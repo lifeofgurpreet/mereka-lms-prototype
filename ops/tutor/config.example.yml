@@ -1,0 +1,17 @@
+# Sanitized Tutor configuration overrides. Copy to tutor_env/config.yml and fill in secrets via `tutor config save`.
+LMS_HOST: local.merekaacademy.test
+CMS_HOST: studio.local.merekaacademy.test
+DOCKER_IMAGE_MYSQL: docker.io/mysql/mysql-server:5.7
+MYSQL_ROOT_HOST: '%'
+MFE_DOCKER_IMAGE: openedx-mfe:nightly
+MFE_COMMON_VERSION: master
+OPENEDX_COMMON_VERSION: open-release/redwood.master
+OPENEDX_LMS_VERSION: open-release/redwood.master
+OPENEDX_CMS_VERSION: open-release/redwood.master
+PLUGINS:
+  - android
+  - discovery
+  - mfe
+  - notes
+  - ecommerce
+  - xqueue

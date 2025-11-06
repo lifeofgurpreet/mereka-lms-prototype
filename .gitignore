@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+
+# Virtual environments
+.venv/
+.env/
+venv/
+
+# macOS
+.DS_Store
+
+# Tutor generated artefacts
+tutor_env/
+data/
+
+# Logs
+*.log
+
+# IDE configs
+.vscode/
+.idea/
+
+# Node modules (if any frontends)
+node_modules/
+
+# Misc
+*.bak
+*.swp
+
+# Terraform
+ops/terraform/.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+terraform.tfvars
