@@ -1,0 +1,3 @@
+[submodule "hubspot-webhook-mct"]
+	path = hubspot-webhook-mct
+	url = https://github.com/Biji-Biji-Initiative/hubspot-webhook-mct.git
