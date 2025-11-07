@@ -3,7 +3,7 @@
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | MongoDB Atlas migration/cutover | Infra | ⚙️ In progress | NAT egress IPs (`35.247.164.211`, `34.142.147.42`) captured, `tools/mongodb-to-atlas.sh` ready, `mongodb-atlas-uri` secret created. Waiting on Atlas cluster + DB user credentials to run the dump/restore and flip `RUN_MONGODB=false`. |
-| 2 | Ingress/DNS hardening (Cloudflare automation, TLS monitoring) | Infra | 💤 Pending | Need to codify Cloudflare records + cert health checks so future deploys auto-sync hostnames and monitor expiry. |
+| 2 | Ingress/DNS hardening (Cloudflare automation, TLS monitoring) | Infra | ✅ Done (2025-11-07) | `tools/cloudflare-sync.sh` idempotently applies the records in `ops/cloudflare/records.json`; HTTPS uptime + cert-expiry alert templates live under `ops/monitoring`. Run the gcloud commands in `docs/MONITORING.md`. |
 | 3 | Budget & cost guardrails (RM250 alert, RM400 cap) | FinOps | 💤 Pending | Billing account is enabled; still need to configure budget + alerts in Cloud Billing (export to BigQuery optional). |
 | 4 | Cloud SQL backup automation & retention | Infra | ✅ Done (2025-11-07) | Service account `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` created, GitHub secret `GCP_SA_KEY` loaded, lifecycle policy deletes backups older than 60 days, workflow scheduled every 3 days (~10 runs/month). |
 | 5 | Monitoring & alerting rollout | SRE | ✅ Done (2025-11-07) | Dashboards + alert policies deployed (see `docs/MONITORING.md`); email notifications wired to techadmin@biji-biji.com & team@mereka.io. |

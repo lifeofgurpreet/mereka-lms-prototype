@@ -28,6 +28,22 @@ Minimum recommended policies (edit thresholds as desired):
 | GKE pod restarts | `ops/monitoring/alerts/pod-restarts.json` | Threshold: >5 restarts / pod within 10 min. |
 | Ingress 5xx spike | `ops/monitoring/alerts/lb-5xx-ratio.json` | Update the `url_map_name` if GKE creates a different LB. |
 | Cloud SQL disk utilization | `ops/monitoring/alerts/cloudsql-disk.json` | Fires when disk usage >80% for 5 min. |
+| TLS certificate expiry | `ops/monitoring/alerts/https-cert-expiry.json` | Requires the uptime check below; fires when `time_until_ssl_cert_expires < 14 days`. |
+
+Apply an alert with:  
+`gcloud monitoring policies create --policy-from-file ops/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
+
+## Uptime & HTTPS checks
+
+Create an HTTPS uptime check to drive both availability metrics and the TLS-expiry alert:
+
+```bash
+gcloud monitoring uptime configs create \
+  --config-from-file=ops/monitoring/uptime/staging-lms-https.json \
+  --project=mereka-lms
+```
+
+The config hits `https://staging.academy.mereka.io/` every five minutes from the Asia-Pacific probe sites and validates that the certificate is valid. After creating the uptime check, re-run the alert creation command so the policy can reference the new metric series.
 
 Apply an alert with:  
 `gcloud monitoring policies create --policy-from-file ops/monitoring/alerts/pod-restarts.json`

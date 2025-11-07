@@ -17,6 +17,7 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `tools/kajabi-export.mjs` – Kajabi data exporter
   - `tools/mongodb-to-atlas.sh` – MongoDB migration helper
   - `tools/sync-brand-assets.sh` – copies fonts/logos into both LMS/Studio and MFE theme directories
+  - `tools/cloudflare-sync.sh` – idempotently updates Cloudflare DNS using `ops/cloudflare/records.json`
 - `docs/SECRETS_SNAPSHOT.md` – temporary credentials generated for the initial rollout (rotate before production).
 
 See `docs/LOCAL_SETUP.md` for step-by-step instructions to bootstrap the Tutor environment and `docs/GCP_ROADMAP.md` for the cloud deployment plan.

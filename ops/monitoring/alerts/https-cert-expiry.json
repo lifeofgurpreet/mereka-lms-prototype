@@ -1,0 +1,26 @@
+{
+  "displayName": "TLS cert expires soon (staging)",
+  "userLabels": {
+    "service": "lms",
+    "environment": "staging"
+  },
+  "conditions": [
+    {
+      "displayName": "Less than 14 days until certificate expiry",
+      "conditionThreshold": {
+        "filter": "resource.type=\"uptime_url\" AND metric.type=\"monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires\" AND resource.label.host=\"staging.academy.mereka.io\"",
+        "comparison": "COMPARISON_LT",
+        "thresholdValue": 1209600,
+        "duration": "0s",
+        "aggregations": [
+          {
+            "alignmentPeriod": "300s",
+            "perSeriesAligner": "ALIGN_MEAN"
+          }
+        ]
+      }
+    }
+  ],
+  "combiner": "OR",
+  "notificationChannels": []
+}

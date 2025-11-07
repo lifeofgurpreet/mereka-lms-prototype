@@ -1,0 +1,26 @@
+[
+  {
+    "description": "Primary LMS ingress",
+    "type": "A",
+    "name": "staging.academy.mereka.io",
+    "content": "34.126.186.80",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio hostname",
+    "type": "CNAME",
+    "name": "studio.staging.academy.mereka.io",
+    "content": "staging.academy.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Microfrontends",
+    "type": "CNAME",
+    "name": "apps.staging.academy.mereka.io",
+    "content": "staging.academy.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  }
+]
