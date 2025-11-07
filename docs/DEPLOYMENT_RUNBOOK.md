@@ -101,9 +101,14 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
     gurpreet@biji-biji.com --staff --superuser --password-from-env SUPERUSER_PASSWORD
   ```
   (Set the password via Secret Manager or prompt; never commit credentials.)
-- Smoke test LMS, Studio, Discovery, MFEs.
-- Configure backup jobs: `tutor k8s do backup-db --output gs://<backup-bucket>/$(date -I)/` and schedule via Cloud Scheduler.
-- Hook monitoring dashboards (Cloud Monitoring, Alerts per roadmap).
+- Smoke test LMS, Studio, Discovery, MFEs (`./tools/smoke-test.sh` covers the public endpoints).
+- Configure backups (details in this section):
+1. Grant the Cloud SQL service account access to the backup bucket  
+   `gsutil iam ch serviceAccount:p355915112439-ora2um@gcp-sa-cloud-sql.iam.gserviceaccount.com:roles/storage.objectAdmin gs://staging-academy-mereka-io-backup`
+2. Run ad-hoc exports with `./tools/backup-db.sh` (set `DATABASES='openedx discovery'` to limit scope).  Output is stored under `gs://staging-academy-mereka-io-backup/sql/<timestamp>/`.
+3. To balance cost, schedule **10 exports per month** (roughly every 3 days). With Cloud Scheduler, set the cron expression `0 2 */3 * *` (UTC) pointing to a Cloud Run job/VM that executes the same `gcloud sql export sql` commands; see comments inside `tools/backup-db.sh` for the exact set of databases.
+   - Serverless exports only incur storage-and-egress costs: ~$0.10/GB written to GCS plus Cloud Storage at $0.026/GB-month in `asia-southeast1`. The current databases are small (<1 GB each), so a nightly export set costs only cents per day.
+- Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `ops/monitoring/`).
 
 ## 7. GitHub integration
 

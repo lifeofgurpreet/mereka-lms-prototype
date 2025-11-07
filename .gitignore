@@ -29,6 +29,7 @@ node_modules/
 # Misc
 *.bak
 *.swp
+exports/
 
 # Terraform
 ops/terraform/.terraform/
