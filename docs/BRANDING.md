@@ -59,6 +59,36 @@ Adjust the relative import path depending on the app layout (gradebook/auth/acco
 
 - Logos live at `assets/branding/logo-horizontal.png` and `assets/branding/logo-square.png`.
 - Web fonts are vendored under `assets/branding/fonts/` and duplicated to `ops/themes/mereka/common/static/fonts/` for LMS/Studio.
-- Favicon/App-icon set is still pending (`docs/BRANDING_PLAN.md` tracks the todo).
+- Favicon/App-icon set ships as `ops/themes/mereka/common/static/images/favicon.svg` (export more sizes via `tools/sync-brand-assets.sh` if required).
 
 When new assets arrive, drop them into `assets/branding/`, re-sync the theme copy if needed, and update the tables above so the next engineer understands which files feed the build.
+
+## LMS/Studio Implementation
+
+- `ops/themes/mereka/lms/templates/header/brand.html` swaps the default Open edX logo strip with the Mereka wordmark plus an org/course pill so every course page feels bespoke.
+- `ops/themes/mereka/lms/templates/index_overlay.html` introduces a gradient hero, CTA buttons, and KPI badges on the anonymous home page.
+- `ops/themes/mereka/lms/templates/footer.html` adds a four-column footer (Explore, Support, Partners, and contact emails) while preserving Open edX attribution.
+- Global styling lives in `ops/themes/mereka/scss/theme.scss` (nav chrome, hero, course cards, chips, footer utilities). Studio automatically inherits the same palette/fonts because `cms/static/sass/theme.scss` imports the shared bundle.
+- The theme expects logos/favicons at `/static/mereka/images/*`; run `./tools/sync-brand-assets.sh` whenever you refresh files under `assets/branding/`.
+
+To preview locally:
+
+```bash
+source ops/tutor-env.sh
+./tools/sync-brand-assets.sh
+tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka
+./ops/tutor/apply-patches.sh
+tutor local start -d && tutor local run lms ./manage.py lms collectstatic --noinput
+```
+
+## Micro-Frontend Plug-in
+
+- `ops/themes/mereka/mfe/mereka.scss` reuses the same tokens/fonts, then layers on navbar/button/card tweaks tailored to Paragon components. Fonts are bundled with each MFE, so there are no cross-origin font requests.
+- `ops/tutor/apply-patches.sh` copies the SCSS + fonts into `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/` and injects `import './mereka/mereka.scss';` into `env.config.jsx` every time you run the script.
+- The Indigo theme’s React plugin now renders a bespoke Mereka footer (links + contact info) by way of the `MerekaFooter` component injected ahead of the `footer_slot` widgets.
+- To rebuild MFEs with the branding baked in: `source ops/tutor-env.sh && ./ops/tutor/apply-patches.sh && tutor images build mfe --no-cache`.
+
+## Favicons & Meta
+
+- Primary favicon: `ops/themes/mereka/common/static/images/favicon.svg`. Browsers that need raster fallbacks can use `logo-square.png` converted to `.ico` via `npx svg2img` or macOS Preview.
+- Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.svg` via `tutor config save` so Django advertises the correct icon and MFEs reuse it from their config.

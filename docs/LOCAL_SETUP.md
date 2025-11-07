@@ -151,6 +151,23 @@ npm start
 Run unit tests with `tutor dev run mfe npm test -- --watch`. The Node 18 patch is idempotent; re-run `./ops/tutor/apply-patches.sh` whenever Tutor regenerates templates.
 Design work references Paragon components and tokens (`https://edx.github.io/paragon/`); theme overrides live alongside the cloned MFEs.
 
+### Previewing the Mereka theme locally
+
+1. Sync fonts/logos into both theme directories:
+   ```bash
+   ./tools/sync-brand-assets.sh
+   ```
+2. Ensure Tutor points at the custom theme:
+   ```bash
+   tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka
+   ```
+3. Re-run the patch helper so LMS/Studio templates and the Indigo plugin pick up the latest SCSS, then restart your stack:
+   ```bash
+   ./ops/tutor/apply-patches.sh
+   tutor local start -d
+   ```
+4. Rebuild MFEs (`tutor images build mfe` or `tutor dev start mfe`) to bundle the same SCSS inside `frontend-app-*`. The plugin automatically imports `mereka/mereka.scss`.
+
 ### Backend customization & QA
 
 - Django shell/tests: `tutor local run lms ./manage.py lms shell` or `tutor local run lms ./manage.py lms test <app>`.

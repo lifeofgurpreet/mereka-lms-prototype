@@ -4,27 +4,27 @@
 - [x] Primary/secondary hex palette (captured in `docs/BRANDING.md#palette`).
 - [x] Typography sources (Poppins + Lato WOFF2 vendored under `assets/branding/fonts/`).
 - [x] PNG/SVG logo variants (horizontal, square, light/white on dark background).
-- [ ] Favicons/app icons (16/32/180 px) or guidance on generating them.
-- [ ] Copy for footer links, support email, marketing URL.
+- [x] Favicons/app icons (16/32/180 px) or guidance on generating them.
+- [x] Copy for footer links, support email, marketing URL.
 
 ## Phase 1 — Preparation
 - [x] Stage brand assets inside the repo (`assets/branding/`) for reproducible builds.
 - [x] Document Paragon token mapping (color → token, font stacks, spacing tweaks).
 - [x] Draft SCSS token overrides shared across MFEs.
-- [ ] Define legacy LMS/Studio theming requirements (login hero, header, footer).
+- [x] Define legacy LMS/Studio theming requirements (login hero, header, footer).
 
 ## Phase 2 — Micro-Frontend Theming
 - [ ] Clone required MFEs via `tutor dev start mfe` (learning, account, auth, profile, gradebook, authoring).
-- [ ] Apply Paragon theme overrides + global styles.
-- [ ] Replace logos/favicons in each MFE’s `public/` folder.
-- [ ] Configure environment copy (`SITE_NAME`, marketing links).
+- [x] Apply Paragon theme overrides + global styles.
+- [x] Replace logos/favicons in each MFE’s `public/` folder. *(Handled centrally by the Indigo plugin which references `/static/mereka/images/*` so we don’t duplicate assets.)*
+- [x] Configure environment copy (`SITE_NAME`, marketing links).
 - [ ] Run `npm start` smoke checks; capture screenshots.
 - [ ] Rebuild Docker image with `tutor images build mfe` once look is signed off.
 
 ## Phase 3 — LMS/Studio Theme
 - [x] Create Mereka theme package under `ops/themes/mereka`.
-- [ ] Drop in SCSS overrides + images for LMS/Studio.
-- [ ] Update `tutor config` (`THEME_NAME`, favicon/static paths) and rebuild `openedx` images.
+- [x] Drop in SCSS overrides + images for LMS/Studio.
+- [x] Update `tutor config` (`THEME_NAME`, favicon/static paths) and rebuild `openedx` images.
 - [ ] Verify legacy pages (login, dashboard, course outline) with new branding.
 
 ## Phase 4 — Extended Surfaces

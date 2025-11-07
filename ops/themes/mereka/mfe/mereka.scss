@@ -1,0 +1,94 @@
+$mereka-font-path: "./fonts";
+@import "./scss/theme";
+
+:root {
+  --mereka-mfe-gradient: linear-gradient(120deg, #1A1623 0%, #276EF1 65%, #5B91F4 100%);
+  --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--mereka-color-surface-primary);
+  background-image: radial-gradient(circle at top right, rgba(39, 110, 241, 0.08), transparent 45%);
+}
+
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: 0 10px 30px rgba(26, 22, 35, 0.05);
+  padding: 0.85rem 1.5rem;
+}
+
+.navbar .navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--mereka-font-heading);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--mereka-color-ink-900);
+}
+
+.navbar .navbar-brand img {
+  height: 32px;
+  width: auto;
+}
+
+.navbar .nav-link,
+.navbar .dropdown-toggle {
+  font-weight: 500;
+  color: var(--mereka-color-ink-700);
+  transition: color 150ms ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .dropdown-toggle:hover,
+.navbar .nav-link:focus,
+.navbar .dropdown-toggle:focus {
+  color: var(--mereka-color-ink-900);
+}
+
+.btn-primary {
+  background-image: var(--mereka-mfe-gradient);
+  border: none;
+  box-shadow: 0 12px 30px rgba(39, 110, 241, 0.3);
+}
+
+.btn-outline-primary {
+  color: var(--mereka-color-ink-900);
+  border-color: rgba(26, 22, 35, 0.25);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  color: #fff;
+  border-color: transparent;
+  background-image: var(--mereka-mfe-gradient);
+}
+
+.card,
+.shadow-lg,
+.pgn__card {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-mfe-card-shadow);
+}
+
+.mereka-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: rgba(39, 110, 241, 0.12);
+  color: var(--mereka-color-info);
+  padding: 0.25rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+}

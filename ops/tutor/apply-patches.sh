@@ -13,6 +13,13 @@ print(Path(inspect.getfile(tutormfe)) / "templates" / "mfe" / "build" / "mfe" / 
 PY
 )
 
+MFE_INDIGO_ENV_TEMPLATE=$(python - <<'PY'
+from pathlib import Path
+import tutorindigo
+print(Path(tutorindigo.__file__).parent / "templates" / "indigo" / "env.config.jsx")
+PY
+)
+
 MYSQL_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -65,6 +72,8 @@ PY
 PATCH_TARGETS=(
   "$MFE_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+  "$MFE_INDIGO_ENV_TEMPLATE"
+  "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
   "$MYSQL_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/local/docker-compose.yml"
   "$OPENEDX_TEMPLATE"
@@ -84,6 +93,7 @@ PATCH_TARGETS=(
 python - "${PATCH_TARGETS[@]}" <<'PY'
 from pathlib import Path
 import sys
+import textwrap
 
 targets = sys.argv[1:]
 
@@ -267,6 +277,80 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         updated = ensure_allowed_hosts(updated)
         updated = ensure_csrf_origins(updated)
 
+    if path.name == "env.config.jsx":
+        updated = updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")
+        css_hook = "import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';\n"
+        css_target = css_hook + "import './mereka/mereka.scss';\n"
+        if "mereka/mereka.scss" not in updated:
+            updated = updated.replace(css_hook, css_target)
+        footer_component = textwrap.dedent(
+            r"""
+            const MerekaFooter = () => {
+              const config = getConfig();
+              const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+              const siteName = config.SITE_NAME || 'Mereka Academy';
+              const coursesUrl = baseUrl ? `${baseUrl}/courses` : '/courses';
+              const dashboardUrl = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
+              const supportEmail = config.CONTACT_EMAIL || 'team@mereka.io';
+              const supportLink = `mailto:${supportEmail}`;
+              const currentYear = new Date().getFullYear();
+              const logoUrl = baseUrl ? `${baseUrl}/static/mereka/images/logo-horizontal.png` : '';
+
+              return (
+                <footer className="mereka-footer" role="contentinfo">
+                  <div className="container-xl footer-primary">
+                    <div className="footer-brand">
+                      {logoUrl ? <img src={logoUrl} alt={`${siteName} logo`} /> : null}
+                      <p>
+                        Mereka Academy blends community, craftsmanship, and technology to help learners master
+                        the creative, digital, and entrepreneurial skills powering Southeast Asia.
+                      </p>
+                      <div className="footer-tags">
+                        <span>Future of Work</span>
+                        <span>Creative Tech</span>
+                        <span>Impact</span>
+                      </div>
+                    </div>
+                    <div className="footer-links">
+                      <h6>Explore</h6>
+                      <ul>
+                        <li><a href={coursesUrl}>Courses</a></li>
+                        <li><a href={dashboardUrl}>My learning</a></li>
+                        <li><a href="https://mereka.my" target="_blank" rel="noopener">Mereka main site</a></li>
+                        <li><a href="mailto:team@mereka.io">team@mereka.io</a></li>
+                      </ul>
+                    </div>
+                    <div className="footer-links">
+                      <h6>Support</h6>
+                      <ul>
+                        <li><a href="mailto:techadmin@biji-biji.com">techadmin@biji-biji.com</a></li>
+                        <li><a href={supportLink}>{supportEmail}</a></li>
+                        <li><a href="https://academy.mereka.io/help" target="_blank" rel="noopener">Help centre</a></li>
+                        <li><a href="https://academy.mereka.io/privacy" target="_blank" rel="noopener">Privacy</a></li>
+                      </ul>
+                    </div>
+                    <div className="footer-links">
+                      <h6>Partners</h6>
+                      <ul>
+                        <li><a href="https://biji-biji.com" target="_blank" rel="noopener">Biji-Biji Initiative</a></li>
+                        <li><a href="https://mereka.my/partner" target="_blank" rel="noopener">Partner with us</a></li>
+                        <li><a href="https://mereka.my/stories" target="_blank" rel="noopener">Stories</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="footer-bottom container-xl">
+                    <span>© {currentYear} Biji-Biji Initiative · {siteName}</span>
+                    <span>Powered by Open edX &amp; Tutor</span>
+                  </div>
+                </footer>
+              );
+            };
+            """
+        ).strip()
+        if "const MerekaFooter" not in updated:
+            updated = updated.replace("const themePluginSlot =", footer_component + "\n\nconst themePluginSlot =", 1)
+        updated = updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")
+
     if path.name == "lms.conf" and "academy.biji-biji.com" not in updated:
         anchor = "  server_name staging.academy.mereka.io preview.staging.academy.mereka.io;"
         if anchor in updated:
@@ -283,5 +367,15 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
     if updated != original:
         path.write_text(updated)
 PY
+
+MFE_INDIGO_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo"
+if [ -d "$MFE_INDIGO_DIR" ]; then
+  mkdir -p "$MFE_INDIGO_DIR/mereka"
+  rm -rf "$MFE_INDIGO_DIR/mereka/scss"
+  cp -R "$REPO_ROOT/ops/themes/mereka/scss" "$MFE_INDIGO_DIR/mereka/scss"
+  rm -rf "$MFE_INDIGO_DIR/mereka/fonts"
+  cp -R "$REPO_ROOT/ops/themes/mereka/mfe/fonts" "$MFE_INDIGO_DIR/mereka/fonts"
+  cp "$REPO_ROOT/ops/themes/mereka/mfe/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
+fi
 
 echo "Applied local Tutor patches."

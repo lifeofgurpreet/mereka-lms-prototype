@@ -116,13 +116,21 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    - Serverless exports only incur storage-and-egress costs: ~$0.10/GB written to GCS plus Cloud Storage at $0.026/GB-month in `asia-southeast1`. At the current data size (<1 GB per database) each run costs only a few cents.
 4. Apply the lifecycle policy under `ops/storage/backup-lifecycle.json` so objects in `sql/` older than 60 days are deleted automatically (`gsutil lifecycle set ops/storage/backup-lifecycle.json gs://staging-academy-mereka-io-backup`).
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and the soon-to-exist `mongodb-atlas-uri`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
+- Apply the Mereka branding pack after each upgrade:
+  ```bash
+  ./tools/sync-brand-assets.sh
+  tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka
+  ./ops/tutor/apply-patches.sh
+  tutor images build openedx && tutor images build mfe
+  ```
+  The patch step copies the SCSS/fonts into the Indigo MFE build so all micro-frontends share the same palette.
 - Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `ops/monitoring/`).
 
 ## 7. GitHub integration
 
-- Create repo `mereka-lms` in the organization.
-- Add GitHub Actions workflow (TODO) to run Terraform plan (with manual approval), build/push Tutor images, and trigger `tutor k8s upgrade` jobs.
-- Store Artifact Registry and GCP service account credentials in GitHub secrets.
+- Repo: `https://github.com/Biji-Biji-Initiative/mereka-lms` (remote `origin` already configured locally).
+- Backups: `.github/workflows/cloud-sql-backup.yml` runs every three days; it authenticates via secret `GCP_SA_KEY` that contains the `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` JSON key.
+- Next pipeline work: add workflows for (a) Tutor image build/push + smoke tests and (b) Terraform plan/apply with manual approvals. Store any additional credentials (Artifact Registry robot, MongoDB Atlas API, etc.) as repo secrets instead of committing them here.
 
 ## 8. Cutover checklist
 

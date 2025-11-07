@@ -79,14 +79,14 @@ Store these values in Google Secret Manager and reference them via Tutor configu
 
 - Service account: `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com`
 - Roles: `roles/cloudsql.admin`, `roles/storage.objectAdmin`
-- JSON key (add to GitHub secret `GCP_SA_KEY` and rotate after first push):
+- JSON key (added to GitHub secret `GCP_SA_KEY` on 2025-11-07; rotate again once CI is validated):
 
 ```
 {
   "type": "service_account",
   "project_id": "mereka-lms",
-  "private_key_id": "dfc68a907f1c26c94720b8d4684a415d24ccde4b",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCZqSDO57V8XW9U\nSnrUSOPv7JO6Hf8Q86/8ViKDqjiLYm/pW8BY3XLyMsNiPR6IkxR1fiIsKtPB7ZX\nWYDJ7BpBAtpIsHLPoez/Ir6cJ3YDXUK6oSJqjg0Xg7AnG1G4aOyi8bTJepm3A9ww\nchmtVtKw+b0EkXk2tKjrHnLEO18eJQlvv63hxfgNwsCVdQYsPtkfdaaKpYxfakhR\nOLjzGn+todbm8B9yfX3kUvVJ2XpfONdTpXprP8eUwhOYVCM7mjSzFzLoDgBlHAu2\nyFgxarljfTk8NkNU3knOkPiolhXkYYlDUz5ZPggpu+cnxNmwy4nt2ADh6WcggJeL\n4aH5aPMJAgMBAAECggEAAff+fpn50xsS9SESwzwOBuLDr8fX7/2GlnpgxWnhcO/1\nI+y5a6t2V4Tg1T4eUoBF6PBHwAC0CaQFeDV2fKGj2TcDsuvGy6g0IB+C2is+D9KL\nXpFBLT5nyyKpWrMHWYLk7Dyr5OO//iwwwoXaztnd/zjKikfxjYiF2n7QgKxNjKMe\nW/zQATmpCzoi6QY8uGwUppKEuvMgIeU9itL/NZjpfvYGxqPewTNhfmWaJ2L4hKw0\nx79JPP1Huf0As3R9JBFrqQDh/WnCcBtt2zEtJHCzMsbVrZy8NVa64kPsiJSoVXPM\nexfnRvvsJMDhpj1hAVuOhYrcIkc1tZmdeYF/uEZyvwKBgQDJ//QtQd/wXxCzuydy\ncydnTPi3OUsn+NIWKxy0XJARTWScZMfksM11bKv+6xv2XOMOJqYy6wTH4w9pZvHl\n5ysJXMRxTg73xcRAenMF2M1C2YtM3ty3xucHnBOckxvlNONr3NzHUViFvE4FFD6R\np7S3NC/8lEoeq870jXOd/5uHPwKBgQDCvQnjSAZnnWtMNLmb4mpskz5JCntQ69GG\nGQkXjI9rkgzHxj/LR3aHosFDNBxDNWiHUpT1Z2T6/tmdThFEy43rONqzUAV21Ggb\nhHnFRchFCINMz3VYEWxbRd+WofpctjHHqDDzyaTsQTSDJ+vRt6dmVfu0h8Ri8m62\n22TW6MB7twKBgCMZsthaZgtiuYhBsS0WDXbJzT4pWoHrnrXzb913aCFZjW4PpRx8\nDHenFowJVqaMpXfEB4U5iW8iaX8rQEVu0e+iixAVPEyZtOxvWqVdcu1219nXsArP\nKT4NROskNOizNAF+M27/F57FhdkkF2s/9QsQqnX9XpPNzvx3x+tgiyoJAoGBAJp4\nOuynSDVOgDsNo6FMQyDm10Q25UR2GlglabndTDKGwk6BKj9D63iBmI2HO1fweH7G\n+dODdW1HVDTcJQSN9n/8NDaCJiNxLzeMqM7boJVpwETgVvNJtsrbrRSeXarG9sup\n1VK7w2+H9XCH7R4IcOfTEnrMKvJV3Y58jwuNyokXAoGBALvUxJmTNqI3jF1lPNCI\nLQkBHkI+s+Su/igBIh0c+oijn5yn050BdueIMSRTF2zI+31YYgDuMG1KH9dFuKii\n2jiHiwZxZd0ljPCLQjivk2Pvjb67UKsX7FAgqd4pS5hbro16lKKtOoJ5c7hecX2L\nLRQwayCUJEKVSvmWfga97klk\n-----END PRIVATE KEY-----\n",
+  "private_key_id": "12839a80a0cfebffdad6b9d282ca48c396955891",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCn5kWv0fCwgS2l\nfT9safFS05owXTHj47lmLe/0yMKq/dT6kK6mu5hIKcUqdqqKNR+tzrtXMlIQWApy\nJXszeoDOb2yqEkSmUnPwwMOekDei89WJFadIYtPUcAksYpUnytN3W83ImwW8D/Gx\nSQqbZfsKvUiWyAoYoh9SPERWZhRH2RQNCjCsmEwfpRTPeT1aOYS/HDaBUNijZYF+\nKjrIaz9JLfB6u7tAn0sbWEGs7ei/C/g7Ctt8nDuRamnKD4CIEl1wy/2PpzhU1LkF\nms+jQNXqirHt+Z7tv/9jeGkKvCjV/FRLHhSCvfRgSVA3Yx+xv6bXzKkgqIcg9dTu\npyxm4KeNAgMBAAECggEALtOUP/MHc9KzTmJeG/h4K6eEa1Syo2JRxOOu9tA/Kr1c\ndv1/GFVdpVKxAKTT73Pdf/YWXb1VEeXcE/XMJJFX9zswTUaHCvQYDd9VL5X9Tl8/\nANqfKxsVBTyx8kUUYGK7E6DxBa/mq4qu18kNQkXw/A/KfPMRjck5fw/75zTVFyxK\nPD+3+5dZ9YlUXK6RrUTGBl58CJsNaUBvhBjqasy9Vse0wqZZLSB4eHaRonZh1j8+\nGRhGA4I8CDD0jDLcWsd8O65tbmTgzgqTbmUI4o7Fss+LiErzkjK6nXnPKi2nkZa2\n7VIf22d47Xwnbztq6HQkgpzn+etCvnmQ7qTze3DXaQKBgQDQDEDPMnOd20ukCxVS\nNLH/VBKtXlKTM5ofo+qZpzPN95TwQ5evmxmLURzgjxfe1UofJh6XSZahlivakigD\niT28cOHAPM3mfmkqxM82WTapZYJLVRlHugl1NXcrTtJQw/BMbWmWwIksh0K1ZuLg\nIL3TjWLxZyhkdskkH7ynzWhdFwKBgQDOmRZo90gJtpBC094oNvJIun/ochVaTR4z\n0lfaOMlMWZD+8yspteoQrM4TbOKcoVTgjmB/+sVK9EFvL0jvAjG525o44uGfVVmx\nB7qMt7X3f8b12hTArawbpGektKWcXCJgfrPGQoJ7FPvkL53+sV/DdBMf+RkZQah7\nseXBEk7u+wKBgDCRG7QCwBCyt8a0u6Z0HLVRKAcGxNoOKsWGG2cBLEvBpygrb0aU\nO3NVXRti7Bydx+7blDqW+C4Cg3xDsEmbCSlrZJfe2eYbzmsohILYcrU6uB7j38Hp\nwPl2oLogbWJjSz5cMFD740nczYrRWNcfbZDsKZPXFAvX2v6u1fiKL/nDAoGBALXC\npZ6vf6dcAMtqjtcekEZAHmwognSxyFKbSkNpFmCfpBtJYL4Pl+AXyC3669wVbBEr\n8eZmf9ET18Wz+hyc95amh6ZopUuC0agYPp2yutsGhcqilQN3SCYBnFWhwNoxjOUM\nU6mnthgHPB1jb0M2ViQlKPZGNzirNUmuF46nRt6lAoGBAJvURe33aQapNAhBWN0/\nnw8BOObf+l6F+N+ebHp2tPQ5t/CGa8dBwTj3gMFwc9H5riQ95fW8jfVKjKQM7ZH/\npXoEOgHGacsWbJ2HxA7GMW3YFTLEJabUCb6o9OLSF3uefKGWcmoBB1kwxWC2Hih7\nQJNMTPh/SMYJDdNEN3lce7Vz\n-----END PRIVATE KEY-----\n",
   "client_email": "cloud-sql-backup@mereka-lms.iam.gserviceaccount.com",
   "client_id": "115360769815101767052",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -96,3 +96,5 @@ Store these values in Google Secret Manager and reference them via Tutor configu
   "universe_domain": "googleapis.com"
 }
 ```
+
+> Previous key `dfc68a907f1c26c94720b8d4684a415d24ccde4b` was deleted immediately after publishing this version. Always rotate once GitHub Actions is validated.

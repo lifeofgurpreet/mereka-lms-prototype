@@ -1,0 +1,94 @@
+## mako
+<%page expression_filter="h"/>
+<%!
+  from datetime import datetime
+  from django.utils.translation import gettext as _
+  from lms.djangoapps.branding.api import get_footer
+  from openedx.core.djangoapps.lang_pref.api import footer_language_selector_is_enabled
+%>
+<% footer = get_footer(is_secure=is_secure) %>
+<% icp_license_info = getattr(settings, 'ICP_LICENSE_INFO', {})%>
+<%namespace name='static' file='static_content.html'/>
+
+<div class="wrapper wrapper-footer mereka-footer">
+  <footer id="footer" class="tutor-container" role="contentinfo"
+    % if bidi:
+      dir=${bidi}
+    % endif
+  >
+    <div class="footer-primary">
+      <div class="footer-brand">
+        <img src="${static.url('images/logo-horizontal.png')}" alt="${static.get_platform_name()} logo" />
+        <p>
+          Mereka Academy blends community, craftsmanship, and technology to help learners master
+          the creative, digital, and entrepreneurial skills powering Southeast Asia.
+        </p>
+        <div class="footer-tags">
+          <span>Future of Work</span>
+          <span>Creative Tech</span>
+          <span>Impact</span>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <h6>${_('Explore')}</h6>
+        <ul>
+          <li><a href="/courses">${_('Courses')}</a></li>
+          <li><a href="/dashboard">${_('My learning')}</a></li>
+          <li><a href="https://mereka.my" rel="noopener" target="_blank">${_('Mereka main site')}</a></li>
+          <li><a href="mailto:team@mereka.io">team@mereka.io</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h6>${_('Support')}</h6>
+        <ul>
+          <li><a href="mailto:techadmin@biji-biji.com">techadmin@biji-biji.com</a></li>
+          <li><a href="mailto:support@mereka.io">support@mereka.io</a></li>
+          <li><a href="https://academy.mereka.io/help" target="_blank" rel="noopener">${_('Help centre')}</a></li>
+          <li><a href="https://academy.mereka.io/privacy" target="_blank" rel="noopener">${_('Privacy')}</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h6>${_('Partners')}</h6>
+        <ul>
+          <li><a href="https://biji-biji.com" target="_blank" rel="noopener">Biji-Biji Initiative</a></li>
+          <li><a href="https://mereka.my/partner" target="_blank" rel="noopener">${_('Partner with us')}</a></li>
+          <li><a href="https://mereka.my/stories" target="_blank" rel="noopener">${_('Stories')}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="colophon">
+      % if context.get('include_language_selector', footer_language_selector_is_enabled()):
+          <%include file="${static.get_template_path('widgets/footer-language-selector.html')}"/>
+      % endif
+    </div>
+
+    <div class="footer-bottom">
+      <span>© ${datetime.now().year} Biji-Biji Initiative · ${static.get_platform_name()}</span>
+      <span>${_('Powered by Open edX and Tutor')}</span>
+      % if icp_license_info.get('icp_license'):
+        <span class="icp">
+          ${u"{text} ".format(text=icp_license_info.get('text'))}
+          <a href="${icp_license_info.get('icp_license_link', '#')}">
+              ${u"{icp}".format(icp=icp_license_info.get('icp_license'))}
+          </a>
+        </span>
+      % endif
+    </div>
+  </footer>
+</div>
+
+% if include_dependencies:
+  <%static:js group='base_vendor'/>
+  <%static:css group='style-vendor'/>
+  <%include file="widgets/segment-io.html" />
+  <%include file="widgets/segment-io-footer.html" />
+% endif
+% if footer_css_urls:
+  % for url in footer_css_urls:
+    <link rel="stylesheet" type="text/css" href="${url}"></link>
+  % endfor
+% endif
