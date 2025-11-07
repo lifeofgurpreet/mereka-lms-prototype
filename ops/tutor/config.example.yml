@@ -15,3 +15,20 @@ PLUGINS:
   - notes
   - ecommerce
   - xqueue
+RUN_MONGODB: false
+MONGODB_URI: mongodb+srv://cs_comments_user:<password>@cluster0.example.mongodb.net/cs_comments_service?retryWrites=true&w=majority
+MONGODB_HOST: ""
+MONGODB_PORT: ""
+MONGODB_AUTH: ""
+MYSQL_HOST: 10.97.0.2
+MYSQL_PORT: 3306
+REDIS_HOST: 10.150.102.108
+REDIS_PORT: 6378
+AWS_S3_REGION_NAME: asia-southeast1
+AWS_STORAGE_BUCKET_NAME: staging-academy-mereka-io-content
+LMS_DEFAULT_SITE_THEME: mereka
+ADDL_INSTALLED_APPS:
+  - openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig
+  - openedx.core.djangoapps.bookmarks.apps.BookmarksConfig
+  - openedx.core.djangoapps.discussions.apps.DiscussionsConfig
+  - openedx.core.djangoapps.theming.apps.ThemingConfig

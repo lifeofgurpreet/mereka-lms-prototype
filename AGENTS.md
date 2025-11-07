@@ -10,6 +10,12 @@ Most automation lives under `ops/`: `ops/tutor/` hosts the Tutor configuration t
 - `tutor local start -d` / `tutor local stop` manage day-to-day lifecycle; add `tutor local dc ps` to inspect container health and `tutor local logs --tail=100` to debug.
 - `./ops/tutor/apply-patches.sh` keeps both the MFE Dockerfile on Node 18 and injects `MYSQL_ROOT_HOST` into Tutor’s compose templates so the `mysql/mysql-server:5.7` image accepts remote root connections.
 
+## Branding Maintenance
+- Theme tokens/fonts live in `ops/themes/mereka` with the spec documented in `docs/BRANDING.md`; sync new assets into `assets/branding/` first, then copy to `ops/themes/mereka/common/static/`.
+- Enable the LMS/Studio theme locally by running `tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka`, followed by `tutor images build openedx` and `tutor local start -d`.
+- For MFEs cloned under `tutor_env/dev/frontend-app-*`, create a local SCSS entrypoint that imports `../../ops/themes/mereka/scss/theme.scss` (override `$mereka-font-path` to point at the app’s `public/fonts/` directory) so every app consumes the same Paragon overrides.
+- After any theme edit, rebuild `openedx`/`mfe` images (or rerun `npm start`) and capture screenshots before shipping.
+
 ## Coding Style & Naming Conventions
 Shell scripts should begin with `#!/usr/bin/env bash`, enable `set -euo pipefail`, and prefer descriptive function names over inline command chains. Keep Bash indented with two spaces; YAML templates should mirror Tutor defaults and group environment variables in uppercase (e.g., `OPENEDX_RELEASE`). When extending scripts, mirror the existing comment style that summarizes intent rather than mechanics.
 

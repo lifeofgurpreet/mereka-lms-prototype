@@ -72,6 +72,21 @@ tutor local init --limit=ecommerce,xqueue
 Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `ops/tutor/config.example.yml` records the non-secret overrides.
 > ℹ️ `tutor-credentials` has no Tutor 12-compatible release (latest wheel targets Tutor >=16). Skip certificate automation until Tutor publishes a 12.x build.
 
+### Apply the Mereka Theme
+
+The shared palette/typography overrides live under `ops/themes/mereka` (see `docs/BRANDING.md`). After sourcing `ops/tutor-env.sh`, point Tutor at that directory and rebuild the LMS/Studio images:
+
+```bash
+source ops/tutor-env.sh
+tutor config save \
+  --set THEME_DIR="$(pwd)/ops/themes" \
+  --set THEME_NAME=mereka
+tutor images build openedx
+tutor local start -d
+```
+
+Tutor will copy everything under `ops/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `ops/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run `tutor images build openedx` whenever you edit the theme SCSS or add new assets (fonts, logos).
+
 ## Initial launch
 
 ```bash

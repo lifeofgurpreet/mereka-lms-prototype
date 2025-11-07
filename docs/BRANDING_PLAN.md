@@ -1,16 +1,16 @@
 # Mereka.io Branding Rollout Tracker
 
 ## Inputs To Confirm
-- [ ] Primary/secondary hex palette (confirm final values from brand team).
-- [ ] Typography sources (Google Fonts URLs or self-hosted files for Lato + Poppins).
-- [ ] PNG/SVG logo variants (horizontal, square, light/white on dark background).
+- [x] Primary/secondary hex palette (captured in `docs/BRANDING.md#palette`).
+- [x] Typography sources (Poppins + Lato WOFF2 vendored under `assets/branding/fonts/`).
+- [x] PNG/SVG logo variants (horizontal, square, light/white on dark background).
 - [ ] Favicons/app icons (16/32/180 px) or guidance on generating them.
 - [ ] Copy for footer links, support email, marketing URL.
 
 ## Phase 1 — Preparation
-- [ ] Stage brand assets inside the repo (`assets/branding/`) for reproducible builds.
-- [ ] Document Paragon token mapping (color → token, font stacks, spacing tweaks).
-- [ ] Draft SCSS token overrides shared across MFEs.
+- [x] Stage brand assets inside the repo (`assets/branding/`) for reproducible builds.
+- [x] Document Paragon token mapping (color → token, font stacks, spacing tweaks).
+- [x] Draft SCSS token overrides shared across MFEs.
 - [ ] Define legacy LMS/Studio theming requirements (login hero, header, footer).
 
 ## Phase 2 — Micro-Frontend Theming
@@ -22,7 +22,7 @@
 - [ ] Rebuild Docker image with `tutor images build mfe` once look is signed off.
 
 ## Phase 3 — LMS/Studio Theme
-- [ ] Create Mereka theme package under `ops/themes/mereka`.
+- [x] Create Mereka theme package under `ops/themes/mereka`.
 - [ ] Drop in SCSS overrides + images for LMS/Studio.
 - [ ] Update `tutor config` (`THEME_NAME`, favicon/static paths) and rebuild `openedx` images.
 - [ ] Verify legacy pages (login, dashboard, course outline) with new branding.
@@ -37,8 +37,8 @@
 - [ ] Cross-browser + mobile smoke tests (Chrome, Edge, Safari, Firefox, iOS, Android).
 - [ ] Accessibility scan (contrast, focus order) on key pages.
 - [ ] Performance spot-check (bundle size changes, Lighthouse).
-- [ ] Publish implementation notes/screenshots in `docs/BRANDING.md`.
-- [ ] Update README/AGENTS with quick branding maintenance instructions.
+- [x] Publish implementation notes/screenshots in `docs/BRANDING.md`.
+- [x] Update README/AGENTS with quick branding maintenance instructions.
 
 ## Deployment Checklist
 - [ ] Confirm Tutor image builds succeed in CI.

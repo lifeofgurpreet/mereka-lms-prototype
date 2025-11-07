@@ -25,6 +25,7 @@ data/
 
 # Node modules (if any frontends)
 node_modules/
+ops/migrations/kajabi/output/
 
 # Misc
 *.bak

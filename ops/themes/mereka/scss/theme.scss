@@ -1,0 +1,35 @@
+@import "fonts";
+@import "tokens";
+
+:root {
+  --mereka-gradient-primary: linear-gradient(135deg, #1A1623 0%, #276EF1 100%);
+  --mereka-radius-xl: 32px;
+}
+
+.bg-mereka-gradient {
+  background-image: var(--mereka-gradient-primary);
+  color: #fff;
+}
+
+.badge-mereka {
+  background: rgba(39, 110, 241, 0.12);
+  color: #276EF1;
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.shadow-mereka-card {
+  box-shadow: var(--mereka-shadow-card);
+  border-radius: var(--mereka-radius-xl);
+  border: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.textbox-mereka {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.1);
+  padding: 1rem 1.25rem;
+  background-color: #fff;
+}

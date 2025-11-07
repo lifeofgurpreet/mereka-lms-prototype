@@ -59,6 +59,7 @@ AQIDAQAB
 | Notes MySQL password | `tp8BHjDHdHXTYzPy` |
 | Open edX superuser email | `gurpreet@biji-biji.com` |
 | Open edX superuser password | `NxO3mIpOqMiNJUKJwaYy` *(replace original `Cr3ativity`)* |
+| MongoDB Atlas URI | `mongodb+srv://cs_comments_user:<password>@cluster0.xxxxx.mongodb.net/cs_comments_service?retryWrites=true&w=majority` *(placeholder—update once Atlas is provisioned)* |
 
 ## SMTP
 
@@ -71,3 +72,27 @@ AQIDAQAB
 ---
 
 Store these values in Google Secret Manager and reference them via Tutor configuration overrides. Rotate all credentials before production.
+
+## Automation credentials
+
+### Cloud SQL backup GitHub runner
+
+- Service account: `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com`
+- Roles: `roles/cloudsql.admin`, `roles/storage.objectAdmin`
+- JSON key (add to GitHub secret `GCP_SA_KEY` and rotate after first push):
+
+```
+{
+  "type": "service_account",
+  "project_id": "mereka-lms",
+  "private_key_id": "dfc68a907f1c26c94720b8d4684a415d24ccde4b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCZqSDO57V8XW9U\nSnrUSOPv7JO6Hf8Q86/8ViKDqjiLYm/pW8BY3XLyMsNiPR6IkxR1fiIsKtPB7ZX\nWYDJ7BpBAtpIsHLPoez/Ir6cJ3YDXUK6oSJqjg0Xg7AnG1G4aOyi8bTJepm3A9ww\nchmtVtKw+b0EkXk2tKjrHnLEO18eJQlvv63hxfgNwsCVdQYsPtkfdaaKpYxfakhR\nOLjzGn+todbm8B9yfX3kUvVJ2XpfONdTpXprP8eUwhOYVCM7mjSzFzLoDgBlHAu2\nyFgxarljfTk8NkNU3knOkPiolhXkYYlDUz5ZPggpu+cnxNmwy4nt2ADh6WcggJeL\n4aH5aPMJAgMBAAECggEAAff+fpn50xsS9SESwzwOBuLDr8fX7/2GlnpgxWnhcO/1\nI+y5a6t2V4Tg1T4eUoBF6PBHwAC0CaQFeDV2fKGj2TcDsuvGy6g0IB+C2is+D9KL\nXpFBLT5nyyKpWrMHWYLk7Dyr5OO//iwwwoXaztnd/zjKikfxjYiF2n7QgKxNjKMe\nW/zQATmpCzoi6QY8uGwUppKEuvMgIeU9itL/NZjpfvYGxqPewTNhfmWaJ2L4hKw0\nx79JPP1Huf0As3R9JBFrqQDh/WnCcBtt2zEtJHCzMsbVrZy8NVa64kPsiJSoVXPM\nexfnRvvsJMDhpj1hAVuOhYrcIkc1tZmdeYF/uEZyvwKBgQDJ//QtQd/wXxCzuydy\ncydnTPi3OUsn+NIWKxy0XJARTWScZMfksM11bKv+6xv2XOMOJqYy6wTH4w9pZvHl\n5ysJXMRxTg73xcRAenMF2M1C2YtM3ty3xucHnBOckxvlNONr3NzHUViFvE4FFD6R\np7S3NC/8lEoeq870jXOd/5uHPwKBgQDCvQnjSAZnnWtMNLmb4mpskz5JCntQ69GG\nGQkXjI9rkgzHxj/LR3aHosFDNBxDNWiHUpT1Z2T6/tmdThFEy43rONqzUAV21Ggb\nhHnFRchFCINMz3VYEWxbRd+WofpctjHHqDDzyaTsQTSDJ+vRt6dmVfu0h8Ri8m62\n22TW6MB7twKBgCMZsthaZgtiuYhBsS0WDXbJzT4pWoHrnrXzb913aCFZjW4PpRx8\nDHenFowJVqaMpXfEB4U5iW8iaX8rQEVu0e+iixAVPEyZtOxvWqVdcu1219nXsArP\nKT4NROskNOizNAF+M27/F57FhdkkF2s/9QsQqnX9XpPNzvx3x+tgiyoJAoGBAJp4\nOuynSDVOgDsNo6FMQyDm10Q25UR2GlglabndTDKGwk6BKj9D63iBmI2HO1fweH7G\n+dODdW1HVDTcJQSN9n/8NDaCJiNxLzeMqM7boJVpwETgVvNJtsrbrRSeXarG9sup\n1VK7w2+H9XCH7R4IcOfTEnrMKvJV3Y58jwuNyokXAoGBALvUxJmTNqI3jF1lPNCI\nLQkBHkI+s+Su/igBIh0c+oijn5yn050BdueIMSRTF2zI+31YYgDuMG1KH9dFuKii\n2jiHiwZxZd0ljPCLQjivk2Pvjb67UKsX7FAgqd4pS5hbro16lKKtOoJ5c7hecX2L\nLRQwayCUJEKVSvmWfga97klk\n-----END PRIVATE KEY-----\n",
+  "client_email": "cloud-sql-backup@mereka-lms.iam.gserviceaccount.com",
+  "client_id": "115360769815101767052",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cloud-sql-backup%40mereka-lms.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+```

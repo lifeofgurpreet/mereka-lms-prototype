@@ -8,8 +8,33 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 
 ## Structure
 
-- `docs/` – runbooks and architecture notes (local quickstart + GCP roadmap).
+- `docs/` – runbooks and architecture notes (local quickstart + GCP roadmap + `docs/BRANDING.md` for theme tokens + `docs/MULTISITE.md` for microsite rollout).
+- `docs/mct/` – MCT migration documentation (`docs/mct/EXPORT_GUIDE.md` for complete export guide)
 - `ops/` – configuration templates and helper scripts, including `ops/tutor/apply-patches.sh` to pin the MFEs to Node 18 until Tutor ships native support.
+- `tools/` – data export and migration scripts:
+  - `tools/mct-export.mjs` – Microsoft Community Training data exporter (see `docs/mct/EXPORT_GUIDE.md`)
+  - `tools/kajabi-export.mjs` – Kajabi data exporter
+  - `tools/mongodb-to-atlas.sh` – MongoDB migration helper
 - `docs/SECRETS_SNAPSHOT.md` – temporary credentials generated for the initial rollout (rotate before production).
 
 See `docs/LOCAL_SETUP.md` for step-by-step instructions to bootstrap the Tutor environment and `docs/GCP_ROADMAP.md` for the cloud deployment plan.
+
+## Container Images
+
+Tutor now pulls most runtime images from our Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`):
+
+| Service | Image | Notes |
+|---------|-------|-------|
+| LMS/CMS + workers | `openedx` | Built via `tutor images build openedx`. |
+| Micro-frontends | `openedx-mfe` | Patched to build on Node 18. |
+| Discovery | `openedx-discovery` | Uses Cloud SQL + OpenSearch. |
+| Forum (cs_comments_service) | `openedx-forum` | Talks to Mongo `mongodb` headless service (migrating to Atlas). |
+| Notes service | `openedx-notes` | Handles ORA notes. |
+| **New:** Ecommerce web/worker | `openedx-ecommerce`, `openedx-ecommerce-worker` | Mirrored from Tutor 12.0.4. |
+| **New:** XQueue | `openedx-xqueue` | Mirrored from Tutor 12.1.0. |
+
+Remaining images (MySQL init job, Android builder, etc.) still come from the upstream Tutor repositories; mirror them later if we need tighter control.
+
+## Automation
+
+- `.github/workflows/cloud-sql-backup.yml` runs `tools/backup-db.sh` every three days (cron `0 18 */3 * *`). Add a service-account JSON with `roles/cloudsql.admin` and `roles/storage.objectAdmin` to the repo secrets as `GCP_SA_KEY` so the workflow can authenticate.

@@ -1,0 +1,26 @@
+name: Cloud SQL Backups
+
+on:
+  schedule:
+    - cron: '0 18 */3 * *'  # roughly ten runs per month
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: mereka-lms
+      - name: Run backup script
+        env:
+          PROJECT: mereka-lms
+          INSTANCE: mereka-lms-mysql
+          BUCKET: staging-academy-mereka-io-backup
+        run: ./tools/backup-db.sh

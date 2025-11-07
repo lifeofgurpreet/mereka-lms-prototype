@@ -52,8 +52,14 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 1. Copy `ops/tutor/config.example.yml` to `ops/tutor/config.prod.yml` and adjust (use values from `docs/SECRETS_SNAPSHOT.md` for bootstrap):
    - `LMS_HOST`: `staging.academy.mereka.io`
    - `CMS_HOST`: `studio.staging.academy.mereka.io`
+   - `MFE_HOST`: `apps.staging.academy.mereka.io`
    - `MFE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:nightly` (post-build)
-   - Configure external service endpoints (Cloud SQL host, Atlas URI, Memorystore host/port, GCS buckets).
+   - `ECOMMERCE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce:12.0.4`
+   - `ECOMMERCE_WORKER_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce-worker:12.0.4`
+   - `XQUEUE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-xqueue:12.1.0`
+   - `MONGODB_URI`: Atlas connection string (leave blank while using the in-cluster StatefulSet).
+   - Configure external service endpoints (Cloud SQL host, Memorystore host/port, GCS buckets).
+   - For additional LMS domains (microsites), see `docs/MULTISITE.md` and re-run `./ops/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=asia-southeast1-docker.pkg.dev/mereka-lms/openedx`.
 
@@ -89,7 +95,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    ```bash
    tutor k8s exec -- kubectl apply -f k8s/addons/mongodb-statefulset.yaml
    ```
-   (We’ll migrate to Atlas for production later.)
+   (See `docs/MONGODB_ATLAS.md` for migrating this data set to Atlas via `tools/mongodb-to-atlas.sh` and the new `MONGODB_URI` setting.)
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `staging-academy-mereka-io`.
 
@@ -106,8 +112,10 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 1. Grant the Cloud SQL service account access to the backup bucket  
    `gsutil iam ch serviceAccount:p355915112439-ora2um@gcp-sa-cloud-sql.iam.gserviceaccount.com:roles/storage.objectAdmin gs://staging-academy-mereka-io-backup`
 2. Run ad-hoc exports with `./tools/backup-db.sh` (set `DATABASES='openedx discovery'` to limit scope).  Output is stored under `gs://staging-academy-mereka-io-backup/sql/<timestamp>/`.
-3. To balance cost, schedule **10 exports per month** (roughly every 3 days). With Cloud Scheduler, set the cron expression `0 2 */3 * *` (UTC) pointing to a Cloud Run job/VM that executes the same `gcloud sql export sql` commands; see comments inside `tools/backup-db.sh` for the exact set of databases.
-   - Serverless exports only incur storage-and-egress costs: ~$0.10/GB written to GCS plus Cloud Storage at $0.026/GB-month in `asia-southeast1`. The current databases are small (<1 GB each), so a nightly export set costs only cents per day.
+3. To balance cost, schedule **10 exports per month** (roughly every 3 days). The repo includes `.github/workflows/cloud-sql-backup.yml`, which runs on the cron `0 18 */3 * *` (UTC). Create a dedicated service account (roles: `roles/cloudsql.admin` + `roles/storage.objectAdmin`), download its JSON key, and store it as the GitHub secret `GCP_SA_KEY`. The workflow invokes `./tools/backup-db.sh` using those credentials. (Service account `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` already exists; its JSON payload is tracked in `docs/SECRETS_SNAPSHOT.md` until we rotate it.)
+   - Serverless exports only incur storage-and-egress costs: ~$0.10/GB written to GCS plus Cloud Storage at $0.026/GB-month in `asia-southeast1`. At the current data size (<1 GB per database) each run costs only a few cents.
+4. Apply the lifecycle policy under `ops/storage/backup-lifecycle.json` so objects in `sql/` older than 60 days are deleted automatically (`gsutil lifecycle set ops/storage/backup-lifecycle.json gs://staging-academy-mereka-io-backup`).
+- Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and the soon-to-exist `mongodb-atlas-uri`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
 - Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `ops/monitoring/`).
 
 ## 7. GitHub integration
