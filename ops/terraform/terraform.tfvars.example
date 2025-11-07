@@ -2,6 +2,7 @@ project_id  = "mereka-lms"
 region      = "asia-southeast1"
 zone        = "asia-southeast1-a"
 domain_root = "staging.academy.mereka.io"
+billing_account_id = "01A879-A82798-7962E2"
 
 # Generate a strong password and inject via environment variable or secret manager.
 cloudsql_root_password = "CHANGE_ME"
@@ -9,6 +10,9 @@ cloudsql_root_username = "root"
 cloudsql_tier          = "db-custom-2-7680"
 cloudsql_disk_size_gb  = 100
 redis_memory_size_gb   = 2
+monthly_budget_myr     = 400
+budget_thresholds      = [0.625, 1.0]
+# budget_monitoring_channels = ["projects/mereka-lms/notificationChannels/1234567890"]
 
 # Example Secret Manager entries (remove or adjust before applying)
 # secrets = [

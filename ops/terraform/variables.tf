@@ -23,10 +23,33 @@ variable "domain_root" {
 variable "labels" {
   type        = map(string)
   description = "Common labels to attach to resources."
-  default     = {
+  default = {
     managed-by = "terraform"
     project    = "mereka-lms"
   }
+}
+
+variable "billing_account_id" {
+  type        = string
+  description = "Billing account ID (e.g. 01A879-A82798-7962E2) used for budgets."
+}
+
+variable "monthly_budget_myr" {
+  type        = number
+  description = "Monthly budget cap in MYR."
+  default     = 400
+}
+
+variable "budget_thresholds" {
+  description = "List of budget threshold percents (0-1) to alert on."
+  type        = list(number)
+  default     = [0.625, 1.0]
+}
+
+variable "budget_monitoring_channels" {
+  description = "Optional Cloud Monitoring notification channel resource names for budget alerts."
+  type        = list(string)
+  default     = []
 }
 
 variable "cloudsql_root_password" {

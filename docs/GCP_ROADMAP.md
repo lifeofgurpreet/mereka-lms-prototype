@@ -70,6 +70,11 @@ The goal is to migrate the nightly Open edX stack managed by Tutor to Google Clo
   - Celery worker queue depth
   - Database CPU/memory thresholds
 
+## Cost controls
+
+- Add Cloud Billing budgets through Terraform (`ops/terraform/budgets.tf`) so RM400/month is enforced with alerts at 62.5% and 100% of spend (`google_billing_budget.mereka_monthly`).
+- Publish billing export to BigQuery once budgets are active to trend per-service costs and feed future dashboards.
+
 ## Managed service choices
 
 | Component | Managed option | Pros | Cons | Recommendation |

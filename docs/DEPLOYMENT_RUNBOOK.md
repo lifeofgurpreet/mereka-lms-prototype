@@ -126,6 +126,13 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
   ```
   The patch step copies the SCSS/fonts into the Indigo MFE build so all micro-frontends share the same palette.
 - Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `ops/monitoring/`).
+- Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `ops/terraform/terraform.tfvars`, then apply:
+  ```bash
+  cd ops/terraform
+  terraform init
+  terraform apply -target=google_billing_budget.mereka_monthly
+  ```
+  This provisions a Cloud Billing budget with alert thresholds (default 62.5% and 100%). Add notification channel resource names to `budget_monitoring_channels` if you want alerts to hit `techadmin@biji-biji.com` via Cloud Monitoring.
 
 ## 7. GitHub integration
 
