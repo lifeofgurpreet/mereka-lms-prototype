@@ -1,16 +1,16 @@
-# Next 10 Tasks (Updated 2025-11-07)
+# Next 10 Tasks (Updated 2025-11-08)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | MongoDB Atlas migration/cutover | Infra | ⚙️ In progress | NAT egress IPs (`35.247.164.211`, `34.142.147.42`) captured, `tools/mongodb-to-atlas.sh` ready, `mongodb-atlas-uri` secret created. Waiting on Atlas cluster + DB user credentials to run the dump/restore and flip `RUN_MONGODB=false`. |
-| 2 | Ingress/DNS hardening (Cloudflare automation, TLS monitoring) | Infra | ✅ Done (2025-11-07) | `tools/cloudflare-sync.sh` idempotently applies the records in `ops/cloudflare/records.json`; HTTPS uptime + cert-expiry alert templates live under `ops/monitoring`. Run the gcloud commands in `docs/MONITORING.md`. |
-| 3 | Budget & cost guardrails (RM250 alert, RM400 cap) | FinOps | ✅ Done (2025-11-08) | Terraform budget applied to billing account `01A879-A82798-7962E2` (RM400 cap, <=RM1k validation). Notifications go to `techadmin@biji-biji.com` + `team@mereka.io`; rerun `terraform apply` with `GOOGLE_CLOUD_QUOTA_PROJECT=mereka-lms` after edits. |
-| 4 | Cloud SQL backup automation & retention | Infra | ✅ Done (2025-11-07) | Service account `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` created, GitHub secret `GCP_SA_KEY` loaded, lifecycle policy deletes backups older than 60 days, workflow scheduled every 3 days (~10 runs/month). |
-| 5 | Monitoring & alerting rollout | SRE | ✅ Done (2025-11-07) | Dashboards + alert policies deployed (see `docs/MONITORING.md`); email notifications wired to techadmin@biji-biji.com & team@mereka.io. |
-| 6 | SES SMTP deliverability | Infra | ⛔ Blocked | AWS SES keeps returning `535 Authentication Credentials Invalid`; awaiting AWS support/domain sandbox removal before retrying. |
-| 7 | GitHub repo + CI scaffolding | DevOps | ✅ Done (2025-11-07) | Repo `Biji-Biji-Initiative/mereka-lms` created, all local work committed/pushed, backup workflow secret configured. Next: add Tutor build/test workflow + Terraform plan job. |
-| 8 | Branding + MFEs alignment | Product | ✅ Done (2025-11-07) | LMS/Studio templates + hero/footer shipped, Indigo plugin now imports `mereka.scss` across MFEs, and assets sync via `tools/sync-brand-assets.sh`. Screenshots remain a nice-to-have. |
-| 9 | Documentation & knowledge base | Infra | ⚙️ In progress | `docs/DEPLOYMENT_RUNBOOK.md`, `docs/MONGODB_ATLAS.md`, `docs/SECRETS_SNAPSHOT.md`, and `docs/NEXT10_TASKS.md` kept current so hand-offs stay clear. |
-|10 | Data migrations (Kajabi/MCT ingestion into Open edX) | Data | 💤 Pending | Export tooling exists under `tools/mct-*` and `ops/migrations/`; waiting on staging stability before bulk loads. |
+| 1 | MongoDB Atlas migration/cutover | Infra | ⚙️ In progress | NAT egress IPs captured, `tools/mongodb-to-atlas.sh` ready, `mongodb-atlas-uri` secret stubbed. Waiting on Atlas cluster + DB creds to dump/restore, set `RUN_MONGODB=false`, and delete the StatefulSet PVCs. |
+| 2 | SES SMTP deliverability | Infra | ⛔ Blocked | AWS SES returns `535 Authentication Credentials Invalid` even for raw AUTH LOGIN. Need AWS support/domain verification before enabling Tutor email tasks + password resets. |
+| 3 | Production GCP environment (Terraform plan/apply) | Infra | 💤 Pending | Clone staging infrastructure into a prod project: parameterize Terraform, add state backend + service accounts, and document cutover approvals. |
+| 4 | Tutor CI/CD workflows | DevOps | 💤 Pending | Add GitHub Actions for Tutor lint/tests, image builds, and Terraform plan jobs (manual approval before apply). Reuse `GCP_SA_KEY` or add scoped robots. |
+| 5 | Disaster recovery rehearsal | SRE | 💤 Pending | Restore latest Cloud SQL dumps into a scratch instance, document timings, and verify course data integrity. Include object-store restore + DNS failover steps. |
+| 6 | Data migrations (Kajabi/MCT ingestion) | Data | 💤 Pending | Finalize `tools/kajabi-*` + `tools/mct-*` flows, import sample cohorts, and validate grading/credential issuance end-to-end. |
+| 7 | Observability & SLO instrumentation | SRE | 💤 Pending | Add synthetic checks for MFEs/account/login, define SLO dashboards (availability + latency), and hook PagerDuty/Slack targets. |
+| 8 | Secrets automation & rotation | Infra | ⚙️ In progress | Move remaining plaintext secrets into Secret Manager, script `tutor config save --set KEY=$(gcloud secrets versions access ...)`, and rotate `cloud-sql-backup` + future Atlas credentials on a schedule. |
+| 9 | Branding QA + accessibility screenshots | Product | 💤 Pending | Capture LMS/Studio/MFE screenshots, run WCAG quick checks, and publish assets for marketing sign-off. |
+|10 | Cloudflare advanced security roadmap | Infra | 💤 Pending | Evaluate WAF/Firewall Rulesets upgrade, page rules for caching MFEs, and long-term plan for Argo Smart Routing once budget allows. |
 
-Use this list when triaging: higher numbers can reshuffle, but keep statuses accurate so everyone knows what “1/4/7/9” refer to.
+Use this list when triaging; reorder as priorities shift, but keep statuses updated so everyone knows what “Task 1/4/7/9” refer to.
