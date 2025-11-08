@@ -8,15 +8,17 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 
 ## Structure
 
-- `docs/` – runbooks and architecture notes (local quickstart + GCP roadmap + `docs/BRANDING.md` for theme tokens + `docs/MULTISITE.md` for microsite rollout).
+- `docs/` – runbooks and architecture notes (local quickstart + GCP roadmap + `docs/BRANDING.md` for theme tokens/MFE workflow + `docs/MULTISITE.md` for microsite rollout).
 - `docs/NEXT10_TASKS.md` – rolling backlog of the top ten items so we can reference “Task 1/4/7/9” in chat without ambiguity.
 - `docs/mct/` – MCT migration documentation (`docs/mct/EXPORT_GUIDE.md` for complete export guide)
-- `ops/` – configuration templates and helper scripts, including `ops/tutor/apply-patches.sh` to pin the MFEs to Node 18 until Tutor ships native support.
+- `ops/` – configuration templates and helper scripts. Run `ops/tutor/apply-patches.sh` after each `tutor config save` to keep the MySQL flags compatible with 8.0.
 - `tools/` – data export and migration scripts:
   - `tools/mct-export.mjs` – Microsoft Community Training data exporter (see `docs/mct/EXPORT_GUIDE.md`)
   - `tools/kajabi-export.mjs` – Kajabi data exporter
   - `tools/mongodb-to-atlas.sh` – MongoDB migration helper
   - `tools/sync-brand-assets.sh` – copies fonts/logos into both LMS/Studio and MFE theme directories
+  - `tools/setup-mfe-branding.sh` – clones the upstream MFEs, vendors fonts, and inserts the shared Mereka SCSS import
+  - `tools/cloudflare-harden-zone.sh` – enforces TLS/HSTS defaults on the mereka.io zone
   - `tools/cloudflare-sync.sh` – idempotently updates Cloudflare DNS using `ops/cloudflare/records.json`
 - `docs/SECRETS_SNAPSHOT.md` – temporary credentials generated for the initial rollout (rotate before production).
 

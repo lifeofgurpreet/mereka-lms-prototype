@@ -40,6 +40,17 @@ Target load balancer IP: **34.126.186.80** (Caddy service in `mereka-lms` GKE cl
 
 If you need additional records (TXT for verification, CNAMEs for future MFEs), add them to the JSON file and rerun `./tools/cloudflare-sync.sh` so the script handles creation/update instead of doing it manually.
 
+## Zone security baseline
+
+Run `./tools/cloudflare-harden-zone.sh` after DNS changes or when cloning the environment. It ensures:
+
+- `ssl=strict` and `min_tls_version=1.2` (older TLS handshakes rejected).
+- `always_use_https` + `automatic_https_rewrites` stay enabled so HTTP gets redirected automatically.
+- HSTS (max-age 365d, includeSubDomains, `nosniff`) is advertised via the Cloudflare security header toggle.
+- HSTS (max-age 365d, includeSubDomains, `nosniff`) is advertised via the Cloudflare security header toggle.
+
+The helper uses the same environment variables as the DNS sync script. The managed WAF toggle is unavailable on our current Cloudflare plan—if you upgrade, enable it directly in the dashboard or extend this script.
+
 ### Optional: spot checks with `cli4`
 
 We ship the official Cloudflare CLI inside `.venv` (`cli4`). After activating the virtualenv and exporting `CF_API_EMAIL`/`CF_API_KEY`, you can list or edit records directly:
