@@ -38,6 +38,10 @@ variable "monthly_budget_myr" {
   type        = number
   description = "Monthly budget cap in MYR."
   default     = 400
+  validation {
+    condition     = var.monthly_budget_myr <= 1000
+    error_message = "monthly_budget_myr must stay at or below RM1,000 as per cost guardrails."
+  }
 }
 
 variable "budget_thresholds" {

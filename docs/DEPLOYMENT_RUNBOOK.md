@@ -130,7 +130,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
   ```bash
   cd ops/terraform
   terraform init
-  terraform apply -target=google_billing_budget.mereka_monthly
+  GOOGLE_CLOUD_QUOTA_PROJECT=mereka-lms terraform apply -target=google_billing_budget.mereka_monthly
   ```
   This provisions a Cloud Billing budget with alert thresholds (default 62.5% and 100%). Add notification channel resource names to `budget_monitoring_channels` if you want alerts to hit `techadmin@biji-biji.com` via Cloud Monitoring.
 

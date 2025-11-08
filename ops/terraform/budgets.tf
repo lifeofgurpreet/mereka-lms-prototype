@@ -18,7 +18,7 @@ resource "google_billing_budget" "mereka_monthly" {
     for_each = var.budget_thresholds
     content {
       threshold_percent = threshold_rules.value
-      basis             = threshold_rules.value >= 1 ? "FORECASTED_SPEND" : "CURRENT_SPEND"
+      spend_basis       = threshold_rules.value >= 1 ? "FORECASTED_SPEND" : "CURRENT_SPEND"
     }
   }
 
