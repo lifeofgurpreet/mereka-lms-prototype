@@ -30,6 +30,16 @@ Target load balancer IP: **34.126.186.80** (Caddy service in `mereka-lms` GKE cl
    The helper now auto-detects which credential style you provided and applies the JSON in `ops/cloudflare/records.json`.
 3. Commit any edits to `ops/cloudflare/records.json` (e.g., different load-balancer IP) so the entire team stays in sync.
 
+## Baseline records
+
+`ops/cloudflare/records.json` is the single source of truth. For staging we enforce:
+
+- `staging.academy.mereka.io` – `A` → `34.126.186.80`, TTL `auto` (1), proxy **off** so Let’s Encrypt challenges reach Caddy directly.
+- `studio.staging.academy.mereka.io` / `apps.staging.academy.mereka.io` – CNAMEs back to the staging host, also DNS-only.
+- `academy.mereka.io` – `CAA 0 issue "letsencrypt.org"` so only Let’s Encrypt can issue certificates for the entire sub-tree; this hardens issuance for our load balancer.
+
+If you need additional records (TXT for verification, CNAMEs for future MFEs), add them to the JSON file and rerun `./tools/cloudflare-sync.sh` so the script handles creation/update instead of doing it manually.
+
 ### Optional: spot checks with `cli4`
 
 We ship the official Cloudflare CLI inside `.venv` (`cli4`). After activating the virtualenv and exporting `CF_API_EMAIL`/`CF_API_KEY`, you can list or edit records directly:

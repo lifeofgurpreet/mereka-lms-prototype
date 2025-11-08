@@ -41,6 +41,8 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
   ttl=$(echo "$record" | jq -r '.ttl')
   proxied=$(echo "$record" | jq -r '.proxied')
   description=$(echo "$record" | jq -r '.description // ""')
+  data=$(echo "$record" | jq -c '.data // null')
+  priority=$(echo "$record" | jq -r '.priority // empty')
 
   existing=$(curl -fsSL "${AUTH_HEADERS[@]}" \
     -H "Content-Type: application/json" \
@@ -54,13 +56,39 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
   current_content=$(echo "$existing" | jq -r '.result[0].content // empty')
   current_ttl=$(echo "$existing" | jq -r '.result[0].ttl // empty')
   current_proxied=$(echo "$existing" | jq -r '.result[0].proxied // false')
+  current_data=$(echo "$existing" | jq -c '.result[0].data // null')
 
-  payload=$(jq -n --arg type "$type" --arg name "$name" --arg content "$content" \
-    --argjson ttl "$ttl" --argjson proxied "$proxied" \
-    --arg comment "$description" '{type:$type,name:$name,content:$content,ttl:$ttl,proxied:$proxied} + ( $comment | select(length>0) | {comment:$comment} )')
+  base_payload=$(jq -n --arg type "$type" --arg name "$name" \
+    --argjson ttl "$ttl" '{type:$type,name:$name,ttl:$ttl}')
+
+  # include proxied flag only for record types that support it (A/AAAA/CNAME)
+  case "$type" in
+    A|AAAA|CNAME)
+      base_payload=$(echo "$base_payload" | jq --argjson proxied "$proxied" '. + {proxied:$proxied}')
+      ;;
+  esac
+
+  if [[ -n "$priority" ]]; then
+    base_payload=$(echo "$base_payload" | jq --argjson priority "$priority" '. + {priority:$priority}')
+  fi
+
+  if [[ "$data" != "null" ]]; then
+    payload=$(echo "$base_payload" | jq --argjson data "$data" '. + {data:$data}')
+  else
+    payload=$(echo "$base_payload" | jq --arg content "$content" '. + {content:$content}')
+  fi
+
+  if [[ -n "$description" ]]; then
+    payload=$(echo "$payload" | jq --arg comment "$description" '. + {comment:$comment}')
+  fi
+
+  display_value=$content
+  if [[ "$data" != "null" ]]; then
+    display_value=$data
+  fi
 
   if [[ -z "$record_id" ]]; then
-    echo "[CREATE] $name -> $content"
+    echo "[CREATE] $name -> $display_value"
     if [[ "$DRY_RUN" == "true" ]]; then
       continue
     fi
@@ -74,7 +102,25 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
     continue
   fi
 
-  if [[ "$current_content" == "$content" && "$current_ttl" == "$ttl" && "$current_proxied" == "$proxied" ]]; then
+  needs_update=false
+  if [[ "$data" != "null" ]]; then
+    desired_data=$(echo "$data" | jq -c '.')
+    current_data_cmp=$current_data
+    [[ "$current_data_cmp" == "null" ]] && current_data_cmp="null"
+    if [[ "$current_data_cmp" == "$desired_data" && "$current_ttl" == "$ttl" ]]; then
+      needs_update=false
+    else
+      needs_update=true
+    fi
+  else
+    if [[ "$current_content" == "$content" && "$current_ttl" == "$ttl" && ( "$type" != "A" && "$type" != "AAAA" && "$type" != "CNAME" || "$current_proxied" == "$proxied" ) ]]; then
+      needs_update=false
+    else
+      needs_update=true
+    fi
+  fi
+
+  if [[ "$needs_update" == "false" ]]; then
     echo "[OK] $name already up to date"
     continue
   fi

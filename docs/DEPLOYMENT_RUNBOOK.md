@@ -99,6 +99,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `staging-academy-mereka-io`.
    - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./tools/cloudflare-sync.sh` keeps the `staging`, `studio`, and `apps` hostnames pointed at the Caddy load balancer (records defined in `ops/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
+   - Certificate hygiene: the same JSON also enforces a `CAA 0 issue "letsencrypt.org"` record on `academy.mereka.io` so only Let’s Encrypt can mint certs for the staging sub-tree.
 
 ## 6. Post-deploy tasks
 
