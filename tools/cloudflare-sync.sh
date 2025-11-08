@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
 # Sync Cloudflare DNS records with the canonical definition in ops/cloudflare/records.json.
-# Requires: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID, jq, curl
+# Requires: CLOUDFLARE_ZONE_ID and either CLOUDFLARE_API_TOKEN or
+#            CLOUDFLARE_EMAIL + CLOUDFLARE_API_KEY, plus jq & curl
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RECORDS_FILE=${1:-"$REPO_ROOT/ops/cloudflare/records.json"}
 API_BASE="https://api.cloudflare.com/client/v4"
 ZONE_ID=${CLOUDFLARE_ZONE_ID:?"Set CLOUDFLARE_ZONE_ID"}
-API_TOKEN=${CLOUDFLARE_API_TOKEN:?"Set CLOUDFLARE_API_TOKEN"}
 DRY_RUN=${DRY_RUN:-false}
+
+declare -a AUTH_HEADERS
+if [[ -n "${CLOUDFLARE_API_TOKEN:-}" ]]; then
+  AUTH_HEADERS=("-H" "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")
+elif [[ -n "${CLOUDFLARE_EMAIL:-}" && -n "${CLOUDFLARE_API_KEY:-}" ]]; then
+  AUTH_HEADERS=("-H" "X-Auth-Email: ${CLOUDFLARE_EMAIL}" "-H" "X-Auth-Key: ${CLOUDFLARE_API_KEY}")
+else
+  echo "Provide CLOUDFLARE_API_TOKEN or CLOUDFLARE_EMAIL + CLOUDFLARE_API_KEY" >&2
+  exit 1
+fi
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required but not installed" >&2
@@ -32,7 +42,7 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
   proxied=$(echo "$record" | jq -r '.proxied')
   description=$(echo "$record" | jq -r '.description // ""')
 
-  existing=$(curl -fsSL -H "Authorization: Bearer $API_TOKEN" \
+  existing=$(curl -fsSL "${AUTH_HEADERS[@]}" \
     -H "Content-Type: application/json" \
     "$API_BASE/zones/$ZONE_ID/dns_records?type=$type&name=$name") || {
       echo "Failed to query record $name" >&2
@@ -43,7 +53,7 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
   record_id=$(echo "$existing" | jq -r '.result[0].id // empty')
   current_content=$(echo "$existing" | jq -r '.result[0].content // empty')
   current_ttl=$(echo "$existing" | jq -r '.result[0].ttl // empty')
-  current_proxied=$(echo "$existing" | jq -r '.result[0].proxied // empty')
+  current_proxied=$(echo "$existing" | jq -r '.result[0].proxied // false')
 
   payload=$(jq -n --arg type "$type" --arg name "$name" --arg content "$content" \
     --argjson ttl "$ttl" --argjson proxied "$proxied" \
@@ -55,7 +65,7 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
       continue
     fi
     curl -fsSL -X POST "$API_BASE/zones/$ZONE_ID/dns_records" \
-      -H "Authorization: Bearer $API_TOKEN" \
+      "${AUTH_HEADERS[@]}" \
       -H "Content-Type: application/json" \
       --data "$payload" >/dev/null || {
         echo "  ! Failed to create $name" >&2
@@ -74,7 +84,7 @@ jq -c '.[]' "$RECORDS_FILE" | while read -r record; do
     continue
   fi
   curl -fsSL -X PUT "$API_BASE/zones/$ZONE_ID/dns_records/$record_id" \
-    -H "Authorization: Bearer $API_TOKEN" \
+    "${AUTH_HEADERS[@]}" \
     -H "Content-Type: application/json" \
     --data "$payload" >/dev/null || {
       echo "  ! Failed to update $name" >&2

@@ -60,6 +60,7 @@ AQIDAQAB
 | Open edX superuser email | `gurpreet@biji-biji.com` |
 | Open edX superuser password | `NxO3mIpOqMiNJUKJwaYy` *(replace original `Cr3ativity`)* |
 | MongoDB Atlas URI | `mongodb+srv://cs_comments_user:<password>@cluster0.xxxxx.mongodb.net/cs_comments_service?retryWrites=true&w=majority` *(placeholder—update once Atlas is provisioned)* |
+| Cloudflare global API key | Stored in 1Password under “Cloudflare – gurpreet@biji-biji.com”. Export as `CLOUDFLARE_API_KEY` only when running `cli4`/`tools/cloudflare-sync.sh`, then rotate if shared. |
 
 ## SMTP
 
