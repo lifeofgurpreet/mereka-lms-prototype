@@ -16,6 +16,7 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `tools/mct-export.mjs` – Microsoft Community Training data exporter (see `docs/mct/EXPORT_GUIDE.md`)
   - `tools/kajabi-export.mjs` – Kajabi data exporter
   - `tools/mongodb-to-atlas.sh` – MongoDB migration helper
+  - `tools/mongodb-atlas-cutover.sh` – dumps data, updates Tutor config, and restarts workloads against Atlas
   - `tools/sync-brand-assets.sh` – copies fonts/logos into both LMS/Studio and MFE theme directories
   - `tools/setup-mfe-branding.sh` – clones the upstream MFEs, vendors fonts, and inserts the shared Mereka SCSS import
   - `tools/cloudflare-harden-zone.sh` – enforces TLS/HSTS defaults on the mereka.io zone

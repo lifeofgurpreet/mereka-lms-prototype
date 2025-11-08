@@ -96,6 +96,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    tutor k8s exec -- kubectl apply -f k8s/addons/mongodb-statefulset.yaml
    ```
    (See `docs/MONGODB_ATLAS.md` for migrating this data set to Atlas via `tools/mongodb-to-atlas.sh` and the new `MONGODB_URI` setting.)
+   - Ready to cut over? Run `ATLAS_URI=... ./tools/mongodb-atlas-cutover.sh` to dump the StatefulSet to Atlas, update Tutor config, restart `forum`, and (optionally) delete the StatefulSet/PVC once the Atlas connection is verified.
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `staging-academy-mereka-io`.
    - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./tools/cloudflare-sync.sh` keeps the `staging`, `studio`, and `apps` hostnames pointed at the Caddy load balancer (records defined in `ops/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.

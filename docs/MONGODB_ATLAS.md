@@ -24,6 +24,27 @@ ATLAS_URI="mongodb+srv://cs_comments_user:<password>@cluster0.abcde.mongodb.net/
 
 The script runs `mongodump` inside `mongodb-0` and pipes it to `mongorestore` (via the official `mongo` Docker image) so the Atlas cluster receives a fresh copy of `cs_comments_service`.
 
+### One-command cutover (data + Tutor config)
+
+To automate the entire migration—including dumping data, updating Tutor overrides, restarting deployments, and storing the URI in Secret Manager—run:
+
+```bash
+ATLAS_URI="mongodb+srv://cs_comments_user:<password>@cluster0.abcde.mongodb.net/cs_comments_service?retryWrites=true&w=majority" \
+  ./tools/mongodb-atlas-cutover.sh
+```
+
+Environment flags:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `RUN_MIGRATION` | `true` | Set to `false` if you already ran `mongodb-to-atlas.sh` and just want to flip Tutor. |
+| `UPDATE_SECRET` | `true` | Controls whether the script writes the URI into the `mongodb-atlas-uri` Secret Manager secret. |
+| `CLEANUP_STATEFULSET` | `false` | When `true`, deletes the `mongodb` StatefulSet + PVC after Tutor connects to Atlas. |
+| `NAMESPACE` / `STATEFULSET` / `PVC_NAME` | `mereka-lms` / `mongodb` / `data-mongodb-0` | Override if your staging namespace differs. |
+| `TUTOR_CMD` | `tutor` | Change if you prefer `tutor --config=...` wrappers. |
+
+The script sources `ops/tutor-env.sh`, runs `tutor config save --set RUN_MONGODB=false --set MONGODB_URI="…"`, restarts the Kubernetes workloads (`tutor k8s start`), waits for the `forum` deployment rollout, and optionally deletes the legacy StatefulSet.
+
 ## 3. Point Tutor at Atlas
 
 1. Update the Tutor config to use the connection string and disable the in-cluster MongoDB:
