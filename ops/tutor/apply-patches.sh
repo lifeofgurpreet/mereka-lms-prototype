@@ -69,6 +69,20 @@ print(Path(tutor.__file__).parent / "templates" / "apps" / "openedx" / "settings
 PY
 )
 
+FORUM_PLUGIN=$(python - <<'PY'
+from pathlib import Path
+import tutorforum
+print(Path(tutorforum.__file__).parent / "plugin.py")
+PY
+)
+
+WEBPACK_PROD_TEMPLATE=$(python - <<'PY'
+from pathlib import Path
+import tutor
+print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "edx-platform" / "webpack.prod.config.js")
+PY
+)
+
 PATCH_TARGETS=(
   "$MFE_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
@@ -88,10 +102,14 @@ PATCH_TARGETS=(
   "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
   "$LMS_ASSETS_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
+  "$WEBPACK_PROD_TEMPLATE"
+  "$REPO_ROOT/tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
+  "$FORUM_PLUGIN"
 )
 
 python - "${PATCH_TARGETS[@]}" <<'PY'
 from pathlib import Path
+import re
 import sys
 import textwrap
 
@@ -103,6 +121,14 @@ for target in targets:
         continue
     original = path.read_text()
     updated = original
+    if path.name == "plugin.py" and 'DD_TRACE_ENABLED' not in updated:
+        needle = '"MONGOID_USE_SSL": "{{ \'true\' if MONGODB_USE_SSL else \'false\' }}",'
+        if needle in updated:
+            updated = updated.replace(
+                needle,
+                needle
+                + '\n    "DD_TRACE_ENABLED": "false",',
+            )
     extra_lms_hosts = [
         "academy.biji-biji.com",
         "skillourfuture.staging.academy.mereka.io",
@@ -221,6 +247,30 @@ for target in targets:
         "RUN pip install --upgrade pip==25.0.1 setuptools==75.3.0 wheel==0.45.1",
     )
     updated = updated.replace(
+        "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    pip install -r /openedx/edx-platform/requirements/edx/base.txt",
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    )
+    updated = updated.replace(
+        "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    bash -o pipefail -c 'for attempt in 1 2 3; do \\n        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0 \\n        echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2 \\n        sleep 10 \\n    done; exit 1'",
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    )
+    updated = updated.replace(
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do
+        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0
+        echo "pip install attempt ${attempt} failed; retrying in 10s" >&2
+        sleep 10
+    done; exit 1'""",
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    )
+    updated = updated.replace(
         "# Re-install local requirements, otherwise egg-info folders are missing\nRUN pip install -r requirements/edx/local.in\n\n",
         "# Local requirements list removed in Redwood; skip redundant reinstall step.\n",
     )
@@ -229,8 +279,34 @@ for target in targets:
         'INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")\n# Mereka adjustments keep Redwood optional apps enabled\nDATABASE_ROUTERS.remove(\n    "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"\n)\nif "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]\nif "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.bookmarks.apps.BookmarksConfig"]\nif "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]\nif "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.theming.apps.ThemingConfig\"]\n',
     )
     updated = updated.replace(
-        "ENV PATH /openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV /openedx/venv/\nWORKDIR /openedx/edx-platform\n",
-        "ENV PATH /openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV /openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nWORKDIR /openedx/edx-platform\n",
+        "--mysql-native-password=ON",
+        "--default-authentication-plugin=mysql_native_password",
+    )
+    env_block_spaces = "ENV PATH /openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV /openedx/venv/\nWORKDIR /openedx/edx-platform\n"
+    env_block_equals = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nWORKDIR /openedx/edx-platform\n"
+    env_block_short = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\n"
+    env_replacement = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\nWORKDIR /openedx/edx-platform\n"
+    updated = updated.replace(env_block_spaces, env_replacement)
+    updated = updated.replace(env_block_equals, env_replacement)
+    updated = updated.replace(
+        env_block_short,
+        "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\n",
+    )
+    updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=1536"\n', "")
+    while "ENV PYTHONPATH=/openedx/edx-platform\nENV PYTHONPATH=/openedx/edx-platform\n" in updated:
+        updated = updated.replace(
+            "ENV PYTHONPATH=/openedx/edx-platform\nENV PYTHONPATH=/openedx/edx-platform\n",
+            "ENV PYTHONPATH=/openedx/edx-platform\n",
+        )
+    dup_suffix = "ENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\n"
+    while env_replacement + dup_suffix in updated:
+        updated = updated.replace(env_replacement + dup_suffix, env_replacement)
+    while dup_suffix + dup_suffix in updated:
+        updated = updated.replace(dup_suffix + dup_suffix, dup_suffix)
+    updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=4096"\n', "")
+    updated = updated.replace(
+        'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH=/openedx/edx-platform\nENV COMPREHENSIVE_THEME_DIRS',
+        'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV COMPREHENSIVE_THEME_DIRS',
     )
     updated = updated.replace(
         "RUN cd /openedx/locale/user && \\\n    django-admin.py compilemessages -v1",
@@ -245,8 +321,88 @@ for target in targets:
         "# Redwood skips manual compilejsi18n while content libraries mature.\n",
     )
     updated = updated.replace(
-        "RUN openedx-assets xmodule \\\n    && openedx-assets npm \\\n    && openedx-assets webpack --env=prod \\\n    && openedx-assets common\n",
-        "RUN npm run postinstall\n",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/edx-platform/node_modules /openedx/node_modules",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules",
+    )
+    updated = updated.replace(
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\nCOPY --chown=app:app ./common/static/bundles /openedx/edx-platform/common/static/bundles\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+    )
+    updated = updated.replace(
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\nCOPY --chown=app:app ./common/static/bundles /openedx/edx-platform/common/static/bundles\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+    )
+    old_node_block = """###### Install nodejs with nodeenv in /openedx/nodeenv
+FROM python AS nodejs-requirements
+ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
+
+# Install nodeenv with the version provided by edx-platform
+# https://github.com/openedx/edx-platform/blob/master/requirements/edx/base.txt
+RUN pip install nodeenv==1.8.0
+RUN nodeenv /openedx/nodeenv --node=18.20.1 --prebuilt
+
+# Install nodejs requirements
+ARG NPM_REGISTRY=https://registry.npmjs.org/
+WORKDIR /openedx/edx-platform
+RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx-platform/package.json \\
+    --mount=type=bind,from=edx-platform,source=/package-lock.json,target=/openedx/edx-platform/package-lock.json \\
+    --mount=type=bind,from=edx-platform,source=/scripts/copy-node-modules.sh,target=/openedx/edx-platform/scripts/copy-node-modules.sh \\
+    --mount=type=cache,target=/root/.npm,sharing=shared \\
+    npm clean-install --no-audit --registry=$NPM_REGISTRY
+"""
+    new_node_block = """###### Reuse upstream Redwood node artifacts to avoid local npm installs
+FROM docker.io/overhangio/openedx:18.2.2 AS openedx_node_cache
+
+###### Install nodejs with nodeenv in /openedx/nodeenv
+FROM python AS nodejs-requirements
+ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
+
+# Copy prebuilt nodeenv/node_modules instead of re-running npm clean-install
+COPY --from=openedx_node_cache /openedx/nodeenv /openedx/nodeenv
+COPY --from=openedx_node_cache /openedx/node_modules /openedx/node_modules
+WORKDIR /openedx/edx-platform
+RUN ln -s /openedx/node_modules /openedx/edx-platform/node_modules
+"""
+    updated = updated.replace(old_node_block, new_node_block)
+    old_node_block_template = """###### Install nodejs with nodeenv in /openedx/nodeenv
+FROM python AS nodejs-requirements
+ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
+
+# Install nodeenv with the version provided by edx-platform
+# https://github.com/openedx/edx-platform/blob/master/requirements/edx/base.txt
+RUN pip install nodeenv==1.8.0
+RUN nodeenv /openedx/nodeenv --node=18.20.1 --prebuilt
+
+# Install nodejs requirements
+ARG NPM_REGISTRY={{ NPM_REGISTRY }}
+WORKDIR /openedx/edx-platform
+RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx-platform/package.json \\
+    --mount=type=bind,from=edx-platform,source=/package-lock.json,target=/openedx/edx-platform/package-lock.json \\
+    --mount=type=bind,from=edx-platform,source=/scripts/copy-node-modules.sh,target=/openedx/edx-platform/scripts/copy-node-modules.sh \\
+    --mount=type=cache,target=/root/.npm,sharing=shared \\
+    npm clean-install --no-audit --registry=$NPM_REGISTRY
+"""
+    updated = updated.replace(old_node_block_template, new_node_block)
+
+    updated = updated.replace(
+        'RUN if [ ! -d /openedx/node_modules ] || [ -z "$(ls -A /openedx/node_modules)" ]; then npm run postinstall; else echo "npm run postinstall skipped (prebuilt node_modules)"; fi',
+        "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.",
+    )
+    updated = updated.replace(
+        'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi',
+        "RUN npm run compile-sass -- --skip-themes",
+    )
+    updated = updated.replace(
+        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi',
+        "RUN npm run webpack",
+    )
+    updated = updated.replace(
+        "new TerserPlugin(),",
+        "new TerserPlugin({ parallel: false }),",
+    )
+    updated = updated.replace(
+        "module.exports = [..._.values(optimizedConfig), ..._.values(requireCompatConfig)];",
+        "module.exports = [..._.values(optimizedConfig)];",
     )
     updated = updated.replace(
         "derive_settings(__name__)\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
@@ -351,18 +507,51 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
             updated = updated.replace("const themePluginSlot =", footer_component + "\n\nconst themePluginSlot =", 1)
         updated = updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")
 
-    if path.name == "lms.conf" and "academy.biji-biji.com" not in updated:
+    if path.name == "lms.conf":
         anchor = "  server_name staging.academy.mereka.io preview.staging.academy.mereka.io;"
-        if anchor in updated:
+        if anchor in updated and "academy.biji-biji.com" not in updated:
             updated = updated.replace(
                 anchor,
                 anchor.rstrip(";")
                 + " academy.biji-biji.com skillourfuture.staging.academy.mereka.io;",
             )
+        if "location = /health" not in updated:
+            health_block = (
+                "  location = /health {\n"
+                "    default_type text/plain;\n"
+                "    return 200 \"ok\\n\";\n"
+                "  }\n\n"
+            )
+            marker = "  location / {"
+            if marker in updated:
+                updated = updated.replace(marker, health_block + marker, 1)
+        if "apps.staging.academy.mereka.io" in updated and "/profile/api/" not in updated:
+            pattern = re.compile(
+                r"(server_name apps\.staging\.academy\.mereka\.io;.*?)(\n  location / \{)",
+                re.S,
+            )
+            profile_proxy = (
+                "  location ^~ /profile/api/ {\n"
+                "    proxy_set_header Host staging.academy.mereka.io;\n"
+                "    proxy_redirect off;\n"
+                "    proxy_pass http://lms-backend;\n"
+                "  }\n\n"
+            )
+            updated = pattern.sub(rf"\\1\n{profile_proxy}\\2", updated, count=1)
     if path.name == "Caddyfile":
         for host in extra_lms_hosts:
             if host not in updated:
                 updated = updated.rstrip() + "\n\n" + caddy_block_template.format(domain=host)
+        if "apps.staging.academy.mereka.io" in updated and "/profile/api/" not in updated:
+            needle = "apps.staging.academy.mereka.io {\n        reverse_proxy nginx:80"
+            replacement = (
+                "apps.staging.academy.mereka.io {\n"
+                "        reverse_proxy /profile/api/* lms:8000 {\n"
+                "            header_up Host staging.academy.mereka.io\n"
+                "        }\n"
+                "        reverse_proxy nginx:80"
+            )
+            updated = updated.replace(needle, replacement, 1)
 
     if updated != original:
         path.write_text(updated)

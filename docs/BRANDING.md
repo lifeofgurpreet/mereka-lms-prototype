@@ -1,4 +1,5 @@
 # Mereka.io Theme Reference
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2025-11-08_
 
 This document captures the brand tokens we apply across LMS/Studio and all MFEs so every surface feels like mereka.io while still leaning on Paragon.
 
@@ -41,19 +42,13 @@ See `ops/themes/mereka/scss/_tokens.scss` for the Paragon/Bootstrap variable map
 ```bash
 source ops/tutor-env.sh
 tutor dev start mfe --detach
-cd tutor_env/dev/frontend-app-learning   # repeat per app
-mkdir -p public/fonts
-cp ../../../assets/branding/fonts/*.woff2 public/fonts/
-cat <<'SCSS' > src/styles/mereka.scss
-$mereka-font-path: "/fonts";
-@import "../../../ops/themes/mereka/scss/theme";
-SCSS
-echo '@import "./styles/mereka.scss";' >> src/index.scss
+./tools/setup-mfe-branding.sh               # clones + wires fonts/SCSS
+cd tutor_env/dev/frontend-app-learning      # repeat per app
 npm install
 npm start
 ```
 
-Adjust the relative import path depending on the app layout (gradebook/auth/account follow the same pattern under `tutor_env/dev`). Use `npm start` for interactive review, then rebuild via `tutor images build mfe` once approved.
+`tools/setup-mfe-branding.sh` clones the key MFEs into `tutor_env/dev/`, drops the shared fonts into each `public/fonts/` directory, copies the Mereka logos/favicons into `public/` + `public/images/`, writes `src/styles/mereka.scss`, and prepends `@import "./styles/mereka.scss";` to `src/index.scss`. The SCSS import points back to the shared tokens at `../../../../../ops/themes/mereka/scss/theme`, so edits remain centralized. Use `npm start` for interactive review, then rebuild via `tutor images build mfe` once approved.
 
 ## Asset Checklist
 
@@ -84,9 +79,9 @@ tutor local start -d && tutor local run lms ./manage.py lms collectstatic --noin
 ## Micro-Frontend Plug-in
 
 - `ops/themes/mereka/mfe/mereka.scss` reuses the same tokens/fonts, then layers on navbar/button/card tweaks tailored to Paragon components. Fonts are bundled with each MFE, so there are no cross-origin font requests.
-- `ops/tutor/apply-patches.sh` copies the SCSS + fonts into `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/` and injects `import './mereka/mereka.scss';` into `env.config.jsx` every time you run the script.
+- `tools/setup-mfe-branding.sh` is the one-stop helper for local development: it clones the upstream MFEs under `tutor_env/dev/`, copies the fonts into each `public/fonts/`, writes `src/styles/mereka.scss`, and ensures `src/index.scss` imports it.
 - The Indigo theme’s React plugin now renders a bespoke Mereka footer (links + contact info) by way of the `MerekaFooter` component injected ahead of the `footer_slot` widgets.
-- To rebuild MFEs with the branding baked in: `source ops/tutor-env.sh && ./ops/tutor/apply-patches.sh && tutor images build mfe --no-cache`.
+- To bake the branding into Tutor’s production MFE image: `source ops/tutor-env.sh && tutor images build mfe`.
 
 ## Favicons & Meta
 

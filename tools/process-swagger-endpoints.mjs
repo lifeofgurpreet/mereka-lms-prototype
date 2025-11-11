@@ -41,7 +41,7 @@ function generateMarkdown(data) {
 }
 
 // Save to file
-const outputPath = path.resolve('./docs/mct/api-endpoints/V1_COMPLETE.md');
+const outputPath = path.resolve('./docs/migrations/mct/api-endpoints/V1_COMPLETE.md');
 console.log(`Will write to: ${outputPath}`);
 
 export { generateMarkdown };

@@ -93,31 +93,81 @@ def build_policy_json(title: str, start: str = DEFAULT_START) -> str:
 
 
 def html_block_for_lesson(lesson: dict) -> str:
-    attrs = {
-        "Kajabi Lesson ID": lesson.get("id", ""),
-        "Status": lesson.get("status", ""),
-        "Publishing Option": lesson.get("publishing_option", ""),
-    }
-    media = lesson.get("media") or {}
-    media_id = lesson.get("media_id")
-    if media_id:
-        attrs["Media ID"] = media_id
-        media_attrs = media.get("attributes", {}) if isinstance(media, dict) else {}
-        if media_attrs:
-            attrs["Media Kind"] = media_attrs.get("kind", "")
-            attrs["Media Duration"] = media_attrs.get("duration", "")
-            attrs["Media State"] = media_attrs.get("upload_state", "")
-
-    rows = [
-        "<p><em>This lesson was migrated from Kajabi. Replace this placeholder with real content.</em></p>",
-        "<ul>",
-    ]
-    for key, value in attrs.items():
-        if value:
-            rows.append(
-                f"  <li><strong>{html.escape(key)}:</strong> {html.escape(str(value))}</li>"
-            )
-    rows.append("</ul>")
+    """
+    Generate HTML content for a lesson, using real content if available,
+    otherwise falling back to a placeholder with metadata.
+    
+    Note: content_html is used as-is (not escaped) since it's already HTML from Kajabi.
+    This is safe because Kajabi is a trusted source.
+    """
+    content_html = lesson.get("content_html")
+    body = lesson.get("body")
+    video_url = lesson.get("video_url")
+    download_url = lesson.get("download_url")
+    
+    # Build the HTML block
+    rows = []
+    
+    # Add main content
+    if content_html:
+        # content_html is already HTML from Kajabi - use it directly
+        rows.append(content_html)
+    elif body:
+        # Plain text body - convert newlines to <br> tags
+        rows.append("<p>" + html.escape(body).replace("\n", "<br>\n") + "</p>")
+    else:
+        # Fallback: placeholder with metadata
+        rows.append("<p><em>This lesson was migrated from Kajabi. Replace this placeholder with real content.</em></p>")
+        attrs = {
+            "Kajabi Lesson ID": lesson.get("id", ""),
+            "Status": lesson.get("status", ""),
+            "Publishing Option": lesson.get("publishing_option", ""),
+        }
+        media = lesson.get("media") or {}
+        media_id = lesson.get("media_id")
+        if media_id:
+            attrs["Media ID"] = media_id
+            media_attrs = media.get("attributes", {}) if isinstance(media, dict) else {}
+            if media_attrs:
+                attrs["Media Kind"] = media_attrs.get("kind", "")
+                attrs["Media Duration"] = media_attrs.get("duration", "")
+                attrs["Media State"] = media_attrs.get("upload_state", "")
+        
+        rows.append("<ul>")
+        for key, value in attrs.items():
+            if value:
+                rows.append(
+                    f"  <li><strong>{html.escape(key)}:</strong> {html.escape(str(value))}</li>"
+                )
+        rows.append("</ul>")
+    
+    # Add media/download links if available (always add these, even if we have content_html)
+    if video_url:
+        rows.append(f'<p><a href="{html.escape(video_url)}" target="_blank">Watch Video</a></p>')
+    
+    if download_url:
+        rows.append(f'<p><a href="{html.escape(download_url)}" download>Download Content</a></p>')
+    
+    # Handle included resources (media, downloads from API)
+    included_resources = lesson.get("included_resources", [])
+    if included_resources:
+        for resource in included_resources:
+            resource_type = resource.get("type")
+            resource_attrs = resource.get("attributes", {})
+            
+            if resource_type == "media":
+                # Media resource - check for streaming/download URLs
+                stream_url = resource_attrs.get("stream_url") or resource_attrs.get("video_url")
+                if stream_url:
+                    rows.append(f'<p><a href="{html.escape(stream_url)}" target="_blank">Stream Media</a></p>')
+            
+            elif resource_type == "downloads":
+                # Download resource
+                download_link = resource_attrs.get("download_url") or resource_attrs.get("url")
+                if download_link:
+                    filename = resource_attrs.get("filename", "Download")
+                    rows.append(f'<p><a href="{html.escape(download_link)}" download>{html.escape(filename)}</a></p>')
+    
     return "\n".join(rows)
 
 

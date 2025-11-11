@@ -1,4 +1,7 @@
 # Mereka.io Branding Rollout Tracker
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2025-11-08_
+
+Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 ## Inputs To Confirm
 - [x] Primary/secondary hex palette (captured in `docs/BRANDING.md#palette`).
@@ -14,10 +17,10 @@
 - [x] Define legacy LMS/Studio theming requirements (login hero, header, footer).
 
 ## Phase 2 — Micro-Frontend Theming
-- [ ] Clone required MFEs via `tutor dev start mfe` (learning, account, auth, profile, gradebook, authoring).
+- [x] Clone required MFEs via `tutor dev start mfe` (learning, account, auth, profile, gradebook, authoring).
 - [x] Apply Paragon theme overrides + global styles.
-- [x] Replace logos/favicons in each MFE’s `public/` folder. *(Handled centrally by the Indigo plugin which references `/static/mereka/images/*` so we don’t duplicate assets.)*
-- [x] Configure environment copy (`SITE_NAME`, marketing links).
+- [x] Replace logos/favicons in each MFE’s `public/` folder (`tools/setup-mfe-branding.sh` now copies favicon + logo assets automatically).
+- [ ] Configure environment copy (`SITE_NAME`, marketing links).
 - [ ] Run `npm start` smoke checks; capture screenshots.
 - [ ] Rebuild Docker image with `tutor images build mfe` once look is signed off.
 
@@ -42,6 +45,6 @@
 
 ## Deployment Checklist
 - [ ] Confirm Tutor image builds succeed in CI.
-- [ ] Regenerate environment with fresh assets (`tutor config save` → `./ops/tutor/apply-patches.sh`).
+- [x] Regenerate environment with fresh assets (`tutor config save` → `./ops/tutor/apply-patches.sh`); Tutor 18.2.2 now serves http://localhost + http://studio.localhost without 500s.
 - [ ] Purge CDN/static caches after deploy.
 - [ ] Notify stakeholders with before/after visuals + rollback plan.

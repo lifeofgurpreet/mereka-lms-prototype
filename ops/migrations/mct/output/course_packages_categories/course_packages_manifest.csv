@@ -1,0 +1,15 @@
+mct_course_id,kajabi_course_id,title,org,course_number,run,package_path,module_count,lesson_count
+24,24,AI Fluency,SKILLOURFUTURE,MCTCAT-24,RUN-24,ai-fluency/ai-fluency.tar.gz,2,16
+16,16,Basic Microsoft,SKILLOURFUTURE,MCTCAT-16,RUN-16,basic-microsoft/basic-microsoft.tar.gz,12,53
+14,14,Employability,SKILLOURFUTURE,MCTCAT-14,RUN-14,employability/employability.tar.gz,7,33
+45,45,Become an Entrepreneur,SKILLOURFUTURE,MCTCAT-45,RUN-45,become-an-entrepreneur/become-an-entrepreneur.tar.gz,8,94
+30,30,Climate Education,SKILLOURFUTURE,MCTCAT-30,RUN-30,climate-education/climate-education.tar.gz,1,7
+44,44,Content Creation,SKILLOURFUTURE,MCTCAT-44,RUN-44,content-creation/content-creation.tar.gz,1,6
+27,27,Digital Literacy,SKILLOURFUTURE,MCTCAT-27,RUN-27,digital-literacy/digital-literacy.tar.gz,5,86
+32,32,FOW (ENG) | Personal Branding,SKILLOURFUTURE,MCTCAT-32,RUN-32,fow-eng-personal-branding/fow-eng-personal-branding.tar.gz,5,23
+35,35,FOW (ENG) | Personal Finance,SKILLOURFUTURE,MCTCAT-35,RUN-35,fow-eng-personal-finance/fow-eng-personal-finance.tar.gz,7,19
+33,33,FOW (IND) | Personal Branding,SKILLOURFUTURE,MCTCAT-33,RUN-33,fow-ind-personal-branding/fow-ind-personal-branding.tar.gz,5,22
+15,15,Mobile Literacy,SKILLOURFUTURE,MCTCAT-15,RUN-15,mobile-literacy/mobile-literacy.tar.gz,4,21
+1,1,Soft Skills,SKILLOURFUTURE,MCTCAT-1,RUN-1,soft-skills/soft-skills.tar.gz,7,38
+46,46,Speak with Impact,SKILLOURFUTURE,MCTCAT-46,RUN-46,speak-with-impact/speak-with-impact.tar.gz,10,27
+31,31,Your Future in Green Jobs,SKILLOURFUTURE,MCTCAT-31,RUN-31,your-future-in-green-jobs/your-future-in-green-jobs.tar.gz,6,71

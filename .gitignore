@@ -26,11 +26,13 @@ data/
 # Node modules (if any frontends)
 node_modules/
 ops/migrations/kajabi/output/
+ops/migrations/kajabi/webhook_app/outbox/
 
 # Misc
 *.bak
 *.swp
 exports/
+.gcloud/
 
 # Terraform
 ops/terraform/.terraform/

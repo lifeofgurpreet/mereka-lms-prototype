@@ -5,15 +5,16 @@ Most automation lives under `ops/`: `ops/tutor/` hosts the Tutor configuration t
 
 ## Build, Test, and Development Commands
 - `python3 -m venv .venv` then `source ops/tutor-env.sh` to refresh and activate the local toolchain.
+- Redwood’s asset build needs headroom: configure Docker Desktop with ≥12 GB RAM and 2–4 GB swap (Settings → Resources) before running `tutor images build openedx`.
 - `tutor images build mfe` rebuilds the micro-frontend image with the Node 18 patch applied.
 - `tutor local quickstart -I` performs an end-to-end configure + launch of the nightly stack.
 - `tutor local start -d` / `tutor local stop` manage day-to-day lifecycle; add `tutor local dc ps` to inspect container health and `tutor local logs --tail=100` to debug.
-- `./ops/tutor/apply-patches.sh` keeps both the MFE Dockerfile on Node 18 and injects `MYSQL_ROOT_HOST` into Tutor’s compose templates so the `mysql/mysql-server:5.7` image accepts remote root connections.
+- `./ops/tutor/apply-patches.sh` keeps Tutor’s rendered local/k8s templates using `--default-authentication-plugin=mysql_native_password` so MySQL 8 starts cleanly after `tutor config save` regenerations.
 
 ## Branding Maintenance
 - Theme tokens/fonts live in `ops/themes/mereka` with the spec documented in `docs/BRANDING.md`; sync new assets into `assets/branding/` first, then copy to `ops/themes/mereka/common/static/`.
-- Enable the LMS/Studio theme locally by running `tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka`, followed by `tutor images build openedx` and `tutor local start -d`.
-- For MFEs cloned under `tutor_env/dev/frontend-app-*`, create a local SCSS entrypoint that imports `../../ops/themes/mereka/scss/theme.scss` (override `$mereka-font-path` to point at the app’s `public/fonts/` directory) so every app consumes the same Paragon overrides.
+- Enable the LMS/Studio theme locally by running `tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka`, executing `./ops/tutor/apply-patches.sh` (fixes MySQL flags), rebuilding `openedx`, and starting the stack.
+- Use `./tools/setup-mfe-branding.sh` after `tutor dev start mfe --detach` to clone the canonical MFEs, copy the fonts, and drop `src/styles/mereka.scss` + import stubs. Each repo then runs `npm install && npm start` from `tutor_env/dev/frontend-app-*`.
 - After any theme edit, rebuild `openedx`/`mfe` images (or rerun `npm start`) and capture screenshots before shipping.
 
 ## Coding Style & Naming Conventions
@@ -27,3 +28,6 @@ There is no upstream history yet, so follow Conventional Commits (`feat:`, `fix:
 
 ## Security & Configuration Notes
 Never commit secrets—`tutor_env/config.yml` stays local and is recreated from `ops/tutor/config.example.yml`. Run `tutor local do backup-db` before upgrades and stash dumps outside the repo. When experimenting with new Tutor plugins or releases, isolate the changes under a feature branch and document toggles in `docs/` so operators can reproduce the configuration, and re-run the patch script immediately after each `tutor config save`.
+
+## Troubleshooting & Site Recovery
+**🚨 If the site is down**, start with `docs/ops/TROUBLESHOOTING.md`—it has a 5-command diagnostic checklist. The most common issue is service selector mismatches after pod restarts. Quick fix: run `./tools/fix-service-selectors.sh` to automatically sync all service selectors with current pod instance IDs. Always check `kubectl get endpoints -n mereka-lms` first—empty endpoints (`<none>`) mean services can't route traffic. After any pod restarts or `tutor k8s` commands, verify endpoints are populated.

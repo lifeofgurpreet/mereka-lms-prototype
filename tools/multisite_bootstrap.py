@@ -10,9 +10,10 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import pymysql
+import textwrap
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
-DEFAULT_ENV_PATH = REPO_ROOT / "tutor_env" / "env" / "apps" / "openedx" / "config" / "lms.env.json"
+DEFAULT_ENV_PATH = REPO_ROOT / "tutor_env" / "env" / "apps" / "openedx" / "config" / "lms.env.yml"
 
 
 @dataclass(frozen=True)
@@ -36,6 +37,22 @@ ORGANIZATIONS = [
     },
 ]
 
+def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, primary_href: str, secondary_label: str, secondary_href: str, accent: str, background: str) -> str:
+    return textwrap.dedent(
+        f"""
+        <section class=\"site-hero\" style=\"background:{background};color:{accent};padding:3rem;border-radius:1.5rem;text-align:center;box-shadow:0 30px 80px rgba(15,23,42,.25);\">
+          <p style=\"letter-spacing:.3em;text-transform:uppercase;font-weight:600;margin-bottom:1rem;color:{accent};\">{eyebrow}</p>
+          <h1 style=\"margin-bottom:1rem;font-size:2.5rem;color:#fff;\">{heading}</h1>
+          <p style=\"max-width:640px;margin:0 auto 2rem;color:#f4f4f5;\">{body}</p>
+          <div style=\"display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;\">
+            <a href=\"{primary_href}\" style=\"background:{accent};color:#0f172a;padding:.85rem 1.75rem;border-radius:999px;font-weight:600;\">{primary_label}</a>
+            <a href=\"{secondary_href}\" style=\"border:2px solid {accent};color:{accent};padding:.75rem 1.5rem;border-radius:999px;font-weight:600;\">{secondary_label}</a>
+          </div>
+        </section>
+        """
+    ).strip()
+
+
 SITE_DEFINITIONS = [
     SiteDefinition(
         domain="academy.biji-biji.com",
@@ -50,8 +67,19 @@ SITE_DEFINITIONS = [
             "course_org_filter": ["BIJIBIJI"],
             "logo_image": "https://staging.academy.mereka.io/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
-            "favicon_path": "https://staging.academy.mereka.io/static/mereka/images/favicon.ico",
+            "favicon_path": "mereka/images/favicon.ico",
             "homepage_banner_enabled": True,
+            "homepage_overlay_html": hero_html(
+                eyebrow="Circular design + impact",
+                heading="Biji-Biji Academy curates learning for makers and changemakers.",
+                body="Master sustainable design, fabrication, and creative tech alongside mentors from Biji-Biji Initiative.",
+                primary_label="Discover Biji-Biji courses",
+                primary_href="/courses",
+                secondary_label="About the academy",
+                secondary_href="https://biji-biji.com",
+                accent="#ffbf3c",
+                background="#072c2f",
+            ),
         },
     ),
     SiteDefinition(
@@ -67,14 +95,32 @@ SITE_DEFINITIONS = [
             "course_org_filter": ["SKILLOURFUTURE"],
             "logo_image": "https://staging.academy.mereka.io/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
+            "favicon_path": "mereka/images/favicon.ico",
             "homepage_banner_enabled": True,
+            "homepage_overlay_html": hero_html(
+                eyebrow="Skill Our Future",
+                heading="Future-proof talent for Southeast Asia's green and digital economy.",
+                body="Live cohorts, micro-credentials, and career accelerators designed with regional employers.",
+                primary_label="Start learning",
+                primary_href="/courses",
+                secondary_label="Talk to our team",
+                secondary_href="mailto:team@mereka.io",
+                accent="#7dd3fc",
+                background="#111b47",
+            ),
         },
     ),
 ]
 
 
 def load_db_settings(path: pathlib.Path) -> Dict[str, object]:
-    payload = json.loads(path.read_text())
+    raw = path.read_text()
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        import yaml  # type: ignore
+
+        payload = yaml.safe_load(raw)
     db = payload["DATABASES"]["default"]
     return {
         "host": db["HOST"],
@@ -193,7 +239,7 @@ def main() -> None:
         "--env",
         type=pathlib.Path,
         default=DEFAULT_ENV_PATH,
-        help="Path to lms.env.json (defaults to tutor_env/.../lms.env.json).",
+        help="Path to lms.env.yml (defaults to tutor_env/.../lms.env.yml).",
     )
     parser.add_argument(
         "--apply",

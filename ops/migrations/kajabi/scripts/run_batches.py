@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
-import math
 import subprocess
 import sys
 from pathlib import Path
+import time
 
 
 def sh(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
@@ -92,7 +92,7 @@ def run_batch(
     with log_file.open("w", encoding="utf-8") as log:
         result = subprocess.run(cmd, stdout=log, stderr=log)
     if result.returncode != 0:
-        raise SystemExit(f"Batch starting at {offset} failed; see {log_file}")
+        raise RuntimeError(f"Batch starting at {offset} failed; see {log_file}")
 
     new_offset = remote_cat(namespace, pod, state_file)
     if not new_offset:
@@ -121,6 +121,8 @@ def main() -> None:
     parser.add_argument("--state-file", default=None)
     parser.add_argument("--log-dir", default="ops/migrations/kajabi/logs")
     parser.add_argument("--skip-upload", action="store_true")
+    parser.add_argument("--retries", type=int, default=3)
+    parser.add_argument("--retry-delay", type=int, default=10, help="Seconds between retries")
     args = parser.parse_args()
 
     csv_path = Path(args.csv).resolve()
@@ -149,18 +151,29 @@ def main() -> None:
         remaining = total - offset
         batch = min(args.batch_size, remaining)
         print(f"→ Batch offset={offset} size={batch}")
-        offset = run_batch(
-            namespace,
-            pod,
-            args.target,
-            remote_csv,
-            args.settings,
-            state_file,
-            offset,
-            batch,
-            logs_dir,
-        )
-        print(f"  ✓ new offset {offset}")
+        attempt = 0
+        while True:
+            try:
+                offset = run_batch(
+                    namespace,
+                    pod,
+                    args.target,
+                    remote_csv,
+                    args.settings,
+                    state_file,
+                    offset,
+                    batch,
+                    logs_dir,
+                )
+                print(f"  ✓ new offset {offset}")
+                break
+            except RuntimeError as exc:
+                attempt += 1
+                print(f"  ! {exc}")
+                if attempt > args.retries:
+                    raise
+                print(f"    retrying in {args.retry_delay}s ({attempt}/{args.retries})")
+                time.sleep(args.retry_delay)
 
     print("All batches completed")
 

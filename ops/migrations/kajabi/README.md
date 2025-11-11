@@ -101,7 +101,7 @@ tutor local run lms ./manage.py lms bulk_enroll --csv /tmp/kajabi-enrollments.cs
   --settings=tutor.production --email-students False --auto-enroll True
 
 # 3) Courses – easiest via Studio UI
-# Sign in to http://studio.local.merekaacademy.test, choose "Import Course",
+# Sign in to http://studio.localhost, choose "Import Course",
 # and upload the desired tarball from ops/migrations/kajabi/output/course_packages/<slug>/<slug>.tar.gz
 ```
 

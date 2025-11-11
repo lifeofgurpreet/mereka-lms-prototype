@@ -22,10 +22,12 @@ const MAX_ATTEMPTS = 3;
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const modulesFile = `${OUT_DIR}/modules.ndjson`;
 const lessonsFile = `${OUT_DIR}/lessons.ndjson`;
+const lessonDetailsFile = `${OUT_DIR}/lesson_details.ndjson`;
 const mediaFile = `${OUT_DIR}/lesson_media.ndjson`;
 const errorsFile = `${OUT_DIR}/errors.ndjson`;
 fs.writeFileSync(modulesFile, "");
 fs.writeFileSync(lessonsFile, "");
+fs.writeFileSync(lessonDetailsFile, "");
 fs.writeFileSync(mediaFile, "");
 fs.writeFileSync(errorsFile, "");
 
@@ -110,6 +112,40 @@ async function fetchCourseLessonMedia(token, courseId) {
   }
 }
 
+async function fetchLessonDetail(token, lessonId) {
+  // Note: Kajabi's Public API may not expose lesson detail endpoints.
+  // This attempts to fetch lesson details, but gracefully handles 404s.
+  // Try with common includes that might expose content
+  const params = new URLSearchParams();
+  params.set("include", "media,downloads");
+  const url = `${API}/v1/lessons/${lessonId}?${params.toString()}`;
+  try {
+    const json = await jfetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return json;
+  } catch (err) {
+    // If detailed fetch fails with 404, the endpoint doesn't exist
+    if (err.message.includes("404")) {
+      return null; // Signal that lesson detail endpoint is not available
+    }
+    // If detailed fetch fails, try without includes
+    try {
+      const basicUrl = `${API}/v1/lessons/${lessonId}`;
+      const basicJson = await jfetch(basicUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return basicJson;
+    } catch (basicErr) {
+      // If both fail with 404, endpoint doesn't exist
+      if (basicErr.message.includes("404")) {
+        return null;
+      }
+      throw new Error(`Failed to fetch lesson ${lessonId}: ${err.message}`);
+    }
+  }
+}
+
 (async () => {
   console.log(`Fetching course structure from ${COURSES_FILE}`);
   const token = await getToken();
@@ -151,6 +187,52 @@ async function fetchCourseLessonMedia(token, courseId) {
         appendLine(lessonsFile, { course_id: courseId, lesson })
       );
       await sleep(DELAY);
+
+      // Fetch detailed lesson content for each lesson
+      // Note: Kajabi's Public API may not expose lesson detail endpoints.
+      // If the endpoint returns 404, we'll skip detail fetching and continue.
+      console.log(`  Fetching details for ${lessonRecords.length} lessons...`);
+      let detailFetchAttempted = false;
+      let detailFetchSucceeded = false;
+      
+      for (const lesson of lessonRecords) {
+        const lessonId = lesson.id;
+        if (!lessonId) continue;
+        
+        try {
+          const detail = await fetchLessonDetail(token, lessonId);
+          detailFetchAttempted = true;
+          
+          if (detail === null) {
+            // Endpoint doesn't exist (404) - skip silently after first attempt
+            if (!detailFetchSucceeded) {
+              console.log(`    Lesson detail endpoint not available (404) - skipping detail fetches`);
+            }
+            break; // Stop trying for remaining lessons
+          }
+          
+          detailFetchSucceeded = true;
+          appendLine(lessonDetailsFile, {
+            course_id: courseId,
+            lesson_id: lessonId,
+            detail: detail.data || detail,
+            included: detail.included || [],
+          });
+          await sleep(DELAY);
+        } catch (err) {
+          detailFetchAttempted = true;
+          appendLine(errorsFile, {
+            course_id: courseId,
+            lesson_id: lessonId,
+            error: `lesson_detail_fetch_failed: ${err.message}`,
+          });
+          // Continue with other lessons even if one fails
+        }
+      }
+      
+      if (detailFetchAttempted && !detailFetchSucceeded) {
+        console.log(`  Note: Lesson detail endpoint not available in Kajabi API - using metadata only`);
+      }
 
       const mediaRecords = await fetchCourseLessonMedia(token, courseId);
       if (Array.isArray(mediaRecords)) {

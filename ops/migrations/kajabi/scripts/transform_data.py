@@ -205,12 +205,14 @@ def build_course_summary(
     modules_file: Path,
     lessons_file: Path,
     lesson_media_file: Path,
+    lesson_details_file: Path | None = None,
 ) -> (List[dict], List[dict]):
     courses = load_courses(courses_file)
     course_modules: Dict[str, List[dict]] = defaultdict(list)
     module_lessons: Dict[str, List[dict]] = defaultdict(list)
     lesson_media_rel: Dict[str, str] = {}
     media_detail: Dict[str, dict] = {}
+    lesson_details: Dict[str, dict] = {}
 
     for rec in read_ndjson(modules_file):
         module = rec.get("module", {})
@@ -231,6 +233,18 @@ def build_course_summary(
         for rec in read_ndjson(lesson_media_file):
             media = rec.get("media", {})
             media_detail[media.get("id")] = media
+
+    # Load lesson details if available
+    if lesson_details_file and lesson_details_file.exists():
+        for rec in read_ndjson(lesson_details_file):
+            lesson_id = rec.get("lesson_id")
+            detail = rec.get("detail", {})
+            if lesson_id and detail:
+                # Store both the lesson data and included resources
+                lesson_details[lesson_id] = {
+                    "attributes": detail.get("attributes", {}),
+                    "included": rec.get("included", []),
+                }
 
     course_structures: List[dict] = []
     summary_rows: List[dict] = []
@@ -262,6 +276,24 @@ def build_course_summary(
                         lesson, "attributes", "publishing_option", default=""
                     ),
                 }
+                
+                # Merge in lesson details if available
+                if lesson_id in lesson_details:
+                    detail_attrs = lesson_details[lesson_id].get("attributes", {})
+                    # Add content fields from detail fetch
+                    if detail_attrs.get("body"):
+                        lesson_entry["body"] = detail_attrs["body"]
+                    if detail_attrs.get("content_html"):
+                        lesson_entry["content_html"] = detail_attrs["content_html"]
+                    if detail_attrs.get("video_url"):
+                        lesson_entry["video_url"] = detail_attrs["video_url"]
+                    if detail_attrs.get("download_url"):
+                        lesson_entry["download_url"] = detail_attrs["download_url"]
+                    # Store included resources (media, downloads, etc.)
+                    included = lesson_details[lesson_id].get("included", [])
+                    if included:
+                        lesson_entry["included_resources"] = included
+                
                 media_id = lesson_media_rel.get(lesson_id)
                 if media_id:
                     lesson_entry["media_id"] = media_id
@@ -305,6 +337,11 @@ def main():
         help="Path to structure files (modules/lessons/lesson_media)",
     )
     parser.add_argument("--output-dir", required=True, help="Where transformed files will be written")
+    parser.add_argument(
+        "--lesson-details-file",
+        default=None,
+        help="Optional path to lesson_details.ndjson (from scrape_lessons.py)",
+    )
     args = parser.parse_args()
 
     exports_dir = Path(args.exports_dir)
@@ -387,11 +424,16 @@ def main():
 
     if structure_dir.exists():
         print("Aggregating course structures…")
+        if args.lesson_details_file:
+            lesson_details_path = Path(args.lesson_details_file)
+        else:
+            lesson_details_path = structure_dir / "lesson_details.ndjson"
         course_structures, summary_rows = build_course_summary(
             exports_dir / "courses_index.ndjson",
             structure_dir / "modules.ndjson",
             structure_dir / "lessons.ndjson",
             structure_dir / "lesson_media.ndjson",
+            lesson_details_path if lesson_details_path.exists() else None,
         )
         (output_dir / "course_structure.json").write_text(
             json.dumps(course_structures, indent=2),

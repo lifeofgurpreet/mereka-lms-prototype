@@ -6,14 +6,17 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 - evolve toward a production-grade deployment on Google Cloud Platform;
 - keep documentation and automation in sync with upstream Open edX updates.
 
+> 🧠 Prerequisite: configure Docker Desktop with at least **12 GB RAM** and **2 GB+ swap** (Settings → Resources) before running `tutor images build openedx`. The Redwood asset pipeline freely uses 6–8 GB during webpack and will OOM if the daemon stays on the default 2 GB cap.
+
 ## Structure
 
-- `docs/` – runbooks and architecture notes (local quickstart + GCP roadmap + `docs/BRANDING.md` for theme tokens/MFE workflow + `docs/MULTISITE.md` for microsite rollout).
+- `docs/` – runbooks and architecture notes. Start with [`docs/README.md`](docs/README.md) for the full index, or jump straight to [`docs/quickstart/WORKFLOW_LOCAL.md`](docs/quickstart/WORKFLOW_LOCAL.md) for the daily Tutor workflow.
 - `docs/NEXT10_TASKS.md` – rolling backlog of the top ten items so we can reference “Task 1/4/7/9” in chat without ambiguity.
-- `docs/mct/` – MCT migration documentation (`docs/mct/EXPORT_GUIDE.md` for complete export guide)
+- `docs/migrations/` – Migration runbooks. Start with [`docs/migrations/README.md`](docs/migrations/README.md), then jump into [`kajabi/`](docs/migrations/kajabi/README.md) or [`mct/`](docs/migrations/mct/README.md) as needed.
 - `ops/` – configuration templates and helper scripts. Run `ops/tutor/apply-patches.sh` after each `tutor config save` to keep the MySQL flags compatible with 8.0.
 - `tools/` – data export and migration scripts:
-  - `tools/mct-export.mjs` – Microsoft Community Training data exporter (see `docs/mct/EXPORT_GUIDE.md`)
+  - `tools/fix-service-selectors.sh` – **🚨 SITE DOWN?** Quick fix for service selector mismatches (see `docs/ops/TROUBLESHOOTING.md`)
+  - `tools/mct-export.mjs` – Microsoft Community Training data exporter (see `docs/migrations/mct/EXPORT_GUIDE.md`)
   - `tools/kajabi-export.mjs` – Kajabi data exporter
   - `tools/mongodb-to-atlas.sh` – MongoDB migration helper
   - `tools/mongodb-atlas-cutover.sh` – dumps data, updates Tutor config, and restarts workloads against Atlas
@@ -23,7 +26,7 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `tools/cloudflare-sync.sh` – idempotently updates Cloudflare DNS using `ops/cloudflare/records.json`
 - `docs/SECRETS_SNAPSHOT.md` – temporary credentials generated for the initial rollout (rotate before production).
 
-See `docs/LOCAL_SETUP.md` for step-by-step instructions to bootstrap the Tutor environment and `docs/GCP_ROADMAP.md` for the cloud deployment plan.
+See `docs/quickstart/LOCAL_SETUP.md` for step-by-step instructions to bootstrap the Tutor environment and `docs/ops/GCP_ROADMAP.md` for the cloud deployment plan.
 
 ## Container Images
 
@@ -34,7 +37,7 @@ Tutor now pulls most runtime images from our Artifact Registry (`asia-southeast1
 | LMS/CMS + workers | `openedx` | Built via `tutor images build openedx`. |
 | Micro-frontends | `openedx-mfe` | Patched to build on Node 18. |
 | Discovery | `openedx-discovery` | Uses Cloud SQL + OpenSearch. |
-| Forum (cs_comments_service) | `openedx-forum` | Talks to Mongo `mongodb` headless service (migrating to Atlas). |
+| Forum (cs_comments_service) | `openedx-forum` | Uses MongoDB Atlas (managed service). |
 | Notes service | `openedx-notes` | Handles ORA notes. |
 | **New:** Ecommerce web/worker | `openedx-ecommerce`, `openedx-ecommerce-worker` | Mirrored from Tutor 12.0.4. |
 | **New:** XQueue | `openedx-xqueue` | Mirrored from Tutor 12.1.0. |

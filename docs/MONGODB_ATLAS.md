@@ -1,4 +1,5 @@
 # MongoDB Atlas Migration Guide
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-11-09_
 
 This guide explains how to move cs_comments_service data from the temporary in-cluster MongoDB StatefulSet to MongoDB Atlas and point Tutor at the managed cluster.
 

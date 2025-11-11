@@ -1,7 +1,11 @@
 # Sanitized Tutor configuration overrides. Copy to tutor_env/config.yml and fill in secrets via `tutor config save`.
-LMS_HOST: local.merekaacademy.test
-CMS_HOST: studio.local.merekaacademy.test
-DOCKER_IMAGE_MYSQL: docker.io/mysql/mysql-server:5.7
+LMS_HOST: localhost
+CMS_HOST: studio.localhost
+DISCOVERY_HOST: discovery.localhost
+ECOMMERCE_HOST: ecommerce.localhost
+MFE_HOST: apps.localhost
+XQUEUE_HOST: xqueue.localhost
+DOCKER_IMAGE_MYSQL: docker.io/mysql:8.0
 MYSQL_ROOT_HOST: '%'
 MFE_DOCKER_IMAGE: openedx-mfe:nightly
 MFE_COMMON_VERSION: master
@@ -9,21 +13,22 @@ OPENEDX_COMMON_VERSION: open-release/redwood.master
 OPENEDX_LMS_VERSION: open-release/redwood.master
 OPENEDX_CMS_VERSION: open-release/redwood.master
 PLUGINS:
-  - android
   - discovery
   - mfe
   - notes
   - ecommerce
   - xqueue
-RUN_MONGODB: false
-MONGODB_URI: mongodb+srv://cs_comments_user:<password>@cluster0.example.mongodb.net/cs_comments_service?retryWrites=true&w=majority
-MONGODB_HOST: ""
-MONGODB_PORT: ""
+  - forum
+  - aspects
+RUN_MONGODB: true
+MONGODB_URI: ""
+MONGODB_HOST: mongodb
+MONGODB_PORT: 27017
 MONGODB_AUTH: ""
-MYSQL_HOST: 10.97.0.2
+MYSQL_HOST: mysql
 MYSQL_PORT: 3306
-REDIS_HOST: 10.150.102.108
-REDIS_PORT: 6378
+REDIS_HOST: redis
+REDIS_PORT: 6379
 AWS_S3_REGION_NAME: asia-southeast1
 AWS_STORAGE_BUCKET_NAME: staging-academy-mereka-io-content
 LMS_DEFAULT_SITE_THEME: mereka
@@ -32,3 +37,8 @@ ADDL_INSTALLED_APPS:
   - openedx.core.djangoapps.bookmarks.apps.BookmarksConfig
   - openedx.core.djangoapps.discussions.apps.DiscussionsConfig
   - openedx.core.djangoapps.theming.apps.ThemingConfig
+# Google OAuth2 Configuration
+# Get these from Google Cloud Console > APIs & Services > Credentials
+# See docs/GOOGLE_OAUTH_SETUP.md for detailed setup instructions
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: ""
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: ""
