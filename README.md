@@ -10,23 +10,44 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 
 ## Structure
 
-- `docs/` – runbooks and architecture notes. Start with [`docs/README.md`](docs/README.md) for the full index, or jump straight to [`docs/quickstart/WORKFLOW_LOCAL.md`](docs/quickstart/WORKFLOW_LOCAL.md) for the daily Tutor workflow.
-- `docs/NEXT10_TASKS.md` – rolling backlog of the top ten items so we can reference “Task 1/4/7/9” in chat without ambiguity.
-- `docs/migrations/` – Migration runbooks. Start with [`docs/migrations/README.md`](docs/migrations/README.md), then jump into [`kajabi/`](docs/migrations/kajabi/README.md) or [`mct/`](docs/migrations/mct/README.md) as needed.
-- `ops/` – configuration templates and helper scripts. Run `ops/tutor/apply-patches.sh` after each `tutor config save` to keep the MySQL flags compatible with 8.0.
-- `tools/` – data export and migration scripts:
-  - `tools/fix-service-selectors.sh` – **🚨 SITE DOWN?** Quick fix for service selector mismatches (see `docs/ops/TROUBLESHOOTING.md`)
-  - `tools/mct-export.mjs` – Microsoft Community Training data exporter (see `docs/migrations/mct/EXPORT_GUIDE.md`)
-  - `tools/kajabi-export.mjs` – Kajabi data exporter
-  - `tools/mongodb-to-atlas.sh` – MongoDB migration helper
-  - `tools/mongodb-atlas-cutover.sh` – dumps data, updates Tutor config, and restarts workloads against Atlas
-  - `tools/sync-brand-assets.sh` – copies fonts/logos into both LMS/Studio and MFE theme directories
-  - `tools/setup-mfe-branding.sh` – clones the upstream MFEs, vendors fonts, and inserts the shared Mereka SCSS import
-  - `tools/cloudflare-harden-zone.sh` – enforces TLS/HSTS defaults on the mereka.io zone
-  - `tools/cloudflare-sync.sh` – idempotently updates Cloudflare DNS using `ops/cloudflare/records.json`
-- `docs/SECRETS_SNAPSHOT.md` – temporary credentials generated for the initial rollout (rotate before production).
+- `docs/` – Documentation organized by category:
+  - `onboarding/` – Setup guides and getting started (start with [`docs/onboarding/QUICK_START_LOCAL.md`](docs/onboarding/QUICK_START_LOCAL.md))
+  - `operations/` – Runbooks, troubleshooting, and operational procedures
+  - `migrations/` – Migration playbooks for Kajabi and MCT
+  - `architecture/` – System architecture and design decisions
+  - `status/` – Status trackers and backlog (see [`docs/status/NEXT10_TASKS.md`](docs/status/NEXT10_TASKS.md))
+- `infrastructure/` – Infrastructure-as-code:
+  - `tutor/` – Tutor configuration templates and patches (`apply-patches.sh`, `tutor-env.sh`)
+  - `terraform/` – Terraform modules and configs
+  - `k8s/` – Kubernetes manifests
+  - `themes/` – Mereka branding themes
+- `scripts/` – Automation scripts organized by domain:
+  - `infra/` – Infrastructure operations (GKE, Cloudflare, MongoDB, etc.)
+  - `migrations/` – Data migration scripts (Kajabi, MCT)
+  - `branding/` – Branding asset sync and theme helpers
+  - `analytics/` – Analytics exports and reconciliation
+  - `qa/` – Quality assurance and testing
+- `services/` – Standalone microservices and webhooks
+- `var/` – Runtime artifacts (gitignored): logs, exports, migration outputs
 
-See `docs/quickstart/LOCAL_SETUP.md` for step-by-step instructions to bootstrap the Tutor environment and `docs/ops/GCP_ROADMAP.md` for the cloud deployment plan.
+## 🚀 Quick Start (New Developers)
+
+**One-Command Setup:**
+```bash
+./scripts/shared/setup-local.sh
+```
+
+Or use Make:
+```bash
+make bootstrap
+make tutor-start
+```
+
+This automatically sets up everything you need for local development. See `README_SETUP.md` for details.
+
+**For complete onboarding:** See [`docs/onboarding/DEVELOPER_ONBOARDING.md`](docs/onboarding/DEVELOPER_ONBOARDING.md)
+
+See [`docs/onboarding/LOCAL_SETUP.md`](docs/onboarding/LOCAL_SETUP.md) for detailed setup instructions and [`docs/operations/GCP_ROADMAP.md`](docs/operations/GCP_ROADMAP.md) for the cloud deployment plan.
 
 ## Container Images
 
@@ -46,4 +67,8 @@ Remaining images (MySQL init job, Android builder, etc.) still come from the ups
 
 ## Automation
 
-- `.github/workflows/cloud-sql-backup.yml` runs `tools/backup-db.sh` every three days (cron `0 18 */3 * *`). Add a service-account JSON with `roles/cloudsql.admin` and `roles/storage.objectAdmin` to the repo secrets as `GCP_SA_KEY` so the workflow can authenticate.
+- **Makefile**: Common tasks (`make tutor-start`, `make tutor-apply`, `make branding-sync`, etc.)
+- **Pre-commit hooks**: Automatic code formatting and linting
+- **CI/CD**: `.github/workflows/cloud-sql-backup.yml` runs `scripts/infra/backup-db.sh` every three days (cron `0 18 */3 * *`). Add a service-account JSON with `roles/cloudsql.admin` and `roles/storage.objectAdmin` to the repo secrets as `GCP_SA_KEY` so the workflow can authenticate.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development workflow and code style guidelines.

@@ -10,6 +10,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 import logging
+from typing import List
 
 
 def bootstrap(settings_module: str) -> None:
@@ -73,6 +74,7 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
     bootstrap(settings_module)
     from django.contrib.auth import get_user_model
     from common.djangoapps.student.models import UserProfile
+    from django.db import IntegrityError
 
     stats = ImportStats(start_offset=start)
     User = get_user_model()
@@ -92,7 +94,51 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
                 "email": email,
                 "is_active": is_active,
             }
-            user, created = User.objects.update_or_create(username=username, defaults=defaults)
+            try:
+                user, created = User.objects.update_or_create(username=username, defaults=defaults)
+            except IntegrityError as err:
+                message = str(err)
+                if "auth_user.email" in message:
+                    existing = User.objects.filter(email=email).first()
+                    if not existing:
+                        stats.failed += 1
+                        stats.errors.append(
+                            f"row={idx} user={username} error={err}"
+                        )
+                        continue
+
+                    user = existing
+                    created = False
+
+                    username_changed = False
+                    if username and user.username != username:
+                        username_conflict = (
+                            User.objects.filter(username=username)
+                            .exclude(id=user.id)
+                            .exists()
+                        )
+                        if not username_conflict:
+                            user.username = username
+                            username_changed = True
+
+                    fields_to_update: List[str] = []
+                    if user.email != email:
+                        user.email = email
+                        fields_to_update.append("email")
+                    if user.is_active != is_active:
+                        user.is_active = is_active
+                        fields_to_update.append("is_active")
+                    if username_changed:
+                        fields_to_update.append("username")
+                    if fields_to_update:
+                        user.save(update_fields=fields_to_update)
+                else:
+                    stats.failed += 1
+                    stats.errors.append(
+                        f"row={idx} user={username} error={err}"
+                    )
+                    continue
+
             if created:
                 user.set_unusable_password()
                 user.save()

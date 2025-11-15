@@ -1,31 +1,103 @@
 # Access URLs & User Management
-_Audience: Everyone • Last updated: 2025-11-11_
+_Audience: Everyone • Last updated: 2025-11-12_
 
-## Main URLs
+## 🌐 Environment URLs
 
-### LMS (Learning Management System)
-- **URL:** https://staging.academy.mereka.io
+### Local Development
+
+**LMS (Learning Management System)**
+- **URL:** http://localhost
+- **Admin Panel:** http://localhost/admin
 - **Purpose:** Main learning platform where students access courses
-- **Admin Panel:** https://staging.academy.mereka.io/admin
 
-### Studio (Course Authoring)
+**Studio (Course Authoring)**
+- **URL:** http://studio.localhost
+- **Purpose:** Create and manage courses
+- **Login:** Same credentials as LMS
+
+**Micro-Frontends (MFEs)**
+- **Base URL:** http://apps.localhost
+- **Available MFEs:**
+  - **Login/Auth:** http://apps.localhost/authn/login
+  - **Account:** http://apps.localhost/account
+  - **Profile:** http://apps.localhost/profile
+  - **Learning Dashboard:** http://apps.localhost/learner-dashboard
+  - **Learning:** http://apps.localhost/learning
+  - **Course Authoring:** http://apps.localhost/course-authoring
+  - **Gradebook:** http://apps.localhost/gradebook
+  - **Discussions:** http://apps.localhost/discussions
+  - **Communications:** http://apps.localhost/communications
+  - **Orders:** http://apps.localhost/orders
+  - **Payment:** http://apps.localhost/payment
+  - **ORA Grading:** http://apps.localhost/ora-grading
+
+**Other Services (Local)**
+- **Discovery:** http://discovery.localhost
+- **Ecommerce:** http://ecommerce.localhost
+- **Notes API:** http://notes.localhost (API only, no UI)
+- **XQueue:** http://xqueue.localhost
+- **Forum:** Integrated into LMS courses
+
+**Default Credentials (Local)**
+- **Username:** `admin`
+- **Password:** `admin123`
+
+---
+
+### Staging Environment
+
+**LMS (Learning Management System)**
+- **URL:** https://staging.academy.mereka.io
+- **Admin Panel:** https://staging.academy.mereka.io/admin
+- **Purpose:** Main learning platform where students access courses
+
+**Studio (Course Authoring)**
 - **URL:** https://studio.staging.academy.mereka.io
 - **Purpose:** Create and manage courses
 - **Login:** Same credentials as LMS
 
-### Micro-Frontends (MFEs)
-- **URL:** https://apps.staging.academy.mereka.io
-- **Purpose:** Modern UI components (profile, account, etc.)
+**Micro-Frontends (MFEs)**
+- **Base URL:** https://apps.staging.academy.mereka.io
+- **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
-### Forum
-- **Integrated into LMS:** https://staging.academy.mereka.io/courses/{course-id}/discussion/forum/
-- **Direct service (internal):** Port-forward to `svc/forum:4567`
-- **Note:** Forum is part of courses, not a standalone service
-
-### Other Services
-- **Discovery:** https://discovery.staging.academy.mereka.io (if configured)
-- **Ecommerce:** https://ecommerce.staging.academy.mereka.io (if configured)
+**Other Services (Staging)**
+- **Discovery:** https://discovery.staging.academy.mereka.io
+- **Ecommerce:** https://ecommerce.staging.academy.mereka.io
 - **Notes API:** https://notes.staging.academy.mereka.io (API only, no UI)
+- **Forum:** Integrated into LMS courses
+  - **Status:** ✅ Running (scaled to 1 replica)
+  - **MongoDB:** ✅ Connected to MongoDB Atlas
+  - **Elasticsearch:** ✅ Connected
+  - **Access:** Forum discussions appear within course pages
+- **Analytics (Superset):** 
+  - **Status:** ✅ Running
+  - **Via Port-Forward:** `kubectl port-forward -n mereka-lms svc/superset 8088:8088` → http://localhost:8088
+  - **Via Ingress (once DNS configured):** https://analytics.staging.academy.mereka.io
+  - **LoadBalancer IP:** `34.126.186.80` (for DNS A record)
+  - **Default Credentials:** `admin` / `admin`
+  - **Full Guide:** [`docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`](analytics/ANALYTICS_CONSOLE_ACCESS.md)
+
+---
+
+### Production Environment
+
+**LMS (Learning Management System)**
+- **URL:** https://academy.mereka.io (when ready)
+- **Admin Panel:** https://academy.mereka.io/admin
+- **Purpose:** Main learning platform where students access courses
+
+**Studio (Course Authoring)**
+- **URL:** https://studio.academy.mereka.io (when ready)
+- **Purpose:** Create and manage courses
+
+**Micro-Frontends (MFEs)**
+- **Base URL:** https://apps.academy.mereka.io (when ready)
+- **Available MFEs:** Same as local/staging
+
+**Other Services (Production)**
+- **Discovery:** https://discovery.academy.mereka.io (when ready)
+- **Ecommerce:** https://ecommerce.academy.mereka.io (when ready)
+- **Notes API:** https://notes.academy.mereka.io (API only, no UI)
 
 ---
 
@@ -33,21 +105,47 @@ _Audience: Everyone • Last updated: 2025-11-11_
 
 ### Create Admin User
 
-**Via Kubernetes:**
+**Via Kubernetes (Staging/Production):**
 ```bash
 kubectl exec -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 ```
 
 **Via Local Tutor:**
 ```bash
+# Method 1: Using tutor command
 tutor local createuser --superuser --staff -p <password> <username> <email>
+
+# Method 2: Direct Django command
+docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff <username> <email>
+docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='<username>'); u.set_password('<password>'); u.is_staff = True; u.is_superuser = True; u.save()"
 ```
 
 ### Access Admin Panel
 
+**Local:**
+1. Go to: http://localhost/admin
+2. Login with superuser credentials (`admin` / `admin123`)
+
+**Staging:**
 1. Go to: https://staging.academy.mereka.io/admin
 2. Login with superuser credentials
-3. Manage users, courses, enrollments, etc.
+
+**Production:**
+1. Go to: https://academy.mereka.io/admin (when ready)
+2. Login with superuser credentials
+
+### Current Admin Users (Staging)
+
+**Verified:** 2025-11-12
+
+The following admin users exist in staging:
+- `gurpreet` (gurpreet@biji-biji.com) - Staff: ✅, Active: ✅
+- `malasari` (malasari@mereka.my) - Staff: ✅, Active: ✅
+- `discovery` (discovery@openedx) - Service account
+- `ecommerce` (ecommerce@openedx) - Service account
+- `notes` (notes@openedx) - Service account
+
+**Note:** Admin credentials are stored securely. Contact infrastructure team for access.
 
 ### Common Admin Tasks
 
@@ -60,6 +158,9 @@ tutor local createuser --superuser --staff -p <password> <username> <email>
 
 ## Port Forwarding (For Debugging)
 
+**Local:** Services run directly on localhost ports (no port-forwarding needed)
+
+**Kubernetes (Staging/Production):**
 ```bash
 # LMS
 kubectl port-forward -n mereka-lms svc/lms 8000:8000
@@ -69,14 +170,32 @@ kubectl port-forward -n mereka-lms svc/cms 8000:8000
 
 # Forum
 kubectl port-forward -n mereka-lms svc/forum 4567:4567
+
+# Analytics (Superset) - See docs/analytics/ANALYTICS_CONSOLE_ACCESS.md
+kubectl port-forward -n mereka-lms svc/superset 8088:8088
+# Then access at: http://localhost:8088
+# Default credentials: admin / admin
 ```
 
 ---
 
 ## Notes
 
-- All URLs use HTTPS (TLS certificates via Let's Encrypt)
-- Staging environment: `staging.academy.mereka.io`
-- Production will use: `academy.mereka.io` (when ready)
+- **Local:** All URLs use HTTP (no TLS needed)
+- **Staging/Production:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
+- **Staging environment:** `staging.academy.mereka.io`
+- **Production environment:** `academy.mereka.io` (when ready)
+- **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
 
+---
 
+## Quick Reference
+
+| Service | Local | Staging | Production |
+|---------|-------|---------|------------|
+| LMS | http://localhost | https://staging.academy.mereka.io | https://academy.mereka.io |
+| Studio | http://studio.localhost | https://studio.staging.academy.mereka.io | https://studio.academy.mereka.io |
+| MFE Base | http://apps.localhost | https://apps.staging.academy.mereka.io | https://apps.academy.mereka.io |
+| Discovery | http://discovery.localhost | https://discovery.staging.academy.mereka.io | https://discovery.academy.mereka.io |
+| Ecommerce | http://ecommerce.localhost | https://ecommerce.staging.academy.mereka.io | https://ecommerce.academy.mereka.io |
+| Analytics (Superset) | Port-forward: http://localhost:8088 | Port-forward: http://localhost:8088<br>Or: https://analytics.staging.academy.mereka.io (once DNS configured) | TBD |

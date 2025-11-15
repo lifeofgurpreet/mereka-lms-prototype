@@ -23,51 +23,48 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
 - ✅ `import_courses_k8s.py` - K8s course import script (needs Tutor environment)
 
 ### 4. Data Files Ready
-- ✅ `ops/migrations/mct/output/openedx/users_import.csv` (68,785 rows)
+- ✅ `ops/migrations/mct/output/openedx/users_import_sanitized.csv` (68,785 rows; header + 68,784 users)
 - ✅ `ops/migrations/mct/output/openedx/enrollments_import.csv` (57,483 rows)
 - ✅ `ops/migrations/mct/output/course_packages_categories/` (14 tarballs)
+
+### 5. Imports Executed on `skillourfuture.staging`
+- ✅ **Users**: all 68,784 rows processed (433 duplicate-email collisions reconciled against existing accounts)
+- ✅ **Courses**: all 14 tarballs imported via `import_courses_k8s.py`
+- ✅ **Enrollments**: 57,302 created; 177 rows skipped because the referenced email does not exist in Open edX (sample: `adeariediah@yahoo.co.id`, `anikrahmana0712@gamil.com`)
 
 ---
 
 ## ⚠️ In Progress / Blocked
 
-### User Import
-- ⚠️ **Partial**: Started importing users via bulk import script
-- ⚠️ **Issue**: Need to complete batch imports (68K users in batches of 2000)
-- **Status**: Script works, needs to be run to completion
+### 1. UI Verification
+- ⚠️ **Blocked**: `https://skillourfuture.staging.academy.mereka.io` is returning `502/504` because LMS cannot resolve `mongodb:27017`
+- 🧪 Evidence:
+  - `curl -I https://skillourfuture.staging.academy.mereka.io/` → `HTTP/2 502`
+  - `kubectl logs lms-5d5bd75dcc-6bkmq` → `ServerSelectionTimeoutError: mongodb:27017: [Errno -2] Name or service not known`
+  - `kubectl get svc mongodb -n mereka-lms` shows headless service with no endpoints; there is currently **no MongoDB pod or external endpoint**
+- 🔧 Action: restore Mongo connectivity (spin up Tutor-managed Mongo statefulset or point the service at the external cluster via endpoints). UI verification must wait until this is fixed.
 
-### Course Import
-- ❌ **Blocked**: Direct kubectl import failing on CONTENTSTORE configuration
-- **Issue**: CMS import command needs proper Tutor environment setup
-- **Workaround Needed**: Use Tutor commands or Studio UI import
+### 2. Enrollment Gap triage
+- ⚠️ 177 enrollment rows reference emails that do not exist in Open edX (likely data-quality issues in MCT export)
+- 📄 Report saved at `ops/migrations/mct/output/openedx/enrollment_missing_users.csv`
+- 🔧 Action: produce a remediation list (CSV of missing emails) and confirm with stakeholders whether to drop or correct these contacts.
 
-### Enrollment Import
-- ⏸️ **Pending**: Waiting for courses to be imported first
+### 3. Pathway / Program Planning
+- ⏸️ Discovery workstill required for Open edX Programs vs MCT learning pathways.
 
 ---
 
 ## 🔧 Technical Issues Encountered
 
-### 1. Course Import via kubectl
-**Problem**: Direct `kubectl exec` with `manage.py cms import` fails with:
-```
-TypeError: 'NoneType' object is not subscriptable
-```
-**Root Cause**: CONTENTSTORE settings not properly configured when running outside Tutor environment
+### 1. MongoDB service lost endpoints (CURRENT BLOCKER)
+- **Symptoms**: Every course outline request in LMS/CMS raises `ServerSelectionTimeoutError`
+- **Root Cause**: `mongodb` service is headless (`clusterIP: None`) but there are no pods or manual endpoints advertising an address.
+- **Impact**: Course pages and Studio authoring return 500/502; UI verification impossible.
+- **Next Step**: Recreate MongoDB statefulset or register the external cluster endpoints (`kubectl get endpoints -n mereka-lms mongodb` currently `<none>`).
 
-**Solutions**:
-1. **Use Tutor commands** (if Tutor is available):
-   ```bash
-   tutor k8s exec cms -- python manage.py cms import /tmp/course_extract slug
-   ```
-
-2. **Use Studio UI** (manual but reliable):
-   - Upload tarballs via Studio web interface
-   - More time-consuming but guaranteed to work
-
-3. **Fix environment setup** in import script:
-   - Set proper DJANGO_SETTINGS_MODULE
-   - Ensure CONTENTSTORE is configured
+### 2. Duplicate-emails during user import (RESOLVED)
+- **Problem**: 433 rows failed with `Duplicate entry '<email>' for key 'auth_user.email'`
+- **Fix**: Enhanced `openedx_bulk_import.py` to reuse existing accounts by email, optionally renaming to the sanitized username. All rows now process successfully.
 
 ---
 
@@ -75,44 +72,21 @@ TypeError: 'NoneType' object is not subscriptable
 
 ### Immediate Actions Needed
 
-1. **Complete User Import**
-   ```bash
-   # Run batch imports for remaining users
-   python3 ops/migrations/kajabi/scripts/run_batches.py users \
-     --csv ops/migrations/mct/output/openedx/users_import.csv \
-     --batch-size 2000 \
-     --remote-csv /tmp/mct-users.csv \
-     --namespace mereka-lms \
-     --settings lms.envs.production
-   ```
+1. **Restore MongoDB connectivity**
+   - Confirm whether Mongo should run in-cluster (redeploy Tutor-managed statefulset) or point the service to the managed Atlas cluster.
+   - Once resolved, re-run a quick `manage.py cms shell -c "len(modulestore().get_courses())"` check.
 
-2. **Import Courses** (Choose one approach):
+2. **UI Verification Runbook**
+   - Log in as `gurpreet@biji-biji.com / Cr3ativity` after Mongo is online.
+   - Spot-check the 4 populated courses (MCTCAT-24, 27, 45, 46) plus one empty shell.
+   - Capture screenshots for leadership.
 
-   **Option A: Via Tutor** (if available):
-   ```bash
-   # Need Tutor installed and configured
-   tutor k8s exec cms -- python manage.py cms import /path/to/extract slug
-   ```
+3. **Enrollment Gap Review**
+   - Export the 177 missing emails into `ops/migrations/mct/output/openedx/enrollment_missing_users.csv`.
+   - Decide whether to re-export users from MCT or drop the enrollments.
 
-   **Option B: Via Studio UI** (manual):
-   - Log into Studio at `https://studio.skillourfuture.staging.academy.mereka.io`
-   - Navigate to each course
-   - Use "Import" feature to upload tarballs
-
-   **Option C: Fix kubectl script**:
-   - Debug CONTENTSTORE configuration
-   - Set proper environment variables
-   - Test with one course first
-
-3. **Import Enrollments** (after courses are imported):
-   ```bash
-   POD=$(kubectl get pod -n mereka-lms -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}')
-   kubectl cp ops/migrations/mct/output/openedx/enrollments_import.csv mereka-lms/$POD:/tmp/mct-enrollments.csv
-   kubectl exec -n mereka-lms $POD -- python /tmp/openedx_bulk_import.py enrollments \
-     --csv /tmp/mct-enrollments.csv \
-     --settings=lms.envs.production \
-     --offset 0 --limit 10000
-   ```
+4. **Programs Strategy**
+   - Document how to mirror MCT pathways (Open edX Programs vs scripted enrollments, plus Discovery/Credentials requirements).
 
 ---
 
@@ -121,7 +95,8 @@ TypeError: 'NoneType' object is not subscriptable
 ### Data Volume
 - **Users**: 68,784
 - **Courses**: 14 (category-level)
-- **Enrollments**: 57,483
+- **Enrollments (CSV)**: 57,483
+- **Enrollments (Created)**: 57,302 (177 missing users)
 - **Lessons**: 516 (with real content)
 
 ### Course Breakdown
@@ -134,9 +109,9 @@ TypeError: 'NoneType' object is not subscriptable
 
 ## 🎯 Success Criteria
 
-- [ ] All 68,784 users imported
-- [ ] All 14 courses imported and visible in Studio
-- [ ] All 57,483 enrollments created
+- [x] All 68,784 users imported
+- [x] All 14 courses imported and visible in Studio
+- [ ] All 57,483 enrollments created (177 pending user remediation)
 - [ ] Courses visible on `skillourfuture.staging.academy.mereka.io`
 - [ ] Users can log in and see enrolled courses
 - [ ] Course content (videos, PDFs) accessible
@@ -152,8 +127,8 @@ TypeError: 'NoneType' object is not subscriptable
 
 ---
 
-**Last Updated**: 2025-11-10
-**Status**: 70% Complete - Data ready, import in progress
+**Last Updated**: 2025-11-12
+**Status**: 85% Complete - Data imported; UI verification blocked pending Mongo fix
 
 
 

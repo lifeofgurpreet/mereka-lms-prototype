@@ -1,11 +1,11 @@
-# Next 10 Tasks (Updated 2025-11-11)
+# Next 10 Tasks (Updated 2025-11-12)
 _Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-11_
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | MongoDB cost optimization | Infra | 🔥 Urgent | **M10 costs \$87/month** - Downgrade to M0 (FREE) for staging. Script ready: `./tools/downgrade-mongodb-to-m0.sh`. Keep M10 only for production. |
-| 2 | User management & access setup | Infra | ⚙️ In progress | Create admin users, document access URLs (see `docs/ACCESS_URLS.md`), verify forum integration works. |
-| 3 | SES SMTP deliverability | Infra | ⛔ Blocked | AWS SES returns `535 Authentication Credentials Invalid`. Need AWS support/domain verification before enabling email. |
+| 2 | User management & access setup | Infra | ✅ Complete | ✅ Admin users verified (5 total), access URLs documented, forum integration verified (running, MongoDB Atlas connected). See `docs/TASK2_COMPLETION_REPORT.md`. |
+| 3 | SES SMTP deliverability | Infra | ✅ Complete | ✅ SMTP credentials configured, test email sent and received successfully. Using SMTP backend. See `docs/TASK3_SES_SETUP_COMPLETE.md`. |
 | 4 | Production GCP environment | Infra | 💤 Pending | Clone staging infrastructure into prod project: parameterize Terraform, add state backend + service accounts, document cutover. |
 | 5 | Tutor CI/CD workflows | DevOps | 💤 Pending | Add GitHub Actions for Tutor lint/tests, image builds, Terraform plan jobs (manual approval before apply). |
 | 6 | Disaster recovery rehearsal | SRE | 💤 Pending | Restore latest Cloud SQL dumps into scratch instance, document timings, verify course data integrity. |

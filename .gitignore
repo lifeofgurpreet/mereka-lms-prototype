@@ -3,40 +3,78 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.so
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
 .venv/
 .env/
 venv/
+ENV/
 
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
-# Tutor generated artefacts
+# Tutor generated artefacts (keep at root for compatibility)
 tutor_env/
 data/
 
-# Logs
+# Runtime artifacts (new var/ structure)
+var/
+build_*.log
 *.log
+
+# Migration outputs (moved to var/)
+ops/migrations/**/output/
+ops/migrations/**/logs/
+
+# Exports (moved to var/)
+exports/
 
 # IDE configs
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Node modules (if any frontends)
+# Node modules
 node_modules/
-ops/migrations/kajabi/output/
+.pnp/
+.pnp.js
+
+# Webhook outbox
 ops/migrations/kajabi/webhook_app/outbox/
 
 # Misc
 *.bak
-*.swp
-exports/
+*.tmp
 .gcloud/
 
 # Terraform
 ops/terraform/.terraform/
+infrastructure/terraform/.terraform/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
 terraform.tfvars
+.terraform/
+
+# Secrets (never commit)
+*.pem
+*.key
+*.crt
+secrets/
+.env.local
+.env.*.local
+.env
+.env.*
+!.env.example
+
+# Backup files
+*.bak
+*.backup

@@ -103,3 +103,6 @@ kubectl logs -n mereka-lms deployment/clickhouse --tail=50
 ```
 
 
+
+
+

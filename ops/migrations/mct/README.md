@@ -7,17 +7,13 @@ This directory contains scripts and outputs for migrating data from Microsoft Co
 ```
 ops/migrations/mct/
 ├── README.md                    # This file
-├── scripts/
-│   ├── transform_data.py        # Transform MCT exports → Open edX format
-│   ├── build_course_packages.py # Generate Open edX course tarballs
-│   ├── prepare_openedx_imports.py # Create bulk import CSVs
-│   └── import_courses.py        # Automated course import helper
-└── output/                      # Generated transformation outputs
-    ├── users.csv
-    ├── courses.csv
-    ├── enrollments.csv
-    ├── course_structure.json
-    └── course_packages/         # Open edX course tarballs
+└── scripts/
+    ├── transform_data.py        # Transform MCT exports → Open edX format
+    ├── build_course_packages.py # Generate Open edX course tarballs
+    ├── prepare_openedx_imports.py # Create bulk import CSVs
+    └── import_courses.py        # Automated course import helper
+
+Note: Migration outputs are now stored in `var/migrations/mct/` (gitignored).
 ```
 
 ## Workflow
@@ -30,12 +26,12 @@ Run the export script from the repo root:
 MCT_BASE_URL=https://learn.skillourfuture.org \
 MCT_API_VERSION=v4 \
 MCT_ACCESS_TOKEN=<your-token> \
-node tools/mct-export.mjs \
+node scripts/migrations/mct/mct-export.mjs \
   --resources users,courses,enrollments \
-  --output-dir exports/mct
+  --output-dir var/exports/mct
 ```
 
-This creates NDJSON files in `exports/mct/`:
+This creates NDJSON files in `var/exports/mct/`:
 - `users.ndjson`
 - `courses.ndjson`
 - `enrollments.ndjson`
@@ -47,8 +43,8 @@ Convert MCT exports to Open edX format:
 
 ```bash
 python ops/migrations/mct/scripts/transform_data.py \
-  --exports-dir exports/mct \
-  --output-dir ops/migrations/mct/output
+  --exports-dir var/exports/mct \
+  --output-dir var/migrations/mct
 ```
 
 ### 3. Build Course Packages
@@ -57,9 +53,9 @@ Generate Open edX course tarballs:
 
 ```bash
 python ops/migrations/mct/scripts/build_course_packages.py \
-  --course-structure ops/migrations/mct/output/course_structure.json \
-  --courses-csv ops/migrations/mct/output/courses.csv \
-  --output-dir ops/migrations/mct/output/course_packages \
+  --course-structure var/migrations/mct/course_structure.json \
+  --courses-csv var/migrations/mct/courses.csv \
+  --output-dir var/migrations/mct/course_packages \
   --org SKILLOURFUTURE \
   --course-prefix MCT- \
   --run-prefix RUN- \
@@ -72,8 +68,8 @@ Create bulk import CSVs:
 
 ```bash
 python ops/migrations/mct/scripts/prepare_openedx_imports.py \
-  --output-root ops/migrations/mct/output \
-  --manifest ops/migrations/mct/output/course_packages/course_packages_manifest.csv
+  --output-root var/migrations/mct \
+  --manifest var/migrations/mct/course_packages/course_packages_manifest.csv
 ```
 
 ### 5. Import into Open edX

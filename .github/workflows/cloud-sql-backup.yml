@@ -23,4 +23,4 @@ jobs:
           PROJECT: mereka-lms
           INSTANCE: mereka-lms-mysql
           BUCKET: staging-academy-mereka-io-backup
-        run: ./tools/backup-db.sh
+        run: ./scripts/infra/backup-db.sh

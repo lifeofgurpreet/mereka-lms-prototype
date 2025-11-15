@@ -13,34 +13,56 @@ def get_pod(namespace: str, service: str) -> str:
     return subprocess.check_output(cmd, text=True).strip()
 
 
-def import_course(namespace: str, pod: str, row: dict, package_path: Path) -> bool:
+def import_course(namespace: str, pod: str, row: dict, package_path: Path) -> tuple[bool, str]:
     course_id = row['mct_course_id']
     course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
     slug = Path(row['package_path']).parent.name
     
-    # Copy tarball to pod
-    subprocess.run(['kubectl', 'cp', str(package_path), f'{namespace}/{pod}:/tmp/course.tgz'], check=True)
+    print(f"   📤 Copying tarball to pod...")
+    sys.stdout.flush()
+    copy_result = subprocess.run(
+        ['kubectl', 'cp', str(package_path), f'{namespace}/{pod}:/tmp/course.tgz'],
+        capture_output=True, text=True
+    )
+    if copy_result.returncode != 0:
+        return False, f"Failed to copy: {copy_result.stderr}"
+    
+    print(f"   🔧 Extracting and importing...")
+    sys.stdout.flush()
     
     # Extract and import - import expects parent dir and subdir name
-    course_key = f"course-v1:{row['org']}+{row['course_number']}+{row['run']}"
     cmd = f"""
 set -euo pipefail
 export DJANGO_SETTINGS_MODULE=tutor.production
 cd /tmp
 rm -rf course_import_base
 mkdir -p course_import_base/{slug}
+echo "Extracting tarball..."
 tar -xzf course.tgz -C course_import_base/{slug}
+echo "Updating course.xml..."
 cd course_import_base/{slug}
 python3 -c "from xml.etree import ElementTree as ET; tree=ET.parse('course.xml'); root=tree.getroot(); root.set('url_name', '{row['run']}'); root.set('run', '{row['run']}'); tree.write('course.xml', encoding='utf-8')"
+echo "Running CMS import..."
 cd /openedx/edx-platform
-python manage.py cms import /tmp/course_import_base {slug} --settings=tutor.production
+python manage.py cms import /tmp/course_import_base {slug} --settings=tutor.production 2>&1
+echo "Cleaning up..."
 rm -rf /tmp/course_import_base /tmp/course.tgz
+echo "Import complete!"
 """
     
-    result = subprocess.run(['kubectl', 'exec', '-n', namespace, pod, '--', 'bash', '-c', cmd], 
-                           capture_output=True, text=True)
+    result = subprocess.run(
+        ['kubectl', 'exec', '-n', namespace, pod, '--', 'bash', '-c', cmd],
+        capture_output=True, text=True, timeout=300
+    )
     
-    return result.returncode == 0, result.stderr
+    if result.returncode == 0:
+        # Print output for visibility
+        if result.stdout:
+            print(f"   Output: {result.stdout[-500:]}")  # Last 500 chars
+        return True, ""
+    else:
+        error_msg = result.stderr or result.stdout or "Unknown error"
+        return False, error_msg
 
 
 def main():
@@ -55,7 +77,9 @@ def main():
         reader = csv.DictReader(f)
         courses = list(reader)
     
-    print(f"📚 Found {len(courses)} courses to import\n")
+    # Only import first 2 courses as requested
+    courses = courses[:2]
+    print(f"📚 Importing {len(courses)} courses (limited to 2 for testing)\n")
     
     success = 0
     failed = 0
@@ -70,16 +94,16 @@ def main():
             failed += 1
             continue
             
-        print(f"📦 [{i}/{len(courses)}] Importing {course_id} -> {course_key}...")
+        print(f"📦 [{i}/{len(courses)}] Importing {row['title']} ({course_id}) -> {course_key}")
+        sys.stdout.flush()
         
         ok, error = import_course(namespace, pod, row, package_path)
         
         if ok:
-            print(f"✅ [{i}/{len(courses)}] Imported {course_id}\n")
+            print(f"✅ [{i}/{len(courses)}] Successfully imported {row['title']}\n")
             success += 1
         else:
-            print(f"❌ [{i}/{len(courses)}] Failed {course_id}")
-            # Show last 500 chars of error (usually the actual error is at the end)
+            print(f"❌ [{i}/{len(courses)}] Failed to import {row['title']}")
             error_lines = error.split('\n')
             print(f"   Error: {' '.join(error_lines[-10:])}\n")
             failed += 1
