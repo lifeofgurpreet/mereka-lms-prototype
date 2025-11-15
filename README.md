@@ -49,6 +49,16 @@ This automatically sets up everything you need for local development. See `READM
 
 See [`docs/onboarding/LOCAL_SETUP.md`](docs/onboarding/LOCAL_SETUP.md) for detailed setup instructions and [`docs/operations/GCP_ROADMAP.md`](docs/operations/GCP_ROADMAP.md) for the cloud deployment plan.
 
+## Submodules
+
+The official authentication micro-frontend, `frontend-app-authn`, is tracked as a Git submodule under `tmp/frontend-app-authn`. After cloning or pulling, run:
+
+```bash
+git submodule update --init --recursive
+```
+
+This ensures the login experience stays in sync with upstream Open edX changes. Treat changes inside the submodule as upstream contributions—commit them from within `tmp/frontend-app-authn` and push to its origin before updating the pointer in this repo (`git submodule update --remote` + commit).
+
 ## Container Images
 
 Tutor now pulls most runtime images from our Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`):
