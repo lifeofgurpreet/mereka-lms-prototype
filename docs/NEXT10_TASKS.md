@@ -1,12 +1,12 @@
-# Next 10 Tasks (Updated 2025-11-12)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-11_
+# Next 10 Tasks (Updated 2025-11-21)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-21_
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | MongoDB cost optimization | Infra | 🔥 Urgent | **M10 costs \$87/month** - Downgrade to M0 (FREE) for staging. Script ready: `./tools/downgrade-mongodb-to-m0.sh`. Keep M10 only for production. |
+| 1 | MongoDB cost optimization | Infra | ✅ Complete | ✅ Using in-cluster MongoDB pod (FREE). No Atlas charges. Verified via `kubectl get pods -n mereka-lms`. Atlas M10 only needed for production. |
 | 2 | User management & access setup | Infra | ✅ Complete | ✅ Admin users verified (5 total), access URLs documented, forum integration verified (running, MongoDB Atlas connected). See `docs/TASK2_COMPLETION_REPORT.md`. |
 | 3 | SES SMTP deliverability | Infra | ✅ Complete | ✅ SMTP credentials configured, test email sent and received successfully. Using SMTP backend. See `docs/TASK3_SES_SETUP_COMPLETE.md`. |
-| 4 | Production GCP environment | Infra | 💤 Pending | Clone staging infrastructure into prod project: parameterize Terraform, add state backend + service accounts, document cutover. |
+| 4 | Production GCP environment | Infra | ⚙️ In progress | Plan complete (see `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`). Est. $1,650-2,200/month. Multi-env Terraform structure ready. Next: Provision prod GCP project. |
 | 5 | Tutor CI/CD workflows | DevOps | 💤 Pending | Add GitHub Actions for Tutor lint/tests, image builds, Terraform plan jobs (manual approval before apply). |
 | 6 | Disaster recovery rehearsal | SRE | 💤 Pending | Restore latest Cloud SQL dumps into scratch instance, document timings, verify course data integrity. |
 | 7 | Data migrations (Kajabi/MCT) | Data | 💤 Pending | Finalize `tools/kajabi-*` + `tools/mct-*` flows, import sample cohorts, validate grading/credential issuance. |
