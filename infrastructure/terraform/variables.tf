@@ -37,10 +37,10 @@ variable "billing_account_id" {
 variable "monthly_budget_myr" {
   type        = number
   description = "Monthly budget cap in MYR."
-  default     = 400
+  default     = 1500
   validation {
-    condition     = var.monthly_budget_myr <= 1000
-    error_message = "monthly_budget_myr must stay at or below RM1,000 as per cost guardrails."
+    condition     = var.monthly_budget_myr <= 3000
+    error_message = "monthly_budget_myr must stay at or below RM3,000 as per cost guardrails."
   }
 }
 
