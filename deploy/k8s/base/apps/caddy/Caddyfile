@@ -1,8 +1,8 @@
 # Global configuration
 {
 
-    
-    
+
+
 }
 
 # proxy directive snippet (with logging) to be used as follows:
@@ -28,13 +28,15 @@
     encode gzip
 
     reverse_proxy {args.0} {
-        header_up X-Forwarded-Port 80
+        header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+        header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
     }
 
-    
+
 }
 
-localhost{$default_site_port}, preview.localhost{$default_site_port} {
+# LMS - localhost and production domains
+localhost{$default_site_port}, preview.localhost{$default_site_port}, staging.academy.mereka.io{$default_site_port}, skillourfuture.staging.academy.mereka.io{$default_site_port}, academy.biji-biji.com{$default_site_port} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -49,7 +51,7 @@ localhost{$default_site_port}, preview.localhost{$default_site_port} {
 
     import proxy "lms:8000"
 
-    
+
 
     handle_path /* {
         request_body {
@@ -58,7 +60,8 @@ localhost{$default_site_port}, preview.localhost{$default_site_port} {
     }
 }
 
-studio.localhost{$default_site_port} {
+# Studio - localhost and production
+studio.localhost{$default_site_port}, studio.staging.academy.mereka.io{$default_site_port} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -66,7 +69,7 @@ studio.localhost{$default_site_port} {
 
     import proxy "cms:8000"
 
-    
+
 
     handle_path /* {
         request_body {
@@ -90,30 +93,18 @@ ecommerce.localhost{$default_site_port} {
     }
     import proxy "ecommerce:8000"
 }
-apps.localhost{$default_site_port} {
-    redir / http://localhost
+# MFE - localhost and production
+apps.localhost{$default_site_port}, apps.staging.academy.mereka.io{$default_site_port} {
     request_body {
         max_size 2MB
     }
     import proxy "mfe:8002"
 }
 # Notes
-notes.localhost{$default_site_port} {
+notes.localhost{$default_site_port}, notes.staging.academy.mereka.io{$default_site_port} {
     import proxy "notes:8000"
 }
 # Xqueue
 xqueue.localhost{$default_site_port} {
     import proxy "xqueue:8000"
-}
-
-academy.biji-biji.com {
-    reverse_proxy nginx:80 {
-        header_up X-Forwarded-Port 443
-    }
-}
-
-skillourfuture.staging.academy.mereka.io {
-    reverse_proxy nginx:80 {
-        header_up X-Forwarded-Port 443
-    }
 }
