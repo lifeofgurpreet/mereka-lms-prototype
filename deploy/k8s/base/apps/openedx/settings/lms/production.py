@@ -348,6 +348,10 @@ ALLOWED_HOSTS = [
     FEATURES["PREVIEW_LMS_BASE"],
     "lms",
     "academy.biji-biji.com",
+    "staging.academy.mereka.io",
+    "studio.staging.academy.mereka.io",
+    "apps.staging.academy.mereka.io",
+    "preview.staging.academy.mereka.io",
     "skillourfuture.staging.academy.mereka.io",
 ]
 CORS_ORIGIN_WHITELIST.append("http://localhost")
