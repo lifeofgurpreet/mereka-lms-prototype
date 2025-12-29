@@ -7,6 +7,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `backup-db.sh` - Database backup automation
 - `check-cluster-status.sh` - GKE cluster health check
 - `fix-service-selectors.sh` - **🚨 SITE DOWN?** Quick fix for service selector mismatches
+- `repair-staging-routing.sh` - Fix selector drift **and** add HTTPS (443) to caddy service
 - `cloudflare-sync.sh` - Cloudflare DNS sync
 - `mongodb-to-atlas.sh` - MongoDB migration to Atlas
 - `deploy-aspects-k8s.sh` - Deploy Aspects analytics to Kubernetes
@@ -22,5 +23,8 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 
 # Fix service selectors (if site is down)
 ./scripts/infra/fix-service-selectors.sh
+
+# Full staging routing repair (selectors + HTTPS port 443)
+./scripts/infra/repair-staging-routing.sh
 ```
 

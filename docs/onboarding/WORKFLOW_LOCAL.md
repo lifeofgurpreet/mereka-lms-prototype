@@ -17,7 +17,7 @@ pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
 Whenever you open a new shell:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 ```
 
 ## 2. Regenerate / Apply Patches
@@ -26,7 +26,7 @@ After any `tutor config save` or plugin change:
 
 ```bash
 tutor config save --env-only        # regenerates tutor_env/env
-./ops/tutor/apply-patches.sh        # keeps MySQL flags, forum env, Dockerfiles, etc.
+./infrastructure/tutor/apply-patches.sh        # keeps MySQL flags, forum env, Dockerfiles, etc.
 ```
 
 > **Why?** Tutor rewrites rendered templates each time you save. The patch script re-applies our Node 18 tweaks, theme pointers, and forum/env adjustments.
@@ -37,7 +37,7 @@ First boot (runs migrations + init jobs):
 
 ```bash
 tutor local launch -I --skip-build
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
 Daily use:
@@ -75,7 +75,7 @@ Enrollments: same command with the `enrollments` sub-command and CSV. See [`KAJA
 
 ```bash
 tutor dev start mfe --detach
-./tools/setup-mfe-branding.sh            # clones/wires fonts + logos
+./scripts/branding/setup-mfe-branding.sh # clones/wires fonts + logos
 cd tutor_env/dev/frontend-app-learning
 npm install
 npm start                                # hot reload on localhost:<port>
@@ -94,7 +94,7 @@ done
 When brand files change:
 
 ```bash
-./tools/sync-brand-assets.sh              # updates ops/themes/mereka/* and MFE copies
+./scripts/branding/sync-brand-assets.sh   # updates infrastructure/tutor/themes/mereka/* and MFE copies
 tutor images build openedx                # LMS/Studio theme rebuild
 tutor images build mfe                    # optional if bundling MFEs
 ```

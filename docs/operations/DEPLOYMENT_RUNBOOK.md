@@ -118,20 +118,20 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 2. Run ad-hoc exports with `./tools/backup-db.sh` (set `DATABASES='openedx discovery'` to limit scope).  Output is stored under `gs://staging-academy-mereka-io-backup/sql/<timestamp>/`.
 3. To balance cost, schedule **10 exports per month** (roughly every 3 days). The repo includes `.github/workflows/cloud-sql-backup.yml`, which runs on the cron `0 18 */3 * *` (UTC). Create a dedicated service account (roles: `roles/cloudsql.admin` + `roles/storage.objectAdmin`), download its JSON key, and store it as the GitHub secret `GCP_SA_KEY`. The workflow invokes `./tools/backup-db.sh` using those credentials. (Service account `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` already exists; its JSON payload is tracked in `docs/SECRETS_SNAPSHOT.md` until we rotate it.)
    - Serverless exports only incur storage-and-egress costs: ~$0.10/GB written to GCS plus Cloud Storage at $0.026/GB-month in `asia-southeast1`. At the current data size (<1 GB per database) each run costs only a few cents.
-4. Apply the lifecycle policy under `ops/storage/backup-lifecycle.json` so objects in `sql/` older than 60 days are deleted automatically (`gsutil lifecycle set ops/storage/backup-lifecycle.json gs://staging-academy-mereka-io-backup`).
+4. Apply the lifecycle policy under `infrastructure/storage/backup-lifecycle.json` so objects in `sql/` older than 60 days are deleted automatically (`gsutil lifecycle set infrastructure/storage/backup-lifecycle.json gs://staging-academy-mereka-io-backup`).
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and the soon-to-exist `mongodb-atlas-uri`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
 - Apply the Mereka branding pack after each upgrade:
   ```bash
-  ./tools/sync-brand-assets.sh
-  tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka
-  ./ops/tutor/apply-patches.sh
+  ./scripts/branding/sync-brand-assets.sh
+  tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
+  ./infrastructure/tutor/apply-patches.sh
   tutor images build openedx && tutor images build mfe
   ```
   The patch step copies the SCSS/fonts into the Indigo MFE build so all micro-frontends share the same palette.
-- Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `ops/monitoring/`).
-- Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `ops/terraform/terraform.tfvars`, then apply:
+- Hook monitoring dashboards/alerts (see `docs/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
+- Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `infrastructure/terraform/terraform.tfvars`, then apply:
   ```bash
-  cd ops/terraform
+  cd infrastructure/terraform
   terraform init
   GOOGLE_CLOUD_QUOTA_PROJECT=mereka-lms terraform apply -target=google_billing_budget.mereka_monthly
   ```

@@ -1,0 +1,171 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/part-of: aspects
+data:
+  logging.xml: |
+    <clickhouse>
+      <logger>
+        <level>warning</level>
+        <console>true</console>
+      </logger>
+      <query_log remove="remove"/>
+      <query_thread_log remove="remove"/>
+      <query_views_log remove="remove"/>
+      <part_log remove="remove"/>
+      <metric_log remove="remove"/>
+      <asynchronous_metric_log remove="remove"/>
+      <session_log remove="remove"/>
+      <trace_log remove="remove"/>
+      <text_log remove="remove"/>
+      <opentelemetry_span_log remove="remove"/>
+    </clickhouse>
+  network.xml: |
+    <clickhouse>
+      <listen_host>0.0.0.0</listen_host>
+      <http_port>8123</http_port>
+      <tcp_port>9000</tcp_port>
+    </clickhouse>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-users
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/part-of: aspects
+data:
+  users.xml: |
+    <clickhouse>
+      <users>
+        <openedx>
+          <password_sha256_hex></password_sha256_hex>
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>default</profile>
+          <quota>default</quota>
+          <access_management>1</access_management>
+        </openedx>
+      </users>
+    </clickhouse>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: superset-config
+  labels:
+    app.kubernetes.io/name: superset
+    app.kubernetes.io/part-of: aspects
+data:
+  superset_config.py: |
+    import os
+    from flask_appbuilder.security.manager import AUTH_OAUTH
+
+    # Superset configuration
+    ROW_LIMIT = 5000
+    SUPERSET_WEBSERVER_PORT = 8088
+
+    # Secret key - from environment
+    SECRET_KEY = os.environ.get('SUPERSET_SECRET_KEY', 'changeme')
+
+    # Database configuration (MySQL backend for Superset metadata)
+    # Using mysqlclient driver (mysql+mysqldb) which is included in the image
+    SQLALCHEMY_DATABASE_URI = (
+        f"mysql+mysqldb://{os.environ.get('DATABASE_USER', 'superset')}:"
+        f"{os.environ.get('DATABASE_PASSWORD', '')}@"
+        f"mysql:3306/"
+        f"{os.environ.get('DATABASE_DB', 'superset')}"
+    )
+
+    # Redis cache configuration - hardcoded to avoid REDIS_PORT conflict
+    CACHE_CONFIG = {
+        'CACHE_TYPE': 'RedisCache',
+        'CACHE_DEFAULT_TIMEOUT': 300,
+        'CACHE_KEY_PREFIX': 'superset_',
+        'CACHE_REDIS_HOST': 'redis',
+        'CACHE_REDIS_PORT': 6379,
+        'CACHE_REDIS_DB': 2,
+    }
+
+    # Celery configuration
+    class CeleryConfig:
+        broker_url = "redis://redis:6379/3"
+        result_backend = "redis://redis:6379/4"
+
+    CELERY_CONFIG = CeleryConfig
+
+    # Feature flags
+    FEATURE_FLAGS = {
+        "ENABLE_TEMPLATE_PROCESSING": True,
+        "DASHBOARD_NATIVE_FILTERS": True,
+        "DASHBOARD_CROSS_FILTERS": True,
+        "DASHBOARD_NATIVE_FILTERS_SET": True,
+        "ALERT_REPORTS": False,
+    }
+
+    # Misc settings
+    ENABLE_PROXY_FIX = True
+    PREFERRED_DATABASES = ["ClickHouse Connect", "MySQL"]
+
+    # ============================================
+    # OAuth2 Authentication with Authentik
+    # ============================================
+    AUTH_TYPE = AUTH_OAUTH
+
+    # Authentik OAuth2 configuration
+    OAUTH_PROVIDERS = [
+        {
+            "name": "authentik",
+            "icon": "fa-key",
+            "token_key": "access_token",
+            "remote_app": {
+                "client_id": os.environ.get("OAUTH_CLIENT_ID", "superset-analytics"),
+                "client_secret": os.environ.get("OAUTH_CLIENT_SECRET", ""),
+                "api_base_url": "https://auth0.mereka.io/application/o/",
+                "access_token_url": "https://auth0.mereka.io/application/o/token/",
+                "authorize_url": "https://auth0.mereka.io/application/o/authorize/",
+                "client_kwargs": {
+                    "scope": "openid email profile",
+                },
+                "jwks_uri": "https://auth0.mereka.io/application/o/superset-analytics/jwks/",
+            },
+        }
+    ]
+
+    # Map Authentik user info to Superset
+    AUTH_USER_REGISTRATION = True
+    AUTH_USER_REGISTRATION_ROLE = "Gamma"  # Default role for new users
+
+    # Custom user info mapping from Authentik
+    from superset.security import SupersetSecurityManager
+
+    class CustomSecurityManager(SupersetSecurityManager):
+        def oauth_user_info(self, provider, response=None):
+            if provider == "authentik":
+                me = self.appbuilder.sm.oauth_remotes[provider].get(
+                    "https://auth0.mereka.io/application/o/userinfo/"
+                )
+                me.raise_for_status()
+                data = me.json()
+                return {
+                    "username": data.get("preferred_username", data.get("email")),
+                    "email": data.get("email"),
+                    "first_name": data.get("given_name", ""),
+                    "last_name": data.get("family_name", ""),
+                }
+            return super().oauth_user_info(provider, response)
+
+    CUSTOM_SECURITY_MANAGER = CustomSecurityManager
+
+    # Allow login with OAuth only (disable local login form)
+    # Set to False to show both OAuth and local login
+    AUTH_OAUTH_REDIRECT = True
+
+    # ClickHouse connection for analytics data
+    # Users can add this as a database in the Superset UI:
+    # clickhousedb+connect://openedx:password@clickhouse:8123/openedx

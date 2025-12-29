@@ -1,9 +1,15 @@
-# Next 10 Tasks (Updated 2025-11-11)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-11_
+# Next 10 Tasks (Updated 2025-11-25)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-25_
+
+## Recent Fixes (2025-11-25)
+- ✅ Staging restored: Fixed MySQL→Cloud SQL routing (service had selector but no pod)
+- ✅ Staging restored: Fixed Redis host drift in configmap (hardcoded IP → `redis:6379`)
+- ✅ Staging restored: Fixed MFE service selector mismatch
+- See `PRODUCTION_STATUS.md` and `docs/operations/TROUBLESHOOTING.md` for details
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | MongoDB cost optimization | Infra | 🔥 Urgent | **M10 costs \$87/month** - Downgrade to M0 (FREE) for staging. Script ready: `./tools/downgrade-mongodb-to-m0.sh`. Keep M10 only for production. |
+| 1 | MongoDB cost optimization | Infra | ✅ Complete | Already on M0 (FREE tier). Verified 2025-11-25 via `atlas clusters describe`. No action needed. |
 | 2 | User management & access setup | Infra | ✅ Complete | ✅ Admin users verified (5 total), access URLs documented, forum integration verified (running, MongoDB Atlas connected). See `docs/TASK2_COMPLETION_REPORT.md`. |
 | 3 | SES SMTP deliverability | Infra | ⚙️ In progress | ✅ SMTP credentials configured and tested. ⚠️ Need domain verification in SES Console. See `docs/TASK3_SES_SETUP_COMPLETE.md`. |
 | 4 | Production GCP environment | Infra | 💤 Pending | Clone staging infrastructure into prod project: parameterize Terraform, add state backend + service accounts, document cutover. |

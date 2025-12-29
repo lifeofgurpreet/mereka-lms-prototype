@@ -9,7 +9,7 @@ Shared palette, typography, and utility styles that bring Open edX surfaces clos
 ## Structure
 
 ```
-ops/themes/mereka/
+infrastructure/tutor/themes/mereka/
 ├── README.md
 ├── scss/                  # Source of truth for fonts/tokens/utilities
 │   ├── _fonts.scss        # Font-face declarations (path overridable via $mereka-font-path)
@@ -24,14 +24,15 @@ ops/themes/mereka/
 
 ```bash
 # From the repo root
-source ops/tutor-env.sh
-tutor config save --set THEME_DIR=$(pwd)/ops/themes
+export TUTOR_ROOT="$(pwd)/tutor_env"
+source infrastructure/tutor/tutor-env.sh
+tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
 tutor config save --set THEME_NAME=mereka
 tutor images build openedx
 tutor local start -d
 ```
 
-Tutor copies everything under `ops/themes/` into `tutor_env/build/openedx/themes`, so the LMS/Studio entrypoints simply include the shared `scss/theme.scss`. Use `tutor local run lms ./manage.py lms collectstatic` if you need to force asset rebuilds during local development.
+Tutor copies everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes`, so the LMS/Studio entrypoints simply include the shared `scss/theme.scss`. Use `tutor local run lms ./manage.py lms collectstatic` if you need to force asset rebuilds during local development.
 
 ## Consuming In MFEs
 
@@ -40,7 +41,7 @@ Inside each `frontend-app-*` directory:
 ```scss
 // src/styles/mereka.scss
 $mereka-font-path: "~@mereka/theme/fonts"; // set to wherever the fonts live for that app
-@import "../../ops/themes/mereka/scss/theme";
+@import "../../../../../infrastructure/tutor/themes/mereka/scss/theme";
 ```
 
 Then import `src/styles/mereka.scss` from the MFE’s `src/index.scss`. The `$mereka-font-path` variable ensures the compiled bundle points at the right font directory (e.g., `/public/fonts` when building MFEs, `/static/mereka/fonts` when running under Tutor).
@@ -48,7 +49,7 @@ Then import `src/styles/mereka.scss` from the MFE’s `src/index.scss`. The `$me
 ## Keeping Assets In Sync
 
 1. Drop updated fonts/logos/favicons into `assets/branding/`.
-2. Run `cp assets/branding/fonts/*.woff2 ops/themes/mereka/common/static/fonts/` to refresh the theme copy (or symlink if preferred).
-3. Commit both locations so MFEs (which read from `assets/branding/`) and LMS/Studio (which serve from `ops/themes/mereka/common/static/fonts`) stay consistent.
+2. Run `./scripts/branding/sync-brand-assets.sh` (or `make branding-sync`) to refresh the theme copies under `infrastructure/tutor/themes/mereka/`.
+3. Commit both locations so MFEs (which read from `assets/branding/`) and LMS/Studio (which serve from `infrastructure/tutor/themes/mereka/common/static/fonts`) stay consistent.
 
-Add new global patterns (e.g., hero backgrounds, footer partials) under `ops/themes/mereka/common/` so they are easy to reuse across both LMS and Studio templates later in the rollout.
+Add new global patterns (e.g., hero backgrounds, footer partials) under `infrastructure/tutor/themes/mereka/common/` so they are easy to reuse across both LMS and Studio templates later in the rollout.

@@ -60,21 +60,23 @@ spec:
     app.kubernetes.io/name: elasticsearch
 
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mongodb
-  labels:
-    app.kubernetes.io/name: mongodb
-spec:
-  type: ClusterIP
-  ports:
-    - port: 27017
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: mongodb
-
+# DISABLED: In-cluster MongoDB service
+# Using MongoDB Atlas instead: cluster-mereka-lms.2pjex4s.mongodb.net
+# Disabled on 2025-12-17 for MCT migration preparation
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: mongodb
+#   labels:
+#     app.kubernetes.io/name: mongodb
+# spec:
+#   type: ClusterIP
+#   ports:
+#     - port: 27017
+#       protocol: TCP
+#   selector:
+#     app.kubernetes.io/name: mongodb
 
 ---
 apiVersion: v1

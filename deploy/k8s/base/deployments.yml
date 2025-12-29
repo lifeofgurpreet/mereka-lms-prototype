@@ -339,45 +339,47 @@ spec:
             claimName: elasticsearch
 
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mongodb
-  labels:
-    app.kubernetes.io/name: mongodb
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: mongodb
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: mongodb
-    spec:
-      securityContext:
-        runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
-        fsGroupChangePolicy: "OnRootMismatch"
-      containers:
-        - name: mongodb
-          image: docker.io/mongo:7.0.7
-          args: ["mongod", "--storageEngine", "wiredTiger"]
-          ports:
-            - containerPort: 27017
-          volumeMounts:
-            - mountPath: /data/db
-              name: data
-          securityContext:
-            allowPrivilegeEscalation: false
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: mongodb
-
+# DISABLED: In-cluster MongoDB deployment
+# Using MongoDB Atlas instead: cluster-mereka-lms.2pjex4s.mongodb.net
+# Disabled on 2025-12-17 for MCT migration preparation
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: mongodb
+#   labels:
+#     app.kubernetes.io/name: mongodb
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: mongodb
+#   strategy:
+#     type: Recreate
+#   template:
+#     metadata:
+#       labels:
+#         app.kubernetes.io/name: mongodb
+#     spec:
+#       securityContext:
+#         runAsUser: 999
+#         runAsGroup: 999
+#         fsGroup: 999
+#         fsGroupChangePolicy: "OnRootMismatch"
+#       containers:
+#         - name: mongodb
+#           image: docker.io/mongo:7.0.7
+#           args: ["mongod", "--storageEngine", "wiredTiger"]
+#           ports:
+#             - containerPort: 27017
+#           volumeMounts:
+#             - mountPath: /data/db
+#               name: data
+#           securityContext:
+#             allowPrivilegeEscalation: false
+#       volumes:
+#         - name: data
+#           persistentVolumeClaim:
+#             claimName: mongodb
 
 ---
 apiVersion: apps/v1
@@ -633,10 +635,11 @@ spec:
           env:
             - name: SEARCH_SERVER
               value: "http://elasticsearch:9200"
+            # MongoDB Atlas configuration (cluster-mereka-lms)
             - name: MONGODB_AUTH
-              value: ""
+              value: "cs_comments_user:CR3ATIVITY"
             - name: MONGODB_HOST
-              value: "mongodb"
+              value: "cluster-mereka-lms.2pjex4s.mongodb.net"
             - name: MONGODB_PORT
               value: "27017"
             - name: MONGODB_DATABASE
@@ -646,7 +649,7 @@ spec:
             - name: MONGOID_AUTH_MECH
               value: ""
             - name: MONGOID_USE_SSL
-              value: "false"
+              value: "true"
             - name: DD_TRACE_ENABLED
               value: "false"
 ---

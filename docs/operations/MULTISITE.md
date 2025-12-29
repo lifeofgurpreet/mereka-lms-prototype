@@ -72,7 +72,7 @@ What the script does:
 
 - **Organizations:** Authors must create courses under the correct org (`BIJIBIJI` or `SKILLOURFUTURE`). Organization-level roles keep Studio permissions separated even though everyone still signs into `studio.staging.academy.mereka.io`.
 - **Discovery / catalog:** The `course_org_filter` value surfaces the right subset of courses at runtime. Discovery also supports organization and catalog filters if you need to hide courses from anonymous visitors.
-- **Themes:** All microsites currently reuse the Mereka comprehensive theme. When brand assets are ready, add new theme directories under `ops/themes/` (e.g., `ops/themes/biji-biji`) and update each site configuration with `THEME_NAME`. Tutor already copies the entire `ops/themes/` tree, so per-site themes only require CSS + static assets.
+- **Themes:** All microsites currently reuse the Mereka comprehensive theme. When brand assets are ready, add new theme directories under `infrastructure/tutor/themes/` (e.g., `infrastructure/tutor/themes/biji-biji`) and update each site configuration with `THEME_NAME`. Tutor already copies the entire `infrastructure/tutor/themes/` tree, so per-site themes only require CSS + static assets.
 
 ## 5. Verification checklist
 
@@ -85,5 +85,5 @@ What the script does:
 ## 6. Operational notes
 
 - Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce, and background services remain shared across all brands.
-- Any `tutor config save` run must be followed by `./ops/tutor/apply-patches.sh` so the additional host headers stay injected.
+- Any `tutor config save` run must be followed by `./infrastructure/tutor/apply-patches.sh` so the additional host headers stay injected.
 - Back up the database (`tutor local do backup-db` / `tools/backup-db.sh`) before rolling out further domain changes.

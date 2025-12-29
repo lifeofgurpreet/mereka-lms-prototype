@@ -1,0 +1,207 @@
+# Caddy ConfigMap patch to add staging domains
+# Apply with: kubectl apply -f caddy-staging-fix.yaml
+# Then restart: kubectl rollout restart deploy/caddy -n mereka-lms
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caddy-config-staging-fix
+  namespace: mereka-lms
+data:
+  Caddyfile: |
+    # Global configuration
+    {
+    }
+
+    # proxy directive snippet (with logging)
+    (proxy) {
+        log {
+            output stdout
+            format filter {
+                wrap json
+                fields {
+                    common_log delete
+                    request>headers delete
+                    resp_headers delete
+                    tls delete
+                }
+            }
+        }
+        encode gzip
+        reverse_proxy {args.0} {
+            header_up X-Forwarded-Port 443
+        }
+    }
+
+    # ============================================
+    # STAGING DOMAINS
+    # ============================================
+
+    # Main LMS - staging.academy.mereka.io
+    staging.academy.mereka.io {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        handle_path /api/profile_images/*/*/upload {
+            request_body {
+                max_size 1MB
+            }
+        }
+
+        import proxy "lms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 4MB
+            }
+        }
+    }
+
+    # Studio CMS - studio.staging.academy.mereka.io
+    studio.staging.academy.mereka.io {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        import proxy "cms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 250MB
+            }
+        }
+    }
+
+    # MFE Apps - apps.staging.academy.mereka.io
+    apps.staging.academy.mereka.io {
+        redir / https://staging.academy.mereka.io
+        request_body {
+            max_size 2MB
+        }
+        import proxy "mfe:8002"
+    }
+
+    # Skill Our Future LMS - skillourfuture.staging.academy.mereka.io
+    skillourfuture.staging.academy.mereka.io {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        import proxy "lms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 4MB
+            }
+        }
+    }
+
+    # Skill Our Future Studio - studio.skillourfuture.staging.academy.mereka.io
+    studio.skillourfuture.staging.academy.mereka.io {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        import proxy "cms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 250MB
+            }
+        }
+    }
+
+    # ============================================
+    # PRODUCTION DOMAINS
+    # ============================================
+
+    # Biji-Biji Academy
+    academy.biji-biji.com {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        import proxy "lms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 4MB
+            }
+        }
+    }
+
+    # ============================================
+    # LOCAL DEVELOPMENT DOMAINS
+    # ============================================
+
+    localhost{$default_site_port}, preview.localhost{$default_site_port} {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        handle_path /api/profile_images/*/*/upload {
+            request_body {
+                max_size 1MB
+            }
+        }
+
+        import proxy "lms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 4MB
+            }
+        }
+    }
+
+    studio.localhost{$default_site_port} {
+        @favicon_matcher {
+            path_regexp ^/favicon.ico$
+        }
+        rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+        import proxy "cms:8000"
+
+        handle_path /* {
+            request_body {
+                max_size 250MB
+            }
+        }
+    }
+
+    discovery.localhost{$default_site_port} {
+        request_body {
+            max_size 10MB
+        }
+        import proxy "discovery:8000"
+    }
+
+    ecommerce.localhost{$default_site_port} {
+        request_body {
+            max_size 10MB
+        }
+        import proxy "ecommerce:8000"
+    }
+
+    apps.localhost{$default_site_port} {
+        redir / http://localhost
+        request_body {
+            max_size 2MB
+        }
+        import proxy "mfe:8002"
+    }
+
+    notes.localhost{$default_site_port} {
+        import proxy "notes:8000"
+    }
+
+    xqueue.localhost{$default_site_port} {
+        import proxy "xqueue:8000"
+    }

@@ -374,10 +374,10 @@ def build_category_courses_structure(
     return category_courses
 
 
-def build_category_enrollments(users_file: Path, courses_file: Path) -> List[dict]:
+def build_category_enrollments_heuristic(users_file: Path, courses_file: Path) -> List[dict]:
     """
-    Build enrollments that target Category-level courses using user 'My groups' pathways.
-    Heuristic: pathway keyword matches category name.
+    DEPRECATED: Build enrollments using heuristic keyword matching.
+    Use build_real_enrollments() instead for accurate data from enrollments.ndjson.
     """
     # Collect categories
     categories: List[dict] = []
@@ -420,6 +420,104 @@ def build_category_enrollments(users_file: Path, courses_file: Path) -> List[dic
                 }
             )
     return enrollments
+
+
+def build_real_enrollments(enrollments_file: Path, courses_file: Path) -> List[dict]:
+    """
+    Build enrollments from REAL enrollment data exported from MCT Reports API.
+
+    Each enrollment record from enrollments.ndjson contains:
+    - courseId: MCT course ID (module level)
+    - Course: Course name
+    - Contact: User email
+    - Name: User name
+    - Lessons Completed: Number of lessons completed
+    - Quizzes Completed: Number of quizzes completed
+    - Course Completion Percentage: Completion percentage (0-100)
+    - Average Score: Average quiz score or "NOT APPLICABLE"
+
+    Returns enrollments aggregated by category (since MCT Category = Open edX Course).
+    """
+    if not enrollments_file.exists():
+        print(f"  ⚠ No enrollments.ndjson found at {enrollments_file}")
+        print("  ⚠ Falling back to heuristic enrollment building")
+        return []
+
+    # Build course -> category mapping from courses.ndjson
+    course_to_category: Dict[int, Dict] = {}
+    for rec in read_ndjson(courses_file):
+        course_id = rec.get("Id") or rec.get("courseId")
+        category_id = rec.get("CategoryId") or rec.get("ParentId")
+        category_name = (rec.get("CategoryName") or "").strip()
+        if course_id and category_id:
+            course_to_category[int(course_id)] = {
+                "category_id": str(category_id),
+                "category_name": category_name,
+            }
+
+    # Read enrollments and aggregate by category
+    # Track unique (email, category_id) pairs to avoid duplicates
+    seen_enrollments: set = set()
+    enrollments: List[dict] = []
+
+    enrollment_count = 0
+    for rec in read_ndjson(enrollments_file):
+        enrollment_count += 1
+        course_id = rec.get("courseId")
+        email = (rec.get("Contact") or "").strip().lower()
+
+        if not email or not course_id:
+            continue
+
+        category = course_to_category.get(int(course_id))
+        if not category:
+            continue
+
+        key = (email, category["category_id"])
+        if key in seen_enrollments:
+            continue
+        seen_enrollments.add(key)
+
+        # Extract completion info
+        completion = rec.get("Course Completion Percentage", "0")
+        try:
+            completion_pct = int(float(completion))
+        except (ValueError, TypeError):
+            completion_pct = 0
+
+        enrollments.append({
+            "email": email,
+            "category_id": category["category_id"],
+            "category_name": category["category_name"],
+            "enrollment_source": "mct_export",
+            "completion_percentage": completion_pct,
+            "lessons_completed": rec.get("Lessons Completed", "0"),
+        })
+
+    print(f"  → Processed {enrollment_count:,} enrollment records")
+    print(f"  → {len(enrollments):,} unique (user, category) enrollments")
+
+    return enrollments
+
+
+def build_category_enrollments(users_file: Path, courses_file: Path, enrollments_file: Optional[Path] = None) -> List[dict]:
+    """
+    Build category-level enrollments. Uses REAL enrollment data if enrollments.ndjson exists,
+    otherwise falls back to heuristic matching (deprecated).
+    """
+    # Check for real enrollment data first
+    if enrollments_file and enrollments_file.exists():
+        print("  Using REAL enrollment data from enrollments.ndjson")
+        return build_real_enrollments(enrollments_file, courses_file)
+
+    # Infer enrollments file path from courses file
+    inferred_path = courses_file.parent / "enrollments.ndjson"
+    if inferred_path.exists():
+        print("  Using REAL enrollment data from enrollments.ndjson")
+        return build_real_enrollments(inferred_path, courses_file)
+
+    print("  ⚠ No enrollments.ndjson found, using heuristic matching (DEPRECATED)")
+    return build_category_enrollments_heuristic(users_file, courses_file)
 
 
 def main():
@@ -532,18 +630,20 @@ def main():
         output_dir / "courses_categories.csv",
     )
     print(f"  → {len(category_courses)} category courses (Category→Course)")
-    # Category-level enrollments (heuristic)
+
+    # Category-level enrollments - use REAL data from enrollments.ndjson if available
     print("Building category-level enrollments…")
     enrollments_categories = build_category_enrollments(
         exports_dir / "users.ndjson",
         exports_dir / "courses.ndjson",
+        exports_dir / "enrollments.ndjson",  # Real enrollment data from MCT Reports API
     )
     write_csv(
         enrollments_categories,
-        ["email", "category_id", "enrollment_source", "pathway"],
+        ["email", "category_id", "category_name", "enrollment_source", "completion_percentage", "lessons_completed"],
         output_dir / "enrollments_categories.csv",
     )
-    print(f"  → {len(enrollments_categories)} category enrollments (heuristic)")
+    print(f"  → {len(enrollments_categories)} category enrollments")
 
 
 if __name__ == "__main__":

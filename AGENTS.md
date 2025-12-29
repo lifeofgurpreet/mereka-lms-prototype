@@ -97,3 +97,7 @@ curl -I http://apps.localhost/authn/login
 
 ## Troubleshooting & Site Recovery
 **🚨 If the site is down**, start with `docs/operations/TROUBLESHOOTING.md`—it has a 5-command diagnostic checklist. The most common issue is service selector mismatches after pod restarts. Quick fix: run `./scripts/infra/fix-service-selectors.sh` to automatically sync all service selectors with current pod instance IDs. Always check `kubectl get endpoints -n mereka-lms` first—empty endpoints (`<none>`) mean services can't route traffic. After any pod restarts or `tutor k8s` commands, verify endpoints are populated.
+
+**Redis host drift will hard-hang LMS/CMS.** If pods are healthy but requests time out/return 499, inspect the rendered configmap (`openedx-config-*.json`). The Redis host must be `redis:6379`; replace any baked-in IPs (e.g., `10.x.x.x:6379`) and restart lms/cms.
+
+**Login failures (CSRF 403 or 500 on login_session).** Ensure `CSRF_TRUSTED_ORIGINS` includes `https://staging.academy.mereka.io`, `https://studio.staging.academy.mereka.io`, `https://apps.staging.academy.mereka.io`, `https://academy.biji-biji.com`, and `https://skillourfuture.staging.academy.mereka.io`. Set `CSRF_COOKIE_DOMAIN=staging.academy.mereka.io` and `SESSION_COOKIE_DOMAIN=.staging.academy.mereka.io` in `openedx-config-*.json` and restart lms/cms. If a specific user still errors with JSONDecodeError on login, reset `user.profile.meta` to `{}` and reset the password.

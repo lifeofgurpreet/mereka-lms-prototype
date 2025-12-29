@@ -8,19 +8,20 @@ import os
 
 from xmodule.modulestore.modulestore_settings import update_module_store_settings
 
-# Mongodb connection parameters: simply modify `mongodb_parameters` to affect all connections to MongoDb.
+# Mongodb connection parameters: MongoDB Atlas (cluster-mereka-lms)
+# IMPORTANT: Using MongoDB Atlas instead of in-cluster MongoDB
+# Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
 mongodb_parameters = {
     "db": "openedx",
-    "host": "mongodb",
+    "host": "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
     "port": 27017,
-    "user": None,
-    "password": None,
+    "user": "cs_comments_user",
+    "password": "CR3ATIVITY",
     # Connection/Authentication
     "connect": False,
-    "ssl": False,
+    "ssl": True,
     "authsource": "admin",
     "replicaSet": None,
-    
 }
 DOC_STORE_CONFIG = mongodb_parameters
 CONTENTSTORE = {

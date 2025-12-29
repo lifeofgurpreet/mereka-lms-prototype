@@ -4,11 +4,11 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 SRC_FONTS="$REPO_ROOT/assets/branding/fonts"
-THEME_FONT_DIR="$REPO_ROOT/ops/themes/mereka/common/static/fonts"
-MFE_FONT_DIR="$REPO_ROOT/ops/themes/mereka/mfe/fonts"
+THEME_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/fonts"
+MFE_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts"
 IMG_SRC_DIR="$REPO_ROOT/assets/branding"
-IMG_DEST_DIR="$REPO_ROOT/ops/themes/mereka/common/static/images"
-MFE_IMG_DEST_DIR="$REPO_ROOT/ops/themes/mereka/mfe/images"
+IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/images"
+MFE_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/images"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
   echo "Missing font source directory: $SRC_FONTS" >&2

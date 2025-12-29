@@ -55,7 +55,7 @@ const DEFAULT_RESOURCES = [
   "groups",         // V1: /api/v1/Groups (learning pathways with rules) ✅
   "learningpaths",  // V1: /api/v1/learningpaths ✅
   "certificates",   // V1: /api/v1/Certificates ✅
-  "enrollments",    // V3: /api/v3/course/{courseId}/Reports/Users (per course) ✅
+  "enrollments",    // V1: /api/v1/Reports/Course/{courseId}/Learners (REAL enrollment data per course) ✅
 ];
 
 // -------- Configuration ------------------------------------------------------
@@ -161,10 +161,10 @@ const RESOURCE_ENDPOINTS = {
     v3: null,
   },
   enrollments: {
-    // Enrollment is via course-specific reports, not a direct endpoint
-    v1: null, // /UserEnrollment doesn't exist (404)
+    // REAL enrollment data via V1 Reports endpoint
+    v1: "/Reports/Course/{courseId}/Learners", // ✅ REAL learner data with completion, progress, etc.
     v2: null,
-    v3: "/course/{courseId}/Reports/Users", // ✅ Course-specific user report (enrollments)
+    v3: null, // V3 /course/{courseId}/Reports/Users may not exist or is incorrect
     v4: null,
   },
   learningpaths: {
@@ -421,6 +421,7 @@ async function exportCollection(token, resource, version = MCT_API_VERSION, para
       const data = await jfetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
+          ClientType: "service",
         },
       });
 
@@ -482,11 +483,112 @@ async function exportCollection(token, resource, version = MCT_API_VERSION, para
 }
 
 async function exportCourses(token, params = {}) {
-  // First export course index (try V1, fallback to V3)
-  await exportCollection(token, "courses", MCT_API_VERSION, params);
+  const coursesPath = path.join(OUT_DIR, "courses.ndjson");
+  const categoriesPath = path.join(OUT_DIR, "categories.ndjson");
+
+  // Clear courses file if forcing overwrite
+  if (FORCE && fs.existsSync(coursesPath)) {
+    fs.unlinkSync(coursesPath);
+    console.log(`[courses] Overwriting existing file: ${coursesPath}`);
+  }
+
+  // Check if we should use categories.ndjson to get all courses
+  // V3 categoriesAndCourses returns: { Offers: [...categories], CourseItems: [...courses] }
+  let allCategories = [];
+  let allCourseItems = [];
+
+  if (fs.existsSync(categoriesPath)) {
+    console.log("[courses] Extracting courses from categories.ndjson (V3 hierarchical structure)...");
+    const categoriesData = fs.readFileSync(categoriesPath, "utf-8")
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line));
+
+    // V3 categoriesAndCourses returns hierarchical structure with "Offers" and "CourseItems" arrays
+    for (const data of categoriesData) {
+      if (data.Offers && Array.isArray(data.Offers)) {
+        allCategories = data.Offers;
+        console.log(`[courses] Found ${allCategories.length} categories`);
+      }
+      if (data.CourseItems && Array.isArray(data.CourseItems)) {
+        allCourseItems = data.CourseItems;
+        console.log(`[courses] Found ${allCourseItems.length} course items (MCT courses = Open edX modules)`);
+      }
+    }
+  }
+
+  // If we didn't get data from file, try fetching from API
+  if (allCategories.length === 0 || allCourseItems.length === 0) {
+    console.log("[courses] No categories.ndjson found or incomplete, fetching from V3 API...");
+    try {
+      const categoriesUrl = `${API_BASE_V3}/admin/categoriesAndCourses`;
+      const categoriesData = await jfetch(categoriesUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          ClientType: "service",
+        },
+      });
+
+      if (categoriesData.Offers && Array.isArray(categoriesData.Offers)) {
+        allCategories = categoriesData.Offers;
+        console.log(`[courses] Fetched ${allCategories.length} categories from API`);
+      }
+      if (categoriesData.CourseItems && Array.isArray(categoriesData.CourseItems)) {
+        allCourseItems = categoriesData.CourseItems;
+        console.log(`[courses] Fetched ${allCourseItems.length} course items from API`);
+      }
+    } catch (error) {
+      console.error("[courses] Failed to fetch categories:", error.message);
+      console.warn("[courses] Falling back to V1 Courses endpoint...");
+      await exportCollection(token, "courses", MCT_API_VERSION, params);
+      return;
+    }
+  }
+
+  // Build category ID to name lookup
+  const categoryLookup = new Map();
+  for (const category of allCategories) {
+    const categoryName = category.Names?.find(n => n.LanguageCode === category.DefaultLanguageCode)?.Value
+                      || category.Names?.[0]?.Value
+                      || "Unknown Category";
+    categoryLookup.set(category.Id, categoryName.trim());
+  }
+
+  // Write all course items to courses.ndjson
+  // CourseItems structure: { Id, ParentId (=CategoryId), Name, Description, Logo, NumPublishedLessons, ... }
+  let totalCourses = 0;
+  const coursesPerCategory = new Map();
+
+  for (const course of allCourseItems) {
+    const categoryId = course.ParentId;
+    const categoryName = categoryLookup.get(categoryId) || "Unknown Category";
+
+    appendLine(coursesPath, {
+      ...course,
+      CategoryId: categoryId,
+      CategoryName: categoryName,
+    });
+    totalCourses++;
+
+    // Track count per category
+    coursesPerCategory.set(categoryId, (coursesPerCategory.get(categoryId) || 0) + 1);
+  }
+
+  // Report per-category counts
+  for (const category of allCategories) {
+    const categoryId = category.Id;
+    const categoryName = categoryLookup.get(categoryId);
+    const count = coursesPerCategory.get(categoryId) || 0;
+    if (count > 0) {
+      console.log(`[courses] ✓ Category "${categoryName}" (ID: ${categoryId}): ${count} courses`);
+    } else {
+      console.log(`[courses] ⚠ Category "${categoryName}" (ID: ${categoryId}): No courses`);
+    }
+  }
+
+  console.log(`[courses] Extracted ${totalCourses} courses from ${allCategories.length} categories`);
 
   // Then fetch detailed course content for each course using V3
-  const coursesPath = path.join(OUT_DIR, "courses.ndjson");
   if (!fs.existsSync(coursesPath)) {
     console.warn("[courses] No courses.ndjson found, skipping course content export");
     return;
@@ -501,28 +603,8 @@ async function exportCourses(token, params = {}) {
     .filter(Boolean)
     .map((line) => JSON.parse(line));
 
-  // Handle hierarchical structure (categories containing courses)
-  const courseList = [];
-  for (const item of courses) {
-    if (item.Courses && Array.isArray(item.Courses)) {
-      // This is a category with courses inside
-      for (const course of item.Courses) {
-        courseList.push({
-          ...course,
-          CategoryId: item.CategoryId,
-          CategoryName: item.CategoryName,
-        });
-      }
-    } else if (item.ProductId || item.courseId || item.id || item.course_id || item.CourseId) {
-      // This is a direct course object
-      courseList.push(item);
-    }
-  }
-
-  console.log(`[courses] Found ${courseList.length} courses to fetch content for...`);
-
-  for (const course of courseList) {
-    const courseId = course.ProductId || course.courseId || course.id || course.course_id || course.CourseId;
+  for (const course of courses) {
+    const courseId = course.Id || course.ProductId || course.courseId || course.id || course.course_id || course.CourseId;
     if (!courseId) {
       console.warn("[courses] Skipping course without ID:", course);
       continue;
@@ -534,6 +616,7 @@ async function exportCourses(token, params = {}) {
       const content = await jfetch(contentUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
+          ClientType: "service",
         },
       });
 
@@ -550,6 +633,7 @@ async function exportCourses(token, params = {}) {
         const metadata = await jfetch(metadataUrl, {
           headers: {
             Authorization: `Bearer ${token}`,
+            ClientType: "service",
           },
         });
         appendLine(path.join(structureDir, "course_metadata.ndjson"), {
@@ -568,6 +652,7 @@ async function exportCourses(token, params = {}) {
         const certificate = await jfetch(certificateUrl, {
           headers: {
             Authorization: `Bearer ${token}`,
+            ClientType: "service",
           },
         });
         appendLine(path.join(structureDir, "course_certificates.ndjson"), {
@@ -592,23 +677,27 @@ async function exportCourses(token, params = {}) {
 }
 
 /**
- * Export enrollments per course using V3 course-specific reports endpoint.
- * Enrollment data is not available via a single endpoint - must fetch per course.
+ * Export enrollments per course using V1 Reports/Course/{courseId}/Learners endpoint.
+ * This endpoint returns REAL enrollment data including completion status, progress, etc.
+ *
+ * According to V1_COMPLETE.md:
+ * - GET /api/v1/Reports/Course/{courseId}/Learners - Download learners in course analytics
+ * - GET /api/v1/Course/{courseId}/users - Search users in the course (alternative)
  */
 async function exportEnrollments(token) {
   const outPath = path.join(OUT_DIR, "enrollments.ndjson");
-  
+
   if (fs.existsSync(outPath) && !FORCE) {
     console.log(`[enrollments] File exists, skipping. Use --force to overwrite or delete ${outPath} to re-export.`);
     return;
   }
-  
+
   if (DRY_RUN) {
-    console.log(`[enrollments] DRY RUN: Would export enrollments per course from V3`);
+    console.log(`[enrollments] DRY RUN: Would export enrollments per course from V1 Reports/Course/{courseId}/Learners`);
     console.log(`[enrollments] DRY RUN: Would write to: ${outPath}`);
     return;
   }
-  
+
   // Clear file if forcing overwrite
   if (FORCE && fs.existsSync(outPath)) {
     fs.unlinkSync(outPath);
@@ -622,50 +711,50 @@ async function exportEnrollments(token) {
     return;
   }
 
-  console.log("[enrollments] Fetching enrollments per course from V3...");
+  console.log("[enrollments] Fetching REAL enrollment data per course from V1 Reports/Course/{courseId}/Learners...");
   const courses = fs.readFileSync(coursesPath, "utf-8")
     .split("\n")
     .filter(Boolean)
     .map((line) => JSON.parse(line));
 
-  // Extract all course IDs (handle hierarchical structure)
+  // Extract all course IDs (note: Id is the field name from V3 categoriesAndCourses CourseItems)
   const courseIds = new Set();
   for (const item of courses) {
-    if (item.Courses && Array.isArray(item.Courses)) {
-      // Category with nested courses
-      for (const course of item.Courses) {
-        const courseId = course.ProductId || course.courseId || course.id || course.course_id || course.CourseId;
-        if (courseId) courseIds.add(courseId);
-      }
-    } else {
-      // Direct course object
-      const courseId = item.ProductId || item.courseId || item.id || item.course_id || item.CourseId;
-      if (courseId) courseIds.add(courseId);
-    }
+    const courseId = item.Id || item.ProductId || item.courseId || item.id || item.course_id || item.CourseId;
+    if (courseId) courseIds.add(courseId);
   }
 
   console.log(`[enrollments] Found ${courseIds.size} courses to fetch enrollments for...`);
 
   let totalEnrollments = 0;
+  let successfulCourses = 0;
+  let failedCourses = 0;
+
   for (const courseId of courseIds) {
     try {
-      // Use V3 course-specific reports endpoint
-      const enrollmentUrl = `${API_BASE_V3}/course/${courseId}/Reports/Users`;
+      // Use V1 Reports endpoint to get REAL learner data
+      const enrollmentUrl = `${API_BASE_V1}/Reports/Course/${courseId}/Learners`;
+      console.log(`[enrollments] Fetching learners for course ${courseId}...`);
+
       const enrollmentData = await jfetch(enrollmentUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
+          ClientType: "service",
         },
       });
 
-      // Handle CSV response (Reports endpoints return CSV)
+      // Handle different response formats (CSV, JSON, or ZIP)
       let enrollments = [];
       if (Array.isArray(enrollmentData)) {
+        // Direct array of learners
         enrollments = enrollmentData;
       } else if (typeof enrollmentData === 'object' && enrollmentData._zip_file) {
-        console.warn(`[enrollments] Course ${courseId} returned ZIP file, skipping`);
+        // ZIP file response - warn and skip
+        console.warn(`[enrollments] Course ${courseId} returned ZIP file, skipping (download manually if needed)`);
+        failedCourses++;
         continue;
-      } else {
-        // Try to extract array from response
+      } else if (typeof enrollmentData === 'object') {
+        // Try to extract array from response object
         const keys = Object.keys(enrollmentData);
         for (const key of keys) {
           if (Array.isArray(enrollmentData[key])) {
@@ -675,26 +764,37 @@ async function exportEnrollments(token) {
         }
       }
 
-      // Write enrollments with courseId reference
-      for (const enrollment of enrollments) {
-        appendLine(outPath, {
-          courseId,
-          ...enrollment,
-        });
-        totalEnrollments++;
+      if (enrollments.length === 0) {
+        console.log(`[enrollments] No enrollments found for course ${courseId}`);
+      } else {
+        // Write enrollments with courseId reference
+        for (const enrollment of enrollments) {
+          appendLine(outPath, {
+            courseId,
+            ...enrollment,
+          });
+          totalEnrollments++;
+        }
+        console.log(`[enrollments] ✓ Course ${courseId}: ${enrollments.length} learners`);
+        successfulCourses++;
       }
 
       await sleep(200); // Rate limiting
     } catch (error) {
       if (error.message.includes("404")) {
-        console.warn(`[enrollments] Endpoint not available for course ${courseId}`);
+        console.warn(`[enrollments] ✗ Course ${courseId}: Endpoint not found (course may have no enrollments)`);
       } else {
-        console.error(`[enrollments] Error fetching enrollments for course ${courseId}:`, error.message);
+        console.error(`[enrollments] ✗ Course ${courseId}: ${error.message}`);
       }
+      failedCourses++;
     }
   }
 
-  console.log(`[enrollments] Exported ${totalEnrollments} enrollment records to ${outPath}`);
+  console.log(`[enrollments] Export complete:`);
+  console.log(`[enrollments]   Total enrollments: ${totalEnrollments}`);
+  console.log(`[enrollments]   Successful courses: ${successfulCourses}/${courseIds.size}`);
+  console.log(`[enrollments]   Failed courses: ${failedCourses}/${courseIds.size}`);
+  console.log(`[enrollments]   Output: ${outPath}`);
 }
 
 // -------- Main execution -----------------------------------------------------

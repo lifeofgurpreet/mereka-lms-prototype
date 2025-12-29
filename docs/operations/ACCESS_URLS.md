@@ -1,5 +1,5 @@
 # Access URLs & User Management
-_Audience: Everyone • Last updated: 2025-11-12_
+_Audience: Everyone • Last updated: 2025-12-29_
 
 ## 🌐 Environment URLs
 
@@ -60,40 +60,62 @@ _Audience: Everyone • Last updated: 2025-11-12_
 - **Base URL:** https://apps.staging.academy.mereka.io
 - **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
-**Other Services (Staging)**
-- **Discovery:** https://discovery.staging.academy.mereka.io
-- **Ecommerce:** https://ecommerce.staging.academy.mereka.io
-- **Notes API:** https://notes.staging.academy.mereka.io (API only, no UI)
+**Other Services (Staging)** - Internal only, port-forward required
+- **Discovery:** Internal (kubectl port-forward svc/discovery 8000:8000)
+- **Ecommerce:** Internal (kubectl port-forward svc/ecommerce 8000:8000)
+- **Credentials:** Internal (kubectl port-forward svc/credentials 8000:8000)
+- **Notes API:** Internal (API only, no UI)
 - **Forum:** Integrated into LMS courses
   - **Status:** ✅ Running (scaled to 1 replica)
   - **MongoDB:** ✅ Connected to MongoDB Atlas
   - **Elasticsearch:** ✅ Connected
   - **Access:** Forum discussions appear within course pages
-- **Analytics (Superset):** Port-forward required (see below)
-  - **Status:** ✅ Running
-  - **Access:** See [`docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`](analytics/ANALYTICS_CONSOLE_ACCESS.md)
+- **Analytics (Superset):** ❌ NOT DEPLOYED
+  - **Status:** Documented but not yet deployed to K8s
+  - **Plan:** See [`docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`](../analytics/ASPECTS_K8S_DEPLOYMENT.md)
 
 ---
 
-### Production Environment
+### Skill Our Future (MCT Migration) - Staging
 
 **LMS (Learning Management System)**
-- **URL:** https://academy.mereka.io (when ready)
-- **Admin Panel:** https://academy.mereka.io/admin
+- **URL:** https://skillourfuture.staging.academy.mereka.io
+- **Admin Panel:** https://skillourfuture.staging.academy.mereka.io/admin
+- **Purpose:** Skill Our Future learning platform (MCT migration target)
+
+**Studio (Course Authoring)**
+- **URL:** https://studio.staging.academy.mereka.io (shared with main staging)
+- **Purpose:** Single Studio instance manages courses for all staging LMS sites
+- **Note:** Courses are organized by Organization (e.g., "SKILLOURFUTURE" org)
+
+**Stats (as of 2025-12-29):**
+- Users: 68,565+ imported from MCT
+- Enrollments: 449,615+ MCT enrollments
+- Courses: 30 MCT courses
+- Programs: 13 learning pathways
+
+---
+
+### Production Environment (Biji-Biji Academy)
+
+**LMS (Learning Management System)**
+- **URL:** https://academy.biji-biji.com ✅ LIVE
+- **Admin Panel:** https://academy.biji-biji.com/admin
 - **Purpose:** Main learning platform where students access courses
 
 **Studio (Course Authoring)**
-- **URL:** https://studio.academy.mereka.io (when ready)
+- **URL:** https://studio.academy.biji-biji.com
 - **Purpose:** Create and manage courses
 
 **Micro-Frontends (MFEs)**
-- **Base URL:** https://apps.academy.mereka.io (when ready)
+- **Base URL:** https://apps.academy.biji-biji.com
 - **Available MFEs:** Same as local/staging
 
 **Other Services (Production)**
-- **Discovery:** https://discovery.academy.mereka.io (when ready)
-- **Ecommerce:** https://ecommerce.academy.mereka.io (when ready)
-- **Notes API:** https://notes.academy.mereka.io (API only, no UI)
+- **Discovery:** Internal only (port-forward required)
+- **Ecommerce:** Internal only (port-forward required)
+- **Credentials:** Internal only (port-forward required)
+- **Notes API:** Internal only
 
 ---
 
@@ -187,11 +209,39 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 
 ## Quick Reference
 
-| Service | Local | Staging | Production |
-|---------|-------|---------|------------|
-| LMS | http://localhost | https://staging.academy.mereka.io | https://academy.mereka.io |
-| Studio | http://studio.localhost | https://studio.staging.academy.mereka.io | https://studio.academy.mereka.io |
-| MFE Base | http://apps.localhost | https://apps.staging.academy.mereka.io | https://apps.academy.mereka.io |
-| Discovery | http://discovery.localhost | https://discovery.staging.academy.mereka.io | https://discovery.academy.mereka.io |
-| Ecommerce | http://ecommerce.localhost | https://ecommerce.staging.academy.mereka.io | https://ecommerce.academy.mereka.io |
-| Analytics (Superset) | Port-forward required | Port-forward required | Port-forward required |
+### Main Staging Environment
+
+| Service | Local | Staging |
+|---------|-------|---------|
+| LMS | http://localhost | https://staging.academy.mereka.io |
+| Studio | http://studio.localhost | https://studio.staging.academy.mereka.io |
+| MFE Base | http://apps.localhost | https://apps.staging.academy.mereka.io |
+| Discovery | http://discovery.localhost | https://discovery.staging.academy.mereka.io |
+| Ecommerce | http://ecommerce.localhost | https://ecommerce.staging.academy.mereka.io |
+| Credentials | - | https://credentials.staging.academy.mereka.io |
+
+### Skill Our Future (MCT) - Staging
+
+| Service | URL |
+|---------|-----|
+| LMS | https://skillourfuture.staging.academy.mereka.io |
+| Studio | https://studio.staging.academy.mereka.io (shared) |
+
+### Biji-Biji Academy - Production
+
+| Service | URL |
+|---------|-----|
+| LMS | https://academy.biji-biji.com |
+| Studio | https://studio.academy.biji-biji.com |
+| MFE Base | https://apps.academy.biji-biji.com |
+
+### Internal Services (Port-forward required)
+
+| Service | Port | Command | Status |
+|---------|------|---------|--------|
+| Discovery | 8000 | `kubectl port-forward -n mereka-lms svc/discovery 8000:8000` | ✅ Running |
+| Ecommerce | 8000 | `kubectl port-forward -n mereka-lms svc/ecommerce 8000:8000` | ✅ Running |
+| Credentials | 8000 | `kubectl port-forward -n mereka-lms svc/credentials 8000:8000` | ✅ Running |
+| Forum | 4567 | `kubectl port-forward -n mereka-lms svc/forum 4567:4567` | ✅ Running |
+| Notes | 8000 | `kubectl port-forward -n mereka-lms svc/notes 8000:8000` | ✅ Running |
+| Analytics (Superset) | 8088 | `kubectl port-forward -n mereka-lms svc/superset 8088:8088` | ❌ Not deployed |

@@ -125,7 +125,164 @@ sleep 3 && kubectl get endpoints caddy -n mereka-lms
 
 ---
 
-### Issue 4: Database Connection Errors
+### Issue 4: HTTPS Port Missing on Caddy
+
+**Symptoms:**
+- HTTP works but HTTPS (`https://staging.academy.mereka.io` or LB IP on 443) times out
+- `kubectl get svc caddy -n mereka-lms -o jsonpath='{.spec.ports[*].port}'` shows only `80`
+
+**Root Cause:**
+- Caddy Service was created without port 443. The GCP LoadBalancer never opens TLS, so all HTTPS requests fail.
+
+**Quick Fix:**
+```bash
+# Add port 443 to caddy service (idempotent if 443 is missing)
+kubectl patch svc caddy -n mereka-lms --type='json' \
+  -p='[{"op": "add", "path": "/spec/ports/-", "value": {"name": "https", "port": 443, "protocol": "TCP", "targetPort": 443}}]'
+
+# Verify ports now include 80 and 443
+kubectl get svc caddy -n mereka-lms -o jsonpath='{.spec.ports[*].port}'
+
+# Wait 5-15 minutes for GCP LB propagation, then test:
+curl -Ik https://staging.academy.mereka.io
+```
+
+**One-command repair (selectors + HTTPS):**
+```bash
+./scripts/infra/repair-staging-routing.sh
+```
+
+---
+
+### Issue 5: Redis Host Drift (Requests Hang)
+
+**Symptoms:**
+- Pods healthy, selectors correct, but LMS/Studio requests time out or nginx reports 499.
+- Internal curl to `http://lms:8000/` hangs; DB/Redis endpoints are up.
+- Rendered configmaps show `redis://@10.x.x.x:6379` instead of the service DNS.
+
+**Root Cause:**
+- The rendered Open edX configmap (`openedx-config-*.json`) was baked with an old Redis IP. When Redis moves or the IP is wrong, Django cache/celery calls block, hanging every request.
+
+**Quick Fix:**
+```bash
+# Patch configmap to use the Redis service DNS
+kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o yaml \
+  | sed 's/10\\.[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+:6379/redis:6379/g' \
+  | kubectl apply -f -
+
+# Restart frontends to pick up the fix
+kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
+```
+
+**Prevention:**
+- Ensure Tutor/Terraform overrides keep `REDIS_HOST=redis` before regenerating configs.
+- After `tutor k8s start` or config regenerations, spot-check `openedx-config-*.json` for `redis:6379`.
+
+---
+
+### Issue 6: MySQL Service Has No Endpoints (Cloud SQL)
+
+**Symptoms:**
+- `kubectl get endpoints mysql -n mereka-lms` shows `<none>`
+- LMS/CMS hang or timeout on database queries
+- Direct connection to Cloud SQL IP works, but service DNS doesn't
+
+**Root Cause:**
+- MySQL K8s service has a pod selector, but there's no MySQL pod (using Cloud SQL instead)
+- K8s ignores manual Endpoints when a selector is present
+
+**Quick Fix:**
+```bash
+# 1. Remove the selector from MySQL service
+kubectl patch svc mysql -n mereka-lms --type='json' -p='[{"op": "remove", "path": "/spec/selector"}]'
+
+# 2. Create/update endpoint pointing to Cloud SQL
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: mysql
+  namespace: mereka-lms
+subsets:
+  - addresses:
+      - ip: 10.97.0.2
+    ports:
+      - port: 3306
+EOF
+
+# 3. Verify and restart
+kubectl get endpoints mysql -n mereka-lms  # Should show 10.97.0.2:3306
+kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
+```
+
+**Prevention:**
+- When using Cloud SQL, ensure MySQL service has no selector
+- Add MySQL endpoint to K8s manifests or Terraform
+
+---
+
+### Issue 7: Login Fails (CSRF 403 or 500 on login_session)
+
+**Symptoms:**
+- Login POST `/api/user/v1/account/login_session/` returns 403 CSRF (referer check failed) or 500 `json.decoder.JSONDecodeError`.
+- Classic LMS login page in use (Auth MFE not enabled).
+
+**Root Cause:**
+- Missing CSRF trusted origins/cookie domains for custom hostnames (`academy.biji-biji.com`, `skillourfuture.staging.academy.mereka.io`, etc.), or a user profile with corrupt `meta` JSON.
+
+**Quick Fix:**
+```bash
+# Add trusted origins and cookie domains in rendered configmap
+kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o yaml \
+  | sed -E 's#"CSRF_TRUSTED_ORIGINS": \\[.*\\]#"CSRF_TRUSTED_ORIGINS": ["https://staging.academy.mereka.io","https://studio.staging.academy.mereka.io","https://apps.staging.academy.mereka.io","https://academy.biji-biji.com","https://skillourfuture.staging.academy.mereka.io"]#' \
+  | sed 's/"CSRF_COOKIE_DOMAIN": ""/"CSRF_COOKIE_DOMAIN": "staging.academy.mereka.io"/' \
+  | sed 's/"SESSION_COOKIE_DOMAIN": ""/"SESSION_COOKIE_DOMAIN": ".staging.academy.mereka.io"/' \
+  | kubectl apply -f -
+kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
+
+# If a specific user throws JSONDecodeError on login, reset profile.meta and password:
+kubectl exec -n mereka-lms deploy/lms -- bash -c "
+cd /openedx/edx-platform && ./manage.py lms shell -c \\
+\"from django.contrib.auth import get_user_model; U=get_user_model(); u=U.objects.get(username='gurpreet@biji-biji.com'); p=u.profile; p.meta='{}'; p.save(); u.set_password('Cr3ativity'); u.save()\""
+```
+
+**Prevention:**
+- Keep the trusted origins list in sync with all served hostnames (staging, studio, apps, academy.biji-biji.com, skillourfuture.*).
+- Avoid corrupting `profile.meta`; if corruption occurs, set it back to `{}`.
+
+---
+
+### Issue 8: Auth MFE not used (still classic login)
+
+**Symptoms:**
+- Login page shows classic LMS form instead of Auth MFE at `/authn`.
+
+**Fix:**
+```bash
+# Set MFE URLs in rendered configmap
+kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o jsonpath='{.data.lms\\.env\\.json}' > /tmp/lms.json
+kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o jsonpath='{.data.cms\\.env\\.json}' > /tmp/cms.json
+
+# Edit both to include:
+#   LOGIN_MICROFRONTEND_URL: https://apps.staging.academy.mereka.io/authn
+#   LOGISTRATION_MICROFRONTEND_URL: https://apps.staging.academy.mereka.io/authn
+# Ensure CSRF trusted origins include staging/studio/apps/academy.biji-biji.com/skillourfuture.*
+
+# Patch the configmap (example using JSON strings)
+LMS=$(python3 - <<'PY'\nimport json; print(json.dumps(open('/tmp/lms.json').read()))\nPY)
+CMS=$(python3 - <<'PY'\nimport json; print(json.dumps(open('/tmp/cms.json').read()))\nPY)
+kubectl patch cm openedx-config-5t8bdcb64h -n mereka-lms --type=merge -p "{\"data\":{\"lms.env.json\":$LMS,\"cms.env.json\":$CMS}}"
+
+# Restart frontends
+kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
+```
+
+**Note:** Ensure the MFE image includes `frontend-app-authn` and Caddy/nginx routes `/authn` to the MFE (already true for apps.staging).
+
+---
+
+### Issue 9: Database Connection Errors
 
 **Symptoms:**
 - Pods crash with `OperationalError` or `DatabaseError`

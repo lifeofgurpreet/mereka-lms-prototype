@@ -26,6 +26,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 | [`operations/MFE_LOGIN_FIX.md`](operations/MFE_LOGIN_FIX.md) | MFE authentication troubleshooting | 2025-11-12 |
 | [`operations/MFE_REBUILD_SUCCESS.md`](operations/MFE_REBUILD_SUCCESS.md) | MFE rebuild documentation | 2025-11-12 |
 | [`operations/TROUBLESHOOTING.md`](operations/TROUBLESHOOTING.md) | **🚨 SITE DOWN?** Quick diagnostic checklist and fixes | 2025-11-11 |
+| [`operations/DJANGO_RAW_SQL_BYPASS.md`](operations/DJANGO_RAW_SQL_BYPASS.md) | Bypass Django signals with raw SQL (when Celery broker unavailable) | 2025-12-29 |
 | [`operations/DEPLOYMENT_RUNBOOK.md`](operations/DEPLOYMENT_RUNBOOK.md) | How we ship Tutor environments (local/prod/k8s) | 2025-10-30 |
 | [`operations/GCP_ROADMAP.md`](operations/GCP_ROADMAP.md) | Cloud architecture plan and outstanding infra tasks | 2025-10-15 |
 | [`operations/MONITORING.md`](operations/MONITORING.md) | Stack monitoring and alerting strategy | 2025-09-28 |

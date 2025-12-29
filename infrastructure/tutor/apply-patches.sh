@@ -576,10 +576,19 @@ MFE_INDIGO_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo"
 if [ -d "$MFE_INDIGO_DIR" ]; then
   mkdir -p "$MFE_INDIGO_DIR/mereka"
   rm -rf "$MFE_INDIGO_DIR/mereka/scss"
-  cp -R "$REPO_ROOT/ops/themes/mereka/scss" "$MFE_INDIGO_DIR/mereka/scss"
+  cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/scss" "$MFE_INDIGO_DIR/mereka/scss"
   rm -rf "$MFE_INDIGO_DIR/mereka/fonts"
-  cp -R "$REPO_ROOT/ops/themes/mereka/mfe/fonts" "$MFE_INDIGO_DIR/mereka/fonts"
-  cp "$REPO_ROOT/ops/themes/mereka/mfe/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
+  cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts" "$MFE_INDIGO_DIR/mereka/fonts"
+  cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
+fi
+
+# Patch MFE Dockerfile to copy mereka folder into Docker build
+MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+if [ -f "$MFE_DOCKERFILE" ]; then
+  echo "Patching MFE Dockerfile to include Mereka branding..."
+  # Add COPY command for mereka folder after each env.config.jsx copy
+  sed -i 's|COPY indigo/env.config.jsx /openedx/app/|COPY indigo/env.config.jsx /openedx/app/\nCOPY indigo/mereka /openedx/app/mereka|g' "$MFE_DOCKERFILE"
+  echo "MFE Dockerfile patched."
 fi
 
 echo "Applied local Tutor patches."

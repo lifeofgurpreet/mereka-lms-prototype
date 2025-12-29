@@ -4,7 +4,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEV_ROOT="$REPO_ROOT/tutor_env/dev"
-THEME_IMPORT="\$mereka-font-path: \"/fonts\";\n\n@import \"../../../../../ops/themes/mereka/scss/theme\";\n"
+THEME_IMPORT="\$mereka-font-path: \"/fonts\";\n\n@import \"../../../../../infrastructure/tutor/themes/mereka/scss/theme\";\n"
 LOGO_HORIZONTAL="$REPO_ROOT/assets/branding/logo-horizontal.png"
 LOGO_SQUARE="$REPO_ROOT/assets/branding/logo-square.png"
 FAVICON_ICO="$REPO_ROOT/assets/branding/favicon.ico"

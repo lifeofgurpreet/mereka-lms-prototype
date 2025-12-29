@@ -32,7 +32,7 @@ tutor local restart mfe
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 tutor dev start mfe --detach
-./tools/setup-mfe-branding.sh
+./scripts/branding/setup-mfe-branding.sh
 cd tutor_env/dev/frontend-app-authn
 npm install
 npm start

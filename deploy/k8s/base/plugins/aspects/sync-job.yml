@@ -1,0 +1,320 @@
+---
+# Data Sync Job - Populates ClickHouse from MySQL
+# Syncs enrollments, completions, and user activity from Open edX to ClickHouse
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clickhouse-data-sync
+  labels:
+    app.kubernetes.io/name: clickhouse-sync
+    app.kubernetes.io/part-of: aspects
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clickhouse-sync
+        app.kubernetes.io/part-of: aspects
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: sync
+          image: docker.io/python:3.11-slim
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              echo "=== Installing dependencies ==="
+              pip install --quiet mysql-connector-python clickhouse-connect
+
+              echo "=== Running data sync ==="
+              python3 << 'PYTHON_SCRIPT'
+              import os
+              import mysql.connector
+              import clickhouse_connect
+              from datetime import datetime
+
+              # MySQL connection (Open edX database)
+              mysql_conn = mysql.connector.connect(
+                  host=os.environ.get('MYSQL_HOST', 'mysql'),
+                  port=int(os.environ.get('MYSQL_PORT', 3306)),
+                  user=os.environ.get('MYSQL_USER', 'openedx'),
+                  password=os.environ.get('MYSQL_PASSWORD', ''),
+                  database=os.environ.get('MYSQL_DATABASE', 'openedx')
+              )
+
+              # ClickHouse connection
+              ch_client = clickhouse_connect.get_client(
+                  host=os.environ.get('CLICKHOUSE_HOST', 'clickhouse'),
+                  port=int(os.environ.get('CLICKHOUSE_PORT', 8123)),
+                  username=os.environ.get('CLICKHOUSE_USER', 'openedx'),
+                  password=os.environ.get('CLICKHOUSE_PASSWORD', '')
+              )
+
+              mysql_cursor = mysql_conn.cursor(dictionary=True)
+
+              # ============================================
+              # Sync Enrollments
+              # ============================================
+              print("=== Syncing Enrollments ===")
+
+              mysql_cursor.execute("""
+                  SELECT
+                      id as enrollment_id,
+                      user_id,
+                      course_id,
+                      SUBSTRING_INDEX(course_id, ':', 1) as org_id,
+                      created as enrollment_date,
+                      is_active,
+                      mode
+                  FROM student_courseenrollment
+              """)
+
+              enrollments = mysql_cursor.fetchall()
+              print(f"Found {len(enrollments)} enrollments in MySQL")
+
+              if enrollments:
+                  # Clear existing data
+                  ch_client.command("TRUNCATE TABLE IF EXISTS openedx.enrollments")
+
+                  # Prepare data for insertion
+                  rows = []
+                  for e in enrollments:
+                      rows.append([
+                          e['enrollment_id'],
+                          e['user_id'],
+                          e['course_id'],
+                          e['org_id'].replace('course-v1', '') if e['org_id'] else '',
+                          e['enrollment_date'],
+                          1 if e['is_active'] else 0,
+                          e['mode'] or 'audit'
+                      ])
+
+                  ch_client.insert(
+                      'openedx.enrollments',
+                      rows,
+                      column_names=['enrollment_id', 'user_id', 'course_id', 'org_id',
+                                    'enrollment_date', 'is_active', 'mode']
+                  )
+                  print(f"Inserted {len(rows)} enrollments into ClickHouse")
+
+              # ============================================
+              # Sync Completions (Block Completions)
+              # ============================================
+              print("\n=== Syncing Completions ===")
+
+              mysql_cursor.execute("""
+                  SELECT
+                      user_id,
+                      course_key as course_id,
+                      block_key as block_id,
+                      block_type,
+                      completion,
+                      modified as completed_at
+                  FROM completion_blockcompletion
+              """)
+
+              completions = mysql_cursor.fetchall()
+              print(f"Found {len(completions)} completions in MySQL")
+
+              if completions:
+                  # Clear existing data
+                  ch_client.command("TRUNCATE TABLE IF EXISTS openedx.completions")
+
+                  # Prepare data for insertion
+                  rows = []
+                  for c in completions:
+                      rows.append([
+                          c['user_id'],
+                          c['course_id'],
+                          c['block_id'],
+                          c['block_type'] or '',
+                          float(c['completion']) if c['completion'] else 0.0,
+                          c['completed_at']
+                      ])
+
+                  ch_client.insert(
+                      'openedx.completions',
+                      rows,
+                      column_names=['user_id', 'course_id', 'block_id', 'block_type',
+                                    'completion', 'completed_at']
+                  )
+                  print(f"Inserted {len(rows)} completions into ClickHouse")
+
+              # ============================================
+              # Summary Statistics
+              # ============================================
+              print("\n=== Summary ===")
+
+              result = ch_client.query("SELECT COUNT(*) FROM openedx.enrollments")
+              print(f"Total enrollments in ClickHouse: {result.result_rows[0][0]}")
+
+              result = ch_client.query("SELECT COUNT(*) FROM openedx.completions")
+              print(f"Total completions in ClickHouse: {result.result_rows[0][0]}")
+
+              result = ch_client.query("SELECT COUNT(DISTINCT user_id) FROM openedx.enrollments")
+              print(f"Unique users with enrollments: {result.result_rows[0][0]}")
+
+              result = ch_client.query("SELECT COUNT(DISTINCT course_id) FROM openedx.enrollments")
+              print(f"Unique courses: {result.result_rows[0][0]}")
+
+              mysql_cursor.close()
+              mysql_conn.close()
+
+              print("\n=== Data sync completed successfully! ===")
+              PYTHON_SCRIPT
+          env:
+            - name: MYSQL_HOST
+              value: mysql
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: openedx
+            - name: MYSQL_PASSWORD
+              value: "aFifpplQ"
+            - name: MYSQL_DATABASE
+              value: openedx
+            - name: CLICKHOUSE_HOST
+              value: clickhouse
+            - name: CLICKHOUSE_PORT
+              value: "8123"
+            - name: CLICKHOUSE_USER
+              value: openedx
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: clickhouse-password
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+---
+# CronJob for scheduled sync (runs daily at 2 AM)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: clickhouse-data-sync-daily
+  labels:
+    app.kubernetes.io/name: clickhouse-sync
+    app.kubernetes.io/part-of: aspects
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: clickhouse-sync
+            app.kubernetes.io/part-of: aspects
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: sync
+              image: docker.io/python:3.11-slim
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  pip install --quiet mysql-connector-python clickhouse-connect
+                  python3 << 'PYTHON_SCRIPT'
+                  import os
+                  import mysql.connector
+                  import clickhouse_connect
+
+                  mysql_conn = mysql.connector.connect(
+                      host=os.environ.get('MYSQL_HOST', 'mysql'),
+                      port=int(os.environ.get('MYSQL_PORT', 3306)),
+                      user=os.environ.get('MYSQL_USER', 'openedx'),
+                      password=os.environ.get('MYSQL_PASSWORD', ''),
+                      database=os.environ.get('MYSQL_DATABASE', 'openedx')
+                  )
+
+                  ch_client = clickhouse_connect.get_client(
+                      host=os.environ.get('CLICKHOUSE_HOST', 'clickhouse'),
+                      port=int(os.environ.get('CLICKHOUSE_PORT', 8123)),
+                      username=os.environ.get('CLICKHOUSE_USER', 'openedx'),
+                      password=os.environ.get('CLICKHOUSE_PASSWORD', '')
+                  )
+
+                  mysql_cursor = mysql_conn.cursor(dictionary=True)
+
+                  # Sync Enrollments
+                  print("Syncing enrollments...")
+                  mysql_cursor.execute("""
+                      SELECT id, user_id, course_id,
+                             SUBSTRING_INDEX(course_id, ':', 1) as org_id,
+                             created, is_active, mode
+                      FROM student_courseenrollment
+                  """)
+                  enrollments = mysql_cursor.fetchall()
+
+                  if enrollments:
+                      ch_client.command("TRUNCATE TABLE IF EXISTS openedx.enrollments")
+                      rows = [[e['id'], e['user_id'], e['course_id'],
+                               e['org_id'].replace('course-v1', '') if e['org_id'] else '',
+                               e['created'], 1 if e['is_active'] else 0, e['mode'] or 'audit']
+                              for e in enrollments]
+                      ch_client.insert('openedx.enrollments', rows,
+                          column_names=['enrollment_id', 'user_id', 'course_id', 'org_id',
+                                        'enrollment_date', 'is_active', 'mode'])
+                      print(f"Synced {len(rows)} enrollments")
+
+                  # Sync Completions
+                  print("Syncing completions...")
+                  mysql_cursor.execute("""
+                      SELECT user_id, course_key, block_key, block_type, completion, modified
+                      FROM completion_blockcompletion
+                  """)
+                  completions = mysql_cursor.fetchall()
+
+                  if completions:
+                      ch_client.command("TRUNCATE TABLE IF EXISTS openedx.completions")
+                      rows = [[c['user_id'], c['course_key'], c['block_key'],
+                               c['block_type'] or '', float(c['completion']) if c['completion'] else 0.0,
+                               c['modified']] for c in completions]
+                      ch_client.insert('openedx.completions', rows,
+                          column_names=['user_id', 'course_id', 'block_id', 'block_type',
+                                        'completion', 'completed_at'])
+                      print(f"Synced {len(rows)} completions")
+
+                  mysql_cursor.close()
+                  mysql_conn.close()
+                  print("Daily sync completed!")
+                  PYTHON_SCRIPT
+              env:
+                - name: MYSQL_HOST
+                  value: mysql
+                - name: MYSQL_PORT
+                  value: "3306"
+                - name: MYSQL_USER
+                  value: openedx
+                - name: MYSQL_PASSWORD
+                  value: "aFifpplQ"
+                - name: MYSQL_DATABASE
+                  value: openedx
+                - name: CLICKHOUSE_HOST
+                  value: clickhouse
+                - name: CLICKHOUSE_PORT
+                  value: "8123"
+                - name: CLICKHOUSE_USER
+                  value: openedx
+                - name: CLICKHOUSE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: aspects-secrets
+                      key: clickhouse-password
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "2Gi"
+                  cpu: "1"

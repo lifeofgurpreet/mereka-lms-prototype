@@ -31,21 +31,23 @@ spec:
       storage: 2Gi
 
 
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongodb
-  labels:
-    app.kubernetes.io/component: volume
-    app.kubernetes.io/name: mongodb
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-
+# DISABLED: In-cluster MongoDB PVC
+# Using MongoDB Atlas instead: cluster-mereka-lms.2pjex4s.mongodb.net
+# Disabled on 2025-12-17 for MCT migration preparation
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: mongodb
+#   labels:
+#     app.kubernetes.io/component: volume
+#     app.kubernetes.io/name: mongodb
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 5Gi
 
 ---
 apiVersion: v1

@@ -19,7 +19,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
 
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
 Installing `tutor[full]` pulls the Tutor 18 core plus the first-party plugins (discovery, ecommerce, notes, xqueue, forum). The separate `tutor-mfe` wheel pins the MFE plugin version used by our Redwood stack.
@@ -31,10 +31,10 @@ Installing `tutor[full]` pulls the Tutor 18 core plus the first-party plugins (d
 Source the helper script whenever you enter a new shell:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 ```
 
-This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. Re-run `./ops/tutor/apply-patches.sh` after every `tutor config save` to keep the MFE build using Node 18 until Tutor ships an official fix.
+This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save` to keep the MFE build using Node 18 until Tutor ships an official fix.
 
 ### Docker resources
 
@@ -53,7 +53,7 @@ The current configuration pins:
 To regenerate the environment after editing configuration values:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor config save \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
@@ -68,39 +68,39 @@ tutor config save \
   --set OPENEDX_CMS_VERSION=open-release/redwood.master \
   --set MFE_COMMON_VERSION=master \
   --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor plugins enable discovery ecommerce forum mfe notes xqueue
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
-Enabling/disabling plugins regenerates the rendered Tutor environment, so always rerun `./ops/tutor/apply-patches.sh` afterwards to keep the Caddy/MySQL tweaks in sync.
+Enabling/disabling plugins regenerates the rendered Tutor environment, so always rerun `./infrastructure/tutor/apply-patches.sh` afterwards to keep the Caddy/MySQL tweaks in sync.
 
-Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `ops/tutor/config.example.yml` records the non-secret overrides.
+Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `infrastructure/tutor/config.example.yml` records the non-secret overrides.
 > ℹ️ `tutor-credentials` has no Tutor 12-compatible release (latest wheel targets Tutor >=16). Skip certificate automation until Tutor publishes a 12.x build.
 
 ### Apply the Mereka Theme
 
-The shared palette/typography overrides live under `ops/themes/mereka` (see `docs/BRANDING.md`). After sourcing `ops/tutor-env.sh`, point Tutor at that directory and rebuild the LMS/Studio images:
+The shared palette/typography overrides live under `infrastructure/tutor/themes/mereka` (see `docs/BRANDING.md`). After sourcing `infrastructure/tutor/tutor-env.sh`, point Tutor at that directory and rebuild the LMS/Studio images:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor config save \
-  --set THEME_DIR="$(pwd)/ops/themes" \
+  --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" \
   --set THEME_NAME=mereka
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor images build openedx
 tutor local start -d
 ```
 
-Tutor will copy everything under `ops/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `ops/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run `tutor images build openedx` whenever you edit the theme SCSS or add new assets (fonts, logos).
+Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `infrastructure/tutor/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run `tutor images build openedx` whenever you edit the theme SCSS or add new assets (fonts, logos).
 
 ## Initial launch
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor images build mfe        # rebuild if you've touched the shared SCSS
 tutor local launch -I --skip-build
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart lms cms mfe caddy
 ```
 
@@ -144,14 +144,14 @@ Modern browsers resolve `*.localhost` to `127.0.0.1`, so no hosts-file entries a
 Create a superuser for manual testing:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@example.com
 ```
 
 ## Daily development workflow
 
 - Start/stop stack: `tutor local start -d` / `tutor local stop`.
-- Bring services back after config changes: rerun `tutor config save`, `./ops/tutor/apply-patches.sh`, then `tutor local restart lms cms mfe ecommerce`.
+- Bring services back after config changes: rerun `tutor config save`, `./infrastructure/tutor/apply-patches.sh`, then `tutor local restart lms cms mfe ecommerce`.
 - Keep databases clean while iterating on configuration: `docker-compose -f tutor_env/env/local/docker-compose.yml -f tutor_env/env/local/docker-compose.prod.yml down -v && rm -rf tutor_env/data`. After wiping `tutor_env/data/mysql`, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so the `openedx` schema and users are recreated before you hit the LMS.
 
 ### MFE development
@@ -159,30 +159,30 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 Tutor’s dev plugin hot-reloads micro-frontends without rebuilding Docker images:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor dev start mfe --detach
-./tools/setup-mfe-branding.sh            # clones + wires Mereka SCSS/fonts
+./scripts/branding/setup-mfe-branding.sh # clones + wires Mereka SCSS/fonts
 cd tutor_env/dev/frontend-app-learning   # repeat per app
 npm install
 npm start
 ```
 
-Run unit tests with `tutor dev run mfe npm test -- --watch`. Re-run `./ops/tutor/apply-patches.sh` whenever Tutor regenerates templates so the MySQL command stays compatible with 8.0.
+Run unit tests with `tutor dev run mfe npm test -- --watch`. Re-run `./infrastructure/tutor/apply-patches.sh` whenever Tutor regenerates templates so the MySQL command stays compatible with 8.0.
 Design work references Paragon components and tokens (`https://edx.github.io/paragon/`); theme overrides live alongside the cloned MFEs.
 
 ### Previewing the Mereka theme locally
 
 1. Sync fonts/logos into both theme directories:
    ```bash
-   ./tools/sync-brand-assets.sh
+   ./scripts/branding/sync-brand-assets.sh
    ```
 2. Ensure Tutor points at the custom theme:
    ```bash
-   tutor config save --set THEME_DIR="$(pwd)/ops/themes" --set THEME_NAME=mereka
+   tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
    ```
 3. Re-run the patch helper so LMS/Studio templates and the Indigo plugin pick up the latest SCSS, then restart your stack:
    ```bash
-   ./ops/tutor/apply-patches.sh
+   ./infrastructure/tutor/apply-patches.sh
    tutor local start -d
    ```
 4. Rebuild MFEs (`tutor images build mfe` or `tutor dev start mfe`) to bundle the same SCSS inside `frontend-app-*`. The plugin automatically imports `mereka/mereka.scss`.
@@ -200,8 +200,8 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 
 - Capture backups before upgrades: `tutor local stop && tutor local do backup-db`. Store dumps outside this repo.
 - Update packages regularly: `pip install --upgrade "tutor[full]" tutor-mfe` (stay on Tutor 18.2.2 unless we intentionally rebase on the next LTS).
-- After any upgrade, rerun `./ops/tutor/apply-patches.sh` before rebuilding MFEs.
-- Apply Tutor upgrades: `source ops/tutor-env.sh && tutor local do upgrade`.
+- After any upgrade, rerun `./infrastructure/tutor/apply-patches.sh` before rebuilding MFEs.
+- Apply Tutor upgrades: `source infrastructure/tutor/tutor-env.sh && tutor local do upgrade`.
 
 ## Troubleshooting
 
