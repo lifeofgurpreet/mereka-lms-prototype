@@ -1,5 +1,31 @@
 # Repository Guidelines
 
+## CRITICAL - Data Protection Rules
+
+> **Master policy:** https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/docs/DATA_PROTECTION.md
+
+### Forbidden Actions (Require Explicit User Confirmation)
+
+1. Delete PVCs, PVs, or namespaces containing databases
+2. Delete or scale StatefulSets/Deployments with databases to 0
+3. Modify volumeClaimTemplates in StatefulSets
+4. Run database DROP/TRUNCATE/DELETE commands
+5. Delete Helm releases containing databases
+6. Modify storage configurations that could cause data loss
+
+### Before Any Risky Operation
+
+Always create a Velero backup first:
+```bash
+velero backup create pre-op-<namespace>-$(date +%Y%m%d-%H%M) --include-namespaces <namespace> --wait
+```
+
+Then ask for explicit user confirmation before proceeding.
+
+**Backup Docs:** https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/docs/BACKUP_AND_RECOVERY.md
+
+---
+
 ## Project Structure & Module Organization
 - **Infrastructure**: `infrastructure/` contains Tutor configs (`infrastructure/tutor/`), Terraform, K8s manifests, and themes
 - **Scripts**: `scripts/` contains automation organized by domain (infra, migrations, branding, analytics, qa)
