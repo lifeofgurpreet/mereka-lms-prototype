@@ -40,17 +40,21 @@ def escape_xml(text: str) -> str:
 
 
 def build_video_xblock(lesson: dict, block_id: str) -> str:
-    """Create a Video XBlock for Mux content."""
+    """Create a Video XBlock for Mux content with poster thumbnail."""
     title = escape_xml(lesson.get('title', 'Video'))
     hls_url = lesson.get('mux_hls_url', '')
-    thumbnail = lesson.get('mux_thumbnail', '')
+    # Prefer GCS thumbnail, fall back to Mux thumbnail
+    thumbnail = lesson.get('gcs_thumbnail') or lesson.get('mux_thumbnail', '')
+
+    # Build poster attribute if thumbnail exists
+    poster_attr = f'\n    poster="{escape_xml(thumbnail)}"' if thumbnail else ''
 
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <video
     url_name="{block_id}"
     display_name="{title}"
     download_video="false"
-    show_captions="true"
+    show_captions="true"{poster_attr}
     sub="">
   <source src="{escape_xml(hls_url)}"/>
 </video>'''

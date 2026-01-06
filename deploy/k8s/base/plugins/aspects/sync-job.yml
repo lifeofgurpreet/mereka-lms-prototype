@@ -144,6 +144,65 @@ spec:
                   print(f"Inserted {len(rows)} completions into ClickHouse")
 
               # ============================================
+              # Sync Course Information
+              # ============================================
+              print("\n=== Syncing Course Information ===")
+
+              # Create courses table if not exists
+              ch_client.command("""
+                  CREATE TABLE IF NOT EXISTS openedx.courses (
+                      course_id String,
+                      org String,
+                      display_name String,
+                      start_date Nullable(DateTime),
+                      end_date Nullable(DateTime),
+                      enrollment_start Nullable(DateTime),
+                      enrollment_end Nullable(DateTime),
+                      created DateTime,
+                      modified DateTime
+                  ) ENGINE = ReplacingMergeTree(modified)
+                  ORDER BY course_id
+              """)
+
+              mysql_cursor.execute("""
+                  SELECT
+                      id as course_id,
+                      org,
+                      display_name,
+                      start as start_date,
+                      end as end_date,
+                      enrollment_start,
+                      enrollment_end,
+                      created,
+                      modified
+                  FROM course_overviews_courseoverview
+              """)
+
+              courses = mysql_cursor.fetchall()
+              print(f"Found {len(courses)} courses in MySQL")
+
+              if courses:
+                  ch_client.command("TRUNCATE TABLE IF EXISTS openedx.courses")
+                  rows = []
+                  for c in courses:
+                      rows.append([
+                          c['course_id'],
+                          c['org'] or '',
+                          c['display_name'] or '',
+                          c['start_date'],
+                          c['end_date'],
+                          c['enrollment_start'],
+                          c['enrollment_end'],
+                          c['created'],
+                          c['modified']
+                      ])
+                  ch_client.insert('openedx.courses', rows,
+                      column_names=['course_id', 'org', 'display_name', 'start_date',
+                                    'end_date', 'enrollment_start', 'enrollment_end',
+                                    'created', 'modified'])
+                  print(f"Inserted {len(rows)} courses into ClickHouse")
+
+              # ============================================
               # Summary Statistics
               # ============================================
               print("\n=== Summary ===")
@@ -154,11 +213,14 @@ spec:
               result = ch_client.query("SELECT COUNT(*) FROM openedx.completions")
               print(f"Total completions in ClickHouse: {result.result_rows[0][0]}")
 
+              result = ch_client.query("SELECT COUNT(*) FROM openedx.courses")
+              print(f"Total courses in ClickHouse: {result.result_rows[0][0]}")
+
               result = ch_client.query("SELECT COUNT(DISTINCT user_id) FROM openedx.enrollments")
               print(f"Unique users with enrollments: {result.result_rows[0][0]}")
 
               result = ch_client.query("SELECT COUNT(DISTINCT course_id) FROM openedx.enrollments")
-              print(f"Unique courses: {result.result_rows[0][0]}")
+              print(f"Unique courses with enrollments: {result.result_rows[0][0]}")
 
               mysql_cursor.close()
               mysql_conn.close()
