@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -55,3 +55,5 @@ clean: ## Clean generated files
 	find . -type d -name __pycache__ -exec rm -rf {} + || true
 	find . -type f -name "*.pyc" -delete || true
 
+mobile-setup: ## Enable mobile API for iOS/Android apps
+	./scripts/infra/setup-mobile-api.sh

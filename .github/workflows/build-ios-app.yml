@@ -1,0 +1,213 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/ios/**'
+      - '.github/workflows/build-ios-app.yml'
+  workflow_dispatch:  # Manual trigger
+
+env:
+  XCODE_VERSION: '15.4'
+  SCHEME: 'OpenEdX'
+  CONFIGURATION: 'Release'
+
+jobs:
+  build-and-upload:
+    runs-on: macos-14
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout mereka-lms
+        uses: actions/checkout@v4
+      
+      - name: Clone OpenEdX iOS App
+        run: |
+          git clone https://github.com/openedx/openedx-app-ios.git ios-app
+          cd ios-app
+          # Use latest stable tag or specific version
+          git checkout $(git describe --tags --abbrev=0) || true
+      
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios-app/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios-app/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+      
+      - name: Install CocoaPods
+        run: |
+          cd ios-app
+          pod install --repo-update
+      
+      - name: Create Mereka Config
+        run: |
+          mkdir -p ios-app/default_config/mereka
+          
+          cat > ios-app/default_config/mereka/config.yaml << 'EOF'
+          # Mereka Academy Mobile App Configuration
+          API_HOST_URL: "https://staging.academy.mereka.io"
+          OAUTH_CLIENT_ID: "mereka-mobile-app"
+          DISCOVERY_BASE_URL: ""
+          
+          FEATURES:
+            PRE_LOGIN_EXPERIENCE_ENABLED: false
+            COURSE_NESTED_LIST_ENABLED: true
+            COURSE_UNIT_PROGRESS_ENABLED: true
+            COURSE_DATES_CALENDAR_SYNC: true
+            WHAT_IS_NEW_ENABLED: true
+            SOCIAL_AUTH_ENABLED: true
+          
+          GOOGLE:
+            ENABLED: false
+          
+          MICROSOFT:
+            ENABLED: false
+          
+          FACEBOOK:
+            ENABLED: false
+          
+          APPLE_SIGNIN:
+            ENABLED: true
+          
+          SEGMENT_IO:
+            ENABLED: false
+          
+          FIREBASE:
+            ENABLED: false
+          
+          BRAZE:
+            ENABLED: false
+          
+          BRANCH:
+            ENABLED: false
+          
+          AGREEMENT_URLS:
+            PRIVACY_POLICY_URL: "https://staging.academy.mereka.io/privacy"
+            TOS_URL: "https://staging.academy.mereka.io/tos"
+            EULA_URL: ""
+            DATA_SELL_CONSENT_URL: ""
+            SUPPORTED_LANGUAGES: []
+          
+          FEEDBACK_EMAIL: "team@mereka.io"
+          
+          THEME:
+            PRIMARY_COLOR: "#1A1A2E"
+            ACCENT_COLOR: "#E94560"
+          EOF
+          
+          cat > ios-app/default_config/mereka/config_settings.yaml << 'EOF'
+          config_directory: "mereka"
+          config_mapping:
+            prod: "config.yaml"
+            stage: "config.yaml"
+            dev: "config.yaml"
+          EOF
+      
+      - name: Install Apple Certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          
+          # Import certificate from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      
+      - name: Install Provisioning Profile
+        env:
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+        run: |
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+      
+      - name: Update Bundle Identifier
+        run: |
+          cd ios-app
+          # Update bundle ID in project
+          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.mereka.academy.mobile;/g' OpenEdX.xcodeproj/project.pbxproj || true
+      
+      - name: Build Archive
+        run: |
+          cd ios-app
+          xcodebuild -workspace OpenEdX.xcworkspace \
+            -scheme ${{ env.SCHEME }} \
+            -configuration ${{ env.CONFIGURATION }} \
+            -sdk iphoneos \
+            -archivePath $RUNNER_TEMP/OpenEdX.xcarchive \
+            archive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
+            PROVISIONING_PROFILE_SPECIFIER="${{ secrets.PROVISIONING_PROFILE_NAME }}" \
+            CONFIG_DIRECTORY=mereka
+      
+      - name: Export IPA
+        run: |
+          cd ios-app
+          
+          cat > $RUNNER_TEMP/ExportOptions.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>${{ secrets.APPLE_TEAM_ID }}</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/OpenEdX.xcarchive \
+            -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/export
+      
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          # Create API key file
+          mkdir -p ~/.private_keys
+          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          
+          # Upload to TestFlight
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$RUNNER_TEMP/export/OpenEdX.ipa" \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+          rm -rf ~/.private_keys || true
