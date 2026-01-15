@@ -49,6 +49,63 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - Use `./scripts/branding/setup-mfe-branding.sh` after `tutor dev start mfe --detach` to clone the canonical MFEs, copy the fonts, and drop `src/styles/mereka.scss` + import stubs. Each repo then runs `npm install && npm start` from `tutor_env/dev/frontend-app-*`.
 - After any theme edit, rebuild `openedx`/`mfe` images (or rerun `npm start`) and capture screenshots before shipping.
 
+## Theme Deployment to GKE (For AI Agents)
+
+**🚨 CRITICAL: Understand the deployment architecture before making changes.**
+
+### Architecture Overview
+- **Theme files** live in `infrastructure/tutor/themes/mereka/` (SCSS, templates)
+- **Brand assets** live in `assets/branding/` (logos, fonts, favicons)
+- **Images are built locally** on VPS, then pushed to Artifact Registry
+- **GKE pulls images** from `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
+- **K8s deployments** must be updated to use new image tags
+
+### Deployment Sequence (DO NOT SKIP STEPS)
+
+1. **Modify theme files** in `infrastructure/tutor/themes/mereka/`
+2. **Sync brand assets**: `./scripts/branding/sync-brand-assets.sh`
+3. **Apply patches**: `./infrastructure/tutor/apply-patches.sh`
+4. **Build images** (~60-90 min first build, ~15 min with cache):
+   ```bash
+   source .venv/bin/activate
+   export TUTOR_ROOT="$(pwd)/tutor_env"
+   tutor images build openedx
+   tutor images build mfe  # if MFE changed
+   ```
+5. **Authenticate to Artifact Registry**: `gcloud auth configure-docker asia-southeast1-docker.pkg.dev`
+6. **Tag images**:
+   ```bash
+   docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
+   ```
+7. **Push images**: `docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG`
+8. **Update K8s deployments**:
+   ```bash
+   kubectl set image deployment/lms lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG -n mereka-lms
+   # Repeat for cms, lms-worker, cms-worker, mfe
+   ```
+9. **Verify rollout**: `kubectl rollout status deployment/lms -n mereka-lms`
+
+### Common Mistakes (AVOID THESE)
+1. **Building locally without pushing** → Changes only exist on VPS, GKE still uses old images
+2. **Forgetting to authenticate Docker** → 403 errors when pulling cache
+3. **Not updating K8s deployments** → Pods still use stock Docker Hub images
+4. **Skipping `apply-patches.sh`** → MySQL auth fails, Node version wrong
+
+### Brand Guidelines Reference
+Official Mereka brand assets: `https://github.com/biji-biji-initiative/bbbi-mereka-brand-assets/tree/main/brands/mereka`
+
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Teal | `#2d898b` | Primary accent, hover states |
+| Magenta | `#ab3b78` | CTA buttons, highlights |
+| Blue | `#295cad` | Links, info states |
+| Black | `#000000` | Primary text, headings |
+
+| Font | Usage |
+|------|-------|
+| Lato | Headings, UI labels |
+| Poppins | Body text, paragraphs |
+
 ## Coding Style & Naming Conventions
 Shell scripts should begin with `#!/usr/bin/env bash`, enable `set -euo pipefail`, and prefer descriptive function names over inline command chains. Keep Bash indented with two spaces; YAML templates should mirror Tutor defaults and group environment variables in uppercase (e.g., `OPENEDX_RELEASE`). When extending scripts, mirror the existing comment style that summarizes intent rather than mechanics.
 
@@ -127,3 +184,52 @@ curl -I http://apps.localhost/authn/login
 **Redis host drift will hard-hang LMS/CMS.** If pods are healthy but requests time out/return 499, inspect the rendered configmap (`openedx-config-*.json`). The Redis host must be `redis:6379`; replace any baked-in IPs (e.g., `10.x.x.x:6379`) and restart lms/cms.
 
 **Login failures (CSRF 403 or 500 on login_session).** Ensure `CSRF_TRUSTED_ORIGINS` includes `https://staging.academy.mereka.io`, `https://studio.staging.academy.mereka.io`, `https://apps.staging.academy.mereka.io`, `https://academy.biji-biji.com`, and `https://skillourfuture.staging.academy.mereka.io`. Set `CSRF_COOKIE_DOMAIN=staging.academy.mereka.io` and `SESSION_COOKIE_DOMAIN=.staging.academy.mereka.io` in `openedx-config-*.json` and restart lms/cms. If a specific user still errors with JSONDecodeError on login, reset `user.profile.meta` to `{}` and reset the password.
+
+---
+
+## Skills (For AI Agents)
+
+This project uses shared skills from the team-skills repository. These skills provide reusable prompts and workflows for common tasks.
+
+**Skills Repository:** `https://github.com/Biji-Biji-Initiative/team-skills`
+
+### Enabled Plugins
+
+| Plugin | Path | Description |
+|--------|------|-------------|
+| core | `plugins/core` | Universal standards - commit, review, security, testing, **readme** |
+| web | `plugins/web` | Web frontend - React, Next.js, CSS, accessibility |
+| backend | `plugins/backend` | Backend services - API design, databases, auth |
+
+### Available Skills
+
+From `plugins/core/skills/`:
+- **commit** - Conventional commit messages
+- **review** - Code review checklist
+- **security** - Security audit patterns
+- **testing** - Test coverage strategies
+- **readme** - TTFS-focused README creation (Time-to-First-Success)
+
+From `plugins/web/skills/`:
+- **react** - React component patterns
+- **nextjs** - Next.js app patterns
+- **styling** - CSS/Tailwind patterns
+
+From `plugins/backend/skills/`:
+- **api-design** - REST/GraphQL API design
+- **postgres** - PostgreSQL patterns
+- **typescript** - TypeScript best practices
+
+### How to Use Skills
+
+**For Claude Code:** Skills are auto-loaded via `.claude/settings.json`
+
+**For Codex/Other Agents:** Reference skills directly:
+```
+Use the readme skill from https://github.com/Biji-Biji-Initiative/team-skills/blob/main/plugins/core/skills/readme/SKILL.md
+```
+
+Or fetch the skill content:
+```bash
+curl -s https://raw.githubusercontent.com/Biji-Biji-Initiative/team-skills/main/plugins/core/skills/readme/SKILL.md
+```
