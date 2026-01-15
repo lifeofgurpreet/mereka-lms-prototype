@@ -7,6 +7,12 @@ resources:
 - services.yml
 - volumes.yml
 
+# Custom Mereka-branded OpenEdX image
+images:
+  - name: docker.io/overhangio/openedx
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newTag: mereka-brand
+
 # namespace to deploy all Resources to
 namespace: mereka-lms
 
