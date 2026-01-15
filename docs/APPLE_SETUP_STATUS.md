@@ -16,25 +16,14 @@
 
 ---
 
-## ⏳ What Needs Manual Step
+## ✅ App Created!
 
-| Item | Status | Action Required |
-|------|--------|-----------------|
-| **App in App Store Connect** | ❌ **NOT CREATED** | Create via web UI (API doesn't allow CREATE) |
-
-### Create App (One-Time Manual Step)
-
-**Note**: App Store Connect API doesn't allow creating apps programmatically. You must create it via the web UI.
-
-1. Go to: **https://appstoreconnect.apple.com**
-2. Click **My Apps** → **+** → **New App**
-3. Fill in:
-   - **Platform**: iOS
-   - **Name**: `Mereka Academy`
-   - **Primary Language**: English
-   - **Bundle ID**: Select `com.mereka.academy.mobile` (from dropdown)
-   - **SKU**: `mereka-academy-ios-001`
-4. Click **Create**
+| Item | Status | Details |
+|------|--------|---------|
+| **App in App Store Connect** | ✅ **CREATED** | Apple ID: `6757837481` |
+| **App Name** | ✅ | `Mereka Academy` |
+| **SKU** | ✅ | `mereka-lms` |
+| **Bundle ID** | ✅ | `com.mereka.academy.mobile` |
 
 ---
 
@@ -64,10 +53,23 @@ python3 scripts/mobile/check_apple_setup.py
 
 ## Next Steps
 
-1. ✅ Create App in App Store Connect (manual, ~2 minutes)
-2. ✅ Trigger GitHub Actions build
-3. ✅ Wait ~45 minutes for build + processing
-4. ✅ Install via TestFlight on iPhone
+1. ✅ **DONE**: App created in App Store Connect
+2. 🚀 **READY**: Trigger GitHub Actions build
+3. ⏳ Wait ~45 minutes for build + processing
+4. ⏳ Install via TestFlight on iPhone
+
+### Trigger the Build
+
+**Option 1: Manual Trigger**
+1. Go to: https://github.com/Biji-Biji-Initiative/mereka-lms/actions
+2. Click **Build iOS App** → **Run workflow** → **Run workflow**
+
+**Option 2: Push Trigger**
+```bash
+cd /home/gurpreet/bbi-meta/mereka-lms
+git commit --allow-empty -m "trigger iOS build"
+git push
+```
 
 ---
 
