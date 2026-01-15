@@ -405,7 +405,7 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
     )
     updated = updated.replace(
         'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi',
-        "RUN npm run compile-sass -- --skip-themes",
+        "RUN npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka && npm run compile-sass -- --skip-themes",
     )
     updated = updated.replace(
         'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi',
