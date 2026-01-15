@@ -111,37 +111,64 @@ jobs:
             dev: "config.yaml"
           EOF
       
-      - name: Install Apple Certificate
-        env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      - name: Install Fastlane
         run: |
-          # Create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          sudo gem install fastlane -NV
+      
+      - name: Auto-Create Certificate & Provisioning Profile via Fastlane
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          cd ios-app
           
-          # Import certificate from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          # Create API key file for Fastlane
+          mkdir -p ~/.private_keys
+          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          
+          # Set environment variables for Fastlane App Store Connect API
+          export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
+          export APP_STORE_CONNECT_API_KEY_ID="$APP_STORE_CONNECT_API_KEY_ID"
+          export APP_STORE_CONNECT_API_ISSUER_ID="$APP_STORE_CONNECT_ISSUER_ID"
           
           # Create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PASSWORD="temp-keychain-password-123"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
           
-          # Import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-      
-      - name: Install Provisioning Profile
-        env:
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-        run: |
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          # Fastlane cert: automatically creates/downloads distribution certificate
+          fastlane cert appstore \
+            --username "gurpreet@biji-biji.com" \
+            --team_id "$APPLE_TEAM_ID" \
+            --keychain_path "$KEYCHAIN_PATH" \
+            --keychain_password "$KEYCHAIN_PASSWORD" \
+            --force || echo "Certificate already exists or created"
+          
+          # Fastlane sigh: automatically creates/downloads provisioning profile
+          fastlane sigh appstore \
+            --app_identifier "com.mereka.academy.mobile" \
+            --username "gurpreet@biji-biji.com" \
+            --team_id "$APPLE_TEAM_ID" \
+            --force || echo "Provisioning profile already exists or created"
+          
+          # Install provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp *.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
+          
+          # Get provisioning profile name for build step
+          PROVISIONING_PROFILE=$(ls -t ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
+          if [ -n "$PROVISIONING_PROFILE" ]; then
+            PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print:Name" /dev/stdin <<< $(security cms -D -i "$PROVISIONING_PROFILE"))
+            echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
+            echo "Using provisioning profile: $PROFILE_NAME"
+          else
+            echo "PROVISIONING_PROFILE_NAME=Mereka Academy Distribution" >> $GITHUB_ENV
+          fi
       
       - name: Update Bundle Identifier
         run: |
@@ -160,7 +187,7 @@ jobs:
             archive \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
-            PROVISIONING_PROFILE_SPECIFIER="${{ secrets.PROVISIONING_PROFILE_NAME }}" \
+            PROVISIONING_PROFILE_SPECIFIER="${{ env.PROVISIONING_PROFILE_NAME }}" \
             CONFIG_DIRECTORY=mereka
       
       - name: Export IPA
