@@ -33,25 +33,41 @@ Team ID: 44F7G2D7U6
 
 ---
 
-## ⏳ Pending: App Store Connect Approval
+## ✅ App Store Connect API Key Created
 
-User is waiting for App Store Connect access to be approved by Apple. Once approved, continue with the steps below.
+**API Key ID**: `9MUD3HJQH5`  
+**Key File**: `AuthKey_9MUD3HJQH5.p8` (Windows: `c:\Users\MSAdmin\Downloads\`)  
+**Status**: ✅ Created, need to get Issuer ID
+
+### Get Issuer ID
+1. Go to https://appstoreconnect.apple.com
+2. **Users and Access** → **Integrations** → **App Store Connect API**
+3. Find your key `9MUD3HJQH5`
+4. Copy the **Issuer ID** shown at the top of the page (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 
 ---
 
-## 📋 Steps to Complete (Once Approved)
+## 📋 Steps to Complete
 
-### Step 1: Create App Store Connect API Key
+### Step 1: Create Bundle ID (App ID) in Apple Developer Portal
 
-1. Go to https://appstoreconnect.apple.com
-2. **Users and Access** → **Integrations** → **App Store Connect API**
-3. Click **+** to generate new key
-4. Settings:
-   - Name: `GitHub Actions`
-   - Access: **App Manager**
-5. Click **Generate**
-6. **Download the .p8 file immediately** (one-time download!)
-7. Note the **Key ID** and **Issuer ID**
+**This is what you need to do now:**
+
+1. Go to https://developer.apple.com/account
+2. Click **Certificates, Identifiers & Profiles**
+3. Click **Identifiers** → **+** (Add button)
+4. Select **App IDs** → **Continue**
+5. Select **App** → **Continue**
+6. Fill in:
+   - **Description**: `Mereka Academy Mobile`
+   - **Bundle ID**: Select **Explicit**
+   - **Bundle ID**: `com.mereka.academy.mobile`
+7. Scroll down to **Capabilities** and enable:
+   - ✅ **Sign In with Apple**
+   - (Optional) Push Notifications
+8. Click **Continue** → **Register**
+
+**Important**: Write down the Bundle ID exactly: `com.mereka.academy.mobile`
 
 ### Step 2: Create App in App Store Connect
 
