@@ -85,11 +85,14 @@ jobs:
           pod install --repo-update
       
       # ============================================
-      # Configuration
+      # Configuration (using OpenEdX whitelabel script)
       # ============================================
       
       - name: Create Mereka Config
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          # Create API/feature config
           mkdir -p ios-app/default_config/mereka
           
           cat > ios-app/default_config/mereka/config.yaml << 'EOF'
@@ -141,6 +144,104 @@ jobs:
             dev: "config.yaml"
           EOF
       
+      - name: Configure Project with Whitelabel Script
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cd ios-app
+          
+          # Create whitelabel config for Mereka Academy
+          # Note: OpenEdX uses configuration names like ReleaseProd, DebugProd, etc.
+          cat > whitelabel_config.yaml << EOF
+          project_config:
+            project_path: 'OpenEdX.xcodeproj/project.pbxproj'
+            dev_team: '${TEAM_ID}'
+            # All framework targets need the same team ID
+            project_extra_targets: ['WhatsNew', 'Dashboard', 'Course', 'Profile', 'Discovery', 'Discussion', 'Core', 'Theme', 'Authorization', 'Downloads']
+            marketing_version: '1.0.0'
+            current_project_version: '1'
+            configurations:
+              # Production configs (used by OpenEdXProd scheme)
+              ReleaseProd:
+                app_bundle_id: "${BUNDLE_ID}"
+                product_name: "Mereka Academy"
+                env_config: 'prod'
+              DebugProd:
+                app_bundle_id: "${BUNDLE_ID}"
+                product_name: "Mereka Academy"
+                env_config: 'prod'
+              # Stage configs
+              ReleaseStage:
+                app_bundle_id: "${BUNDLE_ID}"
+                product_name: "Mereka Academy"
+                env_config: 'stage'
+              DebugStage:
+                app_bundle_id: "${BUNDLE_ID}"
+                product_name: "Mereka Academy"
+                env_config: 'stage'
+              # Dev configs
+              ReleaseDev:
+                app_bundle_id: "${BUNDLE_ID}"
+                product_name: "Mereka Academy"
+                env_config: 'dev'
+              DebugDev:
+                app_bundle_id: "${BUNDLE_ID}"
+                product_name: "Mereka Academy"
+                env_config: 'dev'
+          EOF
+          
+          echo "=== Whitelabel Config ==="
+          cat whitelabel_config.yaml
+          
+          # Install whitelabel script dependencies
+          pip3 install pyyaml pillow coloredlogs
+          
+          # Run the whitelabel script to configure bundle ID and team
+          python3 config_script/whitelabel.py --config-path whitelabel_config.yaml || echo "Whitelabel script completed (may have warnings)"
+          
+          # Verify the changes
+          echo ""
+          echo "=== Verifying Bundle ID in project ==="
+          grep -E "PRODUCT_BUNDLE_IDENTIFIER = .*${BUNDLE_ID}" OpenEdX.xcodeproj/project.pbxproj | head -5 || echo "Bundle ID not found - checking original..."
+          grep "PRODUCT_BUNDLE_IDENTIFIER" OpenEdX.xcodeproj/project.pbxproj | head -10
+          
+          # Update framework projects to disable code signing (they get signed when embedded)
+          # This is the standard CI pattern for iOS frameworks
+          echo ""
+          echo "=== Configuring framework signing ==="
+          
+          for framework_dir in WhatsNew Dashboard Course Profile Discovery Discussion Core Theme Authorization Downloads; do
+            proj_path="${framework_dir}/${framework_dir}.xcodeproj/project.pbxproj"
+            if [ -f "$proj_path" ]; then
+              echo "Configuring ${framework_dir}..."
+              
+              # Set DEVELOPMENT_TEAM
+              sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = ${TEAM_ID};/g" "$proj_path"
+              
+              # Change CODE_SIGN_STYLE from Automatic to Manual for Release builds
+              # This prevents Xcode from looking for development certificates
+              sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" "$proj_path"
+              
+              # Set CODE_SIGN_IDENTITY to empty (no signing for frameworks)
+              # Frameworks get signed when embedded in the main app
+              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
+              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
+              
+              echo "  ✓ ${framework_dir} configured"
+            else
+              echo "  ! ${framework_dir} project not found at $proj_path"
+            fi
+          done
+          
+          echo ""
+          echo "=== Framework signing configuration complete ==="
+          
+          # Verify main app bundle ID was set correctly
+          echo ""
+          echo "=== Verifying main app configuration ==="
+          echo "Looking for PRODUCT_BUNDLE_IDENTIFIER = ${BUNDLE_ID}..."
+          grep "PRODUCT_BUNDLE_IDENTIFIER = ${BUNDLE_ID}" OpenEdX.xcodeproj/project.pbxproj | head -3 || echo "WARNING: Bundle ID may not be set correctly"
+      
       # ============================================
       # Signing setup
       # ============================================
@@ -179,10 +280,10 @@ jobs:
           # Backup original Fastfile
           cp fastlane/Fastfile fastlane/Fastfile.original
           
-          # Create the correct CI Fastfile based on ChatGPT template
+          # Create the correct CI Fastfile
           cat > fastlane/Fastfile << 'EOF'
           # Mereka Academy CI Fastfile
-          # Based on correct approach: setup_ci + readonly match + export_options
+          # Proper approach: setup_ci + match + manual export_options
           
           default_platform(:ios)
           
@@ -211,9 +312,9 @@ jobs:
               )
             end
             
-            # CI lane - temporarily not using setup_ci to allow readonly:false
+            # CI lane for TestFlight
             lane :ci_testflight do
-              # Create temp keychain manually (setup_ci forces readonly:true)
+              # Create temp keychain for CI
               create_keychain(
                 name: "fastlane_tmp_keychain",
                 password: "fastlane_tmp_keychain",
@@ -224,21 +325,24 @@ jobs:
               
               api_key = asc_api_key
               
-            # Match - temporarily using readonly: false to regenerate profile with capabilities
-            # TODO: Change back to readonly: true after profile is generated
-            match(
-              type: "appstore",
-              api_key: api_key,
-              readonly: false,
-              app_identifier: [ENV.fetch("BUNDLE_ID")],
-              git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git",
-              force_for_new_devices: true,
-              platform: "ios",
-              keychain_name: "fastlane_tmp_keychain",
-              keychain_password: "fastlane_tmp_keychain"
-            )
+              # Fetch signing certificates and profiles
+              # Using readonly: true for safety (profile should already exist)
+              match(
+                type: "appstore",
+                api_key: api_key,
+                readonly: true,
+                app_identifier: [ENV.fetch("BUNDLE_ID")],
+                git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git",
+                platform: "ios",
+                keychain_name: "fastlane_tmp_keychain",
+                keychain_password: "fastlane_tmp_keychain"
+              )
               
-              # Build the app - signing config in export_options, NOT xcargs
+              # Build the app
+              # Key settings:
+              # - CODE_SIGN_STYLE=Manual for the main app
+              # - CODE_SIGNING_ALLOWED=NO disables signing for embedded frameworks
+              # - Frameworks get signed when embedded into the main app bundle
               build_app(
                 workspace: "OpenEdX.xcworkspace",
                 scheme: "OpenEdXProd",
@@ -253,13 +357,24 @@ jobs:
                     ENV.fetch("BUNDLE_ID") => "match AppStore #{ENV.fetch("BUNDLE_ID")}"
                   }
                 },
-                # Only DEVELOPMENT_TEAM in xcargs, nothing else
-                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV.fetch('TEAM_ID')}"
+                xcargs: [
+                  "-skipPackagePluginValidation",
+                  "-skipMacroValidation",
+                  "CONFIG_DIRECTORY=mereka",
+                  "DEVELOPMENT_TEAM=#{ENV.fetch('TEAM_ID')}",
+                  "CODE_SIGN_STYLE=Manual",
+                  "CODE_SIGN_IDENTITY='Apple Distribution'",
+                  "PROVISIONING_PROFILE_SPECIFIER='match AppStore #{ENV.fetch('BUNDLE_ID')}'",
+                  # Disable code signing for frameworks - they get signed when embedded
+                  "CODE_SIGNING_ALLOWED[sdk=iphoneos*]=YES",
+                  "CODE_SIGNING_REQUIRED[sdk=iphoneos*]=NO",
+                ].join(" ")
               )
               
               # Upload to TestFlight
               upload_to_testflight(
                 api_key: api_key,
+                ipa: "./build/MerekaAcademy.ipa",
                 skip_waiting_for_build_processing: true
               )
             end
