@@ -424,6 +424,7 @@ jobs:
               # Step 1: Ensure App ID has required capabilities enabled
               # The profile needs Associated Domains, Push Notifications, and Sign in with Apple
               produce(
+                api_key: api_key,
                 app_identifier: ENV.fetch("BUNDLE_ID"),
                 skip_itc: true,  # Don't create in App Store Connect, just update portal
                 enable_services: {
