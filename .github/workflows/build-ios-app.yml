@@ -198,19 +198,8 @@ jobs:
                 in_house: false
               )
               
-              # Sync development certificates (for framework targets)
-              match(
-                type: "development",
-                app_identifier: ENV["BUNDLE_ID"],
-                team_id: ENV["APPLE_TEAM_ID"],
-                keychain_name: ENV["KEYCHAIN_PATH"],
-                keychain_password: ENV["KEYCHAIN_PASSWORD"],
-                readonly: false,
-                generate_apple_certs: true,
-                api_key: api_key
-              )
-              
-              # Sync App Store distribution certificates
+              # Sync App Store distribution certificates only
+              # (development certs not needed - we'll disable signing for framework targets)
               match(
                 type: "appstore",
                 app_identifier: ENV["BUNDLE_ID"],
@@ -228,16 +217,42 @@ jobs:
               # First sync certificates
               certificates
               
-              # Build the app - let Xcode handle code signing per-target
-              # Framework targets use automatic signing (development)
-              # Main app target uses distribution signing via export_options
+              # Disable automatic signing for ALL targets first (prevents "No Accounts" error)
+              # Then configure manual signing for main app only
+              
+              # Disable automatic signing for framework targets (they don't need to be signed)
+              ["Core", "Authorization", "Course", "Dashboard", "Discovery", "Discussion", "Downloads", "Profile", "Theme", "WhatsNew"].each do |target|
+                begin
+                  update_code_signing_settings(
+                    use_automatic_signing: false,
+                    path: "#{target}/#{target}.xcodeproj",
+                    team_id: ENV["APPLE_TEAM_ID"],
+                    code_sign_identity: ""  # Empty = no signing
+                  )
+                rescue => e
+                  UI.message("Could not update #{target}: #{e.message}")
+                end
+              end
+              
+              # Configure the main app target for manual signing with distribution cert
+              update_code_signing_settings(
+                use_automatic_signing: false,
+                path: "OpenEdX.xcodeproj",
+                team_id: ENV["APPLE_TEAM_ID"],
+                targets: ["OpenEdX"],
+                bundle_identifier: ENV["BUNDLE_ID"],
+                profile_name: "match AppStore #{ENV['BUNDLE_ID']}",
+                code_sign_identity: "Apple Distribution"
+              )
+              
+              # Build the app
               gym(
                 workspace: "OpenEdX.xcworkspace",
                 scheme: "OpenEdXProd",
                 configuration: "Release",
                 export_method: "app-store",
                 export_team_id: ENV["APPLE_TEAM_ID"],
-                xcargs: "-skipPackagePluginValidation -skipMacroValidation -allowProvisioningUpdates CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
+                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
                 output_directory: "./build",
                 output_name: "MerekaAcademy.ipa",
                 clean: true,
@@ -245,10 +260,13 @@ jobs:
                 export_options: {
                   method: "app-store",
                   teamID: ENV["APPLE_TEAM_ID"],
-                  signingStyle: "automatic",
+                  signingStyle: "manual",
                   signingCertificate: "Apple Distribution",
                   uploadBitcode: false,
-                  uploadSymbols: true
+                  uploadSymbols: true,
+                  provisioningProfiles: {
+                    ENV["BUNDLE_ID"] => "match AppStore #{ENV['BUNDLE_ID']}"
+                  }
                 }
               )
               
