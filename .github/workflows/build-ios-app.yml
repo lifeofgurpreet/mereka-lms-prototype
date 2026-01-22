@@ -234,10 +234,46 @@ jobs:
           python config_script/whitelabel.py --config-path whitelabel_config.yaml || echo "Whitelabel script completed (may have warnings)"
           deactivate
           
-          # Verify the changes
+          # CRITICAL: OpenEdX uses xcconfig files that OVERRIDE project.pbxproj settings
+          # We must patch the xcconfig files directly to change the bundle ID
           echo ""
-          echo "=== Verifying Bundle ID in project ==="
-          grep -E "PRODUCT_BUNDLE_IDENTIFIER = .*${BUNDLE_ID}" OpenEdX.xcodeproj/project.pbxproj | head -5 || echo "Bundle ID not found - checking original..."
+          echo "=== Patching xcconfig files for bundle ID ==="
+          
+          # Find and patch all xcconfig files that set PRODUCT_BUNDLE_IDENTIFIER
+          for xcconfig in $(find . -name "*.xcconfig" -type f 2>/dev/null); do
+            if grep -q "PRODUCT_BUNDLE_IDENTIFIER" "$xcconfig"; then
+              echo "Patching: $xcconfig"
+              # Replace any bundle ID with our bundle ID
+              sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = ${BUNDLE_ID}/g" "$xcconfig"
+              grep "PRODUCT_BUNDLE_IDENTIFIER" "$xcconfig" || true
+            fi
+          done
+          
+          # Also check the OpenEdX/Info.plist if it has hardcoded bundle ID
+          if [ -f "OpenEdX/Info.plist" ]; then
+            echo ""
+            echo "=== Checking Info.plist ==="
+            # Use PlistBuddy to update bundle identifier if it's hardcoded
+            if /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" OpenEdX/Info.plist 2>/dev/null | grep -v '\$'; then
+              echo "Info.plist has hardcoded bundle ID, updating..."
+              /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${BUNDLE_ID}" OpenEdX/Info.plist || true
+            else
+              echo "Info.plist uses build setting variable (good)"
+            fi
+          fi
+          
+          # Verify the changes in xcconfig
+          echo ""
+          echo "=== Verifying Bundle ID in xcconfig files ==="
+          find . -name "*.xcconfig" -type f -exec grep -l "PRODUCT_BUNDLE_IDENTIFIER" {} \; 2>/dev/null | while read f; do
+            echo "$f:"
+            grep "PRODUCT_BUNDLE_IDENTIFIER" "$f"
+          done
+          
+          # Verify the changes in project.pbxproj
+          echo ""
+          echo "=== Verifying Bundle ID in project.pbxproj ==="
+          grep -E "PRODUCT_BUNDLE_IDENTIFIER = .*${BUNDLE_ID}" OpenEdX.xcodeproj/project.pbxproj | head -5 || echo "Bundle ID not found in project.pbxproj"
           grep "PRODUCT_BUNDLE_IDENTIFIER" OpenEdX.xcodeproj/project.pbxproj | head -10
           
           # Update framework projects to disable code signing (they get signed when embedded)
@@ -271,11 +307,14 @@ jobs:
           echo ""
           echo "=== Framework signing configuration complete ==="
           
-          # Verify main app bundle ID was set correctly
+          # Final verification - show all places where bundle ID is set
           echo ""
-          echo "=== Verifying main app configuration ==="
-          echo "Looking for PRODUCT_BUNDLE_IDENTIFIER = ${BUNDLE_ID}..."
-          grep "PRODUCT_BUNDLE_IDENTIFIER = ${BUNDLE_ID}" OpenEdX.xcodeproj/project.pbxproj | head -3 || echo "WARNING: Bundle ID may not be set correctly"
+          echo "=== Final Bundle ID verification ==="
+          echo "Searching for org.openedx.app (should find NONE):"
+          grep -r "org.openedx.app" --include="*.xcconfig" --include="*.pbxproj" . 2>/dev/null | head -10 || echo "✓ No references to org.openedx.app found"
+          echo ""
+          echo "Searching for ${BUNDLE_ID} (should find several):"
+          grep -r "${BUNDLE_ID}" --include="*.xcconfig" --include="*.pbxproj" . 2>/dev/null | head -10 || echo "WARNING: Bundle ID not found!"
       
       # ============================================
       # Signing setup
@@ -396,6 +435,8 @@ jobs:
                   "-skipPackagePluginValidation",
                   "-skipMacroValidation",
                   "CONFIG_DIRECTORY=mereka",
+                  # Force the bundle ID at build time (overrides xcconfig)
+                  "PRODUCT_BUNDLE_IDENTIFIER=#{ENV.fetch('BUNDLE_ID')}",
                   "DEVELOPMENT_TEAM=#{ENV.fetch('TEAM_ID')}",
                   "CODE_SIGN_STYLE=Manual",
                   "CODE_SIGN_IDENTITY='Apple Distribution'",
