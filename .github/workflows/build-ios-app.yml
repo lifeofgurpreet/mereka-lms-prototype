@@ -193,11 +193,14 @@ jobs:
           echo "=== Whitelabel Config ==="
           cat whitelabel_config.yaml
           
-          # Install whitelabel script dependencies
-          pip3 install pyyaml pillow coloredlogs
+          # Install whitelabel script dependencies in a venv
+          python3 -m venv .whitelabel-venv
+          source .whitelabel-venv/bin/activate
+          pip install pyyaml pillow coloredlogs
           
           # Run the whitelabel script to configure bundle ID and team
-          python3 config_script/whitelabel.py --config-path whitelabel_config.yaml || echo "Whitelabel script completed (may have warnings)"
+          python config_script/whitelabel.py --config-path whitelabel_config.yaml || echo "Whitelabel script completed (may have warnings)"
+          deactivate
           
           # Verify the changes
           echo ""
