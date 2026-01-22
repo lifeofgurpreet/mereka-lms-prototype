@@ -198,8 +198,21 @@ jobs:
                 in_house: false
               )
               
-              # Sync App Store distribution certificates only
-              # (development certs not needed - we'll disable signing for framework targets)
+              # Ensure App ID exists with required capabilities
+              # The OpenEdX app requires Push Notifications and Associated Domains
+              produce(
+                app_identifier: ENV["BUNDLE_ID"],
+                app_name: "Mereka Academy",
+                team_id: ENV["APPLE_TEAM_ID"],
+                skip_itc: true,  # Don't create App Store Connect app, just the App ID
+                enable_services: {
+                  push_notification: "on",
+                  associated_domains: "on"
+                }
+              )
+              
+              # Sync App Store distribution certificates
+              # Force regenerate to pick up the new capabilities
               match(
                 type: "appstore",
                 app_identifier: ENV["BUNDLE_ID"],
@@ -207,6 +220,7 @@ jobs:
                 keychain_name: ENV["KEYCHAIN_PATH"],
                 keychain_password: ENV["KEYCHAIN_PASSWORD"],
                 readonly: false,
+                force: true,  # Force regenerate profile with updated capabilities
                 generate_apple_certs: true,
                 api_key: api_key
               )
