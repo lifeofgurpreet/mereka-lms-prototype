@@ -136,74 +136,45 @@ jobs:
             ACCENT_COLOR: "#E94560"
           EOF
           
-          cat > ios-app/default_config/mereka/config_settings.yaml << 'EOF'
-          config_directory: "mereka"
+          # Update the root config_settings.yaml to point to mereka config
+          cat > ios-app/default_config/config_settings.yaml << 'EOF'
+          config_directory: './default_config/mereka'
           config_mapping:
-            prod: "config.yaml"
-            stage: "config.yaml"
-            dev: "config.yaml"
+            prod: 'prod'
+            stage: 'prod'
+            dev: 'prod'
           EOF
           
-          # Create minimal ios.yaml with Firebase config (disabled, but script needs the file)
-          # This prevents the FirebaseCrashlytics build phase from failing
-          cat > ios-app/default_config/mereka/ios.yaml << 'EOF'
+          # Create the prod config directory structure
+          mkdir -p ios-app/default_config/mereka/prod
+          
+          # Move the config.yaml to prod folder
+          mv ios-app/default_config/mereka/config.yaml ios-app/default_config/mereka/prod/shared.yaml
+          
+          # Create ios.yaml with Firebase placeholders (needed for GoogleService-Info.plist generation)
+          cat > ios-app/default_config/mereka/prod/ios.yaml << 'EOF'
           FIREBASE:
             ENABLED: false
-            API_KEY: "placeholder"
+            API_KEY: "AIzaSyPlaceholder"
             BUNDLE_ID: "com.mereka.academy.mobile"
-            CLIENT_ID: "placeholder"
+            CLIENT_ID: "000000000000-placeholder.apps.googleusercontent.com"
             GOOGLE_APP_ID: "1:000000000000:ios:0000000000000000"
             GCM_SENDER_ID: "000000000000"
-            PROJECT_ID: "placeholder"
-            REVERSED_CLIENT_ID: "placeholder"
+            PROJECT_ID: "mereka-academy-placeholder"
+            REVERSED_CLIENT_ID: "com.googleusercontent.apps.000000000000-placeholder"
             ANALYTICS_SOURCE: "none"
           EOF
           
-          # Create mappings.yaml to point to our config files
-          cat > ios-app/default_config/mereka/mappings.yaml << 'EOF'
+          # Create file_mappings.yaml (this is what process_config.py expects)
+          cat > ios-app/default_config/mereka/prod/file_mappings.yaml << 'EOF'
           ios:
             files:
               - ios.yaml
-              - config.yaml
+              - shared.yaml
           EOF
           
-          # Create a placeholder GoogleService-Info.plist directly
-          # This prevents the FirebaseCrashlytics build script from failing
-          # (Firebase is disabled so these values won't be used at runtime)
-          cat > ios-app/OpenEdX/GoogleService-Info.plist << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>API_KEY</key>
-              <string>placeholder</string>
-              <key>GCM_SENDER_ID</key>
-              <string>000000000000</string>
-              <key>PLIST_VERSION</key>
-              <string>1</string>
-              <key>BUNDLE_ID</key>
-              <string>com.mereka.academy.mobile</string>
-              <key>PROJECT_ID</key>
-              <string>placeholder</string>
-              <key>STORAGE_BUCKET</key>
-              <string>placeholder.appspot.com</string>
-              <key>IS_ADS_ENABLED</key>
-              <false/>
-              <key>IS_ANALYTICS_ENABLED</key>
-              <false/>
-              <key>IS_APPINVITE_ENABLED</key>
-              <false/>
-              <key>IS_GCM_ENABLED</key>
-              <false/>
-              <key>IS_SIGNIN_ENABLED</key>
-              <false/>
-              <key>GOOGLE_APP_ID</key>
-              <string>1:000000000000:ios:0000000000000000</string>
-          </dict>
-          </plist>
-          EOF
-          
-          echo "Created placeholder GoogleService-Info.plist"
+          echo "Config structure created:"
+          ls -laR ios-app/default_config/
       
       - name: Configure Project with Whitelabel Script
         env:
