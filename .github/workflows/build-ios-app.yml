@@ -9,7 +9,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 env:
-  XCODE_VERSION: '16.2'
+  XCODE_VERSION: '16.1'  # Match OpenEdX's CI environment
   BUNDLE_ID: 'com.mereka.academy.mobile'
   APP_NAME: 'Mereka Academy'
 
