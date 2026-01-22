@@ -67,7 +67,11 @@ jobs:
           # Install deps per OpenEdX CI
           brew update && brew install xcodegen git-lfs || true
           
-          # Bundle setup
+          # Update Gemfile to use latest fastlane (fixes UNIVERSAL filter bug)
+          echo 'gem "fastlane", ">= 2.230.0"' > Gemfile
+          echo 'gem "xcode-install"' >> Gemfile
+          
+          # Bundle setup with updated Gemfile
           bundle config path vendor/bundle
           bundle install --jobs 4 --retry 3
           
