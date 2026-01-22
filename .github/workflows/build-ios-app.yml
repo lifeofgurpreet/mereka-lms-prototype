@@ -9,7 +9,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 env:
-  XCODE_VERSION: '16.2'  # Latest stable Xcode
+  XCODE_VERSION: '15.4'  # Stable Xcode compatible with OpenEdX v1.5.1
   BUNDLE_ID: 'com.mereka.academy.mobile'
   APP_NAME: 'Mereka Academy'
 
