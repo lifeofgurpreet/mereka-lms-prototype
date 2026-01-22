@@ -24,10 +24,9 @@ jobs:
       
       - name: Clone OpenEdX iOS App
         run: |
-          git clone https://github.com/openedx/openedx-app-ios.git ios-app
-          cd ios-app
-          git checkout $(git describe --tags --abbrev=0) || true
-          echo "OpenEdX iOS version: $(git describe --tags 2>/dev/null || echo 'latest')"
+          # Use v1.5.1 - stable release that compiles with standard Xcode versions
+          git clone --depth=1 --branch v1.5.1 https://github.com/openedx/openedx-app-ios.git ios-app
+          echo "OpenEdX iOS version: v1.5.1"
       
       - name: Update Bundle Identifier
         env:
@@ -65,15 +64,6 @@ jobs:
           
           echo "Entitlements cleaned up"
       
-      - name: Fix Swift Version Consistency
-        run: |
-          cd ios-app
-          
-          # All modules need Swift 5.0 or 6.0 for trailing comma support
-          # Update all SWIFT_VERSION = 5.0 to 6.0 for consistency with main project
-          find . -name "project.pbxproj" -exec sed -i '' 's/SWIFT_VERSION = 5\.0;/SWIFT_VERSION = 6.0;/g' {} \;
-          
-          echo "Swift versions updated to 6.0"
       
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
