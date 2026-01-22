@@ -68,8 +68,14 @@ jobs:
           brew update && brew install xcodegen git-lfs || true
           
           # Update Gemfile to use latest fastlane (fixes UNIVERSAL filter bug)
-          echo 'gem "fastlane", ">= 2.230.0"' > Gemfile
-          echo 'gem "xcode-install"' >> Gemfile
+          cat > Gemfile << 'EOF'
+          source "https://rubygems.org"
+          gem "fastlane", ">= 2.230.0"
+          gem "xcode-install"
+          EOF
+          
+          # Remove old Gemfile.lock to allow fresh install
+          rm -f Gemfile.lock
           
           # Bundle setup with updated Gemfile
           bundle config path vendor/bundle
