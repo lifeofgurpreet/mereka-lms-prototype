@@ -72,9 +72,24 @@ jobs:
           
           # The Course module and others have SWIFT_VERSION = 5.0 but use Swift 5.3+ syntax
           # (trailing commas in function parameters). Update all modules to Swift 6.0.
-          find . -name "project.pbxproj" -exec sed -i '' 's/SWIFT_VERSION = 5\.0;/SWIFT_VERSION = 6.0;/g' {} \;
           
-          echo "Swift versions updated to 6.0 for all modules"
+          # First, show all Swift version settings before fix
+          echo "=== Swift versions BEFORE fix ==="
+          find . -name "project.pbxproj" -exec grep -H "SWIFT_VERSION" {} \; | head -30
+          
+          # Fix all SWIFT_VERSION = 5.0 to 6.0 (using LC_ALL=C for consistent sed behavior)
+          find . -name "project.pbxproj" -print0 | while IFS= read -r -d '' file; do
+            echo "Processing: $file"
+            LC_ALL=C sed -i '' 's/SWIFT_VERSION = 5\.0/SWIFT_VERSION = 6.0/g' "$file"
+          done
+          
+          # Verify the fix
+          echo "=== Swift versions AFTER fix ==="
+          find . -name "project.pbxproj" -exec grep -H "SWIFT_VERSION" {} \; | head -30
+          
+          # Count remaining 5.0 versions (should be 0)
+          REMAINING=$(find . -name "project.pbxproj" -exec grep -c "SWIFT_VERSION = 5.0" {} \; 2>/dev/null | awk '{s+=$1} END {print s}')
+          echo "Remaining SWIFT_VERSION = 5.0 occurrences: ${REMAINING:-0}"
       
       
       - name: Setup Xcode
