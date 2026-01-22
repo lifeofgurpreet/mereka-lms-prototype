@@ -421,26 +421,16 @@ jobs:
               
               api_key = asc_api_key
               
-              # Step 1: Ensure App ID has required capabilities enabled
-              # The profile needs Associated Domains, Push Notifications, and Sign in with Apple
-              produce(
-                api_key: api_key,
-                app_identifier: ENV.fetch("BUNDLE_ID"),
-                skip_itc: true,  # Don't create in App Store Connect, just update portal
-                enable_services: {
-                  push_notification: "on",
-                  associated_domains: "on",
-                  sign_in_with_apple: "on"
-                }
-              )
-              
-              # Step 2: Fetch signing certificates and profiles
-              # Force regeneration to pick up the enabled capabilities
+              # Fetch signing certificates and profiles
+              # Using force: true to regenerate profiles with any capability changes from the Developer Portal
+              # Note: If this fails with "missing capabilities", enable them manually at:
+              # https://developer.apple.com/account/resources/identifiers/ -> com.mereka.academy.mobile
+              # Required capabilities: Push Notifications, Associated Domains, Sign in with Apple
               match(
                 type: "appstore",
                 api_key: api_key,
                 readonly: false,  # Allow regeneration
-                force_for_new_devices: true,  # Force regeneration
+                force: true,  # Force regeneration of profile
                 app_identifier: [ENV.fetch("BUNDLE_ID")],
                 git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git",
                 platform: "ios",
