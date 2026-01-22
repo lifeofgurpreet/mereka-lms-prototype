@@ -9,7 +9,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 env:
-  XCODE_VERSION: '15.4'
+  XCODE_VERSION: '16.2'
   SCHEME: 'OpenEdX'
   CONFIGURATION: 'Release'
 
