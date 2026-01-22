@@ -190,7 +190,6 @@ jobs:
                 app_identifier: ENV["BUNDLE_ID"],
                 team_id: ENV["APPLE_TEAM_ID"],
                 api_key: api_key,
-                readonly: false,
                 force: true
               )
               
