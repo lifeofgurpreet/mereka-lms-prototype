@@ -186,13 +186,14 @@ jobs:
               )
               
               # Get or create distribution certificate
+              # Using force: true to revoke existing certs we don't have keys for
               cert(
                 team_id: ENV["APPLE_TEAM_ID"],
                 api_key: api_key,
                 keychain_path: ENV["KEYCHAIN_PATH"],
                 keychain_password: ENV["KEYCHAIN_PASSWORD"],
                 development: false,
-                force: false
+                force: true
               )
               
               # Get or create provisioning profile
