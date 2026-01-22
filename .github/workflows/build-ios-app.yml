@@ -281,6 +281,7 @@ jobs:
           echo ""
           echo "=== Configuring framework signing ==="
           
+          # Our custom frameworks
           for framework_dir in WhatsNew Dashboard Course Profile Discovery Discussion Core Theme Authorization Downloads; do
             proj_path="${framework_dir}/${framework_dir}.xcodeproj/project.pbxproj"
             if [ -f "$proj_path" ]; then
@@ -293,23 +294,13 @@ jobs:
               sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" "$proj_path"
               
               # Set CODE_SIGN_IDENTITY to "-" (don't sign) for ALL identity settings
-              # Frameworks get signed automatically when embedded in the main app
-              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
-              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
-              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Distribution";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
-              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Distribution";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
+              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
+              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
+              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Distribution";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
+              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Distribution";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
               
               # Clear any provisioning profile specifier for frameworks
               sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = ".*";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$proj_path"
-              
-              # Explicitly set CODE_SIGNING_REQUIRED = NO and CODE_SIGNING_ALLOWED = NO
-              # This prevents xcodebuild from trying to sign frameworks during export
-              if ! grep -q "CODE_SIGNING_REQUIRED = NO" "$proj_path"; then
-                sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Manual;\n\t\t\t\tCODE_SIGNING_REQUIRED = NO;/g' "$proj_path"
-              fi
-              if ! grep -q "CODE_SIGNING_ALLOWED = NO" "$proj_path"; then
-                sed -i '' 's/CODE_SIGNING_REQUIRED = NO;/CODE_SIGNING_REQUIRED = NO;\n\t\t\t\tCODE_SIGNING_ALLOWED = NO;/g' "$proj_path"
-              fi
               
               echo "  ✓ ${framework_dir} configured"
             else
@@ -317,13 +308,21 @@ jobs:
             fi
           done
           
-          # Also configure the main OpenEdX project for manual signing
+          # Configure main OpenEdX project for manual signing
           echo ""
           echo "=== Configuring main app for manual signing ==="
           main_proj="OpenEdX.xcodeproj/project.pbxproj"
           if [ -f "$main_proj" ]; then
             # Set manual signing for main app
             sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" "$main_proj"
+            
+            # Set the provisioning profile specifier for the main app
+            sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"match AppStore ${BUNDLE_ID}\";/g" "$main_proj"
+            
+            # Set CODE_SIGN_IDENTITY for distribution
+            sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            
             echo "  ✓ Main app configured for manual signing"
           fi
           
@@ -422,12 +421,25 @@ jobs:
               
               api_key = asc_api_key
               
-              # Fetch signing certificates and profiles
-              # Using readonly: true for safety (profile should already exist)
+              # Step 1: Ensure App ID has required capabilities enabled
+              # The profile needs Associated Domains, Push Notifications, and Sign in with Apple
+              produce(
+                app_identifier: ENV.fetch("BUNDLE_ID"),
+                skip_itc: true,  # Don't create in App Store Connect, just update portal
+                enable_services: {
+                  push_notification: "on",
+                  associated_domains: "on",
+                  sign_in_with_apple: "on"
+                }
+              )
+              
+              # Step 2: Fetch signing certificates and profiles
+              # Force regeneration to pick up the enabled capabilities
               match(
                 type: "appstore",
                 api_key: api_key,
-                readonly: true,
+                readonly: false,  # Allow regeneration
+                force_for_new_devices: true,  # Force regeneration
                 app_identifier: [ENV.fetch("BUNDLE_ID")],
                 git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git",
                 platform: "ios",
@@ -436,9 +448,10 @@ jobs:
               )
               
               # Build the app
-              # IMPORTANT: Don't pass signing xcargs - they get applied to export step too,
-              # causing "frameworks don't support provisioning profiles" errors.
-              # Let export_options handle all signing configuration.
+              # Note: xcargs apply to BOTH archive AND export steps
+              # - Archive needs: CODE_SIGN_STYLE, CODE_SIGN_IDENTITY, PROVISIONING_PROFILE_SPECIFIER for main app
+              # - Export fails if these apply to frameworks (they don't support profiles)
+              # Solution: Set framework targets to skip signing entirely (CODE_SIGNING_ALLOWED=NO in project)
               build_app(
                 workspace: "OpenEdX.xcworkspace",
                 scheme: "OpenEdXProd",
@@ -446,24 +459,26 @@ jobs:
                 output_directory: "./build",
                 output_name: "MerekaAcademy.ipa",
                 clean: true,
-                # Export options handle signing - only main app needs profile
+                # Export options tell xcodebuild which profiles to use for export
                 export_options: {
                   signingStyle: "manual",
                   teamID: ENV.fetch("TEAM_ID"),
                   provisioningProfiles: {
                     ENV.fetch("BUNDLE_ID") => "match AppStore #{ENV.fetch("BUNDLE_ID")}"
                   },
-                  # These help with frameworks
                   compileBitcode: false,
                 },
-                # Only pass non-signing xcargs (signing handled by project config + export_options)
+                # xcargs for both archive and export
+                # The key is that framework targets have CODE_SIGNING_ALLOWED=NO set in their project files
                 xcargs: [
                   "-skipPackagePluginValidation",
                   "-skipMacroValidation",
                   "CONFIG_DIRECTORY=mereka",
-                  # Bundle ID and Team are set in project via whitelabel.py
                   "PRODUCT_BUNDLE_IDENTIFIER=#{ENV.fetch('BUNDLE_ID')}",
                   "DEVELOPMENT_TEAM=#{ENV.fetch('TEAM_ID')}",
+                  "CODE_SIGN_STYLE=Manual",
+                  "CODE_SIGN_IDENTITY=Apple\\ Distribution",
+                  "PROVISIONING_PROFILE_SPECIFIER=match\\ AppStore\\ #{ENV.fetch('BUNDLE_ID')}",
                 ].join(" ")
               )
               
