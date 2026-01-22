@@ -410,6 +410,7 @@ jobs:
               upload_to_testflight(
                 api_key: api_key,
                 ipa: "./build/MerekaAcademy.ipa",
+                app_identifier: ENV.fetch("BUNDLE_ID"),
                 skip_waiting_for_build_processing: true
               )
             end
