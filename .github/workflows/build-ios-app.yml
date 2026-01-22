@@ -111,11 +111,12 @@ jobs:
             dev: "config.yaml"
           EOF
       
-      - name: Install Fastlane
+      - name: Install Fastlane and xcpretty
         run: |
           sudo gem install fastlane -NV
+          sudo gem install xcpretty || echo "xcpretty installation failed, continuing without it"
       
-      - name: Auto-Create Certificate & Provisioning Profile via Fastlane
+      - name: Setup Code Signing with Fastlane
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -124,51 +125,84 @@ jobs:
         run: |
           cd ios-app
           
-          # Create API key file for Fastlane
+          # Create API key file for Fastlane App Store Connect API
           mkdir -p ~/.private_keys
           echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          chmod 600 ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
           
           # Set environment variables for Fastlane App Store Connect API
           export APP_STORE_CONNECT_API_KEY_PATH="$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8"
           export APP_STORE_CONNECT_API_KEY_ID="$APP_STORE_CONNECT_API_KEY_ID"
           export APP_STORE_CONNECT_API_ISSUER_ID="$APP_STORE_CONNECT_ISSUER_ID"
           
-          # Create temporary keychain
+          # Create temporary keychain for code signing
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
-          KEYCHAIN_PASSWORD="temp-keychain-password-123"
+          KEYCHAIN_PASSWORD="temp-keychain-password-$(openssl rand -hex 16)"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
           
-          # Fastlane cert: automatically creates/downloads distribution certificate
+          # Store keychain path and password for later steps
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $GITHUB_ENV
+          
+          # Use Fastlane cert with App Store Connect API
+          # Note: cert and sigh use API keys via environment variables set above
+          echo "Creating/downloading distribution certificate..."
           fastlane cert appstore \
-            --username "gurpreet@biji-biji.com" \
             --team_id "$APPLE_TEAM_ID" \
             --keychain_path "$KEYCHAIN_PATH" \
             --keychain_password "$KEYCHAIN_PASSWORD" \
-            --force || echo "Certificate already exists or created"
+            --force 2>&1 | tee /tmp/cert.log || {
+              echo "Certificate step completed (may already exist)"
+              cat /tmp/cert.log | tail -20
+            }
           
-          # Fastlane sigh: automatically creates/downloads provisioning profile
+          # Use Fastlane sigh with App Store Connect API
+          # This creates/downloads the provisioning profile for App Store distribution
+          echo "Creating/downloading provisioning profile..."
           fastlane sigh appstore \
             --app_identifier "com.mereka.academy.mobile" \
-            --username "gurpreet@biji-biji.com" \
             --team_id "$APPLE_TEAM_ID" \
-            --force || echo "Provisioning profile already exists or created"
+            --force 2>&1 | tee /tmp/sigh.log || {
+              echo "Provisioning profile step completed (may already exist)"
+              cat /tmp/sigh.log | tail -20
+            }
           
-          # Install provisioning profile
+          # Install provisioning profile to system location
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp *.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
-          
-          # Get provisioning profile name for build step
-          PROVISIONING_PROFILE=$(ls -t ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
-          if [ -n "$PROVISIONING_PROFILE" ]; then
-            PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print:Name" /dev/stdin <<< $(security cms -D -i "$PROVISIONING_PROFILE"))
-            echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
-            echo "Using provisioning profile: $PROFILE_NAME"
+          if ls *.mobileprovision 1> /dev/null 2>&1; then
+            cp *.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+            echo "Provisioning profiles copied successfully"
           else
-            echo "PROVISIONING_PROFILE_NAME=Mereka Academy Distribution" >> $GITHUB_ENV
+            echo "Warning: No .mobileprovision files found in current directory"
           fi
+          
+          # Extract provisioning profile name for xcodebuild
+          PROVISIONING_PROFILE=$(ls -t ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | grep -i "mereka\|academy\|distribution" | head -1)
+          if [ -z "$PROVISIONING_PROFILE" ]; then
+            PROVISIONING_PROFILE=$(ls -t ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
+          fi
+          
+          if [ -n "$PROVISIONING_PROFILE" ]; then
+            PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print:Name" /dev/stdin <<< $(security cms -D -i "$PROVISIONING_PROFILE" 2>/dev/null))
+            PROFILE_UUID=$(basename "$PROVISIONING_PROFILE" .mobileprovision)
+            if [ -z "$PROFILE_NAME" ]; then
+              # Fallback: use UUID-based name
+              PROFILE_NAME="match AppStore com.mereka.academy.mobile"
+            fi
+            echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
+            echo "PROVISIONING_PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
+            echo "Using provisioning profile: $PROFILE_NAME (UUID: $PROFILE_UUID)"
+          else
+            echo "PROVISIONING_PROFILE_NAME=match AppStore com.mereka.academy.mobile" >> $GITHUB_ENV
+            echo "Warning: No provisioning profile found, using default name"
+          fi
+          
+          # List installed profiles for debugging
+          echo "Installed provisioning profiles:"
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ | head -10
       
       - name: Update Bundle Identifier
         run: |
@@ -177,8 +211,21 @@ jobs:
           sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.mereka.academy.mobile;/g' OpenEdX.xcodeproj/project.pbxproj || true
       
       - name: Build Archive
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEYCHAIN_PATH: ${{ env.KEYCHAIN_PATH }}
+          KEYCHAIN_PASSWORD: ${{ env.KEYCHAIN_PASSWORD }}
         run: |
           cd ios-app
+          
+          # Unlock keychain before build
+          if [ -n "$KEYCHAIN_PATH" ] && [ -n "$KEYCHAIN_PASSWORD" ]; then
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security list-keychain -d user -s "$KEYCHAIN_PATH"
+          fi
+          
+          # Build archive with verbose output for debugging
+          set -o pipefail
           xcodebuild -workspace OpenEdX.xcworkspace \
             -scheme ${{ env.SCHEME }} \
             -configuration ${{ env.CONFIGURATION }} \
@@ -186,14 +233,35 @@ jobs:
             -archivePath $RUNNER_TEMP/OpenEdX.xcarchive \
             archive \
             CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             PROVISIONING_PROFILE_SPECIFIER="${{ env.PROVISIONING_PROFILE_NAME }}" \
-            CONFIG_DIRECTORY=mereka
+            CONFIG_DIRECTORY=mereka 2>&1 | tee /tmp/xcodebuild.log || {
+              echo "Build failed. Last 50 lines of output:"
+              tail -50 /tmp/xcodebuild.log
+              exit 1
+            }
+          
+          # Verify archive was created
+          if [ ! -d "$RUNNER_TEMP/OpenEdX.xcarchive" ]; then
+            echo "Error: Archive was not created"
+            exit 1
+          fi
+          
+          echo "Archive created successfully at $RUNNER_TEMP/OpenEdX.xcarchive"
       
       - name: Export IPA
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           cd ios-app
           
+          # Verify archive exists
+          if [ ! -d "$RUNNER_TEMP/OpenEdX.xcarchive" ]; then
+            echo "Error: Archive not found at $RUNNER_TEMP/OpenEdX.xcarchive"
+            exit 1
+          fi
+          
+          # Create ExportOptions.plist
           cat > $RUNNER_TEMP/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -202,19 +270,41 @@ jobs:
               <key>method</key>
               <string>app-store</string>
               <key>teamID</key>
-              <string>${{ secrets.APPLE_TEAM_ID }}</string>
+              <string>$APPLE_TEAM_ID</string>
               <key>uploadBitcode</key>
               <false/>
               <key>uploadSymbols</key>
               <true/>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.mereka.academy.mobile</key>
+                  <string>${{ env.PROVISIONING_PROFILE_NAME }}</string>
+              </dict>
           </dict>
           </plist>
           EOF
           
+          # Export IPA
+          set -o pipefail
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/OpenEdX.xcarchive \
             -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
-            -exportPath $RUNNER_TEMP/export
+            -exportPath $RUNNER_TEMP/export 2>&1 | tee /tmp/export.log || {
+              echo "Export failed. Last 50 lines of output:"
+              tail -50 /tmp/export.log
+              exit 1
+            }
+          
+          # Verify IPA was created
+          if [ ! -f "$RUNNER_TEMP/export/OpenEdX.ipa" ]; then
+            echo "Error: IPA file was not created"
+            exit 1
+          fi
+          
+          echo "IPA exported successfully at $RUNNER_TEMP/export/OpenEdX.ipa"
+          ls -lh "$RUNNER_TEMP/export/"
       
       - name: Upload to TestFlight
         env:
@@ -222,16 +312,29 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
         run: |
-          # Create API key file
+          # Create API key file if not already exists
           mkdir -p ~/.private_keys
-          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          if [ ! -f ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8 ]; then
+            echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+            chmod 600 ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          fi
           
-          # Upload to TestFlight
+          # Verify IPA exists
+          if [ ! -f "$RUNNER_TEMP/export/OpenEdX.ipa" ]; then
+            echo "Error: IPA file not found at $RUNNER_TEMP/export/OpenEdX.ipa"
+            exit 1
+          fi
+          
+          # Upload to TestFlight using xcrun altool with API key authentication
+          # Note: altool is deprecated but still works with API keys
           xcrun altool --upload-app \
             --type ios \
             --file "$RUNNER_TEMP/export/OpenEdX.ipa" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --verbose
+          
+          echo "Upload to TestFlight completed successfully"
       
       - name: Cleanup
         if: always()
