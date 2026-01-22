@@ -203,20 +203,20 @@ jobs:
                 force: true
               )
               
-              # Build the app
+              # Build the app - use automatic signing during build, manual only for export
               gym(
                 workspace: "OpenEdX.xcworkspace",
                 scheme: "OpenEdXProd",
                 configuration: "Release",
                 export_method: "app-store",
                 export_team_id: ENV["APPLE_TEAM_ID"],
-                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']} CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='#{ENV['BUNDLE_ID']} AppStore'",
+                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
                 output_directory: "./build",
                 output_name: "MerekaAcademy.ipa",
                 clean: true,
                 include_bitcode: false,
-                codesigning_identity: "Apple Distribution",
                 export_options: {
+                  signingStyle: "manual",
                   provisioningProfiles: {
                     ENV["BUNDLE_ID"] => "#{ENV['BUNDLE_ID']} AppStore"
                   }
