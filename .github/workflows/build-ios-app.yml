@@ -9,7 +9,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 env:
-  XCODE_VERSION: '16.1'  # Match OpenEdX's CI environment
+  XCODE_VERSION: '16.2'  # Latest stable Xcode
   BUNDLE_ID: 'com.mereka.academy.mobile'
   APP_NAME: 'Mereka Academy'
 
@@ -64,6 +64,16 @@ jobs:
           find . -name "project.pbxproj" -exec sed -i '' 's/CODE_SIGN_ENTITLEMENTS = .*;/CODE_SIGN_ENTITLEMENTS = "";/g' {} \;
           
           echo "Entitlements cleaned up"
+      
+      - name: Fix Swift Version Consistency
+        run: |
+          cd ios-app
+          
+          # All modules need Swift 5.0 or 6.0 for trailing comma support
+          # Update all SWIFT_VERSION = 5.0 to 6.0 for consistency with main project
+          find . -name "project.pbxproj" -exec sed -i '' 's/SWIFT_VERSION = 5\.0;/SWIFT_VERSION = 6.0;/g' {} \;
+          
+          echo "Swift versions updated to 6.0"
       
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
