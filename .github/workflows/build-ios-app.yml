@@ -66,30 +66,6 @@ jobs:
           
           echo "Entitlements cleaned up"
       
-      - name: Fix Swift Version for All Modules
-        run: |
-          cd ios-app
-          
-          # The Course module and others have SWIFT_VERSION = 5.0 but use Swift 5.3+ syntax
-          # (trailing commas in function parameters). Update all modules to Swift 6.0.
-          
-          # First, show all Swift version settings before fix
-          echo "=== Swift versions BEFORE fix ==="
-          find . -name "project.pbxproj" -exec grep -H "SWIFT_VERSION" {} \; | head -30
-          
-          # Fix all SWIFT_VERSION = 5.0 to 6.0 (using LC_ALL=C for consistent sed behavior)
-          find . -name "project.pbxproj" -print0 | while IFS= read -r -d '' file; do
-            echo "Processing: $file"
-            LC_ALL=C sed -i '' 's/SWIFT_VERSION = 5\.0/SWIFT_VERSION = 6.0/g' "$file"
-          done
-          
-          # Verify the fix
-          echo "=== Swift versions AFTER fix ==="
-          find . -name "project.pbxproj" -exec grep -H "SWIFT_VERSION" {} \; | head -30
-          
-          # Count remaining 5.0 versions (should be 0)
-          REMAINING=$(find . -name "project.pbxproj" -exec grep -c "SWIFT_VERSION = 5.0" {} \; 2>/dev/null | awk '{s+=$1} END {print s}')
-          echo "Remaining SWIFT_VERSION = 5.0 occurrences: ${REMAINING:-0}"
       
       
       - name: Setup Xcode
@@ -346,6 +322,28 @@ jobs:
           echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
           chmod 600 ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
           # Note: Not setting APP_STORE_CONNECT_API_KEY_PATH as env var to avoid fastlane conflicts
+      
+      - name: Fix Swift Version for All Modules (Final)
+        run: |
+          cd ios-app
+          
+          # The Course module and others have SWIFT_VERSION = 5.0 but use Swift 5.3+ syntax
+          # (trailing commas in function parameters). Update all modules to Swift 6.0.
+          # This must run AFTER pod install and all other setup to ensure the fix persists.
+          
+          echo "=== Fixing Swift versions ==="
+          find . -name "project.pbxproj" -print0 | while IFS= read -r -d '' file; do
+            echo "Processing: $file"
+            LC_ALL=C sed -i '' 's/SWIFT_VERSION = 5\.0/SWIFT_VERSION = 6.0/g' "$file"
+          done
+          
+          # Verify Course module specifically
+          echo "=== Course module Swift versions after fix ==="
+          grep "SWIFT_VERSION" ./Course/Course.xcodeproj/project.pbxproj || true
+          
+          # Count remaining 5.0 versions (should be 0)
+          REMAINING=$(find . -name "project.pbxproj" -exec grep -c "SWIFT_VERSION = 5.0" {} \; 2>/dev/null | awk '{s+=$1} END {print s}')
+          echo "Remaining SWIFT_VERSION = 5.0 occurrences: ${REMAINING:-0}"
       
       - name: Build and Upload to TestFlight
         env:
