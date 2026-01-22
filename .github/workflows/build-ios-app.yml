@@ -9,7 +9,7 @@ on:
   workflow_dispatch:  # Manual trigger
 
 env:
-  XCODE_VERSION: '15.4'  # Stable Xcode compatible with OpenEdX v1.5.1
+  XCODE_VERSION: '16.2'  # Latest stable Xcode for Swift 6 compatibility
   BUNDLE_ID: 'com.mereka.academy.mobile'
   APP_NAME: 'Mereka Academy'
 
@@ -24,9 +24,11 @@ jobs:
       
       - name: Clone OpenEdX iOS App
         run: |
-          # Use v1.5.1 - stable release that compiles with standard Xcode versions
-          git clone --depth=1 --branch v1.5.1 https://github.com/openedx/openedx-app-ios.git ios-app
-          echo "OpenEdX iOS version: v1.5.1"
+          # Clone latest release
+          git clone https://github.com/openedx/openedx-app-ios.git ios-app
+          cd ios-app
+          git checkout $(git describe --tags --abbrev=0) || true
+          echo "OpenEdX iOS version: $(git describe --tags 2>/dev/null || echo 'latest')"
       
       - name: Update Bundle Identifier
         env:
@@ -64,26 +66,15 @@ jobs:
           
           echo "Entitlements cleaned up"
       
-      - name: Remove Firebase SPM Dependencies (not needed, incompatible with Xcode 15.4)
+      - name: Fix Swift Version for All Modules
         run: |
           cd ios-app
           
-          # Remove Firebase-related SPM package references from project.pbxproj
-          # These packages use Swift 6 features that are incompatible with Xcode 15.4
-          # Firebase is disabled in our config anyway
+          # The Course module and others have SWIFT_VERSION = 5.0 but use Swift 5.3+ syntax
+          # (trailing commas in function parameters). Update all modules to Swift 6.0.
+          find . -name "project.pbxproj" -exec sed -i '' 's/SWIFT_VERSION = 5\.0;/SWIFT_VERSION = 6.0;/g' {} \;
           
-          PROJECT_FILE="OpenEdX.xcodeproj/project.pbxproj"
-          
-          # Remove analytics-swift-firebase reference and its products
-          sed -i '' '/analytics-swift-firebase/d' "$PROJECT_FILE"
-          
-          # Remove braze-segment-swift reference
-          sed -i '' '/braze-segment-swift/d' "$PROJECT_FILE"
-          
-          # Remove Segment analytics-swift reference
-          sed -i '' '/analytics-swift/d' "$PROJECT_FILE"
-          
-          echo "Firebase SPM dependencies removed"
+          echo "Swift versions updated to 6.0 for all modules"
       
       
       - name: Setup Xcode
