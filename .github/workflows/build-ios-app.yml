@@ -10,7 +10,6 @@ on:
 
 env:
   BUNDLE_ID: 'com.mereka.academy.mobile'
-  APP_NAME: 'Mereka Academy'
 
 jobs:
   build-and-upload:
@@ -23,7 +22,7 @@ jobs:
       
       - name: Clone OpenEdX iOS App
         run: |
-          # Clone latest release tag
+          # Clone latest release tag (v2.2 Ulmo.1 - Swift 6)
           git clone https://github.com/openedx/openedx-app-ios.git ios-app
           cd ios-app
           LATEST_TAG=$(git describe --tags --abbrev=0)
@@ -31,10 +30,10 @@ jobs:
           echo "OpenEdX iOS version: $LATEST_TAG"
       
       # ============================================
-      # PHASE 1: Environment setup (follow OpenEdX CI exactly)
+      # Environment setup (follow OpenEdX CI exactly)
       # ============================================
       
-      - name: Preflight Check - Print Environment
+      - name: Preflight - Print Environment
         run: |
           echo "=== System Info ==="
           sw_vers
@@ -61,11 +60,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pods-
       
-      - name: Setup Environment (OpenEdX CI approach)
+      - name: Setup Environment
         run: |
           cd ios-app
           
-          # Install dependencies per OpenEdX CI
+          # Install deps per OpenEdX CI
           brew update && brew install xcodegen git-lfs || true
           
           # Bundle setup
@@ -74,12 +73,9 @@ jobs:
           
           # Pod install
           pod install --repo-update
-          
-          echo "=== Environment setup complete ==="
       
       # ============================================
-      # PHASE 2: Configuration (bundle ID, config files)
-      # Do NOT edit pbxproj files - use proper tooling
+      # Configuration
       # ============================================
       
       - name: Create Mereka Config
@@ -136,7 +132,7 @@ jobs:
           EOF
       
       # ============================================
-      # PHASE 3: Signing setup (match with proper governance)
+      # Signing setup
       # ============================================
       
       - name: Setup SSH for Match
@@ -154,183 +150,120 @@ jobs:
             IdentitiesOnly yes
           EOF
       
-      - name: Setup Keychain
-        run: |
-          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
-          KEYCHAIN_PASSWORD="$(openssl rand -hex 16)"
-          
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
-          
-          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
-          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $GITHUB_ENV
-      
-      - name: Setup App Store Connect API Key
-        env:
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-        run: |
-          mkdir -p ~/.private_keys
-          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
-          chmod 600 ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
-      
       - name: Create Matchfile
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           cd ios-app
+          mkdir -p fastlane
           
-          cat > fastlane/Matchfile << EOF
+          cat > fastlane/Matchfile << 'EOF'
           git_url("git@github.com:Biji-Biji-Initiative/ios-certificates.git")
           storage_mode("git")
           type("appstore")
-          app_identifier("${{ env.BUNDLE_ID }}")
-          team_id("$APPLE_TEAM_ID")
-          readonly(true)  # CI should be readonly - certs managed separately
+          readonly(true)
           EOF
       
-      - name: Create Release Fastfile
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Create CI Fastfile
         run: |
           cd ios-app
           
           # Backup original Fastfile
           cp fastlane/Fastfile fastlane/Fastfile.original
           
-          # Create our release lane (appending to existing Fastfile)
-          cat >> fastlane/Fastfile << 'ENDOFFILE'
-
-          # Mereka Release Lane
-          lane :mereka_release do
-            # Read the API key
-            key_content = File.read(File.expand_path("~/.private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"))
-            
-            api_key = app_store_connect_api_key(
-              key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
-              issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
-              key_content: key_content,
-              duration: 1200,
-              in_house: false
-            )
-            
-            # Sync certificates (readonly mode)
-            match(
-              type: "appstore",
-              app_identifier: ENV["BUNDLE_ID"],
-              team_id: ENV["APPLE_TEAM_ID"],
-              keychain_name: ENV["KEYCHAIN_PATH"],
-              keychain_password: ENV["KEYCHAIN_PASSWORD"],
-              readonly: true,
-              api_key: api_key
-            )
-            
-            # Disable automatic signing for framework targets (they don't need signing in CI)
-            # This is the proper way to handle it per Fastlane docs
-            ["Core", "Authorization", "Course", "Dashboard", "Discovery", "Discussion", "Downloads", "Profile", "Theme", "WhatsNew"].each do |target|
-              begin
-                update_code_signing_settings(
-                  use_automatic_signing: false,
-                  path: "#{target}/#{target}.xcodeproj",
-                  team_id: ENV["APPLE_TEAM_ID"],
-                  code_sign_identity: ""
-                )
-              rescue => e
-                UI.message("Note: Could not update #{target}: #{e.message}")
-              end
+          # Create the correct CI Fastfile based on ChatGPT template
+          cat > fastlane/Fastfile << 'EOF'
+          # Mereka Academy CI Fastfile
+          # Based on correct approach: setup_ci + readonly match + export_options
+          
+          default_platform(:ios)
+          
+          require "base64"
+          
+          platform :ios do
+            before_all do
+              # Use xcodes plugin to select Xcode 16.4 (Swift 6)
+              xcodes(
+                version: '16.4',
+                select_for_current_build_only: true,
+              )
+              
+              ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "180"
+              ENV["FASTLANE_XCODE_LIST_TIMEOUT"] = "180"
             end
             
-            # Configure main app target for manual distribution signing
-            update_code_signing_settings(
-              use_automatic_signing: false,
-              path: "OpenEdX.xcodeproj",
-              team_id: ENV["APPLE_TEAM_ID"],
-              targets: ["OpenEdX"],
-              bundle_identifier: ENV["BUNDLE_ID"],
-              profile_name: "match AppStore #{ENV['BUNDLE_ID']}",
-              code_sign_identity: "Apple Distribution"
-            )
+            # API Key helper
+            private_lane :asc_api_key do
+              key_content = Base64.decode64(ENV.fetch("ASC_KEY_P8_BASE64"))
+              app_store_connect_api_key(
+                key_id: ENV.fetch("ASC_KEY_ID"),
+                issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+                key_content: key_content,
+                in_house: false
+              )
+            end
             
-            # Build the app using OpenEdXProd scheme with manual signing
-            gym(
-              workspace: "OpenEdX.xcworkspace",
-              scheme: "OpenEdXProd",
-              configuration: "Release",
-              export_method: "app-store",
-              export_team_id: ENV["APPLE_TEAM_ID"],
-              xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
-              output_directory: "./build",
-              output_name: "MerekaAcademy.ipa",
-              clean: true,
-              include_bitcode: false,
-              export_options: {
-                method: "app-store",
-                teamID: ENV["APPLE_TEAM_ID"],
-                signingStyle: "manual",
-                signingCertificate: "Apple Distribution",
-                uploadBitcode: false,
-                uploadSymbols: true,
-                provisioningProfiles: {
-                  ENV["BUNDLE_ID"] => "match AppStore #{ENV['BUNDLE_ID']}"
-                }
-              }
-            )
-            
-            # Upload to TestFlight
-            pilot(
-              api_key: api_key,
-              ipa: "./build/MerekaAcademy.ipa",
-              skip_waiting_for_build_processing: true
-            )
+            # CI lane - readonly, safe
+            lane :ci_testflight do
+              # setup_ci creates temp keychain and sets match to readonly
+              setup_ci
+              
+              api_key = asc_api_key
+              
+              # Match with readonly: true - CI can NEVER create certs
+              match(
+                type: "appstore",
+                api_key: api_key,
+                readonly: true,
+                app_identifier: [ENV.fetch("BUNDLE_ID")],
+                git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git"
+              )
+              
+              # Build the app - signing config in export_options, NOT xcargs
+              build_app(
+                workspace: "OpenEdX.xcworkspace",
+                scheme: "OpenEdXProd",
+                export_method: "app-store",
+                output_directory: "./build",
+                output_name: "MerekaAcademy.ipa",
+                clean: true,
+                export_options: {
+                  signingStyle: "manual",
+                  teamID: ENV.fetch("TEAM_ID"),
+                  provisioningProfiles: {
+                    ENV.fetch("BUNDLE_ID") => "match AppStore #{ENV.fetch("BUNDLE_ID")}"
+                  }
+                },
+                # Only DEVELOPMENT_TEAM in xcargs, nothing else
+                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV.fetch('TEAM_ID')}"
+              )
+              
+              # Upload to TestFlight
+              upload_to_testflight(
+                api_key: api_key,
+                skip_waiting_for_build_processing: true
+              )
+            end
           end
-          ENDOFFILE
+          EOF
       
       # ============================================
-      # PHASE 4: Preflight verification
-      # ============================================
-      
-      - name: Preflight Verification
-        run: |
-          cd ios-app
-          
-          echo "=== Selected Xcode ==="
-          xcode-select -p
-          xcodebuild -version
-          
-          echo ""
-          echo "=== Scheme List ==="
-          xcodebuild -list -workspace OpenEdX.xcworkspace 2>/dev/null | head -30 || true
-          
-          echo ""
-          echo "=== Match Profile Check ==="
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "No profiles installed yet"
-      
-      # ============================================
-      # PHASE 5: Build and Upload
+      # Build and Upload
       # ============================================
       
       - name: Build and Upload to TestFlight
         env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
         run: |
           cd ios-app
           
-          # Unlock keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
-          
           # Use bundle exec fastlane (per OpenEdX CI approach)
-          bundle exec fastlane mereka_release
+          bundle exec fastlane ci_testflight
       
       - name: Cleanup
         if: always()
         run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
-          rm -rf ~/.private_keys || true
           rm -rf ~/.ssh/match_key || true
