@@ -11,6 +11,7 @@ on:
 env:
   XCODE_VERSION: '16.2'
   BUNDLE_ID: 'com.mereka.academy.mobile'
+  APP_NAME: 'Mereka Academy'
 
 jobs:
   build-and-upload:
@@ -25,14 +26,19 @@ jobs:
         run: |
           git clone https://github.com/openedx/openedx-app-ios.git ios-app
           cd ios-app
-          # Use latest stable tag
           git checkout $(git describe --tags --abbrev=0) || true
-          echo "OpenEdX iOS version: $(git describe --tags)"
+          echo "OpenEdX iOS version: $(git describe --tags 2>/dev/null || echo 'latest')"
       
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
       
       - name: Cache CocoaPods
         uses: actions/cache@v4
@@ -52,7 +58,6 @@ jobs:
           mkdir -p ios-app/default_config/mereka
           
           cat > ios-app/default_config/mereka/config.yaml << 'EOF'
-          # Mereka Academy Mobile App Configuration
           API_HOST_URL: "https://staging.academy.mereka.io"
           OAUTH_CLIENT_ID: "mereka-mobile-app"
           DISCOVERY_BASE_URL: ""
@@ -67,34 +72,24 @@ jobs:
           
           GOOGLE:
             ENABLED: false
-          
           MICROSOFT:
             ENABLED: false
-          
           FACEBOOK:
             ENABLED: false
-          
           APPLE_SIGNIN:
             ENABLED: true
-          
           SEGMENT_IO:
             ENABLED: false
-          
           FIREBASE:
             ENABLED: false
-          
           BRAZE:
             ENABLED: false
-          
           BRANCH:
             ENABLED: false
           
           AGREEMENT_URLS:
             PRIVACY_POLICY_URL: "https://staging.academy.mereka.io/privacy"
             TOS_URL: "https://staging.academy.mereka.io/tos"
-            EULA_URL: ""
-            DATA_SELL_CONSENT_URL: ""
-            SUPPORTED_LANGUAGES: []
           
           FEEDBACK_EMAIL: "team@mereka.io"
           
@@ -113,55 +108,56 @@ jobs:
       
       - name: Install Fastlane
         run: |
-          sudo gem install fastlane -NV
+          cd ios-app
+          gem install fastlane -NV
       
-      - name: Setup Keychain and Certificates
+      - name: Setup SSH for Match
         env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
-          DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.DISTRIBUTION_CERTIFICATE_BASE64 }}
-          DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
         run: |
-          # Create API key file
-          mkdir -p ~/.private_keys
-          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
-          chmod 600 ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          mkdir -p ~/.ssh
+          echo "$MATCH_DEPLOY_KEY" > ~/.ssh/match_key
+          chmod 600 ~/.ssh/match_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
           
-          # Create temporary keychain
+          # Configure SSH to use this key for github.com
+          cat >> ~/.ssh/config << EOF
+          Host github.com
+            IdentityFile ~/.ssh/match_key
+            IdentitiesOnly yes
+          EOF
+      
+      - name: Setup Keychain
+        run: |
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
           KEYCHAIN_PASSWORD="$(openssl rand -hex 16)"
+          
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
           
-          # Import distribution certificate if provided
-          if [ -n "$DISTRIBUTION_CERTIFICATE_BASE64" ]; then
-            echo "Importing distribution certificate..."
-            echo -n "$DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode > /tmp/certificate.p12
-            security import /tmp/certificate.p12 \
-              -k "$KEYCHAIN_PATH" \
-              -P "$DISTRIBUTION_CERTIFICATE_PASSWORD" \
-              -T /usr/bin/codesign \
-              -T /usr/bin/security
-            security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-            rm /tmp/certificate.p12
-            echo "Certificate imported successfully"
-          else
-            echo "No certificate provided, will use automatic signing"
-          fi
-          
-          # Store for later steps
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
           echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $GITHUB_ENV
+      
+      - name: Create Matchfile
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cd ios-app
+          
+          cat > fastlane/Matchfile << EOF
+          git_url("git@github.com:Biji-Biji-Initiative/ios-certificates.git")
+          storage_mode("git")
+          type("appstore")
+          app_identifier("${{ env.BUNDLE_ID }}")
+          team_id("$APPLE_TEAM_ID")
+          readonly(false)
+          EOF
       
       - name: Create Fastfile
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: |
           cd ios-app
           
@@ -174,37 +170,35 @@ jobs:
               ENV["FASTLANE_XCODE_LIST_TIMEOUT"] = "180"
             end
             
-            desc "Build and upload to TestFlight"
-            lane :release do
-              # Setup API key
+            desc "Sync certificates and profiles with match"
+            lane :certificates do
               api_key = app_store_connect_api_key(
                 key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
                 issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
-                key_filepath: File.expand_path("~/.private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"),
+                key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
                 duration: 1200,
                 in_house: false
               )
               
-              # Get or create distribution certificate
-              # Using force: true to revoke existing certs we don't have keys for
-              cert(
-                team_id: ENV["APPLE_TEAM_ID"],
-                api_key: api_key,
-                keychain_path: ENV["KEYCHAIN_PATH"],
-                keychain_password: ENV["KEYCHAIN_PASSWORD"],
-                development: false,
-                force: true
-              )
-              
-              # Get or create provisioning profile
-              sigh(
+              match(
+                type: "appstore",
                 app_identifier: ENV["BUNDLE_ID"],
                 team_id: ENV["APPLE_TEAM_ID"],
                 api_key: api_key,
-                force: true
+                keychain_name: ENV["KEYCHAIN_PATH"],
+                keychain_password: ENV["KEYCHAIN_PASSWORD"],
+                readonly: false,
+                force_for_new_devices: true,
+                generate_apple_certs: true
               )
+            end
+            
+            desc "Build and upload to TestFlight"
+            lane :release do
+              # First sync certificates
+              certificates
               
-              # Build the app - use automatic signing during build, manual only for export
+              # Build the app
               gym(
                 workspace: "OpenEdX.xcworkspace",
                 scheme: "OpenEdXProd",
@@ -219,12 +213,20 @@ jobs:
                 export_options: {
                   signingStyle: "manual",
                   provisioningProfiles: {
-                    ENV["BUNDLE_ID"] => "#{ENV['BUNDLE_ID']} AppStore"
+                    ENV["BUNDLE_ID"] => "match AppStore #{ENV['BUNDLE_ID']}"
                   }
                 }
               )
               
               # Upload to TestFlight
+              api_key = app_store_connect_api_key(
+                key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+                issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+                key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+                duration: 1200,
+                in_house: false
+              )
+              
               pilot(
                 api_key: api_key,
                 ipa: "./build/MerekaAcademy.ipa",
@@ -234,14 +236,23 @@ jobs:
           end
           FASTFILE
       
+      - name: Setup App Store Connect API Key
+        env:
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        run: |
+          mkdir -p ~/.private_keys
+          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          chmod 600 ~/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8
+          echo "APP_STORE_CONNECT_API_KEY_PATH=$HOME/.private_keys/AuthKey_$APP_STORE_CONNECT_API_KEY_ID.p8" >> $GITHUB_ENV
+      
       - name: Build and Upload to TestFlight
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
-          KEYCHAIN_PATH: ${{ env.KEYCHAIN_PATH }}
-          KEYCHAIN_PASSWORD: ${{ env.KEYCHAIN_PASSWORD }}
         run: |
           cd ios-app
           
@@ -257,3 +268,4 @@ jobs:
         run: |
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
           rm -rf ~/.private_keys || true
+          rm -rf ~/.ssh/match_key || true
