@@ -231,6 +231,8 @@ jobs:
             -configuration ${{ env.CONFIGURATION }} \
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/OpenEdX.xcarchive \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
             archive \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
