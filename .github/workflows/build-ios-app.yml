@@ -459,17 +459,12 @@ jobs:
                   },
                   compileBitcode: false,
                 },
-                # xcargs for both archive and export
-                # The key is that framework targets have CODE_SIGNING_ALLOWED=NO set in their project files
+                # ONLY non-signing xcargs - signing is handled by export_options
+                # DO NOT add CODE_SIGN_*, PROVISIONING_PROFILE_* here - they leak to all targets!
                 xcargs: [
                   "-skipPackagePluginValidation",
                   "-skipMacroValidation",
                   "CONFIG_DIRECTORY=mereka",
-                  "PRODUCT_BUNDLE_IDENTIFIER=#{ENV.fetch('BUNDLE_ID')}",
-                  "DEVELOPMENT_TEAM=#{ENV.fetch('TEAM_ID')}",
-                  "CODE_SIGN_STYLE=Manual",
-                  "CODE_SIGN_IDENTITY=Apple\\ Distribution",
-                  "PROVISIONING_PROFILE_SPECIFIER=match\\ AppStore\\ #{ENV.fetch('BUNDLE_ID')}",
                 ].join(" ")
               )
               
