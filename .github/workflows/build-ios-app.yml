@@ -208,14 +208,16 @@ jobs:
               
               api_key = asc_api_key
               
-              # Match with readonly: true - CI can NEVER create certs
-              match(
-                type: "appstore",
-                api_key: api_key,
-                readonly: true,
-                app_identifier: [ENV.fetch("BUNDLE_ID")],
-                git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git"
-              )
+            # Match - temporarily using readonly: false to regenerate profile with capabilities
+            # TODO: Change back to readonly: true after profile is generated
+            match(
+              type: "appstore",
+              api_key: api_key,
+              readonly: false,
+              app_identifier: [ENV.fetch("BUNDLE_ID")],
+              git_url: "git@github.com:Biji-Biji-Initiative/ios-certificates.git",
+              force_for_new_devices: true
+            )
               
               # Build the app - signing config in export_options, NOT xcargs
               build_app(
