@@ -170,8 +170,21 @@ jobs:
               ENV["FASTLANE_XCODE_LIST_TIMEOUT"] = "180"
             end
             
+            desc "Get App Store Connect API key"
+            lane :get_api_key do
+              app_store_connect_api_key(
+                key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+                issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+                key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+                duration: 1200,
+                in_house: false
+              )
+            end
+            
             desc "Sync certificates and profiles with match"
             lane :certificates do
+              api_key = get_api_key
+              
               match(
                 type: "appstore",
                 app_identifier: ENV["BUNDLE_ID"],
@@ -179,7 +192,8 @@ jobs:
                 keychain_name: ENV["KEYCHAIN_PATH"],
                 keychain_password: ENV["KEYCHAIN_PASSWORD"],
                 readonly: false,
-                generate_apple_certs: true
+                generate_apple_certs: true,
+                api_key: api_key
               )
             end
             
