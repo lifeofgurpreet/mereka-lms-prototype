@@ -210,14 +210,15 @@ jobs:
                 configuration: "Release",
                 export_method: "app-store",
                 export_team_id: ENV["APPLE_TEAM_ID"],
-                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka",
+                xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']} CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='#{ENV['BUNDLE_ID']} AppStore'",
                 output_directory: "./build",
                 output_name: "MerekaAcademy.ipa",
                 clean: true,
                 include_bitcode: false,
+                codesigning_identity: "Apple Distribution",
                 export_options: {
                   provisioningProfiles: {
-                    ENV["BUNDLE_ID"] => "match AppStore #{ENV['BUNDLE_ID']}"
+                    ENV["BUNDLE_ID"] => "#{ENV['BUNDLE_ID']} AppStore"
                   }
                 }
               )
