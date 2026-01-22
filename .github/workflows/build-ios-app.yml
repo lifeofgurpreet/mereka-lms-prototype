@@ -281,26 +281,31 @@ jobs:
           echo ""
           echo "=== Configuring framework signing ==="
           
-          # Our custom frameworks
+          # Our custom frameworks - COMPLETELY DISABLE signing (they get signed when embedded in app)
           for framework_dir in WhatsNew Dashboard Course Profile Discovery Discussion Core Theme Authorization Downloads; do
             proj_path="${framework_dir}/${framework_dir}.xcodeproj/project.pbxproj"
             if [ -f "$proj_path" ]; then
-              echo "Configuring ${framework_dir}..."
+              echo "Configuring ${framework_dir} to skip signing..."
               
-              # Set DEVELOPMENT_TEAM to the team ID
-              sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = ${TEAM_ID};/g" "$proj_path"
+              # Replace ALL CODE_SIGN_STYLE with Manual
+              sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$proj_path"
               
-              # Change CODE_SIGN_STYLE from Automatic to Manual
-              sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" "$proj_path"
+              # Replace ALL CODE_SIGN_IDENTITY with "-" (means "don't sign")
+              sed -i '' 's/CODE_SIGN_IDENTITY = "[^"]*";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
               
-              # Set CODE_SIGN_IDENTITY to "-" (don't sign) for ALL identity settings
-              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
-              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
-              sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Distribution";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
-              sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Distribution";/CODE_SIGN_IDENTITY = "";/g' "$proj_path"
+              # Set CODE_SIGNING_REQUIRED = NO and CODE_SIGNING_ALLOWED = NO for all build configs
+              # These are the key settings that tell Xcode not to sign frameworks
+              sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$proj_path"
+              sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$proj_path"
               
-              # Clear any provisioning profile specifier for frameworks
-              sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = ".*";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$proj_path"
+              # Clear provisioning profile
+              sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "[^"]*";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$proj_path"
+              
+              # Add CODE_SIGNING_ALLOWED = NO after DEVELOPMENT_TEAM if not present
+              # This catches cases where the setting doesn't exist
+              if ! grep -q "CODE_SIGNING_ALLOWED" "$proj_path"; then
+                sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/&\n\t\t\t\tCODE_SIGNING_ALLOWED = NO;/g' "$proj_path"
+              fi
               
               echo "  ✓ ${framework_dir} configured"
             else
