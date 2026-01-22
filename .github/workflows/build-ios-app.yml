@@ -44,6 +44,27 @@ jobs:
           
           echo "Bundle ID updated to: $BUNDLE_ID"
       
+      - name: Remove Entitlements (Push/Associated Domains not needed)
+        run: |
+          cd ios-app
+          
+          # Find and remove Push Notifications and Associated Domains from entitlements
+          # These capabilities aren't needed since Firebase is disabled
+          find . -name "*.entitlements" -exec sh -c '
+            for f do
+              echo "Processing: $f"
+              # Remove aps-environment (push notifications)
+              /usr/libexec/PlistBuddy -c "Delete :aps-environment" "$f" 2>/dev/null || true
+              # Remove associated domains
+              /usr/libexec/PlistBuddy -c "Delete :com.apple.developer.associated-domains" "$f" 2>/dev/null || true
+            done
+          ' sh {} +
+          
+          # Also remove these from the project build settings
+          find . -name "project.pbxproj" -exec sed -i '' 's/CODE_SIGN_ENTITLEMENTS = .*;/CODE_SIGN_ENTITLEMENTS = "";/g' {} \;
+          
+          echo "Entitlements cleaned up"
+      
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -198,22 +219,7 @@ jobs:
                 in_house: false
               )
               
-              # Ensure App ID exists with required capabilities
-              # The OpenEdX app requires Push Notifications and Associated Domains
-              produce(
-                api_key: api_key,
-                app_identifier: ENV["BUNDLE_ID"],
-                app_name: "Mereka Academy",
-                team_id: ENV["APPLE_TEAM_ID"],
-                skip_itc: true,  # Don't create App Store Connect app, just the App ID
-                enable_services: {
-                  push_notification: "on",
-                  associated_domains: "on"
-                }
-              )
-              
               # Sync App Store distribution certificates
-              # Force regenerate to pick up the new capabilities
               match(
                 type: "appstore",
                 app_identifier: ENV["BUNDLE_ID"],
@@ -221,7 +227,6 @@ jobs:
                 keychain_name: ENV["KEYCHAIN_PATH"],
                 keychain_password: ENV["KEYCHAIN_PASSWORD"],
                 readonly: false,
-                force: true,  # Force regenerate profile with updated capabilities
                 generate_apple_certs: true,
                 api_key: api_key
               )
