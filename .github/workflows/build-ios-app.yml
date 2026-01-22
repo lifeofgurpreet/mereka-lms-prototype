@@ -10,7 +10,7 @@ on:
 
 env:
   XCODE_VERSION: '16.2'
-  SCHEME: 'OpenEdX'
+  SCHEME: 'OpenEdXProd'
   CONFIGURATION: 'Release'
 
 jobs:
