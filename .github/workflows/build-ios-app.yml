@@ -185,6 +185,16 @@ jobs:
                 in_house: false
               )
               
+              # Get or create distribution certificate
+              cert(
+                team_id: ENV["APPLE_TEAM_ID"],
+                api_key: api_key,
+                keychain_path: ENV["KEYCHAIN_PATH"],
+                keychain_password: ENV["KEYCHAIN_PASSWORD"],
+                development: false,
+                force: false
+              )
+              
               # Get or create provisioning profile
               sigh(
                 app_identifier: ENV["BUNDLE_ID"],
