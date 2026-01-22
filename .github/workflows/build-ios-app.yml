@@ -64,6 +64,27 @@ jobs:
           
           echo "Entitlements cleaned up"
       
+      - name: Remove Firebase SPM Dependencies (not needed, incompatible with Xcode 15.4)
+        run: |
+          cd ios-app
+          
+          # Remove Firebase-related SPM package references from project.pbxproj
+          # These packages use Swift 6 features that are incompatible with Xcode 15.4
+          # Firebase is disabled in our config anyway
+          
+          PROJECT_FILE="OpenEdX.xcodeproj/project.pbxproj"
+          
+          # Remove analytics-swift-firebase reference and its products
+          sed -i '' '/analytics-swift-firebase/d' "$PROJECT_FILE"
+          
+          # Remove braze-segment-swift reference
+          sed -i '' '/braze-segment-swift/d' "$PROJECT_FILE"
+          
+          # Remove Segment analytics-swift reference
+          sed -i '' '/analytics-swift/d' "$PROJECT_FILE"
+          
+          echo "Firebase SPM dependencies removed"
+      
       
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
