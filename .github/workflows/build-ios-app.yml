@@ -227,6 +227,32 @@ jobs:
               api_key: api_key
             )
             
+            # Disable automatic signing for framework targets (they don't need signing in CI)
+            # This is the proper way to handle it per Fastlane docs
+            ["Core", "Authorization", "Course", "Dashboard", "Discovery", "Discussion", "Downloads", "Profile", "Theme", "WhatsNew"].each do |target|
+              begin
+                update_code_signing_settings(
+                  use_automatic_signing: false,
+                  path: "#{target}/#{target}.xcodeproj",
+                  team_id: ENV["APPLE_TEAM_ID"],
+                  code_sign_identity: ""
+                )
+              rescue => e
+                UI.message("Note: Could not update #{target}: #{e.message}")
+              end
+            end
+            
+            # Configure main app target for manual distribution signing
+            update_code_signing_settings(
+              use_automatic_signing: false,
+              path: "OpenEdX.xcodeproj",
+              team_id: ENV["APPLE_TEAM_ID"],
+              targets: ["OpenEdX"],
+              bundle_identifier: ENV["BUNDLE_ID"],
+              profile_name: "match AppStore #{ENV['BUNDLE_ID']}",
+              code_sign_identity: "Apple Distribution"
+            )
+            
             # Build the app using OpenEdXProd scheme with manual signing
             gym(
               workspace: "OpenEdX.xcworkspace",
@@ -234,7 +260,7 @@ jobs:
               configuration: "Release",
               export_method: "app-store",
               export_team_id: ENV["APPLE_TEAM_ID"],
-              xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']} PRODUCT_BUNDLE_IDENTIFIER=#{ENV['BUNDLE_ID']}",
+              xcargs: "-skipPackagePluginValidation -skipMacroValidation CONFIG_DIRECTORY=mereka DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
               output_directory: "./build",
               output_name: "MerekaAcademy.ipa",
               clean: true,
