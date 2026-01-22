@@ -1,0 +1,7 @@
+{
+  "enabledPlugins": [
+    "github:Biji-Biji-Initiative/team-skills/plugins/core",
+    "github:Biji-Biji-Initiative/team-skills/plugins/web",
+    "github:Biji-Biji-Initiative/team-skills/plugins/backend"
+  ]
+}

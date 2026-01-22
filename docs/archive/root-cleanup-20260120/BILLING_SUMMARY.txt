@@ -1,0 +1,221 @@
+================================================================================
+         MEREKA-LMS GCP BILLING ANALYSIS - QUICK REFERENCE
+================================================================================
+Generated: 2025-11-20
+Period: November 6-20, 2025 (14 days since first deployment)
+
+PROJECT INFORMATION
+--------------------------------------------------------------------------------
+Project ID:              mereka-lms
+Billing Account:         01A879-A82798-7962E2 (Mereka)
+Region:                  asia-southeast1 (Singapore)
+Project Created:         November 6, 2025
+First Resource Deployed: November 6, 2025 02:18 UTC (Cloud SQL)
+
+CURRENT INFRASTRUCTURE (After Optimization)
+--------------------------------------------------------------------------------
+Compute:
+  • GKE Autopilot Cluster (6 nodes, e2-standard-8)
+  • CPU Utilization: 6-7% | Memory: 9%
+  • Status: Over-provisioned for current workload
+
+Databases:
+  • Cloud SQL MySQL: db-f1-micro (0.6GB RAM, 100GB SSD)
+  • MongoDB Atlas: M0 FREE tier (external)
+  • Cloud Memorystore Redis: BASIC 1GB
+
+Storage:
+  • Persistent Disks: 38GB across 11 volumes
+  • Cloud Storage: 2 buckets (~147MB data)
+  • Artifact Registry: 5+ Docker images
+
+Network:
+  • Static IP: 34.142.147.42 (NAT gateway)
+  • Services: 42 GCP APIs enabled
+
+MONTHLY COST ESTIMATE (Current Configuration)
+--------------------------------------------------------------------------------
+Component                          Monthly Cost (USD)
+--------------------------------------------------------------------------------
+GKE Autopilot (6 nodes)            $400 - $550     (69-89%)
+Cloud Memorystore Redis            $19             (3-4%)
+Network Egress                     $10 - $30       (2-5%)
+Persistent Disks (38GB)            $6              (1%)
+Cloud SQL MySQL (db-f1-micro)      $4              (<1%)
+Static IP                          $3              (<1%)
+Artifact Registry                  $2 - $5         (<1%)
+Cloud Storage                      <$1             (<1%)
+MongoDB Atlas (M0)                 $0 (FREE)       (0%)
+--------------------------------------------------------------------------------
+TOTAL MONTHLY COST:                $444 - $618
+--------------------------------------------------------------------------------
+
+14-DAY COST ESTIMATE (Nov 6-20)
+--------------------------------------------------------------------------------
+Phase 1 (Nov 6-12):  $220-260  (6 days, pre-optimization)
+Phase 2 (Nov 12-20): $118-164  (8 days, post-optimization)
+--------------------------------------------------------------------------------
+TOTAL 14-DAY COST:   $338-424
+--------------------------------------------------------------------------------
+
+COST OPTIMIZATION HISTORY
+--------------------------------------------------------------------------------
+Date: November 12, 2025
+
+Optimization                Before           After          Savings/Month
+--------------------------------------------------------------------------------
+Cloud SQL Tier              db-custom-2-7680 db-f1-micro    $221
+                            (2 vCPU, 7.5GB)  (shared, 0.6GB)
+
+Redis Instance              STANDARD_HA 2GB  BASIC 1GB      $60
+
+MongoDB Atlas               M10 cluster      M0 FREE tier   $87
+
+GKE Node Count              9 nodes          6 nodes        $200-400
+
+Cloud SQL Backups           7 days           3 days         $5
+
+Non-Essential Services      Running          Scaled to 0    $50-100
+--------------------------------------------------------------------------------
+TOTAL SAVINGS:                                              $573-823/month
+COST REDUCTION:                                             67-73%
+--------------------------------------------------------------------------------
+
+BUDGET STATUS
+--------------------------------------------------------------------------------
+Configured Budget:          MYR 400 (~$92/month)
+Actual Monthly Cost:        $444-618 (MYR 1,932-2,688)
+Status:                     ⚠️ OVER BUDGET (482-671% of budget)
+
+Budget Alerts:
+  • 62.5% threshold (MYR 250): Email to techadmin@biji-biji.com, team@mereka.io
+  • 100% threshold (MYR 400):  Email to techadmin@biji-biji.com, team@mereka.io
+
+Recommendation:             Increase budget to MYR 2,000-2,500 ($460-575)
+                            OR implement additional optimizations
+
+TOP 5 COST DRIVERS (Optimized)
+--------------------------------------------------------------------------------
+Rank  Service                     Cost/Month    % of Total   Optimization
+--------------------------------------------------------------------------------
+1     GKE Autopilot               $400-550      69-89%       High potential
+2     Network Egress              $10-30        2-5%         Minimal
+3     Cloud Memorystore Redis     $19           3-4%         Already optimal
+4     Persistent Disks            $6            1%           Low potential
+5     Cloud SQL MySQL             $4            <1%          Already minimal
+--------------------------------------------------------------------------------
+
+COST TREND ANALYSIS
+--------------------------------------------------------------------------------
+Nov 6-12:   HIGH COST PHASE     $1,100-1,300/month (initial deployment)
+Nov 12:     OPTIMIZATION EVENT  73% cost reduction implemented
+Nov 12-20:  LOW COST PHASE      $444-618/month (development optimized)
+
+Current Trend:              STABLE (optimized for development)
+Future Projection:          INCREASE for production (see below)
+
+PRODUCTION SCALING COST ESTIMATE
+--------------------------------------------------------------------------------
+When scaling for production, estimated costs will increase to:
+
+Component                   Development      Production      Increase
+--------------------------------------------------------------------------------
+Cloud SQL MySQL             $4               $225+           +$221
+Redis                       $19              $79+            +$60
+MongoDB Atlas               $0               $87+            +$87
+GKE Autopilot               $400-550         $1,000-1,500    +$600-950
+Backups & Monitoring        $5-10            $50-100         +$45-90
+--------------------------------------------------------------------------------
+TOTAL:                      $444-618         $1,500-2,500    +$1,056-1,882
+--------------------------------------------------------------------------------
+
+RECOMMENDED ACTIONS
+--------------------------------------------------------------------------------
+Immediate (Further Cost Reduction):
+  ☐ Review and reduce GKE pod resource requests (potential: $100-200/month)
+  ☐ Pause Aspects Analytics when not in use (potential: $50-100/month)
+  ☐ Review and remove unused persistent volumes (potential: $5-10/month)
+  ☐ Update budget to realistic amount (MYR 2,000-2,500)
+
+Before Production:
+  ☐ Scale up Cloud SQL to db-custom-2-7680 or higher
+  ☐ Scale up Redis to STANDARD_HA 2GB minimum
+  ☐ Upgrade MongoDB from M0 to M10 or M30
+  ☐ Enable comprehensive backups (7+ days retention)
+  ☐ Configure GKE auto-scaling for high availability
+  ☐ Set up SLO monitoring and alerting
+  ☐ Perform load testing to verify capacity
+
+Monitoring:
+  ☐ Enable BigQuery billing export for detailed analysis
+  ☐ Set up weekly billing review process
+  ☐ Configure cost anomaly alerts
+  ☐ Tag resources for cost allocation
+
+ACCESSING DETAILED BILLING DATA
+--------------------------------------------------------------------------------
+GCP Console (Recommended):
+  1. Navigate to: https://console.cloud.google.com/billing
+  2. Select: 01A879-A82798-7962E2 (Mereka)
+  3. Click: Reports tab
+  4. Filter: Project = mereka-lms, Time = November 2025
+
+Users with Billing Access:
+  • finance@mereka.my (billing.admin)
+  • eugene@mereka.my (billing.admin)
+  • gurpreet@biji-biji.com (billing.admin)
+  • hira@mereka.io (billing.admin)
+  • karzhing@biji-biji.com (billing.admin)
+  • techadmin@biji-biji.com (billing.admin)
+
+CLI Commands:
+  # List billing accounts
+  gcloud billing accounts list
+
+  # Get project billing info
+  gcloud billing projects describe mereka-lms
+
+  # Note: Detailed cost queries require BigQuery export
+  # Current status: No BigQuery billing export configured
+
+RESOURCE FILES
+--------------------------------------------------------------------------------
+Detailed Analysis:          GCP_BILLING_ANALYSIS.md (this directory)
+Cost Estimate:              docs/COST_ESTIMATE.md
+Cost Optimization:          docs/COST_OPTIMIZATION.md
+GCP Roadmap:                docs/operations/GCP_ROADMAP.md
+Terraform Budgets:          infrastructure/terraform/budgets.tf
+Optimization Scripts:       scripts/infra/optimize-dev-costs.sh
+
+DEPLOYMENT TIMELINE (Key Events)
+--------------------------------------------------------------------------------
+2025-11-06 01:27  Project creation (mereka-lms)
+2025-11-06 02:18  Cloud SQL MySQL deployed (db-custom-2-7680)
+2025-11-06 02:28  GKE Autopilot cluster created
+2025-11-06 10:18  Artifact Registry setup (OpenEdX images)
+2025-11-08 12:12  Budget enforcement applied (MYR 400)
+2025-11-12 01:34  Major optimization: SQL downgrade, Redis recreate
+2025-11-12       MongoDB migrated from M10 to M0 FREE tier
+2025-11-20       Billing analysis generated (this report)
+
+NOTES
+--------------------------------------------------------------------------------
+• All costs are USD estimates based on GCP pricing as of November 2025
+• Actual costs can only be verified through GCP Billing Console
+• Current configuration is optimized for DEVELOPMENT only
+• NOT suitable for production workloads
+• Budget (MYR 400 / $92) is significantly under actual costs
+• BigQuery billing export NOT configured (limits detailed analysis)
+• MongoDB M0 FREE tier has 512MB limit and no automated backups
+
+IMPORTANT WARNINGS
+--------------------------------------------------------------------------------
+⚠️ OVER BUDGET: Actual costs ($444-618) exceed budget ($92) by 482-671%
+⚠️ DEVELOPMENT ONLY: Current config not suitable for production
+⚠️ NO BILLING EXPORT: Cannot query detailed historical costs
+⚠️ LOW UTILIZATION: GKE at 6-7% CPU suggests over-provisioning
+⚠️ M0 LIMITATIONS: MongoDB free tier has no backups, 512MB limit
+
+================================================================================
+For the complete detailed analysis, see: GCP_BILLING_ANALYSIS.md
+================================================================================
