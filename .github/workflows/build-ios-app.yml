@@ -143,6 +143,29 @@ jobs:
             stage: "config.yaml"
             dev: "config.yaml"
           EOF
+          
+          # Create minimal ios.yaml with Firebase config (disabled, but script needs the file)
+          # This prevents the FirebaseCrashlytics build phase from failing
+          cat > ios-app/default_config/mereka/ios.yaml << 'EOF'
+          FIREBASE:
+            ENABLED: false
+            API_KEY: "placeholder"
+            BUNDLE_ID: "com.mereka.academy.mobile"
+            CLIENT_ID: "placeholder"
+            GOOGLE_APP_ID: "1:000000000000:ios:0000000000000000"
+            GCM_SENDER_ID: "000000000000"
+            PROJECT_ID: "placeholder"
+            REVERSED_CLIENT_ID: "placeholder"
+            ANALYTICS_SOURCE: "none"
+          EOF
+          
+          # Create mappings.yaml to point to our config files
+          cat > ios-app/default_config/mereka/mappings.yaml << 'EOF'
+          ios:
+            files:
+              - ios.yaml
+              - config.yaml
+          EOF
       
       - name: Configure Project with Whitelabel Script
         env:
