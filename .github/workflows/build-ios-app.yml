@@ -318,15 +318,24 @@ jobs:
           echo "=== Configuring main app for manual signing ==="
           main_proj="OpenEdX.xcodeproj/project.pbxproj"
           if [ -f "$main_proj" ]; then
-            # Set manual signing for main app
-            sed -i '' "s/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g" "$main_proj"
+            # Set ALL CODE_SIGN_STYLE to Manual
+            sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$main_proj"
             
-            # Set the provisioning profile specifier for the main app
-            sed -i '' "s/PROVISIONING_PROFILE_SPECIFIER = \"\";/PROVISIONING_PROFILE_SPECIFIER = \"match AppStore ${BUNDLE_ID}\";/g" "$main_proj"
+            # Set ALL PROVISIONING_PROFILE_SPECIFIER to match profile (replace any value)
+            sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "[^"]*";/PROVISIONING_PROFILE_SPECIFIER = "match AppStore '"${BUNDLE_ID}"'";/g' "$main_proj"
             
-            # Set CODE_SIGN_IDENTITY for distribution
-            sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
-            sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            # Set ALL CODE_SIGN_IDENTITY to Apple Distribution
+            sed -i '' 's/CODE_SIGN_IDENTITY = "[^"]*";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            
+            # Verify the changes
+            echo "Checking CODE_SIGN_STYLE values:"
+            grep "CODE_SIGN_STYLE" "$main_proj" | head -5
+            echo ""
+            echo "Checking PROVISIONING_PROFILE_SPECIFIER values:"
+            grep "PROVISIONING_PROFILE_SPECIFIER" "$main_proj" | head -5
+            echo ""
+            echo "Checking CODE_SIGN_IDENTITY values:"
+            grep "CODE_SIGN_IDENTITY" "$main_proj" | head -5
             
             echo "  ✓ Main app configured for manual signing"
           fi
