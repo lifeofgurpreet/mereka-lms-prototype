@@ -443,6 +443,39 @@ jobs:
                 keychain_password: "fastlane_tmp_keychain"
               )
               
+              # DEBUG: Dump profile entitlements to verify capabilities are present
+              UI.message("=== Debugging: Checking installed profile entitlements ===")
+              sh <<~BASH
+                echo "=== Searching for installed provisioning profiles ==="
+                for dir in "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" "$HOME/Library/MobileDevice/Provisioning Profiles"; do
+                  if [ -d "$dir" ]; then
+                    echo "Checking: $dir"
+                    for p in "$dir"/*.mobileprovision; do
+                      [ -f "$p" ] || continue
+                      security cms -D -i "$p" > /tmp/profile.plist 2>/dev/null || continue
+                      BID=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" /tmp/profile.plist 2>/dev/null || true)
+                      if echo "$BID" | grep -q "com.mereka.academy.mobile"; then
+                        echo ""
+                        echo "=== FOUND PROFILE FOR com.mereka.academy.mobile ==="
+                        echo "File: $p"
+                        echo ""
+                        echo "=== Profile Entitlements ==="
+                        /usr/libexec/PlistBuddy -c "Print :Entitlements" /tmp/profile.plist 2>/dev/null || true
+                        echo ""
+                        echo "=== Checking for specific capabilities ==="
+                        echo -n "aps-environment (Push): "
+                        /usr/libexec/PlistBuddy -c "Print :Entitlements:aps-environment" /tmp/profile.plist 2>/dev/null || echo "NOT FOUND"
+                        echo -n "associated-domains: "
+                        /usr/libexec/PlistBuddy -c "Print :Entitlements:com.apple.developer.associated-domains" /tmp/profile.plist 2>/dev/null || echo "NOT FOUND"
+                        echo -n "sign-in-with-apple: "
+                        /usr/libexec/PlistBuddy -c "Print :Entitlements:com.apple.developer.applesignin" /tmp/profile.plist 2>/dev/null || echo "NOT FOUND"
+                      fi
+                    done
+                  fi
+                done
+                echo "=== Profile debug complete ==="
+              BASH
+              
               # Build the app
               # Note: xcargs apply to BOTH archive AND export steps
               # - Archive needs: CODE_SIGN_STYLE, CODE_SIGN_IDENTITY, PROVISIONING_PROFILE_SPECIFIER for main app
