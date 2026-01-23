@@ -1,21 +1,33 @@
 # iOS CI/CD Specification - Mereka Academy
 
-> **Status**: In Progress  
-> **Last Updated**: 2026-01-22  
+> **Status**: COMPLETE (Successfully deployed to TestFlight)  
+> **Last Updated**: 2026-01-23  
 > **App**: Mereka Academy (OpenEdX iOS fork)  
-> **Bundle ID**: `com.mereka.academy.mobile`
+> **Bundle ID**: `com.mereka.academy.mobile`  
+> **First Successful Build**: Run #21274409453
 
-## Overview
+---
 
-This document specifies the correct approach for building and deploying the Mereka Academy iOS app to TestFlight, based on learnings from multiple failed attempts and expert guidance.
+## Quick Reference
+
+| Item | Value |
+|------|-------|
+| **Workflow** | `.github/workflows/build-ios-app.yml` |
+| **Certificates Repo** | `git@github.com:Biji-Biji-Initiative/ios-certificates.git` |
+| **Scheme** | `OpenEdXProd` |
+| **Team ID** | Stored in `APPLE_TEAM_ID` secret |
+| **Xcode Version** | 16.4 (Swift 6) |
+| **Fastlane** | Via `bundle exec fastlane` |
 
 ---
 
 ## Non-Negotiables
 
-1. **Latest OpenEdX iOS** - Use upstream release tags; don't downgrade
-2. **All Features** - Do NOT delete Firebase/push/entitlements/etc. to make builds pass
-3. **Stable Signing System** - Must not break other apps under the same Apple Developer team
+1. **Latest OpenEdX iOS** - Use upstream release tags; never downgrade
+2. **All Features Intact** - NEVER delete Firebase/push/entitlements to make builds pass
+3. **Stable Signing System** - Must not break other apps under same Apple Developer team
+4. **Manual Capability Management** - Capabilities enabled in Apple Portal, not via Fastlane automation
+5. **Framework Targets Skip Signing** - Frameworks are signed when embedded, not individually
 
 ---
 
@@ -23,69 +35,85 @@ This document specifies the correct approach for building and deploying the Mere
 
 ### 1. Swift Toolchain Mismatch
 
-**Problem**: OpenEdX iOS v2.2 (Ulmo.1) migrated to Swift 6. Mixing Xcode 15.x/Swift 5.x with Swift 6 packages causes:
-- "resolve package dependencies" failures
-- Compiler errors ("unexpected ',' separator" - trailing comma syntax)
-- Build setting drift
+**Problem**: OpenEdX iOS v2.2+ uses Swift 6. Mixing Xcode 15.x with Swift 6 packages causes compiler errors.
 
-**Previous Mistakes**:
-- Bouncing between Xcode versions (15.4, 16.1, 16.2)
-- Downgrading OpenEdX to older versions
-- Trying to patch Swift versions with sed
+**Solution**: Always use Xcode 16+ via `xcodes` Fastlane plugin.
 
-**Correct Approach**: Use Xcode 16+ consistently with latest OpenEdX iOS
+### 2. Global Signing Overrides via xcargs (CRITICAL)
 
-### 2. Code Signing State Management
+**Problem**: Setting `CODE_SIGN_IDENTITY` / `PROVISIONING_PROFILE_SPECIFIER` in `xcargs` applies to **ALL targets** including SPM packages, CocoaPods, and framework targets. These targets don't need (and can't use) provisioning profiles.
 
-**Problem**: Apple code signing is stateful. The private key is generated on the machine that creates the cert. If CI creates a cert and the runner disappears, you have a certificate you can never use again.
+**Symptoms**:
+- `Dashboard.framework does not support provisioning profiles`
+- `No signing certificate "iOS Development" found in target 'Profile'`
+- Random framework targets failing to sign
 
-**Previous Mistakes**:
-- Using `fastlane cert/sigh` to create certs on ephemeral runners
-- Hit Apple's 3-distribution-cert limit
-- Created duplicate certificates
+**Solution**:
+- **NEVER** put signing-related flags in `xcargs`
+- Use `export_options` for main app signing only
+- Set framework targets to `CODE_SIGNING_ALLOWED = NO` in project files
 
-**Correct Approach**: Use `fastlane match` with:
-- Private git repo for cert storage
-- `readonly: true` in CI (never create certs automatically)
-- Manual "signing maintenance" lane for cert rotation (human-triggered only)
+### 3. Fastlane Appfile Auto-Detection
 
-### 3. Global Signing Overrides
+**Problem**: OpenEdX's `fastlane/Appfile` contains `org.openedx.app` which overrides our bundle ID during `upload_to_testflight`.
 
-**Problem**: Setting `CODE_SIGN_IDENTITY` / profile specifiers globally via `xcargs` applies to everything in the build graph (framework targets, packages), causing cascading signing failures.
+**Symptoms**:
+- `No suitable application records were found. Verify your bundle identifier "org.openedx.app"`
 
-**Previous Mistakes**:
-- Using `xcargs` with `CODE_SIGN_IDENTITY='Apple Distribution'`
-- Using `xcargs` with `PRODUCT_BUNDLE_IDENTIFIER`
-- Trying to brute-force signing from command line
+**Solution**: Override `Appfile` in CI before running Fastlane:
+```bash
+cat > fastlane/Appfile <<EOF
+app_identifier(ENV["BUNDLE_ID"])
+EOF
+```
 
-**Correct Approach**: 
-- Set `DEVELOPMENT_TEAM` in project settings (committed to git)
-- Use `export_options` for signing configuration
-- Let Xcode + export options sign the final product
+### 4. Capabilities Mismatch (Manual Portal Action Required)
 
-### 4. Capabilities Mismatch
+**Problem**: If the app's entitlements include Push Notifications / Associated Domains / Sign in with Apple, but the App ID doesn't have those capabilities enabled, signing fails.
 
-**Problem**: If the app's entitlements include Push Notifications / Associated Domains but the App ID / provisioning profile doesn't have those capabilities enabled, signing/export fails.
+**Symptoms**:
+- `Provisioning profile "match AppStore com.mereka.academy.mobile" doesn't support the Associated Domains and Push Notifications capability`
 
-**Previous Mistakes**:
-- Removing entitlements to make builds pass
-- Removing Firebase/analytics SPM dependencies
-- Using sed to delete capabilities from pbxproj
+**CRITICAL**: `fastlane produce` CANNOT enable capabilities via API Key - it requires username/password which is not CI-compatible.
 
-**Correct Approach**:
-- Enable required capabilities in Apple Developer Portal
-- Regenerate profiles via match after enabling capabilities
-- Keep all features intact
+**Solution**: 
+1. Manually enable capabilities in Apple Developer Portal
+2. Run `fastlane match` with `force: true` to regenerate profiles
 
-### 5. Automatic Signing in CI
+### 5. Build Number Collisions
 
-**Problem**: "Automatic signing" requires Xcode to have an Apple ID logged in interactively. GitHub runners can't do this.
+**Problem**: Fixed build numbers cause TestFlight rejection on re-uploads.
 
-**Previous Mistakes**:
-- Trying to use automatic signing with `-allowProvisioningUpdates`
-- Getting "No Accounts" errors
+**Solution**: Use `GITHUB_RUN_NUMBER` as `current_project_version`:
+```yaml
+current_project_version: '${GITHUB_RUN_NUMBER}'
+```
 
-**Correct Approach**: Manual signing with match
+### 6. whitelabel.py Argument Format
+
+**Problem**: OpenEdX's `whitelabel.py` changed its CLI interface, breaking `--config-path`.
+
+**Solution**: Try multiple formats with fallback:
+```bash
+python whitelabel.py whitelabel_config.yaml || \
+python whitelabel.py --config whitelabel_config.yaml || \
+python whitelabel.py --config-file whitelabel_config.yaml
+```
+
+### 7. xcconfig Files Override project.pbxproj
+
+**Problem**: OpenEdX uses `.xcconfig` files that override `PRODUCT_BUNDLE_IDENTIFIER` set in `project.pbxproj`.
+
+**Solution**: Patch BOTH xcconfig files AND project.pbxproj:
+```bash
+# Patch xcconfig files
+for xcconfig in $(find . -name "*.xcconfig" -type f); do
+  sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = ${BUNDLE_ID}/g" "$xcconfig"
+done
+
+# Patch Info.plist if hardcoded
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${BUNDLE_ID}" OpenEdX/Info.plist
+```
 
 ---
 
@@ -93,15 +121,17 @@ This document specifies the correct approach for building and deploying the Mere
 
 ### Signing Repository
 
-- **Location**: `git@github.com:Biji-Biji-Initiative/ios-certificates.git`
-- **Purpose**: Store encrypted certificates and provisioning profiles
-- **Access**: SSH deploy key stored in GitHub Secrets
+| Property | Value |
+|----------|-------|
+| **Location** | `git@github.com:Biji-Biji-Initiative/ios-certificates.git` |
+| **Purpose** | Store encrypted certificates and provisioning profiles |
+| **Access** | SSH deploy key in `MATCH_DEPLOY_KEY` secret |
 
 ### GitHub Secrets Required
 
 | Secret | Description |
 |--------|-------------|
-| `MATCH_DEPLOY_KEY` | SSH private key for accessing certificates repo |
+| `MATCH_DEPLOY_KEY` | SSH private key for certificates repo |
 | `MATCH_PASSWORD` | Encryption password for match |
 | `APPLE_TEAM_ID` | Apple Developer Team ID |
 | `APP_STORE_CONNECT_API_KEY_ID` | App Store Connect API Key ID |
@@ -113,192 +143,182 @@ This document specifies the correct approach for building and deploying the Mere
 | Component | Requirement |
 |-----------|-------------|
 | Runner | `macos-latest` |
-| Xcode | 16+ (via `xcodes` plugin in Fastfile) |
+| Xcode | 16.4 (via `xcodes` plugin) |
 | Ruby | Via bundler with OpenEdX's Gemfile |
-| Fastlane | Via `bundle exec fastlane` |
+| Fastlane | `>= 2.230.0` (fixes UNIVERSAL filter bug) |
 
 ---
 
-## Correct Fastlane Setup
+## Framework Signing Configuration
 
-### Fastfile Template
+**CRITICAL**: Framework targets must NOT be signed individually. They get signed when embedded in the main app.
 
-```ruby
-default_platform(:ios)
+### Required Settings for Each Framework
 
-require "base64"
-
-platform :ios do
-  # API Key helper
-  private_lane :asc_api_key do
-    key_content = Base64.decode64(ENV.fetch("ASC_KEY_P8_BASE64"))
-    app_store_connect_api_key(
-      key_id: ENV.fetch("ASC_KEY_ID"),
-      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
-      key_content: key_content,
-      in_house: false
-    )
-  end
-
-  # Human-triggered only - for cert maintenance
-  lane :signing_maint do
-    api_key = asc_api_key
-
-    match(
-      type: "appstore",
-      api_key: api_key,
-      readonly: false,  # Can create/update certs
-      app_identifier: [ENV.fetch("BUNDLE_ID")],
-      git_url: ENV.fetch("MATCH_GIT_URL")
-    )
-  end
-
-  # CI lane - readonly, safe
-  lane :ci_testflight do
-    setup_ci  # Creates temp keychain, sets match to readonly
-
-    api_key = asc_api_key
-
-    match(
-      type: "appstore",
-      api_key: api_key,
-      readonly: true,  # NEVER create certs in CI
-      app_identifier: [ENV.fetch("BUNDLE_ID")],
-      git_url: ENV.fetch("MATCH_GIT_URL")
-    )
-
-    build_app(
-      workspace: "OpenEdX.xcworkspace",
-      scheme: "OpenEdXProd",
-      export_method: "app-store",
-      export_options: {
-        signingStyle: "manual",
-        teamID: ENV.fetch("TEAM_ID"),
-        provisioningProfiles: {
-          ENV.fetch("BUNDLE_ID") => "match AppStore #{ENV.fetch("BUNDLE_ID")}"
-        }
-      },
-      xcargs: "DEVELOPMENT_TEAM=#{ENV.fetch("TEAM_ID")}"
-    )
-
-    upload_to_testflight(api_key: api_key)
-  end
-end
+```bash
+CODE_SIGN_STYLE = Manual;
+CODE_SIGN_IDENTITY = "-";           # "-" means "don't sign"
+CODE_SIGNING_REQUIRED = NO;
+CODE_SIGNING_ALLOWED = NO;
+PROVISIONING_PROFILE_SPECIFIER = "";
 ```
+
+### Frameworks to Configure
+
+- WhatsNew
+- Dashboard
+- Course
+- Profile
+- Discovery
+- Discussion
+- Core
+- Theme
+- Authorization
+- Downloads
+
+### Main App Settings
+
+```bash
+CODE_SIGN_STYLE = Manual;
+CODE_SIGN_IDENTITY = "Apple Distribution";
+PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.mereka.academy.mobile";
+DEVELOPMENT_TEAM = <YOUR_TEAM_ID>;
+```
+
+---
+
+## Correct Fastlane Configuration
 
 ### Key Points
 
-1. **`setup_ci`** - Creates temp keychain and sets match to readonly mode automatically
-2. **`readonly: true`** - CI can NEVER create certificates
-3. **`export_options`** - Signing configuration goes here, not in xcargs
-4. **`xcargs`** - Only contains `DEVELOPMENT_TEAM`, nothing else
+1. **NO `setup_ci`** - We create our own keychain (setup_ci can conflict)
+2. **`readonly: false` + `force: true`** - Allow profile regeneration after capability changes
+3. **`export_options` only** - All signing config goes here, NOT in xcargs
+4. **Minimal `xcargs`** - Only `-skipPackagePluginValidation`, `-skipMacroValidation`, `CONFIG_DIRECTORY`
 
----
+### Working build_app Configuration
 
-## Guardrails (Prevent Future Issues)
-
-### DO NOT
-
-- ❌ Downgrade OpenEdX to older versions
-- ❌ Create certs in CI (use `readonly: true`)
-- ❌ Delete entitlements to make builds pass
-- ❌ Edit pbxproj files with sed/regex
-- ❌ Use global signing overrides in xcargs
-- ❌ Use `fastlane cert/sigh` directly in CI
-
-### DO
-
-- ✅ Use latest OpenEdX iOS release tags
-- ✅ Use Xcode 16+ (Swift 6) consistently
-- ✅ Use `setup_ci` + `match(readonly: true)` in CI
-- ✅ Enable capabilities in Apple Developer Portal first
-- ✅ Use `bundle exec fastlane` (not raw fastlane)
-- ✅ Keep signing configuration in export_options
+```ruby
+build_app(
+  workspace: "OpenEdX.xcworkspace",
+  scheme: "OpenEdXProd",
+  export_method: "app-store",
+  output_directory: "./build",
+  output_name: "MerekaAcademy.ipa",
+  clean: true,
+  export_options: {
+    signingStyle: "manual",
+    teamID: ENV.fetch("TEAM_ID"),
+    provisioningProfiles: {
+      ENV.fetch("BUNDLE_ID") => "match AppStore #{ENV.fetch("BUNDLE_ID")}"
+    },
+    compileBitcode: false,
+  },
+  # ONLY non-signing xcargs - DO NOT add CODE_SIGN_* here!
+  xcargs: [
+    "-skipPackagePluginValidation",
+    "-skipMacroValidation",
+    "CONFIG_DIRECTORY=mereka",
+  ].join(" ")
+)
+```
 
 ---
 
 ## Apple Developer Portal Setup
 
-### Required Capabilities for Bundle ID
+### Required Capabilities for com.mereka.academy.mobile
 
-**CRITICAL**: The build fails with "profile doesn't support capability" until these are enabled.
+**CRITICAL**: These must be enabled MANUALLY - Fastlane cannot do it via API Key.
 
-Enable these in Apple Developer → Identifiers → App IDs → `com.mereka.academy.mobile`:
+Go to: https://developer.apple.com/account/resources/identifiers/list
 
-- [ ] **Push Notifications** (REQUIRED - app has entitlement)
-- [ ] **Associated Domains** (REQUIRED - app has entitlement)
-- [ ] Sign In with Apple
-- [ ] (Any other capabilities in .entitlements files)
+| Capability | Status | Notes |
+|------------|--------|-------|
+| Push Notifications | ENABLED | Required by app entitlements |
+| Associated Domains | ENABLED | Required for deep linking |
+| Sign In with Apple | ENABLED | Required for Apple auth |
 
-### Steps to Enable Capabilities
+### After Enabling Capabilities
 
-1. Go to https://developer.apple.com/account/resources/identifiers/list
-2. Find `com.mereka.academy.mobile` (or create if it doesn't exist)
-3. Click Edit
-4. Enable "Push Notifications"
-5. Enable "Associated Domains"
-6. Save
+1. Run CI workflow - `match` with `force: true` will regenerate the profile
+2. Or manually: `bundle exec fastlane match appstore --force`
 
-### After Enabling Capabilities - Regenerate Profile
+---
 
-After enabling capabilities, the provisioning profile must be regenerated.
+## Guardrails (Prevent Future Issues)
 
-**Option 1**: Delete and recreate via match (recommended)
-```bash
-# Clone the ios-certificates repo
-git clone git@github.com:Biji-Biji-Initiative/ios-certificates.git
-cd ios-certificates
+### NEVER DO
 
-# Delete the old profile
-rm -rf profiles/appstore/AppStore_com.mereka.academy.mobile.mobileprovision
+| Action | Consequence |
+|--------|-------------|
+| ❌ Put signing flags in `xcargs` | Breaks framework targets |
+| ❌ Use `fastlane produce` for capabilities | Requires username/password, not API Key |
+| ❌ Delete entitlements to make builds pass | Breaks features in production |
+| ❌ Downgrade OpenEdX version | Swift version mismatches |
+| ❌ Use `sed` to randomly edit pbxproj | State corruption |
+| ❌ Skip overriding `Appfile` | Uses wrong bundle ID |
 
-# Commit and push
-git add -A && git commit -m "Remove old profile for capability update" && git push
-```
+### ALWAYS DO
 
-Then trigger the CI workflow - match will create a new profile with the capabilities.
-
-**Option 2**: Run match manually with force
-```bash
-cd ios-app
-BUNDLE_ID=com.mereka.academy.mobile \
-TEAM_ID=YOUR_TEAM_ID \
-ASC_KEY_ID=YOUR_KEY_ID \
-ASC_ISSUER_ID=YOUR_ISSUER_ID \
-ASC_KEY_P8_BASE64=$(base64 < path/to/AuthKey.p8) \
-MATCH_PASSWORD=your_match_password \
-bundle exec fastlane match appstore --force
-```
-
-### Current Status
-
-- **Build Status**: Failing at signing (profile missing capabilities)
-- **Blocking Issue**: Push Notifications and Associated Domains not enabled on App ID
-- **Action Required**: User must enable capabilities in Apple Developer Portal
+| Action | Reason |
+|--------|--------|
+| ✅ Override `fastlane/Appfile` in CI | Prevents org.openedx.app bundle ID |
+| ✅ Disable signing for framework targets | They don't support provisioning profiles |
+| ✅ Use `export_options` for signing | Only affects main app |
+| ✅ Enable capabilities in Portal manually | Fastlane can't do it with API Keys |
+| ✅ Use `GITHUB_RUN_NUMBER` for build number | Prevents TestFlight collisions |
+| ✅ Patch xcconfig files AND pbxproj | xcconfig overrides pbxproj |
 
 ---
 
 ## Troubleshooting
 
-### "No signing certificate found"
+### "Framework does not support provisioning profiles"
 
-**Cause**: Framework targets configured for automatic signing with development certs
-**Fix**: Use `update_code_signing_settings` in Fastlane to disable signing for framework targets (they don't need to be signed for app store builds)
+**Cause**: Signing `xcargs` leaking to framework targets  
+**Fix**: Remove all signing flags from `xcargs`, use `export_options` only
 
-### "Profile doesn't include X capability"
+### "No suitable application records found - org.openedx.app"
 
-**Cause**: App ID doesn't have the capability enabled
-**Fix**: Enable in Apple Developer Portal, then run `fastlane signing_maint`
+**Cause**: `fastlane/Appfile` not overridden  
+**Fix**: Override Appfile before running Fastlane
 
-### "unexpected ',' separator"
+### "Profile doesn't support capability X"
 
-**Cause**: Swift version mismatch (code uses Swift 5.3+ syntax but target set to Swift 5.0)
-**Fix**: Use Xcode 16+ which properly handles Swift 6 via `xcodes` plugin
+**Cause**: Capability not enabled on App ID  
+**Fix**: Enable manually in Apple Developer Portal, run match with `force: true`
 
-### "The specified item could not be found in the keychain"
+### "No signing certificate found" for framework target
 
-**Cause**: Certificate not properly installed or keychain not unlocked
-**Fix**: Use `setup_ci` which handles keychain setup automatically
+**Cause**: Framework configured for development signing  
+**Fix**: Set `CODE_SIGNING_ALLOWED = NO` for all framework targets
+
+### Build number collision
+
+**Cause**: Fixed `current_project_version`  
+**Fix**: Use `${GITHUB_RUN_NUMBER}` as build number
+
+### whitelabel.py argument error
+
+**Cause**: CLI interface changed  
+**Fix**: Try positional arg, `--config`, then `--config-file`
+
+---
+
+## Signing Inventory
+
+### Current Apps
+
+| App | Bundle ID | Team | Profile Type | Capabilities |
+|-----|-----------|------|--------------|--------------|
+| Mereka Academy | com.mereka.academy.mobile | BBI | AppStore | Push, Domains, Apple Sign-In |
+
+### Certificates in ios-certificates Repo
+
+| Type | Name | Expiry |
+|------|------|--------|
+| Distribution | Apple Distribution (BBI) | 2027-01-22 |
 
 ---
 
@@ -306,5 +326,5 @@ bundle exec fastlane match appstore --force
 
 - [OpenEdX iOS Releases](https://github.com/openedx/openedx-app-ios/releases)
 - [Fastlane Match Documentation](https://docs.fastlane.tools/actions/match/)
-- [Fastlane setup_ci Documentation](https://docs.fastlane.tools/actions/setup_ci/)
-- [Apple Certificate Limits](https://stackoverflow.com/questions/38194971/how-many-ios-ad-hoc-distibution-certificates-can-be-created-limit-for-certifica)
+- [Apple Code Signing Guide](https://developer.apple.com/documentation/xcode/code-signing-guide)
+- [GitHub Actions macOS Runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners)

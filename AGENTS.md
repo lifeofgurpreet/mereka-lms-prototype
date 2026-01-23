@@ -187,6 +187,57 @@ curl -I http://apps.localhost/authn/login
 
 ---
 
+## iOS CI/CD Rules (CRITICAL for AI Agents)
+
+**Spec**: `docs/ios-cicd-spec.md`  
+**Learnings**: `docs/IOS_DEPLOYMENT_LEARNINGS.md`  
+**Workflow**: `.github/workflows/build-ios-app.yml`
+
+### Non-Negotiables
+
+| Rule | Reason |
+|------|--------|
+| NEVER put signing flags in `xcargs` | Breaks framework targets |
+| NEVER use `fastlane produce` for capabilities | Requires username/password, not API Key |
+| NEVER delete entitlements to make builds pass | Breaks features in production |
+| NEVER use fixed build numbers | TestFlight rejects duplicates |
+| ALWAYS override `fastlane/Appfile` in CI | Prevents org.openedx.app bundle ID |
+| ALWAYS disable signing for framework targets | Frameworks don't use provisioning profiles |
+
+### Quick Fixes
+
+| Error | Solution |
+|-------|----------|
+| `Framework.framework does not support provisioning profiles` | Remove signing from xcargs, use export_options only |
+| `No suitable application records - org.openedx.app` | Override Appfile: `cat > fastlane/Appfile <<< 'app_identifier(ENV["BUNDLE_ID"])'` |
+| `Profile doesn't support capability X` | Enable manually in Apple Portal, NOT via Fastlane |
+| `No signing certificate for target 'Profile'` | Set `CODE_SIGNING_ALLOWED = NO` for framework targets |
+
+### Correct build_app Configuration
+
+```ruby
+build_app(
+  export_options: {
+    signingStyle: "manual",
+    teamID: ENV.fetch("TEAM_ID"),
+    provisioningProfiles: {
+      ENV.fetch("BUNDLE_ID") => "match AppStore #{ENV.fetch("BUNDLE_ID")}"
+    }
+  },
+  # NO signing flags in xcargs!
+  xcargs: "-skipPackagePluginValidation -skipMacroValidation"
+)
+```
+
+### Enabling New Capabilities
+
+1. Go to https://developer.apple.com/account/resources/identifiers/
+2. Find `com.mereka.academy.mobile`
+3. Enable the capability
+4. Trigger CI build (match will regenerate profile with `force: true`)
+
+---
+
 ## Skills (For AI Agents)
 
 This project uses shared skills from the team-skills repository. These skills provide reusable prompts and workflows for common tasks.
