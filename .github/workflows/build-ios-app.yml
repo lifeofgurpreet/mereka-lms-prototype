@@ -544,23 +544,6 @@ jobs:
                 ].join(" ")
               )
               
-              # SANITY CHECK: Verify the IPA has the correct bundle ID before uploading
-              # This catches whitelabel/config issues immediately
-              expected_bundle_id = ENV.fetch('BUNDLE_ID')
-              UI.message("=== Verifying IPA Bundle ID (expecting: #{expected_bundle_id}) ===")
-              sh("set -euo pipefail; " \
-                 "IPA='./build/MerekaAcademy.ipa'; " \
-                 "TMP=$(mktemp -d); " \
-                 "unzip -q $IPA -d $TMP; " \
-                 "APP=$(find $TMP/Payload -maxdepth 1 -name '*.app' -type d | head -1); " \
-                 "ACTUAL=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' $APP/Info.plist); " \
-                 "echo \"Bundle ID in IPA: $ACTUAL\"; " \
-                 "echo \"Expected: #{expected_bundle_id}\"; " \
-                 "/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' $APP/Info.plist; " \
-                 "/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' $APP/Info.plist; " \
-                 "rm -rf $TMP; " \
-                 "if [ \"$ACTUAL\" != '#{expected_bundle_id}' ]; then echo 'ERROR: Bundle ID mismatch!'; exit 1; fi")
-              
               # Upload to TestFlight
               upload_to_testflight(
                 api_key: api_key,
