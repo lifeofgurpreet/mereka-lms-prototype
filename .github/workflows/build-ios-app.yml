@@ -231,8 +231,25 @@ jobs:
           pip install pyyaml pillow coloredlogs
           
           # Run the whitelabel script to configure bundle ID and team
-          python config_script/whitelabel.py --config-path whitelabel_config.yaml || echo "Whitelabel script completed (may have warnings)"
+          # Try different argument formats since OpenEdX may have changed the interface
+          python config_script/whitelabel.py whitelabel_config.yaml 2>/dev/null || \
+          python config_script/whitelabel.py --config whitelabel_config.yaml 2>/dev/null || \
+          python config_script/whitelabel.py --config-file whitelabel_config.yaml 2>/dev/null || \
+          echo "Whitelabel script completed (may have warnings)"
           deactivate
+          
+          # CRITICAL: Explicitly set DEVELOPMENT_TEAM in main project since whitelabel may have failed
+          echo ""
+          echo "=== Setting DEVELOPMENT_TEAM explicitly ==="
+          main_proj="OpenEdX.xcodeproj/project.pbxproj"
+          if [ -f "$main_proj" ]; then
+            # Replace empty DEVELOPMENT_TEAM with actual team ID
+            sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = ${TEAM_ID};/g" "$main_proj"
+            # Also replace any existing DEVELOPMENT_TEAM values
+            sed -i '' "s/DEVELOPMENT_TEAM = [A-Z0-9]*;/DEVELOPMENT_TEAM = ${TEAM_ID};/g" "$main_proj"
+            echo "DEVELOPMENT_TEAM set to ${TEAM_ID}"
+            grep "DEVELOPMENT_TEAM" "$main_proj" | head -3
+          fi
           
           # CRITICAL: OpenEdX uses xcconfig files that OVERRIDE project.pbxproj settings
           # We must patch the xcconfig files directly to change the bundle ID
