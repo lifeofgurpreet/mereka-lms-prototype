@@ -1,46 +1,62 @@
 # iOS App Build Status
 
-**Build Triggered**: 2026-01-15 06:22:58 UTC  
-**Workflow Run ID**: 21021886080  
-**Status**: 🟡 **IN PROGRESS**
+**Status**: ✅ **SUCCESSFULLY DEPLOYED TO TESTFLIGHT**  
+**First Successful Build**: Run #21274409453  
+**Last Updated**: 2026-01-23
 
 ---
 
-## Watch the Build
+## Current State
 
-**Live Status**: https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/21021886080
+| Item | Status |
+|------|--------|
+| CI/CD Pipeline | ✅ Working |
+| TestFlight Upload | ✅ Complete |
+| Certificate Management | ✅ via fastlane match |
+| Provisioning Profiles | ✅ Stored in ios-certificates repo |
 
-Or check via CLI:
+---
+
+## Documentation
+
+| Document | Purpose |
+|----------|---------|
+| `docs/ios-cicd-spec.md` | Complete CI/CD specification |
+| `docs/IOS_DEPLOYMENT_LEARNINGS.md` | Post-mortem and lessons learned |
+| `AGENTS.md` | Rules for AI agents |
+
+---
+
+## Triggering New Builds
+
+### Automatic Triggers
+- Push to `mobile/ios/**` on main branch
+- Push to `.github/workflows/build-ios-app.yml`
+
+### Manual Trigger
+1. Go to: https://github.com/Biji-Biji-Initiative/mereka-lms/actions
+2. Click **Build iOS App**
+3. Click **Run workflow** → **Run workflow**
+
+### CLI Trigger
 ```bash
-cd /home/gurpreet/bbi-meta/mereka-lms
-gh run watch 21021886080 --repo Biji-Biji-Initiative/mereka-lms
+gh workflow run "Build iOS App" --repo Biji-Biji-Initiative/mereka-lms
 ```
 
 ---
 
-## What's Happening
+## Monitoring
 
-1. ✅ **Workflow triggered** - Build started
-2. ⏳ **Cloning OpenEdX iOS app** - Getting source code
-3. ⏳ **Installing dependencies** - CocoaPods
-4. ⏳ **Creating Mereka config** - App configuration
-5. ⏳ **Fastlane creating certificate** - Auto-generating distribution cert
-6. ⏳ **Fastlane creating provisioning profile** - Auto-generating profile
-7. ⏳ **Building archive** - Compiling iOS app (~30-45 min)
-8. ⏳ **Exporting IPA** - Creating installable package
-9. ⏳ **Uploading to TestFlight** - Sending to Apple
-10. ⏳ **Apple processing** - Apple review (~10-30 min)
+### Watch Build Progress
+```bash
+gh run list --workflow="Build iOS App" --repo Biji-Biji-Initiative/mereka-lms --limit 5
+gh run watch <RUN_ID> --repo Biji-Biji-Initiative/mereka-lms
+```
 
-**Total Estimated Time**: ~45-75 minutes
-
----
-
-## Expected Timeline
-
-- **0-5 min**: Setup and certificate creation
-- **5-45 min**: Building the app
-- **45-50 min**: Upload to TestFlight
-- **50-80 min**: Apple processing
+### Check Failed Build Logs
+```bash
+gh run view <RUN_ID> --repo Biji-Biji-Initiative/mereka-lms --log-failed
+```
 
 ---
 
@@ -48,19 +64,18 @@ gh run watch 21021886080 --repo Biji-Biji-Initiative/mereka-lms
 
 1. Go to: https://appstoreconnect.apple.com → Mereka Academy → TestFlight
 2. Click the build → **Manage Missing Compliance** → "None of the above"
-3. Add yourself as Internal Tester:
-   - TestFlight → Internal Testing → **+** → Add `gurpreet@biji-biji.com`
-4. Install **TestFlight** app on your iPhone
-5. Accept the email invitation
-6. Install **Mereka Academy**
+3. Add Internal Testers if needed
+4. Install via TestFlight app on iPhone
 
 ---
 
-## Troubleshooting
+## Quick Reference
 
-If build fails, check:
-- Workflow logs: https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/21021886080
-- Common issues:
-  - Certificate creation failed → Check API key permissions
-  - Provisioning profile failed → Verify Bundle ID exists
-  - Build failed → Check Xcode version compatibility
+| Property | Value |
+|----------|-------|
+| Bundle ID | `com.mereka.academy.mobile` |
+| App Name | Mereka Academy |
+| Scheme | OpenEdXProd |
+| Xcode | 16.4 |
+| Fastlane | >= 2.230.0 |
+| Certificates Repo | ios-certificates |

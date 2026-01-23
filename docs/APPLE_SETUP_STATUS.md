@@ -1,80 +1,61 @@
 # Apple Developer Account Setup Status
 
-**Checked via API**: 2026-01-15
+**Status**: ✅ **COMPLETE**  
+**Last Updated**: 2026-01-23
 
 ---
 
-## ✅ What's Already Done
+## Configuration Summary
 
-| Item | Status | Details |
-|------|--------|---------|
-| **Bundle ID** | ✅ **EXISTS** | `com.mereka.academy.mobile` |
-| **API Key** | ✅ **CONFIGURED** | `9MUD3HJQH5` |
-| **Issuer ID** | ✅ **CONFIGURED** | `47ae8cb8-bfa9-49bd-816f-bde34e76d882` |
-| **Team ID** | ✅ **CONFIGURED** | `44F7G2D7U6` |
-| **GitHub Secrets** | ✅ **ALL SET** | All 6 secrets configured |
-
----
-
-## ✅ App Created!
-
-| Item | Status | Details |
-|------|--------|---------|
-| **App in App Store Connect** | ✅ **CREATED** | Apple ID: `6757837481` |
-| **App Name** | ✅ | `Mereka Academy` |
-| **SKU** | ✅ | `mereka-lms` |
-| **Bundle ID** | ✅ | `com.mereka.academy.mobile` |
+| Item | Status | Value |
+|------|--------|-------|
+| Bundle ID | ✅ | `com.mereka.academy.mobile` |
+| API Key | ✅ | `9MUD3HJQH5` |
+| Issuer ID | ✅ | `47ae8cb8-bfa9-49bd-816f-bde34e76d882` |
+| Team ID | ✅ | `44F7G2D7U6` |
+| App Store Connect App | ✅ | Apple ID: `6757837481` |
 
 ---
 
-## ✅ What Happens Automatically
+## GitHub Secrets (All Configured)
 
-Once the App is created, Fastlane will automatically:
-
-- ✅ **Create Distribution Certificate** (via `fastlane cert`)
-- ✅ **Create Provisioning Profile** (via `fastlane sigh`)
-- ✅ **Build the app**
-- ✅ **Upload to TestFlight**
-
-**No Mac needed!** Everything runs in GitHub Actions.
-
----
-
-## Quick Check Script
-
-Run this anytime to check status:
-
-```bash
-cd /home/gurpreet/bbi-meta/mereka-lms
-python3 scripts/mobile/check_apple_setup.py
-```
+| Secret | Description | Status |
+|--------|-------------|--------|
+| `APPLE_TEAM_ID` | Apple Developer Team ID | ✅ |
+| `APP_STORE_CONNECT_API_KEY_ID` | API Key ID (9MUD3HJQH5) | ✅ |
+| `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID | ✅ |
+| `APP_STORE_CONNECT_API_KEY_BASE64` | Base64 .p8 key content | ✅ |
+| `MATCH_DEPLOY_KEY` | SSH key for ios-certificates repo | ✅ |
+| `MATCH_PASSWORD` | Encryption password for match | ✅ |
 
 ---
 
-## Next Steps
+## App ID Capabilities (All Enabled)
 
-1. ✅ **DONE**: App created in App Store Connect
-2. 🚀 **READY**: Trigger GitHub Actions build
-3. ⏳ Wait ~45 minutes for build + processing
-4. ⏳ Install via TestFlight on iPhone
-
-### Trigger the Build
-
-**Option 1: Manual Trigger**
-1. Go to: https://github.com/Biji-Biji-Initiative/mereka-lms/actions
-2. Click **Build iOS App** → **Run workflow** → **Run workflow**
-
-**Option 2: Push Trigger**
-```bash
-cd /home/gurpreet/bbi-meta/mereka-lms
-git commit --allow-empty -m "trigger iOS build"
-git push
-```
+| Capability | Status | Required By |
+|------------|--------|-------------|
+| Push Notifications | ✅ | App entitlements |
+| Associated Domains | ✅ | Deep linking |
+| Sign In with Apple | ✅ | Apple auth |
 
 ---
 
-## Summary
+## Certificate Management
 
-**Ready to build**: Almost! Just need to create the App in App Store Connect (can't be done via API).
+**System**: fastlane match with private git repo
 
-**Everything else**: ✅ Automated and ready!
+| Item | Details |
+|------|---------|
+| Repository | `git@github.com:Biji-Biji-Initiative/ios-certificates.git` |
+| Certificate Type | Apple Distribution |
+| Profile Type | App Store |
+| Expires | 2027-01-22 |
+
+---
+
+## Documentation
+
+For detailed CI/CD setup and troubleshooting, see:
+- `docs/ios-cicd-spec.md` - Complete specification
+- `docs/IOS_DEPLOYMENT_LEARNINGS.md` - Lessons learned
+- `AGENTS.md` - Rules for AI agents (iOS section)
