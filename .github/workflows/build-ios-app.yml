@@ -321,11 +321,23 @@ jobs:
             # Set ALL CODE_SIGN_STYLE to Manual
             sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$main_proj"
             
-            # Set ALL PROVISIONING_PROFILE_SPECIFIER to match profile (replace any value)
-            sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "[^"]*";/PROVISIONING_PROFILE_SPECIFIER = "match AppStore '"${BUNDLE_ID}"'";/g' "$main_proj"
+            # INJECT PROVISIONING_PROFILE_SPECIFIER after DEVELOPMENT_TEAM (if not already present)
+            # This adds the setting if it doesn't exist
+            if ! grep -q "PROVISIONING_PROFILE_SPECIFIER" "$main_proj"; then
+              echo "  Injecting PROVISIONING_PROFILE_SPECIFIER..."
+              sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/&\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "match AppStore '"${BUNDLE_ID}"'";/g' "$main_proj"
+            else
+              # Replace existing PROVISIONING_PROFILE_SPECIFIER
+              sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "[^"]*";/PROVISIONING_PROFILE_SPECIFIER = "match AppStore '"${BUNDLE_ID}"'";/g' "$main_proj"
+            fi
             
-            # Set ALL CODE_SIGN_IDENTITY to Apple Distribution
-            sed -i '' 's/CODE_SIGN_IDENTITY = "[^"]*";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            # INJECT CODE_SIGN_IDENTITY if not present or replace existing
+            if ! grep -q "CODE_SIGN_IDENTITY" "$main_proj"; then
+              echo "  Injecting CODE_SIGN_IDENTITY..."
+              sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/&\n\t\t\t\tCODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            else
+              sed -i '' 's/CODE_SIGN_IDENTITY = "[^"]*";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
+            fi
             
             # Verify the changes
             echo "Checking CODE_SIGN_STYLE values:"
