@@ -635,21 +635,21 @@ spec:
           env:
             - name: SEARCH_SERVER
               value: "http://elasticsearch:9200"
-            # MongoDB Atlas configuration (cluster-mereka-lms)
+            # Local MongoDB configuration (in-cluster)
             - name: MONGODB_AUTH
-              value: "cs_comments_user:CR3ATIVITY"
+              value: ""
             - name: MONGODB_HOST
-              value: "cluster-mereka-lms.2pjex4s.mongodb.net"
+              value: "mongodb"
             - name: MONGODB_PORT
               value: "27017"
             - name: MONGODB_DATABASE
               value: "cs_comments_service"
             - name: MONGOID_AUTH_SOURCE
-              value: "admin"
+              value: ""
             - name: MONGOID_AUTH_MECH
               value: ""
             - name: MONGOID_USE_SSL
-              value: "true"
+              value: "false"
             - name: DD_TRACE_ENABLED
               value: "false"
 ---
