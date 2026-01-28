@@ -78,3 +78,6 @@ secrets/
 # Backup files
 *.bak
 *.backup
+
+# bv (beads viewer) local config and caches
+.bv/
