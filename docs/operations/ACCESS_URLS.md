@@ -123,7 +123,7 @@ _Audience: Everyone • Last updated: 2025-12-29_
 
 ### Create Admin User
 
-**Via Kubernetes (Staging/Production):**
+**Via Kubernetes (GKE/Kind):**
 ```bash
 kubectl exec -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 ```
