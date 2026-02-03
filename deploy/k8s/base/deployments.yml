@@ -633,7 +633,10 @@ spec:
             - name: MONGODB_AUTH
               value: "openedx"
             - name: MONGODB_HOST
-              value: "cluster-mereka-lms.2pjex4s.mongodb.net"
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: FORUM_MONGODB_SRV
             - name: MONGODB_PORT
               value: "27017"
             - name: MONGODB_DATABASE
