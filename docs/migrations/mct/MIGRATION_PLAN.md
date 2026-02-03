@@ -1,6 +1,8 @@
 # Microsoft Community Training → Open edX Migration Plan
 _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 2025-08-31_
 
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
+
 ## Overview
 
 This document outlines the migration strategy for exporting data from **Skill Our Future** (hosted on Microsoft Community Training) and importing it into the Open edX platform. This migration runs in parallel with the Kajabi migration, both targeting the same Open edX deployment.
@@ -327,7 +329,7 @@ tutor local run lms ./manage.py lms bulk_enroll \
 
 **1. Small Batch Test:**
 - Export 10 users, 2 courses, 20 enrollments
-- Transform and import into staging Open edX
+- Transform and import into production Open edX (GKE)
 - Validate data integrity
 
 **2. Incremental Migration:**
@@ -376,7 +378,7 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 3. **Medium-term:**
    - [ ] Build course package generator (MCT → Open edX OLX format)
    - [ ] Handle media migration (download/upload course assets)
-   - [ ] Test import into staging Open edX
+   - [ ] Test import into production Open edX (GKE)
    - [ ] Validate data integrity and completeness
 
 4. **Long-term:**

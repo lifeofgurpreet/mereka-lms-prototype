@@ -3,13 +3,19 @@ _Critical: Verify production setup matches expectations • Last updated: 2025-1
 
 ## 🎯 Purpose
 
-Verify that production/staging environment has:
+Verify that production environment has:
 - Proper multi-site configuration
 - Correct user distribution (Skill Our Future ~80K, Mereka 100K+)
 - MFE authn URL working
 - Organizations and sites configured
 
 ## 📋 Verification Steps
+
+### 0. Quick Public Health Check
+
+```bash
+./scripts/qa/public-health-check.sh prod
+```
 
 ### 1. Check Organizations
 
@@ -173,4 +179,3 @@ After verification, update:
 **Status:** ⚠️ **NEEDS VERIFICATION**  
 **Priority:** **HIGH** - Critical for understanding data distribution  
 **Next:** Run verification commands and document findings
-

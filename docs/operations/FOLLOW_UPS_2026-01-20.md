@@ -4,7 +4,7 @@ This file captures what was verified today and what still needs to happen so you
 
 ## Snapshot (Verified)
 
-- LMS/CMS/MFE pods are Running; ingress hosts for `staging`, `studio`, `apps` are OK.
+- LMS/CMS/MFE pods are Running; ingress hosts for `academyv2`, `studio`, `apps` are OK.
 - Multi-site data exists in DB:
   - Organizations: MEREKA, BIJIBIJI, SKILLOURFUTURE (active).
   - Sites: `academyv2.mereka.io`, `academy.biji-biji.com`, `skillourfuture.academy.mereka.io`.
@@ -12,7 +12,7 @@ This file captures what was verified today and what still needs to happen so you
 - Cookies and CSRF:
   - `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io`
   - `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io`
-  - `CSRF_TRUSTED_ORIGINS` includes staging + studio + apps + academy + skillourfuture + auth0.
+  - `CSRF_TRUSTED_ORIGINS` includes academyv2 + studio + apps + academy.biji-biji.com + skillourfuture + auth0.
 - OIDC endpoints are live:
   - `/auth/login/oidc/` returns 302 for all three LMS hosts.
   - Authentik OIDC issuer is `https://auth0.mereka.io/application/o/mereka-lms/`.
@@ -77,7 +77,7 @@ These were done directly on the cluster and are NOT yet committed into repo sour
 ### C) Data/Content Readiness (Medium Priority)
 
 7) Course overviews show `0` across all orgs.
-   - Run `python manage.py lms reindex_courses` on staging.
+  - Run `python manage.py lms reindex_courses` on production.
    - Re-check `CourseOverview` counts per org.
 
 ### D) Optional Improvements

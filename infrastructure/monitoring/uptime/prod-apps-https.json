@@ -1,0 +1,23 @@
+{
+  "displayName": "mereka-apps-prod-https",
+  "monitoredResource": {
+    "type": "uptime_url",
+    "labels": {
+      "project_id": "mereka-lms",
+      "host": "apps.academyv2.mereka.io"
+    }
+  },
+  "httpCheck": {
+    "useSsl": true,
+    "path": "/authn/login",
+    "port": 443,
+    "validateSsl": true
+  },
+  "timeout": "10s",
+  "period": "300s",
+  "selectedRegions": ["REGION_ASIA_PACIFIC"],
+  "userLabels": {
+    "service": "mfe",
+    "environment": "production"
+  }
+}

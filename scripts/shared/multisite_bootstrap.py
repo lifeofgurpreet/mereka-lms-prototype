@@ -26,6 +26,11 @@ class SiteDefinition:
 
 ORGANIZATIONS = [
     {
+        "short_name": "MEREKA",
+        "name": "Mereka Academy",
+        "description": "Mereka Academy main site catalog.",
+    },
+    {
         "short_name": "BIJIBIJI",
         "name": "Biji-Biji Academy",
         "description": "Biji-Biji Academy microsite catalog.",
@@ -55,6 +60,23 @@ def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, prim
 
 SITE_DEFINITIONS = [
     SiteDefinition(
+        domain="academyv2.mereka.io",
+        name="Mereka Academy",
+        orgs=["MEREKA"],
+        site_values={
+            "domain": "academyv2.mereka.io",
+            "site_name": "Mereka Academy",
+            "platform_name": "Mereka Academy",
+            "THEME_NAME": "mereka",
+            "ENABLE_COMPREHENSIVE_THEMING": True,
+            "course_org_filter": ["MEREKA"],
+            "logo_image": "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png",
+            "logo_url": "/",
+            "favicon_path": "mereka/images/favicon.ico",
+            "homepage_banner_enabled": False,
+        },
+    ),
+    SiteDefinition(
         domain="academy.biji-biji.com",
         name="Biji-Biji Academy",
         orgs=["BIJIBIJI"],
@@ -68,18 +90,7 @@ SITE_DEFINITIONS = [
             "logo_image": "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
             "favicon_path": "mereka/images/favicon.ico",
-            "homepage_banner_enabled": True,
-            "homepage_overlay_html": hero_html(
-                eyebrow="Circular design + impact",
-                heading="Biji-Biji Academy curates learning for makers and changemakers.",
-                body="Master sustainable design, fabrication, and creative tech alongside mentors from Biji-Biji Initiative.",
-                primary_label="Discover Biji-Biji courses",
-                primary_href="/courses",
-                secondary_label="About the academy",
-                secondary_href="https://biji-biji.com",
-                accent="#ffbf3c",
-                background="#072c2f",
-            ),
+            "homepage_banner_enabled": False,
         },
     ),
     SiteDefinition(

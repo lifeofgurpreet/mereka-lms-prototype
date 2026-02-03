@@ -90,7 +90,7 @@ deploy/k8s/
     plugins/               # Plugin configs (MFE, Discovery, etc.)
   overlays/
     local/                 # Local development overrides
-    staging/               # Staging environment (academyv2.mereka.io)
+    production/            # GKE production (academyv2.mereka.io)
     production/            # Production environment
   patches/                 # Ad-hoc patches
 ```
@@ -99,10 +99,10 @@ deploy/k8s/
 
 ```bash
 # Preview what will be deployed (dry-run)
-kubectl kustomize deploy/k8s/overlays/staging
+kubectl kustomize deploy/k8s/overlays/production
 
-# Deploy to staging
-kubectl apply -k deploy/k8s/overlays/staging
+# Deploy to production
+kubectl apply -k deploy/k8s/overlays/production
 
 # Deploy to production
 kubectl apply -k deploy/k8s/overlays/production
@@ -116,7 +116,7 @@ kubectl apply -k deploy/k8s/base
 | Environment | Overlay Path | Image Tag | Replicas |
 |-------------|--------------|-----------|----------|
 | Local | `overlays/local` | `latest` | 1 each |
-| Staging | `overlays/staging` | `staging` | 1 each |
+| Production | `overlays/production` | `production` | 1 each |
 | Production | `overlays/production` | `production` | LMS: 2, CMS: 1 |
 
 ### Deployment Strategies
@@ -351,8 +351,8 @@ kubectl get endpoints mysql -n mereka-lms
 # Fix all service selectors
 ./scripts/infra/fix-service-selectors.sh
 
-# Repair staging routing (selectors + HTTPS)
-./scripts/infra/repair-staging-routing.sh
+# Repair routing (selectors + HTTPS)
+./scripts/infra/repair-routing.sh
 
 # Check cluster status
 ./scripts/infra/check-cluster-status.sh
@@ -455,7 +455,8 @@ For detailed secrets management architecture, see `/home/gurpreet/projects/secre
 DATABASES='openedx discovery' ./scripts/infra/backup-db.sh
 
 # Backups are stored at:
-# gs://staging-academy-mereka-io-backup/sql/<timestamp>/<database>.sql.gz
+# gs://staging-academy-mereka-io-backup/sql/<timestamp>/<database>.sql.gz (legacy bucket name)
+# (bucket name is legacy; still used for production backups)
 ```
 
 **Automated Backups**: GitHub workflow runs every 3 days (`.github/workflows/cloud-sql-backup.yml`)
@@ -489,10 +490,10 @@ velero backup create mereka-lms-backup --include-namespaces mereka-lms
 
 ```bash
 # List available backups
-gsutil ls gs://staging-academy-mereka-io-backup/sql/
+gsutil ls gs://staging-academy-mereka-io-backup/sql/  # legacy bucket name
 
 # Download backup
-gsutil cp gs://staging-academy-mereka-io-backup/sql/<timestamp>/openedx.sql.gz /tmp/
+gsutil cp gs://staging-academy-mereka-io-backup/sql/<timestamp>/openedx.sql.gz /tmp/  # legacy bucket name
 
 # Import to Cloud SQL
 gunzip /tmp/openedx.sql.gz
@@ -523,7 +524,7 @@ velero restore create --from-backup mereka-lms-backup --include-resources persis
 velero install \
   --provider gcp \
   --plugins velero/velero-plugin-for-gcp:v1.8.0 \
-  --bucket staging-academy-mereka-io-backup \
+  --bucket staging-academy-mereka-io-backup \  # legacy bucket name
   --secret-file ./credentials-velero
 
 # Create backup
@@ -662,7 +663,7 @@ kubectl logs -n mereka-lms deployment/lms --tail=100
 kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms -f
 
 # === DEPLOY ===
-kubectl apply -k deploy/k8s/overlays/staging
+kubectl apply -k deploy/k8s/overlays/production
 kubectl rollout restart deployment/lms -n mereka-lms
 kubectl rollout status deployment/lms -n mereka-lms
 kubectl rollout undo deployment/lms -n mereka-lms

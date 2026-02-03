@@ -67,7 +67,7 @@ _Last updated: 2025-11-12_
 
 ## 🔗 Related Documentation
 
-- **Complete URL Reference:** `docs/ACCESS_URLS.md` (local, staging, production)
+- **Complete URL Reference:** `docs/ACCESS_URLS.md` (local, dev, production)
 - **Parity Strategy:** `docs/LOCAL_PRODUCTION_PARITY.md`
 - **MFE List:** `docs/MFE_COMPLETE_LIST.md`
 - **Setup Guide:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`

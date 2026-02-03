@@ -3,7 +3,7 @@ _For Coding Agents • Last updated: 2025-11-12_
 
 ## 🎯 Overview
 
-This document outlines the strategy for maintaining parity between local development and production/staging environments. **The goal:** Ensure what works locally will work in production, and vice versa.
+This document outlines the strategy for maintaining parity between local development and production/dev environments. **The goal:** Ensure what works locally will work in production, and vice versa.
 
 ## 📊 Current State Assessment
 
@@ -176,11 +176,11 @@ kubectl get configmap -n mereka-lms -o yaml | grep PLUGINS
    - Check MFEs match
 
 3. **Deploy to Staging**
-   - Test in staging
+   - Test in dev (kind) or a production canary
    - Compare with local
 
 4. **Deploy to Production**
-   - Only after staging verification
+   - Only after dev/canary verification
    - Monitor for issues
 
 ### Data Strategy

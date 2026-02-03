@@ -55,7 +55,7 @@ echo ""
 # 5. MongoDB Atlas optimization (from NEXT10_TASKS.md)
 echo "5️⃣  MONGODB ATLAS OPTIMIZATION"
 echo "   Current: M10 tier (~\$87/month)"
-echo "   Optimize: M0 tier (FREE for dev/staging)"
+echo "   Optimize: M0 tier (FREE for dev)"
 echo "   ⚠️  See: ./tools/downgrade-mongodb-to-m0.sh"
 echo "   Savings: ~\$87/month"
 echo ""

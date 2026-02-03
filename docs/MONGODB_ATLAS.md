@@ -7,12 +7,12 @@ This guide explains how to move cs_comments_service data from the temporary in-c
 
 1. Sign in to https://cloud.mongodb.com/ and create a **Dedicated (M10)** cluster in **AWS `ap-southeast-1`** so latency stays low.
 2. Under *Database Access*, create a database user (e.g. `cs_comments_user`) with password of your choosing and grant **Read and write to any database** (or a scoped role for `cs_comments_service`).
-3. Under *Network Access*, allow outbound IPs from the GKE cluster. The easiest way is to grab the NAT IP(s) by running:
+3. Under *Network Access*, allow outbound IPs from the GKE cluster. We intentionally use public IP allowlists (no private connectivity). The easiest way is to grab the NAT IP(s) by running:
    ```bash
    kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- \
      curl -s https://ifconfig.me
    ```
-   As of 2025-11-07 the pod egress IP is `35.247.164.211` and Cloud NAT advertises `34.142.147.42` (resource `mereka-lms-nat-ip`). Add both to the Atlas IP allow list until Private Service Connect/VPC Peering is in place.
+   As of 2025-11-07 the pod egress IP is `35.247.164.211` and Cloud NAT advertises `34.142.147.42` (resource `mereka-lms-nat-ip`). Add both to the Atlas IP allow list and keep the list current when GKE egress changes.
 
 ## 2. Migrate existing data
 
@@ -41,7 +41,7 @@ Environment flags:
 | `RUN_MIGRATION` | `true` | Set to `false` if you already ran `mongodb-to-atlas.sh` and just want to flip Tutor. |
 | `UPDATE_SECRET` | `true` | Controls whether the script writes the URI into the `mongodb-atlas-uri` Secret Manager secret. |
 | `CLEANUP_STATEFULSET` | `false` | When `true`, deletes the `mongodb` StatefulSet + PVC after Tutor connects to Atlas. |
-| `NAMESPACE` / `STATEFULSET` / `PVC_NAME` | `mereka-lms` / `mongodb` / `data-mongodb-0` | Override if your staging namespace differs. |
+| `NAMESPACE` / `STATEFULSET` / `PVC_NAME` | `mereka-lms` / `mongodb` / `data-mongodb-0` | Override if your dev namespace differs. |
 | `TUTOR_CMD` | `tutor` | Change if you prefer `tutor --config=...` wrappers. |
 
 The script sources `infrastructure/tutor/tutor-env.sh`, runs `tutor config save --set RUN_MONGODB=false --set MONGODB_URI="…"`, restarts the Kubernetes workloads (`tutor k8s start`), waits for the `forum` deployment rollout, and optionally deletes the legacy StatefulSet.
@@ -86,4 +86,6 @@ Document the secret ID in `docs/SECRETS_SNAPSHOT.md` and rotate the Atlas databa
 
 - Rotate the Atlas database user password periodically and update `MONGODB_URI` (run `tutor config save` + `tutor k8s start`).
 - Keep the Atlas cluster metrics in Cloud Monitoring by adding the Atlas Prometheus integration (optional).
-- Remove the firewall rule after you move to Private Service Connect/VPC Peering to avoid maintaining IP allow lists manually.
+- We intentionally keep Atlas on public allowlists. Monitor drift with:
+  - `kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- curl -s https://ifconfig.me`
+  - `atlas accesslists list --projectId <projectId>` (confirm allowlist matches egress)

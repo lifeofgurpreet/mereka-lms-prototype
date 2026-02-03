@@ -102,7 +102,7 @@ _Understanding Kajabi vs MCT Course Data • Last updated: 2025-11-12_
 
 ### Option 1: Export from Production MCT Courses (Recommended)
 ```bash
-# On production/staging
+# On production/dev
 tutor k8s exec cms -- python manage.py cms export /tmp <course_id>
 
 # Download tarball

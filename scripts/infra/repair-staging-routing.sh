@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rapid recovery for staging routing outages caused by selector drift or missing HTTPS port on caddy
+# Rapid recovery for production/dev routing outages caused by selector drift or missing HTTPS port on caddy
 # Usage: ./scripts/infra/repair-staging-routing.sh [namespace]
 set -euo pipefail
 

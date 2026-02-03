@@ -220,4 +220,4 @@ git add . && git commit -m "trigger iOS build" && git push
 - App Store Connect: https://appstoreconnect.apple.com
 - GitHub Repo: https://github.com/Biji-Biji-Initiative/mereka-lms
 - GitHub Actions: https://github.com/Biji-Biji-Initiative/mereka-lms/actions
-- LMS (staging): https://academyv2.mereka.io
+- LMS (production): https://academyv2.mereka.io

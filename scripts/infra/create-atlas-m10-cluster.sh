@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Create M10 MongoDB Atlas cluster for Mereka LMS staging.
+# Create M10 MongoDB Atlas cluster for Mereka LMS (production/dev).
 # Prerequisites: Payment information must be added to Atlas account.
 set -euo pipefail
 
 PROJECT_ID=${PROJECT_ID:-690e7c787757f4238efc94d1}
-CLUSTER_NAME=${CLUSTER_NAME:-mereka-lms-staging}
+CLUSTER_NAME=${CLUSTER_NAME:-cluster-mereka-lms}
 PROVIDER=${PROVIDER:-AWS}
 REGION=${REGION:-AP_SOUTHEAST_1}
 TIER=${TIER:-M10}
@@ -95,7 +95,7 @@ else
 fi
 
 # Configure network access
-log "Configuring network access for GKE egress IPs..."
+log "Configuring network access for GKE egress IPs (public allowlist)..."
 IFS=',' read -ra IPS <<< "$GKE_EGRESS_IPS"
 for ip in "${IPS[@]}"; do
   ip=$(echo "$ip" | xargs) # trim whitespace

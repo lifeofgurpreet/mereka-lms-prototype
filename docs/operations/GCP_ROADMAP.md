@@ -82,12 +82,12 @@ The goal is to migrate the nightly Open edX stack managed by Tutor to Google Clo
 | Component | Managed option | Pros | Cons | Recommendation |
 |-----------|----------------|------|------|----------------|
 | MySQL | Cloud SQL (MySQL 8) | Automated backups, HA, maintenance windows, built-in IAM auth | Higher cost, connection limits, cross-region latency | **Adopt** Cloud SQL with private IP |
-| MongoDB | MongoDB Atlas | Automated patching, backups, monitoring | Separate SaaS billing, VPC peering required, adds Atlas control plane | **Plan for production**; staging uses in-cluster StatefulSet |
+| MongoDB | MongoDB Atlas | Automated patching, backups, monitoring | Separate SaaS billing, VPC peering required, adds Atlas control plane | **Plan for production**; dev can use in-cluster StatefulSet if needed |
 | Redis | Memorystore (Standard) | Fully managed failover, metrics, maintenance | No custom modules, size-based pricing | **Adopt** Standard tier (~1–5 GB) |
 | Object storage | Google Cloud Storage | Durable, lifecycle policies, easy TLS | Multi-region costs higher | **Adopt** regional (asia-southeast1) buckets |
 | Secrets | Secret Manager | Versioned secrets, IAM-based access | API quotas (rarely an issue) | **Adopt** for all credentials |
 
-> For pilot / staging, we can temporarily run MongoDB inside GKE using StatefulSets, but production should move to Atlas or a managed equivalent for reliability.
+> For pilot / dev, we can temporarily run MongoDB inside GKE using StatefulSets, but production should move to Atlas or a managed equivalent for reliability.
 
 ## Next steps
 

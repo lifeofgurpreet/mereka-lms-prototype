@@ -263,7 +263,7 @@ gcloud billing projects describe mereka-lms
      - ⚠️ 512MB storage limit (vs 10GB on M10)
      - ⚠️ Shared CPU/RAM (vs dedicated)
      - ⚠️ No backups (vs automatic backups)
-     - ✅ FREE tier - perfect for dev/staging
+     - ✅ FREE tier - perfect for dev
 
 ### Total Additional Potential Savings
 

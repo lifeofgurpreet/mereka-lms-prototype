@@ -1,7 +1,7 @@
 # Mereka LMS SLO Dashboards Setup
 
 **Date:** 2026-02-03
-**Status:** Partially Complete
+**Status:** Updated
 
 ## Overview
 
@@ -17,11 +17,13 @@ Located in: `infrastructure/monitoring/`
 
 | Type | File | Description |
 |------|------|-------------|
-| Uptime Check | `uptime/staging-lms-https.json` | HTTP check for academyv2.mereka.io |
+| Uptime Check | `uptime/prod-*.json` | HTTPS checks for academyv2 + microsites + APIs |
 | Alert | `alerts/lb-5xx-ratio.json` | 5xx error rate spike detection |
 | Alert | `alerts/pod-restarts.json` | Pod restart threshold alerts |
 | Alert | `alerts/cloudsql-disk.json` | Cloud SQL disk usage |
 | Alert | `alerts/https-cert-expiry.json` | SSL certificate expiry |
+| Alert | `alerts/log-5xx-spike.json` | Log-based 5xx spikes |
+| Alert | `alerts/log-auth-failures.json` | Log-based auth failures |
 
 ### 2. Centralized Grafana Dashboard (VPS Observability Stack)
 
@@ -75,8 +77,12 @@ Use Terraform or gcloud CLI to apply alert policies:
 
 ```bash
 gcloud alpha monitoring uptime create \
-  --config-from-file=infrastructure/monitoring/uptime/staging-lms-https.json \
+  --config-from-file=infrastructure/monitoring/uptime/prod-lms-https.json \
   --project=mereka-lms
+
+# Apply all production checks + alerts
+./scripts/infra/apply-monitoring-configs.sh plan
+./scripts/infra/apply-monitoring-configs.sh apply
 
 gcloud alpha monitoring policies create \
   --policy-from-file=infrastructure/monitoring/alerts/lb-5xx-ratio.json \
@@ -85,9 +91,9 @@ gcloud alpha monitoring policies create \
 
 ## Next Steps
 
-1. [x] Add blackbox probe targets for academyv2.mereka.io to VPS Prometheus
+1. [x] Add uptime configs for all public endpoints (LMS, Studio, MFE, Discovery, Ecommerce, Notes, microsites)
 2. [x] Slack webhook integration (already configured via SLACK_ALERTMANAGER_WEBHOOK_URL in Infisical)
-3. [x] Add synthetic login/MFE checks via Authentik SSO endpoints
+3. [x] Add log-based alerts for 5xx spikes and auth failures
 4. [ ] Verify cross-env datasource connectivity (VPS → GKE)
 5. [ ] Confirm academyv2.mereka.io probes stay green after DNS/cert validation
 
@@ -95,14 +101,9 @@ gcloud alpha monitoring policies create \
 
 ### academyv2.mereka.io Certificate
 
-If academyv2.mereka.io shows the fake Kubernetes ingress certificate, verify the DNS record is pointing
-to the GKE load balancer (`34.177.83.168`) and not the VPS/kind ingress. GKE cert-manager already
-issues Let's Encrypt certs for `academyv2.mereka.io`, `studio.academyv2.mereka.io`, and
-`apps.academyv2.mereka.io` via the `openedx-*-tls` secrets.
-
-The kind cluster currently shows NotReady certs due to issuer mismatch (ingress references
-`letsencrypt-prod` while the cluster uses `letsencrypt-dns01`). The local overlay now
-ships a `letsencrypt-prod` ClusterIssuer alias to keep cert-manager aligned.
+If academyv2.mereka.io shows the fake Kubernetes ingress certificate, verify DNS is pointing to the
+Caddy LoadBalancer and run `./scripts/infra/check-cert-sans.sh`. Caddy manages TLS for
+`academyv2.mereka.io`, `studio.academyv2.mereka.io`, and `apps.academyv2.mereka.io`.
 
 ## Files Modified
 

@@ -1,0 +1,25 @@
+{
+  "displayName": "App 5xx spike (logs)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "ERROR",
+  "conditions": [
+    {
+      "displayName": "HTTP 5xx > 5/min",
+      "conditionThreshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/mereka_lms_http_5xx\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "60s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 5,
+        "duration": "0s",
+        "trigger": { "count": 1 }
+      }
+    }
+  ],
+  "notificationChannels": []
+}

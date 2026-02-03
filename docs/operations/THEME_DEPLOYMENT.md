@@ -1,6 +1,6 @@
 # Theme Deployment Guide
 
-This guide covers deploying branding/theme changes from the Mereka brand system to the staging and production Open edX LMS.
+This guide covers deploying branding/theme changes from the Mereka brand system to the production (GKE) and dev (kind) Open edX environments.
 
 ## Prerequisites
 
@@ -39,8 +39,8 @@ This guide covers deploying branding/theme changes from the Mereka brand system 
 │           │                                                          │
 │  4. Deploy│           5. Verify                                      │
 │           ▼          ┌──────────────────┐                           │
-│  ┌──────────────────┐│ staging.academy. │                           │
-│  │ kubectl set      ││ mereka.io        │                           │
+│  ┌──────────────────┐│ academyv2.mereka.io │                         │
+│  │ kubectl set      ││ (production)       │                         │
 │  │ image deployment │└──────────────────┘                           │
 │  └──────────────────┘                                               │
 │                                                                      │

@@ -4,7 +4,7 @@ set -euo pipefail
 
 PROJECT=${PROJECT:-mereka-lms}
 INSTANCE=${INSTANCE:-mereka-lms-mysql}
-BUCKET=${BUCKET:-staging-academy-mereka-io-backup}
+BUCKET=${BUCKET:-staging-academy-mereka-io-backup} # legacy name, still used for prod backups
 STAMP=$(date -u +%Y-%m-%dT%H%M%SZ)
 BASE_URI="gs://${BUCKET}/sql/${STAMP}"
 DEFAULT_DATABASES=(openedx discovery ecommerce notes xqueue)

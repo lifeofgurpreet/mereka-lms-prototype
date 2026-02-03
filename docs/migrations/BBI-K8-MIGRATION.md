@@ -2,6 +2,8 @@
 
 This document outlines the migration of mereka-lms (OpenEdX) from its standalone GCloud project to the BBI-K8 cluster.
 
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
+
 ## Overview
 
 **Source Environment:**
@@ -109,7 +111,7 @@ kubectl exec -n mereka-lms -it $(kubectl get pod -n mereka-lms -l app.kubernetes
 ## Storage Migration
 
 **GCS Bucket Migration:**
-Current bucket: `staging-academy-mereka-io-content`
+Current bucket: `staging-academy-mereka-io-content` (legacy name)
 
 Option A: Keep using existing GCS bucket (recommended)
 - Add service account to BBI-K8 with access to the bucket
@@ -117,7 +119,7 @@ Option A: Keep using existing GCS bucket (recommended)
 
 Option B: Copy to new bucket
 ```bash
-gsutil -m cp -r gs://staging-academy-mereka-io-content gs://new-bucket-name
+gsutil -m cp -r gs://staging-academy-mereka-io-content gs://new-bucket-name  # legacy bucket name
 ```
 
 ## Configuration Changes

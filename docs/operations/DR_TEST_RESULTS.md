@@ -85,7 +85,7 @@ kubectl exec -n mereka-lms-dr-test mysql-dr-verify -- \
 | PVC Restored | ✅ 5Gi MySQL volume cloned |
 | MySQL Started | ✅ Server started successfully |
 | Databases Present | ✅ openedx, mysql, sys |
-| User Data | ✅ 4 users (staging) |
+| User Data | ✅ 4 users (production) |
 | Data Readable | ✅ No corruption |
 
 ## Recovery Time Objectives

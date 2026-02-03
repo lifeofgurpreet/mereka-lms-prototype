@@ -86,7 +86,7 @@ _Last updated: 2025-11-12 • Auto-generated_
 - `docs/ADMIN_LOGIN_GUIDE.md` - Admin login troubleshooting
 
 ### Reference
-- `docs/ACCESS_URLS.md` - All URLs (local/staging/production)
+- `docs/ACCESS_URLS.md` - All URLs (local/dev/production)
 - `docs/LOCAL_PRODUCTION_PARITY.md` - Parity strategy
 - `docs/MFE_COMPLETE_LIST.md` - All MFEs documented
 - `docs/PARITY_ISSUES_FOUND.md` - Parity issues and fixes
@@ -190,4 +190,3 @@ docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -e "SELECT 1;"
 **System Status:** ✅ FULLY OPERATIONAL  
 **Last Verified:** 2025-11-12  
 **Next Review:** Run `./scripts/qa/comprehensive-test.sh` weekly
-

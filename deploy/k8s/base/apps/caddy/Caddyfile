@@ -35,13 +35,35 @@
 
 }
 
-# LMS - localhost and production/dev domains
-# - localhost: local development
-# - academyv2.mereka.io: main GKE environment
+# LMS - local development (HTTP only)
+localhost{$default_site_port}, preview.localhost{$default_site_port} {
+    @favicon_matcher {
+        path_regexp ^/favicon.ico$
+    }
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    # Limit profile image upload size
+    handle_path /api/profile_images/*/*/upload {
+        request_body {
+            max_size 1MB
+        }
+    }
+
+    import proxy "lms:8000"
+
+    handle_path /* {
+        request_body {
+            max_size 4MB
+        }
+    }
+}
+
+# LMS - production/dev + microsites (TLS via Caddy)
+# - academyv2.mereka.io: main GKE environment (PRODUCTION DOMAIN)
 # - academyv2.mereka.dev: VPS kind cluster
 # - skillourfuture.academy.mereka.io: Skill Our Future microsite
 # - academy.biji-biji.com: Biji-Biji Academy microsite
-localhost{$default_site_port}, preview.localhost{$default_site_port}, academyv2.mereka.io{$default_site_port}, academyv2.mereka.dev{$default_site_port}, preview.academyv2.mereka.io{$default_site_port}, preview.academyv2.mereka.dev{$default_site_port}, skillourfuture.academy.mereka.io{$default_site_port}, academy.biji-biji.com{$default_site_port} {
+academyv2.mereka.io, academyv2.mereka.dev, preview.academyv2.mereka.io, preview.academyv2.mereka.dev, skillourfuture.academy.mereka.io, academy.biji-biji.com {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -65,12 +87,8 @@ localhost{$default_site_port}, preview.localhost{$default_site_port}, academyv2.
     }
 }
 
-# Studio/CMS - shared across all LMS sites per environment
-# - studio.localhost: local development (serves all local LMS sites)
-# - studio.academyv2.mereka.io: GKE Studio
-# - studio.academyv2.mereka.dev: VPS kind Studio
-# - studio.academy.biji-biji.com: Biji-Biji Studio
-studio.localhost{$default_site_port}, studio.academyv2.mereka.io{$default_site_port}, studio.academyv2.mereka.dev{$default_site_port}, studio.academy.biji-biji.com{$default_site_port} {
+# Studio/CMS - local development (HTTP only)
+studio.localhost{$default_site_port} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -87,8 +105,36 @@ studio.localhost{$default_site_port}, studio.academyv2.mereka.io{$default_site_p
     }
 }
 
+# Studio/CMS - production/dev (TLS via Caddy)
+# - studio.academyv2.mereka.io: GKE Studio
+# - studio.academyv2.mereka.dev: VPS kind Studio
+# - studio.academy.biji-biji.com: Biji-Biji Studio
+studio.academyv2.mereka.io, studio.academyv2.mereka.dev, studio.academy.biji-biji.com {
+    @favicon_matcher {
+        path_regexp ^/favicon.ico$
+    }
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    import proxy "cms:8000"
+
+    handle_path /* {
+        request_body {
+            max_size 250MB
+        }
+    }
+}
+
 # Discovery Service (Course Catalog API)
-discovery.localhost{$default_site_port}, discovery.academyv2.mereka.io{$default_site_port}, discovery.academyv2.mereka.dev{$default_site_port} {
+discovery.localhost{$default_site_port} {
+    request_body {
+        max_size 10MB
+    }
+
+    import proxy "discovery:8000"
+}
+
+# Discovery Service (TLS via Caddy)
+discovery.academyv2.mereka.io, discovery.academyv2.mereka.dev {
     request_body {
         max_size 10MB
     }
@@ -96,7 +142,15 @@ discovery.localhost{$default_site_port}, discovery.academyv2.mereka.io{$default_
     import proxy "discovery:8000"
 }
 # E-commerce Service
-ecommerce.localhost{$default_site_port}, ecommerce.academyv2.mereka.io{$default_site_port}, ecommerce.academyv2.mereka.dev{$default_site_port} {
+ecommerce.localhost{$default_site_port} {
+    request_body {
+        max_size 10MB
+    }
+    import proxy "ecommerce:8000"
+}
+
+# E-commerce Service (TLS via Caddy)
+ecommerce.academyv2.mereka.io, ecommerce.academyv2.mereka.dev {
     request_body {
         max_size 10MB
     }
@@ -107,19 +161,37 @@ ecommerce.localhost{$default_site_port}, ecommerce.academyv2.mereka.io{$default_
 # - apps.academyv2.mereka.io: main GKE MFEs
 # - apps.academyv2.mereka.dev: VPS kind MFEs
 # - apps.academy.biji-biji.com: Biji-Biji Academy MFEs
-apps.localhost{$default_site_port}, apps.academyv2.mereka.io{$default_site_port}, apps.academyv2.mereka.dev{$default_site_port}, apps.academy.biji-biji.com{$default_site_port} {
+apps.localhost{$default_site_port} {
+    request_body {
+        max_size 2MB
+    }
+    import proxy "mfe:8002"
+}
+
+# MFE (TLS via Caddy)
+apps.academyv2.mereka.io, apps.academyv2.mereka.dev, apps.academy.biji-biji.com {
+    redir / https://academyv2.mereka.io
     request_body {
         max_size 2MB
     }
     import proxy "mfe:8002"
 }
 # Notes API
-notes.localhost{$default_site_port}, notes.academyv2.mereka.io{$default_site_port}, notes.academyv2.mereka.dev{$default_site_port} {
+notes.localhost{$default_site_port} {
     import proxy "notes:8000"
 }
 
-# Credentials Service (Certificate issuance)
-credentials.academyv2.mereka.io{$default_site_port}, credentials.academyv2.mereka.dev{$default_site_port} {
+# Notes API (TLS via Caddy)
+notes.academyv2.mereka.io, notes.academyv2.mereka.dev {
+    import proxy "notes:8000"
+}
+
+# Credentials Service (certificate issuance)
+# NOTE: Service is not deployed yet; return a clear 503 until it is.
+credentials.academyv2.mereka.io, credentials.academyv2.mereka.dev {
+    handle {
+        respond "Credentials service not deployed yet." 503
+    }
     import proxy "credentials:8000"
 }
 

@@ -1,13 +1,15 @@
 # Kajabi Migration Verification Report
 _Audience: QA • Owner: Migration Squad • Last verified: 2025-09-30_
 
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
+
 **Date:** 2024-11-08  
 **Verified By:** UI + Database Verification  
 **Status:** ✅ **VERIFIED - ALL DATA PROPERLY IMPORTED**
 
 ## Executive Summary
 
-Comprehensive verification confirms that **ALL** Kajabi data has been successfully imported into Open edX staging, including:
+Comprehensive verification confirms that **ALL** Kajabi data has been successfully imported into Open edX production (GKE), including:
 - ✅ Users (84,379 imported)
 - ✅ Enrollments (137,464 imported)  
 - ✅ Courses (107/109 courses - all Kajabi courses imported)

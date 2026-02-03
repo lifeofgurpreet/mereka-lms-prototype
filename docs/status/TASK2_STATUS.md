@@ -81,7 +81,7 @@ tutor local createuser --superuser --staff -p <password> <username> <email>
 **Status:** ⚠️ **NEEDS VERIFICATION**
 
 **Action Required:**
-1. Check if admin users exist in staging
+1. Check if admin users exist in production
 2. Create admin users if they don't exist
 3. Document credentials securely
 
@@ -129,7 +129,7 @@ PYEOF
 - Forum deployment exists but scaled to 0 replicas (`kubectl get deployment forum -n mereka-lms`)
 - Forum service exists (`svc/forum`)
 - MongoDB Atlas migration completed (per `docs/MONGODB_ATLAS.md`)
-- `MONGODB_URI` is empty in `tutor_env/config.yml` (needs verification in staging)
+- `MONGODB_URI` is empty in `tutor_env/config.yml` (needs verification in production)
 
 **Action Required:**
 
@@ -239,7 +239,7 @@ kubectl exec -n mereka-lms deploy/forum -- env | grep MONGODB
 
 - [x] Document access URLs (`docs/ACCESS_URLS.md`)
 - [x] Document user management procedures (`docs/ACCESS_URLS.md`)
-- [ ] Verify admin users exist in staging
+- [ ] Verify admin users exist in production
 - [ ] Create admin users if needed
 - [ ] Verify forum deployment is running
 - [ ] Verify forum MongoDB Atlas connection
@@ -251,4 +251,3 @@ kubectl exec -n mereka-lms deploy/forum -- env | grep MONGODB
 
 **Last Updated:** 2025-11-12
 **Next Review:** After completing verification steps
-

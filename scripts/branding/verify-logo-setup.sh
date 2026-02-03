@@ -80,10 +80,10 @@ echo ""
 echo "4. Checking footer template references..."
 FOOTER_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 if [[ -f "$FOOTER_TEMPLATE" ]]; then
-  if grep -q "logo-horizontal.png" "$FOOTER_TEMPLATE"; then
-    echo "  ✓ Footer template references logo-horizontal.png"
+  if grep -q "logo.png" "$FOOTER_TEMPLATE"; then
+    echo "  ✓ Footer template references logo.png"
   else
-    echo "  ✗ Footer template does not reference logo-horizontal.png"
+    echo "  ✗ Footer template does not reference logo.png"
     MISSING_THEME=1
   fi
 else
@@ -93,10 +93,10 @@ fi
 
 HEADER_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/header/brand.html"
 if [[ -f "$HEADER_TEMPLATE" ]]; then
-  if grep -q "logo-horizontal.png" "$HEADER_TEMPLATE"; then
-    echo "  ✓ Header brand template references logo-horizontal.png"
+  if grep -q "logo.png" "$HEADER_TEMPLATE"; then
+    echo "  ✓ Header brand template references logo.png"
   else
-    echo "  ✗ Header brand template does not reference logo-horizontal.png"
+    echo "  ✗ Header brand template does not reference logo.png"
     MISSING_THEME=1
   fi
 else

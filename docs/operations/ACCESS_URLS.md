@@ -63,7 +63,7 @@ _Audience: Everyone • Last updated: 2025-12-29_
 **Other Services (GKE)** - Internal only, port-forward required
 - **Discovery:** Internal (kubectl port-forward svc/discovery 8000:8000)
 - **Ecommerce:** Internal (kubectl port-forward svc/ecommerce 8000:8000)
-- **Credentials:** Internal (kubectl port-forward svc/credentials 8000:8000)
+- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
 - **Notes API:** Internal (API only, no UI)
 - **Forum:** Integrated into LMS courses
   - **Status:** ✅ Running (scaled to 1 replica)
@@ -114,7 +114,7 @@ _Audience: Everyone • Last updated: 2025-12-29_
 **Other Services (Production)**
 - **Discovery:** Internal only (port-forward required)
 - **Ecommerce:** Internal only (port-forward required)
-- **Credentials:** Internal only (port-forward required)
+- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
 - **Notes API:** Internal only
 
 **Microsite Boundary Note:** `skillourfuture.academy.mereka.io` and `academy.biji-biji.com` are separate client sites with distinct branding, catalogs, and users. Treat them as independent tenants.

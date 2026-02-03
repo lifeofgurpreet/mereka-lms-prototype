@@ -1,6 +1,8 @@
 # Kajabi → Open edX Data Migration Notes
 _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-09-30_
 
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
+
 ## Credentials & Endpoints
 - Base API URL: `https://academy.mereka.my/api` (tenant-specific).
 - OAuth2 client credentials flow against `https://api.kajabi.com/v1/oauth/token`.
@@ -121,7 +123,7 @@ python scripts/migrations/kajabi/kajabi-ndjson-to-csv.py \
 
 ## Open edX Import Workflow (Tutor local or Tutor k8s)
 
-Once the CSVs/tarballs under `scripts/migrations/kajabi/output/` are refreshed, run the following pipeline to land the data in Open edX. Everything below works against both `tutor local` (Docker on your laptop) and `tutor k8s` (GKE staging). Substitute the namespace/service names if your deployment differs from `mereka-lms`/`cms`/`lms`.
+Once the CSVs/tarballs under `scripts/migrations/kajabi/output/` are refreshed, run the following pipeline to land the data in Open edX. Everything below works against both `tutor local` (Docker on your laptop) and `tutor k8s` (GKE production). Substitute the namespace/service names if your deployment differs from `mereka-lms`/`cms`/`lms`.
 
 ### 1. Prerequisites & Health Checks
 
@@ -230,7 +232,7 @@ Key behaviour:
 
 ### 5. Real-time deltas via Kajabi webhooks
 
-Full refreshes keep staging accurate, but we still need a way to capture purchases/tag changes that happen between export runs. The lightweight FastAPI receiver in `scripts/migrations/kajabi/webhook_app/` does the following:
+Full refreshes keep production accurate, but we still need a way to capture purchases/tag changes that happen between export runs. The lightweight FastAPI receiver in `scripts/migrations/kajabi/webhook_app/` does the following:
 
 1. Verifies the `X-Kajabi-Signature` header using `KAJABI_WEBHOOK_SECRET` (same value you provision in the Kajabi UI when adding the webhook).
 2. Writes each accepted event to `scripts/migrations/kajabi/webhook_app/outbox/<event>.ndjson` so downstream workers can pick them up (ship to Pub/Sub, append to BigQuery, etc.).
@@ -283,7 +285,7 @@ python scripts/migrations/kajabi/scripts/scrape_lessons.py \
   Then rebuild packages/import again—lessons with scraped HTML will display the real content, while any missing ones keep the metadata placeholder for manual follow-up.
 
 ## Next Steps
-- [ ] Run the exporter + importer regularly on staging to keep Kajabi and Open edX in sync until cut-over.
+- [ ] Run the exporter + importer regularly on production to keep Kajabi and Open edX in sync until cut-over.
 - [ ] Stand up the webhook receiver endpoint (FastAPI/Express) to capture deltas between full refreshes.
 - [ ] Plan manual video/progress exports and storage locations.
 - [ ] Document mapping tables (Kajabi offer/product IDs → Open edX course IDs) for downstream analytics.

@@ -7,17 +7,32 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-03_
 - ✅ CI/CD workflows added - GitHub Actions for Tutor image builds
 - ✅ Terraform production setup - backend, environments, multi-env workflow documented
 
+## Next 10 Most Awesome Things (2026-02-03)
+
+| # | Task | Owner | Status | Notes |
+|---|------|-------|--------|-------|
+| 1 | Fix ecommerce OAuth 500 | Infra | ✅ Complete | OAuth settings now env-driven; CORS/CSRF aligned. |
+| 2 | Credentials service routing | Infra | ✅ Complete | Caddy returns 503 until service is deployed; docs updated. |
+| 3 | Forum strategy | Infra | ✅ Complete | Forum remains internal (no public hostname). |
+| 4 | Synthetic checks + SLO dashboards | SRE | ✅ Complete | Uptime configs + scheduled health checks added. |
+| 5 | Cert/SAN monitoring | SRE | ✅ Complete | `check-cert-sans.sh` + TLS expiry alert. |
+| 6 | Remove staging language | Docs | ✅ Complete | Active docs now reflect prod/dev; legacy identifiers annotated. |
+| 7 | Formalize DR | SRE | ✅ Complete | `docs/operations/DISASTER_RECOVERY.md` added. |
+| 8 | Multi-site governance | Infra | ✅ Complete | Roles + theming validation added to multisite playbook. |
+| 9 | Release checklist | Infra | ✅ Complete | Domain/secret release checklist added. |
+| 10 | Log-based alerting | SRE | ✅ Complete | 5xx + auth failure log alerts defined. |
+
 ## Previous Fixes (2025-11-25)
-- ✅ Staging restored: Fixed MySQL→Cloud SQL routing
-- ✅ Staging restored: Fixed Redis host drift in configmap
-- ✅ Staging restored: Fixed MFE service selector mismatch
+- ✅ Production restored: Fixed MySQL→Cloud SQL routing
+- ✅ Production restored: Fixed Redis host drift in configmap
+- ✅ Production restored: Fixed MFE service selector mismatch
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | MongoDB cost optimization | Infra | ✅ Complete | Already on M0 (FREE tier). Verified 2025-11-25. |
 | 2 | User management & access setup | Infra | ✅ Complete | Admin users verified, access URLs documented. |
 | 3 | SES SMTP deliverability | Infra | ✅ Complete | SMTP relay configured with SES credentials, test email delivered successfully. See `docs/TASK3_SES_SETUP_COMPLETE.md`. |
-| 4 | Production GCP environment | Infra | ✅ Complete | Terraform backend, staging/production tfvars, multi-env workflow documented. See `infrastructure/terraform/README.md`. Ready to apply when prod project is created. |
+| 4 | Production GCP environment | Infra | ✅ Complete | Terraform backend, dev/production tfvars, multi-env workflow documented (legacy tfvars file retained). See `infrastructure/terraform/README.md`. Ready to apply when prod project is created. |
 | 5 | Tutor CI/CD workflows | DevOps | ✅ Complete | GitHub Actions for lint, validation, image builds, deployment. See `docs/operations/CI_CD_SETUP.md`. |
 | 6 | Disaster recovery rehearsal | SRE | ✅ Complete | Velero backup restored to test namespace, MySQL data verified. See `docs/operations/DR_TEST_RESULTS.md`. |
 | 7 | Data migrations (Kajabi/MCT) | Data | 💤 Pending | Finalize `scripts/migrations/kajabi/kajabi-*` + `scripts/migrations/mct/mct-*` flows, import sample cohorts, validate grading/credential issuance. |

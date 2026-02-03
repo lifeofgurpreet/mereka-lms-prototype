@@ -30,7 +30,7 @@ MYSQL_PORT: 3306
 REDIS_HOST: redis
 REDIS_PORT: 6379
 AWS_S3_REGION_NAME: asia-southeast1
-AWS_STORAGE_BUCKET_NAME: staging-academy-mereka-io-content
+AWS_STORAGE_BUCKET_NAME: staging-academy-mereka-io-content  # legacy bucket name (prod data)
 LMS_DEFAULT_SITE_THEME: mereka
 ADDL_INSTALLED_APPS:
   - openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig

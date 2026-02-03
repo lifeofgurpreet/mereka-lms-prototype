@@ -1,4 +1,6 @@
-# ADR-005: Domain Migration (staging → academyV2)
+# ADR-005: Domain Migration (legacy environment → academyV2)
+
+> **Legacy note:** The old environment name is retired. References to the legacy label are historical only; active environments are production (GKE) and dev (kind).
 
 **Status**: Accepted
 **Date**: 2026-02-03
@@ -41,11 +43,11 @@ The environment variable pattern allows easy domain changes:
 
 ### Use academyv2.mereka.io
 - Simpler URL
-- **Rejected because**: We standardize on academyv2 for GKE now; academy.mereka.io remains unused
+- **Accepted because**: We standardize on academyv2 for GKE now; academy.mereka.io remains unused
 
 ## Implementation Notes
 
 - All domain references use MEREKA_* environment variables
-- Cookie domain: `.mereka.io` (supports all subdomains)
+- Cookie domain: `.academyv2.mereka.io` (supports LMS + Studio + MFEs)
 - Production settings in `deploy/k8s/base/apps/openedx/settings/*/production.py`
 - Caddy Caddyfile handles domain routing

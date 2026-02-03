@@ -3,10 +3,10 @@ _Last updated: 2025-11-12_
 
 ## 🏗️ Architecture
 
-### Production/Staging
+### Production + Dev (K8s)
 **Uses MongoDB Atlas** (Managed Service)
 - **Service:** MongoDB Atlas M10 cluster
-- **Cost:** $87/month (production), M0 FREE (staging)
+- **Cost:** Production M10; dev may use a smaller Atlas tier or a separate DB
 - **Region:** AWS `ap-southeast-1`
 - **Connection:** `mongodb+srv://` URI
 - **Databases:**
@@ -20,25 +20,23 @@ _Last updated: 2025-11-12_
 - ✅ Scaling
 - ✅ **Recommended by Open edX** for production
 
-### Local Development
-**Uses Local MongoDB Container**
+### Local Laptop (Optional)
+**Uses Local MongoDB Container** (only for `tutor local`, not K8s)
 - **Service:** Docker container `tutor_local-mongodb-1`
 - **Cost:** Free (local resources)
 - **Connection:** `mongodb://mongodb:27017`
 - **Same databases:** `openedx`, `cs_comments_service`
 
-**Why Local?**
-- ✅ No cloud costs during dev
-- ✅ Works offline
-- ✅ Fast (no network latency)
-- ✅ Isolated from production
+**Why Optional?**
+- ✅ Works offline for laptop-only development
+- ✅ Avoids touching shared Atlas data
 
 ## 📊 Data Flow
 
 ### Current State
 
 ```
-Production (Staging):
+Production (GKE) + Dev (kind):
 ┌─────────────────────────────────────┐
 │  MongoDB Atlas (M10)                │
 │  ├─ openedx                         │
@@ -50,7 +48,7 @@ Production (Staging):
          ↓
     SYNC NEEDED
          ↓
-Local Development:
+Local Laptop (Optional):
 ┌─────────────────────────────────────┐
 │  tutor_local-mongodb-1              │
 │  ├─ openedx                         │
@@ -156,11 +154,10 @@ MONGODB_PORT: 27017
 
 ## ✅ Best Practices
 
-1. **Production:** Always use Atlas
-2. **Staging:** Use Atlas M0 (free) or M2 (cost-effective)
-3. **Local Dev:** Use local container
-4. **Sync regularly:** Keep local in sync with production for testing
-5. **Never point local at production Atlas:** Use sync script instead
+1. **Production + Dev (K8s):** Always use Atlas
+2. **Local Laptop:** Use local container only for `tutor local`
+3. **Sync regularly:** Keep local in sync with production for testing
+4. **Never point local at production Atlas:** Use sync script instead
 
 ---
 

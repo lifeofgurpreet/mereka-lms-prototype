@@ -247,7 +247,7 @@ ASPECTS_CLICKHOUSE_DATA_RETENTION_DAYS: 365
 
 ## Kubernetes Deployment
 
-For production/staging deployments:
+For production/dev deployments:
 
 ```bash
 # Generate Kubernetes config
@@ -288,4 +288,3 @@ kubectl get pods -n mereka-lms | grep aspects
 | **Cost** | ✅ Free (open source) | ⚠️ May have costs |
 
 **Recommendation**: Start with Aspects as it's the official OpenEdX solution. Consider Panorama if you need specific features Aspects doesn't provide.
-

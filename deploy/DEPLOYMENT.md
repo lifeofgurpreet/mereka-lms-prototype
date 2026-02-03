@@ -9,7 +9,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - **Source of Truth**: `deploy/k8s/base/` contains base Kustomize manifests exported from Tutor
 - **Namespace**: All resources deploy to `mereka-lms` namespace (not `openedx`)
 - **ConfigMaps**: Application configs managed via Kustomize configMapGenerator
-- **Environment Overlays**: To be created for local, staging, and prod environments
+- **Environment Overlays**: Local (kind/VPS) and production (GKE). The legacy `staging/` overlay is deprecated.
 
 ## What Was Created
 
@@ -28,10 +28,10 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 │       │   ├── volumes.yml     # PersistentVolumeClaims
 │       │   ├── apps/           # 14 config files
 │       │   └── plugins/        # 13 plugin config files
-│       └── overlays/           # (To be created)
+│       └── overlays/
 │           ├── local/
-│           ├── staging/
-│           └── prod/
+│           ├── production/
+│           └── staging/        # Legacy (do not use)
 └── scripts/
     └── export-k8s-manifests.sh # Re-export script
 ```
@@ -137,7 +137,7 @@ All resources should have `namespace: mereka-lms`
 
 ### 1. Create Environment Overlays
 
-Create overlays for each environment:
+Create overlays for each active environment:
 
 ```bash
 # Local development
@@ -145,13 +145,8 @@ mkdir -p deploy/k8s/overlays/local
 # Create kustomization.yaml referencing base
 # Add local-specific patches
 
-# Staging
-mkdir -p deploy/k8s/overlays/staging
-# Create kustomization.yaml referencing base
-# Add staging-specific patches
-
 # Production
-mkdir -p deploy/k8s/overlays/prod
+mkdir -p deploy/k8s/overlays/production
 # Create kustomization.yaml referencing base
 # Add production-specific patches
 ```
@@ -178,7 +173,7 @@ For production:
 In the BBI-K8 repository:
 1. Create `apps/mereka-lms/` directory
 2. Create base/kustomization.yaml referencing this repo
-3. Create overlays for each environment
+3. Create overlays for local + production (staging deprecated)
 4. Add to ArgoCD ApplicationSet
 
 ## Maintenance

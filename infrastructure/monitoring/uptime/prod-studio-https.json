@@ -1,10 +1,10 @@
 {
-  "displayName": "mereka-lms-staging-https",
+  "displayName": "mereka-studio-prod-https",
   "monitoredResource": {
     "type": "uptime_url",
     "labels": {
       "project_id": "mereka-lms",
-      "host": "academyv2.mereka.io"
+      "host": "studio.academyv2.mereka.io"
     }
   },
   "httpCheck": {
@@ -17,7 +17,7 @@
   "period": "300s",
   "selectedRegions": ["REGION_ASIA_PACIFIC"],
   "userLabels": {
-    "service": "lms",
-    "environment": "staging"
+    "service": "cms",
+    "environment": "production"
   }
 }

@@ -8,7 +8,7 @@ MEMORY_REQUEST=${MEMORY_REQUEST:-512Mi}
 
 log() { printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
-log "Optimizing pod resource requests for dev/staging environment"
+log "Optimizing pod resource requests for dev environment"
 log "Namespace: $NAMESPACE"
 log "Target memory request: $MEMORY_REQUEST"
 log ""

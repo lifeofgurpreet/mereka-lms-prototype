@@ -1,12 +1,14 @@
 # Kajabi → Open edX Migration Status Report
 _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-09-30_
 
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
+
 **Date:** 2024-11-08  
 **Status:** ✅ **MIGRATION COMPLETE**
 
 ## Executive Summary
 
-The Kajabi to Open edX migration has been successfully completed end-to-end. All data has been exported, transformed, and imported into the staging environment (GKE namespace: `mereka-lms`).
+The Kajabi to Open edX migration has been successfully completed end-to-end. All data has been exported, transformed, and imported into the production environment (GKE namespace: `mereka-lms`).
 
 ## Migration Statistics
 
@@ -205,7 +207,7 @@ kubectl exec -n mereka-lms deploy/cms -- \
 ✅ **All users imported** (84,379 / 85,215 CSV rows)  
 ✅ **All enrollments imported** (137,464 / 180,784 CSV rows)  
 ✅ **All courses imported** (107 / 107 course packages)  
-✅ **Data validated** in staging environment  
+✅ **Data validated** in production environment  
 ✅ **Logs archived** for traceability  
 
 ## Next Steps

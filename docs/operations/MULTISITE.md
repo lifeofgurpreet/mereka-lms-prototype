@@ -3,6 +3,8 @@ _Audience: Platform Eng + Design • Owner: Infra Team • Last verified: 2025-0
 
 This guide captures the steps required to attach additional branded experiences to the canonical `academyv2.mereka.io` Tutor deployment. It covers DNS, Tutor templating changes, database bootstrap, and validation.
 
+> **Microsite boundary:** `academy.biji-biji.com` and `skillourfuture.academy.mereka.io` are distinct client tenants with their own organizations and catalogs. Treat them as separate brands, not aliases.
+
 ## 1. Domains, DNS, and TLS
 
 | Brand | Hostname | Notes |
@@ -68,22 +70,37 @@ What the script does:
 - When you are able to run inside GCP and prefer IAM authentication over a TCP tunnel, the script can talk through the Cloud SQL Python Connector: `python scripts/shared/multisite_bootstrap.py --use-connector --instance mereka-lms:asia-southeast1:mereka-lms-mysql --ip-type PRIVATE --apply`.  
   Private-IP connections still require the runtime to live on a host that can reach the same VPC; when you’re off-network, temporarily assigning a public IP that is locked down to your own `/32` and then removing it afterwards is the quickest path.
 
-## 4. Content governance
+## 4. Governance & roles
+
+- **Platform Admins**: Full access across all sites; approve domain/secret changes.
+- **Client Admins**: Scoped to their org (`BIJIBIJI`, `SKILLOURFUTURE`) and responsible for catalog content.
+- **Course Authors**: Must create courses under the correct org; violations surface on the wrong microsite.
+- **Change approvals**: Any domain, TLS, or theme change requires a release checklist sign-off (see `docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`).
+
+**Theming validation checklist**
+1. Sync assets: `make branding-sync`
+2. Verify logos: `./scripts/branding/verify-logo-setup.sh`
+3. Confirm `course_org_filter` + `THEME_NAME` in `infrastructure/tutor/multisite-sites.yml`
+4. Capture LMS/Studio/MFE screenshots for each microsite before release
+
+## 5. Content governance
 
 - **Organizations:** Authors must create courses under the correct org (`BIJIBIJI` or `SKILLOURFUTURE`). Organization-level roles keep Studio permissions separated even though everyone still signs into `studio.academyv2.mereka.io`.
 - **Discovery / catalog:** The `course_org_filter` value surfaces the right subset of courses at runtime. Discovery also supports organization and catalog filters if you need to hide courses from anonymous visitors.
 - **Themes:** All microsites currently reuse the Mereka comprehensive theme. When brand assets are ready, add new theme directories under `infrastructure/tutor/themes/` (e.g., `infrastructure/tutor/themes/biji-biji`) and update each site configuration with `THEME_NAME`. Tutor already copies the entire `infrastructure/tutor/themes/` tree, so per-site themes only require CSS + static assets.
 
-## 5. Verification checklist
+## 6. Verification checklist
 
-1. `curl -I https://academy.biji-biji.com/health` and `curl -I https://skillourfuture.academy.mereka.io/health` should return `200` after DNS + TLS propagate.
+1. Run `./scripts/qa/public-health-check.sh prod` and verify all endpoints are green.
+2. `curl -I https://academy.biji-biji.com/health` and `curl -I https://skillourfuture.academy.mereka.io/health` should return `200` after DNS + TLS propagate.
 2. Visit each domain in a browser, confirm the navbar title, footer copy, and catalog results reflect the new brand.
 3. Log into Studio (`https://studio.academyv2.mereka.io`), create a course under each organization, then make sure only the matching microsite displays it.
 4. Spot-check CSRF/login by signing in/out through the new hostnames.
 - If Cloudflare ever shows `525` for `skillourfuture…`, double-check the record is gray-clouded. Multi-level subdomains fall outside Universal SSL coverage, so Origin-only TLS is expected there.
 
-## 6. Operational notes
+## 7. Operational notes
 
 - Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce, and background services remain shared across all brands.
+- Forum remains internal to LMS (no dedicated public hostname). Discussions render inside course pages, and moderation happens via Studio.
 - Any `tutor config save` run must be followed by `./infrastructure/tutor/apply-patches.sh` so the additional host headers stay injected.
 - Back up the database (`tutor local do backup-db` / `scripts/infra/backup-db.sh`) before rolling out further domain changes.

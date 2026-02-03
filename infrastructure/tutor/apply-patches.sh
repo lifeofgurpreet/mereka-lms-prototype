@@ -447,6 +447,10 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
     if path.name == "production.py":
         updated = ensure_allowed_hosts(updated)
         updated = ensure_csrf_origins(updated)
+        # Ensure DEFAULT_SITE_THEME is set for fallback branding
+        if "DEFAULT_SITE_THEME" not in updated:
+            # Add at the end of the file
+            updated = updated.rstrip() + '\n\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
 
     if path.name == "env.config.jsx":
         updated = updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")
@@ -465,7 +469,7 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
               const supportEmail = config.CONTACT_EMAIL || 'team@mereka.io';
               const supportLink = `mailto:${supportEmail}`;
               const currentYear = new Date().getFullYear();
-              const logoUrl = baseUrl ? `${baseUrl}/static/mereka/images/logo-horizontal.png` : '';
+              const logoUrl = baseUrl ? `${baseUrl}/static/images/logo.png` : '';
 
               return (
                 <footer className="mereka-footer" role="contentinfo">
@@ -554,9 +558,33 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
             )
             updated = pattern.sub(rf"\\1\n{profile_proxy}\\2", updated, count=1)
     if path.name == "Caddyfile":
+        # For extra LMS hosts, use the proper LMS proxy pattern (not nginx)
+        lms_caddy_block_template = """{domain} {{
+    @favicon_matcher {{
+        path_regexp ^/favicon.ico$
+    }}
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    # Limit profile image upload size
+    handle_path /api/profile_images/*/*/upload {{
+        request_body {{
+            max_size 1MB
+        }}
+    }}
+
+    import proxy "lms:8000"
+
+    handle_path /* {{
+        request_body {{
+            max_size 4MB
+        }}
+    }}
+}}
+
+"""
         for host in extra_lms_hosts:
             if host not in updated:
-                updated = updated.rstrip() + "\n\n" + caddy_block_template.format(domain=host)
+                updated = updated.rstrip() + "\n\n" + lms_caddy_block_template.format(domain=host)
         if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
             needle = "apps.academyv2.mereka.io {\n        reverse_proxy nginx:80"
             replacement = (
@@ -589,6 +617,40 @@ if [ -f "$MFE_DOCKERFILE" ]; then
   # Add COPY command for mereka folder after each env.config.jsx copy
   sed -i 's|COPY indigo/env.config.jsx /openedx/app/|COPY indigo/env.config.jsx /openedx/app/\nCOPY indigo/mereka /openedx/app/mereka|g' "$MFE_DOCKERFILE"
   echo "MFE Dockerfile patched."
+fi
+
+# Sync all logo files from theme source to build directory
+echo "Syncing logo files from theme source to build directory..."
+THEME_BUILD_DIR="$REPO_ROOT/tutor_env/env/build/openedx/themes/mereka"
+if [ -d "$THEME_BUILD_DIR" ]; then
+  # Copy all logo variants to LMS static images
+  mkdir -p "$THEME_BUILD_DIR/lms/static/images"
+  for logo_file in logo.png logo-horizontal.png logo-horizontal-white.png logo-square.png \
+                   logo-horizontal.svg logo-horizontal-white.svg logo-square.svg \
+                   favicon.ico; do
+    src_file="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images/$logo_file"
+    if [ -f "$src_file" ]; then
+      cp "$src_file" "$THEME_BUILD_DIR/lms/static/images/$logo_file"
+      echo "  ✓ Copied $logo_file to LMS theme"
+    fi
+  done
+
+  # Copy to CMS static images if CMS theme exists
+  if [ -d "$THEME_BUILD_DIR/cms" ]; then
+    mkdir -p "$THEME_BUILD_DIR/cms/static/images"
+    for logo_file in logo.png logo-horizontal.png logo-horizontal-white.png logo-square.png \
+                     logo-horizontal.svg logo-horizontal-white.svg logo-square.svg \
+                     favicon.ico; do
+      src_file="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images/$logo_file"
+      if [ -f "$src_file" ]; then
+        cp "$src_file" "$THEME_BUILD_DIR/cms/static/images/$logo_file"
+        echo "  ✓ Copied $logo_file to CMS theme"
+      fi
+    done
+  fi
+  echo "Logo files synced successfully."
+else
+  echo "⚠ Warning: Theme build directory not found. Logo sync skipped."
 fi
 
 echo "Applied local Tutor patches."

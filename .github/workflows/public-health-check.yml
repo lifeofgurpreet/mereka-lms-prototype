@@ -1,0 +1,19 @@
+name: Public Health Checks
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  public-checks:
+    name: Public Endpoint Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run public health checks (prod)
+        run: ./scripts/qa/public-health-check.sh prod
+
+      - name: Check TLS SANs
+        run: ./scripts/infra/check-cert-sans.sh

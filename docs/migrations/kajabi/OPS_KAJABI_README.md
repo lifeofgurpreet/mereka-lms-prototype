@@ -1,6 +1,8 @@
 # Kajabi → Open edX Transformation Pipeline
 
-This folder holds the tooling that turns the raw Kajabi exports (stored under `exports/kajabi/`) into staging files we can feed into Open edX.
+This folder holds the tooling that turns the raw Kajabi exports (stored under `exports/kajabi/`) into production files we can feed into Open edX.
+
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
 
 ## Inputs
 

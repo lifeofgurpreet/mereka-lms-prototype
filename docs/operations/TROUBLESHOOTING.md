@@ -149,8 +149,37 @@ curl -Ik https://academyv2.mereka.io
 
 **One-command repair (selectors + HTTPS):**
 ```bash
-./scripts/infra/repair-staging-routing.sh
+./scripts/infra/repair-routing.sh
 ```
+
+---
+
+### Issue 4b: Fake Ingress Certificate
+
+**Symptoms:**
+- TLS cert shows `Kubernetes Ingress Controller Fake Certificate`
+- Browser warns about invalid certificate on `academyv2.mereka.io`
+
+**Root Cause:**
+- DNS points at the wrong LoadBalancer (Ingress instead of Caddy), or
+- Caddy is not serving TLS for the hostname
+
+**Quick Fix:**
+```bash
+# 1) Validate cert SANs
+./scripts/infra/check-cert-sans.sh
+
+# 2) Confirm Caddy has 443 open
+kubectl get svc caddy -n mereka-lms -o jsonpath='{.spec.ports[*].port}'
+
+# 3) Ensure DNS is pointing at the Caddy LoadBalancer IP
+kubectl get svc caddy -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+./scripts/infra/cloudflare-sync.sh  # records.json should target the Caddy IP
+```
+
+**Notes:**
+- If the fake cert persists, confirm the hostnames appear in `deploy/k8s/base/apps/caddy/Caddyfile`.
+- Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
 ---
 
@@ -248,7 +277,7 @@ cd /openedx/edx-platform && ./manage.py lms shell -c \\
 ```
 
 **Prevention:**
-- Keep the trusted origins list in sync with all served hostnames (staging, studio, apps, academy.biji-biji.com, skillourfuture.*).
+- Keep the trusted origins list in sync with all served hostnames (academyv2, studio, apps, academy.biji-biji.com, skillourfuture.*).
 - Avoid corrupting `profile.meta`; if corruption occurs, set it back to `{}`.
 
 ---
@@ -267,7 +296,7 @@ kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o jsonpath='{.data.cms\\
 # Edit both to include:
 #   LOGIN_MICROFRONTEND_URL: https://apps.academyv2.mereka.io/authn
 #   LOGISTRATION_MICROFRONTEND_URL: https://apps.academyv2.mereka.io/authn
-# Ensure CSRF trusted origins include staging/studio/apps/academy.biji-biji.com/skillourfuture.*
+# Ensure CSRF trusted origins include academyv2/studio/apps/academy.biji-biji.com/skillourfuture.*
 
 # Patch the configmap (example using JSON strings)
 LMS=$(python3 - <<'PY'\nimport json; print(json.dumps(open('/tmp/lms.json').read()))\nPY)
@@ -278,7 +307,7 @@ kubectl patch cm openedx-config-5t8bdcb64h -n mereka-lms --type=merge -p "{\"dat
 kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 ```
 
-**Note:** Ensure the MFE image includes `frontend-app-authn` and Caddy/nginx routes `/authn` to the MFE (already true for apps.staging).
+**Note:** Ensure the MFE image includes `frontend-app-authn` and Caddy/nginx routes `/authn` to the MFE (already true for apps.academyv2).
 
 ---
 
@@ -470,4 +499,3 @@ kubectl get endpoints -n "$NAMESPACE" | grep -E "NAME|$SERVICES"
 ---
 
 _Last updated: 2025-11-11 after resolving service selector mismatch issues that caused site downtime_
-

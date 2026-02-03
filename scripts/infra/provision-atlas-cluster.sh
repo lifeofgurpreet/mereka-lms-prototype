@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Provision MongoDB Atlas cluster via CLI for Mereka Academy.
 # This script automates cluster creation, user setup, and network access configuration.
+# We intentionally use public IP allowlists (no private connectivity).
 set -euo pipefail
 
-CLUSTER_NAME=${CLUSTER_NAME:-mereka-lms-staging}
+CLUSTER_NAME=${CLUSTER_NAME:-cluster-mereka-lms}
 PROJECT_NAME=${PROJECT_NAME:-mereka-lms}
 PROVIDER=${PROVIDER:-AWS}
 REGION=${REGION:-AP_SOUTHEAST_1}
@@ -112,7 +113,7 @@ else
 fi
 
 # Configure network access
-log "Configuring network access for GKE egress IPs..."
+log "Configuring network access for GKE egress IPs (public allowlist)..."
 IFS=',' read -ra IPS <<< "$GKE_EGRESS_IPS"
 for ip in "${IPS[@]}"; do
   ip=$(echo "$ip" | xargs) # trim whitespace

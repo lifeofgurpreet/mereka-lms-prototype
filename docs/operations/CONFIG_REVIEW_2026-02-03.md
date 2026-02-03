@@ -16,7 +16,7 @@ Error: adapting config using caddyfile: parsing caddyfile tokens for 'order':
 /etc/caddy/Caddyfile:5 - Error during parsing: advanced_metrics is not a registered directive
 ```
 
-**Fix:** Removed `advanced_metrics` directive from `caddy-config-staging` ConfigMap.
+**Fix:** Removed `advanced_metrics` directive from `caddy-config` ConfigMap.
 
 **Result:** Caddy now running with 0 restarts, site returning HTTP 200.
 
@@ -33,7 +33,7 @@ Error: adapting config using caddyfile: parsing caddyfile tokens for 'order':
 | Ecommerce | `overhangio/openedx-ecommerce:18.0.1` | Stock Tutor |
 | Caddy | `caddy:2.7.4` | Stock (no metrics plugin) |
 | MySQL | `mysql:8.4.0` | In-cluster |
-| MongoDB | `mongo:7.0` | In-cluster |
+| MongoDB | Atlas | External managed service |
 | Redis | `redis:7.2.4` | In-cluster |
 | Elasticsearch | `elasticsearch:7.17.13` | In-cluster |
 
@@ -60,20 +60,20 @@ All pods running with 0 restarts except:
 
 The following sensitive values are visible in ConfigMaps (should be K8s Secrets):
 
-1. **Database password** in `openedx-config-staging`:
+1. **Database password** in `openedx-config`:
    - `PASSWORD: "CjsIbNU3"` visible in DATABASES config
 
-2. **Django SECRET_KEY** in `openedx-config-staging`:
+2. **Django SECRET_KEY** in `openedx-config`:
    - `SECRET_KEY: "UeCMQQglnc0O68rTJQezNNSt"` visible
 
 **Recommendation:** Move sensitive values to K8s Secrets and reference via `secretKeyRef`.
 
 ### Domain Configuration
 
-Current domains (to be updated by v2 rename agent):
-- LMS: `academyv2.mereka.io` → `academyv2.mereka.io`
-- CMS: `studio.academyv2.mereka.io` → `studio.academyv2.mereka.io`
-- MFE: `apps.academyv2.mereka.io` → `apps.academyv2.mereka.io`
+Current domains (academyv2 is canonical):
+- LMS: `academyv2.mereka.io`
+- CMS: `studio.academyv2.mereka.io`
+- MFE: `apps.academyv2.mereka.io`
 
 ## Feature Flags Review
 

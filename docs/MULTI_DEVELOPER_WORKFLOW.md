@@ -198,7 +198,7 @@ tutor local restart
 ### Before Deploying
 1. Verify locally works perfectly
 2. Compare with production config
-3. Test in staging first
+3. Test in dev (kind) first
 4. Document deployment steps
 
 ## 🔍 Troubleshooting

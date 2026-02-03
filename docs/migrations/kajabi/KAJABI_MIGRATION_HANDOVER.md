@@ -1,6 +1,8 @@
 # Kajabi → Open edX Migration Implementation Guide
 _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-10-05_
 
+> **Legacy note:** This doc predates the production/dev naming. References to the old environment label should be read as production (GKE); dev runs on kind.
+
 **Last Updated:** 2024-11-08  
 **Status:** ✅ **MIGRATION COMPLETE** - All data imported successfully
 
@@ -8,7 +10,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-10-05
 
 ## Current State
 
-- **Data on staging (GKE):** 84,379 users, 137,464 enrollments, 109 courses (Mongo `modulestore.active_versions`) after latest run
+- **Data on production (GKE):** 84,379 users, 137,464 enrollments, 109 courses (Mongo `modulestore.active_versions`) after latest run
 - **All course tarballs imported** via `scripts/migrations/kajabi/scripts/import_courses.py --backend k8s --k8s-namespace mereka-lms`
 - **Batch tooling:** `scripts/migrations/kajabi/scripts/run_batches.py` + `openedx_bulk_import.py` handle offsets, retries, and log each batch to `scripts/migrations/kajabi/logs/`
 - **Webhook receiver:** FastAPI app under `scripts/migrations/kajabi/webhook_app/` (with Dockerfile + README) captures real-time Kajabi events, verifies HMAC, and writes NDJSON outbox files

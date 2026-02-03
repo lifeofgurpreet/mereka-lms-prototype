@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PROJECT_ID=${PROJECT_ID:-690e7c787757f4238efc94d1}
-CLUSTER_NAME=${CLUSTER_NAME:-mereka-lms-staging}
+CLUSTER_NAME=${CLUSTER_NAME:-cluster-mereka-lms}
 TARGET_CLUSTER=${TARGET_CLUSTER:-cluster-mereka-lms}  # Existing M0 cluster
 
 log() { printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
@@ -20,7 +20,7 @@ log "M0 Limitations:"
 log "  • 512MB storage (vs 10GB on M10)"
 log "  • Shared CPU/RAM (vs dedicated)"
 log "  • No backups (vs automatic backups)"
-log "  • Perfect for staging/dev, NOT for production"
+log "  • Cost-optimized for dev only; do NOT use for production"
 log ""
 read -p "Continue with migration to M0? (yes/no): " CONFIRM
 

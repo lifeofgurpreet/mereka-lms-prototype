@@ -20,6 +20,12 @@ sites:
       platform_name: Mereka Academy
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - MEREKA
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
 
   - domain: academy.biji-biji.com
     name: Biji-Biji Academy
@@ -31,9 +37,12 @@ sites:
       platform_name: Biji-Biji Academy
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - BIJIBIJI
       logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
       logo_url: /
       favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
 
   - domain: skillourfuture.academy.mereka.io
     name: Skill Our Future
@@ -45,6 +54,8 @@ sites:
       platform_name: Skill Our Future
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - SKILLOURFUTURE
       logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
       logo_url: /
       favicon_path: mereka/images/favicon.ico

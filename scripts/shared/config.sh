@@ -41,6 +41,7 @@ export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
 
 # Alternative domains (multisite)
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"
+export SKILLOURFUTURE_DOMAIN="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"
 
 # Development
 export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"

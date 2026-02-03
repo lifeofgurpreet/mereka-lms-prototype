@@ -1,0 +1,5 @@
+{
+  "name": "mereka_lms_http_5xx",
+  "description": "Count HTTP 5xx responses in GKE container logs for LMS/CMS/MFE/edge.",
+  "filter": "resource.type=\"k8s_container\" AND (jsonPayload.status>=500 OR jsonPayload.status_code>=500 OR textPayload=~\"\\s5\\d\\d\\s\")"
+}

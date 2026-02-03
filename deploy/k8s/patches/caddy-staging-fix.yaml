@@ -1,4 +1,4 @@
-# Caddy ConfigMap patch to add staging domains
+# Caddy ConfigMap patch to restore domain routing (legacy emergency use)
 # Apply with: kubectl apply -f caddy-staging-fix.yaml
 # Then restart: kubectl rollout restart deploy/caddy -n mereka-lms
 
@@ -34,7 +34,7 @@ data:
     }
 
     # ============================================
-    # STAGING DOMAINS
+    # PRIMARY DOMAINS
     # ============================================
 
     # Main LMS - academyv2.mereka.io
@@ -117,7 +117,7 @@ data:
     }
 
     # ============================================
-    # PRODUCTION DOMAINS
+    # MICROSITES
     # ============================================
 
     # Biji-Biji Academy

@@ -1,0 +1,25 @@
+{
+  "displayName": "Auth failures spike (logs)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "WARNING",
+  "conditions": [
+    {
+      "displayName": "Auth failures > 10/min",
+      "conditionThreshold": {
+        "filter": "metric.type=\"logging.googleapis.com/user/mereka_lms_auth_failures\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "60s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 10,
+        "duration": "0s",
+        "trigger": { "count": 1 }
+      }
+    }
+  ],
+  "notificationChannels": []
+}

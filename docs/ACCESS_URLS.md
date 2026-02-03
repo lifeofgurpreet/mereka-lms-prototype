@@ -63,6 +63,7 @@ _Audience: Everyone • Last updated: 2025-11-12_
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
+- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
 - **Notes API:** https://notes.academyv2.mereka.io (API only, no UI)
 - **Forum:** Integrated into LMS courses
   - **Status:** ✅ Running (scaled to 1 replica)
@@ -99,6 +100,7 @@ _Audience: Everyone • Last updated: 2025-11-12_
 **Other Services (VPS Kind)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
+- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
 - **Notes API:** https://notes.academyv2.mereka.dev (API only, no UI)
 
 ---
@@ -138,9 +140,9 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 ### Current Admin Users (GKE)
 
-**Verified:** 2025-11-12
+**Verified:** 2025-11-12 (re-validate after major user imports)
 
-The following admin users exist in staging:
+The following admin users exist in production:
 - `gurpreet` (gurpreet@biji-biji.com) - Staff: ✅, Active: ✅
 - `malasari` (malasari@mereka.my) - Staff: ✅, Active: ✅
 - `discovery` (discovery@openedx) - Service account
