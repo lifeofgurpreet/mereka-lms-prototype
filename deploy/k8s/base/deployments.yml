@@ -740,6 +740,11 @@ spec:
           env:
             - name: DJANGO_SETTINGS_MODULE
               value: notesserver.settings.tutor
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           volumeMounts:
             - mountPath: /app/edx-notes-api/notesserver/settings/tutor.py
               name: settings

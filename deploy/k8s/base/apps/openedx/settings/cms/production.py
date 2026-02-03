@@ -2,6 +2,11 @@
 import os
 from cms.envs.production import *
 
+# Override SECRET_KEY from environment variable (required for K8s deployment)
+SECRET_KEY = os.environ.get("CMS_SECRET_KEY", "")
+if not SECRET_KEY:
+    raise ValueError("CMS_SECRET_KEY environment variable is required")
+
 ####### Settings common to LMS and CMS
 import json
 import os
