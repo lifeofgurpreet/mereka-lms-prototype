@@ -34,7 +34,7 @@ export K8S_CLUSTER="${K8S_CLUSTER:-mereka-lms}"
 # Domain Settings
 # =============================================================================
 # Production
-export LMS_DOMAIN="${LMS_DOMAIN:-academyV2.mereka.io}"
+export LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
 export STUDIO_DOMAIN="${STUDIO_DOMAIN:-studio.${LMS_DOMAIN}}"
 export MFE_DOMAIN="${MFE_DOMAIN:-apps.${LMS_DOMAIN}}"
 export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
@@ -43,7 +43,7 @@ export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"
 
 # Development
-export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyV2.mereka.dev}"
+export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
 
 # =============================================================================
 # Container Registry

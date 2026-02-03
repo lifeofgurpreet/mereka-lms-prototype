@@ -93,7 +93,7 @@ The team has successfully optimized dev/staging costs by **67-73%** through:
                                  │
                     ┌────────────▼────────────┐
                     │  Cloud DNS (Zone)      │
-                    │  academy.mereka.io     │
+                    │  academyv2.mereka.io   │
                     └────────────┬────────────┘
                                  │
                     ┌────────────▼─────────────┐
@@ -518,7 +518,7 @@ metadata:
     cloud.google.com/armor-config: '{"mereka-lms-armor-policy": "mereka-lms-security-policy"}'
 spec:
   rules:
-  - host: academy.mereka.io
+  - host: academyv2.mereka.io
     http:
       paths:
       - path: /*
@@ -528,7 +528,7 @@ spec:
             name: caddy
             port:
               number: 80
-  - host: studio.academy.mereka.io
+  - host: studio.academyv2.mereka.io
     http:
       paths:
       - path: /*
@@ -549,10 +549,10 @@ metadata:
   namespace: mereka-lms
 spec:
   domains:
-    - academy.mereka.io
-    - studio.academy.mereka.io
-    - apps.academy.mereka.io
-    - discovery.academy.mereka.io
+    - academyv2.mereka.io
+    - studio.academyv2.mereka.io
+    - apps.academyv2.mereka.io
+    - discovery.academyv2.mereka.io
 ```
 
 **Cost**: $18-25/month
@@ -623,7 +623,7 @@ resource "google_storage_bucket" "content" {
   storage_class = "STANDARD"
 
   cors {
-    origin          = ["https://academy.mereka.io"]
+    origin          = ["https://academyv2.mereka.io"]
     method          = ["GET", "HEAD"]
     response_header = ["*"]
     max_age_seconds = 3600
@@ -902,7 +902,7 @@ infrastructure/terraform/
 **File**: `infrastructure/terraform/environments/dev/terraform.tfvars`
 ```hcl
 project_id                 = "mereka-lms-dev"
-domain_root                = "dev.academy.mereka.io"
+domain_root                = "academyv2.mereka.dev"
 billing_account_id         = "01A879-A82798-7962E2"
 monthly_budget_myr         = 500  # ~$115 USD
 
@@ -974,7 +974,7 @@ terraform {
 **File**: `infrastructure/terraform/environments/prod/terraform.tfvars`
 ```hcl
 project_id                 = "mereka-lms-prod"
-domain_root                = "academy.mereka.io"
+domain_root                = "academyv2.mereka.io"
 billing_account_id         = "01A879-A82798-7962E2"
 monthly_budget_myr         = 9200  # ~$2,200 USD with 10% buffer
 
@@ -1392,7 +1392,7 @@ terraform apply prod.tfplan
 ```bash
 # Day 15: Build and push images
 export TUTOR_ROOT="$(pwd)/tutor_env_prod"
-tutor config save --set DOMAIN=academy.mereka.io
+tutor config save --set DOMAIN=academyv2.mereka.io
 tutor images build all --no-cache
 tutor images push all
 
@@ -1409,7 +1409,7 @@ kubectl apply -f infrastructure/k8s/prod/hpa.yaml
 # 1. Update Cloudflare DNS to point to prod LB IP
 # 2. Wait for Google-managed SSL cert provisioning (can take 15-60 min)
 # 3. Verify HTTPS access
-curl -I https://academy.mereka.io
+curl -I https://academyv2.mereka.io
 ```
 
 **Week 4: Load Testing & Validation**
@@ -1479,7 +1479,7 @@ mongodump --uri="mongodb://staging-mongodb-uri" --out=/tmp/forum-dump
 mongorestore --uri="mongodb://prod-atlas-uri" --drop /tmp/forum-dump
 
 # 6. Update DNS to point to production
-# Update Cloudflare DNS record for academy.mereka.io to prod LB IP
+# Update Cloudflare DNS record for academyv2.mereka.io to prod LB IP
 # TTL: 300 seconds (5 minutes)
 
 # 7. Disable maintenance mode on production
@@ -2117,7 +2117,7 @@ gcloud logging read 'jsonPayload.message=~"Authentication failed" AND timestamp>
 - [ ] Firewall rules configured (default deny, explicit allow)
 - [ ] Cloud Armor security policy applied
 - [ ] SSL certificates provisioned (Google-managed)
-- [ ] DNS records configured (academy.mereka.io → prod LB)
+- [ ] DNS records configured (academyv2.mereka.io → prod LB)
 - [ ] VPC peering configured (MongoDB Atlas)
 
 **Kubernetes Cluster:**
@@ -2173,8 +2173,8 @@ gcloud logging read 'jsonPayload.message=~"Authentication failed" AND timestamp>
 - [ ] Persistent volumes claimed (if any)
 
 **Configuration:**
-- [ ] `LMS_HOST` set to `academy.mereka.io`
-- [ ] `CMS_HOST` set to `studio.academy.mereka.io`
+- [ ] `LMS_HOST` set to `academyv2.mereka.io`
+- [ ] `CMS_HOST` set to `studio.academyv2.mereka.io`
 - [ ] `ENABLE_HTTPS` set to `true`
 - [ ] `SMTP_HOST` configured (AWS SES)
 - [ ] `CONTACT_EMAIL` set to support@mereka.io

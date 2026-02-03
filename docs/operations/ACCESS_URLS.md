@@ -109,7 +109,7 @@ _Audience: Everyone • Last updated: 2025-12-29_
 
 **Micro-Frontends (MFEs)**
 - **Base URL:** https://apps.academy.biji-biji.com
-- **Available MFEs:** Same as local/staging
+- **Available MFEs:** Same as local
 
 **Other Services (Production)**
 - **Discovery:** Internal only (port-forward required)
@@ -144,19 +144,19 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 1. Go to: http://localhost/admin
 2. Login with superuser credentials (`admin` / `admin123`)
 
-**Staging:**
+**GKE (Production):**
 1. Go to: https://academyv2.mereka.io/admin
 2. Login with superuser credentials
 
-**Production:**
-1. Go to: https://academy.mereka.io/admin (when ready)
+**VPS Kind (Dev):**
+1. Go to: https://academyv2.mereka.dev/admin
 2. Login with superuser credentials
 
-### Current Admin Users (Staging)
+### Current Admin Users (GKE)
 
 **Verified:** 2025-11-12
 
-The following admin users exist in staging:
+The following admin users exist in GKE:
 - `gurpreet` (gurpreet@biji-biji.com) - Staff: ✅, Active: ✅
 - `malasari` (malasari@mereka.my) - Staff: ✅, Active: ✅
 - `discovery` (discovery@openedx) - Service account
@@ -200,19 +200,19 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 ## Notes
 
 - **Local:** All URLs use HTTP (no TLS needed)
-- **Staging/Production:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
-- **Staging environment:** `academyv2.mereka.io`
-- **Production environment:** `academy.mereka.io` (when ready)
+- **GKE/Kind:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
+- **GKE environment:** `academyv2.mereka.io`
+- **VPS Kind environment:** `academyv2.mereka.dev`
 - **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
 
 ---
 
 ## Quick Reference
 
-### Main Staging Environment
+### Main GKE Environment
 
-| Service | Local | Staging |
-|---------|-------|---------|
+| Service | Local | GKE |
+|---------|-------|-----|
 | LMS | http://localhost | https://academyv2.mereka.io |
 | Studio | http://studio.localhost | https://studio.academyv2.mereka.io |
 | MFE Base | http://apps.localhost | https://apps.academyv2.mereka.io |
@@ -220,14 +220,14 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 | Ecommerce | http://ecommerce.localhost | https://ecommerce.academyv2.mereka.io |
 | Credentials | - | https://credentials.academyv2.mereka.io |
 
-### Skill Our Future (MCT) - Staging
+### Skill Our Future (MCT) - GKE
 
 | Service | URL |
 |---------|-----|
 | LMS | https://skillourfuture.academy.mereka.io |
 | Studio | https://studio.academyv2.mereka.io (shared) |
 
-### Biji-Biji Academy - Production
+### Biji-Biji Academy - GKE
 
 | Service | URL |
 |---------|-----|

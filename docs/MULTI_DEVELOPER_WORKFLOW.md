@@ -76,7 +76,7 @@ tutor local stop
 ### Production/Staging
 - **Database:** Cloud SQL, MongoDB Atlas, managed Redis
 - **Storage:** GCS buckets
-- **URLs:** `academyv2.mereka.io`, `academy.mereka.io`
+- **URLs:** `academyv2.mereka.io`, `academyv2.mereka.dev`
 - **Config:** Kubernetes ConfigMaps/Secrets
 
 ### Key Rule
@@ -249,4 +249,3 @@ tutor config save  # Reconfigure
 ---
 
 **Remember:** Always test locally first, never mix configs, and verify parity regularly!
-

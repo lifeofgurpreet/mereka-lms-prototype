@@ -496,8 +496,8 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
                       <ul>
                         <li><a href="mailto:techadmin@biji-biji.com">techadmin@biji-biji.com</a></li>
                         <li><a href={supportLink}>{supportEmail}</a></li>
-                        <li><a href="https://academy.mereka.io/help" target="_blank" rel="noopener">Help centre</a></li>
-                        <li><a href="https://academy.mereka.io/privacy" target="_blank" rel="noopener">Privacy</a></li>
+                        <li><a href="https://academyv2.mereka.io/help" target="_blank" rel="noopener">Help centre</a></li>
+                        <li><a href="https://academyv2.mereka.io/privacy" target="_blank" rel="noopener">Privacy</a></li>
                       </ul>
                     </div>
                     <div className="footer-links">

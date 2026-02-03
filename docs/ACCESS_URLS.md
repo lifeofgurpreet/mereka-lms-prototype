@@ -44,7 +44,7 @@ _Audience: Everyone • Last updated: 2025-11-12_
 
 ---
 
-### Staging Environment
+### GKE Production Environment
 
 **LMS (Learning Management System)**
 - **URL:** https://academyv2.mereka.io
@@ -60,7 +60,7 @@ _Audience: Everyone • Last updated: 2025-11-12_
 - **Base URL:** https://apps.academyv2.mereka.io
 - **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
-**Other Services (Staging)**
+**Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
 - **Notes API:** https://notes.academyv2.mereka.io (API only, no UI)
@@ -79,25 +79,25 @@ _Audience: Everyone • Last updated: 2025-11-12_
 
 ---
 
-### Production Environment
+### VPS Kind Development Environment
 
 **LMS (Learning Management System)**
-- **URL:** https://academy.mereka.io (when ready)
-- **Admin Panel:** https://academy.mereka.io/admin
-- **Purpose:** Main learning platform where students access courses
+- **URL:** https://academyv2.mereka.dev
+- **Admin Panel:** https://academyv2.mereka.dev/admin
+- **Purpose:** Dev environment on VPS kind cluster
 
 **Studio (Course Authoring)**
-- **URL:** https://studio.academy.mereka.io (when ready)
+- **URL:** https://studio.academyv2.mereka.dev
 - **Purpose:** Create and manage courses
 
 **Micro-Frontends (MFEs)**
-- **Base URL:** https://apps.academy.mereka.io (when ready)
-- **Available MFEs:** Same as local/staging
+- **Base URL:** https://apps.academyv2.mereka.dev
+- **Available MFEs:** Same as local
 
-**Other Services (Production)**
-- **Discovery:** https://discovery.academy.mereka.io (when ready)
-- **Ecommerce:** https://ecommerce.academy.mereka.io (when ready)
-- **Notes API:** https://notes.academy.mereka.io (API only, no UI)
+**Other Services (VPS Kind)**
+- **Discovery:** https://discovery.academyv2.mereka.dev
+- **Ecommerce:** https://ecommerce.academyv2.mereka.dev
+- **Notes API:** https://notes.academyv2.mereka.dev (API only, no UI)
 
 ---
 
@@ -105,7 +105,7 @@ _Audience: Everyone • Last updated: 2025-11-12_
 
 ### Create Admin User
 
-**Via Kubernetes (Staging/Production):**
+**Via Kubernetes (GKE/Kind):**
 ```bash
 kubectl exec -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 ```
@@ -126,15 +126,15 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 1. Go to: http://localhost/admin
 2. Login with superuser credentials (`admin` / `admin123`)
 
-**Staging:**
+**GKE (Production):**
 1. Go to: https://academyv2.mereka.io/admin
 2. Login with superuser credentials
 
-**Production:**
-1. Go to: https://academy.mereka.io/admin (when ready)
+**VPS Kind (Dev):**
+1. Go to: https://academyv2.mereka.dev/admin
 2. Login with superuser credentials
 
-### Current Admin Users (Staging)
+### Current Admin Users (GKE)
 
 **Verified:** 2025-11-12
 
