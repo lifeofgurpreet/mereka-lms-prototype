@@ -17,7 +17,7 @@ Since Kajabi's API doesn't expose certificates, we build eligibility from purcha
 ```bash
 export KAJABI_CLIENT_ID="your_client_id"
 export KAJABI_CLIENT_SECRET="your_client_secret"
-node tools/kajabi-export-certificates.mjs
+node scripts/migrations/kajabi/kajabi-export-certificates.mjs
 ```
 
 **Output**: `exports/kajabi/certificate_eligibility.ndjson`
@@ -39,7 +39,7 @@ Export current enrollments from your Open edX instance:
 
 ```bash
 # Option 1: Using the script (if dump_enrollments command exists)
-./tools/openedx-export-enrollments.sh exports/openedx/enrollments.csv
+./scripts/analytics/openedx-export-enrollments.sh exports/openedx/enrollments.csv
 
 # Option 2: Manual SQL export via Tutor
 tutor local run lms ./manage.py lms shell --settings=tutor.production <<'PYTHON'
@@ -70,7 +70,7 @@ tutor local run lms cat /tmp/enrollments.csv > exports/openedx/enrollments.csv
 Generate a comparison report:
 
 ```bash
-python tools/compare-enrollments-kajabi-openedx.py \
+python scripts/analytics/compare-enrollments-kajabi-openedx.py \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \

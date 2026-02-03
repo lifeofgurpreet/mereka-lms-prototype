@@ -18,7 +18,7 @@ pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
 # Set RAM: 12 GB, Swap: 2-4 GB, then Apply & Restart
 
 # 4. Set up Tutor
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 
 # 5. Configure local services (IMPORTANT: use local Docker names)
@@ -77,7 +77,7 @@ curl -I http://apps.localhost/authn/login   # MFE Login
 
 ```bash
 # Start
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local start -d
 
@@ -119,7 +119,7 @@ tutor local restart
 - **Complete Guide:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`
 - **Workflow:** `docs/quickstart/WORKFLOW_LOCAL.md`
 - **Setup Details:** `docs/quickstart/LOCAL_SETUP.md`
-- **Troubleshooting:** `docs/ops/TROUBLESHOOTING.md`
+- **Troubleshooting:** `docs/operations/TROUBLESHOOTING.md`
 
 ## 🌐 Access URLs
 

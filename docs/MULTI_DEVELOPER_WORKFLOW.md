@@ -25,7 +25,7 @@ This automatically:
 
 ### Verify Setup
 ```bash
-./tools/verify-setup.sh
+./scripts/qa/verify-setup.sh
 ```
 
 ## 🔄 Daily Workflow
@@ -33,7 +33,7 @@ This automatically:
 ### Starting Work
 ```bash
 cd /path/to/mereka.academy
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local start -d
 ```
@@ -87,7 +87,7 @@ tutor local stop
 ### Compare Local with Production
 ```bash
 # Get production config (read-only)
-./tools/sync-production-config.sh
+./scripts/infra/sync-production-config.sh
 
 # Analyze local data
 ./scripts/qa/analyze-local-data.sh
@@ -123,7 +123,7 @@ tutor local stop
 
 2. **Verify:**
    ```bash
-   ./tools/verify-setup.sh
+   ./scripts/qa/verify-setup.sh
    ```
 
 3. **Done!** Developer is ready to work.
@@ -174,18 +174,18 @@ tutor local restart
 ### Code Conflicts
 - Use Git branches for features
 - Test locally before pushing
-- Run `./tools/comprehensive-test.sh` before PR
+- Run `./scripts/qa/comprehensive-test.sh` before PR
 
 ## 📋 Best Practices
 
 ### Before Starting Work
 1. Pull latest changes: `git pull`
-2. Verify setup: `./tools/verify-setup.sh`
+2. Verify setup: `./scripts/qa/verify-setup.sh`
 3. Start services: `tutor local start -d`
 
 ### During Development
 1. Test locally first
-2. Run tests: `./tools/comprehensive-test.sh`
+2. Run tests: `./scripts/qa/comprehensive-test.sh`
 3. Check parity: `./scripts/qa/check-parity.sh`
 4. Document changes
 
@@ -206,11 +206,11 @@ tutor local restart
 ### "My local doesn't match production"
 ```bash
 # Compare configs
-./tools/sync-production-config.sh
+./scripts/infra/sync-production-config.sh
 ./scripts/qa/check-parity.sh
 
 # Fix local config
-./tools/fix-parity.sh
+./scripts/qa/fix-parity.sh
 ```
 
 ### "Database conflicts"
@@ -239,7 +239,7 @@ tutor config save  # Reconfigure
 ## ✅ Checklist for New Developers
 
 - [ ] Ran `./scripts/shared/setup-local.sh`
-- [ ] Verified with `./tools/verify-setup.sh`
+- [ ] Verified with `./scripts/qa/verify-setup.sh`
 - [ ] Can access http://localhost
 - [ ] Can login with admin/admin123
 - [ ] Read `docs/DEVELOPER_ONBOARDING.md`

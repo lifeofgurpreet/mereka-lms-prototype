@@ -140,7 +140,7 @@ When Kajabi courses are imported:
 
 1. **`scripts/shared/setup-local.sh`** - Complete one-click setup
 2. **`scripts/shared/sync-from-production.sh`** - Sync MongoDB + tag users
-3. **`tools/verify-setup.sh`** - Verify everything works
+3. **`scripts/qa/verify-setup.sh`** - Verify everything works
 4. **`scripts/qa/analyze-local-data.sh`** - Check what you have locally
 
 ---

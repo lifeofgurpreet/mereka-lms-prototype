@@ -215,7 +215,7 @@ PYEOF
 3. **Update Open edX Configuration:**
    ```bash
    # Update Tutor config
-   source ops/tutor-env.sh
+   source infrastructure/tutor/tutor-env.sh
    tutor config save \
      --set EMAIL_BACKEND=django_ses.SESBackend \
      --set AWS_SES_REGION_NAME=us-east-1 \

@@ -38,7 +38,7 @@ Then open: **http://localhost:8088**
 
 ```bash
 # Get admin password
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor config printvalue SUPERSET_ADMIN_PASSWORD
 
 # Username: admin

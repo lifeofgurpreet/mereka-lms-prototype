@@ -86,7 +86,7 @@ Outputs land in `scripts/migrations/kajabi/output/openedx/`:
 Make sure the Tutor stack is running (`tutor local start -d`). From the repo root:
 
 ```
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # 1) Users
 tutor local run lms bash -c "cat > /tmp/kajabi-users.csv" \
@@ -122,7 +122,7 @@ This command will create or update the course that is defined inside the tarball
 Instead of clicking through Studio 100+ times, use the automation script:
 
 ```
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 python scripts/migrations/kajabi/scripts/import_courses.py \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
   --packages-root scripts/migrations/kajabi/output/course_packages \

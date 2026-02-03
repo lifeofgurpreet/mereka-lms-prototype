@@ -53,7 +53,7 @@ This creates `scripts/migrations/kajabi/output/openedx/users_import.csv` and `en
 ### Local Tutor (recommended for dry runs)
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local start -d
 
 # Users

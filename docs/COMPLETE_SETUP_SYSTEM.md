@@ -78,12 +78,12 @@ cd mereka.academy
 
 ### Quick Verify
 ```bash
-./tools/verify-setup.sh
+./scripts/qa/verify-setup.sh
 ```
 
 ### Comprehensive Test
 ```bash
-./tools/comprehensive-test.sh
+./scripts/qa/comprehensive-test.sh
 ```
 
 ## 🔄 Multi-Developer Workflow
@@ -110,7 +110,7 @@ cd mereka.academy
 
 ### Compare Local with Production
 ```bash
-./tools/sync-production-config.sh
+./scripts/infra/sync-production-config.sh
 ```
 
 This shows:
@@ -135,17 +135,17 @@ Checks:
 
 ### Setup & Verification
 1. **`scripts/shared/setup-local.sh`** - One-click setup
-2. **`tools/verify-setup.sh`** - Verify setup complete
-3. **`tools/sync-production-config.sh`** - Compare with production
+2. **`scripts/qa/verify-setup.sh`** - Verify setup complete
+3. **`scripts/infra/sync-production-config.sh`** - Compare with production
 
 ### Testing & Analysis
-4. **`tools/comprehensive-test.sh`** - Full test suite
+4. **`scripts/qa/comprehensive-test.sh`** - Full test suite
 5. **`scripts/qa/check-parity.sh`** - Parity verification
 6. **`scripts/qa/analyze-local-data.sh`** - Data analysis
 
 ### Fixes
-7. **`tools/fix-parity.sh`** - Fix parity issues
-8. **`tools/fix-admin-login.sh`** - Fix login issues
+7. **`scripts/qa/fix-parity.sh`** - Fix parity issues
+8. **`scripts/qa/fix-admin-login.sh`** - Fix login issues
 
 ## 📚 Documentation Created
 
@@ -183,14 +183,14 @@ Checks:
 ### New Developer
 - [ ] Clone repository
 - [ ] Run `./scripts/shared/setup-local.sh`
-- [ ] Verify with `./tools/verify-setup.sh`
+- [ ] Verify with `./scripts/qa/verify-setup.sh`
 - [ ] Read `docs/DEVELOPER_ONBOARDING.md`
 - [ ] Bookmark `docs/QUICK_REFERENCE.md`
 
 ### Daily Work
-- [ ] Start: `source ops/tutor-env.sh && tutor local start -d`
+- [ ] Start: `source infrastructure/tutor/tutor-env.sh && tutor local start -d`
 - [ ] Work: Make changes, test locally
-- [ ] Verify: `./tools/comprehensive-test.sh`
+- [ ] Verify: `./scripts/qa/comprehensive-test.sh`
 - [ ] Stop: `tutor local stop`
 
 ### Before Deploying
@@ -214,13 +214,13 @@ docker info | grep "Total Memory"
 
 ### Verify Setup
 ```bash
-./tools/verify-setup.sh
+./scripts/qa/verify-setup.sh
 ```
 
 ### Common Issues
 - **Out of memory:** Increase Docker Desktop RAM
-- **Config issues:** Run `./tools/fix-parity.sh`
-- **Login issues:** Run `./tools/fix-admin-login.sh`
+- **Config issues:** Run `./scripts/qa/fix-parity.sh`
+- **Login issues:** Run `./scripts/qa/fix-admin-login.sh`
 
 ## 🎉 Benefits
 
@@ -246,5 +246,5 @@ docker info | grep "Total Memory"
 
 **Status:** ✅ **COMPLETE AND READY**  
 **Usage:** `./scripts/shared/setup-local.sh`  
-**Verification:** `./tools/verify-setup.sh`
+**Verification:** `./scripts/qa/verify-setup.sh`
 

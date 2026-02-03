@@ -388,7 +388,7 @@ kubectl rollout restart deployment/caddy -n mereka-lms
 **After Restarting:**
 1. Wait for rollout to complete: `kubectl rollout status deployment/<name> -n mereka-lms`
 2. **CRITICAL:** Check endpoints: `kubectl get endpoints -n mereka-lms`
-3. If endpoints are empty, run `./tools/fix-service-selectors.sh`
+3. If endpoints are empty, run `./scripts/infra/fix-service-selectors.sh`
 4. Verify service health: `kubectl get pods -n mereka-lms`
 
 **⚠️ Never restart Caddy first** - It will lose connectivity to backends and cause downtime.
@@ -413,7 +413,7 @@ kubectl rollout restart deployment/caddy -n mereka-lms
 
 ## 📋 Quick Recovery Script
 
-Save this as `tools/fix-service-selectors.sh`:
+Save this as `scripts/infra/fix-service-selectors.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -453,7 +453,7 @@ kubectl get endpoints -n "$NAMESPACE" | grep -E "NAME|$SERVICES"
 
 ## 📚 Related Documentation
 
-- [`docs/ops/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
+- [`docs/operations/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
 - [`docs/ACCESS_URLS.md`](../ACCESS_URLS.md) - Service URLs and access info
 - [`docs/DATABASE_ARCHITECTURE.md`](../DATABASE_ARCHITECTURE.md) - Database connectivity guide
 

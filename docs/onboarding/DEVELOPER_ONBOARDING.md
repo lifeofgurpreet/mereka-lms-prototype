@@ -45,7 +45,7 @@ Before running the setup script, ensure you have:
 
 ### Verify Setup
 ```bash
-./tools/verify-setup.sh
+./scripts/qa/verify-setup.sh
 ```
 
 ### Access Your Local Environment
@@ -60,7 +60,7 @@ Before running the setup script, ensure you have:
 
 ### Run Tests
 ```bash
-./tools/comprehensive-test.sh
+./scripts/qa/comprehensive-test.sh
 ```
 
 ## 🔄 Daily Workflow
@@ -68,7 +68,7 @@ Before running the setup script, ensure you have:
 ### Start Your Day
 ```bash
 cd /path/to/mereka.academy
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local start -d
 ```
@@ -116,18 +116,18 @@ tutor local logs --tail=50 <service-name>
 
 **"Can't connect to MySQL"**
 ```bash
-./tools/fix-parity.sh
+./scripts/qa/fix-parity.sh
 tutor local restart mysql
 ```
 
 **"Too many login attempts"**
 ```bash
-./tools/fix-admin-login.sh
+./scripts/qa/fix-admin-login.sh
 ```
 
 **"Config has cloud IPs"**
 ```bash
-./tools/fix-parity.sh
+./scripts/qa/fix-parity.sh
 ```
 
 ## 📚 Documentation
@@ -143,7 +143,7 @@ To compare local with production:
 
 ```bash
 # Sync production config (read-only)
-./tools/sync-production-config.sh
+./scripts/infra/sync-production-config.sh
 
 # Analyze local data
 ./scripts/qa/analyze-local-data.sh
@@ -156,7 +156,7 @@ To compare local with production:
 
 ### Day 1: Setup
 1. Run `./scripts/shared/setup-local.sh`
-2. Verify with `./tools/verify-setup.sh`
+2. Verify with `./scripts/qa/verify-setup.sh`
 3. Access LMS and explore
 
 ### Day 2: Development
@@ -167,7 +167,7 @@ To compare local with production:
 ### Ongoing
 1. Use `docs/QUICK_REFERENCE.md` for daily commands
 2. Check `docs/OPERATIONAL_STATUS.md` for system status
-3. Run `./tools/comprehensive-test.sh` before committing
+3. Run `./scripts/qa/comprehensive-test.sh` before committing
 
 ## ✅ Success Checklist
 
@@ -176,8 +176,8 @@ After setup, you should be able to:
 - [ ] Access http://apps.localhost/authn/login
 - [ ] Login with admin/admin123
 - [ ] Access Studio at http://studio.localhost
-- [ ] Run `./tools/verify-setup.sh` with all checks passing
-- [ ] Run `./tools/comprehensive-test.sh` successfully
+- [ ] Run `./scripts/qa/verify-setup.sh` with all checks passing
+- [ ] Run `./scripts/qa/comprehensive-test.sh` successfully
 
 ## 🚨 Important Notes
 
@@ -189,9 +189,9 @@ After setup, you should be able to:
 ## 📞 Getting Help
 
 1. Check `docs/` directory for guides
-2. Run `./tools/verify-setup.sh` to diagnose issues
+2. Run `./scripts/qa/verify-setup.sh` to diagnose issues
 3. Check logs: `tutor local logs --tail=50 <service>`
-4. Review `docs/ops/TROUBLESHOOTING.md`
+4. Review `docs/operations/TROUBLESHOOTING.md`
 
 ---
 

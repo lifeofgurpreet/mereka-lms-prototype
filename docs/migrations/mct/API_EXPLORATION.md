@@ -101,7 +101,7 @@ From V3/V4 Models section:
 
 ## Next Steps
 
-1. ✅ **Export script created** - `tools/mct-export.mjs` with working auth pattern
+1. ✅ **Export script created** - `scripts/migrations/mct/mct-export.mjs` with working auth pattern
 2. ✅ **Endpoints verified** - Based on working code in `hubspot-webhook-mct`
 3. **Test export** - Run with authentication credentials
 4. **Export sample data** - Test with small dataset first

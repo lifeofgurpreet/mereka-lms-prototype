@@ -145,7 +145,7 @@ Based on Microsoft Community Training architecture, the following entities likel
 - [ ] Document response structures (JSON schema)
 
 **1.2 Export Script Development**
-Create `tools/mct-export.mjs` (similar to `tools/kajabi-export.mjs`):
+Create `scripts/migrations/mct/mct-export.mjs` (similar to `scripts/migrations/kajabi/kajabi-export.mjs`):
 
 ```javascript
 // Planned structure:
@@ -172,13 +172,13 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=<client-id> \
 MCT_CLIENT_SECRET=<client-secret> \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
-node tools/mct-export.mjs
+node scripts/migrations/mct/mct-export.mjs
 
 # Export specific resources:
-node tools/mct-export.mjs --resources users,courses,enrollments
+node scripts/migrations/mct/mct-export.mjs --resources users,courses,enrollments
 
 # Export with pagination limits (for testing):
-node tools/mct-export.mjs --resources users --start-page 1 --end-page 10
+node scripts/migrations/mct/mct-export.mjs --resources users --start-page 1 --end-page 10
 ```
 
 **Export Script Features:**
@@ -246,7 +246,7 @@ Create `scripts/migrations/mct/scripts/build_course_packages.py`:
 
 **4.1 User Import**
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local run lms bash -c "cat > /tmp/mct-users.csv" \
   < scripts/migrations/mct/output/openedx/users_import.csv
 tutor local run lms ./manage.py lms importusers \
@@ -360,7 +360,7 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 ## Next Steps
 
 1. **Immediate:**
-   - [x] ✅ Export script created (`tools/mct-export.mjs`) with working authentication pattern
+   - [x] ✅ Export script created (`scripts/migrations/mct/mct-export.mjs`) with working authentication pattern
    - [x] ✅ API exploration documented (`docs/migrations/mct/API_EXPLORATION.md`)
    - [x] ✅ Migration plan updated with verified endpoints
    - [ ] **Get authentication credentials** - Use existing service principal or create new one

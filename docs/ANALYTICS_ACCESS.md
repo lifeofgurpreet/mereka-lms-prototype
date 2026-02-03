@@ -72,7 +72,7 @@ grep ASPECTS_SUPERSET_DATABASE_HOST tutor_env/config.yml
 
 **Fix if needed:**
 ```bash
-./tools/fix-parity.sh
+./scripts/qa/fix-parity.sh
 ```
 
 ## 📈 Other Analytics Tools

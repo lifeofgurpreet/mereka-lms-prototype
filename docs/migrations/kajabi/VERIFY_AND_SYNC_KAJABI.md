@@ -6,7 +6,7 @@ Complete end-to-end verification and synchronization tool to ensure enrollments 
 ## Quick Start
 
 ```bash
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -73,7 +73,7 @@ cd scripts/migrations/kajabi/output/verification
 
 Or manually:
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local run lms bash -c 'cat > /tmp/missing-enrollments.csv' \
   < scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv
 tutor local run lms ./manage.py lms bulk_enroll \
@@ -90,7 +90,7 @@ Certificates can only be generated for users who have completed courses. The scr
 For each course with missing certificates:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local run lms ./manage.py lms generate_certificates \
   --course-id course-v1:ORG+NUMBER+RUN \
   --settings=tutor.production
@@ -104,7 +104,7 @@ tutor local run lms ./manage.py lms generate_certificates \
 
 1. **Run verification**:
    ```bash
-   python tools/verify-and-sync-kajabi-to-openedx.py \
+   python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
      --django-settings lms.envs.tutor.production \
      --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
      --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -139,7 +139,7 @@ tutor local run lms ./manage.py lms generate_certificates \
 5. **Re-verify**:
    ```bash
    # Run verification again to confirm fixes
-   python tools/verify-and-sync-kajabi-to-openedx.py \
+   python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
      --skip-openedx-export \
      --django-settings lms.envs.tutor.production \
      ...
@@ -197,7 +197,7 @@ Run verification monthly to catch new discrepancies:
 
 ```bash
 # Add to cron or scheduled task
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \

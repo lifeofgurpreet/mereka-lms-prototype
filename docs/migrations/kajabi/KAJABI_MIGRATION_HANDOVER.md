@@ -21,7 +21,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-10-05
 **Prerequisites:**
 ```bash
 # Activate Tutor environment
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # Authenticate with GCP
 gcloud auth login
@@ -46,7 +46,7 @@ tutor --version  # Should be available after sourcing tutor-env.sh
 KAJABI_CLIENT_ID=<your-client-id> \
 KAJABI_CLIENT_SECRET=<your-secret> \
 KAJABI_SITE_ID=<optional-site-id> \
-node tools/kajabi-export.mjs
+node scripts/migrations/kajabi/kajabi-export.mjs
 
 # Outputs go to exports/kajabi/ (gitignored)
 # Files: contacts.ndjson, customers.ndjson, purchases.ndjson, courses_index.ndjson, etc.
@@ -55,14 +55,14 @@ node tools/kajabi-export.mjs
 **Chunked exports (for large datasets):**
 ```bash
 # Export pages 1-100 only
-node tools/kajabi-export.mjs \
+node scripts/migrations/kajabi/kajabi-export.mjs \
   --resources contacts \
   --start-page 1 \
   --end-page 100 \
   --page-size 100
 
 # Resume from page 101
-node tools/kajabi-export.mjs \
+node scripts/migrations/kajabi/kajabi-export.mjs \
   --resources contacts \
   --start-page 101 \
   --end-page 200
@@ -71,7 +71,7 @@ node tools/kajabi-export.mjs \
 **Course structure details:**
 ```bash
 # If course details weren't included, run the structure helper
-node tools/kajabi-course-structure.mjs \
+node scripts/migrations/kajabi/kajabi-course-structure.mjs \
   --exports-dir exports/kajabi \
   --output-dir exports/kajabi/structure
 ```
@@ -285,7 +285,7 @@ gcloud run deploy kajabi-webhook \
 
 # Option 2: Auto-provision via exporter
 WEBHOOK_TARGET_URL=https://<service-url>/webhooks/kajabi \
-node tools/kajabi-export.mjs \
+node scripts/migrations/kajabi/kajabi-export.mjs \
   --ensure-webhooks \
   --webhook-target $WEBHOOK_TARGET_URL
 ```
@@ -313,8 +313,8 @@ curl https://<service-url>/healthz
 - `scripts/migrations/kajabi/webhook_app/README.md` - Webhook receiver setup
 
 **Script locations:**
-- `tools/kajabi-export.mjs` - Main exporter (Node.js)
-- `tools/kajabi-course-structure.mjs` - Course structure helper
+- `scripts/migrations/kajabi/kajabi-export.mjs` - Main exporter (Node.js)
+- `scripts/migrations/kajabi/kajabi-course-structure.mjs` - Course structure helper
 - `scripts/migrations/kajabi/scripts/transform_data.py` - NDJSON → CSV transformer
 - `scripts/migrations/kajabi/scripts/build_course_packages.py` - Course tarball builder
 - `scripts/migrations/kajabi/scripts/prepare_openedx_imports.py` - Open edX CSV generator
@@ -357,7 +357,7 @@ curl https://<service-url>/healthz
 - ✅ Archive logs after successful runs for traceability
 
 **Common pitfalls:**
-- ⚠️ Don't forget to `source ops/tutor-env.sh` before running Tutor commands
+- ⚠️ Don't forget to `source infrastructure/tutor/tutor-env.sh` before running Tutor commands
 - ⚠️ Ensure `gcloud` is authenticated and cluster credentials are current
 - ⚠️ Check pod readiness (`kubectl get pods -n mereka-lms`) before starting imports
 - ⚠️ Verify CSV paths exist before running batch imports
@@ -374,7 +374,7 @@ curl https://<service-url>/healthz
 **Full pipeline (from scratch):**
 ```bash
 # 1. Export
-KAJABI_CLIENT_ID=... KAJABI_CLIENT_SECRET=... node tools/kajabi-export.mjs
+KAJABI_CLIENT_ID=... KAJABI_CLIENT_SECRET=... node scripts/migrations/kajabi/kajabi-export.mjs
 
 # 2. Transform
 python scripts/migrations/kajabi/scripts/transform_data.py \

@@ -6,7 +6,7 @@ Fixed the pipeline to capture actual lesson content (body, HTML, media URLs) ins
 
 ## Changes Made
 
-1. **Extended `tools/kajabi-course-structure.mjs`**
+1. **Extended `scripts/migrations/kajabi/kajabi-course-structure.mjs`**
    - Now fetches full lesson details via `GET /v1/lessons/{id}?include=media,downloads`
    - Writes to `exports/kajabi/structure/lesson_details.ndjson`
 
@@ -27,7 +27,7 @@ Test what fields Kajabi returns for a single lesson:
 ```bash
 export KAJABI_CLIENT_ID="your_client_id"
 export KAJABI_CLIENT_SECRET="your_client_secret"
-node tools/kajabi-test-lesson-detail.mjs --lesson-id 2192178188
+node scripts/migrations/kajabi/kajabi-test-lesson-detail.mjs --lesson-id 2192178188
 ```
 
 This will show you what fields are available (body, content_html, video_url, etc.).
@@ -35,7 +35,7 @@ This will show you what fields are available (body, content_html, video_url, etc
 ### Step 2: Re-export Course Structure with Lesson Details
 
 ```bash
-node tools/kajabi-course-structure.mjs \
+node scripts/migrations/kajabi/kajabi-course-structure.mjs \
   --input exports/kajabi/courses_index.ndjson \
   --out exports/kajabi/structure \
   --delay 400

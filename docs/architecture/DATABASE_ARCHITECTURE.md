@@ -231,7 +231,7 @@ This document explains **what databases we use, where they run, and what they're
 ## Related Documentation
 
 - [`MONGODB_ATLAS.md`](MONGODB_ATLAS.md) - MongoDB Atlas setup and migration
-- [`ops/GCP_ROADMAP.md`](ops/GCP_ROADMAP.md) - Infrastructure roadmap
+- [`docs/operations/GCP_ROADMAP.md`](../operations/GCP_ROADMAP.md) - Infrastructure roadmap
 - [`analytics/ASPECTS_ANALYTICS.md`](analytics/ASPECTS_ANALYTICS.md) - Analytics setup
 
 

@@ -4,7 +4,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-12-18
 ## Export Status: ⚠️ COMPLETE (with data quality issues identified)
 
 **Date:** 2025-12-17 (latest export)
-**Script:** `tools/mct-export.mjs`
+**Script:** `scripts/migrations/mct/mct-export.mjs`
 **Status:** ✅ All available resources exported
 **Data Quality:** ⚠️ Enrollment data generation issue identified in transformation script
 

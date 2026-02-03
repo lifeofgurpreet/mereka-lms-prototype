@@ -73,7 +73,7 @@ This guide walks through setting up Google Login for OpenEdX LMS sites.
 The configuration is done via Tutor environment variables. Update `tutor_env/config.yml` or use `tutor config save`:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # Set Google OAuth credentials
 tutor config save \

@@ -50,7 +50,7 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
    - API usage patterns
    - Reference for credential format
 
-8. **`tools/mct-export.mjs`**
+8. **`scripts/migrations/mct/mct-export.mjs`**
    - Production export script
    - Handles CSV/JSON responses
    - Hierarchical data structures
@@ -64,7 +64,7 @@ _Audience: Platform Eng + Data • Owner: Migration Squad • Last verified: 202
 
 1. **Read:** `docs/migrations/mct/EXPORT_GUIDE.md` (complete guide)
 2. **Check:** Credentials status (see Credential Management section)
-3. **Test:** Run dry-run first: `node tools/mct-export.mjs --dry-run`
+3. **Test:** Run dry-run first: `node scripts/migrations/mct/mct-export.mjs --dry-run`
 4. **Export:** Follow Quick Reference section in guide
 
 ### Common Tasks
@@ -81,13 +81,13 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
 MCT_CLIENT_SECRET='<secret>' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
-node tools/mct-export.mjs --resources organizations --start-page 1 --end-page 1
+node scripts/migrations/mct/mct-export.mjs --resources organizations --start-page 1 --end-page 1
 ```
 
 **Full Export:**
 ```bash
 # Set environment variables, then:
-node tools/mct-export.mjs
+node scripts/migrations/mct/mct-export.mjs
 ```
 
 ---
@@ -148,5 +148,5 @@ See `docs/migrations/mct/EXPORT_GUIDE.md` → Troubleshooting section for:
 
 - **Kajabi Migration:** `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
 - **Local Setup:** `docs/quickstart/LOCAL_SETUP.md`
-- **Deployment:** `docs/ops/DEPLOYMENT_RUNBOOK.md`
+- **Deployment:** `docs/operations/DEPLOYMENT_RUNBOOK.md`
 - **Branding:** `docs/BRANDING.md`

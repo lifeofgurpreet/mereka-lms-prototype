@@ -62,7 +62,7 @@ docker info | grep "Total Memory"
 
 ```bash
 # Source the environment helper (do this in every new shell)
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # Verify Tutor is configured correctly
 tutor config printroot
@@ -158,7 +158,7 @@ tutor local logs --tail=20 cms | grep -i error
 cd /path/to/mereka.academy
 
 # 2. Source environment
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # 3. Start services
 tutor local start -d
@@ -267,7 +267,7 @@ tutor local restart
 **Fix:**
 ```bash
 # Clean up unused Docker resources
-./tools/docker-cleanup.sh --execute
+./scripts/infra/docker-cleanup.sh --execute
 
 # Or manually:
 docker system prune -a --volumes
@@ -366,7 +366,7 @@ If something doesn't work:
 2. Verify config: `grep -E "MYSQL_HOST|MONGODB_HOST" tutor_env/config.yml`
 3. Check containers: `docker ps --filter "name=tutor_local"`
 4. Review this guide's "Common Issues" section
-5. Check `docs/ops/TROUBLESHOOTING.md` for more detailed troubleshooting
+5. Check `docs/operations/TROUBLESHOOTING.md` for more detailed troubleshooting
 
 ---
 

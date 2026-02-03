@@ -20,7 +20,7 @@ This guide captures the steps required to attach additional branded experiences 
 Additional host headers need to flow through Caddy ➜ Nginx ➜ Django. The repo now patches Tutor templates automatically:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 ./infrastructure/tutor/apply-patches.sh
 ```
 
@@ -33,7 +33,7 @@ This script:
 After running the script, recycle the edge services so they reread the config:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local restart caddy nginx lms
 ```
 
@@ -44,12 +44,12 @@ tutor local restart caddy nginx lms
 The LMS reads per-domain overrides from Django’s Site framework. Use the helper that ships with this repo:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 # Ensure PyMySQL + Cloud SQL connector are installed once (`pip install PyMySQL "cloud-sql-python-connector[pymysql]"`)
 # Preview the operations first
-python tools/multisite_bootstrap.py
+python scripts/shared/multisite_bootstrap.py
 # Apply when ready (requires connectivity to the LMS MySQL instance)
-python tools/multisite_bootstrap.py --apply
+python scripts/shared/multisite_bootstrap.py --apply
 ```
 
 What the script does:
@@ -64,8 +64,8 @@ What the script does:
 **Connecting to Cloud SQL**
 
 - If you already have network access to the database (e.g., you are on a bastion/runner inside the GCP VPC), just run the commands above.
-- To tunnel traffic from your laptop, run the Cloud SQL Auth Proxy (or `gcloud sql connect`) locally and point the script at `127.0.0.1`, e.g. `python tools/multisite_bootstrap.py --host 127.0.0.1 --port 3307 --apply`.
-- When you are able to run inside GCP and prefer IAM authentication over a TCP tunnel, the script can talk through the Cloud SQL Python Connector: `python tools/multisite_bootstrap.py --use-connector --instance mereka-lms:asia-southeast1:mereka-lms-mysql --ip-type PRIVATE --apply`.  
+- To tunnel traffic from your laptop, run the Cloud SQL Auth Proxy (or `gcloud sql connect`) locally and point the script at `127.0.0.1`, e.g. `python scripts/shared/multisite_bootstrap.py --host 127.0.0.1 --port 3307 --apply`.
+- When you are able to run inside GCP and prefer IAM authentication over a TCP tunnel, the script can talk through the Cloud SQL Python Connector: `python scripts/shared/multisite_bootstrap.py --use-connector --instance mereka-lms:asia-southeast1:mereka-lms-mysql --ip-type PRIVATE --apply`.  
   Private-IP connections still require the runtime to live on a host that can reach the same VPC; when you’re off-network, temporarily assigning a public IP that is locked down to your own `/32` and then removing it afterwards is the quickest path.
 
 ## 4. Content governance
@@ -86,4 +86,4 @@ What the script does:
 
 - Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce, and background services remain shared across all brands.
 - Any `tutor config save` run must be followed by `./infrastructure/tutor/apply-patches.sh` so the additional host headers stay injected.
-- Back up the database (`tutor local do backup-db` / `tools/backup-db.sh`) before rolling out further domain changes.
+- Back up the database (`tutor local do backup-db` / `scripts/infra/backup-db.sh`) before rolling out further domain changes.

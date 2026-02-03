@@ -81,7 +81,7 @@ See **[`docs/ASPECTS_ANALYTICS.md`](ASPECTS_ANALYTICS.md)** for complete install
 
 **Quick install**:
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 pip install tutor-contrib-aspects
 tutor plugins enable aspects
 tutor config save
@@ -214,7 +214,7 @@ For advanced queries or custom reports, you can also query the database directly
 
 ### Local Environment
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local run lms ./manage.py lms shell
 ```
 

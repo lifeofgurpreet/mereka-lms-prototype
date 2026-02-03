@@ -20,7 +20,7 @@ Use the helper script to stream the StatefulSet data directly into Atlas. Set `A
 
 ```bash
 ATLAS_URI="mongodb+srv://cs_comments_user:<password>@cluster0.abcde.mongodb.net/cs_comments_service?retryWrites=true&w=majority"
-./tools/mongodb-to-atlas.sh
+./scripts/infra/mongodb-to-atlas.sh
 ```
 
 The script runs `mongodump` inside `mongodb-0` and pipes it to `mongorestore` (via the official `mongo` Docker image) so the Atlas cluster receives a fresh copy of `cs_comments_service`.
@@ -31,7 +31,7 @@ To automate the entire migration—including dumping data, updating Tutor overri
 
 ```bash
 ATLAS_URI="mongodb+srv://cs_comments_user:<password>@cluster0.abcde.mongodb.net/cs_comments_service?retryWrites=true&w=majority" \
-  ./tools/mongodb-atlas-cutover.sh
+  ./scripts/infra/mongodb-atlas-cutover.sh
 ```
 
 Environment flags:
@@ -44,13 +44,13 @@ Environment flags:
 | `NAMESPACE` / `STATEFULSET` / `PVC_NAME` | `mereka-lms` / `mongodb` / `data-mongodb-0` | Override if your staging namespace differs. |
 | `TUTOR_CMD` | `tutor` | Change if you prefer `tutor --config=...` wrappers. |
 
-The script sources `ops/tutor-env.sh`, runs `tutor config save --set RUN_MONGODB=false --set MONGODB_URI="…"`, restarts the Kubernetes workloads (`tutor k8s start`), waits for the `forum` deployment rollout, and optionally deletes the legacy StatefulSet.
+The script sources `infrastructure/tutor/tutor-env.sh`, runs `tutor config save --set RUN_MONGODB=false --set MONGODB_URI="…"`, restarts the Kubernetes workloads (`tutor k8s start`), waits for the `forum` deployment rollout, and optionally deletes the legacy StatefulSet.
 
 ## 3. Point Tutor at Atlas
 
 1. Update the Tutor config to use the connection string and disable the in-cluster MongoDB:
    ```bash
-   source ops/tutor-env.sh
+   source infrastructure/tutor/tutor-env.sh
    tutor config save --set RUN_MONGODB=false \
      --set MONGODB_URI="$ATLAS_URI" \
      --set MONGODB_AUTH="" \

@@ -46,14 +46,14 @@ Since the Google Cloud Console UI requires manual interaction, follow these step
 Once you have the credentials, run:
 
 ```bash
-source ops/tutor-env.sh
-./tools/setup-google-oauth.sh --client-id "YOUR_CLIENT_ID" --client-secret "YOUR_CLIENT_SECRET"
+source infrastructure/tutor/tutor-env.sh
+./scripts/infra/setup-google-oauth.sh --client-id "YOUR_CLIENT_ID" --client-secret "YOUR_CLIENT_SECRET"
 ```
 
 Or manually:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor config save \
   --set SOCIAL_AUTH_GOOGLE_OAUTH2_KEY="YOUR_CLIENT_ID.apps.googleusercontent.com" \
   --set SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET="YOUR_CLIENT_SECRET"

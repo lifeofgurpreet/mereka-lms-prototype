@@ -48,7 +48,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 ### Automated Fix Script
 
 ```bash
-./tools/fix-admin-login.sh
+./scripts/qa/fix-admin-login.sh
 ```
 
 ## 📋 Admin User Verification

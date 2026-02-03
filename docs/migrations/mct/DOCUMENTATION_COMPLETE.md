@@ -101,7 +101,7 @@ All MCT export documentation has been created and is ready for use by future age
 1. **Read:** `docs/migrations/mct/EXPORT_GUIDE.md` (complete guide)
 2. **Check:** Credentials status with `az ad app credential list`
 3. **Refresh:** If expired, use `az ad app credential reset`
-4. **Test:** Run `node tools/mct-export.mjs --dry-run`
+4. **Test:** Run `node scripts/migrations/mct/mct-export.mjs --dry-run`
 5. **Export:** Follow guide's Quick Reference section
 
 ---

@@ -38,7 +38,7 @@ cd scripts/migrations/kajabi/output/verification
 
 **Or Manual Import:**
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # Copy CSV into container
 tutor local run lms bash -c 'cat > /tmp/missing-enrollments.csv' \
@@ -60,7 +60,7 @@ tutor local run lms ./manage.py lms bulk_enroll \
 **Verification After Import:**
 ```bash
 # Re-run verification to confirm
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -79,7 +79,7 @@ Create a script to mark courses complete for migrated users:
 
 ```bash
 # For each course, mark users as complete if they were eligible in Kajabi
-python tools/mark-courses-complete-from-kajabi.py \
+python scripts/migrations/kajabi/mark-courses-complete-from-kajabi.py \
   --certificate-eligibility exports/kajabi/certificate_eligibility.ndjson \
   --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
@@ -89,7 +89,7 @@ python tools/mark-courses-complete-from-kajabi.py \
 After marking completions, generate certificates:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # For each course with certificates
 tutor local run lms ./manage.py lms generate_certificates \
@@ -105,7 +105,7 @@ After importing enrollments and generating certificates:
 
 ```bash
 # Run full verification again
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -141,7 +141,7 @@ python tools/verify-and-sync-kajabi-to-openedx.py \
 
 **Verify Again:**
 ```bash
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \

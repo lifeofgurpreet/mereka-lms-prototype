@@ -15,13 +15,13 @@ Quick guide to compare enrollments between Kajabi and Open edX.
 # 1. Export certificate eligibility from Kajabi
 export KAJABI_CLIENT_ID="your_id"
 export KAJABI_CLIENT_SECRET="your_secret"
-node tools/kajabi-export-certificates.mjs
+node scripts/migrations/kajabi/kajabi-export-certificates.mjs
 
 # 2. Export enrollments from Open edX
-./tools/openedx-export-enrollments.sh exports/openedx/enrollments.csv
+./scripts/analytics/openedx-export-enrollments.sh exports/openedx/enrollments.csv
 
 # 3. Compare enrollments
-python tools/compare-enrollments-kajabi-openedx.py \
+python scripts/analytics/compare-enrollments-kajabi-openedx.py \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \

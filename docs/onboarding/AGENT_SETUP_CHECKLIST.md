@@ -36,7 +36,7 @@ docker info | grep "Total Memory"
 
 ### 3. Tutor Environment Setup
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config printroot  # Should show tutor_env path
 ```
@@ -138,7 +138,7 @@ python3 -m venv .venv  # If missing
 **Fix:** Activate venv:
 ```bash
 source .venv/bin/activate
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 ```
 
 ### Issue: Config shows cloud IPs

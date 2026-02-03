@@ -4,7 +4,7 @@ _Audience: QA • Owner: Migration Squad • Last verified: 2025-08-24_
 ## Pre-Testing Checklist
 
 ### ✅ Script Readiness
-- [x] Export script created (`tools/mct-export.mjs`)
+- [x] Export script created (`scripts/migrations/mct/mct-export.mjs`)
 - [x] Authentication pattern matches working code
 - [x] Dry-run mode implemented
 - [x] Validation and error handling added
@@ -31,7 +31,7 @@ You'll need these credentials (available from `hubspot-webhook-mct` project):
 ### Step 1: Dry Run Test (No API Calls)
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org \
-node tools/mct-export.mjs --dry-run
+node scripts/migrations/mct/mct-export.mjs --dry-run
 ```
 
 **Expected Output:**
@@ -47,7 +47,7 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=<your-client-id> \
 MCT_CLIENT_SECRET=<your-secret> \
 MCT_TENANT_ID=<your-tenant-id> \
-node tools/mct-export.mjs --dry-run
+node scripts/migrations/mct/mct-export.mjs --dry-run
 ```
 
 **Expected Output:**
@@ -61,7 +61,7 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=<your-client-id> \
 MCT_CLIENT_SECRET=<your-secret> \
 MCT_TENANT_ID=<your-tenant-id> \
-node tools/mct-export.mjs \
+node scripts/migrations/mct/mct-export.mjs \
   --resources organizations \
   --start-page 1 \
   --end-page 1
@@ -80,7 +80,7 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=<your-client-id> \
 MCT_CLIENT_SECRET=<your-secret> \
 MCT_TENANT_ID=<your-tenant-id> \
-node tools/mct-export.mjs \
+node scripts/migrations/mct/mct-export.mjs \
   --resources organizations,users \
   --start-page 1 \
   --end-page 1 \
@@ -100,7 +100,7 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=<your-client-id> \
 MCT_CLIENT_SECRET=<your-secret> \
 MCT_TENANT_ID=<your-tenant-id> \
-node tools/mct-export.mjs \
+node scripts/migrations/mct/mct-export.mjs \
   --resources categories \
   --start-page 1 \
   --end-page 1
@@ -118,7 +118,7 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=<your-client-id> \
 MCT_CLIENT_SECRET=<your-secret> \
 MCT_TENANT_ID=<your-tenant-id> \
-node tools/mct-export.mjs \
+node scripts/migrations/mct/mct-export.mjs \
   --resources courses \
   --start-page 1 \
   --end-page 1

@@ -37,7 +37,7 @@ Aspects is installed as a Tutor plugin. Follow these steps:
 ### 1. Install the Aspects Plugin
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # Install the plugin
 pip install tutor-contrib-aspects

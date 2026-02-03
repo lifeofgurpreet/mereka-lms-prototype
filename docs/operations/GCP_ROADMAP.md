@@ -73,7 +73,7 @@ The goal is to migrate the nightly Open edX stack managed by Tutor to Google Clo
 
 ## Cost controls
 
-- Add Cloud Billing budgets through Terraform (`ops/terraform/budgets.tf`) so RM400/month is enforced with alerts at 62.5% and 100% of spend (`google_billing_budget.mereka_monthly`).
+- Add Cloud Billing budgets through Terraform (`infrastructure/terraform/budgets.tf`) so RM400/month is enforced with alerts at 62.5% and 100% of spend (`google_billing_budget.mereka_monthly`).
 - **Status:** Applied on 2025-11-08 (notifications: techadmin@biji-biji.com, team@mereka.io). Re-run Terraform with `GOOGLE_CLOUD_QUOTA_PROJECT=mereka-lms` after edits.
 - Publish billing export to BigQuery once budgets are active to trend per-service costs and feed future dashboards.
 
@@ -91,6 +91,6 @@ The goal is to migrate the nightly Open edX stack managed by Tutor to Google Clo
 
 ## Next steps
 
-1. Draft Terraform skeleton under `ops/terraform/` (TODO) to define project baseline.
+1. Draft Terraform skeleton under `infrastructure/terraform/` (TODO) to define project baseline.
 2. Produce sanitized `config.prod.example.yml` with non-secret overrides (domains, plugin list, release channel).
 3. Write GitHub Action workflow for image build/push (blocked until repo is connected to GitHub).

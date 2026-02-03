@@ -54,15 +54,15 @@ The official Public API delivers JSON API responses with pagination metadata. Ke
    - Export progress/assessment data for archival or manual import.
 
 ## Export Script
-`tools/kajabi-export.mjs` implements the API crawl (Node 20+, NDJSON output):
+`scripts/migrations/kajabi/kajabi-export.mjs` implements the API crawl (Node 20+, NDJSON output):
 ```bash
 # minimal (all default resources):
 KAJABI_CLIENT_ID=... \
 KAJABI_CLIENT_SECRET=... \
-node tools/kajabi-export.mjs
+node scripts/migrations/kajabi/kajabi-export.mjs
 
 # chunk a large resource (contacts pages 1-50 only):
-node tools/kajabi-export.mjs \
+node scripts/migrations/kajabi/kajabi-export.mjs \
   --resources contacts \
   --site 2147565329 \
   --start-page 1 \
@@ -70,7 +70,7 @@ node tools/kajabi-export.mjs \
   --page-size 100
 
 # courses index + details (10 pages) without lesson expansion:
-node tools/kajabi-export.mjs \
+node scripts/migrations/kajabi/kajabi-export.mjs \
   --resources courses \
   --site 2147565329 \
   --page-size 50 \
@@ -108,13 +108,13 @@ Sample output sizes (latest pull):
 > For very large tables (contacts, purchases) run the exporter in batches, e.g. `--start-page 1 --end-page 100`, then resume with `--start-page 101`.
 
 ### Course structure helper
-`tools/kajabi-course-structure.mjs` reads `courses_index.ndjson` and for each course:
+`scripts/migrations/kajabi/kajabi-course-structure.mjs` reads `courses_index.ndjson` and for each course:
 - Calls `?include=modules` and `?include=lessons` (two separate requests to avoid 500 errors) and writes the results to `exports/kajabi/structure/{modules,lessons}.ndjson`.
 - Attempts `?include=lessons.media`; when Kajabi throws 500s the script logs to `structure/errors.ndjson` but still records any media returned.
 
 Convert those NDJSON files into analyst-friendly CSVs with:
 ```bash
-python tools/kajabi-ndjson-to-csv.py \
+python scripts/migrations/kajabi/kajabi-ndjson-to-csv.py \
   --ndjson-dir exports/kajabi/structure \
   --csv-dir exports/kajabi/csv/structure
 ```
@@ -125,7 +125,7 @@ Once the CSVs/tarballs under `scripts/migrations/kajabi/output/` are refreshed, 
 
 ### 1. Prerequisites & Health Checks
 
-1. `source ops/tutor-env.sh` to seed the virtualenv and Tutor CLI on the host machine that will orchestrate the imports.
+1. `source infrastructure/tutor/tutor-env.sh` to seed the virtualenv and Tutor CLI on the host machine that will orchestrate the imports.
 2. For GKE, authenticate `gcloud` (`gcloud auth login`, `gcloud config set project mereka-lms`, `gcloud container clusters get-credentials mereka-lms --region asia-southeast1`).
 3. Confirm the namespace/pods you will target:
 

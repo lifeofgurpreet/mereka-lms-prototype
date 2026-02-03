@@ -6,7 +6,7 @@ Use this checklist whenever you create or update docs in this repository. Consis
 ## 1. Location
 
 - **Quick start / Daily workflow:** `docs/quickstart/`
-- **Operations / Infra / Secrets:** `docs/ops/`
+- **Operations / Infra / Secrets:** `docs/operations/`
 - **Migrations:** `docs/migrations/<domain>/`
 - **Analytics / Reporting:** `docs/analytics/`
 - **Integrations (OAuth, SSO, etc.):** `docs/integrations/`

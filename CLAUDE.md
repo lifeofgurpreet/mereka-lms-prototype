@@ -31,29 +31,51 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 
 ### Repository Structure
 ```
-infrastructure/tutor/     # Tutor configs, patches, themes
-  ├── apply-patches.sh    # Critical: applies MySQL fixes, MFE patches
-  ├── config.example.yml  # Tutor config template
-  ├── tutor-env.sh        # Environment setup script
-  └── themes/mereka/      # Mereka branding theme
+deploy/k8s/               # Kubernetes manifests
+  ├── base/               # Base Kustomize resources
+  │   ├── secrets/        # ExternalSecrets (synced from Infisical)
+  │   ├── apps/           # App-specific configs
+  │   └── plugins/        # Plugin configs (discovery, ecommerce, etc.)
+  └── overlays/           # Environment-specific overlays
+      ├── local/          # Local Kind/Minikube
+      ├── staging/        # Staging GKE
+      └── production/     # Production GKE
+
+infrastructure/           # Infrastructure-as-code
+  ├── tutor/              # Tutor configs, patches, themes
+  ├── cloudflare/         # DNS records
+  ├── terraform/          # Terraform configs
+  └── monitoring/         # Monitoring configs
 
 scripts/                  # Automation organized by domain
+  ├── shared/             # Common utilities (config.sh, setup-local.sh)
   ├── infra/              # GCP, GKE, MongoDB, backups
   ├── migrations/         # Kajabi/MCT data migration
   ├── branding/           # Theme sync scripts
   ├── analytics/          # Analytics exports
   └── qa/                 # Smoke tests
 
+specs/                    # Specifications (machine-checkable intent)
+  ├── secrets-management.md
+  ├── repository-structure.md
+  └── k8s-deployment.md
+
 docs/                     # Documentation by category
+  ├── adr/                # Architecture Decision Records
   ├── onboarding/         # Setup guides (start here)
   ├── operations/         # Runbooks, troubleshooting
   ├── migrations/         # Migration playbooks
-  └── architecture/       # System design docs
+  ├── architecture/       # System design docs
+  └── archive/            # Historical session reports
 
 services/                 # Microservices (HubSpot webhooks)
 var/                      # Runtime artifacts (gitignored)
 tutor_env/                # Generated Tutor state (gitignored)
 ```
+
+**Deprecated directories** (contain only README.md):
+- `tools/` → moved to `scripts/`
+- `ops/` → moved to `infrastructure/` and `scripts/`
 
 ### Key Architectural Patterns
 
@@ -260,6 +282,35 @@ tutor local restart
 - Verify all containers report `Up` via `tutor local dc ps`
 - Capture screenshots after theme changes
 
+## Secrets Management
+
+Secrets flow through a secure pipeline:
+```
+Infisical (source of truth) → GCP Secret Manager → ExternalSecrets → K8s Secrets → Pods
+```
+
+**Key points**:
+- All secrets prefixed with `MEREKA_LMS_` in Infisical/GCP SM
+- ExternalSecrets automatically sync to K8s every 1 hour
+- Python code uses `os.environ.get()` pattern
+- **NEVER hardcode secrets** - use environment variables
+
+**Managing secrets**:
+```bash
+# Add secret to Infisical (from reka-slackbot directory)
+cd /home/gurpreet/projects/k8s/reka-slackbot
+infisical secrets set MEREKA_LMS_NEW_SECRET="value" \
+  --domain https://secrets.mereka.io/api --env prod --path /
+
+# Sync to GCP Secret Manager
+gcloud secrets create MEREKA_LMS_NEW_SECRET --data-file=- <<< "value"
+
+# Update ExternalSecret mapping in deploy/k8s/base/secrets/external-secrets.yaml
+# Then apply: kubectl apply -f deploy/k8s/base/secrets/external-secrets.yaml
+```
+
+See `specs/secrets-management.md` for full specification.
+
 ## Security Notes
 
 - **Never commit secrets**: `tutor_env/config.yml` is gitignored
@@ -275,8 +326,28 @@ tutor local restart
 - **Branding**: `docs/BRANDING.md`
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
 - **Architecture**: `docs/architecture/`
+- **ADRs**: `docs/adr/` (Architecture Decision Records)
 - **Repo Guidelines**: `AGENTS.md` (complements this file)
-- **Secrets Management**: `/home/gurpreet/projects/secrets-management/specs/` (Infisical architecture, AWS SES setup)
+
+## Specifications
+
+Machine-checkable specifications for key systems:
+- **Secrets**: `specs/secrets-management.md` - Secret naming, required keys, verification
+- **Repo Structure**: `specs/repository-structure.md` - Directory layout, deprecated paths
+- **K8s Deployment**: `specs/k8s-deployment.md` - Namespace, overlays, ExternalSecrets
+
+## Central Configuration
+
+Scripts should source `scripts/shared/config.sh` for common variables:
+```bash
+source scripts/shared/config.sh
+echo "Project: $GCP_PROJECT, Region: $GCP_REGION, Domain: $LMS_DOMAIN"
+```
+
+Override with environment variables:
+```bash
+GCP_PROJECT=my-test-project source scripts/shared/config.sh
+```
 
 ## Common Pitfalls
 
@@ -286,6 +357,8 @@ tutor local restart
 4. **Insufficient Docker RAM** (<12GB) → Image builds OOM during webpack
 5. **Empty K8s endpoints** → Services can't route traffic (run `fix-service-selectors.sh`)
 6. **Editing generated files in `tutor_env/`** → Lost on next `tutor config save`
+7. **Using old paths** (`tools/`, `ops/`) → These are deprecated, use `scripts/` and `infrastructure/`
+8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets
 
 ## Getting Help
 

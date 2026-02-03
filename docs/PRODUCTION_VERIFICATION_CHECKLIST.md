@@ -146,7 +146,7 @@ curl https://academy.biji-biji.com | grep -i "biji-biji"
 ### Missing Organizations
 ```bash
 # Apply multi-site bootstrap to production
-python tools/multisite_bootstrap.py \
+python scripts/shared/multisite_bootstrap.py \
   --use-connector \
   --instance mereka-lms:asia-southeast1:mereka-lms-mysql \
   --ip-type PRIVATE \

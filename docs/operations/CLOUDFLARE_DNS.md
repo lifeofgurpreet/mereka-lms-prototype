@@ -50,11 +50,11 @@ Target load balancer IP: **34.177.83.168** (GKE ingress for `academyv2.mereka.io
 
 - `academy.biji-biji.com` lives in the separate `biji-biji.com` zone. Manage it with the dashboard or per-zone API token—point it at `academy.biji-biji.com` (A record to the same GKE ingress IP) and feel free to keep it proxied because Cloudflare can issue apex certificates for that zone.
 
-If you need additional records (TXT for verification, CNAMEs for future MFEs), add them to the JSON file and rerun `./tools/cloudflare-sync.sh` so the script handles creation/update instead of doing it manually.
+If you need additional records (TXT for verification, CNAMEs for future MFEs), add them to the JSON file and rerun `./scripts/infra/cloudflare-sync.sh` so the script handles creation/update instead of doing it manually.
 
 ## Zone security baseline
 
-Run `./tools/cloudflare-harden-zone.sh` after DNS changes or when cloning the environment. It ensures:
+Run `./scripts/infra/cloudflare-harden-zone.sh` after DNS changes or when cloning the environment. It ensures:
 
 - `ssl=strict` and `min_tls_version=1.2` (older TLS handshakes rejected).
 - `always_use_https` + `automatic_https_rewrites` stay enabled so HTTP gets redirected automatically.
@@ -83,9 +83,9 @@ The `:mereka.io` placeholder is converted to the correct zone identifier automat
 1. Wait for propagation (`dig +short academyv2.mereka.io` should return `34.177.83.168`).
 2. Re-enable HTTPS in Tutor:
    ```bash
-   source ops/tutor-env.sh
+   source infrastructure/tutor/tutor-env.sh
    tutor config save --set ENABLE_HTTPS=true
    tutor k8s start
    ```
    This prompts Caddy to request Let’s Encrypt certificates for LMS, Studio, and MFEs.
-3. Re-run the smoke test (`./tools/smoke-test.sh`) and manually verify browser access over HTTPS.
+3. Re-run the smoke test (`./scripts/qa/smoke-test.sh`) and manually verify browser access over HTTPS.

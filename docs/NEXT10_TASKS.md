@@ -9,7 +9,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-21_
 | 4 | Production GCP environment | Infra | ⚙️ In progress | Plan complete (see `docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`). Est. $1,650-2,200/month. Multi-env Terraform structure ready. Next: Provision prod GCP project. |
 | 5 | Tutor CI/CD workflows | DevOps | 💤 Pending | Add GitHub Actions for Tutor lint/tests, image builds, Terraform plan jobs (manual approval before apply). |
 | 6 | Disaster recovery rehearsal | SRE | 💤 Pending | Restore latest Cloud SQL dumps into scratch instance, document timings, verify course data integrity. |
-| 7 | Data migrations (Kajabi/MCT) | Data | 💤 Pending | Finalize `tools/kajabi-*` + `tools/mct-*` flows, import sample cohorts, validate grading/credential issuance. |
+| 7 | Data migrations (Kajabi/MCT) | Data | 💤 Pending | Finalize `scripts/migrations/kajabi/kajabi-*` + `scripts/migrations/mct/mct-*` flows, import sample cohorts, validate grading/credential issuance. |
 | 8 | Observability & monitoring | SRE | 💤 Pending | Add synthetic checks for MFEs/account/login, define SLO dashboards, hook PagerDuty/Slack alerts. |
 | 9 | Secrets automation & rotation | Infra | ⚙️ In progress | Move remaining secrets to Secret Manager, script rotation, schedule credential updates. |
 |10 | Branding QA + accessibility | Product | 💤 Pending | Capture LMS/Studio/MFE screenshots, run WCAG checks, publish assets for marketing sign-off. |

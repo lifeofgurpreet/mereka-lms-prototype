@@ -6,7 +6,7 @@ _Audience: QA • Owner: Migration Squad • Last verified: 2025-08-25_
 ### ✅ Step 1: Dry-Run Test - SUCCESS
 **Command:**
 ```bash
-MCT_BASE_URL=learn.skillourfuture.org node tools/mct-export.mjs --dry-run
+MCT_BASE_URL=learn.skillourfuture.org node scripts/migrations/mct/mct-export.mjs --dry-run
 ```
 
 **Result:** ✅ PASSED
@@ -46,7 +46,7 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
 MCT_CLIENT_SECRET='H0.8Q~LhuMY3w528Xq4rykaGrKO90wpEaC55Hcus' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
-node tools/mct-export.mjs --resources organizations --start-page 1 --end-page 1
+node scripts/migrations/mct/mct-export.mjs --resources organizations --start-page 1 --end-page 1
 ```
 
 **Result:** ❌ FAILED - Client Secret Expired
@@ -102,7 +102,7 @@ Error: Token request failed [401]: {
    ```bash
    MCT_BASE_URL=learn.skillourfuture.org \
    MCT_ACCESS_TOKEN=<extracted-token> \
-   node tools/mct-export.mjs --resources organizations --start-page 1 --end-page 1
+   node scripts/migrations/mct/mct-export.mjs --resources organizations --start-page 1 --end-page 1
    ```
 
 ### Option 3: Check hubspot-webhook-mct Status

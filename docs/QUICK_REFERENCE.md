@@ -5,7 +5,7 @@ _For Daily Use • Last updated: 2025-11-12_
 
 ```bash
 cd /path/to/mereka.academy
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local start -d
 ```
@@ -33,7 +33,7 @@ tutor local restart
 
 ### Fix Admin Login
 ```bash
-./tools/fix-admin-login.sh
+./scripts/qa/fix-admin-login.sh
 ```
 
 ### Check Parity
@@ -43,7 +43,7 @@ tutor local restart
 
 ### Run Tests
 ```bash
-./tools/comprehensive-test.sh
+./scripts/qa/comprehensive-test.sh
 ```
 
 ### View Logs
@@ -62,12 +62,12 @@ grep SUPERSET_ADMIN tutor_env/config.yml  # Get credentials
 
 **Too many login attempts:**
 ```bash
-./tools/fix-admin-login.sh
+./scripts/qa/fix-admin-login.sh
 ```
 
 **Config has cloud IPs:**
 ```bash
-./tools/fix-parity.sh
+./scripts/qa/fix-parity.sh
 ```
 
 **Services not starting:**
@@ -92,7 +92,7 @@ curl -I http://localhost
 curl -I http://apps.localhost/authn/login
 
 # Full check
-./tools/comprehensive-test.sh
+./scripts/qa/comprehensive-test.sh
 ```
 
 ---

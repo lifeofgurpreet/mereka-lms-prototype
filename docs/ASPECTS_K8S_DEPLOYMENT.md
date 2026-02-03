@@ -63,7 +63,7 @@ gcloud container clusters describe mereka-lms \
 Edit Aspects configuration to set appropriate resource requests:
 
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 
 # Set resource limits for Aspects services
 tutor config save \

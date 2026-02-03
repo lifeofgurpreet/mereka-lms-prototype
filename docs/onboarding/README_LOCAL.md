@@ -24,7 +24,7 @@ _Quick reference for coding agents and developers_
 
 ### Agent Guidelines
 - **`AGENTS.md`** - Repository guidelines (updated with local dev priority)
-- **`../ops/TROUBLESHOOTING.md`** - General troubleshooting guide
+- **`../operations/TROUBLESHOOTING.md`** - General troubleshooting guide
 
 ## 🎯 Key Principles
 

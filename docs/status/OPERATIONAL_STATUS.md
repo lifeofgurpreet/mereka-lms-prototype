@@ -68,13 +68,13 @@ _Last updated: 2025-11-12 • Auto-generated_
 ## 🔧 Tools Available
 
 ### Quick Fixes
-- `./tools/fix-parity.sh` - Fix configuration parity issues
-- `./tools/fix-admin-login.sh` - Fix admin login problems
+- `./scripts/qa/fix-parity.sh` - Fix configuration parity issues
+- `./scripts/qa/fix-admin-login.sh` - Fix admin login problems
 - `./scripts/qa/check-parity.sh` - Verify local/production parity
-- `./tools/comprehensive-test.sh` - Run full test suite
+- `./scripts/qa/comprehensive-test.sh` - Run full test suite
 
 ### Maintenance
-- `./tools/docker-cleanup.sh` - Clean up Docker resources
+- `./scripts/infra/docker-cleanup.sh` - Clean up Docker resources
 - `./infrastructure/tutor/apply-patches.sh` - Apply Tutor patches
 
 ## 📚 Documentation
@@ -114,7 +114,7 @@ _Last updated: 2025-11-12 • Auto-generated_
 ### Daily Use
 ```bash
 # Start services
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local start -d
 
@@ -128,13 +128,13 @@ tutor local stop
 ### Troubleshooting
 ```bash
 # Fix admin login
-./tools/fix-admin-login.sh
+./scripts/qa/fix-admin-login.sh
 
 # Fix parity issues
-./tools/fix-parity.sh
+./scripts/qa/fix-parity.sh
 
 # Run comprehensive tests
-./tools/comprehensive-test.sh
+./scripts/qa/comprehensive-test.sh
 ```
 
 ### After Config Changes
@@ -163,7 +163,7 @@ docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -e "SELECT 1;"
 
 ### Full Health Check
 ```bash
-./tools/comprehensive-test.sh
+./scripts/qa/comprehensive-test.sh
 ```
 
 ## 🔍 Known Issues
@@ -181,13 +181,13 @@ docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -e "SELECT 1;"
 - See `AGENTS.md` for coding guidelines
 
 ### Common Issues
-- **Login problems:** Run `./tools/fix-admin-login.sh`
-- **Parity issues:** Run `./tools/fix-parity.sh`
+- **Login problems:** Run `./scripts/qa/fix-admin-login.sh`
+- **Parity issues:** Run `./scripts/qa/fix-parity.sh`
 - **Config issues:** Check `docs/LOCAL_DEVELOPMENT_GUIDE.md`
 
 ---
 
 **System Status:** ✅ FULLY OPERATIONAL  
 **Last Verified:** 2025-11-12  
-**Next Review:** Run `./tools/comprehensive-test.sh` weekly
+**Next Review:** Run `./scripts/qa/comprehensive-test.sh` weekly
 

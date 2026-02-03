@@ -80,7 +80,7 @@ All courses appear to be from **MEREKA** organization:
 # Apply multi-site configuration
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
-python tools/multisite_bootstrap.py --apply
+python scripts/shared/multisite_bootstrap.py --apply
 ```
 
 This will:
@@ -163,5 +163,5 @@ curl 'https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn'
 ---
 
 **Status:** ⚠️ **MULTI-SITE NOT CONFIGURED LOCALLY**  
-**Action Required:** Run `python tools/multisite_bootstrap.py --apply`  
+**Action Required:** Run `python scripts/shared/multisite_bootstrap.py --apply`  
 **Production Check:** Verify production has proper multi-site setup

@@ -133,7 +133,7 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
 - **Course Import:** `scripts/migrations/kajabi/logs/course_import.log`
 
 ### Scripts
-- **Export:** `tools/kajabi-export.mjs`
+- **Export:** `scripts/migrations/kajabi/kajabi-export.mjs`
 - **Transform:** `scripts/migrations/kajabi/scripts/transform_data.py`
 - **Build Packages:** `scripts/migrations/kajabi/scripts/build_course_packages.py`
 - **Prepare Imports:** `scripts/migrations/kajabi/scripts/prepare_openedx_imports.py`
@@ -150,7 +150,7 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
   - Action: `gcloud run deploy kajabi-webhook --image gcr.io/mereka-lms/kajabi-webhook:latest`
 
 - [ ] **Configure Kajabi Webhooks** - Point Kajabi to webhook receiver
-  - Use: `node tools/kajabi-export.mjs --ensure-webhooks --webhook-target <URL>`
+  - Use: `node scripts/migrations/kajabi/kajabi-export.mjs --ensure-webhooks --webhook-target <URL>`
   - Events: purchase, payment_succeeded, order_created, form_submission, tag_added, tag_removed
 
 ### Medium Priority

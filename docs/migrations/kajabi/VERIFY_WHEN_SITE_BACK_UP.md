@@ -13,7 +13,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-11-09
 
 **Option A: Using Django (if site is accessible)**
 ```bash
-python tools/openedx-export-enrollments.py \
+python scripts/analytics/openedx-export-enrollments.py \
   --django-settings lms.envs.tutor.production \
   --output scripts/migrations/kajabi/output/verification/openedx_enrollments_current.csv
 ```
@@ -25,14 +25,14 @@ tutor config printvalue MYSQL_ROOT_PASSWORD
 tutor config printvalue MYSQL_DATABASE
 
 # Export using direct DB connection
-python tools/openedx-export-enrollments.py \
+python scripts/analytics/openedx-export-enrollments.py \
   --db-url "mysql://root:PASSWORD@localhost:3306/openedx" \
   --output scripts/migrations/kajabi/output/verification/openedx_enrollments_current.csv
 ```
 
 **Option C: Using Tutor Command**
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local run lms ./manage.py lms shell --settings=tutor.production <<EOF
 from common.djangoapps.student.models import CourseEnrollment
 import csv
@@ -58,7 +58,7 @@ tutor local run lms cat /tmp/enrollments.csv > scripts/migrations/kajabi/output/
 ### Step 2: Export Current Open edX Certificates
 
 ```bash
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -100,7 +100,7 @@ cd scripts/migrations/kajabi/output/verification_current
 Once site is back up, run this single command:
 
 ```bash
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \

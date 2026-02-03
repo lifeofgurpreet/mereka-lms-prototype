@@ -56,7 +56,7 @@ The difference likely comes from:
 
 **1. Backup Open edX Database:**
 ```bash
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 tutor local do backup-db
 # Or manually:
 tutor local run lms ./manage.py lms dumpdata --settings=tutor.production > backup_before_import.json
@@ -76,7 +76,7 @@ tutor local run lms ./manage.py lms bulk_enroll \
 **3. Verify Test Import:**
 ```bash
 # Re-run verification to see if test worked
-python tools/verify-and-sync-kajabi-to-openedx.py \
+python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
   --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
   --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -93,14 +93,14 @@ Remove enrollments imported from Kajabi:
 
 ```bash
 # Dry run first
-python tools/rollback-openedx-imports.py \
+python scripts/migrations/kajabi/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
   --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --action unenroll \
   --dry-run
 
 # Actually unenroll
-python tools/rollback-openedx-imports.py \
+python scripts/migrations/kajabi/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
   --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --action unenroll
@@ -125,12 +125,12 @@ Remove only specific courses/users:
 
 ```bash
 # Create a filtered CSV with enrollments to remove
-python tools/create-rollback-csv.py \
+python scripts/migrations/kajabi/create-rollback-csv.py \
   --course-ids "course-v1:MEREKA+MEKA-2148875088+R2148875088" \
   --output rollback_specific.csv
 
 # Unenroll from filtered CSV
-python tools/rollback-openedx-imports.py \
+python scripts/migrations/kajabi/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
   --import-file rollback_specific.csv \
   --action unenroll
@@ -167,7 +167,7 @@ python tools/rollback-openedx-imports.py \
 
 4. **Verify After Import**
    ```bash
-   python tools/verify-and-sync-kajabi-to-openedx.py \
+   python scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
      --django-settings lms.envs.tutor.production \
      --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
      --kajabi-users scripts/migrations/kajabi/output/users.csv \
@@ -216,7 +216,7 @@ If something goes wrong:
 
 ```bash
 # Quick unenroll all Kajabi enrollments
-python tools/rollback-openedx-imports.py \
+python scripts/migrations/kajabi/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
   --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
   --action unenroll \

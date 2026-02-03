@@ -17,7 +17,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-08-20
 
 ## Overview
 
-The MCT export script (`tools/mct-export.mjs`) exports data from Microsoft Community Training platform to NDJSON files for transformation and import into Open edX.
+The MCT export script (`scripts/migrations/mct/mct-export.mjs`) exports data from Microsoft Community Training platform to NDJSON files for transformation and import into Open edX.
 
 **Key Features:**
 - Service-to-service authentication via Azure AD
@@ -100,17 +100,17 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
 MCT_CLIENT_SECRET='<your-secret>' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
-node tools/mct-export.mjs
+node scripts/migrations/mct/mct-export.mjs
 ```
 
 ### Export Specific Resources
 
 ```bash
 # Export only users and organizations
-node tools/mct-export.mjs --resources users,organizations
+node scripts/migrations/mct/mct-export.mjs --resources users,organizations
 
 # Export with pagination limits (for testing)
-node tools/mct-export.mjs --resources users --start-page 1 --end-page 10 --page-size 50
+node scripts/migrations/mct/mct-export.mjs --resources users --start-page 1 --end-page 10 --page-size 50
 ```
 
 ### Dry-Run Mode
@@ -118,14 +118,14 @@ node tools/mct-export.mjs --resources users --start-page 1 --end-page 10 --page-
 ```bash
 # Test configuration without making API calls
 MCT_BASE_URL=learn.skillourfuture.org \
-node tools/mct-export.mjs --dry-run
+node scripts/migrations/mct/mct-export.mjs --dry-run
 ```
 
 ### Force Overwrite
 
 ```bash
 # Overwrite existing export files
-node tools/mct-export.mjs --force
+node scripts/migrations/mct/mct-export.mjs --force
 ```
 
 ### Command-Line Options
@@ -352,7 +352,7 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
 **Solution:** Use `--force` flag to overwrite, or delete existing file:
 ```bash
 rm exports/mct/users.ndjson
-node tools/mct-export.mjs --resources users
+node scripts/migrations/mct/mct-export.mjs --resources users
 ```
 
 #### No records exported
@@ -441,7 +441,7 @@ MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
 Then source it:
 ```bash
 source .env
-node tools/mct-export.mjs
+node scripts/migrations/mct/mct-export.mjs
 ```
 
 ---
@@ -488,13 +488,13 @@ MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
 MCT_CLIENT_SECRET='<secret>' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
-node tools/mct-export.mjs --resources organizations --start-page 1 --end-page 1
+node scripts/migrations/mct/mct-export.mjs --resources organizations --start-page 1 --end-page 1
 ```
 
 ### Dry-Run Test
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org \
-node tools/mct-export.mjs --dry-run
+node scripts/migrations/mct/mct-export.mjs --dry-run
 ```
 
 ### Full Export
@@ -507,7 +507,7 @@ export MCT_CLIENT_SECRET='<secret>'
 export MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
 
 # Run export
-node tools/mct-export.mjs
+node scripts/migrations/mct/mct-export.mjs
 ```
 
 ---
