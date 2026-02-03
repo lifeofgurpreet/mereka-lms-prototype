@@ -85,28 +85,23 @@ gcloud alpha monitoring policies create \
 
 ## Next Steps
 
-1. [x] Add blackbox probe targets for staging.academy.mereka.io to VPS Prometheus
+1. [x] Add blackbox probe targets for academyv2.mereka.io to VPS Prometheus
 2. [x] Slack webhook integration (already configured via SLACK_ALERTMANAGER_WEBHOOK_URL in Infisical)
 3. [x] Add synthetic login/MFE checks via Authentik SSO endpoints
 4. [ ] Verify cross-env datasource connectivity (VPS → GKE)
-5. [ ] Add academyv2.mereka.io domains after cert-manager issues SSL certs
+5. [ ] Confirm academyv2.mereka.io probes stay green after DNS/cert validation
 
 ## Known Issues
 
 ### academyv2.mereka.io Certificate
 
-The academyv2.mereka.io domain DNS is set up but shows a fake Kubernetes ingress certificate.
-Cert-manager needs to issue Let's Encrypt certs for:
-- academyv2.mereka.io
-- studio.academyv2.mereka.io
-- apps.academyv2.mereka.io
+If academyv2.mereka.io shows the fake Kubernetes ingress certificate, verify the DNS record is pointing
+to the GKE load balancer (`34.177.83.168`) and not the VPS/kind ingress. GKE cert-manager already
+issues Let's Encrypt certs for `academyv2.mereka.io`, `studio.academyv2.mereka.io`, and
+`apps.academyv2.mereka.io` via the `openedx-*-tls` secrets.
 
-Current certificates only cover:
-```
-openedx-lms-tls      -> staging.academy.mereka.io
-openedx-studio-tls   -> studio.staging.academy.mereka.io
-openedx-mfe-tls      -> apps.staging.academy.mereka.io
-```
+The kind cluster currently shows NotReady certs due to issuer mismatch (ingress references
+`letsencrypt-prod` while the cluster uses `letsencrypt-dns01`).
 
 ## Files Modified
 
