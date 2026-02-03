@@ -106,6 +106,34 @@ Official Mereka brand assets: `https://github.com/biji-biji-initiative/bbbi-mere
 | Lato | Headings, UI labels |
 | Poppins | Body text, paragraphs |
 
+## MongoDB Atlas-Only Architecture
+
+**🚨 CRITICAL: This project uses MongoDB Atlas exclusively. No local MongoDB is deployed.**
+
+### Architecture Decision
+- **Cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net` (MongoDB Atlas)
+- **Databases**: `openedx` (modulestore), `cs_comments_service` (forum)
+- **Why Atlas**: Zero maintenance overhead, automatic backups, managed scaling
+- **Local MongoDB**: Disabled in K8s manifests (commented out)
+
+See `docs/adr/001-mongodb-atlas.md` for full rationale.
+
+### Connection Details
+| Service | Database | Connection |
+|---------|----------|------------|
+| LMS/CMS | `openedx` | Atlas via `MONGODB_PASSWORD` env var |
+| Forum | `cs_comments_service` | Atlas via `MONGODB_PASSWORD` env var |
+
+### Secret Management
+- Password stored in Infisical: `MEREKA_LMS_MONGODB_PASSWORD`
+- Synced to K8s via ExternalSecrets → `openedx-secrets`
+- Python code uses `os.environ.get("MONGODB_PASSWORD")`
+
+### NEVER DO
+1. ❌ Deploy local MongoDB
+2. ❌ Change connection strings to `localhost` or `mongodb`
+3. ❌ Hardcode MongoDB password in files
+
 ## Coding Style & Naming Conventions
 Shell scripts should begin with `#!/usr/bin/env bash`, enable `set -euo pipefail`, and prefer descriptive function names over inline command chains. Keep Bash indented with two spaces; YAML templates should mirror Tutor defaults and group environment variables in uppercase (e.g., `OPENEDX_RELEASE`). When extending scripts, mirror the existing comment style that summarizes intent rather than mechanics.
 

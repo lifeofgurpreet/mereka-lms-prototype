@@ -663,21 +663,26 @@ spec:
           env:
             - name: SEARCH_SERVER
               value: "http://elasticsearch:9200"
-            # Local MongoDB configuration (in-cluster)
+            # MongoDB Atlas configuration
             - name: MONGODB_AUTH
-              value: ""
+              value: "openedx"
             - name: MONGODB_HOST
-              value: "mongodb"
+              value: "cluster-mereka-lms.2pjex4s.mongodb.net"
             - name: MONGODB_PORT
               value: "27017"
             - name: MONGODB_DATABASE
               value: "cs_comments_service"
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: MONGODB_PASSWORD
             - name: MONGOID_AUTH_SOURCE
-              value: ""
+              value: "admin"
             - name: MONGOID_AUTH_MECH
               value: ""
             - name: MONGOID_USE_SSL
-              value: "false"
+              value: "true"
             - name: DD_TRACE_ENABLED
               value: "false"
 ---

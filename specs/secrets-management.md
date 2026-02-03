@@ -33,11 +33,12 @@ Python Application Code
 
 ### Required Secrets
 
-#### openedx-secrets (24 keys)
+#### openedx-secrets (25 keys)
 | K8s Key | GCP SM Key | Purpose |
 |---------|------------|---------|
 | OPENEDX_SECRET_KEY | MEREKA_LMS_OPENEDX_SECRET_KEY | LMS Django secret |
 | CMS_SECRET_KEY | MEREKA_LMS_CMS_SECRET_KEY | CMS Django secret |
+| MONGODB_PASSWORD | MEREKA_LMS_MONGODB_PASSWORD | MongoDB Atlas password |
 | JWT_SECRET_KEY_LMS | MEREKA_LMS_JWT_SECRET_KEY | LMS JWT signing |
 | JWT_SECRET_KEY_CMS | MEREKA_LMS_JWT_SECRET_KEY_CMS | CMS JWT signing |
 | JWT_SECRET_KEY_DISCOVERY | MEREKA_LMS_JWT_SECRET_KEY_DISCOVERY | Discovery JWT |

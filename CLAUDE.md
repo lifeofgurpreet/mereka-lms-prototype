@@ -21,7 +21,7 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 - **Deployment Tool**: Tutor 18.2.2 (wraps Open edX in Docker/K8s)
 - **Databases**:
   - MySQL 8 (course data, user data)
-  - MongoDB Atlas (forum, modulestore)
+  - MongoDB Atlas (forum, modulestore) - **Atlas only, no local MongoDB**
   - Redis (caching, Celery)
 - **Infrastructure**:
   - Local: Docker Compose
@@ -95,6 +95,14 @@ tutor_env/                # Generated Tutor state (gitignored)
 - `tutor images build mfe` → builds micro-frontends with Node 18 patch
 - Images pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
 - Local builds tag as `latest`, cloud builds tag with git SHA
+
+**MongoDB Atlas (No Local MongoDB)**:
+- **Cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net`
+- **Databases**: `openedx` (modulestore), `cs_comments_service` (forum)
+- **Why Atlas**: Zero maintenance overhead, automatic backups, managed scaling
+- **Local MongoDB disabled**: Deployments reference only Atlas connection
+- **Password**: Stored in Infisical as `MEREKA_LMS_MONGODB_PASSWORD`, synced to K8s secrets
+- See `docs/adr/001-mongodb-atlas.md` for full rationale
 
 ## Common Development Commands
 

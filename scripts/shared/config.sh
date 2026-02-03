@@ -7,6 +7,16 @@
 set -euo pipefail
 
 # =============================================================================
+# Source shared library (if available)
+# =============================================================================
+_SHARED_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "${_SHARED_DIR}/lib.sh" ]]; then
+    # shellcheck source=lib.sh
+    source "${_SHARED_DIR}/lib.sh"
+fi
+unset _SHARED_DIR
+
+# =============================================================================
 # GCP Settings
 # =============================================================================
 export GCP_PROJECT="${GCP_PROJECT:-mereka-lms}"

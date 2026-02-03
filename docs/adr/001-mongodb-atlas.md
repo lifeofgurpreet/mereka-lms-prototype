@@ -49,6 +49,20 @@ We chose **MongoDB Atlas** (managed service) for production workloads.
 
 ## Implementation Notes
 
-- Atlas cluster: `mereka-lms-cluster` in GCP `asia-southeast1`
-- Connection string stored in Kubernetes Secret
-- IP allowlist configured for GKE node IPs
+- **Atlas cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net`
+- **Databases**: `openedx` (modulestore), `cs_comments_service` (forum)
+- **Connection**: Password stored in Infisical (`MEREKA_LMS_MONGODB_PASSWORD`), synced to K8s
+- **Local MongoDB**: Disabled in K8s manifests (deployment, service, PVC all commented out)
+- **Services using Atlas**:
+  - LMS/CMS: Modulestore for course content
+  - Forum: cs_comments_service for discussion forums
+
+## Migration Path
+
+If migrating from local MongoDB to Atlas:
+1. Export data from local MongoDB
+2. Import to Atlas cluster
+3. Update connection strings in settings
+4. Remove local MongoDB deployment
+
+**Note**: As of 2026-02-03, this project has always used Atlas for production. Local MongoDB was never deployed with production data.
