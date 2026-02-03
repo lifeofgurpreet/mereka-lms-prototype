@@ -282,7 +282,28 @@ cd /openedx/edx-platform && ./manage.py lms shell -c \\
 
 ---
 
-### Issue 8: Auth MFE not used (still classic login)
+### Issue 8: Ecommerce OAuth 500 (edx-oauth2)
+
+**Symptoms**
+- Ecommerce login redirects to LMS, then returns 500 at `/complete/edx-oauth2/`.
+
+**Likely Cause**
+- LMS OAuth2 application key/secret or redirect URIs don’t match ecommerce settings.
+
+**Fix**
+1. Confirm the LMS OAuth2 application exists at `https://academyv2.mereka.io/admin/oauth2_provider/application/`.
+2. Ensure the client ID matches the ecommerce key (`ECOMMERCE_BACKEND_OAUTH2_KEY`, default `ecommerce`).
+3. Ensure the client secret matches `ECOMMERCE_SOCIAL_AUTH_EDX_OAUTH2_SECRET`.
+4. Ensure redirect URIs include:
+   - `https://ecommerce.academyv2.mereka.io/complete/edx-oauth2/`
+   - `http://ecommerce.localhost/complete/edx-oauth2/` (dev)
+
+**Notes**
+- `ECOMMERCE_EDX_API_KEY` is used for API auth, not OAuth client ID.
+
+---
+
+### Issue 9: Auth MFE not used (still classic login)
 
 **Symptoms:**
 - Login page shows classic LMS form instead of Auth MFE at `/authn`.
@@ -311,7 +332,7 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 ---
 
-### Issue 9: Database Connection Errors
+### Issue 10: Database Connection Errors
 
 **Symptoms:**
 - Pods crash with `OperationalError` or `DatabaseError`
