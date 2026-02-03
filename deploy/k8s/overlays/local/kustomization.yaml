@@ -7,6 +7,9 @@ resources:
   - ../../base
   - clusterissuer-letsencrypt-prod.yaml
 
+patchesStrategicMerge:
+  - patches/domain-env.yaml
+
 # Local development configurations
 labels:
   environment: local

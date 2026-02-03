@@ -8,7 +8,7 @@ ALLOWED_HOSTS = [
     "ecommerce.localhost",
     "ecommerce",
 ]
-PLATFORM_NAME = "My Open edX"
+PLATFORM_NAME = "Mereka Academy"
 PROTOCOL = "http"
 
 CORS_ALLOW_CREDENTIALS = True

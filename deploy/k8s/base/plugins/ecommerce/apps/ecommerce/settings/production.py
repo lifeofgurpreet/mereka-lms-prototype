@@ -3,13 +3,20 @@ from ..production import *
 import json
 import os
 
+MEREKA_SCHEME = os.environ.get("MEREKA_SCHEME", "https")
+MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
+LMS_BASE_URL = os.environ.get("LMS_BASE_URL", f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}")
+LMS_INTERNAL_URL = os.environ.get("LMS_INTERNAL_URL", "http://lms:8000")
+LMS_OAUTH2_ISSUER = f"{LMS_BASE_URL}/oauth2"
+MFE_BASE_URL = os.environ.get("MFE_BASE_URL", f"{MEREKA_SCHEME}://apps.{MEREKA_LMS_DOMAIN}")
+
 SECRET_KEY = os.environ.get("ECOMMERCE_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "ecommerce.localhost",
     "ecommerce",
-    "ecommerce.academyv2.mereka.io",
+    f"ecommerce.{MEREKA_LMS_DOMAIN}",
 ]
-PLATFORM_NAME = "My Open edX"
+PLATFORM_NAME = "Mereka Academy"
 PROTOCOL = "http"
 
 CORS_ALLOW_CREDENTIALS = True
@@ -18,7 +25,7 @@ OSCAR_DEFAULT_CURRENCY = "USD"
 
 EDX_API_KEY = os.environ.get("ECOMMERCE_EDX_API_KEY", "")
 
-JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
+JWT_AUTH["JWT_ISSUER"] = LMS_OAUTH2_ISSUER
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
 JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_ECOMMERCE", "")
 JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
@@ -35,23 +42,23 @@ JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
 )
 JWT_AUTH["JWT_ISSUERS"] = [
     {
-        "ISSUER": "http://localhost/oauth2",
+        "ISSUER": LMS_OAUTH2_ISSUER,
         "AUDIENCE": "openedx",
         "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_ECOMMERCE", "")
     }
 ]
 
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-SOCIAL_AUTH_EDX_OAUTH2_ISSUER = "https://academyv2.mereka.io"
-SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = LMS_BASE_URL.startswith("https://")
+SOCIAL_AUTH_EDX_OAUTH2_ISSUER = LMS_OAUTH2_ISSUER
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = LMS_INTERNAL_URL
 SOCIAL_AUTH_EDX_OAUTH2_KEY = os.environ.get("ECOMMERCE_EDX_API_KEY", "")
 SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("ECOMMERCE_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
 
 BACKEND_SERVICE_EDX_OAUTH2_SECRET = os.environ.get("ECOMMERCE_BACKEND_OAUTH2_SECRET", "")
-BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://lms:8000/oauth2"
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = f"{LMS_INTERNAL_URL}/oauth2"
 
 EDX_DRF_EXTENSIONS = {
-    'OAUTH2_USER_INFO_URL': 'http://lms:8000/oauth2/user_info',
+    'OAUTH2_USER_INFO_URL': f"{LMS_INTERNAL_URL}/oauth2/user_info",
 }
 
 DATABASES = {
@@ -111,10 +118,10 @@ PAYMENT_PROCESSORS = list(PAYMENT_PROCESSORS) + []
 
 
 CORS_ORIGIN_WHITELIST = list(CORS_ORIGIN_WHITELIST) + [
-    "http://apps.localhost",
+    MFE_BASE_URL,
 ]
-CSRF_TRUSTED_ORIGINS = ["apps.localhost"]
+CSRF_TRUSTED_ORIGINS = [MFE_BASE_URL]
 
-SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = "https://academyv2.mereka.io"
+SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = LMS_BASE_URL
 
-BACKEND_SERVICE_EDX_OAUTH2_KEY = "ecommerce"
+BACKEND_SERVICE_EDX_OAUTH2_KEY = os.environ.get("ECOMMERCE_BACKEND_OAUTH2_KEY", "ecommerce")

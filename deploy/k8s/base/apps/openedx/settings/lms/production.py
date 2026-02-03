@@ -166,7 +166,7 @@ CACHES = {
 SITE_ID = 2
 
 # Contact addresses
-CONTACT_MAILING_ADDRESS = f"My Open edX - {MEREKA_LMS_BASE_URL}"
+CONTACT_MAILING_ADDRESS = f"Mereka Academy - {MEREKA_LMS_BASE_URL}"
 DEFAULT_FROM_EMAIL = ENV_TOKENS.get("DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 DEFAULT_FEEDBACK_EMAIL = ENV_TOKENS.get("DEFAULT_FEEDBACK_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 SERVER_EMAIL = ENV_TOKENS.get("SERVER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
@@ -472,14 +472,14 @@ MFE_CONFIG = {
     "LANGUAGE_PREFERENCE_COOKIE_NAME": "openedx-language-preference",
     "LMS_BASE_URL": MEREKA_LMS_BASE_URL,
     "LOGIN_URL": f"{MEREKA_LMS_BASE_URL}/login",
-    "LOGO_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo.png",
-    "LOGO_WHITE_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo.png",
-    "LOGO_TRADEMARK_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo.png",
+    "LOGO_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo-horizontal.png",
+    "LOGO_WHITE_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo-horizontal-white.png",
+    "LOGO_TRADEMARK_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo-horizontal.png",
     "LOGOUT_URL": f"{MEREKA_LMS_BASE_URL}/logout",
     "MARKETING_SITE_BASE_URL": MEREKA_LMS_BASE_URL,
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",
     "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{MEREKA_LMS_BASE_URL}/login_refresh",
-    "SITE_NAME": "My Open edX",
+    "SITE_NAME": "Mereka Academy",
     "STUDIO_BASE_URL": MEREKA_STUDIO_BASE_URL,
     "USER_INFO_COOKIE_NAME": "user-info",
     "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",
@@ -559,6 +559,23 @@ MFE_CONFIG["ECOMMERCE_BASE_URL"] = ECOMMERCE_PUBLIC_URL_ROOT
 MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
 
 MFE_CONFIG['INDIGO_ENABLE_DARK_TOGGLE'] = True
+
+# MFE Config API URLs - maps MFE names to their base URLs
+MFE_CONFIG_API_URLS = {
+    'authn': f"{MEREKA_MFE_BASE_URL}/authn",
+    'account': f"{MEREKA_MFE_BASE_URL}/account",
+    'gradebook': f"{MEREKA_MFE_BASE_URL}/gradebook",
+    'profile': f"{MEREKA_MFE_BASE_URL}/profile",
+    'course-authoring': f"{MEREKA_MFE_BASE_URL}/course-authoring",
+    'communications': f"{MEREKA_MFE_BASE_URL}/communications",
+    'discussions': f"{MEREKA_MFE_BASE_URL}/discussions",
+    'learner-dashboard': f"{MEREKA_MFE_BASE_URL}/learner-dashboard",
+    'learning': f"{MEREKA_MFE_BASE_URL}/learning",
+    'ora-grading': f"{MEREKA_MFE_BASE_URL}/ora-grading",
+    'orders': f"{MEREKA_MFE_BASE_URL}/orders",
+    'payment': f"{MEREKA_MFE_BASE_URL}/payment",
+}
+
 EDXNOTES_PUBLIC_API = f"{MEREKA_NOTES_BASE_URL}/api/v1"
 EDXNOTES_INTERNAL_API = "http://notes:8000/api/v1"
 

@@ -276,7 +276,7 @@ XQUEUE_INTERFACE = {
 ######## End of settings common to LMS and CMS
 
 ######## Common CMS settings
-STUDIO_NAME = "My Open edX - Studio"
+STUDIO_NAME = "Mereka Academy - Studio"
 
 CACHES["staticfiles"] = {
     "KEY_PREFIX": "staticfiles_cms",

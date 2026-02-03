@@ -1,14 +1,23 @@
 from ..production import *
 import os
+import json
+
+MEREKA_SCHEME = os.environ.get("MEREKA_SCHEME", "https")
+MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
+LMS_BASE_URL = os.environ.get("LMS_BASE_URL", f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}")
+LMS_INTERNAL_URL = os.environ.get("LMS_INTERNAL_URL", "http://lms:8000")
+LMS_OAUTH2_ISSUER = f"{LMS_BASE_URL}/oauth2"
+DISCOVERY_DOMAIN = os.environ.get("DISCOVERY_DOMAIN", f"discovery.{MEREKA_LMS_DOMAIN}")
+DISCOVERY_BASE_URL = os.environ.get("DISCOVERY_BASE_URL", f"{MEREKA_SCHEME}://{DISCOVERY_DOMAIN}")
 
 SECRET_KEY = os.environ.get("DISCOVERY_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "discovery",
     "discovery.localhost",
-    "discovery.academyv2.mereka.io",
+    DISCOVERY_DOMAIN,
 ]
 
-PLATFORM_NAME = "My Open edX"
+PLATFORM_NAME = "Mereka Academy"
 
 DATABASES = {
     "default": {
@@ -66,8 +75,7 @@ LOGGING["loggers"]["algoliasearch_django"] = {"level": "WARNING"}
 
 OAUTH_API_TIMEOUT = 5
 
-import json
-JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
+JWT_AUTH["JWT_ISSUER"] = LMS_OAUTH2_ISSUER
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
 JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_DISCOVERY", "")
 # TODO assign a discovery-specific public key
@@ -85,30 +93,29 @@ JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
 )
 JWT_AUTH["JWT_ISSUERS"] = [
     {
-        "ISSUER": "http://localhost/oauth2",
+        "ISSUER": LMS_OAUTH2_ISSUER,
         "AUDIENCE": "openedx",
         "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_DISCOVERY", "")
     }
 ]
 
 EDX_DRF_EXTENSIONS = {
-    'OAUTH2_USER_INFO_URL': 'http://localhost/oauth2/user_info',
+    'OAUTH2_USER_INFO_URL': f"{LMS_INTERNAL_URL}/oauth2/user_info",
 }
 
 
 
 BACKEND_SERVICE_EDX_OAUTH2_KEY = "discovery"
 BACKEND_SERVICE_EDX_OAUTH2_SECRET = os.environ.get("DISCOVERY_BACKEND_OAUTH2_SECRET", "")
-BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://lms:8000/oauth2"
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = f"{LMS_INTERNAL_URL}/oauth2"
 
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "discovery-sso"
 SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("DISCOVERY_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
-SOCIAL_AUTH_EDX_OAUTH2_ISSUER = "http://localhost"
-SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER
-SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER
-SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = SOCIAL_AUTH_EDX_OAUTH2_ISSUER + "/logout"
+SOCIAL_AUTH_EDX_OAUTH2_ISSUER = LMS_OAUTH2_ISSUER
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = LMS_INTERNAL_URL
+SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = LMS_BASE_URL
+SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = f"{LMS_BASE_URL}/logout"
 
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = MEREKA_SCHEME == "https"
 
-DISCOVERY_BASE_URL = "http://discovery.localhost"
 MEDIA_URL = DISCOVERY_BASE_URL + "/media/"

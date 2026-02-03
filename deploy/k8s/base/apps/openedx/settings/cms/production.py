@@ -126,7 +126,7 @@ CACHES = {
 SITE_ID = 2
 
 # Contact addresses
-CONTACT_MAILING_ADDRESS = f"My Open edX - {MEREKA_LMS_BASE_URL}"
+CONTACT_MAILING_ADDRESS = f"Mereka Academy - {MEREKA_LMS_BASE_URL}"
 DEFAULT_FROM_EMAIL = ENV_TOKENS.get("DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 DEFAULT_FEEDBACK_EMAIL = ENV_TOKENS.get("DEFAULT_FEEDBACK_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 SERVER_EMAIL = ENV_TOKENS.get("SERVER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
@@ -297,7 +297,7 @@ XQUEUE_INTERFACE = {
 ######## End of settings common to LMS and CMS
 
 ######## Common CMS settings
-STUDIO_NAME = "My Open edX - Studio"
+STUDIO_NAME = "Mereka Academy - Studio"
 
 CACHES["staticfiles"] = {
     "KEY_PREFIX": "staticfiles_cms",

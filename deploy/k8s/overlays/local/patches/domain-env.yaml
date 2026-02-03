@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery
+spec:
+  template:
+    spec:
+      containers:
+        - name: discovery
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce
+spec:
+  template:
+    spec:
+      containers:
+        - name: ecommerce
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: ecommerce-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev

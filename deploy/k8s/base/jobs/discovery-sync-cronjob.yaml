@@ -1,0 +1,133 @@
+---
+# CronJob to sync course metadata to Discovery service
+# Runs every 6 hours to ensure course catalog is up-to-date
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discovery-sync
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: discovery-sync
+    app.kubernetes.io/component: cronjob
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  # Run every 6 hours
+  schedule: "0 */6 * * *"
+
+  # Keep last 3 successful and 1 failed job for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+  # Allow concurrent runs to be skipped if previous job still running
+  concurrencyPolicy: Forbid
+
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: discovery-sync
+        app.kubernetes.io/component: job
+    spec:
+      # Retry once if job fails
+      backoffLimit: 1
+
+      # Clean up completed jobs after 24 hours
+      ttlSecondsAfterFinished: 86400
+
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: discovery-sync
+            app.kubernetes.io/component: pod
+        spec:
+          restartPolicy: Never
+
+          # Use Discovery service account if exists
+          serviceAccountName: default
+
+          containers:
+          - name: sync
+            image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
+            imagePullPolicy: IfNotPresent
+
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              echo "=== Discovery Course Sync - $(date) ==="
+
+              # Change to Discovery working directory
+              cd /openedx/discovery
+
+              echo "[1/3] Refreshing course metadata..."
+              python manage.py refresh_course_metadata 2>&1 | \
+                grep -v "UserWarning: The 'django-fsm'" || true
+
+              echo "[2/3] Updating search index..."
+              python manage.py update_index --disable-change-limit 2>&1 | \
+                grep -v "UserWarning: The 'django-fsm'" || true
+
+              echo "[3/3] Verifying course count..."
+              COURSE_COUNT=$(python manage.py shell -c \
+                "from course_discovery.apps.course_metadata.models import Course; print(Course.objects.count())" \
+                2>/dev/null | grep -E '^[0-9]+$' || echo "0")
+
+              echo "✓ Sync complete. Total courses in Discovery: $COURSE_COUNT"
+
+            # Environment variables
+            env:
+            # Service type
+            - name: SERVICE_VARIANT
+              value: discovery
+
+            # Django settings
+            - name: DJANGO_SETTINGS_MODULE
+              value: course_discovery.settings.production
+
+            # Database connection (from database-secrets)
+            - name: DB_HOST
+              value: "mysql"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: discovery
+            - name: DB_USER
+              value: discovery
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: MYSQL_DISCOVERY_PASSWORD
+
+            # LMS connection for OAuth
+            - name: LMS_URL
+              value: "https://academyv2.mereka.io"
+            - name: DISCOVERY_URL
+              value: "https://discovery.academyv2.mereka.io"
+
+            # Import secrets
+            envFrom:
+            - secretRef:
+                name: openedx-secrets
+
+            # Resource limits
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "250m"
+              limits:
+                memory: "1Gi"
+                cpu: "500m"
+
+            # Health check (fail fast if container unhealthy)
+            livenessProbe:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - "ps aux | grep -v grep | grep python"
+              initialDelaySeconds: 10
+              periodSeconds: 30
+              timeoutSeconds: 5
+              failureThreshold: 3

@@ -26,6 +26,9 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 | [`operations/MFE_LOGIN_FIX.md`](operations/MFE_LOGIN_FIX.md) | MFE authentication troubleshooting | 2025-11-12 |
 | [`operations/MFE_REBUILD_SUCCESS.md`](operations/MFE_REBUILD_SUCCESS.md) | MFE rebuild documentation | 2025-11-12 |
 | [`operations/TROUBLESHOOTING.md`](operations/TROUBLESHOOTING.md) | **🚨 SITE DOWN?** Quick diagnostic checklist and fixes | 2025-11-11 |
+| [`operations/DISCOVERY_QUICKSTART.md`](operations/DISCOVERY_QUICKSTART.md) | **Discovery Service:** Quick reference for course catalog operations | 2026-02-03 |
+| [`operations/DISCOVERY_DEMO_COURSE_SETUP.md`](operations/DISCOVERY_DEMO_COURSE_SETUP.md) | Full setup guide for Discovery service and demo courses | 2026-02-03 |
+| [`operations/MONGODB_PERMISSIONS_ISSUE.md`](operations/MONGODB_PERMISSIONS_ISSUE.md) | MongoDB Atlas permissions issue and resolution | 2026-02-03 |
 | [`operations/DJANGO_RAW_SQL_BYPASS.md`](operations/DJANGO_RAW_SQL_BYPASS.md) | Bypass Django signals with raw SQL (when Celery broker unavailable) | 2025-12-29 |
 | [`operations/DEPLOYMENT_RUNBOOK.md`](operations/DEPLOYMENT_RUNBOOK.md) | How we ship Tutor environments (local/prod/k8s) | 2025-10-30 |
 | [`operations/GCP_ROADMAP.md`](operations/GCP_ROADMAP.md) | Cloud architecture plan and outstanding infra tasks | 2025-10-15 |

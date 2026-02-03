@@ -2,7 +2,7 @@
 # Clone/update key Open edX MFEs locally and wire in the shared Mereka theme assets.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEV_ROOT="$REPO_ROOT/tutor_env/dev"
 THEME_IMPORT="\$mereka-font-path: \"/fonts\";\n\n@import \"../../../../../infrastructure/tutor/themes/mereka/scss/theme\";\n"
 LOGO_HORIZONTAL="$REPO_ROOT/assets/branding/logo-horizontal.png"

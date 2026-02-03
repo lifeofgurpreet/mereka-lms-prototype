@@ -8,7 +8,7 @@ ALLOWED_HOSTS = [
     "discovery.localhost"
 ]
 
-PLATFORM_NAME = "My Open edX"
+PLATFORM_NAME = "Mereka Academy"
 
 DATABASES = {
     "default": {
