@@ -52,17 +52,18 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - lms - OpenEdX LMS
 - lms-worker - LMS celery workers
 - elasticsearch - Search functionality
-- mongodb - Document store
 - mysql - Relational database
 - smtp - Email service
 - redis - Cache/message broker
 - discovery - Course discovery
 - ecommerce - E-commerce service
 - ecommerce-worker - E-commerce workers
-- forum - Discussion forums
+- forum - Discussion forums (uses MongoDB Atlas)
 - mfe - Micro-frontends
 - notes - Student notes
 - xqueue - External grading queue
+
+**Note**: MongoDB is provided by MongoDB Atlas (cluster-mereka-lms.2pjex4s.mongodb.net), not deployed in-cluster.
 
 **ConfigMaps (12 generated):**
 - caddy-config - Caddyfile

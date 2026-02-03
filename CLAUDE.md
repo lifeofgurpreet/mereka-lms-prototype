@@ -326,6 +326,40 @@ See `specs/secrets-management.md` for full specification.
 - Run `tutor local do backup-db` before upgrades
 - Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save`
 
+### Pre-commit Secret Scanning
+
+A pre-commit hook automatically scans for hardcoded secrets before each commit.
+
+**Setup** (one-time per clone):
+```bash
+git config --local include.path ../.gitconfig
+```
+
+**What it detects**:
+- Hardcoded passwords (`PASSWORD = "..."`)
+- API keys (`api_key`, `apikey`, `API_KEY` with values)
+- Secret keys (`SECRET_KEY = "..."` with actual values)
+- AWS credentials (`AKIA...`, `aws_secret_access_key`)
+- Private keys (`BEGIN RSA PRIVATE KEY`, `BEGIN PRIVATE KEY`)
+- JWT tokens (`eyJ...`)
+- Database connection strings with embedded credentials
+- GitHub/Slack/Google API tokens
+- Placeholder values that should be removed (`CHANGE_ME`, `changeme`)
+
+**What it ignores**:
+- Empty values (`= ""`, `= ''`)
+- Environment variable references (`os.environ.get`, `${...}`, `process.env`)
+- Comments explaining secrets
+- Test/mock/fixture files
+- Documentation files (`.md`, `.txt`, `.rst`)
+
+**Bypassing** (emergencies only):
+```bash
+git commit --no-verify
+```
+
+**False positives**: If the hook flags something incorrectly, verify it is truly safe, then use `--no-verify`. Consider updating the hook patterns in `.githooks/pre-commit` if the false positive is common.
+
 ## Key Documentation Files
 
 - **Quick Start**: `docs/onboarding/QUICK_START_LOCAL.md` (5-min setup)

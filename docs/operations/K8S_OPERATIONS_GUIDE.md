@@ -561,7 +561,91 @@ velero backup delete <backup-name>
 
 ---
 
-## 8. Quick Command Reference Card
+## 8. Database Password Reset
+
+### When to Use
+
+Use this procedure when passwords stored in ExternalSecrets/GCP Secret Manager do not match what MySQL has configured internally. This typically occurs after:
+- Manual password changes in MySQL without updating secrets
+- Failed secret sync operations
+- Migration or restore from backup with different passwords
+
+### Symptoms
+
+- LMS/CMS pods showing error: `Access denied for user 'openedx'@... (using password: YES)`
+- Pods crashing with database connection errors
+- Application logs showing `OperationalError: (1045, "Access denied for user...")`
+- Services unable to start despite secrets appearing correctly configured
+
+### Procedure
+
+```bash
+# 1. Enable skip-grant-tables to bypass authentication
+kubectl patch deployment mysql -n mereka-lms --type='json' \
+  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["mysqld", "--skip-grant-tables", "--mysql-native-password=ON", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]}]'
+
+# 2. Wait for MySQL to restart with new configuration
+kubectl rollout status deployment/mysql -n mereka-lms
+
+# 3. Get the expected passwords from Kubernetes secrets
+ROOT_PW=$(kubectl get secret database-secrets -n mereka-lms -o jsonpath='{.data.MYSQL_ROOT_PASSWORD}' | base64 -d)
+OPENEDX_PW=$(kubectl get secret database-secrets -n mereka-lms -o jsonpath='{.data.OPENEDX_MYSQL_PASSWORD}' | base64 -d)
+
+# 4. Reset passwords in MySQL to match secrets
+kubectl exec -n mereka-lms deployment/mysql -- mysql -u root -e "
+  FLUSH PRIVILEGES;
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$ROOT_PW';
+  ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '$ROOT_PW';
+  ALTER USER 'openedx'@'%' IDENTIFIED WITH mysql_native_password BY '$OPENEDX_PW';
+  FLUSH PRIVILEGES;"
+
+# 5. Remove skip-grant-tables and restore normal operation
+kubectl patch deployment mysql -n mereka-lms --type='json' \
+  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--binlog-expire-logs-seconds=259200", "--mysql-native-password=ON"]}]'
+
+# 6. Wait for MySQL to restart with authentication enabled
+kubectl rollout status deployment/mysql -n mereka-lms
+
+# 7. Restart LMS/CMS to reconnect with correct credentials
+kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
+```
+
+### Verification
+
+```bash
+# Check LMS/CMS pods are running
+kubectl get pods -n mereka-lms -l 'app.kubernetes.io/name in (lms,cms)'
+
+# Verify external access
+curl -sI https://academyv2.mereka.io | head -1  # Should be HTTP/2 200
+
+# Check LMS logs for database errors
+kubectl logs -n mereka-lms deployment/lms --tail=50 | grep -i "mysql\|database\|error"
+```
+
+### Prevention
+
+To avoid password mismatches in the future:
+
+1. **Never directly modify MySQL passwords** without updating the secrets pipeline
+2. **Always update secrets in this order**:
+   - Infisical (source of truth) first
+   - Then GCP Secret Manager (manual sync or automated)
+   - Let ExternalSecrets sync to Kubernetes
+   - Finally restart affected deployments
+3. **Force ExternalSecret refresh** after GCP SM updates:
+   ```bash
+   kubectl annotate externalsecret database-secrets -n mereka-lms force-sync=$(date +%s) --overwrite
+   ```
+4. **Verify secrets are synced** before restarting services:
+   ```bash
+   kubectl get externalsecret database-secrets -n mereka-lms
+   # Status should show "SecretSynced"
+   ```
+
+---
+
+## 9. Quick Command Reference Card
 
 ```bash
 # === CONTEXT ===

@@ -47,7 +47,6 @@ The base configuration includes the following deployments:
 - **cms-worker**: Celery workers for CMS
 - **redis**: Redis cache and message broker
 - **mysql**: MySQL database
-- **mongodb**: MongoDB for forums and other services
 - **elasticsearch**: Search functionality
 - **smtp**: Email service
 - **discovery**: Course discovery service
@@ -57,6 +56,9 @@ The base configuration includes the following deployments:
 - **mfe**: Micro-frontend applications
 - **notes**: Student notes service
 - **xqueue**: External grading queue
+- **forum**: Discussion forums (uses MongoDB Atlas: cluster-mereka-lms.2pjex4s.mongodb.net)
+
+**Note**: MongoDB is provided by MongoDB Atlas (cluster-mereka-lms.2pjex4s.mongodb.net), not deployed in-cluster.
 
 ## Updating from Tutor
 
