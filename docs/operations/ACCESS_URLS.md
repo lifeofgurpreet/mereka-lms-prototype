@@ -44,23 +44,23 @@ _Audience: Everyone • Last updated: 2025-12-29_
 
 ---
 
-### Staging Environment
+### GKE Environment (academyv2.mereka.io)
 
 **LMS (Learning Management System)**
-- **URL:** https://staging.academy.mereka.io
-- **Admin Panel:** https://staging.academy.mereka.io/admin
+- **URL:** https://academyv2.mereka.io
+- **Admin Panel:** https://academyv2.mereka.io/admin
 - **Purpose:** Main learning platform where students access courses
 
 **Studio (Course Authoring)**
-- **URL:** https://studio.staging.academy.mereka.io
+- **URL:** https://studio.academyv2.mereka.io
 - **Purpose:** Create and manage courses
 - **Login:** Same credentials as LMS
 
 **Micro-Frontends (MFEs)**
-- **Base URL:** https://apps.staging.academy.mereka.io
+- **Base URL:** https://apps.academyv2.mereka.io
 - **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
-**Other Services (Staging)** - Internal only, port-forward required
+**Other Services (GKE)** - Internal only, port-forward required
 - **Discovery:** Internal (kubectl port-forward svc/discovery 8000:8000)
 - **Ecommerce:** Internal (kubectl port-forward svc/ecommerce 8000:8000)
 - **Credentials:** Internal (kubectl port-forward svc/credentials 8000:8000)
@@ -76,16 +76,16 @@ _Audience: Everyone • Last updated: 2025-12-29_
 
 ---
 
-### Skill Our Future (MCT Migration) - Staging
+### Skill Our Future (MCT Migration) - GKE
 
 **LMS (Learning Management System)**
-- **URL:** https://skillourfuture.staging.academy.mereka.io
-- **Admin Panel:** https://skillourfuture.staging.academy.mereka.io/admin
+- **URL:** https://skillourfuture.academy.mereka.io
+- **Admin Panel:** https://skillourfuture.academy.mereka.io/admin
 - **Purpose:** Skill Our Future learning platform (MCT migration target)
 
 **Studio (Course Authoring)**
-- **URL:** https://studio.staging.academy.mereka.io (shared with main staging)
-- **Purpose:** Single Studio instance manages courses for all staging LMS sites
+- **URL:** https://studio.academyv2.mereka.io (shared with main GKE LMS)
+- **Purpose:** Single Studio instance manages courses for all GKE LMS sites
 - **Note:** Courses are organized by Organization (e.g., "SKILLOURFUTURE" org)
 
 **Stats (as of 2025-12-29):**
@@ -96,7 +96,7 @@ _Audience: Everyone • Last updated: 2025-12-29_
 
 ---
 
-### Production Environment (Biji-Biji Academy)
+### Production Microsite (Biji-Biji Academy)
 
 **LMS (Learning Management System)**
 - **URL:** https://academy.biji-biji.com ✅ LIVE
@@ -145,7 +145,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 2. Login with superuser credentials (`admin` / `admin123`)
 
 **Staging:**
-1. Go to: https://staging.academy.mereka.io/admin
+1. Go to: https://academyv2.mereka.io/admin
 2. Login with superuser credentials
 
 **Production:**
@@ -201,7 +201,7 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 
 - **Local:** All URLs use HTTP (no TLS needed)
 - **Staging/Production:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
-- **Staging environment:** `staging.academy.mereka.io`
+- **Staging environment:** `academyv2.mereka.io`
 - **Production environment:** `academy.mereka.io` (when ready)
 - **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
 
@@ -213,19 +213,19 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 
 | Service | Local | Staging |
 |---------|-------|---------|
-| LMS | http://localhost | https://staging.academy.mereka.io |
-| Studio | http://studio.localhost | https://studio.staging.academy.mereka.io |
-| MFE Base | http://apps.localhost | https://apps.staging.academy.mereka.io |
-| Discovery | http://discovery.localhost | https://discovery.staging.academy.mereka.io |
-| Ecommerce | http://ecommerce.localhost | https://ecommerce.staging.academy.mereka.io |
-| Credentials | - | https://credentials.staging.academy.mereka.io |
+| LMS | http://localhost | https://academyv2.mereka.io |
+| Studio | http://studio.localhost | https://studio.academyv2.mereka.io |
+| MFE Base | http://apps.localhost | https://apps.academyv2.mereka.io |
+| Discovery | http://discovery.localhost | https://discovery.academyv2.mereka.io |
+| Ecommerce | http://ecommerce.localhost | https://ecommerce.academyv2.mereka.io |
+| Credentials | - | https://credentials.academyv2.mereka.io |
 
 ### Skill Our Future (MCT) - Staging
 
 | Service | URL |
 |---------|-----|
-| LMS | https://skillourfuture.staging.academy.mereka.io |
-| Studio | https://studio.staging.academy.mereka.io (shared) |
+| LMS | https://skillourfuture.academy.mereka.io |
+| Studio | https://studio.academyv2.mereka.io (shared) |
 
 ### Biji-Biji Academy - Production
 

@@ -96,7 +96,7 @@ jobs:
           mkdir -p ios-app/default_config/mereka
           
           cat > ios-app/default_config/mereka/config.yaml << 'EOF'
-          API_HOST_URL: "https://staging.academy.mereka.io"
+          API_HOST_URL: "https://academyv2.mereka.io"
           OAUTH_CLIENT_ID: "mereka-mobile-app"
           DISCOVERY_BASE_URL: ""
           
@@ -126,8 +126,8 @@ jobs:
             ENABLED: false
           
           AGREEMENT_URLS:
-            PRIVACY_POLICY_URL: "https://staging.academy.mereka.io/privacy"
-            TOS_URL: "https://staging.academy.mereka.io/tos"
+            PRIVACY_POLICY_URL: "https://academyv2.mereka.io/privacy"
+            TOS_URL: "https://academyv2.mereka.io/tos"
           
           FEEDBACK_EMAIL: "team@mereka.io"
           

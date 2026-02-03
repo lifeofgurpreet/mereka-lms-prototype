@@ -71,9 +71,9 @@ The following sensitive values are visible in ConfigMaps (should be K8s Secrets)
 ### Domain Configuration
 
 Current domains (to be updated by v2 rename agent):
-- LMS: `staging.academy.mereka.io` → `academyv2.mereka.io`
-- CMS: `studio.staging.academy.mereka.io` → `studio.academyv2.mereka.io`
-- MFE: `apps.staging.academy.mereka.io` → `apps.academyv2.mereka.io`
+- LMS: `academyv2.mereka.io` → `academyv2.mereka.io`
+- CMS: `studio.academyv2.mereka.io` → `studio.academyv2.mereka.io`
+- MFE: `apps.academyv2.mereka.io` → `apps.academyv2.mereka.io`
 
 ## Feature Flags Review
 

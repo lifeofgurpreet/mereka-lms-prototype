@@ -1,0 +1,50 @@
+organizations:
+  - short_name: MEREKA
+    name: Mereka Academy
+    description: Mereka Academy main site catalog.
+  - short_name: BIJIBIJI
+    name: Biji-Biji Academy
+    description: Biji-Biji Academy microsite catalog.
+  - short_name: SKILLOURFUTURE
+    name: Skill Our Future
+    description: Skill Our Future microsite catalog.
+
+sites:
+  - domain: academyv2.mereka.io
+    name: Mereka Academy
+    orgs:
+      - MEREKA
+    site_values:
+      domain: academyv2.mereka.io
+      site_name: Mereka Academy
+      platform_name: Mereka Academy
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+
+  - domain: academy.biji-biji.com
+    name: Biji-Biji Academy
+    orgs:
+      - BIJIBIJI
+    site_values:
+      domain: academy.biji-biji.com
+      site_name: Biji-Biji Academy
+      platform_name: Biji-Biji Academy
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+
+  - domain: skillourfuture.academy.mereka.io
+    name: Skill Our Future
+    orgs:
+      - SKILLOURFUTURE
+    site_values:
+      domain: skillourfuture.academy.mereka.io
+      site_name: Skill Our Future
+      platform_name: Skill Our Future
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico

@@ -8,6 +8,28 @@ import os
 
 from xmodule.modulestore.modulestore_settings import update_module_store_settings
 
+MEREKA_SCHEME = os.environ.get("MEREKA_SCHEME", "https")
+MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
+MEREKA_DEV_DOMAIN = os.environ.get("MEREKA_DEV_DOMAIN", "academyv2.mereka.dev")
+MEREKA_BIJI_DOMAIN = os.environ.get("MEREKA_BIJI_DOMAIN", "academy.biji-biji.com")
+MEREKA_BIJI_STUDIO_DOMAIN = os.environ.get(
+    "MEREKA_BIJI_STUDIO_DOMAIN",
+    "studio.academy.biji-biji.com",
+)
+
+MEREKA_STUDIO_DOMAIN = os.environ.get("MEREKA_STUDIO_DOMAIN", f"studio.{MEREKA_LMS_DOMAIN}")
+MEREKA_MFE_DOMAIN = os.environ.get("MEREKA_MFE_DOMAIN", f"apps.{MEREKA_LMS_DOMAIN}")
+MEREKA_DEV_STUDIO_DOMAIN = os.environ.get(
+    "MEREKA_DEV_STUDIO_DOMAIN",
+    f"studio.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_DEV_MFE_DOMAIN = os.environ.get("MEREKA_DEV_MFE_DOMAIN", f"apps.{MEREKA_DEV_DOMAIN}")
+MEREKA_COOKIE_DOMAIN = os.environ.get("MEREKA_COOKIE_DOMAIN", f".{MEREKA_LMS_DOMAIN}")
+
+MEREKA_LMS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}"
+MEREKA_STUDIO_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_STUDIO_DOMAIN}"
+MEREKA_MFE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
+
 # Mongodb connection parameters: MongoDB Atlas (cluster-mereka-lms)
 # IMPORTANT: Using MongoDB Atlas instead of in-cluster MongoDB
 # Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
@@ -16,7 +38,7 @@ mongodb_parameters = {
     "host": "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
     "port": 27017,
     "user": "cs_comments_user",
-    "password": "CR3ATIVITY",
+    "password": os.environ.get("MONGODB_PASSWORD", ""),
     # Connection/Authentication
     "connect": False,
     "ssl": True,
@@ -94,7 +116,7 @@ CACHES = {
 SITE_ID = 2
 
 # Contact addresses
-CONTACT_MAILING_ADDRESS = "My Open edX - http://localhost"
+CONTACT_MAILING_ADDRESS = f"My Open edX - {MEREKA_LMS_BASE_URL}"
 DEFAULT_FROM_EMAIL = ENV_TOKENS.get("DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 DEFAULT_FEEDBACK_EMAIL = ENV_TOKENS.get("DEFAULT_FEEDBACK_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 SERVER_EMAIL = ENV_TOKENS.get("SERVER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
@@ -189,9 +211,9 @@ LANGUAGE_COOKIE_NAME = "openedx-language-preference"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 
-JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
+JWT_AUTH["JWT_ISSUER"] = f"{MEREKA_LMS_BASE_URL}/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
-JWT_AUTH["JWT_SECRET_KEY"] = "UeCMQQglnc0O68rTJQezNNSt"
+JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_CMS", "")
 JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"] = json.dumps(
     {
         "kid": "openedx",
@@ -220,9 +242,9 @@ JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
 )
 JWT_AUTH["JWT_ISSUERS"] = [
     {
-        "ISSUER": "http://localhost/oauth2",
+        "ISSUER": f"{MEREKA_LMS_BASE_URL}/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": "UeCMQQglnc0O68rTJQezNNSt"
+        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_CMS", "")
     }
 ]
 
@@ -257,7 +279,7 @@ FEATURES["ENABLE_EDXNOTES"] = True
 XQUEUE_INTERFACE = {
   "django_auth": {
     "username": "lms",
-    "password": "QrDNYqmq"
+    "password": os.environ.get("XQUEUE_LMS_PASSWORD", "")
   },
   "url": "http://xqueue:8000",
   "callback_url": "http://lms:8000"
@@ -274,7 +296,7 @@ CACHES["staticfiles"] = {
 }
 
 # Authentication
-SOCIAL_AUTH_EDX_OAUTH2_SECRET = "mbogYijnMUyqm4PBe0rryAvM"
+SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
 SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False  # scheme is correctly included in redirect_uri
 SESSION_COOKIE_NAME = "studio_session_id"
@@ -296,23 +318,29 @@ for folder in [LOG_DIR, MEDIA_ROOT, STATIC_ROOT, ORA2_FILEUPLOAD_ROOT]:
 ALLOWED_HOSTS = [
     ENV_TOKENS.get("CMS_BASE"),
     "cms",
-    # Staging Studio (shared by all staging LMS sites)
-    "studio.staging.academy.mereka.io",
-    # Production Studio
-    "studio.academy.biji-biji.com",
+    MEREKA_STUDIO_DOMAIN,
+    MEREKA_BIJI_STUDIO_DOMAIN,
+    MEREKA_DEV_STUDIO_DOMAIN,
 ]
-CORS_ORIGIN_WHITELIST.append("http://studio.localhost")
-CORS_ORIGIN_WHITELIST.append("https://studio.staging.academy.mereka.io")
+for origin in [MEREKA_STUDIO_BASE_URL, f"{MEREKA_SCHEME}://{MEREKA_BIJI_STUDIO_DOMAIN}"]:
+    if origin not in CORS_ORIGIN_WHITELIST:
+        CORS_ORIGIN_WHITELIST.append(origin)
 
 # Authentication
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "cms-sso"
-SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = "http://localhost"
+SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = MEREKA_LMS_BASE_URL
 
 # MFE-specific settings
 
-COURSE_AUTHORING_MICROFRONTEND_URL = "http://apps.localhost/course-authoring"
+COURSE_AUTHORING_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/course-authoring"
 
 
-LOGIN_REDIRECT_WHITELIST.append("apps.localhost")
-CORS_ORIGIN_WHITELIST.append("http://apps.localhost")
-CSRF_TRUSTED_ORIGINS.append("http://apps.localhost")
+LOGIN_REDIRECT_WHITELIST.extend([MEREKA_MFE_DOMAIN, MEREKA_DEV_MFE_DOMAIN])
+for origin in [
+    MEREKA_MFE_BASE_URL,
+    f"{MEREKA_SCHEME}://{MEREKA_DEV_MFE_DOMAIN}",
+]:
+    if origin not in CORS_ORIGIN_WHITELIST:
+        CORS_ORIGIN_WHITELIST.append(origin)
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)

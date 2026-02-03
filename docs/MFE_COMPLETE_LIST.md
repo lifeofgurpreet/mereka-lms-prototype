@@ -84,7 +84,7 @@ kubectl exec -n mereka-lms deploy/mfe -- ls -la /openedx/dist/ | grep "^d"
 curl http://localhost/api/mfe_config/v1?mfe=authn | jq .
 
 # Production
-curl https://staging.academy.mereka.io/api/mfe_config/v1?mfe=authn | jq .
+curl https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn | jq .
 ```
 
 ## 🎯 Recommendations

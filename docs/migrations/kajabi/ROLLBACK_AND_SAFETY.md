@@ -65,7 +65,7 @@ tutor local run lms ./manage.py lms dumpdata --settings=tutor.production > backu
 **2. Test with Small Batch First:**
 ```bash
 # Test with first 100 enrollments
-head -101 ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv > /tmp/test_enrollments.csv
+head -101 scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv > /tmp/test_enrollments.csv
 tutor local run lms ./manage.py lms bulk_enroll \
   --csv /tmp/test_enrollments.csv \
   --settings=tutor.production \
@@ -78,11 +78,11 @@ tutor local run lms ./manage.py lms bulk_enroll \
 # Re-run verification to see if test worked
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/verification_test
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_test
 ```
 
 ### Rollback Options
@@ -95,14 +95,14 @@ Remove enrollments imported from Kajabi:
 # Dry run first
 python tools/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
-  --import-file ops/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --action unenroll \
   --dry-run
 
 # Actually unenroll
 python tools/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
-  --import-file ops/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --action unenroll
 ```
 
@@ -148,7 +148,7 @@ python tools/rollback-openedx-imports.py \
 2. **Import Users** (if not done)
    ```bash
    tutor local run lms bash -c 'cat > /tmp/kajabi-users.csv' \
-     < ops/migrations/kajabi/output/openedx/users_import.csv
+     < scripts/migrations/kajabi/output/openedx/users_import.csv
    tutor local run lms ./manage.py lms importusers \
      /tmp/kajabi-users.csv --settings=tutor.production --send-email False
    ```
@@ -157,7 +157,7 @@ python tools/rollback-openedx-imports.py \
    ```bash
    # Use the verification file (unique combinations)
    tutor local run lms bash -c 'cat > /tmp/missing-enrollments.csv' \
-     < ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv
+     < scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv
    tutor local run lms ./manage.py lms bulk_enroll \
      --csv /tmp/missing-enrollments.csv \
      --settings=tutor.production \
@@ -169,11 +169,11 @@ python tools/rollback-openedx-imports.py \
    ```bash
    python tools/verify-and-sync-kajabi-to-openedx.py \
      --django-settings lms.envs.tutor.production \
-     --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-     --kajabi-users ops/migrations/kajabi/output/users.csv \
+     --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+     --kajabi-users scripts/migrations/kajabi/output/users.csv \
      --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-     --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-     --output-dir ops/migrations/kajabi/output/verification_after_import
+     --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+     --output-dir scripts/migrations/kajabi/output/verification_after_import
    ```
 
 5. **Handle Certificates** (after marking completions)
@@ -218,7 +218,7 @@ If something goes wrong:
 # Quick unenroll all Kajabi enrollments
 python tools/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
-  --import-file ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
+  --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
   --action unenroll \
   --dry-run  # Remove --dry-run to actually do it
 ```

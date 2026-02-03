@@ -22,11 +22,11 @@ _Last updated: 2025-11-12_
 ### Staging/Production
 
 **LMS Login:**
-- **URL:** https://staging.academy.mereka.io/login
-- **Direct Admin Panel:** https://staging.academy.mereka.io/admin
+- **URL:** https://academyv2.mereka.io/login
+- **Direct Admin Panel:** https://academyv2.mereka.io/admin
 
 **MFE Login (if configured):**
-- **URL:** https://apps.staging.academy.mereka.io/authn/login
+- **URL:** https://apps.academyv2.mereka.io/authn/login
 
 ## 🚨 Troubleshooting "Too Many Login Attempts"
 
@@ -95,11 +95,11 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 ### Admin Panel
 - **Local:** http://localhost/admin
-- **Staging:** https://staging.academy.mereka.io/admin
+- **Staging:** https://academyv2.mereka.io/admin
 
 ### Studio (Course Authoring)
 - **Local:** http://studio.localhost
-- **Staging:** https://studio.staging.academy.mereka.io
+- **Staging:** https://studio.academyv2.mereka.io
 
 ### Analytics (Superset)
 - **Local:** http://localhost:8088

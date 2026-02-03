@@ -13,7 +13,7 @@ _One-Click Setup for Multiple Developers • Last updated: 2025-11-12_
 ```bash
 git clone <repository-url> mereka.academy
 cd mereka.academy
-./tools/setup-local.sh
+./scripts/shared/setup-local.sh
 ```
 
 **That's it!** Everything is automated.
@@ -37,7 +37,7 @@ cd mereka.academy
    - Ensures no cloud IPs in config
 
 4. **Apply Patches**
-   - Runs `./ops/tutor/apply-patches.sh`
+   - Runs `./infrastructure/tutor/apply-patches.sh`
    - Fixes MySQL authentication
    - Updates Docker Compose files
    - Configures Caddy routing
@@ -62,7 +62,7 @@ cd mereka.academy
    - Creates BIJIBIJI organization
    - Creates SKILLOURFUTURE organization
    - Configures academy.biji-biji.com site
-   - Configures skillourfuture.staging.academy.mereka.io site
+   - Configures skillourfuture.academy.mereka.io site
 
 9. **Create Admin User**
    - Creates admin user
@@ -122,7 +122,7 @@ This shows:
 
 ### Verify Parity
 ```bash
-./tools/check-parity.sh
+./scripts/qa/check-parity.sh
 ```
 
 Checks:
@@ -134,14 +134,14 @@ Checks:
 ## 🛠️ Tools Created
 
 ### Setup & Verification
-1. **`tools/setup-local.sh`** - One-click setup
+1. **`scripts/shared/setup-local.sh`** - One-click setup
 2. **`tools/verify-setup.sh`** - Verify setup complete
 3. **`tools/sync-production-config.sh`** - Compare with production
 
 ### Testing & Analysis
 4. **`tools/comprehensive-test.sh`** - Full test suite
-5. **`tools/check-parity.sh`** - Parity verification
-6. **`tools/analyze-local-data.sh`** - Data analysis
+5. **`scripts/qa/check-parity.sh`** - Parity verification
+6. **`scripts/qa/analyze-local-data.sh`** - Data analysis
 
 ### Fixes
 7. **`tools/fix-parity.sh`** - Fix parity issues
@@ -182,7 +182,7 @@ Checks:
 
 ### New Developer
 - [ ] Clone repository
-- [ ] Run `./tools/setup-local.sh`
+- [ ] Run `./scripts/shared/setup-local.sh`
 - [ ] Verify with `./tools/verify-setup.sh`
 - [ ] Read `docs/DEVELOPER_ONBOARDING.md`
 - [ ] Bookmark `docs/QUICK_REFERENCE.md`
@@ -195,7 +195,7 @@ Checks:
 
 ### Before Deploying
 - [ ] Test locally thoroughly
-- [ ] Run `./tools/check-parity.sh`
+- [ ] Run `./scripts/qa/check-parity.sh`
 - [ ] Compare with production
 - [ ] Document changes
 
@@ -209,7 +209,7 @@ python3 --version
 docker info | grep "Total Memory"
 
 # Re-run setup
-./tools/setup-local.sh
+./scripts/shared/setup-local.sh
 ```
 
 ### Verify Setup
@@ -245,6 +245,6 @@ docker info | grep "Total Memory"
 ---
 
 **Status:** ✅ **COMPLETE AND READY**  
-**Usage:** `./tools/setup-local.sh`  
+**Usage:** `./scripts/shared/setup-local.sh`  
 **Verification:** `./tools/verify-setup.sh`
 

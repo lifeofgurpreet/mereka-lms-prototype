@@ -235,7 +235,10 @@ spec:
             - name: MYSQL_USER
               value: openedx
             - name: MYSQL_PASSWORD
-              value: "aFifpplQ"
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: OPENEDX_MYSQL_PASSWORD
             - name: MYSQL_DATABASE
               value: openedx
             - name: CLICKHOUSE_HOST
@@ -359,7 +362,10 @@ spec:
                 - name: MYSQL_USER
                   value: openedx
                 - name: MYSQL_PASSWORD
-                  value: "aFifpplQ"
+                  valueFrom:
+                    secretKeyRef:
+                      name: database-secrets
+                      key: OPENEDX_MYSQL_PASSWORD
                 - name: MYSQL_DATABASE
                   value: openedx
                 - name: CLICKHOUSE_HOST

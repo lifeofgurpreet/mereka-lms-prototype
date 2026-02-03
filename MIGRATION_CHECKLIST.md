@@ -55,12 +55,12 @@
    ```bash
    # Old paths still work via compatibility shims, but update to new paths:
    source infrastructure/tutor/tutor-env.sh  # instead of ops/tutor-env.sh
-   make tutor-apply  # instead of ./ops/tutor/apply-patches.sh
+   make tutor-apply  # instead of ./infrastructure/tutor/apply-patches.sh
    ```
 
 3. **Update your scripts/documentation**
    - Replace `ops/tutor-env.sh` → `infrastructure/tutor/tutor-env.sh`
-   - Replace `ops/tutor/apply-patches.sh` → `make tutor-apply` or `./infrastructure/tutor/apply-patches.sh`
+   - Replace `infrastructure/tutor/apply-patches.sh` → `make tutor-apply` or `./infrastructure/tutor/apply-patches.sh`
    - Replace `tools/` → `scripts/{domain}/`
    - Replace `docs/QUICK_START_LOCAL.md` → `docs/onboarding/QUICK_START_LOCAL.md`
    - Replace `docs/ops/TROUBLESHOOTING.md` → `docs/operations/TROUBLESHOOTING.md`
@@ -83,7 +83,7 @@
 - [x] Updated main `README.md` and `AGENTS.md`
 - [x] Updated `docs/README.md` with new structure
 - [x] Updated `docs/BRANDING_PLAN.md` paths
-- [x] Updated `ops/migrations/mct/README.md` paths
+- [x] Updated `scripts/migrations/mct/README.md` paths
 - [ ] Review team-specific docs and update references
 
 ## 📋 Verification Checklist
@@ -103,7 +103,7 @@ Once team is fully migrated:
 
 1. Remove compatibility shims:
    - `ops/tutor-env.sh` symlink
-   - `ops/tutor/apply-patches.sh` symlink
+   - `infrastructure/tutor/apply-patches.sh` symlink
    - `ops/README.md` (keep migration note for reference)
 
 2. Remove `tools/README.md` (keep migration note)

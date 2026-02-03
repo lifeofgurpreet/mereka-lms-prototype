@@ -23,7 +23,7 @@ The **Instructor Dashboard** is available in every course and provides direct ac
 
 #### Accessing the Instructor Dashboard
 
-1. **Log into the LMS** (e.g., `https://staging.academy.mereka.io` or `http://localhost`)
+1. **Log into the LMS** (e.g., `https://academyv2.mereka.io` or `http://localhost`)
 2. **Navigate to a course** you have instructor access to
 3. **Click on "Instructor"** in the course navigation menu (top navigation bar)
 4. **Select "Data Download"** from the instructor dashboard menu
@@ -131,9 +131,9 @@ See **[`docs/PANORAMA_ANALYTICS.md`](PANORAMA_ANALYTICS.md)** for installation d
 - Instructor Dashboard: `http://localhost/courses/{course-id}/instructor`
 
 ### Staging/Production
-- LMS: `https://staging.academy.mereka.io`
-- Studio: `https://studio.staging.academy.mereka.io`
-- Instructor Dashboard: `https://staging.academy.mereka.io/courses/{course-id}/instructor`
+- LMS: `https://academyv2.mereka.io`
+- Studio: `https://studio.academyv2.mereka.io`
+- Instructor Dashboard: `https://academyv2.mereka.io/courses/{course-id}/instructor`
 
 ## Permissions Required
 
@@ -341,24 +341,24 @@ for item in recent_enrollments:
 
 ## Using the Analytics Script
 
-A Python script is available at `tools/openedx-analytics.py` that provides a command-line interface for common analytics queries.
+A Python script is available at `scripts/analytics/openedx-analytics.py` that provides a command-line interface for common analytics queries.
 
 ### Usage Examples
 
 ```bash
 # Get summary statistics
-tutor local run lms python /path/to/tools/openedx-analytics.py --summary
+tutor local run lms python /path/to/scripts/analytics/openedx-analytics.py --summary
 
 # Get enrollments for a specific course
-tutor local run lms python /path/to/tools/openedx-analytics.py \
+tutor local run lms python /path/to/scripts/analytics/openedx-analytics.py \
   --course "course-v1:org+course+run" --enrollments
 
 # Get completion statistics
-tutor local run lms python /path/to/tools/openedx-analytics.py \
+tutor local run lms python /path/to/scripts/analytics/openedx-analytics.py \
   --course "course-v1:org+course+run" --completions
 
 # Export all course analytics to CSV
-tutor local run lms python /path/to/tools/openedx-analytics.py \
+tutor local run lms python /path/to/scripts/analytics/openedx-analytics.py \
   --export-csv /tmp/analytics.csv
 ```
 

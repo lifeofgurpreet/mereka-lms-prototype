@@ -22,4 +22,4 @@ spec:
                   name: ses-smtp-credentials
                   key: RELAY_PASSWORD
             - name: HOSTNAME
-              value: "mail.staging.academy.mereka.io"
+              value: "mail.academyv2.mereka.io"

@@ -1,0 +1,75 @@
+[
+  {
+    "comment": "=== mereka.dev DNS Records ===",
+    "description": "Primary LMS ingress (VPS kind)",
+    "type": "A",
+    "name": "academyv2.mereka.dev",
+    "content": "194.233.84.55",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio hostname",
+    "type": "CNAME",
+    "name": "studio.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Microfrontends",
+    "type": "CNAME",
+    "name": "apps.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Discovery service",
+    "type": "CNAME",
+    "name": "discovery.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Ecommerce service",
+    "type": "CNAME",
+    "name": "ecommerce.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Notes service host",
+    "type": "CNAME",
+    "name": "notes.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Analytics/Superset dashboard",
+    "type": "CNAME",
+    "name": "analytics.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Credentials service",
+    "type": "CNAME",
+    "name": "credentials.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio preview host (needed for Caddy TLS)",
+    "type": "CNAME",
+    "name": "preview.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  }
+]

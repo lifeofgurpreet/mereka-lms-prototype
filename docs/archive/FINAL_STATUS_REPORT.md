@@ -90,9 +90,9 @@ MFE Authn:       ??? (Need verification)
 
 ## 🛠️ Tools Created
 
-1. **`tools/analyze-local-data.sh`** - Database analysis
+1. **`scripts/qa/analyze-local-data.sh`** - Database analysis
 2. **`tools/comprehensive-test.sh`** - Full test suite
-3. **`tools/check-parity.sh`** - Parity verification
+3. **`scripts/qa/check-parity.sh`** - Parity verification
 4. **`tools/fix-parity.sh`** - Automated fixes
 5. **`tools/fix-admin-login.sh`** - Login fixes
 

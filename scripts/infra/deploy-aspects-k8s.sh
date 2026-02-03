@@ -5,7 +5,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-source infrastructure/tutor/tutor-env.sh
+source ops/tutor-env.sh
 
 echo "=== Configuring Aspects for GKE Autopilot ==="
 echo ""
@@ -95,6 +95,8 @@ echo "  Username: admin"
 echo "  Password: Check with: tutor config printvalue SUPERSET_ADMIN_PASSWORD"
 echo ""
 echo "=== Done ==="
+
+
 
 
 

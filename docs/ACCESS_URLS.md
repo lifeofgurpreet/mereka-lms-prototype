@@ -47,23 +47,23 @@ _Audience: Everyone • Last updated: 2025-11-12_
 ### Staging Environment
 
 **LMS (Learning Management System)**
-- **URL:** https://staging.academy.mereka.io
-- **Admin Panel:** https://staging.academy.mereka.io/admin
+- **URL:** https://academyv2.mereka.io
+- **Admin Panel:** https://academyv2.mereka.io/admin
 - **Purpose:** Main learning platform where students access courses
 
 **Studio (Course Authoring)**
-- **URL:** https://studio.staging.academy.mereka.io
+- **URL:** https://studio.academyv2.mereka.io
 - **Purpose:** Create and manage courses
 - **Login:** Same credentials as LMS
 
 **Micro-Frontends (MFEs)**
-- **Base URL:** https://apps.staging.academy.mereka.io
+- **Base URL:** https://apps.academyv2.mereka.io
 - **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
 **Other Services (Staging)**
-- **Discovery:** https://discovery.staging.academy.mereka.io
-- **Ecommerce:** https://ecommerce.staging.academy.mereka.io
-- **Notes API:** https://notes.staging.academy.mereka.io (API only, no UI)
+- **Discovery:** https://discovery.academyv2.mereka.io
+- **Ecommerce:** https://ecommerce.academyv2.mereka.io
+- **Notes API:** https://notes.academyv2.mereka.io (API only, no UI)
 - **Forum:** Integrated into LMS courses
   - **Status:** ✅ Running (scaled to 1 replica)
   - **MongoDB:** ✅ Connected to MongoDB Atlas
@@ -72,7 +72,7 @@ _Audience: Everyone • Last updated: 2025-11-12_
 - **Analytics (Superset):** 
   - **Status:** ✅ Running
   - **Via Port-Forward:** `kubectl port-forward -n mereka-lms svc/superset 8088:8088` → http://localhost:8088
-  - **Via Ingress (once DNS configured):** https://analytics.staging.academy.mereka.io
+  - **Via Ingress (once DNS configured):** https://analytics.academyv2.mereka.io
   - **LoadBalancer IP:** `34.126.186.80` (for DNS A record)
   - **Default Credentials:** `admin` / `admin`
   - **Full Guide:** [`docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`](analytics/ANALYTICS_CONSOLE_ACCESS.md)
@@ -127,7 +127,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 2. Login with superuser credentials (`admin` / `admin123`)
 
 **Staging:**
-1. Go to: https://staging.academy.mereka.io/admin
+1. Go to: https://academyv2.mereka.io/admin
 2. Login with superuser credentials
 
 **Production:**
@@ -183,7 +183,7 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 
 - **Local:** All URLs use HTTP (no TLS needed)
 - **Staging/Production:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
-- **Staging environment:** `staging.academy.mereka.io`
+- **Staging environment:** `academyv2.mereka.io`
 - **Production environment:** `academy.mereka.io` (when ready)
 - **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
 
@@ -193,9 +193,9 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 
 | Service | Local | Staging | Production |
 |---------|-------|---------|------------|
-| LMS | http://localhost | https://staging.academy.mereka.io | https://academy.mereka.io |
-| Studio | http://studio.localhost | https://studio.staging.academy.mereka.io | https://studio.academy.mereka.io |
-| MFE Base | http://apps.localhost | https://apps.staging.academy.mereka.io | https://apps.academy.mereka.io |
-| Discovery | http://discovery.localhost | https://discovery.staging.academy.mereka.io | https://discovery.academy.mereka.io |
-| Ecommerce | http://ecommerce.localhost | https://ecommerce.staging.academy.mereka.io | https://ecommerce.academy.mereka.io |
-| Analytics (Superset) | Port-forward: http://localhost:8088 | Port-forward: http://localhost:8088<br>Or: https://analytics.staging.academy.mereka.io (once DNS configured) | TBD |
+| LMS | http://localhost | https://academyv2.mereka.io | https://academy.mereka.io |
+| Studio | http://studio.localhost | https://studio.academyv2.mereka.io | https://studio.academy.mereka.io |
+| MFE Base | http://apps.localhost | https://apps.academyv2.mereka.io | https://apps.academy.mereka.io |
+| Discovery | http://discovery.localhost | https://discovery.academyv2.mereka.io | https://discovery.academy.mereka.io |
+| Ecommerce | http://ecommerce.localhost | https://ecommerce.academyv2.mereka.io | https://ecommerce.academy.mereka.io |
+| Analytics (Superset) | Port-forward: http://localhost:8088 | Port-forward: http://localhost:8088<br>Or: https://analytics.academyv2.mereka.io (once DNS configured) | TBD |

@@ -23,11 +23,11 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
 - ✅ `import_courses_k8s.py` - K8s course import script (needs Tutor environment)
 
 ### 4. Data Files Ready
-- ✅ `ops/migrations/mct/output/openedx/users_import_sanitized.csv` (68,785 rows; header + 68,784 users)
-- ✅ `ops/migrations/mct/output/openedx/enrollments_import.csv` (57,483 rows)
-- ✅ `ops/migrations/mct/output/course_packages_categories/` (14 tarballs)
+- ✅ `scripts/migrations/mct/output/openedx/users_import_sanitized.csv` (68,785 rows; header + 68,784 users)
+- ✅ `scripts/migrations/mct/output/openedx/enrollments_import.csv` (57,483 rows)
+- ✅ `scripts/migrations/mct/output/course_packages_categories/` (14 tarballs)
 
-### 5. Imports Executed on `skillourfuture.staging`
+### 5. Imports Executed on `skillourfuture.academy`
 - ✅ **Users**: all 68,784 rows processed (433 duplicate-email collisions reconciled against existing accounts)
 - ✅ **Courses**: all 14 tarballs imported via `import_courses_k8s.py`
 - ✅ **Enrollments**: 57,302 created; 177 rows skipped because the referenced email does not exist in Open edX (sample: `adeariediah@yahoo.co.id`, `anikrahmana0712@gamil.com`)
@@ -37,16 +37,16 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
 ## ⚠️ In Progress / Blocked
 
 ### 1. UI Verification
-- ⚠️ **Blocked**: `https://skillourfuture.staging.academy.mereka.io` is returning `502/504` because LMS cannot resolve `mongodb:27017`
+- ⚠️ **Blocked**: `https://skillourfuture.academy.mereka.io` is returning `502/504` because LMS cannot resolve `mongodb:27017`
 - 🧪 Evidence:
-  - `curl -I https://skillourfuture.staging.academy.mereka.io/` → `HTTP/2 502`
+  - `curl -I https://skillourfuture.academy.mereka.io/` → `HTTP/2 502`
   - `kubectl logs lms-5d5bd75dcc-6bkmq` → `ServerSelectionTimeoutError: mongodb:27017: [Errno -2] Name or service not known`
   - `kubectl get svc mongodb -n mereka-lms` shows headless service with no endpoints; there is currently **no MongoDB pod or external endpoint**
 - 🔧 Action: restore Mongo connectivity (spin up Tutor-managed Mongo statefulset or point the service at the external cluster via endpoints). UI verification must wait until this is fixed.
 
 ### 2. Enrollment Gap triage
 - ⚠️ 177 enrollment rows reference emails that do not exist in Open edX (likely data-quality issues in MCT export)
-- 📄 Report saved at `ops/migrations/mct/output/openedx/enrollment_missing_users.csv`
+- 📄 Report saved at `scripts/migrations/mct/output/openedx/enrollment_missing_users.csv`
 - 🔧 Action: produce a remediation list (CSV of missing emails) and confirm with stakeholders whether to drop or correct these contacts.
 
 ### 3. Pathway / Program Planning
@@ -82,7 +82,7 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
    - Capture screenshots for leadership.
 
 3. **Enrollment Gap Review**
-   - Export the 177 missing emails into `ops/migrations/mct/output/openedx/enrollment_missing_users.csv`.
+   - Export the 177 missing emails into `scripts/migrations/mct/output/openedx/enrollment_missing_users.csv`.
    - Decide whether to re-export users from MCT or drop the enrollments.
 
 4. **Programs Strategy**
@@ -112,7 +112,7 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
 - [x] All 68,784 users imported
 - [x] All 14 courses imported and visible in Studio
 - [ ] All 57,483 enrollments created (177 pending user remediation)
-- [ ] Courses visible on `skillourfuture.staging.academy.mereka.io`
+- [ ] Courses visible on `skillourfuture.academy.mereka.io`
 - [ ] Users can log in and see enrolled courses
 - [ ] Course content (videos, PDFs) accessible
 
@@ -129,6 +129,5 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
 
 **Last Updated**: 2025-11-12
 **Status**: 85% Complete - Data imported; UI verification blocked pending Mongo fix
-
 
 

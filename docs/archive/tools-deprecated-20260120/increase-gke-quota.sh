@@ -74,7 +74,7 @@ fi
 
 echo ""
 echo "After quota is increased, deploy Aspects with:"
-echo "  ./tools/deploy-aspects-k8s.sh"
+echo "  ./scripts/infra/deploy-aspects-k8s.sh"
 
 
 

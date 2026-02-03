@@ -56,7 +56,7 @@ echo ""
 echo "5️⃣  MONGODB ATLAS OPTIMIZATION"
 echo "   Current: M10 tier (~\$87/month)"
 echo "   Optimize: M0 tier (FREE for dev/staging)"
-echo "   ⚠️  See: ./scripts/infra/downgrade-mongodb-to-m0.sh"
+echo "   ⚠️  See: ./tools/downgrade-mongodb-to-m0.sh"
 echo "   Savings: ~\$87/month"
 echo ""
 
@@ -102,5 +102,7 @@ echo "  Previous savings: ~\$480-580/month"
 echo "  Additional savings: ~\$200-350/month"
 echo "  TOTAL SAVINGS: ~\$680-930/month"
 echo "  New monthly cost: ~\$93-583/month (down from \$1,023-1,263)"
+
+
 
 

@@ -93,8 +93,8 @@ jobs:
 
           # Initialize Tutor config
           tutor config save \
-            --set LMS_HOST=staging.academy.mereka.io \
-            --set CMS_HOST=studio.staging.academy.mereka.io \
+            --set LMS_HOST=academyv2.mereka.io \
+            --set CMS_HOST=studio.academyv2.mereka.io \
             --set ENABLE_HTTPS=true
 
           # Apply patches
@@ -165,8 +165,8 @@ jobs:
 
           # Initialize Tutor config
           tutor config save \
-            --set LMS_HOST=staging.academy.mereka.io \
-            --set MFE_HOST=apps.staging.academy.mereka.io \
+            --set LMS_HOST=academyv2.mereka.io \
+            --set MFE_HOST=apps.academyv2.mereka.io \
             --set ENABLE_HTTPS=true
 
           # Apply patches (includes Node 18 + webpack memory fixes)
@@ -273,5 +273,5 @@ jobs:
           echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**LMS:** https://staging.academy.mereka.io" >> $GITHUB_STEP_SUMMARY
-          echo "**MFE:** https://apps.staging.academy.mereka.io" >> $GITHUB_STEP_SUMMARY
+          echo "**LMS:** https://academyv2.mereka.io" >> $GITHUB_STEP_SUMMARY
+          echo "**MFE:** https://apps.academyv2.mereka.io" >> $GITHUB_STEP_SUMMARY

@@ -66,9 +66,9 @@ if user:
 ## Files Location
 
 ### In Repository
-- Import Script: `/ops/migrations/mct/scripts/openedx_bulk_import_mct.py`
-- K8s Runner: `/ops/migrations/mct/scripts/run_user_import_k8s.sh`
-- Test Script: `/ops/migrations/mct/scripts/test_user_import.sh`
+- Import Script: `/scripts/migrations/mct/scripts/openedx_bulk_import_mct.py`
+- K8s Runner: `/scripts/migrations/mct/scripts/run_user_import_k8s.sh`
+- Test Script: `/scripts/migrations/mct/scripts/test_user_import.sh`
 - Import Log: `/var/migrations/mct/user_import_log_2025-12-18.txt`
 
 ### In K8s Pod
@@ -117,4 +117,4 @@ if user:
 See full documentation:
 - Complete report: `/docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md`
 - Executive summary: `/MCT_USER_IMPORT_SUMMARY.md`
-- Migration README: `/ops/migrations/mct/README.md`
+- Migration README: `/scripts/migrations/mct/README.md`

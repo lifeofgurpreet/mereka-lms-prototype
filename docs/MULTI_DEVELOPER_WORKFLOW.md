@@ -9,7 +9,7 @@ This guide ensures all developers can work efficiently without conflicts, with c
 
 ### One-Command Setup
 ```bash
-./tools/setup-local.sh
+./scripts/shared/setup-local.sh
 ```
 
 This automatically:
@@ -45,7 +45,7 @@ tutor local start -d
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 tutor config save --set KEY=value
-./ops/tutor/apply-patches.sh  # CRITICAL: Always run this
+./infrastructure/tutor/apply-patches.sh  # CRITICAL: Always run this
 tutor local restart <affected-services>
 ```
 
@@ -76,7 +76,7 @@ tutor local stop
 ### Production/Staging
 - **Database:** Cloud SQL, MongoDB Atlas, managed Redis
 - **Storage:** GCS buckets
-- **URLs:** `staging.academy.mereka.io`, `academy.mereka.io`
+- **URLs:** `academyv2.mereka.io`, `academy.mereka.io`
 - **Config:** Kubernetes ConfigMaps/Secrets
 
 ### Key Rule
@@ -90,10 +90,10 @@ tutor local stop
 ./tools/sync-production-config.sh
 
 # Analyze local data
-./tools/analyze-local-data.sh
+./scripts/qa/analyze-local-data.sh
 
 # Check parity
-./tools/check-parity.sh
+./scripts/qa/check-parity.sh
 ```
 
 ### What Should Match
@@ -106,7 +106,7 @@ tutor local stop
 
 ### What Should Differ
 - ✅ Database hosts (local Docker vs Cloud SQL)
-- ✅ URLs (localhost vs staging.academy.mereka.io)
+- ✅ URLs (localhost vs academyv2.mereka.io)
 - ✅ Storage (local volumes vs GCS)
 - ✅ User data (local test data vs production)
 
@@ -118,7 +118,7 @@ tutor local stop
    ```bash
    git clone <repo-url>
    cd mereka.academy
-   ./tools/setup-local.sh
+   ./scripts/shared/setup-local.sh
    ```
 
 2. **Verify:**
@@ -134,7 +134,7 @@ tutor local stop
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save --set KEY=value
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 
@@ -169,7 +169,7 @@ tutor local restart
 ### Configuration Conflicts
 - `tutor_env/config.yml` is git-ignored
 - Each developer has their own config
-- Use `ops/tutor/config.example.yml` as template
+- Use `infrastructure/tutor/config.example.yml` as template
 
 ### Code Conflicts
 - Use Git branches for features
@@ -186,7 +186,7 @@ tutor local restart
 ### During Development
 1. Test locally first
 2. Run tests: `./tools/comprehensive-test.sh`
-3. Check parity: `./tools/check-parity.sh`
+3. Check parity: `./scripts/qa/check-parity.sh`
 4. Document changes
 
 ### Before Committing
@@ -207,7 +207,7 @@ tutor local restart
 ```bash
 # Compare configs
 ./tools/sync-production-config.sh
-./tools/check-parity.sh
+./scripts/qa/check-parity.sh
 
 # Fix local config
 ./tools/fix-parity.sh
@@ -224,9 +224,9 @@ tutor local launch -I --skip-build
 ### "Config issues"
 ```bash
 # Recreate from example
-cp ops/tutor/config.example.yml tutor_env/config.yml
+cp infrastructure/tutor/config.example.yml tutor_env/config.yml
 tutor config save  # Reconfigure
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
 ## 📚 Documentation
@@ -238,7 +238,7 @@ tutor config save  # Reconfigure
 
 ## ✅ Checklist for New Developers
 
-- [ ] Ran `./tools/setup-local.sh`
+- [ ] Ran `./scripts/shared/setup-local.sh`
 - [ ] Verified with `./tools/verify-setup.sh`
 - [ ] Can access http://localhost
 - [ ] Can login with admin/admin123

@@ -119,7 +119,7 @@ _Last updated: 2025-11-12 • URGENT REVIEW NEEDED_
 
 1. **`docs/MULTISITE_ANALYSIS.md`** - Complete analysis
 2. **`docs/PRODUCTION_VERIFICATION_CHECKLIST.md`** - Verification steps
-3. **`tools/analyze-local-data.sh`** - Data analysis tool
+3. **`scripts/qa/analyze-local-data.sh`** - Data analysis tool
 4. **`docs/CRITICAL_FINDINGS.md`** - This document
 
 ## 🔍 Key Questions Answered

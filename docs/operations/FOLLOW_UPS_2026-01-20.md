@@ -7,11 +7,11 @@ This file captures what was verified today and what still needs to happen so you
 - LMS/CMS/MFE pods are Running; ingress hosts for `staging`, `studio`, `apps` are OK.
 - Multi-site data exists in DB:
   - Organizations: MEREKA, BIJIBIJI, SKILLOURFUTURE (active).
-  - Sites: `staging.academy.mereka.io`, `academy.biji-biji.com`, `skillourfuture.staging.academy.mereka.io`.
+  - Sites: `academyv2.mereka.io`, `academy.biji-biji.com`, `skillourfuture.academy.mereka.io`.
   - Each site has `course_org_filter` set and theme `mereka`.
 - Cookies and CSRF:
-  - `SESSION_COOKIE_DOMAIN=.staging.academy.mereka.io`
-  - `CSRF_COOKIE_DOMAIN=.staging.academy.mereka.io`
+  - `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io`
+  - `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io`
   - `CSRF_TRUSTED_ORIGINS` includes staging + studio + apps + academy + skillourfuture + auth0.
 - OIDC endpoints are live:
   - `/auth/login/oidc/` returns 302 for all three LMS hosts.
@@ -24,7 +24,7 @@ These were done directly on the cluster and are NOT yet committed into repo sour
 
 1) Ingress `openedx-lms` updated to include hosts:
    - `academy.biji-biji.com`
-   - `skillourfuture.staging.academy.mereka.io`
+   - `skillourfuture.academy.mereka.io`
    TLS cert re-issued successfully with both SANs.
 
 2) LMS settings configmap `openedx-settings-lms-patched` updated:
@@ -33,8 +33,8 @@ These were done directly on the cluster and are NOT yet committed into repo sour
    - Restarted `lms` and `lms-worker`.
 
 3) OIDC provider config duplicated per site:
-   - Created `OAuth2ProviderConfig` entries for `academy.biji-biji.com` and `skillourfuture.staging.academy.mereka.io`.
-   - There are still two existing entries for `staging.academy.mereka.io` (duplicate).
+   - Created `OAuth2ProviderConfig` entries for `academy.biji-biji.com` and `skillourfuture.academy.mereka.io`.
+   - There are still two existing entries for `academyv2.mereka.io` (duplicate).
 
 ## What Still Needs To Happen (Next Steps)
 
@@ -43,7 +43,7 @@ These were done directly on the cluster and are NOT yet committed into repo sour
 1) Update the Argo/Tutor source manifests so the ingress host/TLS changes don’t get reverted.
    - Find the `openedx-lms` ingress in repo and add:
      - `academy.biji-biji.com`
-     - `skillourfuture.staging.academy.mereka.io`
+     - `skillourfuture.academy.mereka.io`
    - Ensure TLS hosts include both.
 
 2) Backport the LMS auth whitelist changes into the repo’s settings patch (source of truth).
@@ -57,13 +57,13 @@ These were done directly on the cluster and are NOT yet committed into repo sour
 3) Make OIDC provider config creation repeatable.
    - Add to `scripts/shared/multisite_bootstrap.py` or a new script:
      - Create one `OAuth2ProviderConfig` per site.
-   - Clean up duplicate entries for `staging.academy.mereka.io`.
+   - Clean up duplicate entries for `academyv2.mereka.io`.
 
 ### B) Verify External Access (High Priority)
 
 4) From a clean external network (not inside the cluster), verify:
    - `https://academy.biji-biji.com`
-   - `https://skillourfuture.staging.academy.mereka.io`
+   - `https://skillourfuture.academy.mereka.io`
    Note: Cloudflare is in front of `academy.biji-biji.com`. Confirm DNS/proxy mode and SSL mode (Full/Strict) are correct.
 
 5) Verify full OIDC login for each LMS host:
@@ -104,7 +104,7 @@ kubectl get certificate -n mereka-lms
 
 # Verify OIDC redirect for each host (inside cluster)
 kubectl exec -n mereka-lms deploy/lms -- sh -c \
-  'for host in staging.academy.mereka.io academy.biji-biji.com skillourfuture.staging.academy.mereka.io; do \
+  'for host in academyv2.mereka.io academy.biji-biji.com skillourfuture.academy.mereka.io; do \
      echo "\n$host"; \
      curl -sS -I -H "Host: $host" http://caddy:80/auth/login/oidc/ | sed -n "1,6p"; \
    done'

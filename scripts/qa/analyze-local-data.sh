@@ -83,10 +83,10 @@ echo "╚═══════════════════════�
 echo ""
 echo "Expected Setup:"
 echo "  • Organizations: BIJIBIJI, SKILLOURFUTURE"
-echo "  • Sites: academy.biji-biji.com, skillourfuture.staging.academy.mereka.io"
+echo "  • Sites: academy.biji-biji.com, skillourfuture.academy.mereka.io"
 echo "  • Skill Our Future: ~80,000 users"
 echo "  • Mereka (main): 100,000+ users"
 echo ""
 echo "If organizations/sites are missing, run:"
-echo "  python scripts/shared/multisite_bootstrap.py --apply"
+echo "  python tools/multisite_bootstrap.py --apply"
 

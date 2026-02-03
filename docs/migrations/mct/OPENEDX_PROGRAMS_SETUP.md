@@ -1,7 +1,7 @@
 # Open edX Programs Setup for Learning Paths
 
 **Purpose:** Map MCT Learning Paths to Open edX Programs
-**Target:** skillourfuture.staging.academy.mereka.io
+**Target:** skillourfuture.academy.mereka.io
 
 ---
 
@@ -53,7 +53,7 @@ Discovery service powers the course catalog and program management.
 kubectl get pods -n mereka-lms | grep discovery
 
 # Check Discovery URL
-curl -I https://discovery.staging.academy.mereka.io/health/
+curl -I https://discovery.academyv2.mereka.io/health/
 ```
 
 If not running, enable in Tutor:
@@ -73,7 +73,7 @@ Credentials service issues program certificates.
 kubectl get pods -n mereka-lms | grep credentials
 
 # Check Credentials URL
-curl -I https://credentials.staging.academy.mereka.io/health/
+curl -I https://credentials.academyv2.mereka.io/health/
 ```
 
 If not running:
@@ -90,7 +90,7 @@ Programs are configured in **Discovery Admin**, not LMS Admin.
 
 1. Access Discovery Admin:
    ```
-   https://discovery.staging.academy.mereka.io/admin/
+   https://discovery.academyv2.mereka.io/admin/
    ```
    (Use LMS superuser credentials)
 
@@ -199,7 +199,7 @@ kubectl exec -it -n mereka-lms $(kubectl get pods -n mereka-lms -l app=lms -o js
    - Upload certificate image template
 
 2. Configure certificate template:
-   - In Credentials Admin: https://credentials.staging.academy.mereka.io/admin/
+   - In Credentials Admin: https://credentials.academyv2.mereka.io/admin/
    - Navigate to Credentials → Program Certificates
    - Design template with organization branding
 
@@ -216,13 +216,13 @@ Learners receive program certificate when:
 
 ### List Programs
 ```bash
-curl https://discovery.staging.academy.mereka.io/api/v1/programs/ \
+curl https://discovery.academyv2.mereka.io/api/v1/programs/ \
   -H "Authorization: JWT <token>"
 ```
 
 ### Get Program Details
 ```bash
-curl https://discovery.staging.academy.mereka.io/api/v1/programs/<uuid>/ \
+curl https://discovery.academyv2.mereka.io/api/v1/programs/<uuid>/ \
   -H "Authorization: JWT <token>"
 ```
 

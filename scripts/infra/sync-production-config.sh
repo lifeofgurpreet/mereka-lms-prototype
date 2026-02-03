@@ -86,13 +86,13 @@ echo ""
 
 # Check MFE
 echo "=== MFE Status ==="
-if curl -sI https://apps.staging.academy.mereka.io/authn/login 2>&1 | grep -q "200\|302"; then
+if curl -sI https://apps.academyv2.mereka.io/authn/login 2>&1 | grep -q "200\|302"; then
     echo -e "${GREEN}  ✅ MFE authn URL accessible${NC}"
 else
     echo -e "${YELLOW}  ⚠️  MFE authn URL not accessible${NC}"
 fi
 
-MFE_CONFIG=$(curl -s 'https://staging.academy.mereka.io/api/mfe_config/v1?mfe=authn' 2>&1)
+MFE_CONFIG=$(curl -s 'https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn' 2>&1)
 if echo "$MFE_CONFIG" | grep -q "BASE_URL"; then
     echo -e "${GREEN}  ✅ MFE config API working${NC}"
 else
@@ -104,5 +104,5 @@ echo "╔═══════════════════════�
 echo "║        Sync Complete                                         ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "Compare with local: ./tools/analyze-local-data.sh"
+echo "Compare with local: ./scripts/qa/analyze-local-data.sh"
 

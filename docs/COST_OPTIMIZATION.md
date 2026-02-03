@@ -223,8 +223,8 @@ gcloud billing projects describe mereka-lms
 
 ## Scripts
 
-- **`tools/optimize-dev-costs.sh`**: Interactive script to apply cost optimizations
-- **`tools/check-cluster-status.sh`**: Check current cluster status and costs
+- **`scripts/infra/optimize-dev-costs.sh`**: Interactive script to apply cost optimizations
+- **`scripts/infra/check-cluster-status.sh`**: Check current cluster status and costs
 
 ---
 
@@ -280,5 +280,5 @@ gcloud billing projects describe mereka-lms
 - Scale up gradually before production
 - Keep backups before major changes
 - Document any custom configurations
-- See `tools/additional-cost-optimizations.sh` for detailed commands
+- See `scripts/infra/additional-cost-optimizations.sh` for detailed commands
 

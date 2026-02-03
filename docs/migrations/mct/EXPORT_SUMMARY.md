@@ -125,7 +125,7 @@ var/migrations/mct/
 ---
 
 **Export Script:** `tools/mct-export.mjs`
-**Transformation Script:** `ops/migrations/mct/scripts/transform_data.py` (⚠️ has bug - needs fix)
+**Transformation Script:** `scripts/migrations/mct/scripts/transform_data.py` (⚠️ has bug - needs fix)
 **Documentation:** `docs/migrations/mct/EXPORT_GUIDE.md`
 **Status Report:** `docs/migrations/mct/MCT_MIGRATION_STATUS.md` ✅ UPDATED
 

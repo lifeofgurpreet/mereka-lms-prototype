@@ -22,7 +22,7 @@ open http://localhost:8088
 
 ### Staging/Production Access
 
-**URL:** https://superset.staging.academy.mereka.io (if configured)
+**URL:** https://superset.academyv2.mereka.io (if configured)
 
 **Note:** Superset may be behind authentication or VPN. Check with infrastructure team.
 

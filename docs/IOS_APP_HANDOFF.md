@@ -9,7 +9,7 @@
 ## ✅ Completed Steps
 
 ### Server-Side (DONE)
-- [x] Mobile API enabled on `staging.academy.mereka.io`
+- [x] Mobile API enabled on `academyv2.mereka.io`
 - [x] OAuth2 Provider enabled
 - [x] OAuth Application created: `mereka-mobile-app`
 - [x] Default Mobile Available: enabled (all courses visible)
@@ -20,7 +20,7 @@
 OAuth Client ID: mereka-mobile-app
 Redirect URI: org.openedx.app://oauth2Callback
 Bundle ID: com.mereka.academy.mobile
-LMS URL: https://staging.academy.mereka.io
+LMS URL: https://academyv2.mereka.io
 ```
 
 ### Apple Developer Account
@@ -220,4 +220,4 @@ git add . && git commit -m "trigger iOS build" && git push
 - App Store Connect: https://appstoreconnect.apple.com
 - GitHub Repo: https://github.com/Biji-Biji-Initiative/mereka-lms
 - GitHub Actions: https://github.com/Biji-Biji-Initiative/mereka-lms/actions
-- LMS (staging): https://staging.academy.mereka.io
+- LMS (staging): https://academyv2.mereka.io

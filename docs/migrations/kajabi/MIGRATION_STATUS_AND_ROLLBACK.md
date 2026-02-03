@@ -72,14 +72,14 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-11-09
 # Dry run first
 python tools/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
-  --import-file ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
+  --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
   --action unenroll \
   --dry-run
 
 # Actually unenroll
 python tools/rollback-openedx-imports.py \
   --django-settings lms.envs.tutor.production \
-  --import-file ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
+  --import-file scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv \
   --action unenroll
 ```
 
@@ -122,7 +122,7 @@ tutor local run lms ./manage.py lms dumpdata --settings=tutor.production > backu
 **2. Test Import (Small Batch)**
 ```bash
 # Test with first 100 enrollments
-head -101 ops/migrations/kajabi/output/verification_fixed/fix_missing_enrollments.csv > /tmp/test_enrollments.csv
+head -101 scripts/migrations/kajabi/output/verification_fixed/fix_missing_enrollments.csv > /tmp/test_enrollments.csv
 
 tutor local run lms bash -c 'cat > /tmp/test-enrollments.csv' < /tmp/test_enrollments.csv
 tutor local run lms ./manage.py lms bulk_enroll \
@@ -137,17 +137,17 @@ tutor local run lms ./manage.py lms bulk_enroll \
 # Re-run verification to see if test worked
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --prepared-enrollments ops/migrations/kajabi/output/openedx/enrollments_import.csv \
-  --output-dir ops/migrations/kajabi/output/verification_test
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --prepared-enrollments scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_test
 ```
 
 **4. Full Import (If Test Successful)**
 ```bash
-cd ops/migrations/kajabi/output/verification_fixed
+cd scripts/migrations/kajabi/output/verification_fixed
 ./import_missing_enrollments.sh
 ```
 
@@ -155,12 +155,12 @@ cd ops/migrations/kajabi/output/verification_fixed
 ```bash
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --prepared-enrollments ops/migrations/kajabi/output/openedx/enrollments_import.csv \
-  --output-dir ops/migrations/kajabi/output/verification_final
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --prepared-enrollments scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_final
 ```
 
 ## Answers to Your Questions

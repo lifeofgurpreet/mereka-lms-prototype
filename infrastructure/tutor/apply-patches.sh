@@ -131,11 +131,11 @@ for target in targets:
             )
     extra_lms_hosts = [
         "academy.biji-biji.com",
-        "skillourfuture.staging.academy.mereka.io",
+        "skillourfuture.academy.mereka.io",
     ]
     extra_csrf_origins = [
         "https://academy.biji-biji.com",
-        "https://skillourfuture.staging.academy.mereka.io",
+        "https://skillourfuture.academy.mereka.io",
     ]
     caddy_block_template = """{domain} {{
     reverse_proxy nginx:80 {{
@@ -173,7 +173,7 @@ for target in targets:
         return text
 
     def ensure_csrf_origins(text):
-        anchor = 'CSRF_TRUSTED_ORIGINS.append("apps.staging.academy.mereka.io")'
+        anchor = 'CSRF_TRUSTED_ORIGINS.append("apps.academyv2.mereka.io")'
         if anchor not in text:
             return text
         inserts = ""
@@ -523,12 +523,12 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         updated = updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")
 
     if path.name == "lms.conf":
-        anchor = "  server_name staging.academy.mereka.io preview.staging.academy.mereka.io;"
+        anchor = "  server_name academyv2.mereka.io preview.academyv2.mereka.io;"
         if anchor in updated and "academy.biji-biji.com" not in updated:
             updated = updated.replace(
                 anchor,
                 anchor.rstrip(";")
-                + " academy.biji-biji.com skillourfuture.staging.academy.mereka.io;",
+                + " academy.biji-biji.com skillourfuture.academy.mereka.io;",
             )
         if "location = /health" not in updated:
             health_block = (
@@ -540,14 +540,14 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
             marker = "  location / {"
             if marker in updated:
                 updated = updated.replace(marker, health_block + marker, 1)
-        if "apps.staging.academy.mereka.io" in updated and "/profile/api/" not in updated:
+        if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
             pattern = re.compile(
-                r"(server_name apps\.staging\.academy\.mereka\.io;.*?)(\n  location / \{)",
+                r"(server_name apps\.academyv2\.mereka\.io;.*?)(\n  location / \{)",
                 re.S,
             )
             profile_proxy = (
                 "  location ^~ /profile/api/ {\n"
-                "    proxy_set_header Host staging.academy.mereka.io;\n"
+                "    proxy_set_header Host academyv2.mereka.io;\n"
                 "    proxy_redirect off;\n"
                 "    proxy_pass http://lms-backend;\n"
                 "  }\n\n"
@@ -557,12 +557,12 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         for host in extra_lms_hosts:
             if host not in updated:
                 updated = updated.rstrip() + "\n\n" + caddy_block_template.format(domain=host)
-        if "apps.staging.academy.mereka.io" in updated and "/profile/api/" not in updated:
-            needle = "apps.staging.academy.mereka.io {\n        reverse_proxy nginx:80"
+        if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
+            needle = "apps.academyv2.mereka.io {\n        reverse_proxy nginx:80"
             replacement = (
-                "apps.staging.academy.mereka.io {\n"
+                "apps.academyv2.mereka.io {\n"
                 "        reverse_proxy /profile/api/* lms:8000 {\n"
-                "            header_up Host staging.academy.mereka.io\n"
+                "            header_up Host academyv2.mereka.io\n"
                 "        }\n"
                 "        reverse_proxy nginx:80"
             )

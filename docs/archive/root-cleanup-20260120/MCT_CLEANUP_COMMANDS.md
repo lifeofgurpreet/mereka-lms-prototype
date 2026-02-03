@@ -131,14 +131,14 @@ for course_id in empty_courses:
 1. Access Studio at `https://studio.staging.academy.mereka.io`
 2. For each course that needs content:
    - Create course with correct ID (e.g., `SKILLOURFUTURE+MCTCAT-24+RUN-24`)
-   - Import the course tarball from `ops/migrations/mct/output/course_packages_categories/`
+   - Import the course tarball from `scripts/migrations/mct/output/course_packages_categories/`
 3. Validate content appears in LMS
 
 **Option B: Re-import via Management Command**
 
 ```bash
 # Check if original course packages exist
-ls -lh ops/migrations/mct/output/course_packages_categories/
+ls -lh scripts/migrations/mct/output/course_packages_categories/
 
 # You need the original MCT course exports
 # If they exist, re-import them with the correct course IDs
@@ -146,7 +146,7 @@ ls -lh ops/migrations/mct/output/course_packages_categories/
 CMS_POD=$(kubectl get pod -n mereka-lms -l app.kubernetes.io/name=cms -o jsonpath='{.items[0].metadata.name}')
 
 # Example for MCT-24 (AI Fluency)
-kubectl cp ops/migrations/mct/output/course_packages_categories/MCT-24.tar.gz \
+kubectl cp scripts/migrations/mct/output/course_packages_categories/MCT-24.tar.gz \
   mereka-lms/$CMS_POD:/tmp/
 
 kubectl exec -n mereka-lms $CMS_POD -- python manage.py cms import \

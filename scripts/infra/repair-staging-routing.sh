@@ -62,7 +62,7 @@ cat <<EOF
 Next steps:
 1) Wait 5-15 minutes for GCP LoadBalancer to propagate port 443 if it was just added.
 2) Test HTTPS externally:
-   curl -Ik https://staging.academy.mereka.io
+   curl -Ik https://academyv2.mereka.io
    curl -Ik https://${LB_IP:-<caddy-lb-ip>}
 3) If endpoints are empty again after a rollout, rerun this script.
 EOF

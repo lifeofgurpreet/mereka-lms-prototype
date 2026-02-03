@@ -10,7 +10,7 @@ This document tracks the installation of Aspects Analytics for platform-wide ana
 - Plugin enabled in Tutor configuration
 
 ✅ **Step 2: Configuration Updated**
-- Aspects added to `PLUGINS` list in `ops/tutor/config.example.yml`
+- Aspects added to `PLUGINS` list in `infrastructure/tutor/config.example.yml`
 - Configuration saved to `tutor_env/config.yml`
 - Patches applied
 
@@ -77,7 +77,7 @@ kubectl get pods -n mereka-lms | grep aspects
 - **Status**: ✅ Installed and enabled
 
 ### Configuration Changes
-- Added `aspects` to `PLUGINS` list in `ops/tutor/config.example.yml`
+- Added `aspects` to `PLUGINS` list in `infrastructure/tutor/config.example.yml`
 - Aspects configuration auto-generated in `tutor_env/config.yml`
 - Patches applied successfully
 
@@ -93,7 +93,7 @@ Once images are built and services started, you'll have:
 
 ### Superset Dashboard
 - **Local**: `http://aspects-superset.localhost`
-- **Staging**: `https://aspects-superset.staging.academy.mereka.io` (if configured)
+- **Staging**: `https://aspects-superset.academyv2.mereka.io` (if configured)
 
 **Default credentials**:
 - Username: `admin`

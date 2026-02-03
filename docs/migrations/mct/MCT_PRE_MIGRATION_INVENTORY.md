@@ -2,7 +2,7 @@
 
 **Document Created:** 2025-12-17
 **Source Platform:** Microsoft Community Training (learn.skillourfuture.org)
-**Target Platform:** Open edX (skillourfuture.staging.academy.mereka.io)
+**Target Platform:** Open edX (skillourfuture.academy.mereka.io)
 **Organization:** SKILLOURFUTURE
 
 ---

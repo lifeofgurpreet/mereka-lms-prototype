@@ -118,7 +118,7 @@ Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local 
 ### Local vs Production Data
 
 - The stack uses Dockerized MySQL/Mongo/Redis under `tutor_env/data/`; **no production data is copied** unless you import it.
-- To work with real Kajabi data locally, generate the CSVs/tarballs under `ops/migrations/kajabi/output/` (see [`KAJABI_MIGRATION.md`](KAJABI_MIGRATION.md)), then run the import helpers described in [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md#5-data-imports-kajabi).
+- To work with real Kajabi data locally, generate the CSVs/tarballs under `scripts/migrations/kajabi/output/` (see [`KAJABI_MIGRATION.md`](KAJABI_MIGRATION.md)), then run the import helpers described in [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md#5-data-imports-kajabi).
 - When you finish testing, you can reset the sandbox via:
   ```bash
   tutor local stop

@@ -1,4 +1,5 @@
 from .settings import *
+import os
 
 ALLOWED_HOSTS = [
     "xqueue.localhost",
@@ -12,7 +13,7 @@ DATABASES = {
         "PORT": 3306,
         "NAME": "xqueue",
         "USER": "xqueue",
-        "PASSWORD": "KEegGJIG",
+        "PASSWORD": os.environ.get("MYSQL_XQUEUE_PASSWORD", ""),
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'",},
     }
 }
@@ -28,8 +29,8 @@ LOGGING["loggers"]["submission_queue.management.commands.run_consumer"] = {
     "handlers": ["console"]
 }
 
-SECRET_KEY = "r5KWFladTqp5uyRDm9k84WZ5"
+SECRET_KEY = os.environ.get("XQUEUE_SECRET_KEY", "")
 
-USERS = {"lms": "QrDNYqmq"}
+USERS = {"lms": os.environ.get("XQUEUE_LMS_PASSWORD", "")}
 XQUEUES = {"openedx": None}
 

@@ -117,4 +117,4 @@ echo "  ❌ Failed:   ${FAILED}"
 echo "╚══════════════════════════════════════════════════════════════╝"
 
 # Show resulting counts
-./tools/analyze-local-data.sh | sed -n '1,80p'
+./scripts/qa/analyze-local-data.sh | sed -n '1,80p'

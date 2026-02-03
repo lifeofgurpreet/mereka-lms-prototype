@@ -192,7 +192,7 @@ node tools/mct-export.mjs --resources users --start-page 1 --end-page 10
 ### Phase 2: Data Transformation
 
 **2.1 Transformation Script**
-Create `ops/migrations/mct/scripts/transform_data.py` (mirroring Kajabi pattern):
+Create `scripts/migrations/mct/scripts/transform_data.py` (mirroring Kajabi pattern):
 
 **Mappings:**
 
@@ -215,7 +215,7 @@ Create `ops/migrations/mct/scripts/transform_data.py` (mirroring Kajabi pattern)
 
 **2.3 Output Files** (similar to Kajabi):
 ```
-ops/migrations/mct/output/
+scripts/migrations/mct/output/
 ├── users.csv                    # User import data
 ├── courses.csv                  # Course catalog metadata
 ├── enrollments.csv              # Enrollment mappings
@@ -229,7 +229,7 @@ ops/migrations/mct/output/
 ### Phase 3: Course Package Building
 
 **3.1 Course Package Script**
-Create `ops/migrations/mct/scripts/build_course_packages.py`:
+Create `scripts/migrations/mct/scripts/build_course_packages.py`:
 
 - Convert MCT course structure to Open edX OLX format
 - Generate course tarballs (`course-v1:SKILLOURFUTURE+{slug}+{run}.tar.gz`)
@@ -248,7 +248,7 @@ Create `ops/migrations/mct/scripts/build_course_packages.py`:
 ```bash
 source ops/tutor-env.sh
 tutor local run lms bash -c "cat > /tmp/mct-users.csv" \
-  < ops/migrations/mct/output/openedx/users_import.csv
+  < scripts/migrations/mct/output/openedx/users_import.csv
 tutor local run lms ./manage.py lms importusers \
   /tmp/mct-users.csv --settings=tutor.production --send-email False
 ```
@@ -256,19 +256,19 @@ tutor local run lms ./manage.py lms importusers \
 **4.2 Course Import**
 ```bash
 # Via Studio UI (manual):
-# Upload tarballs from ops/migrations/mct/output/course_packages/
+# Upload tarballs from scripts/migrations/mct/output/course_packages/
 
 # OR automated:
-python ops/migrations/mct/scripts/import_courses.py \
-  --manifest ops/migrations/mct/output/course_packages/course_packages_manifest.csv \
-  --packages-root ops/migrations/mct/output/course_packages \
+python scripts/migrations/mct/scripts/import_courses.py \
+  --manifest scripts/migrations/mct/output/course_packages/course_packages_manifest.csv \
+  --packages-root scripts/migrations/mct/output/course_packages \
   --org SKILLOURFUTURE
 ```
 
 **4.3 Enrollment Import**
 ```bash
 tutor local run lms bash -c "cat > /tmp/mct-enrollments.csv" \
-  < ops/migrations/mct/output/openedx/enrollments_import.csv
+  < scripts/migrations/mct/output/openedx/enrollments_import.csv
 tutor local run lms ./manage.py lms bulk_enroll \
   --csv /tmp/mct-enrollments.csv \
   --settings=tutor.production \
@@ -370,7 +370,7 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 2. **Short-term:**
    - [ ] Run full data export to `exports/mct/`
    - [ ] Analyze exported data structure
-   - [ ] Build transformation scripts (`ops/migrations/mct/scripts/transform_data.py`)
+   - [ ] Build transformation scripts (`scripts/migrations/mct/scripts/transform_data.py`)
    - [ ] Map MCT user profile fields to Open edX user profile
 
 3. **Medium-term:**
@@ -391,6 +391,6 @@ This MCT migration runs alongside the Kajabi migration. Considerations:
 - **Working MCT Integration:** `hubspot-webhook-mct/functions/index.js` - Production code showing authentication and API usage patterns
 - **📖 Complete Export Guide:** `docs/migrations/mct/EXPORT_GUIDE.md` - Comprehensive documentation for MCT export process
 - Kajabi migration pattern: `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
-- Kajabi transformation scripts: `ops/migrations/kajabi/scripts/`
+- Kajabi transformation scripts: `scripts/migrations/kajabi/scripts/`
 - Open edX bulk import commands: `docs/quickstart/LOCAL_SETUP.md`
 - MCT API exploration results: `docs/migrations/mct/API_EXPLORATION.md`

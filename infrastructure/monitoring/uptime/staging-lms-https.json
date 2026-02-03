@@ -4,7 +4,7 @@
     "type": "uptime_url",
     "labels": {
       "project_id": "mereka-lms",
-      "host": "staging.academy.mereka.io"
+      "host": "academyv2.mereka.io"
     }
   },
   "httpCheck": {

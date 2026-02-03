@@ -8,6 +8,68 @@ import os
 
 from xmodule.modulestore.modulestore_settings import update_module_store_settings
 
+MEREKA_SCHEME = os.environ.get("MEREKA_SCHEME", "https")
+MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
+MEREKA_DEV_DOMAIN = os.environ.get("MEREKA_DEV_DOMAIN", "academyv2.mereka.dev")
+MEREKA_BIJI_DOMAIN = os.environ.get("MEREKA_BIJI_DOMAIN", "academy.biji-biji.com")
+MEREKA_SKILLOURFUTURE_DOMAIN = os.environ.get(
+    "MEREKA_SKILLOURFUTURE_DOMAIN",
+    "skillourfuture.academy.mereka.io",
+)
+
+MEREKA_STUDIO_DOMAIN = os.environ.get("MEREKA_STUDIO_DOMAIN", f"studio.{MEREKA_LMS_DOMAIN}")
+MEREKA_MFE_DOMAIN = os.environ.get("MEREKA_MFE_DOMAIN", f"apps.{MEREKA_LMS_DOMAIN}")
+MEREKA_DISCOVERY_DOMAIN = os.environ.get(
+    "MEREKA_DISCOVERY_DOMAIN",
+    f"discovery.{MEREKA_LMS_DOMAIN}",
+)
+MEREKA_ECOMMERCE_DOMAIN = os.environ.get(
+    "MEREKA_ECOMMERCE_DOMAIN",
+    f"ecommerce.{MEREKA_LMS_DOMAIN}",
+)
+MEREKA_NOTES_DOMAIN = os.environ.get("MEREKA_NOTES_DOMAIN", f"notes.{MEREKA_LMS_DOMAIN}")
+MEREKA_CREDENTIALS_DOMAIN = os.environ.get(
+    "MEREKA_CREDENTIALS_DOMAIN",
+    f"credentials.{MEREKA_LMS_DOMAIN}",
+)
+MEREKA_PREVIEW_DOMAIN = os.environ.get("MEREKA_PREVIEW_DOMAIN", f"preview.{MEREKA_LMS_DOMAIN}")
+
+MEREKA_DEV_STUDIO_DOMAIN = os.environ.get(
+    "MEREKA_DEV_STUDIO_DOMAIN",
+    f"studio.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_DEV_MFE_DOMAIN = os.environ.get("MEREKA_DEV_MFE_DOMAIN", f"apps.{MEREKA_DEV_DOMAIN}")
+MEREKA_DEV_DISCOVERY_DOMAIN = os.environ.get(
+    "MEREKA_DEV_DISCOVERY_DOMAIN",
+    f"discovery.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_DEV_ECOMMERCE_DOMAIN = os.environ.get(
+    "MEREKA_DEV_ECOMMERCE_DOMAIN",
+    f"ecommerce.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_DEV_NOTES_DOMAIN = os.environ.get(
+    "MEREKA_DEV_NOTES_DOMAIN",
+    f"notes.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_DEV_CREDENTIALS_DOMAIN = os.environ.get(
+    "MEREKA_DEV_CREDENTIALS_DOMAIN",
+    f"credentials.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_DEV_PREVIEW_DOMAIN = os.environ.get(
+    "MEREKA_DEV_PREVIEW_DOMAIN",
+    f"preview.{MEREKA_DEV_DOMAIN}",
+)
+MEREKA_COOKIE_DOMAIN = os.environ.get("MEREKA_COOKIE_DOMAIN", f".{MEREKA_LMS_DOMAIN}")
+
+MEREKA_LMS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}"
+MEREKA_STUDIO_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_STUDIO_DOMAIN}"
+MEREKA_MFE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
+MEREKA_DISCOVERY_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_DISCOVERY_DOMAIN}"
+MEREKA_ECOMMERCE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_ECOMMERCE_DOMAIN}"
+MEREKA_NOTES_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_NOTES_DOMAIN}"
+MEREKA_CREDENTIALS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_CREDENTIALS_DOMAIN}"
+MEREKA_PREVIEW_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_PREVIEW_DOMAIN}"
+
 # Mongodb connection parameters: MongoDB Atlas (cluster-mereka-lms)
 # IMPORTANT: Using MongoDB Atlas instead of in-cluster MongoDB
 # Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
@@ -16,7 +78,7 @@ mongodb_parameters = {
     "host": "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
     "port": 27017,
     "user": "cs_comments_user",
-    "password": "CR3ATIVITY",
+    "password": os.environ.get("MONGODB_PASSWORD", ""),
     # Connection/Authentication
     "connect": False,
     "ssl": True,
@@ -94,7 +156,7 @@ CACHES = {
 SITE_ID = 2
 
 # Contact addresses
-CONTACT_MAILING_ADDRESS = "My Open edX - http://localhost"
+CONTACT_MAILING_ADDRESS = f"My Open edX - {MEREKA_LMS_BASE_URL}"
 DEFAULT_FROM_EMAIL = ENV_TOKENS.get("DEFAULT_FROM_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 DEFAULT_FEEDBACK_EMAIL = ENV_TOKENS.get("DEFAULT_FEEDBACK_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
 SERVER_EMAIL = ENV_TOKENS.get("SERVER_EMAIL", ENV_TOKENS["CONTACT_EMAIL"])
@@ -198,9 +260,9 @@ LANGUAGE_COOKIE_NAME = "openedx-language-preference"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 
-JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
+JWT_AUTH["JWT_ISSUER"] = f"{MEREKA_LMS_BASE_URL}/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
-JWT_AUTH["JWT_SECRET_KEY"] = "UeCMQQglnc0O68rTJQezNNSt"
+JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_LMS", "")
 JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"] = json.dumps(
     {
         "kid": "openedx",
@@ -229,9 +291,9 @@ JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
 )
 JWT_AUTH["JWT_ISSUERS"] = [
     {
-        "ISSUER": "http://localhost/oauth2",
+        "ISSUER": f"{MEREKA_LMS_BASE_URL}/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": "UeCMQQglnc0O68rTJQezNNSt"
+        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_LMS", "")
     }
 ]
 
@@ -266,7 +328,7 @@ FEATURES["ENABLE_EDXNOTES"] = True
 XQUEUE_INTERFACE = {
   "django_auth": {
     "username": "lms",
-    "password": "QrDNYqmq"
+    "password": os.environ.get("XQUEUE_LMS_PASSWORD", "")
   },
   "url": "http://xqueue:8000",
   "callback_url": "http://lms:8000"
@@ -274,7 +336,7 @@ XQUEUE_INTERFACE = {
 ######## End of settings common to LMS and CMS
 
 ######## Common LMS settings
-LOGIN_REDIRECT_WHITELIST = ["studio.localhost"]
+LOGIN_REDIRECT_WHITELIST = [MEREKA_STUDIO_DOMAIN]
 
 # Better layout of honor code/tos links during registration
 REGISTRATION_EXTRA_FIELDS["terms_of_service"] = "hidden"
@@ -316,8 +378,8 @@ for folder in [DATA_DIR, LOG_DIR, MEDIA_ROOT, STATIC_ROOT, ORA2_FILEUPLOAD_ROOT]
         os.makedirs(folder, exist_ok=True)
 
 FEATURES["ENABLE_COURSE_DISCOVERY"] = True
-EDX_API_KEY = "6Lnq77PWhG8kqVppsvkq"
-ECOMMERCE_API_SIGNING_KEY = "UeCMQQglnc0O68rTJQezNNSt"
+EDX_API_KEY = os.environ.get("EDX_API_KEY", "")
+ECOMMERCE_API_SIGNING_KEY = os.environ.get("ECOMMERCE_API_SIGNING_KEY", "")
 ECOMMERCE_API_TIMEOUT = 5
 from babel.numbers import get_currency_symbol
 PAID_COURSE_REGISTRATION_CURRENCY = ["USD", get_currency_symbol("USD")]
@@ -348,26 +410,42 @@ ALLOWED_HOSTS = [
     ENV_TOKENS.get("LMS_BASE"),
     FEATURES["PREVIEW_LMS_BASE"],
     "lms",
-    "academy.biji-biji.com",
-    "staging.academy.mereka.io",
-    "studio.staging.academy.mereka.io",
-    "apps.staging.academy.mereka.io",
-    "preview.staging.academy.mereka.io",
-    "skillourfuture.staging.academy.mereka.io",
+    MEREKA_BIJI_DOMAIN,
+    MEREKA_LMS_DOMAIN,
+    MEREKA_STUDIO_DOMAIN,
+    MEREKA_MFE_DOMAIN,
+    MEREKA_PREVIEW_DOMAIN,
+    MEREKA_SKILLOURFUTURE_DOMAIN,
+    MEREKA_DEV_DOMAIN,
+    MEREKA_DEV_STUDIO_DOMAIN,
+    MEREKA_DEV_MFE_DOMAIN,
+    MEREKA_DEV_PREVIEW_DOMAIN,
+    MEREKA_DEV_DISCOVERY_DOMAIN,
+    MEREKA_DEV_ECOMMERCE_DOMAIN,
+    MEREKA_DEV_NOTES_DOMAIN,
+    MEREKA_DEV_CREDENTIALS_DOMAIN,
 ]
-CORS_ORIGIN_WHITELIST.append("http://localhost")
+for origin in [
+    MEREKA_LMS_BASE_URL,
+    MEREKA_STUDIO_BASE_URL,
+    MEREKA_MFE_BASE_URL,
+    f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
+    f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
+]:
+    if origin not in CORS_ORIGIN_WHITELIST:
+        CORS_ORIGIN_WHITELIST.append(origin)
 
 
 # When we cannot provide secure session/csrf cookies, we must disable samesite=none
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
+CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"
 SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_DOMAIN = ".localhost"
-SESSION_COOKIE_DOMAIN = ".localhost"
+CSRF_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
+SESSION_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
 
 
 # CMS authentication
-IDA_LOGOUT_URI_LIST.append("http://studio.localhost/logout/")
+IDA_LOGOUT_URI_LIST.append(f"{MEREKA_STUDIO_BASE_URL}/logout/")
 
 # Required to display all courses on start page
 SEARCH_SKIP_ENROLLMENT_START_DATE_FILTERING = True
@@ -375,24 +453,24 @@ SEARCH_SKIP_ENROLLMENT_START_DATE_FILTERING = True
 # Dynamic config API settings
 # https://openedx.github.io/frontend-platform/module-Config.html
 MFE_CONFIG = {
-    "BASE_URL": "apps.localhost",
+    "BASE_URL": MEREKA_MFE_DOMAIN,
     "CSRF_TOKEN_API_PATH": "/csrf/api/v1/token",
-    "CREDENTIALS_BASE_URL": "",
-    "DISCOVERY_API_BASE_URL": "http://discovery.localhost",
-    "FAVICON_URL": "http://localhost/favicon.ico",
+    "CREDENTIALS_BASE_URL": MEREKA_CREDENTIALS_BASE_URL,
+    "DISCOVERY_API_BASE_URL": MEREKA_DISCOVERY_BASE_URL,
+    "FAVICON_URL": f"{MEREKA_LMS_BASE_URL}/favicon.ico",
     "INFO_EMAIL": "contact@localhost",
     "LANGUAGE_PREFERENCE_COOKIE_NAME": "openedx-language-preference",
-    "LMS_BASE_URL": "http://localhost",
-    "LOGIN_URL": "http://localhost/login",
-    "LOGO_URL": "http://localhost/theming/asset/images/logo.png",
-    "LOGO_WHITE_URL": "http://localhost/theming/asset/images/logo.png",
-    "LOGO_TRADEMARK_URL": "http://localhost/theming/asset/images/logo.png",
-    "LOGOUT_URL": "http://localhost/logout",
-    "MARKETING_SITE_BASE_URL": "http://localhost",
+    "LMS_BASE_URL": MEREKA_LMS_BASE_URL,
+    "LOGIN_URL": f"{MEREKA_LMS_BASE_URL}/login",
+    "LOGO_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo.png",
+    "LOGO_WHITE_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo.png",
+    "LOGO_TRADEMARK_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo.png",
+    "LOGOUT_URL": f"{MEREKA_LMS_BASE_URL}/logout",
+    "MARKETING_SITE_BASE_URL": MEREKA_LMS_BASE_URL,
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",
-    "REFRESH_ACCESS_TOKEN_ENDPOINT": "http://localhost/login_refresh",
+    "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{MEREKA_LMS_BASE_URL}/login_refresh",
     "SITE_NAME": "My Open edX",
-    "STUDIO_BASE_URL": "http://studio.localhost",
+    "STUDIO_BASE_URL": MEREKA_STUDIO_BASE_URL,
     "USER_INFO_COOKIE_NAME": "user-info",
     "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",
 }
@@ -400,18 +478,18 @@ MFE_CONFIG = {
 # MFE-specific settings
 
 
-AUTHN_MICROFRONTEND_URL = "http://apps.localhost/authn"
-AUTHN_MICROFRONTEND_DOMAIN  = "apps.localhost/authn"
+AUTHN_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/authn"
+AUTHN_MICROFRONTEND_DOMAIN = f"{MEREKA_MFE_DOMAIN}/authn"
 MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"] = True
 
 
 
-ACCOUNT_MICROFRONTEND_URL = "http://apps.localhost/account/"
+ACCOUNT_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/account/"
 MFE_CONFIG["ACCOUNT_SETTINGS_URL"] = ACCOUNT_MICROFRONTEND_URL
 
 
 
-MFE_CONFIG["COURSE_AUTHORING_MICROFRONTEND_URL"] = "http://apps.localhost/course-authoring"
+MFE_CONFIG["COURSE_AUTHORING_MICROFRONTEND_URL"] = f"{MEREKA_MFE_BASE_URL}/course-authoring"
 MFE_CONFIG["ENABLE_ASSETS_PAGE"] = "true"
 MFE_CONFIG["ENABLE_HOME_PAGE_COURSE_API_V2"] = "true"
 MFE_CONFIG["ENABLE_PROGRESS_GRAPH_SETTINGS"] = "true"
@@ -419,51 +497,71 @@ MFE_CONFIG["ENABLE_TAGGING_TAXONOMY_PAGES"] = "true"
 
 
 
-DISCUSSIONS_MICROFRONTEND_URL = "http://apps.localhost/discussions"
+DISCUSSIONS_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/discussions"
 MFE_CONFIG["DISCUSSIONS_MFE_BASE_URL"] = DISCUSSIONS_MICROFRONTEND_URL
 DISCUSSIONS_MFE_FEEDBACK_URL = None
 
 
 
-WRITABLE_GRADEBOOK_URL = "http://apps.localhost/gradebook"
+WRITABLE_GRADEBOOK_URL = f"{MEREKA_MFE_BASE_URL}/gradebook"
 
 
 
-LEARNER_HOME_MICROFRONTEND_URL = "http://apps.localhost/learner-dashboard/"
+LEARNER_HOME_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/learner-dashboard/"
 
 
 
-LEARNING_MICROFRONTEND_URL = "http://apps.localhost/learning"
-MFE_CONFIG["LEARNING_BASE_URL"] = "http://apps.localhost/learning"
+LEARNING_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/learning"
+MFE_CONFIG["LEARNING_BASE_URL"] = f"{MEREKA_MFE_BASE_URL}/learning"
 
 
 
-ORA_GRADING_MICROFRONTEND_URL = "http://apps.localhost/ora-grading"
+ORA_GRADING_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/ora-grading"
 
 
 
-PROFILE_MICROFRONTEND_URL = "http://apps.localhost/profile/u/"
-MFE_CONFIG["ACCOUNT_PROFILE_URL"] = "http://apps.localhost/profile"
+PROFILE_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/profile/u/"
+MFE_CONFIG["ACCOUNT_PROFILE_URL"] = f"{MEREKA_MFE_BASE_URL}/profile"
 
 
 
-COMMUNICATIONS_MICROFRONTEND_URL = "http://apps.localhost/communications"
+COMMUNICATIONS_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/communications"
 MFE_CONFIG["SCHEDULE_EMAIL_SECTION"] = True
 
 
-LOGIN_REDIRECT_WHITELIST.append("apps.localhost")
-CORS_ORIGIN_WHITELIST.append("http://apps.localhost")
-CSRF_TRUSTED_ORIGINS.append("http://apps.localhost")
+LOGIN_REDIRECT_WHITELIST.extend([MEREKA_MFE_DOMAIN, MEREKA_DEV_MFE_DOMAIN])
+for origin in [
+    MEREKA_MFE_BASE_URL,
+    f"{MEREKA_SCHEME}://{MEREKA_DEV_MFE_DOMAIN}",
+]:
+    if origin not in CORS_ORIGIN_WHITELIST:
+        CORS_ORIGIN_WHITELIST.append(origin)
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 
 
 # Ecommerce
-ECOMMERCE_PUBLIC_URL_ROOT = "http://ecommerce.localhost"
+ECOMMERCE_PUBLIC_URL_ROOT = MEREKA_ECOMMERCE_BASE_URL
 ECOMMERCE_API_URL = ECOMMERCE_PUBLIC_URL_ROOT + "/api/v2"
-ORDER_HISTORY_MICROFRONTEND_URL = "http://apps.localhost/orders/orders"
+ORDER_HISTORY_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/orders/orders"
 MFE_CONFIG["ECOMMERCE_BASE_URL"] = ECOMMERCE_PUBLIC_URL_ROOT
 MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
 
 MFE_CONFIG['INDIGO_ENABLE_DARK_TOGGLE'] = True
-EDXNOTES_PUBLIC_API = "http://notes.localhost/api/v1"
+EDXNOTES_PUBLIC_API = f"{MEREKA_NOTES_BASE_URL}/api/v1"
 EDXNOTES_INTERNAL_API = "http://notes:8000/api/v1"
+
+LMS_BASE = MEREKA_LMS_DOMAIN
+LMS_ROOT_URL = MEREKA_LMS_BASE_URL
+CMS_BASE = MEREKA_STUDIO_DOMAIN
+CMS_ROOT_URL = MEREKA_STUDIO_BASE_URL
+
+for origin in [
+    MEREKA_LMS_BASE_URL,
+    MEREKA_STUDIO_BASE_URL,
+    f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
+    f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
+]:
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)

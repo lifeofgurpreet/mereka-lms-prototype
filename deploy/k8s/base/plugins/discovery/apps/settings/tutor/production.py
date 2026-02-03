@@ -1,6 +1,7 @@
 from ..production import *
+import os
 
-SECRET_KEY = "wqm8nviUCkEq0bAQVjWz"
+SECRET_KEY = os.environ.get("DISCOVERY_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "discovery",
     "discovery.localhost"
@@ -13,7 +14,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "discovery",
         "USER": "discovery",
-        "PASSWORD": "d6kNkPy9",
+        "PASSWORD": os.environ.get("MYSQL_DISCOVERY_PASSWORD", ""),
         "HOST": "mysql",
         "PORT": "3306",
         "OPTIONS": {
@@ -67,7 +68,7 @@ OAUTH_API_TIMEOUT = 5
 import json
 JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
-JWT_AUTH["JWT_SECRET_KEY"] = "UeCMQQglnc0O68rTJQezNNSt"
+JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_DISCOVERY", "")
 # TODO assign a discovery-specific public key
 JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
     {
@@ -85,7 +86,7 @@ JWT_AUTH["JWT_ISSUERS"] = [
     {
         "ISSUER": "http://localhost/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": "UeCMQQglnc0O68rTJQezNNSt"
+        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_DISCOVERY", "")
     }
 ]
 
@@ -96,11 +97,11 @@ EDX_DRF_EXTENSIONS = {
 
 
 BACKEND_SERVICE_EDX_OAUTH2_KEY = "discovery"
-BACKEND_SERVICE_EDX_OAUTH2_SECRET = "OogipK6s"
+BACKEND_SERVICE_EDX_OAUTH2_SECRET = os.environ.get("DISCOVERY_BACKEND_OAUTH2_SECRET", "")
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://lms:8000/oauth2"
 
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "discovery-sso"
-SOCIAL_AUTH_EDX_OAUTH2_SECRET = "UKOTIZ1z"
+SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("DISCOVERY_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
 SOCIAL_AUTH_EDX_OAUTH2_ISSUER = "http://localhost"
 SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER
 SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER

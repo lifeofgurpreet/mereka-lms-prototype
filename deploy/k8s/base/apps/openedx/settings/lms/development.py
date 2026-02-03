@@ -190,7 +190,7 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 
 JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
-JWT_AUTH["JWT_SECRET_KEY"] = "UeCMQQglnc0O68rTJQezNNSt"
+JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_LMS", "")
 JWT_AUTH["JWT_PRIVATE_SIGNING_JWK"] = json.dumps(
     {
         "kid": "openedx",
@@ -221,7 +221,7 @@ JWT_AUTH["JWT_ISSUERS"] = [
     {
         "ISSUER": "http://localhost/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": "UeCMQQglnc0O68rTJQezNNSt"
+        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_LMS", "")
     }
 ]
 
@@ -256,7 +256,7 @@ FEATURES["ENABLE_EDXNOTES"] = True
 XQUEUE_INTERFACE = {
   "django_auth": {
     "username": "lms",
-    "password": "QrDNYqmq"
+    "password": os.environ.get("XQUEUE_LMS_PASSWORD", "")
   },
   "url": "http://xqueue:8000",
   "callback_url": "http://lms:8000"
@@ -306,8 +306,8 @@ for folder in [DATA_DIR, LOG_DIR, MEDIA_ROOT, STATIC_ROOT, ORA2_FILEUPLOAD_ROOT]
         os.makedirs(folder, exist_ok=True)
 
 FEATURES["ENABLE_COURSE_DISCOVERY"] = True
-EDX_API_KEY = "6Lnq77PWhG8kqVppsvkq"
-ECOMMERCE_API_SIGNING_KEY = "UeCMQQglnc0O68rTJQezNNSt"
+EDX_API_KEY = os.environ.get("EDX_API_KEY", "")
+ECOMMERCE_API_SIGNING_KEY = os.environ.get("ECOMMERCE_API_SIGNING_KEY", "")
 ECOMMERCE_API_TIMEOUT = 5
 from babel.numbers import get_currency_symbol
 PAID_COURSE_REGISTRATION_CURRENCY = ["USD", get_currency_symbol("USD")]

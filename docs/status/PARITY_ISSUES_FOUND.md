@@ -35,7 +35,7 @@ ASPECTS_SUPERSET_DATABASE_HOST: 10.97.0.2
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 tutor config save --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart superset
 ```
 
@@ -90,7 +90,7 @@ echo "1. Fixing Superset database host (cloud IP -> local service)..."
 tutor config save --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
 
 echo "2. Applying patches..."
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 
 echo "3. Restarting Superset services..."
 tutor local restart superset
@@ -115,5 +115,5 @@ grep ASPECTS_SUPERSET_DATABASE_HOST tutor_env/config.yml
 
 ---
 
-**Next Steps:** Run the fix script above, then re-run `./tools/check-parity.sh` to verify.
+**Next Steps:** Run the fix script above, then re-run `./scripts/qa/check-parity.sh` to verify.
 

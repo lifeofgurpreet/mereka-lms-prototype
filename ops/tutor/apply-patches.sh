@@ -1,1 +1,0 @@
-../../infrastructure/tutor/apply-patches.sh

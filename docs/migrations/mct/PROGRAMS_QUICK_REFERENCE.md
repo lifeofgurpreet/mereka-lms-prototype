@@ -75,17 +75,17 @@ tutor k8s launch
 ```bash
 # Check Discovery
 kubectl get pods -n mereka-lms | grep discovery
-curl -I https://discovery.staging.academy.mereka.io/health/
+curl -I https://discovery.academyv2.mereka.io/health/
 
 # Check Credentials
 kubectl get pods -n mereka-lms | grep credentials
-curl -I https://credentials.staging.academy.mereka.io/health/
+curl -I https://credentials.academyv2.mereka.io/health/
 ```
 
 ### 2. Access Admin Interfaces
-- **Discovery Admin:** https://discovery.staging.academy.mereka.io/admin/
-- **Credentials Admin:** https://credentials.staging.academy.mereka.io/admin/
-- **LMS Admin:** https://staging.academy.mereka.io/admin/
+- **Discovery Admin:** https://discovery.academyv2.mereka.io/admin/
+- **Credentials Admin:** https://credentials.academyv2.mereka.io/admin/
+- **LMS Admin:** https://academyv2.mereka.io/admin/
 
 (Use LMS superuser credentials for all)
 
@@ -108,7 +108,7 @@ kubectl exec -it -n mereka-lms <lms-pod> -- bash
 ```
 
 ### 5. Verify Frontend
-Navigate to: https://staging.academy.mereka.io/programs
+Navigate to: https://academyv2.mereka.io/programs
 
 ---
 
@@ -181,7 +181,7 @@ kubectl exec -it -n mereka-lms <credentials-pod> -- bash
 ```python
 # See PROGRAMS_SETUP_PLAN.md for complete authentication code
 token = get_jwt_token(
-    "https://staging.academy.mereka.io",
+    "https://academyv2.mereka.io",
     "admin@example.com",
     "password"
 )
@@ -189,7 +189,7 @@ token = get_jwt_token(
 
 ### List Programs
 ```bash
-curl https://discovery.staging.academy.mereka.io/api/v1/programs/ \
+curl https://discovery.academyv2.mereka.io/api/v1/programs/ \
   -H "Authorization: JWT <token>"
 ```
 

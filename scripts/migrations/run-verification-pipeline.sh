@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$REPO_ROOT"
 
-OUTPUT_DIR="ops/migrations/kajabi/output/verification"
+OUTPUT_DIR="scripts/migrations/kajabi/output/verification"
 VERIFICATION_SCRIPT="scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py"
 
 echo "============================================================"
@@ -101,10 +101,10 @@ echo "STEP 2: Running verification..."
 echo "--------------------------------"
 
 python3 "$VERIFICATION_SCRIPT" \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
   --output-dir "$OUTPUT_DIR" \
   --skip-openedx-export
 

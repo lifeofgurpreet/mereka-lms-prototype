@@ -43,7 +43,7 @@ The goal is to migrate the nightly Open edX stack managed by Tutor to Google Clo
 
 ## Automation outline
 
-- **Config repo**: keep sanitized Tutor config in `ops/tutor/config.prod.yml` (no secrets). Load real values via CI before deployment.
+- **Config repo**: keep sanitized Tutor config in `infrastructure/tutor/config.prod.yml` (no secrets). Load real values via CI before deployment.
 - **Secrets**: temporary bootstrap values live in `docs/SECRETS_SNAPSHOT.md`; migrate them to Secret Manager and rotate immediately after bring-up.
 - **Terraform**: modules for VPC, subnets, Cloud SQL, Memorystore, Artifact Registry, GKE cluster, Cloud DNS, and service accounts.
 - **CI/CD**: GitHub Actions pipeline steps

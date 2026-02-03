@@ -31,7 +31,7 @@ _Quick reference for coding agents and developers_
 1. **Always work locally first** - Never touch cloud instances until local is verified
 2. **Always set `TUTOR_ROOT`** - `export TUTOR_ROOT="$(pwd)/tutor_env"`
 3. **Always use local Docker services** - `mysql`, `mongodb`, `redis` (NOT cloud IPs)
-4. **Always run patches** - `./ops/tutor/apply-patches.sh` after config changes
+4. **Always run patches** - `./infrastructure/tutor/apply-patches.sh` after config changes
 
 ## 🔍 Quick Verification
 

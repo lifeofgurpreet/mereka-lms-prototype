@@ -71,12 +71,12 @@ Generate a comparison report:
 
 ```bash
 python tools/compare-enrollments-kajabi-openedx.py \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
   --openedx-enrollments exports/openedx/enrollments.csv \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/comparison
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/comparison
 ```
 
 **Outputs**:
@@ -169,13 +169,13 @@ If enrollments are missing in Open edX:
 
 ```bash
 # Re-import enrollments from Kajabi
-python ops/migrations/kajabi/scripts/prepare_openedx_imports.py \
-  --output-root ops/migrations/kajabi/output \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv
+python scripts/migrations/kajabi/scripts/prepare_openedx_imports.py \
+  --output-root scripts/migrations/kajabi/output \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 
 # Import missing enrollments
 tutor local run lms bash -c "cat > /tmp/kajabi-enrollments.csv" \
-  < ops/migrations/kajabi/output/openedx/enrollments_import.csv
+  < scripts/migrations/kajabi/output/openedx/enrollments_import.csv
 tutor local run lms ./manage.py lms bulk_enroll \
   --csv /tmp/kajabi-enrollments.csv \
   --settings=tutor.production \

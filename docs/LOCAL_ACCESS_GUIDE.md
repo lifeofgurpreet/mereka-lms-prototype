@@ -5,13 +5,13 @@ _Last updated: 2025-11-12_
 
 Run this command:
 ```bash
-echo '127.0.0.1 skillourfuture.staging.academy.mereka.io' | sudo tee -a /etc/hosts
+echo '127.0.0.1 skillourfuture.academy.mereka.io' | sudo tee -a /etc/hosts
 ```
 
 ## 📍 Access URLs
 
 ### Skill Our Future (MCT Courses)
-**URL:** http://skillourfuture.staging.academy.mereka.io  
+**URL:** http://skillourfuture.academy.mereka.io  
 **Login:** admin / admin123  
 **Courses:** 2 SKILLOURFUTURE courses from production
 
@@ -60,7 +60,7 @@ echo '127.0.0.1 skillourfuture.staging.academy.mereka.io' | sudo tee -a /etc/hos
 ## 🔄 To Refresh from Production
 
 ```bash
-./tools/sync-from-production.sh
+./scripts/shared/sync-from-production.sh
 ```
 
 This will:
@@ -76,7 +76,7 @@ This will:
 cat /etc/hosts | grep skillourfuture
 
 # If not there, add it:
-echo '127.0.0.1 skillourfuture.staging.academy.mereka.io' | sudo tee -a /etc/hosts
+echo '127.0.0.1 skillourfuture.academy.mereka.io' | sudo tee -a /etc/hosts
 ```
 
 ### Courses not showing

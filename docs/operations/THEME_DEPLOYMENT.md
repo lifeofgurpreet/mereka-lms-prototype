@@ -249,7 +249,7 @@ kubectl get pods -n mereka-lms -o jsonpath='{range .items[*]}{.metadata.name}{"\
 
 ### Step 10: Visual Verification
 
-Open https://staging.academy.mereka.io and verify:
+Open https://academyv2.mereka.io and verify:
 
 - [ ] **Logo**: Mereka horizontal logo appears in header
 - [ ] **Primary text**: Black (#000000)
@@ -261,8 +261,8 @@ Open https://staging.academy.mereka.io and verify:
 - [ ] **Favicon**: Mereka logomark in browser tab
 
 Also check:
-- https://studio.staging.academy.mereka.io (Studio branding)
-- https://apps.staging.academy.mereka.io (MFE branding)
+- https://studio.academyv2.mereka.io (Studio branding)
+- https://apps.academyv2.mereka.io (MFE branding)
 
 ## Rollback Procedure
 

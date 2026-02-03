@@ -44,7 +44,7 @@ gcloud monitoring uptime configs create \
   --project=mereka-lms
 ```
 
-The config hits `https://staging.academy.mereka.io/` every five minutes from the Asia-Pacific probe sites and validates that the certificate is valid. After creating the uptime check, re-run the alert creation command so the policy can reference the new metric series.
+The config hits `https://academyv2.mereka.io/` every five minutes from the Asia-Pacific probe sites and validates that the certificate is valid. After creating the uptime check, re-run the alert creation command so the policy can reference the new metric series.
 
 Apply an alert with:  
 `gcloud monitoring policies create --policy-from-file ops/monitoring/alerts/pod-restarts.json`

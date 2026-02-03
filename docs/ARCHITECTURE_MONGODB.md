@@ -75,7 +75,7 @@ ATLAS_URI=$(gcloud secrets versions access latest --secret=mongodb-atlas-uri)
 ### Step 2: Run Sync
 
 ```bash
-ATLAS_URI=$ATLAS_URI ./tools/sync-mongodb-from-production.sh
+ATLAS_URI=$ATLAS_URI ./scripts/infra/sync-mongodb-from-production.sh
 ```
 
 This will:

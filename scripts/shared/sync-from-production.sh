@@ -124,7 +124,7 @@ from organizations.models import Organization
 
 # Get or create Skill Our Future site
 site, created = Site.objects.get_or_create(
-    domain='skillourfuture.staging.academy.mereka.io',
+    domain='skillourfuture.academy.mereka.io',
     defaults={'name': 'Skill Our Future'}
 )
 
@@ -163,7 +163,7 @@ echo ""
 echo "  📍 View courses:"
 echo "    • Studio: http://studio.localhost"
 echo "    • LMS (main): http://localhost"
-echo "    • Skill Our Future: http://skillourfuture.staging.academy.mereka.io"
+echo "    • Skill Our Future: http://skillourfuture.academy.mereka.io"
 echo "    • Login: admin / admin123"
 echo ""
 echo "  👥 User breakdown:"
@@ -171,4 +171,6 @@ echo "    • All current users: MCT (84,378)"
 echo "    • Kajabi users: Will be tagged when imported"
 echo ""
 echo "╚══════════════════════════════════════════════════════════════╝"
+
+
 

@@ -17,7 +17,7 @@ variable "zone" {
 
 variable "domain_root" {
   type        = string
-  description = "Root domain for platform (e.g. staging.academy.mereka.io)."
+  description = "Root domain for platform (e.g. academyv2.mereka.io)."
 }
 
 variable "labels" {

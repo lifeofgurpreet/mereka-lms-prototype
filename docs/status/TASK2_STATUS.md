@@ -196,7 +196,7 @@ PYEOF
 kubectl exec -it -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 
 # 3. Test admin login
-# Visit: https://staging.academy.mereka.io/admin
+# Visit: https://academyv2.mereka.io/admin
 ```
 
 ### Step 2: Verify Forum Integration (HIGH PRIORITY)

@@ -34,7 +34,7 @@ For heavy analytics workloads, consider a separate standard GKE cluster with nod
 Use the deployment script:
 
 ```bash
-./tools/deploy-aspects-k8s.sh
+./scripts/infra/deploy-aspects-k8s.sh
 ```
 
 This script will:

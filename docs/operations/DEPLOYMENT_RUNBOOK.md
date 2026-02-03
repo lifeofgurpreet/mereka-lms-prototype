@@ -1,4 +1,4 @@
-# Deployment Runbook – Mereka LMS (staging.academy.mereka.io)
+# Deployment Runbook – Mereka LMS (academyv2.mereka.io)
 _Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-10-30_
 
 This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project.
@@ -25,7 +25,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 1. `cd ops/terraform` and create `terraform.tfvars`:
    ```hcl
    project_id  = "mereka-lms"
-   domain_root = "staging.academy.mereka.io"
+   domain_root = "academyv2.mereka.io"
    ```
    Add any secret definitions to the `module "secret_manager"` block via tfvars rather than committing to Git.
 2. Implement each module under `modules/` (included in repo):
@@ -50,17 +50,17 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 
 ## 3. Tutor configuration
 
-1. Copy `ops/tutor/config.example.yml` to `ops/tutor/config.prod.yml` and adjust (use values from `docs/SECRETS_SNAPSHOT.md` for bootstrap):
-   - `LMS_HOST`: `staging.academy.mereka.io`
-   - `CMS_HOST`: `studio.staging.academy.mereka.io`
-   - `MFE_HOST`: `apps.staging.academy.mereka.io`
+1. Copy `infrastructure/tutor/config.example.yml` to `infrastructure/tutor/config.prod.yml` and adjust (use values from `docs/SECRETS_SNAPSHOT.md` for bootstrap):
+   - `LMS_HOST`: `academyv2.mereka.io`
+   - `CMS_HOST`: `studio.academyv2.mereka.io`
+   - `MFE_HOST`: `apps.academyv2.mereka.io`
    - `MFE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:nightly` (post-build)
    - `ECOMMERCE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce:12.0.4`
    - `ECOMMERCE_WORKER_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce-worker:12.0.4`
    - `XQUEUE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-xqueue:12.1.0`
    - `MONGODB_URI`: Atlas connection string (leave blank while using the in-cluster StatefulSet).
    - Configure external service endpoints (Cloud SQL host, Memorystore host/port, GCS buckets).
-   - For additional LMS domains (microsites), see `docs/MULTISITE.md` and re-run `./ops/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
+   - For additional LMS domains (microsites), see `docs/MULTISITE.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=asia-southeast1-docker.pkg.dev/mereka-lms/openedx`.
 
@@ -73,7 +73,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 2. Build Tutor images:
    ```bash
    source ops/tutor-env.sh
-   ./ops/tutor/apply-patches.sh
+   ./infrastructure/tutor/apply-patches.sh
    tutor images build all
    tutor images push all --repository asia-southeast1-docker.pkg.dev/mereka-lms/openedx
    ```
@@ -99,9 +99,9 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    (See `docs/MONGODB_ATLAS.md` for migrating this data set to Atlas via `tools/mongodb-to-atlas.sh` and the new `MONGODB_URI` setting.)
    - Ready to cut over? Run `ATLAS_URI=... ./tools/mongodb-atlas-cutover.sh` to dump the StatefulSet to Atlas, update Tutor config, restart `forum`, and (optionally) delete the StatefulSet/PVC once the Atlas connection is verified.
 5. Verify pods: `kubectl get pods -n mereka-lms`.
-6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `staging-academy-mereka-io`.
-   - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./tools/cloudflare-sync.sh` keeps the `staging`, `studio`, and `apps` hostnames pointed at the Caddy load balancer (records defined in `ops/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
-   - Certificate hygiene: the same JSON also enforces a `CAA 0 issue "letsencrypt.org"` record on `academy.mereka.io` so only Let’s Encrypt can mint certs for the staging sub-tree. Follow up with `./tools/cloudflare-harden-zone.sh` to keep TLS min version at 1.2, `ssl=strict`, `always_use_https=on`, and HSTS enabled across subdomains.
+6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `academyv2-mereka-io` (or the existing staging zone if unchanged).
+   - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the GKE ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
+   - Certificate hygiene: the same JSON also enforces a `CAA 0 issue "letsencrypt.org"` record on `academyv2.mereka.io` so only Let’s Encrypt can mint certs for the academyv2 sub-tree. Follow up with `./scripts/infra/cloudflare-harden-zone.sh` to keep TLS min version at 1.2, `ssl=strict`, `always_use_https=on`, and HSTS enabled across subdomains.
 
 ## 6. Post-deploy tasks
 

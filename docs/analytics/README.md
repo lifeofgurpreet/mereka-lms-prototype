@@ -17,4 +17,4 @@ Use this folder whenever you need to instrument, deploy, or interpret analytics 
 
 **Related folders:**
 - `docs/migrations/kajabi/` for the import/export runbooks that feed analytics.
-- `tools/` for Python/Node helpers such as `tools/openedx-analytics.py` when you need raw extracts.
+- `tools/` for Python/Node helpers such as `scripts/analytics/openedx-analytics.py` when you need raw extracts.

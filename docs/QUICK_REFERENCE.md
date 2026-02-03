@@ -27,7 +27,7 @@ tutor local start -d
 ### After Config Changes
 ```bash
 tutor config save --set KEY=value
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 
@@ -38,7 +38,7 @@ tutor local restart
 
 ### Check Parity
 ```bash
-./tools/check-parity.sh
+./scripts/qa/check-parity.sh
 ```
 
 ### Run Tests

@@ -24,16 +24,16 @@ Since the Google Cloud Console UI requires manual interaction, follow these step
    
 6. Add Authorized JavaScript origins:
    ```
-   https://staging.academy.mereka.io
-   https://apps.staging.academy.mereka.io
+   https://academyv2.mereka.io
+   https://apps.academyv2.mereka.io
    http://localhost
    http://apps.localhost
    ```
 
 7. Add Authorized redirect URIs:
    ```
-   https://staging.academy.mereka.io/auth/complete/google-oauth2/
-   https://apps.staging.academy.mereka.io/auth/complete/google-oauth2/
+   https://academyv2.mereka.io/auth/complete/google-oauth2/
+   https://apps.academyv2.mereka.io/auth/complete/google-oauth2/
    http://localhost/auth/complete/google-oauth2/
    http://apps.localhost/auth/complete/google-oauth2/
    ```
@@ -71,7 +71,7 @@ tutor k8s restart lms
 
 ## Step 4: Enable Provider in Django Admin
 
-1. Go to: `http://localhost/admin/` (or `https://staging.academy.mereka.io/admin/`)
+1. Go to: `http://localhost/admin/` (or `https://academyv2.mereka.io/admin/`)
 2. Navigate to: **Third Party Authentication** > **Provider Configuration (SSO)**
 3. Click **"Add Provider Configuration"**
 4. Configure:

@@ -3,7 +3,7 @@ from ..production import *
 import json
 import os
 
-SECRET_KEY = "39RbimInoqcQHbn0xLvU"
+SECRET_KEY = os.environ.get("ECOMMERCE_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "ecommerce.localhost",
     "ecommerce",
@@ -15,11 +15,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 OSCAR_DEFAULT_CURRENCY = "USD"
 
-EDX_API_KEY = "6Lnq77PWhG8kqVppsvkq"
+EDX_API_KEY = os.environ.get("ECOMMERCE_EDX_API_KEY", "")
 
 JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
-JWT_AUTH["JWT_SECRET_KEY"] = "UeCMQQglnc0O68rTJQezNNSt"
+JWT_AUTH["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY_ECOMMERCE", "")
 JWT_AUTH["JWT_PUBLIC_SIGNING_JWK_SET"] = json.dumps(
     {
         "keys": [
@@ -36,7 +36,7 @@ JWT_AUTH["JWT_ISSUERS"] = [
     {
         "ISSUER": "http://localhost/oauth2",
         "AUDIENCE": "openedx",
-        "SECRET_KEY": "UeCMQQglnc0O68rTJQezNNSt"
+        "SECRET_KEY": os.environ.get("JWT_SECRET_KEY_ECOMMERCE", "")
     }
 ]
 
@@ -44,7 +44,7 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 SOCIAL_AUTH_EDX_OAUTH2_ISSUER = "http://localhost"
 SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
 
-BACKEND_SERVICE_EDX_OAUTH2_SECRET = "yU1JIVuY"
+BACKEND_SERVICE_EDX_OAUTH2_SECRET = os.environ.get("ECOMMERCE_BACKEND_OAUTH2_SECRET", "")
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://lms:8000/oauth2"
 
 EDX_DRF_EXTENSIONS = {
@@ -56,7 +56,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "ecommerce",
         "USER": "ecommerce",
-        "PASSWORD": "gHS5cTHo",
+        "PASSWORD": os.environ.get("MYSQL_ECOMMERCE_PASSWORD", ""),
         "HOST": "mysql",
         "PORT": "3306",
         "OPTIONS": {

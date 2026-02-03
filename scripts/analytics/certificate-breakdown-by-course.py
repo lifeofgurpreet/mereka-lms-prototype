@@ -11,8 +11,8 @@ Usage:
     python scripts/analytics/certificate-breakdown-by-course.py \
         --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
         --openedx-certificates exports/openedx/certificates.csv \
-        --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-        --output-dir ops/migrations/kajabi/output/certificate_breakdown
+        --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+        --output-dir scripts/migrations/kajabi/output/certificate_breakdown
 """
 
 from __future__ import annotations

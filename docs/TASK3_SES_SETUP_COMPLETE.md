@@ -132,7 +132,7 @@ tutor config save \
 ## 🎯 Testing Email Functionality
 
 **Password Reset Test:**
-1. Go to: https://staging.academy.mereka.io/account/password
+1. Go to: https://academyv2.mereka.io/account/password
 2. Enter email address (must be verified if in sandbox)
 3. Check email inbox for reset link
 
@@ -160,7 +160,7 @@ tutor config save \
 - Updated `devture/exim-relay` to use correct environment variables
 - `SMARTHOST=email-smtp.ap-southeast-1.amazonaws.com::587`
 - `SMTP_USERNAME` and `SMTP_PASSWORD` from K8s Secret `ses-smtp-credentials`
-- `HOSTNAME=mail.staging.academy.mereka.io` for proper HELO
+- `HOSTNAME=mail.academyv2.mereka.io` for proper HELO
 
 **Verified Working:**
 - Test email delivered successfully via SES

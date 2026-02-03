@@ -35,17 +35,17 @@ This guide walks through setting up Google Login for OpenEdX LMS sites.
    
 4. **Configure Authorized Origins and Redirect URIs:**
    
-   For **staging.academy.mereka.io** (production):
+   For **academyv2.mereka.io** (production):
    - **Authorized JavaScript origins:**
      ```
-     https://staging.academy.mereka.io
-     https://apps.staging.academy.mereka.io
+     https://academyv2.mereka.io
+     https://apps.academyv2.mereka.io
      ```
    
    - **Authorized redirect URIs:**
      ```
-     https://staging.academy.mereka.io/auth/complete/google-oauth2/
-     https://apps.staging.academy.mereka.io/auth/complete/google-oauth2/
+     https://academyv2.mereka.io/auth/complete/google-oauth2/
+     https://apps.academyv2.mereka.io/auth/complete/google-oauth2/
      ```
    
    For **localhost** (local development):
@@ -105,7 +105,7 @@ tutor k8s restart lms
 
 ## Step 4: Enable Google Provider in Django Admin
 
-1. Access Django admin: `https://staging.academy.mereka.io/admin/` (or `http://localhost/admin/` for local)
+1. Access Django admin: `https://academyv2.mereka.io/admin/` (or `http://localhost/admin/` for local)
 2. Navigate to **Third Party Authentication** > **Provider Configuration (SSO)**
 3. Click **Add Provider Configuration**
 4. Configure:
@@ -114,12 +114,12 @@ tutor k8s restart lms
    - **Enabled:** ✓ (checked)
    - **Skip email verification:** ✓ (optional, recommended for better UX)
    - **Skip registration form:** ✓ (optional)
-   - **Site:** Select your site (e.g., `staging.academy.mereka.io`)
+   - **Site:** Select your site (e.g., `academyv2.mereka.io`)
 5. Click **Save**
 
 ## Step 5: Test Google Login
 
-1. Navigate to your LMS login page: `https://staging.academy.mereka.io/login`
+1. Navigate to your LMS login page: `https://academyv2.mereka.io/login`
 2. You should see a **Sign in with Google** button
 3. Click it and complete the OAuth flow
 4. Verify that you're logged in and your account is created
@@ -168,7 +168,7 @@ tutor k8s restart lms
 
 ## Multi-Site Configuration
 
-For multiple sites (e.g., `skillourfuture.staging.academy.mereka.io`):
+For multiple sites (e.g., `skillourfuture.academy.mereka.io`):
 
 1. Add redirect URIs for each domain in Google Cloud Console
 2. Create separate Provider Configuration entries in Django admin for each site

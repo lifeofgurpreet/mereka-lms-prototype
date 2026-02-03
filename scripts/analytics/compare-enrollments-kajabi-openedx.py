@@ -9,11 +9,11 @@ Generates a comparison report showing:
 
 Usage:
     python scripts/analytics/compare-enrollments-kajabi-openedx.py \
-        --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
+        --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
         --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
         --openedx-enrollments exports/openedx/enrollments.csv \
-        --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-        --output-dir ops/migrations/kajabi/output/comparison
+        --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+        --output-dir scripts/migrations/kajabi/output/comparison
 """
 
 from __future__ import annotations

@@ -9,9 +9,9 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 **Critical**: Docker Desktop requires **≥12 GB RAM and 2–4 GB swap** before building images. The Redwood asset pipeline uses 6–8 GB during webpack builds.
 
 **Production URLs**:
-- Staging LMS: `https://staging.academy.mereka.io`
-- Staging Studio: `https://studio.staging.academy.mereka.io`
-- Staging MFE: `https://apps.staging.academy.mereka.io`
+- Staging LMS: `https://academyv2.mereka.io`
+- Staging Studio: `https://studio.academyv2.mereka.io`
+- Staging MFE: `https://apps.academyv2.mereka.io`
 - Alternative domain: `https://academy.biji-biji.com`
 
 ## Architecture
@@ -276,6 +276,7 @@ tutor local restart
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
 - **Architecture**: `docs/architecture/`
 - **Repo Guidelines**: `AGENTS.md` (complements this file)
+- **Secrets Management**: `/home/gurpreet/projects/secrets-management/specs/` (Infisical architecture, AWS SES setup)
 
 ## Common Pitfalls
 

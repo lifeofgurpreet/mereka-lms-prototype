@@ -11,13 +11,13 @@ Usage:
     # Dry run (see what would be removed)
     python tools/rollback-openedx-imports.py \
         --django-settings lms.envs.tutor.production \
-        --import-file ops/migrations/kajabi/output/openedx/enrollments_import.csv \
+        --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
         --dry-run
     
     # Actually remove enrollments
     python tools/rollback-openedx-imports.py \
         --django-settings lms.envs.tutor.production \
-        --import-file ops/migrations/kajabi/output/openedx/enrollments_import.csv \
+        --import-file scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
         --action unenroll
 """
 

@@ -15,7 +15,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-11-09
 ```bash
 python tools/openedx-export-enrollments.py \
   --django-settings lms.envs.tutor.production \
-  --output ops/migrations/kajabi/output/verification/openedx_enrollments_current.csv
+  --output scripts/migrations/kajabi/output/verification/openedx_enrollments_current.csv
 ```
 
 **Option B: Using Direct Database Connection**
@@ -27,7 +27,7 @@ tutor config printvalue MYSQL_DATABASE
 # Export using direct DB connection
 python tools/openedx-export-enrollments.py \
   --db-url "mysql://root:PASSWORD@localhost:3306/openedx" \
-  --output ops/migrations/kajabi/output/verification/openedx_enrollments_current.csv
+  --output scripts/migrations/kajabi/output/verification/openedx_enrollments_current.csv
 ```
 
 **Option C: Using Tutor Command**
@@ -52,7 +52,7 @@ with open('/tmp/enrollments.csv', 'w') as f:
 print(f"Exported {CourseEnrollment.objects.count()} enrollments")
 EOF
 
-tutor local run lms cat /tmp/enrollments.csv > ops/migrations/kajabi/output/verification/openedx_enrollments_current.csv
+tutor local run lms cat /tmp/enrollments.csv > scripts/migrations/kajabi/output/verification/openedx_enrollments_current.csv
 ```
 
 ### Step 2: Export Current Open edX Certificates
@@ -60,12 +60,12 @@ tutor local run lms cat /tmp/enrollments.csv > ops/migrations/kajabi/output/veri
 ```bash
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --prepared-enrollments ops/migrations/kajabi/output/openedx/enrollments_import.csv \
-  --output-dir ops/migrations/kajabi/output/verification_current \
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --prepared-enrollments scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_current \
   --skip-openedx-export  # Skip if you already exported manually
 ```
 
@@ -83,15 +83,15 @@ The verification script will:
 
 Check the generated reports:
 ```bash
-cat ops/migrations/kajabi/output/verification_current/summary.txt
-cat ops/migrations/kajabi/output/verification_current/enrollment_comparison_by_course.csv
+cat scripts/migrations/kajabi/output/verification_current/summary.txt
+cat scripts/migrations/kajabi/output/verification_current/enrollment_comparison_by_course.csv
 ```
 
 ### Step 5: Import Missing Enrollments (If Needed)
 
 If there are missing enrollments:
 ```bash
-cd ops/migrations/kajabi/output/verification_current
+cd scripts/migrations/kajabi/output/verification_current
 ./import_missing_enrollments.sh
 ```
 
@@ -102,12 +102,12 @@ Once site is back up, run this single command:
 ```bash
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --prepared-enrollments ops/migrations/kajabi/output/openedx/enrollments_import.csv \
-  --output-dir ops/migrations/kajabi/output/verification_final
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --prepared-enrollments scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_final
 ```
 
 This will:

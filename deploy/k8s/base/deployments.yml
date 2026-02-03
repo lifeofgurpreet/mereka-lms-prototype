@@ -78,6 +78,11 @@ spec:
             value: cms.envs.tutor.production
           - name: UWSGI_WORKERS
             value: "2"
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           ports:
             - containerPort: 8000
           volumeMounts:
@@ -198,6 +203,11 @@ spec:
             value: lms.envs.tutor.production
           - name: UWSGI_WORKERS
             value: "2"
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           ports:
             - containerPort: 8000
           volumeMounts:
@@ -415,7 +425,10 @@ spec:
             - "--mysql-native-password=ON"
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: "WvdPmUfF"
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: MYSQL_ROOT_PASSWORD
           ports:
             - containerPort: 3306
           volumeMounts:
@@ -467,7 +480,7 @@ spec:
                   name: ses-smtp-credentials
                   key: RELAY_PASSWORD
             - name: HOSTNAME
-              value: "mail.staging.academy.mereka.io"
+              value: "mail.academyv2.mereka.io"
 
 
 ---

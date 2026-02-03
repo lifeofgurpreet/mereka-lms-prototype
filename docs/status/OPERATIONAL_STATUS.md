@@ -15,8 +15,8 @@ _Last updated: 2025-11-12 • Auto-generated_
 
 **Staging:**
 - **Status:** ✅ Operational
-- **URL:** https://staging.academy.mereka.io
-- **MFE URL:** https://apps.staging.academy.mereka.io
+- **URL:** https://academyv2.mereka.io
+- **MFE URL:** https://apps.academyv2.mereka.io
 
 ## 🔐 Access Information
 
@@ -26,7 +26,7 @@ _Last updated: 2025-11-12 • Auto-generated_
 - **Local LMS:** http://localhost/login
 - **Local MFE:** http://apps.localhost/authn/login
 - **Local Admin Panel:** http://localhost/admin
-- **Staging Admin:** https://staging.academy.mereka.io/admin
+- **Staging Admin:** https://academyv2.mereka.io/admin
 
 ### Analytics (Superset)
 - **Local URL:** http://localhost:8088
@@ -70,12 +70,12 @@ _Last updated: 2025-11-12 • Auto-generated_
 ### Quick Fixes
 - `./tools/fix-parity.sh` - Fix configuration parity issues
 - `./tools/fix-admin-login.sh` - Fix admin login problems
-- `./tools/check-parity.sh` - Verify local/production parity
+- `./scripts/qa/check-parity.sh` - Verify local/production parity
 - `./tools/comprehensive-test.sh` - Run full test suite
 
 ### Maintenance
 - `./tools/docker-cleanup.sh` - Clean up Docker resources
-- `./ops/tutor/apply-patches.sh` - Apply Tutor patches
+- `./infrastructure/tutor/apply-patches.sh` - Apply Tutor patches
 
 ## 📚 Documentation
 
@@ -122,7 +122,7 @@ tutor local start -d
 tutor local stop
 
 # Check status
-./tools/check-parity.sh
+./scripts/qa/check-parity.sh
 ```
 
 ### Troubleshooting
@@ -142,7 +142,7 @@ tutor local stop
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 tutor config save --set KEY=value
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 

@@ -1,53 +1,34 @@
-# Ops Directory (Legacy - Migration in Progress)
+# Ops Directory (DEPRECATED)
 
-⚠️ **This directory is being migrated to the new structure.**
+**All contents of this directory have been migrated to their canonical locations.**
 
-## New Locations
+## Migration Complete
 
-All infrastructure configuration has moved to `infrastructure/`:
+| Original Location | New Location |
+|-------------------|--------------|
+| `infrastructure/cloudflare/` | `infrastructure/cloudflare/` |
+| `infrastructure/tutor/multisite-sites.yml` | `infrastructure/tutor/multisite-sites.yml` |
+| `scripts/migrations/kajabi/scripts/` | `scripts/migrations/kajabi/` |
+| `scripts/migrations/mct/scripts/` | `scripts/migrations/mct/` |
+| `scripts/migrations/kajabi/README.md` | `docs/migrations/kajabi/OPS_KAJABI_README.md` |
+| `scripts/migrations/mct/README.md` | `docs/migrations/mct/OPS_MCT_README.md` |
+| `infrastructure/tutor/config.example.yml` | `infrastructure/tutor/config.example.yml` (duplicate removed) |
+| `infrastructure/tutor/apply-patches.sh` | `infrastructure/tutor/apply-patches.sh` (symlink removed) |
+| `ops/tutor-env.sh` | `infrastructure/tutor/tutor-env.sh` (symlink removed) |
 
-- `ops/tutor/` → `infrastructure/tutor/`
-- `ops/themes/` → `infrastructure/tutor/themes/`
-- `ops/terraform/` → `infrastructure/terraform/`
-- `ops/k8s/` → `infrastructure/k8s/`
-- `ops/monitoring/` → `infrastructure/monitoring/`
-- `ops/cloudflare/` → `infrastructure/cloudflare/`
-- `ops/storage/` → `infrastructure/storage/`
-- `ops/tutor-env.sh` → `infrastructure/tutor/tutor-env.sh`
+## Previous Migrations
 
-## Compatibility Shims
+These were already migrated in Phase 1:
 
-For backward compatibility, use these wrapper scripts:
+- `infrastructure/tutor/` -> `infrastructure/tutor/`
+- `ops/themes/` -> `infrastructure/tutor/themes/`
+- `ops/terraform/` -> `infrastructure/terraform/`
+- `ops/k8s/` -> `infrastructure/k8s/`
+- `ops/monitoring/` -> `infrastructure/monitoring/`
+- `ops/storage/` -> `infrastructure/storage/`
 
-### Tutor Environment
+## This Directory Can Be Removed
 
-```bash
-# Old (deprecated):
-source ops/tutor-env.sh
+This directory is kept only for documentation purposes. It can be safely deleted after confirming all references have been updated.
 
-# New:
-source infrastructure/tutor/tutor-env.sh
-```
-
-### Apply Patches
-
-```bash
-# Old (deprecated):
-./ops/tutor/apply-patches.sh
-
-# New:
-./infrastructure/tutor/apply-patches.sh
-```
-
-## Remaining Contents
-
-- `ops/migrations/` - Migration scripts and data (will be reorganized separately)
-
-## Migration Timeline
-
-- **Phase 1**: Infrastructure moved (✅ Complete)
-- **Phase 2**: Scripts reorganization (In Progress)
-- **Phase 3**: Migrations reorganization (Pending)
-
-**Update your scripts and documentation to use `infrastructure/` paths directly.**
-
+**Migration completed: 2026-02-03**

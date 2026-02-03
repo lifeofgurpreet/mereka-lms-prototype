@@ -22,18 +22,18 @@ node tools/kajabi-export-certificates.mjs
 
 # 3. Compare enrollments
 python tools/compare-enrollments-kajabi-openedx.py \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
   --openedx-enrollments exports/openedx/enrollments.csv \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/comparison
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/comparison
 ```
 
 ## Output Files
 
-- `ops/migrations/kajabi/output/comparison/enrollment_comparison.csv` - Detailed per-course comparison
-- `ops/migrations/kajabi/output/comparison/summary.txt` - Summary statistics
+- `scripts/migrations/kajabi/output/comparison/enrollment_comparison.csv` - Detailed per-course comparison
+- `scripts/migrations/kajabi/output/comparison/summary.txt` - Summary statistics
 
 ## Interpreting Results
 

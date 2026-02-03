@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mereka-lms
+
+resources:
+  - ../../base
+
+# Production-specific configurations
+commonLabels:
+  environment: production
+
+# Image tags for production (use specific SHA or version)
+images:
+  - name: openedx
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newTag: production
+  - name: openedx-mfe
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newTag: production
+
+# Production replica counts (higher for availability)
+replicas:
+  - name: lms
+    count: 2
+  - name: cms
+    count: 1
+  - name: lms-worker
+    count: 2
+  - name: cms-worker
+    count: 1

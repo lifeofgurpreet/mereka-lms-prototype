@@ -4,7 +4,7 @@ _One-Click Setup for New Developers • Last updated: 2025-11-12_
 ## 🚀 Quick Start (One Command)
 
 ```bash
-./tools/setup-local.sh
+./scripts/shared/setup-local.sh
 ```
 
 That's it! The script will:
@@ -83,7 +83,7 @@ tutor local stop
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 tutor config save --set KEY=value
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 
@@ -100,7 +100,7 @@ docker info | grep "Total Memory"
 
 **Re-run setup:**
 ```bash
-./tools/setup-local.sh
+./scripts/shared/setup-local.sh
 ```
 
 **Check logs:**
@@ -146,16 +146,16 @@ To compare local with production:
 ./tools/sync-production-config.sh
 
 # Analyze local data
-./tools/analyze-local-data.sh
+./scripts/qa/analyze-local-data.sh
 
 # Check parity
-./tools/check-parity.sh
+./scripts/qa/check-parity.sh
 ```
 
 ## 🎓 Learning Path
 
 ### Day 1: Setup
-1. Run `./tools/setup-local.sh`
+1. Run `./scripts/shared/setup-local.sh`
 2. Verify with `./tools/verify-setup.sh`
 3. Access LMS and explore
 
@@ -183,7 +183,7 @@ After setup, you should be able to:
 
 1. **Always work locally first** - Never touch production until local is verified
 2. **Always set TUTOR_ROOT** - `export TUTOR_ROOT="$(pwd)/tutor_env"`
-3. **Always run patches** - `./ops/tutor/apply-patches.sh` after config changes
+3. **Always run patches** - `./infrastructure/tutor/apply-patches.sh` after config changes
 4. **Never commit secrets** - `tutor_env/config.yml` is git-ignored
 
 ## 📞 Getting Help

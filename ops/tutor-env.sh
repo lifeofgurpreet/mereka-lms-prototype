@@ -1,1 +1,0 @@
-../infrastructure/tutor/tutor-env.sh

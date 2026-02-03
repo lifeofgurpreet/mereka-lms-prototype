@@ -35,7 +35,7 @@ _Audience: <role> • Owner: <team/driver> • Last verified: YYYY‑MM‑DD_
 ## 4. Cross-linking
 
 - Link relative to `docs/` (e.g., `[Quickstart](quickstart/WORKFLOW_LOCAL.md)`).
-- When referencing scripts/tools, link to their repo path (`ops/migrations/kajabi/scripts/...`).
+- When referencing scripts/tools, link to their repo path (`scripts/migrations/kajabi/scripts/...`).
 - Update `docs/README.md` whenever you add, remove, or substantially change a doc.
 
 ## 5. Verification Workflow

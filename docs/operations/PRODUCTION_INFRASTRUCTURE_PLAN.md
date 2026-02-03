@@ -940,7 +940,7 @@ terraform {
 **File**: `infrastructure/terraform/environments/staging/terraform.tfvars`
 ```hcl
 project_id                 = "mereka-lms"  # Current staging project
-domain_root                = "staging.academy.mereka.io"
+domain_root                = "academyv2.mereka.io"
 billing_account_id         = "01A879-A82798-7962E2"
 monthly_budget_myr         = 1500  # ~$345 USD
 

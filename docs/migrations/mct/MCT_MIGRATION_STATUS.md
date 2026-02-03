@@ -229,7 +229,7 @@ Location: `/var/migrations/mct/transformed/`
    - Fixed course extraction from `CourseItems`
    - Added enrollment export from V1 Reports API
 
-2. **`/ops/migrations/mct/scripts/transform_data.py`**
+2. **`/scripts/migrations/mct/scripts/transform_data.py`**
    - Added `build_real_enrollments()` function
    - Deprecated `build_category_enrollments_heuristic()`
    - Auto-detection of `enrollments.ndjson`
@@ -262,7 +262,7 @@ MCT_API_URI="api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4"
 
 ### User Import (COMPLETED)
 - **Source:** `/var/migrations/mct/transformed/users.csv`
-- **Script:** `/ops/migrations/mct/scripts/openedx_bulk_import_mct.py`
+- **Script:** `/scripts/migrations/mct/scripts/openedx_bulk_import_mct.py`
 - **Result:** 68,565 created/updated, 854 failed (profile field issue)
 - **Log:** `/var/migrations/mct/user_import_log_2025-12-18.txt`
 
@@ -368,7 +368,7 @@ Verified via Django ORM on 2025-12-18:
 
 ### Bug Fix Applied During Import
 
-The `CourseEnrollment.get_or_create_enrollment()` method returns a single object, NOT a tuple. Fixed in `/ops/migrations/mct/scripts/openedx_bulk_import_mct.py`:
+The `CourseEnrollment.get_or_create_enrollment()` method returns a single object, NOT a tuple. Fixed in `/scripts/migrations/mct/scripts/openedx_bulk_import_mct.py`:
 
 ```python
 # Correct approach:

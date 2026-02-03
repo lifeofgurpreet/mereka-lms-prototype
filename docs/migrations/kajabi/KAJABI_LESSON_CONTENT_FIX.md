@@ -10,11 +10,11 @@ Fixed the pipeline to capture actual lesson content (body, HTML, media URLs) ins
    - Now fetches full lesson details via `GET /v1/lessons/{id}?include=media,downloads`
    - Writes to `exports/kajabi/structure/lesson_details.ndjson`
 
-2. **Updated `ops/migrations/kajabi/scripts/transform_data.py`**
+2. **Updated `scripts/migrations/kajabi/scripts/transform_data.py`**
    - Loads and merges lesson details into course structure
    - Preserves `content_html`, `body`, `video_url`, `download_url` fields
 
-3. **Enhanced `ops/migrations/kajabi/scripts/build_course_packages.py`**
+3. **Enhanced `scripts/migrations/kajabi/scripts/build_course_packages.py`**
    - Uses real lesson content instead of placeholders
    - Falls back gracefully if content unavailable
 
@@ -51,10 +51,10 @@ This will:
 ### Step 3: Re-transform Data
 
 ```bash
-python ops/migrations/kajabi/scripts/transform_data.py \
+python scripts/migrations/kajabi/scripts/transform_data.py \
   --exports-dir exports/kajabi \
   --structure-dir exports/kajabi/structure \
-  --output-dir ops/migrations/kajabi/output
+  --output-dir scripts/migrations/kajabi/output
 ```
 
 This merges lesson details into `course_structure.json`.
@@ -62,10 +62,10 @@ This merges lesson details into `course_structure.json`.
 ### Step 4: Rebuild Course Packages
 
 ```bash
-python ops/migrations/kajabi/scripts/build_course_packages.py \
-  --course-structure ops/migrations/kajabi/output/course_structure.json \
-  --courses-csv ops/migrations/kajabi/output/courses.csv \
-  --output-dir ops/migrations/kajabi/output/course_packages \
+python scripts/migrations/kajabi/scripts/build_course_packages.py \
+  --course-structure scripts/migrations/kajabi/output/course_structure.json \
+  --courses-csv scripts/migrations/kajabi/output/courses.csv \
+  --output-dir scripts/migrations/kajabi/output/course_packages \
   --org MEREKA \
   --course-prefix MEKA- \
   --run-prefix R \
@@ -79,7 +79,7 @@ The `--keep-build` flag keeps the expanded folders so you can inspect the HTML c
 Check a lesson HTML file in the build directory:
 
 ```bash
-cat ops/migrations/kajabi/output/course_packages/<course-slug>/build/html/*.xml | grep -A 20 "<html"
+cat scripts/migrations/kajabi/output/course_packages/<course-slug>/build/html/*.xml | grep -A 20 "<html"
 ```
 
 You should see actual lesson content instead of placeholders.

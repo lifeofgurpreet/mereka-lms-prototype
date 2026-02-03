@@ -32,7 +32,7 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-11-09
 
 **Import Command:**
 ```bash
-cd ops/migrations/kajabi/output/verification
+cd scripts/migrations/kajabi/output/verification
 ./import_missing_enrollments.sh
 ```
 
@@ -42,7 +42,7 @@ source ops/tutor-env.sh
 
 # Copy CSV into container
 tutor local run lms bash -c 'cat > /tmp/missing-enrollments.csv' \
-  < ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv
+  < scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv
 
 # Import enrollments
 tutor local run lms ./manage.py lms bulk_enroll \
@@ -62,11 +62,11 @@ tutor local run lms ./manage.py lms bulk_enroll \
 # Re-run verification to confirm
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/verification_after_import
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_after_import
 ```
 
 ### STEP 3: Handle Certificates
@@ -81,7 +81,7 @@ Create a script to mark courses complete for migrated users:
 # For each course, mark users as complete if they were eligible in Kajabi
 python tools/mark-courses-complete-from-kajabi.py \
   --certificate-eligibility exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
 
 **Option B: Generate Certificates Per Course**
@@ -107,11 +107,11 @@ After importing enrollments and generating certificates:
 # Run full verification again
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/verification_final
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_final
 ```
 
 **Success Criteria:**
@@ -136,18 +136,18 @@ python tools/verify-and-sync-kajabi-to-openedx.py \
 
 **Import Enrollments:**
 ```bash
-./ops/migrations/kajabi/output/verification/import_missing_enrollments.sh
+./scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh
 ```
 
 **Verify Again:**
 ```bash
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/verification_final
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/verification_final
 ```
 
 ## Troubleshooting

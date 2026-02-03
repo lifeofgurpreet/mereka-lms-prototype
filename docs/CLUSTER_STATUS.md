@@ -72,9 +72,9 @@ kubectl apply -f tutor_env/env/k8s/apps/superset/deployments/superset-worker.yam
 - **Credentials**: Check `tutor config printvalue SUPERSET_ADMIN_PASSWORD`
 
 ### Staging Environment
-- **LMS**: https://staging.academy.mereka.io
-- **Studio**: https://studio.staging.academy.mereka.io
-- **Discovery**: https://discovery.staging.academy.mereka.io
+- **LMS**: https://academyv2.mereka.io
+- **Studio**: https://studio.academyv2.mereka.io
+- **Discovery**: https://discovery.academyv2.mereka.io
 
 ---
 

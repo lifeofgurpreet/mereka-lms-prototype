@@ -7,7 +7,7 @@ _Audience: Everyone • Owner: Data/Analytics • Last updated: 2025-11-12_
 
 Superset runs as a **ClusterIP service** inside Kubernetes, which means it's only accessible from within the cluster. To access it from your local machine, you need to create a temporary tunnel using `kubectl port-forward`. This is a secure way to access internal services without exposing them publicly.
 
-**Alternative:** Once DNS is configured, you can access Superset at `https://analytics.staging.academy.mereka.io` (Caddy ingress is already configured).
+**Alternative:** Once DNS is configured, you can access Superset at `https://analytics.academyv2.mereka.io` (Caddy ingress is already configured).
 
 ### Kubernetes (Staging/Production)
 
@@ -90,7 +90,7 @@ kubectl exec -n mereka-lms $SUPERSET_POD -- \
 
 ### Access via LMS (Instructor Dashboard)
 
-1. **Log into LMS:** https://staging.academy.mereka.io
+1. **Log into LMS:** https://academyv2.mereka.io
 2. **Navigate to any course** you're an instructor for
 3. **Click "Instructor"** in the top navigation
 4. **Look for "Reports" link** - This is added by Aspects
@@ -196,23 +196,23 @@ Should show: `DATABASE_HOST=10.97.0.2` (Cloud SQL IP)
 
 ✅ **Caddy ingress is already configured!** Once DNS is set up, Superset will be accessible at:
 
-**URL:** `https://analytics.staging.academy.mereka.io`
+**URL:** `https://analytics.academyv2.mereka.io`
 
 ### DNS Setup Required
 
-To enable external access, add a DNS A record pointing `analytics.staging.academy.mereka.io` to your Caddy LoadBalancer IP:
+To enable external access, add a DNS A record pointing `analytics.academyv2.mereka.io` to your Caddy LoadBalancer IP:
 
 ```bash
 # Get Caddy LoadBalancer IP
 kubectl get svc -n mereka-lms caddy -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
-Then add this IP to your DNS provider for `analytics.staging.academy.mereka.io`.
+Then add this IP to your DNS provider for `analytics.academyv2.mereka.io`.
 
 ### Current Status
 
-- ✅ Caddy ingress route configured: `analytics.staging.academy.mereka.io → superset:8088`
-- ⏳ DNS record needed: Point `analytics.staging.academy.mereka.io` to Caddy LoadBalancer IP
+- ✅ Caddy ingress route configured: `analytics.academyv2.mereka.io → superset:8088`
+- ⏳ DNS record needed: Point `analytics.academyv2.mereka.io` to Caddy LoadBalancer IP
 - ✅ Superset service running and healthy
 - ✅ Database connection fixed (using Cloud SQL IP: `10.97.0.2`)
 
@@ -281,7 +281,7 @@ kubectl get svc -n mereka-lms caddy -o jsonpath='{.status.loadBalancer.ingress[0
 **Expected Results:**
 - ✅ All Superset pods show `1/1 Running`
 - ✅ Port-forward returns HTTP 302 (redirect to login)
-- ✅ Caddy config shows `analytics.staging.academy.mereka.io` route
+- ✅ Caddy config shows `analytics.academyv2.mereka.io` route
 - ✅ LoadBalancer IP is returned (e.g., `34.126.186.80`)
 
 

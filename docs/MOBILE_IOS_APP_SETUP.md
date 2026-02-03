@@ -5,7 +5,7 @@ This guide covers how to deploy the official OpenEdX iOS app connected to your M
 ## Overview
 
 - **App Repository**: https://github.com/openedx/openedx-app-ios
-- **Your LMS**: `https://staging.academy.mereka.io`
+- **Your LMS**: `https://academyv2.mereka.io`
 - **Deployment Method**: TestFlight (personal/team use) or App Store
 
 ## Quick Start (Mac with Xcode)
@@ -27,7 +27,7 @@ Or if you have this repo cloned locally:
 
 ## Part 1: Server-Side Configuration
 
-> ✅ **COMPLETED** (2026-01-13): Mobile API has been enabled on `staging.academy.mereka.io`
+> ✅ **COMPLETED** (2026-01-13): Mobile API has been enabled on `academyv2.mereka.io`
 > - OAuth App: `mereka-mobile-app`
 > - Redirect URI: `org.openedx.app://oauth2Callback`
 > - Mobile API: Enabled
@@ -85,7 +85,7 @@ kubectl exec -it -n mereka-lms deployment/lms -- \
 
 ### Step 3: Make Courses Mobile-Available
 
-In Studio (`studio.staging.academy.mereka.io`):
+In Studio (`studio.academyv2.mereka.io`):
 1. Go to each course → Settings → Advanced Settings
 2. Set `Mobile Course Available` to `true`
 
@@ -126,12 +126,12 @@ Create `default_config/mereka/config.yaml`:
 
 ```yaml
 # Mereka Academy Mobile App Configuration
-API_HOST_URL: "https://staging.academy.mereka.io"
+API_HOST_URL: "https://academyv2.mereka.io"
 
 OAUTH_CLIENT_ID: "mereka-mobile-app"
 
 # Discovery service (course catalog)
-DISCOVERY_BASE_URL: "https://discovery.staging.academy.mereka.io"
+DISCOVERY_BASE_URL: "https://discovery.academyv2.mereka.io"
 
 # Feature flags
 FEATURES:
@@ -176,8 +176,8 @@ BRANCH:
 
 # Agreement URLs
 AGREEMENT_URLS:
-  PRIVACY_POLICY_URL: "https://staging.academy.mereka.io/privacy"
-  TOS_URL: "https://staging.academy.mereka.io/tos"
+  PRIVACY_POLICY_URL: "https://academyv2.mereka.io/privacy"
+  TOS_URL: "https://academyv2.mereka.io/tos"
   EULA_URL: ""
   DATA_SELL_CONSENT_URL: ""
   SUPPORTED_LANGUAGES: []

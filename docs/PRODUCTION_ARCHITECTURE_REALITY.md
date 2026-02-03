@@ -25,7 +25,7 @@ _Last updated: 2025-11-12 • Reality Check_
   - Courses need to be created/imported
 
 ### Domain Mapping
-- **SKILLOURFUTURE courses** → `skillourfuture.staging.academy.mereka.io`
+- **SKILLOURFUTURE courses** → `skillourfuture.academy.mereka.io`
 - **Main site (future Kajabi)** → `localhost` (dev) or main domain (prod)
 - **BIJIBIJI courses** → `academy.biji-biji.com` (when created)
 
@@ -62,7 +62,7 @@ AND meta NOT LIKE '%: None%';
 
 ### One-Command Setup
 ```bash
-./tools/setup-local.sh
+./scripts/shared/setup-local.sh
 ```
 
 This will:
@@ -81,7 +81,7 @@ gcloud container clusters get-credentials mereka-lms \
   --region asia-southeast1
 
 # Run sync
-./tools/sync-from-production.sh
+./scripts/shared/sync-from-production.sh
 ```
 
 This syncs:
@@ -94,10 +94,10 @@ This syncs:
 # On any new machine
 git clone <repo>
 cd mereka.academy
-./tools/setup-local.sh  # One command!
+./scripts/shared/setup-local.sh  # One command!
 
 # Later, to get latest courses
-./tools/sync-from-production.sh
+./scripts/shared/sync-from-production.sh
 ```
 
 ## 🎓 Course Organization
@@ -105,8 +105,8 @@ cd mereka.academy
 ### Current Production Courses
 | Course ID | Organization | Mapped Domain |
 |-----------|--------------|---------------|
-| `MCTCAT-24` | SKILLOURFUTURE | skillourfuture.staging.academy.mereka.io |
-| `MCTCAT-16` | SKILLOURFUTURE | skillourfuture.staging.academy.mereka.io |
+| `MCTCAT-24` | SKILLOURFUTURE | skillourfuture.academy.mereka.io |
+| `MCTCAT-16` | SKILLOURFUTURE | skillourfuture.academy.mereka.io |
 
 ### When Kajabi Courses Are Imported
 They will be under a different organization (e.g., `MEREKA`) and mapped to the main domain.
@@ -138,10 +138,10 @@ When Kajabi courses are imported:
 
 ## 📚 Scripts Created
 
-1. **`tools/setup-local.sh`** - Complete one-click setup
-2. **`tools/sync-from-production.sh`** - Sync MongoDB + tag users
+1. **`scripts/shared/setup-local.sh`** - Complete one-click setup
+2. **`scripts/shared/sync-from-production.sh`** - Sync MongoDB + tag users
 3. **`tools/verify-setup.sh`** - Verify everything works
-4. **`tools/analyze-local-data.sh`** - Check what you have locally
+4. **`scripts/qa/analyze-local-data.sh`** - Check what you have locally
 
 ---
 

@@ -4,7 +4,7 @@
 project_id  = "mereka-lms"
 region      = "asia-southeast1"
 zone        = "asia-southeast1-a"
-domain_root = "staging.academy.mereka.io"
+domain_root = "academyv2.mereka.io"
 
 # Billing (use actual billing account ID)
 billing_account_id = "01A879-A82798-7962E2"

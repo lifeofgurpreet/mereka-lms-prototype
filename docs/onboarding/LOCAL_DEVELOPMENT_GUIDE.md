@@ -89,7 +89,7 @@ tutor config save \
   --set REDIS_PORT=6379
 
 # Apply patches (fixes MySQL config, MFE builds, etc.)
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
 **Verify config is local:**
@@ -115,7 +115,7 @@ tutor images build mfe
 tutor local launch -I --skip-build
 
 # Apply patches again after launch
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 
 # Restart services
 tutor local restart
@@ -180,7 +180,7 @@ source .venv/bin/activate
 tutor config save --set KEY=value
 
 # 2. ALWAYS apply patches
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 
 # 3. Restart affected services
 tutor local restart lms cms mfe
@@ -258,7 +258,7 @@ tutor config save \
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis
 
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 
@@ -337,7 +337,7 @@ tutor images build mfe        # Rebuild MFEs (15-20 min)
 tutor local stop
 rm -rf tutor_env/data/*
 tutor local launch -I --skip-build
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
 ## 📝 Important Notes
@@ -347,7 +347,7 @@ tutor local launch -I --skip-build
    export TUTOR_ROOT="$(pwd)/tutor_env"
    ```
 
-2. **Always run `./ops/tutor/apply-patches.sh`** after:
+2. **Always run `./infrastructure/tutor/apply-patches.sh`** after:
    - `tutor config save`
    - Plugin changes
    - Tutor upgrades

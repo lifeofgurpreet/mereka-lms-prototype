@@ -63,7 +63,7 @@ _Last updated: 2025-11-12_
 - Config is stored in `tutor_env/config.yml` (git-ignored)
 - To restart services: `tutor local restart`
 - To view logs: `tutor local logs --tail=50 <service>`
-- To check parity: `./tools/check-parity.sh`
+- To check parity: `./scripts/qa/check-parity.sh`
 
 ## 🔗 Related Documentation
 

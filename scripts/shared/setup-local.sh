@@ -51,7 +51,7 @@ echo ""
 
 # Step 3: Tutor Environment
 echo -e "${BLUE}Step 3: Configuring Tutor environment...${NC}"
-source infrastructure/tutor/tutor-env.sh
+source ops/tutor-env.sh
 export TUTOR_ROOT="$REPO_ROOT/tutor_env"
 
 if [ ! -f "tutor_env/config.yml" ]; then
@@ -137,7 +137,7 @@ VALUES ('academy.biji-biji.com', 'Biji-Biji Academy')
 ON DUPLICATE KEY UPDATE name=VALUES(name);
 
 INSERT INTO django_site (domain, name)
-VALUES ('skillourfuture.staging.academy.mereka.io', 'Skill Our Future')
+VALUES ('skillourfuture.academy.mereka.io', 'Skill Our Future')
 ON DUPLICATE KEY UPDATE name=VALUES(name);
 " 2>/dev/null || true
 
@@ -218,7 +218,7 @@ echo "    • Username: admin"
 echo "    • Password: admin123"
 echo ""
 echo "  🛠️  Next Steps:"
-echo "    • Run: ./scripts/qa/comprehensive-test.sh"
+echo "    • Run: ./tools/comprehensive-test.sh"
 echo "    • Read: docs/QUICK_REFERENCE.md"
 echo "    • Check: docs/OPERATIONAL_STATUS.md"
 echo ""

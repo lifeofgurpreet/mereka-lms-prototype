@@ -103,7 +103,7 @@ ASPECTS_ENABLE_SEND_GRADE_DATA: true
 After installation, Superset (the visualization tool) is available at:
 
 - **Local**: `http://aspects-superset.localhost`
-- **Staging**: `https://aspects-superset.staging.academy.mereka.io` (if configured)
+- **Staging**: `https://aspects-superset.academyv2.mereka.io` (if configured)
 
 **Default credentials**:
 - Username: `admin`

@@ -37,8 +37,8 @@ data:
     # STAGING DOMAINS
     # ============================================
 
-    # Main LMS - staging.academy.mereka.io
-    staging.academy.mereka.io {
+    # Main LMS - academyv2.mereka.io
+    academyv2.mereka.io {
         @favicon_matcher {
             path_regexp ^/favicon.ico$
         }
@@ -59,8 +59,8 @@ data:
         }
     }
 
-    # Studio CMS - studio.staging.academy.mereka.io
-    studio.staging.academy.mereka.io {
+    # Studio CMS - studio.academyv2.mereka.io
+    studio.academyv2.mereka.io {
         @favicon_matcher {
             path_regexp ^/favicon.ico$
         }
@@ -75,17 +75,17 @@ data:
         }
     }
 
-    # MFE Apps - apps.staging.academy.mereka.io
-    apps.staging.academy.mereka.io {
-        redir / https://staging.academy.mereka.io
+    # MFE Apps - apps.academyv2.mereka.io
+    apps.academyv2.mereka.io {
+        redir / https://academyv2.mereka.io
         request_body {
             max_size 2MB
         }
         import proxy "mfe:8002"
     }
 
-    # Skill Our Future LMS - skillourfuture.staging.academy.mereka.io
-    skillourfuture.staging.academy.mereka.io {
+    # Skill Our Future LMS - skillourfuture.academy.mereka.io
+    skillourfuture.academy.mereka.io {
         @favicon_matcher {
             path_regexp ^/favicon.ico$
         }
@@ -100,8 +100,8 @@ data:
         }
     }
 
-    # Skill Our Future Studio - studio.skillourfuture.staging.academy.mereka.io
-    studio.skillourfuture.staging.academy.mereka.io {
+    # Skill Our Future Studio - studio.skillourfuture.academy.mereka.io
+    studio.skillourfuture.academy.mereka.io {
         @favicon_matcher {
             path_regexp ^/favicon.ico$
         }

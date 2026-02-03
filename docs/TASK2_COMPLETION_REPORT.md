@@ -165,7 +165,7 @@ kubectl get svc forum -n mereka-lms
 - Forum startup includes dependency checks (MongoDB, Elasticsearch)
 
 ### Access
-- Admin panel: https://staging.academy.mereka.io/admin
+- Admin panel: https://academyv2.mereka.io/admin
 - Forum discussions appear within course pages
 - Forum API is accessible internally at `svc/forum:4567`
 

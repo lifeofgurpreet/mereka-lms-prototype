@@ -12,11 +12,11 @@ This script:
 Usage:
     python tools/verify-and-sync-kajabi-to-openedx.py \
         --django-settings lms.envs.tutor.production \
-        --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-        --kajabi-users ops/migrations/kajabi/output/users.csv \
+        --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+        --kajabi-users scripts/migrations/kajabi/output/users.csv \
         --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-        --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-        --output-dir ops/migrations/kajabi/output/verification
+        --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+        --output-dir scripts/migrations/kajabi/output/verification
 """
 
 from __future__ import annotations
@@ -462,7 +462,7 @@ def main() -> None:
     prepared_enrollments_path = Path(args.prepared_enrollments) if args.prepared_enrollments else None
     if not prepared_enrollments_path:
         # Try default location
-        default_prepared = Path("ops/migrations/kajabi/output/openedx/enrollments_import.csv")
+        default_prepared = Path("scripts/migrations/kajabi/output/openedx/enrollments_import.csv")
         if default_prepared.exists():
             prepared_enrollments_path = default_prepared
     

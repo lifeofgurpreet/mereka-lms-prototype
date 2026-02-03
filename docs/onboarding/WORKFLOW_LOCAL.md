@@ -64,8 +64,8 @@ If ecommerce or forum restart repeatedly, run the troubleshooting commands docum
 Users (local sandbox):
 
 ```bash
-tutor local run --volume="$(pwd)/ops/migrations/kajabi/scripts/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \
-  --volume="$(pwd)/ops/migrations/kajabi/output/openedx/users_import.csv:/tmp/kajabi-users.csv:ro" \
+tutor local run --volume="$(pwd)/scripts/migrations/kajabi/scripts/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \
+  --volume="$(pwd)/scripts/migrations/kajabi/output/openedx/users_import.csv:/tmp/kajabi-users.csv:ro" \
   lms python /tmp/openedx_bulk_import.py users --csv /tmp/kajabi-users.csv --settings=lms.envs.tutor.production
 ```
 

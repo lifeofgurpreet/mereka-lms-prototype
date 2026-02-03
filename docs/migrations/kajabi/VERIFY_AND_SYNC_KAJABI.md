@@ -8,11 +8,11 @@ Complete end-to-end verification and synchronization tool to ensure enrollments 
 ```bash
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/verification
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/verification
 ```
 
 ## What It Does
@@ -67,7 +67,7 @@ python tools/verify-and-sync-kajabi-to-openedx.py \
 ### 1. Import Missing Enrollments
 
 ```bash
-cd ops/migrations/kajabi/output/verification
+cd scripts/migrations/kajabi/output/verification
 ./import_missing_enrollments.sh
 ```
 
@@ -75,7 +75,7 @@ Or manually:
 ```bash
 source ops/tutor-env.sh
 tutor local run lms bash -c 'cat > /tmp/missing-enrollments.csv' \
-  < ops/migrations/kajabi/output/verification/fix_missing_enrollments.csv
+  < scripts/migrations/kajabi/output/verification/fix_missing_enrollments.csv
 tutor local run lms ./manage.py lms bulk_enroll \
   --csv /tmp/missing-enrollments.csv \
   --settings=tutor.production \
@@ -106,31 +106,31 @@ tutor local run lms ./manage.py lms generate_certificates \
    ```bash
    python tools/verify-and-sync-kajabi-to-openedx.py \
      --django-settings lms.envs.tutor.production \
-     --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-     --kajabi-users ops/migrations/kajabi/output/users.csv \
+     --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+     --kajabi-users scripts/migrations/kajabi/output/users.csv \
      --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-     --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-     --output-dir ops/migrations/kajabi/output/verification
+     --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+     --output-dir scripts/migrations/kajabi/output/verification
    ```
 
 2. **Review summary**:
    ```bash
-   cat ops/migrations/kajabi/output/verification/summary.txt
+   cat scripts/migrations/kajabi/output/verification/summary.txt
    ```
 
 3. **Check discrepancies**:
    ```bash
    # View enrollment discrepancies
-   head -20 ops/migrations/kajabi/output/verification/enrollment_comparison.csv
+   head -20 scripts/migrations/kajabi/output/verification/enrollment_comparison.csv
    
    # View certificate discrepancies
-   head -20 ops/migrations/kajabi/output/verification/certificate_comparison.csv
+   head -20 scripts/migrations/kajabi/output/verification/certificate_comparison.csv
    ```
 
 4. **Apply fixes**:
    ```bash
    # Import missing enrollments
-   ./ops/migrations/kajabi/output/verification/import_missing_enrollments.sh
+   ./scripts/migrations/kajabi/output/verification/import_missing_enrollments.sh
    
    # Generate certificates (per course)
    # See generate_missing_certificates.sh for instructions
@@ -171,7 +171,7 @@ with open('/tmp/enrollments.csv', 'w') as f:
         ])
 PYTHON
 
-tutor local run lms cat /tmp/enrollments.csv > ops/migrations/kajabi/output/verification/openedx_enrollments.csv
+tutor local run lms cat /tmp/enrollments.csv > scripts/migrations/kajabi/output/verification/openedx_enrollments.csv
 ```
 
 ### Certificate Generation Requires Completion
@@ -199,10 +199,10 @@ Run verification monthly to catch new discrepancies:
 # Add to cron or scheduled task
 python tools/verify-and-sync-kajabi-to-openedx.py \
   --django-settings lms.envs.tutor.production \
-  --kajabi-enrollments ops/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users ops/migrations/kajabi/output/users.csv \
+  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
+  --kajabi-users scripts/migrations/kajabi/output/users.csv \
   --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir ops/migrations/kajabi/output/verification/$(date +%Y%m%d)
+  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --output-dir scripts/migrations/kajabi/output/verification/$(date +%Y%m%d)
 ```
 

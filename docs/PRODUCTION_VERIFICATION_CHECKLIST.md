@@ -45,10 +45,10 @@ for site in Site.objects.all():
 "
 
 # Expected:
-#   staging.academy.mereka.io: staging.academy.mereka.io
+#   academyv2.mereka.io: academyv2.mereka.io
 #   academy.biji-biji.com: Biji-Biji Academy
 #     Organizations: ['BIJIBIJI']
-#   skillourfuture.staging.academy.mereka.io: Skill Our Future
+#   skillourfuture.academy.mereka.io: Skill Our Future
 #     Organizations: ['SKILLOURFUTURE']
 ```
 
@@ -83,10 +83,10 @@ for org_short_name in ['BIJIBIJI', 'SKILLOURFUTURE', 'MEREKA']:
 
 ```bash
 # Check if MFE authn is accessible
-curl -I https://apps.staging.academy.mereka.io/authn/login
+curl -I https://apps.academyv2.mereka.io/authn/login
 
 # Check MFE config API
-curl 'https://staging.academy.mereka.io/api/mfe_config/v1?mfe=authn' | jq .
+curl 'https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn' | jq .
 
 # Expected: Should return JSON with BASE_URL, LOGIN_URL, etc.
 ```
@@ -109,12 +109,12 @@ for org in Organization.objects.all():
 
 ```bash
 # Check if sites are accessible
-curl -I https://staging.academy.mereka.io
+curl -I https://academyv2.mereka.io
 curl -I https://academy.biji-biji.com
-curl -I https://skillourfuture.staging.academy.mereka.io
+curl -I https://skillourfuture.academy.mereka.io
 
 # Check site-specific content
-curl https://skillourfuture.staging.academy.mereka.io | grep -i "skill our future"
+curl https://skillourfuture.academy.mereka.io | grep -i "skill our future"
 curl https://academy.biji-biji.com | grep -i "biji-biji"
 ```
 
@@ -126,9 +126,9 @@ curl https://academy.biji-biji.com | grep -i "biji-biji"
 - ✅ Both are active
 
 ### Sites
-- ✅ staging.academy.mereka.io (main)
+- ✅ academyv2.mereka.io (main)
 - ✅ academy.biji-biji.com (Biji-Biji)
-- ✅ skillourfuture.staging.academy.mereka.io (Skill Our Future)
+- ✅ skillourfuture.academy.mereka.io (Skill Our Future)
 
 ### Users
 - ⚠️ **Need to verify:** Actual distribution

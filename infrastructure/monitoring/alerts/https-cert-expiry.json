@@ -8,7 +8,7 @@
     {
       "displayName": "Less than 14 days until certificate expiry",
       "conditionThreshold": {
-        "filter": "resource.type=\"uptime_url\" AND metric.type=\"monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires\" AND resource.label.host=\"staging.academy.mereka.io\"",
+        "filter": "resource.type=\"uptime_url\" AND metric.type=\"monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires\" AND resource.label.host=\"academyv2.mereka.io\"",
         "comparison": "COMPARISON_LT",
         "thresholdValue": 1209600,
         "duration": "0s",

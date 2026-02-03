@@ -116,7 +116,157 @@ Treat `tutor local quickstart -I` as the acceptance test for major changes—cap
 There is no upstream history yet, so follow Conventional Commits (`feat:`, `fix:`, `docs:`) to seed a consistent log; e.g., `fix: ensure tutor env script exits when .venv missing`. PRs should include a concise summary, the Tutor commands you ran, and links to any relevant docs you touched. Attach log excerpts or screenshots whenever behaviour changes, and request review before rolling out infrastructure-affecting adjustments.
 
 ## Security & Configuration Notes
-Never commit secrets—`tutor_env/config.yml` stays local and is recreated from `ops/tutor/config.example.yml`. Run `tutor local do backup-db` before upgrades and stash dumps outside the repo. When experimenting with new Tutor plugins or releases, isolate the changes under a feature branch and document toggles in `docs/` so operators can reproduce the configuration, and re-run the patch script immediately after each `tutor config save`.
+Never commit secrets—`tutor_env/config.yml` stays local and is recreated from `infrastructure/tutor/config.example.yml`. Run `tutor local do backup-db` before upgrades and stash dumps outside the repo. When experimenting with new Tutor plugins or releases, isolate the changes under a feature branch and document toggles in `docs/` so operators can reproduce the configuration, and re-run the patch script immediately after each `tutor config save`.
+
+## Secrets Management Architecture
+
+**Full Documentation**: `/home/gurpreet/projects/secrets-management/specs/`
+
+### Single Source of Truth: Infisical
+
+**All secrets are managed in Infisical** (secrets.mereka.io) with automated propagation to downstream systems.
+
+```
+Infisical (edit here) → GCP Secret Manager → K8s Secrets (ESO) → Pods
+                     ↓
+                     VPS Apps (infisical run)
+```
+
+### Key Principles
+
+1. **NEVER edit secrets in GCP, K8s, or .env files directly** - Infisical is the only place for edits
+2. **Runtime injection** - Secrets injected via environment variables, never stored in files
+3. **Automated sync** - GitHub Actions sync Infisical → GCP (on every push)
+4. **External Secrets Operator (ESO)** - Syncs GCP → K8s Secrets (1h refresh)
+
+### Folder Structure
+
+See `/home/gurpreet/projects/secrets-management/specs/02-infisical/FOLDER-STRUCTURE.md` for complete structure.
+
+```
+/ (root)
+├── /shared/                    # Shared across apps
+│   ├── /ai/                    # OPENAI_API_KEY, GEMINI_API_KEY, etc.
+│   ├── /oauth/                 # Google OAuth credentials
+│   ├── /infra/                 # Contabo, Sentry
+│   └── /integrations/          # Rube, Context7, Celery
+│
+├── /vps/                       # VPS standalone apps
+│   ├── /g-finances/
+│   ├── /nfc-cards/
+│   ├── /spoken/
+│   └── /legal-agent/
+│
+└── /k8s/                       # Kubernetes apps
+    ├── /authentik/
+    ├── /n8n/
+    ├── /listmonk/
+    ├── /temporal/
+    ├── /twentycrm/
+    ├── /reka-slackbot/
+    └── /mereka-backend/
+```
+
+### AWS SES Configuration
+
+**IAM User**: `ses-smtp-user.20251113-104139-g-test-singapore`
+**Region**: `ap-southeast-1` (Singapore)
+**Status**: Production mode (200,000 emails/day @ 100/sec)
+
+#### Credentials Locations
+
+| System | Secret Name | Location |
+|--------|-------------|----------|
+| **Infisical** | `AWS_ACCESS_KEY_ID`<br>`AWS_SECRET_ACCESS_KEY` | `/` (root, prod env) |
+| **GCP Secret Manager** | `aws-access-key-id`<br>`aws-secret-access-key`<br>`ses-smtp-username`<br>`ses-smtp-password` | `mereka-lms` project |
+| **K8s Secret** | `RELAY_USERNAME`<br>`RELAY_PASSWORD` | `ses-smtp-credentials` (mereka-lms namespace) |
+| **AWS CLI** | Configured | `~/.aws/credentials` |
+
+#### AWS CLI Usage
+
+```bash
+# Already configured - credentials auto-loaded from GCP Secret Manager
+source .venv/bin/activate
+
+# Check sending quota
+aws ses get-send-quota
+
+# List verified domains/emails (16 identities including mereka.io)
+aws ses list-identities
+
+# Send test email
+aws ses send-email \
+  --from noreply@mereka.io \
+  --to your@email.com \
+  --subject "Test Email" \
+  --text "Test message"
+
+# Get sending statistics
+aws ses get-send-statistics
+
+# Verify new email/domain
+aws ses verify-email-identity --email-address new@mereka.io
+```
+
+#### SMTP vs API Credentials
+
+- **SMTP Credentials** (`RELAY_USERNAME`/`RELAY_PASSWORD`): Used by Open edX email relay (port 587)
+- **API Credentials** (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`): Used by AWS CLI for SES management
+
+**IMPORTANT**: SMTP password ≠ AWS Secret Access Key. SMTP password is derived from the IAM credentials but is NOT reversible.
+
+### Retrieving Secrets
+
+#### From Infisical (Primary Source)
+
+```bash
+cd ~/projects/k8s/reka-slackbot  # Has .infisical.json
+
+infisical secrets get SECRET_NAME \
+  --domain https://secrets.mereka.io/api \
+  --env prod --path / --plain
+```
+
+#### From GCP Secret Manager
+
+```bash
+gcloud secrets versions access latest \
+  --secret=SECRET_NAME \
+  --project=mereka-lms
+```
+
+#### From Kubernetes
+
+```bash
+kubectl get secret SECRET_NAME -n NAMESPACE \
+  -o jsonpath='{.data.KEY}' | base64 -d
+```
+
+### Common Secrets
+
+| Secret | Infisical Path | Used By |
+|--------|----------------|---------|
+| `AWS_ACCESS_KEY_ID` | `/` | AWS CLI, SES API |
+| `AWS_SECRET_ACCESS_KEY` | `/` | AWS CLI, SES API |
+| `CLOUDFLARE_TOKEN_MEREKA_IO` | `/` (use `--recursive`) | DNS management |
+| `CLOUDFLARE_TOKEN_MEREKA_DEV` | `/` (NO recursive) | DNS management |
+| `B2_ACCOUNT_ID` | `/` | Backblaze backups |
+| `B2_APPLICATION_KEY` | `/` | Backblaze backups |
+| `OPENAI_API_KEY` | `/shared/ai` | AI features |
+
+### Security Best Practices
+
+1. **Never commit secrets** - `.env`, `config.yml`, credentials go in `.gitignore`
+2. **Use Infisical CLI in CI/CD** - `infisical run -- command` for runtime injection
+3. **Rotate credentials regularly** - Update in Infisical, sync propagates automatically
+4. **Least privilege** - Apps only access their scoped paths
+5. **Audit logs** - All Infisical access is logged
+
+### Related Documentation
+
+- Architecture: `/home/gurpreet/projects/secrets-management/specs/01-architecture/OVERVIEW.md`
+- Inventory: `/home/gurpreet/projects/secrets-management/specs/00-overview/INVENTORY.md`
+- Operations: `/home/gurpreet/projects/secrets-management/specs/07-operations/INCIDENT-RESPONSE.md`
 
 ## Local Development Priority
 
@@ -183,7 +333,7 @@ curl -I http://apps.localhost/authn/login
 
 **Redis host drift will hard-hang LMS/CMS.** If pods are healthy but requests time out/return 499, inspect the rendered configmap (`openedx-config-*.json`). The Redis host must be `redis:6379`; replace any baked-in IPs (e.g., `10.x.x.x:6379`) and restart lms/cms.
 
-**Login failures (CSRF 403 or 500 on login_session).** Ensure `CSRF_TRUSTED_ORIGINS` includes `https://staging.academy.mereka.io`, `https://studio.staging.academy.mereka.io`, `https://apps.staging.academy.mereka.io`, `https://academy.biji-biji.com`, and `https://skillourfuture.staging.academy.mereka.io`. Set `CSRF_COOKIE_DOMAIN=staging.academy.mereka.io` and `SESSION_COOKIE_DOMAIN=.staging.academy.mereka.io` in `openedx-config-*.json` and restart lms/cms. If a specific user still errors with JSONDecodeError on login, reset `user.profile.meta` to `{}` and reset the password.
+**Login failures (CSRF 403 or 500 on login_session).** Ensure `CSRF_TRUSTED_ORIGINS` includes `https://academyv2.mereka.io`, `https://studio.academyv2.mereka.io`, `https://apps.academyv2.mereka.io`, `https://academy.biji-biji.com`, and `https://skillourfuture.academy.mereka.io`. Set `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io` and `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io` in `openedx-config-*.json` and restart lms/cms. If a specific user still errors with JSONDecodeError on login, reset `user.profile.meta` to `{}` and reset the password.
 
 ---
 

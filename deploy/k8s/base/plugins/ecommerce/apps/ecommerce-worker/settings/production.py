@@ -1,4 +1,5 @@
 import logging.config
+import os
 
 from ecommerce_worker.configuration.logger import get_logger_config
 from ..base import *
@@ -8,7 +9,7 @@ from ..base import *
 
 BROKER_URL = "redis://redis:6379"
 
-JWT_SECRET_KEY = "UeCMQQglnc0O68rTJQezNNSt"
+JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY_ECOMMERCE", "")
 JWT_ISSUER = "http://localhost/oauth2"
 
 # Logging: get rid of local handler

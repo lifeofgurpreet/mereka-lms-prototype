@@ -128,7 +128,7 @@ sleep 3 && kubectl get endpoints caddy -n mereka-lms
 ### Issue 4: HTTPS Port Missing on Caddy
 
 **Symptoms:**
-- HTTP works but HTTPS (`https://staging.academy.mereka.io` or LB IP on 443) times out
+- HTTP works but HTTPS (`https://academyv2.mereka.io` or LB IP on 443) times out
 - `kubectl get svc caddy -n mereka-lms -o jsonpath='{.spec.ports[*].port}'` shows only `80`
 
 **Root Cause:**
@@ -144,7 +144,7 @@ kubectl patch svc caddy -n mereka-lms --type='json' \
 kubectl get svc caddy -n mereka-lms -o jsonpath='{.spec.ports[*].port}'
 
 # Wait 5-15 minutes for GCP LB propagation, then test:
-curl -Ik https://staging.academy.mereka.io
+curl -Ik https://academyv2.mereka.io
 ```
 
 **One-command repair (selectors + HTTPS):**
@@ -229,15 +229,15 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 - Classic LMS login page in use (Auth MFE not enabled).
 
 **Root Cause:**
-- Missing CSRF trusted origins/cookie domains for custom hostnames (`academy.biji-biji.com`, `skillourfuture.staging.academy.mereka.io`, etc.), or a user profile with corrupt `meta` JSON.
+- Missing CSRF trusted origins/cookie domains for custom hostnames (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`, etc.), or a user profile with corrupt `meta` JSON.
 
 **Quick Fix:**
 ```bash
 # Add trusted origins and cookie domains in rendered configmap
 kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o yaml \
-  | sed -E 's#"CSRF_TRUSTED_ORIGINS": \\[.*\\]#"CSRF_TRUSTED_ORIGINS": ["https://staging.academy.mereka.io","https://studio.staging.academy.mereka.io","https://apps.staging.academy.mereka.io","https://academy.biji-biji.com","https://skillourfuture.staging.academy.mereka.io"]#' \
-  | sed 's/"CSRF_COOKIE_DOMAIN": ""/"CSRF_COOKIE_DOMAIN": "staging.academy.mereka.io"/' \
-  | sed 's/"SESSION_COOKIE_DOMAIN": ""/"SESSION_COOKIE_DOMAIN": ".staging.academy.mereka.io"/' \
+  | sed -E 's#"CSRF_TRUSTED_ORIGINS": \\[.*\\]#"CSRF_TRUSTED_ORIGINS": ["https://academyv2.mereka.io","https://studio.academyv2.mereka.io","https://apps.academyv2.mereka.io","https://academy.biji-biji.com","https://skillourfuture.academy.mereka.io"]#' \
+  | sed 's/"CSRF_COOKIE_DOMAIN": ""/"CSRF_COOKIE_DOMAIN": "academyv2.mereka.io"/' \
+  | sed 's/"SESSION_COOKIE_DOMAIN": ""/"SESSION_COOKIE_DOMAIN": ".academyv2.mereka.io"/' \
   | kubectl apply -f -
 kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
@@ -265,8 +265,8 @@ kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o jsonpath='{.data.lms\\
 kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o jsonpath='{.data.cms\\.env\\.json}' > /tmp/cms.json
 
 # Edit both to include:
-#   LOGIN_MICROFRONTEND_URL: https://apps.staging.academy.mereka.io/authn
-#   LOGISTRATION_MICROFRONTEND_URL: https://apps.staging.academy.mereka.io/authn
+#   LOGIN_MICROFRONTEND_URL: https://apps.academyv2.mereka.io/authn
+#   LOGISTRATION_MICROFRONTEND_URL: https://apps.academyv2.mereka.io/authn
 # Ensure CSRF trusted origins include staging/studio/apps/academy.biji-biji.com/skillourfuture.*
 
 # Patch the configmap (example using JSON strings)
@@ -327,7 +327,7 @@ kubectl run curl-test --rm -i --image=curlimages/curl --restart=Never -n mereka-
 kubectl exec -n mereka-lms deploy/caddy -- wget -q -O- --timeout=5 http://nginx:80
 
 # From nginx pod to LMS
-kubectl exec -n mereka-lms deploy/nginx -- curl -H "Host: staging.academy.mereka.io" http://lms:8000
+kubectl exec -n mereka-lms deploy/nginx -- curl -H "Host: academyv2.mereka.io" http://lms:8000
 ```
 
 ### Check LoadBalancer
@@ -336,7 +336,7 @@ kubectl exec -n mereka-lms deploy/nginx -- curl -H "Host: staging.academy.mereka
 kubectl get svc caddy -n mereka-lms -o yaml | grep -A 5 "loadBalancer"
 
 # Test external IP directly
-curl -k -I https://34.126.186.80 -H "Host: staging.academy.mereka.io"
+curl -k -I https://34.126.186.80 -H "Host: academyv2.mereka.io"
 
 # Check firewall rules
 gcloud compute firewall-rules list --filter="allowed.ports:443"

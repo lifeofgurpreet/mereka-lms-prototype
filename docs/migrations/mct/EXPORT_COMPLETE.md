@@ -212,7 +212,7 @@ var/migrations/mct/
 ## 🚨 Data Quality Issues Identified
 
 ### Issue 1: Fake Enrollment Data in transform_data.py
-**File**: `ops/migrations/mct/scripts/transform_data.py` (lines 134-177)
+**File**: `scripts/migrations/mct/scripts/transform_data.py` (lines 134-177)
 **Problem**: Script generates fake enrollments via keyword matching
 **Solution**: Use real data from `enrollments_categories.csv`
 

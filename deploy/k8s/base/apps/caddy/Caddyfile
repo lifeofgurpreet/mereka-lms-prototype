@@ -35,12 +35,13 @@
 
 }
 
-# LMS - localhost and production domains
+# LMS - localhost and production/dev domains
 # - localhost: local development
-# - staging.academy.mereka.io: main staging environment
-# - skillourfuture.staging.academy.mereka.io: MCT/Skill Our Future staging
-# - academy.biji-biji.com: Biji-Biji Academy production
-localhost{$default_site_port}, preview.localhost{$default_site_port}, staging.academy.mereka.io{$default_site_port}, skillourfuture.staging.academy.mereka.io{$default_site_port}, academy.biji-biji.com{$default_site_port} {
+# - academyv2.mereka.io: main GKE environment
+# - academyv2.mereka.dev: VPS kind cluster
+# - skillourfuture.academy.mereka.io: Skill Our Future microsite
+# - academy.biji-biji.com: Biji-Biji Academy microsite
+localhost{$default_site_port}, preview.localhost{$default_site_port}, academyv2.mereka.io{$default_site_port}, academyv2.mereka.dev{$default_site_port}, preview.academyv2.mereka.io{$default_site_port}, preview.academyv2.mereka.dev{$default_site_port}, skillourfuture.academy.mereka.io{$default_site_port}, academy.biji-biji.com{$default_site_port} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -66,9 +67,10 @@ localhost{$default_site_port}, preview.localhost{$default_site_port}, staging.ac
 
 # Studio/CMS - shared across all LMS sites per environment
 # - studio.localhost: local development (serves all local LMS sites)
-# - studio.staging.academy.mereka.io: staging Studio (serves staging + skillourfuture)
-# - studio.academy.biji-biji.com: production Studio
-studio.localhost{$default_site_port}, studio.staging.academy.mereka.io{$default_site_port}, studio.academy.biji-biji.com{$default_site_port} {
+# - studio.academyv2.mereka.io: GKE Studio
+# - studio.academyv2.mereka.dev: VPS kind Studio
+# - studio.academy.biji-biji.com: Biji-Biji Studio
+studio.localhost{$default_site_port}, studio.academyv2.mereka.io{$default_site_port}, studio.academyv2.mereka.dev{$default_site_port}, studio.academy.biji-biji.com{$default_site_port} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -86,7 +88,7 @@ studio.localhost{$default_site_port}, studio.staging.academy.mereka.io{$default_
 }
 
 # Discovery Service (Course Catalog API)
-discovery.localhost{$default_site_port}, discovery.staging.academy.mereka.io{$default_site_port} {
+discovery.localhost{$default_site_port}, discovery.academyv2.mereka.io{$default_site_port}, discovery.academyv2.mereka.dev{$default_site_port} {
     request_body {
         max_size 10MB
     }
@@ -94,29 +96,30 @@ discovery.localhost{$default_site_port}, discovery.staging.academy.mereka.io{$de
     import proxy "discovery:8000"
 }
 # E-commerce Service
-ecommerce.localhost{$default_site_port}, ecommerce.staging.academy.mereka.io{$default_site_port} {
+ecommerce.localhost{$default_site_port}, ecommerce.academyv2.mereka.io{$default_site_port}, ecommerce.academyv2.mereka.dev{$default_site_port} {
     request_body {
         max_size 10MB
     }
     import proxy "ecommerce:8000"
 }
-# MFE (Micro-Frontends) - localhost and production
+# MFE (Micro-Frontends) - localhost and production/dev
 # - apps.localhost: local development
-# - apps.staging.academy.mereka.io: main staging MFEs
-# - apps.academy.biji-biji.com: Biji-Biji Academy production MFEs
-apps.localhost{$default_site_port}, apps.staging.academy.mereka.io{$default_site_port}, apps.academy.biji-biji.com{$default_site_port} {
+# - apps.academyv2.mereka.io: main GKE MFEs
+# - apps.academyv2.mereka.dev: VPS kind MFEs
+# - apps.academy.biji-biji.com: Biji-Biji Academy MFEs
+apps.localhost{$default_site_port}, apps.academyv2.mereka.io{$default_site_port}, apps.academyv2.mereka.dev{$default_site_port}, apps.academy.biji-biji.com{$default_site_port} {
     request_body {
         max_size 2MB
     }
     import proxy "mfe:8002"
 }
 # Notes API
-notes.localhost{$default_site_port}, notes.staging.academy.mereka.io{$default_site_port} {
+notes.localhost{$default_site_port}, notes.academyv2.mereka.io{$default_site_port}, notes.academyv2.mereka.dev{$default_site_port} {
     import proxy "notes:8000"
 }
 
 # Credentials Service (Certificate issuance)
-credentials.staging.academy.mereka.io{$default_site_port} {
+credentials.academyv2.mereka.io{$default_site_port}, credentials.academyv2.mereka.dev{$default_site_port} {
     import proxy "credentials:8000"
 }
 

@@ -9,9 +9,9 @@ _Audience: Platform Eng • Owner: Migration Squad • Last verified: 2025-10-05
 ## Current State
 
 - **Data on staging (GKE):** 84,379 users, 137,464 enrollments, 109 courses (Mongo `modulestore.active_versions`) after latest run
-- **All course tarballs imported** via `ops/migrations/kajabi/scripts/import_courses.py --backend k8s --k8s-namespace mereka-lms`
-- **Batch tooling:** `ops/migrations/kajabi/scripts/run_batches.py` + `openedx_bulk_import.py` handle offsets, retries, and log each batch to `ops/migrations/kajabi/logs/`
-- **Webhook receiver:** FastAPI app under `ops/migrations/kajabi/webhook_app/` (with Dockerfile + README) captures real-time Kajabi events, verifies HMAC, and writes NDJSON outbox files
+- **All course tarballs imported** via `scripts/migrations/kajabi/scripts/import_courses.py --backend k8s --k8s-namespace mereka-lms`
+- **Batch tooling:** `scripts/migrations/kajabi/scripts/run_batches.py` + `openedx_bulk_import.py` handle offsets, retries, and log each batch to `scripts/migrations/kajabi/logs/`
+- **Webhook receiver:** FastAPI app under `scripts/migrations/kajabi/webhook_app/` (with Dockerfile + README) captures real-time Kajabi events, verifies HMAC, and writes NDJSON outbox files
 - **Documentation:** `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` documents the full pipeline (exports, batched imports, course imports, validation, and webhook wiring)
 
 ## Handover Checklist
@@ -81,39 +81,39 @@ node tools/kajabi-course-structure.mjs \
 **Transform raw exports to Open edX format:**
 ```bash
 # Step 1: Transform NDJSON → CSVs
-python ops/migrations/kajabi/scripts/transform_data.py \
+python scripts/migrations/kajabi/scripts/transform_data.py \
   --exports-dir exports/kajabi \
   --structure-dir exports/kajabi/structure \
-  --output-dir ops/migrations/kajabi/output
+  --output-dir scripts/migrations/kajabi/output
 
 # Step 2: Build course packages (OLX tarballs)
-python ops/migrations/kajabi/scripts/build_course_packages.py \
-  --course-structure ops/migrations/kajabi/output/course_structure.json \
-  --courses-csv ops/migrations/kajabi/output/courses.csv \
-  --output-dir ops/migrations/kajabi/output/course_packages \
+python scripts/migrations/kajabi/scripts/build_course_packages.py \
+  --course-structure scripts/migrations/kajabi/output/course_structure.json \
+  --courses-csv scripts/migrations/kajabi/output/courses.csv \
+  --output-dir scripts/migrations/kajabi/output/course_packages \
   --org MEREKA \
   --course-prefix MEKA- \
   --run-prefix RUN- \
   --language en
 
 # Step 3: Prepare Open edX import CSVs
-python ops/migrations/kajabi/scripts/prepare_openedx_imports.py \
-  --output-root ops/migrations/kajabi/output \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv
+python scripts/migrations/kajabi/scripts/prepare_openedx_imports.py \
+  --output-root scripts/migrations/kajabi/output \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
 
 **Outputs created:**
-- `ops/migrations/kajabi/output/openedx/users_import.csv` - Ready for bulk user import
-- `ops/migrations/kajabi/output/openedx/enrollments_import.csv` - Ready for bulk enrollment import
-- `ops/migrations/kajabi/output/course_packages/*.tar.gz` - Course tarballs
-- `ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv` - Course ID mapping
+- `scripts/migrations/kajabi/output/openedx/users_import.csv` - Ready for bulk user import
+- `scripts/migrations/kajabi/output/openedx/enrollments_import.csv` - Ready for bulk enrollment import
+- `scripts/migrations/kajabi/output/course_packages/*.tar.gz` - Course tarballs
+- `scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv` - Course ID mapping
 
 ### 4. Users & Enrollments Imports
 
 **Users import (batched, resumable):**
 ```bash
-python3 ops/migrations/kajabi/scripts/run_batches.py users \
-  --csv ops/migrations/kajabi/output/openedx/users_import.csv \
+python3 scripts/migrations/kajabi/scripts/run_batches.py users \
+  --csv scripts/migrations/kajabi/output/openedx/users_import.csv \
   --batch-size 2000 \
   --remote-csv /tmp/kajabi-users.csv \
   --namespace mereka-lms
@@ -121,14 +121,14 @@ python3 ops/migrations/kajabi/scripts/run_batches.py users \
 # The script:
 # - Uploads openedx_bulk_import.py + CSV to the LMS pod
 # - Maintains /tmp/users.offset for resume capability
-# - Logs each batch to ops/migrations/kajabi/logs/users_offset_<n>.log
+# - Logs each batch to scripts/migrations/kajabi/logs/users_offset_<n>.log
 # - Retries transient failures (3 attempts, 10s backoff)
 ```
 
 **Enrollments import:**
 ```bash
-python3 ops/migrations/kajabi/scripts/run_batches.py enrollments \
-  --csv ops/migrations/kajabi/output/openedx/enrollments_import.csv \
+python3 scripts/migrations/kajabi/scripts/run_batches.py enrollments \
+  --csv scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --batch-size 2000 \
   --remote-csv /tmp/kajabi-enrollments.csv \
   --namespace mereka-lms
@@ -140,8 +140,8 @@ python3 ops/migrations/kajabi/scripts/run_batches.py enrollments \
 ```bash
 # Simply re-run the same command - it reads the offset file and continues
 # Use --skip-upload to avoid re-uploading files if they're already in the pod
-python3 ops/migrations/kajabi/scripts/run_batches.py users \
-  --csv ops/migrations/kajabi/output/openedx/users_import.csv \
+python3 scripts/migrations/kajabi/scripts/run_batches.py users \
+  --csv scripts/migrations/kajabi/output/openedx/users_import.csv \
   --batch-size 2000 \
   --remote-csv /tmp/kajabi-users.csv \
   --namespace mereka-lms \
@@ -151,19 +151,19 @@ python3 ops/migrations/kajabi/scripts/run_batches.py users \
 **Review logs:**
 ```bash
 # Check latest batch logs
-ls -lt ops/migrations/kajabi/logs/ | head -10
+ls -lt scripts/migrations/kajabi/logs/ | head -10
 
 # Inspect a specific batch
-tail -100 ops/migrations/kajabi/logs/users_offset_85214.log
+tail -100 scripts/migrations/kajabi/logs/users_offset_85214.log
 ```
 
 ### 5. Course Imports
 
 **Import all courses:**
 ```bash
-python3 ops/migrations/kajabi/scripts/import_courses.py \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --packages-root ops/migrations/kajabi/output/course_packages \
+python3 scripts/migrations/kajabi/scripts/import_courses.py \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --packages-root scripts/migrations/kajabi/output/course_packages \
   --backend k8s \
   --k8s-namespace mereka-lms
 
@@ -177,9 +177,9 @@ python3 ops/migrations/kajabi/scripts/import_courses.py \
 
 **Dry run (test first):**
 ```bash
-python3 ops/migrations/kajabi/scripts/import_courses.py \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --packages-root ops/migrations/kajabi/output/course_packages \
+python3 scripts/migrations/kajabi/scripts/import_courses.py \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --packages-root scripts/migrations/kajabi/output/course_packages \
   --backend k8s \
   --k8s-namespace mereka-lms \
   --dry-run \
@@ -188,9 +188,9 @@ python3 ops/migrations/kajabi/scripts/import_courses.py \
 
 **Import specific courses:**
 ```bash
-python3 ops/migrations/kajabi/scripts/import_courses.py \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --packages-root ops/migrations/kajabi/output/course_packages \
+python3 scripts/migrations/kajabi/scripts/import_courses.py \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --packages-root scripts/migrations/kajabi/output/course_packages \
   --backend k8s \
   --k8s-namespace mereka-lms \
   --only <kajabi-course-id-1> <kajabi-course-id-2>
@@ -198,12 +198,12 @@ python3 ops/migrations/kajabi/scripts/import_courses.py \
 
 **Capture full import log:**
 ```bash
-python3 ops/migrations/kajabi/scripts/import_courses.py \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --packages-root ops/migrations/kajabi/output/course_packages \
+python3 scripts/migrations/kajabi/scripts/import_courses.py \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --packages-root scripts/migrations/kajabi/output/course_packages \
   --backend k8s \
   --k8s-namespace mereka-lms \
-  2>&1 | tee ops/migrations/kajabi/logs/course_import_$(date +%Y%m%d_%H%M%S).log
+  2>&1 | tee scripts/migrations/kajabi/logs/course_import_$(date +%Y%m%d_%H%M%S).log
 ```
 
 ### 6. Validation
@@ -250,14 +250,14 @@ kubectl exec -n mereka-lms mongodb-0 -- \
 ```
 
 **UI spot-check:**
-- LMS: `https://staging.academy.mereka.io` - Verify courses appear in catalog
-- Studio: `https://studio.staging.academy.mereka.io` - Verify courses in dashboard
+- LMS: `https://academyv2.mereka.io` - Verify courses appear in catalog
+- Studio: `https://studio.academyv2.mereka.io` - Verify courses in dashboard
 
 ### 7. Webhook Deployment
 
 **Build and push Docker image:**
 ```bash
-cd ops/migrations/kajabi/webhook_app
+cd scripts/migrations/kajabi/webhook_app
 
 # Build
 docker build -t gcr.io/<project-id>/kajabi-webhook:latest .
@@ -309,27 +309,27 @@ curl https://<service-url>/healthz
 
 **Primary docs:**
 - `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` - Full pipeline documentation, API coverage, webhook details
-- `ops/migrations/kajabi/README.md` - Transformation pipeline overview
-- `ops/migrations/kajabi/webhook_app/README.md` - Webhook receiver setup
+- `scripts/migrations/kajabi/README.md` - Transformation pipeline overview
+- `scripts/migrations/kajabi/webhook_app/README.md` - Webhook receiver setup
 
 **Script locations:**
 - `tools/kajabi-export.mjs` - Main exporter (Node.js)
 - `tools/kajabi-course-structure.mjs` - Course structure helper
-- `ops/migrations/kajabi/scripts/transform_data.py` - NDJSON → CSV transformer
-- `ops/migrations/kajabi/scripts/build_course_packages.py` - Course tarball builder
-- `ops/migrations/kajabi/scripts/prepare_openedx_imports.py` - Open edX CSV generator
-- `ops/migrations/kajabi/scripts/run_batches.py` - Batch runner (users/enrollments)
-- `ops/migrations/kajabi/scripts/openedx_bulk_import.py` - Django import helper (runs in pod)
-- `ops/migrations/kajabi/scripts/import_courses.py` - Course import orchestrator
+- `scripts/migrations/kajabi/scripts/transform_data.py` - NDJSON → CSV transformer
+- `scripts/migrations/kajabi/scripts/build_course_packages.py` - Course tarball builder
+- `scripts/migrations/kajabi/scripts/prepare_openedx_imports.py` - Open edX CSV generator
+- `scripts/migrations/kajabi/scripts/run_batches.py` - Batch runner (users/enrollments)
+- `scripts/migrations/kajabi/scripts/openedx_bulk_import.py` - Django import helper (runs in pod)
+- `scripts/migrations/kajabi/scripts/import_courses.py` - Course import orchestrator
 
 **Log locations:**
-- `ops/migrations/kajabi/logs/` - Batch logs (`users_offset_*.log`, `enrollments_offset_*.log`)
-- `ops/migrations/kajabi/logs/course_import.log` - Course import history
+- `scripts/migrations/kajabi/logs/` - Batch logs (`users_offset_*.log`, `enrollments_offset_*.log`)
+- `scripts/migrations/kajabi/logs/course_import.log` - Course import history
 
 **Output locations:**
 - `exports/kajabi/` - Raw NDJSON exports (gitignored)
-- `ops/migrations/kajabi/output/` - Transformed CSVs and course packages
-- `ops/migrations/kajabi/webhook_app/outbox/` - Webhook event NDJSON files
+- `scripts/migrations/kajabi/output/` - Transformed CSVs and course packages
+- `scripts/migrations/kajabi/webhook_app/outbox/` - Webhook event NDJSON files
 
 ### 9. Open Questions / To-Do
 
@@ -377,35 +377,35 @@ curl https://<service-url>/healthz
 KAJABI_CLIENT_ID=... KAJABI_CLIENT_SECRET=... node tools/kajabi-export.mjs
 
 # 2. Transform
-python ops/migrations/kajabi/scripts/transform_data.py \
-  --exports-dir exports/kajabi --output-dir ops/migrations/kajabi/output
-python ops/migrations/kajabi/scripts/build_course_packages.py \
-  --course-structure ops/migrations/kajabi/output/course_structure.json \
-  --courses-csv ops/migrations/kajabi/output/courses.csv \
-  --output-dir ops/migrations/kajabi/output/course_packages \
+python scripts/migrations/kajabi/scripts/transform_data.py \
+  --exports-dir exports/kajabi --output-dir scripts/migrations/kajabi/output
+python scripts/migrations/kajabi/scripts/build_course_packages.py \
+  --course-structure scripts/migrations/kajabi/output/course_structure.json \
+  --courses-csv scripts/migrations/kajabi/output/courses.csv \
+  --output-dir scripts/migrations/kajabi/output/course_packages \
   --org MEREKA --course-prefix MEKA- --run-prefix RUN-
-python ops/migrations/kajabi/scripts/prepare_openedx_imports.py \
-  --output-root ops/migrations/kajabi/output \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv
+python scripts/migrations/kajabi/scripts/prepare_openedx_imports.py \
+  --output-root scripts/migrations/kajabi/output \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 
 # 3. Import users
-python3 ops/migrations/kajabi/scripts/run_batches.py users \
-  --csv ops/migrations/kajabi/output/openedx/users_import.csv \
+python3 scripts/migrations/kajabi/scripts/run_batches.py users \
+  --csv scripts/migrations/kajabi/output/openedx/users_import.csv \
   --batch-size 2000 --namespace mereka-lms
 
 # 4. Import enrollments
-python3 ops/migrations/kajabi/scripts/run_batches.py enrollments \
-  --csv ops/migrations/kajabi/output/openedx/enrollments_import.csv \
+python3 scripts/migrations/kajabi/scripts/run_batches.py enrollments \
+  --csv scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --batch-size 2000 --namespace mereka-lms
 
 # 5. Import courses
-python3 ops/migrations/kajabi/scripts/import_courses.py \
-  --manifest ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --packages-root ops/migrations/kajabi/output/course_packages \
+python3 scripts/migrations/kajabi/scripts/import_courses.py \
+  --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
+  --packages-root scripts/migrations/kajabi/output/course_packages \
   --backend k8s --k8s-namespace mereka-lms
 ```
 
 ---
 
-**All relevant code/config lives under `ops/migrations/kajabi/` and `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`.**  
+**All relevant code/config lives under `scripts/migrations/kajabi/` and `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`.**  
 **With this playbook, the next person can reproduce the migration end-to-end or push it into production without retracing the last few days of trial-and-error.**

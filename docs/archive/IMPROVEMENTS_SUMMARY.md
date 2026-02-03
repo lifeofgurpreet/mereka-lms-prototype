@@ -86,7 +86,7 @@ All systems are now **fully operational** with comprehensive documentation, tool
 ## 🛠️ Tools Created
 
 ### Testing & Verification
-1. **`tools/check-parity.sh`** (4.3KB)
+1. **`scripts/qa/check-parity.sh`** (4.3KB)
    - Automated parity checking
    - Service health verification
    - Configuration validation
@@ -149,7 +149,7 @@ All systems are now **fully operational** with comprehensive documentation, tool
 
 ### Recommended Actions
 1. **Weekly:** Run `./tools/comprehensive-test.sh`
-2. **After config changes:** Run `./tools/check-parity.sh`
+2. **After config changes:** Run `./scripts/qa/check-parity.sh`
 3. **Before deploying:** Verify parity with production
 4. **New machine setup:** Follow `docs/AGENT_SETUP_CHECKLIST.md`
 

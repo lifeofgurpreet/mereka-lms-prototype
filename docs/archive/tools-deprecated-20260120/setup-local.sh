@@ -57,7 +57,7 @@ export TUTOR_ROOT="$REPO_ROOT/tutor_env"
 if [ ! -f "tutor_env/config.yml" ]; then
     echo -e "${YELLOW}⚠️  Config file not found, creating from example...${NC}"
     mkdir -p tutor_env
-    cp ops/tutor/config.example.yml tutor_env/config.yml
+    cp infrastructure/tutor/config.example.yml tutor_env/config.yml
 fi
 
 # Ensure local Docker services are configured
@@ -82,7 +82,7 @@ echo ""
 
 # Step 4: Apply Patches
 echo -e "${BLUE}Step 4: Applying Tutor patches...${NC}"
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 echo -e "${GREEN}✅ Patches applied${NC}"
 echo ""
 
@@ -108,7 +108,7 @@ echo -e "${BLUE}Step 6: Initializing database...${NC}"
 if [ ! -d "tutor_env/data/mysql" ]; then
     echo -e "${YELLOW}⚠️  Database not initialized. Running init (this takes 5-10 minutes)...${NC}"
     tutor local launch -I --skip-build
-    ./ops/tutor/apply-patches.sh
+    ./infrastructure/tutor/apply-patches.sh
 else
     echo -e "${GREEN}✅ Database exists${NC}"
 fi
@@ -170,14 +170,14 @@ if kubectl cluster-info &> /dev/null; then
     read -t 10 -n 1 SYNC_PROD || SYNC_PROD="n"
     echo ""
     if [[ "$SYNC_PROD" =~ ^[Yy]$ ]]; then
-        ./tools/sync-from-production.sh || echo -e "${YELLOW}⚠️  Sync failed, continuing...${NC}"
+        ./scripts/shared/sync-from-production.sh || echo -e "${YELLOW}⚠️  Sync failed, continuing...${NC}"
     else
         echo -e "${YELLOW}⏭  Skipping production sync${NC}"
-        echo "  Run manually: ./tools/sync-from-production.sh"
+        echo "  Run manually: ./scripts/shared/sync-from-production.sh"
     fi
 else
     echo -e "${YELLOW}⏭  Not connected to production cluster${NC}"
-    echo "  To sync later: ./tools/sync-from-production.sh"
+    echo "  To sync later: ./scripts/shared/sync-from-production.sh"
 fi
 echo ""
 

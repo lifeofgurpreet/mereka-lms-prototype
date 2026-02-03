@@ -1,31 +1,36 @@
-# Tools Directory (Legacy - Migration Complete)
+# Tools Directory (Deprecated)
 
-⚠️ **This directory has been migrated to `scripts/`.**
+**All scripts have been moved to `scripts/` subdirectories.**
 
-All scripts have been reorganized into domain-specific directories under `scripts/`:
+This directory is deprecated. The scripts that were here have been relocated as follows:
 
-- Infrastructure scripts → `scripts/infra/`
-- Migration scripts → `scripts/migrations/`
-- Branding scripts → `scripts/branding/`
-- Analytics scripts → `scripts/analytics/`
-- QA scripts → `scripts/qa/`
-- Shared utilities → `scripts/shared/`
+## Migration Mapping
 
-## Update Your References
+| Old Location | New Location |
+|--------------|--------------|
+| `scripts/shared/setup-local.sh` | `scripts/shared/setup-local.sh` |
+| `scripts/shared/sync-from-production.sh` | `scripts/shared/sync-from-production.sh` |
+| `scripts/infra/deploy-aspects-k8s.sh` | `scripts/infra/deploy-aspects-k8s.sh` |
+| `scripts/infra/sync-mongodb-from-production.sh` | `scripts/infra/sync-mongodb-from-production.sh` |
+| `scripts/infra/increase-gke-quota.sh` | `scripts/infra/increase-gke-quota.sh` |
+| `scripts/infra/optimize-dev-costs.sh` | `scripts/infra/optimize-dev-costs.sh` |
+| `scripts/infra/check-cluster-status.sh` | `scripts/infra/check-cluster-status.sh` |
+| `scripts/infra/additional-cost-optimizations.sh` | `scripts/infra/additional-cost-optimizations.sh` |
+| `scripts/qa/analyze-local-data.sh` | `scripts/qa/analyze-local-data.sh` |
+| `scripts/qa/check-parity.sh` | `scripts/qa/check-parity.sh` |
+| `scripts/analytics/openedx-analytics.py` | `scripts/analytics/openedx-analytics.py` |
+| `scripts/migrations/bootstrap-courses-from-enrollments.sh` | `scripts/migrations/bootstrap-courses-from-enrollments.sh` |
+| `scripts/migrations/import-production-courses.sh` | `scripts/migrations/import-production-courses.sh` |
 
-**Old (deprecated):**
-```bash
-./tools/backup-db.sh
-./tools/kajabi-export.mjs
-./tools/sync-brand-assets.sh
-```
+## Scripts Directory Structure
 
-**New:**
-```bash
-./scripts/infra/backup-db.sh
-./scripts/migrations/kajabi/kajabi-export.mjs
-./scripts/branding/sync-brand-assets.sh
-```
+All scripts are now organized under `scripts/`:
+
+- `scripts/infra/` - Infrastructure and deployment scripts
+- `scripts/migrations/` - Data migration scripts
+- `scripts/branding/` - Theme and branding scripts
+- `scripts/analytics/` - Analytics and reporting scripts
+- `scripts/qa/` - Quality assurance and testing scripts
+- `scripts/shared/` - Shared utilities
 
 See `scripts/README.md` for the complete structure and usage guide.
-

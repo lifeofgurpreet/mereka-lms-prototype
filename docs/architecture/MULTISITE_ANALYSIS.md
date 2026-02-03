@@ -30,7 +30,7 @@ _Critical: Local vs Production Comparison • Last updated: 2025-11-12_
 **Sites:**
 - ❌ **Only default sites** (example.com, localhost)
 - ❌ Missing: `academy.biji-biji.com`
-- ❌ Missing: `skillourfuture.staging.academy.mereka.io`
+- ❌ Missing: `skillourfuture.academy.mereka.io`
 - ❌ Missing: Main Mereka site configuration
 
 **Expected Organizations:**
@@ -65,7 +65,7 @@ All courses appear to be from **MEREKA** organization:
    - Biji-Biji: Unknown count?
 
 3. **Does production have MFE authn URL?**
-   - Check: `https://apps.staging.academy.mereka.io/authn/login`
+   - Check: `https://apps.academyv2.mereka.io/authn/login`
    - Check: MFE config API response
 
 4. **Are courses organized by organization?**
@@ -118,8 +118,8 @@ for site in Site.objects.all():
 
 **Check production MFE:**
 ```bash
-curl https://apps.staging.academy.mereka.io/authn/login
-curl 'https://staging.academy.mereka.io/api/mfe_config/v1?mfe=authn'
+curl https://apps.academyv2.mereka.io/authn/login
+curl 'https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn'
 ```
 
 ### 4. Sync Production Data (If Needed)
@@ -134,7 +134,7 @@ curl 'https://staging.academy.mereka.io/api/mfe_config/v1?mfe=authn'
 
 ### Local Setup
 - [ ] Organizations created (BIJIBIJI, SKILLOURFUTURE)
-- [ ] Sites configured (academy.biji-biji.com, skillourfuture.staging...)
+- [ ] Sites configured (academy.biji-biji.com, skillourfuture.academy...)
 - [ ] Course overviews indexed
 - [ ] Multi-site routing works
 - [ ] Course filters work per site
@@ -165,4 +165,3 @@ curl 'https://staging.academy.mereka.io/api/mfe_config/v1?mfe=authn'
 **Status:** ⚠️ **MULTI-SITE NOT CONFIGURED LOCALLY**  
 **Action Required:** Run `python tools/multisite_bootstrap.py --apply`  
 **Production Check:** Verify production has proper multi-site setup
-

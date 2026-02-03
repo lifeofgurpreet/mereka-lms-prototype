@@ -34,7 +34,7 @@ tutor config save \
   --set REDIS_PORT=6379
 
 # 6. Apply patches (fixes MySQL, MFE configs)
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 
 # 7. Build images (first time only, takes 30-45 min total)
 tutor images build openedx
@@ -42,7 +42,7 @@ tutor images build mfe
 
 # 8. Launch services
 tutor local launch -I --skip-build
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 
 # 9. Create admin user
@@ -86,7 +86,7 @@ tutor local stop
 
 # After config changes
 tutor config save --set KEY=value
-./ops/tutor/apply-patches.sh  # CRITICAL!
+./infrastructure/tutor/apply-patches.sh  # CRITICAL!
 tutor local restart
 ```
 
@@ -110,7 +110,7 @@ tutor local restart mfe
 **Config shows cloud IPs**
 ```bash
 tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 

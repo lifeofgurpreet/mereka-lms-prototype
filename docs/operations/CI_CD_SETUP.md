@@ -106,7 +106,7 @@ kubectl set image deployment/mfe \
 ### Staging
 
 - **Protection:** None (auto-deploys)
-- **URL:** https://staging.academy.mereka.io
+- **URL:** https://academyv2.mereka.io
 - **Cluster:** mereka-lms (GKE Autopilot)
 
 ### Production (Future)

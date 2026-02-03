@@ -9,7 +9,7 @@ This directory contains K8s manifests for deploying the Aspects analytics stack:
 
 1. MySQL database with a `superset` database and user
 2. Redis for Superset caching and Celery
-3. DNS configured for `analytics.staging.academy.mereka.io` (optional)
+3. DNS configured for `analytics.academyv2.mereka.io` (optional)
 
 ## Quick Deploy
 
@@ -52,9 +52,9 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 ```
 
 ### Via Ingress (Public Access)
-Requires DNS record for `analytics.staging.academy.mereka.io` pointing to `34.177.83.168`.
+Requires DNS record for `analytics.academyv2.mereka.io` pointing to `34.177.83.168`.
 
-URL: https://analytics.staging.academy.mereka.io
+URL: https://analytics.academyv2.mereka.io
 
 ## Connect ClickHouse to Superset
 

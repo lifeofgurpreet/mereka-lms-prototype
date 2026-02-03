@@ -1,34 +1,9 @@
 [
   {
-    "comment": "=== biji-biji.com DNS Records (configure in biji-biji.com zone) ===",
-    "description": "Biji-Biji LMS - points to GKE ingress",
-    "type": "A",
-    "name": "academy.biji-biji.com",
-    "content": "34.177.83.168",
-    "ttl": 1,
-    "proxied": false
-  },
-  {
-    "description": "Biji-Biji Studio/CMS",
-    "type": "CNAME",
-    "name": "studio.academy.biji-biji.com",
-    "content": "academy.biji-biji.com",
-    "ttl": 1,
-    "proxied": false
-  },
-  {
-    "description": "Biji-Biji MFEs (micro-frontends)",
-    "type": "CNAME",
-    "name": "apps.academy.biji-biji.com",
-    "content": "academy.biji-biji.com",
-    "ttl": 1,
-    "proxied": false
-  },
-  {
     "comment": "=== mereka.io DNS Records ===",
-    "description": "Primary LMS ingress",
+    "description": "Primary LMS ingress (GKE)",
     "type": "A",
-    "name": "staging.academy.mereka.io",
+    "name": "academyv2.mereka.io",
     "content": "34.177.83.168",
     "ttl": 1,
     "proxied": false
@@ -36,55 +11,87 @@
   {
     "description": "Studio hostname",
     "type": "CNAME",
-    "name": "studio.staging.academy.mereka.io",
-    "content": "staging.academy.mereka.io",
+    "name": "studio.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false
   },
   {
     "description": "Microfrontends",
     "type": "CNAME",
-    "name": "apps.staging.academy.mereka.io",
-    "content": "staging.academy.mereka.io",
+    "name": "apps.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false
   },
   {
-    "description": "SkillOurFuture microsite (multi-level host stays DNS-only)",
+    "description": "Discovery service",
     "type": "CNAME",
-    "name": "skillourfuture.staging.academy.mereka.io",
-    "content": "staging.academy.mereka.io",
+    "name": "discovery.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false
   },
   {
-    "description": "Studio preview host (needed for Caddy TLS)",
+    "description": "Ecommerce service",
     "type": "CNAME",
-    "name": "preview.staging.academy.mereka.io",
-    "content": "staging.academy.mereka.io",
+    "name": "ecommerce.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false
   },
   {
-    "description": "Notes service host (needed for Caddy TLS)",
+    "description": "Notes service host",
     "type": "CNAME",
-    "name": "notes.staging.academy.mereka.io",
-    "content": "staging.academy.mereka.io",
+    "name": "notes.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false
   },
   {
     "description": "Analytics/Superset dashboard",
     "type": "CNAME",
-    "name": "analytics.staging.academy.mereka.io",
-    "content": "staging.academy.mereka.io",
+    "name": "analytics.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
     "ttl": 1,
     "proxied": false
   },
   {
-    "description": "CAA: allow Let's Encrypt to issue for academy.mereka.io",
+    "description": "Credentials service",
+    "type": "CNAME",
+    "name": "credentials.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio preview host (needed for Caddy TLS)",
+    "type": "CNAME",
+    "name": "preview.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SkillOurFuture microsite (multi-level host stays DNS-only)",
+    "type": "CNAME",
+    "name": "skillourfuture.academy.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Mail HELO host for SES",
+    "type": "CNAME",
+    "name": "mail.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "CAA: allow Let's Encrypt to issue for academyv2.mereka.io",
     "type": "CAA",
-    "name": "academy.mereka.io",
+    "name": "academyv2.mereka.io",
     "ttl": 3600,
     "proxied": false,
     "data": {

@@ -46,7 +46,7 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
   1. `transform_data.py` - Converted NDJSON → CSVs
   2. `build_course_packages.py` - Generated Open edX OLX tarballs
   3. `prepare_openedx_imports.py` - Created import-ready CSVs
-- **Outputs:** `ops/migrations/kajabi/output/`
+- **Outputs:** `scripts/migrations/kajabi/output/`
   - `users.csv` - Combined contacts/customers
   - `enrollments.csv` - Purchase → enrollment mappings
   - `courses.csv` - Course catalog metadata
@@ -62,7 +62,7 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
 - **Method:** Batched import via `run_batches.py`
 - **Batch Size:** 2,000 rows per batch
 - **Total Batches:** 43 batches
-- **Logs:** `ops/migrations/kajabi/logs/users_offset_*.log`
+- **Logs:** `scripts/migrations/kajabi/logs/users_offset_*.log`
 - **Result:** 84,379 users imported (some rows skipped due to missing email/username)
 
 #### Enrollments Import
@@ -70,7 +70,7 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
 - **Method:** Batched import via `run_batches.py`
 - **Batch Size:** 2,000 rows per batch
 - **Total Batches:** 91 batches
-- **Logs:** `ops/migrations/kajabi/logs/enrollments_offset_*.log`
+- **Logs:** `scripts/migrations/kajabi/logs/enrollments_offset_*.log`
 - **Result:** 137,464 enrollments imported (some rows skipped due to missing email/course_id or user not found)
 
 #### Courses Import
@@ -79,11 +79,11 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
 - **Backend:** Kubernetes (GKE)
 - **Namespace:** `mereka-lms`
 - **Result:** All 107 course tarballs imported successfully
-- **Log:** `ops/migrations/kajabi/logs/course_import.log`
+- **Log:** `scripts/migrations/kajabi/logs/course_import.log`
 
 ### ⚠️ Phase 4: Webhook Receiver
 - **Status:** Pending Deployment
-- **Code:** Complete (`ops/migrations/kajabi/webhook_app/`)
+- **Code:** Complete (`scripts/migrations/kajabi/webhook_app/`)
 - **Deployment:** Requires Cloud Run deployment (permission issue encountered)
 - **Next Steps:** Deploy to Cloud Run and configure Kajabi webhooks
 
@@ -123,29 +123,29 @@ The Kajabi to Open edX migration has been successfully completed end-to-end. All
 - **Course Structure:** `exports/kajabi/structure/*.ndjson`
 
 ### Transformed Data
-- **CSVs:** `ops/migrations/kajabi/output/`
-- **Course Packages:** `ops/migrations/kajabi/output/course_packages/`
-- **Manifest:** `ops/migrations/kajabi/output/course_packages/course_packages_manifest.csv`
+- **CSVs:** `scripts/migrations/kajabi/output/`
+- **Course Packages:** `scripts/migrations/kajabi/output/course_packages/`
+- **Manifest:** `scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv`
 
 ### Logs
-- **Batch Logs:** `ops/migrations/kajabi/logs/users_offset_*.log`
-- **Batch Logs:** `ops/migrations/kajabi/logs/enrollments_offset_*.log`
-- **Course Import:** `ops/migrations/kajabi/logs/course_import.log`
+- **Batch Logs:** `scripts/migrations/kajabi/logs/users_offset_*.log`
+- **Batch Logs:** `scripts/migrations/kajabi/logs/enrollments_offset_*.log`
+- **Course Import:** `scripts/migrations/kajabi/logs/course_import.log`
 
 ### Scripts
 - **Export:** `tools/kajabi-export.mjs`
-- **Transform:** `ops/migrations/kajabi/scripts/transform_data.py`
-- **Build Packages:** `ops/migrations/kajabi/scripts/build_course_packages.py`
-- **Prepare Imports:** `ops/migrations/kajabi/scripts/prepare_openedx_imports.py`
-- **Batch Runner:** `ops/migrations/kajabi/scripts/run_batches.py`
-- **Bulk Import:** `ops/migrations/kajabi/scripts/openedx_bulk_import.py`
-- **Course Import:** `ops/migrations/kajabi/scripts/import_courses.py`
+- **Transform:** `scripts/migrations/kajabi/scripts/transform_data.py`
+- **Build Packages:** `scripts/migrations/kajabi/scripts/build_course_packages.py`
+- **Prepare Imports:** `scripts/migrations/kajabi/scripts/prepare_openedx_imports.py`
+- **Batch Runner:** `scripts/migrations/kajabi/scripts/run_batches.py`
+- **Bulk Import:** `scripts/migrations/kajabi/scripts/openedx_bulk_import.py`
+- **Course Import:** `scripts/migrations/kajabi/scripts/import_courses.py`
 
 ## Remaining Tasks
 
 ### High Priority
 - [ ] **Deploy Webhook Receiver** - Deploy FastAPI app to Cloud Run
-  - Location: `ops/migrations/kajabi/webhook_app/`
+  - Location: `scripts/migrations/kajabi/webhook_app/`
   - Requires: GCP permissions for Cloud Run deployment
   - Action: `gcloud run deploy kajabi-webhook --image gcr.io/mereka-lms/kajabi-webhook:latest`
 

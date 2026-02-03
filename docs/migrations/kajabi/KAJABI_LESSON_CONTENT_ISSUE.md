@@ -90,7 +90,7 @@ This is correct behavior given the API limitations.
 ## Related Documentation
 
 - `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md` - Line 31-33 documents missing content
-- `ops/migrations/kajabi/scripts/build_course_packages.py` - Line 95-121 shows placeholder generation
+- `scripts/migrations/kajabi/scripts/build_course_packages.py` - Line 95-121 shows placeholder generation
 
 ---
 

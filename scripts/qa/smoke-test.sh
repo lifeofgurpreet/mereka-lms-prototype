@@ -18,8 +18,9 @@ check() {
   echo "✅ ${host}${path} -> ${status}"
 }
 
-check staging.academy.mereka.io /
-check studio.staging.academy.mereka.io /
-check apps.staging.academy.mereka.io /account
+check academyv2.mereka.io /
+check studio.academyv2.mereka.io /
+check apps.academyv2.mereka.io /account
+check skillourfuture.academy.mereka.io /
 
 echo "Smoke tests completed successfully."

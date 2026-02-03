@@ -1,0 +1,45 @@
+# Architecture Decision Records
+
+This directory contains Architecture Decision Records (ADRs) documenting significant architectural decisions made for the Mereka LMS project.
+
+## Index
+
+| ADR | Title | Status | Date |
+|-----|-------|--------|------|
+| [ADR-001](001-mongodb-atlas.md) | MongoDB Atlas vs Local MongoDB | Accepted | 2026-02-03 |
+| [ADR-002](002-multisite-architecture.md) | Multisite Architecture | Accepted | 2026-02-03 |
+| [ADR-003](003-image-build-pipeline.md) | Image Build Pipeline | Accepted | 2026-02-03 |
+| [ADR-004](004-secrets-management.md) | Secrets Management | Accepted | 2026-02-03 |
+| [ADR-005](005-domain-migration.md) | Domain Migration (staging → academyV2) | Accepted | 2026-02-03 |
+
+## ADR Template
+
+When creating new ADRs, use this template:
+
+```markdown
+# ADR-NNN: Title
+
+**Status**: Proposed | Accepted | Deprecated | Superseded
+**Date**: YYYY-MM-DD
+**Deciders**: [list of people involved]
+
+## Context
+
+[Describe the issue that requires a decision]
+
+## Decision
+
+[Describe the decision made]
+
+## Consequences
+
+### Positive
+- [List positive outcomes]
+
+### Negative
+- [List negative outcomes or trade-offs]
+
+## Alternatives Considered
+
+[List alternatives that were considered but not chosen]
+```

@@ -186,7 +186,7 @@ PYEOF
 2. Click "Request production access"
 3. Fill out form:
    - **Use case:** Transactional emails (password resets, notifications)
-   - **Website URL:** https://staging.academy.mereka.io
+   - **Website URL:** https://academyv2.mereka.io
    - **Describe use case:** Educational platform sending course notifications and password resets
    - **Expected volume:** < 50,000 emails/month (or your estimate)
 4. Submit request

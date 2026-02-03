@@ -62,7 +62,7 @@ done
 
 ```bash
 # Run import script
-./tools/import-production-courses.sh course_tarballs
+./scripts/migrations/import-production-courses.sh course_tarballs
 
 # Or manually import one course
 tutor local exec cms -- python manage.py cms import /tmp /path/to/course

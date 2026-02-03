@@ -51,5 +51,5 @@ echo "╔═══════════════════════�
 echo "║        Parity Fix Complete                                   ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "Run ./tools/check-parity.sh to verify all issues are resolved"
+echo "Run ./scripts/qa/check-parity.sh to verify all issues are resolved"
 

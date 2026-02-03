@@ -60,7 +60,7 @@ tutor config save \
   --set REDIS_PORT=6379
 
 # ALWAYS run patches after config save
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 ```
 
 **Verify config:**
@@ -84,7 +84,7 @@ tutor images build mfe
 tutor local launch -I --skip-build
 
 # Apply patches again
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 
 # Restart services
 tutor local restart
@@ -146,7 +146,7 @@ source ops/tutor-env.sh
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
-./ops/tutor/apply-patches.sh
+./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 

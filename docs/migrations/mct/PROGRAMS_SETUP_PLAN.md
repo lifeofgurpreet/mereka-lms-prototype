@@ -3,7 +3,7 @@
 **Document Version:** 1.0
 **Date:** 2025-12-18
 **Status:** Planning Phase
-**Target Environment:** staging.academy.mereka.io
+**Target Environment:** academyv2.mereka.io
 
 ---
 
@@ -640,10 +640,10 @@ Open edX supports multiple program types. Based on MCT's learning pathway goals:
 kubectl get pods -n mereka-lms | grep discovery
 
 # Check Discovery URL accessibility
-curl -I https://discovery.staging.academy.mereka.io/health/
+curl -I https://discovery.academyv2.mereka.io/health/
 
 # Check Discovery admin access
-# Navigate to: https://discovery.staging.academy.mereka.io/admin/
+# Navigate to: https://discovery.academyv2.mereka.io/admin/
 # Login with LMS superuser credentials
 ```
 
@@ -656,10 +656,10 @@ curl -I https://discovery.staging.academy.mereka.io/health/
 kubectl get pods -n mereka-lms | grep credentials
 
 # Check Credentials URL accessibility
-curl -I https://credentials.staging.academy.mereka.io/health/
+curl -I https://credentials.academyv2.mereka.io/health/
 
 # Check Credentials admin access
-# Navigate to: https://credentials.staging.academy.mereka.io/admin/
+# Navigate to: https://credentials.academyv2.mereka.io/admin/
 ```
 
 **Expected Result:** Credentials service is running and admin interface is accessible.
@@ -668,7 +668,7 @@ curl -I https://credentials.staging.academy.mereka.io/health/
 
 ```bash
 # Access LMS admin
-# Navigate to: https://staging.academy.mereka.io/admin/oauth2_provider/application/
+# Navigate to: https://academyv2.mereka.io/admin/oauth2_provider/application/
 
 # Check for Discovery OAuth2 application
 # Expected: Application named "discovery" with proper redirect URLs
@@ -678,8 +678,8 @@ curl -I https://credentials.staging.academy.mereka.io/health/
 
 1. Create new OAuth2 application at `/admin/oauth2_provider/application/`
 2. Set name: "discovery"
-3. Set URL: `https://discovery.staging.academy.mereka.io`
-4. Set Redirect URL: `https://discovery.staging.academy.mereka.io/complete/edx-oauth2/`
+3. Set URL: `https://discovery.academyv2.mereka.io`
+4. Set Redirect URL: `https://discovery.academyv2.mereka.io/complete/edx-oauth2/`
 5. Client type: Confidential (Web applications)
 6. Authorization grant type: Authorization code
 7. Save and note Client ID and Client Secret
@@ -692,7 +692,7 @@ curl -I https://credentials.staging.academy.mereka.io/health/
 
 ```bash
 # Access LMS Studio
-# Navigate to: https://studio.staging.academy.mereka.io
+# Navigate to: https://studio.academyv2.mereka.io
 
 # Check that all MCT courses have been imported
 # Expected: 178 courses from MCT
@@ -735,22 +735,22 @@ Update `/var/migrations/mct/programs_mapping.json` with actual Open edX course k
 
 ```bash
 # Access Discovery Admin
-# Navigate to: https://discovery.staging.academy.mereka.io/admin/core/partner/
+# Navigate to: https://discovery.academyv2.mereka.io/admin/core/partner/
 
 # Check if SKILLOURFUTURE partner exists
 # If not, create:
 #   - Short Code: skillourfuture
 #   - Name: SKILLOURFUTURE
-#   - Courses API URL: https://staging.academy.mereka.io/api/courses/v1/
-#   - LMS URL: https://staging.academy.mereka.io
-#   - Studio URL: https://studio.staging.academy.mereka.io
+#   - Courses API URL: https://academyv2.mereka.io/api/courses/v1/
+#   - LMS URL: https://academyv2.mereka.io
+#   - Studio URL: https://studio.academyv2.mereka.io
 ```
 
 #### Step 3.2: Create Program Types (If Not Exists)
 
 ```bash
 # Access Discovery Admin
-# Navigate to: https://discovery.staging.academy.mereka.io/admin/course_metadata/programtype/
+# Navigate to: https://discovery.academyv2.mereka.io/admin/course_metadata/programtype/
 
 # Verify these program types exist:
 # - Professional Certificate
@@ -763,7 +763,7 @@ Update `/var/migrations/mct/programs_mapping.json` with actual Open edX course k
 
 For each program in priority order:
 
-1. Navigate to: `https://discovery.staging.academy.mereka.io/admin/course_metadata/program/add/`
+1. Navigate to: `https://discovery.academyv2.mereka.io/admin/course_metadata/program/add/`
 
 2. Fill in program details:
    - **Title**: Program name (e.g., "Become An Entrepreneur")
@@ -803,7 +803,7 @@ For bulk creation, use Discovery API:
 
 ```bash
 # Access Credentials Admin
-# Navigate to: https://credentials.staging.academy.mereka.io/admin/credentials/programcertificate/
+# Navigate to: https://credentials.academyv2.mereka.io/admin/credentials/programcertificate/
 
 # For each program with certificates enabled:
 # 1. Click "Add Program Certificate"
@@ -816,7 +816,7 @@ For bulk creation, use Discovery API:
 #### Step 4.2: Configure Certificate Template Design
 
 ```bash
-# Navigate to: https://credentials.staging.academy.mereka.io/admin/credentials/certificatetemplate/
+# Navigate to: https://credentials.academyv2.mereka.io/admin/credentials/certificatetemplate/
 
 # Create/Edit template:
 # - Upload organization logo
@@ -864,9 +864,9 @@ for p in programs:
 
 ```bash
 # Access LMS Django Admin
-# Navigate to: https://staging.academy.mereka.io/admin/site_configuration/siteconfiguration/
+# Navigate to: https://academyv2.mereka.io/admin/site_configuration/siteconfiguration/
 
-# Find site configuration for staging.academy.mereka.io
+# Find site configuration for academyv2.mereka.io
 # Add to "values" JSON:
 {
   "ENABLE_PROGRAMS": true,
@@ -879,7 +879,7 @@ for p in programs:
 #### Step 5.3: Verify Frontend Display
 
 ```bash
-# Navigate to: https://staging.academy.mereka.io/programs
+# Navigate to: https://academyv2.mereka.io/programs
 
 # Verify:
 # 1. Programs page loads
@@ -961,7 +961,7 @@ def get_jwt_token(lms_url, username, password):
 
 # Example usage
 token = get_jwt_token(
-    "https://staging.academy.mereka.io",
+    "https://academyv2.mereka.io",
     "admin@example.com",
     "password"
 )
@@ -981,7 +981,7 @@ def list_programs(discovery_url, token):
 
 # Example
 programs = list_programs(
-    "https://discovery.staging.academy.mereka.io",
+    "https://discovery.academyv2.mereka.io",
     token
 )
 print(f"Total programs: {programs['count']}")
@@ -1029,7 +1029,7 @@ program_data = {
 }
 
 program = create_program(
-    "https://discovery.staging.academy.mereka.io",
+    "https://discovery.academyv2.mereka.io",
     token,
     program_data
 )
@@ -1062,7 +1062,7 @@ def add_courses_to_program(discovery_url, token, program_uuid, course_keys):
 
 # Example
 add_courses_to_program(
-    "https://discovery.staging.academy.mereka.io",
+    "https://discovery.academyv2.mereka.io",
     token,
     "12345678-1234-1234-1234-123456789abc",
     [
@@ -1089,8 +1089,8 @@ with open('/home/dev/code/mereka-lms/var/migrations/mct/programs_mapping.json') 
     mapping = json.load(f)
 
 # Configuration
-DISCOVERY_URL = "https://discovery.staging.academy.mereka.io"
-LMS_URL = "https://staging.academy.mereka.io"
+DISCOVERY_URL = "https://discovery.academyv2.mereka.io"
+LMS_URL = "https://academyv2.mereka.io"
 USERNAME = "admin@example.com"
 PASSWORD = "password"
 
@@ -1164,7 +1164,7 @@ Open edX Credentials service supports customizable certificate templates. Each p
 
 ```bash
 # Access Credentials Admin
-# Navigate to: https://credentials.staging.academy.mereka.io/admin/credentials/certificatetemplate/
+# Navigate to: https://credentials.academyv2.mereka.io/admin/credentials/certificatetemplate/
 
 # Click "Add Certificate Template"
 # Configure:
@@ -1183,7 +1183,7 @@ Open edX Credentials service supports customizable certificate templates. Each p
 Configure who signs program certificates:
 
 ```bash
-# Navigate to: https://credentials.staging.academy.mereka.io/admin/credentials/signatory/
+# Navigate to: https://credentials.academyv2.mereka.io/admin/credentials/signatory/
 
 # Add signatory:
 #   - Name: Dr. Jane Doe
@@ -1242,7 +1242,7 @@ print(f'Programs count: {len(programs)}')
 "
 
 # 2. Check site configuration
-# Navigate to: https://staging.academy.mereka.io/admin/site_configuration/siteconfiguration/
+# Navigate to: https://academyv2.mereka.io/admin/site_configuration/siteconfiguration/
 # Verify ENABLE_PROGRAMS = true
 ```
 
@@ -1327,7 +1327,7 @@ for cert in certs:
 
 ```bash
 # Ensure certificate configuration exists
-# Navigate to: https://credentials.staging.academy.mereka.io/admin/credentials/programcertificate/
+# Navigate to: https://credentials.academyv2.mereka.io/admin/credentials/programcertificate/
 # Add configuration for program if missing
 
 # Run certificate generation
@@ -1350,7 +1350,7 @@ kubectl logs -n mereka-lms -l app=credentials --tail=100
 
 ```bash
 # Check OAuth2 applications
-# Navigate to: https://staging.academy.mereka.io/admin/oauth2_provider/application/
+# Navigate to: https://academyv2.mereka.io/admin/oauth2_provider/application/
 # Verify "discovery" application exists with correct redirect URLs
 ```
 
@@ -1358,9 +1358,9 @@ kubectl logs -n mereka-lms -l app=credentials --tail=100
 
 ```bash
 # Create OAuth2 application if missing:
-# 1. Navigate to: https://staging.academy.mereka.io/admin/oauth2_provider/application/add/
+# 1. Navigate to: https://academyv2.mereka.io/admin/oauth2_provider/application/add/
 # 2. Name: discovery
-# 3. Redirect URIs: https://discovery.staging.academy.mereka.io/complete/edx-oauth2/
+# 3. Redirect URIs: https://discovery.academyv2.mereka.io/complete/edx-oauth2/
 # 4. Client type: Confidential
 # 5. Authorization grant type: Authorization code
 # 6. Save
@@ -1448,7 +1448,7 @@ For programs with certificates:
 - [ ] Programs synced to LMS (`refresh_course_metadata` run)
 - [ ] Site configuration has `ENABLE_PROGRAMS: true`
 - [ ] Site configuration has `ENABLE_PROGRAM_CERTIFICATES: true`
-- [ ] Programs page loads: `https://staging.academy.mereka.io/programs`
+- [ ] Programs page loads: `https://academyv2.mereka.io/programs`
 - [ ] All programs visible in programs catalog
 - [ ] Program detail pages load correctly
 - [ ] Course lists on program pages are accurate
@@ -1493,10 +1493,10 @@ For programs with certificates:
 
 ### API Endpoints
 
-- **Discovery API Base**: `https://discovery.staging.academy.mereka.io/api/v1/`
+- **Discovery API Base**: `https://discovery.academyv2.mereka.io/api/v1/`
 - **Programs Endpoint**: `/api/v1/programs/`
 - **Courses Endpoint**: `/api/v1/courses/`
-- **Credentials API Base**: `https://credentials.staging.academy.mereka.io/api/v1/`
+- **Credentials API Base**: `https://credentials.academyv2.mereka.io/api/v1/`
 
 ---
 
@@ -1549,7 +1549,7 @@ If issues occur during implementation:
 
 ```bash
 # Disable programs in site configuration
-# Navigate to: https://staging.academy.mereka.io/admin/site_configuration/siteconfiguration/
+# Navigate to: https://academyv2.mereka.io/admin/site_configuration/siteconfiguration/
 # Set: ENABLE_PROGRAMS: false
 ```
 
@@ -1557,7 +1557,7 @@ If issues occur during implementation:
 
 ```bash
 # Set all programs to inactive in Discovery admin
-# Navigate to: https://discovery.staging.academy.mereka.io/admin/course_metadata/program/
+# Navigate to: https://discovery.academyv2.mereka.io/admin/course_metadata/program/
 # Bulk action: Set status to "Unpublished"
 ```
 
