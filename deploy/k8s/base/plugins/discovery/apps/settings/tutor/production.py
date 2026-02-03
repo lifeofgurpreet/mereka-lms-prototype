@@ -4,7 +4,8 @@ import os
 SECRET_KEY = os.environ.get("DISCOVERY_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "discovery",
-    "discovery.localhost"
+    "discovery.localhost",
+    "discovery.academyv2.mereka.io",
 ]
 
 PLATFORM_NAME = "My Open edX"
@@ -111,4 +112,3 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
 DISCOVERY_BASE_URL = "http://discovery.localhost"
 MEDIA_URL = DISCOVERY_BASE_URL + "/media/"
-

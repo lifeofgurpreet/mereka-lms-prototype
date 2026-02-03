@@ -7,6 +7,7 @@ SECRET_KEY = os.environ.get("ECOMMERCE_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "ecommerce.localhost",
     "ecommerce",
+    "ecommerce.academyv2.mereka.io",
 ]
 PLATFORM_NAME = "My Open edX"
 PROTOCOL = "http"
@@ -115,4 +116,3 @@ CSRF_TRUSTED_ORIGINS = ["apps.localhost"]
 SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = "http://localhost"
 
 BACKEND_SERVICE_EDX_OAUTH2_KEY = "ecommerce"
-
