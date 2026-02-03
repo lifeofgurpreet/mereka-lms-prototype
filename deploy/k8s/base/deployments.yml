@@ -552,6 +552,11 @@ spec:
           image: docker.io/overhangio/openedx-discovery:18.0.0
           ports:
             - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           volumeMounts:
             - mountPath: /openedx/discovery/course_discovery/settings/tutor/production.py
               name: settings
@@ -589,6 +594,11 @@ spec:
           env:
             - name: DJANGO_SETTINGS_MODULE
               value: ecommerce.settings.tutor.production
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           volumeMounts:
             - mountPath: /openedx/ecommerce/ecommerce/settings/tutor/
               name: settings
