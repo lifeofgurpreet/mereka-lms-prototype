@@ -7,6 +7,11 @@ SECRET_KEY = os.environ.get("CMS_SECRET_KEY", "")
 if not SECRET_KEY:
     raise ValueError("CMS_SECRET_KEY environment variable is required")
 
+# Override database password from environment variable
+_db_password = os.environ.get("OPENEDX_MYSQL_PASSWORD", "")
+if _db_password and "default" in DATABASES:
+    DATABASES["default"]["PASSWORD"] = _db_password
+
 ####### Settings common to LMS and CMS
 import json
 import os
