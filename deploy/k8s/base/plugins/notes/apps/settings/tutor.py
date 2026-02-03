@@ -5,6 +5,7 @@ SECRET_KEY = os.environ.get("NOTES_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "notes",
     "notes.localhost",
+    "notes.academyv2.mereka.io",
 ]
 
 DATABASES = {
@@ -46,4 +47,3 @@ LOGGING = {
         },
     },
 }
-
