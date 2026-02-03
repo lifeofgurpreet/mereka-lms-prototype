@@ -453,6 +453,21 @@ spec:
           image: docker.io/devture/exim-relay:4.96-r1-0
           ports:
             - containerPort: 8025
+          env:
+            - name: SMARTHOST
+              value: "email-smtp.ap-southeast-1.amazonaws.com::587"
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ses-smtp-credentials
+                  key: RELAY_USERNAME
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ses-smtp-credentials
+                  key: RELAY_PASSWORD
+            - name: HOSTNAME
+              value: "mail.staging.academy.mereka.io"
 
 
 ---

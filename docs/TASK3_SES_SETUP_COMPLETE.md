@@ -151,6 +151,23 @@ tutor config save \
 
 ---
 
-**Last Updated:** 2025-11-12  
-**Status:** ✅ Configuration Complete - Awaiting Domain Verification
+**Last Updated:** 2026-02-03
+**Status:** ✅ FULLY OPERATIONAL - Emails delivering via AWS SES
+
+## 2026-02-03 Update: SES Integration Complete
+
+**SMTP Relay Configuration Fixed:**
+- Updated `devture/exim-relay` to use correct environment variables
+- `SMARTHOST=email-smtp.ap-southeast-1.amazonaws.com::587`
+- `SMTP_USERNAME` and `SMTP_PASSWORD` from K8s Secret `ses-smtp-credentials`
+- `HOSTNAME=mail.staging.academy.mereka.io` for proper HELO
+
+**Verified Working:**
+- Test email delivered successfully via SES
+- TLS 1.3 encryption confirmed
+- SES message ID returned (delivery confirmed)
+
+**Files Updated:**
+- `deploy/k8s/base/deployments.yml` - SMTP deployment with SES config
+- `deploy/k8s/patches/smtp-ses-relay.yaml` - Patch file for reference
 

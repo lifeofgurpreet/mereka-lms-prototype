@@ -1,0 +1,277 @@
+name: Build Tutor Images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/tutor/**'
+      - 'assets/branding/**'
+      - '.github/workflows/build-tutor-images.yml'
+  workflow_dispatch:
+    inputs:
+      build_openedx:
+        description: 'Build OpenEdX image (LMS/CMS)'
+        type: boolean
+        default: true
+      build_mfe:
+        description: 'Build MFE image'
+        type: boolean
+        default: true
+      deploy_to_staging:
+        description: 'Deploy to staging after build'
+        type: boolean
+        default: false
+      image_tag:
+        description: 'Image tag (default: git SHA)'
+        type: string
+        required: false
+
+env:
+  PROJECT_ID: mereka-lms
+  REGION: asia-southeast1
+  REPOSITORY: openedx
+  REGISTRY: asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+
+jobs:
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Tutor config
+        run: |
+          # Check for syntax errors in YAML configs
+          python3 -c "import yaml; yaml.safe_load(open('infrastructure/tutor/config.example.yml'))"
+          echo "✅ Config YAML is valid"
+
+      - name: Lint shell scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './infrastructure/tutor'
+          severity: warning
+
+  build-openedx:
+    name: Build OpenEdX Image
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ github.event_name == 'push' || inputs.build_openedx }}
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Tutor
+        run: |
+          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+          tutor --version
+
+      - name: Configure Docker memory
+        run: |
+          # Tutor builds need significant memory
+          echo "DOCKER_OPTS=--memory=12g --memory-swap=16g" >> $GITHUB_ENV
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Set up Tutor environment
+        run: |
+          export TUTOR_ROOT=$(pwd)/tutor_env
+          mkdir -p $TUTOR_ROOT
+
+          # Initialize Tutor config
+          tutor config save \
+            --set LMS_HOST=staging.academy.mereka.io \
+            --set CMS_HOST=studio.staging.academy.mereka.io \
+            --set ENABLE_HTTPS=true
+
+          # Apply patches
+          ./infrastructure/tutor/apply-patches.sh
+
+      - name: Build OpenEdX image
+        run: |
+          export TUTOR_ROOT=$(pwd)/tutor_env
+          tutor images build openedx --no-cache
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          echo "tags=${{ env.REGISTRY }}/openedx:${TAG}" >> $GITHUB_OUTPUT
+          echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Tag and push image
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          SHORT_SHA="${GITHUB_SHA::8}"
+
+          docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:${TAG}
+          docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
+          docker tag tutor_local/openedx:latest ${{ env.REGISTRY }}/openedx:latest
+
+          docker push ${{ env.REGISTRY }}/openedx:${TAG}
+          docker push ${{ env.REGISTRY }}/openedx:${SHORT_SHA}
+          docker push ${{ env.REGISTRY }}/openedx:latest
+
+          echo "### OpenEdX Image Built ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/openedx:${TAG}\`" >> $GITHUB_STEP_SUMMARY
+
+  build-mfe:
+    name: Build MFE Image
+    runs-on: ubuntu-latest
+    needs: lint
+    if: ${{ github.event_name == 'push' || inputs.build_mfe }}
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Tutor
+        run: |
+          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+          tutor --version
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Set up Tutor environment
+        run: |
+          export TUTOR_ROOT=$(pwd)/tutor_env
+          mkdir -p $TUTOR_ROOT
+
+          # Initialize Tutor config
+          tutor config save \
+            --set LMS_HOST=staging.academy.mereka.io \
+            --set MFE_HOST=apps.staging.academy.mereka.io \
+            --set ENABLE_HTTPS=true
+
+          # Apply patches (includes Node 18 + webpack memory fixes)
+          ./infrastructure/tutor/apply-patches.sh
+
+      - name: Build MFE image
+        run: |
+          export TUTOR_ROOT=$(pwd)/tutor_env
+          export NODE_OPTIONS="--max-old-space-size=6144"
+          tutor images build mfe --no-cache
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          echo "tags=${{ env.REGISTRY }}/mfe:${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Tag and push image
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          SHORT_SHA="${GITHUB_SHA::8}"
+
+          docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:${TAG}
+          docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
+          docker tag tutor_local/openedx-mfe:latest ${{ env.REGISTRY }}/mfe:latest
+
+          docker push ${{ env.REGISTRY }}/mfe:${TAG}
+          docker push ${{ env.REGISTRY }}/mfe:${SHORT_SHA}
+          docker push ${{ env.REGISTRY }}/mfe:latest
+
+          echo "### MFE Image Built ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/mfe:${TAG}\`" >> $GITHUB_STEP_SUMMARY
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-openedx, build-mfe]
+    if: ${{ inputs.deploy_to_staging }}
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials mereka-lms \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Update deployments
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+
+          # Update LMS
+          kubectl set image deployment/lms \
+            lms=${{ env.REGISTRY }}/openedx:${TAG} \
+            -n mereka-lms
+
+          # Update CMS
+          kubectl set image deployment/cms \
+            cms=${{ env.REGISTRY }}/openedx:${TAG} \
+            -n mereka-lms
+
+          # Update workers
+          kubectl set image deployment/lms-worker \
+            lms-worker=${{ env.REGISTRY }}/openedx:${TAG} \
+            -n mereka-lms
+
+          kubectl set image deployment/cms-worker \
+            cms-worker=${{ env.REGISTRY }}/openedx:${TAG} \
+            -n mereka-lms
+
+          # Update MFE
+          kubectl set image deployment/mfe \
+            mfe=${{ env.REGISTRY }}/mfe:${TAG} \
+            -n mereka-lms
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/lms -n mereka-lms --timeout=300s
+          kubectl rollout status deployment/cms -n mereka-lms --timeout=300s
+          kubectl rollout status deployment/mfe -n mereka-lms --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          # Simple health check
+          LMS_STATUS=$(kubectl get deployment lms -n mereka-lms -o jsonpath='{.status.availableReplicas}')
+          if [ "$LMS_STATUS" != "1" ]; then
+            echo "❌ LMS deployment failed"
+            exit 1
+          fi
+          echo "✅ Deployment successful"
+
+          echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**LMS:** https://staging.academy.mereka.io" >> $GITHUB_STEP_SUMMARY
+          echo "**MFE:** https://apps.staging.academy.mereka.io" >> $GITHUB_STEP_SUMMARY

@@ -1,20 +1,25 @@
-# Next 10 Tasks (Updated 2025-11-25)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2025-11-25_
+# Next 10 Tasks (Updated 2026-02-03)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-03_
 
-## Recent Fixes (2025-11-25)
-- ✅ Staging restored: Fixed MySQL→Cloud SQL routing (service had selector but no pod)
-- ✅ Staging restored: Fixed Redis host drift in configmap (hardcoded IP → `redis:6379`)
+## Recent Fixes (2026-02-03)
+- ✅ SES SMTP relay fully configured - emails delivering via AWS SES
+- ✅ Disaster recovery tested - Velero backups verified, restore successful
+- ✅ CI/CD workflows added - GitHub Actions for Tutor image builds
+- ✅ Terraform production setup - backend, environments, multi-env workflow documented
+
+## Previous Fixes (2025-11-25)
+- ✅ Staging restored: Fixed MySQL→Cloud SQL routing
+- ✅ Staging restored: Fixed Redis host drift in configmap
 - ✅ Staging restored: Fixed MFE service selector mismatch
-- See `PRODUCTION_STATUS.md` and `docs/operations/TROUBLESHOOTING.md` for details
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | MongoDB cost optimization | Infra | ✅ Complete | Already on M0 (FREE tier). Verified 2025-11-25 via `atlas clusters describe`. No action needed. |
-| 2 | User management & access setup | Infra | ✅ Complete | ✅ Admin users verified (5 total), access URLs documented, forum integration verified (running, MongoDB Atlas connected). See `docs/TASK2_COMPLETION_REPORT.md`. |
-| 3 | SES SMTP deliverability | Infra | ⚙️ In progress | ✅ SMTP credentials configured and tested. ⚠️ Need domain verification in SES Console. See `docs/TASK3_SES_SETUP_COMPLETE.md`. |
-| 4 | Production GCP environment | Infra | 💤 Pending | Clone staging infrastructure into prod project: parameterize Terraform, add state backend + service accounts, document cutover. |
-| 5 | Tutor CI/CD workflows | DevOps | 💤 Pending | Add GitHub Actions for Tutor lint/tests, image builds, Terraform plan jobs (manual approval before apply). |
-| 6 | Disaster recovery rehearsal | SRE | 💤 Pending | Restore latest Cloud SQL dumps into scratch instance, document timings, verify course data integrity. |
+| 1 | MongoDB cost optimization | Infra | ✅ Complete | Already on M0 (FREE tier). Verified 2025-11-25. |
+| 2 | User management & access setup | Infra | ✅ Complete | Admin users verified, access URLs documented. |
+| 3 | SES SMTP deliverability | Infra | ✅ Complete | SMTP relay configured with SES credentials, test email delivered successfully. See `docs/TASK3_SES_SETUP_COMPLETE.md`. |
+| 4 | Production GCP environment | Infra | ✅ Complete | Terraform backend, staging/production tfvars, multi-env workflow documented. See `infrastructure/terraform/README.md`. Ready to apply when prod project is created. |
+| 5 | Tutor CI/CD workflows | DevOps | ✅ Complete | GitHub Actions for lint, validation, image builds, deployment. See `docs/operations/CI_CD_SETUP.md`. |
+| 6 | Disaster recovery rehearsal | SRE | ✅ Complete | Velero backup restored to test namespace, MySQL data verified. See `docs/operations/DR_TEST_RESULTS.md`. |
 | 7 | Data migrations (Kajabi/MCT) | Data | 💤 Pending | Finalize `tools/kajabi-*` + `tools/mct-*` flows, import sample cohorts, validate grading/credential issuance. |
 | 8 | Observability & monitoring | SRE | 💤 Pending | Add synthetic checks for MFEs/account/login, define SLO dashboards, hook PagerDuty/Slack alerts. |
 | 9 | Secrets automation & rotation | Infra | ⚙️ In progress | Move remaining secrets to Secret Manager, script rotation, schedule credential updates. |
