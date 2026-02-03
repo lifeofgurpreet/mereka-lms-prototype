@@ -73,7 +73,7 @@ tutor local stop
 - **URLs:** `localhost`, `*.localhost`
 - **Config:** `tutor_env/config.yml` (git-ignored)
 
-### Production/Staging
+### GKE/Kind
 - **Database:** Cloud SQL, MongoDB Atlas, managed Redis
 - **Storage:** GCS buckets
 - **URLs:** `academyv2.mereka.io`, `academyv2.mereka.dev`
