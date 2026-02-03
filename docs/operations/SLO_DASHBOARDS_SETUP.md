@@ -85,11 +85,28 @@ gcloud alpha monitoring policies create \
 
 ## Next Steps
 
-1. [x] Add blackbox probe targets for academyv2.mereka.io to VPS Prometheus
-2. [ ] Verify cross-env datasource connectivity (VPS → GKE)
-3. [ ] Set up PagerDuty notification channel for critical alerts
-4. [ ] Create Slack webhook integration for warning alerts
-5. [ ] Add synthetic login/MFE checks
+1. [x] Add blackbox probe targets for staging.academy.mereka.io to VPS Prometheus
+2. [x] Slack webhook integration (already configured via SLACK_ALERTMANAGER_WEBHOOK_URL in Infisical)
+3. [x] Add synthetic login/MFE checks via Authentik SSO endpoints
+4. [ ] Verify cross-env datasource connectivity (VPS → GKE)
+5. [ ] Add academyv2.mereka.io domains after cert-manager issues SSL certs
+
+## Known Issues
+
+### academyv2.mereka.io Certificate
+
+The academyv2.mereka.io domain DNS is set up but shows a fake Kubernetes ingress certificate.
+Cert-manager needs to issue Let's Encrypt certs for:
+- academyv2.mereka.io
+- studio.academyv2.mereka.io
+- apps.academyv2.mereka.io
+
+Current certificates only cover:
+```
+openedx-lms-tls      -> staging.academy.mereka.io
+openedx-studio-tls   -> studio.staging.academy.mereka.io
+openedx-mfe-tls      -> apps.staging.academy.mereka.io
+```
 
 ## Files Modified
 
