@@ -144,9 +144,9 @@ stringData:
 After migration, update DNS records:
 | Domain | Old IP (Cloud SQL LB) | New IP (BBI-K8 Ingress) |
 |--------|----------------------|-------------------------|
-| academy.mereka.io | 34.126.186.80 | <BBI-K8-ingress-IP> |
-| studio.academy.mereka.io | 34.126.186.80 | <BBI-K8-ingress-IP> |
-| apps.academy.mereka.io | 34.126.186.80 | <BBI-K8-ingress-IP> |
+| academyv2.mereka.io | 34.126.186.80 | <BBI-K8-ingress-IP> |
+| studio.academyv2.mereka.io | 34.126.186.80 | <BBI-K8-ingress-IP> |
+| apps.academyv2.mereka.io | 34.126.186.80 | <BBI-K8-ingress-IP> |
 
 ## Migration Steps
 

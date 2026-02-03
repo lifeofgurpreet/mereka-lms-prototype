@@ -46,7 +46,7 @@ Target load balancer IP: **34.177.83.168** (GKE ingress for `academyv2.mereka.io
 - `studio.academyv2.mereka.io` / `apps.academyv2.mereka.io` – CNAMEs back to `academyv2.mereka.io`, also DNS-only.
 - `skillourfuture.academy.mereka.io` – CNAME to `academyv2.mereka.io`, **always DNS-only**. Cloudflare’s Universal SSL covers only one wildcard level (`*.academy.mereka.io`), so this two-level hostname must present our origin certificate directly until we purchase an advanced certificate pack.
 - `preview.academyv2.mereka.io` / `notes.academyv2.mereka.io` – DNS-only CNAMEs so Caddy can mint certificates for Studio preview + Notes without spamming ACME errors.
-- `academy.mereka.io` – `CAA 0 issue "letsencrypt.org"` so only Let’s Encrypt can issue certificates for the entire sub-tree; this hardens issuance for our load balancer.
+- `academyv2.mereka.io` – `CAA 0 issue "letsencrypt.org"` so only Let’s Encrypt can issue certificates for the entire sub-tree; this hardens issuance for our load balancer.
 
 - `academy.biji-biji.com` lives in the separate `biji-biji.com` zone. Manage it with the dashboard or per-zone API token—point it at `academy.biji-biji.com` (A record to the same GKE ingress IP) and feel free to keep it proxied because Cloudflare can issue apex certificates for that zone.
 

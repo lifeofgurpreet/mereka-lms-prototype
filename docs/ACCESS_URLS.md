@@ -77,6 +77,8 @@ _Audience: Everyone • Last updated: 2025-11-12_
   - **Default Credentials:** `admin` / `admin`
   - **Full Guide:** [`docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`](analytics/ANALYTICS_CONSOLE_ACCESS.md)
 
+**Microsites:** `skillourfuture.academy.mereka.io` and `academy.biji-biji.com` are distinct client tenants with separate branding/catalogs.
+
 ---
 
 ### VPS Kind Development Environment
@@ -160,7 +162,7 @@ The following admin users exist in staging:
 
 **Local:** Services run directly on localhost ports (no port-forwarding needed)
 
-**Kubernetes (Staging/Production):**
+**Kubernetes (GKE/Kind):**
 ```bash
 # LMS
 kubectl port-forward -n mereka-lms svc/lms 8000:8000
@@ -182,20 +184,20 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 ## Notes
 
 - **Local:** All URLs use HTTP (no TLS needed)
-- **Staging/Production:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
-- **Staging environment:** `academyv2.mereka.io`
-- **Production environment:** `academy.mereka.io` (when ready)
+- **GKE/Kind:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
+- **GKE environment:** `academyv2.mereka.io`
+- **VPS Kind environment:** `academyv2.mereka.dev`
 - **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
 
 ---
 
 ## Quick Reference
 
-| Service | Local | Staging | Production |
-|---------|-------|---------|------------|
-| LMS | http://localhost | https://academyv2.mereka.io | https://academy.mereka.io |
-| Studio | http://studio.localhost | https://studio.academyv2.mereka.io | https://studio.academy.mereka.io |
-| MFE Base | http://apps.localhost | https://apps.academyv2.mereka.io | https://apps.academy.mereka.io |
-| Discovery | http://discovery.localhost | https://discovery.academyv2.mereka.io | https://discovery.academy.mereka.io |
-| Ecommerce | http://ecommerce.localhost | https://ecommerce.academyv2.mereka.io | https://ecommerce.academy.mereka.io |
+| Service | Local | GKE | VPS Kind |
+|---------|-------|-----|----------|
+| LMS | http://localhost | https://academyv2.mereka.io | https://academyv2.mereka.dev |
+| Studio | http://studio.localhost | https://studio.academyv2.mereka.io | https://studio.academyv2.mereka.dev |
+| MFE Base | http://apps.localhost | https://apps.academyv2.mereka.io | https://apps.academyv2.mereka.dev |
+| Discovery | http://discovery.localhost | https://discovery.academyv2.mereka.io | https://discovery.academyv2.mereka.dev |
+| Ecommerce | http://ecommerce.localhost | https://ecommerce.academyv2.mereka.io | https://ecommerce.academyv2.mereka.dev |
 | Analytics (Superset) | Port-forward: http://localhost:8088 | Port-forward: http://localhost:8088<br>Or: https://analytics.academyv2.mereka.io (once DNS configured) | TBD |

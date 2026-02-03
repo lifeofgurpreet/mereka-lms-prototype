@@ -5,6 +5,7 @@ namespace: mereka-lms
 
 resources:
   - ../../base
+  - clusterissuer-letsencrypt-prod.yaml
 
 # Local development configurations
 labels:

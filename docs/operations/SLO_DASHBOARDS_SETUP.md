@@ -101,7 +101,8 @@ issues Let's Encrypt certs for `academyv2.mereka.io`, `studio.academyv2.mereka.i
 `apps.academyv2.mereka.io` via the `openedx-*-tls` secrets.
 
 The kind cluster currently shows NotReady certs due to issuer mismatch (ingress references
-`letsencrypt-prod` while the cluster uses `letsencrypt-dns01`).
+`letsencrypt-prod` while the cluster uses `letsencrypt-dns01`). The local overlay now
+ships a `letsencrypt-prod` ClusterIssuer alias to keep cert-manager aligned.
 
 ## Files Modified
 

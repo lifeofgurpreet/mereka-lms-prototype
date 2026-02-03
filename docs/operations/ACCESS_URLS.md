@@ -117,6 +117,8 @@ _Audience: Everyone • Last updated: 2025-12-29_
 - **Credentials:** Internal only (port-forward required)
 - **Notes API:** Internal only
 
+**Microsite Boundary Note:** `skillourfuture.academy.mereka.io` and `academy.biji-biji.com` are separate client sites with distinct branding, catalogs, and users. Treat them as independent tenants.
+
 ---
 
 ## User Management
@@ -178,7 +180,7 @@ The following admin users exist in GKE:
 
 **Local:** Services run directly on localhost ports (no port-forwarding needed)
 
-**Kubernetes (Staging/Production):**
+**Kubernetes (GKE/Kind):**
 ```bash
 # LMS
 kubectl port-forward -n mereka-lms svc/lms 8000:8000

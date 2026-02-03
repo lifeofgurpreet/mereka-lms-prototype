@@ -209,7 +209,7 @@ kubectl get configmap -n mereka-lms -o yaml | grep PLUGINS
 
 **Production:**
 - Use managed services: Cloud SQL, MongoDB Atlas, Redis
-- Use production URLs: `academy.mereka.io`
+- Use production URLs: `academyv2.mereka.io`
 - Use GCS buckets for storage
 
 **Shared:**

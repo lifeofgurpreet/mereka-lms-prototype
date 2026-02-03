@@ -39,9 +39,9 @@ The environment variable pattern allows easy domain changes:
 - Would require running two instances
 - **Rejected because**: Cost, operational overhead
 
-### Use academy.mereka.io
+### Use academyv2.mereka.io
 - Simpler URL
-- **Rejected because**: Reserved for potential future use
+- **Rejected because**: We standardize on academyv2 for GKE now; academy.mereka.io remains unused
 
 ## Implementation Notes
 

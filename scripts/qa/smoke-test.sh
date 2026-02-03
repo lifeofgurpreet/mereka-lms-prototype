@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Simple smoke test against the staging URLs.
+# Simple smoke test against the GKE URLs.
 set -euo pipefail
 
 echo "Running smoke tests against live domains"
@@ -20,7 +20,8 @@ check() {
 
 check academyv2.mereka.io /
 check studio.academyv2.mereka.io /
-check apps.academyv2.mereka.io /account
+check apps.academyv2.mereka.io /authn/login
 check skillourfuture.academy.mereka.io /
+check academy.biji-biji.com /
 
 echo "Smoke tests completed successfully."

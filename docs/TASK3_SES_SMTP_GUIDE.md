@@ -56,7 +56,7 @@ aws ses list-identities --region us-east-1
 1. Go to AWS SES Console → Verified identities
 2. Click "Create identity"
 3. Select "Domain"
-4. Enter domain: `mereka.io` or `academy.mereka.io`
+4. Enter domain: `mereka.io` or `academyv2.mereka.io`
 5. Add DNS records (CNAME/TXT) to domain DNS
 6. Wait for verification (can take up to 72 hours)
 
@@ -163,7 +163,7 @@ PYEOF
 1. **AWS Console:**
    - Go to SES → Verified identities → Create identity
    - Select "Domain"
-   - Enter: `mereka.io` (or subdomain like `academy.mereka.io`)
+   - Enter: `mereka.io` (or subdomain like `academyv2.mereka.io`)
    - Choose "Easy DKIM" (recommended)
    - Copy DNS records (CNAME records)
 
@@ -377,6 +377,5 @@ kubectl exec -n mereka-lms deploy/lms -- \
 
 **Last Updated:** 2025-11-12
 **Status:** ⛔ Blocked - Awaiting domain verification and AWS support
-
 
 
