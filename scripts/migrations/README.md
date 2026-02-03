@@ -12,6 +12,12 @@ Scripts for migrating data from Kajabi and MCT (Microsoft Community Training) to
 
 See `docs/migrations/` for complete migration playbooks.
 
+### Dry Run (Smoke Test)
+
+```bash
+./scripts/migrations/run-dry-run.sh
+```
+
 ### Kajabi Migration
 
 ```bash

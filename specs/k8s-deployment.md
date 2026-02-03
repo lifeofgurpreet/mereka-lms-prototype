@@ -31,11 +31,10 @@ envFrom:
 - MUST have `refreshInterval: 1h`
 
 ### Environment Overlays
-Three overlays MUST exist:
+Two overlays are supported (local dev + production):
 | Overlay | Replicas | Image Tag |
 |---------|----------|-----------|
 | local | 1 each | latest |
-| staging | 1 each | staging |
 | production | 2 LMS, 1 CMS | production |
 
 ## Verification
@@ -53,6 +52,6 @@ kubectl get deploy lms -n mereka-lms -o jsonpath='{.spec.template.spec.container
 # MUST include secretRef to openedx-secrets and database-secrets
 
 # Validate overlays
-kubectl kustomize deploy/k8s/overlays/staging --enable-helm 2>/dev/null | head -20
+kubectl kustomize deploy/k8s/overlays/local --enable-helm 2>/dev/null | head -20
 # MUST not error
 ```

@@ -437,6 +437,22 @@ kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data.OPENEDX_SEC
 kubectl annotate externalsecret openedx-secrets -n mereka-lms force-sync=$(date +%s) --overwrite
 ```
 
+### Force ArgoCD refresh (remote base updates)
+
+Remote Kustomize bases can lag until ArgoCD refreshes the Application. Use this helper to
+force a refresh after remote base updates (including this repo).
+
+```bash
+# List ArgoCD applications
+kubectl get applications -n argocd
+
+# Refresh specific apps
+ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refresh.sh
+
+# Optional overrides
+ARGO_NAMESPACE=argocd ARGO_REFRESH_TYPE=hard ./scripts/infra/argocd-refresh.sh mereka-lms-production
+```
+
 For detailed secrets management architecture, see `/home/gurpreet/projects/secrets-management/specs/`.
 
 ---
