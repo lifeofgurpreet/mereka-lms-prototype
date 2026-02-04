@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+LOG_DIR="${LOG_DIR:-${REPO_ROOT}/var}"
+ATLAS_PROJECT_ID="${ATLAS_PROJECT_ID:-690e7c787757f4238efc94d1}"
+
+mkdir -p "$LOG_DIR"
+
+log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
+
+VPS_IP=$(curl -s https://ifconfig.me)
+if [[ -z "$VPS_IP" ]]; then
+  echo "Unable to determine VPS egress IP." >&2
+  exit 1
+fi
+
+log "Checking Atlas allowlist for VPS IP: ${VPS_IP}"
+EGRESS_IPS="$VPS_IP" ATLAS_PROJECT_ID="$ATLAS_PROJECT_ID" \
+  "${SCRIPT_DIR}/check-atlas-allowlist.sh"

@@ -93,3 +93,17 @@ Document the secret ID in `docs/SECRETS_SNAPSHOT.md` and rotate the Atlas databa
   - `kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- curl -s https://ifconfig.me`
   - `atlas accesslists list --projectId <projectId>` (confirm allowlist matches egress)
   - `./scripts/infra/check-atlas-allowlist.sh` (automated check; set `ATLAS_PROJECT_ID` if needed)
+
+### VPS Automation (dev)
+
+The VPS (kind) environment runs a cron-based drift check so the forum stays healthy:
+
+```bash
+/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh
+```
+
+Cron entry (installed on VPS):
+
+```bash
+15 * * * * gurpreet /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+```

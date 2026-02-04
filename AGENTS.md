@@ -363,6 +363,11 @@ curl -I http://apps.localhost/authn/login
 
 **Login failures (CSRF 403 or 500 on login_session).** Ensure `CSRF_TRUSTED_ORIGINS` includes `https://academyv2.mereka.io`, `https://studio.academyv2.mereka.io`, `https://apps.academyv2.mereka.io`, `https://academy.biji-biji.com`, and `https://skillourfuture.academy.mereka.io`. Set `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io` and `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io` in `openedx-config-*.json` and restart lms/cms. If a specific user still errors with JSONDecodeError on login, reset `user.profile.meta` to `{}` and reset the password.
 
+**Operational learnings (read these before touching auth/Forum/Secrets):**
+- Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
+- Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
+- Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
+
 ---
 
 ## iOS CI/CD Rules (CRITICAL for AI Agents)
