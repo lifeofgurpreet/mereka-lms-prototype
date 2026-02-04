@@ -134,6 +134,10 @@ open http://studio.localhost
    - Production Atlas → Local MongoDB
    - To get latest courses for dev/testing
 
+5. **Atlas requires SRV DNS support**
+   - Open edX images must include `dnspython`
+   - Install via `pip install "pymongo[srv]"` during image build
+
 ## 📝 Configuration
 
 ### Production (Atlas)
@@ -158,6 +162,7 @@ MONGODB_PORT: 27017
 2. **Local Laptop:** Use local container only for `tutor local`
 3. **Sync regularly:** Keep local in sync with production for testing
 4. **Never point local at production Atlas:** Use sync script instead
+5. **Keep SRV support installed:** Ensure `pymongo[srv]` is in Open edX images
 
 ---
 

@@ -185,7 +185,43 @@ kubectl get ingress openedx-lms -n mereka-lms -o jsonpath='{.status.loadBalancer
 
 ---
 
-### Issue 4b: Forum Heartbeat 502 (Atlas Allowlist)
+### Issue 4c: Studio "Servers Encountered an Error" (MongoDB SRV)
+
+**Symptoms:**
+- Studio shows “The Studio servers encountered an error”
+- `cms` logs show: `pymongo.errors.ConfigurationError: The "dnspython" module must be installed to use mongodb+srv:// URIs`
+
+**Root Cause:**
+- Open edX image is missing `dnspython`, required for MongoDB Atlas SRV URIs
+
+**Fix (Permanent):**
+```bash
+# 1) Ensure build patches install pymongo SRV extras
+rg -n "pymongo\\[srv\\]" infrastructure/tutor/apply-patches.sh
+
+# 2) Re-apply patches and rebuild image
+./infrastructure/tutor/apply-patches.sh
+source .venv/bin/activate
+export TUTOR_ROOT="$(pwd)/tutor_env"
+tutor images build openedx
+
+# 3) Push + update deployments (GKE)
+docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
+docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
+kubectl set image deployment/cms cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG -n mereka-lms
+kubectl rollout status deployment/cms -n mereka-lms
+```
+
+**Fix (Dev kind):**
+```bash
+./infrastructure/tutor/apply-patches.sh
+tutor images build openedx
+kubectl rollout restart deployment/cms -n mereka-lms
+```
+
+---
+
+### Issue 4d: Forum Heartbeat 502 (Atlas Allowlist)
 
 **Symptoms:**
 - `https://forum.academyv2.mereka.dev/heartbeat` returns 502 (dev)

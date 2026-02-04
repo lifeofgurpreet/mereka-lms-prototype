@@ -26,7 +26,7 @@ Error: adapting config using caddyfile: parsing caddyfile tokens for 'order':
 
 | Service | Image | Notes |
 |---------|-------|-------|
-| LMS/CMS | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand` | Custom Mereka brand |
+| LMS/CMS | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-dnspython` | Custom Mereka brand + Atlas SRV fix |
 | MFE | `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:mereka-brand` | Custom Mereka brand |
 | Forum | `overhangio/openedx-forum:18.1.1` | Stock Tutor |
 | Discovery | `overhangio/openedx-discovery:18.0.0` | Stock Tutor |

@@ -83,3 +83,6 @@ secrets/
 
 # bv (beads viewer) local config and caches
 .bv/
+
+# Claude/Codex local state
+.claude/

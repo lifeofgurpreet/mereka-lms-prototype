@@ -465,14 +465,26 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /open
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)
 
         # Install django-prometheus after pip install of base requirements
-        if "django-prometheus" not in updated:
-            # Find the RUN pip install command for base requirements
-            base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
-            if base_req_marker in updated:
+        # Also install pymongo SRV extras for MongoDB Atlas (dnspython)
+        base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
+        if base_req_marker in updated:
+            if "django-prometheus" not in updated:
                 # Add django-prometheus install after base requirements
                 prometheus_install = base_req_marker + """\n\n# Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1"""
                 updated = updated.replace(base_req_marker, prometheus_install)
+            if "pymongo[srv]" not in updated and "dnspython" not in updated:
+                pymongo_marker = "RUN pip install django-prometheus==2.3.1"
+                pymongo_install = """RUN pip install django-prometheus==2.3.1\n\n# Install pymongo SRV extras for MongoDB Atlas
+RUN pip install "pymongo[srv]" """
+                if pymongo_marker in updated:
+                    updated = updated.replace(pymongo_marker, pymongo_install)
+                else:
+                    updated = updated.replace(
+                        base_req_marker,
+                        base_req_marker + """\n\n# Install pymongo SRV extras for MongoDB Atlas
+RUN pip install "pymongo[srv]" """,
+                    )
 
     if path.name == "production.py":
         updated = ensure_allowed_hosts(updated)
@@ -730,6 +742,17 @@ if [ -d "$THEME_BUILD_DIR" ]; then
   echo "Logo files synced successfully."
 else
   echo "⚠ Warning: Theme build directory not found. Logo sync skipped."
+fi
+
+# Sync custom apps into build context for openedx image
+CUSTOM_APPS_SRC="$REPO_ROOT/infrastructure/tutor/custom-apps"
+CUSTOM_APPS_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/custom-apps"
+if [ -d "$CUSTOM_APPS_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
+  mkdir -p "$CUSTOM_APPS_DEST"
+  cp -R "$CUSTOM_APPS_SRC/." "$CUSTOM_APPS_DEST/"
+  echo "Custom apps synced to build context."
+else
+  echo "⚠ Warning: Custom apps sync skipped (missing build context)."
 fi
 
 echo "Applied local Tutor patches."

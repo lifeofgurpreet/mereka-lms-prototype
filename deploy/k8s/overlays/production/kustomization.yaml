@@ -13,9 +13,9 @@ resources:
 
 # Image tags for production (use specific SHA or version)
 images:
-  - name: openedx
+  - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: production
+    newTag: 20260204-dnspython
   - name: openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: production

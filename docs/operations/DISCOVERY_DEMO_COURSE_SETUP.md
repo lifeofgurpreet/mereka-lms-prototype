@@ -193,7 +193,7 @@ spec:
           serviceAccountName: discovery
           containers:
           - name: sync
-            image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
+            image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-dnspython
             command:
             - /bin/bash
             - -c

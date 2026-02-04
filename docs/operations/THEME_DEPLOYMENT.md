@@ -187,23 +187,28 @@ gcloud auth configure-docker asia-southeast1-docker.pkg.dev
 
 ### Step 6: Tag Images
 
-Choose a meaningful tag (e.g., `mereka-brand`, git SHA, or version):
+Choose a meaningful tag (e.g., git SHA, date, or release name):
+
+```bash
+# Current production tag (Atlas SRV fix)
+TAG="20260204-dnspython"
+```
 
 ```bash
 # OpenEdX image
 docker tag tutor_local/openedx:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
+  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG}
 
 # MFE image (if built)
 docker tag tutor_local/openedx-mfe:latest \
-  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:mereka-brand
+  asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
 ```
 
 ### Step 7: Push to Artifact Registry
 
 ```bash
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand
-docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:mereka-brand
+docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG}
+docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
 ```
 
 ### Step 8: Update Kubernetes Deployments
@@ -211,22 +216,22 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:mereka
 ```bash
 # LMS
 kubectl set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand \
+  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
   -n mereka-lms
 
 # CMS (Studio)
 kubectl set image deployment/cms \
-  cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand \
+  cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
   -n mereka-lms
 
 # LMS Worker
 kubectl set image deployment/lms-worker \
-  lms-worker=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand \
+  lms-worker=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
   -n mereka-lms
 
 # CMS Worker
 kubectl set image deployment/cms-worker \
-  cms-worker=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand \
+  cms-worker=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
   -n mereka-lms
 
 # MFE (if built)
