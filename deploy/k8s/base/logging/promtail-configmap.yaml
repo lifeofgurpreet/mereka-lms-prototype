@@ -1,0 +1,125 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/component: log-forwarder
+data:
+  promtail.yaml: |
+    # Promtail configuration for GKE -> VPS Loki forwarding
+    # Collects logs from mereka-lms namespace pods
+
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+      log_level: info
+
+    positions:
+      filename: /tmp/positions.yaml
+
+    clients:
+      - url: https://loki.mereka.dev/loki/api/v1/push
+        # TLS verification enabled (Cloudflare tunnel provides valid cert)
+        tls_config:
+          insecure_skip_verify: false
+        # Retry configuration for network reliability
+        backoff_config:
+          min_period: 500ms
+          max_period: 5m
+          max_retries: 10
+        # Batch configuration to reduce network overhead
+        batchwait: 1s
+        batchsize: 1048576  # 1MB
+        timeout: 10s
+
+    scrape_configs:
+      # Scrape container logs from mereka-lms namespace
+      - job_name: kubernetes-pods
+        pipeline_stages:
+          # Stage 1: Extract JSON fields if present
+          - json:
+              expressions:
+                level: level
+                logger: logger
+                module: module
+                request_id: request_id
+                message: message
+                timestamp: timestamp
+              source: message
+
+          # Stage 2: Parse log level from various formats
+          - regex:
+              expression: '(?i)(?P<level_extracted>DEBUG|INFO|WARNING|ERROR|CRITICAL|WARN|FATAL)'
+              source: message
+
+          # Stage 3: Set labels from extracted fields
+          - labels:
+              level:
+              logger:
+              module:
+
+          # Stage 4: Add timestamp if available
+          - timestamp:
+              source: timestamp
+              format: RFC3339Nano
+
+          # Stage 5: Output formatting
+          - output:
+              source: message
+
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names:
+                - mereka-lms
+
+        relabel_configs:
+          # Only scrape pods from mereka-lms namespace
+          - source_labels: [__meta_kubernetes_namespace]
+            action: keep
+            regex: mereka-lms
+
+          # Add namespace label
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+
+          # Add pod name label
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
+          # Add container name label
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+
+          # Add app label from pod annotations/labels
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            target_label: app
+
+          # Add component label (e.g., lms, cms, worker)
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+            target_label: component
+
+          # Add node name for debugging
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node
+
+          # Set path to container log file
+          - source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
+            target_label: __path__
+            separator: /
+            replacement: /var/log/pods/*$1/*.log
+
+          # Add instance label (pod IP)
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: instance
+
+          # Add environment label
+          - replacement: gke-production
+            target_label: environment
+
+          # Add cluster label
+          - replacement: bbi-k8-cluster
+            target_label: cluster

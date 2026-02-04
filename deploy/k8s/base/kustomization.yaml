@@ -8,6 +8,7 @@ resources:
 - volumes.yml
 - secrets
 - monitoring
+- logging
 
 # Custom Mereka-branded OpenEdX image
 images:
