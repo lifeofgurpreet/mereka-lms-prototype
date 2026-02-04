@@ -497,7 +497,7 @@ MFE_CONFIG = {
     "MARKETING_SITE_BASE_URL": MEREKA_LMS_BASE_URL,
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",
     "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{MEREKA_LMS_BASE_URL}/login_refresh",
-    "SITE_NAME": "Mereka Academy",
+    "SITE_NAME": "Mereka",
     "STUDIO_BASE_URL": MEREKA_STUDIO_BASE_URL,
     "USER_INFO_COOKIE_NAME": "user-info",
     "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",

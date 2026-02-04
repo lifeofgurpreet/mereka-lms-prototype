@@ -1,11 +1,16 @@
 # Admin Login Guide
-_Last updated: 2025-11-12_
+_Last updated: 2026-02-04_
 
-## 🔐 Admin Credentials
+## 🔐 Admin Credentials (Source of Truth)
 
-**Username:** `admin`  
-**Password:** `admin123`  
-**Email:** `admin@mereka.academy`
+**Infisical path:** `/shared/oauth`  
+**Email secret:** `GOOGLE_IMPERSONATE_EMAIL`  
+**Password secret:** `GOOGLE_IMPERSONATE_PASSWORD`
+
+Use these shared credentials for:
+- **GKE production** (`academyv2.mereka.io`)
+- **VPS kind dev** (`academyv2.mereka.dev`)
+- **Authentik OIDC login** (auth0.mereka.io)
 
 ## 🌐 Login URLs
 
@@ -41,7 +46,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 # 2. Clear all sessions
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.sessions.models import Session; Session.objects.all().delete(); print('Sessions cleared')"
 
-# 3. Reset admin password
+# 3. Reset admin password (local example)
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password('admin123'); u.is_active = True; u.is_staff = True; u.is_superuser = True; u.save(); print('Admin reset')"
 ```
 
@@ -69,26 +74,17 @@ else:
 "
 ```
 
-## 🔄 Create New Admin User
+## 🔄 Sync Admin User (GKE + Kind)
 
-If admin user doesn't exist:
+Use Infisical to pull the shared credentials and sync to LMS:
 
 ```bash
-# Method 1: Using Django shell
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
-from django.contrib.auth import get_user_model
-User = get_user_model()
-u = User.objects.create_user('admin', 'admin@mereka.academy', 'admin123')
-u.is_staff = True
-u.is_superuser = True
-u.is_active = True
-u.save()
-print('✅ Admin user created')
-"
+cd /home/gurpreet/projects/k8s/reka-slackbot
+EMAIL=$(infisical secrets get GOOGLE_IMPERSONATE_EMAIL --domain https://secrets.mereka.io/api --env prod --path / --recursive --plain 2>/dev/null)
+PASSWORD=$(infisical secrets get GOOGLE_IMPERSONATE_PASSWORD --domain https://secrets.mereka.io/api --env prod --path / --recursive --plain 2>/dev/null)
 
-# Method 2: Using manage_user command
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff admin admin@mereka.academy
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password('admin123'); u.save()"
+printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lms -- python manage.py lms shell --settings=tutor.production -c \
+"import sys; from django.contrib.auth import get_user_model; User=get_user_model(); email=sys.stdin.readline().strip(); password=sys.stdin.readline().strip(); user=User.objects.filter(email=email).first() or User.objects.filter(username=email).first() or User.objects.create_user(username=email, email=email, password=password); user.set_password(password); user.is_active=True; user.is_staff=True; user.is_superuser=True; user.save(); print(f'✅ Admin synced: {user.username}')"
 ```
 
 ## 🎯 Access Points
@@ -103,7 +99,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 ### Analytics (Superset)
 - **Local:** http://localhost:8088
-- **Default credentials:** admin/admin (may need to be configured)
+- **Default credentials:** stored separately from LMS (see analytics docs)
 
 ## 📝 Notes
 
@@ -115,5 +111,5 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 ---
 
-**Last Verified:** 2025-11-12  
+**Last Verified:** 2026-02-04  
 **Status:** Admin login working ✅

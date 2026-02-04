@@ -39,8 +39,8 @@ _Audience: Everyone • Last updated: 2026-02-04_
 - **Forum:** Integrated into LMS courses
 
 **Default Credentials (Local)**
-- **Username:** `admin`
-- **Password:** `admin123`
+- Use your local superuser credentials (often `admin` plus a locally set password).
+- For GKE + VPS kind, use the shared Infisical secrets below.
 
 ---
 
@@ -63,6 +63,11 @@ _Audience: Everyone • Last updated: 2026-02-04_
 **SSO / Authentik**
 - **OIDC Issuer:** https://auth0.mereka.io/application/o/mereka-lms/
 - **Note:** Shared Authentik instance for multiple projects.
+
+**Admin Credentials (GKE + Kind)**
+- **Infisical path:** `/shared/oauth`
+- **Email secret:** `GOOGLE_IMPERSONATE_EMAIL`
+- **Password secret:** `GOOGLE_IMPERSONATE_PASSWORD`
 
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io

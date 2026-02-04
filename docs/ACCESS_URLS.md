@@ -39,8 +39,8 @@ _Audience: Everyone • Last updated: 2026-02-04_
 - **Forum:** Integrated into LMS courses
 
 **Default Credentials (Local)**
-- **Username:** `admin`
-- **Password:** `admin123`
+- Use your local superuser credentials (often `admin` plus a locally set password).
+- For GKE + VPS kind, use the shared Infisical secrets below.
 
 ---
 
@@ -77,6 +77,11 @@ _Audience: Everyone • Last updated: 2026-02-04_
   - **LoadBalancer IP:** `34.126.186.80` (for DNS A record)
   - **Default Credentials:** `admin` / `admin`
   - **Full Guide:** [`docs/analytics/ANALYTICS_CONSOLE_ACCESS.md`](analytics/ANALYTICS_CONSOLE_ACCESS.md)
+
+**Admin Credentials (GKE + Kind)**
+- **Infisical path:** `/shared/oauth`
+- **Email secret:** `GOOGLE_IMPERSONATE_EMAIL`
+- **Password secret:** `GOOGLE_IMPERSONATE_PASSWORD`
 
 **Microsites:** `skillourfuture.academy.mereka.io` and `academy.biji-biji.com` are distinct client tenants with separate branding/catalogs.
 

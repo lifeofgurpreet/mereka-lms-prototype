@@ -38,6 +38,12 @@ Python Application Code
 - Do **not** store `MEREKA_LMS_*` secrets in `/` or other folders.
 - Legacy `/mereka-lms` folders are removed to avoid path drift.
 
+### Shared Admin/Test Credentials
+- Stored in Infisical `/shared/oauth`.
+- `GOOGLE_IMPERSONATE_EMAIL` + `GOOGLE_IMPERSONATE_PASSWORD` are the shared
+  admin credentials for LMS + Authentik (GKE + VPS kind).
+- Do not copy these values into repo files or issue comments.
+
 #### openedx-secrets (30+ keys)
 | K8s Key | GCP SM Key | Purpose |
 |---------|------------|---------|
