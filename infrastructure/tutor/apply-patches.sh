@@ -137,13 +137,6 @@ for target in targets:
         "https://academy.biji-biji.com",
         "https://skillourfuture.academy.mereka.io",
     ]
-    caddy_block_template = """{domain} {{
-    reverse_proxy nginx:80 {{
-        header_up X-Forwarded-Port 443
-    }}
-}}
-
-"""
 
     def ensure_allowed_hosts(text):
         marker = "ALLOWED_HOSTS = ["
@@ -559,7 +552,7 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
             updated = pattern.sub(rf"\\1\n{profile_proxy}\\2", updated, count=1)
     if path.name == "Caddyfile":
         # For extra LMS hosts, use the proper LMS proxy pattern (not nginx)
-        lms_caddy_block_template = """{domain} {{
+        lms_caddy_block_template = """{domain}{{{{$default_site_port}}}} {{
     @favicon_matcher {{
         path_regexp ^/favicon.ico$
     }}
