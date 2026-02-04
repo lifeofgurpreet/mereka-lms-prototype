@@ -89,3 +89,4 @@ Document the secret ID in `docs/SECRETS_SNAPSHOT.md` and rotate the Atlas databa
 - We intentionally keep Atlas on public allowlists. Monitor drift with:
   - `kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- curl -s https://ifconfig.me`
   - `atlas accesslists list --projectId <projectId>` (confirm allowlist matches egress)
+  - `./scripts/infra/check-atlas-allowlist.sh` (automated check; set `ATLAS_PROJECT_ID` if needed)

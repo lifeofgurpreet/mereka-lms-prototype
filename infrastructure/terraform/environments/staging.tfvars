@@ -1,4 +1,4 @@
-# Staging Environment Configuration
+# Legacy staging Environment Configuration (reference only)
 # Usage: terraform apply -var-file=environments/staging.tfvars
 
 project_id  = "mereka-lms"

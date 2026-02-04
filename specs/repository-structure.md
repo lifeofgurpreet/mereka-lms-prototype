@@ -31,7 +31,7 @@ All other markdown files MUST be in docs/ or docs/archive/.
 │       │   └── plugins/       # Plugin configs
 │       └── overlays/          # Environment-specific overlays
 │           ├── local/
-│           ├── staging/
+│           ├── staging/       # Legacy (reference only)
 │           └── production/
 │
 ├── scripts/                   # All executable scripts
@@ -79,7 +79,7 @@ ls ops/    # MUST only show README.md
 
 # Check required directories exist
 ls scripts/shared/config.sh    # MUST exist
-ls deploy/k8s/overlays/        # MUST have local, staging, production
+ls deploy/k8s/overlays/        # MUST have local + production (staging is legacy)
 ls docs/adr/                   # MUST have ADRs
 
 # Check root markdown files

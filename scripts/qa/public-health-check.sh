@@ -27,8 +27,8 @@ urls=(
   "https://discovery.${BASE_DOMAIN}/health/"
   "https://ecommerce.${BASE_DOMAIN}/dashboard/"
   "https://credentials.${BASE_DOMAIN}/health/"
-  "https://notes.${BASE_DOMAIN}/api/v1/health/"
-  "https://forum.${BASE_DOMAIN}/"
+  "https://notes.${BASE_DOMAIN}/"
+  "https://forum.${BASE_DOMAIN}/heartbeat"
 )
 
 for host in "${EXTRA_HOSTS[@]}"; do

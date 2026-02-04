@@ -1,5 +1,5 @@
-# Next 10 Tasks (Updated 2026-02-03)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-03_
+# Next 10 Tasks (Updated 2026-02-04)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-04_
 
 ## Recent Fixes (2026-02-03)
 - ✅ SES SMTP relay fully configured - emails delivering via AWS SES
@@ -12,11 +12,11 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-03_
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Fix ecommerce OAuth 500 | Infra | ✅ Complete | OAuth settings now env-driven; CORS/CSRF aligned. |
-| 2 | Credentials service routing | Infra | ⚙️ In progress | Deployment + Caddy routing added; DB + OAuth client init pending. |
-| 3 | Forum strategy | Infra | ⚙️ In progress | Public hostname + Caddy route added; verify health endpoint. |
-| 4 | Synthetic checks + SLO dashboards | SRE | ⚙️ In progress | Health script + new uptime checks added; dashboards pending. |
-| 5 | Cert/SAN monitoring | SRE | ⚙️ In progress | TLS expiry alert extended; SAN audit still required. |
-| 6 | Remove staging language | Docs | ⚙️ In progress | Core docs updated; legacy references remain. |
+| 2 | Credentials service routing | Infra | ✅ Complete | Deployment, DNS, DB init + OAuth apps configured. |
+| 3 | Forum strategy | Infra | ✅ Complete | DNS + Caddy routing + heartbeat health check. |
+| 4 | Synthetic checks + SLO dashboards | SRE | ✅ Complete | Public health checks updated + uptime configs aligned. |
+| 5 | Cert/SAN monitoring | SRE | ✅ Complete | TLS SAN check updated + cert-expiry alert covers microsites. |
+| 6 | Remove staging language | Docs | ✅ Complete | Core docs updated; legacy references remain only where required. |
 | 7 | Formalize DR | SRE | ✅ Complete | `docs/operations/DISASTER_RECOVERY.md` added. |
 | 8 | Multi-site governance | Infra | ✅ Complete | Roles + theming validation added to multisite playbook. |
 | 9 | Release checklist | Infra | ✅ Complete | Domain/secret release checklist added. |

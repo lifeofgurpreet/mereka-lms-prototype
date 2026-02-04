@@ -38,6 +38,8 @@ export LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
 export STUDIO_DOMAIN="${STUDIO_DOMAIN:-studio.${LMS_DOMAIN}}"
 export MFE_DOMAIN="${MFE_DOMAIN:-apps.${LMS_DOMAIN}}"
 export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
+export CREDENTIALS_DOMAIN="${CREDENTIALS_DOMAIN:-credentials.${LMS_DOMAIN}}"
+export FORUM_DOMAIN="${FORUM_DOMAIN:-forum.${LMS_DOMAIN}}"
 
 # Alternative domains (multisite)
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"

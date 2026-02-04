@@ -292,11 +292,12 @@ cd /openedx/edx-platform && ./manage.py lms shell -c \\
 - LMS OAuth2 application key/secret or redirect URIs don’t match ecommerce settings.
 
 **Fix**
-1. Confirm the LMS OAuth2 application exists at `https://academyv2.mereka.io/admin/oauth2_provider/application/`.
-2. Ensure the client ID matches the ecommerce key (`ECOMMERCE_BACKEND_OAUTH2_KEY`, default `ecommerce`).
-3. Ensure the client secret matches `ECOMMERCE_SOCIAL_AUTH_EDX_OAUTH2_SECRET`.
-4. Ensure redirect URIs include:
+1. Confirm the LMS OAuth2 applications exist at `https://academyv2.mereka.io/admin/oauth2_provider/application/`.
+2. Ensure the **backend** client ID matches `ECOMMERCE_BACKEND_OAUTH2_KEY` (default `ecommerce`) and the secret matches `ECOMMERCE_BACKEND_OAUTH2_SECRET`.
+3. Ensure the **SSO** client ID matches `ECOMMERCE_OAUTH2_KEY` (default `ecommerce-sso`) and the secret matches `ECOMMERCE_SOCIAL_AUTH_EDX_OAUTH2_SECRET`.
+4. Ensure SSO redirect URIs include:
    - `https://ecommerce.academyv2.mereka.io/complete/edx-oauth2/`
+   - `https://ecommerce.academyv2.mereka.dev/complete/edx-oauth2/`
    - `http://ecommerce.localhost/complete/edx-oauth2/` (dev)
 
 **Notes**

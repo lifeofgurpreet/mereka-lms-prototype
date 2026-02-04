@@ -9,7 +9,7 @@
   },
   "httpCheck": {
     "useSsl": true,
-    "path": "/api/v1/health/",
+    "path": "/",
     "port": 443,
     "validateSsl": true
   },

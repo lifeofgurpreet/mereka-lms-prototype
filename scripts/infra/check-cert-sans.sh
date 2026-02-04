@@ -12,6 +12,8 @@ HOSTS=(
   "discovery.${LMS_DOMAIN}"
   "ecommerce.${LMS_DOMAIN}"
   "notes.${LMS_DOMAIN}"
+  "$CREDENTIALS_DOMAIN"
+  "$FORUM_DOMAIN"
   "$SKILLOURFUTURE_DOMAIN"
   "$BIJI_DOMAIN"
 )

@@ -374,6 +374,8 @@ GCP Secret Manager
 Kubernetes Secrets
 ```
 
+**Infisical path policy**: All `MEREKA_LMS_*` secrets must live under `/k8s/mereka-lms` in both `prod` and `dev` environments. Avoid duplicating them in `/` or other folders.
+
 ### ExternalSecrets Pipeline
 
 ExternalSecrets syncs secrets from GCP Secret Manager to Kubernetes:

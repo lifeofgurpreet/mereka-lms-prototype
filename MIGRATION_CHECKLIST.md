@@ -76,7 +76,7 @@
 
 - [x] Updated `.github/workflows/cloud-sql-backup.yml` to use `scripts/infra/backup-db.sh`
 - [ ] Review other workflows (if any) and update paths
-- [ ] Test workflows in staging before production
+- [ ] Test workflows in dev (kind/VPS) before production
 
 ### For Documentation
 

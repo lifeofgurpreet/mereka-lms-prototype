@@ -80,9 +80,6 @@ terraform init
 ### 3. Select Environment
 
 ```bash
-# Staging
-terraform workspace select staging || terraform workspace new staging
-
 # Production
 terraform workspace select production || terraform workspace new production
 ```
@@ -93,10 +90,6 @@ terraform workspace select production || terraform workspace new production
 # Set sensitive variables
 export TF_VAR_cloudsql_root_password="$(openssl rand -base64 32)"
 
-# Staging
-terraform plan -var-file=environments/staging.tfvars -out=tfplan
-terraform apply tfplan
-
 # Production (requires separate project)
 terraform plan -var-file=environments/production.tfvars -out=tfplan
 terraform apply tfplan
@@ -106,7 +99,7 @@ terraform apply tfplan
 
 | File | Purpose |
 |------|---------|
-| `environments/staging.tfvars` | Staging environment (mereka-lms project) |
+| `environments/staging.tfvars` | Legacy staging (reference only) |
 | `environments/production.tfvars` | Production environment (mereka-lms-prod project) |
 | `terraform.tfvars.example` | Example with all variables |
 

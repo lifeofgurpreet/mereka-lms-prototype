@@ -93,7 +93,7 @@ Once images are built and services started, you'll have:
 
 ### Superset Dashboard
 - **Local**: `http://aspects-superset.localhost`
-- **Staging**: `https://aspects-superset.academyv2.mereka.io` (if configured)
+- **GKE (production)**: `https://aspects-superset.academyv2.mereka.io` (if configured)
 
 **Default credentials**:
 - Username: `admin`
@@ -152,4 +152,3 @@ tutor local restart aspects-clickhouse aspects-superset
 - Ensure Docker Desktop has sufficient resources (12GB+ RAM recommended)
 - Aspects will start collecting data automatically once services are running
 - Platform-wide analytics will be available immediately after data collection starts
-

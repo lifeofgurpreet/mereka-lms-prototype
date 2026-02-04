@@ -10,6 +10,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `repair-routing.sh` - Fix selector drift **and** add HTTPS (443) to caddy service (wrapper)
 - `repair-staging-routing.sh` - Legacy entrypoint (kept for backwards compatibility)
 - `check-cert-sans.sh` - Verify TLS SANs and detect fake ingress certs
+- `check-atlas-allowlist.sh` - Validate Atlas IP allowlist matches cluster egress
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
 - `cloudflare-sync.sh` - Cloudflare DNS sync
