@@ -60,6 +60,10 @@ _Audience: Everyone • Last updated: 2026-02-04_
 - **Base URL:** https://apps.academyv2.mereka.io
 - **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
+**SSO / Authentik**
+- **OIDC Issuer:** https://auth0.mereka.io/application/o/mereka-lms/
+- **Note:** Shared Authentik instance for multiple projects.
+
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
@@ -69,6 +73,27 @@ _Audience: Everyone • Last updated: 2026-02-04_
 - **Analytics (Superset):** ❌ NOT DEPLOYED
   - **Status:** Documented but not yet deployed to K8s
   - **Plan:** See [`docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`](../analytics/ASPECTS_K8S_DEPLOYMENT.md)
+
+---
+
+### VPS Kind (academyv2.mereka.dev)
+
+**LMS (Learning Management System)**
+- **URL:** https://academyv2.mereka.dev
+- **Admin Panel:** https://academyv2.mereka.dev/admin
+
+**Studio (Course Authoring)**
+- **URL:** https://studio.academyv2.mereka.dev
+
+**Micro-Frontends (MFEs)**
+- **Base URL:** https://apps.academyv2.mereka.dev
+
+**Other Services (Dev)**
+- **Discovery:** https://discovery.academyv2.mereka.dev
+- **Ecommerce:** https://ecommerce.academyv2.mereka.dev
+- **Credentials:** https://credentials.academyv2.mereka.dev
+- **Notes API:** https://notes.academyv2.mereka.dev
+- **Forum:** https://forum.academyv2.mereka.dev
 
 ---
 
@@ -202,6 +227,27 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 - **GKE environment:** `academyv2.mereka.io`
 - **VPS Kind environment:** `academyv2.mereka.dev`
 - **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
+
+---
+
+## Health Check Workflow
+
+Run the standard health check script (prod or dev):
+
+```bash
+./scripts/qa/public-health-check.sh prod
+./scripts/qa/public-health-check.sh dev
+```
+
+**Key endpoints validated**
+- LMS root: `/`
+- Studio root: `/`
+- MFE login: `/authn/login`
+- Discovery: `/health/`
+- Ecommerce: `/dashboard/` (verifies OAuth redirect path)
+- Credentials: `/health/`
+- Notes: `/`
+- Forum: `/heartbeat`
 
 ---
 

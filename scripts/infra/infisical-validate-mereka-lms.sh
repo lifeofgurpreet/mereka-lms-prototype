@@ -8,6 +8,8 @@ INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
 INFISICAL_ENV="${INFISICAL_ENV:-prod}"
 INFISICAL_PATH="${INFISICAL_PATH:-/k8s/mereka-lms}"
 INFISICAL_DIR="${INFISICAL_DIR:-/home/gurpreet/projects/k8s/reka-slackbot}"
+INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
+INFISICAL_CONFIG_FILE="${INFISICAL_CONFIG_FILE:-${INFISICAL_DIR}/.infisical.json}"
 EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml}"
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
@@ -37,15 +39,33 @@ if [[ ! -d "$INFISICAL_DIR" ]]; then
   exit 1
 fi
 
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  if [[ -f "$INFISICAL_CONFIG_FILE" ]]; then
+    INFISICAL_PROJECT_ID=$(jq -r '.workspaceId // empty' "$INFISICAL_CONFIG_FILE")
+  fi
+fi
+
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  echo "INFISICAL_PROJECT_ID not set and workspaceId missing from $INFISICAL_CONFIG_FILE" >&2
+  exit 1
+fi
+
 log "Collecting expected secret keys from external-secrets.yaml..."
 expected_keys=$(rg -o "MEREKA_LMS_[A-Z0-9_]+" "$EXTERNAL_SECRETS_FILE" | sort -u)
 
 log "Collecting actual secret keys from Infisical (${INFISICAL_PATH})..."
-actual_keys=$(cd "$INFISICAL_DIR" && infisical secrets \
-  --domain "$INFISICAL_DOMAIN" \
-  --env "$INFISICAL_ENV" \
-  --path "$INFISICAL_PATH" \
-  --output json 2>/dev/null | jq -r '.[].secretKey' | sort -u)
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+(
+  cd "$INFISICAL_DIR"
+  infisical secrets generate-example-env \
+    --domain "$INFISICAL_DOMAIN" \
+    --env "$INFISICAL_ENV" \
+    --path "$INFISICAL_PATH" \
+    --projectId "$INFISICAL_PROJECT_ID" \
+    > "$tmpfile"
+)
+actual_keys=$(cut -d= -f1 "$tmpfile" | sed '/^$/d' | sort -u)
 
 missing=$(comm -23 <(printf "%s\n" "$expected_keys") <(printf "%s\n" "$actual_keys") || true)
 extra=$(comm -13 <(printf "%s\n" "$expected_keys") <(printf "%s\n" "$actual_keys") || true)

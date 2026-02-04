@@ -23,6 +23,14 @@ Create (or verify) **two** OAuth2 applications in LMS admin:
 
 > Ensure the **backend** client ID and secret are distinct from the **SSO** client.
 
+**Quick verification (no secrets)**
+```bash
+kubectl exec -n mereka-lms deploy/lms -- \
+  python /openedx/edx-platform/manage.py lms shell -c \
+  "from oauth2_provider.models import Application; \
+print([(a.name,a.client_id,a.redirect_uris) for a in Application.objects.filter(name__in=['Ecommerce Backend Service','Ecommerce SSO'])])"
+```
+
 ## ✅ Ecommerce SiteConfiguration + Partner
 
 Ecommerce will return `500` if the **SiteConfiguration** or **Partner** rows are missing.
@@ -73,3 +81,8 @@ kubectl logs -n mereka-lms deployment/ecommerce --tail=100
 ```
 
 If the logs show OAuth client errors, re-check client IDs, secrets, and redirect URIs.
+
+## ✅ Status (2026-02-04)
+- OAuth clients exist in LMS with expected IDs and redirect URIs for `academyv2.mereka.io` + `academyv2.mereka.dev`.
+- Ecommerce secrets are injected into the deployment and match LMS OAuth client secrets.
+- No 500s observed in recent logs; still re-test with a real login flow if users report errors.
