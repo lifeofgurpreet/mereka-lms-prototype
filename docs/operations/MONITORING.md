@@ -67,7 +67,7 @@ Minimum recommended policies (edit thresholds as desired):
 | Log-based 5xx spike | `infrastructure/monitoring/alerts/log-5xx-spike.json` | Requires log metric `mereka_lms_http_5xx`. |
 | Log-based auth failures | `infrastructure/monitoring/alerts/log-auth-failures.json` | Requires log metric `mereka_lms_auth_failures`. |
 
-Apply an alert with:  
+Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
 
 ## Uptime & HTTPS checks
@@ -89,7 +89,7 @@ Apply all production uptime checks at once:
 
 Each config hits the endpoint every five minutes from Asia-Pacific probe sites and validates TLS. The production set now includes LMS, Studio, MFE, Discovery, Ecommerce, Notes, Credentials, Forum, and microsites. After creating uptime checks, re-run the alert creation command so the policy can reference the new metric series.
 
-Apply an alert with:  
+Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/pod-restarts.json`
 
 Log-based metrics (required for auth/5xx alerts):
