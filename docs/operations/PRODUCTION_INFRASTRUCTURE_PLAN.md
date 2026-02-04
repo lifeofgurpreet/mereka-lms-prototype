@@ -6,7 +6,7 @@
 
 ---
 
-> **Legacy note:** This plan predates the “production + dev only” environment model. Any “staging” references below should be read as the production GKE environment that was previously labeled staging.
+> **Legacy note:** This plan predates the “production + dev only” environment model. Any “staging” references below should be read as **production GKE** (the old label), and “dev” refers to the kind/VPS environment.
 
 ## Executive Summary
 

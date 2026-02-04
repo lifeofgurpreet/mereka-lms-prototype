@@ -1,7 +1,7 @@
 # Deployment Runbook – Mereka LMS (academyv2.mereka.io)
 _Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-10-30_
 
-This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project.
+This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project. Environment model: **production (GKE)** + **dev (kind/VPS)** only; “staging” bucket names are legacy production labels.
 
 ## 1. Prerequisites
 

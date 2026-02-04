@@ -2,6 +2,7 @@
 _Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-03_
 
 This runbook defines the backup schedule, restore drill cadence, and recovery procedures for Mereka LMS. It is aligned with the **production (GKE)** and **dev (kind)** environment model.
+Legacy “staging” names in buckets or scripts refer to production resources.
 
 ## Objectives
 

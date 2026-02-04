@@ -3,7 +3,7 @@
 _Audience: Platform Engineers, SREs, Developers_
 _Last updated: 2026-02-03_
 
-This guide provides practical commands and procedures for operating the Mereka LMS Kubernetes deployment.
+This guide provides practical commands and procedures for operating the Mereka LMS Kubernetes deployment. Environment model: **production (GKE)** + **dev (kind/VPS)** only; any “staging” wording in commands or buckets is legacy production naming.
 
 ---
 
