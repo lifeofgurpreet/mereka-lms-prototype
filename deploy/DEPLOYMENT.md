@@ -9,7 +9,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - **Source of Truth**: `deploy/k8s/base/` contains base Kustomize manifests exported from Tutor
 - **Namespace**: All resources deploy to `mereka-lms` namespace (not `openedx`)
 - **ConfigMaps**: Application configs managed via Kustomize configMapGenerator
-- **Environment Overlays**: Local (kind/VPS) and production (GKE). Legacy staging overlays are retained for reference only.
+- **Environment Overlays**: Local (kind/VPS) and production (GKE). The staging overlay is legacy reference-only (no staging environment).
 
 ## What Was Created
 
@@ -31,7 +31,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 │       └── overlays/
 │           ├── local/
 │           ├── production/
-│           └── staging/        # Legacy (reference only)
+│           └── staging/        # Legacy (reference only; no staging env)
 └── scripts/
     └── export-k8s-manifests.sh # Re-export script
 ```
@@ -175,7 +175,7 @@ For production:
 In the BBI-K8 repository:
 1. Create `apps/mereka-lms/` directory
 2. Create base/kustomization.yaml referencing this repo
-3. Create overlays for local + production (staging deprecated)
+3. Create overlays for local + production (staging deprecated; reference only)
 4. Add to ArgoCD ApplicationSet
 
 ## Maintenance

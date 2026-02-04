@@ -61,16 +61,25 @@ echo "Full provider details:"
 echo "$PROVIDERS" | jq '.'
 echo ""
 
-# Check for Authentik specifically
-AUTHENTIK=$(echo "$PROVIDERS" | jq -r '.[] | select(.name == "Authentik")')
-if [ -n "$AUTHENTIK" ]; then
-  echo -e "${GREEN}✓ Authentik provider found${NC}"
-  AUTHENTIK_ID=$(echo "$AUTHENTIK" | jq -r '.id')
-  AUTHENTIK_LOGIN_URL=$(echo "$AUTHENTIK" | jq -r '.loginUrl')
-  echo "  ID: $AUTHENTIK_ID"
-  echo "  Login URL: $AUTHENTIK_LOGIN_URL"
+# Check for the branded provider label
+MEREKA_PROVIDER=$(echo "$PROVIDERS" | jq -r '.[] | select(.name == "Mereka")')
+if [ -n "$MEREKA_PROVIDER" ]; then
+  echo -e "${GREEN}✓ Mereka provider found${NC}"
+  PROVIDER_ID=$(echo "$MEREKA_PROVIDER" | jq -r '.id')
+  PROVIDER_LOGIN_URL=$(echo "$MEREKA_PROVIDER" | jq -r '.loginUrl')
+  echo "  ID: $PROVIDER_ID"
+  echo "  Login URL: $PROVIDER_LOGIN_URL"
 else
-  echo -e "${YELLOW}⚠ Authentik provider not found (may be configured differently)${NC}"
+  AUTHENTIK_PROVIDER=$(echo "$PROVIDERS" | jq -r '.[] | select(.name == "Authentik")')
+  if [ -n "$AUTHENTIK_PROVIDER" ]; then
+    echo -e "${YELLOW}⚠ Authentik provider found (display name not updated)${NC}"
+    PROVIDER_ID=$(echo "$AUTHENTIK_PROVIDER" | jq -r '.id')
+    PROVIDER_LOGIN_URL=$(echo "$AUTHENTIK_PROVIDER" | jq -r '.loginUrl')
+    echo "  ID: $PROVIDER_ID"
+    echo "  Login URL: $PROVIDER_LOGIN_URL"
+  else
+    echo -e "${YELLOW}⚠ Branded OAuth provider not found${NC}"
+  fi
 fi
 
 echo ""

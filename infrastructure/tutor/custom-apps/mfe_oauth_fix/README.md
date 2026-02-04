@@ -16,7 +16,7 @@ The `/api/mfe_context` endpoint exists and returns HTTP 200, but the `providers`
 
 However, the database shows OAuth providers exist and are enabled:
 - Site ID: 6 (academyv2.mereka.io)
-- Provider: Authentik
+- Provider: Authentik (displayed as “Mereka”)
 - enabled=True, visible=True
 
 ## Solution
@@ -57,7 +57,7 @@ Expected output:
 [
   {
     "id": "oa2-authentik",
-    "name": "Authentik",
+    "name": "Mereka",
     "loginUrl": "/auth/login/oauth2-authentik/?auth_entry=login&next=/dashboard",
     "registerUrl": "/auth/login/oauth2-authentik/?auth_entry=register&next=/dashboard"
   }

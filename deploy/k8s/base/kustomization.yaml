@@ -25,12 +25,13 @@ commonAnnotations:
   app.kubernetes.io/version: 18.2.2
 
 # labels (and label selectors) added to all Resources
-# https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
-# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/commonlabels/
-commonLabels:
-  app.kubernetes.io/instance: mereka-lms
-  app.kubernetes.io/part-of: mereka-lms
-  app.kubernetes.io/managed-by: tutor
+# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/labels/
+labels:
+  - pairs:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/part-of: mereka-lms
+      app.kubernetes.io/managed-by: tutor
+    includeSelectors: true
 
 
 configMapGenerator:

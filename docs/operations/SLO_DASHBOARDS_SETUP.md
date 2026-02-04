@@ -123,11 +123,12 @@ The Grafana dashboard on the VPS (`grafana.mereka.dev`) connects to two separate
 ┌─────────────────────────────────┐    ┌──────────────────────────────┐
 │  Mereka LMS GKE Cluster         │    │  External Endpoints          │
 │  Namespace: mereka-lms          │    │                              │
-│                                 │    │  • staging.academy.mereka.io │
-│  • LMS pods (kube_pod_*)        │    │  • studio.staging...         │
-│  • CMS pods                     │    │  • apps.staging...           │
+│                                 │    │  • academyv2.mereka.io       │
+│  • LMS pods (kube_pod_*)        │    │  • academyv2.mereka.io       │
+│  • CMS pods                     │    │  • studio.academyv2.mereka.io│
 │  • Caddy proxy                  │    │  • academy.biji-biji.com     │
-│  • MySQL, Redis, Workers        │    │  • Auth endpoints            │
+│  • MySQL, Redis, Workers        │    │  • apps.academyv2.mereka.io  │
+│                                 │    │  • Auth endpoints            │
 └─────────────────────────────────┘    └──────────────────────────────┘
 ```
 

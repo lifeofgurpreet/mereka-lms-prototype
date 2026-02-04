@@ -69,11 +69,17 @@ class MFEContextView(View):
                 for provider in providers:
                     # Get the backend name (e.g., 'oauth2-authentik')
                     backend_name = provider.backend_name or provider.slug or 'oauth2'
+                    display_name = provider.name
+                    provider_slug = (provider.slug or "").lower()
+                    provider_name = (provider.name or "").lower()
+                    backend_key = (backend_name or "").lower()
+                    if "authentik" in provider_slug or "authentik" in provider_name or "authentik" in backend_key:
+                        display_name = "Mereka"
 
                     # Construct the provider data
                     provider_data = {
                         'id': f"oa2-{provider.slug}" if provider.slug else f"oa2-{provider.name.lower()}",
-                        'name': provider.name,
+                        'name': display_name,
                         'loginUrl': f"/auth/login/{backend_name}/?auth_entry=login&next=/dashboard",
                         'registerUrl': f"/auth/login/{backend_name}/?auth_entry=register&next=/dashboard",
                     }

@@ -2,7 +2,7 @@
 
 ## Problem Summary
 
-The `/api/mfe_context` endpoint returns an empty `providers` array even though OAuth providers (Authentik) are properly configured in the database. This prevents the MFE login page from displaying OAuth login buttons.
+The `/api/mfe_context` endpoint returns an empty `providers` array even though OAuth providers (Authentik) are properly configured in the database. This prevents the MFE login page from displaying OAuth login buttons. The MFE button should display **“Mereka”** (backed by Authentik).
 
 ## Solution Overview
 
@@ -84,7 +84,7 @@ Expected output:
 [
   {
     "id": "oa2-authentik",
-    "name": "Authentik",
+    "name": "Mereka",
     "loginUrl": "/auth/login/oauth2-authentik/?auth_entry=login&next=/dashboard",
     "registerUrl": "/auth/login/oauth2-authentik/?auth_entry=register&next=/dashboard"
   }
@@ -100,7 +100,7 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100 | grep -i "m
 # Look for messages like:
 # - "Empty providers array detected in /api/mfe_context, attempting to fix..."
 # - "Found X OAuth providers for site Y"
-# - "Added provider: Authentik (slug: authentik, backend: oauth2-authentik)"
+# - "Added provider: Mereka (slug: authentik, backend: oauth2-authentik)"
 # - "Successfully fixed /api/mfe_context response with X providers"
 ```
 
