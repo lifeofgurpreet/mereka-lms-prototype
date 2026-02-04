@@ -4,7 +4,7 @@
 #
 # Usage: ./scripts/infra/validate-telemetry-connectivity.sh
 
-set -eo pipefail
+set -euo pipefail
 
 # Colors for output
 RED='\033[0;31m'
@@ -87,11 +87,15 @@ fi
 
 # Test 6: Mereka LMS namespace metrics
 echo "[6/8] Testing Mereka LMS namespace metrics availability..."
-if kubectl exec -n monitoring "$GRAFANA_POD" -- \
-  wget -qO- --timeout=5 'http://monitoring-kube-prometheus-prometheus.monitoring:9090/api/v1/query?query=kube_pod_status_phase{namespace="mereka-lms"}' 2>/dev/null | grep -q '"namespace":"mereka-lms"'; then
-  print_result "Mereka LMS pod metrics" "PASS"
+if [[ -n "$GRAFANA_POD" ]]; then
+  if kubectl exec -n monitoring "$GRAFANA_POD" -- \
+    wget -qO- --timeout=5 'http://monitoring-kube-prometheus-prometheus.monitoring:9090/api/v1/query?query=kube_pod_status_phase{namespace="mereka-lms"}' 2>/dev/null | grep -q '"namespace":"mereka-lms"'; then
+    print_result "Mereka LMS pod metrics" "PASS"
+  else
+    print_result "Mereka LMS pod metrics" "FAIL" "No metrics found for mereka-lms namespace"
+  fi
 else
-  print_result "Mereka LMS pod metrics" "FAIL" "No metrics found for mereka-lms namespace"
+  print_result "Mereka LMS pod metrics" "FAIL" "Skipped - Grafana pod not available"
 fi
 
 # Test 7: Grafana datasource ConfigMaps

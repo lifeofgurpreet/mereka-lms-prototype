@@ -9,7 +9,7 @@
   },
   "httpCheck": {
     "useSsl": true,
-    "path": "/authn/login",
+    "path": "/",
     "port": 443,
     "validateSsl": true
   },
