@@ -6,13 +6,11 @@ namespace: mereka-lms
 resources:
   - ../../base
   - clusterissuer-letsencrypt-prod.yaml
+  - ingress-openedx-lms.yaml
 
 patchesStrategicMerge:
   - patches/domain-env.yaml
-
-# Local development configurations
-labels:
-  environment: local
+  - patches/clustersecretstore-gcp.yaml
 
 # Use local images
 images:

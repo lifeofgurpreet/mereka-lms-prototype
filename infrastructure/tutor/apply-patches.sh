@@ -437,6 +437,22 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         "# Patch edx-platform\n# Redwood already bundles the required security/email fixes; cherry-picks disabled locally.\n\n",
     )
 
+    # Add custom MFE OAuth fix app to Dockerfile
+    if path.name == "Dockerfile" and "/openedx/edx-platform" in updated and "mfe_oauth_fix" not in updated:
+        # Find the line where we copy themes and add our custom app after it
+        copy_themes_marker = "COPY --chown=app:app themes/ /openedx/themes/"
+        if copy_themes_marker in updated:
+            custom_app_copy = """COPY --chown=app:app themes/ /openedx/themes/
+# Copy MFE OAuth fix custom app
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"""
+            updated = updated.replace(copy_themes_marker, custom_app_copy)
+        else:
+            # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
+            workdir_marker = "WORKDIR /openedx/edx-platform\n"
+            if workdir_marker in updated:
+                custom_app_insert = "# Copy MFE OAuth fix custom app\nCOPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n\n" + workdir_marker
+                updated = updated.replace(workdir_marker, custom_app_insert, 1)
+
     if path.name == "production.py":
         updated = ensure_allowed_hosts(updated)
         updated = ensure_csrf_origins(updated)
@@ -444,6 +460,21 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         if "DEFAULT_SITE_THEME" not in updated:
             # Add at the end of the file
             updated = updated.rstrip() + '\n\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
+
+        # Add custom MFE OAuth fix app
+        if "mfe_oauth_fix" not in updated:
+            mfe_oauth_fix_config = textwrap.dedent("""
+
+                # MFE OAuth Fix - Custom app to fix OAuth provider visibility
+                import sys
+                sys.path.insert(0, '/openedx')
+                INSTALLED_APPS.append('mfe_oauth_fix')
+
+                # Add middleware to fix /api/mfe_context responses
+                # Insert at the end of middleware stack so it processes responses
+                MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
+            """).strip()
+            updated = updated.rstrip() + '\n\n' + mfe_oauth_fix_config + '\n'
 
     if path.name == "env.config.jsx":
         updated = updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")

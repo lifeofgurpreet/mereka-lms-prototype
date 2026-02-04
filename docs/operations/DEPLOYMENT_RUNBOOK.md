@@ -45,8 +45,8 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    - `cloudsql_connection_name = mereka-lms:asia-southeast1:mereka-lms-mysql`
    - `cloudsql_private_ip = 10.97.0.2`
    - `redis_host = 10.150.102.108`
-   - `content_bucket = staging-academy-mereka-io-content`
-   - `backup_bucket = staging-academy-mereka-io-backup`
+   - `content_bucket = staging-academy-mereka-io-content` (legacy name)
+   - `backup_bucket = staging-academy-mereka-io-backup` (legacy name)
 
 ## 3. Tutor configuration
 

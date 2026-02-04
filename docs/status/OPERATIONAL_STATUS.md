@@ -13,7 +13,7 @@ _Last updated: 2025-11-12 • Auto-generated_
 - **MFEs:** 12 micro-frontends available
 - **Parity:** ✅ Fixed (no cloud IPs)
 
-**Staging:**
+**Production (GKE):**
 - **Status:** ✅ Operational
 - **URL:** https://academyv2.mereka.io
 - **MFE URL:** https://apps.academyv2.mereka.io
@@ -26,7 +26,7 @@ _Last updated: 2025-11-12 • Auto-generated_
 - **Local LMS:** http://localhost/login
 - **Local MFE:** http://apps.localhost/authn/login
 - **Local Admin Panel:** http://localhost/admin
-- **Staging Admin:** https://academyv2.mereka.io/admin
+- **Production Admin:** https://academyv2.mereka.io/admin
 
 ### Analytics (Superset)
 - **Local URL:** http://localhost:8088

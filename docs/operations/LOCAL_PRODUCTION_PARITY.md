@@ -41,7 +41,7 @@ This document outlines the strategy for maintaining parity between local develop
 - ✅ payment (payment processing)
 - ✅ ora-grading (ORA grading)
 
-### What's Running in Production/Staging
+### What's Running in Production
 
 **Services (Kubernetes):**
 - ✅ LMS + LMS Worker
@@ -175,7 +175,7 @@ kubectl get configmap -n mereka-lms -o yaml | grep PLUGINS
    - Check config matches (where applicable)
    - Check MFEs match
 
-3. **Deploy to Staging**
+3. **Deploy to Production (after dev/kind validation)**
    - Test in dev (kind) or a production canary
    - Compare with local
 
@@ -190,8 +190,8 @@ kubectl get configmap -n mereka-lms -o yaml | grep PLUGINS
 - ✅ Use demo/test data
 - ✅ Reset databases as needed
 
-**Staging:**
-- ✅ Use production-like data (sanitized)
+**Dev (kind):**
+- ✅ Use production-like data only if sanitized
 - ✅ Can sync schema from production
 - ✅ Never sync sensitive data
 

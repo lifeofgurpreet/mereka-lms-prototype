@@ -30,6 +30,11 @@ envFrom:
 - MUST reference `gcp-secret-manager` ClusterSecretStore
 - MUST have `refreshInterval: 1h`
 
+**Dev (kind) note:** `gcp-secret-manager` in kind uses a service account key
+stored in `external-secrets/gcp-secret-manager` (key `key.json`). Run
+`scripts/infra/bootstrap-kind-secrets.sh` to create/update the secret and
+apply the local ClusterSecretStore override.
+
 ### Environment Overlays
 Two overlays are supported (local dev + production):
 | Overlay | Replicas | Image Tag |

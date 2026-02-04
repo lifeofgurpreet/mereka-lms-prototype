@@ -35,6 +35,12 @@ Use this checklist for any domain or secret change on production (GKE). There is
 ## Secret Changes
 
 - [ ] **Infisical is the only source of truth** – update secrets there first
+- [ ] Verify secrets live under `/k8s/mereka-lms` (prod + dev), not `/`
+  ```bash
+  cd /home/gurpreet/projects/k8s/reka-slackbot
+  infisical secrets --env prod --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
+  infisical secrets --env dev --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
+  ```
 - [ ] Confirm sync to GCP Secret Manager (wait for GitHub Actions sync)
 - [ ] Confirm ExternalSecrets refresh in K8s:
   ```bash
@@ -48,7 +54,7 @@ Use this checklist for any domain or secret change on production (GKE). There is
 
 ## Post-release Verification
 
-- [ ] `./scripts/qa/public-health-check.sh prod`
+- [ ] `CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod`
 - [ ] `curl -I https://studio.academyv2.mereka.io` loads
 - [ ] `curl -I https://apps.academyv2.mereka.io/authn/login` returns 200/302
 - [ ] Microsites respond:
@@ -61,4 +67,3 @@ Use this checklist for any domain or secret change on production (GKE). There is
 - [ ] Revert DNS to previous IPs (Cloudflare)
 - [ ] Roll back k8s manifests via Git
 - [ ] Restore DB from latest Cloud SQL backup if required
-

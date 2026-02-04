@@ -20,7 +20,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-04_
 | 7 | Formalize DR | SRE | ✅ Complete | `docs/operations/DISASTER_RECOVERY.md` added. |
 | 8 | Multi-site governance | Infra | ✅ Complete | Roles + theming validation added to multisite playbook. |
 | 9 | Release checklist | Infra | ✅ Complete | Domain/secret release checklist added. |
-| 10 | Log-based alerting | SRE | ✅ Complete | 5xx + auth failure log alerts defined. |
+| 10 | Log-based alerting | SRE | ✅ Complete | 5xx + auth failure log alerts defined; re-run apply script after metric propagation. |
 
 ## Previous Fixes (2025-11-25)
 - ✅ Production restored: Fixed MySQL→Cloud SQL routing

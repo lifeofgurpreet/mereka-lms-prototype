@@ -36,6 +36,7 @@ Python Application Code
 ### Infisical Folder Rules
 - **Prod and Dev** secrets live under `/k8s/mereka-lms`.
 - Do **not** store `MEREKA_LMS_*` secrets in `/` or other folders.
+- Legacy `/mereka-lms` folders are removed to avoid path drift.
 
 #### openedx-secrets (30+ keys)
 | K8s Key | GCP SM Key | Purpose |
@@ -111,6 +112,10 @@ kubectl get secret database-secrets -n mereka-lms  # MUST exist
 cd /home/gurpreet/projects/k8s/reka-slackbot
 infisical secrets --domain https://secrets.mereka.io/api --env prod --path /k8s/mereka-lms --output json --silent | jq -r '.[].secretKey'
 infisical secrets --domain https://secrets.mereka.io/api --env dev --path /k8s/mereka-lms --output json --silent | jq -r '.[].secretKey'
+
+# Contract drift check (Infisical + GCP)
+cd /home/gurpreet/projects/secrets-management
+python3 scripts/validate/check_drift.py --full
 
 # Check pods have envFrom
 kubectl get deploy lms -n mereka-lms -o yaml | grep -A3 envFrom  # MUST show secretRef

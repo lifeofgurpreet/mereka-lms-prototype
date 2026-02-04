@@ -20,7 +20,7 @@ grep SUPERSET_ADMIN tutor_env/config.yml
 open http://localhost:8088
 ```
 
-### Staging/Production Access
+### Production Access
 
 **URL:** https://superset.academyv2.mereka.io (if configured)
 
@@ -112,7 +112,7 @@ grep ASPECTS_SUPERSET_DATABASE_HOST tutor_env/config.yml
 ## 📝 Notes
 
 - **Local:** Superset connects to local ClickHouse
-- **Staging:** May connect to cloud ClickHouse (verify config)
+- **Production:** May connect to cloud ClickHouse (verify config)
 - **Data:** Analytics data accumulates over time
 - **Performance:** Large datasets may take time to load
 
@@ -120,4 +120,3 @@ grep ASPECTS_SUPERSET_DATABASE_HOST tutor_env/config.yml
 
 **Status:** ✅ Superset accessible at http://localhost:8088  
 **Database:** ✅ Connected to ClickHouse (local)
-

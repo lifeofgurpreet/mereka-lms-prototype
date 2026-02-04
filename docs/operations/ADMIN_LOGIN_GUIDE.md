@@ -19,7 +19,7 @@ _Last updated: 2025-11-12_
 - **URL:** http://apps.localhost/authn/login
 - **Note:** This uses the modern micro-frontend interface
 
-### Staging/Production
+### Production (GKE)
 
 **LMS Login:**
 - **URL:** https://academyv2.mereka.io/login
@@ -95,11 +95,11 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 ### Admin Panel
 - **Local:** http://localhost/admin
-- **Staging:** https://academyv2.mereka.io/admin
+- **Production:** https://academyv2.mereka.io/admin
 
 ### Studio (Course Authoring)
 - **Local:** http://studio.localhost
-- **Staging:** https://studio.academyv2.mereka.io
+- **Production:** https://studio.academyv2.mereka.io
 
 ### Analytics (Superset)
 - **Local:** http://localhost:8088
@@ -117,4 +117,3 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 **Last Verified:** 2025-11-12  
 **Status:** Admin login working ✅
-

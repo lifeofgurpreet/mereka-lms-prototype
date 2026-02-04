@@ -71,7 +71,7 @@ kubectl apply -f tutor_env/env/k8s/apps/superset/deployments/superset-worker.yam
 - **Port-forward command**: `kubectl port-forward -n mereka-lms svc/superset 8088:8088`
 - **Credentials**: Check `tutor config printvalue SUPERSET_ADMIN_PASSWORD`
 
-### Staging Environment
+### Production (GKE)
 - **LMS**: https://academyv2.mereka.io
 - **Studio**: https://studio.academyv2.mereka.io
 - **Discovery**: https://discovery.academyv2.mereka.io
@@ -129,4 +129,3 @@ See `docs/COST_ESTIMATE.md` for detailed cost breakdown.
 2. ✅ Verify Superset accessibility
 3. ⏭️ Review cost optimization opportunities
 4. ⏭️ Set up billing alerts in GCP
-

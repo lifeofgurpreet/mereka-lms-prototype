@@ -46,7 +46,7 @@ tutor local start -d
 tutor local dc ps | grep aspects
 ```
 
-### For Kubernetes/Staging
+### For Kubernetes/Production
 
 ```bash
 # 1. Activate environment

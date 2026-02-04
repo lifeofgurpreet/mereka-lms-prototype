@@ -20,17 +20,116 @@ apply_cmd() {
   fi
 }
 
+uptime_id_for() {
+  local display_name=$1
+  gcloud monitoring uptime list-configs --project="$PROJECT" --format=json \
+    | jq -r --arg name "$display_name" '.[] | select(.displayName==$name) | .name' \
+    | head -n 1
+}
+
+policy_id_for() {
+  local display_name=$1
+  gcloud monitoring policies list --project="$PROJECT" --format=json \
+    | jq -r --arg name "$display_name" '.[] | select(.displayName==$name) | .name' \
+    | head -n 1
+}
+
+dashboard_id_for() {
+  local display_name=$1
+  gcloud monitoring dashboards list --project="$PROJECT" --format=json \
+    | jq -r --arg name "$display_name" '.[] | select(.displayName==$name) | .name' \
+    | head -n 1
+}
+
 for file in "$ROOT_DIR"/infrastructure/monitoring/uptime/prod-*.json; do
-  apply_cmd "gcloud monitoring uptime configs create --config-from-file='$file' --project='$PROJECT'"
+  display_name=$(jq -r '.displayName' "$file")
+  host=$(jq -r '.monitoredResource.labels.host' "$file")
+  resource_project=$(jq -r '.monitoredResource.labels.project_id' "$file")
+  path=$(jq -r '.httpCheck.path' "$file")
+  port=$(jq -r '.httpCheck.port' "$file")
+  validate_ssl=$(jq -r '.httpCheck.validateSsl' "$file")
+  use_ssl=$(jq -r '.httpCheck.useSsl' "$file")
+  timeout=$(jq -r '.timeout' "$file")
+  period=$(jq -r '.period' "$file")
+  timeout="${timeout%s}"
+  period="${period%s}"
+  if [[ "$period" =~ ^[0-9]+$ ]]; then
+    period=$((period / 60))
+  fi
+  regions=$(jq -r '.selectedRegions | map(ascii_downcase | sub("^region_";"") | gsub("_";"-")) | join(",")' "$file")
+  if [[ -n "$regions" ]]; then
+    IFS=',' read -ra region_list <<< "$regions"
+    if [[ ${#region_list[@]} -lt 3 ]]; then
+      regions="asia-pacific,usa-oregon,europe"
+    fi
+  fi
+  user_labels=$(jq -r '.userLabels | to_entries | map("\(.key)=\(.value)") | join(",")' "$file")
+  protocol="http"
+  if [[ "$use_ssl" == "true" ]]; then
+    protocol="https"
+  fi
+
+  args=(
+    "--resource-type=uptime-url"
+    "--resource-labels=host=${host},project_id=${resource_project}"
+    "--protocol=${protocol}"
+    "--path=${path}"
+    "--port=${port}"
+    "--validate-ssl=${validate_ssl}"
+    "--timeout=${timeout}"
+    "--period=${period}"
+    "--regions=${regions}"
+    "--project=${PROJECT}"
+  )
+  if [[ -n "$user_labels" ]]; then
+    args+=("--user-labels=${user_labels}")
+  fi
+
+  existing_id=$(uptime_id_for "$display_name")
+  if [[ -n "$existing_id" ]]; then
+    apply_cmd "gcloud monitoring uptime delete '$existing_id' --quiet --project='$PROJECT'"
+  fi
+  apply_cmd "gcloud monitoring uptime create '$display_name' ${args[*]}"
 done
 
 for file in "$ROOT_DIR"/infrastructure/monitoring/logging-metrics/*.json; do
   metric_name=$(basename "$file" .json)
-  apply_cmd "gcloud logging metrics create '$metric_name' --config-from-file='$file' --project='$PROJECT'"
+  if gcloud logging metrics describe "$metric_name" --project="$PROJECT" >/dev/null 2>&1; then
+    apply_cmd "gcloud logging metrics update '$metric_name' --config-from-file='$file' --project='$PROJECT'"
+  else
+    apply_cmd "gcloud logging metrics create '$metric_name' --config-from-file='$file' --project='$PROJECT'"
+  fi
 done
 
 for file in "$ROOT_DIR"/infrastructure/monitoring/alerts/*.json; do
-  apply_cmd "gcloud monitoring policies create --policy-from-file='$file' --project='$PROJECT'"
+  display_name=$(jq -r '.displayName' "$file")
+  existing_id=$(policy_id_for "$display_name")
+  if [[ "$MODE" == "apply" ]]; then
+    if [[ -n "$existing_id" ]]; then
+      if ! gcloud monitoring policies update "$existing_id" --policy-from-file="$file" --project="$PROJECT"; then
+        echo "WARN: Failed to update policy $display_name. Retry after metrics propagate." >&2
+      fi
+    else
+      if ! gcloud monitoring policies create --policy-from-file="$file" --project="$PROJECT"; then
+        echo "WARN: Failed to create policy $display_name. Retry after metrics propagate." >&2
+      fi
+    fi
+  else
+    if [[ -n "$existing_id" ]]; then
+      echo "gcloud monitoring policies update '$existing_id' --policy-from-file='$file' --project='$PROJECT'"
+    else
+      echo "gcloud monitoring policies create --policy-from-file='$file' --project='$PROJECT'"
+    fi
+  fi
+done
+
+for file in "$ROOT_DIR"/infrastructure/monitoring/dashboards/*.json; do
+  display_name=$(jq -r '.displayName' "$file")
+  existing_id=$(dashboard_id_for "$display_name")
+  if [[ -n "$existing_id" ]]; then
+    apply_cmd "gcloud monitoring dashboards delete '$existing_id' --quiet --project='$PROJECT'"
+  fi
+  apply_cmd "gcloud monitoring dashboards create --config-from-file='$file' --project='$PROJECT'"
 done
 
 if [[ "$MODE" == "plan" ]]; then

@@ -138,3 +138,41 @@ spec:
               value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
               value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes
+spec:
+  template:
+    spec:
+      containers:
+        - name: notes
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: NOTES_DOMAIN
+              value: notes.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credentials
+spec:
+  template:
+    spec:
+      containers:
+        - name: credentials
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_MFE_DOMAIN
+              value: apps.academyv2.mereka.dev
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev

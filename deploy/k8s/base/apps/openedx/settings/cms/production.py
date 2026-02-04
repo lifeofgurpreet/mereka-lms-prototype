@@ -123,7 +123,7 @@ CACHES = {
 
 # The default Django contrib site is the one associated to the LMS domain name. 1 is
 # usually "example.com", so it's the next available integer.
-SITE_ID = 2
+SITE_ID = 6
 
 # Contact addresses
 CONTACT_MAILING_ADDRESS = f"Mereka Academy - {MEREKA_LMS_BASE_URL}"

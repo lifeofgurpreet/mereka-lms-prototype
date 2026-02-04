@@ -74,7 +74,7 @@ Triggered by:
 Options:
 - `build_openedx` - Build LMS/CMS/worker image
 - `build_mfe` - Build micro-frontends image
-- `deploy_to_staging` - Auto-deploy to production (academyv2.mereka.io) after build (**legacy name; no staging env**)
+- `deploy_to_staging` - Auto-deploy to **production** (academyv2.mereka.io) after build (**legacy input name; no staging env**)
 - `image_tag` - Custom tag (default: git SHA)
 
 Images pushed to:
@@ -103,17 +103,17 @@ kubectl set image deployment/mfe \
 
 ## Environments
 
-### Staging
-
-- **Protection:** None (auto-deploys)
-- **URL:** https://academyv2.mereka.io
-- **Cluster:** mereka-lms (GKE Autopilot)
-
-### Production (Future)
+### Production (GKE)
 
 - **Protection:** Required reviewers, wait timer
-- **URL:** TBD
-- **Cluster:** TBD
+- **URL:** https://academyv2.mereka.io
+- **Cluster:** bbi-k8 (GKE Autopilot)
+
+### Development (VPS Kind)
+
+- **Protection:** None (manual)
+- **URL:** https://academyv2.mereka.dev
+- **Cluster:** kind on VPS
 
 ## Troubleshooting
 

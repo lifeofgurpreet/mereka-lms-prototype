@@ -1,0 +1,86 @@
+{
+  "displayName": "Mereka LMS - Public Endpoints",
+  "gridLayout": {
+    "columns": 2,
+    "widgets": [
+      {
+        "title": "Core endpoints uptime (LMS / Studio / MFE)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" resource.type=\"uptime_url\" (resource.label.\"host\"=\"academyv2.mereka.io\" OR resource.label.\"host\"=\"studio.academyv2.mereka.io\" OR resource.label.\"host\"=\"apps.academyv2.mereka.io\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_FRACTION_TRUE",
+                    "groupByFields": [
+                      "resource.label.\"host\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Uptime",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Service endpoints uptime (Discovery / Ecommerce / Credentials / Notes / Forum)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" resource.type=\"uptime_url\" (resource.label.\"host\"=\"discovery.academyv2.mereka.io\" OR resource.label.\"host\"=\"ecommerce.academyv2.mereka.io\" OR resource.label.\"host\"=\"credentials.academyv2.mereka.io\" OR resource.label.\"host\"=\"notes.academyv2.mereka.io\" OR resource.label.\"host\"=\"forum.academyv2.mereka.io\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_FRACTION_TRUE",
+                    "groupByFields": [
+                      "resource.label.\"host\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Uptime",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Microsites uptime (Skillourfuture / Biji-biji)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" resource.type=\"uptime_url\" (resource.label.\"host\"=\"skillourfuture.academy.mereka.io\" OR resource.label.\"host\"=\"academy.biji-biji.com\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_FRACTION_TRUE",
+                    "groupByFields": [
+                      "resource.label.\"host\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Uptime",
+            "scale": "LINEAR"
+          }
+        }
+      }
+    ]
+  }
+}

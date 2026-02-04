@@ -9,7 +9,7 @@ Superset runs as a **ClusterIP service** inside Kubernetes, which means it's onl
 
 **Alternative:** Once DNS is configured, you can access Superset at `https://analytics.academyv2.mereka.io` (Caddy ingress is already configured).
 
-### Kubernetes (Staging/Production)
+### Kubernetes (Production)
 
 **Step 1: Port-forward Superset service**
 ```bash
@@ -283,5 +283,4 @@ kubectl get svc -n mereka-lms caddy -o jsonpath='{.status.loadBalancer.ingress[0
 - ✅ Port-forward returns HTTP 302 (redirect to login)
 - ✅ Caddy config shows `analytics.academyv2.mereka.io` route
 - ✅ LoadBalancer IP is returned (e.g., `34.126.186.80`)
-
 

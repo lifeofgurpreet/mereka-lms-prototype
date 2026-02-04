@@ -17,8 +17,8 @@ This checklist focuses on the GKE Autopilot cluster, Cloud SQL, and Memorystore 
 3. **Memorystore (Redis)**
    - Metrics: `redis.googleapis.com/stats/memory/used_bytes` vs `maxmemory`, `redis.googleapis.com/stats/commands/ops`, `redis.googleapis.com/stats/network/bytes`.
 
-> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`). Apply them with  
-> `gcloud monitoring dashboards create --config-from-file infrastructure/monitoring/dashboards/gke.json`
+> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`). Apply them with  
+> `./scripts/infra/apply-monitoring-configs.sh apply`
 
 ## Alerting Policies
 

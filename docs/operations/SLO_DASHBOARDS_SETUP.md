@@ -18,6 +18,7 @@ Located in: `infrastructure/monitoring/`
 | Type | File | Description |
 |------|------|-------------|
 | Uptime Check | `uptime/prod-*.json` | HTTPS checks for academyv2 + microsites + APIs |
+| Dashboard | `dashboards/public-endpoints.json` | Uptime SLO view for public endpoints |
 | Alert | `alerts/lb-5xx-ratio.json` | 5xx error rate spike detection |
 | Alert | `alerts/pod-restarts.json` | Pod restart threshold alerts |
 | Alert | `alerts/cloudsql-disk.json` | Cloud SQL disk usage |

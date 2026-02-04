@@ -1,11 +1,14 @@
 from .common import *
 import os
 
+MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
+NOTES_DOMAIN = os.environ.get("NOTES_DOMAIN", f"notes.{MEREKA_LMS_DOMAIN}")
+
 SECRET_KEY = os.environ.get("NOTES_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     "notes",
     "notes.localhost",
-    "notes.academyv2.mereka.io",
+    NOTES_DOMAIN,
 ]
 
 DATABASES = {

@@ -130,7 +130,7 @@ See **[`docs/PANORAMA_ANALYTICS.md`](PANORAMA_ANALYTICS.md)** for installation d
 - Studio: `http://studio.localhost`
 - Instructor Dashboard: `http://localhost/courses/{course-id}/instructor`
 
-### Staging/Production
+### Production
 - LMS: `https://academyv2.mereka.io`
 - Studio: `https://studio.academyv2.mereka.io`
 - Instructor Dashboard: `https://academyv2.mereka.io/courses/{course-id}/instructor`
@@ -494,4 +494,3 @@ for course in courses[:10]:
 - [OpenEdX Student Models Documentation](https://github.com/openedx/edx-platform/tree/master/common/djangoapps/student)
 - [OpenEdX Certificates Documentation](https://github.com/openedx/edx-platform/tree/master/lms/djangoapps/certificates)
 - Django ORM Query Reference: https://docs.djangoproject.com/en/stable/topics/db/queries/
-

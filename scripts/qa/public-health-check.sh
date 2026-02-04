@@ -60,4 +60,9 @@ if [[ $failures -gt 0 ]]; then
   exit 1
 fi
 
+if [[ "${CHECK_CERTS:-0}" == "1" && "$ENVIRONMENT" == "prod" ]]; then
+  echo "Running certificate SAN checks..."
+  "$SCRIPT_DIR/../infra/check-cert-sans.sh"
+fi
+
 echo "All checks passed."

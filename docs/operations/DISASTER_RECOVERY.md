@@ -13,10 +13,24 @@ This runbook defines the backup schedule, restore drill cadence, and recovery pr
 | Layer | Tooling | Schedule | Notes |
 | --- | --- | --- | --- |
 | Cloud SQL | Automated backups | Daily | Managed by Cloud SQL. Verify in console. |
-| Cloud SQL exports | `cloud-sql-backup.yml` + `scripts/infra/backup-db.sh` | Every 3 days | Writes to `gs://staging-academy-mereka-io-backup/sql/` (legacy bucket name). |
+| Cloud SQL exports | `cloud-sql-backup.yml` + `scripts/infra/backup-db.sh` | Every 3 days | Writes to `gs://staging-academy-mereka-io-backup/sql/` (legacy bucket name used for production backups). |
 | Persistent volumes | Velero | Weekly full + ad-hoc | Use before any risky operation. |
 | MongoDB Atlas | Atlas continuous backups | Continuous | Managed by Atlas (M10). |
 | Config + manifests | Git | Every change | Git is the source of truth for K8s + Tutor configs. |
+
+## Scheduled Backups (Required)
+
+Ensure these schedules are active:
+
+```bash
+# Velero daily backup (03:00 UTC)
+velero schedule create daily-mereka-lms \
+  --schedule="0 3 * * *" \
+  --include-namespaces mereka-lms
+
+# Cloud SQL exports (GitHub Actions)
+# .github/workflows/cloud-sql-backup.yml (every 3 days)
+```
 
 ## Mandatory Pre-Op Backup (Risky Actions)
 
@@ -72,4 +86,3 @@ velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
 - Discovery + Ecommerce health endpoints return `200`
 - Microsites (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`) respond `200`
 - Course content visible for each org
-

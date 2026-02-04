@@ -19,7 +19,7 @@ _Generated: 2025-11-12 • Task Owner: Infra_
 **Status:** ✅ Fully documented
 
 **Includes:**
-- ✅ All environment URLs (Local, Staging, Production)
+- ✅ All environment URLs (Local, Dev, Production)
 - ✅ LMS, Studio, MFEs, Discovery, Ecommerce URLs
 - ✅ Admin panel URLs (`/admin`)
 - ✅ Port forwarding instructions for debugging
@@ -48,7 +48,7 @@ ls -lh docs/ACCESS_URLS.md
 
 **Documented Commands:**
 ```bash
-# Kubernetes (Staging/Production)
+# Kubernetes (Production)
 kubectl exec -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 
 # Local Tutor
@@ -251,5 +251,4 @@ kubectl exec -n mereka-lms deploy/forum -- env | grep MONGODB
 
 **Last Updated:** 2025-11-12
 **Next Review:** After completing verification steps
-
 

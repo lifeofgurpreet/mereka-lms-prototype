@@ -182,17 +182,17 @@ kubectl scale deployment/cms-worker --replicas=2 -n mereka-lms
 
 ### Current Replica Counts by Environment
 
-| Deployment | Local | Staging | Production |
-|------------|-------|---------|------------|
-| lms | 1 | 1 | 2 |
-| cms | 1 | 1 | 1 |
-| lms-worker | 1 | 1 | 2 |
-| cms-worker | 1 | 1 | 1 |
-| mfe | 1 | 1 | 1 |
-| caddy | 1 | 1 | 1 |
-| discovery | 1 | 1 | 1 |
-| ecommerce | 1 | 1 | 1 |
-| forum | 1 | 1 | 1 |
+| Deployment | Local (kind) | Production (GKE) |
+|------------|---------------|------------------|
+| lms | 1 | 2 |
+| cms | 1 | 1 |
+| lms-worker | 1 | 2 |
+| cms-worker | 1 | 1 |
+| mfe | 1 | 1 |
+| caddy | 1 | 1 |
+| discovery | 1 | 1 |
+| ecommerce | 1 | 1 |
+| forum | 1 | 1 |
 
 ### When to Scale
 
@@ -395,6 +395,17 @@ kubectl get secret database-secrets -n mereka-lms
 kubectl describe clustersecretstore gcp-secret-manager
 ```
 
+### Kind (dev) bootstrap
+
+Kind does not support Workload Identity. Use the helper to create the
+`external-secrets/gcp-secret-manager` key secret and apply the local
+ClusterSecretStore override:
+
+```bash
+./scripts/infra/bootstrap-kind-secrets.sh
+kubectl get externalsecrets -n mereka-lms
+```
+
 ### Adding New Secrets
 
 1. **Add to Infisical** (source of truth)
@@ -473,8 +484,8 @@ For detailed secrets management architecture, see `/home/gurpreet/projects/secre
 DATABASES='openedx discovery' ./scripts/infra/backup-db.sh
 
 # Backups are stored at:
-# gs://staging-academy-mereka-io-backup/sql/<timestamp>/<database>.sql.gz (legacy bucket name)
-# (bucket name is legacy; still used for production backups)
+# gs://staging-academy-mereka-io-backup/sql/<timestamp>/<database>.sql.gz
+# (legacy bucket name; still used for production backups)
 ```
 
 **Automated Backups**: GitHub workflow runs every 3 days (`.github/workflows/cloud-sql-backup.yml`)
@@ -508,10 +519,10 @@ velero backup create mereka-lms-backup --include-namespaces mereka-lms
 
 ```bash
 # List available backups
-gsutil ls gs://staging-academy-mereka-io-backup/sql/  # legacy bucket name
+gsutil ls gs://staging-academy-mereka-io-backup/sql/  # legacy bucket name for production backups
 
 # Download backup
-gsutil cp gs://staging-academy-mereka-io-backup/sql/<timestamp>/openedx.sql.gz /tmp/  # legacy bucket name
+gsutil cp gs://staging-academy-mereka-io-backup/sql/<timestamp>/openedx.sql.gz /tmp/  # legacy bucket name for production backups
 
 # Import to Cloud SQL
 gunzip /tmp/openedx.sql.gz
@@ -542,7 +553,7 @@ velero restore create --from-backup mereka-lms-backup --include-resources persis
 velero install \
   --provider gcp \
   --plugins velero/velero-plugin-for-gcp:v1.8.0 \
-  --bucket staging-academy-mereka-io-backup \  # legacy bucket name
+  --bucket staging-academy-mereka-io-backup \  # legacy bucket name for production backups
   --secret-file ./credentials-velero
 
 # Create backup
