@@ -15,6 +15,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `infisical-validate-mereka-lms.sh` - Verify Infisical has all MEREKA_LMS secrets
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
+- `validate-telemetry-connectivity.sh` - **📊 MONITORING** Validate Grafana datasource connectivity to GKE and VPS Prometheus
 - `cloudflare-sync.sh` - Cloudflare DNS sync
 - `mongodb-to-atlas.sh` - MongoDB migration to Atlas
 - `deploy-aspects-k8s.sh` - Deploy Aspects analytics to Kubernetes
@@ -45,5 +46,8 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 
 # Validate Infisical secrets for Mereka LMS
 ./scripts/infra/infisical-validate-mereka-lms.sh
+
+# Validate telemetry connectivity (Grafana → Prometheus)
+./scripts/infra/validate-telemetry-connectivity.sh
 ```
 
