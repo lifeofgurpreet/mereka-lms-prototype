@@ -1,8 +1,6 @@
 # Global configuration
 {
-
-
-
+    auto_https off
 }
 
 # proxy directive snippet (with logging) to be used as follows:
@@ -27,7 +25,7 @@
     # for information about the defaults; i.e. how/when this will be applied.
     encode gzip
 
-    reverse_proxy {args.0} {
+    reverse_proxy {args[0]} {
         header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
         header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
     }
@@ -58,12 +56,12 @@ localhost{$default_site_port}, preview.localhost{$default_site_port} {
     }
 }
 
-# LMS - production/dev + microsites (TLS via Caddy)
+# LMS - production/dev + microsites (TLS via NGINX Ingress)
 # - academyv2.mereka.io: main GKE environment (PRODUCTION DOMAIN)
 # - academyv2.mereka.dev: VPS kind cluster
 # - skillourfuture.academy.mereka.io: Skill Our Future microsite
 # - academy.biji-biji.com: Biji-Biji Academy microsite
-academyv2.mereka.io, academyv2.mereka.dev, preview.academyv2.mereka.io, preview.academyv2.mereka.dev, skillourfuture.academy.mereka.io, academy.biji-biji.com {
+http://academyv2.mereka.io, http://academyv2.mereka.dev, http://preview.academyv2.mereka.io, http://preview.academyv2.mereka.dev, http://skillourfuture.academy.mereka.io, http://academy.biji-biji.com {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -105,11 +103,11 @@ studio.localhost{$default_site_port} {
     }
 }
 
-# Studio/CMS - production/dev (TLS via Caddy)
+# Studio/CMS - production/dev (TLS via NGINX Ingress)
 # - studio.academyv2.mereka.io: GKE Studio
 # - studio.academyv2.mereka.dev: VPS kind Studio
 # - studio.academy.biji-biji.com: Biji-Biji Studio
-studio.academyv2.mereka.io, studio.academyv2.mereka.dev, studio.academy.biji-biji.com {
+http://studio.academyv2.mereka.io, http://studio.academyv2.mereka.dev, http://studio.academy.biji-biji.com {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -133,8 +131,8 @@ discovery.localhost{$default_site_port} {
     import proxy "discovery:8000"
 }
 
-# Discovery Service (TLS via Caddy)
-discovery.academyv2.mereka.io, discovery.academyv2.mereka.dev {
+# Discovery Service (TLS via NGINX Ingress)
+http://discovery.academyv2.mereka.io, http://discovery.academyv2.mereka.dev {
     request_body {
         max_size 10MB
     }
@@ -149,8 +147,8 @@ ecommerce.localhost{$default_site_port} {
     import proxy "ecommerce:8000"
 }
 
-# E-commerce Service (TLS via Caddy)
-ecommerce.academyv2.mereka.io, ecommerce.academyv2.mereka.dev {
+# E-commerce Service (TLS via NGINX Ingress)
+http://ecommerce.academyv2.mereka.io, http://ecommerce.academyv2.mereka.dev {
     request_body {
         max_size 10MB
     }
@@ -168,8 +166,8 @@ apps.localhost{$default_site_port} {
     import proxy "mfe:8002"
 }
 
-# MFE (TLS via Caddy)
-apps.academyv2.mereka.io, apps.academyv2.mereka.dev, apps.academy.biji-biji.com {
+# MFE (TLS via NGINX Ingress)
+http://apps.academyv2.mereka.io, http://apps.academyv2.mereka.dev, http://apps.academy.biji-biji.com {
     redir / https://academyv2.mereka.io
     request_body {
         max_size 2MB
@@ -181,18 +179,18 @@ notes.localhost{$default_site_port} {
     import proxy "notes:8000"
 }
 
-# Notes API (TLS via Caddy)
-notes.academyv2.mereka.io, notes.academyv2.mereka.dev {
+# Notes API (TLS via NGINX Ingress)
+http://notes.academyv2.mereka.io, http://notes.academyv2.mereka.dev {
     import proxy "notes:8000"
 }
 
 # Credentials Service
-credentials.academyv2.mereka.io, credentials.academyv2.mereka.dev {
+http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev {
     import proxy "credentials:8000"
 }
 
 # Forum (discussion service)
-forum.academyv2.mereka.io, forum.academyv2.mereka.dev {
+http://forum.academyv2.mereka.io, http://forum.academyv2.mereka.dev {
     import proxy "forum:4567"
 }
 

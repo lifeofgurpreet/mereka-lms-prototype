@@ -161,24 +161,25 @@ curl -Ik https://academyv2.mereka.io
 - Browser warns about invalid certificate on `academyv2.mereka.io`
 
 **Root Cause:**
-- DNS points at the wrong LoadBalancer (Ingress instead of Caddy), or
-- Caddy is not serving TLS for the hostname
+- DNS points at the wrong LoadBalancer IP, or
+- The Ingress/Certificate SAN list does not include the hostname
 
 **Quick Fix:**
 ```bash
 # 1) Validate cert SANs
 ./scripts/infra/check-cert-sans.sh
 
-# 2) Confirm Caddy has 443 open
-kubectl get svc caddy -n mereka-lms -o jsonpath='{.spec.ports[*].port}'
+# 2) Confirm Ingress hosts + certs include the domain
+kubectl get ingress openedx-lms -n mereka-lms
+kubectl get certificate openedx-lms-tls -n mereka-lms -o jsonpath='{.spec.dnsNames}'
 
-# 3) Ensure DNS is pointing at the Caddy LoadBalancer IP
-kubectl get svc caddy -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-./scripts/infra/cloudflare-sync.sh  # records.json should target the Caddy IP
+# 3) Ensure DNS is pointing at the Ingress LoadBalancer IP
+kubectl get ingress openedx-lms -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+./scripts/infra/cloudflare-sync.sh  # records.json should target the ingress IP
 ```
 
 **Notes:**
-- If the fake cert persists, confirm the hostnames appear in `deploy/k8s/base/apps/caddy/Caddyfile`.
+- If the fake cert persists, confirm the hostnames appear in `deploy/k8s/overlays/production/ingress-openedx-lms.yaml`.
 - When enabling new services (credentials/forum), add their DNS records in `infrastructure/cloudflare/records*.json`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 

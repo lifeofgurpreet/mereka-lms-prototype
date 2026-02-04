@@ -23,6 +23,24 @@ Create (or verify) **two** OAuth2 applications in LMS admin:
 
 > Ensure the **backend** client ID and secret are distinct from the **SSO** client.
 
+## ✅ Ecommerce SiteConfiguration + Partner
+
+Ecommerce will return `500` if the **SiteConfiguration** or **Partner** rows are missing.
+
+Verify in Ecommerce admin:
+
+- **Sites** includes:
+  - `ecommerce.academyv2.mereka.io` (prod)
+  - `ecommerce.academyv2.mereka.dev` (dev)
+  - `ecommerce.localhost` (local)
+- **SiteConfiguration** exists for each site and sets:
+  - `lms_url_root` → `https://academyv2.mereka.io` (prod) / `https://academyv2.mereka.dev` (dev)
+  - `payment_processors` → `cybersource,paypal`
+- **Partner** exists with:
+  - `code`: `mereka`
+  - `short_code`: `mereka`
+  - `default_site`: `ecommerce.academyv2.mereka.io`
+
 ## ✅ Ecommerce Settings (K8s)
 
 `deploy/k8s/base/plugins/ecommerce/apps/ecommerce/settings/production.py` must keep the backend key aligned with the backend OAuth2 client:

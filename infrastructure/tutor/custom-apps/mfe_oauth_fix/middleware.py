@@ -63,7 +63,10 @@ class MFEOAuthFixMiddleware(MiddlewareMixin):
 
                 # Fetch OAuth providers from database
                 try:
-                    from third_party_auth.models import OAuth2ProviderConfig
+                    try:
+                        from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
+                    except ImportError:
+                        from third_party_auth.models import OAuth2ProviderConfig
 
                     # Query for enabled and visible OAuth providers for this site
                     oauth_providers = OAuth2ProviderConfig.objects.filter(

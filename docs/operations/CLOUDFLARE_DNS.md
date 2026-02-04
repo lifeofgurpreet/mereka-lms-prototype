@@ -18,7 +18,7 @@ Target load balancer IP: **34.177.83.168** (GKE ingress for `academyv2.mereka.io
 | CNAME | `preview.academyv2` | `academyv2.mereka.io` | Auto | Off |
 | CNAME | `skillourfuture.academy` | `academyv2.mereka.io` | Auto | Off (must stay DNS-only) |
 
-> Keep Cloudflare proxy **off** (gray cloud) until HTTPS certificates are in place, otherwise ACME HTTP challenges can fail.
+> Keep Cloudflare proxy **off** (gray cloud) until cert-manager has issued the ingress certificates, otherwise ACME HTTP challenges can fail.
 
 ## Automated sync
 
@@ -45,7 +45,7 @@ Target load balancer IP: **34.177.83.168** (GKE ingress for `academyv2.mereka.io
 - `academyv2.mereka.io` – `A` → `34.177.83.168`, TTL `auto` (1), proxy **off** so Let’s Encrypt challenges reach the ingress directly.
 - `studio.academyv2.mereka.io` / `apps.academyv2.mereka.io` – CNAMEs back to `academyv2.mereka.io`, also DNS-only.
 - `skillourfuture.academy.mereka.io` – CNAME to `academyv2.mereka.io`, **always DNS-only**. Cloudflare’s Universal SSL covers only one wildcard level (`*.academy.mereka.io`), so this two-level hostname must present our origin certificate directly until we purchase an advanced certificate pack.
-- `preview.academyv2.mereka.io` / `notes.academyv2.mereka.io` – DNS-only CNAMEs so Caddy can mint certificates for Studio preview + Notes without spamming ACME errors.
+- `preview.academyv2.mereka.io` / `notes.academyv2.mereka.io` – DNS-only CNAMEs so cert-manager can complete HTTP-01 challenges for the ingress.
 - `academyv2.mereka.io` – `CAA 0 issue "letsencrypt.org"` so only Let’s Encrypt can issue certificates for the entire sub-tree; this hardens issuance for our load balancer.
 
 - `academy.biji-biji.com` lives in the separate `biji-biji.com` zone. Manage it with the dashboard or per-zone API token—point it at `academy.biji-biji.com` (A record to the same GKE ingress IP) and feel free to keep it proxied because Cloudflare can issue apex certificates for that zone.
@@ -81,11 +81,9 @@ The `:mereka.io` placeholder is converted to the correct zone identifier automat
 ## After Updating DNS
 
 1. Wait for propagation (`dig +short academyv2.mereka.io` should return `34.177.83.168`).
-2. Re-enable HTTPS in Tutor:
+2. Re-apply the production ingress (cert-manager watches it and issues `openedx-lms-tls`):
    ```bash
-   source infrastructure/tutor/tutor-env.sh
-   tutor config save --set ENABLE_HTTPS=true
-   tutor k8s start
+   kubectl apply -k deploy/k8s/overlays/production
+   kubectl get certificate openedx-lms-tls -n mereka-lms
    ```
-   This prompts Caddy to request Let’s Encrypt certificates for LMS, Studio, and MFEs.
 3. Re-run the smoke test (`./scripts/qa/smoke-test.sh`) and manually verify browser access over HTTPS.

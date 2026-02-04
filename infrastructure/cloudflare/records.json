@@ -4,7 +4,7 @@
     "description": "Primary LMS ingress (GKE)",
     "type": "A",
     "name": "academyv2.mereka.io",
-    "content": "35.187.235.145",
+    "content": "34.177.83.168",
     "ttl": 1,
     "proxied": false
   },

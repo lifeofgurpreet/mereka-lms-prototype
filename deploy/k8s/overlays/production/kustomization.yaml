@@ -5,6 +5,9 @@ namespace: mereka-lms
 
 resources:
   - ../../base
+  - ingress-openedx-lms.yaml
+  - ingress-openedx-mfe.yaml
+  - ingress-openedx-studio.yaml
 
 # Production-specific configurations
 

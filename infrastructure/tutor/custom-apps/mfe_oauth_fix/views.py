@@ -50,7 +50,10 @@ class MFEContextView(View):
 
             # Try to get OAuth providers from third_party_auth
             try:
-                from third_party_auth.models import OAuth2ProviderConfig
+                try:
+                    from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
+                except ImportError:
+                    from third_party_auth.models import OAuth2ProviderConfig
 
                 # Query for enabled and visible OAuth providers for this site
                 providers = OAuth2ProviderConfig.objects.filter(
