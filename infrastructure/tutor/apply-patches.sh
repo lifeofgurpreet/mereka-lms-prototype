@@ -437,21 +437,42 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         "# Patch edx-platform\n# Redwood already bundles the required security/email fixes; cherry-picks disabled locally.\n\n",
     )
 
-    # Add custom MFE OAuth fix app to Dockerfile
-    if path.name == "Dockerfile" and "/openedx/edx-platform" in updated and "mfe_oauth_fix" not in updated:
-        # Find the line where we copy themes and add our custom app after it
+    # Add custom apps to Dockerfile
+    if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
+        # Find the line where we copy themes and add our custom apps after it
         copy_themes_marker = "COPY --chown=app:app themes/ /openedx/themes/"
-        if copy_themes_marker in updated:
-            custom_app_copy = """COPY --chown=app:app themes/ /openedx/themes/
-# Copy MFE OAuth fix custom app
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"""
-            updated = updated.replace(copy_themes_marker, custom_app_copy)
-        else:
+        if copy_themes_marker in updated and "mfe_oauth_fix" not in updated:
+            custom_apps_copy = """COPY --chown=app:app themes/ /openedx/themes/
+# Copy custom apps
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus"""
+            updated = updated.replace(copy_themes_marker, custom_apps_copy)
+        elif "mfe_oauth_fix" in updated and "openedx_prometheus" not in updated:
+            # Add prometheus app alongside existing mfe_oauth_fix
+            mfe_oauth_marker = "COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"
+            custom_apps_add = """COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus"""
+            updated = updated.replace(mfe_oauth_marker, custom_apps_add)
+        elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
             # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
             workdir_marker = "WORKDIR /openedx/edx-platform\n"
             if workdir_marker in updated:
-                custom_app_insert = "# Copy MFE OAuth fix custom app\nCOPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n\n" + workdir_marker
+                custom_app_insert = """# Copy custom apps
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+
+""" + workdir_marker
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)
+
+        # Install django-prometheus after pip install of base requirements
+        if "django-prometheus" not in updated:
+            # Find the RUN pip install command for base requirements
+            base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
+            if base_req_marker in updated:
+                # Add django-prometheus install after base requirements
+                prometheus_install = base_req_marker + """\n\n# Install django-prometheus for metrics
+RUN pip install django-prometheus==2.3.1"""
+                updated = updated.replace(base_req_marker, prometheus_install)
 
     if path.name == "production.py":
         updated = ensure_allowed_hosts(updated)
@@ -475,6 +496,27 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/m
                 MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
             """).strip()
             updated = updated.rstrip() + '\n\n' + mfe_oauth_fix_config + '\n'
+
+        # Add Prometheus metrics integration
+        if "django_prometheus" not in updated:
+            prometheus_config = textwrap.dedent("""
+
+                # Prometheus Metrics Integration
+                # django_prometheus must be added at the START of INSTALLED_APPS
+                if 'django_prometheus' not in INSTALLED_APPS:
+                    INSTALLED_APPS.insert(0, 'django_prometheus')
+
+                # Add custom prometheus app for /metrics endpoint
+                if 'openedx_prometheus' not in INSTALLED_APPS:
+                    INSTALLED_APPS.append('openedx_prometheus')
+
+                # Prometheus middleware must wrap all other middleware
+                if 'django_prometheus.middleware.PrometheusBeforeMiddleware' not in MIDDLEWARE:
+                    MIDDLEWARE.insert(0, 'django_prometheus.middleware.PrometheusBeforeMiddleware')
+                if 'django_prometheus.middleware.PrometheusAfterMiddleware' not in MIDDLEWARE:
+                    MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
+            """).strip()
+            updated = updated.rstrip() + '\n\n' + prometheus_config + '\n'
 
     if path.name == "env.config.jsx":
         updated = updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")
@@ -568,6 +610,19 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/m
             marker = "  location / {"
             if marker in updated:
                 updated = updated.replace(marker, health_block + marker, 1)
+        # Add /metrics endpoint (internal access only, for Prometheus scraping)
+        if "location = /metrics" not in updated:
+            metrics_block = (
+                "  # Prometheus metrics endpoint (internal access only)\n"
+                "  location = /metrics {\n"
+                "    proxy_set_header Host $http_host;\n"
+                "    proxy_redirect off;\n"
+                "    proxy_pass http://lms-backend;\n"
+                "  }\n\n"
+            )
+            marker = "  location = /health {"
+            if marker in updated:
+                updated = updated.replace(marker, metrics_block + marker, 1)
         if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
             pattern = re.compile(
                 r"(server_name apps\.academyv2\.mereka\.io;.*?)(\n  location / \{)",

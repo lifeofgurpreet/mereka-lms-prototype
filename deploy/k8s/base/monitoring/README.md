@@ -4,27 +4,62 @@ This directory contains Prometheus Operator resources for monitoring Open edX se
 
 ## Status
 
-**IMPORTANT**: Open edX does not expose Prometheus metrics by default.
+**UPDATED (2026-02-04)**: Prometheus metrics integration has been implemented via **Bead mereka-lms-2s8**.
 
-The LMS service currently returns HTTP 400 when accessing `/metrics`. This is expected behavior as:
-- Django's `prometheus_client` is not installed or configured
-- Open edX uses its own metrics system (tracking logs, datadog integration)
-- Enabling Prometheus metrics would require custom Django middleware
+The `/metrics` endpoint will be functional after rebuilding the Open edX image with django-prometheus integration.
 
 ## Resources Created
 
-1. **servicemonitor-lms.yaml**: ServiceMonitor for LMS pods (currently non-functional)
-2. **prometheusrule-lms.yaml**: Alert rules based on standard uWSGI/HTTP metrics
+1. **servicemonitor-lms.yaml**: ServiceMonitor for LMS pods
+2. **servicemonitor-cms.yaml**: ServiceMonitor for CMS pods
+3. **prometheusrule-lms.yaml**: Alert rules based on kubelet and application metrics
 
-## Next Steps
+## Metrics Integration
 
-To enable Prometheus metrics in Open edX:
+### Implementation (Bead mereka-lms-2s8)
 
-1. Install `django-prometheus` in the openedx image
-2. Add `django_prometheus` to INSTALLED_APPS in settings
-3. Add `django_prometheus.middleware.PrometheusBeforeMiddleware` and `PrometheusAfterMiddleware`
-4. Mount `/metrics` endpoint in URL configuration
-5. Update ServiceMonitor to target the correct port
+Django-prometheus has been integrated into the Open edX image:
+
+1. **Custom app created**: `infrastructure/tutor/custom-apps/openedx_prometheus/`
+2. **Package installed**: `django-prometheus==2.3.1` added to Open edX requirements
+3. **Configuration**: Middleware and INSTALLED_APPS configured via `apply-patches.sh`
+4. **Endpoint exposed**: `/metrics` accessible via nginx configuration
+5. **Documentation**: See `infrastructure/tutor/README.md` and custom app README
+
+### Activating Metrics
+
+**Rebuild the Open edX image** (required to include django-prometheus):
+
+```bash
+export TUTOR_ROOT="$(pwd)/tutor_env"
+source infrastructure/tutor/tutor-env.sh
+
+# Apply patches (includes prometheus integration)
+./infrastructure/tutor/apply-patches.sh
+
+# Rebuild Open edX image (takes 30-45 min, needs 12GB+ RAM)
+tutor images build openedx
+
+# For production
+docker tag local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:latest
+
+# Restart pods
+kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
+```
+
+### Verification
+
+After image rebuild:
+
+```bash
+# Test /metrics endpoint
+kubectl exec -n mereka-lms deploy/lms -- curl -s localhost:8000/metrics | head -20
+
+# Check Prometheus is scraping
+kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+# Open: http://localhost:9090/targets (search for "lms-metrics")
+```
 
 ## Alternative Monitoring
 
