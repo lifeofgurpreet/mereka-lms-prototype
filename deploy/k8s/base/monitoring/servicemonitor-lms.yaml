@@ -1,0 +1,43 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lms-metrics
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+spec:
+  # Select the LMS service
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lms
+      app.kubernetes.io/instance: mereka-lms
+
+  # Target the mereka-lms namespace
+  namespaceSelector:
+    matchNames:
+      - mereka-lms
+
+  # Scrape configuration
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: http
+      # RelabelConfigs to add additional labels to metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+      # MetricRelabelConfigs to drop unwanted metrics (if needed)
+      # metricRelabelings:
+      #   - sourceLabels: [__name__]
+      #     regex: 'django_http_requests_total_by_view_transport_method'
+      #     action: drop

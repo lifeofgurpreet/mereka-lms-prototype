@@ -5,6 +5,40 @@ This checklist focuses on the GKE Autopilot cluster, Cloud SQL, and Memorystore 
 
 ## Dashboards
 
+### BBI Observability Stack (Grafana)
+
+The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-app-mereka-lms
+
+**Dashboard Sections**:
+1. **Service Health**: LMS, CMS, Caddy, MFE, Workers status
+2. **Data Services**: MySQL, MongoDB Atlas, Redis, Elasticsearch, Forum
+3. **Resource Usage**: CPU and memory by pod
+4. **External Availability (SLO)**: 24h availability, response time, SSL cert expiry
+5. **Authentication & Security**: Auth failures by service
+6. **Logs**: Error volumes and recent errors
+
+### MongoDB Atlas Monitoring
+
+**CRITICAL**: MongoDB Atlas is monitored via TCP connectivity probe (blackbox exporter).
+
+- **Probe**: Checks TCP connection to `cluster-mereka-lms.2pjex4s.mongodb.net:27017` every 60s
+- **Metric**: `probe_success{job="mongodb-atlas"}`
+- **Dashboard Panel**: Shows as "MongoDB Atlas" in Data Services row
+- **Alert**: `MongoDBAtlasDown` fires after 2min of failed probes (severity: critical)
+
+**Why TCP probe?**:
+- MongoDB Atlas is managed externally (no direct metrics export)
+- TCP connectivity check ensures cluster is reachable from GKE
+- Detects network issues, IP whitelist problems, or cluster outages
+
+**If MongoDB Atlas is down**:
+1. Check https://cloud.mongodb.com/ for cluster status
+2. Verify IP whitelist includes GKE NAT IPs
+3. Check billing/payment status
+4. Review LMS/Forum pod logs for connection errors
+
+### GCP Native Monitoring
+
 1. **GKE Autopilot**
    - Metrics: `kubernetes.io/container/cpu/request_utilization`, `kubernetes.io/container/memory/request_utilization`, `kubernetes.io/container/restart_count`, `ingress.googleapis.com/https/request_count`.
    - Filter by namespace `mereka-lms`.
@@ -12,12 +46,12 @@ This checklist focuses on the GKE Autopilot cluster, Cloud SQL, and Memorystore 
 
 2. **Cloud SQL (MySQL)**
    - Metrics: `cloudsql.googleapis.com/database/cpu/utilization`, `cloudsql.googleapis.com/database/memory/utilization`, `cloudsql.googleapis.com/database/disk/utilization`, `cloudsql.googleapis.com/database/replication/lag`.
-   - Enable “Query Insights” in the Cloud SQL console for slow-query heatmaps.
+   - Enable "Query Insights" in the Cloud SQL console for slow-query heatmaps.
 
 3. **Memorystore (Redis)**
    - Metrics: `redis.googleapis.com/stats/memory/used_bytes` vs `maxmemory`, `redis.googleapis.com/stats/commands/ops`, `redis.googleapis.com/stats/network/bytes`.
 
-> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`). Apply them with  
+> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`). Apply them with
 > `./scripts/infra/apply-monitoring-configs.sh apply`
 
 ## Alerting Policies

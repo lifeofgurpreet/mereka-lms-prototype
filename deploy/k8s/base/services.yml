@@ -14,6 +14,9 @@ spec:
       name: http
     - port: 443
       name: https
+    - port: 2019
+      name: metrics
+      targetPort: 2019
   selector:
     app.kubernetes.io/name: caddy
 
@@ -28,6 +31,7 @@ spec:
   type: ClusterIP
   ports:
     - port: 8000
+      name: http
       protocol: TCP
   selector:
     app.kubernetes.io/name: cms
@@ -42,6 +46,7 @@ spec:
   type: ClusterIP
   ports:
     - port: 8000
+      name: http
       protocol: TCP
   selector:
     app.kubernetes.io/name: lms

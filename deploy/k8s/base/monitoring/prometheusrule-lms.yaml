@@ -1,0 +1,213 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lms-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: openedx-lms
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: LMSPodDown
+          expr: up{job="lms-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: lms
+          annotations:
+            summary: "LMS pod is down"
+            description: "LMS pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: LMSPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"lms-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS pod is restarting frequently"
+            description: "LMS pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: LMSPodMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS pod memory usage is high"
+            description: "LMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit."
+
+        - alert: LMSPodMemoryCritical
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+            ) > 0.95
+          for: 5m
+          labels:
+            severity: critical
+            component: lms
+          annotations:
+            summary: "LMS pod memory usage is critical"
+            description: "LMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit and may be OOM killed."
+
+        # CPU alerts
+        - alert: LMSPodCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"lms-.*", container="lms"}[5m])
+              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+              * container_spec_cpu_period{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS pod CPU usage is high"
+            description: "LMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of CPU limit."
+
+        # Disk alerts
+        - alert: LMSPodDiskSpaceHigh
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes{namespace="mereka-lms", persistentvolumeclaim=~"lms-.*"}
+              / kubelet_volume_stats_capacity_bytes{namespace="mereka-lms", persistentvolumeclaim=~"lms-.*"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS persistent volume disk space is high"
+            description: "LMS volume {{ $labels.persistentvolumeclaim }} is using {{ $value | humanizePercentage }} of capacity."
+
+    - name: openedx-cms
+      interval: 30s
+      rules:
+        # Pod availability alerts for CMS
+        - alert: CMSPodDown
+          expr: up{job="cms-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: cms
+          annotations:
+            summary: "CMS (Studio) pod is down"
+            description: "CMS pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: CMSPodMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"cms-.*", container="cms"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"cms-.*", container="cms"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: cms
+          annotations:
+            summary: "CMS pod memory usage is high"
+            description: "CMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit."
+
+    - name: openedx-caddy
+      interval: 30s
+      rules:
+        # Caddy reverse proxy alerts
+        - alert: CaddyPodDown
+          expr: up{job="caddy-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: caddy
+          annotations:
+            summary: "Caddy reverse proxy is down"
+            description: "Caddy pod {{ $labels.pod }} has been down for more than 5 minutes. All traffic to Open edX is affected."
+
+        - alert: CaddyHighErrorRate
+          expr: |
+            (
+              sum(rate(caddy_http_response_status_count_total{namespace="mereka-lms", status=~"5.."}[5m]))
+              / sum(rate(caddy_http_response_status_count_total{namespace="mereka-lms"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: caddy
+          annotations:
+            summary: "Caddy is returning high rate of 5xx errors"
+            description: "Caddy is returning {{ $value | humanizePercentage }} of requests as 5xx errors."
+
+        - alert: CaddyHighLatency
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(caddy_http_request_duration_seconds_bucket{namespace="mereka-lms"}[5m])) by (le)
+            ) > 5
+          for: 5m
+          labels:
+            severity: warning
+            component: caddy
+          annotations:
+            summary: "Caddy p99 latency is high"
+            description: "Caddy p99 request latency is {{ $value }}s (threshold: 5s)."
+
+    - name: openedx-infrastructure
+      interval: 30s
+      rules:
+        # MySQL alerts
+        - alert: MySQLPodDown
+          expr: up{namespace="mereka-lms", pod=~"mysql-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: mysql
+          annotations:
+            summary: "MySQL database is down"
+            description: "MySQL pod {{ $labels.pod }} has been down for more than 5 minutes. Open edX is non-functional."
+
+        # Redis alerts
+        - alert: RedisPodDown
+          expr: up{namespace="mereka-lms", pod=~"redis-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: redis
+          annotations:
+            summary: "Redis cache is down"
+            description: "Redis pod {{ $labels.pod }} has been down for more than 5 minutes. Open edX performance degraded."
+
+        # MongoDB alerts
+        - alert: MongoDBPodDown
+          expr: up{namespace="mereka-lms", pod=~"mongodb-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: mongodb
+          annotations:
+            summary: "MongoDB is down"
+            description: "MongoDB pod {{ $labels.pod }} has been down for more than 5 minutes. Course content and forums unavailable."
+
+        # Elasticsearch alerts
+        - alert: ElasticsearchPodDown
+          expr: up{namespace="mereka-lms", pod=~"elasticsearch-.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: elasticsearch
+          annotations:
+            summary: "Elasticsearch is down"
+            description: "Elasticsearch pod {{ $labels.pod }} has been down for more than 5 minutes. Search functionality unavailable."
