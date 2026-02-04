@@ -8,6 +8,15 @@ resources:
   - clusterissuer-letsencrypt-prod.yaml
   - ingress-openedx-lms.yaml
 
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: ses-smtp-credentials
+    literals:
+      - RELAY_USERNAME=dev
+      - RELAY_PASSWORD=dev
+
 patchesStrategicMerge:
   - patches/domain-env.yaml
   - patches/clustersecretstore-gcp.yaml

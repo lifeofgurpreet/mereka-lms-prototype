@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import pathlib
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
@@ -42,6 +43,13 @@ ORGANIZATIONS = [
     },
 ]
 
+PRIMARY_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
+BIJI_DOMAIN = os.environ.get("MEREKA_BIJI_DOMAIN", "academy.biji-biji.com")
+SKILLOURFUTURE_DOMAIN = os.environ.get(
+    "MEREKA_SKILLOURFUTURE_DOMAIN",
+    "skillourfuture.academy.mereka.io",
+)
+
 def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, primary_href: str, secondary_label: str, secondary_href: str, accent: str, background: str) -> str:
     return textwrap.dedent(
         f"""
@@ -60,51 +68,51 @@ def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, prim
 
 SITE_DEFINITIONS = [
     SiteDefinition(
-        domain="academyv2.mereka.io",
+        domain=PRIMARY_DOMAIN,
         name="Mereka Academy",
         orgs=["MEREKA"],
         site_values={
-            "domain": "academyv2.mereka.io",
+            "domain": PRIMARY_DOMAIN,
             "site_name": "Mereka Academy",
             "platform_name": "Mereka Academy",
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
             "course_org_filter": ["MEREKA"],
-            "logo_image": "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png",
+            "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
             "favicon_path": "mereka/images/favicon.ico",
             "homepage_banner_enabled": False,
         },
     ),
     SiteDefinition(
-        domain="academy.biji-biji.com",
+        domain=BIJI_DOMAIN,
         name="Biji-Biji Academy",
         orgs=["BIJIBIJI"],
         site_values={
-            "domain": "academy.biji-biji.com",
+            "domain": BIJI_DOMAIN,
             "site_name": "Biji-Biji Academy",
             "platform_name": "Biji-Biji Academy",
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
             "course_org_filter": ["BIJIBIJI"],
-            "logo_image": "https://academy.biji-biji.com/static/mereka/images/logo-horizontal.png",
+            "logo_image": f"https://{BIJI_DOMAIN}/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
             "favicon_path": "mereka/images/favicon.ico",
             "homepage_banner_enabled": False,
         },
     ),
     SiteDefinition(
-        domain="skillourfuture.academy.mereka.io",
+        domain=SKILLOURFUTURE_DOMAIN,
         name="Skill Our Future",
         orgs=["SKILLOURFUTURE"],
         site_values={
-            "domain": "skillourfuture.academy.mereka.io",
+            "domain": SKILLOURFUTURE_DOMAIN,
             "site_name": "Skill Our Future",
             "platform_name": "Skill Our Future",
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
             "course_org_filter": ["SKILLOURFUTURE"],
-            "logo_image": "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png",
+            "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
             "favicon_path": "mereka/images/favicon.ico",
             "homepage_banner_enabled": True,

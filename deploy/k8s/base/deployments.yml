@@ -155,6 +155,11 @@ spec:
             value: cms
           - name: DJANGO_SETTINGS_MODULE
             value: cms.envs.tutor.production
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           volumeMounts:
             - mountPath: /openedx/edx-platform/lms/envs/tutor/
               name: settings-lms
@@ -279,6 +284,11 @@ spec:
             value: lms
           - name: DJANGO_SETTINGS_MODULE
             value: lms.envs.tutor.production
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
           volumeMounts:
             - mountPath: /openedx/edx-platform/lms/envs/tutor/
               name: settings-lms
