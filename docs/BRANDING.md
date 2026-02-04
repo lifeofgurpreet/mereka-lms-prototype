@@ -89,6 +89,12 @@ the presence of required logos, fonts, SCSS imports, and favicon assets. `./infr
 and `./scripts/branding/deploy-branded-image.sh` now execute this check automatically and fail fast if any
 asset is missing.
 
+To validate that the branding is actually visible on live domains, run:
+
+```bash
+./scripts/qa/verify-public-branding.sh prod
+```
+
 ## Micro-Frontend Plug-in
 
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` reuses the same tokens/fonts, then layers on navbar/button/card tweaks tailored to Paragon components. Fonts are bundled with each MFE, so there are no cross-origin font requests.

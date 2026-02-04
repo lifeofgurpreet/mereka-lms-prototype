@@ -83,15 +83,16 @@ infrastructure/tutor/themes/mereka/
 
 ---
 
-## Screenshots to Capture (Post-Verification)
+## Screenshots Captured
 
 | Screenshot | Location | Description |
 |------------|----------|-------------|
 | /tmp/lms-homepage.png | LMS | Hero + header + footer branded |
-| /tmp/lms-footer.png | LMS | Footer links + logo visible |
+| /tmp/courses.png | LMS | Courses page with cards |
 | /tmp/studio-homepage.png | Studio | “Mereka Academy - Studio” header |
 | /tmp/mfe-login.png | MFE | Authn login page rendered correctly |
-| /tmp/courses.png | LMS | Courses page with cards |
+| /tmp/biji-homepage.png | Microsite | academy.biji-biji.com homepage |
+| /tmp/skillourfuture-homepage.png | Microsite | skillourfuture.academy.mereka.io homepage |
 
 ---
 
@@ -108,6 +109,9 @@ infrastructure/tutor/themes/mereka/
 ```bash
 # Offline asset wiring check
 ./scripts/branding/verify-branding-health.sh
+
+# Public branding smoke check (prod/dev)
+./scripts/qa/verify-public-branding.sh prod
 
 # Check theme is applied
 curl -s https://academyv2.mereka.io | grep -i "mereka"
