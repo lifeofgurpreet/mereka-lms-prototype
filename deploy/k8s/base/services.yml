@@ -14,9 +14,6 @@ spec:
       name: http
     - port: 443
       name: https
-    - port: 2019
-      name: metrics
-      targetPort: 2019
   selector:
     app.kubernetes.io/name: caddy
 

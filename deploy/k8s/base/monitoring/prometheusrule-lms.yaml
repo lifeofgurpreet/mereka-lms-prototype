@@ -124,47 +124,6 @@ spec:
             summary: "CMS pod memory usage is high"
             description: "CMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit."
 
-    - name: openedx-caddy
-      interval: 30s
-      rules:
-        # Caddy reverse proxy alerts
-        - alert: CaddyPodDown
-          expr: up{job="caddy-metrics", namespace="mereka-lms"} == 0
-          for: 5m
-          labels:
-            severity: critical
-            component: caddy
-          annotations:
-            summary: "Caddy reverse proxy is down"
-            description: "Caddy pod {{ $labels.pod }} has been down for more than 5 minutes. All traffic to Open edX is affected."
-
-        - alert: CaddyHighErrorRate
-          expr: |
-            (
-              sum(rate(caddy_http_response_status_count_total{namespace="mereka-lms", status=~"5.."}[5m]))
-              / sum(rate(caddy_http_response_status_count_total{namespace="mereka-lms"}[5m]))
-            ) > 0.05
-          for: 5m
-          labels:
-            severity: warning
-            component: caddy
-          annotations:
-            summary: "Caddy is returning high rate of 5xx errors"
-            description: "Caddy is returning {{ $value | humanizePercentage }} of requests as 5xx errors."
-
-        - alert: CaddyHighLatency
-          expr: |
-            histogram_quantile(0.99,
-              sum(rate(caddy_http_request_duration_seconds_bucket{namespace="mereka-lms"}[5m])) by (le)
-            ) > 5
-          for: 5m
-          labels:
-            severity: warning
-            component: caddy
-          annotations:
-            summary: "Caddy p99 latency is high"
-            description: "Caddy p99 request latency is {{ $value }}s (threshold: 5s)."
-
     - name: openedx-infrastructure
       interval: 30s
       rules:

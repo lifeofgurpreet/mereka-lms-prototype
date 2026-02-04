@@ -30,7 +30,7 @@ To enable Prometheus metrics in Open edX:
 
 Until native Prometheus metrics are enabled, consider:
 
-1. **Caddy metrics**: Caddy exposes Prometheus metrics on `:2019/metrics`
+1. **Container metrics**: CPU, memory, disk from kubelet (already collected by kube-state-metrics)
 2. **MySQL metrics**: Use mysqld-exporter sidecar
 3. **Redis metrics**: Use redis-exporter sidecar
 4. **Application logs**: Ship to Loki via Promtail (already configured)

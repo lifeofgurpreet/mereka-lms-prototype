@@ -4,5 +4,4 @@ kind: Kustomization
 resources:
   - servicemonitor-lms.yaml
   - servicemonitor-cms.yaml
-  - servicemonitor-caddy.yaml
   - prometheusrule-lms.yaml
