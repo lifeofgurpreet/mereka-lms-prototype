@@ -53,9 +53,12 @@ npm start
 
 ## Asset Checklist
 
-- Logos live at `assets/branding/logo-horizontal.png` and `assets/branding/logo-square.png`.
+- Logos live at `assets/branding/logo-horizontal.png`, `assets/branding/logo-horizontal-white.png`,
+  `assets/branding/logo-square.png`, and the header-safe `assets/branding/logo.png`.
 - Web fonts are vendored under `assets/branding/fonts/` and duplicated to `infrastructure/tutor/themes/mereka/common/static/fonts/` for LMS/Studio.
-- Favicon/App-icon set ships as `infrastructure/tutor/themes/mereka/common/static/images/favicon.svg` (export more sizes via `scripts/branding/sync-brand-assets.sh` if required).
+- Favicons ship as `assets/branding/favicon.ico` plus PNG sizes (`favicon-16x16.png`, `favicon-32x32.png`,
+  `favicon-256x256.png`) and optional `favicon.svg`. `scripts/branding/sync-brand-assets.sh` syncs all of
+  them into the theme images directory.
 
 When new assets arrive, drop them into `assets/branding/`, re-sync the theme copy if needed, and update the tables above so the next engineer understands which files feed the build.
 
@@ -79,6 +82,13 @@ tutor local start -d
 tutor local run lms ./manage.py lms collectstatic --noinput
 ```
 
+## Branding Health Gate
+
+Run `./scripts/branding/verify-branding-health.sh` before building or deploying images. It enforces
+the presence of required logos, fonts, SCSS imports, and favicon assets. `./infrastructure/tutor/apply-patches.sh`
+and `./scripts/branding/deploy-branded-image.sh` now execute this check automatically and fail fast if any
+asset is missing.
+
 ## Micro-Frontend Plug-in
 
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` reuses the same tokens/fonts, then layers on navbar/button/card tweaks tailored to Paragon components. Fonts are bundled with each MFE, so there are no cross-origin font requests.
@@ -88,5 +98,6 @@ tutor local run lms ./manage.py lms collectstatic --noinput
 
 ## Favicons & Meta
 
-- Primary favicon: `infrastructure/tutor/themes/mereka/common/static/images/favicon.svg`. Browsers that need raster fallbacks can use `logo-square.png` converted to `.ico` via `npx svg2img` or macOS Preview.
-- Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.svg` via `tutor config save` so Django advertises the correct icon and MFEs reuse it from their config.
+- Primary favicon: `infrastructure/tutor/themes/mereka/common/static/images/favicon.ico` (synced from `assets/branding/favicon.ico`).
+- Optional SVG: `infrastructure/tutor/themes/mereka/common/static/images/favicon.svg` if you want crisp scaling.
+- Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.ico` via `tutor config save` so Django advertises the correct icon and MFEs reuse it from their config.

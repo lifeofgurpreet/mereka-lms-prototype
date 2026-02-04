@@ -1,95 +1,43 @@
-# Branding Verification Checklist - 2026-02-03
+# Branding Verification Checklist - 2026-02-04
 
 ## Summary
 
-**Overall Status: PARTIALLY IMPLEMENTED** - LMS has Mereka branding but critical issues exist
+**Overall Status: IMPLEMENTED (runtime verification pending)** - repo wiring + assets are in place; confirm via checks below
 
 | Component | Status | Issues |
 |-----------|--------|--------|
-| LMS Homepage | ⚠️ Partial | Hero background missing, footer logo broken |
-| LMS Footer | ⚠️ Partial | Logo shows alt text, image path issue |
-| LMS Header | ✅ Working | Mereka logo displays correctly |
-| Studio | ❌ Broken | Shows "My Open edX - Studio" instead of Mereka |
-| MFE (Login) | ❌ Broken | Error page, API routing issue |
-| MFE (Other) | ❌ Broken | All MFEs affected by same issue |
-| Courses Page | ✅ Working | Header/footer consistent |
-| Brand Colors | ⚠️ Partial | Teal visible, full palette not applied |
+| LMS Homepage | ✅ Expected | Verify hero + footer in runtime |
+| LMS Footer | ✅ Expected | Custom footer + logo in runtime |
+| LMS Header | ✅ Expected | Mereka logo + nav chrome |
+| Studio | ✅ Expected | Theme applied, “Mereka Academy - Studio” |
+| MFE (Login) | ✅ Expected | Authn loads via LMS config |
+| MFE (Other) | ✅ Expected | Same config path as login |
+| Courses Page | ✅ Expected | Header/footer consistent |
+| Brand Colors | ⚠️ Review | Align with official palette if needed |
 
 ---
 
-## Critical Issues (P0)
+## Resolved Issues (Historical)
 
-### 1. MFE Login Page Completely Broken
-**URL**: https://apps.academyv2.mereka.io/authn/login
-**Symptom**: Shows "An unexpected error occurred. Please click the button below to refresh the page."
+### 1. MFE Login Page Config API
+**Fix shipped**: Caddy `Host` header override + MFE config alignment.
+**Verify**: `curl -s "https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn" | jq .`
 
-**Root Cause**:
-- MFE is calling `/api/mfe_config/v1?mfe=authn` on the MFE domain (apps.academyv2.mereka.io)
-- This routes to mfe:8002 (Caddy static server) which returns 400
-- Should call LMS domain (academyv2.mereka.io) for API
-
-**Console Errors**:
-```
-SESSION_COOKIE_DOMAIN is required by ProcessEnvConfigService
-Error with config API Request failed with status code 400
-```
-
-**Fix Required**: Update MFE build configuration to use correct API base URL
-
-### 2. Studio Shows Generic Open edX Branding
-**URL**: https://studio.academyv2.mereka.io
-**Symptom**: Page title "Welcome to My Open edX - Studio"
-
-**Root Cause**: Studio is using default Open edX theme, not Mereka theme
-
-**Evidence**:
-- Header shows generic gray circle icon
-- Title says "My Open edX - Studio"
-- Footer links to "edX Inc." and "Powered by Open edX"
-- No Mereka colors or fonts
-
-**Fix Required**: Apply Mereka theme to CMS configuration
+### 2. Studio Theme
+**Fix shipped**: Theme wiring applied via Tutor patches and theme assets sync.
+**Verify**: `scripts/qa/verify-studio-branding.sh`
 
 ---
 
-## High Priority Issues (P1)
+## Remaining Follow-ups
 
-### 3. Footer Logo Broken
-**Location**: LMS homepage footer
-**Symptom**: Shows "Mereka Academy logo" alt text instead of image
-
-**Root Cause**:
-- Template uses `${static.url('images/logo-horizontal.png')}`
-- Image may not be deployed to theming assets path
-- Or path resolution differs between environments
-
-**Verification Command**:
-```bash
-curl -sI https://academyv2.mereka.io/theming/asset/images/logo-horizontal.png
-```
-
-### 4. Hero Background Missing
-**Location**: LMS homepage hero section
-**Symptom**: Gray solid color instead of branded background
-
-**Expected**: Gradient or branded imagery
-**Actual**: Plain gray (#808080 approximately)
+### 1. Palette Alignment Review
+The official palette calls for teal/magenta/blue accents. Confirm whether the current token set
+matches brand intent and adjust `_tokens.scss` if needed.
 
 ---
 
-## Medium Priority Issues (P2)
-
-### 5. Course Cards Missing Thumbnails
-**Location**: /courses page
-**Symptom**: Blank gray area where course cards should show images/thumbnails
-
-### 6. Font Loading Not Verified
-**Expected Fonts**: Lato, Poppins
-**Status**: Theme files exist but visual confirmation needed
-
----
-
-## Working Elements ✅
+## Working Elements (Expected)
 
 ### LMS Header
 - Mereka logo displays correctly in navigation
@@ -135,31 +83,32 @@ infrastructure/tutor/themes/mereka/
 
 ---
 
-## Screenshots Captured
+## Screenshots to Capture (Post-Verification)
 
 | Screenshot | Location | Description |
 |------------|----------|-------------|
-| /tmp/lms-homepage.png | LMS | Header with Mereka logo, gray hero |
-| /tmp/lms-footer2.png | LMS | Full page with footer issues |
-| /tmp/studio-homepage.png | Studio | Generic Open edX branding |
-| /tmp/mfe-login.png | MFE | Error page with "Try again" |
-| /tmp/courses.png | LMS | Courses page, empty cards |
+| /tmp/lms-homepage.png | LMS | Hero + header + footer branded |
+| /tmp/lms-footer.png | LMS | Footer links + logo visible |
+| /tmp/studio-homepage.png | Studio | “Mereka Academy - Studio” header |
+| /tmp/mfe-login.png | MFE | Authn login page rendered correctly |
+| /tmp/courses.png | LMS | Courses page with cards |
 
 ---
 
-## Recommended Fix Order
+## Recommended Verification Order
 
-1. **MFE API Routing** (P0) - Fix environment config for MFE builds
-2. **Studio Theme** (P0) - Apply Mereka theme to CMS
-3. **Footer Logo** (P1) - Verify/fix static file path
-4. **Hero Background** (P1) - Add CSS or image
-5. **Course Thumbnails** (P2) - May require course content update
+1. Run `./scripts/branding/verify-branding-health.sh`
+2. Run `scripts/qa/verify-studio-branding.sh` (cluster)
+3. Visual check LMS/MFE pages for hero, footer, and cards
 
 ---
 
 ## Verification Commands
 
 ```bash
+# Offline asset wiring check
+./scripts/branding/verify-branding-health.sh
+
 # Check theme is applied
 curl -s https://academyv2.mereka.io | grep -i "mereka"
 
@@ -181,9 +130,6 @@ agent-browser open https://academyv2.mereka.io && agent-browser screenshot homep
 
 ## Next Steps
 
-1. [ ] Fix MFE API routing configuration
-2. [ ] Apply theme to Studio (CMS)
-3. [ ] Debug and fix footer logo path
-4. [ ] Add hero section background styling
-5. [ ] Rebuild MFE images with correct config
-6. [ ] Redeploy and verify all components
+1. [ ] Run the verification steps above in GKE + dev
+2. [ ] Confirm hero gradient + footer logos visually
+3. [ ] Review token palette vs official brand colors

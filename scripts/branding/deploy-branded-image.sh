@@ -4,6 +4,8 @@ set -euo pipefail
 # Deploy branded OpenEdX image to GKE
 # Usage: ./scripts/branding/deploy-branded-image.sh [TAG]
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
 TAG="${1:-mereka-brand}"
 IMAGE_BASE="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
 NAMESPACE="mereka-lms"
@@ -14,7 +16,12 @@ echo "Registry: $IMAGE_BASE"
 echo "Namespace: $NAMESPACE"
 echo ""
 
+# Step 0: Verify branding health before pushing
+echo "Step 0: Verifying branding health..."
+"$REPO_ROOT/scripts/branding/verify-branding-health.sh"
+
 # Step 1: Verify image exists locally
+echo ""
 echo "Step 1: Checking local image..."
 if ! docker images | grep -q "tutor_local/openedx"; then
   echo "ERROR: Local image tutor_local/openedx not found. Run 'tutor images build openedx' first."

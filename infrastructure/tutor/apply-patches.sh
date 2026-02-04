@@ -5,6 +5,11 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/.venv/bin/activate"
 
+BRANDING_CHECK="$REPO_ROOT/scripts/branding/verify-branding-health.sh"
+if [[ -x "$BRANDING_CHECK" ]]; then
+  "$BRANDING_CHECK"
+fi
+
 MFE_TEMPLATE=$(python - <<'PY'
 import inspect
 import tutormfe

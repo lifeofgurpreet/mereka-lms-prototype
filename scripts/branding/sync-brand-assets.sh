@@ -22,7 +22,7 @@ cp "$SRC_FONTS"/*.woff2 "$THEME_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$MFE_FONT_DIR"/
 
 # Copy logo assets to all theme directories
-for asset in logo-horizontal.png logo-horizontal.svg logo-horizontal-white.png logo-horizontal-white.svg logo-square.png logo-square.svg favicon.ico favicon.svg; do
+for asset in logo-horizontal.png logo-horizontal.svg logo-horizontal-white.png logo-horizontal-white.svg logo-square.png logo-square.svg logo.png favicon.ico favicon.svg favicon-16x16.png favicon-32x32.png favicon-256x256.png; do
   if [[ -f "$IMG_SRC_DIR/$asset" ]]; then
     cp "$IMG_SRC_DIR/$asset" "$IMG_DEST_DIR/$asset"
     cp "$IMG_SRC_DIR/$asset" "$MFE_IMG_DEST_DIR/$asset"
