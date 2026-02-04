@@ -11,8 +11,6 @@ kubectl apply -k deploy/k8s/overlays/production
 # Deploy locally (Kind/Minikube)
 kubectl apply -k deploy/k8s/overlays/local
 
-# Legacy staging overlay (do not use)
-# kubectl apply -k deploy/k8s/overlays/staging
 ```
 
 ## Environments
@@ -20,7 +18,6 @@ kubectl apply -k deploy/k8s/overlays/local
 | Environment | Description | Replicas |
 |-------------|-------------|----------|
 | `local` | Local development (Kind/Minikube) | 1 each |
-| `staging` | Legacy overlay (deprecated) | N/A |
 | `production` | Production GKE cluster | 2 LMS, 1 CMS |
 
 ## Customizing

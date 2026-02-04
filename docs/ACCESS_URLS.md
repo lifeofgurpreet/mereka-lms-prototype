@@ -63,9 +63,9 @@ _Audience: Everyone • Last updated: 2025-11-12_
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
-- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
+- **Credentials:** https://credentials.academyv2.mereka.io
 - **Notes API:** https://notes.academyv2.mereka.io (API only, no UI)
-- **Forum:** Integrated into LMS courses
+- **Forum:** https://forum.academyv2.mereka.io (also integrated into LMS courses)
   - **Status:** ✅ Running (scaled to 1 replica)
   - **MongoDB:** ✅ Connected to MongoDB Atlas
   - **Elasticsearch:** ✅ Connected
@@ -100,8 +100,9 @@ _Audience: Everyone • Last updated: 2025-11-12_
 **Other Services (VPS Kind)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
-- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
+- **Credentials:** https://credentials.academyv2.mereka.dev
 - **Notes API:** https://notes.academyv2.mereka.dev (API only, no UI)
+- **Forum:** https://forum.academyv2.mereka.dev (also integrated into LMS courses)
 
 ---
 

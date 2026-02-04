@@ -26,7 +26,9 @@ urls=(
   "https://apps.${BASE_DOMAIN}/authn/login"
   "https://discovery.${BASE_DOMAIN}/health/"
   "https://ecommerce.${BASE_DOMAIN}/dashboard/"
+  "https://credentials.${BASE_DOMAIN}/health/"
   "https://notes.${BASE_DOMAIN}/api/v1/health/"
+  "https://forum.${BASE_DOMAIN}/"
 )
 
 for host in "${EXTRA_HOSTS[@]}"; do

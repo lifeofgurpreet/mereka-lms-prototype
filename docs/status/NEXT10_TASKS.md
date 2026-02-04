@@ -12,11 +12,11 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-03_
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Fix ecommerce OAuth 500 | Infra | ✅ Complete | OAuth settings now env-driven; CORS/CSRF aligned. |
-| 2 | Credentials service routing | Infra | ✅ Complete | Caddy returns 503 until service is deployed; docs updated. |
-| 3 | Forum strategy | Infra | ✅ Complete | Forum remains internal (no public hostname). |
-| 4 | Synthetic checks + SLO dashboards | SRE | ✅ Complete | Uptime configs + scheduled health checks added. |
-| 5 | Cert/SAN monitoring | SRE | ✅ Complete | `check-cert-sans.sh` + TLS expiry alert. |
-| 6 | Remove staging language | Docs | ✅ Complete | Active docs now reflect prod/dev; legacy identifiers annotated. |
+| 2 | Credentials service routing | Infra | ⚙️ In progress | Deployment + Caddy routing added; DB + OAuth client init pending. |
+| 3 | Forum strategy | Infra | ⚙️ In progress | Public hostname + Caddy route added; verify health endpoint. |
+| 4 | Synthetic checks + SLO dashboards | SRE | ⚙️ In progress | Health script + new uptime checks added; dashboards pending. |
+| 5 | Cert/SAN monitoring | SRE | ⚙️ In progress | TLS expiry alert extended; SAN audit still required. |
+| 6 | Remove staging language | Docs | ⚙️ In progress | Core docs updated; legacy references remain. |
 | 7 | Formalize DR | SRE | ✅ Complete | `docs/operations/DISASTER_RECOVERY.md` added. |
 | 8 | Multi-site governance | Infra | ✅ Complete | Roles + theming validation added to multisite playbook. |
 | 9 | Release checklist | Infra | ✅ Complete | Domain/secret release checklist added. |

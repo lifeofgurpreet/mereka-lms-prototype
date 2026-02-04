@@ -186,13 +186,14 @@ notes.academyv2.mereka.io, notes.academyv2.mereka.dev {
     import proxy "notes:8000"
 }
 
-# Credentials Service (certificate issuance)
-# NOTE: Service is not deployed yet; return a clear 503 until it is.
+# Credentials Service
 credentials.academyv2.mereka.io, credentials.academyv2.mereka.dev {
-    handle {
-        respond "Credentials service not deployed yet." 503
-    }
     import proxy "credentials:8000"
+}
+
+# Forum (discussion service)
+forum.academyv2.mereka.io, forum.academyv2.mereka.dev {
+    import proxy "forum:4567"
 }
 
 # Xqueue (external graders, local only)

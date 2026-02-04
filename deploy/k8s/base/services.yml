@@ -135,6 +135,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: credentials
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: forum
 spec:
   type: NodePort

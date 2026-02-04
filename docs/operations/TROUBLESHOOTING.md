@@ -179,6 +179,7 @@ kubectl get svc caddy -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0
 
 **Notes:**
 - If the fake cert persists, confirm the hostnames appear in `deploy/k8s/base/apps/caddy/Caddyfile`.
+- When enabling new services (credentials/forum), add their DNS records in `infrastructure/cloudflare/records*.json`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
 ---

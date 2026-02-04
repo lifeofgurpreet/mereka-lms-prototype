@@ -53,7 +53,7 @@ Apply all production uptime checks at once:
 ./scripts/infra/apply-monitoring-configs.sh apply
 ```
 
-Each config hits the endpoint every five minutes from Asia-Pacific probe sites and validates TLS. After creating uptime checks, re-run the alert creation command so the policy can reference the new metric series.
+Each config hits the endpoint every five minutes from Asia-Pacific probe sites and validates TLS. The production set now includes LMS, Studio, MFE, Discovery, Ecommerce, Notes, Credentials, Forum, and microsites. After creating uptime checks, re-run the alert creation command so the policy can reference the new metric series.
 
 Apply an alert with:  
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/pod-restarts.json`

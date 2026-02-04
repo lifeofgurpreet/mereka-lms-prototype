@@ -65,6 +65,14 @@
     "proxied": false
   },
   {
+    "description": "Forum service",
+    "type": "CNAME",
+    "name": "forum.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
     "description": "Studio preview host (needed for Caddy TLS)",
     "type": "CNAME",
     "name": "preview.academyv2.mereka.dev",

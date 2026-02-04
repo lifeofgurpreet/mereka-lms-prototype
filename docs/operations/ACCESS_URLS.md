@@ -60,16 +60,12 @@ _Audience: Everyone • Last updated: 2025-12-29_
 - **Base URL:** https://apps.academyv2.mereka.io
 - **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
 
-**Other Services (GKE)** - Internal only, port-forward required
-- **Discovery:** Internal (kubectl port-forward svc/discovery 8000:8000)
-- **Ecommerce:** Internal (kubectl port-forward svc/ecommerce 8000:8000)
-- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
-- **Notes API:** Internal (API only, no UI)
-- **Forum:** Integrated into LMS courses
-  - **Status:** ✅ Running (scaled to 1 replica)
-  - **MongoDB:** ✅ Connected to MongoDB Atlas
-  - **Elasticsearch:** ✅ Connected
-  - **Access:** Forum discussions appear within course pages
+**Other Services (GKE)**
+- **Discovery:** https://discovery.academyv2.mereka.io
+- **Ecommerce:** https://ecommerce.academyv2.mereka.io
+- **Credentials:** https://credentials.academyv2.mereka.io
+- **Notes API:** https://notes.academyv2.mereka.io (API only)
+- **Forum:** https://forum.academyv2.mereka.io (also embedded in LMS)
 - **Analytics (Superset):** ❌ NOT DEPLOYED
   - **Status:** Documented but not yet deployed to K8s
   - **Plan:** See [`docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`](../analytics/ASPECTS_K8S_DEPLOYMENT.md)
@@ -112,10 +108,10 @@ _Audience: Everyone • Last updated: 2025-12-29_
 - **Available MFEs:** Same as local
 
 **Other Services (Production)**
-- **Discovery:** Internal only (port-forward required)
-- **Ecommerce:** Internal only (port-forward required)
-- **Credentials:** ❌ Not deployed (Caddy returns 503 until service ships)
-- **Notes API:** Internal only
+- **Discovery:** https://discovery.academyv2.mereka.io (shared service)
+- **Ecommerce:** https://ecommerce.academyv2.mereka.io (shared service)
+- **Credentials:** https://credentials.academyv2.mereka.io (shared service)
+- **Notes API:** https://notes.academyv2.mereka.io (shared service)
 
 **Microsite Boundary Note:** `skillourfuture.academy.mereka.io` and `academy.biji-biji.com` are separate client sites with distinct branding, catalogs, and users. Treat them as independent tenants.
 

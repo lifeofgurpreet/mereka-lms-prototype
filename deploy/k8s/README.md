@@ -19,14 +19,14 @@ deploy/k8s/
 │   │   └── redis/              # Redis configuration
 │   └── plugins/                # OpenEdX plugin configurations
 │       ├── discovery/          # Course discovery service
+│       ├── credentials/        # Credentials service
 │       ├── ecommerce/          # E-commerce service
 │       ├── mfe/                # Micro-frontends
 │       ├── notes/              # Notes service
 │       └── xqueue/             # Xqueue service
 └── overlays/                   # Environment-specific overlays (to be created)
     ├── local/                  # Local development
-    ├── staging/                # Staging environment
-    └── prod/                   # Production environment
+    └── production/             # Production environment
 ```
 
 ## Key Changes from Tutor Defaults
@@ -50,7 +50,7 @@ The base configuration includes the following deployments:
 - **elasticsearch**: Search functionality
 - **smtp**: Email service
 - **discovery**: Course discovery service
-- **discovery-worker**: Discovery celery workers
+- **credentials**: Credentials service
 - **ecommerce**: E-commerce service
 - **ecommerce-worker**: E-commerce celery workers
 - **mfe**: Micro-frontend applications

@@ -8,7 +8,7 @@
     {
       "displayName": "Less than 14 days until certificate expiry",
       "conditionThreshold": {
-        "filter": "resource.type=\"uptime_url\" AND metric.type=\"monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires\" AND (resource.label.host=\"academyv2.mereka.io\" OR resource.label.host=\"studio.academyv2.mereka.io\" OR resource.label.host=\"apps.academyv2.mereka.io\" OR resource.label.host=\"discovery.academyv2.mereka.io\" OR resource.label.host=\"ecommerce.academyv2.mereka.io\" OR resource.label.host=\"notes.academyv2.mereka.io\" OR resource.label.host=\"skillourfuture.academy.mereka.io\" OR resource.label.host=\"academy.biji-biji.com\")",
+        "filter": "resource.type=\"uptime_url\" AND metric.type=\"monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires\" AND (resource.label.host=\"academyv2.mereka.io\" OR resource.label.host=\"studio.academyv2.mereka.io\" OR resource.label.host=\"apps.academyv2.mereka.io\" OR resource.label.host=\"discovery.academyv2.mereka.io\" OR resource.label.host=\"ecommerce.academyv2.mereka.io\" OR resource.label.host=\"notes.academyv2.mereka.io\" OR resource.label.host=\"credentials.academyv2.mereka.io\" OR resource.label.host=\"forum.academyv2.mereka.io\" OR resource.label.host=\"skillourfuture.academy.mereka.io\" OR resource.label.host=\"academy.biji-biji.com\")",
         "comparison": "COMPARISON_LT",
         "thresholdValue": 1209600,
         "duration": "0s",

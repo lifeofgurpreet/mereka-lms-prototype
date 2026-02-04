@@ -9,7 +9,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - **Source of Truth**: `deploy/k8s/base/` contains base Kustomize manifests exported from Tutor
 - **Namespace**: All resources deploy to `mereka-lms` namespace (not `openedx`)
 - **ConfigMaps**: Application configs managed via Kustomize configMapGenerator
-- **Environment Overlays**: Local (kind/VPS) and production (GKE). The legacy `staging/` overlay is deprecated.
+- **Environment Overlays**: Local (kind/VPS) and production (GKE). Legacy staging overlays are retained for reference only.
 
 ## What Was Created
 
@@ -31,7 +31,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 │       └── overlays/
 │           ├── local/
 │           ├── production/
-│           └── staging/        # Legacy (do not use)
+│           └── staging/        # Legacy (reference only)
 └── scripts/
     └── export-k8s-manifests.sh # Re-export script
 ```
@@ -45,7 +45,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - `volumes.yml` - PersistentVolumeClaim definitions
 - `kustomization.yaml` - Main Kustomize configuration
 
-**Deployments (17 total):**
+**Deployments (18 total):**
 - caddy - Reverse proxy
 - cms - OpenEdX Studio
 - cms-worker - Studio celery workers
@@ -58,6 +58,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - discovery - Course discovery
 - ecommerce - E-commerce service
 - ecommerce-worker - E-commerce workers
+- credentials - Credentials service
 - forum - Discussion forums (uses MongoDB Atlas)
 - mfe - Micro-frontends
 - notes - Student notes
@@ -65,7 +66,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 
 **Note**: MongoDB is provided by MongoDB Atlas (cluster-mereka-lms.2pjex4s.mongodb.net), not deployed in-cluster.
 
-**ConfigMaps (12 generated):**
+**ConfigMaps (13 generated):**
 - caddy-config - Caddyfile
 - openedx-settings-lms - LMS Django settings
 - openedx-settings-cms - CMS Django settings
@@ -73,6 +74,7 @@ The deployment has been structured to follow BBI-K8 GitOps patterns:
 - openedx-uwsgi-config - uWSGI configuration
 - redis-config - Redis configuration
 - discovery-settings - Discovery service settings
+- credentials-settings - Credentials service settings
 - ecommerce-settings - E-commerce settings
 - ecommerce-worker-settings - E-commerce worker settings
 - mfe-caddy-config - MFE reverse proxy config
@@ -115,8 +117,8 @@ kubectl kustomize .
 
 Expected output:
 - 1 Namespace
-- 17 Deployments
-- 12 ConfigMaps
+- 18 Deployments
+- 13 ConfigMaps
 - Services and PVCs
 
 All resources should have `namespace: mereka-lms`
