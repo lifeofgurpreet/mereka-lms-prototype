@@ -195,6 +195,13 @@ See `/home/gurpreet/projects/secrets-management/specs/02-infisical/FOLDER-STRUCT
     └── /mereka-backend/
 ```
 
+### Mereka LMS Secret Placement
+- **All** `MEREKA_LMS_*` secrets live under `/k8s/mereka-lms` (prod + dev envs).
+- Shared admin test credentials live under `/shared/oauth`:
+  - `GOOGLE_IMPERSONATE_EMAIL`
+  - `GOOGLE_IMPERSONATE_PASSWORD`
+  - Use these for Authentik + LMS (GKE + VPS kind). Never commit values.
+
 ### AWS SES Configuration
 
 **IAM User**: `ses-smtp-user.20251113-104139-g-test-singapore`

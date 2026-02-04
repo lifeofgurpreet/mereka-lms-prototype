@@ -63,13 +63,16 @@ _Audience: Everyone • Last updated: 2026-02-04_
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
-- **Credentials:** https://credentials.academyv2.mereka.io
+- **Credentials:** https://credentials.academyv2.mereka.io (API-only)
+  - **Health:** https://credentials.academyv2.mereka.io/health/ (301 → API)
+  - **API:** https://credentials.academyv2.mereka.io/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.io (API only, no UI)
 - **Forum:** https://forum.academyv2.mereka.io (also integrated into LMS courses)
   - **Status:** ✅ Running (scaled to 1 replica)
   - **MongoDB:** ✅ Connected to MongoDB Atlas
   - **Elasticsearch:** ✅ Connected
   - **Access:** Forum discussions appear within course pages
+  - **Health:** https://forum.academyv2.mereka.io/heartbeat (200)
 - **Analytics (Superset):** 
   - **Status:** ✅ Running
   - **Via Port-Forward:** `kubectl port-forward -n mereka-lms svc/superset 8088:8088` → http://localhost:8088
@@ -105,9 +108,12 @@ _Audience: Everyone • Last updated: 2026-02-04_
 **Other Services (VPS Kind)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
-- **Credentials:** https://credentials.academyv2.mereka.dev
+- **Credentials:** https://credentials.academyv2.mereka.dev (API-only)
+  - **Health:** https://credentials.academyv2.mereka.dev/health/ (301 → API)
+  - **API:** https://credentials.academyv2.mereka.dev/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.dev (API only, no UI)
 - **Forum:** https://forum.academyv2.mereka.dev (also integrated into LMS courses)
+  - **Health:** https://forum.academyv2.mereka.dev/heartbeat (200)
 
 ---
 

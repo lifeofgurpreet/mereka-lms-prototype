@@ -72,9 +72,12 @@ _Audience: Everyone • Last updated: 2026-02-04_
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
-- **Credentials:** https://credentials.academyv2.mereka.io
+- **Credentials:** https://credentials.academyv2.mereka.io (API-only)
+  - **Health:** https://credentials.academyv2.mereka.io/health/ (301 → API)
+  - **API:** https://credentials.academyv2.mereka.io/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.io (API only)
 - **Forum:** https://forum.academyv2.mereka.io (also embedded in LMS)
+  - **Health:** https://forum.academyv2.mereka.io/heartbeat (200)
 - **Analytics (Superset):** ❌ NOT DEPLOYED
   - **Status:** Documented but not yet deployed to K8s
   - **Plan:** See [`docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`](../analytics/ASPECTS_K8S_DEPLOYMENT.md)
@@ -96,9 +99,12 @@ _Audience: Everyone • Last updated: 2026-02-04_
 **Other Services (Dev)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
-- **Credentials:** https://credentials.academyv2.mereka.dev
+- **Credentials:** https://credentials.academyv2.mereka.dev (API-only)
+  - **Health:** https://credentials.academyv2.mereka.dev/health/ (301 → API)
+  - **API:** https://credentials.academyv2.mereka.dev/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.dev
 - **Forum:** https://forum.academyv2.mereka.dev
+  - **Health:** https://forum.academyv2.mereka.dev/heartbeat (200)
 
 ---
 

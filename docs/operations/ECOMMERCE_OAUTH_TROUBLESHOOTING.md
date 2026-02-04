@@ -85,4 +85,5 @@ If the logs show OAuth client errors, re-check client IDs, secrets, and redirect
 ## ✅ Status (2026-02-04)
 - OAuth clients exist in LMS with expected IDs and redirect URIs for `academyv2.mereka.io` + `academyv2.mereka.dev`.
 - Ecommerce secrets are injected into the deployment and match LMS OAuth client secrets.
+- Client-credentials token check returned `200` from both GKE and VPS kind.
 - No 500s observed in recent logs; still re-test with a real login flow if users report errors.
