@@ -7,10 +7,6 @@ resources:
   - ../../base
 
 # Production-specific configurations
-labels:
-  - pairs:
-      environment: production
-    includeSelectors: false
 
 # Image tags for production (use specific SHA or version)
 images:

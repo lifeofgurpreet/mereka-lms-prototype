@@ -184,6 +184,42 @@ kubectl get svc caddy -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0
 
 ---
 
+### Issue 4c: Credentials Service 500 on `/` (Missing SiteConfiguration)
+
+**Symptoms:**
+- `https://credentials.academyv2.mereka.io/` returns 500
+- Logs show `Site has no siteconfiguration`
+
+**Root Cause:**
+- Django Sites entry exists, but the `SiteConfiguration` row was never created for the credentials service.
+
+**Quick Fix:**
+```bash
+kubectl exec -n mereka-lms deploy/credentials -- ./manage.py shell -c '
+from django.contrib.sites.models import Site
+from credentials.apps.core.models import SiteConfiguration
+site, _ = Site.objects.get_or_create(id=1)
+site.domain = "credentials.academyv2.mereka.io"
+site.name = "Mereka Credentials"
+site.save()
+SiteConfiguration.objects.get_or_create(
+  site=site,
+  defaults={
+    "platform_name": "Mereka Academy",
+    "lms_url_root": "https://academyv2.mereka.io",
+    "homepage_url": "https://academyv2.mereka.io",
+  },
+)
+'
+```
+
+**Verify:**
+```bash
+curl -I https://credentials.academyv2.mereka.io/
+```
+
+---
+
 ### Issue 5: Redis Host Drift (Requests Hang)
 
 **Symptoms:**
