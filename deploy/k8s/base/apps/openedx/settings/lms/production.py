@@ -450,8 +450,11 @@ for origin in [
 SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
 CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"
 SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
-SESSION_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
+
+# For multisite support, set cookie domain to None so Django uses the request domain
+# This allows academy.biji-biji.com, skillourfuture.academy.mereka.io, etc. to work
+SESSION_COOKIE_DOMAIN = None
+CSRF_COOKIE_DOMAIN = None
 
 
 # CMS authentication

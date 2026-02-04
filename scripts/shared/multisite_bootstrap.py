@@ -87,7 +87,7 @@ SITE_DEFINITIONS = [
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
             "course_org_filter": ["BIJIBIJI"],
-            "logo_image": "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png",
+            "logo_image": "https://academy.biji-biji.com/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
             "favicon_path": "mereka/images/favicon.ico",
             "homepage_banner_enabled": False,
