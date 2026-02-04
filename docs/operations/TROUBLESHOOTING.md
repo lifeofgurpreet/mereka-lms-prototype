@@ -185,6 +185,36 @@ kubectl get ingress openedx-lms -n mereka-lms -o jsonpath='{.status.loadBalancer
 
 ---
 
+### Issue 4b: Forum Heartbeat 502 (Atlas Allowlist)
+
+**Symptoms:**
+- `https://forum.academyv2.mereka.dev/heartbeat` returns 502 (dev)
+- `forum` pod logs show MongoDB connection failures
+
+**Root Cause:**
+- MongoDB Atlas is on **public IP allowlists**; the VPS egress IP is missing from the allowlist.
+
+**Quick Fix:**
+```bash
+# From VPS (dev) host
+VPS_IP=$(curl -s https://ifconfig.me)
+
+# Add to Atlas allowlist (requires atlas CLI login)
+atlas projects list --output json | jq -r '.results[] | [.name,.id] | @tsv'
+atlas accessLists create "$VPS_IP" --projectId <atlas-project-id>
+
+# Optional: verify allowlist drift
+EGRESS_IPS="$VPS_IP" ./scripts/infra/check-atlas-allowlist.sh
+```
+
+**Verify:**
+```bash
+curl -I https://forum.academyv2.mereka.dev/heartbeat
+kubectl logs -n mereka-lms deploy/forum --tail=100
+```
+
+---
+
 ### Issue 4c: Credentials Service 500 on `/` (Missing SiteConfiguration)
 
 **Symptoms:**

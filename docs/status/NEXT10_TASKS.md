@@ -13,7 +13,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-04_
 |---|------|-------|--------|-------|
 | 1 | Fix ecommerce OAuth 500 | Infra | ✅ Complete | OAuth settings now env-driven; CORS/CSRF aligned. |
 | 2 | Credentials service routing | Infra | ✅ Complete | Deployment, DNS, DB init + OAuth apps configured. |
-| 3 | Forum strategy | Infra | ✅ Complete | DNS + Caddy routing + heartbeat health check. |
+| 3 | Forum strategy | Infra | ✅ Complete | DNS + Caddy routing + heartbeat health check; keep Atlas allowlist updated for VPS dev. |
 | 4 | Synthetic checks + SLO dashboards | SRE | ✅ Complete | Public health checks updated + uptime configs aligned. |
 | 5 | Cert/SAN monitoring | SRE | ✅ Complete | TLS SAN check updated + cert-expiry alert covers microsites. |
 | 6 | Remove staging language | Docs | ✅ Complete | Core docs updated; legacy references remain only where required. |

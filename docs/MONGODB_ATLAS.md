@@ -1,5 +1,5 @@
 # MongoDB Atlas Migration Guide
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-11-09_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-04_
 
 This guide explains how to move cs_comments_service data from the temporary in-cluster MongoDB StatefulSet to MongoDB Atlas and point Tutor at the managed cluster.
 
@@ -7,12 +7,15 @@ This guide explains how to move cs_comments_service data from the temporary in-c
 
 1. Sign in to https://cloud.mongodb.com/ and create a **Dedicated (M10)** cluster in **AWS `ap-southeast-1`** so latency stays low.
 2. Under *Database Access*, create a database user (e.g. `cs_comments_user`) with password of your choosing and grant **Read and write to any database** (or a scoped role for `cs_comments_service`).
-3. Under *Network Access*, allow outbound IPs from the GKE cluster. We intentionally use public IP allowlists (no private connectivity). The easiest way is to grab the NAT IP(s) by running:
+3. Under *Network Access*, allow outbound IPs from the GKE cluster and the VPS kind cluster. We intentionally use public IP allowlists (no private connectivity).
+   - **GKE (production)**: grab the current egress IP(s) by running:
    ```bash
    kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- \
      curl -s https://ifconfig.me
    ```
-   As of 2025-11-07 the pod egress IP is `35.247.164.211` and Cloud NAT advertises `34.142.147.42` (resource `mereka-lms-nat-ip`). Add both to the Atlas IP allow list and keep the list current when GKE egress changes.
+   - **VPS kind (dev)**: check from the VPS shell: `curl -s https://ifconfig.me`
+
+   **As of 2026-02-04**, the VPS egress IP is `194.233.84.55`. Add it to the Atlas allowlist and update whenever the VPS IP changes.
 
 ## 2. Migrate existing data
 
