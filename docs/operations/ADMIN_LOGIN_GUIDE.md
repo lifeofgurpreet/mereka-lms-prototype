@@ -108,6 +108,7 @@ printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lm
 - **Password Reset:** Always reset password after clearing sessions
 - **Browser:** Try incognito/private mode if issues persist
 - **Cookies:** Clear browser cookies for localhost if needed
+- **Two login flows are expected:** Local username/password (native Open edX) + Authentik OIDC. Both should work; only disable local login if you explicitly want SSO-only.
 - **Authentik redirect_uri errors:** Ensure the Authentik app allowlist includes:
   - `https://academyv2.mereka.io/auth/complete/oidc/`
   - `https://academyv2.mereka.dev/auth/complete/oidc/`

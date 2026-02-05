@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
 INFISICAL_ENV="${INFISICAL_ENV:-prod}"
-INFISICAL_PATH="${INFISICAL_PATH:-/shared/infra}"
+INFISICAL_PATH="${INFISICAL_PATH:-/k8s/mereka-lms/atlas}"
 INFISICAL_DIR="${INFISICAL_DIR:-}"
 
 resolve_infisical_dir() {

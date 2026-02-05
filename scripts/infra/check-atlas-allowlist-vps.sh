@@ -11,7 +11,10 @@ mkdir -p "$LOG_DIR"
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
-VPS_IP=$(curl -s https://ifconfig.me)
+VPS_IP=$(curl -s -4 https://ifconfig.me || true)
+if [[ -z "$VPS_IP" ]]; then
+  VPS_IP=$(curl -s https://api.ipify.org || true)
+fi
 if [[ -z "$VPS_IP" ]]; then
   echo "Unable to determine VPS egress IP." >&2
   exit 1

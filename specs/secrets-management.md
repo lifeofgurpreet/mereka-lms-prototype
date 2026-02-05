@@ -37,6 +37,9 @@ Python Application Code
 - **Prod and Dev** secrets live under `/k8s/mereka-lms`.
 - Do **not** store `MEREKA_LMS_*` secrets in `/` or other folders.
 - Legacy `/mereka-lms` folders are removed to avoid path drift.
+- Non-K8s secrets:
+  - Atlas CLI keys live under `/k8s/mereka-lms/atlas`.
+  - Migration (MCT/Kajabi) keys live under `/k8s/mereka-lms/migrations/*`.
 
 ### Sprawl Cleanup (Required)
 If any `MEREKA_LMS_*` keys appear outside `/k8s/mereka-lms`, re-sync from the
@@ -56,17 +59,27 @@ authoritative path and re-run validation:
 - Do not copy these values into repo files or issue comments.
 
 ### Migration Secrets (MCT + Kajabi)
-- **Path:** `/k8s/mereka-lms`
+- **Path:** `/k8s/mereka-lms/migrations/mct` and `/k8s/mereka-lms/migrations/kajabi`
 - **Purpose:** Used by migration/export scripts (not synced to K8s secrets).
-- **Required keys (MCT):**
+**Required keys (MCT):**
   - `MCT_BASE_URL`, `MCT_ENDPT`, `MCT_API_URI`
   - `MCT_CLIENT_ID`, `MCT_CLIENT_SECRET`, `MCT_TENANT_ID`
   - `MCT_API_VERSION`, `MCT_ACCESS_TOKEN` (optional token override)
-- **Required keys (Kajabi):**
+**Required keys (Kajabi):**
   - `KAJABI_CLIENT_ID`, `KAJABI_CLIENT_SECRET`, `KAJABI_SITE_ID`
   - `KAJABI_WEBHOOK_SECRET`, `KAJABI_EMAIL`, `KAJABI_PASSWORD`
 - **Note:** These are seeded with `REPLACE_ME` placeholders. Replace before running
   `scripts/migrations/mct/*` or `scripts/migrations/kajabi/*` pipelines.
+
+### Atlas Automation Secrets
+- **Path:** `/k8s/mereka-lms`
+- **Purpose:** Used by `scripts/infra/atlas-config-from-infisical.sh` and Atlas allowlist automation.
+- **Required keys:**
+  - `ATLAS_PUBLIC_KEY`
+  - `ATLAS_PRIVATE_KEY`
+  - `ATLAS_ORG_ID`
+  - `ATLAS_PROJECT_ID`
+  - `ATLAS_PROFILE` (defaults to `mereka-lms` if empty)
 
 #### openedx-secrets (30+ keys)
 | K8s Key | GCP SM Key | Purpose |

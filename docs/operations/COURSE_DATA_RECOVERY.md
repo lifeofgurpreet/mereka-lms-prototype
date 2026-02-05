@@ -35,9 +35,13 @@ All migration secrets live under `/k8s/mereka-lms` (prod + dev envs).
 - `MCT_CLIENT_ID`, `MCT_CLIENT_SECRET`, `MCT_TENANT_ID`
 - `MCT_API_VERSION`, `MCT_ACCESS_TOKEN` (optional override)
 
+**Infisical path:** `/k8s/mereka-lms/migrations/mct`
+
 ### Kajabi
 - `KAJABI_CLIENT_ID`, `KAJABI_CLIENT_SECRET`, `KAJABI_SITE_ID`
 - `KAJABI_WEBHOOK_SECRET`, `KAJABI_EMAIL`, `KAJABI_PASSWORD`
+
+**Infisical path:** `/k8s/mereka-lms/migrations/kajabi`
 
 ## Recovery Flow (High Level)
 

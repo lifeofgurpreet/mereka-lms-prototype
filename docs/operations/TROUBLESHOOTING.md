@@ -350,8 +350,8 @@ kubectl rollout restart deployment/cms -n mereka-lms
 
 **Quick Fix:**
 ```bash
-# From VPS (dev) host
-VPS_IP=$(curl -s https://ifconfig.me)
+# From VPS (dev) host — IPv4 only (Atlas doesn't accept IPv6)
+VPS_IP=$(curl -s -4 https://ifconfig.me || curl -s https://api.ipify.org)
 
 # Add to Atlas allowlist (requires atlas CLI login)
 atlas projects list --output json | jq -r '.results[] | [.name,.id] | @tsv'
@@ -359,6 +359,12 @@ atlas accessLists create "$VPS_IP" --projectId <atlas-project-id>
 
 # Optional: verify allowlist drift
 EGRESS_IPS="$VPS_IP" ./scripts/infra/check-atlas-allowlist.sh
+```
+
+**Automation (preferred):**
+```bash
+./scripts/infra/ensure-atlas-allowlist-vps.sh
+./scripts/infra/setup-vps-atlas-allowlist-cron.sh
 ```
 
 **Verify:**

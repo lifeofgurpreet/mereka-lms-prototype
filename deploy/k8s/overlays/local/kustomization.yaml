@@ -7,6 +7,8 @@ resources:
   - ../../base
   - clusterissuer-letsencrypt-prod.yaml
   - ingress-openedx-lms.yaml
+  - ingress-openedx-mfe.yaml
+  - ingress-openedx-studio.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

@@ -12,9 +12,11 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `check-cert-sans.sh` - Verify TLS SANs and detect fake ingress certs
 - `check-atlas-allowlist.sh` - Validate Atlas IP allowlist matches cluster egress
 - `check-atlas-allowlist-vps.sh` - Validate Atlas allowlist for VPS egress IP
+- `ensure-atlas-allowlist-vps.sh` - Add VPS egress IP to Atlas allowlist if missing
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
 - `cron-public-health-check.sh` - Cron entrypoint for public health + branding checks
 - `setup-vps-health-cron.sh` - Install VPS cron entry for public health checks
+- `setup-vps-atlas-allowlist-cron.sh` - Install VPS cron entry to keep Atlas allowlist updated
 - `refresh-i18n-static.sh` - Rebuild LMS/CMS i18n JS bundles (fixes missing gettext)
 - `infisical-validate-mereka-lms.sh` - Verify Infisical has all MEREKA_LMS secrets
 - `infisical-sync-mereka-lms.sh` - Sync MEREKA_LMS secrets into `/k8s/mereka-lms`
@@ -49,6 +51,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 # Validate Atlas allowlist for VPS egress (dev forum)
 ./scripts/infra/check-atlas-allowlist-vps.sh
 
+# Add VPS egress IP to Atlas allowlist if missing
+./scripts/infra/ensure-atlas-allowlist-vps.sh
+
 # Configure Atlas CLI from Infisical (API keys)
 ./scripts/infra/atlas-config-from-infisical.sh
 
@@ -57,6 +62,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 
 # Install VPS cron (optional, local logs)
 ./scripts/infra/setup-vps-health-cron.sh
+
+# Install VPS cron for Atlas allowlist auto-updates
+./scripts/infra/setup-vps-atlas-allowlist-cron.sh
 
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh
@@ -80,6 +88,7 @@ Run these locally only when you need extra signal or on-demand logs:
 ```
 ./scripts/infra/check-atlas-allowlist.sh
 ./scripts/infra/check-atlas-allowlist-vps.sh
+./scripts/infra/ensure-atlas-allowlist-vps.sh
 ./scripts/infra/cron-public-health-check.sh
 ```
 

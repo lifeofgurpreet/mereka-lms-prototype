@@ -85,6 +85,9 @@ tutor config save --set RUN_MONGODB=false --set MONGODB_URI="$ATLAS_URI"
 
 Document the secret ID in `docs/SECRETS_SNAPSHOT.md` and rotate the Atlas database user password regularly.
 
+> **Infisical note:** Atlas API keys now live under `/k8s/mereka-lms/atlas` and are pulled via
+> `scripts/infra/atlas-config-from-infisical.sh`.
+
 ## 5. Ongoing maintenance
 
 - Rotate the Atlas database user password periodically and update `MONGODB_URI` (run `tutor config save` + `tutor k8s start`).
@@ -96,14 +99,14 @@ Document the secret ID in `docs/SECRETS_SNAPSHOT.md` and rotate the Atlas databa
 
 ### VPS Automation (dev)
 
-The VPS (kind) environment runs a cron-based drift check so the forum stays healthy:
+The VPS (kind) environment runs a cron-based allowlist updater so the forum stays healthy:
 
 ```bash
-/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh
+/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/ensure-atlas-allowlist-vps.sh
 ```
 
 Cron entry (installed on VPS):
 
 ```bash
-15 * * * * gurpreet /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+*/15 * * * * gurpreet /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/ensure-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
 ```
