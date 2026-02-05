@@ -65,4 +65,9 @@ if [[ "${CHECK_CERTS:-0}" == "1" && "$ENVIRONMENT" == "prod" ]]; then
   "$SCRIPT_DIR/../infra/check-cert-sans.sh"
 fi
 
+if [[ "${CHECK_BRANDING:-0}" == "1" ]]; then
+  echo "Running branding checks..."
+  "$SCRIPT_DIR/verify-public-branding.sh" "$ENVIRONMENT"
+fi
+
 echo "All checks passed."

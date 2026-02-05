@@ -15,6 +15,7 @@ Verify that production environment has:
 
 ```bash
 ./scripts/qa/public-health-check.sh prod
+CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh prod
 ```
 
 ### 1. Check Organizations

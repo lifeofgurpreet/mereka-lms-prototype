@@ -59,6 +59,7 @@ Use this checklist for any domain or secret change on production (GKE). There is
 ## Post-release Verification
 
 - [ ] `CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod`
+- [ ] `CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh prod`
 - [ ] `curl -I https://studio.academyv2.mereka.io` loads
 - [ ] `curl -I https://apps.academyv2.mereka.io/authn/login` returns 200/302
 - [ ] Microsites respond:

@@ -11,6 +11,7 @@ REGION=${REGION:-AP_SOUTHEAST_1}
 TIER=${TIER:-M10}
 DB_USERNAME=${DB_USERNAME:-cs_comments_user}
 DATABASE=${DATABASE:-cs_comments_service}
+OPENEDX_DATABASE=${OPENEDX_DATABASE:-openedx}
 GKE_EGRESS_IPS=${GKE_EGRESS_IPS:-"35.247.164.211,34.142.147.42"}
 
 log() { printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
@@ -107,6 +108,7 @@ else
     --password "$DB_PASSWORD" \
     --projectId "$PROJECT_ID" \
     --role "readWrite@$DATABASE" \
+    --role "readWrite@$OPENEDX_DATABASE" \
     --output json > /tmp/atlas-user.json
   
   log "Database user created successfully"

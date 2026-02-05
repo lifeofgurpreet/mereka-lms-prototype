@@ -113,10 +113,11 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 
 ## Operational Runbook Tips
 
-1. **On-call checks** – use `./scripts/qa/public-health-check.sh prod` for public endpoints and `./scripts/qa/smoke-test.sh` for deeper verification.
+1. **On-call checks** – use `./scripts/qa/public-health-check.sh prod` (or `CHECK_BRANDING=1`) for public endpoints and `./scripts/qa/smoke-test.sh` for deeper verification.
 2. **Pod deep dive** – `kubectl logs -n mereka-lms deployment/<service>` for each microservice noted in alerts.
 3. **Cloud SQL failover** – confirm automatic backups are successful (Cloud SQL → Backups). Manual export script lives in `scripts/infra/backup-db.sh`.
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
+5. **VPS cron** – `scripts/infra/cron-public-health-check.sh` runs prod + dev checks (includes branding + certs).
 
 ## Certificate/SAN verification
 

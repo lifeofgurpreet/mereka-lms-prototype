@@ -50,6 +50,10 @@ Update the `cs_comments_user` permissions in MongoDB Atlas to include:
 
 Or create a new dedicated user for Open edX with full `readWrite` permissions on the `openedx` database.
 
+If you are provisioning via `scripts/infra/provision-atlas-cluster.sh`, the script now grants
+`readWrite` on both `cs_comments_service` and `openedx` by default (override with `OPENEDX_DATABASE`
+if needed).
+
 ### Option 2: Create Dedicated Open edX User
 
 Create a new MongoDB user specifically for Open edX operations:
