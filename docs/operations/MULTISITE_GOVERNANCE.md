@@ -33,14 +33,23 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 - [ ] OAuth clients include all domains in redirect URIs.
 - [ ] Authentik / Google OAuth apps updated when domains change.
 
-## 5. Validation Commands
+## 5. Cookie / Session Boundaries (Multi-root)
+
+- **Current policy:** session + CSRF cookies are scoped to `.academyv2.mereka.io`.
+- **Implication:** login sessions do **not** carry to `academy.biji-biji.com` or
+  `skillourfuture.academy.mereka.io` (different root domains).
+- **If a microsite requires full login MFEs:** deploy a dedicated MFE/LMS stack
+  on the same root domain, or use a reverse-proxy pattern that preserves cookie
+  scope. Do **not** widen cookie domains across unrelated roots.
+
+## 6. Validation Commands
 
 ```bash
 ./scripts/qa/public-health-check.sh prod
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 ```
 
-## 6. Change Control
+## 7. Change Control
 
 - [ ] Use `docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md` for any domain or secret changes.
 - [ ] Log changes in `docs/operations/CONFIG_REVIEW_YYYY-MM-DD.md`.

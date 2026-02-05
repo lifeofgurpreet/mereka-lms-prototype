@@ -19,7 +19,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-05_
 | 6 | Credentials + forum theming | Product | 💤 Pending | Beads: `mereka-lms-3ur`, `mereka-lms-3qh`. |
 | 7 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
 | 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
-| 9 | Multi-site governance + cookie strategy | Infra | 💤 Pending | Beads: `mereka-lms-s8r`, `mereka-lms-4pj`. |
+| 9 | Multi-site governance hardening | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
 | 10 | Studio create button no-op | Infra | 💤 Pending | Bead: `mereka-lms-3oc` (verify in fresh session). |
 
 ## Previous Fixes (2025-11-25)
