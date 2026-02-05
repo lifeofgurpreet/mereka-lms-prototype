@@ -379,6 +379,7 @@ curl -I http://apps.localhost/authn/login
 - Blank account settings/profile pages = missing `compilejsi18n`. Run `scripts/infra/refresh-i18n-static.sh` or bake into image builds.
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).
 - Atlas user must have `readWrite` on `openedx` + `cs_comments_service` for modulestore + forum.
+- Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/shared/infra`).
 
 ---
 

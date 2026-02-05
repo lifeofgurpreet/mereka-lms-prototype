@@ -80,8 +80,8 @@ Use Infisical to pull the shared credentials and sync to LMS:
 
 ```bash
 cd /home/gurpreet/projects/k8s/reka-slackbot
-EMAIL=$(infisical secrets get GOOGLE_IMPERSONATE_EMAIL --domain https://secrets.mereka.io/api --env prod --path / --recursive --plain 2>/dev/null)
-PASSWORD=$(infisical secrets get GOOGLE_IMPERSONATE_PASSWORD --domain https://secrets.mereka.io/api --env prod --path / --recursive --plain 2>/dev/null)
+EMAIL=$(infisical secrets get GOOGLE_IMPERSONATE_EMAIL --domain https://secrets.mereka.io/api --env prod --path /shared/oauth --plain 2>/dev/null)
+PASSWORD=$(infisical secrets get GOOGLE_IMPERSONATE_PASSWORD --domain https://secrets.mereka.io/api --env prod --path /shared/oauth --plain 2>/dev/null)
 
 printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lms -- python manage.py lms shell --settings=tutor.production -c \
 "import sys; from django.contrib.auth import get_user_model; User=get_user_model(); email=sys.stdin.readline().strip(); password=sys.stdin.readline().strip(); user=User.objects.filter(email=email).first() or User.objects.filter(username=email).first() or User.objects.create_user(username=email, email=email, password=password); user.set_password(password); user.is_active=True; user.is_staff=True; user.is_superuser=True; user.save(); print(f'✅ Admin synced: {user.username}')"
@@ -108,6 +108,13 @@ printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lm
 - **Password Reset:** Always reset password after clearing sessions
 - **Browser:** Try incognito/private mode if issues persist
 - **Cookies:** Clear browser cookies for localhost if needed
+- **Authentik redirect_uri errors:** Ensure the Authentik app allowlist includes:
+  - `https://academyv2.mereka.io/auth/complete/oidc/`
+  - `https://academyv2.mereka.dev/auth/complete/oidc/`
+  - `https://studio.academyv2.mereka.io/auth/complete/oidc/`
+  - `https://studio.academyv2.mereka.dev/auth/complete/oidc/`
+  - `https://apps.academyv2.mereka.io/authn/`
+  - `https://apps.academyv2.mereka.dev/authn/`
 
 ---
 

@@ -3,7 +3,7 @@
 ## Issue Summary
 
 **Date Identified**: 2026-02-03
-**Status**: Requires MongoDB Atlas admin intervention
+**Status**: Resolved
 
 ## Problem
 
@@ -53,6 +53,11 @@ Or create a new dedicated user for Open edX with full `readWrite` permissions on
 If you are provisioning via `scripts/infra/provision-atlas-cluster.sh`, the script now grants
 `readWrite` on both `cs_comments_service` and `openedx` by default (override with `OPENEDX_DATABASE`
 if needed).
+
+To avoid interactive Atlas login, configure the CLI from Infisical first:
+```bash
+./scripts/infra/atlas-config-from-infisical.sh
+```
 
 ### Option 2: Create Dedicated Open edX User
 
@@ -137,7 +142,19 @@ except Exception as e:
 
 ## Resolution
 
-**Status**: PENDING
-**Date Resolved**: TBD
-**Resolved By**: TBD
-**Solution Applied**: TBD
+**Status**: RESOLVED  
+**Date Resolved**: 2026-02-05  
+**Resolved By**: Atlas API keys + CLI automation  
+**Solution Applied**:
+- Updated `cs_comments_user` to include `readWrite` on both `cs_comments_service` and `openedx` using Atlas CLI.
+- Verified write access by inserting/deleting a test document in `openedx.modulestore.structures`.
+
+**Command used**:
+```bash
+atlas dbusers update cs_comments_user \
+  --authDB admin \
+  --projectId 690e7c787757f4238efc94d1 \
+  --role readWrite@cs_comments_service \
+  --role readWrite@openedx \
+  -P mereka-lms
+```
