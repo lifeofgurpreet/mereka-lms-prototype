@@ -24,6 +24,8 @@ urls=(
   "https://${BASE_DOMAIN}/"
   "https://studio.${BASE_DOMAIN}/"
   "https://apps.${BASE_DOMAIN}/authn/login"
+  "https://apps.${BASE_DOMAIN}/account/"
+  "https://apps.${BASE_DOMAIN}/learner-dashboard/"
   "https://discovery.${BASE_DOMAIN}/health/"
   "https://ecommerce.${BASE_DOMAIN}/dashboard/"
   "https://credentials.${BASE_DOMAIN}/health/"
