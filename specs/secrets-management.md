@@ -40,6 +40,14 @@ Python Application Code
 - Non-K8s secrets:
   - Atlas CLI keys live under `/k8s/mereka-lms/atlas`.
   - Migration (MCT/Kajabi) keys live under `/k8s/mereka-lms/migrations/*`.
+- **Safety:** Never run `infisical secrets` without `--output json` because it prints secret values.
+
+### Current Inventory (2026-02-05)
+- `/k8s/mereka-lms` contains **56 keys** in both prod and dev.
+- Categories present:
+  - `MEREKA_LMS_*` (Open edX + DB + JWT + OAuth)
+  - `ATLAS_*` (API access + org/project IDs)
+  - `MCT_*` and `KAJABI_*` (migration inputs)
 
 ### Sprawl Cleanup (Required)
 If any `MEREKA_LMS_*` keys appear outside `/k8s/mereka-lms`, re-sync from the
@@ -155,6 +163,9 @@ kubectl get secret database-secrets -n mereka-lms  # MUST exist
 cd /home/gurpreet/projects/k8s/reka-slackbot
 infisical secrets --domain https://secrets.mereka.io/api --env prod --path /k8s/mereka-lms --output json --silent | jq -r '.[].secretKey'
 infisical secrets --domain https://secrets.mereka.io/api --env dev --path /k8s/mereka-lms --output json --silent | jq -r '.[].secretKey'
+
+# Folder inventory (safe, no values printed)
+infisical secrets folders get --domain https://secrets.mereka.io/api --env prod --path / --output json --silent | jq -r '.[].folderName'
 
 # Contract drift check (Infisical + GCP)
 cd /home/gurpreet/projects/secrets-management
