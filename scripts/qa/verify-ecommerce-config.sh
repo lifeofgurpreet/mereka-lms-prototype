@@ -18,7 +18,7 @@ log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
 run_lms_checks() {
   log "Checking LMS OAuth2 apps + scopes..."
-  kubectl "${CONTEXT_ARGS[@]}" exec -n "${NAMESPACE}" deploy/lms -- env STRICT="${STRICT}" python - <<'PY'
+  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env STRICT="${STRICT}" python - <<'PY'
 import os
 import sys
 import django
@@ -55,7 +55,10 @@ PY
 
 run_ecommerce_checks() {
   log "Checking ecommerce SiteConfiguration + Partner..."
-  kubectl "${CONTEXT_ARGS[@]}" exec -n "${NAMESPACE}" deploy/ecommerce -- python - <<'PY'
+  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/ecommerce -- python - <<'PY'
+import django
+django.setup()
+
 from django.contrib.sites.models import Site
 from ecommerce.core.models import SiteConfiguration
 from oscar.core.loading import get_model

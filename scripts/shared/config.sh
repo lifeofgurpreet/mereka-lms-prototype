@@ -27,7 +27,7 @@ export GCP_ZONE="${GCP_ZONE:-asia-southeast1-b}"
 # Kubernetes Settings
 # =============================================================================
 export K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
-export K8S_CONTEXT="${K8S_CONTEXT:-gke_${GCP_PROJECT}_${GCP_ZONE}_mereka-lms}"
+export K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 export K8S_CLUSTER="${K8S_CLUSTER:-mereka-lms}"
 
 # =============================================================================

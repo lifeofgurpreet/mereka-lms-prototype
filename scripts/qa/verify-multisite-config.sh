@@ -21,7 +21,7 @@ DOMAINS=(
 export DOMAINS_CSV
 DOMAINS_CSV=$(IFS=, ; echo "${DOMAINS[*]}")
 
-kubectl "${CONTEXT_ARGS[@]}" exec -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" python - <<'PY'
+kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" python - <<'PY'
 import os
 import sys
 import django
