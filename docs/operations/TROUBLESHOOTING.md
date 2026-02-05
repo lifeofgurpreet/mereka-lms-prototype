@@ -279,6 +279,12 @@ kubectl exec -n mereka-lms deploy/cms -- /bin/bash -c \
 **Root Cause:**
 User lacks a `CourseCreator` record with `state=granted`.
 
+**If the modal still no-ops and console shows 403 AJAX errors:**
+- CMS cookies/CSRF may not be scoped to `.academyv2.mereka.io`.
+- Ensure `SESSION_COOKIE_DOMAIN` and `CSRF_COOKIE_DOMAIN` are set in
+  `deploy/k8s/base/apps/openedx/settings/cms/production.py`, then rebuild
+  and redeploy the Open edX image.
+
 **Fix:**
 ```bash
 kubectl exec -n mereka-lms deploy/cms -- /bin/bash -c \
