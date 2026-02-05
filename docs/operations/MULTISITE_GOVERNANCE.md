@@ -47,6 +47,7 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 ```bash
 ./scripts/qa/public-health-check.sh prod
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
+./scripts/qa/verify-multisite-config.sh  # add STRICT=1 to fail on missing configs
 ```
 
 ## 7. Change Control
