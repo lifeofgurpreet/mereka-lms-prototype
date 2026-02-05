@@ -51,3 +51,10 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 ./scripts/infra/validate-telemetry-connectivity.sh
 ```
 
+## Scheduled Checks
+
+VPS cron runs the Atlas allowlist check every 30 minutes:
+
+```
+*/30 * * * * /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+```

@@ -31,6 +31,46 @@ kubectl exec -n mereka-lms deploy/lms -- \
 print([(a.name,a.client_id,a.redirect_uris) for a in Application.objects.filter(name__in=['Ecommerce Backend Service','Ecommerce SSO'])])"
 ```
 
+## ✅ OAuth Scopes (ApplicationAccess)
+
+Ecommerce requests `user_id profile email`. The LMS uses **ApplicationAccess** to
+grant extra scopes per client. If the entry is missing, Ecommerce returns
+`invalid_scope` and `/complete/edx-oauth2/` throws a 500.
+
+**Verify scopes**
+```bash
+cat <<'PY' | kubectl exec -i -n mereka-lms deploy/lms -- python -
+import django
+django.setup()
+from openedx.core.djangoapps.oauth_dispatch.models import ApplicationAccess
+from oauth2_provider.models import Application
+for client_id in ["ecommerce-sso", "ecommerce"]:
+    app = Application.objects.filter(client_id=client_id).first()
+    access = ApplicationAccess.objects.filter(application=app).first()
+    print(client_id, access.scopes if access else None)
+PY
+```
+
+**Fix scopes (adds `user_id`)**
+```bash
+cat <<'PY' | kubectl exec -i -n mereka-lms deploy/lms -- python -
+import django
+django.setup()
+from openedx.core.djangoapps.oauth_dispatch.models import ApplicationAccess
+from oauth2_provider.models import Application
+for client_id in ["ecommerce-sso", "ecommerce"]:
+    app = Application.objects.filter(client_id=client_id).first()
+    access, created = ApplicationAccess.objects.get_or_create(
+        application=app,
+        defaults={"scopes": ["user_id"]},
+    )
+    if not created and (not access.scopes or "user_id" not in access.scopes):
+        access.scopes = sorted(set((access.scopes or []) + ["user_id"]))
+        access.save()
+    print(client_id, access.scopes)
+PY
+```
+
 ## ✅ Ecommerce SiteConfiguration + Partner
 
 Ecommerce will return `500` if the **SiteConfiguration** or **Partner** rows are missing.

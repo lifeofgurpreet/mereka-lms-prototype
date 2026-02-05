@@ -89,6 +89,23 @@ Ensure the GKE cluster's egress IP addresses are whitelisted in MongoDB Atlas:
 - Go to MongoDB Atlas > Network Access
 - Add the external IP of your GKE nodes or NAT gateway
 
+Atlas allowlist drift is common when VPS or egress IPs change. Use the
+repository checks and cron to detect it early:
+
+```bash
+# Check GKE egress allowlist
+./scripts/infra/check-atlas-allowlist.sh
+
+# Check VPS egress allowlist
+./scripts/infra/check-atlas-allowlist-vps.sh
+```
+
+Cron (VPS) runs every 30 minutes and logs to `var/atlas-allowlist.log`:
+
+```
+*/30 * * * * /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+```
+
 ## Verification Commands
 
 ```bash
