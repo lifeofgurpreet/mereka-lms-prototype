@@ -294,6 +294,20 @@ Run the standard health check script (prod or dev):
 ./scripts/qa/public-health-check.sh dev
 ```
 
+Optional add-ons:
+
+```bash
+# Include TLS SAN validation + branding checks (prod only uses SAN checks)
+CHECK_CERTS=1 CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh prod
+CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh dev
+```
+
+VPS automation (installs cron for prod+dev checks, logs to `var/cron-public-health-check.log`):
+
+```bash
+./scripts/infra/setup-vps-health-cron.sh
+```
+
 **Key endpoints validated**
 - LMS root: `/`
 - Studio root: `/`
