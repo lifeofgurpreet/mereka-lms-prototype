@@ -116,6 +116,7 @@ kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data.ECOMMERCE_B
 ## ✅ Verify
 
 ```bash
+./scripts/qa/verify-ecommerce-config.sh
 curl -I https://ecommerce.academyv2.mereka.io/dashboard/
 kubectl logs -n mereka-lms deployment/ecommerce --tail=100
 ```
