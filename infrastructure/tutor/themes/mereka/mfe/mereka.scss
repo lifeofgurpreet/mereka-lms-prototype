@@ -54,6 +54,12 @@ body {
   box-shadow: 0 12px 30px rgba(39, 110, 241, 0.3);
 }
 
+.pgn__btn--primary {
+  background-image: var(--mereka-mfe-gradient);
+  border: none;
+  box-shadow: 0 12px 30px rgba(39, 110, 241, 0.3);
+}
+
 .btn-outline-primary {
   color: var(--mereka-color-ink-900);
   border-color: rgba(26, 22, 35, 0.25);
@@ -64,6 +70,31 @@ body {
   color: #fff;
   border-color: transparent;
   background-image: var(--mereka-mfe-gradient);
+}
+
+.pgn__btn--secondary,
+.pgn__btn--link {
+  color: var(--mereka-color-ink-700);
+}
+
+.pgn__btn--secondary:hover,
+.pgn__btn--secondary:focus,
+.pgn__btn--link:hover,
+.pgn__btn--link:focus {
+  color: var(--mereka-color-ink-900);
+}
+
+.pgn__form-control,
+.form-control {
+  border-radius: 16px;
+  border-color: rgba(26, 22, 35, 0.2);
+  box-shadow: none;
+}
+
+.pgn__form-control:focus,
+.form-control:focus {
+  border-color: var(--mereka-color-teal);
+  box-shadow: 0 0 0 3px rgba(45, 137, 139, 0.15);
 }
 
 .card,
