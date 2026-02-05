@@ -446,25 +446,34 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
         # Find the line where we copy themes and add our custom apps after it
         copy_themes_marker = "COPY --chown=app:app themes/ /openedx/themes/"
-        if copy_themes_marker in updated and "mfe_oauth_fix" not in updated:
-            custom_apps_copy = """COPY --chown=app:app themes/ /openedx/themes/
-# Copy custom apps
+        copy_themes_marker_alt = "COPY --chown=app:app ./themes/ /openedx/themes"
+        custom_apps_block = """# Copy custom apps
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus"""
-            updated = updated.replace(copy_themes_marker, custom_apps_copy)
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus"""
+        if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
+            marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
+            custom_apps_copy = f"""{marker}
+{custom_apps_block}"""
+            updated = updated.replace(marker, custom_apps_copy)
         elif "mfe_oauth_fix" in updated and "openedx_prometheus" not in updated:
             # Add prometheus app alongside existing mfe_oauth_fix
             mfe_oauth_marker = "COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"
-            custom_apps_add = """COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus"""
+            custom_apps_add = f"""{mfe_oauth_marker}
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus"""
             updated = updated.replace(mfe_oauth_marker, custom_apps_add)
         elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
             # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
             workdir_marker = "WORKDIR /openedx/edx-platform\n"
             if workdir_marker in updated:
-                custom_app_insert = """# Copy custom apps
+                custom_app_insert = f"""# Copy custom apps
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus
 
 """ + workdir_marker
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)

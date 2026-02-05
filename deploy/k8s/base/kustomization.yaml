@@ -14,7 +14,7 @@ resources:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: 20260204-dnspython
+    newTag: 20260204-mereka-auth-4
 
 # namespace to deploy all Resources to
 namespace: mereka-lms

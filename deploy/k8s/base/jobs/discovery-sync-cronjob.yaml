@@ -46,7 +46,7 @@ spec:
 
           containers:
           - name: sync
-            image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-dnspython
+            image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-mereka-auth-4
             imagePullPolicy: IfNotPresent
 
             command:

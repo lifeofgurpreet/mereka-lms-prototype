@@ -52,6 +52,32 @@ class MFEOAuthFixMiddleware(MiddlewareMixin):
             context_data = data.get('contextData', {})
             providers = context_data.get('providers', [])
 
+            if providers:
+                updated = False
+                for provider in providers:
+                    provider_name = (provider.get('name') or '').lower()
+                    provider_id = (provider.get('id') or '').lower()
+                    login_url = (provider.get('loginUrl') or '').lower()
+                    register_url = (provider.get('registerUrl') or '').lower()
+                    if (
+                        "authentik" in provider_name
+                        or "authentik" in provider_id
+                        or "authentik" in login_url
+                        or "authentik" in register_url
+                    ):
+                        provider['name'] = "Mereka"
+                        updated = True
+
+                if updated:
+                    context_data['providers'] = providers
+                    data['contextData'] = context_data
+
+                    updated_content = json.dumps(data).encode('utf-8')
+                    response.content = updated_content
+                    response['Content-Length'] = len(updated_content)
+
+                return response
+
             if not providers:
                 logger.info("Empty providers array detected in /api/mfe_context, attempting to fix...")
 
@@ -83,10 +109,17 @@ class MFEOAuthFixMiddleware(MiddlewareMixin):
                         # Get the backend name (e.g., 'oauth2-authentik')
                         backend_name = provider.backend_name or f"oauth2-{provider.slug}"
 
+                        display_name = provider.name
+                        provider_slug = (provider.slug or "").lower()
+                        provider_name = (provider.name or "").lower()
+                        backend_key = (backend_name or "").lower()
+                        if "authentik" in provider_slug or "authentik" in provider_name or "authentik" in backend_key:
+                            display_name = "Mereka"
+
                         # Construct the provider data
                         provider_data = {
                             'id': f"oa2-{provider.slug}" if provider.slug else f"oa2-{provider.name.lower().replace(' ', '-')}",
-                            'name': provider.name,
+                            'name': display_name,
                             'loginUrl': f"/auth/login/{backend_name}/?auth_entry=login&next=/dashboard",
                             'registerUrl': f"/auth/login/{backend_name}/?auth_entry=register&next=/dashboard",
                         }

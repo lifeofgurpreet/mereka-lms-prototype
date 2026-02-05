@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 from lms.envs.production import *
 
 # Override SECRET_KEY from environment variable (required for K8s deployment)
@@ -613,3 +614,22 @@ for origin in [
 ]:
     if origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(origin)
+
+# MFE OAuth fix + Prometheus metrics
+sys.path.insert(0, "/openedx")
+if "mfe_oauth_fix" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("mfe_oauth_fix")
+ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+if "mfe_oauth_fix.urls" not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, "mfe_oauth_fix.urls")
+if "mfe_oauth_fix.middleware.MFEOAuthFixMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.append("mfe_oauth_fix.middleware.MFEOAuthFixMiddleware")
+
+if "django_prometheus" not in INSTALLED_APPS:
+    INSTALLED_APPS.insert(0, "django_prometheus")
+if "openedx_prometheus" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_prometheus")
+if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")

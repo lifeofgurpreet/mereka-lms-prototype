@@ -1,6 +1,6 @@
 # MFE OAuth Fix
 
-This custom Django app fixes the issue where the `/api/mfe_context` endpoint returns an empty `providers` array even when OAuth providers are properly configured in the database.
+This custom Django app fixes the issue where the `/api/mfe_context` endpoint returns an empty `providers` array even when OAuth providers are properly configured in the database. It also normalizes Authentik's display name to **“Mereka”** when providers are already present.
 
 ## Problem
 
@@ -19,13 +19,15 @@ However, the database shows OAuth providers exist and are enabled:
 - Provider: Authentik (displayed as “Mereka”)
 - enabled=True, visible=True
 
+Additionally, when the provider is returned with the default name (e.g., `Authentik`), we want the UI to display **“Mereka”** instead.
+
 ## Solution
 
 This app provides a middleware (`MFEOAuthFixMiddleware`) that:
 1. Intercepts responses from `/api/mfe_context`
-2. Checks if the `providers` array is empty
-3. Queries the database directly for OAuth providers for the current site
-4. Injects the providers into the response
+2. If providers are empty, queries the database directly for OAuth providers for the current site
+3. Injects the providers into the response
+4. Normalizes Authentik provider names to **“Mereka”** when present
 
 ## Components
 
@@ -43,6 +45,8 @@ The app is automatically installed and configured via the `apply-patches.sh` scr
 2. App is added to `INSTALLED_APPS` in LMS production settings
 3. Middleware is added to `MIDDLEWARE` stack
 
+For the Kubernetes deployment, make sure the LMS production settings configmap includes the same additions in `deploy/k8s/base/apps/openedx/settings/lms/production.py`. The configmap mounts into `/openedx/edx-platform/lms/envs/tutor/production.py`.
+
 ## Testing
 
 After deploying:
@@ -50,16 +54,19 @@ After deploying:
 ```bash
 # Test the endpoint
 curl -s https://academyv2.mereka.io/api/mfe_context | jq '.contextData.providers'
+
+# Or run the helper script
+./scripts/qa/test-mfe-oauth-fix.sh
 ```
 
 Expected output:
 ```json
 [
   {
-    "id": "oa2-authentik",
+    "id": "oa2-oidc",
     "name": "Mereka",
-    "loginUrl": "/auth/login/oauth2-authentik/?auth_entry=login&next=/dashboard",
-    "registerUrl": "/auth/login/oauth2-authentik/?auth_entry=register&next=/dashboard"
+    "loginUrl": "/auth/login/oidc/?auth_entry=login&next=/dashboard",
+    "registerUrl": "/auth/login/oidc/?auth_entry=register&next=/dashboard"
   }
 ]
 ```

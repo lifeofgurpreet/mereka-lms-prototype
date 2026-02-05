@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 from cms.envs.production import *
 
 # Override SECRET_KEY from environment variable (required for K8s deployment)
@@ -354,3 +355,14 @@ for origin in [
         CORS_ORIGIN_WHITELIST.append(origin)
     if origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(origin)
+
+# Prometheus metrics
+sys.path.insert(0, "/openedx")
+if "django_prometheus" not in INSTALLED_APPS:
+    INSTALLED_APPS.insert(0, "django_prometheus")
+if "openedx_prometheus" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_prometheus")
+if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
