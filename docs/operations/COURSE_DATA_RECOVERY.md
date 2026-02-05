@@ -2,16 +2,21 @@
 _Last updated: 2026-02-05 • Owner: Platform Ops_
 
 ## Summary
-MongoDB Atlas is the source of truth, but `modulestore.active_versions` is empty.
-Studio/LMS appear empty until course content is re-imported.
+MongoDB Atlas is the source of truth, but `modulestore` is currently empty in prod.
+MySQL `CourseOverview` is also empty, so Studio/LMS appear blank until data is restored.
+
+### Current Findings (2026-02-05)
+- LMS `CourseOverview` count: **0**
+- Modulestore course count: **0**
+- MySQL backup exists in GCS and contains course_overviews rows:
+  `gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/openedx.sql.gz`
+- Atlas snapshots list returns **0** (backups not enabled)
 
 ## Symptoms
 - Studio dashboard shows no courses
 - LMS catalog empty
 - `CourseOverview.objects.count()` returns `0`
-- MongoDB Atlas:
-  - `modulestore.structures` exists
-  - `modulestore.active_versions` count is `0`
+- Modulestore course count `0` (no active versions)
 
 ## Confirm the Gap
 ```bash
@@ -20,11 +25,16 @@ kubectl exec -n mereka-lms deploy/lms -- python /openedx/edx-platform/manage.py 
 print('CourseOverview', CourseOverview.objects.count())"
 
 kubectl exec -n mereka-lms deploy/lms -- python /openedx/edx-platform/manage.py lms shell -c \
-"from django.conf import settings; from pymongo import MongoClient; \
-cfg=settings.CONTENTSTORE['DOC_STORE_CONFIG']; \
-client=MongoClient(cfg['host'], username=cfg.get('user'), password=cfg.get('password'), authSource=cfg.get('authsource') or 'admin'); \
-db=client['openedx']; \
-print('active_versions', db['modulestore.active_versions'].count_documents({}))"
+"from xmodule.modulestore.django import modulestore; \
+store=modulestore(); \
+print('modulestore_courses', sum(1 for _ in store.get_courses()))"
+
+# MySQL backup sanity check (contains course_overviews rows)
+gsutil cat gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/openedx.sql.gz | \
+  zgrep -m1 'course_overviews_courseoverview'
+
+# Atlas snapshots (currently empty; backups need enabling)
+atlas backups snapshots list cluster-mereka-lms --projectId <PROJECT_ID>
 ```
 
 ## Required Secrets (Infisical)

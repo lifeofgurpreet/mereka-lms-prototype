@@ -16,7 +16,7 @@ Legacy “staging” bucket names remain in GCS for production backups (there is
 | Cloud SQL | Automated backups | Daily | Managed by Cloud SQL. Verify in console. |
 | Cloud SQL exports | `cloud-sql-backup.yml` + `scripts/infra/backup-db.sh` | Every 3 days | Writes to `gs://staging-academy-mereka-io-backup/sql/` (legacy bucket name used for production backups). |
 | Persistent volumes | Velero | Weekly full + ad-hoc | Use before any risky operation. |
-| MongoDB Atlas | Atlas continuous backups | Continuous | Managed by Atlas (M10). |
+| MongoDB Atlas | Atlas backups | **Not enabled** | Enable snapshots before relying on Atlas for DR. |
 | Config + manifests | Git | Every change | Git is the source of truth for K8s + Tutor configs. |
 
 ## Scheduled Backups (Required)
@@ -32,6 +32,16 @@ velero schedule create daily-mereka-lms \
 # Cloud SQL exports (GitHub Actions)
 # .github/workflows/cloud-sql-backup.yml (every 3 days)
 ```
+
+## Atlas Backups (Required)
+
+Enable Atlas snapshots for `cluster-mereka-lms` before relying on MongoDB for DR:
+
+```bash
+atlas backups snapshots list cluster-mereka-lms --projectId <PROJECT_ID>
+```
+
+If the list is empty, enable backups in Atlas UI or via Terraform before the next restore drill.
 
 ## Mandatory Pre-Op Backup (Risky Actions)
 

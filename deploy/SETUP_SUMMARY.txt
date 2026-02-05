@@ -88,7 +88,7 @@ NEXT STEPS:
 1. Create environment overlays:
    - deploy/k8s/overlays/local/
    - deploy/k8s/overlays/production/
-   - deploy/k8s/overlays/staging/ (legacy reference only; no staging env)
+   - deploy/k8s/overlays/staging/ (legacy reference only; not used)
 
 2. Handle database initialization:
    - Review tutor_env/env/k8s/jobs.yml

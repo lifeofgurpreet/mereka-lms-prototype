@@ -37,12 +37,28 @@ done
 
 failures=0
 
+is_ok() {
+  local url=$1
+  local code=$2
+
+  # Notes API returns 405 on GET / but still indicates service reachability.
+  if [[ "$url" == *"notes."* && "$code" == "405" ]]; then
+    return 0
+  fi
+
+  if [[ "$code" =~ ^[23][0-9][0-9]$ ]]; then
+    return 0
+  fi
+
+  return 1
+}
+
 check_url() {
   local url=$1
   local code
   code=$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")
 
-  if [[ "$code" =~ ^[23][0-9][0-9]$ ]]; then
+  if is_ok "$url" "$code"; then
     printf "✓ %s (%s)\n" "$url" "$code"
   else
     printf "✗ %s (%s)\n" "$url" "$code" >&2

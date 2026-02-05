@@ -1,26 +1,24 @@
-# Next 10 Tasks (Updated 2026-02-04)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-04_
+# Next 10 Tasks (Updated 2026-02-05)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-05_
 
-## Recent Fixes (2026-02-03)
-- ✅ SES SMTP relay fully configured - emails delivering via AWS SES
-- ✅ Disaster recovery tested - Velero backups verified, restore successful
-- ✅ CI/CD workflows added - GitHub Actions for Tutor image builds
-- ✅ Terraform production setup - backend, environments, multi-env workflow documented
+## Recent Fixes (2026-02-05)
+- ✅ Authentik redirect URIs updated for academyv2 domains
+- ✅ Admin login + Authn MFE verified with shared test credentials
 
-## Next 10 Most Awesome Things (2026-02-03)
+## Next 10 Most Awesome Things (2026-02-05)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | Fix ecommerce OAuth 500 | Infra | ✅ Complete | OAuth settings now env-driven; CORS/CSRF aligned. |
-| 2 | Credentials service routing | Infra | ✅ Complete | Deployment, DNS, DB init + OAuth apps configured. |
-| 3 | Forum strategy | Infra | ✅ Complete | DNS + Caddy routing + heartbeat health check; keep Atlas allowlist updated for VPS dev. |
-| 4 | Synthetic checks + SLO dashboards | SRE | ✅ Complete | Public health checks updated + uptime configs aligned. |
-| 5 | Cert/SAN monitoring | SRE | ✅ Complete | TLS SAN check updated + cert-expiry alert covers microsites. |
-| 6 | Remove staging language | Docs | ✅ Complete | Core docs updated; legacy references remain only where required. |
-| 7 | Formalize DR | SRE | ✅ Complete | `docs/operations/DISASTER_RECOVERY.md` added. |
-| 8 | Multi-site governance | Infra | ✅ Complete | Roles + theming validation added to multisite playbook. |
-| 9 | Release checklist | Infra | ✅ Complete | Domain/secret release checklist added. |
-| 10 | Log-based alerting | SRE | ✅ Complete | 5xx + auth failure log alerts defined; re-run apply script after metric propagation. |
+| 1 | Fix ecommerce OAuth 500 | Infra | ⚙️ In progress | Bead: `mereka-lms-1am`. Need repro + logs. |
+| 2 | Credentials service routing/SSO | Infra | ⚙️ In progress | Bead: `mereka-lms-30c`. Health OK; SSO validation pending. |
+| 3 | Forum strategy | Infra | ⚙️ In progress | Bead: `mereka-lms-u2f`. Decide keep + DNS vs remove. |
+| 4 | Synthetic checks + SLO dashboards | SRE | 💤 Pending | Bead: `mereka-lms-24s`. |
+| 5 | Cert/SAN monitoring | SRE | 💤 Pending | Bead: `mereka-lms-147`. |
+| 6 | Remove staging language | Docs | ⚙️ In progress | Bead: `mereka-lms-363` (legacy refs remain). |
+| 7 | Formalize DR | SRE | ⚙️ In progress | Bead: `mereka-lms-usv` (Atlas backups not enabled). |
+| 8 | Multi-site governance | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
+| 9 | Release checklist | Infra | 💤 Pending | Bead: `mereka-lms-2bq`. |
+| 10 | Log-based alerting | SRE | 💤 Pending | Bead: `mereka-lms-ds7`. |
 
 ## Previous Fixes (2025-11-25)
 - ✅ Production restored: Fixed MySQL→Cloud SQL routing

@@ -8,7 +8,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `check-cluster-status.sh` - GKE cluster health check
 - `fix-service-selectors.sh` - **🚨 SITE DOWN?** Quick fix for service selector mismatches
 - `repair-routing.sh` - Fix selector drift **and** add HTTPS (443) to caddy service (wrapper)
-- `repair-staging-routing.sh` - Legacy entrypoint (kept for backwards compatibility)
+- `repair-staging-routing.sh` - Legacy routing entrypoint (kept for backwards compatibility)
 - `check-cert-sans.sh` - Verify TLS SANs and detect fake ingress certs
 - `check-atlas-allowlist.sh` - Validate Atlas IP allowlist matches cluster egress
 - `check-atlas-allowlist-vps.sh` - Validate Atlas allowlist for VPS egress IP

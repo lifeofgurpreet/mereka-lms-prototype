@@ -370,16 +370,28 @@ curl -I http://apps.localhost/authn/login
 
 **Login failures (CSRF 403 or 500 on login_session).** Ensure `CSRF_TRUSTED_ORIGINS` includes `https://academyv2.mereka.io`, `https://studio.academyv2.mereka.io`, `https://apps.academyv2.mereka.io`, `https://academy.biji-biji.com`, and `https://skillourfuture.academy.mereka.io`. Set `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io` and `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io` in `openedx-config-*.json` and restart lms/cms. If a specific user still errors with JSONDecodeError on login, reset `user.profile.meta` to `{}` and reset the password.
 
+### Domain & Auth Notes (Current)
+- **Production (GKE):** `academyv2.mereka.io`, `studio.academyv2.mereka.io`, `apps.academyv2.mereka.io`,
+  `discovery.academyv2.mereka.io`, `ecommerce.academyv2.mereka.io`, `credentials.academyv2.mereka.io`,
+  `forum.academyv2.mereka.io`, `notes.academyv2.mereka.io`, `preview.academyv2.mereka.io`
+- **Development (VPS kind):** `academyv2.mereka.dev`, `studio.academyv2.mereka.dev`, `apps.academyv2.mereka.dev`,
+  `discovery.academyv2.mereka.dev`, `ecommerce.academyv2.mereka.dev`, `credentials.academyv2.mereka.dev`,
+  `forum.academyv2.mereka.dev`, `notes.academyv2.mereka.dev`, `preview.academyv2.mereka.dev`
+- **Subsites (separate clients):** `skillourfuture.academy.mereka.io`, `academy.biji-biji.com`
+- Authentik base URL: `https://auth0.mereka.io`
+- Authn MFE shows two login methods: local LMS credentials + “Sign in with Mereka” (OIDC)
+- Shared admin test creds in Infisical `/shared/oauth`: `GOOGLE_IMPERSONATE_EMAIL`, `GOOGLE_IMPERSONATE_PASSWORD`
+
 **Operational learnings (read these before touching auth/Forum/Secrets):**
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
-- Blank account settings/profile pages = missing `compilejsi18n`. Run `scripts/infra/refresh-i18n-static.sh` or bake into image builds.
+- Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).
 - Atlas user must have `readWrite` on `openedx` + `cs_comments_service` for modulestore + forum.
-- Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/shared/infra`).
+- Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/k8s/mereka-lms/atlas`).
 
 ---
 

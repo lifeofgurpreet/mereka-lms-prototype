@@ -1,5 +1,5 @@
 # Troubleshooting Guide
-_Audience: Developers & Agents • Owner: SRE • Last verified: 2025-11-11_
+_Audience: Developers & Agents • Owner: SRE • Last verified: 2026-02-05_
 
 Quick reference for diagnosing and fixing common Kubernetes service issues. This guide covers the most frequent problems that cause site downtime.
 
@@ -176,6 +176,10 @@ kubectl get certificate openedx-lms-tls -n mereka-lms -o jsonpath='{.spec.dnsNam
 # 3) Ensure DNS is pointing at the Ingress LoadBalancer IP
 kubectl get ingress openedx-lms -n mereka-lms -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ./scripts/infra/cloudflare-sync.sh  # records.json should target the ingress IP
+
+# 4) Verify live certificate (should be Let's Encrypt)
+echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.mereka.io:443 2>/dev/null | \
+  openssl x509 -noout -subject -issuer
 ```
 
 **Notes:**
@@ -525,6 +529,31 @@ cd /openedx/edx-platform && ./manage.py lms shell -c \\
 
 **Prevention:**
 - Ensure admin/test users are created via LMS login or `createsuperuser` to auto-create profile rows.
+
+---
+
+### Issue 7c: Account/Profile MFE shows blank or spins forever
+
+**Symptoms:**
+- `/account/settings` or `/u/<email>` shows a blank panel or loading spinner indefinitely.
+- Authn flow succeeds but account/profile views never render.
+
+**Likely Causes:**
+- Stale cookies from the old domain; JWT cookie not refreshed.
+- Missing cookie-domain entries for `apps.academyv2.*` or subsite domains.
+
+**Quick Fix:**
+1. Test in a fresh browser profile/incognito window.
+2. Confirm cookie domains in LMS settings:
+   - `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io`
+   - `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io`
+3. Ensure MFE config endpoint works:
+   ```bash
+   curl -s https://apps.academyv2.mereka.io/api/mfe_config/v1 | jq .
+   ```
+
+**Prevention:**
+- Keep `CSRF_TRUSTED_ORIGINS` and cookie-domain settings aligned with all served hosts.
 
 ---
 
