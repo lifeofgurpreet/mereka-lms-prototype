@@ -2,7 +2,7 @@
 @import "tokens";
 
 :root {
-  --mereka-gradient-primary: linear-gradient(135deg, #1A1623 0%, #276EF1 100%);
+  --mereka-gradient-primary: linear-gradient(135deg, var(--mereka-color-teal) 0%, var(--mereka-color-blue) 100%);
   --mereka-radius-xl: 32px;
 }
 
@@ -12,8 +12,8 @@
 }
 
 .badge-mereka {
-  background: rgba(39, 110, 241, 0.12);
-  color: #276EF1;
+  background: rgba(45, 137, 139, 0.12);
+  color: var(--mereka-color-teal);
   border-radius: 999px;
   padding: 0.35rem 1rem;
   font-weight: 600;
@@ -38,8 +38,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background-color: rgba(39, 110, 241, 0.12);
-  color: #276EF1;
+  background-color: rgba(45, 137, 139, 0.12);
+  color: var(--mereka-color-teal);
   padding: 0.25rem 0.85rem;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -85,8 +85,8 @@
   align-items: center;
   border-radius: 999px;
   padding: 0.25rem 0.85rem;
-  background-color: rgba(39, 110, 241, 0.12);
-  color: var(--mereka-color-info);
+  background-color: rgba(45, 137, 139, 0.12);
+  color: var(--mereka-color-teal);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -94,7 +94,7 @@
 }
 
 .home.style-logout header {
-  background: linear-gradient(135deg, rgba(26, 22, 35, 0.98), rgba(39, 110, 241, 0.95));
+  background: linear-gradient(135deg, rgba(45, 137, 139, 0.98), rgba(41, 92, 173, 0.95));
   border-radius: 36px;
   padding: 3rem;
   color: #fff;

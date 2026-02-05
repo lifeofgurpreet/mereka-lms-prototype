@@ -1,6 +1,6 @@
 // Mereka → Paragon token bridge. Keeps the brand palette + typography in one place
 // so MFEs and the legacy LMS/Studio theme remain visually consistent.
-$color-ink-900: #1A1623;
+$color-ink-900: #000000;
 $color-ink-700: #4A494A;
 $color-ink-500: #7B7B7B;
 $color-ink-300: #AFADB2;
@@ -8,15 +8,23 @@ $color-neutral-100: #FBFAFB;
 $color-neutral-75: #F5F5F5;
 $color-border: #DDDDDE;
 $color-border-strong: #7B7B7C;
-$color-info: #276EF1;
-$color-info-soft: #5B91F4;
-$color-success: #3AA76D;
-$color-warning: #FFC043;
-$color-danger: #D44333;
-$color-danger-soft: #FDF0EF;
+$color-teal: #2d898b;
+$color-magenta: #ab3b78;
+$color-blue: #295cad;
+$color-sky: #94d1e4;
+$color-forest: #2c6e49;
+$color-gold: #f4be48;
+$color-burgundy: #8c002f;
+$color-pink: #cd89ae;
+$color-info: $color-blue;
+$color-info-soft: $color-sky;
+$color-success: $color-forest;
+$color-warning: $color-gold;
+$color-danger: $color-burgundy;
+$color-danger-soft: $color-pink;
 
-$mereka-body-font: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-$mereka-heading-font: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$mereka-body-font: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$mereka-heading-font: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
 $font-family-sans-serif: $mereka-body-font !default;
 $font-family-base: $mereka-body-font !default;
@@ -24,10 +32,10 @@ $headings-font-family: $mereka-heading-font !default;
 $headings-font-weight: 600 !default;
 $body-color: $color-ink-900 !default;
 $body-bg: $color-neutral-100 !default;
-$link-color: $color-ink-900 !default;
-$link-hover-color: $color-ink-700 !default;
-$primary: $color-ink-900 !default;
-$secondary: $color-ink-700 !default;
+$link-color: $color-info !default;
+$link-hover-color: $color-teal !default;
+$primary: $color-magenta !default;
+$secondary: $color-teal !default;
 $success: $color-success !default;
 $info: $color-info !default;
 $warning: $color-warning !default;
@@ -44,6 +52,10 @@ $btn-border-radius-sm: 999px !default;
   --mereka-color-ink-700: #{$color-ink-700};
   --mereka-color-ink-500: #{$color-ink-500};
   --mereka-color-ink-300: #{$color-ink-300};
+  --mereka-color-teal: #{$color-teal};
+  --mereka-color-magenta: #{$color-magenta};
+  --mereka-color-blue: #{$color-blue};
+  --mereka-color-sky: #{$color-sky};
   --mereka-color-surface-primary: #{$color-neutral-100};
   --mereka-color-surface-secondary: #{$color-neutral-75};
   --mereka-color-border: #{$color-border};
@@ -55,16 +67,16 @@ $btn-border-radius-sm: 999px !default;
   --mereka-color-danger: #{$color-danger};
   --mereka-color-danger-soft: #{$color-danger-soft};
   --mereka-shadow-card: 0 20px 60px rgba(26, 22, 35, 0.08);
-  --pgn-color-primary: #{$color-ink-900};
-  --pgn-color-secondary: #{$color-ink-700};
+  --pgn-color-primary: #{$color-magenta};
+  --pgn-color-secondary: #{$color-teal};
   --pgn-color-success: #{$color-success};
   --pgn-color-info: #{$color-info};
   --pgn-color-warning: #{$color-warning};
   --pgn-color-danger: #{$color-danger};
   --pgn-body-bg: #{$color-neutral-100};
   --pgn-body-color: #{$color-ink-900};
-  --pgn-link-color: #{$color-ink-900};
-  --pgn-link-hover-color: #{$color-ink-700};
+  --pgn-link-color: #{$color-info};
+  --pgn-link-hover-color: #{$color-teal};
   --pgn-font-family-sans-serif: #{$mereka-body-font};
   --pgn-heading-font-family: #{$mereka-heading-font};
   --pgn-border-color: #{$color-border};
@@ -90,13 +102,13 @@ h6 {
 }
 
 a {
-  color: $color-ink-900;
+  color: $color-info;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 
   &:hover,
   &:focus {
-    color: $color-ink-700;
+    color: $color-teal;
   }
 }
 

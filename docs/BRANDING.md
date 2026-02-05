@@ -7,27 +7,25 @@ This document captures the brand tokens we apply across LMS/Studio and all MFEs 
 
 | Token | Hex | Usage |
 | --- | --- | --- |
-| `ink-900` | `#1A1623` | Primary text, CTA backgrounds, dark surfaces |
-| `ink-700` | `#4A494A` | Secondary text, subdued icons |
-| `ink-500` | `#7B7B7B` | Tertiary text, placeholders |
-| `ink-300` | `#AFADB2` | Disabled labels, dividers on dark backgrounds |
-| `neutral-100` | `#FBFAFB` | Default page background |
-| `neutral-75` | `#F5F5F5` | Cards + inset blocks |
-| `info` | `#276EF1` | Links, accent icons, focus rings |
-| `info-soft` | `#5B91F4` | Badges, subtle highlights |
-| `success` | `#3AA76D` | Positive affordances |
-| `warning` | `#FFC043` | Warn/delay states |
-| `danger` | `#D44333` | Errors + destructive actions |
-| `danger-soft` | `#FDF0EF` | Error backgrounds |
+| `black` | `#000000` | Primary text |
+| `white` | `#ffffff` | Backgrounds, negative space |
+| `teal` | `#2d898b` | Primary accent, hover states |
+| `magenta` | `#ab3b78` | CTA buttons |
+| `blue` | `#295cad` | Links, info states |
+| `forest` | `#2c6e49` | Success |
+| `gold` | `#f4be48` | Warnings |
+| `burgundy` | `#8c002f` | Errors |
+| `pink` | `#cd89ae` | Error backgrounds |
+| `sky` | `#94d1e4` | Info backgrounds |
 
-See `infrastructure/tutor/themes/mereka/scss/_tokens.scss` for the Paragon/Bootstrap variable mapping and custom CSS variables exported to `:root`.
+See `infrastructure/tutor/themes/mereka/scss/_tokens.scss` for the Paragon/Bootstrap mapping. Source of truth is `bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css`.
 
 ## Typography
 
-| Family | Weights | Source |
-| --- | --- | --- |
-| Poppins | 400 / 600 / 700 | `assets/branding/fonts/Poppins-*.woff2` |
-| Lato | 400 / 400 italic / 700 / 700 italic / 900 / 900 italic | `assets/branding/fonts/Lato-*.woff2` |
+| Family | Weights | Usage | Source |
+| --- | --- | --- | --- |
+| Lato | 400 / 700 / 900 (+ italics) | Headings | `assets/branding/fonts/Lato-*.woff2` |
+| Poppins | 400 / 600 / 700 | Body text | `assets/branding/fonts/Poppins-*.woff2` |
 
 `_fonts.scss` exposes a `$mereka-font-path` variable (defaults to `/static/mereka/fonts`) so MFEs can override the asset path without duplicating the declarations. Tutor builds copy the fonts into `infrastructure/tutor/themes/mereka/common/static/fonts/` which collectstatic will serve at `/static/mereka/fonts/…`.
 

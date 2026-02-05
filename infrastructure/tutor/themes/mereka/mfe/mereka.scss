@@ -2,7 +2,7 @@ $mereka-font-path: "../fonts";
 @import "./scss/theme";
 
 :root {
-  --mereka-mfe-gradient: linear-gradient(120deg, #1A1623 0%, #276EF1 65%, #5B91F4 100%);
+  --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
 }
 
