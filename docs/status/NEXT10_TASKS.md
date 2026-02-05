@@ -2,23 +2,25 @@
 _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-05_
 
 ## Recent Fixes (2026-02-05)
-- ✅ Authentik redirect URIs updated for academyv2 domains
-- ✅ Admin login + Authn MFE verified with shared test credentials
+- ✅ Public health checks pass (prod + dev) for LMS/Studio/MFE/Discovery/Ecommerce/Credentials/Forum
+- ✅ TLS SAN monitoring wired and verified for all academyv2 microsites
+- ✅ Authentik admin credentials synced; Authn MFE login verified
+- ✅ Account/Profile MFE redirects re-applied; CourseCreator granted for admin
 
 ## Next 10 Most Awesome Things (2026-02-05)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | Fix ecommerce OAuth 500 | Infra | ⚙️ In progress | Bead: `mereka-lms-1am`. Need repro + logs. |
-| 2 | Credentials service routing/SSO | Infra | ⚙️ In progress | Bead: `mereka-lms-30c`. Health OK; SSO validation pending. |
-| 3 | Forum strategy | Infra | ⚙️ In progress | Bead: `mereka-lms-u2f`. Decide keep + DNS vs remove. |
-| 4 | Synthetic checks + SLO dashboards | SRE | 💤 Pending | Bead: `mereka-lms-24s`. |
-| 5 | Cert/SAN monitoring | SRE | 💤 Pending | Bead: `mereka-lms-147`. |
-| 6 | Remove staging language | Docs | ⚙️ In progress | Bead: `mereka-lms-363` (legacy refs remain). |
-| 7 | Formalize DR | SRE | ⚙️ In progress | Bead: `mereka-lms-usv` (Atlas backups not enabled). |
-| 8 | Multi-site governance | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
-| 9 | Release checklist | Infra | 💤 Pending | Bead: `mereka-lms-2bq`. |
-| 10 | Log-based alerting | SRE | 💤 Pending | Bead: `mereka-lms-ds7`. |
+| 1 | Restore MCT/Kajabi courses into Atlas | Data | 💤 Pending | Bead: `mereka-lms-hd3` (awaiting export artifacts). |
+| 2 | Ecommerce checkout readiness validation | Infra | 💤 Pending | Bead: `mereka-lms-xw6`. |
+| 3 | MFE theming hardening (authn/account/learning) | Product | 💤 Pending | Bead: `mereka-lms-29o`. |
+| 4 | Learner dashboard + courseware styling | Product | 💤 Pending | Bead: `mereka-lms-2t0`. |
+| 5 | Studio authoring UI polish | Product | 💤 Pending | Bead: `mereka-lms-3ou`. |
+| 6 | Credentials + forum theming | Product | 💤 Pending | Beads: `mereka-lms-3ur`, `mereka-lms-3qh`. |
+| 7 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
+| 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
+| 9 | Multi-site governance + cookie strategy | Infra | 💤 Pending | Beads: `mereka-lms-s8r`, `mereka-lms-4pj`. |
+| 10 | MFE uptime checks + domain-change runbook | SRE | 💤 Pending | Beads: `mereka-lms-1jo`, `mereka-lms-pqt`. |
 
 ## Previous Fixes (2025-11-25)
 - ✅ Production restored: Fixed MySQL→Cloud SQL routing
