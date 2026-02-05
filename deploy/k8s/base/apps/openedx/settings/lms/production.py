@@ -462,12 +462,13 @@ for origin in [
         CORS_ORIGIN_WHITELIST.append(origin)
 
 
-# When we cannot provide secure session/csrf cookies, we must disable samesite=none
+# Secure cookies for HTTPS + OIDC login flow
 SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
 CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"
-SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
 
-# For multisite support, set cookie domain to None so Django uses the request domain
+# For multisite support, keep cookie domain host-scoped
 # This allows academy.biji-biji.com, skillourfuture.academy.mereka.io, etc. to work
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_DOMAIN = None
