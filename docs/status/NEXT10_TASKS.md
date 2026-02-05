@@ -20,7 +20,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-05_
 | 7 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
 | 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
 | 9 | Multi-site governance + cookie strategy | Infra | 💤 Pending | Beads: `mereka-lms-s8r`, `mereka-lms-4pj`. |
-| 10 | MFE uptime checks + domain-change runbook | SRE | 💤 Pending | Beads: `mereka-lms-1jo`, `mereka-lms-pqt`. |
+| 10 | Credentials SSO validation | Infra | 💤 Pending | Bead: `mereka-lms-30c`. |
 
 ## Previous Fixes (2025-11-25)
 - ✅ Production restored: Fixed MySQL→Cloud SQL routing
