@@ -451,6 +451,24 @@ cd /openedx/edx-platform && ./manage.py lms shell -c \\
 
 ---
 
+### Issue 7b: Studio Create Course fails (`User has no profile`)
+
+**Symptoms:**
+- Studio “New Course/Library” action errors or no-ops.
+- Logs show `User.profile.RelatedObjectDoesNotExist: User has no profile`.
+
+**Fix (create missing profile):**
+```bash
+kubectl exec -n mereka-lms deploy/lms -- bash -c "
+cd /openedx/edx-platform && ./manage.py lms shell -c \\
+\"from django.contrib.auth import get_user_model; from common.djangoapps.student.models import UserProfile; U=get_user_model(); u=U.objects.get(email='gurpreet@biji-biji.com'); UserProfile.objects.get_or_create(user=u, defaults={'name': u.username or u.email}); print('✅ Profile ensured')\""
+```
+
+**Prevention:**
+- Ensure admin/test users are created via LMS login or `createsuperuser` to auto-create profile rows.
+
+---
+
 ### Issue 8: Ecommerce OAuth 500 (edx-oauth2)
 
 **Symptoms**
