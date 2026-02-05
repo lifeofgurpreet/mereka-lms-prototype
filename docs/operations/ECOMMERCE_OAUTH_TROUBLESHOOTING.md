@@ -105,6 +105,9 @@ Ensure these exist in **Infisical** under `/k8s/mereka-lms` for **prod + dev**:
 - `MEREKA_LMS_ECOMMERCE_BACKEND_OAUTH2_SECRET`
 - `MEREKA_LMS_ECOMMERCE_OAUTH2_SECRET`
 - `MEREKA_LMS_JWT_SECRET_KEY_ECOMMERCE`
+- `MEREKA_LMS_STRIPE_PUBLISHABLE_KEY` (if enabling Stripe)
+- `MEREKA_LMS_STRIPE_SECRET_KEY` (if enabling Stripe)
+- `MEREKA_LMS_STRIPE_WEBHOOK_SECRET` (if enabling Stripe)
 
 Then confirm ExternalSecrets sync:
 
@@ -112,6 +115,10 @@ Then confirm ExternalSecrets sync:
 kubectl describe externalsecret openedx-secrets -n mereka-lms
 kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data.ECOMMERCE_BACKEND_OAUTH2_SECRET}'
 ```
+
+If Stripe is enabled, update the Ecommerce **SiteConfiguration** `payment_processors`
+field to include `stripe` (e.g. `cybersource,paypal,stripe`) after the secrets are
+in place.
 
 ## ✅ Verify
 

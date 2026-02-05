@@ -100,6 +100,16 @@ with open(
 ) as payment_processors_file:
     common_payment_processor_config = json.load(payment_processors_file)
 
+stripe_secret_key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+stripe_publishable_key = os.environ.get("STRIPE_PUBLISHABLE_KEY", "").strip()
+stripe_webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "").strip()
+if stripe_secret_key or stripe_publishable_key or stripe_webhook_secret:
+    common_payment_processor_config["stripe"] = {
+        "secret_key": stripe_secret_key,
+        "publishable_key": stripe_publishable_key,
+        "webhook_endpoint_secret": stripe_webhook_secret,
+    }
+
 # Fix cybersource-rest configuration
 if "cybersource" in common_payment_processor_config and "cybersource-rest" not in common_payment_processor_config:
     common_payment_processor_config["cybersource-rest"] = common_payment_processor_config["cybersource"]
@@ -110,8 +120,9 @@ PAYMENT_PROCESSOR_CONFIG = {
 # Dummy config is required to bypass a KeyError
 PAYMENT_PROCESSOR_CONFIG["edx"] = {
     "stripe": {
-        "secret_key": "",
-        "webhook_endpoint_secret": "",
+        "secret_key": stripe_secret_key,
+        "publishable_key": stripe_publishable_key,
+        "webhook_endpoint_secret": stripe_webhook_secret,
     }
 }
 PAYMENT_PROCESSORS = list(PAYMENT_PROCESSORS) + []
