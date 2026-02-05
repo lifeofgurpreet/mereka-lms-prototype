@@ -7,7 +7,7 @@
     {
       "displayName": "Auth failures > 10/min",
       "conditionThreshold": {
-        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/mereka_lms_auth_failures\"",
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/auth-failures\"",
         "aggregations": [
           {
             "alignmentPeriod": "60s",

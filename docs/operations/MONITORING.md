@@ -64,10 +64,10 @@ Minimum recommended policies (edit thresholds as desired):
 | Ingress 5xx spike | `infrastructure/monitoring/alerts/lb-5xx-ratio.json` | Update the `url_map_name` if GKE creates a different LB. |
 | Cloud SQL disk utilization | `infrastructure/monitoring/alerts/cloudsql-disk.json` | Fires when disk usage >80% for 5 min. |
 | TLS certificate expiry | `infrastructure/monitoring/alerts/https-cert-expiry.json` | Requires the uptime checks below; fires when `time_until_ssl_cert_expires < 14 days`. |
-| Log-based 5xx spike | `infrastructure/monitoring/alerts/log-5xx-spike.json` | Requires log metric `mereka_lms_http_5xx`. |
-| Log-based auth failures | `infrastructure/monitoring/alerts/log-auth-failures.json` | Requires log metric `mereka_lms_auth_failures`. |
-| Credentials auth failures | `infrastructure/monitoring/alerts/log-auth-failures-credentials.json` | Requires log metric `mereka_lms_credentials_auth_failures`. |
-| Forum auth failures | `infrastructure/monitoring/alerts/log-auth-failures-forum.json` | Requires log metric `mereka_lms_forum_auth_failures`. |
+| Log-based 5xx spike | `infrastructure/monitoring/alerts/log-5xx-spike.json` | Requires log metric `http-5xx`. |
+| Log-based auth failures | `infrastructure/monitoring/alerts/log-auth-failures.json` | Requires log metric `auth-failures`. |
+| Credentials auth failures | `infrastructure/monitoring/alerts/log-auth-failures-credentials.json` | Requires log metric `auth-failures-credentials`. |
+| Forum auth failures | `infrastructure/monitoring/alerts/log-auth-failures-forum.json` | Requires log metric `auth-failures-forum`. |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -97,19 +97,19 @@ Apply an alert with:
 Log-based metrics (required for auth/5xx alerts):
 
 ```bash
-gcloud logging metrics create mereka_lms_http_5xx \
+gcloud logging metrics create http-5xx \
   --config-from-file=infrastructure/monitoring/logging-metrics/http-5xx.json \
   --project=mereka-lms
 
-gcloud logging metrics create mereka_lms_auth_failures \
+gcloud logging metrics create auth-failures \
   --config-from-file=infrastructure/monitoring/logging-metrics/auth-failures.json \
   --project=mereka-lms
 
-gcloud logging metrics create mereka_lms_credentials_auth_failures \
+gcloud logging metrics create auth-failures-credentials \
   --config-from-file=infrastructure/monitoring/logging-metrics/auth-failures-credentials.json \
   --project=mereka-lms
 
-gcloud logging metrics create mereka_lms_forum_auth_failures \
+gcloud logging metrics create auth-failures-forum \
   --config-from-file=infrastructure/monitoring/logging-metrics/auth-failures-forum.json \
   --project=mereka-lms
 ```

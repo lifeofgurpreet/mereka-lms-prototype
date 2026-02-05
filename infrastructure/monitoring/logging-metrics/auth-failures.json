@@ -1,5 +1,5 @@
 {
-  "name": "mereka_lms_auth_failures",
+  "name": "auth-failures",
   "description": "Count authentication failures and login errors in LMS/CMS logs.",
   "filter": "resource.type=\"k8s_container\" AND (textPayload=~\"login_session\" OR textPayload=~\"authentication\" OR jsonPayload.event=\"login_failed\") AND (textPayload=~\" 401 \" OR textPayload=~\" 403 \" OR textPayload=~\" 500 \" OR jsonPayload.status>=400 OR jsonPayload.status_code>=400)"
 }
