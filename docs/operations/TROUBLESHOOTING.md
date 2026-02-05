@@ -227,7 +227,8 @@ kubectl rollout status deployment/cms -n mereka-lms
 
 **Root Cause (most common now):**
 Account/profile pages are still using legacy LMS templates instead of the MFEs.
-The MFEs are healthy, but the redirect flags/config are not enabled.
+The MFEs are healthy, but the redirect flags/config are not enabled. Stale
+cookies can produce the same symptoms—test in a fresh browser profile first.
 
 **Preferred Fix (redirect to MFEs):**
 ```bash
@@ -529,31 +530,6 @@ cd /openedx/edx-platform && ./manage.py lms shell -c \\
 
 **Prevention:**
 - Ensure admin/test users are created via LMS login or `createsuperuser` to auto-create profile rows.
-
----
-
-### Issue 7c: Account/Profile MFE shows blank or spins forever
-
-**Symptoms:**
-- `/account/settings` or `/u/<email>` shows a blank panel or loading spinner indefinitely.
-- Authn flow succeeds but account/profile views never render.
-
-**Likely Causes:**
-- Stale cookies from the old domain; JWT cookie not refreshed.
-- Missing cookie-domain entries for `apps.academyv2.*` or subsite domains.
-
-**Quick Fix:**
-1. Test in a fresh browser profile/incognito window.
-2. Confirm cookie domains in LMS settings:
-   - `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io`
-   - `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io`
-3. Ensure MFE config endpoint works:
-   ```bash
-   curl -s https://apps.academyv2.mereka.io/api/mfe_config/v1 | jq .
-   ```
-
-**Prevention:**
-- Keep `CSRF_TRUSTED_ORIGINS` and cookie-domain settings aligned with all served hosts.
 
 ---
 
