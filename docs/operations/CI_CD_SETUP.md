@@ -74,7 +74,8 @@ Triggered by:
 Options:
 - `build_openedx` - Build LMS/CMS/worker image
 - `build_mfe` - Build micro-frontends image
-- `deploy_to_staging` - Auto-deploy to **production** (academyv2.mereka.io) after build (**legacy input name; no staging env**)
+- `deploy_to_production` - Auto-deploy to **production** (academyv2.mereka.io) after build
+- `deploy_to_staging` - **Legacy input name** retained for backwards compatibility (there is no staging environment)
 - `image_tag` - Custom tag (default: git SHA)
 
 Images pushed to:

@@ -38,6 +38,16 @@ Python Application Code
 - Do **not** store `MEREKA_LMS_*` secrets in `/` or other folders.
 - Legacy `/mereka-lms` folders are removed to avoid path drift.
 
+### Sprawl Cleanup (Required)
+If any `MEREKA_LMS_*` keys appear outside `/k8s/mereka-lms`, re-sync from the
+authoritative path and re-run validation:
+
+```bash
+./scripts/infra/infisical-sync-mereka-lms.sh prod
+./scripts/infra/infisical-sync-mereka-lms.sh dev
+./scripts/infra/infisical-validate-mereka-lms.sh
+```
+
 ### Shared Admin/Test Credentials
 - Stored in Infisical `/shared/oauth`.
 - `GOOGLE_IMPERSONATE_EMAIL` + `GOOGLE_IMPERSONATE_PASSWORD` are the shared

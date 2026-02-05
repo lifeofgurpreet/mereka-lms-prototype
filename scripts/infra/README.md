@@ -14,6 +14,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `check-atlas-allowlist-vps.sh` - Validate Atlas allowlist for VPS egress IP
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
 - `cron-public-health-check.sh` - Cron entrypoint for public health + branding checks
+- `setup-vps-health-cron.sh` - Install VPS cron entry for public health checks
 - `refresh-i18n-static.sh` - Rebuild LMS/CMS i18n JS bundles (fixes missing gettext)
 - `infisical-validate-mereka-lms.sh` - Verify Infisical has all MEREKA_LMS secrets
 - `infisical-sync-mereka-lms.sh` - Sync MEREKA_LMS secrets into `/k8s/mereka-lms`
@@ -54,6 +55,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 # Run public health checks (prod + dev) with branding + certs
 ./scripts/infra/cron-public-health-check.sh
 
+# Install VPS cron (optional, local logs)
+./scripts/infra/setup-vps-health-cron.sh
+
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh
 
@@ -81,3 +85,8 @@ Run these locally only when you need extra signal or on-demand logs:
 
 If you *explicitly* want VPS cron logs, you can still wire them up, but CI
 is the default source of truth for health checks.
+
+To install the cron entry with logs under `var/`, run:
+```
+./scripts/infra/setup-vps-health-cron.sh
+```

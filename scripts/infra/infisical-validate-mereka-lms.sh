@@ -82,7 +82,8 @@ expected_keys=$(rg -o "MEREKA_LMS_[A-Z0-9_]+" "$EXTERNAL_SECRETS_FILE" | sort -u
 
 log "Collecting actual secret keys from Infisical (${INFISICAL_PATH})..."
 tmpfile=$(mktemp)
-trap 'rm -f "$tmpfile"' EXIT
+tmpvalues=$(mktemp)
+trap 'rm -f "$tmpfile" "$tmpvalues"' EXIT
 (
   cd "$INFISICAL_DIR"
   infisical secrets generate-example-env \
@@ -107,4 +108,16 @@ log "All expected secrets exist in Infisical."
 if [[ -n "$extra" ]]; then
   log "Additional secrets present in Infisical (review if needed):"
   echo "$extra"
+fi
+
+log "Checking for empty or placeholder values in Infisical..."
+(
+  cd "$INFISICAL_DIR"
+  infisical secrets --domain "$INFISICAL_DOMAIN" --env "$INFISICAL_ENV" --path "$INFISICAL_PATH" --output json > "$tmpvalues"
+)
+empty_values=$(jq -r '.[] | select((.secretValue == null) or (.secretValue == "") or (.secretValue|tostring|test("\\*not found\\*"; "i"))) | .secretKey' "$tmpvalues")
+if [[ -n "$empty_values" ]]; then
+  echo "Infisical secrets with empty values:" >&2
+  echo "$empty_values" >&2
+  exit 1
 fi
