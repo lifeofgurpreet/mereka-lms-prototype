@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-This document outlines the production infrastructure architecture for Mereka Academy's Open edX deployment on Google Cloud Platform. The plan scales from the current dev/staging configuration ($186-327/month) to a production-grade, highly available setup designed for 500-2,000 concurrent learners.
+This document outlines the production infrastructure architecture for Mereka Academy's Open edX deployment on Google Cloud Platform. The plan scales from the current dev configuration ($186-327/month) to a production-grade, highly available setup designed for 500-2,000 concurrent learners.
 
 ### Key Objectives
 1. **High Availability**: Multi-zone deployment with automatic failover

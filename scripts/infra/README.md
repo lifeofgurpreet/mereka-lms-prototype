@@ -70,14 +70,14 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 
 ## Scheduled Checks
 
-VPS cron runs the Atlas allowlist check every 30 minutes:
+Primary automation lives in CI (`.github/workflows/public-health-check.yml`).
+Run these locally only when you need extra signal or on-demand logs:
 
 ```
-*/30 * * * * /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/check-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+./scripts/infra/check-atlas-allowlist.sh
+./scripts/infra/check-atlas-allowlist-vps.sh
+./scripts/infra/cron-public-health-check.sh
 ```
 
-Public endpoint health checks (prod + dev) every 15 minutes:
-
-```
-*/15 * * * * /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/cron-public-health-check.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/public-health.log 2>&1
-```
+If you *explicitly* want VPS cron logs, you can still wire them up, but CI
+is the default source of truth for health checks.

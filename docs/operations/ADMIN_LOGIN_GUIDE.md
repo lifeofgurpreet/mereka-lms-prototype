@@ -1,5 +1,5 @@
 # Admin Login Guide
-_Last updated: 2026-02-04_
+_Last updated: 2026-02-05_
 
 ## 🔐 Admin Credentials (Source of Truth)
 
@@ -118,5 +118,5 @@ printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lm
 
 ---
 
-**Last Verified:** 2026-02-04  
+**Last Verified:** 2026-02-05  
 **Status:** Admin login working ✅

@@ -16,6 +16,9 @@ INFISICAL_ENV=dev ./scripts/infra/infisical-validate-mereka-lms.sh
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
 ```
 
+**Policy:** `/k8s/mereka-lms` is the only allowed path for `MEREKA_LMS_*`.
+Remove any root-level duplicates (last cleanup: 2026-02-05).
+
 ## Required Keys
 
 - `MEREKA_LMS_CMS_OAUTH2_SECRET`

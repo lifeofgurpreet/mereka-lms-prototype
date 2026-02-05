@@ -117,7 +117,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 2. **Pod deep dive** – `kubectl logs -n mereka-lms deployment/<service>` for each microservice noted in alerts.
 3. **Cloud SQL failover** – confirm automatic backups are successful (Cloud SQL → Backups). Manual export script lives in `scripts/infra/backup-db.sh`.
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
-5. **VPS cron** – `scripts/infra/cron-public-health-check.sh` runs prod + dev checks (includes branding + certs).
+5. **Optional VPS cron** – use `scripts/infra/cron-public-health-check.sh` only if you want local log files; CI remains the source of truth.
 
 ## Certificate/SAN verification
 

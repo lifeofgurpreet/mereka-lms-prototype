@@ -226,6 +226,9 @@ kubectl rollout status deployment/cms -n mereka-lms
 
 **Quick Fix (in running pods):**
 ```bash
+./scripts/infra/refresh-i18n-static.sh
+
+# Or run manually:
 kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
   "cd /openedx/edx-platform && ./manage.py lms compilejsi18n --output /openedx/staticfiles/js/i18n"
 
@@ -260,6 +263,34 @@ qs=CourseCreator.objects.filter(user=u); \
 (qs.update(state=CourseCreator.GRANTED, all_organizations=True) if qs.exists() \
 else CourseCreator.objects.bulk_create([CourseCreator(user=u, state=CourseCreator.GRANTED, all_organizations=True)]));\""
 ```
+
+---
+
+### Issue 6a: Kind Dev ImagePullBackOff (OpenedX images)
+
+**Symptoms:**
+- `lms/cms` pods stuck in `ImagePullBackOff` on `kind-dev`
+- Images are private (`asia-southeast1-docker.pkg.dev/...`)
+
+**Root Cause:**
+Kind nodes do not have Artifact Registry credentials by default.
+
+**Fix:**
+```bash
+# Pull once on the host (uses local gcloud auth)
+docker pull asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-mereka-auth-4
+
+# Load into kind nodes (cluster name = dev)
+kind load docker-image asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-mereka-auth-4 --name dev
+
+# Restart pods so they pick up the locally loaded image
+kubectl --context kind-dev delete pod -n mereka-lms -l app.kubernetes.io/name=lms
+kubectl --context kind-dev delete pod -n mereka-lms -l app.kubernetes.io/name=cms
+```
+
+**Notes:**
+- Keep the dev tag aligned with production (`deploy/k8s/base/kustomization.yaml`).
+- If the tag changes, re-run `kind load docker-image`.
 
 ---
 
