@@ -41,6 +41,10 @@ Use this checklist for any domain or secret change on production (GKE). There is
   infisical secrets --env prod --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
   infisical secrets --env dev --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
   ```
+- [ ] MongoDB Atlas credentials:
+  - `MEREKA_LMS_MONGODB_USERNAME`
+  - `MEREKA_LMS_MONGODB_PASSWORD`
+  - User must have `readWrite` on `openedx` + `cs_comments_service`
 - [ ] Confirm sync to GCP Secret Manager (wait for GitHub Actions sync)
 - [ ] Confirm ExternalSecrets refresh in K8s:
   ```bash

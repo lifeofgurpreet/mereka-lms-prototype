@@ -99,11 +99,17 @@ CREDENTIALS_SERVICE_USERNAME = os.environ.get("CREDENTIALS_SERVICE_USERNAME", "c
 # Mongodb connection parameters: MongoDB Atlas (cluster-mereka-lms)
 # IMPORTANT: Using MongoDB Atlas instead of in-cluster MongoDB
 # Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
+MONGODB_HOST = os.environ.get(
+    "MONGODB_HOST",
+    "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
+)
+MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
+MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME", "cs_comments_user")
 mongodb_parameters = {
-    "db": "openedx",
-    "host": "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
+    "db": MONGODB_DB,
+    "host": MONGODB_HOST,
     "port": 27017,
-    "user": "cs_comments_user",
+    "user": MONGODB_USERNAME,
     "password": os.environ.get("MONGODB_PASSWORD", ""),
     # Connection/Authentication
     "connect": False,

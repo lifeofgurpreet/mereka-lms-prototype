@@ -212,6 +212,71 @@ kubectl set image deployment/cms cms=asia-southeast1-docker.pkg.dev/mereka-lms/o
 kubectl rollout status deployment/cms -n mereka-lms
 ```
 
+---
+
+### Issue 5: Account Settings/Profile Pages Blank (Missing `gettext`)
+
+**Symptoms:**
+- `/account/settings` or `/u/<user>` loads header/footer only
+- Console errors: `Script error for "gettext"`
+- 404 for `/static/js/i18n/<lang>/djangojs.js`
+
+**Root Cause:**
+`compilejsi18n` was not run for LMS/CMS, so translated JS bundles are missing.
+
+**Quick Fix (in running pods):**
+```bash
+kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
+  "cd /openedx/edx-platform && ./manage.py lms compilejsi18n --output /openedx/staticfiles/js/i18n"
+
+kubectl exec -n mereka-lms deploy/cms -- /bin/bash -c \
+  "cd /openedx/edx-platform && ./manage.py cms compilejsi18n --output /openedx/staticfiles/studio/js/i18n"
+```
+
+**Permanent Fix:**
+- Ensure the Open edX image build runs `compilejsi18n` (or `collectstatic` pipeline includes it).
+- Rebuild and redeploy the image after theme changes.
+
+---
+
+### Issue 6: Studio “New Course” Disabled
+
+**Symptoms:**
+- “New Course” opens but “Create” stays disabled
+- No console errors
+- User is staff/superuser but still can’t create
+
+**Root Cause:**
+User lacks a `CourseCreator` record with `state=granted`.
+
+**Fix:**
+```bash
+kubectl exec -n mereka-lms deploy/cms -- /bin/bash -c \
+  "cd /openedx/edx-platform && ./manage.py cms shell -c \
+  \"from django.contrib.auth import get_user_model; \
+from cms.djangoapps.course_creators.models import CourseCreator; \
+u=get_user_model().objects.get(email='gurpreet@biji-biji.com'); \
+qs=CourseCreator.objects.filter(user=u); \
+(qs.update(state=CourseCreator.GRANTED, all_organizations=True) if qs.exists() \
+else CourseCreator.objects.bulk_create([CourseCreator(user=u, state=CourseCreator.GRANTED, all_organizations=True)]));\""
+```
+
+---
+
+### Issue 7: No Courses Visible / Modulestore Permission Errors
+
+**Symptoms:**
+- `CourseOverview.objects.count()` returns 0
+- CMS/LMS errors: `user is not allowed to do action [find] on [openedx.modulestore]`
+
+**Root Cause:**
+MongoDB Atlas user only has `readWrite` on `cs_comments_service`, not `openedx`.
+
+**Fix:**
+1. Grant the MongoDB user read/write on the `openedx` database in Atlas.
+2. Ensure `MONGODB_USERNAME` + `MONGODB_PASSWORD` secrets are correct and synced.
+3. Redeploy LMS/CMS to pick up updated credentials.
+
 **Fix (Dev kind):**
 ```bash
 ./infrastructure/tutor/apply-patches.sh

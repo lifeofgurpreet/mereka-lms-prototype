@@ -51,8 +51,9 @@ We chose **MongoDB Atlas** (managed service) for production workloads.
 
 - **Atlas cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net`
 - **Databases**: `openedx` (modulestore), `cs_comments_service` (forum)
-- **Connection**: Password stored in Infisical (`MEREKA_LMS_MONGODB_PASSWORD`), synced to K8s
-- **Local MongoDB**: Disabled in K8s manifests (deployment, service, PVC all commented out)
+- **Connection**: Username + password stored in Infisical (`MEREKA_LMS_MONGODB_USERNAME`, `MEREKA_LMS_MONGODB_PASSWORD`), synced to K8s
+- **Required roles**: MongoDB user must have `readWrite` on both `openedx` and `cs_comments_service`
+- **Local MongoDB**: Should remain unused in production (Atlas-only). If a local MongoDB deployment exists in manifests, ensure LMS/CMS point to Atlas only.
 - **Services using Atlas**:
   - LMS/CMS: Modulestore for course content
   - Forum: cs_comments_service for discussion forums

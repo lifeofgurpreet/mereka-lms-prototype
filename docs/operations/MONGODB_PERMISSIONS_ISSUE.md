@@ -25,8 +25,8 @@ full error: {'ok': 0, 'errmsg': 'user is not allowed to do action [insert] on [o
 ```yaml
 MongoDB Cluster: cluster-mereka-lms.2pjex4s.mongodb.net
 Database: openedx
-User: cs_comments_user
-Password: stored in Infisical as MEREKA_LMS_MONGODB_PASSWORD
+User: `MEREKA_LMS_MONGODB_USERNAME` (currently `cs_comments_user`)
+Password: stored in Infisical as `MEREKA_LMS_MONGODB_PASSWORD`
 ```
 
 ## Root Cause
@@ -67,9 +67,9 @@ db.getSiblingDB("admin").createUser({
 ```
 
 Then update the connection string in:
-1. Infisical: Update `MEREKA_LMS_MONGODB_PASSWORD` and create `MEREKA_LMS_MONGODB_USERNAME`
-2. ExternalSecrets: Add `MONGODB_USERNAME` mapping
-3. Tutor config: Update MongoDB connection strings
+1. Infisical: Update `MEREKA_LMS_MONGODB_USERNAME` + `MEREKA_LMS_MONGODB_PASSWORD`
+2. ExternalSecrets: Ensure `MONGODB_USERNAME` mapping exists
+3. Open edX settings: use `MONGODB_USERNAME` in LMS/CMS production config
 
 ## Workaround
 

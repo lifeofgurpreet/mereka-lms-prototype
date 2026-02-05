@@ -12,6 +12,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `check-cert-sans.sh` - Verify TLS SANs and detect fake ingress certs
 - `check-atlas-allowlist.sh` - Validate Atlas IP allowlist matches cluster egress
 - `check-atlas-allowlist-vps.sh` - Validate Atlas allowlist for VPS egress IP
+- `refresh-i18n-static.sh` - Rebuild LMS/CMS i18n JS bundles (fixes missing gettext)
 - `infisical-validate-mereka-lms.sh` - Verify Infisical has all MEREKA_LMS secrets
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
@@ -43,6 +44,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 
 # Validate Atlas allowlist for VPS egress (dev forum)
 ./scripts/infra/check-atlas-allowlist-vps.sh
+
+# Rebuild LMS/CMS gettext bundles (account settings/profile blank)
+./scripts/infra/refresh-i18n-static.sh
 
 # Validate Infisical secrets for Mereka LMS
 ./scripts/infra/infisical-validate-mereka-lms.sh
