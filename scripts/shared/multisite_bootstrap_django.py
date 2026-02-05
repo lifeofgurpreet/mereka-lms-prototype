@@ -75,6 +75,8 @@ SITE_DEFINITIONS = [
             "platform_name": "Mereka Academy",
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
+            "ENABLE_ACCOUNT_MICROFRONTEND": True,
+            "ENABLE_PROFILE_MICROFRONTEND": True,
             "course_org_filter": ["MEREKA"],
             "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
@@ -92,6 +94,8 @@ SITE_DEFINITIONS = [
             "platform_name": "Biji-Biji Academy",
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
+            "ENABLE_ACCOUNT_MICROFRONTEND": True,
+            "ENABLE_PROFILE_MICROFRONTEND": True,
             "course_org_filter": ["BIJIBIJI"],
             "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
@@ -109,6 +113,8 @@ SITE_DEFINITIONS = [
             "platform_name": "Skill Our Future",
             "THEME_NAME": "mereka",
             "ENABLE_COMPREHENSIVE_THEMING": True,
+            "ENABLE_ACCOUNT_MICROFRONTEND": True,
+            "ENABLE_PROFILE_MICROFRONTEND": True,
             "course_org_filter": ["SKILLOURFUTURE"],
             "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
             "logo_url": "/",
@@ -196,6 +202,28 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         print(f"  - organizations: {rendered_values.get('course_org_filter')}")
 
 
+def upsert_waffle_flags(dry_run: bool) -> None:
+    """Ensure MFE redirect flags are enabled for account/profile."""
+    from waffle.models import Flag
+
+    flags = {
+        "account.redirect_to_microfrontend": True,
+        "learner_profile.redirect_to_microfrontend": True,
+    }
+
+    for name, enabled in flags.items():
+        if dry_run:
+            print(f"[dry-run] Would set waffle flag {name} => {enabled}")
+            continue
+
+        flag, created = Flag.objects.update_or_create(
+            name=name,
+            defaults={"everyone": enabled},
+        )
+        action = "Created" if created else "Updated"
+        print(f"{action} waffle flag: {name} => everyone={enabled}")
+
+
 def main() -> None:
     import argparse
 
@@ -248,6 +276,8 @@ def main() -> None:
     upsert_organizations(dry_run=False)
     print()
     upsert_sites(SITE_DEFINITIONS, dry_run=False)
+    print()
+    upsert_waffle_flags(dry_run=False)
 
     print()
     print("=" * 60)

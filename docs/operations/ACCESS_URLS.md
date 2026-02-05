@@ -58,7 +58,19 @@ _Audience: Everyone • Last updated: 2026-02-05_
 
 **Micro-Frontends (MFEs)**
 - **Base URL:** https://apps.academyv2.mereka.io
-- **Available MFEs:** Same as local (authn, account, profile, learning, etc.)
+- **Available MFEs:**
+  - **Login/Auth:** https://apps.academyv2.mereka.io/authn/login
+  - **Account:** https://apps.academyv2.mereka.io/account
+  - **Profile:** https://apps.academyv2.mereka.io/profile
+  - **Learning Dashboard:** https://apps.academyv2.mereka.io/learner-dashboard
+  - **Learning:** https://apps.academyv2.mereka.io/learning
+  - **Course Authoring:** https://apps.academyv2.mereka.io/course-authoring
+  - **Gradebook:** https://apps.academyv2.mereka.io/gradebook
+  - **Discussions:** https://apps.academyv2.mereka.io/discussions
+  - **Communications:** https://apps.academyv2.mereka.io/communications
+  - **Orders:** https://apps.academyv2.mereka.io/orders
+  - **Payment:** https://apps.academyv2.mereka.io/payment
+  - **ORA Grading:** https://apps.academyv2.mereka.io/ora-grading
 
 **SSO / Authentik**
 - **OIDC Issuer:** https://auth0.mereka.io/application/o/mereka-lms/
@@ -114,6 +126,19 @@ print(f"authentik admin ensured: {email}")
 
 **Micro-Frontends (MFEs)**
 - **Base URL:** https://apps.academyv2.mereka.dev
+- **Available MFEs:**
+  - **Login/Auth:** https://apps.academyv2.mereka.dev/authn/login
+  - **Account:** https://apps.academyv2.mereka.dev/account
+  - **Profile:** https://apps.academyv2.mereka.dev/profile
+  - **Learning Dashboard:** https://apps.academyv2.mereka.dev/learner-dashboard
+  - **Learning:** https://apps.academyv2.mereka.dev/learning
+  - **Course Authoring:** https://apps.academyv2.mereka.dev/course-authoring
+  - **Gradebook:** https://apps.academyv2.mereka.dev/gradebook
+  - **Discussions:** https://apps.academyv2.mereka.dev/discussions
+  - **Communications:** https://apps.academyv2.mereka.dev/communications
+  - **Orders:** https://apps.academyv2.mereka.dev/orders
+  - **Payment:** https://apps.academyv2.mereka.dev/payment
+  - **ORA Grading:** https://apps.academyv2.mereka.dev/ora-grading
 
 **Other Services (Dev)**
 - **Discovery:** https://discovery.academyv2.mereka.dev

@@ -214,14 +214,36 @@ kubectl rollout status deployment/cms -n mereka-lms
 
 ---
 
-### Issue 5: Account Settings/Profile Pages Blank (Missing `gettext`)
+### Issue 5: Account Settings/Profile Pages Blank or Stuck
 
 **Symptoms:**
 - `/account/settings` or `/u/<user>` loads header/footer only
 - Console errors: `Script error for "gettext"`
 - 404 for `/static/js/i18n/<lang>/djangojs.js`
 
-**Root Cause:**
+**Root Cause (most common now):**
+Account/profile pages are still using legacy LMS templates instead of the MFEs.
+The MFEs are healthy, but the redirect flags/config are not enabled.
+
+**Preferred Fix (redirect to MFEs):**
+```bash
+kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
+  "cd /openedx/edx-platform && ./manage.py lms shell -c \
+  \"from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; \
+from waffle.models import Flag; \
+domains=['academyv2.mereka.io','academy.biji-biji.com','skillourfuture.academy.mereka.io']; \
+for domain in domains: \
+    site = SiteConfiguration.objects.filter(site__domain=domain).first(); \
+    values = dict(site.site_values); \
+    values['ENABLE_ACCOUNT_MICROFRONTEND'] = True; \
+    values['ENABLE_PROFILE_MICROFRONTEND'] = True; \
+    site.site_values = values; site.save(); \
+for name in ['account.redirect_to_microfrontend','learner_profile.redirect_to_microfrontend']: \
+    Flag.objects.update_or_create(name=name, defaults={'everyone': True}); \
+\""
+```
+
+**Legacy Fix (if you must keep LMS pages):**
 `compilejsi18n` was not run for LMS/CMS, so translated JS bundles are missing.
 
 **Quick Fix (in running pods):**

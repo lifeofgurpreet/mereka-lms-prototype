@@ -33,31 +33,22 @@ _Last updated: 2025-11-12_
 
 ## 📊 Data Flow
 
-### Current State
+### Current State (2026-02-05)
 
 ```
 Production (GKE) + Dev (kind):
 ┌─────────────────────────────────────┐
 │  MongoDB Atlas (M10)                │
 │  ├─ openedx                         │
-│  │  ├─ modulestore.structures      │  ← 74 courses (MCT + Kajabi)
-│  │  ├─ modulestore.definitions     │  ← XBlock content
-│  │  └─ modulestore.active_versions │  ← Published courses
+│  │  ├─ modulestore.structures      │  ← exists, but no published courses
+│  │  ├─ modulestore.definitions     │  ← minimal content only
+│  │  └─ modulestore.active_versions │  ← 0 (no published courses)
 │  └─ cs_comments_service            │  ← Forum posts
 └─────────────────────────────────────┘
-         ↓
-    SYNC NEEDED
-         ↓
-Local Laptop (Optional):
-┌─────────────────────────────────────┐
-│  tutor_local-mongodb-1              │
-│  ├─ openedx                         │
-│  │  ├─ modulestore.structures      │  ← Currently: 5 empty skeletons
-│  │  ├─ modulestore.definitions     │  ← Currently: minimal
-│  │  └─ modulestore.active_versions │  ← Currently: 5 courses
-│  └─ cs_comments_service            │  ← Currently: empty
-└─────────────────────────────────────┘
 ```
+
+**Implication:** LMS/CMS course lists are empty until MCT/Kajabi imports are re-run.
+See `docs/operations/COURSE_DATA_RECOVERY.md` for the recovery plan.
 
 ## 🔄 Syncing Production to Local
 

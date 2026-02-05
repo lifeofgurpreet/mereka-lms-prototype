@@ -1,15 +1,14 @@
 # Production Architecture - The Real Setup
-_Last updated: 2025-11-12 • Reality Check_
+_Last updated: 2026-02-05 • Reality Check_
 
 ## 🔍 What We Actually Have
 
 ### Production MongoDB
-- **NOT Atlas M10/M0** - It's a MongoDB **POD** in Kubernetes
-- **Location:** `mereka-lms` namespace, `mongodb` deployment
-- **Databases:** `openedx` (courses), `admin`, `config`, `local`
-- **Courses:** Only **2 courses** currently (SKILLOURFUTURE org)
-  - `SKILLOURFUTURE/MCTCAT-24`
-  - `SKILLOURFUTURE/MCTCAT-16`
+- **MongoDB Atlas (single source of truth)**
+- **Cluster:** `cluster-mereka-lms.2pjex4s.mongodb.net`
+- **Databases:** `openedx` (courses), `cs_comments_service` (forum)
+- **Courses:** **0 published courses** (`modulestore.active_versions` empty)
+  - `modulestore.structures/definitions` contain only minimal stubs
 
 ### Users: ALL MCT (No Kajabi Yet)
 - **Total users:** 84,378
@@ -18,11 +17,10 @@ _Last updated: 2025-11-12 • Reality Check_
 - **Evidence:** `auth_userprofile.meta` field has `kajabi_contact_id: None` for all users
 
 ### Course Enrollments Mystery
-- **MySQL has:** 137,468 enrollments across 74 unique `course_id`s
-- **MongoDB has:** Only 2 courses
-- **Conclusion:** Most course IDs in enrollments don't have content in modulestore yet
-  - Historical data from MCT migration
-  - Courses need to be created/imported
+- **MySQL has:** enrollment rows for historical course IDs
+- **MongoDB has:** no published courses
+- **Conclusion:** course content must be re-imported into Atlas before UI can display courses
+  - See `docs/operations/COURSE_DATA_RECOVERY.md`
 
 ### Domain Mapping
 - **SKILLOURFUTURE courses** → `skillourfuture.academy.mereka.io`
@@ -85,7 +83,7 @@ gcloud container clusters get-credentials mereka-lms \
 ```
 
 This syncs:
-- ✅ MongoDB course content (from production pod)
+- ✅ MongoDB course content (once Atlas is repopulated)
 - ✅ User tagging (MCT vs Kajabi markers)
 - ✅ Course-domain mappings (SKILLOURFUTURE → skillourfuture site)
 
@@ -103,21 +101,17 @@ cd mereka.academy
 ## 🎓 Course Organization
 
 ### Current Production Courses
-| Course ID | Organization | Mapped Domain |
-|-----------|--------------|---------------|
-| `MCTCAT-24` | SKILLOURFUTURE | skillourfuture.academy.mereka.io |
-| `MCTCAT-16` | SKILLOURFUTURE | skillourfuture.academy.mereka.io |
+No published courses in MongoDB Atlas as of 2026-02-05.
 
 ### When Kajabi Courses Are Imported
 They will be under a different organization (e.g., `MEREKA`) and mapped to the main domain.
 
 ## 🚨 Key Corrections from Previous Assumptions
 
-1. ❌ **NOT using MongoDB Atlas** - Using Kubernetes pod
-2. ❌ **NOT 74 courses** - Only 2 courses currently in modulestore
-3. ❌ **NOT mixed Kajabi+MCT users** - All MCT users (84,378)
-4. ✅ **User tagging infrastructure exists** - Via `meta` field
-5. ✅ **Multi-org setup correct** - SKILLOURFUTURE, BIJIBIJI, etc.
+1. ✅ **MongoDB Atlas is the source of truth**
+2. ❌ **No published courses** - `modulestore.active_versions` is empty
+3. ✅ **User tagging infrastructure exists** - Via `meta` field
+4. ✅ **Multi-org setup correct** - SKILLOURFUTURE, BIJIBIJI, etc.
 
 ## 📝 TODO: Kajabi Import
 
@@ -145,7 +139,6 @@ When Kajabi courses are imported:
 
 ---
 
-**Bottom line:** Production uses a MongoDB pod (not Atlas), has 2 courses (not 74), all users are MCT (no Kajabi yet). Everything is now set up to be repeatable and ready for Kajabi import!
-
-
-
+**Bottom line:** Production uses MongoDB Atlas. Courses are not currently published in
+`modulestore.active_versions`, so Studio/LMS appear empty until MCT + Kajabi imports
+are re-run.

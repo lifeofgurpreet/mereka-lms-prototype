@@ -43,6 +43,7 @@ If any `MEREKA_LMS_*` keys appear outside `/k8s/mereka-lms`, re-sync from the
 authoritative path and re-run validation:
 
 ```bash
+./scripts/infra/infisical-audit-mereka-lms.sh
 ./scripts/infra/infisical-sync-mereka-lms.sh prod
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
 ./scripts/infra/infisical-validate-mereka-lms.sh
@@ -53,6 +54,19 @@ authoritative path and re-run validation:
 - `GOOGLE_IMPERSONATE_EMAIL` + `GOOGLE_IMPERSONATE_PASSWORD` are the shared
   admin credentials for LMS + Authentik (GKE + VPS kind).
 - Do not copy these values into repo files or issue comments.
+
+### Migration Secrets (MCT + Kajabi)
+- **Path:** `/k8s/mereka-lms`
+- **Purpose:** Used by migration/export scripts (not synced to K8s secrets).
+- **Required keys (MCT):**
+  - `MCT_BASE_URL`, `MCT_ENDPT`, `MCT_API_URI`
+  - `MCT_CLIENT_ID`, `MCT_CLIENT_SECRET`, `MCT_TENANT_ID`
+  - `MCT_API_VERSION`, `MCT_ACCESS_TOKEN` (optional token override)
+- **Required keys (Kajabi):**
+  - `KAJABI_CLIENT_ID`, `KAJABI_CLIENT_SECRET`, `KAJABI_SITE_ID`
+  - `KAJABI_WEBHOOK_SECRET`, `KAJABI_EMAIL`, `KAJABI_PASSWORD`
+- **Note:** These are seeded with `REPLACE_ME` placeholders. Replace before running
+  `scripts/migrations/mct/*` or `scripts/migrations/kajabi/*` pipelines.
 
 #### openedx-secrets (30+ keys)
 | K8s Key | GCP SM Key | Purpose |
