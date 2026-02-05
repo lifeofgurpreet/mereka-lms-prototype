@@ -28,7 +28,7 @@ print('active_versions', db['modulestore.active_versions'].count_documents({}))"
 ```
 
 ## Required Secrets (Infisical)
-All migration secrets live under `/k8s/mereka-lms` (prod + dev envs).
+All migration secrets live under `/k8s/mereka-lms/migrations` (prod + dev envs).
 
 ### MCT
 - `MCT_BASE_URL`, `MCT_ENDPT`, `MCT_API_URI`

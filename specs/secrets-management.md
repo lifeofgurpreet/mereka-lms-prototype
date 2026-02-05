@@ -72,7 +72,7 @@ authoritative path and re-run validation:
   `scripts/migrations/mct/*` or `scripts/migrations/kajabi/*` pipelines.
 
 ### Atlas Automation Secrets
-- **Path:** `/k8s/mereka-lms`
+- **Path:** `/k8s/mereka-lms/atlas`
 - **Purpose:** Used by `scripts/infra/atlas-config-from-infisical.sh` and Atlas allowlist automation.
 - **Required keys:**
   - `ATLAS_PUBLIC_KEY`
