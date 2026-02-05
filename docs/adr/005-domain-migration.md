@@ -8,8 +8,8 @@
 
 ## Context
 
-The original staging environment used `staging.mereka.io` which was confusing:
-- "Staging" implied non-production, but it served real users
+The original legacy environment used `staging.mereka.io` which was confusing:
+- The legacy label implied non-production, but it served real users
 - Multiple teams referred to it inconsistently
 - Needed a clearer naming convention
 

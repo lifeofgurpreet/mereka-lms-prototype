@@ -47,7 +47,7 @@ _Last updated: 2026-02-05_
 ## Data State (prod)
 - CourseOverview count: **0**
 - Modulestore course count: **0**
-- SQL backups exist in GCS: `gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/`
+- SQL backups exist in GCS (legacy bucket name for production): `gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/`
 
 ## Known Gaps
 - Atlas backups not enabled (Atlas snapshots list is empty).

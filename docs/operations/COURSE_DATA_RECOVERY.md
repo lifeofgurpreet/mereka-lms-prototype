@@ -9,7 +9,7 @@ MySQL `CourseOverview` is also empty, so Studio/LMS appear blank until data is r
 - LMS `CourseOverview` count: **0**
 - Modulestore course count: **0**
 - MySQL backup exists in GCS and contains course_overviews rows:
-  `gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/openedx.sql.gz`
+  `gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/openedx.sql.gz` (legacy bucket name for production backups)
 - Atlas snapshots list returns **0** (backups not enabled)
 
 ## Symptoms
@@ -29,7 +29,7 @@ kubectl exec -n mereka-lms deploy/lms -- python /openedx/edx-platform/manage.py 
 store=modulestore(); \
 print('modulestore_courses', sum(1 for _ in store.get_courses()))"
 
-# MySQL backup sanity check (contains course_overviews rows)
+# MySQL backup sanity check (contains course_overviews rows; legacy bucket name)
 gsutil cat gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/openedx.sql.gz | \
   zgrep -m1 'course_overviews_courseoverview'
 
