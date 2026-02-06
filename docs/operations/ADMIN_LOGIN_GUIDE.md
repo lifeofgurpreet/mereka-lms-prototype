@@ -1,7 +1,7 @@
 # Admin Login Guide
 _Last updated: 2026-02-05_
 
-## 🔐 Admin Credentials (Source of Truth)
+## 🔐 Shared SSO Test Credentials (Source of Truth)
 
 **Infisical path:** `/shared/oauth`  
 **Email secret:** `GOOGLE_IMPERSONATE_EMAIL`  
@@ -20,6 +20,10 @@ Authentik **admin UI access** is separate from Open edX admin access and is rest
 These humans must have full admin permissions across the Open edX ecosystem:
 - `gurpreet@biji-biji.com`
 - `malasari@mereka.my`
+
+Notes:
+- These are **your actual platform admin accounts** (full permissions everywhere in Open edX services).
+- The shared credentials above are for **testing SSO flows** and are not a substitute for platform-admin access.
 
 Enforce (prod + dev, idempotent):
 ```bash

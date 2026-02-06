@@ -101,6 +101,21 @@ done
 ./scripts/infra/ensure-platform-admins.sh --verify
 ```
 
+### OIDC provider config verification (prod + dev)
+
+If `/auth/login/oidc/` 500s with "Can't fetch setting of a disabled backend/provider.", the
+**OIDC provider config** is missing/disabled for the current site.
+
+Verify (kubectl required, no secrets):
+```bash
+./scripts/qa/verify-oidc-provider-configs.sh
+```
+
+Notes:
+- `OAuth2ProviderConfig` is a versioned ConfigurationModel. If you need to "fix" it,
+  the safest approach is to **create a new enabled row** (do not try to edit old rows to
+  disable them, that can create new versions and accidentally make a disabled version "current").
+
 ## What Does Not Sync (By Default)
 
 - Authentik groups do not automatically map to Open edX `is_staff`/`is_superuser`.

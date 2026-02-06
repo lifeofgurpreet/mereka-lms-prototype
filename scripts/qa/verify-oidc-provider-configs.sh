@@ -86,11 +86,14 @@ def check(domain: str) -> tuple[bool, str]:
     site = Site.objects.filter(domain=domain).first()
     if not site:
         return False, "Site missing"
-    qs = OAuth2ProviderConfig.objects.filter(site=site, backend_name="oidc", enabled=True, visible=True)
+    qs = OAuth2ProviderConfig.objects.filter(site=site, backend_name="oidc").order_by("-change_date", "-id")
     if not qs.exists():
-        total = OAuth2ProviderConfig.objects.filter(site=site, backend_name="oidc").count()
-        return False, f"oidc enabled/visible missing (total oidc records={total})"
-    return True, f"OK (count={qs.count()})"
+        return False, "oidc provider config missing"
+    latest = qs.first()
+    assert latest is not None
+    if not (latest.enabled and latest.visible):
+        return False, f"latest oidc provider config is disabled/hidden (id={latest.id} enabled={latest.enabled} visible={latest.visible})"
+    return True, f"OK (latest_id={latest.id} total={qs.count()})"
 
 for d in domains:
     ok, msg = check(d)
@@ -115,4 +118,3 @@ fi
 
 echo ""
 echo "OK"
-

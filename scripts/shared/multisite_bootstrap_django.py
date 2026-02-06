@@ -229,23 +229,32 @@ def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: boo
             print(f"[dry-run] Would ensure OIDC provider config for site={site.domain} (key={key})")
             continue
 
-        obj, created = OAuth2ProviderConfig.objects.update_or_create(
-            backend_name="oidc",
+        qs = OAuth2ProviderConfig.objects.filter(site=site, backend_name="oidc").order_by("-change_date", "-id")
+        latest = qs.first()
+
+        if latest and latest.enabled and latest.visible and (latest.key or "") == key:
+            print(
+                f"OIDC provider config OK: site={site.domain} latest_id={latest.id} total={qs.count()}"
+            )
+            continue
+
+        # ConfigurationModel semantics: creating a new row is the safest way to
+        # ensure the *current* config (latest) is enabled, even if older rows exist.
+        obj = OAuth2ProviderConfig(
             site=site,
+            backend_name="oidc",
+            enabled=True,
+            visible=True,
+            name="Authentik",
             slug="authentik",
-            defaults={
-                "enabled": True,
-                "visible": True,
-                "name": "Authentik",
-                "secondary": False,
-                # Keep secrets out of DB; lms/cms settings inject via env.
-                "key": key,
-                "secret": "",
-                "other_settings": "",
-            },
+            secondary=False,
+            # Keep secrets out of DB; lms/cms settings inject via env.
+            key=key,
+            secret="",
+            other_settings="",
         )
-        action = "Created" if created else "Updated"
-        print(f"{action} OIDC provider config: site={site.domain} id={obj.id} enabled={obj.enabled}")
+        obj.save()
+        print(f"Created OIDC provider config: site={site.domain} id={obj.id} enabled={obj.enabled}")
 
 
 def upsert_waffle_flags(dry_run: bool) -> None:

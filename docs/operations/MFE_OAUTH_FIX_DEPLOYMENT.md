@@ -147,10 +147,10 @@ Expected: `['mfe_oauth_fix.middleware.MFEOAuthFixMiddleware']`
 kubectl exec -it deployment/lms -n mereka-lms -- python manage.py lms shell
 ```
 ```python
-from third_party_auth.models import OAuth2ProviderConfig
+from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 from django.contrib.sites.models import Site
 
-site = Site.objects.get(id=6)
+site = Site.objects.get(domain="academyv2.mereka.io")
 providers = OAuth2ProviderConfig.objects.filter(site=site, enabled=True, visible=True)
 print(f"Found {providers.count()} providers")
 for p in providers:

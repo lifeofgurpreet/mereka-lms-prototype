@@ -87,6 +87,21 @@ check_contains() {
   fi
 }
 
+check_css_fonts() {
+  local url=$1
+  local label=$2
+  local css
+  css="$(curl -sS -L "$url" || true)"
+  if echo "$css" | grep -q 'font-family:"Poppins"' \
+    && echo "$css" | grep -q 'font-family:"Lato"' \
+    && echo "$css" | grep -q '/static/mereka/fonts/'; then
+    printf "✓ %s\n" "$label"
+  else
+    printf "✗ %s (missing Poppins/Lato font-face wiring)\n" "$label" >&2
+    failures=$((failures + 1))
+  fi
+}
+
 echo "Branding verification ($ENVIRONMENT) for ${BASE_DOMAIN}..."
 echo ""
 
@@ -113,6 +128,9 @@ check_any_follow_200 "Font asset (Poppins-Regular.woff2)" \
 check_any_follow_200 "Font asset (Lato-Regular.woff2)" \
   "https://${BASE_DOMAIN}/theming/asset/fonts/Lato-Regular.woff2" \
   "https://${BASE_DOMAIN}/static/mereka/fonts/Lato-Regular.woff2"
+
+# CSS must reference the brand fonts (otherwise assets may exist but not be used).
+check_css_fonts "https://${BASE_DOMAIN}/static/mereka/css/theme.css" "Theme CSS wires Poppins+Lato"
 
 for host in "${EXTRA_HOSTS[@]}"; do
   check_contains "https://${host}/" "Microsite ${host} includes 'Mereka'" "Mereka"

@@ -56,6 +56,12 @@ Each service includes a small middleware:
   - Discovery/Credentials/Ecommerce `/login/` redirects to `/login/edx-oauth2/`
   - (Optional strict mode) `/admin/login/` redirects to `/login/`
 
+### 3.1) Internal verification (kubectl, no secrets)
+
+- `scripts/qa/verify-oidc-provider-configs.sh`
+  - Verifies the **latest** `OAuth2ProviderConfig` for `backend_name=oidc` is enabled/visible for the configured sites.
+  - This directly prevents `/auth/login/oidc/` from 500ing with "Can't fetch setting of a disabled backend/provider."
+
 ### 4) Continuous verification (CI)
 
 The existing `.github/workflows/public-health-check.yml` now runs:
@@ -72,6 +78,7 @@ The existing `.github/workflows/public-health-check.yml` now runs:
    - create courses in Studio
    - access LMS Django admin
    - access Discovery/Credentials/Ecommerce admin after SSO login
+6. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 
 ## Future Hardening (Optional)
 
@@ -81,4 +88,3 @@ If you want true “role sync” (instead of a platform-admin allowlist), the ne
 - Services: propagate from LMS via edx-oauth2 userinfo and map into local staff/superuser
 
 This is higher-risk because it expands the trusted surface area for privilege escalation; the current allowlist approach is intentionally tight.
-

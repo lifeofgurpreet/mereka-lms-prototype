@@ -6,6 +6,7 @@
 # Checks:
 # - LMS OIDC entrypoint redirects to Authentik authorize URL
 # - Discovery/Credentials/Ecommerce /login redirects to /login/edx-oauth2/
+# - MFE config endpoint is reachable (used by MFEs for auth + backend wiring)
 # - (Optional hardening) /admin/login redirects to /login (SSO entrypoint)
 #
 # Usage:
@@ -118,6 +119,11 @@ require_302_location_contains \
 require_200 \
   "https://apps.${LMS_BASE}/authn/login" \
   "Authn MFE login"
+
+# MFE config is required for consistent auth behavior across MFEs.
+require_200 \
+  "https://apps.${LMS_BASE}/api/mfe_config/v1" \
+  "MFE config endpoint"
 
 for svc in discovery credentials ecommerce; do
   require_302_location_is \

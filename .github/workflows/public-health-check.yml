@@ -18,6 +18,12 @@ jobs:
       - name: Run public health checks (dev, include branding)
         run: CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh dev
 
+      - name: Verify auth surfaces (prod)
+        run: ./scripts/qa/verify-auth-surfaces.sh prod
+
+      - name: Verify auth surfaces (dev)
+        run: ./scripts/qa/verify-auth-surfaces.sh dev
+
       - name: Check TLS SANs
         run: ./scripts/infra/check-cert-sans.sh
 
