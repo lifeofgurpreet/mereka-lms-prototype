@@ -22,5 +22,8 @@
     }
   ],
   "combiner": "OR",
-  "notificationChannels": []
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
 }

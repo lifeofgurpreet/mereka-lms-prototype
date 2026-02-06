@@ -71,6 +71,7 @@ Minimum recommended policies (edit thresholds as desired):
 | Authentik redirect_uri mismatch / authorize 4xx | `infrastructure/monitoring/alerts/log-authentik-authorize-4xx-mereka-lms.json` | Requires log metric `authentik-authorize-4xx-mereka-lms`. |
 | LMS OIDC provider disabled | `infrastructure/monitoring/alerts/log-lms-oidc-provider-disabled.json` | Requires log metric `lms-oidc-provider-disabled` (catches "disabled backend/provider"). |
 | LMS CSRF failures | `infrastructure/monitoring/alerts/log-lms-csrf-failures.json` | Requires log metric `lms-csrf-failures`. |
+| In-cluster auth verify CronJob failures | `infrastructure/monitoring/alerts/log-auth-verify-cronjob-failures.json` | Requires log metric `auth-verify-cronjob-failures` (only applies after CronJob is deployed). |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -127,6 +128,10 @@ gcloud logging metrics create lms-oidc-provider-disabled \
 gcloud logging metrics create lms-csrf-failures \
   --config-from-file=infrastructure/monitoring/logging-metrics/lms-csrf-failures.json \
   --project=mereka-lms
+
+gcloud logging metrics create auth-verify-cronjob-failures \
+  --config-from-file=infrastructure/monitoring/logging-metrics/auth-verify-cronjob-failures.json \
+  --project=mereka-lms
 ```
 
 Create via Console (Monitoring → Alerting) or `gcloud monitoring policies create --policy-from-file alert.json`. When using `gcloud`, populate `notification_channels` with email/SMS/webhook IDs.
@@ -143,6 +148,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 3. **Cloud SQL failover** – confirm automatic backups are successful (Cloud SQL → Backups). Manual export script lives in `scripts/infra/backup-db.sh`.
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
+6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.
 
 ## Certificate/SAN verification
 

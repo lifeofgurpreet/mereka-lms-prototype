@@ -76,15 +76,7 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 ## Remaining Work (Actual Gaps)
 
 ### 1) MFE user‑journey checks (prod)
-**Why:** `prod-apps-https.json` only checks the base host; it does **not** validate
-critical auth/login or account paths.
-
-**Deliverables**
-- Add uptime configs for:
-  - `apps.academyv2.mereka.io/authn/login`
-  - `apps.academyv2.mereka.io/account/`
-  - `apps.academyv2.mereka.io/learner-dashboard`
-- Wire into `scripts/infra/apply-monitoring-configs.sh`.
+**Status:** Done (uptime configs exist: `prod-mfe-login.json`, `prod-mfe-account.json`, `prod-mfe-dashboard.json`).
 
 ### 2) Service‑specific auth failure visibility (forum + credentials)
 **Status:** Done (log metrics + alerts exist for credentials/forum).

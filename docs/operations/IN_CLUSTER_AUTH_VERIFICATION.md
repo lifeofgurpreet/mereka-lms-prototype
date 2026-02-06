@@ -35,8 +35,11 @@ This CronJob fails the Job when any check fails. To alert on it, the recommended
 Alternatively:
 - Alert on Job failures via Kubernetes metrics if you have that pipeline wired into your monitoring stack.
 
+This repo includes templates (GCP):
+- Metric: `infrastructure/monitoring/logging-metrics/auth-verify-cronjob-failures.json`
+- Alert: `infrastructure/monitoring/alerts/log-auth-verify-cronjob-failures.json`
+
 ## Notes
 
 - This CronJob uses `curlimages/curl` and only depends on public HTTPS reachability.
 - It will not detect "permissions drift" (staff/superuser) inside LMS/CMS, because those checks require privileged access.
-

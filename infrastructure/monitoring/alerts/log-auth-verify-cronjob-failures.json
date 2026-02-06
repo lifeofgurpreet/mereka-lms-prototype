@@ -1,21 +1,21 @@
 {
-  "displayName": "Authentik authorize 4xx (mereka-lms) spike (logs)",
+  "displayName": "Auth verify CronJob failures (logs)",
   "combiner": "OR",
   "enabled": true,
-  "severity": "WARNING",
+  "severity": "ERROR",
   "conditions": [
     {
-      "displayName": "Authentik /authorize 4xx > 1/min (mereka-lms)",
+      "displayName": "Auth verify failures > 0/15m",
       "conditionThreshold": {
-        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/authentik-authorize-4xx-mereka-lms\"",
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/auth-verify-cronjob-failures\"",
         "aggregations": [
           {
-            "alignmentPeriod": "60s",
+            "alignmentPeriod": "900s",
             "perSeriesAligner": "ALIGN_SUM"
           }
         ],
         "comparison": "COMPARISON_GT",
-        "thresholdValue": 1,
+        "thresholdValue": 0,
         "duration": "0s",
         "trigger": { "count": 1 }
       }
@@ -26,3 +26,4 @@
     "projects/mereka-lms/notificationChannels/1104353389109200281"
   ]
 }
+
