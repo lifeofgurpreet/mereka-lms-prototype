@@ -7,6 +7,17 @@ on:
     branches: [main]
 
 jobs:
+  generated-docs:
+    name: Generated Docs Are Up To Date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify OPENEDX_HOSTNAMES.md is generated and current
+        run: |
+          ./scripts/gen/update-openedx-hostnames-doc.sh
+          git diff --exit-code -- docs/operations/OPENEDX_HOSTNAMES.md
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
