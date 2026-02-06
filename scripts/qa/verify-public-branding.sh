@@ -187,7 +187,9 @@ echo ""
 
 # HTML branding checks
 check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
+check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes brand overrides marker" "MEREKA_BRAND_OVERRIDES_v1"
 check_contains "https://studio.${BASE_DOMAIN}/" "Studio page includes 'Mereka'" "Mereka"
+check_contains "https://studio.${BASE_DOMAIN}/" "Studio includes brand overrides marker" "MEREKA_BRAND_OVERRIDES_v1"
 check_http "https://apps.${BASE_DOMAIN}/authn/login" "MFE login reachable"
 
 # Asset checks (theme assets)

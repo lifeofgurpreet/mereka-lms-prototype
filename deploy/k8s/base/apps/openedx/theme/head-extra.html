@@ -23,3 +23,12 @@
   media="all"
 />
 
+<style id="mereka-brand-overrides">
+  /* MEREKA_BRAND_OVERRIDES_v1 */
+  /* Hard-stop footer logo from exploding if upstream CSS drifts. */
+  .mereka-footer .footer-brand img {
+    width: clamp(96px, 10vw, 120px) !important;
+    max-width: 120px !important;
+    height: auto !important;
+  }
+</style>

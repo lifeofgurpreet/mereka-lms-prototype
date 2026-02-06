@@ -409,6 +409,11 @@ Auth hardening verification (preferred):
 ./scripts/qa/list-openedx-hostnames.sh
 ```
 
+Regenerate hostname registry (after domain changes):
+```bash
+./scripts/gen/update-openedx-hostnames-doc.sh
+```
+
 **Operational learnings (read these before touching auth/Forum/Secrets):**
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.

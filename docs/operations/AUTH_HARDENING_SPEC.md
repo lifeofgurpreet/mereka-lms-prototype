@@ -111,6 +111,7 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 
 Convenience:
 - `./scripts/qa/verify-auth-hardening.sh` runs the full suite (public + internal) in one command.
+- `./scripts/gen/update-openedx-hostnames-doc.sh` regenerates `docs/operations/OPENEDX_HOSTNAMES.md`.
 
 ## Future Hardening (Optional)
 
