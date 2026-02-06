@@ -88,6 +88,7 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 3. `./scripts/infra/ensure-platform-admins.sh --verify` reports OK for both contexts.
 4. `./scripts/infra/ensure-authentik-admin.sh --verify` reports OK.
 5. `STRICT=1 ./scripts/qa/verify-multisite-config.sh` reports correct LMS/CMS roots for each microsite.
+   (Use `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` explicitly when running from a laptop.)
 6. Gurpreet + Malasari can:
    - create courses in Studio
    - access LMS Django admin

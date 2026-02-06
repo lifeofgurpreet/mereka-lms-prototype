@@ -84,7 +84,9 @@ Expected behavior:
 
 ### Discovery/Credentials/Ecommerce Admin Access
 
-These services have Django Admin sites (`/admin/`), but their `/admin/login/` pages are username/password only.
+These services have Django Admin sites (`/admin/`). By default, Django would render a username/password login at
+`/admin/login/`, but we harden these services to **redirect `/admin/login/` to `/login/`** so admin access always
+starts from SSO.
 
 To access admin as a platform admin:
 1. Log in via SSO first:
@@ -127,7 +129,7 @@ This checks that each microsite has a `Site` + `SiteConfiguration` and that
 `LMS_ROOT_URL`/`CMS_ROOT_URL` are correct.
 
 ```bash
-STRICT=1 ./scripts/qa/verify-multisite-config.sh
+STRICT=1 ./scripts/qa/verify-multisite-config.sh prod
 ```
 
 ### OIDC provider config verification (prod + dev)

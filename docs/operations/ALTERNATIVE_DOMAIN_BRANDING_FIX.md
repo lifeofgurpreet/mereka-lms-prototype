@@ -1,16 +1,25 @@
 # Alternative Domain Branding Fix
 
-**Issue**: The alternative domain `academy.biji-biji.com` shows default Open edX branding instead of Mereka Academy branding.
+**Issue**: The alternative domain `academy.biji-biji.com` shows incorrect branding/config (usually because it is
+missing `django_site` + `SiteConfiguration` or is mapped to the wrong tenant).
 
-**Expected**: Both `academyv2.mereka.io` and `academy.biji-biji.com` should display identical Mereka Academy branding.
+**Expected**: Each LMS domain must render according to its own `SiteConfiguration`:
+- `academyv2.mereka.io`: Mereka Academy
+- `academy.biji-biji.com`: Biji-Biji Academy
+- `skillourfuture.academy.mereka.io`: Skill Our Future
 
-**Root Cause**: The multisite bootstrap script was missing site configuration for the main domain (`academyv2.mereka.io`) and the alternative domain was incorrectly configured with a separate "Biji-Biji Academy" identity instead of sharing the Mereka Academy brand.
+**Root Cause**: SiteConfiguration drift. Common causes:
+- `django_site` row missing for a domain
+- `SiteConfiguration` missing/disabled for a domain
+- `LMS_ROOT_URL`/`CMS_ROOT_URL` unset or pointing at the wrong domain
+- MFE config API being served via the wrong host header (causing the wrong site to be selected)
 
 ## Solution Overview
 
 The fix involves:
 
-1. **Updated multisite configuration** - Added site configuration for `academyv2.mereka.io` and changed `academy.biji-biji.com` to use Mereka Academy branding
+1. **Updated multisite configuration** - Ensure every served LMS domain has a `Site` + `SiteConfiguration` entry.
+   Biji is a separate microsite, but it can still share the same theme.
 2. **Created deployment script** - New script to apply multisite configuration to production database
 3. **Updated documentation** - Aligned configuration files with the correct branding strategy
 
@@ -23,12 +32,11 @@ File: `scripts/shared/multisite_bootstrap.py`
 **Changes**:
 - Added `MEREKA` organization definition
 - Added site configuration for `academyv2.mereka.io` (main domain)
-- Changed `academy.biji-biji.com` configuration to use Mereka Academy branding (not Biji-Biji Academy)
-- Both domains now share:
-  - `platform_name: "Mereka Academy"`
-  - `site_name: "Mereka Academy"`
-  - `THEME_NAME: "mereka"`
-  - `course_org_filter: ["MEREKA"]`
+- Ensured `academy.biji-biji.com` is its own microsite:
+  - `platform_name: "Biji-Biji Academy"`
+  - `site_name: "Biji-Biji Academy"`
+  - `THEME_NAME: "mereka"` (shared theme)
+  - `course_org_filter: ["BIJIBIJI"]`
 
 ### 2. Created Deployment Script
 
@@ -43,13 +51,13 @@ A new script that:
 **Usage**:
 ```bash
 # Preview changes (safe)
-./scripts/infra/apply-multisite-config.sh --dry-run
+./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
 
 # Apply changes to production
-./scripts/infra/apply-multisite-config.sh --apply
+./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
 
 # Apply to different namespace
-./scripts/infra/apply-multisite-config.sh --namespace production --apply
+./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --namespace production --env prod --apply
 ```
 
 ### 3. Updated Configuration File
@@ -79,7 +87,7 @@ curl -I https://academy.biji-biji.com/
 ### Step 2: Preview Changes (Dry Run)
 
 ```bash
-./scripts/infra/apply-multisite-config.sh --dry-run
+./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
 ```
 
 Expected output:
@@ -89,8 +97,8 @@ Expected output:
 [dry-run] Would ensure organization SKILLOURFUTURE
 [dry-run] Would ensure site academyv2.mereka.io -> Mereka Academy
            course_org_filter=['MEREKA']
-[dry-run] Would ensure site academy.biji-biji.com -> Mereka Academy
-           course_org_filter=['MEREKA']
+[dry-run] Would ensure site academy.biji-biji.com -> Biji-Biji Academy
+           course_org_filter=['BIJIBIJI']
 [dry-run] Would ensure site skillourfuture.academy.mereka.io -> Skill Our Future
            course_org_filter=['SKILLOURFUTURE']
 ```
@@ -98,7 +106,7 @@ Expected output:
 ### Step 3: Apply Changes
 
 ```bash
-./scripts/infra/apply-multisite-config.sh --apply
+./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
 ```
 
 ### Step 4: Restart LMS Pods (Optional but Recommended)
@@ -155,7 +163,8 @@ Open edX uses Django's sites framework (`django.contrib.sites`) to support multi
 
 ### Biji-Biji Is a Separate Client Site
 
-`academy.biji-biji.com` is its **own client microsite**, with its own organization (`BIJIBIJI`) and catalog. It is not an alias of the main `academyv2.mereka.io` site. This means:
+`academy.biji-biji.com` is its **own client microsite**, with its own organization (`BIJIBIJI`) and catalog. It is
+not an alias of the main `academyv2.mereka.io` site. This means:
 
 - Biji-Biji has a distinct `django_site` + `SiteConfiguration`
 - Courses are filtered to `BIJIBIJI` org content
