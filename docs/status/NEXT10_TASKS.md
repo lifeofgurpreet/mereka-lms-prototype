@@ -15,27 +15,27 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 - ✅ ArgoCD GitOps sync unblocked (promtail DaemonSet selector immutability fixed)
 - ✅ MySQL hardening: provisioned Notes/XQueue DBs + normalized MySQL secrets (removed trailing CR/LF)
 
-## Top 10 Next Tasks (High Impact)
+## Top 10 Next Tasks (High Impact, Non-Stripe)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | Make this boring: scripted restore into a throwaway namespace, verify key queries, attach outputs. Bead: `mereka-lms-usv`. |
-| 2 | Course data recovery runbook hardening (hybrid Mongo reality) | Data/Infra | 💤 Pending | Keep docs accurate and deterministic. Start from `docs/operations/COURSE_DATA_RECOVERY.md`. |
-| 3 | Modulestore cutover decision + migration plan (in-cluster Mongo -> Atlas) | Infra | 💤 Pending | Must include safety gates. Do not delete in-cluster Mongo until verified. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
-| 4 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
-| 5 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
-| 6 | Observability: synthetic checks for login + admin access across all hostnames | SRE | 💤 Pending | Add a single “auth check” dashboard and alert on regressions (SSO entrypoints, /admin/login redirect). |
-| 7 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
-| 8 | Harden ops UX: one “audit everything” command + JSON output for tickets | SRE | 💤 Pending | Expand `./scripts/qa/audit-auth-access.sh` style reports to include DB health + GitOps status. |
-| 9 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
-| 10 | Ecommerce checkout readiness validation | Infra | ⚙️ In progress | Stripe keys + webhook secret are now injected (prod + dev). Remaining: run a real test checkout + confirm Stripe webhook delivery updates order state. Bead: `mereka-lms-xw6`. |
+| 1 | Fix modulestore persistence (prod): `mereka-lms/mongodb` uses `emptyDir` | Infra | 💤 Pending | Highest risk before any course imports. Move modulestore to Atlas or add PVC-backed MongoDB. See `docs/ARCHITECTURE_MONGODB.md`. |
+| 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | 💤 Pending | Restore drills must be green. See `docs/operations/VELERO_BACKUP_AUDIT.md`. |
+| 3 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | Make this boring: scripted restore into a throwaway namespace, verify key queries, attach outputs. Bead: `mereka-lms-usv`. |
+| 4 | Course data recovery runbook hardening (hybrid Mongo reality) | Data/Infra | 💤 Pending | Keep docs accurate and deterministic. Start from `docs/operations/COURSE_DATA_RECOVERY.md`. |
+| 5 | Modulestore cutover decision + migration plan (in-cluster Mongo -> Atlas) | Infra | 💤 Pending | Must include safety gates. Do not delete in-cluster Mongo until verified. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
+| 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
+| 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
+| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | 💤 Pending | Add a single “auth check” dashboard and alert on regressions (SSO entrypoints, /admin/login redirect). |
+| 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
+| 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 
 ## Product / Content Backlog (Still Valid, Not in the “Auth Hardening” Top 10)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Restore MCT/Kajabi courses into Atlas | Data | 💤 Pending | Bead: `mereka-lms-hd3` (awaiting export artifacts). |
-| 2 | Ecommerce checkout readiness validation | Infra | ⚙️ In progress | Stripe keys + webhook secret are now injected (prod + dev). Remaining: run a real test checkout + confirm Stripe webhook delivery updates order state. Bead: `mereka-lms-xw6`. |
+| 2 | Ecommerce checkout readiness validation | Infra | 💤 Skipped | Stripe/payment work is explicitly deprioritized for now. Bead: `mereka-lms-xw6`. |
 | 3 | MFE theming hardening (authn/account/learning) | Product | 💤 Pending | Bead: `mereka-lms-29o`. |
 | 4 | Learner dashboard + courseware styling | Product | 💤 Pending | Bead: `mereka-lms-2t0`. |
 | 5 | Studio authoring UI polish | Product | 💤 Pending | Bead: `mereka-lms-3ou`. |

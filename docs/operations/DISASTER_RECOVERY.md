@@ -9,31 +9,32 @@ Legacy “staging” bucket names remain in GCS for production backups (there is
 - **RPO (Recovery Point Objective):** ≤ 24 hours for LMS data
 - **RTO (Recovery Time Objective):** ≤ 4 hours for core LMS availability
 
-## Backup Inventory
+## Backup Inventory (Current Reality)
 
 | Layer | Tooling | Schedule | Notes |
 | --- | --- | --- | --- |
-| Cloud SQL | Automated backups | Daily | Managed by Cloud SQL. Verify in console. |
-| Cloud SQL exports | `cloud-sql-backup.yml` + `scripts/infra/backup-db.sh` | Every 3 days | Writes to `gs://staging-academy-mereka-io-backup/sql/` (legacy bucket name used for production backups). |
-| Persistent volumes | Velero | Weekly full + ad-hoc | Use before any risky operation. |
-| MongoDB Atlas | Atlas backups | **Not enabled** | Enable snapshots before relying on Atlas for DR. |
+| In-cluster MySQL + Redis PVs | Velero VolumeSnapshots | Hourly + daily + weekly | This is the current source of truth for database state in prod (DB host is `mysql:3306`). |
+| In-cluster MongoDB (modulestore) | **Not safe today** | N/A | `mereka-lms/mongodb` uses `emptyDir` for `/data/db` (ephemeral). Do not import course content until fixed. |
+| Persistent volumes (general) | Velero | Hourly critical + daily all apps + weekly full | Use before any risky operation. |
+| MongoDB Atlas (forum) | Atlas backups | TBD | Enable/verify snapshots if we move modulestore to Atlas or rely on forum retention. |
 | Config + manifests | Git | Every change | Git is the source of truth for K8s + Tutor configs. |
+
+Note: This repo contains a legacy Cloud SQL export workflow (`.github/workflows/cloud-sql-backup.yml`) and
+`scripts/infra/backup-db.sh`. Those are only correct if/when MySQL runs in Cloud SQL. Today, production
+services use the in-cluster `mysql` Service.
 
 ## Scheduled Backups (Required)
 
-Ensure these schedules are active:
+Production already has Velero schedules. Audit them (and restore drills) with:
 
 ```bash
-# Velero daily backup (03:00 UTC)
-velero schedule create daily-mereka-lms \
-  --schedule="0 3 * * *" \
-  --include-namespaces mereka-lms
-
-# Cloud SQL exports (GitHub Actions)
-# .github/workflows/cloud-sql-backup.yml (every 3 days)
+./scripts/qa/audit-velero.sh --json | jq .
 ```
 
-## Atlas Backups (Required)
+For full procedure and interpretation, see:
+- `docs/operations/VELERO_BACKUP_AUDIT.md`
+
+## Atlas Backups (Only If/When Used)
 
 Enable Atlas snapshots for `cluster-mereka-lms` before relying on MongoDB for DR:
 
@@ -69,15 +70,11 @@ velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
      --from-backup <latest-backup> \
      --namespace-mappings mereka-lms:mereka-lms-dr
    ```
-3. **Restore Cloud SQL snapshot** (if needed)
-   - Use a recent automated backup or the latest export in GCS.
-4. **Point DR pods to the restored database**
-   - Set DB host/credentials via temporary `config.yml` overrides.
-5. **Verify**
+3. **Verify**
    ```bash
    ./scripts/qa/public-health-check.sh prod
    ```
-6. **Clean up**
+4. **Clean up**
    ```bash
    kubectl delete ns mereka-lms-dr
    ```
@@ -85,8 +82,8 @@ velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
 ## Recovery (Production Incident)
 
 1. **Stabilize**: Freeze deploys and announce incident.
-2. **Recover DB**: Restore Cloud SQL from backup/export.
-3. **Recover PVs**: Restore via Velero.
+2. **Recover PVs**: Restore via Velero.
+3. **Recover DB**: If DB is in-cluster, it comes back with PV restore. If/when we migrate to Cloud SQL, update this section.
 4. **Validate**: Use public health checks + Studio login.
 5. **Postmortem**: Document root cause and preventive actions.
 

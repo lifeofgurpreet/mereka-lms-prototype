@@ -1,177 +1,55 @@
-# MongoDB Architecture - Production vs Local
+# MongoDB Architecture (Reality + Target)
 _Last updated: 2026-02-06_
 
-## 🏗️ Architecture
+This doc is intentionally opinionated and reality-first. Do not assume “Atlas-only” without verifying the live config.
 
-### Production (GKE)
-**Hybrid today** (target is Atlas-only)
+## Current Reality (Production: GKE)
 
-- Forum uses **MongoDB Atlas** (managed service).
-- LMS/CMS modulestore currently uses the **in-cluster MongoDB** service unless
-  `MONGODB_HOST` is explicitly set to Atlas.
+1. **Forum uses MongoDB Atlas** (`cs_comments_service`).
+2. **LMS/CMS modulestore is currently configured to use in-cluster MongoDB** by default.
+3. **In-cluster MongoDB in `mereka-lms` is not persistent today**:
+   - `Deployment/mongodb` mounts `/data/db` from `emptyDir` (ephemeral).
 
-Target state:
-- Atlas-only for both `openedx` (modulestore) and `cs_comments_service` (forum)
-- Remove in-cluster MongoDB once modulestore is migrated and verified
+Implication:
+- If/when we import courses into modulestore while it is pointed at in-cluster MongoDB, course content will be lost on pod reschedule/restart.
+- Treat “modulestore cutover” as a critical migration before any course import work.
 
-### Dev (VPS kind)
-Depends on environment:
-- Forum commonly uses Atlas (with allowlist automation).
-- Modulestore may use in-cluster MongoDB unless explicitly pointed to Atlas.
+## Target Architecture (Atlas-only)
 
-### MongoDB Atlas (Managed Service)
-- **Service:** MongoDB Atlas M10 cluster
-- **Cost:** Production M10; dev may use a smaller Atlas tier or a separate DB
-- **Region:** AWS `ap-southeast-1`
-- **Connection:** `mongodb+srv://` URI
-- **Databases:**
-  - `openedx` - Course content (modulestore)
-  - `cs_comments_service` - Forum discussions
+- Forum: Atlas (`cs_comments_service`)
+- Modulestore: Atlas (`openedx`)
+- In-cluster MongoDB removed (or disabled) after cutover is verified.
 
-**Why Atlas?**
-- ✅ Managed service (no maintenance)
-- ✅ Automatic backups
-- ✅ High availability
-- ✅ Scaling
-- ✅ **Recommended by Open edX** for production
+## How To Verify What We’re Actually Using
 
-### Local Laptop (Optional)
-**Uses Local MongoDB Container** (only for `tutor local`, not K8s)
-- **Service:** Docker container `tutor_local-mongodb-1`
-- **Cost:** Free (local resources)
-- **Connection:** `mongodb://mongodb:27017`
-- **Same databases:** `openedx`, `cs_comments_service`
-
-**Why Optional?**
-- ✅ Works offline for laptop-only development
-- ✅ Avoids touching shared Atlas data
-
-## 📊 Data Flow
-
-### Current State (Verified 2026-02-06)
-
-```
-Production (GKE):
-┌─────────────────────────────────────┐
-│  MongoDB Atlas                      │
-│  └─ cs_comments_service             │  ← Forum posts
-├─────────────────────────────────────┤
-│  In-cluster MongoDB (Deployment)    │
-│  └─ openedx                         │  ← LMS/CMS modulestore (today)
-└─────────────────────────────────────┘
-```
-
-**Implication:** Atlas-only is not yet true end-to-end. Treat modulestore cutover
-as a planned migration with explicit verification and rollback.
-
-## 🔄 Syncing Production to Local
-
-### Step 1: Get Atlas URI
-
+### 1) Verify modulestore host (prod/dev)
 ```bash
-# From Google Secret Manager
-ATLAS_URI=$(gcloud secrets versions access latest --secret=mongodb-atlas-uri)
-
-# Or ask infrastructure team
+./scripts/qa/course-data-sanity.sh --env prod
+./scripts/qa/course-data-sanity.sh --env dev
 ```
 
-### Step 2: Run Sync
+You are looking for:
+- `DOC_STORE_HOST mongodb` means modulestore is in-cluster.
+- `DOC_STORE_HOST mongodb+srv://...mongodb.net/...` means modulestore is Atlas.
 
+### 2) Verify in-cluster MongoDB persistence (prod)
 ```bash
-ATLAS_URI=$ATLAS_URI ./scripts/infra/sync-mongodb-from-production.sh
+kubectl -n mereka-lms get deploy mongodb -o jsonpath='{.spec.template.spec.volumes}'
 ```
+If it contains `emptyDir`, it is ephemeral.
 
-This will:
-1. Dump `openedx` and `cs_comments_service` from Atlas
-2. Restore to local MongoDB
-3. Verify course count
+## What To Fix (High Priority)
 
-### Step 3: Verify
+Choose one:
 
-```bash
-# Check course count
-docker exec tutor_local-mongodb-1 mongosh openedx --quiet --eval \
-  "db['modulestore.active_versions'].countDocuments({})"
+1. **Move modulestore to Atlas** (preferred, matches target architecture).
+2. **Make in-cluster MongoDB persistent with a PVC** (acceptable as an interim step, but still operational burden).
 
-# Should show 74 courses (or however many are in production)
+Do not proceed with course imports until one of the above is done.
 
-# View in browser
-open http://studio.localhost
-# Login: admin / admin123
-```
+## Related Docs
 
-## 📈 User Data Clarification
-
-**84,379 users includes:**
-- ✅ MCT (Microsoft Community Training) users
-- ✅ Kajabi users (already migrated!)
-- ✅ Both systems combined
-
-**NOT separate pools** - they're all in MySQL `auth_user` table now.
-
-## 🎓 Course Data Clarification
-
-**74 course IDs in `student_courseenrollment`:**
-- These are MCT course IDs
-- Format: `course-v1:MEREKA+MEKA-{number}+RUN-{number}`
-- Content exists in **production Atlas**
-- NOT in local MongoDB yet (need to sync)
-
-**Kajabi courses:**
-- Also in production Atlas (part of the 74)
-- Or separate course IDs (need to verify with production dump)
-
-## 🚨 Important Notes
-
-1. **Atlas is recommended by Open edX** for production
-   - We're doing it right!
-   - Local MongoDB for dev is also correct
-
-2. **Course content lives in MongoDB** (not MySQL)
-   - MySQL = enrollments, users, metadata
-   - MongoDB = course structure, XBlocks, content
-
-3. **Forums use separate database** (`cs_comments_service`)
-   - Also in Atlas (production)
-   - Also in local MongoDB (dev)
-
-4. **We need to sync regularly**
-   - Production Atlas → Local MongoDB
-   - To get latest courses for dev/testing
-
-5. **Atlas requires SRV DNS support**
-   - Open edX images must include `dnspython`
-   - Install via `pip install "pymongo[srv]"` during image build
-
-## 📝 Configuration
-
-### Production (Target: Atlas-only)
-```yaml
-RUN_MONGODB: false
-MONGODB_URI: "mongodb+srv://..."
-MONGODB_HOST: ""
-MONGODB_PORT: ""
-```
-
-### Local (Container)
-```yaml
-RUN_MONGODB: true
-MONGODB_URI: ""
-MONGODB_HOST: mongodb
-MONGODB_PORT: 27017
-```
-
-## ✅ Best Practices
-
-1. **Production + Dev (K8s):** Always use Atlas
-2. **Local Laptop:** Use local container only for `tutor local`
-3. **Sync regularly:** Keep local in sync with production for testing
-4. **Never point local at production Atlas:** Use sync script instead
-5. **Keep SRV support installed:** Ensure `pymongo[srv]` is in Open edX images
-
----
-
-**Summary:** Production uses Atlas (correct!), local uses container (correct!). We just need to sync the data!
-
-
+- `docs/adr/001-mongodb-atlas.md` (decision record + cautions)
+- `docs/operations/COURSE_DATA_RECOVERY.md` (recovery/import flow, now reality-first)
+- `docs/operations/VELERO_BACKUP_AUDIT.md` (Velero posture, restore drill, and data-risk checks)
 
