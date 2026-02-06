@@ -63,6 +63,19 @@ require_200() {
   fi
 }
 
+require_status() {
+  local url="$1"
+  local label="$2"
+  local expected="$3"
+  local code
+  code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
+  if [[ "$code" == "$expected" ]]; then
+    log_ok "$label ($code)"
+  else
+    log_fail "$label (expected $expected, got $code) url=$url"
+  fi
+}
+
 require_302_location_contains() {
   local url="$1"
   local label="$2"
@@ -257,6 +270,19 @@ done
 for svc in discovery credentials ecommerce; do
   check_admin_login_redirect "$svc" "$ECOSYSTEM_BASE"
 done
+
+# Notes and forum are API-first. They do not have their own SSO entrypoints.
+# We still verify they are reachable so operators don't misdiagnose outages as "SSO missing".
+require_body_contains \
+  "https://notes.${ECOSYSTEM_BASE}/" \
+  "notes: API banner" \
+  "edX Notes API"
+
+# Forum service returns 401 when unauthenticated (expected).
+require_status \
+  "https://forum.${ECOSYSTEM_BASE}/" \
+  "forum: unauthenticated response" \
+  "401"
 
 if [[ "$failures" -gt 0 ]]; then
   echo ""
