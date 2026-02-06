@@ -15,6 +15,10 @@ Dev (kind) health checks remain script-based (`scripts/qa/public-health-check.sh
 
 There is **no staging environment**.
 
+Reality-first:
+- Production MySQL/Redis are **in-cluster** and PVC-backed (not Cloud SQL/Memorystore).
+- Any Cloud SQL references are legacy unless explicitly reintroduced.
+
 ---
 
 ## What’s Already in Place (Baseline)
@@ -47,7 +51,7 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - `log-lms-csrf-failures.json`
 - `https-cert-expiry.json`
 - `pod-restarts.json`
-- `cloudsql-disk.json`
+- `cloudsql-disk.json` *(legacy; replace with PVC disk utilization alerting)*
 
 **Log-based metrics**  
 `infrastructure/monitoring/logging-metrics/`:
@@ -95,6 +99,29 @@ Only implement if the team wants formal burn‑rate enforcement.
 
 ### 5) Wire notification channels for log-based alerts
 **Status:** Done (alert templates include the canonical notification channel IDs for the `mereka-lms` project).
+
+### 6) PVC disk utilization alerting (P0 for in-cluster MySQL/Redis/Elasticsearch)
+**Why:** Disk-full is a top outage cause for PVC-backed stateful services.
+
+**Deliverables**
+- Add a GCP Monitoring alert policy for PVC volume usage (or equivalent metric pipeline).
+- Runbook section: what to do when MySQL/Redis/Elasticsearch PVC is near full.
+
+### 7) In-cluster data service saturation signals (MySQL + Redis)
+**Why:** Today we mostly infer DB/cache pain via app symptoms (timeouts/499s). We need direct saturation signals.
+
+**Deliverables**
+- Add exporters (or managed-equivalent telemetry) for:
+  - MySQL: connections, slow queries, QPS/latency, innodb buffer pool pressure
+  - Redis: memory usage, evictions, hit rate, latency
+- Add dashboards + alerts for the above.
+
+### 8) Backup posture in observability (Velero)
+**Why:** Backups that exist but are silently failing are worse than no backups.
+
+**Deliverables**
+- Dashboard panels for: last successful backup per schedule, last restore drill, restore drill pass/fail.
+- Alerts when restore drills fail or schedules stop producing recent backups.
 
 ---
 

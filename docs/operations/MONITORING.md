@@ -1,7 +1,12 @@
 # Monitoring & Alerting Guide
 _Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-06_
 
-This checklist focuses on the GKE Autopilot cluster, Cloud SQL, and Memorystore that run the production `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
+This checklist focuses on the production **GKE Autopilot** cluster that runs the `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
+
+Reality-first (as of 2026-02-06):
+- **MySQL** and **Redis** are **in-cluster** and PVC-backed (`kubectl get pvc -n mereka-lms`).
+- Some older docs/templates reference **Cloud SQL** / **Memorystore**; treat those as **legacy** unless explicitly reintroduced.
+- Backups are driven by **Velero** (see `docs/operations/VELERO_BACKUP_AUDIT.md`).
 
 ## Dashboards
 
@@ -44,12 +49,14 @@ The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-ap
    - Filter by namespace `mereka-lms`.
    - Add a log panel for `k8s_container` severity `ERROR` (namespace `mereka-lms`).
 
-2. **Cloud SQL (MySQL)**
-   - Metrics: `cloudsql.googleapis.com/database/cpu/utilization`, `cloudsql.googleapis.com/database/memory/utilization`, `cloudsql.googleapis.com/database/disk/utilization`, `cloudsql.googleapis.com/database/replication/lag`.
-   - Enable "Query Insights" in the Cloud SQL console for slow-query heatmaps.
+2. **MySQL (in-cluster)**
+   - Track deployment health: `kubernetes.io/container/restart_count`, CPU/memory utilization, and readiness.
+   - Track **storage** via PVC volume used/capacity metrics (preferred) and alert before disks fill.
+   - If we add a MySQL exporter later, wire QPS/latency/connection saturation into dashboards.
 
-3. **Memorystore (Redis)**
-   - Metrics: `redis.googleapis.com/stats/memory/used_bytes` vs `maxmemory`, `redis.googleapis.com/stats/commands/ops`, `redis.googleapis.com/stats/network/bytes`.
+3. **Redis (in-cluster)**
+   - Track memory saturation, restarts, and latency signals from the application tier (timeouts/499s).
+   - If we add a Redis exporter later, alert on `used_memory`, evictions, and keyspace misses.
 
 > JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`, `auth.json`). Apply them with
 > `./scripts/infra/apply-monitoring-configs.sh apply`
@@ -62,7 +69,7 @@ Minimum recommended policies (edit thresholds as desired):
 |-------|---------------|-------|
 | GKE pod restarts | `infrastructure/monitoring/alerts/pod-restarts.json` | Threshold: >5 restarts / pod within 10 min. |
 | Ingress 5xx spike | `infrastructure/monitoring/alerts/lb-5xx-ratio.json` | Update the `url_map_name` if GKE creates a different LB. |
-| Cloud SQL disk utilization | `infrastructure/monitoring/alerts/cloudsql-disk.json` | Fires when disk usage >80% for 5 min. |
+| (Legacy) Cloud SQL disk utilization | `infrastructure/monitoring/alerts/cloudsql-disk.json` | Legacy template. Replace with PVC disk utilization alerting for in-cluster MySQL/Redis/Elasticsearch. |
 | TLS certificate expiry | `infrastructure/monitoring/alerts/https-cert-expiry.json` | Requires the uptime checks below; fires when `time_until_ssl_cert_expires < 14 days`. |
 | Log-based 5xx spike | `infrastructure/monitoring/alerts/log-5xx-spike.json` | Requires log metric `http-5xx`. |
 | Log-based auth failures | `infrastructure/monitoring/alerts/log-auth-failures.json` | Requires log metric `auth-failures`. |
@@ -146,7 +153,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 
 1. **On-call checks** – use `./scripts/qa/public-health-check.sh prod` (or `CHECK_BRANDING=1`) for public endpoints and `./scripts/qa/smoke-test.sh` for deeper verification.
 2. **Pod deep dive** – `kubectl logs -n mereka-lms deployment/<service>` for each microservice noted in alerts.
-3. **Cloud SQL failover** – confirm automatic backups are successful (Cloud SQL → Backups). Manual export script lives in `scripts/infra/backup-db.sh`.
+3. **Data plane recovery** – for in-cluster state (MySQL/Redis PVs), recovery depends on Velero snapshot+restore drills. See `docs/operations/DISASTER_RECOVERY.md`.
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
 6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.

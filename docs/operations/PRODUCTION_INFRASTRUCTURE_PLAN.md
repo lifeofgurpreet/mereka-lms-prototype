@@ -25,9 +25,11 @@ references staging has been archived at:
 
 ## Data plane
 
-- **MySQL**: Cloud SQL (production); Docker service `mysql` in dev.
-- **MongoDB**: Atlas only (no in-cluster MongoDB).
-- **Redis**: GKE-managed Redis or in-cluster service depending on environment.
+- **MySQL**: in-cluster (PVC-backed) in production and dev.
+- **Redis**: in-cluster (PVC-backed) in production and dev.
+- **MongoDB**:
+  - Target state: Atlas-only (see `docs/adr/001-mongodb-atlas.md`).
+  - Current production reality: there is an in-cluster `mongodb` service, and we must treat it as production-critical until cutover completes (see `docs/ARCHITECTURE_MONGODB.md`).
 
 ## Secrets
 
@@ -62,11 +64,14 @@ See `docs/operations/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
 
 ## Backups
 
-- Cloud SQL backup bucket uses a **legacy name**:
-  `gs://staging-academy-mereka-io-backup`
-  (still the production backup bucket).
-- See `docs/operations/DISASTER_RECOVERY.md` and
-  `docs/operations/COURSE_DATA_RECOVERY.md`.
+- **Source of truth**: Velero schedules + restore drills (GitOps-managed outside this repo).
+- Audit posture with: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
+- Evidence bundles: `./scripts/qa/collect-velero-evidence.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
+
+References:
+- `docs/operations/VELERO_BACKUP_AUDIT.md`
+- `docs/operations/DISASTER_RECOVERY.md`
+- `docs/operations/BACKUP_COVERAGE_MATRIX.md`
 
 ## References
 
