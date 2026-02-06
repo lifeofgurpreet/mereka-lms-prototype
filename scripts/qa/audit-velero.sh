@@ -445,20 +445,28 @@ velero = d.get("velero") or {}
 bsls = velero.get("backup_storage_locations") or []
 if bsls:
   for b in bsls:
-    print(f"BSL {b.get(\"name\")}: {b.get(\"phase\")}")
+    name = b.get("name")
+    phase = b.get("phase")
+    print(f"BSL {name}: {phase}")
 else:
   print("BSL: <none>")
 
 restore = velero.get("restore_drill") or {}
-print(f"Restore drill exists: {bool(restore.get(\"exists\"))}")
+restore_exists = bool(restore.get("exists"))
+print(f"Restore drill exists: {restore_exists}")
 if restore.get("last_job"):
   lj = restore["last_job"]
-  print(f"Restore last job: {lj.get(\"name\")} succeeded={lj.get(\"succeeded\")} failed={lj.get(\"failed\")}")
+  jn = lj.get("name")
+  js = lj.get("succeeded")
+  jf = lj.get("failed")
+  print(f"Restore last job: {jn} succeeded={js} failed={jf}")
 
 verify = velero.get("backup_verification") or {}
-print(f"Backup verification exists: {bool(verify.get(\"exists\"))}")
+verify_exists = bool(verify.get("exists"))
+print(f"Backup verification exists: {verify_exists}")
 if verify.get("last_successful_time"):
-  print(f"Backup verification last OK: {verify.get(\"last_successful_time\")}")
+  ts = verify.get("last_successful_time")
+  print(f"Backup verification last OK: {ts}")
 
 print("")
 risks = d.get("app_data_risks") or []
