@@ -278,9 +278,15 @@ def summarize():
         latest_summary = None
         if latest:
             st = latest.get("status") or {}
+            completed_at = st.get("completionTimestamp")
+            completed_dt = iso_to_dt(completed_at)
+            age_hours = None
+            if completed_dt:
+                age_hours = (now() - completed_dt).total_seconds() / 3600.0
             latest_summary = {
                 "name": latest.get("metadata", {}).get("name"),
-                "completed_at": st.get("completionTimestamp"),
+                "completed_at": completed_at,
+                "age_hours": age_hours,
                 "volume_snapshots_attempted": st.get("volumeSnapshotsAttempted"),
                 "volume_snapshots_completed": st.get("volumeSnapshotsCompleted"),
             }
@@ -314,6 +320,28 @@ def summarize():
                 else:
                     out["checks"]["warnings"] += 1
                     out["app_data_risks"].append({"severity": "warning", "risk": msg})
+
+            # Recency sanity: a "working" backup program must also be recent.
+            if age_hours is not None:
+                # Heuristics by schedule name.
+                if "hourly" in (name or "") and age_hours > 2.5:
+                    out["checks"]["failures"] += 1
+                    out["app_data_risks"].append({
+                        "severity": "critical",
+                        "risk": f"Hourly schedule {name} latest completed backup is stale ({age_hours:.1f}h old).",
+                    })
+                elif "daily" in (name or "") and age_hours > 30:
+                    out["checks"]["warnings"] += 1
+                    out["app_data_risks"].append({
+                        "severity": "warning",
+                        "risk": f"Daily schedule {name} latest completed backup is stale ({age_hours:.1f}h old).",
+                    })
+                elif "weekly" in (name or "") and age_hours > 24 * 8:
+                    out["checks"]["warnings"] += 1
+                    out["app_data_risks"].append({
+                        "severity": "warning",
+                        "risk": f"Weekly schedule {name} latest completed backup is stale ({age_hours:.1f}h old).",
+                    })
 
         out["velero"]["schedules"].append({
             "name": name,
