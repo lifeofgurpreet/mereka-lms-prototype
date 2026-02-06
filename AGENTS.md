@@ -438,6 +438,9 @@ Regenerate hostname registry (after domain changes):
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
+- Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
+  - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
+  - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod`
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).
