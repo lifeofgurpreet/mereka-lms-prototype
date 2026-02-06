@@ -12,6 +12,7 @@ _Last updated: 2026-02-06_
 Core:
 - LMS microsites:
   - `academyv2.mereka.io`
+  - `preview.academyv2.mereka.io` (alias)
   - `academy.biji-biji.com`
   - `skillourfuture.academy.mereka.io`
 - Studio/CMS:
@@ -25,7 +26,12 @@ Ecosystem services:
 - Discovery (`discovery.academyv2.mereka.io`)
 - Credentials (`credentials.academyv2.mereka.io`)
 - Ecommerce (`ecommerce.academyv2.mereka.io`)
+- Notes (`notes.academyv2.mereka.io`) (API-first)
+- Forum (`forum.academyv2.mereka.io`) (API-first; UI is embedded in LMS)
 - Authentik (`auth0.mereka.io`)
+
+Canonical hostname list:
+- `docs/operations/OPENEDX_HOSTNAMES.md`
 
 ## Policy
 
@@ -64,10 +70,14 @@ LMS/CMS also include multisite hardening middleware:
 
 - `scripts/qa/verify-auth-surfaces.sh {prod|dev}`
   - LMS OIDC entrypoint redirects to Authentik authorize
+  - Preview alias domain OIDC entrypoint redirects to Authentik authorize
   - Studio `/signin` redirects to the correct LMS `/login` for the microsite
   - Biji MFE config must point to `academy.biji-biji.com` + `studio.academy.biji-biji.com`
   - Discovery/Credentials/Ecommerce `/login/` redirects to `/login/edx-oauth2/`
   - (Optional strict mode) `/admin/login/` redirects to `/login/`
+
+- `scripts/qa/list-openedx-hostnames.sh`
+  - Compares expected hostnames (from `scripts/shared/config.sh`) vs deployed Ingress hosts (prod + dev).
 
 ### 3.1) Internal verification (kubectl, no secrets)
 

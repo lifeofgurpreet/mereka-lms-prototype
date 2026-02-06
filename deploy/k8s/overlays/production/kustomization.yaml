@@ -15,7 +15,7 @@ resources:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: 20260204-mereka-auth-4
+    newTag: 20260206-branding-overrides-3
   - name: openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: production

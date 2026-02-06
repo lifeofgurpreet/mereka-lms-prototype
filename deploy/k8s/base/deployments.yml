@@ -112,6 +112,10 @@ spec:
               name: settings-cms
             - mountPath: /openedx/config
               name: config
+            # Provide a CMS-side hook if any templates opt-in to including `head-extra.html`.
+            - mountPath: /openedx/edx-platform/cms/templates/head-extra.html
+              name: theme-head-extra
+              subPath: head-extra.html
             - mountPath: /openedx/uwsgi.ini
               name: uwsgi-config
               subPath: uwsgi.ini
@@ -136,6 +140,12 @@ spec:
             items:
               - key: uwsgi.ini
                 path: uwsgi.ini
+        - name: theme-head-extra
+          configMap:
+            name: openedx-theme-head-extra
+            items:
+            - key: head-extra.html
+              path: head-extra.html
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -262,6 +272,10 @@ spec:
               name: settings-cms
             - mountPath: /openedx/config
               name: config
+            # Ensure LMS optional_include_mako("head-extra.html") resolves this file.
+            - mountPath: /openedx/edx-platform/lms/templates/head-extra.html
+              name: theme-head-extra
+              subPath: head-extra.html
             - mountPath: /openedx/uwsgi.ini
               name: uwsgi-config
               subPath: uwsgi.ini
@@ -286,6 +300,12 @@ spec:
             items:
             - key: uwsgi.ini
               path: uwsgi.ini
+        - name: theme-head-extra
+          configMap:
+            name: openedx-theme-head-extra
+            items:
+            - key: head-extra.html
+              path: head-extra.html
 ---
 apiVersion: apps/v1
 kind: Deployment

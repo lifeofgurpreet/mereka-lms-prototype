@@ -14,7 +14,7 @@ resources:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: 20260206-branding-overrides-2
+    newTag: 20260206-branding-overrides-3
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
@@ -73,6 +73,12 @@ configMapGenerator:
 - name: openedx-uwsgi-config
   files:
   - apps/openedx/uwsgi.ini
+  options:
+    labels:
+        app.kubernetes.io/name: openedx
+- name: openedx-theme-head-extra
+  files:
+  - apps/openedx/theme/head-extra.html
   options:
     labels:
         app.kubernetes.io/name: openedx

@@ -1,0 +1,35 @@
+## mako
+<%namespace name="static" file="static_content.html"/>
+<%!
+"""
+Theme hook for LMS pages.
+
+edx-platform `lms/templates/main.html` loads this file via:
+  <%static:optional_include_mako file="head-extra.html" is_theming_enabled="True" />
+
+We use it to load brand typography + color overrides without requiring a full
+recompile of the core Indigo CSS bundle.
+"""
+%>
+
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-Regular.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Lato-Regular.woff2')}"
+/>
+
+<link
+  rel="stylesheet"
+  href="${static.url('mereka/css/mereka-overrides.css')}"
+  type="text/css"
+  media="all"
+/>

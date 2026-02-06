@@ -143,10 +143,10 @@ def upsert_sites(connection, definitions: List[SiteDefinition], dry_run: bool) -
                     "LOGOUT_URL": f"{lms_root}/logout",
                     "MARKETING_SITE_BASE_URL": lms_root,
                     "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{lms_root}/login_refresh",
-                    "FAVICON_URL": f"{lms_root}/favicon.ico",
-                    "LOGO_URL": f"{lms_root}/theming/asset/images/logo.png",
-                    "LOGO_WHITE_URL": f"{lms_root}/theming/asset/images/logo.png",
-                    "LOGO_TRADEMARK_URL": f"{lms_root}/theming/asset/images/logo.png",
+                    "FAVICON_URL": f"{lms_root}/theming/asset/mereka/images/favicon.ico",
+                    "LOGO_URL": f"{lms_root}/theming/asset/mereka/images/logo-horizontal.png",
+                    "LOGO_WHITE_URL": f"{lms_root}/theming/asset/mereka/images/logo-horizontal-white.png",
+                    "LOGO_TRADEMARK_URL": f"{lms_root}/theming/asset/mereka/images/logo.png",
                 }
                 if cms_root:
                     overrides["STUDIO_BASE_URL"] = cms_root

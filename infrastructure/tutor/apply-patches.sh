@@ -780,6 +780,29 @@ if [ -d "$THEME_BUILD_DIR" ]; then
       echo "  ⚠ No CMS fonts found to copy"
     fi
   fi
+
+  # Keep build context in lockstep with repo theme sources (prevents "it works locally
+  # but not in the built image" drift when we add new templates/static dirs).
+  echo "Syncing theme templates/static overrides to build directory..."
+  mkdir -p "$THEME_BUILD_DIR/common/templates" "$THEME_BUILD_DIR/common/static/css"
+  mkdir -p "$THEME_BUILD_DIR/lms/templates" "$THEME_BUILD_DIR/lms/static/css"
+  cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/." "$THEME_BUILD_DIR/lms/templates/"
+  if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css" ]; then
+    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/." "$THEME_BUILD_DIR/lms/static/css/"
+  fi
+  if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates" ]; then
+    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/." "$THEME_BUILD_DIR/common/templates/"
+  fi
+  if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css" ]; then
+    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/." "$THEME_BUILD_DIR/common/static/css/"
+  fi
+  if [ -d "$THEME_BUILD_DIR/cms" ]; then
+    mkdir -p "$THEME_BUILD_DIR/cms/templates" "$THEME_BUILD_DIR/cms/static/css"
+    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/." "$THEME_BUILD_DIR/cms/templates/" 2>/dev/null || true
+    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css" ]; then
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/." "$THEME_BUILD_DIR/cms/static/css/"
+    fi
+  fi
 else
   echo "⚠ Warning: Theme build directory not found. Logo sync skipped."
 fi

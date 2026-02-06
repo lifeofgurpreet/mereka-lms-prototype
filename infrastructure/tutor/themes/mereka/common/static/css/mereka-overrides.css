@@ -1,0 +1,107 @@
+/* Mereka shared brand overrides (staticfiles entrypoint). */
+
+:root {
+  --mereka-teal: #2d898b;
+  --mereka-magenta: #ab3b78;
+  --mereka-blue: #295cad;
+  --mereka-black: #000000;
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Italic.woff2") format("woff2");
+}
+
+html,
+body {
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  color: var(--mereka-black);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.hd-1,
+.hd-2,
+.hd-3,
+.hd-4 {
+  font-family: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+a {
+  color: var(--mereka-blue);
+}
+
+a:hover,
+a:focus {
+  color: var(--mereka-teal);
+}
+
+.btn-primary,
+.btn-brand,
+button.btn.btn-primary {
+  background-color: var(--mereka-magenta);
+  border-color: var(--mereka-magenta);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-brand:hover,
+.btn-brand:focus,
+button.btn.btn-primary:hover,
+button.btn.btn-primary:focus {
+  background-color: #963365;
+  border-color: #963365;
+}
+
+.header-global,
+.nav-global {
+  border-top: 4px solid var(--mereka-teal);
+}
+

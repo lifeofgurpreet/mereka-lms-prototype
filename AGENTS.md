@@ -78,17 +78,35 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
    docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
    ```
 7. **Push images**: `docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG`
-8. **Update K8s deployments**:
+8. **Update GitOps manifests (production is ArgoCD-managed)**:
+   - This repo (`mereka-lms`) provides the base manifests under `deploy/k8s/base`.
+   - The production cluster pulls those manifests via `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`
+     (note the pinned `?ref=<git_sha>`).
+
+   Update flow:
    ```bash
-   kubectl set image deployment/lms lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG -n mereka-lms
-   # Repeat for cms, lms-worker, cms-worker, mfe
+   # 1) In this repo, bump the base image tags in deploy/k8s/base (and overlay if used)
+   #    then commit + push to `Biji-Biji-Initiative/mereka-lms`.
+   #
+   # 2) In bbi-infrastructure, update the pinned ref to the new commit SHA:
+   #    apps/mereka-lms/base/kustomization.yaml
+   #    resources:
+   #      - https://github.com/Biji-Biji-Initiative/mereka-lms.git//deploy/k8s/base?ref=<NEW_SHA>
+   #    then commit + push to `Biji-Biji-Initiative/bbi-infrastructure`.
+   #
+   # 3) ArgoCD self-heals and rolls production automatically.
    ```
-9. **Verify rollout**: `kubectl rollout status deployment/lms -n mereka-lms`
+9. **Verify rollout**:
+   ```bash
+   kubectl rollout status deployment/lms -n mereka-lms
+   kubectl rollout status deployment/cms -n mereka-lms
+   kubectl rollout status deployment/caddy -n mereka-lms
+   ```
 
 ### Common Mistakes (AVOID THESE)
 1. **Building locally without pushing** → Changes only exist on VPS, GKE still uses old images
 2. **Forgetting to authenticate Docker** → 403 errors when pulling cache
-3. **Not updating K8s deployments** → Pods still use stock Docker Hub images
+3. **Not updating GitOps pinned ref** → Production keeps using the old `deploy/k8s/base` snapshot
 4. **Skipping `apply-patches.sh`** → MySQL auth fails, Node version wrong
 
 ### Brand Guidelines Reference
@@ -381,6 +399,15 @@ curl -I http://apps.localhost/authn/login
 - Authentik base URL: `https://auth0.mereka.io`
 - Authn MFE shows two login methods: local LMS credentials + “Sign in with Mereka” (OIDC)
 - Shared admin test creds in Infisical `/shared/oauth`: `GOOGLE_IMPERSONATE_EMAIL`, `GOOGLE_IMPERSONATE_PASSWORD`
+
+Canonical hostname list:
+- `docs/operations/OPENEDX_HOSTNAMES.md`
+
+Auth hardening verification (preferred):
+```bash
+./scripts/qa/verify-auth-hardening.sh
+./scripts/qa/list-openedx-hostnames.sh
+```
 
 **Operational learnings (read these before touching auth/Forum/Secrets):**
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.

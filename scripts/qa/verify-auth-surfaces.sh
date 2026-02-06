@@ -138,11 +138,13 @@ check_admin_login_redirect() {
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   LMS_DOMAINS=("$LMS_DOMAIN" "$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
+  LMS_ALIAS_DOMAINS=("$PREVIEW_DOMAIN")
   STUDIO_HOSTS=("studio.${LMS_DOMAIN}" "$BIJI_STUDIO_DOMAIN")
   MFE_HOSTS=("apps.${LMS_DOMAIN}" "$BIJI_MFE_DOMAIN")
   ECOSYSTEM_BASE="$LMS_DOMAIN"
 else
   LMS_DOMAINS=("$DEV_LMS_DOMAIN")
+  LMS_ALIAS_DOMAINS=("$DEV_PREVIEW_DOMAIN")
   STUDIO_HOSTS=("studio.${DEV_LMS_DOMAIN}")
   MFE_HOSTS=("apps.${DEV_LMS_DOMAIN}")
   ECOSYSTEM_BASE="$DEV_LMS_DOMAIN"
@@ -162,6 +164,19 @@ for domain in "${LMS_DOMAINS[@]}"; do
   require_302_location_contains \
     "https://${domain}/auth/login/oidc/" \
     "${domain}: OIDC redirect_uri matches domain" \
+    "redirect_uri=https://${domain}/auth/complete/oidc/"
+done
+
+# LMS aliases (same stack, extra hostnames) must also support OIDC.
+for domain in "${LMS_ALIAS_DOMAINS[@]}"; do
+  require_302_location_contains \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: LMS OIDC entrypoint (alias)" \
+    "auth0.mereka.io/application/o/authorize/"
+
+  require_302_location_contains \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: OIDC redirect_uri matches domain (alias)" \
     "redirect_uri=https://${domain}/auth/complete/oidc/"
 done
 

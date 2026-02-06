@@ -31,6 +31,7 @@ urls=(
   "https://ecommerce.${BASE_DOMAIN}/dashboard/"
   "https://credentials.${BASE_DOMAIN}/health/"
   "https://notes.${BASE_DOMAIN}/"
+  # Open edX forum (cs_comments_service) uses /heartbeat for health.
   "https://forum.${BASE_DOMAIN}/heartbeat"
 )
 

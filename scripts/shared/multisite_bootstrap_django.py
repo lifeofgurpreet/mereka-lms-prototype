@@ -165,10 +165,19 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
             overrides["LOGOUT_URL"] = f"{lms_root}/logout"
             overrides["MARKETING_SITE_BASE_URL"] = lms_root
             overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = f"{lms_root}/login_refresh"
-            overrides["FAVICON_URL"] = f"{lms_root}/favicon.ico"
-            overrides["LOGO_URL"] = f"{lms_root}/theming/asset/images/logo.png"
-            overrides["LOGO_WHITE_URL"] = f"{lms_root}/theming/asset/images/logo.png"
-            overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/images/logo.png"
+            theme_name = (
+                rendered_values.get("THEME_NAME")
+                or rendered_values.get("DEFAULT_SITE_THEME")
+                or "mereka"
+            )
+            # The upstream /theming/asset/<path> view redirects to staticfiles_storage.url(path)
+            # and does not auto-resolve the "current theme". We therefore namespace theme assets
+            # explicitly under /theming/asset/<theme_name>/... so multisites always get branded
+            # assets (and so MFEs remain deterministic).
+            overrides["FAVICON_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/favicon.ico"
+            overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.png"
+            overrides["LOGO_WHITE_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.png"
+            overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.png"
             if cms_root:
                 overrides["STUDIO_BASE_URL"] = cms_root
             if mfe_host:

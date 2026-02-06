@@ -38,6 +38,9 @@ export LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
 export STUDIO_DOMAIN="${STUDIO_DOMAIN:-studio.${LMS_DOMAIN}}"
 export MFE_DOMAIN="${MFE_DOMAIN:-apps.${LMS_DOMAIN}}"
 export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
+export DISCOVERY_DOMAIN="${DISCOVERY_DOMAIN:-discovery.${LMS_DOMAIN}}"
+export ECOMMERCE_DOMAIN="${ECOMMERCE_DOMAIN:-ecommerce.${LMS_DOMAIN}}"
+export NOTES_DOMAIN="${NOTES_DOMAIN:-notes.${LMS_DOMAIN}}"
 export CREDENTIALS_DOMAIN="${CREDENTIALS_DOMAIN:-credentials.${LMS_DOMAIN}}"
 export FORUM_DOMAIN="${FORUM_DOMAIN:-forum.${LMS_DOMAIN}}"
 
@@ -51,6 +54,14 @@ export BIJI_MFE_DOMAIN="${BIJI_MFE_DOMAIN:-apps.academy.biji-biji.com}"
 
 # Development
 export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
+export DEV_STUDIO_DOMAIN="${DEV_STUDIO_DOMAIN:-studio.${DEV_LMS_DOMAIN}}"
+export DEV_MFE_DOMAIN="${DEV_MFE_DOMAIN:-apps.${DEV_LMS_DOMAIN}}"
+export DEV_PREVIEW_DOMAIN="${DEV_PREVIEW_DOMAIN:-preview.${DEV_LMS_DOMAIN}}"
+export DEV_DISCOVERY_DOMAIN="${DEV_DISCOVERY_DOMAIN:-discovery.${DEV_LMS_DOMAIN}}"
+export DEV_ECOMMERCE_DOMAIN="${DEV_ECOMMERCE_DOMAIN:-ecommerce.${DEV_LMS_DOMAIN}}"
+export DEV_NOTES_DOMAIN="${DEV_NOTES_DOMAIN:-notes.${DEV_LMS_DOMAIN}}"
+export DEV_CREDENTIALS_DOMAIN="${DEV_CREDENTIALS_DOMAIN:-credentials.${DEV_LMS_DOMAIN}}"
+export DEV_FORUM_DOMAIN="${DEV_FORUM_DOMAIN:-forum.${DEV_LMS_DOMAIN}}"
 
 # =============================================================================
 # Container Registry

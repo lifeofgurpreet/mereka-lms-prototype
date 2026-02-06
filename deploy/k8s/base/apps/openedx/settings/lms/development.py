@@ -282,7 +282,7 @@ COURSE_ABOUT_VISIBILITY_PERMISSION = "see_about_page"
 OAUTH_ENFORCE_SECURE = False
 
 # Email settings
-DEFAULT_EMAIL_LOGO_URL = LMS_ROOT_URL + "/theming/asset/images/logo.png"
+DEFAULT_EMAIL_LOGO_URL = LMS_ROOT_URL + f"/theming/asset/{DEFAULT_SITE_THEME}/images/logo.png"
 BULK_EMAIL_SEND_USING_EDX_ACE = True
 FEATURES["ENABLE_FOOTER_MOBILE_APP_LINKS"] = False
 
@@ -381,9 +381,9 @@ MFE_CONFIG = {
     "LANGUAGE_PREFERENCE_COOKIE_NAME": "openedx-language-preference",
     "LMS_BASE_URL": "http://localhost:8000",
     "LOGIN_URL": "http://localhost:8000/login",
-    "LOGO_URL": "http://localhost:8000/theming/asset/images/logo-horizontal.png",
-    "LOGO_WHITE_URL": "http://localhost:8000/theming/asset/images/logo-horizontal-white.png",
-    "LOGO_TRADEMARK_URL": "http://localhost:8000/theming/asset/images/logo-horizontal.png",
+    "LOGO_URL": f"http://localhost:8000/theming/asset/{DEFAULT_SITE_THEME}/images/logo-horizontal.png",
+    "LOGO_WHITE_URL": f"http://localhost:8000/theming/asset/{DEFAULT_SITE_THEME}/images/logo-horizontal-white.png",
+    "LOGO_TRADEMARK_URL": f"http://localhost:8000/theming/asset/{DEFAULT_SITE_THEME}/images/logo.png",
     "LOGOUT_URL": "http://localhost:8000/logout",
     "MARKETING_SITE_BASE_URL": "http://localhost:8000",
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",

@@ -3,12 +3,20 @@ _Audience: Everyone • Last updated: 2026-02-06_
 
 ## 🌐 Environment URLs
 
+Canonical hostname registry (prod + dev + kind-local):
+- `docs/operations/OPENEDX_HOSTNAMES.md`
+
 ### Local Development
 
 **LMS (Learning Management System)**
 - **URL:** http://localhost
 - **Admin Panel:** http://localhost/admin
 - **Purpose:** Main learning platform where students access courses
+
+**Preview (Alias Hostname)**
+- **URL:** http://preview.localhost
+- **Admin Panel:** http://preview.localhost/admin
+- **Purpose:** Same LMS stack, extra hostname for preview/testing
 
 **Studio (Course Authoring)**
 - **URL:** http://studio.localhost
@@ -50,6 +58,11 @@ _Audience: Everyone • Last updated: 2026-02-06_
 - **URL:** https://academyv2.mereka.io
 - **Admin Panel:** https://academyv2.mereka.io/admin
 - **Purpose:** Main learning platform where students access courses
+
+**Preview (Alias Hostname)**
+- **URL:** https://preview.academyv2.mereka.io
+- **Admin Panel:** https://preview.academyv2.mereka.io/admin
+- **Purpose:** Same LMS stack, extra hostname for preview/testing
 
 **Studio (Course Authoring)**
 - **URL:** https://studio.academyv2.mereka.io
@@ -97,8 +110,9 @@ _Audience: Everyone • Last updated: 2026-02-06_
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
-- **Credentials:** https://credentials.academyv2.mereka.io (API-only)
-  - **Health:** https://credentials.academyv2.mereka.io/health/ (301 → API)
+- **Credentials:** https://credentials.academyv2.mereka.io (API-first, has Django admin)
+  - **Admin:** https://credentials.academyv2.mereka.io/admin/
+  - **Health:** https://credentials.academyv2.mereka.io/health/
   - **API:** https://credentials.academyv2.mereka.io/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.io (API only)
 - **Forum:** https://forum.academyv2.mereka.io (also embedded in LMS)
@@ -114,6 +128,11 @@ _Audience: Everyone • Last updated: 2026-02-06_
 **LMS (Learning Management System)**
 - **URL:** https://academyv2.mereka.dev
 - **Admin Panel:** https://academyv2.mereka.dev/admin
+
+**Preview (Alias Hostname)**
+- **URL:** https://preview.academyv2.mereka.dev
+- **Admin Panel:** https://preview.academyv2.mereka.dev/admin
+- **Purpose:** Same LMS stack, extra hostname for preview/testing
 
 **Studio (Course Authoring)**
 - **URL:** https://studio.academyv2.mereka.dev
@@ -137,8 +156,9 @@ _Audience: Everyone • Last updated: 2026-02-06_
 **Other Services (Dev)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
-- **Credentials:** https://credentials.academyv2.mereka.dev (API-only)
-  - **Health:** https://credentials.academyv2.mereka.dev/health/ (301 → API)
+- **Credentials:** https://credentials.academyv2.mereka.dev (API-first, has Django admin)
+  - **Admin:** https://credentials.academyv2.mereka.dev/admin/
+  - **Health:** https://credentials.academyv2.mereka.dev/health/
   - **API:** https://credentials.academyv2.mereka.dev/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.dev
 - **Forum:** https://forum.academyv2.mereka.dev
@@ -247,12 +267,14 @@ These services have their own Django Admin sites:
 - `https://credentials.academyv2.mereka.io/admin/`
 - `https://ecommerce.academyv2.mereka.io/admin/`
 
-**Important:** The `/admin/login/` pages on these services are username/password only and do not show an SSO button.
+Hardening behavior (expected):
+- If you hit `/admin/` or `/admin/login/` while not logged in, you are redirected to the SSO entrypoint (`/login/`).
+- After SSO, you land back on `/admin/`.
 
-For admin access, **log in via SSO first**, then visit `/admin/`:
-1. Visit `https://<service>.academyv2.mereka.io/login/` which redirects to `/login/edx-oauth2/`
-2. Complete the Open edX OAuth flow (LMS)
-3. Then open `https://<service>.academyv2.mereka.io/admin/`
+This is verified by:
+```bash
+./scripts/qa/verify-auth-surfaces.sh prod
+```
 
 ### Common Admin Tasks
 

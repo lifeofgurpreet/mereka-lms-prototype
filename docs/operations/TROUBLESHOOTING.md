@@ -183,8 +183,12 @@ echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.merek
 ```
 
 **Notes:**
-- If the fake cert persists, confirm the hostnames appear in `deploy/k8s/overlays/production/ingress-openedx-lms.yaml`.
-- When enabling new services (credentials/forum), add their DNS records in `infrastructure/cloudflare/records*.json`.
+- If the fake cert persists, confirm:
+  - The hostname appears on an Ingress in `mereka-lms` (use `./scripts/qa/list-openedx-hostnames.sh`), and
+  - The matching `Certificate` includes the hostname in `spec.dnsNames`.
+- Production is GitOps-managed; Ingress/Certificate changes must land in:
+  - `bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/*`
+- When enabling new services (credentials/forum), add/update DNS records in `infrastructure/cloudflare/records*.json` and re-run `./scripts/infra/cloudflare-sync.sh`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
 ---

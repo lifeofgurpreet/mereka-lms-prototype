@@ -401,7 +401,7 @@ COURSE_ABOUT_VISIBILITY_PERMISSION = "see_about_page"
 OAUTH_ENFORCE_SECURE = False
 
 # Email settings
-DEFAULT_EMAIL_LOGO_URL = LMS_ROOT_URL + "/theming/asset/images/logo.png"
+DEFAULT_EMAIL_LOGO_URL = LMS_ROOT_URL + f"/theming/asset/{DEFAULT_SITE_THEME}/images/logo.png"
 BULK_EMAIL_SEND_USING_EDX_ACE = True
 FEATURES["ENABLE_FOOTER_MOBILE_APP_LINKS"] = False
 
@@ -474,11 +474,18 @@ ALLOWED_HOSTS = [
     MEREKA_DEV_ECOMMERCE_DOMAIN,
     MEREKA_DEV_NOTES_DOMAIN,
     MEREKA_DEV_CREDENTIALS_DOMAIN,
+    # Multisite MFEs and Studio hosts (otherwise Django returns Bad Request (400)).
+    f"apps.{MEREKA_BIJI_DOMAIN}",
+    f"studio.{MEREKA_BIJI_DOMAIN}",
+    f"apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
+    f"studio.{MEREKA_SKILLOURFUTURE_DOMAIN}",
 ]
 for origin in [
     MEREKA_LMS_BASE_URL,
     MEREKA_STUDIO_BASE_URL,
     MEREKA_MFE_BASE_URL,
+    f"{MEREKA_SCHEME}://apps.{MEREKA_BIJI_DOMAIN}",
+    f"{MEREKA_SCHEME}://apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
 ]:
@@ -519,9 +526,9 @@ MFE_CONFIG = {
     "LANGUAGE_PREFERENCE_COOKIE_NAME": "openedx-language-preference",
     "LMS_BASE_URL": MEREKA_LMS_BASE_URL,
     "LOGIN_URL": f"{MEREKA_LMS_BASE_URL}/login",
-    "LOGO_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo-horizontal.png",
-    "LOGO_WHITE_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo-horizontal-white.png",
-    "LOGO_TRADEMARK_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/images/logo-horizontal.png",
+    "LOGO_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/{DEFAULT_SITE_THEME}/images/logo-horizontal.png",
+    "LOGO_WHITE_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/{DEFAULT_SITE_THEME}/images/logo-horizontal-white.png",
+    "LOGO_TRADEMARK_URL": f"{MEREKA_LMS_BASE_URL}/theming/asset/{DEFAULT_SITE_THEME}/images/logo.png",
     "LOGOUT_URL": f"{MEREKA_LMS_BASE_URL}/logout",
     "MARKETING_SITE_BASE_URL": MEREKA_LMS_BASE_URL,
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",
@@ -655,6 +662,8 @@ CMS_ROOT_URL = MEREKA_STUDIO_BASE_URL
 for origin in [
     MEREKA_LMS_BASE_URL,
     MEREKA_STUDIO_BASE_URL,
+    f"{MEREKA_SCHEME}://apps.{MEREKA_BIJI_DOMAIN}",
+    f"{MEREKA_SCHEME}://apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
 ]:

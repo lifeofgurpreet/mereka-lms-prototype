@@ -1,0 +1,33 @@
+## mako
+<%namespace name="static" file="static_content.html"/>
+<%!
+"""
+CMS-side safety copy of `head-extra.html`.
+
+Some mako include paths resolve against the default ("main") namespace, which
+maps to CMS template dirs when running in the LMS. Keeping this file here makes
+`optional_include_mako` resilient.
+"""
+%>
+
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-Regular.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Lato-Regular.woff2')}"
+/>
+
+<link
+  rel="stylesheet"
+  href="${static.url('mereka/css/mereka-overrides.css')}"
+  type="text/css"
+  media="all"
+/>
