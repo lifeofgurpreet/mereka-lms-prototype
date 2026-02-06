@@ -405,15 +405,36 @@ Kind nodes do not have Artifact Registry credentials by default.
 
 **Symptoms:**
 - `CourseOverview.objects.count()` returns 0
-- CMS/LMS errors: `user is not allowed to do action [find] on [openedx.modulestore]`
+- CMS/LMS errors referencing modulestore access, e.g.:
+  - `user is not allowed to do action [find] on [openedx.modulestore]`
+  - `pymongo.errors.*` connection/config errors
 
-**Root Cause:**
-MongoDB Atlas user only has `readWrite` on `cs_comments_service`, not `openedx`.
+**Root Cause (depends on modulestore backend):**
+- If modulestore is using **Atlas**: the Atlas DB user may not have `readWrite` on `openedx`.
+- If modulestore is using **in-cluster MongoDB**: service endpoints/selectors may be broken, or MongoDB is down.
+- If modulestore has courses but `CourseOverview` is still 0: MySQL course indexes may be missing; this is a recovery/import problem.
 
-**Fix:**
-1. Grant the MongoDB user read/write on the `openedx` database in Atlas.
-2. Ensure `MONGODB_USERNAME` + `MONGODB_PASSWORD` secrets are correct and synced.
-3. Redeploy LMS/CMS to pick up updated credentials.
+**Step 0: Determine modulestore backend (Atlas vs in-cluster)**
+```bash
+kubectl exec -n mereka-lms deploy/lms -- python /openedx/edx-platform/manage.py lms shell -c \
+"from django.conf import settings; \
+cfg=settings.CONTENTSTORE.get('DOC_STORE_CONFIG', {}); \
+print('DOC_STORE_HOST', cfg.get('host')); \
+print('DOC_STORE_DB', cfg.get('db'));"
+```
+
+**Fix (if modulestore uses Atlas)**
+1. Follow `docs/operations/MONGODB_PERMISSIONS_ISSUE.md` to grant `readWrite@openedx`.
+2. Confirm the secret mappings are correct (Infisical -> GCP -> ESO -> `openedx-secrets`).
+3. Restart `lms/cms` to pick up config/secret changes.
+
+**Fix (if modulestore uses in-cluster MongoDB)**
+1. Check endpoints: `kubectl get endpoints mongodb -n mereka-lms`
+2. If endpoints are empty, patch selector as documented in the "MongoDB exception" section below.
+3. Verify CMS logs after restart.
+
+**Fix (if `CourseOverview` is 0)**
+See `docs/operations/COURSE_DATA_RECOVERY.md` (this is usually import/restore work, not an auth issue).
 
 **Fix (Dev kind):**
 ```bash

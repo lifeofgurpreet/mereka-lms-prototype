@@ -160,6 +160,9 @@ prints the **key type** (`test`/`live`/`unknown`) so you can confirm:
 - **Prod (GKE)** should use `live` keys.
 - **Dev (kind)** should use `test` keys.
 
+Note: Stripe webhook signing secrets are always `whsec_...` and do not encode
+test/live in the prefix. The script reports webhook secret type as `set`.
+
 To enforce that webhooks are configured before declaring “checkout ready”, run:
 
 ```bash

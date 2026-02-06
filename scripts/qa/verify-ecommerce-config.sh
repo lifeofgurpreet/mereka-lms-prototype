@@ -93,10 +93,13 @@ def stripe_key_type(value: str) -> str:
     v = (value or "").strip()
     if not v or v.startswith("REPLACE_") or v == "REPLACE_ME":
         return "missing"
+    # Stripe webhook signing secrets don't encode test/live in the prefix.
+    # They are always shaped like "whsec_...".
+    if v.startswith("whsec_"):
+        return "set"
     if v.startswith(("sk_live_", "pk_live_", "whsec_live_")):
         return "live"
-    if v.startswith(("sk_test_", "pk_test_", "whsec_")):
-        # Stripe webhook secrets are typically "whsec_..." (no explicit test/live prefix).
+    if v.startswith(("sk_test_", "pk_test_")):
         return "test"
     return "unknown"
 

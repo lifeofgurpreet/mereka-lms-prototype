@@ -5,6 +5,25 @@
 **Date Identified**: 2026-02-03
 **Status**: Resolved
 
+## Important Context (Hybrid Reality)
+
+This issue only affects **LMS/CMS modulestore** if (and only if) modulestore is configured to use
+**MongoDB Atlas**.
+
+Today:
+- **Forum** uses **Atlas** (`cs_comments_service`) regardless.
+- **LMS/CMS modulestore** may still be using **in-cluster MongoDB** unless `MONGODB_HOST` (or the
+  rendered `CONTENTSTORE['DOC_STORE_CONFIG']['host']`) points at Atlas.
+
+Before applying any Atlas-permissions fix, confirm where modulestore is pointing:
+```bash
+kubectl exec -n mereka-lms deploy/lms -- python /openedx/edx-platform/manage.py lms shell -c \
+"from django.conf import settings; \
+cfg=settings.CONTENTSTORE.get('DOC_STORE_CONFIG', {}); \
+print('DOC_STORE_HOST', cfg.get('host')); \
+print('DOC_STORE_DB', cfg.get('db'));"
+```
+
 ## Problem
 
 The MongoDB Atlas user `cs_comments_user` currently lacks write permissions to the `openedx.modulestore.structures` collection, preventing:
@@ -95,7 +114,7 @@ Until MongoDB permissions are fixed, courses must be created through:
 To verify permissions are fixed, run:
 
 ```bash
-kubectl exec -n mereka-lms <cms-pod> -- python manage.py cms shell -c "
+kubectl exec -n mereka-lms deploy/cms -- python /openedx/edx-platform/manage.py cms shell -c "
 from pymongo import MongoClient
 from django.conf import settings
 import os

@@ -86,3 +86,6 @@ secrets/
 
 # Claude/Codex local state
 .claude/
+
+# Infisical CLI local config (never commit)
+.infisical.json
