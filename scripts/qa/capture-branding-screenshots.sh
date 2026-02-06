@@ -37,6 +37,8 @@ base_ecommerce="$ECOMMERCE_DOMAIN"
 base_credentials="$CREDENTIALS_DOMAIN"
 biji="$BIJI_DOMAIN"
 sof="$SKILLOURFUTURE_DOMAIN"
+biji_studio="$BIJI_STUDIO_DOMAIN"
+biji_mfe="$BIJI_MFE_DOMAIN"
 
 if [[ "$ENVIRONMENT" == "dev" ]]; then
   base_lms="$DEV_LMS_DOMAIN"
@@ -46,6 +48,8 @@ if [[ "$ENVIRONMENT" == "dev" ]]; then
   base_credentials="$DEV_CREDENTIALS_DOMAIN"
   biji="" # dev does not serve biji/sof microsites
   sof=""
+  biji_studio=""
+  biji_mfe=""
 fi
 
 declare -a URLS=(
@@ -65,6 +69,13 @@ declare -a URLS=(
 
 if [[ -n "$biji" ]]; then
   URLS+=("biji-home|https://${biji}/")
+fi
+if [[ -n "$biji_studio" ]]; then
+  URLS+=("biji-studio-home|https://${biji_studio}/")
+fi
+if [[ -n "$biji_mfe" ]]; then
+  URLS+=("biji-mfe-authn-login|https://${biji_mfe}/authn/login")
+  URLS+=("biji-mfe-account|https://${biji_mfe}/account/")
 fi
 if [[ -n "$sof" ]]; then
   URLS+=("skillourfuture-home|https://${sof}/")

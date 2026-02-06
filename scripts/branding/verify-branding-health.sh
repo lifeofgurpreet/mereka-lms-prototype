@@ -95,6 +95,17 @@ check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
 check_contains "MFE theme styles Paragon modal" "$MFE_SCSS" '.pgn__modal-content'
 
 echo ""
+echo "3.25 Token drift (design system)..."
+if [[ -x "$REPO_ROOT/scripts/branding/verify-token-drift.sh" ]]; then
+  if ! "$REPO_ROOT/scripts/branding/verify-token-drift.sh"; then
+    failures=1
+  fi
+else
+  echo "  ✗ verify-token-drift.sh missing or not executable"
+  failures=1
+fi
+
+echo ""
 echo "3.5 Runtime override CSS..."
 if [[ -x "$REPO_ROOT/scripts/branding/verify-branding-css.sh" ]]; then
   if ! "$REPO_ROOT/scripts/branding/verify-branding-css.sh"; then

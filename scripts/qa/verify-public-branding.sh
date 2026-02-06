@@ -116,6 +116,11 @@ check_css_fonts() {
         printf "✓ %s\n" "$label"
       else
         printf "✗ %s (deep checks: missing course cards/courseware selectors)\n" "$label" >&2
+        echo "  hint: This usually means the cluster is running an older openedx image." >&2
+        echo "  hint: Rebuild + deploy openedx, then rerun:" >&2
+        echo "        BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod" >&2
+        echo "  hint: Source gate for the repo (should already pass):" >&2
+        echo "        BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh" >&2
         failures=$((failures + 1))
       fi
     else
@@ -249,7 +254,9 @@ check_homepage_brand_fonts "${BASE_DOMAIN}" "Homepage uses local brand fonts (no
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
 
 for host in "${EXTRA_HOSTS[@]}"; do
-  check_contains "https://${host}/" "Microsite ${host} includes 'Mereka'" "Mereka"
+  check_http "https://${host}/" "Microsite ${host} reachable"
+  check_homepage_brand_fonts "${host}" "Microsite ${host} uses local brand fonts (no Google fonts)"
+  check_homepage_brand_logo "${host}" "Microsite ${host} logo matches brand assets"
 done
 
 echo ""

@@ -146,6 +146,10 @@ This copies assets to:
 - `infrastructure/tutor/themes/mereka/common/static/` (LMS/Studio)
 - `infrastructure/tutor/themes/mereka/mfe/` (MFE bundling)
 
+It also refreshes the canonical design-system token export (`assets/branding/tokens.css`) from the
+local `bbbi-mereka-brand-assets` repo when present, and keeps a theme copy at:
+`infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css`.
+
 ### Step 3: Apply Tutor Patches
 
 **CRITICAL**: Always run this before building:
@@ -162,6 +166,12 @@ This applies:
 - Custom Mereka footer for MFEs
 
 ### Step 4: Build Docker Images
+
+Before building, run the branding gates (this is the source-of-truth check that prevents regressions):
+
+```bash
+BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
+```
 
 ```bash
 # Activate environment
@@ -213,6 +223,10 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
 
 ### Step 8: Update Kubernetes Deployments
 
+Production is **GitOps-managed**. Prefer updating the pinned `?ref=<git_sha>` in `bbi-infrastructure`
+so ArgoCD rolls the change and the system converges without drift. Direct `kubectl set image` is for
+emergencies only (it will be reverted by ArgoCD if GitOps still points at the old ref).
+
 ```bash
 # LMS
 kubectl set image deployment/lms \
@@ -250,6 +264,14 @@ kubectl rollout status deployment/mfe -n mereka-lms
 
 # Verify pods are using new images
 kubectl get pods -n mereka-lms -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
+```
+
+Run the automated public checks (treat these as release gates):
+
+```bash
+CHECK_CERTS=1 CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh prod
+BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
+./scripts/qa/capture-branding-screenshots.sh prod
 ```
 
 ### Step 10: Visual Verification

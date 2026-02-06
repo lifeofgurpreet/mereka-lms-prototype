@@ -35,7 +35,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Restore MCT/Kajabi courses into Atlas | Data | 💤 Pending | Bead: `mereka-lms-hd3` (awaiting export artifacts). |
-| 2 | Ecommerce checkout readiness validation | Infra | 💤 Skipped | Stripe/payment work is explicitly deprioritized for now. Bead: `mereka-lms-xw6`. |
+| 2 | Ecommerce checkout readiness validation | Infra | ✅ Verified | Stripe keys + webhook secret are injected and webhook delivery is accepted (HTTP 200). Bead: `mereka-lms-xw6` (closed). Remaining: run a real test checkout and confirm order state transitions. |
 | 3 | MFE theming hardening (authn/account/learning) | Product | 💤 Pending | Bead: `mereka-lms-29o`. |
 | 4 | Learner dashboard + courseware styling | Product | 💤 Pending | Bead: `mereka-lms-2t0`. |
 | 5 | Studio authoring UI polish | Product | 💤 Pending | Bead: `mereka-lms-3ou`. |

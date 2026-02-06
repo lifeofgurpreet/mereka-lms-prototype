@@ -98,6 +98,9 @@ To ensure the runtime CSS carries the full branded experience (course cards, cou
 BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
 ```
 
+This health gate also enforces that our canonical design token export (`assets/branding/tokens.css`)
+has not drifted from what we export at runtime in `mereka-overrides.css`.
+
 To validate that the branding is actually visible on live domains, run:
 
 ```bash
@@ -109,6 +112,16 @@ For strict verification of deep surfaces on live domains:
 ```bash
 BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 ```
+
+## Subsites (Different Clients)
+
+Production includes additional client hostnames:
+- `skillourfuture.academy.mereka.io`
+- `academy.biji-biji.com`
+
+These should still load the brand fonts + themed logo assets. `verify-public-branding.sh` checks those
+hosts in production (logo + local fonts), and `capture-branding-screenshots.sh` captures snapshots for
+those hosts (plus the Biji studio/MFEs where applicable).
 
 Note: LMS pages reference fingerprinted (hashed) CSS assets. If an edge cache briefly serves
 an older HTML page after a deploy, it may reference an older hash that no longer exists in the
