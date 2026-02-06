@@ -53,10 +53,15 @@ We chose **MongoDB Atlas** (managed service) for production workloads.
 - **Databases**: `openedx` (modulestore), `cs_comments_service` (forum)
 - **Connection**: Username + password stored in Infisical (`MEREKA_LMS_MONGODB_USERNAME`, `MEREKA_LMS_MONGODB_PASSWORD`), synced to K8s
 - **Required roles**: MongoDB user must have `readWrite` on both `openedx` and `cs_comments_service`
-- **Local MongoDB**: Should remain unused in production (Atlas-only). If a local MongoDB deployment exists in manifests, ensure LMS/CMS point to Atlas only.
-- **Services using Atlas**:
-  - LMS/CMS: Modulestore for course content
-  - Forum: cs_comments_service for discussion forums
+- **Local MongoDB**: Target state is Atlas-only, but do not assume this is true in every environment until verified.
+
+### Current State (Verified 2026-02-06)
+
+- **Forum**: uses Atlas (via `MONGODB_HOST` configured to a `*.mongodb.net` host).
+- **LMS/CMS modulestore**: still uses the in-cluster MongoDB service unless `MONGODB_HOST` is explicitly set to Atlas.
+- **In-cluster MongoDB** (`Deployment/mongodb`) currently exists in production.
+
+See `mereka-lms-m1q` for the cutover plan to make the stack Atlas-only end-to-end and safely remove the in-cluster MongoDB.
 
 ## Migration Path
 
@@ -66,4 +71,4 @@ If migrating from local MongoDB to Atlas:
 3. Update connection strings in settings
 4. Remove local MongoDB deployment
 
-**Note**: As of 2026-02-03, this project has always used Atlas for production. Local MongoDB was never deployed with production data.
+**Note**: This ADR records the intended architecture. Always verify the live configuration (`MONGODB_HOST` in LMS/CMS, forum env/config, and whether `Deployment/mongodb` exists) before assuming Atlas-only.
