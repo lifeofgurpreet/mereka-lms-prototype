@@ -170,6 +170,9 @@ REQUIRE_STRIPE_WEBHOOK_SECRET=1 K8S_CONTEXT=kind-dev ./scripts/qa/verify-ecommer
 Webhook can remain unset until you configure Stripe webhooks, but **real payment
 flows will not be reliable without webhooks**.
 
+For a full setup guide, see:
+- `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
+
 If the logs show OAuth client errors, re-check client IDs, secrets, and redirect URIs.
 
 ## ✅ Status (2026-02-04)
