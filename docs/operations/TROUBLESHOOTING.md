@@ -350,20 +350,16 @@ Kind nodes do not have Artifact Registry credentials by default.
 
 **Fix:**
 ```bash
-# Pull once on the host (uses local gcloud auth)
-docker pull asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-mereka-auth-4
+# One command end-to-end (loads image, applies overlay, verifies health+branding)
+./scripts/infra/apply-kind-overlay.sh
 
-# Load into kind nodes (cluster name = dev)
-kind load docker-image asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:20260204-mereka-auth-4 --name dev
-
-# Restart pods so they pick up the locally loaded image
-kubectl --context kind-dev delete pod -n mereka-lms -l app.kubernetes.io/name=lms
-kubectl --context kind-dev delete pod -n mereka-lms -l app.kubernetes.io/name=cms
+# Or, if you only need to load the image into kind nodes (cluster name = dev):
+./scripts/infra/kind-load-openedx-image.sh
 ```
 
 **Notes:**
 - Keep the dev tag aligned with production (`deploy/k8s/base/kustomization.yaml`).
-- If the tag changes, re-run `kind load docker-image`.
+- If the tag changes, re-run `./scripts/infra/kind-load-openedx-image.sh` (it infers the tag from the overlay).
 
 ---
 

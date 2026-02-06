@@ -33,8 +33,10 @@ images:
   # explicitly testing a new build/tag.
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    # Use a tag already present on the kind nodes to avoid Artifact Registry auth.
-    newTag: mereka-brand
+    # Kind nodes cannot pull from Artifact Registry by default. If this tag is not
+    # already present on the nodes, load it with:
+    #   ./scripts/infra/kind-load-openedx-image.sh
+    newTag: 20260206-branding-overrides-2
   - name: docker.io/overhangio/openedx-mfe
     newName: docker.io/overhangio/openedx-mfe
     newTag: 18.1.0-indigo
