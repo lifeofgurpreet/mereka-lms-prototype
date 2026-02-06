@@ -1,13 +1,29 @@
-# Next 10 Tasks (Updated 2026-02-05)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-05_
+# Next 10 Tasks (Updated 2026-02-06)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 
-## Recent Fixes (2026-02-05)
-- ✅ Public health checks pass (prod + dev) for LMS/Studio/MFE/Discovery/Ecommerce/Credentials/Forum
-- ✅ TLS SAN monitoring wired and verified for all academyv2 microsites
-- ✅ Authentik admin credentials synced; Authn MFE login verified
-- ✅ Account/Profile MFE redirects re-applied; CourseCreator granted for admin
+## Recent Fixes (2026-02-06)
+- ✅ Platform admins enforced and verified (prod + dev): `gurpreet@biji-biji.com`, `malasari@mereka.my`
+- ✅ Authentik redirect URI allowlist fixed for microsites + preview + dev (prevents redirect_uri mismatch)
+- ✅ Public auth surface checks hardened (follows redirect into Authentik /authorize)
+- ✅ Canonical Open edX hostname registry added + drift checks (prod + dev)
+- ✅ SSO entrypoints verified across LMS/Studio/MFE + discovery/credentials/ecommerce (including `/admin/login/` redirect to SSO)
 
-## Next 10 Most Awesome Things (2026-02-05)
+## Next 10 High-Impact Hardening Tasks (Auth + Ecosystem)
+
+| # | Task | Owner | Status | Notes |
+|---|------|-------|--------|-------|
+| 1 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Pending | Bead: `mereka-lms-24r` (canonical). |
+| 2 | Access control matrix + audit report (Authentik vs Open edX perms) | Infra | 💤 Pending | Bead: `mereka-lms-18t`. |
+| 3 | Admin login docs safety pass (prod-safe vs local-only, reduce risky commands) | Infra | 💤 Pending | Bead: `mereka-lms-y6h`. |
+| 4 | Microsite/hostname onboarding workflow (no tribal knowledge) | Infra | 💤 Pending | Bead: `mereka-lms-37d`. |
+| 5 | Notes/forum SSO expectations + checks (explicit, verified) | Infra | 💤 Pending | Bead: `mereka-lms-2o7`. |
+| 6 | Authentik config as code (blueprints or equivalent) | Infra | 💤 Pending | Bead: `mereka-lms-1fs`. |
+| 7 | Enforce MFA for Authentik admins (Gurpreet only) | Security | 💤 Pending | Bead: `mereka-lms-104`. |
+| 8 | In-cluster scheduled verification + alerts (verify-only CronJob + observability) | SRE | 💤 Pending | Bead: `mereka-lms-2gu`. |
+| 9 | Auth dashboards + alerts (redirect_uri mismatch, OIDC 500s, CSRF spikes, 403s) | SRE | 💤 Pending | Bead: `mereka-lms-2fm9`. |
+| 10 | RFC: claim-based role sync (optional, security-reviewed) | Infra/Sec | 💤 Pending | Bead: `mereka-lms-1nyt`. |
+
+## Product / Content Backlog (Still Valid, Not in the “Auth Hardening” Top 10)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|

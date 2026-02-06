@@ -100,7 +100,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
-| [`status/NEXT10_TASKS.md`](status/NEXT10_TASKS.md) | Rolling top-10 backlog for the team | 2025-11-11 |
+| [`status/NEXT10_TASKS.md`](status/NEXT10_TASKS.md) | Rolling top-10 backlog for the team | 2026-02-06 |
 | [`status/OPERATIONAL_STATUS.md`](status/OPERATIONAL_STATUS.md) | Current operational status | 2025-11-12 |
 | [`status/PARITY_ISSUES_FOUND.md`](status/PARITY_ISSUES_FOUND.md) | Local/production parity issues | 2025-11-12 |
 | [`status/TASK2_STATUS.md`](status/TASK2_STATUS.md) | Task 2 status tracker | 2025-11-12 |
