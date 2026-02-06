@@ -154,8 +154,21 @@ kubectl logs -n mereka-lms deployment/ecommerce --tail=100
 ```
 
 `verify-ecommerce-config.sh` reports whether Stripe env vars are present and
-whether the webhook secret is set (without printing any secret values or key
-prefixes). Webhook can remain unset until you configure Stripe webhooks.
+whether the webhook secret is set (without printing any secret values). It also
+prints the **key type** (`test`/`live`/`unknown`) so you can confirm:
+
+- **Prod (GKE)** should use `live` keys.
+- **Dev (kind)** should use `test` keys.
+
+To enforce that webhooks are configured before declaring “checkout ready”, run:
+
+```bash
+REQUIRE_STRIPE_WEBHOOK_SECRET=1 ./scripts/qa/verify-ecommerce-config.sh
+REQUIRE_STRIPE_WEBHOOK_SECRET=1 K8S_CONTEXT=kind-dev ./scripts/qa/verify-ecommerce-config.sh
+```
+
+Webhook can remain unset until you configure Stripe webhooks, but **real payment
+flows will not be reliable without webhooks**.
 
 If the logs show OAuth client errors, re-check client IDs, secrets, and redirect URIs.
 

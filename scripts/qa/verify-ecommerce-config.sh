@@ -54,12 +54,13 @@ if missing and strict:
 
 run_ecommerce_checks() {
   log "Checking ecommerce SiteConfiguration + Partner..."
-  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/ecommerce -- python - <<'PY'
+  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/ecommerce -- env REQUIRE_STRIPE_WEBHOOK_SECRET="${REQUIRE_STRIPE_WEBHOOK_SECRET:-0}" python - <<'PY'
 import django
 django.setup()
 
 import os
 import importlib
+import sys
 from django.contrib.sites.models import Site
 from ecommerce.core.models import SiteConfiguration
 from oscar.core.loading import get_model
@@ -88,13 +89,38 @@ def present(k: str) -> bool:
     v = (os.environ.get(k) or "").strip()
     return bool(v and not v.startswith("REPLACE_") and v != "REPLACE_ME")
 
+def stripe_key_type(value: str) -> str:
+    v = (value or "").strip()
+    if not v or v.startswith("REPLACE_") or v == "REPLACE_ME":
+        return "missing"
+    if v.startswith(("sk_live_", "pk_live_", "whsec_live_")):
+        return "live"
+    if v.startswith(("sk_test_", "pk_test_", "whsec_")):
+        # Stripe webhook secrets are typically "whsec_..." (no explicit test/live prefix).
+        return "test"
+    return "unknown"
+
+require_webhook = (os.environ.get("REQUIRE_STRIPE_WEBHOOK_SECRET") or "0") == "1"
+webhook_present = present("STRIPE_WEBHOOK_SECRET")
+if require_webhook and not webhook_present:
+    print("ERROR: STRIPE_WEBHOOK_SECRET missing but required (set REQUIRE_STRIPE_WEBHOOK_SECRET=0 to skip).")
+    sys.exit(1)
+
 print(
     "Stripe env present:",
     {
         "STRIPE_SECRET_KEY": present("STRIPE_SECRET_KEY"),
         "STRIPE_PUBLISHABLE_KEY": present("STRIPE_PUBLISHABLE_KEY"),
         # Webhook is optional until webhooks are configured.
-        "STRIPE_WEBHOOK_SECRET": present("STRIPE_WEBHOOK_SECRET"),
+        "STRIPE_WEBHOOK_SECRET": webhook_present,
+    },
+)
+print(
+    "Stripe key types:",
+    {
+        "STRIPE_SECRET_KEY": stripe_key_type(os.environ.get("STRIPE_SECRET_KEY", "")),
+        "STRIPE_PUBLISHABLE_KEY": stripe_key_type(os.environ.get("STRIPE_PUBLISHABLE_KEY", "")),
+        "STRIPE_WEBHOOK_SECRET": stripe_key_type(os.environ.get("STRIPE_WEBHOOK_SECRET", "")),
     },
 )
 
@@ -121,6 +147,9 @@ print(
         "secret_set": bool(stripe_secret and not str(stripe_secret).startswith("REPLACE_")),
         "publishable_set": bool(stripe_pub and not str(stripe_pub).startswith("REPLACE_")),
         "webhook_set": bool((stripe_webhook or "").strip()) and not str(stripe_webhook).startswith("REPLACE_"),
+        "secret_type": stripe_key_type(stripe_secret),
+        "publishable_type": stripe_key_type(stripe_pub),
+        "webhook_type": stripe_key_type(stripe_webhook),
         "processor_import_ok": stripe_module_ok,
     },
 )
