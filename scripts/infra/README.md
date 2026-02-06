@@ -24,6 +24,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `infisical-sync-mereka-lms.sh` - Sync MEREKA_LMS secrets into `/k8s/mereka-lms`
 - `normalize-mysql-secrets.sh` - Strip trailing CR/LF for MySQL password secrets (Infisical + GCP SM + K8s ESO target)
 - `provision-mysql-app-dbs.sh` - Create Notes/XQueue MySQL DBs + users (idempotent, non-destructive)
+- `repair-gke-mysql-users.sh` - Align prod MySQL users/passwords to K8s secrets (non-destructive)
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
 - `validate-telemetry-connectivity.sh` - **📊 MONITORING** Validate Grafana datasource connectivity to GKE and VPS Prometheus

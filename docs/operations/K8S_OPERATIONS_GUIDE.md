@@ -451,8 +451,14 @@ kubectl apply -k deploy/k8s/base/secrets
 # View secret keys (not values)
 kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data}' | jq 'keys'
 
-# Decode a secret value
-kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data.OPENEDX_SECRET_KEY}' | base64 -d
+# Never print secret values to your terminal logs. If you need to debug, prefer
+# non-sensitive checks like length/endswith-newline.
+kubectl exec -n mereka-lms deploy/lms -- python - <<'PY'
+import os
+v=os.environ.get("OPENEDX_MYSQL_PASSWORD","")
+print("len", len(v))
+print("endswith_newline", v.endswith("\\n") or v.endswith("\\r"))
+PY
 
 # Force ExternalSecret refresh
 kubectl annotate externalsecret openedx-secrets -n mereka-lms force-sync=$(date +%s) --overwrite
@@ -475,6 +481,29 @@ ARGO_NAMESPACE=argocd ARGO_REFRESH_TYPE=hard ./scripts/infra/argocd-refresh.sh m
 ```
 
 For detailed secrets management architecture, see `/home/gurpreet/projects/secrets-management/specs/`.
+
+### Bump Production GitOps Base Ref (Required After App Repo Changes)
+
+Production is ArgoCD-managed from `Biji-Biji-Initiative/bbi-infrastructure`, and it pins this repo
+as a remote Kustomize base.
+
+When you change anything under `deploy/k8s/base/` in this repo, you must bump the pinned ref:
+
+1. In `mereka-lms`, get the full commit SHA:
+   ```bash
+   cd /home/gurpreet/projects/k8s/mereka-lms
+   git rev-parse HEAD
+   ```
+2. In `bbi-infrastructure`, update:
+   - `apps/mereka-lms/base/kustomization.yaml`
+3. Commit + push to `bbi-infrastructure`.
+4. Force Argo refresh if needed:
+   ```bash
+   kubectl annotate application mereka-lms-local -n argocd argocd.argoproj.io/refresh=hard --overwrite
+   ```
+
+Gotcha:
+- Always use the full 40-char SHA. Short SHAs can produce Argo `ComparisonError` with `not our ref <sha>`.
 
 ---
 
@@ -502,9 +531,10 @@ DATABASES='openedx discovery' ./scripts/infra/backup-db.sh
 
 MongoDB Atlas handles backups automatically. For manual backup:
 ```bash
-# Use mongodump from a pod
+# Use mongodump from a pod (never paste passwords into shell history).
+# Prefer a pre-provisioned URI via environment variable or a securely retrieved value.
 kubectl exec -n mereka-lms deployment/lms -- mongodump \
-  --uri="mongodb+srv://openedx:PASSWORD@cluster-mereka-lms.2pjex4s.mongodb.net" \
+  --uri="$ATLAS_URI" \
   --archive=/tmp/mongo-backup.gz --gzip
 
 # Copy backup locally
@@ -517,8 +547,24 @@ kubectl cp mereka-lms/<lms-pod>:/tmp/mongo-backup.gz ./mongo-backup.gz
 # List PVCs
 kubectl get pvc -n mereka-lms
 
-# Velero backup (if installed)
-velero backup create mereka-lms-backup --include-namespaces mereka-lms
+# Velero backup (preferred)
+velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait
+
+# If velero CLI is not installed, create a Backup CR instead:
+name=pre-op-mereka-lms-$(date +%Y%m%d-%H%M)
+cat > /tmp/$name.yaml <<YAML
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: $name
+  namespace: velero
+spec:
+  includedNamespaces:
+    - mereka-lms
+  ttl: 720h0m0s
+YAML
+kubectl apply -f /tmp/$name.yaml
+kubectl -n velero get backup $name -o jsonpath='{.status.phase}{"\n"}'
 ```
 
 ### Restore Procedures
@@ -618,35 +664,21 @@ Use this procedure when passwords stored in ExternalSecrets/GCP Secret Manager d
 ### Procedure
 
 ```bash
-# 1. Enable skip-grant-tables to bypass authentication
-kubectl patch deployment mysql -n mereka-lms --type='json' \
-  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["mysqld", "--skip-grant-tables", "--mysql-native-password=ON", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]}]'
+# 1) Normalize upstream secrets (removes trailing CR/LF so restarts can't regress)
+./scripts/infra/normalize-mysql-secrets.sh
+APPLY=1 ./scripts/infra/normalize-mysql-secrets.sh
 
-# 2. Wait for MySQL to restart with new configuration
-kubectl rollout status deployment/mysql -n mereka-lms
+# 2) Align MySQL users to match current K8s secrets (non-destructive; no value printing)
+./scripts/infra/repair-gke-mysql-users.sh
 
-# 3. Get the expected passwords from Kubernetes secrets
-ROOT_PW=$(kubectl get secret database-secrets -n mereka-lms -o jsonpath='{.data.MYSQL_ROOT_PASSWORD}' | base64 -d)
-OPENEDX_PW=$(kubectl get secret database-secrets -n mereka-lms -o jsonpath='{.data.OPENEDX_MYSQL_PASSWORD}' | base64 -d)
-
-# 4. Reset passwords in MySQL to match secrets
-kubectl exec -n mereka-lms deployment/mysql -- mysql -u root -e "
-  FLUSH PRIVILEGES;
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$ROOT_PW';
-  ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '$ROOT_PW';
-  ALTER USER 'openedx'@'%' IDENTIFIED WITH mysql_native_password BY '$OPENEDX_PW';
-  FLUSH PRIVILEGES;"
-
-# 5. Remove skip-grant-tables and restore normal operation
-kubectl patch deployment mysql -n mereka-lms --type='json' \
-  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args", "value": ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--binlog-expire-logs-seconds=259200", "--mysql-native-password=ON"]}]'
-
-# 6. Wait for MySQL to restart with authentication enabled
-kubectl rollout status deployment/mysql -n mereka-lms
-
-# 7. Restart LMS/CMS to reconnect with correct credentials
-kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
+# 3) Restart affected services to re-read env vars / configmaps
+kubectl rollout restart -n mereka-lms deploy/lms deploy/lms-worker deploy/cms deploy/cms-worker
+kubectl rollout restart -n mereka-lms deploy/notes deploy/xqueue
 ```
+
+**Last resort only:** If you cannot authenticate as MySQL root and `repair-gke-mysql-users.sh` fails,
+you may need a maintenance window to run MySQL with `--skip-grant-tables`. Treat that as a security
+incident and require a pre-op Velero backup plus explicit review.
 
 ### Verification
 

@@ -34,9 +34,13 @@ GitOps source of truth (prod):
 - GitOps repo: `Biji-Biji-Initiative/bbi-infrastructure`
 - Path: `apps/mereka-lms/overlays/prod`
 
-1. Copy `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` into the GitOps repo overlay.
-2. Copy `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` into the GitOps repo overlay.
-3. Apply via the normal GitOps flow (commit + Argo sync).
+Status:
+- These CronJobs are already deployed in production via GitOps.
+
+When updating the checks:
+1. Update `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and/or `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` in this repo.
+2. Bump the pinned base ref in `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml` to the new commit SHA.
+3. ArgoCD will apply the updated manifests.
 4. Verify CronJobs are running:
    - `kubectl get cronjob -n mereka-lms auth-verify-prod`
    - `kubectl get cronjob -n mereka-lms cert-verify-prod`
