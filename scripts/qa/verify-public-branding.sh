@@ -21,6 +21,21 @@ fi
 
 failures=0
 
+check_follow_200() {
+  local url=$1
+  local label=$2
+  local code size
+  # Follow redirects and require a real 200 so we know the asset is reachable.
+  code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$url" || echo "000")
+  size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$url" || echo "0")
+  if [[ "$code" == "200" && "$size" -gt 0 ]]; then
+    printf "✓ %s (200, %s bytes)\n" "$label" "$size"
+  else
+    printf "✗ %s (%s, %s bytes)\n" "$label" "$code" "$size" >&2
+    failures=$((failures + 1))
+  fi
+}
+
 check_http() {
   local url=$1
   local label=$2
@@ -57,9 +72,13 @@ check_contains "https://studio.${BASE_DOMAIN}/" "Studio page includes 'Mereka'" 
 check_http "https://apps.${BASE_DOMAIN}/authn/login" "MFE login reachable"
 
 # Asset checks (theme assets)
-check_http "https://${BASE_DOMAIN}/theming/asset/images/logo.png" "Logo asset (logo.png)"
-check_http "https://${BASE_DOMAIN}/theming/asset/images/logo-horizontal.png" "Logo asset (logo-horizontal.png)"
-check_http "https://${BASE_DOMAIN}/theming/asset/images/favicon.ico" "Favicon asset (favicon.ico)"
+check_follow_200 "https://${BASE_DOMAIN}/theming/asset/images/logo.png" "Logo asset (logo.png)"
+check_follow_200 "https://${BASE_DOMAIN}/theming/asset/images/logo-horizontal.png" "Logo asset (logo-horizontal.png)"
+check_follow_200 "https://${BASE_DOMAIN}/theming/asset/images/favicon.ico" "Favicon asset (favicon.ico)"
+
+# Font checks (critical for brand typography)
+check_follow_200 "https://${BASE_DOMAIN}/theming/asset/fonts/Poppins-Regular.woff2" "Font asset (Poppins-Regular.woff2)"
+check_follow_200 "https://${BASE_DOMAIN}/theming/asset/fonts/Lato-Regular.woff2" "Font asset (Lato-Regular.woff2)"
 
 for host in "${EXTRA_HOSTS[@]}"; do
   check_contains "https://${host}/" "Microsite ${host} includes 'Mereka'" "Mereka"
