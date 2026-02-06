@@ -90,16 +90,6 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: forum.academyv2.mereka.io
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: caddy
-                port:
-                  number: 80
   tls:
     - hosts:
         - academyv2.mereka.io
@@ -110,5 +100,4 @@ spec:
         - ecommerce.academyv2.mereka.io
         - notes.academyv2.mereka.io
         - credentials.academyv2.mereka.io
-        - forum.academyv2.mereka.io
       secretName: openedx-lms-tls

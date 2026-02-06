@@ -438,8 +438,10 @@ ORA_GRADING_MICROFRONTEND_URL = "http://apps.localhost:1993/ora-grading"
 
 
 
-PROFILE_MICROFRONTEND_URL = "http://apps.localhost:1995/profile/u/"
-MFE_CONFIG["ACCOUNT_PROFILE_URL"] = "http://apps.localhost:1995/profile"
+# Profile MFE routes are mounted at /u/:username (no /profile basename).
+PROFILE_MICROFRONTEND_URL = "http://apps.localhost:1995/u/"
+MFE_CONFIG["ACCOUNT_PROFILE_URL"] = PROFILE_MICROFRONTEND_URL
+MFE_CONFIG["PROFILE_MICROFRONTEND_URL"] = PROFILE_MICROFRONTEND_URL
 
 
 

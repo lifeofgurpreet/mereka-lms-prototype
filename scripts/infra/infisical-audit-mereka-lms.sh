@@ -8,16 +8,15 @@ INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
 INFISICAL_ENV="${INFISICAL_ENV:-prod}"
 CANONICAL_PATH="${CANONICAL_PATH:-/k8s/mereka-lms}"
 INFISICAL_DIR="${INFISICAL_DIR:-}"
+INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
 
 resolve_infisical_dir() {
   if [[ -n "${INFISICAL_DIR:-}" ]]; then
     return
   fi
   local candidates=(
-    "$REPO_ROOT"
     "/home/gurpreet/projects/secrets-management"
-    "/home/gurpreet/projects/k8s/reka-slackbot"
-    "/home/gurpreet/projects/standalone/spoken"
+    "$REPO_ROOT"
   )
   for candidate in "${candidates[@]}"; do
     if [[ -f "${candidate}/.infisical.json" ]]; then
@@ -29,8 +28,26 @@ resolve_infisical_dir() {
 
 resolve_infisical_dir
 
-if [[ -z "${INFISICAL_DIR:-}" || ! -f "${INFISICAL_DIR}/.infisical.json" ]]; then
-  echo "Infisical config not found. Set INFISICAL_DIR to a repo with .infisical.json" >&2
+if [[ -z "${INFISICAL_DIR:-}" || ! -d "${INFISICAL_DIR}" ]]; then
+  INFISICAL_DIR="$REPO_ROOT"
+fi
+
+infer_project_id_from_backup() {
+  local backup_dir="${INFISICAL_BACKUP_DIR:-$HOME/.infisical/secrets-backup}"
+  local candidate=""
+  if [[ -d "$backup_dir" ]]; then
+    candidate=$(ls "$backup_dir"/project_secrets_* 2>/dev/null | head -n 1 || true)
+  fi
+  if [[ -n "$candidate" ]]; then
+    basename "$candidate" | sed -E 's/^project_secrets_([^_]+)_.*/\1/'
+  fi
+}
+
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  INFISICAL_PROJECT_ID=$(infer_project_id_from_backup || true)
+fi
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  echo "Unable to determine Infisical projectId. Set INFISICAL_PROJECT_ID and retry." >&2
   exit 1
 fi
 
@@ -52,6 +69,7 @@ fetch_keys() {
     --domain "$INFISICAL_DOMAIN" \
     --env "$INFISICAL_ENV" \
     --path "$path" \
+    --projectId "$INFISICAL_PROJECT_ID" \
     --output json --silent 2>/dev/null | jq -r '.[].secretKey' | sort -u)
 }
 

@@ -9,6 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 INFISICAL_DIR="${INFISICAL_DIR:-}"
 INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
+INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
 EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml}"
 
 if [[ ! -f "$EXTERNAL_SECRETS_FILE" ]]; then
@@ -21,10 +22,8 @@ resolve_infisical_dir() {
     return
   fi
   local candidates=(
-    "$REPO_ROOT"
     "/home/gurpreet/projects/secrets-management"
-    "/home/gurpreet/projects/k8s/reka-slackbot"
-    "/home/gurpreet/projects/standalone/spoken"
+    "$REPO_ROOT"
   )
   for candidate in "${candidates[@]}"; do
     if [[ -f "${candidate}/.infisical.json" ]]; then
@@ -37,13 +36,8 @@ resolve_infisical_dir() {
 resolve_infisical_dir
 
 if [[ -z "${INFISICAL_DIR:-}" || ! -d "$INFISICAL_DIR" ]]; then
-  echo "Infisical config dir not found. Set INFISICAL_DIR to a repo with .infisical.json" >&2
-  exit 1
-fi
-
-if [[ ! -f "${INFISICAL_DIR}/.infisical.json" ]]; then
-  echo "Missing .infisical.json in ${INFISICAL_DIR}" >&2
-  exit 1
+  # Infisical CLI can operate with global auth (no repo-local .infisical.json).
+  INFISICAL_DIR="$REPO_ROOT"
 fi
 
 if ! command -v infisical >/dev/null 2>&1; then
@@ -53,7 +47,30 @@ fi
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
-log "Using Infisical config: ${INFISICAL_DIR}/.infisical.json"
+infer_project_id_from_backup() {
+  local backup_dir="${INFISICAL_BACKUP_DIR:-$HOME/.infisical/secrets-backup}"
+  local candidate=""
+  if [[ -d "$backup_dir" ]]; then
+    candidate=$(ls "$backup_dir"/project_secrets_* 2>/dev/null | head -n 1 || true)
+  fi
+  if [[ -n "$candidate" ]]; then
+    basename "$candidate" | sed -E 's/^project_secrets_([^_]+)_.*/\1/'
+  fi
+}
+
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  INFISICAL_PROJECT_ID=$(infer_project_id_from_backup || true)
+fi
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  echo "Unable to determine Infisical projectId. Set INFISICAL_PROJECT_ID and retry." >&2
+  exit 1
+fi
+
+if [[ -f "${INFISICAL_DIR}/.infisical.json" ]]; then
+  log "Infisical config: ${INFISICAL_DIR}/.infisical.json"
+else
+  log "Infisical config: (global auth; no .infisical.json found)"
+fi
 log "Syncing MEREKA_LMS secrets from ${SRC_PATH} -> ${DEST_PATH} (env=${ENVIRONMENT})"
 
 mapfile -t keys < <(rg -o "MEREKA_LMS_[A-Z0-9_]+" "$EXTERNAL_SECRETS_FILE" | sort -u)
@@ -67,6 +84,7 @@ for key in "${keys[@]}"; do
       --domain "$INFISICAL_DOMAIN" \
       --env "$ENVIRONMENT" \
       --path "$SRC_PATH" \
+      --projectId "$INFISICAL_PROJECT_ID" \
       --recursive \
       --plain 2>/dev/null > "$tmpfile"); then
     if [[ -s "$tmpfile" ]]; then
@@ -74,6 +92,7 @@ for key in "${keys[@]}"; do
         --domain "$INFISICAL_DOMAIN" \
         --env "$ENVIRONMENT" \
         --path "$DEST_PATH" \
+        --projectId "$INFISICAL_PROJECT_ID" \
         --silent >/dev/null)
       printf "  ✓ %s\n" "$key"
       synced=$((synced + 1))

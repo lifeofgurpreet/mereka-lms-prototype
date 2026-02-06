@@ -749,6 +749,16 @@ kubectl rollout restart deployment/caddy -n mereka-lms
 3. If endpoints are empty, run `./scripts/infra/fix-service-selectors.sh`
 4. Verify service health: `kubectl get pods -n mereka-lms`
 
+**MongoDB exception (Studio "Server Error" / modulestore failures):**
+- The `mongodb` Deployment in this cluster is labeled only with `app.kubernetes.io/name=mongodb` (no Tutor instance label).
+- If `kubectl get endpoints mongodb -n mereka-lms` shows no subsets and CMS logs show `mongodb:27017: [Errno 111] Connection refused`,
+  patch the Service selector to match the pod labels:
+
+```bash
+kubectl patch svc -n mereka-lms mongodb --type json \
+  -p='[{"op":"replace","path":"/spec/selector","value":{"app.kubernetes.io/name":"mongodb"}}]'
+```
+
 **⚠️ Never restart Caddy first** - It will lose connectivity to backends and cause downtime.
 
 ---

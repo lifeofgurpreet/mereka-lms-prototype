@@ -39,10 +39,8 @@ resolve_infisical_dir() {
     return
   fi
   local candidates=(
-    "$REPO_ROOT"
     "/home/gurpreet/projects/secrets-management"
-    "/home/gurpreet/projects/k8s/reka-slackbot"
-    "/home/gurpreet/projects/standalone/spoken"
+    "$REPO_ROOT"
   )
   for candidate in "${candidates[@]}"; do
     if [[ -f "${candidate}/.infisical.json" ]]; then
@@ -55,25 +53,35 @@ resolve_infisical_dir() {
 resolve_infisical_dir
 
 if [[ -z "${INFISICAL_DIR:-}" || ! -d "$INFISICAL_DIR" ]]; then
-  echo "Infisical config dir not found. Set INFISICAL_DIR to a repo with .infisical.json" >&2
-  exit 1
+  # Infisical CLI can run without a repo-local .infisical.json when the user has
+  # already authenticated globally (common on a VPS).
+  INFISICAL_DIR="$REPO_ROOT"
 fi
 
 INFISICAL_CONFIG_FILE="${INFISICAL_CONFIG_FILE:-${INFISICAL_DIR}/.infisical.json}"
 
-if [[ ! -f "$INFISICAL_CONFIG_FILE" ]]; then
-  echo "Missing .infisical.json at ${INFISICAL_CONFIG_FILE}" >&2
-  exit 1
-fi
+infer_project_id_from_backup() {
+  local backup_dir="${INFISICAL_BACKUP_DIR:-$HOME/.infisical/secrets-backup}"
+  local candidate=""
+  if [[ -d "$backup_dir" ]]; then
+    candidate=$(ls "$backup_dir"/project_secrets_* 2>/dev/null | head -n 1 || true)
+  fi
+  if [[ -n "$candidate" ]]; then
+    basename "$candidate" | sed -E 's/^project_secrets_([^_]+)_.*/\1/'
+  fi
+}
 
 if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
   if [[ -f "$INFISICAL_CONFIG_FILE" ]]; then
     INFISICAL_PROJECT_ID=$(jq -r '.workspaceId // empty' "$INFISICAL_CONFIG_FILE")
   fi
 fi
+if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
+  INFISICAL_PROJECT_ID=$(infer_project_id_from_backup || true)
+fi
 
 if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
-  echo "INFISICAL_PROJECT_ID not set and workspaceId missing from $INFISICAL_CONFIG_FILE" >&2
+  echo "Unable to determine Infisical projectId. Set INFISICAL_PROJECT_ID and retry." >&2
   exit 1
 fi
 
@@ -84,6 +92,8 @@ log "Collecting actual secret keys from Infisical (${INFISICAL_PATH})..."
 tmpfile=$(mktemp)
 tmpvalues=$(mktemp)
 trap 'rm -f "$tmpfile" "$tmpvalues"' EXIT
+
+# Key listing via example env generation is stable and avoids printing values.
 (
   cd "$INFISICAL_DIR"
   infisical secrets generate-example-env \
@@ -111,10 +121,12 @@ if [[ -n "$extra" ]]; then
 fi
 
 log "Checking for empty or placeholder values in Infisical..."
-(
-  cd "$INFISICAL_DIR"
-  infisical secrets --domain "$INFISICAL_DOMAIN" --env "$INFISICAL_ENV" --path "$INFISICAL_PATH" --output json > "$tmpvalues"
-)
+if [[ ! -f "$tmpvalues" || ! -s "$tmpvalues" ]]; then
+  (
+    cd "$INFISICAL_DIR"
+    infisical secrets --domain "$INFISICAL_DOMAIN" --env "$INFISICAL_ENV" --path "$INFISICAL_PATH" --projectId "$INFISICAL_PROJECT_ID" --output json --silent > "$tmpvalues"
+  )
+fi
 empty_values=$(jq -r '.[] | select((.secretValue == null) or (.secretValue == "") or (.secretValue|tostring|test("\\*not found\\*"; "i"))) | .secretKey' "$tmpvalues")
 if [[ -n "$empty_values" ]]; then
   echo "Infisical secrets with empty values:" >&2

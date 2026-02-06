@@ -47,25 +47,38 @@ MEREKA_LMS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}"
 MEREKA_STUDIO_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_STUDIO_DOMAIN}"
 MEREKA_MFE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
 
-# Mongodb connection parameters: MongoDB Atlas (cluster-mereka-lms)
-# IMPORTANT: Using MongoDB Atlas instead of in-cluster MongoDB
+# MongoDB modulestore connection.
+#
+# Target state is MongoDB Atlas, but we keep an explicit in-cluster fallback for
+# environments where Atlas connectivity is not yet available.
+#
 # Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
-MONGODB_HOST = os.environ.get(
-    "MONGODB_HOST",
-    "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
-)
+MONGODB_HOST = os.environ.get("MONGODB_HOST", "mongodb")
 MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
-MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME", "cs_comments_user")
+_mongodb_host_lower = (MONGODB_HOST or "").lower()
+_mongodb_is_atlas = _mongodb_host_lower.startswith("mongodb+srv://") or ".mongodb.net" in _mongodb_host_lower
+
+_mongodb_username = None
+_mongodb_password = None
+_mongodb_authsource = "admin"
+if _mongodb_is_atlas:
+    _mongodb_username = os.environ.get("MONGODB_USERNAME") or "cs_comments_user"
+    _mongodb_password = os.environ.get("MONGODB_PASSWORD", "")
+    _mongodb_authsource = os.environ.get("MONGODB_AUTHSOURCE", "admin")
+
 mongodb_parameters = {
     "db": MONGODB_DB,
     "host": MONGODB_HOST,
     "port": 27017,
-    "user": MONGODB_USERNAME,
-    "password": os.environ.get("MONGODB_PASSWORD", ""),
+    "user": _mongodb_username,
+    # IMPORTANT: For non-Atlas hosts (e.g. in-cluster mongodb), ignore any injected
+    # MONGODB_USERNAME/MONGODB_PASSWORD to avoid failing auth against unauthenticated
+    # dev/test mongo containers.
+    "password": _mongodb_password if _mongodb_username else None,
     # Connection/Authentication
     "connect": False,
-    "ssl": True,
-    "authsource": "admin",
+    "ssl": bool(_mongodb_is_atlas),
+    "authsource": _mongodb_authsource,
     "replicaSet": None,
 }
 DOC_STORE_CONFIG = mongodb_parameters
@@ -321,7 +334,9 @@ CACHES["staticfiles"] = {
 # Authentication
 SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
 SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = False  # scheme is correctly included in redirect_uri
+# Studio sits behind TLS termination at the ingress; force https redirect_uri so
+# the OIDC provider accepts it.
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = MEREKA_SCHEME == "https"
 SESSION_COOKIE_NAME = "studio_session_id"
 
 MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB = 100

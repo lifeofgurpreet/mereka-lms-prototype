@@ -20,6 +20,13 @@
         header_up Host {http.request.host}
     }
 
+    # Account MFE does not implement /settings as a standalone SPA route.
+    # Redirect it to the canonical account root so users don't hit a "page unavailable" screen.
+    @account_settings_compat {
+        path /account/settings /account/settings/
+    }
+    redir @account_settings_compat /account/ 302
+
     
     @mfe_authn {
         path /authn /authn/*
@@ -118,6 +125,17 @@
         uri strip_prefix /profile
         root * /openedx/dist/profile
         try_files /{path} /index.html
+        file_server
+    }
+
+    # Profile MFE routes are mounted at /u/:username (no /profile basename).
+    # Serve the same profile SPA for /u/* while keeping /profile/* for its static assets.
+    @mfe_profile_u {
+        path /u /u/*
+    }
+    handle @mfe_profile_u {
+        root * /openedx/dist/profile
+        try_files /index.html
         file_server
     }
     

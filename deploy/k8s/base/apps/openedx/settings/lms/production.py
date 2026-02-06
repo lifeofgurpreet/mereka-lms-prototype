@@ -111,25 +111,38 @@ CREDENTIALS_PUBLIC_SERVICE_URL = os.environ.get(
 )
 CREDENTIALS_SERVICE_USERNAME = os.environ.get("CREDENTIALS_SERVICE_USERNAME", "credentials")
 
-# Mongodb connection parameters: MongoDB Atlas (cluster-mereka-lms)
-# IMPORTANT: Using MongoDB Atlas instead of in-cluster MongoDB
+# MongoDB modulestore connection.
+#
+# Target state is MongoDB Atlas, but we keep an explicit in-cluster fallback for
+# environments where Atlas connectivity is not yet available.
+#
 # Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
-MONGODB_HOST = os.environ.get(
-    "MONGODB_HOST",
-    "mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net",
-)
+MONGODB_HOST = os.environ.get("MONGODB_HOST", "mongodb")
 MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
-MONGODB_USERNAME = os.environ.get("MONGODB_USERNAME", "cs_comments_user")
+_mongodb_host_lower = (MONGODB_HOST or "").lower()
+_mongodb_is_atlas = _mongodb_host_lower.startswith("mongodb+srv://") or ".mongodb.net" in _mongodb_host_lower
+
+_mongodb_username = None
+_mongodb_password = None
+_mongodb_authsource = "admin"
+if _mongodb_is_atlas:
+    _mongodb_username = os.environ.get("MONGODB_USERNAME") or "cs_comments_user"
+    _mongodb_password = os.environ.get("MONGODB_PASSWORD", "")
+    _mongodb_authsource = os.environ.get("MONGODB_AUTHSOURCE", "admin")
+
 mongodb_parameters = {
     "db": MONGODB_DB,
     "host": MONGODB_HOST,
     "port": 27017,
-    "user": MONGODB_USERNAME,
-    "password": os.environ.get("MONGODB_PASSWORD", ""),
+    "user": _mongodb_username,
+    # IMPORTANT: For non-Atlas hosts (e.g. in-cluster mongodb), ignore any injected
+    # MONGODB_USERNAME/MONGODB_PASSWORD to avoid failing auth against unauthenticated
+    # dev/test mongo containers.
+    "password": _mongodb_password if _mongodb_username else None,
     # Connection/Authentication
     "connect": False,
-    "ssl": True,
-    "authsource": "admin",
+    "ssl": bool(_mongodb_is_atlas),
+    "authsource": _mongodb_authsource,
     "replicaSet": None,
 }
 DOC_STORE_CONFIG = mongodb_parameters
@@ -605,8 +618,11 @@ ORA_GRADING_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/ora-grading"
 
 
 
-PROFILE_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/profile/u/"
-MFE_CONFIG["ACCOUNT_PROFILE_URL"] = f"{MEREKA_MFE_BASE_URL}/profile"
+# Profile MFE does not use a "/profile" basename in routing; it expects "/u/:username".
+# We serve the SPA at `apps.<domain>/u/<username>` and keep `/profile/*` for static assets.
+PROFILE_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/u/"
+MFE_CONFIG["ACCOUNT_PROFILE_URL"] = PROFILE_MICROFRONTEND_URL
+MFE_CONFIG["PROFILE_MICROFRONTEND_URL"] = PROFILE_MICROFRONTEND_URL
 
 
 
@@ -640,7 +656,7 @@ MFE_CONFIG_API_URLS = {
     'authn': f"{MEREKA_MFE_BASE_URL}/authn",
     'account': f"{MEREKA_MFE_BASE_URL}/account",
     'gradebook': f"{MEREKA_MFE_BASE_URL}/gradebook",
-    'profile': f"{MEREKA_MFE_BASE_URL}/profile",
+    'profile': f"{MEREKA_MFE_BASE_URL}/u",
     'course-authoring': f"{MEREKA_MFE_BASE_URL}/course-authoring",
     'communications': f"{MEREKA_MFE_BASE_URL}/communications",
     'discussions': f"{MEREKA_MFE_BASE_URL}/discussions",
