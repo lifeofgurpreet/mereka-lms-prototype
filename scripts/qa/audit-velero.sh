@@ -227,12 +227,9 @@ def summarize():
             "driver": (c.get("driver") or (c.get("spec") or {}).get("driver")),
             "deletion_policy": (c.get("deletionPolicy") or (c.get("spec") or {}).get("deletionPolicy")),
         })
-    if not out["velero"]["volume_snapshot_classes"]:
-        out["checks"]["warnings"] += 1
-        out["app_data_risks"].append({
-            "severity": "warning",
-            "risk": "No VolumeSnapshotClass found. CSI snapshotting may not be installed/enabled.",
-        })
+    # Note: VolumeSnapshotClass is relevant only for CSI-based snapshotting. Velero can also
+    # take snapshots via provider plugins without CSI VolumeSnapshot resources, so we do not
+    # treat this as a failure or warning by itself.
 
     # Coverage inventory: Bound/Pending PVC counts by namespace (rough expected snapshot coverage)
     for ns, data in pvc_by_ns.items():
