@@ -145,6 +145,12 @@ printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lm
   ./scripts/qa/verify-auth-surfaces.sh dev
   ```
 
+  Verify/Auth fix (kubectl required, no secrets):
+  ```bash
+  ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --verify
+  ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --apply
+  ```
+
 ---
 
 **Last Verified:** 2026-02-06  

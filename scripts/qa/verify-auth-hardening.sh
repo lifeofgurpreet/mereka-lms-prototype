@@ -33,6 +33,9 @@ log "Verifying platform admin permissions (prod + dev)"
 log "Verifying Authentik admin policy (prod)"
 "$REPO_ROOT/scripts/infra/ensure-authentik-admin.sh" --verify
 
+log "Verifying Authentik OIDC redirect URI allowlist (prod)"
+"$REPO_ROOT/scripts/infra/ensure-authentik-oidc-redirect-uris.sh" --verify
+
 log "Verifying OIDC provider configs (prod + dev, kubectl required)"
 "$REPO_ROOT/scripts/qa/verify-oidc-provider-configs.sh" --env auto
 

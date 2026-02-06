@@ -76,6 +76,27 @@ require_302_location_contains() {
   fi
 }
 
+require_authentik_accepts_authorize_url() {
+  local start_url="$1"
+  local label="$2"
+
+  local code loc auth_code
+  read -r code loc < <(curl_loc "$start_url")
+  if [[ "$code" != "302" || "$loc" != https://auth0.mereka.io/* ]]; then
+    log_fail "$label (expected 302 -> Authentik authorize, got code=$code loc=$loc) url=$start_url"
+    return 1
+  fi
+
+  auth_code="$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "$loc" || echo "000")"
+  if [[ "$auth_code" == "200" || "$auth_code" == "302" || "$auth_code" == "303" ]]; then
+    log_ok "$label (Authentik authorize accepts redirect_uri: $auth_code)"
+    return 0
+  fi
+
+  log_fail "$label (Authentik authorize rejected redirect_uri: $auth_code) url=$loc"
+  return 1
+}
+
 require_302_location_is() {
   local url="$1"
   local label="$2"
@@ -165,6 +186,11 @@ for domain in "${LMS_DOMAINS[@]}"; do
     "https://${domain}/auth/login/oidc/" \
     "${domain}: OIDC redirect_uri matches domain" \
     "redirect_uri=https://${domain}/auth/complete/oidc/"
+
+  # Make sure Authentik actually accepts the authorize request for this redirect_uri.
+  require_authentik_accepts_authorize_url \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: Authentik authorize validates redirect_uri"
 done
 
 # LMS aliases (same stack, extra hostnames) must also support OIDC.
@@ -178,6 +204,10 @@ for domain in "${LMS_ALIAS_DOMAINS[@]}"; do
     "https://${domain}/auth/login/oidc/" \
     "${domain}: OIDC redirect_uri matches domain (alias)" \
     "redirect_uri=https://${domain}/auth/complete/oidc/"
+
+  require_authentik_accepts_authorize_url \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: Authentik authorize validates redirect_uri (alias)"
 done
 
 # Studio does not implement /auth/login/oidc/; it should bounce to the correct LMS /login.

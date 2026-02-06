@@ -53,6 +53,10 @@ Authentik admin (separate):
 - `scripts/infra/ensure-authentik-admin.sh`
   - Ensures only Gurpreet is in Authentik `authentik Admins` group.
 
+- `scripts/infra/ensure-authentik-oidc-redirect-uris.sh`
+  - Ensures Authentik OIDC redirect URIs include **every LMS hostname** we serve (microsites + aliases + dev).
+  - Prevents “redirect_uri mismatch” breakages when adding domains.
+
 ### 2) Runtime hardening (prevents drift)
 
 K8s injects `MEREKA_PLATFORM_ADMIN_EMAILS` into LMS/CMS/Discovery/Credentials/Ecommerce.
