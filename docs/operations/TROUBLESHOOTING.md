@@ -483,8 +483,13 @@ EGRESS_IPS="$VPS_IP" ./scripts/infra/check-atlas-allowlist.sh
 
 **Automation (preferred):**
 ```bash
-./scripts/infra/ensure-atlas-allowlist-vps.sh
+./scripts/infra/monitor-atlas-allowlist-vps.sh
 ./scripts/infra/setup-vps-atlas-allowlist-cron.sh
+```
+
+For non-interactive automation, use API-key profile bootstrap:
+```bash
+REFRESH_ATLAS_PROFILE=1 ATLAS_PROFILE=mereka-lms ./scripts/infra/check-atlas-allowlist-vps.sh
 ```
 
 **Verify:**

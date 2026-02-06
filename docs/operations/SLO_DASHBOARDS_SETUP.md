@@ -182,7 +182,15 @@ Run the automated connectivity validation script to test all datasource connecti
 
 ```bash
 ./scripts/infra/validate-telemetry-connectivity.sh
+./scripts/infra/validate-telemetry-connectivity.sh --json
+./scripts/infra/validate-telemetry-connectivity.sh --strict
+REQUIRE_VPS_PROM_DS=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
 ```
+
+`--strict` additionally fails when observability dashboard parity data is unavailable
+or invalid (for example, missing `bbi-app-mereka-lms` dashboard source file or
+missing `prometheus` datasource references). Set `REQUIRE_VPS_PROM_DS=1` when you
+also want strict enforcement that the dashboard actively uses `prometheus-vps`.
 
 **Expected output:**
 ```

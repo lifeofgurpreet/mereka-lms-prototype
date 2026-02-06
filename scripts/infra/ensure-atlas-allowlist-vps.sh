@@ -7,7 +7,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 LOG_DIR="${LOG_DIR:-${REPO_ROOT}/var}"
 ATLAS_PROJECT_NAME="${ATLAS_PROJECT_NAME:-mereka-lms}"
 ATLAS_PROJECT_ID="${ATLAS_PROJECT_ID:-690e7c787757f4238efc94d1}"
-ATLAS_PROFILE="${ATLAS_PROFILE:-}"
+ATLAS_PROFILE="${ATLAS_PROFILE:-mereka-lms}"
+REFRESH_ATLAS_PROFILE="${REFRESH_ATLAS_PROFILE:-1}"
 
 mkdir -p "$LOG_DIR"
 
@@ -26,8 +27,12 @@ if ! command -v atlas >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ "$REFRESH_ATLAS_PROFILE" == "1" ]]; then
+  "${SCRIPT_DIR}/atlas-config-from-infisical.sh"
+fi
+
 if ! atlas_cmd auth whoami >/dev/null 2>&1; then
-  echo "atlas CLI not authenticated. Run: atlas auth login" >&2
+  echo "atlas CLI not authenticated for profile '${ATLAS_PROFILE:-default}'. Configure API-key profile or run: atlas auth login" >&2
   exit 1
 fi
 

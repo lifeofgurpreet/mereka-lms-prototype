@@ -102,18 +102,24 @@ Document the secret ID in `docs/SECRETS_SNAPSHOT.md` and rotate the Atlas databa
 - We intentionally keep Atlas on public allowlists. Monitor drift with:
   - `kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- curl -s https://ifconfig.me`
   - `atlas accesslists list --projectId <projectId>` (confirm allowlist matches egress)
-  - `./scripts/infra/check-atlas-allowlist.sh` (automated check; set `ATLAS_PROJECT_ID` if needed)
+  - `./scripts/infra/check-atlas-allowlist.sh` (automated check; supports `ATLAS_PROFILE` + Infisical profile refresh)
 
 ### VPS Automation (dev)
 
-The VPS (kind) environment runs a cron-based allowlist updater so the forum stays healthy:
+The VPS (kind) environment runs a cron-based allowlist monitor so drift is detected quickly:
 
 ```bash
-/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/ensure-atlas-allowlist-vps.sh
+/home/gurpreet/projects/k8s/mereka-lms/scripts/infra/monitor-atlas-allowlist-vps.sh
 ```
 
 Cron entry (installed on VPS):
 
 ```bash
-*/15 * * * * gurpreet /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/ensure-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+*/30 * * * * gurpreet /home/gurpreet/projects/k8s/mereka-lms/scripts/infra/monitor-atlas-allowlist-vps.sh >> /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist.log 2>&1
+```
+
+Optional webhook alerting (recommended):
+
+```bash
+ATLAS_ALLOWLIST_WEBHOOK_URL=<your-webhook-url> ./scripts/infra/monitor-atlas-allowlist-vps.sh
 ```

@@ -70,6 +70,10 @@ velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
      --from-backup <latest-backup> \
      --namespace-mappings mereka-lms:mereka-lms-dr
    ```
+   Preferred automated path for ongoing monthly drills:
+   ```bash
+   ./scripts/infra/fix-velero-restore-test.sh
+   ```
 3. **Verify**
    ```bash
    ./scripts/qa/public-health-check.sh prod

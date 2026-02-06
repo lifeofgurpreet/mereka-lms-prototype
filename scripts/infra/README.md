@@ -15,7 +15,9 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `check-atlas-allowlist.sh` - Validate Atlas IP allowlist matches cluster egress
 - `check-atlas-allowlist-vps.sh` - Validate Atlas allowlist for VPS egress IP
 - `ensure-atlas-allowlist-vps.sh` - Add VPS egress IP to Atlas allowlist if missing
+- `monitor-atlas-allowlist-vps.sh` - Drift monitor + webhook alert wrapper for VPS Atlas allowlist
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
+- `fix-velero-restore-test.sh` - Patch/verify `velero/restore-test` CronJob so restore drills run successfully
 - `cron-public-health-check.sh` - Cron entrypoint for public health + branding checks
 - `setup-vps-health-cron.sh` - Install VPS cron entry for public health checks
 - `setup-vps-atlas-allowlist-cron.sh` - Install VPS cron entry to keep Atlas allowlist updated
@@ -65,6 +67,9 @@ OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
 # Add VPS egress IP to Atlas allowlist if missing
 ./scripts/infra/ensure-atlas-allowlist-vps.sh
 
+# Monitor Atlas allowlist drift (alerts when webhook configured)
+./scripts/infra/monitor-atlas-allowlist-vps.sh
+
 # Configure Atlas CLI from Infisical (API keys)
 ./scripts/infra/atlas-config-from-infisical.sh
 
@@ -76,6 +81,9 @@ OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
 
 # Install VPS cron for Atlas allowlist auto-updates
 ./scripts/infra/setup-vps-atlas-allowlist-cron.sh
+
+# Patch + verify Velero restore-test CronJob (fixes shell/image mismatch)
+./scripts/infra/fix-velero-restore-test.sh
 
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh
@@ -104,6 +112,8 @@ ALLOW_OVERWRITE_MONGODB_KEYS=1 ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.
 
 # Validate telemetry connectivity (Grafana → Prometheus)
 ./scripts/infra/validate-telemetry-connectivity.sh
+./scripts/infra/validate-telemetry-connectivity.sh --json
+./scripts/infra/validate-telemetry-connectivity.sh --strict
 
 # Audit monitoring coverage (repo + runtime)
 ./scripts/qa/audit-observability.sh --mode all

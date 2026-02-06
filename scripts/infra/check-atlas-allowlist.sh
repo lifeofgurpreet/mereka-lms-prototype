@@ -9,22 +9,39 @@ source "$SCRIPT_DIR/../shared/config.sh"
 ATLAS_PROJECT_NAME=${ATLAS_PROJECT_NAME:-mereka-lms}
 ATLAS_PROJECT_ID=${ATLAS_PROJECT_ID:-}
 EGRESS_IPS=${EGRESS_IPS:-}
+ATLAS_PROFILE=${ATLAS_PROFILE:-}
+REFRESH_ATLAS_PROFILE=${REFRESH_ATLAS_PROFILE:-0}
 
 log() { printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
+
+atlas_cmd() {
+  if [[ -n "$ATLAS_PROFILE" ]]; then
+    atlas "$@" -P "$ATLAS_PROFILE"
+  else
+    atlas "$@"
+  fi
+}
 
 if ! command -v atlas >/dev/null 2>&1; then
   echo "atlas CLI not found. Install and authenticate first." >&2
   exit 1
 fi
 
-if ! atlas auth whoami >/dev/null 2>&1; then
-  echo "atlas CLI not authenticated. Run: atlas auth login" >&2
+if [[ "$REFRESH_ATLAS_PROFILE" == "1" ]]; then
+  "${SCRIPT_DIR}/atlas-config-from-infisical.sh"
+  if [[ -z "$ATLAS_PROFILE" ]]; then
+    ATLAS_PROFILE="mereka-lms"
+  fi
+fi
+
+if ! atlas_cmd auth whoami >/dev/null 2>&1; then
+  echo "atlas CLI not authenticated for profile '${ATLAS_PROFILE:-default}'. Configure API-key profile or run: atlas auth login" >&2
   exit 1
 fi
 
 if [[ -z "$ATLAS_PROJECT_ID" ]]; then
   log "Resolving Atlas project ID for ${ATLAS_PROJECT_NAME}..."
-  ATLAS_PROJECT_ID=$(atlas projects list --output json | \
+  ATLAS_PROJECT_ID=$(atlas_cmd projects list --output json | \
     jq -r --arg name "$ATLAS_PROJECT_NAME" '.results[]? | select(.name == $name) | .id' | head -1)
 fi
 
@@ -35,7 +52,7 @@ fi
 
 if [[ -z "$EGRESS_IPS" ]]; then
   log "Fetching current egress IP from cluster..."
-  EGRESS_IPS=$(kubectl run egress-check --rm -i --image=curlimages/curl --restart=Never -- \
+  EGRESS_IPS=$(kubectl --context "${K8S_CONTEXT}" run egress-check --rm -i --image=curlimages/curl --restart=Never -- \
     curl -s https://ifconfig.me | tr '\n' ',' | sed 's/,$//')
 fi
 
@@ -45,7 +62,7 @@ if [[ -z "$EGRESS_IPS" ]]; then
 fi
 
 log "Checking Atlas access list..."
-ALLOWLIST_RAW=$(atlas accessLists list --projectId "$ATLAS_PROJECT_ID" --output json)
+ALLOWLIST_RAW=$(atlas_cmd accessLists list --projectId "$ATLAS_PROJECT_ID" --output json)
 ALLOWLIST=$(echo "$ALLOWLIST_RAW" | jq -r '.results[]? | (.ipAddress // .cidrBlock // empty)' | sort -u)
 
 IFS=',' read -ra IPS <<< "$EGRESS_IPS"

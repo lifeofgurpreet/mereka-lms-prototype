@@ -56,12 +56,20 @@ Fix: ensure schedules have:
 If the restore drill job cannot start (wrong image/command), you will only discover it during a real incident.
 
 In this cluster we observed:
-- `CronJob/restore-test` uses image `velero/velero:*` but tries to execute `/bin/bash`.
-- The `velero/velero` image does not ship `/bin/bash`, so the job fails with StartError.
+- `CronJob/restore-test` used image `velero/velero:*` but tried to execute `/bin/bash`.
+- Cleanup blocked on namespace deletion (`velero-restore-test` stuck `Terminating`), causing long-running jobs.
 
-Fix options:
-1. Use an image that includes a shell + tooling and can run a script (recommended).
-2. Rewrite the restore drill to be “no-shell” (pure `velero` CLI, no `bash/jq`), and keep it extremely small.
+Fix path (implemented in this repo):
+1. Use the repo-managed restore script (`infrastructure/k8s/velero/restore-test-script.sh`) that only depends on `kubectl + jq`.
+2. Use non-blocking cleanup in the script so namespace teardown does not wedge the job.
+3. Patch CronJob + ConfigMap and run a verification drill:
+   ```bash
+   ./scripts/infra/fix-velero-restore-test.sh
+   ```
+4. Confirm freshness:
+   ```bash
+   STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+   ```
 
 Note: Velero itself is GitOps-managed outside this repo. Capture the fix as a PR in the infra repo that owns Velero.
 

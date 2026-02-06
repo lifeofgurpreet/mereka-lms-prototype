@@ -436,12 +436,15 @@ Regenerate hostname registry (after domain changes):
 
 **Operational learnings (read these before touching auth/Forum/Secrets):**
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
+- Atlas drift monitor + alert wrapper: `scripts/infra/monitor-atlas-allowlist-vps.sh` (cron target via `scripts/infra/setup-vps-atlas-allowlist-cron.sh`).
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`).
+- Telemetry path validator (Grafana ↔ GKE/VPS Prometheus): `scripts/infra/validate-telemetry-connectivity.sh` (`--json`, `--strict`, optional `REQUIRE_VPS_PROM_DS=1`).
+- Velero restore drill fix path: `scripts/infra/fix-velero-restore-test.sh` (patches `restore-test` CronJob + verifies one-off run).
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
