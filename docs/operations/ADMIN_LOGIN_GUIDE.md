@@ -1,37 +1,53 @@
 # Admin Login Guide
 _Last updated: 2026-02-06_
 
-## 🔐 Shared SSO Test Credentials (Source of Truth)
+This document is intentionally conservative: it prioritizes **prod-safe verification** and avoids
+“quick fixes” that mutate databases unless you explicitly intend to do that.
 
-**Infisical path:** `/shared/oauth`  
-**Email secret:** `GOOGLE_IMPERSONATE_EMAIL`  
-**Password secret:** `GOOGLE_IMPERSONATE_PASSWORD`
+For how auth/permissions work (and what does not sync), see:
+- `docs/operations/AUTH_AND_PERMISSIONS.md`
 
-Use these shared credentials for:
-- **GKE production** (`academyv2.mereka.io`)
-- **VPS kind dev** (`academyv2.mereka.dev`)
-- **Authentik OIDC login** as an end-user (auth0.mereka.io)
-
-Authentik **admin UI access** is separate from Open edX admin access and is restricted to Gurpreet
-(see `docs/operations/AUTH_AND_PERMISSIONS.md`).
-
-## ✅ Required Platform Admins
+## ✅ Required Platform Admins (Authoritative)
 
 These humans must have full admin permissions across the Open edX ecosystem:
 - `gurpreet@biji-biji.com`
 - `malasari@mereka.my`
-
-Notes:
-- These are **your actual platform admin accounts** (full permissions everywhere in Open edX services).
-- The shared credentials above are for **testing SSO flows** and are not a substitute for platform-admin access.
 
 Enforce (prod + dev, idempotent):
 ```bash
 ./scripts/infra/ensure-platform-admins.sh
 ```
 
-**Note:** Authentik handles authentication (OIDC). Open edX (and related services) handle authorization
-(`is_staff`, `is_superuser`, `CourseCreator`). These permissions do not sync from Authentik by default.
+## Production-Safe Verification (Recommended)
+
+Verify without changing state:
+```bash
+./scripts/infra/ensure-platform-admins.sh --verify
+./scripts/qa/verify-auth-hardening.sh
+./scripts/qa/audit-auth-access.sh
+```
+
+Notes:
+- These are the **real platform admin accounts** (staff/superuser everywhere in Open edX services, plus CMS CourseCreator).
+- Authentik handles authentication (OIDC). Open edX and related services handle authorization (`is_staff`, `is_superuser`, `CourseCreator`).
+- **Permissions do not sync from Authentik by default.** We enforce them via allowlist + scripts/runtime backstops.
+
+## 🔐 Shared SSO Test Credentials (Optional)
+
+**Infisical path:** `/shared/oauth`  
+**Email secret:** `GOOGLE_IMPERSONATE_EMAIL`  
+**Password secret:** `GOOGLE_IMPERSONATE_PASSWORD`
+
+Use these shared credentials for:
+- verifying the **SSO login flow** end-to-end (as a normal end-user)
+- both **GKE production** (`academyv2.mereka.io`) and **VPS kind dev** (`academyv2.mereka.dev`)
+
+Authentik **admin UI access** is separate from Open edX admin access and is restricted to Gurpreet
+(see `docs/operations/AUTH_AND_PERMISSIONS.md`).
+
+Important:
+- The shared SSO test user is **not** the platform admin mechanism.
+- Do not grant the shared test user `is_superuser` in production unless you explicitly want that.
 
 ## 🌐 Login URLs
 
@@ -54,7 +70,51 @@ Enforce (prod + dev, idempotent):
 **MFE Login (if configured):**
 - **URL:** https://apps.academyv2.mereka.io/authn/login
 
-## 🚨 Troubleshooting "Too Many Login Attempts"
+## Production Remediation (Explicitly Mutates State)
+
+These commands are idempotent and safe when used intentionally, but they **do write** to service databases/config.
+
+```bash
+# Ensure Gurpreet + Malasari are staff/superuser everywhere + CourseCreator in CMS (writes to DB)
+./scripts/infra/ensure-platform-admins.sh
+
+# Ensure Authentik admin policy (writes to Authentik DB)
+./scripts/infra/ensure-authentik-admin.sh --apply
+
+# Ensure Authentik redirect URIs cover all LMS hostnames (writes to Authentik DB)
+./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --apply
+```
+
+## How To Access Admin (Prod + Dev)
+
+### LMS / CMS
+
+1. Log in to the LMS via:
+   - `https://academyv2.mereka.io/login` (prod)
+   - `https://academyv2.mereka.dev/login` (dev)
+2. Open Django admin:
+   - `https://academyv2.mereka.io/admin` (prod)
+   - `https://academyv2.mereka.dev/admin` (dev)
+
+### Discovery / Credentials / Ecommerce
+
+These services are hardened so `/admin/login/` redirects to SSO (`/login/`):
+
+1. Start at the service login:
+   - `https://discovery.academyv2.mereka.io/login/`
+   - `https://credentials.academyv2.mereka.io/login/`
+   - `https://ecommerce.academyv2.mereka.io/login/`
+2. Then open Django admin:
+   - `https://discovery.academyv2.mereka.io/admin/` (etc.)
+
+If you get a 403 after SSO, your account is missing `is_staff` in that service. Fix with:
+```bash
+./scripts/infra/ensure-platform-admins.sh
+```
+
+## Local-Only Troubleshooting: "Too Many Login Attempts"
+
+This section is **LOCAL DEV ONLY** (Tutor containers). Do not run these against production pods.
 
 If you see "Failed login too many attempts" error:
 
@@ -95,19 +155,6 @@ else:
 "
 ```
 
-## 🔄 Sync Admin User (GKE + Kind)
-
-Use Infisical to pull the shared credentials and sync to LMS:
-
-```bash
-cd /home/gurpreet/projects/k8s/reka-slackbot
-EMAIL=$(infisical secrets get GOOGLE_IMPERSONATE_EMAIL --domain https://secrets.mereka.io/api --env prod --path /shared/oauth --plain 2>/dev/null)
-PASSWORD=$(infisical secrets get GOOGLE_IMPERSONATE_PASSWORD --domain https://secrets.mereka.io/api --env prod --path /shared/oauth --plain 2>/dev/null)
-
-printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lms -- python manage.py lms shell --settings=tutor.production -c \
-"import sys; from django.contrib.auth import get_user_model; User=get_user_model(); email=sys.stdin.readline().strip(); password=sys.stdin.readline().strip(); user=User.objects.filter(email=email).first() or User.objects.filter(username=email).first() or User.objects.create_user(username=email, email=email, password=password); user.set_password(password); user.is_active=True; user.is_staff=True; user.is_superuser=True; user.save(); print(f'✅ Admin synced: {user.username}')"
-```
-
 ## 🎯 Access Points
 
 ### Admin Panel
@@ -124,9 +171,9 @@ printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lm
 
 ## 📝 Notes
 
-- **Cache Issues:** If login fails, clear cache first
-- **Session Issues:** Clear sessions if "too many attempts" error persists
-- **Password Reset:** Always reset password after clearing sessions
+- **Cache Issues (local):** If local login fails, clear cache first.
+- **Session Issues (local):** Clear sessions if "too many attempts" error persists.
+- **Password Reset (local):** Only reset local passwords if you explicitly need a local-admin backdoor.
 - **Browser:** Try incognito/private mode if issues persist
 - **Cookies:** Clear browser cookies for localhost if needed
 - **Two login flows are expected:** Local username/password (native Open edX) + Authentik OIDC. Both should work; only disable local login if you explicitly want SSO-only.

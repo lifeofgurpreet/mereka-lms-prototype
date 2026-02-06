@@ -79,9 +79,26 @@ LMS/CMS also include multisite hardening middleware:
   - Biji MFE config must point to `academy.biji-biji.com` + `studio.academy.biji-biji.com`
   - Discovery/Credentials/Ecommerce `/login/` redirects to `/login/edx-oauth2/`
   - (Optional strict mode) `/admin/login/` redirects to `/login/`
+  - Notes: must return an API banner (API-first, no SSO UI)
+  - Forum: must return `401` unauthenticated (API-first, no SSO UI)
 
 - `scripts/qa/list-openedx-hostnames.sh`
   - Compares expected hostnames (from `scripts/shared/config.sh`) vs deployed Ingress hosts (prod + dev).
+
+### 3.2) Operator audit report (verify-only)
+
+For one consolidated report (good for tickets / incident notes):
+
+```bash
+./scripts/qa/audit-auth-access.sh
+```
+
+It aggregates:
+- public auth surface checks
+- platform admin permission verification
+- Authentik admin policy + redirect URI allowlist verification
+- multisite and OIDC provider config verification
+- hostname registry drift checks
 
 ### 3.1) Internal verification (kubectl, no secrets)
 

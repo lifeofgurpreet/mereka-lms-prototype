@@ -41,6 +41,23 @@ Hardening (prevents drift automatically at runtime):
   - keeps the listed users as staff/superuser
   - redirects `/admin/login/` to `/login/` (SSO entrypoint) for consistent UX in Discovery/Credentials/Ecommerce
 
+## Access Control Matrix (What Is "Super Admin" Where?)
+
+| Component | Authentication (Who are you?) | Authorization (What can you do?) | "Super admin" meaning | Where it is set | How we verify |
+|---|---|---|---|---|---|
+| Authentik (`auth0.mereka.io`) | Authentik login | Authentik groups/roles | Authentik admin UI access | `scripts/infra/ensure-authentik-admin.sh` | `scripts/infra/ensure-authentik-admin.sh --verify` |
+| LMS (Open edX) | OIDC via Authentik (plus optional native login) | Django user flags (`is_staff`, `is_superuser`) + per-course roles | `is_superuser=true` in LMS DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist (`MEREKA_PLATFORM_ADMIN_EMAILS`) | `scripts/infra/ensure-platform-admins.sh --verify` |
+| CMS/Studio (Open edX) | Uses LMS session; `/signin` redirects to LMS `/login` | Django user flags + `CourseCreator` | `is_superuser=true` plus `CourseCreator(state=granted)` | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
+| Discovery | OAuth to LMS (`/login/edx-oauth2/`) | Django user flags | `is_superuser=true` in Discovery DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
+| Credentials | OAuth to LMS (`/login/edx-oauth2/`) | Django user flags | `is_superuser=true` in Credentials DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
+| Ecommerce | OAuth to LMS (`/login/edx-oauth2/`) | Django user flags | `is_superuser=true` in Ecommerce DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
+| Notes (`notes.*`) | API-first (used by LMS); no separate SSO UI | API permissions | Not an admin UI surface | N/A | `scripts/qa/verify-auth-surfaces.sh` (expects Notes API banner) |
+| Forum (`forum.*`) | API-first (used by LMS); no separate SSO UI | API permissions | Not an admin UI surface | N/A | `scripts/qa/verify-auth-surfaces.sh` (expects `401` unauth) |
+
+One-line answer to “am I super admin of everything?”:
+- In the **Open edX ecosystem**, both Gurpreet and Malasari are enforced as `is_superuser` everywhere (LMS/CMS/Discovery/Credentials/Ecommerce).
+- In **Authentik**, only Gurpreet is an admin.
+
 ## Authentik Admin (Separate)
 
 Authentik has its own admin permissions which are **independent** of Open edX.
@@ -124,6 +141,12 @@ done
 
 ```bash
 ./scripts/infra/ensure-platform-admins.sh --verify
+```
+
+### One report (recommended for ops tickets)
+
+```bash
+./scripts/qa/audit-auth-access.sh
 ```
 
 ### Multisite configuration verification (prod)

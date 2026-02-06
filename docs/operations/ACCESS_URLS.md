@@ -89,10 +89,13 @@ Canonical hostname registry (prod + dev + kind-local):
 - **OIDC Issuer:** https://auth0.mereka.io/application/o/mereka-lms/
 - **Note:** Shared Authentik instance for multiple projects.
 
-**Admin Credentials (GKE + Kind)**
+**SSO Test Credentials (Optional)**
 - **Infisical path:** `/shared/oauth`
 - **Email secret:** `GOOGLE_IMPERSONATE_EMAIL`
 - **Password secret:** `GOOGLE_IMPERSONATE_PASSWORD`
+
+These are for verifying the **SSO login flow**. They are not the platform-admin mechanism.
+Platform admins are enforced separately (see `docs/operations/ADMIN_LOGIN_GUIDE.md`).
 
 **Authentik Admin Sync (if login fails)**
 ```bash

@@ -23,6 +23,9 @@ This repo (`mereka-lms`) remains the source of truth for:
 - academy.biji-biji.com
 - dev: academyv2.mereka.dev (+ subdomains)
 
+Canonical hostname registry (prod + dev + kind-local):
+- `docs/operations/OPENEDX_HOSTNAMES.md` (generated from `scripts/shared/config.sh`)
+
 ## Pre-flight (Required)
 - [ ] Pull latest repo and review diffs.
 - [ ] If any storage change: run a Velero backup.
@@ -38,6 +41,11 @@ This repo (`mereka-lms`) remains the source of truth for:
 ## 1) Update configs
 - [ ] Production (GitOps): update `bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/*`
 - [ ] Dev (kind): update `deploy/k8s/*` in this repo
+- [ ] Update domain defaults in `scripts/shared/config.sh` (this drives verification + docs)
+- [ ] Regenerate hostname registry:
+  ```bash
+  ./scripts/gen/update-openedx-hostnames-doc.sh
+  ```
 - [ ] Ensure domain constants + routing are aligned across:
   - Open edX settings (`production.py`)
   - Caddy host routing (forum/credentials/ecommerce/discovery/notes)
@@ -56,12 +64,14 @@ This repo (`mereka-lms`) remains the source of truth for:
   ```
 
 ## 3) OAuth/OIDC
-- [ ] Authentik redirect URIs include:
-  - `https://academyv2.mereka.io/*`
-  - `https://apps.academyv2.mereka.io/*`
-  - `https://studio.academyv2.mereka.io/*`
-  - `https://academy.biji-biji.com/*`
-  - `https://skillourfuture.academy.mereka.io/*`
+- [ ] Authentik redirect URI allowlist includes the OIDC callback for every LMS hostname we serve:
+  - `https://<lms-host>/auth/complete/oidc/`
+
+  Verify/apply (kubectl required, no secrets):
+  ```bash
+  ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --verify
+  ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --apply
+  ```
 - [ ] LMS OAuth2 clients updated (ecommerce/credentials/discovery).
 
 ## 4) Deploy
@@ -76,6 +86,15 @@ CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh dev
 
 # Keep the expected hostname inventory honest (prod + dev)
 ./scripts/qa/list-openedx-hostnames.sh
+
+# Auth + permissions hardening suite (public + internal)
+./scripts/qa/verify-auth-hardening.sh
+
+# One consolidated verify-only report (good for tickets)
+./scripts/qa/audit-auth-access.sh
+
+# Optional: one checklist runner for hostname/microsite onboarding
+./scripts/qa/microsite-onboarding-checklist.sh
 ```
 - [ ] Validate Authn MFE login + account/profile redirects.
 - [ ] Validate Studio course creation.
