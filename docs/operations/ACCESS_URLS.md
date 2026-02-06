@@ -199,6 +199,22 @@ print(f"authentik admin ensured: {email}")
 
 ## User Management
 
+### Platform Admins (Required)
+
+The following humans must have full admin permissions across the Open edX ecosystem:
+- `gurpreet@biji-biji.com`
+- `malasari@mereka.my`
+
+**What “full permissions” means (practical):**
+- **LMS/CMS (Open edX):** `is_active=True`, `is_staff=True`, `is_superuser=True`
+- **Studio course creation:** `CourseCreator(state=granted, all_organizations=True)`
+- **Discovery/Credentials/Ecommerce admin:** `is_active=True`, `is_staff=True`, `is_superuser=True`
+
+**Enforcement (idempotent, prod + dev):**
+```bash
+./scripts/infra/ensure-platform-admins.sh
+```
+
 ### Create Admin User
 
 **Via Kubernetes (GKE/Kind):**
@@ -230,18 +246,19 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 1. Go to: https://academyv2.mereka.dev/admin
 2. Login with superuser credentials
 
-### Current Admin Users (GKE)
+### Admin Access For Discovery/Credentials/Ecommerce
 
-**Verified:** 2025-11-12
+These services have their own Django Admin sites:
+- `https://discovery.academyv2.mereka.io/admin/`
+- `https://credentials.academyv2.mereka.io/admin/`
+- `https://ecommerce.academyv2.mereka.io/admin/`
 
-The following admin users exist in GKE:
-- `gurpreet` (gurpreet@biji-biji.com) - Staff: ✅, Active: ✅
-- `malasari` (malasari@mereka.my) - Staff: ✅, Active: ✅
-- `discovery` (discovery@openedx) - Service account
-- `ecommerce` (ecommerce@openedx) - Service account
-- `notes` (notes@openedx) - Service account
+**Important:** The `/admin/login/` pages on these services are username/password only and do not show an SSO button.
 
-**Note:** Admin credentials are stored securely. Contact infrastructure team for access.
+For admin access, **log in via SSO first**, then visit `/admin/`:
+1. Visit `https://<service>.academyv2.mereka.io/login/` which redirects to `/login/edx-oauth2/`
+2. Complete the Open edX OAuth flow (LMS)
+3. Then open `https://<service>.academyv2.mereka.io/admin/`
 
 ### Common Admin Tasks
 

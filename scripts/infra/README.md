@@ -4,6 +4,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 
 ## Key Scripts
 
+- `ensure-platform-admins.sh` - Ensure Gurpreet + Malasari have full admin permissions across LMS/CMS/Discovery/Credentials/Ecommerce (prod + dev)
 - `backup-db.sh` - Database backup automation
 - `check-cluster-status.sh` - GKE cluster health check
 - `fix-service-selectors.sh` - **🚨 SITE DOWN?** Quick fix for service selector mismatches
@@ -68,6 +69,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh
+
+# Ensure platform admins have full permissions (prod + dev)
+./scripts/infra/ensure-platform-admins.sh
 
 # Validate Infisical secrets for Mereka LMS
 ./scripts/infra/infisical-validate-mereka-lms.sh

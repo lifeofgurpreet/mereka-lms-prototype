@@ -87,7 +87,14 @@ curl -I https://credentials.academyv2.mereka.io/health/
 - **Credentials Admin:** https://credentials.academyv2.mereka.io/admin/
 - **LMS Admin:** https://academyv2.mereka.io/admin/
 
-(Use LMS superuser credentials for all)
+For Discovery/Credentials admin access:
+- Log in via SSO first: `https://<service>.academyv2.mereka.io/login/` (redirects to `/login/edx-oauth2/`)
+- Then open `/admin/`
+
+If you get a 403 in admin, ensure your account is a platform admin:
+```bash
+./scripts/infra/ensure-platform-admins.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+```
 
 ### 3. Create First Program (Manual)
 1. Go to Discovery Admin → Course Metadata → Programs → Add

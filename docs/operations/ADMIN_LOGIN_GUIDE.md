@@ -12,6 +12,20 @@ Use these shared credentials for:
 - **VPS kind dev** (`academyv2.mereka.dev`)
 - **Authentik OIDC login** (auth0.mereka.io)
 
+## ✅ Required Platform Admins
+
+These humans must have full admin permissions across the Open edX ecosystem:
+- `gurpreet@biji-biji.com`
+- `malasari@mereka.my`
+
+Enforce (prod + dev, idempotent):
+```bash
+./scripts/infra/ensure-platform-admins.sh
+```
+
+**Note:** Authentik handles authentication (OIDC). Open edX (and related services) handle authorization
+(`is_staff`, `is_superuser`, `CourseCreator`). These permissions do not sync from Authentik by default.
+
 ## 🌐 Login URLs
 
 ### Local Development

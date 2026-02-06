@@ -7,7 +7,7 @@ This guide explains how to create demo courses and configure the Discovery servi
 ## Prerequisites
 
 - Admin access to Studio (https://studio.academyv2.mereka.io)
-- Admin credentials: `admin@mereka.io`
+- Platform admin access (e.g., `gurpreet@biji-biji.com` or `malasari@mereka.my`)
 - Discovery service running at https://discovery.academyv2.mereka.io
 
 ## Method 1: Create Course via Studio UI (Current Workaround)

@@ -88,11 +88,17 @@ tutor k8s launch
 
 Programs are configured in **Discovery Admin**, not LMS Admin.
 
-1. Access Discovery Admin:
+1. Log in to Discovery via SSO (required to access admin):
+   - Start at:
+     `https://discovery.academyv2.mereka.io/login/` (redirects to `/login/edx-oauth2/`)
+   - Complete the Open edX OAuth flow (LMS)
+   - Then open:
+     `https://discovery.academyv2.mereka.io/admin/`
+
+   If you get a 403 in admin, ensure your account is a platform admin:
+   ```bash
+   ./scripts/infra/ensure-platform-admins.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
    ```
-   https://discovery.academyv2.mereka.io/admin/
-   ```
-   (Use LMS superuser credentials)
 
 2. Navigate to: **Course Metadata → Programs**
 
