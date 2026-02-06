@@ -26,7 +26,7 @@ check_contains() {
     failures=1
     return
   fi
-  if grep -q "$needle" "$path"; then
+  if grep -q -- "$needle" "$path"; then
     echo "  ✓ $label"
   else
     echo "  ✗ $label (missing: $needle)"
@@ -90,11 +90,15 @@ check_contains "LMS theme imports shared tokens" "$LMS_THEME_SCSS" '@import "../
 check_contains "CMS theme imports shared tokens" "$CMS_THEME_SCSS" '@import "../../../scss/theme";'
 check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
 check_contains "MFE theme imports shared tokens" "$MFE_SCSS" '@import "./scss/theme";'
+check_contains "MFE theme exports branding revision marker" "$MFE_SCSS" '--mereka-mfe-branding-rev'
 check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
 check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
 check_contains "MFE theme styles Paragon modal" "$MFE_SCSS" '.pgn__modal-content'
+check_contains "MFE theme targets authn surfaces" "$MFE_SCSS" 'authn'
+check_contains "MFE theme styles auth card header gradient" "$MFE_SCSS" '.pgn__card-header'
 check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
 check_contains "MFE theme targets learner dashboard surfaces" "$MFE_SCSS" 'learner-dashboard'
+check_contains "MFE learner dashboard status pill styling" "$MFE_SCSS" '[class*="status"]'
 
 echo ""
 echo "3.25 Token drift (design system)..."

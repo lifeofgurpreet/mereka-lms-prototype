@@ -4,6 +4,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../shared/config.sh"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+COMMON_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
+MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
+EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
 
 ENVIRONMENT="${1:-prod}"
 if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
@@ -116,11 +122,62 @@ check_contains_any() {
   failures=$((failures + 1))
 }
 
+check_mfe_authn_surface() {
+  local mfe_host=$1
+  local authn_url="https://${mfe_host}/authn/login"
+  local config_url="https://${mfe_host}/api/mfe_config/v1"
+  local html config authn_css_path authn_css
+
+  check_http "$authn_url" "MFE login reachable"
+
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$authn_url" 2>/dev/null || true)"
+  if printf '%s' "$html" | rg -F -q '<div id="root"></div>' \
+    && printf '%s' "$html" | rg -q '/authn/app\.[^"]+\.js' \
+    && printf '%s' "$html" | rg -q '/authn/app\.[^"]+\.css'; then
+    printf "✓ MFE auth page serves authn bundle shell\n"
+  else
+    printf "✗ MFE auth page missing expected authn bundle shell\n" >&2
+    failures=$((failures + 1))
+  fi
+
+  authn_css_path="$(printf '%s' "$html" | rg -o '/authn/app\.[^"]+\.css' | head -n 1 || true)"
+  if [[ -z "$authn_css_path" ]]; then
+    printf "✗ MFE auth page missing app CSS link\n" >&2
+    failures=$((failures + 1))
+  else
+    authn_css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${mfe_host}${authn_css_path}" 2>/dev/null || true)"
+    if printf '%s' "$authn_css" | grep -Eq -- '--mereka-mfe-gradient'; then
+      if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! printf '%s' "$authn_css" | grep -F -q "$EXPECTED_MFE_BRANDING_REV"; then
+        printf "✗ MFE auth CSS missing expected branding revision (%s)\n" "$EXPECTED_MFE_BRANDING_REV" >&2
+        failures=$((failures + 1))
+      else
+        printf "✓ MFE auth CSS includes Mereka branding markers\n"
+      fi
+    else
+      printf "✗ MFE auth CSS missing Mereka gradient marker\n" >&2
+      failures=$((failures + 1))
+    fi
+  fi
+
+  config="$(curl -sS --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$config_url" 2>/dev/null || true)"
+  if printf '%s' "$config" | rg -F -q '"SITE_NAME": "Mereka Academy"' \
+    && printf '%s' "$config" | rg -F -q '/theming/asset/mereka/images/logo-horizontal.png'; then
+    printf "✓ MFE config exposes Mereka site + logo branding\n"
+  else
+    printf "✗ MFE config missing expected Mereka branding fields\n" >&2
+    failures=$((failures + 1))
+  fi
+}
+
 check_css_fonts() {
   local url=$1
   local label=$2
   local css
+  local rev_ok=1
   css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)"
+  if [[ -n "$EXPECTED_BRANDING_REV" ]] && ! printf '%s' "$css" | grep -F -q "$EXPECTED_BRANDING_REV"; then
+    rev_ok=0
+  fi
   # Font-face URLs are fingerprinted (e.g. Poppins-Regular.<hash>.woff2), so match
   # the base name and extension rather than an exact filename.
   if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
@@ -128,7 +185,8 @@ check_css_fonts() {
     && printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
     && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
     && printf '%s' "$css" | grep -Eq '\.mereka-footer' \
-    && printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img'; then
+    && printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img' \
+    && [[ "$rev_ok" == "1" ]]; then
     if [[ "${BRANDING_LEVEL}" == "deep" ]]; then
       # Deep checks verify that key branded surfaces are actually present in the compiled override CSS
       # (course cards, courseware chrome). This avoids "homepage looks branded but the app is default".
@@ -150,7 +208,7 @@ check_css_fonts() {
       printf "✓ %s\n" "$label"
     fi
   else
-    printf "✗ %s (missing Poppins/Lato font-face wiring or footer CSS)\n" "$label" >&2
+    printf "✗ %s (missing Poppins/Lato/footer wiring or branding revision marker)\n" "$label" >&2
     printf "  debug: url=%s\n" "$url" >&2
     printf "  debug: css_bytes=%s\n" "${#css}" >&2
     local ok_poppins ok_lato ok_poppins_file ok_lato_file ok_footer ok_footer_img
@@ -162,6 +220,10 @@ check_css_fonts() {
     if printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img'; then ok_footer_img=1; else ok_footer_img=0; fi
     printf "  debug: checks poppins=%s lato=%s poppins_woff2=%s lato_woff2=%s footer=%s footer_img=%s\n" \
       "$ok_poppins" "$ok_lato" "$ok_poppins_file" "$ok_lato_file" "$ok_footer" "$ok_footer_img" >&2
+    if [[ "$rev_ok" == "0" ]]; then
+      printf "  debug: expected_branding_rev=%s not found in live CSS\n" "$EXPECTED_BRANDING_REV" >&2
+      echo "  hint: Production is likely running an older openedx image." >&2
+    fi
     failures=$((failures + 1))
   fi
 }
@@ -280,7 +342,20 @@ check_studio_brand_css() {
     && printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
     && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
     && ! printf '%s' "$css" | grep -Eq 'fonts\.googleapis\.com'; then
-    printf "✓ %s\n" "$label"
+    if [[ "${BRANDING_LEVEL}" == "deep" ]]; then
+      if printf '%s' "$css" | grep -Eq 'action-create-course' \
+        && printf '%s' "$css" | grep -Eq 'action-create-library' \
+        && printf '%s' "$css" | grep -Eq 'outline-complex' \
+        && printf '%s' "$css" | grep -Eq 'outline-item-title' \
+        && printf '%s' "$css" | grep -Eq 'add-xblock-component'; then
+        printf "✓ %s\n" "$label"
+      else
+        printf "✗ %s (deep checks: missing Studio create-flow/outline selectors)\n" "$label" >&2
+        failures=$((failures + 1))
+      fi
+    else
+      printf "✓ %s\n" "$label"
+    fi
   else
     printf "✗ %s (missing token/font wiring or still importing Google fonts)\n" "$label" >&2
     failures=$((failures + 1))
@@ -301,9 +376,18 @@ check_forum_heartbeat() {
 
 check_credentials_health() {
   local credentials_host=$1
+  local root_url="https://${credentials_host}/"
   local health_url="https://${credentials_host}/health/"
   local admin_url="https://${credentials_host}/admin/login/"
-  local body
+  local body root
+
+  root="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$root_url" 2>/dev/null || true)"
+  if printf '%s' "$root" | rg -F -q "Mereka Credentials Service"; then
+    printf "✓ Credentials root landing is branded\n"
+  else
+    printf "✗ Credentials root landing missing branded content\n" >&2
+    failures=$((failures + 1))
+  fi
 
   check_http "$admin_url" "Credentials admin login reachable"
   body="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$health_url" 2>/dev/null || true)"
@@ -323,8 +407,7 @@ echo ""
 # HTML branding checks
 check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
 check_contains "https://${STUDIO_HOST}/" "Studio page includes 'Mereka'" "Mereka"
-check_http "https://${MFE_HOST}/authn/login" "MFE login reachable"
-check_contains_any "https://${MFE_HOST}/authn/login" "MFE auth page shows branded SSO CTA" "Sign in with Mereka" "Authentik"
+check_mfe_authn_surface "${MFE_HOST}"
 
 # Asset checks (theme assets)
 check_any_follow_200 "Logo asset (logo.png)" \

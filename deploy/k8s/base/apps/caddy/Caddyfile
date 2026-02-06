@@ -187,7 +187,8 @@ http://notes.academyv2.mereka.io, http://notes.academyv2.mereka.dev {
 # Credentials Service
 http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev {
     @credentials_root path /
-    redir @credentials_root /health/
+    header @credentials_root Content-Type "text/html; charset=utf-8"
+    respond @credentials_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mereka Credentials</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Mereka Credentials Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Credential issuance APIs are online. Use the admin route for operator actions and the health route for service checks.</p><p style='margin:0'><a href='/admin/login/' style='color:#295cad;font-weight:600;text-decoration:none'>Open admin login</a><span style='opacity:.5'> · </span><a href='/health/' style='color:#295cad;font-weight:600;text-decoration:none'>Health endpoint</a></p></main></body></html>" 200
     import proxy "credentials:8000"
 }
 

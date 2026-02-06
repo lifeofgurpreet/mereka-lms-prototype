@@ -63,6 +63,7 @@ echo ""
 echo "Required brand signals..."
 require_contains "Has font-face Poppins" "$COMMON_CSS" 'font-family: "Poppins"'
 require_contains "Has font-face Lato" "$COMMON_CSS" 'font-family: "Lato"'
+require_contains "Exports branding revision marker" "$COMMON_CSS" "--mereka-branding-rev"
 require_contains "Exports token --mereka-color-teal" "$COMMON_CSS" "--mereka-color-teal"
 require_contains "Exports token --mereka-color-magenta" "$COMMON_CSS" "--mereka-color-magenta"
 require_contains "Exports token --mereka-font-body" "$COMMON_CSS" "--mereka-font-body"
@@ -82,6 +83,12 @@ if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   require_contains "XBlock video styling present" "$COMMON_CSS" ".video"
   require_contains "Dashboard notice styling present" "$COMMON_CSS" ".dashboard .notice"
   require_contains "Studio wrapper styling present" "$COMMON_CSS" ".wrapper-content"
+  require_contains "Studio create-course CTA styling present" "$COMMON_CSS" ".action-create-course"
+  require_contains "Studio create-library CTA styling present" "$COMMON_CSS" ".action-create-library"
+  require_contains "Studio outline card styling present" "$COMMON_CSS" ".outline-complex"
+  require_contains "Studio outline title typography present" "$COMMON_CSS" ".outline-item-title"
+  require_contains "Studio outline action pill styling present" "$COMMON_CSS" ".action-button"
+  require_contains "Studio add-component CTA styling present" "$COMMON_CSS" ".add-xblock-component"
 fi
 
 echo ""

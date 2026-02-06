@@ -13,6 +13,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../shared/config.sh"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+COMMON_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
+MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
+EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
 
 ENVIRONMENT="${1:-prod}"
 STRICT=0
@@ -69,6 +75,13 @@ check_lms_overrides() {
   if [[ -z "${css:-}" ]]; then
     gap "${label}: could not fetch override CSS (${css_path})"
     return
+  fi
+  if [[ -n "$EXPECTED_BRANDING_REV" ]]; then
+    if printf '%s' "$css" | grep -F -q "$EXPECTED_BRANDING_REV"; then
+      ok "${label}: branding revision marker ${EXPECTED_BRANDING_REV} present"
+    else
+      gap "${label}: branding revision marker ${EXPECTED_BRANDING_REV} missing (older openedx image likely)"
+    fi
   fi
   if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
     && printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"'; then
@@ -129,6 +142,58 @@ check_studio_css() {
   fi
 }
 
+check_mfe_authn_surface() {
+  local host=$1
+  local authn_url="https://${host}/authn/login"
+  local config_url="https://${host}/api/mfe_config/v1"
+  local html config css_path css
+
+  html="$(fetch "$authn_url")"
+  if [[ -z "${html:-}" ]]; then
+    gap "MFE authn (${host}): login page unreachable"
+    return
+  fi
+
+  if printf '%s' "$html" | rg -F -q '<div id="root"></div>' \
+    && printf '%s' "$html" | rg -q '/authn/app\.[^"]+\.js' \
+    && printf '%s' "$html" | rg -q '/authn/app\.[^"]+\.css'; then
+    ok "MFE authn (${host}): authn bundle shell present"
+  else
+    gap "MFE authn (${host}): authn bundle shell missing"
+  fi
+
+  css_path="$(printf '%s' "$html" | rg -o '/authn/app\.[^"]+\.css' | head -n 1 || true)"
+  if [[ -z "${css_path:-}" ]]; then
+    gap "MFE authn (${host}): authn CSS link missing"
+  else
+    css="$(fetch "https://${host}${css_path}")"
+    if [[ -z "${css:-}" ]]; then
+      gap "MFE authn (${host}): could not fetch authn CSS"
+    elif printf '%s' "$css" | grep -Eq -- '--mereka-mfe-gradient'; then
+      if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! printf '%s' "$css" | grep -F -q "$EXPECTED_MFE_BRANDING_REV"; then
+        gap "MFE authn (${host}): branding revision marker ${EXPECTED_MFE_BRANDING_REV} missing"
+      else
+        ok "MFE authn (${host}): authn CSS branding markers present"
+      fi
+    else
+      gap "MFE authn (${host}): authn CSS missing Mereka gradient marker"
+    fi
+  fi
+
+  config="$(fetch "$config_url")"
+  if [[ -z "${config:-}" ]]; then
+    gap "MFE authn (${host}): mfe_config endpoint unreachable"
+    return
+  fi
+
+  if printf '%s' "$config" | rg -F -q '"SITE_NAME": "Mereka Academy"' \
+    && printf '%s' "$config" | rg -F -q '/theming/asset/mereka/images/logo-horizontal.png'; then
+    ok "MFE authn (${host}): mfe_config branding fields present"
+  else
+    gap "MFE authn (${host}): mfe_config branding fields missing"
+  fi
+}
+
 check_forum() {
   local host=$1
   local code
@@ -142,8 +207,18 @@ check_forum() {
 
 check_credentials() {
   local host=$1
-  local health body admin_code
+  local root health root_body body admin_code
+  root="https://${host}/"
   health="https://${host}/health/"
+  root_body="$(fetch "$root")"
+  if [[ -z "${root_body:-}" ]]; then
+    gap "Credentials root page empty/unreachable"
+  elif printf '%s' "$root_body" | rg -F -q "Mereka Credentials Service"; then
+    ok "Credentials root page has branded landing content"
+  else
+    gap "Credentials root page missing branded landing content"
+  fi
+
   admin_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/admin/login/" || echo "000")"
   if [[ "$admin_code" =~ ^[23][0-9][0-9]$ ]]; then
     ok "Credentials admin login reachable (${admin_code})"
@@ -166,6 +241,7 @@ check_credentials() {
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_lms_overrides "$LMS_DOMAIN" "LMS (${LMS_DOMAIN})"
+  check_mfe_authn_surface "$MFE_DOMAIN"
   check_lms_overrides "$BIJI_DOMAIN" "Microsite (${BIJI_DOMAIN})"
   check_lms_overrides "$SKILLOURFUTURE_DOMAIN" "Microsite (${SKILLOURFUTURE_DOMAIN})"
   check_studio_css "$STUDIO_DOMAIN" "Studio (${STUDIO_DOMAIN})"
@@ -173,6 +249,7 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_forum "$FORUM_DOMAIN"
 else
   check_lms_overrides "$DEV_LMS_DOMAIN" "LMS (${DEV_LMS_DOMAIN})"
+  check_mfe_authn_surface "$DEV_MFE_DOMAIN"
   check_studio_css "$DEV_STUDIO_DOMAIN" "Studio (${DEV_STUDIO_DOMAIN})"
   check_credentials "credentials.${DEV_LMS_DOMAIN}"
   check_forum "$DEV_FORUM_DOMAIN"

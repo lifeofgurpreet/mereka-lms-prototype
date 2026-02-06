@@ -2,6 +2,7 @@ $mereka-font-path: "../fonts";
 @import "./scss/theme";
 
 :root {
+  --mereka-mfe-branding-rev: "2026-02-07-pass3";
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
   --mereka-mfe-surface: #ffffff;
@@ -205,6 +206,62 @@ label {
   letter-spacing: 0.08em;
 }
 
+/* Authn/login/register surfaces */
+[class*="authn"],
+[class*="login-register"],
+[class*="auth-page"],
+[data-testid*="login-page"],
+[data-testid*="register-page"] {
+  background: transparent;
+}
+
+[class*="authn"] .pgn__card,
+[class*="login-register"] .pgn__card,
+[class*="auth-page"] .pgn__card,
+[data-testid*="login-page"] .pgn__card,
+[data-testid*="register-page"] .pgn__card {
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.1);
+  box-shadow: 0 28px 72px rgba(26, 22, 35, 0.14);
+}
+
+[class*="authn"] .pgn__card-header,
+[class*="login-register"] .pgn__card-header,
+[class*="auth-page"] .pgn__card-header {
+  background-image: linear-gradient(
+    125deg,
+    rgba(45, 137, 139, 0.14) 0%,
+    rgba(171, 59, 120, 0.1) 55%,
+    rgba(41, 92, 173, 0.12) 100%
+  );
+}
+
+[class*="authn"] .pgn__btn--primary,
+[class*="login-register"] .pgn__btn--primary,
+[class*="auth-page"] .pgn__btn--primary {
+  min-height: 44px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+[class*="authn"] .pgn__hyperlink,
+[class*="login-register"] .pgn__hyperlink,
+[class*="auth-page"] .pgn__hyperlink {
+  color: var(--mereka-color-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+[class*="authn"] .pgn__hyperlink:hover,
+[class*="authn"] .pgn__hyperlink:focus,
+[class*="login-register"] .pgn__hyperlink:hover,
+[class*="login-register"] .pgn__hyperlink:focus,
+[class*="auth-page"] .pgn__hyperlink:hover,
+[class*="auth-page"] .pgn__hyperlink:focus {
+  color: var(--mereka-color-teal);
+  text-decoration: underline;
+}
+
 /* Account/settings + learner dashboard surfaces */
 [class*="account-settings"],
 [class*="account-page"],
@@ -235,9 +292,38 @@ label {
   border-radius: 999px;
 }
 
+[class*="account-settings"] .pgn__alert,
+[class*="account-page"] .pgn__alert,
+[class*="learner-dashboard"] .pgn__alert {
+  border-radius: 16px;
+}
+
+[class*="account-settings"] .pgn__dropdown-toggle,
+[class*="account-page"] .pgn__dropdown-toggle,
+[class*="learner-dashboard"] .pgn__dropdown-toggle {
+  border-radius: 999px;
+  border-color: rgba(26, 22, 35, 0.2);
+}
+
 [class*="learner-dashboard"] [class*="course"],
 [class*="learner-dashboard"] [data-testid*="course"] {
   border-radius: 20px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  background: #fff;
+}
+
+[class*="learner-dashboard"] [class*="course"]:hover,
+[class*="learner-dashboard"] [data-testid*="course"]:hover {
+  box-shadow: 0 18px 48px rgba(26, 22, 35, 0.12);
+}
+
+[class*="learner-dashboard"] [class*="course"] [class*="status"],
+[class*="learner-dashboard"] [data-testid*="course"] [class*="status"] {
+  border-radius: 999px;
+  background: rgba(45, 137, 139, 0.1);
+  color: var(--mereka-color-teal);
+  padding: 0.1rem 0.55rem;
+  font-weight: 600;
 }
 
 [class*="account-settings"] h1,
