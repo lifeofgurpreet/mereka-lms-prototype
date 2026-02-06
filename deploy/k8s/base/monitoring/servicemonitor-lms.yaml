@@ -4,9 +4,12 @@ kind: ServiceMonitor
 metadata:
   name: lms-metrics
   namespace: mereka-lms
+  annotations:
+    app.kubernetes.io/version: 18.2.2
   labels:
     app.kubernetes.io/name: lms
     app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
 spec:
@@ -30,11 +33,14 @@ spec:
       scheme: http
       # RelabelConfigs to add additional labels to metrics
       relabelings:
-        - sourceLabels: [__meta_kubernetes_pod_name]
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_name]
           targetLabel: pod
-        - sourceLabels: [__meta_kubernetes_pod_node_name]
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_node_name]
           targetLabel: node
-        - sourceLabels: [__meta_kubernetes_namespace]
+        - action: replace
+          sourceLabels: [__meta_kubernetes_namespace]
           targetLabel: namespace
       # MetricRelabelConfigs to drop unwanted metrics (if needed)
       # metricRelabelings:
