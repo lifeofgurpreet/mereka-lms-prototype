@@ -93,6 +93,20 @@ To validate that the branding is actually visible on live domains, run:
 ./scripts/qa/verify-public-branding.sh prod
 ```
 
+## Visual Snapshot (Screenshots)
+
+To avoid "HTML checks pass but UI regressed" problems, capture periodic screenshots of the key
+public surfaces (LMS/Studio/MFE login/ecommerce/credentials + microsites).
+
+This writes to `var/screenshots/` (gitignored):
+
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/capture-branding-screenshots.sh dev
+```
+
+Next step (tracked in beads): wire these into CI as a visual regression gate (`mereka-lms-3mz`).
+
 ## Micro-Frontend Plug-in
 
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` reuses the same tokens/fonts, then layers on navbar/button/card tweaks tailored to Paragon components. Fonts are bundled with each MFE, so there are no cross-origin font requests.
