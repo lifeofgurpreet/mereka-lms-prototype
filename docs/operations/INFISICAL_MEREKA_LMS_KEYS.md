@@ -20,6 +20,18 @@ STRICT=1 INFISICAL_ENV=dev ./scripts/infra/infisical-validate-mereka-lms.sh
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
 ```
 
+## CI Guardrail (Recommended)
+
+This repo's CI can validate Infisical keys automatically if you add GitHub Actions secrets:
+- `INFISICAL_TOKEN` (service token / machine identity token with read access)
+- `INFISICAL_PROJECT_ID` (Infisical project/workspace ID)
+
+The CI job runs:
+```bash
+STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
+STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
+```
+
 **Policy:** `/k8s/mereka-lms` is the only allowed path for `MEREKA_LMS_*`.
 Remove any root-level duplicates (last cleanup: 2026-02-05).
 

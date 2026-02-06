@@ -10,6 +10,7 @@ INFISICAL_PATH="${INFISICAL_PATH:-/k8s/mereka-lms}"
 INFISICAL_DIR="${INFISICAL_DIR:-}"
 INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
 INFISICAL_CONFIG_FILE="${INFISICAL_CONFIG_FILE:-}"
+INFISICAL_TOKEN="${INFISICAL_TOKEN:-}"
 EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml}"
 STRICT="${STRICT:-0}"
 
@@ -94,6 +95,12 @@ tmpfile=$(mktemp)
 tmpvalues=$(mktemp)
 trap 'rm -f "$tmpfile" "$tmpvalues"' EXIT
 
+infisical_token_args=()
+if [[ -n "${INFISICAL_TOKEN:-}" ]]; then
+  # Useful for CI: pass a service token instead of relying on local CLI auth state.
+  infisical_token_args=(--token "${INFISICAL_TOKEN}")
+fi
+
 # Key listing via example env generation is stable and avoids printing values.
 (
   cd "$INFISICAL_DIR"
@@ -102,6 +109,7 @@ trap 'rm -f "$tmpfile" "$tmpvalues"' EXIT
     --env "$INFISICAL_ENV" \
     --path "$INFISICAL_PATH" \
     --projectId "$INFISICAL_PROJECT_ID" \
+    "${infisical_token_args[@]}" \
     > "$tmpfile"
 )
 actual_keys=$(cut -d= -f1 "$tmpfile" | sed '/^$/d' | sort -u)
@@ -125,7 +133,13 @@ log "Checking for empty or placeholder values in Infisical..."
 if [[ ! -f "$tmpvalues" || ! -s "$tmpvalues" ]]; then
   (
     cd "$INFISICAL_DIR"
-    infisical secrets --domain "$INFISICAL_DOMAIN" --env "$INFISICAL_ENV" --path "$INFISICAL_PATH" --projectId "$INFISICAL_PROJECT_ID" --output json --silent > "$tmpvalues"
+    infisical secrets \
+      --domain "$INFISICAL_DOMAIN" \
+      --env "$INFISICAL_ENV" \
+      --path "$INFISICAL_PATH" \
+      --projectId "$INFISICAL_PROJECT_ID" \
+      "${infisical_token_args[@]}" \
+      --output json --silent > "$tmpvalues"
   )
 fi
 

@@ -89,6 +89,30 @@ jobs:
           bash -n infrastructure/tutor/apply-patches.sh
           echo "✅ Patch script syntax valid"
 
+  validate-infisical:
+    name: Validate Infisical Secrets (prod/dev)
+    runs-on: ubuntu-latest
+    if: ${{ secrets.INFISICAL_TOKEN != '' && secrets.INFISICAL_PROJECT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node (Infisical CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Infisical CLI
+        run: npm i -g @infisical/cli
+
+      - name: Validate secrets in Infisical (strict)
+        env:
+          INFISICAL_DOMAIN: https://secrets.mereka.io/api
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
+          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
+        run: |
+          STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
+          STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
+
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
