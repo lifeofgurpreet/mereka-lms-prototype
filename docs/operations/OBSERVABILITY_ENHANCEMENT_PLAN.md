@@ -171,5 +171,7 @@ Verify in:
 
 - `docs/operations/SLO_DASHBOARDS_SETUP.md`
 - `docs/operations/MONITORING.md`
+- `docs/operations/OBSERVABILITY_QUICKSTART.md`
 - `scripts/infra/apply-monitoring-configs.sh`
 - `scripts/qa/public-health-check.sh`
+- `scripts/qa/audit-observability.sh`

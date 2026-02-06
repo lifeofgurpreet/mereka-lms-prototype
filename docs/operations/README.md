@@ -24,8 +24,9 @@ Runbooks, troubleshooting guides, and operational procedures for managing the Me
 - [`DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Deployment procedures
 - [`GCP_ROADMAP.md`](GCP_ROADMAP.md) - Cloud architecture plan
 - [`MONITORING.md`](MONITORING.md) - Monitoring and alerting
+- [`OBSERVABILITY_QUICKSTART.md`](OBSERVABILITY_QUICKSTART.md) - Fast health/audit flow for operators
 - [`CLOUDFLARE_DNS.md`](CLOUDFLARE_DNS.md) - DNS management
-- [`SECRETS_SNAPSHOT.md`](SECRETS_SNAPSHOT.md) - Secrets management
+- [`SECRETS_SNAPSHOT.md`](SECRETS_SNAPSHOT.md) - Secret handling policy (redacted, no values)
 
 ### Local Development
 - [`LOCAL_PRODUCTION_PARITY.md`](LOCAL_PRODUCTION_PARITY.md) - Parity guide

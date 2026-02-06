@@ -82,7 +82,7 @@ kubectl apply -k deploy/overlays/vps
 Use Terraform or gcloud CLI to apply alert policies:
 
 ```bash
-gcloud alpha monitoring uptime create \
+gcloud monitoring uptime create \
   --config-from-file=infrastructure/monitoring/uptime/prod-lms-https.json \
   --project=mereka-lms
 
@@ -90,7 +90,7 @@ gcloud alpha monitoring uptime create \
 ./scripts/infra/apply-monitoring-configs.sh plan
 ./scripts/infra/apply-monitoring-configs.sh apply
 
-gcloud alpha monitoring policies create \
+gcloud monitoring policies create \
   --policy-from-file=infrastructure/monitoring/alerts/lb-5xx-ratio.json \
   --project=mereka-lms
 
