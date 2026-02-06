@@ -41,8 +41,14 @@ log_warn() { printf "! %s\n" "$*" >&2; }
 curl_loc() {
   # Prints "code location"
   local url="$1"
+  local method="${2:-HEAD}"
   local out code loc
-  out="$(curl -sS -I "$url" || true)"
+  if [[ "$method" == "HEAD" ]]; then
+    out="$(curl -sS -I "$url" || true)"
+  else
+    # Use GET to exercise middleware redirects (some stacks don't redirect on HEAD).
+    out="$(curl -sS -D - "$url" -o /dev/null || true)"
+  fi
   code="$(printf "%s\n" "$out" | awk 'NR==1 {print $2}')"
   loc="$(printf "%s\n" "$out" | awk -F': ' 'tolower($1)=="location" {print $2}' | tr -d '\r' | head -n 1)"
   printf "%s %s\n" "${code:-000}" "${loc:-}"
@@ -91,7 +97,7 @@ check_admin_login_redirect() {
   local base="$2"
   local url="https://${svc}.${base}/admin/login/?next=/admin/"
   local code loc
-  read -r code loc < <(curl_loc "$url")
+  read -r code loc < <(curl_loc "$url" "GET")
 
   if [[ "$code" == "302" && "$loc" == /login/* ]]; then
     log_ok "${svc}: /admin/login redirects to SSO (/login)"
