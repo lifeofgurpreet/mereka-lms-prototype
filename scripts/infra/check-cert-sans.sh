@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/../shared/config.sh"
 
 HOSTS=(
   "$LMS_DOMAIN"
+  "$PREVIEW_DOMAIN"
   "studio.${LMS_DOMAIN}"
   "apps.${LMS_DOMAIN}"
   "discovery.${LMS_DOMAIN}"

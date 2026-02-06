@@ -22,6 +22,7 @@ fi
 
 urls=(
   "https://${BASE_DOMAIN}/"
+  "https://preview.${BASE_DOMAIN}/"
   "https://studio.${BASE_DOMAIN}/"
   "https://apps.${BASE_DOMAIN}/authn/login"
   "https://apps.${BASE_DOMAIN}/account/"

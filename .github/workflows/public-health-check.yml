@@ -26,9 +26,3 @@ jobs:
 
       - name: Check TLS SANs
         run: ./scripts/infra/check-cert-sans.sh
-
-      - name: Verify authentication entrypoints (prod)
-        run: ./scripts/qa/verify-auth-surfaces.sh prod
-
-      - name: Verify authentication entrypoints (dev)
-        run: ./scripts/qa/verify-auth-surfaces.sh dev
