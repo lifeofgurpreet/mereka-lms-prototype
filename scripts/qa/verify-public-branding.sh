@@ -11,6 +11,12 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   exit 1
 fi
 
+BRANDING_LEVEL="${BRANDING_LEVEL:-core}" # core|deep
+if [[ "$BRANDING_LEVEL" != "core" && "$BRANDING_LEVEL" != "deep" ]]; then
+  echo "Invalid BRANDING_LEVEL: ${BRANDING_LEVEL} (expected core|deep)" >&2
+  exit 1
+fi
+
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   BASE_DOMAIN="$LMS_DOMAIN"
   EXTRA_HOSTS=("$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
@@ -100,7 +106,21 @@ check_css_fonts() {
     && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
     && printf '%s' "$css" | grep -Eq '\.mereka-footer' \
     && printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img'; then
-    printf "✓ %s\n" "$label"
+    if [[ "${BRANDING_LEVEL}" == "deep" ]]; then
+      # Deep checks verify that key branded surfaces are actually present in the compiled override CSS
+      # (course cards, courseware chrome). This avoids "homepage looks branded but the app is default".
+      if printf '%s' "$css" | grep -Eq '\.courses-listing' \
+        && printf '%s' "$css" | grep -Eq '\.courseware' \
+        && printf '%s' "$css" | grep -Eq '\.sequence-nav' \
+        && printf '%s' "$css" | grep -Eq '\.xblock'; then
+        printf "✓ %s\n" "$label"
+      else
+        printf "✗ %s (deep checks: missing course cards/courseware selectors)\n" "$label" >&2
+        failures=$((failures + 1))
+      fi
+    else
+      printf "✓ %s\n" "$label"
+    fi
   else
     printf "✗ %s (missing Poppins/Lato font-face wiring or footer CSS)\n" "$label" >&2
     printf "  debug: url=%s\n" "$url" >&2
@@ -202,6 +222,7 @@ check_homepage_brand_logo() {
 }
 
 echo "Branding verification ($ENVIRONMENT) for ${BASE_DOMAIN}..."
+echo "Branding level: ${BRANDING_LEVEL}"
 echo ""
 
 # HTML branding checks

@@ -1,5 +1,5 @@
 # Mereka.io Theme Reference
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2025-11-08_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-02-06_
 
 This document captures the brand tokens we apply across LMS/Studio and all MFEs so every surface feels like mereka.io while still leaning on Paragon.
 
@@ -65,7 +65,10 @@ When new assets arrive, drop them into `assets/branding/`, re-sync the theme cop
 - `infrastructure/tutor/themes/mereka/lms/templates/header/brand.html` swaps the default Open edX logo strip with the Mereka wordmark plus an org/course pill so every course page feels bespoke.
 - `infrastructure/tutor/themes/mereka/lms/templates/index_overlay.html` introduces a gradient hero, CTA buttons, and KPI badges on the anonymous home page.
 - `infrastructure/tutor/themes/mereka/lms/templates/footer.html` adds a four-column footer (Explore, Support, Partners, and contact emails) while preserving Open edX attribution.
-- Global styling lives in `infrastructure/tutor/themes/mereka/scss/theme.scss` (nav chrome, hero, course cards, chips, footer utilities). Studio automatically inherits the same palette/fonts because `cms/static/sass/theme.scss` imports the shared bundle.
+- Shared styling source lives in `infrastructure/tutor/themes/mereka/scss/theme.scss` (nav chrome, hero, course cards, courseware, footer utilities). Studio imports the shared bundle via `cms/static/sass/theme.scss`.
+- Runtime delivery is via `mereka-overrides.css`, loaded by `infrastructure/tutor/themes/mereka/*/templates/head-extra.html`. This CSS is intentionally self-contained (no runtime build step) and is the most deterministic "brand signal carrier" we verify in production.
+  - `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` is the canonical copy.
+  - `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` must stay identical to avoid drift.
 - The theme expects logos/favicons at `/static/mereka/images/*`; run `./scripts/branding/sync-brand-assets.sh` whenever you refresh files under `assets/branding/`.
 
 To preview locally:
@@ -87,10 +90,22 @@ the presence of required logos, fonts, SCSS imports, and favicon assets. `./infr
 and `./scripts/branding/deploy-branded-image.sh` now execute this check automatically and fail fast if any
 asset is missing.
 
+To ensure the runtime CSS carries the full branded experience (course cards, courseware chrome), run:
+
+```bash
+BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
+```
+
 To validate that the branding is actually visible on live domains, run:
 
 ```bash
 ./scripts/qa/verify-public-branding.sh prod
+```
+
+For strict verification of deep surfaces on live domains:
+
+```bash
+BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 ```
 
 Note: LMS pages reference fingerprinted (hashed) CSS assets. If an edge cache briefly serves

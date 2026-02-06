@@ -92,6 +92,17 @@ check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
 check_contains "MFE theme imports shared tokens" "$MFE_SCSS" '@import "./scss/theme";'
 
 echo ""
+echo "3.5 Runtime override CSS..."
+if [[ -x "$REPO_ROOT/scripts/branding/verify-branding-css.sh" ]]; then
+  if ! "$REPO_ROOT/scripts/branding/verify-branding-css.sh"; then
+    failures=1
+  fi
+else
+  echo "  ✗ verify-branding-css.sh missing or not executable"
+  failures=1
+fi
+
+echo ""
 echo "4. Required branding assets..."
 check_file "Canonical logo.png" "$REPO_ROOT/assets/branding/logo.png"
 check_file "Canonical favicon.ico" "$REPO_ROOT/assets/branding/favicon.ico"

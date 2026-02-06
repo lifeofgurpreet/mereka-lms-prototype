@@ -1,10 +1,71 @@
-/* Mereka LMS brand overrides loaded via lms/templates/head-extra.html */
+/*
+  Mereka brand overrides (runtime CSS entrypoint).
+
+  This file is loaded via `*/templates/head-extra.html` for both LMS + Studio.
+
+  Important:
+  - This file is our deterministic "brand signal carrier" in production.
+  - Keep it self-contained (no build step required at runtime).
+  - Use the same CSS in `lms/static/css/mereka-overrides.css` to avoid drift.
+*/
 
 :root {
-  --mereka-teal: #2d898b;
-  --mereka-magenta: #ab3b78;
-  --mereka-blue: #295cad;
-  --mereka-black: #000000;
+  /* Typography */
+  --mereka-font-body: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --mereka-font-heading: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+
+  /* Palette (source: `scss/_tokens.scss`) */
+  --mereka-color-ink-900: #000000;
+  --mereka-color-ink-700: #4A494A;
+  --mereka-color-ink-500: #7B7B7B;
+  --mereka-color-ink-300: #AFADB2;
+  --mereka-color-teal: #2d898b;
+  --mereka-color-magenta: #ab3b78;
+  --mereka-color-blue: #295cad;
+  --mereka-color-sky: #94d1e4;
+  --mereka-color-surface-primary: #FBFAFB;
+  --mereka-color-surface-secondary: #F5F5F5;
+  --mereka-color-border: #DDDDDE;
+  --mereka-color-border-strong: #7B7B7C;
+
+  /* Semantics */
+  --mereka-color-info: var(--mereka-color-blue);
+  --mereka-color-info-soft: var(--mereka-color-sky);
+  --mereka-color-success: #2c6e49;
+  --mereka-color-warning: #f4be48;
+  --mereka-color-danger: #8c002f;
+  --mereka-color-danger-soft: #cd89ae;
+
+  /* Effects */
+  --mereka-shadow-card: 0 20px 60px rgba(26, 22, 35, 0.08);
+  --mereka-gradient-primary: linear-gradient(
+    135deg,
+    var(--mereka-color-teal) 0%,
+    var(--mereka-color-blue) 100%
+  );
+
+  /* Legacy compatibility (older overrides used these names) */
+  --mereka-teal: var(--mereka-color-teal);
+  --mereka-magenta: var(--mereka-color-magenta);
+  --mereka-blue: var(--mereka-color-blue);
+  --mereka-black: var(--mereka-color-ink-900);
+
+  /* Paragon bridge (MFEs) */
+  --pgn-color-primary: var(--mereka-color-magenta);
+  --pgn-color-secondary: var(--mereka-color-teal);
+  --pgn-color-success: var(--mereka-color-success);
+  --pgn-color-info: var(--mereka-color-info);
+  --pgn-color-warning: var(--mereka-color-warning);
+  --pgn-color-danger: var(--mereka-color-danger);
+  --pgn-body-bg: var(--mereka-color-surface-primary);
+  --pgn-body-color: var(--mereka-color-ink-900);
+  --pgn-link-color: var(--mereka-color-info);
+  --pgn-link-hover-color: var(--mereka-color-teal);
+  --pgn-font-family-sans-serif: var(--mereka-font-body);
+  --pgn-heading-font-family: var(--mereka-font-heading);
+  --pgn-border-color: var(--mereka-color-border);
+  --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
+  --pgn-btn-border-radius: 999px;
 }
 
 @font-face {
@@ -57,7 +118,8 @@
 
 html,
 body {
-  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-family: var(--mereka-font-body);
+  background-color: var(--mereka-color-surface-primary);
   color: var(--mereka-black);
 }
 
@@ -71,11 +133,14 @@ h6,
 .hd-2,
 .hd-3,
 .hd-4 {
-  font-family: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-family: var(--mereka-font-heading);
+  font-weight: 600;
 }
 
 a {
   color: var(--mereka-blue);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 a:hover,
@@ -88,6 +153,11 @@ a:focus {
 button.btn.btn-primary {
   background-color: var(--mereka-magenta);
   border-color: var(--mereka-magenta);
+  border-radius: 999px;
+}
+
+.btn-outline-primary {
+  border-radius: 999px;
 }
 
 .btn-primary:hover,
@@ -100,10 +170,219 @@ button.btn.btn-primary:focus {
   border-color: #963365;
 }
 
-/* Make top nav feel branded without fighting Indigo too hard. */
 .header-global,
 .nav-global {
   border-top: 4px solid var(--mereka-teal);
+}
+
+/* -------------------------- */
+/* Deep branding (LMS surfaces) */
+/* -------------------------- */
+
+.courses-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+}
+
+.courses-listing li,
+.courses-listing-item {
+  list-style: none;
+}
+
+.course {
+  background: #fff;
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.course:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.course .course-image .cover-image {
+  height: 180px;
+  background: linear-gradient(135deg, rgba(45, 137, 139, 0.22), rgba(41, 92, 173, 0.25));
+}
+
+.course .course-image .cover-image img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.course .course-info {
+  padding: 1.5rem;
+}
+
+.course .course-code {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--mereka-color-ink-500);
+  text-transform: uppercase;
+}
+
+.course .course-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course .course-organization {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.learn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #fff;
+  background: var(--mereka-gradient-primary);
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.learn-more:hover,
+.learn-more:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+/* Learner dashboard cards */
+.dashboard .listing-courses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard .listing-courses li {
+  list-style: none;
+}
+
+.dashboard .my-courses .course-item .course {
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+  background: #fff;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dashboard .my-courses .course-item .course:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.dashboard .course .wrapper-course-details {
+  padding: 1.25rem 1.5rem 0;
+}
+
+.dashboard .course .course-title {
+  color: var(--mereka-color-ink-900);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard .course .info-university {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dashboard .course .enter-course {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard .course .enter-course:hover,
+.dashboard .course .enter-course:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+/* Courseware chrome */
+.courseware {
+  background: var(--mereka-color-surface-primary);
+}
+
+.courseware .course-content,
+.courseware .course-outline,
+.courseware .course-index {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.5rem;
+}
+
+.courseware .unit-title,
+.courseware .sequence-nav-title {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .sequence-nav {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.courseware .sequence-nav-button {
+  border-radius: 999px;
+}
+
+.courseware .sequence-nav-button:hover,
+.courseware .sequence-nav-button:focus {
+  background: rgba(45, 137, 139, 0.12);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Footer: ensure our custom template styles are always present. */
@@ -138,7 +417,7 @@ button.btn.btn-primary:focus {
 .mereka-footer .footer-brand p {
   font-size: 0.875rem;
   line-height: 1.6;
-  color: rgba(26, 22, 35, 0.6);
+  color: var(--mereka-color-ink-500);
   margin-bottom: 1rem;
 }
 
@@ -162,7 +441,7 @@ button.btn.btn-primary:focus {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: rgba(26, 22, 35, 0.55);
+  color: var(--mereka-color-ink-500);
   margin-bottom: 0.75rem;
 }
 
@@ -175,12 +454,12 @@ button.btn.btn-primary:focus {
 }
 
 .mereka-footer a {
-  color: rgba(26, 22, 35, 0.75);
+  color: var(--mereka-color-ink-700);
 }
 
 .mereka-footer a:hover,
 .mereka-footer a:focus {
-  color: var(--mereka-teal);
+  color: var(--mereka-color-teal);
 }
 
 .mereka-footer .footer-bottom {
@@ -190,7 +469,7 @@ button.btn.btn-primary:focus {
   justify-content: space-between;
   align-items: center;
   font-size: 0.875rem;
-  color: rgba(26, 22, 35, 0.55);
+  color: var(--mereka-color-ink-500);
   padding-top: 1.5rem;
   margin-top: 1.5rem;
   border-top: 1px solid rgba(26, 22, 35, 0.06);
