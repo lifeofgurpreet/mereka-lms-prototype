@@ -18,12 +18,11 @@ log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
 run_lms_checks() {
   log "Checking LMS OAuth2 apps + scopes..."
-  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env STRICT="${STRICT}" python - <<'PY'
+  # Use manage.py so settings/env are consistent with the running LMS.
+  kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env STRICT="${STRICT}" \
+    python /openedx/edx-platform/manage.py lms shell -c '
 import os
 import sys
-import django
-
-django.setup()
 
 from oauth2_provider.models import Application
 from openedx.core.djangoapps.oauth_dispatch.models import ApplicationAccess
@@ -50,7 +49,7 @@ for key, app in apps.items():
 
 if missing and strict:
     sys.exit(1)
-PY
+'
 }
 
 run_ecommerce_checks() {
@@ -60,10 +59,12 @@ import django
 django.setup()
 
 import os
+import importlib
 from django.contrib.sites.models import Site
 from ecommerce.core.models import SiteConfiguration
 from oscar.core.loading import get_model
 from ecommerce.extensions.payment.models import PaypalProcessorConfiguration
+from django.conf import settings
 
 Partner = get_model("partner", "Partner")
 
@@ -85,7 +86,7 @@ print("Paypal configs:", [(p.name, p.enabled) for p in PaypalProcessorConfigurat
 # Stripe env sanity (do not print values).
 def present(k: str) -> bool:
     v = (os.environ.get(k) or "").strip()
-    return bool(v and v != "REPLACE_ME")
+    return bool(v and not v.startswith("REPLACE_") and v != "REPLACE_ME")
 
 print(
     "Stripe env present:",
@@ -94,6 +95,36 @@ print(
         "STRIPE_PUBLISHABLE_KEY": present("STRIPE_PUBLISHABLE_KEY"),
         # Webhook is optional until webhooks are configured.
         "STRIPE_WEBHOOK_SECRET": present("STRIPE_WEBHOOK_SECRET"),
+    },
+)
+
+# Stripe settings sanity: verify our Tutor settings loaded Stripe values into
+# PAYMENT_PROCESSOR_CONFIG and the Stripe processor module imports cleanly.
+cfg = (getattr(settings, "PAYMENT_PROCESSOR_CONFIG", {}) or {}).get("openedx") or {}
+stripe = cfg.get("stripe") or {}
+
+def prefix(value: str, n: int = 8) -> str:
+    value = (value or "").strip()
+    return value[:n] if value else ""
+
+stripe_secret = stripe.get("secret_key") or ""
+stripe_pub = stripe.get("publishable_key") or ""
+stripe_webhook = stripe.get("webhook_endpoint_secret") or ""
+
+try:
+    importlib.import_module("ecommerce.extensions.payment.processors.stripe")
+    stripe_module_ok = True
+except Exception:
+    stripe_module_ok = False
+
+print(
+    "Stripe settings:",
+    {
+        "stripe_present": bool(stripe),
+        "secret_prefix": prefix(stripe_secret),
+        "publishable_prefix": prefix(stripe_pub),
+        "webhook_set": bool((stripe_webhook or "").strip()) and not str(stripe_webhook).startswith("REPLACE_"),
+        "processor_import_ok": stripe_module_ok,
     },
 )
 PY

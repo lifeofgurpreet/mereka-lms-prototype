@@ -218,6 +218,42 @@ kubectl rollout status deployment/cms -n mereka-lms
 
 ---
 
+### Issue 4d: LMS/CMS MySQL `1045 Access denied` (Trailing Newline In Secret)
+
+**Symptoms:**
+- LMS/CMS logs show: `MySQLdb.OperationalError: (1045, "Access denied for user 'openedx'@'10.x.x.x' (using password: YES)")`
+- `manage.py lms shell -c ...` fails, even when the site still serves `200` for some pages
+
+**Root Cause:**
+- `OPENEDX_MYSQL_PASSWORD` was injected with a trailing newline (`\\n`) from the secret store (Infisical/GCP Secret Manager/ESO).
+- The MySQL user password in the database does not include that newline, so auth fails.
+
+**How to Confirm (no secret value printed):**
+```bash
+kubectl exec -n mereka-lms deploy/lms -- python - <<'PY'
+import os
+pw = os.environ.get("OPENEDX_MYSQL_PASSWORD", "")
+print("len", len(pw))
+print("endswith_newline", pw.endswith("\\n"))
+print("endswith_cr", pw.endswith("\\r"))
+PY
+```
+
+**Fix (Permanent):**
+- The Open edX K8s settings templates strip trailing CR/LF before assigning the DB password:
+  - `deploy/k8s/base/apps/openedx/settings/lms/production.py`
+  - `deploy/k8s/base/apps/openedx/settings/cms/production.py`
+
+Apply the overlay and restart LMS/CMS so the updated settings configmaps are mounted:
+```bash
+kubectl apply -k deploy/k8s/overlays/production
+kubectl rollout restart -n mereka-lms deploy/lms deploy/lms-worker deploy/cms deploy/cms-worker
+```
+
+**Follow-up (recommended):**
+- Normalize the upstream secret values to remove trailing newlines so other services don’t hit the same edge case.
+- Use `scripts/infra/infisical-audit-mereka-lms.sh` to detect newline drift without printing values.
+
 ### Issue 5: Account Settings/Profile Pages Blank or Stuck
 
 **Symptoms:**

@@ -8,8 +8,10 @@ SECRET_KEY = os.environ.get("CMS_SECRET_KEY", "")
 if not SECRET_KEY:
     raise ValueError("CMS_SECRET_KEY environment variable is required")
 
-# Override database password from environment variable
-_db_password = os.environ.get("OPENEDX_MYSQL_PASSWORD", "")
+# Override database password from environment variable.
+# Note: secrets may arrive with a trailing newline from secret stores; strip it
+# to avoid MySQL 1045 due to password mismatch.
+_db_password = (os.environ.get("OPENEDX_MYSQL_PASSWORD", "") or "").rstrip("\r\n")
 if _db_password and "default" in DATABASES:
     DATABASES["default"]["PASSWORD"] = _db_password
 

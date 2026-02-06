@@ -31,6 +31,10 @@ kubectl exec -n mereka-lms deploy/lms -- \
 print([(a.name,a.client_id,a.redirect_uris) for a in Application.objects.filter(name__in=['Ecommerce Backend Service','Ecommerce SSO'])])"
 ```
 
+If the `manage.py` checks fail with MySQL `1045 Access denied`, see
+`docs/operations/TROUBLESHOOTING.md` (Issue 4d). The most common cause is a
+trailing newline in `OPENEDX_MYSQL_PASSWORD` from the secret store.
+
 ## ✅ OAuth Scopes (ApplicationAccess)
 
 Ecommerce requests `user_id profile email`. The LMS uses **ApplicationAccess** to
@@ -117,6 +121,11 @@ separate secrets:
 - `MEREKA_LMS_STRIPE_PUBLISHABLE_KEY_DEV`
 - `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_DEV`
 
+Dev uses a full ExternalSecret patch (not a partial list) to avoid accidentally
+blanking required secrets:
+
+- `deploy/k8s/overlays/local/patches/openedx-secrets-dev.yaml`
+
 Then confirm ExternalSecrets sync:
 
 ```bash
@@ -143,6 +152,10 @@ K8S_CONTEXT=kind-dev ./scripts/qa/verify-ecommerce-config.sh
 curl -I https://ecommerce.academyv2.mereka.io/dashboard/
 kubectl logs -n mereka-lms deployment/ecommerce --tail=100
 ```
+
+`verify-ecommerce-config.sh` now also prints Stripe *prefixes* (`sk_test_` vs
+`sk_live_`) and whether the webhook secret is set (without printing any secret
+values). Webhook can remain unset until you configure Stripe webhooks.
 
 If the logs show OAuth client errors, re-check client IDs, secrets, and redirect URIs.
 
