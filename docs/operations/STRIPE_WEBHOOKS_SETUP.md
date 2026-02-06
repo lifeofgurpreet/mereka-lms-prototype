@@ -79,6 +79,11 @@ K8S_CONTEXT=kind-dev ./scripts/qa/test-stripe-webhook-delivery.sh dev
 
 Stripe CLI is installed on this VPS as `~/.local/bin/stripe`.
 
+Note: this repo’s primary verification path does **not** require Stripe CLI login:
+use `./scripts/qa/test-stripe-webhook-delivery.sh` which signs the payload using the
+webhook secret already injected into the running ecommerce pod. Stripe CLI is optional
+for interactive dev iteration.
+
 1. Login (interactive):
 ```bash
 stripe login
