@@ -153,9 +153,9 @@ curl -I https://ecommerce.academyv2.mereka.io/dashboard/
 kubectl logs -n mereka-lms deployment/ecommerce --tail=100
 ```
 
-`verify-ecommerce-config.sh` now also prints Stripe *prefixes* (`sk_test_` vs
-`sk_live_`) and whether the webhook secret is set (without printing any secret
-values). Webhook can remain unset until you configure Stripe webhooks.
+`verify-ecommerce-config.sh` reports whether Stripe env vars are present and
+whether the webhook secret is set (without printing any secret values or key
+prefixes). Webhook can remain unset until you configure Stripe webhooks.
 
 If the logs show OAuth client errors, re-check client IDs, secrets, and redirect URIs.
 

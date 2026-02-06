@@ -11,6 +11,7 @@ INFISICAL_DIR="${INFISICAL_DIR:-}"
 INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
 INFISICAL_CONFIG_FILE="${INFISICAL_CONFIG_FILE:-}"
 EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml}"
+STRICT="${STRICT:-0}"
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
@@ -127,9 +128,69 @@ if [[ ! -f "$tmpvalues" || ! -s "$tmpvalues" ]]; then
     infisical secrets --domain "$INFISICAL_DOMAIN" --env "$INFISICAL_ENV" --path "$INFISICAL_PATH" --projectId "$INFISICAL_PROJECT_ID" --output json --silent > "$tmpvalues"
   )
 fi
-empty_values=$(jq -r '.[] | select((.secretValue == null) or (.secretValue == "") or (.secretValue|tostring|test("\\*not found\\*"; "i"))) | .secretKey' "$tmpvalues")
+
+# Some keys are intentionally optional until a feature is fully enabled.
+# Keep them present (so ExternalSecrets stays stable), but allow them to be empty
+# or placeholders without failing validation.
+OPTIONAL_KEYS_REGEX='^(MEREKA_LMS_STRIPE_WEBHOOK_SECRET|MEREKA_LMS_STRIPE_WEBHOOK_SECRET_DEV)$'
+
+empty_values=$(
+  jq -r --arg opt_re "$OPTIONAL_KEYS_REGEX" '
+    .[]
+    | select((.secretKey | test($opt_re)) | not)
+    | select((.secretValue == null) or (.secretValue == "") or (.secretValue|tostring|test("\\*not found\\*"; "i")))
+    | .secretKey
+  ' "$tmpvalues"
+)
 if [[ -n "$empty_values" ]]; then
   echo "Infisical secrets with empty values:" >&2
   echo "$empty_values" >&2
   exit 1
+fi
+
+# Fail fast on placeholder values for non-optional keys.
+placeholder_values=$(
+  jq -r --arg opt_re "$OPTIONAL_KEYS_REGEX" '
+    .[]
+    | select((.secretKey | test($opt_re)) | not)
+    | select((.secretValue|tostring|test("^(REPLACE_ME|REPLACE_.+|CHANGE_ME|TODO|TBD)$"; "i")))
+    | .secretKey
+  ' "$tmpvalues"
+)
+if [[ -n "$placeholder_values" ]]; then
+  echo "Infisical secrets with placeholder values (fix at source):" >&2
+  echo "$placeholder_values" >&2
+  exit 1
+fi
+
+# Prevent the "MySQL 1045 due to trailing newline" failure mode at the source.
+newline_values=$(
+  jq -r '
+    .[]
+    | select((.secretKey | test("(_PASSWORD$|_OAUTH2_SECRET$|_CLIENT_SECRET$)")))
+    | select((.secretValue|tostring|test("[\\r\\n]$")))
+    | .secretKey
+  ' "$tmpvalues"
+)
+if [[ -n "$newline_values" ]]; then
+  if [[ "$STRICT" == "1" ]]; then
+    echo "Infisical secrets with trailing CR/LF (will break auth/password parsing):" >&2
+    echo "$newline_values" >&2
+    exit 1
+  fi
+  log "WARN: Infisical secrets with trailing CR/LF detected (run with STRICT=1 to fail):"
+  echo "$newline_values"
+fi
+
+optional_warnings=$(
+  jq -r --arg opt_re "$OPTIONAL_KEYS_REGEX" '
+    .[]
+    | select(.secretKey | test($opt_re))
+    | select((.secretValue == null) or (.secretValue == "") or (.secretValue|tostring|test("^(REPLACE_ME|REPLACE_.+|CHANGE_ME|TODO|TBD)$"; "i")))
+    | .secretKey
+  ' "$tmpvalues"
+)
+if [[ -n "$optional_warnings" ]]; then
+  log "WARN: Optional secrets are unset/placeholders (ok until feature is enabled):"
+  echo "$optional_warnings"
 fi

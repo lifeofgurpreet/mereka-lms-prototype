@@ -11,6 +11,10 @@ under `/k8s/mereka-lms` in both `prod` and `dev`.
 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
 INFISICAL_ENV=dev ./scripts/infra/infisical-validate-mereka-lms.sh
 
+# Enforce stricter hygiene checks (fails on trailing CR/LF bytes)
+STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
+STRICT=1 INFISICAL_ENV=dev ./scripts/infra/infisical-validate-mereka-lms.sh
+
 # Consolidate secrets into /k8s/mereka-lms
 ./scripts/infra/infisical-sync-mereka-lms.sh prod
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
