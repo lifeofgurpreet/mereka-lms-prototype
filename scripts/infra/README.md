@@ -22,6 +22,8 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `refresh-i18n-static.sh` - Rebuild LMS/CMS i18n JS bundles (fixes missing gettext)
 - `infisical-validate-mereka-lms.sh` - Verify Infisical has all MEREKA_LMS secrets
 - `infisical-sync-mereka-lms.sh` - Sync MEREKA_LMS secrets into `/k8s/mereka-lms`
+- `normalize-mysql-secrets.sh` - Strip trailing CR/LF for MySQL password secrets (Infisical + GCP SM + K8s ESO target)
+- `provision-mysql-app-dbs.sh` - Create Notes/XQueue MySQL DBs + users (idempotent, non-destructive)
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
 - `validate-telemetry-connectivity.sh` - **📊 MONITORING** Validate Grafana datasource connectivity to GKE and VPS Prometheus
@@ -80,6 +82,13 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 # Sync MEREKA_LMS secrets into /k8s/mereka-lms (fixes sprawl)
 ./scripts/infra/infisical-sync-mereka-lms.sh prod
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
+
+# Normalize MySQL password secrets (strip trailing CR/LF in Infisical + GCP SM + K8s)
+./scripts/infra/normalize-mysql-secrets.sh
+APPLY=1 ./scripts/infra/normalize-mysql-secrets.sh
+
+# Provision Notes/XQueue MySQL DBs/users (idempotent)
+./scripts/infra/provision-mysql-app-dbs.sh
 
 # Sync Infisical -> GCP Secret Manager (ExternalSecrets source of truth)
 # NOTE: By default this is create-if-missing for safety. If you are fixing a bad

@@ -73,6 +73,22 @@ K8S_CONTEXT=kind-dev ./scripts/infra/repair-kind-mysql-users.sh
 This aligns `root`, `openedx`, `ecommerce`, `discovery`, `notes`, `xqueue`,
 `credentials` to the current `secret/database-secrets` values.
 
+## Normalizing MySQL Password Secrets (Prod)
+
+If `database-secrets` values (or their upstream Infisical/GCP SM secrets) have
+trailing CR/LF bytes, some services can hit MySQL `1045` on restart.
+
+This repo includes a safe normalizer that strips only trailing `\\r`/`\\n`
+bytes (no other mutation, no printing values):
+
+```bash
+# Plan (shows which keys have trailing CR/LF in Infisical, GCP SM, and K8s)
+./scripts/infra/normalize-mysql-secrets.sh
+
+# Apply (updates Infisical + adds new GCP SM versions, then forces ESO refresh)
+APPLY=1 ./scripts/infra/normalize-mysql-secrets.sh
+```
+
 ## Required Keys
 
 - `MEREKA_LMS_CMS_OAUTH2_SECRET`
