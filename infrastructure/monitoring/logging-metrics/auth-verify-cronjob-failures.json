@@ -1,6 +1,5 @@
 {
   "name": "auth-verify-cronjob-failures",
   "description": "Count failures from the in-cluster auth verification CronJob (auth-verify-prod).",
-  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND resource.labels.container_name=\"auth-verify\" AND resource.labels.pod_name=~\"^auth-verify-prod-\" AND (textPayload=~\"FAILED \\\\(\" OR textPayload=~\"^BAD \" OR jsonPayload.message=~\"FAILED \\\\(\")"
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND resource.labels.container_name=\"auth-verify\" AND resource.labels.pod_name=~\"^auth-verify-prod-\" AND (textPayload:\"FAILED (\" OR textPayload:\"BAD \" OR jsonPayload.message:\"FAILED (\")"
 }
-
