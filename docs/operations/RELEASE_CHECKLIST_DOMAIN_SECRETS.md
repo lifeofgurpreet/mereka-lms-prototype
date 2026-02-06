@@ -11,6 +11,23 @@ Use this checklist for any domain or secret change on production (GKE). There is
   velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
     --include-namespaces mereka-lms --wait
   ```
+  If `velero` CLI is not installed, create a Backup CR instead:
+  ```bash
+  name=pre-op-mereka-lms-$(date +%Y%m%d-%H%M)
+  cat > /tmp/$name.yaml <<YAML
+  apiVersion: velero.io/v1
+  kind: Backup
+  metadata:
+    name: $name
+    namespace: velero
+  spec:
+    includedNamespaces:
+      - mereka-lms
+    ttl: 720h0m0s
+  YAML
+  kubectl apply -f /tmp/$name.yaml
+  kubectl -n velero get backup $name -o jsonpath='{.status.phase}{"\n"}'
+  ```
 - [ ] Pull latest repo + review diffs
 
 ## Domain Changes
@@ -34,6 +51,11 @@ Use this checklist for any domain or secret change on production (GKE). There is
 ## Secret Changes
 
 - [ ] **Infisical is the only source of truth** – update secrets there first
+- [ ] Pre-flight hygiene (fails on missing keys, placeholders, and CR/LF drift when strict):
+  ```bash
+  STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
+  STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
+  ```
 - [ ] Verify secrets live under `/k8s/mereka-lms` (prod + dev), not `/`
   ```bash
   cd /home/gurpreet/projects/k8s/reka-slackbot
@@ -49,6 +71,15 @@ Use this checklist for any domain or secret change on production (GKE). There is
   ```bash
   kubectl get externalsecret -n mereka-lms
   kubectl describe externalsecret openedx-secrets -n mereka-lms
+  ```
+- [ ] Normalize MySQL password secrets (strip trailing CR/LF) so restarts cannot regress into MySQL `1045`:
+  ```bash
+  ./scripts/infra/normalize-mysql-secrets.sh
+  APPLY=1 ./scripts/infra/normalize-mysql-secrets.sh
+  ```
+- [ ] Ensure optional service DBs exist (Notes/XQueue) after any MySQL secret rotation:
+  ```bash
+  ./scripts/infra/provision-mysql-app-dbs.sh
   ```
 - [ ] Roll deployments if required:
   ```bash

@@ -124,23 +124,39 @@ Official Mereka brand assets: `https://github.com/biji-biji-initiative/bbbi-mere
 | Lato | Headings, UI labels |
 | Poppins | Body text, paragraphs |
 
-## MongoDB Atlas-Only Architecture
+## MongoDB Architecture (Target: Atlas-Only)
 
-**🚨 CRITICAL: This project uses MongoDB Atlas exclusively. No local MongoDB is deployed.**
+**🚨 CRITICAL: Target state is MongoDB Atlas-only, but do not assume this is true in every environment until verified.**
 
 ### Architecture Decision
 - **Cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net` (MongoDB Atlas)
 - **Databases**: `openedx` (modulestore), `cs_comments_service` (forum)
 - **Why Atlas**: Zero maintenance overhead, automatic backups, managed scaling
-- **Local MongoDB**: Disabled in K8s manifests (commented out)
+- **In-cluster MongoDB**: May still exist in some environments during the cutover window
 
 See `docs/adr/001-mongodb-atlas.md` for full rationale.
+
+### Current State (Verified 2026-02-06, Production GKE)
+- **Forum**: uses Atlas.
+- **LMS/CMS modulestore**: defaults to in-cluster `Service/mongodb` unless `MONGODB_HOST` is explicitly set to Atlas.
+- **In-cluster MongoDB** (`Deployment/mongodb`) exists in production.
 
 ### Connection Details
 | Service | Database | Connection |
 |---------|----------|------------|
-| LMS/CMS | `openedx` | Atlas via `MONGODB_PASSWORD` env var |
-| Forum | `cs_comments_service` | Atlas via `MONGODB_PASSWORD` env var |
+| LMS/CMS | `openedx` | Target: Atlas; Current: in-cluster MongoDB unless configured |
+| Forum | `cs_comments_service` | Atlas |
+
+### How To Verify (No Secrets Printed)
+
+```bash
+# LMS/CMS modulestore: if MONGODB_HOST is empty, they will use in-cluster mongodb by default.
+kubectl -n mereka-lms exec deploy/lms -- python -c 'import os; print(bool(os.environ.get(\"MONGODB_HOST\")))'
+kubectl -n mereka-lms exec deploy/cms -- python -c 'import os; print(bool(os.environ.get(\"MONGODB_HOST\")))'
+
+# In-cluster MongoDB presence:
+kubectl -n mereka-lms get deploy mongodb
+```
 
 ### Secret Management
 - Password stored in Infisical: `MEREKA_LMS_MONGODB_PASSWORD`
@@ -148,9 +164,10 @@ See `docs/adr/001-mongodb-atlas.md` for full rationale.
 - Python code uses `os.environ.get("MONGODB_PASSWORD")`
 
 ### NEVER DO
-1. ❌ Deploy local MongoDB
-2. ❌ Change connection strings to `localhost` or `mongodb`
-3. ❌ Hardcode MongoDB password in files
+1. ❌ Deploy a *new* local MongoDB for production data (Atlas is the target)
+2. ❌ Delete the existing in-cluster MongoDB in prod until `mereka-lms-m1q` is completed (modulestore cutover verified)
+3. ❌ Change connection strings to `localhost` or `mongodb` for production
+4. ❌ Hardcode MongoDB password in files
 
 ## Coding Style & Naming Conventions
 Shell scripts should begin with `#!/usr/bin/env bash`, enable `set -euo pipefail`, and prefer descriptive function names over inline command chains. Keep Bash indented with two spaces; YAML templates should mirror Tutor defaults and group environment variables in uppercase (e.g., `OPENEDX_RELEASE`). When extending scripts, mirror the existing comment style that summarizes intent rather than mechanics.

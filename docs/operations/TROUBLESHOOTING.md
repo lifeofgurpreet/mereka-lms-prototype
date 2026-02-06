@@ -259,6 +259,43 @@ kubectl rollout restart -n mereka-lms deploy/lms deploy/lms-worker deploy/cms de
 - Use `scripts/infra/infisical-audit-mereka-lms.sh` to detect newline drift without printing values.
 - Use `scripts/infra/infisical-validate-mereka-lms.sh` as a pre-flight gate (set `STRICT=1` to fail on trailing CR/LF).
 
+---
+
+### Issue 4e: Notes/XQueue MySQL Failures (DB/User Missing or Env Missing)
+
+**Symptoms:**
+- Notes and/or XQueue endpoints exist but error when they actually hit the DB
+- XQueue migrate/connect fails with: `Access denied ... (using password: NO)`
+- MySQL does not list `notes` / `xqueue` databases or users
+
+**Root Causes (common):**
+1. MySQL DBs/users for optional services were never created (`notes`, `xqueue`)
+2. XQueue deployment was missing `envFrom` for `database-secrets` (no DB password injected)
+
+**How to Confirm (no secrets printed):**
+```bash
+# DB presence
+kubectl exec -n mereka-lms deploy/mysql -- sh -lc 'env MYSQL_PWD=\"$MYSQL_ROOT_PASSWORD\" mysql -uroot -h mysql -e \"SHOW DATABASES;\"'
+
+# XQueue has DB secrets injected (should show envFrom entries > 0)
+kubectl get deploy/xqueue -n mereka-lms -o json | jq -r '.spec.template.spec.containers[] | [.name,(.envFrom|length)] | @tsv'
+```
+
+**Fix (non-destructive, idempotent):**
+```bash
+# Creates DBs + users for notes/xqueue and aligns their passwords to K8s secret values
+./scripts/infra/provision-mysql-app-dbs.sh
+
+# Ensure new env vars/config are picked up (if changed)
+kubectl rollout restart -n mereka-lms deploy/notes deploy/xqueue
+```
+
+**Optional: Run migrations (requires venv python inside containers):**
+```bash
+kubectl exec -n mereka-lms deploy/notes -- sh -lc 'cd /app/edx-notes-api && /app/venv/bin/python manage.py migrate --noinput'
+kubectl exec -n mereka-lms deploy/xqueue -- sh -lc 'cd /openedx/xqueue && /openedx/venv/bin/python manage.py migrate --noinput'
+```
+
 ### Issue 5: Account Settings/Profile Pages Blank or Stuck
 
 **Symptoms:**
