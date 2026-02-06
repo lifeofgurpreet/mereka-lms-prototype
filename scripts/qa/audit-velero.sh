@@ -42,6 +42,10 @@ kubectl_json() {
   kubectl --context "$K8S_CONTEXT" -n "$1" get "$2" -o json 2>/dev/null || echo '{"items":[]}'
 }
 
+kubectl_json_cluster() {
+  kubectl --context "$K8S_CONTEXT" get "$1" -o json 2>/dev/null || echo '{"items":[]}'
+}
+
 warn() { printf "WARN: %s\n" "$*" >&2; }
 fail() { printf "FAIL: %s\n" "$*" >&2; }
 ok() { printf "OK: %s\n" "$*"; }
@@ -49,9 +53,11 @@ ok() { printf "OK: %s\n" "$*"; }
 tmpdir="$(mktemp -d -t audit-velero.XXXXXX)"
 cleanup() { rm -rf "$tmpdir"; }
 trap cleanup EXIT
+export tmpdir APP_NS
 
 bsls_json="$tmpdir/bsls.json"
 vsls_json="$tmpdir/vsls.json"
+vscs_json="$tmpdir/volumesnapshotclasses.json"
 schedules_json="$tmpdir/schedules.json"
 backups_json="$tmpdir/backups.json"
 cronjobs_json="$tmpdir/cronjobs.json"
@@ -61,6 +67,7 @@ app_mongodb_json="$tmpdir/app_mongodb.json"
 
 kubectl_json "$VELERO_NS" backupstoragelocations.velero.io >"$bsls_json"
 kubectl_json "$VELERO_NS" volumesnapshotlocations.velero.io >"$vsls_json"
+kubectl_json_cluster volumesnapshotclasses.snapshot.storage.k8s.io >"$vscs_json" || echo '{"items":[]}' >"$vscs_json"
 kubectl_json "$VELERO_NS" schedules.velero.io >"$schedules_json"
 kubectl_json "$VELERO_NS" backups.velero.io >"$backups_json"
 kubectl_json "$VELERO_NS" cronjobs.batch >"$cronjobs_json"
@@ -69,9 +76,34 @@ kubectl_json "$VELERO_NS" jobs.batch >"$jobs_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get pvc -o json 2>/dev/null >"$app_pvcs_json" || echo '{"items":[]}' >"$app_pvcs_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy mongodb -o json 2>/dev/null >"$app_mongodb_json" || echo '{}' >"$app_mongodb_json"
 
+ns_list="$(
+  python3 - "$schedules_json" <<'PY'
+import json, sys
+from pathlib import Path
+
+data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+namespaces = set()
+for item in data.get("items", []):
+    tpl = (item.get("spec") or {}).get("template") or {}
+    for ns in (tpl.get("includedNamespaces") or []):
+        if isinstance(ns, str) and ns.strip():
+            namespaces.add(ns.strip())
+print(" ".join(sorted(namespaces)))
+PY
+)"
+
+for ns in $ns_list; do
+  kubectl --context "$K8S_CONTEXT" -n "$ns" get pvc -o json 2>/dev/null \
+    >"$tmpdir/pvc_${ns}.json" || echo '{"items":[]}' >"$tmpdir/pvc_${ns}.json"
+
+  kubectl --context "$K8S_CONTEXT" -n "$ns" get volumesnapshots.snapshot.storage.k8s.io -o json 2>/dev/null \
+    >"$tmpdir/vs_${ns}.json" || echo '{"items":[]}' >"$tmpdir/vs_${ns}.json"
+done
+
 python3 - <<'PY'
 import json, os, sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 tmpdir = os.environ.get("tmpdir") or ""
 
@@ -98,6 +130,7 @@ def now():
 paths = {
     "bsls": os.path.join(tmpdir, "bsls.json"),
     "vsls": os.path.join(tmpdir, "vsls.json"),
+    "vscs": os.path.join(tmpdir, "volumesnapshotclasses.json"),
     "schedules": os.path.join(tmpdir, "schedules.json"),
     "backups": os.path.join(tmpdir, "backups.json"),
     "cronjobs": os.path.join(tmpdir, "cronjobs.json"),
@@ -108,12 +141,26 @@ paths = {
 
 bsls = load(paths["bsls"], {"items": []})
 vsls = load(paths["vsls"], {"items": []})
+vscs = load(paths["vscs"], {"items": []})
 schedules = load(paths["schedules"], {"items": []})
 backups = load(paths["backups"], {"items": []})
 cronjobs = load(paths["cronjobs"], {"items": []})
 jobs = load(paths["jobs"], {"items": []})
 app_pvcs = load(paths["app_pvcs"], {"items": []})
 app_mongodb = load(paths["app_mongodb"], {})
+
+def load_prefixed(prefix: str):
+    out = {}
+    for child in Path(tmpdir).glob(prefix + "*.json"):
+        try:
+            key = child.stem[len(prefix):]
+            out[key] = json.loads(child.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+    return out
+
+pvc_by_ns = load_prefixed("pvc_")
+vs_by_ns = load_prefixed("vs_")
 
 def emit(obj):
     print(json.dumps(obj, indent=2, sort_keys=True))
@@ -123,8 +170,13 @@ def summarize():
         "velero": {
             "backup_storage_locations": [],
             "volume_snapshot_locations": [],
+            "volume_snapshot_classes": [],
             "schedules": [],
             "restore_drill": {},
+            "backup_verification": {},
+        },
+        "coverage": {
+            "pvc_by_namespace": {},
         },
         "app_data_risks": [],
         "checks": {"failures": 0, "warnings": 0},
@@ -168,6 +220,32 @@ def summarize():
             "risk": "No VolumeSnapshotLocation found. PV snapshots may not be configured.",
         })
 
+    # VolumeSnapshotClasses (CSI snapshot plumbing)
+    for c in vscs.get("items", []):
+        out["velero"]["volume_snapshot_classes"].append({
+            "name": c.get("metadata", {}).get("name"),
+            "driver": (c.get("driver") or (c.get("spec") or {}).get("driver")),
+            "deletion_policy": (c.get("deletionPolicy") or (c.get("spec") or {}).get("deletionPolicy")),
+        })
+    if not out["velero"]["volume_snapshot_classes"]:
+        out["checks"]["warnings"] += 1
+        out["app_data_risks"].append({
+            "severity": "warning",
+            "risk": "No VolumeSnapshotClass found. CSI snapshotting may not be installed/enabled.",
+        })
+
+    # Coverage inventory: Bound/Pending PVC counts by namespace (rough expected snapshot coverage)
+    for ns, data in pvc_by_ns.items():
+        bound = 0
+        pending = 0
+        for pvc in data.get("items", []):
+            phase = (pvc.get("status") or {}).get("phase") or ""
+            if phase == "Bound":
+                bound += 1
+            elif phase == "Pending":
+                pending += 1
+        out["coverage"]["pvc_by_namespace"][ns] = {"bound": bound, "pending": pending}
+
     # Schedules and their latest backup
     backups_items = backups.get("items", [])
     by_schedule = {}
@@ -197,6 +275,7 @@ def summarize():
         name = s.get("metadata", {}).get("name")
         spec = s.get("spec") or {}
         tpl = spec.get("template") or {}
+        included_ns = tpl.get("includedNamespaces") or []
 
         latest = latest_completed(by_schedule.get(name, []))
         latest_summary = None
@@ -219,13 +298,33 @@ def summarize():
                         "risk": f"Backup {latest_summary['name']} completed with 0 volume snapshots attempted. This is a manifest-only backup.",
                     })
 
+            # Coverage sanity: compare snapshots completed to bound PVC count across included namespaces.
+            expected_bound = 0
+            for ns in included_ns:
+                if not isinstance(ns, str) or not ns.strip():
+                    continue
+                expected_bound += out["coverage"]["pvc_by_namespace"].get(ns.strip(), {}).get("bound", 0)
+
+            completed = st.get("volumeSnapshotsCompleted")
+            if isinstance(completed, int) and expected_bound > 0 and completed < expected_bound:
+                msg = (
+                    f"Backup {latest_summary['name']} snapshots_completed={completed} but expected_bound_pvcs={expected_bound} "
+                    f"(included_namespaces={included_ns})."
+                )
+                if "hourly" in (name or "") or "critical" in (name or ""):
+                    out["checks"]["failures"] += 1
+                    out["app_data_risks"].append({"severity": "critical", "risk": msg})
+                else:
+                    out["checks"]["warnings"] += 1
+                    out["app_data_risks"].append({"severity": "warning", "risk": msg})
+
         out["velero"]["schedules"].append({
             "name": name,
             "schedule": spec.get("schedule"),
             "paused": bool(spec.get("paused", False)),
             "ttl": tpl.get("ttl"),
             "include_cluster_resources": bool(tpl.get("includeClusterResources", False)),
-            "included_namespaces": tpl.get("includedNamespaces") or [],
+            "included_namespaces": included_ns,
             "excluded_namespaces": tpl.get("excludedNamespaces") or [],
             "volume_snapshot_locations": tpl.get("volumeSnapshotLocations") or [],
             "latest_completed_backup": latest_summary,
@@ -271,6 +370,33 @@ def summarize():
 
     out["velero"]["restore_drill"] = restore_status
 
+    # Backup verification CronJob posture (CronJob: backup-verification)
+    verify_cj = next((c for c in cronjobs.get("items", []) if c.get("metadata", {}).get("name") == "backup-verification"), None)
+    verify_status = {"exists": bool(verify_cj)}
+    if verify_cj:
+        verify_status.update({
+            "schedule": (verify_cj.get("spec") or {}).get("schedule"),
+            "last_schedule_time": (verify_cj.get("status") or {}).get("lastScheduleTime"),
+            "last_successful_time": (verify_cj.get("status") or {}).get("lastSuccessfulTime"),
+        })
+        last_ok = iso_to_dt(verify_status.get("last_successful_time"))
+        if not last_ok:
+            out["checks"]["warnings"] += 1
+            out["app_data_risks"].append({
+                "severity": "warning",
+                "risk": "backup-verification CronJob has no lastSuccessfulTime; verification may not be running.",
+            })
+        else:
+            age_hours = (now() - last_ok).total_seconds() / 3600.0
+            if age_hours > 30:
+                out["checks"]["warnings"] += 1
+                out["app_data_risks"].append({
+                    "severity": "warning",
+                    "risk": f"backup-verification lastSuccessfulTime is stale ({age_hours:.1f}h ago).",
+                })
+
+    out["velero"]["backup_verification"] = verify_status
+
     # App-level data risk signals (mereka-lms)
     # 1) PVCs pending
     pending = []
@@ -301,4 +427,3 @@ def summarize():
 
 emit(summarize())
 PY
-
