@@ -30,6 +30,10 @@ DEFAULT_CONTEXTS=(
 )
 
 CONTEXTS=()
+ENVIRONMENT="auto" # auto | prod | dev
+
+# If true, allow an empty domain list (not recommended).
+ALLOW_EMPTY_DOMAINS="${ALLOW_EMPTY_DOMAINS:-0}"
 
 usage() {
   cat <<EOF
@@ -39,6 +43,7 @@ OPTIONS:
   -n, --namespace NAMESPACE   K8s namespace (default: $NAMESPACE)
   -c, --context CONTEXT       Kube context to target (repeatable). If omitted, uses:
                               ${DEFAULT_CONTEXTS[*]}
+  --env {auto|prod|dev}       Which domain set to verify per context (default: $ENVIRONMENT)
   -h, --help                  Show help
 EOF
   exit 1
@@ -52,6 +57,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -n|--namespace) NAMESPACE="$2"; shift 2 ;;
     -c|--context) CONTEXTS+=("$2"); shift 2 ;;
+    --env) ENVIRONMENT="$2"; shift 2 ;;
     -h|--help) usage ;;
     *) echo "Unknown option: $1" >&2; usage ;;
   esac
@@ -64,23 +70,48 @@ fi
 failures=0
 
 for ctx in "${CONTEXTS[@]}"; do
+  env_for_ctx="$ENVIRONMENT"
+  if [[ "$env_for_ctx" == "auto" ]]; then
+    if [[ "$ctx" == kind* ]]; then
+      env_for_ctx="dev"
+    else
+      env_for_ctx="prod"
+    fi
+  fi
+
+  if [[ "$env_for_ctx" != "prod" && "$env_for_ctx" != "dev" ]]; then
+    echo "Invalid --env value: $ENVIRONMENT (expected auto|prod|dev)" >&2
+    exit 1
+  fi
+
+  DOMAINS=()
+  if [[ "$env_for_ctx" == "prod" ]]; then
+    DOMAINS=("$LMS_DOMAIN" "$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
+  else
+    DOMAINS=("$DEV_LMS_DOMAIN")
+  fi
+
+  # Trim empties and de-dupe while preserving order
+  DOMAINS_CSV="$(printf "%s\n" "${DOMAINS[@]}" | awk 'NF{print}' | awk '!seen[$0]++' | paste -sd, -)"
+  if [[ -z "${DOMAINS_CSV:-}" && "$ALLOW_EMPTY_DOMAINS" != "1" ]]; then
+    echo "No domains resolved for ctx=$ctx env=$env_for_ctx (set ALLOW_EMPTY_DOMAINS=1 to bypass)" >&2
+    failures=$((failures + 1))
+    continue
+  fi
+
   log "[$ctx] Verifying OIDC provider configs in LMS (namespace=$NAMESPACE)"
-  kubectl --context "$ctx" exec -i -n "$NAMESPACE" deploy/lms -- bash -lc 'python - <<PY
+  kubectl --context "$ctx" exec -i -n "$NAMESPACE" deploy/lms -- env DOMAINS_CSV="$DOMAINS_CSV" bash -lc 'python - <<PY
+import os
 import django
 django.setup()
 
-from django.conf import settings
 from django.contrib.sites.models import Site
 from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 
-domains = []
-for name in ("MEREKA_LMS_DOMAIN", "MEREKA_BIJI_DOMAIN", "MEREKA_SKILLOURFUTURE_DOMAIN"):
-    dom = getattr(settings, name, None)
-    if dom:
-        domains.append(dom)
-
-domains = [d.strip() for d in domains if str(d).strip()]
+domains = [d.strip() for d in os.environ.get("DOMAINS_CSV", "").split(",") if d.strip()]
 domains = list(dict.fromkeys(domains))  # preserve order, de-dupe
+if not domains:
+    raise SystemExit("DOMAINS_CSV is empty; refusing to verify nothing.")
 
 def check(domain: str) -> tuple[bool, str]:
     site = Site.objects.filter(domain=domain).first()

@@ -74,6 +74,10 @@ LMS/CMS also include multisite hardening middleware:
 - `scripts/qa/verify-oidc-provider-configs.sh`
   - Verifies the **latest** `OAuth2ProviderConfig` for `backend_name=oidc` is enabled/visible for the configured sites.
   - This directly prevents `/auth/login/oidc/` from 500ing with "Can't fetch setting of a disabled backend/provider."
+  - Domain coverage is derived from `scripts/shared/config.sh`:
+    - prod: `academyv2.mereka.io`, `academy.biji-biji.com`, `skillourfuture.academy.mereka.io`
+    - dev: `academyv2.mereka.dev`
+  - By default it runs with `--env auto`, which infers prod vs dev from the kube context name (`kind*` => dev).
 
 ### 4) Continuous verification (CI)
 
@@ -94,6 +98,9 @@ The existing `.github/workflows/public-health-check.yml` now runs:
    - access LMS Django admin
    - access Discovery/Credentials/Ecommerce admin after SSO login
 7. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
+
+Convenience:
+- `./scripts/qa/verify-auth-hardening.sh` runs the full suite (public + internal) in one command.
 
 ## Future Hardening (Optional)
 

@@ -143,6 +143,7 @@ Verify (kubectl required, no secrets):
 ```
 
 Notes:
+- The script verifies the domains configured in `scripts/shared/config.sh` (prod vs dev).
 - `OAuth2ProviderConfig` is a versioned ConfigurationModel. If you need to "fix" it,
   the safest approach is to **create a new enabled row** (do not try to edit old rows to
   disable them, that can create new versions and accidentally make a disabled version "current").

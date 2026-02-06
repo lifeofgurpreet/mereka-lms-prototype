@@ -19,10 +19,10 @@ jobs:
         run: CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh dev
 
       - name: Verify auth surfaces (prod)
-        run: ./scripts/qa/verify-auth-surfaces.sh prod
+        run: STRICT_ADMIN_LOGIN_REDIRECT=1 ./scripts/qa/verify-auth-surfaces.sh prod
 
       - name: Verify auth surfaces (dev)
-        run: ./scripts/qa/verify-auth-surfaces.sh dev
+        run: STRICT_ADMIN_LOGIN_REDIRECT=1 ./scripts/qa/verify-auth-surfaces.sh dev
 
       - name: Check TLS SANs
         run: ./scripts/infra/check-cert-sans.sh
