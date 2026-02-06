@@ -17,6 +17,9 @@ This platform serves multiple "microsite" domains from the same Open edX stack:
 - `academy.biji-biji.com` (Biji microsite)
 - `skillourfuture.academy.mereka.io` (Skillourfuture microsite)
 
+Canonical hostname registry (includes aliases like Preview and all ecosystem services):
+- `docs/operations/OPENEDX_HOSTNAMES.md`
+
 Implications:
 - Sessions do **not** carry across different root domains (expected).
 - Studio and MFEs must still redirect to the **correct** LMS domain for the microsite, otherwise SSO looks "missing" even when Authentik is fine.

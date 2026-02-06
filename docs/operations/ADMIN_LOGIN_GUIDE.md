@@ -1,5 +1,5 @@
 # Admin Login Guide
-_Last updated: 2026-02-05_
+_Last updated: 2026-02-06_
 
 ## 🔐 Shared SSO Test Credentials (Source of Truth)
 
@@ -130,15 +130,22 @@ printf "%s\n%s\n" "$EMAIL" "$PASSWORD" | kubectl exec -i -n mereka-lms deploy/lm
 - **Browser:** Try incognito/private mode if issues persist
 - **Cookies:** Clear browser cookies for localhost if needed
 - **Two login flows are expected:** Local username/password (native Open edX) + Authentik OIDC. Both should work; only disable local login if you explicitly want SSO-only.
-- **Authentik redirect_uri errors:** Ensure the Authentik app allowlist includes:
-  - `https://academyv2.mereka.io/auth/complete/oidc` and trailing `/`
-  - `https://academyv2.mereka.dev/auth/complete/oidc` and trailing `/`
-  - `https://studio.academyv2.mereka.io/auth/complete/oidc` and trailing `/`
-  - `https://studio.academyv2.mereka.dev/auth/complete/oidc` and trailing `/`
-  - `https://apps.academyv2.mereka.io/authn` and trailing `/`
-  - `https://apps.academyv2.mereka.dev/authn` and trailing `/`
+- **Authentik redirect_uri errors:** Ensure the Authentik allowlist includes the OIDC callback for every LMS hostname
+  that can start an OIDC flow (including aliases like Preview and tenant microsites).
+
+  Canonical hostname list:
+  - `docs/operations/OPENEDX_HOSTNAMES.md`
+
+  Required callback format:
+  - `https://<lms-host>/auth/complete/oidc/`
+
+  Verify from your machine (no credentials):
+  ```bash
+  ./scripts/qa/verify-auth-surfaces.sh prod
+  ./scripts/qa/verify-auth-surfaces.sh dev
+  ```
 
 ---
 
-**Last Verified:** 2026-02-05  
+**Last Verified:** 2026-02-06  
 **Status:** Admin login working ✅
