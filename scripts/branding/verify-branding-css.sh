@@ -76,6 +76,7 @@ if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   require_contains "Courseware styling present" "$COMMON_CSS" ".courseware"
   require_contains "Sequence nav styling present" "$COMMON_CSS" ".sequence-nav"
   require_contains "XBlock styling present" "$COMMON_CSS" ".xblock"
+  require_contains "Studio wrapper styling present" "$COMMON_CSS" ".wrapper-content"
 fi
 
 echo ""

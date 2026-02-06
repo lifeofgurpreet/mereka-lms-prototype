@@ -385,6 +385,95 @@ button.btn.btn-primary:focus {
   margin-bottom: 1.25rem;
 }
 
+/* --------------------------- */
+/* Studio polish (CMS surfaces) */
+/* --------------------------- */
+
+/* Studio uses `.wrapper-content` containers (LMS typically does not). */
+.wrapper-content {
+  background: var(--mereka-color-surface-primary);
+}
+
+.wrapper-content .content-primary,
+.wrapper-content .content-secondary,
+.wrapper-content .content {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.wrapper-content .page-header,
+.wrapper-content .page-header-main {
+  border-bottom: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.wrapper-content .page-header h1,
+.wrapper-content .page-header h2 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+/* Authoring forms */
+.wrapper-content input[type="text"],
+.wrapper-content input[type="email"],
+.wrapper-content input[type="password"],
+.wrapper-content input[type="url"],
+.wrapper-content input[type="search"],
+.wrapper-content textarea,
+.wrapper-content select {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: #fff;
+  padding: 0.75rem 1rem;
+}
+
+.wrapper-content input[type="text"]:focus,
+.wrapper-content input[type="email"]:focus,
+.wrapper-content input[type="password"]:focus,
+.wrapper-content input[type="url"]:focus,
+.wrapper-content input[type="search"]:focus,
+.wrapper-content textarea:focus,
+.wrapper-content select:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+}
+
+/* Studio action buttons (names vary by page; keep the scope narrow). */
+.wrapper-content .action-primary,
+.wrapper-content a.action-primary,
+.wrapper-content button.action-primary {
+  border-radius: 999px;
+  background-color: var(--mereka-magenta);
+  border: 1px solid var(--mereka-magenta);
+  color: #fff;
+  font-weight: 700;
+}
+
+.wrapper-content .action-primary:hover,
+.wrapper-content .action-primary:focus {
+  background-color: #963365;
+  border-color: #963365;
+  color: #fff;
+}
+
+.wrapper-content .action-secondary,
+.wrapper-content a.action-secondary,
+.wrapper-content button.action-secondary {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.18);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+  font-weight: 600;
+}
+
+.wrapper-content .action-secondary:hover,
+.wrapper-content .action-secondary:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
 /* Footer: ensure our custom template styles are always present. */
 .mereka-footer {
   background: #fff;
