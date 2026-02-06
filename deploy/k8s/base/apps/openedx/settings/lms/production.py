@@ -21,6 +21,15 @@ if _oidc_secret:
     SOCIAL_AUTH_OAUTH_SECRETS = dict(globals().get("SOCIAL_AUTH_OAUTH_SECRETS", {}))
     SOCIAL_AUTH_OAUTH_SECRETS.setdefault("oidc", _oidc_secret)
 
+# Allow the forum API key to be injected via env var (ExternalSecret), so we
+# don't have to commit it into configmaps.
+#
+# The forum service expects `API_KEY`; LMS expects `COMMENTS_SERVICE_KEY`. We
+# support either env var and override the LMS setting if present.
+_forum_api_key = os.environ.get("COMMENTS_SERVICE_KEY") or os.environ.get("FORUM_API_KEY") or ""
+if _forum_api_key:
+    COMMENTS_SERVICE_KEY = _forum_api_key
+
 ####### Settings common to LMS and CMS
 import json
 import os

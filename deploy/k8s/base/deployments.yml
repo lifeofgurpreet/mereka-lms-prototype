@@ -678,6 +678,11 @@ spec:
           ports:
             - containerPort: 4567
           env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: FORUM_API_KEY
             - name: SEARCH_SERVER
               value: "http://elasticsearch:9200"
             # MongoDB Atlas configuration
