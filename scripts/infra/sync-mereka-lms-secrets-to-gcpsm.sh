@@ -24,15 +24,42 @@ EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/sec
 # Safety: by default, only Stripe keys are allowed to overwrite existing GCP SM
 # secrets. Everything else is "create-if-missing" to avoid clobbering live DB
 # passwords or auth credentials.
-OVERWRITE_ALLOWED_REGEX="${OVERWRITE_ALLOWED_REGEX:-^MEREKA_LMS_STRIPE_(SECRET_KEY|PUBLISHABLE_KEY|WEBHOOK_SECRET)(_DEV)?$}"
+OVERWRITE_ALLOWED_REGEX="${OVERWRITE_ALLOWED_REGEX:-^MEREKA_LMS_STRIPE_(SECRET_KEY|PUBLISHABLE_KEY|WEBHOOK_SECRET)(_DEV)?$|^MEREKA_LMS_MYSQL_(ROOT_PASSWORD|PASSWORD|DISCOVERY_PASSWORD|ECOMMERCE_PASSWORD|NOTES_PASSWORD|XQUEUE_PASSWORD|CREDENTIALS_PASSWORD)_DEV$}"
+
+# Infisical CLI prints a trailing newline by default. If we pipe that directly
+# into Secret Manager, K8s env vars may include a newline and break auth (e.g.,
+# MySQL passwords). We normalize by stripping trailing CR/LF bytes only.
+normalize_value_file() {
+  local src="$1"
+  local dst="$2"
+  python3 - "$src" "$dst" <<'PY'
+import pathlib
+import sys
+
+src = pathlib.Path(sys.argv[1])
+dst = pathlib.Path(sys.argv[2])
+data = src.read_bytes()
+data = data.rstrip(b"\r\n")
+dst.write_bytes(data)
+PY
+}
 
 # Some secrets must differ between prod and dev (notably Stripe).
-# The production ExternalSecret references MEREKA_LMS_STRIPE_* keys.
+# The production ExternalSecret references MEREKA_LMS_* keys.
 # The dev(kind) overlay should reference *_DEV keys, populated from Infisical dev env.
 DEV_SUFFIX_KEYS=(
   "MEREKA_LMS_STRIPE_SECRET_KEY"
   "MEREKA_LMS_STRIPE_PUBLISHABLE_KEY"
   "MEREKA_LMS_STRIPE_WEBHOOK_SECRET"
+  # MySQL credentials drift frequently in kind dev because MySQL persists passwords
+  # in its PVC. We keep prod stable and use *_DEV keys for kind.
+  "MEREKA_LMS_MYSQL_ROOT_PASSWORD"
+  "MEREKA_LMS_MYSQL_PASSWORD"
+  "MEREKA_LMS_MYSQL_DISCOVERY_PASSWORD"
+  "MEREKA_LMS_MYSQL_ECOMMERCE_PASSWORD"
+  "MEREKA_LMS_MYSQL_NOTES_PASSWORD"
+  "MEREKA_LMS_MYSQL_XQUEUE_PASSWORD"
+  "MEREKA_LMS_MYSQL_CREDENTIALS_PASSWORD"
 )
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
@@ -48,9 +75,8 @@ resolve_infisical_dir() {
     return
   fi
   local candidates=(
-    "${REPO_ROOT}"
     "/home/gurpreet/projects/secrets-management"
-    "/home/gurpreet/projects/k8s/reka-slackbot"
+    "${REPO_ROOT}"
   )
   for candidate in "${candidates[@]}"; do
     if [[ -f "${candidate}/.infisical.json" ]]; then
@@ -58,6 +84,10 @@ resolve_infisical_dir() {
       return
     fi
   done
+
+  # Infisical CLI can run without a repo-local .infisical.json when the user has
+  # already authenticated globally (e.g., on a VPS). Fall back to repo root.
+  INFISICAL_DIR="${REPO_ROOT}"
 }
 
 fetch_infisical_plain() {
@@ -73,26 +103,32 @@ fetch_infisical_plain() {
 ensure_gcp_secret_version() {
   local secret_name="$1"
   local value_file="$2"
+  local normalized
+
+  normalized="$(mktemp)"
+  normalize_value_file "${value_file}" "${normalized}"
 
   if gcloud secrets describe "${secret_name}" --project "${GCP_PROJECT_ID}" >/dev/null 2>&1; then
     if [[ "${secret_name}" =~ ${OVERWRITE_ALLOWED_REGEX} ]]; then
       gcloud secrets versions add "${secret_name}" \
         --project "${GCP_PROJECT_ID}" \
-        --data-file="${value_file}" \
+        --data-file="${normalized}" \
         --quiet >/dev/null
       echo "  ✓ ${secret_name} (updated)"
     else
       echo "  - ${secret_name} (exists; skipped)"
     fi
+    rm -f "${normalized}"
     return
   fi
 
   gcloud secrets create "${secret_name}" \
     --project "${GCP_PROJECT_ID}" \
     --replication-policy="automatic" \
-    --data-file="${value_file}" \
+    --data-file="${normalized}" \
     --quiet >/dev/null
   echo "  ✓ ${secret_name} (created)"
+  rm -f "${normalized}"
 }
 
 main() {
@@ -105,10 +141,14 @@ main() {
   fi
 
   resolve_infisical_dir
-  [[ -n "${INFISICAL_DIR:-}" ]] || die "INFISICAL_DIR not found; set it to a folder containing .infisical.json"
+  [[ -n "${INFISICAL_DIR:-}" ]] || die "INFISICAL_DIR resolution failed"
 
   log "GCP project: ${GCP_PROJECT_ID}"
-  log "Infisical config: ${INFISICAL_DIR}/.infisical.json"
+  if [[ -f "${INFISICAL_DIR}/.infisical.json" ]]; then
+    log "Infisical config: ${INFISICAL_DIR}/.infisical.json"
+  else
+    log "Infisical config: (global auth; no .infisical.json found)"
+  fi
   log "Infisical path: ${INFISICAL_PATH}"
 
   mapfile -t keys < <(rg -o "key:\\s*(MEREKA_LMS_[A-Z0-9_]+)" "${EXTERNAL_SECRETS_FILE}" | awk '{print $2}' | sort -u)

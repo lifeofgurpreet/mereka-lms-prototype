@@ -25,6 +25,13 @@ Kubernetes ExternalSecrets reads from GCP Secret Manager (project `bbi-k8` via
 `ClusterSecretStore/gcp-secret-manager`). If a secret exists in Infisical but
 is missing in GCP SM, ExternalSecrets will stop refreshing.
 
+**Important IAM note (required):** ExternalSecrets calls both Secret Manager
+version access and secret metadata APIs. The GCP service account used by ESO
+must have BOTH:
+
+- `roles/secretmanager.secretAccessor` (read secret payload)
+- `roles/secretmanager.viewer` (read secret metadata; avoids misleading 404/Secret does not exist)
+
 Use this script to restore GCP SM entries from Infisical without printing values:
 
 ```bash
@@ -33,14 +40,34 @@ kubectl annotate externalsecret openedx-secrets -n mereka-lms force-sync="$(date
 kubectl --context kind-dev annotate externalsecret openedx-secrets -n mereka-lms force-sync="$(date +%s)" --overwrite
 ```
 
+The sync script also strips trailing CR/LF bytes from CLI output to avoid
+accidentally introducing newline characters into passwords.
+
 By default, the sync script is **create-if-missing** for safety. It only updates
 existing secrets for Stripe keys (to allow routine Stripe rotation without
-touching DB passwords). To override that behavior, set
+touching DB passwords) and dev-only MySQL `*_DEV` keys (to keep kind stable).
+To override that behavior, set
 `OVERWRITE_ALLOWED_REGEX` explicitly.
 
 **Dev Stripe separation:** dev (kind) uses Stripe test keys. Because both
 clusters read from the same GCP SM project, dev Stripe secrets are stored as
 `*_DEV` in GCP SM and the local overlay rewrites ExternalSecret references.
+
+**Dev MySQL separation:** kind dev uses `*_DEV` MySQL password keys (similar
+to Stripe). This prevents production password rotation from breaking the local
+MySQL PVC, while still keeping Infisical as the source of truth (dev env).
+
+## Repairing kind MySQL auth drift
+
+If dev starts failing with MySQL `1045 Access denied` after a secret rotation,
+repair the MySQL users inside the dev MySQL PVC (non-destructive):
+
+```bash
+K8S_CONTEXT=kind-dev ./scripts/infra/repair-kind-mysql-users.sh
+```
+
+This aligns `root`, `openedx`, `ecommerce`, `discovery`, `notes`, `xqueue`,
+`credentials` to the current `secret/database-secrets` values.
 
 ## Required Keys
 

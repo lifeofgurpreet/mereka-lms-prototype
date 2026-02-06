@@ -356,8 +356,22 @@ kubectl rollout restart deployment/cms -n mereka-lms
 - `https://forum.academyv2.mereka.dev/heartbeat` returns 502 (dev)
 - `forum` pod logs show MongoDB connection failures
 
-**Root Cause:**
-- MongoDB Atlas is on **public IP allowlists**; the VPS egress IP is missing from the allowlist.
+**Most common root causes:**
+1. **Dev is accidentally pointing to Atlas SRV.** The forum container generates a `mongoid.yml`
+   from env vars; SRV-style values and/or unquoted special characters can cause `Psych::SyntaxError`
+   and crashloop.
+2. **Atlas allowlist drift.** MongoDB Atlas is on **public IP allowlists**; the VPS egress IP is
+   missing from the allowlist.
+
+**Preferred fix (kind dev): use in-cluster MongoDB**
+Dev defaults to using the in-cluster `mongodb` service (no auth, no TLS) via the local overlay
+patch `deploy/k8s/overlays/local/patches/forum-dev.yaml`.
+
+```bash
+kubectl apply -k deploy/k8s/overlays/local --context kind-dev
+kubectl rollout restart deployment/forum -n mereka-lms --context kind-dev
+curl -I https://forum.academyv2.mereka.dev/heartbeat
+```
 
 **Quick Fix:**
 ```bash

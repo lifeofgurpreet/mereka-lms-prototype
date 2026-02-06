@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forum
+  namespace: mereka-lms
+spec:
+  template:
+    spec:
+      containers:
+        - name: forum
+          env:
+            # In kind dev we use the in-cluster MongoDB (no auth, no TLS) to
+            # avoid Atlas allowlist drift and SRV/YAML parsing issues.
+            - name: MONGODB_AUTH
+              value: ""
+            - name: MONGODB_HOST
+              value: "mongodb"
+              valueFrom: null
+            - name: MONGODB_PASSWORD
+              value: ""
+              valueFrom: null
+            - name: MONGOID_AUTH_SOURCE
+              value: "cs_comments_service"
+            - name: MONGOID_USE_SSL
+              value: "false"
