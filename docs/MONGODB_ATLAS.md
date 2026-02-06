@@ -1,7 +1,11 @@
 # MongoDB Atlas Migration Guide
 _Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-04_
 
-This guide explains how to move cs_comments_service data from the temporary in-cluster MongoDB StatefulSet to MongoDB Atlas and point Tutor at the managed cluster.
+This guide explains how to move `cs_comments_service` (forum) data from an in-cluster MongoDB to MongoDB Atlas and point the forum service at the managed cluster.
+
+Important:
+- This document is **forum-focused**.
+- LMS/CMS modulestore cutover to Atlas is a separate migration and must be planned/verified independently.
 
 ## 1. Provision Atlas resources
 
@@ -17,7 +21,7 @@ This guide explains how to move cs_comments_service data from the temporary in-c
 
    **As of 2026-02-04**, the VPS egress IP is `194.233.84.55`. Add it to the Atlas allowlist and update whenever the VPS IP changes.
 
-## 2. Migrate existing data
+## 2. Migrate existing data (Forum only)
 
 Use the helper script to stream the StatefulSet data directly into Atlas. Set `ATLAS_URI` to the connection string Atlas provides (include `retryWrites=true&w=majority`).
 
@@ -67,6 +71,9 @@ The script sources `infrastructure/tutor/tutor-env.sh`, runs `tutor config save 
    kubectl delete pvc -n mereka-lms data-mongodb-0
    ```
    (Keep a copy of the PVC backup before deleting if you may need to roll back.)
+
+Do not remove the in-cluster MongoDB if LMS/CMS modulestore is still using it.
+Verify `MONGODB_HOST` in LMS/CMS and confirm course content reads correctly from Atlas before cleanup.
 
 ## 4. Store and rotate credentials
 
