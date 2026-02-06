@@ -94,11 +94,7 @@ metrics needs explicit validation and documentation.
 Only implement if the team wants formal burn‑rate enforcement.
 
 ### 5) Wire notification channels for log-based alerts
-**Why:** Some alert templates intentionally leave `notificationChannels` empty to keep them portable.
-
-**Deliverables**
-- Decide the canonical notification channel IDs for the `mereka-lms` GCP project (email/SMS/webhook).
-- Update the alert policy JSON templates accordingly (or document a post-apply patch step).
+**Status:** Done (alert templates include the canonical notification channel IDs for the `mereka-lms` project).
 
 ---
 
