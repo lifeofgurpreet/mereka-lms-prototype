@@ -59,6 +59,7 @@ run_ecommerce_checks() {
 import django
 django.setup()
 
+import os
 from django.contrib.sites.models import Site
 from ecommerce.core.models import SiteConfiguration
 from oscar.core.loading import get_model
@@ -80,6 +81,21 @@ for domain in ["ecommerce.academyv2.mereka.io", "ecommerce.academyv2.mereka.dev"
 
 print("Partners:", [(p.code, p.short_code) for p in Partner.objects.all()])
 print("Paypal configs:", [(p.name, p.enabled) for p in PaypalProcessorConfiguration.objects.all()])
+
+# Stripe env sanity (do not print values).
+def present(k: str) -> bool:
+    v = (os.environ.get(k) or "").strip()
+    return bool(v and v != "REPLACE_ME")
+
+print(
+    "Stripe env present:",
+    {
+        "STRIPE_SECRET_KEY": present("STRIPE_SECRET_KEY"),
+        "STRIPE_PUBLISHABLE_KEY": present("STRIPE_PUBLISHABLE_KEY"),
+        # Webhook is optional until webhooks are configured.
+        "STRIPE_WEBHOOK_SECRET": present("STRIPE_WEBHOOK_SECRET"),
+    },
+)
 PY
 }
 

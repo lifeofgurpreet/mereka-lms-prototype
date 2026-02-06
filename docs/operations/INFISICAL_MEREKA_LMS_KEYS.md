@@ -19,6 +19,29 @@ INFISICAL_ENV=dev ./scripts/infra/infisical-validate-mereka-lms.sh
 **Policy:** `/k8s/mereka-lms` is the only allowed path for `MEREKA_LMS_*`.
 Remove any root-level duplicates (last cleanup: 2026-02-05).
 
+## GCP Secret Manager bridge
+
+Kubernetes ExternalSecrets reads from GCP Secret Manager (project `bbi-k8` via
+`ClusterSecretStore/gcp-secret-manager`). If a secret exists in Infisical but
+is missing in GCP SM, ExternalSecrets will stop refreshing.
+
+Use this script to restore GCP SM entries from Infisical without printing values:
+
+```bash
+./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+kubectl annotate externalsecret openedx-secrets -n mereka-lms force-sync="$(date +%s)" --overwrite
+kubectl --context kind-dev annotate externalsecret openedx-secrets -n mereka-lms force-sync="$(date +%s)" --overwrite
+```
+
+By default, the sync script is **create-if-missing** for safety. It only updates
+existing secrets for Stripe keys (to allow routine Stripe rotation without
+touching DB passwords). To override that behavior, set
+`OVERWRITE_ALLOWED_REGEX` explicitly.
+
+**Dev Stripe separation:** dev (kind) uses Stripe test keys. Because both
+clusters read from the same GCP SM project, dev Stripe secrets are stored as
+`*_DEV` in GCP SM and the local overlay rewrites ExternalSecret references.
+
 ## Required Keys
 
 - `MEREKA_LMS_CMS_OAUTH2_SECRET`

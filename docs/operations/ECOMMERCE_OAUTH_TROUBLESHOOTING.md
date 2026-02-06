@@ -107,7 +107,15 @@ Ensure these exist in **Infisical** under `/k8s/mereka-lms` for **prod + dev**:
 - `MEREKA_LMS_JWT_SECRET_KEY_ECOMMERCE`
 - `MEREKA_LMS_STRIPE_PUBLISHABLE_KEY` (if enabling Stripe)
 - `MEREKA_LMS_STRIPE_SECRET_KEY` (if enabling Stripe)
-- `MEREKA_LMS_STRIPE_WEBHOOK_SECRET` (if enabling Stripe)
+- `MEREKA_LMS_STRIPE_WEBHOOK_SECRET` (optional until webhooks are configured)
+
+**Dev key separation (kind):** both prod and dev clusters read from the same
+GCP Secret Manager project (`bbi-k8`), so dev Stripe values are stored as
+separate secrets:
+
+- `MEREKA_LMS_STRIPE_SECRET_KEY_DEV`
+- `MEREKA_LMS_STRIPE_PUBLISHABLE_KEY_DEV`
+- `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_DEV`
 
 Then confirm ExternalSecrets sync:
 
@@ -120,10 +128,18 @@ If Stripe is enabled, update the Ecommerce **SiteConfiguration** `payment_proces
 field to include `stripe` (e.g. `cybersource,paypal,stripe`) after the secrets are
 in place.
 
+Finally, restart Ecommerce to pick up updated env vars:
+
+```bash
+kubectl rollout restart deploy/ecommerce deploy/ecommerce-worker -n mereka-lms
+kubectl --context kind-dev rollout restart deploy/ecommerce deploy/ecommerce-worker -n mereka-lms
+```
+
 ## ✅ Verify
 
 ```bash
 ./scripts/qa/verify-ecommerce-config.sh
+K8S_CONTEXT=kind-dev ./scripts/qa/verify-ecommerce-config.sh
 curl -I https://ecommerce.academyv2.mereka.io/dashboard/
 kubectl logs -n mereka-lms deployment/ecommerce --tail=100
 ```

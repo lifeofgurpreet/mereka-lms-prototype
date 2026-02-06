@@ -22,6 +22,7 @@ secretGenerator:
 patchesStrategicMerge:
   - patches/domain-env.yaml
   - patches/clustersecretstore-gcp.yaml
+  - patches/openedx-secrets-stripe-dev.yaml
 
 # Use local images
 images:
