@@ -32,6 +32,21 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 
+## Observability Top 10 (Epic: `mereka-lms-16g`)
+
+| # | Task | Bead | Priority |
+|---|------|------|----------|
+| 1 | Ship observability audit in CI (nightly + manual) | `mereka-lms-2nmy` | P1 |
+| 2 | Add Grafana dashboard-as-code sync checklist and ownership | `mereka-lms-mp6b` | P1 |
+| 3 | Implement PVC utilization signal path (metrics + alert) | `mereka-lms-1d7x` | P1 |
+| 4 | Deploy MySQL saturation telemetry (connections/latency) | `mereka-lms-3rx3` | P1 |
+| 5 | Deploy Redis saturation telemetry (memory/evictions/latency) | `mereka-lms-1zfq` | P1 |
+| 6 | Add Velero backup freshness + restore-drill status dashboard panels | `mereka-lms-w2xf` | P1 |
+| 7 | Define alert severity matrix and routing policy | `mereka-lms-3dxx` | P2 |
+| 8 | Build on-call single-pane operations dashboard playbook | `mereka-lms-36ln` | P2 |
+| 9 | Create noisy alert tuning SOP + weekly review cadence | `mereka-lms-15fv` | P2 |
+| 10 | Add PR guardrail for monitoring-as-code lint + dry-run plan | `mereka-lms-2vej` | P2 |
+
 ## Product / Content Backlog (Still Valid, Not in the “Auth Hardening” Top 10)
 
 | # | Task | Owner | Status | Notes |

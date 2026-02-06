@@ -440,6 +440,8 @@ Regenerate hostname registry (after domain changes):
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
+- Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
+- Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`).
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
