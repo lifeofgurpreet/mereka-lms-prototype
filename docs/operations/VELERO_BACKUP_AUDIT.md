@@ -19,6 +19,11 @@ Non-JSON:
 ./scripts/qa/audit-velero.sh
 ```
 
+For a PVC inventory of the hourly critical schedule:
+```bash
+./scripts/qa/list-critical-backup-pvcs.sh
+```
+
 ## What “Good” Looks Like
 
 1. `BackupStorageLocation` phase is `Available`.
@@ -29,6 +34,7 @@ Non-JSON:
 3. Recent Completed backups show:
    - `status.volumeSnapshotsAttempted > 0`
    - `status.volumeSnapshotsCompleted > 0`
+   - Snapshot count is consistent with the Bound PVC inventory of the included namespaces
 4. Restore drill CronJob exists and actually runs successfully (no StartError).
 5. Critical data services do not store state in `emptyDir`.
 
@@ -57,12 +63,12 @@ Note: Velero itself is GitOps-managed outside this repo. Capture the fix as a PR
 ### 3) DBs on `emptyDir` (no persistence)
 Velero cannot protect app data that isn’t on a PV.
 
-Example: `mereka-lms/mongodb` currently mounts `/data/db` from `emptyDir`.
-If modulestore is pointed at in-cluster MongoDB, course content is **ephemeral**.
+Example: in **kind dev** we may run an in-cluster MongoDB for the forum to avoid Atlas allowlist drift.
+If you deploy MongoDB without a PVC (e.g., `emptyDir`), any data is **ephemeral** and not protected by Velero snapshots.
 
 Fix:
 - Prefer: move modulestore to Atlas (target architecture).
-- Alternative: attach a PVC-backed volume to MongoDB before importing courses.
+- Alternative (dev-only): attach a PVC-backed volume to MongoDB before importing anything you care about.
 
 ## Recommended Cadence
 
@@ -73,5 +79,5 @@ Fix:
 ## Related Docs
 
 - DR overview: `docs/operations/DISASTER_RECOVERY.md`
+- Coverage matrix: `docs/operations/BACKUP_COVERAGE_MATRIX.md`
 - Platform auth audit: `scripts/qa/audit-auth-access.sh`
-

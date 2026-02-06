@@ -100,7 +100,7 @@ for ns in $ns_list; do
     >"$tmpdir/vs_${ns}.json" || echo '{"items":[]}' >"$tmpdir/vs_${ns}.json"
 done
 
-python3 - <<'PY'
+report_json="$(python3 - <<'PY'
 import json, os, sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -424,3 +424,53 @@ def summarize():
 
 emit(summarize())
 PY
+)"
+
+if [[ "$JSON_OUT" -eq 1 ]]; then
+  printf "%s\n" "$report_json"
+  exit 0
+fi
+
+python3 -c '
+import json, sys
+d = json.loads(sys.stdin.read() or "{}")
+
+checks = d.get("checks") or {}
+failures = int(checks.get("failures") or 0)
+warnings = int(checks.get("warnings") or 0)
+
+print(f"Velero audit: failures={failures} warnings={warnings}")
+
+velero = d.get("velero") or {}
+bsls = velero.get("backup_storage_locations") or []
+if bsls:
+  for b in bsls:
+    print(f"BSL {b.get(\"name\")}: {b.get(\"phase\")}")
+else:
+  print("BSL: <none>")
+
+restore = velero.get("restore_drill") or {}
+print(f"Restore drill exists: {bool(restore.get(\"exists\"))}")
+if restore.get("last_job"):
+  lj = restore["last_job"]
+  print(f"Restore last job: {lj.get(\"name\")} succeeded={lj.get(\"succeeded\")} failed={lj.get(\"failed\")}")
+
+verify = velero.get("backup_verification") or {}
+print(f"Backup verification exists: {bool(verify.get(\"exists\"))}")
+if verify.get("last_successful_time"):
+  print(f"Backup verification last OK: {verify.get(\"last_successful_time\")}")
+
+print("")
+risks = d.get("app_data_risks") or []
+if risks:
+  print("Findings:")
+  for r in risks:
+    sev = (r.get("severity") or "").upper()
+    risk = r.get("risk") or ""
+    if sev and risk:
+      print(f"- {sev}: {risk}")
+else:
+  print("Findings: none")
+
+sys.exit(1 if failures else 0)
+' <<<"$report_json"
