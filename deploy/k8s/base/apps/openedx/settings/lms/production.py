@@ -9,9 +9,14 @@ if not SECRET_KEY:
     raise ValueError("OPENEDX_SECRET_KEY environment variable is required")
 
 # Override database password from environment variable.
-# Note: secrets may arrive with a trailing newline from secret stores; strip it
-# to avoid MySQL 1045 due to password mismatch.
-_db_password = (os.environ.get("OPENEDX_MYSQL_PASSWORD", "") or "").rstrip("\r\n")
+#
+# IMPORTANT: Some legacy secret-sync paths can introduce a trailing newline.
+# Production currently has a password that includes that newline, so we must
+# pass the value through as-is to avoid MySQL 1045 (Access denied).
+#
+# If/when we rotate the password to a newline-free value at the source
+# (Infisical -> GCP SM -> ESO -> K8s), we can safely re-enable rstrip().
+_db_password = os.environ.get("OPENEDX_MYSQL_PASSWORD", "") or ""
 if _db_password and "default" in DATABASES:
     DATABASES["default"]["PASSWORD"] = _db_password
 
