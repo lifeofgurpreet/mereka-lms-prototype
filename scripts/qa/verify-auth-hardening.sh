@@ -36,5 +36,7 @@ log "Verifying Authentik admin policy (prod)"
 log "Verifying OIDC provider configs (prod + dev, kubectl required)"
 "$REPO_ROOT/scripts/qa/verify-oidc-provider-configs.sh" --env auto
 
-log "OK"
+log "Verifying hostname registry vs deployed ingresses (prod + dev, kubectl required)"
+"$REPO_ROOT/scripts/qa/list-openedx-hostnames.sh"
 
+log "OK"
