@@ -409,6 +409,31 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
     )
     updated = updated.replace(
         'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi',
+        "RUN python - <<'PY'\n"
+        "from pathlib import Path\n"
+        "import re\n"
+        "\n"
+        "# Studio (CMS) still tries to import Open Sans from Google fonts by default.\n"
+        "# We strip those imports at the SASS source so built CSS stays offline-friendly.\n"
+        "root = Path('/openedx/edx-platform')\n"
+        "patterns = [\n"
+        "    re.compile(r'@import\\s+url\\(\\\"https?://fonts\\\\.googleapis\\\\.com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\(\\\"//fonts\\\\.googleapis\\\\.com[^\\)]*\\)\\s*;?', re.I),\n"
+        "]\n"
+        "changed = 0\n"
+        "for path in root.rglob('*.scss'):\n"
+        "    try:\n"
+        "        text = path.read_text(encoding='utf-8', errors='ignore')\n"
+        "    except Exception:\n"
+        "        continue\n"
+        "    updated = text\n"
+        "    for pat in patterns:\n"
+        "        updated = pat.sub('', updated)\n"
+        "    if updated != text:\n"
+        "        path.write_text(updated, encoding='utf-8')\n"
+        "        changed += 1\n"
+        "print(f'Stripped google font imports from {changed} scss files')\n"
+        "PY\n"
         "RUN npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka && npm run compile-sass -- --skip-themes",
     )
     updated = updated.replace(

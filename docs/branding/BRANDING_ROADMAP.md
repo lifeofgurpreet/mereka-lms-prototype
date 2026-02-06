@@ -46,5 +46,5 @@ Client subsites (separate clients, still must be branded):
 
 Additional backlog:
 - `mereka-lms-36jn` Forum UI theming (header/footer + typography)
+- `mereka-lms-1g4b` Strip Google fonts from Studio CSS (build-time patch)
 - `mereka-lms-3mz` Visual regression gate for branding
-
