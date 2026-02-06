@@ -72,6 +72,7 @@ Minimum recommended policies (edit thresholds as desired):
 | LMS OIDC provider disabled | `infrastructure/monitoring/alerts/log-lms-oidc-provider-disabled.json` | Requires log metric `lms-oidc-provider-disabled` (catches "disabled backend/provider"). |
 | LMS CSRF failures | `infrastructure/monitoring/alerts/log-lms-csrf-failures.json` | Requires log metric `lms-csrf-failures`. |
 | In-cluster auth verify CronJob failures | `infrastructure/monitoring/alerts/log-auth-verify-cronjob-failures.json` | Requires log metric `auth-verify-cronjob-failures` (only applies after CronJob is deployed). |
+| In-cluster TLS cert verify CronJob failures | `infrastructure/monitoring/alerts/log-cert-verify-cronjob-failures.json` | Requires log metric `cert-verify-cronjob-failures` (catches SAN mismatch + fake ingress cert). |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`

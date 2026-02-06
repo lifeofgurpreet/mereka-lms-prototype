@@ -17,14 +17,24 @@ It validates:
 - Discovery/Credentials/Ecommerce `/login/` starts the LMS OAuth2 handshake.
 - Notes and Forum behave as API-first surfaces (Notes returns 200; Forum returns 401 unauthenticated).
 
+## TLS Certificate Verification (Prod)
+
+See `infrastructure/k8s/cronjobs/cert-verify-prod.yaml`.
+
+It validates:
+- Each public hostname serves a real TLS certificate (not the NGINX fake ingress cert).
+- Each hostname is present in the certificate SANs (either exact SAN or a valid wildcard).
+
 ## How To Deploy (Prod)
 
 Production is GitOps-managed outside this repo.
 
 1. Copy `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` into the GitOps repo (the cluster manifests repo).
+2. Copy `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` into the GitOps repo (the cluster manifests repo).
 2. Apply via normal GitOps flow.
 3. Verify Jobs are running:
    - `kubectl get cronjob -n mereka-lms auth-verify-prod`
+   - `kubectl get cronjob -n mereka-lms cert-verify-prod`
    - `kubectl get jobs -n mereka-lms --sort-by=.metadata.creationTimestamp | tail`
 
 ## Alerting On Failures
@@ -38,6 +48,10 @@ Alternatively:
 This repo includes templates (GCP):
 - Metric: `infrastructure/monitoring/logging-metrics/auth-verify-cronjob-failures.json`
 - Alert: `infrastructure/monitoring/alerts/log-auth-verify-cronjob-failures.json`
+
+This repo also includes templates (GCP) for TLS verification:
+- Metric: `infrastructure/monitoring/logging-metrics/cert-verify-cronjob-failures.json`
+- Alert: `infrastructure/monitoring/alerts/log-cert-verify-cronjob-failures.json`
 
 ## Notes
 
