@@ -106,3 +106,113 @@ button.btn.btn-primary:focus {
   border-top: 4px solid var(--mereka-teal);
 }
 
+/* Footer: ensure our custom template styles are always present. */
+.mereka-footer {
+  background: #fff;
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 3rem 0 2rem;
+  margin-top: 4rem;
+}
+
+.mereka-footer .footer-primary {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .mereka-footer .footer-primary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mereka-footer .footer-brand img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.mereka-footer .footer-brand p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(26, 22, 35, 0.6);
+  margin-bottom: 1rem;
+}
+
+.mereka-footer .footer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.mereka-footer .footer-tags span {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(26, 22, 35, 0.08);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mereka-footer h6 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(26, 22, 35, 0.55);
+  margin-bottom: 0.75rem;
+}
+
+.mereka-footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mereka-footer a {
+  color: rgba(26, 22, 35, 0.75);
+}
+
+.mereka-footer a:hover,
+.mereka-footer a:focus {
+  color: var(--mereka-teal);
+}
+
+.mereka-footer .footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: rgba(26, 22, 35, 0.55);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(26, 22, 35, 0.06);
+}
+
+@media (max-width: 768px) {
+  .mereka-footer {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .mereka-footer .footer-primary {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .mereka-footer .footer-brand img {
+    width: 100px;
+  }
+
+  .mereka-footer .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

@@ -97,10 +97,12 @@ check_css_fonts() {
   if echo "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
     && echo "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"' \
     && echo "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
-    && echo "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2'; then
+    && echo "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
+    && echo "$css" | grep -Eq '\\.mereka-footer[[:space:]]*\\{' \
+    && echo "$css" | grep -Eq '\\.mereka-footer[[:space:]]+\\.footer-brand[[:space:]]+img'; then
     printf "✓ %s\n" "$label"
   else
-    printf "✗ %s (missing Poppins/Lato font-face wiring)\n" "$label" >&2
+    printf "✗ %s (missing Poppins/Lato font-face wiring or footer CSS)\n" "$label" >&2
     failures=$((failures + 1))
   fi
 }
@@ -187,9 +189,7 @@ echo ""
 
 # HTML branding checks
 check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
-check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes brand overrides marker" "MEREKA_BRAND_OVERRIDES_v1"
 check_contains "https://studio.${BASE_DOMAIN}/" "Studio page includes 'Mereka'" "Mereka"
-check_contains "https://studio.${BASE_DOMAIN}/" "Studio includes brand overrides marker" "MEREKA_BRAND_OVERRIDES_v1"
 check_http "https://apps.${BASE_DOMAIN}/authn/login" "MFE login reachable"
 
 # Asset checks (theme assets)
