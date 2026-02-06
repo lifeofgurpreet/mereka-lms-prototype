@@ -186,6 +186,8 @@ http://notes.academyv2.mereka.io, http://notes.academyv2.mereka.dev {
 
 # Credentials Service
 http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev {
+    @credentials_root path /
+    redir @credentials_root /health/
     import proxy "credentials:8000"
 }
 
