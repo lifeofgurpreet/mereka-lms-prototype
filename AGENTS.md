@@ -420,6 +420,9 @@ curl -I http://apps.localhost/authn/login
 Canonical hostname list:
 - `docs/operations/OPENEDX_HOSTNAMES.md`
 
+Branding guardrails (read before changing theme assets/CSS):
+- `docs/branding/BRANDING_GUARDRAILS.md`
+
 Auth hardening verification (preferred):
 ```bash
 ./scripts/qa/verify-auth-hardening.sh

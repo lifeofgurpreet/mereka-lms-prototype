@@ -3,6 +3,9 @@ _Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 20
 
 This document captures the brand tokens we apply across LMS/Studio and all MFEs so every surface feels like mereka.io while still leaning on Paragon.
 
+Quick operational entrypoint (read this before changing anything):
+- `docs/branding/BRANDING_GUARDRAILS.md`
+
 ## Palette
 
 | Token | Hex | Usage |
