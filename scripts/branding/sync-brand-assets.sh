@@ -5,6 +5,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 SRC_FONTS="$REPO_ROOT/assets/branding/fonts"
 THEME_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/fonts"
+LMS_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts"
+CMS_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts"
 MFE_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts"
 IMG_SRC_DIR="$REPO_ROOT/assets/branding"
 IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/images"
@@ -19,6 +21,9 @@ fi
 
 mkdir -p "$THEME_FONT_DIR" "$MFE_FONT_DIR" "$IMG_DEST_DIR" "$MFE_IMG_DEST_DIR" "$LMS_IMG_DEST_DIR" "$CMS_IMG_DEST_DIR"
 cp "$SRC_FONTS"/*.woff2 "$THEME_FONT_DIR"/
+mkdir -p "$LMS_FONT_DIR" "$CMS_FONT_DIR"
+cp "$SRC_FONTS"/*.woff2 "$LMS_FONT_DIR"/
+cp "$SRC_FONTS"/*.woff2 "$CMS_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$MFE_FONT_DIR"/
 
 # Copy logo assets to all theme directories

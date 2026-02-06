@@ -138,7 +138,9 @@ SITE_DEFINITIONS = [
 
 def setup_django():
     """Initialize Django environment."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.production')
+    # In K8s we run with Tutor settings, which include OIDC settings and other overrides.
+    # Keep the pod-provided module if present; otherwise default to tutor production.
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lms.envs.tutor.production")
     import django
     django.setup()
 
@@ -200,6 +202,50 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         print(f"  - platform_name: {rendered_values.get('platform_name')}")
         print(f"  - theme: {rendered_values.get('THEME_NAME')}")
         print(f"  - organizations: {rendered_values.get('course_org_filter')}")
+
+
+def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: bool) -> None:
+    """
+    Ensure OIDC provider configs exist and are enabled for each site.
+
+    Without this, hitting `/auth/login/oidc/` can 500 with:
+      "Can't fetch setting of a disabled backend/provider."
+    """
+    from django.conf import settings
+    from django.contrib.sites.models import Site
+    from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
+
+    key = getattr(settings, "SOCIAL_AUTH_OIDC_KEY", "mereka-lms")
+
+    for definition in definitions:
+        site = Site.objects.filter(domain=definition.domain).first()
+        if not site:
+            if dry_run:
+                print(f"[dry-run] Would create Site for OIDC provider: {definition.domain}")
+                continue
+            site = Site.objects.create(domain=definition.domain, name=definition.name)
+
+        if dry_run:
+            print(f"[dry-run] Would ensure OIDC provider config for site={site.domain} (key={key})")
+            continue
+
+        obj, created = OAuth2ProviderConfig.objects.update_or_create(
+            backend_name="oidc",
+            site=site,
+            slug="authentik",
+            defaults={
+                "enabled": True,
+                "visible": True,
+                "name": "Authentik",
+                "secondary": False,
+                # Keep secrets out of DB; lms/cms settings inject via env.
+                "key": key,
+                "secret": "",
+                "other_settings": "",
+            },
+        )
+        action = "Created" if created else "Updated"
+        print(f"{action} OIDC provider config: site={site.domain} id={obj.id} enabled={obj.enabled}")
 
 
 def upsert_waffle_flags(dry_run: bool) -> None:
@@ -276,6 +322,8 @@ def main() -> None:
     upsert_organizations(dry_run=False)
     print()
     upsert_sites(SITE_DEFINITIONS, dry_run=False)
+    print()
+    upsert_oidc_provider_configs(SITE_DEFINITIONS, dry_run=False)
     print()
     upsert_waffle_flags(dry_run=False)
 

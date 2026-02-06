@@ -115,3 +115,8 @@ LOGGING["handlers"].pop("local", None)
 for logger in LOGGING["loggers"].values():
     if "local" in logger["handlers"]:
         logger["handlers"].remove("local")
+
+# Hardening: platform admin enforcement + /admin/login -> /login redirect.
+MIDDLEWARE = list(MIDDLEWARE) + [
+    "credentials.settings.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+]

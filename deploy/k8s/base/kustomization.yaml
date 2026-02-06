@@ -47,6 +47,7 @@ configMapGenerator:
   - apps/openedx/settings/lms/development.py
   - apps/openedx/settings/lms/production.py
   - apps/openedx/settings/lms/test.py
+  - apps/openedx/settings/lms/mereka_platform_admin.py
   options:
     labels:
         app.kubernetes.io/name: openedx
@@ -56,6 +57,7 @@ configMapGenerator:
   - apps/openedx/settings/cms/development.py
   - apps/openedx/settings/cms/production.py
   - apps/openedx/settings/cms/test.py
+  - apps/openedx/settings/cms/mereka_platform_admin.py
   options:
     labels:
         app.kubernetes.io/name: openedx
@@ -81,17 +83,20 @@ configMapGenerator:
 - name: discovery-settings
   files:
     - plugins/discovery/apps/settings/tutor/production.py
+    - plugins/discovery/apps/settings/tutor/mereka_platform_admin.py
 - name: credentials-settings
   files:
   - plugins/credentials/apps/credentials/settings/__init__.py
   - plugins/credentials/apps/credentials/settings/development.py
   - plugins/credentials/apps/credentials/settings/production.py
+  - plugins/credentials/apps/credentials/settings/mereka_platform_admin.py
 - name: ecommerce-settings
   files:
   - plugins/ecommerce/apps/ecommerce/settings/__init__.py
   - plugins/ecommerce/apps/ecommerce/settings/development.py
   - plugins/ecommerce/apps/ecommerce/settings/paymentprocessors.json
   - plugins/ecommerce/apps/ecommerce/settings/production.py
+  - plugins/ecommerce/apps/ecommerce/settings/mereka_platform_admin.py
 - name: ecommerce-worker-settings
   files:
   - plugins/ecommerce/apps/ecommerce-worker/settings/__init__.py

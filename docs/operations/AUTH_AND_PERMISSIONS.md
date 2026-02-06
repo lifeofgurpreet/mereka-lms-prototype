@@ -21,6 +21,26 @@ Enforce (idempotent):
 ./scripts/infra/ensure-platform-admins.sh
 ```
 
+Hardening (prevents drift automatically at runtime):
+- K8s sets `MEREKA_PLATFORM_ADMIN_EMAILS` for the core services.
+- Each service adds a small middleware that:
+  - keeps the listed users as staff/superuser
+  - redirects `/admin/login/` to `/login/` (SSO entrypoint) for consistent UX in Discovery/Credentials/Ecommerce
+
+## Authentik Admin (Separate)
+
+Authentik has its own admin permissions which are **independent** of Open edX.
+
+Policy:
+- **Gurpreet** is an Authentik admin (superuser)
+- **Malasari** is **not** an Authentik admin
+
+Verify/apply:
+```bash
+./scripts/infra/ensure-authentik-admin.sh --verify
+./scripts/infra/ensure-authentik-admin.sh --apply
+```
+
 ## Open edX (LMS/CMS) Permission Levels
 
 Global flags (site-wide):

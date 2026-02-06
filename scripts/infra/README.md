@@ -5,6 +5,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 ## Key Scripts
 
 - `ensure-platform-admins.sh` - Ensure Gurpreet + Malasari have full admin permissions across LMS/CMS/Discovery/Credentials/Ecommerce (prod + dev)
+- `ensure-authentik-admin.sh` - Ensure Gurpreet is the only Authentik admin (superuser) (prod)
 - `backup-db.sh` - Database backup automation
 - `check-cluster-status.sh` - GKE cluster health check
 - `fix-service-selectors.sh` - **🚨 SITE DOWN?** Quick fix for service selector mismatches
@@ -79,6 +80,11 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 # Sync MEREKA_LMS secrets into /k8s/mereka-lms (fixes sprawl)
 ./scripts/infra/infisical-sync-mereka-lms.sh prod
 ./scripts/infra/infisical-sync-mereka-lms.sh dev
+
+# Sync Infisical -> GCP Secret Manager (ExternalSecrets source of truth)
+# NOTE: By default this is create-if-missing for safety. If you are fixing a bad
+# MongoDB Atlas secret already present in GCP SM (e.g. trailing newline), opt-in:
+ALLOW_OVERWRITE_MONGODB_KEYS=1 ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 
 # Validate telemetry connectivity (Grafana → Prometheus)
 ./scripts/infra/validate-telemetry-connectivity.sh

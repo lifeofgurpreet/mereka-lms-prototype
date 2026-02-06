@@ -76,6 +76,8 @@ spec:
             value: cms
           - name: DJANGO_SETTINGS_MODULE
             value: cms.envs.tutor.production
+          - name: MEREKA_PLATFORM_ADMIN_EMAILS
+            value: "gurpreet@biji-biji.com,malasari@mereka.my"
           - name: UWSGI_WORKERS
             value: "2"
           envFrom:
@@ -206,6 +208,8 @@ spec:
             value: lms
           - name: DJANGO_SETTINGS_MODULE
             value: lms.envs.tutor.production
+          - name: MEREKA_PLATFORM_ADMIN_EMAILS
+            value: "gurpreet@biji-biji.com,malasari@mereka.my"
           - name: UWSGI_WORKERS
             value: "2"
           envFrom:
@@ -518,6 +522,9 @@ spec:
           image: docker.io/overhangio/openedx-discovery:18.0.0
           ports:
             - containerPort: 8000
+          env:
+            - name: MEREKA_PLATFORM_ADMIN_EMAILS
+              value: "gurpreet@biji-biji.com,malasari@mereka.my"
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -527,6 +534,9 @@ spec:
             - mountPath: /openedx/discovery/course_discovery/settings/tutor/production.py
               name: settings
               subPath: production.py
+            - mountPath: /openedx/discovery/course_discovery/settings/tutor/mereka_platform_admin.py
+              name: settings
+              subPath: mereka_platform_admin.py
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -560,6 +570,8 @@ spec:
           env:
             - name: DJANGO_SETTINGS_MODULE
               value: ecommerce.settings.tutor.production
+            - name: MEREKA_PLATFORM_ADMIN_EMAILS
+              value: "gurpreet@biji-biji.com,malasari@mereka.my"
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -639,6 +651,8 @@ spec:
           env:
             - name: DJANGO_SETTINGS_MODULE
               value: credentials.settings.tutor.production
+            - name: MEREKA_PLATFORM_ADMIN_EMAILS
+              value: "gurpreet@biji-biji.com,malasari@mereka.my"
           envFrom:
             - secretRef:
                 name: openedx-secrets

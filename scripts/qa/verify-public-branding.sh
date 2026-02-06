@@ -36,6 +36,30 @@ check_follow_200() {
   fi
 }
 
+check_any_follow_200() {
+  local label=$1
+  shift
+  local url code size ok=0
+  for url in "$@"; do
+    code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$url" || echo "000")
+    size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$url" || echo "0")
+    if [[ "$code" == "200" && "$size" -gt 0 ]]; then
+      printf "✓ %s (200 via %s, %s bytes)\n" "$label" "$url" "$size"
+      ok=1
+      break
+    fi
+  done
+  if [[ "$ok" == "0" ]]; then
+    printf "✗ %s (no working URL)\n" "$label" >&2
+    for url in "$@"; do
+      code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$url" || echo "000")
+      size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$url" || echo "0")
+      printf "  - %s (%s, %s bytes)\n" "$url" "$code" "$size" >&2
+    done
+    failures=$((failures + 1))
+  fi
+}
+
 check_http() {
   local url=$1
   local label=$2
@@ -72,13 +96,23 @@ check_contains "https://studio.${BASE_DOMAIN}/" "Studio page includes 'Mereka'" 
 check_http "https://apps.${BASE_DOMAIN}/authn/login" "MFE login reachable"
 
 # Asset checks (theme assets)
-check_follow_200 "https://${BASE_DOMAIN}/theming/asset/images/logo.png" "Logo asset (logo.png)"
-check_follow_200 "https://${BASE_DOMAIN}/theming/asset/images/logo-horizontal.png" "Logo asset (logo-horizontal.png)"
-check_follow_200 "https://${BASE_DOMAIN}/theming/asset/images/favicon.ico" "Favicon asset (favicon.ico)"
+check_any_follow_200 "Logo asset (logo.png)" \
+  "https://${BASE_DOMAIN}/theming/asset/images/logo.png" \
+  "https://${BASE_DOMAIN}/static/mereka/images/logo.png"
+check_any_follow_200 "Logo asset (logo-horizontal.png)" \
+  "https://${BASE_DOMAIN}/theming/asset/images/logo-horizontal.png" \
+  "https://${BASE_DOMAIN}/static/mereka/images/logo-horizontal.png"
+check_any_follow_200 "Favicon asset (favicon.ico)" \
+  "https://${BASE_DOMAIN}/theming/asset/images/favicon.ico" \
+  "https://${BASE_DOMAIN}/static/mereka/images/favicon.ico"
 
 # Font checks (critical for brand typography)
-check_follow_200 "https://${BASE_DOMAIN}/theming/asset/fonts/Poppins-Regular.woff2" "Font asset (Poppins-Regular.woff2)"
-check_follow_200 "https://${BASE_DOMAIN}/theming/asset/fonts/Lato-Regular.woff2" "Font asset (Lato-Regular.woff2)"
+check_any_follow_200 "Font asset (Poppins-Regular.woff2)" \
+  "https://${BASE_DOMAIN}/theming/asset/fonts/Poppins-Regular.woff2" \
+  "https://${BASE_DOMAIN}/static/mereka/fonts/Poppins-Regular.woff2"
+check_any_follow_200 "Font asset (Lato-Regular.woff2)" \
+  "https://${BASE_DOMAIN}/theming/asset/fonts/Lato-Regular.woff2" \
+  "https://${BASE_DOMAIN}/static/mereka/fonts/Lato-Regular.woff2"
 
 for host in "${EXTRA_HOSTS[@]}"; do
   check_contains "https://${host}/" "Microsite ${host} includes 'Mereka'" "Mereka"

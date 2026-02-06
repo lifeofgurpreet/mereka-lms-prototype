@@ -760,6 +760,26 @@ if [ -d "$THEME_BUILD_DIR" ]; then
     done
   fi
   echo "Logo files synced successfully."
+
+  # Copy font assets into the build theme dirs so collectstatic picks them up
+  echo "Syncing font files from theme source to build directory..."
+  mkdir -p "$THEME_BUILD_DIR/lms/static/fonts"
+  if compgen -G "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/*.woff2" >/dev/null; then
+    cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/"*.woff2 "$THEME_BUILD_DIR/lms/static/fonts/"
+    echo "  ✓ Copied fonts to LMS theme"
+  else
+    echo "  ⚠ No LMS fonts found to copy"
+  fi
+
+  if [ -d "$THEME_BUILD_DIR/cms" ]; then
+    mkdir -p "$THEME_BUILD_DIR/cms/static/fonts"
+    if compgen -G "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/*.woff2" >/dev/null; then
+      cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/"*.woff2 "$THEME_BUILD_DIR/cms/static/fonts/"
+      echo "  ✓ Copied fonts to CMS theme"
+    else
+      echo "  ⚠ No CMS fonts found to copy"
+    fi
+  fi
 else
   echo "⚠ Warning: Theme build directory not found. Logo sync skipped."
 fi

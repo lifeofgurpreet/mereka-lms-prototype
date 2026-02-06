@@ -26,6 +26,12 @@ EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/sec
 # passwords or auth credentials.
 OVERWRITE_ALLOWED_REGEX="${OVERWRITE_ALLOWED_REGEX:-^MEREKA_LMS_STRIPE_(SECRET_KEY|PUBLISHABLE_KEY|WEBHOOK_SECRET)(_DEV)?$|^MEREKA_LMS_MYSQL_(ROOT_PASSWORD|PASSWORD|DISCOVERY_PASSWORD|ECOMMERCE_PASSWORD|NOTES_PASSWORD|XQUEUE_PASSWORD|CREDENTIALS_PASSWORD)_DEV$}"
 
+# Opt-in: allow overwriting MongoDB Atlas connection secrets.
+# This is intentionally off by default because it affects forum + modulestore.
+if [[ "${ALLOW_OVERWRITE_MONGODB_KEYS:-0}" == "1" ]]; then
+  OVERWRITE_ALLOWED_REGEX="${OVERWRITE_ALLOWED_REGEX}|^MEREKA_LMS_(FORUM_MONGODB_SRV|MONGODB_USERNAME|MONGODB_PASSWORD)$"
+fi
+
 # Infisical CLI prints a trailing newline by default. If we pipe that directly
 # into Secret Manager, K8s env vars may include a newline and break auth (e.g.,
 # MySQL passwords). We normalize by stripping trailing CR/LF bytes only.

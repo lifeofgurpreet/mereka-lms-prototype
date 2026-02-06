@@ -134,3 +134,8 @@ CSRF_TRUSTED_ORIGINS = [MFE_BASE_URL]
 
 SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = LMS_BASE_URL
 BACKEND_SERVICE_EDX_OAUTH2_KEY = ECOMMERCE_BACKEND_OAUTH2_KEY
+
+# Hardening: platform admin enforcement + /admin/login -> /login redirect.
+MIDDLEWARE = list(MIDDLEWARE) + [
+    "ecommerce.settings.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+]

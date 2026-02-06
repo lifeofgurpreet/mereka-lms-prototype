@@ -568,6 +568,11 @@ DISCUSSIONS_MFE_FEEDBACK_URL = None
 
 WRITABLE_GRADEBOOK_URL = f"{MEREKA_MFE_BASE_URL}/gradebook"
 
+# Hardening: keep platform admins as staff/superuser (prevents drift).
+MIDDLEWARE = list(MIDDLEWARE) + [
+    "lms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+]
+
 
 
 LEARNER_HOME_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/learner-dashboard/"

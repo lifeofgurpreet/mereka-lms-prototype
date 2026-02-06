@@ -10,7 +10,10 @@ _Last updated: 2026-02-05_
 Use these shared credentials for:
 - **GKE production** (`academyv2.mereka.io`)
 - **VPS kind dev** (`academyv2.mereka.dev`)
-- **Authentik OIDC login** (auth0.mereka.io)
+- **Authentik OIDC login** as an end-user (auth0.mereka.io)
+
+Authentik **admin UI access** is separate from Open edX admin access and is restricted to Gurpreet
+(see `docs/operations/AUTH_AND_PERMISSIONS.md`).
 
 ## ✅ Required Platform Admins
 

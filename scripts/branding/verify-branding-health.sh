@@ -51,6 +51,8 @@ echo ""
 echo "2. Font assets..."
 FONT_DIR="$REPO_ROOT/assets/branding/fonts"
 THEME_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/fonts"
+LMS_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts"
+CMS_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts"
 MFE_FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts"
 required_fonts=(
   "Poppins-Regular.woff2"
@@ -66,6 +68,8 @@ required_fonts=(
 for font in "${required_fonts[@]}"; do
   check_file "Source font $font" "$FONT_DIR/$font"
   check_file "Theme font $font" "$THEME_FONT_DIR/$font"
+  check_file "LMS font $font" "$LMS_FONT_DIR/$font"
+  check_file "CMS font $font" "$CMS_FONT_DIR/$font"
   check_file "MFE font $font" "$MFE_FONT_DIR/$font"
 done
 

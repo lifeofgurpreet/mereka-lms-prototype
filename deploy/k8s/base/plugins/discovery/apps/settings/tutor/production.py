@@ -119,3 +119,8 @@ SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = f"{LMS_BASE_URL}/logout"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = MEREKA_SCHEME == "https"
 
 MEDIA_URL = DISCOVERY_BASE_URL + "/media/"
+
+# Hardening: platform admin enforcement + /admin/login -> /login redirect.
+MIDDLEWARE = list(MIDDLEWARE) + [
+    "course_discovery.settings.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+]

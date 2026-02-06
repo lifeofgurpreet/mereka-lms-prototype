@@ -8,12 +8,25 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 TAG="${1:-mereka-brand}"
 IMAGE_BASE="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
-NAMESPACE="mereka-lms"
+NAMESPACE="${NAMESPACE:-mereka-lms}"
+KUBECTL_CONTEXT="${KUBECTL_CONTEXT:-}"
+
+DEST_IMAGE="${IMAGE_BASE}/openedx:${TAG}"
+SOURCE_IMAGE="${SOURCE_IMAGE:-}"
+
+KUBECTL_ARGS=()
+if [[ -n "$KUBECTL_CONTEXT" ]]; then
+  KUBECTL_ARGS+=(--context "$KUBECTL_CONTEXT")
+fi
 
 echo "=== Deploying branded OpenEdX image ==="
 echo "Tag: $TAG"
 echo "Registry: $IMAGE_BASE"
 echo "Namespace: $NAMESPACE"
+echo "Destination image: $DEST_IMAGE"
+if [[ -n "$KUBECTL_CONTEXT" ]]; then
+  echo "Kubernetes context: $KUBECTL_CONTEXT"
+fi
 echo ""
 
 # Step 0: Verify branding health before pushing
@@ -23,22 +36,32 @@ echo "Step 0: Verifying branding health..."
 # Step 1: Verify image exists locally
 echo ""
 echo "Step 1: Checking local image..."
-if ! docker images | grep -q "tutor_local/openedx"; then
-  echo "ERROR: Local image tutor_local/openedx not found. Run 'tutor images build openedx' first."
-  exit 1
+if [[ -z "$SOURCE_IMAGE" ]]; then
+  if docker image inspect "$DEST_IMAGE" >/dev/null 2>&1; then
+    SOURCE_IMAGE="$DEST_IMAGE"
+  elif docker image inspect "tutor_local/openedx:latest" >/dev/null 2>&1; then
+    SOURCE_IMAGE="tutor_local/openedx:latest"
+  else
+    echo "ERROR: No local Open edX image found."
+    echo "  Looked for: $DEST_IMAGE and tutor_local/openedx:latest"
+    echo "  Run: tutor images build openedx"
+    exit 1
+  fi
 fi
-echo "  Local image found."
+echo "  Using source image: $SOURCE_IMAGE"
 
 # Step 2: Tag for Artifact Registry
 echo ""
 echo "Step 2: Tagging image for Artifact Registry..."
-docker tag tutor_local/openedx:latest "${IMAGE_BASE}/openedx:${TAG}"
-echo "  Tagged: ${IMAGE_BASE}/openedx:${TAG}"
+if [[ "$SOURCE_IMAGE" != "$DEST_IMAGE" ]]; then
+  docker tag "$SOURCE_IMAGE" "$DEST_IMAGE"
+fi
+echo "  Tagged: $DEST_IMAGE"
 
 # Step 3: Push to Artifact Registry
 echo ""
 echo "Step 3: Pushing to Artifact Registry..."
-docker push "${IMAGE_BASE}/openedx:${TAG}"
+docker push "$DEST_IMAGE"
 echo "  Push complete."
 
 # Step 4: Update K8s deployments
@@ -48,8 +71,8 @@ echo "Step 4: Updating Kubernetes deployments..."
 DEPLOYMENTS=("lms" "cms" "lms-worker" "cms-worker")
 for DEPLOY in "${DEPLOYMENTS[@]}"; do
   echo "  Updating ${DEPLOY}..."
-  kubectl set image "deployment/${DEPLOY}" \
-    "${DEPLOY}=${IMAGE_BASE}/openedx:${TAG}" \
+  kubectl "${KUBECTL_ARGS[@]}" set image "deployment/${DEPLOY}" \
+    "${DEPLOY}=${DEST_IMAGE}" \
     -n "${NAMESPACE}"
 done
 
@@ -58,13 +81,13 @@ echo ""
 echo "Step 5: Waiting for rollouts..."
 for DEPLOY in "${DEPLOYMENTS[@]}"; do
   echo "  Waiting for ${DEPLOY}..."
-  kubectl rollout status "deployment/${DEPLOY}" -n "${NAMESPACE}" --timeout=300s
+  kubectl "${KUBECTL_ARGS[@]}" rollout status "deployment/${DEPLOY}" -n "${NAMESPACE}" --timeout=300s
 done
 
 # Step 6: Verify
 echo ""
 echo "Step 6: Verifying deployments..."
-kubectl get pods -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}' | grep openedx | head -10
+kubectl "${KUBECTL_ARGS[@]}" get pods -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}' | grep openedx | head -10
 
 echo ""
 echo "=== Deployment complete ==="

@@ -357,6 +357,11 @@ CSRF_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "cms-sso"
 SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = MEREKA_LMS_BASE_URL
 
+# Hardening: keep platform admins as staff/superuser and ensure CourseCreator (prevents drift).
+MIDDLEWARE = list(MIDDLEWARE) + [
+    "cms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+]
+
 # MFE-specific settings
 
 COURSE_AUTHORING_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/course-authoring"

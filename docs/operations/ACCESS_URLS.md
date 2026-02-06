@@ -83,21 +83,15 @@ _Audience: Everyone • Last updated: 2026-02-06_
 
 **Authentik Admin Sync (if login fails)**
 ```bash
-# Reset password + ensure user is in "authentik Admins" group (no secrets in logs)
-cd /home/gurpreet/projects/k8s/reka-slackbot
-export EMAIL=$(infisical secrets get GOOGLE_IMPERSONATE_EMAIL --domain https://secrets.mereka.io/api --env prod --path /shared/oauth --plain | tr -d '\n')
-export PASS=$(infisical secrets get GOOGLE_IMPERSONATE_PASSWORD --domain https://secrets.mereka.io/api --env prod --path /shared/oauth --plain | tr -d '\n')
-kubectl exec -n authentik deploy/authentik-server -- env EMAIL="$EMAIL" PASS="$PASS" ak shell -c '
-from django.contrib.auth.models import Group
-from authentik.core.models import User
-import os
-email = os.environ["EMAIL"]; password = os.environ["PASS"]
-user = User.objects.filter(email=email).first() or User(email=email, username=email.split("@")[0], name=email)
-user.is_active = True; user.set_password(password); user.save()
-admin_group = Group.objects.filter(name="authentik Admins").first()
-if admin_group and admin_group not in user.groups.all(): user.groups.add(admin_group)
-print(f"authentik admin ensured: {email}")
-'
+# Verify Authentik admin status (no secrets in logs)
+./scripts/infra/ensure-authentik-admin.sh --verify
+
+# Apply Authentik admin policy (no secrets in logs)
+# - Gurpreet is superuser
+# - Malasari is not
+./scripts/infra/ensure-authentik-admin.sh --apply
+
+# If you also need to reset passwords, do that separately via the Authentik UI.
 ```
 
 **Other Services (GKE)**
