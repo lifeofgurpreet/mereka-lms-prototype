@@ -31,7 +31,10 @@ labels:
       app.kubernetes.io/instance: mereka-lms
       app.kubernetes.io/part-of: mereka-lms
       app.kubernetes.io/managed-by: tutor
-    includeSelectors: true
+    # Do not mutate selectors automatically. It causes drift/immutability issues
+    # and breaks Services when workloads don't carry the injected instance labels
+    # (e.g. the legacy mongodb Deployment).
+    includeSelectors: false
 
 
 configMapGenerator:
