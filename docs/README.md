@@ -22,6 +22,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 | [`operations/ADMIN_LOGIN_GUIDE.md`](operations/ADMIN_LOGIN_GUIDE.md) | Admin access and login instructions | 2026-02-06 |
 | [`operations/AUTH_AND_PERMISSIONS.md`](operations/AUTH_AND_PERMISSIONS.md) | How Authentik SSO and Open edX permissions fit together (and what does not sync) | 2026-02-06 |
 | [`operations/AUTH_HARDENING_SPEC.md`](operations/AUTH_HARDENING_SPEC.md) | Hardening spec: verification + drift prevention across the ecosystem | 2026-02-06 |
+| [`operations/AUTH_ALERT_RUNBOOK.md`](operations/AUTH_ALERT_RUNBOOK.md) | On-call remediation map for auth-related alerts and checks | 2026-02-06 |
 | [`operations/IN_CLUSTER_AUTH_VERIFICATION.md`](operations/IN_CLUSTER_AUTH_VERIFICATION.md) | Verify-only CronJob template for continuous public auth surface checks | 2026-02-06 |
 | [`operations/OPENEDX_HOSTNAMES.md`](operations/OPENEDX_HOSTNAMES.md) | Canonical registry of all Open edX hostnames (prod + dev + kind-local) | 2026-02-06 |
 | [`operations/DOMAIN_CHANGE_RUNBOOK.md`](operations/DOMAIN_CHANGE_RUNBOOK.md) | Domain/microsite change checklist with deterministic verification | 2026-02-06 |
