@@ -13,7 +13,7 @@ DATABASES = {
         "PORT": 3306,
         "NAME": "xqueue",
         "USER": "xqueue",
-        "PASSWORD": os.environ.get("MYSQL_XQUEUE_PASSWORD", ""),
+        "PASSWORD": (os.environ.get("MYSQL_XQUEUE_PASSWORD", "") or "").rstrip("\r\n"),
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'",},
     }
 }
@@ -33,4 +33,3 @@ SECRET_KEY = os.environ.get("XQUEUE_SECRET_KEY", "")
 
 USERS = {"lms": os.environ.get("XQUEUE_LMS_PASSWORD", "")}
 XQUEUES = {"openedx": None}
-

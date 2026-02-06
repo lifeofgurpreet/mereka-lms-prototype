@@ -15,7 +15,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "discovery",
         "USER": "discovery",
-        "PASSWORD": os.environ.get("MYSQL_DISCOVERY_PASSWORD", ""),
+        "PASSWORD": (os.environ.get("MYSQL_DISCOVERY_PASSWORD", "") or "").rstrip("\r\n"),
         "HOST": "mysql",
         "PORT": "3306",
         "OPTIONS": {
@@ -114,4 +114,3 @@ USE_API_CACHING = False
 
 DISCOVERY_BASE_URL = "http://discovery.localhost:8381"
 MEDIA_URL = DISCOVERY_BASE_URL + "/media/"
-

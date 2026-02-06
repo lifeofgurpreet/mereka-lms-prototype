@@ -60,7 +60,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "ecommerce",
         "USER": "ecommerce",
-        "PASSWORD": os.environ.get("MYSQL_ECOMMERCE_PASSWORD", ""),
+        "PASSWORD": (os.environ.get("MYSQL_ECOMMERCE_PASSWORD", "") or "").rstrip("\r\n"),
         "HOST": "mysql",
         "PORT": "3306",
         "OPTIONS": {

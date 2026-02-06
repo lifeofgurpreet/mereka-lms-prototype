@@ -24,7 +24,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "discovery",
         "USER": "discovery",
-        "PASSWORD": os.environ.get("MYSQL_DISCOVERY_PASSWORD", ""),
+        "PASSWORD": (os.environ.get("MYSQL_DISCOVERY_PASSWORD", "") or "").rstrip("\r\n"),
         "HOST": "mysql",
         "PORT": "3306",
         "OPTIONS": {

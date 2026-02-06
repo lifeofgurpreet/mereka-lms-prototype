@@ -18,7 +18,7 @@ DATABASES = {
         "PORT": 3306,
         "NAME": "notes",
         "USER": "notes",
-        "PASSWORD": os.environ.get("MYSQL_NOTES_PASSWORD", ""),
+        "PASSWORD": (os.environ.get("MYSQL_NOTES_PASSWORD", "") or "").rstrip("\r\n"),
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
         },
