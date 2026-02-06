@@ -132,6 +132,7 @@ fi
 if [[ "$should_run_public" -eq 1 ]]; then
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public: auth surfaces (prod)" ./scripts/qa/verify-auth-surfaces.sh prod
+    run_check "public: cert SANs (prod)" ./scripts/infra/check-cert-sans.sh
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public: auth surfaces (dev)" ./scripts/qa/verify-auth-surfaces.sh dev
@@ -156,6 +157,9 @@ if [[ "$should_run_internal" -eq 1 ]]; then
   run_check "internal: Authentik admin policy (prod)" ./scripts/infra/ensure-authentik-admin.sh --verify
   run_check "internal: Authentik redirect URI allowlist (prod)" ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --verify
   run_check "internal: OIDC provider configs (prod + dev)" ./scripts/qa/verify-oidc-provider-configs.sh
+  run_check "internal: platform admin allowlist env (prod + dev)" ./scripts/qa/verify-platform-admin-env.sh --env "$ENV_SCOPE"
+  run_check "internal: core service endpoints (prod + dev)" ./scripts/qa/verify-service-endpoints.sh --env "$ENV_SCOPE"
+  run_check "internal: course data sanity (prod + dev)" ./scripts/qa/course-data-sanity.sh --env "$ENV_SCOPE"
 
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
     run_check "internal: multisite config (prod)" ./scripts/qa/verify-multisite-config.sh prod

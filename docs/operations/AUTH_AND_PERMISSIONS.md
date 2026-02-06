@@ -161,6 +161,19 @@ done
 ./scripts/qa/audit-auth-access.sh
 ```
 
+This includes:
+- Public auth surface checks (OIDC/OAuth redirects, admin-login redirect, MFE config)
+- Authentik hardening verification
+- Platform admin permission verification (DB flags + CourseCreator)
+- Canonical hostname drift check (expected vs deployed)
+- Service endpoint sanity (routes are wired)
+- Course data sanity report (read-only, reports modulestore backend + counts)
+
+To paste into tickets/Slack as JSON:
+```bash
+./scripts/qa/audit-auth-access.sh --json
+```
+
 ### Multisite configuration verification (prod)
 
 This checks that each microsite has a `Site` + `SiteConfiguration` and that
