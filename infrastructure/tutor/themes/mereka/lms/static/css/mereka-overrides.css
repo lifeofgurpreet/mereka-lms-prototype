@@ -218,6 +218,126 @@ button.btn.btn-primary:focus {
 /* Deep branding (LMS surfaces) */
 /* -------------------------- */
 
+/* Course discovery (/courses) */
+.find-courses {
+  background: var(--mereka-color-surface-primary);
+}
+
+.find-courses .courses-container {
+  background: transparent;
+}
+
+.find-courses #discovery-form.wrapper-search-context {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.25rem 1.25rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.find-courses #discovery-form .wrapper-search-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.find-courses #discovery-input.discovery-input {
+  flex: 1 1 260px;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: rgba(251, 250, 251, 0.92);
+  padding: 0.85rem 1.1rem;
+  font-size: 1rem;
+}
+
+.find-courses #discovery-input.discovery-input:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+  background: #fff;
+}
+
+.find-courses button.discovery-submit,
+.find-courses .discovery-submit.button {
+  border-radius: 999px;
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.85rem 1.25rem;
+  background: var(--mereka-gradient-primary);
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.find-courses button.discovery-submit:hover,
+.find-courses button.discovery-submit:focus,
+.find-courses .discovery-submit.button:hover,
+.find-courses .discovery-submit.button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.find-courses .search-facets {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.25rem;
+}
+
+.find-courses .search-facets h2,
+.find-courses .search-facets h3 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+.find-courses .search-facets a,
+.find-courses .search-facets button {
+  border-radius: 999px;
+}
+
+.find-courses #filter-bar,
+.find-courses .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.find-courses #filter-bar li,
+.find-courses .filter-bar li {
+  list-style: none;
+}
+
+.find-courses #filter-bar a,
+.find-courses .filter-bar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: rgba(251, 250, 251, 0.92);
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.find-courses #filter-bar a:hover,
+.find-courses #filter-bar a:focus,
+.find-courses .filter-bar a:hover,
+.find-courses .filter-bar a:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .courses-listing {
+  margin-top: 1.25rem;
+}
+
 .courses-listing {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
