@@ -22,6 +22,7 @@ Located in: `infrastructure/monitoring/`
 | Dashboard | `dashboards/operations-signals.json` | Stateful storage, DB/cache connection, Velero drill signals |
 | Alert | `alerts/lb-5xx-ratio.json` | 5xx error rate spike detection |
 | Alert | `alerts/pod-restarts.json` | Pod restart threshold alerts |
+| Alert | `alerts/pvc-utilization-high.json` | High PVC utilization in `mereka-lms` namespace |
 | Alert | `alerts/log-stateful-storage-errors.json` | ENOSPC/read-only filesystem failures |
 | Alert | `alerts/log-mysql-connection-errors.json` | MySQL connection failures from app logs |
 | Alert | `alerts/log-redis-connection-errors.json` | Redis connection failures from app logs |

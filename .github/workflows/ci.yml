@@ -18,6 +18,33 @@ jobs:
           ./scripts/gen/update-openedx-hostnames-doc.sh
           git diff --exit-code -- docs/operations/OPENEDX_HOSTNAMES.md
 
+  monitoring-guardrails:
+    name: Monitoring Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify script syntax
+        run: |
+          bash -n scripts/infra/apply-monitoring-configs.sh
+          bash -n scripts/qa/audit-observability.sh
+
+      - name: Run local observability audit
+        run: |
+          ./scripts/qa/audit-observability.sh --mode local
+
+      - name: Generate offline monitoring plan
+        run: |
+          OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan | tee monitoring-plan.txt
+          grep -q "Offline plan complete" monitoring-plan.txt
+          grep -q "gcloud monitoring" monitoring-plan.txt
+
+      - name: Upload monitoring plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-offline-plan
+          path: monitoring-plan.txt
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

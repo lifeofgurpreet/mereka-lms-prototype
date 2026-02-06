@@ -1,0 +1,99 @@
+name: Observability Audit
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Audit mode"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - local
+          - runtime
+          - all
+      strict_runtime:
+        description: "Fail if runtime dependencies (gcloud/k8s) are unavailable"
+        required: false
+        default: false
+        type: boolean
+      include_legacy:
+        description: "Include legacy Cloud SQL monitoring templates"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  local-audit:
+    name: Local Observability Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run local audit
+        run: |
+          ./scripts/qa/audit-observability.sh --mode local --json | tee observability-audit-local.json
+
+      - name: Upload local audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-audit-local
+          path: observability-audit-local.json
+
+  runtime-audit:
+    name: Runtime Observability Audit
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GCP_SA_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: mereka-lms
+
+      - name: Get GKE credentials (if available)
+        env:
+          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+        run: |
+          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+            --project "$GKE_CLUSTER_PROJECT" \
+            --zone "$GKE_CLUSTER_LOCATION" || true
+
+      - name: Run runtime/local audit bundle
+        env:
+          INPUT_MODE: ${{ github.event.inputs.mode || 'all' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'false' }}
+          INPUT_INCLUDE_LEGACY: ${{ github.event.inputs.include_legacy || 'false' }}
+        run: |
+          MODE="$INPUT_MODE"
+          if [[ -z "$MODE" ]]; then MODE="all"; fi
+
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          if [[ "$INPUT_INCLUDE_LEGACY" == "true" ]]; then
+            export INCLUDE_LEGACY_MONITORING=1
+          else
+            export INCLUDE_LEGACY_MONITORING=0
+          fi
+
+          ./scripts/qa/audit-observability.sh --mode "$MODE" --json | tee observability-audit-runtime.json
+
+      - name: Upload runtime audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-audit-runtime
+          path: observability-audit-runtime.json

@@ -70,6 +70,7 @@ Minimum recommended policies (edit thresholds as desired):
 | GKE pod restarts | `infrastructure/monitoring/alerts/pod-restarts.json` | Threshold: >5 restarts / pod within 10 min. |
 | Ingress 5xx spike | `infrastructure/monitoring/alerts/lb-5xx-ratio.json` | Update the `url_map_name` if GKE creates a different LB. |
 | (Legacy) Cloud SQL disk utilization | `infrastructure/monitoring/alerts/cloudsql-disk.json` | Legacy template. Replace with PVC disk utilization alerting for in-cluster MySQL/Redis/Elasticsearch. |
+| PVC utilization high | `infrastructure/monitoring/alerts/pvc-utilization-high.json` | Uses `kubernetes.io/pod/volume/utilization` in namespace `mereka-lms`. |
 | TLS certificate expiry | `infrastructure/monitoring/alerts/https-cert-expiry.json` | Requires the uptime checks below; fires when `time_until_ssl_cert_expires < 14 days`. |
 | Log-based 5xx spike | `infrastructure/monitoring/alerts/log-5xx-spike.json` | Requires log metric `http-5xx`. |
 | Log-based auth failures | `infrastructure/monitoring/alerts/log-auth-failures.json` | Requires log metric `auth-failures`. |
@@ -184,6 +185,9 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 - Enable Cloud Logging sinks to BigQuery if long-term retention is required (`gcloud logging sinks create …`).
 - For SMTP delivery issues, monitor AWS SES dashboards (CloudWatch) and set SNS notifications on bounces/complaints.
 - Fast operator flow: `docs/operations/OBSERVABILITY_QUICKSTART.md`.
+- Ownership model: `docs/operations/OBSERVABILITY_OWNERSHIP.md`.
+- Severity policy: `docs/operations/ALERT_SEVERITY_MATRIX.md`.
+- On-call runbook: `docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md`.
 
 ## Operational Runbook Tips
 

@@ -456,6 +456,9 @@ Regenerate hostname registry (after domain changes):
 - Stripe checkout readiness requires webhook signing secret + delivery test:
   - Guide: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
   - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`
+- Secret hygiene/rotation:
+  - Fast scan: `STRICT=1 ./scripts/qa/scan-secrets-fast.sh`
+  - Rotation flow: `docs/operations/SECRET_ROTATION_CHECKLIST.md` (Infisical-first, then sync + runtime verification)
 
 ---
 

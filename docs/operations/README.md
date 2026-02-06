@@ -25,8 +25,13 @@ Runbooks, troubleshooting guides, and operational procedures for managing the Me
 - [`GCP_ROADMAP.md`](GCP_ROADMAP.md) - Cloud architecture plan
 - [`MONITORING.md`](MONITORING.md) - Monitoring and alerting
 - [`OBSERVABILITY_QUICKSTART.md`](OBSERVABILITY_QUICKSTART.md) - Fast health/audit flow for operators
+- [`OBSERVABILITY_OWNERSHIP.md`](OBSERVABILITY_OWNERSHIP.md) - Source-of-truth and sync model
+- [`ALERT_SEVERITY_MATRIX.md`](ALERT_SEVERITY_MATRIX.md) - Severity/routing policy
+- [`ONCALL_OBSERVABILITY_PLAYBOOK.md`](ONCALL_OBSERVABILITY_PLAYBOOK.md) - Incident triage sequence
+- [`ALERT_TUNING_SOP.md`](ALERT_TUNING_SOP.md) - Weekly noise reduction process
 - [`CLOUDFLARE_DNS.md`](CLOUDFLARE_DNS.md) - DNS management
 - [`SECRETS_SNAPSHOT.md`](SECRETS_SNAPSHOT.md) - Secret handling policy (redacted, no values)
+- [`SECRET_ROTATION_CHECKLIST.md`](SECRET_ROTATION_CHECKLIST.md) - Incident-ready secret rotation flow
 
 ### Local Development
 - [`LOCAL_PRODUCTION_PARITY.md`](LOCAL_PRODUCTION_PARITY.md) - Parity guide

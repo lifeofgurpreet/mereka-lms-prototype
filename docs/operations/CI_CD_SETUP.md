@@ -1,6 +1,6 @@
 # CI/CD Setup Guide
 
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-06
 
 ## Overview
 
@@ -12,6 +12,7 @@ This repository uses GitHub Actions for CI/CD with the following workflows:
 | `build-tutor-images.yml` | Push to main (tutor changes), manual | Build and push OpenEdX/MFE images |
 | `build-ios-app.yml` | Manual | Build iOS app for TestFlight |
 | `cloud-sql-backup.yml` | Legacy, gated | Cloud SQL exports (only relevant if/when MySQL runs in Cloud SQL). Enable by setting repo variable `ENABLE_CLOUD_SQL_BACKUPS=true`. |
+| `observability-audit.yml` | Daily schedule, manual | Runs observability audits and uploads JSON artifacts. |
 
 ## Required Secrets
 
@@ -63,7 +64,8 @@ Runs on every PR and push to main:
 1. **Lint** - Python (ruff), YAML (yamllint), Shell (shellcheck)
 2. **Validate K8s** - Kubernetes manifests with kubeconform
 3. **Validate Tutor** - Config syntax, patch script syntax
-4. **Security Scan** - TruffleHog for leaked secrets, Hadolint for Dockerfiles
+4. **Monitoring Guardrails** - Local observability audit + offline monitoring plan artifact
+5. **Security Scan** - TruffleHog for leaked secrets, Hadolint for Dockerfiles
 
 ### Build Tutor Images (`build-tutor-images.yml`)
 
@@ -101,6 +103,22 @@ kubectl set image deployment/mfe \
   mfe=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:${TAG} \
   -n mereka-lms
 ```
+
+### Observability Audit (`observability-audit.yml`)
+
+Runs:
+- Daily (scheduled)
+- Manually via workflow dispatch
+
+What it does:
+1. Runs `./scripts/qa/audit-observability.sh --mode local`
+2. Runs runtime audit when `GCP_SA_KEY` is available
+3. Uploads JSON artifacts (`observability-audit-local`, `observability-audit-runtime`)
+
+Manual inputs:
+- `mode`: `local`, `runtime`, or `all`
+- `strict_runtime`: fail when runtime dependencies are unavailable
+- `include_legacy`: include legacy Cloud SQL monitoring templates
 
 ## Environments
 

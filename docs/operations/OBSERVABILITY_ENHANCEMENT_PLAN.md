@@ -118,7 +118,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Add a GCP Monitoring alert policy for PVC volume usage (or equivalent metric pipeline).
 - Runbook section: what to do when MySQL/Redis/Elasticsearch PVC is near full.
 
-**Status:** In progress (interim logging-based storage error detection shipped via `stateful-storage-errors` metric + alert).
+**Status:** In progress (interim logging-based storage error detection shipped, plus `pvc-utilization-high` alert template + dashboard panel added).
 
 ### 7) In-cluster data service saturation signals (MySQL + Redis)
 **Why:** Today we mostly infer DB/cache pain via app symptoms (timeouts/499s). We need direct saturation signals.

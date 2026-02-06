@@ -4,6 +4,33 @@
     "columns": 2,
     "widgets": [
       {
+        "title": "PVC utilization (mereka-lms)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/pod/volume/utilization\" resource.type=\"k8s_pod\" resource.label.\"namespace_name\"=\"mereka-lms\"",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_MAX",
+                    "groupByFields": [
+                      "resource.label.\"pod_name\"",
+                      "metric.label.\"volume_name\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Utilization",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
         "title": "Stateful storage errors (logs)",
         "xyChart": {
           "dataSets": [

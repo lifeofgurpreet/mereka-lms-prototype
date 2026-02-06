@@ -7,9 +7,15 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PROJECT="${GCP_PROJECT:-mereka-lms}"
 MODE="${1:-plan}"
 INCLUDE_LEGACY="${INCLUDE_LEGACY_MONITORING:-0}"
+OFFLINE_PLAN="${OFFLINE_PLAN:-0}"
 
 if [[ "$MODE" != "plan" && "$MODE" != "apply" ]]; then
   echo "Usage: $0 [plan|apply]" >&2
+  exit 1
+fi
+
+if [[ "$MODE" == "apply" && "$OFFLINE_PLAN" == "1" ]]; then
+  echo "OFFLINE_PLAN=1 is only supported with mode=plan" >&2
   exit 1
 fi
 
@@ -37,6 +43,10 @@ apply_cmd() {
 
 uptime_id_for() {
   local display_name=$1
+  if [[ "$OFFLINE_PLAN" == "1" ]]; then
+    echo ""
+    return 0
+  fi
   gcloud monitoring uptime list-configs --project="$PROJECT" --format=json \
     | jq -r --arg name "$display_name" '.[] | select(.displayName==$name) | .name' \
     | head -n 1
@@ -44,6 +54,10 @@ uptime_id_for() {
 
 policy_id_for() {
   local display_name=$1
+  if [[ "$OFFLINE_PLAN" == "1" ]]; then
+    echo ""
+    return 0
+  fi
   gcloud monitoring policies list --project="$PROJECT" --format=json \
     | jq -r --arg name "$display_name" '.[] | select(.displayName==$name) | .name' \
     | head -n 1
@@ -51,6 +65,10 @@ policy_id_for() {
 
 dashboard_id_for() {
   local display_name=$1
+  if [[ "$OFFLINE_PLAN" == "1" ]]; then
+    echo ""
+    return 0
+  fi
   gcloud monitoring dashboards list --project="$PROJECT" --format=json \
     | jq -r --arg name "$display_name" '.[] | select(.displayName==$name) | .name' \
     | head -n 1
@@ -109,7 +127,9 @@ done
 
 for file in "$ROOT_DIR"/infrastructure/monitoring/logging-metrics/*.json; do
   metric_name=$(basename "$file" .json)
-  if gcloud logging metrics describe "$metric_name" --project="$PROJECT" >/dev/null 2>&1; then
+  if [[ "$OFFLINE_PLAN" == "1" ]]; then
+    echo "gcloud logging metrics create '$metric_name' --config-from-file='$file' --project='$PROJECT'"
+  elif gcloud logging metrics describe "$metric_name" --project="$PROJECT" >/dev/null 2>&1; then
     apply_cmd "gcloud logging metrics update '$metric_name' --config-from-file='$file' --project='$PROJECT'"
   else
     apply_cmd "gcloud logging metrics create '$metric_name' --config-from-file='$file' --project='$PROJECT'"
@@ -156,5 +176,9 @@ for file in "$ROOT_DIR"/infrastructure/monitoring/dashboards/*.json; do
 done
 
 if [[ "$MODE" == "plan" ]]; then
-  echo "Plan complete. Re-run with 'apply' to execute commands."
+  if [[ "$OFFLINE_PLAN" == "1" ]]; then
+    echo "Offline plan complete (no cloud discovery calls were made)."
+  else
+    echo "Plan complete. Re-run with 'apply' to execute commands."
+  fi
 fi

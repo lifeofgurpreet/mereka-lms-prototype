@@ -34,18 +34,18 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 
 ## Observability Top 10 (Epic: `mereka-lms-16g`)
 
-| # | Task | Bead | Priority |
-|---|------|------|----------|
-| 1 | Ship observability audit in CI (nightly + manual) | `mereka-lms-2nmy` | P1 |
-| 2 | Add Grafana dashboard-as-code sync checklist and ownership | `mereka-lms-mp6b` | P1 |
-| 3 | Implement PVC utilization signal path (metrics + alert) | `mereka-lms-1d7x` | P1 |
-| 4 | Deploy MySQL saturation telemetry (connections/latency) | `mereka-lms-3rx3` | P1 |
-| 5 | Deploy Redis saturation telemetry (memory/evictions/latency) | `mereka-lms-1zfq` | P1 |
-| 6 | Add Velero backup freshness + restore-drill status dashboard panels | `mereka-lms-w2xf` | P1 |
-| 7 | Define alert severity matrix and routing policy | `mereka-lms-3dxx` | P2 |
-| 8 | Build on-call single-pane operations dashboard playbook | `mereka-lms-36ln` | P2 |
-| 9 | Create noisy alert tuning SOP + weekly review cadence | `mereka-lms-15fv` | P2 |
-| 10 | Add PR guardrail for monitoring-as-code lint + dry-run plan | `mereka-lms-2vej` | P2 |
+| # | Task | Bead | Priority | Status |
+|---|------|------|----------|--------|
+| 1 | Ship observability audit in CI (nightly + manual) | `mereka-lms-2nmy` | P1 | ✅ Closed |
+| 2 | Add Grafana dashboard-as-code sync checklist and ownership | `mereka-lms-mp6b` | P1 | ✅ Closed |
+| 3 | Implement PVC utilization signal path (metrics + alert) | `mereka-lms-1d7x` | P1 | ⚙️ In progress |
+| 4 | Deploy MySQL saturation telemetry (connections/latency) | `mereka-lms-3rx3` | P1 | 💤 Pending |
+| 5 | Deploy Redis saturation telemetry (memory/evictions/latency) | `mereka-lms-1zfq` | P1 | 💤 Pending |
+| 6 | Add Velero backup freshness + restore-drill status dashboard panels | `mereka-lms-w2xf` | P1 | 💤 Pending |
+| 7 | Define alert severity matrix and routing policy | `mereka-lms-3dxx` | P2 | ✅ Closed |
+| 8 | Build on-call single-pane operations dashboard playbook | `mereka-lms-36ln` | P2 | ✅ Closed |
+| 9 | Create noisy alert tuning SOP + weekly review cadence | `mereka-lms-15fv` | P2 | ✅ Closed |
+| 10 | Add PR guardrail for monitoring-as-code lint + dry-run plan | `mereka-lms-2vej` | P2 | ✅ Closed |
 
 ## Product / Content Backlog (Still Valid, Not in the “Auth Hardening” Top 10)
 
