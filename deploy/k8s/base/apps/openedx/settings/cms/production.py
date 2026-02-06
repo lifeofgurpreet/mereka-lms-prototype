@@ -8,6 +8,10 @@ SECRET_KEY = os.environ.get("CMS_SECRET_KEY", "")
 if not SECRET_KEY:
     raise ValueError("CMS_SECRET_KEY environment variable is required")
 
+# Comprehensive theming is enabled via env.yml; actually activate the theme.
+# Without DEFAULT_SITE_THEME, Studio will keep serving stock Indigo styles/assets.
+DEFAULT_SITE_THEME = os.environ.get("DEFAULT_SITE_THEME", "mereka")
+
 # Override database password from environment variable.
 # Note: secret stores and CLIs often include a trailing newline; strip it to
 # avoid MySQL 1045 due to password mismatch.
@@ -350,8 +354,12 @@ SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
 CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"
 SESSION_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
-CSRF_COOKIE_DOMAIN = MEREKA_COOKIE_DOMAIN
+# Multisite note:
+# This CMS instance is served on multiple root domains (academyv2.mereka.io and
+# biji-biji.com). A single static cookie domain breaks the other root. Keep
+# cookies host-only here and rewrite per-request via middleware.
+SESSION_COOKIE_DOMAIN = None
+CSRF_COOKIE_DOMAIN = None
 
 # Authentication
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "cms-sso"
@@ -360,6 +368,7 @@ SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = MEREKA_LMS_BASE_URL
 # Hardening: keep platform admins as staff/superuser and ensure CourseCreator (prevents drift).
 MIDDLEWARE = list(MIDDLEWARE) + [
     "cms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+    "cms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware",
 ]
 
 # MFE-specific settings

@@ -18,6 +18,9 @@ sites:
       domain: academyv2.mereka.io
       site_name: Mereka Academy
       platform_name: Mereka Academy
+      LMS_ROOT_URL: https://academyv2.mereka.io
+      CMS_ROOT_URL: https://studio.academyv2.mereka.io
+      MFE_BASE_URL: https://apps.academyv2.mereka.io
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
@@ -35,6 +38,9 @@ sites:
       domain: academy.biji-biji.com
       site_name: Biji-Biji Academy
       platform_name: Biji-Biji Academy
+      LMS_ROOT_URL: https://academy.biji-biji.com
+      CMS_ROOT_URL: https://studio.academy.biji-biji.com
+      MFE_BASE_URL: https://apps.academy.biji-biji.com
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
@@ -52,6 +58,9 @@ sites:
       domain: skillourfuture.academy.mereka.io
       site_name: Skill Our Future
       platform_name: Skill Our Future
+      LMS_ROOT_URL: https://skillourfuture.academy.mereka.io
+      CMS_ROOT_URL: https://studio.academyv2.mereka.io
+      MFE_BASE_URL: https://apps.academyv2.mereka.io
       THEME_NAME: mereka
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:

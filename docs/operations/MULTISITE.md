@@ -57,11 +57,15 @@ python scripts/shared/multisite_bootstrap.py --apply
 What the script does:
 
 1. Reads `tutor_env/env/apps/openedx/config/lms.env.yml` to locate the Open edX MySQL host/credentials.
-2. Ensures the `BIJIBIJI` and `SKILLOURFUTURE` records exist in `organizations_organization`.
-3. Upserts two `django_site` entries plus matching `SiteConfiguration` rows with:
+2. Reads multisite definitions from `infrastructure/tutor/multisite-sites.yml` (source of truth).
+3. Ensures the `MEREKA`, `BIJIBIJI`, and `SKILLOURFUTURE` records exist in `organizations_organization`.
+4. Upserts `django_site` entries plus matching `SiteConfiguration` rows with:
    - `platform_name`, `site_name`, and logo metadata.
+   - `LMS_ROOT_URL`, `CMS_ROOT_URL`, `MFE_BASE_URL` for correct redirects and MFE config behavior.
    - `course_org_filter` so each microsite only surfaces its own organization’s catalog.
    - `ENABLE_COMPREHENSIVE_THEMING` + `THEME_NAME=mereka` (custom themes can be layered in later).
+
+**Dev environment:** use `infrastructure/tutor/multisite-sites.dev.yml` (or set `MULTISITE_DEFINITIONS_PATH`) to avoid accidentally applying production domains into the dev database.
 
 **Connecting to Cloud SQL**
 

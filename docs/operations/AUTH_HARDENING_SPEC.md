@@ -10,9 +10,16 @@ _Last updated: 2026-02-06_
 ## Scope (Current Ecosystem)
 
 Core:
-- LMS (`academyv2.mereka.io`)
-- Studio/CMS (`studio.academyv2.mereka.io`)
-- MFE Apps (`apps.academyv2.mereka.io`)
+- LMS microsites:
+  - `academyv2.mereka.io`
+  - `academy.biji-biji.com`
+  - `skillourfuture.academy.mereka.io`
+- Studio/CMS:
+  - `studio.academyv2.mereka.io`
+  - `studio.academy.biji-biji.com`
+- MFE Apps:
+  - `apps.academyv2.mereka.io`
+  - `apps.academy.biji-biji.com`
 
 Ecosystem services:
 - Discovery (`discovery.academyv2.mereka.io`)
@@ -49,10 +56,16 @@ Each service includes a small middleware:
 - For CMS: also ensure `CourseCreator(state=granted, all_organizations=True)`.
 - For Discovery/Credentials/Ecommerce: redirect `/admin/login/` to `/login/` so admin access always starts from SSO.
 
+LMS/CMS also include multisite hardening middleware:
+- Resolves the current "tenant site" based on request host (apps./studio./preview. map to the tenant LMS domain)
+- Rewrites cookie domains per-request so we never emit invalid cookie `Domain=` across different roots (`mereka.io` vs `biji-biji.com`)
+
 ### 3) Verification (no credentials)
 
 - `scripts/qa/verify-auth-surfaces.sh {prod|dev}`
   - LMS OIDC entrypoint redirects to Authentik authorize
+  - Studio `/signin` redirects to the correct LMS `/login` for the microsite
+  - Biji MFE config must point to `academy.biji-biji.com` + `studio.academy.biji-biji.com`
   - Discovery/Credentials/Ecommerce `/login/` redirects to `/login/edx-oauth2/`
   - (Optional strict mode) `/admin/login/` redirects to `/login/`
 
@@ -74,11 +87,12 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 2. `./scripts/qa/verify-auth-surfaces.sh dev` passes in CI.
 3. `./scripts/infra/ensure-platform-admins.sh --verify` reports OK for both contexts.
 4. `./scripts/infra/ensure-authentik-admin.sh --verify` reports OK.
-5. Gurpreet + Malasari can:
+5. `STRICT=1 ./scripts/qa/verify-multisite-config.sh` reports correct LMS/CMS roots for each microsite.
+6. Gurpreet + Malasari can:
    - create courses in Studio
    - access LMS Django admin
    - access Discovery/Credentials/Ecommerce admin after SSO login
-6. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
+7. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 
 ## Future Hardening (Optional)
 

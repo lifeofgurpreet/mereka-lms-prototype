@@ -8,7 +8,10 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 - [ ] `Site` entries exist for every domain (Django admin → **Sites**).
 - [ ] `SiteConfiguration` exists for each site:
   - `site_domain` matches the domain exactly.
-  - `LMS_ROOT_URL` and `CMS_ROOT_URL` point to `academyv2.mereka.io` and `studio.academyv2.mereka.io`.
+  - `LMS_ROOT_URL` points at the site's **own LMS domain**.
+  - `CMS_ROOT_URL` points at the site's **Studio domain**:
+    - `academyv2.mereka.io` and `skillourfuture.academy.mereka.io` currently share `studio.academyv2.mereka.io`
+    - `academy.biji-biji.com` uses `studio.academy.biji-biji.com`
 - [ ] Caddy routes include each domain (`deploy/k8s/base/apps/caddy/Caddyfile`).
 
 ## 2. Organization Ownership
@@ -35,12 +38,13 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 
 ## 5. Cookie / Session Boundaries (Multi-root)
 
-- **Current policy:** session + CSRF cookies are scoped to `.academyv2.mereka.io`.
-- **Implication:** login sessions do **not** carry to `academy.biji-biji.com` or
-  `skillourfuture.academy.mereka.io` (different root domains).
-- **If a microsite requires full login MFEs:** deploy a dedicated MFE/LMS stack
-  on the same root domain, or use a reverse-proxy pattern that preserves cookie
-  scope. Do **not** widen cookie domains across unrelated roots.
+- **Policy:** cookies are scoped per root domain:
+  - Main: `.academyv2.mereka.io` (covers `academyv2`, `studio`, `apps`, etc)
+  - Biji: `.biji-biji.com` (covers `academy`, `studio.academy`, `apps.academy`, etc)
+  - Skillourfuture: `.skillourfuture.academy.mereka.io`
+- **Implication:** login sessions do **not** carry across different roots (expected).
+  Within a root, sessions can be shared across subdomains.
+- **Do not widen cookie domains** across unrelated roots (security risk + browsers will reject invalid domains).
 
 ## 6. Validation Commands
 

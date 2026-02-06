@@ -14,7 +14,7 @@ fi
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   BASE_DOMAIN="$LMS_DOMAIN"
-  EXTRA_HOSTS=("$SKILLOURFUTURE_DOMAIN" "$BIJI_DOMAIN")
+  EXTRA_HOSTS=("$SKILLOURFUTURE_DOMAIN" "$BIJI_DOMAIN" "$BIJI_STUDIO_DOMAIN")
 else
   BASE_DOMAIN="$DEV_LMS_DOMAIN"
   EXTRA_HOSTS=()
@@ -37,6 +37,12 @@ urls=(
 for host in "${EXTRA_HOSTS[@]}"; do
   urls+=("https://${host}/")
 done
+
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  # Biji MFEs live on a dedicated hostname.
+  urls+=("https://${BIJI_MFE_DOMAIN}/authn/login")
+  urls+=("https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1")
+fi
 
 failures=0
 

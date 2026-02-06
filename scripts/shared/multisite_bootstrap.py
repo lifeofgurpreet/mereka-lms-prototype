@@ -15,6 +15,7 @@ import textwrap
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_ENV_PATH = REPO_ROOT / "tutor_env" / "env" / "apps" / "openedx" / "config" / "lms.env.yml"
+DEFAULT_DEFINITIONS_PATH = REPO_ROOT / "infrastructure" / "tutor" / "multisite-sites.yml"
 
 
 @dataclass(frozen=True)
@@ -25,30 +26,11 @@ class SiteDefinition:
     site_values: Dict[str, object]
 
 
-ORGANIZATIONS = [
-    {
-        "short_name": "MEREKA",
-        "name": "Mereka Academy",
-        "description": "Mereka Academy main site catalog.",
-    },
-    {
-        "short_name": "BIJIBIJI",
-        "name": "Biji-Biji Academy",
-        "description": "Biji-Biji Academy microsite catalog.",
-    },
-    {
-        "short_name": "SKILLOURFUTURE",
-        "name": "Skill Our Future",
-        "description": "Skill Our Future microsite catalog.",
-    },
-]
-
-PRIMARY_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
-BIJI_DOMAIN = os.environ.get("MEREKA_BIJI_DOMAIN", "academy.biji-biji.com")
-SKILLOURFUTURE_DOMAIN = os.environ.get(
-    "MEREKA_SKILLOURFUTURE_DOMAIN",
-    "skillourfuture.academy.mereka.io",
-)
+def _load_yaml(path: pathlib.Path) -> Dict[str, object]:
+    import yaml  # type: ignore
+    payload = yaml.safe_load(path.read_text()) or {}
+    assert isinstance(payload, dict)
+    return payload
 
 def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, primary_href: str, secondary_label: str, secondary_href: str, accent: str, background: str) -> str:
     return textwrap.dedent(
@@ -66,76 +48,37 @@ def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, prim
     ).strip()
 
 
-SITE_DEFINITIONS = [
-    SiteDefinition(
-        domain=PRIMARY_DOMAIN,
-        name="Mereka Academy",
-        orgs=["MEREKA"],
-        site_values={
-            "domain": PRIMARY_DOMAIN,
-            "site_name": "Mereka Academy",
-            "platform_name": "Mereka Academy",
-            "THEME_NAME": "mereka",
-            "ENABLE_COMPREHENSIVE_THEMING": True,
-            "ENABLE_ACCOUNT_MICROFRONTEND": True,
-            "ENABLE_PROFILE_MICROFRONTEND": True,
-            "course_org_filter": ["MEREKA"],
-            "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
-            "logo_url": "/",
-            "favicon_path": "mereka/images/favicon.ico",
-            "homepage_banner_enabled": False,
-        },
-    ),
-    SiteDefinition(
-        domain=BIJI_DOMAIN,
-        name="Biji-Biji Academy",
-        orgs=["BIJIBIJI"],
-        site_values={
-            "domain": BIJI_DOMAIN,
-            "site_name": "Biji-Biji Academy",
-            "platform_name": "Biji-Biji Academy",
-            "THEME_NAME": "mereka",
-            "ENABLE_COMPREHENSIVE_THEMING": True,
-            "ENABLE_ACCOUNT_MICROFRONTEND": True,
-            "ENABLE_PROFILE_MICROFRONTEND": True,
-            "course_org_filter": ["BIJIBIJI"],
-            "logo_image": f"https://{BIJI_DOMAIN}/static/mereka/images/logo-horizontal.png",
-            "logo_url": "/",
-            "favicon_path": "mereka/images/favicon.ico",
-            "homepage_banner_enabled": False,
-        },
-    ),
-    SiteDefinition(
-        domain=SKILLOURFUTURE_DOMAIN,
-        name="Skill Our Future",
-        orgs=["SKILLOURFUTURE"],
-        site_values={
-            "domain": SKILLOURFUTURE_DOMAIN,
-            "site_name": "Skill Our Future",
-            "platform_name": "Skill Our Future",
-            "THEME_NAME": "mereka",
-            "ENABLE_COMPREHENSIVE_THEMING": True,
-            "ENABLE_ACCOUNT_MICROFRONTEND": True,
-            "ENABLE_PROFILE_MICROFRONTEND": True,
-            "course_org_filter": ["SKILLOURFUTURE"],
-            "logo_image": f"https://{PRIMARY_DOMAIN}/static/mereka/images/logo-horizontal.png",
-            "logo_url": "/",
-            "favicon_path": "mereka/images/favicon.ico",
-            "homepage_banner_enabled": True,
-            "homepage_overlay_html": hero_html(
-                eyebrow="Skill Our Future",
-                heading="Future-proof talent for Southeast Asia's green and digital economy.",
-                body="Live cohorts, micro-credentials, and career accelerators designed with regional employers.",
-                primary_label="Start learning",
-                primary_href="/courses",
-                secondary_label="Talk to our team",
-                secondary_href="mailto:team@mereka.io",
-                accent="#7dd3fc",
-                background="#111b47",
-            ),
-        },
-    ),
-]
+def load_definitions() -> tuple[List[Dict[str, object]], List[SiteDefinition]]:
+    path = pathlib.Path(os.environ.get("MULTISITE_DEFINITIONS_PATH") or DEFAULT_DEFINITIONS_PATH)
+    payload = _load_yaml(path)
+    orgs = payload.get("organizations") or []
+    sites = payload.get("sites") or []
+    definitions: List[SiteDefinition] = []
+    for s in sites:
+        if not isinstance(s, dict):
+            continue
+        domain = str(s.get("domain") or "").strip()
+        if not domain:
+            continue
+        name = str(s.get("name") or domain).strip()
+        org_list = s.get("orgs") or []
+        if not isinstance(org_list, list):
+            org_list = []
+        site_values = s.get("site_values") or {}
+        if not isinstance(site_values, dict):
+            site_values = {}
+        definitions.append(
+            SiteDefinition(
+                domain=domain,
+                name=name,
+                orgs=[str(o) for o in org_list],
+                site_values=site_values,
+            )
+        )
+    return list(orgs), definitions
+
+
+ORGANIZATIONS, SITE_DEFINITIONS = load_definitions()
 
 
 def load_db_settings(path: pathlib.Path) -> Dict[str, object]:

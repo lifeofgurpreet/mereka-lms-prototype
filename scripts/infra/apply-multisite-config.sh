@@ -10,6 +10,16 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 DRY_RUN="${DRY_RUN:-false}"
+ENVIRONMENT="${ENVIRONMENT:-prod}"
+DEFINITIONS_PATH=""
+
+log_info() {
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] INFO: $*"
+}
+
+log_error() {
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ERROR: $*" >&2
+}
 
 usage() {
   cat <<EOF
@@ -19,6 +29,8 @@ Apply multisite configuration to LMS database via kubectl exec.
 
 OPTIONS:
   -n, --namespace NAMESPACE   K8s namespace (default: mereka-lms)
+  -e, --env ENV               Which definition set to apply (prod|dev). Default: prod
+  --definitions PATH          Path to multisite definitions YAML (overrides --env)
   --dry-run                   Preview operations without applying changes
   --apply                     Apply changes to database (required to make changes)
   -h, --help                  Show this help message
@@ -49,6 +61,14 @@ while [[ $# -gt 0 ]]; do
       NAMESPACE="$2"
       shift 2
       ;;
+    -e|--env)
+      ENVIRONMENT="$2"
+      shift 2
+      ;;
+    --definitions)
+      DEFINITIONS_PATH="$2"
+      shift 2
+      ;;
     --dry-run)
       DRY_RUN="true"
       shift
@@ -68,13 +88,21 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-log_info() {
-  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] INFO: $*"
-}
+if [[ -z "$DEFINITIONS_PATH" ]]; then
+  if [[ "$ENVIRONMENT" == "prod" ]]; then
+    DEFINITIONS_PATH="$REPO_ROOT/infrastructure/tutor/multisite-sites.yml"
+  elif [[ "$ENVIRONMENT" == "dev" ]]; then
+    DEFINITIONS_PATH="$REPO_ROOT/infrastructure/tutor/multisite-sites.dev.yml"
+  else
+    log_error "Unknown --env value: $ENVIRONMENT (expected prod|dev)"
+    exit 1
+  fi
+fi
 
-log_error() {
-  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ERROR: $*" >&2
-}
+if [[ ! -f "$DEFINITIONS_PATH" ]]; then
+  log_error "Definitions YAML not found: $DEFINITIONS_PATH"
+  exit 1
+fi
 
 # Find LMS pod
 log_info "Finding LMS pod in namespace: $NAMESPACE"
@@ -94,22 +122,29 @@ log_info "Copying multisite_bootstrap_django.py to LMS pod..."
 kubectl cp "$REPO_ROOT/scripts/shared/multisite_bootstrap_django.py" \
   "$NAMESPACE/$LMS_POD:/tmp/multisite_bootstrap.py"
 
+# Copy the multisite definition YAML (single source of truth)
+log_info "Copying multisite definitions to LMS pod: $DEFINITIONS_PATH"
+kubectl cp "$DEFINITIONS_PATH" \
+  "$NAMESPACE/$LMS_POD:/tmp/multisite-sites.yml"
+
 # Run the script
 if [[ "$DRY_RUN" == "true" ]]; then
   log_info "Running in DRY RUN mode (no changes will be made)"
   kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+    env MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
     python /tmp/multisite_bootstrap.py \
     --dry-run
 else
   log_info "Applying multisite configuration to database..."
   kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+    env MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
     python /tmp/multisite_bootstrap.py \
     $APPLY_FLAG
 fi
 
 # Cleanup
 log_info "Cleaning up temporary files..."
-kubectl exec -n "$NAMESPACE" "$LMS_POD" -- rm -f /tmp/multisite_bootstrap.py
+kubectl exec -n "$NAMESPACE" "$LMS_POD" -- rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml
 
 log_info "Done!"
 

@@ -5,6 +5,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../shared/config.sh"
 
+ENVIRONMENT="${1:-prod}"
+if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
+  echo "Usage: $0 [prod|dev]" >&2
+  exit 1
+fi
+
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 STRICT="${STRICT:-0}"
 CONTEXT_ARGS=()
@@ -12,18 +18,48 @@ if [[ -n "${K8S_CONTEXT:-}" ]]; then
   CONTEXT_ARGS+=(--context "${K8S_CONTEXT}")
 fi
 
-DOMAINS=(
-  "${LMS_DOMAIN}"
-  "${BIJI_DOMAIN}"
-  "${SKILLOURFUTURE_DOMAIN}"
-)
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  DOMAINS=(
+    "${LMS_DOMAIN}"
+    "${BIJI_DOMAIN}"
+    "${SKILLOURFUTURE_DOMAIN}"
+  )
+else
+  DOMAINS=(
+    "${DEV_LMS_DOMAIN}"
+  )
+fi
 
 export DOMAINS_CSV
 DOMAINS_CSV=$(IFS=, ; echo "${DOMAINS[*]}")
 
-kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" python - <<'PY'
+EXPECTED_JSON=$(
+  python3 - <<PY
+import json, os
+
+lms = os.environ.get("LMS_DOMAIN", "academyv2.mereka.io")
+studio = os.environ.get("STUDIO_DOMAIN", f"studio.{lms}")
+biji = os.environ.get("BIJI_DOMAIN", "academy.biji-biji.com")
+biji_studio = os.environ.get("BIJI_STUDIO_DOMAIN", "studio.academy.biji-biji.com")
+skill = os.environ.get("SKILLOURFUTURE_DOMAIN", "skillourfuture.academy.mereka.io")
+dev = os.environ.get("DEV_LMS_DOMAIN", "academyv2.mereka.dev")
+
+expected = {
+  lms: {"LMS_ROOT_URL": f"https://{lms}", "CMS_ROOT_URL": f"https://{studio}"},
+  biji: {"LMS_ROOT_URL": f"https://{biji}", "CMS_ROOT_URL": f"https://{biji_studio}"},
+  # Skillourfuture currently shares the main Studio domain (no dedicated studio.* DNS).
+  skill: {"LMS_ROOT_URL": f"https://{skill}", "CMS_ROOT_URL": f"https://{studio}"},
+  dev: {"LMS_ROOT_URL": f"https://{dev}", "CMS_ROOT_URL": f"https://studio.{dev}"},
+}
+
+print(json.dumps(expected, sort_keys=True))
+PY
+)
+
+kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" EXPECTED_JSON="${EXPECTED_JSON}" python - <<'PY'
 import os
 import sys
+import json
 import django
 
 django.setup()
@@ -33,8 +69,10 @@ from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 
 domains = [d.strip() for d in os.environ.get("DOMAINS", "").split(",") if d.strip()]
 strict = os.environ.get("STRICT", "0") == "1"
+expected = json.loads(os.environ.get("EXPECTED_JSON", "{}") or "{}")
 
 missing = []
+bad = []
 for domain in domains:
     site = Site.objects.filter(domain=domain).first()
     if not site:
@@ -52,6 +90,20 @@ for domain in domains:
     cms_root = values.get("CMS_ROOT_URL") or "unset"
     print(f"{domain}: theme={theme} lms_root={lms_root} cms_root={cms_root}")
 
+    exp = expected.get(domain) or {}
+    exp_lms = exp.get("LMS_ROOT_URL")
+    exp_cms = exp.get("CMS_ROOT_URL")
+    if exp_lms and lms_root != exp_lms:
+        bad.append(f"{domain}: LMS_ROOT_URL expected={exp_lms} got={lms_root}")
+    if exp_cms and cms_root != exp_cms:
+        bad.append(f"{domain}: CMS_ROOT_URL expected={exp_cms} got={cms_root}")
+
+if bad:
+    for line in bad:
+        print(f"{line} :: MISMATCH")
+
 if missing and strict:
+    sys.exit(1)
+if bad and strict:
     sys.exit(1)
 PY

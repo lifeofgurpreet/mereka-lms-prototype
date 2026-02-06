@@ -10,6 +10,17 @@ This document explains how authentication (login) and authorization (permissions
 
 By default, **permissions do not sync from Authentik into Open edX**. Logging in via OIDC will create/link a user account, but **staff/superuser** and **CourseCreator** are controlled in each service database.
 
+## Multisite Reality (Multiple Domains)
+
+This platform serves multiple "microsite" domains from the same Open edX stack:
+- `academyv2.mereka.io` (primary)
+- `academy.biji-biji.com` (Biji microsite)
+- `skillourfuture.academy.mereka.io` (Skillourfuture microsite)
+
+Implications:
+- Sessions do **not** carry across different root domains (expected).
+- Studio and MFEs must still redirect to the **correct** LMS domain for the microsite, otherwise SSO looks "missing" even when Authentik is fine.
+
 ## Required Platform Admins
 
 These humans must have full permissions in production and dev:
@@ -62,6 +73,15 @@ Two flows exist and should continue to work:
 - **Native Open edX login**: `/login`
 - **Authentik OIDC (SSO)**: `/auth/login/oidc/` then callback to `/auth/complete/oidc`
 
+### Studio (Important)
+
+Studio does not expose the LMS `/auth/login/oidc/` entrypoint. The canonical Studio entrypoint is:
+- `/signin` (redirects to the matching LMS `/login`)
+
+Expected behavior:
+- `https://studio.academyv2.mereka.io/signin` redirects to `https://academyv2.mereka.io/login?...`
+- `https://studio.academy.biji-biji.com/signin` redirects to `https://academy.biji-biji.com/login?...`
+
 ### Discovery/Credentials/Ecommerce Admin Access
 
 These services have Django Admin sites (`/admin/`), but their `/admin/login/` pages are username/password only.
@@ -99,6 +119,15 @@ done
 
 ```bash
 ./scripts/infra/ensure-platform-admins.sh --verify
+```
+
+### Multisite configuration verification (prod)
+
+This checks that each microsite has a `Site` + `SiteConfiguration` and that
+`LMS_ROOT_URL`/`CMS_ROOT_URL` are correct.
+
+```bash
+STRICT=1 ./scripts/qa/verify-multisite-config.sh
 ```
 
 ### OIDC provider config verification (prod + dev)

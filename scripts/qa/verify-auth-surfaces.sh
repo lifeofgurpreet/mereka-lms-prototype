@@ -18,6 +18,9 @@
 
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/config.sh"
+
 ENVIRONMENT="${1:-}"
 if [[ -z "$ENVIRONMENT" || ( "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ) ]]; then
   echo "Usage: $0 {prod|dev}" >&2
@@ -25,12 +28,6 @@ if [[ -z "$ENVIRONMENT" || ( "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev"
 fi
 
 STRICT_ADMIN_LOGIN_REDIRECT="${STRICT_ADMIN_LOGIN_REDIRECT:-0}"
-
-if [[ "$ENVIRONMENT" == "prod" ]]; then
-  LMS_BASE="academyv2.mereka.io"
-elif [[ "$ENVIRONMENT" == "dev" ]]; then
-  LMS_BASE="academyv2.mereka.dev"
-fi
 
 failures=0
 
@@ -92,6 +89,32 @@ require_302_location_is() {
   fi
 }
 
+require_body_contains() {
+  local url="$1"
+  local label="$2"
+  local needle="$3"
+  local body
+  body="$(curl -sS "$url" || true)"
+  if [[ -n "$body" && "$body" == *"$needle"* ]]; then
+    log_ok "$label (contains '$needle')"
+  else
+    log_fail "$label (expected body contains '$needle') url=$url"
+  fi
+}
+
+check_studio_signin_redirect() {
+  local studio_host="$1"
+  local expected_lms_host="$2"
+  local url="https://${studio_host}/signin"
+  local code loc
+  read -r code loc < <(curl_loc "$url")
+  if [[ "$code" == "302" && "$loc" == https://"${expected_lms_host}"/login* ]]; then
+    log_ok "${studio_host}: /signin redirects to ${expected_lms_host}/login"
+  else
+    log_fail "${studio_host}: /signin does not redirect to ${expected_lms_host}/login (code=$code loc=$loc) url=$url"
+  fi
+}
+
 check_admin_login_redirect() {
   local svc="$1"
   local base="$2"
@@ -113,33 +136,81 @@ check_admin_login_redirect() {
   return 0
 }
 
-echo "Environment: $ENVIRONMENT (LMS base: $LMS_BASE)"
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  LMS_DOMAINS=("$LMS_DOMAIN" "$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
+  STUDIO_HOSTS=("studio.${LMS_DOMAIN}" "$BIJI_STUDIO_DOMAIN")
+  MFE_HOSTS=("apps.${LMS_DOMAIN}" "$BIJI_MFE_DOMAIN")
+  ECOSYSTEM_BASE="$LMS_DOMAIN"
+else
+  LMS_DOMAINS=("$DEV_LMS_DOMAIN")
+  STUDIO_HOSTS=("studio.${DEV_LMS_DOMAIN}")
+  MFE_HOSTS=("apps.${DEV_LMS_DOMAIN}")
+  ECOSYSTEM_BASE="$DEV_LMS_DOMAIN"
+fi
 
-# LMS OIDC SSO entrypoint.
-require_302_location_contains \
-  "https://${LMS_BASE}/auth/login/oidc/" \
-  "LMS OIDC entrypoint" \
-  "auth0.mereka.io/application/o/authorize/"
+echo "Environment: $ENVIRONMENT"
+echo "LMS domains: ${LMS_DOMAINS[*]}"
 
-# MFE login should be reachable.
-require_200 \
-  "https://apps.${LMS_BASE}/authn/login" \
-  "Authn MFE login"
+# LMS OIDC SSO entrypoint must work on all served LMS domains.
+for domain in "${LMS_DOMAINS[@]}"; do
+  require_302_location_contains \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: LMS OIDC entrypoint" \
+    "auth0.mereka.io/application/o/authorize/"
 
-# MFE config is required for consistent auth behavior across MFEs.
-require_200 \
-  "https://apps.${LMS_BASE}/api/mfe_config/v1" \
-  "MFE config endpoint"
+  # Make sure redirect_uri is aligned with the domain we're testing.
+  require_302_location_contains \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: OIDC redirect_uri matches domain" \
+    "redirect_uri=https://${domain}/auth/complete/oidc/"
+done
+
+# Studio does not implement /auth/login/oidc/; it should bounce to the correct LMS /login.
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  check_studio_signin_redirect "studio.${LMS_DOMAIN}" "$LMS_DOMAIN"
+  check_studio_signin_redirect "$BIJI_STUDIO_DOMAIN" "$BIJI_DOMAIN"
+else
+  check_studio_signin_redirect "studio.${DEV_LMS_DOMAIN}" "$DEV_LMS_DOMAIN"
+fi
+
+# MFE login should be reachable on all configured MFE hosts.
+for mfe in "${MFE_HOSTS[@]}"; do
+  require_200 "https://${mfe}/authn/login" "${mfe}: Authn MFE login"
+  require_200 "https://${mfe}/api/mfe_config/v1" "${mfe}: MFE config endpoint"
+done
+
+# MFE config must be site-correct (prevents SSO/login drift across microsites).
+require_body_contains \
+  "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" \
+  "Primary MFE config LMS_BASE_URL" \
+  "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
+
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  require_body_contains \
+    "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" \
+    "Biji MFE config LMS_BASE_URL" \
+    "\"LMS_BASE_URL\": \"https://${BIJI_DOMAIN}\""
+  require_body_contains \
+    "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" \
+    "Biji MFE config STUDIO_BASE_URL" \
+    "\"STUDIO_BASE_URL\": \"https://${BIJI_STUDIO_DOMAIN}\""
+fi
 
 for svc in discovery credentials ecommerce; do
   require_302_location_is \
-    "https://${svc}.${LMS_BASE}/login/" \
+    "https://${svc}.${ECOSYSTEM_BASE}/login/" \
     "${svc}: /login SSO entrypoint" \
     "/login/edx-oauth2/"
+
+  # Verify OAuth handshake starts towards the LMS (which itself uses Authentik OIDC).
+  require_302_location_contains \
+    "https://${svc}.${ECOSYSTEM_BASE}/login/edx-oauth2/" \
+    "${svc}: /login/edx-oauth2 redirects to LMS oauth2/authorize" \
+    "https://${ECOSYSTEM_BASE}/oauth2/authorize"
 done
 
 for svc in discovery credentials ecommerce; do
-  check_admin_login_redirect "$svc" "$LMS_BASE"
+  check_admin_login_redirect "$svc" "$ECOSYSTEM_BASE"
 done
 
 if [[ "$failures" -gt 0 ]]; then

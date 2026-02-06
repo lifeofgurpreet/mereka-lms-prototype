@@ -24,10 +24,9 @@ This runbook enforces **zero-drift** changes for production (GKE) and dev (kind/
 ## 1) Update configs
 - [ ] Update domain constants in `deploy/k8s/base/apps/openedx/settings/lms/production.py`
 - [ ] Update Caddy routes in `deploy/k8s/base/apps/caddy/Caddyfile`
-- [ ] Ensure cookies/CSRF for academyv2:
-  - `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io`
-  - `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io`
-  - `CSRF_TRUSTED_ORIGINS` includes all subdomains and microsites
+- [ ] Ensure cookies/CSRF:
+  - Cookie scoping is **per root domain** (mereka.io vs biji-biji.com); do not hardcode a single Domain that would be invalid on other roots.
+  - `CSRF_TRUSTED_ORIGINS` includes all served hosts and microsites.
 
 ## 2) DNS + TLS
 - [ ] Update Cloudflare records:

@@ -27,8 +27,7 @@ Use this checklist for any domain or secret change on production (GKE). There is
   ./scripts/infra/check-cert-sans.sh
   ```
 - [ ] Confirm cookies and CSRF:
-  - `CSRF_COOKIE_DOMAIN=.academyv2.mereka.io`
-  - `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io`
+  - Cookie scope is **per root domain** (mereka.io vs biji-biji.com). Avoid hardcoding a single cookie `Domain=` that would be invalid on other roots.
   - `CSRF_TRUSTED_ORIGINS` includes academyv2 + studio + apps + microsites
 - [ ] Update OAuth redirect URIs (Google/Auth0) for new hostnames
 

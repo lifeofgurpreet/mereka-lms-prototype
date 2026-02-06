@@ -45,6 +45,10 @@ export FORUM_DOMAIN="${FORUM_DOMAIN:-forum.${LMS_DOMAIN}}"
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"
 export SKILLOURFUTURE_DOMAIN="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"
 
+# Biji-Biji dedicated subdomains (public DNS)
+export BIJI_STUDIO_DOMAIN="${BIJI_STUDIO_DOMAIN:-studio.academy.biji-biji.com}"
+export BIJI_MFE_DOMAIN="${BIJI_MFE_DOMAIN:-apps.academy.biji-biji.com}"
+
 # Development
 export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
 
