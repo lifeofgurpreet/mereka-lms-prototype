@@ -46,7 +46,7 @@ on [openedx.modulestore.structures]
 ### Create a Demo Course
 
 1. Navigate to https://studio.academyv2.mereka.io
-2. Log in as `admin@mereka.io`
+2. Log in as a platform admin (e.g., `gurpreet@biji-biji.com` or `malasari@mereka.my`)
 3. Click "New Course"
 4. Fill in:
    - Organization: `MerekaAcademy`

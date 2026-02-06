@@ -58,6 +58,29 @@ If you get a 403 after SSO, you are missing `is_staff` in that service; run:
 ./scripts/infra/ensure-platform-admins.sh
 ```
 
+## Verification (Recommended)
+
+These checks confirm that SSO entrypoints exist across the ecosystem.
+
+### Public redirect checks (from your machine)
+
+```bash
+# LMS OIDC entrypoint (should 302 to Authentik)
+curl -sS -I https://academyv2.mereka.io/auth/login/oidc/ | sed -n '1,8p'
+
+# Services that use LMS OAuth (should 302 to /login/edx-oauth2/)
+for svc in discovery credentials ecommerce; do
+  echo "== $svc =="
+  curl -sS -I "https://${svc}.academyv2.mereka.io/login/" | sed -n '1,8p'
+done
+```
+
+### Cluster permission verification (prod + dev)
+
+```bash
+./scripts/infra/ensure-platform-admins.sh --verify
+```
+
 ## What Does Not Sync (By Default)
 
 - Authentik groups do not automatically map to Open edX `is_staff`/`is_superuser`.
@@ -68,4 +91,3 @@ If you want true role sync, the typical approach is:
 - Add a custom social-auth pipeline step in each service to grant permissions based on that claim
 
 This is not implemented today; we use an idempotent enforcement script instead.
-

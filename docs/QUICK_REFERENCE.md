@@ -22,6 +22,10 @@ tutor local start -d
 - Username: `admin`
 - Password: `admin123`
 
+**Production/Dev (GKE + VPS kind):**
+- Use platform admin accounts (e.g., `gurpreet@biji-biji.com`, `malasari@mereka.my`)
+- If permissions ever drift, enforce with: `./scripts/infra/ensure-platform-admins.sh`
+
 ## 🛠️ Common Tasks
 
 ### After Config Changes
@@ -79,8 +83,8 @@ docker ps --filter "name=tutor_local"
 ## 📚 Documentation
 
 - **Setup:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`
-- **URLs:** `docs/ACCESS_URLS.md`
-- **Admin:** `docs/ADMIN_LOGIN_GUIDE.md`
+- **URLs:** `docs/operations/ACCESS_URLS.md`
+- **Admin:** `docs/operations/ADMIN_LOGIN_GUIDE.md`
 - **Analytics:** `docs/ANALYTICS_ACCESS.md`
 - **Status:** `docs/OPERATIONAL_STATUS.md`
 

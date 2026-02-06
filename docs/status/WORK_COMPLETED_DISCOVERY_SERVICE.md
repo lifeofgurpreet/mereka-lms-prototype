@@ -174,7 +174,7 @@ Updated `docs/README.md` to include new Discovery documentation in the Operation
 
 - **Courses in LMS**: 0
 - **Courses in Discovery**: 0
-- **Admin Users**: 1 (admin@mereka.io)
+- **Platform Admins**: 2 (gurpreet@biji-biji.com, malasari@mereka.my)
 
 ### MongoDB Configuration
 

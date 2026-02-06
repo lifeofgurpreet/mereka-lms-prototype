@@ -24,7 +24,7 @@ The Discovery service is running and accessible at https://discovery.academyv2.m
 |----------|-------|-------|
 | Courses in LMS | 0 | No courses created yet |
 | Courses in Discovery | 0 | Waiting for courses to sync |
-| Admin Users | 1 | admin@mereka.io |
+| Platform Admins | 2 | gurpreet@biji-biji.com, malasari@mereka.my |
 
 ## Blocking Issue: MongoDB Permissions
 

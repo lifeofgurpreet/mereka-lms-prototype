@@ -5,7 +5,7 @@ _Generated: 2025-11-12 • Task Owner: Infra_
 
 **Task 2:** User management & access setup
 - Create admin users
-- Document access URLs (see `docs/ACCESS_URLS.md`)
+- Document access URLs (see `docs/operations/ACCESS_URLS.md`)
 - Verify forum integration works
 
 ---
@@ -14,7 +14,7 @@ _Generated: 2025-11-12 • Task Owner: Infra_
 
 ### 1. Access URLs Documentation ✅ **COMPLETE**
 
-**File:** `docs/ACCESS_URLS.md`
+**File:** `docs/operations/ACCESS_URLS.md`
 
 **Status:** ✅ Fully documented
 
@@ -28,7 +28,7 @@ _Generated: 2025-11-12 • Task Owner: Infra_
 **Verification:**
 ```bash
 # File exists and is comprehensive
-ls -lh docs/ACCESS_URLS.md
+ls -lh docs/operations/ACCESS_URLS.md
 # 172 lines of documentation
 ```
 
@@ -36,7 +36,7 @@ ls -lh docs/ACCESS_URLS.md
 
 ### 2. User Management Procedures ✅ **DOCUMENTED**
 
-**File:** `docs/ACCESS_URLS.md` (lines 93-132)
+**File:** `docs/operations/ACCESS_URLS.md`
 
 **Status:** ✅ Commands documented
 
@@ -68,7 +68,7 @@ tutor local createuser --superuser --staff -p <password> <username> <email>
 - ✅ Port forwarding instructions for debugging
 
 **Files:**
-- `docs/ACCESS_URLS.md` - Forum access info
+- `docs/operations/ACCESS_URLS.md` - Forum access info
 - `docs/MONGODB_ATLAS.md` - Forum MongoDB migration guide
 - `docs/DATABASE_ARCHITECTURE.md` - Forum database architecture
 
@@ -108,7 +108,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 user, created = User.objects.get_or_create(
     username='admin',
-    defaults={'email': 'admin@mereka.io', 'is_staff': True, 'is_superuser': True}
+    defaults={'email': 'gurpreet@biji-biji.com', 'is_staff': True, 'is_superuser': True}
 )
 if created:
     user.set_password('CHANGE_THIS_PASSWORD')
@@ -172,8 +172,8 @@ curl http://localhost:4567/api/v1/health
 
 | Subtask | Status | Notes |
 |---------|--------|-------|
-| **Document access URLs** | ✅ **100%** | Fully documented in `docs/ACCESS_URLS.md` |
-| **Document user management** | ✅ **100%** | Commands documented in `docs/ACCESS_URLS.md` |
+| **Document access URLs** | ✅ **100%** | Fully documented in `docs/operations/ACCESS_URLS.md` |
+| **Document user management** | ✅ **100%** | Commands documented in `docs/operations/ACCESS_URLS.md` |
 | **Create admin users** | ⚠️ **0%** | Needs verification and creation |
 | **Verify forum integration** | ⚠️ **30%** | Documentation exists, but integration not verified |
 
@@ -221,7 +221,7 @@ kubectl exec -n mereka-lms deploy/forum -- env | grep MONGODB
 
 ### Step 3: Document Credentials Securely (MEDIUM PRIORITY)
 - Store admin credentials in Google Secret Manager
-- Document access procedure in `docs/ACCESS_URLS.md`
+- Document access procedure in `docs/operations/ACCESS_URLS.md`
 - Add note about credential rotation
 
 ---
@@ -237,8 +237,8 @@ kubectl exec -n mereka-lms deploy/forum -- env | grep MONGODB
 
 ## ✅ Task 2 Completion Checklist
 
-- [x] Document access URLs (`docs/ACCESS_URLS.md`)
-- [x] Document user management procedures (`docs/ACCESS_URLS.md`)
+- [x] Document access URLs (`docs/operations/ACCESS_URLS.md`)
+- [x] Document user management procedures (`docs/operations/ACCESS_URLS.md`)
 - [ ] Verify admin users exist in production
 - [ ] Create admin users if needed
 - [ ] Verify forum deployment is running

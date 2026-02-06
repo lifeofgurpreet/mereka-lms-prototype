@@ -812,7 +812,7 @@ kubectl get endpoints -n "$NAMESPACE" | grep -E "NAME|$SERVICES"
 ## 📚 Related Documentation
 
 - [`docs/operations/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures
-- [`docs/ACCESS_URLS.md`](../ACCESS_URLS.md) - Service URLs and access info
+- [`docs/operations/ACCESS_URLS.md`](ACCESS_URLS.md) - Service URLs and access info
 - [`docs/DATABASE_ARCHITECTURE.md`](../DATABASE_ARCHITECTURE.md) - Database connectivity guide
 
 ---

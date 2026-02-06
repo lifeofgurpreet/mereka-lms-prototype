@@ -35,7 +35,7 @@ kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell --settings=t
 ```
 
 **Documentation Updated:**
-- ✅ Added admin user list to `docs/ACCESS_URLS.md`
+- ✅ Added admin user list to `docs/operations/ACCESS_URLS.md`
 - ✅ Documented verification procedure
 
 ---
@@ -45,7 +45,7 @@ kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell --settings=t
 ### Status: ✅ Complete
 
 **Action Taken:**
-- Verified all URLs are documented in `docs/ACCESS_URLS.md`
+- Verified all URLs are documented in `docs/operations/ACCESS_URLS.md`
 - Confirmed documentation includes all environments (Local, Dev, Production)
 
 **Results:**
@@ -54,7 +54,7 @@ kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell --settings=t
 - ✅ Port forwarding instructions included
 - ✅ Quick reference table provided
 
-**File:** `docs/ACCESS_URLS.md` (172 lines)
+**File:** `docs/operations/ACCESS_URLS.md`
 
 ---
 
@@ -115,7 +115,7 @@ kubectl get svc forum -n mereka-lms
 - Forum startup may take 1-2 minutes while waiting for dependencies
 
 **Documentation Updated:**
-- ✅ Added forum status to `docs/ACCESS_URLS.md`
+- ✅ Added forum status to `docs/operations/ACCESS_URLS.md`
 - ✅ Documented forum integration verification
 
 ---
@@ -193,4 +193,3 @@ kubectl get svc forum -n mereka-lms
 **Report Generated:** 2025-11-12
 **Verified By:** Infrastructure Team
 **Status:** ✅ Task 2 Complete
-

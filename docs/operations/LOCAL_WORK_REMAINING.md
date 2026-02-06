@@ -26,7 +26,7 @@ _Last updated: 2025-11-11_
   ```
 - [ ] Verify admin panel access: http://localhost/admin
 - [ ] Test forum integration (create test course with discussion)
-- [ ] Document local access URLs in `docs/ACCESS_URLS.md` (add localhost section)
+- [ ] Document local access URLs in `docs/operations/ACCESS_URLS.md` (add localhost section)
 
 **Why now:** Need admin access to test features and verify everything works locally before deploying.
 

@@ -83,10 +83,10 @@ _Last updated: 2025-11-12 • Auto-generated_
 - `docs/LOCAL_DEVELOPMENT_GUIDE.md` - Complete setup guide
 - `docs/QUICK_START_LOCAL.md` - Quick setup (5 min)
 - `docs/AGENT_SETUP_CHECKLIST.md` - Step-by-step checklist
-- `docs/ADMIN_LOGIN_GUIDE.md` - Admin login troubleshooting
+- `docs/operations/ADMIN_LOGIN_GUIDE.md` - Admin login troubleshooting
 
 ### Reference
-- `docs/ACCESS_URLS.md` - All URLs (local/dev/production)
+- `docs/operations/ACCESS_URLS.md` - All URLs (local/dev/production)
 - `docs/LOCAL_PRODUCTION_PARITY.md` - Parity strategy
 - `docs/MFE_COMPLETE_LIST.md` - All MFEs documented
 - `docs/PARITY_ISSUES_FOUND.md` - Parity issues and fixes

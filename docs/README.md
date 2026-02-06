@@ -18,8 +18,9 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
-| [`operations/ACCESS_URLS.md`](operations/ACCESS_URLS.md) | **QUICK REFERENCE:** All URLs (LMS, Studio, Forum, Admin) and user management | 2025-11-11 |
-| [`operations/ADMIN_LOGIN_GUIDE.md`](operations/ADMIN_LOGIN_GUIDE.md) | Admin access and login instructions | 2025-11-12 |
+| [`operations/ACCESS_URLS.md`](operations/ACCESS_URLS.md) | **QUICK REFERENCE:** All URLs (LMS, Studio, Forum, Admin) and user management | 2026-02-06 |
+| [`operations/ADMIN_LOGIN_GUIDE.md`](operations/ADMIN_LOGIN_GUIDE.md) | Admin access and login instructions | 2026-02-06 |
+| [`operations/AUTH_AND_PERMISSIONS.md`](operations/AUTH_AND_PERMISSIONS.md) | How Authentik SSO and Open edX permissions fit together (and what does not sync) | 2026-02-06 |
 | [`operations/LOCAL_ACCESS_INFO.md`](operations/LOCAL_ACCESS_INFO.md) | Local development URLs and credentials | 2025-11-12 |
 | [`operations/LOCAL_PRODUCTION_PARITY.md`](operations/LOCAL_PRODUCTION_PARITY.md) | Local/production parity guide | 2025-11-12 |
 | [`operations/LOCAL_WORK_REMAINING.md`](operations/LOCAL_WORK_REMAINING.md) | Current local development tasks | 2025-11-12 |

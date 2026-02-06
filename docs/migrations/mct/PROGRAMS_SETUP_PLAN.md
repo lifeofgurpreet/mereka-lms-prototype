@@ -643,8 +643,13 @@ kubectl get pods -n mereka-lms | grep discovery
 curl -I https://discovery.academyv2.mereka.io/health/
 
 # Check Discovery admin access
-# Navigate to: https://discovery.academyv2.mereka.io/admin/
-# Login with LMS superuser credentials
+# Log in via SSO first:
+#   https://discovery.academyv2.mereka.io/login/  (redirects to /login/edx-oauth2/)
+# Then open:
+#   https://discovery.academyv2.mereka.io/admin/
+#
+# If you get a 403 in admin, ensure your account is a platform admin:
+#   ./scripts/infra/ensure-platform-admins.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
 ```
 
 **Expected Result:** Discovery service is running and admin interface is accessible.

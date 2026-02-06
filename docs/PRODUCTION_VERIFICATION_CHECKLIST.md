@@ -173,7 +173,7 @@ Same as above - multisite_bootstrap.py creates both
 After verification, update:
 - `docs/OPERATIONAL_STATUS.md` with production findings
 - `docs/MULTISITE_ANALYSIS.md` with actual distribution
-- `docs/ACCESS_URLS.md` with verified URLs
+- `docs/operations/ACCESS_URLS.md` with verified URLs
 
 ---
 
