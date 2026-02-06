@@ -368,6 +368,7 @@ SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = MEREKA_LMS_BASE_URL
 # Hardening: keep platform admins as staff/superuser and ensure CourseCreator (prevents drift).
 MIDDLEWARE = list(MIDDLEWARE) + [
     "cms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
+    "cms.envs.tutor.mereka_multisite.MerekaStudioSigninRedirectMiddleware",
     "cms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware",
 ]
 
@@ -388,11 +389,18 @@ for origin in [
 
 # Prometheus metrics
 sys.path.insert(0, "/openedx")
-if "django_prometheus" not in INSTALLED_APPS:
-    INSTALLED_APPS.insert(0, "django_prometheus")
-if "openedx_prometheus" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_prometheus")
-if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
-if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+try:
+    import django_prometheus  # noqa: F401
+except Exception:
+    # Some images/environments don't ship with django_prometheus installed.
+    # Skip metrics wiring instead of crashing the whole service.
+    pass
+else:
+    if "django_prometheus" not in INSTALLED_APPS:
+        INSTALLED_APPS.insert(0, "django_prometheus")
+    if "openedx_prometheus" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("openedx_prometheus")
+    if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+    if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")

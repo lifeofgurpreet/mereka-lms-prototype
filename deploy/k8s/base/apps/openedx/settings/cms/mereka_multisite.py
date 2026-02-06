@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urlsplit
 
 
 _PATCHED = False
@@ -100,3 +101,66 @@ class MerekaCookieDomainMiddleware:
 
         return response
 
+
+def _lms_root_url_for_host(host: str) -> Optional[str]:
+    """
+    Resolve LMS_ROOT_URL for a request host.
+
+    Studio's `/signin` redirect uses a static `FRONTEND_LOGIN_URL` setting which
+    isn't multisite-aware. We derive the tenant's LMS root from Sites +
+    SiteConfiguration instead.
+    """
+    from django.contrib.sites.models import Site
+
+    for candidate in _candidate_site_domains(host):
+        site = Site.objects.filter(domain__iexact=candidate).first()
+        if not site:
+            continue
+        cfg = getattr(site, "configuration", None)
+        values = (getattr(cfg, "site_values", None) or {}) if cfg else {}
+        lms_root = (values.get("LMS_ROOT_URL") or "").strip()
+        if lms_root:
+            return lms_root.rstrip("/")
+        # Fallback: if we have a Site row but no SiteConfiguration override.
+        return f"https://{candidate}".rstrip("/")
+    return None
+
+
+class MerekaStudioSigninRedirectMiddleware:
+    """
+    Rewrite Studio `/signin` redirects to the correct tenant LMS domain.
+
+    This is a pragmatic backstop because CMS uses a static `FRONTEND_LOGIN_URL`
+    which is not computed per-request.
+    """
+
+    def __init__(self, get_response):
+        patch_sites_framework()
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # Only needed for Studio's legacy redirect endpoints.
+        path = getattr(request, "path", "") or ""
+        if path not in ("/signin", "/signin_redirect_to_lms"):
+            return response
+
+        if getattr(response, "status_code", 0) not in (301, 302, 303, 307, 308):
+            return response
+
+        location = response.get("Location") if hasattr(response, "get") else None
+        if not location or not (location.startswith("http://") or location.startswith("https://")):
+            return response
+
+        lms_root = _lms_root_url_for_host(getattr(request, "get_host", lambda: "")())
+        if not lms_root:
+            return response
+
+        parts = urlsplit(location)
+        # Only rewrite redirects to /login or /register endpoints.
+        if parts.path not in ("/login", "/register"):
+            return response
+
+        response["Location"] = f"{lms_root}{parts.path}" + (f"?{parts.query}" if parts.query else "")
+        return response

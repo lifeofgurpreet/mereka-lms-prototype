@@ -9,6 +9,7 @@ import os
 import pathlib
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 import pymysql
 import textwrap
@@ -122,6 +123,38 @@ def upsert_sites(connection, definitions: List[SiteDefinition], dry_run: bool) -
             site_id = cursor.fetchone()[0]
             rendered_values = dict(definition.site_values)
             rendered_values["course_org_filter"] = definition.orgs
+
+            # Ensure MFEs don't drift back to the primary LMS domain by providing
+            # per-site MFE_CONFIG overrides (merged by the MFE config API).
+            lms_root = str(rendered_values.get("LMS_ROOT_URL") or "").rstrip("/")
+            cms_root = str(rendered_values.get("CMS_ROOT_URL") or "").rstrip("/")
+            mfe_base = str(rendered_values.get("MFE_BASE_URL") or "").rstrip("/")
+            if lms_root:
+                mfe_host = ""
+                if mfe_base:
+                    try:
+                        parsed = urlparse(mfe_base)
+                        mfe_host = parsed.netloc or ""
+                    except Exception:
+                        mfe_host = ""
+                overrides: dict[str, object] = {
+                    "LMS_BASE_URL": lms_root,
+                    "LOGIN_URL": f"{lms_root}/login",
+                    "LOGOUT_URL": f"{lms_root}/logout",
+                    "MARKETING_SITE_BASE_URL": lms_root,
+                    "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{lms_root}/login_refresh",
+                    "FAVICON_URL": f"{lms_root}/favicon.ico",
+                    "LOGO_URL": f"{lms_root}/theming/asset/images/logo.png",
+                    "LOGO_WHITE_URL": f"{lms_root}/theming/asset/images/logo.png",
+                    "LOGO_TRADEMARK_URL": f"{lms_root}/theming/asset/images/logo.png",
+                }
+                if cms_root:
+                    overrides["STUDIO_BASE_URL"] = cms_root
+                if mfe_host:
+                    overrides["BASE_URL"] = mfe_host
+                    overrides["AUTHN_MICROFRONTEND_URL"] = f"https://{mfe_host}/authn"
+                rendered_values["MFE_CONFIG"] = overrides
+
             site_values = json.dumps(rendered_values, sort_keys=True)
             cursor.execute(
                 """

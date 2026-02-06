@@ -15,9 +15,9 @@
     
 
     reverse_proxy /api/mfe_config/v1* lms:8000 {
-        # We need to specify the host header, otherwise it will be rejected with 400
-        # from the lms.
-        header_up Host lms
+        # Preserve the original Host so LMS can resolve the correct SiteConfiguration
+        # (required for multisite MFE config).
+        header_up Host {http.request.host}
     }
 
     

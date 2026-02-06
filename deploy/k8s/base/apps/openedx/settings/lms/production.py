@@ -663,19 +663,33 @@ for origin in [
 
 # MFE OAuth fix + Prometheus metrics
 sys.path.insert(0, "/openedx")
-if "mfe_oauth_fix" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("mfe_oauth_fix")
-ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
-if "mfe_oauth_fix.urls" not in ROOT_URLCONF_OVERRIDES:
-    ROOT_URLCONF_OVERRIDES.insert(0, "mfe_oauth_fix.urls")
-if "mfe_oauth_fix.middleware.MFEOAuthFixMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.append("mfe_oauth_fix.middleware.MFEOAuthFixMiddleware")
+try:
+    import mfe_oauth_fix  # noqa: F401
+except Exception:
+    # Some images/environments don't include this custom patch app.
+    # Skip it rather than crashing the whole service.
+    pass
+else:
+    if "mfe_oauth_fix" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("mfe_oauth_fix")
+    ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+    if "mfe_oauth_fix.urls" not in ROOT_URLCONF_OVERRIDES:
+        ROOT_URLCONF_OVERRIDES.insert(0, "mfe_oauth_fix.urls")
+    if "mfe_oauth_fix.middleware.MFEOAuthFixMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.append("mfe_oauth_fix.middleware.MFEOAuthFixMiddleware")
 
-if "django_prometheus" not in INSTALLED_APPS:
-    INSTALLED_APPS.insert(0, "django_prometheus")
-if "openedx_prometheus" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_prometheus")
-if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
-if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
-    MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+try:
+    import django_prometheus  # noqa: F401
+except Exception:
+    # Some images/environments don't ship with django_prometheus installed.
+    # Skip metrics wiring instead of crashing the whole service.
+    pass
+else:
+    if "django_prometheus" not in INSTALLED_APPS:
+        INSTALLED_APPS.insert(0, "django_prometheus")
+    if "openedx_prometheus" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("openedx_prometheus")
+    if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+    if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")

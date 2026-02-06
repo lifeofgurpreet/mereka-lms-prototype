@@ -6,16 +6,48 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../shared/config.sh"
 
 ENVIRONMENT="${1:-prod}"
+shift || true
 if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Usage: $0 [prod|dev]" >&2
+  echo "Usage: $0 [prod|dev] [--context CONTEXT] [--namespace NS]" >&2
   exit 1
 fi
 
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 STRICT="${STRICT:-0}"
+CTX_OVERRIDE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context)
+      CTX_OVERRIDE="$2"
+      shift 2
+      ;;
+    --namespace)
+      NAMESPACE="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Default contexts per environment (avoid accidentally checking dev values in prod DB).
+DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+DEFAULT_DEV_CTX="kind-dev"
+K8S_CONTEXT_EFFECTIVE="${CTX_OVERRIDE:-}"
+if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
+  if [[ "$ENVIRONMENT" == "prod" ]]; then
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
+  else
+    K8S_CONTEXT_EFFECTIVE="$DEFAULT_DEV_CTX"
+  fi
+fi
+
 CONTEXT_ARGS=()
-if [[ -n "${K8S_CONTEXT:-}" ]]; then
-  CONTEXT_ARGS+=(--context "${K8S_CONTEXT}")
+if [[ -n "${K8S_CONTEXT_EFFECTIVE:-}" ]]; then
+  CONTEXT_ARGS+=(--context "${K8S_CONTEXT_EFFECTIVE}")
 fi
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then

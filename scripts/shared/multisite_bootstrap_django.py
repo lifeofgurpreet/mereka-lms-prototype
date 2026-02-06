@@ -12,6 +12,7 @@ import json
 import textwrap
 from dataclasses import dataclass
 from typing import Dict, List
+from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,7 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
     """Create or update Site and SiteConfiguration records."""
     from django.contrib.sites.models import Site
     from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+    from django.conf import settings
 
     for definition in definitions:
         if dry_run:
@@ -138,6 +140,45 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         # Prepare site values
         rendered_values = dict(definition.site_values)
         rendered_values["course_org_filter"] = definition.orgs
+
+        # MFE config API returns `settings.MFE_CONFIG` unless the current site's
+        # SiteConfiguration provides `MFE_CONFIG` overrides. For multisite, we
+        # must override tenant-specific URLs (LMS/STUDIO/MFE base) so MFEs don't
+        # drift back to the primary LMS domain.
+        lms_root = (rendered_values.get("LMS_ROOT_URL") or "").rstrip("/")
+        cms_root = (rendered_values.get("CMS_ROOT_URL") or "").rstrip("/")
+        mfe_base = (rendered_values.get("MFE_BASE_URL") or "").rstrip("/")
+        if lms_root:
+            mfe_host = ""
+            if mfe_base:
+                try:
+                    parsed = urlparse(mfe_base)
+                    mfe_host = parsed.netloc or ""
+                except Exception:
+                    mfe_host = ""
+
+            default_cfg = dict(getattr(settings, "MFE_CONFIG", {}) or {})
+            overrides: dict[str, object] = {}
+            # Tenant-specific core URLs.
+            overrides["LMS_BASE_URL"] = lms_root
+            overrides["LOGIN_URL"] = f"{lms_root}/login"
+            overrides["LOGOUT_URL"] = f"{lms_root}/logout"
+            overrides["MARKETING_SITE_BASE_URL"] = lms_root
+            overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = f"{lms_root}/login_refresh"
+            overrides["FAVICON_URL"] = f"{lms_root}/favicon.ico"
+            overrides["LOGO_URL"] = f"{lms_root}/theming/asset/images/logo.png"
+            overrides["LOGO_WHITE_URL"] = f"{lms_root}/theming/asset/images/logo.png"
+            overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/images/logo.png"
+            if cms_root:
+                overrides["STUDIO_BASE_URL"] = cms_root
+            if mfe_host:
+                overrides["BASE_URL"] = mfe_host
+                # Keep AUTHN MFE URLs in sync when the MFE host changes.
+                if "AUTHN_MICROFRONTEND_URL" in default_cfg:
+                    overrides["AUTHN_MICROFRONTEND_URL"] = f"https://{mfe_host}/authn"
+
+            # Store overrides only; the API merges with settings.MFE_CONFIG.
+            rendered_values["MFE_CONFIG"] = overrides
 
         # Create or update SiteConfiguration
         site_config, created = SiteConfiguration.objects.update_or_create(

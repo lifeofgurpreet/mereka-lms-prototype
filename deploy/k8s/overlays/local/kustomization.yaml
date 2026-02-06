@@ -28,12 +28,16 @@ patchesStrategicMerge:
 
 # Use local images
 images:
-  - name: openedx
-    newName: openedx
-    newTag: latest
-  - name: openedx-mfe
-    newName: openedx-mfe
-    newTag: latest
+  # Local overlay should not depend on `:latest` tags (which trigger AlwaysPull).
+  # Keep images aligned with whatever the base is already using, unless you are
+  # explicitly testing a new build/tag.
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    # Use a tag already present on the kind nodes to avoid Artifact Registry auth.
+    newTag: mereka-brand
+  - name: docker.io/overhangio/openedx-mfe
+    newName: docker.io/overhangio/openedx-mfe
+    newTag: 18.1.0-indigo
 
 # Minimal replicas for local dev
 replicas:

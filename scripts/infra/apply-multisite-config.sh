@@ -8,8 +8,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
+K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
-DRY_RUN="${DRY_RUN:-false}"
+DRY_RUN="${DRY_RUN:-true}"
 ENVIRONMENT="${ENVIRONMENT:-prod}"
 DEFINITIONS_PATH=""
 
@@ -28,19 +29,21 @@ Usage: $0 [OPTIONS]
 Apply multisite configuration to LMS database via kubectl exec.
 
 OPTIONS:
+  -c, --context CONTEXT       Kubernetes context (default: $K8S_CONTEXT)
   -n, --namespace NAMESPACE   K8s namespace (default: mereka-lms)
   -e, --env ENV               Which definition set to apply (prod|dev). Default: prod
   --definitions PATH          Path to multisite definitions YAML (overrides --env)
-  --dry-run                   Preview operations without applying changes
-  --apply                     Apply changes to database (required to make changes)
+  --dry-run                   Preview operations without applying changes (default)
+  --apply                     Apply changes to database
   -h, --help                  Show this help message
 
 EXAMPLES:
   # Preview changes (dry run - default)
-  $0 --dry-run
+  $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
 
   # Apply changes to production/dev
-  $0 --apply
+  $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
+  $0 --context kind-dev --env dev --apply
 
   # Apply to different namespace
   $0 --namespace production --apply
@@ -57,6 +60,10 @@ EOF
 APPLY_FLAG=""
 while [[ $# -gt 0 ]]; do
   case $1 in
+    -c|--context)
+      K8S_CONTEXT="$2"
+      shift 2
+      ;;
     -n|--namespace)
       NAMESPACE="$2"
       shift 2
@@ -105,13 +112,17 @@ if [[ ! -f "$DEFINITIONS_PATH" ]]; then
 fi
 
 # Find LMS pod
-log_info "Finding LMS pod in namespace: $NAMESPACE"
-LMS_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+log_info "Finding LMS pod in context=$K8S_CONTEXT namespace=$NAMESPACE"
+LMS_POD=$(
+  kubectl --context "$K8S_CONTEXT" get pods -n "$NAMESPACE" \
+    -l app.kubernetes.io/name=lms \
+    -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo ""
+)
 
 if [[ -z "$LMS_POD" ]]; then
   log_error "No LMS pod found in namespace $NAMESPACE"
   log_error "Check that the namespace exists and pods are running:"
-  log_error "  kubectl get pods -n $NAMESPACE"
+  log_error "  kubectl --context $K8S_CONTEXT get pods -n $NAMESPACE"
   exit 1
 fi
 
@@ -119,24 +130,24 @@ log_info "Using LMS pod: $LMS_POD"
 
 # Copy the multisite bootstrap script to the pod
 log_info "Copying multisite_bootstrap_django.py to LMS pod..."
-kubectl cp "$REPO_ROOT/scripts/shared/multisite_bootstrap_django.py" \
+kubectl --context "$K8S_CONTEXT" cp "$REPO_ROOT/scripts/shared/multisite_bootstrap_django.py" \
   "$NAMESPACE/$LMS_POD:/tmp/multisite_bootstrap.py"
 
 # Copy the multisite definition YAML (single source of truth)
 log_info "Copying multisite definitions to LMS pod: $DEFINITIONS_PATH"
-kubectl cp "$DEFINITIONS_PATH" \
+kubectl --context "$K8S_CONTEXT" cp "$DEFINITIONS_PATH" \
   "$NAMESPACE/$LMS_POD:/tmp/multisite-sites.yml"
 
 # Run the script
 if [[ "$DRY_RUN" == "true" ]]; then
   log_info "Running in DRY RUN mode (no changes will be made)"
-  kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+  kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$LMS_POD" -- \
     env MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
     python /tmp/multisite_bootstrap.py \
     --dry-run
 else
-  log_info "Applying multisite configuration to database..."
-  kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+  log_info "Applying multisite configuration to database (context=$K8S_CONTEXT namespace=$NAMESPACE)..."
+  kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$LMS_POD" -- \
     env MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
     python /tmp/multisite_bootstrap.py \
     $APPLY_FLAG
@@ -144,14 +155,14 @@ fi
 
 # Cleanup
 log_info "Cleaning up temporary files..."
-kubectl exec -n "$NAMESPACE" "$LMS_POD" -- rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml
+kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$LMS_POD" -- rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml
 
 log_info "Done!"
 
 if [[ "$DRY_RUN" == "true" ]]; then
   log_info ""
   log_info "This was a dry run. To apply changes, run:"
-  log_info "  $0 --apply"
+  log_info "  $0 --context $K8S_CONTEXT --namespace $NAMESPACE --env $ENVIRONMENT --apply"
 else
   log_info ""
   log_info "Multisite configuration applied successfully!"
