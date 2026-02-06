@@ -1,7 +1,7 @@
 # Mereka LMS Observability Enhancement Plan
 
 **Project**: mereka-lms  
-**Version**: 2.3
+**Version**: 2.5
 **Date**: 2026-02-06  
 **Status**: Active  
 **Owner**: SRE/Infra  
@@ -18,6 +18,34 @@ There is **no staging environment**.
 Reality-first:
 - Production MySQL/Redis are **in-cluster** and PVC-backed (not Cloud SQL/Memorystore).
 - Any Cloud SQL references are legacy unless explicitly reintroduced.
+
+---
+
+## Shipped This Cycle (2026-02-06)
+
+- Added `operations-signals` dashboard template:
+  - `infrastructure/monitoring/dashboards/operations-signals.json`
+- Added new log metrics + alerts for:
+  - stateful storage errors
+  - MySQL connection errors
+  - Redis connection errors
+  - Velero backup-verification failures
+  - Velero restore-test failures
+- Added MySQL/Redis saturation alerts:
+  - `infrastructure/monitoring/alerts/mysql-saturation-high.json`
+  - `infrastructure/monitoring/alerts/redis-saturation-high.json`
+- Added Velero freshness/success signals:
+  - `infrastructure/monitoring/logging-metrics/velero-backup-verification-success.json`
+  - `infrastructure/monitoring/logging-metrics/velero-restore-test-success.json`
+  - `infrastructure/monitoring/alerts/velero-backup-verification-stale.json`
+  - `infrastructure/monitoring/alerts/velero-restore-test-stale.json`
+- Added PVC utilization alert template:
+  - `infrastructure/monitoring/alerts/pvc-utilization-high.json`
+- Added local/runtime audit command:
+  - `scripts/qa/audit-observability.sh`
+- Added CI automation:
+  - `.github/workflows/observability-audit.yml`
+  - PR guardrails in `.github/workflows/ci.yml`
 
 ---
 
@@ -57,6 +85,10 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - `log-redis-connection-errors.json`
 - `log-velero-backup-verification-failures.json`
 - `log-velero-restore-test-failures.json`
+- `mysql-saturation-high.json`
+- `redis-saturation-high.json`
+- `velero-backup-verification-stale.json`
+- `velero-restore-test-stale.json`
 
 **Log-based metrics**  
 `infrastructure/monitoring/logging-metrics/`:
@@ -73,6 +105,8 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - `redis-connection-errors.json`
 - `velero-backup-verification-failures.json`
 - `velero-restore-test-failures.json`
+- `velero-backup-verification-success.json`
+- `velero-restore-test-success.json`
 
 **Dashboards**
 - GCP dashboard JSON: `infrastructure/monitoring/dashboards/`  
@@ -118,16 +152,17 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Add a GCP Monitoring alert policy for PVC volume usage (or equivalent metric pipeline).
 - Runbook section: what to do when MySQL/Redis/Elasticsearch PVC is near full.
 
-**Status:** In progress (interim logging-based storage error detection shipped, plus `pvc-utilization-high` alert template + dashboard panel added).
+**Status:** Done (alert + dashboard panel shipped).
 
 ### 7) In-cluster data service saturation signals (MySQL + Redis)
 **Why:** Today we mostly infer DB/cache pain via app symptoms (timeouts/499s). We need direct saturation signals.
 
 **Deliverables**
-- Add exporters (or managed-equivalent telemetry) for:
-  - MySQL: connections, slow queries, QPS/latency, innodb buffer pool pressure
-  - Redis: memory usage, evictions, hit rate, latency
-- Add dashboards + alerts for the above.
+- Add saturation coverage based on currently available GKE metrics.
+- Add dashboards + alerts for MySQL/Redis pressure.
+- Keep exporter-level telemetry as next-level hardening.
+
+**Status:** Done for baseline (`mysql-saturation-high`, `redis-saturation-high`, dashboard panels); exporter-level signals remain optional hardening.
 
 ### 8) Backup posture in observability (Velero)
 **Why:** Backups that exist but are silently failing are worse than no backups.
@@ -136,7 +171,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Dashboard panels for: last successful backup per schedule, last restore drill, restore drill pass/fail.
 - Alerts when restore drills fail or schedules stop producing recent backups.
 
-**Status:** In progress (restore-test and backup-verification log alerts shipped; next step is schedule-recency and status panels).
+**Status:** In progress (failures + success metrics + stale-success alerts + dashboard status panels shipped; remaining dependency is making `restore-test` CronJob consistently succeed in-cluster).
 
 ### 9) Deterministic observability audit command
 **Why:** Operators need one command that says what is missing in repo vs runtime.

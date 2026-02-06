@@ -18,7 +18,12 @@ _Audience: On-call + SRE • Last updated: 2026-02-06_
 | Stateful storage errors | `infrastructure/monitoring/alerts/log-stateful-storage-errors.json` | ERROR | Immediate |
 | Velero backup verification failures | `infrastructure/monitoring/alerts/log-velero-backup-verification-failures.json` | ERROR | Immediate |
 | Velero restore-test failures | `infrastructure/monitoring/alerts/log-velero-restore-test-failures.json` | ERROR | Immediate |
+| Velero backup verification stale (no success in 30h) | `infrastructure/monitoring/alerts/velero-backup-verification-stale.json` | ERROR | Immediate |
+| Velero restore-test stale (no success in 45d) | `infrastructure/monitoring/alerts/velero-restore-test-stale.json` | ERROR | Immediate |
 | Pod restarts | `infrastructure/monitoring/alerts/pod-restarts.json` | WARNING | Business-hours triage unless sustained |
+| PVC utilization high | `infrastructure/monitoring/alerts/pvc-utilization-high.json` | WARNING | Business-hours triage; escalate early for stateful services |
+| MySQL saturation high | `infrastructure/monitoring/alerts/mysql-saturation-high.json` | WARNING | Business-hours triage unless sustained / user impact |
+| Redis saturation high | `infrastructure/monitoring/alerts/redis-saturation-high.json` | WARNING | Business-hours triage unless sustained / user impact |
 | MySQL connection errors | `infrastructure/monitoring/alerts/log-mysql-connection-errors.json` | WARNING | Business-hours triage unless sustained |
 | Redis connection errors | `infrastructure/monitoring/alerts/log-redis-connection-errors.json` | WARNING | Business-hours triage unless sustained |
 | Auth failure spikes (LMS/credentials/forum) | `infrastructure/monitoring/alerts/log-auth-failures*.json` | WARNING | Investigate auth drift |

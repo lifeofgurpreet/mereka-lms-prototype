@@ -299,6 +299,23 @@ check_forum_heartbeat() {
   fi
 }
 
+check_credentials_health() {
+  local credentials_host=$1
+  local health_url="https://${credentials_host}/health/"
+  local admin_url="https://${credentials_host}/admin/login/"
+  local body
+
+  check_http "$admin_url" "Credentials admin login reachable"
+  body="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$health_url" 2>/dev/null || true)"
+  if printf '%s' "$body" | rg -F -q '"overall_status"' \
+    && printf '%s' "$body" | rg -F -q '"database_status"'; then
+    printf "✓ Credentials health payload includes status fields\n"
+  else
+    printf "✗ Credentials health payload missing expected status fields\n" >&2
+    failures=$((failures + 1))
+  fi
+}
+
 echo "Branding verification ($ENVIRONMENT) for ${BASE_DOMAIN}..."
 echo "Branding level: ${BRANDING_LEVEL}"
 echo ""
@@ -328,6 +345,7 @@ check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
 check_forum_heartbeat "${FORUM_HOST}"
+check_credentials_health "credentials.${BASE_DOMAIN}"
 
 for host in "${EXTRA_HOSTS[@]}"; do
   check_http "https://${host}/" "Microsite ${host} reachable"

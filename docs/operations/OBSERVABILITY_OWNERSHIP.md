@@ -23,6 +23,7 @@ This document defines who owns each observability layer and how changes are sync
    - `./scripts/infra/apply-monitoring-configs.sh apply`
 5. Verify deployed coverage:
    - `./scripts/qa/audit-observability.sh --mode runtime`
+   - For release gates / deep audits: `STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime`
 6. If panel parity is needed in VPS Grafana, open/update PR in observability repo and link both PRs.
 
 ## Drift Rules
@@ -40,4 +41,5 @@ This document defines who owns each observability layer and how changes are sync
   - dashboard panel (if operator-facing)
 - `audit-observability --mode local` passes.
 - Offline plan is generated and attached (CI artifact).
+- If change touches Velero coverage, run strict runtime audit and confirm freshness status for `backup-verification` and `restore-test`.
 - Docs updated (`MONITORING.md`, quickstart/runbooks as needed).

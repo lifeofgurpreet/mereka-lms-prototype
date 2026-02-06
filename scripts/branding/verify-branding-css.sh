@@ -68,6 +68,8 @@ require_contains "Exports token --mereka-color-magenta" "$COMMON_CSS" "--mereka-
 require_contains "Exports token --mereka-font-body" "$COMMON_CSS" "--mereka-font-body"
 require_contains "Exports Paragon token --pgn-color-primary" "$COMMON_CSS" "--pgn-color-primary"
 require_contains "Footer styles present" "$COMMON_CSS" ".mereka-footer"
+require_contains "Footer logo size cap present" "$COMMON_CSS" ".mereka-footer .footer-brand img"
+require_contains "Footer logo width is constrained" "$COMMON_CSS" "width: 120px;"
 
 if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   echo ""
@@ -76,6 +78,9 @@ if [[ "$BRANDING_LEVEL" == "deep" ]]; then
   require_contains "Courseware styling present" "$COMMON_CSS" ".courseware"
   require_contains "Sequence nav styling present" "$COMMON_CSS" ".sequence-nav"
   require_contains "XBlock styling present" "$COMMON_CSS" ".xblock"
+  require_contains "XBlock discussion styling present" "$COMMON_CSS" ".discussion-module"
+  require_contains "XBlock video styling present" "$COMMON_CSS" ".video"
+  require_contains "Dashboard notice styling present" "$COMMON_CSS" ".dashboard .notice"
   require_contains "Studio wrapper styling present" "$COMMON_CSS" ".wrapper-content"
 fi
 

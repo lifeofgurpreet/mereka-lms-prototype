@@ -140,15 +140,41 @@ check_forum() {
   fi
 }
 
+check_credentials() {
+  local host=$1
+  local health body admin_code
+  health="https://${host}/health/"
+  admin_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/admin/login/" || echo "000")"
+  if [[ "$admin_code" =~ ^[23][0-9][0-9]$ ]]; then
+    ok "Credentials admin login reachable (${admin_code})"
+  else
+    gap "Credentials admin login not reachable (${admin_code})"
+  fi
+
+  body="$(fetch "$health")"
+  if [[ -z "${body:-}" ]]; then
+    gap "Credentials health endpoint empty/unreachable"
+    return
+  fi
+  if printf '%s' "$body" | rg -F -q '"overall_status"' \
+    && printf '%s' "$body" | rg -F -q '"database_status"'; then
+    ok "Credentials health payload shape OK"
+  else
+    gap "Credentials health payload missing expected status fields"
+  fi
+}
+
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_lms_overrides "$LMS_DOMAIN" "LMS (${LMS_DOMAIN})"
   check_lms_overrides "$BIJI_DOMAIN" "Microsite (${BIJI_DOMAIN})"
   check_lms_overrides "$SKILLOURFUTURE_DOMAIN" "Microsite (${SKILLOURFUTURE_DOMAIN})"
   check_studio_css "$STUDIO_DOMAIN" "Studio (${STUDIO_DOMAIN})"
+  check_credentials "credentials.${LMS_DOMAIN}"
   check_forum "$FORUM_DOMAIN"
 else
   check_lms_overrides "$DEV_LMS_DOMAIN" "LMS (${DEV_LMS_DOMAIN})"
   check_studio_css "$DEV_STUDIO_DOMAIN" "Studio (${DEV_STUDIO_DOMAIN})"
+  check_credentials "credentials.${DEV_LMS_DOMAIN}"
   check_forum "$DEV_FORUM_DOMAIN"
 fi
 

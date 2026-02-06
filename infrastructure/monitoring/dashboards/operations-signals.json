@@ -31,6 +31,110 @@
         }
       },
       {
+        "title": "MySQL CPU request utilization",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/cpu/request_utilization\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" resource.label.\"container_name\"=\"mysql\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"mysql.*\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_MAX",
+                    "groupByFields": [
+                      "resource.label.\"pod_name\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Utilization",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "MySQL memory request utilization",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/memory/request_utilization\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" resource.label.\"container_name\"=\"mysql\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"mysql.*\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_MAX",
+                    "groupByFields": [
+                      "resource.label.\"pod_name\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Utilization",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Redis CPU request utilization",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/cpu/request_utilization\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" resource.label.\"container_name\"=\"redis\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"redis.*\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_MAX",
+                    "groupByFields": [
+                      "resource.label.\"pod_name\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Utilization",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Redis memory request utilization",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/memory/request_utilization\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" resource.label.\"container_name\"=\"redis\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"redis.*\")",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_MAX",
+                    "groupByFields": [
+                      "resource.label.\"pod_name\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Utilization",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
         "title": "Stateful storage errors (logs)",
         "xyChart": {
           "dataSets": [
@@ -149,6 +253,29 @@
         }
       },
       {
+        "title": "Velero backup verification success runs",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/velero-backup-verification-success\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "3600s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Success runs / 1h",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
         "title": "Velero restore-test failures",
         "xyChart": {
           "dataSets": [
@@ -167,6 +294,29 @@
           ],
           "yAxis": {
             "label": "Failures / 6h",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Velero restore-test success runs",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/velero-restore-test-success\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "21600s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Success runs / 6h",
             "scale": "LINEAR"
           }
         }

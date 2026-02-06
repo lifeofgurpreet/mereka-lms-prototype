@@ -720,6 +720,47 @@ button.btn.btn-primary:focus {
   box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
 }
 
+/* Dashboard notices, certificates, and utility components */
+.dashboard .notice,
+.dashboard .notice-incontext,
+.dashboard .wrapper-msg {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.dashboard .notice .notice-title,
+.dashboard .notice-incontext .notice-title,
+.dashboard .certificates h2,
+.dashboard .messages h2 {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.dashboard .notice a,
+.dashboard .notice-incontext a,
+.dashboard .messages a {
+  color: var(--mereka-color-blue);
+}
+
+.dashboard .notice a:hover,
+.dashboard .notice a:focus,
+.dashboard .notice-incontext a:hover,
+.dashboard .notice-incontext a:focus,
+.dashboard .messages a:hover,
+.dashboard .messages a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.dashboard .profile-sidebar,
+.dashboard .sidebar {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
 /* Courseware chrome */
 .courseware {
   background: var(--mereka-color-surface-primary);
@@ -763,6 +804,43 @@ button.btn.btn-primary:focus {
   border: 1px solid rgba(26, 22, 35, 0.08);
   padding: 1.25rem;
   margin-bottom: 1.25rem;
+}
+
+.courseware .xblock h1,
+.courseware .xblock h2,
+.courseware .xblock h3,
+.courseware .xblock h4,
+.courseware .xblock h5,
+.courseware .xblock h6,
+.courseware .xblock .hd {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+  letter-spacing: -0.01em;
+}
+
+.courseware .xblock p,
+.courseware .xblock li,
+.courseware .xblock label,
+.courseware .xblock .problem,
+.courseware .xblock .discussion-module,
+.courseware .xblock .video,
+.courseware .xblock .callout {
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock a {
+  color: var(--mereka-color-blue);
+}
+
+.courseware .xblock a:hover,
+.courseware .xblock a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.courseware .xblock .problem button,
+.courseware .xblock .problem .submit,
+.courseware .xblock .problem .action {
+  border-radius: 999px;
 }
 
 /* --------------------------- */

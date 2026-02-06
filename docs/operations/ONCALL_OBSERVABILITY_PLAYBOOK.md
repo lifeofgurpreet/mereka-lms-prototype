@@ -33,6 +33,10 @@ Open in order:
   - inspect MySQL/Redis/Elasticsearch logs
   - check PVC status and free capacity
   - follow DR runbook if data-risk
+- Saturation signal (`mysql-saturation-high` / `redis-saturation-high`):
+  - inspect CPU/memory request utilization trends in `operations-signals`
+  - correlate with pod restarts and connection-error spikes
+  - scale resources or reduce pressure before user-facing failures
 - MySQL/Redis connection errors:
   - check pod readiness/restarts
   - confirm service endpoints
@@ -40,6 +44,10 @@ Open in order:
 - Velero verification/restore-test failures:
   - inspect `velero` CronJob/job logs
   - run `./scripts/qa/audit-velero.sh`
+- Velero stale-success signal (`velero-*-stale`):
+  - confirm `lastSuccessfulTime` for `backup-verification` and `restore-test`
+  - inspect `velero` CronJob history and recent job logs
+  - treat as data-risk until success signal is restored
 - Auth/TLS synthetic failures:
   - run auth/cert verify scripts and check redirect/cert drift
 

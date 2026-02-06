@@ -17,6 +17,12 @@ This directory is the source of truth for GCP Monitoring templates used by Merek
 ./scripts/infra/apply-monitoring-configs.sh apply
 ```
 
+Offline dry-run (no cloud discovery/API calls):
+
+```bash
+OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
+```
+
 Legacy Cloud SQL templates are excluded by default. Include only when intentionally needed:
 
 ```bash
@@ -36,3 +42,16 @@ Runtime deployment coverage check:
 ```bash
 ./scripts/qa/audit-observability.sh --mode runtime
 ```
+
+Use strict mode when you want runtime freshness checks to fail hard (for CI gates or audits):
+
+```bash
+STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+```
+
+## Key Signals Added
+
+- PVC utilization alerting for stateful pods.
+- MySQL and Redis saturation alerts (CPU/memory request utilization).
+- Velero success/failure log metrics and stale-success alerts.
+- `operations-signals` dashboard panels for stateful saturation and backup posture.

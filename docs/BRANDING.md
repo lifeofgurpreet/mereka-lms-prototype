@@ -76,6 +76,7 @@ When new assets arrive, drop them into `assets/branding/`, re-sync the theme cop
   - `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` is the canonical copy.
   - `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` must stay identical to avoid drift.
 - The theme expects logos/favicons at `/static/mereka/images/*`; run `./scripts/branding/sync-brand-assets.sh` whenever you refresh files under `assets/branding/`.
+  - `sync-brand-assets.sh` also syncs the runtime override CSS from common -> LMS to prevent drift.
 
 To preview locally:
 
@@ -116,6 +117,11 @@ For strict verification of deep surfaces on live domains:
 ```bash
 BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 ```
+
+`verify-public-branding.sh` also validates Credentials and forum integration surfaces:
+- `https://credentials.<domain>/admin/login/` is reachable
+- `https://credentials.<domain>/health/` includes `overall_status` and `database_status`
+- `https://forum.<domain>/heartbeat` returns `200`
 
 ## Subsites (Different Clients)
 

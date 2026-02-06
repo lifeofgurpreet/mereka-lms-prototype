@@ -56,6 +56,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 # Include legacy Cloud SQL templates only when intentionally needed
 INCLUDE_LEGACY_MONITORING=1 ./scripts/infra/apply-monitoring-configs.sh apply
 
+# Generate an offline dry-run plan (no cloud discovery/API calls)
+OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
+
 # Validate Atlas allowlist for VPS egress (dev forum)
 ./scripts/infra/check-atlas-allowlist-vps.sh
 
@@ -104,6 +107,9 @@ ALLOW_OVERWRITE_MONGODB_KEYS=1 ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.
 
 # Audit monitoring coverage (repo + runtime)
 ./scripts/qa/audit-observability.sh --mode all
+
+# Strict runtime audit (fails on stale Velero freshness checks)
+STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
 ```
 
 ## Scheduled Checks

@@ -27,6 +27,7 @@ What this enforces:
 - Logos/favicons/fonts exist and are wired correctly
 - The runtime override CSS carries deep branded selectors (course cards, courseware, Studio wrapper)
 - Tokens drift is caught (`assets/branding/tokens.css` matches runtime exports)
+- Footer logo sizing guardrails are present in runtime CSS (prevents oversized footer branding regressions)
 
 ## What We Verify (After Deploy, Live)
 
@@ -39,7 +40,7 @@ BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 Notes:
 - `verify-public-branding.sh` checks the main domain plus the client microsites (`academy.biji-biji.com`,
   `skillourfuture.academy.mereka.io`), and also validates Studio themed CSS wiring,
-  MFE auth branding CTA text, and Forum heartbeat.
+  MFE auth branding CTA text, Credentials health/admin reachability, and Forum heartbeat.
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
 
 ## Surface Audit (Gap-Finder)
@@ -70,6 +71,10 @@ This is intentionally non-fatal by default and answers: "which surface is still 
    - Cause: unsafe shell interpolation in check scripts.
    - Fix: keep human-readable strings plain (no command-substitution quoting) and return
      explicit `host unreachable`/`could not fetch css` outcomes.
+
+5. Common and LMS runtime override CSS drift
+   - Cause: edits made in one copy of `mereka-overrides.css` only.
+   - Fix: always run `./scripts/branding/sync-brand-assets.sh` after CSS edits; it now syncs common -> LMS override CSS.
 
 ## Deployment Reference
 

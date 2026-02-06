@@ -27,9 +27,11 @@ GCP Monitoring dashboards (managed from `infrastructure/monitoring/dashboards/`)
 Primary signals to watch first:
 - Uptime dips on LMS/Studio/Apps or microsites
 - `operations-signals` spikes for:
+  - MySQL/Redis CPU and memory request utilization
   - Stateful storage errors
   - MySQL connection errors
   - Redis connection errors
+  - Velero backup verification success/failure and restore-test success/failure
   - Velero backup verification failures
   - Velero restore-test failures
 
@@ -40,9 +42,14 @@ Critical:
 - Stateful storage errors
 - Velero restore-test failures
 - Velero backup verification failures
+- Velero backup verification stale (no success in 30h)
+- Velero restore-test stale (no success in 45d)
 
 Warning:
 - Pod restarts
+- PVC utilization high
+- MySQL saturation high
+- Redis saturation high
 - MySQL/Redis connection error spikes
 
 ## 4) Apply / Update Monitoring

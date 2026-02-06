@@ -44,6 +44,14 @@ gcloud projects add-iam-policy-binding mereka-lms \
   --member="serviceAccount:github-actions@mereka-lms.iam.gserviceaccount.com" \
   --role="roles/container.developer"
 
+gcloud projects add-iam-policy-binding mereka-lms \
+  --member="serviceAccount:github-actions@mereka-lms.iam.gserviceaccount.com" \
+  --role="roles/monitoring.viewer"
+
+gcloud projects add-iam-policy-binding mereka-lms \
+  --member="serviceAccount:github-actions@mereka-lms.iam.gserviceaccount.com" \
+  --role="roles/logging.viewer"
+
 # Create key
 gcloud iam service-accounts keys create github-actions-key.json \
   --iam-account=github-actions@mereka-lms.iam.gserviceaccount.com
@@ -115,9 +123,14 @@ What it does:
 2. Runs runtime audit when `GCP_SA_KEY` is available
 3. Uploads JSON artifacts (`observability-audit-local`, `observability-audit-runtime`)
 
+Optional repo variables for runtime cluster access:
+- `GKE_CLUSTER_PROJECT` (default: `bbi-k8`)
+- `GKE_CLUSTER_LOCATION` (default: `asia-southeast1-c`)
+- `GKE_CLUSTER_NAME` (default: `bbi-k8-cluster`)
+
 Manual inputs:
 - `mode`: `local`, `runtime`, or `all`
-- `strict_runtime`: fail when runtime dependencies are unavailable
+- `strict_runtime`: fail when runtime dependencies are unavailable **or** Velero cronjob freshness checks are stale
 - `include_legacy`: include legacy Cloud SQL monitoring templates
 
 ## Environments

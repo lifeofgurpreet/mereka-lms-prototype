@@ -15,6 +15,8 @@ LMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/image
 CMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images"
 TOKENS_SRC="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
+OVERRIDES_SRC="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
+OVERRIDES_LMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 BRAND_REPO_TOKENS="/home/gurpreet/projects/bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
@@ -42,6 +44,13 @@ if [[ -f "$TOKENS_SRC" ]]; then
   mkdir -p "$(dirname "$TOKENS_DEST")"
   cp "$TOKENS_SRC" "$TOKENS_DEST"
   echo "  ✓ Copied tokens.css -> $(basename "$TOKENS_DEST")"
+fi
+
+# Keep runtime override CSS in sync across common + LMS so deploy checks are deterministic.
+if [[ -f "$OVERRIDES_SRC" ]]; then
+  mkdir -p "$(dirname "$OVERRIDES_LMS_DEST")"
+  cp "$OVERRIDES_SRC" "$OVERRIDES_LMS_DEST"
+  echo "  ✓ Synced runtime overrides -> $(basename "$OVERRIDES_LMS_DEST")"
 fi
 
 # Copy logo assets to all theme directories

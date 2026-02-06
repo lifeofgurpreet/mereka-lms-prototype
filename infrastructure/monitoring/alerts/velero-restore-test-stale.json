@@ -1,0 +1,31 @@
+{
+  "displayName": "Velero restore-test stale (no success in 45d)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "CRITICAL",
+  "conditions": [
+    {
+      "displayName": "restore-test success runs < 1 over 45d",
+      "conditionThreshold": {
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/velero-restore-test-success\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "3888000s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_LT",
+        "thresholdValue": 1,
+        "duration": "0s",
+        "evaluationMissingData": "EVALUATION_MISSING_DATA_ACTIVE",
+        "trigger": {
+          "count": 1
+        }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}

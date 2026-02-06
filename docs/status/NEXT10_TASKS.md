@@ -28,7 +28,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 | 5 | Modulestore cutover decision + migration plan (in-cluster Mongo -> Atlas) | Infra | 💤 Pending | Must include safety gates. Do not delete in-cluster Mongo until verified. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
 | 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
-| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Auth/TLS CronJob metrics+alerts are live; next close-out is dashboard/alert tuning and runtime audit in prod. |
+| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Auth/TLS CronJob metrics+alerts are live, plus saturation/freshness signals. Remaining hardening is exporter-level depth and restore-drill reliability. |
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 
@@ -38,10 +38,10 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 |---|------|------|----------|--------|
 | 1 | Ship observability audit in CI (nightly + manual) | `mereka-lms-2nmy` | P1 | ✅ Closed |
 | 2 | Add Grafana dashboard-as-code sync checklist and ownership | `mereka-lms-mp6b` | P1 | ✅ Closed |
-| 3 | Implement PVC utilization signal path (metrics + alert) | `mereka-lms-1d7x` | P1 | ⚙️ In progress |
-| 4 | Deploy MySQL saturation telemetry (connections/latency) | `mereka-lms-3rx3` | P1 | 💤 Pending |
-| 5 | Deploy Redis saturation telemetry (memory/evictions/latency) | `mereka-lms-1zfq` | P1 | 💤 Pending |
-| 6 | Add Velero backup freshness + restore-drill status dashboard panels | `mereka-lms-w2xf` | P1 | 💤 Pending |
+| 3 | Implement PVC utilization signal path (metrics + alert) | `mereka-lms-1d7x` | P1 | ✅ Closed |
+| 4 | Deploy MySQL saturation telemetry (connections/latency) | `mereka-lms-3rx3` | P1 | ✅ Closed |
+| 5 | Deploy Redis saturation telemetry (memory/evictions/latency) | `mereka-lms-1zfq` | P1 | ✅ Closed |
+| 6 | Add Velero backup freshness + restore-drill status dashboard panels | `mereka-lms-w2xf` | P1 | ✅ Closed |
 | 7 | Define alert severity matrix and routing policy | `mereka-lms-3dxx` | P2 | ✅ Closed |
 | 8 | Build on-call single-pane operations dashboard playbook | `mereka-lms-36ln` | P2 | ✅ Closed |
 | 9 | Create noisy alert tuning SOP + weekly review cadence | `mereka-lms-15fv` | P2 | ✅ Closed |

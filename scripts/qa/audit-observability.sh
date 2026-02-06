@@ -260,6 +260,73 @@ runtime_k8s_check() {
   kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get cronjob restore-test >/dev/null
 }
 
+runtime_velero_freshness_check() {
+  command -v kubectl >/dev/null
+  command -v python3 >/dev/null
+
+  if ! kubectl --context "$K8S_CONTEXT" get namespace "$VELERO_NS" >/dev/null 2>&1; then
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Cannot reach velero namespace: context=$K8S_CONTEXT namespace=$VELERO_NS"
+      return 1
+    fi
+    echo "SKIP: cannot reach velero namespace ($K8S_CONTEXT / $VELERO_NS)"
+    return 0
+  fi
+
+  local cronjobs_json
+  cronjobs_json="$(kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get cronjob backup-verification restore-test -o json)"
+
+  STRICT_RUNTIME="$STRICT_RUNTIME" python3 - "$cronjobs_json" <<'PY'
+import json
+import os
+import sys
+from datetime import datetime, timedelta, timezone
+
+raw = sys.argv[1]
+obj = json.loads(raw)
+items = {it.get("metadata", {}).get("name"): it for it in obj.get("items", [])}
+strict = os.getenv("STRICT_RUNTIME", "0") == "1"
+warnings = []
+
+def parse_ts(ts: str):
+    if not ts:
+        return None
+    return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+
+def age_hours(ts):
+    return (datetime.now(timezone.utc) - ts).total_seconds() / 3600.0
+
+backup = items.get("backup-verification")
+restore = items.get("restore-test")
+if not backup or not restore:
+    msg = "Missing cronjobs backup-verification or restore-test"
+    if strict:
+        print(msg)
+        sys.exit(1)
+    print(f"WARN: {msg}")
+    sys.exit(0)
+
+backup_ts = parse_ts(backup.get("status", {}).get("lastSuccessfulTime"))
+if not backup_ts:
+    warnings.append("backup-verification has no lastSuccessfulTime")
+elif age_hours(backup_ts) > 30:
+    warnings.append(f"backup-verification lastSuccessfulTime stale: {backup_ts.isoformat()}")
+
+restore_ts = parse_ts(restore.get("status", {}).get("lastSuccessfulTime"))
+if not restore_ts:
+    warnings.append("restore-test has no lastSuccessfulTime")
+elif datetime.now(timezone.utc) - restore_ts > timedelta(days=45):
+    warnings.append(f"restore-test lastSuccessfulTime stale: {restore_ts.isoformat()}")
+
+if warnings:
+    if strict:
+        print("; ".join(warnings))
+        sys.exit(1)
+    print("WARN: " + "; ".join(warnings))
+    sys.exit(0)
+PY
+}
+
 if [[ "$JSON_OUT" -eq 0 ]]; then
   echo "Audit: observability posture"
   echo "  project:        $PROJECT"
@@ -277,6 +344,7 @@ run_check "repo: monitoring json files are valid" repo_json_check
 if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   run_check "runtime: gcp monitoring/logging objects exist" runtime_gcp_check
   run_check "runtime: key in-cluster cronjobs exist" runtime_k8s_check
+  run_check "runtime: velero cronjob freshness is within SLO" runtime_velero_freshness_check
 fi
 
 if [[ "$JSON_OUT" -eq 1 ]]; then

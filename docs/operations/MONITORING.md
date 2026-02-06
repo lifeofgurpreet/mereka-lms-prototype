@@ -52,11 +52,12 @@ The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-ap
 2. **MySQL (in-cluster)**
    - Track deployment health: `kubernetes.io/container/restart_count`, CPU/memory utilization, and readiness.
    - Track **storage** via PVC volume used/capacity metrics (preferred) and alert before disks fill.
-   - If we add a MySQL exporter later, wire QPS/latency/connection saturation into dashboards.
+   - Saturation baseline is now live via CPU/memory request utilization on `mysql*` pods (`operations-signals` dashboard + `mysql-saturation-high` alert).
+   - Future hardening: add exporter-level signals (connections, slow queries, innodb pressure).
 
 3. **Redis (in-cluster)**
-   - Track memory saturation, restarts, and latency signals from the application tier (timeouts/499s).
-   - If we add a Redis exporter later, alert on `used_memory`, evictions, and keyspace misses.
+   - Saturation baseline is now live via CPU/memory request utilization on `redis*` pods (`operations-signals` dashboard + `redis-saturation-high` alert).
+   - Continue tracking app-tier symptoms (timeouts/499s) and add exporter-level signals later (`used_memory`, evictions, keyspace misses).
 
 > JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `public-endpoints.json`, `auth.json`, `operations-signals.json`, plus legacy `cloudsql.json`, `redis.json`). Apply them with
 > `./scripts/infra/apply-monitoring-configs.sh apply`
@@ -86,6 +87,10 @@ Minimum recommended policies (edit thresholds as desired):
 | Redis connection errors | `infrastructure/monitoring/alerts/log-redis-connection-errors.json` | Detects cache connection/timeout failures from app logs. |
 | Velero backup verification failures | `infrastructure/monitoring/alerts/log-velero-backup-verification-failures.json` | Detects failed daily backup-verification job runs. |
 | Velero restore-test failures | `infrastructure/monitoring/alerts/log-velero-restore-test-failures.json` | Detects failed restore drill runs. |
+| MySQL saturation high | `infrastructure/monitoring/alerts/mysql-saturation-high.json` | Warns on sustained high CPU/memory request utilization for MySQL pods. |
+| Redis saturation high | `infrastructure/monitoring/alerts/redis-saturation-high.json` | Warns on sustained high CPU/memory request utilization for Redis pods. |
+| Velero backup verification stale | `infrastructure/monitoring/alerts/velero-backup-verification-stale.json` | Critical when no backup-verification success signal is seen within 30h. |
+| Velero restore-test stale | `infrastructure/monitoring/alerts/velero-restore-test-stale.json` | Critical when no restore-test success signal is seen within 45d. |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -175,6 +180,14 @@ gcloud logging metrics create velero-backup-verification-failures \
 
 gcloud logging metrics create velero-restore-test-failures \
   --config-from-file=infrastructure/monitoring/logging-metrics/velero-restore-test-failures.json \
+  --project=mereka-lms
+
+gcloud logging metrics create velero-backup-verification-success \
+  --config-from-file=infrastructure/monitoring/logging-metrics/velero-backup-verification-success.json \
+  --project=mereka-lms
+
+gcloud logging metrics create velero-restore-test-success \
+  --config-from-file=infrastructure/monitoring/logging-metrics/velero-restore-test-success.json \
   --project=mereka-lms
 ```
 

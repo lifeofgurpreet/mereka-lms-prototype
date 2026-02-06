@@ -1,5 +1,5 @@
 # Branding Roadmap (Beads-Driven)
-_Audience: Product Eng + Platform Eng • Last updated: 2026-02-06_
+_Audience: Product Eng + Platform Eng • Last updated: 2026-02-07_
 
 This roadmap decomposes the Mereka design system rollout into concrete, testable beads.
 
@@ -31,6 +31,12 @@ Client subsites (separate clients, still must be branded):
 - `academy.biji-biji.com`
 - `skillourfuture.academy.mereka.io`
 
+## Recently Completed (Source-Level, 2026-02-07)
+
+- `mereka-lms-1cs8` LMS dashboard notices + components
+- `mereka-lms-35an` Courseware xblock typography pass
+- `mereka-lms-1d7x` PVC utilization signal path (branding-adjacent reliability signal)
+
 ## Next 10 Branding Tasks (Execution Order)
 
 Parent epic:
@@ -45,10 +51,9 @@ Parent epic:
 7. `mereka-lms-1byu` Credentials admin branding (decision + minimal implementation)
 8. `mereka-lms-36jn` Forum UI theming (header/footer + typography)
 9. `mereka-lms-3mz` Visual regression gate for branding (screenshots + fail-on-drift)
-10. `mereka-lms-3qh` Forum UI theming follow-through / parity verification (resolve overlap with `mereka-lms-36jn`)
+10. `mereka-lms-5t06` LMS discovery/search polish final live verification pass
 
 ## Notes On Duplicates
 
-- Ecommerce theming appears as both `mereka-lms-h9c9` and `mereka-lms-14q`.
-- Forum theming appears as both `mereka-lms-36jn` and `mereka-lms-3qh`.
-- Resolve duplicates by closing one issue in each pair after confirming the canonical task owner.
+- Ecommerce duplicate resolved (`mereka-lms-14q` closed in favor of `mereka-lms-h9c9`).
+- Forum duplicate resolved (`mereka-lms-3qh` closed in favor of `mereka-lms-36jn`).
