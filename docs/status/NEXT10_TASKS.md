@@ -19,14 +19,14 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 |---|------|-------|--------|-------|
 | 1 | Authentik config as code (blueprints or equivalent) | Infra | ✅ Complete | Implemented as idempotent ensure scripts + `scripts/infra/ensure-authentik-hardening.sh`. Bead: `mereka-lms-1fs`. |
 | 2 | Enforce MFA for Authentik admins (Gurpreet only) | Security | ✅ Complete | Enforced via gated stage + policy. Script: `scripts/infra/ensure-authentik-admin-mfa.sh`. Bead: `mereka-lms-104`. |
-| 3 | In-cluster scheduled verification + alerts (verify-only CronJob + observability) | SRE | ⚙️ In progress | CronJob template added: `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` (deploy via GitOps). Includes log metric + alert templates for failures. Bead: `mereka-lms-2gu`. |
+| 3 | In-cluster scheduled verification + alerts (verify-only CronJob + observability) | SRE | ✅ Complete | CronJobs deployed in prod (`auth-verify-prod`, `cert-verify-prod`) + failure alerts via log metrics. Docs: `docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md`. Bead: `mereka-lms-2gu`. |
 | 4 | Auth dashboards + alerts (redirect_uri mismatch, OIDC 500s, CSRF spikes, 403s) | SRE | ✅ Complete | Added log metrics + alert policies + `infrastructure/monitoring/dashboards/auth.json`. Bead: `mereka-lms-2fm9`. |
 | 5 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (skipped for now). |
 | 6 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
 | 7 | Multi-site governance hardening | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
 | 8 | Ecommerce checkout readiness validation | Infra | 💤 Pending | Bead: `mereka-lms-xw6`. |
 | 9 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
-| 10 | Studio create button no-op | Infra | 💤 Pending | Bead: `mereka-lms-3oc` (verify in fresh session). |
+| 10 | Fix Argo sync blocked by promtail DaemonSet selector immutability | SRE | 💤 Pending | Blocks GitOps updates; see Argo app `mereka-lms-local`. Bead: `mereka-lms-lq4n`. |
 
 ## Product / Content Backlog (Still Valid, Not in the “Auth Hardening” Top 10)
 
