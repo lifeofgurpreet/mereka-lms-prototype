@@ -1,5 +1,5 @@
 # Documentation Index
-_Audience: Everyone • Owner: Infra Team • Last verified: 2025-11-13_
+_Audience: Everyone • Owner: Infra Team • Last verified: 2026-02-06_
 
 Use this file as the front door to the Mereka Academy Open edX docs. Each link below includes a short description plus the last-known verification date so you can see freshness at a glance.
 
@@ -22,6 +22,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 | [`operations/ADMIN_LOGIN_GUIDE.md`](operations/ADMIN_LOGIN_GUIDE.md) | Admin access and login instructions | 2026-02-06 |
 | [`operations/AUTH_AND_PERMISSIONS.md`](operations/AUTH_AND_PERMISSIONS.md) | How Authentik SSO and Open edX permissions fit together (and what does not sync) | 2026-02-06 |
 | [`operations/AUTH_HARDENING_SPEC.md`](operations/AUTH_HARDENING_SPEC.md) | Hardening spec: verification + drift prevention across the ecosystem | 2026-02-06 |
+| [`operations/IN_CLUSTER_AUTH_VERIFICATION.md`](operations/IN_CLUSTER_AUTH_VERIFICATION.md) | Verify-only CronJob template for continuous public auth surface checks | 2026-02-06 |
 | [`operations/OPENEDX_HOSTNAMES.md`](operations/OPENEDX_HOSTNAMES.md) | Canonical registry of all Open edX hostnames (prod + dev + kind-local) | 2026-02-06 |
 | [`operations/DOMAIN_CHANGE_RUNBOOK.md`](operations/DOMAIN_CHANGE_RUNBOOK.md) | Domain/microsite change checklist with deterministic verification | 2026-02-06 |
 | [`operations/RFC_CLAIM_BASED_ROLE_SYNC.md`](operations/RFC_CLAIM_BASED_ROLE_SYNC.md) | Draft RFC: optional claim-based role sync (Authentik -> Open edX) | 2026-02-06 |
@@ -37,7 +38,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 | [`operations/DJANGO_RAW_SQL_BYPASS.md`](operations/DJANGO_RAW_SQL_BYPASS.md) | Bypass Django signals with raw SQL (when Celery broker unavailable) | 2025-12-29 |
 | [`operations/DEPLOYMENT_RUNBOOK.md`](operations/DEPLOYMENT_RUNBOOK.md) | How we ship Tutor environments (local/prod/k8s) | 2025-10-30 |
 | [`operations/GCP_ROADMAP.md`](operations/GCP_ROADMAP.md) | Cloud architecture plan and outstanding infra tasks | 2025-10-15 |
-| [`operations/MONITORING.md`](operations/MONITORING.md) | Stack monitoring and alerting strategy | 2025-09-28 |
+| [`operations/MONITORING.md`](operations/MONITORING.md) | Stack monitoring and alerting strategy | 2026-02-06 |
 | [`operations/CLOUDFLARE_DNS.md`](operations/CLOUDFLARE_DNS.md) | DNS zones plus automation via Cloudflare API | 2025-09-05 |
 | [`operations/SECRETS_SNAPSHOT.md`](operations/SECRETS_SNAPSHOT.md) | Inventory of non-git secrets and how they're stored | 2025-08-22 |
 | [`operations/MULTISITE.md`](operations/MULTISITE.md) | Microsite strategy and shared theme tokens | 2025-09-10 |

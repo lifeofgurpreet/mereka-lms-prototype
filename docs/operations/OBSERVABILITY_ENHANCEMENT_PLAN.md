@@ -1,8 +1,8 @@
 # Mereka LMS Observability Enhancement Plan
 
 **Project**: mereka-lms  
-**Version**: 2.1  
-**Date**: 2026-02-04  
+**Version**: 2.2  
+**Date**: 2026-02-06  
 **Status**: Active  
 **Owner**: SRE/Infra  
 
@@ -40,6 +40,11 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - `lb-5xx-ratio.json`
 - `log-5xx-spike.json`
 - `log-auth-failures.json`
+- `log-auth-failures-credentials.json`
+- `log-auth-failures-forum.json`
+- `log-authentik-authorize-4xx-mereka-lms.json`
+- `log-lms-oidc-provider-disabled.json`
+- `log-lms-csrf-failures.json`
 - `https-cert-expiry.json`
 - `pod-restarts.json`
 - `cloudsql-disk.json`
@@ -49,9 +54,15 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 
 - `http-5xx.json`
 - `auth-failures.json`
+- `auth-failures-credentials.json`
+- `auth-failures-forum.json`
+- `authentik-authorize-4xx-mereka-lms.json`
+- `lms-oidc-provider-disabled.json`
+- `lms-csrf-failures.json`
 
 **Dashboards**
 - GCP dashboard JSON: `infrastructure/monitoring/dashboards/`  
+- Auth-focused: `infrastructure/monitoring/dashboards/auth.json`
 - VPS Grafana dashboard: `/home/gurpreet/projects/observability/dashboards/03-applications/bbi-mereka-lms.json`  
   UID: `bbi-app-mereka-lms`
 
@@ -76,12 +87,7 @@ critical auth/login or account paths.
 - Wire into `scripts/infra/apply-monitoring-configs.sh`.
 
 ### 2) Service‑specific auth failure visibility (forum + credentials)
-**Why:** `log-auth-failures.json` is generic; it should be filtered/sliced per service
-to make alerts actionable.
-
-**Deliverables**
-- Dashboard panels for forum + credentials auth failures.
-- Optional service-scoped log alerts (or clear routing in existing alerts).
+**Status:** Done (log metrics + alerts exist for credentials/forum).
 
 ### 3) Validate Grafana ↔ GKE telemetry path
 **Why:** The VPS Grafana dashboard exists, but datasource connectivity to GKE
@@ -94,6 +100,13 @@ metrics needs explicit validation and documentation.
 ### 4) SLO burn‑rate alerts (optional / if required)
 **Why:** Useful for proactive incident response.  
 Only implement if the team wants formal burn‑rate enforcement.
+
+### 5) Wire notification channels for log-based alerts
+**Why:** Some alert templates intentionally leave `notificationChannels` empty to keep them portable.
+
+**Deliverables**
+- Decide the canonical notification channel IDs for the `mereka-lms` GCP project (email/SMS/webhook).
+- Update the alert policy JSON templates accordingly (or document a post-apply patch step).
 
 ---
 

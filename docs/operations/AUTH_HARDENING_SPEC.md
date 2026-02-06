@@ -53,9 +53,16 @@ Authentik admin (separate):
 - `scripts/infra/ensure-authentik-admin.sh`
   - Ensures only Gurpreet is in Authentik `authentik Admins` group.
 
+- `scripts/infra/ensure-authentik-admin-mfa.sh`
+  - Requires MFA for Authentik admins only (gated by `authentik Admins` group membership).
+  - Does not force MFA for normal LMS users.
+
 - `scripts/infra/ensure-authentik-oidc-redirect-uris.sh`
   - Ensures Authentik OIDC redirect URIs include **every LMS hostname** we serve (microsites + aliases + dev).
   - Prevents “redirect_uri mismatch” breakages when adding domains.
+
+- `scripts/infra/ensure-authentik-hardening.sh`
+  - Single entrypoint to `--verify`/`--apply` all Authentik hardening (admin policy, redirect URI allowlist, admin MFA).
 
 ### 2) Runtime hardening (prevents drift)
 
@@ -122,13 +129,15 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 2. `./scripts/qa/verify-auth-surfaces.sh dev` passes in CI.
 3. `./scripts/infra/ensure-platform-admins.sh --verify` reports OK for both contexts.
 4. `./scripts/infra/ensure-authentik-admin.sh --verify` reports OK.
-5. `STRICT=1 ./scripts/qa/verify-multisite-config.sh` reports correct LMS/CMS roots for each microsite.
+5. `./scripts/infra/ensure-authentik-admin-mfa.sh --verify` reports OK.
+6. `./scripts/infra/ensure-authentik-hardening.sh --verify` reports OK.
+7. `STRICT=1 ./scripts/qa/verify-multisite-config.sh` reports correct LMS/CMS roots for each microsite.
    (Use `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` explicitly when running from a laptop.)
-6. Gurpreet + Malasari can:
+8. Gurpreet + Malasari can:
    - create courses in Studio
    - access LMS Django admin
    - access Discovery/Credentials/Ecommerce admin after SSO login
-7. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
+9. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 
 Convenience:
 - `./scripts/qa/verify-auth-hardening.sh` runs the full suite (public + internal) in one command.

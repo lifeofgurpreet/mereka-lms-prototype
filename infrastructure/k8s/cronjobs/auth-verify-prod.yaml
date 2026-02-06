@@ -1,0 +1,113 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: auth-verify-prod
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: auth-verify
+    app.kubernetes.io/component: qa
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: auth-verify
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: auth-verify
+              image: curlimages/curl:8.5.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+
+                  fail=0
+
+                  ok() { printf "OK  %s\n" "$1"; }
+                  bad() { printf "BAD %s\n" "$1" >&2; fail=$((fail+1)); }
+
+                  curl_loc() {
+                    url="$1"
+                    hdr="$(curl -sS -I "$url" || true)"
+                    code="$(printf "%s\n" "$hdr" | awk 'NR==1 {print $2}')"
+                    loc="$(printf "%s\n" "$hdr" | awk -F': ' 'tolower($1)=="location" {print $2}' | tr -d '\r' | head -n 1)"
+                    printf "%s %s\n" "${code:-000}" "${loc:-}"
+                  }
+
+                  require_200() {
+                    url="$1"
+                    code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo 000)"
+                    if [ "$code" = "200" ]; then ok "$url ($code)"; else bad "$url (expected 200, got $code)"; fi
+                  }
+
+                  require_401() {
+                    url="$1"
+                    code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo 000)"
+                    if [ "$code" = "401" ]; then ok "$url ($code)"; else bad "$url (expected 401, got $code)"; fi
+                  }
+
+                  require_302_loc_contains() {
+                    url="$1"
+                    needle="$2"
+                    set +e
+                    out="$(curl_loc "$url")"
+                    set -e
+                    code="$(printf "%s\n" "$out" | awk '{print $1}')"
+                    loc="$(printf "%s\n" "$out" | cut -d" " -f2-)"
+                    if [ "$code" = "302" ] && printf "%s" "$loc" | grep -q "$needle"; then
+                      ok "$url (302 -> contains '$needle')"
+                    else
+                      bad "$url (expected 302 + location contains '$needle', got code=$code loc=$loc)"
+                    fi
+                  }
+
+                  require_302_loc_is() {
+                    url="$1"
+                    expected="$2"
+                    set +e
+                    out="$(curl_loc "$url")"
+                    set -e
+                    code="$(printf "%s\n" "$out" | awk '{print $1}')"
+                    loc="$(printf "%s\n" "$out" | cut -d" " -f2-)"
+                    if [ "$code" = "302" ] && [ "$loc" = "$expected" ]; then
+                      ok "$url (302 -> $expected)"
+                    else
+                      bad "$url (expected 302 -> $expected, got code=$code loc=$loc)"
+                    fi
+                  }
+
+                  # LMS OIDC entrypoints (core + alias)
+                  require_302_loc_contains "https://academyv2.mereka.io/auth/login/oidc/" "auth0.mereka.io/application/o/authorize/"
+                  require_302_loc_contains "https://preview.academyv2.mereka.io/auth/login/oidc/" "auth0.mereka.io/application/o/authorize/"
+                  require_302_loc_contains "https://academy.biji-biji.com/auth/login/oidc/" "auth0.mereka.io/application/o/authorize/"
+                  require_302_loc_contains "https://skillourfuture.academy.mereka.io/auth/login/oidc/" "auth0.mereka.io/application/o/authorize/"
+
+                  # MFE config and Authn MFE login
+                  require_200 "https://apps.academyv2.mereka.io/api/mfe_config/v1"
+                  require_200 "https://apps.academyv2.mereka.io/authn/login"
+
+                  # Services: /login should start LMS OAuth, which itself relies on Authentik.
+                  for svc in discovery credentials ecommerce; do
+                    require_302_loc_is "https://${svc}.academyv2.mereka.io/login/" "/login/edx-oauth2/"
+                    require_302_loc_contains "https://${svc}.academyv2.mereka.io/login/edx-oauth2/" "https://academyv2.mereka.io/oauth2/authorize"
+                  done
+
+                  # API-first surfaces (no SSO UI expected)
+                  require_200 "https://notes.academyv2.mereka.io/"
+                  require_401 "https://forum.academyv2.mereka.io/"
+
+                  if [ "$fail" -gt 0 ]; then
+                    printf "FAILED (%s checks failed)\n" "$fail" >&2
+                    exit 1
+                  fi
+                  printf "OK\n"
+

@@ -45,7 +45,7 @@ Hardening (prevents drift automatically at runtime):
 
 | Component | Authentication (Who are you?) | Authorization (What can you do?) | "Super admin" meaning | Where it is set | How we verify |
 |---|---|---|---|---|---|
-| Authentik (`auth0.mereka.io`) | Authentik login | Authentik groups/roles | Authentik admin UI access | `scripts/infra/ensure-authentik-admin.sh` | `scripts/infra/ensure-authentik-admin.sh --verify` |
+| Authentik (`auth0.mereka.io`) | Authentik login | Authentik groups/roles + MFA requirements | Authentik admin UI access | `scripts/infra/ensure-authentik-hardening.sh` | `scripts/infra/ensure-authentik-hardening.sh --verify` |
 | LMS (Open edX) | OIDC via Authentik (plus optional native login) | Django user flags (`is_staff`, `is_superuser`) + per-course roles | `is_superuser=true` in LMS DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist (`MEREKA_PLATFORM_ADMIN_EMAILS`) | `scripts/infra/ensure-platform-admins.sh --verify` |
 | CMS/Studio (Open edX) | Uses LMS session; `/signin` redirects to LMS `/login` | Django user flags + `CourseCreator` | `is_superuser=true` plus `CourseCreator(state=granted)` | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
 | Discovery | OAuth to LMS (`/login/edx-oauth2/`) | Django user flags | `is_superuser=true` in Discovery DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
@@ -70,6 +70,18 @@ Verify/apply:
 ```bash
 ./scripts/infra/ensure-authentik-admin.sh --verify
 ./scripts/infra/ensure-authentik-admin.sh --apply
+```
+
+Authentik admin MFA policy (required for Authentik admins only):
+```bash
+./scripts/infra/ensure-authentik-admin-mfa.sh --verify
+./scripts/infra/ensure-authentik-admin-mfa.sh --apply
+```
+
+Recommended single entrypoint (runs admin policy + redirect URI allowlist + admin MFA):
+```bash
+./scripts/infra/ensure-authentik-hardening.sh --verify
+./scripts/infra/ensure-authentik-hardening.sh --apply
 ```
 
 ## Open edX (LMS/CMS) Permission Levels

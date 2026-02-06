@@ -17,10 +17,10 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | Authentik config as code (blueprints or equivalent) | Infra | 💤 Pending | Bead: `mereka-lms-1fs`. |
-| 2 | Enforce MFA for Authentik admins (Gurpreet only) | Security | 💤 Pending | Bead: `mereka-lms-104`. |
-| 3 | In-cluster scheduled verification + alerts (verify-only CronJob + observability) | SRE | 💤 Pending | Bead: `mereka-lms-2gu`. |
-| 4 | Auth dashboards + alerts (redirect_uri mismatch, OIDC 500s, CSRF spikes, 403s) | SRE | 💤 Pending | Bead: `mereka-lms-2fm9`. |
+| 1 | Authentik config as code (blueprints or equivalent) | Infra | ✅ Complete | Implemented as idempotent ensure scripts + `scripts/infra/ensure-authentik-hardening.sh`. Bead: `mereka-lms-1fs`. |
+| 2 | Enforce MFA for Authentik admins (Gurpreet only) | Security | ✅ Complete | Enforced via gated stage + policy. Script: `scripts/infra/ensure-authentik-admin-mfa.sh`. Bead: `mereka-lms-104`. |
+| 3 | In-cluster scheduled verification + alerts (verify-only CronJob + observability) | SRE | ⚙️ In progress | CronJob template added: `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` (deploy via GitOps). Bead: `mereka-lms-2gu`. |
+| 4 | Auth dashboards + alerts (redirect_uri mismatch, OIDC 500s, CSRF spikes, 403s) | SRE | ✅ Complete | Added log metrics + alert policies + `infrastructure/monitoring/dashboards/auth.json`. Bead: `mereka-lms-2fm9`. |
 | 5 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (skipped for now). |
 | 6 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
 | 7 | Multi-site governance hardening | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |

@@ -1,5 +1,5 @@
 # Monitoring & Alerting Guide
-_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2025-09-28_
+_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-06_
 
 This checklist focuses on the GKE Autopilot cluster, Cloud SQL, and Memorystore that run the production `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
 
@@ -51,7 +51,7 @@ The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-ap
 3. **Memorystore (Redis)**
    - Metrics: `redis.googleapis.com/stats/memory/used_bytes` vs `maxmemory`, `redis.googleapis.com/stats/commands/ops`, `redis.googleapis.com/stats/network/bytes`.
 
-> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`). Apply them with
+> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`, `auth.json`). Apply them with
 > `./scripts/infra/apply-monitoring-configs.sh apply`
 
 ## Alerting Policies
@@ -68,6 +68,9 @@ Minimum recommended policies (edit thresholds as desired):
 | Log-based auth failures | `infrastructure/monitoring/alerts/log-auth-failures.json` | Requires log metric `auth-failures`. |
 | Credentials auth failures | `infrastructure/monitoring/alerts/log-auth-failures-credentials.json` | Requires log metric `auth-failures-credentials`. |
 | Forum auth failures | `infrastructure/monitoring/alerts/log-auth-failures-forum.json` | Requires log metric `auth-failures-forum`. |
+| Authentik redirect_uri mismatch / authorize 4xx | `infrastructure/monitoring/alerts/log-authentik-authorize-4xx-mereka-lms.json` | Requires log metric `authentik-authorize-4xx-mereka-lms`. |
+| LMS OIDC provider disabled | `infrastructure/monitoring/alerts/log-lms-oidc-provider-disabled.json` | Requires log metric `lms-oidc-provider-disabled` (catches "disabled backend/provider"). |
+| LMS CSRF failures | `infrastructure/monitoring/alerts/log-lms-csrf-failures.json` | Requires log metric `lms-csrf-failures`. |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -111,6 +114,18 @@ gcloud logging metrics create auth-failures-credentials \
 
 gcloud logging metrics create auth-failures-forum \
   --config-from-file=infrastructure/monitoring/logging-metrics/auth-failures-forum.json \
+  --project=mereka-lms
+
+gcloud logging metrics create authentik-authorize-4xx-mereka-lms \
+  --config-from-file=infrastructure/monitoring/logging-metrics/authentik-authorize-4xx-mereka-lms.json \
+  --project=mereka-lms
+
+gcloud logging metrics create lms-oidc-provider-disabled \
+  --config-from-file=infrastructure/monitoring/logging-metrics/lms-oidc-provider-disabled.json \
+  --project=mereka-lms
+
+gcloud logging metrics create lms-csrf-failures \
+  --config-from-file=infrastructure/monitoring/logging-metrics/lms-csrf-failures.json \
   --project=mereka-lms
 ```
 

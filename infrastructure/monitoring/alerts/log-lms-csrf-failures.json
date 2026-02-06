@@ -1,0 +1,26 @@
+{
+  "displayName": "LMS CSRF failures spike (logs)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "WARNING",
+  "conditions": [
+    {
+      "displayName": "CSRF failures > 5/5min",
+      "conditionThreshold": {
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/lms-csrf-failures\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "300s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 5,
+        "duration": "0s",
+        "trigger": { "count": 1 }
+      }
+    }
+  ],
+  "notificationChannels": []
+}
+
