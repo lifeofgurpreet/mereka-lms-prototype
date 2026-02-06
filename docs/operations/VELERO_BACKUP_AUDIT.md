@@ -24,6 +24,11 @@ For a PVC inventory of the hourly critical schedule:
 ./scripts/qa/list-critical-backup-pvcs.sh
 ```
 
+To collect an evidence bundle (files under `var/`, gitignored):
+```bash
+./scripts/qa/collect-velero-evidence.sh
+```
+
 ## What “Good” Looks Like
 
 1. `BackupStorageLocation` phase is `Available`.
