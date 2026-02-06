@@ -103,10 +103,6 @@ print(
 cfg = (getattr(settings, "PAYMENT_PROCESSOR_CONFIG", {}) or {}).get("openedx") or {}
 stripe = cfg.get("stripe") or {}
 
-def prefix(value: str, n: int = 8) -> str:
-    value = (value or "").strip()
-    return value[:n] if value else ""
-
 stripe_secret = stripe.get("secret_key") or ""
 stripe_pub = stripe.get("publishable_key") or ""
 stripe_webhook = stripe.get("webhook_endpoint_secret") or ""
@@ -121,8 +117,9 @@ print(
     "Stripe settings:",
     {
         "stripe_present": bool(stripe),
-        "secret_prefix": prefix(stripe_secret),
-        "publishable_prefix": prefix(stripe_pub),
+        # Don't print any portion of the keys (even prefixes) to keep logs safe.
+        "secret_set": bool(stripe_secret and not str(stripe_secret).startswith("REPLACE_")),
+        "publishable_set": bool(stripe_pub and not str(stripe_pub).startswith("REPLACE_")),
         "webhook_set": bool((stripe_webhook or "").strip()) and not str(stripe_webhook).startswith("REPLACE_"),
         "processor_import_ok": stripe_module_ok,
     },
