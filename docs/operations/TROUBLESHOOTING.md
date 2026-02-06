@@ -257,6 +257,7 @@ kubectl rollout restart -n mereka-lms deploy/lms deploy/lms-worker deploy/cms de
 **Follow-up (recommended):**
 - Normalize the upstream secret values to remove trailing newlines so other services don’t hit the same edge case.
 - Use `scripts/infra/infisical-audit-mereka-lms.sh` to detect newline drift without printing values.
+- Use `scripts/infra/infisical-validate-mereka-lms.sh` as a pre-flight gate (set `STRICT=1` to fail on trailing CR/LF).
 
 ### Issue 5: Account Settings/Profile Pages Blank or Stuck
 

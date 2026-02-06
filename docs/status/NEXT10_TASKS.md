@@ -12,6 +12,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 - ✅ Deterministic microsite/hostname onboarding checklist added (`./scripts/qa/microsite-onboarding-checklist.sh`)
 - ✅ Notes/forum expectations documented and verified (API-first surfaces)
 - ✅ RFC draft added for optional claim-based role sync (Auth -> perms)
+- ✅ ArgoCD GitOps sync unblocked (promtail DaemonSet selector immutability fixed)
 
 ## Next 10 High-Impact Hardening Tasks (Auth + Ecosystem)
 

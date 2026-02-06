@@ -29,13 +29,38 @@ It validates:
 
 Production is GitOps-managed outside this repo.
 
-1. Copy `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` into the GitOps repo (the cluster manifests repo).
-2. Copy `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` into the GitOps repo (the cluster manifests repo).
-2. Apply via normal GitOps flow.
-3. Verify Jobs are running:
+GitOps source of truth (prod):
+- ArgoCD Application: `mereka-lms-local` (namespace: `argocd`)
+- GitOps repo: `Biji-Biji-Initiative/bbi-infrastructure`
+- Path: `apps/mereka-lms/overlays/prod`
+
+1. Copy `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` into the GitOps repo overlay.
+2. Copy `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` into the GitOps repo overlay.
+3. Apply via the normal GitOps flow (commit + Argo sync).
+4. Verify CronJobs are running:
    - `kubectl get cronjob -n mereka-lms auth-verify-prod`
    - `kubectl get cronjob -n mereka-lms cert-verify-prod`
    - `kubectl get jobs -n mereka-lms --sort-by=.metadata.creationTimestamp | tail`
+
+## How To Run Manually (Prod)
+
+This is useful after adding a new hostname/microsite, after a cert renewal, or when validating monitoring.
+
+Auth surface check:
+```bash
+ts=$(date +%Y%m%d-%H%M%S)
+kubectl -n mereka-lms create job auth-verify-manual-$ts --from=cronjob/auth-verify-prod
+kubectl -n mereka-lms wait --for=condition=complete job/auth-verify-manual-$ts --timeout=180s
+kubectl -n mereka-lms logs job/auth-verify-manual-$ts
+```
+
+TLS cert/SAN check:
+```bash
+ts=$(date +%Y%m%d-%H%M%S)
+kubectl -n mereka-lms create job cert-verify-manual-$ts --from=cronjob/cert-verify-prod
+kubectl -n mereka-lms wait --for=condition=complete job/cert-verify-manual-$ts --timeout=180s
+kubectl -n mereka-lms logs job/cert-verify-manual-$ts
+```
 
 ## Alerting On Failures
 
