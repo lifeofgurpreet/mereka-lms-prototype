@@ -26,7 +26,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 | 7 | Multi-site governance hardening | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
 | 8 | Ecommerce checkout readiness validation | Infra | 💤 Pending | Bead: `mereka-lms-xw6`. |
 | 9 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
-| 10 | Fix Argo sync blocked by promtail DaemonSet selector immutability | SRE | 💤 Pending | Blocks GitOps updates; see Argo app `mereka-lms-local`. Bead: `mereka-lms-lq4n`. |
+| 10 | Fix Argo sync blocked by promtail DaemonSet selector immutability | SRE | ⚙️ In progress | Blocks GitOps updates; see Argo app `mereka-lms-local`. Bead: `mereka-lms-2df4`. |
 
 ## Product / Content Backlog (Still Valid, Not in the “Auth Hardening” Top 10)
 
