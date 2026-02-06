@@ -15,10 +15,18 @@ LMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/image
 CMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images"
 TOKENS_SRC="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
+BRAND_REPO_TOKENS="/home/gurpreet/projects/bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
   echo "Missing font source directory: $SRC_FONTS" >&2
   exit 1
+fi
+
+# Optional: if the canonical brand-assets repo exists locally, refresh tokens.css
+# in this repo so we don't drift from the design system export.
+if [[ -f "$BRAND_REPO_TOKENS" ]]; then
+  cp "$BRAND_REPO_TOKENS" "$TOKENS_SRC"
+  echo "  ✓ Refreshed tokens.css from bbbi-mereka-brand-assets"
 fi
 
 mkdir -p "$THEME_FONT_DIR" "$MFE_FONT_DIR" "$IMG_DEST_DIR" "$MFE_IMG_DEST_DIR" "$LMS_IMG_DEST_DIR" "$CMS_IMG_DEST_DIR"

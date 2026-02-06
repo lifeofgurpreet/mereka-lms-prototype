@@ -50,10 +50,17 @@ fi
 
 declare -a URLS=(
   "lms-home|https://${base_lms}/"
+  "lms-courses|https://${base_lms}/courses"
   "studio-home|https://${base_studio}/"
   "mfe-authn-login|https://${base_mfe}/authn/login"
+  "mfe-account|https://${base_mfe}/account/"
+  "mfe-account-settings|https://${base_mfe}/account/settings"
+  "mfe-learner-dashboard|https://${base_mfe}/learner-dashboard/"
   "ecommerce-dashboard|https://${base_ecommerce}/dashboard/"
+  "ecommerce-stripe-webhook|https://${base_ecommerce}/api/v2/webhooks/stripe/"
   "credentials-admin-login|https://${base_credentials}/admin/login/"
+  "forum-home|https://forum.${base_lms}/"
+  "notes-root|https://notes.${base_lms}/"
 )
 
 if [[ -n "$biji" ]]; then
@@ -84,4 +91,3 @@ done
 agent-browser close >/dev/null || true
 
 echo "OK"
-

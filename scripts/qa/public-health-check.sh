@@ -26,9 +26,12 @@ urls=(
   "https://studio.${BASE_DOMAIN}/"
   "https://apps.${BASE_DOMAIN}/authn/login"
   "https://apps.${BASE_DOMAIN}/account/"
+  "https://apps.${BASE_DOMAIN}/account/settings"
   "https://apps.${BASE_DOMAIN}/learner-dashboard/"
   "https://discovery.${BASE_DOMAIN}/health/"
   "https://ecommerce.${BASE_DOMAIN}/dashboard/"
+  # Webhook endpoint is POST-only; 405 on GET still indicates routing is correct.
+  "https://ecommerce.${BASE_DOMAIN}/api/v2/webhooks/stripe/"
   "https://credentials.${BASE_DOMAIN}/health/"
   "https://notes.${BASE_DOMAIN}/"
   # Open edX forum (cs_comments_service) uses /heartbeat for health.
@@ -54,6 +57,11 @@ is_ok() {
 
   # Notes API returns 405 on GET / but still indicates service reachability.
   if [[ "$url" == *"notes."* && "$code" == "405" ]]; then
+    return 0
+  fi
+
+  # Ecommerce Stripe webhook endpoint is POST-only. A 405 indicates correct routing.
+  if [[ "$url" == *"/api/v2/webhooks/stripe/" && "$code" == "405" ]]; then
     return 0
   fi
 

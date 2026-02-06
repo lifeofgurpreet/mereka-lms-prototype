@@ -513,6 +513,83 @@ button.btn.btn-primary:focus {
   box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
 }
 
+/* ---------------------------- */
+/* Shared primitives (LMS/CMS)  */
+/* ---------------------------- */
+
+/* Bootstrap/legacy alert blocks */
+.alert {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+}
+
+.alert-info {
+  background: rgba(148, 209, 228, 0.22);
+  border-color: rgba(148, 209, 228, 0.55);
+}
+
+.alert-success {
+  background: rgba(44, 110, 73, 0.12);
+  border-color: rgba(44, 110, 73, 0.35);
+}
+
+.alert-warning {
+  background: rgba(244, 190, 72, 0.14);
+  border-color: rgba(244, 190, 72, 0.55);
+}
+
+.alert-danger,
+.alert-error {
+  background: rgba(140, 0, 47, 0.08);
+  border-color: rgba(140, 0, 47, 0.22);
+}
+
+/* Tabs (course about, some dashboards, Studio pages) */
+.nav-tabs > li > a,
+.nav-tabs .nav-link {
+  border-radius: 999px;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus,
+.nav-tabs .nav-link.active {
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Pagination */
+.pagination > li > a,
+.pagination > li > span {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  margin: 0 0.15rem;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  background: var(--mereka-gradient-primary);
+  border-color: transparent;
+}
+
+/* Tables */
+.table,
+table {
+  border-color: rgba(26, 22, 35, 0.10);
+}
+
+.table thead th,
+table thead th {
+  border-bottom: 1px solid rgba(26, 22, 35, 0.12);
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
 /* Footer: ensure our custom template styles are always present. */
 .mereka-footer {
   background: #fff;
