@@ -13,6 +13,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 - ✅ Notes/forum expectations documented and verified (API-first surfaces)
 - ✅ RFC draft added for optional claim-based role sync (Auth -> perms)
 - ✅ ArgoCD GitOps sync unblocked (promtail DaemonSet selector immutability fixed)
+- ✅ MySQL hardening: provisioned Notes/XQueue DBs + normalized MySQL secrets (removed trailing CR/LF)
 
 ## Next 10 High-Impact Hardening Tasks (Auth + Ecosystem)
 
