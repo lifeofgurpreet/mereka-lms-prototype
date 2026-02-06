@@ -5,6 +5,7 @@ This document captures the brand tokens we apply across LMS/Studio and all MFEs 
 
 Quick operational entrypoint (read this before changing anything):
 - `docs/branding/BRANDING_GUARDRAILS.md`
+- `docs/branding/BRANDING_ROADMAP.md`
 
 ## Palette
 

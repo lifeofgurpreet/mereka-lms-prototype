@@ -60,3 +60,7 @@ Notes:
 
 Use `docs/operations/THEME_DEPLOYMENT.md` as the canonical deployment runbook.
 
+## Roadmap
+
+The current bead-backed plan lives at:
+- `docs/branding/BRANDING_ROADMAP.md`
