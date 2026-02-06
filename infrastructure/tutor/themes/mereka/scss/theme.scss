@@ -550,3 +550,87 @@
     gap: 0.5rem;
   }
 }
+
+/* -------------------------------- */
+/* Studio designer (CMS) polish      */
+/* -------------------------------- */
+
+/* Studio output varies by view. We scope to Studio's wrapper to avoid surprising LMS. */
+.wrapper-view .wrapper-content,
+body[class*="view-"] .wrapper-content {
+  background: var(--mereka-color-surface-primary);
+}
+
+.wrapper-view .wrapper-content .content-primary,
+.wrapper-view .wrapper-content .content-supplementary,
+.wrapper-view .wrapper-content .content,
+body[class*="view-"] .wrapper-content .content-primary,
+body[class*="view-"] .wrapper-content .content-supplementary,
+body[class*="view-"] .wrapper-content .content {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+/* Course outline cards */
+.view-outline .outline-complex .outline-section,
+.view-outline .outline-complex .outline-subsection,
+.view-outline .outline-complex .outline-unit,
+.view-container .wrapper-xblock,
+.view-container .xblock-render,
+.view-container .xblock-render .xblock {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.view-outline .outline-complex .outline-section:hover,
+.view-outline .outline-complex .outline-subsection:hover,
+.view-outline .outline-complex .outline-unit:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+/* Studio action buttons */
+.wrapper-mast .mast.has-actions .nav-actions .button,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library,
+.view-outline .content-primary .no-content .button,
+.view-static-pages .content-primary .add-pages .button,
+.view-container .content-primary .no-container-content .button,
+.view-textbooks .content-primary .no-textbook-content .button,
+.view-group-configurations .content-primary .no-content .button,
+.view-certificates .content-primary .no-content .button {
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  text-transform: none;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.wrapper-mast .mast.has-actions .nav-actions .button:hover,
+.wrapper-mast .mast.has-actions .nav-actions .button:focus {
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Secondary buttons */
+.wrapper-content .action-secondary,
+.wrapper-content a.action-secondary,
+.wrapper-content button.action-secondary,
+.btn-default {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.18);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+  font-weight: 700;
+}
+
+.btn-default:hover,
+.btn-default:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}

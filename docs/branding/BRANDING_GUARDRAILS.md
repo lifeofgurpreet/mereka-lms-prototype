@@ -41,6 +41,15 @@ Notes:
   `skillourfuture.academy.mereka.io`).
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
 
+## Surface Audit (Gap-Finder)
+
+This is intentionally non-fatal by default and answers: "which surface is still default?"
+
+```bash
+./scripts/qa/audit-branding-surfaces.sh prod
+./scripts/qa/audit-branding-surfaces.sh prod --strict
+```
+
 ## Most Common Failure Modes
 
 1. Deep branding looks absent on production
