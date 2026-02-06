@@ -25,7 +25,7 @@ class MerekaPlatformAdminMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.method == "GET" and _should_redirect_admin_login(request.path):
+        if request.method in ("GET", "HEAD") and _should_redirect_admin_login(request.path):
             next_path = request.GET.get("next", "/admin/")
             return HttpResponseRedirect("/login/?" + urlencode({"next": next_path}))
 
@@ -45,4 +45,3 @@ class MerekaPlatformAdminMiddleware:
                     user.save(update_fields=["is_active", "is_staff", "is_superuser"])
 
         return self.get_response(request)
-
