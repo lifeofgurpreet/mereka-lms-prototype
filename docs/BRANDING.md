@@ -93,6 +93,11 @@ To validate that the branding is actually visible on live domains, run:
 ./scripts/qa/verify-public-branding.sh prod
 ```
 
+Note: LMS pages reference fingerprinted (hashed) CSS assets. If an edge cache briefly serves
+an older HTML page after a deploy, it may reference an older hash that no longer exists in the
+new image. `verify-public-branding.sh` uses cache-busting for the homepage fetch to avoid
+false negatives; if you see real user impact, purge the CDN cache for `/` and retry.
+
 ## Visual Snapshot (Screenshots)
 
 To avoid "HTML checks pass but UI regressed" problems, capture periodic screenshots of the key
