@@ -46,6 +46,7 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
 fi
 
 failures=0
+DEV_FORUM_HINT_PRINTED=0
 
 is_ok() {
   local url=$1
@@ -63,6 +64,42 @@ is_ok() {
   return 1
 }
 
+dev_forum_diagnostics() {
+  # Only run once per script invocation.
+  if [[ "$DEV_FORUM_HINT_PRINTED" == "1" ]]; then
+    return
+  fi
+  DEV_FORUM_HINT_PRINTED=1
+
+  echo "" >&2
+  echo "Dev forum health check failed. Common cause: MongoDB Atlas allowlist drift (dev VPS egress IP not allowed)." >&2
+  echo "Docs:" >&2
+  echo "  - docs/MONGODB_ATLAS.md" >&2
+  echo "  - docs/operations/TROUBLESHOOTING.md (forum/Atlas sections)" >&2
+
+  if ! command -v kubectl >/dev/null 2>&1; then
+    return
+  fi
+
+  local ctx="${K8S_CONTEXT:-kind-dev}"
+  local ns="${K8S_NAMESPACE:-mereka-lms}"
+
+  if ! kubectl --context "$ctx" get deploy/forum -n "$ns" >/dev/null 2>&1; then
+    echo "Tip: set K8S_CONTEXT (default kind-dev) if you want this script to inspect forum logs." >&2
+    return
+  fi
+
+  # Heuristic log scan (no secrets printed). We don't dump logs to stdout/stderr
+  # to keep CI output minimal; we only surface a directional hint.
+  local tail
+  tail="$(kubectl --context "$ctx" logs -n "$ns" deploy/forum --tail=200 2>/dev/null || true)"
+  if command -v rg >/dev/null 2>&1; then
+    if [[ -n "$tail" ]] && echo "$tail" | rg -qi "(atlas|mongo|mongodb|srv|getaddrinfo|ENOTFOUND|ECONN|EHOST|timed out|connection refused|not authorized|Authentication failed)"; then
+      echo "Forum logs indicate Mongo/Atlas connectivity/auth errors. Check Atlas allowlist + DB user permissions." >&2
+    fi
+  fi
+}
+
 check_url() {
   local url=$1
   local code
@@ -73,6 +110,11 @@ check_url() {
   else
     printf "✗ %s (%s)\n" "$url" "$code" >&2
     failures=$((failures + 1))
+
+    # Dev forum failures are almost always Atlas allowlist drift; print an actionable hint.
+    if [[ "$ENVIRONMENT" == "dev" && "$url" == *"forum."*"/heartbeat" ]]; then
+      dev_forum_diagnostics
+    fi
   fi
 }
 
