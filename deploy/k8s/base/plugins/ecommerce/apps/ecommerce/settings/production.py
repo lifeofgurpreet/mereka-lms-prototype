@@ -10,6 +10,8 @@ LMS_INTERNAL_URL = os.environ.get("LMS_INTERNAL_URL", "http://lms:8000")
 LMS_OAUTH2_ISSUER = f"{LMS_BASE_URL}/oauth2"
 MFE_BASE_URL = os.environ.get("MFE_BASE_URL", f"{MEREKA_SCHEME}://apps.{MEREKA_LMS_DOMAIN}")
 ECOMMERCE_BACKEND_OAUTH2_KEY = os.environ.get("ECOMMERCE_BACKEND_OAUTH2_KEY", "ecommerce")
+# SSO client key for the authorization-code flow used by end users.
+# (Backend service auth uses ECOMMERCE_BACKEND_OAUTH2_KEY instead.)
 ECOMMERCE_OAUTH2_KEY = os.environ.get("ECOMMERCE_OAUTH2_KEY", "ecommerce-sso")
 
 SECRET_KEY = os.environ.get("ECOMMERCE_SECRET_KEY", "")

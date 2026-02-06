@@ -1,0 +1,101 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cert-verify-prod
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: cert-verify
+    app.kubernetes.io/component: qa
+spec:
+  # Every 6 hours
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: cert-verify
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: cert-verify
+              image: alpine:3.19
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+
+                  # Keep the image simple; install only what we need.
+                  apk add --no-cache openssl ca-certificates >/dev/null
+
+                  fail=0
+
+                  ok() { printf "OK  %s\n" "$1"; }
+                  bad() { printf "BAD %s\n" "$1" >&2; fail=$((fail+1)); }
+
+                  get_cert() {
+                    host="$1"
+                    # shellcheck disable=SC2094
+                    echo | openssl s_client -servername "$host" -connect "$host:443" 2>/dev/null \
+                      | openssl x509 -noout -subject -issuer -ext subjectAltName 2>/dev/null
+                  }
+
+                  check_host() {
+                    host="$1"
+
+                    cert="$(get_cert "$host" || true)"
+                    if [ -z "${cert:-}" ]; then
+                      bad "$host: failed to fetch certificate"
+                      return
+                    fi
+
+                    subject="$(printf "%s\n" "$cert" | sed -n 's/^subject=//p')"
+                    if printf "%s" "$subject" | grep -qi "Kubernetes Ingress Controller Fake Certificate"; then
+                      bad "$host: fake ingress certificate detected"
+                      return
+                    fi
+
+                    sans="$(printf "%s\n" "$cert" | awk '/Subject Alternative Name/{flag=1;next}/X509v3/{flag=0}flag' | tr -d ' ')"
+                    if printf "%s" "$sans" | grep -q "DNS:${host}"; then
+                      ok "$host: SAN OK"
+                      return
+                    fi
+
+                    suffix="${host#*.}"
+                    if [ "$host" != "$suffix" ] && printf "%s" "$sans" | grep -q "DNS:\\*\\.${suffix}"; then
+                      ok "$host: SAN OK (wildcard)"
+                      return
+                    fi
+
+                    bad "$host: SAN missing (SANs=${sans})"
+                  }
+
+                  # Core
+                  check_host "academyv2.mereka.io"
+                  check_host "preview.academyv2.mereka.io"
+                  check_host "studio.academyv2.mereka.io"
+                  check_host "apps.academyv2.mereka.io"
+                  check_host "discovery.academyv2.mereka.io"
+                  check_host "ecommerce.academyv2.mereka.io"
+                  check_host "credentials.academyv2.mereka.io"
+                  check_host "notes.academyv2.mereka.io"
+                  check_host "forum.academyv2.mereka.io"
+
+                  # Microsites (different clients)
+                  check_host "skillourfuture.academy.mereka.io"
+                  check_host "academy.biji-biji.com"
+                  check_host "studio.academy.biji-biji.com"
+                  check_host "apps.academy.biji-biji.com"
+
+                  if [ "$fail" -gt 0 ]; then
+                    printf "FAILED (%s checks failed)\n" "$fail" >&2
+                    exit 1
+                  fi
+                  printf "OK\n"
+

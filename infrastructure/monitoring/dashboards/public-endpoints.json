@@ -80,6 +80,52 @@
             "scale": "LINEAR"
           }
         }
+      },
+      {
+        "title": "Auth surface synthetic failures (in-cluster CronJob logs)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/auth-verify-cronjob-failures\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "900s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Failures",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "TLS SAN / fake-cert failures (in-cluster CronJob logs)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/cert-verify-cronjob-failures\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "21600s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Failures",
+            "scale": "LINEAR"
+          }
+        }
       }
     ]
   }

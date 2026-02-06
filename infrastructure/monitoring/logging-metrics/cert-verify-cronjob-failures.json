@@ -1,0 +1,6 @@
+{
+  "name": "cert-verify-cronjob-failures",
+  "description": "Count failures from the in-cluster TLS certificate verification CronJob (cert-verify-prod).",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND resource.labels.container_name=\"cert-verify\" AND resource.labels.pod_name=~\"^cert-verify-prod-\" AND (textPayload:\"FAILED (\" OR textPayload:\"fake ingress certificate\" OR textPayload:\"SAN missing\" OR jsonPayload.message:\"FAILED (\")"
+}
+
