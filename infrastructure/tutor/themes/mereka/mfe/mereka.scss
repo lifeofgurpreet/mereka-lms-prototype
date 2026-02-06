@@ -205,6 +205,51 @@ label {
   letter-spacing: 0.08em;
 }
 
+/* Account/settings + learner dashboard surfaces */
+[class*="account-settings"],
+[class*="account-page"],
+[class*="learner-dashboard"] {
+  background: transparent;
+}
+
+[class*="account-settings"] .pgn__card,
+[class*="account-page"] .pgn__card,
+[class*="learner-dashboard"] .pgn__card,
+[class*="account-settings"] .card,
+[class*="account-page"] .card,
+[class*="learner-dashboard"] .card {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-mfe-card-shadow);
+}
+
+[class*="account-settings"] .pgn__form-control,
+[class*="account-page"] .pgn__form-control,
+[class*="learner-dashboard"] .pgn__form-control {
+  background: #fff;
+}
+
+[class*="account-settings"] .pgn__btn,
+[class*="account-page"] .pgn__btn,
+[class*="learner-dashboard"] .pgn__btn {
+  border-radius: 999px;
+}
+
+[class*="learner-dashboard"] [class*="course"],
+[class*="learner-dashboard"] [data-testid*="course"] {
+  border-radius: 20px;
+}
+
+[class*="account-settings"] h1,
+[class*="account-settings"] h2,
+[class*="account-page"] h1,
+[class*="account-page"] h2,
+[class*="learner-dashboard"] h1,
+[class*="learner-dashboard"] h2 {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 0.75rem 1rem;

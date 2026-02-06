@@ -93,6 +93,8 @@ check_contains "MFE theme imports shared tokens" "$MFE_SCSS" '@import "./scss/th
 check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
 check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
 check_contains "MFE theme styles Paragon modal" "$MFE_SCSS" '.pgn__modal-content'
+check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
+check_contains "MFE theme targets learner dashboard surfaces" "$MFE_SCSS" 'learner-dashboard'
 
 echo ""
 echo "3.25 Token drift (design system)..."
