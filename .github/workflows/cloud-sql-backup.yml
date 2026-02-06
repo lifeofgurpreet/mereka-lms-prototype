@@ -1,15 +1,23 @@
-name: Cloud SQL Backups
+name: Legacy Cloud SQL Backups (Gated)
 
 on:
+  # Keep a schedule so backups are automatic when explicitly enabled.
+  # The job itself is gated via a repo variable to avoid accidental drift/spam.
   schedule:
     - cron: '0 18 */3 * *'  # roughly ten runs per month
   workflow_dispatch:
 
 jobs:
   backup:
+    # Enable by setting GitHub repo variable: ENABLE_CLOUD_SQL_BACKUPS=true
+    if: ${{ vars.ENABLE_CLOUD_SQL_BACKUPS == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Note
+        run: |
+          echo "This workflow is legacy and runs only when ENABLE_CLOUD_SQL_BACKUPS=true."
+          echo "If production uses in-cluster MySQL (PVC + Velero), keep it disabled."
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
