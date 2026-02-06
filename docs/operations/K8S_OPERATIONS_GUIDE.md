@@ -467,11 +467,11 @@ force a refresh after remote base updates (including this repo).
 # List ArgoCD applications
 kubectl get applications -n argocd
 
-# Refresh specific apps
-ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refresh.sh
+# Refresh specific apps (current production uses `mereka-lms-local`)
+ARGO_APPS="mereka-lms-local" ./scripts/infra/argocd-refresh.sh
 
 # Optional overrides
-ARGO_NAMESPACE=argocd ARGO_REFRESH_TYPE=hard ./scripts/infra/argocd-refresh.sh mereka-lms-production
+ARGO_NAMESPACE=argocd ARGO_REFRESH_TYPE=hard ./scripts/infra/argocd-refresh.sh mereka-lms-local
 ```
 
 For detailed secrets management architecture, see `/home/gurpreet/projects/secrets-management/specs/`.

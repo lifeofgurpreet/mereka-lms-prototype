@@ -4,15 +4,24 @@ kind: Deployment
 metadata:
   name: caddy
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: caddy
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: caddy
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: caddy
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       # This Deployment uses a persistent volume claim. This requires
       # that in order to enable rolling updates (i.e. use a deployment
@@ -55,15 +64,24 @@ kind: Deployment
 metadata:
   name: cms
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: cms
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: cms
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: cms
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -124,15 +142,24 @@ kind: Deployment
 metadata:
   name: cms-worker
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: cms-worker
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: cms-worker
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: cms-worker
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -187,15 +214,24 @@ kind: Deployment
 metadata:
   name: lms
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: lms
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: lms
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: lms
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -256,15 +292,24 @@ kind: Deployment
 metadata:
   name: lms-worker
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: lms-worker
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: lms-worker
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: lms-worker
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -319,17 +364,26 @@ kind: Deployment
 metadata:
   name: elasticsearch
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: elasticsearch
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: elasticsearch
+      app.kubernetes.io/part-of: mereka-lms
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: elasticsearch
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -367,17 +421,26 @@ kind: Deployment
 metadata:
   name: mysql
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: mysql
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: mysql
+      app.kubernetes.io/part-of: mereka-lms
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: mysql
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 999
@@ -418,15 +481,24 @@ kind: Deployment
 metadata:
   name: smtp
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: smtp
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: smtp
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: smtp
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 100
@@ -459,17 +531,26 @@ kind: Deployment
 metadata:
   name: redis
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: redis
+      app.kubernetes.io/part-of: mereka-lms
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: redis
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -504,15 +585,24 @@ kind: Deployment
 metadata:
   name: discovery
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: discovery
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: discovery
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: discovery
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -549,15 +639,24 @@ kind: Deployment
 metadata:
   name: ecommerce
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: ecommerce
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: ecommerce
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: ecommerce
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -592,15 +691,24 @@ kind: Deployment
 metadata:
   name: ecommerce-worker
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: ecommerce-worker
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: ecommerce-worker
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: ecommerce-worker
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -630,15 +738,24 @@ kind: Deployment
 metadata:
   name: credentials
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: credentials
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: credentials
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: credentials
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -673,15 +790,24 @@ kind: Deployment
 metadata:
   name: forum
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: forum
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: forum
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: forum
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -730,15 +856,24 @@ kind: Deployment
 metadata:
   name: mfe
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: mfe
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: mfe
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: mfe
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       containers:
         - name: mfe
@@ -758,15 +893,24 @@ kind: Deployment
 metadata:
   name: notes
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: notes
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: notes
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: notes
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
@@ -800,15 +944,24 @@ kind: Deployment
 metadata:
   name: xqueue
   labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/name: xqueue
+    app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
       app.kubernetes.io/name: xqueue
+      app.kubernetes.io/part-of: mereka-lms
   template:
     metadata:
       labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
         app.kubernetes.io/name: xqueue
+        app.kubernetes.io/part-of: mereka-lms
     spec:
       containers:
         - name: xqueue
