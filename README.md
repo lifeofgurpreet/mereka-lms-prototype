@@ -67,7 +67,7 @@ Tutor now pulls most runtime images from our Artifact Registry (`asia-southeast1
 |---------|-------|-------|
 | LMS/CMS + workers | `openedx` | Built via `tutor images build openedx`. |
 | Micro-frontends | `openedx-mfe` | Patched to build on Node 18. |
-| Discovery | `openedx-discovery` | Uses Cloud SQL + OpenSearch. |
+| Discovery | `openedx-discovery` | Uses in-cluster MySQL + in-cluster Elasticsearch. |
 | Forum (cs_comments_service) | `openedx-forum` | Uses MongoDB Atlas (managed service). |
 | Notes service | `openedx-notes` | Handles ORA notes. |
 | **New:** Ecommerce web/worker | `openedx-ecommerce`, `openedx-ecommerce-worker` | Mirrored from Tutor 12.0.4. |
@@ -79,6 +79,7 @@ Remaining images (MySQL init job, Android builder, etc.) still come from the ups
 
 - **Makefile**: Common tasks (`make tutor-start`, `make tutor-apply`, `make branding-sync`, etc.)
 - **Pre-commit hooks**: Automatic code formatting and linting
-- **CI/CD**: `.github/workflows/cloud-sql-backup.yml` runs `scripts/infra/backup-db.sh` every three days (cron `0 18 */3 * *`). Add a service-account JSON with `roles/cloudsql.admin` and `roles/storage.objectAdmin` to the repo secrets as `GCP_SA_KEY` so the workflow can authenticate.
+- **CI/CD**: `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
+- **Backups**: production backups are Velero-driven (see `docs/operations/VELERO_BACKUP_AUDIT.md`). The Cloud SQL export workflow is legacy and gated via `ENABLE_CLOUD_SQL_BACKUPS=true` (see `.github/workflows/cloud-sql-backup.yml`).
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development workflow and code style guidelines.

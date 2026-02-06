@@ -11,7 +11,7 @@ This repository uses GitHub Actions for CI/CD with the following workflows:
 | `ci.yml` | PRs, push to main | Linting, validation, security scans |
 | `build-tutor-images.yml` | Push to main (tutor changes), manual | Build and push OpenEdX/MFE images |
 | `build-ios-app.yml` | Manual | Build iOS app for TestFlight |
-| `cloud-sql-backup.yml` | Scheduled, manual | Database backups |
+| `cloud-sql-backup.yml` | Legacy, gated | Cloud SQL exports (only relevant if/when MySQL runs in Cloud SQL). Enable by setting repo variable `ENABLE_CLOUD_SQL_BACKUPS=true`. |
 
 ## Required Secrets
 

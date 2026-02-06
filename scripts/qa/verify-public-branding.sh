@@ -19,12 +19,19 @@ fi
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   BASE_DOMAIN="$LMS_DOMAIN"
+  STUDIO_HOST="$STUDIO_DOMAIN"
+  MFE_HOST="$MFE_DOMAIN"
+  FORUM_HOST="$FORUM_DOMAIN"
   EXTRA_HOSTS=("$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
 else
   BASE_DOMAIN="$DEV_LMS_DOMAIN"
+  STUDIO_HOST="$DEV_STUDIO_DOMAIN"
+  MFE_HOST="$DEV_MFE_DOMAIN"
+  FORUM_HOST="$DEV_FORUM_DOMAIN"
   EXTRA_HOSTS=()
 fi
 
+CURL_TIMEOUT_SECONDS="${CURL_TIMEOUT_SECONDS:-20}"
 failures=0
 
 check_follow_200() {
@@ -32,8 +39,8 @@ check_follow_200() {
   local label=$2
   local code size
   # Follow redirects and require a real 200 so we know the asset is reachable.
-  code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$url" || echo "000")
-  size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$url" || echo "0")
+  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+  size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$url" 2>/dev/null || echo "0")
   if [[ "$code" == "200" && "$size" -gt 0 ]]; then
     printf "✓ %s (200, %s bytes)\n" "$label" "$size"
   else
@@ -47,8 +54,8 @@ check_any_follow_200() {
   shift
   local url code size ok=0
   for url in "$@"; do
-    code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$url" || echo "000")
-    size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$url" || echo "0")
+    code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+    size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$url" 2>/dev/null || echo "0")
     if [[ "$code" == "200" && "$size" -gt 0 ]]; then
       printf "✓ %s (200 via %s, %s bytes)\n" "$label" "$url" "$size"
       ok=1
@@ -58,8 +65,8 @@ check_any_follow_200() {
   if [[ "$ok" == "0" ]]; then
     printf "✗ %s (no working URL)\n" "$label" >&2
     for url in "$@"; do
-      code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$url" || echo "000")
-      size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$url" || echo "0")
+      code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+      size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$url" 2>/dev/null || echo "0")
       printf "  - %s (%s, %s bytes)\n" "$url" "$code" "$size" >&2
     done
     failures=$((failures + 1))
@@ -70,7 +77,7 @@ check_http() {
   local url=$1
   local label=$2
   local code
-  code=$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")
+  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
   if [[ "$code" =~ ^[23][0-9][0-9]$ ]]; then
     printf "✓ %s (%s)\n" "$label" "$code"
   else
@@ -84,8 +91,8 @@ check_contains() {
   local label=$2
   local needle=$3
   local body
-  body=$(curl -sS -L "$url" || true)
-  if echo "$body" | grep -q "$needle"; then
+  body=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)
+  if printf '%s' "$body" | rg -F -q "$needle"; then
     printf "✓ %s\n" "$label"
   else
     printf "✗ %s (missing '%s')\n" "$label" "$needle" >&2
@@ -93,11 +100,27 @@ check_contains() {
   fi
 }
 
+check_contains_any() {
+  local url=$1
+  local label=$2
+  shift 2
+  local body needle
+  body=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)
+  for needle in "$@"; do
+    if printf '%s' "$body" | rg -F -q "$needle"; then
+      printf "✓ %s\n" "$label"
+      return
+    fi
+  done
+  printf "✗ %s (none of expected strings found)\n" "$label" >&2
+  failures=$((failures + 1))
+}
+
 check_css_fonts() {
   local url=$1
   local label=$2
   local css
-  css="$(curl -sS -L "$url" || true)"
+  css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)"
   # Font-face URLs are fingerprinted (e.g. Poppins-Regular.<hash>.woff2), so match
   # the base name and extension rather than an exact filename.
   if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
@@ -152,7 +175,7 @@ check_homepage_brand_fonts() {
   # Avoid false negatives when an edge cache briefly serves an old HTML page that
   # references an older fingerprinted CSS asset which may no longer exist.
   ts="$(date +%s)"
-  html="$(curl -sS -L "https://${base_domain}/?nocache=${ts}" || true)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${base_domain}/?nocache=${ts}" 2>/dev/null || true)"
 
   # We load brand overrides via comprehensive theme hook `head-extra.html`.
   css_path="$(printf '%s' "$html" | rg -o '/static/mereka/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
@@ -174,7 +197,7 @@ check_homepage_brand_logo() {
   local ts
 
   ts="$(date +%s)"
-  html="$(curl -sS -L "https://${base_domain}/?nocache=${ts}" || true)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${base_domain}/?nocache=${ts}" 2>/dev/null || true)"
   # Prefer the main header logo. Fall back to any logo.png reference.
   logo_path="$(echo "$html" | sed -nE 's/.*<img[^>]*class="logo"[^>]*src="([^"]+)".*/\1/p' | head -n 1)"
   if [[ -z "$logo_path" ]]; then
@@ -195,7 +218,7 @@ check_homepage_brand_logo() {
 
   # Brand sanity check: the homepage logo should ultimately match the theming logo redirect target.
   # On Open edX Indigo this often ends up under /static/images/logo.<hash>.png.
-  theming_effective_url="$(curl -sS -L -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo-horizontal.png" || true)"
+  theming_effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo-horizontal.png" 2>/dev/null || true)"
   if [[ -z "$theming_effective_url" ]]; then
     printf "✗ %s (could not resolve theming logo)\n" "$label" >&2
     failures=$((failures + 1))
@@ -214,8 +237,8 @@ check_homepage_brand_logo() {
     return
   fi
 
-  code=$(curl -sS -L -o /dev/null -w "%{http_code}" "$logo_url" || echo "000")
-  size=$(curl -sS -L -o /dev/null -w "%{size_download}" "$logo_url" || echo "0")
+  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$logo_url" 2>/dev/null || echo "000")
+  size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$logo_url" 2>/dev/null || echo "0")
   if [[ "$code" == "200" && "$size" -gt 2048 ]]; then
     printf "✓ %s\n" "$label"
   else
@@ -226,14 +249,65 @@ check_homepage_brand_logo() {
   fi
 }
 
+check_studio_brand_css() {
+  local studio_host=$1
+  local label=$2
+  local ts html css_path css
+
+  ts="$(date +%s)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}/?nocache=${ts}" 2>/dev/null || true)"
+  if [[ -z "${html:-}" ]]; then
+    printf "✗ %s (studio host unreachable)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  css_path="$(printf '%s' "$html" | rg -o '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css' | head -n 1 || true)"
+  if [[ -z "${css_path:-}" ]]; then
+    printf "✗ %s (missing studio-main-v1 themed CSS link)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}${css_path}?nocache=${ts}" 2>/dev/null || true)"
+  if [[ -z "${css:-}" ]]; then
+    printf "✗ %s (could not fetch studio CSS)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  if printf '%s' "$css" | grep -Eq -- '--mereka-color-teal' \
+    && printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
+    && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
+    && ! printf '%s' "$css" | grep -Eq 'fonts\.googleapis\.com'; then
+    printf "✓ %s\n" "$label"
+  else
+    printf "✗ %s (missing token/font wiring or still importing Google fonts)\n" "$label" >&2
+    failures=$((failures + 1))
+  fi
+}
+
+check_forum_heartbeat() {
+  local forum_host=$1
+  local code
+  code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${forum_host}/heartbeat" 2>/dev/null || echo "000")"
+  if [[ "$code" == "200" ]]; then
+    printf "✓ Forum heartbeat (%s)\n" "$code"
+  else
+    printf "✗ Forum heartbeat (%s)\n" "$code" >&2
+    failures=$((failures + 1))
+  fi
+}
+
 echo "Branding verification ($ENVIRONMENT) for ${BASE_DOMAIN}..."
 echo "Branding level: ${BRANDING_LEVEL}"
 echo ""
 
 # HTML branding checks
 check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
-check_contains "https://studio.${BASE_DOMAIN}/" "Studio page includes 'Mereka'" "Mereka"
-check_http "https://apps.${BASE_DOMAIN}/authn/login" "MFE login reachable"
+check_contains "https://${STUDIO_HOST}/" "Studio page includes 'Mereka'" "Mereka"
+check_http "https://${MFE_HOST}/authn/login" "MFE login reachable"
+check_contains_any "https://${MFE_HOST}/authn/login" "MFE auth page shows branded SSO CTA" "Sign in with Mereka" "Authentik"
 
 # Asset checks (theme assets)
 check_any_follow_200 "Logo asset (logo.png)" \
@@ -249,9 +323,11 @@ check_any_follow_200 "Favicon asset (favicon.ico)" \
 # Font checks (critical for brand typography)
 # The homepage must stop using stock Indigo Google fonts and include brand fonts.
 check_homepage_brand_fonts "${BASE_DOMAIN}" "Homepage uses local brand fonts (no Google fonts)"
+check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no Google fonts)"
 
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
+check_forum_heartbeat "${FORUM_HOST}"
 
 for host in "${EXTRA_HOSTS[@]}"; do
   check_http "https://${host}/" "Microsite ${host} reachable"

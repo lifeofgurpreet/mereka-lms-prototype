@@ -58,7 +58,7 @@ The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-ap
    - Track memory saturation, restarts, and latency signals from the application tier (timeouts/499s).
    - If we add a Redis exporter later, alert on `used_memory`, evictions, and keyspace misses.
 
-> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `cloudsql.json`, `redis.json`, `public-endpoints.json`, `auth.json`). Apply them with
+> JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `public-endpoints.json`, `auth.json`, `operations-signals.json`, plus legacy `cloudsql.json`, `redis.json`). Apply them with
 > `./scripts/infra/apply-monitoring-configs.sh apply`
 
 ## Alerting Policies
@@ -80,6 +80,11 @@ Minimum recommended policies (edit thresholds as desired):
 | LMS CSRF failures | `infrastructure/monitoring/alerts/log-lms-csrf-failures.json` | Requires log metric `lms-csrf-failures`. |
 | In-cluster auth verify CronJob failures | `infrastructure/monitoring/alerts/log-auth-verify-cronjob-failures.json` | Requires log metric `auth-verify-cronjob-failures` (only applies after CronJob is deployed). |
 | In-cluster TLS cert verify CronJob failures | `infrastructure/monitoring/alerts/log-cert-verify-cronjob-failures.json` | Requires log metric `cert-verify-cronjob-failures` (catches SAN mismatch + fake ingress cert). |
+| Stateful storage errors | `infrastructure/monitoring/alerts/log-stateful-storage-errors.json` | Detects ENOSPC/read-only filesystem style failures in stateful services. |
+| MySQL connection errors | `infrastructure/monitoring/alerts/log-mysql-connection-errors.json` | Detects DB connectivity/operational failures from app logs. |
+| Redis connection errors | `infrastructure/monitoring/alerts/log-redis-connection-errors.json` | Detects cache connection/timeout failures from app logs. |
+| Velero backup verification failures | `infrastructure/monitoring/alerts/log-velero-backup-verification-failures.json` | Detects failed daily backup-verification job runs. |
+| Velero restore-test failures | `infrastructure/monitoring/alerts/log-velero-restore-test-failures.json` | Detects failed restore drill runs. |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -99,6 +104,12 @@ Apply all production uptime checks at once:
 ```bash
 ./scripts/infra/apply-monitoring-configs.sh plan
 ./scripts/infra/apply-monitoring-configs.sh apply
+```
+
+By default, legacy Cloud SQL templates are skipped. Include them only if you intentionally run Cloud SQL again:
+
+```bash
+INCLUDE_LEGACY_MONITORING=1 ./scripts/infra/apply-monitoring-configs.sh apply
 ```
 
 Each config hits the endpoint every five minutes from Asia-Pacific probe sites and validates TLS. The production set now includes LMS, Studio, MFE, Discovery, Ecommerce, Notes, Credentials, Forum, and microsites. After creating uptime checks, re-run the alert creation command so the policy can reference the new metric series.
@@ -140,6 +151,30 @@ gcloud logging metrics create lms-csrf-failures \
 gcloud logging metrics create auth-verify-cronjob-failures \
   --config-from-file=infrastructure/monitoring/logging-metrics/auth-verify-cronjob-failures.json \
   --project=mereka-lms
+
+gcloud logging metrics create cert-verify-cronjob-failures \
+  --config-from-file=infrastructure/monitoring/logging-metrics/cert-verify-cronjob-failures.json \
+  --project=mereka-lms
+
+gcloud logging metrics create stateful-storage-errors \
+  --config-from-file=infrastructure/monitoring/logging-metrics/stateful-storage-errors.json \
+  --project=mereka-lms
+
+gcloud logging metrics create mysql-connection-errors \
+  --config-from-file=infrastructure/monitoring/logging-metrics/mysql-connection-errors.json \
+  --project=mereka-lms
+
+gcloud logging metrics create redis-connection-errors \
+  --config-from-file=infrastructure/monitoring/logging-metrics/redis-connection-errors.json \
+  --project=mereka-lms
+
+gcloud logging metrics create velero-backup-verification-failures \
+  --config-from-file=infrastructure/monitoring/logging-metrics/velero-backup-verification-failures.json \
+  --project=mereka-lms
+
+gcloud logging metrics create velero-restore-test-failures \
+  --config-from-file=infrastructure/monitoring/logging-metrics/velero-restore-test-failures.json \
+  --project=mereka-lms
 ```
 
 Create via Console (Monitoring → Alerting) or `gcloud monitoring policies create --policy-from-file alert.json`. When using `gcloud`, populate `notification_channels` with email/SMS/webhook IDs.
@@ -157,6 +192,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
 6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.
+7. **Observability posture audit** – run `./scripts/qa/audit-observability.sh --mode all` (or `--mode local` when offline) to verify coverage and deployment state.
 
 ## Certificate/SAN verification
 

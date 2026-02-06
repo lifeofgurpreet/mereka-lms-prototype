@@ -41,7 +41,7 @@ gap() { printf "✗ %s\n" "$1" >&2; gaps=$((gaps + 1)); }
 
 fetch() {
   local url=$1
-  curl -sS -L "$url" || true
+  curl -sS -L --connect-timeout 10 --max-time 30 "$url" 2>/dev/null || true
 }
 
 extract_first() {
@@ -55,13 +55,21 @@ check_lms_overrides() {
   local html css_path css
 
   html="$(fetch "https://${host}/?nocache=$(date +%s)")"
+  if [[ -z "${html:-}" ]]; then
+    gap "${label}: host unreachable or returned empty response"
+    return
+  fi
   css_path="$(printf '%s' "$html" | extract_first '/static/mereka/css/mereka-overrides[^"]*\.css')"
   if [[ -z "${css_path:-}" ]]; then
-    gap "${label}: missing `mereka-overrides.css` link"
+    gap "${label}: missing mereka-overrides.css link"
     return
   fi
 
   css="$(fetch "https://${host}${css_path}")"
+  if [[ -z "${css:-}" ]]; then
+    gap "${label}: could not fetch override CSS (${css_path})"
+    return
+  fi
   if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
     && printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"'; then
     ok "${label}: override CSS includes local fonts"
@@ -85,6 +93,10 @@ check_studio_css() {
   local html css_path css
 
   html="$(fetch "https://${host}/?nocache=$(date +%s)")"
+  if [[ -z "${html:-}" ]]; then
+    gap "${label}: host unreachable or returned empty response"
+    return
+  fi
   css_path="$(printf '%s' "$html" | extract_first '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css')"
   if [[ -z "${css_path:-}" ]]; then
     gap "${label}: could not locate studio-main-v1 CSS link"
@@ -92,6 +104,10 @@ check_studio_css() {
   fi
 
   css="$(fetch "https://${host}${css_path}")"
+  if [[ -z "${css:-}" ]]; then
+    gap "${label}: could not fetch studio CSS (${css_path})"
+    return
+  fi
 
   if printf '%s' "$css" | grep -Eq -- '--mereka-color-teal'; then
     ok "${label}: studio CSS exports brand tokens"
@@ -116,7 +132,7 @@ check_studio_css() {
 check_forum() {
   local host=$1
   local code
-  code="$(curl -sS -o /dev/null -w "%{http_code}" "https://${host}/heartbeat" || echo "000")"
+  code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/heartbeat" || echo "000")"
   if [[ "$code" == "200" ]]; then
     ok "Forum heartbeat reachable (200)"
   else
@@ -144,4 +160,3 @@ if [[ "$STRICT" == "1" && "$gaps" -gt 0 ]]; then
 fi
 
 exit 0
-

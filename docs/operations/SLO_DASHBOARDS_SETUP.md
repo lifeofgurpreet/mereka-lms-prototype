@@ -1,6 +1,6 @@
 # Mereka LMS SLO Dashboards Setup
 
-**Date:** 2026-02-03
+**Date:** 2026-02-06
 **Status:** Updated
 
 ## Overview
@@ -19,9 +19,14 @@ Located in: `infrastructure/monitoring/`
 |------|------|-------------|
 | Uptime Check | `uptime/prod-*.json` | HTTPS checks for academyv2 + microsites + APIs |
 | Dashboard | `dashboards/public-endpoints.json` | Uptime SLO view for public endpoints |
+| Dashboard | `dashboards/operations-signals.json` | Stateful storage, DB/cache connection, Velero drill signals |
 | Alert | `alerts/lb-5xx-ratio.json` | 5xx error rate spike detection |
 | Alert | `alerts/pod-restarts.json` | Pod restart threshold alerts |
-| Alert | `alerts/cloudsql-disk.json` | Cloud SQL disk usage |
+| Alert | `alerts/log-stateful-storage-errors.json` | ENOSPC/read-only filesystem failures |
+| Alert | `alerts/log-mysql-connection-errors.json` | MySQL connection failures from app logs |
+| Alert | `alerts/log-redis-connection-errors.json` | Redis connection failures from app logs |
+| Alert | `alerts/log-velero-backup-verification-failures.json` | Velero verification job failures |
+| Alert | `alerts/log-velero-restore-test-failures.json` | Velero restore drill failures |
 | Alert | `alerts/https-cert-expiry.json` | SSL certificate expiry |
 | Alert | `alerts/log-5xx-spike.json` | Log-based 5xx spikes |
 | Alert | `alerts/log-auth-failures.json` | Log-based auth failures |
@@ -88,6 +93,12 @@ gcloud alpha monitoring uptime create \
 gcloud alpha monitoring policies create \
   --policy-from-file=infrastructure/monitoring/alerts/lb-5xx-ratio.json \
   --project=mereka-lms
+
+# Audit coverage (local/repo only)
+./scripts/qa/audit-observability.sh --mode local
+
+# Audit runtime deployment state (requires cluster + gcloud auth)
+./scripts/qa/audit-observability.sh --mode runtime
 ```
 
 ## Telemetry Path & Datasource Connectivity

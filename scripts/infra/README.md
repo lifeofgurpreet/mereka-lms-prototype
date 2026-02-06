@@ -53,6 +53,9 @@ ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refres
 # Apply monitoring configs
 ./scripts/infra/apply-monitoring-configs.sh plan
 
+# Include legacy Cloud SQL templates only when intentionally needed
+INCLUDE_LEGACY_MONITORING=1 ./scripts/infra/apply-monitoring-configs.sh apply
+
 # Validate Atlas allowlist for VPS egress (dev forum)
 ./scripts/infra/check-atlas-allowlist-vps.sh
 

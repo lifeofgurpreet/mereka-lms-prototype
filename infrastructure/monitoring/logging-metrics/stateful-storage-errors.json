@@ -1,0 +1,5 @@
+{
+  "name": "stateful-storage-errors",
+  "description": "Critical storage errors for stateful services (ENOSPC, read-only FS, disk pressure) in mereka-lms namespace.",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND (textPayload:\"no space left on device\" OR textPayload:\"Read-only file system\" OR textPayload:\"ENOSPC\" OR textPayload:\"disk pressure\" OR jsonPayload.message:\"no space left on device\" OR jsonPayload.message:\"Read-only file system\")"
+}

@@ -1,5 +1,5 @@
 # Deployment Runbook – Mereka LMS (academyv2.mereka.io)
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-10-30_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-06_
 
 This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project. Environment model: **production (GKE)** + **dev (kind/VPS)** only; “staging” bucket names are legacy production labels.
 
@@ -28,29 +28,28 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    domain_root = "academyv2.mereka.io"
    ```
    Add any secret definitions to the `module "secret_manager"` block via tfvars rather than committing to Git.
-2. Implement each module under `modules/` (included in repo):
+2. Implement each module under `modules/` (included in repo).
+
+Reality-first note:
+- Production currently runs **in-cluster MySQL/Redis (PVC-backed)**, so Cloud SQL / Memorystore are not required for the current architecture.
+- Avoid hardcoding private IPs in configs; prefer K8s service DNS (`mysql`, `redis`).
+
+Modules:
    - `network`: VPC + subnets + secondary ranges for Autopilot.
    - `gke`: Autopilot cluster (Workload Identity, release channel regular).
-   - `cloudsql`: MySQL 8 instance + private service access.
-   - `memorystore`: Redis standard tier.
    - `artifact_registry`: regional Docker repo `asia-southeast1/openedx`.
    - `storage`: buckets for uploads (`lms-content`), blockstore (`lms-blockstore`), backups (`lms-backup`).
    - `secret_manager`: placeholder secrets (Django key, JWT private key, DB creds, SMTP creds).
 3. `terraform init`, `terraform plan`, `terraform apply` once modules are filled.
-4. Record outputs (cluster endpoint, SQL connection string, Redis host, bucket names, secret IDs).
+4. Record outputs (cluster endpoint, bucket names, secret IDs).
    ```bash
    terraform output
    ```
-   Current production values (bucket names are legacy):
-   - `cloudsql_connection_name = mereka-lms:asia-southeast1:mereka-lms-mysql`
-   - `cloudsql_private_ip = 10.97.0.2`
-   - `redis_host = 10.150.102.108`
-   - `content_bucket = staging-academy-mereka-io-content` (legacy name)
-   - `backup_bucket = staging-academy-mereka-io-backup` (legacy name)
+   Do not copy/paste private IPs into app configs; use `mysql`/`redis` service DNS.
 
 ## 3. Tutor configuration
 
-1. Copy `infrastructure/tutor/config.example.yml` to `infrastructure/tutor/config.prod.yml` and adjust (use values from `docs/SECRETS_SNAPSHOT.md` for bootstrap):
+1. Copy `infrastructure/tutor/config.example.yml` to `infrastructure/tutor/config.prod.yml` and adjust (do not copy secret values into git):
    - `LMS_HOST`: `academyv2.mereka.io`
    - `CMS_HOST`: `studio.academyv2.mereka.io`
    - `MFE_HOST`: `apps.academyv2.mereka.io`
@@ -58,8 +57,8 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    - `ECOMMERCE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce:12.0.4`
    - `ECOMMERCE_WORKER_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-ecommerce-worker:12.0.4`
    - `XQUEUE_DOCKER_IMAGE`: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-xqueue:12.1.0`
-   - `MONGODB_URI`: Atlas connection string (leave blank while using the in-cluster StatefulSet).
-   - Configure external service endpoints (Cloud SQL host, Memorystore host/port, GCS buckets).
+   - `MONGODB_URI`: Atlas connection string (for forum and the Atlas-only target state).
+   - Configure external service endpoints (GCS buckets, etc). For DB/cache, prefer in-cluster service DNS.
    - For additional LMS domains (microsites), see `docs/MULTISITE.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=asia-southeast1-docker.pkg.dev/mereka-lms/openedx`.
@@ -92,12 +91,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
    tutor k8s init
    tutor k8s start
    ```
-4. MongoDB (production): use Atlas (no in-cluster StatefulSet)
-   ```bash
-   tutor k8s exec -- kubectl apply -f k8s/addons/mongodb-statefulset.yaml
-   ```
-   (See `docs/MONGODB_ATLAS.md` for migrating this data set to Atlas via `scripts/infra/mongodb-to-atlas.sh` and the new `MONGODB_URI` setting.)
-   - Ready to cut over? Run `ATLAS_URI=... ./scripts/infra/mongodb-atlas-cutover.sh` to dump the StatefulSet to Atlas, update Tutor config, restart `forum`, and (optionally) delete the StatefulSet/PVC once the Atlas connection is verified.
+4. MongoDB (production): target state is Atlas-only. Current production still has an in-cluster `mongodb` service; do not assume it is unused (see `docs/ARCHITECTURE_MONGODB.md`).
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `academyv2-mereka-io`.
    - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the GKE ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
@@ -112,13 +106,11 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
   ```
   (Set the password via Secret Manager or prompt; never commit credentials.)
 - Smoke test LMS, Studio, Discovery, MFEs (`./scripts/qa/smoke-test.sh` covers the public endpoints).
-- Configure backups (details in this section):
-1. Grant the Cloud SQL service account access to the backup bucket  
-   `gsutil iam ch serviceAccount:p355915112439-ora2um@gcp-sa-cloud-sql.iam.gserviceaccount.com:roles/storage.objectAdmin gs://staging-academy-mereka-io-backup` (legacy bucket name)
-2. Run ad-hoc exports with `./scripts/infra/backup-db.sh` (set `DATABASES='openedx discovery'` to limit scope).  Output is stored under `gs://staging-academy-mereka-io-backup/sql/<timestamp>/` (legacy bucket name).
-3. To balance cost, schedule **10 exports per month** (roughly every 3 days). The repo includes `.github/workflows/cloud-sql-backup.yml`, which runs on the cron `0 18 */3 * *` (UTC). Create a dedicated service account (roles: `roles/cloudsql.admin` + `roles/storage.objectAdmin`), download its JSON key, and store it as the GitHub secret `GCP_SA_KEY`. The workflow invokes `./scripts/infra/backup-db.sh` using those credentials. (Service account `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` already exists; its JSON payload is tracked in `docs/SECRETS_SNAPSHOT.md` until we rotate it.)
-   - Serverless exports only incur storage-and-egress costs: ~$0.10/GB written to GCS plus Cloud Storage at $0.026/GB-month in `asia-southeast1`. At the current data size (<1 GB per database) each run costs only a few cents.
-4. Apply the lifecycle policy under `infrastructure/storage/backup-lifecycle.json` so objects in `sql/` older than 60 days are deleted automatically (`gsutil lifecycle set infrastructure/storage/backup-lifecycle.json gs://staging-academy-mereka-io-backup`) (legacy bucket name).
+- Configure backups (Velero-driven):
+  - Audit posture: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
+  - Pre-op backup before risky operations:
+    `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
+  - Docs: `docs/operations/VELERO_BACKUP_AUDIT.md`, `docs/operations/DISASTER_RECOVERY.md`
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and the soon-to-exist `mongodb-atlas-uri`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
 - Apply the Mereka branding pack after each upgrade:
   ```bash
@@ -141,7 +133,7 @@ This runbook captures the steps to roll out the nightly Open edX stack on Google
 ## 7. GitHub integration
 
 - Repo: `https://github.com/Biji-Biji-Initiative/mereka-lms` (remote `origin` already configured locally).
-- Backups: `.github/workflows/cloud-sql-backup.yml` runs every three days; it authenticates via secret `GCP_SA_KEY` that contains the `cloud-sql-backup@mereka-lms.iam.gserviceaccount.com` JSON key.
+- Backups: Cloud SQL backup workflow is legacy and manual-only. Production backups are Velero-driven (see `docs/operations/VELERO_BACKUP_AUDIT.md`).
 - Next pipeline work: add workflows for (a) Tutor image build/push + smoke tests and (b) Terraform plan/apply with manual approvals. Store any additional credentials (Artifact Registry robot, MongoDB Atlas API, etc.) as repo secrets instead of committing them here.
 
 ## 8. Cutover checklist

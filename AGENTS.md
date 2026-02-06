@@ -443,7 +443,8 @@ Regenerate hostname registry (after domain changes):
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
-  - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod`
+  - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod` (includes Studio CSS token/font wiring, MFE auth branding CTA, forum heartbeat)
+- Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.

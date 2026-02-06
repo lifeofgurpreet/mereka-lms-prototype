@@ -1,7 +1,7 @@
 # Mereka LMS Observability Enhancement Plan
 
 **Project**: mereka-lms  
-**Version**: 2.2  
+**Version**: 2.3
 **Date**: 2026-02-06  
 **Status**: Active  
 **Owner**: SRE/Infra  
@@ -52,6 +52,11 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - `https-cert-expiry.json`
 - `pod-restarts.json`
 - `cloudsql-disk.json` *(legacy; replace with PVC disk utilization alerting)*
+- `log-stateful-storage-errors.json`
+- `log-mysql-connection-errors.json`
+- `log-redis-connection-errors.json`
+- `log-velero-backup-verification-failures.json`
+- `log-velero-restore-test-failures.json`
 
 **Log-based metrics**  
 `infrastructure/monitoring/logging-metrics/`:
@@ -63,10 +68,16 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - `authentik-authorize-4xx-mereka-lms.json`
 - `lms-oidc-provider-disabled.json`
 - `lms-csrf-failures.json`
+- `stateful-storage-errors.json`
+- `mysql-connection-errors.json`
+- `redis-connection-errors.json`
+- `velero-backup-verification-failures.json`
+- `velero-restore-test-failures.json`
 
 **Dashboards**
 - GCP dashboard JSON: `infrastructure/monitoring/dashboards/`  
 - Auth-focused: `infrastructure/monitoring/dashboards/auth.json`
+- Ops-focused: `infrastructure/monitoring/dashboards/operations-signals.json`
 - VPS Grafana dashboard: `/home/gurpreet/projects/observability/dashboards/03-applications/bbi-mereka-lms.json`  
   UID: `bbi-app-mereka-lms`
 
@@ -107,6 +118,8 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Add a GCP Monitoring alert policy for PVC volume usage (or equivalent metric pipeline).
 - Runbook section: what to do when MySQL/Redis/Elasticsearch PVC is near full.
 
+**Status:** In progress (interim logging-based storage error detection shipped via `stateful-storage-errors` metric + alert).
+
 ### 7) In-cluster data service saturation signals (MySQL + Redis)
 **Why:** Today we mostly infer DB/cache pain via app symptoms (timeouts/499s). We need direct saturation signals.
 
@@ -122,6 +135,18 @@ Only implement if the team wants formal burn‑rate enforcement.
 **Deliverables**
 - Dashboard panels for: last successful backup per schedule, last restore drill, restore drill pass/fail.
 - Alerts when restore drills fail or schedules stop producing recent backups.
+
+**Status:** In progress (restore-test and backup-verification log alerts shipped; next step is schedule-recency and status panels).
+
+### 9) Deterministic observability audit command
+**Why:** Operators need one command that says what is missing in repo vs runtime.
+
+**Deliverables**
+- `scripts/qa/audit-observability.sh`
+- JSON output for incident tickets
+- Local/offline mode and runtime mode
+
+**Status:** Done.
 
 ---
 

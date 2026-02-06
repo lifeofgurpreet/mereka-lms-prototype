@@ -14,6 +14,8 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 - ✅ RFC draft added for optional claim-based role sync (Auth -> perms)
 - ✅ ArgoCD GitOps sync unblocked (promtail DaemonSet selector immutability fixed)
 - ✅ MySQL hardening: provisioned Notes/XQueue DBs + normalized MySQL secrets (removed trailing CR/LF)
+- ✅ Observability hardening baseline: new operations-signals dashboard + log metrics/alerts for storage, MySQL/Redis connectivity, and Velero verification/restore-drill failures
+- ✅ Deterministic observability audit script added: `./scripts/qa/audit-observability.sh` (local + runtime modes)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 
@@ -26,7 +28,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 | 5 | Modulestore cutover decision + migration plan (in-cluster Mongo -> Atlas) | Infra | 💤 Pending | Must include safety gates. Do not delete in-cluster Mongo until verified. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
 | 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
-| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | 💤 Pending | Add a single “auth check” dashboard and alert on regressions (SSO entrypoints, /admin/login redirect). |
+| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Auth/TLS CronJob metrics+alerts are live; next close-out is dashboard/alert tuning and runtime audit in prod. |
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 

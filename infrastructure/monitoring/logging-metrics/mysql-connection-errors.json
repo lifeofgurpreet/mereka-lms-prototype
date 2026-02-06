@@ -1,0 +1,5 @@
+{
+  "name": "mysql-connection-errors",
+  "description": "MySQL connectivity/operational errors from Open edX services in mereka-lms namespace.",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND (textPayload:\"Can't connect to MySQL\" OR textPayload:\"MySQL server has gone away\" OR textPayload:\"Lost connection to MySQL server\" OR textPayload:\"OperationalError\" OR jsonPayload.message:\"Can't connect to MySQL\" OR jsonPayload.message:\"MySQL server has gone away\")"
+}

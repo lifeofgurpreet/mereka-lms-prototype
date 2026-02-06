@@ -31,20 +31,24 @@ Client subsites (separate clients, still must be branded):
 - `academy.biji-biji.com`
 - `skillourfuture.academy.mereka.io`
 
-## Next 10 Branding Tasks
+## Next 10 Branding Tasks (Execution Order)
 
-1. `mereka-lms-2hxl` Deploy deep branding to prod
-2. `mereka-lms-3bm6` LMS course about page theming
-3. `mereka-lms-5t06` LMS discovery/search UI theming
-4. `mereka-lms-1cs8` LMS dashboard notices + components
-5. `mereka-lms-35an` Courseware xblock typography pass
-6. `mereka-lms-2hb8` Studio create flows theming
-7. `mereka-lms-2vsz` MFE account/settings theming + UX
-8. `mereka-lms-2ypu` MFE learner dashboard polish
-9. `mereka-lms-h9c9` Ecommerce checkout theming (basket/checkout/receipt)
-10. `mereka-lms-1byu` Credentials admin branding (decision + minimal implementation)
+Parent epic:
+- `mereka-lms-3l8` Branding depth & UX polish
 
-Additional backlog:
-- `mereka-lms-36jn` Forum UI theming (header/footer + typography)
-- `mereka-lms-1g4b` Strip Google fonts from Studio CSS (build-time patch)
-- `mereka-lms-3mz` Visual regression gate for branding
+1. `mereka-lms-2hxl` Deploy deep branding to prod (openedx + mfe image parity)
+2. `mereka-lms-1g4b` Strip Google fonts from Studio CSS (confirm live with rebuilt openedx image)
+3. `mereka-lms-2hb8` Studio create flows theming (course/library creation UX)
+4. `mereka-lms-2vsz` MFE account/settings theming + UX
+5. `mereka-lms-2ypu` MFE learner dashboard polish
+6. `mereka-lms-h9c9` Ecommerce checkout theming (basket/checkout/receipt)
+7. `mereka-lms-1byu` Credentials admin branding (decision + minimal implementation)
+8. `mereka-lms-36jn` Forum UI theming (header/footer + typography)
+9. `mereka-lms-3mz` Visual regression gate for branding (screenshots + fail-on-drift)
+10. `mereka-lms-3qh` Forum UI theming follow-through / parity verification (resolve overlap with `mereka-lms-36jn`)
+
+## Notes On Duplicates
+
+- Ecommerce theming appears as both `mereka-lms-h9c9` and `mereka-lms-14q`.
+- Forum theming appears as both `mereka-lms-36jn` and `mereka-lms-3qh`.
+- Resolve duplicates by closing one issue in each pair after confirming the canonical task owner.

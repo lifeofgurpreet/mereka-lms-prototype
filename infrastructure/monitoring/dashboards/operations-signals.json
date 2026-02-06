@@ -1,0 +1,149 @@
+{
+  "displayName": "Mereka LMS - Operations Signals",
+  "gridLayout": {
+    "columns": 2,
+    "widgets": [
+      {
+        "title": "Stateful storage errors (logs)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/stateful-storage-errors\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Errors / 5m",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "MySQL connection errors (logs)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/mysql-connection-errors\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Errors / 5m",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Redis connection errors (logs)",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/redis-connection-errors\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "300s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Errors / 5m",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "MySQL / Redis / Elasticsearch pod restarts",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"kubernetes.io/container/restart_count\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" (resource.label.\"pod_name\"=monitoring.regex.full_match(\"mysql.*\") OR resource.label.\"pod_name\"=monitoring.regex.full_match(\"redis.*\") OR resource.label.\"pod_name\"=monitoring.regex.full_match(\"elasticsearch.*\"))",
+                  "aggregation": {
+                    "alignmentPeriod": "600s",
+                    "perSeriesAligner": "ALIGN_DELTA",
+                    "groupByFields": [
+                      "resource.label.\"pod_name\""
+                    ]
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Restarts / 10m",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Velero backup verification failures",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/velero-backup-verification-failures\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "3600s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Failures / 1h",
+            "scale": "LINEAR"
+          }
+        }
+      },
+      {
+        "title": "Velero restore-test failures",
+        "xyChart": {
+          "dataSets": [
+            {
+              "timeSeriesQuery": {
+                "timeSeriesFilter": {
+                  "filter": "metric.type=\"logging.googleapis.com/user/velero-restore-test-failures\" resource.type=\"k8s_container\"",
+                  "aggregation": {
+                    "alignmentPeriod": "21600s",
+                    "perSeriesAligner": "ALIGN_SUM"
+                  }
+                }
+              },
+              "plotType": "LINE"
+            }
+          ],
+          "yAxis": {
+            "label": "Failures / 6h",
+            "scale": "LINEAR"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 # Kubernetes Deployment Specification
 
 **Status**: Active
-**Last Updated**: 2026-02-03
+**Last Updated**: 2026-02-06
 
 ## Overview
 
@@ -42,6 +42,16 @@ Two overlays are supported (local dev + production):
 | local | 1 each | latest |
 | production | 2 LMS, 1 CMS | production |
 
+### Observability Baseline (Production)
+- MUST keep these synthetic auth/TLS CronJobs present in `mereka-lms`:
+  - `auth-verify-prod`
+  - `cert-verify-prod`
+- MUST keep Velero verification CronJobs present in `velero`:
+  - `backup-verification`
+  - `restore-test`
+- MUST keep monitoring-as-code JSON under `infrastructure/monitoring/` valid and deployable.
+- MUST run `scripts/qa/audit-observability.sh --mode local` after monitoring template edits.
+
 ## Verification
 
 ```bash
@@ -59,4 +69,8 @@ kubectl get deploy lms -n mereka-lms -o jsonpath='{.spec.template.spec.container
 # Validate overlays
 kubectl kustomize deploy/k8s/overlays/local --enable-helm 2>/dev/null | head -20
 # MUST not error
+
+# Observability template integrity
+./scripts/qa/audit-observability.sh --mode local
+# MUST return OK
 ```

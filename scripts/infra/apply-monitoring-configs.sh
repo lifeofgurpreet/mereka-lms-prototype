@@ -6,11 +6,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PROJECT="${GCP_PROJECT:-mereka-lms}"
 MODE="${1:-plan}"
+INCLUDE_LEGACY="${INCLUDE_LEGACY_MONITORING:-0}"
 
 if [[ "$MODE" != "plan" && "$MODE" != "apply" ]]; then
   echo "Usage: $0 [plan|apply]" >&2
   exit 1
 fi
+
+is_legacy_artifact() {
+  local file="$1"
+  local base
+  base="$(basename "$file")"
+  case "$base" in
+    cloudsql.json|cloudsql-disk.json)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
 
 apply_cmd() {
   if [[ "$MODE" == "apply" ]]; then
@@ -102,6 +117,10 @@ for file in "$ROOT_DIR"/infrastructure/monitoring/logging-metrics/*.json; do
 done
 
 for file in "$ROOT_DIR"/infrastructure/monitoring/alerts/*.json; do
+  if [[ "$INCLUDE_LEGACY" != "1" ]] && is_legacy_artifact "$file"; then
+    echo "Skipping legacy alert template: $(basename "$file") (set INCLUDE_LEGACY_MONITORING=1 to include)"
+    continue
+  fi
   display_name=$(jq -r '.displayName' "$file")
   existing_id=$(policy_id_for "$display_name")
   if [[ "$MODE" == "apply" ]]; then
@@ -124,6 +143,10 @@ for file in "$ROOT_DIR"/infrastructure/monitoring/alerts/*.json; do
 done
 
 for file in "$ROOT_DIR"/infrastructure/monitoring/dashboards/*.json; do
+  if [[ "$INCLUDE_LEGACY" != "1" ]] && is_legacy_artifact "$file"; then
+    echo "Skipping legacy dashboard template: $(basename "$file") (set INCLUDE_LEGACY_MONITORING=1 to include)"
+    continue
+  fi
   display_name=$(jq -r '.displayName' "$file")
   existing_id=$(dashboard_id_for "$display_name")
   if [[ -n "$existing_id" ]]; then

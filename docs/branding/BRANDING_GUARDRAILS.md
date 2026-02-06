@@ -38,7 +38,8 @@ BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 
 Notes:
 - `verify-public-branding.sh` checks the main domain plus the client microsites (`academy.biji-biji.com`,
-  `skillourfuture.academy.mereka.io`).
+  `skillourfuture.academy.mereka.io`), and also validates Studio themed CSS wiring,
+  MFE auth branding CTA text, and Forum heartbeat.
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
 
 ## Surface Audit (Gap-Finder)
@@ -64,6 +65,11 @@ This is intentionally non-fatal by default and answers: "which surface is still 
    - Cause: cached HTML references old hashed assets, or a partial rollout.
    - Fix: rerun `verify-public-branding.sh` (it busts cache on homepage fetch). If real users are impacted,
      purge CDN cache for `/` and retry.
+
+4. Branding check scripts fail with shell errors instead of explicit gaps
+   - Cause: unsafe shell interpolation in check scripts.
+   - Fix: keep human-readable strings plain (no command-substitution quoting) and return
+     explicit `host unreachable`/`could not fetch css` outcomes.
 
 ## Deployment Reference
 

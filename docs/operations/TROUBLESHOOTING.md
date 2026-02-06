@@ -558,44 +558,39 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 ---
 
-### Issue 6: MySQL Service Has No Endpoints (Cloud SQL)
+### Issue 6: MySQL Has No Endpoints (In-Cluster)
 
 **Symptoms:**
 - `kubectl get endpoints mysql -n mereka-lms` shows `<none>`
-- LMS/CMS hang or timeout on database queries
-- Direct connection to Cloud SQL IP works, but service DNS doesn't
+- LMS/CMS hang or timeout on DB queries
 
-**Root Cause:**
-- MySQL K8s service has a pod selector, but there's no MySQL pod (using Cloud SQL instead)
-- K8s ignores manual Endpoints when a selector is present
+**Root Cause (current production reality):**
+- MySQL is **in-cluster**. Empty endpoints usually means the **mysql pod is not Ready** or selectors/labels drifted.
 
 **Quick Fix:**
 ```bash
-# 1. Remove the selector from MySQL service
-kubectl patch svc mysql -n mereka-lms --type='json' -p='[{"op": "remove", "path": "/spec/selector"}]'
+# Confirm pod exists + readiness
+kubectl get pods -n mereka-lms -l app=mysql
+kubectl describe deploy/mysql -n mereka-lms | sed -n '1,120p'
 
-# 2. Create/update endpoint pointing to Cloud SQL
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: mysql
-  namespace: mereka-lms
-subsets:
-  - addresses:
-      - ip: 10.97.0.2
-    ports:
-      - port: 3306
-EOF
+# Confirm endpoints and selector
+kubectl get svc mysql -n mereka-lms -o jsonpath='{.spec.selector}{"\n"}'
+kubectl get endpoints mysql -n mereka-lms
 
-# 3. Verify and restart
-kubectl get endpoints mysql -n mereka-lms  # Should show 10.97.0.2:3306
-kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
+# Restart mysql deployment (safe, but expect brief DB downtime)
+kubectl rollout restart deploy/mysql -n mereka-lms
+kubectl rollout status deploy/mysql -n mereka-lms
+kubectl get endpoints mysql -n mereka-lms
+```
+
+**Storage sanity:**
+```bash
+kubectl get pvc -n mereka-lms | rg '^mysql\\s'
 ```
 
 **Prevention:**
-- When using Cloud SQL, ensure MySQL service has no selector
-- Add MySQL endpoint to K8s manifests or Terraform
+- Keep selectors stable (see `docs/operations/TROUBLESHOOTING.md` Issue 1 and `scripts/infra/fix-service-selectors.sh`).
+- Add PVC disk utilization alerting for `mysql` before it fills (see `docs/operations/OBSERVABILITY_ENHANCEMENT_PLAN.md`).
 
 ---
 
@@ -610,18 +605,28 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 **Quick Fix:**
 ```bash
-# Add trusted origins and cookie domains in rendered configmap
-kubectl get cm openedx-config-5t8bdcb64h -n mereka-lms -o yaml \
+# Prefer the safe, deterministic route: verify multisite + hostnames first.
+STRICT=1 ./scripts/qa/verify-multisite-config.sh prod
+
+# If you must hotfix a rendered configmap in an outage, do it generically (no hardcoded cm name).
+cm="$(kubectl get cm -n mereka-lms | awk '/^openedx-config-/{print $1; exit}')"
+kubectl get cm "$cm" -n mereka-lms -o yaml \
   | sed -E 's#"CSRF_TRUSTED_ORIGINS": \\[.*\\]#"CSRF_TRUSTED_ORIGINS": ["https://academyv2.mereka.io","https://studio.academyv2.mereka.io","https://apps.academyv2.mereka.io","https://academy.biji-biji.com","https://skillourfuture.academy.mereka.io"]#' \
-  | sed 's/"CSRF_COOKIE_DOMAIN": ""/"CSRF_COOKIE_DOMAIN": "academyv2.mereka.io"/' \
-  | sed 's/"SESSION_COOKIE_DOMAIN": ""/"SESSION_COOKIE_DOMAIN": ".academyv2.mereka.io"/' \
   | kubectl apply -f -
 kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
-# If a specific user throws JSONDecodeError on login, reset profile.meta and password:
-kubectl exec -n mereka-lms deploy/lms -- bash -c "
-cd /openedx/edx-platform && ./manage.py lms shell -c \\
-\"from django.contrib.auth import get_user_model; U=get_user_model(); u=U.objects.get(username='gurpreet@biji-biji.com'); p=u.profile; p.meta='{}'; p.save(); u.set_password('Cr3ativity'); u.save()\""
+# If a specific user still errors with JSONDecodeError on login, reset profile.meta (do not reset passwords in docs).
+kubectl exec -n mereka-lms deploy/lms -- bash -lc '
+cd /openedx/edx-platform && ./manage.py lms shell --settings=tutor.production -c "
+from django.contrib.auth import get_user_model
+U=get_user_model()
+u=U.objects.filter(email=\\"user@example.com\\").first() or U.objects.filter(username=\\"user@example.com\\").first()
+assert u, \\"user not found\\"
+p=u.profile
+p.meta=\\"{}\\"
+p.save()
+print(\\"profile.meta reset\\", u.email or u.username)
+"'
 ```
 
 **Prevention:**

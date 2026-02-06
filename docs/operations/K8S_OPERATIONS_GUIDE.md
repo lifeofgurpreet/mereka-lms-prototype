@@ -511,21 +511,18 @@ Gotcha:
 
 ### Backup Procedures
 
-#### Database Backups (Cloud SQL)
+#### Database Backups (Production Reality: In-Cluster PVCs)
 
 ```bash
-# Ad-hoc backup of all databases
-./scripts/infra/backup-db.sh
+# Production MySQL/Redis are PVC-backed. Backups are Velero-driven.
+# Use the audit script to verify schedules/recency/coverage:
+./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
 
-# Backup specific databases only
-DATABASES='openedx discovery' ./scripts/infra/backup-db.sh
-
-# Backups are stored at:
-# gs://staging-academy-mereka-io-backup/sql/<timestamp>/<database>.sql.gz
-# (legacy bucket name; still used for production backups)
+# Before any risky operation: create a pre-op Velero backup (data protection rule)
+velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait
 ```
 
-**Automated Backups**: GitHub workflow runs every 3 days (`.github/workflows/cloud-sql-backup.yml`)
+**Legacy note**: `.github/workflows/cloud-sql-backup.yml` is gated (disabled unless `ENABLE_CLOUD_SQL_BACKUPS=true`) and only relevant if/when MySQL runs in Cloud SQL again.
 
 #### MongoDB Backups (Atlas)
 
@@ -569,46 +566,30 @@ kubectl -n velero get backup $name -o jsonpath='{.status.phase}{"\n"}'
 
 ### Restore Procedures
 
-#### Restore Cloud SQL Database
+#### Restore PVCs with Velero (MySQL/Redis/Elasticsearch)
 
 ```bash
 # List available backups
-gsutil ls gs://staging-academy-mereka-io-backup/sql/  # legacy bucket name for production backups
+velero backup get
 
-# Download backup
-gsutil cp gs://staging-academy-mereka-io-backup/sql/<timestamp>/openedx.sql.gz /tmp/  # legacy bucket name for production backups
+# Restore from backup (creates restore object)
+velero restore create --from-backup <backup-name>
 
-# Import to Cloud SQL
-gunzip /tmp/openedx.sql.gz
-gcloud sql import sql mereka-lms-mysql /tmp/openedx.sql --database=openedx --project=mereka-lms
+# Watch restore progress
+velero restore get
+velero restore describe <restore-name>
 ```
 
 #### Restore MongoDB (Atlas)
 
 Use Atlas Console for point-in-time recovery or restore from snapshot.
 
-#### Restore PVCs with Velero
-
-```bash
-# List available backups
-velero backup get
-
-# Restore from backup
-velero restore create --from-backup mereka-lms-backup
-
-# Restore specific resources
-velero restore create --from-backup mereka-lms-backup --include-resources persistentvolumeclaims
-```
+Note: production currently has an in-cluster `mongodb` service as well; treat it as production-critical until the Atlas-only cutover is complete (see `docs/ARCHITECTURE_MONGODB.md`).
 
 ### Velero Commands Reference
 
 ```bash
-# Install Velero (one-time)
-velero install \
-  --provider gcp \
-  --plugins velero/velero-plugin-for-gcp:v1.8.0 \
-  --bucket staging-academy-mereka-io-backup \  # legacy bucket name for production backups
-  --secret-file ./credentials-velero
+# Velero is GitOps-managed in production (outside this repo). Do not reinstall it ad-hoc.
 
 # Create backup
 velero backup create <backup-name> --include-namespaces mereka-lms
@@ -748,7 +729,8 @@ kubectl describe pod/<pod-name> -n mereka-lms
 ./scripts/infra/fix-service-selectors.sh
 
 # === BACKUP ===
-./scripts/infra/backup-db.sh
+./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait
 ```
 
 ---

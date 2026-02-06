@@ -1,0 +1,5 @@
+{
+  "name": "velero-restore-test-failures",
+  "description": "Failures from velero restore-test CronJob in velero namespace.",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"velero\" AND resource.labels.pod_name=~\"^restore-test-\" AND (severity>=ERROR OR textPayload:\"FAIL\" OR textPayload:\"FAILED\" OR textPayload:\"ERROR\" OR textPayload:\"StartError\" OR textPayload:\"Back-off\")"
+}
