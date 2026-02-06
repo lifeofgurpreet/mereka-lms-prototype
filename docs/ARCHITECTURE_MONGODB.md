@@ -1,10 +1,25 @@
 # MongoDB Architecture - Production vs Local
-_Last updated: 2025-11-12_
+_Last updated: 2026-02-06_
 
 ## 🏗️ Architecture
 
-### Production + Dev (K8s)
-**Uses MongoDB Atlas** (Managed Service)
+### Production (GKE)
+**Hybrid today** (target is Atlas-only)
+
+- Forum uses **MongoDB Atlas** (managed service).
+- LMS/CMS modulestore currently uses the **in-cluster MongoDB** service unless
+  `MONGODB_HOST` is explicitly set to Atlas.
+
+Target state:
+- Atlas-only for both `openedx` (modulestore) and `cs_comments_service` (forum)
+- Remove in-cluster MongoDB once modulestore is migrated and verified
+
+### Dev (VPS kind)
+Depends on environment:
+- Forum commonly uses Atlas (with allowlist automation).
+- Modulestore may use in-cluster MongoDB unless explicitly pointed to Atlas.
+
+### MongoDB Atlas (Managed Service)
 - **Service:** MongoDB Atlas M10 cluster
 - **Cost:** Production M10; dev may use a smaller Atlas tier or a separate DB
 - **Region:** AWS `ap-southeast-1`
@@ -33,22 +48,21 @@ _Last updated: 2025-11-12_
 
 ## 📊 Data Flow
 
-### Current State (2026-02-05)
+### Current State (Verified 2026-02-06)
 
 ```
-Production (GKE) + Dev (kind):
+Production (GKE):
 ┌─────────────────────────────────────┐
-│  MongoDB Atlas (M10)                │
-│  ├─ openedx                         │
-│  │  ├─ modulestore.structures      │  ← exists, but no published courses
-│  │  ├─ modulestore.definitions     │  ← minimal content only
-│  │  └─ modulestore.active_versions │  ← 0 (no published courses)
-│  └─ cs_comments_service            │  ← Forum posts
+│  MongoDB Atlas                      │
+│  └─ cs_comments_service             │  ← Forum posts
+├─────────────────────────────────────┤
+│  In-cluster MongoDB (Deployment)    │
+│  └─ openedx                         │  ← LMS/CMS modulestore (today)
 └─────────────────────────────────────┘
 ```
 
-**Implication:** LMS/CMS course lists are empty until MCT/Kajabi imports are re-run.
-See `docs/operations/COURSE_DATA_RECOVERY.md` for the recovery plan.
+**Implication:** Atlas-only is not yet true end-to-end. Treat modulestore cutover
+as a planned migration with explicit verification and rollback.
 
 ## 🔄 Syncing Production to Local
 
@@ -131,7 +145,7 @@ open http://studio.localhost
 
 ## 📝 Configuration
 
-### Production (Atlas)
+### Production (Target: Atlas-only)
 ```yaml
 RUN_MONGODB: false
 MONGODB_URI: "mongodb+srv://..."
