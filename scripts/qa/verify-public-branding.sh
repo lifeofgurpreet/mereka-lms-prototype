@@ -94,15 +94,26 @@ check_css_fonts() {
   css="$(curl -sS -L "$url" || true)"
   # Font-face URLs are fingerprinted (e.g. Poppins-Regular.<hash>.woff2), so match
   # the base name and extension rather than an exact filename.
-  if echo "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
-    && echo "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"' \
-    && echo "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
-    && echo "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
-    && echo "$css" | grep -Eq '\\.mereka-footer[[:space:]]*\\{' \
-    && echo "$css" | grep -Eq '\\.mereka-footer[[:space:]]+\\.footer-brand[[:space:]]+img'; then
+  if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
+    && printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"' \
+    && printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
+    && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
+    && printf '%s' "$css" | grep -Eq '\.mereka-footer' \
+    && printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img'; then
     printf "✓ %s\n" "$label"
   else
     printf "✗ %s (missing Poppins/Lato font-face wiring or footer CSS)\n" "$label" >&2
+    printf "  debug: url=%s\n" "$url" >&2
+    printf "  debug: css_bytes=%s\n" "${#css}" >&2
+    local ok_poppins ok_lato ok_poppins_file ok_lato_file ok_footer ok_footer_img
+    if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"'; then ok_poppins=1; else ok_poppins=0; fi
+    if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"'; then ok_lato=1; else ok_lato=0; fi
+    if printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2'; then ok_poppins_file=1; else ok_poppins_file=0; fi
+    if printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2'; then ok_lato_file=1; else ok_lato_file=0; fi
+    if printf '%s' "$css" | grep -Eq '\.mereka-footer'; then ok_footer=1; else ok_footer=0; fi
+    if printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img'; then ok_footer_img=1; else ok_footer_img=0; fi
+    printf "  debug: checks poppins=%s lato=%s poppins_woff2=%s lato_woff2=%s footer=%s footer_img=%s\n" \
+      "$ok_poppins" "$ok_lato" "$ok_poppins_file" "$ok_lato_file" "$ok_footer" "$ok_footer_img" >&2
     failures=$((failures + 1))
   fi
 }
@@ -111,8 +122,12 @@ check_homepage_brand_fonts() {
   local base_domain=$1
   local label=$2
   local html css_path override_css
+  local ts
 
-  html="$(curl -sS -L "https://${base_domain}/" || true)"
+  # Avoid false negatives when an edge cache briefly serves an old HTML page that
+  # references an older fingerprinted CSS asset which may no longer exist.
+  ts="$(date +%s)"
+  html="$(curl -sS -L "https://${base_domain}/?nocache=${ts}" || true)"
 
   # We load brand overrides via comprehensive theme hook `head-extra.html`.
   css_path="$(printf '%s' "$html" | rg -o '/static/mereka/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
@@ -122,7 +137,7 @@ check_homepage_brand_fonts() {
     return
   fi
 
-  override_css="https://${base_domain}${css_path}"
+  override_css="https://${base_domain}${css_path}?nocache=${ts}"
   check_css_fonts "$override_css" "$label (override CSS wiring)"
 }
 
@@ -131,8 +146,10 @@ check_homepage_brand_logo() {
   local label=$2
   local html logo_path logo_url code size
   local theming_effective_url
+  local ts
 
-  html="$(curl -sS -L "https://${base_domain}/" || true)"
+  ts="$(date +%s)"
+  html="$(curl -sS -L "https://${base_domain}/?nocache=${ts}" || true)"
   # Prefer the main header logo. Fall back to any logo.png reference.
   logo_path="$(echo "$html" | sed -nE 's/.*<img[^>]*class="logo"[^>]*src="([^"]+)".*/\1/p' | head -n 1)"
   if [[ -z "$logo_path" ]]; then
