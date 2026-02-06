@@ -37,7 +37,7 @@ _Updated: 2026-01-20 03:50 UTC_
 - **Root Cause**: Atlas cluster `cluster-mereka-lms.2pjex4s.mongodb.net` doesn't exist
 - **Solution**: Reconfigured forum to use in-cluster MongoDB:
   ```bash
-  MONGODB_AUTH=cs_comments_user:CR3ATIVITY@
+  MONGODB_AUTH=cs_comments_user:<redacted>@
   MONGODB_HOST=mongodb
   MONGODB_PORT=27017
   MONGODB_DATABASE=cs_comments_service

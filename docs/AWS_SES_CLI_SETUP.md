@@ -16,7 +16,6 @@ AWS CLI configured with full SES access for the mereka-lms project. Credentials 
 ### IAM User
 - **Name**: `ses-smtp-user.20251113-104139-g-test-singapore`
 - **Region**: `ap-southeast-1` (Singapore)
-- **Access Key ID**: `AKIAXHZNJFIA6RKX7XST`
 - **Created**: 2025-11-13
 
 ### SES Status
@@ -135,14 +134,13 @@ aws sesv2 get-account
 
 ### SMTP Credentials (Email Relay)
 - **Used by**: Open edX SMTP relay container
-- **Username**: `AKIAXHZNJFIAT74VKX4U` (from K8s secret)
+- **Username**: `<from K8s secret>` (from `ses-smtp-credentials`)
 - **Password**: SMTP-specific password (derived from IAM secret)
 - **Server**: `email-smtp.ap-southeast-1.amazonaws.com:587`
 - **Purpose**: Send emails from Open edX platform
 
 ### API Credentials (AWS CLI)
 - **Used by**: AWS CLI, API operations, SES management
-- **Access Key**: `AKIAXHZNJFIA6RKX7XST`
 - **Secret Key**: In `~/.aws/credentials`
 - **Purpose**: Manage SES settings, verify domains, send via API
 

@@ -38,11 +38,8 @@
 - ✅ **Region**: AWS ap-southeast-1
 - ✅ **Tier**: M10
 - ✅ **Connection String**: `mongodb+srv://cluster-mereka-lms.2pjex4s.mongodb.net`
-- ✅ **Complete URI**:
-  ```
-  mongodb+srv://cs_comments_user:CR3ATIVITY@cluster-mereka-lms.2pjex4s.mongodb.net/cs_comments_service?retryWrites=true&w=majority
-  ```
-- ✅ **Network Access**: Current IP (45.83.126.9) whitelisted
+- ✅ **Complete URI**: Stored as a secret (value redacted; do not commit URIs with passwords)
+- ✅ **Network Access**: Current IP whitelisted (value redacted)
 - ✅ **GCP Secret Manager**: Updated with complete URI (version 5)
 
 #### AWS SES - FULLY OPERATIONAL
@@ -71,8 +68,8 @@
 EMAIL_HOST: email-smtp.ap-southeast-1.amazonaws.com
 EMAIL_PORT: 587
 EMAIL_USE_TLS: true
-EMAIL_HOST_USER: AKIAXHZNJFIAT74VKX4U
-EMAIL_HOST_PASSWORD: BP3cAl8RoylPkxYmSz3VC77ASdegdbhDP6s38NVCyaOe
+EMAIL_HOST_USER: <from secret manager / ESO>
+EMAIL_HOST_PASSWORD: <from secret manager / ESO>
 DEFAULT_FROM_EMAIL: learn@mereka.my
 ```
 
@@ -111,7 +108,7 @@ Wait for current build to finish (~10-15 minutes remaining)
 
 ### 2. Test MongoDB Atlas Connection
 ```bash
-mongosh "mongodb+srv://cs_comments_user:CR3ATIVITY@cluster-mereka-lms.2pjex4s.mongodb.net/cs_comments_service?retryWrites=true&w=majority" --eval "db.runCommand({ ping: 1 })"
+mongosh "mongodb+srv://cs_comments_user:<password>@cluster-mereka-lms.2pjex4s.mongodb.net/cs_comments_service?retryWrites=true&w=majority" --eval "db.runCommand({ ping: 1 })"
 ```
 
 ### 3. Launch Local Tutor Environment

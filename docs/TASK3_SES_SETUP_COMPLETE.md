@@ -7,7 +7,6 @@ _Completed: 2025-11-12 • Task Owner: Infra_
 
 **SMTP Server:** `email-smtp.ap-southeast-1.amazonaws.com:587`  
 **Region:** `ap-southeast-1` (Singapore)  
-**SMTP Username:** `AKIAXHZNJFIAT74VKX4U`  
 **IAM User:** `ses-smtp-user.20251113-104139-g-test-singapore`
 
 ### Configuration Applied
@@ -18,8 +17,8 @@ EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST: email-smtp.ap-southeast-1.amazonaws.com
 EMAIL_PORT: 587
 EMAIL_USE_TLS: true
-EMAIL_HOST_USER: AKIAXHZNJFIAT74VKX4U
-EMAIL_HOST_PASSWORD: BP3cAl8RoylPkxYmSz3VC77ASdegdbhDP6s38NVCyaOe
+EMAIL_HOST_USER: <from secret manager / ESO>
+EMAIL_HOST_PASSWORD: <from secret manager / ESO>
 DEFAULT_FROM_EMAIL: noreply@mereka.io
 ```
 
@@ -102,17 +101,12 @@ PYEOF
 ## 🔒 Security Notes
 
 **Credentials Storage:**
-- ✅ Stored in Google Secret Manager
+- ✅ Stored in Infisical (source of truth), synced to GCP Secret Manager and K8s via ESO
 - ✅ Not committed to git
-- ⚠️ Currently in `tutor_env/config.yml` (should be removed after testing)
+- ❌ Do not store SMTP passwords in `tutor_env/config.yml` (use runtime injection)
 
 **Recommendation:**
-After verifying email works, update Tutor config to use Secret Manager:
-```bash
-tutor config save \
-  --set AWS_ACCESS_KEY_ID="$(gcloud secrets versions access latest --secret=ses-smtp-username)" \
-  --set AWS_SECRET_ACCESS_KEY="$(gcloud secrets versions access latest --secret=ses-smtp-password)"
-```
+Use Infisical for edits, and consume via ESO-synced K8s secrets at runtime (see `AGENTS.md`).
 
 ---
 
@@ -170,4 +164,3 @@ tutor config save \
 **Files Updated:**
 - `deploy/k8s/base/deployments.yml` - SMTP deployment with SES config
 - `deploy/k8s/patches/smtp-ses-relay.yaml` - Patch file for reference
-

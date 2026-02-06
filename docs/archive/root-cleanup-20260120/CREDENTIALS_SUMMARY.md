@@ -1,16 +1,18 @@
 # Credentials & Configuration Summary
 **Date**: 2025-11-21
-**All credentials backed up in GCP Secret Manager (project: mereka-lms)**
+**This is a historical note. Secret values have been intentionally redacted.**
+
+Never store secret values (passwords, access keys, URIs with passwords) in git, including under `docs/archive/`.
 
 ## GCP Secret Manager - All Secrets
 
 | Secret Name | Version | Value | Usage |
 |------------|---------|-------|-------|
-| `mongodb-atlas-uri` | 5 (latest) | `mongodb+srv://cs_comments_user:CR3ATIVITY@cluster-mereka-lms.2pjex4s.mongodb.net/cs_comments_service?retryWrites=true&w=majority` | Forum database connection |
-| `ses-smtp-username` | 1 | `AKIAXHZNJFIAT74VKX4U` | SES SMTP authentication |
-| `ses-smtp-password` | 1 | `BP3cAl8RoylPkxYmSz3VC77ASdegdbhDP6s38NVCyaOe` | SES SMTP authentication |
-| `aws-access-key-id` | 1 | `AKIAXHZNJFIA6RKX7XST` | AWS IAM (ses-cli-user) |
-| `aws-secret-access-key` | 1 | `kMCjla5sxWA6VWz9HTWCcuN37S0Qy01FNu2ef5UP` | AWS IAM (ses-cli-user) |
+| `mongodb-atlas-uri` | 5 (latest) | `<redacted>` | Forum database connection |
+| `ses-smtp-username` | 1 | `<redacted>` | SES SMTP authentication |
+| `ses-smtp-password` | 1 | `<redacted>` | SES SMTP authentication |
+| `aws-access-key-id` | 1 | `<redacted>` | AWS IAM (ses-cli-user) |
+| `aws-secret-access-key` | 1 | `<redacted>` | AWS IAM (ses-cli-user) |
 
 **Retrieve any secret:**
 ```bash
@@ -29,7 +31,6 @@ gcloud secrets versions access latest --secret="SECRET_NAME"
 - **Hostname**: `cluster-mereka-lms.2pjex4s.mongodb.net`
 - **Database**: `cs_comments_service` (for Open edX forum)
 - **User**: `cs_comments_user`
-- **Password**: `CR3ATIVITY`
 - **Full URI**: See GCP secret `mongodb-atlas-uri`
 
 **Network Access**:
