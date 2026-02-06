@@ -90,6 +90,9 @@ check_contains "LMS theme imports shared tokens" "$LMS_THEME_SCSS" '@import "../
 check_contains "CMS theme imports shared tokens" "$CMS_THEME_SCSS" '@import "../../../scss/theme";'
 check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
 check_contains "MFE theme imports shared tokens" "$MFE_SCSS" '@import "./scss/theme";'
+check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
+check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
+check_contains "MFE theme styles Paragon modal" "$MFE_SCSS" '.pgn__modal-content'
 
 echo ""
 echo "3.5 Runtime override CSS..."
@@ -110,6 +113,8 @@ check_file "Canonical favicon.svg" "$REPO_ROOT/assets/branding/favicon.svg"
 check_file "Favicon 16x16" "$REPO_ROOT/assets/branding/favicon-16x16.png"
 check_file "Favicon 32x32" "$REPO_ROOT/assets/branding/favicon-32x32.png"
 check_file "Favicon 256x256" "$REPO_ROOT/assets/branding/favicon-256x256.png"
+check_file "Design tokens (tokens.css)" "$REPO_ROOT/assets/branding/tokens.css"
+check_file "Theme design tokens copy" "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
 check_file "LMS logo.png" "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images/logo.png"
 
 echo ""

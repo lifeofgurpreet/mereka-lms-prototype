@@ -4,12 +4,23 @@ $mereka-font-path: "../fonts";
 :root {
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
+  --mereka-mfe-surface: #ffffff;
+  --mereka-mfe-surface-muted: rgba(26, 22, 35, 0.04);
+  --mereka-mfe-border: rgba(26, 22, 35, 0.10);
+  --mereka-mfe-focus: rgba(45, 137, 139, 0.18);
 }
 
 body {
   min-height: 100vh;
   background-color: var(--mereka-color-surface-primary);
-  background-image: radial-gradient(circle at top right, rgba(39, 110, 241, 0.08), transparent 45%);
+  background-image:
+    radial-gradient(circle at top right, rgba(39, 110, 241, 0.08), transparent 45%),
+    radial-gradient(circle at 10% 20%, rgba(171, 59, 120, 0.06), transparent 35%);
+}
+
+.pgn__page-container,
+.page-container {
+  background: transparent;
 }
 
 .navbar {
@@ -60,6 +71,14 @@ body {
   box-shadow: 0 12px 30px rgba(39, 110, 241, 0.3);
 }
 
+.btn-primary:hover,
+.btn-primary:focus,
+.pgn__btn--primary:hover,
+.pgn__btn--primary:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 38px rgba(45, 137, 139, 0.24);
+}
+
 .btn-outline-primary {
   color: var(--mereka-color-ink-900);
   border-color: rgba(26, 22, 35, 0.25);
@@ -94,7 +113,13 @@ body {
 .pgn__form-control:focus,
 .form-control:focus {
   border-color: var(--mereka-color-teal);
-  box-shadow: 0 0 0 3px rgba(45, 137, 139, 0.15);
+  box-shadow: 0 0 0 4px var(--mereka-mfe-focus);
+}
+
+.pgn__form-label,
+label {
+  font-weight: 600;
+  color: var(--mereka-color-ink-700);
 }
 
 .card,
@@ -103,6 +128,68 @@ body {
   border-radius: 24px;
   border: 1px solid rgba(26, 22, 35, 0.08);
   box-shadow: var(--mereka-mfe-card-shadow);
+}
+
+.pgn__card-header,
+.card-header {
+  background: var(--mereka-mfe-surface);
+  border-bottom: 1px solid var(--mereka-mfe-border);
+}
+
+.pgn__card-footer,
+.card-footer {
+  background: var(--mereka-mfe-surface);
+  border-top: 1px solid var(--mereka-mfe-border);
+}
+
+.pgn__alert {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+}
+
+.pgn__alert--info {
+  background: rgba(148, 209, 228, 0.22);
+  border-color: rgba(148, 209, 228, 0.55);
+}
+
+.pgn__alert--success {
+  background: rgba(44, 110, 73, 0.12);
+  border-color: rgba(44, 110, 73, 0.35);
+}
+
+.pgn__alert--warning {
+  background: rgba(244, 190, 72, 0.14);
+  border-color: rgba(244, 190, 72, 0.55);
+}
+
+.pgn__alert--danger {
+  background: rgba(140, 0, 47, 0.08);
+  border-color: rgba(140, 0, 47, 0.22);
+}
+
+.pgn__modal-content {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  box-shadow: 0 30px 90px rgba(26, 22, 35, 0.18);
+}
+
+.dropdown-menu,
+.pgn__dropdown-menu {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  box-shadow: 0 20px 60px rgba(26, 22, 35, 0.14);
+}
+
+.nav-tabs .nav-link,
+.pgn__tabs .nav-link {
+  border-radius: 999px;
+}
+
+.nav-tabs .nav-link.active,
+.pgn__tabs .nav-link.active {
+  background-image: var(--mereka-mfe-gradient);
+  color: #fff;
+  border-color: transparent;
 }
 
 .mereka-badge {

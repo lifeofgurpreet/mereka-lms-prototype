@@ -18,7 +18,7 @@ This document captures the brand tokens we apply across LMS/Studio and all MFEs 
 | `pink` | `#cd89ae` | Error backgrounds |
 | `sky` | `#94d1e4` | Info backgrounds |
 
-See `infrastructure/tutor/themes/mereka/scss/_tokens.scss` for the Paragon/Bootstrap mapping. Source of truth is `bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css`.
+See `infrastructure/tutor/themes/mereka/scss/_tokens.scss` for the Paragon/Bootstrap mapping. Source of truth is `bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css` (vendored into this repo as `assets/branding/tokens.css`).
 
 ## Typography
 
@@ -57,6 +57,8 @@ npm start
 - Favicons ship as `assets/branding/favicon.ico` plus PNG sizes (`favicon-16x16.png`, `favicon-32x32.png`,
   `favicon-256x256.png`) and optional `favicon.svg`. `scripts/branding/sync-brand-assets.sh` syncs all of
   them into the theme images directory.
+- Design tokens (Figma export) are vendored as `assets/branding/tokens.css` and synced to
+  `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css` for operator inspection on live hosts.
 
 When new assets arrive, drop them into `assets/branding/`, re-sync the theme copy if needed, and update the tables above so the next engineer understands which files feed the build.
 

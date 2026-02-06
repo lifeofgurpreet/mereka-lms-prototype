@@ -66,6 +66,45 @@
   --pgn-border-color: var(--mereka-color-border);
   --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
   --pgn-btn-border-radius: 999px;
+
+  /*
+    Design-system aliases
+    Source of truth: `assets/branding/tokens.css` (synced from bbbi-mereka-brand-assets).
+    We alias the most-used tokens so external apps can speak the same language.
+  */
+  --color-black: var(--mereka-color-ink-900);
+  --color-white: #ffffff;
+  --color-teal: var(--mereka-color-teal);
+  --color-magenta: var(--mereka-color-magenta);
+  --color-blue: var(--mereka-color-blue);
+  --color-burgundy: var(--mereka-color-danger);
+  --color-pink: var(--mereka-color-danger-soft);
+  --color-sky: var(--mereka-color-sky);
+  --color-gold: var(--mereka-color-warning);
+  --color-forest: var(--mereka-color-success);
+
+  --color-success: var(--mereka-color-success);
+  --color-success-light: #8fbec2;
+  --color-warning: var(--mereka-color-warning);
+  --color-warning-dark: #e18437;
+  --color-error: var(--mereka-color-danger);
+  --color-error-light: var(--mereka-color-danger-soft);
+  --color-info: var(--mereka-color-info);
+  --color-info-light: var(--mereka-color-info-soft);
+
+  --font-heading: "Lato", sans-serif;
+  --font-body: "Poppins", sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 }
 
 @font-face {

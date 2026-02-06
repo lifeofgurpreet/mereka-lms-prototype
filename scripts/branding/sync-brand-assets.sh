@@ -13,6 +13,8 @@ IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/images
 MFE_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/images"
 LMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images"
 CMS_IMG_DEST_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images"
+TOKENS_SRC="$REPO_ROOT/assets/branding/tokens.css"
+TOKENS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
   echo "Missing font source directory: $SRC_FONTS" >&2
@@ -25,6 +27,14 @@ mkdir -p "$LMS_FONT_DIR" "$CMS_FONT_DIR"
 cp "$SRC_FONTS"/*.woff2 "$LMS_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$CMS_FONT_DIR"/
 cp "$SRC_FONTS"/*.woff2 "$MFE_FONT_DIR"/
+
+# Optional: keep a copy of the canonical design-token CSS in the theme tree
+# so operators can inspect it on live hosts.
+if [[ -f "$TOKENS_SRC" ]]; then
+  mkdir -p "$(dirname "$TOKENS_DEST")"
+  cp "$TOKENS_SRC" "$TOKENS_DEST"
+  echo "  ✓ Copied tokens.css -> $(basename "$TOKENS_DEST")"
+fi
 
 # Copy logo assets to all theme directories
 for asset in logo-horizontal.png logo-horizontal.svg logo-horizontal-white.png logo-horizontal-white.svg logo-square.png logo-square.svg logo-square-white.png logo-square-white.svg logo.png logo.svg logo-white.png logo-white.svg favicon.ico favicon.svg favicon-16x16.png favicon-32x32.png favicon-256x256.png; do
