@@ -101,6 +101,9 @@ ALLOW_OVERWRITE_MONGODB_KEYS=1 ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.
 
 # Validate telemetry connectivity (Grafana → Prometheus)
 ./scripts/infra/validate-telemetry-connectivity.sh
+
+# Audit monitoring coverage (repo + runtime)
+./scripts/qa/audit-observability.sh --mode all
 ```
 
 ## Scheduled Checks
