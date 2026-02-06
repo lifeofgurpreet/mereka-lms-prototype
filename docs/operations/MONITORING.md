@@ -183,6 +183,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 
 - Enable Cloud Logging sinks to BigQuery if long-term retention is required (`gcloud logging sinks create …`).
 - For SMTP delivery issues, monitor AWS SES dashboards (CloudWatch) and set SNS notifications on bounces/complaints.
+- Fast operator flow: `docs/operations/OBSERVABILITY_QUICKSTART.md`.
 
 ## Operational Runbook Tips
 
