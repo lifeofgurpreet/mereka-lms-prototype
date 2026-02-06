@@ -19,6 +19,7 @@ GCP_PROJECT_ID="${GCP_PROJECT_ID:-bbi-k8}"
 INFISICAL_DOMAIN="${INFISICAL_DOMAIN:-https://secrets.mereka.io/api}"
 INFISICAL_PATH="${INFISICAL_PATH:-/k8s/mereka-lms}"
 INFISICAL_DIR="${INFISICAL_DIR:-}"
+INFISICAL_PROJECT_ID="${INFISICAL_PROJECT_ID:-}"
 EXTERNAL_SECRETS_FILE="${EXTERNAL_SECRETS_FILE:-${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml}"
 
 # Safety: by default, only Stripe keys are allowed to overwrite existing GCP SM
@@ -96,13 +97,55 @@ resolve_infisical_dir() {
   INFISICAL_DIR="${REPO_ROOT}"
 }
 
+infer_infisical_project_id_from_backup() {
+  local backup_dir="${INFISICAL_BACKUP_DIR:-$HOME/.infisical/secrets-backup}"
+  local candidate=""
+  if [[ -d "$backup_dir" ]]; then
+    candidate=$(ls "$backup_dir"/project_secrets_* 2>/dev/null | head -n 1 || true)
+  fi
+  if [[ -n "$candidate" ]]; then
+    basename "$candidate" | sed -E 's/^project_secrets_([^_]+)_.*/\1/'
+  fi
+}
+
+resolve_infisical_project_id() {
+  if [[ -n "${INFISICAL_PROJECT_ID:-}" ]]; then
+    return
+  fi
+
+  # If a local .infisical.json exists, we can often run without --projectId,
+  # but explicitly setting it makes the script work even when that file isn't present.
+  if [[ -r "${INFISICAL_DIR}/.infisical.json" ]]; then
+    INFISICAL_PROJECT_ID="$(python3 - "${INFISICAL_DIR}/.infisical.json" <<'PY'
+import json
+import sys
+try:
+    with open(sys.argv[1], "r", encoding="utf-8") as f:
+        obj = json.load(f)
+    print(obj.get("workspaceId") or "")
+except Exception:
+    print("")
+PY
+)"
+  fi
+
+  if [[ -z "${INFISICAL_PROJECT_ID:-}" ]]; then
+    INFISICAL_PROJECT_ID="$(infer_infisical_project_id_from_backup || true)"
+  fi
+}
+
 fetch_infisical_plain() {
   local env="$1"
   local key="$2"
+  local args=()
+  if [[ -n "${INFISICAL_PROJECT_ID:-}" ]]; then
+    args+=(--projectId "${INFISICAL_PROJECT_ID}")
+  fi
   (cd "${INFISICAL_DIR}" && infisical secrets get "${key}" \
     --domain "${INFISICAL_DOMAIN}" \
     --env "${env}" \
     --path "${INFISICAL_PATH}" \
+    "${args[@]}" \
     --plain 2>/dev/null) || return 1
 }
 
@@ -148,12 +191,16 @@ main() {
 
   resolve_infisical_dir
   [[ -n "${INFISICAL_DIR:-}" ]] || die "INFISICAL_DIR resolution failed"
+  resolve_infisical_project_id
 
   log "GCP project: ${GCP_PROJECT_ID}"
   if [[ -f "${INFISICAL_DIR}/.infisical.json" ]]; then
     log "Infisical config: ${INFISICAL_DIR}/.infisical.json"
   else
     log "Infisical config: (global auth; no .infisical.json found)"
+  fi
+  if [[ -n "${INFISICAL_PROJECT_ID:-}" ]]; then
+    log "Infisical projectId: ${INFISICAL_PROJECT_ID}"
   fi
   log "Infisical path: ${INFISICAL_PATH}"
 

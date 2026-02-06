@@ -435,6 +435,7 @@ Regenerate hostname registry (after domain changes):
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
+- Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
@@ -442,6 +443,9 @@ Regenerate hostname registry (after domain changes):
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).
 - Atlas user must have `readWrite` on `openedx` + `cs_comments_service` for modulestore + forum.
 - Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/k8s/mereka-lms/atlas`).
+- Stripe checkout readiness requires webhook signing secret + delivery test:
+  - Guide: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
+  - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`
 
 ---
 

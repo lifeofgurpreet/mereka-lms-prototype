@@ -65,6 +65,16 @@ REQUIRE_STRIPE_WEBHOOK_SECRET=1 ./scripts/qa/verify-ecommerce-config.sh
 REQUIRE_STRIPE_WEBHOOK_SECRET=1 K8S_CONTEXT=kind-dev ./scripts/qa/verify-ecommerce-config.sh
 ```
 
+## Verify Webhook Delivery (Without Stripe CLI)
+
+This sends a locally signed webhook payload (using the webhook secret already
+injected into the running ecommerce pod) and expects HTTP 200.
+
+```bash
+./scripts/qa/test-stripe-webhook-delivery.sh prod
+K8S_CONTEXT=kind-dev ./scripts/qa/test-stripe-webhook-delivery.sh dev
+```
+
 ## Stripe CLI (Dev Testing)
 
 Stripe CLI is installed on this VPS as `~/.local/bin/stripe`.
