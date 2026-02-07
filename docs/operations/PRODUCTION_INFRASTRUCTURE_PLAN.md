@@ -66,7 +66,8 @@ See `docs/operations/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
 
 - **Source of truth**: Velero schedules + restore drills (GitOps-managed outside this repo).
 - Audit posture with: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
-- Evidence bundles: `./scripts/qa/collect-velero-evidence.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
+- Evidence bundles (recommended): `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
+- Monthly automation: `.github/workflows/dr-evidence-bundle.yml`
 
 References:
 - `docs/operations/VELERO_BACKUP_AUDIT.md`

@@ -35,6 +35,14 @@ To collect an evidence bundle (files under `var/`, gitignored):
 ./scripts/qa/collect-velero-evidence.sh
 ```
 
+Preferred monthly evidence bundle command (includes strict runtime audits + tarball):
+```bash
+STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
+```
+
+GitHub Actions automation:
+- `.github/workflows/dr-evidence-bundle.yml` (monthly schedule + manual dispatch, uploads bundle artifact)
+
 ## What “Good” Looks Like
 
 1. `BackupStorageLocation` phase is `Available`.
@@ -123,9 +131,11 @@ Current enforcement model:
 - Before any risky operation (storage changes): `pre-op` backup with `--wait`.
 
 Monthly restore-drill evidence checklist:
-- `./scripts/qa/collect-velero-evidence.sh`
+- `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
 - attach:
   - `audit-velero.json`
+  - `audit-velero-alert-pipeline.json`
+  - `audit-observability-runtime.json`
   - latest `restore-test` job logs/describe
   - restored PVC summary (bound count)
   - MySQL probe result from restore job log

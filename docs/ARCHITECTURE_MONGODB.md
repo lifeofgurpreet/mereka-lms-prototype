@@ -44,6 +44,16 @@ If it contains `emptyDir`, it is ephemeral.
 2. **Or make in-cluster MongoDB PVC-backed** if it must remain temporarily.
 3. Keep `audit-velero` clean (`failures=0`) and treat any Atlas drift as a release blocker.
 
+Guarded retirement helper (non-destructive by default):
+```bash
+./scripts/infra/retire-legacy-mongodb.sh
+```
+
+Destructive mode requires:
+- runtime Atlas verification
+- pre-op Velero backup
+- explicit confirmation token
+
 ## Related Docs
 
 - `docs/adr/001-mongodb-atlas.md` (decision record + cautions)

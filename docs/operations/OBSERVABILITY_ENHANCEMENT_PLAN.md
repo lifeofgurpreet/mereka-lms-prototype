@@ -45,6 +45,12 @@ Reality-first:
   - `scripts/qa/audit-observability.sh`
 - Added consolidated operator gate:
   - `scripts/qa/run-operations-gates.sh`
+- Added Atlas modulestore path guard:
+  - `scripts/qa/verify-atlas-modulestore-path.sh`
+- Added one-command alert routing verifier:
+  - `scripts/qa/verify-alert-routing.sh`
+- Added DR evidence bundle builder:
+  - `scripts/qa/build-dr-evidence-bundle.sh`
 - Added VPS Atlas allowlist monitor posture audit:
   - `scripts/qa/audit-atlas-allowlist-monitor.sh`
 - Added Grafana coverage contract + audit gate:
@@ -150,7 +156,10 @@ metrics needs explicit validation and documentation.
 Only implement if the team wants formal burn‑rate enforcement.
 
 ### 5) Wire notification channels for log-based alerts
-**Status:** Done for GCP alert policies; Atlas allowlist drift webhook routing remains an operator secret/config step validated by `STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh`.
+**Status:** Done for GCP alert policies. End-to-end validation is now one command:
+- `./scripts/qa/verify-alert-routing.sh`
+- CI runtime audit: `.github/workflows/alert-routing-audit.yml`
+- Atlas allowlist webhook remains a VPS secret/config prerequisite and is enforced when `STRICT_WEBHOOK=1`.
 
 ### 6) PVC disk utilization alerting (P0 for in-cluster MySQL/Redis/Elasticsearch)
 **Why:** Disk-full is a top outage cause for PVC-backed stateful services.
@@ -178,7 +187,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Dashboard panels for: last successful backup per schedule, last restore drill, restore drill pass/fail.
 - Alerts when restore drills fail or schedules stop producing recent backups.
 
-**Status:** In progress (failures + success metrics + stale-success alerts + dashboard status panels shipped; restore-test CronJob now enforces PV-aware validation. Remaining closure item is monthly evidence bundle publication from successful drill output).
+**Status:** In progress (failures + success metrics + stale-success alerts + dashboard status panels shipped; restore-test CronJob now enforces PV-aware validation). Monthly evidence pipeline is now scripted (`build-dr-evidence-bundle.sh`) and automated in `.github/workflows/dr-evidence-bundle.yml`.
 
 ### 9) Deterministic observability audit command
 **Why:** Operators need one command that says what is missing in repo vs runtime.

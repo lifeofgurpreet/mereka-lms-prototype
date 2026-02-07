@@ -21,6 +21,12 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 # Velero alert pipeline + freshness/recency checks (repo + runtime)
 ./scripts/qa/audit-velero-alert-pipeline.sh
 
+# Atlas modulestore guard (repo + runtime)
+./scripts/qa/verify-atlas-modulestore-path.sh --mode all
+
+# Alert routing verification (runtime policies + channels + optional VPS webhook audit)
+./scripts/qa/verify-alert-routing.sh
+
 # Grafana panel/query coverage contract (required + recommended)
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 
@@ -42,6 +48,11 @@ Atlas allowlist drift monitoring posture (VPS):
 ```bash
 ./scripts/qa/audit-atlas-allowlist-monitor.sh
 STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
+```
+
+DR evidence bundle (monthly or before incident reviews):
+```bash
+STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 ```
 
 ## 2) Core Dashboards

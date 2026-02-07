@@ -145,6 +145,8 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 Convenience:
 - `./scripts/qa/verify-auth-hardening.sh` runs the full suite (public + internal) in one command.
 - `./scripts/gen/update-openedx-hostnames-doc.sh` regenerates `docs/operations/OPENEDX_HOSTNAMES.md`.
+- `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` verifies modulestore remains Atlas-backed (repo + runtime).
+- `./scripts/qa/verify-alert-routing.sh` verifies runtime alert policies/channels and routing health.
 - `./scripts/qa/run-operations-gates.sh --env both` runs consolidated auth + observability + Velero + Grafana gates.
 
 ## Future Hardening (Optional)

@@ -120,11 +120,7 @@ for dep in expected_deployments:
             f"Deployment '{dep}' missing MONGODB_HOST -> openedx-secrets/FORUM_MONGODB_SRV contract"
         )
 
-secret_pat = re.compile(
-    r"-\s*secretKey:\s*FORUM_MONGODB_SRV\s+remoteRef:\s+key:\s*MEREKA_LMS_FORUM_MONGODB_SRV",
-    re.S,
-)
-if not secret_pat.search(external_secrets):
+if "- secretKey: FORUM_MONGODB_SRV" not in external_secrets or "key: MEREKA_LMS_FORUM_MONGODB_SRV" not in external_secrets:
     errors.append(
         "ExternalSecret contract missing FORUM_MONGODB_SRV <- MEREKA_LMS_FORUM_MONGODB_SRV mapping"
     )

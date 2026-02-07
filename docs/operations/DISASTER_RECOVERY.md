@@ -14,7 +14,8 @@ Legacy “staging” bucket names remain in GCS for production backups (there is
 | Layer | Tooling | Schedule | Notes |
 | --- | --- | --- | --- |
 | In-cluster MySQL + Redis PVs | Velero VolumeSnapshots | Hourly + daily + weekly | This is the current source of truth for database state in prod (DB host is `mysql:3306`). |
-| In-cluster MongoDB (modulestore) | **Not safe today** | N/A | `mereka-lms/mongodb` uses `emptyDir` for `/data/db` (ephemeral). Do not import course content until fixed. |
+| MongoDB Atlas (modulestore + forum) | Atlas + Open edX runtime | Continuous + Atlas snapshots policy | Production LMS/CMS modulestore now resolves Atlas host via `MONGODB_HOST` secret mapping; verify with `./scripts/qa/verify-atlas-modulestore-path.sh --mode all`. |
+| Legacy in-cluster MongoDB deployment | Transitional (retire) | N/A | `mereka-lms/mongodb` may still exist with `emptyDir`; treat as cleanup target, not active data path. |
 | Persistent volumes (general) | Velero | Hourly critical + daily all apps + weekly full | Use before any risky operation. |
 | MongoDB Atlas (forum) | Atlas backups | TBD | Enable/verify snapshots if we move modulestore to Atlas or rely on forum retention. |
 | Config + manifests | Git | Every change | Git is the source of truth for K8s + Tutor configs. |
@@ -33,6 +34,7 @@ Production already has Velero schedules. Audit them (and restore drills) with:
 
 For full procedure and interpretation, see:
 - `docs/operations/VELERO_BACKUP_AUDIT.md`
+- `.github/workflows/dr-evidence-bundle.yml` (monthly evidence artifact automation)
 
 ## Atlas Backups (Only If/When Used)
 
@@ -57,6 +59,7 @@ velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
 
 - **Monthly**: Restore into a throwaway namespace (`mereka-lms-dr`) and validate.
 - **After major changes**: Run a drill following any domain/secret/migration cutover.
+- **Monthly evidence artifact**: run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use the DR Evidence Bundle workflow artifact).
 
 ## Restore Drill Procedure (Monthly)
 

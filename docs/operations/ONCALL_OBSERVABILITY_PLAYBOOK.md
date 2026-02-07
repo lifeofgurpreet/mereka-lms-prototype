@@ -16,6 +16,7 @@ If this fails, user-facing impact is likely.
 ```bash
 ./scripts/qa/audit-observability.sh --mode runtime
 ./scripts/qa/audit-velero-alert-pipeline.sh
+./scripts/qa/verify-alert-routing.sh
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ./scripts/qa/run-operations-gates.sh --env both
 ```
@@ -73,6 +74,8 @@ Open in order:
 Attach:
 - `audit-observability` JSON output
 - `audit-velero-alert-pipeline` output
+- `verify-alert-routing` output
 - `public-health-check` output
 - relevant dashboard screenshots
 - any `audit-velero` output if data-risk
+- DR bundle path (if generated): `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`

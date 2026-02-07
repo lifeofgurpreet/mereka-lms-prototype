@@ -24,6 +24,23 @@ CONFIRM_TOKEN="YES_DELETE_LEGACY_MONGODB"
 
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
 
+usage() {
+  cat <<'USAGE'
+Usage: ./scripts/infra/retire-legacy-mongodb.sh [--help]
+Env:
+  RUN_DESTRUCTIVE=1                      Execute legacy deployment deletion
+  CREATE_PREOP_BACKUP=1                  Create Velero pre-op backup before delete
+  CONFIRM_RETIRE_LEGACY_MONGODB=<token>  Must equal YES_DELETE_LEGACY_MONGODB
+  K8S_CONTEXT=...                         Kubernetes context (default prod)
+  APP_NS=mereka-lms                       Application namespace
+USAGE
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
 require_cmd() {
   local cmd="$1"
   command -v "$cmd" >/dev/null 2>&1 || {

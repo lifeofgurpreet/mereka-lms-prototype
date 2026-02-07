@@ -185,6 +185,12 @@ Full operational gate (auth + multisite + observability + Velero + Grafana):
 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
+Atlas path + alert routing guard (recommended before production rollout):
+```bash
+./scripts/qa/verify-atlas-modulestore-path.sh --mode all
+./scripts/qa/verify-alert-routing.sh
+```
+
 ### Multisite configuration verification (prod)
 
 This checks that each microsite has a `Site` + `SiteConfiguration` and that

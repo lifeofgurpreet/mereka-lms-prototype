@@ -22,19 +22,23 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 - ✅ Org governance hardening: deterministic org role ownership audit (`./scripts/qa/verify-org-role-ownership.sh`) wired into auth audits and enforcement
 - ✅ Unified operator gate: `./scripts/qa/run-operations-gates.sh` (auth + multisite + observability + Velero + Grafana)
 - ✅ Velero restore drill hardening updated for PV-aware validation (restore PVC/PV resources + read-only restored MySQL probe)
+- ✅ Atlas modulestore CI guardrail added: `./scripts/qa/verify-atlas-modulestore-path.sh` + CI job `atlas-modulestore-guardrails`
+- ✅ Alert routing one-command verifier added: `./scripts/qa/verify-alert-routing.sh` + runtime workflow `.github/workflows/alert-routing-audit.yml`
+- ✅ DR evidence bundle pipeline added: `./scripts/qa/build-dr-evidence-bundle.sh` + monthly workflow `.github/workflows/dr-evidence-bundle.yml`
+- ✅ Operations gate hardened for timeout-safe execution + per-check artifacts (`var/operations-gates/*`)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Retire or persist legacy in-cluster MongoDB (`mereka-lms/mongodb` uses `emptyDir`) | Infra | ⚙️ In progress | Modulestore is now Atlas-backed in prod; remaining work is cleanup hardening so legacy MongoDB cannot become an accidental data path. See `docs/ARCHITECTURE_MONGODB.md`. |
-| 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | ⚙️ In progress | Runtime CronJob config now patched for PV-aware validation; remaining: execute and archive monthly evidence bundle for full closure. |
-| 3 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | Make this boring: scripted restore into a throwaway namespace, verify key queries, attach outputs. Bead: `mereka-lms-usv`. |
+| 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | ✅ Delivered (monitoring) | PV-aware restore-test config + strict audit checks are live; evidence publication is now tracked under DR formalization. |
+| 3 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | `build-dr-evidence-bundle.sh` + monthly GH workflow now publish artifacts; remaining: sustained monthly artifact review + restore-drill proof of execution cadence. Bead: `mereka-lms-usv`. |
 | 4 | Course data recovery runbook hardening (hybrid Mongo reality) | Data/Infra | 💤 Pending | Keep docs accurate and deterministic. Start from `docs/operations/COURSE_DATA_RECOVERY.md`. |
 | 5 | Modulestore cutover closure + decommission plan (legacy in-cluster Mongo) | Infra | ⚙️ In progress | Cutover is verified live; next step is safe retirement (backup evidence + explicit approval) or temporary PVC hardening. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
-| 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ⚙️ In progress | Strict multisite + org-role ownership checks are automated; remaining: CI/GitOps integration policy for release-blocking. Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
-| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits are live; Atlas allowlist monitor strict webhook routing is now passing. Next: CI/GitOps enforcement + on-call runbook polish. |
+| 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ✅ Delivered | Strict multisite + org-role ownership + consolidated operations gate are CI-enforced (`atlas-modulestore-guardrails` + operations gate workflow suite). Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
+| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits + alert-routing verifier are live; remaining: keep routing contacts fresh and incident-response drill cadence. |
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 

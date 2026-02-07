@@ -18,7 +18,11 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `monitor-atlas-allowlist-vps.sh` - Drift monitor + webhook alert wrapper for VPS Atlas allowlist
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
 - `fix-velero-restore-test.sh` - Patch/verify `velero/restore-test` CronJob so restore drills run successfully
+- `retire-legacy-mongodb.sh` - Velero-first guarded retirement flow for legacy in-cluster MongoDB
 - `../qa/audit-atlas-allowlist-monitor.sh` - Validate Atlas allowlist monitor posture (cron wiring, status freshness, webhook config)
+- `../qa/verify-atlas-modulestore-path.sh` - Verify Atlas modulestore contracts (repo + runtime)
+- `../qa/verify-alert-routing.sh` - One-command alert-routing verification (repo + runtime + optional VPS webhook check)
+- `../qa/build-dr-evidence-bundle.sh` - Build DR evidence bundle (Velero audits + artifacts + optional tarball)
 - `cron-public-health-check.sh` - Cron entrypoint for public health + branding checks
 - `setup-vps-health-cron.sh` - Install VPS cron entry for public health checks
 - `setup-vps-atlas-allowlist-cron.sh` - Install VPS cron entry to keep Atlas allowlist updated
@@ -90,6 +94,18 @@ STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
 
 # Patch + verify Velero restore-test CronJob (fixes shell/image mismatch)
 ./scripts/infra/fix-velero-restore-test.sh
+
+# Verify Atlas modulestore contracts (repo + runtime)
+./scripts/qa/verify-atlas-modulestore-path.sh --mode all
+
+# Build DR evidence bundle and tarball
+STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
+
+# Verify alert routing end-to-end (runtime + notification channels)
+./scripts/qa/verify-alert-routing.sh
+
+# Prepare legacy MongoDB retirement (non-destructive by default)
+./scripts/infra/retire-legacy-mongodb.sh
 
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh

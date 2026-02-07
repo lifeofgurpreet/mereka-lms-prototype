@@ -223,7 +223,10 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 8. **Velero alert pipeline audit** – run `./scripts/qa/audit-velero-alert-pipeline.sh` to validate log metrics/policies plus runtime CronJob freshness and hourly backup recency.
 9. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
 10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.
-11. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
+11. **Alert routing verification** – run `./scripts/qa/verify-alert-routing.sh` for runtime policy/channel checks plus optional VPS webhook routing validation.
+12. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
+13. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
+14. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
 
 ## Certificate/SAN verification
 

@@ -437,6 +437,9 @@ Auth hardening verification (preferred):
 ./scripts/qa/verify-auth-hardening.sh
 ./scripts/qa/list-openedx-hostnames.sh
 STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
+./scripts/qa/verify-atlas-modulestore-path.sh --mode all
+./scripts/qa/verify-alert-routing.sh
+STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
@@ -449,6 +452,8 @@ Regenerate hostname registry (after domain changes):
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
 - Atlas drift monitor + alert wrapper: `scripts/infra/monitor-atlas-allowlist-vps.sh` (cron target via `scripts/infra/setup-vps-atlas-allowlist-cron.sh`).
 - Atlas monitor audit (cron + status freshness + webhook): `scripts/qa/audit-atlas-allowlist-monitor.sh` (`STRICT_WEBHOOK=1` for production-ready routing checks).
+- Atlas modulestore guard (repo + runtime): `scripts/qa/verify-atlas-modulestore-path.sh` (CI gate in `.github/workflows/ci.yml`, job `atlas-modulestore-guardrails`).
+- Legacy MongoDB retirement must stay Velero-first + explicit-token guarded: `scripts/infra/retire-legacy-mongodb.sh` (non-destructive by default).
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
@@ -457,6 +462,10 @@ Regenerate hostname registry (after domain changes):
 - Org ownership drift guard: `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both` (enforces staff+instructor coverage and platform-admin role presence for `MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`).
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
+- One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks).
+- DR evidence bundle builder: `scripts/qa/build-dr-evidence-bundle.sh` (monthly automation via `.github/workflows/dr-evidence-bundle.yml`).
+- Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
+- Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.
 - Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`; `velero-restore-test-stale.json` is intentionally skipped because Cloud Monitoring threshold/absence alert windows are limited to ~24h).

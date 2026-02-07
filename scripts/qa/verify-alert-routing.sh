@@ -94,7 +94,21 @@ check_runtime_error_policies_and_channels() {
 
   local policies channels
   policies="$(gcloud monitoring policies list --project="$PROJECT" --format=json)"
-  channels="$(gcloud monitoring channels list --project="$PROJECT" --format=json)"
+  channels=""
+  if channels="$(gcloud monitoring channels list --project="$PROJECT" --format=json 2>/dev/null)"; then
+    :
+  elif channels="$(gcloud alpha monitoring channels list --project="$PROJECT" --format=json 2>/dev/null)"; then
+    :
+  elif channels="$(gcloud beta monitoring channels list --project="$PROJECT" --format=json 2>/dev/null)"; then
+    :
+  else
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Unable to list Monitoring notification channels (tried stable/alpha/beta commands)"
+      return 1
+    fi
+    warn_msg "Skipping runtime channel validation (gcloud monitoring channels API unavailable in this environment)."
+    return 0
+  fi
 
   python3 - "$policies" "$channels" <<'PY'
 import json
