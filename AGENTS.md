@@ -454,6 +454,10 @@ Regenerate hostname registry (after domain changes):
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
   - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod` (includes Studio CSS token/font wiring, MFE auth branding CTA, credentials health/admin reachability, forum heartbeat)
+- Studio branding Sass entrypoints must be present in the build context (`cms/static/sass/studio-main-v1*.scss`);
+  `./infrastructure/tutor/apply-patches.sh` now syncs `infrastructure/tutor/themes/mereka/cms/static/sass/` into `tutor_env/env/build/openedx/themes/mereka/cms/static/sass/`.
+- Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.
+- MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)

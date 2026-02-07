@@ -118,9 +118,16 @@ For strict verification of deep surfaces on live domains:
 BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 ```
 
+For strict MFE revision parity (live CSS must match current source marker):
+
+```bash
+STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod
+```
+
 `verify-public-branding.sh` also validates Credentials and forum integration surfaces:
 - `https://credentials.<domain>/admin/login/` is reachable
 - `https://credentials.<domain>/health/` includes `overall_status` and `database_status`
+- `https://credentials.<domain>/` may be API-first and redirect to `/health/` (accepted)
 - `https://forum.<domain>/heartbeat` returns `200`
 
 ## Subsites (Different Clients)

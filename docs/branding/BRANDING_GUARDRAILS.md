@@ -42,8 +42,10 @@ BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 Notes:
 - `verify-public-branding.sh` checks the main domain plus the client microsites (`academy.biji-biji.com`,
   `skillourfuture.academy.mereka.io`), and also validates Studio themed CSS wiring,
-  MFE auth branding CTA text, Credentials health/admin reachability, branded credentials root landing,
-  and Forum heartbeat.
+  MFE auth branding CTA text, Credentials health/admin reachability, Credentials API-root routing
+  (`/` can be API-first redirect to `/health/`), and Forum heartbeat.
+- To enforce exact live-vs-source MFE branding revision parity, run:
+  `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod`
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
 
 ## Surface Audit (Gap-Finder)
@@ -92,10 +94,10 @@ Current audit coverage:
    - Cause: edits made in one copy of `mereka-overrides.css` only.
    - Fix: always run `./scripts/branding/sync-brand-assets.sh` after CSS edits; it now syncs common -> LMS override CSS.
 
-6. Credentials page appears unbranded or confusing (“Page Not Found” at `/`)
-   - Cause: credentials root path not mapped to a branded landing route.
-   - Fix: keep the Caddy credentials root responder intact and verify
-     `./scripts/qa/verify-public-branding.sh prod` passes `Credentials root landing is branded`.
+6. Credentials root behavior looks different than LMS/Studio
+   - Cause: credentials service is API-first in production; `/` may redirect to `/health/`.
+   - Fix: keep Caddy credentials routing intact and verify
+     `./scripts/qa/verify-public-branding.sh prod` passes both admin + health checks.
 
 ## Deployment Reference
 

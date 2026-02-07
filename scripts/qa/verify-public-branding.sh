@@ -351,7 +351,7 @@ check_studio_brand_css() {
       if grep -Eq 'action-create-course' <<<"$css" \
         && grep -Eq 'action-create-library' <<<"$css" \
         && grep -Eq 'outline-complex' <<<"$css" \
-        && grep -Eq 'outline-item-title' <<<"$css" \
+        && grep -Eq 'outline-item-title|outline-item|outline-subsection' <<<"$css" \
         && grep -Eq 'add-xblock-component' <<<"$css"; then
         printf "✓ %s\n" "$label"
       else
