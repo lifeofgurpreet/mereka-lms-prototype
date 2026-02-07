@@ -43,6 +43,9 @@ Reality-first:
   - `infrastructure/monitoring/alerts/pvc-utilization-high.json`
 - Added local/runtime audit command:
   - `scripts/qa/audit-observability.sh`
+- Added Grafana coverage contract + audit gate:
+  - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
+  - `scripts/qa/audit-grafana-dashboard.sh`
 - Added CI automation:
   - `.github/workflows/observability-audit.yml`
   - PR guardrails in `.github/workflows/ci.yml`

@@ -9,6 +9,7 @@ This directory is the source of truth for GCP Monitoring templates used by Merek
 - `logging-metrics/`: log-based metric definitions
 - `alerts/`: alert policies
 - `dashboards/`: GCP Monitoring dashboards
+- `grafana/`: Grafana dashboard coverage contracts (for parity/audit automation)
 
 ## Apply Flow
 
@@ -43,6 +44,14 @@ Runtime deployment coverage check:
 ./scripts/qa/audit-observability.sh --mode runtime
 ```
 
+Grafana dashboard coverage check:
+
+```bash
+./scripts/qa/audit-grafana-dashboard.sh
+./scripts/qa/audit-grafana-dashboard.sh --strict-required
+./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended
+```
+
 Use strict mode when you want runtime freshness checks to fail hard (for CI gates or audits):
 
 ```bash
@@ -55,3 +64,4 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
 - MySQL and Redis saturation alerts (CPU/memory request utilization).
 - Velero success/failure log metrics and stale-success alerts.
 - `operations-signals` dashboard panels for stateful saturation and backup posture.
+- PrometheusRule coverage for CrashLoopBackOff, Pending pods, critical deployment availability, and synthetic/backup job failures.

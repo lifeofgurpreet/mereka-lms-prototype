@@ -13,6 +13,11 @@ The `/metrics` endpoint will be functional after rebuilding the Open edX image w
 1. **servicemonitor-lms.yaml**: ServiceMonitor for LMS pods
 2. **servicemonitor-cms.yaml**: ServiceMonitor for CMS pods
 3. **prometheusrule-lms.yaml**: Alert rules based on kubelet and application metrics
+   - LMS/CMS availability and saturation
+   - data service availability (MySQL/Redis/MongoDB/Elasticsearch)
+   - critical deployment unavailable replicas
+   - pods stuck pending / CrashLoopBackOff
+   - synthetic/backup job failures (`auth-verify-prod`, `cert-verify-prod`, `backup-verification`, `restore-test`)
 
 ## Metrics Integration
 
@@ -59,6 +64,17 @@ kubectl exec -n mereka-lms deploy/lms -- curl -s localhost:8000/metrics | head -
 # Check Prometheus is scraping
 kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
 # Open: http://localhost:9090/targets (search for "lms-metrics")
+```
+
+Alert/rule validation:
+
+```bash
+# YAML/schema sanity
+kubectl apply --dry-run=client -f deploy/k8s/base/monitoring/prometheusrule-lms.yaml
+
+# Runtime dashboard + datasource + contract check
+./scripts/infra/validate-telemetry-connectivity.sh --strict
+REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
 ```
 
 ## Alternative Monitoring

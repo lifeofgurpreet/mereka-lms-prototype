@@ -29,6 +29,10 @@ _Audience: On-call + SRE • Last updated: 2026-02-06_
 | Auth failure spikes (LMS/credentials/forum) | `infrastructure/monitoring/alerts/log-auth-failures*.json` | WARNING | Investigate auth drift |
 | LMS OIDC provider disabled | `infrastructure/monitoring/alerts/log-lms-oidc-provider-disabled.json` | ERROR | Immediate (SSO outage risk) |
 | LMS CSRF failures spike | `infrastructure/monitoring/alerts/log-lms-csrf-failures.json` | WARNING | Business-hours triage unless login blocked |
+| Critical deployment unavailable replicas | `deploy/k8s/base/monitoring/prometheusrule-lms.yaml` (`OpenEdxCriticalDeploymentUnavailable`) | ERROR | Immediate |
+| CrashLoopBackOff in `mereka-lms` | `deploy/k8s/base/monitoring/prometheusrule-lms.yaml` (`OpenEdxCrashLoopingContainers`) | ERROR | Immediate |
+| Pods pending too long | `deploy/k8s/base/monitoring/prometheusrule-lms.yaml` (`OpenEdxPodsPendingTooLong`) | WARNING | Business-hours triage unless user impact |
+| Synthetic/backup job failures (`auth-verify`, `cert-verify`, `backup-verification`, `restore-test`) | `deploy/k8s/base/monitoring/prometheusrule-lms.yaml` (`OpenEdxSyntheticOrBackupJobFailures`) | WARNING | Triage same day; escalate if repeated |
 
 ## Escalation Rules
 

@@ -443,7 +443,9 @@ Regenerate hostname registry (after domain changes):
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`).
-- Telemetry path validator (Grafana ↔ GKE/VPS Prometheus): `scripts/infra/validate-telemetry-connectivity.sh` (`--json`, `--strict`, optional `REQUIRE_VPS_PROM_DS=1`).
+- Telemetry path validator (Grafana ↔ GKE/VPS Prometheus): `scripts/infra/validate-telemetry-connectivity.sh` (`--json`, `--strict`, optional `REQUIRE_VPS_PROM_DS=1`, `REQUIRE_GRAFANA_RECOMMENDED=1`).
+- Grafana coverage contract audit: `scripts/qa/audit-grafana-dashboard.sh` (contract: `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`).
+- PrometheusRule reliability coverage (CrashLoop/Pending/unavailable replicas/synthetic failures): `deploy/k8s/base/monitoring/prometheusrule-lms.yaml`.
 - Velero restore drill fix path: `scripts/infra/fix-velero-restore-test.sh` (patches `restore-test` CronJob + verifies one-off run).
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:

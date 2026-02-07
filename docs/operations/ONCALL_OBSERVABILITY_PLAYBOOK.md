@@ -15,6 +15,7 @@ If this fails, user-facing impact is likely.
 
 ```bash
 ./scripts/qa/audit-observability.sh --mode runtime
+./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ```
 
 If this fails, monitoring blind spots may exist; fix coverage first.
@@ -48,6 +49,14 @@ Open in order:
   - confirm `lastSuccessfulTime` for `backup-verification` and `restore-test`
   - inspect `velero` CronJob history and recent job logs
   - treat as data-risk until success signal is restored
+- CrashLoopBackOff / Pending pods / unavailable critical deployments:
+  - check `kubectl get pods -n mereka-lms` for stuck/pending pods
+  - check `kubectl get deploy -n mereka-lms` and unavailable replicas
+  - inspect rollout history/events and recent image/config changes
+- Synthetic/backup job failures (`auth-verify-prod`, `cert-verify-prod`, `backup-verification`, `restore-test`):
+  - inspect failed jobs: `kubectl get jobs -A | rg 'auth-verify|cert-verify|backup-verification|restore-test'`
+  - inspect logs for latest failed run in owning namespace
+  - restore success signals before closing incident
 - Auth/TLS synthetic failures:
   - run auth/cert verify scripts and check redirect/cert drift
 

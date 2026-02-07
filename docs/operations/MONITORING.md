@@ -22,6 +22,11 @@ The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-ap
 5. **Authentication & Security**: Auth failures by service
 6. **Logs**: Error volumes and recent errors
 
+Coverage governance:
+- Contract: `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
+- Audit script: `./scripts/qa/audit-grafana-dashboard.sh --strict-required`
+- Strict recommendation gate: `./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended`
+
 ### MongoDB Atlas Monitoring
 
 **CRITICAL**: MongoDB Atlas is monitored via TCP connectivity probe (blackbox exporter).
@@ -211,6 +216,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
 6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.
 7. **Observability posture audit** – run `./scripts/qa/audit-observability.sh --mode all` (or `--mode local` when offline) to verify coverage and deployment state.
+8. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
 
 ## Certificate/SAN verification
 

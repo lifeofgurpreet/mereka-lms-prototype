@@ -1,0 +1,46 @@
+{
+  "name": "Mereka LMS Grafana Dashboard Coverage Contract",
+  "dashboard_uid": "bbi-app-mereka-lms",
+  "required": {
+    "datasources": [
+      "prometheus"
+    ],
+    "panel_titles": [
+      "LMS",
+      "CMS (Studio)",
+      "Caddy",
+      "MySQL",
+      "Redis",
+      "LMS Availability (24h)",
+      "Auth Failures Over Time (by Service)",
+      "Recent Errors"
+    ],
+    "query_fragments": [
+      "kube_pod_status_phase",
+      "container_cpu_usage_seconds_total",
+      "container_memory_usage_bytes"
+    ]
+  },
+  "recommended": {
+    "datasources": [
+      "prometheus-vps"
+    ],
+    "panel_titles": [
+      "Velero Backup Verification",
+      "Velero Restore Drill",
+      "CrashLooping Pods",
+      "Pending Pods",
+      "Critical Deployment Availability",
+      "Synthetic Job Failures"
+    ],
+    "query_fragments": [
+      "kube_pod_container_status_waiting_reason",
+      "kube_deployment_status_replicas_unavailable",
+      "kube_job_status_failed",
+      "backup-verification",
+      "restore-test",
+      "auth-verify-prod",
+      "cert-verify-prod"
+    ]
+  }
+}

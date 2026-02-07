@@ -170,3 +170,65 @@ spec:
           annotations:
             summary: "Elasticsearch is down"
             description: "Elasticsearch pod {{ $labels.pod }} has been down for more than 5 minutes. Search functionality unavailable."
+
+        # Workload stability alerts
+        - alert: OpenEdxCriticalDeploymentUnavailable
+          expr: |
+            sum by (deployment) (
+              kube_deployment_status_replicas_unavailable{
+                namespace="mereka-lms",
+                deployment=~"lms|cms|caddy|mfe|forum|discovery|ecommerce|credentials|notes|xqueue"
+              }
+            ) > 0
+          for: 10m
+          labels:
+            severity: critical
+            component: platform
+          annotations:
+            summary: "Critical deployment has unavailable replicas"
+            description: "Deployment {{ $labels.deployment }} has unavailable replicas for more than 10 minutes."
+
+        - alert: OpenEdxPodsPendingTooLong
+          expr: sum(kube_pod_status_phase{namespace="mereka-lms", phase="Pending"}) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: platform
+          annotations:
+            summary: "Pods stuck in Pending state"
+            description: "One or more pods in namespace mereka-lms have been Pending for over 15 minutes."
+
+        - alert: OpenEdxCrashLoopingContainers
+          expr: |
+            sum by (pod, container) (
+              kube_pod_container_status_waiting_reason{
+                namespace="mereka-lms",
+                reason="CrashLoopBackOff"
+              }
+            ) > 0
+          for: 10m
+          labels:
+            severity: critical
+            component: platform
+          annotations:
+            summary: "CrashLoopBackOff detected"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is crash looping."
+
+        # Synthetic and backup workflow alerts
+        - alert: OpenEdxSyntheticOrBackupJobFailures
+          expr: |
+            sum by (namespace, job_name) (
+              increase(
+                kube_job_status_failed{
+                  namespace=~"mereka-lms|velero",
+                  job_name=~"(auth-verify-prod|cert-verify-prod|backup-verification|restore-test).*"
+                }[6h]
+              )
+            ) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: reliability
+          annotations:
+            summary: "Synthetic/backup job failures detected"
+            description: "Job {{ $labels.namespace }}/{{ $labels.job_name }} has failed at least once in the last 6 hours."

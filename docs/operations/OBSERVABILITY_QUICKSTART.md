@@ -14,6 +14,9 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 
 # Runtime monitoring objects + synthetic cronjobs (requires cluster + gcloud auth)
 ./scripts/qa/audit-observability.sh --mode runtime
+
+# Grafana panel/query coverage contract (required + recommended)
+./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ```
 
 ## 2) Core Dashboards
@@ -44,6 +47,8 @@ Critical:
 - Velero backup verification failures
 - Velero backup verification stale (no success in 30h)
 - Velero restore-test stale (no success in 45d)
+- CrashLoopBackOff on any `mereka-lms` workload
+- Critical deployment unavailable replicas (`lms`, `cms`, `caddy`, `mfe`, `forum`, `discovery`, `ecommerce`, `credentials`, `notes`, `xqueue`)
 
 Warning:
 - Pod restarts
@@ -51,6 +56,8 @@ Warning:
 - MySQL saturation high
 - Redis saturation high
 - MySQL/Redis connection error spikes
+- Pods pending too long
+- Synthetic/backup job failures (`auth-verify-prod`, `cert-verify-prod`, `backup-verification`, `restore-test`)
 
 ## 4) Apply / Update Monitoring
 

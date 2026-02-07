@@ -30,6 +30,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
 - `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
 - `validate-telemetry-connectivity.sh` - **📊 MONITORING** Validate Grafana datasource connectivity to GKE and VPS Prometheus
+- `../qa/audit-grafana-dashboard.sh` - **📊 MONITORING** Validate Grafana panel/query coverage against contract
 - `cloudflare-sync.sh` - Cloudflare DNS sync
 - `mongodb-to-atlas.sh` - MongoDB migration to Atlas
 - `deploy-aspects-k8s.sh` - Deploy Aspects analytics to Kubernetes
@@ -114,6 +115,11 @@ ALLOW_OVERWRITE_MONGODB_KEYS=1 ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.
 ./scripts/infra/validate-telemetry-connectivity.sh
 ./scripts/infra/validate-telemetry-connectivity.sh --json
 ./scripts/infra/validate-telemetry-connectivity.sh --strict
+REQUIRE_VPS_PROM_DS=1 REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
+
+# Audit Grafana dashboard coverage contract
+./scripts/qa/audit-grafana-dashboard.sh --strict-required
+./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended
 
 # Audit monitoring coverage (repo + runtime)
 ./scripts/qa/audit-observability.sh --mode all

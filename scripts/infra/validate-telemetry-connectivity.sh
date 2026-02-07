@@ -12,6 +12,7 @@
 
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 MONITORING_NS="${MONITORING_NS:-monitoring}"
 APP_NS="${APP_NS:-mereka-lms}"
@@ -19,9 +20,11 @@ VPS_PROM_URL="${VPS_PROM_URL:-https://prometheus.mereka.dev}"
 GKE_PROM_SVC="${GKE_PROM_SVC:-monitoring-kube-prometheus-prometheus}"
 GRAFANA_LABEL="${GRAFANA_LABEL:-app.kubernetes.io/name=grafana}"
 OBSERVABILITY_REPO="${OBSERVABILITY_REPO:-/home/gurpreet/projects/observability}"
+GRAFANA_CONTRACT_FILE="${GRAFANA_CONTRACT_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
 JSON_OUT=0
 STRICT=0
 REQUIRE_VPS_PROM_DS="${REQUIRE_VPS_PROM_DS:-0}"
+REQUIRE_GRAFANA_RECOMMENDED="${REQUIRE_GRAFANA_RECOMMENDED:-0}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -41,6 +44,10 @@ Usage: ./scripts/infra/validate-telemetry-connectivity.sh [--json] [--strict]
 Options:
   --json      Emit machine-readable JSON output
   --strict    Fail when optional parity checks are unavailable/missing
+
+Env toggles:
+  REQUIRE_VPS_PROM_DS=1           Fail if dashboard has no prometheus-vps refs
+  REQUIRE_GRAFANA_RECOMMENDED=1   Fail if recommended dashboard coverage is missing
 EOF
 }
 
@@ -200,6 +207,42 @@ check_dashboard_parity() {
       return 1
     fi
     record_warn "Dashboard currently has no prometheus-vps datasource refs; GKE path is still validated."
+  fi
+
+  local audit_script="${REPO_ROOT}/scripts/qa/audit-grafana-dashboard.sh"
+  if [[ ! -x "$audit_script" ]]; then
+    if [[ "$STRICT" -eq 1 ]]; then
+      echo "Grafana audit script missing or not executable: $audit_script"
+      return 1
+    fi
+    record_warn "Grafana coverage audit script missing; skipping contract validation"
+    return 0
+  fi
+
+  local audit_args=(
+    --dashboard-file "$dashboard_file"
+    --contract-file "$GRAFANA_CONTRACT_FILE"
+    --strict-required
+  )
+  if [[ "$STRICT" -eq 1 && "$REQUIRE_GRAFANA_RECOMMENDED" == "1" ]]; then
+    audit_args+=(--strict-recommended)
+  fi
+
+  local out
+  if ! out="$("$audit_script" "${audit_args[@]}" 2>&1)"; then
+    echo "$out"
+    return 1
+  fi
+
+  local warn_count
+  warn_count="$("$audit_script" --dashboard-file "$dashboard_file" --contract-file "$GRAFANA_CONTRACT_FILE" --json \
+    | jq -r '(.recommended_warnings // []) | length' 2>/dev/null || echo 0)"
+  if [[ "$warn_count" -gt 0 ]]; then
+    if [[ "$STRICT" -eq 1 && "$REQUIRE_GRAFANA_RECOMMENDED" == "1" ]]; then
+      echo "Grafana dashboard has $warn_count recommended coverage gaps"
+      return 1
+    fi
+    record_warn "Grafana dashboard has $warn_count recommended coverage gaps. Run ./scripts/qa/audit-grafana-dashboard.sh."
   fi
 }
 
