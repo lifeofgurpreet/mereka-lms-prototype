@@ -60,7 +60,7 @@ We chose **MongoDB Atlas** (managed service) for production workloads.
 - **Forum**: uses Atlas (via `MONGODB_HOST` configured to a `*.mongodb.net` host).
 - **LMS/CMS modulestore**: uses Atlas in production (`MONGODB_HOST` + Atlas-aware settings patches).
 - **Legacy in-cluster MongoDB deployment** (`Deployment/mongodb`) has been retired in production after a Velero pre-op backup.
-- **Legacy in-cluster MongoDB service** (`Service/mongodb`) is being removed through the production overlay GitOps patch.
+- **Legacy in-cluster MongoDB service** (`Service/mongodb`) is removed in production after GitOps sync.
 
 Cutover status: complete for active modulestore and forum paths; enforce Atlas-only via runtime gates to prevent regression.
 

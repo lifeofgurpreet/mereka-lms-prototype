@@ -47,21 +47,20 @@ _Last updated: 2026-02-07_
 
 ## Data Plane State (prod)
 - Atlas guard command:
-  - `STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=0 ./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime`
+  - `STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=1 ./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime`
 - Result:
   - LMS/CMS modulestore host resolves Atlas (`*.mongodb.net`)
   - Legacy `Deployment/mongodb` absent
-  - Legacy `Service/mongodb` still present as orphan until GitOps ref bump + Argo sync
+  - Legacy `Service/mongodb` absent
 
 ## Known Gaps
-1. `Service/mongodb` orphan still present in production runtime until `bbi-infrastructure` pinned ref is bumped to include this repo’s production overlay delete patch.
-2. Velero audit still shows pending legacy PVC inventory entry for `mongodb`; keep this tracked during cleanup.
-3. DR evidence process must remain monthly and reviewed (not just scripted).
+1. Velero audit still shows pending legacy PVC inventory entry for `mongodb`; keep this tracked during cleanup.
+2. DR evidence process must remain monthly and reviewed (not just scripted).
 
 ## Canonical Verification Commands
 ```bash
 ./scripts/qa/public-health-check.sh prod
-STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=0 \
+STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=1 \
   ./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime
 ./scripts/qa/audit-velero.sh
 ```

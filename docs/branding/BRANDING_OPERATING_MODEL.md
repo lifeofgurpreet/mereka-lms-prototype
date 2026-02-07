@@ -99,6 +99,15 @@ Validate both production and dev:
      `scripts/branding/update-token-provenance.sh`, and enforce with
      `scripts/branding/verify-token-drift.sh`.
 
+10. **Studio still imports Google fonts after openedx rebuild**
+   - Cause: regex in generated Dockerfile patch block is over-escaped and does not match
+     real import lines.
+   - Fix:
+     1) regenerate with `./infrastructure/tutor/apply-patches.sh`
+     2) confirm `tutor_env/env/build/openedx/Dockerfile` uses `fonts[.]googleapis[.]com`
+        in both strip blocks
+     3) rebuild/push `openedx`, bump GitOps ref/tag, rerun strict branding gates.
+
 ## What Was Hacky And How We Avoid It
 
 - Hacky pattern: manual one-off checks run ad-hoc by different agents.

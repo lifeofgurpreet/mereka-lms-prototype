@@ -515,10 +515,10 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
         "# We strip those imports at the SASS source so built CSS stays offline-friendly.\n"
         "root = Path('/openedx/edx-platform')\n"
         "patterns = [\n"
-        "    re.compile(r'@import\\s+url\\([\\\"\\']?https?://fonts\\\\.googleapis\\\\.com[^\\)]*\\)\\s*;?', re.I),\n"
-        "    re.compile(r'@import\\s+url\\([\\\"\\']?//fonts\\\\.googleapis\\\\.com[^\\)]*\\)\\s*;?', re.I),\n"
-        "    re.compile(r'@import\\s+[\\\"\\']https?://fonts\\\\.googleapis\\\\.com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
-        "    re.compile(r'@import\\s+[\\\"\\']//fonts\\\\.googleapis\\\\.com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?https?://fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?//fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']https?://fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']//fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
         "]\n"
         "changed = 0\n"
         "for path in root.rglob('*.scss'):\n"
@@ -542,10 +542,10 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
         "# Defense-in-depth: remove any residual Google font imports from compiled Studio CSS.\n"
         "root = Path('/openedx/edx-platform')\n"
         "patterns = [\n"
-        "    re.compile(r'@import\\s+url\\([\\\"\\']?https?://fonts\\\\.googleapis\\\\.com[^\\)]*\\)\\s*;?', re.I),\n"
-        "    re.compile(r'@import\\s+url\\([\\\"\\']?//fonts\\\\.googleapis\\\\.com[^\\)]*\\)\\s*;?', re.I),\n"
-        "    re.compile(r'@import\\s+[\\\"\\']https?://fonts\\\\.googleapis\\\\.com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
-        "    re.compile(r'@import\\s+[\\\"\\']//fonts\\\\.googleapis\\\\.com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?https?://fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?//fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']https?://fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']//fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
         "]\n"
         "changed = 0\n"
         "for path in root.rglob('studio-main-v1*.css'):\n"
@@ -578,6 +578,8 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
                 updated = updated.replace(current_compile_block, f"{brand_compile_block}\nRUN npm run webpack\n", 1)
     if compile_patch_marker in updated:
         updated = updated.replace("\nRUN npm run compile-sass -- --skip-default\n", "\n")
+        # Normalize any legacy over-escaped regex literals left from previous patch versions.
+        updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
     webpack_conditional = (
         'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi'
     )

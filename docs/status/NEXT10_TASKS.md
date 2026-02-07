@@ -30,7 +30,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 - ✅ Studio authoring branding contract added (`./scripts/qa/verify-studio-authoring-branding.sh`) and integrated into branding gates
 - ✅ Design token provenance lock added (`assets/branding/tokens.provenance.json` + `verify-token-drift.sh`)
 - ⚙️ New follow-up: deploy refreshed openedx image to clear live Studio token/Google-font drift (`mereka-lms-2bnq`)
-- ⚙️ New follow-up: bump `bbi-infrastructure` pinned ref so Argo applies production overlay patch removing orphan `Service/mongodb` (`mereka-lms-3ax6`)
+- ✅ GitOps follow-through completed: `bbi-infrastructure` pinned ref + overlay patch now prune legacy `Service/mongodb` in production (`mereka-lms-3ax6`)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 

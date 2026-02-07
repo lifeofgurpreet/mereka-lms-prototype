@@ -140,7 +140,7 @@ See `docs/adr/001-mongodb-atlas.md` for full rationale.
 - **Forum**: uses Atlas.
 - **LMS/CMS modulestore**: explicitly configured to Atlas (`MONGODB_HOST` resolves to `*.mongodb.net` via `openedx-secrets/FORUM_MONGODB_SRV`).
 - **Legacy in-cluster MongoDB deployment**: retired in production after Velero pre-op backup (`pre-op-mereka-lms-20260207-1451`).
-- **Legacy in-cluster MongoDB service**: may still exist as an orphaned service until GitOps sync removes it (production overlay now deletes `Service/mongodb`).
+- **Legacy in-cluster MongoDB service**: removed in production (`Service/mongodb` is absent after Argo sync to `bbi-infrastructure` overlay patch).
 
 ### Connection Details
 | Service | Database | Connection |
@@ -158,7 +158,7 @@ kubectl -n mereka-lms exec deploy/cms -- python -c 'import os; h=os.environ.get(
 # Legacy deployment should be absent:
 kubectl -n mereka-lms get deploy mongodb
 
-# Legacy service should be absent after GitOps sync:
+# Legacy service should be absent:
 kubectl -n mereka-lms get svc mongodb
 
 # Velero posture (critical should be 0 when modulestore is Atlas):
@@ -506,6 +506,9 @@ Regenerate hostname registry (after domain changes):
 - Root-cause authn parity guard: `./infrastructure/tutor/apply-patches.sh` enforces both
   `COPY indigo/env.config.jsx /openedx/app/` and `COPY indigo/mereka /openedx/app/mereka`
   inside `authn-common` if Tutor template drift removes them.
+- GitOps pinned-ref helper for cross-repo rollout:
+  `./scripts/infra/prepare-bbi-infra-ref-bump.sh [--apply]`
+  (updates `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml` ref to current commit).
 - If authn index points to an unbranded CSS bundle, repair image deterministically:
   `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image> [expected_rev]`
   (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
@@ -515,6 +518,8 @@ Regenerate hostname registry (after domain changes):
 - For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
 - `./infrastructure/tutor/apply-patches.sh` now patches MFE Dockerfiles idempotently (no duplicate `COPY indigo/mereka` lines) and injects npm retry/timeouts for transient registry failures.
+- Studio Google-font stripping in openedx Dockerfile must use regex-safe host literals (`fonts[.]googleapis[.]com`), not over-escaped `fonts\\.googleapis\\.com`.
+  Verify generated patch blocks in `tutor_env/env/build/openedx/Dockerfile` before building.
 - Never run more than one `tutor images build mfe` concurrently; wait for the active build to finish before retrying.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).

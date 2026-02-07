@@ -37,10 +37,7 @@ This document answers one question: **if we lose a node/zone/cluster, what data 
 1. **Accidental local MongoDB risk (dev-only):** kind dev may still run in-cluster MongoDB for forum testing.
    - Production is Atlas-only (see `docs/adr/001-mongodb-atlas.md`) and should not keep `mongodb` service/deployment active.
    - In kind dev, do not rely on in-cluster MongoDB for durable course content.
-2. **GitOps sync follow-through required:** production overlay now deletes legacy `Service/mongodb`, but until the pinned ref is bumped and Argo reconciles, runtime may still show an orphan `mongodb` service with no endpoints.
-   - Detect: `kubectl -n mereka-lms get svc mongodb` (should be NotFound after sync).
-   - Gate now surfaces this drift as warning: `./scripts/qa/audit-velero.sh`.
-3. **DR process discipline still required:** restore drill mechanics are fixed, but monthly evidence review and restore-drill artifacts must stay on schedule.
+2. **DR process discipline still required:** restore drill mechanics are fixed, but monthly evidence review and restore-drill artifacts must stay on schedule.
    - Run: `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
 
 ## Proof: What Must Match

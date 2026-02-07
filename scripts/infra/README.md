@@ -19,6 +19,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
 - `fix-velero-restore-test.sh` - Patch/verify `velero/restore-test` CronJob so restore drills run successfully
 - `retire-legacy-mongodb.sh` - Velero-first guarded retirement flow for legacy in-cluster MongoDB
+- `prepare-bbi-infra-ref-bump.sh` - Prepare/apply `bbi-infrastructure` pinned ref bump to current `mereka-lms` commit
 - `../qa/audit-atlas-allowlist-monitor.sh` - Validate Atlas allowlist monitor posture (cron wiring, status freshness, webhook config)
 - `../qa/verify-atlas-modulestore-path.sh` - Verify Atlas modulestore contracts (repo + runtime)
 - `../qa/verify-alert-routing.sh` - One-command alert-routing verification (repo + runtime + optional VPS webhook check)
@@ -106,6 +107,10 @@ STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 
 # Prepare legacy MongoDB retirement (non-destructive by default)
 ./scripts/infra/retire-legacy-mongodb.sh
+
+# Prepare/apply pinned-ref bump in bbi-infrastructure (for Argo sync)
+./scripts/infra/prepare-bbi-infra-ref-bump.sh
+./scripts/infra/prepare-bbi-infra-ref-bump.sh --apply
 
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh
