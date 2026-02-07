@@ -18,7 +18,7 @@ images:
     newTag: 20260206-footer-css-05fabf8
   - name: openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260207-131850-mfe-pass3
+    newTag: 20260207-131850-mfe-pass5-authnrev
 
 # Production replica counts (higher for availability)
 replicas:

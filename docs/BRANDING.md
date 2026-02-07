@@ -131,6 +131,18 @@ For strict MFE revision parity (live CSS must match current source marker):
 STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 ```
 
+To verify MFE image branding before push/deploy:
+
+```bash
+./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
+```
+
+If authn index points to an unbranded CSS bundle, repair image deterministically:
+
+```bash
+./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>
+```
+
 `verify-public-branding.sh` also validates Credentials and forum integration surfaces:
 - `https://credentials.<domain>/admin/login/` is reachable
 - `https://credentials.<domain>/health/` includes `overall_status` and `database_status`

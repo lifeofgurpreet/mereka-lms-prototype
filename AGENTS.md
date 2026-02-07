@@ -473,6 +473,13 @@ Regenerate hostname registry (after domain changes):
   `./infrastructure/tutor/apply-patches.sh` now syncs `infrastructure/tutor/themes/mereka/cms/static/sass/` into `tutor_env/env/build/openedx/themes/mereka/cms/static/sass/`.
 - Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
+- Verify MFE image branding before push/deploy:
+  `./scripts/qa/verify-mfe-image-branding.sh <image_ref>` (ensures authn `index.html` references a branded CSS bundle and revision marker).
+- If authn index points to an unbranded CSS bundle, repair image deterministically:
+  `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image> [expected_rev]`
+  (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
+- GitOps overlay image overrides should include both canonical names when needed
+  (`docker.io/overhangio/openedx-mfe` and `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe`) to avoid post-transform tag drift.
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.

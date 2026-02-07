@@ -197,11 +197,16 @@ tutor images build openedx
 
 # Build MFE image (if MFE styling changed)
 tutor images build mfe
+
+# Verify built MFE branding contract before push
+./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
 ```
 
 **Build discipline:**
 - Run only one `tutor images build mfe` at a time.
 - If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same command after the active run exits; do not launch parallel retries.
+- If authn index points to an unbranded CSS bundle, repair deterministically before push:
+  `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>`
 
 **Build Times:**
 - First build (no cache): 60-90 minutes

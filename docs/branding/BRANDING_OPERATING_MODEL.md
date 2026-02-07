@@ -41,6 +41,8 @@ Validate both production and dev:
 
 1. Run source/live branding gates.
 2. Build/push images (`openedx`, `openedx-mfe` when changed).
+   - After `tutor images build mfe`, verify the built image before push:
+     `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
 3. Update image tags under `deploy/k8s/base`.
 4. Commit/push this repo.
 5. Update pinned `?ref=<sha>` in `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`.
@@ -72,6 +74,14 @@ Validate both production and dev:
    - Cause: transient registry/network failures during multi-MFE npm installs.
    - Fix: rerun from a single build session only; `apply-patches.sh` now injects npm retry/timeouts into MFE Dockerfile.
    - Do not start a second `tutor images build mfe` while one is active.
+
+7. **MFE authn serves unthemed CSS even after branded build**
+   - Cause: authn `index.html` points to an unbranded bundle hash while branded CSS artifacts exist in the image.
+   - Fix:
+     1) verify image contract: `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
+     2) if failing and rollout is urgent, repair image deterministically:
+        `scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>`
+     3) redeploy with GitOps and rerun strict gate.
 
 ## What Was Hacky And How We Avoid It
 
