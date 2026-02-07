@@ -22,6 +22,7 @@ EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*
 
 ENVIRONMENT="${1:-prod}"
 STRICT=0
+STRICT_PROXY_AUTHN_BRANDING="${STRICT_PROXY_AUTHN_BRANDING:-0}"
 
 shift || true
 while [[ $# -gt 0 ]]; do
@@ -197,12 +198,20 @@ check_mfe_authn_surface() {
 
 check_forum() {
   local host=$1
-  local code
+  local code root_code
   code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/heartbeat" || echo "000")"
   if [[ "$code" == "200" ]]; then
     ok "Forum heartbeat reachable (200)"
   else
     gap "Forum heartbeat not OK (${code})"
+  fi
+  root_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/" || echo "000")"
+  if [[ "$root_code" == "401" ]]; then
+    ok "Forum root enforces authenticated access (401)"
+  elif [[ "$root_code" == "200" ]]; then
+    ok "Forum root reachable without auth (200)"
+  else
+    gap "Forum root returned unexpected status (${root_code})"
   fi
 }
 
@@ -245,6 +254,56 @@ check_credentials() {
   fi
 }
 
+check_authn_proxy_surface() {
+  local url=$1
+  local label=$2
+  local html css_path css host ts
+  local url_no_scheme="${url#https://}"
+
+  host="${url_no_scheme%%/*}"
+  ts="$(date +%s)"
+  html="$(fetch "${url}?nocache=${ts}")"
+  if [[ -z "${html:-}" ]]; then
+    gap "${label}: endpoint unavailable"
+    return
+  fi
+
+  if rg -F -q '<div id="root"></div>' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
+    ok "${label}: authn bundle shell present"
+  else
+    gap "${label}: missing authn bundle shell"
+    return
+  fi
+
+  css_path="$(extract_first '/authn/app\.[^"]+\.css' <<<"$html")"
+  if [[ -z "${css_path:-}" ]]; then
+    gap "${label}: missing authn css link"
+    return
+  fi
+
+  css="$(fetch "https://${host}${css_path}?nocache=${ts}")"
+  if [[ -z "${css:-}" ]]; then
+    gap "${label}: could not fetch authn css (${css_path})"
+    return
+  fi
+
+  if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$css"; then
+    if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$css"; then
+      gap "${label}: authn css branding revision differs from source (${EXPECTED_MFE_BRANDING_REV})"
+    else
+      ok "${label}: authn css branding markers present"
+    fi
+  else
+    if [[ "$STRICT_PROXY_AUTHN_BRANDING" == "1" ]]; then
+      gap "${label}: authn css branding markers missing"
+    else
+      ok "${label}: authn css branding markers not enforced (set STRICT_PROXY_AUTHN_BRANDING=1)"
+    fi
+  fi
+}
+
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_lms_overrides "$LMS_DOMAIN" "LMS (${LMS_DOMAIN})"
   check_mfe_authn_surface "$MFE_DOMAIN"
@@ -253,12 +312,16 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_lms_overrides "$BIJI_DOMAIN" "Microsite (${BIJI_DOMAIN})"
   check_lms_overrides "$SKILLOURFUTURE_DOMAIN" "Microsite (${SKILLOURFUTURE_DOMAIN})"
   check_studio_css "$STUDIO_DOMAIN" "Studio (${STUDIO_DOMAIN})"
+  check_authn_proxy_surface "https://${ECOMMERCE_DOMAIN}/dashboard/" "Ecommerce dashboard (${ECOMMERCE_DOMAIN})"
+  check_authn_proxy_surface "https://credentials.${LMS_DOMAIN}/admin/login/" "Credentials admin (${LMS_DOMAIN})"
   check_credentials "credentials.${LMS_DOMAIN}"
   check_forum "$FORUM_DOMAIN"
 else
   check_lms_overrides "$DEV_LMS_DOMAIN" "LMS (${DEV_LMS_DOMAIN})"
   check_mfe_authn_surface "$DEV_MFE_DOMAIN"
   check_studio_css "$DEV_STUDIO_DOMAIN" "Studio (${DEV_STUDIO_DOMAIN})"
+  check_authn_proxy_surface "https://${DEV_ECOMMERCE_DOMAIN}/dashboard/" "Ecommerce dashboard (${DEV_ECOMMERCE_DOMAIN})"
+  check_authn_proxy_surface "https://credentials.${DEV_LMS_DOMAIN}/admin/login/" "Credentials admin (${DEV_LMS_DOMAIN})"
   check_credentials "credentials.${DEV_LMS_DOMAIN}"
   check_forum "$DEV_FORUM_DOMAIN"
 fi

@@ -203,6 +203,12 @@ VISUAL_ALLOW_BOOTSTRAP=1 \
 ./scripts/branding/run-branding-gates.sh prod
 ```
 
+To enforce branded authn assets for service-domain login entrypoints (`ecommerce.*`/`credentials.*`):
+
+```bash
+STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod
+```
+
 For periodic VPS execution (recommended), install the cron wrapper:
 
 ```bash

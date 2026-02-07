@@ -31,6 +31,12 @@ Optional strict parity mode:
 STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 ```
 
+Optional strict service-domain authn mode (`ecommerce.*` + `credentials.*`):
+
+```bash
+STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod
+```
+
 Optional visual diff mode (screenshot capture + RMSE compare):
 
 ```bash
@@ -144,6 +150,15 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
      1) run `RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 ./scripts/branding/run-branding-gates.sh prod`
      2) install scheduled checks with `scripts/infra/setup-vps-branding-visual-regression-cron.sh`
      3) treat non-zero visual regression exit as release-blocking.
+
+14. **Service-domain authn pages load but CSS/JS assets 404**
+   - Cause: authn shell on `ecommerce.*` / `credentials.*` references `/authn/*` paths, but Caddy host blocks
+     are only proxying to service backends (not MFE assets).
+   - Fix:
+     1) add `handle_path /authn/* { import proxy "mfe:8002" }` in both host blocks in
+        `deploy/k8s/base/apps/caddy/Caddyfile`
+     2) redeploy Caddy via GitOps
+     3) enable strict enforcement with `STRICT_PROXY_AUTHN_BRANDING=1` once live checks are green.
 
 ## What Was Hacky And How We Avoid It
 

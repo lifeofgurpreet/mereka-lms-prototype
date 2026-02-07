@@ -52,7 +52,8 @@ Client subsites (separate clients, still must be branded):
 - Live checks include revision marker parity (`--mereka-branding-rev`, `--mereka-mfe-branding-rev`)
   to explicitly detect stale deployed images.
 - Strict parity rollout fixes are complete (`mereka-lms-44nc`, `mereka-lms-2bnq`, `mereka-lms-3mz` closed).
-- Current follow-up drift is isolated to Biji microsite revision marker parity (`mereka-lms-2oqx`).
+- Current follow-up is service-domain authn asset proxy parity for `ecommerce.*` + `credentials.*`
+  (`mereka-lms-3020`), then enabling strict enforcement in branding gates.
 
 ## Next 10 Branding Tasks (Execution Order, Current)
 
@@ -62,13 +63,16 @@ Parent epic:
 1. `mereka-lms-44nc` Clear strict parity gate by deploying current MFE branding revision `[closed]`
 2. `mereka-lms-3mz` Visual regression gate for branding (baseline + diff + fail-on-drift) `[closed]`
 3. `mereka-lms-2bnq` Deploy openedx refresh to clear Studio token/google-font drift on production hosts `[closed]`
-4. `mereka-lms-2oqx` Fix academy.biji-biji.com deep branding revision drift `[open]`
+4. `mereka-lms-3020` Service-domain authn asset proxy parity (ecommerce/credentials) `[open]`
 5. `mereka-lms-h9c9` Ecommerce checkout theming (basket/checkout/receipt) `[open]`
 6. `mereka-lms-36jn` Forum UI theming (header/footer + typography) `[open]`
 7. `mereka-lms-s8r` Harden multi-site governance (policy + enforcement) `[closed]`
 8. `mereka-lms-3l48` Studio authoring flow visual branding checks `[closed]`
 9. `mereka-lms-37kj` Microsite branding parity enforcement `[closed]`
 10. `mereka-lms-3m3v` Design token provenance lock `[closed]`
+
+Recently closed:
+- `mereka-lms-2oqx` Fix academy.biji-biji.com deep branding revision drift `[closed]`
 
 Supporting runbook hardening:
 - `mereka-lms-36bd` Branding incident postmortem template `[closed]`

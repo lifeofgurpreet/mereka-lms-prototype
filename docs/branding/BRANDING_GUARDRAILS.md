@@ -69,6 +69,7 @@ Current audit coverage:
 - Studio compiled CSS token/font wiring (primary + biji studio host)
 - MFE authn shell + `mfe_config` brand fields
 - MFE authn parity for primary + `apps.academy.biji-biji.com`
+- Service-domain authn proxy surfaces (`ecommerce.* /dashboard`, `credentials.* /admin/login`)
 - Branding revision marker parity (live vs source) for LMS/microsites
 - Credentials root/admin/health availability
 - Forum heartbeat
@@ -82,6 +83,8 @@ Visual regression coverage (manual/agent-run):
 - Diff artifacts are written to `var/screenshots-diff/`.
 - Add `--allow-bootstrap` for first-run baseline seeding.
 - Add `--strict` when you need exact screenshot file-set parity.
+- To enforce service-domain authn branding markers (`/authn/*`) as release-blocking:
+  `STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod`
 
 Canonical one-shot gate with screenshots + visual regression:
 ```bash
@@ -158,6 +161,11 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
 8. Screenshot captures exist but no measurable drift signal
    - Cause: captures are not compared against a baseline.
    - Fix: run `scripts/qa/visual-regression-branding.sh` and treat threshold failures as release blockers.
+
+9. Service-domain authn pages render but `/authn/*` assets 404
+   - Cause: `ecommerce.*` / `credentials.*` pages use authn shell paths, but Caddy is not proxying `/authn/*`
+     for those hosts to `mfe:8002`.
+   - Fix: add `handle_path /authn/* { import proxy "mfe:8002" }` in those host blocks and redeploy Caddy.
 
 ## Deployment Reference
 

@@ -15,6 +15,7 @@ Environment flags:
   AUDIT_STRICT=1|0                    Default: 0 (pass --strict to audit-branding-surfaces)
   RUN_STUDIO_AUTHORING_CHECK=1|0      Default: 1
   STRICT_NO_GOOGLE_FONTS=1|0          Default: 0 (passed to studio authoring check)
+  STRICT_PROXY_AUTHN_BRANDING=1|0     Default: 0 (enforce branded /authn assets on service domains)
   RUN_SCREENSHOTS=1|0                 Default: 0
   RUN_VISUAL_REGRESSION=1|0           Default: 0
   VISUAL_THRESHOLD=<float>            Default: 0.06

@@ -760,6 +760,34 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 ---
 
+### Issue 9b: `ecommerce.*` / `credentials.*` authn assets return 404
+
+**Symptoms:**
+- `https://ecommerce.academyv2.mereka.io/dashboard/` or `https://credentials.academyv2.mereka.io/admin/login/`
+  returns authn shell HTML, but `/authn/app.<hash>.css` on those same hosts returns `404`.
+- Branding checks show service-domain authn pages without branded CSS markers.
+
+**Root Cause:**
+- Caddy host blocks for `ecommerce.*` and `credentials.*` proxy requests to service backends only.
+- Authn shell uses `/authn/*` assets that must be served by `mfe:8002`.
+
+**Fix:**
+1. Update `deploy/k8s/base/apps/caddy/Caddyfile` for both host blocks:
+   ```caddy
+   handle_path /authn/* {
+       import proxy "mfe:8002"
+   }
+   ```
+2. Commit + push this repo, bump GitOps pinned ref in `bbi-infrastructure`, and let Argo roll Caddy.
+3. Validate:
+   ```bash
+   curl -sI https://ecommerce.academyv2.mereka.io/authn/app.<hash>.css
+   curl -sI https://credentials.academyv2.mereka.io/authn/app.<hash>.css
+   STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod
+   ```
+
+---
+
 ### Issue 10: Database Connection Errors
 
 **Symptoms:**

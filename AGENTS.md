@@ -492,6 +492,11 @@ Regenerate hostname registry (after domain changes):
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
   - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod` (includes Studio CSS token/font wiring, MFE auth branding CTA, credentials health/admin reachability, forum heartbeat)
+- Service-domain authn proxy contract:
+  - `ecommerce.* /dashboard` and `credentials.* /admin/login` should serve authn shell and `/authn/*` assets.
+  - Enforce with `STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod`.
+  - If `/authn/*` returns 404 on those hosts, add `handle_path /authn/* { import proxy "mfe:8002" }`
+    to the corresponding Caddy host blocks.
 - Studio authoring flow contract check: `scripts/qa/verify-studio-authoring-branding.sh [prod|dev]`
   (enforces `action-create-course`, `action-create-library`, outline, and add-component selectors in source/live CSS).
 - Studio live checks should treat themed `studio-main-v1` selector coverage + no Google-font imports as the primary contract.

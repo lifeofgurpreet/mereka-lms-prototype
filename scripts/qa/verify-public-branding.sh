@@ -27,17 +27,20 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   BASE_DOMAIN="$LMS_DOMAIN"
   STUDIO_HOST="$STUDIO_DOMAIN"
   MFE_HOST="$MFE_DOMAIN"
+  ECOMMERCE_HOST="$ECOMMERCE_DOMAIN"
   FORUM_HOST="$FORUM_DOMAIN"
   EXTRA_HOSTS=("$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
 else
   BASE_DOMAIN="$DEV_LMS_DOMAIN"
   STUDIO_HOST="$DEV_STUDIO_DOMAIN"
   MFE_HOST="$DEV_MFE_DOMAIN"
+  ECOMMERCE_HOST="$DEV_ECOMMERCE_DOMAIN"
   FORUM_HOST="$DEV_FORUM_DOMAIN"
   EXTRA_HOSTS=()
 fi
 
 CURL_TIMEOUT_SECONDS="${CURL_TIMEOUT_SECONDS:-20}"
+STRICT_PROXY_AUTHN_BRANDING="${STRICT_PROXY_AUTHN_BRANDING:-0}"
 failures=0
 
 check_follow_200() {
@@ -175,31 +178,81 @@ check_mfe_authn_surface() {
   fi
 }
 
+check_authn_proxy_surface() {
+  local url=$1
+  local label=$2
+  local html authn_css_path authn_css host ts
+  local url_no_scheme="${url#https://}"
+  host="${url_no_scheme%%/*}"
+
+  check_http "$url" "$label reachable"
+
+  ts="$(date +%s)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "${url}?nocache=${ts}" 2>/dev/null || true)"
+  if rg -F -q '<div id="root"></div>' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
+    printf "✓ %s uses authn shell\n" "$label"
+  else
+    printf "✗ %s missing authn shell\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  authn_css_path="$(rg -o '/authn/app\.[^"]+\.css' <<<"$html" | head -n 1 || true)"
+  if [[ -z "$authn_css_path" ]]; then
+    printf "✗ %s missing authn CSS link\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  authn_css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${host}${authn_css_path}?nocache=${ts}" 2>/dev/null || true)"
+  if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$authn_css"; then
+    if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$authn_css"; then
+      if [[ "${STRICT_MFE_BRANDING_REV:-0}" == "1" ]]; then
+        printf "✗ %s authn CSS missing expected branding revision (%s)\n" "$label" "$EXPECTED_MFE_BRANDING_REV" >&2
+        failures=$((failures + 1))
+      else
+        printf "✓ %s authn CSS includes Mereka branding markers (revision differs from local source)\n" "$label"
+      fi
+    else
+      printf "✓ %s authn CSS includes Mereka branding markers\n" "$label"
+    fi
+  else
+    if [[ "$STRICT_PROXY_AUTHN_BRANDING" == "1" ]]; then
+      printf "✗ %s authn CSS missing Mereka branding markers\n" "$label" >&2
+      failures=$((failures + 1))
+    else
+      printf "✓ %s authn CSS branding markers currently not enforced (set STRICT_PROXY_AUTHN_BRANDING=1)\n" "$label"
+    fi
+  fi
+}
+
 check_css_fonts() {
   local url=$1
   local label=$2
   local css
   local rev_ok=1
   css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)"
-  if [[ -n "$EXPECTED_BRANDING_REV" ]] && ! printf '%s' "$css" | grep -F -q "$EXPECTED_BRANDING_REV"; then
+  if [[ -n "$EXPECTED_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_BRANDING_REV" <<<"$css"; then
     rev_ok=0
   fi
   # Font-face URLs are fingerprinted (e.g. Poppins-Regular.<hash>.woff2), so match
   # the base name and extension rather than an exact filename.
-  if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
-    && printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"' \
-    && printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
-    && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2' \
-    && printf '%s' "$css" | grep -Eq '\.mereka-footer' \
-    && printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img' \
+  if grep -Eq 'font-family:[[:space:]]*"Poppins"' <<<"$css" \
+    && grep -Eq 'font-family:[[:space:]]*"Lato"' <<<"$css" \
+    && grep -Eq 'Poppins-Regular[^"]*\.woff2' <<<"$css" \
+    && grep -Eq 'Lato-Regular[^"]*\.woff2' <<<"$css" \
+    && grep -Eq '\.mereka-footer' <<<"$css" \
+    && grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img' <<<"$css" \
     && [[ "$rev_ok" == "1" ]]; then
     if [[ "${BRANDING_LEVEL}" == "deep" ]]; then
       # Deep checks verify that key branded surfaces are actually present in the compiled override CSS
       # (course cards, courseware chrome). This avoids "homepage looks branded but the app is default".
-      if printf '%s' "$css" | grep -Eq '\.courses-listing' \
-        && printf '%s' "$css" | grep -Eq '\.courseware' \
-        && printf '%s' "$css" | grep -Eq '\.sequence-nav' \
-        && printf '%s' "$css" | grep -Eq '\.xblock'; then
+      if grep -Eq '\.courses-listing' <<<"$css" \
+        && grep -Eq '\.courseware' <<<"$css" \
+        && grep -Eq '\.sequence-nav' <<<"$css" \
+        && grep -Eq '\.xblock' <<<"$css"; then
         printf "✓ %s\n" "$label"
       else
         printf "✗ %s (deep checks: missing course cards/courseware selectors)\n" "$label" >&2
@@ -218,12 +271,12 @@ check_css_fonts() {
     printf "  debug: url=%s\n" "$url" >&2
     printf "  debug: css_bytes=%s\n" "${#css}" >&2
     local ok_poppins ok_lato ok_poppins_file ok_lato_file ok_footer ok_footer_img
-    if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"'; then ok_poppins=1; else ok_poppins=0; fi
-    if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"'; then ok_lato=1; else ok_lato=0; fi
-    if printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2'; then ok_poppins_file=1; else ok_poppins_file=0; fi
-    if printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2'; then ok_lato_file=1; else ok_lato_file=0; fi
-    if printf '%s' "$css" | grep -Eq '\.mereka-footer'; then ok_footer=1; else ok_footer=0; fi
-    if printf '%s' "$css" | grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img'; then ok_footer_img=1; else ok_footer_img=0; fi
+    if grep -Eq 'font-family:[[:space:]]*"Poppins"' <<<"$css"; then ok_poppins=1; else ok_poppins=0; fi
+    if grep -Eq 'font-family:[[:space:]]*"Lato"' <<<"$css"; then ok_lato=1; else ok_lato=0; fi
+    if grep -Eq 'Poppins-Regular[^"]*\.woff2' <<<"$css"; then ok_poppins_file=1; else ok_poppins_file=0; fi
+    if grep -Eq 'Lato-Regular[^"]*\.woff2' <<<"$css"; then ok_lato_file=1; else ok_lato_file=0; fi
+    if grep -Eq '\.mereka-footer' <<<"$css"; then ok_footer=1; else ok_footer=0; fi
+    if grep -Eq '\.mereka-footer[[:space:]]+\.footer-brand[[:space:]]+img' <<<"$css"; then ok_footer_img=1; else ok_footer_img=0; fi
     printf "  debug: checks poppins=%s lato=%s poppins_woff2=%s lato_woff2=%s footer=%s footer_img=%s\n" \
       "$ok_poppins" "$ok_lato" "$ok_poppins_file" "$ok_lato_file" "$ok_footer" "$ok_footer_img" >&2
     if [[ "$rev_ok" == "0" ]]; then
@@ -373,6 +426,20 @@ check_forum_heartbeat() {
   fi
 }
 
+check_forum_access_contract() {
+  local forum_host=$1
+  local code
+  code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${forum_host}/" 2>/dev/null || echo "000")"
+  if [[ "$code" == "401" ]]; then
+    printf "✓ Forum root enforces authenticated access (401)\n"
+  elif [[ "$code" == "200" ]]; then
+    printf "✓ Forum root reachable without auth (200)\n"
+  else
+    printf "✗ Forum root returned unexpected status (%s)\n" "$code" >&2
+    failures=$((failures + 1))
+  fi
+}
+
 check_credentials_health() {
   local credentials_host=$1
   local root_url="https://${credentials_host}/"
@@ -431,7 +498,10 @@ check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
 check_forum_heartbeat "${FORUM_HOST}"
+check_forum_access_contract "${FORUM_HOST}"
+check_authn_proxy_surface "https://${ECOMMERCE_HOST}/dashboard/" "Ecommerce dashboard"
 check_credentials_health "credentials.${BASE_DOMAIN}"
+check_authn_proxy_surface "https://credentials.${BASE_DOMAIN}/admin/login/" "Credentials admin login"
 
 for host in "${EXTRA_HOSTS[@]}"; do
   check_http "https://${host}/" "Microsite ${host} reachable"
