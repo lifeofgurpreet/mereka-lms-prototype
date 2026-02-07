@@ -17,7 +17,7 @@ images:
     newTag: 20260207-branding-pass4-d2f02aa
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: mereka-brand
+    newTag: 20260207-131850-mfe-pass3
 
 # namespace to deploy all Resources to
 namespace: mereka-lms

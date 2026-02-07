@@ -168,6 +168,7 @@ local `bbbi-mereka-brand-assets` repo when present, and keeps a theme copy at:
 This applies:
 - MySQL 8 authentication fix
 - MFE Node 18 build toolchain
+- MFE npm retry + timeout hardening for transient network failures
 - Webpack memory limits
 - CSRF/CORS configuration
 - Custom Mereka footer for MFEs
@@ -197,6 +198,10 @@ tutor images build openedx
 # Build MFE image (if MFE styling changed)
 tutor images build mfe
 ```
+
+**Build discipline:**
+- Run only one `tutor images build mfe` at a time.
+- If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same command after the active run exits; do not launch parallel retries.
 
 **Build Times:**
 - First build (no cache): 60-90 minutes

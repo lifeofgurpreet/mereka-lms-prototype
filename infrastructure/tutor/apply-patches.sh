@@ -14,7 +14,7 @@ MFE_TEMPLATE=$(python - <<'PY'
 import inspect
 import tutormfe
 from pathlib import Path
-print(Path(inspect.getfile(tutormfe)) / "templates" / "mfe" / "build" / "mfe" / "Dockerfile")
+print(Path(inspect.getfile(tutormfe)).parent / "templates" / "mfe" / "build" / "mfe" / "Dockerfile")
 PY
 )
 
@@ -196,6 +196,63 @@ for target in targets:
         )
         return text.replace(marker, cookie_block)
 
+    def ensure_mfe_theme_copy(text):
+        marker = "COPY indigo/env.config.jsx /openedx/app/"
+        copy_line = "COPY indigo/mereka /openedx/app/mereka"
+        if marker not in text:
+            return text
+        lines = text.splitlines()
+        output = []
+        index = 0
+        while index < len(lines):
+            line = lines[index]
+            output.append(line)
+            if line.strip() == marker:
+                next_index = index + 1
+                while next_index < len(lines) and lines[next_index].strip() == copy_line:
+                    next_index += 1
+                output.append(copy_line)
+                index = next_index
+                continue
+            index += 1
+        rebuilt = "\n".join(output)
+        if text.endswith("\n"):
+            rebuilt += "\n"
+        return rebuilt
+
+    def ensure_mfe_npm_resilience(text):
+        if "npm clean-install" not in text:
+            return text
+        if "npm clean-install attempt ${attempt} failed" in text:
+            return text
+        run_line = (
+            "RUN --mount=type=cache,target=/root/.npm,sharing=shared "
+            "npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY"
+        )
+        resilient_block = (
+            "RUN --mount=type=cache,target=/root/.npm,sharing=shared \\\n"
+            "    npm config set fetch-retries 6 \\\n"
+            " && npm config set fetch-retry-mintimeout 20000 \\\n"
+            " && npm config set fetch-retry-maxtimeout 120000 \\\n"
+            " && npm config set fetch-timeout 300000 \\\n"
+            " && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo \"npm clean-install attempt ${attempt} failed; retrying in 15s\" >&2; sleep 15; done; exit 1'"
+        )
+        updated_text = text.replace(run_line, resilient_block)
+        if updated_text != text:
+            return updated_text
+        pattern = re.compile(
+            r"RUN\s+--mount=type=cache,target=/root/\.npm,sharing=shared\s+npm clean-install --no-audit --registry=\$NPM_REGISTRY"
+        )
+        return pattern.sub(
+            "RUN --mount=type=cache,target=/root/.npm,sharing=shared \\\n"
+            "    npm config set fetch-retries 6 \\\n"
+            " && npm config set fetch-retry-mintimeout 20000 \\\n"
+            " && npm config set fetch-retry-maxtimeout 120000 \\\n"
+            " && npm config set fetch-timeout 300000 \\\n"
+            " && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --registry=$NPM_REGISTRY && exit 0; echo \"npm clean-install attempt ${attempt} failed; retrying in 15s\" >&2; sleep 15; done; exit 1'",
+            text,
+        )
+
     # Ensure MFEs build against Node 18 with the required toolchain.
     if "docker.io/node:12-bullseye-slim" in updated:
         updated = updated.replace(
@@ -209,6 +266,8 @@ for target in targets:
         )
 
     updated = ensure_mfe_cookie_env(updated)
+    updated = ensure_mfe_theme_copy(updated)
+    updated = ensure_mfe_npm_resilience(updated)
 
     # Allow remote root access when using upstream MySQL images.
     if "MYSQL_ROOT_PASSWORD" in updated and "MYSQL_ROOT_HOST" not in updated:
@@ -746,14 +805,7 @@ if [ -d "$MFE_INDIGO_DIR" ]; then
   cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
 fi
 
-# Patch MFE Dockerfile to copy mereka folder into Docker build
-MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-if [ -f "$MFE_DOCKERFILE" ]; then
-  echo "Patching MFE Dockerfile to include Mereka branding..."
-  # Add COPY command for mereka folder after each env.config.jsx copy
-  sed -i 's|COPY indigo/env.config.jsx /openedx/app/|COPY indigo/env.config.jsx /openedx/app/\nCOPY indigo/mereka /openedx/app/mereka|g' "$MFE_DOCKERFILE"
-  echo "MFE Dockerfile patched."
-fi
+# MFE Dockerfile patching is handled by the Python patch phase above.
 
 # Sync all logo files from theme source to build directory
 echo "Syncing logo files from theme source to build directory..."

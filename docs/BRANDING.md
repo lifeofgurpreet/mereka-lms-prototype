@@ -172,6 +172,8 @@ Next step (tracked in beads): wire these into CI as a visual regression gate (`m
 - `scripts/branding/setup-mfe-branding.sh` is the one-stop helper for local development: it clones the upstream MFEs under `tutor_env/dev/`, copies the fonts into each `public/fonts/`, writes `src/styles/mereka.scss`, and ensures `src/index.scss` imports it.
 - The Indigo theme’s React plugin now renders a bespoke Mereka footer (links + contact info) by way of the `MerekaFooter` component injected ahead of the `footer_slot` widgets.
 - To bake the branding into Tutor’s production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
+- Always run `./infrastructure/tutor/apply-patches.sh` immediately before `tutor images build mfe` (ensures idempotent theming copy and npm retry/timeouts).
+- Never run parallel `tutor images build mfe` commands; a single active build is the supported path.
 
 ## Favicons & Meta
 

@@ -10,6 +10,8 @@ This is the canonical workflow for branding changes in Mereka LMS.
 3. No branding release is complete until both source and live gates pass.
 4. Production deploys are GitOps-managed; do not treat direct `kubectl set image` as source-of-truth.
 5. Drift is a defect: fix with rebuild+deploy, not by loosening checks.
+6. Run only one `tutor images build mfe` at a time; parallel runs cause cache contention and slow/fail builds.
+7. `./infrastructure/tutor/apply-patches.sh` is idempotent and required before every MFE/openedx build.
 
 ## Canonical Workflow
 
@@ -65,6 +67,11 @@ Validate both production and dev:
 5. **Footer/logo regressions**
    - Cause: asset sync drift or override CSS not deployed.
    - Fix: run `sync-brand-assets.sh`, source gate, redeploy image; never patch live pod files.
+
+6. **MFE build flakes on npm network (`ECONNRESET`/`ETIMEDOUT`)**
+   - Cause: transient registry/network failures during multi-MFE npm installs.
+   - Fix: rerun from a single build session only; `apply-patches.sh` now injects npm retry/timeouts into MFE Dockerfile.
+   - Do not start a second `tutor images build mfe` while one is active.
 
 ## What Was Hacky And How We Avoid It
 
