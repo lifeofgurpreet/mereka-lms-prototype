@@ -1,0 +1,59 @@
+name: Alert Routing Audit
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      strict_runtime:
+        description: "Fail when runtime dependencies are unavailable"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  audit-routing:
+    name: Verify Alert Routing
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GCP_SA_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: mereka-lms
+
+      - name: Get GKE credentials (if available)
+        env:
+          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+        run: |
+          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+            --project "$GKE_CLUSTER_PROJECT" \
+            --zone "$GKE_CLUSTER_LOCATION" || true
+
+      - name: Run alert routing audit
+        env:
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+        run: |
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          RUN_ATLAS_VPS_AUDIT=0 ./scripts/qa/verify-alert-routing.sh | tee alert-routing-audit.txt
+
+      - name: Upload alert routing audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alert-routing-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: alert-routing-audit.txt
+          retention-days: 30

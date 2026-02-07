@@ -1,0 +1,65 @@
+name: DR Evidence Bundle
+
+on:
+  schedule:
+    - cron: '30 2 1 * *'
+  workflow_dispatch:
+    inputs:
+      strict_runtime:
+        description: "Fail when runtime dependencies are unavailable"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  dr-evidence:
+    name: Build DR Evidence Bundle
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GCP_SA_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: mereka-lms
+
+      - name: Get GKE credentials
+        env:
+          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+        run: |
+          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+            --project "$GKE_CLUSTER_PROJECT" \
+            --zone "$GKE_CLUSTER_LOCATION"
+
+      - name: Prepare output path
+        run: |
+          echo "EVIDENCE_DIR=var/dr-evidence/github-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
+
+      - name: Build DR evidence bundle
+        env:
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+        run: |
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          ./scripts/qa/build-dr-evidence-bundle.sh --out-dir "$EVIDENCE_DIR" --tar
+
+      - name: Upload DR evidence artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.EVIDENCE_DIR }}
+            ${{ env.EVIDENCE_DIR }}.tar.gz
+          retention-days: 120
