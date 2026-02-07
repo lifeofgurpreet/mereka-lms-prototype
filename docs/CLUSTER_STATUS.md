@@ -1,5 +1,5 @@
 # Current Cluster Status
-_Last updated: 2026-02-05_
+_Last updated: 2026-02-07_
 
 ## Environments & Domains
 
@@ -29,26 +29,39 @@ _Last updated: 2026-02-05_
 - **Notes**: https://notes.academyv2.mereka.dev
 - **Preview**: https://preview.academyv2.mereka.dev
 
-## Public Health Check Results (2026-02-05)
-- LMS: **200**
-- Studio: **200**
-- Authn MFE: **200**
-- Discovery: **200**
-- Ecommerce: **200**
-- Credentials: **200**
-- Forum: **401** on `/health` (auth required)
-- Notes: **200** on `/` (no dedicated `/health` endpoint)
+## Public Health Check Results (2026-02-07)
+- Command: `./scripts/qa/public-health-check.sh prod`
+- Result: **All checks passed** (18/18)
+- Key surfaces:
+  - LMS/Studio/Authn MFE: `200`
+  - Discovery/Credentials/Notes/Forum heartbeat: `200`
+  - Ecommerce dashboard: `302` (expected login redirect)
+  - Ecommerce Stripe webhook GET: `405` (expected POST-only endpoint)
+  - Microsites (`skillourfuture`, `academy.biji-biji.com`, Biji Studio + MFE): `200`
 
 ## Cluster Snapshot (GKE)
 - All core Open edX pods running: `lms` (2), `cms` (1), `lms-worker` (2), `cms-worker` (1),
   `mfe`, `caddy`, `discovery`, `ecommerce`, `credentials`, `forum`, `notes`, `mysql`,
   `redis`, `elasticsearch`, `smtp`, `xqueue`.
+- Legacy `Deployment/mongodb` is retired in production.
 
-## Data State (prod)
-- CourseOverview count: **0**
-- Modulestore course count: **0**
-- SQL backups exist in GCS (legacy bucket name for production): `gs://staging-academy-mereka-io-backup/sql/2025-12-13T180926Z/`
+## Data Plane State (prod)
+- Atlas guard command:
+  - `STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=0 ./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime`
+- Result:
+  - LMS/CMS modulestore host resolves Atlas (`*.mongodb.net`)
+  - Legacy `Deployment/mongodb` absent
+  - Legacy `Service/mongodb` still present as orphan until GitOps ref bump + Argo sync
 
 ## Known Gaps
-- Atlas backups not enabled (Atlas snapshots list is empty).
-- Notes/Forum health endpoints need consistent 200 responses for monitoring.
+1. `Service/mongodb` orphan still present in production runtime until `bbi-infrastructure` pinned ref is bumped to include this repo’s production overlay delete patch.
+2. Velero audit still shows pending legacy PVC inventory entry for `mongodb`; keep this tracked during cleanup.
+3. DR evidence process must remain monthly and reviewed (not just scripted).
+
+## Canonical Verification Commands
+```bash
+./scripts/qa/public-health-check.sh prod
+STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=0 \
+  ./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime
+./scripts/qa/audit-velero.sh
+```
