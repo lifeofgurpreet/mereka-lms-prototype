@@ -511,7 +511,7 @@ Regenerate hostname registry (after domain changes):
 - CI enforcement for branding:
   - `.github/workflows/ci.yml` runs source-only preflight (`RUN_LIVE_GATE=0 BRANDING_LEVEL=deep`).
   - `.github/workflows/build-tutor-images.yml` runs `verify-mfe-image-branding.sh` before MFE image push and uploads `mfe-branding-contract-log`.
-  - `.github/workflows/public-health-check.yml` runs strict prod parity (`STRICT_MFE_BRANDING_REV=1`) and uploads `var/ci/*.log` artifacts.
+  - `.github/workflows/public-health-check.yml` runs strict parity with strict audit (`STRICT_MFE_BRANDING_REV=1 AUDIT_STRICT=1`) and uploads `var/ci/*.log` artifacts.
 - If strict prod branding gate fails with MFE revision mismatch, treat it as release-blocking deploy drift:
   rebuild/push `openedx-mfe`, bump this repo image tag, update `bbi-infrastructure` pinned ref, then rerun strict gate.
 - Branding incident write-up template (required after production regressions): `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`.
