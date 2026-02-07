@@ -433,6 +433,8 @@ Auth hardening verification (preferred):
 ```bash
 ./scripts/qa/verify-auth-hardening.sh
 ./scripts/qa/list-openedx-hostnames.sh
+STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
+./scripts/qa/run-operations-gates.sh --env both
 ```
 
 Regenerate hostname registry (after domain changes):
@@ -443,10 +445,13 @@ Regenerate hostname registry (after domain changes):
 **Operational learnings (read these before touching auth/Forum/Secrets):**
 - Atlas allowlist drift breaks dev forum; see `docs/MONGODB_ATLAS.md` and `docs/operations/TROUBLESHOOTING.md`.
 - Atlas drift monitor + alert wrapper: `scripts/infra/monitor-atlas-allowlist-vps.sh` (cron target via `scripts/infra/setup-vps-atlas-allowlist-cron.sh`).
+- Atlas monitor audit (cron + status freshness + webhook): `scripts/qa/audit-atlas-allowlist-monitor.sh` (`STRICT_WEBHOOK=1` for production-ready routing checks).
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
+- Multisite drift guard: `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` (enforces `SiteConfiguration.enabled`, LMS/CMS/MFE roots, `THEME_NAME`, `course_org_filter`, and duplicate config detection).
+- Org ownership drift guard: `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both` (enforces staff+instructor coverage and platform-admin role presence for `MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`).
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
@@ -456,6 +461,7 @@ Regenerate hostname registry (after domain changes):
 - Grafana coverage contract audit: `scripts/qa/audit-grafana-dashboard.sh` (contract: `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`).
 - PrometheusRule reliability coverage (CrashLoop/Pending/unavailable replicas/synthetic failures): `deploy/k8s/base/monitoring/prometheusrule-lms.yaml`.
 - Velero restore drill fix path: `scripts/infra/fix-velero-restore-test.sh` (patches `restore-test` CronJob + verifies one-off run).
+- Velero restore drill now enforces PV-aware validation flags (`RESTORE_PERSISTENT_RESOURCES=true`, `REQUIRE_PVC_RESTORE=true`, `VERIFY_RESTORED_MYSQL=true`) and `scripts/qa/audit-velero.sh` will fail if they drift.
 - Branding checks are part of health verification: `CHECK_BRANDING=1 scripts/qa/public-health-check.sh prod`.
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
@@ -465,6 +471,7 @@ Regenerate hostname registry (after domain changes):
 - Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
+- For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).

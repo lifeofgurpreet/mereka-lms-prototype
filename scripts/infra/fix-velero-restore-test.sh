@@ -74,9 +74,13 @@ kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" set env cronjob/restore-test \
   TEST_NAMESPACE=velero-restore-test \
   SOURCE_NAMESPACE="$APP_NAMESPACE" \
   APP_NAMESPACE="$APP_NAMESPACE" \
+  PREFERRED_SCHEDULE=velero-local-hourly-critical-databases \
   VELERO_NS="$VELERO_NS" \
   RESTORE_TIMEOUT=600 \
   POD_READY_TIMEOUT=300 \
+  RESTORE_PERSISTENT_RESOURCES=true \
+  REQUIRE_PVC_RESTORE=true \
+  VERIFY_RESTORED_MYSQL=true \
   MAX_PARTIAL_ERRORS=10 \
   CLEANUP_ON_SUCCESS=true \
   CLEANUP_ON_FAILURE=true \

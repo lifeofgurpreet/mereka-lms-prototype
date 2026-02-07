@@ -16,6 +16,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 LOG_DIR="${LOG_DIR:-${REPO_ROOT}/var}"
 STATUS_FILE="${STATUS_FILE:-${LOG_DIR}/atlas-allowlist-status.json}"
 ATLAS_ALLOWLIST_WEBHOOK_URL="${ATLAS_ALLOWLIST_WEBHOOK_URL:-}"
+ATLAS_ALLOWLIST_WEBHOOK_URL_FILE="${ATLAS_ALLOWLIST_WEBHOOK_URL_FILE:-}"
 ALERT_COOLDOWN_MINUTES="${ALERT_COOLDOWN_MINUTES:-60}"
 FORCE_ALERT="${FORCE_ALERT:-0}"
 
@@ -23,14 +24,28 @@ mkdir -p "$LOG_DIR"
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
+resolve_webhook_url() {
+  if [[ -n "${ATLAS_ALLOWLIST_WEBHOOK_URL:-}" ]]; then
+    return 0
+  fi
+  if [[ -n "${ATLAS_ALLOWLIST_WEBHOOK_URL_FILE:-}" && -f "${ATLAS_ALLOWLIST_WEBHOOK_URL_FILE}" ]]; then
+    ATLAS_ALLOWLIST_WEBHOOK_URL="$(tr -d '\r\n' <"${ATLAS_ALLOWLIST_WEBHOOK_URL_FILE}")"
+  fi
+}
+
 write_status() {
   local status="$1"
   local message="$2"
+  local webhook_configured="false"
+  if [[ -n "${ATLAS_ALLOWLIST_WEBHOOK_URL:-}" ]]; then
+    webhook_configured="true"
+  fi
   cat >"$STATUS_FILE" <<EOF
 {
   "status": "${status}",
   "message": "$(printf '%s' "$message" | sed 's/"/\\"/g')",
-  "timestamp_utc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  "timestamp_utc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "webhook_configured": ${webhook_configured}
 }
 EOF
 }
@@ -63,6 +78,8 @@ send_webhook_alert() {
     -d "$body" >/dev/null || log "WARN: failed to send webhook alert"
   date +%s >"${LOG_DIR}/atlas-allowlist-last-alert.ts"
 }
+
+resolve_webhook_url
 
 tmp_log="$(mktemp -t atlas-allowlist-vps.XXXXXX)"
 trap 'rm -f "$tmp_log"' EXIT

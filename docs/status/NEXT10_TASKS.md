@@ -1,7 +1,7 @@
-# Next 10 Tasks (Updated 2026-02-06)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
+# Next 10 Tasks (Updated 2026-02-07)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 
-## Recent Fixes (2026-02-06)
+## Recent Fixes (2026-02-07)
 - ✅ Platform admins enforced and verified (prod + dev): `gurpreet@biji-biji.com`, `malasari@mereka.my`
 - ✅ Authentik redirect URI allowlist fixed for microsites + preview + dev (prevents redirect_uri mismatch)
 - ✅ Public auth surface checks hardened (follows redirect into Authentik /authorize)
@@ -16,19 +16,25 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 - ✅ MySQL hardening: provisioned Notes/XQueue DBs + normalized MySQL secrets (removed trailing CR/LF)
 - ✅ Observability hardening baseline: new operations-signals dashboard + log metrics/alerts for storage, MySQL/Redis connectivity, and Velero verification/restore-drill failures
 - ✅ Deterministic observability audit script added: `./scripts/qa/audit-observability.sh` (local + runtime modes)
+- ✅ Velero alert pipeline audit added: `./scripts/qa/audit-velero-alert-pipeline.sh` (runtime metrics/policies + cron freshness + hourly recency)
+- ✅ Monitoring apply flow hardened (`apply-monitoring-configs.sh`): unsupported long-window alert templates are skipped with explicit messaging
+- ✅ Multisite verification hardened: strict checks now enforce `SiteConfiguration.enabled`, LMS/CMS/MFE roots, `THEME_NAME`, `course_org_filter`, and duplicate-config detection
+- ✅ Org governance hardening: deterministic org role ownership audit (`./scripts/qa/verify-org-role-ownership.sh`) wired into auth audits and enforcement
+- ✅ Unified operator gate: `./scripts/qa/run-operations-gates.sh` (auth + multisite + observability + Velero + Grafana)
+- ✅ Velero restore drill hardening updated for PV-aware validation (restore PVC/PV resources + read-only restored MySQL probe)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Fix modulestore persistence (prod): `mereka-lms/mongodb` uses `emptyDir` | Infra | 💤 Pending | Highest risk before any course imports. Move modulestore to Atlas or add PVC-backed MongoDB. See `docs/ARCHITECTURE_MONGODB.md`. |
-| 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | 💤 Pending | Restore drills must be green. See `docs/operations/VELERO_BACKUP_AUDIT.md`. |
+| 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | ⚙️ In progress | Runtime CronJob config now patched for PV-aware validation; remaining: execute and archive monthly evidence bundle for full closure. |
 | 3 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | Make this boring: scripted restore into a throwaway namespace, verify key queries, attach outputs. Bead: `mereka-lms-usv`. |
 | 4 | Course data recovery runbook hardening (hybrid Mongo reality) | Data/Infra | 💤 Pending | Keep docs accurate and deterministic. Start from `docs/operations/COURSE_DATA_RECOVERY.md`. |
 | 5 | Modulestore cutover decision + migration plan (in-cluster Mongo -> Atlas) | Infra | 💤 Pending | Must include safety gates. Do not delete in-cluster Mongo until verified. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
-| 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
-| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Auth/TLS CronJob metrics+alerts are live, plus saturation/freshness signals. Remaining hardening is exporter-level depth and restore-drill reliability. |
+| 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ⚙️ In progress | Strict multisite + org-role ownership checks are automated; remaining: CI/GitOps integration policy for release-blocking. Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
+| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits are live; remaining high-impact gap: production webhook routing for Atlas allowlist drift (`STRICT_WEBHOOK=1` currently fails until configured). |
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 
@@ -59,7 +65,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-06_
 | 6 | Credentials + forum theming | Product | 💤 Pending | Beads: `mereka-lms-3ur`, `mereka-lms-3qh`. |
 | 7 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
 | 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
-| 9 | Multi-site governance hardening | Infra | 💤 Pending | Bead: `mereka-lms-s8r`. |
+| 9 | Multi-site governance hardening | Infra | ⚙️ In progress | Strict governance drift checks now block on core config mismatches and org-ownership validation. |
 | 10 | Studio create button no-op | Infra | 💤 Pending | Bead: `mereka-lms-3oc` (verify in fresh session). |
 
 ## Legacy / Archive

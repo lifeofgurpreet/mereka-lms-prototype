@@ -1,5 +1,5 @@
 # Authentication and Permissions (Open edX + Authentik)
-_Last updated: 2026-02-06_
+_Last updated: 2026-02-07_
 
 This document explains how authentication (login) and authorization (permissions) work in the Mereka Open edX ecosystem.
 
@@ -35,6 +35,11 @@ Enforce (idempotent):
 ./scripts/infra/ensure-platform-admins.sh
 ```
 
+This now also enforces org-level ownership roles in LMS:
+- `OrgStaffRole`
+- `OrgInstructorRole`
+for each active organization (`MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`).
+
 Hardening (prevents drift automatically at runtime):
 - K8s sets `MEREKA_PLATFORM_ADMIN_EMAILS` for the core services.
 - Each service adds a small middleware that:
@@ -46,7 +51,7 @@ Hardening (prevents drift automatically at runtime):
 | Component | Authentication (Who are you?) | Authorization (What can you do?) | "Super admin" meaning | Where it is set | How we verify |
 |---|---|---|---|---|---|
 | Authentik (`auth0.mereka.io`) | Authentik login | Authentik groups/roles + MFA requirements | Authentik admin UI access | `scripts/infra/ensure-authentik-hardening.sh` | `scripts/infra/ensure-authentik-hardening.sh --verify` |
-| LMS (Open edX) | OIDC via Authentik (plus optional native login) | Django user flags (`is_staff`, `is_superuser`) + per-course roles | `is_superuser=true` in LMS DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist (`MEREKA_PLATFORM_ADMIN_EMAILS`) | `scripts/infra/ensure-platform-admins.sh --verify` |
+| LMS (Open edX) | OIDC via Authentik (plus optional native login) | Django user flags (`is_staff`, `is_superuser`) + org roles + per-course roles | `is_superuser=true` in LMS DB + org ownership roles | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist (`MEREKA_PLATFORM_ADMIN_EMAILS`) | `scripts/infra/ensure-platform-admins.sh --verify` + `scripts/qa/verify-org-role-ownership.sh both` |
 | CMS/Studio (Open edX) | Uses LMS session; `/signin` redirects to LMS `/login` | Django user flags + `CourseCreator` | `is_superuser=true` plus `CourseCreator(state=granted)` | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
 | Discovery | OAuth to LMS (`/login/edx-oauth2/`) | Django user flags | `is_superuser=true` in Discovery DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
 | Credentials | OAuth to LMS (`/login/edx-oauth2/`) | Django user flags | `is_superuser=true` in Credentials DB | `scripts/infra/ensure-platform-admins.sh` + runtime allowlist | `scripts/infra/ensure-platform-admins.sh --verify` |
@@ -153,6 +158,7 @@ done
 
 ```bash
 ./scripts/infra/ensure-platform-admins.sh --verify
+STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
 ```
 
 ### One report (recommended for ops tickets)
@@ -172,6 +178,11 @@ This includes:
 To paste into tickets/Slack as JSON:
 ```bash
 ./scripts/qa/audit-auth-access.sh --json
+```
+
+Full operational gate (auth + multisite + observability + Velero + Grafana):
+```bash
+./scripts/qa/run-operations-gates.sh --env both
 ```
 
 ### Multisite configuration verification (prod)

@@ -17,6 +17,7 @@ If this fails, user-facing impact is likely.
 ./scripts/qa/audit-observability.sh --mode runtime
 ./scripts/qa/audit-velero-alert-pipeline.sh
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
+./scripts/qa/run-operations-gates.sh --env both
 ```
 
 If this fails, monitoring blind spots may exist; fix coverage first.
@@ -47,6 +48,10 @@ Open in order:
   - inspect `velero` CronJob/job logs
   - run `./scripts/qa/audit-velero.sh`
   - run `./scripts/qa/audit-velero-alert-pipeline.sh`
+- Atlas allowlist drift (dev/forum risk):
+  - run `./scripts/qa/audit-atlas-allowlist-monitor.sh`
+  - run strict routing check: `STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh`
+  - remediate with `./scripts/infra/ensure-atlas-allowlist-vps.sh` and re-run monitor/audit
 - Velero stale-success signal (`velero-*-stale`):
   - confirm `lastSuccessfulTime` for `backup-verification` and `restore-test`
   - run strict freshness checks: `STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh`

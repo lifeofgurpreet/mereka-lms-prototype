@@ -364,11 +364,24 @@ def summarize():
         c0 = containers[0] if containers else {}
         image = c0.get("image") or ""
         cmd = c0.get("command") or []
+        env_items = c0.get("env") or []
+        env_map = {}
+        for it in env_items:
+            name = (it or {}).get("name")
+            val = (it or {}).get("value")
+            if isinstance(name, str) and name:
+                env_map[name] = val
         restore_status.update({
             "schedule": (restore_cj.get("spec") or {}).get("schedule"),
             "last_schedule_time": (restore_cj.get("status") or {}).get("lastScheduleTime"),
             "container_image": image,
             "container_command": cmd,
+            "config": {
+                "preferred_schedule": env_map.get("PREFERRED_SCHEDULE"),
+                "restore_persistent_resources": env_map.get("RESTORE_PERSISTENT_RESOURCES"),
+                "require_pvc_restore": env_map.get("REQUIRE_PVC_RESTORE"),
+                "verify_restored_mysql": env_map.get("VERIFY_RESTORED_MYSQL"),
+            },
         })
 
         # Known-bad: velero image does not ship /bin/bash, but CronJob uses it.
@@ -378,6 +391,31 @@ def summarize():
                 "severity": "critical",
                 "risk": "Velero restore drill CronJob is misconfigured: image is velero/velero but command uses /bin/bash. The job will StartError and drills will silently fail.",
                 "fix_hint": "Patch the restore-test CronJob to use an image that actually includes a shell + tooling, or rewrite it to not require bash/jq.",
+            })
+
+        restore_persistent = str(env_map.get("RESTORE_PERSISTENT_RESOURCES") or "").lower() in {"1", "true", "yes"}
+        require_pvc = str(env_map.get("REQUIRE_PVC_RESTORE") or "").lower() in {"1", "true", "yes"}
+        verify_mysql = str(env_map.get("VERIFY_RESTORED_MYSQL") or "").lower() in {"1", "true", "yes"}
+        if not restore_persistent:
+            out["checks"]["failures"] += 1
+            out["app_data_risks"].append({
+                "severity": "critical",
+                "risk": "restore-test is configured without persistent resource restore validation (RESTORE_PERSISTENT_RESOURCES!=true).",
+                "fix_hint": "Set RESTORE_PERSISTENT_RESOURCES=true on velero/restore-test CronJob.",
+            })
+        if not require_pvc:
+            out["checks"]["failures"] += 1
+            out["app_data_risks"].append({
+                "severity": "critical",
+                "risk": "restore-test does not require restored PVCs to bind (REQUIRE_PVC_RESTORE!=true).",
+                "fix_hint": "Set REQUIRE_PVC_RESTORE=true on velero/restore-test CronJob.",
+            })
+        if not verify_mysql:
+            out["checks"]["warnings"] += 1
+            out["app_data_risks"].append({
+                "severity": "warning",
+                "risk": "restore-test is not probing restored MySQL with a read-only query (VERIFY_RESTORED_MYSQL!=true).",
+                "fix_hint": "Set VERIFY_RESTORED_MYSQL=true on velero/restore-test CronJob.",
             })
 
         # Last restore job status (best-effort)

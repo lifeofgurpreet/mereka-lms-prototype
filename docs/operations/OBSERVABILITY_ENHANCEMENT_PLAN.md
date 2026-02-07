@@ -1,8 +1,8 @@
 # Mereka LMS Observability Enhancement Plan
 
 **Project**: mereka-lms  
-**Version**: 2.5
-**Date**: 2026-02-06  
+**Version**: 2.6
+**Date**: 2026-02-07  
 **Status**: Active  
 **Owner**: SRE/Infra  
 
@@ -43,6 +43,10 @@ Reality-first:
   - `infrastructure/monitoring/alerts/pvc-utilization-high.json`
 - Added local/runtime audit command:
   - `scripts/qa/audit-observability.sh`
+- Added consolidated operator gate:
+  - `scripts/qa/run-operations-gates.sh`
+- Added VPS Atlas allowlist monitor posture audit:
+  - `scripts/qa/audit-atlas-allowlist-monitor.sh`
 - Added Grafana coverage contract + audit gate:
   - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
   - `scripts/qa/audit-grafana-dashboard.sh`
@@ -146,7 +150,7 @@ metrics needs explicit validation and documentation.
 Only implement if the team wants formal burn‑rate enforcement.
 
 ### 5) Wire notification channels for log-based alerts
-**Status:** Done (alert templates include the canonical notification channel IDs for the `mereka-lms` project).
+**Status:** Done for GCP alert policies; Atlas allowlist drift webhook routing remains an operator secret/config step validated by `STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh`.
 
 ### 6) PVC disk utilization alerting (P0 for in-cluster MySQL/Redis/Elasticsearch)
 **Why:** Disk-full is a top outage cause for PVC-backed stateful services.
@@ -174,7 +178,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Dashboard panels for: last successful backup per schedule, last restore drill, restore drill pass/fail.
 - Alerts when restore drills fail or schedules stop producing recent backups.
 
-**Status:** In progress (failures + success metrics + stale-success alerts + dashboard status panels shipped; remaining dependency is making `restore-test` CronJob consistently succeed in-cluster).
+**Status:** In progress (failures + success metrics + stale-success alerts + dashboard status panels shipped; restore-test CronJob now enforces PV-aware validation. Remaining closure item is monthly evidence bundle publication from successful drill output).
 
 ### 9) Deterministic observability audit command
 **Why:** Operators need one command that says what is missing in repo vs runtime.

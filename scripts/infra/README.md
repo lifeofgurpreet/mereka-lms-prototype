@@ -18,6 +18,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `monitor-atlas-allowlist-vps.sh` - Drift monitor + webhook alert wrapper for VPS Atlas allowlist
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
 - `fix-velero-restore-test.sh` - Patch/verify `velero/restore-test` CronJob so restore drills run successfully
+- `../qa/audit-atlas-allowlist-monitor.sh` - Validate Atlas allowlist monitor posture (cron wiring, status freshness, webhook config)
 - `cron-public-health-check.sh` - Cron entrypoint for public health + branding checks
 - `setup-vps-health-cron.sh` - Install VPS cron entry for public health checks
 - `setup-vps-atlas-allowlist-cron.sh` - Install VPS cron entry to keep Atlas allowlist updated
@@ -83,6 +84,10 @@ OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
 # Install VPS cron for Atlas allowlist auto-updates
 ./scripts/infra/setup-vps-atlas-allowlist-cron.sh
 
+# Audit Atlas allowlist monitor posture (strict webhook mode for prod-readiness)
+./scripts/qa/audit-atlas-allowlist-monitor.sh
+STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
+
 # Patch + verify Velero restore-test CronJob (fixes shell/image mismatch)
 ./scripts/infra/fix-velero-restore-test.sh
 
@@ -126,6 +131,9 @@ REQUIRE_VPS_PROM_DS=1 REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-tel
 
 # Strict runtime audit (fails on stale Velero freshness checks)
 STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+
+# Consolidated operator release gate (auth + observability + Velero + Grafana)
+./scripts/qa/run-operations-gates.sh --env both
 ```
 
 ## Scheduled Checks

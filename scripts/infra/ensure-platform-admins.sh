@@ -3,6 +3,7 @@
 #
 # What this enforces (idempotent):
 # - LMS user: is_active, is_staff, is_superuser
+# - LMS org-level roles: OrgStaff + OrgInstructor for every active org
 # - CMS Studio course creation: CourseCreator(state=granted, all_organizations=True)
 # - Discovery / Credentials / Ecommerce: is_active, is_staff, is_superuser
 #
@@ -38,6 +39,7 @@ Usage: $0 [OPTIONS]
 
 Ensures Gurpreet + Malasari have full permissions across:
   - LMS/CMS (Open edX)
+  - LMS org-level ownership roles (OrgStaff + OrgInstructor)
   - Discovery
   - Credentials
   - Ecommerce
@@ -150,6 +152,59 @@ for email in admins:
 PY
 }
 
+ensure_lms_org_roles() {
+  local ctx="$1"
+  log "[$ctx] Ensuring LMS org roles (staff + instructor) for platform admins ($MODE)"
+  exec_py "$ctx" "lms" "/openedx/edx-platform" <<'PY'
+import os
+import sys
+mode = os.environ.get("MODE", "apply")
+admins = [a.strip() for a in os.environ["ADMINS_CSV"].split(",") if a.strip()]
+
+import django
+django.setup()
+from django.contrib.auth import get_user_model
+from organizations.models import Organization
+from common.djangoapps.student.roles import OrgStaffRole, OrgInstructorRole
+
+User = get_user_model()
+orgs = list(Organization.objects.filter(active=True).values_list("short_name", flat=True))
+if not orgs:
+    print("NO_ACTIVE_ORGS")
+    sys.exit(1 if mode == "verify" else 0)
+
+failed = False
+for email in admins:
+    u = User.objects.filter(email=email).first() or User.objects.filter(username=email).first()
+    if not u:
+        print(email, "USER_MISSING")
+        if mode == "verify":
+            failed = True
+        continue
+
+    for org in orgs:
+        staff_role = OrgStaffRole(org=org)
+        instructor_role = OrgInstructorRole(org=org)
+        has_staff = staff_role.users_with_role().filter(id=u.id).exists()
+        has_instructor = instructor_role.users_with_role().filter(id=u.id).exists()
+
+        if mode != "verify":
+            if not has_staff:
+                staff_role.add_users(u)
+            if not has_instructor:
+                instructor_role.add_users(u)
+            has_staff = staff_role.users_with_role().filter(id=u.id).exists()
+            has_instructor = instructor_role.users_with_role().filter(id=u.id).exists()
+
+        print(email, org, f"staff={has_staff}", f"instructor={has_instructor}")
+        if mode == "verify" and (not has_staff or not has_instructor):
+            failed = True
+
+if mode == "verify" and failed:
+    sys.exit(1)
+PY
+}
+
 ensure_cms_coursecreator() {
   local ctx="$1"
   log "[$ctx] Ensuring CMS CourseCreator grants ($MODE)"
@@ -232,6 +287,7 @@ for ctx in "${CONTEXTS[@]}"; do
   done
 
   ensure_lms_admins "$ctx"
+  ensure_lms_org_roles "$ctx"
   ensure_cms_coursecreator "$ctx"
 
   # These services use Open edX OAuth (edx-oauth2) for normal login. To access /admin,
@@ -242,4 +298,3 @@ for ctx in "${CONTEXTS[@]}"; do
 done
 
 log "Done."
-

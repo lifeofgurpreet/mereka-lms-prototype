@@ -1,5 +1,5 @@
 # Multisite Governance Checklist
-_Audience: Platform Eng + Academic Ops • Last updated: 2026-02-04_
+_Audience: Platform Eng + Academic Ops • Last updated: 2026-02-07_
 
 This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture.academy.mereka.io`, `academy.biji-biji.com`) consistent and secure without drift.
 
@@ -16,11 +16,11 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 
 ## 2. Organization Ownership
 
-- [ ] Each org has at least **one owner** and **one staff admin**.
-- [ ] Roles reviewed quarterly:
-  - Django admin → **Organizations** → Members.
-  - Confirm owners for `SKILLOURFUTURE`, `BIJI`, and `MEREKA`.
-- [ ] Remove inactive or duplicated admins.
+- [ ] Each org has at least **one instructor** and **one staff admin**.
+- [ ] Platform admins (`gurpreet@biji-biji.com`, `malasari@mereka.my`) should hold both org roles for all tenant orgs.
+- [ ] Run deterministic verifier instead of manual spot checks:
+  - `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both`
+- [ ] Remove inactive or duplicated role assignments during quarterly review.
 
 ## 3. Theme & Branding Validation
 
@@ -51,8 +51,24 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 ```bash
 ./scripts/qa/public-health-check.sh prod
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
-./scripts/qa/verify-multisite-config.sh  # add STRICT=1 to fail on missing configs
+STRICT=1 ./scripts/qa/verify-multisite-config.sh prod
+STRICT=1 ./scripts/qa/verify-multisite-config.sh dev
+STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
+./scripts/qa/audit-auth-access.sh --mode internal --env both
 ```
+
+`verify-multisite-config.sh` enforces per-site:
+- `SiteConfiguration.enabled=true`
+- `LMS_ROOT_URL`, `CMS_ROOT_URL`, `MFE_BASE_URL`
+- `THEME_NAME`
+- `course_org_filter`
+- duplicate `SiteConfiguration` row detection (drift guard)
+
+`verify-org-role-ownership.sh` enforces per-org:
+- org exists (`MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`)
+- at least one `OrgStaffRole` user
+- at least one `OrgInstructorRole` user
+- platform admins hold both roles in each org
 
 ## 7. Change Control
 

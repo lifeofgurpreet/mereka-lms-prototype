@@ -47,6 +47,10 @@ To collect an evidence bundle (files under `var/`, gitignored):
    - `status.volumeSnapshotsCompleted > 0`
    - Snapshot count is consistent with the Bound PVC inventory of the included namespaces
 4. Restore drill CronJob exists and actually runs successfully (no StartError).
+5. Restore drill is configured for PV validation:
+   - `RESTORE_PERSISTENT_RESOURCES=true`
+   - `REQUIRE_PVC_RESTORE=true`
+   - `VERIFY_RESTORED_MYSQL=true`
 5. Critical data services do not store state in `emptyDir`.
 
 ## Critical Failure Modes We Explicitly Detect
@@ -68,13 +72,21 @@ In this cluster we observed:
 Fix path (implemented in this repo):
 1. Use the repo-managed restore script (`infrastructure/k8s/velero/restore-test-script.sh`) that only depends on `kubectl + jq`.
 2. Use non-blocking cleanup in the script so namespace teardown does not wedge the job.
-3. Patch CronJob + ConfigMap and run a verification drill:
+3. Enforce PV-aware restore validation:
+   - restore PVC/PV resources (no manifest-only exclusions)
+   - fail when no PVC is restored/bound
+   - run read-only `SELECT 1` probe against restored MySQL pod when present
+4. Patch CronJob + ConfigMap and run a verification drill:
    ```bash
    ./scripts/infra/fix-velero-restore-test.sh
    ```
-4. Confirm freshness:
+5. Confirm freshness:
    ```bash
    STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+   ```
+6. Confirm restore-test config contract:
+   ```bash
+   ./scripts/qa/audit-velero.sh
    ```
 
 Note: Velero itself is GitOps-managed outside this repo. Capture the fix as a PR in the infra repo that owns Velero.
@@ -105,6 +117,14 @@ Current enforcement model:
 - Daily: `backup-verification` CronJob in `velero` namespace.
 - Monthly: restore drill into a throwaway namespace and validate (must be green).
 - Before any risky operation (storage changes): `pre-op` backup with `--wait`.
+
+Monthly restore-drill evidence checklist:
+- `./scripts/qa/collect-velero-evidence.sh`
+- attach:
+  - `audit-velero.json`
+  - latest `restore-test` job logs/describe
+  - restored PVC summary (bound count)
+  - MySQL probe result from restore job log
 
 ## Related Docs
 

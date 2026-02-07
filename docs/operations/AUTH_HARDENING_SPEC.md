@@ -1,5 +1,5 @@
 # Auth Hardening Spec
-_Last updated: 2026-02-06_
+_Last updated: 2026-02-07_
 
 ## Goals
 
@@ -47,7 +47,7 @@ Authentik admin (separate):
 ### 1) Idempotent enforcement scripts
 
 - `scripts/infra/ensure-platform-admins.sh`
-  - Ensures platform admins are staff/superuser everywhere, and CourseCreator is granted in CMS.
+  - Ensures platform admins are staff/superuser everywhere, CourseCreator is granted in CMS, and org roles (`OrgStaffRole` + `OrgInstructorRole`) are present for every active org in LMS.
   - Runs on both prod + dev contexts.
 
 - `scripts/infra/ensure-authentik-admin.sh`
@@ -104,7 +104,7 @@ It aggregates:
 - public auth surface checks
 - platform admin permission verification
 - Authentik admin policy + redirect URI allowlist verification
-- multisite and OIDC provider config verification
+- multisite + org-role ownership + OIDC provider config verification
 - hostname registry drift checks
 
 ### 3.1) Internal verification (kubectl, no secrets)
@@ -131,17 +131,21 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 4. `./scripts/infra/ensure-authentik-admin.sh --verify` reports OK.
 5. `./scripts/infra/ensure-authentik-admin-mfa.sh --verify` reports OK.
 6. `./scripts/infra/ensure-authentik-hardening.sh --verify` reports OK.
-7. `STRICT=1 ./scripts/qa/verify-multisite-config.sh` reports correct LMS/CMS roots for each microsite.
+7. `STRICT=1 ./scripts/qa/verify-multisite-config.sh` reports correct multisite governance values per microsite:
+   `SiteConfiguration.enabled=true`, LMS/CMS/MFE roots, `THEME_NAME`, and `course_org_filter`.
    (Use `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` explicitly when running from a laptop.)
-8. Gurpreet + Malasari can:
+8. `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both` passes:
+   each org exists and has staff/instructor ownership, and both platform admins hold both org roles.
+9. Gurpreet + Malasari can:
    - create courses in Studio
    - access LMS Django admin
    - access Discovery/Credentials/Ecommerce admin after SSO login
-9. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
+10. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 
 Convenience:
 - `./scripts/qa/verify-auth-hardening.sh` runs the full suite (public + internal) in one command.
 - `./scripts/gen/update-openedx-hostnames-doc.sh` regenerates `docs/operations/OPENEDX_HOSTNAMES.md`.
+- `./scripts/qa/run-operations-gates.sh --env both` runs consolidated auth + observability + Velero + Grafana gates.
 
 ## Future Hardening (Optional)
 

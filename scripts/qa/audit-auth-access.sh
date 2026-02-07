@@ -162,10 +162,12 @@ if [[ "$should_run_internal" -eq 1 ]]; then
   run_check "internal: course data sanity (prod + dev)" ./scripts/qa/course-data-sanity.sh --env "$ENV_SCOPE"
 
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-    run_check "internal: multisite config (prod)" ./scripts/qa/verify-multisite-config.sh prod
+    run_check "internal: multisite config (prod)" env STRICT=1 ./scripts/qa/verify-multisite-config.sh prod
+    run_check "internal: org role ownership (prod)" env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh prod
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-    run_check "internal: multisite config (dev)" ./scripts/qa/verify-multisite-config.sh dev
+    run_check "internal: multisite config (dev)" env STRICT=1 ./scripts/qa/verify-multisite-config.sh dev
+    run_check "internal: org role ownership (dev)" env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh dev
   fi
 
   run_check "internal: hostnames registry drift (prod + dev)" ./scripts/qa/list-openedx-hostnames.sh

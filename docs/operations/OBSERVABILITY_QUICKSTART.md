@@ -20,6 +20,9 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 
 # Grafana panel/query coverage contract (required + recommended)
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
+
+# Consolidated gate (auth + multisite + observability + Velero + Grafana)
+./scripts/qa/run-operations-gates.sh --env both
 ```
 
 `audit-observability --mode runtime` now also verifies that `PrometheusRule/lms-alerts`
@@ -28,6 +31,12 @@ contains the reliability alerts:
 `OpenEdxCrashLoopingContainers`, and `OpenEdxSyntheticOrBackupJobFailures`.
 It additionally verifies these alert rules are loaded by Prometheus runtime via
 `/api/v1/rules` (not just present in Kubernetes objects).
+
+Atlas allowlist drift monitoring posture (VPS):
+```bash
+./scripts/qa/audit-atlas-allowlist-monitor.sh
+STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
+```
 
 ## 2) Core Dashboards
 

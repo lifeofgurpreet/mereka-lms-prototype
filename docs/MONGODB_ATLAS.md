@@ -123,3 +123,22 @@ Optional webhook alerting (recommended):
 ```bash
 ATLAS_ALLOWLIST_WEBHOOK_URL=<your-webhook-url> ./scripts/infra/monitor-atlas-allowlist-vps.sh
 ```
+
+Recommended persistent cron wiring (avoid exporting secrets in crontab line):
+
+1. Create env file (gitignored path):
+```bash
+cat > /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist-monitor.env <<'EOF'
+ATLAS_ALLOWLIST_WEBHOOK_URL=<your-webhook-url>
+EOF
+chmod 600 /home/gurpreet/projects/k8s/mereka-lms/var/atlas-allowlist-monitor.env
+```
+2. Install/refresh cron wrapper:
+```bash
+./scripts/infra/setup-vps-atlas-allowlist-cron.sh
+```
+3. Audit monitor posture:
+```bash
+./scripts/qa/audit-atlas-allowlist-monitor.sh
+STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
+```

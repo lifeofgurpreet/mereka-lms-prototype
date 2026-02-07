@@ -71,17 +71,47 @@ import json, os
 
 lms = os.environ.get("LMS_DOMAIN", "academyv2.mereka.io")
 studio = os.environ.get("STUDIO_DOMAIN", f"studio.{lms}")
+mfe = os.environ.get("MFE_DOMAIN", f"apps.{lms}")
 biji = os.environ.get("BIJI_DOMAIN", "academy.biji-biji.com")
 biji_studio = os.environ.get("BIJI_STUDIO_DOMAIN", "studio.academy.biji-biji.com")
+biji_mfe = os.environ.get("BIJI_MFE_DOMAIN", "apps.academy.biji-biji.com")
 skill = os.environ.get("SKILLOURFUTURE_DOMAIN", "skillourfuture.academy.mereka.io")
 dev = os.environ.get("DEV_LMS_DOMAIN", "academyv2.mereka.dev")
+dev_studio = os.environ.get("DEV_STUDIO_DOMAIN", f"studio.{dev}")
+dev_mfe = os.environ.get("DEV_MFE_DOMAIN", f"apps.{dev}")
+
+base = {"THEME_NAME": "mereka"}
 
 expected = {
-  lms: {"LMS_ROOT_URL": f"https://{lms}", "CMS_ROOT_URL": f"https://{studio}"},
-  biji: {"LMS_ROOT_URL": f"https://{biji}", "CMS_ROOT_URL": f"https://{biji_studio}"},
+  lms: {
+    **base,
+    "LMS_ROOT_URL": f"https://{lms}",
+    "CMS_ROOT_URL": f"https://{studio}",
+    "MFE_BASE_URL": f"https://{mfe}",
+    "COURSE_ORG_FILTER": ["MEREKA"],
+  },
+  biji: {
+    **base,
+    "LMS_ROOT_URL": f"https://{biji}",
+    "CMS_ROOT_URL": f"https://{biji_studio}",
+    "MFE_BASE_URL": f"https://{biji_mfe}",
+    "COURSE_ORG_FILTER": ["BIJIBIJI"],
+  },
   # Skillourfuture currently shares the main Studio domain (no dedicated studio.* DNS).
-  skill: {"LMS_ROOT_URL": f"https://{skill}", "CMS_ROOT_URL": f"https://{studio}"},
-  dev: {"LMS_ROOT_URL": f"https://{dev}", "CMS_ROOT_URL": f"https://studio.{dev}"},
+  skill: {
+    **base,
+    "LMS_ROOT_URL": f"https://{skill}",
+    "CMS_ROOT_URL": f"https://{studio}",
+    "MFE_BASE_URL": f"https://{mfe}",
+    "COURSE_ORG_FILTER": ["SKILLOURFUTURE"],
+  },
+  dev: {
+    **base,
+    "LMS_ROOT_URL": f"https://{dev}",
+    "CMS_ROOT_URL": f"https://{dev_studio}",
+    "MFE_BASE_URL": f"https://{dev_mfe}",
+    "COURSE_ORG_FILTER": ["MEREKA"],
+  },
 }
 
 print(json.dumps(expected, sort_keys=True))
@@ -111,24 +141,56 @@ for domain in domains:
         print(f"{domain}: SITE_MISSING")
         missing.append(domain)
         continue
-    cfg = SiteConfiguration.objects.filter(site=site).first()
+    cfg_qs = SiteConfiguration.objects.filter(site=site).order_by("-id")
+    cfg = cfg_qs.first()
     if not cfg:
         print(f"{domain}: CONFIG_MISSING")
         missing.append(domain)
         continue
+    if cfg_qs.count() > 1:
+        bad.append(f"{domain}: duplicate SiteConfiguration rows={cfg_qs.count()} (expected 1)")
     values = cfg.site_values or {}
+    enabled = bool(getattr(cfg, "enabled", False))
     theme = values.get("THEME_NAME", "unset")
     lms_root = values.get("LMS_ROOT_URL") or "unset"
     cms_root = values.get("CMS_ROOT_URL") or "unset"
-    print(f"{domain}: theme={theme} lms_root={lms_root} cms_root={cms_root}")
+    mfe_base = values.get("MFE_BASE_URL") or "unset"
+    org_filter = values.get("course_org_filter") or []
+    if isinstance(org_filter, str):
+        org_filter = [org_filter]
+    if not isinstance(org_filter, list):
+        org_filter = [str(org_filter)]
+    org_filter_norm = sorted(str(x).strip() for x in org_filter if str(x).strip())
+    print(
+        f"{domain}: enabled={enabled} theme={theme} "
+        f"lms_root={lms_root} cms_root={cms_root} mfe_base={mfe_base} "
+        f"org_filter={','.join(org_filter_norm) if org_filter_norm else 'unset'}"
+    )
 
     exp = expected.get(domain) or {}
     exp_lms = exp.get("LMS_ROOT_URL")
     exp_cms = exp.get("CMS_ROOT_URL")
+    exp_mfe = exp.get("MFE_BASE_URL")
+    exp_theme = exp.get("THEME_NAME")
+    exp_orgs = sorted((exp.get("COURSE_ORG_FILTER") or []))
+    site_domain = values.get("domain")
+    if not enabled:
+        bad.append(f"{domain}: SiteConfiguration enabled=false")
+    if site_domain and site_domain != domain:
+        bad.append(f"{domain}: site_values.domain expected={domain} got={site_domain}")
     if exp_lms and lms_root != exp_lms:
         bad.append(f"{domain}: LMS_ROOT_URL expected={exp_lms} got={lms_root}")
     if exp_cms and cms_root != exp_cms:
         bad.append(f"{domain}: CMS_ROOT_URL expected={exp_cms} got={cms_root}")
+    if exp_mfe and mfe_base != exp_mfe:
+        bad.append(f"{domain}: MFE_BASE_URL expected={exp_mfe} got={mfe_base}")
+    if exp_theme and theme != exp_theme:
+        bad.append(f"{domain}: THEME_NAME expected={exp_theme} got={theme}")
+    if exp_orgs and org_filter_norm != exp_orgs:
+        bad.append(
+            f"{domain}: course_org_filter expected={','.join(exp_orgs)} "
+            f"got={','.join(org_filter_norm) if org_filter_norm else 'unset'}"
+        )
 
 if bad:
     for line in bad:

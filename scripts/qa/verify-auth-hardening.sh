@@ -27,6 +27,12 @@ STRICT=1 "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" prod
 log "Verifying multisite config (dev)"
 STRICT=1 "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" dev
 
+log "Verifying org role ownership (prod)"
+STRICT=1 "$REPO_ROOT/scripts/qa/verify-org-role-ownership.sh" prod
+
+log "Verifying org role ownership (dev)"
+STRICT=1 "$REPO_ROOT/scripts/qa/verify-org-role-ownership.sh" dev
+
 log "Verifying platform admin permissions (prod + dev)"
 "$REPO_ROOT/scripts/infra/ensure-platform-admins.sh" --verify
 

@@ -222,6 +222,8 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 7. **Observability posture audit** – run `./scripts/qa/audit-observability.sh --mode all` (or `--mode local` when offline) to verify coverage and deployment state.
 8. **Velero alert pipeline audit** – run `./scripts/qa/audit-velero-alert-pipeline.sh` to validate log metrics/policies plus runtime CronJob freshness and hourly backup recency.
 9. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
+10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.
+11. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
 
 ## Certificate/SAN verification
 

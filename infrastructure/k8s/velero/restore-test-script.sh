@@ -11,6 +11,10 @@ POD_READY_TIMEOUT="${POD_READY_TIMEOUT:-300}"
 CLEANUP_ON_SUCCESS="${CLEANUP_ON_SUCCESS:-true}"
 CLEANUP_ON_FAILURE="${CLEANUP_ON_FAILURE:-true}"
 MAX_PARTIAL_ERRORS="${MAX_PARTIAL_ERRORS:-10}"
+PREFERRED_SCHEDULE="${PREFERRED_SCHEDULE:-velero-local-hourly-critical-databases}"
+RESTORE_PERSISTENT_RESOURCES="${RESTORE_PERSISTENT_RESOURCES:-true}"
+REQUIRE_PVC_RESTORE="${REQUIRE_PVC_RESTORE:-true}"
+VERIFY_RESTORED_MYSQL="${VERIFY_RESTORED_MYSQL:-true}"
 
 # Colors for logs
 RED='\033[0;31m'
@@ -69,15 +73,35 @@ cleanup() {
 find_latest_backup() {
   log_step "Finding latest completed backup..." >&2
   local backup
-  backup="$(kubectl -n "$VELERO_NS" get backup.velero.io -o json | jq -r --arg ns "$SOURCE_NAMESPACE" '
+  backup="$(kubectl -n "$VELERO_NS" get backup.velero.io -o json | jq -r --arg ns "$SOURCE_NAMESPACE" --arg sched "$PREFERRED_SCHEDULE" '
+    def namespace_match:
+      ($ns == "")
+      or ((.spec.includedNamespaces // []) | index($ns) != null)
+      or ((.spec.includedNamespaces // []) | index("*") != null);
+
+    def schedule_match:
+      ($sched != "")
+      and ((.metadata.labels["velero.io/schedule-name"] // "") == $sched);
+
+    (
+      [
+        .items[]
+        | select(.status.phase == "Completed")
+        | select(namespace_match)
+        | select(schedule_match)
+        | {
+            name: .metadata.name,
+            ts: (.status.completionTimestamp // .metadata.creationTimestamp // "")
+          }
+      ]
+      | sort_by(.ts)
+      | reverse
+      | .[0].name // empty
+    ) // (
     [
       .items[]
       | select(.status.phase == "Completed")
-      | select(
-          ($ns == "")
-          or ((.spec.includedNamespaces // []) | index($ns) != null)
-          or ((.spec.includedNamespaces // []) | index("*") != null)
-        )
+      | select(namespace_match)
       | {
           name: .metadata.name,
           ts: (.status.completionTimestamp // .metadata.creationTimestamp // "")
@@ -91,7 +115,7 @@ find_latest_backup() {
     log_error "No completed backup found for SOURCE_NAMESPACE='${SOURCE_NAMESPACE:-<auto>}'" >&2
     return 1
   fi
-  log_info "Using backup: $backup" >&2
+  log_info "Using backup: $backup (preferred schedule=${PREFERRED_SCHEDULE:-<none>})" >&2
   echo "$backup"
 }
 
@@ -132,7 +156,25 @@ create_restore() {
   RESTORE_NAME="restore-test-$(date +%Y%m%d-%H%M%S)"
 
   log_step "Creating restore resource: $RESTORE_NAME"
-  cat <<EOF | kubectl apply -f - >/dev/null
+  if is_true "$RESTORE_PERSISTENT_RESOURCES"; then
+    cat <<EOF | kubectl apply -f - >/dev/null
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: ${RESTORE_NAME}
+  namespace: ${VELERO_NS}
+  labels:
+    app: velero
+    component: restore-test
+spec:
+  backupName: "${backup_name}"
+  includedNamespaces:
+    - "${source_ns}"
+  namespaceMapping:
+    "${source_ns}": "${TEST_NAMESPACE}"
+EOF
+  else
+    cat <<EOF | kubectl apply -f - >/dev/null
 apiVersion: velero.io/v1
 kind: Restore
 metadata:
@@ -152,6 +194,7 @@ spec:
     - persistentvolumes
     - secrets
 EOF
+  fi
 }
 
 wait_for_restore() {
@@ -229,6 +272,54 @@ verify_restored_namespace() {
   return 0
 }
 
+verify_restored_persistent_data() {
+  if ! is_true "$RESTORE_PERSISTENT_RESOURCES"; then
+    log_warn "Skipping persistent data verification (RESTORE_PERSISTENT_RESOURCES=${RESTORE_PERSISTENT_RESOURCES})"
+    return 0
+  fi
+
+  log_step "Verifying restored persistent resources"
+  local pvc_json pvc_count bound_count
+  pvc_json="$(kubectl get pvc -n "$TEST_NAMESPACE" -o json 2>/dev/null || echo '{"items":[]}')"
+  pvc_count="$(echo "$pvc_json" | jq -r '.items | length')"
+  bound_count="$(echo "$pvc_json" | jq -r '[.items[] | select(.status.phase == "Bound")] | length')"
+  log_info "Restored PVCs: total=${pvc_count} bound=${bound_count}"
+
+  if is_true "$REQUIRE_PVC_RESTORE"; then
+    if [[ "$pvc_count" -lt 1 ]]; then
+      log_error "No PVCs restored in ${TEST_NAMESPACE} (PV validation failed)"
+      return 1
+    fi
+    if [[ "$bound_count" -lt 1 ]]; then
+      log_error "Restored PVCs are not Bound in ${TEST_NAMESPACE}"
+      return 1
+    fi
+  fi
+
+  if ! is_true "$VERIFY_RESTORED_MYSQL"; then
+    log_warn "Skipping restored MySQL read-only check (VERIFY_RESTORED_MYSQL=${VERIFY_RESTORED_MYSQL})"
+    return 0
+  fi
+
+  local mysql_pod
+  mysql_pod="$(kubectl get pods -n "$TEST_NAMESPACE" -o json \
+    | jq -r '.items[]?.metadata.name | select(test("^mysql(-|$)"))' \
+    | head -n 1)"
+
+  if [[ -z "$mysql_pod" ]]; then
+    log_warn "No restored MySQL pod found in ${TEST_NAMESPACE}; skipping SQL probe"
+    return 0
+  fi
+
+  log_step "Running read-only MySQL probe in restored namespace"
+  if ! kubectl exec -n "$TEST_NAMESPACE" "$mysql_pod" -- sh -lc \
+    'MYSQL_PWD="${MYSQL_ROOT_PASSWORD:-}" mysql -uroot -Nse "SELECT 1" >/dev/null'; then
+    log_error "Restored MySQL read-only probe failed (${mysql_pod})"
+    return 1
+  fi
+  log_info "Restored MySQL read-only probe passed (${mysql_pod})"
+}
+
 main() {
   log_info "==========================================="
   log_info "Starting Velero Restore Test"
@@ -239,6 +330,10 @@ main() {
   log_info "TEST_NAMESPACE=${TEST_NAMESPACE}"
   log_info "RESTORE_TIMEOUT=${RESTORE_TIMEOUT}"
   log_info "POD_READY_TIMEOUT=${POD_READY_TIMEOUT}"
+  log_info "PREFERRED_SCHEDULE=${PREFERRED_SCHEDULE:-<none>}"
+  log_info "RESTORE_PERSISTENT_RESOURCES=${RESTORE_PERSISTENT_RESOURCES}"
+  log_info "REQUIRE_PVC_RESTORE=${REQUIRE_PVC_RESTORE}"
+  log_info "VERIFY_RESTORED_MYSQL=${VERIFY_RESTORED_MYSQL}"
   log_info "==========================================="
 
   trap cleanup EXIT
@@ -252,6 +347,7 @@ main() {
   create_restore "$backup" "$source_ns" || { TEST_RESULT="failed"; exit 1; }
   wait_for_restore || { TEST_RESULT="failed"; exit 1; }
   verify_restored_namespace || true
+  verify_restored_persistent_data || { TEST_RESULT="failed"; exit 1; }
 
   TEST_RESULT="passed"
   log_info "==========================================="
