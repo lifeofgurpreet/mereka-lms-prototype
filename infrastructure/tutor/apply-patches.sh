@@ -506,8 +506,7 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
         'RUN if [ ! -d /openedx/node_modules ] || [ -z "$(ls -A /openedx/node_modules)" ]; then npm run postinstall; else echo "npm run postinstall skipped (prebuilt node_modules)"; fi',
         "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.",
     )
-    updated = updated.replace(
-        'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi',
+    brand_compile_block = (
         "RUN python - <<'PY'\n"
         "from pathlib import Path\n"
         "import re\n"
@@ -561,12 +560,28 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
         "        path.write_text(updated, encoding='utf-8')\n"
         "        changed += 1\n"
         "print(f'Stripped google font imports from {changed} compiled studio css files')\n"
-        "PY",
+        "PY"
     )
-    updated = updated.replace(
-        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi',
-        "RUN npm run webpack",
+    compile_patch_marker = "Stripped google font imports from {changed} scss files"
+    if compile_patch_marker not in updated:
+        old_conditional_compile = (
+            'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi'
+        )
+        if old_conditional_compile in updated:
+            updated = updated.replace(old_conditional_compile, brand_compile_block, 1)
+        else:
+            current_compile_block = (
+                "RUN npm run compile-sass -- --skip-themes\n"
+                "RUN npm run webpack\n"
+            )
+            if current_compile_block in updated:
+                updated = updated.replace(current_compile_block, f"{brand_compile_block}\nRUN npm run webpack\n", 1)
+    if compile_patch_marker in updated:
+        updated = updated.replace("\nRUN npm run compile-sass -- --skip-default\n", "\n")
+    webpack_conditional = (
+        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi'
     )
+    updated = updated.replace("RUN npm run webpack", webpack_conditional)
     updated = updated.replace(
         "new TerserPlugin(),",
         "new TerserPlugin({ parallel: false }),",

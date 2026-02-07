@@ -14,7 +14,7 @@ resources:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: 20260207-branding-pass4-d2f02aa
+    newTag: 20260207-branding-pass5-1f98c7e
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: 20260207-131850-mfe-pass5-authnrev
