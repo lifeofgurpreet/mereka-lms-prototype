@@ -18,7 +18,7 @@ patchesStrategicMerge:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: 20260207-branding-pass6-c7e88a2
+    newTag: 20260207-branding-pass7-5b26e45
   - name: openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: 20260207-131850-mfe-pass5-authnrev

@@ -1,0 +1,1229 @@
+/*
+  Mereka brand overrides (runtime CSS entrypoint).
+
+  This file is loaded via `*/templates/head-extra.html` for both LMS + Studio.
+
+  Important:
+  - This file is our deterministic "brand signal carrier" in production.
+  - Keep it self-contained (no build step required at runtime).
+  - Use the same CSS in `lms/static/css/mereka-overrides.css` to avoid drift.
+*/
+
+:root {
+  --mereka-branding-rev: "2026-02-07-pass3";
+
+  /* Typography */
+  --mereka-font-body: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --mereka-font-heading: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+
+  /* Palette (source: `scss/_tokens.scss`) */
+  --mereka-color-ink-900: #000000;
+  --mereka-color-ink-700: #4A494A;
+  --mereka-color-ink-500: #7B7B7B;
+  --mereka-color-ink-300: #AFADB2;
+  --mereka-color-teal: #2d898b;
+  --mereka-color-magenta: #ab3b78;
+  --mereka-color-blue: #295cad;
+  --mereka-color-sky: #94d1e4;
+  --mereka-color-surface-primary: #FBFAFB;
+  --mereka-color-surface-secondary: #F5F5F5;
+  --mereka-color-border: #DDDDDE;
+  --mereka-color-border-strong: #7B7B7C;
+
+  /* Semantics */
+  --mereka-color-info: var(--mereka-color-blue);
+  --mereka-color-info-soft: var(--mereka-color-sky);
+  --mereka-color-success: #2c6e49;
+  --mereka-color-warning: #f4be48;
+  --mereka-color-danger: #8c002f;
+  --mereka-color-danger-soft: #cd89ae;
+
+  /* Effects */
+  --mereka-shadow-card: 0 20px 60px rgba(26, 22, 35, 0.08);
+  --mereka-gradient-primary: linear-gradient(
+    135deg,
+    var(--mereka-color-teal) 0%,
+    var(--mereka-color-blue) 100%
+  );
+
+  /* Legacy compatibility (older overrides used these names) */
+  --mereka-teal: var(--mereka-color-teal);
+  --mereka-magenta: var(--mereka-color-magenta);
+  --mereka-blue: var(--mereka-color-blue);
+  --mereka-black: var(--mereka-color-ink-900);
+
+  /* Paragon bridge (MFEs) */
+  --pgn-color-primary: var(--mereka-color-magenta);
+  --pgn-color-secondary: var(--mereka-color-teal);
+  --pgn-color-success: var(--mereka-color-success);
+  --pgn-color-info: var(--mereka-color-info);
+  --pgn-color-warning: var(--mereka-color-warning);
+  --pgn-color-danger: var(--mereka-color-danger);
+  --pgn-body-bg: var(--mereka-color-surface-primary);
+  --pgn-body-color: var(--mereka-color-ink-900);
+  --pgn-link-color: var(--mereka-color-info);
+  --pgn-link-hover-color: var(--mereka-color-teal);
+  --pgn-font-family-sans-serif: var(--mereka-font-body);
+  --pgn-heading-font-family: var(--mereka-font-heading);
+  --pgn-border-color: var(--mereka-color-border);
+  --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
+  --pgn-btn-border-radius: 999px;
+
+  /*
+    Design-system aliases
+    Source of truth: `assets/branding/tokens.css` (synced from bbbi-mereka-brand-assets).
+    We alias the most-used tokens so external apps can speak the same language.
+  */
+  --color-black: var(--mereka-color-ink-900);
+  --color-white: #ffffff;
+  --color-teal: var(--mereka-color-teal);
+  --color-magenta: var(--mereka-color-magenta);
+  --color-blue: var(--mereka-color-blue);
+  --color-burgundy: var(--mereka-color-danger);
+  --color-pink: var(--mereka-color-danger-soft);
+  --color-sky: var(--mereka-color-sky);
+  --color-gold: var(--mereka-color-warning);
+  --color-forest: var(--mereka-color-success);
+
+  --color-success: var(--mereka-color-success);
+  --color-success-light: #8fbec2;
+  --color-warning: var(--mereka-color-warning);
+  --color-warning-dark: #e18437;
+  --color-error: var(--mereka-color-danger);
+  --color-error-light: var(--mereka-color-danger-soft);
+  --color-info: var(--mereka-color-info);
+  --color-info-light: var(--mereka-color-info-soft);
+
+  --font-heading: "Lato", sans-serif;
+  --font-body: "Poppins", sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Italic.woff2") format("woff2");
+}
+
+html,
+body {
+  font-family: var(--mereka-font-body);
+  background-color: var(--mereka-color-surface-primary);
+  color: var(--mereka-black);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.hd-1,
+.hd-2,
+.hd-3,
+.hd-4 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 600;
+}
+
+a {
+  color: var(--mereka-blue);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+a:hover,
+a:focus {
+  color: var(--mereka-teal);
+}
+
+.btn-primary,
+.btn-brand,
+button.btn.btn-primary {
+  background-color: var(--mereka-magenta);
+  border-color: var(--mereka-magenta);
+  border-radius: 999px;
+}
+
+.btn-outline-primary {
+  border-radius: 999px;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-brand:hover,
+.btn-brand:focus,
+button.btn.btn-primary:hover,
+button.btn.btn-primary:focus {
+  background-color: #963365;
+  border-color: #963365;
+}
+
+.header-global,
+.nav-global {
+  border-top: 4px solid var(--mereka-teal);
+}
+
+/* -------------------------- */
+/* Deep branding (LMS surfaces) */
+/* -------------------------- */
+
+/* Course discovery (/courses) */
+.find-courses {
+  background: var(--mereka-color-surface-primary);
+}
+
+.find-courses .courses-container {
+  background: transparent;
+}
+
+.find-courses #discovery-form.wrapper-search-context {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.25rem 1.25rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.find-courses #discovery-form .wrapper-search-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.find-courses #discovery-input.discovery-input {
+  flex: 1 1 260px;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: rgba(251, 250, 251, 0.92);
+  padding: 0.85rem 1.1rem;
+  font-size: 1rem;
+}
+
+.find-courses #discovery-input.discovery-input:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+  background: #fff;
+}
+
+.find-courses button.discovery-submit,
+.find-courses .discovery-submit.button {
+  border-radius: 999px;
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.85rem 1.25rem;
+  background: var(--mereka-gradient-primary);
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.find-courses button.discovery-submit:hover,
+.find-courses button.discovery-submit:focus,
+.find-courses .discovery-submit.button:hover,
+.find-courses .discovery-submit.button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.find-courses .search-facets {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.25rem;
+}
+
+.find-courses .search-facets h2,
+.find-courses .search-facets h3 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+.find-courses .search-facets a,
+.find-courses .search-facets button {
+  border-radius: 999px;
+}
+
+.find-courses #filter-bar,
+.find-courses .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.find-courses #filter-bar.filters {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1rem 1.25rem;
+}
+
+.find-courses #filter-bar .filters-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.find-courses #filter-bar .facet-list,
+.find-courses .search-facets .facet-list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.find-courses #filter-bar li,
+.find-courses .filter-bar li {
+  list-style: none;
+}
+
+.find-courses #filter-bar a,
+.find-courses .filter-bar a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: rgba(251, 250, 251, 0.92);
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.find-courses #filter-bar a:hover,
+.find-courses #filter-bar a:focus,
+.find-courses .filter-bar a:hover,
+.find-courses .filter-bar a:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .discovery-button,
+.find-courses .facet-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: rgba(251, 250, 251, 0.92);
+  color: var(--mereka-color-ink-900);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.find-courses .discovery-button:hover,
+.find-courses .discovery-button:focus,
+.find-courses .facet-option:hover,
+.find-courses .facet-option:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .facet-option.selected {
+  background: var(--mereka-gradient-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.find-courses .facet-option .count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(26, 22, 35, 0.08);
+  color: var(--mereka-color-ink-700);
+  font-size: 0.85em;
+}
+
+.find-courses .facet-option.selected .count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.find-courses #clear-all-filters.clear-filters {
+  margin-left: auto;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+  font-weight: 700;
+}
+
+.find-courses #clear-all-filters.clear-filters:hover,
+.find-courses #clear-all-filters.clear-filters:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .search-facets .header-search-facets,
+.find-courses .search-facets .header-facet {
+  font-family: var(--mereka-font-heading);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.find-courses .search-facets .header-facet {
+  margin: 1rem 0 0.75rem;
+}
+
+.find-courses .search-facets .toggle {
+  margin-top: 0.75rem;
+}
+
+.find-courses .courses-listing {
+  margin-top: 1.25rem;
+}
+
+/* Course about (/courses/<id>/about) */
+.course-info,
+.course-about {
+  background: var(--mereka-color-surface-primary);
+}
+
+.course-info .container,
+.course-about .container,
+.course-about .main-container,
+.course-info .main-container {
+  padding-top: 1.5rem;
+}
+
+.course-info header,
+.course-about header,
+.course-info .intro-inner-wrapper,
+.course-about .intro-inner-wrapper {
+  background: #fff;
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+}
+
+.course-info .intro-inner-wrapper,
+.course-about .intro-inner-wrapper {
+  padding: 2rem;
+  position: relative;
+}
+
+.course-info .intro-inner-wrapper::before,
+.course-about .intro-inner-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 10%, rgba(45, 137, 139, 0.14), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(171, 59, 120, 0.12), transparent 60%),
+    radial-gradient(circle at 90% 80%, rgba(41, 92, 173, 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+.course-info .intro-inner-wrapper > *,
+.course-about .intro-inner-wrapper > * {
+  position: relative;
+}
+
+.course-info .intro-inner-wrapper h1,
+.course-about .intro-inner-wrapper h1,
+.course-info .intro-inner-wrapper .course-title,
+.course-about .intro-inner-wrapper .course-title {
+  font-family: var(--mereka-font-heading);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--mereka-color-ink-900);
+}
+
+.course-about .course-sidebar,
+.course-info .course-sidebar,
+.course-about .course-sidebar-primary,
+.course-info .course-sidebar-primary {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.25rem;
+}
+
+.course-about .register,
+.course-about .enroll-btn,
+.course-about .enroll-btn button,
+.course-about .enroll-btn a,
+.course-info .register,
+.course-info .enroll-btn,
+.course-info .enroll-btn button,
+.course-info .enroll-btn a {
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  border: 0;
+  padding: 0.85rem 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.course-about .register:hover,
+.course-about .register:focus,
+.course-info .register:hover,
+.course-info .register:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.course-about .course-summary,
+.course-info .course-summary,
+.course-about .course-description,
+.course-info .course-description {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.5rem;
+}
+
+.course-about .course-summary h2,
+.course-about .course-description h2,
+.course-info .course-summary h2,
+.course-info .course-description h2 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 800;
+}
+
+.course-about .course-staff,
+.course-info .course-staff {
+  margin-top: 1.5rem;
+}
+
+.courses-listing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+}
+
+.courses-listing li,
+.courses-listing-item {
+  list-style: none;
+}
+
+.course {
+  background: #fff;
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.course:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.course .course-image .cover-image {
+  height: 180px;
+  background: linear-gradient(135deg, rgba(45, 137, 139, 0.22), rgba(41, 92, 173, 0.25));
+}
+
+.course .course-image .cover-image img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.course .course-info {
+  padding: 1.5rem;
+}
+
+.course .course-code {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--mereka-color-ink-500);
+  text-transform: uppercase;
+}
+
+.course .course-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course .course-organization {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.learn-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #fff;
+  background: var(--mereka-gradient-primary);
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.learn-more:hover,
+.learn-more:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+/* Learner dashboard cards */
+.dashboard .listing-courses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard .listing-courses li {
+  list-style: none;
+}
+
+.dashboard .my-courses .course-item .course {
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+  background: #fff;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dashboard .my-courses .course-item .course:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.dashboard .course .wrapper-course-details {
+  padding: 1.25rem 1.5rem 0;
+}
+
+.dashboard .course .course-title {
+  color: var(--mereka-color-ink-900);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard .course .info-university {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dashboard .course .enter-course {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard .course .enter-course:hover,
+.dashboard .course .enter-course:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+/* Dashboard notices, certificates, and utility components */
+.dashboard .notice,
+.dashboard .notice-incontext,
+.dashboard .wrapper-msg {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.dashboard .notice .notice-title,
+.dashboard .notice-incontext .notice-title,
+.dashboard .certificates h2,
+.dashboard .messages h2 {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.dashboard .notice a,
+.dashboard .notice-incontext a,
+.dashboard .messages a {
+  color: var(--mereka-color-blue);
+}
+
+.dashboard .notice a:hover,
+.dashboard .notice a:focus,
+.dashboard .notice-incontext a:hover,
+.dashboard .notice-incontext a:focus,
+.dashboard .messages a:hover,
+.dashboard .messages a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.dashboard .profile-sidebar,
+.dashboard .sidebar {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+/* Courseware chrome */
+.courseware {
+  background: var(--mereka-color-surface-primary);
+}
+
+.courseware .course-content,
+.courseware .course-outline,
+.courseware .course-index {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.5rem;
+}
+
+.courseware .unit-title,
+.courseware .sequence-nav-title {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .sequence-nav {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.courseware .sequence-nav-button {
+  border-radius: 999px;
+}
+
+.courseware .sequence-nav-button:hover,
+.courseware .sequence-nav-button:focus {
+  background: rgba(45, 137, 139, 0.12);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.courseware .xblock h1,
+.courseware .xblock h2,
+.courseware .xblock h3,
+.courseware .xblock h4,
+.courseware .xblock h5,
+.courseware .xblock h6,
+.courseware .xblock .hd {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+  letter-spacing: -0.01em;
+}
+
+.courseware .xblock p,
+.courseware .xblock li,
+.courseware .xblock label,
+.courseware .xblock .problem,
+.courseware .xblock .discussion-module,
+.courseware .xblock .video,
+.courseware .xblock .callout {
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock a {
+  color: var(--mereka-color-blue);
+}
+
+.courseware .xblock a:hover,
+.courseware .xblock a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.courseware .xblock .problem button,
+.courseware .xblock .problem .submit,
+.courseware .xblock .problem .action {
+  border-radius: 999px;
+}
+
+/* --------------------------- */
+/* Studio polish (CMS surfaces) */
+/* --------------------------- */
+
+/* Studio uses `.wrapper-content` containers (LMS typically does not). */
+.wrapper-content {
+  background: var(--mereka-color-surface-primary);
+}
+
+.wrapper-content .content-primary,
+.wrapper-content .content-secondary,
+.wrapper-content .content {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.wrapper-content .page-header,
+.wrapper-content .page-header-main {
+  border-bottom: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.wrapper-content .page-header h1,
+.wrapper-content .page-header h2 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+/* Authoring forms */
+.wrapper-content input[type="text"],
+.wrapper-content input[type="email"],
+.wrapper-content input[type="password"],
+.wrapper-content input[type="url"],
+.wrapper-content input[type="search"],
+.wrapper-content textarea,
+.wrapper-content select {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: #fff;
+  padding: 0.75rem 1rem;
+}
+
+.wrapper-content input[type="text"]:focus,
+.wrapper-content input[type="email"]:focus,
+.wrapper-content input[type="password"]:focus,
+.wrapper-content input[type="url"]:focus,
+.wrapper-content input[type="search"]:focus,
+.wrapper-content textarea:focus,
+.wrapper-content select:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+}
+
+/* Studio action buttons (names vary by page; keep the scope narrow). */
+.wrapper-content .action-primary,
+.wrapper-content a.action-primary,
+.wrapper-content button.action-primary {
+  border-radius: 999px;
+  background-color: var(--mereka-magenta);
+  border: 1px solid var(--mereka-magenta);
+  color: #fff;
+  font-weight: 700;
+}
+
+.wrapper-content .action-primary:hover,
+.wrapper-content .action-primary:focus {
+  background-color: #963365;
+  border-color: #963365;
+  color: #fff;
+}
+
+.wrapper-content .action-secondary,
+.wrapper-content a.action-secondary,
+.wrapper-content button.action-secondary {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.18);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+  font-weight: 600;
+}
+
+.wrapper-content .action-secondary:hover,
+.wrapper-content .action-secondary:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+/* Studio create-course/create-library flows + authoring panels */
+.wrapper-mast .mast.has-actions .nav-actions .button,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library,
+.view-outline .content-primary .no-content .button,
+.view-static-pages .content-primary .add-pages .button,
+.view-container .content-primary .no-container-content .button,
+.view-textbooks .content-primary .no-textbook-content .button,
+.view-group-configurations .content-primary .no-content .button,
+.view-certificates .content-primary .no-content .button {
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  text-transform: none;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.wrapper-mast .mast.has-actions .nav-actions .button:hover,
+.wrapper-mast .mast.has-actions .nav-actions .button:focus,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course:hover,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library:hover,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course:hover,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.view-outline .outline-complex .outline-section,
+.view-outline .outline-complex .outline-subsection,
+.view-outline .outline-complex .outline-unit,
+.view-container .wrapper-xblock,
+.view-container .xblock-render,
+.view-container .xblock-render .xblock {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.view-outline .outline-complex .outline-section:hover,
+.view-outline .outline-complex .outline-subsection:hover,
+.view-outline .outline-complex .outline-unit:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.view-outline .outline-complex .outline-item .outline-item-title,
+.view-outline .outline-complex .outline-item .item-title,
+.view-outline .outline-complex .outline-item .title,
+.view-outline .outline-complex .outline-section .section-name,
+.view-outline .outline-complex .outline-subsection .subsection-name,
+.view-outline .outline-complex .outline-unit .unit-name {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+  color: var(--mereka-color-ink-900);
+}
+
+.view-outline .outline-complex .outline-item .actions-list .action,
+.view-outline .outline-complex .outline-item .actions-list a,
+.view-outline .outline-complex .outline-item .actions-list button,
+.view-outline .outline-complex .outline-item .action-button {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+}
+
+.view-outline .outline-complex .outline-item .actions-list .action:hover,
+.view-outline .outline-complex .outline-item .actions-list a:hover,
+.view-outline .outline-complex .outline-item .actions-list button:hover,
+.view-outline .outline-complex .outline-item .action-button:hover,
+.view-outline .outline-complex .outline-item .actions-list .action:focus,
+.view-outline .outline-complex .outline-item .actions-list a:focus,
+.view-outline .outline-complex .outline-item .actions-list button:focus,
+.view-outline .outline-complex .outline-item .action-button:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.view-outline .outline-complex .add-xblock-component .button,
+.view-outline .outline-complex .add-xblock-component button,
+.view-outline .outline-complex .add-xblock-component a {
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Studio modals used by course/library creation flows */
+.modal,
+.modal-window,
+.wrapper-modal-window {
+  border-radius: 20px;
+}
+
+.modal .modal-content,
+.modal-window .inner-wrapper,
+.wrapper-modal-window .inner-wrapper {
+  border-radius: 20px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  box-shadow: 0 30px 90px rgba(26, 22, 35, 0.18);
+}
+
+/* ---------------------------- */
+/* Shared primitives (LMS/CMS)  */
+/* ---------------------------- */
+
+/* Bootstrap/legacy alert blocks */
+.alert {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+}
+
+.alert-info {
+  background: rgba(148, 209, 228, 0.22);
+  border-color: rgba(148, 209, 228, 0.55);
+}
+
+.alert-success {
+  background: rgba(44, 110, 73, 0.12);
+  border-color: rgba(44, 110, 73, 0.35);
+}
+
+.alert-warning {
+  background: rgba(244, 190, 72, 0.14);
+  border-color: rgba(244, 190, 72, 0.55);
+}
+
+.alert-danger,
+.alert-error {
+  background: rgba(140, 0, 47, 0.08);
+  border-color: rgba(140, 0, 47, 0.22);
+}
+
+/* Tabs (course about, some dashboards, Studio pages) */
+.nav-tabs > li > a,
+.nav-tabs .nav-link {
+  border-radius: 999px;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus,
+.nav-tabs .nav-link.active {
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Pagination */
+.pagination > li > a,
+.pagination > li > span {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  margin: 0 0.15rem;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  background: var(--mereka-gradient-primary);
+  border-color: transparent;
+}
+
+/* Tables */
+.table,
+table {
+  border-color: rgba(26, 22, 35, 0.10);
+}
+
+.table thead th,
+table thead th {
+  border-bottom: 1px solid rgba(26, 22, 35, 0.12);
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+/* Footer: ensure our custom template styles are always present. */
+.mereka-footer {
+  background: #fff;
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 3rem 0 2rem;
+  margin-top: 4rem;
+}
+
+.mereka-footer .footer-primary {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .mereka-footer .footer-primary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mereka-footer .footer-brand img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.mereka-footer .footer-brand p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--mereka-color-ink-500);
+  margin-bottom: 1rem;
+}
+
+.mereka-footer .footer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.mereka-footer .footer-tags span {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(26, 22, 35, 0.08);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mereka-footer h6 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mereka-color-ink-500);
+  margin-bottom: 0.75rem;
+}
+
+.mereka-footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mereka-footer a {
+  color: var(--mereka-color-ink-700);
+}
+
+.mereka-footer a:hover,
+.mereka-footer a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.mereka-footer .footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--mereka-color-ink-500);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(26, 22, 35, 0.06);
+}
+
+@media (max-width: 768px) {
+  .mereka-footer {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .mereka-footer .footer-primary {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .mereka-footer .footer-brand img {
+    width: 100px;
+  }
+
+  .mereka-footer .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

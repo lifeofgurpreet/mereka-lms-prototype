@@ -81,6 +81,8 @@ FONTS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_fonts.scss"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 LMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/theme.scss"
 CMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/theme.scss"
+CMS_HEAD_EXTRA_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
+CMS_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 
 check_file "Shared tokens" "$TOKENS_SCSS"
 check_file "Shared fonts" "$FONTS_SCSS"
@@ -88,6 +90,8 @@ check_contains "Theme imports fonts" "$THEME_SCSS" '@import "fonts";'
 check_contains "Theme imports tokens" "$THEME_SCSS" '@import "tokens";'
 check_contains "LMS theme imports shared tokens" "$LMS_THEME_SCSS" '@import "../../../scss/theme";'
 check_contains "CMS theme imports shared tokens" "$CMS_THEME_SCSS" '@import "../../../scss/theme";'
+check_file "CMS runtime overrides CSS" "$CMS_OVERRIDE_CSS"
+check_contains "CMS head-extra links runtime overrides" "$CMS_HEAD_EXTRA_TEMPLATE" "mereka/css/mereka-overrides.css"
 check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
 check_contains "MFE theme imports shared tokens" "$MFE_SCSS" '@import "./scss/theme";'
 check_contains "MFE theme exports branding revision marker" "$MFE_SCSS" '--mereka-mfe-branding-rev'

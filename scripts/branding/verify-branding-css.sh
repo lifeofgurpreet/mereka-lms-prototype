@@ -6,6 +6,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 COMMON_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 LMS_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
+CMS_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 
 BRANDING_LEVEL="${BRANDING_LEVEL:-core}" # core|deep
 if [[ "$BRANDING_LEVEL" != "core" && "$BRANDING_LEVEL" != "deep" ]]; then
@@ -49,12 +50,19 @@ echo ""
 
 require_file "Common overrides CSS" "$COMMON_CSS"
 require_file "LMS overrides CSS" "$LMS_CSS"
+require_file "CMS overrides CSS" "$CMS_CSS"
 
-if [[ -f "$COMMON_CSS" && -f "$LMS_CSS" ]]; then
+if [[ -f "$COMMON_CSS" && -f "$LMS_CSS" && -f "$CMS_CSS" ]]; then
   if cmp -s "$COMMON_CSS" "$LMS_CSS"; then
     echo "  ✓ Common/LMS overrides are identical"
   else
     echo "  ✗ Common/LMS overrides drifted (files differ)"
+    failures=1
+  fi
+  if cmp -s "$COMMON_CSS" "$CMS_CSS"; then
+    echo "  ✓ Common/CMS overrides are identical"
+  else
+    echo "  ✗ Common/CMS overrides drifted (files differ)"
     failures=1
   fi
 fi
@@ -102,4 +110,5 @@ echo ""
 echo "Fixes:"
 echo "  1. Ensure deep styles are shipped in: infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 echo "  2. Keep LMS copy identical: infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
+echo "  3. Keep CMS copy identical: infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 exit 1

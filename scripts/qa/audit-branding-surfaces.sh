@@ -103,7 +103,7 @@ check_lms_overrides() {
 check_studio_css() {
   local host=$1
   local label=$2
-  local html css_path css
+  local html css_path override_path css override_css
 
   html="$(fetch "https://${host}/?nocache=$(date +%s)")"
   if [[ -z "${html:-}" ]]; then
@@ -115,24 +115,42 @@ check_studio_css() {
     gap "${label}: could not locate studio-main-v1 CSS link"
     return
   fi
+  override_path="$(extract_first '/static/studio/mereka/css/mereka-overrides[^"]*\.css' <<<"$html")"
+  if [[ -z "${override_path:-}" ]]; then
+    gap "${label}: missing studio runtime overrides CSS link"
+    return
+  fi
 
   css="$(fetch "https://${host}${css_path}")"
   if [[ -z "${css:-}" ]]; then
     gap "${label}: could not fetch studio CSS (${css_path})"
     return
   fi
-
-  if grep -Eq -- '--mereka-color-teal' <<<"$css"; then
-    ok "${label}: studio CSS exports brand tokens"
-  else
-    gap "${label}: studio CSS missing brand token exports (likely older openedx image deployed)"
+  override_css="$(fetch "https://${host}${override_path}")"
+  if [[ -z "${override_css:-}" ]]; then
+    gap "${label}: could not fetch studio runtime overrides CSS (${override_path})"
+    return
   fi
 
-  if grep -Eq 'Poppins-Regular[^"]*\.woff2' <<<"$css" \
-    && grep -Eq 'Lato-Regular[^"]*\.woff2' <<<"$css"; then
-    ok "${label}: studio CSS references local brand fonts"
+  if [[ -n "$EXPECTED_BRANDING_REV" ]] && grep -F -q "$EXPECTED_BRANDING_REV" <<<"$override_css"; then
+    ok "${label}: studio runtime overrides include branding revision marker ${EXPECTED_BRANDING_REV}"
   else
-    gap "${label}: studio CSS not referencing local brand fonts"
+    gap "${label}: studio runtime overrides missing branding revision marker ${EXPECTED_BRANDING_REV}"
+  fi
+
+  if grep -Eq 'font-family:[[:space:]]*"Poppins"' <<<"$override_css" \
+    && grep -Eq 'font-family:[[:space:]]*"Lato"' <<<"$override_css"; then
+    ok "${label}: studio runtime overrides reference local brand fonts"
+  else
+    gap "${label}: studio runtime overrides missing local brand fonts"
+  fi
+
+  if grep -Eq '\.action-create-course' <<<"$override_css" \
+    && grep -Eq '\.action-create-library' <<<"$override_css" \
+    && grep -Eq '\.add-xblock-component' <<<"$override_css"; then
+    ok "${label}: studio runtime overrides include deep Studio selectors"
+  else
+    gap "${label}: studio runtime overrides missing deep Studio selectors"
   fi
 
   if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then

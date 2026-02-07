@@ -320,7 +320,7 @@ check_homepage_brand_logo() {
 check_studio_brand_css() {
   local studio_host=$1
   local label=$2
-  local ts html css_path css
+  local ts html css_path override_path css
 
   ts="$(date +%s)"
   html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}/?nocache=${ts}" 2>/dev/null || true)"
@@ -336,6 +336,12 @@ check_studio_brand_css() {
     failures=$((failures + 1))
     return
   fi
+  override_path="$(printf '%s' "$html" | rg -o '/static/studio/mereka/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
+  if [[ -z "${override_path:-}" ]]; then
+    printf "✗ %s (missing studio runtime overrides CSS link)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
 
   css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}${css_path}?nocache=${ts}" 2>/dev/null || true)"
   if [[ -z "${css:-}" ]]; then
@@ -344,30 +350,13 @@ check_studio_brand_css() {
     return
   fi
 
-  if grep -Eq -- '--mereka-color-teal|--mereka-font-body|--pgn-font-family-sans-serif' <<<"$css" \
-    && grep -Eq 'Poppins-Regular[^"]*\.woff2|font-family:[[:space:]]*"Poppins"' <<<"$css" \
-    && grep -Eq 'Lato-Regular[^"]*\.woff2|font-family:[[:space:]]*"Lato"' <<<"$css"; then
-    if [[ "${BRANDING_LEVEL}" == "deep" ]]; then
-      if grep -Eq 'action-create-course' <<<"$css" \
-        && grep -Eq 'action-create-library' <<<"$css" \
-        && grep -Eq 'outline-complex' <<<"$css" \
-        && grep -Eq 'outline-item-title|outline-item|outline-subsection' <<<"$css" \
-        && grep -Eq 'add-xblock-component' <<<"$css"; then
-        printf "✓ %s\n" "$label"
-      else
-        printf "✗ %s (deep checks: missing Studio create-flow/outline selectors)\n" "$label" >&2
-        failures=$((failures + 1))
-      fi
-    else
-      if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then
-        printf "✓ %s (legacy Google import still present, but local brand tokens/fonts active)\n" "$label"
-      else
-        printf "✓ %s\n" "$label"
-      fi
-    fi
-  else
-    printf "✗ %s (missing token/font wiring)\n" "$label" >&2
+  check_css_fonts "https://${studio_host}${override_path}?nocache=${ts}" "$label (override CSS wiring)"
+
+  if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then
+    printf "✗ %s (studio-main-v1 still imports Google fonts)\n" "$label" >&2
     failures=$((failures + 1))
+  else
+    printf "✓ %s\n" "${label} (studio-main-v1 has no Google fonts)"
   fi
 }
 
