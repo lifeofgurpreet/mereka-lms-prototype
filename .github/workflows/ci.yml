@@ -18,6 +18,18 @@ jobs:
           ./scripts/gen/update-openedx-hostnames-doc.sh
           git diff --exit-code -- docs/operations/OPENEDX_HOSTNAMES.md
 
+  branding-preflight:
+    name: Branding Preflight (Source)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run source-only branding gate (deep)
+        run: |
+          RUN_LIVE_GATE=0 \
+          BRANDING_LEVEL=deep \
+          ./scripts/branding/run-branding-gates.sh prod
+
   monitoring-guardrails:
     name: Monitoring Guardrails
     runs-on: ubuntu-latest

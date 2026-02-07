@@ -81,6 +81,16 @@ Validate both production and dev:
 - **Every production rollout**: run `run-branding-gates.sh prod`.
 - **Daily/shift checks**: run `run-branding-gates.sh prod` (can disable screenshots by default).
 
+## CI Enforcement
+
+- PR/push source preflight: `.github/workflows/ci.yml` job `branding-preflight`
+  - Runs: `RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod`
+- Scheduled/runtime strict checks: `.github/workflows/public-health-check.yml`
+  - Runs prod with strict revision parity:
+    `STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod`
+  - Uploads logs from `var/ci/*.log` as workflow artifacts.
+  - Any strict parity failure is a release blocker until deploy drift is corrected.
+
 ## Related Documents
 
 - `docs/branding/BRANDING_GUARDRAILS.md`

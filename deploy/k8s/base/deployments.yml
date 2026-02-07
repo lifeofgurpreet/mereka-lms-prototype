@@ -98,6 +98,11 @@ spec:
             value: "gurpreet@biji-biji.com,malasari@mereka.my"
           - name: UWSGI_WORKERS
             value: "2"
+          - name: MONGODB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: FORUM_MONGODB_SRV
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -196,6 +201,11 @@ spec:
             value: cms
           - name: DJANGO_SETTINGS_MODULE
             value: cms.envs.tutor.production
+          - name: MONGODB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: FORUM_MONGODB_SRV
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -262,6 +272,11 @@ spec:
             value: "gurpreet@biji-biji.com,malasari@mereka.my"
           - name: UWSGI_WORKERS
             value: "2"
+          - name: MONGODB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: FORUM_MONGODB_SRV
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -359,6 +374,11 @@ spec:
             value: lms
           - name: DJANGO_SETTINGS_MODULE
             value: lms.envs.tutor.production
+          - name: MONGODB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: FORUM_MONGODB_SRV
           envFrom:
             - secretRef:
                 name: openedx-secrets

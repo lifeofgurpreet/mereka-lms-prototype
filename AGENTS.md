@@ -475,6 +475,11 @@ Regenerate hostname registry (after domain changes):
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).
+- CI enforcement for branding:
+  - `.github/workflows/ci.yml` runs source-only preflight (`RUN_LIVE_GATE=0 BRANDING_LEVEL=deep`).
+  - `.github/workflows/public-health-check.yml` runs strict prod parity (`STRICT_MFE_BRANDING_REV=1`) and uploads `var/ci/*.log` artifacts.
+- If strict prod branding gate fails with MFE revision mismatch, treat it as release-blocking deploy drift:
+  rebuild/push `openedx-mfe`, bump this repo image tag, update `bbi-infrastructure` pinned ref, then rerun strict gate.
 - Branding incident write-up template (required after production regressions): `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`.
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.

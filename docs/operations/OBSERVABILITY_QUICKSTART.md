@@ -9,6 +9,9 @@ Use this when you need a fast answer to: "Is Mereka LMS healthy right now?"
 # Public surfaces + certs
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 
+# Canonical strict branding parity check (prod)
+STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
+
 # Monitoring config integrity (repo-local)
 ./scripts/qa/audit-observability.sh --mode local
 
@@ -24,6 +27,9 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 # Consolidated gate (auth + multisite + observability + Velero + Grafana)
 ./scripts/qa/run-operations-gates.sh --env both
 ```
+
+Automated equivalent:
+- `.github/workflows/public-health-check.yml` runs strict prod branding parity + dev branding gate and uploads logs.
 
 `audit-observability --mode runtime` now also verifies that `PrometheusRule/lms-alerts`
 contains the reliability alerts:

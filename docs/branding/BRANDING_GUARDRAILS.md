@@ -6,6 +6,9 @@ This doc exists to make branding changes predictable and low-drama.
 Canonical execution model:
 - `docs/branding/BRANDING_OPERATING_MODEL.md`
 - `./scripts/branding/run-branding-gates.sh prod`
+- CI/runtime enforcement:
+  - `.github/workflows/ci.yml` (`branding-preflight`)
+  - `.github/workflows/public-health-check.yml` (strict prod parity + artifact logs)
 
 ## The 3 Sources Of Truth
 
