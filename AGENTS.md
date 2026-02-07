@@ -458,6 +458,8 @@ Regenerate hostname registry (after domain changes):
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
+- Public health workflow now runs branding gates with strict audit mode (`AUDIT_STRICT=1`) for prod+dev:
+  `.github/workflows/public-health-check.yml`.
 - Multisite drift guard: `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` (enforces `SiteConfiguration.enabled`, LMS/CMS/MFE roots, `THEME_NAME`, `course_org_filter`, and duplicate config detection).
 - Org ownership drift guard: `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both` (enforces staff+instructor coverage and platform-admin role presence for `MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`).
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
@@ -479,6 +481,12 @@ Regenerate hostname registry (after domain changes):
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
   - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod` (includes Studio CSS token/font wiring, MFE auth branding CTA, credentials health/admin reachability, forum heartbeat)
+- Studio authoring flow contract check: `scripts/qa/verify-studio-authoring-branding.sh [prod|dev]`
+  (enforces `action-create-course`, `action-create-library`, outline, and add-component selectors in source/live CSS).
+- Token provenance lock:
+  - Metadata file: `assets/branding/tokens.provenance.json`
+  - Validate drift + pinned source hash: `./scripts/branding/verify-token-drift.sh`
+  - Refresh metadata from upstream repo: `./scripts/branding/update-token-provenance.sh`
 - Studio branding Sass entrypoints must be present in the build context (`cms/static/sass/studio-main-v1*.scss`);
   `./infrastructure/tutor/apply-patches.sh` now syncs `infrastructure/tutor/themes/mereka/cms/static/sass/` into `tutor_env/env/build/openedx/themes/mereka/cms/static/sass/`.
 - Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.

@@ -26,6 +26,10 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 - ✅ Alert routing one-command verifier added: `./scripts/qa/verify-alert-routing.sh` + runtime workflow `.github/workflows/alert-routing-audit.yml`
 - ✅ DR evidence bundle pipeline added: `./scripts/qa/build-dr-evidence-bundle.sh` + monthly workflow `.github/workflows/dr-evidence-bundle.yml`
 - ✅ Operations gate hardened for timeout-safe execution + per-check artifacts (`var/operations-gates/*`)
+- ✅ Microsite branding parity enforcement expanded (Biji Studio + Biji MFE) and strict audit wired into public-health workflow
+- ✅ Studio authoring branding contract added (`./scripts/qa/verify-studio-authoring-branding.sh`) and integrated into branding gates
+- ✅ Design token provenance lock added (`assets/branding/tokens.provenance.json` + `verify-token-drift.sh`)
+- ⚙️ New follow-up: deploy refreshed openedx image to clear live Studio token/Google-font drift (`mereka-lms-2bnq`)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 

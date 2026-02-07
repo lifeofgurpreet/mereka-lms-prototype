@@ -52,11 +52,9 @@ Client subsites (separate clients, still must be branded):
 - Live checks now include revision marker parity (`--mereka-branding-rev`, `--mereka-mfe-branding-rev`)
   to explicitly detect older deployed images.
 - Public audit currently reports:
-  - MFE revision marker drift (branding marker present, expected rev mismatch)
   - Studio token/font drift (missing token export + legacy Google font import)
 - Strict parity is now enforced in CI/scheduled checks; clearing drift is tracked by:
-  - `mereka-lms-44nc` (deploy current MFE branding revision)
-  - `mereka-lms-1g4b` (Studio Google-font/token drift)
+  - `mereka-lms-2bnq` (deploy openedx refresh to clear Studio token/Google-font drift)
 
 ## Next 10 Branding Tasks (Execution Order, Current)
 
@@ -65,13 +63,13 @@ Parent epic:
 
 1. `mereka-lms-44nc` Clear strict parity gate by deploying current MFE branding revision `[open]`
 2. `mereka-lms-3mz` Visual regression gate for branding (baseline + diff + fail-on-drift) `[open]`
-3. `mereka-lms-1g4b` Strip Google fonts from Studio CSS (confirm live with rebuilt `openedx`) `[open]`
+3. `mereka-lms-2bnq` Deploy openedx refresh to clear Studio token/google-font drift on production hosts `[open]`
 4. `mereka-lms-h9c9` Ecommerce checkout theming (basket/checkout/receipt) `[open]`
 5. `mereka-lms-36jn` Forum UI theming (header/footer + typography) `[open]`
 6. `mereka-lms-s8r` Harden multi-site governance (policy + enforcement) `[open]`
-7. `mereka-lms-3l48` Studio authoring flow visual branding checks `[open]`
-8. `mereka-lms-37kj` Microsite branding parity enforcement `[open]`
-9. `mereka-lms-3m3v` Design token provenance lock `[open]`
+7. `mereka-lms-3l48` Studio authoring flow visual branding checks `[closed]`
+8. `mereka-lms-37kj` Microsite branding parity enforcement `[closed]`
+9. `mereka-lms-3m3v` Design token provenance lock `[closed]`
 10. `mereka-lms-2grh` Branding release preflight CI gate `[closed]`
 
 Supporting runbook hardening:

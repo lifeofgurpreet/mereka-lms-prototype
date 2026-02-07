@@ -34,8 +34,10 @@ What this enforces:
 - Logos/favicons/fonts exist and are wired correctly
 - The runtime override CSS carries deep branded selectors (course cards, courseware, Studio wrapper)
 - The MFE theme carries explicit selectors for authn/account/learner-dashboard surfaces
+- Studio authoring selectors are enforced explicitly (`action-create-course`, `action-create-library`,
+  `outline-complex`, `add-xblock-component`) via `scripts/qa/verify-studio-authoring-branding.sh`
 - Branding revision markers exist (`--mereka-branding-rev`, `--mereka-mfe-branding-rev`) for deploy parity checks
-- Tokens drift is caught (`assets/branding/tokens.css` matches runtime exports)
+- Token drift + provenance lock is caught (`assets/branding/tokens.css` + `assets/branding/tokens.provenance.json`)
 - Footer logo sizing guardrails are present in runtime CSS (prevents oversized footer branding regressions)
 
 ## What We Verify (After Deploy, Live)
@@ -64,8 +66,9 @@ This is intentionally non-fatal by default and answers: "which surface is still 
 
 Current audit coverage:
 - LMS + microsite runtime override CSS depth
-- Studio compiled CSS token/font wiring
+- Studio compiled CSS token/font wiring (primary + biji studio host)
 - MFE authn shell + `mfe_config` brand fields
+- MFE authn parity for primary + `apps.academy.biji-biji.com`
 - Branding revision marker parity (live vs source) for LMS/microsites
 - Credentials root/admin/health availability
 - Forum heartbeat
@@ -92,6 +95,11 @@ Current audit coverage:
    - Fix: rerun `./infrastructure/tutor/apply-patches.sh`; it enforces:
      - `COPY indigo/env.config.jsx /openedx/app/`
      - `COPY indigo/mereka /openedx/app/mereka`
+
+2d. Token updates happen without upstream provenance
+   - Cause: `tokens.css` edited directly with no pinned source commit/hash.
+   - Fix: update provenance lock with `./scripts/branding/update-token-provenance.sh`
+     and verify with `./scripts/branding/verify-token-drift.sh`.
 
 3. “Worked right after deploy, broken later”
    - Cause: cached HTML references old hashed assets, or a partial rollout.

@@ -74,6 +74,8 @@ Runs on every PR and push to main:
 3. **Validate Tutor** - Config syntax, patch script syntax
 4. **Monitoring Guardrails** - Local observability audit + offline monitoring plan artifact
 5. **Security Scan** - TruffleHog for leaked secrets, Hadolint for Dockerfiles
+6. **Branding Source Guard** - Includes Studio authoring selector check and token provenance lock
+   via `RUN_LIVE_GATE=0 ./scripts/branding/run-branding-gates.sh prod`
 
 ### Build Tutor Images (`build-tutor-images.yml`)
 
@@ -132,6 +134,14 @@ Optional repo variables for runtime cluster access:
 - `GKE_CLUSTER_PROJECT` (default: `bbi-k8`)
 - `GKE_CLUSTER_LOCATION` (default: `asia-southeast1-c`)
 - `GKE_CLUSTER_NAME` (default: `bbi-k8-cluster`)
+
+### Public Health Workflow (`public-health-check.yml`)
+
+Runs every 30 minutes and enforces branding/runtime parity:
+- `STRICT_MFE_BRANDING_REV=1 AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod`
+- `AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh dev`
+- Includes microsite parity (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`,
+  `apps.academy.biji-biji.com`, `studio.academy.biji-biji.com`) and Studio authoring selector checks.
 
 Manual inputs:
 - `mode`: `local`, `runtime`, or `all`

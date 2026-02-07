@@ -22,7 +22,7 @@ Run this from repo root:
 ./scripts/branding/sync-brand-assets.sh
 
 # 2) Validate branding from source to live
-./scripts/branding/run-branding-gates.sh prod
+AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod
 ```
 
 Optional strict parity mode:
@@ -89,6 +89,16 @@ Validate both production and dev:
      `COPY indigo/mereka /openedx/app/mereka` into `authn-common` when Tutor template
      drift omits them.
 
+8. **Studio authoring create-flow styles regress silently**
+   - Cause: generic Studio CSS checks pass but create-course/create-library selectors drift.
+   - Fix: enforce `scripts/qa/verify-studio-authoring-branding.sh` in source and live gates.
+
+9. **Token source drift across repos**
+   - Cause: `assets/branding/tokens.css` changes without pinned upstream source metadata.
+   - Fix: maintain `assets/branding/tokens.provenance.json`, refresh using
+     `scripts/branding/update-token-provenance.sh`, and enforce with
+     `scripts/branding/verify-token-drift.sh`.
+
 ## What Was Hacky And How We Avoid It
 
 - Hacky pattern: manual one-off checks run ad-hoc by different agents.
@@ -110,7 +120,7 @@ Validate both production and dev:
   - Runs: `RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod`
 - Scheduled/runtime strict checks: `.github/workflows/public-health-check.yml`
   - Runs prod with strict revision parity:
-    `STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod`
+    `STRICT_MFE_BRANDING_REV=1 AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod`
   - Uploads logs from `var/ci/*.log` as workflow artifacts.
   - Any strict parity failure is a release blocker until deploy drift is corrected.
 

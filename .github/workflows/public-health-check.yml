@@ -16,12 +16,14 @@ jobs:
         run: |
           mkdir -p var/ci
           STRICT_MFE_BRANDING_REV=1 \
+          AUDIT_STRICT=1 \
           CHECK_CERTS=1 \
           RUN_SCREENSHOTS=0 \
           ./scripts/branding/run-branding-gates.sh prod | tee var/ci/branding-gates-prod.log
 
       - name: Run canonical branding gate (dev)
         run: |
+          AUDIT_STRICT=1 \
           RUN_SCREENSHOTS=0 \
           ./scripts/branding/run-branding-gates.sh dev | tee var/ci/branding-gates-dev.log
 

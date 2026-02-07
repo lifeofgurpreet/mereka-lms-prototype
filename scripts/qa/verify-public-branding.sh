@@ -449,6 +449,11 @@ for host in "${EXTRA_HOSTS[@]}"; do
   check_homepage_brand_logo "${host}" "Microsite ${host} logo matches brand assets"
 done
 
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  check_mfe_authn_surface "${BIJI_MFE_DOMAIN}"
+  check_studio_brand_css "${BIJI_STUDIO_DOMAIN}" "Biji Studio uses themed CSS tokens/fonts (no Google fonts)"
+fi
+
 echo ""
 if [[ $failures -gt 0 ]]; then
   echo "${failures} branding checks failed." >&2

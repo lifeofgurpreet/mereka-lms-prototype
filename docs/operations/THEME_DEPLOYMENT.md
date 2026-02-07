@@ -157,6 +157,13 @@ It also refreshes the canonical design-system token export (`assets/branding/tok
 local `bbbi-mereka-brand-assets` repo when present, and keeps a theme copy at:
 `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css`.
 
+After intentional token updates, refresh and commit provenance metadata:
+
+```bash
+./scripts/branding/update-token-provenance.sh
+./scripts/branding/verify-token-drift.sh
+```
+
 ### Step 3: Apply Tutor Patches
 
 **CRITICAL**: Always run this before building:
@@ -178,13 +185,14 @@ This applies:
 Before building, run the branding gates (this is the source-of-truth check that prevents regressions):
 
 ```bash
-./scripts/branding/run-branding-gates.sh prod
+AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod
 ```
 
 Equivalent source-only gate:
 
 ```bash
 BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
+./scripts/qa/verify-studio-authoring-branding.sh prod --source-only
 ```
 
 ```bash

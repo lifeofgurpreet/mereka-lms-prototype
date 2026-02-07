@@ -248,6 +248,8 @@ check_credentials() {
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_lms_overrides "$LMS_DOMAIN" "LMS (${LMS_DOMAIN})"
   check_mfe_authn_surface "$MFE_DOMAIN"
+  check_studio_css "$BIJI_STUDIO_DOMAIN" "Biji Studio (${BIJI_STUDIO_DOMAIN})"
+  check_mfe_authn_surface "$BIJI_MFE_DOMAIN"
   check_lms_overrides "$BIJI_DOMAIN" "Microsite (${BIJI_DOMAIN})"
   check_lms_overrides "$SKILLOURFUTURE_DOMAIN" "Microsite (${SKILLOURFUTURE_DOMAIN})"
   check_studio_css "$STUDIO_DOMAIN" "Studio (${STUDIO_DOMAIN})"
