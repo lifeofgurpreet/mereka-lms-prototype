@@ -1,5 +1,5 @@
 # Monitoring & Alerting Guide
-_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-06_
+_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-07_
 
 This checklist focuses on the production **GKE Autopilot** cluster that runs the `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
 
@@ -94,8 +94,8 @@ Minimum recommended policies (edit thresholds as desired):
 | Velero restore-test failures | `infrastructure/monitoring/alerts/log-velero-restore-test-failures.json` | Detects failed restore drill runs. |
 | MySQL saturation high | `infrastructure/monitoring/alerts/mysql-saturation-high.json` | Warns on sustained high CPU/memory request utilization for MySQL pods. |
 | Redis saturation high | `infrastructure/monitoring/alerts/redis-saturation-high.json` | Warns on sustained high CPU/memory request utilization for Redis pods. |
-| Velero backup verification stale | `infrastructure/monitoring/alerts/velero-backup-verification-stale.json` | Critical when no backup-verification success signal is seen within 30h. |
-| Velero restore-test stale | `infrastructure/monitoring/alerts/velero-restore-test-stale.json` | Critical when no restore-test success signal is seen within 45d. |
+| Velero backup verification stale | `infrastructure/monitoring/alerts/velero-backup-verification-stale.json` | Critical stale approximation for daily verification cadence (implemented as `< 1 success over 24h for 6h`). |
+| Velero restore-test stale (runtime audit) | Runtime checks (`audit-observability`, `audit-velero-alert-pipeline`) | Enforced by CronJob freshness audits; long-window 45d stale cannot be expressed as a standard Cloud Monitoring threshold/absence alert condition. |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -122,6 +122,10 @@ By default, legacy Cloud SQL templates are skipped. Include them only if you int
 ```bash
 INCLUDE_LEGACY_MONITORING=1 ./scripts/infra/apply-monitoring-configs.sh apply
 ```
+
+`apply-monitoring-configs.sh` also skips
+`infrastructure/monitoring/alerts/velero-restore-test-stale.json` for the same 45-day
+window limitation above.
 
 Each config hits the endpoint every five minutes from Asia-Pacific probe sites and validates TLS. The production set now includes LMS, Studio, MFE, Discovery, Ecommerce, Notes, Credentials, Forum, and microsites. After creating uptime checks, re-run the alert creation command so the policy can reference the new metric series.
 
@@ -216,7 +220,8 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
 6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.
 7. **Observability posture audit** – run `./scripts/qa/audit-observability.sh --mode all` (or `--mode local` when offline) to verify coverage and deployment state.
-8. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
+8. **Velero alert pipeline audit** – run `./scripts/qa/audit-velero-alert-pipeline.sh` to validate log metrics/policies plus runtime CronJob freshness and hourly backup recency.
+9. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
 
 ## Certificate/SAN verification
 

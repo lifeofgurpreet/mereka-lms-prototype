@@ -33,6 +33,20 @@ is_legacy_artifact() {
   esac
 }
 
+is_unsupported_alert_template() {
+  local file="$1"
+  local base
+  base="$(basename "$file")"
+  case "$base" in
+    velero-restore-test-stale.json)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 apply_cmd() {
   if [[ "$MODE" == "apply" ]]; then
     eval "$1"
@@ -141,6 +155,10 @@ for file in "$ROOT_DIR"/infrastructure/monitoring/alerts/*.json; do
     echo "Skipping legacy alert template: $(basename "$file") (set INCLUDE_LEGACY_MONITORING=1 to include)"
     continue
   fi
+  if is_unsupported_alert_template "$file"; then
+    echo "Skipping unsupported alert template: $(basename "$file") (Cloud Monitoring alert windows are limited to 24h for this condition type)"
+    continue
+  fi
   display_name=$(jq -r '.displayName' "$file")
   existing_id=$(policy_id_for "$display_name")
   if [[ "$MODE" == "apply" ]]; then
@@ -169,10 +187,21 @@ for file in "$ROOT_DIR"/infrastructure/monitoring/dashboards/*.json; do
   fi
   display_name=$(jq -r '.displayName' "$file")
   existing_id=$(dashboard_id_for "$display_name")
-  if [[ -n "$existing_id" ]]; then
-    apply_cmd "gcloud monitoring dashboards delete '$existing_id' --quiet --project='$PROJECT'"
+  if [[ "$MODE" == "apply" ]]; then
+    if [[ -n "$existing_id" ]]; then
+      if ! gcloud monitoring dashboards delete "$existing_id" --quiet --project="$PROJECT"; then
+        echo "WARN: Failed to delete dashboard $display_name ($existing_id)." >&2
+      fi
+    fi
+    if ! gcloud monitoring dashboards create --config-from-file="$file" --project="$PROJECT"; then
+      echo "WARN: Failed to create dashboard $display_name from $(basename "$file")." >&2
+    fi
+  else
+    if [[ -n "$existing_id" ]]; then
+      echo "gcloud monitoring dashboards delete '$existing_id' --quiet --project='$PROJECT'"
+    fi
+    echo "gcloud monitoring dashboards create --config-from-file='$file' --project='$PROJECT'"
   fi
-  apply_cmd "gcloud monitoring dashboards create --config-from-file='$file' --project='$PROJECT'"
 done
 
 if [[ "$MODE" == "plan" ]]; then

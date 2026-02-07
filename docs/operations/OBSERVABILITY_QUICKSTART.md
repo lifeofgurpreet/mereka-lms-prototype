@@ -1,5 +1,5 @@
 # Observability Quickstart
-_Audience: On-call / Operators • Last updated: 2026-02-06_
+_Audience: On-call / Operators • Last updated: 2026-02-07_
 
 Use this when you need a fast answer to: "Is Mereka LMS healthy right now?"
 
@@ -14,6 +14,9 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 
 # Runtime monitoring objects + synthetic cronjobs (requires cluster + gcloud auth)
 ./scripts/qa/audit-observability.sh --mode runtime
+
+# Velero alert pipeline + freshness/recency checks (repo + runtime)
+./scripts/qa/audit-velero-alert-pipeline.sh
 
 # Grafana panel/query coverage contract (required + recommended)
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
@@ -53,7 +56,7 @@ Critical:
 - Velero restore-test failures
 - Velero backup verification failures
 - Velero backup verification stale (no success in 30h)
-- Velero restore-test stale (no success in 45d)
+- Velero restore-test stale (enforced by runtime freshness audit, not a long-window GCP alert policy)
 - CrashLoopBackOff on any `mereka-lms` workload
 - Critical deployment unavailable replicas (`lms`, `cms`, `caddy`, `mfe`, `forum`, `discovery`, `ecommerce`, `credentials`, `notes`, `xqueue`)
 
@@ -72,6 +75,10 @@ Warning:
 ./scripts/infra/apply-monitoring-configs.sh plan
 ./scripts/infra/apply-monitoring-configs.sh apply
 ```
+
+`apply-monitoring-configs.sh` intentionally skips
+`velero-restore-test-stale.json` because Cloud Monitoring threshold/absence alert
+conditions cannot evaluate 45-day windows.
 
 Legacy-only templates (Cloud SQL) are skipped by default:
 

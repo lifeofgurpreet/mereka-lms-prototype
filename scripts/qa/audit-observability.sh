@@ -117,6 +117,19 @@ is_legacy_artifact() {
   esac
 }
 
+is_unsupported_alert_artifact() {
+  local base
+  base="$(basename "$1")"
+  case "$base" in
+    velero-restore-test-stale.json)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 expected_from_repo() {
   local kind="$1"
   local out="$2"
@@ -139,6 +152,9 @@ expected_from_repo() {
     alerts)
       for file in infrastructure/monitoring/alerts/*.json; do
         if [[ "$INCLUDE_LEGACY" != "1" ]] && is_legacy_artifact "$file"; then
+          continue
+        fi
+        if is_unsupported_alert_artifact "$file"; then
           continue
         fi
         jq -r '.displayName' "$file" >>"$out"
@@ -182,9 +198,6 @@ assert_expected_in_actual() {
 fetch_runtime_names() {
   local kind="$1"
   local out="$2"
-  CLOUDSDK_CONFIG=/tmp/gcloud-observability-audit
-  export CLOUDSDK_CONFIG
-  mkdir -p "$CLOUDSDK_CONFIG"
 
   case "$kind" in
     uptime)
@@ -221,7 +234,7 @@ runtime_gcp_check() {
   command -v jq >/dev/null
 
   local active_account
-  active_account="$(CLOUDSDK_CONFIG=/tmp/gcloud-observability-audit gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null || true)"
+  active_account="$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null || true)"
   if [[ -z "$active_account" ]]; then
     if [[ "$STRICT_RUNTIME" == "1" ]]; then
       echo "No active gcloud account. Run: gcloud auth login && gcloud config set account <account>"

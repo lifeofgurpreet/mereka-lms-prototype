@@ -1,5 +1,5 @@
 # Observability Ownership and Sync Model
-_Audience: SRE + Platform + Contributors • Last updated: 2026-02-06_
+_Audience: SRE + Platform + Contributors • Last updated: 2026-02-07_
 
 This document defines who owns each observability layer and how changes are synchronized.
 
@@ -10,6 +10,7 @@ This document defines who owns each observability layer and how changes are sync
 | GCP Monitoring templates (dashboards, alerts, uptime, log metrics) | `infrastructure/monitoring/` in this repo | Mereka LMS platform team |
 | Apply logic | `scripts/infra/apply-monitoring-configs.sh` | Mereka LMS platform team |
 | Audit logic | `scripts/qa/audit-observability.sh` | Mereka LMS platform team |
+| Velero alert pipeline audit | `scripts/qa/audit-velero-alert-pipeline.sh` | Mereka LMS platform team |
 | VPS Grafana dashboard (`bbi-app-mereka-lms`) | observability repo (`/home/gurpreet/projects/observability`) | Observability platform team |
 
 ## Change Process
@@ -24,6 +25,7 @@ This document defines who owns each observability layer and how changes are sync
 5. Verify deployed coverage:
    - `./scripts/qa/audit-observability.sh --mode runtime`
    - For release gates / deep audits: `STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime`
+   - For Velero pipeline gate: `STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh --json`
 6. If panel parity is needed in VPS Grafana, open/update PR in observability repo and link both PRs.
 
 ## Drift Rules

@@ -1,5 +1,5 @@
 # On-Call Observability Playbook
-_Audience: Incident responders • Last updated: 2026-02-06_
+_Audience: Incident responders • Last updated: 2026-02-07_
 
 Use this sequence to understand platform health quickly.
 
@@ -15,6 +15,7 @@ If this fails, user-facing impact is likely.
 
 ```bash
 ./scripts/qa/audit-observability.sh --mode runtime
+./scripts/qa/audit-velero-alert-pipeline.sh
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ```
 
@@ -45,8 +46,10 @@ Open in order:
 - Velero verification/restore-test failures:
   - inspect `velero` CronJob/job logs
   - run `./scripts/qa/audit-velero.sh`
+  - run `./scripts/qa/audit-velero-alert-pipeline.sh`
 - Velero stale-success signal (`velero-*-stale`):
   - confirm `lastSuccessfulTime` for `backup-verification` and `restore-test`
+  - run strict freshness checks: `STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh`
   - inspect `velero` CronJob history and recent job logs
   - treat as data-risk until success signal is restored
 - CrashLoopBackOff / Pending pods / unavailable critical deployments:
@@ -64,6 +67,7 @@ Open in order:
 
 Attach:
 - `audit-observability` JSON output
+- `audit-velero-alert-pipeline` output
 - `public-health-check` output
 - relevant dashboard screenshots
 - any `audit-velero` output if data-risk

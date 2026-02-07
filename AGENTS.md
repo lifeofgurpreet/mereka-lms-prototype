@@ -442,9 +442,10 @@ Regenerate hostname registry (after domain changes):
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
+- Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.
-- Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`).
+- Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`; `velero-restore-test-stale.json` is intentionally skipped because Cloud Monitoring threshold/absence alert windows are limited to ~24h).
 - Telemetry path validator (Grafana ↔ GKE/VPS Prometheus): `scripts/infra/validate-telemetry-connectivity.sh` (`--json`, `--strict`, optional `REQUIRE_VPS_PROM_DS=1`, `REQUIRE_GRAFANA_RECOMMENDED=1`).
 - Grafana coverage contract audit: `scripts/qa/audit-grafana-dashboard.sh` (contract: `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`).
 - PrometheusRule reliability coverage (CrashLoop/Pending/unavailable replicas/synthetic failures): `deploy/k8s/base/monitoring/prometheusrule-lms.yaml`.

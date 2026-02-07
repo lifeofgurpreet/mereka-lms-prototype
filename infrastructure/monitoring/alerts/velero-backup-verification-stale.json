@@ -5,18 +5,18 @@
   "severity": "CRITICAL",
   "conditions": [
     {
-      "displayName": "backup-verification success runs < 1 over 30h",
+      "displayName": "backup-verification success runs < 1 over 24h for 6h",
       "conditionThreshold": {
         "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/velero-backup-verification-success\"",
         "aggregations": [
           {
-            "alignmentPeriod": "108000s",
+            "alignmentPeriod": "86400s",
             "perSeriesAligner": "ALIGN_SUM"
           }
         ],
         "comparison": "COMPARISON_LT",
         "thresholdValue": 1,
-        "duration": "0s",
+        "duration": "21600s",
         "evaluationMissingData": "EVALUATION_MISSING_DATA_ACTIVE",
         "trigger": {
           "count": 1

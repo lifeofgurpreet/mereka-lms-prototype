@@ -1,5 +1,5 @@
 # Velero Backup Audit (End-to-End)
-_Audience: SRE + Platform Ops • Owner: Infra • Last updated: 2026-02-06_
+_Audience: SRE + Platform Ops • Owner: Infra • Last updated: 2026-02-07_
 
 This document defines the **backup posture audit** we run to ensure:
 - backups are actually being created (not just manifests)
@@ -17,6 +17,12 @@ Run this from the repo root (prod by default):
 Non-JSON:
 ```bash
 ./scripts/qa/audit-velero.sh
+```
+
+Velero alert pipeline + runtime freshness/recency coverage:
+```bash
+./scripts/qa/audit-velero-alert-pipeline.sh
+STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh --json | jq .
 ```
 
 For a PVC inventory of the hourly critical schedule:
@@ -82,6 +88,17 @@ If you deploy MongoDB without a PVC (e.g., `emptyDir`), any data is **ephemeral*
 Fix:
 - Prefer: move modulestore to Atlas (target architecture).
 - Alternative (dev-only): attach a PVC-backed volume to MongoDB before importing anything you care about.
+
+### 4) Restore stale alert window mismatch in Cloud Monitoring
+Cloud Monitoring threshold/absence alert conditions are limited to roughly 24h lookback windows.
+That means a direct `restore-test success < 1 over 45d` policy is not deployable as a standard
+condition.
+
+Current enforcement model:
+- `backup-verification` stale signal is handled by GCP policy + runtime checks.
+- `restore-test` stale signal is enforced by runtime freshness checks in:
+  - `./scripts/qa/audit-observability.sh --mode runtime`
+  - `./scripts/qa/audit-velero-alert-pipeline.sh`
 
 ## Recommended Cadence
 
