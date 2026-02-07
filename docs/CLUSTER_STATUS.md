@@ -54,8 +54,7 @@ _Last updated: 2026-02-07_
   - Legacy `Service/mongodb` absent
 
 ## Known Gaps
-1. Velero audit still shows pending legacy PVC inventory entry for `mongodb`; keep this tracked during cleanup.
-2. DR evidence process must remain monthly and reviewed (not just scripted).
+1. DR evidence process must remain monthly and reviewed (not just scripted).
 
 ## Canonical Verification Commands
 ```bash

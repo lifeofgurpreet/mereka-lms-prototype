@@ -141,6 +141,7 @@ See `docs/adr/001-mongodb-atlas.md` for full rationale.
 - **LMS/CMS modulestore**: explicitly configured to Atlas (`MONGODB_HOST` resolves to `*.mongodb.net` via `openedx-secrets/FORUM_MONGODB_SRV`).
 - **Legacy in-cluster MongoDB deployment**: retired in production after Velero pre-op backup (`pre-op-mereka-lms-20260207-1451`).
 - **Legacy in-cluster MongoDB service**: removed in production (`Service/mongodb` is absent after Argo sync to `bbi-infrastructure` overlay patch).
+- **Legacy in-cluster MongoDB PVC** (`PVC/mongodb`): removed in production after fresh pre-op backup (`pre-op-mereka-lms-20260207-2158`).
 
 ### Connection Details
 | Service | Database | Connection |
