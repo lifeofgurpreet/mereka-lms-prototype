@@ -3,6 +3,9 @@ _Audience: Product Eng + Platform Eng • Last updated: 2026-02-07_
 
 This roadmap decomposes the Mereka design system rollout into concrete, testable beads.
 
+Execution standard:
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
+
 ## Global Gates (Do Not Skip)
 
 Source gates (repo truth):
@@ -52,21 +55,24 @@ Client subsites (separate clients, still must be branded):
 - This is deployment parity drift (older `openedx` image in production), tracked by
   `mereka-lms-2hxl` and `mereka-lms-1g4b`.
 
-## Next 10 Branding Tasks (Execution Order)
+## Next 10 Branding Tasks (Execution Order, Current)
 
 Parent epic:
 - `mereka-lms-3l8` Branding depth & UX polish
 
-1. `mereka-lms-2hxl` Deploy deep branding to prod (openedx + mfe image parity)
-2. `mereka-lms-1g4b` Strip Google fonts from Studio CSS (confirm live with rebuilt openedx image)
-3. `mereka-lms-2vsz` MFE account/settings theming + UX
-4. `mereka-lms-2ypu` MFE learner dashboard polish
-5. `mereka-lms-5t06` LMS discovery/search polish final live verification pass
-6. `mereka-lms-h9c9` Ecommerce checkout theming (basket/checkout/receipt)
-7. `mereka-lms-1byu` Credentials admin branding (decision + minimal implementation)
-8. `mereka-lms-36jn` Forum UI theming (header/footer + typography)
-9. `mereka-lms-3mz` Visual regression gate for branding (screenshots + fail-on-drift)
-10. `mereka-lms-s8r` Multisite branding governance + enforcement checks
+1. `mereka-lms-1ywp` Enforce strict MFE branding revision parity in CI `[open]`
+2. `mereka-lms-3mz` Visual regression gate for branding (baseline + diff + fail-on-drift) `[open]`
+3. `mereka-lms-1g4b` Strip Google fonts from Studio CSS (confirm live with rebuilt `openedx`) `[open]`
+4. `mereka-lms-h9c9` Ecommerce checkout theming (basket/checkout/receipt) `[open]`
+5. `mereka-lms-36jn` Forum UI theming (header/footer + typography) `[open]`
+6. `mereka-lms-s8r` Harden multi-site governance (policy + enforcement) `[open]`
+7. `mereka-lms-2grh` Branding release preflight CI gate `[open]`
+8. `mereka-lms-3l48` Studio authoring flow visual branding checks `[open]`
+9. `mereka-lms-37kj` Microsite branding parity enforcement `[open]`
+10. `mereka-lms-3m3v` Design token provenance lock `[open]`
+
+Supporting runbook hardening:
+- `mereka-lms-36bd` Branding incident postmortem template `[closed]`
 
 ## Notes On Duplicates
 

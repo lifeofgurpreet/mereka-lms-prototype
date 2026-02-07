@@ -2,6 +2,13 @@
 
 This guide covers deploying branding/theme changes from the Mereka brand system to the production (GKE) and dev (kind) Open edX environments.
 
+Canonical branding workflow:
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
+- `./scripts/branding/run-branding-gates.sh prod`
+
+Important:
+- Production is GitOps-managed. Direct `kubectl set image` changes are non-durable and will drift.
+
 ## Prerequisites
 
 - Docker installed and running
@@ -168,6 +175,12 @@ This applies:
 ### Step 4: Build Docker Images
 
 Before building, run the branding gates (this is the source-of-truth check that prevents regressions):
+
+```bash
+./scripts/branding/run-branding-gates.sh prod
+```
+
+Equivalent source-only gate:
 
 ```bash
 BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh

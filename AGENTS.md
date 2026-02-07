@@ -422,6 +422,12 @@ Canonical hostname list:
 
 Branding guardrails (read before changing theme assets/CSS):
 - `docs/branding/BRANDING_GUARDRAILS.md`
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
+
+Canonical branding execution command (source + live verification):
+```bash
+./scripts/branding/run-branding-gates.sh prod
+```
 
 Auth hardening verification (preferred):
 ```bash
@@ -461,6 +467,8 @@ Regenerate hostname registry (after domain changes):
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
+- Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).
+- Branding incident write-up template (required after production regressions): `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`.
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).

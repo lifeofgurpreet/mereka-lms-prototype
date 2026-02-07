@@ -1,10 +1,11 @@
 # Mereka.io Theme Reference
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-02-06_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-02-07_
 
 This document captures the brand tokens we apply across LMS/Studio and all MFEs so every surface feels like mereka.io while still leaning on Paragon.
 
 Quick operational entrypoint (read this before changing anything):
 - `docs/branding/BRANDING_GUARDRAILS.md`
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
 - `docs/branding/BRANDING_ROADMAP.md`
 
 ## Palette
@@ -106,7 +107,13 @@ BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
 This health gate also enforces that our canonical design token export (`assets/branding/tokens.css`)
 has not drifted from what we export at runtime in `mereka-overrides.css`.
 
-To validate that the branding is actually visible on live domains, run:
+Canonical end-to-end gate (source + live):
+
+```bash
+./scripts/branding/run-branding-gates.sh prod
+```
+
+To validate that the branding is actually visible on live domains manually, run:
 
 ```bash
 ./scripts/qa/verify-public-branding.sh prod
@@ -121,7 +128,7 @@ BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
 For strict MFE revision parity (live CSS must match current source marker):
 
 ```bash
-STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod
+STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 ```
 
 `verify-public-branding.sh` also validates Credentials and forum integration surfaces:

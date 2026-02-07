@@ -1,139 +1,59 @@
-# Branding Verification Checklist - 2026-02-04
+# Branding Verification Checklist
+_Last updated: 2026-02-07_
 
-## Summary
+Use this checklist for any branding PR or branding deployment.
 
-**Overall Status: IMPLEMENTED (runtime verification pending)** - repo wiring + assets are in place; confirm via checks below
-
-| Component | Status | Issues |
-|-----------|--------|--------|
-| LMS Homepage | ✅ Expected | Verify hero + footer in runtime |
-| LMS Footer | ✅ Expected | Custom footer + logo in runtime |
-| LMS Header | ✅ Expected | Mereka logo + nav chrome |
-| Studio | ✅ Expected | Theme applied, “Mereka Academy - Studio” |
-| MFE (Login) | ✅ Expected | Authn loads via LMS config |
-| MFE (Other) | ✅ Expected | Same config path as login |
-| Courses Page | ✅ Expected | Header/footer consistent |
-| Brand Colors | ⚠️ Review | Align with official palette if needed |
-
----
-
-## Resolved Issues (Historical)
-
-### 1. MFE Login Page Config API
-**Fix shipped**: Caddy `Host` header override + MFE config alignment.
-**Verify**: `curl -s "https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn" | jq .`
-
-### 2. Studio Theme
-**Fix shipped**: Theme wiring applied via Tutor patches and theme assets sync.
-**Verify**: `scripts/qa/verify-studio-branding.sh`
-
----
-
-## Remaining Follow-ups
-
-### 1. Palette Alignment Review
-The official palette calls for teal/magenta/blue accents. Confirm whether the current token set
-matches brand intent and adjust `_tokens.scss` if needed.
-
----
-
-## Working Elements (Expected)
-
-### LMS Header
-- Mereka logo displays correctly in navigation
-- "Explore courses" link present
-- "Register for free" and "Sign in" buttons styled
-- Teal accent color visible on search button
-
-### LMS Footer Content
-- Footer text is correct ("Mereka Academy blends community...")
-- Sections (Explore, Support, Partners) populated
-- Links point to correct URLs
-- Copyright shows "2026 Biji-Biji Initiative · Mereka Academy"
-- "Powered by Open edX and Tutor" attribution present
-
-### LMS Courses Page
-- Same header/footer as homepage
-- Search functionality present
-- "Refine Your Search" sidebar visible
-
----
-
-## Theme Files Inventory
-
-### Present in Repository
-```
-infrastructure/tutor/themes/mereka/
-├── common/static/
-│   ├── fonts/ (Lato, Poppins woff2 files)
-│   └── images/ (logos, favicons)
-├── lms/
-│   ├── static/sass/theme.scss
-│   ├── static/images/logo.png
-│   └── templates/ (footer.html, header/brand.html, index_overlay.html)
-├── cms/static/sass/theme.scss
-├── mfe/ (fonts, images, mereka.scss)
-└── scss/ (_fonts.scss, _tokens.scss, theme.scss)
-```
-
-### Theming Configuration Required
-- `ENABLE_COMPREHENSIVE_THEMING: true`
-- `DEFAULT_SITE_THEME: "mereka"`
-- `COMPREHENSIVE_THEME_DIRS: ["/openedx/themes"]`
-
----
-
-## Screenshots Captured
-
-| Screenshot | Location | Description |
-|------------|----------|-------------|
-| /tmp/lms-homepage.png | LMS | Hero + header + footer branded |
-| /tmp/courses.png | LMS | Courses page with cards |
-| /tmp/studio-homepage.png | Studio | “Mereka Academy - Studio” header |
-| /tmp/mfe-login.png | MFE | Authn login page rendered correctly |
-| /tmp/biji-homepage.png | Microsite | academy.biji-biji.com homepage |
-| /tmp/skillourfuture-homepage.png | Microsite | skillourfuture.academy.mereka.io homepage |
-
----
-
-## Recommended Verification Order
-
-1. Run `./scripts/branding/verify-branding-health.sh`
-2. Run `scripts/qa/verify-studio-branding.sh` (cluster)
-3. Visual check LMS/MFE pages for hero, footer, and cards
-
----
-
-## Verification Commands
+## Canonical Command
 
 ```bash
-# Offline asset wiring check
-./scripts/branding/verify-branding-health.sh
-
-# Public branding smoke check (prod/dev)
-./scripts/qa/verify-public-branding.sh prod
-
-# Check theme is applied
-curl -s https://academyv2.mereka.io | grep -i "mereka"
-
-# Check MFE config API (LMS)
-curl -s "https://academyv2.mereka.io/api/mfe_config/v1?mfe=authn" | jq .
-
-# Check static assets
-curl -sI https://academyv2.mereka.io/theming/asset/images/logo.png
-curl -sI https://academyv2.mereka.io/theming/asset/images/logo-horizontal.png
-
-# Check Studio theme
-curl -s https://studio.academyv2.mereka.io | grep -E "(Mereka|My Open edX)"
-
-# Visual verification with agent-browser
-agent-browser open https://academyv2.mereka.io && agent-browser screenshot homepage.png
+./scripts/branding/run-branding-gates.sh prod
 ```
 
----
+This runs source checks, live checks, and a branding surface audit.
 
-## Next Steps
+Strict parity mode (recommended for CI/scheduled runs):
 
-1. [ ] Run the verification steps above in GKE + dev
-2. [ ] Confirm hero gradient + footer logos visually
-3. [ ] Review token palette vs official brand colors
+```bash
+STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
+```
+
+## Pass Criteria
+
+- Source gate passes (`verify-branding-health` with `BRANDING_LEVEL=deep`).
+- Public endpoint checks pass (`public-health-check`).
+- Live branding checks pass (`verify-public-branding`).
+- No high-severity gaps in surface audit.
+
+## Quick Manual Spot Checks
+
+1. `https://academyv2.mereka.io/`
+2. `https://studio.academyv2.mereka.io/`
+3. `https://apps.academyv2.mereka.io/authn/login`
+4. `https://ecommerce.academyv2.mereka.io/dashboard/`
+5. `https://forum.academyv2.mereka.io/heartbeat`
+6. `https://credentials.academyv2.mereka.io/health/`
+7. `https://academy.biji-biji.com/`
+8. `https://skillourfuture.academy.mereka.io/`
+
+## Known Non-Blocking Behavior
+
+- Credentials is API-first; `/` may redirect to `/health/`.
+- Non-strict MFE checks allow revision mismatch but still require branding markers.
+
+## If Any Check Fails
+
+1. Re-run asset sync:
+   - `./scripts/branding/sync-brand-assets.sh`
+2. Re-run source gate:
+   - `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
+3. Rebuild/push images as needed (`openedx`, `openedx-mfe`).
+4. Update GitOps pinned ref and verify rollout.
+5. Re-run:
+   - `./scripts/branding/run-branding-gates.sh prod`
+
+## References
+
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
+- `docs/branding/BRANDING_GUARDRAILS.md`
+- `docs/branding/BRANDING_ROADMAP.md`
+- `docs/operations/THEME_DEPLOYMENT.md`

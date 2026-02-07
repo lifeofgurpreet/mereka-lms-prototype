@@ -1,7 +1,11 @@
 # Branding Guardrails (Source Of Truth)
-_Audience: Platform Eng + Product Eng • Last updated: 2026-02-06_
+_Audience: Platform Eng + Product Eng • Last updated: 2026-02-07_
 
 This doc exists to make branding changes predictable and low-drama.
+
+Canonical execution model:
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
+- `./scripts/branding/run-branding-gates.sh prod`
 
 ## The 3 Sources Of Truth
 
@@ -34,9 +38,7 @@ What this enforces:
 ## What We Verify (After Deploy, Live)
 
 ```bash
-CHECK_CERTS=1 CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh prod
-BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod
-./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/branding/run-branding-gates.sh prod
 ```
 
 Notes:
@@ -45,7 +47,7 @@ Notes:
   MFE auth branding CTA text, Credentials health/admin reachability, Credentials API-root routing
   (`/` can be API-first redirect to `/health/`), and Forum heartbeat.
 - To enforce exact live-vs-source MFE branding revision parity, run:
-  `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod`
+  `STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod`
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
 
 ## Surface Audit (Gap-Finder)

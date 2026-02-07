@@ -22,6 +22,8 @@ Runbooks, troubleshooting guides, and operational procedures for managing the Me
 
 ### Deployment & Infrastructure
 - [`DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Deployment procedures
+- [`THEME_DEPLOYMENT.md`](THEME_DEPLOYMENT.md) - Branding/theme deployment flow
+- [`../branding/BRANDING_OPERATING_MODEL.md`](../branding/BRANDING_OPERATING_MODEL.md) - Canonical branding execution contract
 - [`GCP_ROADMAP.md`](GCP_ROADMAP.md) - Cloud architecture plan
 - [`MONITORING.md`](MONITORING.md) - Monitoring and alerting
 - [`OBSERVABILITY_QUICKSTART.md`](OBSERVABILITY_QUICKSTART.md) - Fast health/audit flow for operators

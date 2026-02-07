@@ -1,0 +1,91 @@
+# Branding Operating Model
+_Audience: Platform + Product Engineering • Last updated: 2026-02-07_
+
+This is the canonical workflow for branding changes in Mereka LMS.
+
+## Non-Negotiable Rules
+
+1. `assets/branding/*` is the source input; runtime truth is `infrastructure/tutor/themes/mereka/*`.
+2. Any `tutor config save` must be followed by `./infrastructure/tutor/apply-patches.sh`.
+3. No branding release is complete until both source and live gates pass.
+4. Production deploys are GitOps-managed; do not treat direct `kubectl set image` as source-of-truth.
+5. Drift is a defect: fix with rebuild+deploy, not by loosening checks.
+
+## Canonical Workflow
+
+Run this from repo root:
+
+```bash
+# 1) Sync brand assets + runtime CSS
+./scripts/branding/sync-brand-assets.sh
+
+# 2) Validate branding from source to live
+./scripts/branding/run-branding-gates.sh prod
+```
+
+Optional strict parity mode:
+
+```bash
+STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
+```
+
+Validate both production and dev:
+
+```bash
+./scripts/branding/run-branding-gates.sh all
+```
+
+## Deploy Contract (Production)
+
+1. Run source/live branding gates.
+2. Build/push images (`openedx`, `openedx-mfe` when changed).
+3. Update image tags under `deploy/k8s/base`.
+4. Commit/push this repo.
+5. Update pinned `?ref=<sha>` in `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`.
+6. Verify Argo rollout and rerun branding gates.
+
+## Known Failure Patterns And Correct Fixes
+
+1. **LMS/Studio unbranded on live after merge**
+   - Cause: old `openedx` image still running.
+   - Fix: rebuild/push `openedx`, bump GitOps ref, rerun `run-branding-gates.sh prod`.
+
+2. **MFE looks old while LMS is correct**
+   - Cause: MFE CSS is image-baked; no MFE rebuild.
+   - Fix: rebuild/push `openedx-mfe`; enforce `STRICT_MFE_BRANDING_REV=1`.
+
+3. **Studio token/font drift**
+   - Cause: Studio Sass entrypoints not synced into Tutor build context.
+   - Fix: keep `cms/static/sass/studio-main-v1*.scss` tracked; rerun `apply-patches.sh` before build.
+
+4. **Credentials root returns Page Not Found**
+   - Cause: service is API-first.
+   - Fix: treat `/health/` + `/admin/login/` as contract; do not require UI landing page at `/`.
+
+5. **Footer/logo regressions**
+   - Cause: asset sync drift or override CSS not deployed.
+   - Fix: run `sync-brand-assets.sh`, source gate, redeploy image; never patch live pod files.
+
+## What Was Hacky And How We Avoid It
+
+- Hacky pattern: manual one-off checks run ad-hoc by different agents.
+  - Standard now: `scripts/branding/run-branding-gates.sh`.
+- Hacky pattern: assuming prod and repo are in sync.
+  - Standard now: revision markers + strict parity option.
+- Hacky pattern: updating docs after incidents only.
+  - Standard now: update `AGENTS.md` + this doc in every branding incident/fix PR.
+
+## Ownership And Cadence
+
+- **Every branding-affecting PR**: run source gate at minimum.
+- **Every production rollout**: run `run-branding-gates.sh prod`.
+- **Daily/shift checks**: run `run-branding-gates.sh prod` (can disable screenshots by default).
+
+## Related Documents
+
+- `docs/branding/BRANDING_GUARDRAILS.md`
+- `docs/branding/BRANDING_ROADMAP.md`
+- `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`
+- `docs/BRANDING.md`
+- `docs/operations/THEME_DEPLOYMENT.md`
+- `docs/operations/OPENEDX_HOSTNAMES.md`
