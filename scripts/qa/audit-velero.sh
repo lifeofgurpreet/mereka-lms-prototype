@@ -64,6 +64,8 @@ cronjobs_json="$tmpdir/cronjobs.json"
 jobs_json="$tmpdir/jobs.json"
 app_pvcs_json="$tmpdir/app_pvcs.json"
 app_mongodb_json="$tmpdir/app_mongodb.json"
+app_mongodb_svc_json="$tmpdir/app_mongodb_svc.json"
+app_mongodb_ep_json="$tmpdir/app_mongodb_ep.json"
 app_lms_json="$tmpdir/app_lms.json"
 app_cms_json="$tmpdir/app_cms.json"
 openedx_secrets_json="$tmpdir/openedx_secrets.json"
@@ -78,6 +80,8 @@ kubectl_json "$VELERO_NS" jobs.batch >"$jobs_json"
 
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get pvc -o json 2>/dev/null >"$app_pvcs_json" || echo '{"items":[]}' >"$app_pvcs_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy mongodb -o json 2>/dev/null >"$app_mongodb_json" || echo '{}' >"$app_mongodb_json"
+kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get svc mongodb -o json 2>/dev/null >"$app_mongodb_svc_json" || echo '{}' >"$app_mongodb_svc_json"
+kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get endpoints mongodb -o json 2>/dev/null >"$app_mongodb_ep_json" || echo '{}' >"$app_mongodb_ep_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy lms -o json 2>/dev/null >"$app_lms_json" || echo '{}' >"$app_lms_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy cms -o json 2>/dev/null >"$app_cms_json" || echo '{}' >"$app_cms_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get secret openedx-secrets -o json 2>/dev/null >"$openedx_secrets_json" || echo '{}' >"$openedx_secrets_json"
@@ -143,6 +147,8 @@ paths = {
     "jobs": os.path.join(tmpdir, "jobs.json"),
     "app_pvcs": os.path.join(tmpdir, "app_pvcs.json"),
     "app_mongodb": os.path.join(tmpdir, "app_mongodb.json"),
+    "app_mongodb_svc": os.path.join(tmpdir, "app_mongodb_svc.json"),
+    "app_mongodb_ep": os.path.join(tmpdir, "app_mongodb_ep.json"),
     "app_lms": os.path.join(tmpdir, "app_lms.json"),
     "app_cms": os.path.join(tmpdir, "app_cms.json"),
     "openedx_secrets": os.path.join(tmpdir, "openedx_secrets.json"),
@@ -157,6 +163,8 @@ cronjobs = load(paths["cronjobs"], {"items": []})
 jobs = load(paths["jobs"], {"items": []})
 app_pvcs = load(paths["app_pvcs"], {"items": []})
 app_mongodb = load(paths["app_mongodb"], {})
+app_mongodb_svc = load(paths["app_mongodb_svc"], {})
+app_mongodb_ep = load(paths["app_mongodb_ep"], {})
 app_lms = load(paths["app_lms"], {})
 app_cms = load(paths["app_cms"], {})
 openedx_secrets = load(paths["openedx_secrets"], {})
@@ -536,6 +544,28 @@ def summarize():
                     "risk": "mereka-lms/mongodb Deployment uses emptyDir for /data/db (ephemeral). If modulestore is pointed at in-cluster MongoDB, course content will be lost on pod reschedule/restart.",
                     "fix_hint": "Move modulestore to Atlas OR add a PVC-backed volume to MongoDB before importing any courses.",
                 })
+    except Exception:
+        pass
+
+    # 3) Legacy mongodb Service drift
+    try:
+        svc_exists = bool((app_mongodb_svc.get("metadata") or {}).get("name"))
+        deploy_exists = bool((app_mongodb.get("metadata") or {}).get("name"))
+        has_endpoints = bool((app_mongodb_ep.get("subsets") or []))
+        if svc_exists and not deploy_exists:
+            out["checks"]["warnings"] += 1
+            out["app_data_risks"].append({
+                "severity": "warning",
+                "risk": "legacy Service/mongodb exists without a deployment; remove the orphan service via production overlay GitOps patch.",
+                "fix_hint": "Keep deploy/k8s/overlays/production/patches/remove-legacy-mongodb-service.yaml applied and synced.",
+            })
+        elif svc_exists and has_endpoints and not (lms_is_atlas and cms_is_atlas):
+            out["checks"]["failures"] += 1
+            out["app_data_risks"].append({
+                "severity": "critical",
+                "risk": "legacy Service/mongodb has active endpoints while modulestore is not fully Atlas-backed.",
+                "fix_hint": "Complete Atlas cutover before relying on in-cluster MongoDB paths.",
+            })
     except Exception:
         pass
 

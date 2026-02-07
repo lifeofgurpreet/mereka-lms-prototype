@@ -17,8 +17,10 @@ cd "$REPO_ROOT"
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 APP_NS="${APP_NS:-mereka-lms}"
 LEGACY_DEPLOYMENT_NAME="${LEGACY_DEPLOYMENT_NAME:-mongodb}"
+LEGACY_SERVICE_NAME="${LEGACY_SERVICE_NAME:-mongodb}"
 RUN_DESTRUCTIVE="${RUN_DESTRUCTIVE:-0}"
 CREATE_PREOP_BACKUP="${CREATE_PREOP_BACKUP:-1}"
+DELETE_LEGACY_SERVICE="${DELETE_LEGACY_SERVICE:-0}"
 CONFIRM_RETIRE_LEGACY_MONGODB="${CONFIRM_RETIRE_LEGACY_MONGODB:-}"
 CONFIRM_TOKEN="YES_DELETE_LEGACY_MONGODB"
 
@@ -30,6 +32,7 @@ Usage: ./scripts/infra/retire-legacy-mongodb.sh [--help]
 Env:
   RUN_DESTRUCTIVE=1                      Execute legacy deployment deletion
   CREATE_PREOP_BACKUP=1                  Create Velero pre-op backup before delete
+  DELETE_LEGACY_SERVICE=1                Also delete legacy mongodb Service (optional)
   CONFIRM_RETIRE_LEGACY_MONGODB=<token>  Must equal YES_DELETE_LEGACY_MONGODB
   K8S_CONTEXT=...                         Kubernetes context (default prod)
   APP_NS=mereka-lms                       Application namespace
@@ -58,6 +61,9 @@ STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=0 K8S_CONTEXT="$K8S_CONTEXT" APP_NS="$AP
 
 if ! kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy "$LEGACY_DEPLOYMENT_NAME" >/dev/null 2>&1; then
   log "Legacy deployment ${APP_NS}/${LEGACY_DEPLOYMENT_NAME} is already absent"
+  if kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get svc "$LEGACY_SERVICE_NAME" >/dev/null 2>&1; then
+    log "Legacy service ${APP_NS}/${LEGACY_SERVICE_NAME} still exists (expected to be removed by production overlay GitOps patch)"
+  fi
   exit 0
 fi
 
@@ -94,3 +100,9 @@ if kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy "$LEGACY_DEPLOYMENT_
 fi
 
 log "Legacy deployment retired"
+
+if [[ "$DELETE_LEGACY_SERVICE" == "1" ]] && kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get svc "$LEGACY_SERVICE_NAME" >/dev/null 2>&1; then
+  log "Deleting legacy service ${APP_NS}/${LEGACY_SERVICE_NAME}"
+  kubectl --context "$K8S_CONTEXT" -n "$APP_NS" delete svc "$LEGACY_SERVICE_NAME"
+  log "Legacy service deleted"
+fi

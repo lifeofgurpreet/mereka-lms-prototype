@@ -7,18 +7,19 @@ This doc is intentionally opinionated and reality-first. Do not assume “Atlas-
 
 1. **Forum uses MongoDB Atlas** (`cs_comments_service`).
 2. **LMS/CMS modulestore uses Atlas** (`openedx`) through `MONGODB_HOST` + Atlas-aware settings.
-3. **In-cluster MongoDB in `mereka-lms` still exists and is not persistent**:
-   - `Deployment/mongodb` mounts `/data/db` from `emptyDir` (ephemeral).
+3. **Legacy in-cluster MongoDB deployment is retired in production**:
+   - `Deployment/mongodb` has been deleted after backup + runtime Atlas verification.
+   - `Service/mongodb` cleanup is tracked through GitOps (production overlay deletes it).
 
 Implication:
-- Active modulestore traffic is no longer on in-cluster MongoDB.
-- Legacy in-cluster MongoDB must still be treated as risky infra until removed or PVC-backed.
+- Active modulestore/forum traffic is Atlas-backed.
+- Any reintroduction of in-cluster MongoDB in production is drift and should fail gates.
 
 ## Target Architecture (Atlas-only)
 
 - Forum: Atlas (`cs_comments_service`)
 - Modulestore: Atlas (`openedx`)
-- In-cluster MongoDB removed (or disabled) after cutover is verified.
+- In-cluster MongoDB deployment/service absent from production runtime.
 
 ## How To Verify What We’re Actually Using
 
@@ -32,17 +33,18 @@ You are looking for:
 - `DOC_STORE_HOST mongodb+srv://...mongodb.net/...` means modulestore is Atlas (expected for prod).
 - `DOC_STORE_HOST mongodb` means modulestore is in-cluster (drift/risk for production).
 
-### 2) Verify in-cluster MongoDB persistence (prod)
+### 2) Verify legacy in-cluster MongoDB resources are absent (prod)
 ```bash
-kubectl -n mereka-lms get deploy mongodb -o jsonpath='{.spec.template.spec.volumes}'
+kubectl -n mereka-lms get deploy mongodb
+kubectl -n mereka-lms get svc mongodb
 ```
-If it contains `emptyDir`, it is ephemeral.
+Both commands should return `NotFound` after GitOps reconciliation.
 
 ## Remaining High-Priority Fixes
 
-1. **Retire legacy in-cluster MongoDB** after explicit backup + approval (preferred).
-2. **Or make in-cluster MongoDB PVC-backed** if it must remain temporarily.
-3. Keep `audit-velero` clean (`failures=0`) and treat any Atlas drift as a release blocker.
+1. Keep `verify-atlas-modulestore-path` green with strict runtime checks.
+2. Keep `audit-velero` clean (`failures=0`) and treat any Atlas drift as a release blocker.
+3. Keep production overlay patch that deletes `Service/mongodb` in place.
 
 Guarded retirement helper (non-destructive by default):
 ```bash

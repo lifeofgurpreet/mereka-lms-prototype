@@ -59,9 +59,10 @@ We chose **MongoDB Atlas** (managed service) for production workloads.
 
 - **Forum**: uses Atlas (via `MONGODB_HOST` configured to a `*.mongodb.net` host).
 - **LMS/CMS modulestore**: uses Atlas in production (`MONGODB_HOST` + Atlas-aware settings patches).
-- **In-cluster MongoDB** (`Deployment/mongodb`) still exists in production as legacy runtime and uses `emptyDir` (non-durable).
+- **Legacy in-cluster MongoDB deployment** (`Deployment/mongodb`) has been retired in production after a Velero pre-op backup.
+- **Legacy in-cluster MongoDB service** (`Service/mongodb`) is being removed through the production overlay GitOps patch.
 
-Cutover status: complete for active modulestore path, but cleanup remains. Remove or PVC-back the in-cluster MongoDB only after explicit approval and backup evidence.
+Cutover status: complete for active modulestore and forum paths; enforce Atlas-only via runtime gates to prevent regression.
 
 ## Migration Path
 
@@ -71,4 +72,4 @@ If migrating from local MongoDB to Atlas:
 3. Update connection strings in settings
 4. Remove local MongoDB deployment
 
-**Note**: This ADR records the intended architecture. Always verify the live configuration (`MONGODB_HOST` in LMS/CMS, forum env/config, and whether `Deployment/mongodb` exists) before assuming Atlas-only.
+**Note**: This ADR records the intended architecture. Always verify the live configuration (`MONGODB_HOST` in LMS/CMS + forum) and confirm legacy in-cluster resources remain absent.

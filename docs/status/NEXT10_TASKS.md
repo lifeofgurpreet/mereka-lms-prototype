@@ -35,11 +35,11 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | Retire or persist legacy in-cluster MongoDB (`mereka-lms/mongodb` uses `emptyDir`) | Infra | ⚙️ In progress | Modulestore is now Atlas-backed in prod; remaining work is cleanup hardening so legacy MongoDB cannot become an accidental data path. See `docs/ARCHITECTURE_MONGODB.md`. |
+| 1 | Retire or persist legacy in-cluster MongoDB (`mereka-lms/mongodb` uses `emptyDir`) | Infra | ✅ Delivered (prod) | Production `Deployment/mongodb` retired after Velero backup; overlay patch now deletes legacy `Service/mongodb` in prod to prevent drift. See `docs/ARCHITECTURE_MONGODB.md`. |
 | 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | ✅ Delivered (monitoring) | PV-aware restore-test config + strict audit checks are live; evidence publication is now tracked under DR formalization. |
 | 3 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | `build-dr-evidence-bundle.sh` + monthly GH workflow now publish artifacts; remaining: sustained monthly artifact review + restore-drill proof of execution cadence. Bead: `mereka-lms-usv`. |
 | 4 | Course data recovery runbook hardening (hybrid Mongo reality) | Data/Infra | 💤 Pending | Keep docs accurate and deterministic. Start from `docs/operations/COURSE_DATA_RECOVERY.md`. |
-| 5 | Modulestore cutover closure + decommission plan (legacy in-cluster Mongo) | Infra | ⚙️ In progress | Cutover is verified live; next step is safe retirement (backup evidence + explicit approval) or temporary PVC hardening. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
+| 5 | Modulestore cutover closure + decommission plan (legacy in-cluster Mongo) | Infra | ✅ Delivered (prod) | Cutover and decommission are complete in production; continue watching atlas guard + ops gates for regression. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
 | 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ✅ Delivered | Strict multisite + org-role ownership + consolidated operations gate are CI/runtime-enforced (`atlas-modulestore-guardrails` + `.github/workflows/operations-gates-runtime.yml`). Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
 | 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits + alert-routing verifier are live; remaining: keep routing contacts fresh and incident-response drill cadence. |

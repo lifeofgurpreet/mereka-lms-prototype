@@ -139,7 +139,8 @@ See `docs/adr/001-mongodb-atlas.md` for full rationale.
 ### Current State (Verified 2026-02-07, Production GKE)
 - **Forum**: uses Atlas.
 - **LMS/CMS modulestore**: explicitly configured to Atlas (`MONGODB_HOST` resolves to `*.mongodb.net` via `openedx-secrets/FORUM_MONGODB_SRV`).
-- **In-cluster MongoDB** (`Deployment/mongodb`) still exists as legacy runtime and currently uses `emptyDir`; keep it out of production data paths until removed or PVC-backed.
+- **Legacy in-cluster MongoDB deployment**: retired in production after Velero pre-op backup (`pre-op-mereka-lms-20260207-1451`).
+- **Legacy in-cluster MongoDB service**: may still exist as an orphaned service until GitOps sync removes it (production overlay now deletes `Service/mongodb`).
 
 ### Connection Details
 | Service | Database | Connection |
@@ -154,8 +155,11 @@ See `docs/adr/001-mongodb-atlas.md` for full rationale.
 kubectl -n mereka-lms exec deploy/lms -- python -c 'import os; h=os.environ.get(\"MONGODB_HOST\",\"\"); print(bool(h), \".mongodb.net\" in h or h.startswith(\"mongodb+srv://\"))'
 kubectl -n mereka-lms exec deploy/cms -- python -c 'import os; h=os.environ.get(\"MONGODB_HOST\",\"\"); print(bool(h), \".mongodb.net\" in h or h.startswith(\"mongodb+srv://\"))'
 
-# In-cluster MongoDB presence:
+# Legacy deployment should be absent:
 kubectl -n mereka-lms get deploy mongodb
+
+# Legacy service should be absent after GitOps sync:
+kubectl -n mereka-lms get svc mongodb
 
 # Velero posture (critical should be 0 when modulestore is Atlas):
 ./scripts/qa/audit-velero.sh
@@ -168,7 +172,7 @@ kubectl -n mereka-lms get deploy mongodb
 
 ### NEVER DO
 1. ❌ Deploy a *new* local MongoDB for production data (Atlas is the target)
-2. ❌ Delete the existing in-cluster MongoDB in prod without explicit approval + backup evidence
+2. ❌ Delete active production data-plane resources without explicit approval + backup evidence
 3. ❌ Change connection strings to `localhost` or `mongodb` for production
 4. ❌ Hardcode MongoDB password in files
 
@@ -453,7 +457,7 @@ Regenerate hostname registry (after domain changes):
 - Atlas drift monitor + alert wrapper: `scripts/infra/monitor-atlas-allowlist-vps.sh` (cron target via `scripts/infra/setup-vps-atlas-allowlist-cron.sh`).
 - Atlas monitor audit (cron + status freshness + webhook): `scripts/qa/audit-atlas-allowlist-monitor.sh` (`STRICT_WEBHOOK=1` for production-ready routing checks).
 - Atlas modulestore guard (repo + runtime): `scripts/qa/verify-atlas-modulestore-path.sh` (CI gate in `.github/workflows/ci.yml`, job `atlas-modulestore-guardrails`).
-- Legacy MongoDB retirement must stay Velero-first + explicit-token guarded: `scripts/infra/retire-legacy-mongodb.sh` (non-destructive by default).
+- Legacy MongoDB retirement must stay Velero-first + explicit-token guarded: `scripts/infra/retire-legacy-mongodb.sh` (non-destructive by default); production overlay deletes `Service/mongodb` via `deploy/k8s/overlays/production/patches/remove-legacy-mongodb-service.yaml`.
 - Infisical is the single source of truth; validate with `scripts/infra/infisical-validate-mereka-lms.sh`.
 - Use `scripts/infra/infisical-sync-mereka-lms.sh` to consolidate `MEREKA_LMS_*` secrets under `/k8s/mereka-lms`.
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).

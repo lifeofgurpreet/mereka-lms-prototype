@@ -1,5 +1,5 @@
 # Deployment Runbook – Mereka LMS (academyv2.mereka.io)
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-06_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-07_
 
 This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project. Environment model: **production (GKE)** + **dev (kind/VPS)** only; “staging” bucket names are legacy production labels.
 
@@ -91,7 +91,7 @@ Modules:
    tutor k8s init
    tutor k8s start
    ```
-4. MongoDB (production): target state is Atlas-only. Current production still has an in-cluster `mongodb` service; do not assume it is unused (see `docs/ARCHITECTURE_MONGODB.md`).
+4. MongoDB (production): Atlas-only. Keep `MONGODB_HOST` wired to `openedx-secrets/FORUM_MONGODB_SRV` and ensure legacy `Service/mongodb` remains removed via production overlay patching (see `docs/ARCHITECTURE_MONGODB.md`).
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `academyv2-mereka-io`.
    - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the GKE ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
@@ -111,7 +111,7 @@ Modules:
   - Pre-op backup before risky operations:
     `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
   - Docs: `docs/operations/VELERO_BACKUP_AUDIT.md`, `docs/operations/DISASTER_RECOVERY.md`
-- Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and the soon-to-exist `mongodb-atlas-uri`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
+- Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
 - Apply the Mereka branding pack after each upgrade:
   ```bash
   ./scripts/branding/sync-brand-assets.sh

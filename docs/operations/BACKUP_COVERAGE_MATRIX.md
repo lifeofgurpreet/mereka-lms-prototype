@@ -1,5 +1,5 @@
 # Backup Coverage Matrix (Reality-First)
-_Audience: SRE + Platform Ops • Last updated: 2026-02-06_
+_Audience: SRE + Platform Ops • Last updated: 2026-02-07_
 
 This document answers one question: **if we lose a node/zone/cluster, what data do we lose, and how do we restore it?**
 
@@ -34,9 +34,9 @@ This document answers one question: **if we lose a node/zone/cluster, what data 
 
 ## Known Gaps (As Of 2026-02-06)
 
-1. **Accidental local MongoDB risk (dev-only):** We have legacy/optional in-cluster MongoDB manifests and a `mongodb` Service.
-   - Production should use Atlas (see `docs/adr/001-mongodb-atlas.md`).
-   - In kind dev, the forum may target in-cluster MongoDB; do not rely on it for durable course content.
+1. **Accidental local MongoDB risk (dev-only):** kind dev may still run in-cluster MongoDB for forum testing.
+   - Production is Atlas-only (see `docs/adr/001-mongodb-atlas.md`) and should not keep `mongodb` service/deployment active.
+   - In kind dev, do not rely on in-cluster MongoDB for durable course content.
 2. **Restore drill broken:** `velero/restore-test` CronJob uses `velero/velero:*` but tries `/bin/bash`, causing StartError.
 
 ## Proof: What Must Match

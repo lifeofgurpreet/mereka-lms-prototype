@@ -12,6 +12,8 @@ cd "$REPO_ROOT"
 
 ENV_SCOPE="${ENV_SCOPE:-both}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
+FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-1}"
+FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
 RUN_ATLAS_ALLOWLIST_AUDIT="${RUN_ATLAS_ALLOWLIST_AUDIT:-0}"
 RUN_ALERT_ROUTING_AUDIT="${RUN_ALERT_ROUTING_AUDIT:-0}"
 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT="${ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT:-1}"
@@ -25,6 +27,8 @@ usage() {
 Usage: ./scripts/qa/run-operations-gates.sh [--env prod|dev|both]
 Env:
   STRICT_RUNTIME=1               Enforce strict runtime checks for observability/Velero
+  FAIL_ON_LEGACY_MONGODB=1       Fail atlas gate if legacy mongodb Deployment exists
+  FAIL_ON_LEGACY_MONGODB_SERVICE=1  Fail atlas gate if legacy mongodb Service exists
   RUN_ATLAS_ALLOWLIST_AUDIT=1    Also run VPS Atlas allowlist monitor audit
   RUN_ALERT_ROUTING_AUDIT=1      Also run one-command alert routing verification
   ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0  Skip VPS-only atlas routing check inside alert-routing audit
@@ -94,6 +98,8 @@ run_check() {
 echo "Operations gates"
 echo "  env: $ENV_SCOPE"
 echo "  strict_runtime: $STRICT_RUNTIME"
+echo "  fail_on_legacy_mongodb: $FAIL_ON_LEGACY_MONGODB"
+echo "  fail_on_legacy_mongodb_service: $FAIL_ON_LEGACY_MONGODB_SERVICE"
 echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
 echo "  run_alert_routing_audit: $RUN_ALERT_ROUTING_AUDIT"
 echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
@@ -105,7 +111,7 @@ run_check "auth + permissions + multisite audit" \
   ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
 
 run_check "atlas modulestore path guard" \
-  env STRICT_RUNTIME="$STRICT_RUNTIME" ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
+  env STRICT_RUNTIME="$STRICT_RUNTIME" FAIL_ON_LEGACY_MONGODB="$FAIL_ON_LEGACY_MONGODB" FAIL_ON_LEGACY_MONGODB_SERVICE="$FAIL_ON_LEGACY_MONGODB_SERVICE" ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 
 run_check "observability runtime audit" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" ./scripts/qa/audit-observability.sh --mode runtime

@@ -1,5 +1,5 @@
 # Disaster Recovery (DR) Runbook
-_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-03_
+_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-07_
 
 This runbook defines the backup schedule, restore drill cadence, and recovery procedures for Mereka LMS. It is aligned with the **production (GKE)** and **dev (kind)** environment model.
 Legacy “staging” bucket names remain in GCS for production backups (there is no staging environment).
@@ -15,7 +15,7 @@ Legacy “staging” bucket names remain in GCS for production backups (there is
 | --- | --- | --- | --- |
 | In-cluster MySQL + Redis PVs | Velero VolumeSnapshots | Hourly + daily + weekly | This is the current source of truth for database state in prod (DB host is `mysql:3306`). |
 | MongoDB Atlas (modulestore + forum) | Atlas + Open edX runtime | Continuous + Atlas snapshots policy | Production LMS/CMS modulestore now resolves Atlas host via `MONGODB_HOST` secret mapping; verify with `./scripts/qa/verify-atlas-modulestore-path.sh --mode all`. |
-| Legacy in-cluster MongoDB deployment | Transitional (retire) | N/A | `mereka-lms/mongodb` may still exist with `emptyDir`; treat as cleanup target, not active data path. |
+| Legacy in-cluster MongoDB runtime | Retired (prod) | N/A | `Deployment/mongodb` removed in prod after backup verification; keep `Service/mongodb` removal enforced via production overlay GitOps patch. |
 | Persistent volumes (general) | Velero | Hourly critical + daily all apps + weekly full | Use before any risky operation. |
 | MongoDB Atlas (forum) | Atlas backups | TBD | Enable/verify snapshots if we move modulestore to Atlas or rely on forum retention. |
 | Config + manifests | Git | Every change | Git is the source of truth for K8s + Tutor configs. |

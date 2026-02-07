@@ -14,14 +14,16 @@ K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 APP_NS="${APP_NS:-mereka-lms}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-0}"
+FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
 MODE="all" # local | runtime | all
 
 usage() {
   cat <<'USAGE'
 Usage: ./scripts/qa/verify-atlas-modulestore-path.sh [--mode local|runtime|all]
 Env:
-  STRICT_RUNTIME=1         Fail if runtime checks cannot be executed
-  FAIL_ON_LEGACY_MONGODB=1 Fail if in-cluster mongodb deployment still exists
+  STRICT_RUNTIME=1                  Fail if runtime checks cannot be executed
+  FAIL_ON_LEGACY_MONGODB=1          Fail if legacy mongodb deployment still exists
+  FAIL_ON_LEGACY_MONGODB_SERVICE=1  Fail if legacy mongodb Service still exists
 USAGE
 }
 
@@ -89,6 +91,8 @@ deployments = (repo / "deploy/k8s/base/deployments.yml").read_text(encoding="utf
 external_secrets = (repo / "deploy/k8s/base/secrets/external-secrets.yaml").read_text(encoding="utf-8")
 lms_settings = (repo / "deploy/k8s/base/apps/openedx/settings/lms/production.py").read_text(encoding="utf-8")
 cms_settings = (repo / "deploy/k8s/base/apps/openedx/settings/cms/production.py").read_text(encoding="utf-8")
+prod_overlay = (repo / "deploy/k8s/overlays/production/kustomization.yaml").read_text(encoding="utf-8")
+prod_mongo_delete_patch = repo / "deploy/k8s/overlays/production/patches/remove-legacy-mongodb-service.yaml"
 
 errors = []
 
@@ -135,6 +139,21 @@ for name, content in (("lms", lms_settings), ("cms", cms_settings)):
     for token in required_tokens:
         if token not in content:
             errors.append(f"{name} settings missing token: {token}")
+
+if "- patches/remove-legacy-mongodb-service.yaml" not in prod_overlay:
+    errors.append(
+        "Production overlay missing patches/remove-legacy-mongodb-service.yaml reference"
+    )
+
+if not prod_mongo_delete_patch.exists():
+    errors.append("Missing production patch file: remove-legacy-mongodb-service.yaml")
+else:
+    patch_text = prod_mongo_delete_patch.read_text(encoding="utf-8")
+    for token in ("kind: Service", "name: mongodb", "$patch: delete"):
+        if token not in patch_text:
+            errors.append(
+                f"Production mongodb service delete patch missing token: {token}"
+            )
 
 if errors:
     for err in errors:
@@ -266,12 +285,47 @@ PY
   return 0
 }
 
+check_runtime_legacy_mongodb_service() {
+  command -v kubectl >/dev/null
+
+  if ! kubectl --context "$K8S_CONTEXT" get namespace "$APP_NS" >/dev/null 2>&1; then
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Cannot reach context/namespace: $K8S_CONTEXT / $APP_NS"
+      return 1
+    fi
+    echo "SKIP: cannot reach context/namespace: $K8S_CONTEXT / $APP_NS"
+    return 0
+  fi
+
+  if ! kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get svc mongodb >/dev/null 2>&1; then
+    echo "legacy mongodb service not present"
+    return 0
+  fi
+
+  local subsets risk
+  subsets="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get endpoints mongodb -o jsonpath='{.subsets}' 2>/dev/null || true)"
+  if [[ -z "$subsets" || "$subsets" == "[]" ]]; then
+    risk="legacy mongodb service exists with empty endpoints"
+  else
+    risk="legacy mongodb service exists with active endpoints"
+  fi
+
+  if [[ "$FAIL_ON_LEGACY_MONGODB_SERVICE" == "1" ]]; then
+    echo "$risk"
+    return 1
+  fi
+
+  warn_msg "$risk (set FAIL_ON_LEGACY_MONGODB_SERVICE=1 to fail gate)"
+  return 0
+}
+
 echo "Verify: Atlas modulestore path"
 echo "  mode:                  $MODE"
 echo "  context:               $K8S_CONTEXT"
 echo "  app namespace:         $APP_NS"
 echo "  strict runtime:        $STRICT_RUNTIME"
 echo "  fail on legacy mongo:  $FAIL_ON_LEGACY_MONGODB"
+echo "  fail on legacy svc:    $FAIL_ON_LEGACY_MONGODB_SERVICE"
 echo ""
 
 if [[ "$MODE" == "local" || "$MODE" == "all" ]]; then
@@ -286,6 +340,8 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     check_runtime_modulestore_is_atlas
   run_check "runtime: legacy mongodb deployment posture" \
     check_runtime_legacy_mongodb_presence
+  run_check "runtime: legacy mongodb service posture" \
+    check_runtime_legacy_mongodb_service
 fi
 
 echo ""

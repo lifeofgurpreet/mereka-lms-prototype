@@ -584,7 +584,7 @@ velero restore describe <restore-name>
 
 Use Atlas Console for point-in-time recovery or restore from snapshot.
 
-Note: production still has an in-cluster `mongodb` service, but active modulestore traffic is Atlas-backed. Treat in-cluster MongoDB as legacy risk surface (non-durable `emptyDir`) until it is safely removed or PVC-backed (see `docs/ARCHITECTURE_MONGODB.md`).
+Note: production modulestore/forum traffic is Atlas-backed. Legacy in-cluster MongoDB deployment has been retired; keep the production overlay patch that deletes `Service/mongodb` so this path cannot reappear silently (see `docs/ARCHITECTURE_MONGODB.md`).
 
 ### Velero Commands Reference
 

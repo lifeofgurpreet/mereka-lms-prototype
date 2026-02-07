@@ -35,8 +35,7 @@ labels:
       app.kubernetes.io/part-of: mereka-lms
       app.kubernetes.io/managed-by: tutor
     # Do not mutate selectors automatically. It causes drift/immutability issues
-    # and breaks Services when workloads don't carry the injected instance labels
-    # (e.g. the legacy mongodb Deployment).
+    # and breaks Services when workloads don't carry the injected instance labels.
     includeSelectors: false
 
 
