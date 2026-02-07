@@ -44,7 +44,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | ✅ Delivered | Helper + docs are in place (`scripts/infra/prepare-bbi-infra-ref-bump.sh`, AGENTS + troubleshooting notes for exact `git rev-parse HEAD` pinning). |
 | 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ✅ Delivered | Strict multisite + org-role ownership + consolidated operations gate are CI/runtime-enforced (`atlas-modulestore-guardrails` + `.github/workflows/operations-gates-runtime.yml`). Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
 | 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits + alert-routing verifier are live; remaining: keep routing contacts fresh and incident-response drill cadence. |
-| 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | ⚙️ In progress | Screenshot capture exists and baseline-vs-candidate diff gate added (`scripts/qa/visual-regression-branding.sh`); remaining work: wire fail-on-drift into CI workflow. Bead: `mereka-lms-3mz`. |
+| 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | ✅ Delivered | Canonical gate now supports screenshot+diff flow (`RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1`) and VPS scheduler tooling is in place (`scripts/infra/setup-vps-branding-visual-regression-cron.sh`). Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 
 ## Observability Top 10 (Epic: `mereka-lms-16g`)
@@ -72,7 +72,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 | 4 | Learner dashboard + courseware styling | Product | 💤 Pending | Bead: `mereka-lms-2t0`. |
 | 5 | Studio authoring UI polish | Product | 💤 Pending | Bead: `mereka-lms-3ou`. |
 | 6 | Credentials + forum theming | Product | 💤 Pending | Beads: `mereka-lms-3ur`, `mereka-lms-3qh`. |
-| 7 | Visual regression gate for branding | Product | 💤 Pending | Bead: `mereka-lms-3mz`. |
+| 7 | Visual regression gate for branding | Product | ✅ Delivered | `run-branding-gates.sh` now supports visual diff mode + bootstrap-safe baseline seeding; VPS cron wrapper available for continuous checks. Bead: `mereka-lms-3mz`. |
 | 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
 | 9 | Multi-site governance hardening | Infra | ⚙️ In progress | Strict governance drift checks now block on core config mismatches and org-ownership validation. |
 | 10 | Studio create button no-op | Infra | 💤 Pending | Bead: `mereka-lms-3oc` (verify in fresh session). |

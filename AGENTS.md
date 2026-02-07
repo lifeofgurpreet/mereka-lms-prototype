@@ -533,6 +533,13 @@ Regenerate hostname registry (after domain changes):
 - Never run more than one `tutor images build mfe` concurrently; wait for the active build to finish before retrying.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).
+- Visual regression is part of the canonical gate when enabled:
+  `RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 VISUAL_ALLOW_BOOTSTRAP=1 ./scripts/branding/run-branding-gates.sh prod`
+  (`VISUAL_ALLOW_BOOTSTRAP=1` prevents first-run baseline seeding from failing CI/cron).
+- VPS scheduled visual regression setup: `./scripts/infra/setup-vps-branding-visual-regression-cron.sh`
+  (runs `scripts/infra/cron-branding-visual-regression.sh` for prod+dev by default).
+- Cron visual regression intentionally excludes noisy dynamic/authenticated pages by default;
+  tune `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` only if signal quality requires it.
 - CI enforcement for branding:
   - `.github/workflows/ci.yml` runs source-only preflight (`RUN_LIVE_GATE=0 BRANDING_LEVEL=deep`).
   - `.github/workflows/build-tutor-images.yml` runs `verify-mfe-image-branding.sh` before MFE image push and uploads `mfe-branding-contract-log`.

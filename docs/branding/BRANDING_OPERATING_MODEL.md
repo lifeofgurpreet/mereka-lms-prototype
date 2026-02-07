@@ -31,11 +31,26 @@ Optional strict parity mode:
 STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 ```
 
+Optional visual diff mode (screenshot capture + RMSE compare):
+
+```bash
+RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 VISUAL_ALLOW_BOOTSTRAP=1 \
+./scripts/branding/run-branding-gates.sh prod
+```
+
 Validate both production and dev:
 
 ```bash
 ./scripts/branding/run-branding-gates.sh all
 ```
+
+Install scheduled VPS visual regression checks:
+
+```bash
+./scripts/infra/setup-vps-branding-visual-regression-cron.sh
+```
+Default cron config excludes noisy dynamic/authenticated pages to keep drift alerts actionable.
+Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` when needed.
 
 ## Deploy Contract (Production)
 
@@ -123,6 +138,13 @@ Validate both production and dev:
      2) update `apps/mereka-lms/base/kustomization.yaml` with that exact SHA
      3) push and wait for `mereka-lms-local` app to return `Synced/Healthy`.
 
+13. **Visual regression never runs after screenshot capture**
+   - Cause: screenshots are captured but no compare step is executed, so drift is only detected manually.
+   - Fix:
+     1) run `RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 ./scripts/branding/run-branding-gates.sh prod`
+     2) install scheduled checks with `scripts/infra/setup-vps-branding-visual-regression-cron.sh`
+     3) treat non-zero visual regression exit as release-blocking.
+
 ## What Was Hacky And How We Avoid It
 
 - Hacky pattern: manual one-off checks run ad-hoc by different agents.
@@ -137,6 +159,8 @@ Validate both production and dev:
 - **Every branding-affecting PR**: run source gate at minimum.
 - **Every production rollout**: run `run-branding-gates.sh prod`.
 - **Daily/shift checks**: run `run-branding-gates.sh prod` (can disable screenshots by default).
+- **Scheduled visual drift checks**: keep VPS cron active via
+  `scripts/infra/setup-vps-branding-visual-regression-cron.sh`.
 
 ## CI Enforcement
 

@@ -80,7 +80,23 @@ Visual regression coverage (manual/agent-run):
 ```
 - Uses baseline-vs-candidate screenshot RMSE checks.
 - Diff artifacts are written to `var/screenshots-diff/`.
+- Add `--allow-bootstrap` for first-run baseline seeding.
 - Add `--strict` when you need exact screenshot file-set parity.
+
+Canonical one-shot gate with screenshots + visual regression:
+```bash
+RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 VISUAL_ALLOW_BOOTSTRAP=1 \
+./scripts/branding/run-branding-gates.sh prod
+```
+
+Scheduled VPS guardrail:
+```bash
+./scripts/infra/setup-vps-branding-visual-regression-cron.sh
+```
+This installs a periodic run (`scripts/infra/cron-branding-visual-regression.sh`) that captures screenshots
+and runs RMSE diffs for both `prod` and `dev` by default.
+By default it excludes dynamic/authenticated surfaces (dashboards/account/webhooks/forum/notes) to reduce noise;
+override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if needed.
 
 ## Most Common Failure Modes
 

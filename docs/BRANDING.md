@@ -187,9 +187,30 @@ Run visual regression against two capture runs:
   --baseline var/screenshots/prod/<older_ts> \
   --candidate var/screenshots/prod/<newer_ts> \
   --strict
+
+# Bootstrap-friendly run (first capture won't fail)
+./scripts/qa/visual-regression-branding.sh prod --allow-bootstrap
 ```
 
 Diff images are written to `var/screenshots-diff/<env>/<timestamp>/`.
+
+You can run screenshot capture + visual diff in one command through the canonical branding gate:
+
+```bash
+RUN_SCREENSHOTS=1 \
+RUN_VISUAL_REGRESSION=1 \
+VISUAL_ALLOW_BOOTSTRAP=1 \
+./scripts/branding/run-branding-gates.sh prod
+```
+
+For periodic VPS execution (recommended), install the cron wrapper:
+
+```bash
+./scripts/infra/setup-vps-branding-visual-regression-cron.sh
+```
+
+The cron wrapper uses a default exclude regex for noisy dynamic/authenticated pages.
+Tune it via `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env`.
 
 ## Micro-Frontend Plug-in
 

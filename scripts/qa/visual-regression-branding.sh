@@ -25,6 +25,7 @@ Options:
   --candidate <dir>       Candidate screenshot directory.
   --threshold <float>     Normalized RMSE threshold per image (default: 0.06).
   --exclude-regex <expr>  Skip matching filenames (e.g. 'forum|notes').
+  --allow-bootstrap       Exit 0 when fewer than two screenshot runs exist.
   --strict                Fail if baseline/candidate file sets differ.
   --json                  Emit machine-readable summary JSON.
   -h, --help              Show help.
@@ -42,6 +43,7 @@ BASELINE_DIR=""
 CANDIDATE_DIR=""
 THRESHOLD="${THRESHOLD:-0.06}"
 EXCLUDE_REGEX="${EXCLUDE_REGEX:-}"
+ALLOW_BOOTSTRAP=0
 STRICT=0
 JSON=0
 
@@ -51,6 +53,7 @@ while [[ $# -gt 0 ]]; do
     --candidate) CANDIDATE_DIR="${2:-}"; shift 2 ;;
     --threshold) THRESHOLD="${2:-}"; shift 2 ;;
     --exclude-regex) EXCLUDE_REGEX="${2:-}"; shift 2 ;;
+    --allow-bootstrap) ALLOW_BOOTSTRAP=1; shift ;;
     --strict) STRICT=1; shift ;;
     --json) JSON=1; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -71,11 +74,29 @@ fi
 ROOT="$REPO_ROOT/var/screenshots/$ENVIRONMENT"
 if [[ -z "$BASELINE_DIR" || -z "$CANDIDATE_DIR" ]]; then
   if [[ ! -d "$ROOT" ]]; then
+    if [[ "$ALLOW_BOOTSTRAP" -eq 1 ]]; then
+      if [[ "$JSON" -eq 1 ]]; then
+        printf '{"env":"%s","bootstrap":true,"reason":"screenshot root missing","screenshot_root":"%s"}\n' \
+          "$ENVIRONMENT" "$ROOT"
+      else
+        echo "Visual regression bootstrap mode: screenshot root missing: $ROOT"
+      fi
+      exit 0
+    fi
     echo "No screenshot root found: $ROOT" >&2
     exit 2
   fi
   mapfile -t runs < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
   if [[ "${#runs[@]}" -lt 2 ]]; then
+    if [[ "$ALLOW_BOOTSTRAP" -eq 1 ]]; then
+      if [[ "$JSON" -eq 1 ]]; then
+        printf '{"env":"%s","bootstrap":true,"reason":"need at least two screenshot runs","screenshot_root":"%s"}\n' \
+          "$ENVIRONMENT" "$ROOT"
+      else
+        echo "Visual regression bootstrap mode: need at least two screenshot runs under $ROOT"
+      fi
+      exit 0
+    fi
     echo "Need at least two screenshot runs under $ROOT" >&2
     exit 2
   fi
