@@ -14,7 +14,10 @@ resources:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: 20260206-footer-css-05fabf8
+    newTag: 20260207-branding-pass3-f6980e6
+  - name: docker.io/overhangio/openedx-mfe
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newTag: mereka-brand
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
