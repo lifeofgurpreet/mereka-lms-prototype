@@ -530,6 +530,8 @@ Regenerate hostname registry (after domain changes):
   (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
 - GitOps overlay image overrides should include both canonical names when needed
   (`docker.io/overhangio/openedx-mfe` and `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe`) to avoid post-transform tag drift.
+- Enforce this contract before rollout with:
+  `./scripts/qa/verify-gitops-image-overrides.sh` (add `--check-infra` when validating local `bbi-infrastructure` checkout).
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it syncs runtime override CSS from common -> LMS + CMS to prevent drift.

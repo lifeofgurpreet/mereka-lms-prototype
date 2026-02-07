@@ -13,10 +13,10 @@ commonLabels:
 
 # Image tags for staging
 images:
-  - name: openedx
+  - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
     newTag: staging
-  - name: openedx-mfe
+  - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: staging
 

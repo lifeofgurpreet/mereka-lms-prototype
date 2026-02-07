@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+APP_BASE="${APP_BASE:-$REPO_ROOT/deploy/k8s/base/kustomization.yaml}"
+APP_PROD_OVERLAY="${APP_PROD_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml}"
+APP_STAGING_OVERLAY="${APP_STAGING_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/staging/kustomization.yaml}"
+INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml}"
+CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/qa/verify-gitops-image-overrides.sh [--check-infra|--skip-infra] [--infra-file PATH]
+
+Purpose:
+  Enforce image override contract to avoid silent tag drift after Kustomize image transforms.
+
+Checks:
+  1) Base kustomization pins canonical docker.io names to Artifact Registry.
+  2) Production overlay uses canonical names.
+  3) Production overlay includes transformed-name override parity for openedx-mfe.
+  4) Staging overlay uses canonical docker.io names (no bare openedx/openedx-mfe names).
+  5) Optional infra overlay parity check in bbi-infrastructure (when available).
+
+Options:
+  --check-infra        Require and validate infra overlay file.
+  --skip-infra         Skip infra overlay validation.
+  --infra-file PATH    Override infra overlay file path.
+  -h, --help           Show this help.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check-infra)
+      CHECK_INFRA="1"
+      shift
+      ;;
+    --skip-infra)
+      CHECK_INFRA="0"
+      shift
+      ;;
+    --infra-file)
+      INFRA_PROD_OVERLAY="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+python3 - "$APP_BASE" "$APP_PROD_OVERLAY" "$APP_STAGING_OVERLAY" "$INFRA_PROD_OVERLAY" "$CHECK_INFRA" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+APP_BASE = Path(sys.argv[1])
+APP_PROD = Path(sys.argv[2])
+APP_STAGING = Path(sys.argv[3])
+INFRA_PROD = Path(sys.argv[4])
+CHECK_INFRA = sys.argv[5]
+
+TARGET_OPENEDX = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
+TARGET_MFE = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
+SOURCE_OPENEDX = "docker.io/overhangio/openedx"
+SOURCE_MFE = "docker.io/overhangio/openedx-mfe"
+
+
+def parse_images(path: Path):
+    if not path.exists():
+        return None
+    images = []
+    current = None
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.rstrip()
+        m_name = re.match(r"^\s*-\s*name:\s*(\S+)\s*$", line)
+        if m_name:
+            if current:
+                images.append(current)
+            current = {"name": m_name.group(1), "newName": None, "newTag": None}
+            continue
+        if current is None:
+            continue
+        m_new_name = re.match(r"^\s*newName:\s*(\S+)\s*$", line)
+        if m_new_name:
+            current["newName"] = m_new_name.group(1)
+            continue
+        m_new_tag = re.match(r"^\s*newTag:\s*(\S+)\s*$", line)
+        if m_new_tag:
+            current["newTag"] = m_new_tag.group(1)
+            continue
+    if current:
+        images.append(current)
+    return images
+
+
+def find_by_name(images, name):
+    return [image for image in images if image["name"] == name]
+
+
+def ensure_mapping(images, name, expected_new_name, context, errors):
+    matches = find_by_name(images, name)
+    if not matches:
+        errors.append(f"{context}: missing image override for '{name}'")
+        return None
+    mapping = matches[0]
+    if mapping["newName"] != expected_new_name:
+        errors.append(
+            f"{context}: '{name}' newName mismatch (got '{mapping['newName']}', expected '{expected_new_name}')"
+        )
+    return mapping
+
+
+errors = []
+notes = []
+
+for required in (APP_BASE, APP_PROD, APP_STAGING):
+    if not required.exists():
+        errors.append(f"missing required file: {required}")
+
+if errors:
+    for error in errors:
+        print(f"✗ {error}")
+    sys.exit(1)
+
+base_images = parse_images(APP_BASE)
+prod_images = parse_images(APP_PROD)
+staging_images = parse_images(APP_STAGING)
+
+ensure_mapping(base_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(APP_BASE), errors)
+ensure_mapping(base_images, SOURCE_MFE, TARGET_MFE, str(APP_BASE), errors)
+
+prod_openedx = ensure_mapping(prod_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(APP_PROD), errors)
+prod_mfe_source = ensure_mapping(prod_images, SOURCE_MFE, TARGET_MFE, str(APP_PROD), errors)
+prod_mfe_transformed = ensure_mapping(prod_images, TARGET_MFE, TARGET_MFE, str(APP_PROD), errors)
+
+if prod_mfe_source and prod_mfe_transformed:
+    if not prod_mfe_source["newTag"] or not prod_mfe_transformed["newTag"]:
+        errors.append(f"{APP_PROD}: missing newTag for openedx-mfe dual-name overrides")
+    elif prod_mfe_source["newTag"] != prod_mfe_transformed["newTag"]:
+        errors.append(
+            f"{APP_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
+            f"('{prod_mfe_source['newTag']}' vs '{prod_mfe_transformed['newTag']}')"
+        )
+
+for bare_name in ("openedx", "openedx-mfe"):
+    if find_by_name(prod_images, bare_name):
+        errors.append(f"{APP_PROD}: bare image name '{bare_name}' is not allowed; use canonical docker.io name")
+    if find_by_name(staging_images, bare_name):
+        errors.append(f"{APP_STAGING}: bare image name '{bare_name}' is not allowed; use canonical docker.io name")
+
+ensure_mapping(staging_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(APP_STAGING), errors)
+ensure_mapping(staging_images, SOURCE_MFE, TARGET_MFE, str(APP_STAGING), errors)
+
+check_infra = CHECK_INFRA
+if check_infra == "auto":
+    check_infra = "1" if INFRA_PROD.exists() else "0"
+
+if check_infra == "1":
+    if not INFRA_PROD.exists():
+        errors.append(f"infra check requested but file missing: {INFRA_PROD}")
+    else:
+        infra_images = parse_images(INFRA_PROD)
+        infra_mfe_source = ensure_mapping(infra_images, SOURCE_MFE, TARGET_MFE, str(INFRA_PROD), errors)
+        infra_mfe_transformed = ensure_mapping(infra_images, TARGET_MFE, TARGET_MFE, str(INFRA_PROD), errors)
+        if infra_mfe_source and infra_mfe_transformed:
+            if infra_mfe_source["newTag"] != infra_mfe_transformed["newTag"]:
+                errors.append(
+                    f"{INFRA_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
+                    f"('{infra_mfe_source['newTag']}' vs '{infra_mfe_transformed['newTag']}')"
+                )
+else:
+    notes.append("infra overlay check skipped")
+
+if errors:
+    for error in errors:
+        print(f"✗ {error}")
+    for note in notes:
+        print(f"- {note}")
+    sys.exit(1)
+
+print("✓ GitOps image override contract checks passed")
+print(f"  base: {APP_BASE}")
+print(f"  prod overlay: {APP_PROD}")
+print(f"  staging overlay: {APP_STAGING}")
+if check_infra == "1":
+    print(f"  infra overlay: {INFRA_PROD}")
+else:
+    print("  infra overlay: skipped")
+PY

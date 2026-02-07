@@ -41,6 +41,7 @@ jobs:
           bash -n scripts/infra/apply-monitoring-configs.sh
           bash -n scripts/qa/audit-observability.sh
           bash -n scripts/qa/run-operations-gates.sh
+          bash -n scripts/qa/verify-gitops-image-overrides.sh
           bash -n scripts/qa/verify-alert-routing.sh
           bash -n scripts/qa/build-dr-evidence-bundle.sh
 
@@ -73,6 +74,16 @@ jobs:
       - name: Run repository Atlas modulestore contract check
         run: |
           ./scripts/qa/verify-atlas-modulestore-path.sh --mode local
+
+  gitops-image-contract:
+    name: GitOps Image Override Contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify image override contract (repo-local)
+        run: |
+          ./scripts/qa/verify-gitops-image-overrides.sh --skip-infra
 
   lint:
     name: Lint

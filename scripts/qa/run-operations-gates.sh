@@ -110,6 +110,9 @@ echo ""
 run_check "auth + permissions + multisite audit" \
   ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
 
+run_check "gitops image override contract" \
+  ./scripts/qa/verify-gitops-image-overrides.sh
+
 run_check "atlas modulestore path guard" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" FAIL_ON_LEGACY_MONGODB="$FAIL_ON_LEGACY_MONGODB" FAIL_ON_LEGACY_MONGODB_SERVICE="$FAIL_ON_LEGACY_MONGODB_SERVICE" ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 

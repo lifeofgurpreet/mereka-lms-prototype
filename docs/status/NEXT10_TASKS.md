@@ -31,6 +31,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 - ✅ Design token provenance lock added (`assets/branding/tokens.provenance.json` + `verify-token-drift.sh`)
 - ⚙️ New follow-up: deploy refreshed openedx image to clear live Studio token/Google-font drift (`mereka-lms-2bnq`)
 - ✅ GitOps follow-through completed: `bbi-infrastructure` pinned ref + overlay patch now prune legacy `Service/mongodb` in production (`mereka-lms-3ax6`)
+- ✅ GitOps image override contract enforcement added (`scripts/qa/verify-gitops-image-overrides.sh`) and wired into CI + operations gates (`mereka-lms-12yy`)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 

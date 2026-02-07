@@ -208,6 +208,9 @@ tutor images build mfe
 
 # Verify built MFE branding contract before push
 ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
+
+# Verify Kustomize image override contract (prevents transformed-name tag drift)
+./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 ```
 
 **Build discipline:**
