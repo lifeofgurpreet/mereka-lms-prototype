@@ -10,7 +10,7 @@
  * Usage:
  *   # Export all resources using service-to-service auth (recommended):
  *   MCT_BASE_URL=https://learn.skillourfuture.org \
- *   MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
+ *   MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4 \
  *   MCT_CLIENT_ID=<client-id> \
  *   MCT_CLIENT_SECRET=<client-secret> \
  *   MCT_TENANT_ID=<tenant-id> \
@@ -40,7 +40,7 @@
  *   MCT_CLIENT_ID         - Service principal ID (for service-to-service auth)
  *   MCT_CLIENT_SECRET     - Service principal secret (for service-to-service auth)
  *   MCT_TENANT_ID         - Azure tenant ID (for service-to-service auth)
- *   MCT_API_URI           - API URI scope (for service-to-service auth, e.g., api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3)
+ *   MCT_API_URI           - API URI scope (for service-to-service auth, e.g., api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4)
  */
 
 import fs from "node:fs";
@@ -91,7 +91,7 @@ if (!DRY_RUN) {
   }
 
   if (!MCT_ACCESS_TOKEN && !MCT_API_URI) {
-    console.error("Missing MCT_API_URI (required for service-to-service auth, e.g., api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3)");
+    console.error("Missing MCT_API_URI (required for service-to-service auth, e.g., api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4)");
     process.exit(1);
   }
 }
