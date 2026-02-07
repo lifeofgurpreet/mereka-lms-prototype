@@ -79,11 +79,19 @@ Current audit coverage:
 2. MFE pages look unbranded even when LMS is perfect
    - Cause: MFE styling is baked into the MFE image; CSS changes in `mfe/mereka.scss` don’t apply until rebuild.
    - Fix: rebuild + deploy the MFE image.
+   - Required contract gate: `scripts/qa/verify-mfe-image-branding.sh <image_ref>` validates
+     the authn CSS bundle(s) referenced by `index.html` are branded before push/deploy.
 
 2b. Health checks pass locally but fail live on revision marker checks
    - Cause: production is still serving an older image than current repo source.
    - Fix: deploy latest openedx/mfe images and bump GitOps pinned ref; rerun:
      `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod`.
+
+2c. Tutor template drift removes authn theme copy lines
+   - Cause: generated MFE Dockerfile can omit theme asset copy in `authn-common`.
+   - Fix: rerun `./infrastructure/tutor/apply-patches.sh`; it enforces:
+     - `COPY indigo/env.config.jsx /openedx/app/`
+     - `COPY indigo/mereka /openedx/app/mereka`
 
 3. “Worked right after deploy, broken later”
    - Cause: cached HTML references old hashed assets, or a partial rollout.

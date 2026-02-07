@@ -150,6 +150,9 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
 
 # Consolidated operator release gate (auth + observability + Velero + Grafana)
 ./scripts/qa/run-operations-gates.sh --env both
+
+# Run gate + alert-routing audit in CI-safe mode (skip VPS-only atlas monitor checks)
+RUN_ALERT_ROUTING_AUDIT=1 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
 ## Scheduled Checks

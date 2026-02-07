@@ -92,6 +92,11 @@ Images pushed to:
 - `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>`
 - `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:<tag>`
 
+Release safety gates:
+- Before MFE push, workflow runs `scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest <expected_rev>`.
+- Gate fails if authn `index.html` references unbranded CSS or misses the expected revision marker.
+- Verification log is uploaded as artifact: `mfe-branding-contract-log`.
+
 ### Manual Deployment
 
 After images are built, deploy manually:

@@ -1,0 +1,86 @@
+name: Operations Gates Runtime
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      env_scope:
+        description: "Environment scope for auth/multisite checks"
+        required: false
+        default: "both"
+        type: choice
+        options:
+          - prod
+          - dev
+          - both
+      strict_runtime:
+        description: "Fail when runtime dependencies are unavailable"
+        required: false
+        default: true
+        type: boolean
+      run_alert_routing_audit:
+        description: "Run alert routing verification inside operations gate"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  operations-gates:
+    name: Run Operations Gates (Runtime)
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GCP_SA_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: mereka-lms
+
+      - name: Get GKE credentials
+        env:
+          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+        run: |
+          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+            --project "$GKE_CLUSTER_PROJECT" \
+            --zone "$GKE_CLUSTER_LOCATION"
+
+      - name: Run consolidated operations gate
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'both' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+          INPUT_RUN_ALERT_ROUTING_AUDIT: ${{ github.event.inputs.run_alert_routing_audit || 'true' }}
+        run: |
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          if [[ "$INPUT_RUN_ALERT_ROUTING_AUDIT" == "true" ]]; then
+            export RUN_ALERT_ROUTING_AUDIT=1
+          else
+            export RUN_ALERT_ROUTING_AUDIT=0
+          fi
+
+          # VPS atlas monitor cron/status checks are host-local and not available in GH runner.
+          export ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0
+          export RUN_ATLAS_ALLOWLIST_AUDIT=0
+
+          ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
+
+      - name: Upload operations gate artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: operations-gates-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/operations-gates/
+          retention-days: 30

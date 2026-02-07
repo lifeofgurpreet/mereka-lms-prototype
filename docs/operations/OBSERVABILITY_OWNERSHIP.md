@@ -14,6 +14,7 @@ This document defines who owns each observability layer and how changes are sync
 | Alert routing verifier | `scripts/qa/verify-alert-routing.sh` | Mereka LMS platform team |
 | Atlas modulestore guard | `scripts/qa/verify-atlas-modulestore-path.sh` | Mereka LMS platform team |
 | DR evidence bundle builder | `scripts/qa/build-dr-evidence-bundle.sh` | Mereka LMS platform team |
+| Runtime consolidated operations gate | `.github/workflows/operations-gates-runtime.yml` | Mereka LMS platform team |
 | Atlas allowlist monitor audit (VPS drift routing) | `scripts/qa/audit-atlas-allowlist-monitor.sh` | Mereka LMS platform team |
 | Unified operator gate | `scripts/qa/run-operations-gates.sh` | Mereka LMS platform team |
 | VPS Grafana dashboard (`bbi-app-mereka-lms`) | observability repo (`/home/gurpreet/projects/observability`) | Observability platform team |

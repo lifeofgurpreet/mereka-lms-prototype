@@ -465,6 +465,7 @@ Regenerate hostname registry (after domain changes):
 - One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks).
 - DR evidence bundle builder: `scripts/qa/build-dr-evidence-bundle.sh` (monthly automation via `.github/workflows/dr-evidence-bundle.yml`).
 - Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
+- Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana, with CI-safe alert-routing mode).
 - Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.
@@ -484,6 +485,9 @@ Regenerate hostname registry (after domain changes):
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Verify MFE image branding before push/deploy:
   `./scripts/qa/verify-mfe-image-branding.sh <image_ref>` (ensures authn `index.html` references a branded CSS bundle and revision marker).
+- Root-cause authn parity guard: `./infrastructure/tutor/apply-patches.sh` enforces both
+  `COPY indigo/env.config.jsx /openedx/app/` and `COPY indigo/mereka /openedx/app/mereka`
+  inside `authn-common` if Tutor template drift removes them.
 - If authn index points to an unbranded CSS bundle, repair image deterministically:
   `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image> [expected_rev]`
   (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
@@ -498,6 +502,7 @@ Regenerate hostname registry (after domain changes):
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).
 - CI enforcement for branding:
   - `.github/workflows/ci.yml` runs source-only preflight (`RUN_LIVE_GATE=0 BRANDING_LEVEL=deep`).
+  - `.github/workflows/build-tutor-images.yml` runs `verify-mfe-image-branding.sh` before MFE image push and uploads `mfe-branding-contract-log`.
   - `.github/workflows/public-health-check.yml` runs strict prod parity (`STRICT_MFE_BRANDING_REV=1`) and uploads `var/ci/*.log` artifacts.
 - If strict prod branding gate fails with MFE revision mismatch, treat it as release-blocking deploy drift:
   rebuild/push `openedx-mfe`, bump this repo image tag, update `bbi-infrastructure` pinned ref, then rerun strict gate.

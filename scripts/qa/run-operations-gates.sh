@@ -14,6 +14,7 @@ ENV_SCOPE="${ENV_SCOPE:-both}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 RUN_ATLAS_ALLOWLIST_AUDIT="${RUN_ATLAS_ALLOWLIST_AUDIT:-0}"
 RUN_ALERT_ROUTING_AUDIT="${RUN_ALERT_ROUTING_AUDIT:-0}"
+ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT="${ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -26,6 +27,7 @@ Env:
   STRICT_RUNTIME=1               Enforce strict runtime checks for observability/Velero
   RUN_ATLAS_ALLOWLIST_AUDIT=1    Also run VPS Atlas allowlist monitor audit
   RUN_ALERT_ROUTING_AUDIT=1      Also run one-command alert routing verification
+  ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0  Skip VPS-only atlas routing check inside alert-routing audit
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -94,6 +96,7 @@ echo "  env: $ENV_SCOPE"
 echo "  strict_runtime: $STRICT_RUNTIME"
 echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
 echo "  run_alert_routing_audit: $RUN_ALERT_ROUTING_AUDIT"
+echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -120,7 +123,7 @@ fi
 
 if [[ "$RUN_ALERT_ROUTING_AUDIT" == "1" ]]; then
   run_check "alert routing verification" \
-    env STRICT_RUNTIME="$STRICT_RUNTIME" STRICT_WEBHOOK=1 ./scripts/qa/verify-alert-routing.sh
+    env STRICT_RUNTIME="$STRICT_RUNTIME" STRICT_WEBHOOK=1 RUN_ATLAS_VPS_AUDIT="$ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT" ./scripts/qa/verify-alert-routing.sh
 fi
 
 echo ""

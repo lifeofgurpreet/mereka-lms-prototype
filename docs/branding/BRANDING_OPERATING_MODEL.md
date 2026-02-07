@@ -43,6 +43,8 @@ Validate both production and dev:
 2. Build/push images (`openedx`, `openedx-mfe` when changed).
    - After `tutor images build mfe`, verify the built image before push:
      `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
+   - CI now enforces this automatically in `.github/workflows/build-tutor-images.yml`
+     before MFE image tags are pushed.
 3. Update image tags under `deploy/k8s/base`.
 4. Commit/push this repo.
 5. Update pinned `?ref=<sha>` in `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`.
@@ -82,6 +84,10 @@ Validate both production and dev:
      2) if failing and rollout is urgent, repair image deterministically:
         `scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>`
      3) redeploy with GitOps and rerun strict gate.
+   - Prevention (root-cause): `./infrastructure/tutor/apply-patches.sh` now enforces
+     authn parity by injecting both `COPY indigo/env.config.jsx /openedx/app/` and
+     `COPY indigo/mereka /openedx/app/mereka` into `authn-common` when Tutor template
+     drift omits them.
 
 ## What Was Hacky And How We Avoid It
 

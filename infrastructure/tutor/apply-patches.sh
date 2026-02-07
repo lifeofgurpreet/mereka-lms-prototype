@@ -197,25 +197,65 @@ for target in targets:
         return text.replace(marker, cookie_block)
 
     def ensure_mfe_theme_copy(text):
-        marker = "COPY indigo/env.config.jsx /openedx/app/"
-        copy_line = "COPY indigo/mereka /openedx/app/mereka"
-        if marker not in text:
-            return text
+        env_copy = "COPY indigo/env.config.jsx /openedx/app/"
+        theme_copy = "COPY indigo/mereka /openedx/app/mereka"
+
+        # Keep existing env.config copy blocks idempotent by enforcing a single
+        # adjacent theme copy line.
         lines = text.splitlines()
-        output = []
+        normalized = []
         index = 0
         while index < len(lines):
             line = lines[index]
-            output.append(line)
-            if line.strip() == marker:
+            normalized.append(line)
+            if line.strip() == env_copy:
                 next_index = index + 1
-                while next_index < len(lines) and lines[next_index].strip() == copy_line:
+                while next_index < len(lines) and lines[next_index].strip() == theme_copy:
                     next_index += 1
-                output.append(copy_line)
+                normalized.append(theme_copy)
                 index = next_index
                 continue
             index += 1
-        rebuilt = "\n".join(output)
+
+        # Tutor template drift can omit theme copy wiring in authn-common.
+        # Enforce parity with other MFEs by inserting both copy lines there.
+        lines = normalized
+        start = None
+        for idx, line in enumerate(lines):
+            if line.strip() == "FROM base AS authn-common":
+                start = idx
+                break
+        if start is not None:
+            end = len(lines)
+            for idx in range(start + 1, len(lines)):
+                stripped = lines[idx].strip()
+                if stripped.startswith("######## ") or stripped.startswith("####################### "):
+                    end = idx
+                    break
+            authn_block = lines[start:end]
+            has_env_copy = any(line.strip() == env_copy for line in authn_block)
+            has_theme_copy = any(line.strip() == theme_copy for line in authn_block)
+
+            if not (has_env_copy and has_theme_copy):
+                insert_at = None
+                for idx in range(start, end):
+                    if lines[idx].strip() == "COPY --from=authn-src / /openedx/app":
+                        insert_at = idx
+                        break
+                if insert_at is None:
+                    for idx in range(start, end):
+                        if lines[idx].strip().startswith("RUN make OPENEDX_ATLAS_PULL="):
+                            insert_at = idx
+                            break
+                if insert_at is not None:
+                    inserts = []
+                    if not has_env_copy:
+                        inserts.append(env_copy)
+                    if not has_theme_copy:
+                        inserts.append(theme_copy)
+                    lines = lines[:insert_at] + inserts + lines[insert_at:]
+
+        rebuilt = "\n".join(lines)
         if text.endswith("\n"):
             rebuilt += "\n"
         return rebuilt

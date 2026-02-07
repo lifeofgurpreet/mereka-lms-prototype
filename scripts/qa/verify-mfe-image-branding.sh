@@ -46,26 +46,60 @@ docker run --rm \
     set -euo pipefail
     cd /openedx/dist/authn
 
-    css_file="$(grep -o '\''app\.[^"]*\.css'\'' index.html | head -n 1 || true)"
-    if [[ -z "$css_file" ]]; then
-      echo "ERROR: authn index.html missing app CSS reference" >&2
-      exit 1
-    fi
-    if [[ ! -f "$css_file" ]]; then
-      echo "ERROR: authn CSS file referenced by index is missing: $css_file" >&2
+    css_refs="$(grep -Eo '\''href="[^"]+\.css"'\'' index.html \
+      | sed -E '\''s/^href="([^"]+)"$/\1/'\'' \
+      | sed -E '\''s#^/authn/##'\'' \
+      | awk '\''!seen[$0]++'\'' || true)"
+
+    if [ -z "${css_refs}" ]; then
+      echo "ERROR: authn index.html missing CSS references" >&2
       exit 1
     fi
 
-    if ! grep -Eq -- '\''--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins'\'' "$css_file"; then
-      echo "ERROR: authn CSS is not branded: $css_file" >&2
+    missing_refs=""
+    for css_ref in $css_refs; do
+      if [ ! -f "$css_ref" ]; then
+        missing_refs="$missing_refs $css_ref"
+      fi
+    done
+    if [ -n "$missing_refs" ]; then
+      echo "ERROR: authn index references missing CSS file(s):$missing_refs" >&2
       exit 1
     fi
 
-    if [[ -n "${EXPECTED_MFE_BRANDING_REV:-}" ]] && ! grep -F -q -- "${EXPECTED_MFE_BRANDING_REV}" "$css_file"; then
-      echo "ERROR: authn CSS missing expected branding revision marker: ${EXPECTED_MFE_BRANDING_REV}" >&2
+    candidate_refs="$(printf "%s\n" "$css_refs" | grep -E "^app\\..*\\.css$" || true)"
+    if [ -z "$candidate_refs" ]; then
+      candidate_refs="$(printf "%s\n" "$css_refs" | head -n 1)"
+    fi
+
+    branded_count=0
+    revision_count=0
+    unbranded_refs=""
+    for css_ref in $candidate_refs; do
+      if grep -Eq -- '\''--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins'\'' "$css_ref"; then
+        branded_count=$((branded_count + 1))
+        if [ -n "${EXPECTED_MFE_BRANDING_REV:-}" ] && grep -F -q -- "${EXPECTED_MFE_BRANDING_REV}" "$css_ref"; then
+          revision_count=$((revision_count + 1))
+        fi
+      else
+        unbranded_refs="$unbranded_refs $css_ref"
+      fi
+    done
+
+    if [ "$branded_count" -eq 0 ]; then
+      echo "ERROR: authn candidate CSS bundle(s) are not branded: $candidate_refs" >&2
       exit 1
     fi
 
-    echo "OK: authn index CSS is branded ($css_file)"
+    if [ -n "$unbranded_refs" ]; then
+      echo "ERROR: authn index references unbranded candidate CSS bundle(s):$unbranded_refs" >&2
+      exit 1
+    fi
+
+    if [ -n "${EXPECTED_MFE_BRANDING_REV:-}" ] && [ "$revision_count" -eq 0 ]; then
+      echo "ERROR: authn candidate CSS bundles missing expected branding revision marker: ${EXPECTED_MFE_BRANDING_REV}" >&2
+      exit 1
+    fi
+
+    echo "OK: authn index candidate CSS bundles are branded ($candidate_refs)"
   '
-
