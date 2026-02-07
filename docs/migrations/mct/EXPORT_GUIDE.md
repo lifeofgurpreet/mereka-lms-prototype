@@ -50,7 +50,7 @@ The MCT export script (`scripts/migrations/mct/mct-export.mjs`) exports data fro
 2. **Azure AD App Registration** - Service principal with MCT API permissions
    - App ID: `caa4dce3-e49c-4c09-9160-031d51bfd2a9`
    - Tenant ID: `b1aab053-6242-46ec-9cf8-bd02e63dd2da`
-   - API URI: `api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3`
+   - API URI: `api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4`
 
 ### Credential Refresh (IMPORTANT)
 
@@ -78,7 +78,7 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
 ```bash
 # Required
 MCT_BASE_URL=learn.skillourfuture.org  # Domain only (no https://)
-MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3
+MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
 MCT_CLIENT_SECRET=<secret-from-azure-cli>
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
@@ -96,7 +96,7 @@ MCT_API_VERSION=v1  # Default: v1 (recommended)
 ```bash
 # Export all default resources
 MCT_BASE_URL=learn.skillourfuture.org \
-MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
+MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
 MCT_CLIENT_SECRET='<your-secret>' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
@@ -388,7 +388,7 @@ curl -H "Authorization: Bearer <token>" \
 **App Registration:**
 - **App ID:** `caa4dce3-e49c-4c09-9160-031d51bfd2a9`
 - **Tenant ID:** `b1aab053-6242-46ec-9cf8-bd02e63dd2da`
-- **API URI:** `api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3`
+- **API URI:** `api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4`
 - **Base URL:** `learn.skillourfuture.org`
 
 ### Checking Credential Expiration
@@ -432,7 +432,7 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9
 **Example `.env` file:**
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org
-MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3
+MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
 MCT_CLIENT_SECRET=<your-secret-here>
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da
@@ -484,7 +484,7 @@ az ad app credential reset --id caa4dce3-e49c-4c09-9160-031d51bfd2a9 --append
 ### Test Authentication
 ```bash
 MCT_BASE_URL=learn.skillourfuture.org \
-MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3 \
+MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4 \
 MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9 \
 MCT_CLIENT_SECRET='<secret>' \
 MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da \
@@ -501,7 +501,7 @@ node scripts/migrations/mct/mct-export.mjs --dry-run
 ```bash
 # Set credentials in environment
 export MCT_BASE_URL=learn.skillourfuture.org
-export MCT_API_URI=api://e8edea94-e86f-4dc7-857e-3c5c09bb76d3
+export MCT_API_URI=api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4
 export MCT_CLIENT_ID=caa4dce3-e49c-4c09-9160-031d51bfd2a9
 export MCT_CLIENT_SECRET='<secret>'
 export MCT_TENANT_ID=b1aab053-6242-46ec-9cf8-bd02e63dd2da

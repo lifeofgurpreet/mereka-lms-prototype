@@ -73,7 +73,7 @@ cd /home/dev/bbi-meta/mereka-lms
 
 MCT_BASE_URL="mctindonesia.azurewebsites.net" \
 MCT_CLIENT_ID="caa4dce3-e49c-4c09-9160-031d51bfd2a9" \
-MCT_CLIENT_SECRET="Mwo8Q~it.mHuXlwAKG4DPIq-~IuXMzuqkASfZcfh" \
+MCT_CLIENT_SECRET="<SEE INFISICAL /mereka-lms/mct/MCT_CLIENT_SECRET>" \
 MCT_TENANT_ID="b1aab053-6242-46ec-9cf8-bd02e63dd2da" \
 MCT_API_URI="api://bf8331fd-17ed-4bcf-af5f-599db14ff4f4" \
 node scripts/migrations/mct/mct-export.mjs --resources courses --force
