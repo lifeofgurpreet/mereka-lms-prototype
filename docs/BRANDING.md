@@ -176,7 +176,20 @@ This writes to `var/screenshots/` (gitignored):
 ./scripts/qa/capture-branding-screenshots.sh dev
 ```
 
-Next step (tracked in beads): wire these into CI as a visual regression gate (`mereka-lms-3mz`).
+Run visual regression against two capture runs:
+
+```bash
+# Auto-picks previous run as baseline and latest run as candidate
+./scripts/qa/visual-regression-branding.sh prod --threshold 0.06
+
+# Explicit directories + strict file-set matching
+./scripts/qa/visual-regression-branding.sh prod \
+  --baseline var/screenshots/prod/<older_ts> \
+  --candidate var/screenshots/prod/<newer_ts> \
+  --strict
+```
+
+Diff images are written to `var/screenshots-diff/<env>/<timestamp>/`.
 
 ## Micro-Frontend Plug-in
 

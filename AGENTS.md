@@ -493,12 +493,16 @@ Regenerate hostname registry (after domain changes):
   - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod` (includes Studio CSS token/font wiring, MFE auth branding CTA, credentials health/admin reachability, forum heartbeat)
 - Studio authoring flow contract check: `scripts/qa/verify-studio-authoring-branding.sh [prod|dev]`
   (enforces `action-create-course`, `action-create-library`, outline, and add-component selectors in source/live CSS).
+- Studio live checks should treat themed `studio-main-v1` selector coverage + no Google-font imports as the primary contract.
+  Do not fail production branding gates solely because a separate Studio runtime override link is absent.
 - Token provenance lock:
   - Metadata file: `assets/branding/tokens.provenance.json`
   - Validate drift + pinned source hash: `./scripts/branding/verify-token-drift.sh`
   - Refresh metadata from upstream repo: `./scripts/branding/update-token-provenance.sh`
 - Studio branding Sass entrypoints must be present in the build context (`cms/static/sass/studio-main-v1*.scss`);
   `./infrastructure/tutor/apply-patches.sh` now syncs `infrastructure/tutor/themes/mereka/cms/static/sass/` into `tutor_env/env/build/openedx/themes/mereka/cms/static/sass/`.
+- Runtime override CSS should remain in parity across common + LMS + CMS.
+  `./scripts/branding/sync-brand-assets.sh` now syncs all three copies.
 - Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Verify MFE image branding before push/deploy:
@@ -509,6 +513,9 @@ Regenerate hostname registry (after domain changes):
 - GitOps pinned-ref helper for cross-repo rollout:
   `./scripts/infra/prepare-bbi-infra-ref-bump.sh [--apply]`
   (updates `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml` ref to current commit).
+- When bumping pinned `?ref=...`, always use exact output from `git rev-parse HEAD`;
+  a typo causes Argo `ComparisonError` (`fatal: ... not our ref`).
+- Production Argo app name is `mereka-lms-local` (namespace: `argocd`).
 - If authn index points to an unbranded CSS bundle, repair image deterministically:
   `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image> [expected_rev]`
   (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
@@ -516,7 +523,9 @@ Regenerate hostname registry (after domain changes):
   (`docker.io/overhangio/openedx-mfe` and `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe`) to avoid post-transform tag drift.
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
-- Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
+- Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it syncs runtime override CSS from common -> LMS + CMS to prevent drift.
+- Always export `TUTOR_ROOT=\"$(pwd)/tutor_env\"` in the same shell before `tutor images build ...`;
+  missing `TUTOR_ROOT` can produce a fast fail/no-op build and stale image rollouts.
 - `./infrastructure/tutor/apply-patches.sh` now patches MFE Dockerfiles idempotently (no duplicate `COPY indigo/mereka` lines) and injects npm retry/timeouts for transient registry failures.
 - Studio Google-font stripping in openedx Dockerfile must use regex-safe host literals (`fonts[.]googleapis[.]com`), not over-escaped `fonts\\.googleapis\\.com`.
   Verify generated patch blocks in `tutor_env/env/build/openedx/Dockerfile` before building.

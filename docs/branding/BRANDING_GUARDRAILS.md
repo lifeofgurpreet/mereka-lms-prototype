@@ -73,6 +73,15 @@ Current audit coverage:
 - Credentials root/admin/health availability
 - Forum heartbeat
 
+Visual regression coverage (manual/agent-run):
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/visual-regression-branding.sh prod --threshold 0.06
+```
+- Uses baseline-vs-candidate screenshot RMSE checks.
+- Diff artifacts are written to `var/screenshots-diff/`.
+- Add `--strict` when you need exact screenshot file-set parity.
+
 ## Most Common Failure Modes
 
 1. Deep branding looks absent on production
@@ -123,6 +132,16 @@ Current audit coverage:
    - Cause: credentials service is API-first in production; `/` may redirect to `/health/`.
    - Fix: keep Caddy credentials routing intact and verify
      `./scripts/qa/verify-public-branding.sh prod` passes both admin + health checks.
+
+7. Studio check false negatives after valid deploy
+   - Cause: expecting a separate Studio runtime override CSS link in HTML, while the deployed contract
+     is the themed `studio-main-v1` bundle selectors + no Google fonts.
+   - Fix: treat `scripts/qa/verify-studio-authoring-branding.sh` as canonical for Studio authoring UI,
+   and keep public gate checks aligned to that contract.
+
+8. Screenshot captures exist but no measurable drift signal
+   - Cause: captures are not compared against a baseline.
+   - Fix: run `scripts/qa/visual-regression-branding.sh` and treat threshold failures as release blockers.
 
 ## Deployment Reference
 

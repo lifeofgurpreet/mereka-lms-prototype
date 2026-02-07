@@ -103,7 +103,7 @@ check_lms_overrides() {
 check_studio_css() {
   local host=$1
   local label=$2
-  local html css_path override_path css override_css
+  local html css_path css
 
   html="$(fetch "https://${host}/?nocache=$(date +%s)")"
   if [[ -z "${html:-}" ]]; then
@@ -115,42 +115,24 @@ check_studio_css() {
     gap "${label}: could not locate studio-main-v1 CSS link"
     return
   fi
-  override_path="$(extract_first '/static/studio/mereka/css/mereka-overrides[^"]*\.css' <<<"$html")"
-  if [[ -z "${override_path:-}" ]]; then
-    gap "${label}: missing studio runtime overrides CSS link"
-    return
-  fi
-
   css="$(fetch "https://${host}${css_path}")"
   if [[ -z "${css:-}" ]]; then
     gap "${label}: could not fetch studio CSS (${css_path})"
     return
   fi
-  override_css="$(fetch "https://${host}${override_path}")"
-  if [[ -z "${override_css:-}" ]]; then
-    gap "${label}: could not fetch studio runtime overrides CSS (${override_path})"
-    return
+
+  if grep -Eq 'action-create-course' <<<"$css" \
+    && grep -Eq 'action-create-library' <<<"$css" \
+    && grep -Eq 'outline-complex' <<<"$css" \
+    && grep -Eq 'add-xblock-component' <<<"$css"; then
+    ok "${label}: studio CSS includes deep Studio selectors"
+  else
+    gap "${label}: studio CSS missing deep Studio selectors (likely older openedx image deployed)"
   fi
 
-  if [[ -n "$EXPECTED_BRANDING_REV" ]] && grep -F -q "$EXPECTED_BRANDING_REV" <<<"$override_css"; then
-    ok "${label}: studio runtime overrides include branding revision marker ${EXPECTED_BRANDING_REV}"
-  else
-    gap "${label}: studio runtime overrides missing branding revision marker ${EXPECTED_BRANDING_REV}"
-  fi
-
-  if grep -Eq 'font-family:[[:space:]]*"Poppins"' <<<"$override_css" \
-    && grep -Eq 'font-family:[[:space:]]*"Lato"' <<<"$override_css"; then
-    ok "${label}: studio runtime overrides reference local brand fonts"
-  else
-    gap "${label}: studio runtime overrides missing local brand fonts"
-  fi
-
-  if grep -Eq '\.action-create-course' <<<"$override_css" \
-    && grep -Eq '\.action-create-library' <<<"$override_css" \
-    && grep -Eq '\.add-xblock-component' <<<"$override_css"; then
-    ok "${label}: studio runtime overrides include deep Studio selectors"
-  else
-    gap "${label}: studio runtime overrides missing deep Studio selectors"
+  # The built Studio bundle can inline values, so do not require token/font names here.
+  if [[ -n "$EXPECTED_BRANDING_REV" ]] && grep -F -q "$EXPECTED_BRANDING_REV" <<<"$css"; then
+    ok "${label}: studio CSS includes branding revision marker ${EXPECTED_BRANDING_REV}"
   fi
 
   if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then

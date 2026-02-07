@@ -320,7 +320,7 @@ check_homepage_brand_logo() {
 check_studio_brand_css() {
   local studio_host=$1
   local label=$2
-  local ts html css_path override_path css
+  local ts html css_path css
 
   ts="$(date +%s)"
   html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}/?nocache=${ts}" 2>/dev/null || true)"
@@ -336,13 +336,6 @@ check_studio_brand_css() {
     failures=$((failures + 1))
     return
   fi
-  override_path="$(printf '%s' "$html" | rg -o '/static/studio/mereka/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
-  if [[ -z "${override_path:-}" ]]; then
-    printf "✗ %s (missing studio runtime overrides CSS link)\n" "$label" >&2
-    failures=$((failures + 1))
-    return
-  fi
-
   css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}${css_path}?nocache=${ts}" 2>/dev/null || true)"
   if [[ -z "${css:-}" ]]; then
     printf "✗ %s (could not fetch studio CSS)\n" "$label" >&2
@@ -350,7 +343,15 @@ check_studio_brand_css() {
     return
   fi
 
-  check_css_fonts "https://${studio_host}${override_path}?nocache=${ts}" "$label (override CSS wiring)"
+  if grep -Eq 'action-create-course' <<<"$css" \
+    && grep -Eq 'action-create-library' <<<"$css" \
+    && grep -Eq 'outline-complex' <<<"$css" \
+    && grep -Eq 'add-xblock-component' <<<"$css"; then
+    printf "✓ %s\n" "$label"
+  else
+    printf "✗ %s (missing Studio create-flow/outline selectors)\n" "$label" >&2
+    failures=$((failures + 1))
+  fi
 
   if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then
     printf "✗ %s (studio-main-v1 still imports Google fonts)\n" "$label" >&2

@@ -108,6 +108,21 @@ Validate both production and dev:
         in both strip blocks
      3) rebuild/push `openedx`, bump GitOps ref/tag, rerun strict branding gates.
 
+11. **Build command appears to "finish" instantly (no real image change)**
+   - Cause: `tutor images build openedx` executed without `TUTOR_ROOT` set; Tutor exits early with
+     project-root/config error.
+   - Fix:
+     1) `export TUTOR_ROOT="$(pwd)/tutor_env"`
+     2) rerun build
+     3) verify local image digest changed before tagging/pushing.
+
+12. **Argo `ComparisonError` with `not our ref` during GitOps rollout**
+   - Cause: incorrect pinned SHA in `bbi-infrastructure` (`?ref=<sha>` typo or stale SHA).
+   - Fix:
+     1) get exact SHA from source repo: `git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD`
+     2) update `apps/mereka-lms/base/kustomization.yaml` with that exact SHA
+     3) push and wait for `mereka-lms-local` app to return `Synced/Healthy`.
+
 ## What Was Hacky And How We Avoid It
 
 - Hacky pattern: manual one-off checks run ad-hoc by different agents.

@@ -401,6 +401,57 @@ Kind nodes do not have Artifact Registry credentials by default.
 
 ---
 
+### Issue 6b: Tutor Build No-Op / Fast-Fail (`Project root does not exist`)
+
+**Symptoms:**
+- `tutor images build openedx` exits immediately with:
+  `Project root does not exist. Make sure to generate the initial configuration...`
+- Subsequent rollout still serves old image/tag.
+
+**Root Cause:**
+- `TUTOR_ROOT` was not exported in the active shell before running Tutor commands.
+
+**Fix:**
+```bash
+cd /home/gurpreet/projects/k8s/mereka-lms
+source .venv/bin/activate
+export TUTOR_ROOT="$(pwd)/tutor_env"
+tutor images build openedx
+```
+
+**Operator rule:**
+- Treat every Tutor command as invalid unless `echo "$TUTOR_ROOT"` resolves to this repo’s `tutor_env`.
+
+---
+
+### Issue 6c: Argo `ComparisonError` (`not our ref`) after GitOps bump
+
+**Symptoms:**
+- Argo app shows `ComparisonError` with:
+  `fatal: remote error: upload-pack: not our ref <sha>`
+- App stays out of sync even though manifests were pushed.
+
+**Root Cause:**
+- Wrong commit SHA pinned in:
+  `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`
+
+**Fix:**
+```bash
+# source SHA must come from mereka-lms repo
+git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD
+
+# update pinned ref in bbi-infrastructure and push
+# then force Argo refresh for app:
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  -n argocd annotate application mereka-lms-local \
+  argocd.argoproj.io/refresh=hard --overwrite
+```
+
+**Operator rule:**
+- Never hand-type long `?ref=` SHAs; always paste exact `git rev-parse HEAD` output.
+
+---
+
 ### Issue 7: No Courses Visible / Modulestore Permission Errors
 
 **Symptoms:**
