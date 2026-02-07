@@ -275,6 +275,50 @@ runtime_k8s_check() {
           $alerts | index("OpenEdxSyntheticOrBackupJobFailures")
         ) != null
     ' >/dev/null
+
+  local prom_pod rules_json
+  prom_pod="$(
+    kubectl --context "$K8S_CONTEXT" -n monitoring get pods \
+      -l app.kubernetes.io/name=prometheus \
+      -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true
+  )"
+  if [[ -z "$prom_pod" ]]; then
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Prometheus pod not found in monitoring namespace"
+      return 1
+    fi
+    echo "SKIP: Prometheus pod not found in monitoring namespace"
+    return 0
+  fi
+
+  rules_json="$(
+    kubectl --context "$K8S_CONTEXT" -n monitoring exec "$prom_pod" -- \
+      wget -qO- --timeout=5 'http://localhost:9090/api/v1/rules' 2>/dev/null || true
+  )"
+  if [[ -z "$rules_json" ]]; then
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Unable to query Prometheus /api/v1/rules from pod $prom_pod"
+      return 1
+    fi
+    echo "SKIP: unable to query Prometheus /api/v1/rules from pod $prom_pod"
+    return 0
+  fi
+
+  jq -e '
+    [ .data.groups[].rules[]? | select(.type=="alerting") | .name ] as $alerts
+    | (
+        $alerts | index("OpenEdxCriticalDeploymentUnavailable")
+      ) != null
+    and (
+        $alerts | index("OpenEdxPodsPendingTooLong")
+      ) != null
+    and (
+        $alerts | index("OpenEdxCrashLoopingContainers")
+      ) != null
+    and (
+        $alerts | index("OpenEdxSyntheticOrBackupJobFailures")
+      ) != null
+  ' <<<"$rules_json" >/dev/null
 }
 
 runtime_velero_freshness_check() {

@@ -23,6 +23,8 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 contains the reliability alerts:
 `OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`,
 `OpenEdxCrashLoopingContainers`, and `OpenEdxSyntheticOrBackupJobFailures`.
+It additionally verifies these alert rules are loaded by Prometheus runtime via
+`/api/v1/rules` (not just present in Kubernetes objects).
 
 ## 2) Core Dashboards
 
