@@ -49,7 +49,8 @@ Canonical path for this stack: `/k8s/mereka-lms` (prod + dev).
 2. Push to Artifact Registry:
    `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`.
 3. Update K8s deployments (LMS/CMS/workers/MFE) to new tags.
-4. Verify rollouts (`kubectl rollout status ...`).
+4. If production is pinned through `bbi-infrastructure`, bump the pinned `?ref=<sha>` there so Argo can reconcile this repo’s latest manifests.
+5. Verify rollouts (`kubectl rollout status ...`).
 
 See `docs/operations/DEPLOYMENT_RUNBOOK.md` for the full, step-by-step flow.
 

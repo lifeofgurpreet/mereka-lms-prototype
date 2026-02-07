@@ -447,6 +447,12 @@ STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
+Post-GitOps sync strict Atlas enforcement (prod):
+```bash
+STRICT_RUNTIME=1 FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=1 \
+  ./scripts/qa/verify-atlas-modulestore-path.sh --mode runtime
+```
+
 Regenerate hostname registry (after domain changes):
 ```bash
 ./scripts/gen/update-openedx-hostnames-doc.sh

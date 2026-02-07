@@ -1,16 +1,16 @@
 # Course Data Recovery (MCT + Kajabi)
-_Last updated: 2026-02-05 • Owner: Platform Ops_
+_Last updated: 2026-02-07 • Owner: Platform Ops_
 
 ## Summary
 Open edX course content lives in:
 - **MongoDB modulestore** (course blocks/content)
 - **MySQL** (course metadata/indexes like `CourseOverview`)
 
-This environment is **hybrid** today:
-- **Forum** uses **MongoDB Atlas** (`cs_comments_service`) exclusively.
-- **LMS/CMS modulestore** may use **in-cluster MongoDB** or **Atlas**, depending on the active Open edX config.
+Current reality:
+- **Production (GKE)** is Atlas-backed for both forum and modulestore.
+- **Development (kind/VPS)** may use in-cluster MongoDB for forum/modulestore depending on local overlay/config.
 
-Before doing any recovery work, confirm where modulestore is pointing, then verify which data store is actually empty.
+Before doing any recovery work, confirm where modulestore is pointing in the target environment, then verify which data store is actually empty.
 
 ### Historical Findings (2026-02-05)
 - LMS `CourseOverview` count was observed as **0**
@@ -28,7 +28,7 @@ Before doing any recovery work, confirm where modulestore is pointing, then veri
 ## Confirm the Gap (What Is Empty?)
 
 ### 0) Determine modulestore backend (in-cluster MongoDB vs Atlas)
-Run this first in the affected environment (prod/dev):
+Run this first in the affected environment (prod/dev) every time:
 ```bash
 kubectl exec -n mereka-lms deploy/lms -- python /openedx/edx-platform/manage.py lms shell -c \
 "from django.conf import settings; \
@@ -40,6 +40,10 @@ print('DOC_STORE_DB', cfg.get('db'));"
 Interpretation:
 - If `DOC_STORE_HOST` contains `mongodb` or `mongodb:27017`, modulestore is using **in-cluster MongoDB**.
 - If `DOC_STORE_HOST` contains `mongodb+srv://` or `*.mongodb.net`, modulestore is using **Atlas**.
+
+Expected defaults:
+- **prod**: Atlas
+- **dev**: in-cluster is allowed, Atlas also possible
 
 ### 1) Check course indexes (MySQL)
 ```bash
