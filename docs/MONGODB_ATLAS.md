@@ -1,11 +1,11 @@
 # MongoDB Atlas Migration Guide
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-04_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-07_
 
 This guide explains how to move `cs_comments_service` (forum) data from an in-cluster MongoDB to MongoDB Atlas and point the forum service at the managed cluster.
 
 Important:
 - This document is **forum-focused**.
-- LMS/CMS modulestore cutover to Atlas is a separate migration and must be planned/verified independently.
+- LMS/CMS modulestore cutover is now verified in production (2026-02-07), but keep verifying per-environment because overlays/configs can drift.
 
 ## 1. Provision Atlas resources
 

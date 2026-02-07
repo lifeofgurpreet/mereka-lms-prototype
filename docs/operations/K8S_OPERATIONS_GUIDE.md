@@ -584,7 +584,7 @@ velero restore describe <restore-name>
 
 Use Atlas Console for point-in-time recovery or restore from snapshot.
 
-Note: production currently has an in-cluster `mongodb` service as well; treat it as production-critical until the Atlas-only cutover is complete (see `docs/ARCHITECTURE_MONGODB.md`).
+Note: production still has an in-cluster `mongodb` service, but active modulestore traffic is Atlas-backed. Treat in-cluster MongoDB as legacy risk surface (non-durable `emptyDir`) until it is safely removed or PVC-backed (see `docs/ARCHITECTURE_MONGODB.md`).
 
 ### Velero Commands Reference
 

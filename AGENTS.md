@@ -136,26 +136,29 @@ Official Mereka brand assets: `https://github.com/biji-biji-initiative/bbbi-mere
 
 See `docs/adr/001-mongodb-atlas.md` for full rationale.
 
-### Current State (Verified 2026-02-06, Production GKE)
+### Current State (Verified 2026-02-07, Production GKE)
 - **Forum**: uses Atlas.
-- **LMS/CMS modulestore**: defaults to in-cluster `Service/mongodb` unless `MONGODB_HOST` is explicitly set to Atlas.
-- **In-cluster MongoDB** (`Deployment/mongodb`) exists in production.
+- **LMS/CMS modulestore**: explicitly configured to Atlas (`MONGODB_HOST` resolves to `*.mongodb.net` via `openedx-secrets/FORUM_MONGODB_SRV`).
+- **In-cluster MongoDB** (`Deployment/mongodb`) still exists as legacy runtime and currently uses `emptyDir`; keep it out of production data paths until removed or PVC-backed.
 
 ### Connection Details
 | Service | Database | Connection |
 |---------|----------|------------|
-| LMS/CMS | `openedx` | Target: Atlas; Current: in-cluster MongoDB unless configured |
+| LMS/CMS | `openedx` | Atlas (enforced via env + settings patches) |
 | Forum | `cs_comments_service` | Atlas |
 
 ### How To Verify (No Secrets Printed)
 
 ```bash
-# LMS/CMS modulestore: if MONGODB_HOST is empty, they will use in-cluster mongodb by default.
-kubectl -n mereka-lms exec deploy/lms -- python -c 'import os; print(bool(os.environ.get(\"MONGODB_HOST\")))'
-kubectl -n mereka-lms exec deploy/cms -- python -c 'import os; print(bool(os.environ.get(\"MONGODB_HOST\")))'
+# LMS/CMS modulestore should be Atlas (True/True):
+kubectl -n mereka-lms exec deploy/lms -- python -c 'import os; h=os.environ.get(\"MONGODB_HOST\",\"\"); print(bool(h), \".mongodb.net\" in h or h.startswith(\"mongodb+srv://\"))'
+kubectl -n mereka-lms exec deploy/cms -- python -c 'import os; h=os.environ.get(\"MONGODB_HOST\",\"\"); print(bool(h), \".mongodb.net\" in h or h.startswith(\"mongodb+srv://\"))'
 
 # In-cluster MongoDB presence:
 kubectl -n mereka-lms get deploy mongodb
+
+# Velero posture (critical should be 0 when modulestore is Atlas):
+./scripts/qa/audit-velero.sh
 ```
 
 ### Secret Management
@@ -165,7 +168,7 @@ kubectl -n mereka-lms get deploy mongodb
 
 ### NEVER DO
 1. ❌ Deploy a *new* local MongoDB for production data (Atlas is the target)
-2. ❌ Delete the existing in-cluster MongoDB in prod until `mereka-lms-m1q` is completed (modulestore cutover verified)
+2. ❌ Delete the existing in-cluster MongoDB in prod without explicit approval + backup evidence
 3. ❌ Change connection strings to `localhost` or `mongodb` for production
 4. ❌ Hardcode MongoDB password in files
 
@@ -473,6 +476,8 @@ Regenerate hostname registry (after domain changes):
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it also syncs runtime override CSS from common -> LMS to prevent drift.
+- `./infrastructure/tutor/apply-patches.sh` now patches MFE Dockerfiles idempotently (no duplicate `COPY indigo/mereka` lines) and injects npm retry/timeouts for transient registry failures.
+- Never run more than one `tutor images build mfe` concurrently; wait for the active build to finish before retrying.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).
 - CI enforcement for branding:

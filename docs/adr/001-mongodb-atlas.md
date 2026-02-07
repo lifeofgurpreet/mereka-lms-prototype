@@ -55,13 +55,13 @@ We chose **MongoDB Atlas** (managed service) for production workloads.
 - **Required roles**: MongoDB user must have `readWrite` on both `openedx` and `cs_comments_service`
 - **Local MongoDB**: Target state is Atlas-only, but do not assume this is true in every environment until verified.
 
-### Current State (Verified 2026-02-06)
+### Current State (Verified 2026-02-07)
 
 - **Forum**: uses Atlas (via `MONGODB_HOST` configured to a `*.mongodb.net` host).
-- **LMS/CMS modulestore**: still uses the in-cluster MongoDB service unless `MONGODB_HOST` is explicitly set to Atlas.
-- **In-cluster MongoDB** (`Deployment/mongodb`) currently exists in production.
+- **LMS/CMS modulestore**: uses Atlas in production (`MONGODB_HOST` + Atlas-aware settings patches).
+- **In-cluster MongoDB** (`Deployment/mongodb`) still exists in production as legacy runtime and uses `emptyDir` (non-durable).
 
-See `mereka-lms-m1q` for the cutover plan to make the stack Atlas-only end-to-end and safely remove the in-cluster MongoDB.
+Cutover status: complete for active modulestore path, but cleanup remains. Remove or PVC-back the in-cluster MongoDB only after explicit approval and backup evidence.
 
 ## Migration Path
 

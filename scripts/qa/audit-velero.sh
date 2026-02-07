@@ -64,6 +64,9 @@ cronjobs_json="$tmpdir/cronjobs.json"
 jobs_json="$tmpdir/jobs.json"
 app_pvcs_json="$tmpdir/app_pvcs.json"
 app_mongodb_json="$tmpdir/app_mongodb.json"
+app_lms_json="$tmpdir/app_lms.json"
+app_cms_json="$tmpdir/app_cms.json"
+openedx_secrets_json="$tmpdir/openedx_secrets.json"
 
 kubectl_json "$VELERO_NS" backupstoragelocations.velero.io >"$bsls_json"
 kubectl_json "$VELERO_NS" volumesnapshotlocations.velero.io >"$vsls_json"
@@ -75,6 +78,9 @@ kubectl_json "$VELERO_NS" jobs.batch >"$jobs_json"
 
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get pvc -o json 2>/dev/null >"$app_pvcs_json" || echo '{"items":[]}' >"$app_pvcs_json"
 kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy mongodb -o json 2>/dev/null >"$app_mongodb_json" || echo '{}' >"$app_mongodb_json"
+kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy lms -o json 2>/dev/null >"$app_lms_json" || echo '{}' >"$app_lms_json"
+kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy cms -o json 2>/dev/null >"$app_cms_json" || echo '{}' >"$app_cms_json"
+kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get secret openedx-secrets -o json 2>/dev/null >"$openedx_secrets_json" || echo '{}' >"$openedx_secrets_json"
 
 ns_list="$(
   python3 - "$schedules_json" <<'PY'
@@ -137,6 +143,9 @@ paths = {
     "jobs": os.path.join(tmpdir, "jobs.json"),
     "app_pvcs": os.path.join(tmpdir, "app_pvcs.json"),
     "app_mongodb": os.path.join(tmpdir, "app_mongodb.json"),
+    "app_lms": os.path.join(tmpdir, "app_lms.json"),
+    "app_cms": os.path.join(tmpdir, "app_cms.json"),
+    "openedx_secrets": os.path.join(tmpdir, "openedx_secrets.json"),
 }
 
 bsls = load(paths["bsls"], {"items": []})
@@ -148,6 +157,9 @@ cronjobs = load(paths["cronjobs"], {"items": []})
 jobs = load(paths["jobs"], {"items": []})
 app_pvcs = load(paths["app_pvcs"], {"items": []})
 app_mongodb = load(paths["app_mongodb"], {})
+app_lms = load(paths["app_lms"], {})
+app_cms = load(paths["app_cms"], {})
+openedx_secrets = load(paths["openedx_secrets"], {})
 
 def load_prefixed(prefix: str):
     out = {}
@@ -177,10 +189,34 @@ def summarize():
         },
         "coverage": {
             "pvc_by_namespace": {},
+            "modulestore_runtime": {},
         },
         "app_data_risks": [],
         "checks": {"failures": 0, "warnings": 0},
     }
+
+    def is_atlas_host(value):
+        host = (value or "").strip().lower()
+        return host.startswith("mongodb+srv://") or ".mongodb.net" in host
+
+    def resolve_env_var(deploy_obj, name):
+        env = ((((deploy_obj.get("spec") or {}).get("template") or {}).get("spec") or {}).get("containers") or [{}])[0].get("env") or []
+        for item in env:
+            if (item or {}).get("name") != name:
+                continue
+            if "value" in (item or {}):
+                return item.get("value")
+            ref = ((item.get("valueFrom") or {}).get("secretKeyRef") or {})
+            key = ref.get("key")
+            if key:
+                data = (openedx_secrets.get("data") or {}).get(key)
+                if data:
+                    try:
+                        import base64
+                        return base64.b64decode(data).decode("utf-8")
+                    except Exception:
+                        return None
+        return None
 
     # BSLs
     for b in bsls.get("items", []):
@@ -461,6 +497,15 @@ def summarize():
     out["velero"]["backup_verification"] = verify_status
 
     # App-level data risk signals (mereka-lms)
+    lms_mongodb_host = resolve_env_var(app_lms, "MONGODB_HOST")
+    cms_mongodb_host = resolve_env_var(app_cms, "MONGODB_HOST")
+    lms_is_atlas = is_atlas_host(lms_mongodb_host)
+    cms_is_atlas = is_atlas_host(cms_mongodb_host)
+    out["coverage"]["modulestore_runtime"] = {
+        "lms_mongodb_host_is_atlas": lms_is_atlas,
+        "cms_mongodb_host_is_atlas": cms_is_atlas,
+    }
+
     # 1) PVCs pending
     pending = []
     for pvc in app_pvcs.get("items", []):
@@ -477,12 +522,20 @@ def summarize():
     try:
         vols = (((app_mongodb.get("spec") or {}).get("template") or {}).get("spec") or {}).get("volumes") or []
         if any("emptyDir" in (v or {}) for v in vols):
-            out["checks"]["failures"] += 1
-            out["app_data_risks"].append({
-                "severity": "critical",
-                "risk": "mereka-lms/mongodb Deployment uses emptyDir for /data/db (ephemeral). If modulestore is pointed at in-cluster MongoDB, course content will be lost on pod reschedule/restart.",
-                "fix_hint": "Move modulestore to Atlas OR add a PVC-backed volume to MongoDB before importing any courses.",
-            })
+            if lms_is_atlas and cms_is_atlas:
+                out["checks"]["warnings"] += 1
+                out["app_data_risks"].append({
+                    "severity": "warning",
+                    "risk": "mereka-lms/mongodb Deployment uses emptyDir, but LMS/CMS modulestore is currently configured to Atlas. Keep this deployment out of the production data path or migrate it to PVC-backed storage before reuse.",
+                    "fix_hint": "Preferred: remove legacy in-cluster MongoDB after cutover verification. Interim: add PVC-backed storage if it must remain active.",
+                })
+            else:
+                out["checks"]["failures"] += 1
+                out["app_data_risks"].append({
+                    "severity": "critical",
+                    "risk": "mereka-lms/mongodb Deployment uses emptyDir for /data/db (ephemeral). If modulestore is pointed at in-cluster MongoDB, course content will be lost on pod reschedule/restart.",
+                    "fix_hint": "Move modulestore to Atlas OR add a PVC-backed volume to MongoDB before importing any courses.",
+                })
     except Exception:
         pass
 

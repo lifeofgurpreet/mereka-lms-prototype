@@ -98,8 +98,12 @@ Example: in **kind dev** we may run an in-cluster MongoDB for the forum to avoid
 If you deploy MongoDB without a PVC (e.g., `emptyDir`), any data is **ephemeral** and not protected by Velero snapshots.
 
 Fix:
-- Prefer: move modulestore to Atlas (target architecture).
-- Alternative (dev-only): attach a PVC-backed volume to MongoDB before importing anything you care about.
+- Preferred (prod): keep modulestore on Atlas and ensure in-cluster MongoDB is never in the active data path.
+- Alternative (dev-only / temporary): attach a PVC-backed volume to MongoDB before importing anything you care about.
+
+`audit-velero.sh` behavior:
+- `emptyDir` + modulestore on in-cluster MongoDB => **critical** (fails gate)
+- `emptyDir` + modulestore verified on Atlas => **warning** (cleanup still required)
 
 ### 4) Restore stale alert window mismatch in Cloud Monitoring
 Cloud Monitoring threshold/absence alert conditions are limited to roughly 24h lookback windows.

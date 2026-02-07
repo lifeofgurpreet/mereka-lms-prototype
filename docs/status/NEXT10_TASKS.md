@@ -27,14 +27,14 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| 1 | Fix modulestore persistence (prod): `mereka-lms/mongodb` uses `emptyDir` | Infra | 💤 Pending | Highest risk before any course imports. Move modulestore to Atlas or add PVC-backed MongoDB. See `docs/ARCHITECTURE_MONGODB.md`. |
+| 1 | Retire or persist legacy in-cluster MongoDB (`mereka-lms/mongodb` uses `emptyDir`) | Infra | ⚙️ In progress | Modulestore is now Atlas-backed in prod; remaining work is cleanup hardening so legacy MongoDB cannot become an accidental data path. See `docs/ARCHITECTURE_MONGODB.md`. |
 | 2 | Fix Velero restore drill job (`velero/restore-test` CronJob broken) | SRE | ⚙️ In progress | Runtime CronJob config now patched for PV-aware validation; remaining: execute and archive monthly evidence bundle for full closure. |
 | 3 | Formalize DR: backups + restore drills (with evidence artifacts + runbook) | SRE | ⚙️ In progress | Make this boring: scripted restore into a throwaway namespace, verify key queries, attach outputs. Bead: `mereka-lms-usv`. |
 | 4 | Course data recovery runbook hardening (hybrid Mongo reality) | Data/Infra | 💤 Pending | Keep docs accurate and deterministic. Start from `docs/operations/COURSE_DATA_RECOVERY.md`. |
-| 5 | Modulestore cutover decision + migration plan (in-cluster Mongo -> Atlas) | Infra | 💤 Pending | Must include safety gates. Do not delete in-cluster Mongo until verified. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
+| 5 | Modulestore cutover closure + decommission plan (legacy in-cluster Mongo) | Infra | ⚙️ In progress | Cutover is verified live; next step is safe retirement (backup evidence + explicit approval) or temporary PVC hardening. Beads: `mereka-lms-m1q`, `mereka-lms-dnt`. |
 | 6 | GitOps pin hygiene: automate/standardize “bump base ref SHA” + guardrails | Infra | 💤 Pending | Reduce Argo `ComparisonError` risk; add a helper script + docs. |
 | 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ⚙️ In progress | Strict multisite + org-role ownership checks are automated; remaining: CI/GitOps integration policy for release-blocking. Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
-| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits are live; remaining high-impact gap: production webhook routing for Atlas allowlist drift (`STRICT_WEBHOOK=1` currently fails until configured). |
+| 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits are live; Atlas allowlist monitor strict webhook routing is now passing. Next: CI/GitOps enforcement + on-call runbook polish. |
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | 💤 Pending | Generate screenshots, diff, and fail PRs on big regressions. Bead: `mereka-lms-3mz`. |
 | 10 | CI: authenticated browser E2E smoke test (Authentik login + admin access) | Infra | 💤 Deferred | Bead: `mereka-lms-24r` (explicitly skipped for now). |
 

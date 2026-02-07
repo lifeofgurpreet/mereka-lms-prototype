@@ -58,7 +58,10 @@ from django.conf import settings; \
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview; \
 from xmodule.modulestore.django import modulestore; \
 cfg=settings.CONTENTSTORE.get('DOC_STORE_CONFIG', {}); \
-print('DOC_STORE_HOST', cfg.get('host')); \
+host=str(cfg.get('host') or ''); \
+parts=host.split('://', 1); \
+host=((parts[0] + '://***@' + parts[1].split('@', 1)[1]) if (len(parts)==2 and '@' in parts[1]) else host); \
+print('DOC_STORE_HOST', host); \
 print('DOC_STORE_DB', cfg.get('db')); \
 print('CourseOverview', CourseOverview.objects.count()); \
 store=modulestore(); \
@@ -95,4 +98,3 @@ if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
 fi
 
 exit "$rc"
-

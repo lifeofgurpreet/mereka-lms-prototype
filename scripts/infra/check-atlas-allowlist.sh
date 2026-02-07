@@ -11,6 +11,7 @@ ATLAS_PROJECT_ID=${ATLAS_PROJECT_ID:-}
 EGRESS_IPS=${EGRESS_IPS:-}
 ATLAS_PROFILE=${ATLAS_PROFILE:-}
 REFRESH_ATLAS_PROFILE=${REFRESH_ATLAS_PROFILE:-0}
+APP_NS=${APP_NS:-${K8S_NAMESPACE:-mereka-lms}}
 
 log() { printf '\n[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
@@ -40,6 +41,16 @@ if ! atlas_cmd auth whoami >/dev/null 2>&1; then
 fi
 
 if [[ -z "$ATLAS_PROJECT_ID" ]]; then
+  # Prefer explicit project_id configured in the selected Atlas profile.
+  if [[ -n "$ATLAS_PROFILE" ]]; then
+    ATLAS_PROJECT_ID="$(
+      atlas config describe "$ATLAS_PROFILE" -o json 2>/dev/null | \
+        jq -r '.project_id // empty' | head -1
+    )"
+  fi
+fi
+
+if [[ -z "$ATLAS_PROJECT_ID" ]]; then
   log "Resolving Atlas project ID for ${ATLAS_PROJECT_NAME}..."
   ATLAS_PROJECT_ID=$(atlas_cmd projects list --output json | \
     jq -r --arg name "$ATLAS_PROJECT_NAME" '.results[]? | select(.name == $name) | .id' | head -1)
@@ -51,15 +62,22 @@ if [[ -z "$ATLAS_PROJECT_ID" ]]; then
 fi
 
 if [[ -z "$EGRESS_IPS" ]]; then
-  log "Fetching current egress IP from cluster..."
-  EGRESS_IPS=$(kubectl --context "${K8S_CONTEXT}" run egress-check --rm -i --image=curlimages/curl --restart=Never -- \
-    curl -s https://ifconfig.me | tr '\n' ',' | sed 's/,$//')
+  log "Fetching current egress IP from cluster (using deploy/lms)..."
+  EGRESS_IPS="$(kubectl --context "${K8S_CONTEXT}" -n "$APP_NS" exec deploy/lms -- sh -c 'curl -s https://ifconfig.me' 2>/dev/null || true)"
+fi
+
+if [[ -z "$EGRESS_IPS" ]]; then
+  log "Fallback: fetching current egress IP via transient pod..."
+  EGRESS_IPS="$(kubectl --context "${K8S_CONTEXT}" run egress-check --rm --restart=Never --image=curlimages/curl --command -- sh -c 'curl -s https://ifconfig.me' 2>/dev/null || true)"
 fi
 
 if [[ -z "$EGRESS_IPS" ]]; then
   echo "Unable to determine egress IPs. Set EGRESS_IPS manually." >&2
   exit 1
 fi
+
+# Keep only comma-separated IPv4 tokens to avoid kubectl status noise.
+EGRESS_IPS="$(echo "$EGRESS_IPS" | tr '\n' ',' | tr -cd '0-9.,' | sed 's/,,*/,/g; s/^,//; s/,$//')"
 
 log "Checking Atlas access list..."
 ALLOWLIST_RAW=$(atlas_cmd accessLists list --projectId "$ATLAS_PROJECT_ID" --output json)

@@ -29,7 +29,7 @@ references staging has been archived at:
 - **Redis**: in-cluster (PVC-backed) in production and dev.
 - **MongoDB**:
   - Target state: Atlas-only (see `docs/adr/001-mongodb-atlas.md`).
-  - Current production reality: there is an in-cluster `mongodb` service, and we must treat it as production-critical until cutover completes (see `docs/ARCHITECTURE_MONGODB.md`).
+  - Current production reality: modulestore + forum are Atlas-backed; an in-cluster `mongodb` service still exists as legacy runtime and must remain out of the production data path until safely retired (see `docs/ARCHITECTURE_MONGODB.md`).
 
 ## Secrets
 
