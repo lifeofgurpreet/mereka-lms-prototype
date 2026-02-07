@@ -442,6 +442,7 @@ Regenerate hostname registry (after domain changes):
 - Use `scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh` to propagate Infisical -> GCP Secret Manager for ESO (safe defaults: only overwrites Stripe + *_DEV MySQL unless opted in).
 - Public endpoint health checks + cert SAN verification: `scripts/qa/public-health-check.sh` and `scripts/infra/check-cert-sans.sh`.
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
+- Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`).
 - Telemetry path validator (Grafana ↔ GKE/VPS Prometheus): `scripts/infra/validate-telemetry-connectivity.sh` (`--json`, `--strict`, optional `REQUIRE_VPS_PROM_DS=1`, `REQUIRE_GRAFANA_RECOMMENDED=1`).
 - Grafana coverage contract audit: `scripts/qa/audit-grafana-dashboard.sh` (contract: `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`).

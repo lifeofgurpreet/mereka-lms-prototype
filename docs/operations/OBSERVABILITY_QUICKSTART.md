@@ -19,6 +19,11 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ```
 
+`audit-observability --mode runtime` now also verifies that `PrometheusRule/lms-alerts`
+contains the reliability alerts:
+`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`,
+`OpenEdxCrashLoopingContainers`, and `OpenEdxSyntheticOrBackupJobFailures`.
+
 ## 2) Core Dashboards
 
 GCP Monitoring dashboards (managed from `infrastructure/monitoring/dashboards/`):

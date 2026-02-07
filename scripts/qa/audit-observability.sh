@@ -258,6 +258,23 @@ runtime_k8s_check() {
   kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get cronjob cert-verify-prod >/dev/null
   kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get cronjob backup-verification >/dev/null
   kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get cronjob restore-test >/dev/null
+
+  kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get prometheusrule lms-alerts -o json \
+    | jq -e '
+      [ .spec.groups[].rules[].alert ] as $alerts
+      | (
+          $alerts | index("OpenEdxCriticalDeploymentUnavailable")
+        ) != null
+      and (
+          $alerts | index("OpenEdxPodsPendingTooLong")
+        ) != null
+      and (
+          $alerts | index("OpenEdxCrashLoopingContainers")
+        ) != null
+      and (
+          $alerts | index("OpenEdxSyntheticOrBackupJobFailures")
+        ) != null
+    ' >/dev/null
 }
 
 runtime_velero_freshness_check() {
