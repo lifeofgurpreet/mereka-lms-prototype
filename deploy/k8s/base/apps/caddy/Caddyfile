@@ -150,7 +150,7 @@ ecommerce.localhost{$default_site_port} {
 # E-commerce Service (TLS via NGINX Ingress)
 http://ecommerce.academyv2.mereka.io, http://ecommerce.academyv2.mereka.dev {
     # Authn assets are served by MFE; keep service-domain auth pages branded/functional.
-    handle_path /authn/* {
+    handle /authn/* {
         import proxy "mfe:8002"
     }
 
@@ -192,7 +192,7 @@ http://notes.academyv2.mereka.io, http://notes.academyv2.mereka.dev {
 # Credentials Service
 http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev {
     # Authn assets are served by MFE; keep service-domain admin/login pages branded/functional.
-    handle_path /authn/* {
+    handle /authn/* {
         import proxy "mfe:8002"
     }
 

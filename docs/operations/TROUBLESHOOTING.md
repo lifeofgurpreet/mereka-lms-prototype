@@ -760,11 +760,11 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 ---
 
-### Issue 9b: `ecommerce.*` / `credentials.*` authn assets return 404
+### Issue 9b: `ecommerce.*` / `credentials.*` authn assets fail (404 or empty 200)
 
 **Symptoms:**
 - `https://ecommerce.academyv2.mereka.io/dashboard/` or `https://credentials.academyv2.mereka.io/admin/login/`
-  returns authn shell HTML, but `/authn/app.<hash>.css` on those same hosts returns `404`.
+  returns authn shell HTML, but `/authn/app.<hash>.css` on those same hosts returns `404` or `200` with empty body.
 - Branding checks show service-domain authn pages without branded CSS markers.
 
 **Root Cause:**
@@ -772,13 +772,16 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 - Authn shell uses `/authn/*` assets that must be served by `mfe:8002`.
 
 **Fix:**
-1. Update `deploy/k8s/base/apps/caddy/Caddyfile` for both host blocks:
+1. Update Caddy host blocks for both service domains (base + active GitOps overlay):
    ```caddy
-   handle_path /authn/* {
+   handle /authn/* {
        import proxy "mfe:8002"
    }
    ```
+   `handle_path` is incorrect here because it strips `/authn` before proxying.
 2. Commit + push this repo, bump GitOps pinned ref in `bbi-infrastructure`, and let Argo roll Caddy.
+   If Argo reports `Synced` while stale config still serves, trigger one full sync with
+   `ApplyOutOfSyncOnly=false` for that operation.
 3. Validate:
    ```bash
    curl -sI https://ecommerce.academyv2.mereka.io/authn/app.<hash>.css

@@ -162,10 +162,11 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
    - Cause: captures are not compared against a baseline.
    - Fix: run `scripts/qa/visual-regression-branding.sh` and treat threshold failures as release blockers.
 
-9. Service-domain authn pages render but `/authn/*` assets 404
+9. Service-domain authn pages render but `/authn/*` assets fail
    - Cause: `ecommerce.*` / `credentials.*` pages use authn shell paths, but Caddy is not proxying `/authn/*`
      for those hosts to `mfe:8002`.
-   - Fix: add `handle_path /authn/* { import proxy "mfe:8002" }` in those host blocks and redeploy Caddy.
+   - Fix: add `handle /authn/* { import proxy "mfe:8002" }` in those host blocks and redeploy Caddy.
+   - Important: do not use `handle_path` here; stripping `/authn` breaks MFE asset paths.
 
 ## Deployment Reference
 

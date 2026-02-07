@@ -495,8 +495,9 @@ Regenerate hostname registry (after domain changes):
 - Service-domain authn proxy contract:
   - `ecommerce.* /dashboard` and `credentials.* /admin/login` should serve authn shell and `/authn/*` assets.
   - Enforce with `STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod`.
-  - If `/authn/*` returns 404 on those hosts, add `handle_path /authn/* { import proxy "mfe:8002" }`
+  - If `/authn/*` returns 404/empty responses on those hosts, add `handle /authn/* { import proxy "mfe:8002" }`
     to the corresponding Caddy host blocks.
+  - Do **not** use `handle_path` for this route; it strips `/authn` and breaks MFE asset paths.
 - Studio authoring flow contract check: `scripts/qa/verify-studio-authoring-branding.sh [prod|dev]`
   (enforces `action-create-course`, `action-create-library`, outline, and add-component selectors in source/live CSS).
 - Studio live checks should treat themed `studio-main-v1` selector coverage + no Google-font imports as the primary contract.
@@ -522,6 +523,8 @@ Regenerate hostname registry (after domain changes):
 - When bumping pinned `?ref=...`, always use exact output from `git rev-parse HEAD`;
   a typo causes Argo `ComparisonError` (`fatal: ... not our ref`).
 - Production Argo app name is `mereka-lms-local` (namespace: `argocd`).
+- If Argo shows `Synced` but routing/ConfigMap payloads are stale, force one full sync operation with
+  `ApplyOutOfSyncOnly=false` for that run (then keep default policy afterward).
 - If authn index points to an unbranded CSS bundle, repair image deterministically:
   `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image> [expected_rev]`
   (use only as controlled fallback; still rerun strict parity gate after GitOps rollout).
