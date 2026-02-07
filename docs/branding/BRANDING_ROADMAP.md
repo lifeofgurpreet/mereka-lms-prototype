@@ -51,9 +51,10 @@ Client subsites (separate clients, still must be branded):
 - Source gates pass at `BRANDING_LEVEL=deep`.
 - Live checks now include revision marker parity (`--mereka-branding-rev`, `--mereka-mfe-branding-rev`)
   to explicitly detect older deployed images.
-- Public audit still reports deep selector gaps on LMS microsites and Studio token/font drift.
-- This is deployment parity drift (older `openedx` image in production), tracked by
-  `mereka-lms-2hxl` and `mereka-lms-1g4b`.
+- Public audit currently reports:
+  - MFE revision marker drift (branding marker present, expected rev mismatch)
+  - Studio token/font drift (missing token export + legacy Google font import)
+- Tracked by `mereka-lms-1ywp` and `mereka-lms-1g4b`.
 
 ## Next 10 Branding Tasks (Execution Order, Current)
 

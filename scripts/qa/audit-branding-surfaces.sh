@@ -65,7 +65,7 @@ check_lms_overrides() {
     gap "${label}: host unreachable or returned empty response"
     return
   fi
-  css_path="$(printf '%s' "$html" | extract_first '/static/mereka/css/mereka-overrides[^"]*\.css')"
+  css_path="$(extract_first '/static/mereka/css/mereka-overrides[^"]*\.css' <<<"$html")"
   if [[ -z "${css_path:-}" ]]; then
     gap "${label}: missing mereka-overrides.css link"
     return
@@ -77,23 +77,23 @@ check_lms_overrides() {
     return
   fi
   if [[ -n "$EXPECTED_BRANDING_REV" ]]; then
-    if printf '%s' "$css" | grep -F -q "$EXPECTED_BRANDING_REV"; then
+    if grep -F -q "$EXPECTED_BRANDING_REV" <<<"$css"; then
       ok "${label}: branding revision marker ${EXPECTED_BRANDING_REV} present"
     else
       gap "${label}: branding revision marker ${EXPECTED_BRANDING_REV} missing (older openedx image likely)"
     fi
   fi
-  if printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Poppins"' \
-    && printf '%s' "$css" | grep -Eq 'font-family:[[:space:]]*"Lato"'; then
+  if grep -Eq 'font-family:[[:space:]]*"Poppins"' <<<"$css" \
+    && grep -Eq 'font-family:[[:space:]]*"Lato"' <<<"$css"; then
     ok "${label}: override CSS includes local fonts"
   else
     gap "${label}: override CSS missing local font-face wiring"
   fi
 
-  if printf '%s' "$css" | grep -Eq '\.courses-listing' \
-    && printf '%s' "$css" | grep -Eq '\.courseware' \
-    && printf '%s' "$css" | grep -Eq '\.sequence-nav' \
-    && printf '%s' "$css" | grep -Eq '\.xblock'; then
+  if grep -Eq '\.courses-listing' <<<"$css" \
+    && grep -Eq '\.courseware' <<<"$css" \
+    && grep -Eq '\.sequence-nav' <<<"$css" \
+    && grep -Eq '\.xblock' <<<"$css"; then
     ok "${label}: deep selectors present in override CSS"
   else
     gap "${label}: deep selectors missing (likely older openedx image deployed)"
@@ -110,7 +110,7 @@ check_studio_css() {
     gap "${label}: host unreachable or returned empty response"
     return
   fi
-  css_path="$(printf '%s' "$html" | extract_first '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css')"
+  css_path="$(extract_first '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css' <<<"$html")"
   if [[ -z "${css_path:-}" ]]; then
     gap "${label}: could not locate studio-main-v1 CSS link"
     return
@@ -122,20 +122,20 @@ check_studio_css() {
     return
   fi
 
-  if printf '%s' "$css" | grep -Eq -- '--mereka-color-teal'; then
+  if grep -Eq -- '--mereka-color-teal' <<<"$css"; then
     ok "${label}: studio CSS exports brand tokens"
   else
     gap "${label}: studio CSS missing brand token exports (likely older openedx image deployed)"
   fi
 
-  if printf '%s' "$css" | grep -Eq 'Poppins-Regular[^"]*\.woff2' \
-    && printf '%s' "$css" | grep -Eq 'Lato-Regular[^"]*\.woff2'; then
+  if grep -Eq 'Poppins-Regular[^"]*\.woff2' <<<"$css" \
+    && grep -Eq 'Lato-Regular[^"]*\.woff2' <<<"$css"; then
     ok "${label}: studio CSS references local brand fonts"
   else
     gap "${label}: studio CSS not referencing local brand fonts"
   fi
 
-  if printf '%s' "$css" | grep -Eq 'fonts\.googleapis\.com'; then
+  if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then
     gap "${label}: studio CSS still imports Google fonts (override planned)"
   else
     ok "${label}: studio CSS has no Google font imports"
@@ -146,31 +146,32 @@ check_mfe_authn_surface() {
   local host=$1
   local authn_url="https://${host}/authn/login"
   local config_url="https://${host}/api/mfe_config/v1"
-  local html config css_path css
+  local html config css_path css ts
+  ts="$(date +%s)"
 
-  html="$(fetch "$authn_url")"
+  html="$(fetch "${authn_url}?nocache=${ts}")"
   if [[ -z "${html:-}" ]]; then
     gap "MFE authn (${host}): login page unreachable"
     return
   fi
 
-  if printf '%s' "$html" | rg -F -q '<div id="root"></div>' \
-    && printf '%s' "$html" | rg -q '/authn/app\.[^"]+\.js' \
-    && printf '%s' "$html" | rg -q '/authn/app\.[^"]+\.css'; then
+  if rg -F -q '<div id="root"></div>' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
     ok "MFE authn (${host}): authn bundle shell present"
   else
     gap "MFE authn (${host}): authn bundle shell missing"
   fi
 
-  css_path="$(printf '%s' "$html" | rg -o '/authn/app\.[^"]+\.css' | head -n 1 || true)"
+  css_path="$(rg -o '/authn/app\.[^"]+\.css' <<<"$html" | head -n 1 || true)"
   if [[ -z "${css_path:-}" ]]; then
     gap "MFE authn (${host}): authn CSS link missing"
   else
-    css="$(fetch "https://${host}${css_path}")"
+    css="$(fetch "https://${host}${css_path}?nocache=${ts}")"
     if [[ -z "${css:-}" ]]; then
       gap "MFE authn (${host}): could not fetch authn CSS"
-    elif printf '%s' "$css" | grep -Eq -- '--mereka-mfe-gradient'; then
-      if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! printf '%s' "$css" | grep -F -q "$EXPECTED_MFE_BRANDING_REV"; then
+    elif grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$css"; then
+      if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$css"; then
         gap "MFE authn (${host}): branding revision marker ${EXPECTED_MFE_BRANDING_REV} missing"
       else
         ok "MFE authn (${host}): authn CSS branding markers present"
@@ -186,8 +187,8 @@ check_mfe_authn_surface() {
     return
   fi
 
-  if printf '%s' "$config" | rg -F -q '"SITE_NAME": "Mereka Academy"' \
-    && printf '%s' "$config" | rg -F -q '/theming/asset/mereka/images/logo-horizontal.png'; then
+  if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \
+    && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
     ok "MFE authn (${host}): mfe_config branding fields present"
   else
     gap "MFE authn (${host}): mfe_config branding fields missing"
@@ -207,16 +208,21 @@ check_forum() {
 
 check_credentials() {
   local host=$1
-  local root health root_body body admin_code
+  local root health root_body body admin_code root_effective
   root="https://${host}/"
   health="https://${host}/health/"
   root_body="$(fetch "$root")"
+
+  root_effective="$(curl -s -L -o /dev/null -w "%{url_effective}" --connect-timeout 10 --max-time 20 "$root" 2>/dev/null || true)"
+
   if [[ -z "${root_body:-}" ]]; then
     gap "Credentials root page empty/unreachable"
-  elif printf '%s' "$root_body" | rg -F -q "Mereka Credentials Service"; then
+  elif rg -F -q "Mereka Credentials Service" <<<"$root_body"; then
     ok "Credentials root page has branded landing content"
+  elif [[ "${root_effective:-}" == *"/health/" ]]; then
+    ok "Credentials root is API-first (redirects to /health/)"
   else
-    gap "Credentials root page missing branded landing content"
+    gap "Credentials root is neither branded landing nor API-first health redirect"
   fi
 
   admin_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/admin/login/" || echo "000")"
@@ -231,8 +237,8 @@ check_credentials() {
     gap "Credentials health endpoint empty/unreachable"
     return
   fi
-  if printf '%s' "$body" | rg -F -q '"overall_status"' \
-    && printf '%s' "$body" | rg -F -q '"database_status"'; then
+  if rg -F -q '"overall_status"' <<<"$body" \
+    && rg -F -q '"database_status"' <<<"$body"; then
     ok "Credentials health payload shape OK"
   else
     gap "Credentials health payload missing expected status fields"

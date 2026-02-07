@@ -92,6 +92,10 @@ Current audit coverage:
    - Fix: keep human-readable strings plain (no command-substitution quoting) and return
      explicit `host unreachable`/`could not fetch css` outcomes.
 
+4b. False negatives on minified CSS checks under `set -o pipefail`
+   - Cause: `printf ... | grep -q` can return non-zero on SIGPIPE after early grep match.
+   - Fix: prefer here-strings (`grep ... <<<"$css"` / `rg ... <<<"$html"`) for deterministic checks.
+
 5. Common and LMS runtime override CSS drift
    - Cause: edits made in one copy of `mereka-overrides.css` only.
    - Fix: always run `./scripts/branding/sync-brand-assets.sh` after CSS edits; it now syncs common -> LMS override CSS.
