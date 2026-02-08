@@ -86,8 +86,9 @@ Triggered by:
 Options:
 - `build_openedx` - Build LMS/CMS/worker image
 - `build_mfe` - Build micro-frontends image
-- `deploy_to_production` - Auto-deploy to **production** (academyv2.mereka.io) after build
-- `deploy_to_staging` - **Legacy input name** retained for backwards compatibility (there is no staging environment)
+- `update_gitops` - Update GitOps tags after build
+- `target_environment` - GitOps target environment (`production` default, `staging` optional)
+- `deploy_to_staging` - **Legacy input name** retained for backwards compatibility
 - `image_tag` - Custom tag (default: git SHA)
 
 Images pushed to:
@@ -99,25 +100,29 @@ Release safety gates:
 - Gate fails if authn `index.html` references unbranded CSS or misses the expected revision marker.
 - Verification log is uploaded as artifact: `mfe-branding-contract-log`.
 
-### Manual Deployment
+### Deployment Flow (GitOps)
 
-After images are built, deploy manually:
+After images are built, deploy via GitOps orchestration:
 
 ```bash
 TAG="your-tag-or-sha"
 
-kubectl set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
-  -n mereka-lms
-
-kubectl set image deployment/cms \
-  cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
-  -n mereka-lms
-
-kubectl set image deployment/mfe \
-  mfe=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:${TAG} \
-  -n mereka-lms
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${TAG}" \
+  --mfe-tag "${TAG}" \
+  --apply --commit --push --verify-runtime
 ```
+
+Do not use direct `kubectl set image` for normal rollouts; production is ArgoCD/GitOps managed.
+
+### On-demand Policy Checks
+
+Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to run:
+- release automation contract checks
+- build workflow contract checks
+- production tag guard (`no latest`)
+- active docs env-model lint
 
 ### Observability Audit (`observability-audit.yml`)
 

@@ -6,6 +6,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 BUILD_WORKFLOW="$WORKFLOWS_DIR/build-tutor-images.yml"
+BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
 
 echo "Checking release automation contract for explicit target environment..."
 
@@ -38,6 +39,11 @@ if ! rg -n 'TARGET_ENV_SET' "$RELEASE_SCRIPT" >/dev/null; then
 fi
 if ! rg -n 'CI mode requires explicit --target-env' "$RELEASE_SCRIPT" >/dev/null; then
   echo "❌ Missing CI explicit --target-env guard in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
+  violations=1
+fi
+
+if [[ ! -f "$BUILD_WORKFLOW_CONTRACT" ]]; then
+  echo "❌ Missing build workflow contract checker: ${BUILD_WORKFLOW_CONTRACT#"$REPO_ROOT"/}"
   violations=1
 fi
 
