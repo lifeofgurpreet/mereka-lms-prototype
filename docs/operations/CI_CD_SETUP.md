@@ -1,6 +1,6 @@
 # CI/CD Setup Guide
 
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-02-08
 
 ## Overview
 
@@ -121,8 +121,12 @@ Do not use direct `kubectl set image` for normal rollouts; production is ArgoCD/
 Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to run:
 - release automation contract checks
 - build workflow contract checks
+- release workflow invocation contract checks (`--target-env --apply --commit --push`)
 - production tag guard (`no latest`)
 - active docs env-model lint
+
+For full operator flow, see:
+- `docs/operations/RELEASE_CHECKLIST.md`
 
 ### Observability Audit (`observability-audit.yml`)
 

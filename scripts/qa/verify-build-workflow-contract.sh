@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
+RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
 
 echo "Checking build workflow contract..."
 
@@ -11,6 +12,11 @@ violations=0
 
 if [[ ! -f "$BUILD_WORKFLOW" ]]; then
   echo "❌ Missing workflow: ${BUILD_WORKFLOW#"$REPO_ROOT"/}"
+  exit 1
+fi
+
+if [[ ! -f "$RELEASE_INVOKE_CHECKER" ]]; then
+  echo "❌ Missing checker: ${RELEASE_INVOKE_CHECKER#"$REPO_ROOT"/}"
   exit 1
 fi
 

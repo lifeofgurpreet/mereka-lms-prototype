@@ -47,6 +47,7 @@ jobs:
           bash -n scripts/infra/release-openedx-gitops.sh
           bash -n scripts/qa/verify-release-automation.sh
           bash -n scripts/qa/verify-build-workflow-contract.sh
+          bash -n scripts/qa/verify-release-workflow-invocation.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
 
       - name: Run local observability audit
@@ -60,6 +61,10 @@ jobs:
       - name: Verify build workflow contract
         run: |
           ./scripts/qa/verify-build-workflow-contract.sh
+
+      - name: Verify release workflow invocation flags
+        run: |
+          bash ./scripts/qa/verify-release-workflow-invocation.sh
 
       - name: Lint active docs env model wording
         run: |

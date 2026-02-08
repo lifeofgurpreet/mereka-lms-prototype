@@ -8,6 +8,7 @@ docs=(
   "$REPO_ROOT/AGENTS.md"
   "$REPO_ROOT/scripts/infra/README.md"
   "$REPO_ROOT/docs/operations/CI_CD_SETUP.md"
+  "$REPO_ROOT/docs/operations/RELEASE_CHECKLIST.md"
   "$REPO_ROOT/docs/operations/THEME_DEPLOYMENT.md"
   "$REPO_ROOT/docs/operations/DOMAIN_CHANGE_RUNBOOK.md"
   "$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"

@@ -7,6 +7,7 @@ WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 BUILD_WORKFLOW="$WORKFLOWS_DIR/build-tutor-images.yml"
 BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
+RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
 
 echo "Checking release automation contract for explicit target environment..."
 
@@ -44,6 +45,11 @@ fi
 
 if [[ ! -f "$BUILD_WORKFLOW_CONTRACT" ]]; then
   echo "❌ Missing build workflow contract checker: ${BUILD_WORKFLOW_CONTRACT#"$REPO_ROOT"/}"
+  violations=1
+fi
+
+if [[ ! -f "$RELEASE_INVOKE_CHECKER" ]]; then
+  echo "❌ Missing release invocation checker: ${RELEASE_INVOKE_CHECKER#"$REPO_ROOT"/}"
   violations=1
 fi
 
