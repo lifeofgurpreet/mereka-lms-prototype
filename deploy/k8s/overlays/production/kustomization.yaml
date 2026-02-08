@@ -9,8 +9,8 @@ resources:
   - ingress-openedx-mfe.yaml
   - ingress-openedx-studio.yaml
 
-patchesStrategicMerge:
-  - patches/remove-legacy-mongodb-service.yaml
+patches:
+  - path: patches/remove-legacy-mongodb-service.yaml
 
 # Production-specific configurations
 

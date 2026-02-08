@@ -7,8 +7,11 @@ resources:
   - ../../base
 
 # Staging-specific configurations
-commonLabels:
-  environment: staging
+labels:
+  - includeSelectors: true
+    includeTemplates: true
+    pairs:
+      environment: staging
 
 # Image tags for staging
 # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.

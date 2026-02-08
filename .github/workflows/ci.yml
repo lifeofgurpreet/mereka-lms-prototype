@@ -74,6 +74,7 @@ jobs:
           bash -n scripts/qa/verify-release-workflow-invocation.sh
           bash -n scripts/qa/verify-release-dry-run-contract.sh
           bash -n scripts/qa/verify-release-evidence-workflow.sh
+          bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
 
       - name: Run local observability audit
@@ -99,6 +100,10 @@ jobs:
       - name: Verify release evidence workflow contract
         run: |
           ./scripts/qa/verify-release-evidence-workflow.sh
+
+      - name: Verify no deprecated kustomize keys
+        run: |
+          ./scripts/qa/verify-kustomize-no-deprecated-keys.sh
 
       - name: Lint active docs env model wording
         run: |
