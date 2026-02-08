@@ -89,7 +89,7 @@ LMS/CMS also include multisite hardening middleware:
   - Notes: must return an API banner (API-first, no SSO UI)
   - Forum: must return `401` unauthenticated (API-first, no SSO UI)
 
-- `scripts/qa/list-openedx-hostnames.sh`
+- `scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`
   - Compares expected hostnames (from `scripts/shared/config.sh`) vs deployed Ingress hosts (prod + dev).
 
 ### 3.2) Operator audit report (verify-only)
@@ -97,7 +97,7 @@ LMS/CMS also include multisite hardening middleware:
 For one consolidated report (good for tickets / incident notes):
 
 ```bash
-./scripts/qa/audit-auth-access.sh
+./scripts/qa/audit-auth-access.sh --env both --mode all
 ```
 
 It aggregates:
@@ -143,11 +143,13 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 10. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 
 Convenience:
-- `./scripts/qa/verify-auth-hardening.sh` runs the full suite (public + internal) in one command.
+- `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all`
+  runs the full suite (public + internal) with bounded per-check timeouts.
 - `./scripts/gen/update-openedx-hostnames-doc.sh` regenerates `docs/operations/OPENEDX_HOSTNAMES.md`.
 - `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` verifies modulestore remains Atlas-backed (repo + runtime).
 - `./scripts/qa/verify-alert-routing.sh` verifies runtime alert policies/channels and routing health.
-- `./scripts/qa/run-operations-gates.sh --env both` runs consolidated auth + observability + Velero + Grafana gates.
+- `CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env both`
+  runs consolidated auth + observability + Velero + Grafana gates.
 
 ## Future Hardening (Optional)
 

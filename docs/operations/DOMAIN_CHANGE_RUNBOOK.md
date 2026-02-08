@@ -85,13 +85,13 @@ CHECK_CERTS=1 CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh prod
 CHECK_BRANDING=1 ./scripts/qa/public-health-check.sh dev
 
 # Keep the expected hostname inventory honest (prod + dev)
-./scripts/qa/list-openedx-hostnames.sh
+./scripts/qa/list-openedx-hostnames.sh --env both
 
 # Auth + permissions hardening suite (public + internal)
-./scripts/qa/verify-auth-hardening.sh
+CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all
 
 # One consolidated verify-only report (good for tickets)
-./scripts/qa/audit-auth-access.sh
+CHECK_TIMEOUT_SECONDS=240 ./scripts/qa/audit-auth-access.sh --env both --mode all
 
 # Optional: one checklist runner for hostname/microsite onboarding
 ./scripts/qa/microsite-onboarding-checklist.sh

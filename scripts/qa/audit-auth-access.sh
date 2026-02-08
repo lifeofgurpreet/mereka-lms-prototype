@@ -156,7 +156,16 @@ if [[ "$should_run_internal" -eq 1 ]]; then
 
   run_check "internal: Authentik admin policy (prod)" ./scripts/infra/ensure-authentik-admin.sh --verify
   run_check "internal: Authentik redirect URI allowlist (prod)" ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --verify
-  run_check "internal: OIDC provider configs (prod + dev)" ./scripts/qa/verify-oidc-provider-configs.sh
+  if [[ "$ENV_SCOPE" == "prod" ]]; then
+    run_check "internal: OIDC provider configs (prod)" \
+      ./scripts/qa/verify-oidc-provider-configs.sh --env prod --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+  elif [[ "$ENV_SCOPE" == "dev" ]]; then
+    run_check "internal: OIDC provider configs (dev)" \
+      ./scripts/qa/verify-oidc-provider-configs.sh --env dev --context kind-dev
+  else
+    run_check "internal: OIDC provider configs (prod + dev)" \
+      ./scripts/qa/verify-oidc-provider-configs.sh --env auto
+  fi
   run_check "internal: platform admin allowlist env (prod + dev)" ./scripts/qa/verify-platform-admin-env.sh --env "$ENV_SCOPE"
   run_check "internal: core service endpoints (prod + dev)" ./scripts/qa/verify-service-endpoints.sh --env "$ENV_SCOPE"
   run_check "internal: course data sanity (prod + dev)" ./scripts/qa/course-data-sanity.sh --env "$ENV_SCOPE"
@@ -170,7 +179,7 @@ if [[ "$should_run_internal" -eq 1 ]]; then
     run_check "internal: org role ownership (dev)" env STRICT=1 ./scripts/qa/verify-org-role-ownership.sh dev
   fi
 
-  run_check "internal: hostnames registry drift (prod + dev)" ./scripts/qa/list-openedx-hostnames.sh
+  run_check "internal: hostnames registry drift ($ENV_SCOPE)" ./scripts/qa/list-openedx-hostnames.sh --env "$ENV_SCOPE"
 fi
 
 if [[ "$JSON_OUT" -eq 1 ]]; then

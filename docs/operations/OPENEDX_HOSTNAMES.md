@@ -15,7 +15,9 @@ Why this exists:
 
 Compare expected hostnames vs deployed Ingress hosts:
 ```bash
-./scripts/qa/list-openedx-hostnames.sh
+./scripts/qa/list-openedx-hostnames.sh --env both
+./scripts/qa/list-openedx-hostnames.sh --env prod
+./scripts/qa/list-openedx-hostnames.sh --env dev
 ```
 
 ## Production (GKE)

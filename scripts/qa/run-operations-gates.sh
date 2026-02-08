@@ -108,7 +108,7 @@ echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
 
 run_check "auth + permissions + multisite audit" \
-  ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
+  env CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
 
 run_check "gitops image override contract" \
   ./scripts/qa/verify-gitops-image-overrides.sh

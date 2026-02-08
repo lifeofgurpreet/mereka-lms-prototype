@@ -41,8 +41,9 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-08_
   (admin login authn shell + branded `/authn/*` assets + API-first `/health/` root contract)
 - ✅ Stripe webhook delivery probe confirmed accepted (HTTP 200) against
   `https://ecommerce.academyv2.mereka.io/api/v2/webhooks/stripe/`
-- ⚙️ New follow-up: make auth hardening checks env-selective + timeout-safe for deterministic
-  CI/runtime completion (`mereka-lms-11ft`)
+- ✅ Auth hardening gate hardening delivered (`mereka-lms-11ft`):
+  `verify-auth-hardening.sh` supports `--env/--mode` + `CHECK_TIMEOUT_SECONDS`,
+  hostname drift check supports `--env`, and operations/audit flows now scope OIDC+hostname checks by env.
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 

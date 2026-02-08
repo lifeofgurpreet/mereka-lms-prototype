@@ -6,6 +6,7 @@
 #
 # Usage:
 #   ./scripts/qa/list-openedx-hostnames.sh
+#   ./scripts/qa/list-openedx-hostnames.sh --env prod
 #
 # Optional:
 #   STRICT=1  # exit non-zero if deployed hosts differ from expected
@@ -20,11 +21,41 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 STRICT="${STRICT:-0}"
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+ENV_SCOPE="both" # prod|dev|both
 
 CONTEXT_PROD="${CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 CONTEXT_DEV="${CONTEXT_DEV:-kind-dev}"
 
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
+
+usage() {
+  cat <<EOF >&2
+Usage: $0 [--env prod|dev|both]
+
+Env:
+  STRICT=1  Fail when deployed hosts differ from expected set
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --env)
+      ENV_SCOPE="${2:-}"; shift 2 ;;
+    -h|--help)
+      usage
+      exit 0 ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1 ;;
+  esac
+done
+
+if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" ]]; then
+  echo "Invalid --env: $ENV_SCOPE" >&2
+  usage
+  exit 1
+fi
 
 collect_ingress_hosts() {
   local ctx="$1"
@@ -113,39 +144,43 @@ diff_sets() {
 
 rc=0
 
-log "Collecting Open edX hostnames from cluster ingresses"
+log "Collecting Open edX hostnames from cluster ingresses (env=$ENV_SCOPE)"
 
-expected_prod="$(print_expected prod)"
-deployed_prod="$(
-  collect_ingress_hosts "$CONTEXT_PROD" \
-    | tr -d '\r' \
-    | sed 's/[[:space:]]*$//' \
-    | grep -E '(mereka\.io|biji-biji\.com)$' \
-    || true
-)"
-diff_sets "$expected_prod" "$deployed_prod" "prod ($CONTEXT_PROD)" || rc=1
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+  expected_prod="$(print_expected prod)"
+  deployed_prod="$(
+    collect_ingress_hosts "$CONTEXT_PROD" \
+      | tr -d '\r' \
+      | sed 's/[[:space:]]*$//' \
+      | grep -E '(mereka\.io|biji-biji\.com)$' \
+      || true
+  )"
+  diff_sets "$expected_prod" "$deployed_prod" "prod ($CONTEXT_PROD)" || rc=1
+fi
 
-expected_dev="$(print_expected dev)"
-deployed_dev_public="$(
-  collect_ingress_hosts "$CONTEXT_DEV" \
-    | tr -d '\r' \
-    | sed 's/[[:space:]]*$//' \
-    | grep -E 'mereka\.dev$' \
-    || true
-)"
-deployed_dev_local="$(
-  collect_ingress_hosts "$CONTEXT_DEV" \
-    | tr -d '\r' \
-    | sed 's/[[:space:]]*$//' \
-    | grep -E 'lvh\.me$' \
-    || true
-)"
-diff_sets "$expected_dev" "$deployed_dev_public" "dev (public) ($CONTEXT_DEV)" || rc=1
+if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
+  expected_dev="$(print_expected dev)"
+  deployed_dev_public="$(
+    collect_ingress_hosts "$CONTEXT_DEV" \
+      | tr -d '\r' \
+      | sed 's/[[:space:]]*$//' \
+      | grep -E 'mereka\.dev$' \
+      || true
+  )"
+  deployed_dev_local="$(
+    collect_ingress_hosts "$CONTEXT_DEV" \
+      | tr -d '\r' \
+      | sed 's/[[:space:]]*$//' \
+      | grep -E 'lvh\.me$' \
+      || true
+  )"
+  diff_sets "$expected_dev" "$deployed_dev_public" "dev (public) ($CONTEXT_DEV)" || rc=1
 
-if [[ -n "${deployed_dev_local:-}" ]]; then
-  echo ""
-  echo "== dev (kind-local hostnames) ($CONTEXT_DEV) =="
-  printf "%s\n" "$deployed_dev_local" | sed 's/^/  - /'
+  if [[ -n "${deployed_dev_local:-}" ]]; then
+    echo ""
+    echo "== dev (kind-local hostnames) ($CONTEXT_DEV) =="
+    printf "%s\n" "$deployed_dev_local" | sed 's/^/  - /'
+  fi
 fi
 
 if [[ "$rc" -ne 0 ]]; then

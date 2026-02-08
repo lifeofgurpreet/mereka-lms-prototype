@@ -439,13 +439,13 @@ Canonical branding execution command (source + live verification):
 
 Auth hardening verification (preferred):
 ```bash
-./scripts/qa/verify-auth-hardening.sh
-./scripts/qa/list-openedx-hostnames.sh
+CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env prod --mode all
+./scripts/qa/list-openedx-hostnames.sh --env prod
 STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 ./scripts/qa/verify-alert-routing.sh
 STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
-./scripts/qa/run-operations-gates.sh --env both
+CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
 Post-GitOps sync strict Atlas enforcement (prod):
@@ -569,6 +569,12 @@ Regenerate hostname registry (after domain changes):
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).
 - Atlas user must have `readWrite` on `openedx` + `cs_comments_service` for modulestore + forum.
 - Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/k8s/mereka-lms/atlas`).
+- Auth hardening suite is now env/mode-selective and timeout-safe:
+  `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env prod --mode all`.
+- Hostname drift checks are now env-scoped:
+  `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
+- Consolidated auth audit now scopes OIDC/hostname checks by requested env:
+  `./scripts/qa/audit-auth-access.sh --mode all --env prod|dev|both`.
 - Stripe checkout readiness requires webhook signing secret + delivery test:
   - Guide: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
   - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`

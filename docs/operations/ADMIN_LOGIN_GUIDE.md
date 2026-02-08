@@ -23,8 +23,8 @@ Enforce (prod + dev, idempotent):
 Verify without changing state:
 ```bash
 ./scripts/infra/ensure-platform-admins.sh --verify
-./scripts/qa/verify-auth-hardening.sh
-./scripts/qa/audit-auth-access.sh
+CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all
+CHECK_TIMEOUT_SECONDS=240 ./scripts/qa/audit-auth-access.sh --env both --mode all
 ```
 
 Notes:
