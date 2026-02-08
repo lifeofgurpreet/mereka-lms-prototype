@@ -87,7 +87,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 7. **Push images**: `docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG`
 8. **Update GitOps manifests (production is ArgoCD-managed)**:
    - This repo (`mereka-lms`) provides the base manifests under `deploy/k8s/base`.
-   - Active GitOps checkout is usually `/home/gurpreet/projects/k8s/infrastructure` (same remote as `bbi-infrastructure`).
+   - Active GitOps checkout is usually `/home/gurpreet/projects/k8s/infrastructure` (currently tracking `Biji-Biji-Initiative/BBI-K8`; older docs may refer to `bbi-infrastructure`).
    - Argo app `mereka-lms-local` renders `apps/mereka-lms/overlays/prod`, which has its own image tags.
    - You must update both:
      1) pinned base ref (`apps/mereka-lms/base/kustomization.yaml`)
@@ -110,13 +110,13 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
    # 1) In this repo, bump the base image tags in deploy/k8s/base (and overlay if used)
    #    then commit + push to `Biji-Biji-Initiative/mereka-lms`.
    #
-   # 2) In bbi-infrastructure/infrastructure checkout, update:
+   # 2) In BBI-K8/infrastructure checkout, update:
    #    a) pinned ref to the new commit SHA:
    #    apps/mereka-lms/base/kustomization.yaml
    #    resources:
    #      - https://github.com/Biji-Biji-Initiative/mereka-lms.git//deploy/k8s/base?ref=<NEW_SHA>
    #    b) image tags in apps/mereka-lms/overlays/prod/kustomization.yaml
-   #    then commit + push to `Biji-Biji-Initiative/bbi-infrastructure`.
+   #    then commit + push to `Biji-Biji-Initiative/BBI-K8` (or the mirrored bbi-infrastructure remote, if used in your environment).
    #
    # 3) Run contract check before/after push:
    #    ./scripts/qa/verify-gitops-image-overrides.sh --check-infra
@@ -167,7 +167,7 @@ See `docs/adr/001-mongodb-atlas.md` for full rationale.
 - **Forum**: uses Atlas.
 - **LMS/CMS modulestore**: explicitly configured to Atlas (`MONGODB_HOST` resolves to `*.mongodb.net` via `openedx-secrets/FORUM_MONGODB_SRV`).
 - **Legacy in-cluster MongoDB deployment**: retired in production after Velero pre-op backup (`pre-op-mereka-lms-20260207-1451`).
-- **Legacy in-cluster MongoDB service**: removed in production (`Service/mongodb` is absent after Argo sync to `bbi-infrastructure` overlay patch).
+- **Legacy in-cluster MongoDB service**: removed in production (`Service/mongodb` is absent after Argo sync to `BBI-K8` overlay patch).
 - **Legacy in-cluster MongoDB PVC** (`PVC/mongodb`): removed in production after fresh pre-op backup (`pre-op-mereka-lms-20260207-2158`).
 
 ### Connection Details
@@ -615,7 +615,7 @@ Regenerate hostname registry (after domain changes):
   - `.github/workflows/build-tutor-images.yml` runs `verify-mfe-image-branding.sh` before MFE image push and uploads `mfe-branding-contract-log`.
   - `.github/workflows/public-health-check.yml` runs strict parity with strict audit (`STRICT_MFE_BRANDING_REV=1 AUDIT_STRICT=1`) and uploads `var/ci/*.log` artifacts.
 - If strict prod branding gate fails with MFE revision mismatch, treat it as release-blocking deploy drift:
-  rebuild/push `openedx-mfe`, bump this repo image tag, update `bbi-infrastructure` pinned ref, then rerun strict gate.
+  rebuild/push `openedx-mfe`, bump this repo image tag, update `BBI-K8` pinned ref, then rerun strict gate.
 - Branding incident write-up template (required after production regressions): `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`.
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.

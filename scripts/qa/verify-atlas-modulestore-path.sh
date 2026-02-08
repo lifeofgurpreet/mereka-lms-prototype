@@ -140,7 +140,10 @@ for name, content in (("lms", lms_settings), ("cms", cms_settings)):
         if token not in content:
             errors.append(f"{name} settings missing token: {token}")
 
-if "- patches/remove-legacy-mongodb-service.yaml" not in prod_overlay:
+if (
+    "- patches/remove-legacy-mongodb-service.yaml" not in prod_overlay
+    and "path: patches/remove-legacy-mongodb-service.yaml" not in prod_overlay
+):
     errors.append(
         "Production overlay missing patches/remove-legacy-mongodb-service.yaml reference"
     )
