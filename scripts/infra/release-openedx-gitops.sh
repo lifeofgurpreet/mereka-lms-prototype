@@ -17,6 +17,7 @@ OPENEDX_TAG=""
 MFE_TAG=""
 APP_SHA_OVERRIDE=""
 TARGET_ENV="production"
+TARGET_ENV_SET=0
 UPDATE_BASE_REF_MODE="auto" # auto|1|0
 
 APPLY=0
@@ -96,6 +97,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --target-env)
       TARGET_ENV="${2:-}"
+      TARGET_ENV_SET=1
       shift 2
       ;;
     --app-repo)
@@ -399,6 +401,13 @@ require_git_repo "$APP_REPO"
 require_git_repo "$INFRA_REPO"
 
 TARGET_ENV="$(normalize_target_env "$TARGET_ENV")"
+
+if [[ "${CI:-}" == "true" && "$TARGET_ENV_SET" -ne 1 ]]; then
+  echo "Error: CI mode requires explicit --target-env (production|staging)." >&2
+  usage
+  exit 1
+fi
+
 UPDATE_APP_BASE=0
 UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
