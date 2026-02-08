@@ -60,6 +60,11 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - **GKE pulls images** from `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
 - **K8s deployments** must be updated to use new image tags
 
+### Environment Reality (Current)
+- Active ArgoCD runtime environments are `local/dev` and `prod`.
+- A dedicated `staging` cluster is not currently active due resource constraints.
+- Keep staging overlays/scripts as optional future-ready paths, but default operations should assume `local/dev -> prod`.
+
 ### Deployment Sequence (DO NOT SKIP STEPS)
 
 1. **Modify theme files** in `infrastructure/tutor/themes/mereka/`
