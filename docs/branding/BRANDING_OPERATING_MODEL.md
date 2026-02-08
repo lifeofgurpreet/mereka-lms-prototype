@@ -62,6 +62,15 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
 
 ## Deploy Contract (Production)
 
+Preferred deployment command:
+
+```bash
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag <OPENEDX_TAG> \
+  --mfe-tag <MFE_TAG> \
+  --apply --commit --push --verify-runtime
+```
+
 1. Run source/live branding gates.
 2. Build/push images (`openedx`, `openedx-mfe` when changed).
    - Before `tutor images build mfe`, run:

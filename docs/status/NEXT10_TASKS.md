@@ -34,6 +34,8 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-08_
 - ✅ GitOps image override contract enforcement added (`scripts/qa/verify-gitops-image-overrides.sh`) and wired into CI + operations gates (`mereka-lms-12yy`)
 - ✅ Fresh non-repair MFE branding pipeline completed (`mereka-lms-vy6m`): image
   `openedx-mfe:20260208-mfe-nonrepair-931f55e` is live in production and strict branding parity gate passes
+- ✅ Deployment ergonomics hardening: canonical one-command GitOps release orchestrator added
+  (`scripts/infra/release-openedx-gitops.sh`) and wired into AGENTS/runbooks
 - ⚙️ Dev branding parity still pending after prod rollout; new child bead `mereka-lms-c3gz`
   tracks kind overlay/tag alignment and strict dev branding gate closure
 - ✅ MFE branding preflight gate added and wired into canonical branding execution:

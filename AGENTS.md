@@ -87,7 +87,15 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
      2) production overlay tags (`apps/mereka-lms/overlays/prod/kustomization.yaml`)
      or production can stay on old images while Argo still reports `Synced`.
 
-   Update flow:
+   Canonical flow (preferred):
+   ```bash
+   ./scripts/infra/release-openedx-gitops.sh \
+     --openedx-tag <OPENEDX_TAG> \
+     --mfe-tag <MFE_TAG> \
+     --apply --commit --push --verify-runtime
+   ```
+
+   Manual update flow (fallback):
    ```bash
    # 1) In this repo, bump the base image tags in deploy/k8s/base (and overlay if used)
    #    then commit + push to `Biji-Biji-Initiative/mereka-lms`.
@@ -536,6 +544,8 @@ Regenerate hostname registry (after domain changes):
 - GitOps pinned-ref helper for cross-repo rollout:
   `./scripts/infra/prepare-bbi-infra-ref-bump.sh [--apply]`
   (updates `apps/mereka-lms/base/kustomization.yaml` ref in the selected GitOps checkout to current commit; helper now uses safe replacement that preserves full SHA prefixes).
+- Canonical one-command image rollout (app tags + GitOps ref + GitOps prod overlay tags + optional push/runtime verify):
+  `./scripts/infra/release-openedx-gitops.sh --openedx-tag <TAG> --mfe-tag <TAG> --apply --commit --push --verify-runtime`
 - When bumping pinned `?ref=...`, always use exact output from `git rev-parse HEAD`;
   a typo causes Argo `ComparisonError` (`fatal: ... not our ref`).
 - Production Argo app name is `mereka-lms-local` (namespace: `argocd`).

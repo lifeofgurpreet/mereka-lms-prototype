@@ -79,6 +79,13 @@ Canonical hostname registry (prod + dev + kind-local):
   - Update both `apps/mereka-lms/base/kustomization.yaml` (`?ref=`) and
     `apps/mereka-lms/overlays/prod/kustomization.yaml` (openedx/openedx-mfe tags) when rollout includes images.
   - Run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra` before push.
+  - Preferred command:
+    ```bash
+    ./scripts/infra/release-openedx-gitops.sh \
+      --openedx-tag <OPENEDX_TAG> \
+      --mfe-tag <MFE_TAG> \
+      --apply --commit --push --verify-runtime
+    ```
 - [ ] Dev: apply k8s manifests to kind.
 - [ ] If image rebuilt, update tags and roll deployments.
 

@@ -17,6 +17,24 @@ Important:
 - Python 3.10+ with venv activated
 - Tutor 18.2.2 installed
 
+## One-Command Release (Canonical)
+
+Use this after image build + push is complete:
+
+```bash
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag <OPENEDX_TAG> \
+  --mfe-tag <MFE_TAG> \
+  --apply --commit --push --verify-runtime
+```
+
+This updates:
+- app repo image tags (`deploy/k8s/base` + `deploy/k8s/overlays/production`)
+- GitOps base `?ref=` pointer
+- GitOps production overlay image tags
+- cross-repo tag/ref contract verification before push
+- optional runtime convergence verification against Argo + live `Deployment/mfe`
+
 ## Architecture Overview
 
 ```
@@ -268,6 +286,8 @@ Production is **GitOps-managed** by Argo app `mereka-lms-local` from:
 - path: `apps/mereka-lms/overlays/prod`
 
 Do not use `kubectl set image` for normal releases.
+
+Fast path: use `scripts/infra/release-openedx-gitops.sh` (section above).
 
 ```bash
 # 1) Push this repo first (mereka-lms) so the new base ref exists remotely.

@@ -14,7 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-TARGET_REPO="${TARGET_REPO:-/home/gurpreet/projects/k8s/bbi-infrastructure}"
+TARGET_REPO="${TARGET_REPO:-}"
 TARGET_FILE_REL="apps/mereka-lms/base/kustomization.yaml"
 APPLY=0
 SOURCE_SHA=""
@@ -25,7 +25,7 @@ Usage: ./scripts/infra/prepare-bbi-infra-ref-bump.sh [--apply] [--repo PATH] [--
 
 Options:
   --apply       Write changes to target file (default is dry-run)
-  --repo PATH   Path to bbi-infrastructure repo
+  --repo PATH   Path to GitOps repo (auto-detects infrastructure/bbi-infrastructure when omitted)
   --sha COMMIT  Explicit commit SHA to pin (default: current repo HEAD)
 EOF
 }
@@ -58,6 +58,22 @@ done
 
 if [[ -z "$SOURCE_SHA" ]]; then
   SOURCE_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+fi
+
+if [[ -z "$TARGET_REPO" ]]; then
+  for candidate in \
+    /home/gurpreet/projects/k8s/infrastructure \
+    /home/gurpreet/projects/k8s/bbi-infrastructure; do
+    if [[ -f "$candidate/$TARGET_FILE_REL" ]]; then
+      TARGET_REPO="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$TARGET_REPO" ]]; then
+  echo "Unable to detect GitOps repo. Pass --repo PATH." >&2
+  exit 1
 fi
 
 TARGET_FILE="$TARGET_REPO/$TARGET_FILE_REL"
