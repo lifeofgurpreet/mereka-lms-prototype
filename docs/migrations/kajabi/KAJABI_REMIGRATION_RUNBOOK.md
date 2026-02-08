@@ -276,3 +276,70 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 | Course import fails | Check CMS pod logs: `kubectl logs -n mereka-lms deploy/cms --tail=50` |
 | Batch import resumes from wrong offset | Delete offset file in `scripts/migrations/kajabi/logs/` |
 | Users import skips rows | Check for missing email/username in CSV |
+
+---
+
+## Current Status (2026-02-08)
+
+### Completed
+
+- [x] **Phase 0**: Kajabi credentials stored in Infisical at `/mereka-lms/kajabi` (prod + dev)
+- [x] **Phase 1**: Full export to `exports/kajabi/` (691MB total)
+- [x] **Phase 2**: Transform complete — CSVs and OLX packages ready
+
+### Actual Export Counts (Feb 2026)
+
+| Resource | Count | Notes |
+|----------|-------|-------|
+| contacts | 326,104 | ~4x growth since Nov 2024 |
+| customers | 189,640 | ~2x growth |
+| courses_index | 218 | ~2x growth |
+| purchases | 219,204 | ~2x growth |
+| offers | 768 | |
+| products | 224 | |
+| contact_tags | 196 | |
+| custom_fields | 52 | |
+| certificate_eligibility | 386,620 | |
+| structure/modules | 846 | |
+| structure/lessons | 3,146 | |
+| structure/lesson_media | 1,394 | |
+
+### Transform Output
+
+| File | Records |
+|------|---------|
+| users_import.csv | ~326K |
+| enrollments_import.csv | ~386K |
+| course_packages | 109 OLX tarballs |
+| courses.csv | 218 courses |
+
+### Pending
+
+- [ ] **Phase 3**: Import into Open edX (courses, users, enrollments)
+- [ ] **Phase 4**: Verification
+- [ ] **Phase 5**: Post-migration (lesson content scraping, webhooks, certificates)
+
+### File Locations (VPS)
+
+```
+~/projects/k8s/mereka-lms/
+├── exports/kajabi/                          # Raw NDJSON exports (691MB)
+│   ├── contacts.ndjson                      # 326K records
+│   ├── customers.ndjson                     # 190K records
+│   ├── purchases.ndjson                     # 219K records
+│   ├── courses_index.ndjson                 # 218 courses
+│   ├── certificate_eligibility.ndjson       # 387K records
+│   └── structure/                           # Course structure
+├── scripts/migrations/kajabi/output/        # Transformed data
+│   ├── users.csv                            # Combined contacts/customers
+│   ├── enrollments.csv                      # Purchase→enrollment mappings
+│   ├── courses.csv                          # Course metadata
+│   ├── course_structure.json                # Nested structure
+│   ├── course_packages/                     # 109 OLX tarballs
+│   │   └── course_packages_manifest.csv
+│   └── openedx/                             # Import-ready CSVs
+│       ├── users_import.csv
+│       └── enrollments_import.csv
+└── docs/migrations/kajabi/
+    └── KAJABI_REMIGRATION_RUNBOOK.md        # This file
+```

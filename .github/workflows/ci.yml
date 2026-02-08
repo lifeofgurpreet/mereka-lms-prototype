@@ -86,6 +86,17 @@ jobs:
         run: |
           ./scripts/qa/verify-gitops-image-overrides.sh --skip-infra
 
+  prod-tag-guard:
+    name: Production Tag Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify no mutable latest tags in prod overlays
+        run: |
+          bash -n scripts/qa/verify-no-latest-prod-tags.sh
+          ./scripts/qa/verify-no-latest-prod-tags.sh
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
