@@ -100,6 +100,9 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
      --mfe-tag <MFE_TAG> \
      --apply --commit --push --verify-runtime
    ```
+   Optional (recommended for production when available): add
+   `--openedx-digest sha256:<OPENEDX_DIGEST>` and `--mfe-digest sha256:<MFE_DIGEST>`
+   for immutable digest pinning in app + GitOps overlays.
 
    Manual update flow (fallback):
    ```bash

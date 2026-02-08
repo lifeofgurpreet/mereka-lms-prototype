@@ -15,6 +15,8 @@ APP_REPO="${APP_REPO:-$REPO_ROOT}"
 INFRA_REPO="${INFRA_REPO:-}"
 OPENEDX_TAG=""
 MFE_TAG=""
+OPENEDX_DIGEST=""
+MFE_DIGEST=""
 APP_SHA_OVERRIDE=""
 TARGET_ENV="production"
 TARGET_ENV_SET=0
@@ -46,6 +48,8 @@ Purpose:
 Options:
   --openedx-tag TAG     Required. openedx image tag.
   --mfe-tag TAG         Required. openedx-mfe image tag.
+  --openedx-digest DIGEST Optional image digest (sha256:...) for openedx.
+  --mfe-digest DIGEST   Optional image digest (sha256:...) for openedx-mfe.
   --target-env ENV      Target environment: production|staging (default: production).
   --app-repo PATH       Override app repo path (default: current repo root).
   --infra-repo PATH     Override GitOps repo path.
@@ -78,6 +82,11 @@ Examples:
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
     --apply --commit --push --verify-runtime
 
+  # Production with immutable digests
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
+    --openedx-digest sha256:<openedx_digest> --mfe-digest sha256:<mfe_digest> \
+    --apply --commit --push --verify-runtime
+
   # Staging-only tag update (no base-ref bump by default)
   ./scripts/infra/release-openedx-gitops.sh --target-env staging \
     --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
@@ -93,6 +102,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --mfe-tag)
       MFE_TAG="${2:-}"
+      shift 2
+      ;;
+    --openedx-digest)
+      OPENEDX_DIGEST="${2:-}"
+      shift 2
+      ;;
+    --mfe-digest)
+      MFE_DIGEST="${2:-}"
       shift 2
       ;;
     --target-env)
@@ -174,6 +191,21 @@ if [[ -z "$OPENEDX_TAG" || -z "$MFE_TAG" ]]; then
   exit 1
 fi
 
+validate_digest() {
+  local digest="$1"
+  local label="$2"
+  if [[ -z "$digest" ]]; then
+    return 0
+  fi
+  if [[ ! "$digest" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
+    echo "Invalid $label digest format: $digest (expected sha256:<64-hex>)" >&2
+    exit 1
+  fi
+}
+
+validate_digest "$OPENEDX_DIGEST" "openedx"
+validate_digest "$MFE_DIGEST" "openedx-mfe"
+
 if [[ "$COMMIT" -eq 1 && "$APPLY" -ne 1 ]]; then
   echo "--commit requires --apply." >&2
   exit 1
@@ -229,10 +261,12 @@ update_image_tags_file() {
   local file="$1"
   local openedx_tag="$2"
   local mfe_tag="$3"
-  local apply="$4"
-  local required_names_csv="$5"
+  local openedx_digest="$4"
+  local mfe_digest="$5"
+  local apply="$6"
+  local required_names_csv="$7"
 
-  python3 - "$file" "$openedx_tag" "$mfe_tag" "$apply" "$required_names_csv" <<'PY'
+  python3 - "$file" "$openedx_tag" "$mfe_tag" "$openedx_digest" "$mfe_digest" "$apply" "$required_names_csv" <<'PY'
 import re
 import sys
 from pathlib import Path
@@ -240,8 +274,10 @@ from pathlib import Path
 path = Path(sys.argv[1])
 openedx_tag = sys.argv[2]
 mfe_tag = sys.argv[3]
-apply = sys.argv[4] == "1"
-required_names = [name for name in sys.argv[5].split(",") if name]
+openedx_digest = sys.argv[4]
+mfe_digest = sys.argv[5]
+apply = sys.argv[6] == "1"
+required_names = [name for name in sys.argv[7].split(",") if name]
 
 if not path.exists():
     raise SystemExit(f"missing file: {path}")
@@ -251,12 +287,30 @@ targets = {
     "docker.io/overhangio/openedx-mfe": mfe_tag,
     "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe": mfe_tag,
 }
+digest_targets = {
+    "docker.io/overhangio/openedx": openedx_digest,
+    "docker.io/overhangio/openedx-mfe": mfe_digest,
+    "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe": mfe_digest,
+}
 
 raw = path.read_text(encoding="utf-8")
 lines = raw.splitlines(keepends=True)
 current_name = None
 seen_names = set()
 updates = []
+digest_updates = []
+
+name_indices = []
+for idx, line in enumerate(lines):
+    line_no_eol = line.rstrip("\r\n")
+    name_match = re.match(r"^(\s*-\s*name:\s*)(\S+)(\s*)$", line_no_eol)
+    if name_match:
+        name_indices.append((idx, name_match.group(2), name_match.group(1)))
+
+block_ranges = []
+for pos, (start_idx, image_name, name_prefix) in enumerate(name_indices):
+    end_idx = len(lines) - 1 if pos == len(name_indices) - 1 else name_indices[pos + 1][0] - 1
+    block_ranges.append((start_idx, end_idx, image_name, name_prefix))
 
 for idx, line in enumerate(lines):
     line_no_eol = line.rstrip("\r\n")
@@ -284,17 +338,59 @@ for idx, line in enumerate(lines):
     updates.append((idx + 1, current_name, current_tag, wanted_tag))
     lines[idx] = updated_line
 
+for start_idx, end_idx, image_name, name_prefix in block_ranges:
+    wanted_digest = digest_targets.get(image_name, "")
+    if not wanted_digest:
+        continue
+
+    digest_idx = None
+    digest_indent = "    "
+    insert_after_idx = start_idx
+
+    for idx in range(start_idx + 1, end_idx + 1):
+        line_no_eol = lines[idx].rstrip("\r\n")
+        digest_match = re.match(r"^(\s*digest:\s*)(\S+)(\s*)$", line_no_eol)
+        if digest_match:
+            digest_idx = idx
+            digest_indent = re.match(r"^(\s*)", line_no_eol).group(1)
+            current_digest = digest_match.group(2)
+            if current_digest != wanted_digest:
+                eol = lines[idx][len(line_no_eol):]
+                lines[idx] = f"{digest_match.group(1)}{wanted_digest}{digest_match.group(3)}{eol}"
+                digest_updates.append((idx + 1, image_name, current_digest, wanted_digest))
+            break
+
+        if re.match(r"^\s*(newTag|newName):\s*\S+", line_no_eol):
+            insert_after_idx = idx
+            digest_indent = re.match(r"^(\s*)", line_no_eol).group(1)
+
+    if digest_idx is None:
+        insert_line = f"{digest_indent}digest: {wanted_digest}\n"
+        lines.insert(insert_after_idx + 1, insert_line)
+        digest_updates.append((insert_after_idx + 2, image_name, "<missing>", wanted_digest))
+        for i, (s_idx, e_idx, n, pref) in enumerate(block_ranges):
+            if s_idx > insert_after_idx:
+                block_ranges[i] = (s_idx + 1, e_idx + 1, n, pref)
+            elif i >= 0 and s_idx == start_idx:
+                block_ranges[i] = (s_idx, e_idx + 1, n, pref)
+
 missing = [name for name in required_names if name not in seen_names]
 if missing:
     raise SystemExit(f"{path}: missing expected image entries: {', '.join(missing)}")
 
 if not updates:
-    print(f"= {path}: image tags already up-to-date")
-    raise SystemExit(0)
+    if not digest_updates:
+        print(f"= {path}: image tags/digests already up-to-date")
+        raise SystemExit(0)
+else:
+    print(f"~ {path}: {len(updates)} tag update(s)")
+    for line_no, image_name, before, after in updates:
+        print(f"    L{line_no} {image_name}: {before} -> {after}")
 
-print(f"~ {path}: {len(updates)} tag update(s)")
-for line_no, image_name, before, after in updates:
-    print(f"    L{line_no} {image_name}: {before} -> {after}")
+if digest_updates:
+    print(f"~ {path}: {len(digest_updates)} digest update(s)")
+    for line_no, image_name, before, after in digest_updates:
+        print(f"    L{line_no} {image_name}: {before} -> {after}")
 
 if apply:
     path.write_text("".join(lines), encoding="utf-8")
@@ -444,20 +540,22 @@ echo "Infra repo: $INFRA_REPO"
 echo "Target env: $TARGET_ENV"
 echo "OpenedX tag: $OPENEDX_TAG"
 echo "MFE tag:     $MFE_TAG"
-echo "Update app base tags: $([[ "$UPDATE_APP_BASE" -eq 1 ]] && echo yes || echo no)"
+echo "OpenedX digest: ${OPENEDX_DIGEST:-<unchanged>}"
+echo "MFE digest:     ${MFE_DIGEST:-<unchanged>}"
+echo "Update app base image overrides: $([[ "$UPDATE_APP_BASE" -eq 1 ]] && echo yes || echo no)"
 echo "Update GitOps base ref: $([[ "$UPDATE_BASE_REF" -eq 1 ]] && echo yes || echo no)"
 echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"
 
 if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
   update_image_tags_file \
-    "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
+    "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
     "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
 else
   echo "= skipping app base tag update for target env '$TARGET_ENV'"
 fi
 
 update_image_tags_file \
-  "$APP_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
+  "$APP_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
   "$APP_REQUIRED_NAMES"
 
 if [[ "$COMMIT" -eq 1 ]]; then
@@ -482,7 +580,7 @@ else
 fi
 
 update_image_tags_file \
-  "$INFRA_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
+  "$INFRA_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
   "$INFRA_REQUIRED_NAMES"
 
 if [[ "$APPLY" -eq 1 ]]; then

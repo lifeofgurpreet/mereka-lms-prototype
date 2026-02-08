@@ -1,0 +1,36 @@
+# specdocs.config.yml — mereka-lms
+# Project-specific overrides for specs-vs-docs skill
+
+project:
+  name: "mereka-lms"
+  vehicle: "talent_platform"
+  additional_vehicles: ["data_pipeline"]
+  description: "Open edX LMS deployment on GKE with custom theming, analytics, and multi-site support"
+
+paths:
+  specs_root: "specs/"
+  docs_root: "docs/"
+  adr_root: "docs/adr/"
+  runbooks_root: "docs/operations/"
+
+defaults:
+  require_runbook_for_production: true
+
+nfrs:
+  privacy: "GDPR-like principles"
+  accessibility: "WCAG-minded"
+  uptime_slo: "99.5%"
+  recovery_time_objective: "4 hours"
+
+required_specs:
+  existing:
+    - "k8s-deployment"
+    - "repository-structure"
+    - "secrets-management"
+  missing_critical:
+    - "tutor-configuration"
+    - "multi-site-domains"
+    - "mongodb-atlas-integration"
+    - "branding-system"
+    - "analytics-pipeline"
+    - "observability-stack"

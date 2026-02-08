@@ -8,6 +8,7 @@ RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 BUILD_WORKFLOW="$WORKFLOWS_DIR/build-tutor-images.yml"
 BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
 RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
+RELEASE_DRY_RUN_CHECKER="$REPO_ROOT/scripts/qa/verify-release-dry-run-contract.sh"
 
 echo "Checking release automation contract for explicit target environment..."
 
@@ -43,6 +44,16 @@ if ! rg -n 'CI mode requires explicit --target-env' "$RELEASE_SCRIPT" >/dev/null
   violations=1
 fi
 
+# release-openedx script should support optional digest pinning flags.
+if ! rg -n -- '--openedx-digest' "$RELEASE_SCRIPT" >/dev/null; then
+  echo "❌ Missing --openedx-digest support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
+  violations=1
+fi
+if ! rg -n -- '--mfe-digest' "$RELEASE_SCRIPT" >/dev/null; then
+  echo "❌ Missing --mfe-digest support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
+  violations=1
+fi
+
 if [[ ! -f "$BUILD_WORKFLOW_CONTRACT" ]]; then
   echo "❌ Missing build workflow contract checker: ${BUILD_WORKFLOW_CONTRACT#"$REPO_ROOT"/}"
   violations=1
@@ -50,6 +61,11 @@ fi
 
 if [[ ! -f "$RELEASE_INVOKE_CHECKER" ]]; then
   echo "❌ Missing release invocation checker: ${RELEASE_INVOKE_CHECKER#"$REPO_ROOT"/}"
+  violations=1
+fi
+
+if [[ ! -f "$RELEASE_DRY_RUN_CHECKER" ]]; then
+  echo "❌ Missing release dry-run checker: ${RELEASE_DRY_RUN_CHECKER#"$REPO_ROOT"/}"
   violations=1
 fi
 

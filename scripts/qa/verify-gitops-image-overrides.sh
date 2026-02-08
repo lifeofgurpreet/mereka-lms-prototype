@@ -37,7 +37,7 @@ Checks:
   3) Production overlay includes transformed-name override parity for openedx-mfe.
   4) Staging overlay uses canonical docker.io names (no bare openedx/openedx-mfe names).
   5) Optional infra overlay parity check in active GitOps checkout (when available).
-  6) Optional tag parity check between this repo's production overlay and infra production overlay.
+  6) Optional tag/digest parity check between this repo's production overlay and infra production overlay.
 
 Options:
   --check-infra        Require and validate infra overlay file.
@@ -102,7 +102,7 @@ def parse_images(path: Path):
         if m_name:
             if current:
                 images.append(current)
-            current = {"name": m_name.group(1), "newName": None, "newTag": None}
+            current = {"name": m_name.group(1), "newName": None, "newTag": None, "digest": None}
             continue
         if current is None:
             continue
@@ -113,6 +113,10 @@ def parse_images(path: Path):
         m_new_tag = re.match(r"^\s*newTag:\s*(\S+)\s*$", line)
         if m_new_tag:
             current["newTag"] = m_new_tag.group(1)
+            continue
+        m_digest = re.match(r"^\s*digest:\s*(\S+)\s*$", line)
+        if m_digest:
+            current["digest"] = m_digest.group(1)
             continue
     if current:
         images.append(current)
@@ -167,6 +171,13 @@ if prod_mfe_source and prod_mfe_transformed:
             f"{APP_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
             f"('{prod_mfe_source['newTag']}' vs '{prod_mfe_transformed['newTag']}')"
         )
+    if (prod_mfe_source["digest"] or prod_mfe_transformed["digest"]) and (
+        prod_mfe_source["digest"] != prod_mfe_transformed["digest"]
+    ):
+        errors.append(
+            f"{APP_PROD}: openedx-mfe digest mismatch between canonical and transformed entries "
+            f"('{prod_mfe_source['digest']}' vs '{prod_mfe_transformed['digest']}')"
+        )
 
 for bare_name in ("openedx", "openedx-mfe"):
     if find_by_name(prod_images, bare_name):
@@ -195,17 +206,36 @@ if check_infra == "1":
                     f"{INFRA_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
                     f"('{infra_mfe_source['newTag']}' vs '{infra_mfe_transformed['newTag']}')"
                 )
+            if (infra_mfe_source["digest"] or infra_mfe_transformed["digest"]) and (
+                infra_mfe_source["digest"] != infra_mfe_transformed["digest"]
+            ):
+                errors.append(
+                    f"{INFRA_PROD}: openedx-mfe digest mismatch between canonical and transformed entries "
+                    f"('{infra_mfe_source['digest']}' vs '{infra_mfe_transformed['digest']}')"
+                )
         if prod_openedx and infra_openedx and prod_openedx["newTag"] and infra_openedx["newTag"]:
             if prod_openedx["newTag"] != infra_openedx["newTag"]:
                 errors.append(
                     f"prod openedx tag drift: app overlay '{prod_openedx['newTag']}' "
                     f"!= infra overlay '{infra_openedx['newTag']}'"
                 )
+        if prod_openedx and infra_openedx and (prod_openedx["digest"] or infra_openedx["digest"]):
+            if prod_openedx["digest"] != infra_openedx["digest"]:
+                errors.append(
+                    f"prod openedx digest drift: app overlay '{prod_openedx['digest']}' "
+                    f"!= infra overlay '{infra_openedx['digest']}'"
+                )
         if prod_mfe_source and infra_mfe_source and prod_mfe_source["newTag"] and infra_mfe_source["newTag"]:
             if prod_mfe_source["newTag"] != infra_mfe_source["newTag"]:
                 errors.append(
                     f"prod openedx-mfe tag drift: app overlay '{prod_mfe_source['newTag']}' "
                     f"!= infra overlay '{infra_mfe_source['newTag']}'"
+                )
+        if prod_mfe_source and infra_mfe_source and (prod_mfe_source["digest"] or infra_mfe_source["digest"]):
+            if prod_mfe_source["digest"] != infra_mfe_source["digest"]:
+                errors.append(
+                    f"prod openedx-mfe digest drift: app overlay '{prod_mfe_source['digest']}' "
+                    f"!= infra overlay '{infra_mfe_source['digest']}'"
                 )
 else:
     notes.append("infra overlay check skipped")

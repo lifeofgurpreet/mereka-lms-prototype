@@ -21,6 +21,7 @@ Or run locally:
 ./scripts/qa/verify-release-automation.sh
 ./scripts/qa/verify-build-workflow-contract.sh
 ./scripts/qa/verify-release-workflow-invocation.sh
+./scripts/qa/verify-release-dry-run-contract.sh
 ./scripts/qa/verify-no-latest-prod-tags.sh
 ./scripts/qa/lint-active-docs-env-model.sh
 ```
@@ -59,6 +60,18 @@ Staging note:
   --target-env production \
   --openedx-tag "${OPENEDX_TAG}" \
   --mfe-tag "${MFE_TAG}" \
+  --apply --commit --push --verify-runtime
+```
+
+Digest pinning (recommended when digests are available):
+
+```bash
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${OPENEDX_TAG}" \
+  --mfe-tag "${MFE_TAG}" \
+  --openedx-digest "sha256:<openedx-digest>" \
+  --mfe-digest "sha256:<mfe-digest>" \
   --apply --commit --push --verify-runtime
 ```
 

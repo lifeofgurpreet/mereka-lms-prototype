@@ -70,6 +70,17 @@ if ! rg -n -- '--target-env "\$\{TARGET_ENV\}"' "$BUILD_WORKFLOW" >/dev/null; th
   violations=1
 fi
 
+# Build workflow must not publish mutable latest tags to Artifact Registry.
+if rg -n 'docker push .*:latest([[:space:]]|$)' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ build workflow publishes mutable :latest tags"
+  violations=1
+fi
+
+if rg -n '\$\{\{[[:space:]]*env\.REGISTRY[[:space:]]*\}\}/(openedx|mfe):latest' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ build workflow tags Artifact Registry images as :latest"
+  violations=1
+fi
+
 if [[ "$violations" -ne 0 ]]; then
   echo "Build workflow contract failed."
   exit 1

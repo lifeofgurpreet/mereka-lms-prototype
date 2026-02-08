@@ -1,3 +1,12 @@
+---
+title: Secrets Management Specification
+type: feature_spec
+status: draft
+owner: engineering
+vehicle: talent_platform
+last_updated: '2026-02-08'
+---
+
 # Secrets Management Specification
 
 **Status**: Active
@@ -174,3 +183,36 @@ python3 scripts/validate/check_drift.py --full
 # Check pods have envFrom
 kubectl get deploy lms -n mereka-lms -o yaml | grep -A3 envFrom  # MUST show secretRef
 ```
+
+
+## Scope
+
+_Defines the boundaries of this specification._
+
+## Non-goals
+
+_Explicitly out of scope for this specification._
+
+## Requirements
+
+- This section requires review to add MUST/SHOULD/MAY requirements.
+
+## Acceptance Criteria
+
+- [ ] Acceptance criteria to be defined.
+
+## Edge Cases
+
+_Edge cases to be documented._
+
+## Observability
+
+_Logging, metrics, and alerting requirements to be defined._
+
+## Rollout & Rollback
+
+_Rollout strategy and rollback procedures to be defined._
+
+## Open Questions
+
+_No open questions at this time._

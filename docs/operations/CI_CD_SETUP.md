@@ -99,6 +99,10 @@ Images pushed to:
 - `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>`
 - `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:<tag>`
 
+Tag immutability:
+- Workflow publishes only immutable tags (`<image_tag>` and short SHA).
+- Workflow does **not** publish mutable `:latest` tags to Artifact Registry.
+
 Release safety gates:
 - Before MFE push, workflow runs `scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest <expected_rev>`.
 - Gate fails if authn `index.html` references unbranded CSS or misses the expected revision marker.
@@ -116,6 +120,15 @@ TAG="your-tag-or-sha"
   --openedx-tag "${TAG}" \
   --mfe-tag "${TAG}" \
   --apply --commit --push --verify-runtime
+
+# Optional immutable digest pinning (recommended for production):
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${TAG}" \
+  --mfe-tag "${TAG}" \
+  --openedx-digest "sha256:<openedx-digest>" \
+  --mfe-digest "sha256:<mfe-digest>" \
+  --apply --commit --push --verify-runtime
 ```
 
 Do not use direct `kubectl set image` for normal rollouts; production is ArgoCD/GitOps managed.
@@ -126,6 +139,7 @@ Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to ru
 - release automation contract checks
 - build workflow contract checks
 - release workflow invocation contract checks (`--target-env --apply --commit --push`)
+- release dry-run contract check (`scripts/infra/release-openedx-gitops.sh` dry-run against fixture infra repo)
 - production tag guard (`no latest`)
 - active docs env-model lint
 
