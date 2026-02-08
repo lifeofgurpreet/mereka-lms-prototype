@@ -152,7 +152,7 @@ function extractCoursePrefix(tagName) {
       const params = new URLSearchParams({
         "page[number]": tagPage,
         "page[size]": PAGE_SIZE,
-        "filter[tag_id]": tag.id,
+        "filter[has_tag_id]": tag.id,
       });
       if (SITE_ID) params.set("filter[site_id]", SITE_ID);
 
