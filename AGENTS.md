@@ -80,21 +80,30 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 7. **Push images**: `docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG`
 8. **Update GitOps manifests (production is ArgoCD-managed)**:
    - This repo (`mereka-lms`) provides the base manifests under `deploy/k8s/base`.
-   - The production cluster pulls those manifests via `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`
-     (note the pinned `?ref=<git_sha>`).
+   - Active GitOps checkout is usually `/home/gurpreet/projects/k8s/infrastructure` (same remote as `bbi-infrastructure`).
+   - Argo app `mereka-lms-local` renders `apps/mereka-lms/overlays/prod`, which has its own image tags.
+   - You must update both:
+     1) pinned base ref (`apps/mereka-lms/base/kustomization.yaml`)
+     2) production overlay tags (`apps/mereka-lms/overlays/prod/kustomization.yaml`)
+     or production can stay on old images while Argo still reports `Synced`.
 
    Update flow:
    ```bash
    # 1) In this repo, bump the base image tags in deploy/k8s/base (and overlay if used)
    #    then commit + push to `Biji-Biji-Initiative/mereka-lms`.
    #
-   # 2) In bbi-infrastructure, update the pinned ref to the new commit SHA:
+   # 2) In bbi-infrastructure/infrastructure checkout, update:
+   #    a) pinned ref to the new commit SHA:
    #    apps/mereka-lms/base/kustomization.yaml
    #    resources:
    #      - https://github.com/Biji-Biji-Initiative/mereka-lms.git//deploy/k8s/base?ref=<NEW_SHA>
+   #    b) image tags in apps/mereka-lms/overlays/prod/kustomization.yaml
    #    then commit + push to `Biji-Biji-Initiative/bbi-infrastructure`.
    #
-   # 3) ArgoCD self-heals and rolls production automatically.
+   # 3) Run contract check before/after push:
+   #    ./scripts/qa/verify-gitops-image-overrides.sh --check-infra
+   #
+   # 4) ArgoCD self-heals and rolls production automatically.
    ```
 9. **Verify rollout**:
    ```bash
@@ -106,7 +115,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 ### Common Mistakes (AVOID THESE)
 1. **Building locally without pushing** → Changes only exist on VPS, GKE still uses old images
 2. **Forgetting to authenticate Docker** → 403 errors when pulling cache
-3. **Not updating GitOps pinned ref** → Production keeps using the old `deploy/k8s/base` snapshot
+3. **Not updating GitOps pinned ref + prod overlay image tags together** → Argo shows `Synced` but production can stay on old images
 4. **Skipping `apply-patches.sh`** → MySQL auth fails, Node version wrong
 
 ### Brand Guidelines Reference
@@ -526,7 +535,7 @@ Regenerate hostname registry (after domain changes):
   Do not hot-edit generated Dockerfiles under `tutor_env/`.
 - GitOps pinned-ref helper for cross-repo rollout:
   `./scripts/infra/prepare-bbi-infra-ref-bump.sh [--apply]`
-  (updates `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml` ref to current commit).
+  (updates `apps/mereka-lms/base/kustomization.yaml` ref in the selected GitOps checkout to current commit; helper now uses safe replacement that preserves full SHA prefixes).
 - When bumping pinned `?ref=...`, always use exact output from `git rev-parse HEAD`;
   a typo causes Argo `ComparisonError` (`fatal: ... not our ref`).
 - Production Argo app name is `mereka-lms-local` (namespace: `argocd`).
@@ -538,7 +547,8 @@ Regenerate hostname registry (after domain changes):
 - GitOps overlay image overrides should include both canonical names when needed
   (`docker.io/overhangio/openedx-mfe` and `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe`) to avoid post-transform tag drift.
 - Enforce this contract before rollout with:
-  `./scripts/qa/verify-gitops-image-overrides.sh` (add `--check-infra` when validating local `bbi-infrastructure` checkout).
+  `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`
+  (now also fails on prod tag drift between this repo overlay and active GitOps overlay checkout).
 - Gap-finder for multi-surface branding drift: `./scripts/qa/audit-branding-surfaces.sh prod` (non-fatal by default, explicit unreachable-host diagnostics).
 - For minified CSS checks, avoid `printf ... | grep -q` under `set -o pipefail`; use here-strings (`grep ... <<<"$css"`) to prevent SIGPIPE false negatives.
 - Run `./scripts/branding/sync-brand-assets.sh` after branding edits; it syncs runtime override CSS from common -> LMS + CMS to prevent drift.

@@ -44,11 +44,11 @@ Important:
 │  │ mereka-lms/      │          └──────────────────┘                 │
 │  └────────┬─────────┘                                               │
 │           │                                                          │
-│  4. Deploy│           5. Verify                                      │
+│  4. GitOps│           5. Verify                                      │
 │           ▼          ┌──────────────────┐                           │
 │  ┌──────────────────┐│ academyv2.mereka.io │                         │
-│  │ kubectl set      ││ (production)       │                         │
-│  │ image deployment │└──────────────────┘                           │
+│  │ commit/push      ││ (production)       │                         │
+│  │ overlay+ref      │└──────────────────┘                           │
 │  └──────────────────┘                                               │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
@@ -261,37 +261,32 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG}
 docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
 ```
 
-### Step 8: Update Kubernetes Deployments
+### Step 8: Update GitOps Sources (Production)
 
-Production is **GitOps-managed**. Prefer updating the pinned `?ref=<git_sha>` in `bbi-infrastructure`
-so ArgoCD rolls the change and the system converges without drift. Direct `kubectl set image` is for
-emergencies only (it will be reverted by ArgoCD if GitOps still points at the old ref).
+Production is **GitOps-managed** by Argo app `mereka-lms-local` from:
+- repo: `Biji-Biji-Initiative/bbi-infrastructure` (legacy name `BBI-K8` may still appear in Argo)
+- path: `apps/mereka-lms/overlays/prod`
+
+Do not use `kubectl set image` for normal releases.
 
 ```bash
-# LMS
-kubectl set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
-  -n mereka-lms
+# 1) Push this repo first (mereka-lms) so the new base ref exists remotely.
+git -C /home/gurpreet/projects/k8s/mereka-lms push
 
-# CMS (Studio)
-kubectl set image deployment/cms \
-  cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
-  -n mereka-lms
+# 2) In GitOps repo checkout, update BOTH:
+#    a) pinned base ref
+#    b) production overlay image tags
+git -C /home/gurpreet/projects/k8s/infrastructure pull --rebase
+$EDITOR /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/base/kustomization.yaml
+$EDITOR /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
 
-# LMS Worker
-kubectl set image deployment/lms-worker \
-  lms-worker=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
-  -n mereka-lms
+# 3) Verify no image-tag drift between repos before push.
+./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 
-# CMS Worker
-kubectl set image deployment/cms-worker \
-  cms-worker=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:${TAG} \
-  -n mereka-lms
-
-# MFE (if built)
-kubectl set image deployment/mfe \
-  mfe=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:mereka-brand \
-  -n mereka-lms
+# 4) Commit + push GitOps repo.
+git -C /home/gurpreet/projects/k8s/infrastructure add apps/mereka-lms/base/kustomization.yaml apps/mereka-lms/overlays/prod/kustomization.yaml
+git -C /home/gurpreet/projects/k8s/infrastructure commit -m "chore: rollout openedx/openedx-mfe tags ${TAG}"
+git -C /home/gurpreet/projects/k8s/infrastructure push
 ```
 
 ### Step 9: Verify Deployment
@@ -336,33 +331,16 @@ Also check:
 If issues arise after deployment:
 
 ```bash
-# Rollback to stock images
-kubectl set image deployment/lms \
-  lms=docker.io/overhangio/openedx:18.2.2-indigo \
-  -n mereka-lms
+# 1) Revert GitOps commit(s) in infrastructure checkout.
+git -C /home/gurpreet/projects/k8s/infrastructure log --oneline -n 5
+git -C /home/gurpreet/projects/k8s/infrastructure revert <bad_commit_sha>
+git -C /home/gurpreet/projects/k8s/infrastructure push
 
-kubectl set image deployment/cms \
-  cms=docker.io/overhangio/openedx:18.2.2-indigo \
-  -n mereka-lms
-
-kubectl set image deployment/lms-worker \
-  lms-worker=docker.io/overhangio/openedx:18.2.2-indigo \
-  -n mereka-lms
-
-kubectl set image deployment/cms-worker \
-  cms-worker=docker.io/overhangio/openedx:18.2.2-indigo \
-  -n mereka-lms
-
-kubectl set image deployment/mfe \
-  mfe=docker.io/overhangio/openedx-mfe:18.1.0-indigo \
-  -n mereka-lms
-```
-
-Or rollback to a previous custom image:
-```bash
-kubectl set image deployment/lms \
-  lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:PREVIOUS_TAG \
-  -n mereka-lms
+# 2) Confirm Argo converges back to known-good revision/images.
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n argocd get applications.argoproj.io mereka-lms-local \
+  -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}{"\n"}'
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get deploy mfe \
+  -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
 ```
 
 ## Troubleshooting
@@ -382,14 +360,17 @@ gcloud auth configure-docker asia-southeast1-docker.pkg.dev
 
 ### Pods Not Using New Image
 
-Check if image tag is correct:
-```bash
-kubectl get deployment lms -n mereka-lms -o jsonpath='{.spec.template.spec.containers[0].image}'
-```
+Most common cause is GitOps overlay tag drift, not rollout failure.
 
-Force pod restart if needed:
 ```bash
-kubectl rollout restart deployment/lms -n mereka-lms
+# App repo overlay tag
+rg -n "openedx-mfe|openedx:" deploy/k8s/overlays/production/kustomization.yaml
+
+# GitOps overlay tag (active source for prod)
+rg -n "openedx-mfe|openedx:" /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+
+# Contract check
+./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 ```
 
 ### Styles Not Appearing
@@ -413,16 +394,17 @@ kubectl rollout restart deployment/lms -n mereka-lms
 ./infrastructure/tutor/apply-patches.sh
 source .venv/bin/activate && export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor images build openedx
+tutor images build mfe
+./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
 docker tag tutor_local/openedx:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
+docker tag tutor_local/openedx-mfe:latest asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG
 docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG
-kubectl set image deployment/lms lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG -n mereka-lms
-kubectl set image deployment/cms cms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:TAG -n mereka-lms
+docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:TAG
+./scripts/qa/verify-gitops-image-overrides.sh --check-infra
 
-# Check current images
-kubectl get pods -n mereka-lms -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
-
-# Watch logs during deployment
-kubectl logs -f deployment/lms -n mereka-lms
+# Check Argo + live image
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n argocd get applications.argoproj.io mereka-lms-local -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}{"\n"}'
+kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get deploy mfe -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
 ```
 
 ## Related Documentation

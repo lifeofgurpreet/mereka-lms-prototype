@@ -6,8 +6,23 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_BASE="${APP_BASE:-$REPO_ROOT/deploy/k8s/base/kustomization.yaml}"
 APP_PROD_OVERLAY="${APP_PROD_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml}"
 APP_STAGING_OVERLAY="${APP_STAGING_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/staging/kustomization.yaml}"
-INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-/home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml}"
+INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-}"
 CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
+
+if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
+  for candidate in \
+    /home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml \
+    /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml; do
+    if [[ -f "$candidate" ]]; then
+      INFRA_PROD_OVERLAY="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
+  INFRA_PROD_OVERLAY="/home/gurpreet/projects/k8s/infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
+fi
 
 usage() {
   cat <<'EOF'
@@ -21,12 +36,14 @@ Checks:
   2) Production overlay uses canonical names.
   3) Production overlay includes transformed-name override parity for openedx-mfe.
   4) Staging overlay uses canonical docker.io names (no bare openedx/openedx-mfe names).
-  5) Optional infra overlay parity check in bbi-infrastructure (when available).
+  5) Optional infra overlay parity check in active GitOps checkout (when available).
+  6) Optional tag parity check between this repo's production overlay and infra production overlay.
 
 Options:
   --check-infra        Require and validate infra overlay file.
   --skip-infra         Skip infra overlay validation.
   --infra-file PATH    Override infra overlay file path.
+                       (default auto-detect: infrastructure -> bbi-infrastructure)
   -h, --help           Show this help.
 EOF
 }
@@ -169,6 +186,7 @@ if check_infra == "1":
         errors.append(f"infra check requested but file missing: {INFRA_PROD}")
     else:
         infra_images = parse_images(INFRA_PROD)
+        infra_openedx = ensure_mapping(infra_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(INFRA_PROD), errors)
         infra_mfe_source = ensure_mapping(infra_images, SOURCE_MFE, TARGET_MFE, str(INFRA_PROD), errors)
         infra_mfe_transformed = ensure_mapping(infra_images, TARGET_MFE, TARGET_MFE, str(INFRA_PROD), errors)
         if infra_mfe_source and infra_mfe_transformed:
@@ -176,6 +194,18 @@ if check_infra == "1":
                 errors.append(
                     f"{INFRA_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
                     f"('{infra_mfe_source['newTag']}' vs '{infra_mfe_transformed['newTag']}')"
+                )
+        if prod_openedx and infra_openedx and prod_openedx["newTag"] and infra_openedx["newTag"]:
+            if prod_openedx["newTag"] != infra_openedx["newTag"]:
+                errors.append(
+                    f"prod openedx tag drift: app overlay '{prod_openedx['newTag']}' "
+                    f"!= infra overlay '{infra_openedx['newTag']}'"
+                )
+        if prod_mfe_source and infra_mfe_source and prod_mfe_source["newTag"] and infra_mfe_source["newTag"]:
+            if prod_mfe_source["newTag"] != infra_mfe_source["newTag"]:
+                errors.append(
+                    f"prod openedx-mfe tag drift: app overlay '{prod_mfe_source['newTag']}' "
+                    f"!= infra overlay '{infra_mfe_source['newTag']}'"
                 )
 else:
     notes.append("infra overlay check skipped")

@@ -72,8 +72,11 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
      before MFE image tags are pushed.
 3. Update image tags under `deploy/k8s/base`.
 4. Commit/push this repo.
-5. Update pinned `?ref=<sha>` in `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`.
-6. Verify Argo rollout and rerun branding gates.
+5. Update GitOps checkout (`/home/gurpreet/projects/k8s/infrastructure` or `bbi-infrastructure`) in both files:
+   - `apps/mereka-lms/base/kustomization.yaml` (`?ref=<sha>`)
+   - `apps/mereka-lms/overlays/prod/kustomization.yaml` (openedx/openedx-mfe tags)
+6. Run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`.
+7. Verify Argo rollout and rerun branding gates.
 
 ## Known Failure Patterns And Correct Fixes
 
@@ -159,7 +162,14 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
      2) update `apps/mereka-lms/base/kustomization.yaml` with that exact SHA
      3) push and wait for `mereka-lms-local` app to return `Synced/Healthy`.
 
-13. **Visual regression never runs after screenshot capture**
+14. **Argo is `Synced`, but MFE/LMS still run old image tags**
+   - Cause: production GitOps overlay (`apps/mereka-lms/overlays/prod/kustomization.yaml`) still pins old tags.
+   - Fix:
+     1) update overlay tags (`docker.io/overhangio/openedx`, `docker.io/overhangio/openedx-mfe`, transformed MFE entry)
+     2) run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`
+     3) push GitOps repo and confirm Argo summary images + live deployment images match.
+
+15. **Visual regression never runs after screenshot capture**
    - Cause: screenshots are captured but no compare step is executed, so drift is only detected manually.
    - Fix:
      1) run `RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 ./scripts/branding/run-branding-gates.sh prod`

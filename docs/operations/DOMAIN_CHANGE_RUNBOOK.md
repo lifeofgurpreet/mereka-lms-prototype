@@ -76,6 +76,9 @@ Canonical hostname registry (prod + dev + kind-local):
 
 ## 4) Deploy
 - [ ] Production: commit + push to `bbi-infrastructure` (ArgoCD applies automatically).
+  - Update both `apps/mereka-lms/base/kustomization.yaml` (`?ref=`) and
+    `apps/mereka-lms/overlays/prod/kustomization.yaml` (openedx/openedx-mfe tags) when rollout includes images.
+  - Run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra` before push.
 - [ ] Dev: apply k8s manifests to kind.
 - [ ] If image rebuilt, update tags and roll deployments.
 

@@ -89,7 +89,7 @@ if not match:
     raise SystemExit("Could not find mereka-lms base ref URL in target kustomization")
 
 old_sha = match.group(2)
-updated = pat.sub(rf"\1{new_sha}", content, count=1)
+updated = pat.sub(lambda m: f"{m.group(1)}{new_sha}", content, count=1)
 
 print(f"Target file: {path}")
 print(f"Old ref: {old_sha}")
