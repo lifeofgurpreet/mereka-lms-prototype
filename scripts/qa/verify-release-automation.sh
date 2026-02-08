@@ -9,6 +9,7 @@ BUILD_WORKFLOW="$WORKFLOWS_DIR/build-tutor-images.yml"
 BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
 RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
 RELEASE_DRY_RUN_CHECKER="$REPO_ROOT/scripts/qa/verify-release-dry-run-contract.sh"
+RELEASE_EVIDENCE_WORKFLOW_CHECKER="$REPO_ROOT/scripts/qa/verify-release-evidence-workflow.sh"
 
 echo "Checking release automation contract for explicit target environment..."
 
@@ -70,6 +71,11 @@ fi
 
 if [[ ! -f "$RELEASE_DRY_RUN_CHECKER" ]]; then
   echo "❌ Missing release dry-run checker: ${RELEASE_DRY_RUN_CHECKER#"$REPO_ROOT"/}"
+  violations=1
+fi
+
+if [[ ! -f "$RELEASE_EVIDENCE_WORKFLOW_CHECKER" ]]; then
+  echo "❌ Missing release evidence workflow checker: ${RELEASE_EVIDENCE_WORKFLOW_CHECKER#"$REPO_ROOT"/}"
   violations=1
 fi
 

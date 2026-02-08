@@ -47,20 +47,12 @@ jobs:
         id: digests
         run: |
           set -euo pipefail
-          resolve_digest() {
-            local ref="$1"
-            local key="$2"
-            local digest
-            digest="$(docker buildx imagetools inspect "${ref}" --format '{{json .Manifest.Digest}}' | tr -d '"')"
-            if [[ ! "${digest}" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
-              echo "Failed to resolve valid digest for ${ref}: ${digest}" >&2
-              exit 1
-            fi
-            echo "${key}=${digest}" >> "$GITHUB_OUTPUT"
-          }
-
-          resolve_digest "${{ env.REGISTRY }}/openedx:${{ inputs.openedx_tag }}" "openedx_digest"
-          resolve_digest "${{ env.REGISTRY }}/mfe:${{ inputs.mfe_tag }}" "mfe_digest"
+          ./scripts/infra/resolve-image-digest.sh \
+            --image-ref "${{ env.REGISTRY }}/openedx:${{ inputs.openedx_tag }}" \
+            --output-key openedx_digest >/dev/null
+          ./scripts/infra/resolve-image-digest.sh \
+            --image-ref "${{ env.REGISTRY }}/mfe:${{ inputs.mfe_tag }}" \
+            --output-key mfe_digest >/dev/null
 
       - name: Run policy checks
         run: |

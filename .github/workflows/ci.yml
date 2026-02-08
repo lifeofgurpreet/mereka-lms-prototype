@@ -73,6 +73,7 @@ jobs:
           bash -n scripts/qa/verify-build-workflow-contract.sh
           bash -n scripts/qa/verify-release-workflow-invocation.sh
           bash -n scripts/qa/verify-release-dry-run-contract.sh
+          bash -n scripts/qa/verify-release-evidence-workflow.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
 
       - name: Run local observability audit
@@ -94,6 +95,10 @@ jobs:
       - name: Verify release dry-run contract
         run: |
           ./scripts/qa/verify-release-dry-run-contract.sh
+
+      - name: Verify release evidence workflow contract
+        run: |
+          ./scripts/qa/verify-release-evidence-workflow.sh
 
       - name: Lint active docs env model wording
         run: |

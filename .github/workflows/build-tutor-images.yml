@@ -149,12 +149,7 @@ jobs:
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           REF="${{ env.REGISTRY }}/openedx:${TAG}"
-          docker pull "${REF}" >/dev/null
-          DIGEST="$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "${REF}" | sed -n 's|.*@||p' | head -n 1)"
-          if [[ ! "${DIGEST}" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
-            echo "Failed to resolve valid digest for ${REF}: ${DIGEST}" >&2
-            exit 1
-          fi
+          DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -242,12 +237,7 @@ jobs:
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           REF="${{ env.REGISTRY }}/mfe:${TAG}"
-          docker pull "${REF}" >/dev/null
-          DIGEST="$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "${REF}" | sed -n 's|.*@||p' | head -n 1)"
-          if [[ ! "${DIGEST}" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
-            echo "Failed to resolve valid digest for ${REF}: ${DIGEST}" >&2
-            exit 1
-          fi
+          DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 

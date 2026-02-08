@@ -70,6 +70,11 @@ if ! rg -n 'image_digest:[[:space:]]*\$\{\{ steps\.digest\.outputs\.digest \}\}'
   violations=1
 fi
 
+if [[ "$(rg -n './scripts/infra/resolve-image-digest\.sh --image-ref' "$BUILD_WORKFLOW" | wc -l | tr -d '[:space:]')" -lt 2 ]]; then
+  echo "❌ build workflow does not use shared digest helper for both openedx and mfe"
+  violations=1
+fi
+
 if ! rg -n 'update_gitops requires build_openedx=true and build_mfe=true' "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ Missing manual dispatch gate requiring both builds for deterministic digest capture"
   violations=1
