@@ -1,7 +1,7 @@
 # Mereka LMS Observability Enhancement Plan
 
 **Project**: mereka-lms  
-**Version**: 2.7
+**Version**: 2.8
 **Date**: 2026-02-07  
 **Status**: Active  
 **Owner**: SRE/Infra  
@@ -52,6 +52,16 @@ Reality-first:
   - `scripts/qa/verify-alert-routing.sh`
 - Added explicit multisite governance gate runner:
   - `scripts/qa/run-multisite-governance-gates.sh`
+- Added deep data-store exporter telemetry baseline:
+  - MySQL sidecar `mysqld-exporter` + ServiceMonitor `mysql-metrics`
+  - Redis sidecar `redis-exporter` + ServiceMonitor `redis-metrics`
+  - Deep telemetry alerts in `prometheusrule-lms.yaml`:
+    - `MySQLExporterDown`, `MySQLHighConnectionUtilization`, `MySQLSlowQueriesSpike`
+    - `RedisExporterDown`, `RedisRejectedConnectionsSpike`, `RedisEvictionsSpike`
+- Added deterministic exporter telemetry audit:
+  - `scripts/qa/audit-db-exporter-telemetry.sh` (`--mode local|runtime|all`)
+- Consolidated gate now includes DB exporter telemetry audit in local mode by default:
+  - `scripts/qa/run-operations-gates.sh` (`RUN_DB_EXPORTER_TELEMETRY_AUDIT=1`)
 - Added DR evidence bundle builder:
   - `scripts/qa/build-dr-evidence-bundle.sh`
 - Added VPS Atlas allowlist monitor posture audit:
@@ -182,7 +192,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 - Add dashboards + alerts for MySQL/Redis pressure.
 - Keep exporter-level telemetry as next-level hardening.
 
-**Status:** Done for baseline (`mysql-saturation-high`, `redis-saturation-high`, dashboard panels); exporter-level signals remain optional hardening.
+**Status:** Baseline + exporter telemetry contract shipped. Runtime rollout verification remains environment-dependent (run `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime` post-GitOps apply).
 
 ### 8) Backup posture in observability (Velero)
 **Why:** Backups that exist but are silently failing are worse than no backups.

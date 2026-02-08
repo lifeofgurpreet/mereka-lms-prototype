@@ -14,18 +14,37 @@ K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 STRICT_WEBHOOK="${STRICT_WEBHOOK:-1}"
 RUN_ATLAS_VPS_AUDIT="${RUN_ATLAS_VPS_AUDIT:-1}"
+CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-900}"
 
 failures=0
 warnings=0
 
 run_check() {
   local name="$1"; shift
-  local tmp rc out
+  local tmp rc out timed_out waited cmd_pid
   tmp="$(mktemp -t verify-alert-routing.XXXXXX)"
+  timed_out=0
 
   set +e
-  "$@" >"$tmp" 2>&1
-  rc=$?
+  "$@" >"$tmp" 2>&1 &
+  cmd_pid=$!
+  waited=0
+  while kill -0 "$cmd_pid" 2>/dev/null; do
+    if [[ "$waited" -ge "$CHECK_TIMEOUT_SECONDS" ]]; then
+      timed_out=1
+      kill "$cmd_pid" 2>/dev/null || true
+      wait "$cmd_pid" 2>/dev/null || true
+      rc=124
+      break
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+
+  if [[ "$timed_out" -eq 0 ]]; then
+    wait "$cmd_pid"
+    rc=$?
+  fi
   set -e
 
   out="$(cat "$tmp")"
@@ -35,7 +54,11 @@ run_check() {
     echo "OK   $name"
   else
     failures=$((failures + 1))
-    echo "FAIL $name"
+    if [[ "$timed_out" -eq 1 ]]; then
+      echo "FAIL $name (timed out after ${CHECK_TIMEOUT_SECONDS}s)"
+    else
+      echo "FAIL $name"
+    fi
     if [[ -n "$out" ]]; then
       echo "$out" | sed 's/^/  /'
     fi
@@ -169,6 +192,7 @@ echo "  context:              $K8S_CONTEXT"
 echo "  strict runtime:       $STRICT_RUNTIME"
 echo "  strict webhook:       $STRICT_WEBHOOK"
 echo "  run atlas vps audit:  $RUN_ATLAS_VPS_AUDIT"
+echo "  check timeout:        ${CHECK_TIMEOUT_SECONDS}s"
 echo ""
 
 run_check "repo: high-severity alert templates declare notification channels" \

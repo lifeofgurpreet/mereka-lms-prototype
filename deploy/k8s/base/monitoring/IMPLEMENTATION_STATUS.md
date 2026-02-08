@@ -1,11 +1,13 @@
 # Open edX Monitoring Implementation Status
 
-**Date**: 2026-02-04
+**Date**: 2026-02-08
 **Bead**: mereka-lms-76i
 
 ## Summary
 
-ServiceMonitors and PrometheusRules have been created for Open edX LMS/CMS in GKE, but **application-level metrics are not yet available** because Open edX does not expose Prometheus metrics by default.
+ServiceMonitors and PrometheusRules are in place for Open edX LMS/CMS and now include
+MySQL/Redis exporter telemetry wiring. Open edX app-level `/metrics` still depends on
+django-prometheus image rollout.
 
 ## What Was Implemented
 
@@ -13,6 +15,8 @@ ServiceMonitors and PrometheusRules have been created for Open edX LMS/CMS in GK
 
 - **`servicemonitor-lms.yaml`**: Targets LMS service on port 8000
 - **`servicemonitor-cms.yaml`**: Targets CMS service on port 8000
+- **`servicemonitor-mysql.yaml`**: Targets MySQL exporter sidecar on port 9104
+- **`servicemonitor-redis.yaml`**: Targets Redis exporter sidecar on port 9121
 
 Both ServiceMonitors are configured to:
 - Scrape `/metrics` endpoint every 30s
@@ -180,15 +184,17 @@ Application-level metrics that require Django instrumentation:
 
 ### Option 3: Deploy exporters for infrastructure
 
+**Status**: Implemented in base manifests (2026-02-08).
+
 **Benefits**: Better visibility into MySQL, Redis, MongoDB
 
 **Implementation**:
 
-1. **MySQL**: Deploy mysqld-exporter as sidecar
-2. **Redis**: Deploy redis-exporter as sidecar
-3. **MongoDB**: Atlas already exposes metrics via MongoDB Cloud
+1. **MySQL**: `mysqld-exporter` sidecar + `mysql-metrics` ServiceMonitor
+2. **Redis**: `redis-exporter` sidecar + `redis-metrics` ServiceMonitor
+3. **MongoDB**: Atlas remains external; monitored via connectivity checks and app symptoms
 
-**Estimated effort**: 3-4 hours
+**Estimated effort**: Completed (runtime rollout still requires GitOps/apply).
 
 ## Verification Steps
 
@@ -221,6 +227,8 @@ deploy/k8s/base/monitoring/
 ├── kustomization.yaml              # Kustomize resources
 ├── servicemonitor-lms.yaml         # LMS metrics scraping (non-functional until metrics enabled)
 ├── servicemonitor-cms.yaml         # CMS metrics scraping (non-functional until metrics enabled)
+├── servicemonitor-mysql.yaml       # MySQL exporter metrics scraping
+├── servicemonitor-redis.yaml       # Redis exporter metrics scraping
 └── prometheusrule-lms.yaml         # Alert rules (functional, uses kubelet metrics)
 ```
 
@@ -229,6 +237,4 @@ deploy/k8s/base/monitoring/
 Create these beads for next steps:
 
 1. **mereka-lms-76j**: Enable django-prometheus in Open edX image
-2. **mereka-lms-76k**: Add mysqld-exporter sidecar to MySQL deployment
-3. **mereka-lms-76l**: Add redis-exporter sidecar to Redis deployment
-4. **mereka-lms-76m**: Create Grafana dashboards for Open edX metrics
+2. **mereka-lms-76m**: Create Grafana dashboards for Open edX metrics

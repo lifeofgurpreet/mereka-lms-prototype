@@ -44,6 +44,7 @@ Located in: `/home/gurpreet/projects/observability/`
 **Panels:**
 - Service Health (LMS, CMS, Caddy, MFE, Workers)
 - Data Services (MySQL, MongoDB, Redis, Elasticsearch, Forum, Discovery, SMTP)
+- Data-store Deep Telemetry (MySQL connection utilization + slow queries, Redis rejected connections + evictions)
 - Resource Usage (CPU, Memory by pod)
 - External Availability (SLO: 99.5%)
 - Response Time tracking
@@ -186,6 +187,9 @@ Run the automated connectivity validation script to test all datasource connecti
 ./scripts/infra/validate-telemetry-connectivity.sh --strict
 REQUIRE_VPS_PROM_DS=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
 REQUIRE_VPS_PROM_DS=1 REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
+REQUIRE_DB_EXPORTER_METRICS=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
+./scripts/qa/audit-db-exporter-telemetry.sh --mode local
+STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ```
 
@@ -195,6 +199,10 @@ missing `prometheus` datasource references). Set `REQUIRE_VPS_PROM_DS=1` when yo
 also want strict enforcement that the dashboard actively uses `prometheus-vps`.
 Set `REQUIRE_GRAFANA_RECOMMENDED=1` when you want strict enforcement of recommended
 dashboard coverage (CrashLoop/Pending/critical deployment/Velero synthetic job signals).
+Set `REQUIRE_DB_EXPORTER_METRICS=1` when you want strict enforcement that MySQL/Redis
+exporter metrics are queryable via the GKE Prometheus datasource.
+These checks use stable `service` + `namespace` labels so they remain valid even if
+Prometheus `job` labels differ by operator defaults.
 
 **Expected output:**
 ```

@@ -138,6 +138,41 @@ spec:
             summary: "MySQL database is down"
             description: "MySQL pod {{ $labels.pod }} has been down for more than 5 minutes. Open edX is non-functional."
 
+        - alert: MySQLExporterDown
+          expr: up{namespace="mereka-lms", service="mysql", endpoint="metrics"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: mysql
+          annotations:
+            summary: "MySQL exporter is down"
+            description: "MySQL exporter target {{ $labels.instance }} is down for over 5 minutes."
+
+        - alert: MySQLHighConnectionUtilization
+          expr: |
+            (
+              mysql_global_status_threads_connected{namespace="mereka-lms", service="mysql"}
+              /
+              clamp_min(mysql_global_variables_max_connections{namespace="mereka-lms", service="mysql"}, 1)
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: mysql
+          annotations:
+            summary: "MySQL connection utilization is high"
+            description: "MySQL is using more than 85% of max connections for at least 10 minutes."
+
+        - alert: MySQLSlowQueriesSpike
+          expr: increase(mysql_global_status_slow_queries{namespace="mereka-lms", service="mysql"}[10m]) > 20
+          for: 10m
+          labels:
+            severity: warning
+            component: mysql
+          annotations:
+            summary: "MySQL slow queries are spiking"
+            description: "MySQL slow query count increased by more than 20 in the last 10 minutes."
+
         # Redis alerts
         - alert: RedisPodDown
           expr: up{namespace="mereka-lms", pod=~"redis-.*"} == 0
@@ -148,6 +183,36 @@ spec:
           annotations:
             summary: "Redis cache is down"
             description: "Redis pod {{ $labels.pod }} has been down for more than 5 minutes. Open edX performance degraded."
+
+        - alert: RedisExporterDown
+          expr: up{namespace="mereka-lms", service="redis", endpoint="metrics"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: redis
+          annotations:
+            summary: "Redis exporter is down"
+            description: "Redis exporter target {{ $labels.instance }} is down for over 5 minutes."
+
+        - alert: RedisRejectedConnectionsSpike
+          expr: increase(redis_rejected_connections_total{namespace="mereka-lms", service="redis"}[10m]) > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: redis
+          annotations:
+            summary: "Redis rejected connections detected"
+            description: "Redis rejected one or more client connections in the last 10 minutes."
+
+        - alert: RedisEvictionsSpike
+          expr: increase(redis_evicted_keys_total{namespace="mereka-lms", service="redis"}[15m]) > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: redis
+          annotations:
+            summary: "Redis key evictions detected"
+            description: "Redis evicted keys in the last 15 minutes. Check memory pressure and maxmemory policy."
 
         # MongoDB alerts
         - alert: MongoDBPodDown

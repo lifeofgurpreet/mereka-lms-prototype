@@ -12,9 +12,13 @@ The `/metrics` endpoint will be functional after rebuilding the Open edX image w
 
 1. **servicemonitor-lms.yaml**: ServiceMonitor for LMS pods
 2. **servicemonitor-cms.yaml**: ServiceMonitor for CMS pods
-3. **prometheusrule-lms.yaml**: Alert rules based on kubelet and application metrics
+3. **servicemonitor-mysql.yaml**: ServiceMonitor for mysqld-exporter sidecar metrics
+4. **servicemonitor-redis.yaml**: ServiceMonitor for redis-exporter sidecar metrics
+5. **prometheusrule-lms.yaml**: Alert rules based on kubelet, app, and data-store exporter metrics
    - LMS/CMS availability and saturation
    - data service availability (MySQL/Redis/MongoDB/Elasticsearch)
+   - MySQL deep telemetry (`threads_connected/max_connections`, slow query spike)
+   - Redis deep telemetry (rejected connections, evictions)
    - critical deployment unavailable replicas
    - pods stuck pending / CrashLoopBackOff
    - synthetic/backup job failures (`auth-verify-prod`, `cert-verify-prod`, `backup-verification`, `restore-test`)
@@ -77,15 +81,27 @@ kubectl apply --dry-run=client -f deploy/k8s/base/monitoring/prometheusrule-lms.
 REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
 ```
 
-## Alternative Monitoring
+## Data-store Exporter Telemetry
 
-Until native Prometheus metrics are enabled, consider:
+Deep data-store telemetry is now baked into base manifests:
+- `deploy/k8s/base/deployments.yml`: `mysqld-exporter` and `redis-exporter` sidecars
+- `deploy/k8s/base/services.yml`: metrics service ports (9104/9121)
+- `deploy/k8s/base/monitoring/servicemonitor-*.yaml`: scrape wiring
 
-1. **Container metrics**: CPU, memory, disk from kubelet (already collected by kube-state-metrics)
-2. **MySQL metrics**: Use mysqld-exporter sidecar
-3. **Redis metrics**: Use redis-exporter sidecar
-4. **Application logs**: Ship to Loki via Promtail (already configured)
-5. **Traces**: OpenTelemetry integration (future work)
+Read-only contract audit:
+```bash
+./scripts/qa/audit-db-exporter-telemetry.sh --mode local
+```
+
+Runtime verification (after GitOps/apply rollout):
+```bash
+STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
+```
+
+Full gate (includes exporter contract in local mode by default):
+```bash
+CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env both
+```
 
 ## References
 

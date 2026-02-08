@@ -1,5 +1,5 @@
 # Monitoring & Alerting Guide
-_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-07_
+_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-02-08_
 
 This checklist focuses on the production **GKE Autopilot** cluster that runs the `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
 
@@ -58,11 +58,13 @@ Coverage governance:
    - Track deployment health: `kubernetes.io/container/restart_count`, CPU/memory utilization, and readiness.
    - Track **storage** via PVC volume used/capacity metrics (preferred) and alert before disks fill.
    - Saturation baseline is now live via CPU/memory request utilization on `mysql*` pods (`operations-signals` dashboard + `mysql-saturation-high` alert).
-   - Future hardening: add exporter-level signals (connections, slow queries, innodb pressure).
+   - Exporter-level telemetry is now wired via `mysqld-exporter` sidecar + `mysql-metrics` ServiceMonitor.
+   - Deep alert coverage in PrometheusRule: `MySQLExporterDown`, `MySQLHighConnectionUtilization`, `MySQLSlowQueriesSpike`.
 
 3. **Redis (in-cluster)**
    - Saturation baseline is now live via CPU/memory request utilization on `redis*` pods (`operations-signals` dashboard + `redis-saturation-high` alert).
-   - Continue tracking app-tier symptoms (timeouts/499s) and add exporter-level signals later (`used_memory`, evictions, keyspace misses).
+   - Exporter-level telemetry is now wired via `redis-exporter` sidecar + `redis-metrics` ServiceMonitor.
+   - Deep alert coverage in PrometheusRule: `RedisExporterDown`, `RedisRejectedConnectionsSpike`, `RedisEvictionsSpike`.
 
 > JSON templates live under `infrastructure/monitoring/dashboards/` (`gke.json`, `public-endpoints.json`, `auth.json`, `operations-signals.json`, plus legacy `cloudsql.json`, `redis.json`). Apply them with
 > `./scripts/infra/apply-monitoring-configs.sh apply`
@@ -224,10 +226,11 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 9. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
 10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.
 11. **Alert routing verification** – run `./scripts/qa/verify-alert-routing.sh` for runtime policy/channel checks plus optional VPS webhook routing validation.
-12. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
-13. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
-14. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
-15. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
+12. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
+13. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
+14. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
+15. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
+16. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
 
 ## Certificate/SAN verification
 

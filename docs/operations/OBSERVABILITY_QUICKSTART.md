@@ -25,10 +25,15 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 
 # Alert routing verification (runtime policies + channels + optional VPS webhook audit)
-./scripts/qa/verify-alert-routing.sh
+CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/verify-alert-routing.sh
 
 # Grafana panel/query coverage contract (required + recommended)
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
+
+# DB exporter telemetry contract (repo + optional runtime)
+./scripts/qa/audit-db-exporter-telemetry.sh --mode local
+# After rollout:
+STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 
 # Multisite governance gate (site config + org ownership + auth surfaces + hostname drift)
 CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
@@ -36,6 +41,9 @@ CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env b
 # Consolidated gate (auth + multisite + observability + Velero + Grafana)
 ./scripts/qa/run-operations-gates.sh --env both
 ```
+
+If runtime mode fails while local mode passes, treat it as rollout drift (GitOps/runtime
+state has not picked up this repo commit yet), not as a source-contract failure.
 
 Automated equivalent:
 - `.github/workflows/public-health-check.yml` runs strict prod branding parity + dev branding gate and uploads logs.
@@ -79,6 +87,9 @@ Primary signals to watch first:
   - Velero backup verification success/failure and restore-test success/failure
   - Velero backup verification failures
   - Velero restore-test failures
+- Prometheus deep telemetry:
+  - MySQL connection utilization + slow query spikes
+  - Redis rejected connections + key evictions
 
 ## 3) Alert Categories
 

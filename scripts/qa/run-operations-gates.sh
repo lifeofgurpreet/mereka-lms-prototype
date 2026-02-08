@@ -18,6 +18,8 @@ RUN_ATLAS_ALLOWLIST_AUDIT="${RUN_ATLAS_ALLOWLIST_AUDIT:-0}"
 RUN_ALERT_ROUTING_AUDIT="${RUN_ALERT_ROUTING_AUDIT:-1}"
 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT="${ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT:-1}"
 RUN_MULTISITE_GOVERNANCE_AUDIT="${RUN_MULTISITE_GOVERNANCE_AUDIT:-1}"
+RUN_DB_EXPORTER_TELEMETRY_AUDIT="${RUN_DB_EXPORTER_TELEMETRY_AUDIT:-1}"
+DB_EXPORTER_AUDIT_MODE="${DB_EXPORTER_AUDIT_MODE:-local}" # local|runtime|all
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -34,6 +36,8 @@ Env:
   RUN_ALERT_ROUTING_AUDIT=0      Skip one-command alert routing verification (enabled by default)
   ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0  Skip VPS-only atlas routing check inside alert-routing audit
   RUN_MULTISITE_GOVERNANCE_AUDIT=0  Skip explicit multisite governance gate (enabled by default)
+  RUN_DB_EXPORTER_TELEMETRY_AUDIT=0  Skip db exporter telemetry contract/runtime audit (enabled by default)
+  DB_EXPORTER_AUDIT_MODE=local   Mode for db exporter audit: local|runtime|all
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -106,6 +110,8 @@ echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
 echo "  run_alert_routing_audit: $RUN_ALERT_ROUTING_AUDIT"
 echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
 echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
+echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
+echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -114,6 +120,12 @@ if [[ "$RUN_MULTISITE_GOVERNANCE_AUDIT" == "1" ]]; then
   run_check "multisite governance gate" \
     env STRICT=1 CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" \
     ./scripts/qa/run-multisite-governance-gates.sh --env "$ENV_SCOPE"
+fi
+
+if [[ "$RUN_DB_EXPORTER_TELEMETRY_AUDIT" == "1" ]]; then
+  run_check "db exporter telemetry audit (${DB_EXPORTER_AUDIT_MODE})" \
+    env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
+    ./scripts/qa/audit-db-exporter-telemetry.sh --mode "$DB_EXPORTER_AUDIT_MODE"
 fi
 
 run_check "auth + permissions + multisite audit" \
@@ -141,7 +153,7 @@ fi
 
 if [[ "$RUN_ALERT_ROUTING_AUDIT" == "1" ]]; then
   run_check "alert routing verification" \
-    env STRICT_RUNTIME="$STRICT_RUNTIME" STRICT_WEBHOOK=1 RUN_ATLAS_VPS_AUDIT="$ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT" ./scripts/qa/verify-alert-routing.sh
+    env STRICT_RUNTIME="$STRICT_RUNTIME" STRICT_WEBHOOK=1 RUN_ATLAS_VPS_AUDIT="$ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT" CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/verify-alert-routing.sh
 fi
 
 echo ""

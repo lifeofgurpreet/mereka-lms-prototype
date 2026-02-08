@@ -12,6 +12,7 @@ This document defines who owns each observability layer and how changes are sync
 | Audit logic | `scripts/qa/audit-observability.sh` | Mereka LMS platform team |
 | Velero alert pipeline audit | `scripts/qa/audit-velero-alert-pipeline.sh` | Mereka LMS platform team |
 | Alert routing verifier | `scripts/qa/verify-alert-routing.sh` | Mereka LMS platform team |
+| DB exporter telemetry audit | `scripts/qa/audit-db-exporter-telemetry.sh` | Mereka LMS platform team |
 | Atlas modulestore guard | `scripts/qa/verify-atlas-modulestore-path.sh` | Mereka LMS platform team |
 | DR evidence bundle builder | `scripts/qa/build-dr-evidence-bundle.sh` | Mereka LMS platform team |
 | Runtime consolidated operations gate | `.github/workflows/operations-gates-runtime.yml` | Mereka LMS platform team |
@@ -30,6 +31,8 @@ This document defines who owns each observability layer and how changes are sync
    - `./scripts/infra/apply-monitoring-configs.sh apply`
 5. Verify deployed coverage:
    - `./scripts/qa/audit-observability.sh --mode runtime`
+   - `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`
+   - Post-rollout deep validation: `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`
    - For release gates / deep audits: `STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime`
    - For Velero pipeline gate: `STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh --json`
    - For routing gate: `./scripts/qa/verify-alert-routing.sh`
@@ -37,6 +40,8 @@ This document defines who owns each observability layer and how changes are sync
    - For Atlas monitor posture (VPS): `./scripts/qa/audit-atlas-allowlist-monitor.sh` (and `STRICT_WEBHOOK=1` for production-ready routing)
 6. Run consolidated release gate:
    - `./scripts/qa/run-operations-gates.sh --env both`
+   - After exporter rollout, enforce runtime exporter checks in the same gate:
+     `DB_EXPORTER_AUDIT_MODE=runtime CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env prod`
 7. Build DR evidence artifact (monthly / major changes):
    - `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
 8. If panel parity is needed in VPS Grafana, open/update PR in observability repo and link both PRs.

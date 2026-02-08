@@ -65,6 +65,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - A dedicated `staging` cluster is not currently active due resource constraints.
 - Keep staging overlays/scripts as optional future-ready paths, but default operations should assume `local/dev -> prod`.
 - CI guardrail: manual `build-tutor-images.yml` runs with `target_environment=staging` are blocked unless repo variable `ENABLE_STAGING_ENV=true`.
+- CI release guardrail: `update_gitops=true` requires both `build_openedx=true` and `build_mfe=true` so digest pinning inputs are captured deterministically.
 
 ### Deployment Sequence (DO NOT SKIP STEPS)
 
@@ -471,6 +472,7 @@ STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
 CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 ./scripts/qa/verify-alert-routing.sh
+./scripts/qa/audit-db-exporter-telemetry.sh --mode local
 STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env both
 ```
@@ -502,11 +504,15 @@ Regenerate hostname registry (after domain changes):
 - Org ownership drift guard: `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both` (enforces staff+instructor coverage and platform-admin role presence for `MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`).
 - Canonical multisite governance gate: `CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both` (runs multisite config + org ownership + auth surface + hostname drift checks with per-check logs).
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
+- DB exporter telemetry audit (repo/runtime): `scripts/qa/audit-db-exporter-telemetry.sh` (`--mode local|runtime|all`; runtime mode validates ServiceMonitors + Prometheus queryability for MySQL/Redis exporter metrics).
+- DB exporter telemetry PromQL selectors are `service`/`namespace` based (not hardcoded `job=*`) to stay resilient across Prometheus Operator job-label defaults.
 - Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
 - One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks; high-severity policy contract covers both `ERROR` and `CRITICAL`).
+- Alert routing verification is timeout-safe via `CHECK_TIMEOUT_SECONDS` (defaults to 900s) to prevent indefinite gate hangs in degraded runtime/API conditions.
 - DR evidence bundle builder: `scripts/qa/build-dr-evidence-bundle.sh` (monthly automation via `.github/workflows/dr-evidence-bundle.yml`).
 - Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
 - Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana; alert-routing audit enabled by default and can be opt-out for CI-safe mode).
+- Unified operations gate includes DB exporter telemetry audit in `local` mode by default; use `DB_EXPORTER_AUDIT_MODE=runtime` after rollout to enforce runtime metric presence.
 - Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.
@@ -613,6 +619,7 @@ Regenerate hostname registry (after domain changes):
 - Branding incident write-up template (required after production regressions): `docs/branding/BRANDING_INCIDENT_TEMPLATE.md`.
 - In-cluster synthetic checks (recommended for drift detection): `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` (template files; deploy via GitOps).
 - Blank account settings/profile pages usually indicate stale cookies or MFE config mismatch; test in a fresh browser and verify `https://apps.academyv2.mereka.io/api/mfe_config/v1`.
+- Production LMS/CMS `SITE_ID` must stay env-driven (`DJANGO_SITE_ID`) with multisite fallback enabled in `mereka_multisite.py`; never reintroduce hardcoded numeric `SITE_ID` in production settings.
 - Studio course creation requires `CourseCreator` state=granted (see `docs/operations/TROUBLESHOOTING.md`).
 - Atlas user must have `readWrite` on `openedx` + `cs_comments_service` for modulestore + forum.
 - Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/k8s/mereka-lms/atlas`).
@@ -756,3 +763,28 @@ curl -s https://raw.githubusercontent.com/Biji-Biji-Initiative/team-skills/main/
 - NEVER stop before pushing - that leaves work stranded locally
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
+
+## Specs & Docs Convention
+
+This project uses the **specs-vs-docs** convention from [team-skills](https://github.com/Biji-Biji-Initiative/team-skills).
+
+### Quick Reference
+- **Specs** (testable contracts): `specs/` — define WHAT MUST BE TRUE
+- **Docs** (explanations): `docs/` — explain what IS and HOW TO USE IT
+- **Config**: `specdocs.config.yml`
+
+### Rules
+- Before implementing any feature, check if a spec exists in `specs/`
+- Specs use normative language: MUST, SHOULD, MAY (RFC 2119)
+- Acceptance Criteria use stable IDs: `AC-001`, `AC-002`, etc.
+- Each AC maps to a verification method (automated/monitoring/manual)
+
+### Key Tools
+| Tool | Purpose |
+|------|---------|
+| `spec_lint.py specs/` | Lint specs for structure compliance |
+| `spec_verify.py specs/` | Verify AC-IDs + testmap coverage |
+| `spec_fix.py specs/ --add-ac-ids` | Bulk-add AC-IDs to checkboxes |
+
+### Spec Template
+New specs should follow `specs/_TEMPLATE.md`. Required sections: Scope, Non-goals, Requirements, Acceptance Criteria, Edge Cases, Observability, Rollout & Rollback, Open Questions.

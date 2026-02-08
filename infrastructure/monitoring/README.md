@@ -1,5 +1,5 @@
 # Monitoring-as-Code
-_Last updated: 2026-02-06_
+_Last updated: 2026-02-08_
 
 This directory is the source of truth for GCP Monitoring templates used by Mereka LMS.
 
@@ -44,6 +44,13 @@ Runtime deployment coverage check:
 ./scripts/qa/audit-observability.sh --mode runtime
 ```
 
+DB exporter telemetry contract and runtime checks:
+
+```bash
+./scripts/qa/audit-db-exporter-telemetry.sh --mode local
+STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
+```
+
 Grafana dashboard coverage check:
 
 ```bash
@@ -62,6 +69,10 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
 
 - PVC utilization alerting for stateful pods.
 - MySQL and Redis saturation alerts (CPU/memory request utilization).
+- MySQL/Redis exporter deep telemetry:
+  - `threads_connected/max_connections` saturation
+  - MySQL slow query spikes
+  - Redis rejected connections and eviction spikes
 - Velero success/failure log metrics and stale-success alerts.
 - `operations-signals` dashboard panels for stateful saturation and backup posture.
 - PrometheusRule coverage for CrashLoopBackOff, Pending pods, critical deployment availability, and synthetic/backup job failures.

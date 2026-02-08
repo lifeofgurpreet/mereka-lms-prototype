@@ -517,6 +517,29 @@ spec:
               name: data
           securityContext:
             allowPrivilegeEscalation: false
+        - name: mysqld-exporter
+          image: quay.io/prometheus/mysqld-exporter:v0.18.0
+          args:
+            - --mysqld.address=127.0.0.1:3306
+            - --mysqld.username=root
+          env:
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: MYSQL_ROOT_PASSWORD
+          ports:
+            - containerPort: 9104
+              name: metrics
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
       volumes:
         - name: data
           persistentVolumeClaim:
@@ -617,6 +640,23 @@ spec:
               name: config
             - mountPath: /openedx/redis/data
               name: data
+          securityContext:
+            allowPrivilegeEscalation: false
+        - name: redis-exporter
+          image: quay.io/oliver006/redis_exporter:v1.80.1
+          env:
+            - name: REDIS_ADDR
+              value: redis://127.0.0.1:6379
+          ports:
+            - containerPort: 9121
+              name: metrics
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
           securityContext:
             allowPrivilegeEscalation: false
       volumes:

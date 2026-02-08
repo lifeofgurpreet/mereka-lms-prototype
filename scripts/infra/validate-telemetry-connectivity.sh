@@ -25,6 +25,7 @@ JSON_OUT=0
 STRICT=0
 REQUIRE_VPS_PROM_DS="${REQUIRE_VPS_PROM_DS:-0}"
 REQUIRE_GRAFANA_RECOMMENDED="${REQUIRE_GRAFANA_RECOMMENDED:-0}"
+REQUIRE_DB_EXPORTER_METRICS="${REQUIRE_DB_EXPORTER_METRICS:-0}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -48,6 +49,7 @@ Options:
 Env toggles:
   REQUIRE_VPS_PROM_DS=1           Fail if dashboard has no prometheus-vps refs
   REQUIRE_GRAFANA_RECOMMENDED=1   Fail if recommended dashboard coverage is missing
+  REQUIRE_DB_EXPORTER_METRICS=1   Fail if MySQL/Redis exporter metrics are not queryable
 EOF
 }
 
@@ -152,6 +154,49 @@ check_mereka_metrics_from_grafana() {
   kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec "$grafana_pod" -- \
     wget -qO- --timeout=5 "http://${GKE_PROM_SVC}.${MONITORING_NS}:9090/api/v1/query?query=kube_pod_status_phase{namespace=\"${APP_NS}\"}" \
     | jq -e --arg ns "$APP_NS" '.status == "success" and (.data.result | any(.metric.namespace == $ns))' >/dev/null
+}
+
+check_db_exporter_metrics_from_grafana() {
+  local grafana_pod
+  grafana_pod="$(grafana_pod_name)"
+  [[ -n "$grafana_pod" ]] || { echo "Grafana pod not found in $MONITORING_NS"; return 1; }
+
+  local queries=(
+    "mysql_global_status_threads_connected{namespace=\"${APP_NS}\",service=\"mysql\"}"
+    "mysql_global_variables_max_connections{namespace=\"${APP_NS}\",service=\"mysql\"}"
+    "mysql_global_status_slow_queries{namespace=\"${APP_NS}\",service=\"mysql\"}"
+    "redis_rejected_connections_total{namespace=\"${APP_NS}\",service=\"redis\"}"
+    "redis_evicted_keys_total{namespace=\"${APP_NS}\",service=\"redis\"}"
+  )
+
+  local q encoded resp
+  for q in "${queries[@]}"; do
+    encoded="$(python3 - <<PY
+import urllib.parse
+print(urllib.parse.quote("""$q""", safe=''))
+PY
+)"
+    resp="$(
+      kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec "$grafana_pod" -- \
+        wget -qO- --timeout=5 "http://${GKE_PROM_SVC}.${MONITORING_NS}:9090/api/v1/query?query=${encoded}" 2>/dev/null || true
+    )"
+    if [[ -z "$resp" ]]; then
+      if [[ "$STRICT" -eq 1 && "$REQUIRE_DB_EXPORTER_METRICS" == "1" ]]; then
+        echo "Empty response for exporter query: $q"
+        return 1
+      fi
+      record_warn "Exporter query returned empty response (rollout may be pending): $q"
+      return 0
+    fi
+    if ! jq -e '.status == "success" and ((.data.result // []) | length > 0)' <<<"$resp" >/dev/null; then
+      if [[ "$STRICT" -eq 1 && "$REQUIRE_DB_EXPORTER_METRICS" == "1" ]]; then
+        echo "Exporter metric missing or not queryable: $q"
+        return 1
+      fi
+      record_warn "Exporter metric not queryable yet (rollout may be pending): $q"
+      return 0
+    fi
+  done
 }
 
 check_grafana_datasource_configmaps() {
@@ -265,6 +310,7 @@ run_check "Mereka LMS pod metrics from Grafana" check_mereka_metrics_from_grafan
 run_check "Grafana datasource ConfigMaps present" check_grafana_datasource_configmaps
 run_check "Required datasource ConfigMaps exist" check_required_datasource_configmaps
 run_check "Grafana dashboard parity file sanity" check_dashboard_parity
+run_check "DB exporter metrics from Grafana" check_db_exporter_metrics_from_grafana
 
 if [[ "$JSON_OUT" -eq 1 ]]; then
   printf "{"
