@@ -21,10 +21,10 @@ images:
     newTag: 20260207-branding-pass7-5b26e45
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260207-131850-mfe-pass5-authnrev
+    newTag: 20260208-mfe-nonrepair-931f55e
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260207-131850-mfe-pass5-authnrev
+    newTag: 20260208-mfe-nonrepair-931f55e
 
 # Production replica counts (higher for availability)
 replicas:
