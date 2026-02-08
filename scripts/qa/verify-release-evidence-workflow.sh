@@ -19,6 +19,16 @@ if [[ ! -x "$REPO_ROOT/scripts/infra/resolve-image-digest.sh" ]]; then
   violations=1
 fi
 
+if ! rg -n 'uses:[[:space:]]*google-github-actions/auth@' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing google-github-actions/auth step"
+  violations=1
+fi
+
+if ! rg -n 'gcloud auth configure-docker' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing Artifact Registry docker auth configuration"
+  violations=1
+fi
+
 if ! rg -n './scripts/infra/resolve-image-digest\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow does not use scripts/infra/resolve-image-digest.sh"
   violations=1
