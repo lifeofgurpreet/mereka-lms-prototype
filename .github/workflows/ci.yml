@@ -45,10 +45,15 @@ jobs:
           bash -n scripts/qa/verify-alert-routing.sh
           bash -n scripts/qa/build-dr-evidence-bundle.sh
           bash -n scripts/infra/release-openedx-gitops.sh
+          bash -n scripts/qa/verify-release-automation.sh
 
       - name: Run local observability audit
         run: |
           ./scripts/qa/audit-observability.sh --mode local
+
+      - name: Verify release automation contract
+        run: |
+          ./scripts/qa/verify-release-automation.sh
 
       - name: Generate offline monitoring plan
         run: |
