@@ -330,6 +330,7 @@ jobs:
             --mfe-tag "${TAG}" \
             --openedx-digest "${OPENEDX_DIGEST}" \
             --mfe-digest "${MFE_DIGEST}" \
+            --require-digests \
             --app-repo "$GITHUB_WORKSPACE" \
             --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
             --apply --commit --push

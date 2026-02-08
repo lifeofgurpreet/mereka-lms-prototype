@@ -53,6 +53,10 @@ if ! rg -n -- '--mfe-digest' "$RELEASE_SCRIPT" >/dev/null; then
   echo "❌ Missing --mfe-digest support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
   violations=1
 fi
+if ! rg -n -- '--require-digests' "$RELEASE_SCRIPT" >/dev/null; then
+  echo "❌ Missing --require-digests support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
+  violations=1
+fi
 
 if [[ ! -f "$BUILD_WORKFLOW_CONTRACT" ]]; then
   echo "❌ Missing build workflow contract checker: ${BUILD_WORKFLOW_CONTRACT#"$REPO_ROOT"/}"

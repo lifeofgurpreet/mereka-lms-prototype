@@ -73,6 +73,7 @@ Digest pinning (recommended when digests are available):
   --mfe-tag "${MFE_TAG}" \
   --openedx-digest "sha256:<openedx-digest>" \
   --mfe-digest "sha256:<mfe-digest>" \
+  --require-digests \
   --apply --commit --push --verify-runtime
 ```
 

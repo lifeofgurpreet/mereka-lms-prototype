@@ -23,13 +23,44 @@ jobs:
   release-evidence:
     name: Build Release Evidence Bundle
     runs-on: ubuntu-latest
+    env:
+      REGION: asia-southeast1
+      REGISTRY: asia-southeast1-docker.pkg.dev/mereka-lms/openedx
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
       - name: Create evidence directory
         run: |
           mkdir -p var/release-evidence
+
+      - name: Resolve image digests from registry tags
+        id: digests
+        run: |
+          set -euo pipefail
+          resolve_digest() {
+            local ref="$1"
+            local key="$2"
+            local digest
+            digest="$(docker buildx imagetools inspect "${ref}" --format '{{json .Manifest.Digest}}' | tr -d '"')"
+            if [[ ! "${digest}" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
+              echo "Failed to resolve valid digest for ${ref}: ${digest}" >&2
+              exit 1
+            fi
+            echo "${key}=${digest}" >> "$GITHUB_OUTPUT"
+          }
+
+          resolve_digest "${{ env.REGISTRY }}/openedx:${{ inputs.openedx_tag }}" "openedx_digest"
+          resolve_digest "${{ env.REGISTRY }}/mfe:${{ inputs.mfe_tag }}" "mfe_digest"
 
       - name: Run policy checks
         run: |
@@ -48,6 +79,9 @@ jobs:
             --target-env "${{ inputs.target_environment }}" \
             --openedx-tag "${{ inputs.openedx_tag }}" \
             --mfe-tag "${{ inputs.mfe_tag }}" \
+            --openedx-digest "${{ steps.digests.outputs.openedx_digest }}" \
+            --mfe-digest "${{ steps.digests.outputs.mfe_digest }}" \
+            --require-digests \
             | tee var/release-evidence/release-dry-run.log
 
       - name: Write release metadata
@@ -71,6 +105,8 @@ jobs:
               "ref": os.environ.get("GITHUB_REF"),
               "openedx_tag": "${{ inputs.openedx_tag }}",
               "mfe_tag": "${{ inputs.mfe_tag }}",
+              "openedx_digest": "${{ steps.digests.outputs.openedx_digest }}",
+              "mfe_digest": "${{ steps.digests.outputs.mfe_digest }}",
               "target_environment": "${{ inputs.target_environment }}",
           }
 

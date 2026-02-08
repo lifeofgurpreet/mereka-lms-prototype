@@ -17,6 +17,7 @@ OPENEDX_TAG=""
 MFE_TAG=""
 OPENEDX_DIGEST=""
 MFE_DIGEST=""
+REQUIRE_DIGESTS=0
 APP_SHA_OVERRIDE=""
 TARGET_ENV="production"
 TARGET_ENV_SET=0
@@ -50,6 +51,7 @@ Options:
   --mfe-tag TAG         Required. openedx-mfe image tag.
   --openedx-digest DIGEST Optional image digest (sha256:...) for openedx.
   --mfe-digest DIGEST   Optional image digest (sha256:...) for openedx-mfe.
+  --require-digests     Fail unless both openedx/mfe digests are provided.
   --target-env ENV      Target environment: production|staging (default: production).
   --app-repo PATH       Override app repo path (default: current repo root).
   --infra-repo PATH     Override GitOps repo path.
@@ -111,6 +113,10 @@ while [[ $# -gt 0 ]]; do
     --mfe-digest)
       MFE_DIGEST="${2:-}"
       shift 2
+      ;;
+    --require-digests)
+      REQUIRE_DIGESTS=1
+      shift
       ;;
     --target-env)
       TARGET_ENV="${2:-}"
@@ -205,6 +211,11 @@ validate_digest() {
 
 validate_digest "$OPENEDX_DIGEST" "openedx"
 validate_digest "$MFE_DIGEST" "openedx-mfe"
+
+if [[ "$REQUIRE_DIGESTS" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]]; then
+  echo "--require-digests requires both --openedx-digest and --mfe-digest." >&2
+  exit 1
+fi
 
 if [[ "$COMMIT" -eq 1 && "$APPLY" -ne 1 ]]; then
   echo "--commit requires --apply." >&2
@@ -542,6 +553,7 @@ echo "OpenedX tag: $OPENEDX_TAG"
 echo "MFE tag:     $MFE_TAG"
 echo "OpenedX digest: ${OPENEDX_DIGEST:-<unchanged>}"
 echo "MFE digest:     ${MFE_DIGEST:-<unchanged>}"
+echo "Require digests: $([[ "$REQUIRE_DIGESTS" -eq 1 ]] && echo yes || echo no)"
 echo "Update app base image overrides: $([[ "$UPDATE_APP_BASE" -eq 1 ]] && echo yes || echo no)"
 echo "Update GitOps base ref: $([[ "$UPDATE_BASE_REF" -eq 1 ]] && echo yes || echo no)"
 echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"

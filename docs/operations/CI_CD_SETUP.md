@@ -158,10 +158,15 @@ Use workflow `.github/workflows/release-evidence.yml` via `workflow_dispatch` wi
 This generates and uploads an artifact bundle containing:
 - policy check logs
 - dry-run rollout plan from `release-openedx-gitops.sh`
+- resolved immutable digests for provided `openedx_tag`/`mfe_tag`
 - release metadata JSON (run id, SHA, actor, tags, target env)
 
 For full operator flow, see:
 - `docs/operations/RELEASE_CHECKLIST.md`
+
+Digest strictness:
+- Release invocations now support `--require-digests`.
+- Use `--require-digests` to fail fast unless both `--openedx-digest` and `--mfe-digest` are provided.
 
 ### Observability Audit (`observability-audit.yml`)
 

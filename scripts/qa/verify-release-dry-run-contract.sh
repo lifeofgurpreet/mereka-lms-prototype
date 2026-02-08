@@ -47,6 +47,7 @@ INFRA_PROD_BEFORE="$(sha256sum "$INFRA_PROD_FILE" | awk '{print $1}')"
   --mfe-tag qa-contract-mfe \
   --openedx-digest "sha256:1111111111111111111111111111111111111111111111111111111111111111" \
   --mfe-digest "sha256:2222222222222222222222222222222222222222222222222222222222222222" \
+  --require-digests \
   --app-repo "$REPO_ROOT" \
   --infra-repo "$TMP_INFRA" \
   --skip-base-ref >/tmp/release-dry-run-contract.log
@@ -61,6 +62,23 @@ fi
 
 if [[ "$INFRA_PROD_BEFORE" != "$INFRA_PROD_AFTER" ]]; then
   echo "❌ Dry-run modified infra production overlay unexpectedly"
+  exit 1
+fi
+
+if "$RELEASE_SCRIPT" \
+  --target-env production \
+  --openedx-tag qa-contract-openedx \
+  --mfe-tag qa-contract-mfe \
+  --require-digests \
+  --app-repo "$REPO_ROOT" \
+  --infra-repo "$TMP_INFRA" \
+  --skip-base-ref >/tmp/release-require-digest-negative.log 2>&1; then
+  echo "❌ --require-digests did not fail when digests were omitted"
+  exit 1
+fi
+
+if ! rg -n -- '--require-digests requires both --openedx-digest and --mfe-digest' /tmp/release-require-digest-negative.log >/dev/null; then
+  echo "❌ Missing expected error message when --require-digests is used without digests"
   exit 1
 fi
 

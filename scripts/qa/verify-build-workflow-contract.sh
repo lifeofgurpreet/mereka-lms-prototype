@@ -90,6 +90,11 @@ if ! rg -n -- '--mfe-digest "\$\{MFE_DIGEST\}"' "$BUILD_WORKFLOW" >/dev/null; th
   violations=1
 fi
 
+if ! rg -n -- '--require-digests' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ release-openedx-gitops.sh is not called with --require-digests"
+  violations=1
+fi
+
 # Build workflow must not publish mutable latest tags to Artifact Registry.
 if rg -n 'docker push .*:latest([[:space:]]|$)' "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ build workflow publishes mutable :latest tags"
