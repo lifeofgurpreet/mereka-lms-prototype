@@ -2,9 +2,11 @@
 
 _Last verified: 2026-02-08 | Owner: Platform Eng_
 
-## Status: Migration Complete, Ongoing Sync
+## Status: RE-MIGRATION REQUIRED
 
-The Microsoft Community Training (MCT) platform at `learn.skillourfuture.org` has been fully migrated to Open edX. This spec documents the verified architecture, authentication, data model, and export pipeline for ongoing data synchronization.
+**Verified 2026-02-08 via kubectl exec into LMS pod**: The `mereka-lms` Open edX instance is **empty**. Zero courses, zero programs, zero learner users, zero enrollments. The instance appears to have been rebuilt/reset since the original migration.
+
+All MCT source data is fully exported and mapped (30 categories, 178 courses, 833 lessons, 503 Mux videos, 2.3M enrollments). The data pipeline and mapping files are ready. A fresh migration into the current Open edX instance is needed.
 
 ## 1. Authentication
 
@@ -276,3 +278,102 @@ Before assuming any mapping is correct, check:
 | `download_thumbnails.py` | 157 | **Broken** | Wrong path (/home/dev/ not /home/gurpreet/) |
 | `create_programs*.py` (5 files) | ~1000 | Superseded | Multiple program creation iterations |
 | `fix_mux_titles.py` | 100 | Done | One-time Mux title fix |
+
+
+## 11. Live Open edX Instance State (Verified 2026-02-08)
+
+Queried via `kubectl exec` into the LMS pod in `mereka-lms` namespace.
+
+| Entity | Expected (per migration docs) | **Actual (live)** |
+|--------|-------------------------------|-------------------|
+| Courses (modulestore) | 30 | **0** |
+| Programs (Discovery) | 13 | **0** |
+| Users | 68,565 | **7** (test/admin only) |
+| Enrollments | 621,430 | **1** (test health-check) |
+
+### Users in the system
+
+| Username | Email | Staff | Superuser |
+|----------|-------|-------|-----------|
+| login_service_user | login_service_user@fake.email | No | No |
+| oidc-test-1768792810 | oidc-test-1768792810@mereka.io | No | No |
+| oidc-test-1768792896 | oidc-test-1768792896@mereka.io | No | No |
+| authentik_test | authentik_test@mereka.io | Yes | No |
+| admin | admin@mereka.io | Yes | Yes |
+| gurpreet@biji-biji.com | gurpreet@biji-biji.com | Yes | Yes |
+| malasari@mereka.my | malasari@mereka.my | Yes | Yes |
+
+The single enrollment is to `course-v1:MEREKA+TEST-HEALTH+2026` (a health-check test course not in modulestore).
+
+### Infrastructure (running)
+
+Full Tutor-deployed stack with 25 pods: 2 LMS replicas + 2 workers, CMS + worker, Discovery, Credentials, Ecommerce + worker, MFE, MySQL, Redis, Elasticsearch, Forum, Notes, SMTP, Caddy, xqueue, 3 promtail pods.
+
+## 12. Complete MCT Mapping Chain (30 Categories)
+
+### Two Competing Course Key Schemes
+
+| Scheme | Pattern | Courses | Script | Status |
+|--------|---------|---------|--------|--------|
+| **A** (category-level) | `SKILLOURFUTURE+MCT-{cat_id}+course` | 30 | `build_category_packages.py` | Never run (no output) |
+| **B** (individual courses) | `SKILLOURFUTURE+{SLUG}+2024` | 69 | `link_courses_to_programs.py` | Manually crafted slugs |
+
+**Scheme A** bundles each MCT category into 1 OpenEdX course (MCT courses become chapters/sections within). This produces 30 courses total.
+
+**Scheme B** creates individual OpenEdX courses with human-readable slugs, grouped into Programs. This produces 69 courses across 11 programs. 19 of 30 categories have no program mapping.
+
+**Decision needed**: Which scheme to use for re-migration.
+
+### Program Mapping (Scheme B -- 11 programs, 69 courses)
+
+| Program | Courses | MCT Category ID |
+|---------|---------|-----------------|
+| Become An Entrepreneur | 8 | 45 |
+| Speak with Impact | 10 | 46 |
+| Embark on a Green Jobs Journey | 7 | 31 |
+| Developer | 8 | 20 |
+| Data Analyst | 5 | 19 |
+| Project Manager | 4 | 17 |
+| Digital Marketer | 5 | 21 |
+| Administrative Professional | 4 | 22 |
+| Employability | 7 | 14 |
+| Mastering Digital Tools | 9 | 28 |
+| TEST Virtual Assistant | 2 | 29 |
+
+### Categories WITHOUT Programs (19 of 30)
+
+| Cat ID | Name | Courses | Lessons |
+|--------|------|---------|---------|
+| 1 | Soft Skills | 8 | 44 |
+| 4 | X - Productivity with Microsoft 365 (Bahasa) | 8 | 41 |
+| 15 | Mobile Literacy | 4 | 21 |
+| 16 | Basic Microsoft | 18 | 136 |
+| 24 | AI Fluency | 3 | 28 |
+| 27 | Digital Literacy | 6 | 86 |
+| 30 | Climate Education | 1 | 7 |
+| 32 | FOW (ENG) Personal Branding | 5 | 23 |
+| 33 | FOW (IND) Personal Branding | 5 | 22 |
+| 34 | FOW (ENG) Personal Well-being | 5 | 1 |
+| 35 | FOW (ENG) Personal Finance | 7 | 19 |
+| 36 | FOW (ENG) Managing Your First Client | 7 | 0 |
+| 37 | FOW (ENG) Freelancing 101 | 6 | 0 |
+| 38 | FOW (ENG) Skills Profiling | 6 | 0 |
+| 39 | FOW (ENG) Securing Your First Client | 6 | 0 |
+| 40 | FOW (ENG) Securing Your First Job | 6 | 0 |
+| 41 | FOW (ENG) Thriving In Your Job | 6 | 0 |
+| 44 | Content Creation | 1 | 6 |
+| 47 | Gaming Garage with HP | 1 | 2 |
+
+Note: FOW categories 36-41 have **0 published lessons** (content not yet uploaded in MCT).
+
+### Re-Migration Checklist
+
+1. [ ] Decide on course key scheme (A vs B vs hybrid)
+2. [ ] Build OLX packages with chosen scheme
+3. [ ] Import courses via `import_courses_k8s.py` into CMS
+4. [ ] Import users via `openedx_bulk_import_mct.py` into LMS
+5. [ ] Import enrollments (map to correct course keys)
+6. [ ] Create programs in Discovery (if using Scheme B)
+7. [ ] Link courses to programs via `link_courses_to_programs.py`
+8. [ ] Validate via `validate_course_content.py`
+9. [ ] Verify Mux video playback in Video XBlocks
