@@ -15,8 +15,9 @@ STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-1}"
 FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
 RUN_ATLAS_ALLOWLIST_AUDIT="${RUN_ATLAS_ALLOWLIST_AUDIT:-0}"
-RUN_ALERT_ROUTING_AUDIT="${RUN_ALERT_ROUTING_AUDIT:-0}"
+RUN_ALERT_ROUTING_AUDIT="${RUN_ALERT_ROUTING_AUDIT:-1}"
 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT="${ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT:-1}"
+RUN_MULTISITE_GOVERNANCE_AUDIT="${RUN_MULTISITE_GOVERNANCE_AUDIT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -30,8 +31,9 @@ Env:
   FAIL_ON_LEGACY_MONGODB=1       Fail atlas gate if legacy mongodb Deployment exists
   FAIL_ON_LEGACY_MONGODB_SERVICE=1  Fail atlas gate if legacy mongodb Service exists
   RUN_ATLAS_ALLOWLIST_AUDIT=1    Also run VPS Atlas allowlist monitor audit
-  RUN_ALERT_ROUTING_AUDIT=1      Also run one-command alert routing verification
+  RUN_ALERT_ROUTING_AUDIT=0      Skip one-command alert routing verification (enabled by default)
   ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0  Skip VPS-only atlas routing check inside alert-routing audit
+  RUN_MULTISITE_GOVERNANCE_AUDIT=0  Skip explicit multisite governance gate (enabled by default)
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -103,9 +105,16 @@ echo "  fail_on_legacy_mongodb_service: $FAIL_ON_LEGACY_MONGODB_SERVICE"
 echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
 echo "  run_alert_routing_audit: $RUN_ALERT_ROUTING_AUDIT"
 echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
+echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
+
+if [[ "$RUN_MULTISITE_GOVERNANCE_AUDIT" == "1" ]]; then
+  run_check "multisite governance gate" \
+    env STRICT=1 CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" \
+    ./scripts/qa/run-multisite-governance-gates.sh --env "$ENV_SCOPE"
+fi
 
 run_check "auth + permissions + multisite audit" \
   env CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"

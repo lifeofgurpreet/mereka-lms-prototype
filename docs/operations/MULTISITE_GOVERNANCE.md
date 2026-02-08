@@ -51,11 +51,16 @@ This checklist keeps multiple microsites (`academyv2.mereka.io`, `skillourfuture
 ```bash
 ./scripts/qa/public-health-check.sh prod
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
+CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
 STRICT=1 ./scripts/qa/verify-multisite-config.sh prod
 STRICT=1 ./scripts/qa/verify-multisite-config.sh dev
 STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
 ./scripts/qa/audit-auth-access.sh --mode internal --env both
 ```
+
+Canonical gate:
+- `run-multisite-governance-gates.sh` is the preferred one-command audit for multisite governance.
+- It runs per-environment multisite config checks, org role ownership checks, auth surface checks, and hostname registry drift checks with timeout-safe per-check logs under `var/multisite-governance-gates/`.
 
 `verify-multisite-config.sh` enforces per-site:
 - `SiteConfiguration.enabled=true`

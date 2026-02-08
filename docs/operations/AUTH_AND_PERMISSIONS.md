@@ -185,11 +185,19 @@ Full operational gate (auth + multisite + observability + Velero + Grafana):
 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
+Dedicated multisite governance gate (site config + org ownership + auth surfaces + hostname drift):
+```bash
+CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
+```
+
 Atlas path + alert routing guard (recommended before production rollout):
 ```bash
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 ./scripts/qa/verify-alert-routing.sh
 ```
+
+Note:
+- `run-operations-gates.sh` enables alert-routing verification by default.
 
 ### Multisite configuration verification (prod)
 

@@ -1,7 +1,7 @@
 # Mereka LMS Observability Enhancement Plan
 
 **Project**: mereka-lms  
-**Version**: 2.6
+**Version**: 2.7
 **Date**: 2026-02-07  
 **Status**: Active  
 **Owner**: SRE/Infra  
@@ -45,10 +45,13 @@ Reality-first:
   - `scripts/qa/audit-observability.sh`
 - Added consolidated operator gate:
   - `scripts/qa/run-operations-gates.sh`
+  - Alert-routing verification is enabled by default (opt-out only)
 - Added Atlas modulestore path guard:
   - `scripts/qa/verify-atlas-modulestore-path.sh`
 - Added one-command alert routing verifier:
   - `scripts/qa/verify-alert-routing.sh`
+- Added explicit multisite governance gate runner:
+  - `scripts/qa/run-multisite-governance-gates.sh`
 - Added DR evidence bundle builder:
   - `scripts/qa/build-dr-evidence-bundle.sh`
 - Added VPS Atlas allowlist monitor posture audit:
@@ -160,6 +163,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 - `./scripts/qa/verify-alert-routing.sh`
 - CI runtime audit: `.github/workflows/alert-routing-audit.yml`
 - Atlas allowlist webhook remains a VPS secret/config prerequisite and is enforced when `STRICT_WEBHOOK=1`.
+- High-severity routing contract now enforces both `ERROR` and `CRITICAL` policy/channel validation.
 
 ### 6) PVC disk utilization alerting (P0 for in-cluster MySQL/Redis/Elasticsearch)
 **Why:** Disk-full is a top outage cause for PVC-backed stateful services.

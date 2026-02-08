@@ -465,6 +465,7 @@ Auth hardening verification (preferred):
 CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env prod --mode all
 ./scripts/qa/list-openedx-hostnames.sh --env prod
 STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
+CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 ./scripts/qa/verify-alert-routing.sh
 STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
@@ -496,12 +497,13 @@ Regenerate hostname registry (after domain changes):
   `.github/workflows/public-health-check.yml`.
 - Multisite drift guard: `STRICT=1 ./scripts/qa/verify-multisite-config.sh prod` (enforces `SiteConfiguration.enabled`, LMS/CMS/MFE roots, `THEME_NAME`, `course_org_filter`, and duplicate config detection).
 - Org ownership drift guard: `STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both` (enforces staff+instructor coverage and platform-admin role presence for `MEREKA`, `BIJIBIJI`, `SKILLOURFUTURE`).
+- Canonical multisite governance gate: `CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both` (runs multisite config + org ownership + auth surface + hostname drift checks with per-check logs).
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
-- One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks).
+- One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks; high-severity policy contract covers both `ERROR` and `CRITICAL`).
 - DR evidence bundle builder: `scripts/qa/build-dr-evidence-bundle.sh` (monthly automation via `.github/workflows/dr-evidence-bundle.yml`).
 - Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
-- Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana, with CI-safe alert-routing mode).
+- Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana; alert-routing audit enabled by default and can be opt-out for CI-safe mode).
 - Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.

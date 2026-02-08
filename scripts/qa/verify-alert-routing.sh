@@ -47,7 +47,7 @@ warn_msg() {
   echo "WARN $*"
 }
 
-check_repo_error_policies_have_channels() {
+check_repo_high_severity_policies_have_channels() {
   command -v python3 >/dev/null
 
   python3 - <<'PY'
@@ -58,17 +58,20 @@ import sys
 alerts_dir = pathlib.Path("infrastructure/monitoring/alerts")
 unsupported = {"velero-restore-test-stale.json"}
 errors = []
+required_severities = {"ERROR", "CRITICAL"}
 
 for path in sorted(alerts_dir.glob("*.json")):
     if path.name in unsupported:
         continue
     obj = json.loads(path.read_text(encoding="utf-8"))
     severity = (obj.get("severity") or "").strip().upper()
-    if severity != "ERROR":
+    if severity not in required_severities:
         continue
     channels = obj.get("notificationChannels") or []
     if not channels:
-        errors.append(f"{path.name}: ERROR policy has no notificationChannels")
+        errors.append(
+            f"{path.name}: {severity} policy has no notificationChannels"
+        )
 
 if errors:
     for e in errors:
@@ -77,7 +80,7 @@ if errors:
 PY
 }
 
-check_runtime_error_policies_and_channels() {
+check_runtime_high_severity_policies_and_channels() {
   command -v gcloud >/dev/null
   command -v python3 >/dev/null
 
@@ -119,28 +122,31 @@ runtime_policies = json.loads(sys.argv[1])
 runtime_channels = json.loads(sys.argv[2])
 
 unsupported = {"velero-restore-test-stale.json"}
-expected_error_policy_names = []
+required_severities = {"ERROR", "CRITICAL"}
+expected_high_severity_policy_names = []
 for path in sorted(pathlib.Path("infrastructure/monitoring/alerts").glob("*.json")):
     if path.name in unsupported:
         continue
     obj = json.loads(path.read_text(encoding="utf-8"))
-    if (obj.get("severity") or "").strip().upper() == "ERROR":
-        expected_error_policy_names.append(obj.get("displayName", ""))
+    if (obj.get("severity") or "").strip().upper() in required_severities:
+        expected_high_severity_policy_names.append(obj.get("displayName", ""))
 
 runtime_by_name = {p.get("displayName", ""): p for p in runtime_policies}
 channel_by_name = {c.get("name", ""): c for c in runtime_channels}
 
 errors = []
-for display_name in expected_error_policy_names:
+for display_name in expected_high_severity_policy_names:
     policy = runtime_by_name.get(display_name)
     if not policy:
-        errors.append(f"Missing runtime ERROR policy: {display_name}")
+        errors.append(f"Missing runtime high-severity policy: {display_name}")
         continue
     if not policy.get("enabled", False):
-        errors.append(f"Runtime ERROR policy disabled: {display_name}")
+        errors.append(f"Runtime high-severity policy disabled: {display_name}")
     policy_channels = policy.get("notificationChannels") or []
     if not policy_channels:
-        errors.append(f"Runtime ERROR policy has no routing channels: {display_name}")
+        errors.append(
+            f"Runtime high-severity policy has no routing channels: {display_name}"
+        )
         continue
     for ch in policy_channels:
         channel = channel_by_name.get(ch)
@@ -165,11 +171,11 @@ echo "  strict webhook:       $STRICT_WEBHOOK"
 echo "  run atlas vps audit:  $RUN_ATLAS_VPS_AUDIT"
 echo ""
 
-run_check "repo: ERROR alert templates declare notification channels" \
-  check_repo_error_policies_have_channels
+run_check "repo: high-severity alert templates declare notification channels" \
+  check_repo_high_severity_policies_have_channels
 
-run_check "runtime: ERROR policies + channels are enabled" \
-  check_runtime_error_policies_and_channels
+run_check "runtime: high-severity policies + channels are enabled" \
+  check_runtime_high_severity_policies_and_channels
 
 run_check "runtime: observability audit" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" \

@@ -30,12 +30,18 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 # Grafana panel/query coverage contract (required + recommended)
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 
+# Multisite governance gate (site config + org ownership + auth surfaces + hostname drift)
+CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
+
 # Consolidated gate (auth + multisite + observability + Velero + Grafana)
 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
 Automated equivalent:
 - `.github/workflows/public-health-check.yml` runs strict prod branding parity + dev branding gate and uploads logs.
+
+`run-operations-gates.sh` now enables alert-routing verification by default and writes
+per-check logs under `var/operations-gates/`.
 
 `audit-observability --mode runtime` now also verifies that `PrometheusRule/lms-alerts`
 contains the reliability alerts:
