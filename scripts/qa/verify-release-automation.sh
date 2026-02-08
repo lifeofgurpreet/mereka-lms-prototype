@@ -44,6 +44,10 @@ if ! rg -n 'CI mode requires explicit --target-env' "$RELEASE_SCRIPT" >/dev/null
   echo "❌ Missing CI explicit --target-env guard in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
   violations=1
 fi
+if ! rg -n 'CI production apply requires both --openedx-digest and --mfe-digest' "$RELEASE_SCRIPT" >/dev/null; then
+  echo "❌ Missing CI production digest safety gate in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
+  violations=1
+fi
 
 # release-openedx script should support optional digest pinning flags.
 if ! rg -n -- '--openedx-digest' "$RELEASE_SCRIPT" >/dev/null; then

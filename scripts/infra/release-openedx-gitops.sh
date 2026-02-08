@@ -515,6 +515,11 @@ if [[ "${CI:-}" == "true" && "$TARGET_ENV_SET" -ne 1 ]]; then
   exit 1
 fi
 
+if [[ "${CI:-}" == "true" && "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]]; then
+  echo "Error: CI production apply requires both --openedx-digest and --mfe-digest." >&2
+  exit 1
+fi
+
 UPDATE_APP_BASE=0
 UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"

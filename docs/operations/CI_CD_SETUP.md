@@ -168,6 +168,7 @@ For full operator flow, see:
 Digest strictness:
 - Release invocations now support `--require-digests`.
 - Use `--require-digests` to fail fast unless both `--openedx-digest` and `--mfe-digest` are provided.
+- Additional safety gate: in CI, any `production` run with `--apply` fails if digests are missing.
 
 ### Observability Audit (`observability-audit.yml`)
 
