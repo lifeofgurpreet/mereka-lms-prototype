@@ -174,7 +174,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 **Status:** Done for GCP alert policies. End-to-end validation is now one command:
 - `./scripts/qa/verify-alert-routing.sh`
 - CI runtime audit: `.github/workflows/alert-routing-audit.yml`
-- Atlas allowlist webhook remains a VPS secret/config prerequisite and is enforced when `STRICT_WEBHOOK=1`.
+- Atlas allowlist webhook routing is enforced via `STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh` (latest strict audit pass: 2026-02-08).
 - High-severity routing contract now enforces both `ERROR` and `CRITICAL` policy/channel validation.
 
 ### 6) PVC disk utilization alerting (P0 for in-cluster MySQL/Redis/Elasticsearch)
