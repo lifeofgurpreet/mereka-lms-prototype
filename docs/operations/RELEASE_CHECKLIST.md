@@ -48,6 +48,7 @@ Use `build-tutor-images.yml` (manual trigger) with:
 If you want one workflow to update GitOps immediately:
 - `update_gitops=true`
 - `target_environment=production`
+- `build_openedx=true` and `build_mfe=true` (required for digest capture)
 
 Staging note:
 - `target_environment=staging` is intentionally blocked unless repository variable `ENABLE_STAGING_ENV=true`.

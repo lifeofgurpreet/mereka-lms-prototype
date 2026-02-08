@@ -102,6 +102,7 @@ Images pushed to:
 Tag immutability:
 - Workflow publishes only immutable tags (`<image_tag>` and short SHA).
 - Workflow does **not** publish mutable `:latest` tags to Artifact Registry.
+- Workflow resolves pushed image digests and exposes them as job outputs.
 
 Release safety gates:
 - Before MFE push, workflow runs `scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest <expected_rev>`.
@@ -132,6 +133,10 @@ TAG="your-tag-or-sha"
 ```
 
 Do not use direct `kubectl set image` for normal rollouts; production is ArgoCD/GitOps managed.
+
+When using `build-tutor-images.yml` with `update_gitops=true`:
+- Set both `build_openedx=true` and `build_mfe=true`.
+- Workflow captures both digests and passes `--openedx-digest/--mfe-digest` automatically to the release orchestrator.
 
 ### On-demand Policy Checks
 

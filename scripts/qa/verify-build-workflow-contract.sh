@@ -65,8 +65,28 @@ if ! rg -n 'TARGET_ENV="\$\{\{ github\.event_name == '\''workflow_dispatch'\'' &
   violations=1
 fi
 
+if ! rg -n 'image_digest:[[:space:]]*\$\{\{ steps\.digest\.outputs\.digest \}\}' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ Missing image_digest output wiring from digest steps"
+  violations=1
+fi
+
+if ! rg -n 'update_gitops requires build_openedx=true and build_mfe=true' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ Missing manual dispatch gate requiring both builds for deterministic digest capture"
+  violations=1
+fi
+
 if ! rg -n -- '--target-env "\$\{TARGET_ENV\}"' "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ release-openedx-gitops.sh is not called with explicit --target-env"
+  violations=1
+fi
+
+if ! rg -n -- '--openedx-digest "\$\{OPENEDX_DIGEST\}"' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ release-openedx-gitops.sh is not called with --openedx-digest"
+  violations=1
+fi
+
+if ! rg -n -- '--mfe-digest "\$\{MFE_DIGEST\}"' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ release-openedx-gitops.sh is not called with --mfe-digest"
   violations=1
 fi
 

@@ -74,6 +74,7 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.build_openedx }}
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.digest.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -143,6 +144,20 @@ jobs:
           echo "**Image:** \`${{ env.REGISTRY }}/openedx:${TAG}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Immutable tags:** \`${TAG}\`, \`${SHORT_SHA}\`" >> $GITHUB_STEP_SUMMARY
 
+      - name: Resolve pushed openedx digest
+        id: digest
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          REF="${{ env.REGISTRY }}/openedx:${TAG}"
+          docker pull "${REF}" >/dev/null
+          DIGEST="$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "${REF}" | sed -n 's|.*@||p' | head -n 1)"
+          if [[ ! "${DIGEST}" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
+            echo "Failed to resolve valid digest for ${REF}: ${DIGEST}" >&2
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+
   build-mfe:
     name: Build MFE Image
     runs-on: ubuntu-latest
@@ -150,6 +165,7 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.build_mfe }}
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.digest.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
 
@@ -221,6 +237,20 @@ jobs:
           echo "**Image:** \`${{ env.REGISTRY }}/mfe:${TAG}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Immutable tags:** \`${TAG}\`, \`${SHORT_SHA}\`" >> $GITHUB_STEP_SUMMARY
 
+      - name: Resolve pushed mfe digest
+        id: digest
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          REF="${{ env.REGISTRY }}/mfe:${TAG}"
+          docker pull "${REF}" >/dev/null
+          DIGEST="$(docker inspect --format='{{range .RepoDigests}}{{println .}}{{end}}' "${REF}" | sed -n 's|.*@||p' | head -n 1)"
+          if [[ ! "${DIGEST}" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
+            echo "Failed to resolve valid digest for ${REF}: ${DIGEST}" >&2
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+
       - name: Upload MFE branding verification log
         uses: actions/upload-artifact@v4
         if: always()
@@ -258,6 +288,10 @@ jobs:
             echo "target_environment=staging is disabled. Set repository variable ENABLE_STAGING_ENV=true when staging is ready." >&2
             exit 1
           fi
+          if [[ "${{ inputs.build_openedx }}" != "true" || "${{ inputs.build_mfe }}" != "true" ]]; then
+            echo "update_gitops requires build_openedx=true and build_mfe=true so digests are captured deterministically." >&2
+            exit 1
+          fi
 
       - name: Validate GitOps token
         env:
@@ -284,10 +318,18 @@ jobs:
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          if [[ -z "${OPENEDX_DIGEST}" || -z "${MFE_DIGEST}" ]]; then
+            echo "Missing image digests from build jobs (openedx='${OPENEDX_DIGEST}' mfe='${MFE_DIGEST}')." >&2
+            exit 1
+          fi
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env "${TARGET_ENV}" \
             --openedx-tag "${TAG}" \
             --mfe-tag "${TAG}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
             --app-repo "$GITHUB_WORKSPACE" \
             --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
             --apply --commit --push
@@ -296,8 +338,12 @@ jobs:
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
           TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
           echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Mode:** GitOps update" >> $GITHUB_STEP_SUMMARY
           echo "**Target environment:** \`${TARGET_ENV}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**OpenedX digest:** \`${OPENEDX_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**MFE digest:** \`${MFE_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
