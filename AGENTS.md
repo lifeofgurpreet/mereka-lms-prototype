@@ -64,6 +64,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - Active ArgoCD runtime environments are `local/dev` and `prod`.
 - A dedicated `staging` cluster is not currently active due resource constraints.
 - Keep staging overlays/scripts as optional future-ready paths, but default operations should assume `local/dev -> prod`.
+- CI guardrail: manual `build-tutor-images.yml` runs with `target_environment=staging` are blocked unless repo variable `ENABLE_STAGING_ENV=true`.
 
 ### Deployment Sequence (DO NOT SKIP STEPS)
 

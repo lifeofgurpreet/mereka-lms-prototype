@@ -31,6 +31,12 @@ if ! rg -n '^[[:space:]]+target_environment:' "$BUILD_WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+# Staging must be explicitly enabled via repository variable gate.
+if ! rg -n 'ENABLE_STAGING_ENV:[[:space:]]*\$\{\{ vars\.ENABLE_STAGING_ENV \|\| '\''false'\'' \}\}' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ Missing ENABLE_STAGING_ENV guard variable wiring in update-gitops job"
+  violations=1
+fi
+
 # Must force explicit target selection during manual dispatch.
 if ! rg -n '^[[:space:]]+default:[[:space:]]+select-environment$' "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ target_environment default is not select-environment"
@@ -46,6 +52,11 @@ fi
 # Update job contract
 if ! rg -n "inputs\\.update_gitops[[:space:]]*&&[[:space:]]*inputs\\.target_environment[[:space:]]*!=[[:space:]]*'select-environment'" "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ update-gitops manual dispatch gate is missing explicit target selection"
+  violations=1
+fi
+
+if ! rg -n 'target_environment=staging is disabled' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ Missing staging-disabled guard messaging in manual dispatch validation"
   violations=1
 fi
 

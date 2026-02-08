@@ -91,6 +91,10 @@ Options:
 - `deploy_to_staging` - **Legacy input name** retained for backwards compatibility
 - `image_tag` - Custom tag (default: git SHA)
 
+Staging safety gate:
+- Manual `target_environment=staging` dispatch is blocked unless repository variable `ENABLE_STAGING_ENV=true`.
+- Current operating model is `local/dev -> prod`, so leave `ENABLE_STAGING_ENV` unset until staging is actually provisioned.
+
 Images pushed to:
 - `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<tag>`
 - `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/mfe:<tag>`

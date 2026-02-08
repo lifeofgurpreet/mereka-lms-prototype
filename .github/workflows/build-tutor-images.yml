@@ -236,6 +236,8 @@ jobs:
     needs: [build-openedx, build-mfe]
     if: ${{ (github.event_name != 'workflow_dispatch' && (inputs.update_gitops || inputs.deploy_to_staging)) || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment') }}
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}
+    env:
+      ENABLE_STAGING_ENV: ${{ vars.ENABLE_STAGING_ENV || 'false' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -252,6 +254,10 @@ jobs:
           fi
           if [[ "${{ inputs.target_environment }}" == "select-environment" ]]; then
             echo "target_environment must be explicitly selected." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.target_environment }}" == "staging" && "${ENABLE_STAGING_ENV}" != "true" ]]; then
+            echo "target_environment=staging is disabled. Set repository variable ENABLE_STAGING_ENV=true when staging is ready." >&2
             exit 1
           fi
 
