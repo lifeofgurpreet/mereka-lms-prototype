@@ -147,6 +147,7 @@ Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to ru
 - release dry-run contract check (`scripts/infra/release-openedx-gitops.sh` dry-run against fixture infra repo)
 - release-evidence workflow contract check (digest resolution + strict dry-run flags)
 - kustomize deprecation key guard (`patchesStrategicMerge/commonLabels/patchesJson6902`)
+- dev/prod image parity guard (local overlay tags must match production overlay tags)
 - production tag guard (`no latest`)
 - active docs env-model lint
 
