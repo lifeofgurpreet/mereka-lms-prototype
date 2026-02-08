@@ -484,7 +484,7 @@ For detailed secrets management architecture, see `/home/gurpreet/projects/secre
 
 ### Bump Production GitOps Base Ref (Required After App Repo Changes)
 
-Production is ArgoCD-managed from `Biji-Biji-Initiative/bbi-infrastructure`, and it pins this repo
+Production is ArgoCD-managed from `Biji-Biji-Initiative/BBI-K8` (legacy docs may still reference `bbi-infrastructure`), and it pins this repo
 as a remote Kustomize base.
 
 When you change anything under `deploy/k8s/base/` in this repo, you must bump the pinned ref:
@@ -494,9 +494,9 @@ When you change anything under `deploy/k8s/base/` in this repo, you must bump th
    cd /home/gurpreet/projects/k8s/mereka-lms
    git rev-parse HEAD
    ```
-2. In `bbi-infrastructure`, update:
+2. In the active GitOps repo (`BBI-K8`), update:
    - `apps/mereka-lms/base/kustomization.yaml`
-3. Commit + push to `bbi-infrastructure`.
+3. Commit + push to `BBI-K8` (or mirrored remote in your environment).
 4. Force Argo refresh if needed:
    ```bash
    kubectl annotate application mereka-lms-local -n argocd argocd.argoproj.io/refresh=hard --overwrite

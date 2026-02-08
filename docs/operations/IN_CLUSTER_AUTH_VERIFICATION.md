@@ -31,7 +31,7 @@ Production is GitOps-managed outside this repo.
 
 GitOps source of truth (prod):
 - ArgoCD Application: `mereka-lms-local` (namespace: `argocd`)
-- GitOps repo: `Biji-Biji-Initiative/bbi-infrastructure`
+- GitOps repo: `Biji-Biji-Initiative/BBI-K8` (older environments/docs may still refer to `bbi-infrastructure`)
 - Path: `apps/mereka-lms/overlays/prod`
 
 Status:
@@ -39,7 +39,7 @@ Status:
 
 When updating the checks:
 1. Update `infrastructure/k8s/cronjobs/auth-verify-prod.yaml` and/or `infrastructure/k8s/cronjobs/cert-verify-prod.yaml` in this repo.
-2. Bump the pinned base ref in `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml` to the new commit SHA.
+2. Bump the pinned base ref in `BBI-K8/apps/mereka-lms/base/kustomization.yaml` to the new commit SHA.
 3. ArgoCD will apply the updated manifests.
 4. Verify CronJobs are running:
    - `kubectl get cronjob -n mereka-lms auth-verify-prod`

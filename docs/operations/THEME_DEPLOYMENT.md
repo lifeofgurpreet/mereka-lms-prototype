@@ -301,7 +301,7 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${TAG}
 ### Step 8: Update GitOps Sources (Production)
 
 Production is **GitOps-managed** by Argo app `mereka-lms-local` from:
-- repo: `Biji-Biji-Initiative/bbi-infrastructure` (legacy name `BBI-K8` may still appear in Argo)
+- repo: `Biji-Biji-Initiative/BBI-K8` (older docs may still mention `bbi-infrastructure`)
 - path: `apps/mereka-lms/overlays/prod`
 
 Do not use `kubectl set image` for normal releases.

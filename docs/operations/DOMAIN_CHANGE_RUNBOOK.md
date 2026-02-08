@@ -5,8 +5,8 @@ This runbook enforces **zero-drift** changes for production (GKE) and dev (kind/
 
 ## Source Of Truth (No Drift)
 
-Production (`academyv2.mereka.io`) is **GitOps-managed by ArgoCD** from the `bbi-infrastructure` repo:
-- Repo: `Biji-Biji-Initiative/bbi-infrastructure`
+Production (`academyv2.mereka.io`) is **GitOps-managed by ArgoCD** from the `BBI-K8` repo:
+- Repo: `Biji-Biji-Initiative/BBI-K8` (legacy docs may still reference `bbi-infrastructure`)
 - Path: `apps/mereka-lms/overlays/prod`
 - Argo app: `mereka-lms-local` (namespace `argocd`)
 
@@ -39,7 +39,7 @@ Canonical hostname registry (prod + dev + kind-local):
   ```
 
 ## 1) Update configs
-- [ ] Production (GitOps): update `bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/*`
+- [ ] Production (GitOps): update `BBI-K8/apps/mereka-lms/overlays/prod/patches/*`
 - [ ] Dev (kind): update `deploy/k8s/*` in this repo
 - [ ] Update domain defaults in `scripts/shared/config.sh` (this drives verification + docs)
 - [ ] Regenerate hostname registry:
@@ -75,7 +75,7 @@ Canonical hostname registry (prod + dev + kind-local):
 - [ ] LMS OAuth2 clients updated (ecommerce/credentials/discovery).
 
 ## 4) Deploy
-- [ ] Production: commit + push to `bbi-infrastructure` (ArgoCD applies automatically).
+- [ ] Production: commit + push to `BBI-K8` (ArgoCD applies automatically).
   - Update both `apps/mereka-lms/base/kustomization.yaml` (`?ref=`) and
     `apps/mereka-lms/overlays/prod/kustomization.yaml` (openedx/openedx-mfe tags) when rollout includes images.
   - Run `./scripts/qa/verify-gitops-image-overrides.sh --check-infra` before push.

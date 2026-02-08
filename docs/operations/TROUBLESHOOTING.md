@@ -187,7 +187,7 @@ echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.merek
   - The hostname appears on an Ingress in `mereka-lms` (use `./scripts/qa/list-openedx-hostnames.sh`), and
   - The matching `Certificate` includes the hostname in `spec.dnsNames`.
 - Production is GitOps-managed; Ingress/Certificate changes must land in:
-  - `bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/*`
+  - `BBI-K8/apps/mereka-lms/overlays/prod/patches/*` (older docs may still say `bbi-infrastructure`)
 - When enabling new services (credentials/forum), add/update DNS records in `infrastructure/cloudflare/records*.json` and re-run `./scripts/infra/cloudflare-sync.sh`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
@@ -433,14 +433,14 @@ tutor images build openedx
 
 **Root Cause:**
 - Wrong commit SHA pinned in:
-  `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml`
+  `BBI-K8/apps/mereka-lms/base/kustomization.yaml`
 
 **Fix:**
 ```bash
 # source SHA must come from mereka-lms repo
 git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD
 
-# update pinned ref in bbi-infrastructure and push
+# update pinned ref in BBI-K8 (active GitOps repo) and push
 # then force Argo refresh for app:
 kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
   -n argocd annotate application mereka-lms-local \
@@ -784,7 +784,7 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
    `handle_path` is incorrect here because it strips `/authn` before proxying.
    `import proxy "mfe:8002"` is also incorrect inside `handle` because the imported snippet contains
    `log` and can crash Caddy config reload.
-2. Commit + push this repo, bump GitOps pinned ref in `bbi-infrastructure`, and let Argo roll Caddy.
+2. Commit + push this repo, bump GitOps pinned ref in `BBI-K8`, and let Argo roll Caddy.
    If Argo reports `Synced` while stale config still serves, trigger one full sync with
    `ApplyOutOfSyncOnly=false` for that operation.
 3. Validate:
