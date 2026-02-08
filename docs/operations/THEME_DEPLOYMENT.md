@@ -35,6 +35,25 @@ This updates:
 - cross-repo tag/ref contract verification before push
 - optional runtime convergence verification against Argo + live `Deployment/mfe`
 
+## Dev (kind) Parity Rollout (Canonical)
+
+Use this after updating local overlay tags in `deploy/k8s/overlays/local/kustomization.yaml`:
+
+```bash
+./scripts/infra/apply-kind-overlay.sh
+```
+
+This script now performs the full dev parity chain:
+- loads both Open edX and MFE images into kind (`scripts/infra/kind-load-openedx-image.sh`)
+- applies local overlay
+- waits for LMS/CMS/worker rollouts
+- runs dev public health checks
+- runs dev branding checks
+
+Important Caddy note for service-domain authn fixes:
+- inside `handle /authn/*`, use explicit `reverse_proxy mfe:8002` with header passthrough
+- do not use `import proxy "mfe:8002"` inside `handle` (it imports `log`, which is invalid in ordered handler chains)
+
 ## Architecture Overview
 
 ```

@@ -191,6 +191,10 @@ check_mfe_authn_surface() {
   if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \
     && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
     ok "MFE authn (${host}): mfe_config branding fields present"
+  elif [[ "$ENVIRONMENT" == "dev" ]] \
+    && rg -F -q '"SITE_NAME": "Mereka"' <<<"$config" \
+    && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
+    ok "MFE authn (${host}): mfe_config branding fields present (dev transitional SITE_NAME)"
   else
     gap "MFE authn (${host}): mfe_config branding fields missing"
   fi

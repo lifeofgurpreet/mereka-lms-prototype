@@ -513,15 +513,18 @@ Regenerate hostname registry (after domain changes):
   discussions selectors current and verify via `./scripts/qa/verify-public-branding.sh prod`.
 - Service-domain root landing contract is part of branding:
   - `https://ecommerce.* /` should render `Mereka Ecommerce Service`
-  - `https://forum.* /` should render `Mereka Forum Service`
+  - `https://forum.* /` should render `Mereka Forum Service` only where forum traffic is routed through Caddy (dev/local overlays).
+    In production, forum is currently direct-ingress and root is expected to return `401`.
   - `https://credentials.* /` may be API-first (redirect to `/health/`)
   - Verify with `./scripts/qa/verify-public-branding.sh prod` and `./scripts/qa/audit-branding-surfaces.sh prod --strict`.
 - Service-domain authn proxy contract:
   - `ecommerce.* /dashboard` and `credentials.* /admin/login` should serve authn shell and `/authn/*` assets.
   - Enforce with `STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod`.
-  - If `/authn/*` returns 404/empty responses on those hosts, add `handle /authn/* { import proxy "mfe:8002" }`
-    to the corresponding Caddy host blocks.
+  - If `/authn/*` returns 404/empty responses on those hosts, add explicit reverse-proxy handlers in the
+    corresponding Caddy host blocks:
+    `handle /authn/* { reverse_proxy mfe:8002 { header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port} header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto} } }`
   - Do **not** use `handle_path` for this route; it strips `/authn` and breaks MFE asset paths.
+  - Do **not** use `import proxy "mfe:8002"` inside a `handle` block; imported `log` directives are not valid ordered HTTP handlers there and can crash Caddy at reload.
 - Studio authoring flow contract check: `scripts/qa/verify-studio-authoring-branding.sh [prod|dev]`
   (enforces `action-create-course`, `action-create-library`, outline, and add-component selectors in source/live CSS).
 - Studio live checks should treat themed `studio-main-v1` selector coverage + no Google-font imports as the primary contract.
@@ -535,6 +538,9 @@ Regenerate hostname registry (after domain changes):
 - Runtime override CSS should remain in parity across common + LMS + CMS.
   `./scripts/branding/sync-brand-assets.sh` now syncs all three copies.
 - Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.
+- Forum host behavior in production:
+  - `forum.academyv2.mereka.io` is currently routed by dedicated ingress (`openedx-forum`) directly to `forum:4567`.
+  - Expected contract in gates is `heartbeat=200` and root `401` (authenticated service root), not a public forum landing page.
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Verify MFE image branding before push/deploy:
   `./scripts/qa/verify-mfe-image-branding.sh <image_ref>` (ensures authn `index.html` references a branded CSS bundle and revision marker).
@@ -577,6 +583,9 @@ Regenerate hostname registry (after domain changes):
 - Never run more than one `tutor images build mfe` concurrently; wait for the active build to finish before retrying.
 - Design token drift guard: `./scripts/branding/verify-token-drift.sh` (tokens.css vs runtime exports)
 - Canonical branding gate wrapper: `./scripts/branding/run-branding-gates.sh [prod|dev|all]` (runs source gate + public health + live branding checks + optional audit/screenshots).
+- Kind parity deployment contract:
+  - `./scripts/infra/kind-load-openedx-image.sh` loads both Open edX and MFE images from `deploy/k8s/overlays/local/kustomization.yaml`.
+  - Canonical dev rollout is `./scripts/infra/apply-kind-overlay.sh` (image load + apply + rollout + health + branding checks).
 - Visual regression is part of the canonical gate when enabled:
   `RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1 VISUAL_ALLOW_BOOTSTRAP=1 ./scripts/branding/run-branding-gates.sh prod`
   (`VISUAL_ALLOW_BOOTSTRAP=1` prevents first-run baseline seeding from failing CI/cron).

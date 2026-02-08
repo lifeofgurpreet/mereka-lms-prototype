@@ -29,17 +29,13 @@ patchesStrategicMerge:
 # Use local images
 images:
   # Local overlay should not depend on `:latest` tags (which trigger AlwaysPull).
-  # Keep images aligned with whatever the base is already using, unless you are
-  # explicitly testing a new build/tag.
+  # Keep images aligned with production tags; load them into kind nodes before apply.
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    # Kind nodes cannot pull from Artifact Registry by default. If this tag is not
-    # already present on the nodes, load it with:
-    #   ./scripts/infra/kind-load-openedx-image.sh
-    newTag: 20260206-branding-overrides-2
+    newTag: 20260207-branding-pass7-5b26e45
   - name: docker.io/overhangio/openedx-mfe
-    newName: docker.io/overhangio/openedx-mfe
-    newTag: 18.1.0-indigo
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newTag: 20260208-mfe-discussions-pass4-c17df16
 
 # Minimal replicas for local dev
 replicas:

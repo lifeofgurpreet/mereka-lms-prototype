@@ -775,10 +775,15 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 1. Update Caddy host blocks for both service domains (base + active GitOps overlay):
    ```caddy
    handle /authn/* {
-       import proxy "mfe:8002"
+       reverse_proxy mfe:8002 {
+           header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+           header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+       }
    }
    ```
    `handle_path` is incorrect here because it strips `/authn` before proxying.
+   `import proxy "mfe:8002"` is also incorrect inside `handle` because the imported snippet contains
+   `log` and can crash Caddy config reload.
 2. Commit + push this repo, bump GitOps pinned ref in `bbi-infrastructure`, and let Argo roll Caddy.
    If Argo reports `Synced` while stale config still serves, trigger one full sync with
    `ApplyOutOfSyncOnly=false` for that operation.

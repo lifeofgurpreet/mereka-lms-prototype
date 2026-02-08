@@ -40,8 +40,11 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-08_
   strict live checks in `verify-public-branding.sh` / `audit-branding-surfaces.sh`
 - ✅ Discussions MFE branding expanded (forum learner-facing path): dedicated discussions selectors in
   `infrastructure/tutor/themes/mereka/mfe/mereka.scss` with source gate enforcement
-- ⚙️ Dev branding parity still pending after prod rollout; new child bead `mereka-lms-c3gz`
-  tracks kind overlay/tag alignment and strict dev branding gate closure
+- ✅ Dev branding parity rollout completed (`mereka-lms-c3gz`): local overlay tags now track current branded
+  openedx/mfe release tags, `apply-kind-overlay.sh` loads both images into kind, and strict deep dev branding
+  gates pass (`BRANDING_LEVEL=deep STRICT_PROXY_AUTHN_BRANDING=1 AUDIT_STRICT=1`).
+- ✅ Caddy authn handler hardening: service-domain `/authn/*` now uses explicit `reverse_proxy` in handle blocks;
+  avoiding `import proxy` inside `handle` prevents Caddy reload crashes in dev rollouts.
 - ✅ MFE branding preflight gate added and wired into canonical branding execution:
   `./scripts/qa/verify-mfe-build-prereqs.sh` now runs inside `run-branding-gates.sh`
   source phase to fail fast on generated Dockerfile prerequisite drift

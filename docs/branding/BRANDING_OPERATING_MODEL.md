@@ -189,11 +189,12 @@ Preferred deployment command:
    - Cause: authn shell on `ecommerce.*` / `credentials.*` references `/authn/*` paths, but Caddy host blocks
      are only proxying to service backends (not MFE assets).
    - Fix:
-     1) add `handle /authn/* { import proxy "mfe:8002" }` in both host blocks in
+     1) add explicit `/authn/*` `reverse_proxy mfe:8002` handlers in both host blocks in
         `deploy/k8s/base/apps/caddy/Caddyfile`
      2) redeploy Caddy via GitOps
      3) enable strict enforcement with `STRICT_PROXY_AUTHN_BRANDING=1` once live checks are green.
      4) do not use `handle_path`; it strips `/authn` and breaks MFE asset paths.
+     5) do not use `import proxy "mfe:8002"` inside `handle` blocks; imported `log` directives are invalid there and can crash Caddy.
 
 17. **Forum/ecommerce service roots regress to plain or default pages**
    - Cause: service-domain root landing contract drift in Caddy host blocks.
@@ -201,6 +202,20 @@ Preferred deployment command:
      1) keep branded root responses in `deploy/k8s/base/apps/caddy/Caddyfile`
      2) verify with `./scripts/qa/verify-public-branding.sh prod`
      3) enforce via `./scripts/qa/audit-branding-surfaces.sh prod --strict`
+
+18. **kind dev parity drifts from production image tags**
+   - Cause: local overlay pins old `openedx`/`openedx-mfe` tags or only one image is loaded into kind.
+   - Fix:
+     1) keep `deploy/k8s/overlays/local/kustomization.yaml` aligned to current release tags
+     2) run `./scripts/infra/apply-kind-overlay.sh` (it loads both images before apply)
+     3) verify with `./scripts/qa/verify-public-branding.sh dev`
+
+19. **Caddy crashes after authn host routing edits**
+   - Cause: using `import proxy "mfe:8002"` inside `handle /authn/*` blocks; imported `log` is invalid there.
+   - Fix:
+     1) replace with explicit `reverse_proxy mfe:8002` plus header passthrough
+     2) redeploy and confirm `Deployment/caddy` ready
+     3) rerun `./scripts/infra/apply-kind-overlay.sh` (dev) or production GitOps rollout + gates
 
 ## What Was Hacky And How We Avoid It
 

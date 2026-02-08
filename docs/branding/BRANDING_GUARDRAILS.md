@@ -180,8 +180,10 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
 9. Service-domain authn pages render but `/authn/*` assets fail
    - Cause: `ecommerce.*` / `credentials.*` pages use authn shell paths, but Caddy is not proxying `/authn/*`
    for those hosts to `mfe:8002`.
-  - Fix: add `handle /authn/* { import proxy "mfe:8002" }` in those host blocks and redeploy Caddy.
-  - Important: do not use `handle_path` here; stripping `/authn` breaks MFE asset paths.
+   - Fix: add explicit `reverse_proxy` handlers for `/authn/*` in those host blocks and redeploy Caddy.
+   - Important:
+     - do not use `handle_path` here; stripping `/authn` breaks MFE asset paths.
+     - do not use `import proxy "mfe:8002"` inside `handle`; imported `log` directives are invalid there and can crash Caddy.
 
 10. Ecommerce/forum roots look unbranded after deploy
    - Cause: root landing response contract drift in Caddy service host blocks.
