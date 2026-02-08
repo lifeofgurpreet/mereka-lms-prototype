@@ -511,8 +511,8 @@ Regenerate hostname registry (after domain changes):
 - Alert routing verification is timeout-safe via `CHECK_TIMEOUT_SECONDS` (defaults to 900s) to prevent indefinite gate hangs in degraded runtime/API conditions.
 - DR evidence bundle builder: `scripts/qa/build-dr-evidence-bundle.sh` (monthly automation via `.github/workflows/dr-evidence-bundle.yml`).
 - Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
-- Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana; alert-routing audit enabled by default and can be opt-out for CI-safe mode).
-- Unified operations gate includes DB exporter telemetry audit in `local` mode by default; use `DB_EXPORTER_AUDIT_MODE=runtime` after rollout to enforce runtime metric presence.
+- Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana; alert-routing audit enabled by default and DB exporter telemetry enforced in `runtime` mode).
+- Unified operations gate includes DB exporter telemetry audit in `local` mode by default; use `DB_EXPORTER_AUDIT_MODE=runtime` for live cluster enforcement (the runtime workflow now sets this explicitly).
 - Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable).
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.

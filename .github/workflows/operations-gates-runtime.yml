@@ -74,6 +74,9 @@ jobs:
           # VPS atlas monitor cron/status checks are host-local and not available in GH runner.
           export ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0
           export RUN_ATLAS_ALLOWLIST_AUDIT=0
+          # Runtime workflow must validate live exporter telemetry, not just local contracts.
+          export RUN_DB_EXPORTER_TELEMETRY_AUDIT=1
+          export DB_EXPORTER_AUDIT_MODE=runtime
 
           ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
 
