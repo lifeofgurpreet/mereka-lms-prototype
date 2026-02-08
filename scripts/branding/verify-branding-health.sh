@@ -83,6 +83,7 @@ LMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/sass/th
 CMS_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/theme.scss"
 CMS_HEAD_EXTRA_TEMPLATE="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
 CMS_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
+CADDYFILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
 
 check_file "Shared tokens" "$TOKENS_SCSS"
 check_file "Shared fonts" "$FONTS_SCSS"
@@ -103,6 +104,10 @@ check_contains "MFE theme styles auth card header gradient" "$MFE_SCSS" '.pgn__c
 check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
 check_contains "MFE theme targets learner dashboard surfaces" "$MFE_SCSS" 'learner-dashboard'
 check_contains "MFE learner dashboard status pill styling" "$MFE_SCSS" '[class*="status"]'
+check_contains "MFE theme targets discussions surfaces" "$MFE_SCSS" 'discussions'
+check_contains "MFE discussions links styled to brand tokens" "$MFE_SCSS" 'var(--mereka-color-blue)'
+check_contains "Caddy ecommerce root landing is branded" "$CADDYFILE" 'Mereka Ecommerce Service'
+check_contains "Caddy forum root landing is branded" "$CADDYFILE" 'Mereka Forum Service'
 
 echo ""
 echo "3.25 Token drift (design system)..."

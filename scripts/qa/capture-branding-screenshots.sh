@@ -60,10 +60,14 @@ declare -a URLS=(
   "mfe-account|https://${base_mfe}/account/"
   "mfe-account-settings|https://${base_mfe}/account/settings"
   "mfe-learner-dashboard|https://${base_mfe}/learner-dashboard/"
+  "ecommerce-root|https://${base_ecommerce}/"
   "ecommerce-dashboard|https://${base_ecommerce}/dashboard/"
+  "ecommerce-basket|https://${base_ecommerce}/basket/"
+  "ecommerce-checkout|https://${base_ecommerce}/checkout/"
   "ecommerce-stripe-webhook|https://${base_ecommerce}/api/v2/webhooks/stripe/"
   "credentials-admin-login|https://${base_credentials}/admin/login/"
   "forum-home|https://forum.${base_lms}/"
+  "forum-heartbeat|https://forum.${base_lms}/heartbeat"
   "notes-root|https://notes.${base_lms}/"
 )
 

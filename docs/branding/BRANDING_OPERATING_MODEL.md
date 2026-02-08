@@ -1,5 +1,5 @@
 # Branding Operating Model
-_Audience: Platform + Product Engineering • Last updated: 2026-02-07_
+_Audience: Platform + Product Engineering • Last updated: 2026-02-08_
 
 This is the canonical workflow for branding changes in Mereka LMS.
 
@@ -185,7 +185,7 @@ Preferred deployment command:
      2) install scheduled checks with `scripts/infra/setup-vps-branding-visual-regression-cron.sh`
      3) treat non-zero visual regression exit as release-blocking.
 
-14. **Service-domain authn pages load but CSS/JS assets fail**
+16. **Service-domain authn pages load but CSS/JS assets fail**
    - Cause: authn shell on `ecommerce.*` / `credentials.*` references `/authn/*` paths, but Caddy host blocks
      are only proxying to service backends (not MFE assets).
    - Fix:
@@ -194,6 +194,13 @@ Preferred deployment command:
      2) redeploy Caddy via GitOps
      3) enable strict enforcement with `STRICT_PROXY_AUTHN_BRANDING=1` once live checks are green.
      4) do not use `handle_path`; it strips `/authn` and breaks MFE asset paths.
+
+17. **Forum/ecommerce service roots regress to plain or default pages**
+   - Cause: service-domain root landing contract drift in Caddy host blocks.
+   - Fix:
+     1) keep branded root responses in `deploy/k8s/base/apps/caddy/Caddyfile`
+     2) verify with `./scripts/qa/verify-public-branding.sh prod`
+     3) enforce via `./scripts/qa/audit-branding-surfaces.sh prod --strict`
 
 ## What Was Hacky And How We Avoid It
 

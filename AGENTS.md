@@ -509,6 +509,13 @@ Regenerate hostname registry (after domain changes):
 - Deep branding (course cards/courseware) is carried by `infrastructure/tutor/themes/mereka/*/static/css/mereka-overrides.css`:
   - Source check: `BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh`
   - Live check: `BRANDING_LEVEL=deep ./scripts/qa/verify-public-branding.sh prod` (includes Studio CSS token/font wiring, MFE auth branding CTA, credentials health/admin reachability, forum heartbeat)
+- Forum thread UI is learner-facing through Discussions MFE; keep `infrastructure/tutor/themes/mereka/mfe/mereka.scss`
+  discussions selectors current and verify via `./scripts/qa/verify-public-branding.sh prod`.
+- Service-domain root landing contract is part of branding:
+  - `https://ecommerce.* /` should render `Mereka Ecommerce Service`
+  - `https://forum.* /` should render `Mereka Forum Service`
+  - `https://credentials.* /` may be API-first (redirect to `/health/`)
+  - Verify with `./scripts/qa/verify-public-branding.sh prod` and `./scripts/qa/audit-branding-surfaces.sh prod --strict`.
 - Service-domain authn proxy contract:
   - `ecommerce.* /dashboard` and `credentials.* /admin/login` should serve authn shell and `/authn/*` assets.
   - Enforce with `STRICT_PROXY_AUTHN_BRANDING=1 ./scripts/branding/run-branding-gates.sh prod`.

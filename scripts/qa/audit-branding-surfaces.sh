@@ -198,20 +198,39 @@ check_mfe_authn_surface() {
 
 check_forum() {
   local host=$1
-  local code root_code
+  local code root_code root_body
   code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/heartbeat" || echo "000")"
   if [[ "$code" == "200" ]]; then
     ok "Forum heartbeat reachable (200)"
   else
     gap "Forum heartbeat not OK (${code})"
   fi
+  root_body="$(fetch "https://${host}/")"
   root_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/" || echo "000")"
-  if [[ "$root_code" == "401" ]]; then
+  if rg -F -q "Mereka Forum Service" <<<"$root_body"; then
+    ok "Forum root landing has branded content"
+  elif [[ "$root_code" == "401" ]]; then
     ok "Forum root enforces authenticated access (401)"
   elif [[ "$root_code" == "200" ]]; then
     ok "Forum root reachable without auth (200)"
   else
     gap "Forum root returned unexpected status (${root_code})"
+  fi
+}
+
+check_ecommerce_landing() {
+  local host=$1
+  local root root_body root_effective
+  root="https://${host}/"
+  root_body="$(fetch "$root")"
+  root_effective="$(curl -s -L -o /dev/null -w "%{url_effective}" --connect-timeout 10 --max-time 20 "$root" 2>/dev/null || true)"
+
+  if rg -F -q "Mereka Ecommerce Service" <<<"$root_body"; then
+    ok "Ecommerce root landing has branded content"
+  elif [[ "${root_effective:-}" == *"/dashboard/" ]] || [[ "${root_effective:-}" == *"/login" ]]; then
+    ok "Ecommerce root redirects to dashboard/login"
+  else
+    gap "Ecommerce root missing branded landing and redirect contract"
   fi
 }
 
@@ -312,6 +331,7 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_lms_overrides "$BIJI_DOMAIN" "Microsite (${BIJI_DOMAIN})"
   check_lms_overrides "$SKILLOURFUTURE_DOMAIN" "Microsite (${SKILLOURFUTURE_DOMAIN})"
   check_studio_css "$STUDIO_DOMAIN" "Studio (${STUDIO_DOMAIN})"
+  check_ecommerce_landing "$ECOMMERCE_DOMAIN"
   check_authn_proxy_surface "https://${ECOMMERCE_DOMAIN}/dashboard/" "Ecommerce dashboard (${ECOMMERCE_DOMAIN})"
   check_authn_proxy_surface "https://credentials.${LMS_DOMAIN}/admin/login/" "Credentials admin (${LMS_DOMAIN})"
   check_credentials "credentials.${LMS_DOMAIN}"
@@ -320,6 +340,7 @@ else
   check_lms_overrides "$DEV_LMS_DOMAIN" "LMS (${DEV_LMS_DOMAIN})"
   check_mfe_authn_surface "$DEV_MFE_DOMAIN"
   check_studio_css "$DEV_STUDIO_DOMAIN" "Studio (${DEV_STUDIO_DOMAIN})"
+  check_ecommerce_landing "$DEV_ECOMMERCE_DOMAIN"
   check_authn_proxy_surface "https://${DEV_ECOMMERCE_DOMAIN}/dashboard/" "Ecommerce dashboard (${DEV_ECOMMERCE_DOMAIN})"
   check_authn_proxy_surface "https://credentials.${DEV_LMS_DOMAIN}/admin/login/" "Credentials admin (${DEV_LMS_DOMAIN})"
   check_credentials "credentials.${DEV_LMS_DOMAIN}"

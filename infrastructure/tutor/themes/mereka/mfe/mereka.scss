@@ -2,7 +2,7 @@ $mereka-font-path: "../fonts";
 @import "./scss/theme";
 
 :root {
-  --mereka-mfe-branding-rev: "2026-02-07-pass3";
+  --mereka-mfe-branding-rev: "2026-02-08-pass4";
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
   --mereka-mfe-surface: #ffffff;
@@ -332,6 +332,69 @@ label {
 [class*="account-page"] h2,
 [class*="learner-dashboard"] h1,
 [class*="learner-dashboard"] h2 {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+/* Discussions/forum surfaces (MFE discussions is the learner-facing forum UI) */
+[class*="discussions"],
+[class*="discussion"],
+[data-testid*="discussions"],
+[data-testid*="discussion"] {
+  background: transparent;
+}
+
+[class*="discussions"] .card,
+[class*="discussion"] .card,
+[data-testid*="discussions"] .card,
+[data-testid*="discussion"] .card,
+[class*="discussions"] .pgn__card,
+[class*="discussion"] .pgn__card,
+[data-testid*="discussions"] .pgn__card,
+[data-testid*="discussion"] .pgn__card {
+  border-radius: 22px;
+  border: 1px solid rgba(26, 22, 35, 0.09);
+  box-shadow: var(--mereka-mfe-card-shadow);
+}
+
+[class*="discussions"] a,
+[class*="discussion"] a,
+[data-testid*="discussions"] a,
+[data-testid*="discussion"] a {
+  color: var(--mereka-color-blue);
+}
+
+[class*="discussions"] a:hover,
+[class*="discussions"] a:focus,
+[class*="discussion"] a:hover,
+[class*="discussion"] a:focus,
+[data-testid*="discussions"] a:hover,
+[data-testid*="discussions"] a:focus,
+[data-testid*="discussion"] a:hover,
+[data-testid*="discussion"] a:focus {
+  color: var(--mereka-color-teal);
+}
+
+[class*="discussions"] .btn-primary,
+[class*="discussion"] .btn-primary,
+[data-testid*="discussions"] .btn-primary,
+[data-testid*="discussion"] .btn-primary,
+[class*="discussions"] .pgn__btn--primary,
+[class*="discussion"] .pgn__btn--primary,
+[data-testid*="discussions"] .pgn__btn--primary,
+[data-testid*="discussion"] .pgn__btn--primary {
+  background-image: var(--mereka-mfe-gradient);
+  border: none;
+}
+
+[class*="discussions"] h1,
+[class*="discussions"] h2,
+[class*="discussion"] h1,
+[class*="discussion"] h2,
+[data-testid*="discussions"] h1,
+[data-testid*="discussions"] h2,
+[data-testid*="discussion"] h1,
+[data-testid*="discussion"] h2 {
   font-family: var(--mereka-font-heading);
   color: var(--mereka-color-ink-900);
 }

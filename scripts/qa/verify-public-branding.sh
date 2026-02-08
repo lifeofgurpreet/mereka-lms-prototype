@@ -426,16 +426,35 @@ check_forum_heartbeat() {
   fi
 }
 
-check_forum_access_contract() {
+check_forum_landing() {
   local forum_host=$1
-  local code
+  local code body
   code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${forum_host}/" 2>/dev/null || echo "000")"
-  if [[ "$code" == "401" ]]; then
+  body="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${forum_host}/" 2>/dev/null || true)"
+  if printf '%s' "$body" | rg -F -q "Mereka Forum Service"; then
+    printf "✓ Forum root landing is branded\n"
+  elif [[ "$code" == "401" ]]; then
     printf "✓ Forum root enforces authenticated access (401)\n"
   elif [[ "$code" == "200" ]]; then
     printf "✓ Forum root reachable without auth (200)\n"
   else
     printf "✗ Forum root returned unexpected status (%s)\n" "$code" >&2
+    failures=$((failures + 1))
+  fi
+}
+
+check_ecommerce_landing() {
+  local ecommerce_host=$1
+  local root_url="https://${ecommerce_host}/"
+  local body effective
+  body="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$root_url" 2>/dev/null || true)"
+  effective="$(curl -s -L -o /dev/null -w "%{url_effective}" --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$root_url" 2>/dev/null || true)"
+  if printf '%s' "$body" | rg -F -q "Mereka Ecommerce Service"; then
+    printf "✓ Ecommerce root landing is branded\n"
+  elif [[ "${effective:-}" == *"/dashboard/" ]] || [[ "${effective:-}" == *"/login" ]]; then
+    printf "✓ Ecommerce root redirects to dashboard/login\n"
+  else
+    printf "✗ Ecommerce root landing missing branded content\n" >&2
     failures=$((failures + 1))
   fi
 }
@@ -498,7 +517,8 @@ check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
 check_forum_heartbeat "${FORUM_HOST}"
-check_forum_access_contract "${FORUM_HOST}"
+check_forum_landing "${FORUM_HOST}"
+check_ecommerce_landing "${ECOMMERCE_HOST}"
 check_authn_proxy_surface "https://${ECOMMERCE_HOST}/dashboard/" "Ecommerce dashboard"
 check_credentials_health "credentials.${BASE_DOMAIN}"
 check_authn_proxy_surface "https://credentials.${BASE_DOMAIN}/admin/login/" "Credentials admin login"

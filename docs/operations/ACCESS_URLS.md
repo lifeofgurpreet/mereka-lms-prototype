@@ -113,12 +113,17 @@ Platform admins are enforced separately (see `docs/operations/ADMIN_LOGIN_GUIDE.
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
+  - **Service Landing:** https://ecommerce.academyv2.mereka.io/ (branded root)
+  - **Dashboard:** https://ecommerce.academyv2.mereka.io/dashboard/
+  - **Basket:** https://ecommerce.academyv2.mereka.io/basket/
+  - **Checkout:** https://ecommerce.academyv2.mereka.io/checkout/
 - **Credentials:** https://credentials.academyv2.mereka.io (API-first, has Django admin)
   - **Admin:** https://credentials.academyv2.mereka.io/admin/
   - **Health:** https://credentials.academyv2.mereka.io/health/
   - **API:** https://credentials.academyv2.mereka.io/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.io (API only)
 - **Forum:** https://forum.academyv2.mereka.io (also embedded in LMS)
+  - **Service Landing:** https://forum.academyv2.mereka.io/ (branded root)
   - **Health:** https://forum.academyv2.mereka.io/heartbeat (200)
 - **Analytics (Superset):** ❌ NOT DEPLOYED
   - **Status:** Documented but not yet deployed to K8s
@@ -159,12 +164,17 @@ Platform admins are enforced separately (see `docs/operations/ADMIN_LOGIN_GUIDE.
 **Other Services (Dev)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
+  - **Service Landing:** https://ecommerce.academyv2.mereka.dev/ (branded root)
+  - **Dashboard:** https://ecommerce.academyv2.mereka.dev/dashboard/
+  - **Basket:** https://ecommerce.academyv2.mereka.dev/basket/
+  - **Checkout:** https://ecommerce.academyv2.mereka.dev/checkout/
 - **Credentials:** https://credentials.academyv2.mereka.dev (API-first, has Django admin)
   - **Admin:** https://credentials.academyv2.mereka.dev/admin/
   - **Health:** https://credentials.academyv2.mereka.dev/health/
   - **API:** https://credentials.academyv2.mereka.dev/api/v2/ (401 without auth)
 - **Notes API:** https://notes.academyv2.mereka.dev
 - **Forum:** https://forum.academyv2.mereka.dev
+  - **Service Landing:** https://forum.academyv2.mereka.dev/ (branded root)
   - **Health:** https://forum.academyv2.mereka.dev/heartbeat (200)
 
 ---
@@ -349,10 +359,10 @@ VPS automation (installs cron for prod+dev checks, logs to `var/cron-public-heal
 - Studio root: `/`
 - MFE login: `/authn/login`
 - Discovery: `/health/`
-- Ecommerce: `/dashboard/` (verifies OAuth redirect path)
+- Ecommerce: `/` + `/dashboard/` (root landing + OAuth redirect path)
 - Credentials: `/health/`
 - Notes: `/`
-- Forum: `/heartbeat`
+- Forum: `/` + `/heartbeat` (root landing + API health)
 
 ---
 

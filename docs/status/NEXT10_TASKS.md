@@ -36,6 +36,10 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-08_
   `openedx-mfe:20260208-mfe-nonrepair-931f55e` is live in production and strict branding parity gate passes
 - ✅ Deployment ergonomics hardening: canonical one-command GitOps release orchestrator added
   (`scripts/infra/release-openedx-gitops.sh`) and wired into AGENTS/runbooks
+- ✅ Service-domain branding contract expanded: branded root landings for ecommerce/forum in Caddy +
+  strict live checks in `verify-public-branding.sh` / `audit-branding-surfaces.sh`
+- ✅ Discussions MFE branding expanded (forum learner-facing path): dedicated discussions selectors in
+  `infrastructure/tutor/themes/mereka/mfe/mereka.scss` with source gate enforcement
 - ⚙️ Dev branding parity still pending after prod rollout; new child bead `mereka-lms-c3gz`
   tracks kind overlay/tag alignment and strict dev branding gate closure
 - ✅ MFE branding preflight gate added and wired into canonical branding execution:
@@ -88,7 +92,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-08_
 | 3 | MFE theming hardening (authn/account/learning) | Product | 💤 Pending | Bead: `mereka-lms-29o`. |
 | 4 | Learner dashboard + courseware styling | Product | 💤 Pending | Bead: `mereka-lms-2t0`. |
 | 5 | Studio authoring UI polish | Product | 💤 Pending | Bead: `mereka-lms-3ou`. |
-| 6 | Credentials + forum theming | Product | ⚙️ In progress | Credentials theming contract is closed (`mereka-lms-3ur`); forum UI theming remains (`mereka-lms-36jn`). |
+| 6 | Credentials + forum + ecommerce service-domain theming | Product | ⚙️ In progress | Credentials contract is closed (`mereka-lms-3ur`); forum/ecommerce branded root contract + discussions MFE styling are in place, while deep ecommerce basket/checkout template theming remains (`mereka-lms-h9c9`). |
 | 7 | Visual regression gate for branding | Product | ✅ Delivered | `run-branding-gates.sh` now supports visual diff mode + bootstrap-safe baseline seeding; VPS cron wrapper available for continuous checks. Bead: `mereka-lms-3mz`. |
 | 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
 | 9 | Multi-site governance hardening | Infra | ⚙️ In progress | Strict governance drift checks now block on core config mismatches and org-ownership validation. |

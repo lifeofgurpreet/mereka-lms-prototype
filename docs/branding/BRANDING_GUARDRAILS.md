@@ -33,7 +33,7 @@ BRANDING_LEVEL=deep ./scripts/branding/verify-branding-health.sh
 What this enforces:
 - Logos/favicons/fonts exist and are wired correctly
 - The runtime override CSS carries deep branded selectors (course cards, courseware, Studio wrapper)
-- The MFE theme carries explicit selectors for authn/account/learner-dashboard surfaces
+- The MFE theme carries explicit selectors for authn/account/learner-dashboard/discussions surfaces
 - Studio authoring selectors are enforced explicitly (`action-create-course`, `action-create-library`,
   `outline-complex`, `add-xblock-component`) via `scripts/qa/verify-studio-authoring-branding.sh`
 - Branding revision markers exist (`--mereka-branding-rev`, `--mereka-mfe-branding-rev`) for deploy parity checks
@@ -52,7 +52,8 @@ Notes:
 - `verify-public-branding.sh` checks the main domain plus the client microsites (`academy.biji-biji.com`,
   `skillourfuture.academy.mereka.io`), and also validates Studio themed CSS wiring,
   MFE auth branding CTA text, Credentials health/admin reachability, Credentials API-root routing
-  (`/` can be API-first redirect to `/health/`), and Forum heartbeat.
+  (`/` can be API-first redirect to `/health/`), Ecommerce root landing/dashboard auth shell,
+  and Forum heartbeat/root landing.
 - To enforce exact live-vs-source MFE branding revision parity, run:
   `STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod`
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
@@ -72,9 +73,10 @@ Current audit coverage:
 - MFE authn shell + `mfe_config` brand fields
 - MFE authn parity for primary + `apps.academy.biji-biji.com`
 - Service-domain authn proxy surfaces (`ecommerce.* /dashboard`, `credentials.* /admin/login`)
+- Service-domain root branding contract (`ecommerce.* /`, `forum.* /`, credentials API-first root)
 - Branding revision marker parity (live vs source) for LMS/microsites
 - Credentials root/admin/health availability
-- Forum heartbeat
+- Forum heartbeat + branded root landing
 
 Visual regression coverage (manual/agent-run):
 ```bash
@@ -177,9 +179,18 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
 
 9. Service-domain authn pages render but `/authn/*` assets fail
    - Cause: `ecommerce.*` / `credentials.*` pages use authn shell paths, but Caddy is not proxying `/authn/*`
-     for those hosts to `mfe:8002`.
-   - Fix: add `handle /authn/* { import proxy "mfe:8002" }` in those host blocks and redeploy Caddy.
-   - Important: do not use `handle_path` here; stripping `/authn` breaks MFE asset paths.
+   for those hosts to `mfe:8002`.
+  - Fix: add `handle /authn/* { import proxy "mfe:8002" }` in those host blocks and redeploy Caddy.
+  - Important: do not use `handle_path` here; stripping `/authn` breaks MFE asset paths.
+
+10. Ecommerce/forum roots look unbranded after deploy
+   - Cause: root landing response contract drift in Caddy service host blocks.
+   - Fix: keep branded root responses in `deploy/k8s/base/apps/caddy/Caddyfile`:
+     - `Mereka Ecommerce Service` (`ecommerce.* /`)
+     - `Mereka Forum Service` (`forum.* /`)
+   - Verify:
+     - `./scripts/qa/verify-public-branding.sh prod`
+     - `./scripts/qa/audit-branding-surfaces.sh prod --strict`
 
 ## Deployment Reference
 
