@@ -27,12 +27,13 @@ on:
         type: boolean
         default: false
       target_environment:
-        description: 'GitOps target environment'
+        description: 'GitOps target environment (required when update_gitops=true)'
         type: choice
         options:
+          - select-environment
           - production
           - staging
-        default: production
+        default: select-environment
       image_tag:
         description: 'Image tag (default: git SHA)'
         type: string
@@ -233,10 +234,26 @@ jobs:
     name: Update GitOps
     runs-on: ubuntu-latest
     needs: [build-openedx, build-mfe]
-    if: ${{ inputs.update_gitops || inputs.deploy_to_staging }}
-    environment: ${{ inputs.target_environment || 'production' }}
+    if: ${{ (github.event_name != 'workflow_dispatch' && (inputs.update_gitops || inputs.deploy_to_staging)) || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment') }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Validate manual dispatch inputs
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [[ "${{ inputs.deploy_to_staging }}" == "true" ]]; then
+            echo "deploy_to_staging is deprecated; use update_gitops=true." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.update_gitops }}" != "true" ]]; then
+            echo "update_gitops must be true for manual GitOps update." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.target_environment }}" == "select-environment" ]]; then
+            echo "target_environment must be explicitly selected." >&2
+            exit 1
+          fi
 
       - name: Validate GitOps token
         env:
@@ -262,7 +279,7 @@ jobs:
       - name: Update app + GitOps tags via release orchestrator
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
-          TARGET_ENV="${{ inputs.target_environment || 'production' }}"
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env "${TARGET_ENV}" \
             --openedx-tag "${TAG}" \
@@ -274,7 +291,7 @@ jobs:
       - name: Summary
         run: |
           TAG="${{ inputs.image_tag || github.sha }}"
-          TARGET_ENV="${{ inputs.target_environment || 'production' }}"
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
           echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Mode:** GitOps update" >> $GITHUB_STEP_SUMMARY

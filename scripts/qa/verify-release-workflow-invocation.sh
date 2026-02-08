@@ -46,6 +46,23 @@ for wf_path in sorted(workflows_dir.glob("*.y*ml")):
             invocations += 1
             missing = [flag for flag in required_flags if flag not in run]
             if missing:
+                exception_reason = None
+                for raw_line in run.splitlines():
+                    line = raw_line.strip()
+                    if "release-invocation-exception:" in line:
+                        exception_reason = line.split("release-invocation-exception:", 1)[1].strip()
+                        break
+
+                if exception_reason:
+                    # Allowed only for explicitly documented dry-run/evidence invocations.
+                    # release-openedx-gitops.sh is dry-run by default when apply/commit/push are omitted.
+                    if "--apply" not in run and "--commit" not in run and "--push" not in run:
+                        continue
+                    violations.append(
+                        f"{wf_path.name}::{job_name} has exception reason but invocation still applies/commits/pushes"
+                    )
+                    continue
+
                 step_name = (step or {}).get("name", f"step#{idx}")
                 violations.append(
                     f"{wf_path.name}::{job_name}::{step_name} missing flags: {', '.join(missing)}"

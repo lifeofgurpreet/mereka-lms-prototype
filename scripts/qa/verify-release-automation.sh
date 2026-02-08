@@ -23,13 +23,13 @@ while IFS= read -r workflow_file; do
   fi
 done < <(find "$WORKFLOWS_DIR" -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
 
-# build-tutor-images must default to production for target_environment input.
+# build-tutor-images must force explicit target selection during manual dispatch.
 if ! rg -n "target_environment:" "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ Missing target_environment input in ${BUILD_WORKFLOW#"$REPO_ROOT"/}"
   violations=1
 fi
-if ! rg -n "default:[[:space:]]*production" "$BUILD_WORKFLOW" >/dev/null; then
-  echo "❌ target_environment default is not production in ${BUILD_WORKFLOW#"$REPO_ROOT"/}"
+if ! rg -n "default:[[:space:]]*select-environment" "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ target_environment default is not select-environment in ${BUILD_WORKFLOW#"$REPO_ROOT"/}"
   violations=1
 fi
 

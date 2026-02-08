@@ -1,0 +1,85 @@
+name: Release Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      openedx_tag:
+        description: "Open edX image tag"
+        required: true
+        type: string
+      mfe_tag:
+        description: "MFE image tag"
+        required: true
+        type: string
+      target_environment:
+        description: "Target environment for dry-run evidence"
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  release-evidence:
+    name: Build Release Evidence Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create evidence directory
+        run: |
+          mkdir -p var/release-evidence
+
+      - name: Run policy checks
+        run: |
+          set -euo pipefail
+          bash ./scripts/qa/verify-release-automation.sh | tee var/release-evidence/policy-release-automation.log
+          bash ./scripts/qa/verify-build-workflow-contract.sh | tee var/release-evidence/policy-build-workflow-contract.log
+          bash ./scripts/qa/verify-release-workflow-invocation.sh | tee var/release-evidence/policy-release-invocation.log
+          bash ./scripts/qa/verify-no-latest-prod-tags.sh | tee var/release-evidence/policy-prod-tag-guard.log
+          bash ./scripts/qa/lint-active-docs-env-model.sh | tee var/release-evidence/policy-docs-env-model.log
+
+      - name: Capture release dry-run plan
+        run: |
+          set -euo pipefail
+          # release-invocation-exception: evidence workflow runs dry-run only (no apply/commit/push)
+          ./scripts/infra/release-openedx-gitops.sh \
+            --target-env "${{ inputs.target_environment }}" \
+            --openedx-tag "${{ inputs.openedx_tag }}" \
+            --mfe-tag "${{ inputs.mfe_tag }}" \
+            | tee var/release-evidence/release-dry-run.log
+
+      - name: Write release metadata
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          out = Path("var/release-evidence/release-metadata.json")
+          out.parent.mkdir(parents=True, exist_ok=True)
+
+          payload = {
+              "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+              "repo": os.environ.get("GITHUB_REPOSITORY"),
+              "run_id": os.environ.get("GITHUB_RUN_ID"),
+              "run_number": os.environ.get("GITHUB_RUN_NUMBER"),
+              "sha": os.environ.get("GITHUB_SHA"),
+              "actor": os.environ.get("GITHUB_ACTOR"),
+              "ref": os.environ.get("GITHUB_REF"),
+              "openedx_tag": "${{ inputs.openedx_tag }}",
+              "mfe_tag": "${{ inputs.mfe_tag }}",
+              "target_environment": "${{ inputs.target_environment }}",
+          }
+
+          out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+          print(out)
+          PY
+
+      - name: Upload release evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ inputs.target_environment }}-${{ github.run_number }}
+          path: var/release-evidence/

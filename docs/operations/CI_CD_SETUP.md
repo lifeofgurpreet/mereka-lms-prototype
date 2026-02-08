@@ -87,7 +87,7 @@ Options:
 - `build_openedx` - Build LMS/CMS/worker image
 - `build_mfe` - Build micro-frontends image
 - `update_gitops` - Update GitOps tags after build
-- `target_environment` - GitOps target environment (`production` default, `staging` optional)
+- `target_environment` - GitOps target environment (`select-environment` default; must be explicitly selected when `update_gitops=true`)
 - `deploy_to_staging` - **Legacy input name** retained for backwards compatibility
 - `image_tag` - Custom tag (default: git SHA)
 
@@ -124,6 +124,18 @@ Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to ru
 - release workflow invocation contract checks (`--target-env --apply --commit --push`)
 - production tag guard (`no latest`)
 - active docs env-model lint
+
+### Release Evidence Artifacts
+
+Use workflow `.github/workflows/release-evidence.yml` via `workflow_dispatch` with:
+- `openedx_tag`
+- `mfe_tag`
+- `target_environment`
+
+This generates and uploads an artifact bundle containing:
+- policy check logs
+- dry-run rollout plan from `release-openedx-gitops.sh`
+- release metadata JSON (run id, SHA, actor, tags, target env)
 
 For full operator flow, see:
 - `docs/operations/RELEASE_CHECKLIST.md`

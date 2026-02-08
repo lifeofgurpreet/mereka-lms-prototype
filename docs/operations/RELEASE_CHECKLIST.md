@@ -27,7 +27,16 @@ Or run locally:
 
 All checks must pass before release.
 
-## 3. Build and Push Images
+## 3. Generate Evidence Bundle (Recommended)
+
+Run `.github/workflows/release-evidence.yml` (`workflow_dispatch`) with:
+- `openedx_tag`
+- `mfe_tag`
+- `target_environment`
+
+Keep the uploaded artifact with release notes/change record.
+
+## 4. Build and Push Images
 
 Use `build-tutor-images.yml` (manual trigger) with:
 - `build_openedx=true` (if backend/theme changed)
@@ -39,7 +48,7 @@ If you want one workflow to update GitOps immediately:
 - `update_gitops=true`
 - `target_environment=production`
 
-## 4. GitOps Rollout (Canonical)
+## 5. GitOps Rollout (Canonical)
 
 ```bash
 ./scripts/infra/release-openedx-gitops.sh \
@@ -51,7 +60,7 @@ If you want one workflow to update GitOps immediately:
 
 Do not use direct `kubectl set image` for normal production rollouts.
 
-## 5. Post-Release Verification
+## 6. Post-Release Verification
 
 - Confirm Argo app and rollout:
   - `kubectl -n argocd get application mereka-lms-local`
@@ -62,7 +71,7 @@ Do not use direct `kubectl set image` for normal production rollouts.
   - `./scripts/branding/run-branding-gates.sh prod`
   - `./scripts/qa/public-health-check.sh prod`
 
-## 6. Rollback
+## 7. Rollback
 
 If production is unhealthy:
 1. Re-run release orchestrator with prior known-good tags.

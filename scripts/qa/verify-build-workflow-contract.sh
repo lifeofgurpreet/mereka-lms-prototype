@@ -31,9 +31,9 @@ if ! rg -n '^[[:space:]]+target_environment:' "$BUILD_WORKFLOW" >/dev/null; then
   violations=1
 fi
 
-# Must default target environment to production.
-if ! rg -n '^[[:space:]]+default:[[:space:]]+production$' "$BUILD_WORKFLOW" >/dev/null; then
-  echo "❌ target_environment default is not production"
+# Must force explicit target selection during manual dispatch.
+if ! rg -n '^[[:space:]]+default:[[:space:]]+select-environment$' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ target_environment default is not select-environment"
   violations=1
 fi
 
@@ -44,12 +44,12 @@ if rg -n 'deploy_to_production' "$BUILD_WORKFLOW" >/dev/null; then
 fi
 
 # Update job contract
-if ! rg -n 'if:[[:space:]]+\$\{\{[[:space:]]*inputs\.update_gitops' "$BUILD_WORKFLOW" >/dev/null; then
-  echo "❌ update-gitops job does not gate on inputs.update_gitops"
+if ! rg -n "inputs\\.update_gitops[[:space:]]*&&[[:space:]]*inputs\\.target_environment[[:space:]]*!=[[:space:]]*'select-environment'" "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ update-gitops manual dispatch gate is missing explicit target selection"
   violations=1
 fi
 
-if ! rg -n 'TARGET_ENV="\$\{\{ inputs\.target_environment \|\| '\''production'\'' \}\}"' "$BUILD_WORKFLOW" >/dev/null; then
+if ! rg -n 'TARGET_ENV="\$\{\{ github\.event_name == '\''workflow_dispatch'\'' && inputs\.target_environment \|\| '\''production'\'' \}\}"' "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ Missing TARGET_ENV wiring from workflow input"
   violations=1
 fi
