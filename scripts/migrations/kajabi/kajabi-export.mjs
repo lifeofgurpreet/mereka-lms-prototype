@@ -38,6 +38,10 @@ const DEFAULT_RESOURCES = [
   "order_items",
   "forms",
   "form_submissions",
+  "blog_posts",
+  "landing_pages",
+  "contact_notes",
+  "podcasts",
 ];
 
 // -------- argument parsing -------------------------------------------------
@@ -370,6 +374,13 @@ async function ensureWebhook(token, event, siteId, targetUrl) {
         await exportFormSubmissions(token, baseParams, ids);
         break;
       }
+
+      case "blog_posts":
+      case "landing_pages":
+      case "contact_notes":
+      case "podcasts":
+        await exportCollection(token, resource, baseParams);
+        break;
 
       default:
         console.warn(`Unknown resource "${resource}" – skipping.`);

@@ -28,17 +28,60 @@ cd ~/projects/k8s/mereka-lms
 infisical run --env=prod --path=/mereka-lms/kajabi -- <command>
 ```
 
-**Validate credentials**:
-```bash
-infisical run --env=prod --path=/mereka-lms/kajabi -- node -e "
-const r = await fetch('https://api.kajabi.com/v1/oauth/token', {
-  method: 'POST', headers: {'Content-Type':'application/json'},
-  body: JSON.stringify({grant_type:'client_credentials',
-    client_id:process.env.KAJABI_CLIENT_ID,
-    client_secret:process.env.KAJABI_CLIENT_SECRET})
-}); const j = await r.json(); console.log(j.access_token ? 'TOKEN OK' : j);
-"
-```
+---
+
+## Kajabi API Coverage
+
+Endpoints confirmed via [official docs](https://developers.kajabi.com) and live probing (Feb 2026):
+
+| Endpoint | Status | Exported by |
+|----------|--------|-------------|
+| contacts | 200 | `kajabi-export.mjs` |
+| customers | 200 | `kajabi-export.mjs` |
+| contact_tags | 200 | `kajabi-export.mjs` |
+| custom_fields | 200 | `kajabi-export.mjs` |
+| offers | 200 | `kajabi-export.mjs` |
+| products | 200 | `kajabi-export.mjs` |
+| courses | 200 | `kajabi-export.mjs` |
+| purchases | 200 | `kajabi-export.mjs` |
+| transactions | 200 | `kajabi-export.mjs` |
+| orders | 200 | `kajabi-export.mjs` |
+| order_items | 200 | `kajabi-export.mjs` |
+| forms | 200 | `kajabi-export.mjs` |
+| form_submissions | 200 | `kajabi-export.mjs` |
+| blog_posts | 200 | `kajabi-export.mjs` |
+| landing_pages | 200 | `kajabi-export.mjs` |
+| contact_notes | 200 | `kajabi-export.mjs` |
+| podcasts | 200 | `kajabi-export.mjs` |
+| **completions** | **404** | No API — use tag-based workaround |
+| **certificates** | **404** | No API — use tag-based workaround |
+| **progress** | **404** | Not available |
+
+### Completion Data Workaround
+
+Kajabi has no completions/certificates API. However, lesson automations tag
+contacts on completion (e.g. `F101 - Course Completed`, `MYFC - Quiz 1 Completed`).
+
+`kajabi-export-completions.mjs` queries contacts by these tags to produce
+`completions.ndjson` — real completion data that can drive certificate issuance
+in Open edX.
+
+---
+
+## Contacts vs Users
+
+Kajabi "contacts" includes everyone who ever touched the site (leads, subscribers,
+form fills). Only a subset are actual course users:
+
+| Segment | Feb 2026 count | Import? |
+|---------|---------------|---------|
+| All contacts | 326K | No — too broad |
+| With enrollments (purchases) | ~73K | Yes — these are real learners |
+| Signed in 2+ times | ~106K | Alternative filter |
+| Never signed in | ~23K | No |
+
+**Decision**: Import only users with actual enrollments (~73K), not all 326K contacts.
+The `prepare_openedx_imports.py` script should be updated to filter accordingly.
 
 ---
 
@@ -57,22 +100,11 @@ infisical run --env=prod --path=/mereka-lms/kajabi -- \
     2>&1 | tee exports/kajabi/export_$(date +%Y%m%d).log
 ```
 
-**Duration**: ~2-3 hours (85K+ contacts, 100/page)
+**Duration**: ~3-4 hours (326K contacts at 100/page, plus other resources)
 
-**Expected output files**:
-
-| File | Expected count |
-|------|---------------|
-| `contacts.ndjson` | ~85,000+ |
-| `customers.ndjson` | ~85,000+ |
-| `courses_index.ndjson` | ~107+ |
-| `purchases.ndjson` | ~104,000+ |
-| `offers.ndjson` | ~375 |
-| `products.ndjson` | ~110 |
-| `transactions.ndjson` | varies |
-| `contact_tags.ndjson` | ~100 |
-| `forms.ndjson` | varies |
-| `form_submissions.ndjson` | varies |
+**IMPORTANT**: The export script resets each file before writing. If rate-limited
+mid-export, resume with `--resources <remaining> --start-page 1` — do NOT use
+`--start-page N` on a resource that was partially exported (it truncates the file first).
 
 ### 1b. Course Structure Export
 
@@ -84,35 +116,44 @@ infisical run --env=prod --path=/mereka-lms/kajabi -- \
     --delay 400
 ```
 
-**Duration**: ~45 min (107 courses, 400ms delay between requests)
-
-**Expected**: `structure/{modules,lessons,lesson_media,lesson_details,errors}.ndjson`
-
-### 1c. Certificate Eligibility
+### 1c. Completions Export (tag-based)
 
 ```bash
 infisical run --env=prod --path=/mereka-lms/kajabi -- \
-  node scripts/migrations/kajabi/kajabi-export-certificates.mjs \
-    --out exports/kajabi
+  node scripts/migrations/kajabi/kajabi-export-completions.mjs \
+    --out exports/kajabi \
+    2>&1 | tee exports/kajabi/completions_$(date +%Y%m%d).log
 ```
 
-**Expected**: `certificate_eligibility.ndjson`
+**Duration**: Several hours (50 tags, many with 90K+ contacts each)
+
+**Output**: `completions.ndjson` — each record has:
+```json
+{
+  "email": "user@example.com",
+  "name": "User Name",
+  "contact_id": "...",
+  "tag_id": "...",
+  "tag_name": "MYFC - Course Completed",
+  "tag_type": "course_completed",
+  "course_prefix": "MYFC"
+}
+```
+
+Tag types: `course_completed`, `quiz_completed`, `certificate`, `onboarded`, `started`
 
 ### 1d. Sanity Check
 
 ```bash
 echo "=== Export Counts ==="
 for f in exports/kajabi/*.ndjson; do
-  echo "$(wc -l < "$f") $f"
+  printf "%8d %s\n" "$(wc -l < "$f")" "$(basename $f)"
 done
 echo "=== Structure Counts ==="
 for f in exports/kajabi/structure/*.ndjson; do
-  echo "$(wc -l < "$f") $f"
+  printf "%8d %s\n" "$(wc -l < "$f")" "$(basename $f)"
 done
 ```
-
-Compare against Nov 2024 baseline: contacts ~85K, customers ~85K, courses ~107, purchases ~104K.
-If counts differ by >10%, investigate before proceeding.
 
 ---
 
@@ -127,8 +168,6 @@ python3 scripts/migrations/kajabi/transform_data.py \
   --output-dir scripts/migrations/kajabi/output
 ```
 
-**Outputs**: `users.csv`, `enrollments.csv`, `courses.csv`, `course_structure.json`, `course_summary.csv`
-
 ### 2b. Build OLX Course Packages
 
 ```bash
@@ -138,8 +177,6 @@ python3 scripts/migrations/kajabi/build_course_packages.py \
   --output-dir scripts/migrations/kajabi/output/course_packages \
   --org MEREKA --course-prefix MEKA- --run-prefix RUN-
 ```
-
-**Outputs**: ~107 `.tar.gz` OLX tarballs + `course_packages_manifest.csv`
 
 Course key format: `course-v1:MEREKA+MEKA-{kajabi_id}+RUN-{kajabi_id}`
 
@@ -151,18 +188,13 @@ python3 scripts/migrations/kajabi/prepare_openedx_imports.py \
   --manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv
 ```
 
-**Outputs**: `openedx/users_import.csv`, `openedx/enrollments_import.csv`
+**TODO**: Filter users_import.csv to only enrolled users (~73K), not all contacts.
 
 ---
 
 ## Phase 3: Import into Open edX
 
 > **STOP**: Confirm the Open edX instance is empty and ready before proceeding.
-> ```bash
-> kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell \
->   -c "from django.contrib.auth.models import User; print('Users:', User.objects.count())" \
->   --settings=tutor.production
-> ```
 
 ### 3a. Import Courses (into CMS)
 
@@ -190,11 +222,8 @@ python3 scripts/migrations/kajabi/import_courses.py \
 python3 scripts/migrations/kajabi/run_batches.py users \
   --csv scripts/migrations/kajabi/output/openedx/users_import.csv \
   --batch-size 2000 \
-  --namespace mereka-lms \
-  2>&1 | tee scripts/migrations/kajabi/logs/users_import_$(date +%Y%m%d).log
+  --namespace mereka-lms
 ```
-
-**Expected**: ~43 batches, ~84K users
 
 ### 3c. Import Enrollments (batched, resumable)
 
@@ -202,11 +231,32 @@ python3 scripts/migrations/kajabi/run_batches.py users \
 python3 scripts/migrations/kajabi/run_batches.py enrollments \
   --csv scripts/migrations/kajabi/output/openedx/enrollments_import.csv \
   --batch-size 2000 \
-  --namespace mereka-lms \
-  2>&1 | tee scripts/migrations/kajabi/logs/enrollments_import_$(date +%Y%m%d).log
+  --namespace mereka-lms
 ```
 
-**Expected**: ~69 batches, ~137K enrollments
+### 3d. Issue Certificates (from completions data)
+
+After users and enrollments are imported, use `completions.ndjson` to issue certs:
+
+```bash
+# Filter to course_completed tags only, extract unique emails per course_prefix
+python3 -c "
+import json
+completions = {}
+with open('exports/kajabi/completions.ndjson') as f:
+    for line in f:
+        d = json.loads(line)
+        if d['tag_type'] == 'course_completed':
+            key = (d['email'], d['course_prefix'])
+            if key not in completions:
+                completions[key] = d
+print(f'Unique course completions: {len(completions)}')
+# TODO: Map course_prefix to Open edX course key, then call generate_certificates
+"
+```
+
+Full certificate issuance script TBD — requires mapping tag prefixes (F101, MYFC, PB, etc.)
+to Open edX course keys.
 
 ---
 
@@ -215,26 +265,17 @@ python3 scripts/migrations/kajabi/run_batches.py enrollments \
 ### 4a. Count Checks
 
 ```bash
-# Courses
 kubectl exec -n mereka-lms deploy/lms -- \
   /bin/bash -c "cd /openedx/edx-platform && \
-  ./manage.py lms shell -c 'from xmodule.modulestore.django import modulestore; \
-  print(\"Courses:\", len(modulestore().get_courses()))' --settings=tutor.production"
-
-# Users
-kubectl exec -n mereka-lms deploy/lms -- \
-  /bin/bash -c "cd /openedx/edx-platform && \
-  ./manage.py lms shell -c 'from django.contrib.auth.models import User; \
-  print(\"Users:\", User.objects.count())' --settings=tutor.production"
-
-# Enrollments
-kubectl exec -n mereka-lms deploy/lms -- \
-  /bin/bash -c "cd /openedx/edx-platform && \
-  ./manage.py lms shell -c 'from common.djangoapps.student.models import CourseEnrollment; \
-  print(\"Enrollments:\", CourseEnrollment.objects.count())' --settings=tutor.production"
+  ./manage.py lms shell -c '
+from django.contrib.auth.models import User
+from common.djangoapps.student.models import CourseEnrollment
+from xmodule.modulestore.django import modulestore
+print(\"Courses:\", len(modulestore().get_courses()))
+print(\"Users:\", User.objects.count())
+print(\"Enrollments:\", CourseEnrollment.objects.count())
+' --settings=tutor.production"
 ```
-
-**Expected**: ~107 courses, ~84K users, ~137K enrollments
 
 ### 4b. Verification Script
 
@@ -246,36 +287,16 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
   --output-dir scripts/migrations/kajabi/output/verification
 ```
 
-### 4c. UI Spot-Check
-
-- Browse LMS catalog — courses should appear
-- Open 2-3 courses — check content renders
-- Check Studio dashboard — verify course list
-
----
-
-## Phase 5: Post-Migration (optional, later)
-
-1. **Lesson content scraping** — Kajabi API doesn't expose lesson body HTML.
-   Run `scrape_lessons.py` with admin creds to capture real content.
-
-2. **Webhook deployment** — Deploy `services/kajabi-webhook/` to Cloud Run for
-   real-time sync of new purchases/enrollments.
-
-3. **Certificate generation** — Use certificate eligibility data + Open edX
-   `generate_certificates` command.
-
 ---
 
 ## Troubleshooting
 
 | Issue | Fix |
 |-------|-----|
-| Export hangs on large collection | Restart with `--resources <resource> --start-page <N>` |
-| `Missing KAJABI_CLIENT_ID` | Ensure `infisical run --path=/mereka-lms/kajabi` prefix |
+| Export rate-limited | Wait 2-5 min, restart with `--resources <remaining>` (NOT `--start-page`, it truncates) |
+| `Missing KAJABI_CLIENT_ID` | Use `infisical run --path=/mereka-lms/kajabi` prefix |
 | Course import fails | Check CMS pod logs: `kubectl logs -n mereka-lms deploy/cms --tail=50` |
-| Batch import resumes from wrong offset | Delete offset file in `scripts/migrations/kajabi/logs/` |
-| Users import skips rows | Check for missing email/username in CSV |
+| Batch import resumes wrong | Delete offset file in `scripts/migrations/kajabi/logs/` |
 
 ---
 
@@ -283,63 +304,76 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 
 ### Completed
 
-- [x] **Phase 0**: Kajabi credentials stored in Infisical at `/mereka-lms/kajabi` (prod + dev)
-- [x] **Phase 1**: Full export to `exports/kajabi/` (691MB total)
-- [x] **Phase 2**: Transform complete — CSVs and OLX packages ready
+- [x] **Infisical**: Kajabi credentials at `/mereka-lms/kajabi` (prod + dev)
+- [x] **Full API export**: All resources to `exports/kajabi/` (691MB)
+- [x] **Course structure**: 218 courses, 846 modules, 3,146 lessons
+- [x] **New endpoints**: landing_pages (22), podcasts (1), blog_posts (0), contact_notes (0)
+- [x] **Transform**: CSVs + 109 OLX packages ready
+- [x] **Script updates**: Added new endpoints, removed fake certificate script, added completions exporter
 
-### Actual Export Counts (Feb 2026)
+### In Progress
 
-| Resource | Count | Notes |
-|----------|-------|-------|
-| contacts | 326,104 | ~4x growth since Nov 2024 |
-| customers | 189,640 | ~2x growth |
-| courses_index | 218 | ~2x growth |
-| purchases | 219,204 | ~2x growth |
-| offers | 768 | |
-| products | 224 | |
-| contact_tags | 196 | |
-| custom_fields | 52 | |
-| certificate_eligibility | 386,620 | |
-| structure/modules | 846 | |
-| structure/lessons | 3,146 | |
-| structure/lesson_media | 1,394 | |
-
-### Transform Output
-
-| File | Records |
-|------|---------|
-| users_import.csv | ~326K |
-| enrollments_import.csv | ~386K |
-| course_packages | 109 OLX tarballs |
-| courses.csv | 218 courses |
+- [ ] **Completions export**: Tag-based completion data (50 tags, running on VPS)
 
 ### Pending
 
-- [ ] **Phase 3**: Import into Open edX (courses, users, enrollments)
-- [ ] **Phase 4**: Verification
-- [ ] **Phase 5**: Post-migration (lesson content scraping, webhooks, certificates)
+- [ ] **Filter users**: Update pipeline to import only enrolled users (~73K), not all contacts (326K)
+- [ ] **Import**: Courses, users, enrollments into Open edX
+- [ ] **Certificates**: Map tag prefixes to course keys, run `generate_certificates`
+- [ ] **Lesson content**: Scrape HTML bodies from Kajabi admin (API doesn't expose them)
+- [ ] **Webhooks**: Deploy real-time sync for new purchases/enrollments
+
+### Export Counts (Feb 2026)
+
+| Resource | Count |
+|----------|-------|
+| contacts | 326,104 |
+| customers | 189,640 |
+| courses_index | 218 |
+| purchases | 219,204 |
+| offers | 768 |
+| products | 224 |
+| contact_tags | 196 |
+| custom_fields | 52 |
+| landing_pages | 22 |
+| podcasts | 1 |
+| structure/modules | 846 |
+| structure/lessons | 3,146 |
+| structure/lesson_media | 1,394 |
+| completions | (in progress) |
+
+### Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `kajabi-export.mjs` | Full API export (17 resource types) |
+| `kajabi-course-structure.mjs` | Course modules/lessons/media |
+| `kajabi-export-completions.mjs` | Tag-based completion data |
+| `transform_data.py` | NDJSON → CSVs |
+| `build_course_packages.py` | CSVs → OLX tarballs |
+| `prepare_openedx_imports.py` | Generate import-ready CSVs |
+| `import_courses.py` | OLX → CMS import |
+| `run_batches.py` | Batched user/enrollment import |
+| `scrape_lessons.py` | Playwright-based lesson HTML scraper |
 
 ### File Locations (VPS)
 
 ```
 ~/projects/k8s/mereka-lms/
-├── exports/kajabi/                          # Raw NDJSON exports (691MB)
-│   ├── contacts.ndjson                      # 326K records
-│   ├── customers.ndjson                     # 190K records
-│   ├── purchases.ndjson                     # 219K records
+├── exports/kajabi/                          # Raw NDJSON exports
+│   ├── contacts.ndjson                      # 326K contacts
+│   ├── customers.ndjson                     # 190K customers
+│   ├── purchases.ndjson                     # 219K purchases
 │   ├── courses_index.ndjson                 # 218 courses
-│   ├── certificate_eligibility.ndjson       # 387K records
+│   ├── completions.ndjson                   # Tag-based completions (in progress)
+│   ├── landing_pages.ndjson                 # 22 landing pages
+│   ├── podcasts.ndjson                      # 1 podcast
 │   └── structure/                           # Course structure
-├── scripts/migrations/kajabi/output/        # Transformed data
-│   ├── users.csv                            # Combined contacts/customers
-│   ├── enrollments.csv                      # Purchase→enrollment mappings
-│   ├── courses.csv                          # Course metadata
-│   ├── course_structure.json                # Nested structure
-│   ├── course_packages/                     # 109 OLX tarballs
-│   │   └── course_packages_manifest.csv
-│   └── openedx/                             # Import-ready CSVs
-│       ├── users_import.csv
-│       └── enrollments_import.csv
+├── scripts/migrations/kajabi/
+│   ├── output/                              # Transformed data
+│   │   ├── course_packages/                 # 109 OLX tarballs
+│   │   └── openedx/                         # Import-ready CSVs
+│   └── logs/                                # Import logs
 └── docs/migrations/kajabi/
-    └── KAJABI_REMIGRATION_RUNBOOK.md        # This file
+    └── KAJABI_REMIGRATION_RUNBOOK.md         # This file
 ```
