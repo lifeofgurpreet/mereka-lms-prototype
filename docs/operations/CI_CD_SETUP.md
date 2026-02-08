@@ -76,6 +76,8 @@ Runs on every PR and push to main:
 5. **Security Scan** - TruffleHog for leaked secrets, Hadolint for Dockerfiles
 6. **Branding Source Guard** - Includes Studio authoring selector check and token provenance lock
    via `RUN_LIVE_GATE=0 ./scripts/branding/run-branding-gates.sh prod`
+7. **SITE_ID Hardening Guard** - Enforces env-driven `DJANGO_SITE_ID` wiring and multisite
+   fallback logic in LMS/CMS production settings (`scripts/qa/verify-site-id-hardening.sh`)
 
 ### Build Tutor Images (`build-tutor-images.yml`)
 
@@ -148,6 +150,7 @@ Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to ru
 - release-evidence workflow contract check (digest resolution + strict dry-run flags)
 - kustomize deprecation key guard (`patchesStrategicMerge/commonLabels/patchesJson6902`)
 - dev/prod image parity guard (local overlay tags must match production overlay tags)
+- SITE_ID hardening guard (no hardcoded production SITE_ID; multisite fallback present)
 - production tag guard (`no latest`)
 - active docs env-model lint
 

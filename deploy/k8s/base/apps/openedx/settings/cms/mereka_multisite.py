@@ -9,6 +9,7 @@ package so it can be referenced from CMS middleware paths.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from typing import Optional
 from urllib.parse import urlsplit
 
@@ -38,6 +39,47 @@ def _candidate_site_domains(host: str) -> list[str]:
     return out
 
 
+def _domain_from_env_value(value: str) -> str:
+    value = (value or "").strip()
+    if not value:
+        return ""
+    if "://" in value:
+        value = (urlsplit(value).hostname or "").strip()
+    return _strip_port(value.lower())
+
+
+def _env_site_domain_candidates() -> list[str]:
+    raw_candidates = [
+        os.environ.get("MEREKA_LMS_DOMAIN", ""),
+        os.environ.get("MEREKA_LMS_BASE_URL", ""),
+        os.environ.get("LMS_HOST", ""),
+        os.environ.get("MEREKA_BIJI_DOMAIN", ""),
+    ]
+    domains: list[str] = []
+    for raw in raw_candidates:
+        domain = _domain_from_env_value(raw)
+        if not domain:
+            continue
+        domains.extend(_candidate_site_domains(domain))
+
+    seen = set()
+    out: list[str] = []
+    for domain in domains:
+        if domain in seen:
+            continue
+        seen.add(domain)
+        out.append(domain)
+    return out
+
+
+def _fallback_site_without_request(Site):
+    for candidate in _env_site_domain_candidates():
+        site = Site.objects.filter(domain__iexact=candidate).first()
+        if site is not None:
+            return site
+    return Site.objects.order_by("id").first()
+
+
 def patch_sites_framework() -> None:
     global _PATCHED
     if _PATCHED:
@@ -53,7 +95,13 @@ def patch_sites_framework() -> None:
                 site = Site.objects.filter(domain__iexact=candidate).first()
                 if site is not None:
                     return site
-        return original_get_current(self, None)
+        try:
+            return original_get_current(self, None)
+        except Exception:
+            site = _fallback_site_without_request(Site)
+            if site is not None:
+                return site
+            raise
 
     get_current._mereka_patched = True  # type: ignore[attr-defined]
     SiteManager.get_current = get_current  # type: ignore[assignment]

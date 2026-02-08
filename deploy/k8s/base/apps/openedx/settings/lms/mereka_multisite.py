@@ -15,7 +15,9 @@ This module is imported via middleware in production settings.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from typing import Optional
+from urllib.parse import urlsplit
 
 
 _PATCHED = False
@@ -52,6 +54,53 @@ def _candidate_site_domains(host: str) -> list[str]:
     return out
 
 
+def _domain_from_env_value(value: str) -> str:
+    value = (value or "").strip()
+    if not value:
+        return ""
+    # Support both host values (academyv2.mereka.io) and full URLs.
+    if "://" in value:
+        value = (urlsplit(value).hostname or "").strip()
+    return _strip_port(value.lower())
+
+
+def _env_site_domain_candidates() -> list[str]:
+    raw_candidates = [
+        os.environ.get("MEREKA_LMS_DOMAIN", ""),
+        os.environ.get("MEREKA_LMS_BASE_URL", ""),
+        os.environ.get("LMS_HOST", ""),
+        os.environ.get("MEREKA_BIJI_DOMAIN", ""),
+        os.environ.get("MEREKA_SKILLOURFUTURE_DOMAIN", ""),
+    ]
+    domains: list[str] = []
+    for raw in raw_candidates:
+        domain = _domain_from_env_value(raw)
+        if not domain:
+            continue
+        domains.extend(_candidate_site_domains(domain))
+
+    # De-dupe while preserving order.
+    seen = set()
+    out: list[str] = []
+    for domain in domains:
+        if domain in seen:
+            continue
+        seen.add(domain)
+        out.append(domain)
+    return out
+
+
+def _fallback_site_without_request(Site):
+    """
+    Resolve a safe default Site row when SITE_ID is stale after DB restores.
+    """
+    for candidate in _env_site_domain_candidates():
+        site = Site.objects.filter(domain__iexact=candidate).first()
+        if site is not None:
+            return site
+    return Site.objects.order_by("id").first()
+
+
 def patch_sites_framework() -> None:
     """
     Make Site.objects.get_current(request) prefer host-based site resolution
@@ -72,8 +121,16 @@ def patch_sites_framework() -> None:
                 site = Site.objects.filter(domain__iexact=candidate).first()
                 if site is not None:
                     return site
-        # Fall back to the original behavior (SITE_ID-based).
-        return original_get_current(self, None)
+        # Fall back to the original behavior (SITE_ID-based). If the configured
+        # SITE_ID points to a missing row after restore/migration, use domain-
+        # based fallback so endpoints such as /api/mfe_config/v1 stay healthy.
+        try:
+            return original_get_current(self, None)
+        except Exception:
+            site = _fallback_site_without_request(Site)
+            if site is not None:
+                return site
+            raise
 
     # Idempotent patching guard.
     get_current._mereka_patched = True  # type: ignore[attr-defined]
@@ -137,4 +194,3 @@ class MerekaCookieDomainMiddleware:
                 response.cookies[name]["domain"] = policy.domain
 
         return response
-

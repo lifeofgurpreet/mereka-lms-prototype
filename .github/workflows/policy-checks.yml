@@ -21,6 +21,7 @@ jobs:
           bash -n scripts/qa/verify-release-evidence-workflow.sh
           bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
           bash -n scripts/qa/verify-dev-prod-image-parity.sh
+          bash -n scripts/qa/verify-site-id-hardening.sh
           bash -n scripts/qa/verify-no-latest-prod-tags.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
 
@@ -51,6 +52,10 @@ jobs:
       - name: Verify dev/prod image parity
         run: |
           ./scripts/qa/verify-dev-prod-image-parity.sh
+
+      - name: Verify SITE_ID hardening contract
+        run: |
+          ./scripts/qa/verify-site-id-hardening.sh
 
       - name: Verify no mutable latest tags in prod overlays
         run: |

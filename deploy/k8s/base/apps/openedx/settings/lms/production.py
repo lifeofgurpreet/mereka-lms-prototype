@@ -211,9 +211,9 @@ CACHES = {
     }
 }
 
-# The default Django contrib site is the one associated to the LMS domain name. 1 is
-# usually "example.com", so it's the next available integer.
-SITE_ID = 6
+# Keep SITE_ID configurable to avoid hardcoded DB-id coupling across restores.
+# Request paths use host-based site resolution via mereka_multisite middleware.
+SITE_ID = int(os.environ.get("DJANGO_SITE_ID", "1"))
 
 # Contact addresses
 CONTACT_MAILING_ADDRESS = f"Mereka Academy - {MEREKA_LMS_BASE_URL}"

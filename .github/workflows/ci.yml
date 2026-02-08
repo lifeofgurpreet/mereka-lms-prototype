@@ -76,6 +76,7 @@ jobs:
           bash -n scripts/qa/verify-release-evidence-workflow.sh
           bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
           bash -n scripts/qa/verify-dev-prod-image-parity.sh
+          bash -n scripts/qa/verify-site-id-hardening.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
 
       - name: Run local observability audit
@@ -109,6 +110,10 @@ jobs:
       - name: Verify dev/prod image parity
         run: |
           ./scripts/qa/verify-dev-prod-image-parity.sh
+
+      - name: Verify SITE_ID hardening contract
+        run: |
+          ./scripts/qa/verify-site-id-hardening.sh
 
       - name: Lint active docs env model wording
         run: |
