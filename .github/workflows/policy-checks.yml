@@ -1,0 +1,31 @@
+name: Policy Checks
+
+on:
+  workflow_dispatch:
+
+jobs:
+  policy-checks:
+    name: Run Release Policy Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Script syntax
+        run: |
+          bash -n scripts/infra/release-openedx-gitops.sh
+          bash -n scripts/qa/verify-release-automation.sh
+          bash -n scripts/qa/verify-no-latest-prod-tags.sh
+          bash -n scripts/qa/lint-active-docs-env-model.sh
+
+      - name: Verify release automation contract
+        run: |
+          ./scripts/qa/verify-release-automation.sh
+
+      - name: Verify no mutable latest tags in prod overlays
+        run: |
+          ./scripts/qa/verify-no-latest-prod-tags.sh
+
+      - name: Lint active docs env model wording
+        run: |
+          ./scripts/qa/lint-active-docs-env-model.sh
