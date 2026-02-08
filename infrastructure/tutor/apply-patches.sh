@@ -293,6 +293,18 @@ for target in targets:
             text,
         )
 
+    def ensure_mfe_plugin_framework_dependency(text):
+        plugin_line = "RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
+        legacy_line = "RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
+        if legacy_line in text:
+            text = text.replace(legacy_line, plugin_line)
+        if plugin_line in text:
+            return text
+        brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'"
+        if brand_line not in text:
+            return text
+        return text.replace(brand_line, f"{brand_line}\n{plugin_line}")
+
     # Ensure MFEs build against Node 18 with the required toolchain.
     if "docker.io/node:12-bullseye-slim" in updated:
         updated = updated.replace(
@@ -308,6 +320,7 @@ for target in targets:
     updated = ensure_mfe_cookie_env(updated)
     updated = ensure_mfe_theme_copy(updated)
     updated = ensure_mfe_npm_resilience(updated)
+    updated = ensure_mfe_plugin_framework_dependency(updated)
 
     # Allow remote root access when using upstream MySQL images.
     if "MYSQL_ROOT_PASSWORD" in updated and "MYSQL_ROOT_HOST" not in updated:

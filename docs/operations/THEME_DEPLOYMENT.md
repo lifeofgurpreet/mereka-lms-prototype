@@ -203,6 +203,9 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 # Build OpenEdX image (LMS/CMS/workers)
 tutor images build openedx
 
+# Preflight MFE generated Dockerfile prerequisites
+./scripts/qa/verify-mfe-build-prereqs.sh
+
 # Build MFE image (if MFE styling changed)
 tutor images build mfe
 
@@ -216,6 +219,9 @@ tutor images build mfe
 **Build discipline:**
 - Run only one `tutor images build mfe` at a time.
 - If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same command after the active run exits; do not launch parallel retries.
+- If MFE build fails with `Can't resolve '@openedx/frontend-plugin-framework'`, rerun
+  `./infrastructure/tutor/apply-patches.sh` before retrying; it patches generated MFE Dockerfiles
+  to inject the required dependency install for Indigo `env.config.jsx`.
 - If authn index points to an unbranded CSS bundle, repair deterministically before push:
   `./scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>`
 

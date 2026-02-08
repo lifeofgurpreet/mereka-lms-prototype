@@ -23,6 +23,8 @@ Run this from repo root:
 
 # 2) Validate branding from source to live
 AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod
+# includes source-time MFE prerequisite contract check:
+# ./scripts/qa/verify-mfe-build-prereqs.sh
 ```
 
 Optional strict parity mode:
@@ -62,6 +64,8 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
 
 1. Run source/live branding gates.
 2. Build/push images (`openedx`, `openedx-mfe` when changed).
+   - Before `tutor images build mfe`, run:
+     `scripts/qa/verify-mfe-build-prereqs.sh`
    - After `tutor images build mfe`, verify the built image before push:
      `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
    - CI now enforces this automatically in `.github/workflows/build-tutor-images.yml`
@@ -110,17 +114,28 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
      `COPY indigo/mereka /openedx/app/mereka` into `authn-common` when Tutor template
      drift omits them.
 
-8. **Studio authoring create-flow styles regress silently**
+8. **`tutor images build mfe` fails at `authn-prod` with `Can't resolve '@openedx/frontend-plugin-framework'`**
+   - Cause: Indigo `env.config.jsx` imports plugin framework, but generated MFE Dockerfile is missing
+     dependency install in one or more `*-common` stages.
+   - Fix:
+     1) rerun `./infrastructure/tutor/apply-patches.sh`
+     2) rerun `tutor images build mfe`
+     3) validate image contract with `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+   - Prevention: patch script now injects
+     `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
+     idempotently across generated MFE common stages.
+
+9. **Studio authoring create-flow styles regress silently**
    - Cause: generic Studio CSS checks pass but create-course/create-library selectors drift.
    - Fix: enforce `scripts/qa/verify-studio-authoring-branding.sh` in source and live gates.
 
-9. **Token source drift across repos**
+10. **Token source drift across repos**
    - Cause: `assets/branding/tokens.css` changes without pinned upstream source metadata.
    - Fix: maintain `assets/branding/tokens.provenance.json`, refresh using
      `scripts/branding/update-token-provenance.sh`, and enforce with
      `scripts/branding/verify-token-drift.sh`.
 
-10. **Studio still imports Google fonts after openedx rebuild**
+11. **Studio still imports Google fonts after openedx rebuild**
    - Cause: regex in generated Dockerfile patch block is over-escaped and does not match
      real import lines.
    - Fix:
@@ -129,7 +144,7 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
         in both strip blocks
      3) rebuild/push `openedx`, bump GitOps ref/tag, rerun strict branding gates.
 
-11. **Build command appears to "finish" instantly (no real image change)**
+12. **Build command appears to "finish" instantly (no real image change)**
    - Cause: `tutor images build openedx` executed without `TUTOR_ROOT` set; Tutor exits early with
      project-root/config error.
    - Fix:
@@ -137,7 +152,7 @@ Override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` whe
      2) rerun build
      3) verify local image digest changed before tagging/pushing.
 
-12. **Argo `ComparisonError` with `not our ref` during GitOps rollout**
+13. **Argo `ComparisonError` with `not our ref` during GitOps rollout**
    - Cause: incorrect pinned SHA in `bbi-infrastructure` (`?ref=<sha>` typo or stale SHA).
    - Fix:
      1) get exact SHA from source repo: `git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD`

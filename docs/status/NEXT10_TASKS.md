@@ -1,5 +1,5 @@
-# Next 10 Tasks (Updated 2026-02-07)
-_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
+# Next 10 Tasks (Updated 2026-02-08)
+_Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-08_
 
 ## Recent Fixes (2026-02-07)
 - ✅ Platform admins enforced and verified (prod + dev): `gurpreet@biji-biji.com`, `malasari@mereka.my`
@@ -32,6 +32,17 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 - ⚙️ New follow-up: deploy refreshed openedx image to clear live Studio token/Google-font drift (`mereka-lms-2bnq`)
 - ✅ GitOps follow-through completed: `bbi-infrastructure` pinned ref + overlay patch now prune legacy `Service/mongodb` in production (`mereka-lms-3ax6`)
 - ✅ GitOps image override contract enforcement added (`scripts/qa/verify-gitops-image-overrides.sh`) and wired into CI + operations gates (`mereka-lms-12yy`)
+- ⚙️ In progress: fresh non-repair MFE branding pipeline (`mereka-lms-vy6m`) with Tutor patch hardening for
+  `@openedx/frontend-plugin-framework` dependency drift in generated MFE Dockerfile stages
+- ✅ MFE branding preflight gate added and wired into canonical branding execution:
+  `./scripts/qa/verify-mfe-build-prereqs.sh` now runs inside `run-branding-gates.sh`
+  source phase to fail fast on generated Dockerfile prerequisite drift
+- ✅ Credentials branding contract verified live and closed (`mereka-lms-3ur`) via strict deep branding gate
+  (admin login authn shell + branded `/authn/*` assets + API-first `/health/` root contract)
+- ✅ Stripe webhook delivery probe confirmed accepted (HTTP 200) against
+  `https://ecommerce.academyv2.mereka.io/api/v2/webhooks/stripe/`
+- ⚙️ New follow-up: make auth hardening checks env-selective + timeout-safe for deterministic
+  CI/runtime completion (`mereka-lms-11ft`)
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 
@@ -68,11 +79,11 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-07_
 | # | Task | Owner | Status | Notes |
 |---|------|-------|--------|-------|
 | 1 | Restore MCT/Kajabi courses into Atlas | Data | 💤 Pending | Bead: `mereka-lms-hd3` (awaiting export artifacts). |
-| 2 | Ecommerce checkout readiness validation | Infra | ✅ Verified | Stripe keys + webhook secret are injected and webhook delivery is accepted (HTTP 200). Bead: `mereka-lms-xw6` (closed). Remaining: run a real test checkout and confirm order state transitions. |
+| 2 | Ecommerce checkout readiness validation | Infra | ✅ Verified | Stripe keys + webhook secret are injected and webhook delivery probe is accepted (HTTP 200). Bead: `mereka-lms-xw6` (closed). Remaining: run a real test checkout and confirm order state transitions. |
 | 3 | MFE theming hardening (authn/account/learning) | Product | 💤 Pending | Bead: `mereka-lms-29o`. |
 | 4 | Learner dashboard + courseware styling | Product | 💤 Pending | Bead: `mereka-lms-2t0`. |
 | 5 | Studio authoring UI polish | Product | 💤 Pending | Bead: `mereka-lms-3ou`. |
-| 6 | Credentials + forum theming | Product | 💤 Pending | Beads: `mereka-lms-3ur`, `mereka-lms-3qh`. |
+| 6 | Credentials + forum theming | Product | ⚙️ In progress | Credentials theming contract is closed (`mereka-lms-3ur`); forum UI theming remains (`mereka-lms-3qh`). |
 | 7 | Visual regression gate for branding | Product | ✅ Delivered | `run-branding-gates.sh` now supports visual diff mode + bootstrap-safe baseline seeding; VPS cron wrapper available for continuous checks. Bead: `mereka-lms-3mz`. |
 | 8 | Formalize DR: backups + restore drills | SRE | ⚙️ In progress | Bead: `mereka-lms-usv`. |
 | 9 | Multi-site governance hardening | Infra | ⚙️ In progress | Strict governance drift checks now block on core config mismatches and org-ownership validation. |

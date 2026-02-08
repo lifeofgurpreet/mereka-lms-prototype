@@ -791,6 +791,45 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 ---
 
+### Issue 9c: `tutor images build mfe` fails in `authn-prod` with plugin framework error
+
+**Symptoms:**
+- MFE build fails at `RUN npm run build` in `authn-prod`.
+- Webpack shows:
+  `Module not found: Error: Can't resolve '@openedx/frontend-plugin-framework' in '/openedx/app'`
+
+**Root Cause:**
+- Indigo `env.config.jsx` imports `@openedx/frontend-plugin-framework`.
+- Generated MFE Dockerfile is missing dependency install in one or more `*-common` stages.
+
+**Fix:**
+1. Run MFE build prereq preflight:
+   ```bash
+   ./scripts/qa/verify-mfe-build-prereqs.sh
+   ```
+2. Regenerate build context with patch script:
+   ```bash
+   ./infrastructure/tutor/apply-patches.sh
+   ```
+3. Re-run full MFE build:
+   ```bash
+   source .venv/bin/activate
+   export TUTOR_ROOT="$(pwd)/tutor_env"
+   tutor images build mfe
+   ```
+4. Validate branding contract before push/deploy:
+   ```bash
+   ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
+   ```
+
+**Notes:**
+- `apply-patches.sh` now injects
+  `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
+  idempotently across MFE common stages.
+- Do not hand-edit `tutor_env/env/plugins/mfe/build/mfe/Dockerfile`; it is generated.
+
+---
+
 ### Issue 10: Database Connection Errors
 
 **Symptoms:**

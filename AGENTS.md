@@ -514,9 +514,16 @@ Regenerate hostname registry (after domain changes):
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Verify MFE image branding before push/deploy:
   `./scripts/qa/verify-mfe-image-branding.sh <image_ref>` (ensures authn `index.html` references a branded CSS bundle and revision marker).
+- Verify MFE build prerequisites before long builds:
+  `./scripts/qa/verify-mfe-build-prereqs.sh` (asserts patch-source contract + generated Dockerfile plugin dependency wiring).
 - Root-cause authn parity guard: `./infrastructure/tutor/apply-patches.sh` enforces both
   `COPY indigo/env.config.jsx /openedx/app/` and `COPY indigo/mereka /openedx/app/mereka`
   inside `authn-common` if Tutor template drift removes them.
+- If `tutor images build mfe` fails in `authn-prod` with
+  `Module not found: Can't resolve '@openedx/frontend-plugin-framework'`, rerun
+  `./infrastructure/tutor/apply-patches.sh` (it injects
+  `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'` into MFE common stages).
+  Do not hot-edit generated Dockerfiles under `tutor_env/`.
 - GitOps pinned-ref helper for cross-repo rollout:
   `./scripts/infra/prepare-bbi-infra-ref-bump.sh [--apply]`
   (updates `bbi-infrastructure/apps/mereka-lms/base/kustomization.yaml` ref to current commit).

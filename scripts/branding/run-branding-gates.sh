@@ -14,6 +14,7 @@ Environment flags:
   RUN_AUDIT=1|0                       Default: 1
   AUDIT_STRICT=1|0                    Default: 0 (pass --strict to audit-branding-surfaces)
   RUN_STUDIO_AUTHORING_CHECK=1|0      Default: 1
+  RUN_MFE_PREREQ_CHECK=1|0            Default: 1
   STRICT_NO_GOOGLE_FONTS=1|0          Default: 0 (passed to studio authoring check)
   STRICT_PROXY_AUTHN_BRANDING=1|0     Default: 0 (enforce branded /authn assets on service domains)
   RUN_SCREENSHOTS=1|0                 Default: 0
@@ -47,6 +48,7 @@ RUN_LIVE_GATE="${RUN_LIVE_GATE:-1}"
 RUN_AUDIT="${RUN_AUDIT:-1}"
 AUDIT_STRICT="${AUDIT_STRICT:-0}"
 RUN_STUDIO_AUTHORING_CHECK="${RUN_STUDIO_AUTHORING_CHECK:-1}"
+RUN_MFE_PREREQ_CHECK="${RUN_MFE_PREREQ_CHECK:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_VISUAL_REGRESSION="${RUN_VISUAL_REGRESSION:-0}"
 VISUAL_THRESHOLD="${VISUAL_THRESHOLD:-0.06}"
@@ -65,6 +67,10 @@ fi
 run_source_gate() {
   echo "==> Source gate: verify-branding-health (${BRANDING_LEVEL})"
   BRANDING_LEVEL="$BRANDING_LEVEL" "$REPO_ROOT/scripts/branding/verify-branding-health.sh"
+  if [[ "$RUN_MFE_PREREQ_CHECK" == "1" ]]; then
+    echo "==> Source gate: verify-mfe-build-prereqs"
+    "$REPO_ROOT/scripts/qa/verify-mfe-build-prereqs.sh"
+  fi
   if [[ "$RUN_STUDIO_AUTHORING_CHECK" == "1" ]]; then
     echo "==> Source gate: verify-studio-authoring-branding (source-only)"
     "$REPO_ROOT/scripts/qa/verify-studio-authoring-branding.sh" prod --source-only

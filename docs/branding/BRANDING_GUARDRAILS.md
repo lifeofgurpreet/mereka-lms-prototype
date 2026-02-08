@@ -44,6 +44,8 @@ What this enforces:
 
 ```bash
 ./scripts/branding/run-branding-gates.sh prod
+# Includes source-time MFE prerequisite enforcement:
+#   ./scripts/qa/verify-mfe-build-prereqs.sh
 ```
 
 Notes:
@@ -124,7 +126,18 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
      - `COPY indigo/env.config.jsx /openedx/app/`
      - `COPY indigo/mereka /openedx/app/mereka`
 
-2d. Token updates happen without upstream provenance
+2d. Full MFE build fails with `Can't resolve '@openedx/frontend-plugin-framework'`
+   - Cause: Tutor-generated MFE Dockerfile has Indigo `env.config.jsx` (which imports plugin framework),
+     but missing plugin dependency install in one or more `*-common` stages.
+   - Fix: rerun `./infrastructure/tutor/apply-patches.sh`; it now injects
+     `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
+     idempotently across MFE common stages.
+   - Verify by rebuilding and running:
+     `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+   - Preflight this before long builds:
+     `./scripts/qa/verify-mfe-build-prereqs.sh`
+
+2e. Token updates happen without upstream provenance
    - Cause: `tokens.css` edited directly with no pinned source commit/hash.
    - Fix: update provenance lock with `./scripts/branding/update-token-provenance.sh`
      and verify with `./scripts/branding/verify-token-drift.sh`.
