@@ -1,7 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Legacy overlay retained for reference only (no active staging environment).
 namespace: mereka-lms
 
 resources:
@@ -12,13 +11,17 @@ commonLabels:
   environment: staging
 
 # Image tags for staging
+# Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: staging
+    newTag: 20260207-branding-pass7-5b26e45
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: staging
+    newTag: 20260208-mfe-discussions-pass4-c17df16
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newTag: 20260208-mfe-discussions-pass4-c17df16
 
 # Staging replica counts (lower for cost)
 replicas:

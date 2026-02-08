@@ -116,6 +116,9 @@ STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 # Canonical one-command image rollout (recommended)
 ./scripts/infra/release-openedx-gitops.sh --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push --verify-runtime
 
+# Staging-only GitOps update (skips base-ref bump by default)
+./scripts/infra/release-openedx-gitops.sh --target-env staging --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push
+
 # Rebuild LMS/CMS gettext bundles (account settings/profile blank)
 ./scripts/infra/refresh-i18n-static.sh
 

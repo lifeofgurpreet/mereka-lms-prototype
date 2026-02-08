@@ -6,14 +6,18 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 APP_BASE_REL="deploy/k8s/base/kustomization.yaml"
 APP_PROD_REL="deploy/k8s/overlays/production/kustomization.yaml"
+APP_STAGING_REL="deploy/k8s/overlays/staging/kustomization.yaml"
 INFRA_BASE_REL="apps/mereka-lms/base/kustomization.yaml"
 INFRA_PROD_REL="apps/mereka-lms/overlays/prod/kustomization.yaml"
+INFRA_STAGING_REL="apps/mereka-lms/overlays/staging/kustomization.yaml"
 
 APP_REPO="${APP_REPO:-$REPO_ROOT}"
 INFRA_REPO="${INFRA_REPO:-}"
 OPENEDX_TAG=""
 MFE_TAG=""
 APP_SHA_OVERRIDE=""
+TARGET_ENV="production"
+UPDATE_BASE_REF_MODE="auto" # auto|1|0
 
 APPLY=0
 COMMIT=0
@@ -33,17 +37,21 @@ Usage:
 
 Purpose:
   Canonical one-command release orchestration for Open edX images:
-  1) Update app repo image tags (base + prod overlay)
-  2) Update GitOps repo (base ref + prod overlay image tags)
-  3) Verify cross-repo image override contract
+  1) Update app repo image tags (overlay for target env, plus base for production)
+  2) Update GitOps repo (overlay for target env, plus optional base ref bump)
+  3) Verify image override contract (production mode enforces cross-repo contract)
   4) Optionally commit/push both repos and verify runtime convergence
 
 Options:
   --openedx-tag TAG     Required. openedx image tag.
   --mfe-tag TAG         Required. openedx-mfe image tag.
+  --target-env ENV      Target environment: production|staging (default: production).
   --app-repo PATH       Override app repo path (default: current repo root).
   --infra-repo PATH     Override GitOps repo path.
   --app-sha SHA         Override app SHA to pin in GitOps base ref.
+  --update-base-ref     Force update GitOps base ref to app SHA.
+  --skip-base-ref       Skip GitOps base ref update.
+                       Default: update for production, skip for staging.
 
   --apply               Write file changes (default: dry-run).
   --commit              Commit changed files in app + GitOps repos (requires --apply).
@@ -61,13 +69,18 @@ Examples:
   # Dry-run preview
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b
 
-  # Apply + commit both repos
+  # Apply + commit production rollout
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
     --apply --commit
 
-  # Full automation (apply, commit, push, runtime verify)
+  # Full production automation (apply, commit, push, runtime verify)
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
     --apply --commit --push --verify-runtime
+
+  # Staging-only tag update (no base-ref bump by default)
+  ./scripts/infra/release-openedx-gitops.sh --target-env staging \
+    --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
+    --apply --commit --push
 EOF
 }
 
@@ -81,6 +94,10 @@ while [[ $# -gt 0 ]]; do
       MFE_TAG="${2:-}"
       shift 2
       ;;
+    --target-env)
+      TARGET_ENV="${2:-}"
+      shift 2
+      ;;
     --app-repo)
       APP_REPO="${2:-}"
       shift 2
@@ -92,6 +109,14 @@ while [[ $# -gt 0 ]]; do
     --app-sha)
       APP_SHA_OVERRIDE="${2:-}"
       shift 2
+      ;;
+    --update-base-ref)
+      UPDATE_BASE_REF_MODE="1"
+      shift
+      ;;
+    --skip-base-ref)
+      UPDATE_BASE_REF_MODE="0"
+      shift
       ;;
     --apply)
       APPLY=1
@@ -156,6 +181,23 @@ if [[ "$PUSH" -eq 1 && "$COMMIT" -ne 1 ]]; then
   echo "--push requires --commit." >&2
   exit 1
 fi
+
+normalize_target_env() {
+  local env_lc
+  env_lc="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$env_lc" in
+    prod|production)
+      echo "production"
+      ;;
+    stage|staging)
+      echo "staging"
+      ;;
+    *)
+      echo "Unsupported --target-env: $1 (expected production|staging)" >&2
+      exit 1
+      ;;
+  esac
+}
 
 detect_infra_repo() {
   if [[ -n "$INFRA_REPO" ]]; then
@@ -356,50 +398,103 @@ detect_infra_repo
 require_git_repo "$APP_REPO"
 require_git_repo "$INFRA_REPO"
 
+TARGET_ENV="$(normalize_target_env "$TARGET_ENV")"
+UPDATE_APP_BASE=0
+UPDATE_BASE_REF_DEFAULT=0
+APP_OVERLAY_REL="$APP_PROD_REL"
+INFRA_OVERLAY_REL="$INFRA_PROD_REL"
+APP_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
+INFRA_REQUIRED_NAMES="$APP_REQUIRED_NAMES"
+
+if [[ "$TARGET_ENV" == "production" ]]; then
+  UPDATE_APP_BASE=1
+  UPDATE_BASE_REF_DEFAULT=1
+  APP_OVERLAY_REL="$APP_PROD_REL"
+  INFRA_OVERLAY_REL="$INFRA_PROD_REL"
+elif [[ "$TARGET_ENV" == "staging" ]]; then
+  UPDATE_APP_BASE=0
+  UPDATE_BASE_REF_DEFAULT=0
+  APP_OVERLAY_REL="$APP_STAGING_REL"
+  INFRA_OVERLAY_REL="$INFRA_STAGING_REL"
+fi
+
+UPDATE_BASE_REF="$UPDATE_BASE_REF_DEFAULT"
+if [[ "$UPDATE_BASE_REF_MODE" == "1" ]]; then
+  UPDATE_BASE_REF=1
+elif [[ "$UPDATE_BASE_REF_MODE" == "0" ]]; then
+  UPDATE_BASE_REF=0
+fi
+
 APP_BASE_FILE="$APP_REPO/$APP_BASE_REL"
-APP_PROD_FILE="$APP_REPO/$APP_PROD_REL"
+APP_OVERLAY_FILE="$APP_REPO/$APP_OVERLAY_REL"
 INFRA_BASE_FILE="$INFRA_REPO/$INFRA_BASE_REL"
-INFRA_PROD_FILE="$INFRA_REPO/$INFRA_PROD_REL"
+INFRA_OVERLAY_FILE="$INFRA_REPO/$INFRA_OVERLAY_REL"
 
 echo "App repo:   $APP_REPO"
 echo "Infra repo: $INFRA_REPO"
+echo "Target env: $TARGET_ENV"
 echo "OpenedX tag: $OPENEDX_TAG"
 echo "MFE tag:     $MFE_TAG"
+echo "Update app base tags: $([[ "$UPDATE_APP_BASE" -eq 1 ]] && echo yes || echo no)"
+echo "Update GitOps base ref: $([[ "$UPDATE_BASE_REF" -eq 1 ]] && echo yes || echo no)"
 echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"
 
-update_image_tags_file \
-  "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
-  "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
+if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
+  update_image_tags_file \
+    "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
+    "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
+else
+  echo "= skipping app base tag update for target env '$TARGET_ENV'"
+fi
 
 update_image_tags_file \
-  "$APP_PROD_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
-  "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
+  "$APP_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
+  "$APP_REQUIRED_NAMES"
 
 if [[ "$COMMIT" -eq 1 ]]; then
-  commit_if_needed "$APP_REPO" "chore: release openedx tags $OPENEDX_TAG/$MFE_TAG" "$APP_BASE_REL" "$APP_PROD_REL"
+  APP_COMMIT_PATHS=("$APP_OVERLAY_REL")
+  if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
+    APP_COMMIT_PATHS=("$APP_BASE_REL" "$APP_OVERLAY_REL")
+  fi
+  commit_if_needed "$APP_REPO" \
+    "chore: release openedx tags $OPENEDX_TAG/$MFE_TAG ($TARGET_ENV)" \
+    "${APP_COMMIT_PATHS[@]}"
 fi
 
-APP_SHA="$APP_SHA_OVERRIDE"
-if [[ -z "$APP_SHA" ]]; then
-  APP_SHA="$(git -C "$APP_REPO" rev-parse HEAD)"
+if [[ "$UPDATE_BASE_REF" -eq 1 ]]; then
+  APP_SHA="$APP_SHA_OVERRIDE"
+  if [[ -z "$APP_SHA" ]]; then
+    APP_SHA="$(git -C "$APP_REPO" rev-parse HEAD)"
+  fi
+  echo "App SHA for GitOps base ref: $APP_SHA"
+  update_gitops_base_ref "$INFRA_BASE_FILE" "$APP_SHA" "$APPLY"
+else
+  echo "= skipping GitOps base ref update for target env '$TARGET_ENV'"
 fi
-echo "App SHA for GitOps base ref: $APP_SHA"
-
-update_gitops_base_ref "$INFRA_BASE_FILE" "$APP_SHA" "$APPLY"
 
 update_image_tags_file \
-  "$INFRA_PROD_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
-  "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
+  "$INFRA_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$APPLY" \
+  "$INFRA_REQUIRED_NAMES"
 
 if [[ "$APPLY" -eq 1 ]]; then
-  INFRA_PROD_OVERLAY="$INFRA_PROD_FILE" \
-  APP_BASE="$APP_BASE_FILE" \
-  APP_PROD_OVERLAY="$APP_PROD_FILE" \
-    "$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh" --check-infra
+  if [[ "$TARGET_ENV" == "production" ]]; then
+    INFRA_PROD_OVERLAY="$INFRA_OVERLAY_FILE" \
+    APP_BASE="$APP_BASE_FILE" \
+    APP_PROD_OVERLAY="$APP_OVERLAY_FILE" \
+      "$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh" --check-infra
+  else
+    echo "= skipping production-only cross-repo image contract check for staging target"
+  fi
 fi
 
 if [[ "$COMMIT" -eq 1 ]]; then
-  commit_if_needed "$INFRA_REPO" "chore: rollout openedx tags $OPENEDX_TAG/$MFE_TAG" "$INFRA_BASE_REL" "$INFRA_PROD_REL"
+  INFRA_COMMIT_PATHS=("$INFRA_OVERLAY_REL")
+  if [[ "$UPDATE_BASE_REF" -eq 1 ]]; then
+    INFRA_COMMIT_PATHS=("$INFRA_BASE_REL" "$INFRA_OVERLAY_REL")
+  fi
+  commit_if_needed "$INFRA_REPO" \
+    "chore: rollout openedx tags $OPENEDX_TAG/$MFE_TAG ($TARGET_ENV)" \
+    "${INFRA_COMMIT_PATHS[@]}"
 fi
 
 if [[ "$PUSH" -eq 1 ]]; then
