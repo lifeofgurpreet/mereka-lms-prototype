@@ -45,9 +45,24 @@ def build_course_key_map(manifest_csv: Path) -> Dict[str, str]:
     return mapping
 
 
-def create_users_import(users_csv: Path, output_csv: Path) -> None:
+def create_users_import(
+    users_csv: Path,
+    output_csv: Path,
+    enrolled_emails: set | None = None,
+) -> None:
     rows = []
+    seen: set[str] = set()
+    skipped_dup = 0
+    skipped_no_enroll = 0
     for row in read_csv(users_csv):
+        email = (row.get("email") or "").strip().lower()
+        if not email or email in seen:
+            skipped_dup += 1
+            continue
+        seen.add(email)
+        if enrolled_emails is not None and email not in enrolled_emails:
+            skipped_no_enroll += 1
+            continue
         subscribed = str(row.get("subscribed", "")).lower()
         rows.append(
             {
@@ -65,6 +80,7 @@ def create_users_import(users_csv: Path, output_csv: Path) -> None:
         ["email", "username", "full_name", "password", "roles", "is_active", "country"],
         rows,
     )
+    print(f"Users: {len(rows)} written, {skipped_dup} duplicates skipped, {skipped_no_enroll} non-enrolled skipped")
 
 
 def create_enrollments_import(
@@ -124,13 +140,19 @@ def main() -> None:
     user_maps = build_user_maps(users_csv)
     course_map = build_course_key_map(manifest_csv)
 
-    create_users_import(users_csv, openedx_dir / "users_import.csv")
-    create_enrollments_import(
-        enrollments_csv,
-        user_maps,
-        course_map,
-        openedx_dir / "enrollments_import.csv",
-    )
+    # Build enrollments first so we know which users actually have enrollments
+    enrollments_out = openedx_dir / "enrollments_import.csv"
+    create_enrollments_import(enrollments_csv, user_maps, course_map, enrollments_out)
+
+    # Collect enrolled emails, then filter users to only those with enrollments
+    enrolled_emails: set[str] = set()
+    for row in read_csv(enrollments_out):
+        email = (row.get("email") or "").strip().lower()
+        if email:
+            enrolled_emails.add(email)
+    print(f"Found {len(enrolled_emails)} unique enrolled emails")
+
+    create_users_import(users_csv, openedx_dir / "users_import.csv", enrolled_emails)
 
     print("Open edX CSVs generated in", openedx_dir)
 
