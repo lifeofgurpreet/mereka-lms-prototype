@@ -305,21 +305,19 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 ### Completed
 
 - [x] **Infisical**: Kajabi credentials at `/mereka-lms/kajabi` (prod + dev)
-- [x] **Full API export**: All resources to `exports/kajabi/` (691MB)
+- [x] **Full API export**: All 17 resources to `exports/kajabi/` (691MB)
 - [x] **Course structure**: 218 courses, 846 modules, 3,146 lessons
 - [x] **New endpoints**: landing_pages (22), podcasts (1), blog_posts (0), contact_notes (0)
+- [x] **Completions export**: 11,179 records from 50 lifecycle tags (via `filter[has_tag_id]`)
 - [x] **Transform**: CSVs + 109 OLX packages ready
-- [x] **Script updates**: Added new endpoints, removed fake certificate script, added completions exporter
+- [x] **User filter**: Import pipeline filters to enrolled users only (73K, not 326K contacts)
+- [x] **Tag-to-course mapping**: All 9 standard + 3 non-standard tag prefixes mapped to Open edX course keys
+- [x] **Script updates**: All scripts committed and pushed
 
-### In Progress
+### Pending (import not yet started)
 
-- [ ] **Completions export**: Tag-based completion data (50 tags, running on VPS)
-
-### Pending
-
-- [ ] **Filter users**: Update pipeline to import only enrolled users (~73K), not all contacts (326K)
-- [ ] **Import**: Courses, users, enrollments into Open edX
-- [ ] **Certificates**: Map tag prefixes to course keys, run `generate_certificates`
+- [ ] **Import**: Courses, users, enrollments into Open edX (dry-run first)
+- [ ] **Certificates**: Use completions + mapping to issue certs via `generate_certificates`
 - [ ] **Lesson content**: Scrape HTML bodies from Kajabi admin (API doesn't expose them)
 - [ ] **Webhooks**: Deploy real-time sync for new purchases/enrollments
 
@@ -337,10 +335,41 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 | custom_fields | 52 |
 | landing_pages | 22 |
 | podcasts | 1 |
+| completions | 11,179 |
 | structure/modules | 846 |
 | structure/lessons | 3,146 |
 | structure/lesson_media | 1,394 |
-| completions | (in progress) |
+
+### Import-Ready Counts
+
+| File | Records |
+|------|---------|
+| `users_import.csv` | 73,107 (enrolled users only, deduplicated) |
+| `enrollments_import.csv` | 386,300 |
+| `course_packages/` | 109 OLX tarballs |
+| `tag_prefix_to_course_mapping.json` | 12 prefix mappings (9 standard + 3 non-standard) |
+
+### Completion Tags Summary
+
+50 lifecycle tags across 9 course prefixes. Key counts:
+
+| Tag Type | Example | Typical Count |
+|----------|---------|---------------|
+| `course_completed` | "F101 - Course Completed" | 100–1,134 |
+| `quiz_completed` | "MYFC - Quiz 3 Completed" | 50–800 |
+| `started` | "PB - Started" | 200–1,134 |
+| `onboarded` | "PF - Onboarded" | 100–900 |
+| `certificate` | "mce-cert" | 1–100 |
+
+**API gotcha**: Use `filter[has_tag_id]` (NOT `filter[tag_id]`) — Kajabi silently ignores unknown filter params.
+
+### Courses Without Completion Tags
+
+These courses have quiz lessons but no Kajabi tags were set up for them:
+- **DP**: Digital Presence / Keterlihatan Digital
+- **DT**: Digital Transformation / Transformasi Digital
+- **AI**: Azure AI Fundamentals AI-900
+- **PKMU**: Profil Keterampilan yang Membuatmu Unggul (Indonesian Skills Profiling)
 
 ### Scripts
 
@@ -348,10 +377,10 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 |--------|---------|
 | `kajabi-export.mjs` | Full API export (17 resource types) |
 | `kajabi-course-structure.mjs` | Course modules/lessons/media |
-| `kajabi-export-completions.mjs` | Tag-based completion data |
+| `kajabi-export-completions.mjs` | Tag-based completion data (`filter[has_tag_id]`) |
 | `transform_data.py` | NDJSON → CSVs |
 | `build_course_packages.py` | CSVs → OLX tarballs |
-| `prepare_openedx_imports.py` | Generate import-ready CSVs |
+| `prepare_openedx_imports.py` | Generate import-ready CSVs (enrolled-only, deduplicated) |
 | `import_courses.py` | OLX → CMS import |
 | `run_batches.py` | Batched user/enrollment import |
 | `scrape_lessons.py` | Playwright-based lesson HTML scraper |
@@ -360,19 +389,20 @@ python3 scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py \
 
 ```
 ~/projects/k8s/mereka-lms/
-├── exports/kajabi/                          # Raw NDJSON exports
+├── exports/kajabi/                          # Raw NDJSON exports (691MB)
 │   ├── contacts.ndjson                      # 326K contacts
 │   ├── customers.ndjson                     # 190K customers
 │   ├── purchases.ndjson                     # 219K purchases
 │   ├── courses_index.ndjson                 # 218 courses
-│   ├── completions.ndjson                   # Tag-based completions (in progress)
+│   ├── completions.ndjson                   # 11,179 tag-based completions
 │   ├── landing_pages.ndjson                 # 22 landing pages
 │   ├── podcasts.ndjson                      # 1 podcast
 │   └── structure/                           # Course structure
 ├── scripts/migrations/kajabi/
 │   ├── output/                              # Transformed data
 │   │   ├── course_packages/                 # 109 OLX tarballs
-│   │   └── openedx/                         # Import-ready CSVs
+│   │   ├── openedx/                         # Import-ready CSVs
+│   │   └── tag_prefix_to_course_mapping.json
 │   └── logs/                                # Import logs
 └── docs/migrations/kajabi/
     └── KAJABI_REMIGRATION_RUNBOOK.md         # This file
