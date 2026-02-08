@@ -19,12 +19,12 @@ secretGenerator:
       - RELAY_USERNAME=dev
       - RELAY_PASSWORD=dev
 
-patchesStrategicMerge:
-  - patches/domain-env.yaml
-  - patches/clustersecretstore-gcp.yaml
-  - patches/openedx-secrets-dev.yaml
-  - patches/database-secrets-dev.yaml
-  - patches/forum-dev.yaml
+patches:
+  - path: patches/domain-env.yaml
+  - path: patches/clustersecretstore-gcp.yaml
+  - path: patches/openedx-secrets-dev.yaml
+  - path: patches/database-secrets-dev.yaml
+  - path: patches/forum-dev.yaml
 
 # Use local images
 images:
