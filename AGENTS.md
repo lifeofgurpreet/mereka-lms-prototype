@@ -513,7 +513,7 @@ Regenerate hostname registry (after domain changes):
 - Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
 - Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana; alert-routing audit enabled by default and DB exporter telemetry enforced in `runtime` mode).
 - Unified operations gate includes DB exporter telemetry audit in `local` mode by default; use `DB_EXPORTER_AUDIT_MODE=runtime` for live cluster enforcement (the runtime workflow now sets this explicitly).
-- Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable).
+- Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable), plus `summary.md` and `summary.json` for quick operator triage.
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.
 - Monitoring apply flow: `scripts/infra/apply-monitoring-configs.sh` (legacy Cloud SQL templates are opt-in via `INCLUDE_LEGACY_MONITORING=1`; `velero-restore-test-stale.json` is intentionally skipped because Cloud Monitoring threshold/absence alert windows are limited to ~24h).

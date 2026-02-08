@@ -63,13 +63,18 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
 fi
 
 failures=0
+SUMMARY_TSV="${ARTIFACT_DIR}/checks.tsv"
+SUMMARY_JSON="${ARTIFACT_DIR}/summary.json"
+SUMMARY_MD="${ARTIFACT_DIR}/summary.md"
+: >"$SUMMARY_TSV"
 
 run_check() {
   local name="$1"; shift
-  local out_file rc out slug timed_out
+  local out_file rc out slug timed_out start_ts
   slug="$(echo "$name" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
   out_file="${ARTIFACT_DIR}/${slug}.log"
   timed_out=0
+  start_ts="$(date +%s)"
 
   set +e
   if command -v timeout >/dev/null 2>&1; then
@@ -81,15 +86,22 @@ run_check() {
   set -e
   out="$(cat "$out_file")"
 
+  local status end_ts duration_s
+  end_ts="$(date +%s)"
+  duration_s=$((end_ts - start_ts))
+
   if [[ "$rc" -eq 124 ]]; then
     timed_out=1
   fi
 
   if [[ "$rc" -eq 0 ]]; then
+    status="ok"
     echo "OK   $name"
   else
+    status="fail"
     failures=$((failures + 1))
     if [[ "$timed_out" -eq 1 ]]; then
+      status="timeout"
       echo "FAIL $name (timed out after ${CHECK_TIMEOUT_SECONDS}s)"
     else
       echo "FAIL $name"
@@ -99,6 +111,72 @@ run_check() {
     fi
     echo "  log: $out_file"
   fi
+
+  printf "%s\t%s\t%s\t%s\t%s\n" "$name" "$status" "$rc" "$duration_s" "$out_file" >>"$SUMMARY_TSV"
+}
+
+write_summary_artifacts() {
+  python3 - "$SUMMARY_TSV" "$SUMMARY_JSON" "$SUMMARY_MD" "$ENV_SCOPE" "$STRICT_RUNTIME" "$CHECK_TIMEOUT_SECONDS" <<'PY'
+import json
+import pathlib
+import sys
+from datetime import datetime, timezone
+
+summary_tsv = pathlib.Path(sys.argv[1])
+summary_json = pathlib.Path(sys.argv[2])
+summary_md = pathlib.Path(sys.argv[3])
+env_scope = sys.argv[4]
+strict_runtime = sys.argv[5]
+timeout_s = sys.argv[6]
+
+checks = []
+if summary_tsv.exists():
+    for line in summary_tsv.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        name, status, rc, duration_s, log_file = line.split("\t", 4)
+        checks.append(
+            {
+                "name": name,
+                "status": status,
+                "exit_code": int(rc),
+                "duration_seconds": int(duration_s),
+                "log": log_file,
+            }
+        )
+
+total = len(checks)
+ok = sum(1 for c in checks if c["status"] == "ok")
+timeouts = sum(1 for c in checks if c["status"] == "timeout")
+failed = sum(1 for c in checks if c["status"] != "ok")
+
+payload = {
+    "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+    "env_scope": env_scope,
+    "strict_runtime": strict_runtime == "1",
+    "check_timeout_seconds": int(timeout_s),
+    "totals": {"checks": total, "ok": ok, "failed": failed, "timeouts": timeouts},
+    "checks": checks,
+}
+summary_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+lines = []
+lines.append("# Operations Gates Summary")
+lines.append("")
+lines.append(f"- Generated (UTC): `{payload['generated_at_utc']}`")
+lines.append(f"- Env scope: `{env_scope}`")
+lines.append(f"- Strict runtime: `{payload['strict_runtime']}`")
+lines.append(f"- Timeout per check: `{timeout_s}s`")
+lines.append(f"- Totals: `{ok} ok / {failed} failed` (timeouts: `{timeouts}`)")
+lines.append("")
+lines.append("| Check | Status | Duration (s) | Exit | Log |")
+lines.append("|---|---|---:|---:|---|")
+for c in checks:
+    lines.append(
+        f"| {c['name']} | {c['status']} | {c['duration_seconds']} | {c['exit_code']} | `{c['log']}` |"
+    )
+summary_md.write_text("\n".join(lines) + "\n", encoding="utf-8")
+PY
 }
 
 echo "Operations gates"
@@ -156,6 +234,8 @@ if [[ "$RUN_ALERT_ROUTING_AUDIT" == "1" ]]; then
     env STRICT_RUNTIME="$STRICT_RUNTIME" STRICT_WEBHOOK=1 RUN_ATLAS_VPS_AUDIT="$ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT" CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/verify-alert-routing.sh
 fi
 
+write_summary_artifacts
+
 echo ""
 if [[ "$failures" -eq 0 ]]; then
   echo "OK"
@@ -163,5 +243,7 @@ else
   echo "FAILED ($failures checks failed)"
 fi
 echo "Logs: $ARTIFACT_DIR"
+echo "Summary: $SUMMARY_MD"
+echo "Summary JSON: $SUMMARY_JSON"
 
 [[ "$failures" -eq 0 ]]

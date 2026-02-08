@@ -50,6 +50,9 @@ Automated equivalent:
 
 `run-operations-gates.sh` now enables alert-routing verification by default and writes
 per-check logs under `var/operations-gates/`.
+It also writes machine/human summaries:
+- `summary.json` (structured check results)
+- `summary.md` (operator-readable table with status + duration + log path)
 
 `audit-observability --mode runtime` now also verifies that `PrometheusRule/lms-alerts`
 contains the reliability alerts:

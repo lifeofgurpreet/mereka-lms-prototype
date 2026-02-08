@@ -63,6 +63,7 @@ Reality-first:
 - Consolidated gate now includes DB exporter telemetry audit in local mode by default:
   - `scripts/qa/run-operations-gates.sh` (`RUN_DB_EXPORTER_TELEMETRY_AUDIT=1`)
   - Runtime workflow `.github/workflows/operations-gates-runtime.yml` enforces `DB_EXPORTER_AUDIT_MODE=runtime`.
+  - Gate artifacts now include `summary.md` and `summary.json` for fast triage.
 - Added DR evidence bundle builder:
   - `scripts/qa/build-dr-evidence-bundle.sh`
 - Added VPS Atlas allowlist monitor posture audit:
