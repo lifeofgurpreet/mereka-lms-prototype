@@ -739,6 +739,9 @@ kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
 **Root Cause:**
 - OIDC callback reaches LMS, but token exchange fails with HTTP 400 in social-auth.
 - In practice this is commonly caused by provider/client hardening expecting PKCE while LMS is still on a non-PKCE OIDC backend path.
+- Another high-frequency cause is OIDC client secret drift:
+  - Authentik logs `Invalid client secret` for `client_id=mereka-lms`.
+  - Latest `OAuth2ProviderConfig` resolves empty secret (`secret=""` with missing `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]`).
 
 **Quick Verify:**
 ```bash
@@ -748,14 +751,25 @@ kubectl -n mereka-lms logs deploy/lms --since=6h | rg -n "auth/complete/oidc|Aut
 curl -sS -I https://academyv2.mereka.io/auth/login/oidc/ \
   | rg -i '^location:' \
   | rg -i 'code_challenge_method=|code_challenge='
+
+# Confirm OIDC provider config is enabled and resolves non-empty secret:
+./scripts/qa/verify-oidc-provider-configs.sh --env prod
+
+# Confirm Authentik token endpoint is not rejecting LMS client secret:
+kubectl -n authentik logs deploy/authentik-server --since=2h \
+  | rg -n 'client_id=mereka-lms|Invalid client secret|/application/o/token/'
 ```
 
 **Fix:**
 - Ensure production OIDC backend path is PKCE-enabled and active (no legacy backend shadowing by name).
 - Redeploy LMS settings and confirm OIDC authorize redirect includes PKCE params on all served hosts.
+- Ensure latest `OAuth2ProviderConfig` for each LMS site resolves a non-empty secret:
+  - Either set DB `secret` on latest row, or ensure runtime `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]` is populated.
+  - If needed for emergency recovery, set latest row name back to `Sign in with Mereka` and secret from runtime env.
 
 **Prevention:**
 - `scripts/qa/verify-auth-surfaces.sh prod` now asserts PKCE markers on OIDC entrypoint redirects.
+- `scripts/qa/verify-oidc-provider-configs.sh` now fails if latest provider resolves empty secret.
 
 ---
 

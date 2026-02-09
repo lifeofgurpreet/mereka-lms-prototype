@@ -66,6 +66,7 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - Keep staging overlays/scripts as optional future-ready paths, but default operations should assume `local/dev -> prod`.
 - CI guardrail: manual `build-tutor-images.yml` runs with `target_environment=staging` are blocked unless repo variable `ENABLE_STAGING_ENV=true`.
 - CI release guardrail: `update_gitops=true` requires both `build_openedx=true` and `build_mfe=true` so digest pinning inputs are captured deterministically.
+- Repo ownership boundary contract: `docs/operations/REPO_BOUNDARIES.md`
 
 ### Deployment Sequence (DO NOT SKIP STEPS)
 
@@ -628,7 +629,9 @@ Regenerate hostname registry (after domain changes):
 - OIDC callback reliability guardrail:
   - If LMS logs show `Session value state missing` during `/auth/complete/oidc/`, check cookie middleware ordering and cookie headers.
   - If LMS logs show `Authentication process canceled` at `/auth/complete/oidc/`, verify PKCE markers exist on `/auth/login/oidc/` redirect (`code_challenge_method`, `code_challenge`) and ensure legacy non-PKCE backend is not shadowing the active backend name.
+  - If Authentik logs show `Invalid client secret` for `client_id=mereka-lms`, check latest `OAuth2ProviderConfig` effective secret resolution (`secret` field or `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]`).
   - Repo check: `./scripts/qa/verify-oidc-cookie-middleware-order.sh`
+  - Runtime provider check: `./scripts/qa/verify-oidc-provider-configs.sh --env prod`
   - Public check (includes `sessionid` cookie `Domain=` + OIDC PKCE redirect validation): `./scripts/qa/verify-auth-surfaces.sh prod`
 - Hostname drift checks are now env-scoped:
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.

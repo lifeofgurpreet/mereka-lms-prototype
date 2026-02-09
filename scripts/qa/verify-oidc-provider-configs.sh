@@ -16,6 +16,8 @@
 # Env:
 #   NAMESPACE=mereka-lms
 #   CONTEXTS="ctx1 ctx2"
+#   OIDC_PROVIDER_DISPLAY_NAME="Sign in with Mereka"
+#   VERIFY_OIDC_DISPLAY_NAME=1
 #
 set -euo pipefail
 
@@ -34,6 +36,8 @@ ENVIRONMENT="auto" # auto | prod | dev
 
 # If true, allow an empty domain list (not recommended).
 ALLOW_EMPTY_DOMAINS="${ALLOW_EMPTY_DOMAINS:-0}"
+OIDC_PROVIDER_DISPLAY_NAME="${OIDC_PROVIDER_DISPLAY_NAME:-Sign in with Mereka}"
+VERIFY_OIDC_DISPLAY_NAME="${VERIFY_OIDC_DISPLAY_NAME:-1}"
 
 usage() {
   cat <<EOF
@@ -100,7 +104,11 @@ for ctx in "${CONTEXTS[@]}"; do
   fi
 
   log "[$ctx] Verifying OIDC provider configs in LMS (namespace=$NAMESPACE)"
-  kubectl --context "$ctx" exec -i -n "$NAMESPACE" deploy/lms -- env DOMAINS_CSV="$DOMAINS_CSV" bash -lc 'python - <<PY
+  kubectl --context "$ctx" exec -i -n "$NAMESPACE" deploy/lms -- env \
+    DOMAINS_CSV="$DOMAINS_CSV" \
+    OIDC_PROVIDER_DISPLAY_NAME="$OIDC_PROVIDER_DISPLAY_NAME" \
+    VERIFY_OIDC_DISPLAY_NAME="$VERIFY_OIDC_DISPLAY_NAME" \
+    bash -lc 'python - <<PY
 import os
 import django
 django.setup()
@@ -112,6 +120,8 @@ domains = [d.strip() for d in os.environ.get("DOMAINS_CSV", "").split(",") if d.
 domains = list(dict.fromkeys(domains))  # preserve order, de-dupe
 if not domains:
     raise SystemExit("DOMAINS_CSV is empty; refusing to verify nothing.")
+expected_display_name = os.environ.get("OIDC_PROVIDER_DISPLAY_NAME", "Sign in with Mereka")
+verify_display_name = os.environ.get("VERIFY_OIDC_DISPLAY_NAME", "1") == "1"
 
 def check(domain: str) -> tuple[bool, str]:
     site = Site.objects.filter(domain=domain).first()
@@ -124,7 +134,22 @@ def check(domain: str) -> tuple[bool, str]:
     assert latest is not None
     if not (latest.enabled and latest.visible):
         return False, f"latest oidc provider config is disabled/hidden (id={latest.id} enabled={latest.enabled} visible={latest.visible})"
-    return True, f"OK (latest_id={latest.id} total={qs.count()})"
+    secret = ""
+    try:
+        secret = latest.get_setting("SECRET") or ""
+    except Exception:
+        secret = ""
+    if not secret:
+        return False, f"latest oidc provider config resolves empty secret (id={latest.id})"
+    if verify_display_name and (latest.name or "") != expected_display_name:
+        return False, (
+            f"latest oidc provider display name mismatch (id={latest.id} "
+            f"got={latest.name!r} expected={expected_display_name!r})"
+        )
+    return True, (
+        f"OK (latest_id={latest.id} total={qs.count()} "
+        f"secret_len={len(secret)} display_name={latest.name!r})"
+    )
 
 for d in domains:
     ok, msg = check(d)

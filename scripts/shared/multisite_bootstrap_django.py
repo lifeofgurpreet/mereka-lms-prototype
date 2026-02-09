@@ -85,6 +85,7 @@ def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, prim
 
 
 ORGANIZATIONS, SITE_DEFINITIONS = load_definitions()
+OIDC_PROVIDER_DISPLAY_NAME = os.environ.get("OIDC_PROVIDER_DISPLAY_NAME", "Sign in with Mereka")
 
 
 def setup_django():
@@ -216,6 +217,11 @@ def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: boo
     from common.djangoapps.third_party_auth.models import OAuth2ProviderConfig
 
     key = getattr(settings, "SOCIAL_AUTH_OIDC_KEY", "mereka-lms")
+    configured_secret = (
+        (getattr(settings, "SOCIAL_AUTH_OAUTH_SECRETS", {}) or {}).get("oidc")
+        or getattr(settings, "SOCIAL_AUTH_OIDC_SECRET", "")
+        or ""
+    )
 
     for definition in definitions:
         site = Site.objects.filter(domain=definition.domain).first()
@@ -232,7 +238,21 @@ def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: boo
         qs = OAuth2ProviderConfig.objects.filter(site=site, backend_name="oidc").order_by("-change_date", "-id")
         latest = qs.first()
 
-        if latest and latest.enabled and latest.visible and (latest.key or "") == key:
+        latest_secret = ""
+        if latest is not None:
+            try:
+                latest_secret = latest.get_setting("SECRET") or ""
+            except Exception:
+                latest_secret = ""
+
+        if (
+            latest
+            and latest.enabled
+            and latest.visible
+            and (latest.key or "") == key
+            and (latest.name or "") == OIDC_PROVIDER_DISPLAY_NAME
+            and bool(latest_secret)
+        ):
             print(
                 f"OIDC provider config OK: site={site.domain} latest_id={latest.id} total={qs.count()}"
             )
@@ -245,16 +265,20 @@ def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: boo
             backend_name="oidc",
             enabled=True,
             visible=True,
-            name="Authentik",
+            name=OIDC_PROVIDER_DISPLAY_NAME,
             slug="authentik",
             secondary=False,
-            # Keep secrets out of DB; lms/cms settings inject via env.
+            # Keep a valid secret in DB so token exchange remains stable even if
+            # SOCIAL_AUTH_OAUTH_SECRETS drifts at runtime.
             key=key,
-            secret="",
+            secret=configured_secret,
             other_settings="",
         )
         obj.save()
-        print(f"Created OIDC provider config: site={site.domain} id={obj.id} enabled={obj.enabled}")
+        print(
+            f"Created OIDC provider config: site={site.domain} id={obj.id} "
+            f"enabled={obj.enabled} secret_set={bool(configured_secret)}"
+        )
 
 
 def upsert_waffle_flags(dry_run: bool) -> None:
