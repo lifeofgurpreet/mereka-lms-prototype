@@ -28,6 +28,11 @@ if [[ -z "$ENVIRONMENT" || ( "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev"
 fi
 
 STRICT_ADMIN_LOGIN_REDIRECT="${STRICT_ADMIN_LOGIN_REDIRECT:-0}"
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  REQUIRE_OIDC_PKCE="${REQUIRE_OIDC_PKCE:-1}"
+else
+  REQUIRE_OIDC_PKCE="${REQUIRE_OIDC_PKCE:-0}"
+fi
 
 failures=0
 
@@ -245,6 +250,17 @@ for domain in "${LMS_DOMAINS[@]}"; do
     "${domain}: OIDC redirect_uri matches domain" \
     "redirect_uri=https://${domain}/auth/complete/oidc/"
 
+  if [[ "$REQUIRE_OIDC_PKCE" == "1" ]]; then
+    require_302_location_contains \
+      "https://${domain}/auth/login/oidc/" \
+      "${domain}: OIDC PKCE code_challenge_method present" \
+      "code_challenge_method="
+    require_302_location_contains \
+      "https://${domain}/auth/login/oidc/" \
+      "${domain}: OIDC PKCE code_challenge present" \
+      "code_challenge="
+  fi
+
   # Make sure Authentik actually accepts the authorize request for this redirect_uri.
   require_authentik_accepts_authorize_url \
     "https://${domain}/auth/login/oidc/" \
@@ -267,6 +283,17 @@ for domain in "${LMS_ALIAS_DOMAINS[@]}"; do
     "https://${domain}/auth/login/oidc/" \
     "${domain}: OIDC redirect_uri matches domain (alias)" \
     "redirect_uri=https://${domain}/auth/complete/oidc/"
+
+  if [[ "$REQUIRE_OIDC_PKCE" == "1" ]]; then
+    require_302_location_contains \
+      "https://${domain}/auth/login/oidc/" \
+      "${domain}: OIDC PKCE code_challenge_method present (alias)" \
+      "code_challenge_method="
+    require_302_location_contains \
+      "https://${domain}/auth/login/oidc/" \
+      "${domain}: OIDC PKCE code_challenge present (alias)" \
+      "code_challenge="
+  fi
 
   require_authentik_accepts_authorize_url \
     "https://${domain}/auth/login/oidc/" \
