@@ -77,7 +77,8 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     fi
   done
 
-  if grep -q '^RUN_AUTHENTICATED_SSO_CANARY[[:space:]]\+true$' <<<"$variable_rows"; then
+  run_canary_value="$(awk '$1=="RUN_AUTHENTICATED_SSO_CANARY"{print tolower($2); exit}' <<<"$variable_rows")"
+  if [[ "$run_canary_value" == "true" ]]; then
     echo "OK github variable RUN_AUTHENTICATED_SSO_CANARY=true"
   else
     if [[ "$STRICT" == "1" ]]; then

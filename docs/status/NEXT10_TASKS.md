@@ -56,6 +56,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-09_
   `verify-auth-hardening.sh` supports `--env/--mode` + `CHECK_TIMEOUT_SECONDS`,
   hostname drift check supports `--env`, and operations/audit flows now scope OIDC+hostname checks by env.
 - ✅ OIDC callback regression resolved (2026-02-09): Authentik token 400 (`Invalid client secret`) fixed by restoring effective provider secret resolution + provider label contract (`Sign in with Mereka`) and adding hard guardrails in `verify-oidc-provider-configs.sh`.
+- ✅ OIDC disabled-account regression resolved (2026-02-09): active OIDC users with unusable LMS passwords were remediated in prod; added runtime guardrail `scripts/qa/verify-oidc-user-password-state.sh` and integrated checks into `audit-auth-access.sh` + `verify-auth-hardening.sh`.
 
 ## Immediate Next Task (Active)
 

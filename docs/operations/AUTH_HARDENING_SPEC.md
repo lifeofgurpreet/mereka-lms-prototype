@@ -105,6 +105,7 @@ It aggregates:
 - platform admin permission verification
 - Authentik admin policy + redirect URI allowlist verification
 - multisite + org-role ownership + OIDC provider config verification
+- OIDC user password-state verification (detects disabled-account regression)
 - hostname registry drift checks
 
 ### 3.1) Internal verification (kubectl, no secrets)
@@ -119,6 +120,11 @@ It aggregates:
     - prod: `academyv2.mereka.io`, `academy.biji-biji.com`, `skillourfuture.academy.mereka.io`
     - dev: `academyv2.mereka.dev`
   - By default it runs with `--env auto`, which infers prod vs dev from the kube context name (`kind*` => dev).
+
+- `scripts/qa/verify-oidc-user-password-state.sh`
+  - Verifies active OIDC-linked users do not have unusable LMS passwords.
+  - Prevents callback/session failures that surface as `Your account is disabled`.
+  - Optional remediation mode (`--fix`) sets strong random passwords for affected active OIDC users.
 
 ### 3.3) Credentialed callback/session verification (browser canary)
 
@@ -166,8 +172,9 @@ The existing `.github/workflows/public-health-check.yml` now runs:
    - access Discovery/Credentials/Ecommerce admin after SSO login
 10. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 11. Authentik logs do not show `Invalid client secret` for `client_id=mereka-lms` during SSO callback tests.
-12. `./scripts/qa/verify-authenticated-sso-canary.sh --env prod` passes with dedicated canary credentials.
-13. `STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh` passes:
+12. `./scripts/qa/verify-oidc-user-password-state.sh --env prod` passes (no affected active OIDC users).
+13. `./scripts/qa/verify-authenticated-sso-canary.sh --env prod` passes with dedicated canary credentials.
+14. `STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh` passes:
     runtime workflow contract is present, prod canary secrets exist, and `RUN_AUTHENTICATED_SSO_CANARY=true` is set.
 
 Convenience:

@@ -635,6 +635,9 @@ Regenerate hostname registry (after domain changes):
   - If LMS logs show `Session value state missing` during `/auth/complete/oidc/`, check cookie middleware ordering and cookie headers.
   - If LMS logs show `Authentication process canceled` at `/auth/complete/oidc/`, verify PKCE markers exist on `/auth/login/oidc/` redirect (`code_challenge_method`, `code_challenge`) and ensure legacy non-PKCE backend is not shadowing the active backend name.
   - If Authentik logs show `Invalid client secret` for `client_id=mereka-lms`, check latest `OAuth2ProviderConfig` effective secret resolution (`secret` field or `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]`).
+  - If Authn shows `Your account is disabled`, audit OIDC-linked active users for unusable LMS passwords:
+    `./scripts/qa/verify-oidc-user-password-state.sh --env prod`
+    and remediate with `./scripts/qa/verify-oidc-user-password-state.sh --env prod --fix`.
   - Repo check: `./scripts/qa/verify-oidc-cookie-middleware-order.sh`
   - Runtime provider check: `./scripts/qa/verify-oidc-provider-configs.sh --env prod` (enforces enabled+visible, non-empty effective secret, and provider display name contract).
   - Public check (includes `sessionid` cookie `Domain=` + OIDC PKCE redirect validation): `./scripts/qa/verify-auth-surfaces.sh prod`

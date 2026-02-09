@@ -773,7 +773,43 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
 
 ---
 
-### Issue 7c: Studio Create Course fails (`User has no profile`)
+### Issue 7c: OIDC login ends with `Your account is disabled`
+
+**Symptoms:**
+- Authentik login appears successful, but Authn MFE shows:
+  - `Your account is disabled`
+  - and/or `We couldn't sign you in` with callback/session churn.
+- Browser console can show `401` on `/login_refresh`.
+- LMS callback path may bounce through `/auth/complete/oidc/` without a durable session.
+
+**Root Cause:**
+- Open edX third-party-auth pipeline treats users with **unusable LMS passwords** as disabled:
+  - `common/djangoapps/third_party_auth/pipeline.py` (`set_logged_in_cookies`)
+  - Returns `403 "Your account is disabled"` when `user.has_usable_password()` is false.
+- This can affect OIDC-linked users created/imported without a usable LMS password.
+
+**Quick Verify:**
+```bash
+# Detect affected OIDC-linked users (active + unusable password):
+./scripts/qa/verify-oidc-user-password-state.sh --env prod
+```
+
+**Fix:**
+```bash
+# Remediate by setting strong random passwords for affected active OIDC users:
+./scripts/qa/verify-oidc-user-password-state.sh --env prod --fix
+```
+
+**Prevention:**
+- Runtime auth audits now include this guard:
+  - `./scripts/qa/verify-auth-hardening.sh --env prod --mode internal`
+  - `./scripts/qa/audit-auth-access.sh --env prod --mode internal`
+- Credentialed canary now fails explicitly on this condition:
+  - `./scripts/qa/verify-authenticated-sso-canary.sh --env prod`
+
+---
+
+### Issue 7d: Studio Create Course fails (`User has no profile`)
 
 **Symptoms:**
 - Studio “New Course/Library” action errors or no-ops.

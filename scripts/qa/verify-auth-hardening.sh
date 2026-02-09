@@ -126,12 +126,14 @@ if [[ "$run_internal" -eq 1 ]]; then
     run_check "Authentik admin policy (prod)" "$REPO_ROOT/scripts/infra/ensure-authentik-admin.sh" --verify
     run_check "Authentik OIDC redirect URI allowlist (prod)" "$REPO_ROOT/scripts/infra/ensure-authentik-oidc-redirect-uris.sh" --verify
     run_check "OIDC provider configs (prod)" "$REPO_ROOT/scripts/qa/verify-oidc-provider-configs.sh" --env prod --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+    run_check "OIDC user password state (prod)" "$REPO_ROOT/scripts/qa/verify-oidc-user-password-state.sh" --env prod
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     run_check "multisite config (dev)" env STRICT=1 "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" dev
     run_check "org role ownership (dev)" env STRICT=1 "$REPO_ROOT/scripts/qa/verify-org-role-ownership.sh" dev
     run_check "platform admin perms (dev)" "$REPO_ROOT/scripts/infra/ensure-platform-admins.sh" --context kind-dev --verify
     run_check "OIDC provider configs (dev)" "$REPO_ROOT/scripts/qa/verify-oidc-provider-configs.sh" --env dev --context kind-dev
+    run_check "OIDC user password state (dev)" "$REPO_ROOT/scripts/qa/verify-oidc-user-password-state.sh" --env dev
   fi
   run_check "hostname registry vs ingresses ($ENV_SCOPE)" "$REPO_ROOT/scripts/qa/list-openedx-hostnames.sh" --env "$ENV_SCOPE"
 fi

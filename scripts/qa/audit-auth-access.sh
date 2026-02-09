@@ -161,12 +161,18 @@ if [[ "$should_run_internal" -eq 1 ]]; then
   if [[ "$ENV_SCOPE" == "prod" ]]; then
     run_check "internal: OIDC provider configs (prod)" \
       ./scripts/qa/verify-oidc-provider-configs.sh --env prod --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+    run_check "internal: OIDC user password state (prod)" \
+      ./scripts/qa/verify-oidc-user-password-state.sh --env prod
   elif [[ "$ENV_SCOPE" == "dev" ]]; then
     run_check "internal: OIDC provider configs (dev)" \
       ./scripts/qa/verify-oidc-provider-configs.sh --env dev --context kind-dev
+    run_check "internal: OIDC user password state (dev)" \
+      ./scripts/qa/verify-oidc-user-password-state.sh --env dev
   else
     run_check "internal: OIDC provider configs (prod + dev)" \
       ./scripts/qa/verify-oidc-provider-configs.sh --env auto
+    run_check "internal: OIDC user password state (prod + dev)" \
+      ./scripts/qa/verify-oidc-user-password-state.sh --env both
   fi
   run_check "internal: platform admin allowlist env (prod + dev)" ./scripts/qa/verify-platform-admin-env.sh --env "$ENV_SCOPE"
   run_check "internal: core service endpoints (prod + dev)" ./scripts/qa/verify-service-endpoints.sh --env "$ENV_SCOPE"

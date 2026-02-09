@@ -22,6 +22,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `release-openedx-gitops.sh` - Canonical one-command Open edX release orchestrator (app tags + GitOps ref/tags + optional push/runtime verify)
 - `prepare-bbi-infra-ref-bump.sh` - Prepare/apply GitOps pinned ref bump (active repo is typically `BBI-K8`) to current `mereka-lms` commit
 - `configure-github-authenticated-sso-canary.sh` - Set GitHub canary secrets/variable for credentialed SSO runtime gate enforcement
+- `../qa/verify-oidc-user-password-state.sh` - Verify/fix OIDC-linked active users with unusable LMS passwords (`Your account is disabled` regression guardrail)
 - `../qa/audit-atlas-allowlist-monitor.sh` - Validate Atlas allowlist monitor posture (cron wiring, status freshness, webhook config)
 - `../qa/verify-atlas-modulestore-path.sh` - Verify Atlas modulestore contracts (repo + runtime)
 - `../qa/verify-alert-routing.sh` - One-command alert-routing verification (repo + runtime + optional VPS webhook check)
@@ -178,6 +179,10 @@ STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh
 SSO_CANARY_EMAIL_PROD='sso-canary@example.com' \
 SSO_CANARY_PASSWORD_PROD='***' \
 ./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate
+
+# Detect/fix OIDC disabled-account regression (active OIDC users with unusable LMS passwords)
+./scripts/qa/verify-oidc-user-password-state.sh --env prod
+./scripts/qa/verify-oidc-user-password-state.sh --env prod --fix
 ```
 
 ## Scheduled Checks
