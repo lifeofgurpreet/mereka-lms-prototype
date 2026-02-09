@@ -19,8 +19,13 @@ _db_password = (os.environ.get("OPENEDX_MYSQL_PASSWORD", "") or "").rstrip("\r\n
 if _db_password and "default" in DATABASES:
     DATABASES["default"]["PASSWORD"] = _db_password
 
-# Inject Authentik OIDC secret from environment (avoid storing in DB or YAML)
-_oidc_secret = os.environ.get("OIDC_CLIENT_SECRET", "")
+# Inject Authentik OIDC secret from environment (avoid storing in DB or YAML).
+# Keep backward compatibility across env var names used by different overlays.
+_oidc_secret = (
+    os.environ.get("OIDC_CLIENT_SECRET")
+    or os.environ.get("SOCIAL_AUTH_OIDC_SECRET")
+    or ""
+)
 if _oidc_secret:
     SOCIAL_AUTH_OAUTH_SECRETS = dict(globals().get("SOCIAL_AUTH_OAUTH_SECRETS", {}))
     SOCIAL_AUTH_OAUTH_SECRETS.setdefault("oidc", _oidc_secret)
