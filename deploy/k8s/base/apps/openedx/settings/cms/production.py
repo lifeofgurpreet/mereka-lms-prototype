@@ -419,3 +419,14 @@ else:
         MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+
+# Keep cookie-domain rewriting ahead of session middleware in request order so
+# it runs after session middleware in response order and can rewrite cookie
+# domains reliably on multisite Studio responses.
+_cookie_middleware = "cms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware"
+_session_middleware = "django.contrib.sessions.middleware.SessionMiddleware"
+if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
+    cookie_index = MIDDLEWARE.index(_cookie_middleware)
+    session_index = MIDDLEWARE.index(_session_middleware)
+    if cookie_index > session_index:
+        MIDDLEWARE.insert(session_index, MIDDLEWARE.pop(cookie_index))

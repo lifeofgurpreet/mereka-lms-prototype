@@ -691,6 +691,44 @@ print(\\"profile.meta reset\\", u.email or u.username)
 
 ---
 
+### Issue 7a: Authentik login returns, but user is not signed in (`Session value state missing`)
+
+**Symptoms:**
+- Authentik login completes and returns to LMS, but session is not established.
+- LMS logs include `Session value state missing` during `/auth/complete/oidc/`.
+- `/auth/login/oidc/` response sets `sessionid` without the expected `Domain=...`.
+
+**Root Cause:**
+- Cookie-domain rewrite middleware (`MerekaCookieDomainMiddleware`) runs too early in response order.
+- Session middleware sets OIDC state cookie after that, so the cookie can remain host-only and fail callback validation.
+
+**Quick Verify:**
+```bash
+# Runtime signal in LMS logs:
+kubectl -n mereka-lms logs deploy/lms --since=6h | rg -n "Session value state missing|auth/complete/oidc"
+
+# Public header check (prod host example):
+curl -sS -D - -o /dev/null https://academyv2.mereka.io/auth/login/oidc/ | rg -i '^set-cookie: sessionid='
+# Expected: includes "Domain=.academyv2.mereka.io"
+```
+
+**Fix:**
+```bash
+# Verify repository guardrails first:
+./scripts/qa/verify-oidc-cookie-middleware-order.sh
+
+# Ensure lms/cms production settings keep cookie middleware before SessionMiddleware
+# in request order (so it runs after SessionMiddleware in response order), then
+# redeploy config and restart lms/cms.
+kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
+```
+
+**Prevention:**
+- `scripts/qa/verify-auth-hardening.sh` and `scripts/qa/audit-auth-access.sh` include this guard.
+- `scripts/qa/verify-auth-surfaces.sh` validates OIDC session cookie domain on public hosts.
+
+---
+
 ### Issue 7b: Studio Create Course fails (`User has no profile`)
 
 **Symptoms:**

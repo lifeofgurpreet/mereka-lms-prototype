@@ -569,8 +569,11 @@ button.btn.btn-primary:focus {
 }
 
 .courses-listing li,
-.courses-listing-item {
+.courses-listing-item,
+.dashboard .listing-courses li {
   list-style: none;
+  display: flex;
+  min-width: 0;
 }
 
 .course {
@@ -582,18 +585,37 @@ button.btn.btn-primary:focus {
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
+.courses-listing li > .course,
+.courses-listing-item > .course,
+.dashboard .listing-courses li .course {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
 .course:hover {
   transform: translateY(-4px);
   box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
 }
 
-.course .course-image .cover-image {
-  height: 180px;
+.course .course-image,
+.dashboard .course .course-image {
+  min-height: 180px;
   background: linear-gradient(135deg, rgba(45, 137, 139, 0.22), rgba(41, 92, 173, 0.25));
 }
 
-.course .course-image .cover-image img {
-  height: 100%;
+.course .course-image .cover-image,
+.dashboard .course .course-image .cover-image {
+  height: 180px;
+  min-height: 180px;
+  background: inherit;
+}
+
+.course .course-image img,
+.dashboard .course .course-image img {
+  display: block;
+  height: 180px;
   width: 100%;
   object-fit: cover;
   object-position: center;
@@ -601,6 +623,9 @@ button.btn.btn-primary:focus {
 
 .course .course-info {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
 .course .course-code {
@@ -658,10 +683,6 @@ button.btn.btn-primary:focus {
   gap: 1.5rem;
   margin: 0;
   padding: 0;
-}
-
-.dashboard .listing-courses li {
-  list-style: none;
 }
 
 .dashboard .my-courses .course-item .course {

@@ -110,6 +110,51 @@ require_authentik_accepts_authorize_url() {
   return 1
 }
 
+expected_cookie_domain_for_host() {
+  local host="${1,,}"
+  local tenant="$host"
+
+  for prefix in apps. studio. preview.; do
+    if [[ "$tenant" == "$prefix"* ]]; then
+      tenant="${tenant#"$prefix"}"
+      break
+    fi
+  done
+
+  if [[ "$tenant" == *"biji-biji.com" ]]; then
+    printf ".biji-biji.com\n"
+    return 0
+  fi
+
+  printf ".%s\n" "$tenant"
+}
+
+require_oidc_session_cookie_domain() {
+  local url="$1"
+  local label="$2"
+  local host="$3"
+  local expected cookie_headers cookie_line cookie_line_lc
+
+  expected="$(expected_cookie_domain_for_host "$host" | tr '[:upper:]' '[:lower:]')"
+  cookie_headers="$(curl -sS -D - -o /dev/null "$url" || true)"
+  cookie_line="$(
+    printf "%s\n" "$cookie_headers" \
+      | awk 'tolower($1)=="set-cookie:" && tolower($2) ~ /^sessionid=/{print; exit}'
+  )"
+
+  if [[ -z "$cookie_line" ]]; then
+    log_fail "$label (missing Set-Cookie for sessionid) url=$url"
+    return 1
+  fi
+
+  cookie_line_lc="$(printf "%s" "$cookie_line" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$cookie_line_lc" == *"domain=${expected}"* ]]; then
+    log_ok "$label (session cookie domain=${expected})"
+  else
+    log_fail "$label (expected session cookie domain=${expected}, got: $cookie_line) url=$url"
+  fi
+}
+
 require_302_location_is() {
   local url="$1"
   local label="$2"
@@ -204,6 +249,11 @@ for domain in "${LMS_DOMAINS[@]}"; do
   require_authentik_accepts_authorize_url \
     "https://${domain}/auth/login/oidc/" \
     "${domain}: Authentik authorize validates redirect_uri"
+
+  require_oidc_session_cookie_domain \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: OIDC session cookie domain" \
+    "$domain"
 done
 
 # LMS aliases (same stack, extra hostnames) must also support OIDC.
@@ -221,6 +271,11 @@ for domain in "${LMS_ALIAS_DOMAINS[@]}"; do
   require_authentik_accepts_authorize_url \
     "https://${domain}/auth/login/oidc/" \
     "${domain}: Authentik authorize validates redirect_uri (alias)"
+
+  require_oidc_session_cookie_domain \
+    "https://${domain}/auth/login/oidc/" \
+    "${domain}: OIDC session cookie domain (alias)" \
+    "$domain"
 done
 
 # Studio does not implement /auth/login/oidc/; it should bounce to the correct LMS /login.

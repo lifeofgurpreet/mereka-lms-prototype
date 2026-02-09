@@ -154,6 +154,11 @@ for svc in discovery credentials ecommerce; do
 done
 ```
 
+For full auth-surface validation (including OIDC `sessionid` cookie `Domain=` checks):
+```bash
+./scripts/qa/verify-auth-surfaces.sh prod
+```
+
 ### Cluster permission verification (prod + dev)
 
 ```bash

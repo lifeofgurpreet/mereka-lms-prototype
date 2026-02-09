@@ -625,6 +625,10 @@ Regenerate hostname registry (after domain changes):
 - Atlas CLI can be configured from Infisical keys via `scripts/infra/atlas-config-from-infisical.sh` (keys in `/k8s/mereka-lms/atlas`).
 - Auth hardening suite is now env/mode-selective and timeout-safe:
   `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env prod --mode all`.
+- OIDC callback reliability guardrail:
+  - If LMS logs show `Session value state missing` during `/auth/complete/oidc/`, check cookie middleware ordering and cookie headers.
+  - Repo check: `./scripts/qa/verify-oidc-cookie-middleware-order.sh`
+  - Public check (includes `sessionid` cookie `Domain=` validation): `./scripts/qa/verify-auth-surfaces.sh prod`
 - Hostname drift checks are now env-scoped:
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
 - Consolidated auth audit now scopes OIDC/hostname checks by requested env:

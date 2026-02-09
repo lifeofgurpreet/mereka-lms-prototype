@@ -129,6 +129,8 @@ if [[ "$JSON_OUT" -eq 0 ]]; then
   echo ""
 fi
 
+run_check "repo: OIDC cookie middleware order guard" ./scripts/qa/verify-oidc-cookie-middleware-order.sh
+
 if [[ "$should_run_public" -eq 1 ]]; then
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public: auth surfaces (prod)" ./scripts/qa/verify-auth-surfaces.sh prod

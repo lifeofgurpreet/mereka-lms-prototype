@@ -718,3 +718,14 @@ else:
         MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+
+# OIDC hardening: the cookie-domain middleware must run after SessionMiddleware
+# has set session/csrf cookies on the response, otherwise OIDC state cookies
+# can remain host-only and fail on callback ("Session value state missing").
+_cookie_middleware = "lms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware"
+_session_middleware = "django.contrib.sessions.middleware.SessionMiddleware"
+if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
+    cookie_index = MIDDLEWARE.index(_cookie_middleware)
+    session_index = MIDDLEWARE.index(_session_middleware)
+    if cookie_index > session_index:
+        MIDDLEWARE.insert(session_index, MIDDLEWARE.pop(cookie_index))
