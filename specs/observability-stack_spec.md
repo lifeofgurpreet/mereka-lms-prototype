@@ -6,7 +6,6 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-08"
 ---
-
 # Observability Stack (Prometheus/Tempo/Loki)
 
 ## Scope
@@ -86,14 +85,14 @@ The system MUST expose the following custom metrics from LMS/CMS:
 
 ## Acceptance Criteria
 
-- [ ] Prometheus scrapes all pods: `kubectl get servicemonitor -n mereka-lms`
-- [ ] Grafana shows pod CPU/memory: Dashboard visible at `https://grafana.mereka.io`
-- [ ] LMS `/metrics` endpoint returns Prometheus metrics: `curl https://academyv2.mereka.io/metrics`
-- [ ] Loki receives logs: `logcli query '{namespace="mereka-lms"}' --limit 10`
-- [ ] Tempo receives traces: `tempo-cli query-trace <trace-id>`
-- [ ] Alerts fire on OOM: Simulate OOM and verify alert in Slack
-- [ ] Log correlation works: Click trace ID in Grafana, jumps to Loki logs
-- [ ] Metrics retention 30 days: Query old metrics: `rate(http_requests_total[30d])`
+- [ ] AC-001: Prometheus scrapes all pods: `kubectl get servicemonitor -n mereka-lms`
+- [ ] AC-002: Grafana shows pod CPU/memory: Dashboard visible at `https://grafana.mereka.io`
+- [ ] AC-003: LMS `/metrics` endpoint returns Prometheus metrics: `curl https://academyv2.mereka.io/metrics`
+- [ ] AC-004: Loki receives logs: `logcli query '{namespace="mereka-lms"}' --limit 10`
+- [ ] AC-005: Tempo receives traces: `tempo-cli query-trace <trace-id>`
+- [ ] AC-006: Alerts fire on OOM: Simulate OOM and verify alert in Slack
+- [ ] AC-007: Log correlation works: Click trace ID in Grafana, jumps to Loki logs
+- [ ] AC-008: Metrics retention 30 days: Query old metrics: `rate(http_requests_total[30d])`
 
 ## Edge Cases
 

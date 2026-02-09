@@ -6,7 +6,6 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-08"
 ---
-
 # Analytics Pipeline (Aspects/Panorama)
 
 ## Scope
@@ -75,14 +74,14 @@ The system SHOULD collect the following xAPI verbs:
 
 ## Acceptance Criteria
 
-- [ ] Aspects plugin enabled: `tutor plugins list | grep aspects` shows enabled
-- [ ] xAPI events flow to ClickHouse: `clickhouse-client --query "SELECT count() FROM xapi_events_all"`
-- [ ] ClickHouse retention policy active: Events older than 90 days are deleted
-- [ ] Superset accessible at configured URL (e.g., `https://analytics.mereka.io`)
-- [ ] Pre-built dashboards visible in Superset for staff users
-- [ ] No PII in events: `clickhouse-client --query "SELECT * FROM xapi_events_all LIMIT 10"` shows hashed IDs
-- [ ] Instructor dashboard embeds in LMS course pages
-- [ ] Data deletion works: Deleting user removes their events from ClickHouse
+- [ ] AC-001: Aspects plugin enabled: `tutor plugins list | grep aspects` shows enabled
+- [ ] AC-002: xAPI events flow to ClickHouse: `clickhouse-client --query "SELECT count() FROM xapi_events_all"`
+- [ ] AC-003: ClickHouse retention policy active: Events older than 90 days are deleted
+- [ ] AC-004: Superset accessible at configured URL (e.g., `https://analytics.mereka.io`)
+- [ ] AC-005: Pre-built dashboards visible in Superset for staff users
+- [ ] AC-006: No PII in events: `clickhouse-client --query "SELECT * FROM xapi_events_all LIMIT 10"` shows hashed IDs
+- [ ] AC-007: Instructor dashboard embeds in LMS course pages
+- [ ] AC-008: Data deletion works: Deleting user removes their events from ClickHouse
 
 ## Edge Cases
 

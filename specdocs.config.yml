@@ -34,3 +34,8 @@ required_specs:
     - "branding-system"
     - "analytics-pipeline"
     - "observability-stack"
+
+quality_gates:
+  specs:
+    require_testmap: false
+    testmap_suffix: ".testmap.yml"

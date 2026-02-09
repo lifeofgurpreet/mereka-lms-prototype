@@ -6,7 +6,6 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-08"
 ---
-
 # Multi-Site Domain Configuration
 
 ## Scope
@@ -65,14 +64,14 @@ The system MUST support the following domains:
 
 ## Acceptance Criteria
 
-- [ ] All three domains resolve to the LMS
-- [ ] Login on `academyv2.mereka.io` persists session when navigating to `apps.academyv2.mereka.io`
-- [ ] Login on `academy.biji-biji.com` works independently (separate session)
-- [ ] CSRF tokens are accepted from all three domains
-- [ ] `/api/mfe_config/v1` returns correct `LMS_BASE_URL` for each domain
-- [ ] Studio is accessible at `studio.academyv2.mereka.io` only
-- [ ] Profile image upload from MFE succeeds
-- [ ] Favicon loads correctly on all domains
+- [ ] AC-001: All three domains resolve to the LMS
+- [ ] AC-002: Login on `academyv2.mereka.io` persists session when navigating to `apps.academyv2.mereka.io`
+- [ ] AC-003: Login on `academy.biji-biji.com` works independently (separate session)
+- [ ] AC-004: CSRF tokens are accepted from all three domains
+- [ ] AC-005: `/api/mfe_config/v1` returns correct `LMS_BASE_URL` for each domain
+- [ ] AC-006: Studio is accessible at `studio.academyv2.mereka.io` only
+- [ ] AC-007: Profile image upload from MFE succeeds
+- [ ] AC-008: Favicon loads correctly on all domains
 
 ## Edge Cases
 

@@ -6,7 +6,6 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-08"
 ---
-
 # Branding System
 
 ## Scope
@@ -106,16 +105,16 @@ The system MUST pass the following verification checks:
 
 ## Acceptance Criteria
 
-- [ ] Mereka logo visible on LMS homepage
-- [ ] Mereka logo visible on Studio homepage
-- [ ] Custom Mereka footer renders on all MFEs (authn, account, profile, learning)
-- [ ] Favicon loads correctly (mereka icon, not Open edX default)
-- [ ] Custom fonts load without Google Fonts fallback
-- [ ] `grep "fonts.googleapis.com" tutor_env/env/build/openedx/lms/static/css/*.css` returns 0 results
-- [ ] `scripts/branding/verify-branding-health.sh` exits 0
-- [ ] Theme applies consistently across all domains (academyv2.mereka.io, academy.biji-biji.com)
-- [ ] Studio preview shows Mereka branding
-- [ ] Login page shows Mereka branding (not default Open edX)
+- [ ] AC-001: Mereka logo visible on LMS homepage
+- [ ] AC-002: Mereka logo visible on Studio homepage
+- [ ] AC-003: Custom Mereka footer renders on all MFEs (authn, account, profile, learning)
+- [ ] AC-004: Favicon loads correctly (mereka icon, not Open edX default)
+- [ ] AC-005: Custom fonts load without Google Fonts fallback
+- [ ] AC-006: `grep "fonts.googleapis.com" tutor_env/env/build/openedx/lms/static/css/*.css` returns 0 results
+- [ ] AC-007: `scripts/branding/verify-branding-health.sh` exits 0
+- [ ] AC-008: Theme applies consistently across all domains (academyv2.mereka.io, academy.biji-biji.com)
+- [ ] AC-009: Studio preview shows Mereka branding
+- [ ] AC-010: Login page shows Mereka branding (not default Open edX)
 
 ## Edge Cases
 

@@ -6,7 +6,6 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-08"
 ---
-
 # Tutor Configuration Lifecycle
 
 ## Scope
@@ -69,16 +68,16 @@ The `apply-patches.sh` script MUST apply the following patches:
 
 ## Acceptance Criteria
 
-- [ ] `grep mysql_native_password tutor_env/env/local/docker-compose.yml` returns results
-- [ ] `grep "NODE_OPTIONS.*6144" tutor_env/env/build/openedx/Dockerfile` returns results
-- [ ] `grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
-- [ ] `grep "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
-- [ ] `grep "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
-- [ ] MFE images build successfully with Node 18
-- [ ] MySQL 8 connections succeed without authentication errors
-- [ ] All three production domains (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io) resolve and accept logins
-- [ ] Mereka logo and custom footer render on all MFEs
-- [ ] `tutor local dc ps` shows all services with status "Up"
+- [ ] AC-001: `grep mysql_native_password tutor_env/env/local/docker-compose.yml` returns results
+- [ ] AC-002: `grep "NODE_OPTIONS.*6144" tutor_env/env/build/openedx/Dockerfile` returns results
+- [ ] AC-003: `grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
+- [ ] AC-004: `grep "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
+- [ ] AC-005: `grep "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
+- [ ] AC-006: MFE images build successfully with Node 18
+- [ ] AC-007: MySQL 8 connections succeed without authentication errors
+- [ ] AC-008: All three production domains (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io) resolve and accept logins
+- [ ] AC-009: Mereka logo and custom footer render on all MFEs
+- [ ] AC-010: `tutor local dc ps` shows all services with status "Up"
 
 ## Edge Cases
 

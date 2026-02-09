@@ -6,7 +6,6 @@ owner: engineering
 vehicle: talent_platform
 last_updated: '2026-02-08'
 ---
-
 # Repository Structure Specification
 
 **Status**: Active
@@ -110,7 +109,7 @@ _Explicitly out of scope for this specification._
 
 ## Acceptance Criteria
 
-- [ ] Acceptance criteria to be defined.
+- [ ] AC-001: Acceptance criteria to be defined.
 
 ## Edge Cases
 

@@ -6,7 +6,6 @@ owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-08"
 ---
-
 # MongoDB Atlas Integration
 
 ## Scope
@@ -68,15 +67,15 @@ The system MUST use the following databases on the Atlas cluster:
 
 ## Acceptance Criteria
 
-- [ ] `tutor local logs lms | grep mongodb` shows SRV connection attempts
-- [ ] `kubectl logs -l app.kubernetes.io/name=lms | grep "Connected to MongoDB"` succeeds
-- [ ] Course creation in Studio persists to Atlas `openedx` database
-- [ ] Forum posts persist to Atlas `cs_comments_service` database
-- [ ] No local MongoDB container exists: `docker ps | grep mongodb` returns nothing (local)
-- [ ] No MongoDB StatefulSet exists: `kubectl get statefulset mongodb` returns not found (K8s)
-- [ ] Atlas cluster shows active connections in monitoring dashboard
-- [ ] `pymongo[srv]` installed: `pip list | grep pymongo` shows extras
-- [ ] DNS resolution succeeds: `nslookup cluster-mereka-lms.2pjex4s.mongodb.net` returns results
+- [ ] AC-001: `tutor local logs lms | grep mongodb` shows SRV connection attempts
+- [ ] AC-002: `kubectl logs -l app.kubernetes.io/name=lms | grep "Connected to MongoDB"` succeeds
+- [ ] AC-003: Course creation in Studio persists to Atlas `openedx` database
+- [ ] AC-004: Forum posts persist to Atlas `cs_comments_service` database
+- [ ] AC-005: No local MongoDB container exists: `docker ps | grep mongodb` returns nothing (local)
+- [ ] AC-006: No MongoDB StatefulSet exists: `kubectl get statefulset mongodb` returns not found (K8s)
+- [ ] AC-007: Atlas cluster shows active connections in monitoring dashboard
+- [ ] AC-008: `pymongo[srv]` installed: `pip list | grep pymongo` shows extras
+- [ ] AC-009: DNS resolution succeeds: `nslookup cluster-mereka-lms.2pjex4s.mongodb.net` returns results
 
 ## Edge Cases
 
