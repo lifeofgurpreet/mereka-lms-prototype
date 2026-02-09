@@ -35,11 +35,18 @@ CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/verify-alert-routing.sh
 # After rollout:
 STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 
+# Sentry wiring contract (repo + optional runtime)
+./scripts/qa/verify-sentry-wiring.sh --mode local
+# After SENTRY_DSN + sentry_sdk rollout:
+STRICT_RUNTIME=1 ./scripts/qa/verify-sentry-wiring.sh --mode runtime
+
 # Multisite governance gate (site config + org ownership + auth surfaces + hostname drift)
 CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
 
 # Consolidated gate (auth + multisite + observability + Velero + Grafana)
 ./scripts/qa/run-operations-gates.sh --env both
+# Optional Sentry gate:
+RUN_SENTRY_WIRING_AUDIT=1 SENTRY_AUDIT_MODE=local ./scripts/qa/run-operations-gates.sh --env both
 ```
 
 If runtime mode fails while local mode passes, treat it as rollout drift (GitOps/runtime
@@ -50,6 +57,8 @@ Automated equivalent:
 
 `run-operations-gates.sh` now enables alert-routing verification by default and writes
 per-check logs under `var/operations-gates/`.
+Sentry wiring audit is available as an opt-in check
+(`RUN_SENTRY_WIRING_AUDIT=1`, `SENTRY_AUDIT_MODE=local|runtime|all`).
 It also writes machine/human summaries:
 - `summary.json` (structured check results)
 - `summary.md` (operator-readable table with status + duration + log path)

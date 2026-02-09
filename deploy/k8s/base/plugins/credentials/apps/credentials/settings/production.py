@@ -1,9 +1,53 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import os
 
 from credentials.settings.production import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from credentials.settings.utils import get_logger_config
+
+
+def _parse_sentry_rate(env_key, default=0.0):
+    raw = (os.environ.get(env_key, "") or "").strip()
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        logging.getLogger(__name__).warning("Invalid %s=%r, defaulting to %.2f", env_key, raw, default)
+        return default
+
+
+def _parse_sentry_bool(env_key, default=False):
+    raw = (os.environ.get(env_key, "") or "").strip().lower()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "on"}
+
+
+def _init_sentry(service_name):
+    dsn = (os.environ.get("SENTRY_DSN", "") or "").strip()
+    if not dsn:
+        return
+    try:
+        import sentry_sdk
+    except ImportError:
+        logging.getLogger(__name__).warning(
+            "SENTRY_DSN is set but sentry_sdk is not installed; skipping Sentry init for %s",
+            service_name,
+        )
+        return
+
+    sentry_sdk.init(
+        dsn=dsn,
+        environment=(os.environ.get("SENTRY_ENVIRONMENT") or os.environ.get("LOGGING_ENV") or "production"),
+        release=(os.environ.get("SENTRY_RELEASE") or None),
+        traces_sample_rate=_parse_sentry_rate("SENTRY_TRACES_SAMPLE_RATE", 0.0),
+        profiles_sample_rate=_parse_sentry_rate("SENTRY_PROFILES_SAMPLE_RATE", 0.0),
+        send_default_pii=_parse_sentry_bool("SENTRY_SEND_DEFAULT_PII", False),
+    )
+    sentry_sdk.set_tag("service", service_name)
+
 
 MEREKA_SCHEME = os.environ.get("MEREKA_SCHEME", "https")
 MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
@@ -115,6 +159,7 @@ LOGGING["handlers"].pop("local", None)
 for logger in LOGGING["loggers"].values():
     if "local" in logger["handlers"]:
         logger["handlers"].remove("local")
+_init_sentry("credentials")
 
 # Hardening: platform admin enforcement + /admin/login -> /login redirect.
 MIDDLEWARE = list(MIDDLEWARE) + [

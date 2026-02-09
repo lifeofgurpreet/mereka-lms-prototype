@@ -474,6 +474,7 @@ CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env b
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 ./scripts/qa/verify-alert-routing.sh
 ./scripts/qa/audit-db-exporter-telemetry.sh --mode local
+./scripts/qa/verify-sentry-wiring.sh --mode local
 STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env both
 ```
@@ -506,6 +507,7 @@ Regenerate hostname registry (after domain changes):
 - Canonical multisite governance gate: `CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both` (runs multisite config + org ownership + auth surface + hostname drift checks with per-check logs).
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - DB exporter telemetry audit (repo/runtime): `scripts/qa/audit-db-exporter-telemetry.sh` (`--mode local|runtime|all`; runtime mode validates ServiceMonitors + Prometheus queryability for MySQL/Redis exporter metrics).
+- Sentry wiring audit (repo/runtime): `scripts/qa/verify-sentry-wiring.sh` (`--mode local|runtime|all`; strict runtime mode enforces `SENTRY_DSN` + `sentry_sdk` presence on required deployments).
 - DB exporter telemetry PromQL selectors are `service`/`namespace` based (not hardcoded `job=*`) to stay resilient across Prometheus Operator job-label defaults.
 - Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
 - One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks; high-severity policy contract covers both `ERROR` and `CRITICAL`).
@@ -514,6 +516,7 @@ Regenerate hostname registry (after domain changes):
 - Runtime alert-routing workflow: `.github/workflows/alert-routing-audit.yml`.
 - Runtime consolidated operations gate workflow: `.github/workflows/operations-gates-runtime.yml` (runs auth + multisite + observability + Velero + Grafana; alert-routing audit enabled by default and DB exporter telemetry enforced in `runtime` mode).
 - Unified operations gate includes DB exporter telemetry audit in `local` mode by default; use `DB_EXPORTER_AUDIT_MODE=runtime` for live cluster enforcement (the runtime workflow now sets this explicitly).
+- Unified operations gate supports optional Sentry wiring enforcement: `RUN_SENTRY_WIRING_AUDIT=1` with `SENTRY_AUDIT_MODE=local|runtime|all`.
 - Unified operations gate now writes per-check logs and timeout-safe artifacts under `var/operations-gates/` (`CHECK_TIMEOUT_SECONDS` configurable), plus `summary.md` and `summary.json` for quick operator triage.
 - Runtime observability audit now enforces Prometheus reliability alert presence in `PrometheusRule/lms-alerts` (`OpenEdxCriticalDeploymentUnavailable`, `OpenEdxPodsPendingTooLong`, `OpenEdxCrashLoopingContainers`, `OpenEdxSyntheticOrBackupJobFailures`).
 - Runtime observability audit also confirms those alert names are loaded by Prometheus `/api/v1/rules` in the `monitoring` namespace.

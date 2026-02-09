@@ -208,6 +208,13 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 
 - Enable Cloud Logging sinks to BigQuery if long-term retention is required (`gcloud logging sinks create …`).
 - For SMTP delivery issues, monitor AWS SES dashboards (CloudWatch) and set SNS notifications on bounces/complaints.
+- Open edX log pipeline:
+  - app logs (`all.log`, `tracking.log`) under `/openedx/data/logs`
+  - Promtail -> Loki forwarding (`deploy/k8s/base/logging/`)
+  - GCP log-based metrics in `infrastructure/monitoring/logging-metrics/`
+- Sentry wiring contract: `./scripts/qa/verify-sentry-wiring.sh --mode local`
+  (runtime enforcement: `STRICT_RUNTIME=1 ./scripts/qa/verify-sentry-wiring.sh --mode runtime`).
+- Canonical logging + Sentry runbook: `docs/operations/LOGGING_AND_SENTRY.md`.
 - Fast operator flow: `docs/operations/OBSERVABILITY_QUICKSTART.md`.
 - Ownership model: `docs/operations/OBSERVABILITY_OWNERSHIP.md`.
 - Severity policy: `docs/operations/ALERT_SEVERITY_MATRIX.md`.

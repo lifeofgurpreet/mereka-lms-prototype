@@ -20,6 +20,8 @@ ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT="${ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT:-1}"
 RUN_MULTISITE_GOVERNANCE_AUDIT="${RUN_MULTISITE_GOVERNANCE_AUDIT:-1}"
 RUN_DB_EXPORTER_TELEMETRY_AUDIT="${RUN_DB_EXPORTER_TELEMETRY_AUDIT:-1}"
 DB_EXPORTER_AUDIT_MODE="${DB_EXPORTER_AUDIT_MODE:-local}" # local|runtime|all
+RUN_SENTRY_WIRING_AUDIT="${RUN_SENTRY_WIRING_AUDIT:-0}"
+SENTRY_AUDIT_MODE="${SENTRY_AUDIT_MODE:-local}" # local|runtime|all
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -38,6 +40,8 @@ Env:
   RUN_MULTISITE_GOVERNANCE_AUDIT=0  Skip explicit multisite governance gate (enabled by default)
   RUN_DB_EXPORTER_TELEMETRY_AUDIT=0  Skip db exporter telemetry contract/runtime audit (enabled by default)
   DB_EXPORTER_AUDIT_MODE=local   Mode for db exporter audit: local|runtime|all
+  RUN_SENTRY_WIRING_AUDIT=1      Run Sentry wiring contract/runtime audit
+  SENTRY_AUDIT_MODE=local        Mode for sentry wiring audit: local|runtime|all
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -190,6 +194,8 @@ echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
 echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
 echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
 echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
+echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
+echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -204,6 +210,12 @@ if [[ "$RUN_DB_EXPORTER_TELEMETRY_AUDIT" == "1" ]]; then
   run_check "db exporter telemetry audit (${DB_EXPORTER_AUDIT_MODE})" \
     env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
     ./scripts/qa/audit-db-exporter-telemetry.sh --mode "$DB_EXPORTER_AUDIT_MODE"
+fi
+
+if [[ "$RUN_SENTRY_WIRING_AUDIT" == "1" ]]; then
+  run_check "sentry wiring audit (${SENTRY_AUDIT_MODE})" \
+    env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
+    ./scripts/qa/verify-sentry-wiring.sh --mode "$SENTRY_AUDIT_MODE"
 fi
 
 run_check "auth + permissions + multisite audit" \
