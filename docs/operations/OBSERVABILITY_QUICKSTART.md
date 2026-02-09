@@ -37,6 +37,8 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 
 # Sentry wiring contract (repo + optional runtime)
 ./scripts/qa/verify-sentry-wiring.sh --mode local
+# Sentry CLI/org/project contract
+./scripts/qa/verify-sentry-cli-contract.sh
 # After SENTRY_DSN + sentry_sdk rollout:
 STRICT_RUNTIME=1 ./scripts/qa/verify-sentry-wiring.sh --mode runtime
 

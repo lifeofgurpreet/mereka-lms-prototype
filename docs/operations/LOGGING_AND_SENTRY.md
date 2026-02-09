@@ -42,6 +42,16 @@ Supported env vars:
 - `SENTRY_PROFILES_SAMPLE_RATE` (float, default `0.0`)
 - `SENTRY_SEND_DEFAULT_PII` (`true|false`, default `false`)
 
+Canonical standard references (shared observability repo):
+- `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-STANDARD.md`
+- `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-K8S-INTEGRATION.md`
+- `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-PROJECT-REGISTRY.md`
+
+Current org/project contract:
+- Org: `biji-biji-non-profits`
+- Project: `mereka-lms-web`
+- Infisical DSN key (registry convention): `SENTRY_DSN__mereka-lms__web`
+
 ## 3) Verification
 
 Repo contract check:
@@ -64,6 +74,11 @@ Unified ops gate (opt-in):
 RUN_SENTRY_WIRING_AUDIT=1 SENTRY_AUDIT_MODE=local ./scripts/qa/run-operations-gates.sh --env both
 ```
 
+Sentry CLI contract (auth + org + project):
+```bash
+./scripts/qa/verify-sentry-cli-contract.sh
+```
+
 ## 4) Rollout Sequence (Recommended)
 
 1. Configure `SENTRY_*` secrets in Infisical (`/k8s/mereka-lms`).
@@ -79,3 +94,4 @@ RUN_SENTRY_WIRING_AUDIT=1 SENTRY_AUDIT_MODE=local ./scripts/qa/run-operations-ga
 - This contract verifies wiring and SDK availability, not event delivery health in Sentry SaaS.
 - Add a controlled non-production test event during maintenance windows before making
   strict Sentry gating mandatory in CI/runtime workflows.
+- `SENTRY_AUTH_TOKEN` must stay CI/build-only; never inject it into runtime pods.

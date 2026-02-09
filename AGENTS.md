@@ -510,6 +510,7 @@ Regenerate hostname registry (after domain changes):
 - Observability coverage audit (repo/runtime): `scripts/qa/audit-observability.sh` (`--mode local` for offline checks, `--mode runtime` for deployed objects).
 - DB exporter telemetry audit (repo/runtime): `scripts/qa/audit-db-exporter-telemetry.sh` (`--mode local|runtime|all`; runtime mode validates ServiceMonitors + Prometheus queryability for MySQL/Redis exporter metrics).
 - Sentry wiring audit (repo/runtime): `scripts/qa/verify-sentry-wiring.sh` (`--mode local|runtime|all`; strict runtime mode enforces `SENTRY_DSN` + `sentry_sdk` presence on required deployments).
+- Sentry CLI contract audit (operator workstation): `scripts/qa/verify-sentry-cli-contract.sh` (checks `sentry-cli` install/auth + org/project presence; aligns with observability `specs/16-error-tracking` standards).
 - DB exporter telemetry PromQL selectors are `service`/`namespace` based (not hardcoded `job=*`) to stay resilient across Prometheus Operator job-label defaults.
 - Velero alert pipeline audit (repo+runtime): `scripts/qa/audit-velero-alert-pipeline.sh` (includes CronJob freshness and hourly critical-backup recency checks).
 - One-command alert routing verification: `scripts/qa/verify-alert-routing.sh` (repo channels + runtime policy/channel enablement + optional VPS webhook route checks; high-severity policy contract covers both `ERROR` and `CRITICAL`).
