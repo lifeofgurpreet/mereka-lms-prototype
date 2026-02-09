@@ -111,7 +111,10 @@ It aggregates:
 
 - `scripts/qa/verify-oidc-provider-configs.sh`
   - Verifies the **latest** `OAuth2ProviderConfig` for `backend_name=oidc` is enabled/visible for the configured sites.
+  - Verifies the latest config resolves a **non-empty effective secret** (`get_setting("SECRET")`).
+  - Verifies provider display name contract (default: `Sign in with Mereka`).
   - This directly prevents `/auth/login/oidc/` from 500ing with "Can't fetch setting of a disabled backend/provider."
+  - This also prevents callback regressions where token exchange fails with `Invalid client secret`.
   - Domain coverage is derived from `scripts/shared/config.sh`:
     - prod: `academyv2.mereka.io`, `academy.biji-biji.com`, `skillourfuture.academy.mereka.io`
     - dev: `academyv2.mereka.dev`
@@ -141,6 +144,7 @@ The existing `.github/workflows/public-health-check.yml` now runs:
    - access LMS Django admin
    - access Discovery/Credentials/Ecommerce admin after SSO login
 10. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
+11. Authentik logs do not show `Invalid client secret` for `client_id=mereka-lms` during SSO callback tests.
 
 Convenience:
 - `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all`

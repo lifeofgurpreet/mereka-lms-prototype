@@ -86,3 +86,5 @@ This repo also includes templates (GCP) for TLS verification:
 
 - This CronJob uses `curlimages/curl` and only depends on public HTTPS reachability.
 - It will not detect "permissions drift" (staff/superuser) inside LMS/CMS, because those checks require privileged access.
+- It will not detect OIDC token-exchange failures on callback (for example `Invalid client secret` at `/application/o/token/`), because it is intentionally non-credentialed.
+- Credentialed synthetic SSO canary is tracked as the active follow-up in `docs/status/NEXT10_TASKS.md`.

@@ -4,7 +4,7 @@ type: "feature_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-08"
+last_updated: "2026-02-09"
 ---
 # Multi-Site Domain Configuration
 
@@ -48,6 +48,12 @@ The system MUST support the following domains:
 - Each SiteConfiguration MUST specify the correct domain name
 - Each SiteConfiguration SHOULD override branding if domain-specific customization is needed
 
+### OIDC Provider Contract
+
+- The latest `OAuth2ProviderConfig` for `backend_name=oidc` MUST be enabled and visible.
+- The latest provider config MUST resolve a non-empty effective secret (`get_setting("SECRET")`).
+- The default provider display label MUST remain `Sign in with Mereka`.
+
 ### Reverse Proxy
 
 #### Nginx (LMS Backend)
@@ -72,6 +78,7 @@ The system MUST support the following domains:
 - [ ] AC-006: Studio is accessible at `studio.academyv2.mereka.io` only
 - [ ] AC-007: Profile image upload from MFE succeeds
 - [ ] AC-008: Favicon loads correctly on all domains
+- [ ] AC-009: `./scripts/qa/verify-oidc-provider-configs.sh --env prod` passes (enabled/visible + non-empty effective secret + provider label contract)
 
 ## Edge Cases
 

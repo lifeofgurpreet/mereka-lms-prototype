@@ -631,7 +631,7 @@ Regenerate hostname registry (after domain changes):
   - If LMS logs show `Authentication process canceled` at `/auth/complete/oidc/`, verify PKCE markers exist on `/auth/login/oidc/` redirect (`code_challenge_method`, `code_challenge`) and ensure legacy non-PKCE backend is not shadowing the active backend name.
   - If Authentik logs show `Invalid client secret` for `client_id=mereka-lms`, check latest `OAuth2ProviderConfig` effective secret resolution (`secret` field or `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]`).
   - Repo check: `./scripts/qa/verify-oidc-cookie-middleware-order.sh`
-  - Runtime provider check: `./scripts/qa/verify-oidc-provider-configs.sh --env prod`
+  - Runtime provider check: `./scripts/qa/verify-oidc-provider-configs.sh --env prod` (enforces enabled+visible, non-empty effective secret, and provider display name contract).
   - Public check (includes `sessionid` cookie `Domain=` + OIDC PKCE redirect validation): `./scripts/qa/verify-auth-surfaces.sh prod`
 - Hostname drift checks are now env-scoped:
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
