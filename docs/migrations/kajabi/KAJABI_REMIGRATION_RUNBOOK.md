@@ -407,3 +407,32 @@ These courses have quiz lessons but no Kajabi tags were set up for them:
 └── docs/migrations/kajabi/
     └── KAJABI_REMIGRATION_RUNBOOK.md         # This file
 ```
+
+---
+
+## Import Execution Results (2026-02-09)
+
+### Summary
+
+| Entity | CSV Rows | Unique | Imported | Notes |
+|--------|----------|--------|----------|-------|
+| Courses | 109 | 109 | **109** | All successful, ~55 min |
+| Users | 73,107 | 73,107 | **72,354** | 753 merged via email collision |
+| Enrollments | 386,300 | 147,971 | **146,887** | 238K duplicate rows, 1,084 skipped |
+| Certificates | 3,268 | — | **3** (test) | gurpreet@biji-biji.com test certs |
+
+### Key Lessons
+
+1. **ArgoCD ConfigMap churn**: LMS pods roll every 3-5 min due to CSS ConfigMap hash changes. Use `resilient_import.sh` instead of `run_batches.py`.
+
+2. **Resilient import script**: Re-resolves pods and re-uploads files on each batch. Survived 3+ pod changes during 6.5-hour enrollment import.
+
+3. **Enrollment duplicates**: CSV had 238K duplicate (email, course_id) pairs. Handled idempotently.
+
+4. **Certificate API**: Use `GeneratedCertificate.objects.update_or_create()` with `CertificateStatuses.downloadable`. The `generate_certificate_task()` requires actual course completion/grading.
+
+5. **Profile requirement**: Users need a UserProfile for certificates. Pre-existing admin users may not have one.
+
+### Incremental Re-migration
+
+All scripts are idempotent (update_or_create / enroll). Re-export from Kajabi and re-run to add new data without duplicating existing records.
