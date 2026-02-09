@@ -22,3 +22,49 @@
   type="text/css"
   media="all"
 />
+
+<style id="mereka-course-card-hotfix">
+  .courses-listing li,
+  .courses-listing-item,
+  .dashboard .listing-courses li {
+    display: flex;
+    min-width: 0;
+  }
+
+  .courses-listing li > .course,
+  .courses-listing-item > .course,
+  .dashboard .listing-courses li .course {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+  }
+
+  .course .course-image,
+  .dashboard .course .course-image {
+    min-height: 180px;
+    background: linear-gradient(135deg, rgba(45, 137, 139, 0.22), rgba(41, 92, 173, 0.25));
+  }
+
+  .course .course-image .cover-image,
+  .dashboard .course .course-image .cover-image {
+    height: 180px;
+    min-height: 180px;
+    background: inherit;
+  }
+
+  .course .course-image img,
+  .dashboard .course .course-image img {
+    display: block;
+    height: 180px;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .course .course-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+</style>
