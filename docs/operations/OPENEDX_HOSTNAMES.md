@@ -20,6 +20,23 @@ Compare expected hostnames vs deployed Ingress hosts:
 ./scripts/qa/list-openedx-hostnames.sh --env dev
 ```
 
+Build a runtime routing matrix (which host is actually deployed in prod vs dev):
+```bash
+./scripts/qa/map-openedx-host-routing.sh --env both
+./scripts/qa/map-openedx-host-routing.sh --env both --format json
+```
+
+## Runtime Ownership Model (Why "two Open edX" on VPS?)
+
+On the VPS, Open edX services can look duplicated, but they are usually:
+- `kind-dev` Kubernetes workloads (local dev cluster) running many pods/processes.
+- Production workloads running in GKE (remote cluster), accessed via the `gke_*` kube context.
+
+What often causes confusion:
+- `ps` on the VPS shows many `uwsgi`/`celery` Open edX processes.
+- Those processes can still belong to `kind-dev` containers (not host-native Open edX services).
+- Use the routing matrix command above to verify where each hostname is deployed.
+
 ## Production (GKE)
 
 LMS microsites (tenant roots):

@@ -644,6 +644,8 @@ Regenerate hostname registry (after domain changes):
   - Public check (includes `sessionid` cookie `Domain=` + OIDC PKCE redirect validation): `./scripts/qa/verify-auth-surfaces.sh prod`
 - Hostname drift checks are now env-scoped:
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
+- Runtime hostname ownership matrix (prod GKE vs dev kind):
+  `./scripts/qa/map-openedx-host-routing.sh --env both` (use `--format json` for machine-readable output).
 - Consolidated auth audit now scopes OIDC/hostname checks by requested env:
   `./scripts/qa/audit-auth-access.sh --mode all --env prod|dev|both`.
 - Credentialed SSO callback/session canary is available and gate-integrated:
