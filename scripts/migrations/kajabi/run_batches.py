@@ -136,7 +136,7 @@ def main() -> None:
     pod = get_pod(namespace, "lms")
 
     if not args.skip_upload:
-        copy_file(namespace, pod, Path("scripts/migrations/kajabi/scripts/openedx_bulk_import.py"), "/tmp/openedx_bulk_import.py")
+        copy_file(namespace, pod, Path("scripts/migrations/kajabi/openedx_bulk_import.py"), "/tmp/openedx_bulk_import.py")
         copy_file(namespace, pod, csv_path, remote_csv)
 
     total = count_rows(csv_path)
