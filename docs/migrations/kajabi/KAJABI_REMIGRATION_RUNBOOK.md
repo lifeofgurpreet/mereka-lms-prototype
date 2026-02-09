@@ -436,3 +436,45 @@ These courses have quiz lessons but no Kajabi tags were set up for them:
 ### Incremental Re-migration
 
 All scripts are idempotent (update_or_create / enroll). Re-export from Kajabi and re-run to add new data without duplicating existing records.
+
+
+## Post-Import Follow-up (2026-02-09, Session 2)
+
+### Contact Duplication Investigation
+
+The contacts export (326,104 records) was found to have only **94,872 unique emails**. Root cause: **Kajabi API pagination bug** -- the API returns the same page multiple times before advancing. Analysis:
+- 654 pages appeared 4x consecutively
+- 437 pages appeared 3x consecutively
+- 30 pages appeared 2x consecutively
+- 295 pages appeared 1x (no duplication)
+- This is NOT a script bug -- the resetFile() call works correctly. The Kajabi API itself is non-deterministic with page[number] pagination.
+
+### Remaining Contacts Import
+
+After deduplicating, 21,779 contacts were not in the initial enrolled-users import. These were imported using resilient_import.sh:
+- 11 batches, ~25 minutes
+- ~21,663 created, ~116 updated (overlap with enrolled set), 0 failed
+
+### Certificate Issuance
+
+Issued certificates for all 3,268 course_completed records from completions.ndjson:
+- **3,265 certificates issued** (1,131 first pass + 2,135 after contacts import)
+- 3 skipped (user email not found)
+- Uses GeneratedCertificate.objects.update_or_create() with CertificateStatuses.downloadable
+
+### Course Thumbnails Migration
+
+Downloaded 109 thumbnail images from Kajabi S3 pre-signed URLs and uploaded to CMS contentstore:
+- 109/109 uploaded, 0 failed
+- Each course's course_image field updated in modulestore
+- **NOTE**: Kajabi S3 pre-signed URLs expire 7 days after export. If re-export is needed, run the Kajabi export again.
+
+### Final Verification
+
+| Metric | Count |
+|--------|-------|
+| Courses | 109 |
+| Users | 94,017 |
+| Enrollments | 146,887 |
+| Certificates | 3,266 |
+| Course thumbnails | 109/109 |
