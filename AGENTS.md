@@ -627,8 +627,9 @@ Regenerate hostname registry (after domain changes):
   `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env prod --mode all`.
 - OIDC callback reliability guardrail:
   - If LMS logs show `Session value state missing` during `/auth/complete/oidc/`, check cookie middleware ordering and cookie headers.
+  - If LMS logs show `Authentication process canceled` at `/auth/complete/oidc/`, verify PKCE markers exist on `/auth/login/oidc/` redirect (`code_challenge_method`, `code_challenge`) and ensure legacy non-PKCE backend is not shadowing the active backend name.
   - Repo check: `./scripts/qa/verify-oidc-cookie-middleware-order.sh`
-  - Public check (includes `sessionid` cookie `Domain=` validation): `./scripts/qa/verify-auth-surfaces.sh prod`
+  - Public check (includes `sessionid` cookie `Domain=` + OIDC PKCE redirect validation): `./scripts/qa/verify-auth-surfaces.sh prod`
 - Hostname drift checks are now env-scoped:
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
 - Consolidated auth audit now scopes OIDC/hostname checks by requested env:

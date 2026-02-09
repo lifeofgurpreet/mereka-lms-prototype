@@ -154,7 +154,7 @@ for svc in discovery credentials ecommerce; do
 done
 ```
 
-For full auth-surface validation (including OIDC `sessionid` cookie `Domain=` checks):
+For full auth-surface validation (including OIDC `sessionid` cookie `Domain=` checks and PKCE redirect markers):
 ```bash
 ./scripts/qa/verify-auth-surfaces.sh prod
 ```
@@ -174,6 +174,7 @@ STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
 
 This includes:
 - Public auth surface checks (OIDC/OAuth redirects, admin-login redirect, MFE config)
+- OIDC PKCE contract checks (`code_challenge_method` + `code_challenge` on `/auth/login/oidc/` redirects)
 - Authentik hardening verification
 - Platform admin permission verification (DB flags + CourseCreator)
 - Canonical hostname drift check (expected vs deployed)

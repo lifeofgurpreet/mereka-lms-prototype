@@ -729,7 +729,37 @@ kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
 
 ---
 
-### Issue 7b: Studio Create Course fails (`User has no profile`)
+### Issue 7b: Authentik callback fails with `Authentication process canceled`
+
+**Symptoms:**
+- Authentik returns to LMS `/auth/complete/oidc/`, but login fails in Authn MFE.
+- LMS logs show `Authentication process canceled` (social auth middleware), with no `Session value state missing`.
+- `/auth/login/oidc/` redirect URL does not include PKCE parameters (`code_challenge`, `code_challenge_method`).
+
+**Root Cause:**
+- OIDC callback reaches LMS, but token exchange fails with HTTP 400 in social-auth.
+- In practice this is commonly caused by provider/client hardening expecting PKCE while LMS is still on a non-PKCE OIDC backend path.
+
+**Quick Verify:**
+```bash
+kubectl -n mereka-lms logs deploy/lms --since=6h | rg -n "auth/complete/oidc|Authentication process canceled"
+
+# Redirect should include PKCE parameters:
+curl -sS -I https://academyv2.mereka.io/auth/login/oidc/ \
+  | rg -i '^location:' \
+  | rg -i 'code_challenge_method=|code_challenge='
+```
+
+**Fix:**
+- Ensure production OIDC backend path is PKCE-enabled and active (no legacy backend shadowing by name).
+- Redeploy LMS settings and confirm OIDC authorize redirect includes PKCE params on all served hosts.
+
+**Prevention:**
+- `scripts/qa/verify-auth-surfaces.sh prod` now asserts PKCE markers on OIDC entrypoint redirects.
+
+---
+
+### Issue 7c: Studio Create Course fails (`User has no profile`)
 
 **Symptoms:**
 - Studio “New Course/Library” action errors or no-ops.
