@@ -24,6 +24,11 @@ on:
         required: false
         default: true
         type: boolean
+      run_authenticated_sso_canary:
+        description: "Run credentialed browser SSO canary (requires canary secrets)"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   operations-gates:
@@ -58,6 +63,13 @@ jobs:
           INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'both' }}
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
           INPUT_RUN_ALERT_ROUTING_AUDIT: ${{ github.event.inputs.run_alert_routing_audit || 'true' }}
+          INPUT_RUN_AUTHENTICATED_SSO_CANARY: ${{ github.event.inputs.run_authenticated_sso_canary || vars.RUN_AUTHENTICATED_SSO_CANARY || 'false' }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL: ${{ secrets.SSO_CANARY_EMAIL }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
         run: |
           if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
             export STRICT_RUNTIME=1
@@ -77,6 +89,13 @@ jobs:
           # Runtime workflow must validate live exporter telemetry, not just local contracts.
           export RUN_DB_EXPORTER_TELEMETRY_AUDIT=1
           export DB_EXPORTER_AUDIT_MODE=runtime
+
+          if [[ "$INPUT_RUN_AUTHENTICATED_SSO_CANARY" == "true" ]]; then
+            export RUN_AUTHENTICATED_SSO_CANARY=1
+            export AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1
+          else
+            export RUN_AUTHENTICATED_SSO_CANARY=0
+          fi
 
           ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
 

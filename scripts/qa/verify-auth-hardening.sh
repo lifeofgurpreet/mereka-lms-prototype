@@ -18,6 +18,8 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 ENV_SCOPE="both" # prod|dev|both
 MODE="all"       # public|internal|all
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-300}"
+RUN_AUTHENTICATED_SSO_CANARY="${RUN_AUTHENTICATED_SSO_CANARY:-0}"
+AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS="${AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS:-1}"
 
 usage() {
   cat <<EOF
@@ -25,6 +27,8 @@ Usage: $0 [--env prod|dev|both] [--mode public|internal|all]
 
 Env:
   CHECK_TIMEOUT_SECONDS=300  Per-check timeout in seconds (default: 300)
+  RUN_AUTHENTICATED_SSO_CANARY=1  Run credentialed browser SSO canary
+  AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1  Fail if canary creds are missing
 EOF
 }
 
@@ -97,6 +101,7 @@ case "$MODE" in
 esac
 
 log "verify-auth-hardening: env=$ENV_SCOPE mode=$MODE timeout=${CHECK_TIMEOUT_SECONDS}s"
+log "verify-auth-hardening: run_authenticated_sso_canary=$RUN_AUTHENTICATED_SSO_CANARY require_secrets=$AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS"
 
 if [[ "$run_public" -eq 1 ]]; then
   run_check "repo: OIDC cookie middleware order guard" "$REPO_ROOT/scripts/qa/verify-oidc-cookie-middleware-order.sh"
@@ -105,6 +110,11 @@ if [[ "$run_public" -eq 1 ]]; then
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public auth surfaces (dev)" env STRICT_ADMIN_LOGIN_REDIRECT=1 "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh" dev
+  fi
+  if [[ "$RUN_AUTHENTICATED_SSO_CANARY" == "1" ]]; then
+    run_check "authenticated SSO canary ($ENV_SCOPE)" \
+      env REQUIRE_SECRETS="$AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS" \
+      "$REPO_ROOT/scripts/qa/verify-authenticated-sso-canary.sh" --env "$ENV_SCOPE"
   fi
 fi
 

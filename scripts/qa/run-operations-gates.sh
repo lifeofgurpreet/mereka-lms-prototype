@@ -22,6 +22,8 @@ RUN_DB_EXPORTER_TELEMETRY_AUDIT="${RUN_DB_EXPORTER_TELEMETRY_AUDIT:-1}"
 DB_EXPORTER_AUDIT_MODE="${DB_EXPORTER_AUDIT_MODE:-local}" # local|runtime|all
 RUN_SENTRY_WIRING_AUDIT="${RUN_SENTRY_WIRING_AUDIT:-0}"
 SENTRY_AUDIT_MODE="${SENTRY_AUDIT_MODE:-local}" # local|runtime|all
+RUN_AUTHENTICATED_SSO_CANARY="${RUN_AUTHENTICATED_SSO_CANARY:-0}"
+AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS="${AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS:-0}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -42,6 +44,8 @@ Env:
   DB_EXPORTER_AUDIT_MODE=local   Mode for db exporter audit: local|runtime|all
   RUN_SENTRY_WIRING_AUDIT=1      Run Sentry wiring contract/runtime audit
   SENTRY_AUDIT_MODE=local        Mode for sentry wiring audit: local|runtime|all
+  RUN_AUTHENTICATED_SSO_CANARY=1 Run credentialed browser SSO canary check
+  AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1  Fail if canary creds are missing
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -196,6 +200,8 @@ echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
 echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
 echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
 echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
+echo "  run_authenticated_sso_canary: $RUN_AUTHENTICATED_SSO_CANARY"
+echo "  authenticated_sso_canary_require_secrets: $AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -216,6 +222,12 @@ if [[ "$RUN_SENTRY_WIRING_AUDIT" == "1" ]]; then
   run_check "sentry wiring audit (${SENTRY_AUDIT_MODE})" \
     env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
     ./scripts/qa/verify-sentry-wiring.sh --mode "$SENTRY_AUDIT_MODE"
+fi
+
+if [[ "$RUN_AUTHENTICATED_SSO_CANARY" == "1" ]]; then
+  run_check "authenticated SSO canary (${ENV_SCOPE})" \
+    env REQUIRE_SECRETS="$AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS" \
+    ./scripts/qa/verify-authenticated-sso-canary.sh --env "$ENV_SCOPE"
 fi
 
 run_check "auth + permissions + multisite audit" \

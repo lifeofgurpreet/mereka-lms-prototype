@@ -1,5 +1,5 @@
 # Auth Hardening Spec
-_Last updated: 2026-02-07_
+_Last updated: 2026-02-09_
 
 ## Goals
 
@@ -120,6 +120,21 @@ It aggregates:
     - dev: `academyv2.mereka.dev`
   - By default it runs with `--env auto`, which infers prod vs dev from the kube context name (`kind*` => dev).
 
+### 3.3) Credentialed callback/session verification (browser canary)
+
+- `scripts/qa/verify-authenticated-sso-canary.sh --env prod|dev|both`
+  - Runs a real browser OIDC login flow:
+    - `/auth/login/oidc/` -> Authentik login form -> `/auth/complete/oidc/` callback
+  - Verifies the post-login browser session can access `/api/user/v1/me` (expects HTTP 200).
+  - Verifies dashboard navigation stays authenticated (does not bounce to login/Auth0).
+  - Writes failure screenshots to `var/auth-sso-canary/`.
+  - Uses env-only secrets (never CLI args):
+    - `SSO_CANARY_EMAIL[_PROD|_DEV]`
+    - `SSO_CANARY_PASSWORD[_PROD|_DEV]`
+  - Integration flags:
+    - `RUN_AUTHENTICATED_SSO_CANARY=1`
+    - `AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`
+
 ### 4) Continuous verification (CI)
 
 The existing `.github/workflows/public-health-check.yml` now runs:
@@ -145,6 +160,7 @@ The existing `.github/workflows/public-health-check.yml` now runs:
    - access Discovery/Credentials/Ecommerce admin after SSO login
 10. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 11. Authentik logs do not show `Invalid client secret` for `client_id=mereka-lms` during SSO callback tests.
+12. `./scripts/qa/verify-authenticated-sso-canary.sh --env prod` passes with dedicated canary credentials.
 
 Convenience:
 - `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all`
@@ -154,6 +170,8 @@ Convenience:
 - `./scripts/qa/verify-alert-routing.sh` verifies runtime alert policies/channels and routing health.
 - `CHECK_TIMEOUT_SECONDS=1200 ./scripts/qa/run-operations-gates.sh --env both`
   runs consolidated auth + observability + Velero + Grafana gates.
+- `RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 ./scripts/qa/run-operations-gates.sh --env prod`
+  enables callback/session canary enforcement inside the consolidated gate.
 
 ## Future Hardening (Optional)
 

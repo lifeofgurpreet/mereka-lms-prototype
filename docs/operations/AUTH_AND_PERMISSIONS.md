@@ -159,6 +159,16 @@ For full auth-surface validation (including OIDC `sessionid` cookie `Domain=` ch
 ./scripts/qa/verify-auth-surfaces.sh prod
 ```
 
+For real callback/session validation (credentialed browser canary):
+```bash
+RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 \
+  ./scripts/qa/verify-auth-hardening.sh --env prod --mode public
+```
+or direct:
+```bash
+./scripts/qa/verify-authenticated-sso-canary.sh --env prod
+```
+
 ### Cluster permission verification (prod + dev)
 
 ```bash
@@ -204,6 +214,7 @@ Atlas path + alert routing guard (recommended before production rollout):
 
 Note:
 - `run-operations-gates.sh` enables alert-routing verification by default.
+- Set `RUN_AUTHENTICATED_SSO_CANARY=1` to include the credentialed SSO canary in consolidated gates.
 
 ### Multisite configuration verification (prod)
 

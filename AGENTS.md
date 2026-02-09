@@ -468,6 +468,8 @@ Canonical branding execution command (source + live verification):
 Auth hardening verification (preferred):
 ```bash
 CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env prod --mode all
+RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 \
+  ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
 ./scripts/qa/list-openedx-hostnames.sh --env prod
 STRICT=1 ./scripts/qa/verify-org-role-ownership.sh both
 CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env both
@@ -640,6 +642,10 @@ Regenerate hostname registry (after domain changes):
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
 - Consolidated auth audit now scopes OIDC/hostname checks by requested env:
   `./scripts/qa/audit-auth-access.sh --mode all --env prod|dev|both`.
+- Credentialed SSO callback/session canary is available and gate-integrated:
+  `./scripts/qa/verify-authenticated-sso-canary.sh --env prod|dev|both`
+  (secrets via env: `SSO_CANARY_EMAIL[_PROD|_DEV]`, `SSO_CANARY_PASSWORD[_PROD|_DEV]`;
+  enable in consolidated gates with `RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`).
 - Stripe checkout readiness requires webhook signing secret + delivery test:
   - Guide: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
   - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`

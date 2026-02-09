@@ -1,11 +1,13 @@
 # In-Cluster Auth Verification (CronJob)
-_Last updated: 2026-02-06_
+_Last updated: 2026-02-09_
 
 This repo includes a **verify-only** Kubernetes CronJob template that continuously checks the public authentication surfaces without requiring credentials.
 
 Why:
 - CI checks are good, but an in-cluster Job makes drift visible even if CI is paused and gives you native Job failure signals.
 - The checks are intentionally **public-surface** only (no DB access, no secrets).
+- Callback/session validation is covered by a separate credentialed browser canary script:
+  `scripts/qa/verify-authenticated-sso-canary.sh`.
 
 ## What It Checks (Prod)
 
@@ -87,4 +89,5 @@ This repo also includes templates (GCP) for TLS verification:
 - This CronJob uses `curlimages/curl` and only depends on public HTTPS reachability.
 - It will not detect "permissions drift" (staff/superuser) inside LMS/CMS, because those checks require privileged access.
 - It will not detect OIDC token-exchange failures on callback (for example `Invalid client secret` at `/application/o/token/`), because it is intentionally non-credentialed.
-- Credentialed synthetic SSO canary is tracked as the active follow-up in `docs/status/NEXT10_TASKS.md`.
+- Use `scripts/qa/verify-authenticated-sso-canary.sh --env prod` for credentialed callback/session verification.
+- Runtime workflow can enable the canary via `.github/workflows/operations-gates-runtime.yml` input `run_authenticated_sso_canary=true` (requires canary secrets).

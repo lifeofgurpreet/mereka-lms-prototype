@@ -59,11 +59,11 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-09_
 
 ## Immediate Next Task (Active)
 
-1. Implement authenticated synthetic SSO canary (prod + dev):
-   - Use dedicated synthetic user credentials from secret manager.
-   - Exercise real login callback (`/auth/complete/oidc/`) and assert post-login session.
-   - Publish pass/fail signal to existing operations gates and alerting.
-   - Document emergency runbook path if canary fails.
+1. Wire authenticated SSO canary credentials + runtime enforcement:
+   - `scripts/qa/verify-authenticated-sso-canary.sh` is implemented and integrated behind gate flags.
+   - Next: add dedicated canary user credentials in secret manager (`SSO_CANARY_EMAIL[_PROD|_DEV]`, `SSO_CANARY_PASSWORD[_PROD|_DEV]`).
+   - Enable runtime gate enforcement with `RUN_AUTHENTICATED_SSO_CANARY=1` and `AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`.
+   - Confirm recurring workflow coverage in `.github/workflows/operations-gates-runtime.yml`.
 
 ## Top 10 Next Tasks (High Impact, Non-Stripe)
 
@@ -78,7 +78,7 @@ _Audience: Everyone • Owner: Program Mgmt • Last verified: 2026-02-09_
 | 7 | Multi-site governance hardening (domain onboarding + config drift prevention) | Infra | ✅ Delivered | Strict multisite + org-role ownership + consolidated operations gate are CI/runtime-enforced (`atlas-modulestore-guardrails` + `.github/workflows/operations-gates-runtime.yml`). Beads: `mereka-lms-s8r`, `mereka-lms-2q6`. |
 | 8 | Observability: synthetic checks for login + admin access across all hostnames | SRE | ⚙️ In progress | Runtime observability + Velero pipeline audits + alert-routing verifier are live; remaining: keep routing contacts fresh and incident-response drill cadence. |
 | 9 | Visual regression gate for branding (LMS/Studio/Authn MFE) | Product/SRE | ✅ Delivered | Canonical gate supports screenshot+diff flow (`RUN_SCREENSHOTS=1 RUN_VISUAL_REGRESSION=1`), VPS scheduler tooling is in place (`scripts/infra/setup-vps-branding-visual-regression-cron.sh`), and service-domain `/authn/*` proxy parity with strict enforcement is now live (`mereka-lms-3020`). |
-| 10 | CI/runtime authenticated browser E2E smoke test (Authentik login + admin access) | Infra | ⚙️ In progress | Bead: `mereka-lms-24r` reactivated. Contract: fail on callback/authn regressions that public redirect checks cannot catch. |
+| 10 | CI/runtime authenticated browser E2E smoke test (Authentik login + admin access) | Infra | ⚙️ In progress | Implemented: `verify-authenticated-sso-canary.sh` + gate/workflow hooks. Remaining: secret wiring + turn on strict runtime enforcement. Bead: `mereka-lms-24r`. |
 
 ## Observability Top 10 (Epic: `mereka-lms-16g`)
 
