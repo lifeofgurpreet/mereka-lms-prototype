@@ -646,6 +646,9 @@ Regenerate hostname registry (after domain changes):
   `./scripts/qa/verify-authenticated-sso-canary.sh --env prod|dev|both`
   (secrets via env: `SSO_CANARY_EMAIL[_PROD|_DEV]`, `SSO_CANARY_PASSWORD[_PROD|_DEV]`;
   enable in consolidated gates with `RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`).
+- Canonical canary wiring management:
+  - Audit workflow + GitHub secret/variable posture: `./scripts/qa/audit-authenticated-sso-canary-wiring.sh` (`STRICT=1` for enforce mode).
+  - Configure GitHub canary secrets/variable: `./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate`.
 - Stripe checkout readiness requires webhook signing secret + delivery test:
   - Guide: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
   - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`

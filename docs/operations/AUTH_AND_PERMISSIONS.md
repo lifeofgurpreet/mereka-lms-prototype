@@ -169,6 +169,12 @@ or direct:
 ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
 ```
 
+Canary wiring posture (workflow + GitHub secrets/variable):
+```bash
+./scripts/qa/audit-authenticated-sso-canary-wiring.sh
+STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh
+```
+
 ### Cluster permission verification (prod + dev)
 
 ```bash

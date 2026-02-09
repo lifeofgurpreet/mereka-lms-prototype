@@ -91,3 +91,6 @@ This repo also includes templates (GCP) for TLS verification:
 - It will not detect OIDC token-exchange failures on callback (for example `Invalid client secret` at `/application/o/token/`), because it is intentionally non-credentialed.
 - Use `scripts/qa/verify-authenticated-sso-canary.sh --env prod` for credentialed callback/session verification.
 - Runtime workflow can enable the canary via `.github/workflows/operations-gates-runtime.yml` input `run_authenticated_sso_canary=true` (requires canary secrets).
+- Verify runtime canary wiring with:
+  - `./scripts/qa/audit-authenticated-sso-canary-wiring.sh`
+  - `STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh`

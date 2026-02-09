@@ -21,6 +21,7 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `retire-legacy-mongodb.sh` - Velero-first guarded retirement flow for legacy in-cluster MongoDB
 - `release-openedx-gitops.sh` - Canonical one-command Open edX release orchestrator (app tags + GitOps ref/tags + optional push/runtime verify)
 - `prepare-bbi-infra-ref-bump.sh` - Prepare/apply GitOps pinned ref bump (active repo is typically `BBI-K8`) to current `mereka-lms` commit
+- `configure-github-authenticated-sso-canary.sh` - Set GitHub canary secrets/variable for credentialed SSO runtime gate enforcement
 - `../qa/audit-atlas-allowlist-monitor.sh` - Validate Atlas allowlist monitor posture (cron wiring, status freshness, webhook config)
 - `../qa/verify-atlas-modulestore-path.sh` - Verify Atlas modulestore contracts (repo + runtime)
 - `../qa/verify-alert-routing.sh` - One-command alert-routing verification (repo + runtime + optional VPS webhook check)
@@ -168,6 +169,15 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
 
 # Run gate + alert-routing audit in CI-safe mode (skip VPS-only atlas monitor checks)
 RUN_ALERT_ROUTING_AUDIT=1 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0 ./scripts/qa/run-operations-gates.sh --env both
+
+# Audit credentialed SSO canary wiring (workflow contract + GH secrets/variable presence)
+./scripts/qa/audit-authenticated-sso-canary-wiring.sh
+STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh
+
+# Configure GitHub canary secrets and enable runtime gate toggle
+SSO_CANARY_EMAIL_PROD='sso-canary@example.com' \
+SSO_CANARY_PASSWORD_PROD='***' \
+./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate
 ```
 
 ## Scheduled Checks

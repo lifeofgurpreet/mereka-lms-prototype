@@ -134,6 +134,12 @@ It aggregates:
   - Integration flags:
     - `RUN_AUTHENTICATED_SSO_CANARY=1`
     - `AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`
+  - GitHub wiring helpers:
+    - Audit wiring status:
+      - `./scripts/qa/audit-authenticated-sso-canary-wiring.sh`
+      - `STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh`
+    - Configure repo secrets/variable:
+      - `SSO_CANARY_EMAIL_PROD=... SSO_CANARY_PASSWORD_PROD=... ./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate`
 
 ### 4) Continuous verification (CI)
 
@@ -161,6 +167,8 @@ The existing `.github/workflows/public-health-check.yml` now runs:
 10. `./scripts/qa/verify-oidc-provider-configs.sh` passes (operator run).
 11. Authentik logs do not show `Invalid client secret` for `client_id=mereka-lms` during SSO callback tests.
 12. `./scripts/qa/verify-authenticated-sso-canary.sh --env prod` passes with dedicated canary credentials.
+13. `STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh` passes:
+    runtime workflow contract is present, prod canary secrets exist, and `RUN_AUTHENTICATED_SSO_CANARY=true` is set.
 
 Convenience:
 - `CHECK_TIMEOUT_SECONDS=300 ./scripts/qa/verify-auth-hardening.sh --env both --mode all`

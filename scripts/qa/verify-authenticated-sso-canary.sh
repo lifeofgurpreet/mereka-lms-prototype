@@ -70,14 +70,16 @@ failures=0
 
 run_env() {
   local env_name="$1"
-  local lms_domain email password run_id
+  local lms_domain mfe_domain email password
 
   if [[ "$env_name" == "prod" ]]; then
     lms_domain="$LMS_DOMAIN"
+    mfe_domain="$MFE_DOMAIN"
     email="${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}"
     password="${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}"
   else
     lms_domain="$DEV_LMS_DOMAIN"
+    mfe_domain="$DEV_MFE_DOMAIN"
     email="${SSO_CANARY_EMAIL_DEV:-${SSO_CANARY_EMAIL:-}}"
     password="${SSO_CANARY_PASSWORD_DEV:-${SSO_CANARY_PASSWORD:-}}"
   fi
@@ -92,8 +94,6 @@ run_env() {
     return
   fi
 
-  run_id="$(date -u +%Y%m%dT%H%M%SZ)-${env_name}"
-
   if ! timeout "${SSO_CANARY_TIMEOUT_SECONDS}s" python3 - <<'PY'
 import json
 import os
@@ -104,6 +104,7 @@ from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
 
 env_name = os.environ["CANARY_ENV_NAME"]
 lms_domain = os.environ["CANARY_LMS_DOMAIN"]
+mfe_domain = os.environ["CANARY_MFE_DOMAIN"]
 email = os.environ["CANARY_EMAIL"]
 password = os.environ["CANARY_PASSWORD"]
 debug = os.environ.get("SSO_CANARY_DEBUG", "0") == "1"
@@ -128,6 +129,19 @@ def fail(msg: str, page=None, code: int = 1) -> None:
     log(f"FAIL {msg}")
     raise SystemExit(code)
 
+def assert_not_auth_error_page(page, phase: str) -> None:
+    url = (page.url or "").lower()
+    if "error=" in url and ("auth/callback" in url or "authn/login" in url or "/login" in url):
+        fail(f"{phase}: callback/login error query detected in url={page.url}", page=page)
+    try:
+        body = page.inner_text("body", timeout=3000).lower()
+    except Exception:
+        body = ""
+    if "authentication process canceled" in body:
+        fail(f"{phase}: Authentik reported canceled authentication", page=page)
+    if "we couldn't sign you in" in body and "not authorized" in body:
+        fail(f"{phase}: Open edX authorization denied after callback", page=page)
+
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     context = browser.new_context(ignore_https_errors=False)
@@ -146,10 +160,24 @@ with sync_playwright() as p:
         page.get_by_placeholder("Password").fill(password, timeout=30000)
         page.get_by_role("button", name=re.compile(r"Continue", re.I)).click(timeout=20000)
 
-        # We expect to leave auth0 and land on LMS host after callback exchange.
-        page.wait_for_url(re.compile(rf"^https://{re.escape(lms_domain)}/"), timeout=60000)
+        # We expect callback to leave Authentik domain.
+        # Depending on the flow, we may land on LMS or Authn MFE first.
+        page.wait_for_url(
+            re.compile(
+                rf"^https://({re.escape(lms_domain)}|{re.escape(mfe_domain)})/"
+            ),
+            timeout=60000,
+        )
+        assert_not_auth_error_page(page, "post_callback")
         if debug:
             log(f"post_callback_url={page.url}")
+
+        # Final guardrail: dashboard should stay authenticated (not bounce to login).
+        page.goto(dashboard_url, wait_until="domcontentloaded", timeout=60000)
+        assert_not_auth_error_page(page, "dashboard_navigation")
+        current = page.url
+        if "/login" in current or "auth0.mereka.io" in current:
+            fail(f"dashboard redirected to unauthenticated flow: {current}", page=page)
 
         # Validate the authenticated browser session against a logged-in endpoint.
         me = page.evaluate(
@@ -170,12 +198,6 @@ with sync_playwright() as p:
         if "username" not in (me.get("body") or ""):
             fail("/api/user/v1/me response missing username marker", page=page)
 
-        # Final guardrail: dashboard should stay authenticated (not bounce to login).
-        page.goto(dashboard_url, wait_until="domcontentloaded", timeout=60000)
-        current = page.url
-        if "/login" in current or "auth0.mereka.io" in current:
-            fail(f"dashboard redirected to unauthenticated flow: {current}", page=page)
-
         log("OK authenticated session validated")
     except PWTimeout as exc:
         fail(f"timeout: {exc}", page=page)
@@ -190,6 +212,7 @@ PY
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   CANARY_ENV_NAME="prod" \
   CANARY_LMS_DOMAIN="$LMS_DOMAIN" \
+  CANARY_MFE_DOMAIN="$MFE_DOMAIN" \
   CANARY_EMAIL="${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}" \
   CANARY_PASSWORD="${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}" \
   CANARY_RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-prod" \
@@ -201,6 +224,7 @@ fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   CANARY_ENV_NAME="dev" \
   CANARY_LMS_DOMAIN="$DEV_LMS_DOMAIN" \
+  CANARY_MFE_DOMAIN="$DEV_MFE_DOMAIN" \
   CANARY_EMAIL="${SSO_CANARY_EMAIL_DEV:-${SSO_CANARY_EMAIL:-}}" \
   CANARY_PASSWORD="${SSO_CANARY_PASSWORD_DEV:-${SSO_CANARY_PASSWORD:-}}" \
   CANARY_RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-dev" \
