@@ -487,3 +487,9 @@ if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
     session_index = MIDDLEWARE.index(_session_middleware)
     if cookie_index > session_index:
         MIDDLEWARE.insert(session_index, MIDDLEWARE.pop(cookie_index))
+
+# Ensure social-auth callback failures (missing/invalid state, etc.) do not surface as 500s.
+# This is critical for Studio's LMS OAuth2 roundtrip (/login/edx-oauth2 -> /complete/edx-oauth2).
+_social_exception_middleware = "social_django.middleware.SocialAuthExceptionMiddleware"
+if _social_exception_middleware not in MIDDLEWARE:
+    MIDDLEWARE.append(_social_exception_middleware)

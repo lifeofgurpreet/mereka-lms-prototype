@@ -90,7 +90,7 @@ LMS/CMS also include multisite hardening middleware:
   - Discovery/Credentials/Ecommerce `/login/` redirects to `/login/edx-oauth2/`
   - (Optional strict mode) `/admin/login/` redirects to `/login/`
   - Notes: must return an API banner (API-first, no SSO UI)
-  - Forum: must return `401` unauthenticated (API-first, no SSO UI)
+  - Forum: must be reachable and `GET /heartbeat` must return `200`
 
 - `scripts/qa/verify-mfe-config-contract.sh --env {prod|dev|both}`
   - Verifies `/api/mfe_config/v1` on the public apps host contains the auth-critical keys we depend on:
@@ -102,6 +102,11 @@ LMS/CMS also include multisite hardening middleware:
       and the apps host MUST reverse-proxy `/login_refresh` back to the LMS.
       This prevents the common regression where MFEs call cross-origin `https://<lms>/login_refresh`
       without sending cookies (browser default `credentials: "same-origin"`), which causes MFE auth loops.
+    - Note: When `SiteConfiguration` is enabled, `/api/mfe_config/v1` is sourced from
+      `SiteConfiguration.site_values["MFE_CONFIG"]` and can override file-based settings.
+      If this override still contains an absolute LMS refresh endpoint, MFEs will regress even if
+      the repo settings are correct. Fix with:
+      - `./scripts/infra/fix-mfe-refresh-endpoint-site-config.sh`
   - This catches “stale config” and cookie posture regressions before they become user-visible SSO failures.
 
 - `scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`

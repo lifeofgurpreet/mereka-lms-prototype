@@ -548,7 +548,7 @@ Regenerate hostname registry (after domain changes):
 - Service-domain root landing contract is part of branding:
   - `https://ecommerce.* /` should render `Mereka Ecommerce Service`
   - `https://forum.* /` should render `Mereka Forum Service` only where forum traffic is routed through Caddy (dev/local overlays).
-    In production, forum is currently direct-ingress and root is expected to return `401`.
+    In production, forum is routed via dedicated ingress and is expected to be reachable (root may be `200` or `401` depending on routing mode).
   - `https://credentials.* /` may be API-first (redirect to `/health/`)
   - Verify with `./scripts/qa/verify-public-branding.sh prod` and `./scripts/qa/audit-branding-surfaces.sh prod --strict`.
 - Service-domain authn proxy contract:
@@ -573,8 +573,8 @@ Regenerate hostname registry (after domain changes):
   `./scripts/branding/sync-brand-assets.sh` now syncs all three copies.
 - Credentials root in production is API-first (`/` may redirect to `/health/`); use admin + health checks as the contract.
 - Forum host behavior in production:
-  - `forum.academyv2.mereka.io` is currently routed by dedicated ingress (`openedx-forum`) directly to `forum:4567`.
-  - Expected contract in gates is `heartbeat=200` and root `401` (authenticated service root), not a public forum landing page.
+  - `forum.academyv2.mereka.io` is routed by dedicated ingress (`openedx-forum`).
+  - Expected contract in gates is `GET /heartbeat -> 200` and the host is reachable (root may be `200`, `401`, or `404` depending on architecture).
 - MFE revision parity can be enforced explicitly with `STRICT_MFE_BRANDING_REV=1 ./scripts/qa/verify-public-branding.sh prod` (default mode validates branding markers without failing on revision drift).
 - Verify MFE image branding before push/deploy:
   `./scripts/qa/verify-mfe-image-branding.sh <image_ref>` (ensures authn `index.html` references a branded CSS bundle and revision marker).

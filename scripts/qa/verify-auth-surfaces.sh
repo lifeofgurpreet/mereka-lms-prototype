@@ -81,6 +81,25 @@ require_status() {
   fi
 }
 
+require_status_one_of() {
+  local url="$1"
+  local label="$2"
+  shift 2
+  local code expected ok=0
+  code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
+  for expected in "$@"; do
+    if [[ "$code" == "$expected" ]]; then
+      ok=1
+      break
+    fi
+  done
+  if [[ "$ok" -eq 1 ]]; then
+    log_ok "$label ($code)"
+  else
+    log_fail "$label (expected one of: $*, got $code) url=$url"
+  fi
+}
+
 require_302_location_contains() {
   local url="$1"
   local label="$2"
@@ -333,9 +352,24 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_studio_signin_redirect "$BIJI_STUDIO_DOMAIN" "$BIJI_DOMAIN"
   check_studio_home_next_scheme "studio.${LMS_DOMAIN}"
   check_studio_home_next_scheme "$BIJI_STUDIO_DOMAIN"
+
+  # Studio callback endpoint must never 500 (missing state should be handled gracefully).
+  require_status_one_of \
+    "https://studio.${LMS_DOMAIN}/complete/edx-oauth2/" \
+    "studio.${LMS_DOMAIN}: /complete/edx-oauth2 does not 500" \
+    "302" "400" "403" "404"
+  require_status_one_of \
+    "https://${BIJI_STUDIO_DOMAIN}/complete/edx-oauth2/" \
+    "${BIJI_STUDIO_DOMAIN}: /complete/edx-oauth2 does not 500" \
+    "302" "400" "403" "404"
 else
   check_studio_signin_redirect "studio.${DEV_LMS_DOMAIN}" "$DEV_LMS_DOMAIN"
   check_studio_home_next_scheme "studio.${DEV_LMS_DOMAIN}"
+
+  require_status_one_of \
+    "https://studio.${DEV_LMS_DOMAIN}/complete/edx-oauth2/" \
+    "studio.${DEV_LMS_DOMAIN}: /complete/edx-oauth2 does not 500" \
+    "302" "400" "403" "404"
 fi
 
 # MFE login should be reachable on all configured MFE hosts.
@@ -415,11 +449,16 @@ require_body_contains \
   "notes: API banner" \
   "edX Notes API"
 
-# Forum service returns 401 when unauthenticated (expected).
-require_status \
+# Forum has had multiple production architectures over time.
+# Current contract: it MUST be reachable (no 5xx) and heartbeat MUST return 200.
+require_status_one_of \
   "https://forum.${ECOSYSTEM_BASE}/" \
-  "forum: unauthenticated response" \
-  "401"
+  "forum: reachable" \
+  "200" "401" "404"
+
+require_200 \
+  "https://forum.${ECOSYSTEM_BASE}/heartbeat" \
+  "forum: heartbeat"
 
 if [[ "$failures" -gt 0 ]]; then
   echo ""

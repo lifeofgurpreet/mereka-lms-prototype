@@ -885,6 +885,12 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
 1. Ensure MFE config is **same-origin** for refresh:
    - `/api/mfe_config/v1` MUST contain:
      - `REFRESH_ACCESS_TOKEN_ENDPOINT=https://apps.<domain>/login_refresh` **or** `REFRESH_ACCESS_TOKEN_ENDPOINT=/login_refresh`
+   - Important: `/api/mfe_config/v1` is backed by `SiteConfiguration.site_values["MFE_CONFIG"]` when enabled.
+     If that DB override still has an absolute LMS URL, it will override file-based settings and keep MFEs broken.
+     Use:
+     ```bash
+     ./scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
+     ```
 2. Ensure the MFE origin exposes `/login_refresh` and reverse-proxies to LMS:
    - Implemented via MFE Caddy reverse-proxy (see `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`).
 3. Deploy the updated manifests via GitOps (BBI-K8 pinned ref bump).
@@ -917,6 +923,9 @@ RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 \
   - wrong/missing oauth client secret
   - wrong LMS oauth endpoints (root URL mismatch)
   - multisite site resolution drift (Studio host not mapping to the right tenant root)
+- Social-auth exceptions are not being handled in Studio:
+  - If `social_django.middleware.SocialAuthExceptionMiddleware` is missing, callback failures
+    (e.g. missing/invalid `state`) surface as **500s** instead of a clean redirect/error page.
 
 **Verify (preferred, credentialed canary):**
 ```bash
@@ -929,6 +938,12 @@ This canary now fails explicitly if Studio 500s during `/complete/edx-oauth2/`, 
 **Verify (public preflight):**
 ```bash
 ./scripts/qa/verify-auth-surfaces.sh prod
+```
+
+**Quick sanity check (no credentials):**
+```bash
+# Should NOT be a 500 (expected 302/400 depending on backend behavior).
+curl -sS -o /dev/null -D- "https://studio.academyv2.mereka.io/complete/edx-oauth2/" | head
 ```
 
 If public checks pass but Studio still 500s, treat it as a runtime secret/config drift issue and audit:
