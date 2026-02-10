@@ -106,7 +106,8 @@ infer_project_id_from_backup() {
     candidate=$(ls "$backup_dir"/project_secrets_* 2>/dev/null | head -n 1 || true)
   fi
   if [[ -n "$candidate" ]]; then
-    basename "$candidate" | sed -E 's/^project_secrets_([^_]+)_.*/\\1/'
+    # Example filename: project_secrets_<workspaceId>_<timestamp>.json
+    basename "$candidate" | sed -E 's/^project_secrets_([^_]+)_.*/\1/'
   fi
 }
 
@@ -163,4 +164,3 @@ exec env \
   "$REPO_ROOT/scripts/infra/configure-github-authenticated-sso-canary.sh" \
   --repo "$REPO_SLUG" \
   $([[ "$ENABLE_RUNTIME_GATE" == "1" ]] && echo "--enable-runtime-gate")
-
