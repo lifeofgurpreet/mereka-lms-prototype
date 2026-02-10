@@ -1,0 +1,244 @@
+# Testmap: Video Pipeline & Delivery System
+# Source Spec: specs/video-pipeline-delivery_spec.md
+# Generated: 2026-02-10
+
+spec: "specs/video-pipeline-delivery_spec.md"
+
+acceptance_criteria:
+  # --- Video Ingestion ---
+
+  - id: "AC-001"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/test_mux_upload.py"
+        command: "pytest tests/test_mux_upload.py -k test_upload_valid_mp4"
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/test_mux_api_utils.py"
+        command: "pytest tests/test_mux_api_utils.py -k test_rate_limit_backoff"
+
+  - id: "AC-002"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-mux-upload-completeness.sh"
+        command: "bash scripts/qa/verify-mux-upload-completeness.sh"
+
+  - id: "AC-003"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-studio-upload.sh"
+        command: "bash scripts/qa/verify-studio-upload.sh"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-001: Studio Upload UX"
+        justification: "Requires browser interaction with Studio UI; cannot be fully automated without headless browser infrastructure"
+
+  - id: "AC-004"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/test_mux_upload.py"
+        command: "pytest tests/test_mux_upload.py -k test_batch_resume_from_checkpoint"
+
+  # --- Transcoding & Playback ---
+
+  - id: "AC-005"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-hls-renditions.sh"
+        command: "bash scripts/qa/verify-hls-renditions.sh"
+
+  - id: "AC-006"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/smoke-video-playback.sh"
+        command: "bash scripts/qa/smoke-video-playback.sh"
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-poster-dimensions.sh"
+        command: "bash scripts/qa/verify-poster-dimensions.sh"
+
+  - id: "AC-007"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-hls-renditions.sh"
+        command: "bash scripts/qa/verify-hls-renditions.sh"
+
+  # --- Subtitle Management ---
+
+  - id: "AC-008"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/test_mux_subtitle_utils.py"
+        command: "pytest tests/test_mux_subtitle_utils.py -k test_upload_srt_subtitle"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-002: Subtitle Display"
+        justification: "Synchronized subtitle display requires visual verification in browser video player"
+
+  - id: "AC-009"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/test_mux_subtitle_utils.py"
+        command: "pytest tests/test_mux_subtitle_utils.py -k test_default_language_code_en"
+
+  - id: "AC-010"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-video-subtitles.sh"
+        command: "bash scripts/qa/verify-video-subtitles.sh"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-002: Subtitle Display"
+        justification: "Language selector UI behavior requires visual verification in browser"
+
+  # --- Content Protection ---
+
+  - id: "AC-011"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mux-signed-playback.sh"
+        command: "bash scripts/qa/verify-mux-signed-playback.sh"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-003: Content Protection"
+        justification: "Enrollment-gated access requires testing with authenticated user sessions in browser"
+
+  - id: "AC-012"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mux-signed-playback.sh"
+        command: "bash scripts/qa/verify-mux-signed-playback.sh"
+
+  - id: "AC-013"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-no-mux-asset-ids.sh"
+        command: "bash scripts/qa/verify-no-mux-asset-ids.sh"
+
+  # --- Analytics ---
+
+  - id: "AC-014"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-video-xapi-events.sh"
+        command: "bash scripts/qa/verify-video-xapi-events.sh"
+
+  - id: "AC-015"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mux-data-dashboard.sh"
+        command: "bash scripts/qa/verify-mux-data-dashboard.sh"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-004: Mux Data QoS"
+        justification: "Mux dashboard UI verification requires browser login to Mux dashboard"
+
+  - id: "AC-016"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-superset-video-dashboard.sh"
+        command: "bash scripts/qa/verify-superset-video-dashboard.sh"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-005: Superset Dashboard"
+        justification: "Superset dashboard visual correctness requires human verification"
+
+  # --- Cost Control ---
+
+  - id: "AC-017"
+    verify:
+      - type: "monitoring"
+        metric: "mux_storage_minutes"
+        dashboard: "grafana://dashboards/video-cost"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-006: Cold Storage Cost"
+        justification: "Cold storage discounts require 90+ day wait; verified via Mux billing dashboard"
+
+  - id: "AC-018"
+    verify:
+      - type: "monitoring"
+        metric: "video_delivery_minutes_monthly"
+        dashboard: "grafana://dashboards/video-cost"
+      - type: "manual"
+        runbook: "specs/plans/video-pipeline-delivery_testplan.md"
+        section: "MV-006: Cold Storage Cost"
+        justification: "Delivery cost verification requires Mux billing dashboard access"
+
+  - id: "AC-019"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mux-alerts.sh"
+        command: "bash scripts/qa/verify-mux-alerts.sh"
+      - type: "monitoring"
+        metric: "video_delivery_minutes_monthly"
+        dashboard: "grafana://dashboards/video-cost"
+
+  # --- Secret Management ---
+
+  - id: "AC-020"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mux-secrets.sh"
+        command: "bash scripts/qa/verify-mux-secrets.sh"
+
+  - id: "AC-021"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/scan-mux-credentials.sh"
+        command: "bash scripts/qa/scan-mux-credentials.sh"
+
+  # --- Migration Continuity ---
+
+  - id: "AC-022"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mux-asset-status.py"
+        command: "python scripts/qa/verify-mux-asset-status.py"
+
+  - id: "AC-023"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/smoke-video-playback.sh"
+        command: "bash scripts/qa/smoke-video-playback.sh"
+
+  # --- Graceful Degradation ---
+
+  - id: "AC-024"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-video-degradation.sh"
+        command: "bash scripts/qa/verify-video-degradation.sh"
+
+  - id: "AC-025"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-video-degradation.sh"
+        command: "bash scripts/qa/verify-video-degradation.sh"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/smoke-video-playback.sh"
+        command: "bash scripts/qa/smoke-video-playback.sh"

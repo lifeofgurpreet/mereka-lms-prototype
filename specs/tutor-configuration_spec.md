@@ -18,6 +18,7 @@ links:
     - "specs/multi-site-domains_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/secrets-management_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -93,7 +94,7 @@ The `apply-patches.sh` script MUST apply the following patches:
 - MUST update i18n archive URL to `openedx-unsupported/openedx-i18n`
 - MUST skip legacy `requirements/edx/local.in` reinstall step
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - `apply-patches.sh` execution time MUST be <= 30 seconds on a standard development machine
 - Image build time with patches applied SHOULD be <= 45 minutes for `openedx` image on a 12GB RAM host

@@ -1,0 +1,784 @@
+# Testmap for Data Privacy & GDPR Compliance
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/data-privacy-gdpr-compliance_testmap.yaml
+
+spec: specs/data-privacy-gdpr-compliance_spec.md
+tests:
+  # PII Inventory
+  - criterion: "AC-001: Given the PII registry at specs/pii-registry.yml, when the validation tool is run against all database schemas, then zero unregistered PII fields are flagged and zero registry entries reference non-existent fields"
+    test_file: tests/integration/test_pii_registry_validation.py
+    test_name: "test_pii_registry_matches_schema_no_drift"
+    type: integration
+
+  - criterion: "AC-001: Schema has new PII field not in registry"
+    test_file: tests/unit/test_pii_registry_validation.py
+    test_name: "test_unregistered_field_flagged"
+    type: unit
+
+  - criterion: "AC-002: Given a new database migration that adds a field containing PII, when the migration is submitted for review, then the CI pipeline requires the PII registry tobe updated (validation tool returns non-zero exit code if field is not registered)"
+    test_file: tests/integration/test_ci_pii_validation.py
+    test_name: "test_ci_blocks_merge_if_registry_outdated"
+    type: integration
+
+  # Consent Management
+  - criterion: "AC-003: Given a new user registration, when the user completes the registration form, then consent recordsare created for all mandatory processing purposes with granted=true and for optional purposes according to user selection"
+    test_file: tests/integration/test_consent_registration.py
+    test_name: "test_consent_records_created_on_registration"
+    type: integration
+
+  - criterion: "AC-004: Given an authenticated user, when they visit /account/privacy/, then they see all consent purposeswith their current consent status and can toggle non-essential consents"
+    test_file: tests/e2e/test_preference_center.py
+    test_name: "test_preference_center_displays_all_purposes"
+    type: e2e
+
+  - criterion: "AC-005: Given a user withdraws consent for analytics, when the withdrawal is saved, then analytics event collection for that user stops within 24 hours and a consent_withdrawn audit entry is created"
+    test_file: tests/integration/test_consent_withdrawal_enforcement.py
+    test_name: "test_analytics_consent_withdrawal_enforced"
+    type: integration
+
+  - criterion: "AC-006: Given a user in the EU visits the LMS, when the page loads, then a cookie consent banner is displayed and no non-essential cookies are set until consent is granted"
+    test_file: tests/e2e/test_cookie_banner.py
+    test_name: "test_eu_user_sees_cookie_banner"
+    type: e2e
+
+  - criterion: "AC-007: Given a user grants cookie consent for analytics category, when they subsequently revoke it, thenanalytics cookies are cleared and the tracking pixel is deactivated on the next page load"
+    test_file: tests/integration/test_cookie_revocation.py
+    test_name: "test_cookie_consent_revocation_clears_cookies"
+    type: integration
+
+  # Right to Be Forgotten
+  - criterion: "AC-008: Given an authenticated user submits adeletion request via POST /api/v1/privacy/deletion-request/,when the request is verified, then the deletion pipeline begins processing within 48 hours"
+    test_file: tests/integration/test_deletion_request_api.py
+    test_name: "test_deletion_request_triggers_pipeline"
+    type: integration
+
+  - criterion: "AC-009: Given a deletion pipeline runs for user X, when all stores are processed successfully, then: (a) auth_user.email is replaced with retired_email_{hash}@retired.invalid, (b) auth_user.username is replaced with retired_user_{hash}, (c) auth_userprofile record is deleted, (d) forum posts show [deleted] as author, (e) profile image is deleted from GCS, (f) Redis sessions are invalidated, (g) ClickHouse events for the user are deleted/anonymized, (h) Purchase Gateway buyer_email is anonymized"
+    test_file: tests/e2e/test_deletion_pipeline_full.py
+    test_name: "test_deletion_pipeline_all_stores_success"
+    type: e2e
+
+  - criterion: "AC-010: Given a deletion pipeline completes,when the proof is generated, then the proof document contains: the deletion request ID, each data store name, the action taken (deleted/anonymized/retained with reason), the timestampof completion, and a valid cryptographic signature"
+    test_file: tests/unit/test_deletion_proof.py
+    test_name: "test_deletion_proof_signed_manifest"
+    type: unit
+
+  - criterion: "AC-011: Given a deletion request for a user with financial records within the 7-year retention period, when the pipeline processes the Purchase Gateway, then financialamounts and order UUIDs are retained (anonymized PII) and the deletion proof notes the legal retention basis"
+    test_file: tests/integration/test_deletion_legal_retention.py
+    test_name: "test_deletion_financial_records_retained"
+    type: integration
+
+  - criterion: "AC-012: Given a deletion pipeline fails for MongoDB Atlas (network error), when the failure is detected, then the request transitions to partially_completed, the remaining stores are still processed, and an alert is fired to theprivacy operations team"
+    test_file: tests/integration/test_deletion_partial_failure.py
+    test_name: "test_deletion_partial_failure_continues_processing"
+    type: integration
+
+  # Data Portability
+  - criterion: "AC-013: Given an authenticated user submits an export request via POST /api/v1/privacy/export-request/, when the export is generated, then a ZIP archive is produced containing profile.json, enrollments.json, grades.json, certificates.json, forum_posts.json, notes.json, purchases.json, consents.json, audit_log.json, and README.md"
+    test_file: tests/e2e/test_export_pipeline_full.py
+    test_name: "test_export_archive_contains_all_files"
+    type: e2e
+
+  - criterion: "AC-014: Given an export archive is generated,when the user accesses the download link, then the archive is encrypted and the download link expires after 48 hours"
+    test_file: tests/integration/test_export_download_link.py
+    test_name: "test_export_link_expires_after_48h"
+    type: integration
+
+  - criterion: "AC-015: Given a user has already submitted 3export requests in the current 30-day period, when they submit a 4th request, then the request is rejected with HTTP 429 and a message indicating the rate limit"
+    test_file: tests/unit/test_export_rate_limit.py
+    test_name: "test_export_rate_limit_3_per_30_days"
+    type: unit
+
+  # Data Retention
+  - criterion: "AC-016: Given a user account with no login for 18 months, when the retention enforcement job runs, then areminder email is sent to the user warning of impending account deletion at 24 months"
+    test_file: tests/integration/test_retention_reminder.py
+    test_name: "test_18_month_inactivity_reminder"
+    type: integration
+
+  - criterion: "AC-017: Given a user account with no login for 24 months and no response to the 18-month reminder, when the retention enforcement job runs, then the account enters thedeletion pipeline"
+    test_file: tests/integration/test_retention_deletion.py
+    test_name: "test_24_month_inactivity_deletion"
+    type: integration
+
+  - criterion: "AC-018: Given ClickHouse analytics events older than 365 days, when the retention enforcement job runs, then those partitions are dropped"
+    test_file: tests/integration/test_clickhouse_retention.py
+    test_name: "test_clickhouse_partitions_dropped_365_days"
+    type: integration
+
+  - criterion: "AC-019: Given Loki log entries older than 30days, when the Loki retention policy executes, then those entries are no longer queryable"
+    test_file: tests/integration/test_loki_retention.py
+    test_name: "test_loki_retention_30_days"
+    type: integration
+
+  # Audit Trail
+  - criterion: "AC-020: Given any consent change, deletion request, export request, or breach event, when the event occurs, then an audit trail entry is created within 1 second with avalid integrity hash linking to the previous entry"
+    test_file: tests/integration/test_audit_trail_creation.py
+    test_name: "test_audit_entry_created_with_hash_chain"
+    type: integration
+
+  - criterion: "AC-021: Given an auditor runs the integrity verification tool against the audit trail, when no tampering has occurred, then the hash chain validates completely with zero broken links"
+    test_file: tests/unit/test_audit_trail_integrity.py
+    test_name: "test_audit_hash_chain_validates"
+    type: unit
+
+  - criterion: "AC-022: Given the audit trail is replicated to GCS, when an entry is tampered with in the database, then the GCS copy provides evidence of the original entry"
+    test_file: tests/integration/test_audit_trail_gcs_replication.py
+    test_name: "test_gcs_replication_tamper_evidence"
+    type: integration
+
+  # Breach Notification
+  - criterion: "AC-023: Given the PII leakage scanner detectsraw email addresses in Loki log entries, when the scan completes, then a breach_detected audit entry is created and a Warning alert is fired to the privacy operations team"
+    test_file: tests/integration/test_pii_leakage_detection_loki.py
+    test_name: "test_pii_leakage_loki_breach_alert"
+    type: integration
+
+  - criterion: "AC-024: Given a confirmed data breach affecting more than 100 users, when the incident commander classifies it as high severity, then the breach notification templateis auto-populated with breach details and the supervisory authority contact list is retrieved from the breach contact registry"
+    test_file: tests/integration/test_breach_notification_workflow.py
+    test_name: "test_breach_notification_template_populated"
+    type: integration
+
+  # PII Leakage Detection
+  - criterion: "AC-025: Given a Loki log query for raw emailpatterns ([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}), when the PII leakage scanner runs, then any log lines matchingthe pattern are flagged in the scan results"
+    test_file: tests/unit/test_pii_scanner_loki_regex.py
+    test_name: "test_pii_scanner_email_regex_match"
+    type: unit
+
+  - criterion: "AC-026: Given ClickHouse xapi_events_all contains a field with unhashed email (violating the anonymizationrequirement), when the PII scanner runs, then the field is flagged as a critical PII leakage"
+    test_file: tests/integration/test_pii_scanner_clickhouse.py
+    test_name: "test_pii_scanner_clickhouse_unhashed_email"
+    type: integration
+
+  # Compliance Reporting
+  - criterion: "AC-027: Given a privacy_admin user, when theycall GET /api/v1/privacy/compliance/consent-coverage/, thenthe response includes the percentage of active users with consent records for each purpose"
+    test_file: tests/integration/test_compliance_api_consent_coverage.py
+    test_name: "test_compliance_api_consent_coverage_percentage"
+    type: integration
+
+  - criterion: "AC-028: Given one or more pending deletion requests, when the compliance dashboard is viewed, then each request shows its status, elapsed time, and SLA compliance (green if within 30 days, red if overdue)"
+    test_file: tests/e2e/test_compliance_dashboard.py
+    test_name: "test_compliance_dashboard_deletion_sla"
+    type: e2e
+
+  # Cross-Service Integration
+  - criterion: "AC-029: Given the analytics pipeline processes an event, when the user has withdrawn analytics consent, then the event is dropped before reaching ClickHouse"
+    test_file: tests/integration/test_consent_enforcement_analytics.py
+    test_name: "test_analytics_event_dropped_on_consent_withdrawal"
+    type: integration
+
+  - criterion: "AC-030: Given a tenant offboarding is initiated per specs/multi-tenancy-architecture_spec.md, when the offboarding completes, then all tenant user data has been processed through either the deletion pipeline or the export pipeline per the tenant's DPA terms"
+    test_file: tests/integration/test_tenant_offboarding_deletion.py
+    test_name: "test_tenant_offboarding_processes_all_user_data"
+    type: integration
+
+  # Edge Cases
+  - criterion: "Edge Case: User with active course enrollmentrequests deletion"
+    test_file: tests/integration/test_deletion_active_enrollment.py
+    test_name: "test_deletion_deactivates_active_enrollment"
+    type: integration
+
+  - criterion: "Edge Case: User with in-flight purchase requests deletion"
+    test_file: tests/integration/test_deletion_inflight_purchase.py
+    test_name: "test_deletion_waits_for_order_terminal_state"
+    type: integration
+
+  - criterion: "Edge Case: Deletion of user who is course author"
+    test_file: tests/integration/test_deletion_course_author.py
+    test_name: "test_deletion_anonymizes_author_retains_content"
+    type: integration
+
+  - criterion: "Edge Case: Re-registration after deletion"
+    test_file: tests/integration/test_reregistration_after_deletion.py
+    test_name: "test_reregistration_treated_as_new_user"
+    type: integration
+
+  - criterion: "Edge Case: Concurrent deletion and export requests"
+    test_file: tests/integration/test_concurrent_deletion_export.py
+    test_name: "test_export_completes_before_deletion"
+    type: integration
+
+  - criterion: "Edge Case: Deletion request for enterprise admin"
+    test_file: tests/integration/test_deletion_enterprise_admin.py
+    test_name: "test_deletion_enterprise_admin_notifies_tenant"
+    type: integration
+
+  - criterion: "Edge Case: User registered before consent system deployed"
+    test_file: tests/integration/test_consent_backfill.py
+    test_name: "test_consent_prompt_for_pre_consent_users"
+    type: integration
+
+  - criterion: "Edge Case: Enterprise user with conflicting consent and DPA"
+    test_file: tests/integration/test_consent_dpa_conflict.py
+    test_name: "test_dpa_contract_basis_overrides_consent"
+    type: integration
+
+  - criterion: "Edge Case: Consent version migration"
+    test_file: tests/integration/test_consent_version_migration.py
+    test_name: "test_old_consent_valid_until_reconsent"
+    type: integration
+
+  - criterion: "Edge Case: Minor data subjects (under 16 EU)"
+    test_file: tests/integration/test_parental_consent.py
+    test_name: "test_parental_consent_required_for_minors"
+    type: integration
+
+  - criterion: "Edge Case: EU user data in Singapore infrastructure"
+    test_file: tests/unit/test_cross_border_transfer_documentation.py
+    test_name: "test_sccs_documented_in_processor_inventory"
+    type: unit
+
+  - criterion: "Edge Case: Stripe data residency"
+    test_file: tests/unit/test_stripe_data_residency.py
+    test_name: "test_stripe_data_residency_in_dpia"
+    type: unit
+
+  - criterion: "Edge Case: Inactive account with outstandingfinancial obligation"
+    test_file: tests/integration/test_retention_financial_obligation.py
+    test_name: "test_retention_anonymizes_account_retains_financial"
+    type: integration
+
+  - criterion: "Edge Case: Inactive account with active enterprise subscription"
+    test_file: tests/integration/test_retention_active_enterprise.py
+    test_name: "test_retention_skips_active_enterprise_admin"
+    type: integration
+
+  - criterion: "Edge Case: Backup retention and deletion right"
+    test_file: tests/integration/test_deletion_backup_retention.py
+    test_name: "test_deletion_reruns_after_backup_restore"
+    type: integration
+
+  - criterion: "Edge Case: Hash chain break after system recovery"
+    test_file: tests/integration/test_audit_chain_break_recovery.py
+    test_name: "test_audit_chain_break_recovery_creates_entry"
+    type: integration
+
+  - criterion: "Edge Case: High-volume audit events during bulk deletion"
+    test_file: tests/load/test_audit_trail_bulk_volume.py
+    test_name: "test_audit_trail_no_dropped_events"
+    type: load
+
+  - criterion: "Edge Case: Deletion pipeline per-store timeout"
+    test_file: tests/integration/test_deletion_store_timeout.py
+    test_name: "test_deletion_store_timeout_30min"
+    type: integration
+
+  - criterion: "Edge Case: Export pipeline timeout"
+    test_file: tests/integration/test_export_timeout.py
+    test_name: "test_export_timeout_72h"
+    type: integration
+
+  - criterion: "Edge Case: Consent cache staleness"
+    test_file: tests/unit/test_consent_cache_staleness.py
+    test_name: "test_consent_cache_max_staleness_24h"
+    type: unit
+
+  - criterion: "Edge Case: Deletion pipeline re-run idempotency"
+    test_file: tests/unit/test_deletion_idempotency.py
+    test_name: "test_deletion_rerun_only_retries_failed_stores"
+    type: unit
+
+  - criterion: "Edge Case: Consent record duplication"
+    test_file: tests/unit/test_consent_duplication_prevention.py
+    test_name: "test_consent_grant_no_duplicate_records"
+    type: unit
+
+  - criterion: "Edge Case: Export request duplication"
+    test_file: tests/unit/test_export_duplication_prevention.py
+    test_name: "test_export_duplicate_returns_existing_id"
+    type: unit
+
+  - criterion: "Edge Case: Deletion request rate limit"
+    test_file: tests/load/test_deletion_rate_limit.py
+    test_name: "test_deletion_rate_limit_10_per_hour"
+    type: load
+
+  - criterion: "Edge Case: Compliance API rate limit"
+    test_file: tests/load/test_compliance_api_rate_limit.py
+    test_name: "test_compliance_api_rate_limit_60_per_min"
+    type: load
+
+  - criterion: "Edge Case: Consent update rate limit"
+    test_file: tests/load/test_consent_rate_limit.py
+    test_name: "test_consent_rate_limit_30_per_hour"
+    type: load
+
+  - criterion: "Edge Case: Deletion with >3 store failures"
+    test_file: tests/integration/test_deletion_systemic_failure.py
+    test_name: "test_deletion_pauses_on_systemic_failure"
+    type: integration
+
+  - criterion: "Edge Case: Consent service unavailable"
+    test_file: tests/integration/test_consent_service_failover.py
+    test_name: "test_consent_service_fail_open_for_essential"
+    type: integration
+
+  # Load Tests
+  - criterion: "Load: Deletion pipeline with 1M user records"
+    test_file: tests/load/test_deletion_scale.py
+    test_name: "test_deletion_1m_records_72h"
+    type: load
+
+  - criterion: "Load: PII scan with 7 days of Loki logs (10GB)"
+    test_file: tests/load/test_pii_scan_scale_loki.py
+    test_name: "test_pii_scan_7_days_logs_4h"
+    type: load
+
+  - criterion: "Load: Consent check API with 1000 req/sec"
+    test_file: tests/load/test_consent_check_latency.py
+    test_name: "test_consent_check_1000_rps_10ms"
+    type: load
+
+  - criterion: "Load: Audit trail write burst (100 events/sec)"
+    test_file: tests/load/test_audit_trail_write_burst.py
+    test_name: "test_audit_trail_100_events_per_sec"
+    type: load
+
+  - criterion: "Load: Export for user with 100,000 events"
+    test_file: tests/load/test_export_large_user.py
+    test_name: "test_export_100k_events_72h"
+    type: load
+
+  # Security Tests
+  - criterion: "Security: OWASP Top 10 audit"
+    test_file: tests/security/test_privacy_service_owasp.py
+    test_name: "test_owasp_top10_no_critical_findings"
+    type: security
+
+  - criterion: "Security: JWT bypass attempts"
+    test_file: tests/security/test_jwt_bypass_privacy.py
+    test_name: "test_jwt_bypass_attempts_rejected"
+    type: security
+
+  - criterion: "Security: Tenant isolation bypass"
+    test_file: tests/security/test_tenant_isolation_privacy.py
+    test_name: "test_cross_tenant_deletion_blocked"
+    type: security
+
+  - criterion: "Security: Audit trail tampering"
+    test_file: tests/security/test_audit_trail_tampering.py
+    test_name: "test_audit_trail_append_only_enforced"
+    type: security
+
+  - criterion: "Security: PII in metrics labels"
+    test_file: tests/security/test_metrics_pii.py
+    test_name: "test_no_pii_in_prometheus_labels"
+    type: security
+
+  - criterion: "Security: Secrets in error messages"
+    test_file: tests/security/test_secrets_in_errors_privacy.py
+    test_name: "test_no_secrets_in_http_responses"
+    type: security
+
+  - criterion: "Security: Deletion proof forgery"
+    test_file: tests/security/test_deletion_proof_forgery.py
+    test_name: "test_invalid_signature_rejected"
+    type: security
+
+  - criterion: "Security: Export archive encryption"
+    test_file: tests/security/test_export_encryption.py
+    test_name: "test_export_archive_aes_256"
+    type: security└ specs/testmaps/disaster-recovery-business-continuity_testmap.yaml
+# Testmap for Disaster Recovery & Business Continuity Spec
+# Spec: specs/disaster-recovery-business-continuity_spec.md
+# Generated: 2026-02-10
+
+spec: "specs/disaster-recovery-business-continuity_spec.md"
+
+acceptance_criteria:
+  # Backup Infrastructure
+  - id: "AC-001"
+    criterion: "Given production is running, when ./scripts/qa/audit-velero.sh --json executes, then it reports all threeschedules (hourly-critical, daily-all-apps, weekly-full) as active with recent Completed backups"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-velero.sh"
+        command: "./scripts/qa/audit-velero.sh --json | jq '.checks.failures' # must be 0"
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/qa/test_audit_velero.py"
+        command: "pytest tests/qa/test_audit_velero.py -k test_backup_schedule_validation"
+
+  - id: "AC-002"
+    criterion: "Given the hourly-critical schedule runs, whenthe backup completes, then volumeSnapshotsCompleted equals the number of Bound PVCs reported by ./scripts/qa/list-critical-backup-pvcs.sh"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-velero.sh"
+        command: "./scripts/qa/audit-velero.sh --json | jq '.velero.schedules[] | select(.name | contains(\"hourly-critical\")) | .latest_completed_backup.volume_snapshots_completed'"
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/qa/test_audit_velero.py"
+        command: "pytest tests/qa/test_audit_velero.py -k test_snapshot_count_vs_bound_pvc"
+
+  - id: "AC-003"
+    criterion: "Given a Velero backup exists, when BackupStorageLocation is queried, then its phase is Available"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-velero.sh"
+        command: "kubectl -n velero get backupstoragelocation-o json | jq -r '.items[].status.phase' # must be Available"
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/qa/test_audit_velero.py"
+        command: "pytest tests/qa/test_audit_velero.py -k test_bsl_phase_available"
+
+  - id: "AC-004"
+    criterion: "Given production namespaces, when all Deployments/StatefulSets are inspected, then no critical stateful service uses emptyDir for persistent data"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-velero.sh"
+        command: "./scripts/qa/audit-velero.sh --json | jq '.app_data_risks[] | select(.severity == \"critical\" and (.risk | contains(\"emptyDir\")))' # must be empty"
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/qa/test_audit_velero.py"
+        command: "pytest tests/qa/test_audit_velero.py -k test_emptydir_detection"
+
+  # Restore Drills
+  - id: "AC-005"
+    criterion: "Given the monthly restore-test CronJob runs,when it completes, then a throwaway namespace is created, PVCs are restored to Bound state, and a MySQL SELECT 1 probe succeeds"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "infrastructure/k8s/velero/restore-test-script.sh"
+        command: "./infrastructure/k8s/velero/restore-test-script.sh"
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/qa/test_restore_drill.sh"
+        command: "./tests/qa/test_restore_drill.sh"
+
+  - id: "AC-006"
+    criterion: "Given a restore drill completes, when the throwaway namespace is inspected, then at least 1 PVC is in Bound state matching the source backup"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/qa/test_restore_drill.sh"
+        command: "./tests/qa/test_restore_drill.sh # verifiesPVC Bound count"
+
+  - id: "AC-007"
+    criterion: "Given a restore drill, when ./scripts/infra/fix-velero-restore-test.sh executes, then the drill passes end-to-end including PV validation and MySQL probe"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/infra/fix-velero-restore-test.sh"
+        command: "./scripts/infra/fix-velero-restore-test.sh"
+
+  - id: "AC-008"
+    criterion: "Given the backup-verification CronJob, when it runs daily, then it confirms backup freshness within the last 2 hours for hourly schedule and 26 hours for daily schedule"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/qa/test_backup_verification.sh"
+        command: "./tests/qa/test_backup_verification.sh"
+      - type: "monitoring"
+        metric: "backup-verification CronJob lastSuccessfulTime"
+        dashboard: "grafana://dashboards/dr-health"
+
+  # DR Evidence
+  - id: "AC-009"
+    criterion: "Given the DR evidence bundle workflow runs, when STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh--tar executes, then it produces a tarball containing audit-velero.json, audit-velero-alert-pipeline.json, audit-observability-runtime.json, restore-test logs, and PVC summary"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/build-dr-evidence-bundle.sh"
+        command: "STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar"
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/qa/test_dr_evidence_bundle.sh"
+        command: "./tests/qa/test_dr_evidence_bundle.sh"
+
+  - id: "AC-010"
+    criterion: "Given GitHub Actions DR Evidence Bundle workflow, when it runs monthly (1st of month at 02:30 UTC), then artifacts are uploaded with 120-day retention"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: ".github/workflows/dr-evidence-bundle.yml"
+        command: "gh workflow run dr-evidence-bundle.yml --ref main # manual trigger"
+      - type: "monitoring"
+        metric: "github_workflow_run_status"
+        dashboard: "github://actions?workflow=dr-evidence-bundle"
+
+  - id: "AC-011"
+    criterion: "Given an enterprise audit request, when DR evidence is requested, then a complete evidence bundle can be generated within 1 business day"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/DR_COMPLIANCE_REPORT_TEMPLATE.md"
+        section: "Evidence Bundle Generation Procedure"
+        justification: "Enterprise audit is infrequent; manual generation with script ensures latest data"
+
+  # Alert Pipeline
+  - id: "AC-012"
+    criterion: "Given Velero backup fails, when the failure is detected, then an alert fires within 1 hour"
+    verify:
+      - type: "monitoring"
+        metric: "velero_backup_failure_total"
+        dashboard: "grafana://dashboards/dr-health"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-alert-routing.sh"
+        command: "./scripts/qa/verify-alert-routing.sh --alert VeleroBackupFailed"
+
+  - id: "AC-013"
+    criterion: "Given restore-test has not succeeded in 45+ days, when STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh runs, then it reports a stale-restore-test failure"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-velero-alert-pipeline.sh"
+        command: "STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh --json | jq '.checks.failures' # must detect stale restore-test"
+
+  - id: "AC-014"
+    criterion: "Given ./scripts/qa/audit-velero-alert-pipeline.sh runs, then it validates both backup-verification and restore-test freshness signals"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-velero-alert-pipeline.sh"
+        command: "./scripts/qa/audit-velero-alert-pipeline.sh--json"
+
+  # Recovery Procedures
+  - id: "AC-015"
+    criterion: "Given a single PVC failure (DR-002), when thedocumented restore procedure is followed, then the PVC is restored from the latest hourly backup within 30 minutes"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/DISASTER_RECOVERY.md"
+        section: "Recovery (Production Incident) > Recover PVs"
+        justification: "Production PVC failure is rare; documented runbook with time tracking"
+
+  - id: "AC-016"
+    criterion: "Given a full namespace loss (DR-003), when velero restore create is executed with --namespace-mappings, then all resources including PVCs are restored within 1 hour"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "tests/e2e/test_full_restore.sh"
+        command: "./tests/e2e/test_full_restore.sh # measurestime to completion"
+
+  - id: "AC-017"
+    criterion: "Given a secret compromise (DR-006), when thesecret rotation checklist is followed, then all affected secrets are rotated in Infisical, synced to GCP SM, and pods restarted within 1 hour"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/SECRET_ROTATION_CHECKLIST.md"
+        section: "Full Rotation Procedure"
+        justification: "Secret compromise is rare; manual checklist with time tracking"
+
+  - id: "AC-018"
+    criterion: "Given complete cluster loss (DR-007), when the cluster rebuild procedure is followed, then platform availability is restored within 4 hours with data loss not exceeding 1 hour (Tier 1 RPO)"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/DISASTER_RECOVERY.md"
+        section: "Recovery (Production Incident) > Full Cluster Rebuild"
+        justification: "Full cluster loss is catastrophic; tabletop exercise with time tracking"
+
+  # Data Integrity
+  - id: "AC-019"
+    criterion: "Given a restore completes, when kubectl execmysql-pod -- mysql -e \"SELECT COUNT(*) FROM openedx.auth_user\" is run, then the count is within 5% of the pre-incident count"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/qa/test_restore_drill.sh"
+        command: "./tests/qa/test_restore_drill.sh # includesMySQL row count check"
+
+  - id: "AC-020"
+    criterion: "Given a restore completes, when ./scripts/qa/public-health-check.sh prod runs, then LMS homepage, Studio login, Discovery, and Ecommerce health endpoints all return 200/302"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/public-health-check.sh"
+        command: "./scripts/qa/public-health-check.sh prod"
+
+  # Cross-Region Readiness
+  - id: "AC-021"
+    criterion: "Given Terraform/Kustomize configs exist, whenkubectl kustomize deploy/k8s/overlays/production is run, then it produces valid manifests deployable to any GKE cluster"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "deploy/k8s/overlays/production/kustomization.yaml"
+        command: "kubectl kustomize deploy/k8s/overlays/production | kubectl apply --dry-run=client -f -"
+
+  - id: "AC-022"
+    criterion: "Given Velero backups are stored in GCS, whenthe backup bucket is inspected, then it is configured for multi-region storage or cross-region replication"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "infrastructure/gcs/backup-bucket.tf"
+        command: "gsutil ls -L gs://BUCKET_NAME | grep -E 'Storage class|Location constraint' # must show multi-region"
+
+# Edge Cases (negative tests)
+edge_cases:
+  - id: "EDGE-001"
+    scenario: "Velero backup succeeds but volume snapshots are zero"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/negative/test_zero_snapshots.sh"
+        command: "./tests/negative/test_zero_snapshots.sh"
+
+  - id: "EDGE-002"
+    scenario: "Restore drill CronJob silently broken"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/negative/test_stuck_namespace.sh"
+        command: "./tests/negative/test_stuck_namespace.sh"
+
+  - id: "EDGE-003"
+    scenario: "Backup-restore namespace stuck in Terminating"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/DISASTER_RECOVERY.md"
+        section: "Edge Cases > Namespace Stuck in Terminating"
+        justification: "Rare occurrence; documented recoveryprocedure with kubectl patch commands"
+
+  - id: "EDGE-004"
+    scenario: "Atlas backup verification failure"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/negative/test_atlas_stale.sh"
+        command: "./tests/negative/test_atlas_stale.sh"
+
+  - id: "EDGE-005"
+    scenario: "Partial restore with acceptable errors"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/negative/test_partial_restore.sh"
+        command: "./tests/negative/test_partial_restore.sh"
+
+  - id: "EDGE-006"
+    scenario: "Secrets desync after restore"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/negative/test_secrets_desync.sh"
+        command: "./tests/negative/test_secrets_desync.sh"
+
+  - id: "EDGE-007"
+    scenario: "GCS bucket inaccessible during restore"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/DISASTER_RECOVERY.md"
+        section: "Edge Cases > GCS Bucket Inaccessible"
+        justification: "Regional GCS outage is rare; documented fallback to Atlas + Git rebuild"
+
+  - id: "EDGE-008"
+    scenario: "Concurrent backup and restore operations"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/negative/test_concurrent_ops.sh"
+        command: "./tests/negative/test_concurrent_ops.sh"
+
+  - id: "EDGE-009"
+    scenario: "Clock skew in backup freshness checks"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/qa/test_audit_velero.py"
+        command: "pytest tests/qa/test_audit_velero.py -k test_timestamp_parsing_utc"
+
+# Non-Functional Requirements
+nfrs:
+  - id: "NFR-PERF-001"
+    requirement: "Velero backup completion time MUST be underminutes for hourly critical schedule"
+    verify:
+      - type: "automated"
+        test_type: "load"
+        file: "tests/load/test_backup_performance.sh"
+        command: "./tests/load/test_backup_performance.sh # measures backup completion time"
+
+  - id: "NFR-PERF-002"
+    requirement: "Velero restore completion time MUST be under 15 minutes for single-namespace restore"
+    verify:
+      - type: "automated"
+        test_type: "load"
+        file: "tests/load/test_backup_performance.sh"
+        command: "./tests/load/test_backup_performance.sh # measures restore completion time"
+
+  - id: "NFR-PERF-003"
+    requirement: "Full cluster rebuild from scratch MUST complete within 4 hours including image pulls and data restoration"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/DISASTER_RECOVERY.md"
+        section: "Recovery (Production Incident) > Full Cluster Rebuild"
+        justification: "Full rebuild is tabletop exercise with time tracking"
+
+  - id: "NFR-REL-001"
+    requirement: "Backup success rate MUST be >= 99% over a 30-day rolling window"
+    verify:
+      - type: "monitoring"
+        metric: "velero_backup_success_total / (velero_backup_success_total + velero_backup_failure_total) >= 0.99"
+        dashboard: "grafana://dashboards/dr-health"
+
+  - id: "NFR-REL-002"
+    requirement: "Restore drill success rate MUST be >= 95% over a 12-month rolling window"
+    verify:
+      - type: "monitoring"
+        metric: "dr_restore_drill_success_rate"
+        dashboard: "grafana://dashboards/dr-health"
+
+  - id: "NFR-SEC-001"
+    requirement: "Velero backup storage (GCS) MUST be encrypted at rest using Google-managed encryption keys (minimum)"
+    verify:
+      - type: "automated"
+        test_type: "security"
+        file: "tests/security/test_gcs_backup_iam.sh"
+        command: "./tests/security/test_gcs_backup_iam.sh # verifies encryption"
+
+  - id: "NFR-SEC-002"
+    requirement: "Velero backup storage MUST have IAM accessrestricted to the Velero service account only"
+    verify:
+      - type: "automated"
+        test_type: "security"
+        file: "tests/security/test_gcs_backup_iam.sh"
+        command: "./tests/security/test_gcs_backup_iam.sh # verifies IAM restrictions"
+
+  - id: "NFR-SEC-003"
+    requirement: "DR evidence bundles MUST NOT contain plaintext secrets (sanitize before upload)"
+    verify:
+      - type: "automated"
+        test_type: "security"
+        file: "tests/security/test_evidence_sanitization.py"
+        command: "pytest tests/security/test_evidence_sanitization.py"
+
+  - id: "NFR-COMP-001"
+    requirement: "The system MUST generate audit-ready DR evidence on demand (within 1 business day)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/build-dr-evidence-bundle.sh"
+        command: "STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar # completion within 1 day"
+
+  - id: "NFR-COMP-002"
+    requirement: "The system MUST retain DR evidence bundlesfor a minimum of 12 months"
+    verify:
+      - type: "monitoring"
+        metric: "gcs_bucket_lifecycle_policy"
+        dashboard: "gcp://storage/buckets/dr-evidence"
+
+  - id: "NFR-OBS-001"
+    requirement: "The system MUST emit metrics for backup success/failure, restore drill success/failure, and backup age"
+    verify:
+      - type: "monitoring"
+        metric: "velero_backup_success_total, velero_backup_failure_total, velero_backup_last_successful_timestamp, dr_restore_drill_age_days"
+        dashboard: "grafana://dashboards/dr-health"
+
+  - id: "NFR-OBS-002"
+    requirement: "The system MUST alert when backup age exceeds 2x the scheduled interval"
+    verify:
+      - type: "monitoring"
+        metric: "VeleroBackupStale alert"
+        dashboard: "grafana://dashboards/dr-health"
+
+  - id: "NFR-OBS-003"
+    requirement: "The system MUST alert when restore drill has not succeeded in >45 days"
+    verify:
+      - type: "monitoring"
+        metric: "VeleroRestoreTestStale alert"
+        dashboard: "grafana://dashboards/dr-health"
+
+# Coverage Summary
+coverage_summary:
+  total_acceptance_criteria: 22
+  automated_tests: 16
+  monitoring_checks: 6
+  manual_procedures: 4
+  edge_case_tests: 9
+  nfr_verifications: 13
+  total_verifications: 48

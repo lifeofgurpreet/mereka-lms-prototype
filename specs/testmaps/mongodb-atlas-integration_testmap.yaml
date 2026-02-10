@@ -1,0 +1,154 @@
+# mongodb-atlas-integration_testmap.yaml
+# Machine-readable mapping of spec acceptance criteria to verification methods.
+# Used by spec_verify.py for automated traceability checking.
+
+spec: "specs/mongodb-atlas-integration_spec.md"
+
+acceptance_criteria:
+  - id: "AC-001"
+    description: "tutor local logs lms | grep mongodb shows SRV connection attempts"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode runtime"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-atlas-modulestore-path.sh"
+        command: "./scripts/qa/verify-atlas-modulestore-path.sh --mode local"
+
+  - id: "AC-002"
+    description: "kubectl logs -l app.kubernetes.io/name=lms| grep 'Connected to MongoDB' succeeds"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode runtime"
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-atlas-modulestore-path.sh"
+        command: "./scripts/qa/verify-atlas-modulestore-path.sh --mode local"
+
+  - id: "AC-003"
+    description: "Course creation in Studio persists to Atlasopenedx database"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/MONGODB_ATLAS_RUNBOOK.md"
+        section: "Verify Data Persistence > Modulestore"
+        justification: "Requires Studio UI interaction and Atlas console verification; no E2E browser test framework in this repo"
+
+  - id: "AC-004"
+    description: "Forum posts persist to Atlas cs_comments_service database"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/MONGODB_ATLAS_RUNBOOK.md"
+        section: "Verify Data Persistence > Forum"
+        justification: "Requires discussions MFE interactionand Atlas console verification; no E2E browser test frameworkin this repo"
+
+  - id: "AC-005"
+    description: "No local MongoDB container exists: docker ps | grep mongodb returns nothing (local)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode local"
+
+  - id: "AC-006"
+    description: "No MongoDB StatefulSet exists: kubectl getstatefulset mongodb returns not found (K8s)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode runtime"
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-atlas-modulestore-path.sh"
+        command: "FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=1 ./scripts/qa/verify-atlas-modulestore-path.sh--mode all"
+
+  - id: "AC-007"
+    description: "Atlas cluster shows active connections in monitoring dashboard"
+    verify:
+      - type: "monitoring"
+        metric: "mongodb_atlas_connections_current"
+        dashboard: "Atlas Console > Project > Cluster > Metrics > Connections"
+      - type: "manual"
+        runbook: "docs/operations/MONGODB_ATLAS_RUNBOOK.md"
+        section: "Verify Atlas Health > Active Connections"
+        justification: "Atlas monitoring dashboard requires Atlas console credentials not available to CI; verified manually during deployment"
+
+  - id: "AC-008"
+    description: "pymongo[srv] installed: pip list | grep pymongo shows extras"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode runtime"
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode local"
+
+  - id: "AC-009"
+    description: "DNS resolution succeeds: nslookup cluster-mereka-lms.2pjex4s.mongodb.net returns results"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode all"
+
+# Edge case coverage (mapped to spec Edge Cases section)
+edge_cases:
+  - id: "EC-DNS-FAILURE"
+    description: "DNS resolution failure (dnspython not installed or DNS unreachable)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode runtime"
+
+  - id: "EC-IP-ALLOWLIST"
+    description: "IP allowlist block (GKE egress IP not in Atlas allowlist)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/audit-atlas-allowlist-monitor.sh"
+        command: "./scripts/qa/audit-atlas-allowlist-monitor.sh"
+
+  - id: "EC-POOL-EXHAUSTION"
+    description: "Connection pool exhaustion (maxPoolSize toosmall)"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode local"
+      - type: "monitoring"
+        metric: "mongodb_atlas_connections_current"
+        dashboard: "Atlas Console > Project > Cluster > Metrics > Connections"
+
+  - id: "EC-MAINTENANCE-WINDOW"
+    description: "Atlas maintenance window causes transient failures"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/verify-mongodb-atlas-integration.sh"
+        command: "./scripts/qa/verify-mongodb-atlas-integration.sh --mode local"
+      - type: "manual"
+        runbook: "docs/operations/MONGODB_ATLAS_RUNBOOK.md"
+        section: "Atlas Maintenance Windows"
+        justification: "Maintenance windows are scheduled byAtlas; retryWrites=true handles failover transparently"
+
+  - id: "EC-CROSS-REGION-LATENCY"
+    description: "Cross-region latency between GKE and Atlascluster"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/MONGODB_ATLAS_RUNBOOK.md"
+        section: "Latency Verification"
+        justification: "Requires Atlas Performance Advisor access and real traffic patterns; not automatable in CI"
+
+  - id: "EC-LEGACY-REGRESSION"
+    description: "Legacy MongoDB deployment/service reappearsafter changes"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-atlas-modulestore-path.sh"
+        command: "FAIL_ON_LEGACY_MONGODB=1 FAIL_ON_LEGACY_MONGODB_SERVICE=1 ./scripts/qa/verify-atlas-modulestore-path.sh--mode all"

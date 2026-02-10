@@ -19,6 +19,7 @@ links:
     - "specs/enterprise-microservices_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -390,7 +391,7 @@ Without this spec:
 - The compliance API MUST require `privacy_admin` or `compliance_officer` role authentication
 - The system MUST provide a Grafana compliance dashboard aggregating the above metrics
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 
@@ -719,6 +720,21 @@ Without this spec:
 4. Deletion and export requests queue but do not execute
 5. Audit trail continues recording (it has no feature flag; it is always on once deployed)
 6. Investigate, fix, and re-enable features one by one
+
+---
+
+## Monorepo Location
+
+| Component | Path | Notes |
+|-----------|------|-------|
+| Deletion pipeline scripts | `services/privacy-tools/deletion/` | Cross-service PII deletion orchestrator |
+| Export pipeline scripts | `services/privacy-tools/export/` | Data portability export generator |
+| PII inventory | `services/privacy-tools/inventory/` | Machine-readable PII field registry |
+| Consent API (if needed) | `services/privacy-tools/consent/` | Centralized consent service |
+| Tests | `services/privacy-tools/tests/` | pytest (deletion verification, export validation) |
+| Compliance dashboards | `infrastructure/monitoring/dashboards/` | Grafana dashboard JSON |
+| K8s manifests | `deploy/k8s/base/apps/privacy-tools/` | CronJob for retention enforcement |
+| Audit scripts | `scripts/qa/audit-pii-*.sh` | CI/CD PII scanning scripts |
 
 ---
 

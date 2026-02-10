@@ -23,6 +23,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -218,7 +219,7 @@ This spec also addresses critical security gaps: there is no formal contract for
 - The system MUST support administrator-initiated identity verification: a platform operator MUST be able to manually verify a user's identity in Django admin and record the verification method and date
 - The system MUST NOT allow unverified accounts to access enterprise-subsidized content (content gated behind subscription/license access policies)
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

@@ -1,0 +1,403 @@
+# Testmap for Enterprise Microservices Deployment
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/enterprise-microservices_testmap.yaml
+
+spec: specs/enterprise-microservices_spec.md
+tests:
+  # Service Deployment
+  - criterion: "AC-001: Given the K8s manifests are applied,when kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterprise is run, then deployments for enterprise-catalog, license-manager, enterprise-access, and enterprise-subsidy are listed with READY replicas >= 1"
+    test_file: tests/integration/enterprise/test_deployment.py
+    test_name: "test_enterprise_deployments_ready"
+    type: integration
+
+  - criterion: "AC-002: Given all enterprise services are deployed, when kubectl get endpoints -n mereka-lms is run, theneach enterprise service has non-empty endpoints"
+    test_file: tests/integration/enterprise/test_deployment.py
+    test_name: "test_enterprise_service_endpoints_nonempty"
+    type: integration
+
+  - criterion: "AC-003: Given the enterprise-catalog serviceis running, when curl http://enterprise-catalog:8000/health/is called from within the cluster, then the response is HTTPwith status=ok"
+    test_file: tests/integration/enterprise/test_health_checks.py
+    test_name: "test_enterprise_catalog_health_check"
+    type: integration
+
+  - criterion: "AC-004: Given the license-manager service isrunning, when curl http://license-manager:8000/health/ is called from within the cluster, then the response is HTTP 200"
+    test_file: tests/integration/enterprise/test_health_checks.py
+    test_name: "test_license_manager_health_check"
+    type: integration
+
+  - criterion: "AC-005: Given the enterprise-access service is running, when curl http://enterprise-access:8000/health/ iscalled from within the cluster, then the response is HTTP 200"
+    test_file: tests/integration/enterprise/test_health_checks.py
+    test_name: "test_enterprise_access_health_check"
+    type: integration
+
+  - criterion: "AC-006: Given the enterprise-subsidy serviceis running, when curl http://enterprise-subsidy:8000/health/is called from within the cluster, then the response is HTTP200"
+    test_file: tests/integration/enterprise/test_health_checks.py
+    test_name: "test_enterprise_subsidy_health_check"
+    type: integration
+
+  - criterion: "AC-007: Given enterprise MFEs are deployed, when curl https://admin.academyv2.mereka.io/ is called, then the admin portal HTML is returned with HTTP 200"
+    test_file: tests/e2e/enterprise/test_mfe_deployment.py
+    test_name: "test_admin_portal_accessible"
+    type: e2e
+
+  - criterion: "AC-008: Given enterprise MFEs are deployed, when curl https://enterprise.academyv2.mereka.io/ is called, then the learner portal HTML is returned with HTTP 200"
+    test_file: tests/e2e/enterprise/test_mfe_deployment.py
+    test_name: "test_learner_portal_accessible"
+    type: e2e
+
+  # Tenant Isolation
+  - criterion: "AC-009: Given enterprise customer A and enterprise customer B exist, when admin A calls GET /api/v1/enterprise-catalogs/, then only catalogs belonging to customer A are returned"
+    test_file: tests/integration/enterprise/test_tenant_isolation.py
+    test_name: "test_admin_sees_only_own_catalogs"
+    type: integration
+
+  - criterion: "AC-010: Given enterprise customer A with a subscription plan, when admin B calls GET /api/v1/subscriptions/{plan_uuid_of_A}/, then the response is HTTP 403 Forbidden"
+    test_file: tests/integration/enterprise/test_tenant_isolation.py
+    test_name: "test_cross_tenant_subscription_access_denied"
+    type: integration
+
+  - criterion: "AC-011: Given enterprise customer A with enrolled learners, when admin B calls the enterprise-access API for customer A's UUID, then the response is HTTP 403 Forbidden"
+    test_file: tests/integration/enterprise/test_tenant_isolation.py
+    test_name: "test_cross_tenant_access_api_denied"
+    type: integration
+
+  - criterion: "AC-012: Given a learner linked to enterprisecustomer A, when they browse the enterprise learner portal, then they see only courses from customer A's catalogs"
+    test_file: tests/e2e/enterprise/test_learner_portal_isolation.py
+    test_name: "test_learner_sees_only_own_customer_catalog"
+    type: e2e
+
+  - criterion: "AC-013: Given a user belonging to both enterprise customer A and B, when they select customer A in the learner portal, then no data or catalog from customer B is visible until they switch context"
+    test_file: tests/e2e/enterprise/test_multi_org_learner.py
+    test_name: "test_multi_org_learner_context_switching"
+    type: e2e
+
+  # License Management
+  - criterion: "AC-014: Given a subscription plan with 100 licenses and 50 assigned, when an admin assigns 51 more licenses, then the request fails with HTTP 422 and an error indicating insufficient seats"
+    test_file: tests/integration/enterprise/test_license_assignment.py
+    test_name: "test_license_assignment_exceeds_limit"
+    type: integration
+
+  - criterion: "AC-015: Given a subscription plan with should_auto_apply_licenses=true, when an enterprise learner requests enrollment, then a license is automatically assigned and activated"
+    test_file: tests/integration/enterprise/test_license_auto_apply.py
+    test_name: "test_license_auto_apply_on_enrollment"
+    type: integration
+
+  - criterion: "AC-016: Given a license in activated state, when an admin revokes it, then the license state transitions to revoked and an enrollment revocation event is published"
+    test_file: tests/integration/enterprise/test_license_revocation.py
+    test_name: "test_license_revocation_publishes_event"
+    type: integration
+
+  - criterion: "AC-017: Given a subscription plan with is_revocation_cap_enabled=true and revoke_max_percentage=10 and 100licenses, when an admin attempts to revoke the 11th license,then the request fails with HTTP 422 indicating revocation cap reached"
+    test_file: tests/integration/enterprise/test_license_revocation_cap.py
+    test_name: "test_revocation_cap_enforced"
+    type: integration
+
+  - criterion: "AC-018: Given an email address already assigned a license in a plan, when the admin assigns a license to the same email again, then no duplicate license is created andthe response indicates the existing assignment"
+    test_file: tests/unit/enterprise/test_license_idempotency.py
+    test_name: "test_license_assignment_idempotent"
+    type: unit
+
+  # Enterprise Catalog
+  - criterion: "AC-019: Given an enterprise catalog with a content filter for subject 'Technology', when GET /api/v1/enterprise-catalogs/{uuid}/get_content_metadata/ is called, then only courses tagged with 'Technology' subject are returned"
+    test_file: tests/integration/enterprise/test_catalog_filters.py
+    test_name: "test_catalog_filter_by_subject"
+    type: integration
+
+  - criterion: "AC-020: Given the catalog sync task has not run in 6 hours, when the Celery beat scheduler fires, then thesync task executes and updates content metadata from the LMSdiscovery service"
+    test_file: tests/integration/enterprise/test_catalog_sync.py
+    test_name: "test_catalog_sync_task_runs_on_schedule"
+    type: integration
+
+  - criterion: "AC-021: Given a course key 'course-v1:Mereka+ENT101+2026', when GET /api/v1/enterprise-catalogs/{uuid}/contains_content_items/?course_run_ids=course-v1:Mereka+ENT101+2is called, then the response indicates whether the courseis in the catalog within 100ms"
+    test_file: tests/integration/enterprise/test_catalog_contains.py
+    test_name: "test_catalog_contains_content_items_fast"
+    type: integration
+
+  # Enterprise Access and Subsidy
+  - criterion: "AC-022: Given a learner with a PerLearnerEnrollmentCreditAccessPolicy limiting to 5 enrollments and already 5 enrollments, when the learner requests a 6th enrollment,then the can-redeem endpoint returns false with reason 'per-learner enrollment limit reached'"
+    test_file: tests/integration/enterprise/test_access_policy_limit.py
+    test_name: "test_per_learner_enrollment_limit_enforced"
+    type: integration
+
+  - criterion: "AC-023: Given a subsidy with a starting balance of 10000 (cents) and 3000 already spent, when a transaction for 8000 is attempted, then it fails with insufficient balance error and the balance remains 7000"
+    test_file: tests/integration/enterprise/test_subsidy_insufficient_balance.py
+    test_name: "test_subsidy_insufficient_balance_error"
+    type: integration
+
+  - criterion: "AC-024: Given a committed transaction for enrollment in course X, when the admin revokes the enrollment and a reversal is requested, then the subsidy balance is restored by the transaction amount"
+    test_file: tests/integration/enterprise/test_transaction_reversal.py
+    test_name: "test_transaction_reversal_restores_balance"
+    type: integration
+
+  - criterion: "AC-025: Given a reversal is requested on an already-reversed transaction, when the API processes it, thenthe response is HTTP 200 (idempotent) and no balance change occurs"
+    test_file: tests/unit/enterprise/test_transaction_reversal_idempotency.py
+    test_name: "test_reversal_idempotent"
+    type: unit
+
+  # SSO/SAML
+  - criterion: "AC-026: Given enterprise customer 'Acme Corp'with SAML IdP configured and enable_slug_login=true, when auser navigates to https://academyv2.mereka.io/enterprise/login/acme-corp, then they are redirected to the Acme Corp SAML IdP login page"
+    test_file: tests/e2e/enterprise/test_saml_login.py
+    test_name: "test_slug_based_saml_login_redirect"
+    type: e2e
+
+  - criterion: "AC-027: Given a successful SAML assertion from the Acme Corp IdP for a user not yet in the LMS, when the assertion is processed, then a new LMS user is created and linked to the Acme Corp enterprise customer"
+    test_file: tests/integration/enterprise/test_saml_jit_provisioning.py
+    test_name: "test_saml_jit_provision_new_user"
+    type: integration
+
+  - criterion: "AC-028: Given a SAML assertion with NotOnOrAfter in the past, when the LMS processes the assertion, then the authentication is rejected and the user sees an error message"
+    test_file: tests/integration/enterprise/test_saml_expired_assertion.py
+    test_name: "test_expired_saml_assertion_rejected"
+    type: integration
+
+  - criterion: "AC-029: Given enterprise customer A with SAMLIdP 'IdP-A' and enterprise customer B with SAML IdP 'IdP-B',when a user authenticates via IdP-A, then they are linked tocustomer A only (no cross-tenant linking)"
+    test_file: tests/integration/enterprise/test_saml_tenant_isolation.py
+    test_name: "test_saml_authentication_tenant_isolation"
+    type: integration
+
+  # Integrated Channels
+  - criterion: "AC-030: Given a Degreed integration configured for enterprise customer A with valid credentials, when thesync task runs, then course completion data for consenting learners of customer A is transmitted to the Degreed API"
+    test_file: tests/integration/enterprise/test_channel_sync_degreed.py
+    test_name: "test_degreed_sync_transmits_completion_data"
+    type: integration
+
+  - criterion: "AC-031: Given a channel sync in dry-run mode,when the sync task runs, then no data is transmitted to theexternal system and the sync log indicates 'dry-run'"
+    test_file: tests/integration/enterprise/test_channel_sync_dryrun.py
+    test_name: "test_channel_sync_dry_run_mode"
+    type: integration
+
+  - criterion: "AC-032: Given a channel sync that encountersa transient API error (HTTP 503), when the task retries, thenit retries up to 5 times with exponential backoff before marking the sync as failed"
+    test_file: tests/integration/enterprise/test_channel_sync_retry.py
+    test_name: "test_channel_sync_retry_exponential_backoff"
+    type: integration
+
+  # Secrets and Configuration
+  - criterion: "AC-033: Given all enterprise secrets are provisioned in Infisical at /k8s/mereka-lms, when ExternalSecretssyncs, then the enterprise-secrets K8s Secret contains all expected keys"
+    test_file: tests/integration/enterprise/test_secrets_sync.py
+    test_name: "test_externalsecrets_sync_complete"
+    type: integration
+
+  - criterion: "AC-034: Given the enterprise-catalog servicestarts, when it reads its Django SECRET_KEY from the environment, then the value matches the Infisical secret MEREKA_LMS_ENTERPRISE_CATALOG_SECRET_KEY"
+    test_file: tests/integration/enterprise/test_secret_consumption.py
+    test_name: "test_catalog_service_reads_correct_secret"
+    type: integration
+
+  # Observability
+  - criterion: "AC-035: Given enterprise services are running, when /metrics is scraped by Prometheus, then enterprise-specific metrics (request count, latency histogram) are present"
+    test_file: tests/integration/enterprise/test_metrics.py
+    test_name: "test_enterprise_metrics_exported"
+    type: integration
+
+  - criterion: "AC-036: Given a license assignment fails, when the error is logged, then the log entry includes enterprise_customer_uuid, subscription_plan_uuid, error_type, and user_email_hash (not the raw email)"
+    test_file: tests/integration/enterprise/test_logging_redaction.py
+    test_name: "test_license_error_logging_redacts_pii"
+    type: integration
+
+  # Edge Cases (Negative Tests)
+  - criterion: "EC-1: Concurrent license assignment - two admins assign last license simultaneously, exactly one succeeds"
+    test_file: tests/integration/enterprise/test_license_concurrency.py
+    test_name: "test_concurrent_license_assignment_serialized"
+    type: integration
+
+  - criterion: "EC-2: Expired subscription with active licenses - new assignments fail, existing licenses remain active"
+    test_file: tests/integration/enterprise/test_expired_subscription.py
+    test_name: "test_expired_subscription_prevents_new_assignment"
+    type: integration
+
+  - criterion: "EC-3: License assigned to non-existent emailcreates PendingEnterpriseCustomerUser, resolved on registration"
+    test_file: tests/integration/enterprise/test_license_pending_user.py
+    test_name: "test_license_pending_user_resolution"
+    type: integration
+
+  - criterion: "EC-4: Batch assignment partial failure - entire batch rejected (all-or-nothing)"
+    test_file: tests/integration/enterprise/test_batch_assignment_failure.py
+    test_name: "test_batch_assignment_all_or_nothing"
+    type: integration
+
+  - criterion: "EC-5: Double-redemption prevention - learnerredeems twice, idempotent response, no double deduction"
+    test_file: tests/integration/enterprise/test_subsidy_double_redemption.py
+    test_name: "test_subsidy_double_redemption_idempotent"
+    type: integration
+
+  - criterion: "EC-6: Concurrent transaction race condition -multiple redemptions serialized, only fitting balance committed"
+    test_file: tests/integration/enterprise/test_subsidy_concurrency.py
+    test_name: "test_subsidy_concurrent_redemptions_serialized"
+    type: integration
+
+  - criterion: "EC-7: Transaction reversal of pending transaction transitions to failed without restoring balance"
+    test_file: tests/unit/enterprise/test_reversal_pending_transaction.py
+    test_name: "test_reversal_pending_transaction_no_balance_change"
+    type: unit
+
+  - criterion: "EC-8: IdP metadata refresh failure - system continues using cached metadata"
+    test_file: tests/integration/enterprise/test_saml_metadata_refresh_failure.py
+    test_name: "test_metadata_refresh_failure_uses_cache"
+    type: integration
+
+  - criterion: "EC-9: SAML assertion without required attributes rejected, log shows missing attributes"
+    test_file: tests/integration/enterprise/test_saml_missing_attributes.py
+    test_name: "test_saml_missing_attributes_rejected"
+    type: integration
+
+  - criterion: "EC-10: Duplicate enterprise user linking - existing user auto-linked on SAML login, no duplicate account"
+    test_file: tests/integration/enterprise/test_saml_existing_user_link.py
+    test_name: "test_saml_existing_user_auto_link"
+    type: integration
+
+  - criterion: "EC-11: Course deletion during sync - contentmarked unavailable (soft delete), catalog remains valid"
+    test_file: tests/integration/enterprise/test_catalog_sync_deleted_course.py
+    test_name: "test_catalog_sync_soft_deletes_removed_content"
+    type: integration
+
+  - criterion: "EC-12: Catalog filter returning zero results- empty catalog valid, admin portal displays message"
+    test_file: tests/e2e/enterprise/test_empty_catalog.py
+    test_name: "test_empty_catalog_displays_message"
+    type: e2e
+
+  - criterion: "EC-13: Discovery service unavailable during sync - retry 3 times, log error, alert, preserve last sync state"
+    test_file: tests/integration/enterprise/test_catalog_sync_discovery_down.py
+    test_name: "test_catalog_sync_discovery_unavailable"
+    type: integration
+
+  - criterion: "EC-14: External API rate limiting (HTTP 429)- sync respects Retry-After header, reschedules batch"
+    test_file: tests/integration/enterprise/test_channel_rate_limiting.py
+    test_name: "test_channel_sync_respects_rate_limit"
+    type: integration
+
+  - criterion: "EC-15: Credential rotation - sync fails withauth error, updating credentials in admin fixes next cycle"
+    test_file: tests/integration/enterprise/test_channel_credential_rotation.py
+    test_name: "test_channel_credential_rotation_recovery"
+    type: integration
+
+  - criterion: "EC-16: Large learner set pagination - enterprise with >10k learners, sync paginates fetches (batch 500)"
+    test_file: tests/load/enterprise/test_channel_sync_large_learner_set.py
+    test_name: "test_channel_sync_paginates_large_learner_set"
+    type: load
+
+  - criterion: "EC-17: DSC revocation mid-sync - learner excluded from current sync payload"
+    test_file: tests/integration/enterprise/test_dsc_revocation_mid_sync.py
+    test_name: "test_dsc_revocation_mid_sync_excluded"
+    type: integration
+
+  - criterion: "EC-18: Service-to-service calls use higher rate limit tier, not blocked by admin limits"
+    test_file: tests/integration/enterprise/test_service_rate_limits.py
+    test_name: "test_service_to_service_higher_rate_limit"
+    type: integration
+
+  # Performance (NFR Tests)
+  - criterion: "NFR-Performance-1: Enterprise catalog contentmetadata API p95 latency <= 300ms"
+    test_file: tests/load/enterprise/test_catalog_list_latency.py
+    test_name: "test_catalog_list_latency_p95_under_300ms"
+    type: load
+
+  - criterion: "NFR-Performance-2: Enterprise catalog contains_content_items API p95 latency <= 100ms"
+    test_file: tests/load/enterprise/test_catalog_contains_latency.py
+    test_name: "test_catalog_contains_latency_p95_under_100ms"
+    type: load
+
+  - criterion: "NFR-Performance-3: License manager batch assignment (500 emails) p95 latency <= 5 seconds"
+    test_file: tests/load/enterprise/test_license_batch_latency.py
+    test_name: "test_license_batch_assignment_latency_p95_under_5s"
+    type: load
+
+  - criterion: "NFR-Performance-4: License manager single license lookup p95 latency <= 200ms"
+    test_file: tests/load/enterprise/test_license_lookup_latency.py
+    test_name: "test_license_lookup_latency_p95_under_200ms"
+    type: load
+
+  - criterion: "NFR-Performance-5: Enterprise access can-redeem API p95 latency <= 500ms"
+    test_file: tests/load/enterprise/test_access_can_redeem_latency.py
+    test_name: "test_access_can_redeem_latency_p95_under_500ms"
+    type: load
+
+  - criterion: "NFR-Performance-6: Enterprise subsidy transaction creation p95 latency <= 1 second"
+    test_file: tests/load/enterprise/test_subsidy_transaction_latency.py
+    test_name: "test_subsidy_transaction_latency_p95_under_1s"
+    type: load
+
+  - criterion: "NFR-Performance-7: SAML SSO login round-tripcompletes within 5 seconds at p95"
+    test_file: tests/load/enterprise/test_saml_login_latency.py
+    test_name: "test_saml_login_latency_p95_under_5s"
+    type: load
+
+  - criterion: "NFR-Performance-8: Enterprise admin portal initial page load <= 3 seconds at p95"
+    test_file: tests/load/enterprise/test_admin_portal_load_time.py
+    test_name: "test_admin_portal_load_time_p95_under_3s"
+    type: load
+
+  - criterion: "NFR-Performance-9: Integrated channel sync (10,000 learners) completes within 30 minutes"
+    test_file: tests/load/enterprise/test_channel_sync_large_scale.py
+    test_name: "test_channel_sync_10k_learners_under_30min"
+    type: load
+
+  # Reliability (NFR Tests)
+  - criterion: "NFR-Reliability-1: All enterprise services have readiness and liveness probes responding"
+    test_file: tests/integration/enterprise/test_probes.py
+    test_name: "test_all_services_have_probes"
+    type: integration
+
+  - criterion: "NFR-Reliability-2: License assignment batch partial failure rolled back (all-or-nothing)"
+    test_file: tests/integration/enterprise/test_license_batch_atomicity.py
+    test_name: "test_license_batch_atomic"
+    type: integration
+
+  - criterion: "NFR-Reliability-3: Enterprise subsidy ledgereventually consistent within 30 seconds"
+    test_file: tests/integration/enterprise/test_subsidy_eventual_consistency.py
+    test_name: "test_subsidy_balance_eventually_consistent"
+    type: integration
+
+  - criterion: "NFR-Reliability-4: Integrated channel sync retry with exponential backoff"
+    test_file: tests/integration/enterprise/test_channel_retry_backoff.py
+    test_name: "test_channel_sync_exponential_backoff"
+    type: integration
+
+  # Security (NFR Tests)
+  - criterion: "NFR-Security-1: Inter-service communication uses K8s Service DNS, no external egress"
+    test_file: tests/integration/enterprise/test_internal_communication.py
+    test_name: "test_services_use_internal_dns"
+    type: integration
+
+  - criterion: "NFR-Security-2: Enterprise service API requires JWT authentication, unauthenticated returns HTTP 401"
+    test_file: tests/integration/enterprise/test_jwt_enforcement.py
+    test_name: "test_api_requires_jwt"
+    type: integration
+
+  - criterion: "NFR-Security-3: Enterprise service API enforces RBAC, wrong role returns HTTP 403"
+    test_file: tests/integration/enterprise/test_rbac_enforcement.py
+    test_name: "test_api_enforces_rbac"
+    type: integration
+
+  - criterion: "NFR-Security-4: Enterprise catalog content filtered by enterprise_customer_uuid at queryset level"
+    test_file: tests/integration/enterprise/test_queryset_filtering.py
+    test_name: "test_catalog_queryset_filters_by_customer"
+    type: integration
+
+  - criterion: "NFR-Security-5: License manager enforces admin can only view/modify own customer's plans"
+    test_file: tests/integration/enterprise/test_license_manager_rbac.py
+    test_name: "test_license_manager_cross_tenant_denied"
+    type: integration
+
+  - criterion: "NFR-Security-6: SAML assertion signature validated, invalid signature rejected"
+    test_file: tests/integration/enterprise/test_saml_signature_validation.py
+    test_name: "test_invalid_saml_signature_rejected"
+    type: integration
+
+  - criterion: "NFR-Security-7: SAML assertion NotOnOrAfter validated, expired assertion rejected"
+    test_file: tests/integration/enterprise/test_saml_replay_prevention.py
+    test_name: "test_expired_saml_assertion_replay_prevented"
+    type: integration
+
+  - criterion: "NFR-Security-8: SAML assertion audience restriction validated"
+    test_file: tests/integration/enterprise/test_saml_audience_validation.py
+    test_name: "test_saml_audience_validated"
+    type: integration
+
+  - criterion: "NFR-Security-9: System does not log SAML assertion XML (PII), only metadata"
+    test_file: tests/integration/enterprise/test_saml_logging_redaction.py
+    test_name: "test_saml_assertion_xml_not_logged"
+    type: integration
+
+  - criterion: "NFR-Security-10: API rate limiting enforced (req/min per admin, 1000 req/min per service)"
+    test_file: tests/integration/enterprise/test_rate_limiting.py
+    test_name: "test_api_rate_limiting_enforced"
+    type: integration

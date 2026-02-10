@@ -19,6 +19,7 @@ links:
     - "specs/disaster-recovery-business-continuity_spec.md"
     - "specs/forum-service-migration_spec.md"
     - "specs/observability-stack_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -97,7 +98,7 @@ The system MUST use the following databases on the Atlas cluster:
 - The system SHOULD use Atlas VPC peering for production (future enhancement)
 - The system MUST NOT expose Atlas cluster to 0.0.0.0/0
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - Read latency (p95) from GKE to Atlas MUST be <= 100ms for modulestore queries
 - Write latency (p95) for course save operations MUST be <= 500ms

@@ -1,0 +1,432 @@
+# Proctoring Integration Testmap
+# Status: DEFERRED until 2027
+# All tests are planned but not yet implemented.
+# Generated from: specs/proctoring-integration_spec.md
+
+spec: "specs/proctoring-integration_spec.md"
+status: deferred
+deferred_until: "2027"
+note: >
+  This testmap is a placeholder for the deferred proctoring integration spec.
+  All acceptance criteria are mapped with planned verification approaches.
+  No test files exist yet. When the spec moves to active status, create the
+  test files listed below and update automated: true as tests are implemented.
+
+acceptance_criteria:
+  # --- Provider Integration ---
+  - id: "AC-001"
+    description: "Proctorio backend registered and retrievable via get_backend('proctorio')"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_provider_registry.py"
+        command: "pytest -k test_proctorio_backend_registered"
+        note: "Test file does not exist yet"
+
+  - id: "AC-002"
+    description: "Examity register_exam_attempt() creates provider record and returns provider_session_id"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_examity_adapter.py"
+        command: "pytest -k test_register_exam_attempt"
+        note: "Requires Examity sandbox API credentials"
+
+  - id: "AC-003"
+    description: "Respondus detects missing LockDown Browser and shows download prompt"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Browser Lockdown"
+        justification: "Requires actual LockDown Browser software; cannot be automated in CI"
+
+  - id: "AC-004"
+    description: "ProctorTrack webhook with low integrity score triggers second_review_required"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_webhook_processing.py"
+        command: "pytest -k test_low_integrity_score_triggers_review"
+        note: "Test file does not exist yet"
+
+  - id: "AC-005"
+    description: "No-op backend completes full exam flow without external API calls"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_noop_backend.py"
+        command: "pytest -k test_full_exam_flow_noop"
+        note: "Test file does not exist yet"
+
+  # --- Exam Setup ---
+  - id: "AC-006"
+    description: "Studio editor allows selecting proctored exam type and choosing providers"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Exam Setup"
+        justification: "Studio UI interaction; smoke test with browser automation when implemented"
+
+  - id: "AC-007"
+    description: "Exam blocked with deadline passed message after due_date"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_exam_scheduling.py"
+        command: "pytest -k test_exam_blocked_after_due_date"
+        note: "Test file does not exist yet"
+
+  - id: "AC-008"
+    description: "Studio validation error when selecting disabled provider for enterprise customer"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_exam_config_validation.py"
+        command: "pytest -k test_disabled_provider_validation_error"
+        note: "Test file does not exist yet"
+
+  - id: "AC-009"
+    description: "Course re-run preserves proctored exam settings"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_course_rerun.py"
+        command: "pytest -k test_rerun_preserves_proctoring_settings"
+        note: "Test file does not exist yet"
+
+  # --- Identity Verification ---
+  - id: "AC-010"
+    description: "Identity verification captures photo ID and sends to provider"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_identity_verification.py"
+        command: "pytest -k test_photo_id_capture_and_send"
+        note: "Requires provider sandbox API"
+
+  - id: "AC-011"
+    description: "Failed verification blocks exam, allows up to 2 retries"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_identity_verification.py"
+        command: "pytest -k test_failed_verification_retry_limit"
+        note: "Test file does not exist yet"
+
+  - id: "AC-012"
+    description: "Passed verification stored with user_id, enterprise_customer_uuid, timestamp"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_identity_verification.py"
+        command: "pytest -k test_passed_verification_stored"
+        note: "Test file does not exist yet"
+
+  - id: "AC-013"
+    description: "Subsequent exam uses baseline verification without full ID re-capture"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_identity_verification.py"
+        command: "pytest -k test_baseline_verification_reuse"
+        note: "Test file does not exist yet"
+
+  # --- Environment Check ---
+  - id: "AC-014"
+    description: "Blocked webcam shows camera access permission message"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Environment Check"
+        justification: "Browser permission interaction; smoke test with browser automation when implemented"
+
+  - id: "AC-015"
+    description: "All checks pass shows green checkmarks for each component"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Environment Check"
+        justification: "Browser UI rendering; smoke test with browser automation when implemented"
+
+  - id: "AC-016"
+    description: "Low bandwidth fails network check with minimum bandwidth message"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_environment_check.py"
+        command: "pytest -k test_low_bandwidth_fails_network_check"
+        note: "Test file does not exist yet"
+
+  # --- Browser Lockdown ---
+  - id: "AC-017"
+    description: "LockDown Browser prevents other apps, copy/paste, screenshots, other tabs"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Browser Lockdown"
+        justification: "Requires physical LockDown Browser installation; cannot automate in CI"
+
+  - id: "AC-018"
+    description: "Proctorio enforces lock_fullscreen and disable_clipboard settings"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Browser Lockdown"
+        justification: "Requires Proctorio extension; cannot automate in CI"
+
+  - id: "AC-019"
+    description: "VM detection flags attempt with vm_detected event"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Browser Lockdown"
+        justification: "Requires VM environment; manual verification only"
+
+  # --- Exam Session Lifecycle ---
+  - id: "AC-020"
+    description: "Exam start transitions ready_to_start to started with logged timestamp and user ID"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_state_machine.py"
+        command: "pytest -k test_start_transition_logging"
+        note: "Test file does not exist yet"
+
+  - id: "AC-021"
+    description: "Exam submission transitions to submitted and notifies provider"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_state_machine.py"
+        command: "pytest -k test_submit_notifies_provider"
+        note: "Test file does not exist yet"
+
+  - id: "AC-022"
+    description: "Auto-expiry transitions started to timed_out after time_limit + 30 minutes"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_state_machine.py"
+        command: "pytest -k test_auto_expiry"
+        note: "Test file does not exist yet"
+
+  - id: "AC-023"
+    description: "Provider outage preserves answers and shows reconnect prompt"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Resilience"
+        justification: "Requires network interruption simulation; smoke test when implemented"
+
+  - id: "AC-024"
+    description: "Invalid transition verified to started is rejected"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_state_machine.py"
+        command: "pytest -k test_invalid_transition_rejected"
+        note: "Test file does not exist yet"
+
+  # --- Proctor Review ---
+  - id: "AC-025"
+    description: "Reviewer for customer A sees only customer A attempts"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_review_dashboard.py"
+        command: "pytest -k test_tenant_scoped_review_queue"
+        note: "Test file does not exist yet"
+
+  - id: "AC-026"
+    description: "Reject with reason transitions to rejected, stores reason, emails student"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_review_actions.py"
+        command: "pytest -k test_reject_with_reason"
+        note: "Test file does not exist yet"
+
+  - id: "AC-027"
+    description: "Proctoring admin can override rejection to verified with audit log"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_review_actions.py"
+        command: "pytest -k test_admin_override_rejection"
+        note: "Test file does not exist yet"
+
+  - id: "AC-028"
+    description: "SLA-breached attempts highlighted on dashboard load"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_review_dashboard.py"
+        command: "pytest -k test_sla_breach_highlighting"
+        note: "Test file does not exist yet"
+
+  # --- Grading Integration ---
+  - id: "AC-029"
+    description: "Verified attempt grade appears in gradebook within 5 minutes"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_grading_integration.py"
+        command: "pytest -k test_verified_grade_released"
+        note: "Test file does not exist yet"
+
+  - id: "AC-030"
+    description: "Rejected attempt sets grade to 0 with proctoring_status rejected"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_grading_integration.py"
+        command: "pytest -k test_rejected_grade_zeroed"
+        note: "Test file does not exist yet"
+
+  - id: "AC-031"
+    description: "Instructor override restores original grade with audit entry"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_grading_integration.py"
+        command: "pytest -k test_instructor_override"
+        note: "Test file does not exist yet"
+
+  - id: "AC-032"
+    description: "Pending review shows Pending Proctoring Review with no numeric grade"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_grading_integration.py"
+        command: "pytest -k test_pending_grade_display"
+        note: "Test file does not exist yet"
+
+  # --- Multi-Tenant Isolation ---
+  - id: "AC-033"
+    description: "Simultaneous sessions for 2 customers route to respective providers without credential cross-contamination"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_tenant_isolation.py"
+        command: "pytest -k test_concurrent_multi_tenant_sessions"
+        note: "Test file does not exist yet"
+
+  - id: "AC-034"
+    description: "Per-customer SLA thresholds applied correctly on review dashboard"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_review_dashboard.py"
+        command: "pytest -k test_per_customer_sla_thresholds"
+        note: "Test file does not exist yet"
+
+  - id: "AC-035"
+    description: "GDPR deletion for one student does not affect other students"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/proctoring/test_gdpr_deletion.py"
+        command: "pytest -k test_deletion_scoped_to_student"
+        note: "Test file does not exist yet"
+
+  # --- Compliance ---
+  - id: "AC-036"
+    description: "Consent notice includes all required fields"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > Compliance"
+        justification: "Content verification; smoke test with browser automation when implemented"
+
+  - id: "AC-037"
+    description: "Declining consent blocks exam start with informational message"
+    automated: false
+    status: deferred
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/proctoring/test_consent.py"
+        command: "pytest -k test_declined_consent_blocks_exam"
+        note: "Test file does not exist yet"
+
+  - id: "AC-038"
+    description: "GDPR DSAR produces all proctoring metadata within 30 days"
+    automated: false
+    status: deferred
+    verify:
+      - type: "manual"
+        runbook: "docs/runbooks/proctoring-operations-runbook.md"
+        section: "Verification > GDPR"
+        justification: "Requires provider coordination; manual verification with quarterly audit"

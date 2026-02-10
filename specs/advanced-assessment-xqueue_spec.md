@@ -20,6 +20,7 @@ links:
     - "specs/multi-tenancy-architecture_spec.md"
     - "specs/badges-credentials-enterprise_spec.md"
     - "specs/branding-system_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -306,7 +307,7 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
   - Time-on-task for timed exams (average completion time vs. allowed time)
   - XQueue grader performance (average grading time, error rate)
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 
@@ -691,6 +692,21 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
 2. Existing problems already embedded in courses continue to render and grade (XBlocks are self-contained)
 3. Students can still submit answers to existing advanced problems
 4. New courses cannot add new advanced problems until the flag is re-enabled
+
+---
+
+## Monorepo Location
+
+| Component | Path | Notes |
+|-----------|------|-------|
+| Custom grader scripts | `services/xqueue-graders/graders/` | Python/shell grading scripts |
+| Grader Dockerfile | `services/xqueue-graders/Dockerfile` | Sandboxed execution environment |
+| Grader tests | `services/xqueue-graders/tests/` | pytest (grader unit tests) |
+| XQueue K8s config | `deploy/k8s/base/apps/xqueue/` | XQueue Deployment + grader worker pods |
+| ORA2 config | `infrastructure/tutor/` | Tutor plugin config for ORA2 settings |
+| Advanced XBlock config | `infrastructure/tutor/` | Tutor plugin for drag-and-drop v2, math input, etc. |
+
+**Note**: The XQueue service itself is an upstream Open edX image — we do not fork it. Custom graders are the only new source code.
 
 ---
 

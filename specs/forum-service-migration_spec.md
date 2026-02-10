@@ -27,6 +27,7 @@ links:
     - "specs/observability-stack_spec.md"
     - "specs/auth-sso-enterprise_spec.md"
     - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -189,7 +190,7 @@ Existing forum data in MongoDB Atlas -- threads, posts, comments, votes, abuse f
 - The Python forum service MUST support filtering search results by course_id, author, date range, and thread type (discussion, question)
 - The system SHOULD support incremental index updates (not requiring a full reindex for every post)
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - The Python forum service p95 response latency MUST be <= 300ms for thread listing endpoints (matching or improving upon the Ruby service baseline)
 - The Python forum service p95 response latency MUST be <= 500ms for search endpoints
@@ -201,7 +202,7 @@ Existing forum data in MongoDB Atlas -- threads, posts, comments, votes, abuse f
 - The Python forum Docker image size SHOULD be <= 500MB (ideally smaller than the Ruby image by sharing the openedx base)
 - The system MUST maintain 99.5% forum availability during the phased rollout (excluding the planned maintenance window)
 
-### Non-functional -- Security
+### Non-Functional Requirements — Security
 
 - The Python forum service MUST NOT expose any API endpoint without `API_KEY` authentication
 - The Python forum service MUST use TLS for all MongoDB Atlas connections (`MONGOID_USE_SSL=true` equivalent)

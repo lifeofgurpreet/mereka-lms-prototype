@@ -18,6 +18,7 @@ links:
     - "specs/tutor-configuration_spec.md"
     - "specs/auth-sso-enterprise_spec.md"
     - "specs/multi-tenancy-architecture_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -109,7 +110,7 @@ The system MUST support the following domains:
 - MUST limit profile image uploads to 1MB
 - MUST set general request body limit to 4MB
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - All domain endpoints MUST respond with HTTP 200 within 2 seconds (p95) under normal load
 - CSRF validation failure rate MUST remain below 0.5% of total requests per domain

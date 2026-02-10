@@ -1,0 +1,105 @@
+# Testmap: Multi-Site Domain Configuration
+# Source spec: specs/multi-site-domains_spec.md
+# Generated: 2026-02-10
+
+spec: "specs/multi-site-domains_spec.md"
+acceptance_criteria:
+  - id: "AC-001"
+    description: "All three domains resolve to the LMS"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/smoke-test.sh"
+        command: "bash scripts/qa/smoke-test.sh"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-multisite-config.sh"
+        command: "STRICT=1 bash scripts/qa/verify-multisite-config.sh prod"
+
+  - id: "AC-002"
+    description: "Login on academyv2.mereka.io persists session when navigating to apps.academyv2.mereka.io"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-session-persistence.sh"
+        command: "bash scripts/qa/verify-session-persistence.sh --test cross-subdomain"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-session-persistence.sh"
+        command: "bash scripts/qa/verify-session-persistence.sh --test cookie-domain-check"
+
+  - id: "AC-003"
+    description: "Login on academy.biji-biji.com works independently (separate session)"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-session-persistence.sh"
+        command: "bash scripts/qa/verify-session-persistence.sh --test independent-session"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-session-persistence.sh"
+        command: "bash scripts/qa/verify-session-persistence.sh --test no-cookie-leakage"
+
+  - id: "AC-004"
+    description: "CSRF tokens are accepted from all three domains"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-csrf-multisite.sh"
+        command: "bash scripts/qa/verify-csrf-multisite.sh"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-csrf-multisite.sh"
+        command: "bash scripts/qa/verify-csrf-multisite.sh --check-origins-only"
+
+  - id: "AC-005"
+    description: "/api/mfe_config/v1 returns correct LMS_BASE_URL for each domain"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-mfe-config-contract.sh"
+        command: "bash scripts/qa/verify-mfe-config-contract.sh --env prod"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-multisite-config.sh"
+        command: "STRICT=1 bash scripts/qa/verify-multisite-config.sh prod"
+
+  - id: "AC-006"
+    description: "Studio is accessible at studio.academyv2.mereka.io only"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/smoke-test.sh"
+        command: "bash scripts/qa/smoke-test.sh"
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-studio-isolation.sh"
+        command: "bash scripts/qa/verify-studio-isolation.sh"
+
+  - id: "AC-007"
+    description: "Profile image upload from MFE succeeds"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-body-limits.sh"
+        command: "bash scripts/qa/verify-body-limits.sh"
+      - type: "manual"
+        runbook: "docs/operations/DOMAIN_MANAGEMENT.md"
+        section: "Verification > Profile Image Upload"
+        justification: "Full upload flow requires authenticated browser session with file selection; curl can only test rejection path"
+
+  - id: "AC-008"
+    description: "Favicon loads correctly on all domains"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: "scripts/qa/verify-favicon-multisite.sh"
+        command: "bash scripts/qa/verify-favicon-multisite.sh"
+
+  - id: "AC-009"
+    description: "OIDC provider configs pass verification (enabled/visible + non-empty secret + label contract)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/qa/verify-oidc-provider-configs.sh"
+        command: "bash scripts/qa/verify-oidc-provider-configs.sh --env prod"

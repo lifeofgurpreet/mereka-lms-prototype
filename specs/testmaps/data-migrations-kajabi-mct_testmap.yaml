@@ -1,0 +1,291 @@
+# Testmap: Data Migrations -- Kajabi & MCT
+# Source Spec: specs/data-migrations-kajabi-mct_spec.md
+
+spec: "specs/data-migrations-kajabi-mct_spec.md"
+
+acceptance_criteria:
+  # === Export Phase ===
+
+  - id: "AC-001"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-kajabi-export.sh"
+        command: "bash scripts/qa/verify-kajabi-export.sh"
+
+  - id: "AC-002"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mct-export.sh"
+        command: "bash scripts/qa/verify-mct-export.sh"
+
+  - id: "AC-003"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-kajabi-completions-export.sh"
+        command: "bash scripts/qa/verify-kajabi-completions-export.sh"
+
+  - id: "AC-004"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mct-video-urls.sh"
+        command: "bash scripts/qa/verify-mct-video-urls.sh"
+
+  # === Transform Phase ===
+
+  - id: "AC-005"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-kajabi-transform.sh"
+        command: "bash scripts/qa/verify-kajabi-transform.sh"
+
+  - id: "AC-006"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-kajabi-transform.sh"
+        command: "bash scripts/qa/verify-kajabi-transform.sh --check-enrollments"
+
+  - id: "AC-007"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mct-transform.sh"
+        command: "bash scripts/qa/verify-mct-transform.sh"
+
+  - id: "AC-008"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mct-transform.sh"
+        command: "bash scripts/qa/verify-mct-transform.sh --check-enrollment-dedup"
+
+  - id: "AC-009"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-kajabi-olx-packages.sh"
+        command: "bash scripts/qa/verify-kajabi-olx-packages.sh"
+
+  - id: "AC-010"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mct-olx-packages.sh"
+        command: "bash scripts/qa/verify-mct-olx-packages.sh"
+
+  # === User Import Phase ===
+
+  - id: "AC-011"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-user-import-counts.sh"
+        command: "bash scripts/qa/verify-user-import-counts.sh --source kajabi"
+
+  - id: "AC-012"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-user-import-counts.sh"
+        command: "bash scripts/qa/verify-user-import-counts.sh --source mct"
+
+  - id: "AC-013"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-cross-system-identity.sh"
+        command: "bash scripts/qa/verify-cross-system-identity.sh"
+
+  - id: "AC-014"
+    verify:
+      - type: "manual"
+        runbook: "docs/migrations/VERIFICATION_CHECKLIST.md"
+        section: "Pod Restart Recovery"
+        justification: "Requires intentional pod kill during active import; cannot be safely automated in production GKE cluster"
+
+  # === Course Import Phase ===
+
+  - id: "AC-015"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-course-import-counts.sh"
+        command: "bash scripts/qa/verify-course-import-counts.sh --source kajabi"
+
+  - id: "AC-016"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-course-import-counts.sh"
+        command: "bash scripts/qa/verify-course-import-counts.sh --source mct"
+
+  - id: "AC-017"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-course-structure-sample.sh"
+        command: "bash scripts/qa/verify-course-structure-sample.sh --source kajabi"
+
+  - id: "AC-018"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-course-structure-sample.sh"
+        command: "bash scripts/qa/verify-course-structure-sample.sh --source mct --course basic-microsoft"
+
+  # === Enrollment Import Phase ===
+
+  - id: "AC-019"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-enrollment-import-counts.sh"
+        command: "bash scripts/qa/verify-enrollment-import-counts.sh --source kajabi"
+
+  - id: "AC-020"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-enrollment-import-counts.sh"
+        command: "bash scripts/qa/verify-enrollment-import-counts.sh --source mct"
+
+  - id: "AC-021"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-enrollment-skip-handling.sh"
+        command: "bash scripts/qa/verify-enrollment-skip-handling.sh --check user-not-found"
+
+  - id: "AC-022"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-enrollment-skip-handling.sh"
+        command: "bash scripts/qa/verify-enrollment-skip-handling.sh --check course-not-found"
+
+  # === Certificate Phase ===
+
+  - id: "AC-023"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-certificate-issuance.sh"
+        command: "bash scripts/qa/verify-certificate-issuance.sh --source kajabi"
+
+  - id: "AC-024"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-certificate-issuance.sh"
+        command: "bash scripts/qa/verify-certificate-issuance.sh --check-counts"
+
+  - id: "AC-025"
+    verify:
+      - type: "manual"
+        runbook: "docs/migrations/VERIFICATION_CHECKLIST.md"
+        section: "MCT Program Certificates"
+        justification: "ProgramCertificate verification requires Discovery admin UI navigation and Credentials service API inspection; not scriptable without admin session tokens"
+
+  # === Video Migration Phase ===
+
+  - id: "AC-026"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mux-video-upload.sh"
+        command: "bash scripts/qa/verify-mux-video-upload.sh"
+
+  - id: "AC-027"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mux-video-upload.sh"
+        command: "bash scripts/qa/verify-mux-video-upload.sh --check-captions"
+
+  - id: "AC-028"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-mct-olx-packages.sh"
+        command: "bash scripts/qa/verify-mct-olx-packages.sh --check-video-xblocks"
+
+  - id: "AC-029"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-kajabi-thumbnails.sh"
+        command: "bash scripts/qa/verify-kajabi-thumbnails.sh"
+
+  # === Verification Phase ===
+
+  - id: "AC-030"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/migrations/run-verification-pipeline.sh"
+        command: "bash scripts/migrations/run-verification-pipeline.sh"
+
+  - id: "AC-031"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/migrations/run-verification-pipeline.sh"
+        command: "bash scripts/migrations/run-verification-pipeline.sh && test -f scripts/migrations/kajabi/output/verification/summary.txt"
+
+  - id: "AC-032"
+    verify:
+      - type: "manual"
+        runbook: "docs/migrations/VERIFICATION_CHECKLIST.md"
+        section: "Studio Course Spot-Check"
+        justification: "Visual rendering verification requires human inspection of Studio UI for 10 sample courses to confirm section/unit/content display"
+
+  - id: "AC-033"
+    verify:
+      - type: "manual"
+        runbook: "docs/migrations/VERIFICATION_CHECKLIST.md"
+        section: "User Login Spot-Check"
+        justification: "User login and dashboard verification requires browser-based interaction with the LMS as specific users"
+
+  # === Rollback Phase ===
+
+  - id: "AC-034"
+    verify:
+      - type: "manual"
+        runbook: "docs/migrations/VERIFICATION_CHECKLIST.md"
+        section: "Full Rollback Test"
+        justification: "Full database restore is a destructive operation that must be tested manually in a staging environment with operator oversight"
+
+  - id: "AC-035"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-rollback-dry-run.sh"
+        command: "bash scripts/qa/verify-rollback-dry-run.sh"
+
+  - id: "AC-036"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-idempotency.sh"
+        command: "bash scripts/qa/verify-idempotency.sh"
+
+  # === Idempotency & Re-migration ===
+
+  - id: "AC-037"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-idempotency.sh"
+        command: "bash scripts/qa/verify-idempotency.sh --full-pipeline"
+
+  - id: "AC-038"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-incremental-sync.sh"
+        command: "bash scripts/qa/verify-incremental-sync.sh"

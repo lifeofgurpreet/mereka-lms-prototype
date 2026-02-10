@@ -20,6 +20,7 @@ links:
     - "specs/disaster-recovery-business-continuity_spec.md"
     - "specs/data-privacy-gdpr-compliance_spec.md"
     - "specs/analytics-pipeline_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -227,7 +228,7 @@ This spec establishes the contracts for how libraries are created, governed, ver
 - The system SHOULD support bulk library creation via a management command (`manage.py create_libraries_from_csv`) for enterprise onboarding scenarios
 - The system MUST support migrating library content between organizations (e.g., when transferring a library from one tenant to another) via export + import with updated organization ownership
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

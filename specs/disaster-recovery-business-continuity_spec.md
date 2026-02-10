@@ -19,6 +19,7 @@ links:
     - "specs/secrets-management_spec.md"
     - "specs/mongodb-atlas-integration_spec.md"
     - "specs/observability-stack_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -202,7 +203,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 - The system MUST publish incident postmortems within 5 business days of P1/P2 incidents
 - The system SHOULD conduct a tabletop DR exercise semi-annually covering scenario DR-007 (full cluster loss)
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

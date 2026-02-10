@@ -18,6 +18,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/analytics-pipeline_spec.md"
     - "specs/observability-stack_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -228,7 +229,7 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 - The isolation test suite SHOULD be run nightly as a scheduled job to detect regressions
 - The isolation test suite MUST log all test results with timestamps for audit purposes
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

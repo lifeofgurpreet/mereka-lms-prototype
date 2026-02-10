@@ -15,6 +15,7 @@ links:
     - "specs/secrets-management_spec.md"
     - "specs/analytics-pipeline_spec.md"
     - "specs/branding-system_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -157,7 +158,7 @@ Video is the primary content medium for Mereka Academy courses. The 30 courses m
 - The system SHOULD provide poster images at 640x360 resolution for mobile thumbnail display
 - The system MUST ensure Video XBlock HTML is responsive and renders correctly in the Open edX mobile app WebView
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

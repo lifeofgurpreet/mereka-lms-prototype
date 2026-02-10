@@ -15,6 +15,7 @@ links:
     - "specs/secrets-management_spec.md"
     - "specs/k8s-deployment_spec.md"
     - "specs/tutor-configuration_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -160,7 +161,7 @@ Without a canonical structure contract, agents and engineers create files in ad-
 - Spec files MUST use the naming convention `<slug>_spec.md`.
 - Specs MUST NOT be placed in `docs/` (specs are contracts, docs are explanations).
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - **Discoverability**: A new engineer or AI agent MUST be able to locate any file category (scripts, k8s manifests, docs, specs) within 1 directory traversal from root.
 - **Verification speed**: The structure verification script MUST complete in under 5 seconds on a standard checkout.

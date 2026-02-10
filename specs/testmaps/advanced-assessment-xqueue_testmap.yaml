@@ -1,0 +1,449 @@
+# Testmap for Advanced Assessment & XQueue Integration
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/advanced-assessment-xqueue_testmap.yaml
+
+spec: specs/advanced-assessment-xqueue_spec.md
+tests:
+  # ORA2 Configuration and Peer Assessment
+  - criterion: "AC-001: Given a course author in Studio, whenthey add an ORA2 component to a unit, then they can configure a rubric with 3 criteria, each with 4 options, and set peerassessment to require 3 reviews per submission and 5 reviewsgiven per student"
+    test_file: tests/integration/test_ora2_rubric_configuration.py
+    test_name: "test_ora2_rubric_configuration_success"
+    type: integration
+
+  - criterion: "AC-001: Invalid rubric validation"
+    test_file: tests/unit/test_ora2_rubric_validation.py
+    test_name: "test_ora2_invalid_rubric_rejected"
+    type: unit
+
+  - criterion: "AC-002: Given a student who has submitted anORA2 response, when 3 peers have completed their reviews andthe grading deadline has passed, then the student sees a final grade that is the median of the 3 peer scores displayed ontheir submission page"
+    test_file: tests/e2e/test_ora2_peer_assessment_flow.py
+    test_name: "test_ora2_peer_assessment_median_grade"
+    type: e2e
+
+  - criterion: "AC-002: Insufficient peer reviewers fallback"
+    test_file: tests/integration/test_ora2_insufficient_peers.py
+    test_name: "test_ora2_insufficient_peers_staff_fallback"
+    type: integration
+
+  - criterion: "AC-003: Given an ORA2 assignment configured with file uploads allowing PDF and PNG up to 10 MB, when a student uploads a 9.5 MB PDF, then the upload succeeds and the file is stored at /openedx/data/ora2/"
+    test_file: tests/integration/test_ora2_file_upload.py
+    test_name: "test_ora2_file_upload_success"
+    type: integration
+
+  - criterion: "AC-004: Given an ORA2 assignment configured with file uploads, when a student attempts to upload a .exe file, then the upload is rejected with a validation error message listing allowed file types"
+    test_file: tests/integration/test_ora2_file_upload.py
+    test_name: "test_ora2_file_upload_type_validation"
+    type: integration
+
+  - criterion: "AC-005: Given an ORA2 assignment where the rubric has been configured and one student has already submitted, when the course author attempts to modify the rubric criteria, then Studio prevents the change and displays a warning that the rubric is locked"
+    test_file: tests/integration/test_ora2_rubric_immutability.py
+    test_name: "test_ora2_rubric_immutable_after_submission"
+    type: integration
+
+  - criterion: "AC-006: Given an ORA2 assignment with peer calibration enabled, when a student attempts to start peer grading without completing calibration, then they are redirectedto the calibration step first"
+    test_file: tests/integration/test_ora2_peer_calibration.py
+    test_name: "test_ora2_peer_calibration_required"
+    type: integration
+
+  # ORA Grading MFE
+  - criterion: "AC-007: Given a course staff member navigating to apps.academyv2.mereka.io/ora-grading, when they select acourse with 10 ORA2 submissions awaiting staff assessment, then the grading queue displays all 10 submissions ordered bysubmission time"
+    test_file: tests/e2e/test_ora_grading_mfe.py
+    test_name: "test_ora_grading_queue_display"
+    type: e2e
+
+  - criterion: "AC-007: ORA Grading MFE filtering"
+    test_file: tests/integration/test_ora_grading_mfe_filtering.py
+    test_name: "test_ora_grading_mfe_filter_by_course_status"
+    type: integration
+
+  - criterion: "AC-008: Given a staff grader reviewing a submission in the ORA Grading MFE, when they select options for all rubric criteria and enter feedback text, then they can submit the grade and the next submission loads automatically"
+    test_file: tests/e2e/test_ora_grading_mfe.py
+    test_name: "test_ora_staff_grading_workflow"
+    type: e2e
+
+  - criterion: "AC-009: Given a staff grader who submits a grade via the ORA Grading MFE, when the grade is saved, then itappears in the Open edX gradebook within 5 minutes"
+    test_file: tests/integration/test_ora_staff_grade_integration.py
+    test_name: "test_ora_staff_grade_to_gradebook"
+    type: integration
+
+  # Timed Exams
+  - criterion: "AC-010: Given a course author in Studio, whenthey set a subsection's exam_type to timed with time_limit_minutes=60, then the subsection is displayed to students witha 60-minute countdown timer and no proctoring prompts"
+    test_file: tests/e2e/test_timed_exam_timer.py
+    test_name: "test_timed_exam_timer_display"
+    type: e2e
+
+  - criterion: "AC-010: Timed exam type configuration"
+    test_file: tests/unit/test_timed_exam_configuration.py
+    test_name: "test_exam_type_is_timed_not_proctored"
+    type: unit
+
+  - criterion: "AC-011: Given a student taking a timed exam with 5 minutes remaining, when the timer reaches 5:00, then avisual and screen-reader-accessible warning is displayed"
+    test_file: tests/e2e/test_timed_exam_timer.py
+    test_name: "test_timed_exam_warning_5_minutes"
+    type: e2e
+
+  - criterion: "AC-012: Given a student taking a timed exam,when the timer reaches 0:00, then all current answers are auto-submitted and the student sees a Time expired -- your examhas been submitted message"
+    test_file: tests/e2e/test_timed_exam_timer.py
+    test_name: "test_timed_exam_auto_submit"
+    type: e2e
+
+  - criterion: "AC-013: Given a timed exam that has been auto-submitted, when the student attempts to re-access the exam,then they see a read-only view of their submitted answers (ifshow_correctness allows) and cannot modify responses"
+    test_file: tests/integration/test_timed_exam_reentry_prevention.py
+    test_name: "test_timed_exam_no_reentry_after_submit"
+    type: integration
+
+  - criterion: "AC-014: Given an instructor who grants a 30-minute time extension to a specific student, when that studentstarts the timed exam, then they receive 90 minutes (60 + 30) on the timer"
+    test_file: tests/integration/test_timed_exam_extension.py
+    test_name: "test_timed_exam_time_extension"
+    type: integration
+
+  - criterion: "AC-015: Given a timed exam, when a student submits before the timer expires, then the grade is released tothe gradebook immediately (no proctoring review hold)"
+    test_file: tests/integration/test_timed_exam_grade_release.py
+    test_name: "test_timed_exam_immediate_grade_release"
+    type: integration
+
+  # XQueue Integration
+  - criterion: "AC-016: Given the XQueue service running at http://xqueue:8000 and a Python code grader worker deployed, when a student submits a Python code answer to an XQueue-backed problem, then the code is executed in a sandboxed environment and a grade result is returned within 30 seconds"
+    test_file: tests/e2e/test_xqueue_grading_flow.py
+    test_name: "test_xqueue_python_grading_end_to_end"
+    type: e2e
+
+  - criterion: "AC-016: XQueue grade to gradebook integration"
+    test_file: tests/integration/test_xqueue_grade_integration.py
+    test_name: "test_xqueue_grade_appears_in_gradebook"
+    type: integration
+
+  - criterion: "AC-017: Given a student submission containingan infinite loop, when the grader worker processes it, thenthe execution is terminated after the configured CPU time limit (10 seconds) and the student receives feedback indicatinga timeout error"
+    test_file: tests/integration/test_xqueue_sandbox_timeout.py
+    test_name: "test_xqueue_infinite_loop_timeout"
+    type: integration
+
+  - criterion: "AC-018: Given a student submission containingimport os; os.system(rm -rf /), when the grader worker processes it, then the sandboxed environment blocks the system call and the student receives feedback indicating a security violation"
+    test_file: tests/security/test_xqueue_sandbox_security.py
+    test_name: "test_xqueue_sandbox_blocks_system_calls"
+    type: security
+
+  - criterion: "AC-019: Given the XQueue grader worker crashes during processing, when the visibility timeout (60 seconds)expires, then the submission reappears in the queue and is picked up by another worker"
+    test_file: tests/integration/test_xqueue_worker_failure.py
+    test_name: "test_xqueue_worker_crash_recovery"
+    type: integration
+
+  - criterion: "AC-020: Given an XQueue-graded problem, whenthe grader returns a result, then the grade (scaled to the problem's maximum points) appears in the gradebook within 5 minutes"
+    test_file: tests/integration/test_xqueue_grade_scaling.py
+    test_name: "test_xqueue_grade_scaled_correctly"
+    type: integration
+
+  # Advanced Question Types
+  - criterion: "AC-021: Given a course author in Studio, whenthey add a new advanced component, then drag-and-drop v2 andmath expression input are available in the component picker"
+    test_file: tests/integration/test_advanced_xblocks_availability.py
+    test_name: "test_advanced_xblocks_in_studio"
+    type: integration
+
+  - criterion: "AC-022: Given a drag-and-drop v2 problem withitems and 3 zones, when a student correctly places all items using keyboard navigation only, then the problem is scoredas correct"
+    test_file: tests/e2e/test_drag_drop_keyboard_navigation.py
+    test_name: "test_drag_drop_keyboard_only"
+    type: e2e
+
+  - criterion: "AC-023: Given a math expression input problemexpecting x^2 + 2*x + 1, when a student enters (x+1)^2 (mathematically equivalent), then the SymPy-based grader marks itas correct"
+    test_file: tests/integration/test_math_expression_equivalence.py
+    test_name: "test_math_expression_equivalent_accepted"
+    type: integration
+
+  - criterion: "AC-024: Given a randomized problem pool of 20questions configured to show 10, when two different studentsaccess the subsection, then each student sees a different subset of 10 questions"
+    test_file: tests/integration/test_randomized_problem_pool.py
+    test_name: "test_randomized_problem_pool_different_subsets"
+    type: integration
+
+  # Assessment Security
+  - criterion: "AC-025: Given an exam subsection configured with randomized question order, when two students access the same exam, then the questions appear in different orders"
+    test_file: tests/integration/test_randomized_question_order.py
+    test_name: "test_randomized_question_order"
+    type: integration
+
+  - criterion: "AC-026: Given a multiple-choice problem withanswer shuffling enabled, when two students view the same problem, then the answer options appear in different orders"
+    test_file: tests/integration/test_randomized_answer_order.py
+    test_name: "test_randomized_answer_order"
+    type: integration
+
+  - criterion: "AC-027: Given an exam configured with one-at-a-time question display, when a student advances to question3, then questions 1 and 2 are no longer accessible"
+    test_file: tests/integration/test_one_at_a_time_display.py
+    test_name: "test_one_at_a_time_no_back_navigation"
+    type: integration
+
+  - criterion: "AC-028: Given an exam configured with max_attempts=1, when a student submits their answer, then the submitbutton is disabled and no further attempts are allowed"
+    test_file: tests/integration/test_max_attempts_enforcement.py
+    test_name: "test_max_attempts_enforced"
+    type: integration
+
+  # Grade Integration
+  - criterion: "AC-029: Given a course with an ORA2 assignment (weight: 20%), a timed exam (weight: 40%), and standard problems (weight: 40%), when all three are graded for a student,then the final course grade accurately reflects the weightedsum"
+    test_file: tests/integration/test_weighted_grade_calculation.py
+    test_name: "test_course_grade_weighted_sum"
+    type: integration
+
+  - criterion: "AC-030: Given an instructor who overrides a student's ORA2 grade from 70% to 85% with a reason, then the gradebook reflects 85%, the original 70% is preserved in the audit log, and the reason is recorded"
+    test_file: tests/integration/test_grade_override.py
+    test_name: "test_grade_override_with_audit_log"
+    type: integration
+
+  - criterion: "AC-031: Given an instructor who performs a bulk grade export for a 500-student course, when the CSV is generated, then it contains one row per student per graded assessment with columns: student_id, assessment_name, assessment_type, score, max_score, submission_timestamp, grading_source"
+    test_file: tests/load/test_bulk_grade_export.py
+    test_name: "test_bulk_grade_export_500_students"
+    type: load
+
+  - criterion: "AC-031: Bulk grade import"
+    test_file: tests/integration/test_bulk_grade_import.py
+    test_name: "test_bulk_grade_import_csv"
+    type: integration
+
+  # Bulk Operations
+  - criterion: "AC-032: Given a course with 2,000 submissionsfor a single problem, when an instructor triggers a bulk regrade, then the operation runs asynchronously, reports progress, and completes without LMS service degradation"
+    test_file: tests/load/test_bulk_regrade.py
+    test_name: "test_bulk_regrade_2000_submissions"
+    type: load
+
+  - criterion: "AC-033: Given an instructor who uploads a CSVwith grade overrides for 100 students, when the bulk importis processed, then each student's grade is updated and an audit log entry is created for each override"
+    test_file: tests/integration/test_bulk_grade_import.py
+    test_name: "test_bulk_override_audit_log"
+    type: integration
+
+  - criterion: "AC-034: Given a bulk regrade operation in progress, when the instructor checks the operation status, thenthey see a progress percentage and estimated time remaining"
+    test_file: tests/integration/test_bulk_operation_progress.py
+    test_name: "test_bulk_operation_progress_reporting"
+    type: integration
+
+  # Multi-Language and Accessibility
+  - criterion: "AC-035: Given an ORA2 rubric with criteria labels in both English and Malay, when a student whose languagepreference is Malay views the rubric, then the Malay labelsare displayed"
+    test_file: tests/integration/test_multilingual_rubric.py
+    test_name: "test_rubric_displays_malay_labels"
+    type: integration
+
+  - criterion: "AC-036: Given a timed exam timer with 1 minute remaining, when a screen reader user is taking the exam, then the screen reader announces 1 minute remaining via an ARIAlive region"
+    test_file: tests/accessibility/test_timer_screen_reader.py
+    test_name: "test_timer_screen_reader_announcement"
+    type: accessibility
+
+  - criterion: "AC-037: Given a drag-and-drop v2 problem, when a keyboard-only user presses Tab to navigate items and Enter/Space to select and drop, then the interaction completes successfully"
+    test_file: tests/accessibility/test_drag_drop_keyboard.py
+    test_name: "test_drag_drop_keyboard_interaction"
+    type: accessibility
+
+  # Student Feedback
+  - criterion: "AC-038: Given an ORA2 submission that receives a final staff grade, when the grade is posted, then the student receives an email notification within 10 minutes containing the course name, assignment name, and a link to view feedback"
+    test_file: tests/integration/test_ora_email_notification.py
+    test_name: "test_ora_grade_email_notification"
+    type: integration
+
+  - criterion: "AC-039: Given an auto-graded problem with show_correctness=past_due, when the student submits before the due date, then they see Answer submitted but not whether it iscorrect; after the due date, the correct answer and explanation are shown"
+    test_file: tests/integration/test_correctness_visibility.py
+    test_name: "test_show_correctness_past_due"
+    type: integration
+
+  # Edge Cases
+  - criterion: "Edge Case: ORA2 insufficient peer reviewers"
+    test_file: tests/integration/test_ora2_insufficient_peers.py
+    test_name: "test_ora2_insufficient_peers_no_zero_grade"
+    type: integration
+
+  - criterion: "Edge Case: ORA2 peer reviewer collusion (highscore variance)"
+    test_file: tests/integration/test_ora2_peer_score_variance.py
+    test_name: "test_ora2_high_variance_flagged"
+    type: integration
+
+  - criterion: "Edge Case: ORA2 student submits but never grades peers"
+    test_file: tests/integration/test_ora2_peer_grading_penalty.py
+    test_name: "test_ora2_peer_grading_penalty_applied"
+    type: integration
+
+  - criterion: "Edge Case: ORA2 large file upload failure"
+    test_file: tests/integration/test_ora2_large_file_failure.py
+    test_name: "test_ora2_file_upload_network_timeout"
+    type: integration
+
+  - criterion: "Edge Case: ORA2 rubric with zero-point options"
+    test_file: tests/unit/test_ora2_zero_point_scoring.py
+    test_name: "test_ora2_zero_point_option_scored_correctly"
+    type: unit
+
+  - criterion: "Edge Case: ORA2 file storage exhaustion"
+    test_file: tests/integration/test_ora2_storage_exhaustion.py
+    test_name: "test_ora2_storage_full_error_and_alert"
+    type: integration
+
+  - criterion: "Edge Case: XQueue grader worker unavailable"
+    test_file: tests/integration/test_xqueue_no_workers.py
+    test_name: "test_xqueue_no_workers_alert"
+    type: integration
+
+  - criterion: "Edge Case: XQueue malicious code (fork bomb)"
+    test_file: tests/security/test_xqueue_fork_bomb.py
+    test_name: "test_xqueue_sandbox_blocks_fork_bomb"
+    type: security
+
+  - criterion: "Edge Case: XQueue malicious code (memory exhaustion)"
+    test_file: tests/security/test_xqueue_memory_exhaustion.py
+    test_name: "test_xqueue_sandbox_memory_limit"
+    type: security
+
+  - criterion: "Edge Case: XQueue database connection pool exhaustion"
+    test_file: tests/load/test_xqueue_connection_pool.py
+    test_name: "test_xqueue_connection_pool_handles_load"
+    type: load
+
+  - criterion: "Edge Case: XQueue grader returns invalid response"
+    test_file: tests/integration/test_xqueue_invalid_response.py
+    test_name: "test_xqueue_invalid_response_retry_dead_letter"
+    type: integration
+
+  - criterion: "Edge Case: XQueue service restart during grading"
+    test_file: tests/integration/test_xqueue_restart_recovery.py
+    test_name: "test_xqueue_restart_recovers_inflight"
+    type: integration
+
+  - criterion: "Edge Case: XQueue student rapid re-submissions"
+    test_file: tests/integration/test_xqueue_duplicate_submission.py
+    test_name: "test_xqueue_deduplicates_rapid_submissions"
+    type: integration
+
+  - criterion: "Edge Case: Timed exam browser crash during exam"
+    test_file: tests/e2e/test_timed_exam_browser_crash.py
+    test_name: "test_timed_exam_resume_after_browser_crash"
+    type: e2e
+
+  - criterion: "Edge Case: Timed exam clock skew (client manipulation)"
+    test_file: tests/security/test_timed_exam_clock_skew.py
+    test_name: "test_timed_exam_server_side_enforcement"
+    type: security
+
+  - criterion: "Edge Case: Timed exam network disconnection during auto-submit"
+    test_file: tests/integration/test_timed_exam_network_disconnect.py
+    test_name: "test_timed_exam_auto_submit_retry"
+    type: integration
+
+  - criterion: "Edge Case: Timed exam instructor changes timelimit during active exams"
+    test_file: tests/integration/test_timed_exam_limit_change.py
+    test_name: "test_timed_exam_existing_attempts_retain_limit"
+    type: integration
+
+  - criterion: "Edge Case: Timed exam simultaneous access from multiple devices"
+    test_file: tests/integration/test_timed_exam_multi_device.py
+    test_name: "test_timed_exam_single_active_session"
+    type: integration
+
+  - criterion: "Edge Case: Grade conflicting sources (auto vsmanual override)"
+    test_file: tests/integration/test_grade_source_precedence.py
+    test_name: "test_manual_override_takes_precedence"
+    type: integration
+
+  - criterion: "Edge Case: Bulk regrade with manual overrides"
+    test_file: tests/integration/test_bulk_regrade_override_preservation.py
+    test_name: "test_bulk_regrade_preserves_overrides"
+    type: integration
+
+  - criterion: "Edge Case: Gradebook calculation with missinggrades"
+    test_file: tests/integration/test_gradebook_missing_grade.py
+    test_name: "test_missing_grade_treated_as_zero"
+    type: integration
+
+  - criterion: "Edge Case: Celery task failure during bulk regrade"
+    test_file: tests/integration/test_bulk_regrade_celery_failure.py
+    test_name: "test_bulk_regrade_resume_after_failure"
+    type: integration
+
+  # Load Tests
+  - criterion: "Load: 50 concurrent ORA2 submissions withoutdegradation"
+    test_file: tests/load/test_concurrent_ora2_submissions.py
+    test_name: "test_50_concurrent_ora2_submissions"
+    type: load
+
+  - criterion: "Load: Bulk grade export for 5,000-student course within 5 minutes"
+    test_file: tests/load/test_bulk_grade_export_5k.py
+    test_name: "test_bulk_export_5000_students_5_minutes"
+    type: load
+
+  - criterion: "Load: Bulk regrade for 5,000 submissions within 30 minutes"
+    test_file: tests/load/test_bulk_regrade_5k.py
+    test_name: "test_bulk_regrade_5000_submissions_30_minutes"
+    type: load
+
+  - criterion: "Load: XQueue grading under burst load (50 submissions/second)"
+    test_file: tests/load/test_xqueue_burst_load.py
+    test_name: "test_xqueue_burst_50_per_second"
+    type: load
+
+  - criterion: "Load: Timed exam page load with 100 problemswithin 5 seconds"
+    test_file: tests/load/test_timed_exam_large_page.py
+    test_name: "test_timed_exam_100_problems_5_seconds"
+    type: load
+
+  # Security Tests
+  - criterion: "Security: XQueue sandbox blocks network access"
+    test_file: tests/security/test_xqueue_sandbox_network.py
+    test_name: "test_xqueue_sandbox_no_network"
+    type: security
+
+  - criterion: "Security: XQueue sandbox blocks filesystem writes"
+    test_file: tests/security/test_xqueue_sandbox_filesystem.py
+    test_name: "test_xqueue_sandbox_no_filesystem_writes"
+    type: security
+
+  - criterion: "Security: XQueue sandbox blocks environment variables"
+    test_file: tests/security/test_xqueue_sandbox_env_vars.py
+    test_name: "test_xqueue_sandbox_no_env_vars"
+    type: security
+
+  - criterion: "Security: XQueue sandbox data isolation"
+    test_file: tests/security/test_xqueue_sandbox_data_isolation.py
+    test_name: "test_xqueue_no_cross_submission_access"
+    type: security
+
+  - criterion: "Security: ORA2 file upload blocks executableMIME types"
+    test_file: tests/security/test_ora2_file_mime_validation.py
+    test_name: "test_ora2_blocks_executable_uploads"
+    type: security
+
+  - criterion: "Security: ORA2 file download headers (attachment)"
+    test_file: tests/security/test_ora2_file_download_headers.py
+    test_name: "test_ora2_file_content_disposition_attachment"
+    type: security
+
+  - criterion: "Security: Timed exam server-side enforcement"
+    test_file: tests/security/test_timed_exam_server_enforcement.py
+    test_name: "test_timed_exam_client_manipulation_blocked"
+    type: security
+
+  - criterion: "Security: Assessment IP logging compliance (hashed, not raw)"
+    test_file: tests/security/test_ip_logging_compliance.py
+    test_name: "test_ip_addresses_hashed_not_raw"
+    type: security
+
+  - criterion: "Security: Grade override authorization"
+    test_file: tests/security/test_grade_override_authorization.py
+    test_name: "test_grade_override_requires_staff_role"
+    type: security
+
+  # Accessibility Tests
+  - criterion: "Accessibility: WCAG 2.1 AA compliance"
+    test_file: tests/accessibility/test_wcag_compliance.py
+    test_name: "test_assessment_interfaces_wcag_aa"
+    type: accessibility
+
+  - criterion: "Accessibility: Drag-and-drop keyboard navigation"
+    test_file: tests/accessibility/test_drag_drop_keyboard.py
+    test_name: "test_drag_drop_fully_keyboard_navigable"
+    type: accessibility
+
+  - criterion: "Accessibility: Timed exam timer screen readerannouncements"
+    test_file: tests/accessibility/test_timer_screen_reader.py
+    test_name: "test_timer_announces_at_intervals"
+    type: accessibility
+
+  - criterion: "Accessibility: Math expression input keyboardsupport"
+    test_file: tests/accessibility/test_math_input_keyboard.py
+    test_name: "test_math_input_keyboard_only"
+    type: accessibility
+
+  - criterion: "Accessibility: ORA2 peer review keyboard navigation"
+    test_file: tests/accessibility/test_ora_keyboard_navigation.py
+    test_name: "test_ora_peer_review_keyboard_navigable"
+    type: accessibility

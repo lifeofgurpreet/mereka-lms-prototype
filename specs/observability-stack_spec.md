@@ -24,6 +24,7 @@ links:
     - "specs/disaster-recovery-business-continuity_spec.md"
     - "specs/analytics-pipeline_spec.md"
     - "specs/ci-cd-pipeline_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -132,7 +133,7 @@ The system MUST expose the following custom metrics from LMS/CMS:
   - Redis cache metrics
 - The system MUST restrict dashboard access to authorized staff
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - Prometheus scrape interval MUST be <= 30 seconds for all targets
 - Alert firing-to-notification latency MUST be <= 2 minutes

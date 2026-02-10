@@ -21,6 +21,7 @@ links:
     - "specs/disaster-recovery-business-continuity_spec.md"
     - "specs/k8s-deployment_spec.md"
     - "specs/secrets-management_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -341,7 +342,7 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - The system MUST distribute monthly reports to enterprise account contacts within 5 business days of month end
 - Enterprise clients MUST receive quarterly business reviews including the SLA report within 10 business days of quarter end
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

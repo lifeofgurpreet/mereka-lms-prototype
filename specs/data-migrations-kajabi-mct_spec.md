@@ -26,6 +26,7 @@ links:
     - "specs/mongodb-atlas-integration_spec.md"
     - "specs/video-pipeline-delivery_spec.md"
     - "specs/observability-stack_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -228,7 +229,7 @@ This is a one-way bulk migration, not a gradual cutover with dual writes. Both s
 - Programs with manual course ordering (Entrepreneur, Impact, Green Jobs) MUST have order restrictions set
 - The migration SHOULD upload program thumbnails to Discovery for all programs that have logos in MCT source data
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Data Integrity
 

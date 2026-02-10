@@ -1,0 +1,197 @@
+# Testmap: SLO/SLA Definitions & Service Level Management
+# Source Spec: specs/slo-sla-service-level-management_spec.md
+# Generated: 2026-02-10
+
+spec: "specs/slo-sla-service-level-management_spec.md"
+acceptance_criteria:
+  # --- Service Tier Classification ---
+  - id: "AC-001"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-sli-foundation.sh"
+        command: "bash scripts/qa/verify-sli-foundation.sh --check-tier-classification"
+
+  - id: "AC-002"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-sli-foundation.sh"
+        command: "bash scripts/qa/verify-sli-foundation.sh --check-slo-sla-margin"
+
+  # --- SLI Measurement ---
+  - id: "AC-003"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-sli-foundation.sh"
+        command: "bash scripts/qa/verify-sli-foundation.sh --check-metrics-endpoint"
+
+  - id: "AC-004"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-sli-foundation.sh"
+        command: "bash scripts/qa/verify-sli-foundation.sh --check-availability-ratio"
+
+  - id: "AC-005"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-sli-foundation.sh"
+        command: "bash scripts/qa/verify-sli-foundation.sh --check-recording-rules"
+
+  - id: "AC-006"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-sli-foundation.sh"
+        command: "bash scripts/qa/verify-sli-foundation.sh --check-uptime-checks"
+
+  # --- Error Budget ---
+  - id: "AC-007"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-error-budget.sh"
+        command: "bash scripts/qa/verify-error-budget.sh --check-budget-ratio"
+
+  - id: "AC-008"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-error-budget.sh"
+        command: "bash scripts/qa/verify-error-budget.sh --check-dashboard"
+      - type: "monitoring"
+        metric: "mereka_slo_error_budget_remaining_ratio"
+        dashboard: "https://grafana.mereka.io/d/mereka-slo-overview"
+
+  - id: "AC-009"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-error-budget.sh"
+        command: "bash scripts/qa/verify-error-budget.sh --check-burn-rate-alerts"
+      - type: "manual"
+        runbook: "docs/operations/SLO_DASHBOARDS_SETUP.md"
+        section: "Verification > Simulate Budget Burn"
+        justification: "Requires scaling LMS to 0 replicas to trigger real alert; not safe to automate in production"
+
+  # --- Deployment Gating ---
+  - id: "AC-010"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-deployment-gate.sh"
+        command: "bash scripts/qa/verify-deployment-gate.sh --test-budget-above-50"
+
+  - id: "AC-011"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-deployment-gate.sh"
+        command: "bash scripts/qa/verify-deployment-gate.sh --test-budget-below-25"
+
+  - id: "AC-012"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-deployment-gate.sh"
+        command: "bash scripts/qa/verify-deployment-gate.sh --test-override-logging"
+
+  # --- Performance Regression Detection ---
+  - id: "AC-013"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-regression-detection.sh"
+        command: "bash scripts/qa/verify-regression-detection.sh --check-regression-alerts"
+      - type: "manual"
+        runbook: "docs/operations/SLO_DASHBOARDS_SETUP.md"
+        section: "Verification > Simulate Latency Regression"
+        justification: "Requires injecting artificial latency in production to verify alert fires within 15 minutes; not safe to automate"
+
+  - id: "AC-014"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-regression-detection.sh"
+        command: "bash scripts/qa/verify-regression-detection.sh --check-deployment-annotation-template"
+
+  - id: "AC-015"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-regression-detection.sh"
+        command: "bash scripts/qa/verify-regression-detection.sh --check-grafana-annotations"
+      - type: "monitoring"
+        metric: "mereka_slo_latency_p95_seconds"
+        dashboard: "https://grafana.mereka.io/d/mereka-slo-overview"
+
+  # --- Maintenance Windows ---
+  - id: "AC-016"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/MAINTENANCE_WINDOWS.md"
+        section: "Verification > SLA Exclusion Test"
+        justification: "Requires declaring a real maintenance window and generating a monthly report to verify exclusion; involves calendar-dependent data that cannot be unit tested"
+
+  - id: "AC-017"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/generate-sla-report.sh"
+        command: "bash scripts/qa/generate-sla-report.sh --dry-run | grep -q 'Maintenance Windows'"
+      - type: "manual"
+        runbook: "docs/operations/SLA_REPORTING.md"
+        section: "Report Sections > Maintenance Windows"
+        justification: "Requires actual maintenance window data to verify start/end/scope appear correctly; dry-run only checks section existence"
+
+  # --- Incident Communication ---
+  - id: "AC-018"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/ONCALL_ROTATION.md"
+        section: "Incident Response > P1 Acknowledgement"
+        justification: "Tests human response time to P1 alerts; requires a real or simulated incident with on-call engineer availability"
+
+  - id: "AC-019"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/INCIDENT_TEMPLATES.md"
+        section: "Postmortem > Required Sections Checklist"
+        justification: "Tests organizational process (postmortem published within 5 business days with required sections); cannot be automated without incident tracking system integration"
+
+  # --- On-Call ---
+  - id: "AC-020"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/ONCALL_ROTATION.md"
+        section: "Schedule Verification"
+        justification: "Requires inspecting on-call schedule for primary/secondary assignment and consecutive-day limits; format depends on tool choice (Slack, PagerDuty, wiki)"
+
+  - id: "AC-021"
+    verify:
+      - type: "automated"
+        test_type: "kubectl_check"
+        file: "scripts/qa/verify-error-budget.sh"
+        command: "bash scripts/qa/verify-error-budget.sh --check-escalation-config"
+      - type: "manual"
+        runbook: "docs/operations/ONCALL_ROTATION.md"
+        section: "Escalation > Auto-Escalation Test"
+        justification: "Full end-to-end escalation test requires primary on-call to be unreachable for 15 minutes; automated check verifies Alertmanager config only"
+
+  # --- Reporting ---
+  - id: "AC-022"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/generate-sla-report.sh"
+        command: "bash scripts/qa/generate-sla-report.sh --dry-run --validate-sections"
+
+  - id: "AC-023"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-sla-report-security.sh"
+        command: "bash scripts/qa/verify-sla-report-security.sh /tmp/sla-report-latest.md"

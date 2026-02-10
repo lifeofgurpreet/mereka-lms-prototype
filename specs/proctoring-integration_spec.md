@@ -17,6 +17,7 @@ links:
     - "specs/multi-site-domains_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/mobile-apps-enterprise_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -339,7 +340,7 @@ Enterprise clients purchasing learning platforms for high-stakes training (compl
 - The system MUST maintain an audit log of all proctoring-related data access events (who accessed what, when, from where)
 - The system MUST support data processing agreements (DPAs) with each proctoring provider; the platform verifies DPA status in the provider configuration but does not enforce the legal agreement itself
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

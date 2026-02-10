@@ -18,6 +18,7 @@ links:
     - "specs/branding-system_spec.md"
     - "specs/repository-structure_spec.md"
     - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # CI/CD Pipeline Specification
@@ -269,7 +270,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - Scheduled workflows SHOULD avoid running when no changes have been pushed (use path filters or conditional logic where possible).
 - The `cloud-sql-backup.yml` workflow MUST remain gated behind `ENABLE_CLOUD_SQL_BACKUPS` to avoid unnecessary GCP costs.
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

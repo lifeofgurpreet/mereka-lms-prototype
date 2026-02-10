@@ -19,6 +19,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/analytics-pipeline_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -268,7 +269,7 @@ For enterprise HR departments, badge data flowing into their talent management s
 - The system MUST detect and alert on anomalous verification patterns: more than 1000 verification requests for a single assertion within 1 hour MUST trigger an alert
 - The system MUST support CRL (Certificate Revocation List) distribution for signed assertions, published at a stable URL per issuer
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 
@@ -582,6 +583,21 @@ For enterprise HR departments, badge data flowing into their talent management s
 2. Badges continue to be issued with hosted verification (no blockchain)
 3. Previously anchored badges retain their on-chain anchors and remain verifiable via blockchain
 4. Re-enable when chain connectivity or cost issues are resolved
+
+---
+
+## Monorepo Location
+
+| Component | Path | Notes |
+|-----------|------|-------|
+| Badgr Server config | `services/badgr-server/` | Docker Compose / K8s config for self-hosted Badgr |
+| Badge templates | `services/badgr-server/templates/` | Per-tenant badge template assets |
+| K8s manifests | `deploy/k8s/base/apps/badgr-server/` | Deployment, Service, PVC |
+| Credentials service config | `deploy/k8s/base/apps/credentials/` | Existing credentials service K8s config |
+| LMS badge integration | Tutor plugin / `infrastructure/tutor/` | Open edX badges Django app config |
+| ExternalSecrets | `deploy/k8s/base/secrets/external-secrets.yaml` | Badgr API keys, DB credentials |
+
+**Note**: If the built-in Open edX badges app (without Badgr Server) proves sufficient for v1, the `services/badgr-server/` directory is not needed and badge configuration lives entirely in Tutor/LMS settings.
 
 ---
 

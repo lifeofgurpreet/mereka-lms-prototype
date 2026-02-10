@@ -16,6 +16,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -213,7 +214,7 @@ Secrets mismanagement is a top-tier operational risk. A hardcoded password commi
 
 - If any `MEREKA_LMS_*` keys appear outside `/k8s/mereka-lms`, operators MUST re-sync from the authoritative path using the audit, sync, and validate scripts in sequence.
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Security
 

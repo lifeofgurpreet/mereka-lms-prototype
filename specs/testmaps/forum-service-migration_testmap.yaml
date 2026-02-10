@@ -1,0 +1,235 @@
+# Testmap for Forum Service Migration
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/forum-service-migration_testmap.yaml
+
+spec: specs/forum-service-migration_spec.md
+tests:
+  # Data Integrity
+  - criterion: "AC-001: Given the existing MongoDB Atlas cs_comments_service database, when the Python forum service starts, then it reads all collections (threads, posts, comments, votes, subscriptions, abuse_flags) without errors"
+    test_file: scripts/qa/test-forum-mongodb-connection.sh
+    test_name: "test_mongodb_connection_success"
+    type: integration
+
+  - criterion: "AC-002: Given N threads in MongoDB before migration, when migration completes, then db.contents.count({_type: 'CommentThread'}) returns exactly N"
+    test_file: scripts/qa/verify-forum-data-integrity.sh
+    test_name: "test_thread_count_preservation"
+    type: integration
+
+  - criterion: "AC-002: Thread count mismatch detection"
+    test_file: scripts/qa/verify-forum-data-integrity.sh
+    test_name: "test_thread_count_mismatch_error"
+    type: integration
+
+  - criterion: "AC-003: Given a random sample of 1000 posts,when comparing SHA-256 hashes of body + author_id + created_at between pre-migration and post-migration, then 100% match"
+    test_file: scripts/qa/verify-forum-data-integrity.sh
+    test_name: "test_content_hash_comparison"
+    type: integration
+
+  - criterion: "AC-004: Given existing vote records, when querying through the Python API, then vote counts for every thread and comment match the Ruby API responses exactly"
+    test_file: scripts/qa/verify-forum-vote-counts.sh
+    test_name: "test_vote_count_preservation"
+    type: integration
+
+  # API Compatibility
+  - criterion: "AC-005: Given the discussions MFE loading a course discussion page, when backed by the Python forum service, then all threads render with correct titles, authors, timestamps, and vote counts"
+    test_file: tests/e2e/test_forum_mfe.py
+    test_name: "test_discussions_mfe_thread_rendering"
+    type: e2e
+
+  - criterion: "AC-005: Forum API authentication with invalidkey"
+    test_file: scripts/qa/test-forum-auth.sh
+    test_name: "test_invalid_api_key_rejected"
+    type: integration
+
+  - criterion: "AC-006: Given a learner creating a new threadvia the discussions MFE, when the Python forum service processes the request, then the thread appears in the thread listing within 5 seconds"
+    test_file: tests/e2e/test_forum_thread_creation.py
+    test_name: "test_thread_creation_appears_in_listing"
+    type: e2e
+
+  - criterion: "AC-007: Given a learner voting on a post, when the vote is processed by the Python forum service, then thevote count increments and persists across page refreshes"
+    test_file: tests/e2e/test_forum_voting.py
+    test_name: "test_vote_persists_across_refreshes"
+    type: e2e
+
+  - criterion: "AC-008: Given a moderator flagging a post forabuse, when processed by the Python forum service, then theflag is recorded and the post appears in the moderation queue"
+    test_file: tests/e2e/test_forum_moderation.py
+    test_name: "test_flag_post_appears_in_moderation_queue"
+    type: e2e
+
+  - criterion: "AC-009: Given a search query for 'assignmenthelp' in a course, when processed by the Python forum service, then results include threads with matching titles and postbodies, ordered by relevance"
+    test_file: tests/e2e/test_forum_search.py
+    test_name: "test_search_returns_relevant_results"
+    type: e2e
+
+  - criterion: "AC-009: Search parity with pre-migration results"
+    test_file: scripts/qa/compare-search-results.sh
+    test_name: "test_search_parity_with_elasticsearch"
+    type: integration
+
+  - criterion: "AC-010: Given the LMS backend requesting useractivity for a learner, when the Python forum service responds, then the activity list matches the Ruby service responseformat"
+    test_file: scripts/qa/test-forum-api-compat.sh
+    test_name: "test_user_activity_api_format"
+    type: integration
+
+  # Deployment
+  - criterion: "AC-011: Given the updated K8s manifests applied to the Kind cluster, when kubectl get pods -n mereka-lms -l app.kubernetes.io/component=lms runs, then the LMS pod is Running with Ready status using Python forum integrated image"
+    test_file: scripts/qa/test-local-forum-deployment.sh
+    test_name: "test_lms_pod_running_with_python_forum"
+    type: integration
+
+  - criterion: "AC-012: Given the Python forum integrated into LMS pod is running, when curl http://lms:8000/api/discussion/v1/threads (or the configured path) is executed from withinthe cluster, then the response is HTTP 200"
+    test_file: scripts/qa/test-forum-api-compat.sh
+    test_name: "test_forum_api_http_200"
+    type: integration
+
+  - criterion: "AC-013: Given the production GKE cluster, when the LMS Deployment with Ulmo images is applied, then the pod starts and passes health checks within 60 seconds"
+    test_file: scripts/infra/verify-lms-health.sh
+    test_name: "test_lms_health_check_passes_60s"
+    type: e2e
+
+  - criterion: "AC-013: LMS pod startup error handling"
+    test_file: scripts/qa/test-forum-startup-errors.sh
+    test_name: "test_startup_error_messages_clear"
+    type: integration
+
+  - criterion: "AC-014: Given the apply-patches.sh script isrun after tutor config save, when patches are applied, then Python forum configuration is correctly injected"
+    test_file: scripts/qa/test-apply-patches-forum-config.sh
+    test_name: "test_apply_patches_injects_forum_config"
+    type: integration
+
+  # Performance
+  - criterion: "AC-015: Given 50 concurrent requests to the thread listing endpoint, when served by the Python forum, thenp95 latency is <=300ms"
+    test_file: scripts/qa/benchmark-forum-performance.sh
+    test_name: "test_thread_listing_p95_latency_300ms"
+    type: load
+
+  - criterion: "AC-015: Thread listing latency failure reporting"
+    test_file: scripts/qa/benchmark-forum-performance.sh
+    test_name: "test_latency_failure_report"
+    type: load
+
+  - criterion: "AC-016: Given 20 concurrent search requests,when served by the Python forum with Meilisearch, then p95 latency is <=500ms"
+    test_file: scripts/qa/benchmark-forum-performance.sh
+    test_name: "test_search_p95_latency_500ms"
+    type: load
+
+  - criterion: "AC-017: Given the Python forum (integrated into LMS pod) running under normal load (10 req/s), when monitoring memory usage, then LMS pod RSS stays below 512Mi"
+    test_file: scripts/qa/monitor-forum-memory.sh
+    test_name: "test_memory_usage_below_512mi"
+    type: integration
+
+  # Rollback
+  - criterion: "AC-018: Given the Python forum service is deployed in Tutor v21, when rollback to Tutor v18 Ruby forum isrequired, then tutor local stop && git checkout v18 && tutorlocal start restores Ruby forum within 2 minutes"
+    test_file: docs/operations/FORUM_ROLLBACK.md
+    test_name: "rollback_procedure (manual)"
+    type: manual
+
+  - criterion: "AC-019: Given a rollback to the Ruby service,when querying forum data, then all posts created during thePython service period are visible (because both services readthe same MongoDB database)"
+    test_file: scripts/qa/verify-forum-rollback-data.sh
+    test_name: "test_rollback_data_integrity"
+    type: integration
+
+  # Observability
+  - criterion: "AC-020: Given the Python forum service is running in production, when a forum auth failure occurs, then the log-auth-failures-forum alert fires within 60 seconds"
+    test_file: scripts/qa/test-forum-alerts.sh
+    test_name: "test_auth_failure_alert_fires"
+    type: integration
+
+  - criterion: "AC-021: Given the Python forum service is running, when Prometheus scrapes the /metrics endpoint on LMS pod, then forum-specific metrics (request count, latency histogram, error rate) are present"
+    test_file: scripts/qa/test-forum-metrics.sh
+    test_name: "test_prometheus_forum_metrics_present"
+    type: integration
+
+  - criterion: "AC-021: Meilisearch metrics collection"
+    test_file: scripts/qa/test-meilisearch-metrics.sh
+    test_name: "test_prometheus_meilisearch_metrics_present"
+    type: integration
+
+  # Local Development
+  - criterion: "AC-022: Given a developer running tutor locallaunch with the Python forum, when the LMS container starts,then it connects to MongoDB Atlas and serves the API on theexpected path"
+    test_file: scripts/qa/test-local-forum-deployment.sh
+    test_name: "test_local_forum_deployment_success"
+    type: integration
+
+  # Edge Cases
+  - criterion: "Edge Case: MongoDB Atlas connection timeout"
+    test_file: scripts/qa/test-forum-startup-errors.sh
+    test_name: "test_mongodb_timeout_health_check_fails"
+    type: integration
+
+  - criterion: "Edge Case: Meilisearch service unavailable"
+    test_file: scripts/qa/test-meilisearch-unavailable.sh
+    test_name: "test_meilisearch_down_returns_503"
+    type: integration
+
+  - criterion: "Edge Case: Forum API key mismatch"
+    test_file: scripts/qa/test-forum-auth.sh
+    test_name: "test_api_key_mismatch_returns_401"
+    type: integration
+
+  - criterion: "Edge Case: Meilisearch index not yet created"
+    test_file: scripts/qa/test-meilisearch-index-missing.sh
+    test_name: "test_missing_index_graceful_error"
+    type: integration
+
+  - criterion: "Edge Case: Forum thread with Unicode emoji characters"
+    test_file: scripts/qa/test-forum-unicode.sh
+    test_name: "test_unicode_emoji_handling"
+    type: integration
+
+  - criterion: "Edge Case: Concurrent thread creation race condition"
+    test_file: scripts/qa/test-concurrent-thread-creation.sh
+    test_name: "test_concurrent_creation_no_duplicates"
+    type: load
+
+  - criterion: "Edge Case: Forum post exceeding size limit"
+    test_file: scripts/qa/test-forum-post-size-limit.sh
+    test_name: "test_large_post_rejected_413"
+    type: integration
+
+  - criterion: "Edge Case: Search query with SQL injection attempt"
+    test_file: scripts/security/test-forum-sql-injection.sh
+    test_name: "test_sql_injection_rejected"
+    type: security
+
+  - criterion: "Edge Case: SAML assertion replay after forummigration"
+    test_file: scripts/qa/test-forum-replay-cache-persistence.sh
+    test_name: "test_replay_cache_persists_across_migration"
+    type: integration
+
+  # Performance Tests (separate from AC performance requirements)
+  - criterion: "Performance: Thread listing latency under sustained load"
+    test_file: scripts/qa/benchmark-forum-performance.sh
+    test_name: "test_sustained_load_thread_listing"
+    type: performance
+
+  - criterion: "Performance: Search latency under sustained load"
+    test_file: scripts/qa/benchmark-forum-performance.sh
+    test_name: "test_sustained_load_search"
+    type: performance
+
+  - criterion: "Performance: Memory usage under sustained load"
+    test_file: scripts/qa/monitor-forum-memory.sh
+    test_name: "test_sustained_load_memory"
+    type: performance
+
+  - criterion: "Performance: Forum API error rate under normal load"
+    test_file: scripts/qa/monitor-forum-error-rate.sh
+    test_name: "test_normal_load_error_rate"
+    type: performance
+
+  # Observability Verification (beyond AC requirements)
+  - criterion: "Observability: Grafana dashboard displays forum metrics"
+    test_file: docs/operations/OBSERVABILITY_VERIFICATION.md
+    test_name: "verify_grafana_dashboard (manual)"
+    type: manual
+
+  - criterion: "Observability: Alert fires on forum error rate >5%"
+    test_file: docs/operations/OBSERVABILITY_VERIFICATION.md
+    test_name: "verify_alert_firing (manual)"
+    type: manual
+
+  - criterion: "Observability: MongoDB Atlas backup integrity"
+    test_file: docs/operations/OBSERVABILITY_VERIFICATION.md
+    test_name: "verify_backup_restore (manual)"
+    type: manual

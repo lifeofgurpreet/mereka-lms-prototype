@@ -16,6 +16,7 @@ links:
     - "specs/multi-site-domains_spec.md"
     - "specs/mobile-apps-enterprise_spec.md"
     - "specs/observability-stack_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -24,7 +25,7 @@ links:
 
 A production-grade suite of Open edX enterprise microservices deployed on GKE alongside the existing Mereka Academy platform. The suite consists of five services -- enterprise-catalog, license-manager, enterprise-access, enterprise-subsidy, and enterprise-integrated-channels -- that collectively enable "many clients" enterprise functionality: organizations purchase license pools, provision learner access to curated catalog subsets, manage SSO/SAML authentication, and sync learning data with third-party HR/LMS platforms.
 
-These services are maintained by the Open edX community as independent Django applications. Each runs as its own K8s Deployment in the `mereka-lms` namespace, shares the existing MySQL (Cloud SQL) and Redis infrastructure, communicates with the LMS via internal HTTP and the Open edX event bus (Kafka or Redis Streams), and exposes REST APIs consumed by the enterprise admin MFE (`frontend-app-admin-portal`) and the learner MFE (`frontend-app-learner-portal-enterprise`).
+These services are maintained by the Open edX community as independent Django applications. Each runs as its own K8s Deployment in the `mereka-lms` namespace, shares the existing MySQL (Cloud SQL) and Redis infrastructure, communicates with the LMS via internal HTTP and the Open edX event bus (Redis Streams), and exposes REST APIs consumed by the enterprise admin MFE (`frontend-app-admin-portal`) and the learner MFE (`frontend-app-learner-portal-enterprise`).
 
 The system supports multi-tenant operation where each enterprise client organization is an `EnterpriseCustomer` record in the LMS database with a unique UUID. All enterprise services route requests using this UUID. There are no separate databases per tenant; isolation is achieved through application-level queryset filtering, API-level permission enforcement, and the Open edX enterprise consent framework.
 
@@ -129,8 +130,8 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 - Enterprise services MUST communicate with the LMS via internal K8s DNS (`http://lms:8000`) for backend API calls, not via external URLs
 - Enterprise services MUST use the Open edX JWT authentication backend to validate incoming requests from the LMS, admin portal, and learner portal
 - The system MUST support an event bus for asynchronous communication between the LMS and enterprise services
-- The event bus SHOULD use Redis Streams (already deployed) as the transport layer for the initial deployment
-- The system SHOULD support migration to Apache Kafka for the event bus when scale requires it
+- The event bus MUST use Redis Streams (already deployed) as the transport layer — this is a platform-wide decision (see `specs/cross-cutting-requirements_spec.md`, Section 5: Technology Decisions)
+- The system MAY support migration to an alternative event bus transport if Redis Streams proves insufficient at scale, but this is not a near-term requirement
 - The following events MUST be published by the LMS and consumed by enterprise services:
   - `ENROLLMENT_CREATED` -- consumed by enterprise-access, enterprise-subsidy
   - `ENROLLMENT_REVOKED` -- consumed by enterprise-access, enterprise-subsidy, license-manager
@@ -322,7 +323,7 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 - All enterprise service Deployments MUST reference the `enterprise-secrets` K8s Secret via `envFrom`
 - Per-client integrated channel credentials (Degreed API keys, CSOD OAuth secrets) MUST be stored in the `integrated_channels` configuration model in the LMS database, encrypted at rest by the `enterprise_integrated_channels` encrypted model fields -- NOT in Infisical (they are client-specific and admin-managed)
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 
@@ -627,9 +628,26 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 
 ---
 
+## Monorepo Location
+
+These services deploy **upstream Open edX community images** — no forked source code lives in this repo. Configuration and deployment manifests only:
+
+| Component | Path | Notes |
+|-----------|------|-------|
+| K8s manifests (all 5 services) | `deploy/k8s/base/apps/enterprise/` | Deployments, Services, HPA |
+| Celery worker manifests | `deploy/k8s/base/apps/enterprise/workers/` | Worker Deployments per service |
+| ExternalSecrets | `deploy/k8s/base/secrets/external-secrets.yaml` | OAuth2 credentials, DB passwords |
+| Tutor plugin config | `infrastructure/tutor/` | LMS settings for enterprise integration |
+| MFE config (admin portal) | `deploy/k8s/base/apps/mfe/` | Admin portal + learner portal MFE config |
+| Provisioning scripts | `scripts/infra/enterprise/` | Tenant onboarding automation |
+
+**Note**: If Mereka-specific patches are needed for any enterprise service, we build custom images and track the Dockerfiles under `services/enterprise-<name>/` — but the default is to use upstream images.
+
+---
+
 ## Open Questions
 
-1. **Event bus transport**: Should the initial deployment use Redis Streams or Kafka for the enterprise event bus? Redis Streams is simpler (already deployed) but may not handle the volume if multiple enterprise clients are onboarded simultaneously. Need capacity estimate for event throughput.
+1. ~~**Event bus transport**~~: **RESOLVED** — Redis Streams is the platform-wide event bus (see `specs/cross-cutting-requirements_spec.md`, Technology Decisions). Capacity planning for event throughput under multi-client load is still needed as a separate task.
 
 2. **Cloud SQL tier**: What is the current Cloud SQL tier and can it support 4 additional databases with the expected enterprise query load? Need to measure current database utilization before provisioning.
 

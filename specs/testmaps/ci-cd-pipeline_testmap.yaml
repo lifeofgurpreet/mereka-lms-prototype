@@ -1,0 +1,351 @@
+# Testmap for CI/CD Pipeline
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/ci-cd-pipeline_testmap.yaml
+
+spec: specs/ci-cd-pipeline_spec.md
+tests:
+  # Quality Gates (CI Workflow)
+  - criterion: "AC-001: Given a PR is opened against main, when CI runs, then all 12 CI jobs execute and their pass/fail status is reported as GitHub commit status checks"
+    test_file: tests/workflows/test_ci_trigger.sh
+    test_name: "test_pr_triggers_all_ci_jobs"
+    type: e2e
+
+  - criterion: "AC-001: All CI jobs report commit status checks"
+    test_file: tests/workflows/test_ci_status_checks.sh
+    test_name: "test_all_jobs_report_status"
+    type: integration
+
+  - criterion: "AC-002: Given the spec-lint job runs, when specs in specs/ have structural issues (missing frontmatter, missing required sections), then the job fails with specific error messages identifying the non-conforming spec"
+    test_file: tests/workflows/test_spec_lint.sh
+    test_name: "test_spec_lint_detects_invalid_specs"
+    type: unit
+
+  - criterion: "AC-002: Spec-lint error message identifies non-conforming spec"
+    test_file: tests/workflows/test_spec_lint_errors.sh
+    test_name: "test_error_message_specificity"
+    type: unit
+
+  - criterion: "AC-003: Given the lint job runs, when Pythonfiles in scripts/ or services/ have ruff violations, then thejob fails"
+    test_file: tests/workflows/test_lint_python.sh
+    test_name: "test_ruff_violations_fail_lint"
+    type: unit
+
+  - criterion: "AC-004: Given the validate-k8s job runs, whenany YAML in deploy/k8s/ is not a valid Kubernetes manifest,then kubeconform fails the job"
+    test_file: tests/workflows/test_validate_k8s.sh
+    test_name: "test_invalid_k8s_fails_validation"
+    type: unit
+
+  - criterion: "AC-005: Given the security-scan job runs, when verified secrets are detected by TruffleHog, then the job fails and the finding is reported"
+    test_file: tests/workflows/test_trufflechog.sh
+    test_name: "test_trufflechog_detects_secrets"
+    type: integration
+
+  - criterion: "AC-005: Security finding reported in workflowoutput"
+    test_file: tests/workflows/test_security_findings.sh
+    test_name: "test_security_findings_in_output"
+    type: integration
+
+  - criterion: "AC-006: Given the prod-tag-guard job runs, when any production overlay references a :latest tag, then thejob fails"
+    test_file: tests/workflows/test_prod_tag_guard.sh
+    test_name: "test_latest_tag_blocked_in_prod"
+    type: unit
+
+  - criterion: "AC-007: Given all CI jobs pass, when the PR is reviewed and approved, then the merge button is enabled"
+    test_file: tests/workflows/test_merge_gate_pass.sh
+    test_name: "test_all_pass_enables_merge"
+    type: e2e
+
+  - criterion: "AC-008: Given a CI job fails, when a developer views the PR, then the merge button is disabled"
+    test_file: tests/workflows/test_merge_gate_block.sh
+    test_name: "test_failure_blocks_merge"
+    type: e2e
+
+  # Image Build
+  - criterion: "AC-009: Given a push to main modifies infrastructure/tutor/**, when the build workflow triggers, then bothopenedx and MFE images are built, tagged with the git SHA and short SHA, and pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
+    test_file: tests/workflows/test_build_trigger.sh
+    test_name: "test_tutor_change_triggers_build"
+    type: integration
+
+  - criterion: "AC-009: Images tagged with SHA and short SHA"
+    test_file: tests/workflows/test_image_tagging.sh
+    test_name: "test_sha_based_tagging"
+    type: integration
+
+  - criterion: "AC-009: Images pushed to Artifact Registry"
+    test_file: tests/workflows/test_image_registry.sh
+    test_name: "test_images_pushed_to_registry"
+    type: integration
+
+  - criterion: "AC-010: Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved image digest (sha256:...)"
+    test_file: tests/workflows/test_digest_resolution.sh
+    test_name: "test_digest_resolved_and_exposed"
+    type: integration
+
+  - criterion: "AC-011: Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contains the expected branding revision marker"
+    test_file: tests/workflows/test_mfe_branding_check.sh
+    test_name: "test_mfe_branding_verification"
+    type: unit
+
+  - criterion: "AC-011: MFE branding check failure fails build"
+    test_file: tests/workflows/test_mfe_branding_fail.sh
+    test_name: "test_branding_fail_blocks_push"
+    type: integration
+
+  - criterion: "AC-012: Given a manual dispatch with build_openedx=true and image_tag=v1.2.3, when the build completes, then the image is tagged as openedx:v1.2.3 and openedx:<short-sha>"
+    test_file: tests/workflows/test_custom_tag.sh
+    test_name: "test_custom_tag_applied"
+    type: integration
+
+  - criterion: "AC-013: Given the build workflow, when imagesare pushed, then no :latest tag is published to Artifact Registry"
+    test_file: tests/workflows/test_no_latest_tag.sh
+    test_name: "test_latest_tag_not_published"
+    type: unit
+
+  # GitOps Deployment
+  - criterion: "AC-014: Given update_gitops=true and target_environment=production, when both builds succeed with digests,then release-openedx-gitops.sh is invoked with --apply --commit --push --require-digests and both digest flags"
+    test_file: tests/workflows/test_gitops_update_success.sh
+    test_name: "test_gitops_update_invoked_with_digests"
+    type: integration
+
+  - criterion: "AC-014: Release script called with correct flags"
+    test_file: tests/workflows/test_gitops_flags.sh
+    test_name: "test_release_script_flags"
+    type: integration
+
+  - criterion: "AC-015: Given update_gitops=true and target_environment=select-environment, when the workflow runs, then it fails with an error requiring explicit environment selection"
+    test_file: tests/workflows/test_gitops_no_default_env.sh
+    test_name: "test_select_environment_rejected"
+    type: unit
+
+  - criterion: "AC-016: Given update_gitops=true and target_environment=staging, when ENABLE_STAGING_ENV is not set to true, then the workflow fails with a message indicating stagingis disabled"
+    test_file: tests/workflows/test_staging_gated.sh
+    test_name: "test_staging_gated_behind_flag"
+    type: unit
+
+  - criterion: "AC-017: Given deploy_to_staging=true is usedin manual dispatch, when the workflow runs, then it fails with a deprecation error directing the user to update_gitops"
+    test_file: tests/workflows/test_deploy_staging_deprecated.sh
+    test_name: "test_deploy_staging_deprecated"
+    type: unit
+
+  - criterion: "AC-018: Given update_gitops=true but build_openedx=false, when the workflow runs, then it fails requiringboth builds for deterministic digest capture"
+    test_file: tests/workflows/test_gitops_requires_builds.sh
+    test_name: "test_gitops_requires_both_builds"
+    type: unit
+
+  # Release Process
+  - criterion: "AC-019: Given the release-evidence.yml workflow is dispatched with valid tags, when it completes, then a release-evidence-<env>-<run> artifact is uploaded containing:policy check logs, dry-run plan, resolved digests, and release-metadata.json"
+    test_file: tests/workflows/test_release_evidence.sh
+    test_name: "test_release_evidence_artifact_uploaded"
+    type: integration
+
+  - criterion: "AC-019: Release evidence bundle contains required files"
+    test_file: tests/workflows/test_evidence_bundle_contents.sh
+    test_name: "test_bundle_contents_complete"
+    type: integration
+
+  - criterion: "AC-020: Given the policy-checks.yml workflowis dispatched, when all verification scripts pass, then the workflow succeeds"
+    test_file: tests/workflows/test_policy_checks.sh
+    test_name: "test_all_policy_checks_pass"
+    type: integration
+
+  - criterion: "AC-020: All 10 verification scripts execute"
+    test_file: tests/workflows/test_policy_checks_complete.sh
+    test_name: "test_all_scripts_executed"
+    type: integration
+
+  - criterion: "AC-021: Given a production rollback is needed, when the operator runs release-openedx-gitops.sh with priorknown-good tags, then the rollback completes without building new images and pods converge within 10 minutes"
+    test_file: tests/workflows/test_rollback_no_build.sh
+    test_name: "test_rollback_uses_prior_images"
+    type: integration
+
+  - criterion: "AC-021: Rollback completes within 10 minutes"
+    test_file: tests/workflows/test_rollback_convergence.sh
+    test_name: "test_rollback_time_sla"
+    type: e2e
+
+  # Scheduled Operations
+  - criterion: "AC-022: Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, thenno failures are reported and logs are uploaded as artifacts"
+    test_file: tests/workflows/test_health_check_scheduled.sh
+    test_name: "test_health_check_success_uploads_logs"
+    type: integration
+
+  - criterion: "AC-022: Health check failure triggers alert"
+    test_file: tests/workflows/test_health_check_alert.sh
+    test_name: "test_health_check_failure_alerts"
+    type: integration
+
+  - criterion: "AC-023: Given the operations-gates-runtime.yml runs on schedule, when GKE authentication succeeds, then operations gates execute against the live cluster and artifactsare uploaded with 30-day retention"
+    test_file: tests/workflows/test_ops_gates_scheduled.sh
+    test_name: "test_ops_gates_success"
+    type: integration
+
+  - criterion: "AC-023: Artifacts uploaded with 30-day retention"
+    test_file: tests/workflows/test_ops_gates_retention.sh
+    test_name: "test_artifact_retention_30_days"
+    type: unit
+
+  - criterion: "AC-024: Given the dr-evidence-bundle.yml runson the 1st of the month, when GKE access is available, thena DR evidence bundle is generated and uploaded with 120-day retention"
+    test_file: tests/workflows/test_dr_evidence_scheduled.sh
+    test_name: "test_dr_bundle_monthly"
+    type: integration
+
+  # iOS Build
+  - criterion: "AC-025: Given the iOS workflow is manually dispatched, when it completes successfully, then a signed IPA is uploaded to TestFlight via App Store Connect API"
+    test_file: tests/workflows/test_ios_build.sh
+    test_name: "test_ios_testflight_upload"
+    type: e2e
+
+  - criterion: "AC-026: Given the iOS workflow runs, when itcompletes (pass or fail), then SSH keys used for Match are cleaned up"
+    test_file: tests/workflows/test_ios_ssh_cleanup.sh
+    test_name: "test_ssh_cleanup_always_runs"
+    type: integration
+
+  # Security
+  - criterion: "AC-027: Given the pre-commit hook is installed, when a developer attempts to commit a file containing a hardcoded secret pattern, then the commit is rejected with a warning"
+    test_file: tests/workflows/test_precommit_hook.sh
+    test_name: "test_precommit_rejects_secrets"
+    type: unit
+
+  - criterion: "AC-028: Given any workflow runs, when secretsare used, then no secret values appear in workflow logs (GitHub Actions masking)"
+    test_file: tests/workflows/test_secret_masking.sh
+    test_name: "test_secrets_masked_in_logs"
+    type: integration
+
+  # Edge Cases
+  - criterion: "EC-OOM-1: OpenEdX build OOM fails clearly (not hang)"
+    test_file: tests/workflows/test_openedx_oom.sh
+    test_name: "test_openedx_oom_clear_error"
+    type: integration
+
+  - criterion: "EC-OOM-1: Step summary suggests remediation (local build or self-hosted runner)"
+    test_file: tests/workflows/test_oom_remediation.sh
+    test_name: "test_oom_remediation_guidance"
+    type: integration
+
+  - criterion: "EC-OOM-2: MFE build OOM error distinguishablefrom other failures"
+    test_file: tests/workflows/test_mfe_oom.sh
+    test_name: "test_mfe_oom_distinguishable"
+    type: integration
+
+  - criterion: "EC-Network-1: Docker push network failure fails build (no silent partial push)"
+    test_file: tests/workflows/test_docker_push_failure.sh
+    test_name: "test_push_failure_not_silent"
+    type: integration
+
+  - criterion: "EC-Network-2: Re-running workflow after pushfailure is idempotent"
+    test_file: tests/workflows/test_build_idempotency.sh
+    test_name: "test_build_retry_idempotent"
+    type: integration
+
+  - criterion: "EC-Cache-1: Stale Tutor cache with --no-cacheproduces correct build"
+    test_file: tests/workflows/test_tutor_no_cache.sh
+    test_name: "test_no_cache_overrides_stale"
+    type: integration
+
+  - criterion: "EC-GitOps-1: GitOps PAT expired fails beforegit operations with clear error"
+    test_file: tests/workflows/test_gitops_pat_expired.sh
+    test_name: "test_expired_pat_clear_error"
+    type: unit
+
+  - criterion: "EC-GitOps-2: bbi-infrastructure merge conflict fails push (no force push)"
+    test_file: tests/workflows/test_gitops_conflict.sh
+    test_name: "test_conflict_no_force_push"
+    type: integration
+
+  - criterion: "EC-GitOps-3: Digest mismatch (build vs registry) fails release script"
+    test_file: tests/workflows/test_digest_mismatch.sh
+    test_name: "test_digest_mismatch_fails"
+    type: integration
+
+  - criterion: "EC-GitOps-4: Partial build success (openedx builds, MFE fails) prevents GitOps update"
+    test_file: tests/workflows/test_partial_build_blocks_gitops.sh
+    test_name: "test_partial_build_blocks_gitops"
+    type: integration
+
+  - criterion: "EC-Schedule-1: GKE auth failure in scheduledworkflows (strict=false) skips GKE checks and reports warnings"
+    test_file: tests/workflows/test_schedule_auth_failure_soft.sh
+    test_name: "test_auth_failure_soft_mode"
+    type: integration
+
+  - criterion: "EC-Schedule-2: GKE auth failure in scheduledworkflows (strict=true) fails workflow"
+    test_file: tests/workflows/test_schedule_auth_failure_strict.sh
+    test_name: "test_auth_failure_strict_mode"
+    type: integration
+
+  - criterion: "EC-Rate-1: GitHub API rate limits hit duringscheduled workflows fail gracefully"
+    test_file: tests/workflows/test_rate_limit_graceful.sh
+    test_name: "test_rate_limit_graceful_fail"
+    type: integration
+
+  - criterion: "EC-Retry-1: Failed workflow manual re-run succeeds (no stuck state)"
+    test_file: tests/workflows/test_workflow_retry.sh
+    test_name: "test_workflow_retry_succeeds"
+    type: integration
+
+  # NFR - Performance
+  - criterion: "NFR-Performance-1: CI quality gate jobs complete within 10 minutes each"
+    test_file: tests/workflows/test_ci_job_duration.sh
+    test_name: "test_ci_job_duration_under_10min"
+    type: integration
+
+  - criterion: "NFR-Performance-2: Full CI workflow completeswithin 15 minutes for typical PR"
+    test_file: tests/workflows/test_ci_total_duration.sh
+    test_name: "test_ci_total_under_15min"
+    type: integration
+
+  - criterion: "NFR-Performance-3: OpenEdX image build completes within 45 minutes"
+    test_file: tests/workflows/test_openedx_build_time.sh
+    test_name: "test_openedx_build_under_45min"
+    type: integration
+
+  - criterion: "NFR-Performance-4: MFE image build completeswithin 20 minutes"
+    test_file: tests/workflows/test_mfe_build_time.sh
+    test_name: "test_mfe_build_under_20min"
+    type: integration
+
+  - criterion: "NFR-Performance-5: iOS build completes withinminutes (timeout enforced)"
+    test_file: tests/workflows/test_ios_build_time.sh
+    test_name: "test_ios_build_under_90min"
+    type: e2e
+
+  - criterion: "NFR-Performance-6: GitOps update (excluding build) completes within 5 minutes"
+    test_file: tests/workflows/test_gitops_update_time.sh
+    test_name: "test_gitops_update_under_5min"
+    type: integration
+
+  # NFR - Reliability
+  - criterion: "NFR-Reliability-1: CI workflow pass rate on main branch >= 95%"
+    test_file: tests/workflows/test_ci_pass_rate.sh
+    test_name: "test_ci_pass_rate_above_95_percent"
+    type: monitoring
+
+  - criterion: "NFR-Reliability-2: Build workflows produce deterministic outputs (same commit, same image)"
+    test_file: tests/workflows/test_build_determinism.sh
+    test_name: "test_build_deterministic"
+    type: integration
+
+  # Observability
+  - criterion: "Observability-1: Every workflow produces GitHub Step Summary with structured results"
+    test_file: tests/workflows/test_step_summary.sh
+    test_name: "test_step_summary_generated"
+    type: integration
+
+  - criterion: "Observability-2: Build workflows log image tags, digests, registry references in step summary"
+    test_file: tests/workflows/test_build_logs.sh
+    test_name: "test_build_logs_complete"
+    type: integration
+
+  - criterion: "Observability-3: Scheduled workflows upload structured artifacts (JSON or log files)"
+    test_file: tests/workflows/test_scheduled_artifacts.sh
+    test_name: "test_scheduled_artifacts_structured"
+    type: integration
+
+  - criterion: "Observability-4: Failed steps include stderrin step output"
+    test_file: tests/workflows/test_failure_logs.sh
+    test_name: "test_stderr_in_output"
+    type: integration
+
+  - criterion: "Observability-5: Health check failure triggers notification"
+    test_file: tests/workflows/test_health_check_notification.sh
+    test_name: "test_health_check_alert_fired"
+    type: e2e

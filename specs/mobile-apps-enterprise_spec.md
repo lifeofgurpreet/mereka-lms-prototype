@@ -16,6 +16,7 @@ links:
     - "specs/branding-system_spec.md"
     - "specs/multi-site-domains_spec.md"
     - "specs/k8s-deployment_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -235,7 +236,7 @@ Mobile is the primary access channel for learners across Mereka Academy's client
 - When implemented, the system MUST support subscription and one-time purchase product types
 - When implemented, the system MUST handle purchase restoration across device reinstalls
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 

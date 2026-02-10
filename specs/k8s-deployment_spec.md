@@ -19,6 +19,7 @@ links:
     - "specs/multi-site-domains_spec.md"
     - "specs/tutor-configuration_spec.md"
     - "specs/mongodb-atlas-integration_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -297,7 +298,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - Superset MUST set resource requests (memory: 1Gi, cpu: 250m) and limits (memory: 2Gi, cpu: 1).
 - Aspects Deployments MUST use a separate label set (`app.kubernetes.io/part-of: aspects`) to distinguish from core workloads.
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Availability
 

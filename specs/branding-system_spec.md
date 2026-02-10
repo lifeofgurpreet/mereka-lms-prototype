@@ -18,6 +18,7 @@ links:
     - "specs/tutor-configuration_spec.md"
     - "specs/multi-site-domains_spec.md"
     - "specs/k8s-deployment_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -133,7 +134,7 @@ The system MUST pass the following verification checks:
 - The system MUST set `DEFAULT_SITE_THEME = "mereka"` in LMS production.py
 - The system SHOULD configure SiteConfiguration to override theme per domain if needed
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - Page load time: LMS homepage with branding assets MUST load in under 3 seconds (p95) on a 4G connection
 - Total theme static asset size MUST remain under 5 MB

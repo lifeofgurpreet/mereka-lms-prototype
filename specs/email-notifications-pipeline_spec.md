@@ -20,6 +20,7 @@ links:
     - "specs/branding-system_spec.md"
     - "specs/k8s-deployment_spec.md"
     - "specs/slo-sla-service-level-management_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -303,7 +304,7 @@ Learner engagement is directly correlated with timely, relevant communications. 
 - The system MUST NOT send marketing communications to users who have not explicitly opted in (consent recorded) or who have withdrawn consent
 - The system MUST support per-tenant consent policies: each enterprise tenant MAY define a custom consent text that is shown to learners during preference configuration
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 
@@ -664,3 +665,5 @@ Learner engagement is directly correlated with timely, relevant communications. 
 9. **Enterprise admin portal for bulk campaigns**: Does the enterprise admin portal MFE (`frontend-app-admin-portal`) already include a bulk email composition interface, or does this need to be built? The scope states enterprise admins initiate campaigns "via enterprise admin portal" but the portal may not have this feature.
 
 10. **Budget for SES and SNS**: What is the monthly budget allocation for email infrastructure? SES charges $0.10/1k emails, SNS charges per notification. For 100k emails/month with tracking, the estimated cost is approximately $10-15/month for SES + $1-2/month for SNS, but this should be confirmed.
+
+11. **Email provider commitment**: This spec assumes AWS SES as the email provider (already configured via exim relay). Is this a firm commitment, or should the architecture support swapping to SendGrid/Mailgun/Postmark in the future? If SES is confirmed, the exim relay approach is appropriate. If provider flexibility is needed, ACE's pluggable channel architecture should be leveraged to abstract the provider. **Current status: AWS SES is operational but this decision has not been formally ratified.**

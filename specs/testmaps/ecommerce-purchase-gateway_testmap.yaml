@@ -1,0 +1,483 @@
+# Testmap for Ecommerce Purchase Gateway
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/ecommerce-purchase-gateway_testmap.yaml
+
+spec: specs/ecommerce-purchase-gateway_spec.md
+tests:
+  # Checkout Flow
+  - criterion: "AC-001: Given a valid offering UUID and buyeremail, when POST /api/v1/checkout/ is called, then a StripeCheckout Session is created and the response includes a checkout_url"
+    test_file: tests/integration/test_checkout_api.py
+    test_name: "test_checkout_session_creation_success"
+    type: integration
+
+  - criterion: "AC-001: Invalid offering UUID returns HTTP 404"
+    test_file: tests/unit/test_checkout_validation.py
+    test_name: "test_checkout_invalid_offering"
+    type: unit
+
+  - criterion: "AC-001: Stripe API outage returns HTTP 503"
+    test_file: tests/integration/test_checkout_api.py
+    test_name: "test_checkout_stripe_outage"
+    type: integration
+
+  - criterion: "AC-001: Multi-tenant Stripe Connect routing"
+    test_file: tests/unit/test_checkout_multitenancy.py
+    test_name: "test_checkout_stripe_connect_account_header"
+    type: unit
+
+  - criterion: "AC-002: Given a buyer with an existing LMS account completes Stripe Checkout, when the checkout.session.completed webhook fires, then the buyer is enrolled in the course within 30 seconds"
+    test_file: tests/e2e/test_checkout_flow.py
+    test_name: "test_checkout_existing_user_enrollment"
+    type: e2e
+
+  - criterion: "AC-002: LMS Enrollment API returns 409 (idempotency)"
+    test_file: tests/unit/test_fulfillment_idempotency.py
+    test_name: "test_enrollment_already_exists_409"
+    type: unit
+
+  - criterion: "AC-003: Given a buyer without an LMS accountcompletes Stripe Checkout, when the checkout.session.completed webhook fires, then an entitlement is created and an invitation email is sent to the buyer"
+    test_file: tests/e2e/test_checkout_flow.py
+    test_name: "test_checkout_new_user_entitlement"
+    type: e2e
+
+  - criterion: "AC-003: Invitation email delivery failure retry"
+    test_file: tests/integration/test_invitation_retry.py
+    test_name: "test_invitation_email_retry_on_failure"
+    type: integration
+
+  - criterion: "AC-004: Given an expired Stripe Checkout Session, when the checkout.session.expired webhook fires, then the order status transitions to expired and no fulfillment occurs"
+    test_file: tests/integration/test_webhook_handler.py
+    test_name: "test_webhook_checkout_session_expired"
+    type: integration
+
+  - criterion: "AC-005: Given a buyer cancels at Stripe Checkout, when they return to the cancel URL, then the order status remains pending"
+    test_file: tests/integration/test_checkout_cancellation.py
+    test_name: "test_checkout_cancellation_status"
+    type: integration
+
+  # Webhook Handling
+  - criterion: "AC-006: Given a webhook request with a validStripe signature, when the gateway receives it, then HTTP 200is returned within 500ms and the event is logged in stripe_events"
+    test_file: tests/integration/test_webhook_signature.py
+    test_name: "test_webhook_valid_signature_logged"
+    type: integration
+
+  - criterion: "AC-006: Webhook processing latency under load"
+    test_file: tests/load/test_webhook_latency.py
+    test_name: "test_webhook_500ms_latency_target"
+    type: load
+
+  - criterion: "AC-007: Given a webhook request with an invalid signature, when the gateway receives it, then HTTP 400 isreturned and the event is NOT logged"
+    test_file: tests/security/test_webhook_signature_bypass.py
+    test_name: "test_webhook_invalid_signature_rejected"
+    type: security
+
+  - criterion: "AC-007: Missing signature header returns HTTP400"
+    test_file: tests/unit/test_webhook_validation.py
+    test_name: "test_webhook_missing_signature_header"
+    type: unit
+
+  - criterion: "AC-008: Given the same Stripe event ID is received twice (retry), when the gateway processes it, then thesecond processing is a no-op and no duplicate order or enrollment is created"
+    test_file: tests/integration/test_webhook_idempotency.py
+    test_name: "test_webhook_duplicate_event_id_noop"
+    type: integration
+
+  - criterion: "AC-008: Concurrent duplicate webhooks (idempotency under load)"
+    test_file: tests/load/test_concurrent_webhooks.py
+    test_name: "test_concurrent_duplicate_webhooks"
+    type: load
+
+  - criterion: "AC-009: Given a checkout.session.completed event for a multi-tenant order (Stripe Connect), when the gateway processes it, then the order is associated with the correct tenant"
+    test_file: tests/integration/test_webhook_multitenancy.py
+    test_name: "test_webhook_stripe_connect_tenant_routing"
+    type: integration
+
+  - criterion: "AC-009: Webhook tenant isolation"
+    test_file: tests/security/test_webhook_tenant_isolation.py
+    test_name: "test_webhook_no_cross_tenant_impact"
+    type: security
+
+  # Entitlement and Invitation
+  - criterion: "AC-010: Given an unclaimed entitlement with avalid claim token, when an authenticated user visits POST /api/v1/claim/{token}, then the entitlement is fulfilled (enrollment created) and status is set to claimed"
+    test_file: tests/integration/test_entitlement_claim.py
+    test_name: "test_entitlement_claim_authenticated_success"
+    type: integration
+
+  - criterion: "AC-010: Claim token used by different email (forwarding scenario)"
+    test_file: tests/unit/test_entitlement_claim_email_mismatch.py
+    test_name: "test_claim_token_email_forwarding"
+    type: unit
+
+  - criterion: "AC-011: Given an unclaimed entitlement with avalid claim token, when an unauthenticated user visits GET /api/v1/claim/{token}, then they are redirected to the LMS login/registration page with a return URL to the claim endpoint"
+    test_file: tests/integration/test_entitlement_claim.py
+    test_name: "test_entitlement_claim_unauthenticated_redirect"
+    type: integration
+
+  - criterion: "AC-012: Given a claim token that has expired(past expires_at), when a user visits the claim URL, then a clear error message is returned indicating the entitlement hasexpired"
+    test_file: tests/unit/test_entitlement_expiry.py
+    test_name: "test_claim_token_expired_error"
+    type: unit
+
+  - criterion: "AC-012: Claim token expiring soon (warning message)"
+    test_file: tests/unit/test_entitlement_expiry_warning.py
+    test_name: "test_claim_token_expiring_warning"
+    type: unit
+
+  - criterion: "AC-013: Given a claimed entitlement, when thesame claim token is visited again, then the response indicates the entitlement has already been claimed (no duplicate enrollment)"
+    test_file: tests/integration/test_entitlement_claim.py
+    test_name: "test_entitlement_already_claimed_idempotent"
+    type: integration
+
+  - criterion: "AC-014: Given an enterprise admin with 100 seat pack entitlements, when POST /admin/api/v1/entitlements/assign/ is called with 50 email addresses, then 50 entitlementsare assigned and invitation emails are sent"
+    test_file: tests/integration/test_enterprise_bulk_assignment.py
+    test_name: "test_bulk_entitlement_assignment_success"
+    type: integration
+
+  - criterion: "AC-014: Bulk assignment validation (all-or-nothing)"
+    test_file: tests/unit/test_bulk_assignment_validation.py
+    test_name: "test_bulk_assignment_invalid_email_rejected"
+    type: unit
+
+  - criterion: "AC-014: Bulk assignment limit (501 emails exceeds limit)"
+    test_file: tests/unit/test_bulk_assignment_limit.py
+    test_name: "test_bulk_assignment_limit_exceeded"
+    type: unit
+
+  # Refund and Dispute
+  - criterion: "AC-015: Given a fulfilled order, when a fullrefund is processed in Stripe and the charge.refunded webhookfires, then the order status transitions to refunded and theenrollment is deactivated in the LMS within 5 minutes"
+    test_file: tests/e2e/test_refund_flow.py
+    test_name: "test_full_refund_enrollment_deactivated"
+    type: e2e
+
+  - criterion: "AC-015: Refund with claimed entitlement"
+    test_file: tests/integration/test_refund_with_entitlement.py
+    test_name: "test_refund_claimed_entitlement_revoked"
+    type: integration
+
+  - criterion: "AC-016: Given a fulfilled order, when a partial refund is processed in Stripe, then the order status transitions to partially_refunded and no enrollment is automatically revoked"
+    test_file: tests/integration/test_partial_refund.py
+    test_name: "test_partial_refund_no_auto_revoke"
+    type: integration
+
+  - criterion: "AC-017: Given a fulfilled order, when a charge.dispute.created webhook fires, then the order status transitions to disputed and an alert is fired to the finance channel"
+    test_file: tests/integration/test_dispute_flow.py
+    test_name: "test_dispute_created_alert_fired"
+    type: integration
+
+  - criterion: "AC-017: Dispute auto-revoke policy disabled"
+    test_file: tests/unit/test_dispute_policy.py
+    test_name: "test_dispute_no_auto_revoke_when_disabled"
+    type: unit
+
+  - criterion: "AC-018: Given a disputed order where the merchant wins (charge.dispute.closed with status=won), then the order status is restored to its pre-dispute state and no enrollments are revoked"
+    test_file: tests/integration/test_dispute_flow.py
+    test_name: "test_dispute_won_order_restored"
+    type: integration
+
+  - criterion: "AC-018: Dispute lost (buyer wins)"
+    test_file: tests/integration/test_dispute_flow.py
+    test_name: "test_dispute_lost_enrollment_revoked"
+    type: integration
+
+  # Fulfillment Retry
+  - criterion: "AC-019: Given a fulfillment job that fails due to LMS API returning HTTP 503, when the worker retries, then it retries up to 10 times with exponential backoff (5s, 10s, 20s, 40s, ...)"
+    test_file: tests/unit/test_fulfillment_retry.py
+    test_name: "test_fulfillment_retry_exponential_backoff"
+    type: unit
+
+  - criterion: "AC-019: Retry backoff timing verification"
+    test_file: tests/unit/test_retry_backoff_timing.py
+    test_name: "test_backoff_delays_correct"
+    type: unit
+
+  - criterion: "AC-020: Given a fulfillment job that fails all 10 retries, when the max retries are exhausted, then the order transitions to fulfillment_failed, the job is moved to the dead letter queue, and a Critical alert is fired"
+    test_file: tests/integration/test_fulfillment_failure.py
+    test_name: "test_max_retries_exhausted_dlq_alert"
+    type: integration
+
+  - criterion: "AC-020: Manual retry after failure"
+    test_file: tests/integration/test_manual_retry.py
+    test_name: "test_admin_manual_retry_fulfillment"
+    type: integration
+
+  - criterion: "AC-021: Given a fulfillment job for a user already enrolled in the course (LMS returns 409), when the worker processes it, then the line item is marked as fulfilled (idempotent) and no error is logged"
+    test_file: tests/unit/test_fulfillment_idempotency.py
+    test_name: "test_fulfillment_409_idempotent_success"
+    type: unit
+
+  # Enterprise Features
+  - criterion: "AC-022: Given an enterprise tenant with a subscription, when invoice.paid fires for a renewal, then seat pack entitlements are replenished for the new billing period"
+    test_file: tests/integration/test_subscription_renewal.py
+    test_name: "test_subscription_renewal_replenish_seats"
+    type: integration
+
+  - criterion: "AC-022: Seat pack replenishment creates correct number of entitlements"
+    test_file: tests/unit/test_seat_pack_replenishment.py
+    test_name: "test_seat_pack_replenishment_count"
+    type: unit
+
+  - criterion: "AC-023: Given an enterprise tenant whose subscription payment fails, when invoice.payment_failed fires, then a grace period begins and the admin is notified. No accessis revoked during the grace period"
+    test_file: tests/integration/test_subscription_payment_failure.py
+    test_name: "test_subscription_payment_failed_grace_period"
+    type: integration
+
+  - criterion: "AC-023: Grace period expiry suspends access"
+    test_file: tests/integration/test_grace_period_expiry.py
+    test_name: "test_grace_period_expiry_access_suspended"
+    type: integration
+
+  # Multi-Tenant Isolation
+  - criterion: "AC-024: Given an enterprise admin for tenantA, when they call GET /admin/api/v1/orders/, then only ordersfor tenant A are returned (zero orders from tenant B)"
+    test_file: tests/integration/test_admin_api_tenant_isolation.py
+    test_name: "test_admin_api_tenant_isolation"
+    type: integration
+
+  - criterion: "AC-024: Platform superuser sees all tenants"
+    test_file: tests/integration/test_admin_api_superuser.py
+    test_name: "test_superuser_sees_all_tenants"
+    type: integration
+
+  - criterion: "AC-025: Given tenants A and B, when admin A calls any admin API endpoint, then zero records from tenant Bare returned"
+    test_file: tests/security/test_tenant_isolation_bypass.py
+    test_name: "test_tenant_isolation_no_bypass"
+    type: security
+
+  - criterion: "AC-026: Given tenants A and B using Stripe Connect, when a webhook fires for tenant A's connected account,then the event is processed in tenant A's context only"
+    test_file: tests/integration/test_webhook_multitenancy.py
+    test_name: "test_stripe_connect_tenant_context"
+    type: integration
+
+  # Migration
+  - criterion: "AC-027: Given the Purchase Gateway is deployed alongside the legacy ecommerce service, when a new purchaseis initiated, then it routes to the Purchase Gateway (not the legacy service)"
+    test_file: tests/e2e/test_migration_routing.py
+    test_name: "test_new_purchase_routes_to_gateway"
+    type: e2e
+
+  - criterion: "AC-028: Given all in-flight orders in the legacy ecommerce system have completed, when the decommission script runs, then the legacy ecommerce Deployment, Service, DNSrecords, and OAuth2 clients are removed"
+    test_file: tests/integration/test_decommission_script.py
+    test_name: "test_legacy_ecommerce_decommission"
+    type: integration
+
+  # Observability
+  - criterion: "AC-029: Given the gateway is running, when /metrics/ is scraped by Prometheus, then purchase-specific metrics (checkout count, fulfillment duration, webhook processingtime) are present"
+    test_file: tests/integration/test_metrics_endpoint.py
+    test_name: "test_prometheus_metrics_present"
+    type: integration
+
+  - criterion: "AC-030: Given a fulfillment failure occurs, when the error is logged, then the log entry includes order_uuid, tenant_id, offering_type, lms_resource_id, error_type, and buyer_email_hash (not raw email)"
+    test_file: tests/unit/test_logging_pii.py
+    test_name: "test_logging_includes_required_fields_hashed"
+    type: unit
+
+  - criterion: "AC-030: No PII in logs"
+    test_file: tests/security/test_logging_pii_compliance.py
+    test_name: "test_logs_no_raw_pii"
+    type: security
+
+  # Health and Deployment
+  - criterion: "AC-031: Given the gateway Deployment is applied, when kubectl get deployments -n mereka-lms -l app.kubernetes.io/name=payments-gateway is run, then the deployment shows READY replicas >= 1"
+    test_file: tests/e2e/test_k8s_deployment.py
+    test_name: "test_payments_gateway_deployment_ready"
+    type: e2e
+
+  - criterion: "AC-032: Given the gateway worker Deployment is applied, when kubectl get deployments -n mereka-lms -l app.kubernetes.io/name=payments-worker is run, then the deployment shows READY replicas >= 1"
+    test_file: tests/e2e/test_k8s_deployment.py
+    test_name: "test_payments_worker_deployment_ready"
+    type: e2e
+
+  - criterion: "AC-033: Given the gateway is running, when curl http://payments-gateway:8000/health/ is called from withinthe cluster, then the response is HTTP 200 with {\"status\":\"ok\", \"database\": \"ok\", \"redis\": \"ok\", \"stripe\":\"ok\"}"
+    test_file: tests/e2e/test_health_endpoint.py
+    test_name: "test_health_endpoint_all_ok"
+    type: e2e
+
+  # Edge Cases
+  - criterion: "Edge Case: Checkout session created but usernever completes"
+    test_file: tests/integration/test_checkout_timeout.py
+    test_name: "test_checkout_session_expires_after_24h"
+    type: integration
+
+  - criterion: "Edge Case: Duplicate webhook delivery storm"
+    test_file: tests/load/test_webhook_retry_storm.py
+    test_name: "test_webhook_duplicate_storm_idempotent"
+    type: load
+
+  - criterion: "Edge Case: Webhook arrives before redirect completes"
+    test_file: tests/integration/test_webhook_race_condition.py
+    test_name: "test_webhook_arrives_before_redirect"
+    type: integration
+
+  - criterion: "Edge Case: Stripe API outage during checkout"
+    test_file: tests/integration/test_stripe_outage.py
+    test_name: "test_checkout_stripe_unreachable"
+    type: integration
+
+  - criterion: "Edge Case: Currency mismatch and conversion"
+    test_file: tests/unit/test_currency_handling.py
+    test_name: "test_currency_conversion_stored"
+    type: unit
+
+  - criterion: "Edge Case: Zero-amount checkout (free offering)"
+    test_file: tests/integration/test_free_offering.py
+    test_name: "test_free_offering_no_stripe_checkout"
+    type: integration
+
+  - criterion: "Edge Case: LMS user lookup race condition"
+    test_file: tests/integration/test_user_registration_race.py
+    test_name: "test_user_registers_during_fulfillment"
+    type: integration
+
+  - criterion: "Edge Case: Course unpublished between purchase and fulfillment"
+    test_file: tests/integration/test_course_unpublished.py
+    test_name: "test_course_404_fulfillment_failed"
+    type: integration
+
+  - criterion: "Edge Case: Program with zero active course runs"
+    test_file: tests/integration/test_program_no_runs.py
+    test_name: "test_program_no_runs_creates_entitlement"
+    type: integration
+
+  - criterion: "Edge Case: Worker crash mid-fulfillment"
+    test_file: tests/integration/test_worker_crash_recovery.py
+    test_name: "test_worker_crash_idempotent_recovery"
+    type: integration
+
+  - criterion: "Edge Case: Redis queue full"
+    test_file: tests/integration/test_queue_full.py
+    test_name: "test_queue_full_job_rejected_alert"
+    type: integration
+
+  - criterion: "Edge Case: Claim token used by wrong email"
+    test_file: tests/unit/test_claim_token_forwarding.py
+    test_name: "test_claim_token_forwarding_logs_both_emails"
+    type: unit
+
+  - criterion: "Edge Case: Claim during registration (long delay)"
+    test_file: tests/integration/test_claim_during_registration.py
+    test_name: "test_claim_expires_at_checked_at_claim_time"
+    type: integration
+
+  - criterion: "Edge Case: Multiple entitlements for same email and offering"
+    test_file: tests/unit/test_entitlement_duplicate_prevention.py
+    test_name: "test_duplicate_entitlement_prevented"
+    type: unit
+
+  - criterion: "Edge Case: Entitlement expires with user registered but not claimed"
+    test_file: tests/integration/test_entitlement_expiry_no_autofulfill.py
+    test_name: "test_entitlement_not_autofulfilled_on_expiry"
+    type: integration
+
+  - criterion: "Edge Case: Bulk assignment with mixed valid/invalid emails"
+    test_file: tests/unit/test_bulk_assignment_validation.py
+    test_name: "test_bulk_assignment_all_or_nothing"
+    type: unit
+
+  - criterion: "Edge Case: Refund for order with claimed entitlements"
+    test_file: tests/integration/test_refund_claimed_entitlement.py
+    test_name: "test_refund_revokes_claimed_entitlement"
+    type: integration
+
+  - criterion: "Edge Case: Partial refund ambiguity (multi-line-item)"
+    test_file: tests/integration/test_partial_refund_multiline.py
+    test_name: "test_partial_refund_requires_admin_intervention"
+    type: integration
+
+  - criterion: "Edge Case: Refund after course completion"
+    test_file: tests/integration/test_refund_after_completion.py
+    test_name: "test_refund_after_completion_logs_warning"
+    type: integration
+
+  - criterion: "Edge Case: Dispute on Stripe Connect order"
+    test_file: tests/integration/test_dispute_stripe_connect.py
+    test_name: "test_dispute_routed_to_connected_account"
+    type: integration
+
+  - criterion: "Edge Case: Public checkout rate limit exceeded"
+    test_file: tests/load/test_checkout_rate_limit.py
+    test_name: "test_checkout_rate_limit_429"
+    type: load
+
+  - criterion: "Edge Case: Webhook rate limit exceeded"
+    test_file: tests/load/test_webhook_rate_limit.py
+    test_name: "test_webhook_rate_limit_429"
+    type: load
+
+  - criterion: "Edge Case: Admin API rate limit exceeded"
+    test_file: tests/load/test_admin_api_rate_limit.py
+    test_name: "test_admin_api_rate_limit_429"
+    type: load
+
+  - criterion: "Edge Case: Stripe Checkout Session creation timeout"
+    test_file: tests/integration/test_stripe_timeout.py
+    test_name: "test_stripe_checkout_timeout_504"
+    type: integration
+
+  - criterion: "Edge Case: LMS Enrollment API call timeout"
+    test_file: tests/integration/test_lms_timeout.py
+    test_name: "test_lms_enrollment_timeout_retry"
+    type: integration
+
+  - criterion: "Edge Case: Webhook processing takes >5 seconds"
+    test_file: tests/load/test_webhook_async_processing.py
+    test_name: "test_webhook_200_returned_async_processing"
+    type: load
+
+  # Load Tests
+  - criterion: "Load: 100 concurrent checkouts without degradation"
+    test_file: tests/load/test_concurrent_checkouts.py
+    test_name: "test_100_concurrent_checkouts"
+    type: load
+
+  - criterion: "Load: 500-seat pack fulfillment within 60 seconds"
+    test_file: tests/load/test_bulk_fulfillment.py
+    test_name: "test_500_seat_fulfillment_60s"
+    type: load
+
+  - criterion: "Load: 1 million orders in database, admin API<=300ms"
+    test_file: tests/load/test_admin_api_scale.py
+    test_name: "test_admin_api_1m_orders_300ms"
+    type: load
+
+  - criterion: "Load: Webhook burst (50 events/second)"
+    test_file: tests/load/test_webhook_burst.py
+    test_name: "test_webhook_burst_50_per_second"
+    type: load
+
+  # Security Tests
+  - criterion: "Security: OWASP Top 10 audit"
+    test_file: tests/security/test_owasp_top10.py
+    test_name: "test_owasp_top10_no_critical_findings"
+    type: security
+
+  - criterion: "Security: Webhook signature bypass attempts"
+    test_file: tests/security/test_webhook_signature_bypass.py
+    test_name: "test_webhook_signature_bypass_rejected"
+    type: security
+
+  - criterion: "Security: JWT bypass attempts"
+    test_file: tests/security/test_jwt_bypass.py
+    test_name: "test_jwt_bypass_rejected"
+    type: security
+
+  - criterion: "Security: Tenant isolation bypass"
+    test_file: tests/security/test_tenant_isolation_bypass.py
+    test_name: "test_tenant_isolation_no_cross_tenant_leak"
+    type: security
+
+  - criterion: "Security: Rate limit bypass"
+    test_file: tests/security/test_rate_limit_bypass.py
+    test_name: "test_rate_limit_bypass_rejected"
+    type: security
+
+  - criterion: "Security: PII in logs"
+    test_file: tests/security/test_logging_pii_compliance.py
+    test_name: "test_no_pii_in_logs"
+    type: security
+
+  - criterion: "Security: Secrets in error messages"
+    test_file: tests/security/test_secrets_in_errors.py
+    test_name: "test_no_secrets_in_errors"
+    type: security
+
+  - criterion: "Security: Claim token enumeration"
+    test_file: tests/security/test_claim_token_enumeration.py
+    test_name: "test_claim_token_no_enumeration"
+    type: security

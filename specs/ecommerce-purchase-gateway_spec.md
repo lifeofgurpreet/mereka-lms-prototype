@@ -19,6 +19,7 @@ links:
     - "specs/k8s-deployment_spec.md"
     - "specs/observability-stack_spec.md"
     - "specs/auth-sso-enterprise_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 
 # Human Summary
@@ -327,7 +328,7 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 - After the migration cutover, the system MUST provide a script to verify zero active orders remain in the legacy system
 - After cutover verification, the legacy ecommerce service MUST be fully decommissioned: Deployment scaled to 0, DNS records removed, OAuth2 clients disabled, secrets archived
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 #### Performance
 
@@ -709,6 +710,24 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 5. New purchases route to legacy ecommerce
 6. After fix, scale gateway back up -- pending jobs in Redis are processed
 7. Run reconciliation to verify no orders were lost during the outage
+
+---
+
+## Monorepo Location
+
+All source code for the Purchase Gateway lives within this repository:
+
+| Component | Path | Notes |
+|-----------|------|-------|
+| Gateway API server | `services/purchase-gateway/api/` | FastAPI application (Python) |
+| Fulfillment worker | `services/purchase-gateway/worker/` | Async job processor |
+| Database migrations | `services/purchase-gateway/migrations/` | Alembic (PostgreSQL) |
+| Tests | `services/purchase-gateway/tests/` | pytest (unit + integration) |
+| Dockerfile | `services/purchase-gateway/Dockerfile` | Multi-stage build |
+| K8s manifests | `deploy/k8s/base/apps/purchase-gateway/` | Deployment, Service, HPA |
+| ExternalSecrets | `deploy/k8s/base/secrets/external-secrets.yaml` | Stripe keys, DB credentials |
+
+**Database**: PostgreSQL (Cloud SQL) — confirmed platform decision for new services requiring financial data integrity (see `specs/cross-cutting-requirements_spec.md`, Section 5: Technology Decisions).
 
 ---
 

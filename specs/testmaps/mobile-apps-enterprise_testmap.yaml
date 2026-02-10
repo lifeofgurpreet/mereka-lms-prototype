@@ -1,0 +1,509 @@
+# Testmap for Mobile Apps (iOS + Android) Enterprise Deployment
+# Maps acceptance criteria from spec to test files for traceability
+# Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/mobile-apps-enterprise_testmap.yaml
+
+spec: specs/mobile-apps-enterprise_spec.md
+tests:
+  # OAuth 2.0 Authentication (iOS)
+  - criterion: "AC-001: Given a new user on iOS, when they tap Sign In, then the system browser opens to the LMS OAuth authorize endpoint with PKCE parameters (code_challenge, code_challenge_method=S256, response_type=code, client_id=mereka-mobile-app)"
+    test_file: tests/mobile/e2e/ios/test_oauth_flow.py
+    test_name: "test_ios_oauth_pkce_authorization"
+    type: e2e
+
+  - criterion: "AC-001: Apple Sign-In integration"
+    test_file: tests/mobile/e2e/ios/test_apple_signin.py
+    test_name: "test_apple_signin_flow"
+    type: e2e
+
+  # OAuth 2.0 Authentication (Android)
+  - criterion: "AC-002: Given a new user on Android, when they tap Sign In, then a Custom Tab opens to the LMS OAuth authorize endpoint with identical PKCE parameters"
+    test_file: tests/mobile/e2e/android/test_oauth_flow.py
+    test_name: "test_android_oauth_pkce_authorization"
+    type: e2e
+
+  - criterion: "AC-002: Google Sign-In integration"
+    test_file: tests/mobile/e2e/android/test_google_signin.py
+    test_name: "test_google_signin_flow"
+    type: e2e
+
+  # Token Storage
+  - criterion: "AC-003: Given a successful authorization codecallback, when the app exchanges the code for tokens, then the access token and refresh token are stored in platform-secure storage (Keychain on iOS, EncryptedSharedPreferences on Android)"
+    test_file: tests/mobile/integration/ios/test_token_storage.swift
+    test_name: "testTokensStoredInKeychainWithCorrectAccessLevel"
+    type: integration
+
+  - criterion: "AC-003: Android token storage in EncryptedSharedPreferences"
+    test_file: tests/mobile/integration/android/TokenStorageTest.kt
+    test_name: "testTokensStoredInEncryptedSharedPreferences"
+    type: integration
+
+  # Token Lifecycle Management
+  - criterion: "AC-004: Given a stored access token with < 5minutes remaining validity, when the app makes an API call, then the token is refreshed proactively before the call proceeds"
+    test_file: tests/mobile/unit/ios/TokenManagerTests.swift
+    test_name: "testProactiveTokenRefreshWhenExpiringIn5Minutes"
+    type: unit
+
+  - criterion: "AC-004: Android proactive token refresh"
+    test_file: tests/mobile/unit/android/TokenManagerTest.kt
+    test_name: "testProactiveTokenRefreshWhenExpiringIn5Minutes"
+    type: unit
+
+  - criterion: "AC-005: Given a concurrent burst of 10 API calls during token refresh, when the refresh is in-flight, thenexactly one token refresh request is sent to the backend (single-flight)"
+    test_file: tests/mobile/integration/ios/test_token_refresh_concurrency.swift
+    test_name: "testSingleFlightTokenRefresh"
+    type: integration
+
+  - criterion: "AC-005: Android single-flight token refresh"
+    test_file: tests/mobile/integration/android/TokenRefreshConcurrencyTest.kt
+    test_name: "testSingleFlightTokenRefresh"
+    type: integration
+
+  - criterion: "AC-006: Given a 401 response from the API, when the refresh token is still valid, then the app refreshes the token and retries the original request exactly once"
+    test_file: tests/mobile/integration/ios/test_token_retry_401.swift
+    test_name: "testRetryAPICallAfterTokenRefreshOn401"
+    type: integration
+
+  - criterion: "AC-006: Android retry on 401"
+    test_file: tests/mobile/integration/android/TokenRetry401Test.kt
+    test_name: "testRetryAPICallAfterTokenRefreshOn401"
+    type: integration
+
+  - criterion: "AC-007: Given a failed token refresh (invalid/expired refresh token), when the app detects the failure, then the user is redirected to the login screen and all tokensare cleared"
+    test_file: tests/mobile/integration/ios/test_token_refresh_failure.swift
+    test_name: "testRedirectToLoginOnRefreshFailure"
+    type: integration
+
+  - criterion: "AC-007: Android redirect to login on refreshfailure"
+    test_file: tests/mobile/integration/android/TokenRefreshFailureTest.kt
+    test_name: "testRedirectToLoginOnRefreshFailure"
+    type: integration
+
+  - criterion: "AC-008: Given an authenticated user who tapsLogout, when logout completes, then the refresh token is revoked server-side and all local tokens, cached user data, and branding overrides are cleared"
+    test_file: tests/mobile/e2e/ios/test_logout_flow.py
+    test_name: "test_ios_logout_clears_all_data"
+    type: e2e
+
+  - criterion: "AC-008: Android logout flow"
+    test_file: tests/mobile/e2e/android/test_logout_flow.py
+    test_name: "test_android_logout_clears_all_data"
+    type: e2e
+
+  # Push Notifications
+  - criterion: "AC-009: Given a freshly installed app after first login, when the user reaches the dashboard, then the apprequests push notification permission (not at app launch, not before login)"
+    test_file: tests/mobile/integration/ios/test_push_permission_timing.swift
+    test_name: "testPushPermissionRequestedAfterLoginNotBefore"
+    type: integration
+
+  - criterion: "AC-009: Android push permission timing"
+    test_file: tests/mobile/integration/android/PushPermissionTimingTest.kt
+    test_name: "testPushPermissionRequestedAfterLoginNotBefore"
+    type: integration
+
+  - criterion: "AC-010: Given notification permission granted, when the device token is obtained, then the app registers it with the backend including device_token, platform, app_version, and org_slug"
+    test_file: tests/mobile/integration/ios/test_push_registration.swift
+    test_name: "testPushRegistrationWithCorrectPayload"
+    type: integration
+
+  - criterion: "AC-010: Android push registration"
+    test_file: tests/mobile/integration/android/PushRegistrationTest.kt
+    test_name: "testPushRegistrationWithCorrectPayload"
+    type: integration
+
+  - criterion: "AC-011: Given a course announcement is published, when the backend sends a push notification, then the notification appears in the system notification center within 60seconds"
+    test_file: tests/mobile/e2e/test_push_delivery.py
+    test_name: "test_push_notification_delivered_within_60_seconds"
+    type: e2e
+
+  - criterion: "AC-011: Push delivery latency p95 target"
+    test_file: tests/mobile/load/test_push_delivery_latency.py
+    test_name: "test_push_delivery_p95_under_30_seconds"
+    type: load
+
+  - criterion: "AC-012: Given a notification with type=assignment_due and a valid deep_link_url, when the user taps it, then the app navigates directly to the assignment within the course"
+    test_file: tests/mobile/e2e/ios/test_push_tap_navigation.py
+    test_name: "test_push_tap_navigates_to_deep_link"
+    type: e2e
+
+  - criterion: "AC-012: Android push tap navigation"
+    test_file: tests/mobile/e2e/android/test_push_tap_navigation.py
+    test_name: "test_push_tap_navigates_to_deep_link"
+    type: e2e
+
+  - criterion: "AC-013: Given a user logs out, when logout completes, then the device token is unregistered from the backend"
+    test_file: tests/mobile/integration/ios/test_push_unregistration.swift
+    test_name: "testPushUnregistrationOnLogout"
+    type: integration
+
+  - criterion: "AC-013: Android push unregistration"
+    test_file: tests/mobile/integration/android/PushUnregistrationTest.kt
+    test_name: "testPushUnregistrationOnLogout"
+    type: integration
+
+  # Deep Linking
+  - criterion: "AC-014: Given the AASA file is served at https://academyv2.mereka.io/.well-known/apple-app-site-association, when iOS validates it, then Universal Links are recognizedfor academyv2.mereka.io"
+    test_file: tests/mobile/integration/backend/test_aasa_file.py
+    test_name: "test_aasa_file_valid_json_structure"
+    type: integration
+
+  - criterion: "AC-015: Given the assetlinks.json is served at https://academyv2.mereka.io/.well-known/assetlinks.json, when Android validates it, then App Links are recognized"
+    test_file: tests/mobile/integration/backend/test_assetlinks_file.py
+    test_name: "test_assetlinks_file_valid_json_structure"
+    type: integration
+
+  - criterion: "AC-016: Given a URL https://academyv2.mereka.io/courses/course-v1:Mereka+101+2026/courseware/section1/, when the app receives it as a deep link, then it navigates to section1 of the course"
+    test_file: tests/mobile/e2e/ios/test_universal_link_navigation.py
+    test_name: "test_universal_link_navigates_to_course_section"
+    type: e2e
+
+  - criterion: "AC-016: Android App Link navigation"
+    test_file: tests/mobile/e2e/android/test_app_link_navigation.py
+    test_name: "test_app_link_navigates_to_course_section"
+    type: e2e
+
+  - criterion: "AC-017: Given an unauthenticated user opens adeep link, when the link is received, then the app stores the URL, presents login, and navigates to the stored URL aftersuccessful authentication"
+    test_file: tests/mobile/e2e/ios/test_unauthenticated_deep_link.py
+    test_name: "test_unauthenticated_deep_link_deferred_navigation"
+    type: e2e
+
+  - criterion: "AC-017: Android unauthenticated deep link"
+    test_file: tests/mobile/e2e/android/test_unauthenticated_deep_link.py
+    test_name: "test_unauthenticated_deep_link_deferred_navigation"
+    type: e2e
+
+  - criterion: "AC-018: Given a deep link to an unsupported path (e.g., /admin/), when the app receives it, then it opensthe URL in an in-app browser"
+    test_file: tests/mobile/integration/ios/test_unsupported_deep_link.swift
+    test_name: "testUnsupportedDeepLinkOpensInBrowser"
+    type: integration
+
+  - criterion: "AC-018: Android unsupported deep link"
+    test_file: tests/mobile/integration/android/UnsupportedDeepLinkTest.kt
+    test_name: "testUnsupportedDeepLinkOpensInWebView"
+    type: integration
+
+  # Offline Mode
+  - criterion: "AC-019: Given a user taps Download on a course section, when the download completes, then all video, HTML,and PDF content for that section is available without network connectivity"
+    test_file: tests/mobile/e2e/ios/test_offline_download.py
+    test_name: "test_offline_download_content_available"
+    type: e2e
+
+  - criterion: "AC-019: Android offline download"
+    test_file: tests/mobile/e2e/android/test_offline_download.py
+    test_name: "test_offline_download_content_available"
+    type: e2e
+
+  - criterion: "AC-020: Given a user completes a quiz while offline, when the device regains connectivity, then the completion and score data sync to the backend within 60 seconds"
+    test_file: tests/mobile/e2e/test_offline_sync.py
+    test_name: "test_offline_progress_synced_within_60_seconds"
+    type: e2e
+
+  - criterion: "AC-020: Offline sync retry logic"
+    test_file: tests/mobile/integration/ios/test_offline_sync_retry.swift
+    test_name: "testOfflineSyncRetriesWithExponentialBackoff"
+    type: integration
+
+  - criterion: "AC-021: Given the device has less than 500 MBfree storage, when the user attempts to start a download, then the app displays a storage warning before proceeding"
+    test_file: tests/mobile/integration/ios/test_storage_warning.swift
+    test_name: "testStorageWarningWhenLessThan500MB"
+    type: integration
+
+  - criterion: "AC-021: Android storage warning"
+    test_file: tests/mobile/integration/android/StorageWarningTest.kt
+    test_name: "testStorageWarningWhenLessThan500MB"
+    type: integration
+
+  - criterion: "AC-022: Given downloaded content exists, whenthe user views Manage Downloads, then they see per-section storage usage and can delete individual sections"
+    test_file: tests/mobile/integration/ios/test_manage_downloads.swift
+    test_name: "testManageDownloadsShowsStorageAndDelete"
+    type: integration
+
+  - criterion: "AC-022: Android manage downloads"
+    test_file: tests/mobile/integration/android/ManageDownloadsTest.kt
+    test_name: "testManageDownloadsShowsStorageAndDelete"
+    type: integration
+
+  - criterion: "AC-023: Given a download is in progress and the user backgrounds the app, when the download completes in the background, then a local notification confirms completion(iOS: background URLSession; Android: WorkManager)"
+    test_file: tests/mobile/integration/ios/test_background_download.swift
+    test_name: "testBackgroundDownloadCompletionNotification"
+    type: integration
+
+  - criterion: "AC-023: Android background download"
+    test_file: tests/mobile/integration/android/BackgroundDownloadTest.kt
+    test_name: "testBackgroundDownloadCompletionNotification"
+    type: integration
+
+  # Multi-Tenant Branding
+  - criterion: "AC-024: Given org_slug=client-a with brandingconfig specifying primary_color=#FF5733, when the app renders, then the navigation bar and primary UI elements use #FF5733"
+    test_file: tests/mobile/e2e/ios/test_branding_colors.py
+    test_name: "test_ios_branding_colors_applied"
+    type: e2e
+
+  - criterion: "AC-024: Android branding colors"
+    test_file: tests/mobile/e2e/android/test_branding_colors.py
+    test_name: "test_android_branding_colors_applied"
+    type: e2e
+
+  - criterion: "AC-025: Given the branding config endpoint isunreachable and a cached config exists, when the app launches, then it renders using the cached branding"
+    test_file: tests/mobile/integration/ios/test_branding_cache_fallback.swift
+    test_name: "testBrandingUseCacheWhenEndpointUnreachable"
+    type: integration
+
+  - criterion: "AC-025: Android branding cache fallback"
+    test_file: tests/mobile/integration/android/BrandingCacheFallbackTest.kt
+    test_name: "testBrandingUseCacheWhenEndpointUnreachable"
+    type: integration
+
+  - criterion: "AC-026: Given the branding config endpoint isunreachable and no cache exists, when the app launches, thenit renders using default Mereka Academy branding"
+    test_file: tests/mobile/integration/ios/test_branding_default_fallback.swift
+    test_name: "testBrandingUseDefaultWhenNoCacheAndUnreachable"
+    type: integration
+
+  - criterion: "AC-026: Android branding default fallback"
+    test_file: tests/mobile/integration/android/BrandingDefaultFallbackTest.kt
+    test_name: "testBrandingUseDefaultWhenNoCacheAndUnreachable"
+    type: integration
+
+  - criterion: "AC-027: Given a user authenticated under org_slug=client-a, when they request course listings, then they see only courses associated with client-a (no cross-tenant leakage)"
+    test_file: tests/mobile/integration/backend/test_tenant_isolation.py
+    test_name: "test_cross_tenant_data_isolation"
+    type: integration
+
+  # Security
+  - criterion: "AC-028: Given the app is running on a device,when it connects to academyv2.mereka.io, then the TLS certificate is validated against pinned intermediate CA certificates"
+    test_file: tests/mobile/integration/ios/test_cert_pinning.swift
+    test_name: "testCertificatePinningValidation"
+    type: integration
+
+  - criterion: "AC-028: Android certificate pinning"
+    test_file: tests/mobile/integration/android/CertPinningTest.kt
+    test_name: "testCertificatePinningValidation"
+    type: integration
+
+  - criterion: "AC-029: Given a certificate pin mismatch (MITM scenario), when the connection fails, then the app displaysa security warning and does not send any data"
+    test_file: tests/mobile/security/ios/test_cert_pin_mismatch.swift
+    test_name: "testCertPinMismatchDisplaysWarningNoDataSent"
+    type: security
+
+  - criterion: "AC-029: Android certificate pin mismatch"
+    test_file: tests/mobile/security/android/CertPinMismatchTest.kt
+    test_name: "testCertPinMismatchDisplaysWarningNoDataSent"
+    type: security
+
+  - criterion: "AC-030: Given the app enters the background,when the OS captures a task-switcher screenshot, then the screenshot shows a branded splash screen (not sensitive content)"
+    test_file: tests/mobile/integration/ios/test_app_snapshot_clearing.swift
+    test_name: "testAppSnapshotShowsSplashNotSensitiveContent"
+    type: integration
+
+  - criterion: "AC-030: Android app snapshot clearing"
+    test_file: tests/mobile/integration/android/AppSnapshotClearingTest.kt
+    test_name: "testAppSnapshotShowsSplashNotSensitiveContent"
+    type: integration
+
+  - criterion: "AC-031: Given a release build artifact, wheninspected, then it contains no debug logging statements, testAPI endpoints, or hardcoded credentials"
+    test_file: tests/mobile/security/test_release_build_inspection.py
+    test_name: "test_release_build_no_debug_or_secrets"
+    type: security
+
+  # CI/CD Pipelines
+  - criterion: "AC-032: Given a push to mobile/ios/** on themain branch, when the iOS CI workflow triggers, then it produces a signed IPA and uploads it to TestFlight without manualintervention"
+    test_file: tests/mobile/e2e/test_ios_ci_pipeline.py
+    test_name: "test_ios_ci_produces_testflight_build"
+    type: e2e
+
+  - criterion: "AC-033: Given a push to mobile/android/** onthe main branch, when the Android CI workflow triggers, thenit produces a signed AAB and uploads it to Google Play Internal Testing without manual intervention"
+    test_file: tests/mobile/e2e/test_android_ci_pipeline.py
+    test_name: "test_android_ci_produces_play_console_build"
+    type: e2e
+
+  - criterion: "AC-034: Given a new client org_slug=new-client is added to the branding configuration, when the CI pipeline runs, then no code changes or pipeline modifications are required (configuration-only onboarding)"
+    test_file: tests/mobile/integration/backend/test_config_only_onboarding.py
+    test_name: "test_new_client_config_only_onboarding"
+    type: integration
+
+  # App Store Release
+  - criterion: "AC-035: Given a release candidate build, whensubmitted to the Apple App Store, then the submission includes: app description, screenshots (6.7\" and 6.1\" iPhones), privacy nutrition labels, and age rating"
+    test_file: N/A (manual verification)
+    test_name: "manual_verify_app_store_submission_complete"
+    type: manual
+
+  - criterion: "AC-036: Given a release candidate build, whensubmitted to Google Play Store, then the submission includes: store listing, screenshots (phone), content rating questionnaire, and data safety form"
+    test_file: N/A (manual verification)
+    test_name: "manual_verify_play_store_submission_complete"
+    type: manual
+
+  - criterion: "AC-037: Given a production release is approved, when the app is published, then it uses a phased/staged rollout (iOS: phased release over 7 days; Android: staged rollout starting at 10%)"
+    test_file: N/A (manual verification)
+    test_name: "manual_verify_phased_rollout_configuration"
+    type: manual
+
+  # Edge Cases
+  - criterion: "Edge Case: Clock skew - token expiry checks use server Date header"
+    test_file: tests/mobile/unit/ios/TokenClockSkewTest.swift
+    test_name: "testTokenExpiryUsesServerTime"
+    type: unit
+
+  - criterion: "Edge Case: OAuth state tampering prevention"
+    test_file: tests/mobile/security/ios/test_oauth_state_tampering.swift
+    test_name: "testOAuthStateMismatchRejected"
+    type: security
+
+  - criterion: "Edge Case: Biometric auth after background memory purge"
+    test_file: tests/mobile/integration/ios/test_biometric_restore.swift
+    test_name: "testBiometricRestoreAfterMemoryPurge"
+    type: integration
+
+  - criterion: "Edge Case: Duplicate device tokens - backenddeduplicates"
+    test_file: tests/mobile/integration/backend/test_duplicate_token_handling.py
+    test_name: "test_duplicate_device_token_deduplication"
+    type: integration
+
+  - criterion: "Edge Case: Notification permission denied - graceful degradation"
+    test_file: tests/mobile/integration/ios/test_notification_permission_denied.swift
+    test_name: "testNotificationPermissionDeniedGracefulDegradation"
+    type: integration
+
+  - criterion: "Edge Case: Background notification throttling- no reliance on silent push"
+    test_file: tests/mobile/integration/ios/test_background_notification_throttling.swift
+    test_name: "testBackgroundNotificationThrottlingHandled"
+    type: integration
+
+  - criterion: "Edge Case: Multi-tenant notification routing- no cross-tenant leakage"
+    test_file: tests/mobile/integration/backend/test_notification_tenant_routing.py
+    test_name: "test_notification_tenant_routing_isolation"
+    type: integration
+
+  - criterion: "Edge Case: Expired course link shows enrollment option"
+    test_file: tests/mobile/integration/ios/test_deep_link_unenrolled_course.swift
+    test_name: "testDeepLinkUnenrolledCourseShowsEnrollmentOption"
+    type: integration
+
+  - criterion: "Edge Case: Concurrent deep link and login - queue and process"
+    test_file: tests/mobile/integration/ios/test_deep_link_during_login.swift
+    test_name: "testDeepLinkQueuedDuringLogin"
+    type: integration
+
+  - criterion: "Edge Case: Partial download corruption - resume from chunk"
+    test_file: tests/mobile/integration/ios/test_download_resume.swift
+    test_name: "testDownloadResumeFromLastChunk"
+    type: integration
+
+  - criterion: "Edge Case: Content version mismatch - updateindicator"
+    test_file: tests/mobile/integration/ios/test_offline_content_version_mismatch.swift
+    test_name: "testContentVersionMismatchShowsUpdateIndicator"
+    type: integration
+
+  - criterion: "Edge Case: Storage exhaustion during download"
+    test_file: tests/mobile/integration/ios/test_storage_exhaustion.swift
+    test_name: "testStorageExhaustionPausesDownload"
+    type: integration
+
+  - criterion: "Edge Case: Offline progress conflict - optimistic concurrency"
+    test_file: tests/mobile/integration/backend/test_offline_progress_conflict.py
+    test_name: "test_offline_progress_conflict_resolution"
+    type: integration
+
+  - criterion: "Edge Case: DRM-protected video download"
+    test_file: tests/mobile/integration/ios/test_drm_video_download.swift
+    test_name: "testDRMVideoDownloadUsePlatformDRM"
+    type: integration
+
+  - criterion: "Edge Case: Tenant switch mid-session - reloadbranding"
+    test_file: tests/mobile/integration/ios/test_tenant_switch.swift
+    test_name: "testTenantSwitchReloadsBranding"
+    type: integration
+
+  - criterion: "Edge Case: Invalid branding config - fallbackto cache or default"
+    test_file: tests/mobile/integration/ios/test_invalid_branding_config.swift
+    test_name: "testInvalidBrandingConfigFallback"
+    type: integration
+
+  - criterion: "Edge Case: Logo loading failure - text fallback"
+    test_file: tests/mobile/integration/ios/test_logo_loading_failure.swift
+    test_name: "testLogoLoadingFailureTextFallback"
+    type: integration
+
+  - criterion: "Edge Case: Build number collision detection"
+    test_file: tests/mobile/integration/test_build_number_collision.py
+    test_name: "test_build_number_collision_detection"
+    type: integration
+
+  - criterion: "Edge Case: Rate limiting - respect Retry-After header"
+    test_file: tests/mobile/integration/ios/test_rate_limiting.swift
+    test_name: "testRateLimitingRespectsRetryAfter"
+    type: integration
+
+  - criterion: "Edge Case: API timeout - user-friendly error"
+    test_file: tests/mobile/integration/ios/test_api_timeout.swift
+    test_name: "testAPITimeoutShowsUserFriendlyError"
+    type: integration
+
+  # Load Tests
+  - criterion: "Load: 1000 concurrent mobile API requests"
+    test_file: tests/mobile/load/test_concurrent_api_requests.py
+    test_name: "test_1000_concurrent_api_requests"
+    type: load
+
+  - criterion: "Load: 1000 concurrent branding config requests"
+    test_file: tests/mobile/load/test_concurrent_branding_config.py
+    test_name: "test_1000_concurrent_branding_config"
+    type: load
+
+  - criterion: "Load: 1000 concurrent push notification registrations"
+    test_file: tests/mobile/load/test_concurrent_push_registrations.py
+    test_name: "test_1000_concurrent_push_registrations"
+    type: load
+
+  - criterion: "Load: 1000 concurrent offline syncs"
+    test_file: tests/mobile/load/test_concurrent_offline_syncs.py
+    test_name: "test_1000_concurrent_offline_syncs"
+    type: load
+
+  - criterion: "Load: 1000 push notifications sent via FCM"
+    test_file: tests/mobile/load/test_push_notification_burst.py
+    test_name: "test_1000_push_notifications_delivered"
+    type: load
+
+  - criterion: "Load: 500MB video download on 10 devices"
+    test_file: tests/mobile/load/test_concurrent_downloads.py
+    test_name: "test_concurrent_video_downloads"
+    type: load
+
+  # Security Tests
+  - criterion: "Security: OWASP Mobile Top 10 audit"
+    test_file: tests/mobile/security/test_owasp_mobile_top10.py
+    test_name: "test_owasp_mobile_top10_no_critical_findings"
+    type: security
+
+  - criterion: "Security: Token leakage in logs/crash reports/analytics"
+    test_file: tests/mobile/security/test_token_leakage.py
+    test_name: "test_no_token_leakage_in_logs_or_crashes"
+    type: security
+
+  - criterion: "Security: Certificate pinning bypass attempts"
+    test_file: tests/mobile/security/test_cert_pinning_bypass.py
+    test_name: "test_cert_pinning_bypass_rejected"
+    type: security
+
+  - criterion: "Security: Jailbreak/root detection bypass"
+    test_file: tests/mobile/security/test_jailbreak_detection_bypass.py
+    test_name: "test_jailbreak_detection_not_easily_bypassable"
+    type: security
+
+  - criterion: "Security: Reverse engineering resistance"
+    test_file: tests/mobile/security/test_reverse_engineering.py
+    test_name: "test_api_keys_not_easily_extractable"
+    type: security
+
+  - criterion: "Security: Deep link injection (malicious URLs)"
+    test_file: tests/mobile/security/test_deep_link_injection.py
+    test_name: "test_malicious_deep_links_rejected"
+    type: security
+
+  - criterion: "Security: Insecure data storage (tokens, userdata)"
+    test_file: tests/mobile/security/test_insecure_data_storage.py
+    test_name: "test_all_sensitive_data_encrypted_at_rest"
+    type: security
+
+  - criterion: "Security: Man-in-the-middle attack simulation"
+    test_file: tests/mobile/security/test_mitm_attack.py
+    test_name: "test_app_detects_and_rejects_mitm"
+    type: security

@@ -14,6 +14,7 @@ links:
     - "specs/observability-stack_spec.md"
     - "specs/data-privacy-gdpr-compliance_spec.md"
     - "specs/k8s-deployment_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
 ---
 # Analytics Pipeline (Aspects/Panorama)
 
@@ -95,7 +96,7 @@ The system SHOULD collect the following xAPI verbs:
 - The system MUST provide data deletion mechanism for GDPR right-to-be-forgotten
 - The system SHOULD implement role-based access control (RBAC) for dashboards
 
-### Non-functional Requirements (NFRs)
+### Non-Functional Requirements
 
 - Event processing lag (generation to storage) MUST be <= 10 minutes under normal load
 - Event processing lag SHOULD be <= 2 minutes at p50
