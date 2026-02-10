@@ -39,6 +39,7 @@ jobs:
       - name: Generate clean config
         run: |
           source .venv/bin/activate
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor config save
 
@@ -100,6 +101,7 @@ jobs:
       - name: Generate clean config
         run: |
           source .venv/bin/activate
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor config save
 
@@ -182,6 +184,7 @@ jobs:
       - name: Generate clean config
         run: |
           source .venv/bin/activate
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor config save
 
@@ -244,6 +247,7 @@ jobs:
       - name: Generate clean config
         run: |
           source .venv/bin/activate
+          mkdir -p tutor_env
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor config save
 
