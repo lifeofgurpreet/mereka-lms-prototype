@@ -4,6 +4,10 @@ acceptance_criteria:
   description: Given the K8s manifests are applied,when kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterpr...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_deployment.py
     command: pytest tests/integration/enterprise/test_deployment.py::test_enterprise_deployments_ready
@@ -11,6 +15,10 @@ acceptance_criteria:
   description: Given all enterprise services are deployed, when kubectl get endpoints -n mereka-lms is run, theneach enterprise
     serv...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_deployment.py
@@ -20,6 +28,10 @@ acceptance_criteria:
     within...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_health_checks.py
     command: pytest tests/integration/enterprise/test_health_checks.py::test_enterprise_catalog_health_check
@@ -27,6 +39,10 @@ acceptance_criteria:
   description: Given the license-manager service isrunning, when curl http://license-manager:8000/health/ is called from within
     the ...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_health_checks.py
@@ -36,6 +52,10 @@ acceptance_criteria:
     within ...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_health_checks.py
     command: pytest tests/integration/enterprise/test_health_checks.py::test_enterprise_access_health_check
@@ -43,6 +63,10 @@ acceptance_criteria:
   description: Given the enterprise-subsidy serviceis running, when curl http://enterprise-subsidy:8000/health/is called from
     within...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_health_checks.py
@@ -52,6 +76,10 @@ acceptance_criteria:
     portal HTM...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
+  - type: automated
     test_type: e2e
     file: tests/e2e/enterprise/test_mfe_deployment.py
     command: pytest tests/e2e/enterprise/test_mfe_deployment.py::test_admin_portal_accessible
@@ -59,6 +87,10 @@ acceptance_criteria:
   description: Given enterprise MFEs are deployed, when curl https://enterprise.academyv2.mereka.io/ is called, then the learner
     por...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
   - type: automated
     test_type: e2e
     file: tests/e2e/enterprise/test_mfe_deployment.py
@@ -68,12 +100,20 @@ acceptance_criteria:
     the...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_tenant_isolation.py
     command: pytest tests/integration/enterprise/test_tenant_isolation.py::test_admin_sees_only_own_catalogs
 - id: AC-010
   description: Given enterprise customer A with a subscription plan, when admin B calls GET /api/v1/subscriptions/{plan_uuid_of_A}/,...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_tenant_isolation.py
@@ -83,6 +123,10 @@ acceptance_criteria:
     A's UUI...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_tenant_isolation.py
     command: pytest tests/integration/enterprise/test_tenant_isolation.py::test_cross_tenant_access_api_denied
@@ -90,6 +134,10 @@ acceptance_criteria:
   description: Given a learner linked to enterprisecustomer A, when they browse the enterprise learner portal, then they see
     only co...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
   - type: automated
     test_type: e2e
     file: tests/e2e/enterprise/test_learner_portal_isolation.py
@@ -99,6 +147,10 @@ acceptance_criteria:
     then n...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
+  - type: automated
     test_type: e2e
     file: tests/e2e/enterprise/test_multi_org_learner.py
     command: pytest tests/e2e/enterprise/test_multi_org_learner.py::test_multi_org_learner_context_switching
@@ -106,6 +158,10 @@ acceptance_criteria:
   description: Given a subscription plan with 100 licenses and 50 assigned, when an admin assigns 51 more licenses, then the
     request...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: ./scripts/qa/verify-enterprise-license-management.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_license_assignment.py
@@ -115,6 +171,10 @@ acceptance_criteria:
     then ...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: ./scripts/qa/verify-enterprise-license-management.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_license_auto_apply.py
     command: pytest tests/integration/enterprise/test_license_auto_apply.py::test_license_auto_apply_on_enrollment
@@ -122,6 +182,10 @@ acceptance_criteria:
   description: Given a license in activated state, when an admin revokes it, then the license state transitions to revoked
     and an en...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: ./scripts/qa/verify-enterprise-license-management.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_license_revocation.py
@@ -131,6 +195,10 @@ acceptance_criteria:
     when an a...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: ./scripts/qa/verify-enterprise-license-management.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_license_revocation_cap.py
     command: pytest tests/integration/enterprise/test_license_revocation_cap.py::test_revocation_cap_enforced
@@ -139,6 +207,10 @@ acceptance_criteria:
     again...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: ./scripts/qa/verify-enterprise-license-management.sh
+  - type: automated
     test_type: unit
     file: tests/unit/enterprise/test_license_idempotency.py
     command: pytest tests/unit/enterprise/test_license_idempotency.py::test_license_assignment_idempotent
@@ -146,21 +218,21 @@ acceptance_criteria:
   description: Given an enterprise catalog with a content filter for subject 'Technology', when GET /api/v1/enterprise-catalogs/{uui...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-catalog.sh
+    command: ./scripts/qa/verify-enterprise-catalog.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_catalog_filters.py
     command: pytest tests/integration/enterprise/test_catalog_filters.py::test_catalog_filter_by_subject
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-org-role-ownership.sh
-    command: ./scripts/qa/verify-org-role-ownership.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/infra/ensure-platform-admins.sh
-    command: ./scripts/infra/ensure-platform-admins.sh --verify
 - id: AC-020
   description: Given the catalog sync task has not run in 6 hours, when the Celery beat scheduler fires, then thesync task
     executes ...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-catalog.sh
+    command: ./scripts/qa/verify-enterprise-catalog.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_catalog_sync.py
@@ -168,6 +240,10 @@ acceptance_criteria:
 - id: AC-021
   description: Given a course key 'course-v1:Mereka+ENT101+2026', when GET /api/v1/enterprise-catalogs/{uuid}/contains_content_items...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-catalog.sh
+    command: ./scripts/qa/verify-enterprise-catalog.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_catalog_contains.py
@@ -177,6 +253,10 @@ acceptance_criteria:
     wh...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: ./scripts/qa/verify-enterprise-access-subsidy.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_access_policy_limit.py
     command: pytest tests/integration/enterprise/test_access_policy_limit.py::test_per_learner_enrollment_limit_enforced
@@ -184,6 +264,10 @@ acceptance_criteria:
   description: Given a subsidy with a starting balance of 10000 (cents) and 3000 already spent, when a transaction for 8000
     is attem...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: ./scripts/qa/verify-enterprise-access-subsidy.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_subsidy_insufficient_balance.py
@@ -193,6 +277,10 @@ acceptance_criteria:
     is req...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: ./scripts/qa/verify-enterprise-access-subsidy.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_transaction_reversal.py
     command: pytest tests/integration/enterprise/test_transaction_reversal.py::test_transaction_reversal_restores_balance
@@ -200,6 +288,10 @@ acceptance_criteria:
   description: Given a reversal is requested on an already-reversed transaction, when the API processes it, thenthe response
     is HTTP...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: ./scripts/qa/verify-enterprise-access-subsidy.sh
   - type: automated
     test_type: unit
     file: tests/unit/enterprise/test_transaction_reversal_idempotency.py
@@ -209,6 +301,10 @@ acceptance_criteria:
     to htt...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
+  - type: automated
     test_type: e2e
     file: tests/e2e/enterprise/test_saml_login.py
     command: pytest tests/e2e/enterprise/test_saml_login.py::test_slug_based_saml_login_redirect
@@ -216,6 +312,10 @@ acceptance_criteria:
   description: Given a successful SAML assertion from the Acme Corp IdP for a user not yet in the LMS, when the assertion
     is process...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_jit_provisioning.py
@@ -225,6 +325,10 @@ acceptance_criteria:
     i...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_expired_assertion.py
     command: pytest tests/integration/enterprise/test_saml_expired_assertion.py::test_expired_saml_assertion_rejected
@@ -232,6 +336,10 @@ acceptance_criteria:
   description: Given enterprise customer A with SAMLIdP 'IdP-A' and enterprise customer B with SAML IdP 'IdP-B',when a user
     authenti...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_tenant_isolation.py
@@ -241,6 +349,10 @@ acceptance_criteria:
     runs, then...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: ./scripts/qa/verify-enterprise-integrated-channels.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_channel_sync_degreed.py
     command: pytest tests/integration/enterprise/test_channel_sync_degreed.py::test_degreed_sync_transmits_completion_data
@@ -248,6 +360,10 @@ acceptance_criteria:
   description: Given a channel sync in dry-run mode,when the sync task runs, then no data is transmitted to theexternal system
     and t...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: ./scripts/qa/verify-enterprise-integrated-channels.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_channel_sync_dryrun.py
@@ -257,6 +373,10 @@ acceptance_criteria:
     up to 5 t...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: ./scripts/qa/verify-enterprise-integrated-channels.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_channel_sync_retry.py
     command: pytest tests/integration/enterprise/test_channel_sync_retry.py::test_channel_sync_retry_exponential_backoff
@@ -264,6 +384,10 @@ acceptance_criteria:
   description: Given all enterprise secrets are provisioned in Infisical at /k8s/mereka-lms, when ExternalSecretssyncs, then
     the ent...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-secrets.sh
+    command: ./scripts/qa/verify-enterprise-secrets.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_secrets_sync.py
@@ -273,6 +397,10 @@ acceptance_criteria:
     the value ...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-secrets.sh
+    command: ./scripts/qa/verify-enterprise-secrets.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_secret_consumption.py
     command: pytest tests/integration/enterprise/test_secret_consumption.py::test_catalog_service_reads_correct_secret
@@ -281,6 +409,10 @@ acceptance_criteria:
     (requ...
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-observability.sh
+    command: ./scripts/qa/verify-enterprise-observability.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_metrics.py
     command: pytest tests/integration/enterprise/test_metrics.py::test_enterprise_metrics_exported
@@ -288,6 +420,10 @@ acceptance_criteria:
   description: Given a license assignment fails, when the error is logged, then the log entry includes enterprise_customer_uuid,
     sub...
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-observability.sh
+    command: ./scripts/qa/verify-enterprise-observability.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_logging_redaction.py
@@ -486,6 +622,10 @@ edge_cases:
   description: 'NFR-Reliability-1: All enterprise services have readiness and liveness probes responding'
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: ./scripts/qa/verify-enterprise-service-deployment.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_probes.py
     command: pytest tests/integration/enterprise/test_probes.py::test_all_services_have_probes
@@ -507,12 +647,20 @@ edge_cases:
   description: 'NFR-Reliability-4: Integrated channel sync retry with exponential backoff'
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: ./scripts/qa/verify-enterprise-integrated-channels.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_channel_retry_backoff.py
     command: pytest tests/integration/enterprise/test_channel_retry_backoff.py::test_channel_sync_exponential_backoff
 - id: UNGROUPED-68
   description: 'NFR-Security-1: Inter-service communication uses K8s Service DNS, no external egress'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_internal_communication.py
@@ -521,12 +669,20 @@ edge_cases:
   description: 'NFR-Security-2: Enterprise service API requires JWT authentication, unauthenticated returns HTTP 401'
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_jwt_enforcement.py
     command: pytest tests/integration/enterprise/test_jwt_enforcement.py::test_api_requires_jwt
 - id: UNGROUPED-70
   description: 'NFR-Security-3: Enterprise service API enforces RBAC, wrong role returns HTTP 403'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_rbac_enforcement.py
@@ -535,12 +691,20 @@ edge_cases:
   description: 'NFR-Security-4: Enterprise catalog content filtered by enterprise_customer_uuid at queryset level'
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: ./scripts/qa/verify-enterprise-tenant-isolation.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_queryset_filtering.py
     command: pytest tests/integration/enterprise/test_queryset_filtering.py::test_catalog_queryset_filters_by_customer
 - id: UNGROUPED-72
   description: 'NFR-Security-5: License manager enforces admin can only view/modify own customer''s plans'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: ./scripts/qa/verify-enterprise-license-management.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_license_manager_rbac.py
@@ -549,12 +713,20 @@ edge_cases:
   description: 'NFR-Security-6: SAML assertion signature validated, invalid signature rejected'
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_signature_validation.py
     command: pytest tests/integration/enterprise/test_saml_signature_validation.py::test_invalid_saml_signature_rejected
 - id: UNGROUPED-74
   description: 'NFR-Security-7: SAML assertion NotOnOrAfter validated, expired assertion rejected'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_replay_prevention.py
@@ -563,12 +735,20 @@ edge_cases:
   description: 'NFR-Security-8: SAML assertion audience restriction validated'
   verify:
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: ./scripts/qa/verify-enterprise-sso-saml.sh
+  - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_audience_validation.py
     command: pytest tests/integration/enterprise/test_saml_audience_validation.py::test_saml_audience_validated
 - id: UNGROUPED-76
   description: 'NFR-Security-9: System does not log SAML assertion XML (PII), only metadata'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-observability.sh
+    command: ./scripts/qa/verify-enterprise-observability.sh
   - type: automated
     test_type: integration
     file: tests/integration/enterprise/test_saml_logging_redaction.py

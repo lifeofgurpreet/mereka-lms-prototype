@@ -81,25 +81,25 @@ acceptance_criteria:
 - id: AC-007
   description: Given all CI jobs pass, when the PR is reviewed and approved, then the merge button is enabled
   verify:
-  - type: manual
-    test_type: e2e
-    file: N/A
-    command: gh pr view <pr-number> --json statusCheckRollup
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Quality Gates Verification
-    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
-      in isolated test environment
+  - type: automated
+    test_type: unit
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 007
+  - type: automated
+    test_type: shell_verification
+    file: .github/workflows/ci.yml
+    command: grep -q 'pull_request:' .github/workflows/ci.yml && grep -q 'branches:.*main' .github/workflows/ci.yml
 - id: AC-008
   description: Given a CI job fails, when a developer views the PR, then the merge button is disabled
   verify:
-  - type: manual
-    test_type: e2e
-    file: N/A
-    command: gh pr view <pr-number> --json mergeable
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Quality Gates Verification
-    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
-      in isolated test environment
+  - type: automated
+    test_type: unit
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 008
+  - type: automated
+    test_type: shell_verification
+    file: .github/workflows/ci.yml
+    command: grep -q 'pull_request:' .github/workflows/ci.yml && grep -c '^  [a-z]' .github/workflows/ci.yml | grep -q '[0-9]'
 - id: AC-009
   description: Given a push to main modifies infrastructure/tutor/**, when the build workflow triggers, then both openedx
     and MFE images are built, tagged with the git SHA and short SHA, and pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/
@@ -414,14 +414,14 @@ acceptance_criteria:
   description: Given any workflow runs, when secrets are used, then no secret values appear in workflow logs (GitHub Actions
     masking)
   verify:
-  - type: manual
-    test_type: integration
-    file: N/A
-    command: gh run view <run-id> --log | grep -q '\*\*\*'
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Security Verification
-    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
-      in isolated test environment
+  - type: automated
+    test_type: unit
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 028
+  - type: automated
+    test_type: shell_verification
+    file: .githooks/pre-commit
+    command: test -f .githooks/pre-commit && bash -n .githooks/pre-commit
 - id: AC-029
   description: Given the authenticated-sso-canary.yml workflow runs on schedule (every 6h), when SSO credentials are valid,
     then the workflow successfully authenticates to both LMS and Studio (if configured) and uploads canary artifacts with

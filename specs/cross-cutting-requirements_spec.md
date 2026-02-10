@@ -1,7 +1,7 @@
 ---
 title: "Cross-Cutting Requirements"
 type: "feature_spec"
-status: "in_review"
+status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"

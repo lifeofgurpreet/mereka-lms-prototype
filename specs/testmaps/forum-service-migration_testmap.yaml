@@ -10,6 +10,11 @@ acceptance_criteria:
 - id: AC-002
   description: Thread count preservation - N threads before = N threads after
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 002
+    notes: Verifies shared cs_comments_service database architecture (no data migration = thread counts preserved by definition)
   - type: manual
     file: docs/operations/FORUM_DATA_VERIFICATION.md
     command: Manual verification - compare thread counts in MongoDB Atlas before/after migration
@@ -20,6 +25,11 @@ acceptance_criteria:
 - id: AC-003
   description: Content hash comparison - SHA-256 of 1000 random posts matches 100%
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 003
+    notes: Verifies shared cs_comments_service database (no migration = content hashes identical by definition)
   - type: manual
     file: docs/operations/FORUM_DATA_VERIFICATION.md
     command: Manual verification - hash comparison requires sampling script not yet implemented
@@ -32,6 +42,11 @@ acceptance_criteria:
 - id: AC-004
   description: Vote count preservation - vote counts match between Python and Ruby APIs
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 004
+    notes: Verifies shared cs_comments_service database (same DB = vote counts identical)
   - type: manual
     file: docs/operations/FORUM_DATA_VERIFICATION.md
     command: Manual verification - compare vote counts via API responses
@@ -164,6 +179,11 @@ acceptance_criteria:
 - id: AC-018
   description: Rollback procedure - documented steps to revert to Ruby forum if needed
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 018
+    notes: Verifies shared DB architecture, no schema migration scripts, Ruby forum removal documented
   - type: manual
     file: docs/operations/FORUM_ROLLBACK.md
     command: Manual verification - review rollback procedure documentation
@@ -174,6 +194,11 @@ acceptance_criteria:
 - id: AC-019
   description: Rollback data integrity - posts created during Python period visible after rollback
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 019
+    notes: Verifies no separate forum data store, Meilisearch is search-only (source of truth is shared MongoDB)
   - type: manual
     file: docs/operations/FORUM_ROLLBACK.md
     command: Manual verification - both services use same MongoDB database
@@ -185,6 +210,11 @@ acceptance_criteria:
 - id: AC-020
   description: Auth failure alerts - log-auth-failures-forum alert fires on auth failure
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 020
+    notes: Verifies alert config file exists, enabled, correct metric/threshold/notification channels
   - type: manual
     file: docs/operations/OBSERVABILITY_VERIFICATION.md
     command: Manual verification - trigger auth failure and verify alert fires in Alertmanager
@@ -195,6 +225,11 @@ acceptance_criteria:
 - id: AC-021
   description: Prometheus metrics - forum-specific metrics present in /metrics endpoint
   verify:
+  - type: automated
+    test_type: integration
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: ./scripts/qa/verify-forum-migration-contracts.sh --ac 021
+    notes: Verifies django-prometheus + ServiceMonitor + PrometheusRule chain for LMS (forum integrated into LMS)
   - type: manual
     file: docs/operations/OBSERVABILITY_VERIFICATION.md
     command: kubectl exec -n mereka-lms $(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}')

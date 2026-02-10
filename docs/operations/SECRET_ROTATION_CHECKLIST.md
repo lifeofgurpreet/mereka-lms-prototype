@@ -1,7 +1,13 @@
 # Secret Rotation Checklist
-_Audience: Platform / Security responders • Last updated: 2026-02-06_
+_Audience: Platform / Security responders • Last updated: 2026-02-10_
 
 Use this when a secret may have leaked or whenever scheduled credential rotation is due.
+
+**Target**: Complete full rotation within 1 hour of incident declaration (DR-006).
+
+## Full Rotation Procedure
+
+Follow steps 1–5 below in order. Each step has verification commands.
 
 ## 1) Contain
 

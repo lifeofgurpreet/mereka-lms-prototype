@@ -1287,6 +1287,190 @@ kubectl get endpoints -n "$NAMESPACE" | grep -E "NAME|$SERVICES"
 
 ---
 
+## Cross-Cutting Requirements Verification
+
+These procedures verify platform-wide cross-cutting requirements defined in `specs/cross-cutting-requirements_spec.md`.
+
+### Tenant Isolation Testing
+
+Verify that API endpoints enforce tenant data isolation (AC-CCR-001).
+
+**Prerequisites**: Multi-tenancy with `EnterpriseCustomer` model must be deployed (Tier 4). This procedure is deferred until `multi-tenancy-architecture_spec.md` is implemented.
+
+**Procedure** (when multi-tenancy is available):
+
+1. **Create two test tenants** with distinct `EnterpriseCustomer.uuid` values
+2. **Create test data** (enrollments, grades) in each tenant
+3. **Authenticate as Tenant A** and query each API endpoint that returns tenant data:
+   ```bash
+   # Example: enrollment API
+   curl -H "Authorization: JWT <tenant_a_token>" \
+     https://academyv2.mereka.io/api/enrollment/v1/enrollment
+   ```
+4. **Verify** the response contains zero records belonging to Tenant B
+5. **Attempt cross-tenant access** by manipulating UUIDs in URLs:
+   ```bash
+   curl -H "Authorization: JWT <tenant_a_token>" \
+     https://academyv2.mereka.io/api/enrollment/v1/enrollment?enterprise_customer=<tenant_b_uuid>
+   ```
+6. **Verify** the response returns 403 or empty results (never Tenant B's data)
+
+**Acceptance**: No API endpoint returns data belonging to a tenant other than the authenticated tenant.
+
+### Log Format Verification
+
+Verify that all services emit structured JSON logs with required fields (AC-CCR-003).
+
+**Procedure**:
+
+1. **Sample logs from each running service**:
+   ```bash
+   for deploy in lms cms lms-worker cms-worker; do
+     echo "=== $deploy ==="
+     kubectl logs -n mereka-lms deploy/$deploy --tail=5 2>/dev/null | head -3
+   done
+   ```
+
+2. **Verify JSON structure** — each log line should parse as JSON:
+   ```bash
+   kubectl logs -n mereka-lms deploy/lms --tail=20 | while read line; do
+     echo "$line" | python3 -c "import sys,json; json.load(sys.stdin); print('OK')" 2>/dev/null || echo "NOT JSON: $line"
+   done
+   ```
+
+3. **Verify required fields** in JSON log entries:
+   - `timestamp` (or `time` or `asctime`)
+   - `level` (or `levelname` or `severity`)
+   - `service` (or `name` or `logger`)
+   - `request_id` (where applicable — not all log lines are request-scoped)
+
+4. **Verify no PII at INFO level**:
+   ```bash
+   kubectl logs -n mereka-lms deploy/lms --tail=100 | \
+     grep -iE '"(email|password|name)"' | head -5
+   # Should return empty or only DEBUG-level entries
+   ```
+
+**Acceptance**: All services emit structured JSON logs; required fields are present; no PII at INFO level or below.
+
+### Tenant Offboarding
+
+Verify tenant offboarding produces a cryptographic deletion certificate (AC-CCR-007).
+
+**Prerequisites**: Tenant offboarding workflow must be implemented (depends on `multi-tenancy-architecture_spec.md` and `data-privacy-gdpr-compliance_spec.md`, both Tier 4+). This procedure is deferred until those specs are implemented.
+
+**Procedure** (when offboarding is available):
+
+1. **Initiate offboarding** for a test tenant
+2. **Verify data export** completes within 7 days:
+   - All tenant data exported to a secure archive
+   - Export includes: enrollments, grades, user profiles, certificates, forum posts
+3. **Verify data deletion** completes within 30 days:
+   - Tenant data removed from MySQL, MongoDB, Redis, Elasticsearch
+   - Each data store confirms deletion
+4. **Verify deletion certificate** is produced:
+   - Certificate lists all data stores from which data was removed
+   - Certificate is cryptographically signed
+   - Certificate includes timestamp, tenant ID, and data store inventory
+
+**Acceptance**: Offboarding produces a verifiable deletion certificate listing all purged data stores.
+
+### Payment Idempotency Testing
+
+Verify financial write operations are idempotent (AC-CCR-010).
+
+**Prerequisites**: Purchase gateway service (`services/purchase-gateway/`) must be deployed (Tier 5). This procedure is deferred until `ecommerce-purchase-gateway_spec.md` is implemented.
+
+**Procedure** (when ecommerce is available):
+
+1. **Generate a unique idempotency key** for a test payment
+2. **Submit the payment** twice with the same idempotency key:
+   ```bash
+   # First submission
+   curl -X POST -H "Idempotency-Key: test-$(date +%s)" \
+     -d '{"amount": 100, "currency": "MYR"}' \
+     https://api.academyv2.mereka.io/api/payments/v1/charge
+
+   # Duplicate submission (same key)
+   curl -X POST -H "Idempotency-Key: test-$(date +%s)" \
+     -d '{"amount": 100, "currency": "MYR"}' \
+     https://api.academyv2.mereka.io/api/payments/v1/charge
+   ```
+3. **Verify** only one payment was processed (no double charge)
+4. **Verify** the duplicate returns the same response as the original
+
+**Acceptance**: Re-executing the same financial write operation produces the same result without creating duplicate records.
+
+### Celery Worker Log Verification
+
+Verify background job failure logs include full context (AC-CCR-011).
+
+**Procedure**:
+
+1. **Identify a recent Celery worker failure** (or trigger one deliberately):
+   ```bash
+   kubectl logs -n mereka-lms deploy/lms-worker --tail=200 | grep -i "error\|exception\|traceback" | head -10
+   ```
+
+2. **Verify log entry contains required fields**:
+   - **Error code** or exception class (e.g., `ConnectionError`, `TimeoutError`)
+   - **Error message** (human-readable description)
+   - **Full context**: job ID / task name, tenant ID (if applicable), input parameters
+   - **Stack trace** (for internal diagnostics)
+
+3. **Example of a compliant failure log**:
+   ```json
+   {
+     "timestamp": "2026-02-10T12:00:00Z",
+     "level": "ERROR",
+     "service": "lms-worker",
+     "task": "lms.djangoapps.grades.tasks.compute_grades_for_course_v2",
+     "task_id": "abc-123",
+     "error": "ConnectionError",
+     "message": "MySQL connection refused",
+     "traceback": "...",
+     "tenant_id": "enterprise-uuid-here"
+   }
+   ```
+
+4. **Verify retry behavior** — failed jobs should be retried with exponential backoff:
+   ```bash
+   kubectl logs -n mereka-lms deploy/lms-worker --tail=500 | \
+     grep -E "Retry|retry|backoff" | head -5
+   ```
+
+**Acceptance**: Background job failure logs include error code, message, context (job ID, tenant ID, input), and stack trace.
+
+### Event Bus Verification
+
+Verify Redis Streams consumers implement idempotent handling with deduplication (AC-CCR-012).
+
+**Prerequisites**: Redis Streams event bus must be implemented (Tier 4 platform decision). This procedure is deferred until event bus consumers are built.
+
+**Procedure** (when event bus is available):
+
+1. **Publish a test event** to a Redis Stream with a known event ID:
+   ```bash
+   kubectl exec -n mereka-lms deploy/redis -- redis-cli XADD test-stream '*' event_id "test-$(date +%s)" type "test" data '{"key":"value"}'
+   ```
+
+2. **Publish the same event again** (duplicate by event_id):
+   ```bash
+   kubectl exec -n mereka-lms deploy/redis -- redis-cli XADD test-stream '*' event_id "test-<same-id>" type "test" data '{"key":"value"}'
+   ```
+
+3. **Verify consumer processes the event only once**:
+   - Check consumer logs for deduplication message
+   - Verify downstream effects occurred exactly once (not twice)
+
+4. **Verify consumer handles out-of-order events**:
+   - Publish events with non-sequential timestamps
+   - Verify consumer uses event timestamps (not processing order) for ordering
+
+**Acceptance**: Redis Streams consumers deduplicate events by event ID and handle out-of-order delivery gracefully.
+
+---
+
 ## 📚 Related Documentation
 
 - [`docs/operations/DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - Full deployment procedures

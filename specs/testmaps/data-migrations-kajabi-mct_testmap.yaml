@@ -111,6 +111,10 @@ acceptance_criteria:
     user account exists for that email with enrollments from both source systems
 - id: AC-014
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: bash scripts/qa/verify-data-migration-contracts.sh --ac 014
   - type: manual
     runbook: docs/migrations/VERIFICATION_CHECKLIST.md
     section: Pod Restart Recovery
@@ -323,6 +327,10 @@ acceptance_criteria:
 - id: AC-040
   description: Valid webhook with HMAC signature persists event to outbox
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: bash scripts/qa/verify-data-migration-contracts.sh --ac 040
   - type: manual
     runbook: docs/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
@@ -330,6 +338,10 @@ acceptance_criteria:
 - id: AC-041
   description: Invalid signature returns HTTP 401
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: bash scripts/qa/verify-data-migration-contracts.sh --ac 041
   - type: manual
     runbook: docs/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
@@ -337,6 +349,10 @@ acceptance_criteria:
 - id: AC-042
   description: Missing event key returns HTTP 400
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: bash scripts/qa/verify-data-migration-contracts.sh --ac 042
   - type: manual
     runbook: docs/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
@@ -344,6 +360,10 @@ acceptance_criteria:
 - id: AC-043
   description: Unknown event type written to unknown__ outbox file
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: bash scripts/qa/verify-data-migration-contracts.sh --ac 043
   - type: manual
     runbook: docs/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing
@@ -351,6 +371,10 @@ acceptance_criteria:
 - id: AC-044
   description: Missing KAJABI_WEBHOOK_SECRET returns HTTP 500 on healthcheck
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: bash scripts/qa/verify-data-migration-contracts.sh --ac 044
   - type: manual
     runbook: docs/operations/TROUBLESHOOTING.md
     section: Kajabi Webhook Testing

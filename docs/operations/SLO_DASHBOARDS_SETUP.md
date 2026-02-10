@@ -402,6 +402,77 @@ kubectl logs -n monitoring prometheus-monitoring-kube-prometheus-prometheus-0 \
 - [ ] ServiceMonitors created for LMS application metrics (future)
 - [ ] Alert rules firing correctly to Alertmanager
 
+## Verification
+
+### Simulate Budget Burn
+
+To verify that error budget burn rate alerts fire correctly when budget drops below 50%:
+
+1. **Understand the alert rule**:
+   - Alert `SLOBudgetFastBurn` fires when 1h burn rate > 14.4x for Tier 1 services
+   - Alert `SLOBudgetWarning` fires when 6h burn rate > 3x
+
+2. **Simulated test procedure** (non-production only):
+   ```bash
+   # Scale LMS to 0 replicas to simulate full outage
+   kubectl scale deploy/lms -n mereka-lms --replicas=0
+
+   # Wait 5-10 minutes for Prometheus to record downtime
+   # Check burn rate alert status
+   kubectl -n monitoring exec prometheus-monitoring-kube-prometheus-prometheus-0 -- \
+     wget -qO- 'http://localhost:9090/api/v1/alerts' | jq '.data.alerts[] | select(.labels.alertname | startswith("SLO"))'
+
+   # IMMEDIATELY restore LMS
+   kubectl scale deploy/lms -n mereka-lms --replicas=1
+   ```
+
+3. **Verify alert delivery**:
+   - Check Slack `#mereka-operations` for alert notification
+   - Check Alertmanager UI for firing alert
+   - Verify notification arrived within 5 minutes of budget crossing
+
+4. **IMPORTANT**: This test requires scaling production LMS to zero. Only perform during a declared maintenance window or on a dev/staging cluster. For production verification, use the automated check instead:
+   ```bash
+   bash scripts/qa/verify-error-budget.sh --check-burn-rate-alerts
+   ```
+
+**Acceptance**: When error budget drops below 50% (simulated by scaling to 0), a Slack notification fires within 5 minutes.
+
+### Simulate Latency Regression
+
+To verify that latency regression detection alerts fire when p95 exceeds 2x baseline:
+
+1. **Understand the alert rule**:
+   - Alert `LatencyRegressionSpike` fires when p95 latency > 2x 7-day baseline for 15 minutes
+
+2. **Simulated test procedure** (non-production only):
+   ```bash
+   # Option A: Inject artificial latency via a test middleware
+   # Requires django-prometheus and a test endpoint that adds sleep()
+
+   # Option B: Use traffic generation with slow responses
+   # Generate slow requests to LMS to push p95 up
+   for i in $(seq 1 100); do
+     curl -s -o /dev/null -w "%{time_total}\n" "https://academyv2.mereka.io/api/heartbeat" &
+   done
+
+   # Wait 15+ minutes for the regression window to fill
+   # Check Prometheus for regression alert
+   kubectl -n monitoring exec prometheus-monitoring-kube-prometheus-prometheus-0 -- \
+     wget -qO- 'http://localhost:9090/api/v1/alerts' | jq '.data.alerts[] | select(.labels.alertname == "LatencyRegressionSpike")'
+   ```
+
+3. **Verify alert delivery**:
+   - Check Slack for P2 alert notification
+   - Verify alert annotation includes deployment context (if recent deploy occurred)
+
+4. **For production verification** (non-destructive), use the automated config check:
+   ```bash
+   bash scripts/qa/verify-regression-detection.sh --check-regression-alerts
+   ```
+
+**Acceptance**: When p95 latency exceeds 2x the 7-day baseline for 15 consecutive minutes, a P2 alert fires and is delivered to on-call.
+
 ## Next Steps
 
 1. [x] Add uptime configs for all public endpoints (LMS, Studio, MFE, Discovery, Ecommerce, Notes, microsites)
