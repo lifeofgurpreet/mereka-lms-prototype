@@ -100,7 +100,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
+from playwright.sync_api import Error as PWError, TimeoutError as PWTimeout, sync_playwright
 
 env_name = os.environ["CANARY_ENV_NAME"]
 lms_domain = os.environ["CANARY_LMS_DOMAIN"]
@@ -114,6 +114,7 @@ run_id = os.environ["CANARY_RUN_ID"]
 base_url = f"https://{lms_domain}"
 login_url = f"{base_url}/auth/login/oidc/"
 dashboard_url = f"{base_url}/dashboard"
+sso_mfe_learner_dashboard_url = f"https://{mfe_domain}/learner-dashboard"
 screenshot_path = out_dir / f"{run_id}-failure.png"
 
 def log(msg: str) -> None:
@@ -133,6 +134,7 @@ def assert_not_auth_error_page(page, phase: str) -> None:
     url = (page.url or "").lower()
     if "error=" in url and ("auth/callback" in url or "authn/login" in url or "/login" in url):
         fail(f"{phase}: callback/login error query detected in url={page.url}", page=page)
+
     try:
         body = page.inner_text("body", timeout=3000).lower()
     except Exception:
@@ -147,6 +149,31 @@ def assert_not_auth_error_page(page, phase: str) -> None:
         fail(f"{phase}: Open edX authorization denied after callback", page=page)
     if "your account is disabled" in body:
         fail(f"{phase}: Open edX reports account disabled (check OIDC user password state)", page=page)
+
+def wait_for_app_return(page) -> None:
+    # Browser/network layers can occasionally throw ERR_NETWORK_CHANGED during redirect chains.
+    # Retry a couple times before declaring failure.
+    attempts = 0
+    last_exc = None
+    while attempts < 3:
+        attempts += 1
+        try:
+            page.wait_for_url(
+                re.compile(
+                    rf"^https://({re.escape(lms_domain)}|{re.escape(mfe_domain)})/"
+                ),
+                timeout=60000,
+            )
+            return
+        except PWError as exc:
+            last_exc = exc
+            msg = str(exc)
+            if "ERR_NETWORK_CHANGED" in msg or "net::ERR_NETWORK_CHANGED" in msg:
+                # Small backoff before retry.
+                page.wait_for_timeout(1500)
+                continue
+            raise
+    fail(f"post_callback navigation failed after retries: {last_exc}", page=page)
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
@@ -173,12 +200,7 @@ with sync_playwright() as p:
 
         # We expect callback to leave Authentik domain.
         # Depending on the flow, we may land on LMS or Authn MFE first.
-        page.wait_for_url(
-            re.compile(
-                rf"^https://({re.escape(lms_domain)}|{re.escape(mfe_domain)})/"
-            ),
-            timeout=60000,
-        )
+        wait_for_app_return(page)
         assert_not_auth_error_page(page, "post_callback")
         if debug:
             log(f"post_callback_url={page.url}")
@@ -209,9 +231,24 @@ with sync_playwright() as p:
                 pass
         assert_not_auth_error_page(page, "dashboard_navigation")
 
+        # Cross-domain regression guardrail:
+        # After successful LMS SSO, MFEs must be able to refresh the session (login_refresh)
+        # and load authenticated surfaces. This catches the common failure mode where
+        # REFRESH_ACCESS_TOKEN_ENDPOINT is cross-origin and cookies are not sent, causing
+        # MFEs to loop back to /authn/login.
+        page.goto(sso_mfe_learner_dashboard_url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_load_state("domcontentloaded", timeout=60000)
+        if "/authn/login" in (page.url or ""):
+            fail(
+                f"mfe_learner_dashboard_redirected_to_authn_login url={page.url} "
+                "(likely login_refresh 401 / cookie or reverse-proxy drift)",
+                page=page,
+            )
+        assert_not_auth_error_page(page, "mfe_learner_dashboard")
+
         log("OK authenticated session validated")
-    except PWTimeout as exc:
-        fail(f"timeout: {exc}", page=page)
+    except (PWTimeout, PWError) as exc:
+        fail(f"timeout_or_browser_error: {exc}", page=page)
     finally:
         browser.close()
 PY

@@ -612,7 +612,10 @@ MFE_CONFIG = {
     "LOGOUT_URL": f"{MEREKA_LMS_BASE_URL}/logout",
     "MARKETING_SITE_BASE_URL": MEREKA_LMS_BASE_URL,
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",
-    "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{MEREKA_LMS_BASE_URL}/login_refresh",
+    # IMPORTANT: MFEs call this via browser fetch. Many stacks default to `credentials: "same-origin"`,
+    # which will NOT send LMS session cookies to a different origin. Point this at the MFE origin
+    # and reverse-proxy it back to the LMS (see deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile).
+    "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{MEREKA_MFE_BASE_URL}/login_refresh",
     "SITE_NAME": "Mereka",
     "STUDIO_BASE_URL": MEREKA_STUDIO_BASE_URL,
     "USER_INFO_COOKIE_NAME": "user-info",

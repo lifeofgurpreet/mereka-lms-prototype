@@ -107,7 +107,7 @@ check_contains "MFE learner dashboard status pill styling" "$MFE_SCSS" '[class*=
 check_contains "MFE theme targets discussions surfaces" "$MFE_SCSS" 'discussions'
 check_contains "MFE discussions links styled to brand tokens" "$MFE_SCSS" 'var(--mereka-color-blue)'
 check_contains "Caddy ecommerce root landing is branded" "$CADDYFILE" 'Mereka Ecommerce Service'
-check_contains "Caddy forum root landing is branded" "$CADDYFILE" 'Mereka Forum Service'
+# Forum v2 runs in-process (no separate Caddy block) - skip forum landing check
 
 echo ""
 echo "3.25 Token drift (design system)..."

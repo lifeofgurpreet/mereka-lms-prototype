@@ -96,7 +96,10 @@ LMS/CMS also include multisite hardening middleware:
   - Verifies `/api/mfe_config/v1` on the public apps host contains the auth-critical keys we depend on:
     - `AUTHN_MICROFRONTEND_URL` / `AUTHN_MICROFRONTEND_DOMAIN`
     - `SESSION_COOKIE_SAMESITE` / `CSRF_COOKIE_SAMESITE` (should be `"None"`)
-    - `REFRESH_ACCESS_TOKEN_ENDPOINT` and base URLs match the current hostnames
+    - `REFRESH_ACCESS_TOKEN_ENDPOINT` MUST be **same-origin** (`https://apps.<domain>/login_refresh`)
+      and the apps host MUST reverse-proxy `/login_refresh` back to the LMS.
+      This prevents the common regression where MFEs call cross-origin `https://<lms>/login_refresh`
+      without sending cookies (browser default `credentials: "same-origin"`), which causes MFE auth loops.
   - This catches “stale config” and cookie posture regressions before they become user-visible SSO failures.
 
 - `scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`

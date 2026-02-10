@@ -55,6 +55,12 @@ spec:
                     if [ "$code" = "401" ]; then ok "$url ($code)"; else bad "$url (expected 401, got $code)"; fi
                   }
 
+                  require_405() {
+                    url="$1"
+                    code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo 000)"
+                    if [ "$code" = "405" ]; then ok "$url ($code)"; else bad "$url (expected 405, got $code)"; fi
+                  }
+
                   require_302_loc_contains() {
                     url="$1"
                     needle="$2"
@@ -94,6 +100,10 @@ spec:
                   # MFE config and Authn MFE login
                   require_200 "https://apps.academyv2.mereka.io/api/mfe_config/v1"
                   require_200 "https://apps.academyv2.mereka.io/authn/login"
+                  # MFE refresh endpoint must be exposed on apps origin (reverse-proxy to LMS).
+                  require_405 "https://apps.academyv2.mereka.io/login_refresh"
+                  # Biji MFE host should also expose login_refresh (same contract).
+                  require_405 "https://apps.academy.biji-biji.com/login_refresh"
 
                   # Services: /login should start LMS OAuth, which itself relies on Authentik.
                   for svc in discovery credentials ecommerce; do
@@ -110,4 +120,3 @@ spec:
                     exit 1
                   fi
                   printf "OK\n"
-

@@ -103,7 +103,9 @@ def require_truthy(key: str) -> None:
 # Hard requirements: must align with the currently deployed public surface.
 require_eq("LMS_BASE_URL", f"https://{lms_domain}")
 require_eq("STUDIO_BASE_URL", f"https://{studio_domain}")
-require_eq("REFRESH_ACCESS_TOKEN_ENDPOINT", f"https://{lms_domain}/login_refresh")
+# IMPORTANT: expose login_refresh on the MFE origin to avoid cross-origin cookie drops
+# (many browser clients default to credentials='same-origin').
+require_eq("REFRESH_ACCESS_TOKEN_ENDPOINT", f"https://{mfe_domain}/login_refresh")
 require_eq("DISABLE_ENTERPRISE_LOGIN", True)
 
 # Authn wiring SHOULD be present; missing values are a common signal that a

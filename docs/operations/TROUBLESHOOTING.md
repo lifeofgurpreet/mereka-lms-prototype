@@ -858,6 +858,44 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
 
 ---
 
+### Issue 7c2: MFEs loop back to `/authn/login` after successful SSO (`/login_refresh` 401)
+
+**Symptoms:**
+- Authentik login succeeds, LMS session works (e.g. `https://academyv2.mereka.io/dashboard` loads),
+  but MFEs (e.g. `https://apps.academyv2.mereka.io/learner-dashboard`) redirect to:
+  - `https://apps.../authn/login?next=...`
+- Browser network shows:
+  - `POST https://academyv2.mereka.io/login_refresh` → `401`
+- Browser request headers for `login_refresh` are missing `Cookie:` entirely (session cookie not sent).
+
+**Root Cause:**
+- MFEs call `REFRESH_ACCESS_TOKEN_ENDPOINT` via browser fetch/Axios.
+- Many clients default to `credentials: "same-origin"`, so **cross-origin** calls to the LMS
+  (`apps.*` → `academyv2.*`) do **not** send session cookies.
+- The LMS returns `401`, and MFEs assume the user is not authenticated and bounce to `/authn/login`.
+
+**Fix:**
+1. Ensure MFE config is **same-origin** for refresh:
+   - `/api/mfe_config/v1` MUST contain:
+     - `REFRESH_ACCESS_TOKEN_ENDPOINT=https://apps.<domain>/login_refresh`
+2. Ensure the MFE origin exposes `/login_refresh` and reverse-proxies to LMS:
+   - Implemented via MFE Caddy reverse-proxy (see `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`).
+3. Deploy the updated manifests via GitOps (BBI-K8 pinned ref bump).
+
+**Verify (no credentials):**
+```bash
+./scripts/qa/verify-auth-surfaces.sh prod
+./scripts/qa/verify-mfe-config-contract.sh --env prod
+```
+
+**Verify (credentialed):**
+```bash
+RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 \
+  ./scripts/qa/verify-auth-hardening.sh --env prod --mode public
+```
+
+---
+
 ### Issue 7d: Studio Create Course fails (`User has no profile`)
 
 **Symptoms:**

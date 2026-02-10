@@ -350,6 +350,18 @@ require_body_contains \
   "Primary MFE config LMS_BASE_URL" \
   "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
 
+require_body_contains \
+  "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" \
+  "Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh)" \
+  "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\""
+
+# Sanity-check the reverse-proxy exists: unauthenticated HEAD should return 405 (POST only),
+# not 404/500. We do not require 401 here because the endpoint can be hit without session.
+require_status \
+  "https://apps.${ECOSYSTEM_BASE}/login_refresh" \
+  "Primary MFE host exposes /login_refresh" \
+  "405"
+
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   require_body_contains \
     "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" \
@@ -359,6 +371,16 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
     "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" \
     "Biji MFE config STUDIO_BASE_URL" \
     "\"STUDIO_BASE_URL\": \"https://${BIJI_STUDIO_DOMAIN}\""
+
+  require_body_contains \
+    "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" \
+    "Biji MFE config refresh endpoint is same-origin" \
+    "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://${BIJI_MFE_DOMAIN}/login_refresh\""
+
+  require_status \
+    "https://${BIJI_MFE_DOMAIN}/login_refresh" \
+    "Biji MFE host exposes /login_refresh" \
+    "405"
 fi
 
 for svc in discovery credentials ecommerce; do

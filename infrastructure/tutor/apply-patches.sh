@@ -65,11 +65,18 @@ PY
 LMS_ASSETS_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
-print(Path(tutor.__file__).parent / "templates" / "apps" / "openedx" / "settings" / "lms" / "assets.py")
+print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "settings" / "lms" / "assets.py")
 PY
 )
 
 # FORUM_PLUGIN still exists in v21 but structure simplified (no DD_TRACE_ENABLED patch needed)
+
+CMS_ASSETS_TEMPLATE=$(python - <<'PY'
+from pathlib import Path
+import tutor
+print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "settings" / "cms" / "assets.py")
+PY
+)
 
 WEBPACK_PROD_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
@@ -96,6 +103,8 @@ PATCH_TARGETS=(
   "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
   "$LMS_ASSETS_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
+  "$CMS_ASSETS_TEMPLATE"
+  "$REPO_ROOT/tutor_env/env/build/openedx/settings/cms/assets.py"
   "$WEBPACK_PROD_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
 )
@@ -611,6 +620,14 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         "# Patch edx-platform\n# Redwood already bundles the required security/email fixes; cherry-picks disabled locally.\n\n",
     )
 
+    # Fix Tutor v21 node_modules path: npm installs at WORKDIR /openedx/edx-platform
+    # but COPY expects /openedx/node_modules. Move node_modules after install.
+    if path.name == "Dockerfile" and "nodejs-requirements" in updated:
+        npm_install_marker = "npm clean-install --no-audit --registry=$NPM_REGISTRY"
+        node_mv = "npm clean-install --no-audit --registry=$NPM_REGISTRY\nRUN mv /openedx/edx-platform/node_modules /openedx/node_modules"
+        if npm_install_marker in updated and "mv /openedx/edx-platform/node_modules" not in updated:
+            updated = updated.replace(npm_install_marker, node_mv)
+
     # Add custom apps to Dockerfile
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
         # Find the line where we copy themes and add our custom apps after it
@@ -833,32 +850,32 @@ RUN pip install "pymongo[srv]" """,
             updated = pattern.sub(rf"\\1\n{profile_proxy}\\2", updated, count=1)
     if path.name == "Caddyfile":
         # For extra LMS hosts, use the proper LMS proxy pattern (not nginx)
-        lms_caddy_block_template = """{domain}{{{{$default_site_port}}}} {{
-    @favicon_matcher {{
+        lms_caddy_block_template = """__DOMAIN__{$default_site_port} {
+    @favicon_matcher {
         path_regexp ^/favicon.ico$
-    }}
+    }
     rewrite @favicon_matcher /theming/asset/images/favicon.ico
 
     # Limit profile image upload size
-    handle_path /api/profile_images/*/*/upload {{
-        request_body {{
+    handle_path /api/profile_images/*/*/upload {
+        request_body {
             max_size 1MB
-        }}
-    }}
+        }
+    }
 
     import proxy "lms:8000"
 
-    handle_path /* {{
-        request_body {{
+    handle_path /* {
+        request_body {
             max_size 4MB
-        }}
-    }}
-}}
+        }
+    }
+}
 
 """
         for host in extra_lms_hosts:
             if host not in updated:
-                updated = updated.rstrip() + "\n\n" + lms_caddy_block_template.format(domain=host)
+                updated = updated.rstrip() + "\n\n" + lms_caddy_block_template.replace("__DOMAIN__", host)
         if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
             needle = "apps.academyv2.mereka.io {\n        reverse_proxy nginx:80"
             replacement = (
@@ -869,6 +886,17 @@ RUN pip install "pymongo[srv]" """,
                 "        reverse_proxy nginx:80"
             )
             updated = updated.replace(needle, replacement, 1)
+
+    # Fix collectstatic SuspiciousFileOperation in v21 asset builds.
+    # The theming storage's safe_join fails on relative CSS paths that resolve outside STATIC_ROOT.
+    # Must be set AFTER derive_settings() which overrides STATICFILES_STORAGE.
+    if path.name == "assets.py" and "derive_settings" in updated:
+        storage_override = 'STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"'
+        if storage_override not in updated:
+            updated = updated.replace(
+                "derive_settings(__name__)",
+                "derive_settings(__name__)\n\n" + storage_override,
+            )
 
     if updated != original:
         path.write_text(updated)

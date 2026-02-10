@@ -20,6 +20,12 @@
         header_up Host {http.request.host}
     }
 
+    # MFEs use this endpoint to refresh the JWT cookie. Some frontends do not send cross-origin
+    # cookies by default, so we expose /login_refresh on the MFE origin and reverse-proxy to LMS.
+    reverse_proxy /login_refresh* lms:8000 {
+        header_up Host {http.request.host}
+    }
+
     # Account MFE does not implement /settings as a standalone SPA route.
     # Redirect it to the canonical account root so users don't hit a "page unavailable" screen.
     @account_settings_compat {

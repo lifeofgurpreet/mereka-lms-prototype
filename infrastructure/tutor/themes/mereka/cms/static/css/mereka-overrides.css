@@ -719,8 +719,18 @@ button.btn.btn-primary:focus {
 
 .dashboard .my-courses .course-item .wrapper-course-image {
   flex: 0 0 clamp(220px, 34%, 360px);
+  min-width: 220px;
   max-width: 360px;
   margin: 0;
+}
+
+.dashboard .my-courses .course-item .details {
+  /* Older LMS markup wraps image+details in a .details section that defaults to block,
+     which squashes the cover image down to its intrinsic width. Force a two-column layout. */
+  display: flex !important;
+  align-items: stretch;
+  flex-direction: row;
+  width: 100%;
 }
 
 .dashboard .my-courses .course-item .wrapper-course-image a,
