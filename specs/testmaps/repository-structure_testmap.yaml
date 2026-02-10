@@ -6,164 +6,130 @@ spec: repository-structure_spec.md
 plan: plans/repository-structure_plan.md
 testplan: plans/repository-structure_testplan.md
 tier: 0
-
 acceptance_criteria:
-  - id: AC-001
-    description: "Given a fresh clone, when listing top-leveldirectories, then deploy/, scripts/, infrastructure/, docs/,specs/, services/, and assets/ all exist"
+- id: AC-001
+  description: "Given a fresh clone, when listing top-leveldirectories, then deploy/, scripts/, infrastructure/, docs/,specs/, services/, and assets/ all exist"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Top-level directory existence checks"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'Top-level directory'"
-    automated: true
-    priority: P0
-
-  - id: AC-002
-    description: "Given the repository root, when listing *.md files, then only files in the defined allowlist are present"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'Top-level directory'
+- id: AC-002
+  description: "Given the repository root, when listing *.md files, then only files in the defined allowlist are present"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Root markdown allowlist check"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -E 'Root markdown|allowlist'"
-    automated: true
-    priority: P0
-
-  - id: AC-003
-    description: "Given the scripts/ directory, when listingsubdirectories, then shared/, infra/, migrations/, branding/,analytics/, and qa/ all exist"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -E 'Root markdown|allowlist'
+- id: AC-003
+  description: "Given the scripts/ directory, when listingsubdirectories, then shared/, infra/, migrations/, branding/,analytics/, and qa/ all exist"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Scripts subdirectory existence checks"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'scripts/'"
-    automated: true
-    priority: P0
-
-  - id: AC-004
-    description: "Given scripts/shared/config.sh, when sourcing it, then GCP_PROJECT, GCP_REGION, and LMS_DOMAIN are exported with non-empty values"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'scripts/'
+- id: AC-004
+  description: "Given scripts/shared/config.sh, when sourcing it, then GCP_PROJECT, GCP_REGION, and LMS_DOMAIN are exported with non-empty values"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "config.sh variable export verification"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'config.sh'"
-    automated: true
-    priority: P0
-
-  - id: AC-005
-    description: "Given deploy/k8s/overlays/, when listing subdirectories, then local/ and production/ both exist"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'config.sh'
+- id: AC-005
+  description: "Given deploy/k8s/overlays/, when listing subdirectories, then local/ and production/ both exist"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "K8s overlay directory existence checks"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'deploy/k8s/overlays'"
-    automated: true
-    priority: P0
-
-  - id: AC-006
-    description: "Given deploy/k8s/base/secrets/, when scanning YAML files, then no file contains kind: Secret with data:or stringData: fields containing non-reference values"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'deploy/k8s/overlays'
+- id: AC-006
+  description: "Given deploy/k8s/base/secrets/, when scanning YAML files, then no file contains kind: Secret with data:or stringData: fields containing non-reference values"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "No hardcoded secrets in K8s manifests"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'secret'"
-    automated: true
-    priority: P0
-
-  - id: AC-007
-    description: "Given the repository, when checking for tools/ and ops/, then neither exists OR each contains only a README.md redirect"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'secret'
+- id: AC-007
+  description: "Given the repository, when checking for tools/ and ops/, then neither exists OR each contains only a README.md redirect"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Deprecated directory hygiene check"
+    file: scripts/qa/verify-repo-structure.sh
     command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'deprecated\\|tools/\\|ops/'"
-    automated: true
-    priority: P0
-
-  - id: AC-008
-    description: "Given docs/, when listing subdirectories, then adr/, onboarding/, operations/, migrations/, architecture/, and archive/ all exist"
+- id: AC-008
+  description: "Given docs/, when listing subdirectories, then adr/, onboarding/, operations/, migrations/, architecture/, and archive/ all exist"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Docs subdirectory existence checks"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'docs/'"
-    automated: true
-    priority: P0
-
-  - id: AC-009
-    description: "Given infrastructure/, when listing subdirectories, then tutor/, cloudflare/, terraform/, and monitoring/ all exist"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'docs/'
+- id: AC-009
+  description: "Given infrastructure/, when listing subdirectories, then tutor/, cloudflare/, terraform/, and monitoring/ all exist"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Infrastructure subdirectory existence checks"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'infrastructure/'"
-    automated: true
-    priority: P0
-
-  - id: AC-010
-    description: "Given var/ and tutor_env/, when checking .gitignore, then both directories are listed as gitignored patterns"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'infrastructure/'
+- id: AC-010
+  description: "Given var/ and tutor_env/, when checking .gitignore, then both directories are listed as gitignored patterns"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Gitignore pattern verification"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep '.gitignore'"
-    automated: true
-    priority: P0
-
-  - id: AC-011
-    description: "Given any specs/*.md file, when checking the filename, then it matches the pattern *_spec.md"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep '.gitignore'
+- id: AC-011
+  description: "Given any specs/*.md file, when checking the filename, then it matches the pattern *_spec.md"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Spec naming convention check"
-    command: "bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'spec.*naming\\|_spec.md'"
-    automated: true
-    priority: P0
-
-  - id: AC-012
-    description: "Given the full verification script, when executed, then it completes in under 5 seconds and reports PASSwith zero violations"
+    file: scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'spec.*naming\|_spec.md'
+- id: AC-012
+  description: "Given the full verification script, when executed, then it completes in under 5 seconds and reports PASSwith zero violations"
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    test_name: "Full verification pass with timing"
-    command: "time bash scripts/qa/verify-repo-structure.sh"
-    automated: true
-    priority: P0
-    notes: "Also verified via CI workflow at .github/workflows/verify-repo-structure.yml"
-
-# Negative / edge case tests (implemented in the test harness)
-edge_case_tests:
-  - id: EC-001
-    description: "Root markdown violation on feature branch vs main enforcement"
-    test_type: manual_verification
-    automated: false
-    priority: P2
-    justification: "Requires real GitHub PR workflow to validate branch-specific enforcement"
-
-  - id: EC-002
-    description: "New subdirectory under scripts/ does not cause failure"
+    file: scripts/qa/verify-repo-structure.sh
+    command: time bash scripts/qa/verify-repo-structure.sh
+    notes: Also verified via CI workflow at .github/workflows/verify-repo-structure.yml
+- id: EC-001
+  description: Root markdown violation on feature branch vs main enforcement
+  verify:
+  - type: manual
+    justification: Requires real GitHub PR workflow to validate branch-specific enforcement
+- id: EC-002
+  description: New subdirectory under scripts/ does not cause failure
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/test-verify-repo-structure.sh"
-    automated: true
-    priority: P1
-
-  - id: EC-003
-    description: "Deprecated directory tools/ recreated withnon-README files is detected"
+    file: scripts/qa/test-verify-repo-structure.sh
+- id: EC-003
+  description: Deprecated directory tools/ recreated withnon-README files is detected
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/test-verify-repo-structure.sh"
-    automated: true
-    priority: P1
-
-  - id: EC-004
-    description: "var/ and tutor_env/ absent on fresh clone does not fail verification"
+    file: scripts/qa/test-verify-repo-structure.sh
+- id: EC-004
+  description: var/ and tutor_env/ absent on fresh clone does not fail verification
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/test-verify-repo-structure.sh"
-    automated: true
-    priority: P1
-
-  - id: EC-005
-    description: "Submodule directory in apps/ is not recursed into"
+    file: scripts/qa/test-verify-repo-structure.sh
+- id: EC-005
+  description: Submodule directory in apps/ is not recursed into
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/test-verify-repo-structure.sh"
-    automated: true
-    priority: P2
-
-  - id: EC-006
-    description: "Empty required directory still passes verification"
+    file: scripts/qa/test-verify-repo-structure.sh
+- id: EC-006
+  description: Empty required directory still passes verification
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/test-verify-repo-structure.sh"
-    automated: true
-    priority: P1
-
-  - id: EC-007
-    description: "IMPLEMENTATION_ORDER.md in specs/ is a known exception to *_spec.md naming"
+    file: scripts/qa/test-verify-repo-structure.sh
+- id: EC-007
+  description: IMPLEMENTATION_ORDER.md in specs/ is a known exception to *_spec.md naming
+  verify:
+  - type: automated
     test_type: shell_verification
-    test_file: "scripts/qa/verify-repo-structure.sh"
-    automated: true
-    priority: P1
+    file: scripts/qa/verify-repo-structure.sh

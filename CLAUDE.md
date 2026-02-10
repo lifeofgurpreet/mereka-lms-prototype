@@ -135,8 +135,16 @@ make tutor-start                  # Start all services in background
 make tutor-stop                   # Stop all services
 make tutor-restart                # Restart all services
 
-# After config changes
-make tutor-apply                  # Saves config, applies patches, restarts
+# Modifying configuration (SAFE WORKFLOW)
+./scripts/infra/tutor-config-save.sh --set KEY=value  # Saves config, applies patches, verifies
+# OR for advanced users:
+tutor config save --set KEY=value
+./infrastructure/tutor/apply-patches.sh              # CRITICAL: Must run after config save
+./scripts/infra/verify-tutor-config.sh               # Verify patches applied correctly
+tutor local restart                                  # Apply changes
+
+# Quick verification
+./scripts/infra/verify-tutor-config.sh  # Check all patches are present
 ```
 
 ### Building Images
@@ -216,11 +224,21 @@ tutor local stop && docker system prune -a  # Deep clean (removes all images)
 
 ## Critical Workflows
 
-### After Modifying Tutor Config
+### After Modifying Tutor Config (RECOMMENDED WORKFLOW)
+
+**Use the safe wrapper script** (handles everything automatically):
+```bash
+export TUTOR_ROOT="$(pwd)/tutor_env"
+./scripts/infra/tutor-config-save.sh --set KEY=value
+tutor local restart
+```
+
+**Manual workflow** (for advanced users):
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save --set KEY=value
 ./infrastructure/tutor/apply-patches.sh    # CRITICAL!
+./scripts/infra/verify-tutor-config.sh     # Verify patches applied
 tutor local restart
 ```
 
@@ -231,17 +249,26 @@ tutor local restart
 - Webpack memory limit increase (`NODE_OPTIONS=--max-old-space-size=6144`)
 - CSRF trusted origins and allowed hosts
 - Custom Mereka footer component for MFEs
+- Prometheus metrics integration
+- MongoDB Atlas SRV support
+- Build optimizations and retry logic
+
+The wrapper script (`tutor-config-save.sh`) automatically:
+1. Backs up existing config
+2. Runs `tutor config save`
+3. Applies all patches
+4. Verifies configuration
+5. Provides clear next steps
 
 ### Fixing "Cloud IPs in Local Config" Issue
 If services fail to connect and config shows `MYSQL_HOST: "10.97.0.2"`:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set MYSQL_HOST=mysql \
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017
-./infrastructure/tutor/apply-patches.sh
 tutor local restart
 ```
 
@@ -326,9 +353,12 @@ See `specs/secrets-management.md` for full specification.
 - Run `tutor local do backup-db` before upgrades
 - Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save`
 
-### Pre-commit Secret Scanning
+### Git Hooks
 
-A pre-commit hook automatically scans for hardcoded secrets before each commit.
+The repository includes two pre-commit hooks to prevent common mistakes:
+
+#### 1. Secret Scanning (`.githooks/pre-commit`)
+Automatically scans for hardcoded secrets before each commit.
 
 **Setup** (one-time per clone):
 ```bash
@@ -359,6 +389,46 @@ git commit --no-verify
 ```
 
 **False positives**: If the hook flags something incorrectly, verify it is truly safe, then use `--no-verify`. Consider updating the hook patterns in `.githooks/pre-commit` if the false positive is common.
+
+#### 2. Tutor Config Safety (`.githooks/pre-tutor-config`)
+Warns when committing Tutor-generated files and ensures patches have been applied.
+
+**Setup** (one-time per clone):
+```bash
+git config --local include.path ../.gitconfig
+```
+
+**What it does**:
+- Detects commits touching `tutor_env/` files
+- Warns if `config.yml` contains secrets
+- Prompts to confirm patches were applied
+- Optionally runs verification checks
+- Can be bypassed with `--no-verify`
+
+**Example flow**:
+```
+$ git add tutor_env/env/apps/openedx/settings/lms/production.py
+$ git commit -m "feat: update LMS settings"
+
+=== Tutor Configuration Change Detected ===
+
+The following Tutor-generated files are being committed:
+  - tutor_env/env/apps/openedx/settings/lms/production.py
+
+IMPORTANT: Did you run apply-patches.sh?
+
+Have you run apply-patches.sh after 'tutor config save'? [y/N] y
+
+Running verification checks...
+✓ All required patches verified successfully!
+
+✓ Proceeding with commit
+```
+
+**Recommended workflow**:
+1. Use `./scripts/infra/tutor-config-save.sh` (patches applied automatically)
+2. Git hook verifies patches on commit
+3. No manual intervention needed
 
 ## Key Documentation Files
 
@@ -394,13 +464,17 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 ## Common Pitfalls
 
 1. **Forgetting to run `apply-patches.sh`** → MySQL auth fails, MFE Node 18 build breaks
+   - **Fix**: Use `./scripts/infra/tutor-config-save.sh` (patches applied automatically)
+   - **Verify**: Run `./scripts/infra/verify-tutor-config.sh`
 2. **Cloud IPs in local config** (`MYSQL_HOST: "10.97.0.2"`) → Services can't connect
 3. **Not setting `TUTOR_ROOT`** → Tutor creates configs in wrong directory
 4. **Insufficient Docker RAM** (<12GB) → Image builds OOM during webpack
 5. **Empty K8s endpoints** → Services can't route traffic (run `fix-service-selectors.sh`)
 6. **Editing generated files in `tutor_env/`** → Lost on next `tutor config save`
+   - **Note**: Git hook will warn you before committing
 7. **Using old paths** (`tools/`, `ops/`) → These are deprecated, use `scripts/` and `infrastructure/`
 8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets
+   - **Note**: Pre-commit hook will block commits with hardcoded secrets
 
 ## Getting Help
 

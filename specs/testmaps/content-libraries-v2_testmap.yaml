@@ -3,357 +3,473 @@
 # Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/content-libraries-v2_testmap.yaml
 
 spec: specs/content-libraries-v2_spec.md
-tests:
-  # Library Lifecycle
-  - criterion: "AC-001: Given a user with CONTENT_LIBRARY_CREATOR permission and organization Mereka, when they call POST/api/libraries/v2/ with valid payload, then a library is created with key lib:Mereka:compliance-2026"
-    test_file: tests/integration/test_library_lifecycle.py
-    test_name: "test_library_creation_success"
-    type: integration
-
-  - criterion: "AC-002: Given library lib:Mereka:compliance-2exists, when the same POST is sent with the same slug, then the response is HTTP 400 with an error indicating the slugis already in use"
-    test_file: tests/integration/test_library_lifecycle.py
-    test_name: "test_library_creation_duplicate_slug"
-    type: integration
-
-  - criterion: "AC-003: Given library lib:Mereka:compliance-2with 5 components, when a Library Admin calls DELETE, then the library is soft-deleted and no longer appears in listing responses, but can be restored within 30 days"
-    test_file: tests/integration/test_library_lifecycle.py
-    test_name: "test_library_soft_deletion_and_restore"
-    type: integration
-
-  # Component Authoring
-  - criterion: "AC-004: Given library lib:Mereka:compliance-2026, when a Library Author calls POST /blocks/ with {block_type: html}, then an HTML XBlock component is added to the library and has_unpublished_changes becomes true"
-    test_file: tests/integration/test_component_authoring.py
-    test_name: "test_add_html_component_to_library"
-    type: integration
-
-  - criterion: "AC-005: Given a library with 10 components, when a Library Author edits the content of component intro-module via the OLX update endpoint, then the component content is updated in draft and has_unpublished_changes remains true"
-    test_file: tests/integration/test_component_authoring.py
-    test_name: "test_edit_component_content"
-    type: integration
-
-  - criterion: "AC-006: Given a library with a problem type component, when a Library Author adds a video type component,then both components coexist in the library (mixed-type library support)"
-    test_file: tests/unit/test_component_authoring.py
-    test_name: "test_mixed_type_library_support"
-    type: unit
-
-  - criterion: "AC-007: Given a library, when a user attemptsto add a component of an XBlock type not installed on the platform, then the response is HTTP 400 with XBlock type not installed"
-    test_file: tests/unit/test_component_authoring.py
-    test_name: "test_unsupported_xblock_type_rejected"
-    type: unit
-
-  # Versioning and Publishing
-  - criterion: "AC-008: Given library lib:Mereka:compliance-2with unpublished draft changes, when a Library Admin calls POST /commit/, then all draft changes are committed, has_unpublished_changes becomes false, and a version record is created"
-    test_file: tests/integration/test_versioning.py
-    test_name: "test_publish_draft_changes"
-    type: integration
-
-  - criterion: "AC-009: Given library lib:Mereka:compliance-2with no unpublished changes, when POST /commit/ is called, then the response is HTTP 200 with a message No changes topublish and no new version record is created"
-    test_file: tests/integration/test_versioning.py
-    test_name: "test_publish_no_changes_idempotent"
-    type: integration
-
-  - criterion: "AC-010: Given a library with 3 published versions, when a Library Admin calls the revert endpoint for version 2, then the library content reverts to the state of version 2 and has_unpublished_changes becomes true"
-    test_file: tests/integration/test_versioning.py
-    test_name: "test_revert_to_previous_version"
-    type: integration
-
-  - criterion: "AC-011: Given a library with a recently published component quiz-1, when a course author views a course referencing that component in Studio, then Studio shows the published version of quiz-1 (not any subsequent draft changes)"
-    test_file: tests/e2e/test_library_course_integration.py
-    test_name: "test_course_shows_published_version_only"
-    type: e2e
-
-  # Cross-Course Content Reuse
-  - criterion: "AC-012: Given library lib:Mereka:compliance-2with 20 published problem components, when a course author adds a library_content XBlock to a course unit and configures it with max_count=5, then each learner sees 5 randomly selected problems from the library"
-    test_file: tests/e2e/test_library_course_integration.py
-    test_name: "test_library_content_randomized_selection"
-    type: e2e
-
-  - criterion: "AC-013: Given a library_v2_ref block in a course pointing to component quiz-1 in library lib:Mereka:compliance-2026, when the library author updates and publishes quiz-1, then Studio displays a notification on the course unit indicating Library content has updates available"
-    test_file: tests/e2e/test_library_course_integration.py
-    test_name: "test_library_update_notification_in_studio"
-    type: e2e
-
-  - criterion: "AC-014: Given the notification from AC-013, when the course author clicks Update from library, then the course unit receives the latest published version of quiz-1"
-    test_file: tests/e2e/test_library_course_integration.py
-    test_name: "test_sync_from_library_updates_course"
-    type: e2e
-
-  - criterion: "AC-015: Given a library that is deleted aftera course has synced its content, then the course retains itslast-synced copies and continues to function without errorsfor learners"
-    test_file: tests/e2e/test_library_course_integration.py
-    test_name: "test_deleted_library_does_not_break_course"
-    type: e2e
-
-  # Access Controls
-  - criterion: "AC-016: Given a user who is a member of organization Acme (an enterprise tenant), when they call GET /api/libraries/v2/, then only libraries belonging to organizationAcme and libraries with allow_public_read: true are returned"
-    test_file: tests/integration/test_library_access_control.py
-    test_name: "test_org_based_library_visibility"
-    type: integration
-
-  - criterion: "AC-017: Given a user who is a member of organization Acme, when they call GET /api/libraries/v2/lib:Beta:internal-training/, then the response is HTTP 403"
-    test_file: tests/integration/test_library_access_control.py
-    test_name: "test_cross_org_access_denied"
-    type: integration
-
-  - criterion: "AC-018: Given a Library Admin, when they callPOST /team/ with {username: author1, access_level: author},then author1 is granted Library Author access and a permission change audit log entry is created"
-    test_file: tests/integration/test_library_access_control.py
-    test_name: "test_grant_library_author_access"
-    type: integration
-
-  - criterion: "AC-019: Given a Library Author, when they attempt to call DELETE /api/libraries/v2/{library_key}/, then the response is HTTP 403 (authors cannot delete libraries)"
-    test_file: tests/unit/test_library_rbac.py
-    test_name: "test_author_cannot_delete_library"
-    type: unit
-
-  # Multi-Tenant Isolation
-  - criterion: "AC-020: Given enterprise tenant Acme with organization AcmeCorp and enterprise tenant Beta with organization BetaCorp, when an Acme admin creates library lib:AcmeCorp:acme-training, then Beta users calling GET /api/libraries/v2/do NOT see lib:AcmeCorp:acme-training in results"
-    test_file: tests/integration/test_tenant_isolation.py
-    test_name: "test_tenant_library_isolation"
-    type: integration
-
-  - criterion: "AC-021: Given a platform-global library lib:Mereka:shared-templates with allow_public_read: true, when a user from any enterprise tenant calls GET /api/libraries/v2/,then lib:Mereka:shared-templates appears in results with read-only access"
-    test_file: tests/integration/test_tenant_isolation.py
-    test_name: "test_public_library_visible_to_all_tenants"
-    type: integration
-
-  - criterion: "AC-022: Given a Beta user, when they attemptto add a component from lib:AcmeCorp:acme-training to a course via Studio, then the operation is denied and a security event is logged"
-    test_file: tests/security/test_tenant_isolation_bypass.py
-    test_name: "test_cross_tenant_component_access_denied"
-    type: security
-
-  # Search and Discovery
-  - criterion: "AC-023: Given 50 libraries across 5 organizations, when a user from organization Mereka searches for compliance in the library listing, then only libraries from Mereka(and public libraries) containing compliance in the title, description, or component content are returned"
-    test_file: tests/integration/test_library_search.py
-    test_name: "test_library_search_with_org_filter"
-    type: integration
-
-  - criterion: "AC-024: Given a library with 100 components,when the listing API is called with ?page_size=20&page=3, then components 41-60 are returned with pagination metadata"
-    test_file: tests/integration/test_library_search.py
-    test_name: "test_component_listing_pagination"
-    type: integration
-
-  - criterion: "AC-025: Given a library component tagged withtaxonomy tag assessments > multiple-choice, when a user searches for libraries with tag assessments, then the library containing that component appears in results"
-    test_file: tests/integration/test_library_search.py
-    test_name: "test_library_search_by_tag"
-    type: integration
-
-  # Analytics
-  - criterion: "AC-026: Given library lib:Mereka:compliance-2referenced by 3 courses, when GET /api/libraries/v2/lib:Mereka:compliance-2026/links/ is called, then the response lists all 3 courses with their course keys and the specific components referenced"
-    test_file: tests/integration/test_library_analytics.py
-    test_name: "test_library_usage_tracking"
-    type: integration
-
-  - criterion: "AC-027: Given a learner completing a problemsourced from library lib:Mereka:compliance-2026, when the xAPI event is emitted, then the event context includes library_key: lib:Mereka:compliance-2026"
-    test_file: tests/integration/test_library_analytics.py
-    test_name: "test_xapi_event_library_context"
-    type: integration
-
-  # Backup and Recovery
-  - criterion: "AC-028: Given library lib:Mereka:compliance-2with 50 components, when GET /api/libraries/v2/lib:Mereka:compliance-2026/export/ is called, then a valid tar.gz OLX archive is returned containing all component content and metadata"
-    test_file: tests/integration/test_library_backup.py
-    test_name: "test_library_export_to_olx"
-    type: integration
-
-  - criterion: "AC-029: Given a valid OLX archive exported from AC-028, when POST /api/libraries/v2/import/ is called withthe archive and a new slug, then a new library is created with identical content to the original"
-    test_file: tests/integration/test_library_backup.py
-    test_name: "test_library_import_from_olx"
-    type: integration
-
-  - criterion: "AC-030: Given an OLX archive containing a component of type custom_xblock_v3 (not installed), when importis attempted, then the response is HTTP 400 listing the unsupported XBlock type"
-    test_file: tests/unit/test_library_import_validation.py
-    test_name: "test_import_unsupported_xblock_rejected"
-    type: unit
-
-  # Performance
-  - criterion: "AC-031: Given 100 libraries in organization Mereka, when GET /api/libraries/v2/?org=Mereka is called, thenthe response is returned within 500ms at p95"
-    test_file: tests/performance/test_library_listing_perf.py
-    test_name: "test_library_listing_latency_p95"
-    type: load
-
-  - criterion: "AC-032: Given a library with 1,000 components, when GET /api/libraries/v2/{library_key}/blocks/?page_size=is called, then the first page is returned within 1000ms at p95"
-    test_file: tests/performance/test_component_listing_perf.py
-    test_name: "test_component_listing_latency_p95"
-    type: load
-
-  - criterion: "AC-033: Given a library with 500 components,when the publish endpoint is called, then the operation completes within 30 seconds"
-    test_file: tests/performance/test_publish_perf.py
-    test_name: "test_publish_operation_duration"
-    type: load
-
-  # Edge Cases - Component Authoring Failures
-  - criterion: "Edge Case: Invalid XBlock OLX - If a LibraryAuthor uploads OLX content for a component that fails schemavalidation, the system MUST reject the update with a descriptive error and leave the component in its prior state"
-    test_file: tests/unit/test_component_validation.py
-    test_name: "test_invalid_olx_rejected"
-    type: unit
-
-  - criterion: "Edge Case: XBlock type uninstalled after component creation - If an XBlock type is uninstalled from the platform after components of that type exist in a library, thelibrary listing MUST still render showing the component as unsupported type but editing MUST be disabled"
-    test_file: tests/integration/test_unsupported_xblock.py
-    test_name: "test_uninstalled_xblock_type_handling"
-    type: integration
-
-  - criterion: "Edge Case: Maximum component limit - If a library approaches 10,000+ components and exceeds the configuredlimit, the system MUST return HTTP 400 with Component limitexceeded"
-    test_file: tests/unit/test_component_limit.py
-    test_name: "test_component_limit_enforced"
-    type: unit
-
-  # Edge Cases - Versioning
-  - criterion: "Edge Case: Concurrent publish attempts - If two Library Admins attempt to publish the same library simultaneously, the system MUST serialize the operations (first publish succeeds, second is no-op)"
-    test_file: tests/load/test_concurrent_publish.py
-    test_name: "test_concurrent_publish_serialized"
-    type: load
-
-  - criterion: "Edge Case: Revert to deleted component state- If a library is reverted to a version where a component existed that has since been deleted, the revert MUST restore thecomponent content from the version history"
-    test_file: tests/integration/test_versioning.py
-    test_name: "test_revert_restores_deleted_component"
-    type: integration
-
-  - criterion: "Edge Case: Orphaned drafts across restarts -If a Library Author creates draft changes but the system is restarted before publishing, the drafts MUST persist in Blockstore's draft layer"
-    test_file: tests/integration/test_draft_persistence.py
-    test_name: "test_drafts_persist_across_restarts"
-    type: integration
-
-  # Edge Cases - Cross-Course Reuse
-  - criterion: "Edge Case: Library deleted while sync in progress - If a library is deleted while a course is performing async from library operation, the sync operation MUST fail gracefully with an error message and MUST NOT corrupt the existing course content"
-    test_file: tests/e2e/test_sync_failure.py
-    test_name: "test_sync_during_library_deletion"
-    type: e2e
-
-  - criterion: "Edge Case: Library component type mismatch -If a library_content XBlock is configured to pull from a library but the library's published components include types notcompatible with the course context, the system MUST skip incompatible components during randomized selection and log a warning"
-    test_file: tests/integration/test_component_type_mismatch.py
-    test_name: "test_incompatible_component_types_skipped"
-    type: integration
-
-  - criterion: "Edge Case: Empty library referenced - If a course references a library that has zero published components,the library_content XBlock MUST render an appropriate message for course authors in Studio and MUST render as empty (no error) for learners"
-    test_file: tests/e2e/test_empty_library_reference.py
-    test_name: "test_empty_library_handling"
-    type: e2e
-
-  - criterion: "Edge Case: Circular references - The system MUST prevent a library component from referencing another library (no library-within-library nesting). The library_contentXBlock type MUST NOT be addable as a component within a library"
-    test_file: tests/unit/test_circular_reference.py
-    test_name: "test_circular_library_reference_prevented"
-    type: unit
-
-  # Edge Cases - Access Control
-  - criterion: "Edge Case: Organization removal - If a user is removed from an organization, they MUST immediately lose access to all libraries owned by that organization. Active Studio sessions MUST deny library operations on the next API call"
-    test_file: tests/integration/test_org_membership_change.py
-    test_name: "test_org_removal_revokes_access"
-    type: integration
-
-  - criterion: "Edge Case: Library admin removes themselves (last admin) - If the last Library Admin of a library removesthemselves, the system MUST prevent the operation and returnan error Cannot remove the last admin of a library"
-    test_file: tests/unit/test_last_admin_prevention.py
-    test_name: "test_last_admin_removal_prevented"
-    type: unit
-
-  - criterion: "Edge Case: Public library with enterprise content - If a library marked allow_public_read contains contentthat references enterprise-specific resources, the system MUST NOT prevent the public read flag from being set, but SHOULD warn the Library Admin"
-    test_file: tests/unit/test_public_library_warning.py
-    test_name: "test_public_library_enterprise_content_warning"
-    type: unit
-
-  # Edge Cases - Multi-Tenant
-  - criterion: "Edge Case: Organization mapped to multiple tenants - If a single Open edX organization is erroneously associated with multiple EnterpriseCustomer records, the system MUST use the organization as the access boundary (not the enterprise customer UUID)"
-    test_file: tests/integration/test_multi_tenant_org.py
-    test_name: "test_org_based_access_boundary"
-    type: integration
-
-  - criterion: "Edge Case: Tenant offboarding with active libraries - If a tenant is offboarded, their organization's libraries MUST be included in the data export. After the grace period, library content bundles MUST be deleted from Blockstorestorage, and library metadata MUST be removed from MySQL"
-    test_file: tests/integration/test_tenant_offboarding.py
-    test_name: "test_tenant_offboarding_library_cleanup"
-    type: integration
-
-  - criterion: "Edge Case: Shared course with tenant-scoped library - If a course shared across tenants references a library that is scoped to only one tenant's organization, learnersfrom the other tenant MUST see the last-synced content in the course (content was synced into the course structure) but MUST NOT have direct access to browse the library"
-    test_file: tests/e2e/test_shared_course_library.py
-    test_name: "test_shared_course_tenant_library_access"
-    type: e2e
-
-  # Edge Cases - Import/Export
-  - criterion: "Edge Case: Large archive import (>500MB) - Ifan OLX archive exceeds 500MB, the system MUST support chunked upload and asynchronous processing. The import endpoint MUST return HTTP 202 with a task ID"
-    test_file: tests/integration/test_large_import.py
-    test_name: "test_large_archive_async_import"
-    type: integration
-
-  - criterion: "Edge Case: Duplicate slug on import - If an import specifies a slug that already exists in the target organization, the system MUST reject the import with HTTP 409 Library with slug already exists"
-    test_file: tests/unit/test_import_duplicate_slug.py
-    test_name: "test_import_duplicate_slug_rejected"
-    type: unit
-
-  - criterion: "Edge Case: Version history on import - Imported libraries MUST start with a clean version history (version1) in the target system. The original version history is nottransferred"
-    test_file: tests/integration/test_import_version_reset.py
-    test_name: "test_import_resets_version_history"
-    type: integration
-
-  # Edge Cases - Retry/Timeout
-  - criterion: "Edge Case: Retry idempotency - Library publish operations MUST be idempotent: retrying a failed publish MUST NOT create duplicate version entries"
-    test_file: tests/integration/test_publish_retry.py
-    test_name: "test_publish_retry_idempotent"
-    type: integration
-
-  - criterion: "Edge Case: Export operation resumable - Library export operations MUST be resumable: if a download is interrupted, the client can re-request the export (the system SHOULD cache the generated archive for 1 hour)"
-    test_file: tests/integration/test_export_resume.py
-    test_name: "test_export_download_resumable"
-    type: integration
-
-  - criterion: "Edge Case: Search re-indexing retry - Searchre-indexing after publish MUST retry up to 3 times with exponential backoff (1s, 4s, 16s) if the search service is temporarily unavailable"
-    test_file: tests/integration/test_search_index_retry.py
-    test_name: "test_search_index_retry_on_failure"
-    type: integration
-
-  # Edge Cases - Rate Limits
-  - criterion: "Edge Case: Rate limit on mutation endpoints -Library mutation endpoints (create, edit, publish, delete) MUST be rate-limited to 60 requests per minute per user"
-    test_file: tests/load/test_mutation_rate_limit.py
-    test_name: "test_mutation_rate_limit_enforced"
-    type: load
-
-  - criterion: "Edge Case: Rate limit on read endpoints - Library listing and read endpoints MUST be rate-limited to 300 requests per minute per user"
-    test_file: tests/load/test_read_rate_limit.py
-    test_name: "test_read_rate_limit_enforced"
-    type: load
-
-  - criterion: "Edge Case: Rate limit on export endpoints - Library export endpoints MUST be rate-limited to 5 requests per minute per user"
-    test_file: tests/load/test_export_rate_limit.py
-    test_name: "test_export_rate_limit_enforced"
-    type: load
-
-  # Security Tests
-  - criterion: "Security: Cross-tenant isolation - JWT manipulation attempts to access other tenant's libraries MUST be denied and logged as security events"
-    test_file: tests/security/test_jwt_manipulation.py
-    test_name: "test_jwt_manipulation_denied"
-    type: security
-
-  - criterion: "Security: API parameter tampering - API parameter tampering (e.g., changing org in request) MUST be ignored and only user's organization libraries returned"
-    test_file: tests/security/test_api_parameter_tampering.py
-    test_name: "test_api_parameter_tampering_ineffective"
-    type: security
-
-  - criterion: "Security: Direct Blockstore bundle URL access- Direct Blockstore bundle URL access without passing through library access control MUST return HTTP 403"
-    test_file: tests/security/test_blockstore_direct_access.py
-    test_name: "test_direct_blockstore_access_denied"
-    type: security
-
-  - criterion: "Security: Permission escalation - Library Reader cannot edit components (HTTP 403), Library Author cannotdelete library (HTTP 403)"
-    test_file: tests/security/test_permission_escalation.py
-    test_name: "test_permission_escalation_prevented"
-    type: security
-
-  - criterion: "Security: CSRF protection - POST /blocks/ without CSRF token MUST return HTTP 403"
-    test_file: tests/security/test_csrf_protection.py
-    test_name: "test_csrf_protection_enforced"
-    type: security
-
-  - criterion: "Security: Unauthenticated access - No auth header on any library API endpoint MUST return HTTP 401"
-    test_file: tests/security/test_unauthenticated_access.py
-    test_name: "test_unauthenticated_access_denied"
-    type: security
-
-  - criterion: "Security: Export archive data leakage - Export archives MUST NOT contain API keys, credentials, secrets beyond component content"
-    test_file: tests/security/test_export_data_leakage.py
-    test_name: "test_export_no_credential_leakage"
-    type: security
-
-  - criterion: "Security: Export archive PII leakage - Exportarchives MUST NOT contain user emails, usernames beyond component content"
-    test_file: tests/security/test_export_pii_leakage.py
-    test_name: "test_export_no_pii_leakage"
-    type: security
-
-  - criterion: "Security: Export GCS access control - Exportarchives in GCS MUST NOT be publicly readable"
-    test_file: tests/security/test_export_gcs_permissions.py
-    test_name: "test_export_gcs_not_public"
-    type: security
+acceptance_criteria:
+- id: AC-001
+  description: "Given a user with CONTENT_LIBRARY_CREATOR permission and organization Mereka, when they call POST/api/libraries/v2/ w..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_lifecycle.py
+    command: "pytest tests/integration/test_library_lifecycle.py::test_library_creation_success"
+- id: AC-002
+  description: "Given library lib:Mereka:compliance-2exists, when the same POST is sent with the same slug, then the response is HTTP..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_lifecycle.py
+    command: "pytest tests/integration/test_library_lifecycle.py::test_library_creation_duplicate_slug"
+- id: AC-003
+  description: "Given library lib:Mereka:compliance-2with 5 components, when a Library Admin calls DELETE, then the library is soft-d..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_lifecycle.py
+    command: "pytest tests/integration/test_library_lifecycle.py::test_library_soft_deletion_and_restore"
+- id: AC-004
+  description: "Given library lib:Mereka:compliance-2026, when a Library Author calls POST /blocks/ with {block_type: html}, then an ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_component_authoring.py
+    command: "pytest tests/integration/test_component_authoring.py::test_add_html_component_to_library"
+- id: AC-005
+  description: "Given a library with 10 components, when a Library Author edits the content of component intro-module via the OLX upd..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_component_authoring.py
+    command: "pytest tests/integration/test_component_authoring.py::test_edit_component_content"
+- id: AC-006
+  description: "Given a library with a problem type component, when a Library Author adds a video type component,then both components..."
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_component_authoring.py
+    command: pytest tests/unit/test_component_authoring.py::test_mixed_type_library_support
+- id: AC-007
+  description: "Given a library, when a user attemptsto add a component of an XBlock type not installed on the platform, then the res..."
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_component_authoring.py
+    command: "pytest tests/unit/test_component_authoring.py::test_unsupported_xblock_type_rejected"
+- id: AC-008
+  description: "Given library lib:Mereka:compliance-2with unpublished draft changes, when a Library Admin calls POST /commit/, then a..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_versioning.py
+    command: pytest tests/integration/test_versioning.py::test_publish_draft_changes
+- id: AC-009
+  description: "Given library lib:Mereka:compliance-2with no unpublished changes, when POST /commit/ is called, then the response is ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_versioning.py
+    command: pytest tests/integration/test_versioning.py::test_publish_no_changes_idempotent
+- id: AC-010
+  description: "Given a library with 3 published versions, when a Library Admin calls the revert endpoint for version 2, then the lib..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_versioning.py
+    command: pytest tests/integration/test_versioning.py::test_revert_to_previous_version
+- id: AC-011
+  description: "Given a library with a recently published component quiz-1, when a course author views a course referencing that comp..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_library_course_integration.py
+    command: "pytest tests/e2e/test_library_course_integration.py::test_course_shows_published_version_only"
+- id: AC-012
+  description: "Given library lib:Mereka:compliance-2with 20 published problem components, when a course author adds a library_conten..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_library_course_integration.py
+    command: "pytest tests/e2e/test_library_course_integration.py::test_library_content_randomized_selection"
+- id: AC-013
+  description: "Given a library_v2_ref block in a course pointing to component quiz-1 in library lib:Mereka:compliance-2026, when the..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_library_course_integration.py
+    command: "pytest tests/e2e/test_library_course_integration.py::test_library_update_notification_in_studio"
+- id: AC-014
+  description: "Given the notification from AC-013, when the course author clicks Update from library, then the course unit receives ..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_library_course_integration.py
+    command: "pytest tests/e2e/test_library_course_integration.py::test_sync_from_library_updates_course"
+- id: AC-015
+  description: "Given a library that is deleted aftera course has synced its content, then the course retains itslast-synced copies a..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_library_course_integration.py
+    command: "pytest tests/e2e/test_library_course_integration.py::test_deleted_library_does_not_break_course"
+- id: AC-016
+  description: "Given a user who is a member of organization Acme (an enterprise tenant), when they call GET /api/libraries/v2/, then..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_access_control.py
+    command: "pytest tests/integration/test_library_access_control.py::test_org_based_library_visibility"
+- id: AC-017
+  description: "Given a user who is a member of organization Acme, when they call GET /api/libraries/v2/lib:Beta:internal-training/, ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_access_control.py
+    command: "pytest tests/integration/test_library_access_control.py::test_cross_org_access_denied"
+- id: AC-018
+  description: "Given a Library Admin, when they callPOST /team/ with {username: author1, access_level: author},then author1 is grant..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_access_control.py
+    command: "pytest tests/integration/test_library_access_control.py::test_grant_library_author_access"
+- id: AC-019
+  description: "Given a Library Author, when they attempt to call DELETE /api/libraries/v2/{library_key}/, then the response is HTTP ..."
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_library_rbac.py
+    command: pytest tests/unit/test_library_rbac.py::test_author_cannot_delete_library
+- id: AC-020
+  description: "Given enterprise tenant Acme with organization AcmeCorp and enterprise tenant Beta with organization BetaCorp, when a..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_isolation.py
+    command: pytest tests/integration/test_tenant_isolation.py::test_tenant_library_isolation
+- id: AC-021
+  description: "Given a platform-global library lib:Mereka:shared-templates with allow_public_read: true, when a user from any enterp..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_isolation.py
+    command: "pytest tests/integration/test_tenant_isolation.py::test_public_library_visible_to_all_tenants"
+- id: AC-022
+  description: "Given a Beta user, when they attemptto add a component from lib:AcmeCorp:acme-training to a course via Studio, then t..."
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_tenant_isolation_bypass.py
+    command: "pytest tests/security/test_tenant_isolation_bypass.py::test_cross_tenant_component_access_denied"
+- id: AC-023
+  description: "Given 50 libraries across 5 organizations, when a user from organization Mereka searches for compliance in the librar..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_search.py
+    command: "pytest tests/integration/test_library_search.py::test_library_search_with_org_filter"
+- id: AC-024
+  description: "Given a library with 100 components,when the listing API is called with ?page_size=20&page=3, then components 41-60 a..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_search.py
+    command: "pytest tests/integration/test_library_search.py::test_component_listing_pagination"
+- id: AC-025
+  description: "Given a library component tagged withtaxonomy tag assessments > multiple-choice, when a user searches for libraries w..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_search.py
+    command: pytest tests/integration/test_library_search.py::test_library_search_by_tag
+- id: AC-026
+  description: "Given library lib:Mereka:compliance-2referenced by 3 courses, when GET /api/libraries/v2/lib:Mereka:compliance-2026/l..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_analytics.py
+    command: pytest tests/integration/test_library_analytics.py::test_library_usage_tracking
+- id: AC-027
+  description: "Given a learner completing a problemsourced from library lib:Mereka:compliance-2026, when the xAPI event is emitted, ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_analytics.py
+    command: "pytest tests/integration/test_library_analytics.py::test_xapi_event_library_context"
+- id: AC-028
+  description: "Given library lib:Mereka:compliance-2with 50 components, when GET /api/libraries/v2/lib:Mereka:compliance-2026/export..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_backup.py
+    command: pytest tests/integration/test_library_backup.py::test_library_export_to_olx
+- id: AC-029
+  description: "Given a valid OLX archive exported from AC-028, when POST /api/libraries/v2/import/ is called withthe archive and a n..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_library_backup.py
+    command: pytest tests/integration/test_library_backup.py::test_library_import_from_olx
+- id: AC-030
+  description: "Given an OLX archive containing a component of type custom_xblock_v3 (not installed), when importis attempted, then t..."
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_library_import_validation.py
+    command: "pytest tests/unit/test_library_import_validation.py::test_import_unsupported_xblock_rejected"
+- id: AC-031
+  description: "Given 100 libraries in organization Mereka, when GET /api/libraries/v2/?org=Mereka is called, thenthe response is ret..."
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/performance/test_library_listing_perf.py
+    command: "pytest tests/performance/test_library_listing_perf.py::test_library_listing_latency_p95"
+- id: AC-032
+  description: "Given a library with 1,000 components, when GET /api/libraries/v2/{library_key}/blocks/?page_size=is called, then the..."
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/performance/test_component_listing_perf.py
+    command: "pytest tests/performance/test_component_listing_perf.py::test_component_listing_latency_p95"
+- id: AC-033
+  description: "Given a library with 500 components,when the publish endpoint is called, then the operation completes within 30 seconds"
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/performance/test_publish_perf.py
+    command: pytest tests/performance/test_publish_perf.py::test_publish_operation_duration
+- id: UNGROUPED-34
+  description: "Edge Case: Invalid XBlock OLX - If a LibraryAuthor uploads OLX content for a component that fails schemavalidation, the "
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_component_validation.py
+    command: pytest tests/unit/test_component_validation.py::test_invalid_olx_rejected
+- id: UNGROUPED-35
+  description: "Edge Case: XBlock type uninstalled after component creation - If an XBlock type is uninstalled from the platform after c"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_unsupported_xblock.py
+    command: "pytest tests/integration/test_unsupported_xblock.py::test_uninstalled_xblock_type_handling"
+- id: UNGROUPED-36
+  description: "Edge Case: Maximum component limit - If a library approaches 10,000+ components and exceeds the configuredlimit, the sys"
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_component_limit.py
+    command: pytest tests/unit/test_component_limit.py::test_component_limit_enforced
+- id: UNGROUPED-37
+  description: "Edge Case: Concurrent publish attempts - If two Library Admins attempt to publish the same library simultaneously, the s"
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/load/test_concurrent_publish.py
+    command: pytest tests/load/test_concurrent_publish.py::test_concurrent_publish_serialized
+- id: UNGROUPED-38
+  description: "Edge Case: Revert to deleted component state- If a library is reverted to a version where a component existed that has s"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_versioning.py
+    command: "pytest tests/integration/test_versioning.py::test_revert_restores_deleted_component"
+- id: UNGROUPED-39
+  description: "Edge Case: Orphaned drafts across restarts -If a Library Author creates draft changes but the system is restarted before"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_draft_persistence.py
+    command: "pytest tests/integration/test_draft_persistence.py::test_drafts_persist_across_restarts"
+- id: UNGROUPED-40
+  description: "Edge Case: Library deleted while sync in progress - If a library is deleted while a course is performing async from libr"
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_sync_failure.py
+    command: pytest tests/e2e/test_sync_failure.py::test_sync_during_library_deletion
+- id: UNGROUPED-41
+  description: "Edge Case: Library component type mismatch -If a library_content XBlock is configured to pull from a library but the lib"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_component_type_mismatch.py
+    command: "pytest tests/integration/test_component_type_mismatch.py::test_incompatible_component_types_skipped"
+- id: UNGROUPED-42
+  description: "Edge Case: Empty library referenced - If a course references a library that has zero published components,the library_co"
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_empty_library_reference.py
+    command: pytest tests/e2e/test_empty_library_reference.py::test_empty_library_handling
+- id: UNGROUPED-43
+  description: "Edge Case: Circular references - The system MUST prevent a library component from referencing another library (no librar"
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_circular_reference.py
+    command: "pytest tests/unit/test_circular_reference.py::test_circular_library_reference_prevented"
+- id: UNGROUPED-44
+  description: "Edge Case: Organization removal - If a user is removed from an organization, they MUST immediately lose access to all li"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_org_membership_change.py
+    command: "pytest tests/integration/test_org_membership_change.py::test_org_removal_revokes_access"
+- id: UNGROUPED-45
+  description: "Edge Case: Library admin removes themselves (last admin) - If the last Library Admin of a library removesthemselves, the"
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_last_admin_prevention.py
+    command: "pytest tests/unit/test_last_admin_prevention.py::test_last_admin_removal_prevented"
+- id: UNGROUPED-46
+  description: "Edge Case: Public library with enterprise content - If a library marked allow_public_read contains contentthat reference"
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_public_library_warning.py
+    command: "pytest tests/unit/test_public_library_warning.py::test_public_library_enterprise_content_warning"
+- id: UNGROUPED-47
+  description: "Edge Case: Organization mapped to multiple tenants - If a single Open edX organization is erroneously associated with mu"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_multi_tenant_org.py
+    command: "pytest tests/integration/test_multi_tenant_org.py::test_org_based_access_boundary"
+- id: UNGROUPED-48
+  description: "Edge Case: Tenant offboarding with active libraries - If a tenant is offboarded, their organization's libraries MUST be "
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_offboarding.py
+    command: "pytest tests/integration/test_tenant_offboarding.py::test_tenant_offboarding_library_cleanup"
+- id: UNGROUPED-49
+  description: "Edge Case: Shared course with tenant-scoped library - If a course shared across tenants references a library that is sco"
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_shared_course_library.py
+    command: "pytest tests/e2e/test_shared_course_library.py::test_shared_course_tenant_library_access"
+- id: UNGROUPED-50
+  description: "Edge Case: Large archive import (>500MB) - Ifan OLX archive exceeds 500MB, the system MUST support chunked upload and as"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_large_import.py
+    command: pytest tests/integration/test_large_import.py::test_large_archive_async_import
+- id: UNGROUPED-51
+  description: "Edge Case: Duplicate slug on import - If an import specifies a slug that already exists in the target organization, the "
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_import_duplicate_slug.py
+    command: "pytest tests/unit/test_import_duplicate_slug.py::test_import_duplicate_slug_rejected"
+- id: UNGROUPED-52
+  description: "Edge Case: Version history on import - Imported libraries MUST start with a clean version history (version1) in the targ"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_import_version_reset.py
+    command: "pytest tests/integration/test_import_version_reset.py::test_import_resets_version_history"
+- id: UNGROUPED-53
+  description: "Edge Case: Retry idempotency - Library publish operations MUST be idempotent: retrying a failed publish MUST NOT create "
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_publish_retry.py
+    command: pytest tests/integration/test_publish_retry.py::test_publish_retry_idempotent
+- id: UNGROUPED-54
+  description: "Edge Case: Export operation resumable - Library export operations MUST be resumable: if a download is interrupted, the c"
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_export_resume.py
+    command: pytest tests/integration/test_export_resume.py::test_export_download_resumable
+- id: UNGROUPED-55
+  description: "Edge Case: Search re-indexing retry - Searchre-indexing after publish MUST retry up to 3 times with exponential backoff "
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_search_index_retry.py
+    command: "pytest tests/integration/test_search_index_retry.py::test_search_index_retry_on_failure"
+- id: UNGROUPED-56
+  description: "Edge Case: Rate limit on mutation endpoints -Library mutation endpoints (create, edit, publish, delete) MUST be rate-lim"
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/load/test_mutation_rate_limit.py
+    command: pytest tests/load/test_mutation_rate_limit.py::test_mutation_rate_limit_enforced
+- id: UNGROUPED-57
+  description: "Edge Case: Rate limit on read endpoints - Library listing and read endpoints MUST be rate-limited to 300 requests per mi"
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/load/test_read_rate_limit.py
+    command: pytest tests/load/test_read_rate_limit.py::test_read_rate_limit_enforced
+- id: UNGROUPED-58
+  description: "Edge Case: Rate limit on export endpoints - Library export endpoints MUST be rate-limited to 5 requests per minute per u"
+  verify:
+  - type: automated
+    test_type: load
+    file: tests/load/test_export_rate_limit.py
+    command: pytest tests/load/test_export_rate_limit.py::test_export_rate_limit_enforced
+- id: UNGROUPED-59
+  description: "Security: Cross-tenant isolation - JWT manipulation attempts to access other tenant's libraries MUST be denied and logge"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_jwt_manipulation.py
+    command: pytest tests/security/test_jwt_manipulation.py::test_jwt_manipulation_denied
+- id: UNGROUPED-60
+  description: "Security: API parameter tampering - API parameter tampering (e.g., changing org in request) MUST be ignored and only use"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_api_parameter_tampering.py
+    command: "pytest tests/security/test_api_parameter_tampering.py::test_api_parameter_tampering_ineffective"
+- id: UNGROUPED-61
+  description: "Security: Direct Blockstore bundle URL access- Direct Blockstore bundle URL access without passing through library acces"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_blockstore_direct_access.py
+    command: "pytest tests/security/test_blockstore_direct_access.py::test_direct_blockstore_access_denied"
+- id: UNGROUPED-62
+  description: "Security: Permission escalation - Library Reader cannot edit components (HTTP 403), Library Author cannotdelete library "
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_permission_escalation.py
+    command: "pytest tests/security/test_permission_escalation.py::test_permission_escalation_prevented"
+- id: UNGROUPED-63
+  description: "Security: CSRF protection - POST /blocks/ without CSRF token MUST return HTTP 403"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_csrf_protection.py
+    command: pytest tests/security/test_csrf_protection.py::test_csrf_protection_enforced
+- id: UNGROUPED-64
+  description: "Security: Unauthenticated access - No auth header on any library API endpoint MUST return HTTP 401"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_unauthenticated_access.py
+    command: "pytest tests/security/test_unauthenticated_access.py::test_unauthenticated_access_denied"
+- id: UNGROUPED-65
+  description: "Security: Export archive data leakage - Export archives MUST NOT contain API keys, credentials, secrets beyond component"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_export_data_leakage.py
+    command: "pytest tests/security/test_export_data_leakage.py::test_export_no_credential_leakage"
+- id: UNGROUPED-66
+  description: "Security: Export archive PII leakage - Exportarchives MUST NOT contain user emails, usernames beyond component content"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_export_pii_leakage.py
+    command: pytest tests/security/test_export_pii_leakage.py::test_export_no_pii_leakage
+- id: UNGROUPED-67
+  description: "Security: Export GCS access control - Exportarchives in GCS MUST NOT be publicly readable"
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_export_gcs_permissions.py
+    command: pytest tests/security/test_export_gcs_permissions.py::test_export_gcs_not_public

@@ -11,6 +11,7 @@ This directory contains Architecture Decision Records (ADRs) documenting signifi
 | [ADR-003](003-image-build-pipeline.md) | Image Build Pipeline | Accepted | 2026-02-03 |
 | [ADR-004](004-secrets-management.md) | Secrets Management | Accepted | 2026-02-03 |
 | [ADR-005](005-domain-migration.md) | Domain Migration (legacy environment → academyV2) | Accepted | 2026-02-03 |
+| [ADR-006](006-tutor-plugin-based-configuration.md) | Tutor Plugin-Based Configuration Resilience | Proposed | 2026-02-10 |
 
 ## ADR Template
 

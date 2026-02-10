@@ -3,413 +3,555 @@
 # Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/email-notifications-pipeline_testmap.yaml
 
 spec: specs/email-notifications-pipeline_spec.md
-tests:
-  # Email Delivery Infrastructure
-  - criterion: "AC-001: Given the sending domain academyv2.mereka.io, when SES domain verification is checked, then DKIM,SPF, and DMARC all pass verification"
-    test_file: scripts/infra/verify-ses-domain.sh
-    test_name: "academyv2.mereka.io"
-    type: manual
-
-  - criterion: "AC-002: Given the sending domain academy.biji-biji.com, when SES domain verification is checked, then DKIM, SPF, and DMARC all pass verification"
-    test_file: scripts/infra/verify-ses-domain.sh
-    test_name: "academy.biji-biji.com"
-    type: manual
-
-  - criterion: "AC-003: Given a learner triggers a password reset, when ACE dispatches the email, then the email is delivered via SES within 30 seconds and the From header shows noreply@academyv2.mereka.io"
-    test_file: tests/e2e/test_email_delivery.py
-    test_name: "test_password_reset_email_delivered_within_30_seconds"
-    type: e2e
-
-  - criterion: "AC-004: Given the custom MAIL FROM domain mail.academyv2.mereka.io, when an email is sent, then the envelope sender aligns with the header sender (DMARC alignment pass)"
-    test_file: tests/integration/test_dmarc_alignment.py
-    test_name: "test_envelope_sender_alignment"
-    type: integration
-
-  - criterion: "AC-005: Given an enterprise tenant with org_slug=acme, when a course announcement email is sent, then theFrom display name shows 'Acme Corp via Mereka Academy'"
-    test_file: tests/integration/test_tenant_sender_identity.py
-    test_name: "test_enterprise_sender_identity"
-    type: integration
-
-  # ACE Channels
-  - criterion: "AC-006: Given ACE configuration with channels['django_email', 'push', 'in_app'], when a course_announcement notification is triggered, then ACE dispatches to all three channels for users with all channels enabled"
-    test_file: tests/integration/test_ace_channel_dispatch.py
-    test_name: "test_course_announcement_all_channels"
-    type: integration
-
-  - criterion: "AC-007: Given a user who has disabled email for course_announcement but enabled push and in_app, when a course announcement is published, then the user receives push and in-app notifications but no email"
-    test_file: tests/integration/test_preference_filtering.py
-    test_name: "test_disabled_email_enabled_push_inapp"
-    type: integration
-
-  - criterion: "AC-008: Given a password_reset message type,when the user has disabled all notification channels, then the email is still sent (system-critical, non-suppressible)"
-    test_file: tests/integration/test_system_critical_bypass.py
-    test_name: "test_password_reset_bypasses_preferences"
-    type: integration
-
-  - criterion: "AC-009: Given Celery workers processing the edx.lms.core.default queue, when 100 ACE messages are enqueuedsimultaneously, then all 100 are dispatched within 60 seconds"
-    test_file: tests/performance/test_ace_dispatch_throughput.py
-    test_name: "test_100_messages_dispatched_within_60s"
-    type: performance
-
-  # In-App Notifications
-  - criterion: "AC-010: Given a learner with 5 unread notifications, when they call GET /api/notifications/v1/unread-count/, then the response is {\"unread_count\": 5} with p95 latency <= 100ms"
-    test_file: tests/integration/test_inapp_api.py
-    test_name: "test_unread_count_api"
-    type: integration
-
-  - criterion: "AC-011: Given 50 notifications for a user (30read, 20 unread), when they call GET /api/notifications/v1/?read=false, then only the 20 unread notifications are returned, sorted by created_at descending"
-    test_file: tests/integration/test_inapp_api.py
-    test_name: "test_filter_unread_notifications"
-    type: integration
-
-  - criterion: "AC-012: Given a notification with expires_atin the past, when the notification list is queried, then theexpired notification is not included in the response"
-    test_file: tests/integration/test_inapp_api.py
-    test_name: "test_expired_notification_excluded"
-    type: integration
-
-  - criterion: "AC-013: Given a user calls POST /api/notifications/v1/mark-all-read/, when the operation completes, then GET /api/notifications/v1/unread-count/ returns {\"unread_count\": 0}"
-    test_file: tests/integration/test_inapp_api.py
-    test_name: "test_mark_all_read"
-    type: integration
-
-  - criterion: "AC-014: Given a user under org_slug=acme, when they query the notification list, then they see only notifications with org_slug=acme (no cross-tenant leakage)"
-    test_file: tests/integration/test_tenant_isolation_inapp.py
-    test_name: "test_inapp_tenant_isolation"
-    type: integration
-
-  # Push Notifications
-  - criterion: "AC-015: Given a device registers via POST /api/mobile/v1/notifications/register/ with a valid FCM token, when a grade_posted notification is triggered, then the push notification is delivered to FCM within 60 seconds"
-    test_file: tests/e2e/test_push_delivery.py
-    test_name: "test_push_delivered_within_60s"
-    type: e2e
-
-  - criterion: "AC-016: Given a device token that FCM reportsas UNREGISTERED, when a push notification fails for that token, then the device record is marked is_active=false and no further pushes are attempted"
-    test_file: tests/integration/test_push_error_handling.py
-    test_name: "test_device_marked_inactive_on_unregistered"
-    type: integration
-
-  - criterion: "AC-017: Given a user logs out and calls DELETE /api/mobile/v1/notifications/register/, when a notificationis subsequently triggered, then no push notification is sentto the deregistered device"
-    test_file: tests/integration/test_push_after_deregister.py
-    test_name: "test_no_push_after_deregistration"
-    type: integration
-
-  - criterion: "AC-018: Given 1,000 push notifications queuedfor dispatch, when the batch sender runs, then FCM receivesbatches of up to 500 messages each (2 API calls, not 1,000)"
-    test_file: tests/integration/test_push_batching.py
-    test_name: "test_push_batch_sending_500_per_batch"
-    type: integration
-
-  - criterion: "AC-019: Given a notification for org_slug=acme, when dispatch occurs, then only devices with org_slug=acmereceive the push (no cross-tenant delivery)"
-    test_file: tests/integration/test_tenant_isolation_push.py
-    test_name: "test_push_tenant_isolation"
-    type: integration
-
-  # Notification Preferences
-  - criterion: "AC-020: Given a new user with no preference records, when they call GET /api/notifications/v1/preferences/, then default preferences are returned (all enabled except bulk_campaign email which is disabled)"
-    test_file: tests/integration/test_preferences_defaults.py
-    test_name: "test_default_preferences_new_user"
-    type: integration
-
-  - criterion: "AC-021: Given a user updates preferences viaPUT /api/notifications/v1/preferences/ with [{\"message_type\": \"discussion_reply\", \"channel\": \"email\", \"enabled\":false}], when a discussion reply notification is triggered,then no email is sent but push and in-app are sent"
-    test_file: tests/integration/test_preference_update.py
-    test_name: "test_disable_discussion_reply_email"
-    type: integration
-
-  - criterion: "AC-022: Given a user clicks a one-click unsubscribe link in a bulk_campaign email, when the signed token is valid and not expired, then bulk_campaign and course_announcement email preferences are set to disabled without requiring login"
-    test_file: tests/integration/test_unsubscribe_link.py
-    test_name: "test_one_click_unsubscribe"
-    type: integration
-
-  - criterion: "AC-023: Given a preference change, when the audit log is queried, then it contains the user_id, old_value,new_value, consent_version, ip_address_hash, and timestamp"
-    test_file: tests/integration/test_preference_audit.py
-    test_name: "test_preference_audit_fields"
-    type: integration
-
-  - criterion: "AC-024: Given a bulk_campaign email, when theemail headers are inspected, then List-Unsubscribe and List-Unsubscribe-Post headers are present with a valid one-click unsubscribe URL"
-    test_file: tests/integration/test_rfc8058_headers.py
-    test_name: "test_list_unsubscribe_headers"
-    type: integration
-
-  # Multi-Language Templates
-  - criterion: "AC-025: Given a user with language_preference=ms, when an enrollment_confirmation email is sent, then thesubject and body are rendered in Malay"
-    test_file: tests/integration/test_multilang_templates.py
-    test_name: "test_malay_template_rendering"
-    type: integration
-
-  - criterion: "AC-026: Given a user with language_preference=zh-hans, when a grade_posted email is sent, then the subjectand body are rendered in Simplified Chinese"
-    test_file: tests/integration/test_multilang_templates.py
-    test_name: "test_chinese_template_rendering"
-    type: integration
-
-  - criterion: "AC-027: Given a user with language_preference=ja (unsupported), when an email is sent, then the template falls back to English (en)"
-    test_file: tests/integration/test_multilang_fallback.py
-    test_name: "test_unsupported_language_fallback"
-    type: integration
-
-  - criterion: "AC-028: Given a tenant org_slug=acme with org_display_name='Acme Corp', when an email template renders, then the branding variables show 'Acme Corp' as the organization name and the tenant's logo URL"
-    test_file: tests/integration/test_tenant_branding.py
-    test_name: "test_tenant_branding_variables"
-    type: integration
-
-  # Bulk Messaging
-  - criterion: "AC-029: Given an enterprise admin schedules abulk campaign for 10,000 recipients at 2026-02-15 09:00 UTC,when the scheduled time arrives, then the campaign begins sending and completes within 30 minutes"
-    test_file: tests/performance/test_bulk_campaign_throughput.py
-    test_name: "test_10k_campaign_completes_30min"
-    type: performance
-
-  - criterion: "AC-030: Given a bulk campaign in sending status, when the admin clicks Pause, then sending stops and the campaign status changes to paused; when resumed, sending continues from the next unsent recipient"
-    test_file: tests/integration/test_campaign_pause_resume.py
-    test_name: "test_campaign_pause_resume"
-    type: integration
-
-  - criterion: "AC-031: Given a bulk campaign to 10,000 recipients where 500 have opted out of bulk_campaign email, when the campaign completes, then 9,500 emails are sent and the campaign metrics report 500 skipped"
-    test_file: tests/integration/test_campaign_opt_out.py
-    test_name: "test_campaign_respects_opt_out"
-    type: integration
-
-  - criterion: "AC-032: Given two tenants sending bulk campaigns simultaneously, when both campaigns are active, then neither tenant exceeds 50 emails per second and the combined ratedoes not exceed the SES account limit"
-    test_file: tests/integration/test_rate_limiting_multi_tenant.py
-    test_name: "test_per_tenant_rate_limiting"
-    type: integration
-
-  # Bounce and Complaint Handling
-  - criterion: "AC-033: Given SES reports a hard bounce for user@example.com, when the bounce webhook processes the event,then user@example.com is added to the suppression list and subsequent sends to that address are blocked"
-    test_file: tests/integration/test_bounce_handling.py
-    test_name: "test_hard_bounce_suppression"
-    type: integration
-
-  - criterion: "AC-034: Given an email address with 3 soft bounces within 7 days, when the third soft bounce is processed,then the address is added to the suppression list as a hardbounce"
-    test_file: tests/integration/test_soft_bounce_threshold.py
-    test_name: "test_three_soft_bounces_treated_as_hard"
-    type: integration
-
-  - criterion: "AC-035: Given SES reports a complaint for a bulk_campaign email, when the complaint webhook processes theevent, then the user's bulk_campaign email preference is disabled and the address is added to the suppression list"
-    test_file: tests/integration/test_complaint_handling.py
-    test_name: "test_complaint_disables_preference"
-    type: integration
-
-  - criterion: "AC-036: Given the SES account bounce rate is6% (above 5% threshold), when the alert fires, then the ops team receives a critical alert"
-    test_file: tests/integration/test_bounce_rate_alert.py
-    test_name: "test_bounce_rate_alert_critical"
-    type: integration
-
-  # Digests
-  - criterion: "AC-037: Given a user with digest preference set to daily for discussion_reply, when they receive 10 discussion replies throughout the day, then at 09:00 in their timezone they receive one digest email summarizing all 10 repliesgrouped by course"
-    test_file: tests/integration/test_daily_digest.py
-    test_name: "test_daily_digest_groups_by_course"
-    type: integration
-
-  - criterion: "AC-038: Given a user on daily digest for course_announcement, when a course announcement is published, then no immediate email is sent (push and in-app may still be immediate)"
-    test_file: tests/integration/test_digest_suppression.py
-    test_name: "test_digest_suppresses_immediate_email"
-    type: integration
-
-  - criterion: "AC-039: Given 5 replies to the same discussion thread within one digest period, when the digest renders, then one entry shows the thread title with '(5 new replies)' instead of 5 separate entries"
-    test_file: tests/integration/test_digest_deduplication.py
-    test_name: "test_digest_deduplicates_same_thread"
-    type: integration
-
-  # Engagement Analytics
-  - criterion: "AC-040: Given a bulk_campaign email is sent with open tracking enabled, when the recipient opens the email, then an open event is recorded with campaign_id, user_id, timestamp"
-    test_file: tests/integration/test_open_tracking.py
-    test_name: "test_open_event_logged"
-    type: integration
-
-  - criterion: "AC-041: Given a bulk_campaign email containsa tracked URL, when the recipient clicks it, then a click event is recorded and the user is redirected to the original URLwithin 200ms"
-    test_file: tests/performance/test_click_tracking_latency.py
-    test_name: "test_click_redirect_within_200ms"
-    type: performance
-
-  - criterion: "AC-042: Given an enterprise admin views the campaign analytics dashboard for tenant acme, when they querycampaign metrics, then they see only acme campaign data (no cross-tenant analytics leakage)"
-    test_file: tests/integration/test_analytics_tenant_isolation.py
-    test_name: "test_analytics_tenant_isolation"
-    type: integration
-
-  # GDPR Compliance
-  - criterion: "AC-043: Given a user has not explicitly optedinto marketing communications, when a bulk_campaign is sent,then the user does NOT receive the email"
-    test_file: tests/integration/test_gdpr_opt_in.py
-    test_name: "test_marketing_requires_opt_in"
-    type: integration
-
-  - criterion: "AC-044: Given a user exercises their right todata export, when the export is generated, then notificationpreferences and consent records are included in the export archive"
-    test_file: tests/integration/test_gdpr_export_notifications.py
-    test_name: "test_gdpr_export_includes_notifications"
-    type: integration
-
-  - criterion: "AC-045: Given a user exercises their right todeletion, when the deletion pipeline runs, then all notification records, preference records, consent records, and deviceregistrations for that user are deleted or anonymized"
-    test_file: tests/integration/test_gdpr_deletion_notifications.py
-    test_name: "test_gdpr_deletion_removes_notifications"
-    type: integration
-
-  # Edge Cases (Negative Tests)
-  - criterion: "EC-1: SES sending limit exceeded queues messages locally with exponential backoff"
-    test_file: tests/integration/test_ses_rate_limit_queue.py
-    test_name: "test_ses_rate_limit_queues_with_backoff"
-    type: integration
-
-  - criterion: "EC-2: SES region outage queues messages, doesnot drop"
-    test_file: tests/integration/test_ses_outage_queue.py
-    test_name: "test_ses_outage_queues_messages"
-    type: integration
-
-  - criterion: "EC-3: Invalid sender address falls back to default verified sender"
-    test_file: tests/integration/test_invalid_sender_fallback.py
-    test_name: "test_unverified_sender_fallback"
-    type: integration
-
-  - criterion: "EC-4: Email exceeding SES 10MB limit rejectedwith clear error"
-    test_file: tests/integration/test_email_size_limit.py
-    test_name: "test_email_size_limit_rejection"
-    type: integration
-
-  - criterion: "EC-5: Admin removal from suppression list allows sending"
-    test_file: tests/integration/test_suppression_list_removal.py
-    test_name: "test_suppression_list_false_positive_removal"
-    type: integration
-
-  - criterion: "EC-6: Bounce storm from Kajabi migration datatriggers alert"
-    test_file: tests/integration/test_bounce_storm_alert.py
-    test_name: "test_bounce_storm_alert_fires"
-    type: integration
-
-  - criterion: "EC-7: SES account suspension detected, emailsending paused"
-    test_file: tests/integration/test_ses_suspension_detection.py
-    test_name: "test_ses_account_suspension_detected"
-    type: integration
-
-  - criterion: "EC-8: FCM quota exceeded queues messages withbackoff"
-    test_file: tests/integration/test_fcm_quota_exceeded.py
-    test_name: "test_fcm_quota_queues_with_backoff"
-    type: integration
-
-  - criterion: "EC-9: iOS device token update deduplicates registration"
-    test_file: tests/integration/test_device_token_update.py
-    test_name: "test_device_token_update_deduplicated"
-    type: integration
-
-  - criterion: "EC-10: Silent push notification includes alert payload"
-    test_file: tests/unit/test_push_payload_validation.py
-    test_name: "test_push_includes_alert_payload"
-    type: unit
-
-  - criterion: "EC-11: Preference race condition uses last-write-wins"
-    test_file: tests/integration/test_preference_race_condition.py
-    test_name: "test_preference_race_last_write_wins"
-    type: integration
-
-  - criterion: "EC-12: Consent version migration re-prompts for updated consent"
-    test_file: tests/integration/test_consent_version_migration.py
-    test_name: "test_consent_version_change_reprompts"
-    type: integration
-
-  - criterion: "EC-13: Expired unsubscribe token redirects topreferences page with login required"
-    test_file: tests/integration/test_unsubscribe_expired_redirect.py
-    test_name: "test_expired_token_redirects_to_login"
-    type: integration
-
-  - criterion: "EC-14: Notification flood batches 100 repliesinto single in-app notification"
-    test_file: tests/integration/test_notification_batching.py
-    test_name: "test_notification_flood_batching"
-    type: integration
-
-  - criterion: "EC-15: Notification list API cursor-based pagination handles 10,000+ notifications"
-    test_file: tests/performance/test_inapp_pagination.py
-    test_name: "test_pagination_10k_notifications"
-    type: performance
-
-  - criterion: "EC-16: Digest for user without timezone defaults to Asia/Kuala_Lumpur"
-    test_file: tests/unit/test_digest_timezone_fallback.py
-    test_name: "test_digest_timezone_fallback"
-    type: unit
-
-  - criterion: "EC-17: Empty digest not sent"
-    test_file: tests/integration/test_empty_digest.py
-    test_name: "test_empty_digest_skipped"
-    type: integration
-
-  - criterion: "EC-18: Celery task retry does not duplicate notifications"
-    test_file: tests/integration/test_celery_idempotency.py
-    test_name: "test_celery_retry_idempotent"
-    type: integration
-
-  - criterion: "EC-19: SNS webhook idempotent (duplicate MessageId ignored)"
-    test_file: tests/integration/test_sns_webhook_idempotency.py
-    test_name: "test_sns_duplicate_ignored"
-    type: integration
-
-  - criterion: "EC-20: Preferences API rate limiting blocks 11th request in 1 minute"
-    test_file: tests/integration/test_preferences_rate_limiting.py
-    test_name: "test_preferences_rate_limit_10_per_min"
-    type: integration
-
-  # Performance NFRs
-  - criterion: "NFR-Performance-1: Transactional email dispatch latency <=30s at p95"
-    test_file: tests/performance/test_email_latency.py
-    test_name: "test_email_dispatch_latency_p95"
-    type: performance
-
-  - criterion: "NFR-Performance-2: Bulk email throughput >=50emails/sec/tenant"
-    test_file: tests/performance/test_bulk_throughput.py
-    test_name: "test_bulk_throughput_50_per_sec"
-    type: performance
-
-  - criterion: "NFR-Performance-3: In-app list API p95 latency <=200ms"
-    test_file: tests/performance/test_inapp_api_latency.py
-    test_name: "test_inapp_list_latency_p95"
-    type: performance
-
-  - criterion: "NFR-Performance-4: In-app unread count API p9latency <=100ms"
-    test_file: tests/performance/test_inapp_api_latency.py
-    test_name: "test_unread_count_latency_p95"
-    type: performance
-
-  - criterion: "NFR-Performance-5: Push dispatch latency <=60s at p95"
-    test_file: tests/performance/test_push_latency.py
-    test_name: "test_push_dispatch_latency_p95"
-    type: performance
-
-  - criterion: "NFR-Performance-6: Preferences API p95 latency <=150ms"
-    test_file: tests/performance/test_preferences_api_latency.py
-    test_name: "test_preferences_api_latency_p95"
-    type: performance
-
-  - criterion: "NFR-Performance-7: Digest generation for 10,0users completes within 15 minutes"
-    test_file: tests/performance/test_digest_generation.py
-    test_name: "test_digest_generation_10k_users"
-    type: performance
-
-  # Reliability NFRs
-  - criterion: "NFR-Reliability-1: Email delivery rate to valid addresses >=99%"
-    test_file: tests/integration/test_email_delivery_rate.py
-    test_name: "test_email_delivery_rate_99_percent"
-    type: integration
-
-  - criterion: "NFR-Reliability-2: Push delivery rate to FCM/APNs >=98%"
-    test_file: tests/integration/test_push_delivery_rate.py
-    test_name: "test_push_delivery_rate_98_percent"
-    type: integration
-
-  # Observability
-  - criterion: "Observability-1: notification_emails_sent_total metric incremented on send"
-    test_file: tests/integration/test_metrics.py
-    test_name: "test_email_sent_metric_incremented"
-    type: integration
-
-  - criterion: "Observability-2: notification_emails_bounced_total fires alert at 5%"
-    test_file: tests/integration/test_bounce_rate_alert.py
-    test_name: "test_bounce_rate_alert_5_percent"
-    type: integration
-
-  - criterion: "Observability-3: Email dispatch event log contains required fields"
-    test_file: tests/integration/test_email_event_logging.py
-    test_name: "test_email_dispatch_log_fields"
-    type: integration
-
-  - criterion: "Observability-4: Sensitive data not in logs (no plaintext emails, tokens)"
-    test_file: tests/security/test_log_pii_redaction.py
-    test_name: "test_logs_no_plaintext_pii"
-    type: security
-
-  - criterion: "Observability-5: Grafana dashboard queries valid"
-    test_file: tests/unit/test_dashboard_queries.py
-    test_name: "test_notification_dashboard_promql_valid"
-    type: unit
+acceptance_criteria:
+- id: AC-001
+  description: "Given the sending domain academyv2.mereka.io, when SES domain verification is checked, then DKIM,SPF, and DMARC all p..."
+  verify:
+  - type: manual
+    file: scripts/infra/verify-ses-domain.sh
+    command: scripts/infra/verify-ses-domain.sh academyv2.mereka.io
+- id: AC-002
+  description: "Given the sending domain academy.biji-biji.com, when SES domain verification is checked, then DKIM, SPF, and DMARC al..."
+  verify:
+  - type: manual
+    file: scripts/infra/verify-ses-domain.sh
+    command: scripts/infra/verify-ses-domain.sh academy.biji-biji.com
+- id: AC-003
+  description: "Given a learner triggers a password reset, when ACE dispatches the email, then the email is delivered via SES within ..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_email_delivery.py
+    command: "pytest tests/e2e/test_email_delivery.py::test_password_reset_email_delivered_within_30_seconds"
+- id: AC-004
+  description: "Given the custom MAIL FROM domain mail.academyv2.mereka.io, when an email is sent, then the envelope sender aligns wi..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_dmarc_alignment.py
+    command: pytest tests/integration/test_dmarc_alignment.py::test_envelope_sender_alignment
+- id: AC-005
+  description: "Given an enterprise tenant with org_slug=acme, when a course announcement email is sent, then theFrom display name sh..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_sender_identity.py
+    command: "pytest tests/integration/test_tenant_sender_identity.py::test_enterprise_sender_identity"
+- id: AC-006
+  description: "Given ACE configuration with channels['django_email', 'push', 'in_app'], when a course_announcement notification is t..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_ace_channel_dispatch.py
+    command: "pytest tests/integration/test_ace_channel_dispatch.py::test_course_announcement_all_channels"
+- id: AC-007
+  description: "Given a user who has disabled email for course_announcement but enabled push and in_app, when a course announcement i..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_preference_filtering.py
+    command: "pytest tests/integration/test_preference_filtering.py::test_disabled_email_enabled_push_inapp"
+- id: AC-008
+  description: "Given a password_reset message type,when the user has disabled all notification channels, then the email is still sen..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_system_critical_bypass.py
+    command: "pytest tests/integration/test_system_critical_bypass.py::test_password_reset_bypasses_preferences"
+- id: AC-009
+  description: "Given Celery workers processing the edx.lms.core.default queue, when 100 ACE messages are enqueuedsimultaneously, the..."
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_ace_dispatch_throughput.py
+    command: "pytest tests/performance/test_ace_dispatch_throughput.py::test_100_messages_dispatched_within_60s"
+- id: AC-010
+  description: "Given a learner with 5 unread notifications, when they call GET /api/notifications/v1/unread-count/, then the respons..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_inapp_api.py
+    command: pytest tests/integration/test_inapp_api.py::test_unread_count_api
+- id: AC-011
+  description: "Given 50 notifications for a user (30read, 20 unread), when they call GET /api/notifications/v1/?read=false, then onl..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_inapp_api.py
+    command: pytest tests/integration/test_inapp_api.py::test_filter_unread_notifications
+- id: AC-012
+  description: "Given a notification with expires_atin the past, when the notification list is queried, then theexpired notification ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_inapp_api.py
+    command: pytest tests/integration/test_inapp_api.py::test_expired_notification_excluded
+- id: AC-013
+  description: "Given a user calls POST /api/notifications/v1/mark-all-read/, when the operation completes, then GET /api/notificatio..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_inapp_api.py
+    command: pytest tests/integration/test_inapp_api.py::test_mark_all_read
+- id: AC-014
+  description: "Given a user under org_slug=acme, when they query the notification list, then they see only notifications with org_sl..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_isolation_inapp.py
+    command: "pytest tests/integration/test_tenant_isolation_inapp.py::test_inapp_tenant_isolation"
+- id: AC-015
+  description: "Given a device registers via POST /api/mobile/v1/notifications/register/ with a valid FCM token, when a grade_posted ..."
+  verify:
+  - type: automated
+    test_type: e2e
+    file: tests/e2e/test_push_delivery.py
+    command: pytest tests/e2e/test_push_delivery.py::test_push_delivered_within_60s
+- id: AC-016
+  description: "Given a device token that FCM reportsas UNREGISTERED, when a push notification fails for that token, then the device ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_push_error_handling.py
+    command: "pytest tests/integration/test_push_error_handling.py::test_device_marked_inactive_on_unregistered"
+- id: AC-017
+  description: "Given a user logs out and calls DELETE /api/mobile/v1/notifications/register/, when a notificationis subsequently tri..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_push_after_deregister.py
+    command: "pytest tests/integration/test_push_after_deregister.py::test_no_push_after_deregistration"
+- id: AC-018
+  description: "Given 1,000 push notifications queuedfor dispatch, when the batch sender runs, then FCM receivesbatches of up to 500 ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_push_batching.py
+    command: "pytest tests/integration/test_push_batching.py::test_push_batch_sending_500_per_batch"
+- id: AC-019
+  description: "Given a notification for org_slug=acme, when dispatch occurs, then only devices with org_slug=acmereceive the push (n..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_isolation_push.py
+    command: "pytest tests/integration/test_tenant_isolation_push.py::test_push_tenant_isolation"
+- id: AC-020
+  description: "Given a new user with no preference records, when they call GET /api/notifications/v1/preferences/, then default pref..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_preferences_defaults.py
+    command: "pytest tests/integration/test_preferences_defaults.py::test_default_preferences_new_user"
+- id: AC-021
+  description: "Given a user updates preferences viaPUT /api/notifications/v1/preferences/ with [{\"message_type\": \"discussion_reply\",..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_preference_update.py
+    command: "pytest tests/integration/test_preference_update.py::test_disable_discussion_reply_email"
+- id: AC-022
+  description: "Given a user clicks a one-click unsubscribe link in a bulk_campaign email, when the signed token is valid and not exp..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_unsubscribe_link.py
+    command: pytest tests/integration/test_unsubscribe_link.py::test_one_click_unsubscribe
+- id: AC-023
+  description: "Given a preference change, when the audit log is queried, then it contains the user_id, old_value,new_value, consent_..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_preference_audit.py
+    command: pytest tests/integration/test_preference_audit.py::test_preference_audit_fields
+- id: AC-024
+  description: "Given a bulk_campaign email, when theemail headers are inspected, then List-Unsubscribe and List-Unsubscribe-Post hea..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_rfc8058_headers.py
+    command: pytest tests/integration/test_rfc8058_headers.py::test_list_unsubscribe_headers
+- id: AC-025
+  description: "Given a user with language_preference=ms, when an enrollment_confirmation email is sent, then thesubject and body are..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_multilang_templates.py
+    command: "pytest tests/integration/test_multilang_templates.py::test_malay_template_rendering"
+- id: AC-026
+  description: "Given a user with language_preference=zh-hans, when a grade_posted email is sent, then the subjectand body are render..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_multilang_templates.py
+    command: "pytest tests/integration/test_multilang_templates.py::test_chinese_template_rendering"
+- id: AC-027
+  description: "Given a user with language_preference=ja (unsupported), when an email is sent, then the template falls back to Englis..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_multilang_fallback.py
+    command: "pytest tests/integration/test_multilang_fallback.py::test_unsupported_language_fallback"
+- id: AC-028
+  description: "Given a tenant org_slug=acme with org_display_name='Acme Corp', when an email template renders, then the branding var..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_tenant_branding.py
+    command: pytest tests/integration/test_tenant_branding.py::test_tenant_branding_variables
+- id: AC-029
+  description: "Given an enterprise admin schedules abulk campaign for 10,000 recipients at 2026-02-15 09:00 UTC,when the scheduled t..."
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_bulk_campaign_throughput.py
+    command: "pytest tests/performance/test_bulk_campaign_throughput.py::test_10k_campaign_completes_30min"
+- id: AC-030
+  description: "Given a bulk campaign in sending status, when the admin clicks Pause, then sending stops and the campaign status chan..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_campaign_pause_resume.py
+    command: "pytest tests/integration/test_campaign_pause_resume.py::test_campaign_pause_resume"
+- id: AC-031
+  description: "Given a bulk campaign to 10,000 recipients where 500 have opted out of bulk_campaign email, when the campaign complet..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_campaign_opt_out.py
+    command: "pytest tests/integration/test_campaign_opt_out.py::test_campaign_respects_opt_out"
+- id: AC-032
+  description: "Given two tenants sending bulk campaigns simultaneously, when both campaigns are active, then neither tenant exceeds ..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_rate_limiting_multi_tenant.py
+    command: "pytest tests/integration/test_rate_limiting_multi_tenant.py::test_per_tenant_rate_limiting"
+- id: AC-033
+  description: "Given SES reports a hard bounce for user@example.com, when the bounce webhook processes the event,then user@example.c..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_bounce_handling.py
+    command: pytest tests/integration/test_bounce_handling.py::test_hard_bounce_suppression
+- id: AC-034
+  description: "Given an email address with 3 soft bounces within 7 days, when the third soft bounce is processed,then the address is..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_soft_bounce_threshold.py
+    command: "pytest tests/integration/test_soft_bounce_threshold.py::test_three_soft_bounces_treated_as_hard"
+- id: AC-035
+  description: "Given SES reports a complaint for a bulk_campaign email, when the complaint webhook processes theevent, then the user..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_complaint_handling.py
+    command: "pytest tests/integration/test_complaint_handling.py::test_complaint_disables_preference"
+- id: AC-036
+  description: "Given the SES account bounce rate is6% (above 5% threshold), when the alert fires, then the ops team receives a criti..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_bounce_rate_alert.py
+    command: "pytest tests/integration/test_bounce_rate_alert.py::test_bounce_rate_alert_critical"
+- id: AC-037
+  description: "Given a user with digest preference set to daily for discussion_reply, when they receive 10 discussion replies throug..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_daily_digest.py
+    command: "pytest tests/integration/test_daily_digest.py::test_daily_digest_groups_by_course"
+- id: AC-038
+  description: "Given a user on daily digest for course_announcement, when a course announcement is published, then no immediate emai..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_digest_suppression.py
+    command: "pytest tests/integration/test_digest_suppression.py::test_digest_suppresses_immediate_email"
+- id: AC-039
+  description: "Given 5 replies to the same discussion thread within one digest period, when the digest renders, then one entry shows..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_digest_deduplication.py
+    command: "pytest tests/integration/test_digest_deduplication.py::test_digest_deduplicates_same_thread"
+- id: AC-040
+  description: "Given a bulk_campaign email is sent with open tracking enabled, when the recipient opens the email, then an open even..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_open_tracking.py
+    command: pytest tests/integration/test_open_tracking.py::test_open_event_logged
+- id: AC-041
+  description: "Given a bulk_campaign email containsa tracked URL, when the recipient clicks it, then a click event is recorded and t..."
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_click_tracking_latency.py
+    command: "pytest tests/performance/test_click_tracking_latency.py::test_click_redirect_within_200ms"
+- id: AC-042
+  description: "Given an enterprise admin views the campaign analytics dashboard for tenant acme, when they querycampaign metrics, th..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_analytics_tenant_isolation.py
+    command: "pytest tests/integration/test_analytics_tenant_isolation.py::test_analytics_tenant_isolation"
+- id: AC-043
+  description: "Given a user has not explicitly optedinto marketing communications, when a bulk_campaign is sent,then the user does N..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_gdpr_opt_in.py
+    command: pytest tests/integration/test_gdpr_opt_in.py::test_marketing_requires_opt_in
+- id: AC-044
+  description: "Given a user exercises their right todata export, when the export is generated, then notificationpreferences and cons..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_gdpr_export_notifications.py
+    command: "pytest tests/integration/test_gdpr_export_notifications.py::test_gdpr_export_includes_notifications"
+- id: AC-045
+  description: "Given a user exercises their right todeletion, when the deletion pipeline runs, then all notification records, prefer..."
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_gdpr_deletion_notifications.py
+    command: "pytest tests/integration/test_gdpr_deletion_notifications.py::test_gdpr_deletion_removes_notifications"
+- id: EC-1
+  description: SES sending limit exceeded queues messages locally with exponential backoff
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_ses_rate_limit_queue.py
+    command: "pytest tests/integration/test_ses_rate_limit_queue.py::test_ses_rate_limit_queues_with_backoff"
+- id: EC-2
+  description: SES region outage queues messages, doesnot drop
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_ses_outage_queue.py
+    command: "pytest tests/integration/test_ses_outage_queue.py::test_ses_outage_queues_messages"
+- id: EC-3
+  description: Invalid sender address falls back to default verified sender
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_invalid_sender_fallback.py
+    command: "pytest tests/integration/test_invalid_sender_fallback.py::test_unverified_sender_fallback"
+- id: EC-4
+  description: Email exceeding SES 10MB limit rejectedwith clear error
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_email_size_limit.py
+    command: "pytest tests/integration/test_email_size_limit.py::test_email_size_limit_rejection"
+- id: EC-5
+  description: Admin removal from suppression list allows sending
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_suppression_list_removal.py
+    command: "pytest tests/integration/test_suppression_list_removal.py::test_suppression_list_false_positive_removal"
+- id: EC-6
+  description: Bounce storm from Kajabi migration datatriggers alert
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_bounce_storm_alert.py
+    command: "pytest tests/integration/test_bounce_storm_alert.py::test_bounce_storm_alert_fires"
+- id: EC-7
+  description: SES account suspension detected, emailsending paused
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_ses_suspension_detection.py
+    command: "pytest tests/integration/test_ses_suspension_detection.py::test_ses_account_suspension_detected"
+- id: EC-8
+  description: FCM quota exceeded queues messages withbackoff
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_fcm_quota_exceeded.py
+    command: "pytest tests/integration/test_fcm_quota_exceeded.py::test_fcm_quota_queues_with_backoff"
+- id: EC-9
+  description: iOS device token update deduplicates registration
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_device_token_update.py
+    command: "pytest tests/integration/test_device_token_update.py::test_device_token_update_deduplicated"
+- id: EC-10
+  description: Silent push notification includes alert payload
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_push_payload_validation.py
+    command: "pytest tests/unit/test_push_payload_validation.py::test_push_includes_alert_payload"
+- id: EC-11
+  description: Preference race condition uses last-write-wins
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_preference_race_condition.py
+    command: "pytest tests/integration/test_preference_race_condition.py::test_preference_race_last_write_wins"
+- id: EC-12
+  description: Consent version migration re-prompts for updated consent
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_consent_version_migration.py
+    command: "pytest tests/integration/test_consent_version_migration.py::test_consent_version_change_reprompts"
+- id: EC-13
+  description: Expired unsubscribe token redirects topreferences page with login required
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_unsubscribe_expired_redirect.py
+    command: "pytest tests/integration/test_unsubscribe_expired_redirect.py::test_expired_token_redirects_to_login"
+- id: EC-14
+  description: Notification flood batches 100 repliesinto single in-app notification
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_notification_batching.py
+    command: "pytest tests/integration/test_notification_batching.py::test_notification_flood_batching"
+- id: EC-15
+  description: Notification list API cursor-based pagination handles 10,000+ notifications
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_inapp_pagination.py
+    command: "pytest tests/performance/test_inapp_pagination.py::test_pagination_10k_notifications"
+- id: EC-16
+  description: Digest for user without timezone defaults to Asia/Kuala_Lumpur
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_digest_timezone_fallback.py
+    command: "pytest tests/unit/test_digest_timezone_fallback.py::test_digest_timezone_fallback"
+- id: EC-17
+  description: Empty digest not sent
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_empty_digest.py
+    command: pytest tests/integration/test_empty_digest.py::test_empty_digest_skipped
+- id: EC-18
+  description: Celery task retry does not duplicate notifications
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_celery_idempotency.py
+    command: "pytest tests/integration/test_celery_idempotency.py::test_celery_retry_idempotent"
+- id: EC-19
+  description: SNS webhook idempotent (duplicate MessageId ignored)
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_sns_webhook_idempotency.py
+    command: "pytest tests/integration/test_sns_webhook_idempotency.py::test_sns_duplicate_ignored"
+- id: EC-20
+  description: Preferences API rate limiting blocks 11th request in 1 minute
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_preferences_rate_limiting.py
+    command: "pytest tests/integration/test_preferences_rate_limiting.py::test_preferences_rate_limit_10_per_min"
+- id: UNGROUPED-66
+  description: 'NFR-Performance-1: Transactional email dispatch latency <=30s at p95'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_email_latency.py
+    command: pytest tests/performance/test_email_latency.py::test_email_dispatch_latency_p95
+- id: UNGROUPED-67
+  description: 'NFR-Performance-2: Bulk email throughput >=50emails/sec/tenant'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_bulk_throughput.py
+    command: "pytest tests/performance/test_bulk_throughput.py::test_bulk_throughput_50_per_sec"
+- id: UNGROUPED-68
+  description: 'NFR-Performance-3: In-app list API p95 latency <=200ms'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_inapp_api_latency.py
+    command: pytest tests/performance/test_inapp_api_latency.py::test_inapp_list_latency_p95
+- id: UNGROUPED-69
+  description: 'NFR-Performance-4: In-app unread count API p9latency <=100ms'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_inapp_api_latency.py
+    command: "pytest tests/performance/test_inapp_api_latency.py::test_unread_count_latency_p95"
+- id: UNGROUPED-70
+  description: 'NFR-Performance-5: Push dispatch latency <=60s at p95'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_push_latency.py
+    command: pytest tests/performance/test_push_latency.py::test_push_dispatch_latency_p95
+- id: UNGROUPED-71
+  description: 'NFR-Performance-6: Preferences API p95 latency <=150ms'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_preferences_api_latency.py
+    command: "pytest tests/performance/test_preferences_api_latency.py::test_preferences_api_latency_p95"
+- id: UNGROUPED-72
+  description: 'NFR-Performance-7: Digest generation for 10,0users completes within 15 minutes'
+  verify:
+  - type: automated
+    test_type: performance
+    file: tests/performance/test_digest_generation.py
+    command: "pytest tests/performance/test_digest_generation.py::test_digest_generation_10k_users"
+- id: UNGROUPED-73
+  description: 'NFR-Reliability-1: Email delivery rate to valid addresses >=99%'
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_email_delivery_rate.py
+    command: "pytest tests/integration/test_email_delivery_rate.py::test_email_delivery_rate_99_percent"
+- id: UNGROUPED-74
+  description: 'NFR-Reliability-2: Push delivery rate to FCM/APNs >=98%'
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_push_delivery_rate.py
+    command: "pytest tests/integration/test_push_delivery_rate.py::test_push_delivery_rate_98_percent"
+- id: UNGROUPED-75
+  description: 'Observability-1: notification_emails_sent_total metric incremented on send'
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_metrics.py
+    command: pytest tests/integration/test_metrics.py::test_email_sent_metric_incremented
+- id: UNGROUPED-76
+  description: 'Observability-2: notification_emails_bounced_total fires alert at 5%'
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_bounce_rate_alert.py
+    command: "pytest tests/integration/test_bounce_rate_alert.py::test_bounce_rate_alert_5_percent"
+- id: UNGROUPED-77
+  description: 'Observability-3: Email dispatch event log contains required fields'
+  verify:
+  - type: automated
+    test_type: integration
+    file: tests/integration/test_email_event_logging.py
+    command: "pytest tests/integration/test_email_event_logging.py::test_email_dispatch_log_fields"
+- id: UNGROUPED-78
+  description: 'Observability-4: Sensitive data not in logs (no plaintext emails, tokens)'
+  verify:
+  - type: automated
+    test_type: security
+    file: tests/security/test_log_pii_redaction.py
+    command: pytest tests/security/test_log_pii_redaction.py::test_logs_no_plaintext_pii
+- id: UNGROUPED-79
+  description: 'Observability-5: Grafana dashboard queries valid'
+  verify:
+  - type: automated
+    test_type: unit
+    file: tests/unit/test_dashboard_queries.py
+    command: "pytest tests/unit/test_dashboard_queries.py::test_notification_dashboard_promql_valid"
