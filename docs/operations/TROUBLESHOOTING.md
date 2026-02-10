@@ -927,6 +927,7 @@ This canary now fails explicitly if Studio 500s during `/complete/edx-oauth2/`, 
 If public checks pass but Studio still 500s, treat it as a runtime secret/config drift issue and audit:
 - `scripts/qa/verify-oidc-provider-configs.sh --env prod` (OIDC provider posture)
 - `scripts/qa/verify-multisite-config.sh prod` (roots + host mapping)
+- `scripts/qa/verify-cms-oauth2-secret-present.sh --context <prod_context>` (CMS oauth secret present, without printing values)
 
 ---
 
