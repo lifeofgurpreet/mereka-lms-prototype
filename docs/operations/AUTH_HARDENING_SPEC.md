@@ -92,6 +92,13 @@ LMS/CMS also include multisite hardening middleware:
   - Notes: must return an API banner (API-first, no SSO UI)
   - Forum: must return `401` unauthenticated (API-first, no SSO UI)
 
+- `scripts/qa/verify-mfe-config-contract.sh --env {prod|dev|both}`
+  - Verifies `/api/mfe_config/v1` on the public apps host contains the auth-critical keys we depend on:
+    - `AUTHN_MICROFRONTEND_URL` / `AUTHN_MICROFRONTEND_DOMAIN`
+    - `SESSION_COOKIE_SAMESITE` / `CSRF_COOKIE_SAMESITE` (should be `"None"`)
+    - `REFRESH_ACCESS_TOKEN_ENDPOINT` and base URLs match the current hostnames
+  - This catches “stale config” and cookie posture regressions before they become user-visible SSO failures.
+
 - `scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`
   - Compares expected hostnames (from `scripts/shared/config.sh`) vs deployed Ingress hosts (prod + dev).
 

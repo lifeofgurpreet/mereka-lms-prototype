@@ -310,16 +310,22 @@ cookies can produce the same symptoms—test in a fresh browser profile first.
 
 **Preferred Fix (redirect to MFEs):**
 ```bash
-kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
-  "cd /openedx/edx-platform && ./manage.py lms shell -c \
-  \"from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; \
-from waffle.models import Flag; \
-domains=['academyv2.mereka.io','academy.biji-biji.com','skillourfuture.academy.mereka.io']; \
-for domain in domains: \
-    site = SiteConfiguration.objects.filter(site__domain=domain).first(); \
-    values = dict(site.site_values); \
-    values['ENABLE_ACCOUNT_MICROFRONTEND'] = True; \
-    values['ENABLE_PROFILE_MICROFRONTEND'] = True; \
+	kubectl exec -n mereka-lms deploy/lms -- /bin/bash -c \
+	  "cd /openedx/edx-platform && ./manage.py lms shell -c \
+	  \"from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; \
+	from waffle.models import Flag; \
+	domains=['academyv2.mereka.io','academy.biji-biji.com','skillourfuture.academy.mereka.io']; \
+	# NOTE: `skillourfuture.academyv2.mereka.io` is not a canonical hostname today.
+	# The Skill Our Future microsite uses `skillourfuture.academy.mereka.io`.
+	# If you introduce a new alias under `*.academyv2.mereka.io`, you must also:
+	# - add DNS + Ingress + TLS SAN coverage
+	# - ensure Authentik OIDC redirect_uri allowlist includes that host
+	# - update the hostname registry (`docs/operations/OPENEDX_HOSTNAMES.md`)
+	for domain in domains: \
+	    site = SiteConfiguration.objects.filter(site__domain=domain).first(); \
+	    values = dict(site.site_values); \
+	    values['ENABLE_ACCOUNT_MICROFRONTEND'] = True; \
+	    values['ENABLE_PROFILE_MICROFRONTEND'] = True; \
     site.site_values = values; site.save(); \
 for name in ['account.redirect_to_microfrontend','learner_profile.redirect_to_microfrontend']: \
     Flag.objects.update_or_create(name=name, defaults={'everyone': True}); \

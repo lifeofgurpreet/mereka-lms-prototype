@@ -134,10 +134,12 @@ run_check "repo: OIDC cookie middleware order guard" ./scripts/qa/verify-oidc-co
 if [[ "$should_run_public" -eq 1 ]]; then
   if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public: auth surfaces (prod)" ./scripts/qa/verify-auth-surfaces.sh prod
+    run_check "public: MFE config contract (prod)" ./scripts/qa/verify-mfe-config-contract.sh --env prod
     run_check "public: cert SANs (prod)" ./scripts/infra/check-cert-sans.sh
   fi
   if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
     run_check "public: auth surfaces (dev)" ./scripts/qa/verify-auth-surfaces.sh dev
+    run_check "public: MFE config contract (dev)" ./scripts/qa/verify-mfe-config-contract.sh --env dev
   fi
 fi
 
