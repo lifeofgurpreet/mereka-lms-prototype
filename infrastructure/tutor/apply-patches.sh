@@ -889,14 +889,27 @@ RUN pip install "pymongo[srv]" """,
 
     # Fix collectstatic SuspiciousFileOperation in v21 asset builds.
     # The theming storage's safe_join fails on relative CSS paths that resolve outside STATIC_ROOT.
-    # Must be set AFTER derive_settings() which overrides STATICFILES_STORAGE.
+    # Monkey-patch safe_join in the canonical module AND in every module that already imported it
+    # (e.g. django.core.files.storage.filesystem imports safe_join at module level).
     if path.name == "assets.py" and "derive_settings" in updated:
-        storage_override = 'STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"'
-        if storage_override not in updated:
-            updated = updated.replace(
-                "derive_settings(__name__)",
-                "derive_settings(__name__)\n\n" + storage_override,
-            )
+        safe_join_patch = (
+            "# Monkey-patch safe_join to be permissive during asset build.\n"
+            "import sys as _sys\n"
+            "import os.path as _osp\n"
+            "import django.utils._os as _os_mod\n"
+            "_orig_safe_join = _os_mod.safe_join\n"
+            "def _build_safe_join(base, *paths):\n"
+            "    return _osp.abspath(_osp.join(base, *paths))\n"
+            "_os_mod.safe_join = _build_safe_join\n"
+            "for _m in list(_sys.modules.values()):\n"
+            "    try:\n"
+            "        if getattr(_m, 'safe_join', None) is _orig_safe_join:\n"
+            "            _m.safe_join = _build_safe_join\n"
+            "    except Exception:\n"
+            "        pass\n"
+        )
+        if "_build_safe_join" not in updated:
+            updated = updated.rstrip() + "\n\n" + safe_join_patch
 
     if updated != original:
         path.write_text(updated)

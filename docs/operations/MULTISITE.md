@@ -12,6 +12,8 @@ This guide captures the steps required to attach additional branded experiences 
 | Biji-Biji Academy | `academy.biji-biji.com` | apex domain managed by the Biji-Biji team |
 | Skill Our Future | `skillourfuture.academy.mereka.io` | subdomain that lives inside the existing academyv2 zone (keep the Cloudflare record DNS-only; Universal SSL does not cover two-level wildcards) |
 
+> **Common mistake:** `skillsourfuture.academyv2.mereka.io` is **not** a canonical hostname and is not expected to resolve. The tenant domain is `skillourfuture.academy.mereka.io`.
+
 1. Create `A`/`CNAME` records that resolve to the same load balancer / host IP that currently serves `academyv2.mereka.io`. The `skillourfuture.academy` record is tracked in `infrastructure/cloudflare/records.json` and must stay gray-clouded unless you buy an Advanced Certificate pack.
 2. Manage `academy.biji-biji.com` from the `biji-biji.com` Cloudflare zone (flattened CNAME to `academyv2.mereka.io`, orange-clouded is fine there).  
 3. Keep DNS-only CNAMEs for `preview.academyv2` and `notes.academyv2` pointing at `academyv2.mereka.io` so the edge proxy can keep issuing certificates without warnings.

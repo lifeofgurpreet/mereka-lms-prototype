@@ -146,6 +146,9 @@ It aggregates:
     - `/auth/login/oidc/` -> Authentik login form -> `/auth/complete/oidc/` callback
   - Verifies the post-login browser session can access `/api/user/v1/me` (expects HTTP 200).
   - Verifies dashboard navigation stays authenticated (does not bounce to login/Auth0).
+  - Verifies authenticated surfaces across the stack after OIDC:
+    - `https://apps.<domain>/learner-dashboard` must not bounce to `/authn/login` (catches `login_refresh` cookie / reverse-proxy drift).
+    - `https://studio.<domain>/` must not 500 during `/complete/edx-oauth2/` (catches Studio oauth client secret/config drift).
   - Writes failure screenshots to `var/auth-sso-canary/`.
   - Uses env-only secrets (never CLI args):
     - `SSO_CANARY_EMAIL[_PROD|_DEV]`

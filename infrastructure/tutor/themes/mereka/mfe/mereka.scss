@@ -338,6 +338,52 @@ label {
   min-height: 96px;
 }
 
+/* Learning MFE (My Courses / Discover New) card layout guardrails */
+[class*="learning"] {
+  background: transparent;
+}
+
+[class*="learning"] [class*="course-grid"],
+[class*="learning"] [class*="course-list"],
+[class*="learning"] [data-testid*="course-grid"],
+[class*="learning"] [data-testid*="course-list"] {
+  gap: 1rem;
+}
+
+/* Bootstrap-ish fallback: many MFEs render course cards inside `.row > .col-*`. */
+[class*="learning"] [class*="my-courses"] .row > [class*="col"],
+[class*="learning"] [data-testid*="my-courses"] .row > [class*="col"] {
+  margin-bottom: 1rem;
+}
+
+[class*="learning"] :is(.pgn__card, .card) {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+[class*="learning"] :is(.pgn__card, .card) img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+  aspect-ratio: 16 / 9;
+  min-height: 96px;
+}
+
+/* When course cards use a horizontal layout, ensure the media column doesn't collapse. */
+[class*="learning"] :is(.pgn__card, .card) [class*="image"],
+[class*="learning"] :is(.pgn__card, .card) [class*="media"] {
+  min-width: 160px;
+}
+
+[class*="learning"] :is(.pgn__card, .card) [class*="image"] img,
+[class*="learning"] :is(.pgn__card, .card) [class*="media"] img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */
 [class*="learner-dashboard"] [class*="course-list"] > * + *,
 [class*="learner-dashboard"] [data-testid*="course-list"] > * + * {

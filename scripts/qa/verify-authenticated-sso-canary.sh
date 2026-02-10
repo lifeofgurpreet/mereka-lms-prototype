@@ -70,15 +70,17 @@ failures=0
 
 run_env() {
   local env_name="$1"
-  local lms_domain mfe_domain email password
+  local lms_domain studio_domain mfe_domain email password
 
   if [[ "$env_name" == "prod" ]]; then
     lms_domain="$LMS_DOMAIN"
+    studio_domain="$STUDIO_DOMAIN"
     mfe_domain="$MFE_DOMAIN"
     email="${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}"
     password="${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}"
   else
     lms_domain="$DEV_LMS_DOMAIN"
+    studio_domain="$DEV_STUDIO_DOMAIN"
     mfe_domain="$DEV_MFE_DOMAIN"
     email="${SSO_CANARY_EMAIL_DEV:-${SSO_CANARY_EMAIL:-}}"
     password="${SSO_CANARY_PASSWORD_DEV:-${SSO_CANARY_PASSWORD:-}}"
@@ -104,6 +106,7 @@ from playwright.sync_api import Error as PWError, TimeoutError as PWTimeout, syn
 
 env_name = os.environ["CANARY_ENV_NAME"]
 lms_domain = os.environ["CANARY_LMS_DOMAIN"]
+studio_domain = os.environ["CANARY_STUDIO_DOMAIN"]
 mfe_domain = os.environ["CANARY_MFE_DOMAIN"]
 email = os.environ["CANARY_EMAIL"]
 password = os.environ["CANARY_PASSWORD"]
@@ -114,8 +117,10 @@ run_id = os.environ["CANARY_RUN_ID"]
 base_url = f"https://{lms_domain}"
 login_url = f"{base_url}/auth/login/oidc/"
 dashboard_url = f"{base_url}/dashboard"
+studio_url = f"https://{studio_domain}/"
 sso_mfe_learner_dashboard_url = f"https://{mfe_domain}/learner-dashboard"
 screenshot_path = out_dir / f"{run_id}-failure.png"
+studio_failure_path = out_dir / f"{run_id}-studio-failure.png"
 
 def log(msg: str) -> None:
     print(f"[{env_name}] {msg}")
@@ -179,6 +184,19 @@ with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     context = browser.new_context(ignore_https_errors=False)
     page = context.new_page()
+    studio_error = {"url": None, "status": None}
+
+    def on_response(resp):
+        try:
+            url = resp.url or ""
+            if "/complete/edx-oauth2" in url and resp.status >= 500 and studio_error["status"] is None:
+                studio_error["url"] = url
+                studio_error["status"] = resp.status
+        except Exception:
+            # Never fail the run on observer errors.
+            return
+
+    page.on("response", on_response)
 
     try:
         if debug:
@@ -246,6 +264,35 @@ with sync_playwright() as p:
             )
         assert_not_auth_error_page(page, "mfe_learner_dashboard")
 
+        # Studio regression guardrail: studio must not 500 during the LMS oauth2 completion
+        # flow (`/complete/edx-oauth2/`) after OIDC login. This is a common failure mode
+        # when Studio's oauth client secret wiring drifts.
+        if debug:
+            log(f"goto={studio_url}")
+        page.goto(studio_url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_load_state("domcontentloaded", timeout=60000)
+        try:
+            body = page.inner_text("body", timeout=5000).lower()
+        except Exception:
+            body = ""
+        if "the studio servers encountered an error" in body or "an error occurred in studio" in body:
+            try:
+                page.screenshot(path=str(studio_failure_path), full_page=True)
+                log(f"studio_screenshot={studio_failure_path}")
+            except Exception as exc:
+                log(f"studio_screenshot_failed={exc}")
+            fail(f"studio_error_page url={page.url}", page=page)
+        if studio_error["status"] is not None:
+            try:
+                page.screenshot(path=str(studio_failure_path), full_page=True)
+                log(f"studio_screenshot={studio_failure_path}")
+            except Exception as exc:
+                log(f"studio_screenshot_failed={exc}")
+            fail(
+                f"studio_complete_edx_oauth2_http_{studio_error['status']} url={studio_error['url']}",
+                page=page,
+            )
+
         log("OK authenticated session validated")
     except (PWTimeout, PWError) as exc:
         fail(f"timeout_or_browser_error: {exc}", page=page)
@@ -260,6 +307,7 @@ PY
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   CANARY_ENV_NAME="prod" \
   CANARY_LMS_DOMAIN="$LMS_DOMAIN" \
+  CANARY_STUDIO_DOMAIN="$STUDIO_DOMAIN" \
   CANARY_MFE_DOMAIN="$MFE_DOMAIN" \
   CANARY_EMAIL="${SSO_CANARY_EMAIL_PROD:-${SSO_CANARY_EMAIL:-}}" \
   CANARY_PASSWORD="${SSO_CANARY_PASSWORD_PROD:-${SSO_CANARY_PASSWORD:-}}" \
@@ -272,6 +320,7 @@ fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
   CANARY_ENV_NAME="dev" \
   CANARY_LMS_DOMAIN="$DEV_LMS_DOMAIN" \
+  CANARY_STUDIO_DOMAIN="$DEV_STUDIO_DOMAIN" \
   CANARY_MFE_DOMAIN="$DEV_MFE_DOMAIN" \
   CANARY_EMAIL="${SSO_CANARY_EMAIL_DEV:-${SSO_CANARY_EMAIL:-}}" \
   CANARY_PASSWORD="${SSO_CANARY_PASSWORD_DEV:-${SSO_CANARY_PASSWORD:-}}" \

@@ -896,6 +896,40 @@ RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 \
 
 ---
 
+### Issue 7c3: Studio login 500s at `/complete/edx-oauth2/` (Studio cannot establish LMS oauth session)
+
+**Symptoms:**
+- `https://studio.<domain>/` shows a generic error page:
+  - `The Studio servers encountered an error`
+- Browser network shows `500` on:
+  - `https://studio.<domain>/complete/edx-oauth2/?code=...&state=...`
+- Console logs may mention “no site id” during the callback URL.
+
+**Root Cause (most common):**
+- Studio’s `edx-oauth2` client configuration drifted:
+  - wrong/missing oauth client secret
+  - wrong LMS oauth endpoints (root URL mismatch)
+  - multisite site resolution drift (Studio host not mapping to the right tenant root)
+
+**Verify (preferred, credentialed canary):**
+```bash
+RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1 \
+  ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
+```
+
+This canary now fails explicitly if Studio 500s during `/complete/edx-oauth2/`, and writes a screenshot to `var/auth-sso-canary/`.
+
+**Verify (public preflight):**
+```bash
+./scripts/qa/verify-auth-surfaces.sh prod
+```
+
+If public checks pass but Studio still 500s, treat it as a runtime secret/config drift issue and audit:
+- `scripts/qa/verify-oidc-provider-configs.sh --env prod` (OIDC provider posture)
+- `scripts/qa/verify-multisite-config.sh prod` (roots + host mapping)
+
+---
+
 ### Issue 7d: Studio Create Course fails (`User has no profile`)
 
 **Symptoms:**

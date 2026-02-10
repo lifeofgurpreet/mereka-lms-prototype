@@ -68,6 +68,16 @@ The generated Tutor state (`tutor_env/`) is git-ignored; use `infrastructure/tut
 - CI release guardrail: `update_gitops=true` requires both `build_openedx=true` and `build_mfe=true` so digest pinning inputs are captured deterministically.
 - Repo ownership boundary contract: `docs/operations/REPO_BOUNDARIES.md`
 
+### Agent Runtime Notes (Codex/Claude)
+
+This repo uses automation heavily. Some agent configuration keys referenced in internal runbooks are **agent runtime flags**, not Kubernetes/Tutor config:
+
+- `approval_policy=never`: run autonomously (closest analog in official Codex CLI is "Full Auto").
+- `sandbox_mode=danger-full-access`: agent has filesystem access; treat as production-risky and follow the Data Protection Rules.
+- `web_search=live`: when verifying drift or up-to-date behavior, use live web lookups (and prefer official docs for primary sources).
+
+These flags do not live in this repo; they are provided by the agent runner at execution time.
+
 ### Deployment Sequence (DO NOT SKIP STEPS)
 
 1. **Modify theme files** in `infrastructure/tutor/themes/mereka/`
