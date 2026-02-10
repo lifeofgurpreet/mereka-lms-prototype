@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -104,3 +104,6 @@ spec-lint: ## Run spec integrity gates (lint + verify + format + coverage)
 spec-coverage: ## Show spec coverage report (text)
 	python3 scripts/qa/spec-tools/spec_coverage_report.py \
 		--specs-dir specs/ --testmaps-dir specs/testmaps/ --repo-root . --format text
+
+spec-compliance: ## Run automated tests and report spec compliance (repo-local only)
+	python3 scripts/qa/spec-tools/run_spec_compliance.py --mode local --timeout 30
