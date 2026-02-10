@@ -678,11 +678,29 @@ button.btn.btn-primary:focus {
 
 /* Learner dashboard cards */
 .dashboard .listing-courses {
+  /* The upstream dashboard uses floats + fixed widths in some variants.
+     Force a modern layout baseline first, then apply our desired grid/list styles. */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
   margin: 0;
   padding: 0;
+  list-style: none;
+}
+
+.dashboard .listing-courses li {
+  float: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  display: flex;
+  min-width: 0;
+}
+
+.dashboard .listing-courses li .course {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard .my-courses .listing-courses {
