@@ -428,6 +428,12 @@ CSRF_COOKIE_DOMAIN = None
 # Authentication
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "cms-sso"
 SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = MEREKA_LMS_BASE_URL
+# Critical: if Studio's OAuth callback fails (missing/invalid state, etc) we must
+# NOT return a 500. SocialAuthExceptionMiddleware will only swallow exceptions
+# if LOGIN_ERROR_URL is configured.
+SOCIAL_AUTH_LOGIN_ERROR_URL = "/signin"
+# Be explicit: treat social-auth exceptions as user-facing auth failures, not server errors.
+SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
 # Hardening: keep platform admins as staff/superuser and ensure CourseCreator (prevents drift).
 MIDDLEWARE = list(MIDDLEWARE) + [
