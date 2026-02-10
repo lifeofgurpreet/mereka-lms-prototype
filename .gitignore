@@ -32,6 +32,9 @@ build_*.log
 ops/migrations/**/output/
 ops/migrations/**/logs/
 
+# Kajabi migration outputs (may contain PII)
+scripts/migrations/kajabi/output/
+
 # Exports (moved to var/)
 exports/
 
