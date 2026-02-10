@@ -386,7 +386,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 - The system MUST NOT break the existing `make tutor-apply` workflow at any migration phase.
 - The system MUST maintain a compatibility matrix documenting which Tutor versions (18.x, 21.x) are supported by which plugin version.
 
-### Non-functional (NFRs)
+### Non-Functional Requirements
 
 - Patch verification MUST complete within 30 seconds for the full manifest.
 - The Tutor plugin MUST NOT increase `tutor config save` execution time by more than 5 seconds.

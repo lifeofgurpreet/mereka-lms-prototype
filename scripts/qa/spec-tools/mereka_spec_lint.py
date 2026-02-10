@@ -42,8 +42,9 @@ def mereka_lint_file(path: Path) -> LintResult:
 
     # MEREKA-REF-001: related_specs must reference cross-cutting spec
     # Severity: warn (many specs predate this rule; will be error after bulk fix)
+    # Check both top-level and nested under links.related_specs
     if fm and not is_cross_cutting:
-        related = fm.get("related_specs", [])
+        related = fm.get("related_specs", []) or fm.get("links", {}).get("related_specs", [])
         if not isinstance(related, list):
             related = [related] if related else []
         related_str = [str(r) for r in related]
