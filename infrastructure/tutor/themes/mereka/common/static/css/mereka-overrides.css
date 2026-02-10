@@ -691,9 +691,16 @@ button.btn.btn-primary:focus {
 .dashboard .listing-courses li {
   float: none !important;
   width: auto !important;
-  margin: 0 !important;
+  /* Fallback spacing in case a downstream override disables CSS grid `gap`. */
+  margin: 0 0 1.5rem 0 !important;
   display: flex;
   min-width: 0;
+}
+
+@supports (display: grid) {
+  .dashboard .listing-courses li {
+    margin: 0 !important;
+  }
 }
 
 .dashboard .listing-courses li .course {
@@ -725,9 +732,10 @@ button.btn.btn-primary:focus {
    which makes the cover image collapse to a narrow strip when the card is a row. */
 .dashboard .my-courses .course-item .course .course-image,
 .dashboard .my-courses .course-item .course .wrapper-course-image {
-  flex: 0 0 clamp(220px, 34%, 360px);
-  min-width: 220px;
-  max-width: 360px;
+  flex: 0 0 clamp(220px, 34%, 360px) !important;
+  width: clamp(220px, 34%, 360px) !important;
+  min-width: 220px !important;
+  max-width: 360px !important;
   margin: 0;
   min-height: 0;
 }
@@ -758,6 +766,7 @@ button.btn.btn-primary:focus {
   display: flex !important;
   align-items: stretch;
   flex-direction: row;
+  flex-wrap: nowrap;
   width: 100%;
 }
 
