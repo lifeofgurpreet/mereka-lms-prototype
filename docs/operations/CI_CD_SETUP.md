@@ -191,6 +191,15 @@ Optional repo variables for runtime cluster access:
 - `GKE_CLUSTER_LOCATION` (default: `asia-southeast1-c`)
 - `GKE_CLUSTER_NAME` (default: `bbi-k8-cluster`)
 
+Runtime IAM requirement:
+- The GitHub Actions service account behind `GCP_SA_KEY` MUST have permission to fetch GKE credentials
+  in `GKE_CLUSTER_PROJECT` (cluster project), not just in the `mereka-lms` project.
+- Minimum required permission for `gcloud container clusters get-credentials ...` is `container.clusters.get`
+  (and typically `container.clusters.getCredentials`), usually satisfied by granting:
+  `roles/container.clusterViewer` (or broader `roles/container.developer`) on the cluster project.
+- If runtime workflows fail with `code=403 ... Required "container.clusters.get"`, fix IAM first; the workflow
+  will otherwise skip runtime gates when `strict_runtime=false`.
+
 ### Public Health Workflow (`public-health-check.yml`)
 
 Runs every 30 minutes and enforces branding/runtime parity:
@@ -236,6 +245,7 @@ The OpenEdX build requires significant memory. If builds fail:
 
 ### Deployment Fails
 
-1. Check GKE credentials: `gcloud container clusters get-credentials mereka-lms --region asia-southeast1`
-2. Verify service account has `roles/container.developer`
+1. Check GKE credentials (prod): `gcloud container clusters get-credentials bbi-k8-cluster --zone asia-southeast1-c --project bbi-k8`
+2. Verify the CI service account in `GCP_SA_KEY` has GKE access in the **cluster project** (default: `bbi-k8`)
+   (recommended roles: `roles/container.clusterViewer` or `roles/container.developer`)
 3. Check pod events: `kubectl describe pod -n mereka-lms -l app.kubernetes.io/name=lms`
