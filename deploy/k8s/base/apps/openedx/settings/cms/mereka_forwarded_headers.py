@@ -18,6 +18,8 @@ Fix:
 from __future__ import annotations
 
 import json
+import os
+import re
 from typing import Optional
 
 
@@ -40,6 +42,18 @@ class MerekaForwardedHeadersMiddleware:
     def __call__(self, request):
         meta = getattr(request, "META", None)
         if isinstance(meta, dict):
+            # Prometheus scrapes pod IPs directly (Host: <pod-ip>:<port>), which Django rejects
+            # as DisallowedHost before it can serve /metrics. Rewrite that host to the
+            # public Studio domain for the metrics endpoint only.
+            try:
+                path = getattr(request, "path", "") or ""
+            except Exception:
+                path = ""
+            if path == "/metrics":
+                raw_host = (meta.get("HTTP_HOST") or "").split(",", 1)[0].strip().lower()
+                if re.match(r"^\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?$", raw_host or ""):
+                    meta["HTTP_HOST"] = os.environ.get("MEREKA_STUDIO_DOMAIN", "studio.academyv2.mereka.io")
+
             for key in ("HTTP_X_FORWARDED_PROTO", "HTTP_X_FORWARDED_PORT", "HTTP_X_FORWARDED_HOST"):
                 value = meta.get(key)
                 if value and "," in value:
