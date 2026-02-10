@@ -408,3 +408,18 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 - Repository guidelines: `AGENTS.md`
 - Migration checklist: `MIGRATION_CHECKLIST.md`
 - Setup verification: `LOCAL_SETUP_COMPLETE.md`
+
+## Official Documentation Resources
+
+**CRITICAL**: When stuck on Open edX concepts, always check official documentation first using the `openedx-documentation` skill.
+
+**Quick Links**:
+- [Open edX Official Documentation](https://docs.openedx.org/) - Platform architecture, development guides, site operations (6 personas: Educators, Learners, Site Operators, Developers, Documentors, Translators)
+- [Tutor Documentation](https://docs.tutor.edly.io/) - Deployment tool (8 sections: Getting Started, Running, Configuration, Plugins, Reference, Tutorials, Troubleshooting, Development)
+- [Open edX Community Wiki](https://openedx.atlassian.net/wiki/spaces/COMM/overview) - OEPs, working groups, architecture deep-dives
+- [Developer's Guide](https://docs.openedx.org/en/latest/developers/references/developer_guide/index.html) - Architecture, contributing, extending, testing, security, i18n
+- [Discussion Forums](https://discuss.openedx.org/) - Community support and troubleshooting
+
+**Usage**: Invoke with `/openedx-docs` or natural language ("Check Open edX documentation for forum configuration")
+
+**Pattern**: Before implementing ANY Open edX feature, search docs first to prevent reinventing existing solutions
