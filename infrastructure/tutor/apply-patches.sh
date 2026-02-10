@@ -253,6 +253,21 @@ for target in targets:
         # Tutor template drift can omit theme copy wiring in authn-common.
         # Enforce parity with other MFEs by inserting both copy lines there.
         lines = normalized
+
+        # Prefer a single global theme copy in the base stage so the shared env.config.jsx
+        # can safely import `./mereka/mereka.scss` across *all* MFEs.
+        base_anchor = "WORKDIR /openedx/app"
+        has_global_copy = any(line.strip() == theme_copy for line in lines[:50])
+        if base_anchor in text and not has_global_copy:
+            patched = []
+            inserted = False
+            for line in lines:
+                patched.append(line)
+                if not inserted and line.strip() == base_anchor:
+                    patched.append(theme_copy)
+                    inserted = True
+            lines = patched
+
         start = None
         for idx, line in enumerate(lines):
             if line.strip() == "FROM base AS authn-common":

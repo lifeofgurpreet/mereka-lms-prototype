@@ -114,6 +114,9 @@ The platform currently has workflows that evolved organically -- CI, image build
 | `alert-routing-audit.yml` | Daily schedule + manual | Operations | No |
 | `dr-evidence-bundle.yml` | Monthly schedule + manual | Compliance | No |
 | `cloud-sql-backup.yml` | Tri-daily schedule (gated) | Operations | No |
+| `authenticated-sso-canary.yml` | Every 6h schedule + manual | Operations | No |
+| `tutor-config-verify.yml` | PR + push (path filter) + manual | Quality Gates | No |
+| `tutor-plugin-test.yml` | PR + push (path filter) + manual | Quality Gates | No |
 
 - Every workflow MUST use `actions/checkout@v4` as the first step.
 - Every workflow MUST pin action versions to major tags (e.g., `@v4`, `@v2`) or SHA for third-party actions.
@@ -226,6 +229,51 @@ The platform currently has workflows that evolved organically -- CI, image build
 - The `alert-routing-audit.yml` workflow MUST run daily and MUST verify alert routing configuration.
 - The `dr-evidence-bundle.yml` workflow MUST run monthly (1st of each month at 02:30 UTC) and MUST upload DR evidence with 120-day retention.
 - The `cloud-sql-backup.yml` workflow MUST only execute when repository variable `ENABLE_CLOUD_SQL_BACKUPS=true` is set.
+
+#### Authenticated SSO Canary (authenticated-sso-canary.yml)
+
+- The SSO canary workflow MUST run every 6 hours on schedule and MUST support `workflow_dispatch`.
+- The SSO canary workflow MUST support `env_scope` input with options: `prod`, `dev`, `both` (default: `prod`).
+- The SSO canary workflow MUST install Playwright with Chromium for browser automation.
+- The SSO canary workflow MUST run `verify-authenticated-sso-canary.sh` with environment-scoped credentials.
+- The SSO canary workflow MUST support environment-specific secrets: `SSO_CANARY_EMAIL_PROD`, `SSO_CANARY_PASSWORD_PROD`, `SSO_CANARY_EMAIL_DEV`, `SSO_CANARY_PASSWORD_DEV`.
+- The SSO canary workflow SHOULD support optional Studio staff canary credentials: `SSO_CANARY_STUDIO_EMAIL_PROD`, `SSO_CANARY_STUDIO_PASSWORD_PROD`, `SSO_CANARY_STUDIO_EMAIL_DEV`, `SSO_CANARY_STUDIO_PASSWORD_DEV`.
+- The SSO canary workflow MUST upload artifacts (screenshots, logs) from `var/auth-sso-canary/` with 30-day retention.
+- The SSO canary workflow MUST upload artifacts even on failure (`if: always()`) for debugging.
+- The SSO canary workflow MUST set `REQUIRE_SECRETS=1` to fail loudly if required secrets are missing.
+- The SSO canary workflow SHOULD set `REQUIRE_STUDIO_CANARY=0` to keep Studio staff checks non-blocking.
+
+#### Tutor Configuration Verification (tutor-config-verify.yml)
+
+- The Tutor config verification workflow MUST trigger on push and pull requests when files change in `tutor_env/config.yml` or `infrastructure/tutor/**`.
+- The Tutor config verification workflow MUST support `workflow_dispatch` for manual runs.
+- The Tutor config verification workflow MUST install Tutor 18.2.2 and tutor-mfe 18.1.0 for all jobs.
+- The Tutor config verification workflow MUST install Python 3.12 with pip caching for faster runs.
+- The workflow MUST include a `verify-patches` job that verifies MySQL authentication patch (`mysql_native_password`) and MFE Node.js patch (`NODE_OPTIONS=--max-old-space-size=6144`).
+- The workflow MUST include a `verify-multi-site-domains` job that verifies all production domains (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`, `academyv2.mereka.io`) are present in `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
+- The workflow MUST include a `verify-enterprise-features` job that verifies custom apps (`mfe_oauth_fix`, `django_prometheus`) are installed.
+- The workflow MUST include a `verify-idempotency` job that runs patches twice and verifies checksums remain identical.
+- The workflow MUST generate a clean config from `infrastructure/tutor/config.example.yml` before running patches.
+- The workflow MUST run `./infrastructure/tutor/apply-patches.sh` after `tutor config save` in all jobs.
+- The workflow MUST upload patch failure artifacts (docker-compose.yml, Dockerfile, settings files) when verification fails.
+- The workflow MUST post a PR comment on failure with common issues and remediation steps (requires `pull-requests: write` permission).
+- All verification steps MUST use descriptive pass/fail messages (e.g., "✅ AC-001 PASSED: MySQL authentication patch applied").
+
+#### Tutor Plugin Testing (tutor-plugin-test.yml)
+
+- The Tutor plugin test workflow MUST trigger on push and pull requests when files change in `infrastructure/tutor/plugins/**`.
+- The Tutor plugin test workflow MUST support `workflow_dispatch` for manual runs.
+- The Tutor plugin test workflow MUST install Tutor 18.2.2 and tutor-mfe 18.1.0 for all jobs.
+- The workflow MUST include a `test-mfe-oauth-plugin` job that verifies plugin syntax (`py_compile`), enables the plugin, generates config, and verifies plugin patches are applied.
+- The workflow MUST include a `test-plugin-lifecycle` job that tests enable, disable, and re-enable operations.
+- The workflow MUST include a `verify-custom-app-structure` job that documents expected plugin structure and mount points.
+- The workflow MUST include a `lint-plugins` job that runs ruff and black on plugin code.
+- The workflow MUST include an `integration-test` job that verifies plugins work correctly with `apply-patches.sh` (both sets of patches present).
+- The workflow MUST verify plugin metadata (`__version__`, hook registration via `hooks.Filters.CONFIG_DEFAULTS`).
+- The workflow MUST verify plugin structure (presence of `hooks.Filters.ENV_PATCHES` and `openedx-lms-production-settings` patch target).
+- The workflow MUST copy plugin to `tutor_env/plugins/` before enabling.
+- The workflow MUST post a PR comment on failure with plugin-specific troubleshooting guidance (requires `pull-requests: write` permission).
+- The workflow MUST verify that enabled plugins appear in `tutor plugins list` output.
 
 #### Branch Protection and Merge Gates
 
@@ -353,6 +401,26 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 - [ ] AC-027: Given the pre-commit hook is installed, when a developer attempts to commit a file containing a hardcoded secret pattern, then the commit is rejected with a warning.
 - [ ] AC-028: Given any workflow runs, when secrets are used, then no secret values appear in workflow logs (GitHub Actions masking).
+
+### SSO Canary
+
+- [ ] AC-029: Given the `authenticated-sso-canary.yml` workflow runs on schedule (every 6h), when SSO credentials are valid, then the workflow successfully authenticates to both LMS and Studio (if configured) and uploads canary artifacts with 30-day retention.
+- [ ] AC-030: Given the SSO canary fails authentication, when the workflow completes, then artifacts (screenshots, logs) are uploaded showing the failure point for debugging.
+
+### Tutor Configuration Verification
+
+- [ ] AC-031: Given the `tutor-config-verify.yml` workflow runs when changes are made to `tutor_env/config.yml` or `infrastructure/tutor/**`, when all patches are correctly applied, then the workflow succeeds with verification passing for MySQL auth patch, MFE Node.js patch, multi-site domains, and custom apps.
+- [ ] AC-032: Given the Tutor config verification runs, when required patches are missing, then the job fails with specific error messages identifying which patch (MySQL, MFE, domains, or apps) is not applied.
+- [ ] AC-033: Given the patch idempotency check runs, when patches are applied twice, then the checksums of all generated files remain identical.
+- [ ] AC-034: Given the Tutor config verification fails on a PR, when a developer views the PR, then a comment is posted with common issues and remediation steps.
+
+### Tutor Plugin Testing
+
+- [ ] AC-035: Given the `tutor-plugin-test.yml` workflow runs when changes are made to `infrastructure/tutor/plugins/**`, when the plugin code is valid, then the workflow succeeds with plugin syntax verification, enable/disable lifecycle tests, and integration tests passing.
+- [ ] AC-036: Given the plugin tests run, when the plugin patches are correctly applied, then the LMS settings file contains the expected plugin configuration (mfe_oauth_fix installed).
+- [ ] AC-037: Given the plugin lifecycle test runs, when the plugin is enabled, disabled, and re-enabled, then all state transitions succeed without errors.
+- [ ] AC-038: Given the integration test runs, when both plugin and apply-patches.sh are used together, then both sets of patches are present in the generated configuration.
+- [ ] AC-039: Given plugin tests fail on a PR, when a developer views the PR, then a comment is posted with plugin-specific troubleshooting guidance.
 
 ## Edge Cases
 
