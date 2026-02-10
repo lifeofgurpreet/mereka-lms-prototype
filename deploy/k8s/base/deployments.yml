@@ -110,6 +110,7 @@ spec:
                 name: database-secrets
             - secretRef:
                 name: mereka-lms-runtime-secrets
+                optional: true
           ports:
             - containerPort: 8000
           volumeMounts:
@@ -213,6 +214,7 @@ spec:
                 name: database-secrets
             - secretRef:
                 name: mereka-lms-runtime-secrets
+                optional: true
           volumeMounts:
             - mountPath: /openedx/edx-platform/lms/envs/tutor/
               name: settings-lms
@@ -284,6 +286,7 @@ spec:
                 name: database-secrets
             - secretRef:
                 name: mereka-lms-runtime-secrets
+                optional: true
           ports:
             - containerPort: 8000
           volumeMounts:
@@ -386,6 +389,7 @@ spec:
                 name: database-secrets
             - secretRef:
                 name: mereka-lms-runtime-secrets
+                optional: true
           volumeMounts:
             - mountPath: /openedx/edx-platform/lms/envs/tutor/
               name: settings-lms

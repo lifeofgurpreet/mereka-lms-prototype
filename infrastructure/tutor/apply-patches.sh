@@ -296,8 +296,30 @@ for target in targets:
     def ensure_mfe_npm_resilience(text):
         if "npm clean-install" not in text:
             return text
-        if "npm clean-install attempt ${attempt} failed" in text:
+        # If we've already injected the fallback markers, still normalize any prior escaping
+        # that would break shell parsing (e.g., `echo \"...; ...\"`).
+        if "npm clean-install attempt ${attempt} failed; attempting npm install fallback" in text:
+            if 'echo \\"' in text or '\\" >&2;' in text:
+                text = text.replace('echo \\"', 'echo "')
+                text = text.replace('\\" >&2;', '" >&2;')
             return text
+
+        # Upgrade older resilience patch blocks (retries only) to include an `npm install` fallback.
+        retry_only = re.compile(
+            r"bash -o pipefail -c 'for attempt in 1 2 3; do "
+            r"(npm clean-install [^;]+--registry=\$NPM_REGISTRY) && exit 0; "
+            r"echo \"npm clean-install attempt \${attempt} failed; retrying in 15s\" >&2; "
+            r"sleep 15; done; exit 1'"
+        )
+        text = retry_only.sub(
+            "bash -o pipefail -c 'for attempt in 1 2 3; do "
+            "\\1 && exit 0; "
+            'echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; '
+            "npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; "
+            'echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; '
+            "sleep 15; done; exit 1'",
+            text,
+        )
         run_line = (
             "RUN --mount=type=cache,target=/root/.npm,sharing=shared "
             "npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY"
@@ -308,7 +330,15 @@ for target in targets:
             " && npm config set fetch-retry-mintimeout 20000 \\\n"
             " && npm config set fetch-retry-maxtimeout 120000 \\\n"
             " && npm config set fetch-timeout 300000 \\\n"
-            " && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo \"npm clean-install attempt ${attempt} failed; retrying in 15s\" >&2; sleep 15; done; exit 1'"
+            " && bash -o pipefail -c 'for attempt in 1 2 3; do "
+            "npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; "
+            # Upstream MFE repos occasionally ship with package-lock drift that breaks `npm ci`/`npm clean-install`.
+            # Fall back to `npm install` to unblock builds while still preferring the lockfile path when it works.
+            'echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; '
+            "npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; "
+            'echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; '
+            "sleep 15; "
+            "done; exit 1'"
         )
         updated_text = text.replace(run_line, resilient_block)
         if updated_text != text:
@@ -322,7 +352,13 @@ for target in targets:
             " && npm config set fetch-retry-mintimeout 20000 \\\n"
             " && npm config set fetch-retry-maxtimeout 120000 \\\n"
             " && npm config set fetch-timeout 300000 \\\n"
-            " && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --registry=$NPM_REGISTRY && exit 0; echo \"npm clean-install attempt ${attempt} failed; retrying in 15s\" >&2; sleep 15; done; exit 1'",
+            " && bash -o pipefail -c 'for attempt in 1 2 3; do "
+            "npm clean-install --no-audit --registry=$NPM_REGISTRY && exit 0; "
+            'echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; '
+            "npm install --no-audit --registry=$NPM_REGISTRY && exit 0; "
+            'echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; '
+            "sleep 15; "
+            "done; exit 1'",
             text,
         )
 
@@ -337,6 +373,47 @@ for target in targets:
         if brand_line not in text:
             return text
         return text.replace(brand_line, f"{brand_line}\n{plugin_line}")
+
+    def ensure_mfe_admin_console_redux_deps(text):
+        """
+        `frontend-app-admin-console` can import frontend-platform's OptionalReduxProvider which expects
+        `react-redux` to be present at build time. In some upstream combinations it is not installed
+        (peer dependency drift), which breaks `npm run build`.
+        """
+        if "FROM base AS admin-console-common" not in text:
+            return text
+        if "react-redux" in text:
+            return text
+
+        plugin_line = "RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
+        redux_line = "RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'"
+
+        lines = text.splitlines()
+        start = None
+        for idx, line in enumerate(lines):
+            if line.strip() == "FROM base AS admin-console-common":
+                start = idx
+                break
+        if start is None:
+            return text
+
+        end = len(lines)
+        for idx in range(start + 1, len(lines)):
+            stripped = lines[idx].strip()
+            if stripped.startswith("######## ") or stripped.startswith("####################### "):
+                end = idx
+                break
+
+        for idx in range(start, end):
+            if lines[idx].strip() == plugin_line:
+                # Insert right after the plugin-framework install, within the admin-console-common stage.
+                lines.insert(idx + 1, redux_line)
+                rebuilt = "\n".join(lines)
+                if text.endswith("\n"):
+                    rebuilt += "\n"
+                return rebuilt
+
+        return text
 
     # Ensure MFEs build against Node 18 with the required toolchain.
     #
@@ -359,6 +436,7 @@ for target in targets:
     updated = ensure_mfe_theme_copy(updated)
     updated = ensure_mfe_npm_resilience(updated)
     updated = ensure_mfe_plugin_framework_dependency(updated)
+    updated = ensure_mfe_admin_console_redux_deps(updated)
 
     # Allow remote root access when using upstream MySQL images.
     if "MYSQL_ROOT_PASSWORD" in updated and "MYSQL_ROOT_HOST" not in updated:

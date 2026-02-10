@@ -357,7 +357,16 @@ label {
 /* Bootstrap-ish fallback: many MFEs render course cards inside `.row > .col-*`. */
 [class*="learning"] [class*="my-courses"] .row > [class*="col"],
 [class*="learning"] [data-testid*="my-courses"] .row > [class*="col"] {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Learning MFE course cards are typically horizontal (media rail + content).
+   Force the card container to be a flex row in the My Courses / Discover views so
+   the cover image cannot collapse into a thin strip when upstream CSS changes. */
+[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"], [data-testid*="my-courses"], [data-testid*="discover"]) :is(.pgn__card, .card) {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
 }
 
 [class*="learning"] :is(.pgn__card, .card) {
@@ -382,10 +391,11 @@ label {
 
 /* Learning course cards often use Paragon Card ImageCap on the left; ensure it doesn't collapse. */
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) {
-  flex: 0 0 160px;
-  width: 160px;
-  max-width: 40%;
-  min-width: 140px;
+  flex: 0 0 180px;
+  width: 180px;
+  max-width: 42%;
+  min-width: 160px;
+  flex-shrink: 0;
 }
 
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img {
@@ -402,7 +412,8 @@ label {
 /* When course cards use a horizontal layout, ensure the media column doesn't collapse. */
 [class*="learning"] :is(.pgn__card, .card) [class*="image"],
 [class*="learning"] :is(.pgn__card, .card) [class*="media"] {
-  min-width: 160px;
+  min-width: 180px;
+  flex-shrink: 0;
 }
 
 [class*="learning"] :is(.pgn__card, .card) [class*="image"] img,
