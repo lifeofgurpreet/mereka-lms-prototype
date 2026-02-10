@@ -673,6 +673,10 @@ WRITABLE_GRADEBOOK_URL = f"{MEREKA_MFE_BASE_URL}/gradebook"
 MIDDLEWARE = list(MIDDLEWARE) + [
     "lms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
     "lms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware",
+    # Studio SSO uses LMS OAuth2 provider endpoints. MFEs authenticate via JWT
+    # cookies; legacy OAuth2 views still expect an authenticated request.user.
+    # Bridge JWT-cookie auth into request.user/session for `/oauth2/*` only.
+    "lms.envs.tutor.mereka_jwt_session.MerekaJwtToSessionBridgeMiddleware",
 ]
 
 
