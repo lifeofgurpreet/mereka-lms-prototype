@@ -4,9 +4,41 @@ type: "feature_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-08"
+last_updated: "2026-02-10"
+links:
+  related_docs:
+    - "docs/adr/001-mongodb-atlas.md"
+    - "docs/architecture/MONGODB_ATLAS_MIGRATION.md"
+    - "docs/architecture/DATABASE_ARCHITECTURE.md"
+    - "docs/operations/MONGODB_PERMISSIONS_ISSUE.md"
+    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
+  related_specs:
+    - "specs/secrets-management_spec.md"
+    - "specs/k8s-deployment_spec.md"
+    - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/forum-service-migration_spec.md"
+    - "specs/observability-stack_spec.md"
 ---
-# MongoDB Atlas Integration
+
+# Human Summary
+
+## What we're building
+
+MongoDB Atlas replaces the local in-cluster MongoDB containers that previously served Open edX. The two databases affected are the modulestore (course structure, blocks, and metadata used by LMS and CMS) and the forum database (posts, comments, and votes used by the forum service). Atlas is a managed MongoDB cluster hosted at `cluster-mereka-lms.2pjex4s.mongodb.net`, eliminating the need to operate, back up, and scale MongoDB ourselves.
+
+## Why it matters
+
+Running a stateful database inside Kubernetes introduces significant operational risk: manual backup management, no automatic failover, and complex scaling. Atlas removes all of that overhead while providing built-in monitoring, automated backups with point-in-time recovery, and seamless scaling. This directly improves platform reliability for Mereka Academy learners and reduces the on-call burden for the engineering team.
+
+## Success looks like
+
+- All LMS, CMS, and Forum traffic routes to Atlas with zero local MongoDB containers running in any environment.
+- Learners experience no degradation in course load times (p95 read latency under 100ms from GKE to Atlas).
+- The team spends zero hours per month on MongoDB operational tasks (backups, patching, failover).
+- Atlas monitoring dashboard shows healthy connection counts and no authentication or timeout errors.
+
+# Agent Contract
 
 ## Scope
 
@@ -64,6 +96,18 @@ The system MUST use the following databases on the Atlas cluster:
 - The system MUST add GKE cluster egress IPs to Atlas IP allowlist
 - The system SHOULD use Atlas VPC peering for production (future enhancement)
 - The system MUST NOT expose Atlas cluster to 0.0.0.0/0
+
+### Non-functional (NFRs)
+
+- Read latency (p95) from GKE to Atlas MUST be <= 100ms for modulestore queries
+- Write latency (p95) for course save operations MUST be <= 500ms
+- Connection establishment time MUST be <= 2s (including SRV resolution)
+- Atlas cluster availability MUST meet 99.95% uptime (Atlas M10+ SLA)
+- Connection pool utilization SHOULD remain below 80% of `maxPoolSize` under normal load
+- The system MUST support at least 200 concurrent connections across all services
+- Secrets rotation MUST be achievable with zero downtime (rolling restart)
+- Data at rest MUST be encrypted (Atlas default encryption at rest)
+- Data in transit MUST use TLS 1.2 or higher (enforced by SRV connection)
 
 ## Acceptance Criteria
 
@@ -170,6 +214,12 @@ Atlas built-in alerts:
 Application alerts:
 - MUST alert if MongoDB connection fails for >1 minute
 - SHOULD alert if query latency p99 exceeds 500ms
+
+### Dashboards
+
+- Atlas monitoring dashboard: cluster health, connections, operations, storage
+- Grafana dashboard: application-side MongoDB query latency, connection pool usage, error rates
+- Link: Atlas console > Project > Cluster > Metrics (URL configured per environment)
 
 ## Rollout & Rollback
 

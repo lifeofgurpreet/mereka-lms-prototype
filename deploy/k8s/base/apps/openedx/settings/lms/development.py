@@ -546,7 +546,7 @@ MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
 
 
 
-COMMENTS_SERVICE_URL = "http://forum:4567"
+# Forum v2 (Python) runs in-process within LMS - no external service URL needed.
 
 javascript_files = ['base_application', 'application', 'certificates_wv']
 dark_theme_filepath = ['indigo/js/dark-theme.js']

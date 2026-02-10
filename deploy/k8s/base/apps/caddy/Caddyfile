@@ -212,13 +212,9 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
     import proxy "credentials:8000"
 }
 
-# Forum (discussion service)
-http://forum.academyv2.mereka.io, http://forum.academyv2.mereka.dev {
-    @forum_root path /
-    header @forum_root Content-Type "text/html; charset=utf-8"
-    respond @forum_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mereka Forum</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Mereka Forum Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Discussion APIs are online. Learner discussions are served through the Discussions MFE; this host exposes forum service routes and health checks.</p><p style='margin:0'><a href='/heartbeat' style='color:#295cad;font-weight:600;text-decoration:none'>Forum heartbeat</a></p></main></body></html>" 200
-    import proxy "forum:4567"
-}
+# Forum v2 (Python) is now integrated into LMS - no standalone forum service.
+# Discussion APIs are served by the LMS at /api/discussion/ and /forum_form_discussion/.
+# The Discussions MFE handles the learner-facing UI.
 
 # Xqueue (external graders, local only)
 xqueue.localhost{$default_site_port} {

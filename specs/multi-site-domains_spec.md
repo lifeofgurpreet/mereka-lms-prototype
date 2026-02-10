@@ -4,13 +4,54 @@ type: "feature_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-09"
+last_updated: "2026-02-10"
+links:
+  related_docs:
+    - "docs/operations/OPENEDX_HOSTNAMES.md"
+    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/operations/AUTH_AND_PERMISSIONS.md"
+    - "docs/branding/BRANDING_OPERATING_MODEL.md"
+    - "docs/operations/K8S_OPERATIONS_GUIDE.md"
+  related_specs:
+    - "specs/k8s-deployment_spec.md"
+    - "specs/branding-system_spec.md"
+    - "specs/tutor-configuration_spec.md"
+    - "specs/auth-sso-enterprise_spec.md"
+    - "specs/multi-tenancy-architecture_spec.md"
 ---
-# Multi-Site Domain Configuration
+
+# Human Summary
+
+## What we're building
+
+Multi-site domain support for Mereka Academy, enabling the Open edX LMS to serve learners across three distinct production domains: the primary `academyv2.mereka.io`, the partner-branded `academy.biji-biji.com`, and the program-specific `skillourfuture.academy.mereka.io`. Each domain must resolve to the same LMS instance with correct CSRF protection, cookie scoping, cross-domain authentication, and reverse proxy routing.
+
+## Why it matters
+
+Mereka Academy operates under multiple organizational brands (Mereka, Biji-Biji Initiative, SkillOurFuture). Learners and partners access the platform through domain names they recognize and trust. If CSRF tokens are rejected, cookies are mis-scoped, or reverse proxy headers are wrong, users experience login failures, session loss, or broken API calls -- all of which erode trust and block learning. A precise domain configuration contract prevents these failures from recurring after every Tutor config regeneration cycle.
+
+## Success looks like
+
+- All three production domains serve the LMS with zero CSRF or session errors for 7 consecutive days after rollout.
+- Cross-subdomain session sharing works between `academyv2.mereka.io` and `apps.academyv2.mereka.io` without re-login.
+- Partner domain `academy.biji-biji.com` operates with an independent session, no cookie leakage from the primary domain.
+- Adding or removing a domain follows a documented, repeatable procedure that completes in under 30 minutes.
+
+# Agent Contract
 
 ## Scope
 
-This spec covers the configuration of three production domains for Mereka Academy, ensuring proper CSRF protection, cookie scoping, and cross-domain authentication.
+- In scope:
+  - Django `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` configuration for all domains
+  - Session and CSRF cookie domain scoping
+  - SiteConfiguration records in Django admin
+  - OIDC provider configuration contract
+  - Nginx (LMS backend) and Caddy (K8s ingress) reverse proxy rules
+  - Domain addition and removal procedures
+- Out of scope:
+  - SSL certificate management (handled by Cloudflare/Let's Encrypt)
+  - DNS configuration (managed in infrastructure/cloudflare/)
+  - Load balancing (handled by GKE Ingress/Caddy)
 
 ## Non-goals
 
@@ -67,6 +108,15 @@ The system MUST support the following domains:
 - MUST rewrite `/favicon.ico` to `/theming/asset/images/favicon.ico`
 - MUST limit profile image uploads to 1MB
 - MUST set general request body limit to 4MB
+
+### Non-functional (NFRs)
+
+- All domain endpoints MUST respond with HTTP 200 within 2 seconds (p95) under normal load
+- CSRF validation failure rate MUST remain below 0.5% of total requests per domain
+- Session cookie propagation between subdomains MUST succeed on first navigation (zero re-login required)
+- Domain addition or removal procedure SHOULD complete in under 30 minutes including verification
+- The system SHOULD maintain 99.9% availability across all configured domains (measured monthly)
+- Caddy request body limits (1MB profile images, 4MB general) MUST be enforced without silent truncation
 
 ## Acceptance Criteria
 

@@ -2,8 +2,12 @@
 # Ensure Authentik admins are required to complete MFA (without forcing MFA on all users).
 #
 # Design:
-# - Create an ExpressionPolicy that matches users in the "authentik Admins" group.
+# - Create an ExpressionPolicy that matches users in the "authentik Admins" group AND only
+#   when accessing the Authentik admin UI path (/if/admin/*). This prevents MFA hardening
+#   from blocking normal OIDC app authorizations.
 # - Create a dedicated AuthenticatorValidateStage whose not_configured_action is "configure".
+#   IMPORTANT: configuration stages MUST be set, otherwise Authentik denies the flow with:
+#   "Authenticator validation stage is set to configure user but no configuration flow is set."
 # - Bind that stage into the default authentication flow with the policy attached,
 #   so the stage only runs for Authentik admins.
 #
@@ -88,7 +92,10 @@ from authentik.core.models import Group
 from authentik.flows.models import Flow, FlowStageBinding
 from authentik.policies.models import PolicyBinding
 from authentik.policies.expression.models import ExpressionPolicy
+from authentik.stages.authenticator_static.models import AuthenticatorStaticStage
+from authentik.stages.authenticator_totp.models import AuthenticatorTOTPStage
 from authentik.stages.authenticator_validate.models import AuthenticatorValidateStage
+from authentik.stages.authenticator_webauthn.models import AuthenticatorWebAuthnStage
 
 def ok(msg): print("✓", msg)
 def fail(msg): print("✗", msg); raise SystemExit(1)
@@ -103,7 +110,8 @@ if not flow:
     fail(f"Flow not found: {flow_slug}")
 
 expected_expression = (
-    "return request.user.ak_groups.filter(name="
+    "return request.path.startswith(\"/if/admin/\") and "
+    "request.user.ak_groups.filter(name="
     + repr(admin_group_name)
     + ").exists()"
 )
@@ -127,13 +135,28 @@ if mode == "apply" and not stage:
     stage = AuthenticatorValidateStage.objects.create(
         name=stage_name,
         not_configured_action="configure",
-        device_classes=["totp", "webauthn"],
+        device_classes=["totp", "webauthn", "static"],
     )
 if not stage:
     fail(f"AuthenticatorValidateStage missing: {stage_name}")
 
 desired_not_configured = "configure"
-desired_device_classes = ["totp", "webauthn"]
+desired_device_classes = ["totp", "webauthn", "static"]
+
+# These are created by default in Authentik installs; keep the requirement explicit so
+# we fail loudly if the cluster drifted.
+totp_setup = AuthenticatorTOTPStage.objects.filter(name="default-authenticator-totp-setup").first()
+webauthn_setup = AuthenticatorWebAuthnStage.objects.filter(name="default-authenticator-webauthn-setup").first()
+static_setup = AuthenticatorStaticStage.objects.filter(name="default-authenticator-static-setup").first()
+if not totp_setup or not webauthn_setup or not static_setup:
+    missing = []
+    if not totp_setup:
+        missing.append("default-authenticator-totp-setup")
+    if not webauthn_setup:
+        missing.append("default-authenticator-webauthn-setup")
+    if not static_setup:
+        missing.append("default-authenticator-static-setup")
+    fail("Missing Authentik authenticator setup stages: " + ", ".join(missing))
 
 if mode == "apply":
     changed = False
@@ -145,6 +168,11 @@ if mode == "apply":
     if sorted(cur) != sorted(desired_device_classes):
         stage.device_classes = desired_device_classes
         changed = True
+    # Ensure configuration stages exist so "configure" does not deny the flow.
+    desired_config_stages = [totp_setup, webauthn_setup, static_setup]
+    cur_cfg = list(stage.configuration_stages.all())
+    if sorted([s.pk for s in cur_cfg]) != sorted([s.pk for s in desired_config_stages]):
+        stage.configuration_stages.set(desired_config_stages)
     if changed:
         stage.save(update_fields=["not_configured_action", "device_classes"])
 
@@ -173,6 +201,10 @@ if stage.not_configured_action != desired_not_configured:
     errs.append(f"Stage not_configured_action={stage.not_configured_action} expected={desired_not_configured}")
 if sorted(list(stage.device_classes or [])) != sorted(desired_device_classes):
     errs.append(f"Stage device_classes={stage.device_classes} expected={desired_device_classes}")
+cfg_pks = sorted([s.pk for s in stage.configuration_stages.all()])
+desired_cfg_pks = sorted([totp_setup.pk, webauthn_setup.pk, static_setup.pk])
+if cfg_pks != desired_cfg_pks:
+    errs.append("Stage configuration_stages mismatch (required for not_configured_action=configure)")
 if binding.order != binding_order:
     errs.append(f"Binding order={binding.order} expected={binding_order}")
 if PolicyBinding.objects.filter(target=binding).count() == 0:

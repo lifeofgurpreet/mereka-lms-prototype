@@ -1,12 +1,35 @@
 ---
 title: "Analytics Pipeline (Aspects/Panorama)"
-type: "feature_spec"
+type: "data_pipeline_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-08"
+last_updated: "2026-02-10"
+links:
+  related_docs:
+    - "docs/operations/OBSERVABILITY_QUICKSTART.md"
+    - "docs/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/operations/MONITORING.md"
+  related_specs:
+    - "specs/observability-stack_spec.md"
+    - "specs/data-privacy-gdpr-compliance_spec.md"
+    - "specs/k8s-deployment_spec.md"
 ---
 # Analytics Pipeline (Aspects/Panorama)
+
+## Human Summary
+
+### What we're building
+A learning analytics data pipeline that captures learner behavior from Open edX (LMS, CMS, and MFEs), transforms events into xAPI format, stores them in ClickHouse, and visualizes them through Superset dashboards. This gives instructors and administrators quantitative insight into course engagement, completion rates, and content effectiveness.
+
+### Why it matters
+Without analytics, instructors have no visibility into how learners interact with course content. This pipeline turns raw platform events into actionable dashboards -- enabling data-driven course design, early identification of struggling learners, and evidence-based decisions about content investment. It also supports institutional reporting requirements.
+
+### Success looks like
+- xAPI events flow from all platform surfaces (LMS, CMS, MFEs) to ClickHouse within 10 minutes of occurrence
+- Superset dashboards load in under 5 seconds for staff users
+- Zero PII leakage in the analytics data store (verified by automated audit)
+- Instructors embed dashboards directly in their course pages
 
 ## Scope
 
@@ -16,7 +39,7 @@ The pipeline provides insights into learner behavior, course engagement, and pla
 
 ## Non-goals
 
-- Operational monitoring (covered in observability-stack.md)
+- Operational monitoring (covered in observability-stack_spec.md)
 - Business intelligence for non-learning data (revenue, marketing)
 - Real-time alerting (Aspects is batch-oriented, not streaming)
 - GDPR/privacy compliance implementation (separate compliance spec)
@@ -71,6 +94,17 @@ The system SHOULD collect the following xAPI verbs:
 - The system MUST NOT store IP addresses in events
 - The system MUST provide data deletion mechanism for GDPR right-to-be-forgotten
 - The system SHOULD implement role-based access control (RBAC) for dashboards
+
+### Non-functional Requirements (NFRs)
+
+- Event processing lag (generation to storage) MUST be <= 10 minutes under normal load
+- Event processing lag SHOULD be <= 2 minutes at p50
+- ClickHouse query response time for dashboard queries MUST be <= 5 seconds at p95
+- ClickHouse query response time for dashboard queries SHOULD be <= 2 seconds at p50
+- The analytics pipeline MUST sustain >= 500 events/second write throughput without backpressure
+- Superset dashboard availability SHOULD be >= 99.5% during business hours (08:00-22:00 MYT)
+- ClickHouse storage cost SHOULD be <= $50/month for 90-day retention with compression
+- Data deletion requests (GDPR) MUST complete within 7 days of receipt
 
 ## Acceptance Criteria
 

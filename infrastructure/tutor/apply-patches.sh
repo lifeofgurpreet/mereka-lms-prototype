@@ -39,12 +39,7 @@ print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "Dockerf
 PY
 )
 
-FORUM_ENTRYPOINT_TEMPLATE=$(python - <<'PY'
-from pathlib import Path
-import tutor
-print(Path(tutor.__file__).parent / "templates" / "apps" / "forum" / "bin" / "docker-entrypoint.sh")
-PY
-)
+# FORUM_ENTRYPOINT_TEMPLATE removed in v21 - Python forum integrated into LMS, no separate container
 
 CADDY_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
@@ -74,12 +69,7 @@ print(Path(tutor.__file__).parent / "templates" / "apps" / "openedx" / "settings
 PY
 )
 
-FORUM_PLUGIN=$(python - <<'PY'
-from pathlib import Path
-import tutorforum
-print(Path(tutorforum.__file__).parent / "plugin.py")
-PY
-)
+# FORUM_PLUGIN still exists in v21 but structure simplified (no DD_TRACE_ENABLED patch needed)
 
 WEBPACK_PROD_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
@@ -97,8 +87,7 @@ PATCH_TARGETS=(
   "$REPO_ROOT/tutor_env/env/local/docker-compose.yml"
   "$OPENEDX_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
-  "$FORUM_ENTRYPOINT_TEMPLATE"
-  "$REPO_ROOT/tutor_env/env/build/forum/bin/docker-entrypoint.sh"
+  # Forum patches removed in v21 - Python forum integrated into LMS
   "$CADDY_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/apps/caddy/Caddyfile"
   "$NGINX_LMS_TEMPLATE"
@@ -109,7 +98,6 @@ PATCH_TARGETS=(
   "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
   "$WEBPACK_PROD_TEMPLATE"
   "$REPO_ROOT/tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
-  "$FORUM_PLUGIN"
 )
 
 python - "${PATCH_TARGETS[@]}" <<'PY'
@@ -126,14 +114,7 @@ for target in targets:
         continue
     original = path.read_text()
     updated = original
-    if path.name == "plugin.py" and 'DD_TRACE_ENABLED' not in updated:
-        needle = '"MONGOID_USE_SSL": "{{ \'true\' if MONGODB_USE_SSL else \'false\' }}",'
-        if needle in updated:
-            updated = updated.replace(
-                needle,
-                needle
-                + '\n    "DD_TRACE_ENABLED": "false",',
-            )
+    # DD_TRACE_ENABLED patch removed - Ruby forum (Mongoid) no longer exists in v21
     extra_lms_hosts = [
         "academy.biji-biji.com",
         "skillourfuture.academy.mereka.io",

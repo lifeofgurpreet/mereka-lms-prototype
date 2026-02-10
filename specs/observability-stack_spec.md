@@ -4,18 +4,67 @@ type: "feature_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-08"
+last_updated: "2026-02-10"
+links:
+  related_docs:
+    - "docs/operations/OBSERVABILITY_QUICKSTART.md"
+    - "docs/operations/OBSERVABILITY_ENHANCEMENT_PLAN.md"
+    - "docs/operations/OBSERVABILITY_OWNERSHIP.md"
+    - "docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+    - "docs/operations/MONITORING.md"
+    - "docs/operations/SLO_DASHBOARDS_SETUP.md"
+    - "docs/operations/ALERT_SEVERITY_MATRIX.md"
+    - "docs/operations/ALERT_TUNING_SOP.md"
+    - "docs/operations/LOGGING_AND_SENTRY.md"
+    - "docs/operations/GKE_LOKI_FORWARDING.md"
+    - "docs/operations/TROUBLESHOOTING.md"
+  related_specs:
+    - "specs/slo-sla-service-level-management_spec.md"
+    - "specs/k8s-deployment_spec.md"
+    - "specs/disaster-recovery-business-continuity_spec.md"
+    - "specs/analytics-pipeline_spec.md"
+    - "specs/ci-cd-pipeline_spec.md"
 ---
-# Observability Stack (Prometheus/Tempo/Loki)
+
+# Human Summary
+
+## What we're building
+
+A production-grade observability stack for the Mereka Academy Open edX deployment on GKE. The stack comprises Prometheus for metrics collection, Tempo for distributed tracing, Loki for centralized log aggregation, Alertmanager for alert routing, and Grafana for unified visualization. Together these tools give the engineering team full visibility into platform health, request latency, error rates, and resource consumption -- enabling fast incident detection and diagnosis.
+
+## Why it matters
+
+Open edX is a complex, multi-service platform (LMS, CMS, workers, forum, discovery, MFEs) running on Kubernetes. Without structured observability, failures are discovered by users instead of engineers, root-cause analysis takes hours instead of minutes, and capacity planning is guesswork. This stack transforms operations from reactive to proactive, directly protecting learner experience and platform reliability.
+
+## Success looks like
+
+- Every pod in `mereka-lms` is scraped for metrics with zero gaps
+- An on-call engineer can go from alert to root cause in under 15 minutes using correlated metrics, logs, and traces in Grafana
+- Critical alerts (OOM, crash loops, 5xx spikes) fire within 2 minutes and reach the team via Slack
+- Dashboards load in under 3 seconds and display 30 days of historical metrics
+
+# Agent Contract
 
 ## Scope
 
-This spec covers the observability stack for monitoring Open edX on GKE, including metrics collection (Prometheus), distributed tracing (Tempo), and log aggregation (Loki). This provides visibility into platform health, performance, and incident diagnosis.
+- In scope:
+  - Prometheus deployment, ServiceMonitor configuration, and metrics scraping
+  - Application-level metrics instrumentation via django-prometheus
+  - Loki deployment, Promtail DaemonSet, and log forwarding
+  - Tempo deployment and OpenTelemetry trace collection
+  - Alertmanager deployment and critical alert rule configuration
+  - Grafana deployment, datasource configuration, and dashboard provisioning
+  - Meta-monitoring (observability of the observability stack itself)
+- Out of scope:
+  - Application-level bug fixes or feature work
+  - Network-level monitoring beyond K8s pod metrics
+  - Third-party SaaS integration (Datadog, New Relic, PagerDuty)
+  - Grafana user/team/org management beyond basic access control
 
 ## Non-goals
 
 - Application Performance Monitoring (APM) like Datadog/New Relic (too expensive)
-- Business metrics/analytics (covered in analytics-pipeline.md)
+- Business metrics/analytics (covered in analytics-pipeline_spec.md)
 - Cost optimization monitoring (separate FinOps spec)
 - Security event monitoring (SIEM, separate security spec)
 
@@ -82,6 +131,19 @@ The system MUST expose the following custom metrics from LMS/CMS:
   - Database performance (MySQL, MongoDB)
   - Redis cache metrics
 - The system MUST restrict dashboard access to authorized staff
+
+### Non-functional (NFRs)
+
+- Prometheus scrape interval MUST be <= 30 seconds for all targets
+- Alert firing-to-notification latency MUST be <= 2 minutes
+- Grafana dashboard load time SHOULD be <= 3 seconds for standard queries (24h window)
+- Loki log query response SHOULD be <= 5 seconds for queries spanning 1 hour
+- Prometheus MUST handle at least 50,000 active time series without degradation
+- Loki MUST ingest at least 500 KB/s of log volume without dropping entries
+- The observability stack MUST NOT consume more than 20% of cluster CPU or 25% of cluster memory
+- Prometheus MUST survive single-node failure without data loss (via persistent volume)
+- Grafana MUST support at least 10 concurrent dashboard viewers without degradation
+- All observability endpoints (Grafana, Prometheus UI) MUST require authentication
 
 ## Acceptance Criteria
 

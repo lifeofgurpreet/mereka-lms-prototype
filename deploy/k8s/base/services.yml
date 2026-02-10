@@ -178,14 +178,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: forum
+  name: meilisearch
+  labels:
+    app.kubernetes.io/name: meilisearch
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
-    - port: 4567
+    - port: 7700
       protocol: TCP
   selector:
-    app.kubernetes.io/name: forum
+    app.kubernetes.io/name: meilisearch
 ---
 apiVersion: v1
 kind: Service

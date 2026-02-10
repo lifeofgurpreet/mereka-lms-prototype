@@ -74,14 +74,31 @@ if _oidc_secret:
     SOCIAL_AUTH_OAUTH_SECRETS = dict(globals().get("SOCIAL_AUTH_OAUTH_SECRETS", {}))
     SOCIAL_AUTH_OAUTH_SECRETS.setdefault("oidc", _oidc_secret)
 
-# Allow the forum API key to be injected via env var (ExternalSecret), so we
-# don't have to commit it into configmaps.
-#
-# The forum service expects `API_KEY`; LMS expects `COMMENTS_SERVICE_KEY`. We
-# support either env var and override the LMS setting if present.
-_forum_api_key = os.environ.get("COMMENTS_SERVICE_KEY") or os.environ.get("FORUM_API_KEY") or ""
-if _forum_api_key:
-    COMMENTS_SERVICE_KEY = _forum_api_key
+# Forum v2 (Python) - integrated into LMS as of Tutor v19+/Sumac.
+# Forum runs in-process; no separate COMMENTS_SERVICE_URL needed.
+FORUM_SEARCH_BACKEND = "forum.search.meilisearch.MeilisearchBackend"
+FEATURES["ENABLE_DISCUSSION_SERVICE"] = True
+
+# Forum MongoDB configuration (for platforms still using MongoDB backend).
+# MongoDB Atlas connection is configured via environment variables.
+FORUM_MONGODB_DATABASE = "cs_comments_service"
+FORUM_MONGODB_CLIENT_PARAMETERS = {
+    "host": os.environ.get("FORUM_MONGODB_HOST", "mongodb"),
+    "port": int(os.environ.get("FORUM_MONGODB_PORT", "27017")),
+    "username": os.environ.get("FORUM_MONGODB_USERNAME") or None,
+    "password": os.environ.get("FORUM_MONGODB_PASSWORD") or None,
+    "ssl": os.environ.get("FORUM_MONGODB_USE_SSL", "false").lower() == "true",
+}
+_forum_auth_source = os.environ.get("FORUM_MONGODB_AUTH_SOURCE")
+if _forum_auth_source:
+    FORUM_MONGODB_CLIENT_PARAMETERS["authSource"] = _forum_auth_source
+
+# Meilisearch configuration (replaces Elasticsearch for forum search).
+MEILISEARCH_ENABLED = True
+MEILISEARCH_URL = "http://meilisearch:7700"
+MEILISEARCH_INDEX_PREFIX = "tutor_"
+MEILISEARCH_API_KEY = os.environ.get("MEILISEARCH_API_KEY", "")
+SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine"
 
 ####### Settings common to LMS and CMS
 import json

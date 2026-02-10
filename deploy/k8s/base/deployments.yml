@@ -88,7 +88,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: cms
-          image: docker.io/overhangio/openedx:18.2.2-indigo
+          image: docker.io/overhangio/openedx:21.0.0-indigo
           env:
           - name: SERVICE_VARIANT
             value: cms
@@ -102,7 +102,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: openedx-secrets
-                key: FORUM_MONGODB_SRV
+                key: FORUM_MONGODB_HOST
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -183,7 +183,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: cms-worker
-          image: docker.io/overhangio/openedx:18.2.2-indigo
+          image: docker.io/overhangio/openedx:21.0.0-indigo
           args:
           
           - "celery"
@@ -205,7 +205,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: openedx-secrets
-                key: FORUM_MONGODB_SRV
+                key: FORUM_MONGODB_HOST
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -262,7 +262,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: lms
-          image: docker.io/overhangio/openedx:18.2.2-indigo
+          image: docker.io/overhangio/openedx:21.0.0-indigo
           env:
           - name: SERVICE_VARIANT
             value: lms
@@ -276,7 +276,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: openedx-secrets
-                key: FORUM_MONGODB_SRV
+                key: FORUM_MONGODB_HOST
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -357,7 +357,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: lms-worker
-          image: docker.io/overhangio/openedx:18.2.2-indigo
+          image: docker.io/overhangio/openedx:21.0.0-indigo
           args: 
           - "celery"
           - "--app=lms.celery"
@@ -378,7 +378,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: openedx-secrets
-                key: FORUM_MONGODB_SRV
+                key: FORUM_MONGODB_HOST
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -697,7 +697,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: discovery
-          image: docker.io/overhangio/openedx-discovery:18.0.0
+          image: docker.io/overhangio/openedx-discovery:21.0.1
           ports:
             - containerPort: 8000
           env:
@@ -751,7 +751,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: ecommerce
-          image: docker.io/overhangio/openedx-ecommerce:18.0.1
+          image: docker.io/overhangio/openedx-ecommerce:19.0.0
           ports:
             - containerPort: 8000
           env:
@@ -803,7 +803,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: ecommerce-worker
-          image: docker.io/overhangio/openedx-ecommerce-worker:18.0.1
+          image: docker.io/overhangio/openedx-ecommerce-worker:19.0.0
           ports:
             - containerPort: 8000
           env:
@@ -850,7 +850,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: credentials
-          image: docker.io/overhangio/openedx-credentials:18.0.0
+          image: docker.io/overhangio/openedx-credentials:21.0.0
           ports:
             - containerPort: 8000
           env:
@@ -873,71 +873,62 @@ spec:
           configMap:
             name: credentials-settings
 ---
+# Forum v2 (Python) is integrated into the LMS container as of Tutor v19+ (Sumac).
+# The standalone Ruby forum deployment has been removed. Forum configuration is now
+# in LMS Django settings (FORUM_SEARCH_BACKEND, FORUM_MONGODB_CLIENT_PARAMETERS).
+# Search is handled by Meilisearch instead of Elasticsearch for forum queries.
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: forum
+  name: meilisearch
   labels:
     app.kubernetes.io/instance: mereka-lms
     app.kubernetes.io/managed-by: tutor
-    app.kubernetes.io/name: forum
+    app.kubernetes.io/name: meilisearch
     app.kubernetes.io/part-of: mereka-lms
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/instance: mereka-lms
       app.kubernetes.io/managed-by: tutor
-      app.kubernetes.io/name: forum
+      app.kubernetes.io/name: meilisearch
       app.kubernetes.io/part-of: mereka-lms
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         app.kubernetes.io/instance: mereka-lms
         app.kubernetes.io/managed-by: tutor
-        app.kubernetes.io/name: forum
+        app.kubernetes.io/name: meilisearch
         app.kubernetes.io/part-of: mereka-lms
     spec:
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
       containers:
-        - name: forum
-          image: docker.io/overhangio/openedx-forum:18.1.1
-          ports:
-            - containerPort: 4567
+        - name: meilisearch
+          image: docker.io/getmeili/meilisearch:v1.8.4
           env:
-            - name: API_KEY
+            - name: MEILI_MASTER_KEY
               valueFrom:
                 secretKeyRef:
                   name: openedx-secrets
-                  key: FORUM_API_KEY
-            - name: SEARCH_SERVER
-              value: "http://elasticsearch:9200"
-            # MongoDB Atlas configuration
-            - name: MONGODB_AUTH
-              value: "openedx"
-            - name: MONGODB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: openedx-secrets
-                  key: FORUM_MONGODB_SRV
-            - name: MONGODB_PORT
-              value: "27017"
-            - name: MONGODB_DATABASE
-              value: "cs_comments_service"
-            - name: MONGODB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: openedx-secrets
-                  key: MONGODB_PASSWORD
-            - name: MONGOID_AUTH_SOURCE
-              value: "admin"
-            - name: MONGOID_AUTH_MECH
-              value: ""
-            - name: MONGOID_USE_SSL
-              value: "true"
-            - name: DD_TRACE_ENABLED
-              value: "false"
+                  key: MEILISEARCH_MASTER_KEY
+          ports:
+            - containerPort: 7700
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - mountPath: /meili_data
+              name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: meilisearch
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -965,7 +956,7 @@ spec:
     spec:
       containers:
         - name: mfe
-          image: docker.io/overhangio/openedx-mfe:18.1.0-indigo
+          image: docker.io/overhangio/openedx-mfe:21.0.0-indigo
           ports:
             - containerPort: 8002
           volumeMounts:
@@ -1005,7 +996,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: notes
-          image: docker.io/overhangio/openedx-notes:18.0.0
+          image: docker.io/overhangio/openedx-notes:21.0.0
           ports:
             - containerPort: 8000
           env:
@@ -1053,7 +1044,7 @@ spec:
     spec:
       containers:
         - name: xqueue
-          image: docker.io/overhangio/openedx-xqueue:18.0.0
+          image: docker.io/overhangio/openedx-xqueue:21.0.0
           ports:
             - containerPort: 8000
           env:
@@ -1069,7 +1060,7 @@ spec:
               name: settings
               subPath: tutor.py
         - name: xqueue-consumer
-          image: docker.io/overhangio/openedx-xqueue:18.0.0
+          image: docker.io/overhangio/openedx-xqueue:21.0.0
           command: ["sh", "-e", "-c"]
           args: ["while true; do echo 'running consumers'; ./manage.py run_consumer; sleep 10; done"]
           env:

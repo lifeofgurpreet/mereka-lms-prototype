@@ -4,9 +4,36 @@ type: "feature_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-08"
+last_updated: "2026-02-10"
+links:
+  related_docs:
+    - "docs/onboarding/QUICK_START_LOCAL.md"
+    - "docs/onboarding/DEVELOPER_ONBOARDING.md"
+    - "docs/operations/TROUBLESHOOTING.md"
+    - "docs/operations/THEME_DEPLOYMENT.md"
+    - "docs/operations/DEPLOYMENT_RUNBOOK.md"
+  related_specs:
+    - "specs/branding-system_spec.md"
+    - "specs/k8s-deployment_spec.md"
+    - "specs/multi-site-domains_spec.md"
+    - "specs/observability-stack_spec.md"
+    - "specs/secrets-management_spec.md"
 ---
-# Tutor Configuration Lifecycle
+
+# Human Summary
+
+## What we're building
+A deterministic configuration workflow for Tutor-managed Open edX deployments. Every time a Tutor configuration changes, a series of patches must be applied to fix MySQL authentication, Node.js build toolchain, multi-site domain support, theme integration, custom application installation, and Redwood compatibility. This spec codifies that workflow as a testable contract so that no patch step is ever skipped or applied out of order.
+
+## Why it matters
+Open edX on Tutor regenerates all Docker Compose, Dockerfile, and Django settings templates from scratch on every `tutor config save`. Without re-applying patches afterward, production-critical fixes (MySQL auth, MFE builds, multi-site domains) are silently lost. This has caused outages in the past and will continue to do so if the workflow is not enforced. The spec protects against human error and enables automation.
+
+## Success looks like
+- Every `tutor config save` is followed by `apply-patches.sh` within 5 minutes, with zero manual intervention in CI.
+- All 10 acceptance criteria pass on every configuration change.
+- Zero incidents caused by missing patches in the last 90 days.
+
+# Agent Contract
 
 ## Scope
 
@@ -16,7 +43,7 @@ This spec covers the Tutor configuration save-patch-restart workflow required to
 
 - Upstream Tutor template contributions (handled separately)
 - Custom plugin development outside of existing patches
-- Kubernetes-specific configuration (covered in k8s-deployment.md)
+- Kubernetes-specific configuration (covered in k8s-deployment_spec.md)
 
 ## Requirements
 
@@ -66,6 +93,15 @@ The `apply-patches.sh` script MUST apply the following patches:
 - MUST update i18n archive URL to `openedx-unsupported/openedx-i18n`
 - MUST skip legacy `requirements/edx/local.in` reinstall step
 
+### Non-functional (NFRs)
+
+- `apply-patches.sh` execution time MUST be <= 30 seconds on a standard development machine
+- Image build time with patches applied SHOULD be <= 45 minutes for `openedx` image on a 12GB RAM host
+- Patch idempotency: running `apply-patches.sh` multiple times consecutively MUST produce identical output
+- Patch script MUST exit with non-zero status code if any patch fails to apply
+- Configuration validation SHOULD complete within 5 seconds
+- The system SHOULD support offline patch application (no network required for the patch step itself)
+
 ## Acceptance Criteria
 
 - [ ] AC-001: `grep mysql_native_password tutor_env/env/local/docker-compose.yml` returns results
@@ -113,8 +149,8 @@ tutor local restart
 **Symptom**: Webpack build OOM during `tutor images build openedx`
 
 **Recovery**:
-- Increase Docker Desktop RAM to ≥12GB
-- Increase swap to ≥2GB
+- Increase Docker Desktop RAM to >=12GB
+- Increase swap to >=2GB
 - Rebuild: `tutor images build openedx`
 
 ### Theme Assets Not Syncing
@@ -128,6 +164,22 @@ tutor images build openedx
 tutor local restart lms cms
 ```
 
+### Partial Patch Application
+
+**Symptom**: Some patches applied but script interrupted mid-execution (e.g., disk full, process killed)
+
+**Recovery**:
+- Re-run `./infrastructure/tutor/apply-patches.sh` (script MUST be idempotent)
+- If files are corrupted: `tutor config save` to regenerate clean templates, then re-apply patches
+
+### Concurrent Config Saves
+
+**Symptom**: Two developers or agents run `tutor config save` simultaneously, interleaving patches
+
+**Recovery**:
+- The system SHOULD use file locking or a wrapper script to serialize config save operations
+- If conflict detected: `tutor config save` again from clean state, then apply patches
+
 ## Observability
 
 ### Logs
@@ -140,11 +192,18 @@ tutor local restart lms cms
 
 - Build time: Track duration of `tutor images build openedx` (baseline: 30-45 min)
 - Theme sync duration: Time for `apply-patches.sh` to complete (baseline: <30s)
+- Patch success rate: Percentage of `apply-patches.sh` executions that exit 0
 
 ### Alerts
 
 - MUST alert if `tutor config save` runs without subsequent `apply-patches.sh` within 5 minutes
 - SHOULD alert if MySQL authentication fails with caching_sha2_password error
+- SHOULD alert if `apply-patches.sh` execution time exceeds 60 seconds
+
+### Dashboards
+
+- Tutor configuration change log (timestamp, operator, changes made)
+- Patch application history (success/failure, duration, files modified)
 
 ## Rollout & Rollback
 

@@ -4,9 +4,37 @@ type: "feature_spec"
 status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-08"
+last_updated: "2026-02-10"
+links:
+  related_docs:
+    - "docs/BRANDING.md"
+    - "docs/BRANDING_PLAN.md"
+    - "docs/BRANDING_VERIFICATION_CHECKLIST.md"
+    - "docs/branding/BRANDING_OPERATING_MODEL.md"
+    - "docs/branding/BRANDING_GUARDRAILS.md"
+    - "docs/branding/BRANDING_ROADMAP.md"
+    - "docs/branding/BRANDING_INCIDENT_TEMPLATE.md"
+  related_specs:
+    - "specs/tutor-configuration_spec.md"
+    - "specs/multi-site-domains_spec.md"
+    - "specs/k8s-deployment_spec.md"
 ---
-# Branding System
+
+# Human Summary
+
+## What we're building
+A custom branding system for Mereka Academy that replaces the default Open edX visual identity across all touchpoints: the LMS learner interface, Studio course authoring, and all React-based micro-frontends. The system manages logo variants, fonts, color themes, a custom footer component, and SASS compilation, with automated verification gates to guarantee branding consistency after every build and deployment.
+
+## Why it matters
+Brand consistency directly affects learner trust and partner credibility. Mereka Academy serves both the academyv2.mereka.io and academy.biji-biji.com domains, and any default Open edX branding leaking through signals an unfinished product. The branding system also strips Google Fonts dependencies, ensuring privacy compliance and faster page loads. Without automated verification, branding regressions silently ship with every Tutor config regeneration.
+
+## Success looks like
+- Every page across LMS, Studio, and all MFEs displays Mereka branding with zero Open edX default leakage.
+- `scripts/branding/verify-branding-health.sh` passes in CI on every build.
+- Google Fonts requests are absent from production network traffic.
+- A new team member can update branding assets by following the rollout workflow without needing tribal knowledge.
+
+# Agent Contract
 
 ## Scope
 
@@ -20,7 +48,9 @@ This spec covers the custom branding system for Mereka Academy, including theme 
 
 ## Requirements
 
-### Theme Structure
+### Functional
+
+#### Theme Structure
 
 The system MUST maintain the following theme structure:
 
@@ -55,7 +85,7 @@ infrastructure/tutor/themes/mereka/
     └── templates/
 ```
 
-### Asset Sync Workflow
+#### Asset Sync Workflow
 
 - The system MUST run `./infrastructure/tutor/apply-patches.sh` to sync theme assets to build directory
 - The system MUST copy logo variants to `tutor_env/env/build/openedx/themes/mereka/lms/static/images/`
@@ -63,14 +93,14 @@ infrastructure/tutor/themes/mereka/
 - The system MUST sync templates to preserve Django template overrides
 - The system MUST sync MFE SCSS to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
 
-### SASS Compilation
+#### SASS Compilation
 
 - The system MUST compile custom theme SASS before default theme: `npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka`
 - The system MUST strip Google Fonts imports from SCSS sources before compilation
 - The system MUST strip residual Google Fonts imports from compiled CSS
 - The system MUST compile both LMS and Studio themes
 
-### MFE Branding
+#### MFE Branding
 
 - The system MUST import `mereka.scss` in MFE env.config.jsx
 - The system MUST replace default Indigo footer with custom `MerekaFooter` component
@@ -82,26 +112,36 @@ infrastructure/tutor/themes/mereka/
   - Copyright notice and Open edX credit
 - The system MUST copy MFE theme fonts to build context
 
-### Branding Verification Gates
+#### Branding Verification Gates
 
 The system MUST pass the following verification checks:
 
-#### Pre-Patch Gate
+##### Pre-Patch Gate
 - `scripts/branding/verify-branding-health.sh` MUST run before applying patches
 - MUST verify all required logo variants exist in theme source
 - MUST verify font files exist
 - MUST verify SCSS files have no syntax errors
 
-#### Post-Build Gate
+##### Post-Build Gate
 - MUST verify Mereka logo present in LMS/CMS static images
 - MUST verify compiled CSS contains Mereka theme rules
 - MUST verify Google Fonts imports absent from compiled CSS
 - MUST verify MFE footer component includes "Mereka Academy" text
 
-### Django Settings
+#### Django Settings
 
 - The system MUST set `DEFAULT_SITE_THEME = "mereka"` in LMS production.py
 - The system SHOULD configure SiteConfiguration to override theme per domain if needed
+
+### Non-functional (NFRs)
+
+- Page load time: LMS homepage with branding assets MUST load in under 3 seconds (p95) on a 4G connection
+- Total theme static asset size MUST remain under 5 MB
+- SASS compilation time SHOULD complete within 90 seconds
+- The system MUST NOT make any external font requests (Google Fonts or other third-party font CDNs) to preserve learner privacy
+- Accessibility: Branding elements SHOULD meet WCAG 2.1 AA contrast ratios (minimum 4.5:1 for normal text, 3:1 for large text)
+- Logo images MUST include meaningful alt text for screen readers
+- The branding system MUST NOT break existing accessibility features of the Open edX platform
 
 ## Acceptance Criteria
 
@@ -205,7 +245,7 @@ tutor k8s exec lms ./manage.py lms collectstatic --noinput --clear
 
 ### Logs
 
-- Asset sync: Console output from `apply-patches.sh` showing "✓ Copied logo.png to LMS theme"
+- Asset sync: Console output from `apply-patches.sh` showing "Copied logo.png to LMS theme"
 - SASS compilation: Build logs showing "Compiled mereka theme"
 - Collectstatic: `tutor k8s exec lms ./manage.py lms collectstatic --noinput --verbosity=2`
 
@@ -219,6 +259,11 @@ tutor k8s exec lms ./manage.py lms collectstatic --noinput --clear
 
 - SHOULD alert if `verify-branding-health.sh` fails in CI
 - SHOULD alert if Google Fonts requests detected in production
+
+### Dashboards
+
+- Branding health: CI dashboard showing pass/fail of `verify-branding-health.sh` across builds
+- Asset budget: Track theme static asset size over time to detect bloat
 
 ## Rollout & Rollback
 

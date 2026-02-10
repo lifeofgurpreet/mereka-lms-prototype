@@ -24,7 +24,7 @@ patches:
   - path: patches/clustersecretstore-gcp.yaml
   - path: patches/openedx-secrets-dev.yaml
   - path: patches/database-secrets-dev.yaml
-  - path: patches/forum-dev.yaml
+  # forum-dev.yaml removed: Forum v2 runs in-process within LMS (no separate deployment)
 
 # Use local images
 images:
