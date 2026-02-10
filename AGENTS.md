@@ -642,6 +642,11 @@ Regenerate hostname registry (after domain changes):
   - Repo check: `./scripts/qa/verify-oidc-cookie-middleware-order.sh`
   - Runtime provider check: `./scripts/qa/verify-oidc-provider-configs.sh --env prod` (enforces enabled+visible, non-empty effective secret, and provider display name contract).
   - Public check (includes `sessionid` cookie `Domain=` + OIDC PKCE redirect validation): `./scripts/qa/verify-auth-surfaces.sh prod`
+- Studio OAuth (edx-oauth2) callback reliability guardrail:
+  - If CMS logs show `AuthStateMissing: Session value state missing` during `/complete/edx-oauth2/`, verify Studio home page does not contain `next=http://...` links.
+  - Root cause is typically proxy forwarded-proto drift (`X-Forwarded-Proto` becomes multi-valued like `https,http`).
+  - Fix/backstop is `cms.envs.tutor.mereka_forwarded_headers.MerekaForwardedHeadersMiddleware`.
+  - Public check is enforced by `./scripts/qa/verify-auth-surfaces.sh prod`.
 - Hostname drift checks are now env-scoped:
   `./scripts/qa/list-openedx-hostnames.sh --env prod|dev|both`.
 - Runtime hostname ownership matrix (prod GKE vs dev kind):
