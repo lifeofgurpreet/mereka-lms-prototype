@@ -52,7 +52,11 @@
   .dashboard .my-courses .listing-courses {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    /* Avoid relying on flex-gap (inconsistent on older Safari builds). */
+  }
+
+  .dashboard .my-courses .listing-courses > * + * {
+    margin-top: 1.25rem;
   }
 
   .dashboard .my-courses .course-item {
@@ -71,8 +75,8 @@
   }
 
   .dashboard .my-courses .course-item .wrapper-course-image {
-    flex: 0 0 clamp(180px, 32%, 300px);
-    max-width: 300px;
+    flex: 0 0 clamp(220px, 34%, 360px);
+    max-width: 360px;
     margin: 0;
   }
 
