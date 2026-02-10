@@ -45,7 +45,6 @@ jobs:
   runtime-audit:
     name: Runtime Observability Audit
     runs-on: ubuntu-latest
-    if: ${{ secrets.GCP_SA_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 

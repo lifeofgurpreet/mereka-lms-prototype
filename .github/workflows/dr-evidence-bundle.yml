@@ -15,7 +15,6 @@ jobs:
   dr-evidence:
     name: Build DR Evidence Bundle
     runs-on: ubuntu-latest
-    if: ${{ secrets.GCP_SA_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
