@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is the **Mereka Academy Open edX** deployment repository. It tracks infrastructure-as-code, configuration, and automation for running Open edX (an open-source learning management system) on Google Cloud Platform. The stack is managed via **Tutor** (an Open edX deployment tool) and includes custom theming, data migrations from Kajabi and MCT, and analytics integration.
 
-**Critical**: Docker Desktop requires **≥12 GB RAM and 2–4 GB swap** before building images. The Redwood asset pipeline uses 6–8 GB during webpack builds.
+**Critical**: Docker Desktop requires **≥12 GB RAM and 2–4 GB swap** before building images. The Ulmo asset pipeline uses 6–8 GB during webpack builds.
 
 **Production URLs**:
 - LMS: `https://academyv2.mereka.io`
@@ -18,7 +18,7 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 
 ### Technology Stack
 - **Open edX Platform**: LMS (learner-facing) + Studio (CMS for course authoring)
-- **Deployment Tool**: Tutor 18.2.2 (wraps Open edX in Docker/K8s)
+- **Deployment Tool**: Tutor 21.0.0 (Ulmo) - wraps Open edX in Docker/K8s
 - **Databases**:
   - MySQL 8 (course data, user data)
   - MongoDB Atlas (forum, modulestore) - **Atlas only, no local MongoDB**
@@ -27,7 +27,7 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
   - Local: Docker Compose
   - Production: Google Kubernetes Engine (GKE), Cloud SQL, Artifact Registry
 - **Frontend**: Micro-frontends (MFEs) built on React, served via Caddy reverse proxy
-- **Services**: Discovery (course catalog), Forum (cs_comments_service), Notes, Ecommerce, XQueue
+- **Services**: Discovery (course catalog), Forum (Python openedx-forum v0.3.8, integrated into LMS), Notes, Ecommerce, XQueue, Meilisearch (forum search)
 
 ### Repository Structure
 ```

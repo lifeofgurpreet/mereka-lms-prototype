@@ -1,10 +1,17 @@
 ---
 title: "Forum Service Migration: Ruby cs_comments_service to Python openedx-forum"
 type: "migration_spec"
-status: "draft"
+status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+completed_date: "2026-02-10"
+implementation_notes: |
+  Migration completed via Tutor v18→v21 upgrade.
+  Python forum (openedx-forum v0.3.8) integrated into LMS process.
+  Meilisearch v1.8.4 deployed for search (replaces Elasticsearch).
+  Zero data loss - 183MB MySQL backup created pre-upgrade.
+  Deployed to production GKE with zero downtime.
 links:
   related_docs:
     - "docs/operations/TROUBLESHOOTING.md"
