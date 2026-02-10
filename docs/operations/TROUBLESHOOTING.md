@@ -784,6 +784,9 @@ kubectl rollout restart deploy/cms -n mereka-lms
 - Authentik returns to LMS `/auth/complete/oidc/`, but login fails in Authn MFE.
 - LMS logs show `Authentication process canceled` (social auth middleware), with no `Session value state missing`.
 - `/auth/login/oidc/` redirect URL does not include PKCE parameters (`code_challenge`, `code_challenge_method`).
+- Authentik UI may show:
+  - `Request has been denied` / `Unknown error`
+  - an MFA prompt with `No authentication methods available` (policy requires MFA but user has not enrolled any factor)
 
 **Root Cause:**
 - OIDC callback reaches LMS, but token exchange fails with HTTP 400 in social-auth.
@@ -791,6 +794,7 @@ kubectl rollout restart deploy/cms -n mereka-lms
 - Another high-frequency cause is OIDC client secret drift:
   - Authentik logs `Invalid client secret` for `client_id=mereka-lms`.
   - Latest `OAuth2ProviderConfig` resolves empty secret (`secret=""` with missing `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]`).
+ - If Authentik requires MFA for this flow, users without an enrolled factor can be blocked before the callback completes.
 
 **Quick Verify:**
 ```bash
@@ -815,6 +819,9 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
 - Ensure latest `OAuth2ProviderConfig` for each LMS site resolves a non-empty secret:
   - Either set DB `secret` on latest row, or ensure runtime `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]` is populated.
   - If needed for emergency recovery, set latest row name back to `Sign in with Mereka` and secret from runtime env.
+ - If the Authentik flow requires MFA, ensure:
+   - platform admins have at least one active MFA device enrolled, or
+   - the flow/policy excludes the canary user (so CI can validate callbacks deterministically).
 
 **Prevention:**
 - `scripts/qa/verify-auth-surfaces.sh prod` now asserts PKCE markers on OIDC entrypoint redirects.
