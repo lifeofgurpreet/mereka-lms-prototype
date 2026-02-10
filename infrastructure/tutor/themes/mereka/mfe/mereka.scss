@@ -311,6 +311,7 @@ label {
   border: 1px solid rgba(26, 22, 35, 0.08);
   background: #fff;
   min-width: 0;
+  overflow: hidden;
 }
 
 [class*="learner-dashboard"] [class*="course"]:hover,
@@ -330,6 +331,17 @@ label {
   display: block;
   width: 100%;
   object-fit: cover;
+  object-position: center;
+  /* Guardrail: some learner-dashboard list layouts can collapse the image height. */
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 96px;
+}
+
+/* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */
+[class*="learner-dashboard"] [class*="course-list"] > * + *,
+[class*="learner-dashboard"] [data-testid*="course-list"] > * + * {
+  margin-top: 1rem;
 }
 
 [class*="learner-dashboard"] [class*="course"] [class*="status"],
