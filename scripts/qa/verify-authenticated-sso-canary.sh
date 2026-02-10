@@ -139,6 +139,10 @@ def assert_not_auth_error_page(page, phase: str) -> None:
         body = ""
     if "authentication process canceled" in body:
         fail(f"{phase}: Authentik reported canceled authentication", page=page)
+    if "request has been denied" in body:
+        fail(f"{phase}: Authentik denied the authorization request (policy/assignment likely)", page=page)
+    if "unknown error" in body and "powered by authentik" in body:
+        fail(f"{phase}: Authentik error page encountered (unknown error)", page=page)
     if "we couldn't sign you in" in body and "not authorized" in body:
         fail(f"{phase}: Open edX authorization denied after callback", page=page)
     if "your account is disabled" in body:
@@ -153,14 +157,19 @@ with sync_playwright() as p:
         if debug:
             log(f"goto={login_url}")
         page.goto(login_url, wait_until="domcontentloaded", timeout=60000)
+        assert_not_auth_error_page(page, "oidc_entrypoint")
 
         # Stage 1: identify user in Authentik
         page.get_by_placeholder("Email or Username").fill(email, timeout=30000)
         page.get_by_role("button", name=re.compile(r"Log in", re.I)).click(timeout=20000)
+        page.wait_for_load_state("domcontentloaded", timeout=60000)
+        assert_not_auth_error_page(page, "authentik_username_submitted")
 
         # Stage 2: submit password
         page.get_by_placeholder("Password").fill(password, timeout=30000)
         page.get_by_role("button", name=re.compile(r"Continue", re.I)).click(timeout=20000)
+        page.wait_for_load_state("domcontentloaded", timeout=60000)
+        assert_not_auth_error_page(page, "authentik_password_submitted")
 
         # We expect callback to leave Authentik domain.
         # Depending on the flow, we may land on LMS or Authn MFE first.

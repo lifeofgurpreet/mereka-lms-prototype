@@ -590,6 +590,13 @@ if [[ "$UPDATE_BASE_REF" -eq 1 ]]; then
   if [[ -z "$APP_SHA" ]]; then
     APP_SHA="$(git -C "$APP_REPO" rev-parse HEAD)"
   fi
+  # Guardrail: ArgoCD/kustomize fetches by SHA and will fail with "not our ref" if the SHA
+  # isn't a real commit reachable from the app repo. Validate locally before writing it into GitOps.
+  if ! git -C "$APP_REPO" cat-file -e "${APP_SHA}^{commit}" 2>/dev/null; then
+    echo "Invalid --app-sha (or app repo HEAD is not a commit): $APP_SHA" >&2
+    echo "Tip: use the exact output of: git -C \"$APP_REPO\" rev-parse HEAD" >&2
+    exit 1
+  fi
   echo "App SHA for GitOps base ref: $APP_SHA"
   update_gitops_base_ref "$INFRA_BASE_FILE" "$APP_SHA" "$APPLY"
 else
