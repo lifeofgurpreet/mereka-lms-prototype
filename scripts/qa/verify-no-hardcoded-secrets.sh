@@ -43,7 +43,7 @@ for name in "${!PATTERNS[@]}"; do
   out="$tmpdir/${name}.txt"
 
   set +e
-  rg -n --pcre2 \
+  rg -n \
     --glob '!.git/**' \
     --glob '!tutor_env/**' \
     --glob '!var/**' \

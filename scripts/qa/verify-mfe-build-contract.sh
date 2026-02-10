@@ -19,7 +19,7 @@ if [[ ! -f "$dockerfile" ]]; then
   exit 1
 fi
 
-if rg -n "FROM node:18" "$dockerfile" >/dev/null 2>&1; then
+if rg -n "FROM.*node:18" "$dockerfile" >/dev/null 2>&1; then
   echo "OK"
   exit 0
 fi

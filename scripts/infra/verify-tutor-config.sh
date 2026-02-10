@@ -104,7 +104,10 @@ fi
 
 file_exists "$TUTOR_ENV/config.yml" "Tutor config file"
 file_exists "$TUTOR_ENV/env/apps/caddy/Caddyfile" "Caddy config"
-file_exists "$TUTOR_ENV/env/apps/nginx/lms.conf" "Nginx LMS config"
+# Nginx was replaced by Caddy in Tutor v21 — check only if present
+if [[ -d "$TUTOR_ENV/env/apps/nginx" ]]; then
+  file_exists "$TUTOR_ENV/env/apps/nginx/lms.conf" "Nginx LMS config"
+fi
 file_exists "$TUTOR_ENV/env/apps/openedx/settings/lms/production.py" "LMS production settings"
 file_exists "$TUTOR_ENV/env/build/openedx/Dockerfile" "OpenEdX Dockerfile"
 

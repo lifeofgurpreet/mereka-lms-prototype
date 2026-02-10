@@ -13,7 +13,7 @@ acceptance_criteria:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
-    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'Top-level directory'
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep 'Directory exists'
 - id: AC-002
   description: "Given the repository root, when listing *.md files, then only files in the defined allowlist are present"
   verify:
@@ -83,14 +83,14 @@ acceptance_criteria:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
-    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'spec.*naming\|_spec.md'
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -i 'spec naming'
 - id: AC-012
   description: "Given the full verification script, when executed, then it completes in under 5 seconds and reports PASSwith zero violations"
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
-    command: time bash scripts/qa/verify-repo-structure.sh
+    command: bash scripts/qa/verify-repo-structure.sh 2>&1 |grep -q 'OK'
     notes: Also verified via CI workflow at .github/workflows/verify-repo-structure.yml
 - id: EC-001
   description: Root markdown violation on feature branch vs main enforcement

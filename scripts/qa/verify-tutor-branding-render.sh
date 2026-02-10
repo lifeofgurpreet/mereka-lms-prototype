@@ -28,7 +28,8 @@ need "infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 need "infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 
 # Basic logo assets (source-of-truth location).
-need "assets/branding/logos"
+need "assets/branding/logo.svg"
+need "assets/branding/favicon.ico"
 
 if [[ "$failures" -gt 0 ]]; then
   echo "FAIL ($failures issue(s))" >&2

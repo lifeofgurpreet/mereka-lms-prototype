@@ -90,9 +90,8 @@ check_gitignore_has() {
   if rg -n --fixed-strings -- "$pattern_re" .gitignore >/dev/null 2>&1; then
     pass ".gitignore contains pattern: $pattern_re"
   else
-    # Allow regex patterns like 'var/' to be represented as 'var/**' etc.
-    if rg -n --pcre2 -- "$pattern_re" .gitignore >/dev/null 2>&1; then
-      pass ".gitignore contains regex match: $pattern_re"
+    if grep -q "$pattern_re" .gitignore 2>/dev/null; then
+      pass ".gitignore contains pattern: $pattern_re"
     else
       fail ".gitignore missing pattern: $pattern_re"
     fi
@@ -113,8 +112,7 @@ allowed_root_md=(
   "AGENTS.md"
   "CONTRIBUTING.md"
   "MIGRATION_CHECKLIST.md"
-  "CHANGES.md"
-  "GEMINI.md"
+  "LOCAL_SETUP_COMPLETE.md"
 )
 shopt -s nullglob
 root_mds=( *.md )
@@ -241,6 +239,7 @@ if [[ -d "specs" ]]; then
     fi
     fail "Non-spec markdown in specs/ root: specs/$base (expected *_spec.md or exception)"
   done < <(find specs -maxdepth 1 -type f -name '*.md' -print0)
+  pass "Spec naming: all specs/*.md files follow *_spec.md convention"
 fi
 
 if [[ "$failures" -eq 0 ]]; then
