@@ -498,6 +498,51 @@ python scripts/migrations/kajabi/rollback-openedx-imports.py \
 
 **Rollback time estimate**: Full database restore takes 30-60 minutes. Selective enrollment rollback takes 1-2 hours for large datasets.
 
+## Webhook Integration Services
+
+### Kajabi Webhook Receiver (Real-time Sync)
+
+**Implementation**: `services/kajabi-webhook/main.py` (FastAPI, 120 lines)
+
+A lightweight FastAPI service that receives Kajabi webhook events for incremental sync of purchases, enrollments, and tag changes after the initial bulk migration.
+
+**Architecture**:
+- **Endpoint**: `POST /webhooks/kajabi` — receives webhook payloads from Kajabi
+- **Health**: `GET /healthz` — readiness probe (fails if secret not configured)
+- **Authentication**: HMAC-SHA256 signature verification via `X-Kajabi-Signature` header
+- **Persistence**: NDJSON outbox pattern — events written to `var/services/kajabi-webhook/outbox/{event}.ndjson`
+- **Secret**: `KAJABI_WEBHOOK_SECRET` from environment variable (Infisical)
+
+**Supported Events**: `purchase`, `payment_succeeded`, `order_created`, `form_submission`, `tag_added`, `tag_removed`
+
+**Requirements**:
+- REQ-WH-001: The service MUST verify the HMAC-SHA256 signature before processing any webhook
+- REQ-WH-002: The service MUST return 401 for invalid or missing signatures
+- REQ-WH-003: The service MUST return 400 for payloads missing an `event` or `type` key
+- REQ-WH-004: The service MUST persist valid events to the NDJSON outbox atomically (append-only)
+- REQ-WH-005: The service MUST accept unknown event types and write them to `unknown__{type}.ndjson`
+- REQ-WH-006: The service MUST return 202 Accepted for successfully persisted events
+- REQ-WH-007: The `/healthz` endpoint MUST return 500 if `KAJABI_WEBHOOK_SECRET` is not set
+
+### MCT User Provisioning (HubSpot-driven)
+
+**Implementation**: `services/hubspot-webhook/` (Firebase Cloud Functions, Node.js)
+
+A legacy Firebase Cloud Function that provisions users in the MCT (Mereka Career Training) platform when HubSpot contacts are created. This is **independent** of the bulk migration pipeline and is **not in scope** for migration verification.
+
+**Flow**: HubSpot form submission → webhook → create MCT user → create Azure AD B2C account → send welcome email (SendGrid) → schedule reminder email (7 days)
+
+> **Note**: This service is deployed to Firebase and managed separately. See `services/hubspot-webhook/README.md` for deployment details.
+
+### Webhook Acceptance Criteria
+
+- [ ] AC-039: Given the Kajabi webhook receiver is running, when a `GET /healthz` request is made, then the service MUST return `{"status": "ok"}` with HTTP 200 if `KAJABI_WEBHOOK_SECRET` is configured
+- [ ] AC-040: Given a valid Kajabi webhook with correct HMAC signature, when `POST /webhooks/kajabi` is called, then the event MUST be appended to the correct NDJSON outbox file and HTTP 202 returned
+- [ ] AC-041: Given a Kajabi webhook with an invalid or missing `X-Kajabi-Signature`, when `POST /webhooks/kajabi` is called, then the service MUST return HTTP 401
+- [ ] AC-042: Given a Kajabi webhook payload missing the `event` key, when `POST /webhooks/kajabi` is called, then the service MUST return HTTP 400
+- [ ] AC-043: Given a Kajabi webhook with an unknown event type, when `POST /webhooks/kajabi` is called, then the event MUST be written to `unknown__{type}.ndjson` and HTTP 202 returned
+- [ ] AC-044: Given the Kajabi webhook receiver is running without `KAJABI_WEBHOOK_SECRET`, when `GET /healthz` is called, then the service MUST return HTTP 500
+
 ## Open Questions
 
 - **OQ-001**: What is the long-term plan for Kajabi lesson HTML content? The API does not expose lesson body content. The `scrape_lessons.py` Playwright-based scraper exists but has not been run at scale. Should we scrape all 3,146 lessons or accept placeholder content in Open edX?

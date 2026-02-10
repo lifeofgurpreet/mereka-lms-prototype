@@ -289,3 +289,53 @@ acceptance_criteria:
         test_type: "shell_verification"
         file: "scripts/qa/verify-incremental-sync.sh"
         command: "bash scripts/qa/verify-incremental-sync.sh"
+
+  # === Webhook Integration ===
+
+  - id: "AC-039"
+    description: "Kajabi webhook healthcheck returns 200 when secret configured"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "services/kajabi-webhook/main.py"
+        command: "curl -sf http://localhost:8080/healthz | grep -q ok"
+
+  - id: "AC-040"
+    description: "Valid webhook with HMAC signature persists event to outbox"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/TROUBLESHOOTING.md"
+        section: "Kajabi Webhook Testing"
+        justification: "Requires running webhook service and valid HMAC signature computation"
+
+  - id: "AC-041"
+    description: "Invalid signature returns HTTP 401"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/TROUBLESHOOTING.md"
+        section: "Kajabi Webhook Testing"
+        justification: "Requires running webhook service with crafted invalid signature"
+
+  - id: "AC-042"
+    description: "Missing event key returns HTTP 400"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/TROUBLESHOOTING.md"
+        section: "Kajabi Webhook Testing"
+        justification: "Requires running webhook service with crafted payload"
+
+  - id: "AC-043"
+    description: "Unknown event type written to unknown__ outbox file"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/TROUBLESHOOTING.md"
+        section: "Kajabi Webhook Testing"
+        justification: "Requires running webhook service with non-standard event type"
+
+  - id: "AC-044"
+    description: "Missing KAJABI_WEBHOOK_SECRET returns HTTP 500 on healthcheck"
+    verify:
+      - type: "manual"
+        runbook: "docs/operations/TROUBLESHOOTING.md"
+        section: "Kajabi Webhook Testing"
+        justification: "Requires running webhook service without secret env var"
