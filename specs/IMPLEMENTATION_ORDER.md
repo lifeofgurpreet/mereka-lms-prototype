@@ -22,13 +22,13 @@ noted otherwise.
 | Tier | Completion | Notes |
 |------|-----------|-------|
 | Tier 0 — Foundations | ~95% | Repo structure ✅, secrets ✅, tutor ✅, tutor resilience ✅, cross-cutting ✅ |
-| Tier 1 — Core Infra | ~90% | K8s ✅, Atlas ✅, domains ✅, branding ✅ |
-| Tier 2 — Operational | ~90% | Observability ✅, SLO/SLA ✅, CI/CD ✅, analytics 7/8 scripts created |
+| Tier 1 — Core Infra | ~90% | K8s ✅, Atlas ✅, domains ✅, branding ✅, middleware 0/20 planned |
+| Tier 2 — Operational | ~90% | Observability ✅, SLO/SLA ✅, CI/CD ✅, analytics 7/8, design tokens 11/12 auto |
 | Tier 3 — Data & Migrations | ~75% | Forum ✅, DR ✅, Kajabi 40/44 auto, video 6/25 auto |
 | Tier 4 — Enterprise Foundation | ~45% | Enterprise microservices ✅ (7 services + 10 verification scripts); multi-tenancy/SSO partial |
 | Tier 5 — Enterprise Features | ~1% | Spec-only; ecommerce has basic Tutor plugin; HubSpot registration spec + testmap created |
 | Tier 6 — Deferred | ~0% | Spec-only |
-| **Weighted Overall** | **~42% (310/737)** | 310 automated, 373 planned (phantom), 51 manual, 3 monitoring, 0 unmapped; 16/29 specs pass full verification |
+| **Weighted Overall** | **~42% (321/769)** | 321 automated, 393 planned (phantom), 52 manual, 3 monitoring, 0 unmapped; 16/31 specs pass full verification |
 
 ---
 
@@ -62,6 +62,7 @@ ract every spec must honor.
 | `mongodb-atlas-integration_spec.md` | ✅ DONE | 9/9 ACs auto-verified | Forum, analytics, any MongoDB consumer | Atlas connected, SRV working, config chain verified |
 | `multi-site-domains_spec.md` | ✅ DONE | 9/9 ACs auto-verified | Branding, MFEs, enterprise portals | DNS/Caddy configured, all domains working |
 | `branding-system_spec.md` | ✅ DONE | 10/10 ACs auto-verified | Multi-tenancy (branding) | Themes, logos, MFE customization working |
+| `platform-middleware-custom-apps_spec.md` | 🟢 LARGELY DONE | 0/20 ACs auto, 19 planned, 1 manual | Multi-tenancy (cookie domain), observability (prometheus) | 3 middleware + 2 Django apps deployed; verification scripts not yet created |
 
 **Rationale**: K8s deployment defines the runtime environment
 . MongoDB Atlas provides document storage. Multi-site domains
@@ -78,6 +79,7 @@ visual identity.
 |------|--------|-----------|--------|-------|
 | `observability-stack_spec.md` | ✅ DONE | 8/8 ACs auto-verified | SLO/SLA, all monitoring | Prometheus, Loki deployed; 3 enterprise ServiceMonitors + 12 alerts configured |
 | `ci-cd-pipeline_spec.md` | ✅ DONE | 39/39 ACs auto-verified | All automated deployments | GitHub Actions running, Docker/K8s builds verified, merge gates + secret masking verified |
+| `design-tokens-system_spec.md` | ✅ DONE | 11/12 ACs auto, 1 planned | Branding (tokens source of truth) | tokens.css + provenance tracking + drift detection; 1 phantom script |
 | `analytics-pipeline_spec.md` | 🟡 IN PROGRESS | 7/8 ACs auto, 1 manual | Enterprise reporting, privacy | 7 verification scripts created; Aspects/ClickHouse not deployed yet |
 | `slo-sla-service-level-management_spec.md` | ✅ DONE | 19/23 ACs auto, 4 manual | Enterprise SLA contracts | SLO definitions verified, all runbooks documented (maintenance, on-call, incident, reporting) |
 
@@ -216,8 +218,9 @@ Tier 6: mobile-apps (deferred)
 | k8s-deployment | Tier 0 | Tiers 2-5 |
 | mongodb-atlas-integration | Tier 0 | forum, analytics |
 | multi-site-domains | Tier 0 | branding, multi-tenancy |
-| branding-system | Tier 0, multi-site-domains | multi-tenanc
-y |
+| branding-system | Tier 0, multi-site-domains | multi-tenancy, design-tokens |
+| platform-middleware-custom-apps | Tier 0, Tier 1 | multi-tenancy (cookie domain), observability (prometheus) |
+| design-tokens-system | branding-system | multi-tenancy (theming) |
 | observability-stack | Tier 0, Tier 1 | slo-sla, Tier 4+ |
 | ci-cd-pipeline | Tier 0, Tier 1 | All automated deployments
 |
@@ -286,3 +289,4 @@ s every other service's PII handling.
 | 2026-02-10 | Phantom script creation sprint | Created 33 verification scripts across data-migrations (20), analytics (5), video-pipeline (5), tutor-resilience (1), secrets-management (1), migration-pipeline orchestrator (1). Coverage: 206→304 automated (29%→42.8%). 16/28 specs pass full verification. Restructured 12 testmaps (moved 362 edge_cases from acceptance_criteria). Added 86 missing AC descriptions. Fixed linter MEREKA-REF-001 false positives. All 4 integrity gates pass. |
 | 2026-02-10 | Alignment audit | Created verify-mux-alerts.sh (AC-019, video-pipeline 5→6 auto). Added external-registration-hubspot to Tier 5 (26 ACs, no testmap). Fixed 11 spec frontmatter statuses to match reality (8 draft→completed, 2 draft→in_progress, 1 approved→completed). Updated totals: 29 specs, 737 ACs, 305 auto. |
 | 2026-02-10 | HubSpot testmap integration | Created 4 static verification scripts (scan-hubspot-credentials.sh, verify-hubspot-secrets.sh, verify-hubspot-k8s-security.sh, verify-hubspot-alerts.sh). Integrated into existing testmap as shell_verification entries for AC-HUB-005, AC-HUB-021, AC-HUB-022, AC-HUB-023, AC-HUB-026. Fixed testmap tier 2→5. Coverage: 305→310 auto (41%→42%). |
+| 2026-02-10 | Gap closure: new specs + docs | Added 2 new specs: platform-middleware-custom-apps (20 ACs, Tier 1) and design-tokens-system (12 ACs, Tier 2). Created 8 runbooks + 7 architecture overview docs to resolve all phantom doc references in spec frontmatter. Generated testmaps + plans + testplans for both new specs. Coverage: 310→321 auto (42%→42%), total ACs 737→769. 16/31 specs pass full verification. |
