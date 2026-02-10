@@ -412,8 +412,12 @@ for origin in [MEREKA_STUDIO_BASE_URL, f"{MEREKA_SCHEME}://{MEREKA_BIJI_STUDIO_D
 # Secure cookies for HTTPS + shared auth on academyv2.mereka.io
 SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
 CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"
-SESSION_COOKIE_SAMESITE = "None"
-CSRF_COOKIE_SAMESITE = "None"
+# CMS uses an OAuth2 roundtrip to the LMS (/login/edx-oauth2 -> /complete/edx-oauth2).
+# Safari (and some hardened cookie postures) can drop SameSite=None cookies on redirects
+# in ways that break the session-backed OAuth state. For Studio, Lax is sufficient and
+# avoids state-missing failures on the callback.
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 # Multisite note:
 # This CMS instance is served on multiple root domains (academyv2.mereka.io and
 # biji-biji.com). A single static cookie domain breaks the other root. Keep
