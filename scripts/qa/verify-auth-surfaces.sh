@@ -350,10 +350,14 @@ require_body_contains \
   "Primary MFE config LMS_BASE_URL" \
   "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
 
-require_body_contains \
-  "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" \
-  "Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh)" \
-  "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\""
+primary_mfe_config="$(curl -fsSL "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1")" || primary_mfe_config=""
+if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\"" <<<"$primary_mfe_config" \
+  || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$primary_mfe_config"; then
+  echo "✓ Primary MFE config refresh endpoint is same-origin (absolute or relative)"
+else
+  echo "✗ Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh) (expected REFRESH_ACCESS_TOKEN_ENDPOINT to be https://apps.${ECOSYSTEM_BASE}/login_refresh OR /login_refresh) url=https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" >&2
+  failures=$((failures + 1))
+fi
 
 # Sanity-check the reverse-proxy exists: unauthenticated HEAD should return 405 (POST only),
 # not 404/500. We do not require 401 here because the endpoint can be hit without session.
@@ -372,10 +376,14 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
     "Biji MFE config STUDIO_BASE_URL" \
     "\"STUDIO_BASE_URL\": \"https://${BIJI_STUDIO_DOMAIN}\""
 
-  require_body_contains \
-    "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" \
-    "Biji MFE config refresh endpoint is same-origin" \
-    "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://${BIJI_MFE_DOMAIN}/login_refresh\""
+  biji_mfe_config="$(curl -fsSL "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1")" || biji_mfe_config=""
+  if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://${BIJI_MFE_DOMAIN}/login_refresh\"" <<<"$biji_mfe_config" \
+    || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$biji_mfe_config"; then
+    echo "✓ Biji MFE config refresh endpoint is same-origin (absolute or relative)"
+  else
+    echo "✗ Biji MFE config refresh endpoint is same-origin (expected REFRESH_ACCESS_TOKEN_ENDPOINT to be https://${BIJI_MFE_DOMAIN}/login_refresh OR /login_refresh) url=https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1" >&2
+    failures=$((failures + 1))
+  fi
 
   require_status \
     "https://${BIJI_MFE_DOMAIN}/login_refresh" \

@@ -615,7 +615,9 @@ MFE_CONFIG = {
     # IMPORTANT: MFEs call this via browser fetch. Many stacks default to `credentials: "same-origin"`,
     # which will NOT send LMS session cookies to a different origin. Point this at the MFE origin
     # and reverse-proxy it back to the LMS (see deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile).
-    "REFRESH_ACCESS_TOKEN_ENDPOINT": f"{MEREKA_MFE_BASE_URL}/login_refresh",
+    # Use a relative path so this remains same-origin across multiple MFE hostnames
+    # (e.g. apps.academyv2.mereka.io and apps.academy.biji-biji.com).
+    "REFRESH_ACCESS_TOKEN_ENDPOINT": "/login_refresh",
     "SITE_NAME": "Mereka",
     "STUDIO_BASE_URL": MEREKA_STUDIO_BASE_URL,
     "USER_INFO_COOKIE_NAME": "user-info",

@@ -105,7 +105,12 @@ require_eq("LMS_BASE_URL", f"https://{lms_domain}")
 require_eq("STUDIO_BASE_URL", f"https://{studio_domain}")
 # IMPORTANT: expose login_refresh on the MFE origin to avoid cross-origin cookie drops
 # (many browser clients default to credentials='same-origin').
-require_eq("REFRESH_ACCESS_TOKEN_ENDPOINT", f"https://{mfe_domain}/login_refresh")
+refresh = data.get("REFRESH_ACCESS_TOKEN_ENDPOINT")
+if refresh not in (f"https://{mfe_domain}/login_refresh", "/login_refresh"):
+    fail(
+        f"REFRESH_ACCESS_TOKEN_ENDPOINT={refresh!r} "
+        f"(expected {('https://'+mfe_domain+'/login_refresh')!r} OR '/login_refresh')"
+    )
 require_eq("DISABLE_ENTERPRISE_LOGIN", True)
 
 # Authn wiring SHOULD be present; missing values are a common signal that a

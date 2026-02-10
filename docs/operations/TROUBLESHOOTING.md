@@ -884,7 +884,7 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
 **Fix:**
 1. Ensure MFE config is **same-origin** for refresh:
    - `/api/mfe_config/v1` MUST contain:
-     - `REFRESH_ACCESS_TOKEN_ENDPOINT=https://apps.<domain>/login_refresh`
+     - `REFRESH_ACCESS_TOKEN_ENDPOINT=https://apps.<domain>/login_refresh` **or** `REFRESH_ACCESS_TOKEN_ENDPOINT=/login_refresh`
 2. Ensure the MFE origin exposes `/login_refresh` and reverse-proxies to LMS:
    - Implemented via MFE Caddy reverse-proxy (see `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`).
 3. Deploy the updated manifests via GitOps (BBI-K8 pinned ref bump).
