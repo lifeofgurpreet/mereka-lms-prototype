@@ -382,7 +382,10 @@ SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
 # Studio sits behind TLS termination at the ingress; force https redirect_uri so
 # the OIDC provider accepts it.
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = MEREKA_SCHEME == "https"
-SESSION_COOKIE_NAME = "studio_session_id"
+# CRITICAL: Studio must share the authenticated LMS session across subdomains
+# (academyv2.mereka.io <-> studio.academyv2.mereka.io). A separate cookie name
+# causes infinite redirect loops back to LMS /login after successful SSO.
+SESSION_COOKIE_NAME = "sessionid"
 
 MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB = 100
 
