@@ -795,6 +795,11 @@ kubectl rollout restart deploy/cms -n mereka-lms
   - Authentik logs `Invalid client secret` for `client_id=mereka-lms`.
   - Latest `OAuth2ProviderConfig` resolves empty secret (`secret=""` with missing `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]`).
  - If Authentik requires MFA for this flow, users without an enrolled factor can be blocked before the callback completes.
+- A third, easy-to-miss cause: **Authentik policy exceptions** in the login/authorize flow.
+  Example seen in production:
+  - `action=policy_exception` for policy `require-authentik-admins`
+  - exception: `AttributeError: 'PolicyRequest' object has no attribute 'path'`
+  These exceptions can surface as Authentik UI `Request has been denied` / `Unknown error`.
 
 **Quick Verify:**
 ```bash
@@ -811,6 +816,9 @@ curl -sS -I https://academyv2.mereka.io/auth/login/oidc/ \
 # Confirm Authentik token endpoint is not rejecting LMS client secret:
 kubectl -n authentik logs deploy/authentik-server --since=2h \
   | rg -n 'client_id=mereka-lms|Invalid client secret|/application/o/token/'
+
+# Confirm Authentik isn't throwing policy exceptions during authorize flow:
+./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h
 ```
 
 **Fix:**
@@ -822,6 +830,9 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
  - If the Authentik flow requires MFA, ensure:
    - platform admins have at least one active MFA device enrolled, or
    - the flow/policy excludes the canary user (so CI can validate callbacks deterministically).
+- If Authentik logs show `action=policy_exception` during the authorize/login flow, fix the policy code:
+  - Example: replace `request.path` with `request.context.get("http_request", {}).get("path")`
+  - Or remove that policy binding from the flow stage if it isn't meant to run for OIDC authorize requests.
 
 **Prevention:**
 - `scripts/qa/verify-auth-surfaces.sh prod` now asserts PKCE markers on OIDC entrypoint redirects.

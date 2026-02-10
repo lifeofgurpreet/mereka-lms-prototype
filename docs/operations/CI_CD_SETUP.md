@@ -13,6 +13,7 @@ This repository uses GitHub Actions for CI/CD with the following workflows:
 | `build-ios-app.yml` | Manual | Build iOS app for TestFlight |
 | `cloud-sql-backup.yml` | Legacy, gated | Cloud SQL exports (only relevant if/when MySQL runs in Cloud SQL). Enable by setting repo variable `ENABLE_CLOUD_SQL_BACKUPS=true`. |
 | `observability-audit.yml` | Daily schedule, manual | Runs observability audits and uploads JSON artifacts. |
+| `authenticated-sso-canary.yml` | Every 6h, manual | Credentialed OIDC login + post-login session checks (LMS, MFEs, Studio). |
 
 ## Required Secrets
 
@@ -26,6 +27,10 @@ Configure these in GitHub Settings → Secrets and variables → Actions:
 | `APPLE_API_KEY_BASE64` | Apple API Key (base64 encoded) | Apple Developer Portal |
 | `MATCH_PASSWORD` | Fastlane match encryption password | Generate with `openssl rand -base64 32` |
 | `MATCH_GIT_PRIVATE_KEY` | SSH key for match certificates repo | `ssh-keygen -t ed25519` |
+| `SSO_CANARY_EMAIL_PROD` | **Prod** canary user email for Authentik SSO | Infisical (`/shared/oauth`) |
+| `SSO_CANARY_PASSWORD_PROD` | **Prod** canary user password for Authentik SSO | Infisical (`/shared/oauth`) |
+| `SSO_CANARY_STUDIO_EMAIL_PROD` | **Optional (recommended)**: Prod Studio-access canary (staff) email | Infisical (`/shared/oauth`) |
+| `SSO_CANARY_STUDIO_PASSWORD_PROD` | **Optional (recommended)**: Prod Studio-access canary (staff) password | Infisical (`/shared/oauth`) |
 
 ### Creating GCP Service Account Key
 
@@ -199,6 +204,23 @@ Runtime IAM requirement:
   `roles/container.clusterViewer` (or broader `roles/container.developer`) on the cluster project.
 - If runtime workflows fail with `code=403 ... Required "container.clusters.get"`, fix IAM first; the workflow
   will otherwise skip runtime gates when `strict_runtime=false`.
+
+### Authenticated SSO Canary Wiring
+
+The canary workflows intentionally run a **real, credentialed** Authentik login and then verify:
+- LMS session is valid (`/api/user/v1/me` returns 200)
+- MFEs do not loop back to `/authn/login` (common cookie / refresh endpoint regressions)
+- Studio does not 500 during the LMS OAuth2 completion flow (`/complete/edx-oauth2/`)
+- Optional: Studio `/home/` loads for a staff canary (hard regression guard)
+
+Preferred wiring method (does not print secret values):
+```bash
+SSO_CANARY_EMAIL_PROD='user@example.com' \
+SSO_CANARY_PASSWORD_PROD='***' \
+SSO_CANARY_STUDIO_EMAIL_PROD='staff@example.com' \
+SSO_CANARY_STUDIO_PASSWORD_PROD='***' \
+./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate
+```
 
 ### Public Health Workflow (`public-health-check.yml`)
 

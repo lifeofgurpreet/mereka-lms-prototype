@@ -680,9 +680,9 @@ button.btn.btn-primary:focus {
 .dashboard .listing-courses {
   /* The upstream dashboard uses floats + fixed widths in some variants.
      Force a modern layout baseline first, then apply our desired grid/list styles. */
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  gap: 1.5rem !important;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -703,16 +703,6 @@ button.btn.btn-primary:focus {
   flex-direction: column;
 }
 
-.dashboard .my-courses .listing-courses {
-  display: flex;
-  flex-direction: column;
-  /* Avoid relying on flex-gap (inconsistent on older Safari builds). */
-}
-
-.dashboard .my-courses .listing-courses > * + * {
-  margin-top: 1.25rem;
-}
-
 .dashboard .my-courses .course-item {
   margin: 0;
   width: 100%;
@@ -730,16 +720,36 @@ button.btn.btn-primary:focus {
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
-.dashboard .my-courses .course-item .course:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
-}
-
-.dashboard .my-courses .course-item .wrapper-course-image {
+/* Dashboard "My Courses" cards: force a real two-column cover layout.
+   Upstream styles assume a vertical card (cover on top) and hardcode heights,
+   which makes the cover image collapse to a narrow strip when the card is a row. */
+.dashboard .my-courses .course-item .course .course-image,
+.dashboard .my-courses .course-item .course .wrapper-course-image {
   flex: 0 0 clamp(220px, 34%, 360px);
   min-width: 220px;
   max-width: 360px;
   margin: 0;
+  min-height: 0;
+}
+
+.dashboard .my-courses .course-item .course .course-image,
+.dashboard .my-courses .course-item .course .course-image .cover-image,
+.dashboard .my-courses .course-item .course .course-image img,
+.dashboard .my-courses .course-item .course .wrapper-course-image a,
+.dashboard .my-courses .course-item .course .wrapper-course-image img {
+  height: 100%;
+}
+
+.dashboard .my-courses .course-item .course .course-image img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.dashboard .my-courses .course-item .course:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
 }
 
 .dashboard .my-courses .course-item .details {

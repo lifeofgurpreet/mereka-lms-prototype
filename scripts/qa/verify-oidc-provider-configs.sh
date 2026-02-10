@@ -68,7 +68,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ ${#CONTEXTS[@]} -eq 0 ]]; then
-  CONTEXTS=("${DEFAULT_CONTEXTS[@]}")
+  # If caller explicitly scopes env, only target the matching default context(s).
+  # This avoids accidentally verifying prod domains against a dev kind cluster (or vice versa).
+  if [[ "$ENVIRONMENT" == "prod" ]]; then
+    CONTEXTS=("gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster")
+  elif [[ "$ENVIRONMENT" == "dev" ]]; then
+    CONTEXTS=("kind-dev")
+  else
+    CONTEXTS=("${DEFAULT_CONTEXTS[@]}")
+  fi
 fi
 
 failures=0

@@ -666,11 +666,19 @@ Regenerate hostname registry (after domain changes):
   `./scripts/qa/audit-auth-access.sh --mode all --env prod|dev|both`.
 - Credentialed SSO callback/session canary is available and gate-integrated:
   `./scripts/qa/verify-authenticated-sso-canary.sh --env prod|dev|both`
-  (secrets via env: `SSO_CANARY_EMAIL[_PROD|_DEV]`, `SSO_CANARY_PASSWORD[_PROD|_DEV]`;
-  enable in consolidated gates with `RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`).
+  (secrets via env:
+  `SSO_CANARY_EMAIL[_PROD|_DEV]`, `SSO_CANARY_PASSWORD[_PROD|_DEV]`,
+  plus the recommended staff canary:
+  `SSO_CANARY_STUDIO_EMAIL[_PROD|_DEV]`, `SSO_CANARY_STUDIO_PASSWORD[_PROD|_DEV]`;
+  enable in consolidated gates with:
+  `RUN_AUTHENTICATED_SSO_CANARY=1 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1`.
+  Add `REQUIRE_STUDIO_CANARY=1` only after Studio staff canary secrets are configured.)
 - Canonical canary wiring management:
   - Audit workflow + GitHub secret/variable posture: `./scripts/qa/audit-authenticated-sso-canary-wiring.sh` (`STRICT=1` for enforce mode).
   - Configure GitHub canary secrets/variable: `./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate`.
+- Authentik policy exception guardrail (runtime):
+  - If Authentik emits `action=policy_exception` during OIDC authorize, users may see `Request has been denied` / `Unknown error`.
+  - Audit (no secrets printed): `./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h`
 - Stripe checkout readiness requires webhook signing secret + delivery test:
   - Guide: `docs/operations/STRIPE_WEBHOOKS_SETUP.md`
   - Test (no Stripe CLI login needed): `scripts/qa/test-stripe-webhook-delivery.sh prod` and `K8S_CONTEXT=kind-dev scripts/qa/test-stripe-webhook-delivery.sh dev`

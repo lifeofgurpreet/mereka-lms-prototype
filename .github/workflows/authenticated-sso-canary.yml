@@ -43,10 +43,18 @@ jobs:
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
           SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          # Optional Studio-access staff canary (recommended)
+          SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
           SSO_CANARY_EMAIL: ${{ secrets.SSO_CANARY_EMAIL }}
           SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
           # Fail loudly: if the secrets are missing, we want to know.
           REQUIRE_SECRETS: "1"
+          # Studio staff canary is optional (recommended). It requires a staff account
+          # and additional secrets; keep it non-blocking by default.
+          REQUIRE_STUDIO_CANARY: "0"
           SSO_CANARY_TIMEOUT_SECONDS: "180"
         run: |
           ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
@@ -58,4 +66,3 @@ jobs:
           name: sso-canary-${{ github.run_id }}-${{ github.run_attempt }}
           path: var/auth-sso-canary/
           retention-days: 30
-

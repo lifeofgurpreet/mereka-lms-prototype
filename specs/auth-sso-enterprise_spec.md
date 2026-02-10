@@ -338,6 +338,8 @@ This spec also addresses critical security gaps: there is no formal contract for
 
 - [ ] AC-042: Given all enterprise IdPs are configured, when `./scripts/qa/verify-auth-surfaces.sh prod` runs, then all existing checks pass plus new checks for enterprise SAML/OIDC endpoints
 - [ ] AC-043: Given enterprise SSO is configured for a tenant, when `./scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=prod` runs, then: (a) the tenant's IdP metadata is reachable, (b) the enterprise login URL redirects correctly, (c) SP metadata is valid
+- [ ] AC-044: Given Authentik is the default OIDC provider, when Authentik policies execute during `/application/o/authorize` for `client_id=mereka-lms`, then there are **zero** `policy_exception` events in the last 6 hours (verified by `./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h`)
+- [ ] AC-045: Given valid canary credentials exist for both a learner user and a Studio-access staff user, when the credentialed canary runs, then: (a) LMS session validates (`/api/user/v1/me=200`), (b) MFEs do not loop back to `/authn/login`, and (c) Studio `/home/` loads without `500` or error page (verified by `./scripts/qa/verify-authenticated-sso-canary.sh --env prod` and workflow `authenticated-sso-canary.yml`)
 
 ---
 

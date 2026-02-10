@@ -16,6 +16,7 @@ set -euo pipefail
 
 REPO_SLUG="${REPO_SLUG:-Biji-Biji-Initiative/mereka-lms}"
 REQUIRE_DEV="${REQUIRE_DEV:-0}"
+REQUIRE_STUDIO="${REQUIRE_STUDIO:-0}"
 ENABLE_RUNTIME_GATE=0
 
 usage() {
@@ -26,13 +27,22 @@ Env inputs (required for prod):
   SSO_CANARY_EMAIL_PROD
   SSO_CANARY_PASSWORD_PROD
 
+Optional prod inputs (recommended for Studio staff canary):
+  SSO_CANARY_STUDIO_EMAIL_PROD
+  SSO_CANARY_STUDIO_PASSWORD_PROD
+
 Optional dev inputs:
   SSO_CANARY_EMAIL_DEV
   SSO_CANARY_PASSWORD_DEV
 
+Optional dev inputs (recommended for Studio staff canary):
+  SSO_CANARY_STUDIO_EMAIL_DEV
+  SSO_CANARY_STUDIO_PASSWORD_DEV
+
 Options:
   --repo owner/repo      GitHub repo slug (default: $REPO_SLUG)
   --require-dev          Require dev secrets too (or set REQUIRE_DEV=1)
+  --require-studio       Require Studio staff canary secrets too (or set REQUIRE_STUDIO=1)
   --enable-runtime-gate  Set repo variable RUN_AUTHENTICATED_SSO_CANARY=true
   -h, --help             Show help
 EOF_USAGE
@@ -44,6 +54,8 @@ while [[ $# -gt 0 ]]; do
       REPO_SLUG="${2:-}"; shift 2 ;;
     --require-dev)
       REQUIRE_DEV=1; shift ;;
+    --require-studio)
+      REQUIRE_STUDIO=1; shift ;;
     --enable-runtime-gate)
       ENABLE_RUNTIME_GATE=1; shift ;;
     -h|--help)
@@ -94,19 +106,42 @@ require_var "SSO_CANARY_PASSWORD_PROD"
 
 set_secret_if_present "SSO_CANARY_EMAIL_PROD"
 set_secret_if_present "SSO_CANARY_PASSWORD_PROD"
+studio_prod_email_set=0
+studio_prod_password_set=0
+if set_secret_if_present "SSO_CANARY_STUDIO_EMAIL_PROD"; then
+  studio_prod_email_set=1
+fi
+if set_secret_if_present "SSO_CANARY_STUDIO_PASSWORD_PROD"; then
+  studio_prod_password_set=1
+fi
 
 dev_email_set=0
 dev_password_set=0
+dev_studio_email_set=0
+dev_studio_password_set=0
 if set_secret_if_present "SSO_CANARY_EMAIL_DEV"; then
   dev_email_set=1
 fi
 if set_secret_if_present "SSO_CANARY_PASSWORD_DEV"; then
   dev_password_set=1
 fi
+if set_secret_if_present "SSO_CANARY_STUDIO_EMAIL_DEV"; then
+  dev_studio_email_set=1
+fi
+if set_secret_if_present "SSO_CANARY_STUDIO_PASSWORD_DEV"; then
+  dev_studio_password_set=1
+fi
 
 if [[ "$REQUIRE_DEV" == "1" ]]; then
-  if [[ "$dev_email_set" != "1" || "$dev_password_set" != "1" ]]; then
+  if [[ "$dev_email_set" != "1" || "$dev_password_set" != "1" || "$dev_studio_email_set" != "1" || "$dev_studio_password_set" != "1" ]]; then
     echo "REQUIRE_DEV=1 but dev canary secrets are missing" >&2
+    exit 1
+  fi
+fi
+
+if [[ "$REQUIRE_STUDIO" == "1" ]]; then
+  if [[ "$studio_prod_email_set" != "1" || "$studio_prod_password_set" != "1" ]]; then
+    echo "REQUIRE_STUDIO=1 but prod Studio canary secrets are missing" >&2
     exit 1
   fi
 fi
@@ -117,7 +152,12 @@ fi
 
 echo "Configured GitHub authenticated SSO canary wiring for $REPO_SLUG"
 echo "  prod secrets: set"
-if [[ "$dev_email_set" == "1" && "$dev_password_set" == "1" ]]; then
+if [[ "$studio_prod_email_set" == "1" && "$studio_prod_password_set" == "1" ]]; then
+  echo "  prod studio secrets: set"
+else
+  echo "  prod studio secrets: not set (optional unless --require-studio)"
+fi
+if [[ "$dev_email_set" == "1" && "$dev_password_set" == "1" && "$dev_studio_email_set" == "1" && "$dev_studio_password_set" == "1" ]]; then
   echo "  dev secrets: set"
 else
   echo "  dev secrets: not fully set (optional unless --require-dev)"

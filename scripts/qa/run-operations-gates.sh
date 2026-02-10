@@ -24,6 +24,7 @@ RUN_SENTRY_WIRING_AUDIT="${RUN_SENTRY_WIRING_AUDIT:-0}"
 SENTRY_AUDIT_MODE="${SENTRY_AUDIT_MODE:-local}" # local|runtime|all
 RUN_AUTHENTICATED_SSO_CANARY="${RUN_AUTHENTICATED_SSO_CANARY:-0}"
 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS="${AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS:-0}"
+RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT="${RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -46,6 +47,7 @@ Env:
   SENTRY_AUDIT_MODE=local        Mode for sentry wiring audit: local|runtime|all
   RUN_AUTHENTICATED_SSO_CANARY=1 Run credentialed browser SSO canary check
   AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1  Fail if canary creds are missing
+  RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT=1  Audit Authentik policy exceptions (runtime; enabled by default)
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -202,6 +204,7 @@ echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
 echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
 echo "  run_authenticated_sso_canary: $RUN_AUTHENTICATED_SSO_CANARY"
 echo "  authenticated_sso_canary_require_secrets: $AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS"
+echo "  run_authentik_policy_exception_audit: $RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -216,6 +219,12 @@ if [[ "$RUN_DB_EXPORTER_TELEMETRY_AUDIT" == "1" ]]; then
   run_check "db exporter telemetry audit (${DB_EXPORTER_AUDIT_MODE})" \
     env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
     ./scripts/qa/audit-db-exporter-telemetry.sh --mode "$DB_EXPORTER_AUDIT_MODE"
+fi
+
+if [[ "$RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ) ]]; then
+  run_check "authentik policy exception audit" \
+    env K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" \
+    ./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h
 fi
 
 if [[ "$RUN_SENTRY_WIRING_AUDIT" == "1" ]]; then

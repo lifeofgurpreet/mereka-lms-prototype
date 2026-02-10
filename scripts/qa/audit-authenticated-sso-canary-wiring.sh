@@ -8,6 +8,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKFLOW_FILE="$REPO_ROOT/.github/workflows/operations-gates-runtime.yml"
+CANARY_WORKFLOW_FILE="$REPO_ROOT/.github/workflows/authenticated-sso-canary.yml"
 REPO_SLUG="${REPO_SLUG:-Biji-Biji-Initiative/mereka-lms}"
 STRICT="${STRICT:-0}"
 
@@ -38,9 +39,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 check_workflow_pattern() {
-  local pattern="$1"
-  local label="$2"
-  if rg -q --fixed-strings "$pattern" "$WORKFLOW_FILE"; then
+  local file="$1"
+  local pattern="$2"
+  local label="$3"
+  if rg -q --fixed-strings "$pattern" "$file"; then
     echo "OK workflow: $label"
   else
     echo "FAIL workflow: missing $label" >&2
@@ -53,17 +55,27 @@ if [[ ! -f "$WORKFLOW_FILE" ]]; then
   exit 1
 fi
 
-check_workflow_pattern "run_authenticated_sso_canary:" "dispatch input run_authenticated_sso_canary"
-check_workflow_pattern "RUN_AUTHENTICATED_SSO_CANARY=1" "runtime gate enable export"
-check_workflow_pattern "AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1" "strict secret requirement export"
-check_workflow_pattern "SSO_CANARY_EMAIL_PROD" "prod canary email secret wiring"
-check_workflow_pattern "SSO_CANARY_PASSWORD_PROD" "prod canary password secret wiring"
+check_workflow_pattern "$WORKFLOW_FILE" "run_authenticated_sso_canary:" "dispatch input run_authenticated_sso_canary"
+check_workflow_pattern "$WORKFLOW_FILE" "RUN_AUTHENTICATED_SSO_CANARY=1" "runtime gate enable export"
+check_workflow_pattern "$WORKFLOW_FILE" "AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1" "strict secret requirement export"
+check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_EMAIL_PROD" "prod canary email secret wiring"
+check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_PASSWORD_PROD" "prod canary password secret wiring"
+
+if [[ ! -f "$CANARY_WORKFLOW_FILE" ]]; then
+  echo "FAIL workflow file not found: $CANARY_WORKFLOW_FILE" >&2
+  exit 1
+fi
+
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_EMAIL_PROD" "canary workflow prod canary email wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_PASSWORD_PROD" "canary workflow prod canary password wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_EMAIL_PROD" "canary workflow prod studio canary email wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "SSO_CANARY_STUDIO_PASSWORD_PROD" "canary workflow prod studio canary password wiring"
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   secret_names="$(gh secret list --repo "$REPO_SLUG" | awk '{print $1}')"
   variable_rows="$(gh variable list --repo "$REPO_SLUG" || true)"
 
-  for key in SSO_CANARY_EMAIL_PROD SSO_CANARY_PASSWORD_PROD; do
+  for key in SSO_CANARY_EMAIL_PROD SSO_CANARY_PASSWORD_PROD SSO_CANARY_STUDIO_EMAIL_PROD SSO_CANARY_STUDIO_PASSWORD_PROD; do
     if grep -qx "$key" <<<"$secret_names"; then
       echo "OK github secret present: $key"
     else
