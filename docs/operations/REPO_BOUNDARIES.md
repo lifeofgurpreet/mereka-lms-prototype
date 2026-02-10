@@ -18,6 +18,27 @@ This document defines ownership boundaries to prevent drift, duplication, and re
 | Cross-app platform services (Authentik, Grafana, n8n, listmonk, etc.) | `BBI-K8` | Platform scope beyond Open edX |
 | Secrets values | Infisical | Single source of truth (not Git) |
 
+## Critical Detail: Prod Uses Patched Settings from GitOps
+
+In production, the GitOps repo generates and mounts *patched* Django settings ConfigMaps.
+
+That means:
+- Changing `deploy/k8s/base/apps/openedx/settings/**/production.py` in `mereka-lms` is necessary for correctness,
+  but it may not affect **live prod** until the corresponding GitOps patch file is also updated.
+
+Current canonical prod patch files live in the GitOps repo:
+- `apps/mereka-lms/overlays/prod/patches/production-prod.py` (LMS settings)
+- `apps/mereka-lms/overlays/prod/patches/production-cms-prod.py` (CMS settings, if present)
+
+So the minimal “prod release” for auth changes is:
+1. Merge `mereka-lms` changes.
+2. Bump the pinned base ref in GitOps:
+   `apps/mereka-lms/base/kustomization.yaml` (`ref=<new sha>`).
+3. Update any GitOps settings patch files that override the changed behavior.
+
+Guardrail:
+- `./scripts/qa/verify-gitops-mereka-lms-pin.sh` (this repo) detects “pinned ref not bumped”.
+
 ## Golden Rules
 
 1. Do not duplicate the same runtime intent in both repos.
@@ -51,4 +72,3 @@ This document defines ownership boundaries to prevent drift, duplication, and re
   - `./scripts/qa/verify-gitops-image-overrides.sh --check-infra`
 - In `BBI-K8`:
   - Ensure prod overlay uses expected image tags and latest pinned `?ref`.
-
