@@ -247,5 +247,45 @@ if [[ $SECRETS_FOUND -eq 1 ]]; then
   exit 1
 fi
 
-echo -e "${GREEN}No secrets detected. Proceeding with commit.${NC}"
+echo -e "${GREEN}No secrets detected.${NC}"
+echo ""
+
+# Check if any Tutor infrastructure files are being committed
+TUTOR_FILES=$(echo "$STAGED_FILES" | grep -E "^infrastructure/tutor/|^tutor_env/" || true)
+
+if [[ -n "$TUTOR_FILES" ]]; then
+  echo -e "${BLUE}Tutor infrastructure files detected. Running patch verification...${NC}"
+  echo ""
+
+  # Run verification script
+  REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
+
+  if [[ -x "$VERIFY_SCRIPT" ]]; then
+    # Run verification (will exit 1 if patches missing)
+    if ! "$VERIFY_SCRIPT"; then
+      echo ""
+      echo -e "${RED}========================================${NC}"
+      echo -e "${RED}COMMIT BLOCKED: Tutor patches missing${NC}"
+      echo -e "${RED}========================================${NC}"
+      echo ""
+      echo "Some required Tutor patches are not applied."
+      echo "This usually happens after running 'tutor config save' without applying patches."
+      echo ""
+      echo "To fix:"
+      echo "  ./infrastructure/tutor/apply-patches.sh"
+      echo ""
+      echo "Or bypass with: git commit --no-verify (not recommended)"
+      echo ""
+      exit 1
+    fi
+    echo -e "${GREEN}✓ Tutor patches verified${NC}"
+  else
+    echo -e "${YELLOW}⚠ Verification script not found or not executable${NC}"
+    echo "Skipping Tutor patch verification."
+  fi
+  echo ""
+fi
+
+echo -e "${GREEN}All checks passed. Proceeding with commit.${NC}"
 exit 0

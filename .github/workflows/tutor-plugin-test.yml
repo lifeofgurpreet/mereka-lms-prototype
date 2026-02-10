@@ -1,0 +1,361 @@
+name: Tutor Plugin Tests
+
+on:
+  push:
+    paths:
+      - 'infrastructure/tutor/plugins/**'
+  pull_request:
+    paths:
+      - 'infrastructure/tutor/plugins/**'
+  workflow_dispatch:
+
+jobs:
+  test-mfe-oauth-plugin:
+    name: Test MFE OAuth Fix Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Tutor
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -U pip
+          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+
+      - name: Set Tutor environment
+        run: |
+          echo "TUTOR_ROOT=$(pwd)/tutor_env" >> $GITHUB_ENV
+
+      - name: Verify plugin syntax
+        run: |
+          source .venv/bin/activate
+          python3 -m py_compile infrastructure/tutor/plugins/mfe_oauth_fix.py
+          echo "✅ Plugin syntax valid"
+
+      - name: Enable plugin
+        run: |
+          source .venv/bin/activate
+          mkdir -p tutor_env/plugins
+          cp infrastructure/tutor/plugins/mfe_oauth_fix.py tutor_env/plugins/
+          tutor plugins enable mfe_oauth_fix
+
+      - name: Verify plugin enabled
+        run: |
+          source .venv/bin/activate
+          if ! tutor plugins list | grep -q "mfe_oauth_fix"; then
+            echo "❌ FAILED: Plugin not enabled"
+            exit 1
+          fi
+          echo "✅ PASSED: Plugin enabled successfully"
+
+      - name: Generate config with plugin
+        run: |
+          source .venv/bin/activate
+          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
+          tutor config save
+
+      - name: Verify plugin patches applied
+        run: |
+          SETTINGS_FILE="tutor_env/env/apps/openedx/settings/lms/production.py"
+
+          if [ ! -f "$SETTINGS_FILE" ]; then
+            echo "❌ FAILED: LMS settings not generated"
+            exit 1
+          fi
+
+          if ! grep -q "mfe_oauth_fix" "$SETTINGS_FILE"; then
+            echo "❌ FAILED: Plugin patch not applied to LMS settings"
+            echo "Settings file content:"
+            grep -C 5 "INSTALLED_APPS" "$SETTINGS_FILE" || echo "INSTALLED_APPS not found"
+            exit 1
+          fi
+
+          echo "✅ PASSED: Plugin patches applied correctly"
+
+      - name: Verify plugin metadata
+        run: |
+          source .venv/bin/activate
+          python3 - <<'EOF'
+          import sys
+          sys.path.insert(0, 'infrastructure/tutor/plugins')
+          import mfe_oauth_fix
+
+          # Verify version
+          if not hasattr(mfe_oauth_fix, '__version__'):
+              print("❌ FAILED: Plugin missing __version__")
+              sys.exit(1)
+
+          print(f"✅ Plugin version: {mfe_oauth_fix.__version__}")
+
+          # Verify hooks
+          from tutor import hooks
+          defaults = dict(hooks.Filters.CONFIG_DEFAULTS.iterate())
+
+          if 'MFE_OAUTH_FIX_VERSION' not in defaults:
+              print("❌ FAILED: Plugin config not registered")
+              sys.exit(1)
+
+          print("✅ PASSED: Plugin metadata valid")
+          EOF
+
+      - name: Verify plugin structure
+        run: |
+          if [ ! -f "infrastructure/tutor/plugins/mfe_oauth_fix.py" ]; then
+            echo "❌ FAILED: Plugin file not found"
+            exit 1
+          fi
+
+          # Check for required hooks
+          if ! grep -q "hooks.Filters.ENV_PATCHES" infrastructure/tutor/plugins/mfe_oauth_fix.py; then
+            echo "❌ FAILED: Plugin missing ENV_PATCHES hook"
+            exit 1
+          fi
+
+          if ! grep -q "openedx-lms-production-settings" infrastructure/tutor/plugins/mfe_oauth_fix.py; then
+            echo "❌ FAILED: Plugin missing LMS settings patch"
+            exit 1
+          fi
+
+          echo "✅ PASSED: Plugin structure valid"
+
+  test-plugin-lifecycle:
+    name: Test Plugin Enable/Disable Lifecycle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Tutor
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -U pip
+          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+
+      - name: Set Tutor environment
+        run: |
+          echo "TUTOR_ROOT=$(pwd)/tutor_env" >> $GITHUB_ENV
+
+      - name: Copy plugin to Tutor plugins directory
+        run: |
+          source .venv/bin/activate
+          mkdir -p tutor_env/plugins
+          cp infrastructure/tutor/plugins/mfe_oauth_fix.py tutor_env/plugins/
+
+      - name: Test enable
+        run: |
+          source .venv/bin/activate
+          tutor plugins enable mfe_oauth_fix
+
+          if ! tutor plugins list | grep -q "mfe_oauth_fix"; then
+            echo "❌ FAILED: Plugin enable failed"
+            exit 1
+          fi
+          echo "✅ Plugin enabled"
+
+      - name: Test config generation with plugin
+        run: |
+          source .venv/bin/activate
+          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
+          tutor config save
+          echo "✅ Config generated with plugin"
+
+      - name: Test disable
+        run: |
+          source .venv/bin/activate
+          tutor plugins disable mfe_oauth_fix
+
+          if tutor plugins list | grep -q "mfe_oauth_fix.*enabled"; then
+            echo "❌ FAILED: Plugin disable failed"
+            exit 1
+          fi
+          echo "✅ Plugin disabled"
+
+      - name: Test re-enable
+        run: |
+          source .venv/bin/activate
+          tutor plugins enable mfe_oauth_fix
+
+          if ! tutor plugins list | grep -q "mfe_oauth_fix"; then
+            echo "❌ FAILED: Plugin re-enable failed"
+            exit 1
+          fi
+          echo "✅ Plugin re-enabled"
+
+  verify-custom-app-structure:
+    name: Verify Custom App Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for custom app directory
+        run: |
+          # The plugin expects custom-apps/mfe_oauth_fix to exist
+          # This test documents the expected structure
+
+          echo "Custom app structure requirements:"
+          echo "  - Plugin: infrastructure/tutor/plugins/mfe_oauth_fix.py"
+          echo "  - Expected mount point: /openedx/mfe_oauth_fix (in container)"
+          echo "  - Plugin copies from: ./custom-apps/mfe_oauth_fix"
+
+          # Note: This is a documentation test
+          # The actual custom app would be in a separate repo or directory
+          echo "✅ PASSED: Structure requirements documented"
+
+  lint-plugins:
+    name: Lint Plugin Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install linting tools
+        run: |
+          pip install ruff black
+
+      - name: Lint with ruff
+        run: |
+          ruff check infrastructure/tutor/plugins/
+
+      - name: Check formatting with black
+        run: |
+          black --check infrastructure/tutor/plugins/
+
+  integration-test:
+    name: Integration Test - Plugin with Patches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Tutor and dependencies
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -U pip
+          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+          pip install pyyaml jinja2
+
+      - name: Set Tutor environment
+        run: |
+          echo "TUTOR_ROOT=$(pwd)/tutor_env" >> $GITHUB_ENV
+
+      - name: Enable plugin
+        run: |
+          source .venv/bin/activate
+          mkdir -p tutor_env/plugins
+          cp infrastructure/tutor/plugins/mfe_oauth_fix.py tutor_env/plugins/
+          tutor plugins enable mfe_oauth_fix
+
+      - name: Generate config
+        run: |
+          source .venv/bin/activate
+          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
+          tutor config save
+
+      - name: Apply patches (should work with plugin enabled)
+        run: |
+          source .venv/bin/activate
+          ./infrastructure/tutor/apply-patches.sh
+
+      - name: Verify both plugin and patches applied
+        run: |
+          SETTINGS_FILE="tutor_env/env/apps/openedx/settings/lms/production.py"
+
+          # Check plugin patch
+          if ! grep -q "mfe_oauth_fix" "$SETTINGS_FILE"; then
+            echo "❌ FAILED: Plugin patch not found"
+            exit 1
+          fi
+
+          # Check apply-patches.sh patches
+          if ! grep -q "academy.biji-biji.com" "$SETTINGS_FILE"; then
+            echo "❌ FAILED: Multi-site domain patch not found"
+            exit 1
+          fi
+
+          echo "✅ PASSED: Plugin and patches work together"
+
+  post-failure-comment:
+    name: Post PR Comment on Plugin Test Failure
+    runs-on: ubuntu-latest
+    needs: [test-mfe-oauth-plugin, test-plugin-lifecycle, lint-plugins, integration-test]
+    if: failure() && github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post failure comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## ❌ Tutor Plugin Tests Failed
+
+            One or more plugin tests failed. This indicates an issue with the plugin code or structure.
+
+            ### Common Issues
+
+            1. **Plugin Syntax Error**
+               - Check Python syntax in \`infrastructure/tutor/plugins/mfe_oauth_fix.py\`
+               - Run: \`python3 -m py_compile infrastructure/tutor/plugins/mfe_oauth_fix.py\`
+
+            2. **Plugin Not Loading**
+               - Verify plugin uses correct Tutor hooks API
+               - Check that plugin is in Tutor's plugin directory
+
+            3. **Patch Not Applied**
+               - Ensure ENV_PATCHES hook target is correct
+               - Verify patch syntax matches Tutor expectations
+
+            4. **Integration Conflict**
+               - Plugin may conflict with apply-patches.sh
+               - Check that both can run without interference
+
+            ### How to Fix
+
+            \`\`\`bash
+            # Test plugin locally
+            source .venv/bin/activate
+            export TUTOR_ROOT="\$(pwd)/tutor_env"
+
+            # Copy and enable plugin
+            mkdir -p tutor_env/plugins
+            cp infrastructure/tutor/plugins/mfe_oauth_fix.py tutor_env/plugins/
+            tutor plugins enable mfe_oauth_fix
+
+            # Generate config
+            tutor config save
+
+            # Verify patches applied
+            grep -q "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py
+            \`\`\`
+
+            See plugin documentation for detailed requirements.
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

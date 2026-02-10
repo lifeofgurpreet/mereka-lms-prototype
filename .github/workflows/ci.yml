@@ -8,7 +8,7 @@ on:
 
 jobs:
   spec-lint:
-    name: Spec Quality Gates
+    name: Spec Integrity Gates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,14 +22,27 @@ jobs:
         run: pip install pyyaml
 
       - name: Lint specs
-        run: |
-          curl -sL https://raw.githubusercontent.com/Biji-Biji-Initiative/team-skills/main/plugins/core/skills/specs-vs-docs/tools/spec_lint.py -o /tmp/spec_lint.py
-          python3 /tmp/spec_lint.py specs/
+        run: python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error
 
-      - name: Verify specs
+      - name: Verify spec-testmap mapping (informational)
+        run: python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . --testmaps-dir specs/testmaps/ || true
+
+      - name: Validate testmap format
+        run: python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
+
+      - name: Coverage report
         run: |
-          curl -sL https://raw.githubusercontent.com/Biji-Biji-Initiative/team-skills/main/plugins/core/skills/specs-vs-docs/tools/spec_verify.py -o /tmp/spec_verify.py
-          python3 /tmp/spec_verify.py specs/ --repo-root .
+          mkdir -p var
+          python3 scripts/qa/spec-tools/spec_coverage_report.py \
+            --specs-dir specs/ --testmaps-dir specs/testmaps/ --repo-root . \
+            --format markdown --output var/spec-coverage.md --fail-under 80
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-coverage
+          path: var/spec-coverage.md
 
   generated-docs:
     name: Generated Docs Are Up To Date

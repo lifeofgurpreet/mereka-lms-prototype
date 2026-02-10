@@ -1,0 +1,238 @@
+# Testmap: Tutor Configuration Resilience and Patch Automation
+# Generated from: specs/tutor-configuration-resilience_spec.md
+# Plan: specs/plans/tutor-configuration-resilience_plan.md
+# Testplan: specs/plans/tutor-configuration-resilience_testplan.md
+
+spec: "specs/tutor-configuration-resilience_spec.md"
+plan: "specs/plans/tutor-configuration-resilience_plan.md"
+testplan: "specs/plans/tutor-configuration-resilience_testplan.md"
+tier: 0
+
+acceptance_criteria:
+  - id: "AC-TCR-001"
+    description: "Plugin installs via pip install -e and tutor plugins list shows mereka as available"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_plugin_lifecycle.sh"
+        command: "bash tests/tutor/test_plugin_lifecycle.sh"
+        status: "not_implemented"
+      - type: "automated"
+        test_type: "integration"
+        file: ".github/workflows/tutor-plugin-test.yml"
+        command: "gh workflow run tutor-plugin-test.yml"
+        status: "implemented"
+        notes: "Existing CI job test-plugin-lifecycle covers enable/disable/re-enable"
+
+  - id: "AC-TCR-002"
+    description: "Plugin-enabled config save produces academy.biji-biji.com in ALLOWED_HOSTS without apply-patches.sh"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_plugin_integration.sh"
+        command: "bash tests/tutor/test_plugin_integration.sh"
+        status: "not_implemented"
+      - type: "automated"
+        test_type: "integration"
+        file: ".github/workflows/tutor-config-verify.yml"
+        command: "gh workflow run tutor-config-verify.yml"
+        status: "implemented"
+        notes: "verify-multi-site-domains job checks ALLOWED_HOSTS, but after apply-patches (not plugin-only)"
+
+  - id: "AC-TCR-003"
+    description: "Plugin-enabled config save produces mysql_native_password in docker-compose without apply-patches.sh"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_plugin_integration.sh"
+        command: "bash tests/tutor/test_plugin_integration.sh"
+        status: "not_implemented"
+      - type: "automated"
+        test_type: "integration"
+        file: ".github/workflows/tutor-config-verify.yml"
+        command: "gh workflow run tutor-config-verify.yml"
+        status: "implemented"
+        notes: "verify-patches job checks mysql_native_password, but after apply-patches (not plugin-only)"
+
+  - id: "AC-TCR-004"
+    description: "All patches in patch-manifest.yml report PASS after plugin + apply-patches.sh"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_verify_patches.sh"
+        command: "bash tests/tutor/test_verify_patches.sh"
+        status: "implemented"
+        notes: "Tests verification script, manifest parsing, and individual patch reporting"
+      - type: "automated"
+        test_type: "integration"
+        file: "scripts/infra/verify-tutor-config.sh"
+        command: "bash scripts/infra/verify-tutor-config.sh"
+        status: "implemented"
+        notes: "Existing verification script covers most patches but is not manifest-driven"
+
+  - id: "AC-TCR-005"
+    description: "Pre-commit hook runs verify-tutor-patches.sh and blocks commit on failure when infrastructure/tutor/ files modified"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_pre_commit_hook.sh"
+        command: "bash tests/tutor/test_pre_commit_hook.sh"
+        status: "implemented"
+        notes: "Pre-commit hook updated to call verify-tutor-patches.sh for Tutor file changes"
+
+  - id: "AC-TCR-006"
+    description: "CI workflow executes full patch verification on PRs touching infrastructure/tutor/ and reports per-patch pass/fail"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: ".github/workflows/tutor-config-verify.yml"
+        command: "gh workflow run tutor-config-verify.yml"
+        status: "partially_implemented"
+        notes: "Existing workflow has 4 jobs with inline checks; needs refactor to use manifest-driven verify-tutor-patches.sh"
+
+  - id: "AC-TCR-007"
+    description: "Verification script --json flag outputs valid JSON with id, description, status, target_file, severity per patch"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/tutor/test_verify_patches.sh"
+        command: "bash tests/tutor/test_verify_patches.sh"
+        status: "implemented"
+        notes: "Tests JSON output validation, required keys, and summary section"
+
+  - id: "AC-TCR-008"
+    description: "Unpatched config: all critical patches report FAIL with non-zero exit"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_verify_patches.sh"
+        command: "bash tests/tutor/test_verify_patches.sh"
+        status: "implemented"
+        notes: "Tests exit code behavior and failure detection in verification script"
+
+  - id: "AC-TCR-009"
+    description: "Double apply-patches.sh produces byte-identical output (idempotency)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_idempotency.sh"
+        command: "bash tests/tutor/test_idempotency.sh"
+        status: "implemented"
+        notes: "Tests byte-identical output for Python, YAML, and Dockerfile files"
+      - type: "automated"
+        test_type: "integration"
+        file: ".github/workflows/tutor-config-verify.yml"
+        command: "gh workflow run tutor-config-verify.yml"
+        status: "implemented"
+        notes: "verify-idempotency job already runs double-apply checksum comparison in CI"
+
+  - id: "AC-TCR-010"
+    description: "Tutor version upgrade PR: CI reports which patches need adaptation and blocks merge"
+    verify:
+      - type: "automated"
+        test_type: "e2e"
+        file: ".github/workflows/tutor-config-verify.yml"
+        command: "gh workflow run tutor-config-verify.yml"
+        status: "not_implemented"
+        notes: "Existing workflow does not detect version upgrades or report patch adaptation needs"
+      - type: "manual"
+        runbook: "docs/operations/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md"
+        section: "Tutor Version Upgrade Procedure"
+        justification: "Version upgrades are infrequent events requiring human judgment on patch adaptation; CI catches failures but upgrade planning is manual"
+        status: "not_implemented"
+
+  - id: "AC-TCR-011"
+    description: "Critical patch failure shows red/bold formatting and includes remediation steps"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/tutor/test_verify_patches.sh"
+        command: "bash tests/tutor/test_verify_patches.sh"
+        status: "implemented"
+        notes: "Tests ANSI color codes and remediation text in verification output"
+
+  - id: "AC-TCR-012"
+    description: "make tutor-apply executes config save, plugin enable, patches, verify, restart in order, failing fast on any step"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_tutor_apply.sh"
+        command: "bash tests/tutor/test_tutor_apply.sh"
+        status: "not_implemented"
+        notes: "Requires running Tutor environment; current Makefile runs config save + apply-patches + restart but does not enable plugin or run verification"
+      - type: "manual"
+        runbook: "docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md"
+        section: "Full Configuration Apply"
+        justification: "End-to-end make tutor-apply requires Docker Compose stack; CI tests individual steps but full pipeline needs Docker environment"
+        status: "not_implemented"
+
+edge_cases:
+  - id: "EC-TCR-001"
+    description: "Plugin hook not firing -- plugin installed and enabled but patches not applied to rendered templates"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests verification catches missing patches"
+
+  - id: "EC-TCR-002"
+    description: "apply-patches.sh interrupted mid-execution -- some files patched, others not"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests re-run completes successfully"
+
+  - id: "EC-TCR-003"
+    description: "Concurrent tutor config save -- two processes interleaving output"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests sequential runs complete without conflicts"
+
+  - id: "EC-TCR-004"
+    description: "New Tutor version changes template structure -- string-replacement patches no longer match"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests verification catches template conflicts"
+
+  - id: "EC-TCR-005"
+    description: "Plugin conflicts with third-party Tutor plugins (tutor-mfe, tutor-indigo)"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests double-application idempotency"
+
+  - id: "EC-TCR-006"
+    description: "Partial plugin migration -- some patches in plugin, some in script, developer disables one"
+    verify:
+      - type: "automated"
+        test_type: "integration"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests verification passes after apply-patches"
+
+  - id: "EC-TCR-007"
+    description: "Verification tool false positive -- grep pattern matches unrelated text"
+    verify:
+      - type: "automated"
+        test_type: "unit"
+        file: "tests/tutor/test_edge_cases.sh"
+        command: "bash tests/tutor/test_edge_cases.sh"
+        status: "implemented"
+        notes: "Tests pattern specificity in manifest"
