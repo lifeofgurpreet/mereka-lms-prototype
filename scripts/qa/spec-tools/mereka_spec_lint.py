@@ -28,7 +28,7 @@ from lint_core import (
 from spec_lint import lint_file as base_lint_file
 
 CROSS_CUTTING_SPEC = "specs/cross-cutting-requirements_spec.md"
-AC_ID_RE = re.compile(r"\bAC-(\d{3,})\b")
+AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
 
 
 def mereka_lint_file(path: Path) -> LintResult:
@@ -73,7 +73,7 @@ def mereka_lint_file(path: Path) -> LintResult:
     # MEREKA-AC-001: AC IDs must be unique within Acceptance Criteria section
     # Only count the leading AC ID on checkbox lines (- [ ] AC-NNN:) to avoid
     # false positives from references to other ACs in description text or code.
-    ac_leading_re = re.compile(r"^[-*]\s+\[ \]\s+(AC-\d{3,})")
+    ac_leading_re = re.compile(r"^[-*]\s+\[ \]\s+(AC-(?:[A-Z]+-)?(\d{3,}))")
     seen_ids: dict[str, int] = {}
     for lineno, line in enumerate(md.splitlines(), 1):
         stripped = line.strip()

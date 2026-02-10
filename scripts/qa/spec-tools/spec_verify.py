@@ -22,7 +22,7 @@ except Exception as e:  # pragma: no cover
     raise SystemExit("PyYAML not found. Install with: pip install pyyaml") from e
 
 
-AC_ID_RE = re.compile(r"\bAC-(\d{3,})\b")
+AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
 
 
 @dataclass
@@ -51,7 +51,7 @@ def parse_acceptance_criteria(md: str) -> List[Tuple[str, str]]:
         if line.strip().startswith(("- [ ]", "* [ ]")):
             m = AC_ID_RE.search(line)
             if m:
-                out.append((f"AC-{m.group(1)}", line.strip()))
+                out.append((m.group(1), line.strip()))
     return out
 
 

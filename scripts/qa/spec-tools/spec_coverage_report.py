@@ -28,7 +28,7 @@ try:
 except ImportError:
     raise SystemExit("PyYAML required: pip install pyyaml")
 
-AC_ID_RE = re.compile(r"\bAC-(\d{3,})\b")
+AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
 
 
 @dataclass
@@ -59,7 +59,7 @@ def extract_ac_ids(md: str) -> list[str]:
         if stripped.startswith(("- [ ]", "* [ ]")):
             m = AC_ID_RE.search(line)
             if m:
-                ids.append(f"AC-{m.group(1)}")
+                ids.append(m.group(1))
     return ids
 
 
