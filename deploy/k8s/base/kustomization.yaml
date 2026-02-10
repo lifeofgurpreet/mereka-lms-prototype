@@ -9,6 +9,7 @@ resources:
 - secrets
 - monitoring
 - logging
+- apps/enterprise
 
 # Custom Mereka-branded OpenEdX image
 images:
@@ -55,6 +56,7 @@ configMapGenerator:
   - apps/openedx/settings/lms/mereka_platform_admin.py
   - apps/openedx/settings/lms/mereka_forwarded_headers.py
   - apps/openedx/settings/lms/mereka_multisite.py
+  - apps/openedx/settings/lms/mereka_enterprise_channels.py
   options:
     labels:
         app.kubernetes.io/name: openedx
@@ -128,3 +130,10 @@ configMapGenerator:
 - name: xqueue-settings
   files:
     - plugins/xqueue/apps/settings/tutor.py
+- name: enterprise-access-settings
+  files:
+    - apps/enterprise/settings/enterprise-access-settings.py
+  options:
+    labels:
+        app.kubernetes.io/name: enterprise-access
+        app.kubernetes.io/component: enterprise

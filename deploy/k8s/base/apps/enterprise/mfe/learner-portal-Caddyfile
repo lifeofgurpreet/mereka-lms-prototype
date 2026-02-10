@@ -1,0 +1,18 @@
+:8002 {
+    log {
+        output stdout
+        format filter {
+            wrap json
+            fields {
+                common_log delete
+                request>headers delete
+                resp_headers delete
+                tls delete
+            }
+        }
+    }
+
+    root * /openedx/dist
+    try_files {path} /index.html
+    file_server
+}

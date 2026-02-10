@@ -1,0 +1,160 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access-worker
+  labels:
+    app.kubernetes.io/name: enterprise-access-worker
+    app.kubernetes.io/component: enterprise
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/name: enterprise-access-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-access-worker
+        app.kubernetes.io/component: enterprise
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+        - name: config-gen
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access:latest
+          command: ["python3", "-c"]
+          args:
+            - |
+              import os, yaml
+              config = {
+                  'SECRET_KEY': os.environ['DJANGO_SECRET_KEY'],
+                  'ALLOWED_HOSTS': ['*'],
+                  'DATABASES': {
+                      'default': {
+                          'ENGINE': 'django.db.backends.mysql',
+                          'NAME': os.environ.get('DB_NAME', 'enterprise_access'),
+                          'USER': os.environ.get('DB_USER', 'enterprise_access'),
+                          'PASSWORD': os.environ['DB_PASSWORD'],
+                          'HOST': os.environ.get('DB_HOST', 'mysql'),
+                          'PORT': 3306,
+                          'ATOMIC_REQUESTS': False,
+                          'CONN_MAX_AGE': 60,
+                      }
+                  },
+                  'CACHES': {
+                      'default': {
+                          'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/12'),
+                          'KEY_PREFIX': 'enterprise_access',
+                      }
+                  },
+                  'CELERY_BROKER_TRANSPORT': 'redis',
+                  'CELERY_BROKER_USER': '',
+                  'CELERY_BROKER_PASSWORD': '',
+                  'CELERY_BROKER_HOSTNAME': os.environ.get('CELERY_BROKER_HOSTNAME', 'redis:6379'),
+                  'CELERY_BROKER_VHOST': os.environ.get('CELERY_BROKER_VHOST', '13'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_KEY': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_KEY', 'enterprise-access-key'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_SECRET': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_SECRET', ''),
+                  'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': 'http://lms:8000',
+                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': 'https://academyv2.mereka.io',
+                  'BACKEND_SERVICE_EDX_OAUTH2_KEY': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_KEY', 'enterprise-access-key'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_SECRET': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET', ''),
+                  'LMS_BASE_URL': 'http://lms:8000',
+                  'LMS_ROOT_URL': 'https://academyv2.mereka.io',
+                  'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
+                  'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
+              }
+              with open('/config/enterprise_access.yml', 'w') as f:
+                  yaml.dump(config, f, default_flow_style=False)
+              print('Config generated successfully')
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_ACCESS_SECRET_KEY
+            - name: DB_NAME
+              value: enterprise_access
+            - name: DB_USER
+              value: enterprise_access
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: MYSQL_ENTERPRISE_ACCESS_PASSWORD
+            - name: DB_HOST
+              value: mysql
+            - name: CACHE_LOCATION
+              value: redis://redis:6379/12
+            - name: CELERY_BROKER_HOSTNAME
+              value: "redis:6379"
+            - name: CELERY_BROKER_VHOST
+              value: "13"
+            - name: SOCIAL_AUTH_EDX_OAUTH2_KEY
+              value: enterprise-access-key
+            - name: SOCIAL_AUTH_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_ACCESS_OAUTH2_SECRET
+            - name: BACKEND_SERVICE_EDX_OAUTH2_KEY
+              value: enterprise-access-key
+            - name: BACKEND_SERVICE_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_ACCESS_OAUTH2_SECRET
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      containers:
+        - name: enterprise-access-worker
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-enterprise-access:latest
+          args:
+            - celery
+            - --app=enterprise_access
+            - worker
+            - --loglevel=info
+            - --hostname=enterprise-access.worker.%h
+            - --queues=enterprise_access.default
+            - --max-tasks-per-child=100
+            - --prefetch-multiplier=1
+            - --without-gossip
+            - --without-mingle
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: enterprise_access.settings.production
+            - name: ENTERPRISE_ACCESS_CFG
+              value: /config/enterprise_access.yml
+            - name: C_FORCE_ROOT
+              value: "1"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          emptyDir: {}

@@ -1,7 +1,7 @@
 ---
 title: "Secrets Management Specification"
 type: "feature_spec"
-status: "in_review"
+status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
@@ -23,7 +23,7 @@ links:
 
 ## What we're building
 
-A layered secrets management architecture for the Mereka Academy Open edX platform that flows credentials from a single source of truth (Infisical) through GCP Secret Manager and the ExternalSecrets Operator into Kubernetes Secrets, where application pods consume them as environment variables. The system manages 56+ secrets across two K8s secret objects (`openedx-secrets` with 33+ keys, `database-secrets` with 7 keys), plus auxiliary secrets for Atlas automation and data migrations (MCT/Kajabi). The architecture covers both production (GKE) and development (Kind) environments, with environment-specific separation for Stripe and MySQL credentials.
+A layered secrets management architecture for the Mereka Academy Open edX platform that flows credentials from a single source of truth (Infisical) through GCP Secret Manager and the ExternalSecrets Operator into Kubernetes Secrets, where application pods consume them as environment variables. The system manages 51+ secrets across three K8s secret objects (`openedx-secrets` with 33+ keys, `database-secrets` with 7 keys, `enterprise-secrets` with 11 keys), plus auxiliary secrets for Atlas automation and data migrations (MCT/Kajabi). The architecture covers both production (GKE) and development (Kind) environments, with environment-specific separation for Stripe and MySQL credentials.
 
 ## Why it matters
 
@@ -31,7 +31,7 @@ Secrets mismanagement is a top-tier operational risk. A hardcoded password commi
 
 ## Success looks like
 
-- All 56+ secrets exist in Infisical under the canonical path `/k8s/mereka-lms` with non-empty, non-placeholder values.
+- All 51+ secrets (33 openedx, 7 database, 11 enterprise) exist in Infisical under the canonical path `/k8s/mereka-lms` with non-empty, non-placeholder values.
 - ExternalSecrets sync to K8s within 1 hour of changes, reaching `SecretSynced` status without manual intervention.
 - Zero hardcoded secrets in any file committed to the repository, enforced by pre-commit hooks and CI scanning.
 - Secret rotation completes end-to-end (Infisical to running pods) in under 30 minutes with zero downtime.
@@ -45,7 +45,7 @@ Secrets mismanagement is a top-tier operational risk. A hardcoded password commi
   - The end-to-end secrets pipeline: Infisical -> GCP Secret Manager -> ExternalSecrets Operator -> K8s Secrets -> Pod environment variables -> Python `os.environ.get()`
   - Naming conventions for all secret keys (`MEREKA_LMS_` prefix in Infisical/GCP SM)
   - Infisical folder structure and path rules (`/k8s/mereka-lms`, `/k8s/mereka-lms/atlas`, `/k8s/mereka-lms/migrations/*`)
-  - Complete inventory of `openedx-secrets` (33+ keys) and `database-secrets` (7 keys)
+  - Complete inventory of `openedx-secrets` (33+ keys), `database-secrets` (7 keys), and `enterprise-secrets` (11 keys)
   - Migration secrets inventory (MCT and Kajabi)
   - Atlas automation secrets inventory
   - Shared admin/test credentials governance (`/shared/oauth`)
@@ -166,6 +166,24 @@ Secrets mismanagement is a top-tier operational risk. A hardcoded password commi
   | MYSQL_XQUEUE_PASSWORD | MEREKA_LMS_MYSQL_XQUEUE_PASSWORD | XQueue DB |
   | MYSQL_CREDENTIALS_PASSWORD | MEREKA_LMS_MYSQL_CREDENTIALS_PASSWORD | Credentials DB |
 
+#### Required Secret Inventory -- enterprise-secrets (11 keys)
+
+- The `enterprise-secrets` K8s Secret MUST contain all of the following key mappings:
+
+  | K8s Key | GCP SM Key | Purpose |
+  |---------|------------|---------|
+  | ENTERPRISE_CATALOG_SECRET_KEY | MEREKA_LMS_ENTERPRISE_CATALOG_SECRET_KEY | Enterprise Catalog Django secret |
+  | ENTERPRISE_CATALOG_OAUTH2_SECRET | MEREKA_LMS_ENTERPRISE_CATALOG_OAUTH2_SECRET | Enterprise Catalog OAuth2 client secret |
+  | MYSQL_ENTERPRISE_CATALOG_PASSWORD | MEREKA_LMS_MYSQL_ENTERPRISE_CATALOG_PASSWORD | Enterprise Catalog DB password |
+  | ENTERPRISE_SUBSIDY_SECRET_KEY | MEREKA_LMS_ENTERPRISE_SUBSIDY_SECRET_KEY | Enterprise Subsidy Django secret |
+  | ENTERPRISE_SUBSIDY_OAUTH2_SECRET | MEREKA_LMS_ENTERPRISE_SUBSIDY_OAUTH2_SECRET | Enterprise Subsidy OAuth2 client secret |
+  | MYSQL_ENTERPRISE_SUBSIDY_PASSWORD | MEREKA_LMS_MYSQL_ENTERPRISE_SUBSIDY_PASSWORD | Enterprise Subsidy DB password |
+  | ENTERPRISE_ACCESS_SECRET_KEY | MEREKA_LMS_ENTERPRISE_ACCESS_SECRET_KEY | Enterprise Access Django secret |
+  | ENTERPRISE_ACCESS_OAUTH2_SECRET | MEREKA_LMS_ENTERPRISE_ACCESS_OAUTH2_SECRET | Enterprise Access OAuth2 client secret |
+  | MYSQL_ENTERPRISE_ACCESS_PASSWORD | MEREKA_LMS_MYSQL_ENTERPRISE_ACCESS_PASSWORD | Enterprise Access DB password |
+  | LICENSE_MANAGER_SECRET_KEY | MEREKA_LMS_LICENSE_MANAGER_SECRET_KEY | License Manager Django secret |
+  | LICENSE_MANAGER_OAUTH2_SECRET | MEREKA_LMS_LICENSE_MANAGER_OAUTH2_SECRET | License Manager OAuth2 client secret |
+
 #### Migration Secrets (Not Synced to K8s)
 
 - MCT migration secrets MUST exist under `/k8s/mereka-lms/migrations/mct` with keys: `MCT_BASE_URL`, `MCT_ENDPT`, `MCT_API_URI`, `MCT_CLIENT_ID`, `MCT_CLIENT_SECRET`, `MCT_TENANT_ID`, `MCT_API_VERSION`, and optionally `MCT_ACCESS_TOKEN`.
@@ -180,10 +198,10 @@ Secrets mismanagement is a top-tier operational risk. A hardcoded password commi
 
 #### ExternalSecrets Configuration
 
-- Both `openedx-secrets` and `database-secrets` ExternalSecrets MUST set `refreshInterval: 1h`.
-- Both ExternalSecrets MUST reference `secretStoreRef.kind: ClusterSecretStore` with `name: gcp-secret-manager`.
-- Both ExternalSecrets MUST set `target.deletionPolicy: Retain` to prevent secret loss on accidental ExternalSecret resource deletion.
-- Both ExternalSecrets MUST set `target.creationPolicy: Owner`.
+- All three ExternalSecrets (`openedx-secrets`, `database-secrets`, `enterprise-secrets`) MUST set `refreshInterval: 1h`.
+- All ExternalSecrets MUST reference `secretStoreRef.kind: ClusterSecretStore` with `name: gcp-secret-manager`.
+- All ExternalSecrets MUST set `target.deletionPolicy: Retain` to prevent secret loss on accidental ExternalSecret resource deletion.
+- All ExternalSecrets MUST set `target.creationPolicy: Owner`.
 - The ClusterSecretStore MUST reference GCP project `bbi-k8` with `secretVersionSelectionPolicy: LatestOrFail`.
 
 #### Security Rules

@@ -808,3 +808,9 @@ if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
     session_index = MIDDLEWARE.index(_session_middleware)
     if cookie_index > session_index:
         MIDDLEWARE.insert(session_index, MIDDLEWARE.pop(cookie_index))
+
+# Enterprise Integrated Channels (Degreed, CSOD, etc.)
+try:
+    from lms.envs.tutor.mereka_enterprise_channels import *  # noqa: F401,F403
+except ImportError:
+    pass

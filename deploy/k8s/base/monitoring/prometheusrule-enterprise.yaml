@@ -1,0 +1,178 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: enterprise-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: enterprise
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: openedx-enterprise-catalog
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: EnterpriseCatalogPodDown
+          expr: up{job="enterprise-catalog-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: enterprise-catalog
+          annotations:
+            summary: "Enterprise Catalog pod is down"
+            description: "Enterprise Catalog pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: EnterpriseCatalogPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"enterprise-catalog-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: enterprise-catalog
+          annotations:
+            summary: "Enterprise Catalog pod is restarting frequently"
+            description: "Enterprise Catalog pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: EnterpriseCatalogMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: enterprise-catalog
+          annotations:
+            summary: "Enterprise Catalog pod memory usage is high"
+            description: "Enterprise Catalog pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its memory limit."
+
+        # CPU alerts
+        - alert: EnterpriseCatalogCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}[5m])
+              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
+              * container_spec_cpu_period{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: enterprise-catalog
+          annotations:
+            summary: "Enterprise Catalog pod CPU usage is high"
+            description: "Enterprise Catalog pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."
+
+    - name: openedx-enterprise-access
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: EnterpriseAccessPodDown
+          expr: up{job="enterprise-access-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: enterprise-access
+          annotations:
+            summary: "Enterprise Access pod is down"
+            description: "Enterprise Access pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: EnterpriseAccessPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"enterprise-access-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: enterprise-access
+          annotations:
+            summary: "Enterprise Access pod is restarting frequently"
+            description: "Enterprise Access pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: EnterpriseAccessMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: enterprise-access
+          annotations:
+            summary: "Enterprise Access pod memory usage is high"
+            description: "Enterprise Access pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its memory limit."
+
+        # CPU alerts
+        - alert: EnterpriseAccessCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}[5m])
+              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
+              * container_spec_cpu_period{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: enterprise-access
+          annotations:
+            summary: "Enterprise Access pod CPU usage is high"
+            description: "Enterprise Access pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."
+
+    - name: openedx-enterprise-subsidy
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: EnterpriseSubsidyPodDown
+          expr: up{job="enterprise-subsidy-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: enterprise-subsidy
+          annotations:
+            summary: "Enterprise Subsidy pod is down"
+            description: "Enterprise Subsidy pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: EnterpriseSubsidyPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"enterprise-subsidy-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: enterprise-subsidy
+          annotations:
+            summary: "Enterprise Subsidy pod is restarting frequently"
+            description: "Enterprise Subsidy pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: EnterpriseSubsidyMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: enterprise-subsidy
+          annotations:
+            summary: "Enterprise Subsidy pod memory usage is high"
+            description: "Enterprise Subsidy pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its memory limit."
+
+        # CPU alerts
+        - alert: EnterpriseSubsidyCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}[5m])
+              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
+              * container_spec_cpu_period{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: enterprise-subsidy
+          annotations:
+            summary: "Enterprise Subsidy pod CPU usage is high"
+            description: "Enterprise Subsidy pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."

@@ -6,4 +6,6 @@ resources:
   - servicemonitor-cms.yaml
   - servicemonitor-mysql.yaml
   - servicemonitor-redis.yaml
+  - servicemonitor-enterprise.yaml
   - prometheusrule-lms.yaml
+  - prometheusrule-enterprise.yaml

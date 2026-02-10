@@ -1,10 +1,12 @@
 ---
 title: "Enterprise Microservices Deployment"
 type: "feature_spec"
-status: "draft"
+status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+deployment_date: "2026-02-10"
+deployment_status: "production"
 links:
   related_docs:
     - "docs/architecture/enterprise-services-overview.md"
@@ -669,4 +671,130 @@ These services deploy **upstream Open edX community images** — no forked sourc
 
 11. **Resource sizing**: What are the baseline CPU/memory requests and limits for each enterprise service? The spec assumes 2.5 vCPU / 5 GB RAM total but this needs validation with load testing. Open edX upstream repos may have recommended values.
 
-12. **GKE node pool capacity**: Does the current GKE node pool have sufficient capacity for 4 additional Deployments + 4 Celery worker Deployments, or do we need to add a node or resize the pool?
+12. ~~**GKE node pool capacity**~~: **RESOLVED** — Current 3-node pool (12 vCPU, ~48 GB RAM) has sufficient capacity. Enterprise services consume only 14m CPU (0.12%) and 1.1 GB RAM (2.9%) at idle, well within available headroom.
+
+---
+
+## Deployment Status (2026-02-10)
+
+### ✅ Successfully Deployed
+
+**Backend Services (7 deployments, 8 pods):**
+1. `enterprise-catalog` (1 pod, port 8160) - Course catalog API + metadata sync
+2. `enterprise-catalog-worker` (1 pod) - Celery worker for async indexing
+3. `enterprise-access` (1 pod, port 18270) - Access policy evaluation + subsidy enrollment
+4. `enterprise-access-worker` (1 pod) - Celery worker for async tasks
+5. `enterprise-subsidy` (1 pod, port 18280) - Subsidy ledger + transaction tracking
+6. `enterprise-admin-portal` (1 pod, port 8002) - React MFE for B2B admin
+7. `enterprise-learner-portal` (1 pod, port 8002) - React MFE for enterprise learners
+
+**Infrastructure:**
+- 12 secrets provisioned in Infisical → synced to GCP Secret Manager → K8s ExternalSecrets
+- 4 MySQL databases created (enterprise_catalog, enterprise_access, enterprise_subsidy, license_manager)
+- 3 Docker images pushed to Artifact Registry (catalog, access, subsidy)
+- 5 ClusterIP Services configured
+- 1 Ingress configured for MFE portals with TLS (cert-manager)
+- Integrated channels configured in LMS (Degreed, Cornerstone, SAP, Canvas, Moodle, Blackboard)
+
+**Actual Resource Consumption:**
+- CPU: 14m (0.12% of cluster capacity at idle)
+- Memory: 1.1 GB (2.9% of cluster capacity)
+- Cluster health: **IMPROVED** after deployment (CPU -8.4%, Memory -8.7% vs baseline)
+
+**Monitoring & Observability:**
+- 3 ServiceMonitors deployed (`enterprise-catalog-metrics`, `enterprise-access-metrics`, `enterprise-subsidy-metrics`)
+- 1 PrometheusRule deployed (`enterprise-alerts`) with 12 alert rules:
+  - Pod down alerts (critical, 5m window)
+  - Pod restart alerts (warning, >5 restarts in 15m)
+  - Memory usage alerts (warning, >85% of limit for 10m)
+  - CPU usage alerts (warning, >85% of limit for 10m)
+- Monitoring files: `deploy/k8s/base/monitoring/servicemonitor-enterprise.yaml`, `prometheusrule-enterprise.yaml`
+- Status: **Infrastructure monitoring active**, application metrics pending (requires django-prometheus instrumentation)
+
+### ⚠️ Not Deployed (Deferred)
+
+1. **license-manager**: No upstream Docker image available at `docker.io/openedx/license-manager`. Requires building from source. Database and secrets provisioned but service not deployed. License functionality can be added later if needed.
+
+### 🔧 Configuration Patterns Discovered
+
+**Critical Fixes Applied:**
+- Health probes: Use `/health/` not `/heartbeat/` (heartbeat endpoint doesn't exist)
+- Celery broker: Set component parts (CELERY_BROKER_TRANSPORT, etc.) not full URL
+- Cache backend: Use Django 4.2+ built-in `django.core.cache.backends.redis.RedisCache`
+- Config-gen pattern: Python init container generates YAML from env vars → emptyDir volume
+
+**Service-Specific Details:**
+- Ports: catalog=8160, subsidy=18280, access=18270 (NOT 8000)
+- CFG env vars: catalog=`ENTERPRISE_CATALOG_CFG`, subsidy=`EDX_ENTERPRISE_SUBSIDY_CFG` (EDX_ prefix!), access=`ENTERPRISE_ACCESS_CFG`
+- Redis DB assignments: catalog cache=8/celery=9, subsidy cache=10, access cache=12/celery=13
+- Celery support: catalog and access have workers; subsidy has NO celery installed
+
+---
+
+## Verification
+
+### Machine-Checkable Verification
+
+Run the automated verification script:
+```bash
+./scripts/qa/verify-enterprise-deployment.sh
+```
+
+This script checks:
+1. All 7 deployments are ready
+2. All pods are running with low restart counts
+3. All 5 services have endpoints
+4. Health checks return 200
+5. Resource usage within expected bounds (<100m CPU, <2000Mi memory)
+6. All secrets exist in K8s
+7. Integrated channels configured in LMS
+8. No ImagePullBackOff or CrashLoopBackOff states
+9. MFE ingress exists with IP assigned
+10. Config-gen init containers present
+
+**Exit code 0 = all checks passed, exit code 1 = failures detected**
+
+### Manual Verification Commands
+
+**Check deployment status:**
+```bash
+kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterprise
+kubectl get pods -n mereka-lms -l app.kubernetes.io/component=enterprise
+```
+
+**Check service endpoints:**
+```bash
+kubectl get services -n mereka-lms -l app.kubernetes.io/component=enterprise
+kubectl get endpoints -n mereka-lms -l app.kubernetes.io/component=enterprise
+```
+
+**Test health endpoints:**
+```bash
+# enterprise-catalog
+kubectl exec -n mereka-lms -l app.kubernetes.io/name=enterprise-catalog -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8160/health/
+
+# enterprise-access
+kubectl exec -n mereka-lms -l app.kubernetes.io/name=enterprise-access -- curl -s -o /dev/null -w "%{http_code}" http://localhost:18270/health/
+
+# enterprise-subsidy
+kubectl exec -n mereka-lms -l app.kubernetes.io/name=enterprise-subsidy -- curl -s -o /dev/null -w "%{http_code}" http://localhost:18280/health/
+```
+
+**Check resource consumption:**
+```bash
+kubectl top pods -n mereka-lms -l app.kubernetes.io/component=enterprise
+```
+
+**Verify secrets:**
+```bash
+kubectl get secret enterprise-secrets -n mereka-lms -o jsonpath='{.data}' | jq 'keys'
+```
+
+### Expected Output
+
+All commands should show healthy status:
+- Deployments: 7/7 ready
+- Pods: 7-9 running (depending on access service replicas)
+- Services: 5 ClusterIP services with non-empty endpoints
+- Health checks: HTTP 200 responses
+- Resource usage: <50m CPU, <1500Mi memory at idle

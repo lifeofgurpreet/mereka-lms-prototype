@@ -216,6 +216,22 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
 # Discussion APIs are served by the LMS at /api/discussion/ and /forum_form_discussion/.
 # The Discussions MFE handles the learner-facing UI.
 
+# Enterprise Admin Portal MFE (TLS via NGINX Ingress)
+http://admin.academyv2.mereka.io {
+    request_body {
+        max_size 2MB
+    }
+    import proxy "enterprise-admin-portal:8002"
+}
+
+# Enterprise Learner Portal MFE (TLS via NGINX Ingress)
+http://enterprise.academyv2.mereka.io {
+    request_body {
+        max_size 2MB
+    }
+    import proxy "enterprise-learner-portal:8002"
+}
+
 # Xqueue (external graders, local only)
 xqueue.localhost{$default_site_port} {
     import proxy "xqueue:8000"

@@ -1,0 +1,25 @@
+SECRET_KEY: placeholder-overridden-by-env
+ALLOWED_HOSTS:
+  - "*"
+DATABASES:
+  default:
+    ENGINE: django.db.backends.mysql
+    NAME: enterprise_access
+    USER: enterprise_access
+    PASSWORD: ""
+    HOST: mysql
+    PORT: 3306
+    ATOMIC_REQUESTS: false
+    CONN_MAX_AGE: 60
+CELERY_BROKER_URL: redis://redis:6379/13
+CELERY_RESULT_BACKEND: redis://redis:6379/13
+SOCIAL_AUTH_EDX_OAUTH2_KEY: enterprise-access-key
+SOCIAL_AUTH_EDX_OAUTH2_SECRET: ""
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT: http://lms:8000
+SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT: https://academyv2.mereka.io
+BACKEND_SERVICE_EDX_OAUTH2_KEY: enterprise-access-key
+BACKEND_SERVICE_EDX_OAUTH2_SECRET: ""
+LMS_BASE_URL: http://lms:8000
+LMS_ROOT_URL: https://academyv2.mereka.io
+ENTERPRISE_CATALOG_URL: http://enterprise-catalog:8000
+ENTERPRISE_SUBSIDY_URL: http://enterprise-subsidy:8000

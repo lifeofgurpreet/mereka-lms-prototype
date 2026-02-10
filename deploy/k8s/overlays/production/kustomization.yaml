@@ -8,6 +8,7 @@ resources:
   - ingress-openedx-lms.yaml
   - ingress-openedx-mfe.yaml
   - ingress-openedx-studio.yaml
+  - ingress-enterprise-mfe.yaml
 
 patches:
   - path: patches/remove-legacy-mongodb-service.yaml

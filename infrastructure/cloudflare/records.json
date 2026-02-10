@@ -81,6 +81,22 @@
     "proxied": false
   },
   {
+    "description": "Enterprise Admin Portal MFE (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "admin.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Enterprise Learner Portal MFE (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "enterprise.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
     "description": "SkillOurFuture microsite (multi-level host stays DNS-only)",
     "type": "CNAME",
     "name": "skillourfuture.academy.mereka.io",
