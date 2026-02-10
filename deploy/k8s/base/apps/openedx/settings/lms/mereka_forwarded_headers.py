@@ -63,5 +63,14 @@ class MerekaForwardedHeadersMiddleware:
             if meta.get("HTTP_X_FORWARDED_HOST"):
                 meta["HTTP_X_FORWARDED_HOST"] = _first_csv_value(meta["HTTP_X_FORWARDED_HOST"])
 
-        return self.get_response(request)
+            host = (
+                (meta.get("HTTP_X_FORWARDED_HOST") or meta.get("HTTP_HOST") or "")
+                .split(",", 1)[0]
+                .strip()
+                .lower()
+            )
+            if host and (host.endswith(".mereka.io") or host.endswith(".biji-biji.com") or host.endswith(".mereka.dev")):
+                if meta.get("HTTP_X_FORWARDED_PROTO") in {"", None, "http"}:
+                    meta["HTTP_X_FORWARDED_PROTO"] = "https"
 
+        return self.get_response(request)
