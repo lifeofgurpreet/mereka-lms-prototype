@@ -769,6 +769,13 @@ else:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
+# Forwarded-header hardening: normalize multi-valued X-Forwarded-* headers.
+# Without this, Django may treat HTTPS requests as HTTP which can break URL
+# generation and callback flows in some proxy chains.
+_forwarded_headers_middleware = "lms.envs.tutor.mereka_forwarded_headers.MerekaForwardedHeadersMiddleware"
+if _forwarded_headers_middleware not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, _forwarded_headers_middleware)
+
 # OIDC hardening: the cookie-domain middleware must run after SessionMiddleware
 # has set session/csrf cookies on the response, otherwise OIDC state cookies
 # can remain host-only and fail on callback ("Session value state missing").

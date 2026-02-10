@@ -199,6 +199,28 @@ check_studio_signin_redirect() {
   fi
 }
 
+check_studio_home_next_scheme() {
+  local studio_host="$1"
+  local url="https://${studio_host}/"
+  local body
+  body="$(curl -sS "$url" || true)"
+  if [[ -z "$body" ]]; then
+    log_fail "${studio_host}: Studio home page not reachable"
+    return 1
+  fi
+
+  # If Studio thinks it's behind HTTP, it generates login/register links like:
+  #   /login/?next=http%3A%2F%2Fstudio...
+  # This breaks Secure cookie flows (OAuth state cookies won't persist reliably).
+  if [[ "$body" == *"next=http%3A%2F%2F${studio_host}"* ]]; then
+    log_fail "${studio_host}: Studio home page contains insecure next=http:// links (proxy forwarded-proto drift)"
+    return 1
+  fi
+
+  log_ok "${studio_host}: Studio home page next= links do not use http://"
+  return 0
+}
+
 check_admin_login_redirect() {
   local svc="$1"
   local base="$2"
@@ -309,8 +331,11 @@ done
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_studio_signin_redirect "studio.${LMS_DOMAIN}" "$LMS_DOMAIN"
   check_studio_signin_redirect "$BIJI_STUDIO_DOMAIN" "$BIJI_DOMAIN"
+  check_studio_home_next_scheme "studio.${LMS_DOMAIN}"
+  check_studio_home_next_scheme "$BIJI_STUDIO_DOMAIN"
 else
   check_studio_signin_redirect "studio.${DEV_LMS_DOMAIN}" "$DEV_LMS_DOMAIN"
+  check_studio_home_next_scheme "studio.${DEV_LMS_DOMAIN}"
 fi
 
 # MFE login should be reachable on all configured MFE hosts.

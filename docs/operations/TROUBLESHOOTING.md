@@ -729,6 +729,49 @@ kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
 
 ---
 
+### Issue 7a2: Studio SSO loops or 500s at `/complete/edx-oauth2/` (`Session value state missing`)
+
+**Symptoms:**
+- Studio login page shows Sign In, Authentik flow appears to complete, but you are not signed in to Studio.
+- Studio may bounce back to `/login/edx-oauth2/` repeatedly.
+- CMS logs include one of:
+  - `social_core.exceptions.AuthStateMissing: Session value state missing`
+  - `Internal Server Error: /complete/edx-oauth2/`
+- The Studio home page HTML contains links like:
+  - `/login/?next=http%3A%2F%2Fstudio.<domain>%2F`
+
+**Root Cause:**
+- Proxy forwarded-proto drift causes Django to treat HTTPS requests as HTTP.
+- In practice this often happens when `X-Forwarded-Proto` becomes multi-valued
+  (e.g. `https,http`) in a Cloudflare -> Ingress -> Caddy chain.
+- Studio then generates `next=http://...` URLs. When the browser follows them:
+  - `Secure` cookies may not be set (or sent), and OAuth state validation fails.
+
+**Quick Verify:**
+```bash
+# Public check: Studio home page should NOT contain next=http://... for the same host.
+curl -sS https://studio.academyv2.mereka.io/ | rg -n 'next=http%3A%2F%2Fstudio[.]academyv2[.]mereka[.]io'
+
+# Runtime signal in CMS logs:
+kubectl -n mereka-lms logs deploy/cms --since=6h | rg -n 'complete/edx-oauth2|AuthStateMissing|Session value state missing'
+
+# Public auth surface contract (includes the Studio next= scheme check):
+./scripts/qa/verify-auth-surfaces.sh prod
+```
+
+**Fix:**
+- Ensure CMS normalizes multi-valued forwarded headers so Django reliably detects HTTPS:
+  - `cms.envs.tutor.mereka_forwarded_headers.MerekaForwardedHeadersMiddleware`
+- Redeploy + restart CMS:
+```bash
+kubectl rollout restart deploy/cms -n mereka-lms
+```
+
+**Prevention:**
+- `scripts/qa/verify-auth-surfaces.sh` fails if Studio home page contains insecure `next=http://` links.
+
+---
+
 ### Issue 7b: Authentik callback fails with `Authentication process canceled`
 
 **Symptoms:**

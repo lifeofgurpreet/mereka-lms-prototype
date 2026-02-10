@@ -465,6 +465,14 @@ else:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
+# Forwarded-header hardening: normalize multi-valued X-Forwarded-* headers.
+# Without this, Django may treat HTTPS requests as HTTP and Studio can generate
+# `next=http://...` URLs, causing Secure cookies to be dropped and OAuth callback
+# state validation to fail.
+_forwarded_headers_middleware = "cms.envs.tutor.mereka_forwarded_headers.MerekaForwardedHeadersMiddleware"
+if _forwarded_headers_middleware not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, _forwarded_headers_middleware)
+
 # Keep cookie-domain rewriting ahead of session middleware in request order so
 # it runs after session middleware in response order and can rewrite cookie
 # domains reliably on multisite Studio responses.

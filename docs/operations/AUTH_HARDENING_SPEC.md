@@ -1,5 +1,5 @@
 # Auth Hardening Spec
-_Last updated: 2026-02-09_
+_Last updated: 2026-02-10_
 
 ## Goals
 
@@ -76,6 +76,8 @@ Each service includes a small middleware:
 LMS/CMS also include multisite hardening middleware:
 - Resolves the current "tenant site" based on request host (apps./studio./preview. map to the tenant LMS domain)
 - Rewrites cookie domains per-request so we never emit invalid cookie `Domain=` across different roots (`mereka.io` vs `biji-biji.com`)
+- Normalizes multi-valued forwarded headers (`X-Forwarded-Proto`, etc.) so Django reliably detects HTTPS behind Cloudflare/Ingress.
+  (Prevents Studio from generating `next=http://...` URLs and breaking OAuth callback state.)
 
 ### 3) Verification (no credentials)
 
@@ -83,6 +85,7 @@ LMS/CMS also include multisite hardening middleware:
   - LMS OIDC entrypoint redirects to Authentik authorize
   - Preview alias domain OIDC entrypoint redirects to Authentik authorize
   - Studio `/signin` redirects to the correct LMS `/login` for the microsite
+  - Studio home page MUST NOT contain insecure `next=http://...` links (proxy forwarded-proto drift guard)
   - Biji MFE config must point to `academy.biji-biji.com` + `studio.academy.biji-biji.com`
   - Discovery/Credentials/Ecommerce `/login/` redirects to `/login/edx-oauth2/`
   - (Optional strict mode) `/admin/login/` redirects to `/login/`

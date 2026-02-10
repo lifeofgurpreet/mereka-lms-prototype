@@ -53,6 +53,7 @@ configMapGenerator:
   - apps/openedx/settings/lms/production.py
   - apps/openedx/settings/lms/test.py
   - apps/openedx/settings/lms/mereka_platform_admin.py
+  - apps/openedx/settings/lms/mereka_forwarded_headers.py
   - apps/openedx/settings/lms/mereka_multisite.py
   options:
     labels:
@@ -64,6 +65,7 @@ configMapGenerator:
   - apps/openedx/settings/cms/production.py
   - apps/openedx/settings/cms/test.py
   - apps/openedx/settings/cms/mereka_platform_admin.py
+  - apps/openedx/settings/cms/mereka_forwarded_headers.py
   - apps/openedx/settings/cms/mereka_multisite.py
   options:
     labels:
