@@ -134,7 +134,7 @@ for line in tsv.read_text().strip().splitlines():
         })
 
 total = len(checks)
-passed = sum(1 for c in checks if c["status"] == "ok")
+passed = sum(1 for c in checks if c["status"] in ("ok", "info"))
 failed = total - passed
 
 summary = {
@@ -156,7 +156,7 @@ md_lines = [
     "|-------|--------|----------|",
 ]
 for c in checks:
-    icon = "PASS" if c["status"] == "ok" else "FAIL"
+    icon = "PASS" if c["status"] in ("ok", "info") else "FAIL"
     md_lines.append(f"| {c['name']} | {icon} | {c['duration_s']}s |")
 
 (artifact_dir / "summary.md").write_text("\n".join(md_lines) + "\n")

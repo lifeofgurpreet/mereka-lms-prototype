@@ -173,8 +173,11 @@ acceptance_criteria:
   description: "Given an Authentik admin, when they attempt to access the Authentik admin UI, then they are required to complete MFA ..."
   verify:
   - type: manual
+    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    section: "Authentik Admin (Separate)"
+    justification: "Authentik admin MFA enforcement is validated against the live Authentik instance; this cannot be fully verified in CI without cluster credentials."
     file: scripts/infra/ensure-authentik-admin-mfa.sh
-    command: scripts/infra/ensure-authentik-admin-mfa.sh --verify
+    command: ./scripts/infra/ensure-authentik-admin-mfa.sh --verify
 - id: AC-017
   description: "Given a newly elevated staff user, when they next log in, then they are forced to enroll in MFA before accessing any ..."
   verify:
@@ -433,19 +436,41 @@ acceptance_criteria:
 - id: AC-042
   description: "Given all enterprise IdPs are configured, when ./scripts/qa/verify-auth-surfaces.sh prod runs, then all existing chec..."
   verify:
-  - type: manual
+  - type: automated
+    test_type: runtime_smoke
     file: scripts/qa/verify-auth-surfaces.sh
-    command: scripts/qa/verify-auth-surfaces.sh prod
+    command: ./scripts/qa/verify-auth-surfaces.sh prod
   - type: automated
     test_type: e2e
     file: scripts/qa/verify-authenticated-sso-canary.sh
-    command: pytest scripts/qa/verify-authenticated-sso-canary.sh::--env prod
+    command: ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
 - id: AC-043
   description: "Given enterprise SSO is configured for a tenant, when ./scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=..."
   verify:
   - type: manual
+    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    section: "How Login Works"
+    justification: "Enterprise tenant SSO flows depend on tenant-specific IdP configuration and cannot be verified generically without tenant credentials and live runtime."
     file: scripts/qa/verify-enterprise-sso.sh
     command: scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=prod
+- id: AC-044
+  description: "Given Authentik is the default OIDC provider, when Authentik policies execute during /application/o/authorize for client_id=mereka-lms, then there are zero policy_exception events in the last 6 hours"
+  verify:
+  - type: automated
+    test_type: runtime_smoke
+    file: scripts/qa/audit-authentik-policy-exceptions.sh
+    command: ./scripts/qa/audit-authentik-policy-exceptions.sh --since 6h
+- id: AC-045
+  description: "Given valid canary credentials exist for both a learner user and a Studio-access staff user, when the credentialed canary runs, then LMS+MFE+Studio authenticated sessions validate without auth error pages"
+  verify:
+  - type: automated
+    test_type: e2e
+    file: scripts/qa/verify-authenticated-sso-canary.sh
+    command: REQUIRE_STUDIO_CANARY=1 ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
+  - type: automated
+    test_type: wiring_audit
+    file: scripts/qa/audit-authenticated-sso-canary-wiring.sh
+    command: STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh
 - id: EC-1
   description: "IdP unreachable during login displays user-friendly error, does not affect other tenants"
   verify:

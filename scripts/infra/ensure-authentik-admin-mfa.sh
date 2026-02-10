@@ -110,10 +110,16 @@ if not flow:
     fail(f"Flow not found: {flow_slug}")
 
 expected_expression = (
-    "return request.path.startswith(\"/if/admin/\") and "
-    "request.user.ak_groups.filter(name="
+    # IMPORTANT: do not assume PolicyRequest exposes .path across authentik versions.
+    # We must extract the underlying Django HttpRequest path safely, otherwise the policy
+    # can throw and break unrelated OIDC authorization flows.
+    "http_request = getattr(request, \"http_request\", None) or (getattr(request, \"context\", {}) or {}).get(\"http_request\")\n"
+    "path = getattr(request, \"path\", None) or getattr(http_request, \"path\", None) or \"\"\n"
+    "is_admin_path = str(path).startswith(\"/if/admin/\")\n"
+    "is_admin = request.user.ak_groups.filter(name="
     + repr(admin_group_name)
-    + ").exists()"
+    + ").exists()\n"
+    "return is_admin_path and is_admin"
 )
 
 pol = ExpressionPolicy.objects.filter(name=policy_name).first()
