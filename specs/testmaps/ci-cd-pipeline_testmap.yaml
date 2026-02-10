@@ -20,6 +20,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh pr checks <pr-number> --required"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Quality Gates Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-002"
     description: "Given the spec-lint job runs, when specs in specs/ have structural issues (missing frontmatter, missing required sections), then the job fails with specific error messages identifying the non-conforming spec"
@@ -88,6 +91,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh pr view <pr-number> --json statusCheckRollup"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Quality Gates Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-008"
     description: "Given a CI job fails, when a developer views the PR, then the merge button is disabled"
@@ -96,6 +102,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh pr view <pr-number> --json mergeable"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Quality Gates Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # Image Build
   - id: "AC-009"
@@ -117,6 +126,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=build-tutor-images.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Image Build Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-010"
     description: "Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved image digest (sha256:...)"
@@ -129,6 +141,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -E 'sha256:[a-f0-9]{64}'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Image Build Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-011"
     description: "Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contains the expected branding revision marker"
@@ -141,6 +156,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep 'branding verification'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Image Build Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-012"
     description: "Given a manual dispatch with build_openedx=true and image_tag=v1.2.3, when the build completes, then the image is tagged as openedx:v1.2.3 and openedx:<short-sha>"
@@ -153,6 +171,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh workflow run build-tutor-images.yml -f build_openedx=true -f image_tag=v1.2.3"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Image Build Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-013"
     description: "Given the build workflow, when images are pushed, then no :latest tag is published to Artifact Registry"
@@ -198,6 +219,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh workflow run build-tutor-images.yml -f update_gitops=true -f target_environment=select-environment"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "GitOps Deployment Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-016"
     description: "Given update_gitops=true and target_environment=staging, when ENABLE_STAGING_ENV is not set to true, then the workflow fails with a message indicating staging is disabled"
@@ -210,6 +234,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh variable list | grep ENABLE_STAGING_ENV"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "GitOps Deployment Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-017"
     description: "Given deploy_to_staging=true is used in manual dispatch, when the workflow runs, then it fails with a deprecation error directing the user to update_gitops"
@@ -222,6 +249,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh workflow run build-tutor-images.yml -f deploy_to_staging=true"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "GitOps Deployment Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-018"
     description: "Given update_gitops=true but build_openedx=false, when the workflow runs, then it fails requiring both builds for deterministic digest capture"
@@ -234,6 +264,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh workflow run build-tutor-images.yml -f update_gitops=true -f build_openedx=false"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "GitOps Deployment Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # Release Process
   - id: "AC-019"
@@ -251,6 +284,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh run download <run-id>"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Release Process Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-020"
     description: "Given the policy-checks.yml workflow is dispatched, when all verification scripts pass, then the workflow succeeds"
@@ -287,6 +323,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "docs/operations/RELEASE_CHECKLIST.md"
         command: "grep -q 'Rollback' docs/operations/RELEASE_CHECKLIST.md"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Release Process Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # Scheduled Operations
   - id: "AC-022"
@@ -300,6 +339,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=public-health-check.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Scheduled Operations Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-023"
     description: "Given the operations-gates-runtime.yml runs on schedule, when GKE authentication succeeds, then operations gates execute against the live cluster and artifacts are uploaded with 30-day retention"
@@ -312,6 +354,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=operations-gates-runtime.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Scheduled Operations Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-024"
     description: "Given the dr-evidence-bundle.yml runs on the 1st of the month, when GKE access is available, then a DR evidence bundle is generated and uploaded with 120-day retention"
@@ -324,6 +369,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=dr-evidence-bundle.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Scheduled Operations Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # iOS Build
   - id: "AC-025"
@@ -337,6 +385,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh run list --workflow=build-ios-app.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "iOS Build Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-026"
     description: "Given the iOS workflow runs, when it completes (pass or fail), then SSH keys used for Match are cleaned up"
@@ -366,6 +417,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -q '\\*\\*\\*'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Security Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # Edge Cases
   - id: "EC-OOM-1"
@@ -375,6 +429,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -i 'out of memory'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "OOM conditions require controlled resource exhaustion in a disposable GitHub Actions runner environment; cannot be safely simulated in automated tests"
 
   - id: "EC-OOM-2"
     description: "MFE build OOM error distinguishable from other failures"
@@ -387,6 +444,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -i 'javascript heap out of memory'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "MFE OOM conditions require controlled resource exhaustion in a disposable GitHub Actions runner environment; cannot be safely simulated in automated tests"
 
   - id: "EC-Network-1"
     description: "Docker push network failure fails build (no silent partial push)"
@@ -395,6 +455,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep 'docker push'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "Network failure conditions require simulated network partitions which cannot be safely automated without infrastructure changes"
 
   - id: "EC-Network-2"
     description: "Re-running workflow after push failure is idempotent"
@@ -403,6 +466,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run rerun <run-id>"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "Network failure conditions require simulated network partitions which cannot be safely automated without infrastructure changes"
 
   - id: "EC-Cache-1"
     description: "Stale Tutor cache with --no-cache produces correct build"
@@ -423,6 +489,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh secret list | grep GITOPS_PAT"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "PAT expiration requires live GitHub API interaction with repository secrets; cannot be automated without exposing sensitive credentials in test environment"
 
   - id: "EC-GitOps-2"
     description: "bbi-infrastructure merge conflict fails push (no force push)"
@@ -475,6 +544,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh api rate_limit"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "GitHub API rate limits require live API interaction and cannot be reliably simulated without affecting real rate limit budgets"
 
   - id: "EC-Retry-1"
     description: "Failed workflow manual re-run succeeds (no stuck state)"
@@ -483,6 +555,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run rerun <run-id>"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Edge Case Handling"
+        justification: "Workflow retry behavior requires live GitHub Actions state management; cannot be automated without creating failed workflow states"
 
   # NFR-Performance (all manual - require CI run history analysis)
   - id: "NFR-Performance-1"
@@ -492,6 +567,9 @@ acceptance_criteria:
         test_type: "performance"
         file: "N/A"
         command: "gh run list --workflow=ci.yml --limit 20 --json durationMs"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Performance testing requires dedicated load test environment with controlled conditions to avoid affecting production CI runners and generate accurate baseline metrics"
 
   - id: "NFR-Performance-2"
     description: "Full CI workflow completes within 15 minutes for typical PR"
@@ -500,6 +578,9 @@ acceptance_criteria:
         test_type: "performance"
         file: "N/A"
         command: "gh run list --workflow=ci.yml --limit 20 --json durationMs"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Performance testing requires dedicated load test environment with controlled conditions to avoid affecting production CI runners and generate accurate baseline metrics"
 
   - id: "NFR-Performance-3"
     description: "OpenEdX image build completes within 45 minutes"
@@ -508,6 +589,9 @@ acceptance_criteria:
         test_type: "performance"
         file: "N/A"
         command: "gh run list --workflow=build-tutor-images.yml --limit 20 --json durationMs"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Performance testing requires dedicated load test environment with controlled conditions to avoid affecting production CI runners and generate accurate baseline metrics"
 
   - id: "NFR-Performance-4"
     description: "MFE image build completes within 20 minutes"
@@ -516,6 +600,9 @@ acceptance_criteria:
         test_type: "performance"
         file: "N/A"
         command: "gh run list --workflow=build-tutor-images.yml --limit 20 --json durationMs"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Performance testing requires dedicated load test environment with controlled conditions to avoid affecting production CI runners and generate accurate baseline metrics"
 
   - id: "NFR-Performance-5"
     description: "iOS build completes within 90 minutes (timeout enforced)"
@@ -532,6 +619,9 @@ acceptance_criteria:
         test_type: "performance"
         file: "N/A"
         command: "gh run list --workflow=build-tutor-images.yml --limit 20 --json durationMs"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Performance testing requires dedicated load test environment with controlled conditions to avoid affecting production CI runners and generate accurate baseline metrics"
 
   - id: "NFR-Reliability-1"
     description: "CI workflow pass rate on main branch >= 95%"
@@ -540,6 +630,9 @@ acceptance_criteria:
         test_type: "monitoring"
         file: "N/A"
         command: "gh run list --workflow=ci.yml --branch=main --limit 100 --json conclusion | jq '[.[] | select(.conclusion==\"success\")] | length'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Reliability Testing"
+        justification: "Requires access to live GitHub Actions history data over extended time periods to calculate accurate reliability metrics; cannot be simulated in test environment"
 
   - id: "NFR-Reliability-2"
     description: "Build workflows produce deterministic outputs (same commit, same image)"
@@ -548,6 +641,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=build-tutor-images.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Reliability Testing"
+        justification: "Requires building same commit multiple times on live GitHub Actions runners to compare image digests; resource-intensive and cannot be automated without dedicated infrastructure"
 
   # Observability
   - id: "Observability-1"
@@ -561,6 +657,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id>"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to live Prometheus/Grafana dashboards with accumulated metrics data; cannot be validated without running actual workflows"
 
   - id: "Observability-2"
     description: "Build workflows log image tags, digests, registry references in step summary"
@@ -569,6 +668,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -E 'sha256:[a-f0-9]{64}'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to live Prometheus/Grafana dashboards with accumulated metrics data; cannot be validated without running actual workflows"
 
   - id: "Observability-3"
     description: "Scheduled workflows upload structured artifacts (JSON or log files)"
@@ -581,6 +683,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run download <run-id>"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to live Prometheus/Grafana dashboards with accumulated metrics data; cannot be validated without running actual workflows"
 
   - id: "Observability-4"
     description: "Failed steps include stderr in step output"
@@ -589,6 +694,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -A 5 'Error:'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to live Prometheus/Grafana dashboards with accumulated metrics data; cannot be validated without running actual workflows"
 
   - id: "Observability-5"
     description: "Health check failure triggers notification"
@@ -601,6 +709,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=public-health-check.yml --status=failure --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to live Prometheus/Grafana dashboards with accumulated metrics data; cannot be validated without running actual workflows"
 
   # SSO Canary
   - id: "AC-029"
@@ -622,6 +733,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=authenticated-sso-canary.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "SSO Canary Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-030"
     description: "Given the SSO canary fails authentication, when the workflow completes, then artifacts (screenshots, logs) are uploaded showing the failure point for debugging"
@@ -638,6 +752,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run download <run-id>"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "SSO Canary Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # Tutor Configuration Verification
   - id: "AC-031"
@@ -663,6 +780,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=tutor-config-verify.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Configuration Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-032"
     description: "Given the Tutor config verification runs, when required patches are missing, then the job fails with specific error messages identifying which patch (MySQL, MFE, domains, or apps) is not applied"
@@ -679,6 +799,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -E 'AC-[0-9]{3} (PASSED|FAILED)'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Configuration Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-033"
     description: "Given the patch idempotency check runs, when patches are applied twice, then the checksums of all generated files remain identical"
@@ -695,6 +818,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep 'idempotent'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Configuration Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-034"
     description: "Given the Tutor config verification fails on a PR, when a developer views the PR, then a comment is posted with common issues and remediation steps"
@@ -711,6 +837,9 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh pr view <pr-number> --comments"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Configuration Verification"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   # Tutor Plugin Testing
   - id: "AC-035"
@@ -736,6 +865,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run list --workflow=tutor-plugin-test.yml --limit 5"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Plugin Testing"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-036"
     description: "Given the plugin tests run, when the plugin patches are correctly applied, then the LMS settings file contains the expected plugin configuration (mfe_oauth_fix installed)"
@@ -752,6 +884,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep 'Plugin patches applied correctly'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Plugin Testing"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-037"
     description: "Given the plugin lifecycle test runs, when the plugin is enabled, disabled, and re-enabled, then all state transitions succeed without errors"
@@ -768,6 +903,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep -E '(enabled|disabled|re-enabled)'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Tutor Plugin Testing"
+        justification: "Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated in isolated test environment"
 
   - id: "AC-038"
     description: "Given the integration test runs, when both plugin and apply-patches.sh are used together, then both sets of patches are present in the generated configuration"
@@ -784,6 +922,9 @@ acceptance_criteria:
         test_type: "integration"
         file: "N/A"
         command: "gh run view <run-id> --log | grep 'PASSED.*Plugin and patches'"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "Plugin Integration Testing"
+        justification: "Requires triggering actual GitHub Actions workflow run and inspecting its logs for plugin+patches integration result"
 
   - id: "AC-039"
     description: "Given plugin tests fail on a PR, when a developer views the PR, then a comment is posted with plugin-specific troubleshooting guidance"
@@ -800,3 +941,6 @@ acceptance_criteria:
         test_type: "e2e"
         file: "N/A"
         command: "gh pr view <pr-number> --comments"
+        runbook: "docs/operations/CI_CD_RUNBOOK.md"
+        section: "PR Failure Comment Verification"
+        justification: "Requires triggering a real PR with a failing plugin test and verifying the bot posts a troubleshooting comment"

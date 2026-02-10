@@ -21,14 +21,14 @@ noted otherwise.
 
 | Tier | Completion | Notes |
 |------|-----------|-------|
-| Tier 0 — Foundations | ~70% | Repo structure ✅, secrets/tutor partially verified |
-| Tier 1 — Core Infra | ~55% | K8s deployed, Atlas connected, domains configured |
-| Tier 2 — Operational | ~40% | Prometheus/Loki running, CI partial, analytics not started |
-| Tier 3 — Data & Migrations | ~35% | Forum done, DR scripts exist, Kajabi/video not started |
+| Tier 0 — Foundations | ~85% | Repo structure ✅, secrets ✅, tutor ✅, tutor resilience ✅, cross-cutting partially verified |
+| Tier 1 — Core Infra | ~80% | K8s ✅, Atlas 🟢, domains ✅, branding ✅ |
+| Tier 2 — Operational | ~65% | Observability ✅, SLO/SLA 🟢, CI/CD 🟢, analytics not started |
+| Tier 3 — Data & Migrations | ~45% | Forum ✅, DR 🟢, Kajabi partial, video not started |
 | Tier 4 — Enterprise Foundation | ~10% | Auth/SSO via Authentik exists; no multi-tenancy or enterprise services |
-| Tier 5 — Enterprise Features | ~3% | Spec-only; ecommerce has basic Tutor plugin |
-| Tier 6 — Deferred | ~2% | Spec-only |
-| **Weighted Overall** | **~25-30%** | Most infra exists but enterprise features are aspirational |
+| Tier 5 — Enterprise Features | ~2% | Spec-only; ecommerce has basic Tutor plugin |
+| Tier 6 — Deferred | ~0% | Spec-only |
+| **Weighted Overall** | **~29%** | 206/711 ACs automated (29%), 433 planned, 69 manual, 3 monitoring |
 
 ---
 
@@ -39,9 +39,10 @@ noted otherwise.
 | Spec | Status | Completion | Blocks |
 |------|--------|-----------|--------|
 | `repository-structure_spec.md` | ✅ DONE | 12/12 ACs auto-verified | All other specs (defines where code lives) |
-| `secrets-management_spec.md` | ✅ DONE | 51 secrets documented, enterprise secrets added | All specs consume secrets |
-| `tutor-configuration_spec.md` | 🟢 LARGELY DONE | 10/10 ACs auto-verified | All specs that modify Tutor config |
-| `cross-cutting-requirements_spec.md` | 🟢 LARGELY DONE | Referenced by all specs | All specs inherit cross-cutting requirements |
+| `secrets-management_spec.md` | ✅ DONE | 12/18 ACs auto, 6 manual | All specs consume secrets |
+| `tutor-configuration_spec.md` | ✅ DONE | 10/10 ACs auto-verified | All specs that modify Tutor config |
+| `tutor-configuration-resilience_spec.md` | ✅ DONE | 11/12 ACs auto, 1 planned | All specs that modify Tutor config |
+| `cross-cutting-requirements_spec.md` | 🟡 IN PROGRESS | 4/12 ACs auto, 1 planned, 6 manual, 1 monitoring | All specs inherit cross-cutting requirements |
 
 **Rationale**: Repository structure defines where everything
 goes. Secrets management defines how every service accesses c
@@ -57,10 +58,10 @@ ract every spec must honor.
 
 | Spec | Status | Completion | Blocks | Notes |
 |------|--------|-----------|--------|-------|
-| `k8s-deployment_spec.md` | 🟡 IN PROGRESS | 3/32 ACs verified (manifests exist, verification scripts being added) | Tier 2+: all K8s services | GKE cluster running, manifests deployed |
-| `mongodb-atlas-integration_spec.md` | 🟢 LARGELY DONE | 4/9 ACs auto, 2 manual | Forum, analytics, any MongoDB consumer | Atlas connected, SRV working |
-| `multi-site-domains_spec.md` | 🟡 IN PROGRESS | 4/9 ACs auto | Branding, MFEs, enterprise portals | DNS/Caddy configured, some checks pending |
-| `branding-system_spec.md` | 🟢 LARGELY DONE | 10/10 ACs auto-verified | Multi-tenancy (branding) | Themes, logos, MFE customization working |
+| `k8s-deployment_spec.md` | ✅ DONE | 32/32 ACs auto-verified | Tier 2+: all K8s services | GKE cluster running, all manifests verified |
+| `mongodb-atlas-integration_spec.md` | 🟢 LARGELY DONE | 7/9 ACs auto, 2 manual | Forum, analytics, any MongoDB consumer | Atlas connected, SRV working |
+| `multi-site-domains_spec.md` | ✅ DONE | 9/9 ACs auto-verified | Branding, MFEs, enterprise portals | DNS/Caddy configured, all domains working |
+| `branding-system_spec.md` | ✅ DONE | 10/10 ACs auto-verified | Multi-tenancy (branding) | Themes, logos, MFE customization working |
 
 **Rationale**: K8s deployment defines the runtime environment
 . MongoDB Atlas provides document storage. Multi-site domains
@@ -75,9 +76,9 @@ visual identity.
 
 | Spec | Status | Completion | Blocks | Notes |
 |------|--------|-----------|--------|-------|
-| `observability-stack_spec.md` | 🟢 LARGELY DONE | 8/8 ACs auto-verified, enterprise monitoring added | SLO/SLA, all monitoring | Prometheus, Loki deployed; 3 enterprise ServiceMonitors + 12 alerts configured |
-| `ci-cd-pipeline_spec.md` | 🟡 IN PROGRESS | 6/28 ACs verified | All automated deployments | GitHub Actions exist, ArgoCD not deployed |
-| `analytics-pipeline_spec.md` | 📝 SPEC ONLY | 0/8 ACs verified | Enterprise reporting, privacy | Aspects/ClickHouse not deployed |
+| `observability-stack_spec.md` | ✅ DONE | 8/8 ACs auto-verified | SLO/SLA, all monitoring | Prometheus, Loki deployed; 3 enterprise ServiceMonitors + 12 alerts configured |
+| `ci-cd-pipeline_spec.md` | 🟢 LARGELY DONE | 36/39 ACs auto-verified, 3 manual | All automated deployments | GitHub Actions running, Docker/K8s builds verified, ArgoCD not deployed |
+| `analytics-pipeline_spec.md` | 📝 SPEC ONLY | 0/8 ACs auto, 7 planned, 1 manual | Enterprise reporting, privacy | Aspects/ClickHouse not deployed |
 | `slo-sla-service-level-management_spec.md` | 🟢 LARGELY DONE | 19/23 ACs auto, 4 manual | Enterprise SLA contracts | SLO definitions exist, alert rules configured |
 
 **Rationale**: Observability must be in place before deployin
@@ -93,10 +94,10 @@ he data pipeline. SLO/SLA defines service level contracts.
 
 | Spec | Status | Completion | Blocks | Notes |
 |------|--------|-----------|--------|-------|
-| `data-migrations-kajabi-mct_spec.md` | 🟡 IN PROGRESS | 2/38 ACs auto, 5 manual | — | Migration scripts exist, verification partial |
-| `video-pipeline-delivery_spec.md` | 📝 SPEC ONLY | 0/25 ACs verified | Content libraries (video in courses) | S3/GCS, transcoding, CDN not started |
+| `data-migrations-kajabi-mct_spec.md` | 🟡 IN PROGRESS | 3/44 ACs auto, 31 planned, 10 manual | — | Migration scripts exist, webhook ACs added, verification partial |
+| `video-pipeline-delivery_spec.md` | 📝 SPEC ONLY | 0/25 ACs auto, 23 planned, 2 monitoring | Content libraries (video in courses) | S3/GCS, transcoding, CDN not started |
 | `disaster-recovery-business-continuity_spec.md` | 🟢 LARGELY DONE | 16/22 ACs auto, 6 manual | Production readiness | Velero scripts exist, backup verification automated |
-| `forum-service-migration_spec.md` | ✅ DONE | 0/22 ACs auto-verified (verification scripts needed) | — | Python forum v2 with Meilisearch operational |
+| `forum-service-migration_spec.md` | 🟢 LARGELY DONE | 9/22 ACs auto, 13 manual | — | Python forum v2 with Meilisearch operational |
 
 **Rationale**: Data migrations bring legacy content into the
 platform. Video pipeline handles media delivery. DR/BC ensure
@@ -120,9 +121,9 @@ multi-tenancy-architecture → auth-sso-enterprise → enterprise
 
 | Order | Spec | Status | Completion | Blocks | Notes |
 |-------|------|--------|-----------|--------|-------|
-| 4.1 | `multi-tenancy-architecture_spec.md` | 📝 SPEC ONLY | 0/28 ACs verified | auth-sso, enterprise-microservices, all Tier 5 | EnterpriseCustomer model not implemented |
-| 4.2 | `auth-sso-enterprise_spec.md` | 🟡 IN PROGRESS | 6/45 ACs auto | enterprise-microservices, all Tier 5 | Authentik SSO working; enterprise SAML/OIDC per-tenant not started |
-| 4.3 | `enterprise-microservices_spec.md` | 🟢 LARGELY DONE | 7/8 services deployed, monitoring configured | All Tier 5 enterprise features | 7 deployments running (catalog, access, subsidy, admin-portal, learner-portal, 2 workers); license-manager deferred |
+| 4.1 | `multi-tenancy-architecture_spec.md` | 📝 SPEC ONLY | 0/28 ACs auto, 27 planned, 1 manual | auth-sso, enterprise-microservices, all Tier 5 | EnterpriseCustomer model not implemented |
+| 4.2 | `auth-sso-enterprise_spec.md` | 🟡 IN PROGRESS | 6/45 ACs auto, 38 planned, 1 manual | enterprise-microservices, all Tier 5 | Authentik SSO working; enterprise SAML/OIDC per-tenant not started |
+| 4.3 | `enterprise-microservices_spec.md` | 📝 SPEC ONLY | 1/36 ACs auto, 35 planned | All Tier 5 enterprise features | 7 deployments running (catalog, access, subsidy, admin-portal, learner-portal, 2 workers); license-manager deferred; ACs need verification scripts |
 
 **Rationale**: Multi-tenancy defines the tenant model that ev
 erything else uses. Auth/SSO provides the authentication laye
@@ -141,12 +142,12 @@ ier 4 is done.
 
 | Spec | Status | Completion | Monorepo Location | Notes |
 |------|--------|-----------|-------------------|-------|
-| `ecommerce-purchase-gateway_spec.md` | 📝 SPEC ONLY | 1/33 ACs auto | `services/purchase-gateway/` | FastAPI + PostgreSQL not started; basic Tutor ecommerce plugin exists |
-| `email-notifications-pipeline_spec.md` | 📝 SPEC ONLY | 0/45 ACs verified | LMS config + K8s manifests | ACE + SES + FCM/APNs not started |
-| `badges-credentials-enterprise_spec.md` | 📝 SPEC ONLY | 0/32 ACs verified | `services/badgr-server/` | Badgr Server not deployed |
-| `content-libraries-v2_spec.md` | 📝 SPEC ONLY | 0/33 ACs verified | LMS config + K8s manifests | Content Libraries v2 + Blockstore not started |
-| `advanced-assessment-xqueue_spec.md` | 📝 SPEC ONLY | 0/39 ACs verified | `services/xqueue-graders/` | XQueue exists in manifests; graders not built |
-| `data-privacy-gdpr-compliance_spec.md` | 📝 SPEC ONLY | 0/30 ACs verified | `services/privacy-tools/` | GDPR/PDPA compliance (implement LAST in tier) |
+| `ecommerce-purchase-gateway_spec.md` | 📝 SPEC ONLY | 1/33 ACs auto, 32 planned | `services/purchase-gateway/` | FastAPI + PostgreSQL not started; basic Tutor ecommerce plugin exists |
+| `email-notifications-pipeline_spec.md` | 📝 SPEC ONLY | 0/45 ACs auto, 43 planned, 2 manual | LMS config + K8s manifests | ACE + SES + FCM/APNs not started |
+| `badges-credentials-enterprise_spec.md` | 📝 SPEC ONLY | 0/32 ACs auto, 31 planned, 1 manual | `services/badgr-server/` | Badgr Server not deployed |
+| `content-libraries-v2_spec.md` | 📝 SPEC ONLY | 0/33 ACs auto, 33 planned | LMS config + K8s manifests | Content Libraries v2 + Blockstore not started |
+| `advanced-assessment-xqueue_spec.md` | 📝 SPEC ONLY | 0/39 ACs auto, 39 planned | `services/xqueue-graders/` | XQueue exists in manifests; graders not built |
+| `data-privacy-gdpr-compliance_spec.md` | 📝 SPEC ONLY | 0/30 ACs auto, 30 planned | `services/privacy-tools/` | GDPR/PDPA compliance (implement LAST in tier) |
 
 ⚠️ **data-privacy-gdpr-compliance** should be implemented las
 t in this tier because it audits all the services above.
@@ -160,8 +161,8 @@ s.**
 
 | Spec | Status | Completion | Notes |
 |------|--------|-----------|-------|
-| `mobile-apps-enterprise_spec.md` | 📝 SPEC ONLY | 0/37 ACs verified | CI + LMS config here; app source in upstream repos |
-| `proctoring-integration_spec.md` | ⏸️ DEFERRED | 0/38 ACs | Deferred until 2027; depends on enterprise assessment needs |
+| `mobile-apps-enterprise_spec.md` | 📝 SPEC ONLY | 0/37 ACs auto, 34 planned, 3 manual | CI + LMS config here; app source in upstream repos |
+| `proctoring-integration_spec.md` | ⏸️ DEFERRED | 0/38 ACs auto, 28 planned, 10 manual | Deferred until 2027; depends on enterprise assessment needs |
 
 ---
 
@@ -279,3 +280,4 @@ s every other service's PII handling.
 |------|-------|-------|
 | 2026-02-10 | Initial creation | Tier structure and dependency graph |
 | 2026-02-10 | Deep audit pass | Updated statuses with actual implementation percentages. 670 ACs across 26 specs; 222 with automated test files, 1004 planned (phantom scripts), 43 manual. Weighted overall: ~25-30% implemented. |
+| 2026-02-10 | Coverage report sync | Updated all AC counts from spec_coverage_report.py. 711 ACs across 28 specs; 206 automated, 433 planned, 69 manual, 3 monitoring. Weighted overall: 29%. Added tutor-configuration-resilience to Tier 0. Updated CI/CD (36/39 auto), data migrations (3/44), forum (9/22 auto + 13 manual), K8s (32/32), multi-site (9/9), enterprise-microservices (1/36). |

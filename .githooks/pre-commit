@@ -96,11 +96,27 @@ check_file() {
       fi
     fi
 
-    # Pattern 2: API keys
-    # Matches: api_key = "...", apikey: "...", API_KEY = "..."
-    if echo "$line" | grep -qiE '(api[_-]?key|apikey)[[:space:]]*[:=][[:space:]]*["\047][A-Za-z0-9_\-]{16,}["\047]'; then
+    # Pattern 2: API keys (including camelCase variants)
+    # Matches: api_key = "...", apikey: "...", API_KEY = "...", apiKey = "..."
+    if echo "$line" | grep -qiE '(api[_-]?[Kk]ey|apikey|API_KEY)[[:space:]]*[:=][[:space:]]*["\047][A-Za-z0-9_\-]{16,}["\047]'; then
       if ! echo "$line" | grep -qiE '(CHANGE_ME|changeme|placeholder|example|xxx+|TODO|FIXME)'; then
         echo -e "${RED}[SECRET]${NC} $file:$line_num - Possible hardcoded API key"
+        echo "    $line"
+        file_has_secrets=1
+      fi
+    fi
+
+    # Pattern 2b: HubSpot Personal Access Tokens (pat-na1-...)
+    if echo "$line" | grep -qE 'pat-na[0-9]-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'; then
+      echo -e "${RED}[SECRET]${NC} $file:$line_num - HubSpot Personal Access Token detected"
+      echo "    $line"
+      file_has_secrets=1
+    fi
+
+    # Pattern 2c: SendGrid API keys (SG....)
+    if echo "$line" | grep -qE 'SG\.[A-Za-z0-9_-]{22,}'; then
+      if ! echo "$line" | grep -qiE '(example|placeholder|xxx+)'; then
+        echo -e "${RED}[SECRET]${NC} $file:$line_num - SendGrid API key detected"
         echo "    $line"
         file_has_secrets=1
       fi

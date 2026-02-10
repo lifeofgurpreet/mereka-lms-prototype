@@ -178,6 +178,9 @@ acceptance_criteria:
   - type: manual
     file: scripts/qa/verify-tenant-isolation.sh
     command: scripts/qa/verify-tenant-isolation.sh --tenant-a={uuid_a} --tenant-b={uuid_b}
+    runbook: "docs/operations/MULTI_TENANCY_RUNBOOK.md"
+    section: "Tenant Isolation Verification"
+    justification: "Requires multiple authenticated sessions across different tenant domains to verify data isolation boundaries"
 - id: AC-026
   description: "Given the nightly isolation test jobruns, when any isolation check fails, then a Critical alert is fired to the oncal..."
   verify:

@@ -10,12 +10,18 @@ acceptance_criteria:
   - type: manual
     file: scripts/infra/verify-ses-domain.sh
     command: scripts/infra/verify-ses-domain.sh academyv2.mereka.io
+    runbook: "docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md"
+    section: "ACE Pipeline Verification"
+    justification: "Requires active SES configuration with verified sender domain and test recipient"
 - id: AC-002
   description: "Given the sending domain academy.biji-biji.com, when SES domain verification is checked, then DKIM, SPF, and DMARC al..."
   verify:
   - type: manual
     file: scripts/infra/verify-ses-domain.sh
     command: scripts/infra/verify-ses-domain.sh academy.biji-biji.com
+    runbook: "docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md"
+    section: "Email Template Rendering"
+    justification: "Requires sending actual test emails through SES to verify template rendering across email clients"
 - id: AC-003
   description: "Given a learner triggers a password reset, when ACE dispatches the email, then the email is delivered via SES within ..."
   verify:

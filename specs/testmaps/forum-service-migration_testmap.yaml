@@ -23,6 +23,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_DATA_VERIFICATION.md"
         command: "Manual verification - compare thread counts in MongoDB Atlas before/after migration"
         notes: "Use MongoDB Atlas UI or mongosh to run db.contents.count({_type: 'CommentThread'})"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Thread Count Verification"
+        justification: "Requires access to MongoDB Atlas dashboard and comparison between production snapshots before/after migration"
 
   - id: "AC-003"
     description: "Content hash comparison - SHA-256 of 1000 random posts matches 100%"
@@ -31,6 +34,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_DATA_VERIFICATION.md"
         command: "Manual verification - hash comparison requires sampling script not yet implemented"
         notes: "Run: mongosh cluster-mereka-lms.2pjex4s.mongodb.net --eval 'db.contents.aggregate([{$match: {_type: \"Comment\"}}, {$sample: {size: 1000}}])' | shasum"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Content Hash Verification"
+        justification: "Requires MongoDB Atlas access for random sampling and custom script to compute stable content hashes across 1000 posts"
 
   - id: "AC-004"
     description: "Vote count preservation - vote counts match between Python and Ruby APIs"
@@ -39,6 +45,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_DATA_VERIFICATION.md"
         command: "Manual verification - compare vote counts via API responses"
         notes: "Both services read same MongoDB database, so vote counts are inherently preserved"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Vote Count Verification"
+        justification: "Requires running both Python and Ruby forum instances against production data to compare API responses"
 
   # ============================================================================
   # API Compatibility (AC-005 through AC-010)
@@ -58,6 +67,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_MFE_TESTING.md"
         command: "Manual E2E test - create thread via discussions MFE UI"
         notes: "Navigate to course discussions, create new thread, verify it appears in listing"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Thread CRUD Operations"
+        justification: "Requires running LMS instance with authenticated user session and populated course data to test end-to-end MFE functionality"
 
   - id: "AC-007"
     description: "Vote persistence - vote increments and persists across page refreshes"
@@ -65,6 +77,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_MFE_TESTING.md"
         command: "Manual E2E test - vote on post, refresh page, verify vote persists"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Vote Persistence Testing"
+        justification: "Requires running LMS instance with authenticated user session to test vote interactions and persistence across browser refreshes"
 
   - id: "AC-008"
     description: "Abuse flagging - flag recorded and post appears in moderation queue"
@@ -73,6 +88,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_MFE_TESTING.md"
         command: "Manual E2E test - flag post as abuse, verify in moderation queue"
         notes: "Requires moderator/staff account access"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Moderation Queue Verification"
+        justification: "Requires running LMS instance with both regular user and moderator accounts to test abuse flagging workflow"
 
   - id: "AC-009"
     description: "Search functionality - search query returns relevant results via Meilisearch"
@@ -84,6 +102,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_MFE_TESTING.md"
         command: "Manual test - search for 'assignment help' in course discussions"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Meilisearch Index Verification"
+        justification: "Requires running LMS instance with populated course forum data indexed in Meilisearch to test search relevance"
 
   - id: "AC-010"
     description: "User activity API - Python forum returns activity list in expected format"
@@ -122,6 +143,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/DEPLOYMENT_RUNBOOK.md"
         command: "kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=50 | grep -i 'forum\\|startup\\|ready'"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Production Health Check"
+        justification: "Requires production Kubernetes cluster with LMS deployment to verify startup timing and health check behavior"
 
   - id: "AC-014"
     description: "apply-patches.sh - Python forum configuration correctly injected"
@@ -141,6 +165,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_PERFORMANCE_TESTING.md"
         command: "Manual load test - requires load testing tools (locust, k6, or artillery)"
         notes: "Run: k6 run --vus 50 --duration 60s scripts/qa/load-test-forum-threads.js"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   - id: "AC-016"
     description: "Search latency - p95 <=500ms under 20 concurrent search requests"
@@ -149,6 +176,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_PERFORMANCE_TESTING.md"
         command: "Manual load test - requires load testing tools"
         notes: "Run: k6 run --vus 20 --duration 60s scripts/qa/load-test-forum-search.js"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   - id: "AC-017"
     description: "Memory usage - LMS pod RSS stays below 512Mi under normal load (10 req/s)"
@@ -157,6 +187,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_PERFORMANCE_TESTING.md"
         command: "kubectl top pods -n mereka-lms -l app.kubernetes.io/name=lms"
         notes: "Monitor memory over 10 minutes under sustained load"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   # ============================================================================
   # Rollback (AC-018 through AC-019)
@@ -168,6 +201,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_ROLLBACK.md"
         command: "Manual verification - review rollback procedure documentation"
         notes: "In v21, Ruby forum no longer available upstream - rollback would require downgrade to v18"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Rollback Procedure"
+        justification: "Requires documentation review and validation against production deployment architecture for rollback feasibility"
 
   - id: "AC-019"
     description: "Rollback data integrity - posts created during Python period visible after rollback"
@@ -176,6 +212,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_ROLLBACK.md"
         command: "Manual verification - both services use same MongoDB database"
         notes: "Data integrity guaranteed by shared database - no migration needed in reverse direction"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Rollback Data Integrity"
+        justification: "Requires rollback scenario testing with production-like data to verify data accessibility across forum service versions"
 
   # ============================================================================
   # Observability (AC-020 through AC-021)
@@ -187,6 +226,9 @@ acceptance_criteria:
         file: "docs/operations/OBSERVABILITY_VERIFICATION.md"
         command: "Manual verification - trigger auth failure and verify alert fires in Alertmanager"
         notes: "Check infrastructure/monitoring/alerts/log-auth-failures-forum.json"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to Grafana dashboard with accumulated forum metrics data"
 
   - id: "AC-021"
     description: "Prometheus metrics - forum-specific metrics present in /metrics endpoint"
@@ -195,6 +237,9 @@ acceptance_criteria:
         file: "docs/operations/OBSERVABILITY_VERIFICATION.md"
         command: "kubectl exec -n mereka-lms $(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}') -- curl -s http://localhost:8000/metrics | grep forum"
         notes: "Verify forum_request_duration_seconds, forum_request_total metrics present"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to Grafana dashboard with accumulated forum metrics data"
 
   # ============================================================================
   # Local Development (AC-022)
@@ -218,6 +263,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual test - simulate MongoDB timeout by blocking network or using invalid credentials"
         notes: "Verify LMS logs show clear error message, pod restarts with backoff"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires simulated network partition to MongoDB Atlas or credential manipulation to test connection timeout handling"
 
   - id: "EDGE-MEILISEARCH-DOWN"
     description: "Edge Case: Meilisearch service unavailable - search returns 503 or graceful error"
@@ -226,6 +274,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "kubectl scale deployment meilisearch -n mereka-lms --replicas=0 && test search API"
         notes: "Search fails but thread listing/posting should continue to work"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires stopping Meilisearch service to verify graceful degradation of search functionality while maintaining core forum operations"
 
   - id: "EDGE-API-KEY-MISMATCH"
     description: "Edge Case: Forum API key mismatch - returns 401 Unauthorized"
@@ -233,6 +284,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual test - modify FORUM_API_KEY secret and verify auth failure"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires manipulating Kubernetes secrets and testing API authentication to verify proper error responses"
 
   - id: "EDGE-MEILISEARCH-INDEX-MISSING"
     description: "Edge Case: Meilisearch index not yet created - graceful error message"
@@ -240,6 +294,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual test - delete Meilisearch indexes and test search"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires deleting Meilisearch indexes via Meilisearch API to test index creation and error handling"
 
   - id: "EDGE-UNICODE-EMOJI"
     description: "Edge Case: Forum thread with Unicode emoji characters - handled correctly"
@@ -247,6 +304,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual test - create thread with emoji (😀, 🎉, etc.) and verify storage/display"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires running LMS instance with authenticated user session to create threads with Unicode emoji and verify storage/display correctness"
 
   - id: "EDGE-CONCURRENT-CREATION"
     description: "Edge Case: Concurrent thread creation race condition - no duplicates"
@@ -254,6 +314,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual load test - requires concurrent request simulation"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires concurrent load generation tools to simulate race conditions in thread creation"
 
   - id: "EDGE-POST-SIZE-LIMIT"
     description: "Edge Case: Forum post exceeding size limit - rejected with 413"
@@ -261,6 +324,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual test - create post with >100KB content"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires running LMS instance with authenticated user session to test size limit enforcement via API or UI"
 
   - id: "EDGE-SQL-INJECTION"
     description: "Edge Case: Search query with SQL injection attempt - rejected safely"
@@ -269,6 +335,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_SECURITY_TESTING.md"
         command: "Manual security test - search for SQL injection payloads ('; DROP TABLE--)"
         notes: "Meilisearch uses JSON API, not SQL, so traditional SQL injection not applicable"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires running LMS instance with authenticated session to test search input validation and sanitization"
 
   - id: "EDGE-SAML-REPLAY"
     description: "Edge Case: SAML assertion replay after forum migration - replay cache persists"
@@ -277,6 +346,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_EDGE_CASES.md"
         command: "Manual test - not forum-specific, related to overall SSO implementation"
         notes: "Out of scope for forum migration - covered by auth-sso-enterprise spec"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Edge Case Testing"
+        justification: "Requires SSO infrastructure and SAML assertion replay testing tools, covered by separate auth-sso-enterprise spec"
 
   # ============================================================================
   # Performance (UNGROUPED-32 through UNGROUPED-35)
@@ -287,6 +359,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_PERFORMANCE_TESTING.md"
         command: "Manual load test - sustained 50 req/s for 10 minutes"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   - id: "PERF-SUSTAINED-SEARCH"
     description: "Performance: Search latency under sustained load"
@@ -294,6 +369,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/FORUM_PERFORMANCE_TESTING.md"
         command: "Manual load test - sustained 20 search req/s for 10 minutes"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   - id: "PERF-SUSTAINED-MEMORY"
     description: "Performance: Memory usage under sustained load"
@@ -302,6 +380,9 @@ acceptance_criteria:
         file: "docs/operations/FORUM_PERFORMANCE_TESTING.md"
         command: "kubectl top pods -n mereka-lms -l app.kubernetes.io/name=lms --containers"
         notes: "Monitor for 30 minutes under sustained load"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   - id: "PERF-ERROR-RATE"
     description: "Performance: Forum API error rate under normal load <1%"
@@ -309,6 +390,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/OBSERVABILITY_VERIFICATION.md"
         command: "Query Prometheus: rate(forum_request_total{status=~'5..'}[5m])"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Performance Testing"
+        justification: "Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes"
 
   # ============================================================================
   # Observability (UNGROUPED-36 through UNGROUPED-38)
@@ -320,6 +404,9 @@ acceptance_criteria:
         file: "docs/operations/OBSERVABILITY_VERIFICATION.md"
         command: "Open Grafana, navigate to Forum Dashboard, verify metrics appear"
         notes: "Dashboard should show request rate, latency, error rate, MongoDB query time"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to Grafana dashboard with accumulated forum metrics data"
 
   - id: "OBS-ALERT-ERROR-RATE"
     description: "Observability: Alert fires on forum error rate >5%"
@@ -327,6 +414,9 @@ acceptance_criteria:
       - type: "manual"
         file: "docs/operations/OBSERVABILITY_VERIFICATION.md"
         command: "Manual test - trigger errors to exceed threshold, verify alert fires"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to Grafana dashboard with accumulated forum metrics data"
 
   - id: "OBS-MONGODB-BACKUP"
     description: "Observability: MongoDB Atlas backup integrity verified"
@@ -335,3 +425,6 @@ acceptance_criteria:
         file: "docs/operations/OBSERVABILITY_VERIFICATION.md"
         command: "Login to MongoDB Atlas, verify automated backups running, test restore"
         notes: "Atlas handles backups automatically - verify backup policy in Atlas UI"
+        runbook: "docs/operations/FORUM_SERVICE_RUNBOOK.md"
+        section: "Observability Verification"
+        justification: "Requires access to Grafana dashboard with accumulated forum metrics data"

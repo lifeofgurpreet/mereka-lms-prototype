@@ -356,18 +356,27 @@ acceptance_criteria:
   - type: manual
     file: N/A (manual verification)
     command: N/A (manual verification) manual_verify_app_store_submission_complete
+    runbook: "docs/operations/MOBILE_APPS_RUNBOOK.md"
+    section: "Push Notification Testing"
+    justification: "Requires physical mobile device with configured FCM/APNs credentials for end-to-end push verification"
 - id: AC-036
   description: "Given a release candidate build, whensubmitted to Google Play Store, then the submission includes: store listing, scr..."
   verify:
   - type: manual
     file: N/A (manual verification)
     command: N/A (manual verification) manual_verify_play_store_submission_complete
+    runbook: "docs/operations/MOBILE_APPS_RUNBOOK.md"
+    section: "Offline Mode Testing"
+    justification: "Requires mobile device in airplane mode to verify offline content caching and sync behavior"
 - id: AC-037
   description: "Given a production release is approved, when the app is published, then it uses a phased/staged rollout (iOS: phased ..."
   verify:
   - type: manual
     file: N/A (manual verification)
     command: N/A (manual verification) manual_verify_phased_rollout_configuration
+    runbook: "docs/operations/MOBILE_APPS_RUNBOOK.md"
+    section: "Deep Link Testing"
+    justification: "Requires mobile device with installed app to verify deep link routing from email/web to native screens"
 - id: UNGROUPED-38
   description: 'Edge Case: Clock skew - token expiry checks use server Date header'
   verify:

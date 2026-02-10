@@ -96,7 +96,9 @@ acceptance_criteria:
   description: Root markdown violation on feature branch vs main enforcement
   verify:
   - type: manual
-    justification: Requires real GitHub PR workflow to validate branch-specific enforcement
+    runbook: "docs/operations/REPOSITORY_STRUCTURE_RUNBOOK.md"
+    section: "Edge Case: Deprecated Path Usage"
+    justification: "Requires manual code review to verify no scripts import from deprecated paths"
 - id: EC-002
   description: New subdirectory under scripts/ does not cause failure
   verify:
