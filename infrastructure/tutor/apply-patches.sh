@@ -498,6 +498,19 @@ for target in targets:
         "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
         "ARG OPENEDX_I18N_VERSION=master",
     )
+
+    # Tutor v21+ can use `uv pip` for requirements installs. Some upstream sdists
+    # incorrectly import pkg_resources at build time without declaring it in their
+    # build-system.requires (e.g. loremipsum). `--no-build-isolation` keeps
+    # setuptools/pkg_resources available and prevents hard build failures.
+    updated = updated.replace(
+        "$PIP_COMMAND install -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+        "$PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+    )
+    updated = updated.replace(
+        "$PIP_COMMAND install -r requirements/edx/development.txt",
+        "$PIP_COMMAND install --no-build-isolation -r requirements/edx/development.txt",
+    )
     updated = updated.replace(
         "RUN pip install setuptools==44.1.0 pip==20.0.2 wheel==0.34.2",
         "RUN pip install --upgrade pip==25.0.1 setuptools==75.3.0 wheel==0.45.1",

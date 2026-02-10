@@ -10,7 +10,7 @@
 */
 
 :root {
-  --mereka-branding-rev: "2026-02-07-pass3";
+  --mereka-branding-rev: "2026-02-10-pass1";
 
   /* Typography */
   --mereka-font-body: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -710,12 +710,14 @@ button.btn.btn-primary:focus {
   flex-direction: column;
 }
 
-.dashboard .my-courses .course-item {
+.dashboard .my-courses .course-item,
+.dashboard .listing-courses .course-item {
   margin: 0;
   width: 100%;
 }
 
-.dashboard .my-courses .course-item .course {
+.dashboard .my-courses .course-item .course,
+.dashboard .listing-courses .course-item .course {
   display: flex;
   align-items: stretch;
   min-height: 200px;
@@ -731,7 +733,9 @@ button.btn.btn-primary:focus {
    Upstream styles assume a vertical card (cover on top) and hardcode heights,
    which makes the cover image collapse to a narrow strip when the card is a row. */
 .dashboard .my-courses .course-item .course .course-image,
+.dashboard .listing-courses .course-item .course .course-image,
 .dashboard .my-courses .course-item .course .wrapper-course-image {
+  /* Some LMS variants skip `.my-courses` in markup; keep the fix scoped to the dashboard listing. */
   flex: 0 0 clamp(220px, 34%, 360px) !important;
   width: clamp(220px, 34%, 360px) !important;
   min-width: 220px !important;
@@ -741,14 +745,24 @@ button.btn.btn-primary:focus {
 }
 
 .dashboard .my-courses .course-item .course .course-image,
+.dashboard .listing-courses .course-item .course .course-image,
 .dashboard .my-courses .course-item .course .course-image .cover-image,
+.dashboard .listing-courses .course-item .course .course-image .cover-image,
 .dashboard .my-courses .course-item .course .course-image img,
+.dashboard .listing-courses .course-item .course .course-image img,
 .dashboard .my-courses .course-item .course .wrapper-course-image a,
 .dashboard .my-courses .course-item .course .wrapper-course-image img {
   height: 100%;
 }
 
 .dashboard .my-courses .course-item .course .course-image img {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.dashboard .listing-courses .course-item .course .course-image img {
   display: block;
   width: 100%;
   object-fit: cover;
@@ -770,8 +784,18 @@ button.btn.btn-primary:focus {
   width: 100%;
 }
 
+.dashboard .listing-courses .course-item .details {
+  display: flex !important;
+  align-items: stretch;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
 .dashboard .my-courses .course-item .wrapper-course-image a,
+.dashboard .listing-courses .course-item .wrapper-course-image a,
 .dashboard .my-courses .course-item .course-image,
+.dashboard .listing-courses .course-item .course-image,
 .dashboard .my-courses .course-item .course-image .cover-image {
   display: block;
   height: 100%;
@@ -785,7 +809,24 @@ button.btn.btn-primary:focus {
   object-position: center;
 }
 
+.dashboard .listing-courses .course-item .wrapper-course-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
 .dashboard .my-courses .course-item .wrapper-course-details {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.dashboard .listing-courses .course-item .wrapper-course-details {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -839,19 +880,27 @@ button.btn.btn-primary:focus {
 }
 
 @media (max-width: 992px) {
-  .dashboard .my-courses .course-item .course {
+  .dashboard .my-courses .course-item .course,
+  .dashboard .listing-courses .course-item .course {
     flex-direction: column;
     min-height: 0;
   }
 
-  .dashboard .my-courses .course-item .wrapper-course-image {
+  .dashboard .my-courses .course-item .wrapper-course-image,
+  .dashboard .listing-courses .course-item .wrapper-course-image {
     flex: 0 0 auto;
     max-width: none;
   }
 
   .dashboard .my-courses .course-item .course-image,
+  .dashboard .listing-courses .course-item .course-image,
   .dashboard .my-courses .course-item .course-image .cover-image,
+  .dashboard .listing-courses .course-item .course-image .cover-image,
   .dashboard .my-courses .course-item .wrapper-course-image img {
+    height: 200px;
+  }
+
+  .dashboard .listing-courses .course-item .wrapper-course-image img {
     height: 200px;
   }
 }
