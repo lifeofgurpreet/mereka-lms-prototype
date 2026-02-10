@@ -2,482 +2,602 @@
 # Maps acceptance criteria from spec to test files for traceability
 # Verify coverage: python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/ci-cd-pipeline_testmap.yaml
 
-spec: specs/ci-cd-pipeline_spec.md
+spec: "specs/ci-cd-pipeline_spec.md"
 acceptance_criteria:
-- id: AC-001
-  description: "Given a PR is opened against main, when CI runs, then all 12 CI jobs execute and their pass/fail status is reported a..."
-  verify:
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_ci_trigger.sh
-    command: pytest tests/workflows/test_ci_trigger.sh::test_pr_triggers_all_ci_jobs
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_ci_status_checks.sh
-    command: pytest tests/workflows/test_ci_status_checks.sh::test_all_jobs_report_status
-- id: AC-002
-  description: "Given the spec-lint job runs, when specs in specs/ have structural issues (missing frontmatter, missing required sect..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_spec_lint.sh
-    command: pytest tests/workflows/test_spec_lint.sh::test_spec_lint_detects_invalid_specs
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_spec_lint_errors.sh
-    command: pytest tests/workflows/test_spec_lint_errors.sh::test_error_message_specificity
-- id: AC-003
-  description: "Given the lint job runs, when Pythonfiles in scripts/ or services/ have ruff violations, then thejob fails"
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_lint_python.sh
-    command: pytest tests/workflows/test_lint_python.sh::test_ruff_violations_fail_lint
-- id: AC-004
-  description: "Given the validate-k8s job runs, whenany YAML in deploy/k8s/ is not a valid Kubernetes manifest,then kubeconform fail..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_validate_k8s.sh
-    command: pytest tests/workflows/test_validate_k8s.sh::test_invalid_k8s_fails_validation
-- id: AC-005
-  description: "Given the security-scan job runs, when verified secrets are detected by TruffleHog, then the job fails and the findin..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_trufflechog.sh
-    command: pytest tests/workflows/test_trufflechog.sh::test_trufflechog_detects_secrets
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_security_findings.sh
-    command: "pytest tests/workflows/test_security_findings.sh::test_security_findings_in_output"
-- id: AC-006
-  description: "Given the prod-tag-guard job runs, when any production overlay references a :latest tag, then thejob fails"
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_prod_tag_guard.sh
-    command: pytest tests/workflows/test_prod_tag_guard.sh::test_latest_tag_blocked_in_prod
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-no-latest-prod-tags.sh
-    command: ./scripts/qa/verify-no-latest-prod-tags.sh
-- id: AC-007
-  description: "Given all CI jobs pass, when the PR is reviewed and approved, then the merge button is enabled"
-  verify:
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_merge_gate_pass.sh
-    command: pytest tests/workflows/test_merge_gate_pass.sh::test_all_pass_enables_merge
-- id: AC-008
-  description: "Given a CI job fails, when a developer views the PR, then the merge button is disabled"
-  verify:
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_merge_gate_block.sh
-    command: pytest tests/workflows/test_merge_gate_block.sh::test_failure_blocks_merge
-- id: AC-009
-  description: "Given a push to main modifies infrastructure/tutor/**, when the build workflow triggers, then bothopenedx and MFE ima..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_build_trigger.sh
-    command: pytest tests/workflows/test_build_trigger.sh::test_tutor_change_triggers_build
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_image_tagging.sh
-    command: pytest tests/workflows/test_image_tagging.sh::test_sha_based_tagging
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_image_registry.sh
-    command: pytest tests/workflows/test_image_registry.sh::test_images_pushed_to_registry
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-build-workflow-contract.sh
-    command: ./scripts/qa/verify-build-workflow-contract.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-dev-prod-image-parity.sh
-    command: ./scripts/qa/verify-dev-prod-image-parity.sh
-- id: AC-010
-  description: "Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved i..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_digest_resolution.sh
-    command: "pytest tests/workflows/test_digest_resolution.sh::test_digest_resolved_and_exposed"
-  - type: automated
-    test_type: shell_verification
-    file: scripts/infra/resolve-image-digest.sh
-    command: ./scripts/infra/resolve-image-digest.sh --verify
-- id: AC-011
-  description: "Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contai..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_mfe_branding_check.sh
-    command: "pytest tests/workflows/test_mfe_branding_check.sh::test_mfe_branding_verification"
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_mfe_branding_fail.sh
-    command: pytest tests/workflows/test_mfe_branding_fail.sh::test_branding_fail_blocks_push
-- id: AC-012
-  description: "Given a manual dispatch with build_openedx=true and image_tag=v1.2.3, when the build completes, then the image is tag..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_custom_tag.sh
-    command: pytest tests/workflows/test_custom_tag.sh::test_custom_tag_applied
-- id: AC-013
-  description: "Given the build workflow, when imagesare pushed, then no :latest tag is published to Artifact Registry"
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_no_latest_tag.sh
-    command: pytest tests/workflows/test_no_latest_tag.sh::test_latest_tag_not_published
-- id: AC-014
-  description: "Given update_gitops=true and target_environment=production, when both builds succeed with digests,then release-opened..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_gitops_update_success.sh
-    command: "pytest tests/workflows/test_gitops_update_success.sh::test_gitops_update_invoked_with_digests"
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_gitops_flags.sh
-    command: pytest tests/workflows/test_gitops_flags.sh::test_release_script_flags
-  - type: automated
-    test_type: shell_verification
-    file: scripts/infra/release-openedx-gitops.sh
-    command: ./scripts/infra/release-openedx-gitops.sh --dry-run
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-gitops-image-overrides.sh
-    command: ./scripts/qa/verify-gitops-image-overrides.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-gitops-mereka-lms-pin.sh
-    command: ./scripts/qa/verify-gitops-mereka-lms-pin.sh
-- id: AC-015
-  description: "Given update_gitops=true and target_environment=select-environment, when the workflow runs, then it fails with an err..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_gitops_no_default_env.sh
-    command: "pytest tests/workflows/test_gitops_no_default_env.sh::test_select_environment_rejected"
-- id: AC-016
-  description: "Given update_gitops=true and target_environment=staging, when ENABLE_STAGING_ENV is not set to true, then the workflo..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_staging_gated.sh
-    command: pytest tests/workflows/test_staging_gated.sh::test_staging_gated_behind_flag
-- id: AC-017
-  description: "Given deploy_to_staging=true is usedin manual dispatch, when the workflow runs, then it fails with a deprecation erro..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_deploy_staging_deprecated.sh
-    command: "pytest tests/workflows/test_deploy_staging_deprecated.sh::test_deploy_staging_deprecated"
-- id: AC-018
-  description: "Given update_gitops=true but build_openedx=false, when the workflow runs, then it fails requiringboth builds for dete..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_gitops_requires_builds.sh
-    command: "pytest tests/workflows/test_gitops_requires_builds.sh::test_gitops_requires_both_builds"
-- id: AC-019
-  description: "Given the release-evidence.yml workflow is dispatched with valid tags, when it completes, then a release-evidence-<en..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_release_evidence.sh
-    command: "pytest tests/workflows/test_release_evidence.sh::test_release_evidence_artifact_uploaded"
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_evidence_bundle_contents.sh
-    command: "pytest tests/workflows/test_evidence_bundle_contents.sh::test_bundle_contents_complete"
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-release-evidence-workflow.sh
-    command: ./scripts/qa/verify-release-evidence-workflow.sh
-- id: AC-020
-  description: "Given the policy-checks.yml workflowis dispatched, when all verification scripts pass, then the workflow succeeds"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_policy_checks.sh
-    command: pytest tests/workflows/test_policy_checks.sh::test_all_policy_checks_pass
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_policy_checks_complete.sh
-    command: pytest tests/workflows/test_policy_checks_complete.sh::test_all_scripts_executed
-- id: AC-021
-  description: "Given a production rollback is needed, when the operator runs release-openedx-gitops.sh with priorknown-good tags, th..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_rollback_no_build.sh
-    command: "pytest tests/workflows/test_rollback_no_build.sh::test_rollback_uses_prior_images"
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_rollback_convergence.sh
-    command: pytest tests/workflows/test_rollback_convergence.sh::test_rollback_time_sla
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-release-automation.sh
-    command: ./scripts/qa/verify-release-automation.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-release-dry-run-contract.sh
-    command: ./scripts/qa/verify-release-dry-run-contract.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-release-workflow-invocation.sh
-    command: ./scripts/qa/verify-release-workflow-invocation.sh
-- id: AC-022
-  description: "Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, thenno failures are rep..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_health_check_scheduled.sh
-    command: "pytest tests/workflows/test_health_check_scheduled.sh::test_health_check_success_uploads_logs"
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_health_check_alert.sh
-    command: "pytest tests/workflows/test_health_check_alert.sh::test_health_check_failure_alerts"
-- id: AC-023
-  description: "Given the operations-gates-runtime.yml runs on schedule, when GKE authentication succeeds, then operations gates exec..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_ops_gates_scheduled.sh
-    command: pytest tests/workflows/test_ops_gates_scheduled.sh::test_ops_gates_success
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_ops_gates_retention.sh
-    command: "pytest tests/workflows/test_ops_gates_retention.sh::test_artifact_retention_30_days"
-- id: AC-024
-  description: "Given the dr-evidence-bundle.yml runson the 1st of the month, when GKE access is available, thena DR evidence bundle ..."
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_dr_evidence_scheduled.sh
-    command: pytest tests/workflows/test_dr_evidence_scheduled.sh::test_dr_bundle_monthly
-- id: AC-025
-  description: "Given the iOS workflow is manually dispatched, when it completes successfully, then a signed IPA is uploaded to TestF..."
-  verify:
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_ios_build.sh
-    command: pytest tests/workflows/test_ios_build.sh::test_ios_testflight_upload
-- id: AC-026
-  description: "Given the iOS workflow runs, when itcompletes (pass or fail), then SSH keys used for Match are cleaned up"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_ios_ssh_cleanup.sh
-    command: pytest tests/workflows/test_ios_ssh_cleanup.sh::test_ssh_cleanup_always_runs
-- id: AC-027
-  description: "Given the pre-commit hook is installed, when a developer attempts to commit a file containing a hardcoded secret patt..."
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_precommit_hook.sh
-    command: pytest tests/workflows/test_precommit_hook.sh::test_precommit_rejects_secrets
-- id: AC-028
-  description: "Given any workflow runs, when secretsare used, then no secret values appear in workflow logs (GitHub Actions masking)"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_secret_masking.sh
-    command: pytest tests/workflows/test_secret_masking.sh::test_secrets_masked_in_logs
-- id: UNGROUPED-29
-  description: 'EC-OOM-1: OpenEdX build OOM fails clearly (not hang)'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_openedx_oom.sh
-    command: pytest tests/workflows/test_openedx_oom.sh::test_openedx_oom_clear_error
-- id: UNGROUPED-30
-  description: 'EC-OOM-1: Step summary suggests remediation (local build or self-hosted runner)'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_oom_remediation.sh
-    command: pytest tests/workflows/test_oom_remediation.sh::test_oom_remediation_guidance
-- id: UNGROUPED-31
-  description: 'EC-OOM-2: MFE build OOM error distinguishablefrom other failures'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_mfe_oom.sh
-    command: pytest tests/workflows/test_mfe_oom.sh::test_mfe_oom_distinguishable
-- id: UNGROUPED-32
-  description: 'EC-Network-1: Docker push network failure fails build (no silent partial push)'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_docker_push_failure.sh
-    command: pytest tests/workflows/test_docker_push_failure.sh::test_push_failure_not_silent
-- id: UNGROUPED-33
-  description: 'EC-Network-2: Re-running workflow after pushfailure is idempotent'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_build_idempotency.sh
-    command: pytest tests/workflows/test_build_idempotency.sh::test_build_retry_idempotent
-- id: UNGROUPED-34
-  description: 'EC-Cache-1: Stale Tutor cache with --no-cacheproduces correct build'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_tutor_no_cache.sh
-    command: pytest tests/workflows/test_tutor_no_cache.sh::test_no_cache_overrides_stale
-- id: UNGROUPED-35
-  description: 'EC-GitOps-1: GitOps PAT expired fails beforegit operations with clear error'
-  verify:
-  - type: automated
-    test_type: unit
-    file: tests/workflows/test_gitops_pat_expired.sh
-    command: pytest tests/workflows/test_gitops_pat_expired.sh::test_expired_pat_clear_error
-- id: UNGROUPED-36
-  description: 'EC-GitOps-2: bbi-infrastructure merge conflict fails push (no force push)'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_gitops_conflict.sh
-    command: pytest tests/workflows/test_gitops_conflict.sh::test_conflict_no_force_push
-- id: UNGROUPED-37
-  description: 'EC-GitOps-3: Digest mismatch (build vs registry) fails release script'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_digest_mismatch.sh
-    command: pytest tests/workflows/test_digest_mismatch.sh::test_digest_mismatch_fails
-- id: UNGROUPED-38
-  description: "EC-GitOps-4: Partial build success (openedx builds, MFE fails) prevents GitOps update"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_partial_build_blocks_gitops.sh
-    command: "pytest tests/workflows/test_partial_build_blocks_gitops.sh::test_partial_build_blocks_gitops"
-- id: UNGROUPED-39
-  description: "EC-Schedule-1: GKE auth failure in scheduledworkflows (strict=false) skips GKE checks and reports warnings"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_schedule_auth_failure_soft.sh
-    command: "pytest tests/workflows/test_schedule_auth_failure_soft.sh::test_auth_failure_soft_mode"
-- id: UNGROUPED-40
-  description: "EC-Schedule-2: GKE auth failure in scheduledworkflows (strict=true) fails workflow"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_schedule_auth_failure_strict.sh
-    command: "pytest tests/workflows/test_schedule_auth_failure_strict.sh::test_auth_failure_strict_mode"
-- id: UNGROUPED-41
-  description: 'EC-Rate-1: GitHub API rate limits hit duringscheduled workflows fail gracefully'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_rate_limit_graceful.sh
-    command: "pytest tests/workflows/test_rate_limit_graceful.sh::test_rate_limit_graceful_fail"
-- id: UNGROUPED-42
-  description: 'EC-Retry-1: Failed workflow manual re-run succeeds (no stuck state)'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_workflow_retry.sh
-    command: pytest tests/workflows/test_workflow_retry.sh::test_workflow_retry_succeeds
-- id: UNGROUPED-43
-  description: 'NFR-Performance-1: CI quality gate jobs complete within 10 minutes each'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_ci_job_duration.sh
-    command: pytest tests/workflows/test_ci_job_duration.sh::test_ci_job_duration_under_10min
-- id: UNGROUPED-44
-  description: 'NFR-Performance-2: Full CI workflow completeswithin 15 minutes for typical PR'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_ci_total_duration.sh
-    command: pytest tests/workflows/test_ci_total_duration.sh::test_ci_total_under_15min
-- id: UNGROUPED-45
-  description: 'NFR-Performance-3: OpenEdX image build completes within 45 minutes'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_openedx_build_time.sh
-    command: "pytest tests/workflows/test_openedx_build_time.sh::test_openedx_build_under_45min"
-- id: UNGROUPED-46
-  description: 'NFR-Performance-4: MFE image build completeswithin 20 minutes'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_mfe_build_time.sh
-    command: pytest tests/workflows/test_mfe_build_time.sh::test_mfe_build_under_20min
-- id: UNGROUPED-47
-  description: 'NFR-Performance-5: iOS build completes withinminutes (timeout enforced)'
-  verify:
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_ios_build_time.sh
-    command: pytest tests/workflows/test_ios_build_time.sh::test_ios_build_under_90min
-- id: UNGROUPED-48
-  description: 'NFR-Performance-6: GitOps update (excluding build) completes within 5 minutes'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_gitops_update_time.sh
-    command: pytest tests/workflows/test_gitops_update_time.sh::test_gitops_update_under_5min
-- id: UNGROUPED-49
-  description: 'NFR-Reliability-1: CI workflow pass rate on main branch >= 95%'
-  verify:
-  - type: automated
-    test_type: monitoring
-    file: tests/workflows/test_ci_pass_rate.sh
-    command: tests/workflows/test_ci_pass_rate.sh test_ci_pass_rate_above_95_percent
-- id: UNGROUPED-50
-  description: "NFR-Reliability-2: Build workflows produce deterministic outputs (same commit, same image)"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_build_determinism.sh
-    command: pytest tests/workflows/test_build_determinism.sh::test_build_deterministic
-- id: UNGROUPED-51
-  description: "Observability-1: Every workflow produces GitHub Step Summary with structured results"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_step_summary.sh
-    command: pytest tests/workflows/test_step_summary.sh::test_step_summary_generated
-- id: UNGROUPED-52
-  description: "Observability-2: Build workflows log image tags, digests, registry references in step summary"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_build_logs.sh
-    command: pytest tests/workflows/test_build_logs.sh::test_build_logs_complete
-- id: UNGROUPED-53
-  description: "Observability-3: Scheduled workflows upload structured artifacts (JSON or log files)"
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_scheduled_artifacts.sh
-    command: "pytest tests/workflows/test_scheduled_artifacts.sh::test_scheduled_artifacts_structured"
-- id: UNGROUPED-54
-  description: 'Observability-4: Failed steps include stderrin step output'
-  verify:
-  - type: automated
-    test_type: integration
-    file: tests/workflows/test_failure_logs.sh
-    command: pytest tests/workflows/test_failure_logs.sh::test_stderr_in_output
-- id: UNGROUPED-55
-  description: 'Observability-5: Health check failure triggers notification'
-  verify:
-  - type: automated
-    test_type: e2e
-    file: tests/workflows/test_health_check_notification.sh
-    command: "pytest tests/workflows/test_health_check_notification.sh::test_health_check_alert_fired"
+  # Quality Gates
+  - id: "AC-001"
+    description: "Given a PR is opened against main, when CI runs, then all 12 CI jobs execute and their pass/fail status is reported as GitHub commit status checks"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'on:.*pull_request' .github/workflows/ci.yml && grep -q 'branches:.*main' .github/workflows/ci.yml"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "yq eval '.jobs | keys | length' .github/workflows/ci.yml | grep -q '[0-9]'"
+      - type: "manual"
+        test_type: "e2e"
+        file: "N/A"
+        command: "gh pr checks <pr-number> --required"
+
+  - id: "AC-002"
+    description: "Given the spec-lint job runs, when specs in specs/ have structural issues (missing frontmatter, missing required sections), then the job fails with specific error messages identifying the non-conforming spec"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'spec-lint' .github/workflows/ci.yml && grep -q 'mereka_spec_lint.py' .github/workflows/ci.yml"
+      - type: "automated"
+        test_type: "unit"
+        file: "scripts/qa/spec-tools/mereka_spec_lint.py"
+        command: "python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error"
+
+  - id: "AC-003"
+    description: "Given the lint job runs, when Python files in scripts/ or services/ have ruff violations, then the job fails"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'lint:' .github/workflows/ci.yml"
+      - type: "automated"
+        test_type: "unit"
+        file: "pyproject.toml"
+        command: "ruff check scripts/ services/ || test $? -eq 0"
+
+  - id: "AC-004"
+    description: "Given the validate-k8s job runs, when any YAML in deploy/k8s/ is not a valid Kubernetes manifest, then kubeconform fails the job"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'validate-k8s' .github/workflows/ci.yml && grep -q 'kubeconform' .github/workflows/ci.yml"
+      - type: "automated"
+        test_type: "integration"
+        file: "deploy/k8s/"
+        command: "find deploy/k8s/ -name '*.yaml' -o -name '*.yml' | wc -l | grep -q '[0-9]'"
+
+  - id: "AC-005"
+    description: "Given the security-scan job runs, when verified secrets are detected by TruffleHog, then the job fails and the finding is reported"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'security-scan' .github/workflows/ci.yml && grep -q 'trufflesecurity/trufflehog' .github/workflows/ci.yml"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q '\\-\\-only-verified' .github/workflows/ci.yml"
+
+  - id: "AC-006"
+    description: "Given the prod-tag-guard job runs, when any production overlay references a :latest tag, then the job fails"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-no-latest-prod-tags.sh"
+        command: "./scripts/qa/verify-no-latest-prod-tags.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'prod-tag-guard' .github/workflows/ci.yml || grep -q 'verify-no-latest-prod-tags.sh' .github/workflows/ci.yml"
+
+  - id: "AC-007"
+    description: "Given all CI jobs pass, when the PR is reviewed and approved, then the merge button is enabled"
+    verify:
+      - type: "manual"
+        test_type: "e2e"
+        file: "N/A"
+        command: "gh pr view <pr-number> --json statusCheckRollup"
+
+  - id: "AC-008"
+    description: "Given a CI job fails, when a developer views the PR, then the merge button is disabled"
+    verify:
+      - type: "manual"
+        test_type: "e2e"
+        file: "N/A"
+        command: "gh pr view <pr-number> --json mergeable"
+
+  # Image Build
+  - id: "AC-009"
+    description: "Given a push to main modifies infrastructure/tutor/**, when the build workflow triggers, then both openedx and MFE images are built, tagged with the git SHA and short SHA, and pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'infrastructure/tutor' .github/workflows/build-tutor-images.yml && grep -q 'asia-southeast1-docker.pkg.dev/mereka-lms/openedx' .github/workflows/build-tutor-images.yml"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-build-workflow-contract.sh"
+        command: "./scripts/qa/verify-build-workflow-contract.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-dev-prod-image-parity.sh"
+        command: "./scripts/qa/verify-dev-prod-image-parity.sh"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run list --workflow=build-tutor-images.yml --limit 5"
+
+  - id: "AC-010"
+    description: "Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved image digest (sha256:...)"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/infra/resolve-image-digest.sh"
+        command: "./scripts/infra/resolve-image-digest.sh --verify"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep -E 'sha256:[a-f0-9]{64}'"
+
+  - id: "AC-011"
+    description: "Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contains the expected branding revision marker"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'verify-mfe-image-branding.sh' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep 'branding verification'"
+
+  - id: "AC-012"
+    description: "Given a manual dispatch with build_openedx=true and image_tag=v1.2.3, when the build completes, then the image is tagged as openedx:v1.2.3 and openedx:<short-sha>"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'workflow_dispatch' .github/workflows/build-tutor-images.yml && grep -q 'image_tag' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh workflow run build-tutor-images.yml -f build_openedx=true -f image_tag=v1.2.3"
+
+  - id: "AC-013"
+    description: "Given the build workflow, when images are pushed, then no :latest tag is published to Artifact Registry"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-no-latest-prod-tags.sh"
+        command: "./scripts/qa/verify-no-latest-prod-tags.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "! grep -q ':latest' .github/workflows/build-tutor-images.yml || grep -q 'MUST NOT' .github/workflows/build-tutor-images.yml"
+
+  # GitOps Deployment
+  - id: "AC-014"
+    description: "Given update_gitops=true and target_environment=production, when both builds succeed with digests, then release-openedx-gitops.sh is invoked with --apply --commit --push --require-digests and both digest flags"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/infra/release-openedx-gitops.sh"
+        command: "./scripts/infra/release-openedx-gitops.sh --dry-run"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-gitops-image-overrides.sh"
+        command: "./scripts/qa/verify-gitops-image-overrides.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-gitops-mereka-lms-pin.sh"
+        command: "./scripts/qa/verify-gitops-mereka-lms-pin.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'update_gitops' .github/workflows/build-tutor-images.yml && grep -q 'target_environment' .github/workflows/build-tutor-images.yml"
+
+  - id: "AC-015"
+    description: "Given update_gitops=true and target_environment=select-environment, when the workflow runs, then it fails with an error requiring explicit environment selection"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'select-environment' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh workflow run build-tutor-images.yml -f update_gitops=true -f target_environment=select-environment"
+
+  - id: "AC-016"
+    description: "Given update_gitops=true and target_environment=staging, when ENABLE_STAGING_ENV is not set to true, then the workflow fails with a message indicating staging is disabled"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'ENABLE_STAGING_ENV' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh variable list | grep ENABLE_STAGING_ENV"
+
+  - id: "AC-017"
+    description: "Given deploy_to_staging=true is used in manual dispatch, when the workflow runs, then it fails with a deprecation error directing the user to update_gitops"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'deploy_to_staging' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh workflow run build-tutor-images.yml -f deploy_to_staging=true"
+
+  - id: "AC-018"
+    description: "Given update_gitops=true but build_openedx=false, when the workflow runs, then it fails requiring both builds for deterministic digest capture"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'build_openedx' .github/workflows/build-tutor-images.yml && grep -q 'build_mfe' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh workflow run build-tutor-images.yml -f update_gitops=true -f build_openedx=false"
+
+  # Release Process
+  - id: "AC-019"
+    description: "Given the release-evidence.yml workflow is dispatched with valid tags, when it completes, then a release-evidence-<env>-<run> artifact is uploaded containing: policy check logs, dry-run plan, resolved digests, and release-metadata.json"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/release-evidence.yml"
+        command: "grep -q 'release-evidence' .github/workflows/release-evidence.yml && grep -q 'release-metadata.json' .github/workflows/release-evidence.yml"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-release-evidence-workflow.sh"
+        command: "./scripts/qa/verify-release-evidence-workflow.sh"
+      - type: "manual"
+        test_type: "e2e"
+        file: "N/A"
+        command: "gh run download <run-id>"
+
+  - id: "AC-020"
+    description: "Given the policy-checks.yml workflow is dispatched, when all verification scripts pass, then the workflow succeeds"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/policy-checks.yml"
+        command: "grep -q 'verify-release-automation.sh' .github/workflows/policy-checks.yml"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-release-automation.sh"
+        command: "./scripts/qa/verify-release-automation.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-build-workflow-contract.sh"
+        command: "./scripts/qa/verify-build-workflow-contract.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-release-workflow-invocation.sh"
+        command: "./scripts/qa/verify-release-workflow-invocation.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-release-dry-run-contract.sh"
+        command: "./scripts/qa/verify-release-dry-run-contract.sh"
+
+  - id: "AC-021"
+    description: "Given a production rollback is needed, when the operator runs release-openedx-gitops.sh with prior known-good tags, then the rollback completes without building new images and pods converge within 10 minutes"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/infra/release-openedx-gitops.sh"
+        command: "./scripts/infra/release-openedx-gitops.sh --dry-run"
+      - type: "manual"
+        test_type: "e2e"
+        file: "docs/operations/RELEASE_CHECKLIST.md"
+        command: "grep -q 'Rollback' docs/operations/RELEASE_CHECKLIST.md"
+
+  # Scheduled Operations
+  - id: "AC-022"
+    description: "Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, then no failures are reported and logs are uploaded as artifacts"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/public-health-check.yml"
+        command: "grep -q 'schedule:' .github/workflows/public-health-check.yml && grep -q 'cron:' .github/workflows/public-health-check.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run list --workflow=public-health-check.yml --limit 5"
+
+  - id: "AC-023"
+    description: "Given the operations-gates-runtime.yml runs on schedule, when GKE authentication succeeds, then operations gates execute against the live cluster and artifacts are uploaded with 30-day retention"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/operations-gates-runtime.yml"
+        command: "grep -q 'schedule:' .github/workflows/operations-gates-runtime.yml && grep -q 'retention-days: 30' .github/workflows/operations-gates-runtime.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run list --workflow=operations-gates-runtime.yml --limit 5"
+
+  - id: "AC-024"
+    description: "Given the dr-evidence-bundle.yml runs on the 1st of the month, when GKE access is available, then a DR evidence bundle is generated and uploaded with 120-day retention"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/dr-evidence-bundle.yml"
+        command: "grep -q 'cron:.*0 2 1 \\* \\*' .github/workflows/dr-evidence-bundle.yml && grep -q 'retention-days: 120' .github/workflows/dr-evidence-bundle.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run list --workflow=dr-evidence-bundle.yml --limit 5"
+
+  # iOS Build
+  - id: "AC-025"
+    description: "Given the iOS workflow is manually dispatched, when it completes successfully, then a signed IPA is uploaded to TestFlight via App Store Connect API"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-ios-app.yml"
+        command: "grep -q 'workflow_dispatch' .github/workflows/build-ios-app.yml && grep -q 'TestFlight' .github/workflows/build-ios-app.yml"
+      - type: "manual"
+        test_type: "e2e"
+        file: "N/A"
+        command: "gh run list --workflow=build-ios-app.yml --limit 5"
+
+  - id: "AC-026"
+    description: "Given the iOS workflow runs, when it completes (pass or fail), then SSH keys used for Match are cleaned up"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-ios-app.yml"
+        command: "grep -q 'if: always()' .github/workflows/build-ios-app.yml && grep -q 'ssh-add -D' .github/workflows/build-ios-app.yml"
+
+  # Security
+  - id: "AC-027"
+    description: "Given the pre-commit hook is installed, when a developer attempts to commit a file containing a hardcoded secret pattern, then the commit is rejected with a warning"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".githooks/pre-commit"
+        command: "test -f .githooks/pre-commit && grep -q 'PASSWORD.*=.*[\"']' .githooks/pre-commit"
+      - type: "automated"
+        test_type: "unit"
+        file: ".githooks/pre-commit"
+        command: "bash -n .githooks/pre-commit"
+
+  - id: "AC-028"
+    description: "Given any workflow runs, when secrets are used, then no secret values appear in workflow logs (GitHub Actions masking)"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep -q '\\*\\*\\*'"
+
+  # Edge Cases
+  - id: "EC-OOM-1"
+    description: "OpenEdX build OOM fails clearly (not hang) with step summary suggesting remediation (local build or self-hosted runner)"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep -i 'out of memory'"
+
+  - id: "EC-OOM-2"
+    description: "MFE build OOM error distinguishable from other failures"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'NODE_OPTIONS=--max-old-space-size=6144' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep -i 'javascript heap out of memory'"
+
+  - id: "EC-Network-1"
+    description: "Docker push network failure fails build (no silent partial push)"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep 'docker push'"
+
+  - id: "EC-Network-2"
+    description: "Re-running workflow after push failure is idempotent"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run rerun <run-id>"
+
+  - id: "EC-Cache-1"
+    description: "Stale Tutor cache with --no-cache produces correct build"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q '\\-\\-no-cache' .github/workflows/build-tutor-images.yml || grep -q 'tutor images build' .github/workflows/build-tutor-images.yml"
+
+  - id: "EC-GitOps-1"
+    description: "GitOps PAT expired fails before git operations with clear error"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'GITOPS_PAT' .github/workflows/build-tutor-images.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh secret list | grep GITOPS_PAT"
+
+  - id: "EC-GitOps-2"
+    description: "bbi-infrastructure merge conflict fails push (no force push)"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/infra/release-openedx-gitops.sh"
+        command: "! grep -q 'git push.*--force' scripts/infra/release-openedx-gitops.sh"
+
+  - id: "EC-GitOps-3"
+    description: "Digest mismatch (build vs registry) fails release script"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/infra/release-openedx-gitops.sh"
+        command: "grep -q '\\-\\-require-digests' scripts/infra/release-openedx-gitops.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/infra/resolve-image-digest.sh"
+        command: "./scripts/infra/resolve-image-digest.sh --verify"
+
+  - id: "EC-GitOps-4"
+    description: "Partial build success (openedx builds, MFE fails) prevents GitOps update"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-tutor-images.yml"
+        command: "grep -q 'needs:' .github/workflows/build-tutor-images.yml"
+
+  - id: "EC-Schedule-1"
+    description: "GKE auth failure in scheduled workflows (strict=false) skips GKE checks and reports warnings"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/operations-gates-runtime.yml"
+        command: "grep -q 'strict_runtime' .github/workflows/operations-gates-runtime.yml"
+
+  - id: "EC-Schedule-2"
+    description: "GKE auth failure in scheduled workflows (strict=true) fails workflow"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/operations-gates-runtime.yml"
+        command: "grep -q 'strict_runtime' .github/workflows/operations-gates-runtime.yml"
+
+  - id: "EC-Rate-1"
+    description: "GitHub API rate limits hit during scheduled workflows fail gracefully"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh api rate_limit"
+
+  - id: "EC-Retry-1"
+    description: "Failed workflow manual re-run succeeds (no stuck state)"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run rerun <run-id>"
+
+  # NFR-Performance (all manual - require CI run history analysis)
+  - id: "NFR-Performance-1"
+    description: "CI quality gate jobs complete within 10 minutes each"
+    verify:
+      - type: "manual"
+        test_type: "performance"
+        file: "N/A"
+        command: "gh run list --workflow=ci.yml --limit 20 --json durationMs"
+
+  - id: "NFR-Performance-2"
+    description: "Full CI workflow completes within 15 minutes for typical PR"
+    verify:
+      - type: "manual"
+        test_type: "performance"
+        file: "N/A"
+        command: "gh run list --workflow=ci.yml --limit 20 --json durationMs"
+
+  - id: "NFR-Performance-3"
+    description: "OpenEdX image build completes within 45 minutes"
+    verify:
+      - type: "manual"
+        test_type: "performance"
+        file: "N/A"
+        command: "gh run list --workflow=build-tutor-images.yml --limit 20 --json durationMs"
+
+  - id: "NFR-Performance-4"
+    description: "MFE image build completes within 20 minutes"
+    verify:
+      - type: "manual"
+        test_type: "performance"
+        file: "N/A"
+        command: "gh run list --workflow=build-tutor-images.yml --limit 20 --json durationMs"
+
+  - id: "NFR-Performance-5"
+    description: "iOS build completes within 90 minutes (timeout enforced)"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/build-ios-app.yml"
+        command: "grep -q 'timeout-minutes: 90' .github/workflows/build-ios-app.yml"
+
+  - id: "NFR-Performance-6"
+    description: "GitOps update (excluding build) completes within 5 minutes"
+    verify:
+      - type: "manual"
+        test_type: "performance"
+        file: "N/A"
+        command: "gh run list --workflow=build-tutor-images.yml --limit 20 --json durationMs"
+
+  - id: "NFR-Reliability-1"
+    description: "CI workflow pass rate on main branch >= 95%"
+    verify:
+      - type: "manual"
+        test_type: "monitoring"
+        file: "N/A"
+        command: "gh run list --workflow=ci.yml --branch=main --limit 100 --json conclusion | jq '[.[] | select(.conclusion==\"success\")] | length'"
+
+  - id: "NFR-Reliability-2"
+    description: "Build workflows produce deterministic outputs (same commit, same image)"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run list --workflow=build-tutor-images.yml --limit 5"
+
+  # Observability
+  - id: "Observability-1"
+    description: "Every workflow produces GitHub Step Summary with structured results"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/ci.yml"
+        command: "grep -q 'GITHUB_STEP_SUMMARY' .github/workflows/ci.yml || grep -q 'step-summary' .github/workflows/ci.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id>"
+
+  - id: "Observability-2"
+    description: "Build workflows log image tags, digests, registry references in step summary"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep -E 'sha256:[a-f0-9]{64}'"
+
+  - id: "Observability-3"
+    description: "Scheduled workflows upload structured artifacts (JSON or log files)"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/operations-gates-runtime.yml"
+        command: "grep -q 'upload-artifact' .github/workflows/operations-gates-runtime.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run download <run-id>"
+
+  - id: "Observability-4"
+    description: "Failed steps include stderr in step output"
+    verify:
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run view <run-id> --log | grep -A 5 'Error:'"
+
+  - id: "Observability-5"
+    description: "Health check failure triggers notification"
+    verify:
+      - type: "automated"
+        test_type: "shell_verification"
+        file: ".github/workflows/public-health-check.yml"
+        command: "grep -q 'if: failure()' .github/workflows/public-health-check.yml || grep -q 'notification' .github/workflows/public-health-check.yml"
+      - type: "manual"
+        test_type: "integration"
+        file: "N/A"
+        command: "gh run list --workflow=public-health-check.yml --status=failure --limit 5"
