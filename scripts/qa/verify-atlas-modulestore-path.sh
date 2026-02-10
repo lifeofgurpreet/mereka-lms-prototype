@@ -111,7 +111,7 @@ for doc in raw_docs:
 
 expected_deployments = ["lms", "cms", "lms-worker", "cms-worker"]
 pat = re.compile(
-    r"-\s*name:\s*MONGODB_HOST\s+valueFrom:\s+secretKeyRef:\s+name:\s*openedx-secrets\s+key:\s*FORUM_MONGODB_SRV",
+    r"-\s*name:\s*MONGODB_HOST\s+valueFrom:\s+secretKeyRef:\s+name:\s*openedx-secrets\s+key:\s*FORUM_MONGODB_HOST",
     re.S,
 )
 for dep in expected_deployments:
@@ -121,12 +121,15 @@ for dep in expected_deployments:
         continue
     if not pat.search(doc):
         errors.append(
-            f"Deployment '{dep}' missing MONGODB_HOST -> openedx-secrets/FORUM_MONGODB_SRV contract"
+            f"Deployment '{dep}' missing MONGODB_HOST -> openedx-secrets/FORUM_MONGODB_HOST contract"
         )
 
-if "- secretKey: FORUM_MONGODB_SRV" not in external_secrets or "key: MEREKA_LMS_FORUM_MONGODB_SRV" not in external_secrets:
+if (
+    "- secretKey: FORUM_MONGODB_HOST" not in external_secrets
+    or "key: MEREKA_LMS_FORUM_MONGODB_SRV" not in external_secrets
+):
     errors.append(
-        "ExternalSecret contract missing FORUM_MONGODB_SRV <- MEREKA_LMS_FORUM_MONGODB_SRV mapping"
+        "ExternalSecret contract missing FORUM_MONGODB_HOST <- MEREKA_LMS_FORUM_MONGODB_SRV mapping"
     )
 
 for name, content in (("lms", lms_settings), ("cms", cms_settings)):
@@ -199,9 +202,9 @@ if not entry:
 ref = ((entry.get("valueFrom") or {}).get("secretKeyRef") or {})
 name = ref.get("name")
 key = ref.get("key")
-if name != "openedx-secrets" or key != "FORUM_MONGODB_SRV":
+if name != "openedx-secrets" or key != "FORUM_MONGODB_HOST":
     raise SystemExit(
-        f"Deployment {dep}: expected MONGODB_HOST from openedx-secrets/FORUM_MONGODB_SRV, got {name}/{key}"
+        f"Deployment {dep}: expected MONGODB_HOST from openedx-secrets/FORUM_MONGODB_HOST, got {name}/{key}"
     )
 PY
   done

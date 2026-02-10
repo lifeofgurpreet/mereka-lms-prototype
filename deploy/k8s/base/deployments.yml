@@ -103,6 +103,18 @@ spec:
               secretKeyRef:
                 name: openedx-secrets
                 key: FORUM_MONGODB_HOST
+          # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: JWT_SECRET_KEY_CMS
+          # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
+          - name: SOCIAL_AUTH_OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: OIDC_CLIENT_SECRET
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -207,6 +219,18 @@ spec:
               secretKeyRef:
                 name: openedx-secrets
                 key: FORUM_MONGODB_HOST
+          # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: JWT_SECRET_KEY_CMS
+          # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
+          - name: SOCIAL_AUTH_OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: OIDC_CLIENT_SECRET
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -279,6 +303,24 @@ spec:
               secretKeyRef:
                 name: openedx-secrets
                 key: FORUM_MONGODB_HOST
+          # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: JWT_SECRET_KEY_LMS
+          # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
+          - name: XQUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: XQUEUE_LMS_PASSWORD
+          # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
+          - name: SOCIAL_AUTH_OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: OIDC_CLIENT_SECRET
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -382,6 +424,24 @@ spec:
               secretKeyRef:
                 name: openedx-secrets
                 key: FORUM_MONGODB_HOST
+          # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
+          - name: JWT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: JWT_SECRET_KEY_LMS
+          # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
+          - name: XQUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: XQUEUE_LMS_PASSWORD
+          # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
+          - name: SOCIAL_AUTH_OIDC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: OIDC_CLIENT_SECRET
           envFrom:
             - secretRef:
                 name: openedx-secrets

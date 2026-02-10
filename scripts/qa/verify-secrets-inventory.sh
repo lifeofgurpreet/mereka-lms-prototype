@@ -49,7 +49,7 @@ required_subset = {
     # Atlas
     "MONGODB_USERNAME",
     "MONGODB_PASSWORD",
-    "FORUM_MONGODB_SRV",
+    "FORUM_MONGODB_HOST",
     # JWT
     "JWT_SECRET_KEY_LMS",
     "JWT_SECRET_KEY_CMS",
@@ -111,4 +111,3 @@ if extra_db:
 
 print("OK")
 PY
-
