@@ -44,9 +44,17 @@ class GridMail {
 		return this;
 	}
 	async sendErrorEmail(error) {
+		const errorNotificationEmails = process.env.ERROR_NOTIFICATION_EMAILS || '';
+		const emailList = errorNotificationEmails.split(',').map(e => e.trim()).filter(e => e);
+
+		if (emailList.length === 0) {
+			console.warn("ERROR_NOTIFICATION_EMAILS not configured - skipping error notification");
+			return this;
+		}
+
 		await this.mailer.sendMultiple({
 			from: this.from,
-			personalizations: ['0iamhira@gmail.com', 'gurpreet@biji-biji.com'].map((email) => {
+			personalizations: emailList.map((email) => {
 				return {
 					to: email,
 					subject: "Error in MCT",

@@ -24,11 +24,11 @@ noted otherwise.
 | Tier 0 — Foundations | ~95% | Repo structure ✅, secrets ✅, tutor ✅, tutor resilience ✅, cross-cutting ✅ |
 | Tier 1 — Core Infra | ~90% | K8s ✅, Atlas ✅, domains ✅, branding ✅ |
 | Tier 2 — Operational | ~90% | Observability ✅, SLO/SLA ✅, CI/CD ✅, analytics 7/8 scripts created |
-| Tier 3 — Data & Migrations | ~75% | Forum ✅, DR ✅, Kajabi 40/44 auto, video 5/25 auto |
+| Tier 3 — Data & Migrations | ~75% | Forum ✅, DR ✅, Kajabi 40/44 auto, video 6/25 auto |
 | Tier 4 — Enterprise Foundation | ~45% | Enterprise microservices ✅ (7 services + 10 verification scripts); multi-tenancy/SSO partial |
-| Tier 5 — Enterprise Features | ~2% | Spec-only; ecommerce has basic Tutor plugin |
+| Tier 5 — Enterprise Features | ~1% | Spec-only; ecommerce has basic Tutor plugin; HubSpot registration spec + testmap created |
 | Tier 6 — Deferred | ~0% | Spec-only |
-| **Weighted Overall** | **~43% (304/711)** | 304 automated, 353 planned (phantom), 51 manual, 3 monitoring; 16/28 specs pass full verification |
+| **Weighted Overall** | **~41% (305/737)** | 305 automated, 377 planned (phantom), 52 manual, 3 monitoring, 0 unmapped; 16/29 specs pass full verification |
 
 ---
 
@@ -95,7 +95,7 @@ he data pipeline. SLO/SLA defines service level contracts.
 | Spec | Status | Completion | Blocks | Notes |
 |------|--------|-----------|--------|-------|
 | `data-migrations-kajabi-mct_spec.md` | 🟢 LARGELY DONE | 40/44 ACs auto, 4 manual | — | 22 migration scripts + webhook contract verification; 4 remaining manual ACs require live E2E testing |
-| `video-pipeline-delivery_spec.md` | 🟡 IN PROGRESS | 5/25 ACs auto, 18 planned, 2 monitoring | Content libraries (video in courses) | Mux integration partial; 5 verification scripts created |
+| `video-pipeline-delivery_spec.md` | 🟡 IN PROGRESS | 6/25 ACs auto, 17 planned, 2 monitoring | Content libraries (video in courses) | Mux integration partial; 6 verification scripts created |
 | `disaster-recovery-business-continuity_spec.md` | ✅ DONE | 16/22 ACs auto, 6 manual | Production readiness | Velero scripts verified, backup automation complete, all runbook sections documented |
 | `forum-service-migration_spec.md` | ✅ DONE | 16/22 ACs auto, 6 manual | — | Python forum v2 with Meilisearch operational; 6 remaining manual ACs require live E2E/load testing |
 
@@ -147,6 +147,7 @@ ier 4 is done.
 | `badges-credentials-enterprise_spec.md` | 📝 SPEC ONLY | 0/32 ACs auto, 31 planned, 1 manual | `services/badgr-server/` | Badgr Server not deployed |
 | `content-libraries-v2_spec.md` | 📝 SPEC ONLY | 0/33 ACs auto, 33 planned | LMS config + K8s manifests | Content Libraries v2 + Blockstore not started |
 | `advanced-assessment-xqueue_spec.md` | 📝 SPEC ONLY | 0/39 ACs auto, 39 planned | `services/xqueue-graders/` | XQueue exists in manifests; graders not built |
+| `external-registration-hubspot_spec.md` | 📝 SPEC ONLY | 0/26 ACs, 24 planned, 2 manual | `services/hubspot-registration/` | HubSpot → Open edX user creation; feature-flagged, security-hardened |
 | `data-privacy-gdpr-compliance_spec.md` | 📝 SPEC ONLY | 0/30 ACs auto, 30 planned | `services/privacy-tools/` | GDPR/PDPA compliance (implement LAST in tier) |
 
 ⚠️ **data-privacy-gdpr-compliance** should be implemented las
@@ -240,6 +241,7 @@ er 5 |
 | badges-credentials-enterprise | Tier 4 | privacy |
 | content-libraries-v2 | Tier 4, video-pipeline | privacy |
 | advanced-assessment-xqueue | Tier 4 | privacy |
+| external-registration-hubspot | Tier 4, secrets, K8s, email-notifications | privacy |
 | data-privacy-gdpr-compliance | Tier 4, all Tier 5 peers | —
 (audits everything) |
 | mobile-apps-enterprise | Tier 4 | — (DEFERRED) |
@@ -282,3 +284,4 @@ s every other service's PII handling.
 | 2026-02-10 | Deep audit pass | Updated statuses with actual implementation percentages. 670 ACs across 26 specs; 222 with automated test files, 1004 planned (phantom scripts), 43 manual. Weighted overall: ~25-30% implemented. |
 | 2026-02-10 | Coverage report sync | Updated all AC counts from spec_coverage_report.py. 711 ACs across 28 specs; 206 automated, 433 planned, 69 manual, 3 monitoring. Weighted overall: 29%. Added tutor-configuration-resilience to Tier 0. Updated CI/CD (36/39 auto), data migrations (3/44), forum (9/22 auto + 13 manual), K8s (32/32), multi-site (9/9), enterprise-microservices (1/36). |
 | 2026-02-10 | Phantom script creation sprint | Created 33 verification scripts across data-migrations (20), analytics (5), video-pipeline (5), tutor-resilience (1), secrets-management (1), migration-pipeline orchestrator (1). Coverage: 206→304 automated (29%→42.8%). 16/28 specs pass full verification. Restructured 12 testmaps (moved 362 edge_cases from acceptance_criteria). Added 86 missing AC descriptions. Fixed linter MEREKA-REF-001 false positives. All 4 integrity gates pass. |
+| 2026-02-10 | Alignment audit | Created verify-mux-alerts.sh (AC-019, video-pipeline 5→6 auto). Added external-registration-hubspot to Tier 5 (26 ACs, no testmap). Fixed 11 spec frontmatter statuses to match reality (8 draft→completed, 2 draft→in_progress, 1 approved→completed). Updated totals: 29 specs, 737 ACs, 305 auto. |

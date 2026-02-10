@@ -81,6 +81,9 @@ secrets/
 .env.*
 !.env.example
 
+# HubSpot webhook MCT variant credentials
+hubspot-webhook-mct/.env
+
 # Backup files
 *.bak
 *.backup

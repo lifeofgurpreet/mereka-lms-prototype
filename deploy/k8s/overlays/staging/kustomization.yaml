@@ -1,3 +1,9 @@
+# DEPRECATED: 2026-02-10
+# This staging overlay is no longer actively maintained.
+# It is kept for historical reference only.
+# Production deployments use the 'production' overlay.
+# Local development uses the 'local' overlay.
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

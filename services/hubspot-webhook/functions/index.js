@@ -13,6 +13,7 @@ import { TokenCredentialAuthenticationProvider } from "@microsoft/microsoft-grap
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import crypto from "crypto";
 // Initialize Firebase Admin SDK
 initializeApp();
 const db = getFirestore();
@@ -36,6 +37,41 @@ setGlobalOptions({ maxInstances: 10 });
 const app = express();
 app.use(bodyParser.json());
 
+/**
+ * Verify HubSpot webhook signature (v3)
+ * @param {Object} req - Express request object
+ * @returns {boolean} - True if signature is valid
+ */
+function verifyHubSpotSignature(req) {
+  if (!HUBSPOT_WEBHOOK_SECRET) {
+    console.warn("HUBSPOT_WEBHOOK_SECRET not configured - skipping signature verification");
+    return true; // Allow requests if secret not configured (for backward compatibility)
+  }
+
+  const signature = req.headers['x-hubspot-signature-v3'];
+  if (!signature) {
+    console.error("Missing x-hubspot-signature-v3 header");
+    return false;
+  }
+
+  const requestBody = JSON.stringify(req.body);
+  const timestamp = req.headers['x-hubspot-request-timestamp'];
+
+  if (!timestamp) {
+    console.error("Missing x-hubspot-request-timestamp header");
+    return false;
+  }
+
+  // HubSpot v3 signature format: timestamp + method + uri + body
+  const sourceString = req.method + req.originalUrl + requestBody + timestamp;
+  const hash = crypto
+    .createHmac('sha256', HUBSPOT_WEBHOOK_SECRET)
+    .update(sourceString)
+    .digest('base64');
+
+  return hash === signature;
+}
+
 const MCT_ENDPT = process.env.MCT_ENDPT;
 const MCT_CLIENT_ID = process.env.MCT_CLIENT_ID;
 const MCT_CLIENT_SECRET = process.env.MCT_CLIENT_SECRET;
@@ -43,6 +79,9 @@ const MCT_API_URI = process.env.MCT_API_URI;
 const MCT_TENANT_ID = process.env.MCT_TENANT_ID;
 const SGRID_API_KEY = process.env.SGRID_API_KEY;
 const SGRID_FROM_EMAIL = process.env.SGRID_FROM_EMAIL;
+const HUBSPOT_PAT = process.env.HUBSPOT_PAT;
+const HUBSPOT_WEBHOOK_SECRET = process.env.HUBSPOT_WEBHOOK_SECRET;
+const HUBSPOT_REGISTRATION_ENABLED = process.env.HUBSPOT_REGISTRATION_ENABLED;
 const substringsToCheck = ['1kTBgf9zSQl2J4KhZWBh8Tw5437v', '1DQqCAAJfSzCDlK_rPCReEg5437v', '1UkBP9VPoRgymtkMFCPmHtg5437v', '1MWgao74AS-mixdrxJm46XA5437v', '1eASlzPOxQCK5yddvT2P0jg5437v'];
 const sendGridIdsForVariousLanguage = {
   '1MWgao74AS-mixdrxJm46XA5437v': 'd-f3d06a9f4eb54205852a89372767e84c', //vetname
@@ -59,6 +98,18 @@ const sendGridUidsofReminderEmailforVariousLanguage = {
   "1eASlzPOxQCK5yddvT2P0jg5437v": "d-90269d4b9ae140758307806e331fe5e9" //chinese
 }
 app.post("/api/createUser", async (req, res) => {
+  // Feature flag check
+  if (HUBSPOT_REGISTRATION_ENABLED !== 'true') {
+    console.log("HubSpot registration is disabled by feature flag");
+    return res.status(503).json({ message: 'Service disabled by feature flag' });
+  }
+
+  // Verify HubSpot webhook signature
+  if (!verifyHubSpotSignature(req)) {
+    console.error("Invalid HubSpot webhook signature");
+    return res.status(401).json({ message: 'Unauthorized - invalid signature' });
+  }
+
   await new Promise((resolve) => setTimeout(resolve, 10000));
   console.log("Request Body", req.body)
   GridMail.setApiKey(SGRID_API_KEY);
@@ -353,14 +404,14 @@ app.post("/api/createUser", async (req, res) => {
     }
   }
 });
-//It will generate the random password
+//It will generate the random password using cryptographically secure randomness
 function generateStrongPassword(length) {
   const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
   let password = "";
-  for (let i = 0, n = charset.length; i < length; ++i) {
-    password += charset.charAt(Math.floor(Math.random() * n));
+  const randomBytes = crypto.randomBytes(length);
+  for (let i = 0; i < length; i++) {
+    password += charset.charAt(randomBytes[i] % charset.length);
   }
-  console.log(password);
   return password;
 }
 
@@ -1000,11 +1051,13 @@ async function lookup_user(akey, email) {
 
 
 const getContactInfo = async (contactId) => {
-  const apiKey = "pat-na1-967cc036-c56e-407f-b84b-4d434f710e7d";
+  if (!HUBSPOT_PAT) {
+    throw new Error("HUBSPOT_PAT environment variable not configured");
+  }
   const url = `https://api.hubapi.com/contacts/v1/contact/vid/${contactId}/profile`;
   const config = {
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${HUBSPOT_PAT}`,
       clientType: "service",
     },
   };

@@ -1,7 +1,7 @@
 ---
 title: "Observability Stack (Prometheus/Tempo/Loki)"
 type: "feature_spec"
-status: "draft"
+status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"

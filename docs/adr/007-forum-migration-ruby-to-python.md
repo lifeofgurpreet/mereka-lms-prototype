@@ -1,4 +1,4 @@
-# ADR 002: Forum Service Migration from Ruby to Python
+# ADR-007: Forum Service Migration from Ruby to Python
 
 **Status:** Accepted and Implemented
 **Date:** 2026-02-10

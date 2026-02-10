@@ -12,6 +12,10 @@ This directory contains Architecture Decision Records (ADRs) documenting signifi
 | [ADR-004](004-secrets-management.md) | Secrets Management | Accepted | 2026-02-03 |
 | [ADR-005](005-domain-migration.md) | Domain Migration (legacy environment → academyV2) | Accepted | 2026-02-03 |
 | [ADR-006](006-tutor-plugin-based-configuration.md) | Tutor Plugin-Based Configuration Resilience | Proposed | 2026-02-10 |
+| [ADR-007](007-forum-migration-ruby-to-python.md) | Forum Service Migration from Ruby to Python | Accepted and Implemented | 2026-02-10 |
+| [ADR-008](008-redis-streams-event-bus.md) | Redis Streams as Event Bus | Accepted | 2026-02-10 |
+| [ADR-009](009-in-cluster-storage.md) | In-Cluster MySQL/Redis vs Cloud SQL/Memorystore | Accepted | 2026-02-10 |
+| [ADR-010](010-monorepo-architecture.md) | Monorepo Architecture | Accepted | 2026-02-10 |
 
 ## ADR Template
 

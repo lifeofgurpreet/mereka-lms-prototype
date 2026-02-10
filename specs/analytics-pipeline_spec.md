@@ -1,7 +1,7 @@
 ---
 title: "Analytics Pipeline (Aspects/Panorama)"
 type: "data_pipeline_spec"
-status: "draft"
+status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"

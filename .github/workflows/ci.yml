@@ -250,6 +250,27 @@ jobs:
           bash -n infrastructure/tutor/apply-patches.sh
           echo "✅ Patch script syntax valid"
 
+  tutor-config-tests:
+    name: Tutor Configuration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tutor apply patches test
+        run: bash tests/tutor/test_tutor_apply.sh
+
+      - name: Run tutor verify patches test
+        run: bash tests/tutor/test_verify_patches.sh
+
+      - name: Run tutor pre-commit hook test
+        run: bash tests/tutor/test_pre_commit_hook.sh
+
+      - name: Run tutor idempotency test
+        run: bash tests/tutor/test_idempotency.sh
+
+      - name: Run tutor edge cases test
+        run: bash tests/tutor/test_edge_cases.sh
+
   validate-infisical:
     name: Validate Infisical Secrets (prod/dev)
     runs-on: ubuntu-latest

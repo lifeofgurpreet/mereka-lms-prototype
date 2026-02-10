@@ -1,7 +1,7 @@
 ---
 title: "Data Migrations: Kajabi & MCT Legacy Systems"
 type: "migration_spec"
-status: "draft"
+status: "in_progress"
 owner: "migration-squad"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
