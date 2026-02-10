@@ -28,7 +28,7 @@ noted otherwise.
 | Tier 4 — Enterprise Foundation | ~45% | Enterprise microservices ✅ (7 services + 10 verification scripts); multi-tenancy/SSO partial |
 | Tier 5 — Enterprise Features | ~1% | Spec-only; ecommerce has basic Tutor plugin; HubSpot registration spec + testmap created |
 | Tier 6 — Deferred | ~0% | Spec-only |
-| **Weighted Overall** | **~41% (305/737)** | 305 automated, 377 planned (phantom), 52 manual, 3 monitoring, 0 unmapped; 16/29 specs pass full verification |
+| **Weighted Overall** | **~42% (310/737)** | 310 automated, 373 planned (phantom), 51 manual, 3 monitoring, 0 unmapped; 16/29 specs pass full verification |
 
 ---
 
@@ -147,7 +147,7 @@ ier 4 is done.
 | `badges-credentials-enterprise_spec.md` | 📝 SPEC ONLY | 0/32 ACs auto, 31 planned, 1 manual | `services/badgr-server/` | Badgr Server not deployed |
 | `content-libraries-v2_spec.md` | 📝 SPEC ONLY | 0/33 ACs auto, 33 planned | LMS config + K8s manifests | Content Libraries v2 + Blockstore not started |
 | `advanced-assessment-xqueue_spec.md` | 📝 SPEC ONLY | 0/39 ACs auto, 39 planned | `services/xqueue-graders/` | XQueue exists in manifests; graders not built |
-| `external-registration-hubspot_spec.md` | 📝 SPEC ONLY | 0/26 ACs, 24 planned, 2 manual | `services/hubspot-registration/` | HubSpot → Open edX user creation; feature-flagged, security-hardened |
+| `external-registration-hubspot_spec.md` | 📝 SPEC ONLY | 5/26 ACs auto, 21 planned | `services/hubspot-registration/` | HubSpot → Open edX user creation; feature-flagged, security-hardened |
 | `data-privacy-gdpr-compliance_spec.md` | 📝 SPEC ONLY | 0/30 ACs auto, 30 planned | `services/privacy-tools/` | GDPR/PDPA compliance (implement LAST in tier) |
 
 ⚠️ **data-privacy-gdpr-compliance** should be implemented las
@@ -285,3 +285,4 @@ s every other service's PII handling.
 | 2026-02-10 | Coverage report sync | Updated all AC counts from spec_coverage_report.py. 711 ACs across 28 specs; 206 automated, 433 planned, 69 manual, 3 monitoring. Weighted overall: 29%. Added tutor-configuration-resilience to Tier 0. Updated CI/CD (36/39 auto), data migrations (3/44), forum (9/22 auto + 13 manual), K8s (32/32), multi-site (9/9), enterprise-microservices (1/36). |
 | 2026-02-10 | Phantom script creation sprint | Created 33 verification scripts across data-migrations (20), analytics (5), video-pipeline (5), tutor-resilience (1), secrets-management (1), migration-pipeline orchestrator (1). Coverage: 206→304 automated (29%→42.8%). 16/28 specs pass full verification. Restructured 12 testmaps (moved 362 edge_cases from acceptance_criteria). Added 86 missing AC descriptions. Fixed linter MEREKA-REF-001 false positives. All 4 integrity gates pass. |
 | 2026-02-10 | Alignment audit | Created verify-mux-alerts.sh (AC-019, video-pipeline 5→6 auto). Added external-registration-hubspot to Tier 5 (26 ACs, no testmap). Fixed 11 spec frontmatter statuses to match reality (8 draft→completed, 2 draft→in_progress, 1 approved→completed). Updated totals: 29 specs, 737 ACs, 305 auto. |
+| 2026-02-10 | HubSpot testmap integration | Created 4 static verification scripts (scan-hubspot-credentials.sh, verify-hubspot-secrets.sh, verify-hubspot-k8s-security.sh, verify-hubspot-alerts.sh). Integrated into existing testmap as shell_verification entries for AC-HUB-005, AC-HUB-021, AC-HUB-022, AC-HUB-023, AC-HUB-026. Fixed testmap tier 2→5. Coverage: 305→310 auto (41%→42%). |

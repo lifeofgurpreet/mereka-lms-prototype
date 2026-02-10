@@ -5,7 +5,7 @@
 spec: external-registration-hubspot_spec.md
 plan: plans/external-registration-hubspot_plan.md
 testplan: plans/external-registration-hubspot_testplan.md
-tier: 2
+tier: 5
 
 acceptance_criteria:
   - id: AC-HUB-001
@@ -64,6 +64,14 @@ acceptance_criteria:
         test_type: integration
         file: "services/hubspot-registration/tests/integration/test_hubspot_integration.js"
         test_case: "should fetch contact profile using OAuth token and retry on 5xx"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/scan-hubspot-credentials.sh"
+        command: "Scan for PAT usage pattern (spec requires OAuth, not PAT)"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-hubspot-secrets.sh"
+        command: "Verify ExternalSecrets define HUBSPOT_CLIENT_ID, HUBSPOT_CLIENT_SECRET, HUBSPOT_REFRESH_TOKEN, SENDGRID_API_KEY, OPENEDX creds"
 
   - id: AC-HUB-006
     description: "Expired OAuth access token refreshed automatically and request retried"
@@ -212,6 +220,10 @@ acceptance_criteria:
         test_type: integration
         file: "services/hubspot-registration/tests/integration/test_webhook_receiver.js"
         test_case: "should log signature failure with email_hash and source IP hash, not plaintext email"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/scan-hubspot-credentials.sh"
+        command: "Scan for password/token logging patterns in console.log statements"
 
   - id: AC-HUB-022
     description: "Logs never contain plaintext passwords, API keys, or full email addresses (use email hash)"
@@ -229,6 +241,10 @@ acceptance_criteria:
         test_type: shell_verification
         file: "scripts/qa/verify-hubspot-registration.sh"
         command: "kubectl logs -n mereka-lms -l app=hubspot-registration-service | rg -i '(password|api_key|secret)' (should find none)"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/scan-hubspot-credentials.sh"
+        command: "Scan for hardcoded PATs, SendGrid keys, committed .env files, weak randomness, and password logging patterns"
 
   - id: AC-HUB-023
     description: "Container runs as UID 1000 (non-root), filesystem read-only except /tmp"
@@ -242,6 +258,10 @@ acceptance_criteria:
         test_type: shell_verification
         file: "scripts/qa/verify-hubspot-registration.sh"
         command: "kubectl exec into pod, verify UID 1000 and read-only filesystem"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-hubspot-k8s-security.sh"
+        command: "Static check: K8s Deployment securityContext (runAsNonRoot, runAsUser 1000, readOnlyRootFilesystem) and Dockerfile USER directive"
 
   - id: AC-HUB-024
     description: "/metrics endpoint returns all Prometheus metrics (10 metrics with correct labels)"
@@ -273,6 +293,10 @@ acceptance_criteria:
         runbook: "specs/plans/external-registration-hubspot_testplan.md"
         section: "Phase 5: Manual Verification > AC-HUB-026: Alert firing"
         justification: "Requires Prometheus + Alertmanager deployed; simulate failure by disabling Open edX API"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-hubspot-alerts.sh"
+        command: "Static check: PrometheusRule manifests define 5 HubSpot alerts + ServiceMonitor for metric scraping"
 
 edge_cases:
   - id: EC-1
