@@ -63,12 +63,23 @@ jobs:
           GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
           GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
           GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'false' }}
         run: |
-          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+          if gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
             --project "$GKE_CLUSTER_PROJECT" \
-            --zone "$GKE_CLUSTER_LOCATION" || true
+            --zone "$GKE_CLUSTER_LOCATION"; then
+            echo "CAN_RUN_RUNTIME=true" >> "$GITHUB_ENV"
+          else
+            echo "CAN_RUN_RUNTIME=false" >> "$GITHUB_ENV"
+            if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+              echo "ERROR: unable to get GKE credentials (set strict_runtime=false to skip runtime audit)" >&2
+              exit 1
+            fi
+            echo "WARN: unable to get GKE credentials; skipping runtime audit (strict_runtime=false)" >&2
+          fi
 
       - name: Run runtime/local audit bundle
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         env:
           INPUT_MODE: ${{ github.event.inputs.mode || 'all' }}
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'false' }}
@@ -92,6 +103,7 @@ jobs:
           ./scripts/qa/audit-observability.sh --mode "$MODE" --json | tee observability-audit-runtime.json
 
       - name: Upload runtime audit artifact
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: observability-audit-runtime

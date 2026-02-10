@@ -52,12 +52,23 @@ jobs:
           GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
           GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
           GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
         run: |
-          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+          if gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
             --project "$GKE_CLUSTER_PROJECT" \
-            --zone "$GKE_CLUSTER_LOCATION"
+            --zone "$GKE_CLUSTER_LOCATION"; then
+            echo "CAN_RUN_RUNTIME=true" >> "$GITHUB_ENV"
+          else
+            echo "CAN_RUN_RUNTIME=false" >> "$GITHUB_ENV"
+            if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+              echo "ERROR: unable to get GKE credentials (set strict_runtime=false to skip runtime gates)" >&2
+              exit 1
+            fi
+            echo "WARN: unable to get GKE credentials; skipping runtime gates (strict_runtime=false)" >&2
+          fi
 
       - name: Run consolidated operations gate
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         env:
           INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'both' }}
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
@@ -99,7 +110,7 @@ jobs:
           ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
 
       - name: Upload operations gate artifacts
-        if: ${{ always() }}
+        if: ${{ always() && env.CAN_RUN_RUNTIME == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: operations-gates-${{ github.run_id }}-${{ github.run_attempt }}

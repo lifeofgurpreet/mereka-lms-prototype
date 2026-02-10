@@ -33,16 +33,28 @@ jobs:
           GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
           GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
           GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
         run: |
-          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+          if gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
             --project "$GKE_CLUSTER_PROJECT" \
-            --zone "$GKE_CLUSTER_LOCATION"
+            --zone "$GKE_CLUSTER_LOCATION"; then
+            echo "CAN_RUN_RUNTIME=true" >> "$GITHUB_ENV"
+          else
+            echo "CAN_RUN_RUNTIME=false" >> "$GITHUB_ENV"
+            if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+              echo "ERROR: unable to get GKE credentials (set strict_runtime=false to skip runtime evidence)" >&2
+              exit 1
+            fi
+            echo "WARN: unable to get GKE credentials; skipping runtime evidence (strict_runtime=false)" >&2
+          fi
 
       - name: Prepare output path
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         run: |
           echo "EVIDENCE_DIR=var/dr-evidence/github-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
 
       - name: Build DR evidence bundle
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         env:
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
         run: |
@@ -55,6 +67,7 @@ jobs:
           ./scripts/qa/build-dr-evidence-bundle.sh --out-dir "$EVIDENCE_DIR" --tar
 
       - name: Upload DR evidence artifacts
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: dr-evidence-${{ github.run_id }}-${{ github.run_attempt }}
