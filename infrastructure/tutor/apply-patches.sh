@@ -173,6 +173,49 @@ for target in targets:
         index = text.index(anchor) + len(anchor)
         return text[:index] + inserts + text[index:]
 
+    def force_mfe_discussions_only(text):
+        """Force all courses to use MFE discussions, disable legacy Django views."""
+        if "lms/production.py" not in str(path):
+            return text
+
+        # Check if already patched
+        if "# Force MFE-only discussions (greenfield" in text:
+            return text
+
+        # Find the last occurrence of ENABLE_DISCUSSION_SERVICE and insert after it
+        marker = 'FEATURES["ENABLE_DISCUSSION_SERVICE"] = True'
+        if marker not in text:
+            marker = 'FEATURES["ENABLE_DISCUSSION_SERVICE"] = False'
+
+        if marker not in text:
+            return text
+
+        mfe_config = textwrap.dedent("""
+
+        # Force MFE-only discussions (greenfield - no legacy views needed)
+        FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel
+
+        # Ensure all courses use MFE by default
+        DISCUSSIONS_MFE_ENABLED = True
+        if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
+            DISCUSSIONS_MICROFRONTEND_URL = "https://apps.academyv2.mereka.io/discussions"
+        if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
+            DISCUSSIONS_MFE_FEEDBACK_URL = None
+        """)
+
+        # Find last occurrence of the marker and insert after that line
+        lines = text.splitlines()
+        last_idx = None
+        for idx, line in enumerate(lines):
+            if marker in line and not line.strip().startswith("#"):
+                last_idx = idx
+
+        if last_idx is not None:
+            lines.insert(last_idx + 1, mfe_config)
+            return "\n".join(lines)
+
+        return text
+
     def ensure_mfe_cookie_env(text):
         marker = "ENV MFE_CONFIG_API_URL=/api/mfe_config/v1"
         if marker not in text or "SESSION_COOKIE_DOMAIN" in text:
@@ -689,6 +732,7 @@ RUN pip install "pymongo[srv]" """,
     if path.name == "production.py":
         updated = ensure_allowed_hosts(updated)
         updated = ensure_csrf_origins(updated)
+        updated = force_mfe_discussions_only(updated)
         # Ensure DEFAULT_SITE_THEME is set for fallback branding
         if "DEFAULT_SITE_THEME" not in updated:
             # Add at the end of the file
