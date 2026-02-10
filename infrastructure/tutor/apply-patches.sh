@@ -339,11 +339,16 @@ for target in targets:
         return text.replace(brand_line, f"{brand_line}\n{plugin_line}")
 
     # Ensure MFEs build against Node 18 with the required toolchain.
-    if "docker.io/node:12-bullseye-slim" in updated:
-        updated = updated.replace(
-            "FROM docker.io/node:12-bullseye-slim",
-            "FROM docker.io/node:18-bullseye-slim",
-        )
+    #
+    # Tutor/upstream templates can drift between Node major versions (12 -> 18 -> 24 ...).
+    # We standardize *any* node base image reference in the MFE build Dockerfile to Node 18,
+    # which is the supported baseline for our current MFE patch stack.
+    updated = re.sub(
+        r"^FROM\s+(?:docker[.]io/)?node:[^ \t\r\n]+",
+        "FROM docker.io/node:18-bullseye-slim",
+        updated,
+        flags=re.MULTILINE,
+    )
     if "gcc git libgl1 libxi6 make" in updated:
         updated = updated.replace(
             "gcc git libgl1 libxi6 make",
