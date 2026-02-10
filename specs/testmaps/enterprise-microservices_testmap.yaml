@@ -137,6 +137,14 @@ acceptance_criteria:
     test_type: integration
     file: tests/integration/enterprise/test_catalog_filters.py
     command: "pytest tests/integration/enterprise/test_catalog_filters.py::test_catalog_filter_by_subject"
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-org-role-ownership.sh
+    command: ./scripts/qa/verify-org-role-ownership.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-platform-admins.sh
+    command: ./scripts/infra/ensure-platform-admins.sh --verify
 - id: AC-020
   description: "Given the catalog sync task has not run in 6 hours, when the Celery beat scheduler fires, then thesync task executes ..."
   verify:

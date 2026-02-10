@@ -18,6 +18,22 @@ acceptance_criteria:
         test_type: shell_verification
         file: "scripts/qa/verify-kustomize-render.sh"
         command: "scripts/qa/verify-kustomize-render.sh --overlay local"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/setup-k8s-overrides.sh"
+        command: "scripts/infra/setup-k8s-overrides.sh --verify"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/verify-k8s-overrides.sh"
+        command: "scripts/infra/verify-k8s-overrides.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/apply-kind-overlay.sh"
+        command: "scripts/infra/apply-kind-overlay.sh --dry-run"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-kustomize-no-deprecated-keys.sh"
+        command: "scripts/qa/verify-kustomize-no-deprecated-keys.sh"
     automated: true
     priority: P1
 
@@ -43,6 +59,18 @@ acceptance_criteria:
         test_type: kubectl_check
         file: "scripts/qa/verify-k8s-live-cluster.sh"
         command: "scripts/qa/verify-k8s-live-cluster.sh --check deployments"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/kind-load-openedx-image.sh"
+        command: "scripts/infra/kind-load-openedx-image.sh --verify"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/bootstrap-kind-secrets.sh"
+        command: "scripts/infra/bootstrap-kind-secrets.sh --verify"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/verify-deployment.sh"
+        command: "scripts/infra/verify-deployment.sh"
     automated: true
     priority: P1
 
@@ -165,6 +193,14 @@ acceptance_criteria:
         test_type: kubectl_check
         file: "scripts/qa/verify-k8s-live-cluster.sh"
         command: "scripts/qa/verify-k8s-live-cluster.sh --check endpoints"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/fix-service-selectors.sh"
+        command: "scripts/infra/fix-service-selectors.sh --dry-run"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-service-endpoints.sh"
+        command: "scripts/qa/verify-service-endpoints.sh"
     automated: true
     priority: P1
 

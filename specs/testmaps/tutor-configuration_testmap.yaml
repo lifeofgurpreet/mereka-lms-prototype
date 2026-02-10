@@ -20,6 +20,22 @@ acceptance_criteria:
         test_type: shell_verification
         file: "scripts/qa/verify-tutor-patches.sh"
         command: "grep mysql_native_password tutor_env/env/local/docker-compose.yml"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/tutor-config-save.sh"
+        command: "./scripts/infra/tutor-config-save.sh --verify"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/verify-tutor-patches.sh"
+        command: "./scripts/infra/verify-tutor-patches.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-mfe-build-prereqs.sh"
+        command: "./scripts/qa/verify-mfe-build-prereqs.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-mfe-image-branding.sh"
+        command: "./scripts/qa/verify-mfe-image-branding.sh"
 
   - id: AC-002
     description: "grep NODE_OPTIONS.*6144 tutor_env/env/build/openedx/Dockerfile returns results"

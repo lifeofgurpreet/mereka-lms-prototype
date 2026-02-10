@@ -11,6 +11,14 @@ acceptance_criteria:
         test_type: "shell_verification"
         file: "scripts/qa/verify-sli-foundation.sh"
         command: "bash scripts/qa/verify-sli-foundation.sh --check-tier-classification"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/verify-site-id-hardening.sh"
+        command: "bash scripts/qa/verify-site-id-hardening.sh"
+      - type: "automated"
+        test_type: "shell_verification"
+        file: "scripts/qa/lint-active-docs-env-model.sh"
+        command: "bash scripts/qa/lint-active-docs-env-model.sh"
 
   - id: "AC-002"
     verify:

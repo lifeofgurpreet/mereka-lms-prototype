@@ -26,6 +26,14 @@ acceptance_criteria:
     test_type: unit
     file: tests/unit/test_oidc_pkce.py
     command: "pytest tests/unit/test_oidc_pkce.py::test_oidc_authorization_includes_pkce_challenge"
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oidc-cookie-middleware-order.sh
+    command: ./scripts/qa/verify-oidc-cookie-middleware-order.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oidc-user-password-state.sh
+    command: ./scripts/qa/verify-oidc-user-password-state.sh
 - id: AC-003
   description: "Given two enterprise tenants with different IdPs, when a user authenticates via Acme's IdP, then the resulting Enterp..."
   verify:
@@ -178,6 +186,22 @@ acceptance_criteria:
     justification: "Authentik admin MFA enforcement is validated against the live Authentik instance; this cannot be fully verified in CI without cluster credentials."
     file: scripts/infra/ensure-authentik-admin-mfa.sh
     command: ./scripts/infra/ensure-authentik-admin-mfa.sh --verify
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-authentik-admin.sh
+    command: ./scripts/infra/ensure-authentik-admin.sh --verify
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-authentik-hardening.sh
+    command: ./scripts/infra/ensure-authentik-hardening.sh --verify
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-authentik-oidc-redirect-uris.sh
+    command: ./scripts/infra/ensure-authentik-oidc-redirect-uris.sh --verify
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/configure-github-authenticated-sso-canary.sh
+    command: ./scripts/infra/configure-github-authenticated-sso-canary.sh --verify
 - id: AC-017
   description: "Given a newly elevated staff user, when they next log in, then they are forced to enroll in MFA before accessing any ..."
   verify:
@@ -444,6 +468,14 @@ acceptance_criteria:
     test_type: e2e
     file: scripts/qa/verify-authenticated-sso-canary.sh
     command: ./scripts/qa/verify-authenticated-sso-canary.sh --env prod
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-auth-access.sh
+    command: ./scripts/qa/audit-auth-access.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-hardening.sh
+    command: ./scripts/qa/verify-auth-hardening.sh
 - id: AC-043
   description: "Given enterprise SSO is configured for a tenant, when ./scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=..."
   verify:

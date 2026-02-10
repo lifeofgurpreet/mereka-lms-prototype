@@ -309,6 +309,14 @@ acceptance_criteria:
     test_type: e2e
     file: tests/e2e/test_k8s_deployment.py
     command: pytest tests/e2e/test_k8s_deployment.py::test_payments_gateway_deployment_ready
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ecommerce-config.sh
+    command: ./scripts/qa/verify-ecommerce-config.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/test-stripe-webhook-delivery.sh
+    command: ./scripts/qa/test-stripe-webhook-delivery.sh --dry-run
 - id: AC-032
   description: "Given the gateway worker Deployment is applied, when kubectl get deployments -n mereka-lms -l app.kubernetes.io/name=..."
   verify:

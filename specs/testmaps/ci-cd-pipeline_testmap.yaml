@@ -58,6 +58,10 @@ acceptance_criteria:
     test_type: unit
     file: tests/workflows/test_prod_tag_guard.sh
     command: pytest tests/workflows/test_prod_tag_guard.sh::test_latest_tag_blocked_in_prod
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-no-latest-prod-tags.sh
+    command: ./scripts/qa/verify-no-latest-prod-tags.sh
 - id: AC-007
   description: "Given all CI jobs pass, when the PR is reviewed and approved, then the merge button is enabled"
   verify:
@@ -87,6 +91,14 @@ acceptance_criteria:
     test_type: integration
     file: tests/workflows/test_image_registry.sh
     command: pytest tests/workflows/test_image_registry.sh::test_images_pushed_to_registry
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: ./scripts/qa/verify-build-workflow-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dev-prod-image-parity.sh
+    command: ./scripts/qa/verify-dev-prod-image-parity.sh
 - id: AC-010
   description: "Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved i..."
   verify:
@@ -94,6 +106,10 @@ acceptance_criteria:
     test_type: integration
     file: tests/workflows/test_digest_resolution.sh
     command: "pytest tests/workflows/test_digest_resolution.sh::test_digest_resolved_and_exposed"
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/resolve-image-digest.sh
+    command: ./scripts/infra/resolve-image-digest.sh --verify
 - id: AC-011
   description: "Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contai..."
   verify:
@@ -130,6 +146,18 @@ acceptance_criteria:
     test_type: integration
     file: tests/workflows/test_gitops_flags.sh
     command: pytest tests/workflows/test_gitops_flags.sh::test_release_script_flags
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/release-openedx-gitops.sh
+    command: ./scripts/infra/release-openedx-gitops.sh --dry-run
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gitops-image-overrides.sh
+    command: ./scripts/qa/verify-gitops-image-overrides.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gitops-mereka-lms-pin.sh
+    command: ./scripts/qa/verify-gitops-mereka-lms-pin.sh
 - id: AC-015
   description: "Given update_gitops=true and target_environment=select-environment, when the workflow runs, then it fails with an err..."
   verify:
@@ -169,6 +197,10 @@ acceptance_criteria:
     test_type: integration
     file: tests/workflows/test_evidence_bundle_contents.sh
     command: "pytest tests/workflows/test_evidence_bundle_contents.sh::test_bundle_contents_complete"
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-evidence-workflow.sh
+    command: ./scripts/qa/verify-release-evidence-workflow.sh
 - id: AC-020
   description: "Given the policy-checks.yml workflowis dispatched, when all verification scripts pass, then the workflow succeeds"
   verify:
@@ -191,6 +223,18 @@ acceptance_criteria:
     test_type: e2e
     file: tests/workflows/test_rollback_convergence.sh
     command: pytest tests/workflows/test_rollback_convergence.sh::test_rollback_time_sla
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-automation.sh
+    command: ./scripts/qa/verify-release-automation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-dry-run-contract.sh
+    command: ./scripts/qa/verify-release-dry-run-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-release-workflow-invocation.sh
+    command: ./scripts/qa/verify-release-workflow-invocation.sh
 - id: AC-022
   description: "Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, thenno failures are rep..."
   verify:

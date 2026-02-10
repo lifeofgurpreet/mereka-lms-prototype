@@ -33,6 +33,18 @@ acceptance_criteria:
         file: "scripts/qa/verify-observability-stack.sh"
         command: "grep -r 'interval:' deploy/k8s/base/monitoring/servicemonitor-*.yaml | grep -v '#' | awk -F: '{print $NF}' | tr -d ' s' | awk '{if($1>30) exit 1}'"
         description: "Verify all ServiceMonitor scrape intervals are <= 30 seconds"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/audit-observability.sh"
+        command: "./scripts/qa/audit-observability.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/apply-monitoring-configs.sh"
+        command: "./scripts/infra/apply-monitoring-configs.sh --verify"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/verify-prometheus-integration.sh"
+        command: "./scripts/infra/verify-prometheus-integration.sh"
 
   - id: AC-002
     description: "Grafana shows pod CPU/memory: Dashboard visible at https://grafana.mereka.io"
@@ -79,6 +91,22 @@ acceptance_criteria:
         file: "scripts/qa/verify-observability-stack.sh"
         command: "kubectl exec -n mereka-lms deploy/lms -- curl -s localhost:8000/metrics | grep -qE '(http_request_duration_seconds|django_db_query_duration_seconds|django_cache_hit_ratio|celery_task_duration_seconds|lms_enrollment_total|lms_active_users)'"
         description: "Verify /metrics contains custom Open edX metrics from spec"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-sentry-wiring.sh"
+        command: "./scripts/qa/verify-sentry-wiring.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/verify-sentry-cli-contract.sh"
+        command: "./scripts/qa/verify-sentry-cli-contract.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/qa/audit-db-exporter-telemetry.sh"
+        command: "./scripts/qa/audit-db-exporter-telemetry.sh"
+      - type: automated
+        test_type: shell_verification
+        file: "scripts/infra/validate-telemetry-connectivity.sh"
+        command: "./scripts/infra/validate-telemetry-connectivity.sh"
 
   - id: AC-004
     description: "Loki receives logs: logcli query '{namespace=\"mereka-lms\"}' --limit 10"
