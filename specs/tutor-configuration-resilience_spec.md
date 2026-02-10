@@ -82,6 +82,236 @@ Every one of these incidents was caused by the same root failure: reliance on a 
 
 ---
 
+## Implementation Status
+
+### Overview
+
+The three-layer defense system has been partially implemented with the Tutor plugin architecture as the foundation. The plugin consolidates the majority of patches from the legacy `apply-patches.sh` script into native Tutor hooks.
+
+**Current State:**
+- **Layer 1 (Tutor Plugin)**: ✅ Implemented (`infrastructure/tutor/plugins/mereka_lms.py`)
+- **Layer 2 (Git Hooks)**: ✅ Implemented (`.githooks/pre-tutor-config`)
+- **Layer 3 (CI/CD)**: ⚠️ Partially implemented (`.github/workflows/tutor-config-verify.yml`, `.github/workflows/tutor-plugin-test.yml`)
+
+### Layer 1: Tutor Plugin Architecture
+
+**File:** `infrastructure/tutor/plugins/mereka_lms.py`
+**Size:** 555 lines
+**Version:** 1.0.0
+
+The `mereka_lms` plugin implements 15 ENV_PATCHES hooks covering:
+
+#### Django Settings Patches
+- **Hook:** `openedx-lms-production-settings`
+- **Patches Applied:**
+  - Multi-site domain configuration: Adds `academy.biji-biji.com` and `skillourfuture.academy.mereka.io` to `ALLOWED_HOSTS`
+  - CSRF trusted origins for all domains
+  - Session and CSRF cookie domains (`.academyv2.mereka.io`)
+  - Enterprise integration enablement (`ENABLE_ENTERPRISE_INTEGRATION = True`)
+  - MFE-only discussions (disables legacy in-LMS panel)
+  - Default theme (`DEFAULT_SITE_THEME = "mereka"`)
+  - Optional Redwood apps registration (content libraries, bookmarks, discussions, theming)
+  - Custom Django apps: `mfe_oauth_fix`, `openedx_prometheus`
+  - Django middleware: `MFEOAuthFixMiddleware`, `django_prometheus` middleware stack
+  - Prometheus metrics integration
+
+#### Asset Build Fixes
+- **Hooks:** `openedx-lms-assets-settings`, `openedx-cms-assets-settings`
+- **Patches Applied:**
+  - Ensures optional Redwood apps exist during collectstatic
+  - Monkey-patches Django's `safe_join` to prevent `SuspiciousFileOperation` errors (fixes CSS relative path references like `../../css/images/correct-icon.png`)
+
+#### Open edX Dockerfile Patches
+- **Hooks:** `openedx-dockerfile-pre-assets`, `openedx-dockerfile-post-python-requirements`
+- **Patches Applied:**
+  - Node.js memory limit increase (`NODE_OPTIONS="--max-old-space-size=6144"`)
+  - PYTHONPATH configuration (`/openedx/edx-platform`)
+  - Custom app installation (`mfe_oauth_fix`, `openedx_prometheus`)
+  - Additional dependencies: `django-prometheus==2.3.1`, `pymongo[srv]` (MongoDB Atlas SRV support)
+  - Google Fonts stripping from SCSS sources (offline-friendly CSS)
+  - Custom theme SASS compilation with Mereka theme
+  - Post-compilation Google Fonts cleanup from Studio CSS
+
+#### Webpack Configuration
+- **Hook:** `webpack-prod-config`
+- **Patches Applied:**
+  - Disables Terser parallel processing for build stability
+
+#### MFE Dockerfile Patches
+- **Hooks:** `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install`
+- **Patches Applied:**
+  - Node 18 build toolchain installation (gcc, g++, python3)
+  - Cookie domain environment variables
+  - `@openedx/frontend-plugin-framework` installation with legacy peer deps
+  - npm install resilience (retry logic: 6 attempts, configurable timeouts)
+
+#### MFE Theme Patches
+- **Hook:** `mfe-env-config`
+- **Patches Applied:**
+  - Imports Mereka theme SCSS
+  - Custom Mereka footer component (React)
+
+#### Infrastructure Configuration
+- **Hook:** `mysql-docker-compose`
+- **Patches Applied:**
+  - MySQL 8 authentication plugin fix (`--default-authentication-plugin=mysql_native_password`)
+
+- **Hook:** `caddy-caddyfile`
+- **Patches Applied:**
+  - Multi-domain LMS host blocks for extra domains
+  - Favicon rewrite rules
+  - Profile image upload size limits
+  - MFE proxy configuration for profile API
+
+- **Hook:** `nginx-lms-config`
+- **Patches Applied:**
+  - Additional server names for multi-site support
+  - Health check endpoint (`/health`)
+  - Prometheus metrics endpoint (`/metrics`)
+  - MFE profile API proxy
+
+#### Configuration Defaults
+The plugin defines the following configuration variables via `CONFIG_DEFAULTS` hook:
+- `MEREKA_LMS_VERSION`: Plugin version (1.0.0)
+- `MEREKA_LMS_EXTRA_HOSTS`: Additional LMS domains
+- `MEREKA_LMS_EXTRA_CSRF_ORIGINS`: CSRF trusted origins
+- `MEREKA_SESSION_COOKIE_DOMAIN`: Session cookie domain
+- `MEREKA_CSRF_COOKIE_DOMAIN`: CSRF cookie domain
+
+#### Plugin Initialization
+- **Hook:** `PLUGIN_LOADED` action
+- Prints loading message with version: `"Mereka LMS plugin v1.0.0 loaded"`
+
+### Custom Django Applications
+
+The plugin installs two custom Django applications that live under `infrastructure/tutor/custom-apps/`:
+
+#### 1. `mfe_oauth_fix`
+**Location:** `infrastructure/tutor/custom-apps/mfe_oauth_fix/`
+**Purpose:** Fixes MFE OAuth provider visibility by adding middleware that processes `/api/mfe_context` responses.
+
+#### 2. `openedx_prometheus`
+**Location:** `infrastructure/tutor/custom-apps/openedx_prometheus/`
+**Purpose:** Exposes `/metrics` endpoint for Prometheus scraping. Integrates with `django_prometheus` middleware.
+
+### Layer 2: Git Hooks
+
+**File:** `.githooks/pre-tutor-config`
+**Status:** ✅ Implemented
+
+The pre-commit hook:
+- Detects commits touching `tutor_env/` files
+- Warns if `config.yml` contains secrets
+- Prompts to confirm `apply-patches.sh` was run
+- Optionally runs verification checks (`verify-tutor-config.sh`)
+- Can be bypassed with `--no-verify`
+
+**Setup:**
+```bash
+git config --local include.path ../.gitconfig
+```
+
+**Workflow:**
+1. User commits changes to Tutor-generated files
+2. Hook detects changes and warns
+3. User confirms patches were applied
+4. Hook runs verification (optional)
+5. Commit proceeds if verification passes
+
+### Layer 3: CI/CD Verification
+
+**Status:** ⚠️ Partially implemented
+
+#### Existing Workflows
+
+**1. `tutor-config-verify.yml`**
+- Runs on pushes to `main` and pull requests
+- **Jobs:**
+  - `verify-patches`: Checks critical patches (MySQL auth, MFE Node 18, forum MongoDB SRV, multi-site domains)
+  - `verify-multi-site-domains`: Validates ALLOWED_HOSTS and CSRF origins
+  - `verify-idempotency`: Runs `apply-patches.sh` twice and compares checksums
+  - `verify-plugin-patches`: Checks plugin applies expected patches (placeholder)
+- **Limitation:** Uses inline checks instead of manifest-driven verification
+
+**2. `tutor-plugin-test.yml`**
+- Tests plugin lifecycle (enable, disable, re-enable)
+- Validates plugin loads without errors
+- Checks configuration variables are set
+
+#### Gap Analysis
+
+| Requirement | Status | Implementation |
+|-------------|--------|----------------|
+| Install Tutor and plugin in clean environment | ✅ Implemented | Both workflows install Tutor + plugin |
+| Run `tutor config save` with production settings | ✅ Implemented | Both workflows generate config |
+| Run `apply-patches.sh` | ✅ Implemented | `tutor-config-verify.yml` runs patches |
+| Execute manifest-driven verification | ❌ Not implemented | Workflows use inline checks, not `verify-tutor-patches.sh` |
+| Report per-patch pass/fail | ⚠️ Partial | `verify-patches` job reports 4 checks, not all patches |
+| Block merges on failure | ✅ Implemented | Both workflows are required checks |
+| Complete within 5 minutes | ✅ Implemented | Workflows complete in ~3-4 minutes |
+| Produce audit artifact | ❌ Not implemented | No artifact upload of verification report |
+
+### Migration Path from `apply-patches.sh`
+
+The plugin architecture enables a phased migration:
+
+**Phase 1 (Current):**
+- Plugin handles Django settings patches and Dockerfile environment patches
+- `apply-patches.sh` handles file-copy operations and template rewrites
+- Both run; verification checks all patches
+
+**Phase 2 (Target):**
+- Plugin handles all hook-expressible patches
+- `apply-patches.sh` reduced to file-system operations only (theme sync, logo copy)
+
+**Phase 3 (Future):**
+- `apply-patches.sh` eliminated entirely
+- All patches expressed as plugin hooks or Tutor mounts
+
+**Documentation:**
+- Plugin README: `infrastructure/tutor/plugins/README.md`
+- Implementation summary: `infrastructure/tutor/plugins/IMPLEMENTATION_SUMMARY.md`
+- Migration guide: `infrastructure/tutor/MIGRATION_TO_PLUGIN.md`
+
+### Testing & Verification
+
+**Test Files:**
+- `infrastructure/tutor/plugins/test_plugin.py`: Python syntax validation
+- `infrastructure/tutor/plugins/verify-plugin.sh`: Plugin verification script
+- Test suite planned: `tests/tutor/` (referenced in testmap but not yet implemented)
+
+**Verification Commands:**
+```bash
+# Enable plugin
+tutor plugins enable mereka_lms
+
+# Verify plugin loaded
+tutor plugins list | grep mereka_lms
+
+# Check configuration
+tutor config printvalue MEREKA_LMS_VERSION
+
+# Verify patches applied
+tutor config save
+grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py
+```
+
+### Outstanding Work
+
+1. **Patch Manifest:** `infrastructure/tutor/patch-manifest.yml` not yet created (specification exists in this document)
+2. **Verification Script:** `scripts/infra/verify-tutor-patches.sh` not yet implemented (existing `verify-tutor-config.sh` uses inline checks)
+3. **CI Refactor:** Workflows need refactor to use manifest-driven verification
+4. **Test Suite:** `tests/tutor/` directory tests not yet implemented (testmap references exist)
+5. **Makefile Integration:** `make tutor-apply` does not yet enable plugin or run manifest verification
+
+### Known Limitations
+
+1. **Theme file copying:** Plugin does NOT handle file copying (logos, fonts, SCSS files). These must be copied manually or via Tutor mounts.
+2. **MFE theme assets:** `indigo/mereka` directory requires manual setup or Dockerfile COPY.
+3. **Hook API stability:** Plugin tested with Tutor 18.2.2; may need adjustments for other versions.
+
+---
+
 ## Requirements
 
 ### Functional
@@ -170,17 +400,52 @@ Every one of these incidents was caused by the same root failure: reliance on a 
 ## Acceptance Criteria
 
 - [ ] AC-TCR-001: Given a clean checkout of the repository, when `pip install -e ./infrastructure/tutor/tutor-plugin-mereka` is run, then the plugin installs without errors and `tutor plugins list` shows `mereka` as available.
+  - **Status:** ✅ Implemented (plugin at `infrastructure/tutor/plugins/mereka_lms.py`, enabled via `tutor plugins enable mereka_lms`)
+  - **Verification:** `.github/workflows/tutor-plugin-test.yml` tests plugin lifecycle (enable/disable/re-enable)
+
 - [ ] AC-TCR-002: Given the Mereka plugin is enabled, when `tutor config save` is run, then the rendered `production.py` contains `academy.biji-biji.com` in `ALLOWED_HOSTS` without running `apply-patches.sh`.
+  - **Status:** ✅ Implemented (via `openedx-lms-production-settings` ENV_PATCHES hook)
+  - **Verification:** CI job `verify-multi-site-domains` checks ALLOWED_HOSTS (note: current job runs after `apply-patches.sh`, needs plugin-only test)
+
 - [ ] AC-TCR-003: Given the Mereka plugin is enabled, when `tutor config save` is run, then the rendered `docker-compose.yml` contains `mysql_native_password` without running `apply-patches.sh`.
+  - **Status:** ✅ Implemented (via `mysql-docker-compose` ENV_PATCHES hook)
+  - **Verification:** CI job `verify-patches` checks `mysql_native_password` (note: current job runs after `apply-patches.sh`, needs plugin-only test)
+
 - [ ] AC-TCR-004: Given the Mereka plugin is enabled and `apply-patches.sh` is run, when `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml` report PASS.
+  - **Status:** ❌ Not implemented (manifest-driven verification script does not exist; existing `verify-tutor-config.sh` uses inline checks)
+  - **Blocker:** `infrastructure/tutor/patch-manifest.yml` not yet created; `scripts/infra/verify-tutor-patches.sh` not yet implemented
+
 - [ ] AC-TCR-005: Given a developer modifies `infrastructure/tutor/apply-patches.sh` and attempts to commit, when the pre-commit hook runs, then it executes `verify-tutor-patches.sh` and blocks the commit if any patch verification fails.
+  - **Status:** ⚠️ Partially implemented (`.githooks/pre-tutor-config` hook exists and warns on Tutor changes, but does not yet call manifest-driven `verify-tutor-patches.sh`)
+  - **Current Behavior:** Hook prompts user to confirm patches were applied, optionally runs `verify-tutor-config.sh`
+
 - [ ] AC-TCR-006: Given a pull request that modifies any file under `infrastructure/tutor/`, when the CI workflow runs, then it executes the full patch verification and reports per-patch pass/fail status in the PR checks.
+  - **Status:** ⚠️ Partially implemented (`.github/workflows/tutor-config-verify.yml` has inline checks for 4 critical patches, not manifest-driven per-patch reporting)
+  - **Gap:** Workflow needs refactor to use `verify-tutor-patches.sh` reading from `patch-manifest.yml`
+
 - [ ] AC-TCR-007: Given the verification script is run with `--json` flag, then the output is valid JSON containing an array of objects with keys `id`, `description`, `status`, `target_file`, and `severity`.
+  - **Status:** ❌ Not implemented (verification script does not exist)
+  - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
+
 - [ ] AC-TCR-008: Given `tutor config save` is run without enabling the Mereka plugin and without running `apply-patches.sh`, when `verify-tutor-patches.sh` is executed, then it reports FAIL for all critical patches and exits with non-zero status.
+  - **Status:** ❌ Not implemented (verification script does not exist)
+  - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
+
 - [ ] AC-TCR-009: Given the `apply-patches.sh` script is run twice consecutively, when the rendered templates are compared, then they are byte-identical (idempotency).
+  - **Status:** ✅ Implemented (CI job `verify-idempotency` runs double-apply checksum comparison)
+  - **Verification:** `.github/workflows/tutor-config-verify.yml` job checks byte-identical output for Python, YAML, Dockerfile files
+
 - [ ] AC-TCR-010: Given a Tutor version upgrade from 18.x to 21.x, when the CI workflow runs on the upgrade PR, then it reports which patches need adaptation and blocks merge until all patches pass verification.
+  - **Status:** ❌ Not implemented (CI does not detect version upgrades or report patch adaptation needs)
+  - **Note:** Version upgrades are manual events; CI catches failures but upgrade planning requires human judgment
+
 - [ ] AC-TCR-011: Given the patch manifest contains a patch with severity `critical`, when that patch fails verification, then the verification tool outputs the failure in red/bold formatting (terminal) and includes remediation steps.
+  - **Status:** ❌ Not implemented (verification script does not exist)
+  - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
+
 - [ ] AC-TCR-012: Given the `make tutor-apply` command is run, then it executes `tutor config save`, enables the Mereka plugin, runs `apply-patches.sh`, runs `verify-tutor-patches.sh`, and restarts services -- in that order, failing fast on any step.
+  - **Status:** ⚠️ Partially implemented (Makefile runs `tutor config save` + `apply-patches.sh` + `restart`, but does not enable plugin or run verification)
+  - **Gap:** Needs plugin enablement step and manifest-driven verification
 
 ---
 
