@@ -1,132 +1,201 @@
-#!/bin/bash
-# Complete verification and sync pipeline for Kajabi → Open edX
-# Run this script step by step or all at once
+#!/usr/bin/env bash
+# Migration Verification Pipeline Orchestrator
+#
+# Runs all migration verification scripts in workflow order and produces
+# a summary report. Continues even if individual scripts fail.
+#
+# Usage: ./scripts/migrations/run-verification-pipeline.sh
+#
+# Output: scripts/migrations/output/verification/summary.txt
 
 set -euo pipefail
 
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-cd "$REPO_ROOT"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+QA_DIR="$PROJECT_ROOT/scripts/qa"
+OUTPUT_DIR="$SCRIPT_DIR/output/verification"
 
-OUTPUT_DIR="scripts/migrations/kajabi/output/verification"
-VERIFICATION_SCRIPT="scripts/migrations/kajabi/verify-and-sync-kajabi-to-openedx.py"
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
 
-echo "============================================================"
-echo "Kajabi → Open edX Verification & Sync Pipeline"
-echo "============================================================"
-echo
+# Summary file
+SUMMARY_FILE="$OUTPUT_DIR/summary.txt"
 
-# Step 1: Export from Open edX
-echo "STEP 1: Exporting from Open edX..."
-echo "-----------------------------------"
+# Results tracking
+declare -a RESULTS
+declare -a DURATIONS
+TOTAL_PASSED=0
+TOTAL_FAILED=0
 
-if command -v tutor &> /dev/null || [ -f "ops/tutor-env.sh" ]; then
-    echo "Attempting to export via Tutor/Django..."
-    
-    if [ -f "ops/tutor-env.sh" ]; then
-        source infrastructure/tutor/tutor-env.sh
-    fi
-    
-    # Try to export enrollments
-    if command -v tutor &> /dev/null; then
-        echo "Exporting enrollments via Tutor..."
-        tutor local run lms ./manage.py lms shell --settings=tutor.production <<'PYTHON' > "$OUTPUT_DIR/openedx_enrollments.csv" 2>/dev/null || true
-import csv
-import sys
-from django.contrib.auth.models import User
-from student.models import CourseEnrollment
+echo -e "${BLUE}=== Migration Verification Pipeline ===${NC}"
+echo -e "Started: $(date '+%Y-%m-%d %H:%M:%S')\n"
 
-writer = csv.writer(sys.stdout)
-writer.writerow(['email', 'username', 'course_id', 'enrollment_date', 'is_active'])
+# Verification scripts in workflow order
+VERIFICATION_SCRIPTS=(
+  # Export phase
+  "verify-kajabi-export.sh"
+  "verify-mct-export.sh"
+  "verify-kajabi-completions-export.sh"
+  "verify-mct-video-urls.sh"
 
-for enrollment in CourseEnrollment.objects.select_related('user').all():
-    writer.writerow([
-        enrollment.user.email or '',
-        enrollment.user.username,
-        str(enrollment.course_id),
-        enrollment.created.isoformat() if enrollment.created else '',
-        'True' if enrollment.is_active else 'False'
-    ])
-PYTHON
-        
-        echo "Exporting certificates via Tutor..."
-        tutor local run lms ./manage.py lms shell --settings=tutor.production <<'PYTHON' > "$OUTPUT_DIR/openedx_certificates.csv" 2>/dev/null || true
-import csv
-import sys
-from django.contrib.auth.models import User
-try:
-    from certificates.models import GeneratedCertificate
-except ImportError:
-    try:
-        from lms.djangoapps.certificates.models import GeneratedCertificate
-    except ImportError:
-        from common.djangoapps.certificates.models import GeneratedCertificate
+  # Transform phase
+  "verify-kajabi-transform.sh"
+  "verify-mct-transform.sh"
+  "verify-kajabi-olx-packages.sh"
+  "verify-mct-olx-packages.sh"
 
-writer = csv.writer(sys.stdout)
-writer.writerow(['email', 'username', 'course_id', 'status', 'created_date', 'modified_date', 'grade', 'mode'])
+  # User import phase
+  "verify-user-import-counts.sh"
+  "verify-cross-system-identity.sh"
 
-for cert in GeneratedCertificate.objects.select_related('user').all():
-    writer.writerow([
-        cert.user.email if cert.user else '',
-        cert.user.username if cert.user else '',
-        str(cert.course_id) if cert.course_id else '',
-        cert.status or '',
-        cert.created_date.isoformat() if cert.created_date else '',
-        cert.modified_date.isoformat() if cert.modified_date else '',
-        str(cert.grade) if cert.grade is not None else '',
-        cert.mode or '',
-    ])
-PYTHON
-        
-        if [ -f "$OUTPUT_DIR/openedx_enrollments.csv" ] && [ -s "$OUTPUT_DIR/openedx_enrollments.csv" ]; then
-            echo "✓ Exported enrollments: $(wc -l < "$OUTPUT_DIR/openedx_enrollments.csv" | tr -d ' ') lines"
-        fi
-        
-        if [ -f "$OUTPUT_DIR/openedx_certificates.csv" ] && [ -s "$OUTPUT_DIR/openedx_certificates.csv" ]; then
-            echo "✓ Exported certificates: $(wc -l < "$OUTPUT_DIR/openedx_certificates.csv" | tr -d ' ') lines"
-        fi
-    else
-        echo "⚠ Tutor command not found - skipping Open edX export"
-        echo "  You can export manually or provide database credentials"
-    fi
+  # Course import phase
+  "verify-course-import-counts.sh"
+  "verify-course-structure-sample.sh"
+
+  # Enrollment phase
+  "verify-enrollment-import-counts.sh"
+  "verify-enrollment-skip-handling.sh"
+
+  # Certificate phase
+  "verify-certificate-issuance.sh"
+
+  # Video phase
+  "verify-mux-video-upload.sh"
+  "verify-kajabi-thumbnails.sh"
+
+  # Rollback and idempotency phase
+  "verify-rollback-dry-run.sh"
+  "verify-idempotency.sh"
+  "verify-incremental-sync.sh"
+)
+
+# Function to run a verification script
+run_verification() {
+  local script_name="$1"
+  local script_path="$QA_DIR/$script_name"
+
+  # Check if script exists
+  if [[ ! -f "$script_path" ]]; then
+    echo -e "${YELLOW}⚠ SKIP${NC}  $script_name (not found)"
+    RESULTS+=("SKIP")
+    DURATIONS+=("0")
+    return
+  fi
+
+  echo -e "${BLUE}▶ RUN${NC}   $script_name"
+
+  # Run script and capture exit code
+  local start_time
+  start_time=$(date +%s)
+
+  set +e
+  "$script_path" > "$OUTPUT_DIR/${script_name}.log" 2>&1
+  local exit_code=$?
+  set -e
+
+  local end_time
+  end_time=$(date +%s)
+  local duration=$((end_time - start_time))
+
+  # Record result
+  if [[ $exit_code -eq 0 ]]; then
+    echo -e "${GREEN}✓ PASS${NC}  $script_name (${duration}s)"
+    RESULTS+=("PASS")
+    TOTAL_PASSED=$((TOTAL_PASSED + 1))
+  else
+    echo -e "${RED}✗ FAIL${NC}  $script_name (exit code: $exit_code, ${duration}s)"
+    RESULTS+=("FAIL")
+    TOTAL_FAILED=$((TOTAL_FAILED + 1))
+  fi
+
+  DURATIONS+=("$duration")
+  echo ""
+}
+
+# Run all verification scripts
+for script in "${VERIFICATION_SCRIPTS[@]}"; do
+  run_verification "$script"
+done
+
+# Calculate total duration
+TOTAL_DURATION=0
+for duration in "${DURATIONS[@]}"; do
+  TOTAL_DURATION=$((TOTAL_DURATION + duration))
+done
+
+# Write summary file
+{
+  echo "=== Migration Verification Pipeline Summary ==="
+  echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+  echo ""
+  echo "Total Scripts: ${#VERIFICATION_SCRIPTS[@]}"
+  echo "Passed: $TOTAL_PASSED"
+  echo "Failed: $TOTAL_FAILED"
+  echo "Total Duration: ${TOTAL_DURATION}s"
+  echo ""
+  echo "=== Individual Results ==="
+  echo ""
+  printf "%-50s %-10s %-10s\n" "Script" "Result" "Duration"
+  printf "%-50s %-10s %-10s\n" "------" "------" "--------"
+
+  for i in "${!VERIFICATION_SCRIPTS[@]}"; do
+    printf "%-50s %-10s %-10s\n" \
+      "${VERIFICATION_SCRIPTS[$i]}" \
+      "${RESULTS[$i]}" \
+      "${DURATIONS[$i]}s"
+  done
+
+  echo ""
+  echo "=== Logs ==="
+  echo "Individual logs: $OUTPUT_DIR/*.log"
+} > "$SUMMARY_FILE"
+
+# Print summary table
+echo -e "${BLUE}=== Summary ===${NC}"
+echo ""
+printf "%-50s %-10s %-10s\n" "Script" "Result" "Duration"
+printf "%-50s %-10s %-10s\n" "------" "------" "--------"
+
+for i in "${!VERIFICATION_SCRIPTS[@]}"; do
+  result="${RESULTS[$i]}"
+  color="$NC"
+
+  case "$result" in
+    PASS) color="$GREEN" ;;
+    FAIL) color="$RED" ;;
+    SKIP) color="$YELLOW" ;;
+  esac
+
+  printf "%-50s ${color}%-10s${NC} %-10s\n" \
+    "${VERIFICATION_SCRIPTS[$i]}" \
+    "$result" \
+    "${DURATIONS[$i]}s"
+done
+
+echo ""
+echo -e "${BLUE}Total:${NC} ${#VERIFICATION_SCRIPTS[@]} scripts"
+echo -e "${GREEN}Passed:${NC} $TOTAL_PASSED"
+echo -e "${RED}Failed:${NC} $TOTAL_FAILED"
+echo -e "${BLUE}Duration:${NC} ${TOTAL_DURATION}s"
+echo ""
+echo -e "${BLUE}Summary written to:${NC} $SUMMARY_FILE"
+
+# Exit with failure if any script failed
+if [[ $TOTAL_FAILED -gt 0 ]]; then
+  echo -e "${RED}Pipeline failed: $TOTAL_FAILED script(s) failed${NC}"
+  exit 1
 else
-    echo "⚠ Tutor not available - skipping Open edX export"
-    echo "  To export manually, see: docs/VERIFY_AND_SYNC_KAJABI.md"
+  echo -e "${GREEN}Pipeline passed: All scripts succeeded${NC}"
+  exit 0
 fi
-
-echo
-
-# Step 2: Run verification
-echo "STEP 2: Running verification..."
-echo "--------------------------------"
-
-python3 "$VERIFICATION_SCRIPT" \
-  --kajabi-enrollments scripts/migrations/kajabi/output/enrollments.csv \
-  --kajabi-users scripts/migrations/kajabi/output/users.csv \
-  --kajabi-certificates exports/kajabi/certificate_eligibility.ndjson \
-  --course-manifest scripts/migrations/kajabi/output/course_packages/course_packages_manifest.csv \
-  --output-dir "$OUTPUT_DIR" \
-  --skip-openedx-export
-
-echo
-
-# Step 3: Show summary
-echo "STEP 3: Summary Report"
-echo "--------------------------------"
-if [ -f "$OUTPUT_DIR/summary.txt" ]; then
-    cat "$OUTPUT_DIR/summary.txt"
-fi
-
-echo
-echo "============================================================"
-echo "✓ Verification complete!"
-echo "============================================================"
-echo
-echo "Next steps:"
-echo "1. Review reports in: $OUTPUT_DIR"
-echo "2. Import missing enrollments: $OUTPUT_DIR/import_missing_enrollments.sh"
-echo "3. Generate certificates: See $OUTPUT_DIR/generate_missing_certificates.sh"
-echo
 
 
 
