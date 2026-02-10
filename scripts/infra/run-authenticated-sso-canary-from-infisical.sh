@@ -127,13 +127,20 @@ fetch_plain() {
     --plain --silent)
 }
 
+fetch_plain_optional() {
+  local key="$1"
+  fetch_plain "$key" 2>/dev/null || true
+}
+
 # Use the shared admin test creds as the canary identity. Do not print.
 SSO_CANARY_EMAIL_PROD="$(fetch_plain GOOGLE_IMPERSONATE_EMAIL)"
 SSO_CANARY_PASSWORD_PROD="$(fetch_plain GOOGLE_IMPERSONATE_PASSWORD)"
 
-# Default: reuse for Studio canary unless overridden upstream.
-SSO_CANARY_STUDIO_EMAIL_PROD="${SSO_CANARY_STUDIO_EMAIL_PROD:-$SSO_CANARY_EMAIL_PROD}"
-SSO_CANARY_STUDIO_PASSWORD_PROD="${SSO_CANARY_STUDIO_PASSWORD_PROD:-$SSO_CANARY_PASSWORD_PROD}"
+# Studio canary creds MUST be explicit and should belong to a Studio-access (staff) account.
+# Do NOT default to the primary canary identity, because a non-staff user can get stuck in
+# a /home -> /login -> oauth2 loop (and this would produce noisy false-negative failures).
+SSO_CANARY_STUDIO_EMAIL_PROD="${SSO_CANARY_STUDIO_EMAIL_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_PROD)}"
+SSO_CANARY_STUDIO_PASSWORD_PROD="${SSO_CANARY_STUDIO_PASSWORD_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_PROD)}"
 
 exec env \
   REQUIRE_SECRETS="$REQUIRE_SECRETS" \
@@ -143,4 +150,3 @@ exec env \
   SSO_CANARY_STUDIO_EMAIL_PROD="$SSO_CANARY_STUDIO_EMAIL_PROD" \
   SSO_CANARY_STUDIO_PASSWORD_PROD="$SSO_CANARY_STUDIO_PASSWORD_PROD" \
   "$REPO_ROOT/scripts/qa/verify-authenticated-sso-canary.sh" --env "$ENV_SCOPE"
-

@@ -146,15 +146,22 @@ fetch_plain() {
     --plain --silent)
 }
 
+fetch_plain_optional() {
+  local key="$1"
+  fetch_plain "$key" 2>/dev/null || true
+}
+
 # Source-of-truth shared creds used for Authentik + LMS admin verification.
 export SSO_CANARY_EMAIL_PROD
 export SSO_CANARY_PASSWORD_PROD
 SSO_CANARY_EMAIL_PROD="$(fetch_plain GOOGLE_IMPERSONATE_EMAIL)"
 SSO_CANARY_PASSWORD_PROD="$(fetch_plain GOOGLE_IMPERSONATE_PASSWORD)"
 
-# Optional: allow using the same creds for Studio canary unless overridden upstream.
-export SSO_CANARY_STUDIO_EMAIL_PROD="${SSO_CANARY_STUDIO_EMAIL_PROD:-$SSO_CANARY_EMAIL_PROD}"
-export SSO_CANARY_STUDIO_PASSWORD_PROD="${SSO_CANARY_STUDIO_PASSWORD_PROD:-$SSO_CANARY_PASSWORD_PROD}"
+# Studio canary creds MUST be explicit and should belong to a Studio-access (staff) account.
+# Do NOT default to the primary canary identity, otherwise non-staff users can get stuck
+# in a /home -> /login -> oauth2 loop and the gate becomes noisy.
+export SSO_CANARY_STUDIO_EMAIL_PROD="${SSO_CANARY_STUDIO_EMAIL_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_EMAIL_PROD)}"
+export SSO_CANARY_STUDIO_PASSWORD_PROD="${SSO_CANARY_STUDIO_PASSWORD_PROD:-$(fetch_plain_optional SSO_CANARY_STUDIO_PASSWORD_PROD)}"
 
 # Delegate GitHub secret creation to the existing helper.
 exec env \
