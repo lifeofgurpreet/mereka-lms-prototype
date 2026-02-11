@@ -1,22 +1,278 @@
+# @covers AC-004, AC-006, AC-007, AC-008, AC-015, AC-016, AC-017, AC-018
+# @spec: ecommerce-purchase-gateway_spec.md
+
+from datetime import datetime, timezone
+
 import stripe
 import structlog
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.database import get_db
+from app.models.order import Order, OrderAuditLog, OrderStatus
+from app.models.stripe_event import ProcessingStatus, StripeEvent
+from app.services.fulfillment import fulfill_order
+from app.services.lms_client import LMSClient
 
 router = APIRouter()
 logger = structlog.get_logger()
+
+
+async def _log_audit(
+    db: AsyncSession,
+    order: Order,
+    old_status: OrderStatus,
+    new_status: OrderStatus,
+    triggered_by: str,
+    details: dict | None = None,
+):
+    """Create an audit log entry for order state transition."""
+    audit_entry = OrderAuditLog(
+        order_id=order.id,
+        old_status=old_status.value,
+        new_status=new_status.value,
+        triggered_by=triggered_by,
+        details=details,
+    )
+    db.add(audit_entry)
+    logger.info(
+        "order.status_changed",
+        order_uuid=str(order.id),
+        old_status=old_status.value,
+        new_status=new_status.value,
+        triggered_by=triggered_by,
+    )
+
+
+async def _handle_checkout_completed(
+    event_data: dict,
+    db: AsyncSession,
+):
+    """Handle checkout.session.completed event."""
+    session = event_data["object"]
+    session_id = session["id"]
+    payment_intent_id = session.get("payment_intent")
+
+    result = await db.execute(
+        select(Order).where(Order.stripe_checkout_session_id == session_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        logger.warning("webhook.order_not_found", session_id=session_id)
+        return
+
+    old_status = order.status
+    order.status = OrderStatus.paid
+    order.stripe_payment_intent_id = payment_intent_id
+
+    await _log_audit(
+        db, order, old_status, OrderStatus.paid, "stripe.checkout.session.completed"
+    )
+    await db.commit()
+
+    # Dispatch fulfillment
+    await fulfill_order(order, db)
+
+
+async def _handle_checkout_expired(
+    event_data: dict,
+    db: AsyncSession,
+):
+    """Handle checkout.session.expired event."""
+    session = event_data["object"]
+    session_id = session["id"]
+
+    result = await db.execute(
+        select(Order).where(Order.stripe_checkout_session_id == session_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        return
+
+    old_status = order.status
+    order.status = OrderStatus.expired
+
+    await _log_audit(
+        db, order, old_status, OrderStatus.expired, "stripe.checkout.session.expired"
+    )
+    await db.commit()
+
+
+async def _handle_payment_failed(
+    event_data: dict,
+    db: AsyncSession,
+):
+    """Handle payment_intent.payment_failed event."""
+    payment_intent = event_data["object"]
+    payment_intent_id = payment_intent["id"]
+
+    result = await db.execute(
+        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        return
+
+    old_status = order.status
+    # Add payment_failed to OrderStatus if missing (scaffold doesn't have it)
+    # For now, use "canceled" as closest match
+    order.status = OrderStatus.canceled
+
+    await _log_audit(
+        db,
+        order,
+        old_status,
+        OrderStatus.canceled,
+        "stripe.payment_intent.payment_failed",
+        details={"payment_intent_id": payment_intent_id},
+    )
+    await db.commit()
+
+
+async def _handle_refund(
+    event_data: dict,
+    db: AsyncSession,
+):
+    """Handle charge.refunded event."""
+    charge = event_data["object"]
+    payment_intent_id = charge.get("payment_intent")
+    amount_refunded = charge["amount_refunded"]
+    amount = charge["amount"]
+
+    result = await db.execute(
+        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        return
+
+    old_status = order.status
+    is_full_refund = amount_refunded >= amount
+
+    if is_full_refund:
+        order.status = OrderStatus.refunded
+    else:
+        order.status = OrderStatus.partially_refunded
+
+    order.refunded_at = datetime.now(timezone.utc)
+
+    await _log_audit(
+        db,
+        order,
+        old_status,
+        order.status,
+        "stripe.charge.refunded",
+        details={
+            "amount_refunded": amount_refunded,
+            "total_amount": amount,
+            "full_refund": is_full_refund,
+        },
+    )
+
+    # Deactivate enrollments if user exists
+    if order.buyer_user_id:
+        lms = LMSClient()
+        # Look up user to get username
+        user = await lms.get_user_by_email(order.buyer_email)
+        if user:
+            for item in order.line_items:
+                await lms.deactivate_enrollment(user["username"], item.lms_resource_id)
+                logger.info(
+                    "enrollment.deactivated",
+                    order_uuid=str(order.id),
+                    course_id=item.lms_resource_id,
+                )
+
+    await db.commit()
+
+
+async def _handle_dispute_created(
+    event_data: dict,
+    db: AsyncSession,
+):
+    """Handle charge.dispute.created event."""
+    dispute = event_data["object"]
+    charge_id = dispute.get("charge")
+
+    # Fetch the charge to get payment_intent
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    charge = stripe.Charge.retrieve(charge_id)
+    payment_intent_id = charge.payment_intent
+
+    result = await db.execute(
+        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        return
+
+    old_status = order.status
+    order.status = OrderStatus.disputed
+
+    await _log_audit(
+        db,
+        order,
+        old_status,
+        OrderStatus.disputed,
+        "stripe.charge.dispute.created",
+        details={"dispute_id": dispute["id"], "reason": dispute.get("reason")},
+    )
+    await db.commit()
+
+
+async def _handle_dispute_closed(
+    event_data: dict,
+    db: AsyncSession,
+):
+    """Handle charge.dispute.closed event."""
+    dispute = event_data["object"]
+    status = dispute["status"]
+    charge_id = dispute.get("charge")
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    charge = stripe.Charge.retrieve(charge_id)
+    payment_intent_id = charge.payment_intent
+
+    result = await db.execute(
+        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        return
+
+    old_status = order.status
+
+    if status == "won":
+        # Merchant won — restore order to previous state (typically paid/fulfilled)
+        order.status = OrderStatus.paid
+        details_msg = "dispute_won_restored"
+    else:
+        # Lost or closed without winning — treat as refunded
+        order.status = OrderStatus.refunded
+        order.refunded_at = datetime.now(timezone.utc)
+        details_msg = "dispute_lost_refunded"
+
+    await _log_audit(
+        db,
+        order,
+        old_status,
+        order.status,
+        "stripe.charge.dispute.closed",
+        details={"dispute_id": dispute["id"], "outcome": status, "action": details_msg},
+    )
+    await db.commit()
 
 
 @router.post("/webhooks/stripe/")
 async def stripe_webhook(
     request: Request,
     stripe_signature: str = Header(alias="Stripe-Signature"),
+    db: AsyncSession = Depends(get_db),
 ):
-    """Receive and verify Stripe webhook events.
-
-    Returns 200 immediately. Actual processing is dispatched asynchronously.
-    """
+    """Handle incoming Stripe webhook events with idempotent processing."""
     payload = await request.body()
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -40,8 +296,75 @@ async def stripe_webhook(
         event_type=event_type,
     )
 
-    # TODO: Check stripe_events table for idempotency (duplicate event_id)
-    # TODO: Log event in stripe_events table
-    # TODO: Dispatch to fulfillment worker via Redis queue
+    # Check idempotency: already processed this event?
+    result = await db.execute(
+        select(StripeEvent).where(StripeEvent.stripe_event_id == event_id)
+    )
+    existing_event = result.scalar_one_or_none()
+    if existing_event:
+        # Allow retry of failed events; skip already-processed ones
+        if existing_event.processing_status == ProcessingStatus.processed:
+            logger.info("webhook.duplicate", stripe_event_id=event_id)
+            return {"status": "duplicate"}
+        if existing_event.processing_status == ProcessingStatus.failed:
+            logger.info("webhook.retrying_failed", stripe_event_id=event_id)
+            stripe_event_record = existing_event
+        else:
+            logger.info("webhook.already_processing", stripe_event_id=event_id)
+            return {"status": "duplicate"}
+    else:
+        # Log event in stripe_events table (handle race with IntegrityError)
+        stripe_event_record = StripeEvent(
+            stripe_event_id=event_id,
+            event_type=event_type,
+            payload_json=event,
+            processing_status=ProcessingStatus.received,
+        )
+        db.add(stripe_event_record)
+        try:
+            await db.commit()
+        except IntegrityError:
+            await db.rollback()
+            logger.info("webhook.duplicate_race", stripe_event_id=event_id)
+            return {"status": "duplicate"}
+
+    # Process event
+    try:
+        stripe_event_record.processing_status = ProcessingStatus.processing
+        await db.commit()
+
+        event_data = event["data"]
+        if event_type == "checkout.session.completed":
+            await _handle_checkout_completed(event_data, db)
+        elif event_type == "checkout.session.expired":
+            await _handle_checkout_expired(event_data, db)
+        elif event_type == "payment_intent.payment_failed":
+            await _handle_payment_failed(event_data, db)
+        elif event_type == "charge.refunded":
+            await _handle_refund(event_data, db)
+        elif event_type == "charge.dispute.created":
+            await _handle_dispute_created(event_data, db)
+        elif event_type == "charge.dispute.closed":
+            await _handle_dispute_closed(event_data, db)
+        else:
+            logger.info("webhook.unhandled_event_type", event_type=event_type)
+
+        stripe_event_record.processing_status = ProcessingStatus.processed
+        stripe_event_record.processed_at = datetime.now(timezone.utc)
+        await db.commit()
+
+    except Exception as e:
+        logger.error(
+            "webhook.processing_failed",
+            stripe_event_id=event_id,
+            error=str(e),
+        )
+        await db.rollback()
+        stripe_event_record.processing_status = ProcessingStatus.failed
+        try:
+            await db.commit()
+        except Exception:
+            logger.error("webhook.failed_status_update_error", stripe_event_id=event_id)
+        raise
 
     return {"status": "received"}

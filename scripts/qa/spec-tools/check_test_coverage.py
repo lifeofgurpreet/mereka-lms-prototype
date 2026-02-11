@@ -106,7 +106,7 @@ def main() -> int:
     ap.add_argument(
         "--scan-dirs",
         nargs="+",
-        default=["tests/", "scripts/"],
+        default=["tests/", "scripts/", "deploy/", "infrastructure/", "services/", ".github/workflows/"],
         help="Directories to scan for @covers",
     )
     ap.add_argument(

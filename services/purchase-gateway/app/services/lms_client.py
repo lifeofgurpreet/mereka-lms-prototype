@@ -1,4 +1,6 @@
 """Open edX LMS API client with OAuth2 authentication."""
+# @covers AC-002, AC-021
+# @spec: ecommerce-purchase-gateway_spec.md
 
 import structlog
 import httpx

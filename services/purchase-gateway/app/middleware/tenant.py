@@ -1,4 +1,6 @@
 """Tenant resolution middleware."""
+# @covers AC-024, AC-025
+# @spec: ecommerce-purchase-gateway_spec.md
 
 import uuid
 

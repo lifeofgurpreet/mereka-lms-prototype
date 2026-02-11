@@ -824,9 +824,10 @@ except ImportError:
     pass
 
 # ── Enterprise SSO Foundation ────────────────────────────────────────────
+# @covers AC-004, AC-005
+# @spec: auth-sso-enterprise_spec.md
 # Per-tenant SAML/OIDC authentication via Open edX third_party_auth.
 # Phase 0: inject SP cert/key from environment; IdPs configured via Django admin.
-# See: specs/auth-sso-enterprise_spec.md
 
 # Ensure third_party_auth is in INSTALLED_APPS (should be in base Open edX).
 if "third_party_auth" not in INSTALLED_APPS:

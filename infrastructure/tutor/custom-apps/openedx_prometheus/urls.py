@@ -2,9 +2,8 @@
 URL configuration for Prometheus metrics endpoint.
 """
 
-# @spec platform-middleware-custom-apps AC-MPC-017: Expose /metrics endpoint for Prometheus scraping
-# @spec platform-middleware-custom-apps AC-MPC-018: Return text/plain metrics in Prometheus format
-# @spec observability-stack: Application metrics collection at /metrics endpoint
+# @covers AC-017, AC-018, AC-020
+# @spec: platform-middleware-custom-apps_spec.md
 
 from django.urls import path
 

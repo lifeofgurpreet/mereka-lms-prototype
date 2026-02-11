@@ -1,3 +1,5 @@
+// @covers AC-HUB-001, AC-HUB-002, AC-HUB-004, AC-HUB-005, AC-HUB-010, AC-HUB-012, AC-HUB-013
+// @spec: external-registration-hubspot_spec.md
 import { onRequest } from "firebase-functions/v2/https";
 import moment from "moment";
 import express from "express";

@@ -1,3 +1,5 @@
+# @covers AC-001, AC-002, AC-021
+# @spec: multi-tenancy-architecture_spec.md
 """
 Django management command to provision a new tenant.
 
@@ -10,8 +12,6 @@ Usage:
         [--country MY]
 
 Idempotent: running twice for the same slug skips already-created records.
-
-See: specs/multi-tenancy-architecture_spec.md (AC-001, AC-002, AC-021)
 """
 
 import logging

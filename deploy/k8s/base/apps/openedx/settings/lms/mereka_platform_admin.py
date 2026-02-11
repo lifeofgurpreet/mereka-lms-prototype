@@ -1,8 +1,7 @@
 import os
 
-# @spec platform-middleware-custom-apps AC-MPC-001: Auto-escalate platform admin users to staff/superuser
-# @spec platform-middleware-custom-apps AC-MPC-002: Skip save() when user already has correct privileges
-# @spec platform-middleware-custom-apps AC-MPC-003: Never modify non-admin users
+# @covers AC-001, AC-002, AC-003, AC-019
+# @spec: platform-middleware-custom-apps_spec.md
 
 
 def _platform_admin_emails() -> set[str]:

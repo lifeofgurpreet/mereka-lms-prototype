@@ -1,3 +1,5 @@
+# @covers AC-012, AC-013, AC-014
+# @spec: multi-tenancy-architecture_spec.md
 """
 Tenant resolution middleware for Open edX multi-tenancy.
 
@@ -6,8 +8,6 @@ Resolves tenant from request hostname using the chain:
 
 Sets request.tenant_uuid and request.tenant_slug for downstream code.
 Adds X-Tenant-ID response header for observability.
-
-See: specs/multi-tenancy-architecture_spec.md (AC-012, AC-013, AC-014)
 """
 
 import logging

@@ -1,3 +1,5 @@
+# @covers AC-TCR-006
+# @spec: tutor-configuration-resilience_spec.md
 name: Tutor Config Verification
 
 on:

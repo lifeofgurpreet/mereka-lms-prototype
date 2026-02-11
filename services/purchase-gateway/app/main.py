@@ -1,3 +1,6 @@
+# @covers AC-029, AC-032
+# @spec: ecommerce-purchase-gateway_spec.md
+
 import structlog
 from contextlib import asynccontextmanager
 from fastapi import FastAPI

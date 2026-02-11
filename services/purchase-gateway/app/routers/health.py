@@ -1,3 +1,6 @@
+# @covers AC-033
+# @spec: ecommerce-purchase-gateway_spec.md
+
 import redis.asyncio as redis
 import structlog
 from fastapi import APIRouter

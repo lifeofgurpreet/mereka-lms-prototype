@@ -1,4 +1,6 @@
 """Fulfillment engine — enrolls users or creates entitlements after payment."""
+# @covers AC-002, AC-003, AC-019, AC-020, AC-021
+# @spec: ecommerce-purchase-gateway_spec.md
 
 import secrets
 import uuid

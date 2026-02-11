@@ -1,3 +1,5 @@
+# @covers AC-001, AC-002
+# @spec: multi-tenancy-architecture_spec.md
 """
 Tenant configuration model extending Open edX EnterpriseCustomer.
 
@@ -5,7 +7,6 @@ EnterpriseCustomer already provides: uuid, name, slug, site, active.
 TenantConfig adds: branding, SSO config, feature flags, and provisioning metadata.
 
 Isolation is at the ORM queryset level — NOT separate databases.
-See: specs/multi-tenancy-architecture_spec.md (AC-001, AC-002)
 """
 
 from django.db import models
