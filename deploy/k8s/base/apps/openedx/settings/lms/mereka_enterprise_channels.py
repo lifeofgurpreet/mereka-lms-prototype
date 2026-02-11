@@ -23,12 +23,16 @@ _CHANNEL_APPS = [
     "integrated_channels.canvas",
     "integrated_channels.moodle",
 ]
-for _app in _CHANNEL_APPS:
-    if _app not in INSTALLED_APPS:  # noqa: F821 (INSTALLED_APPS from parent)
-        INSTALLED_APPS.append(_app)  # noqa: F821
+_installed_apps = globals().get("INSTALLED_APPS")
+if isinstance(_installed_apps, list):
+    for _app in _CHANNEL_APPS:
+        if _app not in _installed_apps:
+            _installed_apps.append(_app)
 
 # ── Enterprise feature flags ─────────────────────────────────────────
-FEATURES["ENABLE_ENTERPRISE_INTEGRATION"] = True  # noqa: F821
+_features = globals().get("FEATURES")
+if isinstance(_features, dict):
+    _features["ENABLE_ENTERPRISE_INTEGRATION"] = True
 
 # ── Celery beat schedule for channel sync ────────────────────────────
 # Sync learner data to external channels every 4 hours.
