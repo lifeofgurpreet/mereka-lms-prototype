@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-011, AC-012
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify user import CSV files against AC-011 and AC-012.
 #
 # Checks:

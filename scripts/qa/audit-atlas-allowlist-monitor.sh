@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: mongodb-atlas-integration_spec.md
 # Audit Atlas allowlist monitor posture on VPS host.
 #
 # Validates:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: k8s-deployment_spec.md
 # Bootstrap ExternalSecrets access for the kind dev cluster.
 set -euo pipefail
 

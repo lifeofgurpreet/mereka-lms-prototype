@@ -332,9 +332,9 @@ Infisical (source of truth) → GCP Secret Manager → ExternalSecrets → K8s S
 
 **Managing secrets**:
 ```bash
-# Add secret to Infisical (from reka-slackbot directory)
-cd /home/gurpreet/projects/k8s/reka-slackbot
-infisical secrets set MEREKA_LMS_NEW_SECRET="value" \
+# Add secret to Infisical (use canonical wrapper; do not depend on app repos for context)
+INFISICAL=/home/gurpreet/projects/vps/infrastructure/scripts/infisical
+${INFISICAL} secrets set MEREKA_LMS_NEW_SECRET="value" \
   --domain https://secrets.mereka.io/api --env prod --path /
 
 # Sync to GCP Secret Manager

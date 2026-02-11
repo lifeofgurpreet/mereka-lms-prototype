@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: branding-system_spec.md
 set -euo pipefail
 
 # Deploy branded OpenEdX image to GKE

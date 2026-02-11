@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-012
+# @spec: secrets-management_spec.md
 # Verify Studio (CMS) edx-oauth2 client secret is present in the running pods.
 #
 # This catches a common failure mode where Studio login 500s on `/complete/edx-oauth2/`

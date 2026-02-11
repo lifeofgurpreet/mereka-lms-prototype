@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-030, AC-031, AC-032
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-integrated-channels.sh
 # Covers: AC-030 through AC-032 (Integrated Channels)
 # Verifies channel infrastructure, LMS configuration, and sync task readiness.

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-024, AC-027, AC-028, AC-029, AC-030, AC-032, AC-CCR-002, AC-CCR-008, AC-CCR-009
+# @spec: k8s-deployment_spec.md
 set -euo pipefail
 
 # verify-k8s-deployment-spec.sh

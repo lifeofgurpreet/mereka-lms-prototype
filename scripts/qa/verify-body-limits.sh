@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: multi-site-domains_spec.md
 # Verify request body size limits in Caddyfile.
 set -euo pipefail
 

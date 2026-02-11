@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-022, AC-023, AC-024, AC-025
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-access-subsidy.sh
 # Covers: AC-022 through AC-025 (Enterprise Access & Subsidy)
 # Exit 0 = all checks pass, exit 1 = failures

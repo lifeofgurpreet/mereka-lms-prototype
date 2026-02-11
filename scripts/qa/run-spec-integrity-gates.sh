@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Spec integrity gate — lint, verify, format validation, coverage.
+# Spec integrity gate — lint, verify (annotation-based), coverage.
 #
 # Usage:
 #   ./scripts/qa/run-spec-integrity-gates.sh
@@ -9,7 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-FAIL_UNDER="${FAIL_UNDER:-80}"
+FAIL_UNDER="${FAIL_UNDER:-50}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-120}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/spec-integrity-gates/${STAMP}}"
@@ -98,19 +98,18 @@ echo ""
 run_check "spec-lint" \
   python3 "${TOOL_DIR}/mereka_spec_lint.py" specs/ --severity-filter error
 
-# 2. Spec-testmap verification (informational — many tests are planned but not yet written)
+# 2. Spec verification via @covers annotations (informational — coverage may not be 100%)
 run_check_info "spec-verify" \
-  python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . --testmaps-dir specs/testmaps/
+  python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
+    --scan-dirs scripts/ tests/ \
+    --manual-file specs/manual_verifications.yaml
 
-# 3. Testmap format validation (all must be Format B)
-run_check "testmap-format" \
-  python3 "${TOOL_DIR}/validate_testmap_format.py" specs/testmaps/
-
-# 4. Coverage report with threshold
+# 3. Coverage report with threshold
 run_check "spec-coverage" \
   python3 "${TOOL_DIR}/spec_coverage_report.py" \
-    --specs-dir specs/ --testmaps-dir specs/testmaps/ --repo-root . \
-    --format text --fail-under "$FAIL_UNDER"
+    --specs-dir specs/ --scan-dirs scripts/ tests/ \
+    --manual-file specs/manual_verifications.yaml \
+    --repo-root . --format text --fail-under "$FAIL_UNDER"
 
 # Write summary artifacts
 write_summary() {

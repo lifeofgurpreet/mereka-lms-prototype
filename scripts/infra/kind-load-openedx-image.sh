@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: k8s-deployment_spec.md
 # Load the Open edX and MFE images into kind nodes (dev cluster).
 #
 # Usage:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-005, AC-006, AC-028, AC-029, AC-030
+# @spec: ecommerce-purchase-gateway_spec.md
 set -euo pipefail
 
 # Verify Purchase Gateway has no hardcoded secrets and proper security patterns.

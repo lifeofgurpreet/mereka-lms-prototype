@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-033, AC-034
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-secrets.sh
 # Covers: AC-033, AC-034 (Secrets and Configuration)
 # Exit 0 = all checks pass, exit 1 = failures

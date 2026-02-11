@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: multi-site-domains_spec.md
 # List the Open edX ecosystem hostnames (expected vs deployed).
 #
 # This is an operator tool to keep docs/specs honest when hostnames change.

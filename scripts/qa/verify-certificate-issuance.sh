@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-023, AC-024
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify certificate issuance preparation against AC-023 and AC-024.
 #
 # Checks:

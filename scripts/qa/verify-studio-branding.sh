@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: branding-system_spec.md
 # Verify Studio (CMS) branding shows "Mereka Academy - Studio"
 
 set -euo pipefail

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-005, AC-006
+# @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
 # verify-analytics-pipeline.sh - Verifies Aspects analytics plugin configuration

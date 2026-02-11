@@ -5,6 +5,11 @@ This module provides a fixed version of the mfe_context endpoint that properly
 returns OAuth providers for the current site.
 """
 
+# @spec platform-middleware-custom-apps AC-MPC-013: Provide /api/mfe_context endpoint with OAuth providers
+# @spec platform-middleware-custom-apps AC-MPC-015: Query OAuth2ProviderConfig for current site
+# @spec platform-middleware-custom-apps AC-MPC-016: Rename "Authentik" providers to "Mereka"
+# @spec auth-sso-enterprise: Support OAuth provider visibility for MFE login pages
+
 import logging
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-004, AC-005
+# @spec: secrets-management_spec.md
 # Verify ExternalSecrets remoteRef keys follow MEREKA_LMS_* conventions.
 #
 # Scope: deploy/k8s/**/secrets/**/*.yaml + overlays secret patches.

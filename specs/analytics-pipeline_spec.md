@@ -5,6 +5,10 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/repository-structure_spec.md"
+  - "specs/k8s-deployment_spec.md"
+  - "specs/mongodb-atlas-integration_spec.md"
 links:
   related_docs:
     - "docs/operations/OBSERVABILITY_QUICKSTART.md"

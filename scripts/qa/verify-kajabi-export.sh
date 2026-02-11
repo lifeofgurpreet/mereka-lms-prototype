@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify Kajabi export files against AC-001.
 #
 # Checks:

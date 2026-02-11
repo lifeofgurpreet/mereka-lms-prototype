@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002, AC-003
+# @spec: multi-site-domains_spec.md
 # Verify session cookie configuration for cross-subdomain login persistence.
 set -euo pipefail
 

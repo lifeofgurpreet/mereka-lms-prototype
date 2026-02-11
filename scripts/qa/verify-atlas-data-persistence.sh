@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003, AC-004
+# @spec: mongodb-atlas-integration_spec.md
 # Verify Atlas data persistence configuration chain for AC-003 and AC-004.
 #
 # AC-003: Course creation in Studio persists to Atlas `openedx` database.

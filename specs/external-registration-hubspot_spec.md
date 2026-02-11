@@ -5,6 +5,10 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/k8s-deployment_spec.md"
+  - "specs/secrets-management_spec.md"
+  - "specs/email-notifications-pipeline_spec.md"
 links:
   related_docs:
     - "services/hubspot-webhook/README.md"

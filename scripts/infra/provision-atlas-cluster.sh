@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: mongodb-atlas-integration_spec.md
 # Provision MongoDB Atlas cluster via CLI for Mereka Academy.
 # This script automates cluster creation, user setup, and network access configuration.
 # We intentionally use public IP allowlists (no private connectivity).

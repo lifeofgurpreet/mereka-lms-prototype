@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006, AC-009
+# @spec: branding-system_spec.md
 # Verify Studio authoring branding signals for create-course/create-library flows.
 #
 # This script is deterministic:

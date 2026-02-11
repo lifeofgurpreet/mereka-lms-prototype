@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-042
+# @spec: auth-sso-enterprise_spec.md
 # One-shot "world-class" verification for auth + permissions hardening.
 #
 # This aggregates both public and internal checks:

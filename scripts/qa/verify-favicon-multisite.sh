@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-008
+# @spec: multi-site-domains_spec.md
 # Verify favicon is configured for all multi-site domains.
 set -euo pipefail
 

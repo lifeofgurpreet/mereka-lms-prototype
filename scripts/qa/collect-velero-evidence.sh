@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009
+# @spec: disaster-recovery-business-continuity_spec.md
 # Collect Velero backup posture evidence into var/ for audits/incidents.
 #
 # This is read-only. It writes artifacts under var/ (gitignored).

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-021
+# @spec: video-pipeline-delivery_spec.md
 # Scan codebase for hardcoded Mux credentials
 # AC-021: Ensure no hardcoded MUX tokens in code
 #

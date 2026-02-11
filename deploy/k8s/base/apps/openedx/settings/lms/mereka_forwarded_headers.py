@@ -13,6 +13,11 @@ Fix:
   Normalize the left-most forwarded header value before Django evaluates it.
 """
 
+# @spec platform-middleware-custom-apps AC-MPC-009: Normalize X-Forwarded-Proto/Port/Host by taking left-most value
+# @spec platform-middleware-custom-apps AC-MPC-010: Parse CF-Visitor JSON to extract scheme for X-Forwarded-Proto
+# @spec platform-middleware-custom-apps AC-MPC-011: Rewrite HTTP_HOST for /metrics requests from pod IPs
+# @spec platform-middleware-custom-apps AC-MPC-012: Force HTTPS for mereka.io/biji-biji.com/mereka.dev hosts
+
 from __future__ import annotations
 
 import json

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-036, AC-037
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify migration idempotency logic against AC-036 and AC-037.
 #
 # Checks:

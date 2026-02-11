@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-021
+# @spec: multi-tenancy-architecture_spec.md
 # Verify tenant provisioning management command exists and is well-formed.
 # AC-001, AC-002, AC-021: Idempotent provisioning with validation.
 set -euo pipefail

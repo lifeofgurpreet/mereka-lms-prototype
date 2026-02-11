@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-042, AC-045
+# @spec: auth-sso-enterprise_spec.md
 # Verify real authenticated SSO login (OIDC callback + post-login session).
 #
 # This check is intentionally credentialed and validates what public redirect checks cannot:
@@ -112,6 +114,9 @@ debug = os.environ.get("SSO_CANARY_DEBUG", "0") == "1"
 out_dir = Path(os.environ["OUT_DIR"])
 run_id = os.environ["CANARY_RUN_ID"]
 
+_http_trace = []
+_studio_cookie_names = set()
+
 base_url = f"https://{lms_domain}"
 login_url = f"{base_url}/auth/login/oidc/"
 dashboard_url = f"{base_url}/dashboard"
@@ -125,7 +130,33 @@ studio_failure_path = out_dir / f"{run_id}-studio-failure.png"
 def log(msg: str) -> None:
     print(f"[{env_name}] {msg}")
 
+def _redact_set_cookie(header_value: str) -> str:
+    # Never print raw cookie values. Keep cookie names + attributes only.
+    parts = [p.strip() for p in header_value.split(",") if p.strip()]
+    redacted_parts = []
+    for p in parts:
+        # Split cookie segments (name=value; attrs...)
+        segs = [s.strip() for s in p.split(";")]
+        if segs and "=" in segs[0]:
+            name = segs[0].split("=", 1)[0]
+            segs[0] = f"{name}=<redacted>"
+        redacted_parts.append("; ".join(segs))
+    return ", ".join(redacted_parts)
+
 def fail(msg: str, page=None, code: int = 1) -> None:
+    # Emit useful diagnostics without leaking secrets.
+    try:
+        trace = globals().get("_http_trace", [])
+        if trace:
+            log("http_trace (latest 40, redacted cookies):")
+            for row in trace[-40:]:
+                log("  " + row)
+        studio_cookie_names = globals().get("_studio_cookie_names", set())
+        if studio_cookie_names:
+            log("studio_cookie_names=" + ",".join(sorted(studio_cookie_names)))
+    except Exception as exc:
+        log(f"diagnostics_failed={exc}")
+
     if page is not None:
         try:
             page.screenshot(path=str(screenshot_path), full_page=True)
@@ -185,17 +216,157 @@ with sync_playwright() as p:
     context = browser.new_context(ignore_https_errors=False)
     page = context.new_page()
     studio_error = {"url": None, "status": None}
+    _http_trace.clear()
+    _studio_cookie_names.clear()
+    if debug:
+        log(f"require_studio_access={require_studio_access}")
+
+    def _push_trace(row: str) -> None:
+        try:
+            _http_trace.append(row)
+            # Keep bounded to avoid runaway logs in redirect loops.
+            if len(_http_trace) > 400:
+                del _http_trace[:200]
+        except Exception:
+            return
+
+    def _record_trace(resp):
+        try:
+            url = resp.url or ""
+            status = resp.status
+            headers = resp.headers or {}
+            location = headers.get("location", "")
+            set_cookie = headers.get("set-cookie", "")
+            set_cookie_redacted = _redact_set_cookie(set_cookie) if set_cookie else ""
+
+            # Record only auth-relevant URLs to keep noise low.
+            watch = (
+                studio_domain in url
+                or "/complete/edx-oauth2" in url
+                or "/login/edx-oauth2" in url
+                or "/oauth2/authorize" in url
+                or "/auth/complete/oidc" in url
+                or "/auth/login/oidc" in url
+                or "/authn/login" in url
+            )
+            if not watch:
+                return
+
+            row = f"{status} {url}"
+            if location:
+                row += f" location={location}"
+            if set_cookie_redacted:
+                row += f" set-cookie={set_cookie_redacted}"
+                # Track cookie names for Studio domain debugging.
+                for seg in set_cookie.split(","):
+                    first = seg.split(";", 1)[0].strip()
+                    if "=" in first:
+                        _studio_cookie_names.add(first.split("=", 1)[0])
+            _push_trace(row)
+        except Exception:
+            return
 
     def on_response(resp):
         try:
             url = resp.url or ""
+            _record_trace(resp)
             if "/complete/edx-oauth2" in url and resp.status >= 500 and studio_error["status"] is None:
                 studio_error["url"] = url
                 studio_error["status"] = resp.status
         except Exception:
             return
 
+    def on_request(req):
+        try:
+            url = req.url or ""
+            if studio_domain in url or "/complete/edx-oauth2" in url or "/login/edx-oauth2" in url:
+                _push_trace(f"REQ {req.method} {url}")
+        except Exception:
+            return
+
+    def on_request_finished(req):
+        try:
+            url = req.url or ""
+            if not (studio_domain in url or "/complete/edx-oauth2" in url or "/login/edx-oauth2" in url):
+                return
+            resp = req.response()
+            if resp is None:
+                _push_trace(f"RESP <none> {url}")
+                return
+            headers = resp.headers or {}
+            location = headers.get("location", "")
+            set_cookie = headers.get("set-cookie", "")
+            set_cookie_redacted = _redact_set_cookie(set_cookie) if set_cookie else ""
+            row = f"RESP {resp.status} {url}"
+            if location:
+                row += f" location={location}"
+            if set_cookie_redacted:
+                row += f" set-cookie={set_cookie_redacted}"
+                for seg in set_cookie.split(","):
+                    first = seg.split(";", 1)[0].strip()
+                    if "=" in first:
+                        _studio_cookie_names.add(first.split("=", 1)[0])
+            _push_trace(row)
+        except Exception:
+            return
+
+    def on_request_failed(req):
+        try:
+            url = req.url or ""
+            if studio_domain in url or "/complete/edx-oauth2" in url or "/login/edx-oauth2" in url:
+                failure = req.failure or {}
+                _push_trace(f"FAILREQ {url} error={failure.get('errorText','')}")
+        except Exception:
+            return
+
+    def manual_redirect_probe(start_url: str, max_steps: int = 25) -> None:
+        """
+        Follow redirects manually via APIRequestContext (shared cookies), to avoid
+        Playwright's browser-level ERR_TOO_MANY_REDIRECTS masking the chain.
+        """
+        visited = set()
+        url = start_url
+        for _ in range(max_steps):
+            if url in visited:
+                _push_trace(f"LOOP {url}")
+                return
+            visited.add(url)
+            resp = context.request.get(url, max_redirects=0, fail_on_status_code=False)
+            status = resp.status
+            headers = resp.headers or {}
+            location = headers.get("location", "")
+            set_cookie = headers.get("set-cookie", "")
+            set_cookie_redacted = _redact_set_cookie(set_cookie) if set_cookie else ""
+            row = f"API {status} {url}"
+            if location:
+                row += f" location={location}"
+            if set_cookie_redacted:
+                row += f" set-cookie={set_cookie_redacted}"
+                for seg in set_cookie.split(","):
+                    first = seg.split(";", 1)[0].strip()
+                    if "=" in first:
+                        _studio_cookie_names.add(first.split("=", 1)[0])
+            _push_trace(row)
+
+            if status in (301, 302, 303, 307, 308) and location:
+                if location.startswith("/"):
+                    url = f"https://{studio_domain}{location}"
+                elif location.startswith("http://") or location.startswith("https://"):
+                    url = location
+                else:
+                    # Relative URL fallback
+                    if url.endswith("/"):
+                        url = url + location
+                    else:
+                        url = url.rsplit("/", 1)[0] + "/" + location
+                continue
+            return
+        _push_trace(f"MAX_REDIRECT_STEPS_EXCEEDED start={start_url}")
+
     page.on("response", on_response)
+    page.on("request", on_request)
+    page.on("requestfinished", on_request_finished)
+    page.on("requestfailed", on_request_failed)
 
     try:
         if debug:
@@ -233,7 +404,13 @@ with sync_playwright() as p:
         if require_studio_access:
             if debug:
                 log(f"goto={studio_url}")
-            page.goto(studio_url, wait_until="domcontentloaded", timeout=60000)
+            manual_redirect_probe(studio_url)
+            if debug:
+                log(f"manual_probe_entries={len(_http_trace)}")
+            try:
+                page.goto(studio_url, wait_until="domcontentloaded", timeout=60000)
+            except PWError as exc:
+                fail(f"studio_goto_error: {exc}", page=page)
             page.wait_for_load_state("domcontentloaded", timeout=60000)
             try:
                 body = page.inner_text("body", timeout=5000).lower()
@@ -256,7 +433,10 @@ with sync_playwright() as p:
 
             if debug:
                 log(f"goto={studio_home_url}")
-            page.goto(studio_home_url, wait_until="domcontentloaded", timeout=60000)
+            try:
+                page.goto(studio_home_url, wait_until="domcontentloaded", timeout=60000)
+            except PWError as exc:
+                fail(f"studio_home_goto_error: {exc}", page=page)
             page.wait_for_load_state("domcontentloaded", timeout=60000)
             try:
                 body = page.inner_text("body", timeout=5000).lower()

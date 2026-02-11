@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-012
+# @spec: secrets-management_spec.md
 # Verify that MEREKA_PLATFORM_ADMIN_EMAILS is set correctly on core deployments.
 #
 # This does not mutate anything. It checks the runtime backstop allowlist that

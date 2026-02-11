@@ -12,6 +12,10 @@ implementation_notes: |
   Meilisearch v1.8.4 deployed for search (replaces Elasticsearch).
   Zero data loss - 183MB MySQL backup created pre-upgrade.
   Deployed to production GKE with zero downtime.
+depends_on:
+  - "specs/repository-structure_spec.md"
+  - "specs/mongodb-atlas-integration_spec.md"
+  - "specs/tutor-configuration_spec.md"
 links:
   related_docs:
     - "docs/operations/TROUBLESHOOTING.md"

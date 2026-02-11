@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006
+# @spec: observability-stack_spec.md
 # Verify alert routing end-to-end (repo contracts + runtime policies/channels).
 #
 # Usage:

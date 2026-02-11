@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: mongodb-atlas-integration_spec.md
 # Dump the in-cluster MongoDB to Atlas, update Tutor config, and optionally clean up the StatefulSet.
 set -euo pipefail
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004, AC-006
+# @spec: mongodb-atlas-integration_spec.md
 # Verify Atlas modulestore path contracts (repo + runtime).
 #
 # Usage:

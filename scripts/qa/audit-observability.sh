@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: observability-stack_spec.md
 # End-to-end observability posture audit (read-only).
 #
 # Goals:

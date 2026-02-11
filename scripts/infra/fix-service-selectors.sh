@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-013
+# @spec: k8s-deployment_spec.md
 # Fix service selector mismatches after pod restarts
 # Usage: ./scripts/infra/fix-service-selectors.sh [namespace]
 set -euo pipefail

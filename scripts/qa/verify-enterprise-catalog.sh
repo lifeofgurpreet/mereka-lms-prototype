@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-019, AC-020, AC-021
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-catalog.sh
 # Covers: AC-019 through AC-021 (Enterprise Catalog)
 # Exit 0 = all checks pass, exit 1 = failures

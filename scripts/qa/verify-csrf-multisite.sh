@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-004
+# @spec: multi-site-domains_spec.md
 # Verify CSRF trusted origins cover all multi-site domains.
 set -euo pipefail
 

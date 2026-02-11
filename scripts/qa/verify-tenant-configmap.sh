@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-022
+# @spec: multi-tenancy-architecture_spec.md
 # Verify K8s ConfigMap template for tenant registry exists.
 # Spec reference: multi-tenancy-architecture_spec.md
 set -euo pipefail

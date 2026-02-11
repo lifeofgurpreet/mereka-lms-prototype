@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: tutor-configuration_spec.md
 # Validate MFE branding build prerequisites before running long image builds.
 set -euo pipefail
 

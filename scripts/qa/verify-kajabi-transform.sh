@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-005, AC-006
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify Kajabi data transformation against AC-005 and AC-006.
 #
 # Checks:

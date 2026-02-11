@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-005
+# @spec: multi-site-domains_spec.md
 # Validate Site + SiteConfiguration entries for academyv2 microsites.
 set -euo pipefail
 

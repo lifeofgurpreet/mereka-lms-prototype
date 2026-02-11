@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006
+# @spec: secrets-management_spec.md
 set -euo pipefail
 
 ENVIRONMENT="${1:-prod}"

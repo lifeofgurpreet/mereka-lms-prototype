@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-008
+# @spec: tutor-configuration_spec.md
 # Verify Tutor-generated settings include our canonical production domains.
 #
 # Usage:

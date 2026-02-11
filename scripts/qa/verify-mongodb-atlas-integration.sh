@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-005, AC-006, AC-008, AC-009
+# @spec: mongodb-atlas-integration_spec.md
 # Verify MongoDB Atlas Integration
 # Ensures Atlas-only configuration (no local MongoDB) and proper connection setup
 set -euo pipefail

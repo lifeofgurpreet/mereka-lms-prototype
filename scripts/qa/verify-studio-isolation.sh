@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006
+# @spec: multi-site-domains_spec.md
 # Verify Studio (CMS) is only accessible on studio.* subdomains.
 set -euo pipefail
 

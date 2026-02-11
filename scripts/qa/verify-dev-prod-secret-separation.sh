@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-017
+# @spec: secrets-management_spec.md
 # Verify dev/local overlay uses *_DEV suffixed keys for Stripe and MySQL.
 #
 # This is a repo-level guardrail so dev cannot accidentally point at prod payment/db creds.

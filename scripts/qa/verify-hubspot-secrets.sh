@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-HUB-005
+# @spec: external-registration-hubspot_spec.md
 # Verify HubSpot service secrets in ExternalSecrets and K8s
 # AC-HUB-005: HubSpot OAuth credentials in Infisical/ExternalSecrets
 #

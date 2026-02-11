@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003, AC-013, AC-020, AC-021, AC-029, AC-031
+# @spec: k8s-deployment_spec.md
 set -euo pipefail
 
 # verify-k8s-live-cluster.sh

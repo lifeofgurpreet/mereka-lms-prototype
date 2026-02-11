@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-026, AC-027
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify Mux video upload results against AC-026 and AC-027.
 #
 # Checks:
@@ -62,10 +64,10 @@ fi
 
 # Check for playback IDs in sample assets
 sample_with_playback=0
-sample_count=10
+sample_count=$((asset_count < 10 ? asset_count : 10))
 
 for i in $(seq 0 $((sample_count - 1))); do
-  playback_id=$(jq -r ".[$i].playback_id // .[] | select(.playback_id) | .playback_id" "$MUX_UPLOAD_FILE" 2>/dev/null | head -1)
+  playback_id=$(jq -r ".[$i].playback_id // empty" "$MUX_UPLOAD_FILE" 2>/dev/null || true)
   if [[ -n "$playback_id" && "$playback_id" != "null" ]]; then
     sample_with_playback=$((sample_with_playback + 1))
   fi

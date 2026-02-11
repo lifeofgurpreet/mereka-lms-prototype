@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-017, AC-018
+# @spec: multi-tenancy-architecture_spec.md
 # Verify org-level role ownership for multisite governance.
 #
 # Checks per org:

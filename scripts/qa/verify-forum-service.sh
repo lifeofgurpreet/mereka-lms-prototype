@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-005, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-022
+# @spec: forum-service-migration_spec.md
 # Verify Forum Service Integration
 # Ensures Python forum v2 (integrated into LMS) with Meilisearch is configured correctly
 set -euo pipefail

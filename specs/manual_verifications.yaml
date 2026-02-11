@@ -1,0 +1,1265 @@
+# Manual and monitoring verification entries.
+# Automated entries are discovered from @covers annotations in code.
+# Generated from testmaps on 2026-02-11
+entries:
+- id: AC-002
+  spec: analytics-pipeline_spec.md
+  description: 'xAPI events flow to ClickHouse: SELECT count() FROM xapi_events_all returns > 0'
+  verify:
+  - type: monitoring
+    metric: clickhouse_xapi_events_count
+    dashboard: grafana://dashboards/analytics-pipeline
+- id: AC-003
+  spec: analytics-pipeline_spec.md
+  description: 'ClickHouse retention policy active: Events older than 90 days are deleted'
+  verify:
+  - type: manual
+    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    section: ClickHouse Disk Space
+    justification: Verifying actual TTL-based deletion requires inserting backdated data and waiting for merge cycle orforcing
+      OPTIMIZE TABLE -- not automatable in a stateless CI run
+- id: AC-004
+  spec: analytics-pipeline_spec.md
+  description: Superset accessible at configured URL (analytics.academyv2.mereka.io)
+  verify:
+  - type: monitoring
+    metric: superset_health_status
+    dashboard: grafana://dashboards/analytics-pipeline
+- id: AC-005
+  spec: analytics-pipeline_spec.md
+  description: Pre-built dashboards visible in Superset forstaff users
+  verify:
+  - type: manual
+    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    section: Dashboard Verification
+    justification: Verifying dashboard load time < 5s andvisual correctness requires browser interaction that cannot be automated
+      with kubectl alone
+- id: AC-007
+  spec: analytics-pipeline_spec.md
+  description: Instructor dashboard embeds in LMS course pages
+  verify:
+  - type: manual
+    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    section: Dashboard Embedding Verification
+    justification: Dashboard embedding requires browser-based verification of iframe rendering within LMS course pages;no
+      headless equivalent available in the current test infrastructure
+- id: AC-016
+  spec: auth-sso-enterprise_spec.md
+  description: Given an Authentik admin, when they attempt to access the Authentik admin UI, then they are required to complete
+    MFA ...
+  verify:
+  - type: manual
+    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    section: Authentik Admin (Separate)
+    justification: Authentik admin MFA enforcement is validated against the live Authentik instance; this cannot be fully
+      verified in CI without cluster credentials.
+    file: scripts/infra/ensure-authentik-admin-mfa.sh
+- id: AC-043
+  spec: auth-sso-enterprise_spec.md
+  description: Given enterprise SSO is configured for a tenant, when ./scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp
+    --env=...
+  verify:
+  - type: manual
+    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
+    section: How Login Works
+    justification: Enterprise tenant SSO flows depend on tenant-specific IdP configuration and cannot be verified generically
+      without tenant credentials and live runtime.
+    file: scripts/qa/verify-enterprise-sso.sh
+- id: AC-013
+  spec: badges-credentials-enterprise_spec.md
+  description: Learner in both tenants sees badges from both, labeled by issuer
+  verify:
+  - type: manual
+    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
+    section: Badge Issuing Verification
+    justification: Visual UI verification requires browser interaction
+- id: AC-021
+  spec: badges-credentials-enterprise_spec.md
+  description: Add to LinkedIn button redirects with correct parameters (name, org, dates, URL)
+  verify:
+  - type: manual
+    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
+    section: Credential Template Testing
+    justification: Full LinkedIn integration requires interactive browser verification
+- id: AC-028
+  spec: badges-credentials-enterprise_spec.md
+  description: 1000+ verification requests for single assertion within 1 hour triggers alert
+  verify:
+  - type: monitoring
+    metric: badge_verification_requests_total
+    dashboard: infrastructure/observability/dashboards/badges-credentials-dashboard.json
+- id: AC-029
+  spec: badges-credentials-enterprise_spec.md
+  description: Admin analytics dashboard shows total issued, sharing rate, verification count, top badge classes for tenant
+  verify:
+  - type: manual
+    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
+    section: Badge Revocation Testing
+    justification: Dashboard visual verification requires browser interaction
+- id: AC-003
+  spec: branding-system_spec.md
+  description: Custom Mereka footer renders on all MFEs (authn, account, profile, learning)
+  verify:
+  - type: manual
+    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
+    section: MFE Footer Verification
+    justification: Account, profile, and learning MFE surfaces require interactive navigation to verify footer rendering;
+      no headless script covers all four surfaces currently
+- id: AC-010
+  spec: branding-system_spec.md
+  description: Login page shows Mereka branding (not default Open edX)
+  verify:
+  - type: manual
+    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
+    section: Login Page Visual Verification
+    justification: Visual confirmation that gradient, logo placement, and font rendering match brand guidelines requires human
+      judgment
+- id: AC-001
+  spec: ci-cd-pipeline_spec.md
+  description: Given a PR is opened against main, when CI runs, then all 12 CI jobs execute and their pass/fail status is
+    reported as GitHub commit status checks
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Quality Gates Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-009
+  spec: ci-cd-pipeline_spec.md
+  description: Given a push to main modifies infrastructure/tutor/**, when the build workflow triggers, then both openedx
+    and MFE images are built, tagged with the git SHA and short SHA, and pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-010
+  spec: ci-cd-pipeline_spec.md
+  description: Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the
+    resolved image digest (sha256:...)
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-011
+  spec: ci-cd-pipeline_spec.md
+  description: Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html
+    contains the expected branding revision marker
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-012
+  spec: ci-cd-pipeline_spec.md
+  description: Given a manual dispatch with build_openedx=true and image_tag=v1.2.3, when the build completes, then the image
+    is tagged as openedx:v1.2.3 and openedx:<short-sha>
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-015
+  spec: ci-cd-pipeline_spec.md
+  description: Given update_gitops=true and target_environment=select-environment, when the workflow runs, then it fails with
+    an error requiring explicit environment selection
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-016
+  spec: ci-cd-pipeline_spec.md
+  description: Given update_gitops=true and target_environment=staging, when ENABLE_STAGING_ENV is not set to true, then the
+    workflow fails with a message indicating staging is disabled
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-017
+  spec: ci-cd-pipeline_spec.md
+  description: Given deploy_to_staging=true is used in manual dispatch, when the workflow runs, then it fails with a deprecation
+    error directing the user to update_gitops
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-018
+  spec: ci-cd-pipeline_spec.md
+  description: Given update_gitops=true but build_openedx=false, when the workflow runs, then it fails requiring both builds
+    for deterministic digest capture
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: GitOps Deployment Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-019
+  spec: ci-cd-pipeline_spec.md
+  description: 'Given the release-evidence.yml workflow is dispatched with valid tags, when it completes, then a release-evidence-<env>-<run>
+    artifact is uploaded containing: policy check logs, dry-run plan, resolved digests, and release-metadata.json'
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Release Process Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-021
+  spec: ci-cd-pipeline_spec.md
+  description: Given a production rollback is needed, when the operator runs release-openedx-gitops.sh with prior known-good
+    tags, then the rollback completes without building new images and pods converge within 10 minutes
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Release Process Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: docs/operations/RELEASE_CHECKLIST.md
+- id: AC-022
+  spec: ci-cd-pipeline_spec.md
+  description: Given the public-health-check.yml runs on schedule, when branding is correct on prod and dev, then no failures
+    are reported and logs are uploaded as artifacts
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Scheduled Operations Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-023
+  spec: ci-cd-pipeline_spec.md
+  description: Given the operations-gates-runtime.yml runs on schedule, when GKE authentication succeeds, then operations
+    gates execute against the live cluster and artifacts are uploaded with 30-day retention
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Scheduled Operations Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-024
+  spec: ci-cd-pipeline_spec.md
+  description: Given the dr-evidence-bundle.yml runs on the 1st of the month, when GKE access is available, then a DR evidence
+    bundle is generated and uploaded with 120-day retention
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Scheduled Operations Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-025
+  spec: ci-cd-pipeline_spec.md
+  description: Given the iOS workflow is manually dispatched, when it completes successfully, then a signed IPA is uploaded
+    to TestFlight via App Store Connect API
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: iOS Build Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-029
+  spec: ci-cd-pipeline_spec.md
+  description: Given the authenticated-sso-canary.yml workflow runs on schedule (every 6h), when SSO credentials are valid,
+    then the workflow successfully authenticates to both LMS and Studio (if configured) and uploads canary artifacts with
+    30-day retention
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: SSO Canary Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-030
+  spec: ci-cd-pipeline_spec.md
+  description: Given the SSO canary fails authentication, when the workflow completes, then artifacts (screenshots, logs)
+    are uploaded showing the failure point for debugging
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: SSO Canary Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-031
+  spec: ci-cd-pipeline_spec.md
+  description: Given the tutor-config-verify.yml workflow runs when changes are made to tutor_env/config.yml or infrastructure/tutor/**,
+    when all patches are correctly applied, then the workflow succeeds with verification passing for MySQL auth patch, MFE
+    Node.js patch, multi-site domains, and custom apps
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-032
+  spec: ci-cd-pipeline_spec.md
+  description: Given the Tutor config verification runs, when required patches are missing, then the job fails with specific
+    error messages identifying which patch (MySQL, MFE, domains, or apps) is not applied
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-033
+  spec: ci-cd-pipeline_spec.md
+  description: Given the patch idempotency check runs, when patches are applied twice, then the checksums of all generated
+    files remain identical
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-034
+  spec: ci-cd-pipeline_spec.md
+  description: Given the Tutor config verification fails on a PR, when a developer views the PR, then a comment is posted
+    with common issues and remediation steps
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Configuration Verification
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-035
+  spec: ci-cd-pipeline_spec.md
+  description: Given the tutor-plugin-test.yml workflow runs when changes are made to infrastructure/tutor/plugins/**, when
+    the plugin code is valid, then the workflow succeeds with plugin syntax verification, enable/disable lifecycle tests,
+    and integration tests passing
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Plugin Testing
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-036
+  spec: ci-cd-pipeline_spec.md
+  description: Given the plugin tests run, when the plugin patches are correctly applied, then the LMS settings file contains
+    the expected plugin configuration (mfe_oauth_fix installed)
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Plugin Testing
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-037
+  spec: ci-cd-pipeline_spec.md
+  description: Given the plugin lifecycle test runs, when the plugin is enabled, disabled, and re-enabled, then all state
+    transitions succeed without errors
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Tutor Plugin Testing
+    justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
+      in isolated test environment
+    file: N/A
+- id: AC-038
+  spec: ci-cd-pipeline_spec.md
+  description: Given the integration test runs, when both plugin and apply-patches.sh are used together, then both sets of
+    patches are present in the generated configuration
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Plugin Integration Testing
+    justification: Requires triggering actual GitHub Actions workflow run and inspecting its logs for plugin+patches integration
+      result
+    file: N/A
+- id: AC-039
+  spec: ci-cd-pipeline_spec.md
+  description: Given plugin tests fail on a PR, when a developer views the PR, then a comment is posted with plugin-specific
+    troubleshooting guidance
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: PR Failure Comment Verification
+    justification: Requires triggering a real PR with a failing plugin test and verifying the bot posts a troubleshooting
+      comment
+    file: N/A
+- id: AC-CCR-001
+  spec: cross-cutting-requirements_spec.md
+  description: Tenant data isolation — API responses must contain zero records from other tenants
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Tenant Isolation Testing
+    justification: Requires multi-tenant test data and authenticated API calls across tenant contexts
+- id: AC-CCR-003
+  spec: cross-cutting-requirements_spec.md
+  description: All log entries must be structured JSON with timestamp, level, service, request_id
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Log Format Verification
+    justification: Requires running pods and log stream inspection via kubectl
+- id: AC-CCR-006
+  spec: cross-cutting-requirements_spec.md
+  description: Production API p95 latency < 500ms, availability >= 99.9% over 30 days
+  verify:
+  - type: monitoring
+    metric: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30d]))
+    dashboard: 'Grafana: LMS Performance Dashboard'
+- id: AC-CCR-007
+  spec: cross-cutting-requirements_spec.md
+  description: Tenant offboarding must produce cryptographic deletion certificate
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Tenant Offboarding
+    justification: Requires actual tenant data and deletion workflow — not yet implemented
+- id: AC-CCR-010
+  spec: cross-cutting-requirements_spec.md
+  description: Financial write operations must be idempotent
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Payment Idempotency Testing
+    justification: Requires ecommerce/purchase-gateway service with test transactions — not yet implemented
+- id: AC-CCR-011
+  spec: cross-cutting-requirements_spec.md
+  description: Background job failure logs must include error code, message, context, and stack trace
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Celery Worker Log Verification
+    justification: Requires running Celery workers with forced failure scenarios
+- id: AC-CCR-012
+  spec: cross-cutting-requirements_spec.md
+  description: Redis Streams consumers must implement idempotent handling with deduplication
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Event Bus Verification
+    justification: Redis Streams event bus not yet implemented — deferred to Tier 4
+- id: AC-014
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Given a batch import is interrupted by a pod restart, when the import is re-executed, then it resumes from
+    the last successful offset without duplicating previously imported users
+  verify:
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: Pod Restart Recovery
+    justification: Requires intentional pod kill during active import; cannot be safely automated in production GKE cluster
+- id: AC-025
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Given MCT Programs configured in Discovery with ProgramCertificate records, when a user completes all courses
+    in a program, then the Credentials service can issue a program certificate
+  verify:
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: MCT Program Certificates
+    justification: ProgramCertificate verification requires Discovery admin UI navigation and Credentials service API inspection;
+      not scriptable without admin session tokens
+- id: AC-032
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Given migration complete, when a sample of 10 courses is inspected via Studio UI, then course structure (sections,
+    units, content) renders correctly
+  verify:
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: Studio Course Spot-Check
+    justification: Visual rendering verification requires human inspection of Studio UI for 10 sample courses to confirm section/unit/content
+      display
+- id: AC-033
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Given migration complete, when a sample of 5 users logs into the LMS, then their enrolled courses are visible
+    in the dashboard
+  verify:
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: User Login Spot-Check
+    justification: User login and dashboard verification requires browser-based interaction with the LMS as specific users
+- id: AC-034
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Given a database backup taken before import, when `tutor local do restore-db` runs, then Open edX reverts to
+    pre-migration state
+  verify:
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: Full Rollback Test
+    justification: Full database restore is a destructive operation that must be tested manually in a staging environment
+      with operator oversight
+- id: AC-040
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Valid webhook with HMAC signature persists event to outbox
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service and valid HMAC signature computation
+- id: AC-041
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Invalid signature returns HTTP 401
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service with crafted invalid signature
+- id: AC-042
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Missing event key returns HTTP 400
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service with crafted payload
+- id: AC-043
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Unknown event type written to unknown__ outbox file
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service with non-standard event type
+- id: AC-044
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Missing KAJABI_WEBHOOK_SECRET returns HTTP 500 on healthcheck
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service without secret env var
+- id: AC-011
+  spec: design-tokens-system_spec.md
+  description: update-token-provenance.sh syncs tokens from upstream and updates provenance metadata when SYNC_FILE=1
+  verify:
+  - type: manual
+    runbook: specs/design-tokens-system_spec.md
+    section: Rollout & Rollback > Syncing New Tokens from Figma
+    justification: Full sync workflow requires access to upstream bbbi-mereka-brand-assets repository
+- id: AC-011
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Complete evidence bundle generated within 1 business day on request
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: DR Evidence Generation
+    justification: Requires human to initiate enterprise audit request and verify completeness against client requirements
+- id: AC-012
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Backup failure alert fires within 1 hour
+  verify:
+  - type: monitoring
+    metric: velero_backup_failure_total
+    dashboard: GCP Cloud Monitoring > Velero Alerts
+- id: AC-013
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Stale restore-test (>45 days) detected by audit pipeline
+  verify:
+  - type: monitoring
+    metric: dr_restore_drill_age_days
+    dashboard: GCP Cloud Monitoring > Velero Alerts
+- id: AC-015
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Single PVC restored from hourly backup within 30 minutes (DR-002)
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: 'DR-002: Single PVC Data Corruption'
+    justification: Requires live cluster with simulated PVC failure; destructive test cannot be fully automated against production
+- id: AC-016
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Full namespace restore via velero restore create within 1 hour (DR-003)
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: 'DR-003: Namespace Deletion/Corruption'
+    justification: Full namespace restore requires human approval gate and coordination; tested during quarterly drills
+- id: AC-017
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Secret rotation completes within 1 hour following DR-006 checklist
+  verify:
+  - type: manual
+    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    section: Full Rotation Procedure
+    justification: Secret rotation touches Infisical, GCP SM, and K8s in sequence; requires human verification of non-disruption
+- id: AC-018
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Full cluster rebuild within 4 hours with RPO <= 1 hour (DR-007)
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: 'DR-007: Full Cluster Loss'
+    justification: Full cluster rebuild cannot be automated as a test; verified via semi-annual tabletop exercise
+- id: AC-019
+  spec: disaster-recovery-business-continuity_spec.md
+  description: MySQL auth_user COUNT within 5% of pre-incident count post-restore
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: Data Integrity Verification
+    justification: 5% tolerance comparison requires baseline count from production which varies over time
+- id: AC-022
+  spec: disaster-recovery-business-continuity_spec.md
+  description: GCS backup bucket is multi-region or has cross-region replication
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: Cross-Region Readiness Verification
+    justification: GCS bucket configuration requires gcloud auth and varies by environment; verified during Phase 3 implementation
+- id: AC-001
+  spec: email-notifications-pipeline_spec.md
+  description: Given the sending domain academyv2.mereka.io, when SES domain verification is checked, then DKIM,SPF, and DMARC
+    all p...
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: ACE Pipeline Verification
+    justification: Requires active SES configuration with verified sender domain and test recipient
+    file: scripts/infra/verify-ses-domain.sh
+- id: AC-002
+  spec: email-notifications-pipeline_spec.md
+  description: Given the sending domain academy.biji-biji.com, when SES domain verification is checked, then DKIM, SPF, and
+    DMARC al...
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Email Template Rendering
+    justification: Requires sending actual test emails through SES to verify template rendering across email clients
+    file: scripts/infra/verify-ses-domain.sh
+- id: AC-HUB-023
+  spec: external-registration-hubspot_spec.md
+  description: Container runs as UID 1000 (non-root), filesystem read-only except /tmp
+  verify:
+  - type: manual
+    runbook: specs/plans/external-registration-hubspot_testplan.md
+    section: 'Phase 5: Manual Verification > AC-HUB-023: Container security'
+    justification: Requires live K8s pod inspection with kubectl exec
+- id: AC-HUB-026
+  spec: external-registration-hubspot_spec.md
+  description: 'User creation success rate drops below 95% over 15 min fires critical alert to #ops-alerts'
+  verify:
+  - type: manual
+    runbook: specs/plans/external-registration-hubspot_testplan.md
+    section: 'Phase 5: Manual Verification > AC-HUB-026: Alert firing'
+    justification: Requires Prometheus + Alertmanager deployed; simulate failure by disabling Open edX API
+- id: AC-002
+  spec: forum-service-migration_spec.md
+  description: Thread count preservation - N threads before = N threads after
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Thread Count Verification
+    justification: Requires access to MongoDB Atlas dashboard and comparison between production snapshots before/after migration
+    file: docs/operations/FORUM_DATA_VERIFICATION.md
+- id: AC-003
+  spec: forum-service-migration_spec.md
+  description: Content hash comparison - SHA-256 of 1000 random posts matches 100%
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Content Hash Verification
+    justification: Requires MongoDB Atlas access for random sampling and custom script to compute stable content hashes across
+      1000 posts
+    file: docs/operations/FORUM_DATA_VERIFICATION.md
+- id: AC-004
+  spec: forum-service-migration_spec.md
+  description: Vote count preservation - vote counts match between Python and Ruby APIs
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Vote Count Verification
+    justification: Requires running both Python and Ruby forum instances against production data to compare API responses
+    file: docs/operations/FORUM_DATA_VERIFICATION.md
+- id: AC-006
+  spec: forum-service-migration_spec.md
+  description: Thread creation via MFE - new thread appears in listing within 5 seconds
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Thread CRUD Operations
+    justification: Requires running LMS instance with authenticated user session and populated course data to test end-to-end
+      MFE functionality
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-007
+  spec: forum-service-migration_spec.md
+  description: Vote persistence - vote increments and persists across page refreshes
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Vote Persistence Testing
+    justification: Requires running LMS instance with authenticated user session to test vote interactions and persistence
+      across browser refreshes
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-008
+  spec: forum-service-migration_spec.md
+  description: Abuse flagging - flag recorded and post appears in moderation queue
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Moderation Queue Verification
+    justification: Requires running LMS instance with both regular user and moderator accounts to test abuse flagging workflow
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-009
+  spec: forum-service-migration_spec.md
+  description: Search functionality - search query returns relevant results via Meilisearch
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Meilisearch Index Verification
+    justification: Requires running LMS instance with populated course forum data indexed in Meilisearch to test search relevance
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-013
+  spec: forum-service-migration_spec.md
+  description: Production health - LMS pod with Python forum starts and passes health checks <60s
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Production Health Check
+    justification: Requires production Kubernetes cluster with LMS deployment to verify startup timing and health check behavior
+    file: docs/operations/DEPLOYMENT_RUNBOOK.md
+- id: AC-015
+  spec: forum-service-migration_spec.md
+  description: Thread listing latency - p95 <=300ms under 50 concurrent requests
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Performance Testing
+    justification: Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes
+    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
+- id: AC-016
+  spec: forum-service-migration_spec.md
+  description: Search latency - p95 <=500ms under 20 concurrent search requests
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Performance Testing
+    justification: Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes
+    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
+- id: AC-017
+  spec: forum-service-migration_spec.md
+  description: Memory usage - LMS pod RSS stays below 512Mi under normal load (10 req/s)
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Performance Testing
+    justification: Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes
+    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
+- id: AC-018
+  spec: forum-service-migration_spec.md
+  description: Rollback procedure - documented steps to revert to Ruby forum if needed
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Rollback Procedure
+    justification: Requires documentation review and validation against production deployment architecture for rollback feasibility
+    file: docs/operations/FORUM_ROLLBACK.md
+- id: AC-019
+  spec: forum-service-migration_spec.md
+  description: Rollback data integrity - posts created during Python period visible after rollback
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Rollback Data Integrity
+    justification: Requires rollback scenario testing with production-like data to verify data accessibility across forum
+      service versions
+    file: docs/operations/FORUM_ROLLBACK.md
+- id: AC-020
+  spec: forum-service-migration_spec.md
+  description: Auth failure alerts - log-auth-failures-forum alert fires on auth failure
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Observability Verification
+    justification: Requires access to Grafana dashboard with accumulated forum metrics data
+    file: docs/operations/OBSERVABILITY_VERIFICATION.md
+- id: AC-021
+  spec: forum-service-migration_spec.md
+  description: Prometheus metrics - forum-specific metrics present in /metrics endpoint
+  verify:
+  - type: manual
+    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    section: Observability Verification
+    justification: Requires access to Grafana dashboard with accumulated forum metrics data
+    file: docs/operations/OBSERVABILITY_VERIFICATION.md
+- id: AC-035
+  spec: mobile-apps-enterprise_spec.md
+  description: 'Given a release candidate build, whensubmitted to the Apple App Store, then the submission includes: app description,...'
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Testing
+    justification: Requires physical mobile device with configured FCM/APNs credentials for end-to-end push verification
+    file: N/A (manual verification)
+- id: AC-036
+  spec: mobile-apps-enterprise_spec.md
+  description: 'Given a release candidate build, whensubmitted to Google Play Store, then the submission includes: store listing,
+    scr...'
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Offline Mode Testing
+    justification: Requires mobile device in airplane mode to verify offline content caching and sync behavior
+    file: N/A (manual verification)
+- id: AC-037
+  spec: mobile-apps-enterprise_spec.md
+  description: 'Given a production release is approved, when the app is published, then it uses a phased/staged rollout (iOS:
+    phased ...'
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Deep Link Testing
+    justification: Requires mobile device with installed app to verify deep link routing from email/web to native screens
+    file: N/A (manual verification)
+- id: AC-007
+  spec: mongodb-atlas-integration_spec.md
+  description: Atlas cluster shows active connections in monitoring dashboard
+  verify:
+  - type: monitoring
+    metric: mongodb_atlas_connections_current
+    dashboard: Atlas Console > Project > Cluster > Metrics > Connections
+  - type: manual
+    runbook: docs/operations/MONGODB_ATLAS_RUNBOOK.md
+    section: Verify Atlas Health > Active Connections
+    justification: Atlas monitoring dashboard requires Atlas console credentials not available to CI; verified manually during
+      deployment
+- id: AC-007
+  spec: multi-site-domains_spec.md
+  description: Profile image upload from MFE succeeds
+  verify:
+  - type: manual
+    runbook: docs/operations/DOMAIN_MANAGEMENT.md
+    section: Verification > Profile Image Upload
+    justification: Full upload flow requires authenticated browser session with file selection; curl can only test rejection
+      path
+- id: AC-025
+  spec: multi-tenancy-architecture_spec.md
+  description: Given tenants A and B are provisioned, when scripts/qa/verify-tenant-isolation.sh --tenant-a={uuid_a} --tenant-b={uui...
+  verify:
+  - type: manual
+    runbook: docs/operations/MULTI_TENANCY_RUNBOOK.md
+    section: Tenant Isolation Verification
+    justification: Requires multiple authenticated sessions across different tenant domains to verify data isolation boundaries
+    file: scripts/qa/verify-tenant-isolation.sh
+- id: AC-002
+  spec: observability-stack_spec.md
+  description: 'Grafana shows pod CPU/memory: Dashboard visible at https://grafana.mereka.io'
+  verify:
+  - type: manual
+    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
+    section: Dashboard Verification
+    justification: Dashboard load time and visual correctness require human verification in browser
+- id: AC-006
+  spec: observability-stack_spec.md
+  description: 'Alerts fire on OOM: Simulate OOM and verify alert in Slack'
+  verify:
+  - type: manual
+    runbook: docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
+    section: Alert Verification > OOM Simulation
+    justification: OOM simulation requires deliberate resource exhaustion which cannot be safely automated in production
+- id: AC-007
+  spec: observability-stack_spec.md
+  description: 'Log correlation works: Click trace ID in Grafana, jumps to Loki logs'
+  verify:
+  - type: manual
+    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
+    section: Trace-Log Correlation
+    justification: Click-through navigation from logs to traces requires visual verification in Grafana UI
+- id: AC-020
+  spec: platform-middleware-custom-apps_spec.md
+  description: openedx_prometheus app gracefully degrades if django-prometheus is not installed
+  verify:
+  - type: manual
+    file: docs/operations/MIDDLEWARE_VERIFICATION.md
+- id: AC-003
+  spec: proctoring-integration_spec.md
+  description: Respondus detects missing LockDown Browser and shows download prompt
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires actual LockDown Browser software; cannot be automated in CI
+- id: AC-006
+  spec: proctoring-integration_spec.md
+  description: Studio editor allows selecting proctored exam type and choosing providers
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Exam Setup
+    justification: Studio UI interaction; smoke test with browser automation when implemented
+- id: AC-014
+  spec: proctoring-integration_spec.md
+  description: Blocked webcam shows camera access permission message
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Environment Check
+    justification: Browser permission interaction; smoke test with browser automation when implemented
+- id: AC-015
+  spec: proctoring-integration_spec.md
+  description: All checks pass shows green checkmarks for each component
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Environment Check
+    justification: Browser UI rendering; smoke test with browser automation when implemented
+- id: AC-017
+  spec: proctoring-integration_spec.md
+  description: LockDown Browser prevents other apps, copy/paste, screenshots, other tabs
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires physical LockDown Browser installation; cannot automate in CI
+- id: AC-018
+  spec: proctoring-integration_spec.md
+  description: Proctorio enforces lock_fullscreen and disable_clipboard settings
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires Proctorio extension; cannot automate in CI
+- id: AC-019
+  spec: proctoring-integration_spec.md
+  description: VM detection flags attempt with vm_detected event
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires VM environment; manual verification only
+- id: AC-023
+  spec: proctoring-integration_spec.md
+  description: Provider outage preserves answers and shows reconnect prompt
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Resilience
+    justification: Requires network interruption simulation; smoke test when implemented
+- id: AC-036
+  spec: proctoring-integration_spec.md
+  description: Consent notice includes all required fields
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Compliance
+    justification: Content verification; smoke test with browser automation when implemented
+- id: AC-038
+  spec: proctoring-integration_spec.md
+  description: GDPR DSAR produces all proctoring metadata within 30 days
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > GDPR
+    justification: Requires provider coordination; manual verification with quarterly audit
+- id: AC-001
+  spec: secrets-management_spec.md
+  description: ExternalSecrets show STATUS=SecretSynced for openedx-secrets and database-secrets
+  verify:
+  - type: manual
+    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    section: Verification > ExternalSecrets are synced
+    justification: Requires live GKE cluster access; cannot be verified in CI without cluster credentials
+- id: AC-002
+  spec: secrets-management_spec.md
+  description: Deployments use envFrom with secretRef foropenedx-secrets and database-secrets
+  verify:
+  - type: manual
+    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    section: Verification > Pods have envFrom referencing secrets
+    justification: Requires live GKE cluster access; K8sdeploy manifests reference envFrom but runtime verificationneeds cluster
+- id: AC-003
+  spec: secrets-management_spec.md
+  description: LMS pod has non-empty OPENEDX_SECRET_KEY environment variable
+  verify:
+  - type: manual
+    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    section: Verification > Runtime health
+    justification: Requires live GKE cluster with running LMS pod; cannot be simulated in CI
+- id: AC-009
+  spec: secrets-management_spec.md
+  description: openedx-secrets K8s Secret has at least 33keys matching spec inventory
+  verify:
+  - type: manual
+    runbook: specs/secrets-management_spec.md
+    section: Verification > K8s secrets exist with correct key counts
+    justification: Live key count verification requirescluster access
+- id: AC-010
+  spec: secrets-management_spec.md
+  description: database-secrets K8s Secret has exactly 7 specified keys
+  verify:
+  - type: manual
+    runbook: specs/secrets-management_spec.md
+    section: Verification > K8s secrets exist with correct key counts
+    justification: Live key count verification requirescluster access
+- id: AC-011
+  spec: secrets-management_spec.md
+  description: Atlas secrets (ATLAS_PUBLIC_KEY, ATLAS_PRIVATE_KEY, ATLAS_ORG_ID, ATLAS_PROJECT_ID) exist at /k8s/mereka-lms/atlas
+  verify:
+  - type: manual
+    runbook: docs/operations/INFISICAL_MEREKA_LMS_KEYS.md
+    section: Atlas Automation Keys
+    justification: Atlas path is not referenced in ExternalSecrets (not synced to K8s); requires direct Infisical CLIaccess
+- id: AC-013
+  spec: secrets-management_spec.md
+  description: Pre-commit hook blocks commits containing hardcoded password patterns
+  verify:
+  - type: manual
+    runbook: specs/secrets-management_spec.md
+    section: Acceptance Criteria > No Hardcoded Secrets> AC-013
+    justification: Pre-commit hook testing requires interactive git workflow; cannot run in CI without staging actualfiles
+- id: AC-018
+  spec: secrets-management_spec.md
+  description: Rotated secret propagates end-to-end aftersync + force-sync annotation + pod restart
+  verify:
+  - type: manual
+    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
+    section: Full Rotation Procedure
+    justification: End-to-end rotation test requires live Infisical, GCP SM, GKE cluster, and running pods; executedquarterly
+      during game days
+- id: AC-008
+  spec: slo-sla-service-level-management_spec.md
+  description: 'Given the SLO dashboard exists in Grafana, when `https://grafana.mereka.io/d/mereka-slo-overview` is loaded,
+    then panels display: per-service availability ratio, error budget remaining, burn rate trend, and latency distributions'
+  verify:
+  - type: monitoring
+    metric: mereka_slo_error_budget_remaining_ratio
+    dashboard: https://grafana.mereka.io/d/mereka-slo-overview
+- id: AC-009
+  spec: slo-sla-service-level-management_spec.md
+  description: Given error budget drops below 50%, when the burn rate alert evaluates, then a Slack notification is sent to
+    the engineering channel within 5 minutes
+  verify:
+  - type: manual
+    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    section: Verification > Simulate Budget Burn
+    justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe to automate in production
+- id: AC-013
+  spec: slo-sla-service-level-management_spec.md
+  description: Given a stable 7-day latency baseline, when p95 latency exceeds 2x the baseline for 15 consecutive minutes,
+    then a P2 alert fires and is delivered to on-call
+  verify:
+  - type: manual
+    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    section: Verification > Simulate Latency Regression
+    justification: Requires injecting artificial latency in production to verify alert fires within 15 minutes; not safe to
+      automate
+- id: AC-015
+  spec: slo-sla-service-level-management_spec.md
+  description: Given deployment events are annotated in Grafana, when the SLO dashboard is viewed, then vertical markers appear
+    at each deployment timestamp on latency and availability panels
+  verify:
+  - type: monitoring
+    metric: mereka_slo_latency_p95_seconds
+    dashboard: https://grafana.mereka.io/d/mereka-slo-overview
+- id: AC-016
+  spec: slo-sla-service-level-management_spec.md
+  description: Given a maintenance window is declared 72 hours in advance, when SLA availability is calculated for the month,
+    then the maintenance window duration is excluded from both numerator and denominator
+  verify:
+  - type: manual
+    runbook: docs/operations/MAINTENANCE_WINDOWS.md
+    section: Verification > SLA Exclusion Test
+    justification: Requires declaring a real maintenance window and generating a monthly report to verify exclusion; involves
+      calendar-dependent data that cannot be unit tested
+- id: AC-017
+  spec: slo-sla-service-level-management_spec.md
+  description: Given a maintenance window record, when the monthly SLA report is generated, then the maintenance window appears
+    in the report with start time, end time, and scope
+  verify:
+  - type: manual
+    runbook: docs/operations/SLA_REPORTING.md
+    section: Report Sections > Maintenance Windows
+    justification: Requires actual maintenance window data to verify start/end/scope appear correctly; dry-run only checks
+      section existence
+- id: AC-018
+  spec: slo-sla-service-level-management_spec.md
+  description: Given a P1 incident is declared, when the on-call engineer acknowledges, then acknowledgement occurs within
+    15 minutes of alert firing
+  verify:
+  - type: manual
+    runbook: docs/operations/ONCALL_ROTATION.md
+    section: Incident Response > P1 Acknowledgement
+    justification: Tests human response time to P1 alerts; requires a real or simulated incident with on-call engineer availability
+- id: AC-019
+  spec: slo-sla-service-level-management_spec.md
+  description: 'Given a P1/P2 incident is resolved, when the postmortem is published, then it is published within 5 business
+    days and contains: timeline, root cause, impact, remediation, and prevention sections'
+  verify:
+  - type: manual
+    runbook: docs/operations/INCIDENT_TEMPLATES.md
+    section: Postmortem > Required Sections Checklist
+    justification: Tests organizational process (postmortem published within 5 business days with required sections); cannot
+      be automated without incident tracking system integration
+- id: AC-020
+  spec: slo-sla-service-level-management_spec.md
+  description: Given the on-call schedule, when any week is inspected, then a primary and secondary on-call engineer are assigned
+    and no engineer has consecutive on-call duty exceeding 7 days
+  verify:
+  - type: manual
+    runbook: docs/operations/ONCALL_ROTATION.md
+    section: Schedule Verification
+    justification: Requires inspecting on-call schedule for primary/secondary assignment and consecutive-day limits; format
+      depends on tool choice (Slack, PagerDuty, wiki)
+- id: AC-021
+  spec: slo-sla-service-level-management_spec.md
+  description: Given a P1 alert fires, when the primary on-call does not acknowledge within 15 minutes, then the alert automatically
+    escalates to the secondary on-call
+  verify:
+  - type: manual
+    runbook: docs/operations/ONCALL_ROTATION.md
+    section: Escalation > Auto-Escalation Test
+    justification: Full end-to-end escalation test requires primary on-call to be unreachable for 15 minutes; automated check
+      verifies Alertmanager config only
+- id: AC-TCR-010
+  spec: tutor-configuration-resilience_spec.md
+  description: 'Tutor version upgrade PR: CI reports which patches need adaptation and blocks merge'
+  verify:
+  - type: manual
+    runbook: docs/operations/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
+    section: Tutor Version Upgrade Procedure
+    justification: Version upgrades are infrequent events requiring human judgment on patch adaptation; CI catches failures
+      but upgrade planning is manual
+- id: AC-TCR-012
+  spec: tutor-configuration-resilience_spec.md
+  description: make tutor-apply executes config save, plugin enable, patches, verify, restart in order, failing fast on any
+    step
+  verify:
+  - type: manual
+    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Full Configuration Apply
+    justification: End-to-end make tutor-apply requires Docker Compose stack; CI tests individual steps but full pipeline
+      needs Docker environment
+- id: AC-006
+  spec: tutor-configuration_spec.md
+  description: MFE images build successfully with Node 18
+  verify:
+  - type: manual
+    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: MFE Build Verification
+    justification: Full image build (15-20 min) cannot run in CI; script verifies Dockerfile contract
+- id: AC-007
+  spec: tutor-configuration_spec.md
+  description: MySQL 8 connections succeed without authentication errors
+  verify:
+  - type: manual
+    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: MySQL Authentication Verification
+    justification: Requires running MySQL 8 Docker container; cannot run in CI without Docker-in-Docker
+- id: AC-009
+  spec: tutor-configuration_spec.md
+  description: Mereka logo and custom footer render on allMFEs
+  verify:
+  - type: manual
+    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Visual Branding Verification
+    justification: Visual rendering requires browser inspection; automated checks verify file presence only
+- id: AC-010
+  spec: tutor-configuration_spec.md
+  description: tutor local dc ps shows all services with status Up
+  verify:
+  - type: manual
+    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Service Health Verification
+    justification: Requires running Docker Compose stack; cannot run in standard CI
+- id: AC-003
+  spec: video-pipeline-delivery_spec.md
+  description: Given a new video upload from Studio, when the author submits a video file, then a Mux direct upload URL is
+    generated within 2 seconds and the file upload begins
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-001: Studio Upload UX'
+    justification: Requires browser interaction with Studio UI; cannot be fully automated without headless browser infrastructure
+- id: AC-008
+  spec: video-pipeline-delivery_spec.md
+  description: Given a video with an uploaded SRT subtitle in English, when the learner enables captions, then English subtitles
+    display synchronized with video playback
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-002: Subtitle Display'
+    justification: Synchronized subtitle display requires visual verification in browser video player
+- id: AC-010
+  spec: video-pipeline-delivery_spec.md
+  description: Given a Vietnamese-localized course, when subtitle files in Vietnamese are uploaded to Mux, then the language
+    selector in the video player shows "Vietnamese" as an option
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-002: Subtitle Display'
+    justification: Language selector UI behavior requires visual verification in browser
+- id: AC-011
+  spec: video-pipeline-delivery_spec.md
+  description: Given a restricted course with `signed` playback policy, when an unenrolled user attempts to play the video,
+    then playback is denied with an appropriate error message
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-003: Content Protection'
+    justification: Enrollment-gated access requires testing with authenticated user sessions in browser
+- id: AC-015
+  spec: video-pipeline-delivery_spec.md
+  description: Given Mux Data is enabled, when the Mux dashboard is accessed, then quality metrics (rebuffer ratio, TTFF,
+    startup time) are visible for the last 7 days
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-004: Mux Data QoS'
+    justification: Mux dashboard UI verification requires browser login to Mux dashboard
+- id: AC-016
+  spec: video-pipeline-delivery_spec.md
+  description: Given a Superset dashboard for video engagement, when an instructor views it, then per-video play rates and
+    average completion percentages are displayed
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-005: Superset Dashboard'
+    justification: Superset dashboard visual correctness requires human verification
+- id: AC-017
+  spec: video-pipeline-delivery_spec.md
+  description: Given the current catalog of 1,290 video-minutes, when Mux storage charges are calculated after 90 days, then
+    monthly storage cost is <= $1.55 (cold storage discount applied)
+  verify:
+  - type: monitoring
+    metric: mux_storage_minutes
+    dashboard: grafana://dashboards/video-cost
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-006: Cold Storage Cost'
+    justification: Cold storage discounts require 90+ day wait; verified via Mux billing dashboard
+- id: AC-018
+  spec: video-pipeline-delivery_spec.md
+  description: Given 30,000 delivery minutes/month, when the Mux invoice is reviewed, then delivery cost is $0.00 (within
+    100K free tier)
+  verify:
+  - type: monitoring
+    metric: video_delivery_minutes_monthly
+    dashboard: grafana://dashboards/video-cost
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: 'MV-006: Cold Storage Cost'
+    justification: Delivery cost verification requires Mux billing dashboard access
+- id: AC-019
+  spec: video-pipeline-delivery_spec.md
+  description: Given a monitoring alert rule, when monthly delivery minutes exceed 80,000, then a Slack/email alert is triggered
+  verify:
+  - type: monitoring
+    metric: video_delivery_minutes_monthly
+    dashboard: grafana://dashboards/video-cost

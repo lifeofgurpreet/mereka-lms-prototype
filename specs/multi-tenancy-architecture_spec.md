@@ -5,6 +5,14 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/repository-structure_spec.md"
+  - "specs/k8s-deployment_spec.md"
+  - "specs/secrets-management_spec.md"
+  - "specs/observability-stack_spec.md"
+  - "specs/branding-system_spec.md"
+  - "specs/multi-site-domains_spec.md"
+  - "specs/platform-middleware-custom-apps_spec.md"
 links:
   related_docs:
     - "docs/architecture/multi-tenancy-overview.md"

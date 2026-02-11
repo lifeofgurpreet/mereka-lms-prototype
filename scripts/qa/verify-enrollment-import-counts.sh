@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-019, AC-020
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify enrollment import CSV files against AC-019 and AC-020.
 #
 # Checks:

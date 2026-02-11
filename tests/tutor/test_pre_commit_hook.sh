@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-TCR-005
+# @spec: tutor-configuration-resilience_spec.md
 # Tests for pre-commit hook integration
 # Coverage: AC-TCR-005
 

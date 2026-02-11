@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: observability-stack_spec.md
 # Verify Sentry CLI auth + org/project contract using observability standards.
 #
 # Usage:

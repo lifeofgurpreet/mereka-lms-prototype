@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify MCT export files against AC-002.
 #
 # Checks:

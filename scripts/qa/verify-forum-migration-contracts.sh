@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002, AC-003, AC-004, AC-018, AC-019, AC-020, AC-021
+# @spec: forum-service-migration_spec.md
 # Verify Forum Service Migration contracts for AC-002..AC-021.
 #
 # AC-002: Thread count preservation (shared database architecture guarantees it)

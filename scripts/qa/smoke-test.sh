@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-006, AC-008
+# @spec: multi-site-domains_spec.md
 # Simple smoke test against the GKE URLs.
 set -euo pipefail
 

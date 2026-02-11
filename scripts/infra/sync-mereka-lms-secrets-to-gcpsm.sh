@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006
+# @spec: secrets-management_spec.md
 # Sync Infisical secrets -> GCP Secret Manager for ExternalSecrets.
 #
 # Why this exists:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: observability-stack_spec.md
 # Validate Grafana dashboard coverage against a contract so critical signals
 # stay visible across handoffs.
 #

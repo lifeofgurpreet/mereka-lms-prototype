@@ -5,6 +5,15 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/enterprise-microservices_spec.md"
+  - "specs/multi-tenancy-architecture_spec.md"
+  - "specs/ecommerce-purchase-gateway_spec.md"
+  - "specs/email-notifications-pipeline_spec.md"
+  - "specs/badges-credentials-enterprise_spec.md"
+  - "specs/content-libraries-v2_spec.md"
+  - "specs/advanced-assessment-xqueue_spec.md"
+  - "specs/external-registration-hubspot_spec.md"
 links:
   related_docs:
     - "docs/runbooks/data-privacy-compliance-runbook.md"

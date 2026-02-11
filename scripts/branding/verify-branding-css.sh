@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-012
+# @spec: branding-system_spec.md
 # Verify the runtime override CSS contains required brand signals.
 set -euo pipefail
 

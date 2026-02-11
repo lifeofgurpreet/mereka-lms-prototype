@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-005, AC-007
+# @spec: disaster-recovery-business-continuity_spec.md
 set -euo pipefail
 
 # Patch and verify velero/restore-test CronJob so monthly restore drills are reliable.

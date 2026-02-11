@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-013
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify cross-system identity handling against AC-013.
 #
 # Checks:

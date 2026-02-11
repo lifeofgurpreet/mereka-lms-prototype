@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-020
+# @spec: video-pipeline-delivery_spec.md
 # Verify Mux secrets exist in ExternalSecrets and K8s namespace
 # AC-020: Check MUX_TOKEN_ID and MUX_TOKEN_SECRET are synced
 #

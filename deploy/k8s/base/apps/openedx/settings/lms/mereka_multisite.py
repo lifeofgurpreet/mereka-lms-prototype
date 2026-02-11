@@ -12,6 +12,15 @@ Goals:
 This module is imported via middleware in production settings.
 """
 
+# @spec platform-middleware-custom-apps AC-MPC-004: Patch Sites framework for host-based site resolution
+# @spec platform-middleware-custom-apps AC-MPC-005: Strip port numbers from request.get_host()
+# @spec platform-middleware-custom-apps AC-MPC-006: Map subdomains (apps., studio., preview.) to parent tenant
+# @spec platform-middleware-custom-apps AC-MPC-007: Use env vars as fallback when SITE_ID points to missing row
+# @spec platform-middleware-custom-apps AC-MPC-008: Rewrite sessionid, csrftoken, JWT, user-info cookies with tenant domain
+# @spec multi-site-domains AC-MSD-002: Cross-subdomain session persistence (.academyv2.mereka.io)
+# @spec multi-site-domains AC-MSD-003: Independent sessions for different root domains (biji-biji.com)
+# @spec multi-site-domains AC-MSD-008: Host-based site resolution for Site.objects.get_current()
+
 from __future__ import annotations
 
 from dataclasses import dataclass

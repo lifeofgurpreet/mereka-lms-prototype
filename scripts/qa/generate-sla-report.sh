@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-017, AC-022
+# @spec: slo-sla-service-level-management_spec.md
 # Generate a lightweight SLA/SLO evidence bundle (repo-safe).
 #
 # This does NOT compute a true SLA (needs time-series + business rules), but it:

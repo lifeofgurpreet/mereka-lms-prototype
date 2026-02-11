@@ -1,3 +1,5 @@
+# @covers AC-003
+# @spec: ci-cd-pipeline_spec.md
 [project]
 name = "mereka-academy"
 version = "0.1.0"

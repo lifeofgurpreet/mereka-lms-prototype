@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-004
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify MCT video URLs structure against AC-004.
 #
 # Checks:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009
+# @spec: tutor-configuration_spec.md
 # Verify Tutor-rendered theme assets are present in the build context.
 #
 # This is a file-level check only; it does not validate browser rendering.

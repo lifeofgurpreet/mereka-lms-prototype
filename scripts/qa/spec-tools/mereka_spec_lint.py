@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# @covers AC-002
+# @spec: ci-cd-pipeline_spec.md
 """mereka_spec_lint.py — Project-specific spec linter for Mereka LMS.
 
 Wraps the generic spec_lint.py and adds Mereka-specific rules:

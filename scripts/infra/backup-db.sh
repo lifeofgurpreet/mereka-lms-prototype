@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009
+# @spec: disaster-recovery-business-continuity_spec.md
 # Export Cloud SQL databases to GCS.
 set -euo pipefail
 

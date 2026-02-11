@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: mongodb-atlas-integration_spec.md
 # Safely retire the legacy in-cluster mongodb deployment after Atlas cutover verification.
 #
 # Safety model:

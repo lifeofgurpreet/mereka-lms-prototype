@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify Kajabi OLX packages against AC-009.
 #
 # Checks:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-016
+# @spec: auth-sso-enterprise_spec.md
 # Ensure Authentik admin permissions are correct.
 #
 # Policy:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-025, AC-026
+# @spec: k8s-deployment_spec.md
 set -euo pipefail
 
 # verify-k8s-images.sh - Verifies production image tags in K8s manifests

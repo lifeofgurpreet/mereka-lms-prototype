@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009, AC-010, AC-011, AC-012, AC-013
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-tenant-isolation.sh
 # Covers: AC-009 through AC-013 (Tenant Isolation)
 # Verifies infrastructure-level tenant isolation controls.

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-017, AC-018
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify course structure in OLX packages against AC-017 and AC-018.
 #
 # Checks:

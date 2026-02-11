@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: slo-sla-service-level-management_spec.md
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

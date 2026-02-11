@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-022, AC-023
+# @spec: k8s-deployment_spec.md
 set -euo pipefail
 
 # verify-k8s-externalsecrets.sh - Verifies ExternalSecret YAML manifests

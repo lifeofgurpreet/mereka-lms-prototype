@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-026, AC-027
+# @spec: ecommerce-purchase-gateway_spec.md
 set -euo pipefail
 
 # Verify Purchase Gateway K8s manifests are syntactically valid YAML

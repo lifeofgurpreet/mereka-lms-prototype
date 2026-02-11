@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-TCR-009
+# @spec: tutor-configuration-resilience_spec.md
 # Tests for apply-patches.sh idempotency
 # Coverage: AC-TCR-009
 

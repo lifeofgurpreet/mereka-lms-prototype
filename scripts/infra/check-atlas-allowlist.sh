@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: mongodb-atlas-integration_spec.md
 # Validate Atlas IP allowlist matches current cluster egress IPs.
 # Requires: atlas CLI auth + kubectl access to cluster.
 set -euo pipefail

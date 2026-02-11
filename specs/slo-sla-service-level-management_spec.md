@@ -5,6 +5,8 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/observability-stack_spec.md"
 links:
   related_docs:
     - "docs/operations/SLO_DASHBOARDS_SETUP.md"

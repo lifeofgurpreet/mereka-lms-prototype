@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# No @covers - setup utility, not a verification script
 # Verify Local Setup is Complete and Ready
 set -euo pipefail
 

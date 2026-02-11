@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-010
+# @spec: tutor-configuration_spec.md
 # Best-effort Tutor runtime verification.
 #
 # This is intended to be run by operators locally (not in CI):

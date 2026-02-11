@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-004
+# @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
 # smoke-test-analytics.sh - Static verification of analytics configuration

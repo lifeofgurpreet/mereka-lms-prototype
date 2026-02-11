@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-010
+# @spec: ci-cd-pipeline_spec.md
 set -euo pipefail
 
 usage() {

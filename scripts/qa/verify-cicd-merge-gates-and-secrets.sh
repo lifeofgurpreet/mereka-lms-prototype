@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-008, AC-028
+# @spec: ci-cd-pipeline_spec.md
 # Verify CI/CD merge gates and secret masking for AC-007, AC-008, AC-028.
 #
 # AC-007: All CI jobs pass → merge button enabled (branch protection + required checks)

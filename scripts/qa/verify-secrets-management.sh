@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-CCR-005
+# @spec: cross-cutting-requirements_spec.md
 # Umbrella script for AC-CCR-005: Secrets Management Verification
 #
 # Orchestrates all secrets-related verification scripts to ensure:

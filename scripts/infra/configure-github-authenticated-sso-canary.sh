@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-016
+# @spec: auth-sso-enterprise_spec.md
 # Configure GitHub secrets/variable for authenticated SSO canary enforcement.
 #
 # This script never prints secret values. Provide secrets via environment variables.

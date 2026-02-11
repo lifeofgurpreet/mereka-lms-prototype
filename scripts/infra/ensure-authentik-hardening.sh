@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-016
+# @spec: auth-sso-enterprise_spec.md
 # One entrypoint to verify/apply Authentik hardening configuration.
 #
 # This is the "config as code" surface for Authentik in this repo:

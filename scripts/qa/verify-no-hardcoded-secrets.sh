@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-012
+# @spec: secrets-management_spec.md
 # Verify there are no obvious hardcoded secrets under deploy/k8s/.
 #
 # This is a scoped variant of scripts/qa/scan-secrets-fast.sh.

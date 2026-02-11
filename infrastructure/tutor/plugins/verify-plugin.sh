@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-TCR-001, AC-TCR-002, AC-TCR-003
+# @spec: tutor-configuration-resilience_spec.md
 # Verification script for Mereka LMS Tutor plugin
 set -euo pipefail
 

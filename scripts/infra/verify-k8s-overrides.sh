@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: k8s-deployment_spec.md
 # Verify k8s-override patches are correctly applied to deployments
 # This script checks that memory requests are set to 512Mi for core deployments
 set -euo pipefail

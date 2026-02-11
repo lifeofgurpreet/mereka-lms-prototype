@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: multi-tenancy-architecture_spec.md
 # Verify TenantConfig model exists in the codebase.
 # AC-001: TenantConfig extends EnterpriseCustomer with a OneToOneField.
 set -euo pipefail

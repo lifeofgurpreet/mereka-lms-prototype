@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-041, AC-044
+# @spec: auth-sso-enterprise_spec.md
 # Audit Authentik policy execution exceptions that can break SSO flows.
 #
 # Why: Authentik policy exceptions can surface as:

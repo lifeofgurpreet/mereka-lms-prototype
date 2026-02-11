@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: multi-site-domains_spec.md
 # Build a runtime hostname routing matrix for the Open edX ecosystem.
 #
 # Purpose:

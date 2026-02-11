@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: multi-site-domains_spec.md
 # Apply multisite configuration to production/dev LMS database.
 # This script runs the multisite_bootstrap.py script from within an LMS pod
 # to configure Django site entries and SiteConfiguration for all domains.

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-021, AC-022
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify enrollment import skip handling against AC-021 and AC-022.
 #
 # Checks:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-014
+# @spec: ci-cd-pipeline_spec.md
 # Verify that the GitOps repo pins `mereka-lms` to the expected commit.
 #
 # Why:

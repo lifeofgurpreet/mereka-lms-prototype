@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-008
+# @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
 # verify-user-deletion.sh - Verify user event deletion was complete

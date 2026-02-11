@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002
+# @spec: k8s-deployment_spec.md
 # Verify that Kustomize overlays render without errors and all resources
 # are in the mereka-lms namespace.
 #

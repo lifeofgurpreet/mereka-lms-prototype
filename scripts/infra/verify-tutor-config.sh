@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-TCR-004
+# @spec: tutor-configuration-resilience_spec.md
 # Verify that all required Tutor patches are present in generated files
 # Exit 1 if any check fails, 0 if all pass
 #

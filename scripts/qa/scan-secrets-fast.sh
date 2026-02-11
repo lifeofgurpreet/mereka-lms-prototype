@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-012
+# @spec: secrets-management_spec.md
 # Fast local secret hygiene scan (deterministic, repo-safe output).
 #
 # Purpose:

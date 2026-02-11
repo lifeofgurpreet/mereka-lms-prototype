@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-010, AC-011, AC-012
+# @spec: slo-sla-service-level-management_spec.md
 # One-shot deployment gate wrapper (world-state, not just manifests).
 #
 # Intended use:

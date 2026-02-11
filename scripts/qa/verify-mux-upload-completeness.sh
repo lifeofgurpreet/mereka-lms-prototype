@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: video-pipeline-delivery_spec.md
 # Verify Mux upload completeness from results file
 # AC-002: Check all 503 MCT videos have mux_asset_id and mux_playback_id
 #

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# @covers AC-TCR-001
+# @spec: tutor-configuration-resilience_spec.md
 """
 Test script to validate Tutor plugin syntax.
 

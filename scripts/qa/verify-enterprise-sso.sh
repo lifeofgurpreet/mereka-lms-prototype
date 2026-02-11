@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-026, AC-027, AC-028, AC-029
+# @spec: enterprise-microservices_spec.md
 # Verify enterprise SSO configuration for a specific tenant.
 #
 # Checks (when enterprise SSO is implemented):

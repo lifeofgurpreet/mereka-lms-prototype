@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-013, AC-014, AC-015
+# @spec: slo-sla-service-level-management_spec.md
 # Regression detection wrapper for critical user-facing surfaces.
 #
 # Usage:

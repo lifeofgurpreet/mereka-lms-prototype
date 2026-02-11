@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: multi-site-domains_spec.md
 # Microsite/hostname onboarding checklist runner.
 #
 # Intended workflow:

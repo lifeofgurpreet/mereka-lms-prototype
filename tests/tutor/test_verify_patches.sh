@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011
+# @spec: tutor-configuration-resilience_spec.md
 # Tests for verify-tutor-patches.sh script
 # Coverage: AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011
 

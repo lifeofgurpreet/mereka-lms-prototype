@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-042
+# @spec: auth-sso-enterprise_spec.md
 # Aggregate audit for authentication surfaces + admin permissions.
 #
 # This is verify-only (no changes applied). It is intended to remove tribal knowledge by

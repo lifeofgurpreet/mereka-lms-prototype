@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-008, AC-009, AC-021
+# @spec: slo-sla-service-level-management_spec.md
 # Verify error budget instrumentation is present.
 #
 # This is intentionally conservative: true error budget math depends on live SLO queries.

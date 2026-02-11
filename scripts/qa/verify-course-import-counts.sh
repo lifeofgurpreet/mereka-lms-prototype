@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-015, AC-016
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify course import package counts against AC-015 and AC-016.
 #
 # Checks:

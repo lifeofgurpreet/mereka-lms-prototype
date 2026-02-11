@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: observability-stack_spec.md
 # Audit MySQL/Redis exporter telemetry contract (repo + optional runtime).
 #
 # Usage:

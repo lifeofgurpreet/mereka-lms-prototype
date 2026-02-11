@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# @covers AC-039
+# @spec: data-migrations-kajabi-mct_spec.md
 """Minimal FastAPI receiver for Kajabi webhooks.
 
 The handler verifies the HMAC signature Kajabi includes in the

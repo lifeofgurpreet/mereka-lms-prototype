@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-HUB-023
+# @spec: external-registration-hubspot_spec.md
 # Verify HubSpot registration service K8s security hardening
 # AC-HUB-023: Container read-only FS, non-root UID 1000
 #

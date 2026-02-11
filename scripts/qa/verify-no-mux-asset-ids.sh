@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-013
+# @spec: video-pipeline-delivery_spec.md
 # Verify no Mux asset IDs exposed in HTML/JS output
 # AC-013: Only playback IDs should be visible, never asset IDs or API credentials
 #

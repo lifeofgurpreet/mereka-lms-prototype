@@ -58,9 +58,9 @@ Use this checklist for any domain or secret change on production (GKE). There is
   ```
 - [ ] Verify secrets live under `/k8s/mereka-lms` (prod + dev), not `/`
   ```bash
-  cd /home/gurpreet/projects/k8s/reka-slackbot
-  infisical secrets --env prod --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
-  infisical secrets --env dev --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
+  INFISICAL=/home/gurpreet/projects/vps/infrastructure/scripts/infisical
+  ${INFISICAL} secrets --env prod --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
+  ${INFISICAL} secrets --env dev --path /k8s/mereka-lms --domain https://secrets.mereka.io/api
   ```
 - [ ] MongoDB Atlas credentials:
   - `MEREKA_LMS_MONGODB_USERNAME`

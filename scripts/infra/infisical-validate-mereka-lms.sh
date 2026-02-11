@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-008
+# @spec: secrets-management_spec.md
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-014, AC-040, AC-041, AC-042, AC-043, AC-044
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify Data Migration contract coverage for manual ACs.
 #
 # AC-014: Pod restart recovery (resilient import infrastructure verification)

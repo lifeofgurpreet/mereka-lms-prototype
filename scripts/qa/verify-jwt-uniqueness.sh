@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-014
+# @spec: secrets-management_spec.md
 # Verify JWT secret keys map to distinct MEREKA_LMS_* remote keys.
 #
 # This prevents drift where multiple services accidentally share the same JWT secret.

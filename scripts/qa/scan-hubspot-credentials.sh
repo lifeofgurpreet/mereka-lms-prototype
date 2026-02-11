@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-HUB-005, AC-HUB-021, AC-HUB-022
+# @spec: external-registration-hubspot_spec.md
 # Scan codebase for hardcoded HubSpot/SendGrid credentials and security issues
 # AC-HUB-005: OAuth only (no hardcoded PAT)
 # AC-HUB-022: No plaintext passwords/keys/emails in logs

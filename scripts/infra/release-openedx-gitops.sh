@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-014, AC-021
+# @spec: ci-cd-pipeline_spec.md
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

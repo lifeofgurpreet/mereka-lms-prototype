@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004, AC-005
+# @spec: tutor-configuration_spec.md
 # Verify key Tutor patch artifacts exist in tutor_env/ output.
 #
 # This is a fast, repo-local check that assumes tutor_env/ has been generated.

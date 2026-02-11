@@ -5,6 +5,8 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/branding-system_spec.md"
 links:
   related_docs:
     - "assets/branding/tokens.css"

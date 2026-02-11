@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-service-deployment.sh
 # Covers: AC-001 through AC-008 (Service Deployment)
 # Exit 0 = all checks pass, exit 1 = failures

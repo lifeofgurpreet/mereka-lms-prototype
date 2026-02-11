@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-TCR-012
+# @spec: tutor-configuration-resilience_spec.md
 # Test script for AC-TCR-012: make tutor-apply workflow verification
 #
 # Verifies that the Tutor configuration workflow components exist and are properly wired:

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: auth-sso-enterprise_spec.md
 # Verify OIDC-linked active users are not blocked by unusable LMS passwords.
 #
 # Open edX third-party-auth pipeline returns "Your account is disabled" when an

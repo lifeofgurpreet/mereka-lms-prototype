@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# @covers AC-022
+# @spec: video-pipeline-delivery_spec.md
 """
 Verify Mux asset status from video mapping
 AC-022: Check every playback_id in video_mapping_openedx.json resolves to valid, ready asset

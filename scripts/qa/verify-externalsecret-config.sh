@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-015, AC-016
+# @spec: secrets-management_spec.md
 # Verify ExternalSecrets Operator config manifests match secrets-management_spec.md.
 #
 # Repo-level checks only (no cluster required):

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004
+# @spec: disaster-recovery-business-continuity_spec.md
 # End-to-end Velero backup posture audit (read-only).
 #
 # Goals:

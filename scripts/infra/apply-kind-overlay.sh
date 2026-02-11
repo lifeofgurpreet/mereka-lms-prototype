@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: k8s-deployment_spec.md
 # Apply the dev(kind) overlay end-to-end (load image, apply manifests, verify health).
 #
 # Usage:

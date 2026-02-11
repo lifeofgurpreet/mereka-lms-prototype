@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-038
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify incremental sync logic against AC-038.
 #
 # Checks:

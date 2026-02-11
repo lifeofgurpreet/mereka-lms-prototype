@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-012, AC-CCR-004
+# @spec: cross-cutting-requirements_spec.md
 set -euo pipefail
 
 # verify-k8s-secrets-hygiene.sh - Scans K8s manifests for hardcoded secrets

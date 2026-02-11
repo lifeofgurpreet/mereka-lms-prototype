@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-011
+# @spec: branding-system_spec.md
 # Refresh assets/branding/tokens.provenance.json from the upstream branding repo.
 set -euo pipefail
 

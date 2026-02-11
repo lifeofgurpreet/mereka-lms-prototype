@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-033, AC-034
+# @spec: enterprise-microservices_spec.md
 # Machine-verifiable enterprise deployment verification
 # Exit 0 if all checks pass, exit 1 if any check fails
 

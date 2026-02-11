@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-031
+# @spec: ecommerce-purchase-gateway_spec.md
 # Validate ecommerce OAuth + site configuration (non-secret checks).
 set -euo pipefail
 

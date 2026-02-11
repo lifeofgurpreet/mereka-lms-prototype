@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: auth-sso-enterprise_spec.md
 # Verify multisite cookie-domain middleware ordering guardrails for OIDC.
 #
 # Why this matters:

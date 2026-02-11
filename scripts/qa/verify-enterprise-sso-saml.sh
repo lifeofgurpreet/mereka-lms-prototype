@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-026, AC-027, AC-028, AC-029
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-sso-saml.sh
 # Covers: AC-026 through AC-029 (SSO/SAML Integration)
 # Verifies SAML infrastructure readiness via LMS configuration checks.

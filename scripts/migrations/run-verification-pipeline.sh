@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-030, AC-031
+# @spec: data-migrations-kajabi-mct_spec.md
 # Migration Verification Pipeline Orchestrator
 #
 # Runs all migration verification scripts in workflow order and produces

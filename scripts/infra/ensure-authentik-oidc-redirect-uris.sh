@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-016
+# @spec: auth-sso-enterprise_spec.md
 # Ensure Authentik OIDC provider has redirect URIs for every LMS hostname we serve.
 #
 # This is intentionally additive and idempotent.

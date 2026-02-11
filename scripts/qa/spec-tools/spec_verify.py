@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """spec_verify.py
 
-Machine-verifies that specs are enforceable.
+Machine-verifies that specs are enforceable via @covers annotations.
 
-Copied from team-skills: plugins/core/skills/specs-vs-docs/tools/spec_verify.py
+Checks:
+- AC IDs are stable and unique
+- Each AC has @covers annotation in source OR manual entry
+- Referenced files exist
+- Optional: --run executes verification commands
+
+Usage:
+  python3 spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .
+  python3 spec_verify.py specs/ --scan-dirs tests/ scripts/ --manual-file specs/manual_verifications.yaml
 """
 
 from __future__ import annotations
@@ -12,36 +20,24 @@ import argparse
 import re
 import shlex
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 try:
-    import yaml  # type: ignore
-except Exception as e:  # pragma: no cover
-    raise SystemExit("PyYAML not found. Install with: pip install pyyaml") from e
+    import yaml
+except ImportError:
+    raise SystemExit("PyYAML required: pip install pyyaml")
 
-
+COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
+SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
 AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
-
-
-@dataclass
-class VerifyEntry:
-    type: str  # automated | monitoring | manual
-    test_type: Optional[str] = None
-    file: Optional[str] = None
-    command: Optional[str] = None
-    metric: Optional[str] = None
-    dashboard: Optional[str] = None
-    runbook: Optional[str] = None
-    section: Optional[str] = None
-    justification: Optional[str] = None
+SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 
 
 def find_markdown_files(p: Path) -> List[Path]:
     if p.is_file():
         return [p]
-    return sorted([x for x in p.rglob("*.md") if x.is_file()])
+    return sorted(x for x in p.rglob("*.md") if x.is_file())
 
 
 def parse_acceptance_criteria(md: str) -> List[Tuple[str, str]]:
@@ -55,44 +51,114 @@ def parse_acceptance_criteria(md: str) -> List[Tuple[str, str]]:
     return out
 
 
-def load_testmap(path: Path) -> Dict:
-    obj = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(obj, dict):
-        raise ValueError("testmap must be a YAML mapping")
-    return obj
-
-
-def normalize_verify_entries(ac_item: Dict) -> List[VerifyEntry]:
-    entries = ac_item.get("verify", [])
-    if not isinstance(entries, list):
-        raise ValueError("verify must be a list")
-    out: List[VerifyEntry] = []
-    for e in entries:
-        if not isinstance(e, dict):
-            raise ValueError("verify entry must be a mapping")
-        out.append(
-            VerifyEntry(
-                type=str(e.get("type", "")).strip(),
-                test_type=(str(e.get("test_type")).strip() if e.get("test_type") else None),
-                file=(str(e.get("file")).strip() if e.get("file") else None),
-                command=(str(e.get("command")).strip() if e.get("command") else None),
-                metric=(str(e.get("metric")).strip() if e.get("metric") else None),
-                dashboard=(str(e.get("dashboard")).strip() if e.get("dashboard") else None),
-                runbook=(str(e.get("runbook")).strip() if e.get("runbook") else None),
-                section=(str(e.get("section")).strip() if e.get("section") else None),
-                justification=(str(e.get("justification")).strip() if e.get("justification") else None),
-            )
-        )
-    return out
-
-
 def is_spec_like(path: Path) -> bool:
     name = path.name.lower()
     parts = path.parts
-    return "spec" in name or name.endswith(".spec.md") or "_spec" in name or "specs" in parts
+    return (
+        "spec" in name
+        or name.endswith(".spec.md")
+        or "_spec" in name
+        or "specs" in parts
+    )
 
 
-def verify_one_spec(spec_path: Path, require_testmap: bool, run: bool, repo_root: Path) -> List[str]:
+def scan_file_for_covers(path: Path) -> Dict[str, str]:
+    """Returns {ac_id: spec_name} for @covers in file."""
+    try:
+        content = path.read_text(encoding="utf-8")
+    except Exception:
+        return {}
+    spec_name = None
+    for m in SPEC_RE.finditer(content):
+        spec_name = m.group(1)
+    covers: Dict[str, str] = {}
+    for m in COVERS_RE.finditer(content):
+        ids = [s.strip() for s in m.group(1).split(",") if s.strip()]
+        for raw_id in ids:
+            ac_match = AC_ID_RE.match(raw_id)
+            if ac_match:
+                covers[ac_match.group(1)] = spec_name or ""
+    return covers
+
+
+def scan_dirs_for_covers(dirs: List[Path]) -> Dict[str, List[Path]]:
+    """Scan directories for @covers annotations.
+
+    Returns {(spec_name, ac_id) as 'spec_name::ac_id': [file_paths]}.
+    Also stores unkeyed ac_id entries for backward compat.
+    """
+    result: Dict[str, List[Path]] = {}
+    for d in dirs:
+        if not d.exists():
+            continue
+        for f in sorted(d.rglob("*")):
+            if not f.is_file() or f.suffix not in SCAN_EXTENSIONS:
+                continue
+            covers = scan_file_for_covers(f)
+            for ac_id, spec_name in covers.items():
+                # Store both scoped and unscoped keys
+                if spec_name:
+                    result.setdefault(f"{spec_name}::{ac_id}", []).append(f)
+                result.setdefault(ac_id, []).append(f)
+    return result
+
+
+def ac_is_covered(ac_id: str, spec_filename: str, index: Dict[str, List[Path]]) -> bool:
+    """Check if an AC is covered, using spec-scoped matching for non-prefixed IDs."""
+    has_prefix = bool(re.match(r"AC-[A-Z]+-\d+", ac_id))
+    if has_prefix:
+        # Globally unique — any match
+        return ac_id in index
+    # Non-prefixed — prefer spec-scoped match
+    scoped_key = f"{spec_filename}::{ac_id}"
+    if scoped_key in index:
+        return True
+    # Fall back to unscoped only if no spec annotation existed
+    if ac_id in index:
+        # Check if all files covering this AC are unscoped (no @spec:)
+        for f in index[ac_id]:
+            covers = scan_file_for_covers(f)
+            if ac_id in covers and not covers[ac_id]:
+                return True
+    return False
+
+
+def get_covered_files(ac_id: str, spec_filename: str, index: Dict[str, List[Path]]) -> List[Path]:
+    """Get files that cover an AC for a specific spec."""
+    has_prefix = bool(re.match(r"AC-[A-Z]+-\d+", ac_id))
+    if has_prefix:
+        return index.get(ac_id, [])
+    scoped_key = f"{spec_filename}::{ac_id}"
+    if scoped_key in index:
+        return index[scoped_key]
+    return []
+
+
+def load_manual_verifications(
+    manual_file: Optional[Path], spec_name: str
+) -> Dict[str, dict]:
+    """Load manual/monitoring entries for a spec."""
+    if not manual_file or not manual_file.exists():
+        return {}
+    data = yaml.safe_load(manual_file.read_text(encoding="utf-8")) or {}
+    entries = data.get("entries", [])
+    result: Dict[str, dict] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        entry_spec = entry.get("spec", "")
+        if spec_name in entry_spec or entry_spec in spec_name:
+            result[entry["id"]] = entry
+    return result
+
+
+def verify_one_spec(
+    spec_path: Path,
+    scan_dirs: List[Path],
+    manual_file: Optional[Path],
+    run: bool,
+    repo_root: Path,
+) -> List[str]:
     errors: List[str] = []
     md = spec_path.read_text(encoding="utf-8")
 
@@ -106,94 +172,96 @@ def verify_one_spec(spec_path: Path, require_testmap: bool, run: bool, repo_root
         errors.append("Duplicate Acceptance Criteria IDs found.")
         return errors
 
-    testmap_path = Path(str(spec_path) + ".testmap.yml")
-    if not testmap_path.exists():
-        if require_testmap:
-            errors.append(f"Missing required testmap: {testmap_path}")
-        return errors
-
-    try:
-        tm = load_testmap(testmap_path)
-    except Exception as e:
-        errors.append(f"Failed to parse testmap YAML: {e}")
-        return errors
-
-    ac_items = tm.get("acceptance_criteria", [])
-    if not isinstance(ac_items, list):
-        errors.append("testmap.acceptance_criteria must be a list")
-        return errors
-
-    tm_index: Dict[str, Dict] = {}
-    for item in ac_items:
-        if not isinstance(item, dict) or "id" not in item:
-            errors.append("Each acceptance_criteria item must be a mapping with an 'id'")
-            continue
-        tm_index[str(item["id"]).strip()] = item
+    automated = scan_dirs_for_covers(scan_dirs)
+    manual_entries = load_manual_verifications(manual_file, spec_path.name)
+    spec_filename = spec_path.name
 
     for ac_id, ac_line in acs:
-        if ac_id not in tm_index:
-            errors.append(f"AC {ac_id} missing from testmap. Spec line: {ac_line}")
+        is_covered = ac_is_covered(ac_id, spec_filename, automated)
+        if not is_covered and ac_id not in manual_entries:
+            errors.append(
+                f"{ac_id} not covered by any @covers annotation or manual entry"
+            )
             continue
 
-        try:
-            entries = normalize_verify_entries(tm_index[ac_id])
-        except Exception as e:
-            errors.append(f"AC {ac_id} has invalid verify entries: {e}")
-            continue
+        if is_covered:
+            covered_files = get_covered_files(ac_id, spec_filename, automated)
+            for fpath in covered_files:
+                if not fpath.exists():
+                    errors.append(f"{ac_id} references non-existent file: {fpath}")
 
-        if not entries:
-            errors.append(f"AC {ac_id} has no verification entries in testmap.")
-            continue
-
-        for ve in entries:
-            if ve.type not in ("automated", "monitoring", "manual"):
-                errors.append(f"AC {ac_id} verify.type must be automated|monitoring|manual (got {ve.type!r}).")
-
-            if ve.type == "automated":
-                if not ve.command:
-                    errors.append(f"AC {ac_id} automated verification missing command.")
-                if ve.file:
-                    f = (repo_root / ve.file).resolve()
-                    if not f.exists():
-                        errors.append(f"AC {ac_id} references missing test file: {ve.file}")
-                if run and ve.command:
+            if run:
+                for fpath in covered_files:
+                    if fpath.suffix == ".sh":
+                        cmd = str(fpath.relative_to(repo_root))
+                    elif fpath.suffix == ".py":
+                        cmd = f"pytest {fpath.relative_to(repo_root)}"
+                    else:
+                        continue
                     try:
                         res = subprocess.run(
-                            shlex.split(ve.command),
+                            shlex.split(cmd),
                             cwd=str(repo_root),
                             capture_output=True,
                             text=True,
                             check=False,
+                            timeout=120,
                         )
                         if res.returncode != 0:
                             errors.append(
-                                f"AC {ac_id} automated command failed (exit {res.returncode}): {ve.command}\n"
-                                f"STDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}"
+                                f"{ac_id} command failed (exit {res.returncode}): {cmd}\n"
+                                f"STDERR: {res.stderr[:200]}"
                             )
                     except Exception as e:
-                        errors.append(f"AC {ac_id} failed to execute command {ve.command!r}: {e}")
+                        errors.append(f"{ac_id} failed to execute {cmd}: {e}")
 
-            elif ve.type == "monitoring":
-                if not ve.metric and not ve.dashboard:
-                    errors.append(f"AC {ac_id} monitoring verification should include metric and/or dashboard.")
-
-            elif ve.type == "manual":
-                if not ve.runbook or not ve.section:
-                    errors.append(f"AC {ac_id} manual verification requires runbook + section.")
-                if not ve.justification:
-                    errors.append(f"AC {ac_id} manual verification requires justification.")
-                if ve.runbook and not (repo_root / ve.runbook).exists():
-                    errors.append(f"AC {ac_id} references missing runbook file: {ve.runbook}")
+        if ac_id in manual_entries:
+            me = manual_entries[ac_id]
+            for v in me.get("verify", []):
+                vtype = v.get("type", "")
+                if vtype == "manual":
+                    if not v.get("runbook") or not v.get("section"):
+                        errors.append(
+                            f"{ac_id} manual verification requires runbook + section."
+                        )
+                    if not v.get("justification"):
+                        errors.append(
+                            f"{ac_id} manual verification requires justification."
+                        )
+                    if v.get("runbook") and not (repo_root / v["runbook"]).exists():
+                        errors.append(
+                            f"{ac_id} references missing runbook: {v['runbook']}"
+                        )
+                elif vtype == "monitoring":
+                    if not v.get("metric") and not v.get("dashboard"):
+                        errors.append(
+                            f"{ac_id} monitoring should include metric and/or dashboard."
+                        )
 
     return errors
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Verify that specs are machine-enforceable.")
-    ap.add_argument("path", type=str, help="A spec file or a folder to scan for specs")
-    ap.add_argument("--repo-root", type=str, default=".", help="Repo root for resolving relative paths")
-    ap.add_argument("--require-testmap", action="store_true", help="Fail if <spec>.testmap.yml is missing")
-    ap.add_argument("--run", action="store_true", help="Execute automated verification commands (best-effort)")
+    ap = argparse.ArgumentParser(
+        description="Verify specs via @covers annotations."
+    )
+    ap.add_argument("path", type=str, help="Spec file or folder")
+    ap.add_argument("--repo-root", type=str, default=".", help="Repo root")
+    ap.add_argument(
+        "--scan-dirs",
+        nargs="+",
+        default=["tests/", "scripts/"],
+        help="Dirs to scan for @covers",
+    )
+    ap.add_argument(
+        "--manual-file",
+        type=str,
+        default=None,
+        help="Path to manual_verifications.yaml",
+    )
+    ap.add_argument(
+        "--run", action="store_true", help="Execute verification commands"
+    )
     args = ap.parse_args()
 
     repo_root = Path(args.repo_root).resolve()
@@ -201,6 +269,9 @@ def main() -> int:
     if not target.exists():
         print(f"ERROR: path not found: {target}")
         return 2
+
+    scan_dirs = [repo_root / d for d in args.scan_dirs]
+    manual_file = Path(args.manual_file) if args.manual_file else None
 
     files = find_markdown_files(target)
     spec_files = [f for f in files if is_spec_like(f)]
@@ -211,7 +282,7 @@ def main() -> int:
 
     any_errors = False
     for f in spec_files:
-        errs = verify_one_spec(f, require_testmap=args.require_testmap, run=args.run, repo_root=repo_root)
+        errs = verify_one_spec(f, scan_dirs, manual_file, args.run, repo_root)
         if errs:
             any_errors = True
             print(f"\nFAIL {f}")

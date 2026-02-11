@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-014, AC-015, AC-016, AC-017, AC-018
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-license-management.sh
 # Covers: AC-014 through AC-018 (License Management)
 # Note: license-manager is deferred (no upstream Docker image).

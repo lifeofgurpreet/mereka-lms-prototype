@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: observability-stack_spec.md
 # Verify prometheus integration in Open edX deployment
 set -euo pipefail
 

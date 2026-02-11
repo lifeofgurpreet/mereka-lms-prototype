@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002, AC-004, AC-005, AC-006, AC-007, AC-009
+# @spec: branding-system_spec.md
 # Verify end-to-end Mereka branding assets + wiring before builds/deploys.
 set -euo pipefail
 

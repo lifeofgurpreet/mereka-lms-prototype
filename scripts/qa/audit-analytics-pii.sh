@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006
+# @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
 # audit-analytics-pii.sh - Scan analytics configuration for PII field exposure

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009, AC-010
+# @spec: secrets-management_spec.md
 # Verify ExternalSecret inventories roughly match specs/secrets-management_spec.md.
 #
 # This is a repo-level check: it validates the ExternalSecret manifests contain the

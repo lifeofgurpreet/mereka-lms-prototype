@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-HUB-026
+# @spec: external-registration-hubspot_spec.md
 # Verify HubSpot registration service alert rules in K8s manifests
 # AC-HUB-026: Alert fires when user creation success rate < 95%
 #

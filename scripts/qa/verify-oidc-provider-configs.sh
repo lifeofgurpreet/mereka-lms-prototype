@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-009
+# @spec: multi-site-domains_spec.md
 # Verify OIDC provider configs exist/enabled for the current LMS sites.
 #
 # Why this exists:

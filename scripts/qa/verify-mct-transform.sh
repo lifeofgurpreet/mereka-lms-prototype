@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007, AC-008
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify MCT data transformation against AC-007 and AC-008.
 #
 # Checks:

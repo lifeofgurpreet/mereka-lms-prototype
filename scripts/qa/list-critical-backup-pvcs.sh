@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-002
+# @spec: disaster-recovery-business-continuity_spec.md
 # List Bound PVCs covered by the "hourly critical databases" Velero schedule.
 #
 # Purpose:

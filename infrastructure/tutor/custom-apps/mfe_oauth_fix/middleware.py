@@ -5,6 +5,12 @@ This middleware intercepts responses from the /api/mfe_context endpoint
 and ensures OAuth providers are properly included.
 """
 
+# @spec platform-middleware-custom-apps AC-MPC-013: Intercept /api/mfe_context responses
+# @spec platform-middleware-custom-apps AC-MPC-014: Only process 200 responses with application/json content type
+# @spec platform-middleware-custom-apps AC-MPC-015: Query OAuth2ProviderConfig for empty providers array
+# @spec platform-middleware-custom-apps AC-MPC-016: Rename "Authentik" providers to "Mereka"
+# @spec auth-sso-enterprise: Support OAuth provider visibility for MFE login pages
+
 import json
 import logging
 from django.utils.deprecation import MiddlewareMixin

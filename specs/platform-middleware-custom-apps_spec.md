@@ -5,6 +5,10 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/repository-structure_spec.md"
+  - "specs/k8s-deployment_spec.md"
+  - "specs/tutor-configuration_spec.md"
 links:
   related_docs:
     - "deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py"

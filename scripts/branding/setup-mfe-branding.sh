@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-007
+# @spec: branding-system_spec.md
 # Clone/update key Open edX MFEs locally and wire in the shared Mereka theme assets.
 set -euo pipefail
 

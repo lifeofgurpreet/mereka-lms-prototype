@@ -2,6 +2,9 @@
 Django app configuration for Open edX Prometheus integration.
 """
 
+# @spec platform-middleware-custom-apps AC-MPC-017: Django app config for Prometheus metrics integration
+# @spec observability-stack: Application-level metrics instrumentation via django-prometheus
+
 from django.apps import AppConfig
 
 

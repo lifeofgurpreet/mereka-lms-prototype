@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-023
+# @spec: slo-sla-service-level-management_spec.md
 # Validate SLA evidence bundles do not contain obvious secret patterns.
 #
 # Usage:

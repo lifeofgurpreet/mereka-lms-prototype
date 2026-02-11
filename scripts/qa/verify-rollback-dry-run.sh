@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-035
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify rollback script dry-run functionality against AC-035.
 #
 # Checks:

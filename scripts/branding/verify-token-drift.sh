@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-012
+# @spec: design-tokens-system_spec.md
 # Ensure runtime token exports do not drift from the canonical design tokens.
 #
 # Canonical source in this repo: assets/branding/tokens.css

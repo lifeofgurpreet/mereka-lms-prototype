@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-008, AC-012, AC-013, AC-014
+# @spec: disaster-recovery-business-continuity_spec.md
 # Audit Velero alert pipeline end-to-end:
 # - repo templates (log metrics + alert policies)
 # - runtime GCP objects (optional if gcloud auth present)

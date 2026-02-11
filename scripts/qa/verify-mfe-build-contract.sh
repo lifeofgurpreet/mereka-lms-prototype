@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-006
+# @spec: tutor-configuration_spec.md
 # Verify the MFE build contract after patches are applied.
 #
 # This is a light wrapper that reuses existing prereq checks and enforces Node 18

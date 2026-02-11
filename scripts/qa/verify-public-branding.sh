@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-008, AC-009, AC-010
+# @spec: branding-system_spec.md
 # Verify branding signals are visible on public endpoints (prod + dev)
 set -euo pipefail
 

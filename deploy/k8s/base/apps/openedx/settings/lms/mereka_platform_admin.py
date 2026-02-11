@@ -1,5 +1,9 @@
 import os
 
+# @spec platform-middleware-custom-apps AC-MPC-001: Auto-escalate platform admin users to staff/superuser
+# @spec platform-middleware-custom-apps AC-MPC-002: Skip save() when user already has correct privileges
+# @spec platform-middleware-custom-apps AC-MPC-003: Never modify non-admin users
+
 
 def _platform_admin_emails() -> set[str]:
     raw = os.environ.get("MEREKA_PLATFORM_ADMIN_EMAILS", "")

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: observability-stack_spec.md
 # Validate Grafana -> Prometheus telemetry connectivity for Mereka LMS.
 #
 # Tests both:

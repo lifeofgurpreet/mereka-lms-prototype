@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-045
+# @spec: auth-sso-enterprise_spec.md
 # Audit authenticated SSO canary wiring (workflow contract + GitHub secret/variable presence).
 #
 # Usage:

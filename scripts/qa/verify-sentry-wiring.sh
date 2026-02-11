@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: observability-stack_spec.md
 # Verify Sentry wiring contract for Open edX services (repo + optional runtime).
 #
 # Usage:

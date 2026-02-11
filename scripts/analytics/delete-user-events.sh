@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-008
+# @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
 # delete-user-events.sh - Delete user analytics events (GDPR right-to-be-forgotten)

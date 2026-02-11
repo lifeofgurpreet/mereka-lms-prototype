@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-035, AC-036
+# @spec: enterprise-microservices_spec.md
 # verify-enterprise-observability.sh
 # Covers: AC-035, AC-036 (Observability)
 # Exit 0 = all checks pass, exit 1 = failures

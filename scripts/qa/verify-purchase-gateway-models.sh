@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-008, AC-009, AC-010, AC-011
+# @spec: ecommerce-purchase-gateway_spec.md
 set -euo pipefail
 
 # Verify Purchase Gateway models contain required fields.

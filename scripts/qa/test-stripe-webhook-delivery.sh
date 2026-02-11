@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-031
+# @spec: ecommerce-purchase-gateway_spec.md
 # Send a locally-signed Stripe webhook payload to ecommerce and confirm 200.
 #
 # Why this exists:

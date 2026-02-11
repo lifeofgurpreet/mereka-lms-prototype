@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-029
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify Kajabi thumbnail upload preparation against AC-029.
 #
 # Checks:

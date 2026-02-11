@@ -7,6 +7,11 @@ vehicle: "talent_platform"
 last_updated: "2026-02-10"
 deployment_date: "2026-02-10"
 deployment_status: "production"
+depends_on:
+  - "specs/multi-tenancy-architecture_spec.md"
+  - "specs/auth-sso-enterprise_spec.md"
+  - "specs/k8s-deployment_spec.md"
+  - "specs/observability-stack_spec.md"
 links:
   related_docs:
     - "docs/architecture/enterprise-services-overview.md"

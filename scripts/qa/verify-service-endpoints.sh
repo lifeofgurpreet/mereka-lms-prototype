@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-013
+# @spec: k8s-deployment_spec.md
 # Verify that core Services have non-empty Endpoints (i.e., traffic can route).
 #
 # Empty endpoints are one of the most common causes of "site down" incidents.

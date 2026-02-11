@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-005
+# @spec: multi-site-domains_spec.md
 # Verify `/api/mfe_config/v1` contract on the public MFE host.
 #
 # Why:

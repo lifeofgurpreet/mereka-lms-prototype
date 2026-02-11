@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-010, AC-028
+# @spec: data-migrations-kajabi-mct_spec.md
 # Verify MCT OLX packages against AC-010 and AC-028.
 #
 # Checks:

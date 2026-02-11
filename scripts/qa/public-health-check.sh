@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-020
+# @spec: disaster-recovery-business-continuity_spec.md
 # Synthetic health checks for public endpoints (prod + dev)
 set -euo pipefail
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: branding-system_spec.md
 # Verify that footer/header logo files are correctly configured
 set -euo pipefail
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-012, AC-013, AC-014, AC-026, AC-027
+# @spec: ecommerce-purchase-gateway_spec.md
 set -euo pipefail
 
 # Verify Purchase Gateway scaffold — directory structure, required files.

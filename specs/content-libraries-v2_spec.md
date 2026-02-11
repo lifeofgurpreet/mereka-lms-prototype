@@ -5,6 +5,10 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/enterprise-microservices_spec.md"
+  - "specs/multi-tenancy-architecture_spec.md"
+  - "specs/video-pipeline-delivery_spec.md"
 links:
   related_docs:
     - "docs/architecture/content-libraries-overview.md"

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: k8s-deployment_spec.md
 # Auto-generate k8s override file for resource requests
 # This script creates the override.yml file that sets memory requests to 512Mi
 # for core Open edX deployments.

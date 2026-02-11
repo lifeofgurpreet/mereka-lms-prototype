@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: tutor-configuration_spec.md
 # Manifest-driven verification tool for Tutor patches
 # Reads patch-manifest.yml and verifies each patch is present
 #

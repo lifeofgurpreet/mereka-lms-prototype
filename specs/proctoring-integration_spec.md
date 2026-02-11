@@ -5,6 +5,10 @@ status: "deferred"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+depends_on:
+  - "specs/enterprise-microservices_spec.md"
+  - "specs/multi-tenancy-architecture_spec.md"
+  - "specs/advanced-assessment-xqueue_spec.md"
 links:
   related_docs:
     - "docs/architecture/proctoring-architecture-overview.md"

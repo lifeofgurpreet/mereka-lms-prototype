@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-019
+# @spec: video-pipeline-delivery_spec.md
 # Verify Mux video delivery alert rules are defined in K8s manifests
 # AC-019: When monthly delivery minutes exceed 80,000, a Slack/email alert is triggered
 #

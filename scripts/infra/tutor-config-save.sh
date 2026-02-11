@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-001
+# @spec: tutor-configuration_spec.md
 # Safe wrapper for 'tutor config save'
 # Automatically applies patches and verifies configuration
 #

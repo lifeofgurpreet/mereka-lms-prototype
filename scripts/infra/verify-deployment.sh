@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-003
+# @spec: k8s-deployment_spec.md
 # Post-deployment verification wrapper.
 #
 # Intent: provide one command that an operator can run after a rollout to sanity-check
