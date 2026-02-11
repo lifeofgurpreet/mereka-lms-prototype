@@ -10,6 +10,7 @@ resources:
 - monitoring
 - logging
 - apps/enterprise
+- apps/multi-tenancy
 
 # Custom Mereka-branded OpenEdX image
 images:

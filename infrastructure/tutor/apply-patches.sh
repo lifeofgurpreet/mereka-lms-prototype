@@ -792,7 +792,8 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/m
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
 COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
 RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus"""
+RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/mereka_tenancy"""
         if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
             marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
             custom_apps_copy = f"""{marker}
@@ -805,7 +806,8 @@ RUN pip install -e /openedx/openedx_prometheus"""
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
 COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
 RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus"""
+RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/mereka_tenancy"""
             updated = updated.replace(mfe_oauth_marker, custom_apps_add)
         elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
             # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
@@ -817,6 +819,7 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /open
 COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/mereka_tenancy
 
 """ + workdir_marker
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)

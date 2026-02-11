@@ -632,7 +632,11 @@ MFE_CONFIG = {
 
 AUTHN_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/authn"
 AUTHN_MICROFRONTEND_DOMAIN = f"{MEREKA_MFE_DOMAIN}/authn"
-MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"] = True
+# Enterprise login: disabled by default; enable when per-tenant IdPs are configured.
+# Set MEREKA_ENABLE_ENTERPRISE_LOGIN=true in env to show enterprise SSO on login page.
+MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"] = os.environ.get(
+    "MEREKA_ENABLE_ENTERPRISE_LOGIN", ""
+).lower() not in ("true", "1", "yes")
 MFE_CONFIG["AUTHN_MICROFRONTEND_URL"] = AUTHN_MICROFRONTEND_URL
 MFE_CONFIG["AUTHN_MICROFRONTEND_DOMAIN"] = AUTHN_MICROFRONTEND_DOMAIN
 if SESSION_COOKIE_DOMAIN:
@@ -818,3 +822,37 @@ try:
     from lms.envs.tutor.mereka_enterprise_channels import *  # noqa: F401,F403
 except ImportError:
     pass
+
+# ── Enterprise SSO Foundation ────────────────────────────────────────────
+# Per-tenant SAML/OIDC authentication via Open edX third_party_auth.
+# Phase 0: inject SP cert/key from environment; IdPs configured via Django admin.
+# See: specs/auth-sso-enterprise_spec.md
+
+# Ensure third_party_auth is in INSTALLED_APPS (should be in base Open edX).
+if "third_party_auth" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("third_party_auth")
+
+# Enable third-party auth feature flag (required for enterprise login routing).
+FEATURES.setdefault("ENABLE_THIRD_PARTY_AUTH", True)
+FEATURES.setdefault("ENABLE_ENTERPRISE_INTEGRATION", True)
+
+# SAML SP certificate and private key — injected from ExternalSecrets.
+# These override the SAMLConfiguration model values, allowing key rotation
+# without Django admin access.
+_saml_sp_cert = os.environ.get("SAML_SP_PUBLIC_CERT", "")
+_saml_sp_key = os.environ.get("SAML_SP_PRIVATE_KEY", "")
+if _saml_sp_cert and _saml_sp_key:
+    SOCIAL_AUTH_SAML_SP_PUBLIC_CERT = _saml_sp_cert
+    SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = _saml_sp_key
+
+# SAML SP entity ID — defaults to LMS URL (standard for Open edX).
+SOCIAL_AUTH_SAML_SP_ENTITY_ID = os.environ.get(
+    "SAML_SP_ENTITY_ID", MEREKA_LMS_BASE_URL
+)
+
+# SAML technical and support contacts (required by SAML spec).
+SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {
+    "givenName": os.environ.get("SAML_CONTACT_NAME", "Mereka Tech"),
+    "emailAddress": os.environ.get("SAML_CONTACT_EMAIL", "tech@mereka.io"),
+}
+SOCIAL_AUTH_SAML_SUPPORT_CONTACT = SOCIAL_AUTH_SAML_TECHNICAL_CONTACT
