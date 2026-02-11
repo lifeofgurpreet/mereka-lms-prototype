@@ -289,7 +289,9 @@ SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRE
 SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False  # scheme is correctly included in redirect_uri
 # Keep dev aligned with prod: Studio must share LMS sessions across subdomains.
-SESSION_COOKIE_NAME = "sessionid"
+# Keep parity with production: Studio uses a dedicated session cookie name so
+# LMS and Studio sessions never collide across subdomains.
+SESSION_COOKIE_NAME = "studio_session_id"
 
 MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB = 100
 

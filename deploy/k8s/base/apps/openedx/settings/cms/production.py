@@ -385,7 +385,9 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = MEREKA_SCHEME == "https"
 # CRITICAL: Studio must share the authenticated LMS session across subdomains
 # (academyv2.mereka.io <-> studio.academyv2.mereka.io). A separate cookie name
 # causes infinite redirect loops back to LMS /login after successful SSO.
-SESSION_COOKIE_NAME = "sessionid"
+# IMPORTANT: Studio must use a dedicated session cookie name to avoid collisions
+# with the LMS `sessionid` cookie when `Domain=.academyv2.mereka.io` is used.
+SESSION_COOKIE_NAME = "studio_session_id"
 
 MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB = 100
 
