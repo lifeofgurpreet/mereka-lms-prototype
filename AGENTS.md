@@ -26,6 +26,27 @@ Then ask for explicit user confirmation before proceeding.
 
 ---
 
+## Implementation Roadmap & Specs
+
+**📊 Current Progress**: 59.6% coverage (458/769 ACs implemented)
+
+All feature development is driven by specifications with acceptance criteria:
+- **Roadmap**: `docs/IMPLEMENTATION_ROADMAP.md` - Implementation order by tier, current progress, sprint plans
+- **Specs**: `specs/` directory - 31 specifications covering all platform features
+- **Sprint Plans**: `docs/sprints/` - Detailed sprint breakdowns with tasks and estimates
+- **Coverage Reports**: Run `python3 scripts/qa/spec-tools/spec_coverage_report.py` for current status
+
+**For agents implementing features**:
+1. Check `docs/IMPLEMENTATION_ORDER.md` for dependency order (Tier 0 → Tier 9)
+2. Read the spec in `specs/` for acceptance criteria
+3. Write tests FIRST with `@covers AC-XXX` and `@spec: feature_spec.md` annotations
+4. Implement feature to pass tests
+5. Run `spec_verify.py` and `spec_coverage_report.py` to verify
+
+**Current sprint focus**: See `docs/sprints/SPRINT-01-foundation-complete.md`
+
+---
+
 ## Project Structure & Module Organization
 - **Infrastructure**: `infrastructure/` contains Tutor configs (`infrastructure/tutor/`), Terraform, K8s manifests, and themes
 - **Scripts**: `scripts/` contains automation organized by domain (infra, migrations, branding, analytics, qa)
