@@ -377,7 +377,7 @@ CACHES["staticfiles"] = {
 }
 
 # Authentication
-SOCIAL_AUTH_EDX_OAUTH2_SECRET = os.environ.get("CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
+SOCIAL_AUTH_EDX_OAUTH2_SECRET = (os.environ.get("CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "") or "").strip()
 SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
 # Studio sits behind TLS termination at the ingress; force https redirect_uri so
 # the OIDC provider accepts it.
