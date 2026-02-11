@@ -13,18 +13,29 @@ WARNINGS=0
 
 check_pass() {
     echo -e "${GREEN}✅ $1${NC}"
-    ((PASSED++))
+    PASSED=$((PASSED + 1))
 }
 
 check_fail() {
     echo -e "${RED}❌ $1${NC}"
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
 }
 
 check_warn() {
     echo -e "${YELLOW}⚠️  $1${NC}"
-    ((WARNINGS++))
+    WARNINGS=$((WARNINGS + 1))
 }
+
+# This script requires a local Tutor development environment with Docker.
+# Skip gracefully when prerequisites are not available.
+if ! command -v docker >/dev/null 2>&1; then
+  echo "SKIP: Docker not available (this script requires a local Tutor dev environment)"
+  exit 0
+fi
+if [[ ! -f "tutor_env/config.yml" ]] && [[ ! -d ".venv" ]]; then
+  echo "SKIP: No local Tutor environment detected (missing tutor_env/config.yml and .venv)"
+  exit 0
+fi
 
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Local Setup Verification                              ║"

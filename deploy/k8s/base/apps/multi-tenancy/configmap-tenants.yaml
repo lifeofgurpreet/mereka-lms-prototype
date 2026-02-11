@@ -1,0 +1,42 @@
+# Tenant registry ConfigMap.
+#
+# Maps tenant slugs to their domains and EnterpriseCustomer UUIDs.
+# This is a reference/bootstrap file — the canonical source of truth is
+# the EnterpriseCustomer + TenantConfig records in the LMS database.
+#
+# Update this file when provisioning or offboarding tenants so that
+# infrastructure scripts can discover tenant configuration without
+# querying the database.
+#
+# See: specs/multi-tenancy-architecture_spec.md
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-registry
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/component: multi-tenancy
+    app.kubernetes.io/part-of: mereka-lms
+data:
+  # YAML-formatted tenant registry.  One entry per tenant.
+  # Infrastructure scripts can parse this with yq/jq.
+  tenants.yaml: |
+    # Mereka Academy — default "self" tenant (platform owner).
+    - slug: mereka-academy
+      name: Mereka Academy
+      domain: academyv2.mereka.io
+      enterprise_customer_uuid: "PLACEHOLDER-MEREKA-UUID"
+      active: true
+      # Additional alias domains (all resolve to the same Site).
+      alias_domains:
+        - academy.biji-biji.com
+        - skillourfuture.academy.mereka.io
+
+    # Template for adding new tenants:
+    # - slug: acme-corp
+    #   name: Acme Corp
+    #   domain: acme.academyv2.mereka.io
+    #   enterprise_customer_uuid: "uuid-here"
+    #   active: true
+    #   alias_domains: []

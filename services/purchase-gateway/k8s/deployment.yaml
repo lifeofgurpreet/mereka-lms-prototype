@@ -1,0 +1,114 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-gateway
+  labels:
+    app.kubernetes.io/name: payments-gateway
+    app.kubernetes.io/component: ecommerce
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/name: payments-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: payments-gateway
+        app.kubernetes.io/component: ecommerce
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+        - name: migrate
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:latest
+          command: ["python", "-m", "alembic", "upgrade", "head"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: DATABASE_URL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+      containers:
+        - name: payments-gateway
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/payments-gateway:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              value: "redis://redis:6379/14"
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: STRIPE_SECRET_KEY
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+            - name: LMS_BASE_URL
+              value: "http://lms:8000"
+            - name: LMS_PUBLIC_URL
+              value: "https://academyv2.mereka.io"
+            - name: LMS_OAUTH_CLIENT_ID
+              value: "payments-gateway"
+            - name: LMS_OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: LMS_OAUTH_CLIENT_SECRET
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: payments-gateway-secrets
+                  key: SECRET_KEY
+            - name: ENABLE_GATEWAY_FULFILLMENT
+              value: "false"
+            - name: TENANT_ISOLATION_ENABLED
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /ready/
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false

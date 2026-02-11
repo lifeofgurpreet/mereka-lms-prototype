@@ -1,0 +1,91 @@
+import uuid
+
+import stripe
+import structlog
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, EmailStr
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.config import settings
+from app.database import get_db
+from app.models.order import LineItem, Order, OrderStatus
+
+router = APIRouter()
+logger = structlog.get_logger()
+
+
+class CheckoutRequest(BaseModel):
+    offering_uuid: uuid.UUID
+    buyer_email: EmailStr
+    tenant_id: uuid.UUID | None = None
+    success_url: str
+    cancel_url: str
+    metadata: dict | None = None
+
+
+class CheckoutResponse(BaseModel):
+    checkout_url: str
+    order_id: uuid.UUID
+    session_id: str
+
+
+@router.post("/checkout/", response_model=CheckoutResponse)
+async def create_checkout(
+    request: CheckoutRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a Stripe Checkout Session for a given offering."""
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    # TODO: Look up offering by UUID from DB to get stripe_price_id and details
+    # For scaffold, we accept the request and would resolve offering details here.
+
+    tenant_id = request.tenant_id or uuid.UUID("00000000-0000-0000-0000-000000000000")
+    order_id = uuid.uuid4()
+
+    # Create pending order
+    order = Order(
+        id=order_id,
+        tenant_id=tenant_id,
+        buyer_email=request.buyer_email,
+        stripe_checkout_session_id="pending",  # Updated after Stripe call
+        status=OrderStatus.pending,
+        total_cents=0,  # TODO: resolve from offering
+        currency="USD",
+        metadata_json=request.metadata,
+    )
+
+    try:
+        session = stripe.checkout.Session.create(
+            customer_email=request.buyer_email,
+            mode="payment",
+            success_url=f"{request.success_url}?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=request.cancel_url,
+            metadata={"order_uuid": str(order_id)},
+            payment_intent_data={"capture_method": "automatic"},
+        )
+    except stripe.StripeError as e:
+        logger.error(
+            "checkout.stripe_error",
+            error=str(e),
+            tenant_id=str(tenant_id),
+        )
+        raise HTTPException(status_code=503, detail="Payment service unavailable") from e
+
+    order.stripe_checkout_session_id = session.id
+
+    db.add(order)
+    await db.commit()
+
+    logger.info(
+        "checkout.created",
+        order_uuid=str(order_id),
+        tenant_id=str(tenant_id),
+        offering_uuid=str(request.offering_uuid),
+    )
+
+    return CheckoutResponse(
+        checkout_url=session.url,
+        order_id=order_id,
+        session_id=session.id,
+    )

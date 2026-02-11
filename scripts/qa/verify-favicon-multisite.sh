@@ -44,11 +44,11 @@ for domain in "${EXPECTED_DOMAINS[@]}"; do
   if grep -A 5 "$domain" "$CADDYFILE" | grep -q '@favicon_matcher' && \
      grep -A 5 "$domain" "$CADDYFILE" | grep -q 'rewrite @favicon_matcher /theming/asset/images/favicon.ico'; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${YELLOW}WARN${NC}"
     echo "  Favicon rewrite not found for $domain (may inherit from parent block)"
-    ((WARN++))
+    WARN=$((WARN + 1))
   fi
 done
 
@@ -58,11 +58,11 @@ echo -n "Checking favicon file exists in theme assets... "
 if [[ -f "$THEME_ASSETS_DIR/favicon.ico" ]]; then
   echo -e "${GREEN}PASS${NC}"
   echo "  Found: $THEME_ASSETS_DIR/favicon.ico"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${RED}FAIL${NC}"
   echo "  Favicon file not found: $THEME_ASSETS_DIR/favicon.ico"
-  ((FAIL++))
+  FAIL=$((FAIL + 1))
 fi
 
 # Test 3: Count total favicon rewrite rules
@@ -72,10 +72,10 @@ echo "Total favicon matchers found in Caddyfile: $FAVICON_COUNT"
 
 if [[ $FAVICON_COUNT -ge 3 ]]; then
   echo -e "${GREEN}PASS${NC} (Found $FAVICON_COUNT favicon matchers)"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${YELLOW}WARN${NC} (Expected at least 3, found $FAVICON_COUNT)"
-  ((WARN++))
+  WARN=$((WARN + 1))
 fi
 
 # Test 4: Verify rewrite path is consistent
@@ -85,11 +85,11 @@ INCONSISTENT=$(grep -A 1 '@favicon_matcher' "$CADDYFILE" | grep 'rewrite' | \
   grep -v '/theming/asset/images/favicon.ico' | wc -l)
 if [[ $INCONSISTENT -eq 0 ]]; then
   echo -e "${GREEN}PASS${NC}"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${RED}FAIL${NC}"
   echo "  Found $INCONSISTENT inconsistent favicon rewrite paths"
-  ((FAIL++))
+  FAIL=$((FAIL + 1))
 fi
 
 # Summary

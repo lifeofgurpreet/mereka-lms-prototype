@@ -11,6 +11,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+TUTOR_ROOT="${TUTOR_ROOT:-$ROOT_DIR/tutor_env}"
+if [[ ! -d "$TUTOR_ROOT/env" ]]; then
+  echo "SKIP: Tutor env not found at $TUTOR_ROOT (set TUTOR_ROOT or run tutor config save)"
+  exit 0
+fi
+
 failures=0
 fail() { echo "[FAIL] $*"; failures=$((failures + 1)); }
 pass() { echo "[PASS] $*"; }

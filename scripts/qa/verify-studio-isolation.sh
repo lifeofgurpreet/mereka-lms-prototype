@@ -30,33 +30,33 @@ echo -n "Checking studio.academyv2.mereka.io routes to cms:8000... "
 if grep -q 'studio.academyv2.mereka.io' "$CADDYFILE" && \
    grep -A 10 'studio.academyv2.mereka.io' "$CADDYFILE" | grep -q 'proxy "cms:8000"'; then
   echo -e "${GREEN}PASS${NC}"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${RED}FAIL${NC}"
   echo "  Studio domain not found or not routing to cms:8000"
-  ((FAIL++))
+  FAIL=$((FAIL + 1))
 fi
 
 echo -n "Checking studio.academyv2.mereka.dev routes to cms:8000... "
 if grep -q 'studio.academyv2.mereka.dev' "$CADDYFILE" && \
    grep -A 10 'studio.academyv2.mereka.dev' "$CADDYFILE" | grep -q 'proxy "cms:8000"'; then
   echo -e "${GREEN}PASS${NC}"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${YELLOW}WARN${NC}"
   echo "  Dev studio domain not found (may be local-only)"
-  ((WARN++))
+  WARN=$((WARN + 1))
 fi
 
 echo -n "Checking studio.academy.biji-biji.com routes to cms:8000... "
 if grep -q 'studio.academy.biji-biji.com' "$CADDYFILE" && \
    grep -A 10 'studio.academy.biji-biji.com' "$CADDYFILE" | grep -q 'proxy "cms:8000"'; then
   echo -e "${GREEN}PASS${NC}"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${YELLOW}WARN${NC}"
   echo "  Biji-Biji studio domain not found in Caddyfile"
-  ((WARN++))
+  WARN=$((WARN + 1))
 fi
 
 # Test 2: Non-studio domains do NOT route to cms
@@ -76,10 +76,10 @@ for domain in "${NON_STUDIO_DOMAINS[@]}"; do
   if grep -A 10 "^.*${domain}" "$CADDYFILE" | grep -q 'proxy "cms:8000"'; then
     echo -e "${RED}FAIL${NC}"
     echo "  $domain incorrectly routes to cms:8000"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
   else
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   fi
 done
 
@@ -92,26 +92,26 @@ if [[ -f "$INGRESS_STUDIO_PROD" ]]; then
   echo -n "Checking studio.academyv2.mereka.io in Ingress... "
   if grep -q 'studio.academyv2.mereka.io' "$INGRESS_STUDIO_PROD"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${RED}FAIL${NC}"
     echo "  studio.academyv2.mereka.io not found in Studio Ingress"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
   fi
 
   echo -n "Checking Ingress service target is caddy... "
   if grep -A 5 'service:' "$INGRESS_STUDIO_PROD" | grep -q 'name: caddy'; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${YELLOW}WARN${NC}"
     echo "  Ingress service target may not be caddy"
-    ((WARN++))
+    WARN=$((WARN + 1))
   fi
 else
   echo -e "${YELLOW}WARN${NC}"
   echo "  Studio Ingress file not found: $INGRESS_STUDIO_PROD"
-  ((WARN++))
+  WARN=$((WARN + 1))
 fi
 
 # Summary

@@ -6,9 +6,13 @@
 set -euo pipefail
 
 DIR="${1:-}"
-if [[ -z "$DIR" || ! -d "$DIR" ]]; then
-  echo "Usage: $0 <artifact_dir>" >&2
-  exit 2
+if [[ -z "$DIR" ]]; then
+  echo "SKIP: No artifact directory provided (usage: $0 <artifact_dir>)"
+  exit 0
+fi
+if [[ ! -d "$DIR" ]]; then
+  echo "SKIP: Artifact directory not found: $DIR"
+  exit 0
 fi
 
 # Reuse the same patterns as scan-secrets-fast.

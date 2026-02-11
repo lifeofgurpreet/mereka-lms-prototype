@@ -790,6 +790,7 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         custom_apps_block = """# Copy custom apps
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus"""
         if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
@@ -802,6 +803,7 @@ RUN pip install -e /openedx/openedx_prometheus"""
             mfe_oauth_marker = "COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"
             custom_apps_add = f"""{mfe_oauth_marker}
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus"""
             updated = updated.replace(mfe_oauth_marker, custom_apps_add)
@@ -812,6 +814,7 @@ RUN pip install -e /openedx/openedx_prometheus"""
                 custom_app_insert = f"""# Copy custom apps
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 
@@ -884,6 +887,30 @@ RUN pip install "pymongo[srv]" """,
                     MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
             """).strip()
             updated = updated.rstrip() + '\n\n' + prometheus_config + '\n'
+
+        # Add mereka_tenancy multi-tenancy app
+        if "mereka_tenancy" not in updated:
+            tenancy_config = textwrap.dedent("""
+
+                # Mereka Multi-Tenancy — tenant model extensions + resolution middleware
+                # See: specs/multi-tenancy-architecture_spec.md
+                import sys as _mt_sys
+                if '/openedx' not in _mt_sys.path:
+                    _mt_sys.path.insert(0, '/openedx')
+                if 'mereka_tenancy' not in INSTALLED_APPS:
+                    INSTALLED_APPS.append('mereka_tenancy')
+
+                # TenantResolutionMiddleware resolves hostname → Site → EnterpriseCustomer
+                # Insert after CurrentSiteMiddleware so Site is already resolved.
+                if 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
+                    _site_mw = 'django.contrib.sites.middleware.CurrentSiteMiddleware'
+                    if _site_mw in MIDDLEWARE:
+                        _idx = MIDDLEWARE.index(_site_mw) + 1
+                        MIDDLEWARE.insert(_idx, 'mereka_tenancy.middleware.TenantResolutionMiddleware')
+                    else:
+                        MIDDLEWARE.append('mereka_tenancy.middleware.TenantResolutionMiddleware')
+            """).strip()
+            updated = updated.rstrip() + '\n\n' + tenancy_config + '\n'
 
     if path.name == "env.config.jsx":
         updated = updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")

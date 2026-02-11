@@ -19,14 +19,15 @@ WARN=0
 LMS_SETTINGS="${REPO_ROOT}/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 TUTOR_CONFIG="${REPO_ROOT}/tutor_env/config.yml"
 
-# Expected domains
-EXPECTED_DOMAINS=(
-  "https://academyv2.mereka.io"
-  "https://studio.academyv2.mereka.io"
-  "https://apps.academyv2.mereka.io"
-  "https://academy.biji-biji.com"
-  "https://apps.academy.biji-biji.com"
-  "https://skillourfuture.academy.mereka.io"
+# Expected code patterns that produce CSRF trusted origins.
+# The production.py constructs URLs dynamically from MEREKA_* variables,
+# so we check for the variable patterns rather than literal URLs.
+EXPECTED_PATTERNS=(
+  "MEREKA_LMS_BASE_URL"
+  "MEREKA_STUDIO_BASE_URL"
+  "MEREKA_MFE_BASE_URL"
+  "MEREKA_BIJI_DOMAIN"
+  "MEREKA_SKILLOURFUTURE_DOMAIN"
 )
 
 # Parse arguments
@@ -43,54 +44,40 @@ extract_csrf_origins() {
   # Look for CSRF_TRUSTED_ORIGINS in LMS settings
   if ! grep -q 'CSRF_TRUSTED_ORIGINS' "$LMS_SETTINGS"; then
     echo -e "${RED}FAIL${NC}: CSRF_TRUSTED_ORIGINS not found in LMS settings"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
     return 1
   fi
 
-  # Extract origins (multi-line aware)
-  CSRF_ORIGINS=$(python3 -c "
-import re
-with open('$LMS_SETTINGS', 'r') as f:
-    content = f.read()
-    # Find CSRF_TRUSTED_ORIGINS.append() calls
-    matches = re.findall(r'CSRF_TRUSTED_ORIGINS\.append\([\"']([^\"']+)[\"']\)', content)
-    for m in matches:
-        print(m)
-" 2>/dev/null || echo "")
-
-  if [[ -z "$CSRF_ORIGINS" ]]; then
-    echo -e "${YELLOW}WARN${NC}: Could not extract CSRF_TRUSTED_ORIGINS from LMS settings"
-    ((WARN++))
-    return 1
-  fi
-
-  echo "Configured CSRF_TRUSTED_ORIGINS:"
-  echo "$CSRF_ORIGINS" | while read -r origin; do
-    echo "  - $origin"
+  echo "CSRF_TRUSTED_ORIGINS references found in LMS settings:"
+  grep -n 'CSRF_TRUSTED_ORIGINS' "$LMS_SETTINGS" | while read -r line; do
+    echo "  $line"
   done
   echo ""
 }
 
-# Check if all expected domains are present
+# Check if all expected code patterns are present in CSRF_TRUSTED_ORIGINS blocks
 check_expected_domains() {
   MISSING=()
-  for domain in "${EXPECTED_DOMAINS[@]}"; do
-    echo -n "Checking $domain... "
-    if grep -q "$domain" "$LMS_SETTINGS"; then
+  # Extract lines referencing CSRF_TRUSTED_ORIGINS
+  csrf_context=$(grep -B2 -A2 'CSRF_TRUSTED_ORIGINS' "$LMS_SETTINGS" 2>/dev/null || true)
+
+  for pattern in "${EXPECTED_PATTERNS[@]}"; do
+    echo -n "Checking CSRF origin for $pattern... "
+    if echo "$csrf_context" | grep -q "$pattern"; then
       echo -e "${GREEN}PASS${NC}"
-      ((PASS++))
+      PASS=$((PASS + 1))
     else
       echo -e "${RED}FAIL${NC}"
-      MISSING+=("$domain")
-      ((FAIL++))
+      MISSING+=("$pattern")
+      FAIL=$((FAIL + 1))
     fi
   done
 
   if [[ ${#MISSING[@]} -gt 0 ]]; then
     echo ""
-    echo -e "${RED}Missing CSRF origins:${NC}"
-    for domain in "${MISSING[@]}"; do
-      echo "  - $domain"
+    echo -e "${RED}Missing CSRF origin patterns:${NC}"
+    for pattern in "${MISSING[@]}"; do
+      echo "  - $pattern"
     done
   fi
 }

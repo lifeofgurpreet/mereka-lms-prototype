@@ -226,6 +226,52 @@ with sync_playwright() as p:
         if "username" not in me_body:
             fail("/api/user/v1/me response missing username marker", page=page)
 
+        # Studio SSO is sensitive to cookie/session churn if we touch the Authn MFE
+        # first (it can trigger refresh flows that overwrite/clear session state).
+        # For the Studio-capable canary run, validate Studio directly after OIDC
+        # callback, without visiting LMS/MFE pages.
+        if require_studio_access:
+            if debug:
+                log(f"goto={studio_url}")
+            page.goto(studio_url, wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            try:
+                body = page.inner_text("body", timeout=5000).lower()
+            except Exception:
+                body = ""
+            if "the studio servers encountered an error" in body or "an error occurred in studio" in body:
+                try:
+                    page.screenshot(path=str(studio_failure_path), full_page=True)
+                    log(f"studio_screenshot={studio_failure_path}")
+                except Exception as exc:
+                    log(f"studio_screenshot_failed={exc}")
+                fail(f"studio_error_page url={page.url}", page=page)
+            if studio_error["status"] is not None:
+                try:
+                    page.screenshot(path=str(studio_failure_path), full_page=True)
+                    log(f"studio_screenshot={studio_failure_path}")
+                except Exception as exc:
+                    log(f"studio_screenshot_failed={exc}")
+                fail(f"studio_complete_edx_oauth2_http_{studio_error['status']} url={studio_error['url']}", page=page)
+
+            if debug:
+                log(f"goto={studio_home_url}")
+            page.goto(studio_home_url, wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_load_state("domcontentloaded", timeout=60000)
+            try:
+                body = page.inner_text("body", timeout=5000).lower()
+            except Exception:
+                body = ""
+            if "the studio servers encountered an error" in body or "an error occurred in studio" in body:
+                fail(f"studio_error_page url={page.url}", page=page)
+            if "/signin" in (page.url or "") or "already have a studio account? sign in" in body:
+                fail(f"studio_access_required_but_not_authenticated url={page.url}", page=page)
+            if "/home" not in (page.url or ""):
+                fail(f"studio_access_expected_home_but_got url={page.url}", page=page)
+
+            log("OK authenticated session validated")
+            raise SystemExit(0)
+
         page.goto(dashboard_url, wait_until="domcontentloaded", timeout=60000)
         if "/authn/login" in (page.url or ""):
             try:

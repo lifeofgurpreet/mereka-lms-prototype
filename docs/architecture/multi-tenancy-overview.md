@@ -240,6 +240,33 @@ Tenant Isolation Layers:
 
 ---
 
+## Implementation Artifacts
+
+### Django App: `mereka_tenancy`
+- **Location**: `infrastructure/tutor/plugins/multi-tenancy/`
+- **Model**: `TenantConfig` — extends `EnterpriseCustomer` via OneToOneField
+  - Fields: `slug`, `branding_config`, `sso_config`, `feature_flags`, `is_active`, `provisioned_at`
+- **Middleware**: `TenantResolutionMiddleware` — resolves hostname → Site → EnterpriseCustomer → TenantConfig
+  - Sets `request.tenant_uuid`, `request.tenant_slug`
+  - Adds `X-Tenant-ID` response header
+- **Management Command**: `provision_tenant` — idempotent tenant provisioning
+  - Usage: `manage.py lms provision_tenant --slug acme --name "Acme Corp" --domain acme.academyv2.mereka.io`
+- **Tutor Integration**: Installed via `apply-patches.sh` (INSTALLED_APPS + MIDDLEWARE)
+- **Docker Integration**: Copied as `/openedx/mereka_tenancy` in the openedx image
+
+### K8s Resources
+- **ConfigMap**: `deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml` — tenant registry
+- **Kustomization**: `deploy/k8s/base/apps/multi-tenancy/kustomization.yaml`
+
+### Verification Scripts
+- `scripts/qa/verify-tenant-model.sh` — TenantConfig model structure
+- `scripts/qa/verify-tenant-middleware.sh` — Middleware class and settings integration
+- `scripts/qa/verify-tenant-configmap.sh` — K8s ConfigMap template
+- `scripts/qa/verify-tenant-provisioning.sh` — Management command structure
+- `scripts/qa/verify-tenant-isolation-patterns.sh` — Isolation patterns across codebase
+
+---
+
 ## Related Specs and ADRs
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Runbook**: `docs/runbooks/tenant-provisioning-runbook.md`

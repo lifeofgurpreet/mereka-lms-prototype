@@ -1,0 +1,48 @@
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    # Database
+    DATABASE_URL: str = "postgresql+asyncpg://payments:payments@localhost:5432/payments_gateway"
+
+    # Redis
+    REDIS_URL: str = "redis://localhost:6379/14"
+
+    # Stripe
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+
+    # Open edX LMS
+    LMS_BASE_URL: str = "http://lms:8000"
+    LMS_PUBLIC_URL: str = "https://academyv2.mereka.io"
+    LMS_OAUTH_CLIENT_ID: str = "payments-gateway"
+    LMS_OAUTH_CLIENT_SECRET: str = ""
+
+    # Application
+    SECRET_KEY: str = ""
+    ALLOWED_ORIGINS: list[str] = [
+        "https://academyv2.mereka.io",
+        "https://apps.academyv2.mereka.io",
+    ]
+    DEBUG: bool = False
+
+    # Feature flags
+    ENABLE_GATEWAY_FULFILLMENT: bool = False
+    TENANT_ISOLATION_ENABLED: bool = True
+    ENABLE_ENTITLEMENT_INVITATIONS: bool = True
+    ENABLE_ENTERPRISE_SUBSCRIPTIONS: bool = False
+    ENABLE_AUTO_REVOKE_ON_DISPUTE: bool = False
+    ENABLE_RECONCILIATION_JOB: bool = False
+
+    # Fulfillment
+    FULFILLMENT_MAX_RETRIES: int = 10
+    FULFILLMENT_BASE_DELAY_SECONDS: int = 5
+
+    # Entitlements
+    ENTITLEMENT_CLAIM_EXPIRY_DAYS: int = 30
+
+    model_config = {"env_prefix": "", "case_sensitive": True}
+
+
+settings = Settings()

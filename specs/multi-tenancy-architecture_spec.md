@@ -1,7 +1,7 @@
 ---
 title: "Multi-Tenancy Architecture"
 type: "feature_spec"
-status: "draft"
+status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"

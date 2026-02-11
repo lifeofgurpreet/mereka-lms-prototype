@@ -3,7 +3,7 @@ _Audience: Platform Eng + Operations • Owner: Engineering Lead • Last update
 
 This runbook covers operational procedures for multi-tenant provisioning and management.
 
-> **Status**: Multi-tenancy architecture is **partially implemented** (Tier 1). This runbook documents target-state procedures.
+> **Status**: Multi-tenancy architecture foundation is **in progress** (Tier 4.1). TenantConfig model, middleware, and provisioning command are implemented.
 > **Spec**: `specs/multi-tenancy-architecture_spec.md`
 > **Testmap**: `specs/testmaps/multi-tenancy-architecture_testmap.yaml`
 
@@ -18,7 +18,20 @@ This runbook covers operational procedures for multi-tenant provisioning and man
 
 ## Provisioning a New Tenant (End-to-End)
 
-### Procedure
+### Automated Provisioning (Preferred)
+```bash
+# Provision all core records in one command (idempotent — safe to re-run):
+kubectl exec -n mereka-lms -l app.kubernetes.io/name=lms -- \
+  python manage.py lms provision_tenant \
+    --slug client-corp \
+    --name "Client Corp" \
+    --domain client.academyv2.mereka.io \
+    --contact-email admin@clientcorp.com \
+    --country MY
+```
+This creates: Django Site, SiteConfiguration, EnterpriseCustomer, and TenantConfig in one step.
+
+### Manual Procedure (Alternative)
 1. **Create Site and SiteConfiguration**:
    ```bash
    kubectl exec -n mereka-lms -l app.kubernetes.io/name=lms -- \

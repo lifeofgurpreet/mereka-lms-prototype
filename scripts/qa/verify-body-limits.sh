@@ -26,11 +26,11 @@ echo -n "Checking profile image upload 1MB limit... "
 if grep -A 3 '/api/profile_images/\*\/\*/upload' "$CADDYFILE" | grep -q 'max_size 1MB'; then
   echo -e "${GREEN}PASS${NC}"
   echo "  Found: request_body { max_size 1MB } for profile images"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${RED}FAIL${NC}"
   echo "  Profile image upload limit not found or incorrect"
-  ((FAIL++))
+  FAIL=$((FAIL + 1))
 fi
 
 # Test 2: General LMS/MFE requests have 4MB limit
@@ -40,11 +40,11 @@ echo -n "Checking general LMS 4MB limit... "
 if grep -B 2 -A 2 'handle_path /\*' "$CADDYFILE" | grep -q 'max_size 4MB'; then
   echo -e "${GREEN}PASS${NC}"
   echo "  Found: request_body { max_size 4MB } for general paths"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${YELLOW}WARN${NC}"
   echo "  General 4MB limit not found or may be configured differently"
-  ((WARN++))
+  WARN=$((WARN + 1))
 fi
 
 echo -n "Checking MFE 2MB limit... "
@@ -53,11 +53,11 @@ if grep -B 3 'apps.localhost' "$CADDYFILE" | grep -q 'max_size 2MB' || \
    grep -A 3 'apps.academyv2.mereka.io' "$CADDYFILE" | grep -q 'max_size 2MB'; then
   echo -e "${GREEN}PASS${NC}"
   echo "  Found: request_body { max_size 2MB } for MFE"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${YELLOW}WARN${NC}"
   echo "  MFE 2MB limit not found"
-  ((WARN++))
+  WARN=$((WARN + 1))
 fi
 
 # Test 3: Studio has 250MB limit for course imports
@@ -67,11 +67,11 @@ if grep -B 3 -A 3 'studio.academyv2.mereka.io' "$CADDYFILE" | grep -q 'max_size 
    grep -B 3 -A 3 'studio.localhost' "$CADDYFILE" | grep -q 'max_size 250MB'; then
   echo -e "${GREEN}PASS${NC}"
   echo "  Found: request_body { max_size 250MB } for Studio"
-  ((PASS++))
+  PASS=$((PASS + 1))
 else
   echo -e "${RED}FAIL${NC}"
   echo "  Studio 250MB limit not found"
-  ((FAIL++))
+  FAIL=$((FAIL + 1))
 fi
 
 # Test 4: Count all max_size directives

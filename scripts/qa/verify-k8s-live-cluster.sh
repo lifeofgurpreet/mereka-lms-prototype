@@ -27,17 +27,17 @@ print_header() {
 
 print_pass() {
   echo -e "${GREEN}✓${NC} $1"
-  ((PASS_COUNT++))
+  PASS_COUNT=$((PASS_COUNT + 1))
 }
 
 print_fail() {
   echo -e "${RED}✗${NC} $1"
-  ((FAIL_COUNT++))
+  FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
 print_warn() {
   echo -e "${YELLOW}⚠${NC} $1"
-  ((WARN_COUNT++))
+  WARN_COUNT=$((WARN_COUNT + 1))
 }
 
 print_info() {

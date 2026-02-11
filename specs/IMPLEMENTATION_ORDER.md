@@ -123,7 +123,7 @@ multi-tenancy-architecture → auth-sso-enterprise → enterprise
 
 | Order | Spec | Status | Completion | Blocks | Notes |
 |-------|------|--------|-----------|--------|-------|
-| 4.1 | `multi-tenancy-architecture_spec.md` | 📝 SPEC ONLY | 0/28 ACs auto, 27 planned, 1 manual | auth-sso, enterprise-microservices, all Tier 5 | EnterpriseCustomer model not implemented |
+| 4.1 | `multi-tenancy-architecture_spec.md` | 🟡 IN PROGRESS | 0/28 ACs auto, 27 planned, 1 manual | auth-sso, enterprise-microservices, all Tier 5 | TenantConfig model, middleware, provisioning command, K8s ConfigMap, 5 verification scripts implemented |
 | 4.2 | `auth-sso-enterprise_spec.md` | 🟡 IN PROGRESS | 6/45 ACs auto, 38 planned, 1 manual | enterprise-microservices, all Tier 5 | Authentik SSO working; enterprise runbook + per-tenant verification script created; SAML/OIDC per-tenant not started |
 | 4.3 | `enterprise-microservices_spec.md` | ✅ DONE | 36/36 ACs shell-verified | All Tier 5 enterprise features | 7 deployments running + 10 verification scripts (1,628 lines); license-manager deferred |
 

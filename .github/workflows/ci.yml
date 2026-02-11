@@ -295,6 +295,74 @@ jobs:
           STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
           STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
 
+  verify-static:
+    name: Static Verification Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Run static verification scripts
+        run: |
+          PASS=0
+          FAIL=0
+          SKIP=0
+          SCRIPTS=(
+            scripts/qa/verify-repo-structure.sh
+            scripts/qa/verify-no-hardcoded-secrets.sh
+            scripts/qa/verify-secrets-naming-convention.sh
+            scripts/qa/verify-k8s-deployment-spec.sh
+            scripts/qa/verify-k8s-externalsecrets.sh
+            scripts/qa/verify-k8s-images.sh
+            scripts/qa/verify-k8s-secrets-hygiene.sh
+            scripts/qa/verify-kustomize-no-deprecated-keys.sh
+            scripts/qa/verify-multisite-config.sh
+            scripts/qa/verify-tutor-multisite-domains.sh
+            scripts/qa/verify-mongodb-atlas-integration.sh
+            scripts/qa/verify-atlas-data-persistence.sh
+            scripts/qa/verify-data-migration-contracts.sh
+            scripts/qa/verify-forum-migration-contracts.sh
+            scripts/qa/verify-dev-prod-secret-separation.sh
+            scripts/qa/verify-no-latest-prod-tags.sh
+            scripts/qa/verify-sli-foundation.sh
+            scripts/qa/verify-error-budget.sh
+            scripts/qa/verify-sentry-wiring.sh
+            scripts/qa/verify-sentry-cli-contract.sh
+            scripts/qa/verify-observability-stack.sh
+            scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+            scripts/qa/verify-build-workflow-contract.sh
+            scripts/qa/verify-mfe-build-contract.sh
+            scripts/qa/verify-mfe-build-prereqs.sh
+            scripts/qa/verify-mfe-config-contract.sh
+          )
+          for f in "${SCRIPTS[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "SKIP $f (not found)"
+              SKIP=$((SKIP + 1))
+              continue
+            fi
+            if timeout 60 bash "$f" >/dev/null 2>&1; then
+              echo "PASS $(basename "$f")"
+              PASS=$((PASS + 1))
+            else
+              echo "FAIL $(basename "$f")"
+              FAIL=$((FAIL + 1))
+            fi
+          done
+          echo ""
+          echo "=== Results: $PASS passed, $FAIL failed, $SKIP skipped ==="
+          if [[ $FAIL -gt 0 ]]; then
+            echo "::error::$FAIL static verification script(s) failed"
+            exit 1
+          fi
+
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest

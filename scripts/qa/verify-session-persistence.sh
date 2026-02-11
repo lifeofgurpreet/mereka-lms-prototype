@@ -44,17 +44,17 @@ test_cross_subdomain() {
   echo -n "Checking SESSION_COOKIE_DOMAIN for .mereka.io... "
   if grep -q 'SESSION_COOKIE_DOMAIN.*\.mereka\.io' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     # Check if it's set to None (host-only)
     if grep -q 'SESSION_COOKIE_DOMAIN = None' "$LMS_SETTINGS"; then
       echo -e "${YELLOW}WARN${NC} (set to None, uses host-only cookies)"
       echo "  Note: Middleware may rewrite per-request for cross-subdomain"
-      ((WARN++))
+      WARN=$((WARN + 1))
     else
       echo -e "${RED}FAIL${NC}"
       echo "  SESSION_COOKIE_DOMAIN not found or not set to .mereka.io"
-      ((FAIL++))
+      FAIL=$((FAIL + 1))
     fi
   fi
 }
@@ -64,22 +64,22 @@ test_cookie_domain_check() {
   echo -n "Checking MEREKA_COOKIE_DOMAIN configuration... "
   if grep -q 'MEREKA_COOKIE_DOMAIN.*\.mereka\.io' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${YELLOW}WARN${NC}"
     echo "  MEREKA_COOKIE_DOMAIN not explicitly set in LMS settings"
-    ((WARN++))
+    WARN=$((WARN + 1))
   fi
 
   echo -n "Checking SESSION_COOKIE_SECURE (HTTPS-only cookies)... "
   if grep -q 'SESSION_COOKIE_SECURE.*=.*True' "$LMS_SETTINGS" || \
      grep -q 'SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${RED}FAIL${NC}"
     echo "  SESSION_COOKIE_SECURE not set to True for HTTPS"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
   fi
 }
 
@@ -91,11 +91,11 @@ test_independent_session() {
   if grep -q 'MerekaCookieDomainMiddleware' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
     echo "  Middleware present for dynamic cookie domain handling"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${YELLOW}WARN${NC}"
     echo "  MerekaCookieDomainMiddleware not found in settings"
-    ((WARN++))
+    WARN=$((WARN + 1))
   fi
 }
 
@@ -104,44 +104,44 @@ test_no_cookie_leakage() {
   echo -n "Checking SESSION_COOKIE_HTTPONLY... "
   if grep -q 'SESSION_COOKIE_HTTPONLY' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${YELLOW}WARN${NC}"
     echo "  SESSION_COOKIE_HTTPONLY not explicitly set (defaults to True)"
-    ((WARN++))
+    WARN=$((WARN + 1))
   fi
 
   echo -n "Checking SESSION_COOKIE_SECURE... "
   if grep -q 'SESSION_COOKIE_SECURE.*=.*True' "$LMS_SETTINGS" || \
      grep -q 'SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${RED}FAIL${NC}"
     echo "  SESSION_COOKIE_SECURE not configured properly"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
   fi
 
   echo -n "Checking SESSION_COOKIE_SAMESITE... "
   if grep -q 'SESSION_COOKIE_SAMESITE.*=.*"None"' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
     echo "  SameSite=None allows cross-origin cookie sending (required for OIDC)"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${YELLOW}WARN${NC}"
     echo "  SESSION_COOKIE_SAMESITE not set to 'None'"
-    ((WARN++))
+    WARN=$((WARN + 1))
   fi
 
   echo -n "Checking CSRF_COOKIE_SECURE... "
   if grep -q 'CSRF_COOKIE_SECURE.*=.*True' "$LMS_SETTINGS" || \
      grep -q 'CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"' "$LMS_SETTINGS"; then
     echo -e "${GREEN}PASS${NC}"
-    ((PASS++))
+    PASS=$((PASS + 1))
   else
     echo -e "${RED}FAIL${NC}"
     echo "  CSRF_COOKIE_SECURE not configured properly"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
   fi
 }
 
