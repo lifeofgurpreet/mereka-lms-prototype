@@ -59,8 +59,11 @@ class TenantResolutionMiddleware:
                             if tc:
                                 request.tenant_slug = tc.slug
                         except Exception:
-                            # TenantConfig may not exist yet (pre-migration).
-                            pass
+                            logger.debug(
+                                "TenantConfig lookup failed for uuid=%s",
+                                enterprise_uuid,
+                                exc_info=True,
+                            )
         except Exception:
             logger.debug("Tenant resolution failed for host=%s", host, exc_info=True)
 

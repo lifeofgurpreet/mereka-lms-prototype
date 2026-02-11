@@ -72,6 +72,8 @@ class LMSClient:
             if resp.status_code == 409:
                 # Already enrolled — idempotent success
                 return True
+            if resp.status_code == 401:
+                self._token = None  # Refresh on next call
 
             logger.error(
                 "lms.enrollment_failed",

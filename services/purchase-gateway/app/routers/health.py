@@ -26,8 +26,10 @@ async def health_check():
     # Redis check
     try:
         r = redis.from_url(settings.REDIS_URL)
-        await r.ping()
-        await r.aclose()
+        try:
+            await r.ping()
+        finally:
+            await r.aclose()
     except Exception:
         checks["redis"] = "error"
         checks["status"] = "degraded"

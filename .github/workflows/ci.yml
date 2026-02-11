@@ -348,11 +348,12 @@ jobs:
               SKIP=$((SKIP + 1))
               continue
             fi
-            if timeout 60 bash "$f" >/dev/null 2>&1; then
+            if output=$(timeout 60 bash "$f" 2>&1); then
               echo "PASS $(basename "$f")"
               PASS=$((PASS + 1))
             else
               echo "FAIL $(basename "$f")"
+              echo "$output" | tail -10
               FAIL=$((FAIL + 1))
             fi
           done

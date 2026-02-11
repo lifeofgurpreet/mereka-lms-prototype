@@ -1,9 +1,10 @@
 import uuid
+from urllib.parse import urlparse
 
 import stripe
 import structlog
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, HttpUrl, model_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
@@ -14,13 +15,28 @@ router = APIRouter()
 logger = structlog.get_logger()
 
 
+def _is_allowed_origin(url: str) -> bool:
+    """Check if a URL's origin is in the allowed list."""
+    parsed = urlparse(url)
+    origin = f"{parsed.scheme}://{parsed.netloc}"
+    return origin in settings.ALLOWED_ORIGINS
+
+
 class CheckoutRequest(BaseModel):
     offering_uuid: uuid.UUID
     buyer_email: EmailStr
     tenant_id: uuid.UUID | None = None
-    success_url: str
-    cancel_url: str
+    success_url: HttpUrl
+    cancel_url: HttpUrl
     metadata: dict | None = None
+
+    @model_validator(mode="after")
+    def validate_redirect_urls(self):
+        for field_name in ("success_url", "cancel_url"):
+            url = str(getattr(self, field_name))
+            if not _is_allowed_origin(url):
+                raise ValueError(f"{field_name} origin not in ALLOWED_ORIGINS")
+        return self
 
 
 class CheckoutResponse(BaseModel):
@@ -60,7 +76,7 @@ async def create_checkout(
             customer_email=request.buyer_email,
             mode="payment",
             success_url=f"{request.success_url}?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=request.cancel_url,
+            cancel_url=str(request.cancel_url),
             metadata={"order_uuid": str(order_id)},
             payment_intent_data={"capture_method": "automatic"},
         )

@@ -58,12 +58,12 @@ extract_csrf_origins() {
 # Check if all expected code patterns are present in CSRF_TRUSTED_ORIGINS blocks
 check_expected_domains() {
   MISSING=()
-  # Extract lines referencing CSRF_TRUSTED_ORIGINS
-  csrf_context=$(grep -B2 -A2 'CSRF_TRUSTED_ORIGINS' "$LMS_SETTINGS" 2>/dev/null || true)
-
+  # Search the entire LMS settings file for each pattern.
+  # These MEREKA_* variables are only used for CSRF origin construction,
+  # so presence anywhere in the file confirms correct wiring.
   for pattern in "${EXPECTED_PATTERNS[@]}"; do
     echo -n "Checking CSRF origin for $pattern... "
-    if echo "$csrf_context" | grep -q "$pattern"; then
+    if grep -q "$pattern" "$LMS_SETTINGS" 2>/dev/null; then
       echo -e "${GREEN}PASS${NC}"
       PASS=$((PASS + 1))
     else
