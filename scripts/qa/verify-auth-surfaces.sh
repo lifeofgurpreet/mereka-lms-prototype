@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-042
+# @spec: auth-sso-enterprise_spec.md
 # Verify that authentication entrypoints exist and redirect as expected.
 #
 # This script is designed to run without credentials and can run in CI.
@@ -222,7 +224,7 @@ check_studio_home_next_scheme() {
   local studio_host="$1"
   local url="https://${studio_host}/"
   local body
-  body="$(curl -sS "$url" || true)"
+  body="$(curl -sS -L --max-redirs 15 "$url" || true)"
   if [[ -z "$body" ]]; then
     log_fail "${studio_host}: Studio home page not reachable"
     return 1
