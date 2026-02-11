@@ -830,8 +830,9 @@ except ImportError:
 # Phase 0: inject SP cert/key from environment; IdPs configured via Django admin.
 
 # Ensure third_party_auth is in INSTALLED_APPS (should be in base Open edX).
-if "third_party_auth" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("third_party_auth")
+# Use full dotted path — edx-platform registers it as 'common.djangoapps.third_party_auth'.
+if not any("third_party_auth" in app for app in INSTALLED_APPS):
+    INSTALLED_APPS.append("common.djangoapps.third_party_auth")
 
 # Enable third-party auth feature flag (required for enterprise login routing).
 FEATURES.setdefault("ENABLE_THIRD_PARTY_AUTH", True)

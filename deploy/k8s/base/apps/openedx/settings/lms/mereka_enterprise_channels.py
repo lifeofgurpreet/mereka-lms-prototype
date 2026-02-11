@@ -76,7 +76,7 @@ EVENT_BUS_PRODUCER_CONFIG.setdefault(
 
 # Also publish enrollment events for channel sync triggers.
 EVENT_BUS_PRODUCER_CONFIG.setdefault(
-    "org.openedx.learning.student.enrollment.changed.v1", {}
+    "org.openedx.learning.course.enrollment.changed.v1", {}
 ).setdefault("enterprise-events", {"event_key_field": "enrollment.user.id", "enabled": True})
 
 # Redis Streams event bus backend (platform-wide decision).
