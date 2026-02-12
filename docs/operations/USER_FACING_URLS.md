@@ -41,10 +41,11 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 - Discussions MFE - Part of MFE hub, embedded in course experience
 
 **Analytics** (⚠️ NOT YET DEPLOYED):
-- Aspects - Uses Apache Superset for visualization (Tutor plugin)
-- Superset - Data visualization tool (used by Aspects)
-- Panorama - Separate analytics platform (alternative to Aspects)
+- **Aspects** - Official Open edX analytics using Apache Superset for visualization (Tutor plugin)
+- **Superset** - Data visualization tool (used by Aspects)
+- **Current Choice**: Aspects + Superset infrastructure in place
 - **Current Status**: Analytics not deployed, see `docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- **Note**: Panorama is a separate analytics platform (alternative to Aspects), but we're using Aspects
 
 ---
 
@@ -80,8 +81,12 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
    - Admin: https://discovery.academyv2.mereka.io/admin
    - Health: https://discovery.academyv2.mereka.io/health
 
-6. **Ecommerce** - https://ecommerce.academyv2.mereka.io
+6. **Ecommerce (Custom Purchase Gateway)** - https://ecommerce.academyv2.mereka.io
    - Purpose: Course purchases, checkout, payment processing
+   - **IMPORTANT**: This is our CUSTOM purchase-gateway service (NOT Open edX Oscar/ecommerce)
+   - Architecture: FastAPI + PostgreSQL with Stripe integration
+   - Spec: `specs/ecommerce-purchase-gateway_spec.md`
+   - Note: Open edX ecommerce (Oscar) has been sunsetted and is NOT used
    - Key paths: `/`, `/dashboard`, `/basket`, `/checkout`
    - Admin: https://ecommerce.academyv2.mereka.io/admin
 
@@ -91,9 +96,9 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
    - API: https://credentials.academyv2.mereka.io/api/v2
    - Health: https://credentials.academyv2.mereka.io/health
 
-8. **Forum** - https://forum.academyv2.mereka.io ⚠️ RARELY USED
-   - Purpose: Course discussions - **primary access is embedded in courses**
-   - Standalone URL: Exists but rarely used (browse all discussions)
+8. **Forum** - https://forum.academyv2.mereka.io
+   - Purpose: Course discussions - **accessible both embedded in courses and standalone**
+   - Standalone URL: Exists for browsing all discussions across courses
    - Architecture: Discussions MFE (part of apps.academyv2.mereka.io/discussions)
    - Access patterns:
      - ✅ **Primary**: Embedded in course pages (in-context discussions)
@@ -297,18 +302,14 @@ When adding a new tenant, ensure these URLs are configured:
 - Backend storage: Django REST API + Elasticsearch
 - Not a URL users would directly visit
 
-**Analytics Stack** (⚠️ CLARIFICATION NEEDED):
+**Analytics Stack**:
 - **Aspects** = Official Open edX analytics using **Superset** for visualization
   - Tutor plugin: `tutor-contrib-aspects`
   - Uses Apache Superset as reporting tool
   - **Sources**: [Aspects Docs](https://docs.openedx.org/projects/openedx-aspects/), [Superset Decision](https://docs.openedx.org/projects/openedx-aspects/en/latest/technical_documentation/decisions/0003_superset.html)
-- **Panorama** = Alternative analytics platform (not part of Aspects)
-  - Independent solution by Aulasneo
-  - ELT agent with dedicated dashboards for staff and students
-  - Tutor plugin: `tutor-contrib-panorama`
-  - **Sources**: [Panorama Discussion](https://discuss.openedx.org/t/panorama-the-open-source-free-to-use-ultimate-analytics-workbench-for-open-edx-and-more-some-faq-from-our-customers/13037)
-- **Decision**: Choose **either** Aspects (with Superset) **or** Panorama (not both)
-- **Current Status**: Neither deployed yet
+- **Our Choice**: Aspects + Superset
+- **Current Status**: Not yet deployed, see `docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+- **Note**: Panorama is an alternative analytics platform by Aulasneo, but we're using Aspects
 
 **Preview Domain**:
 - `preview.academyv2.mereka.io` is same LMS stack, different hostname
