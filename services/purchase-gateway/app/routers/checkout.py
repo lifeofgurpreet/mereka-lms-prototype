@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
+from app.models.offering import Offering
 from app.models.order import LineItem, Order, OrderStatus
 
 router = APIRouter()
@@ -57,10 +58,22 @@ async def create_checkout(
     """Create a Stripe Checkout Session for a given offering."""
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    # TODO: Look up offering by UUID from DB to get stripe_price_id and details
-    # For scaffold, we accept the request and would resolve offering details here.
+    # Look up offering by UUID from DB to get stripe_price_id and details
+    result = await db.execute(
+        select(Offering).where(
+            Offering.id == request.offering_uuid,
+            Offering.active == True,  # noqa: E712
+        )
+    )
+    offering = result.scalar_one_or_none()
+    if not offering:
+        raise HTTPException(status_code=404, detail="Offering not found or inactive")
 
+    # Validate tenant isolation if enabled
     tenant_id = request.tenant_id or uuid.UUID("00000000-0000-0000-0000-000000000000")
+    if settings.TENANT_ISOLATION_ENABLED and offering.tenant_id != tenant_id:
+        raise HTTPException(status_code=403, detail="Offering not available for this tenant")
+
     order_id = uuid.uuid4()
 
     # Create pending order
@@ -70,8 +83,8 @@ async def create_checkout(
         buyer_email=request.buyer_email,
         stripe_checkout_session_id="pending",  # Updated after Stripe call
         status=OrderStatus.pending,
-        total_cents=0,  # TODO: resolve from offering
-        currency="USD",
+        total_cents=offering.price_cents,
+        currency=offering.currency,
         metadata_json=request.metadata,
     )
 
@@ -79,6 +92,12 @@ async def create_checkout(
         session = stripe.checkout.Session.create(
             customer_email=request.buyer_email,
             mode="payment",
+            line_items=[
+                {
+                    "price": offering.stripe_price_id,
+                    "quantity": 1,
+                }
+            ],
             success_url=f"{request.success_url}?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=str(request.cancel_url),
             metadata={"order_uuid": str(order_id)},
