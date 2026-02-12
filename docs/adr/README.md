@@ -18,6 +18,7 @@ This directory contains Architecture Decision Records (ADRs) documenting signifi
 | [ADR-010](010-monorepo-architecture.md) | Monorepo Architecture | Accepted | 2026-02-10 |
 | [ADR-011](011-convention-based-spec-verification.md) | Convention-Based Spec Verification (V3) | Accepted | 2026-02-11 |
 | [ADR-012](012-no-runtime-css-overlay.md) | Eliminate Runtime CSS ConfigMap Overlay | Accepted | 2026-02-10 |
+| [ADR-013](013-studio-sso-bypass-middleware.md) | Studio SSO Bypass Middleware | Accepted | 2026-02-12 |
 
 ## ADR Template
 
