@@ -232,3 +232,190 @@ Tune it via `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env`.
 - Primary favicon: `infrastructure/tutor/themes/mereka/common/static/images/favicon.ico` (synced from `assets/branding/favicon.ico`).
 - Optional SVG: `infrastructure/tutor/themes/mereka/common/static/images/favicon.svg` if you want crisp scaling.
 - Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.ico` via `tutor config save` so Django advertises the correct icon and MFEs reuse it from their config.
+
+---
+
+## Quick Reference
+
+### Update Branding Assets
+
+```bash
+# 1. Update assets
+cp new-logo.png assets/branding/logo-horizontal.png
+cp new-font.woff2 assets/branding/fonts/
+
+# 2. Sync to theme
+./scripts/branding/sync-brand-assets.sh
+
+# 3. Rebuild and deploy
+./scripts/branding/deploy-branded-image.sh
+```
+
+### Verify Branding
+
+```bash
+# Local
+./scripts/branding/verify-branding-health.sh
+
+# Production
+./scripts/branding/run-branding-gates.sh prod
+```
+
+### Common Commands
+
+```bash
+# Sync assets after changes
+./scripts/branding/sync-brand-assets.sh
+
+# Verify branding health (CI gate)
+./scripts/branding/verify-branding-health.sh
+
+# Check logo setup
+./scripts/branding/verify-logo-setup.sh
+
+# Verify CSS loading
+./scripts/branding/verify-branding-css.sh
+
+# Check design token drift
+./scripts/branding/verify-token-drift.sh
+
+# Deploy branded image to production
+./scripts/branding/deploy-branded-image.sh
+```
+
+---
+
+## Troubleshooting
+
+### Logo Not Showing
+
+**Symptom**: Default Open edX logo appears instead of Mereka logo.
+
+**Causes**:
+1. **Assets not synced**:
+   ```bash
+   ./scripts/branding/sync-brand-assets.sh
+   tutor local run lms ./manage.py lms collectstatic --noinput
+   ```
+
+2. **Theme not configured**:
+   ```bash
+   tutor config save --set THEME_NAME=mereka --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
+   ./infrastructure/tutor/apply-patches.sh
+   tutor local restart
+   ```
+
+3. **Cached static files**:
+   ```bash
+   # Clear browser cache
+   # Or hard refresh: Ctrl+Shift+R (Linux/Win) / Cmd+Shift+R (Mac)
+   ```
+
+### Google Fonts Still Loading
+
+**Symptom**: Network tab shows requests to `fonts.googleapis.com`
+
+**Cause**: Font references not replaced with local fonts.
+
+**Fix**:
+```bash
+# Verify fonts synced
+ls -lh infrastructure/tutor/themes/mereka/common/static/fonts/
+
+# Check SCSS imports
+grep -r "google" infrastructure/tutor/themes/mereka/scss/
+# Should return nothing
+
+# Rebuild with patches
+./infrastructure/tutor/apply-patches.sh
+tutor images build openedx
+```
+
+### MFE Shows Default Theme
+
+**Symptom**: MFE not using Mereka branding.
+
+**Causes**:
+1. **Branding not set up in dev**:
+   ```bash
+   ./scripts/branding/setup-mfe-branding.sh
+   cd tutor_env/dev/frontend-app-learning
+   npm start
+   ```
+
+2. **Production MFE image not rebuilt**:
+   ```bash
+   ./infrastructure/tutor/apply-patches.sh
+   tutor images build mfe
+   kubectl rollout restart deployment/mfe -n mereka-lms
+   ```
+
+### Branding Health Check Fails
+
+**Symptom**: `verify-branding-health.sh` exits with errors.
+
+**Debug**:
+```bash
+# Run with verbose output
+./scripts/branding/verify-branding-health.sh
+
+# Check specific assets
+ls -lh infrastructure/tutor/themes/mereka/lms/static/images/logo*.png
+ls -lh infrastructure/tutor/themes/mereka/lms/static/fonts/*.woff2
+
+# Verify SCSS structure
+find infrastructure/tutor/themes/mereka -name "*.scss"
+```
+
+### CSS Not Applying
+
+**Symptom**: Branding colors/styles not showing.
+
+**Causes**:
+1. **CSS not loaded**:
+   ```bash
+   # Check head-extra template
+   grep "mereka-overrides.css" infrastructure/tutor/themes/mereka/lms/templates/head-extra.html
+
+   # Verify CSS exists
+   ls -lh infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css
+   ```
+
+2. **Collectstatic not run**:
+   ```bash
+   tutor local run lms ./manage.py lms collectstatic --noinput
+   tutor local restart
+   ```
+
+---
+
+## Related Resources
+
+**Spec**: `specs/branding-system_spec.md` (10 ACs, 100% complete)
+
+**Operations Docs**:
+- `docs/branding/BRANDING_OPERATING_MODEL.md` - Branding workflow and ownership
+- `docs/branding/BRANDING_GUARDRAILS.md` - What NOT to change
+- `docs/branding/BRANDING_ROADMAP.md` - Future branding plans
+- `docs/BRANDING_VERIFICATION_CHECKLIST.md` - Pre-deploy checklist
+- `docs/BRANDING_PLAN.md` - Rollout plan
+
+**Scripts**:
+- `scripts/branding/sync-brand-assets.sh` - Sync assets to theme
+- `scripts/branding/verify-branding-health.sh` - CI gate
+- `scripts/branding/verify-logo-setup.sh` - Logo verification
+- `scripts/branding/verify-branding-css.sh` - CSS loading check
+- `scripts/branding/verify-token-drift.sh` - Design token drift detection
+- `scripts/branding/deploy-branded-image.sh` - Production deployment
+- `scripts/branding/setup-mfe-branding.sh` - MFE dev setup
+- `scripts/branding/run-branding-gates.sh` - Full gate suite
+
+**Assets**:
+- `assets/branding/` - Source assets (logos, fonts, tokens)
+- `infrastructure/tutor/themes/mereka/` - Theme directory
+- `infrastructure/tutor/themes/mereka/scss/theme.scss` - Shared SCSS
+- `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` - Runtime CSS
+
+**Design System**:
+- `bbbi-mereka-brand-assets` (external repo) - Design source of truth
+- `assets/branding/tokens.css` - Design tokens (vendored from Figma)

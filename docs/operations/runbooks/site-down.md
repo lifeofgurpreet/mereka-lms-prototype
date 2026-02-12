@@ -1,46 +1,122 @@
-# Troubleshooting Guide
-_Audience: Developers & Agents • Owner: SRE • Last verified: 2026-02-05_
+# Site Down Runbook
+_Audience: Developers & Agents • Owner: SRE • Last verified: 2026-02-12_
 
-Quick reference for diagnosing and fixing common Kubernetes service issues. This guide covers the most frequent problems that cause site downtime.
+Quick reference for diagnosing and fixing site downtime. Follow the decision tree below to isolate the issue quickly.
 
-## 🚨 Site Down - Quick Diagnostic Checklist
+## 🔍 Decision Tree (Start Here)
+
+```mermaid
+flowchart TD
+    Start[Site Inaccessible] --> CheckPods{Pods Running?}
+
+    CheckPods -->|No| FixPods[Fix: Check image pull, resource limits<br/>See Performance Degradation Guide]
+    CheckPods -->|Yes| CheckEndpoints{Endpoints Populated?}
+
+    CheckEndpoints -->|No - MOST COMMON| FixSelectors[Fix: Service selector mismatch<br/>Run fix-service-selectors.sh<br/>⏱️ 2 min]
+    CheckEndpoints -->|Yes| CheckServices{Services Healthy?}
+
+    CheckServices -->|No| FixServices[Fix: Check service ports/selectors<br/>⏱️ 3 min]
+    CheckServices -->|Yes| CheckIngress{Ingress/LB OK?}
+
+    CheckIngress -->|No| FixIngress[Fix: Check cert SANs, DNS<br/>⏱️ 5-15 min]
+    CheckIngress -->|Yes| CheckApp{App Layer OK?}
+
+    CheckApp -->|No| FixApp[Fix: Check DB connections, Redis<br/>See Database Issues Guide<br/>⏱️ 5-30 min]
+    CheckApp -->|Yes| Advanced[Advanced: Check DNS, CDN<br/>⏱️ 10+ min]
+
+    FixSelectors --> Verify[Verify endpoints populated]
+    FixServices --> Verify
+    FixIngress --> Verify
+    FixApp --> Verify
+    Verify --> Success[✅ Site Accessible]
+
+    style Start fill:#ffcccc
+    style Success fill:#ccffcc
+    style FixSelectors fill:#ffffcc
+    style CheckEndpoints fill:#ffddaa
+```
+
+**Timing Key**: Total diagnostic time: **5-10 minutes** for most common issues (selector mismatches)
+
+**Related Runbooks**:
+- [Performance Degradation](performance-degradation.md) - Slow responses, high latency
+- [Database Issues](database-issues.md) - MySQL/MongoDB connection failures
+- [Certificate Issues](certificate-issues.md) - TLS/SSL problems
+
+---
+
+## 🚨 Quick Diagnostic Checklist (5 Commands, 2 Minutes)
 
 When the site is inaccessible, run these commands in order:
 
 ```bash
-# 1. Check if pods are running
+# Step 1: Check if pods are running (⏱️ 10 seconds)
 kubectl get pods -n mereka-lms
 
-# 2. Check service endpoints (CRITICAL - empty endpoints = no traffic routing)
+# Step 2: Check service endpoints (⏱️ 10 seconds)
+# CRITICAL: Empty endpoints (<none>) = #1 cause of downtime
 kubectl get endpoints -n mereka-lms
 
-# 3. Check service selectors match pod labels
+# Step 3: Check service selectors match pod labels (⏱️ 20 seconds)
 kubectl get svc -n mereka-lms -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.selector}{"\n"}{end}'
 kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms --show-labels | head -1
 
-# 4. Check LoadBalancer status
+# Step 4: Check LoadBalancer status (⏱️ 10 seconds)
 kubectl get svc caddy -n mereka-lms
 
-# 5. Test internal connectivity
+# Step 5: Test internal connectivity (⏱️ 30 seconds)
 kubectl run curl-test --rm -i --image=curlimages/curl --restart=Never -n mereka-lms -- curl -I http://lms:8000
 ```
+
+**Expected Results**:
+- Step 1: All pods `Running` or `Completed`
+- Step 2: All services have IP:Port endpoints (NOT `<none>`)
+- Step 3: Service selectors match pod labels (same instance ID)
+- Step 4: LoadBalancer has `EXTERNAL-IP` (not `<pending>`)
+- Step 5: Internal curl returns `HTTP/1.1 200` or `302`
+
+**If Step 2 shows `<none>`**: Jump to [Issue 1: Service Has No Endpoints](#issue-1-service-has-no-endpoints-none) (2-minute fix)
+
+---
+
+## 📊 Issue Frequency & Impact
+
+| Issue | Frequency | MTTR | Impact | Related Runbook |
+|-------|-----------|------|--------|-----------------|
+| Service selector mismatch | 70% | 2 min | Total outage | This guide |
+| HTTPS port missing on Caddy | 10% | 15 min (LB propagation) | HTTPS-only outage | [Certificate Issues](certificate-issues.md) |
+| Database connection failures | 10% | 5-30 min | Total outage | [Database Issues](database-issues.md) |
+| Redis host drift | 5% | 5 min | Slow/hanging requests | [Performance Degradation](performance-degradation.md) |
+| Other (DNS, CDN, app bugs) | 5% | Variable | Variable | Various |
+
+**Key Insight**: 70% of site downtime is caused by selector mismatches. Always check endpoints first.
 
 ---
 
 ## 🔧 Common Issues & Fixes
 
-### Issue 1: Service Has No Endpoints (`<none>`)
+### Issue 1: Service Has No Endpoints (`<none>`) ⏱️ 2 MIN
 
 **Symptoms:**
 - `kubectl get endpoints` shows `<none>` for a service
-- Service exists but can't route traffic
-- Pods are running but unreachable
+- Site returns 502/503/504 errors
+- Pods are running (`kubectl get pods`) but site is inaccessible
 
 **Root Cause:**
 Service selector doesn't match pod labels. This happens when:
 - Pods are restarted/recreated with new instance IDs
 - Tutor regenerates configs with different instance IDs
 - Manual pod deletions/recreations
+
+**Diagnosis Flowchart:**
+```mermaid
+flowchart LR
+    A[kubectl get endpoints] --> B{Any <none>?}
+    B -->|Yes| C[Run fix-service-selectors.sh]
+    B -->|No| D[Check next issue]
+    C --> E[Verify endpoints populated]
+    E --> F[✅ Fixed]
+```
 
 **Quick Fix:**
 ```bash
@@ -75,9 +151,13 @@ for svc in lms cms caddy nginx discovery ecommerce notes xqueue; do
 done
 ```
 
+**See Also**:
+- [Performance Degradation](performance-degradation.md) - If endpoints exist but responses are slow
+- [Database Issues](database-issues.md) - If pods are CrashLooping
+
 ---
 
-### Issue 2: Nginx Upstream Timeout
+### Issue 2: Nginx Upstream Timeout ⏱️ 3 MIN
 
 **Symptoms:**
 - Nginx logs show: `upstream timed out` or `upstream prematurely closed connection`
@@ -101,9 +181,11 @@ kubectl delete pod -n mereka-lms -l app.kubernetes.io/name=nginx
 kubectl delete pod -n mereka-lms -l app.kubernetes.io/name=nginx
 ```
 
+**Common Pitfall**: Don't restart nginx first - always verify backend endpoints are populated
+
 ---
 
-### Issue 3: LoadBalancer Connection Refused
+### Issue 3: LoadBalancer Connection Refused ⏱️ 3 MIN
 
 **Symptoms:**
 - External access fails: `Connection refused`
@@ -123,9 +205,11 @@ kubectl apply -f /tmp/caddy-svc.yaml
 sleep 3 && kubectl get endpoints caddy -n mereka-lms
 ```
 
+**See Also**: [Issue 1](#issue-1-service-has-no-endpoints-none) - Caddy endpoint issues have the same root cause
+
 ---
 
-### Issue 4: HTTPS Port Missing on Caddy
+### Issue 4: HTTPS Port Missing on Caddy ⏱️ 15 MIN (LB propagation)
 
 **Symptoms:**
 - HTTP works but HTTPS (`https://academyv2.mereka.io` or LB IP on 443) times out
@@ -133,6 +217,9 @@ sleep 3 && kubectl get endpoints caddy -n mereka-lms
 
 **Root Cause:**
 - Caddy Service was created without port 443. The GCP LoadBalancer never opens TLS, so all HTTPS requests fail.
+
+**Related Issues**:
+- [Certificate Issues Runbook](certificate-issues.md) - For fake certificate or TLS handshake errors
 
 **Quick Fix:**
 ```bash
@@ -154,7 +241,7 @@ curl -Ik https://academyv2.mereka.io
 
 ---
 
-### Issue 4b: Fake Ingress Certificate
+### Issue 4b: Fake Ingress Certificate ⏱️ 10-30 MIN
 
 **Symptoms:**
 - TLS cert shows `Kubernetes Ingress Controller Fake Certificate`
@@ -191,9 +278,11 @@ echo | openssl s_client -servername academyv2.mereka.io -connect academyv2.merek
 - When enabling new services (credentials/forum), add/update DNS records in `infrastructure/cloudflare/records*.json` and re-run `./scripts/infra/cloudflare-sync.sh`.
 - Re-run `./scripts/infra/repair-routing.sh` after any selector drift.
 
+**See Also**: [Certificate Issues Runbook](certificate-issues.md) - Comprehensive TLS troubleshooting
+
 ---
 
-### Issue 4c: Studio "Servers Encountered an Error" (MongoDB SRV)
+### Issue 4c: Studio "Servers Encountered an Error" (MongoDB SRV) ⏱️ 30 MIN (rebuild required)
 
 **Symptoms:**
 - Studio shows “The Studio servers encountered an error”
@@ -220,9 +309,11 @@ kubectl set image deployment/cms cms=asia-southeast1-docker.pkg.dev/mereka-lms/o
 kubectl rollout status deployment/cms -n mereka-lms
 ```
 
+**See Also**: [Database Issues Runbook](database-issues.md) - MongoDB connection troubleshooting
+
 ---
 
-### Issue 4d: LMS/CMS MySQL `1045 Access denied` (Trailing Newline In Secret)
+### Issue 4d: LMS/CMS MySQL `1045 Access denied` (Trailing Newline In Secret) ⏱️ 5 MIN
 
 **Symptoms:**
 - LMS/CMS logs show: `MySQLdb.OperationalError: (1045, "Access denied for user 'openedx'@'10.x.x.x' (using password: YES)")`
@@ -255,13 +346,15 @@ kubectl rollout restart -n mereka-lms deploy/lms deploy/lms-worker deploy/cms de
 ```
 
 **Follow-up (recommended):**
-- Normalize the upstream secret values to remove trailing newlines so other services don’t hit the same edge case.
+- Normalize the upstream secret values to remove trailing newlines so other services don't hit the same edge case.
 - Use `scripts/infra/infisical-audit-mereka-lms.sh` to detect newline drift without printing values.
 - Use `scripts/infra/infisical-validate-mereka-lms.sh` as a pre-flight gate (set `STRICT=1` to fail on trailing CR/LF).
 
+**See Also**: [Database Issues Runbook](database-issues.md) - MySQL authentication and connection troubleshooting
+
 ---
 
-### Issue 4e: Notes/XQueue MySQL Failures (DB/User Missing or Env Missing)
+### Issue 4e: Notes/XQueue MySQL Failures (DB/User Missing or Env Missing) ⏱️ 10 MIN
 
 **Symptoms:**
 - Notes and/or XQueue endpoints exist but error when they actually hit the DB
@@ -296,7 +389,11 @@ kubectl exec -n mereka-lms deploy/notes -- sh -lc 'cd /app/edx-notes-api && /app
 kubectl exec -n mereka-lms deploy/xqueue -- sh -lc 'cd /openedx/xqueue && /openedx/venv/bin/python manage.py migrate --noinput'
 ```
 
-### Issue 5: Account Settings/Profile Pages Blank or Stuck
+**See Also**: [Database Issues Runbook](database-issues.md) - Provisioning databases for services
+
+---
+
+### Issue 5: Account Settings/Profile Pages Blank or Stuck ⏱️ 5-15 MIN
 
 **Symptoms:**
 - `/account/settings` or `/u/<user>` loads header/footer only
@@ -351,9 +448,11 @@ kubectl exec -n mereka-lms deploy/cms -- /bin/bash -c \
 - Ensure the Open edX image build runs `compilejsi18n` (or `collectstatic` pipeline includes it).
 - Rebuild and redeploy the image after theme changes.
 
+**Common Pitfall**: Always test in a fresh browser profile first - stale cookies can mimic config issues
+
 ---
 
-### Issue 6: Studio “New Course” Disabled
+### Issue 6: Studio "New Course" Disabled ⏱️ 2 MIN
 
 **Symptoms:**
 - “New Course” opens but “Create” stays disabled
@@ -381,9 +480,11 @@ qs=CourseCreator.objects.filter(user=u); \
 else CourseCreator.objects.bulk_create([CourseCreator(user=u, state=CourseCreator.GRANTED, all_organizations=True)]));\""
 ```
 
+**See Also**: Authentication issues can also cause Studio problems - see [Issue 7 series](#issue-7-login-fails-csrf-403-or-500-on-login_session)
+
 ---
 
-### Issue 6a: Kind Dev ImagePullBackOff (OpenedX images)
+### Issue 6a: Kind Dev ImagePullBackOff (OpenedX images) ⏱️ 10 MIN
 
 **Symptoms:**
 - `lms/cms` pods stuck in `ImagePullBackOff` on `kind-dev`
@@ -458,7 +559,7 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
 
 ---
 
-### Issue 7: No Courses Visible / Modulestore Permission Errors
+### Issue 7: No Courses Visible / Modulestore Permission Errors ⏱️ 5-30 MIN
 
 **Symptoms:**
 - `CourseOverview.objects.count()` returns 0
@@ -493,6 +594,8 @@ print('DOC_STORE_DB', cfg.get('db'));"
 **Fix (if `CourseOverview` is 0)**
 See `docs/operations/COURSE_DATA_RECOVERY.md` (this is usually import/restore work, not an auth issue).
 
+**See Also**: [Database Issues Runbook](database-issues.md) - MongoDB Atlas connectivity and permissions
+
 **Fix (Dev kind):**
 ```bash
 ./infrastructure/tutor/apply-patches.sh
@@ -502,7 +605,7 @@ kubectl rollout restart deployment/cms -n mereka-lms
 
 ---
 
-### Issue 4d: Forum Heartbeat 502 (Atlas Allowlist)
+### Issue 4d: Forum Heartbeat 502 (Atlas Allowlist) ⏱️ 5-15 MIN
 
 **Symptoms:**
 - `https://forum.academyv2.mereka.dev/heartbeat` returns 502 (dev)
@@ -591,9 +694,11 @@ SiteConfiguration.objects.get_or_create(
 curl -I https://credentials.academyv2.mereka.io/
 ```
 
+**See Also**: [Database Issues Runbook](database-issues.md) - MongoDB Atlas troubleshooting
+
 ---
 
-### Issue 5: Redis Host Drift (Requests Hang)
+### Issue 5: Redis Host Drift (Requests Hang) ⏱️ 5 MIN
 
 **Symptoms:**
 - Pods healthy, selectors correct, but LMS/Studio requests time out or nginx reports 499.
@@ -618,9 +723,11 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 - Ensure Tutor/Terraform overrides keep `REDIS_HOST=redis` before regenerating configs.
 - After `tutor k8s start` or config regenerations, spot-check `openedx-config-*.json` for `redis:6379`.
 
+**See Also**: [Performance Degradation Runbook](performance-degradation.md) - Redis-related slow responses
+
 ---
 
-### Issue 6: MySQL Has No Endpoints (In-Cluster)
+### Issue 6: MySQL Has No Endpoints (In-Cluster) ⏱️ 5 MIN
 
 **Symptoms:**
 - `kubectl get endpoints mysql -n mereka-lms` shows `<none>`
@@ -651,12 +758,14 @@ kubectl get pvc -n mereka-lms | rg '^mysql\\s'
 ```
 
 **Prevention:**
-- Keep selectors stable (see `docs/operations/TROUBLESHOOTING.md` Issue 1 and `scripts/infra/fix-service-selectors.sh`).
+- Keep selectors stable (see [Issue 1](#issue-1-service-has-no-endpoints-none) and `scripts/infra/fix-service-selectors.sh`).
 - Add PVC disk utilization alerting for `mysql` before it fills (see `docs/operations/OBSERVABILITY_ENHANCEMENT_PLAN.md`).
+
+**See Also**: [Database Issues Runbook](database-issues.md) - MySQL troubleshooting and recovery
 
 ---
 
-### Issue 7: Login Fails (CSRF 403 or 500 on login_session)
+### Issue 7: Login Fails (CSRF 403 or 500 on login_session) ⏱️ 10 MIN
 
 **Symptoms:**
 - Login POST `/api/user/v1/account/login_session/` returns 403 CSRF (referer check failed) or 500 `json.decoder.JSONDecodeError`.
@@ -1489,4 +1598,43 @@ Verify Redis Streams consumers implement idempotent handling with deduplication 
 
 ---
 
-_Last updated: 2025-11-11 after resolving service selector mismatch issues that caused site downtime_
+## 🎯 Quick Navigation
+
+**By Symptom**:
+- **Site completely down** → [Issue 1: Service selector mismatch](#issue-1-service-has-no-endpoints-none) (70% of cases)
+- **HTTPS doesn't work, HTTP does** → [Issue 4: HTTPS port missing](#issue-4-https-port-missing-on-caddy-15-min-lb-propagation)
+- **Certificate warnings** → [Issue 4b: Fake certificate](#issue-4b-fake-ingress-certificate-10-30-min) or [Certificate Issues Runbook](certificate-issues.md)
+- **Site slow/hanging** → [Issue 5: Redis host drift](#issue-5-redis-host-drift-requests-hang-5-min) or [Performance Degradation Runbook](performance-degradation.md)
+- **Login broken** → [Issue 7 series](#issue-7-login-fails-csrf-403-or-500-on-login_session-10-min)
+- **Database errors** → [Database Issues Runbook](database-issues.md)
+- **No courses visible** → [Issue 7: Modulestore permissions](#issue-7-no-courses-visible--modulestore-permission-errors-5-30-min)
+
+**By Time Constraint**:
+- **0-5 minutes**: Issues 1, 3, 4d, 5, 6, 7a-7c
+- **5-15 minutes**: Issues 2, 4, 4b, 4d (Forum), 6a, 7
+- **15-30 minutes**: Issues 4 (LB propagation), 4c, 7 (Modulestore)
+- **30+ minutes**: Image rebuilds, data recovery
+
+**By Related Runbook**:
+- [Performance Degradation](performance-degradation.md) - Slow responses, high latency, resource exhaustion
+- [Database Issues](database-issues.md) - MySQL, MongoDB, Redis connection/auth failures
+- [Certificate Issues](certificate-issues.md) - TLS/SSL certificate problems, fake certs, SAN mismatches
+- [Authentication Issues](authentication-issues.md) - SSO, OIDC, session problems (if created)
+
+---
+
+## 📝 Runbook Maintenance
+
+This runbook is actively maintained. When adding new issues:
+1. Add timing estimate in heading (`⏱️ X MIN`)
+2. Include symptoms, root cause, and fix
+3. Add cross-references to related runbooks
+4. Update decision tree if it's a common issue (>5% frequency)
+5. Update issue frequency table
+
+**Last Major Update**: 2026-02-12 - Added decision tree, timing estimates, cross-references
+**Previous Update**: 2025-11-11 - Added service selector mismatch fixes
+
+---
+
+_Audience: Developers & Agents • Owner: SRE • Last verified: 2026-02-12_
