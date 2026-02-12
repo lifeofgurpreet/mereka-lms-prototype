@@ -55,6 +55,78 @@ jobs:
           ./scripts/gen/update-openedx-hostnames-doc.sh
           git diff --exit-code -- docs/operations/OPENEDX_HOSTNAMES.md
 
+  design-token-validation:
+    name: Design Token Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate tokens.css syntax
+        run: |
+          python3 -c "
+          import re, sys
+          css = open('assets/branding/tokens.css').read()
+          if ':root' not in css:
+              print('FAIL: tokens.css missing :root selector'); sys.exit(1)
+          # Check balanced braces
+          if css.count('{') != css.count('}'):
+              print('FAIL: tokens.css has unbalanced braces'); sys.exit(1)
+          # Check all properties end with semicolons
+          props = re.findall(r'--[a-z0-9_-]+\s*:', css)
+          if len(props) < 80:
+              print(f'FAIL: tokens.css only has {len(props)} properties (expected >= 80)'); sys.exit(1)
+          print(f'OK: tokens.css has {len(props)} token definitions')
+          "
+
+      - name: Validate tokens.provenance.json
+        run: |
+          python3 -c "
+          import json, re, sys
+          p = json.load(open('assets/branding/tokens.provenance.json'))
+          required = ['source_repo','source_path','source_branch','source_commit','source_sha256','synced_at_utc']
+          missing = [k for k in required if not p.get(k)]
+          if missing:
+              print(f'FAIL: provenance missing keys: {missing}'); sys.exit(1)
+          if not re.fullmatch(r'[0-9a-f]{40}', p['source_commit']):
+              print('FAIL: source_commit is not a valid 40-char SHA'); sys.exit(1)
+          if not re.fullmatch(r'[0-9a-f]{64}', p['source_sha256']):
+              print('FAIL: source_sha256 is not a valid 64-char SHA256'); sys.exit(1)
+          print('OK: tokens.provenance.json is valid')
+          "
+
+      - name: Verify token drift (tokens.css vs overrides)
+        run: |
+          ./scripts/branding/verify-token-drift.sh
+
+      - name: Verify token values in theme files
+        run: |
+          python3 -c "
+          import re, sys
+          tokens_css = open('assets/branding/tokens.css').read()
+          overrides = open('infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css').read()
+          mfe_scss = open('infrastructure/tutor/themes/mereka/mfe/mereka.scss').read()
+          # Extract color hex values from tokens.css
+          colors = dict(re.findall(r'(--color-(?:teal|magenta|blue|sky))\s*:\s*(#[0-9a-fA-F]{6})', tokens_css))
+          fails = []
+          for name, val in colors.items():
+              if val.lower() not in overrides.lower():
+                  fails.append(f'{name}={val} missing from mereka-overrides.css')
+              if val.lower() not in mfe_scss.lower():
+                  # MFE uses var() references, check for the token name instead
+                  alias = name.replace('--color-', '--mereka-color-')
+                  if alias not in mfe_scss:
+                      fails.append(f'{name} / {alias} not referenced in mfe/mereka.scss')
+          if fails:
+              for f in fails: print(f'FAIL: {f}')
+              sys.exit(1)
+          print(f'OK: {len(colors)} key token values verified in theme files')
+          "
+
   branding-preflight:
     name: Branding Preflight (Source)
     runs-on: ubuntu-latest

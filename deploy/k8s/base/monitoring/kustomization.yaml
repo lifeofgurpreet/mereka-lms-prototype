@@ -9,3 +9,5 @@ resources:
   - servicemonitor-enterprise.yaml
   - prometheusrule-lms.yaml
   - prometheusrule-enterprise.yaml
+  - prometheusrule-velero.yaml
+  - prometheusrule-slo.yaml
