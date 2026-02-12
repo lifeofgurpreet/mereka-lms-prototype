@@ -79,16 +79,19 @@ Digest pinning (recommended when digests are available):
 
 Do not use direct `kubectl set image` for normal production rollouts.
 
-## 6. Post-Release Verification
+## 6. Post-Release Verification (MANDATORY)
 
 - Confirm Argo app and rollout:
   - `kubectl -n argocd get application mereka-lms-local`
   - `kubectl -n mereka-lms rollout status deployment/lms`
   - `kubectl -n mereka-lms rollout status deployment/cms`
   - `kubectl -n mereka-lms rollout status deployment/mfe`
-- Run branding and health checks if release affects UI:
+- Run branding and health checks (**always**, not just UI releases):
   - `./scripts/branding/run-branding-gates.sh prod`
   - `./scripts/qa/public-health-check.sh prod`
+- Why mandatory: The 2026-02-10 incident showed that branding regressions can be silent
+  (no pod crashes, no log errors). Only post-deploy branding verification catches them.
+  See [ADR-012](../adr/012-no-runtime-css-overlay.md).
 
 ## 7. Rollback
 

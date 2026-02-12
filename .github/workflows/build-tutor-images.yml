@@ -47,6 +47,7 @@ env:
   REGION: asia-southeast1
   REPOSITORY: openedx
   REGISTRY: asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+  DOCKER_BUILDKIT: 1
 
 jobs:
   lint:
@@ -116,10 +117,46 @@ jobs:
           # Apply patches
           ./infrastructure/tutor/apply-patches.sh
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+          # Use 'docker' driver so Tutor's 'docker build' benefits from BuildKit.
+          # The 'docker-container' driver would require 'docker buildx build'.
+
       - name: Build OpenEdX image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
-          tutor images build openedx --no-cache
+          # BuildKit enabled via DOCKER_BUILDKIT=1 env var.
+          # Layer caching allowed (--no-cache removed per ADR-012).
+          # Parallelizes independent Dockerfile stages for faster builds.
+          tutor images build openedx
+
+      - name: Verify OpenEdX image branding contract
+        run: |
+          # Since ADR-012 eliminated runtime CSS overlays, branding CSS must be
+          # baked into the image. Verify the branded CSS file exists and the
+          # branding revision marker is present.
+          mkdir -p var/ci
+          EXPECTED_LMS_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css | head -n 1)"
+          echo "Expected LMS branding rev: ${EXPECTED_LMS_BRANDING_REV:-<none>}"
+
+          # Extract staticfiles.json from the built image to verify collectstatic ran
+          docker run --rm tutor_local/openedx:latest \
+            python -c "import json; data=json.load(open('/openedx/staticfiles/staticfiles.json')); css=data['paths'].get('mereka/css/mereka-overrides.css','MISSING'); print(f'CSS hash: {css}')" \
+            | tee var/ci/verify-openedx-image-branding.log
+
+          # Verify the hashed CSS file actually exists in the image
+          HASHED_CSS="$(docker run --rm tutor_local/openedx:latest \
+            python -c "import json; data=json.load(open('/openedx/staticfiles/staticfiles.json')); print(data['paths'].get('mereka/css/mereka-overrides.css','MISSING'))")"
+          if [[ "$HASHED_CSS" == "MISSING" ]]; then
+            echo "FAIL: mereka-overrides.css not found in staticfiles.json" | tee -a var/ci/verify-openedx-image-branding.log
+            exit 1
+          fi
+          docker run --rm tutor_local/openedx:latest \
+            test -f "/openedx/staticfiles/${HASHED_CSS}" \
+            && echo "PASS: /openedx/staticfiles/${HASHED_CSS} exists" | tee -a var/ci/verify-openedx-image-branding.log \
+            || { echo "FAIL: /openedx/staticfiles/${HASHED_CSS} missing" | tee -a var/ci/verify-openedx-image-branding.log; exit 1; }
 
       - name: Generate image metadata
         id: meta
@@ -152,6 +189,13 @@ jobs:
           DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload OpenEdX branding verification log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openedx-branding-contract-log
+          path: var/ci/verify-openedx-image-branding.log
 
   build-mfe:
     name: Build MFE Image
@@ -197,11 +241,16 @@ jobs:
           # Apply patches (includes Node 18 + webpack memory fixes)
           ./infrastructure/tutor/apply-patches.sh
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+
       - name: Build MFE image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           export NODE_OPTIONS="--max-old-space-size=6144"
-          tutor images build mfe --no-cache
+          tutor images build mfe
 
       - name: Verify MFE image branding contract
         run: |

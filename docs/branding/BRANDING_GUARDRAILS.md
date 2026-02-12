@@ -194,6 +194,15 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
      - `./scripts/qa/verify-public-branding.sh prod`
      - `./scripts/qa/audit-branding-surfaces.sh prod --strict`
 
+11. **[ELIMINATED]** Cross-repo CSS hash drift (runtime ConfigMap overlay)
+   - This failure mode existed when a runtime CSS ConfigMap in `bbi-infrastructure` was mounted
+     at a content-hashed path inside the LMS container. Image rebuilds changed the hash,
+     but the ConfigMap mount path was not updated, causing silent branding loss.
+   - **Root cause**: Tight coupling between Django `collectstatic` hash and a hardcoded path in a separate repo.
+   - **Resolution**: The runtime CSS overlay pattern was removed entirely (see ADR-012).
+     CSS now lives exclusively in the Docker image. Branding changes require image rebuild.
+   - **Incident**: 2026-02-10 production branding regression.
+
 ## Deployment Reference
 
 Use `docs/operations/THEME_DEPLOYMENT.md` as the canonical deployment runbook.
