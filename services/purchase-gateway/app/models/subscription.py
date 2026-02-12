@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base, TenantMixin, TimestampMixin
 
 
-class SubscriptionStatus(str, enum.Enum):
+class SubscriptionStatus(enum.StrEnum):
     active = "active"
     past_due = "past_due"
     canceled = "canceled"
@@ -23,13 +23,16 @@ class Subscription(Base, TenantMixin, TimestampMixin):
     __tablename__ = "subscriptions"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    enterprise_customer_uuid: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, nullable=True, index=True
+    )
     offering_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("offerings.id"), nullable=False, index=True
     )
     stripe_subscription_id: Mapped[str] = mapped_column(
         String(255), unique=True, nullable=False
     )
-    stripe_customer_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    stripe_customer_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     status: Mapped[SubscriptionStatus] = mapped_column(
         Enum(SubscriptionStatus, native_enum=False), nullable=False
     )
@@ -40,6 +43,9 @@ class Subscription(Base, TenantMixin, TimestampMixin):
         DateTime(timezone=True), nullable=False
     )
     grace_period_end: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    canceled_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     seat_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

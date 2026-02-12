@@ -1,0 +1,126 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: auth-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: auth
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: auth.alert.rules
+      rules:
+        # ── AuthFailureRateHigh (Critical) ────────────────────────────
+        # >10% of requests to auth endpoints returning 401/403 in 5m window
+        - alert: AuthFailureRateHigh
+          expr: |
+            (
+              sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"40[13]",view=~".*auth.*|.*login.*|.*saml.*|.*oauth.*"}[5m]))
+              /
+              clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",view=~".*auth.*|.*login.*|.*saml.*|.*oauth.*"}[5m])), 1e-10)
+            ) > 0.10
+          for: 5m
+          labels:
+            severity: critical
+            component: auth
+          annotations:
+            summary: "High authentication failure rate (>10%)"
+            description: >-
+              {{ $value | humanizePercentage }} of authentication requests are
+              failing (401/403) over the last 5 minutes. Possible causes: IdP
+              misconfiguration, credential stuffing, or SAML certificate expiry.
+
+        # ── SSOLoginLatencyHigh (Warning) ─────────────────────────────
+        # p95 latency on auth endpoints exceeds 2 seconds
+        - alert: SSOLoginLatencyHigh
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="lms-metrics",view=~".*auth.*|.*login.*|.*saml.*|.*oauth.*"}[5m])) by (le)
+            ) > 2
+          for: 10m
+          labels:
+            severity: warning
+            component: auth
+          annotations:
+            summary: "SSO login p95 latency exceeds 2s"
+            description: >-
+              The 95th percentile login latency is {{ $value | printf "%.2f" }}s
+              (threshold: 2s). Check IdP response times, SAML metadata fetch
+              latency, and database query performance for auth tables.
+
+        # ── MFAChallengeFailureRate (Warning) ─────────────────────────
+        # >20% MFA challenge failures in 15m
+        - alert: MFAChallengeFailureRate
+          expr: |
+            (
+              sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"40[13]",view=~".*mfa.*|.*2fa.*|.*totp.*"}[15m]))
+              /
+              clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",view=~".*mfa.*|.*2fa.*|.*totp.*"}[15m])), 1e-10)
+            ) > 0.20
+          for: 15m
+          labels:
+            severity: warning
+            component: auth
+          annotations:
+            summary: "High MFA challenge failure rate (>20%)"
+            description: >-
+              {{ $value | humanizePercentage }} of MFA challenges are failing
+              over the last 15 minutes. Check for TOTP clock drift, expired
+              recovery codes, or Authentik policy misconfiguration.
+
+        # ── SessionStoreUnavailable (Critical) ────────────────────────
+        # Redis auth-related connection errors
+        - alert: SessionStoreUnavailable
+          expr: |
+            sum(rate(django_http_exceptions_total_by_type_total{job="lms-metrics",type=~".*Redis.*|.*ConnectionError.*|.*Session.*"}[2m])) > 0
+            or
+            redis_up{namespace="mereka-lms"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: auth
+          annotations:
+            summary: "Session store (Redis) unavailable"
+            description: >-
+              Redis session backend is experiencing errors or is unreachable.
+              Users cannot establish or maintain sessions. Immediate action
+              required to restore session persistence.
+
+        # ── SCIMWebhookErrors (Warning) ───────────────────────────────
+        # SCIM endpoint returning 5xx errors
+        - alert: SCIMWebhookErrors
+          expr: |
+            sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~".*scim.*"}[10m])) > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: auth
+          annotations:
+            summary: "SCIM endpoint returning server errors"
+            description: >-
+              The SCIM provisioning endpoint is returning 5xx errors. Enterprise
+              user provisioning and deprovisioning may be disrupted. Check LMS
+              logs for SCIM handler exceptions.
+
+        # ── EnterpriseIdPUnreachable (Warning) ────────────────────────
+        # SAML metadata refresh failures (IdP metadata URL unreachable)
+        - alert: EnterpriseIdPUnreachable
+          expr: |
+            sum(rate(django_http_exceptions_total_by_type_total{job="lms-metrics",type=~".*MetadataFetch.*|.*SAMLMetadata.*|.*ConnectionError.*"}[30m])) > 0
+            or
+            sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~".*saml.*metadata.*"}[30m])) > 0
+          for: 30m
+          labels:
+            severity: warning
+            component: auth
+          annotations:
+            summary: "Enterprise IdP metadata refresh failing"
+            description: >-
+              SAML metadata refresh from an enterprise IdP has been failing for
+              30+ minutes. If the IdP rotates its certificate before metadata is
+              refreshed, SSO logins will break. Check IdP metadata URL
+              reachability and DNS resolution.

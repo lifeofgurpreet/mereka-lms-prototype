@@ -14,8 +14,16 @@ from app.config import settings
 from app.database import get_db
 from app.models.order import Order, OrderAuditLog, OrderStatus
 from app.models.stripe_event import ProcessingStatus, StripeEvent
+from app.services.dispute import handle_dispute_closed, handle_dispute_created
 from app.services.fulfillment import fulfill_order
-from app.services.lms_client import LMSClient
+from app.services.refund import process_refund
+from app.services.subscription import (
+    handle_invoice_paid,
+    handle_invoice_payment_failed,
+    handle_subscription_created,
+    handle_subscription_deleted,
+    handle_subscription_updated,
+)
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -132,138 +140,19 @@ async def _handle_payment_failed(
     await db.commit()
 
 
-async def _handle_refund(
-    event_data: dict,
-    db: AsyncSession,
-):
-    """Handle charge.refunded event."""
-    charge = event_data["object"]
-    payment_intent_id = charge.get("payment_intent")
-    amount_refunded = charge["amount_refunded"]
-    amount = charge["amount"]
-
-    result = await db.execute(
-        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
-    )
-    order = result.scalar_one_or_none()
-    if not order:
-        return
-
-    old_status = order.status
-    is_full_refund = amount_refunded >= amount
-
-    if is_full_refund:
-        order.status = OrderStatus.refunded
-    else:
-        order.status = OrderStatus.partially_refunded
-
-    order.refunded_at = datetime.now(timezone.utc)
-
-    await _log_audit(
-        db,
-        order,
-        old_status,
-        order.status,
-        "stripe.charge.refunded",
-        details={
-            "amount_refunded": amount_refunded,
-            "total_amount": amount,
-            "full_refund": is_full_refund,
-        },
-    )
-
-    # Deactivate enrollments if user exists
-    if order.buyer_user_id:
-        lms = LMSClient()
-        # Look up user to get username
-        user = await lms.get_user_by_email(order.buyer_email)
-        if user:
-            for item in order.line_items:
-                await lms.deactivate_enrollment(user["username"], item.lms_resource_id)
-                logger.info(
-                    "enrollment.deactivated",
-                    order_uuid=str(order.id),
-                    course_id=item.lms_resource_id,
-                )
-
-    await db.commit()
+async def _handle_refund(event_data: dict, db: AsyncSession):
+    """Handle charge.refunded — delegates to refund service."""
+    await process_refund(event_data, db)
 
 
-async def _handle_dispute_created(
-    event_data: dict,
-    db: AsyncSession,
-):
-    """Handle charge.dispute.created event."""
-    dispute = event_data["object"]
-    charge_id = dispute.get("charge")
-
-    # Fetch the charge to get payment_intent
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-    charge = stripe.Charge.retrieve(charge_id)
-    payment_intent_id = charge.payment_intent
-
-    result = await db.execute(
-        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
-    )
-    order = result.scalar_one_or_none()
-    if not order:
-        return
-
-    old_status = order.status
-    order.status = OrderStatus.disputed
-
-    await _log_audit(
-        db,
-        order,
-        old_status,
-        OrderStatus.disputed,
-        "stripe.charge.dispute.created",
-        details={"dispute_id": dispute["id"], "reason": dispute.get("reason")},
-    )
-    await db.commit()
+async def _handle_dispute_created(event_data: dict, db: AsyncSession):
+    """Handle charge.dispute.created — delegates to dispute service."""
+    await handle_dispute_created(event_data, db)
 
 
-async def _handle_dispute_closed(
-    event_data: dict,
-    db: AsyncSession,
-):
-    """Handle charge.dispute.closed event."""
-    dispute = event_data["object"]
-    status = dispute["status"]
-    charge_id = dispute.get("charge")
-
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-    charge = stripe.Charge.retrieve(charge_id)
-    payment_intent_id = charge.payment_intent
-
-    result = await db.execute(
-        select(Order).where(Order.stripe_payment_intent_id == payment_intent_id)
-    )
-    order = result.scalar_one_or_none()
-    if not order:
-        return
-
-    old_status = order.status
-
-    if status == "won":
-        # Merchant won — restore order to previous state (typically paid/fulfilled)
-        order.status = OrderStatus.paid
-        details_msg = "dispute_won_restored"
-    else:
-        # Lost or closed without winning — treat as refunded
-        order.status = OrderStatus.refunded
-        order.refunded_at = datetime.now(timezone.utc)
-        details_msg = "dispute_lost_refunded"
-
-    await _log_audit(
-        db,
-        order,
-        old_status,
-        order.status,
-        "stripe.charge.dispute.closed",
-        details={"dispute_id": dispute["id"], "outcome": status, "action": details_msg},
-    )
-    await db.commit()
+async def _handle_dispute_closed(event_data: dict, db: AsyncSession):
+    """Handle charge.dispute.closed — delegates to dispute service."""
+    await handle_dispute_closed(event_data, db)
 
 
 @router.post("/webhooks/stripe/")
@@ -346,6 +235,16 @@ async def stripe_webhook(
             await _handle_dispute_created(event_data, db)
         elif event_type == "charge.dispute.closed":
             await _handle_dispute_closed(event_data, db)
+        elif event_type == "customer.subscription.created":
+            await handle_subscription_created(event_data, db)
+        elif event_type == "customer.subscription.updated":
+            await handle_subscription_updated(event_data, db)
+        elif event_type == "customer.subscription.deleted":
+            await handle_subscription_deleted(event_data, db)
+        elif event_type == "invoice.paid":
+            await handle_invoice_paid(event_data, db)
+        elif event_type == "invoice.payment_failed":
+            await handle_invoice_payment_failed(event_data, db)
         else:
             logger.info("webhook.unhandled_event_type", event_type=event_type)
 

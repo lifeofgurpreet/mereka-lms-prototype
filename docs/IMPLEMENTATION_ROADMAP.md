@@ -1,6 +1,6 @@
 # Mereka LMS Implementation Roadmap
 
-**Status**: 59.6% mapped (458/769 ACs) as of 2026-02-11
+**Status**: ~70% mapped as of 2026-02-12 (Sprint 1+2 complete)
 **Goal**: 100% coverage across all 31 specifications
 
 This document provides the systematic implementation order for all Mereka Academy features based on dependency analysis and current progress.
@@ -81,19 +81,15 @@ Based on `specs/IMPLEMENTATION_ORDER.md` (computed from `depends_on` frontmatter
 
 ## Sprint Planning
 
-### Current Sprint Focus
+### Sprint Status
 
-**Priority**: Close gaps in Tier 2-4 (foundation nearly complete)
+| Sprint | Status | Focus | Coverage |
+|--------|--------|-------|----------|
+| **Sprint 1** | ✅ COMPLETE | Close Tier 2-3 gaps | 60% → 65% |
+| **Sprint 2** | ✅ COMPLETE | SLI/SLO, gap fixes, multi-tenancy | 65% → 70% |
+| **Sprint 3** | 🚧 IN PROGRESS | Auth SSO verification, forum moderation, purchase gateway | 70% → 78% |
 
 See `docs/sprints/` for detailed sprint plans.
-
-### Next 3 Sprints
-
-| Sprint | Duration | Focus | Target Coverage |
-|--------|----------|-------|----------------|
-| **Sprint 1** | 2 weeks | Close Tier 2-3 gaps | 63% → 68% |
-| **Sprint 2** | 2 weeks | Multi-tenancy + SLOs | 68% → 72% |
-| **Sprint 3** | 3 weeks | Auth SSO Phase 1 | 72% → 78% |
 
 ---
 

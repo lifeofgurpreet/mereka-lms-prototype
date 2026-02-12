@@ -1,15 +1,16 @@
 # @covers AC-029, AC-032
 # @spec: ecommerce-purchase-gateway_spec.md
 
-import structlog
 from contextlib import asynccontextmanager
+
+import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
 from app.config import settings
 from app.database import engine
-from app.routers import checkout, health, webhooks
+from app.routers import admin, checkout, health, subscriptions, webhooks
 
 logger = structlog.get_logger()
 
@@ -35,13 +36,15 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
 )
 
 # Routers
 app.include_router(health.router)
 app.include_router(checkout.router, prefix="/api/v1")
+app.include_router(subscriptions.router, prefix="/api/v1")
+app.include_router(admin.router, prefix="/api/v1")
 app.include_router(webhooks.router)
 
 # Prometheus metrics
