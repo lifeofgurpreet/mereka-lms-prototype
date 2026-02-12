@@ -4,7 +4,7 @@
 #            CLOUDFLARE_EMAIL + CLOUDFLARE_API_KEY, plus jq & curl
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RECORDS_FILE=${1:-"$REPO_ROOT/infrastructure/cloudflare/records.json"}
 API_BASE="https://api.cloudflare.com/client/v4"
 ZONE_ID=${CLOUDFLARE_ZONE_ID:?"Set CLOUDFLARE_ZONE_ID"}

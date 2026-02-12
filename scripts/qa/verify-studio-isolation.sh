@@ -74,14 +74,27 @@ NON_STUDIO_DOMAINS=(
 
 for domain in "${NON_STUDIO_DOMAINS[@]}"; do
   echo -n "Checking $domain does not route to cms... "
-  # Find the domain block and check if it routes to cms:8000
-  if grep -A 10 "^.*${domain}" "$CADDYFILE" | grep -q 'proxy "cms:8000"'; then
-    echo -e "${RED}FAIL${NC}"
-    echo "  $domain incorrectly routes to cms:8000"
-    FAIL=$((FAIL + 1))
+  # Find the line containing this domain (it may be in a comma-separated list)
+  # Then extract the block and check if it routes to cms:8000
+
+  # Search for lines with the domain, excluding studio/discovery/ecommerce/notes/credentials/admin/enterprise subdomains
+  line_num=$(grep -n "http://${domain}" "$CADDYFILE" | grep -v "studio\.${domain}" | grep -v "apps\.${domain}" | grep -v "discovery\.${domain}" | grep -v "ecommerce\.${domain}" | grep -v "notes\.${domain}" | grep -v "credentials\.${domain}" | grep -v "admin\.${domain}" | grep -v "enterprise\.${domain}" | head -1 | cut -d: -f1)
+
+  if [[ -n "$line_num" ]]; then
+    # Get the block (from line_num to closing brace)
+    block=$(sed -n "${line_num},/^}/p" "$CADDYFILE")
+    if echo "$block" | grep -q 'proxy "cms:8000"'; then
+      echo -e "${RED}FAIL${NC}"
+      echo "  $domain incorrectly routes to cms:8000"
+      FAIL=$((FAIL + 1))
+    else
+      echo -e "${GREEN}PASS${NC}"
+      PASS=$((PASS + 1))
+    fi
   else
-    echo -e "${GREEN}PASS${NC}"
-    PASS=$((PASS + 1))
+    echo -e "${YELLOW}WARN${NC}"
+    echo "  $domain not found in Caddyfile"
+    WARN=$((WARN + 1))
   fi
 done
 

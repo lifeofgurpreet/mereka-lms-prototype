@@ -242,6 +242,12 @@ fi
 run_check "auth + permissions + multisite audit" \
   env CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
 
+if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
+  run_check "cert-manager readiness (prod)" \
+    env K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}" K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}" \
+    ./scripts/qa/verify-cert-manager-readiness.sh prod
+fi
+
 run_check "gitops image override contract" \
   ./scripts/qa/verify-gitops-image-overrides.sh
 

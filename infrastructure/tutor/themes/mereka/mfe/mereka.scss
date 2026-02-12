@@ -360,10 +360,8 @@ label {
   margin-bottom: 1.5rem !important;
 }
 
-/* Learning MFE course cards are typically horizontal (media rail + content).
-   Force the card container to be a flex row in the My Courses / Discover views so
-   the cover image cannot collapse into a thin strip when upstream CSS changes. */
-[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"], [data-testid*="my-courses"], [data-testid*="discover"]) :is(.pgn__card, .card) {
+/* Only target actual course cards to avoid disturbing unrelated card shells. */
+[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"], [data-testid*="my-courses"], [data-testid*="discover"]) :is([class*="course-card"], [data-testid*="course-card"], [data-testid*="course"]) {
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -379,16 +377,6 @@ label {
   margin-bottom: 1.5rem;
 }
 
-[class*="learning"] :is(.pgn__card, .card) img {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  object-position: center;
-  aspect-ratio: 16 / 9;
-  min-height: 96px;
-}
-
 /* Learning course cards often use Paragon Card ImageCap on the left; ensure it doesn't collapse. */
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) {
   flex: 0 0 180px;
@@ -399,6 +387,7 @@ label {
 }
 
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img {
+  display: block;
   width: 100%;
   height: 100%;
   max-width: none;
@@ -418,9 +407,23 @@ label {
 
 [class*="learning"] :is(.pgn__card, .card) [class*="image"] img,
 [class*="learning"] :is(.pgn__card, .card) [class*="media"] img {
+  display: block;
   width: 100%;
   height: 100%;
+  min-height: 112px;
+  max-height: 180px;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
+  object-position: center;
+}
+
+/* Some Learning MFE layouts don't apply CSS gap; add reliable vertical spacing fallback. */
+[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"], [data-testid*="my-courses"], [data-testid*="discover"]) > * + * {
+  margin-top: 1.25rem;
+}
+
+[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"], [data-testid*="my-courses"], [data-testid*="discover"]) .row > * {
+  margin-bottom: 1.25rem;
 }
 
 /* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */

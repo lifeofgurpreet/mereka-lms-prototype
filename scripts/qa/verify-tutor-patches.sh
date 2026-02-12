@@ -42,7 +42,7 @@ require_file "tutor_env/env/local/docker-compose.yml"
 require_grep "mysql_native_password" "tutor_env/env/local/docker-compose.yml"
 
 require_file "tutor_env/env/build/openedx/Dockerfile"
-require_grep "NODE_OPTIONS=--max-old-space-size=6144" "tutor_env/env/build/openedx/Dockerfile"
+require_grep "NODE_OPTIONS=\"--max-old-space-size=6144\"" "tutor_env/env/build/openedx/Dockerfile"
 
 require_file "tutor_env/env/apps/openedx/settings/lms/production.py"
 require_grep "academy.biji-biji.com" "tutor_env/env/apps/openedx/settings/lms/production.py"
