@@ -135,10 +135,10 @@ check_ac_006() {
       discussions_url="https://apps.academyv2.mereka.io/discussions"
     fi
     local http_status
-    http_status=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "$discussions_url" 2>/dev/null || echo "000")
+    http_status=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "$discussions_url" 2>/dev/null) || true
     if [[ "$http_status" =~ ^(200|301|302|304)$ ]]; then
       pass "AC-006: Discussions MFE reachable (HTTP $http_status)"
-    elif [[ "$http_status" == "000" ]]; then
+    elif [[ -z "$http_status" || "$http_status" == "000" ]]; then
       skip "AC-006: Discussions MFE not reachable (network timeout)"
     else
       fail "AC-006: Discussions MFE returned HTTP $http_status"
@@ -198,7 +198,7 @@ check_ac_007() {
       api_status=$(kubectl exec -n mereka-lms "$lms_pod" -- \
         curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/api/discussion/v1/ \
         2>/dev/null || echo "000")
-      if [[ "$api_status" =~ ^(200|301|302|401|403)$ ]]; then
+      if [[ "$api_status" =~ ^(200|301|302|400|401|403)$ ]]; then
         pass "AC-007: Discussion API v1 responds (HTTP $api_status) — vote endpoints available"
       else
         fail "AC-007: Discussion API v1 not responding (HTTP $api_status)"

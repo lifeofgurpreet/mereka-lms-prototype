@@ -27,6 +27,25 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 **Infrastructure URLs**: 1 (Authentik SSO)
 **Internal-Only APIs**: 2 (Notes, XQueue - not user-facing)
 
+### ⚠️ Service Type Classification
+
+**User-Facing (Has UI)**:
+- LMS, Studio, MFE, Discovery, Ecommerce, Credentials, Forum
+
+**API-Only (No Standalone UI)**:
+- Notes API - Backend for student annotations (accessed via LMS interface)
+- XQueue - External grader queue (internal service)
+
+**Embedded in Courses (Also Has Standalone)**:
+- Forum - Primary access is embedded in course pages, but has standalone URL for browsing across course
+- Discussions MFE - Part of MFE hub, embedded in course experience
+
+**Analytics** (⚠️ NOT YET DEPLOYED):
+- Aspects - Uses Apache Superset for visualization (Tutor plugin)
+- Superset - Data visualization tool (used by Aspects)
+- Panorama - Separate analytics platform (alternative to Aspects)
+- **Current Status**: Analytics not deployed, see `docs/analytics/ASPECTS_K8S_DEPLOYMENT.md`
+
 ---
 
 ## 🌐 Production URLs (GKE - *.mereka.io)
@@ -72,19 +91,29 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
    - API: https://credentials.academyv2.mereka.io/api/v2
    - Health: https://credentials.academyv2.mereka.io/health
 
-8. **Forum** - https://forum.academyv2.mereka.io
-   - Purpose: Standalone forum access (also embedded in LMS courses)
+8. **Forum** - https://forum.academyv2.mereka.io ⚠️ RARELY USED
+   - Purpose: Course discussions - **primary access is embedded in courses**
+   - Standalone URL: Exists but rarely used (browse all discussions)
+   - Architecture: Discussions MFE (part of apps.academyv2.mereka.io/discussions)
+   - Access patterns:
+     - ✅ **Primary**: Embedded in course pages (in-context discussions)
+     - ✅ **Secondary**: Standalone tabs (My Posts, All Posts, Topics, Learners)
    - Health: https://forum.academyv2.mereka.io/heartbeat
    - Note: Python-based (openedx-forum v0.3.8), integrated into LMS process
+   - **Sources**: [Open edX Discussions](https://openedx.org/blog/new-and-improved-discussions-forum/), [Architecture](https://docs.openedx.org/en/latest/developers/references/developer_guide/architecture.html)
 
-9. **Notes API** - https://notes.academyv2.mereka.io
-   - Purpose: Student annotations/highlighting API
-   - Type: API-only (no UI)
-   - Internal use
+9. **Notes API** - https://notes.academyv2.mereka.io ⚠️ API-ONLY
+   - Purpose: Student annotations/highlighting backend
+   - Type: **API-only (NO standalone UI)**
+   - User access: Via LMS interface (Annotator tool embedded in course content)
+   - Architecture: Django/Python REST API with Elasticsearch backend
+   - OAuth2 authentication for programmatic access
+   - **Sources**: [edX Notes API](https://github.com/openedx/edx-notes-api)
 
-10. **XQueue** - (Internal only - no public URL)
+10. **XQueue** - (Internal only - no public URL) ⚠️ INTERNAL
     - Purpose: External grader queue
-    - Type: Internal service only
+    - Type: **Internal service only (not user-facing)**
+    - Access: LMS → XQueue → External grader → LMS
 
 11. **Authentik SSO** - https://auth0.mereka.io/application/o/mereka-lms/
     - Purpose: Centralized OIDC authentication
@@ -254,10 +283,32 @@ When adding a new tenant, ensure these URLs are configured:
 ## 🚨 Important Notes
 
 **Forum URL Behavior**:
-- Forum is **embedded** in LMS courses (no separate login)
-- Standalone URL (https://forum.academyv2.mereka.io) exists but rarely used
-- Uses openedx-forum v0.3.8 (Python), integrated into LMS process
-- No separate Ruby container (legacy forum removed)
+- Forum is **embedded** in LMS courses (primary access pattern)
+- Discussions appear inline below course content AND in dedicated forum tabs
+- Standalone URL (https://forum.academyv2.mereka.io) exists for browsing across entire course
+- Implemented as Discussions MFE (frontend-app-discussions)
+- Backend: openedx-forum v0.3.8 (Python), integrated into LMS process
+- No separate Ruby container (legacy forum removed in Tutor v19+)
+
+**Notes Service Behavior**:
+- **API-only service** - no standalone UI for end users
+- Users interact via Annotator tool embedded in LMS course content
+- Clicking "Notes" in LMS triggers API calls to Notes service
+- Backend storage: Django REST API + Elasticsearch
+- Not a URL users would directly visit
+
+**Analytics Stack** (⚠️ CLARIFICATION NEEDED):
+- **Aspects** = Official Open edX analytics using **Superset** for visualization
+  - Tutor plugin: `tutor-contrib-aspects`
+  - Uses Apache Superset as reporting tool
+  - **Sources**: [Aspects Docs](https://docs.openedx.org/projects/openedx-aspects/), [Superset Decision](https://docs.openedx.org/projects/openedx-aspects/en/latest/technical_documentation/decisions/0003_superset.html)
+- **Panorama** = Alternative analytics platform (not part of Aspects)
+  - Independent solution by Aulasneo
+  - ELT agent with dedicated dashboards for staff and students
+  - Tutor plugin: `tutor-contrib-panorama`
+  - **Sources**: [Panorama Discussion](https://discuss.openedx.org/t/panorama-the-open-source-free-to-use-ultimate-analytics-workbench-for-open-edx-and-more-some-faq-from-our-customers/13037)
+- **Decision**: Choose **either** Aspects (with Superset) **or** Panorama (not both)
+- **Current Status**: Neither deployed yet
 
 **Preview Domain**:
 - `preview.academyv2.mereka.io` is same LMS stack, different hostname
