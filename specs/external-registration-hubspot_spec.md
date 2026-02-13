@@ -1,10 +1,11 @@
 ---
 title: "External Registration via HubSpot"
 type: "feature_spec"
-status: "draft"
+status: "deferred"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-10"
+last_updated: "2026-02-12"
+deferred_reason: "SkillOurFuture/MCT migration only - deploy when ready to migrate MCT users"
 depends_on:
   - "specs/k8s-deployment_spec.md"
   - "specs/secrets-management_spec.md"

@@ -11,6 +11,7 @@ resources:
 - logging
 - apps/enterprise
 - apps/multi-tenancy
+- ../../../services/purchase-gateway/k8s
 
 # Custom Mereka-branded OpenEdX image
 images:
