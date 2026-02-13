@@ -1,0 +1,131 @@
+# GitHub Actions Cost Monitoring Budget Configuration
+# See: specs/github-actions-cost-monitoring_spec.md
+
+budget:
+  # Soft limit - triggers warnings and optimization recommendations
+  monthly_limit_usd: 50
+
+  # Hard limit - triggers workflow pausing at 95% consumed
+  hard_limit_usd: 100
+
+  # Alert thresholds
+  alerts:
+    - threshold_percent: 80
+      channel: slack
+      recipients:
+        - "#platform-alerts"
+      message: "Warning: 80% of GitHub Actions budget consumed"
+
+    - threshold_percent: 100
+      channel: slack,email
+      recipients:
+        - "#platform-alerts"
+        - "platform-team@mereka.io"
+      message: "Critical: 100% of GitHub Actions budget consumed"
+
+    - threshold_percent: 150
+      channel: slack,email,pagerduty
+      recipients:
+        - "#platform-alerts"
+        - "platform-lead@mereka.io"
+      escalation: true
+      message: "Emergency: 150% of budget exceeded - immediate review required"
+
+  # Workflow-specific limits
+  workflow_limits:
+    "verify-specs.yml":
+      max_duration_minutes: 30
+      priority: high
+      description: "Spec verification and coverage checks"
+
+    "build-tutor-images.yml":
+      max_duration_minutes: 45
+      priority: high
+      description: "Open edX image builds"
+
+    "build-ios-app.yml":
+      max_duration_minutes: 90
+      priority: high
+      description: "iOS app build for TestFlight"
+
+    "ci.yml":
+      max_duration_minutes: 15
+      priority: high
+      description: "CI quality gates (required for merge)"
+
+    "docs-deploy.yml":
+      max_duration_minutes: 10
+      priority: low
+      description: "Documentation builds (can be paused)"
+
+    "public-health-check.yml":
+      max_duration_minutes: 5
+      priority: medium
+      description: "Production health monitoring (every 30 min)"
+
+    "operations-gates-runtime.yml":
+      max_duration_minutes: 10
+      priority: medium
+      description: "Operational gates (every 6h)"
+
+  # Cost optimization settings
+  optimization:
+    # Enable caching for these artifact types
+    cache_strategy:
+      - docker_layers
+      - npm_dependencies
+      - pip_dependencies
+      - build_artifacts
+
+    # Maximum parallel jobs across all workflows
+    max_parallel_jobs: 5
+
+    # Conditional execution rules
+    conditional_execution:
+      docs_deploy:
+        paths:
+          - "docs/**"
+          - "*.md"
+        branches:
+          - main
+
+      scheduled_workflows:
+        # Skip scheduled workflows if no commits in last 24h
+        require_recent_activity: true
+        activity_window_hours: 24
+
+# Cost calculation settings
+cost_tracking:
+  # Runner costs per minute (as of 2026-02)
+  runner_costs_usd:
+    ubuntu-latest: 0.008  # Linux
+    macos-latest: 0.08    # macOS (10x more expensive!)
+    windows-latest: 0.016 # Windows (2x Linux)
+
+  # Free tier minutes by account type
+  free_tier_minutes:
+    free: 2000
+    pro: 3000
+    team: 3000
+    enterprise: 50000
+
+  # Current account type (used for free tier calculation)
+  account_type: pro
+
+# Reporting configuration
+reporting:
+  # Daily report schedule (UTC)
+  daily_report_time: "00:00"
+
+  # Report recipients
+  recipients:
+    slack_channel: "#platform-metrics"
+    email:
+      - "platform-team@mereka.io"
+
+  # Report format
+  format:
+    include_forecasts: true
+    include_recommendations: true
+    include_top_workflows: 5
+    comparison_period_days: 30
