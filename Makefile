@@ -120,11 +120,15 @@ verify-specs: ## Verify @covers annotations match spec ACs
 validate-testmaps: ## Validate testmap YAML format
 	python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
 
-generate-testmaps: ## Generate testmaps from @covers annotations
-	python3 scripts/qa/spec-tools/discover_testmap.py \
-		--all-specs specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-		--manual-file specs/manual_verifications.yaml --repo-root . \
-		--format yaml --output specs/testmaps/all.testmap.yml
+generate-testmaps: ## Generate per-spec testmaps from @covers annotations
+	@for spec in specs/*_spec.md; do \
+		name=$$(basename "$$spec" .md); \
+		python3 scripts/qa/spec-tools/discover_testmap.py \
+			--spec "$$spec" \
+			--scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+			--manual-file specs/manual_verifications.yaml --repo-root . \
+			--format yaml --output "specs/testmaps/$${name}.testmap.yml"; \
+	done
 
 lint-conventions: ## Check repo file/naming conventions (glob-ability, grep-ability, boundaries)
 	./scripts/qa/lint-repo-conventions.sh
