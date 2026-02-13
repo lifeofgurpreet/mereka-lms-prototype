@@ -284,10 +284,17 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 - [ ] AC-019: Given a restore completes, when `kubectl exec mysql-pod -- mysql -e "SELECT COUNT(*) FROM openedx.auth_user"` is run, then the count is within 5% of the pre-incident count
 - [ ] AC-020: Given a restore completes, when `./scripts/qa/public-health-check.sh prod` runs, then LMS homepage, Studio login, Discovery, and Ecommerce health endpoints all return 200/302
 
+### PV Recovery Validation
+
+- [ ] AC-021: Given a restore drill runs, when PVCs are restored, then the restore-test job MUST verify PV data integrity by comparing checksums of critical PVs (MySQL data directory) pre-backup and post-restore
+- [ ] AC-022: Given a PV checksum verification, when comparing pre-backup and post-restore checksums, then they MUST match exactly for MySQL data files (ibdata1, ib_logfile*, *.ibd)
+- [ ] AC-023: Given a restore drill completes, when drill evidence is archived, then it MUST include: timestamp (ISO8601), PV checksum comparison results, pass/fail status, and drill execution logs
+- [ ] AC-024: Given quarterly restore drill schedule, when the schedule is documented, then it MUST specify: drill cadence (quarterly), responsible team, notification window (1 week advance), and success criteria (all PVs verified, checksums match, MySQL probe succeeds)
+
 ### Cross-Region Readiness
 
-- [ ] AC-021: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production` is run, then it produces valid manifests deployable to any GKE cluster
-- [ ] AC-022: Given Velero backups are stored in GCS, when the backup bucket is inspected, then it is configured for multi-region storage or cross-region replication
+- [ ] AC-025: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production` is run, then it produces valid manifests deployable to any GKE cluster
+- [ ] AC-026: Given Velero backups are stored in GCS, when the backup bucket is inspected, then it is configured for multi-region storage or cross-region replication
 
 ## Edge Cases
 

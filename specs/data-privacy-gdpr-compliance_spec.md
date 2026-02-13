@@ -607,6 +607,34 @@ Without this spec:
 - [ ] AC-AUDIT-003: Given a deletion request is verified and enters processing, when the pipeline begins, then an audit trail entry MUST be logged with: `event_type: "deletion_processing_started"`, `deletion_request_id`, `user_id_hash`, `estimated_completion_date` (requested_at + 30 days)
 - [ ] AC-AUDIT-004: Given a deletion pipeline completes a single data store deletion, when the store verification passes, then an audit trail entry MUST be logged with: `event_type: "deletion_step_completed"`, `deletion_request_id`, `user_id_hash`, `data_store`, `records_affected`, `verification_status: "passed"`
 
+### Consent Management (Phase 3)
+
+- [ ] AC-CONSENT-001: Given a user visits the LMS for the first time, when the page loads, then a cookie consent banner MUST appear before any non-essential cookies are set
+- [ ] AC-CONSENT-002: Given a user interacts with the cookie consent banner, when they make consent choices, then the system MUST store consent choices with: `consent_version` (privacy policy version), `granted_at` (ISO 8601 timestamp), `collection_method` ("banner"), `ip_address_hash` (SHA-256), and per-category consent status (analytics, marketing, functional)
+- [ ] AC-CONSENT-003: Given a user has granted consent for a specific category, when they revoke consent at any time via `/account/privacy/`, then the consent record MUST be updated with `withdrawn_at` timestamp AND the withdrawal MUST take effect within 24 hours (cache invalidation)
+- [ ] AC-CONSENT-004: Given the cookie consent banner is displayed, when the banner renders, then the banner MUST NOT block page rendering (async load) AND the LMS core functionality MUST remain accessible even if banner JavaScript fails to load
+- [ ] AC-CONSENT-005: Given a user accepts the latest privacy policy version on login, when the acceptance is recorded, then the audit trail MUST contain: `event_type: "privacy_policy_accepted"`, `user_id_hash`, `policy_version`, `accepted_at` (timestamp), `ip_address_hash`
+- [ ] AC-CONSENT-006: Given a user logs in for the first time after a privacy policy update, when they access any protected resource, then the system MUST present the latest privacy policy version for acceptance before allowing access
+- [ ] AC-CONSENT-007: Given the privacy policy version changes from v2.0 to v3.0, when the update is deployed, then the system MUST support multi-language policy versions (English, Malay, Chinese) with language selection based on user's `language_preference` setting
+- [ ] AC-CONSENT-008: Given consent is tracked for multiple purposes (analytics, marketing, functional), when a user modifies consent for `analytics` purpose, then the consent change MUST be tracked independently AND MUST NOT affect consent status for `marketing` or `functional` purposes
+- [ ] AC-CONSENT-009: Given consent records exist with version history, when an auditor queries consent history for a user, then the system MUST return all consent versions with: `purpose`, `granted` (boolean), `consent_version`, `granted_at`, `withdrawn_at` (if applicable), ordered by `granted_at` descending
+- [ ] AC-CONSENT-010: Given the consent schema changes (e.g., new purpose "AI_training" added), when the schema version increments, then the system MUST trigger re-consent for all active users on next login AND MUST display a clear explanation of what changed
+
+### Retention Enforcement (Phase 3)
+
+- [ ] AC-RETENTION-001: Given the PII classification matrix specifies retention periods for each data category, when the automated data purge CronJob runs daily, then the job MUST identify records past their retention period per classification matrix rules (e.g., "ClickHouse analytics events: 365 days", "Inactive accounts: 24 months no login")
+- [ ] AC-RETENTION-002: Given the retention enforcement CronJob runs in production, when purge operations complete, then each purge operation MUST be logged in the audit trail with: `event_type: "retention_purge_completed"`, `data_store`, `data_category`, `records_purged_count`, `purge_duration_seconds`, `retention_policy_version`
+- [ ] AC-RETENTION-003: Given the retention enforcement CronJob is configured with dry-run mode, when the job executes with `DRY_RUN=true`, then the job MUST identify records eligible for purge AND log the planned actions WITHOUT actually deleting any data AND output a summary report with record counts per data store
+- [ ] AC-RETENTION-004: Given the retention enforcement job runs and encounters a data store timeout (e.g., ClickHouse partition drop exceeds 30 minutes), when the timeout occurs, then the job MUST log the failure, skip that data store, continue processing remaining stores, and fire a Warning alert to the privacy operations team
+
+### Compliance Reporting (Phase 3)
+
+- [ ] AC-COMPLIANCE-001: Given a compliance dashboard is deployed, when a `compliance_officer` role user accesses the dashboard, then the dashboard MUST display: DSAR (Data Subject Access Request) count (last 30 days, last 12 months), DSAR SLA compliance percentage (requests completed within 30 days), deletion request pipeline status (pending, processing, completed, failed counts), consent rate by category (percentage of active users with consent granted for analytics, marketing, functional), data retention compliance score (percentage of data stores with zero overdue purge operations)
+- [ ] AC-COMPLIANCE-002: Given the DSAR count metric is displayed on the compliance dashboard, when the metric is queried, then the system MUST aggregate: total export requests submitted in the time range, total deletion requests submitted in the time range, average completion time for export requests, average completion time for deletion requests
+- [ ] AC-COMPLIANCE-003: Given the deletion request pipeline status is displayed, when a `privacy_admin` user filters by `partially_completed` status, then the dashboard MUST show: request ID, user identifier (hashed), submission date, elapsed days, failed data stores (array), retry count, last retry timestamp, and a "Re-run" action button
+- [ ] AC-COMPLIANCE-004: Given the consent rate by category is calculated, when the metric is rendered on the dashboard, then the system MUST compute: `(users_with_consent_granted_for_purpose / total_active_users) * 100` for each purpose (analytics, marketing, functional), with "active users" defined as users with login within the last 90 days
+- [ ] AC-COMPLIANCE-005: Given the data retention compliance score is displayed, when the score is calculated, then the system MUST: (a) query each data store for records past retention period, (b) flag any data store with overdue purge count > 0 as non-compliant, (c) compute compliance score as `(compliant_data_stores / total_data_stores_with_retention_policy) * 100`, (d) display the score with color coding (green ≥95%, yellow 90-94%, red <90%)
+
 ---
 
 ## Edge Cases

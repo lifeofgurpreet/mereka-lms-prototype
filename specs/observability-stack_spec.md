@@ -255,6 +255,120 @@ kubectl -n mereka-lms delete pod -l app=prometheus  # Let K8s recreate
 kubectl -n mereka-lms exec prometheus-pod -- promtool tsdb clean /prometheus
 ```
 
+## Logging Pipeline Contract
+
+### Canonical Log Sources
+
+The system MUST collect logs from the following Open edX services:
+
+| Service | Component Type | Log Volume | Priority |
+|---------|---------------|-----------|----------|
+| LMS | Application | High | Critical |
+| CMS | Application | High | Critical |
+| Workers (Celery) | Background Jobs | High | Critical |
+| MFE | Frontend | Medium | Important |
+| Discovery | API | Medium | Important |
+| Ecommerce | API | Medium | Important |
+| Credentials | API | Low | Important |
+| Forum | API | Medium | Important |
+| Notes | API | Low | Optional |
+
+### Required Loki Label Schema
+
+The system MUST apply the following labels to all logs ingested into Loki:
+
+| Label | Type | Description | Examples |
+|-------|------|-------------|----------|
+| `service` | Required | Service name (lowercase, hyphenated) | `lms`, `cms`, `forum`, `discovery` |
+| `env` | Required | Environment identifier | `prod`, `dev`, `staging` |
+| `cluster` | Required | Kubernetes cluster identifier | `gke-mereka-lms-prod`, `kind-local` |
+| `namespace` | Required | Kubernetes namespace | `mereka-lms` |
+| `hostname` | Required | Pod hostname or node name | `lms-6f8c9d7b-xkz4p` |
+| `severity` | Required | Log level | `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` |
+
+**Label Cardinality Limits**:
+- Total unique label combinations MUST NOT exceed 10,000 per service
+- `hostname` label SHOULD be dropped after 7 days for historical queries (use Loki aggregation)
+
+### Log Format Requirements
+
+The system MUST output structured JSON logs with the following mandatory fields:
+
+```json
+{
+  "timestamp": "2026-02-13T18:30:00.123456Z",
+  "level": "ERROR",
+  "service": "lms",
+  "message": "Database connection pool exhausted",
+  "trace_id": "abc123def456",
+  "user_id": "redacted",
+  "request_id": "req-789",
+  "module": "django.db.backends.mysql"
+}
+```
+
+**Required Fields**:
+- `timestamp` (ISO8601 with microseconds, UTC timezone)
+- `level` (one of: DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- `service` (matches Loki `service` label)
+- `message` (human-readable log message)
+
+**Optional Fields**:
+- `trace_id` (distributed tracing correlation ID)
+- `request_id` (HTTP request correlation ID)
+- `user_id` (anonymized user identifier, NOT email)
+- `module` (source code module/file)
+- `stack_trace` (only for ERROR/CRITICAL levels)
+
+### PII Filtering Requirements
+
+The system MUST filter the following PII from all logs before ingestion into Loki:
+
+**Prohibited Data**:
+- Email addresses (must be redacted or anonymized)
+- Passwords (must NEVER appear in logs)
+- Session tokens (must NEVER appear in logs)
+- OAuth access tokens (must NEVER appear in logs)
+- Credit card numbers
+- Social security numbers
+- API keys and secrets
+
+**Anonymization Strategy**:
+- User identifiers MUST use hashed/anonymized IDs, NOT email addresses
+- Request bodies MUST be sanitized before logging (remove sensitive fields)
+- Error messages MUST NOT include user-supplied credentials
+
+**Implementation**:
+- Django logging MUST use custom formatters that redact sensitive fields
+- Promtail MUST use pipeline stages to drop/redact sensitive patterns
+- Loki queries MUST NOT expose raw user data in dashboards
+
+### Retention Requirements
+
+The system MUST implement the following retention policies:
+
+| Data Type | Retention Period | Storage Backend |
+|-----------|-----------------|-----------------|
+| Loki logs (all services) | 30 days | Loki object storage (GCS) |
+| Tempo traces | 7 days | Tempo object storage (GCS) |
+| Prometheus metrics | 30 days (local), 90 days (remote) | Prometheus TSDB, Thanos/GCS |
+
+**Compliance**:
+- Logs older than 30 days MUST be automatically deleted
+- No manual deletion override (to prevent compliance gaps)
+- Retention policy MUST be enforced via Loki compactor configuration
+
+### Acceptance Criteria (Logging Pipeline)
+
+- [ ] AC-LOG-001: Promtail DaemonSet is deployed and scraping logs from all pods in `mereka-lms` namespace
+- [ ] AC-LOG-002: Loki query `{namespace="mereka-lms"}` returns logs from all canonical log sources (LMS, CMS, workers, MFE, discovery, ecommerce, credentials, forum, notes)
+- [ ] AC-LOG-003: All logs have required labels: `service`, `env`, `cluster`, `namespace`, `hostname`, `severity`
+- [ ] AC-LOG-004: LMS and CMS logs are structured JSON with `timestamp`, `level`, `service`, `message` fields
+- [ ] AC-LOG-005: No email addresses are visible in Loki query results: `{namespace="mereka-lms"} |~ "@.*\\.com"` returns zero results
+- [ ] AC-LOG-006: No passwords are visible in Loki query results: `{namespace="mereka-lms"} |~ "(?i)password.*=.*[^*]"` returns zero results
+- [ ] AC-LOG-007: Logs older than 30 days are automatically deleted: query `{namespace="mereka-lms"}` with time range `now-31d to now-30d` returns no results
+- [ ] AC-LOG-008: Tempo traces are retained for 7 days: traces older than 8 days are not retrievable
+
 ## Observability
 
 ### Logs

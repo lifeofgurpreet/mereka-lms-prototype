@@ -464,6 +464,46 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - The system SHOULD automatically identify the most recent deployment as a potential cause when regression is detected within 30 minutes of deploy
 - The system MUST retain performance baseline data for at least 90 days to support trend analysis
 
+#### Synthetic Alert Delivery Drills
+
+To ensure the alert delivery pipeline (Alertmanager → Slack/PagerDuty) remains operational, the system MUST perform regular synthetic drills:
+
+**Weekly Drill Requirements**:
+- The system MUST send a synthetic test alert every Monday at 09:00 UTC
+- The synthetic alert MUST route through the production Alertmanager instance
+- The synthetic alert MUST be delivered to the same channels as production alerts (Slack `#ops-alerts`, PagerDuty if configured)
+- The synthetic alert MUST be clearly labeled as a drill (subject line: `[DRILL] Alert Delivery Test`)
+
+**Drill Implementation**:
+- The system MUST deploy a Kubernetes CronJob to generate synthetic alerts
+- The CronJob MUST run in the `mereka-lms` namespace with label `app.kubernetes.io/name=synthetic-alert-drill`
+- The drill script MUST POST to the Alertmanager API: `/api/v1/alerts` with a test alert payload
+- The drill alert MUST have severity `info` to avoid triggering on-call pages
+
+**Delivery Confirmation**:
+- The system MUST log the delivery confirmation timestamp to Loki with structured fields:
+  ```json
+  {
+    "event": "synthetic_alert_drill",
+    "status": "success|failed",
+    "delivery_timestamp": "<ISO8601>",
+    "delivery_latency_ms": <N>,
+    "channel": "slack|pagerduty"
+  }
+  ```
+- The system SHOULD verify delivery by checking Slack API or PagerDuty API for the drill message
+
+**Missed Drill Handling**:
+- If a synthetic alert drill fails to deliver within 5 minutes, the system MUST trigger a REAL P2 alert
+- The real alert MUST page the on-call engineer with subject: `Alert Delivery Pipeline Failure - Drill Not Received`
+- The real alert MUST include: expected drill time, delivery status check results, runbook link
+- The system MUST NOT suppress missed-drill alerts (no silencing/inhibition rules)
+
+**Drill Verification**:
+- The system MUST track drill success rate as a metric: `mereka_alerting_drill_success_total` (counter)
+- The system MUST track drill delivery latency: `mereka_alerting_drill_latency_seconds` (histogram)
+- The system SHOULD display drill health on the SLO dashboard (panel: "Alert Delivery Drills - Last 30 Days")
+
 #### SLI Measurement Infrastructure
 
 - The system MUST implement SLI measurement using the following infrastructure components:
@@ -811,6 +851,16 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - [ ] AC-014: Given a deployment event, when regression is detected within 30 minutes of the deployment, then the alert annotation includes the deployment identifier and commit SHA
 - [ ] AC-015: Given deployment events are annotated in Grafana, when the SLO dashboard is viewed, then vertical markers appear at each deployment timestamp on latency and availability panels
 
+### Synthetic Alert Drills
+
+- [ ] AC-DRILL-001: Given the synthetic alert drill CronJob is deployed, when `kubectl get cronjob -n mereka-lms synthetic-alert-drill` is run, then the CronJob exists with schedule `0 9 * * 1` (every Monday at 09:00 UTC)
+- [ ] AC-DRILL-002: Given a drill execution, when the drill script runs, then it POSTs to Alertmanager API `/api/v1/alerts` with a test alert labeled `[DRILL] Alert Delivery Test`
+- [ ] AC-DRILL-003: Given a successful drill, when the drill completes, then a structured log entry is written to Loki with `event=synthetic_alert_drill`, `status=success`, and `delivery_timestamp`
+- [ ] AC-DRILL-004: Given drill metrics are exposed, when Prometheus queries `mereka_alerting_drill_success_total`, then a counter value is returned showing cumulative drill successes
+- [ ] AC-DRILL-005: Given a missed drill (no delivery within 5 minutes), when the watchdog timer expires, then a REAL P2 alert is triggered with subject `Alert Delivery Pipeline Failure - Drill Not Received`
+- [ ] AC-DRILL-006: Given the SLO dashboard, when viewing the "Alert Delivery Drills - Last 30 Days" panel, then drill success/failure history is visible as a time series
+- [ ] AC-DRILL-007: Given the drill alert is sent to Slack, when checking the `#ops-alerts` channel, then the drill message appears within 2 minutes with clear `[DRILL]` prefix
+
 ### Maintenance Windows
 
 - [ ] AC-016: Given a maintenance window is declared 72 hours in advance, when SLA availability is calculated for the month, then the maintenance window duration is excluded from both numerator and denominator
@@ -853,13 +903,21 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - [ ] AC-035: Given an SLA breach, when remediation plan is created, then it includes root cause analysis, immediate fixes, long-term improvements, and timeline for each, documented within 4 hours of breach detection
 - [ ] AC-036: Given a Tier 1 service breaches SLA in 2 consecutive months, when the second breach is confirmed, then an emergency architecture review is automatically scheduled
 
+### SLO Dashboard
+
+- [ ] AC-037: Given the Open edX SLO dashboard exists at `infrastructure/monitoring/dashboards/openedx-slo-dashboard.json`, when it is deployed to GCP Monitoring, then it displays all Tier 1 SLO metrics (LMS availability, CMS availability, latency P99/P95/P50, error rates, error budget)
+- [ ] AC-038: Given the SLO dashboard, when viewed, then it includes a service ownership panel displaying: primary owner, service tier, on-call rotation structure, and escalation contacts (L1 through L4)
+- [ ] AC-039: Given the SLO dashboard, when viewed, then it includes direct links to PrometheusRule definitions in `deploy/k8s/base/monitoring/prometheusrule-slo.yaml`
+- [ ] AC-040: Given the SLO dashboard, when viewed, then it includes links to operational runbooks: On-Call Observability Playbook, SLO/SLA Spec, Deployment Runbook, and Troubleshooting Guide
+- [ ] AC-041: Given the SLO dashboard, when error budget panels are displayed, then they use color thresholds: RED (< 10% or exhausted), YELLOW (10-25%), GREEN (>= 25%)
+
 ### Additional Edge Cases
 
-- [ ] AC-037: Given GCP uptime checks from multiple regions, when latency is measured for SLA purposes, then only the Asia-Pacific regional probe is used as the authoritative measurement
-- [ ] AC-038: Given a MySQL infrastructure failure causes LMS, CMS, and Forum to fail simultaneously, when error budgets are calculated, then downtime is attributed to MySQL only and dependent services' budgets are not consumed if they recover immediately after MySQL
-- [ ] AC-039: Given a maintenance window notification email fails to send, when the failure is detected, then operations is alerted within 1 hour and manual client outreach is triggered
-- [ ] AC-040: Given a rolling deployment causes transient 503 errors, when errors are < 0.1% of traffic and last < 1 minute, then they may be excluded from SLO calculation if documented in monthly report
-- [ ] AC-041: Given timestamp discrepancies between Prometheus and GCP Monitoring, when SLA is calculated, then the time measurement most favorable to the client is used
+- [ ] AC-042: Given GCP uptime checks from multiple regions, when latency is measured for SLA purposes, then only the Asia-Pacific regional probe is used as the authoritative measurement
+- [ ] AC-043: Given a MySQL infrastructure failure causes LMS, CMS, and Forum to fail simultaneously, when error budgets are calculated, then downtime is attributed to MySQL only and dependent services' budgets are not consumed if they recover immediately after MySQL
+- [ ] AC-044: Given a maintenance window notification email fails to send, when the failure is detected, then operations is alerted within 1 hour and manual client outreach is triggered
+- [ ] AC-045: Given a rolling deployment causes transient 503 errors, when errors are < 0.1% of traffic and last < 1 minute, then they may be excluded from SLO calculation if documented in monthly report
+- [ ] AC-046: Given timestamp discrepancies between Prometheus and GCP Monitoring, when SLA is calculated, then the time measurement most favorable to the client is used
 
 ## Edge Cases
 
