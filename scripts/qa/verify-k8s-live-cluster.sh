@@ -142,6 +142,12 @@ check_endpoints() {
       continue
     fi
 
+    # MongoDB uses Atlas (no local pod), so empty endpoints are expected
+    if [[ "$service_name" == "mongodb" ]]; then
+      print_info "$service_name (Atlas-managed, no local pod expected)"
+      continue
+    fi
+
     local endpoints
     endpoints=$(kubectl get endpoints "$service_name" -n "$NAMESPACE" --context="$CLUSTER_CONTEXT" -o json 2>/dev/null || echo '{}')
 

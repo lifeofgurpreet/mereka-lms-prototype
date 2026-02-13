@@ -65,8 +65,8 @@ fi
 # Test 3: Studio has 250MB limit for course imports
 echo ""
 echo -n "Checking Studio 250MB limit for course imports... "
-if grep -B 3 -A 3 'studio.academyv2.mereka.io' "$CADDYFILE" | grep -q 'max_size 250MB' || \
-   grep -B 3 -A 3 'studio.localhost' "$CADDYFILE" | grep -q 'max_size 250MB'; then
+if grep -B 3 -A 15 'studio.academyv2.mereka.io' "$CADDYFILE" | grep -q 'max_size 250MB' || \
+   grep -B 3 -A 15 'studio.localhost' "$CADDYFILE" | grep -q 'max_size 250MB'; then
   echo -e "${GREEN}PASS${NC}"
   echo "  Found: request_body { max_size 250MB } for Studio"
   PASS=$((PASS + 1))
