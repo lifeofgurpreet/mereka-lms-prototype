@@ -618,7 +618,7 @@ MFE_CONFIG = {
     # Use a relative path so this remains same-origin across multiple MFE hostnames
     # (e.g. apps.academyv2.mereka.io and apps.academy.biji-biji.com).
     "REFRESH_ACCESS_TOKEN_ENDPOINT": "/login_refresh",
-    "SITE_NAME": "Mereka",
+    "SITE_NAME": "Mereka Academy",
     "STUDIO_BASE_URL": MEREKA_STUDIO_BASE_URL,
     "USER_INFO_COOKIE_NAME": "user-info",
     "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",

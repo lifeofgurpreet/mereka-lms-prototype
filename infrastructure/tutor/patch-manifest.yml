@@ -453,3 +453,51 @@ patches:
     verify_pattern: "/profile/api/"
     severity: high
     required: false  # Only for Caddy deployments
+
+  # MFE Directory Name Fixes
+  - id: mfe-course-authoring-directory
+    name: "Course Authoring MFE Directory Name Fix"
+    category: mfe-build
+    description: "Symlinks frontend-app-course-authoring to course-authoring to fix blank page (mereka-lms-3f8g)"
+    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    verify_command: "grep -F 'ln -sf /openedx/app/frontend-app-course-authoring /openedx/app/course-authoring' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    verify_pattern: "course-authoring"
+    severity: high
+    required: false  # Only if course-authoring MFE is used
+    bead: mereka-lms-3f8g
+
+  # MFE Cache Headers
+  - id: mfe-cache-headers-html
+    name: "MFE HTML Cache Headers"
+    category: mfe-caching
+    description: "Sets no-cache for MFE HTML files to prevent stale blank pages (mereka-lms-2pne)"
+    target_file: "tutor_env/env/apps/caddy/Caddyfile"
+    verify_command: "grep -A 2 'Cache-Control.*no-cache' tutor_env/env/apps/caddy/Caddyfile"
+    verify_pattern: "no-cache, no-store, must-revalidate"
+    severity: high
+    required: true
+    bead: mereka-lms-2pne
+
+  - id: mfe-cache-headers-static
+    name: "MFE Static Asset Cache Headers"
+    category: mfe-caching
+    description: "Sets long cache + immutable for MFE JS/CSS assets (mereka-lms-2pne)"
+    target_file: "tutor_env/env/apps/caddy/Caddyfile"
+    verify_command: "grep -F 'max-age=31536000, immutable' tutor_env/env/apps/caddy/Caddyfile"
+    verify_pattern: "max-age=31536000, immutable"
+    severity: high
+    required: true
+    bead: mereka-lms-2pne
+
+  # ArgoCD ConfigMap Ignore
+  - id: argocd-configmap-ignore
+    name: "ArgoCD CSS ConfigMap ignoreDifferences"
+    category: argocd
+    description: "Prevents ArgoCD from triggering pod rolling on CSS ConfigMap hash changes (mereka-lms-dcd)"
+    target_file: "deploy/k8s/patches/argocd-configmap-ignore.yaml"
+    verify_command: "test -f deploy/k8s/patches/argocd-configmap-ignore.yaml"
+    verify_pattern: "ignoreDifferences"
+    severity: critical
+    required: true
+    bead: mereka-lms-dcd
+    notes: "Requires manual application: kubectl patch application mereka-lms -n argocd --type=merge --patch-file=deploy/k8s/patches/argocd-configmap-ignore.yaml"

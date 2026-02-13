@@ -1,0 +1,33 @@
+# ArgoCD ignoreDifferences patch for CSS ConfigMap churn (mereka-lms-dcd)
+# Prevents ArgoCD from triggering rolling updates when CSS ConfigMap hashes change
+# Apply with: kubectl patch application mereka-lms -n argocd --type=merge --patch-file=argocd-configmap-ignore.yaml
+# Or add to your ArgoCD Application manifest under spec.ignoreDifferences
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mereka-lms
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: mereka-lms
+spec:
+  ignoreDifferences:
+    # Ignore CSS ConfigMap hash changes to prevent pod rolling every 3-5 minutes
+    # Root cause: openedx-overrides-runtime-css and openedx-theme-head-extra-patched
+    # change hash suffixes between commits, triggering ArgoCD selfHeal rolling updates
+    - group: ""
+      kind: ConfigMap
+      name: openedx-overrides-runtime-css
+      jsonPointers:
+        - /metadata/name  # Ignore hash suffix changes
+    - group: ""
+      kind: ConfigMap
+      name: openedx-theme-head-extra-patched
+      jsonPointers:
+        - /metadata/name  # Ignore hash suffix changes
+    # If using Kustomize configMapGenerator, ignore the generated suffix entirely
+    - group: ""
+      kind: ConfigMap
+      nameRegex: "openedx-.*-css-.*"
+      jqPathExpressions:
+        - .metadata.name

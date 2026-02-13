@@ -174,10 +174,6 @@ check_mfe_authn_surface() {
   if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \
     && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
     printf "✓ MFE config exposes Mereka site + logo branding\n"
-  elif [[ "$ENVIRONMENT" == "dev" ]] \
-    && rg -F -q '"SITE_NAME": "Mereka"' <<<"$config" \
-    && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
-    printf "✓ MFE config exposes Mereka site + logo branding (dev transitional SITE_NAME)\n"
   else
     printf "✗ MFE config missing expected Mereka branding fields\n" >&2
     failures=$((failures + 1))

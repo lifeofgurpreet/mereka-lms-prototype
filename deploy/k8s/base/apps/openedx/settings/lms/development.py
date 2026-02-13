@@ -388,7 +388,7 @@ MFE_CONFIG = {
     "MARKETING_SITE_BASE_URL": "http://localhost:8000",
     "PASSWORD_RESET_SUPPORT_LINK": "mailto:contact@localhost",
     "REFRESH_ACCESS_TOKEN_ENDPOINT": "http://localhost:8000/login_refresh",
-    "SITE_NAME": "Mereka",
+    "SITE_NAME": "Mereka Academy",
     "STUDIO_BASE_URL": "http://studio.localhost:8001",
     "USER_INFO_COOKIE_NAME": "user-info",
     "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",

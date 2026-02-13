@@ -447,11 +447,106 @@ for target in targets:
             "gcc g++ git libgl1 libxi6 make python3 python3-distutils",
         )
 
+    def ensure_mfe_course_authoring_directory_fix(text):
+        """
+        Fix course-authoring MFE directory name mismatch (mereka-lms-3f8g).
+        Tutor MFE plugin expects 'course-authoring' but build produces 'frontend-app-course-authoring'.
+        Add a symlink or rename step in the Dockerfile to align names.
+        """
+        if "FROM base AS course-authoring-common" not in text:
+            return text
+        if "ln -s /openedx/app/frontend-app-course-authoring /openedx/app/course-authoring" in text:
+            return text
+
+        lines = text.splitlines()
+        start = None
+        for idx, line in enumerate(lines):
+            if line.strip() == "FROM base AS course-authoring-common":
+                start = idx
+                break
+        if start is None:
+            return text
+
+        # Find the end of this stage (next FROM or end of file)
+        end = len(lines)
+        for idx in range(start + 1, len(lines)):
+            stripped = lines[idx].strip()
+            if stripped.startswith("######## ") or stripped.startswith("FROM "):
+                end = idx
+                break
+
+        # Insert symlink creation after WORKDIR line
+        for idx in range(start, end):
+            if "WORKDIR /openedx/app" in lines[idx]:
+                symlink_cmd = "RUN ln -sf /openedx/app/frontend-app-course-authoring /openedx/app/course-authoring || true"
+                lines.insert(idx + 1, symlink_cmd)
+                break
+
+        rebuilt = "\n".join(lines)
+        if text.endswith("\n"):
+            rebuilt += "\n"
+        return rebuilt
+
+    def ensure_mfe_cache_headers(text):
+        """
+        Configure proper cache headers for MFE assets (mereka-lms-2pne).
+        HTML files: no-cache to prevent stale blank pages.
+        JS/CSS with content-hash: long cache + immutable.
+        Applied via Caddy reverse proxy configuration.
+        """
+        # This patch targets Caddyfile, not Dockerfile
+        if "apps.academyv2.mereka.io" not in text or "Caddyfile" not in str(path):
+            return text
+
+        # Check if cache headers already configured
+        if "Cache-Control" in text and "no-cache" in text:
+            return text
+
+        # Find the apps.academyv2.mereka.io block
+        needle = "apps.academyv2.mereka.io {"
+        if needle not in text:
+            return text
+
+        cache_config = """    # MFE cache headers to prevent stale blank pages (mereka-lms-2pne)
+    header {
+        # HTML: no-cache to prevent stale pages after deployment
+        @html {
+            path *.html /
+        }
+        Cache-Control "no-cache, no-store, must-revalidate" @html
+
+        # JS/CSS with content-hash: long cache + immutable
+        @static {
+            path *.js *.css *.woff2 *.woff *.ttf *.eot *.svg *.png *.jpg *.jpeg *.gif *.ico
+        }
+        Cache-Control "public, max-age=31536000, immutable" @static
+    }
+
+"""
+        # Insert after the opening brace
+        text = text.replace(
+            needle,
+            needle + "\n" + cache_config
+        )
+        return text
+
+    def ensure_argocd_configmap_ignore(text):
+        """
+        Add ignoreDifferences for CSS ConfigMaps to prevent ArgoCD churn (mereka-lms-dcd).
+        This should be applied to ArgoCD Application manifests, not Tutor templates.
+        Since no ArgoCD manifests exist in tutor_env/, document the fix in a separate patch file.
+        """
+        # This patch is not applied via apply-patches.sh
+        # It requires a separate ArgoCD Application patch in deploy/k8s/patches/
+        return text
+
     updated = ensure_mfe_cookie_env(updated)
     updated = ensure_mfe_theme_copy(updated)
     updated = ensure_mfe_npm_resilience(updated)
     updated = ensure_mfe_plugin_framework_dependency(updated)
     updated = ensure_mfe_admin_console_redux_deps(updated)
+    updated = ensure_mfe_course_authoring_directory_fix(updated)
+    updated = ensure_mfe_cache_headers(updated)
 
     # Allow remote root access when using upstream MySQL images.
     if "MYSQL_ROOT_PASSWORD" in updated and "MYSQL_ROOT_HOST" not in updated:
