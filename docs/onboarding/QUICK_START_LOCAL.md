@@ -116,9 +116,9 @@ tutor local restart
 
 ## 📚 Full Documentation
 
-- **Complete Guide:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`
-- **Workflow:** `docs/quickstart/WORKFLOW_LOCAL.md`
-- **Setup Details:** `docs/quickstart/LOCAL_SETUP.md`
+- **Complete Guide:** `docs/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
+- **Workflow:** `docs/onboarding/WORKFLOW_LOCAL.md`
+- **Setup Details:** `docs/onboarding/LOCAL_SETUP.md`
 - **Troubleshooting:** `docs/operations/TROUBLESHOOTING.md`
 
 ## 🌐 Access URLs

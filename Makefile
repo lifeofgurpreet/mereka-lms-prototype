@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -125,14 +125,17 @@ generate-testmaps: ## Generate testmaps from @covers annotations
 		--manual-file specs/manual_verifications.yaml --repo-root . \
 		--format yaml --output specs/testmaps/all.testmap.yml
 
-check-fast: lint-specs validate-testmaps ## Fast quality gates (<30s)
+lint-conventions: ## Check repo file/naming conventions (glob-ability, grep-ability, boundaries)
+	./scripts/qa/lint-repo-conventions.sh
+
+check-fast: lint-specs validate-testmaps lint-conventions ## Fast quality gates (<30s)
 	@echo "Fast checks passed."
 
 spec-dashboard: ## Show per-spec coverage dashboard
 	python3 scripts/qa/spec-tools/spec_coverage_dashboard.py \
 		--specs-dir specs/ --testmaps-dir specs/testmaps/
 
-check: lint-specs validate-testmaps verify-specs spec-coverage ## Full spec quality suite
+check: lint-specs validate-testmaps lint-conventions verify-specs spec-coverage ## Full spec quality suite
 	@echo "All spec checks passed."
 
 ## Spec Quality Gates

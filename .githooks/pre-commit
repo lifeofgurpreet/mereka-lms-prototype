@@ -303,5 +303,98 @@ if [[ -n "$TUTOR_FILES" ]]; then
   echo ""
 fi
 
+# ========================================
+# Spec & Testmap Linting (Non-blocking)
+# ========================================
+
+echo -e "${GREEN}Running spec lint checks...${NC}"
+echo ""
+
+SPEC_WARNINGS=0
+
+# Check if python3 is available
+if ! command -v python3 &> /dev/null; then
+  echo -e "${YELLOW}[WARNING]${NC} python3 not found, skipping spec lint checks"
+  echo ""
+else
+  # Check for spec files
+  SPEC_FILES=$(echo "$STAGED_FILES" | grep -E "^specs/.*\.md$" || true)
+
+  if [[ -n "$SPEC_FILES" ]]; then
+    echo -e "${YELLOW}Spec files detected, running lint...${NC}"
+
+    if [[ -f "scripts/qa/spec-tools/mereka_spec_lint.py" ]]; then
+      if python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error 2>&1 | tee /tmp/spec-lint.out; then
+        echo -e "${GREEN}✓ Spec lint passed${NC}"
+      else
+        echo -e "${YELLOW}⚠ Spec lint found issues (non-blocking)${NC}"
+        cat /tmp/spec-lint.out
+        SPEC_WARNINGS=1
+      fi
+    else
+      echo -e "${YELLOW}⚠ mereka_spec_lint.py not found, skipping${NC}"
+    fi
+    echo ""
+  fi
+
+  # Check for testmap files
+  TESTMAP_FILES=$(echo "$STAGED_FILES" | grep -E "^specs/testmaps/.*\.ya?ml$" || true)
+
+  if [[ -n "$TESTMAP_FILES" ]]; then
+    echo -e "${YELLOW}Testmap files detected, running validation...${NC}"
+
+    if [[ -f "scripts/qa/spec-tools/validate_testmap_format.py" ]]; then
+      if python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/ 2>&1 | tee /tmp/testmap-validation.out; then
+        echo -e "${GREEN}✓ Testmap validation passed${NC}"
+      else
+        echo -e "${YELLOW}⚠ Testmap validation found issues (non-blocking)${NC}"
+        cat /tmp/testmap-validation.out
+        SPEC_WARNINGS=1
+      fi
+    else
+      echo -e "${YELLOW}⚠ validate_testmap_format.py not found, skipping${NC}"
+    fi
+    echo ""
+  fi
+
+  # Check for K8s manifests
+  K8S_FILES=$(echo "$STAGED_FILES" | grep -E "^deploy/k8s/.*\.ya?ml$" || true)
+
+  if [[ -n "$K8S_FILES" ]]; then
+    echo -e "${YELLOW}K8s manifest files detected, checking labels...${NC}"
+
+    K8S_LABEL_WARNINGS=0
+    for file in $K8S_FILES; do
+      # Skip if file doesn't exist or is deleted
+      [[ -f "$file" ]] || continue
+
+      # Check for app.kubernetes.io/name label
+      if ! grep -q "app.kubernetes.io/name" "$file"; then
+        echo -e "${YELLOW}[WARNING]${NC} $file - Missing recommended label 'app.kubernetes.io/name'"
+        K8S_LABEL_WARNINGS=1
+      fi
+    done
+
+    if [[ $K8S_LABEL_WARNINGS -eq 0 ]]; then
+      echo -e "${GREEN}✓ K8s label checks passed${NC}"
+    else
+      echo -e "${YELLOW}⚠ Some K8s manifests missing recommended labels (non-blocking)${NC}"
+      SPEC_WARNINGS=1
+    fi
+    echo ""
+  fi
+fi
+
+# Summary
+if [[ $SPEC_WARNINGS -eq 1 ]]; then
+  echo -e "${YELLOW}========================================${NC}"
+  echo -e "${YELLOW}Spec/Testmap warnings detected${NC}"
+  echo -e "${YELLOW}========================================${NC}"
+  echo ""
+  echo "These warnings are non-blocking, but please review them."
+  echo "Consider fixing issues before committing for better quality."
+  echo ""
+fi
+
 echo -e "${GREEN}All checks passed. Proceeding with commit.${NC}"
 exit 0

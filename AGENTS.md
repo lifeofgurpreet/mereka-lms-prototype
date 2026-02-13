@@ -811,6 +811,50 @@ Or fetch the skill content:
 curl -s https://raw.githubusercontent.com/Biji-Biji-Initiative/team-skills/main/plugins/core/skills/readme/SKILL.md
 ```
 
+## Linter-Directed Agent Workflow
+
+**Philosophy**: Based on Factory.ai pattern: "agents write the code, linters write the law." Encode standards as executable lint rules that agents automatically obey. Shift from natural language guidance to deterministic collaboration.
+
+### Quick Commands
+
+```bash
+make check-fast    # Fast lint gates (<30s): spec lint + testmap validation
+make check         # Full suite: lint + verify + coverage
+make lint-specs    # Spec lint only (errors)
+make spec-lint     # Full spec integrity gates
+```
+
+### Lint Categories
+
+| Category | What It Enforces |
+|----------|------------------|
+| **Grep-ability** | Consistent naming, labels, imports |
+| **Glob-ability** | Predictable file placement (`_spec.md`, `_testplan.md`, `verify-*.sh`) |
+| **Architectural boundaries** | No deprecated paths, valid cross-refs |
+| **Security & privacy** | Secret scanning (pre-commit hook) |
+| **Testability** | Colocated testplans, testmap traceability |
+| **Observability** | Structured logging, telemetry naming |
+| **Documentation signals** | Spec frontmatter, AC format |
+
+### Agent Remediation Loop
+
+1. Agent runs `make check-fast`
+2. Lint output = agent task list (each violation is a work item)
+3. Agent fixes violations
+4. Agent re-runs `make check-fast` to verify
+5. When clean, agent runs `make check` for full verification
+
+### Custom Rules
+
+| Rule File | Purpose |
+|-----------|---------|
+| `scripts/qa/spec-tools/mereka_spec_lint.py` | 7 Mereka-specific spec rules |
+| `scripts/qa/spec-tools/spec_lint.py` | Base spec linter |
+| `scripts/qa/lint-repo-conventions.sh` | Repo conventions: glob-ability, grep-ability, boundaries, observability |
+| `.githooks/pre-commit` | Secret scanning + spec lint on commit |
+
+---
+
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
