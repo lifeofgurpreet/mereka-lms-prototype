@@ -795,7 +795,7 @@ All source code for the Purchase Gateway lives within this repository:
 
 6. **Enterprise subscription renewal UX**: When a subscription renews and new seat pack entitlements are created, should existing unclaimed entitlements from the previous period be rolled over or expired? Need product decision.
 
-7. **Email delivery service**: Which service should send invitation emails? Options: (a) the LMS email pipeline (already configured, consistent branding), (b) a separate transactional email service (SendGrid, Postmark) from the gateway, (c) Stripe's built-in receipts for purchase confirmation + separate service for invitations. Need ops/cost assessment.
+7. **Email delivery service**: Which service should send invitation emails? Options: (a) the LMS email pipeline (already configured, consistent branding), (b) a separate transactional email service (SendGrid, Postmark) from the gateway, (c) Stripe's built-in receipts for purchase confirmation + separate service for invitations. Need infrastructure/cost assessment.
 
 8. **Admin UI**: Should the gateway have its own admin UI (React SPA), use Django admin (simpler but less polished), or integrate into the existing enterprise admin portal MFE? Need product/UX input.
 

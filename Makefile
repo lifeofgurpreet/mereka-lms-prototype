@@ -103,7 +103,8 @@ spec-lint: ## Run spec integrity gates (lint + verify + format + coverage)
 
 spec-coverage: ## Show spec coverage report (text)
 	python3 scripts/qa/spec-tools/spec_coverage_report.py \
-		--specs-dir specs/ --testmaps-dir specs/testmaps/ --repo-root . --format text
+		--specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+		--manual-file specs/manual_verifications.yaml --repo-root . --format text
 
 spec-compliance: ## Run automated tests and report spec compliance (repo-local only)
 	python3 scripts/qa/spec-tools/run_spec_compliance.py --mode local --timeout 30

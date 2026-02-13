@@ -3,4 +3,6 @@ kind: Service
 metadata:
   name: mongodb
   namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: mongodb
 $patch: delete

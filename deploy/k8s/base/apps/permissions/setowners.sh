@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/usr/bin/env bash
 # NOTE: MongoDB uses Atlas (cluster-mereka-lms.2pjex4s.mongodb.net), no local volume needed
 setowner $OPENEDX_USER_ID /mounts/lms /mounts/cms /mounts/openedx
 setowner 1000 /mounts/elasticsearch

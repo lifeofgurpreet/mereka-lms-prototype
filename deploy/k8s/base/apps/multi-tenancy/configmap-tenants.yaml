@@ -16,6 +16,7 @@ metadata:
   name: tenant-registry
   namespace: mereka-lms
   labels:
+    app.kubernetes.io/name: tenant-registry
     app.kubernetes.io/component: multi-tenancy
     app.kubernetes.io/part-of: mereka-lms
 data:

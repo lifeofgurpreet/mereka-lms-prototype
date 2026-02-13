@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: smtp
   namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: smtp
 spec:
   template:
     spec:

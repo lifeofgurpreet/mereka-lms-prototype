@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lms
+  labels:
+    app.kubernetes.io/name: lms
 spec:
   template:
     spec:
@@ -23,6 +25,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cms
+  labels:
+    app.kubernetes.io/name: cms
 spec:
   template:
     spec:
@@ -44,6 +48,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lms-worker
+  labels:
+    app.kubernetes.io/name: lms-worker
 spec:
   template:
     spec:
@@ -65,6 +71,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cms-worker
+  labels:
+    app.kubernetes.io/name: cms-worker
 spec:
   template:
     spec:
@@ -86,6 +94,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: discovery
+  labels:
+    app.kubernetes.io/name: discovery
 spec:
   template:
     spec:
@@ -105,6 +115,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ecommerce
+  labels:
+    app.kubernetes.io/name: ecommerce
 spec:
   template:
     spec:
@@ -124,6 +136,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ecommerce-worker
+  labels:
+    app.kubernetes.io/name: ecommerce-worker
 spec:
   template:
     spec:
@@ -143,6 +157,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: notes
+  labels:
+    app.kubernetes.io/name: notes
 spec:
   template:
     spec:
@@ -158,6 +174,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: credentials
+  labels:
+    app.kubernetes.io/name: credentials
 spec:
   template:
     spec:

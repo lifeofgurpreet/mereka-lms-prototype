@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: openedx-studio
   namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: openedx-studio
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: 100m

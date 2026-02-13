@@ -369,14 +369,18 @@ def validate_testmap_file(path: Path) -> LintResult:
 
 
 def gather_testmap_files(path: Path) -> List[Path]:
-    """Gather testmap YAML files from path (file or directory)."""
+    """Gather testmap YAML files from path (file or directory).
+
+    Skips 'all.testmap.yml' — it is a generated multi-document YAML aggregate
+    and individual per-spec testmaps are already validated separately.
+    """
     if path.is_file():
         return [path]
 
     files = []
     for pattern in ("*.testmap.yml", "*.testmap.yaml"):
         files.extend(sorted(path.glob(pattern)))
-    return files
+    return [f for f in files if f.name != "all.testmap.yml"]
 
 
 def main() -> int:
