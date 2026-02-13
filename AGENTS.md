@@ -864,6 +864,49 @@ This project uses the **specs-vs-docs** convention from [team-skills](https://gi
 ### Spec Template
 New specs should follow `specs/_TEMPLATE.md`. Required sections: Scope, Non-goals, Requirements, Acceptance Criteria, Edge Cases, Observability, Rollout & Rollback, Open Questions.
 
+### Spec-Driven Design Workflow
+
+**Non-negotiable**: Every feature MUST go through the spec pipeline before implementation begins.
+
+**Workflow (in order)**:
+
+| Step | Agent/Tool | Input | Output |
+|------|-----------|-------|--------|
+| 1. Route | `spec-write` (Opus) | Feature description | SPEC, DOCS, or BOTH classification |
+| 2. Generate | `spec-write` (Opus) | Classification + context | `specs/<name>_spec.md` from `_TEMPLATE.md` |
+| 3. Lint | `spec_lint.py` | Spec file | Frontmatter, AC IDs, NFR, cross-cutting ref validation |
+| 4. Plan | `spec-planner` (Opus) | Approved spec | Tasks + test plan + `specs/testmaps/<name>.testmap.yml` |
+| 5. Implement | `implementor` (Sonnet) | Tasks from step 4 | Code with `@covers AC-XXX` annotations |
+| 6. Verify | `build-validator` (Sonnet) | Implementation | Tests pass, lint clean, types check |
+| 7. Review | `reviewer` (Opus) | Implementation | Quality gate pass (REQUIRED after Sonnet) |
+| 8. Coverage | `spec_coverage_report.py` | Codebase scan | AC coverage percentage |
+
+**Key files**:
+
+| File | Purpose |
+|------|---------|
+| `specs/_TEMPLATE.md` | Canonical spec template |
+| `specdocs.config.yml` | Project-level config (paths, quality gates, lint rules) |
+| `specs/cross-cutting-requirements_spec.md` | Shared NFRs, AC naming standard (Section 7), versioning (Section 8), feature flags (Section 9) |
+| `specs/testmaps/*.testmap.yml` | AC → test file traceability |
+
+**AC naming standard** (from cross-cutting-requirements_spec.md Section 7):
+- Format: `AC-{PREFIX}-{NNN}` (e.g., `AC-K8S-001`, `AC-MTA-015`)
+- Prefix registry: 31 specs, each with a unique 2-5 char prefix
+- Sequential numbering, zero-padded to 3 digits
+
+**Spec versioning** (Section 8):
+- All specs carry `version: "X.Y.Z"` in YAML frontmatter
+- Major = breaking changes, Minor = new ACs added, Patch = clarifications
+
+**Lint commands**:
+```bash
+python3 scripts/qa/spec-tools/spec_lint.py specs/          # Lint all specs
+python3 scripts/qa/spec-tools/spec_verify.py specs/         # Verify AC-IDs + testmap coverage
+python3 scripts/qa/spec-tools/spec_coverage_report.py       # Coverage dashboard
+python3 scripts/qa/spec-tools/spec_fix.py specs/ --add-ac-ids  # Bulk-add AC-IDs
+```
+
 <!-- bv-agent-instructions-v1 -->
 
 ---

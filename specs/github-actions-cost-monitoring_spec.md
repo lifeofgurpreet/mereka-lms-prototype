@@ -17,6 +17,30 @@ references:
 
 # GitHub Actions Cost Monitoring
 
+# Human Summary
+
+## What we're building
+An automated cost monitoring and alerting system for GitHub Actions CI/CD workflows. It tracks workflow minutes consumed, calculates costs by runner type, generates daily reports, and enforces budget limits to prevent surprise billing.
+
+## Why it matters
+GitHub Actions costs can balloon unexpectedly with matrix builds, long-running verification scripts, and frequent PR cycles. Without monitoring, a 126-script verification suite running 10 PRs/day could cost $580/month. This system keeps costs under the $50/month target with proactive alerts and automatic workflow throttling.
+
+## Success looks like
+- GitHub Actions costs stay below $50/month consistently
+- Budget alerts fire within 5 minutes of threshold breaches
+- Cost dashboard shows real-time spend vs budget with projections
+- Non-critical workflows auto-pause when budget reaches 95%
+
+# Agent Contract
+
+## Scope
+Cost tracking, budget alerting, workflow duration limits, optimization recommendations, and monthly cost caps for GitHub Actions.
+
+## Non-goals
+- GitHub Actions workflow authoring (covered in ci-cd-pipeline_spec.md)
+- Self-hosted runner infrastructure
+- Cost optimization for non-GitHub CI systems
+
 ## Context
 
 GitHub Actions provides generous free minutes (2,000/month for free accounts, 3,000/month for Pro), but costs can balloon unexpectedly with:

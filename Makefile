@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -128,5 +128,18 @@ generate-testmaps: ## Generate testmaps from @covers annotations
 check-fast: lint-specs validate-testmaps ## Fast quality gates (<30s)
 	@echo "Fast checks passed."
 
+spec-dashboard: ## Show per-spec coverage dashboard
+	python3 scripts/qa/spec-tools/spec_coverage_dashboard.py \
+		--specs-dir specs/ --testmaps-dir specs/testmaps/
+
 check: lint-specs validate-testmaps verify-specs spec-coverage ## Full spec quality suite
 	@echo "All spec checks passed."
+
+## Spec Quality Gates
+check-specs: lint-specs validate-testmaps ## Run all spec quality checks
+	@echo "All spec quality checks passed."
+
+spec-verify: verify-specs ## Verify AC-IDs and testmap traceability (alias)
+
+spec-fix: ## Bulk-add AC-IDs to spec checkboxes
+	python3 scripts/qa/spec-tools/spec_fix.py specs/ --add-ac-ids

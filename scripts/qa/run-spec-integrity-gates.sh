@@ -98,16 +98,20 @@ echo ""
 run_check "spec-lint" \
   python3 "${TOOL_DIR}/mereka_spec_lint.py" specs/ --severity-filter error
 
-# 2. Spec verification via @covers annotations (informational — coverage may not be 100%)
+# 2. Testmap format validation
+run_check "testmap-validate" \
+  python3 "${TOOL_DIR}/validate_testmap_format.py" specs/testmaps/
+
+# 3. Spec verification via @covers annotations (informational — coverage may not be 100%)
 run_check_info "spec-verify" \
   python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
-    --scan-dirs scripts/ tests/ \
+    --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
     --manual-file specs/manual_verifications.yaml
 
-# 3. Coverage report with threshold
+# 4. Coverage report with threshold
 run_check "spec-coverage" \
   python3 "${TOOL_DIR}/spec_coverage_report.py" \
-    --specs-dir specs/ --scan-dirs scripts/ tests/ \
+    --specs-dir specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
     --manual-file specs/manual_verifications.yaml \
     --repo-root . --format text --fail-under "$FAIL_UNDER"
 

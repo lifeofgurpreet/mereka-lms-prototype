@@ -1,0 +1,171 @@
+# Certification Scorecard
+# Defines release gates, verification methods, and flake governance
+# Modeled after climate-exchange certification standards
+#
+# Last updated: 2026-02-13
+# Owner: Platform Team
+
+version: "1.0.0"
+
+# ──────────────────────────────────────────────────
+# Release Gates
+# ──────────────────────────────────────────────────
+release_gates:
+  pr_fast:
+    description: "Fast checks on every PR (target: <15 minutes)"
+    timeout_minutes: 15
+    required: true
+    checks:
+      - name: lint-specs
+        command: "python3 scripts/qa/spec-tools/spec_lint.py specs/"
+        owner: ci
+      - name: validate-testmaps
+        command: "python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/"
+        owner: ci
+      - name: shellcheck
+        command: "shellcheck scripts/**/*.sh"
+        owner: ci
+      - name: ruff-lint
+        command: "ruff check ."
+        owner: ci
+      - name: secret-scan
+        command: ".githooks/pre-commit"
+        owner: ci
+
+  nightly:
+    description: "Full verification suite run nightly (target: <60 minutes)"
+    timeout_minutes: 60
+    required: false
+    checks:
+      - name: spec-coverage
+        command: "python3 scripts/qa/spec-tools/spec_coverage_report.py"
+        owner: ci
+      - name: spec-verify
+        command: "python3 scripts/qa/spec-tools/spec_verify.py specs/"
+        owner: ci
+      - name: public-health-check
+        command: "scripts/qa/public-health-check.sh prod"
+        owner: ci
+      - name: auth-hardening
+        command: "CHECK_TIMEOUT_SECONDS=300 scripts/qa/verify-auth-hardening.sh --env prod --mode all"
+        owner: ci
+      - name: operations-gates
+        command: "CHECK_TIMEOUT_SECONDS=1200 scripts/qa/run-operations-gates.sh --env both"
+        owner: ci
+      - name: branding-gates
+        command: "scripts/branding/run-branding-gates.sh prod"
+        owner: ci
+
+  release:
+    description: "Full release certification (target: <90 minutes)"
+    timeout_minutes: 90
+    required: true
+    checks:
+      - name: all-pr-fast-checks
+        description: "All PR fast checks must pass"
+        owner: ci
+      - name: all-nightly-checks
+        description: "All nightly checks must have passed within 24h"
+        owner: ci
+      - name: spec-coverage-threshold
+        command: "python3 scripts/qa/spec-tools/spec_coverage_report.py --fail-under 50"
+        owner: ci
+        threshold: "50% AC coverage minimum"
+      - name: dr-evidence-bundle
+        command: "STRICT_RUNTIME=1 scripts/qa/build-dr-evidence-bundle.sh --tar"
+        owner: platform-team
+      - name: image-branding-verification
+        command: "scripts/qa/verify-mfe-image-branding.sh <image_ref>"
+        owner: ci
+      - name: gitops-image-overrides
+        command: "scripts/qa/verify-gitops-image-overrides.sh --check-infra"
+        owner: platform-team
+
+# ──────────────────────────────────────────────────
+# Verification Methods
+# ──────────────────────────────────────────────────
+verification_methods:
+  static_analysis:
+    description: "Repo-level checks (no cluster required)"
+    examples:
+      - "spec_lint.py — frontmatter, sections, AC IDs"
+      - "shellcheck — shell script quality"
+      - "ruff — Python linting"
+      - "secret-scan — no hardcoded credentials"
+    frequency: every_pr
+
+  contract_testing:
+    description: "API and schema contract validation"
+    examples:
+      - "verify-mfe-config-contract.sh — MFE configuration"
+      - "verify-oidc-provider-configs.sh — OIDC provider state"
+      - "verify-auth-surfaces.sh — auth endpoint contract"
+    frequency: nightly
+
+  behavioral_testing:
+    description: "Functional correctness verification"
+    examples:
+      - "smoke-test — PM2 app health"
+      - "public-health-check.sh — endpoint reachability"
+      - "verify-public-branding.sh — visual branding correctness"
+    frequency: nightly
+
+  resilience_testing:
+    description: "Failure mode and recovery verification"
+    examples:
+      - "audit-velero.sh — backup integrity"
+      - "build-dr-evidence-bundle.sh — DR readiness"
+      - "fix-velero-restore-test.sh — restore drill"
+    frequency: monthly
+
+  monitoring_verification:
+    description: "Observability-based runtime checks"
+    examples:
+      - "audit-observability.sh — monitoring coverage"
+      - "verify-alert-routing.sh — alert delivery"
+      - "audit-db-exporter-telemetry.sh — metric export"
+    frequency: nightly
+
+# ──────────────────────────────────────────────────
+# Flake Governance
+# ──────────────────────────────────────────────────
+flake_governance:
+  definition: "A test that fails intermittently without code changes"
+  detection:
+    method: "Same test fails 2+ times in 5 consecutive runs without code changes"
+    tracking: "specs/testmaps/FLAKE_QUARANTINE.yml"
+
+  escalation:
+    - threshold: 2
+      action: "Flag as potential flake, add to watch list"
+    - threshold: 5
+      action: "Move to quarantine registry, exclude from PR gate"
+    - threshold: 10
+      action: "Escalate to platform team for root cause analysis"
+
+  quarantine_policy:
+    max_quarantine_days: 14
+    review_cadence: "weekly"
+    auto_unquarantine: "After 7 consecutive passes in nightly"
+    owner_required: true
+
+  prevention:
+    - "Use deterministic test data (no random seeds without fixed seed)"
+    - "Mock external services (GitHub API, Slack, email)"
+    - "Set explicit timeouts with CHECK_TIMEOUT_SECONDS"
+    - "Use retry-safe assertions for async operations"
+
+# ──────────────────────────────────────────────────
+# Coverage Targets
+# ──────────────────────────────────────────────────
+coverage_targets:
+  current:
+    ac_coverage_percent: 59.6
+    automated_percent: 45
+    specs_with_testmaps: 34
+  target_q1_2026:
+    ac_coverage_percent: 70
+    automated_percent: 60
+  target_q2_2026:
+    ac_coverage_percent: 85
+    automated_percent: 75

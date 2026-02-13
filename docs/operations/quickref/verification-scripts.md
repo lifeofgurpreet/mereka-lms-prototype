@@ -11,6 +11,7 @@ scripts/
 ├── qa/                          # Quality assurance & verification
 │   ├── verify-*.sh              # Verification scripts (164 scripts)
 │   ├── spec-tools/              # Spec coverage tools
+│   │   ├── spec_coverage_dashboard.py  # Compact coverage dashboard
 │   │   ├── spec_coverage_report.py     # Generate coverage report
 │   │   ├── check_test_coverage.py      # Check AC coverage
 │   │   └── mereka_spec_lint.py         # Lint specs
@@ -89,7 +90,27 @@ As of 2026-02-11:
 - **4 monitoring** (in `specs/manual_verifications.yaml`)
 - **311 unmapped** (59.6% overall coverage)
 
-### Generate Coverage Report
+### Coverage Dashboard (Quick View)
+
+```bash
+cd scripts/qa/spec-tools
+
+# Compact dashboard (text format)
+python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --specs-dir ../../specs/
+
+# Output:
+# - Overall coverage rate
+# - Per-spec coverage (sorted by rate)
+# - Color-coded tiers (GREEN ≥80%, YELLOW 50-79%, RED <50%)
+
+# JSON format (for CI/tooling)
+python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --format json
+
+# Markdown format (for GitHub issues/PRs)
+python spec_coverage_dashboard.py --testmaps-dir ../../specs/testmaps/ --format markdown
+```
+
+### Generate Coverage Report (Detailed)
 
 ```bash
 cd scripts/qa/spec-tools

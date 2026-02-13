@@ -1,0 +1,32 @@
+# SPEC-NORM: Normative language rules
+# RFC 2119 keyword enforcement in spec requirements sections.
+
+rules:
+  - id: "SPEC-NORM-001"
+    severity: "error"
+    description: "Requirements section must use normative keywords (MUST/SHOULD/MAY)"
+    rationale: "RFC 2119 keywords make requirements unambiguous and testable"
+    autofix: false
+    keywords:
+      - "MUST"
+      - "MUST NOT"
+      - "SHOULD"
+      - "SHOULD NOT"
+      - "MAY"
+    sections:
+      - "Acceptance Criteria"
+      - "Non-Functional Requirements"
+      - "Scope"
+
+  - id: "SPEC-NORM-002"
+    severity: "warn"
+    description: "Avoid weak language in requirements sections"
+    rationale: "Words like 'might', 'could', 'possibly' introduce ambiguity"
+    autofix: false
+    forbidden_words:
+      - "might"
+      - "could"
+      - "possibly"
+      - "maybe"
+      - "try to"
+      - "attempt to"

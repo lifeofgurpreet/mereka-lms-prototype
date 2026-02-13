@@ -1,0 +1,61 @@
+# SPEC-FM: Frontmatter rules
+# These rules validate the YAML frontmatter in spec files.
+
+rules:
+  - id: "SPEC-FM-001"
+    severity: "error"
+    description: "Frontmatter must be present"
+    rationale: "Frontmatter enables automated parsing, indexing, and dependency resolution"
+    autofix: false
+    check: "File starts with '---' delimiter"
+
+  - id: "SPEC-FM-002"
+    severity: "error"
+    description: "Required frontmatter fields must be present"
+    rationale: "Core metadata needed for spec lifecycle management"
+    autofix: false
+    required_fields:
+      - "title"
+      - "type"
+      - "status"
+      - "owner"
+      - "last_updated"
+
+  - id: "SPEC-FM-003"
+    severity: "error"
+    description: "Status must be a valid lifecycle value"
+    rationale: "Consistent status enables filtering and workflow automation"
+    autofix: false
+    valid_values:
+      - "draft"
+      - "review"
+      - "approved"
+      - "in_progress"
+      - "completed"
+      - "deprecated"
+
+  - id: "SPEC-FM-004"
+    severity: "warn"
+    description: "Type must be a recognized spec type"
+    rationale: "Enables template selection and categorization"
+    autofix: false
+    valid_values:
+      - "feature_spec"
+      - "migration_spec"
+      - "infrastructure_spec"
+      - "service_spec"
+
+  - id: "SPEC-FM-005"
+    severity: "warn"
+    description: "last_updated should be in ISO 8601 date format"
+    rationale: "Consistent date format for sorting and filtering"
+    autofix: true
+    pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+
+  - id: "SPEC-FM-006"
+    severity: "error"
+    description: "Vehicle field must be present"
+    rationale: "Vehicle categorization required for implementation planning"
+    autofix: false
+    required_fields:
+      - "vehicle"

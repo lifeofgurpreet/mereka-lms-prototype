@@ -1,0 +1,309 @@
+# AC Verification Strategy Matrix
+# Defines required verification methods by priority tier
+
+version: "1.0.0"
+last_updated: "2026-02-13"
+
+# Method classes available
+method_classes:
+  static:
+    description: "Compile-time or repo-level checks (lint, type check, file existence)"
+    tools: ["spec_lint.py", "spec_verify.py", "shellcheck", "ruff"]
+  contract:
+    description: "API contract and schema validation"
+    tools: ["curl", "openapi-validator", "json-schema"]
+  behavioral:
+    description: "Functional correctness (unit tests, integration tests)"
+    tools: ["pytest", "jest", "smoke-test"]
+  resilience:
+    description: "Failure mode and recovery testing"
+    tools: ["chaos-mesh", "manual-drill"]
+  monitoring:
+    description: "Observability-based verification (metrics, alerts, dashboards)"
+    tools: ["prometheus", "grafana", "alertmanager"]
+
+# Required methods by priority tier
+tier_policy:
+  P0_critical:
+    required_methods: [static, contract, behavioral, resilience]
+    coverage_target: 95
+    automation_target: 90
+  P1_high:
+    required_methods: [static, behavioral]
+    coverage_target: 80
+    automation_target: 75
+  P2_medium:
+    required_methods: [static]
+    coverage_target: 60
+    automation_target: 50
+  P3_low:
+    required_methods: []
+    coverage_target: 30
+    automation_target: 20
+
+# Flake policy
+flake_policy:
+  max_retries: 3
+  quarantine_after: 5  # failures before quarantine
+  quarantine_file: "specs/testmaps/FLAKE_QUARANTINE.yml"
+  review_period_days: 14
+
+# Per-spec required runtime ACs
+# These ACs MUST be verified at runtime (not just static/repo checks)
+required_runtime_acs:
+  k8s-deployment_spec:
+    acs: [AC-003, AC-013, AC-020, AC-021, AC-029, AC-031]
+    reason: "Pod health, service endpoints, cert-manager certificates, ExternalSecrets sync, Promtail DaemonSet, and CronJobs require live cluster"
+    verification_methods:
+      - kubectl get pods -n mereka-lms
+      - kubectl get endpoints -n mereka-lms
+      - kubectl get certificates -n mereka-lms
+      - kubectl get externalsecrets -n mereka-lms
+      - kubectl get cronjobs -n mereka-lms
+      - kubectl get daemonsets -n mereka-lms
+
+  secrets-management_spec:
+    acs: [AC-001, AC-002, AC-003, AC-018]
+    reason: "Secret sync status, pod envFrom injection, runtime environment variables, and end-to-end rotation require Infisical + GCP SM + K8s integration"
+    verification_methods:
+      - kubectl get externalsecrets -n mereka-lms
+      - kubectl describe pod <lms-pod> -n mereka-lms
+      - kubectl exec <lms-pod> -n mereka-lms -- env | grep OPENEDX_SECRET_KEY
+      - scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+
+  observability-stack_spec:
+    acs: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007]
+    reason: "Prometheus scraping, Grafana dashboards, /metrics endpoints, Loki logs, Tempo traces, alert firing, and trace-log correlation require live observability stack"
+    verification_methods:
+      - kubectl get servicemonitor -n mereka-lms
+      - curl -s https://grafana.mereka.io/api/health
+      - curl -s https://academyv2.mereka.io/metrics
+      - logcli query '{namespace="mereka-lms"}' --limit 10
+      - scripts/qa/verify-alert-routing.sh
+      - scripts/infra/validate-telemetry-connectivity.sh
+
+  auth-sso-enterprise_spec:
+    acs: [AC-016, AC-043]
+    reason: "Authentik admin MFA enforcement and enterprise tenant SSO flows require live authentication services with tenant credentials"
+    verification_methods:
+      - scripts/infra/ensure-authentik-admin-mfa.sh --verify
+      - scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=prod
+      - curl -I https://authentik.mereka.io/if/admin/
+      - curl -I https://academyv2.mereka.io/enterprise/login/<tenant-slug>
+
+  multi-site-domains_spec:
+    acs: [AC-001, AC-002, AC-003, AC-007]
+    reason: "Domain resolution, session persistence across domains, and authenticated upload flows require live HTTP(S) endpoints"
+    verification_methods:
+      - scripts/qa/smoke-test.sh
+      - scripts/qa/verify-session-persistence.sh
+      - curl -I https://academyv2.mereka.io
+      - curl -I https://academy.biji-biji.com
+      - curl -I https://apps.academyv2.mereka.io
+
+  tutor-configuration_spec:
+    acs: [AC-006, AC-007, AC-010]
+    reason: "MFE image builds, MySQL authentication, and service health require Docker runtime"
+    verification_methods:
+      - tutor images build mfe  # Full build (15-20 min)
+      - tutor local dc ps
+      - scripts/qa/verify-tutor-services.sh
+      - docker exec -it tutor_local-mysql-1 mysql -u root -p -e "SELECT 1"
+
+  slo-sla-service-level-management_spec:
+    acs: [AC-003, AC-004, AC-006, AC-008, AC-009, AC-013, AC-015]
+    reason: "SLI metrics, Prometheus recording rules, GCP uptime checks, Grafana dashboards, alert firing, latency regression detection, and deployment annotations require live monitoring stack"
+    verification_methods:
+      - curl -s https://academyv2.mereka.io/metrics | grep http_request_duration_seconds
+      - promtool query instant http://prometheus:9090 'mereka:http_requests:availability_ratio_5m{service="lms"}'
+      - gcloud monitoring uptime list-configs --project=mereka-lms
+      - curl -s https://grafana.mereka.io/d/mereka-slo-overview
+      - scripts/qa/verify-error-budget.sh
+      - scripts/qa/verify-regression-detection.sh
+
+  disaster-recovery-business-continuity_spec:
+    acs: [AC-001, AC-002, AC-003, AC-005, AC-008, AC-012, AC-013, AC-020]
+    reason: "Velero backup status, volume snapshot counts, BackupStorageLocation availability, restore drills, backup verification, alert firing, and health checks require live cluster + Velero + GCS"
+    verification_methods:
+      - scripts/qa/audit-velero.sh --json
+      - kubectl get backupstoragelocation -n velero
+      - scripts/infra/fix-velero-restore-test.sh
+      - infrastructure/k8s/velero/restore-test-script.sh
+      - scripts/qa/audit-velero-alert-pipeline.sh
+      - scripts/qa/public-health-check.sh prod
+
+# Verification method assignment logic
+# How to determine which method class(es) apply to a given AC
+assignment_logic:
+  static:
+    - AC references file existence, format validation, or naming convention
+    - AC uses grep/rg to check static config files
+    - AC validates YAML/JSON schema
+    - AC checks for hardcoded secrets in repo
+    - Example: AC-004 (secrets naming convention), AC-012 (no hardcoded secrets), AC-025 (no 'latest' tags)
+
+  contract:
+    - AC validates HTTP response status codes (200, 302, 404)
+    - AC checks API endpoint existence or schema
+    - AC verifies JSON response structure
+    - Example: AC-003 (observability /metrics endpoint), AC-005 (multi-site /api/mfe_config/v1)
+
+  behavioral:
+    - AC validates end-to-end functional flow
+    - AC requires user actions (login, upload, navigation)
+    - AC verifies business logic correctness
+    - Example: AC-002 (multi-site session persistence), AC-006 (auth SSO SAML assertion processing)
+
+  resilience:
+    - AC simulates failure modes (OOM, pod kill, network partition)
+    - AC tests recovery procedures (restore, rotation, failover)
+    - AC validates disaster recovery RTO/RPO
+    - Example: AC-006 (observability OOM alert firing), AC-005 (disaster-recovery restore drill)
+
+  monitoring:
+    - AC queries Prometheus/Grafana for metrics
+    - AC validates alert definitions or firing behavior
+    - AC checks dashboard existence or data freshness
+    - Example: AC-001 (observability Prometheus scraping), AC-008 (SLO dashboard), AC-012 (disaster-recovery backup alert)
+
+# Automation feasibility indicators
+# When is an AC suitable for automation vs manual verification?
+automation_indicators:
+  fully_automatable:
+    - AC checks static files or config values
+    - AC runs shell commands with deterministic output
+    - AC queries APIs with predictable responses
+    - AC uses kubectl to inspect K8s resources
+    - Example: AC-001 (k8s Kustomize rendering), AC-004 (secrets naming), AC-001 (observability ServiceMonitors)
+
+  partially_automatable:
+    - AC requires live cluster but can use read-only kubectl commands
+    - AC checks runtime state but does not trigger destructive actions
+    - AC validates metrics existence but not alert firing
+    - Example: AC-003 (k8s pod health), AC-001 (secrets ExternalSecrets status), AC-008 (SLO dashboard existence)
+
+  manual_only:
+    - AC requires human judgment (visual inspection, UX assessment)
+    - AC involves destructive or high-risk operations (secret rotation, cluster rebuild)
+    - AC tests organizational processes (postmortem timeliness, on-call response)
+    - AC depends on external vendor integrations (Okta, Azure AD)
+    - Example: AC-006 (observability OOM simulation), AC-016 (disaster-recovery full namespace restore), AC-043 (auth enterprise SSO with tenant credentials)
+
+# Coverage gaps and migration path
+# How to identify ACs that need better verification
+coverage_gaps:
+  missing_automated_tests:
+    - ACs with verify: [] (empty verification array)
+    - ACs with only manual verification
+    - Example: slo-sla AC-024 through AC-041 (quarterly reports, capacity planning)
+
+  missing_runtime_verification:
+    - ACs with shell scripts that only check static files
+    - ACs marked "automated" but script does not connect to live cluster
+    - Example: tutor-configuration AC-006 (MFE build) - script verifies Dockerfile, not actual build
+
+  over_reliance_on_manual:
+    - ACs marked "manual" but could be partially automated
+    - ACs with runbook sections that describe deterministic checks
+    - Example: observability AC-002 (Grafana dashboard) - automated check for JSON, manual for visual correctness
+
+# Migration strategy
+migration_strategy:
+  phase_1_static_coverage:
+    description: "Cover all ACs with at least static verification (file checks, grep, lint)"
+    target_specs: [k8s-deployment, secrets-management, tutor-configuration]
+    automation_target: 100
+
+  phase_2_contract_coverage:
+    description: "Add contract verification for all API/endpoint ACs"
+    target_specs: [observability-stack, multi-site-domains, auth-sso-enterprise]
+    automation_target: 80
+
+  phase_3_behavioral_coverage:
+    description: "Add behavioral tests for critical user flows"
+    target_specs: [auth-sso-enterprise, multi-site-domains]
+    automation_target: 60
+
+  phase_4_resilience_coverage:
+    description: "Add chaos testing and failure mode verification"
+    target_specs: [disaster-recovery-business-continuity, slo-sla-service-level-management]
+    automation_target: 40
+
+  phase_5_monitoring_coverage:
+    description: "Ensure all SLIs, SLOs, and alerts have automated verification"
+    target_specs: [observability-stack, slo-sla-service-level-management]
+    automation_target: 90
+
+# Special cases and exceptions
+special_cases:
+  long_running_tests:
+    description: "ACs that require >10 minutes to verify"
+    examples:
+      - tutor-configuration AC-006 (MFE build: 15-20 min)
+      - k8s-deployment AC-003 (17 deployments to Ready: <10 min)
+    policy: "Run in nightly CI only, not on every commit"
+
+  credential_dependent_tests:
+    description: "ACs that require live credentials or tenant configuration"
+    examples:
+      - auth-sso-enterprise AC-043 (enterprise tenant SSO)
+      - secrets-management AC-001, AC-003 (GCP SM + K8s cluster)
+    policy: "Use test tenants/namespaces where possible; fallback to manual for production validation"
+
+  destructive_tests:
+    description: "ACs that modify production state or require manual approval"
+    examples:
+      - observability-stack AC-006 (OOM simulation)
+      - disaster-recovery AC-016 (full namespace restore)
+      - secrets-management AC-018 (secret rotation)
+    policy: "Manual only; run during scheduled maintenance windows or game days"
+
+  organizational_process_tests:
+    description: "ACs that test human workflows, not technical systems"
+    examples:
+      - slo-sla AC-018 (P1 acknowledgement within 15 min)
+      - slo-sla AC-019 (postmortem published within 5 business days)
+      - disaster-recovery AC-011 (DR evidence generation within 1 business day)
+    policy: "Manual verification during incident retrospectives and audits"
+
+# Testmap quality gates
+# Criteria for accepting testmaps as complete
+testmap_quality_gates:
+  minimum_coverage:
+    description: "Every AC must have at least one verification method"
+    threshold: 100
+    enforcement: "CI blocks PRs with verify: [] entries unless justified in manual section"
+
+  automation_ratio:
+    description: "Percentage of ACs with at least one automated verification"
+    threshold_by_tier:
+      P0_critical: 90
+      P1_high: 75
+      P2_medium: 50
+      P3_low: 20
+    enforcement: "CI warns if automation ratio falls below threshold"
+
+  runtime_coverage:
+    description: "All specs in required_runtime_acs must have corresponding runtime verification scripts"
+    threshold: 100
+    enforcement: "CI checks that all listed ACs have shell_verification or monitoring entries"
+
+  manual_justification:
+    description: "All manual-only ACs must have justification explaining why automation is infeasible"
+    threshold: 100
+    enforcement: "CI blocks PRs with manual entries lacking justification field"
+
+# Maintenance and evolution
+maintenance:
+  review_cadence: "Quarterly (aligned with OKR cycles)"
+  responsibility: "QA + SRE teams"
+  trigger_conditions:
+    - New spec added to specs/
+    - Tier policy changes (SLO targets adjusted)
+    - New verification tool introduced (e.g., chaos-mesh)
+    - Automation ratio falls below tier threshold
+
+  version_bumping:
+    major: "Tier policy changes, method class definitions change"
+    minor: "New specs added to required_runtime_acs"
+    patch: "Individual AC mappings updated, justification refinements"

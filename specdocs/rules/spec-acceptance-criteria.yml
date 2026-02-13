@@ -1,0 +1,42 @@
+# SPEC-AC: Acceptance criteria rules
+# These rules validate AC format, uniqueness, and completeness.
+
+rules:
+  - id: "SPEC-AC-001"
+    severity: "error"
+    description: "AC IDs must be unique within each spec"
+    rationale: "Duplicate IDs cause incorrect coverage tracking"
+    autofix: false
+    check: "No duplicate AC-NNN IDs on checkbox lines"
+
+  - id: "SPEC-AC-002"
+    severity: "warn"
+    description: "AC IDs should use domain prefix format (AC-PREFIX-NNN)"
+    rationale: "Prefixed IDs prevent cross-spec collisions and improve traceability"
+    autofix: false
+    recommended_format: "AC-{DOMAIN}-{NNN}"
+    examples:
+      - "AC-AUTH-001"
+      - "AC-K8S-001"
+      - "AC-DB-001"
+
+  - id: "SPEC-AC-003"
+    severity: "warn"
+    description: "ACs should use Given/When/Then format"
+    rationale: "Behavioral format makes criteria unambiguously testable"
+    autofix: false
+    pattern: "Given .+, when .+, then .+"
+
+  - id: "SPEC-AC-004"
+    severity: "info"
+    description: "Spec should not have more than 50 ACs"
+    rationale: "Large specs should be split for manageability"
+    autofix: false
+    max_count: 50
+
+  - id: "SPEC-AC-005"
+    severity: "warn"
+    description: "Every AC should have @covers annotation in at least one source file"
+    rationale: "Unmapped ACs indicate missing verification"
+    autofix: false
+    check: "Cross-reference with testmap verify lists"

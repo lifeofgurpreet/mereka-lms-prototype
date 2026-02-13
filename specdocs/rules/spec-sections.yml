@@ -1,0 +1,59 @@
+# SPEC-SEC: Section structure rules
+# These rules validate required/recommended markdown sections.
+
+rules:
+  - id: "SPEC-SEC-001"
+    severity: "error"
+    description: "Must have 'Scope' section"
+    rationale: "Defines implementation boundaries and prevents scope creep"
+    autofix: false
+    section: "Scope"
+
+  - id: "SPEC-SEC-002"
+    severity: "error"
+    description: "Must have 'Non-goals' section"
+    rationale: "Clarifies intent and prevents misinterpretation"
+    autofix: false
+    section: "Non-goals"
+
+  - id: "SPEC-SEC-003"
+    severity: "error"
+    description: "Must have 'Human Summary' section"
+    rationale: "Human-first communication ensures spec is understood by all stakeholders"
+    autofix: false
+    section: "Human Summary"
+
+  - id: "SPEC-SEC-004"
+    severity: "error"
+    description: "Must have 'Acceptance Criteria' section"
+    rationale: "ACs are the machine-checkable contract for implementation"
+    autofix: false
+    section: "Acceptance Criteria"
+
+  - id: "SPEC-SEC-005"
+    severity: "warn"
+    description: "Should have 'Edge Cases' section"
+    rationale: "Forces consideration of failure modes and boundary conditions"
+    autofix: false
+    section: "Edge Cases"
+
+  - id: "SPEC-SEC-006"
+    severity: "warn"
+    description: "Should have 'Observability' section"
+    rationale: "Ensures monitoring, logging, and alerting are planned"
+    autofix: false
+    section: "Observability"
+
+  - id: "SPEC-SEC-007"
+    severity: "warn"
+    description: "Should have 'Rollout & Rollback' section"
+    rationale: "Deployment strategy prevents incidents"
+    autofix: false
+    section: "Rollout & Rollback"
+
+  - id: "SPEC-SEC-008"
+    severity: "warn"
+    description: "Should have 'Open Questions' section"
+    rationale: "Tracks unresolved decisions for transparency"
+    autofix: false
+    section: "Open Questions"

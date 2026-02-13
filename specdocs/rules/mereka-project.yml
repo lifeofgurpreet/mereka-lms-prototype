@@ -1,0 +1,25 @@
+# MEREKA: Project-specific rules for Mereka LMS
+# These extend the generic SPEC-* rules with project conventions.
+
+rules:
+  - id: "MEREKA-REF-001"
+    severity: "warn"
+    description: "related_specs must include cross-cutting-requirements_spec.md"
+    rationale: "All specs inherit shared requirements (tenant isolation, observability, secrets)"
+    autofix: true
+    reference: "specs/cross-cutting-requirements_spec.md"
+    exception: "cross-cutting-requirements_spec.md itself"
+
+  - id: "MEREKA-SEC-001"
+    severity: "warn"
+    description: "Must have '### Non-Functional Requirements' heading"
+    rationale: "Standardized NFR heading ensures consistent quality attribute coverage"
+    autofix: false
+    heading: "### Non-Functional Requirements"
+
+  - id: "MEREKA-AC-001"
+    severity: "error"
+    description: "AC IDs must be unique within each spec"
+    rationale: "Duplicates cause incorrect coverage metrics and confuse verification"
+    autofix: false
+    check: "Leading AC ID on checkbox lines (- [ ] AC-NNN:) must be unique"
