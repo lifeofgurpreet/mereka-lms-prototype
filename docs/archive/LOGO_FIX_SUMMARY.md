@@ -37,42 +37,42 @@ Fixed critical logo 404 issues blocking production readiness by updating templat
 
 ### Files Modified
 
-1. **`/infrastructure/tutor/themes/mereka/lms/templates/footer.html`**
+1. **`infrastructure/tutor/themes/mereka/lms/templates/footer.html`**
    - Line 21: Changed `logo-horizontal.png` → `logo.png`
    - Impact: LMS footer now displays logo correctly
 
-2. **`/infrastructure/tutor/themes/mereka/lms/templates/header/brand.html`**
+2. **`infrastructure/tutor/themes/mereka/lms/templates/header/brand.html`**
    - Line 17: Changed `logo-horizontal.png` → `logo.png`
    - Impact: LMS header now displays logo correctly
 
-3. **`/infrastructure/tutor/apply-patches.sh`**
+3. **`infrastructure/tutor/apply-patches.sh`**
    - Line 468: Changed MFE footer logo URL to `/static/images/logo.png`
    - Added logo sync section (lines 595-625)
    - Impact: All logo files synced on every `tutor config save`
 
-4. **`/scripts/branding/verify-logo-setup.sh`**
+4. **`./scripts/branding/verify-logo-setup.sh`**
    - Updated checks to verify `logo.png` references
    - Impact: Verification script now matches new implementation
 
 ### New Files Created
 
-1. **`/scripts/branding/fix-logo-static-files.sh`**
+1. **`./scripts/branding/fix-logo-static-files.sh`**
    - Quick fix script for logo sync
    - Runs collectstatic in local/K8s
    - Usage: `./scripts/branding/fix-logo-static-files.sh`
 
-2. **`/scripts/branding/deploy-logo-fix.sh`**
+2. **`./scripts/branding/deploy-logo-fix.sh`**
    - Production deployment script
    - Copies logos to K8s pods
    - Runs collectstatic in production
    - Usage: `./scripts/branding/deploy-logo-fix.sh`
 
-3. **`/docs/operations/LOGO_404_FIX.md`**
+3. **`docs/operations/LOGO_404_FIX.md`**
    - Complete technical documentation
    - Troubleshooting guide
    - Rollback procedures
 
-4. **`/LOGO_FIX_DEPLOYMENT_CHECKLIST.md`**
+4. **`LOGO_FIX_DEPLOYMENT_CHECKLIST.md`**
    - Step-by-step deployment guide
    - Verification checklist
    - Success criteria

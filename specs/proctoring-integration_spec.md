@@ -96,7 +96,7 @@ Enterprise clients purchasing learning platforms for high-stakes training (compl
 
 ## Assumptions
 
-- The Open edX LMS is running Tutor 18.2.2 (Redwood release) with the `edx-proctoring` package available in the base image (ships with standard Tutor build)
+- The Open edX LMS is running Tutor 21.0.0 (Ulmo) with the `edx-proctoring` package available in the base image (ships with standard Tutor build)
 - The `edx-proctoring` package provides the `ProctoringBackendProvider` plugin interface that third-party providers implement
 - Enterprise clients have independent contracts with their chosen proctoring provider(s) and will supply API credentials
 - Students have access to a desktop/laptop computer with webcam, microphone, and stable internet (minimum 1.5 Mbps upload) for proctored exams
@@ -572,7 +572,7 @@ Enterprise clients purchasing learning platforms for high-stakes training (compl
 
 #### Phase 0: Infrastructure and Backend Preparation (Week 1-3)
 
-1. Verify `edx-proctoring` package is present in the LMS image and is the correct version for the Redwood release
+1. Verify `edx-proctoring` package is present in the LMS image and is the correct version for the Ulmo release
 2. Install and configure proctoring provider backend packages (`edx-proctoring-proctorio`, `edx-proctoring-examity`, etc.) as Tutor plugins
 3. Create the `EnterpriseProctoringConfig` Django model and admin interface
 4. Implement the provider adapter registry and "no-op" testing backend
@@ -719,7 +719,7 @@ Enterprise clients purchasing learning platforms for high-stakes training (compl
 
 2. **Provider pricing model impact**: How do proctoring provider costs (per-session, per-seat, or platform license) affect the enterprise billing model? Should proctoring be bundled into the enterprise subscription or billed separately as an add-on? This affects whether the platform needs to track per-session usage for billing purposes.
 
-3. **edx-proctoring version compatibility**: The spec assumes `edx-proctoring` is compatible with Tutor 18.2.2 (Redwood). Need to verify the exact version of `edx-proctoring` bundled with the Redwood release and confirm that the provider backend plugin architecture supports all four target providers. Some providers may require newer versions.
+3. **edx-proctoring version compatibility**: The spec assumes `edx-proctoring` is compatible with Tutor 21.0.0 (Ulmo). Need to verify the exact version of `edx-proctoring` bundled with the Ulmo release and confirm that the provider backend plugin architecture supports all four target providers. Some providers may require newer versions.
 
 4. **Recording storage jurisdiction**: Where do each proctoring provider's recording storage servers reside geographically? For enterprise clients with data residency requirements (EU, Singapore, Australia), the provider's storage location may be a compliance blocker. Need data processing location information from each provider.
 

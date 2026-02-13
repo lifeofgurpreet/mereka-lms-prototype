@@ -434,21 +434,9 @@ ocumented justification for relaxation
 
 ## Open Questions
 
-1. Should per-tenant rate limiting be a MUST or SHOULD? (Curr
-ently SHOULD -- depends on traffic patterns from initial ente
-rprise clients)
-2. What is the compliance timeline for existing services to m
-eet all cross-cutting requirements? (Suggested: 90 days from
-spec approval)
-3. Should mTLS between services be mandatory or recommended?
-(Currently SHOULD -- depends on GKE network policy support an
-d operational overhead)
-4. What is the retention policy for tenant offboarding deleti
-on certificates? (Suggested: 7 years for regulatory complianc
-e)
-5. Should we define a standard error code taxonomy across all
-services? (Benefits: consistent client error handling. Cost:
-coordination overhead)
-6. What is the maximum number of concurrent tenants the share
-d-everything model must support? (Current target: 50+ from mu
-lti-tenancy spec)
+1. ~~Should per-tenant rate limiting be a MUST or SHOULD?~~ **RESOLVED**: Keep as SHOULD for v1. Upgrade to MUST once traffic patterns from first 3 enterprise clients are measured (target: Q3 2026).
+2. ~~What is the compliance timeline for existing services to meet all cross-cutting requirements?~~ **RESOLVED**: 90 days from spec approval. Already-deployed services (LMS, Studio, Forum) get 180-day remediation window for non-critical items.
+3. ~~Should mTLS between services be mandatory or recommended?~~ **RESOLVED**: Keep as SHOULD. GKE Network Policies provide namespace-level isolation. mTLS adds complexity with minimal gain for single-cluster. Revisit for multi-cluster.
+4. ~~What is the retention policy for tenant offboarding deletion certificates?~~ **RESOLVED**: 7 years for regulatory compliance (Malaysia PDPA + potential EU GDPR). Store in GCS with lifecycle policy.
+5. Should we define a standard error code taxonomy across all services? **STATUS**: Deferred to post-v1. Not blocking any current implementation.
+6. ~~What is the maximum number of concurrent tenants the shared-everything model must support?~~ **RESOLVED**: 50 tenants as defined in multi-tenancy-architecture_spec.md.

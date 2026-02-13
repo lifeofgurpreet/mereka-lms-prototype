@@ -31,11 +31,11 @@ links:
 
 ## What we're building
 
-A comprehensive management and enterprise usage framework for Open edX Content Libraries v2, the modern component-based content authoring system available in the Redwood release. Content Libraries v2 replaces the legacy Content Libraries v1 system with a Blockstore-backed architecture that enables granular, reusable XBlock components to be authored once in a library, versioned with explicit draft/published lifecycle, and referenced across multiple courses without duplication.
+A comprehensive management and enterprise usage framework for Open edX Content Libraries v2, the modern component-based content authoring system available in the Ulmo release. Content Libraries v2 replaces the legacy Content Libraries v1 system with a Blockstore-backed architecture that enables granular, reusable XBlock components to be authored once in a library, versioned with explicit draft/published lifecycle, and referenced across multiple courses without duplication.
 
 This spec covers the full lifecycle of Content Libraries v2 on the Mereka Academy platform: library creation and organization, component-based authoring with XBlock support, versioning with draft/published workflow, cross-course content reuse via library content blocks, enterprise multi-tenant library access controls, content search and discovery, usage analytics, backup and recovery, performance optimization for scale, and integration with the existing course authoring pipeline in Studio. The system builds on the `openedx.core.djangoapps.content_libraries` Django app already enabled in the Mereka LMS/CMS settings (confirmed in `deploy/k8s/base/apps/openedx/settings/lms/production.py`).
 
-The architecture relies on Blockstore as the underlying storage and versioning engine. In Redwood, Blockstore is integrated as a Django app within the LMS/CMS process (not a separate service), storing library content bundles in the configured object storage backend (local filesystem or Google Cloud Storage). Each library is a Blockstore collection of typed bundles, where each bundle maps to an XBlock component. Libraries expose a REST API (`/api/libraries/v2/`) consumed by Studio and the authoring MFE (`frontend-app-authoring`).
+The architecture relies on Blockstore as the underlying storage and versioning engine. In Ulmo, Blockstore is integrated as a Django app within the LMS/CMS process (not a separate service), storing library content bundles in the configured object storage backend (local filesystem or Google Cloud Storage). Each library is a Blockstore collection of typed bundles, where each bundle maps to an XBlock component. Libraries expose a REST API (`/api/libraries/v2/`) consumed by Studio and the authoring MFE (`frontend-app-authoring`).
 
 ## Why it matters
 
@@ -106,8 +106,8 @@ This spec establishes the contracts for how libraries are created, governed, ver
 - The existing enterprise multi-tenancy architecture (`specs/multi-tenancy-architecture_spec.md`) provides the tenant identity model (`EnterpriseCustomer`) and organization model that libraries will be scoped to
 - The existing Studio user permission model supports the `CONTENT_LIBRARY_CREATOR` role for library creation authorization
 - Google Cloud Storage is the target object storage backend for Blockstore bundles in production (per `infrastructure/terraform/modules/storage/README.md`)
-- The platform runs Tutor 18.2.2 (Redwood) which includes the Content Libraries v2 REST API at `/api/libraries/v2/`
-- Meilisearch or Elasticsearch (depending on Redwood configuration) provides the content search index for libraries
+- The platform runs Tutor 21.0.0 (Ulmo) which includes the Content Libraries v2 REST API at `/api/libraries/v2/`
+- Meilisearch or Elasticsearch (depending on Ulmo configuration) provides the content search index for libraries
 
 ---
 
@@ -550,9 +550,9 @@ This spec establishes the contracts for how libraries are created, governed, ver
 
 ## Open Questions
 
-1. **Blockstore storage backend for production**: Should Blockstore use GCS bucket `lms-blockstore` (referenced in Terraform module) or the local filesystem with periodic GCS sync? GCS provides durability and scalability but may add latency for small reads. Need infrastructure team input on whether Blockstore's GCS backend is production-tested in the Redwood release.
+1. **Blockstore storage backend for production**: Should Blockstore use GCS bucket `lms-blockstore` (referenced in Terraform module) or the local filesystem with periodic GCS sync? GCS provides durability and scalability but may add latency for small reads. Need infrastructure team input on whether Blockstore's GCS backend is production-tested in the Ulmo release.
 
-2. **Search engine selection**: Redwood supports both Meilisearch and Elasticsearch for content search. Which search engine is deployed (or will be deployed) on the Mereka GKE cluster? Library search indexing depends on this choice. Need infrastructure team confirmation.
+2. **Search engine selection**: Ulmo supports both Meilisearch and Elasticsearch for content search. Which search engine is deployed (or will be deployed) on the Mereka GKE cluster? Library search indexing depends on this choice. Need infrastructure team confirmation.
 
 3. **Content Libraries v1 migration**: Do any Content Libraries v1 libraries exist on the current platform? If so, should they be migrated to v2 or left as-is? v1 libraries use a different storage model (modulestore-backed). Need content team inventory.
 

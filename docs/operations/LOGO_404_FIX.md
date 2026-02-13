@@ -23,9 +23,9 @@ The theme static files were not being collected to the proper static paths durin
 Updated templates to use the working logo path (`logo.png`):
 
 **Files changed:**
-- `/infrastructure/tutor/themes/mereka/lms/templates/footer.html` (line 21)
-- `/infrastructure/tutor/themes/mereka/lms/templates/header/brand.html` (line 17)
-- `/infrastructure/tutor/apply-patches.sh` (line 468 - MFE footer logo)
+- `infrastructure/tutor/themes/mereka/lms/templates/footer.html` (line 21)
+- `infrastructure/tutor/themes/mereka/lms/templates/header/brand.html` (line 17)
+- `infrastructure/tutor/apply-patches.sh` (line 468 - MFE footer logo)
 
 **Before:**
 ```html
@@ -57,12 +57,12 @@ This ensures that after every `tutor config save`, all logo files are synced.
 
 Created two new scripts for immediate fixes and deployments:
 
-**`/scripts/branding/fix-logo-static-files.sh`**
+**`./scripts/branding/fix-logo-static-files.sh`**
 - Syncs logo files to build directory
 - Runs `collectstatic` in local or K8s environments
 - Useful for quick fixes without full rebuild
 
-**`/scripts/branding/deploy-logo-fix.sh`**
+**`./scripts/branding/deploy-logo-fix.sh`**
 - Production deployment script for K8s
 - Copies logo files directly to running pods
 - Runs `collectstatic` in production
@@ -70,7 +70,7 @@ Created two new scripts for immediate fixes and deployments:
 
 ### 4. Updated Verification Script
 
-Updated `/scripts/branding/verify-logo-setup.sh` to check for `logo.png` references instead of `logo-horizontal.png`.
+Updated `./scripts/branding/verify-logo-setup.sh` to check for `logo.png` references instead of `logo-horizontal.png`.
 
 ## Deployment Steps
 

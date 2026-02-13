@@ -138,6 +138,15 @@ The system MUST pass the following verification checks:
 - The system MUST set `DEFAULT_SITE_THEME = "mereka"` in LMS production.py
 - The system SHOULD configure SiteConfiguration to override theme per domain if needed
 
+### Cross-Spec Integration Criteria
+
+### Multi-Site Domains Integration (Tier 2 → Tier 3)
+- [ ] AC-INT-001: Given `multi-site-domains_spec.md` configures three production domains (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io), when branding assets are deployed, then Mereka logo and custom footer render correctly on all three domains with zero Open edX default branding leakage.
+- [ ] AC-INT-002: Given multi-site domains are configured, when `scripts/branding/verify-branding-health.sh` runs in production, then it passes for all configured domains without domain-specific branding regressions.
+
+### Tutor Configuration Integration (Tier 1 → Tier 3)
+- [ ] AC-INT-003: Given `tutor-configuration_spec.md` apply-patches workflow syncs theme assets, when `tutor images build openedx` completes, then Mereka logo variants exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/` returns zero results.
+
 ### Non-Functional Requirements
 
 - Page load time: LMS homepage with branding assets MUST load in under 3 seconds (p95) on a 4G connection

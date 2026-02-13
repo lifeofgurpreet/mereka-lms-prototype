@@ -93,6 +93,15 @@ Existing forum data in MongoDB Atlas -- threads, posts, comments, votes, abuse f
 - Supporting dual-runtime (Ruby and Python) permanently; dual-run is transitional only
 - Changing the forum's public-facing URL structure or ingress routing
 
+## Cross-Spec Integration Criteria
+
+### MongoDB Atlas Integration (Tier 2 → Tier 3)
+- [ ] AC-INT-001: Given `mongodb-atlas-integration_spec.md` is deployed with `cs_comments_service` database on Atlas, when Python forum service starts, then it connects to Atlas without local MongoDB dependency and logs show successful SRV connection.
+- [ ] AC-INT-002: Given forum data exists in Atlas `cs_comments_service`, when Python forum reads threads/posts, then data integrity checks (row counts, content hashes) match Ruby forum baseline with zero data loss.
+
+### K8s Deployment Integration (Tier 2 → Tier 3)
+- [ ] AC-INT-003: Given K8s Deployment for forum is updated to Python image, when forum Service selector matches pod labels, then `kubectl get endpoints forum` shows non-empty endpoints and forum API responds on configured port.
+
 ## Assumptions
 
 - The upstream `openedx-forum` Python package is compatible with Open edX Redwood (the current release running on Mereka LMS)

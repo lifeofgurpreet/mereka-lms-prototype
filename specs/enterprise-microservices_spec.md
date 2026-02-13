@@ -100,7 +100,7 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 
 - The existing GKE cluster in `mereka-lms` namespace has sufficient resource headroom for 5 additional Deployments (estimated: 2.5 vCPU, 5 GB RAM total at baseline)
 - Cloud SQL (MySQL 8) can handle the additional databases (5 new logical databases) within its current tier, or can be scaled up
-- The Open edX LMS is running Tutor 18.2.2 (Redwood release) with the `openedx-enterprise` package already included in the base image (it ships with the standard Tutor build)
+- The Open edX LMS is running Tutor 21.0.0 (Ulmo) with the `openedx-enterprise` package already included in the base image (it ships with the standard Tutor build)
 - The existing Caddy reverse proxy can route to additional internal services
 - Redis (existing) is available for Celery task queues and caching for all enterprise services
 - Infisical is the secrets source of truth (per `specs/secrets-management_spec.md`)

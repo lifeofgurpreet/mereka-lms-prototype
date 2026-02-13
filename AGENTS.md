@@ -36,6 +36,10 @@ All feature development is driven by specifications with acceptance criteria:
 - **Sprint Plans**: `docs/sprints/` - Detailed sprint breakdowns with tasks and estimates
 - **Coverage Reports**: Run `python3 scripts/qa/spec-tools/spec_coverage_report.py` for current status
 
+**For agents starting a session**:
+1. Run `bv --robot-triage` (or `bv --robot-next` for quick start) to get graph-aware prioritization
+2. Claim the recommended task with `br update <id> --status in_progress`
+
 **For agents implementing features**:
 1. Check `docs/IMPLEMENTATION_ORDER.md` for dependency order (Tier 0 → Tier 9)
 2. Read the spec in `specs/` for acceptance criteria
@@ -859,3 +863,85 @@ This project uses the **specs-vs-docs** convention from [team-skills](https://gi
 
 ### Spec Template
 New specs should follow `specs/_TEMPLATE.md`. Required sections: Scope, Non-goals, Requirements, Acceptance Criteria, Edge Cases, Observability, Rollout & Rollback, Open Questions.
+
+<!-- bv-agent-instructions-v1 -->
+
+---
+
+## Beads Workflow Integration
+
+This project uses [beads_rust](https://github.com/Dicklesworthstone/beads_rust) (`br`) for issue tracking and [beads_viewer](https://github.com/Dicklesworthstone/beads_viewer) (`bv`) for graph-aware triage. Issues are stored in `.beads/` and tracked in git.
+
+> **WARNING**: Never run bare `bv` (launches TUI). Always use `--robot-*` flags for agent sessions.
+
+### Essential Commands
+
+```bash
+# Graph-aware triage (USE THIS AT SESSION START)
+bv --robot-triage                    # Full triage: priority, insights, alerts, plan
+bv --robot-next                      # Single next task (quick start)
+bv --robot-plan                      # Parallel execution tracks for multi-agent
+
+# Issue management (br = beads_rust CLI)
+br list                              # All open issues
+br ready                             # Unblocked issues ready to work
+br show <id>                         # Full issue details with dependencies
+br create "Title" -t task -p 2 -d "Description with ## Acceptance Criteria"
+br update <id> --status in_progress
+br close <id>                        # Close completed issue
+br close <id1> <id2>                 # Close multiple issues
+br dep add <issue> <depends-on>      # Add dependency
+br sync --flush-only                 # Sync beads to git (no push)
+
+# Hygiene & health
+bv --robot-suggest                   # Duplicates, missing deps, label gaps
+bv --robot-alerts                    # Critical/warning alerts
+bv --robot-label-health              # Per-label health metrics
+bv --robot-label-attention           # Labels needing attention
+bv --robot-label-flow                # Label-based flow analysis
+bv --robot-insights                  # PageRank, betweenness, critical path
+bv --robot-priority                  # Priority misalignment detection
+
+# Baseline & drift
+bv --save-baseline "description"     # Save current state as baseline
+bv --check-drift                     # Compare against last baseline
+```
+
+### Workflow Pattern
+
+1. **Triage**: Run `bv --robot-triage` (or `bv --robot-next` for quick start)
+2. **Claim**: Use `br update <id> --status in_progress`
+3. **Work**: Implement the task
+4. **Complete**: Use `br close <id>`
+5. **Hygiene**: Run `bv --robot-suggest` to catch issues
+6. **Sync**: Always run `br sync --flush-only` at session end
+
+### Quality Bar
+
+Every bead MUST have:
+- **Labels**: At least 1 domain label (specs, infra, auth, branding, data, observability, enterprise, ci-cd, mobile, dr, ecommerce, ops, linting, bv, multisite, openedx, analytics)
+- **Acceptance Criteria**: Epics and tasks MUST have `## Acceptance Criteria` with `AC-NNN` IDs
+- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog
+- **Types**: task, bug, feature, epic, question, docs, chore
+
+### Multi-Agent Coordination
+
+When working in a team, use `bv --robot-plan` to get independent parallel tracks:
+```bash
+bv --robot-plan    # Shows Union-Find connected components
+                   # Each track can be assigned to a different agent
+```
+
+### Session Protocol
+
+**Before ending any session, run this checklist:**
+
+```bash
+git status                           # Check what changed
+git add <files>                      # Stage code changes
+br sync --flush-only                 # Commit beads changes
+git commit -m "..."                  # Commit code
+git push                             # Push to remote
+```
+
+<!-- end-bv-agent-instructions -->

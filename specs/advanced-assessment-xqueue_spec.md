@@ -35,7 +35,7 @@ A comprehensive advanced assessment system for Mereka Academy's Open edX platfor
 
 The system covers five major capabilities:
 
-1. **Open Response Assessment (ORA2)** -- Full configuration and operationalization of the ORA2 framework already present in the Open edX Redwood release. This includes peer assessment workflows (students grade each other using rubrics), self-assessment, staff assessment, and AI-assisted assessment grading using the ORA2 pipeline. File upload support (images, PDFs, code files) for portfolio-style submissions. The ORA Grading MFE (already configured at `apps.academyv2.mereka.io/ora-grading`) provides the staff grading interface.
+1. **Open Response Assessment (ORA2)** -- Full configuration and operationalization of the ORA2 framework already present in the Open edX Ulmo release. This includes peer assessment workflows (students grade each other using rubrics), self-assessment, staff assessment, and AI-assisted assessment grading using the ORA2 pipeline. File upload support (images, PDFs, code files) for portfolio-style submissions. The ORA Grading MFE (already configured at `apps.academyv2.mereka.io/ora-grading`) provides the staff grading interface.
 
 2. **XQueue External Grading** -- The XQueue service is already deployed (K8s service `xqueue` on port 8000, MySQL database provisioned, secrets in Infisical) but has no configured external graders. This spec defines how to connect self-hosted grading backends (CodeJail sandboxed Python execution, custom grading scripts, containerized graders) to the XQueue framework for automated assessment of code submissions, mathematical proofs, and structured data problems.
 
@@ -120,7 +120,7 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
 
 ## Assumptions
 
-- The Open edX LMS is running Tutor 18.2.2 (Redwood release) with ORA2 (`openassessment`) included in the base image
+- The Open edX LMS is running Tutor 21.0.0 (Ulmo) with ORA2 (`openassessment`) included in the base image
 - The XQueue service is deployed as a K8s service (`xqueue`) with MySQL database (`xqueue`) and secrets provisioned via ExternalSecrets
 - The ORA Grading MFE is deployed and accessible at `apps.academyv2.mereka.io/ora-grading`
 - ORA2 file upload is configured with filesystem backend at `/openedx/data/ora2` with Redis cache `ora2-storage`
@@ -227,7 +227,7 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
   - **Image Annotation**: Problems where students annotate regions of an image with labels
   - **Numerical Input with Tolerance**: Problems accepting numeric answers within a configurable tolerance range
   - **Custom JavaScript Problem** (`jsinput`): Problems with custom JavaScript interaction that submit a JSON answer for server-side grading
-- The system SHOULD support the following additional XBlocks if available as stable packages for the Redwood release:
+- The system SHOULD support the following additional XBlocks if available as stable packages for the Ulmo release:
   - **Problem Builder** (`xblock-problem-builder`): Multi-step guided assessment with branching logic
   - **Circuit Schematic Builder**: Interactive circuit design and simulation problems
   - **Peer Instruction** (`ubcpi`): Two-phase assessment where students answer individually, see peer responses, and may revise
@@ -601,8 +601,8 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
 
 #### Phase 4: Advanced Question Types (Week 8-10)
 
-1. Verify drag-and-drop v2 XBlock is available in Studio (ships with Redwood base image)
-2. Verify math expression input is available (ships with Redwood base image)
+1. Verify drag-and-drop v2 XBlock is available in Studio (ships with Ulmo base image)
+2. Verify math expression input is available (ships with Ulmo base image)
 3. Install Problem Builder XBlock via Tutor plugin if not already present
 4. Create test problems for each advanced question type
 5. Verify keyboard accessibility for drag-and-drop v2
@@ -722,9 +722,9 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
 
 3. **ORA2 file storage volume sizing**: The current `/openedx/data/ora2` path is on the LMS pod's persistent volume. For enterprise scale (5,000+ students submitting files), should we migrate ORA2 file storage to Google Cloud Storage (GCS) via the `ORA2_FILEUPLOAD_BACKEND=swift` or `s3` backend? What is the current persistent volume size?
 
-4. **Advanced XBlock availability in Redwood**: Which advanced XBlocks (drag-and-drop v2, Problem Builder, Peer Instruction, Circuit Schematic Builder) ship with the Tutor 18.2.2 Redwood base image, and which require additional pip installation? Need to test the Studio component picker to determine what is available out of the box.
+4. **Advanced XBlock availability in Ulmo**: Which advanced XBlocks (drag-and-drop v2, Problem Builder, Peer Instruction, Circuit Schematic Builder) ship with the Tutor 21.0.0 Ulmo base image, and which require additional pip installation? Need to test the Studio component picker to determine what is available out of the box.
 
-5. **AI-assisted ORA2 grading model**: The ORA2 AI-assisted grading feature uses machine learning to predict scores based on staff-graded examples. Is this feature fully functional in the Redwood release? What ML backend does it use? Does it require additional infrastructure (separate ML serving pod, model training pipeline)?
+5. **AI-assisted ORA2 grading model**: The ORA2 AI-assisted grading feature uses machine learning to predict scores based on staff-graded examples. Is this feature fully functional in the Ulmo release? What ML backend does it use? Does it require additional infrastructure (separate ML serving pod, model training pipeline)?
 
 6. **Peer assessment at enterprise scale**: For a course with 2,000+ students, peer assessment workflows generate O(n * must_grade) assessment records. What is the database performance impact? Should we implement pagination or sharding for the peer assessment query paths?
 

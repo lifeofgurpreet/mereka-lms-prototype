@@ -87,6 +87,18 @@ The platform currently has workflows that evolved organically -- CI, image build
 - The pipeline will NOT build custom Open edX plugins or XBlocks as separate artifacts.
 - The pipeline will NOT implement DAST (Dynamic Application Security Testing) or container runtime security scanning.
 
+## Cross-Spec Integration Criteria
+
+### K8s Deployment Integration (Tier 2 → Tier 3)
+- [ ] AC-INT-001: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes images to Artifact Registry, then production Kustomize overlay references the new image tags and `kubectl apply` succeeds without resource validation errors.
+- [ ] AC-INT-002: Given K8s Deployments require specific ExternalSecrets, when CI deployment workflow runs, then it verifies ExternalSecrets reach `SecretSynced` before declaring deployment success.
+
+### Secrets Management Integration (Tier 1 → Tier 3)
+- [ ] AC-INT-003: Given `secrets-management_spec.md` defines required secret keys, when CI runs secret validation (`infisical-validate-mereka-lms.sh`), then it fails the build if any required `MEREKA_LMS_*` key is missing or contains placeholder values in the target environment.
+
+### Branding System Integration (Tier 3 → Tier 3)
+- [ ] AC-INT-004: Given branding assets are synced via `apply-patches.sh`, when CI builds openedx image, then `branding-preflight.sh` passes and verifies Mereka logo presence and Google Fonts absence in compiled artifacts.
+
 ## Assumptions
 
 - GitHub Actions is the sole CI/CD platform. No Jenkins, CircleCI, or other systems.
@@ -96,7 +108,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - Dev/local runs on Kind cluster on the VPS (`194.233.84.55`).
 - All secrets are managed via Infisical -> GCP Secret Manager -> ExternalSecrets (per `specs/secrets-management_spec.md`).
 - GitHub-hosted runners provide 2-core, 7GB RAM machines. OpenEdX image builds may require 12GB+ (handled by Docker memory config or may need self-hosted runners).
-- Tutor 18.2.2 with tutor-mfe 18.1.0 is the deployment toolchain.
+- Tutor 21.0.0 (Ulmo) is the deployment toolchain.
 
 ## Requirements
 
@@ -159,7 +171,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - The build workflow MUST trigger on push to `main` when files change in `infrastructure/tutor/**`, `assets/branding/**`, or `.github/workflows/build-tutor-images.yml`.
 - The build workflow MUST support `workflow_dispatch` with the following inputs: `build_openedx` (boolean), `build_mfe` (boolean), `update_gitops` (boolean), `target_environment` (choice: select-environment/production/staging), `image_tag` (string, optional).
 - The build workflow MUST run a `lint` job before build jobs. Build jobs MUST depend on lint passing (`needs: lint`).
-- The build workflow MUST install Tutor 18.2.2 and tutor-mfe 18.1.0 for all build jobs.
+- The build workflow MUST install Tutor 21.0.0 for all build jobs.
 - The build workflow MUST run `./infrastructure/tutor/apply-patches.sh` after `tutor config save` in every build job.
 - The build workflow MUST authenticate to GCP Artifact Registry using `google-github-actions/auth@v2` with `GCP_SA_KEY`.
 - The build workflow MUST tag images with both the full git SHA (or custom `image_tag`) and the 8-character short SHA.
@@ -252,7 +264,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 - The Tutor config verification workflow MUST trigger on push and pull requests when files change in `tutor_env/config.yml` or `infrastructure/tutor/**`.
 - The Tutor config verification workflow MUST support `workflow_dispatch` for manual runs.
-- The Tutor config verification workflow MUST install Tutor 18.2.2 and tutor-mfe 18.1.0 for all jobs.
+- The Tutor config verification workflow MUST install Tutor 21.0.0 for all jobs.
 - The Tutor config verification workflow MUST install Python 3.12 with pip caching for faster runs.
 - The workflow MUST include a `verify-patches` job that verifies MySQL authentication patch (`mysql_native_password`) and MFE Node.js patch (`NODE_OPTIONS=--max-old-space-size=6144`).
 - The workflow MUST include a `verify-multi-site-domains` job that verifies all production domains (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`, `academyv2.mereka.io`) are present in `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
@@ -268,7 +280,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 - The Tutor plugin test workflow MUST trigger on push and pull requests when files change in `infrastructure/tutor/plugins/**`.
 - The Tutor plugin test workflow MUST support `workflow_dispatch` for manual runs.
-- The Tutor plugin test workflow MUST install Tutor 18.2.2 and tutor-mfe 18.1.0 for all jobs.
+- The Tutor plugin test workflow MUST install Tutor 21.0.0 for all jobs.
 - The workflow MUST include a `test-mfe-oauth-plugin` job that verifies plugin syntax (`py_compile`), enables the plugin, generates config, and verifies plugin patches are applied.
 - The workflow MUST include a `test-plugin-lifecycle` job that tests enable, disable, and re-enable operations.
 - The workflow MUST include a `verify-custom-app-structure` job that documents expected plugin structure and mount points.

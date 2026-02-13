@@ -30,7 +30,7 @@ links:
 
 ## What we're building
 
-A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 18.2.2) on Google Kubernetes Engine. The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Ecommerce, Credentials, Notes, XQueue), infrastructure databases (MySQL, Redis, Elasticsearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays with two environments: local (Kind) and production (GKE).
+A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo) on Google Kubernetes Engine. The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Ecommerce, Credentials, Notes, XQueue), infrastructure databases (MySQL, Redis, Elasticsearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays with two environments: local (Kind) and production (GKE).
 
 ## Why it matters
 
@@ -334,6 +334,17 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - All resources MUST carry `app.kubernetes.io/instance: mereka-lms` and `app.kubernetes.io/part-of: mereka-lms`.
 - The Kustomize `labels` configuration MUST set `includeSelectors: false` to prevent selector mutation and immutability errors.
 - The base `commonAnnotations` MUST include `app.kubernetes.io/version` set to the current Tutor release version.
+
+## Cross-Spec Integration Criteria
+
+### Secrets Management Integration (Tier 1 → Tier 2)
+- [ ] AC-INT-001: Given `secrets-management_spec.md` ExternalSecrets are deployed, when K8s deployments reference `openedx-secrets` and `database-secrets`, then all pods reach Running state with no missing environment variable errors in logs.
+- [ ] AC-INT-002: Given ExternalSecrets reach `SecretSynced` status, when LMS pods start, then `kubectl exec lms-pod -- env | grep OPENEDX_SECRET_KEY` returns a non-empty value matching the GCP Secret Manager source.
+- [ ] AC-INT-003: Given a secret is rotated in Infisical and synced to GCP SM, when ExternalSecrets refresh (within 1h) and pods restart, then new pods use the rotated value without manual K8s Secret edits.
+
+### Tutor Configuration Integration (Tier 1 → Tier 2)
+- [ ] AC-INT-004: Given `tutor-configuration_spec.md` patches are applied, when K8s manifests reference MySQL, then MySQL Deployment includes `--mysql-native-password=ON` flag and LMS connects without authentication errors.
+- [ ] AC-INT-005: Given Tutor config includes multi-site domains (academy.biji-biji.com, skillourfuture.academy.mereka.io), when LMS production settings are inspected in the running pod, then `ALLOWED_HOSTS` contains all three domains.
 
 ## Acceptance Criteria
 

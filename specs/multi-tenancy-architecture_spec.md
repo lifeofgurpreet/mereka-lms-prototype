@@ -98,7 +98,7 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 
 - The `EnterpriseCustomer` model from the `openedx-enterprise` Django app is the canonical tenant identifier, as defined in `specs/enterprise-microservices_spec.md`
 - Open edX's Django Sites framework and `SiteConfiguration` model are functional and can drive per-site (per-tenant) configuration
-- The Tutor 18.2.2 (Redwood) deployment includes the `openedx-enterprise` package in the base image
+- The Tutor 21.0.0 (Ulmo) deployment includes the `openedx-enterprise` package in the base image
 - The existing Cloud SQL (MySQL 8) instance can support the additional query load from multi-tenant filtering (queryset-level `WHERE enterprise_customer_uuid = ...`)
 - MongoDB Atlas (modulestore, forum) does not require per-tenant isolation at v1 because enterprise services handle content access control through the catalog layer
 - The existing Caddy reverse proxy can route to tenant-specific domains without per-tenant Caddy configuration (wildcard or multi-domain blocks suffice)

@@ -77,7 +77,7 @@ Every one of these incidents was caused by the same root failure: reliance on a 
 
 ## Assumptions
 
-- Tutor 18.x (Redwood) or 21.x (Ulmo) is the deployment tool, with support for the `tutor hooks` Python API.
+- Tutor 21.x (Ulmo) is the deployment tool, with support for the `tutor hooks` Python API.
 - The repository uses GitHub Actions for CI/CD.
 - Developers and agents use `make tutor-apply` or equivalent wrapper commands rather than raw `tutor config save`.
 - The `tutor_env/` directory is gitignored and regenerated from config + patches.
@@ -311,7 +311,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 1. **Theme file copying:** Plugin does NOT handle file copying (logos, fonts, SCSS files). These must be copied manually or via Tutor mounts.
 2. **MFE theme assets:** `indigo/mereka` directory requires manual setup or Dockerfile COPY.
-3. **Hook API stability:** Plugin tested with Tutor 18.2.2; may need adjustments for other versions.
+3. **Hook API stability:** Plugin tested with Tutor 21.0.0; may need adjustments for other versions.
 
 ---
 

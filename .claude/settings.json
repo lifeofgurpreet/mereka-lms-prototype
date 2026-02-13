@@ -2,6 +2,7 @@
   "enabledPlugins": {
     "github:Biji-Biji-Initiative/team-skills/plugins/core": true,
     "github:Biji-Biji-Initiative/team-skills/plugins/web": true,
-    "github:Biji-Biji-Initiative/team-skills/plugins/backend": true
+    "github:Biji-Biji-Initiative/team-skills/plugins/backend": true,
+    "github:anthropics/claude-code/plugins/ralph-wiggum": true
   }
 }

@@ -84,7 +84,7 @@ Mobile is the primary access channel for learners across Mereka Academy's client
 
 ## Assumptions
 
-- Open edX LMS backend (Tutor 18.2.2, Redwood release) exposes the standard Mobile REST API at `/api/mobile/v1/`, `/api/courses/v1/`, `/api/enrollment/v1/`, and related endpoints
+- Open edX LMS backend (Tutor 21.0.0, Ulmo) exposes the standard Mobile REST API at `/api/mobile/v1/`, `/api/courses/v1/`, `/api/enrollment/v1/`, and related endpoints
 - The existing iOS CI/CD pipeline (`.github/workflows/build-ios-app.yml`) is the baseline for iOS; Android will follow a parallel pattern
 - Firebase project `mereka-academy` exists and is configured for both iOS (`com.mereka.academy.mobile`) and Android (`com.mereka.academy.mobile`) bundle/application IDs
 - Apple Developer account (Team ID: `44F7G2D7U6`) and Google Play Developer account are both active
