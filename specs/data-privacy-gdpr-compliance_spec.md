@@ -497,6 +497,13 @@ Without this spec:
 - [ ] AC-029: Given the analytics pipeline processes an event, when the user has withdrawn `analytics` consent, then the event is dropped before reaching ClickHouse
 - [ ] AC-030: Given a tenant offboarding is initiated per `specs/multi-tenancy-architecture_spec.md`, when the offboarding completes, then all tenant user data has been processed through either the deletion pipeline or the export pipeline per the tenant's DPA terms
 
+### GDPR Deletion Workflow
+
+- [ ] AC-031: Given a verified right-to-erasure request for a user, when the deletion pipeline completes across all data stores (MySQL, MongoDB Atlas, Redis, ClickHouse, GCS), then a cryptographic deletion certificate MUST be generated listing each data store, records deleted count, and SHA-256 hash of the deletion log
+- [ ] AC-032: Given a deletion pipeline execution where one data store fails (e.g., MongoDB timeout), when the failure is detected, then all completed deletions MUST be logged, the pipeline MUST retry the failed store 3 times with exponential backoff, and if still failing MUST alert ops and pause (NOT rollback successful deletions since data is already gone)
+- [ ] AC-033: Given a completed deletion for user X, when a Subject Access Request is submitted for user X, then the SAR pipeline MUST return zero personal data records and include the deletion certificate reference
+- [ ] AC-034: Given a completed right-to-erasure request, when the deletion certificate is generated, then the requesting user (or DPO if user account deleted) MUST receive an email confirmation within 24 hours listing the deletion date and certificate reference
+
 ---
 
 ## Edge Cases

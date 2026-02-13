@@ -398,43 +398,48 @@ Proctoring features referenced in this spec are defined in `specs/proctoring-int
 - [ ] AC-018: Given a student submission containing `import os; os.system("rm -rf /")`, when the grader worker processes it, then the sandboxed environment blocks the system call and the student receives feedback indicating a security violation
 - [ ] AC-019: Given the XQueue grader worker crashes during processing, when the visibility timeout (60 seconds) expires, then the submission reappears in the queue and is picked up by another worker
 - [ ] AC-020: Given an XQueue-graded problem, when the grader returns a result, then the grade (scaled to the problem's maximum points) appears in the gradebook within 5 minutes
+- [ ] AC-021: Given a student submission containing `x = [0] * (256 * 1024 * 1024)` (256MB array allocation), when the grader worker processes it, then the execution is terminated when memory usage exceeds 256MB and the student receives feedback: "Your code exceeded the memory limit (256MB)"
+- [ ] AC-022: Given a student submission containing `import os; [os.fork() for _ in range(100)]`, when the grader worker processes it, then the sandboxed environment blocks the fork() system call and the student receives feedback indicating a security violation
+- [ ] AC-023: Given a student submission containing `import socket; s = socket.socket(); s.connect(("evil.com", 80))`, when the grader worker processes it, then the network access is blocked by the sandbox and the student receives feedback: "Network access is not permitted in the grading environment"
+- [ ] AC-024: Given a student submission containing `open("/etc/passwd").read()`, when the grader worker processes it, then the file access is blocked (sandbox restricts reads to /tmp and the submission directory only) and the student receives feedback indicating a security violation
+- [ ] AC-025: Given a student submission containing `import os; print(os.environ)`, when the grader worker processes it, then the output contains only a minimal set of safe environment variables (PATH, HOME) and does NOT contain any secrets (database credentials, API keys, Infisical tokens)
 
 ### Advanced Question Types
 
-- [ ] AC-021: Given a course author in Studio, when they add a new advanced component, then drag-and-drop v2 and math expression input are available in the component picker
-- [ ] AC-022: Given a drag-and-drop v2 problem with 5 items and 3 zones, when a student correctly places all items using keyboard navigation only, then the problem is scored as correct
-- [ ] AC-023: Given a math expression input problem expecting `x^2 + 2*x + 1`, when a student enters `(x+1)^2` (mathematically equivalent), then the SymPy-based grader marks it as correct
-- [ ] AC-024: Given a randomized problem pool of 20 questions configured to show 10, when two different students access the subsection, then each student sees a different subset of 10 questions
+- [ ] AC-026: Given a course author in Studio, when they add a new advanced component, then drag-and-drop v2 and math expression input are available in the component picker
+- [ ] AC-027: Given a drag-and-drop v2 problem with 5 items and 3 zones, when a student correctly places all items using keyboard navigation only, then the problem is scored as correct
+- [ ] AC-028: Given a math expression input problem expecting `x^2 + 2*x + 1`, when a student enters `(x+1)^2` (mathematically equivalent), then the SymPy-based grader marks it as correct
+- [ ] AC-029: Given a randomized problem pool of 20 questions configured to show 10, when two different students access the subsection, then each student sees a different subset of 10 questions
 
 ### Assessment Security
 
-- [ ] AC-025: Given an exam subsection configured with randomized question order, when two students access the same exam, then the questions appear in different orders
-- [ ] AC-026: Given a multiple-choice problem with answer shuffling enabled, when two students view the same problem, then the answer options appear in different orders
-- [ ] AC-027: Given an exam configured with one-at-a-time question display, when a student advances to question 3, then questions 1 and 2 are no longer accessible
-- [ ] AC-028: Given an exam configured with `max_attempts=1`, when a student submits their answer, then the submit button is disabled and no further attempts are allowed
+- [ ] AC-030: Given an exam subsection configured with randomized question order, when two students access the same exam, then the questions appear in different orders
+- [ ] AC-031: Given a multiple-choice problem with answer shuffling enabled, when two students view the same problem, then the answer options appear in different orders
+- [ ] AC-032: Given an exam configured with one-at-a-time question display, when a student advances to question 3, then questions 1 and 2 are no longer accessible
+- [ ] AC-033: Given an exam configured with `max_attempts=1`, when a student submits their answer, then the submit button is disabled and no further attempts are allowed
 
 ### Grade Integration
 
-- [ ] AC-029: Given a course with an ORA2 assignment (weight: 20%), a timed exam (weight: 40%), and standard problems (weight: 40%), when all three are graded for a student, then the final course grade accurately reflects the weighted sum
-- [ ] AC-030: Given an instructor who overrides a student's ORA2 grade from 70% to 85% with a reason, then the gradebook reflects 85%, the original 70% is preserved in the audit log, and the reason is recorded
-- [ ] AC-031: Given an instructor who performs a bulk grade export for a 500-student course, when the CSV is generated, then it contains one row per student per graded assessment with columns: student_id, assessment_name, assessment_type, score, max_score, submission_timestamp, grading_source
+- [ ] AC-034: Given a course with an ORA2 assignment (weight: 20%), a timed exam (weight: 40%), and standard problems (weight: 40%), when all three are graded for a student, then the final course grade accurately reflects the weighted sum
+- [ ] AC-035: Given an instructor who overrides a student's ORA2 grade from 70% to 85% with a reason, then the gradebook reflects 85%, the original 70% is preserved in the audit log, and the reason is recorded
+- [ ] AC-036: Given an instructor who performs a bulk grade export for a 500-student course, when the CSV is generated, then it contains one row per student per graded assessment with columns: student_id, assessment_name, assessment_type, score, max_score, submission_timestamp, grading_source
 
 ### Bulk Operations
 
-- [ ] AC-032: Given a course with 2,000 submissions for a single problem, when an instructor triggers a bulk regrade, then the operation runs asynchronously, reports progress, and completes without LMS service degradation
-- [ ] AC-033: Given an instructor who uploads a CSV with grade overrides for 100 students, when the bulk import is processed, then each student's grade is updated and an audit log entry is created for each override
-- [ ] AC-034: Given a bulk regrade operation in progress, when the instructor checks the operation status, then they see a progress percentage and estimated time remaining
+- [ ] AC-037: Given a course with 2,000 submissions for a single problem, when an instructor triggers a bulk regrade, then the operation runs asynchronously, reports progress, and completes without LMS service degradation
+- [ ] AC-038: Given an instructor who uploads a CSV with grade overrides for 100 students, when the bulk import is processed, then each student's grade is updated and an audit log entry is created for each override
+- [ ] AC-039: Given a bulk regrade operation in progress, when the instructor checks the operation status, then they see a progress percentage and estimated time remaining
 
 ### Multi-Language and Accessibility
 
-- [ ] AC-035: Given an ORA2 rubric with criteria labels in both English and Malay, when a student whose language preference is Malay views the rubric, then the Malay labels are displayed
-- [ ] AC-036: Given a timed exam timer with 1 minute remaining, when a screen reader user is taking the exam, then the screen reader announces "1 minute remaining" via an ARIA live region
-- [ ] AC-037: Given a drag-and-drop v2 problem, when a keyboard-only user presses Tab to navigate items and Enter/Space to select and drop, then the interaction completes successfully
+- [ ] AC-040: Given an ORA2 rubric with criteria labels in both English and Malay, when a student whose language preference is Malay views the rubric, then the Malay labels are displayed
+- [ ] AC-041: Given a timed exam timer with 1 minute remaining, when a screen reader user is taking the exam, then the screen reader announces "1 minute remaining" via an ARIA live region
+- [ ] AC-042: Given a drag-and-drop v2 problem, when a keyboard-only user presses Tab to navigate items and Enter/Space to select and drop, then the interaction completes successfully
 
 ### Student Feedback
 
-- [ ] AC-038: Given an ORA2 submission that receives a final staff grade, when the grade is posted, then the student receives an email notification within 10 minutes containing the course name, assignment name, and a link to view feedback
-- [ ] AC-039: Given an auto-graded problem with `show_correctness=past_due`, when the student submits before the due date, then they see "Answer submitted" but not whether it is correct; after the due date, the correct answer and explanation are shown
+- [ ] AC-043: Given an ORA2 submission that receives a final staff grade, when the grade is posted, then the student receives an email notification within 10 minutes containing the course name, assignment name, and a link to view feedback
+- [ ] AC-044: Given an auto-graded problem with `show_correctness=past_due`, when the student submits before the due date, then they see "Answer submitted" but not whether it is correct; after the due date, the correct answer and explanation are shown
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: GitHub Actions Cost Monitoring
-type: spec
+type: "feature_spec"
 status: approved
 owner: Platform Team
 last_updated: 2026-02-12

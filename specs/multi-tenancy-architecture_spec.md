@@ -1,10 +1,10 @@
 ---
 title: "Multi-Tenancy Architecture"
 type: "feature_spec"
-status: "in_progress"
+status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-10"
+last_updated: "2026-02-13"
 version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
@@ -318,64 +318,82 @@ This section defines the canonical data model for the `EnterpriseCustomer` entit
 - This schema is version-controlled. Breaking changes to these fields MUST be documented as a schema version increment (e.g., v2.0) and communicated across all dependent specs.
 - Specs that add new `EnterpriseCustomer` fields MUST update this canonical schema and increment the version number.
 
+### Terminology Glossary
+
+This section defines canonical terms used throughout the multi-tenancy architecture and related specs. All specs referencing these concepts MUST use the terms as defined here.
+
+| Term | Definition | Canonical Reference |
+|------|------------|-------------------|
+| EnterpriseCustomer | The Django model representing a tenant organization in the Open edX enterprise system. The `uuid` field is the globally unique, canonical tenant identifier used for data segregation, API scoping, and analytics tagging across all enterprise services | enterprise-microservices_spec.md |
+| Tenant | An organization (represented by an `EnterpriseCustomer` record) that subscribes to the Mereka Academy platform. Each tenant receives a branded, isolated learning environment with its own user population, course catalog, licenses, subsidies, SSO configuration, and analytics scope. Synonyms: "enterprise client", "client organization", "enterprise", "org" | multi-tenancy-architecture_spec.md |
+| Site | A Django `Site` model record mapping one or more domain names to tenant-specific configuration. Each `EnterpriseCustomer` links to a `Site` via the `site_id` foreign key, enabling per-tenant domain routing, theme resolution, and feature flag configuration via the associated `SiteConfiguration` | multi-site-domains_spec.md |
+| Learner | An individual user (Django `User` model) enrolled in one or more courses on the platform. A learner may belong to zero, one, or multiple tenants simultaneously via `EnterpriseCustomerUser` link records. Non-enterprise learners (individual enrollments) are not linked to any tenant | auth-sso-enterprise_spec.md |
+| Catalog | A curated collection of courses (`EnterpriseCatalog` model) available to a specific tenant. Catalogs are content-filtered subsets of the full course library, scoped by `enterprise_customer_uuid`. Learners see only courses from catalogs assigned to their tenant(s) | enterprise-microservices_spec.md |
+| Entitlement | A purchased or allocated right for a learner to enroll in a specific course or program, represented by the `CourseEntitlement` model. Entitlements may be transferable (assignable to different learners) or non-transferable (bound to a specific learner). Enterprise-subsidized entitlements are managed via the subsidy service | ecommerce-purchase-gateway_spec.md |
+
+**Notes**:
+- These definitions establish the **single source of truth** for architectural concepts. Specs SHOULD NOT redefine these terms.
+- When a spec introduces a new architectural concept that will be referenced across multiple specs, it SHOULD be added to this glossary.
+- Synonyms are provided for common alternate terms, but specs SHOULD prefer the canonical term listed in the "Term" column.
+
 ---
 
 ## Acceptance Criteria
 
 ### Tenant Identity
 
-- [ ] AC-001: Given a new enterprise client "Acme Corp", when the provisioning script runs with `--slug=acme-corp --name="Acme Corp" --domain=acme.academyv2.mereka.io`, then an `EnterpriseCustomer` record is created with a unique UUID, a Django `Site` with the specified domain, and a `SiteConfiguration` with Mereka default values
-- [ ] AC-002: Given tenant "Acme Corp" exists, when the provisioning script runs again with the same slug, then no duplicate records are created and the script exits with a success message indicating "already provisioned"
+- [ ] AC-MTA-001: Given a new enterprise client "Acme Corp", when the provisioning script runs with `--slug=acme-corp --name="Acme Corp" --domain=acme.academyv2.mereka.io`, then an `EnterpriseCustomer` record is created with a unique UUID, a Django `Site` with the specified domain, and a `SiteConfiguration` with Mereka default values
+- [ ] AC-MTA-002: Given tenant "Acme Corp" exists, when the provisioning script runs again with the same slug, then no duplicate records are created and the script exits with a success message indicating "already provisioned"
 
 ### Data Isolation
 
-- [ ] AC-003: Given tenant A (Acme) and tenant B (Beta), when admin A calls `GET /api/v1/enterprise-catalogs/`, then zero catalogs belonging to tenant B are returned
-- [ ] AC-004: Given tenant A and tenant B, when admin A calls `GET /api/v1/subscriptions/` with tenant B's UUID in the path, then the response is HTTP 403
-- [ ] AC-005: Given tenant A and tenant B, when admin A queries ClickHouse analytics via Superset, then zero xAPI events with tenant B's UUID are visible
-- [ ] AC-006: Given tenant A and tenant B, when a raw SQL query `SELECT * FROM enterprise_enterprisecustomer` is executed by a non-superuser database role, then only the requesting service's scoped records are returned (database user grants prevent cross-schema access for enterprise service databases)
-- [ ] AC-007: Given a learner belonging to both tenant A and tenant B, when they log into the enterprise learner portal and select tenant A, then only tenant A's catalog, licenses, and enrollment data are visible
+- [ ] AC-MTA-003: Given tenant A (Acme) and tenant B (Beta), when admin A calls `GET /api/v1/enterprise-catalogs/`, then zero catalogs belonging to tenant B are returned
+- [ ] AC-MTA-004: Given tenant A and tenant B, when admin A calls `GET /api/v1/subscriptions/` with tenant B's UUID in the path, then the response is HTTP 403
+- [ ] AC-MTA-005: Given tenant A and tenant B, when admin A queries ClickHouse analytics via Superset, then zero xAPI events with tenant B's UUID are visible
+- [ ] AC-MTA-006: Given tenant A and tenant B, when a raw SQL query `SELECT * FROM enterprise_enterprisecustomer` is executed by a non-superuser database role, then only the requesting service's scoped records are returned (database user grants prevent cross-schema access for enterprise service databases)
+- [ ] AC-MTA-007: Given a learner belonging to both tenant A and tenant B, when they log into the enterprise learner portal and select tenant A, then only tenant A's catalog, licenses, and enrollment data are visible
 
 ### Branding
 
-- [ ] AC-008: Given tenant "Acme Corp" with a custom logo configured in `SiteConfiguration`, when a learner navigates to `acme.academyv2.mereka.io`, then the Acme Corp logo is displayed (not the default Mereka logo)
-- [ ] AC-009: Given tenant "Acme Corp" with custom brand colors configured, when the login page loads at `acme.academyv2.mereka.io`, then the primary brand color matches the configured value
-- [ ] AC-010: Given tenant "Acme Corp" with a custom footer configured, when any page loads, then the footer displays Acme Corp branding (not default Mereka footer)
-- [ ] AC-011: Given a tenant branding asset update (new logo), when `collectstatic` is run, then the updated logo is served without requiring an image rebuild
+- [ ] AC-MTA-008: Given tenant "Acme Corp" with a custom logo configured in `SiteConfiguration`, when a learner navigates to `acme.academyv2.mereka.io`, then the Acme Corp logo is displayed (not the default Mereka logo)
+- [ ] AC-MTA-009: Given tenant "Acme Corp" with custom brand colors configured, when the login page loads at `acme.academyv2.mereka.io`, then the primary brand color matches the configured value
+- [ ] AC-MTA-010: Given tenant "Acme Corp" with a custom footer configured, when any page loads, then the footer displays Acme Corp branding (not default Mereka footer)
+- [ ] AC-MTA-011: Given a tenant branding asset update (new logo), when `collectstatic` is run, then the updated logo is served without requiring an image rebuild
 
 ### Domain Routing
 
-- [ ] AC-012: Given tenant "Acme Corp" with domain `acme.academyv2.mereka.io`, when a browser requests that domain, then the LMS responds with the correct Acme-branded page
-- [ ] AC-013: Given tenant "Acme Corp" with a client-owned domain `learning.acmecorp.com` configured as a CNAME, when a browser requests that domain, then the LMS responds with the correct Acme-branded page and a valid SSL certificate
-- [ ] AC-014: Given two tenants with different domains, when requests arrive simultaneously for both domains, then each request resolves the correct `SiteConfiguration` based on `Host` header
+- [ ] AC-MTA-012: Given tenant "Acme Corp" with domain `acme.academyv2.mereka.io`, when a browser requests that domain, then the LMS responds with the correct Acme-branded page
+- [ ] AC-MTA-013: Given tenant "Acme Corp" with a client-owned domain `learning.acmecorp.com` configured as a CNAME, when a browser requests that domain, then the LMS responds with the correct Acme-branded page and a valid SSL certificate
+- [ ] AC-MTA-014: Given two tenants with different domains, when requests arrive simultaneously for both domains, then each request resolves the correct `SiteConfiguration` based on `Host` header
 
 ### Authentication
 
-- [ ] AC-015: Given tenant "Acme Corp" with SAML IdP configured, when a user navigates to `/enterprise/login/acme-corp`, then they are redirected to Acme's IdP
-- [ ] AC-016: Given a successful SAML assertion from Acme's IdP for a new user, when processed, then the user is auto-provisioned and linked to the Acme `EnterpriseCustomer`
-- [ ] AC-017: Given tenant A's IdP and tenant B's IdP, when a user authenticates via tenant A's IdP, then they are linked to tenant A only (no cross-tenant linking from the SAML flow)
+- [ ] AC-MTA-015: Given tenant "Acme Corp" with SAML IdP configured, when a user navigates to `/enterprise/login/acme-corp`, then they are redirected to Acme's IdP
+- [ ] AC-MTA-016: Given a successful SAML assertion from Acme's IdP for a new user, when processed, then the user is auto-provisioned and linked to the Acme `EnterpriseCustomer`
+- [ ] AC-MTA-017: Given tenant A's IdP and tenant B's IdP, when a user authenticates via tenant A's IdP, then they are linked to tenant A only (no cross-tenant linking from the SAML flow)
 
 ### Analytics
 
-- [ ] AC-018: Given tenant "Acme Corp" with enrolled learners, when a learner completes a course, then the xAPI event in ClickHouse includes `enterprise_customer_uuid` matching Acme's UUID
-- [ ] AC-019: Given tenant "Acme Corp" admin in Superset, when they query the enrollment dashboard, then row-level security filters ensure only Acme's data is visible
-- [ ] AC-020: Given platform operator (superuser) in Superset, when they query the cross-tenant overview dashboard, then aggregate data from all tenants is visible
+- [ ] AC-MTA-018: Given tenant "Acme Corp" with enrolled learners, when a learner completes a course, then the xAPI event in ClickHouse includes `enterprise_customer_uuid` matching Acme's UUID
+- [ ] AC-MTA-019: Given tenant "Acme Corp" admin in Superset, when they query the enrollment dashboard, then row-level security filters ensure only Acme's data is visible
+- [ ] AC-MTA-020: Given platform operator (superuser) in Superset, when they query the cross-tenant overview dashboard, then aggregate data from all tenants is visible
 
 ### Provisioning and Offboarding
 
-- [ ] AC-021: Given valid provisioning inputs, when `scripts/tenants/provision-tenant.sh` runs, then all required records (Site, SiteConfiguration, EnterpriseCustomer, catalogs, subscriptions, access policies) are created within 15 minutes
-- [ ] AC-022: Given tenant "Acme Corp" is offboarded, when the offboarding script completes data deletion, then `SELECT count(*) FROM enterprise_catalog WHERE enterprise_customer_uuid = '{acme_uuid}'` returns 0 across all enterprise service databases
-- [ ] AC-023: Given tenant "Acme Corp" is offboarded, when ClickHouse is queried, then zero events with Acme's UUID exist
-- [ ] AC-024: Given a tenant offboarding action, when it completes, then an audit log entry exists with: tenant UUID, action "offboarded", actor, timestamp
+- [ ] AC-MTA-021: Given valid provisioning inputs, when `scripts/tenants/provision-tenant.sh` runs, then all required records (Site, SiteConfiguration, EnterpriseCustomer, catalogs, subscriptions, access policies) are created within 15 minutes
+- [ ] AC-MTA-022: Given tenant "Acme Corp" is offboarded, when the offboarding script completes data deletion, then `SELECT count(*) FROM enterprise_catalog WHERE enterprise_customer_uuid = '{acme_uuid}'` returns 0 across all enterprise service databases
+- [ ] AC-MTA-023: Given tenant "Acme Corp" is offboarded, when ClickHouse is queried, then zero events with Acme's UUID exist
+- [ ] AC-MTA-024: Given a tenant offboarding action, when it completes, then an audit log entry exists with: tenant UUID, action "offboarded", actor, timestamp
 
 ### Isolation Verification
 
-- [ ] AC-025: Given tenants A and B are provisioned, when `scripts/qa/verify-tenant-isolation.sh --tenant-a={uuid_a} --tenant-b={uuid_b}` runs, then all isolation checks pass (API, portal, analytics, search)
-- [ ] AC-026: Given the nightly isolation test job runs, when any isolation check fails, then a Critical alert is fired to the oncall channel
+- [ ] AC-MTA-025: Given tenants A and B are provisioned, when `scripts/qa/verify-tenant-isolation.sh --tenant-a={uuid_a} --tenant-b={uuid_b}` runs, then all isolation checks pass (API, portal, analytics, search)
+- [ ] AC-MTA-026: Given the nightly isolation test job runs, when any isolation check fails, then a Critical alert is fired to the oncall channel
 
 ### Performance
 
-- [ ] AC-027: Given 10 active tenants, when enterprise catalog API queries are benchmarked, then p95 latency remains <= 300ms (per enterprise-microservices spec)
-- [ ] AC-028: Given 50 active tenants simulated in a load test, when concurrent API requests are sent from 50 different tenant contexts, then no tenant's p95 latency exceeds 120% of the single-tenant baseline
+- [ ] AC-MTA-027: Given 10 active tenants, when enterprise catalog API queries are benchmarked, then p95 latency remains <= 300ms (per enterprise-microservices spec)
+- [ ] AC-MTA-028: Given 50 active tenants simulated in a load test, when concurrent API requests are sent from 50 different tenant contexts, then no tenant's p95 latency exceeds 120% of the single-tenant baseline
 
 ---
 

@@ -245,7 +245,9 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 - The API MUST support filtering assertions by: `badge_class_id`, `issued_after`, `issued_before`, `learner_email_hash`, `status` (active, revoked, expired)
 - The API MUST support webhook notifications: enterprise admins MUST be able to register webhook URLs that receive `POST` notifications for badge events (`badge_issued`, `badge_revoked`, `badge_expired`, `badge_shared`)
 - Webhook payloads MUST include: `event_type`, `assertion_uid`, `badge_class_name`, `learner_email_hash`, `enterprise_customer_uuid`, `timestamp`
-- Webhook delivery MUST retry failed deliveries (HTTP non-2xx response) up to 5 times with exponential backoff (base: 30s, max: 30min)
+- Webhook delivery MUST retry failed deliveries (HTTP non-2xx response) with exponential backoff: 1s, 2s, 4s, 8s, 16s (total: 6 attempts including initial delivery = 1 initial + 5 retries)
+- The system MUST suspend a webhook URL after 10 distinct badge events have exhausted all retry attempts (not 10 consecutive retry attempts on a single event); the webhook remains suspended until manually re-enabled by the enterprise admin
+- After all retry attempts are exhausted for a badge event, the system MUST write the event to a dead letter queue with full payload (event type, assertion UID, enterprise customer UUID, timestamp, all retry attempts and errors) for manual replay by platform operators
 - The system MUST support SCIM-compatible user-to-badge mapping exports for HR systems that use SCIM for identity sync
 
 #### Badge Revocation
@@ -422,7 +424,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 ### Webhook Edge Cases
 
-- **Webhook endpoint permanently failing**: If all 5 retry attempts fail for a webhook delivery, the event MUST be moved to a dead letter queue. After 10 consecutive failures to a webhook URL, the system MUST mark the webhook as "suspended" and notify the enterprise admin. The admin MUST manually re-enable the webhook after fixing the endpoint
+- **Webhook endpoint permanently failing**: If all retry attempts (1 initial + 5 retries = 6 total attempts) fail for a webhook delivery, the event MUST be moved to a dead letter queue with full payload (event type, assertion UID, enterprise customer UUID, timestamp, all retry attempts and errors). After 10 distinct badge events have exhausted all retry attempts (not 10 consecutive failures on one event), the system MUST mark the webhook as "suspended" and notify the enterprise admin via email. The admin MUST manually re-enable the webhook after fixing the endpoint. Dead letter queue events MUST be manually replayable by platform operators via Django admin or management command
 - **Webhook payload size**: Webhook payloads MUST NOT exceed 64 KB. If additional data is needed, the payload MUST include a URL to fetch the full assertion via the enterprise API
 - **Webhook SSRF prevention**: The system MUST validate webhook URLs against a deny list of private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8, 169.254.0.0/16, ::1) and MUST reject registration of webhook URLs pointing to these ranges
 

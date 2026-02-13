@@ -101,7 +101,25 @@ Mobile is the primary access channel for learners across Mereka Academy's client
 
 #### Mobile API Contract
 
-- The mobile apps MUST authenticate all API requests using OAuth 2.0 bearer tokens in the `Authorization: Bearer <token>` header
+### Mobile API Contract
+
+The mobile apps MUST authenticate all API requests using OAuth 2.0 bearer tokens in the `Authorization: Bearer <token>` header.
+
+| Endpoint | Method | Purpose | Auth | Response |
+|----------|--------|---------|------|----------|
+| /api/mobile/v1/users/me | GET | Current user profile | Bearer JWT | UserProfile object with username, email, name, profile image URL, enrolled courses count, completed courses count |
+| /api/mobile/v1/courses | GET | Enrolled courses list | Bearer JWT | CourseEnrollment[] (course ID, title, org, enrollment date, progress percentage, next section URL) |
+| /api/mobile/v1/courses/{id}/blocks | GET | Course content blocks | Bearer JWT | CourseBlock[] (block ID, type [video, html, problem], display name, children block IDs, student view URL) |
+| /api/mobile/v1/courses/{id}/handouts | GET | Course handouts | Bearer JWT | Handout[] (title, data [HTML or URL], last updated timestamp) |
+| /api/mobile/v3/notifications/preferences | GET/PUT | Push notification preferences | Bearer JWT | NotificationPrefs object (course_announcement, assignment_due, grade_posted, discussion_reply; each boolean opt-in/opt-out) |
+
+**HTTP Error Codes**:
+- `401 Unauthorized` -- Invalid or expired JWT token; client MUST refresh token or redirect to login
+- `403 Forbidden` -- Enrollment required for the requested course resource; client SHOULD present enrollment option
+- `404 Not Found` -- Requested course or resource does not exist; client SHOULD display appropriate message
+- `429 Too Many Requests` -- Rate limit exceeded; client MUST respect `Retry-After` header (exponential backoff)
+- `503 Service Unavailable` -- Maintenance mode or backend service down; client SHOULD display maintenance message and retry after `Retry-After` seconds
+
 - The mobile apps MUST use the Open edX Mobile REST API endpoints:
   - `POST /oauth2/access_token/` for token exchange
   - `GET /api/mobile/v4/my_courses/` for enrolled courses list
