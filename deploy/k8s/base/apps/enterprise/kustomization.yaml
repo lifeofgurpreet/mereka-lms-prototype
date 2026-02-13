@@ -8,6 +8,8 @@ resources:
   - enterprise-subsidy-service.yaml
   - enterprise-access-deployment.yaml
   - enterprise-access-service.yaml
+  - license-manager-deployment.yaml
+  - license-manager-service.yaml
   - workers/enterprise-catalog-worker-deployment.yaml
   - workers/enterprise-access-worker-deployment.yaml
   - mfe
