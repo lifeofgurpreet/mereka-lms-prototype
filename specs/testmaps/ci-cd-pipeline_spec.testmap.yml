@@ -45,6 +45,14 @@ acceptance_criteria:
     file: scripts/qa/spec-tools/mereka_spec_lint.py
     command: pytest scripts/qa/spec-tools/mereka_spec_lint.py
   - type: automated
+    test_type: automated
+    file: scripts/qa/spec-tools/spec_coverage_dashboard.py
+    command: pytest scripts/qa/spec-tools/spec_coverage_dashboard.py
+  - type: automated
+    test_type: automated
+    file: scripts/qa/spec-tools/spec_fix.py
+    command: pytest scripts/qa/spec-tools/spec_fix.py
+  - type: automated
     test_type: unit
     file: scripts/qa/spec-tools/validate_testmap_format.py
     command: pytest scripts/qa/spec-tools/validate_testmap_format.py
@@ -152,6 +160,10 @@ acceptance_criteria:
   description: Given a manual dispatch with `build_openedx=true` and `image_tag=v1.2.3`,
     when the build completes, then the image is tagged as `openedx:v1.2.3` and `openedx:<short-sha>`.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-image-build.sh
+    command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Image Build Verification
@@ -196,6 +208,10 @@ acceptance_criteria:
     when the workflow runs, then it fails with an error requiring explicit environment
     selection.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-image-build.sh
+    command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
@@ -207,6 +223,10 @@ acceptance_criteria:
     is not set to `true`, then the workflow fails with a message indicating staging
     is disabled.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-image-build.sh
+    command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
@@ -217,6 +237,10 @@ acceptance_criteria:
   description: Given `deploy_to_staging=true` is used in manual dispatch, when the
     workflow runs, then it fails with a deprecation error directing the user to `update_gitops`.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-image-build.sh
+    command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
@@ -227,6 +251,10 @@ acceptance_criteria:
   description: Given `update_gitops=true` but `build_openedx=false`, when the workflow
     runs, then it fails requiring both builds for deterministic digest capture.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-image-build.sh
+    command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
@@ -285,6 +313,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/infra/release-openedx-gitops.sh
     command: scripts/infra/release-openedx-gitops.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-release-rollback.sh
+    command: scripts/qa/verify-cicd-release-rollback.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Release Process Verification
@@ -296,6 +328,10 @@ acceptance_criteria:
     is correct on prod and dev, then no failures are reported and logs are uploaded
     as artifacts.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
@@ -307,6 +343,10 @@ acceptance_criteria:
     authentication succeeds, then operations gates execute against the live cluster
     and artifacts are uploaded with 30-day retention.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
@@ -318,6 +358,10 @@ acceptance_criteria:
     GKE access is available, then a DR evidence bundle is generated and uploaded with
     120-day retention.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
@@ -328,6 +372,10 @@ acceptance_criteria:
   description: Given the iOS workflow is manually dispatched, when it completes successfully,
     then a signed IPA is uploaded to TestFlight via App Store Connect API.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-ios-build.sh
+    command: scripts/qa/verify-cicd-ios-build.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: iOS Build Verification
@@ -337,7 +385,11 @@ acceptance_criteria:
 - id: AC-026
   description: Given the iOS workflow runs, when it completes (pass or fail), then
     SSH keys used for Match are cleaned up.
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-ios-build.sh
+    command: scripts/qa/verify-cicd-ios-build.sh
 - id: AC-027
   description: Given the pre-commit hook is installed, when a developer attempts to
     commit a file containing a hardcoded secret pattern, then the commit is rejected
@@ -369,6 +421,10 @@ acceptance_criteria:
     to both LMS and Studio (if configured) and uploads canary artifacts with 30-day
     retention.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: SSO Canary Verification
@@ -380,6 +436,10 @@ acceptance_criteria:
     then artifacts (screenshots, logs) are uploaded showing the failure point for
     debugging.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-scheduled-ops.sh
+    command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: SSO Canary Verification
@@ -392,6 +452,10 @@ acceptance_criteria:
     are correctly applied, then the workflow succeeds with verification passing for
     MySQL auth patch, MFE Node.js patch, multi-site domains, and custom apps.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-config-workflow.sh
+    command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
@@ -403,6 +467,10 @@ acceptance_criteria:
     missing, then the job fails with specific error messages identifying which patch
     (MySQL, MFE, domains, or apps) is not applied.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-config-workflow.sh
+    command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
@@ -413,6 +481,10 @@ acceptance_criteria:
   description: Given the patch idempotency check runs, when patches are applied twice,
     then the checksums of all generated files remain identical.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-config-workflow.sh
+    command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
@@ -423,6 +495,10 @@ acceptance_criteria:
   description: Given the Tutor config verification fails on a PR, when a developer
     views the PR, then a comment is posted with common issues and remediation steps.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-config-workflow.sh
+    command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
@@ -435,6 +511,10 @@ acceptance_criteria:
     workflow succeeds with plugin syntax verification, enable/disable lifecycle tests,
     and integration tests passing.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
@@ -446,6 +526,10 @@ acceptance_criteria:
     then the LMS settings file contains the expected plugin configuration (mfe_oauth_fix
     installed).
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
@@ -456,6 +540,10 @@ acceptance_criteria:
   description: Given the plugin lifecycle test runs, when the plugin is enabled, disabled,
     and re-enabled, then all state transitions succeed without errors.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
@@ -466,6 +554,10 @@ acceptance_criteria:
   description: Given the integration test runs, when both plugin and apply-patches.sh
     are used together, then both sets of patches are present in the generated configuration.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: Plugin Integration Testing
@@ -476,6 +568,10 @@ acceptance_criteria:
   description: Given plugin tests fail on a PR, when a developer views the PR, then
     a comment is posted with plugin-specific troubleshooting guidance.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
     runbook: docs/operations/CI_CD_RUNBOOK.md
     section: PR Failure Comment Verification
@@ -489,5 +585,4 @@ _unmapped:
 - AC-INT-004
 - AC-003
 - AC-004
-- AC-026
 

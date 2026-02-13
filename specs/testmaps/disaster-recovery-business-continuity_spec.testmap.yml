@@ -281,9 +281,14 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
 - id: AC-021
-  description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
-    is run, then it produces valid manifests deployable to any GKE cluster
+  description: Given a restore drill runs, when PVCs are restored, then the restore-test
+    job MUST verify PV data integrity by comparing checksums of critical PVs (MySQL
+    data directory) pre-backup and post-restore
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
@@ -293,9 +298,14 @@ acceptance_criteria:
     file: deploy/k8s/overlays/production/kustomization.yaml
     command: deploy/k8s/overlays/production/kustomization.yaml
 - id: AC-022
-  description: Given Velero backups are stored in GCS, when the backup bucket is inspected,
-    then it is configured for multi-region storage or cross-region replication
+  description: Given a PV checksum verification, when comparing pre-backup and post-restore
+    checksums, then they MUST match exactly for MySQL data files (ibdata1, ib_logfile*,
+    *.ibd)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
@@ -305,4 +315,31 @@ acceptance_criteria:
     section: Cross-Region Readiness Verification
     justification: GCS bucket configuration requires gcloud auth and varies by environment;
       verified during Phase 3 implementation
+- id: AC-023
+  description: 'Given a restore drill completes, when drill evidence is archived,
+    then it MUST include: timestamp (ISO8601), PV checksum comparison results, pass/fail
+    status, and drill execution logs'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
+- id: AC-024
+  description: 'Given quarterly restore drill schedule, when the schedule is documented,
+    then it MUST specify: drill cadence (quarterly), responsible team, notification
+    window (1 week advance), and success criteria (all PVs verified, checksums match,
+    MySQL probe succeeds)'
+  verify: []
+- id: AC-025
+  description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
+    is run, then it produces valid manifests deployable to any GKE cluster
+  verify: []
+- id: AC-026
+  description: Given Velero backups are stored in GCS, when the backup bucket is inspected,
+    then it is configured for multi-region storage or cross-region replication
+  verify: []
+_unmapped:
+- AC-024
+- AC-025
+- AC-026
 

@@ -153,6 +153,435 @@ acceptance_criteria:
     when the offboarding completes, then all tenant user data has been processed through
     either the deletion pipeline or the export pipeline per the tenant's DPA terms
   verify: []
+- id: AC-031
+  description: Given a verified right-to-erasure request for a user, when the deletion
+    pipeline completes across all data stores (MySQL, MongoDB Atlas, Redis, ClickHouse,
+    GCS), then a cryptographic deletion certificate MUST be generated listing each
+    data store, records deleted count, and SHA-256 hash of the deletion log
+  verify: []
+- id: AC-032
+  description: Given a deletion pipeline execution where one data store fails (e.g.,
+    MongoDB timeout), when the failure is detected, then all completed deletions MUST
+    be logged, the pipeline MUST retry the failed store 3 times with exponential backoff,
+    and if still failing MUST alert ops and pause (NOT rollback successful deletions
+    since data is already gone)
+  verify: []
+- id: AC-033
+  description: Given a completed deletion for user X, when a Subject Access Request
+    is submitted for user X, then the SAR pipeline MUST return zero personal data
+    records and include the deletion certificate reference
+  verify: []
+- id: AC-034
+  description: Given a completed right-to-erasure request, when the deletion certificate
+    is generated, then the requesting user (or DPO if user account deleted) MUST receive
+    an email confirmation within 24 hours listing the deletion date and certificate
+    reference
+  verify: []
+- id: AC-PRIVACY-001
+  description: 'Given the PII Data Classification Matrix is deployed, when a privacy
+    audit is conducted, then every PII-bearing field in production MUST be documented
+    in the matrix with: data store name, PII sensitivity tier (critical/high/medium/low),
+    legal basis for processing, retention period, access controls, and deletion mechanism'
+  verify: []
+- id: AC-PRIVACY-002
+  description: Given a database schema migration adds a new field containing PII (e.g.,
+    `user_phone_verified_at`), when the migration is merged to main, then the PII
+    classification matrix MUST be updated to include the new field before deployment,
+    or CI MUST block the deployment
+  verify: []
+- id: AC-PRIVACY-003
+  description: 'Given the PII classification matrix documents that `MySQL: auth_user.email`
+    has retention period "Account lifetime" and deletion mechanism "Anonymize to retired_email_{hash}@retired.invalid",
+    when a right-to-erasure request completes, then verification queries MUST confirm
+    `auth_user.email` for the user matches pattern `retired_email_*@retired.invalid`'
+  verify: []
+- id: AC-PRIVACY-004
+  description: 'Given the classification matrix lists `ClickHouse: xapi_events_all.actor_mbox`
+    with sensitivity tier "Critical" and requirement "MUST be hashed, not raw email",
+    when the PII leakage scanner runs against ClickHouse, then any `actor_mbox` field
+    containing raw email format (regex match for `@` with domain) MUST be flagged
+    as critical violation'
+  verify: []
+- id: AC-PRIVACY-005
+  description: 'Given the classification matrix specifies `GCS: profile-images/{username}/`
+    retention as "Account lifetime" with deletion mechanism "Delete blobs matching
+    path pattern", when a deletion pipeline completes, then GCS bucket verification
+    MUST confirm zero blobs exist under `profile-images/{username}/` for the deleted
+    user'
+  verify: []
+- id: AC-PRIVACY-006
+  description: 'Given the classification matrix documents `PostgreSQL: orders.buyer_email`
+    legal basis as "Legal obligation (7-year financial retention)" with deletion mechanism
+    "Anonymize buyer_email, retain order_uuid and amounts", when a deletion request
+    is processed for a user with orders within 7-year window, then `orders.buyer_email`
+    MUST be anonymized to `retired_{hash}@retired.invalid` AND `order_uuid`, `total_cents`,
+    `currency` MUST remain unchanged'
+  verify: []
+- id: AC-PRIVACY-007
+  description: 'Given the classification matrix specifies `MongoDB Atlas: cs_comments_service.contents.author_username`
+    deletion mechanism as "Anonymize author (replace with [deleted], retain post body)",
+    when a deletion pipeline completes, then MongoDB queries for posts originally
+    authored by the user MUST return `author_username: "[deleted]"` AND `body` field
+    MUST be unchanged (posts retained for community value per GDPR Recital 65)'
+  verify: []
+- id: AC-PRIVACY-008
+  description: 'Given the classification matrix lists `Redis: session keys` retention
+    as "24 hours TTL" with deletion mechanism "Delete all keys matching user:{user_id}:*
+    pattern", when a deletion pipeline begins, then Redis verification MUST confirm
+    `KEYS user:{user_id}:*` returns empty list after session invalidation step'
+  verify: []
+- id: AC-PRIVACY-009
+  description: 'Given the classification matrix documents `Loki: application logs`
+    retention as "30 days" with deletion mechanism "Not directly deletable; rely on
+    retention policy + PII leakage prevention", when a deletion request is submitted,
+    then the deletion proof MUST note that log entries will naturally expire within
+    30 days AND PII leakage scanner MUST confirm no new logs containing the user''s
+    email are being written post-deletion'
+  verify: []
+- id: AC-PRIVACY-010
+  description: Given the classification matrix is updated (e.g., retention period
+    for certificates changed from "10 years" to "5 years"), when the update is committed,
+    then a privacy impact assessment (PIA) MUST be triggered AND affected users MUST
+    be notified if the change reduces their data retention rights
+  verify: []
+- id: AC-EXPORT-001
+  description: 'Given a user submits an export request via `POST /api/v1/privacy/export-request/`,
+    when the export pipeline begins, then the system MUST aggregate data from all
+    stores listed in the classification matrix marked `export_included: yes` (MySQL
+    user profile, enrollments, grades, certificates, forum posts, notes, purchases,
+    consents, audit log)'
+  verify: []
+- id: AC-EXPORT-002
+  description: Given the export pipeline aggregates data from MySQL, MongoDB Atlas,
+    PostgreSQL, and ClickHouse, when any single data store is temporarily unavailable
+    (e.g., MongoDB Atlas network timeout), then the export pipeline MUST retry the
+    failed store 3 times with exponential backoff (30s, 60s, 120s), and if still failing
+    MUST continue processing remaining stores, mark the export as `partially_completed`,
+    and include a `MISSING_DATA.txt` file in the archive listing which stores failed
+  verify: []
+- id: AC-EXPORT-003
+  description: 'Given an export request completes successfully, when the ZIP archive
+    is generated, then the archive MUST contain: `profile.json` (auth_user + auth_userprofile
+    fields), `enrollments.json` (course_id, enrollment date, status), `grades.json`
+    (course_id, grade, pass/fail), `certificates.json` (course_id, certificate URL,
+    issue date), `forum_posts.json` (post body, thread, timestamps), `notes.json`
+    (note text, course context), `purchases.json` (order_uuid, total, currency, date,
+    anonymized Stripe customer ID), `consents.json` (purpose, granted status, timestamps,
+    consent version), `audit_log.json` (privacy-relevant events for user), `README.md`
+    (human-readable explanation of archive structure, GDPR Article 20 reference)'
+  verify: []
+- id: AC-EXPORT-004
+  description: 'Given an export archive is generated, when the archive is downloaded,
+    then the archive MUST be AES-256 encrypted with either: (a) user-provided password
+    (collected during export request), OR (b) auto-generated password sent via separate
+    communication channel (email to user''s registered address)'
+  verify: []
+- id: AC-EXPORT-005
+  description: Given an export archive download link is generated, when 48 hours elapse
+    OR the user downloads the archive once, then the download link MUST expire (HTTP
+    410 Gone) AND the server-side archive file MUST be deleted from temporary storage
+    within 1 hour of expiry
+  verify: []
+- id: AC-EXPORT-006
+  description: Given a user submits an export request, when an export for the same
+    user is already in `processing` state, then the API MUST return HTTP 409 Conflict
+    with the existing export request ID and estimated completion time (not create
+    duplicate export)
+  verify: []
+- id: AC-EXPORT-007
+  description: Given a user submits an export request, when the user has already completed
+    3 export requests within the trailing 30-day window, then the API MUST return
+    HTTP 429 Too Many Requests with `Retry-After` header set to seconds until oldest
+    export exits the 30-day window
+  verify: []
+- id: AC-EXPORT-008
+  description: Given an export request is submitted, when the export generation exceeds
+    72 hours (SLA breach), then the export request status MUST transition to `failed`,
+    an alert MUST fire to privacy operations team, the user MUST receive an email
+    notification with failure reason, and the user MUST be offered a retry option
+    (bypassing rate limit for retry)
+  verify: []
+- id: AC-EXPORT-009
+  description: 'Given an export archive is successfully generated, when the user downloads
+    the archive, then an audit trail entry MUST be created with event type `export_downloaded`,
+    including: `export_request_id`, `user_id_hash`, `download_timestamp`, `download_ip_address_hash`,
+    `archive_size_bytes`'
+  verify: []
+- id: AC-EXPORT-010
+  description: Given an export request completes, when the archive contains data from
+    7+ data stores totaling 500MB+, then the export pipeline MUST split the archive
+    into multiple ZIP files (max 200MB each), each encrypted separately, with a manifest
+    file listing all archive parts and their SHA-256 checksums
+  verify: []
+- id: AC-DELETE-001
+  description: 'Given a deletion pipeline begins execution, when the pipeline orchestrates
+    deletion across 15+ data stores (per classification matrix), then the orchestrator
+    MUST execute stores in the documented sequence order: (1) session invalidation,
+    (2) account deactivation, (3) forum anonymization, (4) analytics deletion, (5)
+    purchase anonymization, (6) notes deletion, (7) enrollment/grades deletion, (8)
+    certificates revocation, (9) profile deletion, (10) user account anonymization,
+    (11) SSO linkage deletion, (12) consent anonymization, (13) audit trail anonymization,
+    (14) cache cleanup, (15) log flagging'
+  verify: []
+- id: AC-DELETE-002
+  description: Given the deletion pipeline processes data store X (e.g., MongoDB Atlas
+    forum content), when the deletion step completes, then the pipeline MUST immediately
+    verify deletion success by querying the data store for the user's identifiers
+    (user_id, email, username) and confirming zero records returned OR anonymized
+    values only
+  verify: []
+- id: AC-DELETE-003
+  description: 'Given a deletion pipeline step fails for data store X (e.g., ClickHouse
+    deletion query timeout after 30 minutes), when the failure is detected, then the
+    pipeline MUST: (a) log the failure with full error context (error message, stack
+    trace, data store endpoint), (b) retry the failed step 3 times with exponential
+    backoff (30s, 60s, 120s), (c) if all retries fail, mark data store X as `failed`
+    in deletion manifest, (d) continue processing remaining data stores (do NOT halt
+    pipeline), (e) transition overall deletion request status to `partially_completed`,
+    (f) fire Critical alert to privacy operations team with failed store name and
+    user identifier'
+  verify: []
+- id: AC-DELETE-004
+  description: 'Given a deletion pipeline completes with status `partially_completed`
+    (one or more stores failed), when the privacy operations team reviews the failure,
+    then the team MUST have access to a re-run mechanism that: (a) loads the original
+    deletion manifest, (b) skips already-completed stores (idempotent), (c) re-attempts
+    only `failed` stores, (d) updates the deletion certificate upon successful re-run
+    completion'
+  verify: []
+- id: AC-DELETE-005
+  description: 'Given a deletion pipeline completes all stores successfully (status
+    `completed`), when the deletion certificate is generated, then the certificate
+    MUST contain: `deletion_request_id` (UUID), `user_id_hash` (SHA-256), `completion_timestamp`
+    (ISO 8601), per-store manifest array with entries: `{data_store: "MySQL:auth_user",
+    action: "anonymized", records_affected: 1, verification_query: "SELECT email FROM
+    auth_user WHERE id=X", verification_result: "retired_email_abc123@retired.invalid",
+    completed_at: "..."}`, `certificate_signature` (HMAC-SHA256 using platform secret
+    key from Infisical)'
+  verify: []
+- id: AC-DELETE-006
+  description: 'Given a deletion certificate is generated, when the certificate signature
+    is verified by an independent auditor tool, then the tool MUST validate: (a) HMAC-SHA256
+    signature matches certificate body using platform public key, (b) `completion_timestamp`
+    is within 30 days of `deletion_request.created_at` (GDPR SLA compliance), (c)
+    all data stores from classification matrix are listed in manifest (no stores skipped),
+    (d) verification queries confirm anonymization/deletion for each store'
+  verify: []
+- id: AC-DELETE-007
+  description: 'Given a deletion pipeline processes `PostgreSQL: orders` (Purchase
+    Gateway), when the user has orders with `created_at` within 7-year financial retention
+    window (Malaysian Companies Act 2016, GDPR Art. 6(1)(c)), then the deletion step
+    MUST: (a) anonymize `buyer_email` to `retired_{hash}@retired.invalid`, (b) retain
+    `order_uuid`, `total_cents`, `currency`, `created_at`, `stripe_checkout_session_id`
+    (for dispute resolution), (c) deletion certificate MUST note legal retention basis:
+    "Legal obligation: 7-year financial record retention per Malaysian Companies Act
+    2016"'
+  verify: []
+- id: AC-DELETE-008
+  description: 'Given a deletion pipeline processes `MySQL: consent_datasharingconsent`,
+    when the user has consent records, then the deletion step MUST: (a) anonymize
+    `username` field to `retired_user_{hash}`, (b) retain `enterprise_customer_uuid`,
+    `granted` (boolean), `granted_at`, `consent_version` (GDPR Art. 7(1) evidence
+    of lawful processing), (c) deletion certificate MUST note retention basis: "Legal
+    obligation: Consent evidence retention per GDPR Art. 7(1)"'
+  verify: []
+- id: AC-DELETE-009
+  description: 'Given a deletion pipeline processes `GCS: profile-images/{username}/`,
+    when the deletion step executes, then the pipeline MUST: (a) list all blobs matching
+    `gs://mereka-lms-media/profile-images/{username}/*`, (b) delete all matched blobs,
+    (c) verify blob count for path returns 0, (d) log deleted blob names and sizes
+    in deletion manifest'
+  verify: []
+- id: AC-DELETE-010
+  description: 'Given a deletion pipeline completes, when the user''s original email
+    address is still stored in a temporary deletion context table (for sending completion
+    notification), then the system MUST: (a) send deletion completion email to the
+    original email address within 24 hours, (b) delete the email address from the
+    temporary table immediately after email send confirmation, (c) log email send
+    event in audit trail with `user_id_hash` only (not email)'
+  verify: []
+- id: AC-DELETE-011
+  description: 'Given a deletion request is submitted for a user with an in-flight
+    order in Purchase Gateway (status `pending` or `fulfilling`), when the deletion
+    pipeline reaches the Purchase Gateway step, then the pipeline MUST: (a) poll order
+    status every 6 hours, (b) wait for order to reach terminal state (`fulfilled`,
+    `expired`, `canceled`, `failed`), (c) proceed with anonymization once terminal
+    state reached, (d) if order remains non-terminal after 14 days, escalate to privacy
+    operations team for manual review, (e) overall deletion SLA (30 days) accommodates
+    this wait period'
+  verify: []
+- id: AC-DELETE-012
+  description: 'Given a deletion request is submitted for a user who is an enterprise
+    admin for tenant X, when the deletion pipeline begins, then the system MUST: (a)
+    check if user has role `enterprise_admin` for any active tenant, (b) if yes, send
+    notification to tenant''s designated contact email with 7-day warning, (c) recommend
+    tenant assign new admin, (d) proceed with deletion after 7 days OR upon tenant
+    confirmation of admin handover (whichever is earlier), (e) log enterprise admin
+    handover in audit trail'
+  verify: []
+- id: AC-PARTIAL-001
+  description: 'Given a deletion pipeline encounters failures in 2 out of 15 data
+    stores, when the pipeline completes, then the deletion request status MUST be
+    `partially_completed` AND the deletion certificate MUST include a `failures` array
+    listing: `{data_store: "MongoDB:cs_comments_service", error: "Connection timeout
+    after 3 retries", retry_count: 3, last_attempt_at: "..."}`'
+  verify: []
+- id: AC-PARTIAL-002
+  description: 'Given an export pipeline fails to retrieve data from `ClickHouse:
+    xapi_events_all` due to network partition, when the export completes, then the
+    archive MUST include `MISSING_DATA.txt` file stating: "Data from ClickHouse analytics
+    events could not be retrieved due to: [error message]. You may re-request export
+    after [retry timestamp]. This does not affect your right to data portability under
+    GDPR Article 20."'
+  verify: []
+- id: AC-PARTIAL-003
+  description: 'Given a deletion pipeline marks `MongoDB:cs_comments_service` as failed,
+    when the privacy operations team re-runs the deletion, then the re-run MUST: (a)
+    load previous deletion manifest, (b) skip stores with `action: "completed"` status,
+    (c) re-attempt `MongoDB:cs_comments_service` with fresh retry budget, (d) update
+    deletion certificate with new completion timestamp and re-run audit trail entry'
+  verify: []
+- id: AC-AUDIT-001
+  description: 'Given a user submits an export request, when the request is created,
+    then an audit trail entry MUST be logged with: `event_type: "export_requested"`,
+    `user_id_hash`, `request_id`, `requested_at`, `requested_via` (API/preference
+    center), `ip_address_hash`'
+  verify: []
+- id: AC-AUDIT-002
+  description: 'Given an export request completes, when the archive is ready, then
+    an audit trail entry MUST be logged with: `event_type: "export_completed"`, `export_request_id`,
+    `user_id_hash`, `archive_size_bytes`, `data_stores_included` (array), `completion_duration_seconds`'
+  verify: []
+- id: AC-AUDIT-003
+  description: 'Given a deletion request is verified and enters processing, when the
+    pipeline begins, then an audit trail entry MUST be logged with: `event_type: "deletion_processing_started"`,
+    `deletion_request_id`, `user_id_hash`, `estimated_completion_date` (requested_at
+    + 30 days)'
+  verify: []
+- id: AC-AUDIT-004
+  description: 'Given a deletion pipeline completes a single data store deletion,
+    when the store verification passes, then an audit trail entry MUST be logged with:
+    `event_type: "deletion_step_completed"`, `deletion_request_id`, `user_id_hash`,
+    `data_store`, `records_affected`, `verification_status: "passed"`'
+  verify: []
+- id: AC-CONSENT-001
+  description: Given a user visits the LMS for the first time, when the page loads,
+    then a cookie consent banner MUST appear before any non-essential cookies are
+    set
+  verify: []
+- id: AC-CONSENT-002
+  description: 'Given a user interacts with the cookie consent banner, when they make
+    consent choices, then the system MUST store consent choices with: `consent_version`
+    (privacy policy version), `granted_at` (ISO 8601 timestamp), `collection_method`
+    ("banner"), `ip_address_hash` (SHA-256), and per-category consent status (analytics,
+    marketing, functional)'
+  verify: []
+- id: AC-CONSENT-003
+  description: Given a user has granted consent for a specific category, when they
+    revoke consent at any time via `/account/privacy/`, then the consent record MUST
+    be updated with `withdrawn_at` timestamp AND the withdrawal MUST take effect within
+    24 hours (cache invalidation)
+  verify: []
+- id: AC-CONSENT-004
+  description: Given the cookie consent banner is displayed, when the banner renders,
+    then the banner MUST NOT block page rendering (async load) AND the LMS core functionality
+    MUST remain accessible even if banner JavaScript fails to load
+  verify: []
+- id: AC-CONSENT-005
+  description: 'Given a user accepts the latest privacy policy version on login, when
+    the acceptance is recorded, then the audit trail MUST contain: `event_type: "privacy_policy_accepted"`,
+    `user_id_hash`, `policy_version`, `accepted_at` (timestamp), `ip_address_hash`'
+  verify: []
+- id: AC-CONSENT-006
+  description: Given a user logs in for the first time after a privacy policy update,
+    when they access any protected resource, then the system MUST present the latest
+    privacy policy version for acceptance before allowing access
+  verify: []
+- id: AC-CONSENT-007
+  description: Given the privacy policy version changes from v2.0 to v3.0, when the
+    update is deployed, then the system MUST support multi-language policy versions
+    (English, Malay, Chinese) with language selection based on user's `language_preference`
+    setting
+  verify: []
+- id: AC-CONSENT-008
+  description: Given consent is tracked for multiple purposes (analytics, marketing,
+    functional), when a user modifies consent for `analytics` purpose, then the consent
+    change MUST be tracked independently AND MUST NOT affect consent status for `marketing`
+    or `functional` purposes
+  verify: []
+- id: AC-CONSENT-009
+  description: 'Given consent records exist with version history, when an auditor
+    queries consent history for a user, then the system MUST return all consent versions
+    with: `purpose`, `granted` (boolean), `consent_version`, `granted_at`, `withdrawn_at`
+    (if applicable), ordered by `granted_at` descending'
+  verify: []
+- id: AC-CONSENT-010
+  description: Given the consent schema changes (e.g., new purpose "AI_training" added),
+    when the schema version increments, then the system MUST trigger re-consent for
+    all active users on next login AND MUST display a clear explanation of what changed
+  verify: []
+- id: AC-RETENTION-001
+  description: 'Given the PII classification matrix specifies retention periods for
+    each data category, when the automated data purge CronJob runs daily, then the
+    job MUST identify records past their retention period per classification matrix
+    rules (e.g., "ClickHouse analytics events: 365 days", "Inactive accounts: 24 months
+    no login")'
+  verify: []
+- id: AC-RETENTION-002
+  description: 'Given the retention enforcement CronJob runs in production, when purge
+    operations complete, then each purge operation MUST be logged in the audit trail
+    with: `event_type: "retention_purge_completed"`, `data_store`, `data_category`,
+    `records_purged_count`, `purge_duration_seconds`, `retention_policy_version`'
+  verify: []
+- id: AC-RETENTION-003
+  description: Given the retention enforcement CronJob is configured with dry-run
+    mode, when the job executes with `DRY_RUN=true`, then the job MUST identify records
+    eligible for purge AND log the planned actions WITHOUT actually deleting any data
+    AND output a summary report with record counts per data store
+  verify: []
+- id: AC-RETENTION-004
+  description: Given the retention enforcement job runs and encounters a data store
+    timeout (e.g., ClickHouse partition drop exceeds 30 minutes), when the timeout
+    occurs, then the job MUST log the failure, skip that data store, continue processing
+    remaining stores, and fire a Warning alert to the privacy operations team
+  verify: []
+- id: AC-COMPLIANCE-001
+  description: 'Given a compliance dashboard is deployed, when a `compliance_officer`
+    role user accesses the dashboard, then the dashboard MUST display: DSAR (Data
+    Subject Access Request) count (last 30 days, last 12 months), DSAR SLA compliance
+    percentage (requests completed within 30 days), deletion request pipeline status
+    (pending, processing, completed, failed counts), consent rate by category (percentage
+    of active users with consent granted for analytics, marketing, functional), data
+    retention compliance score (percentage of data stores with zero overdue purge
+    operations)'
+  verify: []
+- id: AC-COMPLIANCE-002
+  description: 'Given the DSAR count metric is displayed on the compliance dashboard,
+    when the metric is queried, then the system MUST aggregate: total export requests
+    submitted in the time range, total deletion requests submitted in the time range,
+    average completion time for export requests, average completion time for deletion
+    requests'
+  verify: []
+- id: AC-COMPLIANCE-003
+  description: 'Given the deletion request pipeline status is displayed, when a `privacy_admin`
+    user filters by `partially_completed` status, then the dashboard MUST show: request
+    ID, user identifier (hashed), submission date, elapsed days, failed data stores
+    (array), retry count, last retry timestamp, and a "Re-run" action button'
+  verify: []
+- id: AC-COMPLIANCE-004
+  description: 'Given the consent rate by category is calculated, when the metric
+    is rendered on the dashboard, then the system MUST compute: `(users_with_consent_granted_for_purpose
+    / total_active_users) * 100` for each purpose (analytics, marketing, functional),
+    with "active users" defined as users with login within the last 90 days'
+  verify: []
+- id: AC-COMPLIANCE-005
+  description: 'Given the data retention compliance score is displayed, when the score
+    is calculated, then the system MUST: (a) query each data store for records past
+    retention period, (b) flag any data store with overdue purge count > 0 as non-compliant,
+    (c) compute compliance score as `(compliant_data_stores / total_data_stores_with_retention_policy)
+    * 100`, (d) display the score with color coding (green ≥95%, yellow 90-94%, red
+    <90%)'
+  verify: []
 _unmapped:
 - AC-001
 - AC-002
@@ -184,4 +613,66 @@ _unmapped:
 - AC-028
 - AC-029
 - AC-030
+- AC-031
+- AC-032
+- AC-033
+- AC-034
+- AC-PRIVACY-001
+- AC-PRIVACY-002
+- AC-PRIVACY-003
+- AC-PRIVACY-004
+- AC-PRIVACY-005
+- AC-PRIVACY-006
+- AC-PRIVACY-007
+- AC-PRIVACY-008
+- AC-PRIVACY-009
+- AC-PRIVACY-010
+- AC-EXPORT-001
+- AC-EXPORT-002
+- AC-EXPORT-003
+- AC-EXPORT-004
+- AC-EXPORT-005
+- AC-EXPORT-006
+- AC-EXPORT-007
+- AC-EXPORT-008
+- AC-EXPORT-009
+- AC-EXPORT-010
+- AC-DELETE-001
+- AC-DELETE-002
+- AC-DELETE-003
+- AC-DELETE-004
+- AC-DELETE-005
+- AC-DELETE-006
+- AC-DELETE-007
+- AC-DELETE-008
+- AC-DELETE-009
+- AC-DELETE-010
+- AC-DELETE-011
+- AC-DELETE-012
+- AC-PARTIAL-001
+- AC-PARTIAL-002
+- AC-PARTIAL-003
+- AC-AUDIT-001
+- AC-AUDIT-002
+- AC-AUDIT-003
+- AC-AUDIT-004
+- AC-CONSENT-001
+- AC-CONSENT-002
+- AC-CONSENT-003
+- AC-CONSENT-004
+- AC-CONSENT-005
+- AC-CONSENT-006
+- AC-CONSENT-007
+- AC-CONSENT-008
+- AC-CONSENT-009
+- AC-CONSENT-010
+- AC-RETENTION-001
+- AC-RETENTION-002
+- AC-RETENTION-003
+- AC-RETENTION-004
+- AC-COMPLIANCE-001
+- AC-COMPLIANCE-002
+- AC-COMPLIANCE-003
+- AC-COMPLIANCE-004
+- AC-COMPLIANCE-005
 

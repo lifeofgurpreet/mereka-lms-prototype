@@ -126,6 +126,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/branding/verify-branding-health.sh
     command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-health.sh
+    command: scripts/qa/verify-branding-health.sh
 - id: AC-008
   description: Theme applies consistently across all domains (academyv2.mereka.io,
     academy.biji-biji.com)

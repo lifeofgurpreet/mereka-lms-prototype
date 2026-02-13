@@ -44,6 +44,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/smoke-test-analytics.sh
     command: scripts/qa/smoke-test-analytics.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-retention.sh
+    command: scripts/qa/verify-analytics-retention.sh
   - type: monitoring
     metric: superset_health_status
     dashboard: grafana://dashboards/analytics-pipeline
@@ -74,6 +78,10 @@ acceptance_criteria:
 - id: AC-007
   description: Instructor dashboard embeds in LMS course pages
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-retention.sh
+    command: scripts/qa/verify-analytics-retention.sh
   - type: manual
     runbook: docs/operations/ANALYTICS_RUNBOOK.md
     section: Dashboard Embedding Verification
@@ -91,4 +99,8 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/analytics/verify-user-deletion.sh
     command: scripts/analytics/verify-user-deletion.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-analytics-retention.sh
+    command: scripts/qa/verify-analytics-retention.sh
 
