@@ -6,6 +6,8 @@
 **Date**: 2026-02-03
 **Deciders**: Platform Team
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The original legacy environment used `staging.mereka.io` which was confusing:

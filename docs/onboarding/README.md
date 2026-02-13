@@ -1,5 +1,7 @@
 # Onboarding Documentation
 
+<!-- Last verified: 2026-02-13 -->
+
 Documentation for new developers and agents getting started with the Mereka Academy Open edX project.
 
 ## Quick Start Path

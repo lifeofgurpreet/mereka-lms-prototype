@@ -1,5 +1,7 @@
 # Troubleshooting
 
+<!-- Last verified: 2026-02-13 -->
+
 Quick diagnostics and fixes for common Mereka LMS issues.
 
 ## Site Down? Start Here (5-Command Diagnostic)

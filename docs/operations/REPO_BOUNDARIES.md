@@ -1,5 +1,7 @@
 # Repo Boundaries: `mereka-lms` vs `BBI-K8` (`infrastructure`)
 
+<!-- Last verified: 2026-02-13 -->
+
 This document defines ownership boundaries to prevent drift, duplication, and regression.
 
 ## Current Environment Reality

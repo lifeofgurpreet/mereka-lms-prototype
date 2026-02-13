@@ -4,6 +4,8 @@
 **Date**: 2026-02-03
 **Deciders**: Platform Team
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 Open edX uses MongoDB for the course modulestore and forum service. We needed to decide between:

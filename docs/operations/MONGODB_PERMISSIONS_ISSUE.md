@@ -1,5 +1,7 @@
 # MongoDB Atlas Permissions Issue
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Issue Summary
 
 **Date Identified**: 2026-02-03

@@ -5,6 +5,8 @@
 **Deciders**: Platform Team
 **Related**: [ADR-003: Image Build Pipeline](003-image-build-pipeline.md), [BRANDING_GUARDRAILS.md](../branding/BRANDING_GUARDRAILS.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 ### The Runtime CSS Overlay Pattern

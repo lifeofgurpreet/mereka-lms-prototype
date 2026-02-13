@@ -1,5 +1,7 @@
 # Open edX Release Checklist
 
+<!-- Last verified: 2026-02-13 -->
+
 Use this checklist for every `mereka-lms` release to production.
 
 ## 1. Preflight

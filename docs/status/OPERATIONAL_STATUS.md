@@ -92,8 +92,8 @@ _Last updated: 2025-11-12 • Auto-generated_
 - `docs/PARITY_ISSUES_FOUND.md` - Parity issues and fixes
 
 ### Workflow
-- `docs/quickstart/WORKFLOW_LOCAL.md` - Daily workflow
-- `docs/quickstart/LOCAL_SETUP.md` - Detailed setup
+- `docs/onboarding/WORKFLOW_LOCAL.md` - Daily workflow
+- `docs/onboarding/LOCAL_SETUP.md` - Detailed setup
 
 ## 🚀 Recent Improvements
 

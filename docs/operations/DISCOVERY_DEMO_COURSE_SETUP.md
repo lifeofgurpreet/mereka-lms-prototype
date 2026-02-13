@@ -1,5 +1,7 @@
 # Discovery Service Demo Course Setup
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Overview
 
 This guide explains how to create demo courses and configure the Discovery service to index and display them in the course catalog.

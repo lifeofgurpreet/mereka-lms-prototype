@@ -1,5 +1,7 @@
 # Deployment Verification Framework
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Overview
 
 Every K8s deployment now has **automated verification** to catch issues before they become outages.

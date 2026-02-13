@@ -113,7 +113,7 @@ They will be under a different organization (e.g., `MEREKA`) and mapped to the m
 3. ✅ **User tagging infrastructure exists** - Via `meta` field
 4. ✅ **Multi-org setup correct** - SKILLOURFUTURE, BIJIBIJI, etc.
 
-## 📝 TODO: Kajabi Import
+## 📝 Next Step: Kajabi Import
 
 When Kajabi courses are imported:
 

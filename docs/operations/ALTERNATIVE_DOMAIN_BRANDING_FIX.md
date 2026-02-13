@@ -1,5 +1,7 @@
 # Alternative Domain Branding Fix
 
+<!-- Last verified: 2026-02-13 -->
+
 **Issue**: The alternative domain `academy.biji-biji.com` shows incorrect branding/config (usually because it is
 missing `django_site` + `SiteConfiguration` or is mapped to the wrong tenant).
 

@@ -1,5 +1,7 @@
 # Django Raw SQL Bypass - Skill Documentation
 
+<!-- Last verified: 2026-02-13 -->
+
 When Django ORM operations fail due to signals triggering Celery tasks (with unavailable broker), use raw SQL to bypass the ORM layer entirely.
 
 ## Problem

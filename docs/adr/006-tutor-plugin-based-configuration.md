@@ -18,6 +18,8 @@ links:
 **Date**: 2026-02-10
 **Deciders**: Platform Team
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The Mereka Academy Open edX deployment depends on approximately 30 post-hoc patches applied to Tutor-generated templates. These patches cover critical functionality: MySQL authentication, MFE build toolchain, multi-site domain support, theme integration, custom application installation, observability instrumentation, and Redwood/Ulmo compatibility fixes.

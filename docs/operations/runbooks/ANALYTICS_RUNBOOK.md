@@ -1,10 +1,23 @@
 # Analytics Pipeline Runbook
-_Audience: Platform Eng + Data Team • Owner: Engineering Lead • Last updated: 2026-02-10_
+_Audience: Platform Eng + Data Team • Owner: Engineering Lead • Last updated: 2026-02-13_
 
 This runbook covers operational procedures for the analytics pipeline.
 
+> **DEPLOYMENT STATUS**: Aspects/Superset NOT DEPLOYED - This runbook documents target-state procedures
+>
+> **Current state**:
+> - Aspects plugin installed locally but not deployed to production
+> - Superset dashboards not available
+> - Learning analytics pipeline not active
+>
+> **Infrastructure monitoring** (Prometheus/Grafana): OPERATIONAL - but this is separate from learning analytics
+>
+> **To deploy Aspects**: Follow `docs/analytics/ASPECTS_INSTALLATION.md`
+>
 > **Spec**: `specs/analytics-pipeline_spec.md`
 > **Testmap**: `specs/testmaps/analytics-pipeline_testmap.yaml`
+>
+> <!-- Last deployment status check: 2026-02-13 (docs audit) -->
 
 ## Prerequisites
 

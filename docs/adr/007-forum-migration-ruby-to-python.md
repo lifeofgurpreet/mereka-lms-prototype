@@ -5,6 +5,8 @@
 **Deciders:** Engineering Team
 **Related:** [specs/forum-service-migration_spec.md](../../specs/forum-service-migration_spec.md), [ADR 001: MongoDB Atlas](001-mongodb-atlas.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The Open edX forum service was running on Ruby-based `cs_comments_service` (v18.1.1), which is deprecated by the upstream Open edX community. Tutor v19+ ships with a Python-based forum (`openedx-forum`) integrated directly into the LMS process.

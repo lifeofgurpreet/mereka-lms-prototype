@@ -5,6 +5,8 @@
 **Deciders**: Platform Team
 **Related**: [specs/repository-structure.md](../../specs/repository-structure.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The Mereka Academy platform includes:

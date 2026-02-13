@@ -91,6 +91,6 @@ The goal is to migrate the nightly Open edX stack managed by Tutor to Google Clo
 
 ## Next steps
 
-1. Draft Terraform skeleton under `infrastructure/terraform/` (TODO) to define project baseline.
+1. Draft Terraform skeleton under `infrastructure/terraform/` to define project baseline (not yet started).
 2. Produce sanitized `config.prod.example.yml` with non-secret overrides (domains, plugin list, release channel).
 3. Write GitHub Action workflow for image build/push (blocked until repo is connected to GitHub).

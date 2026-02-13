@@ -5,6 +5,8 @@
 **Deciders**: Platform Team
 **Related**: [ADR-001: MongoDB Atlas](001-mongodb-atlas.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The Mereka Academy platform requires persistent storage for:

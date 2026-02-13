@@ -4,6 +4,8 @@
 **Date**: 2026-02-12
 **Deciders**: Platform Engineering
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 When Studio (CMS) initiates SSO login via the LMS OAuth provider, the redirect chain is:

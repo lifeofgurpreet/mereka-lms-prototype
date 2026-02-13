@@ -1,5 +1,7 @@
 # Disaster Recovery Test Results
 
+<!-- Last verified: 2026-02-13 -->
+
 **Date:** 2026-02-03
 **Tester:** Claude Agent
 **Status:** ✅ PASSED

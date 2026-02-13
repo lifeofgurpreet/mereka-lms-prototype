@@ -1,4 +1,6 @@
 # Local Development Documentation Index
+
+<!-- Last verified: 2026-02-13 -->
 _Quick reference for coding agents and developers_
 
 ## 🚀 Getting Started

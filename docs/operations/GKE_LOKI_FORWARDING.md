@@ -1,5 +1,7 @@
 # GKE to VPS Loki Log Forwarding
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Overview
 
 This document describes the log forwarding setup that sends logs from the GKE `mereka-lms` namespace to the VPS Loki instance for unified search and monitoring.

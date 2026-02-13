@@ -5,7 +5,7 @@ Use this checklist whenever you create or update docs in this repository. Consis
 
 ## 1. Location
 
-- **Quick start / Daily workflow:** `docs/quickstart/`
+- **Quick start / Daily workflow:** `docs/onboarding/`
 - **Operations / Infra / Secrets:** `docs/operations/`
 - **Migrations:** `docs/migrations/<domain>/`
 - **Analytics / Reporting:** `docs/analytics/`
@@ -34,8 +34,8 @@ _Audience: <role> • Owner: <team/driver> • Last verified: YYYY‑MM‑DD_
 
 ## 4. Cross-linking
 
-- Link relative to `docs/` (e.g., `[Quickstart](quickstart/WORKFLOW_LOCAL.md)`).
-- When referencing scripts/tools, link to their repo path (`scripts/migrations/kajabi/scripts/...`).
+- Link relative to `docs/` (e.g., `[Quickstart](onboarding/WORKFLOW_LOCAL.md)`).
+- When referencing scripts/tools, link to their repo path (`scripts/migrations/kajabi/...`).
 - Update `docs/README.md` whenever you add, remove, or substantially change a doc.
 
 ## 5. Verification Workflow

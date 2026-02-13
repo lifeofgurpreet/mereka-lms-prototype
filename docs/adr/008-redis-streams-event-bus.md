@@ -5,6 +5,8 @@
 **Deciders**: Platform Team
 **Related**: [specs/cross-cutting-requirements_spec.md](../../specs/cross-cutting-requirements_spec.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The Mereka Academy platform requires an event bus for asynchronous communication between services, including:

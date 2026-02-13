@@ -27,11 +27,14 @@ Or if you have this repo cloned locally:
 
 ## Part 1: Server-Side Configuration
 
-> ✅ **COMPLETED** (2026-01-13): Mobile API has been enabled on `academyv2.mereka.io`
-> - OAuth App: `mereka-mobile-app`
-> - Redirect URI: `org.openedx.app://oauth2Callback`
-> - Mobile API: Enabled
-> - Default Mobile Available: Enabled
+> ⚠️ **STATUS UNVERIFIED** (2026-02-13): Documentation claims mobile API enabled but requires runtime confirmation
+> - OAuth App: `mereka-mobile-app` (claimed configured)
+> - Redirect URI: `org.openedx.app://oauth2Callback` (claimed configured)
+> - Mobile API: Claimed enabled (verify with: `tutor local run lms python manage.py lms shell -c "from django.conf import settings; print(settings.FEATURES.get('ENABLE_MOBILE_REST_API'))"`)
+> - Default Mobile Available: Claimed enabled (verify with: `tutor local run lms python manage.py lms shell -c "from django.conf import settings; print(settings.FEATURES.get('DEFAULT_MOBILE_AVAILABLE'))"`)
+>
+> **Last verified**: Never (docs audit only, not runtime verification)
+> **To verify**: Run the commands above in production environment
 
 ### Step 1: Enable Mobile API Features (Already Done)
 

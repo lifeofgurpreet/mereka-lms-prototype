@@ -5,6 +5,8 @@
 **Deciders**: Platform Team
 **Related**: [Mobile Apps Secrets Management Spec](../../specs/mobile-apps-secrets-management_spec.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ---
 
 ## Context

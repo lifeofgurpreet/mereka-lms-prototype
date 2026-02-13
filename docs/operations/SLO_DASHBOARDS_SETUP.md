@@ -1,5 +1,7 @@
 # Mereka LMS SLO Dashboards Setup
 
+<!-- Last verified: 2026-02-13 -->
+
 **Date:** 2026-02-06
 **Status:** Updated
 

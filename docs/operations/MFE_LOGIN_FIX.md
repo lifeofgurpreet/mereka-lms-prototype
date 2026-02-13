@@ -1,5 +1,7 @@
 # MFE Login White Screen Fix
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Problem
 Accessing `http://apps.localhost/authn/login` shows a white screen (404 error).
 

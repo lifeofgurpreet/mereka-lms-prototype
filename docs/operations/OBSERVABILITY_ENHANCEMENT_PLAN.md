@@ -1,5 +1,7 @@
 # Mereka LMS Observability Enhancement Plan
 
+<!-- Last verified: 2026-02-13 -->
+
 **Project**: mereka-lms  
 **Version**: 2.8
 **Date**: 2026-02-07  

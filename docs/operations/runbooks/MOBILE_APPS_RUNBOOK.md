@@ -1,11 +1,35 @@
 # Mobile Apps Runbook
-_Audience: Platform Eng + Mobile Dev • Owner: Engineering Lead • Last updated: 2026-02-10_
+_Audience: Platform Eng + Mobile Dev • Owner: Engineering Lead • Last updated: 2026-02-13_
 
 This runbook covers operational procedures for enterprise mobile app testing.
 
 > **Status**: Mobile app enterprise features are **not yet implemented** (Tier 6). This runbook documents target-state procedures.
+> **Runtime verification**: REQUIRED before operational use - Mobile API enablement and OAuth setup have not been runtime-verified
 > **Spec**: `specs/mobile-apps-enterprise_spec.md`
 > **Testmap**: `specs/testmaps/mobile-apps-enterprise_testmap.yaml`
+
+## Runtime Verification Commands
+
+Before using this runbook operationally, verify mobile API configuration:
+
+```bash
+# Verify ENABLE_MOBILE_REST_API is enabled
+tutor local run lms python manage.py lms shell -c \
+  "from django.conf import settings; print(settings.FEATURES.get('ENABLE_MOBILE_REST_API'))"
+# Expected: True
+
+# Verify OAuth application exists
+kubectl exec -n mereka-lms deployment/lms -- \
+  ./manage.py lms shell -c \
+  "from oauth2_provider.models import Application; print(Application.objects.filter(client_id='mereka-mobile-app').exists())"
+# Expected: True
+
+# Verify FCM/APNs credentials are configured (when push notifications implemented)
+kubectl get secret -n mereka-lms mobile-secrets -o jsonpath='{.data.MOBILE_FCM_SERVICE_ACCOUNT_JSON}' | base64 -d | jq .
+# Expected: Valid Firebase service account JSON
+```
+
+<!-- Last verified: 2026-02-13 (docs audit, not runtime) -->
 
 ## Prerequisites
 

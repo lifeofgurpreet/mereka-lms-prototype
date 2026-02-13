@@ -86,12 +86,17 @@ Mobile is the primary access channel for learners across Mereka Academy's client
 ## Assumptions
 
 - Open edX LMS backend (Tutor 21.0.0, Ulmo) exposes the standard Mobile REST API at `/api/mobile/v1/`, `/api/courses/v1/`, `/api/enrollment/v1/`, and related endpoints
+  - **Runtime status**: UNVERIFIED - requires production verification via `tutor local run lms python manage.py lms shell -c "from django.conf import settings; print(settings.FEATURES.get('ENABLE_MOBILE_REST_API'))"`
 - The existing iOS CI/CD pipeline (`.github/workflows/build-ios-app.yml`) is the baseline for iOS; Android will follow a parallel pattern
 - Firebase project `mereka-academy` exists and is configured for both iOS (`com.mereka.academy.mobile`) and Android (`com.mereka.academy.mobile`) bundle/application IDs
+  - **Runtime status**: UNVERIFIED - requires Firebase Console confirmation
 - Apple Developer account (Team ID: `44F7G2D7U6`) and Google Play Developer account are both active
 - Client organizations are identified by a unique `org_slug` that maps to their tenant configuration
 - The Open edX OAuth2 provider is configured with a `mereka-mobile-app` client ID (already present in iOS config)
+  - **Runtime status**: UNVERIFIED - requires database query to confirm OAuth application exists
 - Infisical is the secrets source of truth (per `specs/secrets-management_spec.md`)
+
+<!-- Last verified: 2026-02-13 (docs audit, not runtime) -->
 
 ---
 

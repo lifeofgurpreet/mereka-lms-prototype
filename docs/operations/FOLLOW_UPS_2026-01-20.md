@@ -1,5 +1,7 @@
 # Mereka LMS Follow-ups (2026-01-20)
 
+<!-- Last verified: 2026-02-13 -->
+
 This file captures what was verified today and what still needs to happen so you can resume later without re-tracing steps.
 
 ## Snapshot (Verified)

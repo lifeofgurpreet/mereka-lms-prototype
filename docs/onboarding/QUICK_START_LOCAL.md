@@ -1,4 +1,6 @@
 # Quick Start: Local Development Setup
+
+<!-- Last verified: 2026-02-13 -->
 _For Coding Agents • 5-minute setup guide_
 
 ## 🚀 Fast Setup (Copy-Paste Ready)

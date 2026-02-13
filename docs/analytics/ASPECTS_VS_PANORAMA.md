@@ -1,7 +1,17 @@
 # Aspects vs Panorama: Feature Comparison
-_Audience: Leadership • Owner: Data/Analytics • Last verified: 2025-07-25_
+_Audience: Leadership • Owner: Data/Analytics • Last verified: 2026-02-13_
 
 This document explains what Panorama can do that Aspects cannot, helping you decide if you need Panorama in addition to (or instead of) Aspects.
+
+> **DEPLOYMENT STATUS**: Neither Aspects nor Panorama currently deployed to production
+>
+> **Aspects status**: Plugin installed locally, not deployed to GKE
+> **Panorama status**: Not installed or evaluated
+> **Infrastructure monitoring** (Prometheus/Grafana): OPERATIONAL - but this is for system metrics, not learning analytics
+>
+> This comparison remains valid for future decision-making when learning analytics deployment begins.
+>
+> <!-- Last deployment status check: 2026-02-13 -->
 
 ## Quick Summary
 

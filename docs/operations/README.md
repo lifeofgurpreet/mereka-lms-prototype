@@ -1,9 +1,12 @@
 # Operations Documentation
 
+<!-- Last verified: 2026-02-13 -->
+
 Runbooks, troubleshooting guides, and operational procedures for managing the Mereka Academy Open edX platform.
 
 ## Key Documents
 
+- [`CAPABILITY_MATRIX.md`](CAPABILITY_MATRIX.md) - **Complete inventory** of all Open edX capabilities (deployed vs planned)
 - [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) - **🚨 SITE DOWN?** Start here for quick diagnostics
 - [`ACCESS_URLS.md`](ACCESS_URLS.md) - Quick reference for all URLs and access
 - [`DEPLOYMENT_RUNBOOK.md`](DEPLOYMENT_RUNBOOK.md) - How we deploy Tutor environments

@@ -1,5 +1,7 @@
 # Theme Deployment Guide
 
+<!-- Last verified: 2026-02-13 -->
+
 This guide covers deploying branding/theme changes from the Mereka brand system to the production (GKE) and dev (kind) Open edX environments.
 
 Canonical branding workflow:

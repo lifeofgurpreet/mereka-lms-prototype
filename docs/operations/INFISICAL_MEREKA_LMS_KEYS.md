@@ -1,5 +1,7 @@
 # Infisical Keys Inventory (Mereka LMS)
 
+<!-- Last verified: 2026-02-13 -->
+
 Canonical list of `MEREKA_LMS_*` secrets used by the platform. The authoritative
 source is `deploy/k8s/base/secrets/external-secrets.yaml` and all secrets must live
 under `/k8s/mereka-lms` in both `prod` and `dev`.

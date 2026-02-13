@@ -1,4 +1,6 @@
 # Agent Setup Checklist
+
+<!-- Last verified: 2026-02-13 -->
 _For coding agents setting up on a new machine_
 
 ## ✅ Pre-Flight Checklist
@@ -170,10 +172,10 @@ Once setup is complete:
 
 ## 🔗 Quick Links
 
-- **Complete Guide:** `docs/LOCAL_DEVELOPMENT_GUIDE.md`
-- **Quick Reference:** `docs/QUICK_START_LOCAL.md`
-- **Daily Workflow:** `docs/quickstart/WORKFLOW_LOCAL.md`
-- **Access Info:** `docs/LOCAL_ACCESS_INFO.md`
+- **Complete Guide:** `docs/onboarding/LOCAL_DEVELOPMENT_GUIDE.md`
+- **Quick Reference:** `docs/onboarding/QUICK_START_LOCAL.md`
+- **Daily Workflow:** `docs/onboarding/WORKFLOW_LOCAL.md`
+- **Access Info:** `docs/operations/LOCAL_ACCESS_INFO.md`
 
 ---
 

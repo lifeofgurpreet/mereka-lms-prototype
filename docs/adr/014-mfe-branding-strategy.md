@@ -5,6 +5,8 @@
 **Deciders**: Platform Team (Decision Owner: Gurpreet)
 **Related**: [ADR-012: No Runtime CSS Overlay](012-no-runtime-css-overlay.md), [FRONTEND_BRANDING_METHOD.md](../operations/FRONTEND_BRANDING_METHOD.md)
 
+<!-- Last verified: 2026-02-13 -->
+
 ---
 
 ## Executive Summary

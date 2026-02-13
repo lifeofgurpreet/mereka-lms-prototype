@@ -1,5 +1,7 @@
 # Tutor Configuration Safety Guide
 
+<!-- Last verified: 2026-02-13 -->
+
 This guide explains the safety mechanisms in place to prevent Tutor configuration mistakes.
 
 ## Problem Statement

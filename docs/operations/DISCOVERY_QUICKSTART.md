@@ -1,5 +1,7 @@
 # Discovery Service Quick Start
 
+<!-- Last verified: 2026-02-13 -->
+
 Quick reference for working with the Discovery service (course catalog).
 
 ## TL;DR

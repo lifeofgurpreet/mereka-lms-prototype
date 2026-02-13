@@ -88,13 +88,20 @@ Mobile secrets are uniquely fragile. An expired Apple Distribution certificate b
 ## Assumptions
 
 - The Mereka Academy Firebase project (`mereka-academy`) exists and is configured for both iOS (`com.mereka.academy.mobile`) and Android (`com.mereka.academy.mobile`)
+  - **Verification status**: UNVERIFIED - requires Firebase Console confirmation
 - Apple Developer Team ID `44F7G2D7U6` is active with an Apple Developer Program membership
+  - **Verification status**: VERIFIED via Apple Developer Portal
 - The `ios-certificates` private git repository (`git@github.com:Biji-Biji-Initiative/ios-certificates.git`) is used by Fastlane match for certificate and profile storage
+  - **Verification status**: VERIFIED - repository exists and accessible
 - GitHub Actions is the CI/CD platform for both iOS and Android builds
 - Infisical at `secrets.mereka.io` is the canonical source of truth for secrets that flow to K8s (per `specs/secrets-management_spec.md`)
 - GitHub repository secrets are the canonical source of truth for CI/CD-only secrets that do not need K8s injection
 - The existing iOS CI/CD pipeline (`.github/workflows/build-ios-app.yml`) is operational and serves as the baseline pattern
+  - **Verification status**: VERIFIED - CI pipeline exists and runs
 - Google Play Developer account will be provisioned before Android CI/CD implementation begins
+  - **Verification status**: NOT PROVISIONED - pending Android development kickoff
+
+<!-- Last verified: 2026-02-13 (docs audit + GitHub/Apple Portal verification) -->
 
 ---
 

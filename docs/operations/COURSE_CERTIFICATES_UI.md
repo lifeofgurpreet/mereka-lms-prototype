@@ -1,4 +1,6 @@
 # Course Certificates: Where To Check Issues (UI)
+
+<!-- Last verified: 2026-02-13 -->
 _Audience: Course staff (instructors, course team) • Owner: Platform Eng_
 
 This doc is about **learner course completion certificates** (not TLS/SSL certs).

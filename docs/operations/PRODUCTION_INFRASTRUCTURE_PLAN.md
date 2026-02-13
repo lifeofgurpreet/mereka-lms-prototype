@@ -1,5 +1,7 @@
 # Production Infrastructure Plan (Current)
 
+<!-- Last verified: 2026-02-13 -->
+
 This document captures the **current** production/development model for the
 Mereka LMS stack. There is **no staging environment**. Historical planning that
 references staging has been archived at:

@@ -147,6 +147,6 @@ See `docs/migrations/mct/EXPORT_GUIDE.md` → Troubleshooting section for:
 ## 🔗 Related Documentation
 
 - **Kajabi Migration:** `docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md`
-- **Local Setup:** `docs/quickstart/LOCAL_SETUP.md`
+- **Local Setup:** `docs/onboarding/LOCAL_SETUP.md`
 - **Deployment:** `docs/operations/DEPLOYMENT_RUNBOOK.md`
 - **Branding:** `docs/BRANDING.md`

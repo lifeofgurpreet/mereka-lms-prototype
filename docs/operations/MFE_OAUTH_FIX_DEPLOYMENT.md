@@ -1,5 +1,7 @@
 # MFE OAuth Fix Deployment Guide
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Problem Summary
 
 The `/api/mfe_context` endpoint returns an empty `providers` array even though OAuth providers (Authentik) are properly configured in the database. This prevents the MFE login page from displaying OAuth login buttons. The MFE button should display **“Mereka”** (backed by Authentik).

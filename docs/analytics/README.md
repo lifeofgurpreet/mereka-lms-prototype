@@ -1,7 +1,16 @@
 # Analytics & Reporting
-_Audience: Platform Eng + Data • Owner: Analytics Guild • Last verified: 2025-11-09_
+_Audience: Platform Eng + Data • Owner: Analytics Guild • Last verified: 2026-02-13_
 
 Use this folder whenever you need to instrument, deploy, or interpret analytics across Mereka Academy. Start with the installation + quickstart docs if you are standing up Aspects, then branch into the comparative studies and utility guides below.
+
+> **IMPORTANT**: Aspects/Superset (learning analytics) is NOT CURRENTLY DEPLOYED
+>
+> **What IS running**: Prometheus/Grafana for infrastructure monitoring (CPU, memory, request rates, etc.)
+> **What is NOT running**: Aspects/Superset for learning analytics (enrollments, completions, engagement, etc.)
+>
+> The documents below describe the TARGET STATE for learning analytics deployment.
+>
+> <!-- Last deployment status check: 2026-02-13 -->
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |

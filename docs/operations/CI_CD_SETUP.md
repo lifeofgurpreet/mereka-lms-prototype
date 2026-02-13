@@ -1,5 +1,7 @@
 # CI/CD Setup Guide
 
+<!-- Last verified: 2026-02-13 -->
+
 **Last Updated:** 2026-02-08
 
 ## Overview

@@ -1,26 +1,48 @@
 # Aspects Analytics Installation - Step by Step
-_Audience: Platform Eng • Owner: Data/Analytics • Last verified: 2025-07-25_
+_Audience: Platform Eng • Owner: Data/Analytics • Last verified: 2026-02-13_
 
 This document tracks the installation of Aspects Analytics for platform-wide analytics.
 
 ## Installation Status
 
-✅ **Step 1: Plugin Installed**
-- `tutor-contrib-aspects` package installed
+✅ **Step 1: Plugin Installed** (Local environment only)
+- `tutor-contrib-aspects` package installed in local `.venv`
 - Plugin enabled in Tutor configuration
 
-✅ **Step 2: Configuration Updated**
+✅ **Step 2: Configuration Updated** (Local environment only)
 - Aspects added to `PLUGINS` list in `infrastructure/tutor/config.example.yml`
 - Configuration saved to `tutor_env/config.yml`
 - Patches applied
 
-⏳ **Step 3: Docker Images (Pending)**
+⏳ **Step 3: Docker Images (Pending - NOT BUILT)**
 - Need to build Aspects Docker images
 - This step requires Docker to be running
+- **Status**: Not built for local OR production
 
-⏳ **Step 4: Initialize Services (Pending)**
+⏳ **Step 4: Initialize Services (Pending - NOT DEPLOYED)**
 - Initialize Aspects services
 - Start all services
+- **Status**: Not deployed to local OR production environments
+
+## Deployment Status Summary
+
+| Environment | Plugin Installed | Images Built | Services Running | Data Flowing |
+|-------------|------------------|--------------|------------------|--------------|
+| Local | ✅ Yes | ❌ No | ❌ No | ❌ No |
+| Production (GKE) | ❌ No | ❌ No | ❌ No | ❌ No |
+
+**Verification command** (run to confirm current state):
+```bash
+# Local environment
+tutor local dc ps | grep aspects
+# Expected: No output (services not running)
+
+# Production environment
+kubectl get pods -n mereka-lms | grep aspects
+# Expected: No resources found (not deployed)
+```
+
+<!-- Last deployment status check: 2026-02-13 -->
 
 ## Next Steps to Complete Installation
 

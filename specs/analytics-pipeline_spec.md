@@ -54,6 +54,18 @@ The pipeline provides insights into learner behavior, course engagement, and pla
 
 ### Event Collection (Aspects)
 
+> **DEPLOYMENT STATUS**: NOT DEPLOYED - Aspects is available in Tutor but not yet enabled in production
+>
+> **To deploy**:
+> 1. Enable plugin: `tutor plugins enable aspects`
+> 2. Build images: `tutor images build aspects aspects-superset`
+> 3. Initialize: `tutor k8s init`
+> 4. Start services: `tutor k8s start`
+>
+> **Verification**: `kubectl get pods -n mereka-lms | grep aspects`
+>
+> <!-- Last deployment status check: 2026-02-13 (docs audit) -->
+
 - The system MUST install Aspects plugin via Tutor: `tutor plugins enable aspects`
 - The system MUST collect xAPI events from LMS, CMS, and MFEs
 - The system MUST transform Open edX tracking events to xAPI 1.0.3 format

@@ -5,6 +5,8 @@
 **Deciders**: Platform Team
 **Related**: [specs/IMPLEMENTATION_ORDER.md](../../specs/IMPLEMENTATION_ORDER.md), [scripts/qa/spec-tools/](../../scripts/qa/spec-tools/)
 
+<!-- Last verified: 2026-02-13 -->
+
 ## Context
 
 The Mereka Academy platform has 31 specifications defining 769 acceptance criteria (ACs) across all features and infrastructure. We needed a system to track which ACs are verified by automated tests and scripts.
