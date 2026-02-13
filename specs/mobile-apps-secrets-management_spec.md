@@ -491,13 +491,17 @@ kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data}' | jq 'key
 
 ---
 
-## Open Questions
+## Decisions Made (2026-02-13)
 
-1. **Separate `mobile-secrets` ExternalSecret vs appending to `openedx-secrets`?** Adding to `openedx-secrets` is simpler (one resource to manage) but increases blast radius of sync failures. A separate `mobile-secrets` ExternalSecret provides isolation but adds operational overhead (another resource to monitor). Recommendation: start with `openedx-secrets` for simplicity, split if the key count exceeds 5.
+1. **✅ Separate `mobile-secrets` ExternalSecret**: Create dedicated `mobile-secrets` ExternalSecret for isolation and clearer ownership. Better separation of concerns even with operational overhead.
 
-2. **Firebase project sharing between dev and prod**: Should dev and prod use the same Firebase project with different app registrations, or completely separate Firebase projects? Same project simplifies management but risks dev push notifications reaching prod analytics. Separate projects require duplicating Firebase configuration. Need Firebase admin input.
+2. **✅ Firebase Cloud Messaging (FCM) for push notifications**:
+   - **Clarification**: Firebase is ONLY used for push notifications (FCM), NOT for hosting
+   - Open edX backend runs on GCP, but mobile apps use FCM to send push notifications to learners' devices
+   - This is standard for Open edX mobile apps (see [Open edX Mobile Documentation](https://docs.openedx.org/en/latest/developers/references/mobile_api.html))
+   - **Decision deferred**: Firebase project sharing (dev vs prod) - will decide when mobile app deployment is ready
 
-3. **APNs Authentication Key vs APNs Certificate**: Apple supports two push notification credential types: Authentication Key (.p8, no expiry, one key per account for all apps) and APNs Certificate (.pem, expires yearly, per-app). The Authentication Key is recommended because it does not expire and works across all apps. Confirm this is the chosen approach before creating Infisical entries.
+3. **✅ APNs Authentication Key (.p8)**: Use APNs Authentication Key (no expiry, works for all apps) instead of per-app certificates.
 
 4. **Android upload key generation procedure**: Should the upload keystore be generated locally by an operator, or generated within a CI step and exported? Local generation is more secure (key never exists outside the operator's machine and GitHub) but requires manual steps. CI generation is automated but the key transiently exists in the runner.
 
@@ -505,4 +509,4 @@ kubectl get secret openedx-secrets -n mereka-lms -o jsonpath='{.data}' | jq 'key
 
 6. **Weekly validation CI cost**: Running the validation script weekly requires a GitHub Actions workflow that authenticates to Infisical (needs `INFISICAL_TOKEN` and `INFISICAL_PROJECT_ID` as GitHub secrets) and optionally to the Apple Developer API. Is this approved, and should it be a blocking check or an advisory notification?
 
-7. **Google Play Developer account status**: Is the Google Play Developer account provisioned? The Android CI/CD secrets (Tier Phase 3) depend on this. If not yet provisioned, Android secrets should remain in the "Not yet created" state in the inventory.
+4. **Google Play Developer account status**: ⏳ **UNSURE** - Need to check if account is provisioned before proceeding with Android CI/CD secrets (Phase 3).

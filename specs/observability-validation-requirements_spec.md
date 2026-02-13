@@ -631,13 +631,25 @@ The system MUST produce a compliance report in the following structure when `--j
 4. **Phase 4**: Runtime mode is script logic only -- no cluster state to roll back.
 5. **Phase 5**: Set `OBSERVABILITY_COMPLIANCE_CI_GATE=false` in GitHub Actions. CI check stops running. Remove the workflow step if desired.
 
-## Open Questions
+## Decisions Made (2026-02-13)
 
-1. **Caddy metrics port**: Does the production Caddy deployment currently expose a metrics port (default: 2019)? If not, enabling Caddy metrics requires a Caddy configuration change before the ServiceMonitor can scrape it.
-2. **MFE metrics**: Micro-frontends are static React apps served by Caddy. They do not have a `/metrics` endpoint. Should the MFE ServiceMonitor target the Caddy container serving MFEs instead? Or should MFE monitoring rely solely on uptime checks and Caddy access logs?
-3. **Forum metrics availability**: The Forum service (openedx-forum v0.3.8, Python) is integrated into the LMS process. Does it expose a separate `/metrics` endpoint, or are forum metrics included in the LMS django-prometheus output?
-4. **Purchase Gateway readiness**: The Purchase Gateway (FastAPI) is under development. When will it be deployed to production and ready for a ServiceMonitor?
-5. **Known gaps file format**: Should the known-gaps file be YAML, JSON, or a simple text list? YAML is proposed for consistency with other spec tooling.
-6. **Grafana API access from CI**: Does the CI runner have network access to `grafana.mereka.io`? If not, Grafana dashboard runtime checks must be skipped in CI.
-7. **Compliance score metric push mechanism**: Should the validation script push metrics to a Prometheus Pushgateway, write to a file for node-exporter textfile collector, or rely on log-based metric extraction?
-8. **Alert rule decommissioning process**: When a service is decommissioned, what is the process for removing its alerts from this spec? Should there be a "deprecated alerts" section with removal dates?
+1. **✅ Caddy metrics port**: Should be enabled (port :2019), but needs verification. **Action**: Check production Caddy config before creating ServiceMonitor.
+
+2. **✅ MFE monitoring approach**: Monitor MFEs via platform-independent uptime checks (NOT GCP-only)
+   - **Rationale**: Avoid vendor lock-in, enable monitoring of dev/staging clusters not on GCP
+   - **Implementation**: Use Prometheus Blackbox Exporter for HTTP probes (cluster-agnostic)
+   - ServiceMonitor targets Blackbox Exporter, which probes MFE URLs
+
+3. **✅ Forum metrics**: Forum exposes **separate /metrics endpoint** - create dedicated ServiceMonitor
+
+4. **✅ Known gaps file format**: Use **YAML** for consistency with other spec tooling
+
+## Open Questions (Remaining)
+
+5. **Purchase Gateway readiness**: When will Purchase Gateway be deployed to production and ready for ServiceMonitor?
+
+6. **Grafana API access from CI**: Does CI runner have network access to `grafana.mereka.io`? If not, skip Grafana dashboard checks in CI.
+
+7. **Compliance score metric push**: Should validation script push metrics to Prometheus Pushgateway, write to textfile collector, or use log-based extraction?
+
+8. **Alert decommissioning process**: When services are decommissioned, how to remove alerts from this spec? Need "deprecated alerts" section with removal dates?
