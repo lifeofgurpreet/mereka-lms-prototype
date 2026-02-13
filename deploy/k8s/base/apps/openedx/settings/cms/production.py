@@ -382,11 +382,9 @@ SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://lms:8000"
 # Studio sits behind TLS termination at the ingress; force https redirect_uri so
 # the OIDC provider accepts it.
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = MEREKA_SCHEME == "https"
-# CRITICAL: Studio must share the authenticated LMS session across subdomains
-# (academyv2.mereka.io <-> studio.academyv2.mereka.io). A separate cookie name
-# causes infinite redirect loops back to LMS /login after successful SSO.
-# IMPORTANT: Studio must use a dedicated session cookie name to avoid collisions
-# with the LMS `sessionid` cookie when `Domain=.academyv2.mereka.io` is used.
+# Studio must use a dedicated session cookie to avoid collisions with the LMS
+# `sessionid` cookie (which has Domain=.academyv2.mereka.io via middleware).
+# Using the same name causes both services to overwrite each other's sessions.
 SESSION_COOKIE_NAME = "studio_session_id"
 
 MAX_ASSET_UPLOAD_FILE_SIZE_IN_MB = 100
@@ -418,11 +416,13 @@ for origin in [MEREKA_STUDIO_BASE_URL, f"{MEREKA_SCHEME}://{MEREKA_BIJI_STUDIO_D
 SESSION_COOKIE_SECURE = MEREKA_SCHEME == "https"
 CSRF_COOKIE_SECURE = MEREKA_SCHEME == "https"
 # CMS uses an OAuth2 roundtrip to the LMS (/login/edx-oauth2 -> /complete/edx-oauth2).
-# Safari (and some hardened cookie postures) can drop SameSite=None cookies on redirects
-# in ways that break the session-backed OAuth state. For Studio, Lax is sufficient and
-# avoids state-missing failures on the callback.
-SESSION_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SAMESITE = "Lax"
+# The redirect chain may traverse Authentik (auth0.mereka.io) when the user is not yet
+# logged in to LMS, resulting in 6+ redirects across subdomains. SameSite=None (matching
+# the upstream LMS convention from DCS_SESSION_COOKIE_SAMESITE) ensures the studio
+# session cookie is always sent back on the callback regardless of redirect chain length
+# or browser-specific cookie handling.  Secure=True (above) is required for SameSite=None.
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
 # Multisite note:
 # This CMS instance is served on multiple root domains (academyv2.mereka.io and
 # biji-biji.com). A single static cookie domain breaks the other root. Keep
