@@ -114,6 +114,8 @@ The middleware stack MUST execute in the following order (earliest to latest in 
 - The middleware MUST log actions at `INFO` level via the `mfe_oauth_fix.middleware` logger.
 - The middleware MUST NOT raise exceptions that propagate to the client (catch all exceptions, log errors, return original response on failure).
 
+**Note**: MFE footer component is defined in `specs/branding-system_spec.md`. This spec handles OAuth provider normalization only.
+
 #### openedx_prometheus Custom App (AC-017 to AC-018)
 
 - The app MUST be added to `INSTALLED_APPS` after `django_prometheus`.
