@@ -588,6 +588,12 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 ### Payment-Specific Metrics
 
+- `gateway_payment_duration_seconds` (histogram, labels: `provider`, `status`) -- Payment processing latency by provider and outcome
+- `gateway_payment_total` (counter, labels: `provider`, `currency`, `status`) -- Payment attempt count by provider, currency, and status
+- `gateway_payment_amount_usd` (counter, labels: `provider`, `currency`) -- Payment amount in USD equivalent
+- `gateway_webhook_processing_duration_seconds` (histogram, labels: `event_type`) -- Webhook processing latency by event type
+- `gateway_refund_total` (counter, labels: `provider`, `reason`, `status`) -- Refund count by provider, reason, and status
+- `gateway_active_subscriptions` (gauge, labels: `plan_type`) -- Active subscription count by plan type
 - `payment_success_rate` (gauge, labels: `tenant_id`, `offering_type`) -- successful payments / total payment attempts
 - `payment_processing_duration_seconds` (histogram, labels: `tenant_id`, `currency`) -- time from checkout creation to payment confirmation
 - `refund_processing_duration_seconds` (histogram, labels: `tenant_id`, `refund_type`) -- time from refund initiation to enrollment revocation
@@ -603,10 +609,14 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 ### Payment Health Dashboard
 
+- **Payment Processing**: Request latency (p50/p95/p99), success rate by provider, error rate breakdown
+- **Webhook Processing**: Delivery rate by event type, processing latency, failure count with reasons
 - **Payment Success Rate**: 7-day rolling success rate by tenant, offering type, and payment method
 - **Processing Times**: Checkout latency, payment confirmation latency, refund processing time percentiles
 - **Revenue Tracking**: Daily revenue by tenant, currency breakdown, top-performing offerings, refund rate trend
 - **Stripe Webhook Health**: Delivery success rate, processing latency, event types received, signature validation failures
+
+Logs MUST be structured JSON and MUST NOT log card numbers or unmasked card data. Card last 4 digits MUST be masked with `****` in logs.
 
 ---
 

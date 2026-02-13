@@ -499,6 +499,7 @@ Without this spec:
 
 ### GDPR Deletion Workflow
 
+- [ ] AC-GDPR-DEL-001: Given a user submits a right-to-be-forgotten request, when the deletion pipeline executes, then all PII across all 8+ data stores MUST be deleted or anonymized within 30 days. Partial deletion failures MUST be reported to the compliance team within 24 hours.
 - [ ] AC-031: Given a verified right-to-erasure request for a user, when the deletion pipeline completes across all data stores (MySQL, MongoDB Atlas, Redis, ClickHouse, GCS), then a cryptographic deletion certificate MUST be generated listing each data store, records deleted count, and SHA-256 hash of the deletion log
 - [ ] AC-032: Given a deletion pipeline execution where one data store fails (e.g., MongoDB timeout), when the failure is detected, then all completed deletions MUST be logged, the pipeline MUST retry the failed store 3 times with exponential backoff, and if still failing MUST alert ops and pause (NOT rollback successful deletions since data is already gone)
 - [ ] AC-033: Given a completed deletion for user X, when a Subject Access Request is submitted for user X, then the SAR pipeline MUST return zero personal data records and include the deletion certificate reference

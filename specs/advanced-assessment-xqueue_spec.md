@@ -136,6 +136,8 @@ Proctoring features referenced in this spec are defined in `specs/proctoring-int
 - Automated AI essay grading for ORA2 (AI-assisted grading provides suggestions to human graders, not autonomous scoring)
 - Supporting assessment types that require browser plugins or desktop software installation
 
+**Proctoring boundary**: The system MUST NOT implement browser lockdown, identity verification, or live proctor assignment. These features are deferred to Q3 2027 per `specs/proctoring-integration_spec.md`. Assessment security (non-proctored) is limited to time limits, randomization, and one-at-a-time display.
+
 ## Assumptions
 
 - The Open edX LMS is running Tutor 21.0.0 (Ulmo) with ORA2 (`openassessment`) included in the base image
@@ -394,7 +396,7 @@ Proctoring features referenced in this spec are defined in `specs/proctoring-int
 ### XQueue Integration
 
 - [ ] AC-016: Given the XQueue service running at `http://xqueue:8000` and a Python code grader worker deployed, when a student submits a Python code answer to an XQueue-backed problem, then the code is executed in a sandboxed environment and a grade result is returned within 30 seconds
-- [ ] AC-017: Given a student submission containing an infinite loop, when the grader worker processes it, then the execution is terminated after the configured CPU time limit (10 seconds) and the student receives feedback indicating a timeout error
+- [ ] AC-017: Given a student submission containing an infinite loop, when the grader worker processes it, then the execution is terminated after the configured CPU time limit (10 seconds) and the student receives feedback message "Code execution timeout". Note: Additional security vectors that SHOULD be addressed include memory exhaustion (256MB limit), disk write outside /tmp, network access blocking, and fork bomb protection
 - [ ] AC-018: Given a student submission containing `import os; os.system("rm -rf /")`, when the grader worker processes it, then the sandboxed environment blocks the system call and the student receives feedback indicating a security violation
 - [ ] AC-019: Given the XQueue grader worker crashes during processing, when the visibility timeout (60 seconds) expires, then the submission reappears in the queue and is picked up by another worker
 - [ ] AC-020: Given an XQueue-graded problem, when the grader returns a result, then the grade (scaled to the problem's maximum points) appears in the gradebook within 5 minutes

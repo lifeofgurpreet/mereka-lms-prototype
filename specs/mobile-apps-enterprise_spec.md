@@ -307,11 +307,17 @@ The mobile apps MUST authenticate all API requests using OAuth 2.0 bearer tokens
   - `content_downloaded`, `content_download_failed` (with `course_id`, `size_mb`)
   - `offline_sync_completed`, `offline_sync_failed`
 - The backend MUST expose mobile-specific Prometheus metrics:
-  - `mobile_api_requests_total` (labels: `endpoint`, `platform`, `org_slug`, `status_code`)
+  - `mobile_api_request_duration_seconds` (histogram, labels: `endpoint`, `method`, `status`) -- API request latency distribution
+  - `mobile_api_errors_total` (counter, labels: `endpoint`, `error_type`) -- API error count by type
+  - `mobile_push_notification_delivery_total` (counter, labels: `platform` [ios/android], `status`) -- Push notification delivery count
+  - `mobile_oauth_token_refresh_total` (counter, labels: `status` [success/failure]) -- OAuth token refresh attempts
+  - `mobile_api_requests_total` (counter, labels: `endpoint`, `platform`, `org_slug`, `status_code`)
   - `mobile_api_latency_seconds` (histogram, labels: `endpoint`, `platform`)
   - `push_notifications_sent_total` (labels: `type`, `org_slug`, `platform`)
   - `push_notifications_failed_total` (labels: `type`, `org_slug`, `platform`, `error_code`)
   - `device_registrations_active` (gauge, labels: `platform`, `org_slug`)
+- Logs MUST be structured JSON format and MUST NOT log device ID or user location (PII rules)
+- The system MUST provide a **Mobile API Performance** dashboard with: request latency percentiles, error rate by endpoint, active device count
 
 ---
 
