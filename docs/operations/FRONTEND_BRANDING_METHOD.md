@@ -246,21 +246,44 @@ grep "pgn-color-primary" infrastructure/tutor/themes/mereka/scss/_tokens.scss
 
 ---
 
+## Current MFE Branding Coverage
+
+**6 MFEs Total**:
+| MFE | Branding | Usage |
+|-----|:--------:|-------|
+| `frontend-app-learning` | ✅ | Course learning experience |
+| `frontend-app-authn` | ✅ | Login/registration |
+| `frontend-app-account` | ✅ | Account settings |
+| `frontend-app-profile` | ✅ | User profiles |
+| `frontend-app-gradebook` | ✅ | Instructor gradebook |
+| `frontend-app-course-authoring` | ❌ | Studio course authoring (NOT branded) |
+
+**Custom Components**:
+- ✅ **LMS Footer**: Heavily customized (`infrastructure/tutor/themes/mereka/lms/templates/footer.html`)
+  - 95 lines of custom HTML
+  - Custom structure, links, partners section
+
+---
+
 ## Future Considerations
 
-### Migration to tutor-contrib-paragon?
+### Migration to OEP-48 Brand Package (@mereka/brand)
 
-**Pros**:
-- Automated token compilation via Paragon CLI
-- Official Open edX plugin support
-- Consistent with upstream patterns
+**Status**: 🔴 **DECISION PENDING** - See [ADR-014](../adr/014-mfe-branding-strategy.md)
 
-**Cons**:
-- Migration effort required
-- Loss of manual SCSS control
-- Need to maintain JSON design tokens (not CSS)
+**Current Analysis** (2026-02-12):
+- OEP-48 brand package approach is industry standard
+- Our custom SCSS overlay works but diverges from best practices
+- Three migration options documented (Status Quo, Full Migration, Phased)
+- **Recommendation**: Phased migration starting at next branding change
 
-**Decision**: Stick with current approach unless Paragon CLI offers compelling new features.
+**Key Questions** (needs user input):
+1. How often does Figma design system change?
+2. Do we plan major branding changes in next 6 months?
+3. Team scaling planned?
+4. Need custom React footers in MFEs?
+
+**Read full analysis**: [ADR-014: MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)
 
 ---
 
