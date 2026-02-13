@@ -1,18 +1,22 @@
 ---
-title: GitHub Actions Cost Monitoring
+title: "GitHub Actions Cost Monitoring"
 type: "feature_spec"
-status: approved
-owner: Platform Team
-last_updated: 2026-02-12
+status: "approved"
+owner: "Platform Team"
+vehicle: "talent_platform"
+last_updated: "2026-02-12"
 version: "1.0.0"
-priority: high
+priority: "high"
 tier: 2
 depends_on:
-  - ci-cd-pipeline_spec.md
-references:
-  - specs/cross-cutting-requirements_spec.md
-  - docs/operations/runbooks/CI_CD_RUNBOOK.md
-  - .github/workflows/verify-specs.yml
+  - "specs/ci-cd-pipeline_spec.md"
+links:
+  related_specs:
+    - "specs/cross-cutting-requirements_spec.md"
+    - "specs/ci-cd-pipeline_spec.md"
+  related_docs:
+    - "docs/operations/runbooks/CI_CD_RUNBOOK.md"
+    - ".github/workflows/verify-specs.yml"
 ---
 
 # GitHub Actions Cost Monitoring
@@ -64,18 +68,22 @@ GitHub Actions provides generous free minutes (2,000/month for free accounts, 3,
 
 ## Requirements
 
+All requirements are expressed as acceptance criteria below with normative language (MUST/SHOULD/MAY per RFC 2119).
+
+## Acceptance Criteria
+
 ### Functional Requirements
 
 #### AC-001: Workflow Cost Tracking
 **Given** GitHub Actions workflows execute
 **When** workflow runs complete
-**Then** total minutes consumed must be tracked per workflow
-**And** cost calculated based on runner type (Linux $0.008/min, macOS $0.08/min, Windows $0.016/min)
+**Then** total minutes consumed MUST be tracked per workflow
+**And** cost MUST be calculated based on runner type (Linux $0.008/min, macOS $0.08/min, Windows $0.016/min)
 
 #### AC-002: Daily Cost Report
 **Given** workflows run throughout the day
 **When** end of day (00:00 UTC)
-**Then** automated report must be generated showing:
+**Then** automated report MUST be generated showing:
 - Total minutes consumed (by workflow)
 - Estimated cost for the day
 - Month-to-date total
@@ -85,7 +93,7 @@ GitHub Actions provides generous free minutes (2,000/month for free accounts, 3,
 #### AC-003: Budget Alerts
 **Given** workflow costs are being tracked
 **When** cost thresholds are exceeded
-**Then** alerts must be sent:
+**Then** alerts MUST be sent:
 - **Warning** (80% of budget = $40/month): Slack notification
 - **Critical** (100% of budget = $50/month): Slack + email notification
 - **Emergency** (150% of budget = $75/month): Escalate to platform lead
@@ -93,16 +101,16 @@ GitHub Actions provides generous free minutes (2,000/month for free accounts, 3,
 #### AC-004: Workflow Duration Limits
 **Given** workflows are configured
 **When** workflow job executes
-**Then** maximum duration must be enforced:
+**Then** maximum duration MUST be enforced:
 - Fast verification (PR checks): **5 minutes** max
 - Full verification (merge to main): **30 minutes** max
 - Build workflows: **45 minutes** max
-**And** jobs exceeding limits must fail with cost warning
+**And** jobs exceeding limits MUST fail with cost warning
 
 #### AC-005: Cost Optimization Recommendations
 **Given** workflow execution history
 **When** weekly cost analysis runs
-**Then** automated recommendations must be generated:
+**Then** automated recommendations MUST be generated:
 - Identify high-cost workflows (>10% of total minutes)
 - Suggest optimizations (caching, parallelization, timeout reduction)
 - Flag inefficient patterns (excessive re-runs, redundant checks)
@@ -110,7 +118,7 @@ GitHub Actions provides generous free minutes (2,000/month for free accounts, 3,
 #### AC-006: Monthly Cost Cap
 **Given** monthly cost approaches hard limit
 **When** 95% of budget consumed ($95 if $100 limit)
-**Then** non-critical workflows must be paused:
+**Then** non-critical workflows MUST be paused:
 - Verification workflows continue (required for merges)
 - Documentation builds paused
 - Scheduled jobs paused
@@ -123,7 +131,7 @@ GitHub Actions provides generous free minutes (2,000/month for free accounts, 3,
 #### AC-007: Workflow Execution Metrics
 **Given** Prometheus metrics are configured
 **When** workflows execute
-**Then** metrics must be exported:
+**Then** metrics MUST be exported:
 ```
 github_actions_workflow_duration_seconds{workflow="verify-specs",conclusion="success"}
 github_actions_workflow_cost_usd{workflow="verify-specs",runner="ubuntu-latest"}
@@ -133,7 +141,7 @@ github_actions_monthly_budget_consumed_percent{month="2026-02"}
 #### AC-008: Cost Dashboard
 **Given** Grafana is configured
 **When** operators view analytics
-**Then** cost dashboard must display:
+**Then** cost dashboard MUST display:
 - Current month spend vs budget (gauge)
 - Daily spend trend (time series)
 - Top 5 expensive workflows (bar chart)
@@ -143,7 +151,7 @@ github_actions_monthly_budget_consumed_percent{month="2026-02"}
 #### AC-009: Anomaly Detection
 **Given** workflow execution history
 **When** cost patterns deviate from normal
-**Then** anomalies must be detected:
+**Then** anomalies MUST be detected:
 - Sudden spike (>50% increase day-over-day)
 - New workflow consuming >5% of budget
 - Workflow duration increased >2x
@@ -156,7 +164,7 @@ github_actions_monthly_budget_consumed_percent{month="2026-02"}
 #### AC-010: Budget Configuration
 **Given** repository configuration
 **When** budget is defined
-**Then** budget must be configurable via:
+**Then** budget MUST be configurable via:
 - `.github/actions-budget.yml` file
 - Environment variables (for overrides)
 **And** default budget is $50/month
@@ -190,7 +198,7 @@ budget:
 #### AC-011: Cost Optimization Settings
 **Given** workflows are configured
 **When** cost optimization is enabled
-**Then** settings must be applied:
+**Then** settings MUST be applied:
 - Cache strategy (Docker layers, npm/pip dependencies, build artifacts)
 - Concurrency limits (max parallel jobs)
 - Conditional execution (skip if no relevant changes)
@@ -203,8 +211,8 @@ budget:
 #### AC-012: Cost Tracking Accuracy
 **Given** workflows execute
 **When** costs are calculated
-**Then** calculated cost must match GitHub's billing within ±5%
-**And** discrepancies >5% must be investigated
+**Then** calculated cost MUST match GitHub's billing within ±5%
+**And** discrepancies >5% MUST be investigated
 
 **Verification**:
 ```bash
@@ -223,8 +231,8 @@ gh api /repos/Biji-Biji-Initiative/mereka-lms/actions/cache/usage
 #### AC-013: Alert Delivery
 **Given** cost threshold is exceeded
 **When** alert is triggered
-**Then** notification must be delivered within **5 minutes**
-**And** notification must include:
+**Then** notification MUST be delivered within **5 minutes**
+**And** notification MUST include:
 - Current spend and budget
 - Triggering workflow and cost
 - Recommended actions
@@ -245,8 +253,8 @@ gh api /repos/Biji-Biji-Initiative/mereka-lms/actions/cache/usage
 #### AC-014: Dashboard Availability
 **Given** cost monitoring is deployed
 **When** operators access Grafana
-**Then** cost dashboard must be available at `/dashboards/github-actions-cost`
-**And** all panels must render without errors
+**Then** cost dashboard MUST be available at `/dashboards/github-actions-cost`
+**And** all panels MUST render without errors
 
 **Verification**:
 ```bash
