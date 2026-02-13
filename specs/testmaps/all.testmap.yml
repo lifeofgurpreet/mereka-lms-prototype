@@ -3307,6 +3307,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: automated
@@ -3320,13 +3324,21 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
 - id: AC-023
   description: 'Given a restore drill completes, when drill evidence is archived,
     then it MUST include: timestamp (ISO8601), PV checksum comparison results, pass/fail
     status, and drill execution logs'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
 - id: AC-024
   description: 'Given quarterly restore drill schedule, when the schedule is documented,
     then it MUST specify: drill cadence (quarterly), responsible team, notification
@@ -3342,7 +3354,6 @@ acceptance_criteria:
     then it is configured for multi-region storage or cross-region replication
   verify: []
 _unmapped:
-- AC-023
 - AC-024
 - AC-025
 - AC-026
