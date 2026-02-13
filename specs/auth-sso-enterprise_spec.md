@@ -13,7 +13,6 @@ links:
   related_docs:
     - "docs/operations/AUTH_HARDENING_SPEC.md"
     - "docs/operations/AUTH_AND_PERMISSIONS.md"
-    - "docs/operations/AUTH_ALERT_RUNBOOK.md"
     - "docs/operations/IN_CLUSTER_AUTH_VERIFICATION.md"
     - "docs/operations/RFC_CLAIM_BASED_ROLE_SYNC.md"
     - "docs/integrations/GOOGLE_OAUTH_SETUP.md"
@@ -450,7 +449,7 @@ This spec also addresses critical security gaps: there is no formal contract for
 #### Phase 0: Foundation (Week 1-2)
 
 1. Audit existing `third_party_auth` configuration and ensure all SAML/OIDC infrastructure is present in the Tutor build
-2. Create per-tenant SAML key pair generation script (`scripts/tenants/generate-saml-keys.sh`)
+2. Create per-tenant SAML key pair generation script (`scripts/tenants/generate-saml-keypair.sh`)
 3. Create IdP configuration helper script (`scripts/tenants/configure-tenant-idp.sh`) wrapping Django management commands
 4. Extend `scripts/qa/verify-auth-surfaces.sh` with enterprise SSO endpoint checks
 5. Create `scripts/qa/verify-enterprise-sso.sh` for per-tenant SSO verification

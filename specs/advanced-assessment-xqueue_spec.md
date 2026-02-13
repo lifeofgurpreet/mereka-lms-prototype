@@ -370,7 +370,7 @@ Proctoring features referenced in this spec are defined in `specs/proctoring-int
 ### ORA2 Configuration
 
 - [ ] AC-001: Given a course author in Studio, when they add an ORA2 component to a unit, then they can configure a rubric with 3 criteria, each with 4 options, and set peer assessment to require 3 reviews per submission and 5 reviews given per student
-- [ ] AC-002: Given a student who has submitted an ORA2 response, when 3 peers have completed their reviews and the grading deadline has passed, then the student sees a final grade that is the median of the 3 peer scores displayed on their submission page
+- [ ] AC-002: Given a student who has submitted an ORA2 response, when 3 peers have completed their reviews and the grading deadline has passed, then the student sees a final grade that is the median of the 3 peer scores (middle value for odd count, average of two middle values for even count) displayed on their submission page
 - [ ] AC-003: Given an ORA2 assignment configured with file uploads allowing PDF and PNG up to 10 MB, when a student uploads a 9.5 MB PDF, then the upload succeeds and the file is stored at `/openedx/data/ora2/`
 - [ ] AC-004: Given an ORA2 assignment configured with file uploads, when a student attempts to upload a `.exe` file, then the upload is rejected with a validation error message listing allowed file types
 - [ ] AC-005: Given an ORA2 assignment where the rubric has been configured and one student has already submitted, when the course author attempts to modify the rubric criteria, then Studio prevents the change and displays a warning that the rubric is locked

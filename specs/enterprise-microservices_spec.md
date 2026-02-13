@@ -122,6 +122,8 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 | SSL provider | Let's Encrypt via cert-manager |
 | Reason | Multi-level subdomain (`*.*.mereka.io`) not covered by Cloudflare Free SSL |
 
+**Note**: Multi-level subdomains (*.academyv2.mereka.io) require DNS-only mode + Let's Encrypt certificates. Cloudflare Free SSL does not cover *.*.mereka.io.
+
 See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirements.
 
 ### Functional

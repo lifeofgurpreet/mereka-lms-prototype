@@ -126,6 +126,8 @@ For enterprise HR departments, badge data flowing into their talent management s
 | SSL provider | Let's Encrypt via cert-manager |
 | Reason | Multi-level subdomain (`*.*.mereka.io`) not covered by Cloudflare Free SSL |
 
+**Note**: Multi-level subdomains (*.academyv2.mereka.io) require DNS-only mode + Let's Encrypt certificates. Cloudflare Free SSL does not cover *.*.mereka.io.
+
 See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirements.
 
 ### Functional
@@ -245,8 +247,8 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 - The API MUST support filtering assertions by: `badge_class_id`, `issued_after`, `issued_before`, `learner_email_hash`, `status` (active, revoked, expired)
 - The API MUST support webhook notifications: enterprise admins MUST be able to register webhook URLs that receive `POST` notifications for badge events (`badge_issued`, `badge_revoked`, `badge_expired`, `badge_shared`)
 - Webhook payloads MUST include: `event_type`, `assertion_uid`, `badge_class_name`, `learner_email_hash`, `enterprise_customer_uuid`, `timestamp`
-- Webhook delivery MUST retry failed deliveries (HTTP non-2xx response) with exponential backoff: 1s, 2s, 4s, 8s, 16s (total: 6 attempts including initial delivery = 1 initial + 5 retries)
-- The system MUST suspend a webhook URL after 10 distinct badge events have exhausted all retry attempts (not 10 consecutive retry attempts on a single event); the webhook remains suspended until manually re-enabled by the enterprise admin
+- Webhook delivery MUST retry failed deliveries (HTTP non-2xx response) with exponential backoff: 30s, 1m, 2m, 4m, 8m (total: 6 attempts including initial delivery = 1 initial + 5 retries)
+- The system MUST suspend a webhook URL after 10 distinct badge events have each exhausted all 6 delivery attempts (not 10 consecutive failures on a single event); the webhook remains suspended until manually re-enabled by the enterprise admin
 - After all retry attempts are exhausted for a badge event, the system MUST write the event to a dead letter queue with full payload (event type, assertion UID, enterprise customer UUID, timestamp, all retry attempts and errors) for manual replay by platform operators
 - The system MUST support SCIM-compatible user-to-badge mapping exports for HR systems that use SCIM for identity sync
 
@@ -405,7 +407,13 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 ### Multi-Tenant Edge Cases
 
-- **Tenant deactivation with active badges**: If an `EnterpriseCustomer` is deactivated, all badges issued under that tenant's issuer profiles MUST remain publicly verifiable. The issuer profile MUST NOT be deleted. New badge issuance for the tenant MUST be blocked
+- **Tenant deactivation with active badges**: If an `EnterpriseCustomer` is deactivated, the following behaviors apply:
+  - All badges issued under that tenant's issuer profiles MUST remain publicly verifiable (badges already issued are permanent)
+  - The issuer profile MUST NOT be deleted (required for verification)
+  - New badge issuance for the tenant MUST be blocked
+  - **Template edits**: MUST be blocked for deactivated tenants (no badge template changes allowed)
+  - **Admin portal access**: MUST be read-only for deactivated tenants (admins can view but not modify badge data)
+  - **Learner badge viewing**: MAY continue (badges remain publicly verifiable via assertion URLs; learners can still access their credential portfolio to view/share badges)
 - **Issuer profile branding update**: If a tenant updates their issuer profile (logo, name), existing badge assertions MUST NOT be modified. The issuer profile URL returns the current branding; assertion JSON references the issuer URL, so verifiers always see the latest branding. The system SHOULD maintain an issuer profile version history for audit purposes
 - **Admin removed from tenant**: If an enterprise admin is removed from the `EnterpriseCustomer`, all their pending (not yet processed) bulk issuance or revocation tasks MUST continue to completion (tasks are tenant-scoped, not admin-scoped). The admin's access to view/manage badges MUST be immediately revoked
 
@@ -424,7 +432,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 ### Webhook Edge Cases
 
-- **Webhook endpoint permanently failing**: If all retry attempts (1 initial + 5 retries = 6 total attempts) fail for a webhook delivery, the event MUST be moved to a dead letter queue with full payload (event type, assertion UID, enterprise customer UUID, timestamp, all retry attempts and errors). After 10 distinct badge events have exhausted all retry attempts (not 10 consecutive failures on one event), the system MUST mark the webhook as "suspended" and notify the enterprise admin via email. The admin MUST manually re-enable the webhook after fixing the endpoint. Dead letter queue events MUST be manually replayable by platform operators via Django admin or management command
+- **Webhook endpoint permanently failing**: If all retry attempts (1 initial + 5 retries = 6 total attempts with backoff schedule 30s, 1m, 2m, 4m, 8m) fail for a webhook delivery, the event MUST be moved to a dead letter queue with full payload (event type, assertion UID, enterprise customer UUID, timestamp, all retry attempts and errors). After 10 distinct badge events have each exhausted all 6 delivery attempts (not 10 consecutive failures on one event), the system MUST mark the webhook as "suspended" and notify the enterprise admin via email. The admin MUST manually re-enable the webhook after fixing the endpoint. Dead letter queue events MUST be manually replayable by platform operators via Django admin or management command
 - **Webhook payload size**: Webhook payloads MUST NOT exceed 64 KB. If additional data is needed, the payload MUST include a URL to fetch the full assertion via the enterprise API
 - **Webhook SSRF prevention**: The system MUST validate webhook URLs against a deny list of private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8, 169.254.0.0/16, ::1) and MUST reject registration of webhook URLs pointing to these ranges
 

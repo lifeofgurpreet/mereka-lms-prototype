@@ -622,9 +622,9 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
    - `MEREKA_LMS_PAYMENTS_GATEWAY_SECRET_KEY` (application secret key)
    - `MEREKA_LMS_PAYMENTS_GATEWAY_DB_PASSWORD` (PostgreSQL password)
    - `MEREKA_LMS_PAYMENTS_GATEWAY_OAUTH2_SECRET` (LMS OAuth2 client secret)
-   - `MEREKA_LMS_STRIPE_SECRET_KEY` (existing, used by gateway)
-   - `MEREKA_LMS_STRIPE_PUBLISHABLE_KEY` (existing, used by frontend)
-   - `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY` (new webhook endpoint secret)
+   - `MEREKA_LMS_STRIPE_SECRET_KEY` (existing, used by gateway; see `specs/secrets-management_spec.md`)
+   - `MEREKA_LMS_STRIPE_PUBLISHABLE_KEY` (existing, used by frontend; see `specs/secrets-management_spec.md`)
+   - `MEREKA_LMS_STRIPE_WEBHOOK_SECRET` (existing, used by gateway; see `specs/secrets-management_spec.md`)
 4. Sync secrets to GCP Secret Manager
 5. Create ExternalSecret manifest (`payments-gateway-secrets`)
 6. Register OAuth2 client application in LMS Django admin: client ID `payments-gateway`, grant type `client-credentials`

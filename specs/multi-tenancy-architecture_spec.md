@@ -281,9 +281,11 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 - If query performance degrades below acceptable thresholds at high tenant counts, the system SHOULD support horizontal read replicas for enterprise service databases
 - The system SHOULD support a migration path from shared-database to per-tenant-database isolation if regulatory or client requirements demand it in the future (this is a non-goal for v1 but the schema design should not preclude it)
 
-### EnterpriseCustomer Canonical Schema (v1.0)
+### EnterpriseCustomer Canonical Schema (v1.1.0)
 
 This section defines the canonical data model for the `EnterpriseCustomer` entity. All specs referencing enterprise tenant data MUST use this schema as the single source of truth. Individual specs SHOULD NOT redefine these fields; they SHOULD reference this section.
+
+**Model version: 1.1.0** — canonical schema, referenced by all service specs
 
 | Field | Type | Source Spec | Description |
 |-------|------|-------------|-------------|
@@ -306,10 +308,10 @@ This section defines the canonical data model for the `EnterpriseCustomer` entit
 | `enable_analytics_screen` | boolean | enterprise-microservices | Whether the analytics dashboard is enabled in the admin portal for this tenant |
 | `sender_alias` | string | enterprise-microservices | Email sender alias for tenant-specific system emails (e.g., "Acme Learning Team") |
 | `enable_slug_login` | boolean | auth-sso-enterprise | Whether slug-based login routing (`/enterprise/login/{slug}`) is enabled for this tenant |
-| `branding_logo_url` | URL | badges-credentials-enterprise | Tenant's primary logo URL (used in badge issuer profiles, emails, and portal branding) |
-| `webhook_urls` | JSON (list of URLs) | badges-credentials-enterprise | Webhook endpoints for badge events (`badge_issued`, `badge_revoked`, etc.); used by badge system |
+| `branding_logo_url` | URL | badges-credentials-enterprise | Tenant's primary logo URL (used in badge issuer profiles, emails, and portal branding; referenced in specs/badges-credentials-enterprise_spec.md) |
+| `webhook_urls` | JSON (list of URLs) | badges-credentials-enterprise | Webhook endpoints for badge events (`badge_issued`, `badge_revoked`, etc.); used by badge system (referenced in specs/badges-credentials-enterprise_spec.md) |
 | `issuer_profile` | JSON | badges-credentials-enterprise | Badge issuer profile metadata (name, description, email, logo) for OpenBadges assertions |
-| `stripe_connect_account_id` | string | ecommerce-purchase-gateway | Stripe Connect account ID for tenant-specific payment processing (if using Stripe Connect multi-tenant billing) |
+| `stripe_connect_account_id` | string | ecommerce-purchase-gateway | Stripe Connect account ID for tenant-specific payment processing (if using Stripe Connect multi-tenant billing; referenced in specs/ecommerce-purchase-gateway_spec.md) |
 
 **Notes**:
 - Fields marked with `(FK)` are foreign keys or references to other models.
@@ -394,6 +396,14 @@ This section defines canonical terms used throughout the multi-tenancy architect
 
 - [ ] AC-MTA-027: Given 10 active tenants, when enterprise catalog API queries are benchmarked, then p95 latency remains <= 300ms (per enterprise-microservices spec)
 - [ ] AC-MTA-028: Given 50 active tenants simulated in a load test, when concurrent API requests are sent from 50 different tenant contexts, then no tenant's p95 latency exceeds 120% of the single-tenant baseline
+
+### Cross-Tenant Isolation
+
+- [ ] AC-MTA-029: Given Tenant A's admin is authenticated, when they attempt to access Tenant B's learner data via API, then HTTP 403 is returned
+- [ ] AC-MTA-030: Given Tenant A's learner data exists in the database, when Tenant B's admin queries the API, then zero records from Tenant A are returned
+- [ ] AC-MTA-031: Given Tenant A sends a webhook event, when the webhook payload is inspected, then it contains ONLY Tenant A's data (no cross-tenant leakage)
+- [ ] AC-MTA-032: Given Tenant A's admin queries the enterprise catalog API, when the response is returned, then zero courses from Tenant B's private catalog are visible
+- [ ] AC-MTA-033: Given Tenant A's admin attempts to assign a license from Tenant B's subscription plan, when the API processes the request, then HTTP 403 is returned
 
 ---
 
