@@ -296,9 +296,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
-  - type: monitoring
-    metric: clickhouse_xapi_events_count
-    dashboard: grafana://dashboards/analytics-pipeline
 - id: AC-003
   description: 'ClickHouse retention policy active: Events older than 90 days are
     deleted'
@@ -311,12 +308,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-retention.sh
     command: scripts/qa/verify-analytics-retention.sh
-  - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
-    section: ClickHouse Disk Space
-    justification: Verifying actual TTL-based deletion requires inserting backdated
-      data and waiting for merge cycle orforcing OPTIMIZE TABLE -- not automatable
-      in a stateless CI run
 - id: AC-004
   description: Superset accessible at configured URL (e.g., `https://analytics.mereka.io`)
   verify:
@@ -324,9 +315,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/smoke-test-analytics.sh
     command: scripts/qa/smoke-test-analytics.sh
-  - type: monitoring
-    metric: superset_health_status
-    dashboard: grafana://dashboards/analytics-pipeline
 - id: AC-005
   description: Pre-built dashboards visible in Superset for staff users
   verify:
@@ -334,11 +322,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
-  - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
-    section: Dashboard Verification
-    justification: Verifying dashboard load time < 5s andvisual correctness requires
-      browser interaction that cannot be automated with kubectl alone
 - id: AC-006
   description: 'No PII in events: `clickhouse-client --query "SELECT * FROM xapi_events_all
     LIMIT 10"` shows hashed IDs'
@@ -353,13 +336,7 @@ acceptance_criteria:
     command: scripts/qa/verify-analytics-pipeline.sh
 - id: AC-007
   description: Instructor dashboard embeds in LMS course pages
-  verify:
-  - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
-    section: Dashboard Embedding Verification
-    justification: Dashboard embedding requires browser-based verification of iframe
-      rendering within LMS course pages;no headless equivalent available in the current
-      test infrastructure
+  verify: []
 - id: AC-008
   description: 'Data deletion works: Deleting user removes their events from ClickHouse'
   verify:
@@ -371,6 +348,8 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/analytics/verify-user-deletion.sh
     command: scripts/analytics/verify-user-deletion.sh
+_unmapped:
+- AC-007
 
 ---
 spec: auth-sso-enterprise_spec.md
@@ -552,12 +531,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: manual
-    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
-    section: Authentik Admin (Separate)
-    justification: Authentik admin MFA enforcement is validated against the live Authentik
-      instance; this cannot be fully verified in CI without cluster credentials.
-    file: scripts/infra/ensure-authentik-admin-mfa.sh
 - id: AC-017
   description: Given a newly elevated staff user, when they next log in, then they
     are forced to enroll in MFA before accessing any staff-only functionality
@@ -830,12 +803,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: manual
-    runbook: docs/operations/AUTH_AND_PERMISSIONS.md
-    section: How Login Works
-    justification: Enterprise tenant SSO flows depend on tenant-specific IdP configuration
-      and cannot be verified generically without tenant credentials and live runtime.
-    file: scripts/qa/verify-enterprise-sso.sh
 - id: AC-044
   description: Given Authentik is the default OIDC provider, when Authentik policies
     execute during `/application/o/authorize` for `client_id=mereka-lms`, then there
@@ -934,11 +901,7 @@ acceptance_criteria:
   description: Given enterprise customer A's issuer profile, when the badge assertion
     JSON is inspected, then the issuer name, logo, and URL reflect tenant A's branding,
     not Mereka Academy's default branding
-  verify:
-  - type: manual
-    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
-    section: Badge Issuing Verification
-    justification: Visual UI verification requires browser interaction
+  verify: []
 - id: AC-014
   description: Given a learner belonging to both enterprise customer A and B, when
     they view their credential portfolio, then they see badges from both tenants clearly
@@ -978,11 +941,7 @@ acceptance_criteria:
   description: Given a revoked badge that was blockchain-anchored, when the revocation
     list is checked, then the assertion UID appears in the revocation list but the
     on-chain anchor transaction is unchanged
-  verify:
-  - type: manual
-    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
-    section: Credential Template Testing
-    justification: Full LinkedIn integration requires interactive browser verification
+  verify: []
 - id: AC-022
   description: Given a learner views a badge in their credential portfolio, when they
     click "Add to LinkedIn", then they are redirected to LinkedIn's certification
@@ -1016,18 +975,11 @@ acceptance_criteria:
   description: Given more than 100 verification requests from a single IP within 1
     minute, when the next request arrives, then the response is HTTP 429 with a Retry-After
     header
-  verify:
-  - type: monitoring
-    metric: badge_verification_requests_total
-    dashboard: infrastructure/observability/dashboards/badges-credentials-dashboard.json
+  verify: []
 - id: AC-029
   description: Given more than 1000 verification requests for a single assertion within
     1 hour, then an alert is triggered in the observability stack
-  verify:
-  - type: manual
-    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
-    section: Badge Revocation Testing
-    justification: Dashboard visual verification requires browser interaction
+  verify: []
 - id: AC-030
   description: Given an enterprise admin accesses the badge analytics dashboard, when
     the page loads, then it displays total badges issued, sharing rate, verification
@@ -1060,6 +1012,7 @@ _unmapped:
 - AC-010
 - AC-011
 - AC-012
+- AC-013
 - AC-014
 - AC-015
 - AC-016
@@ -1067,12 +1020,15 @@ _unmapped:
 - AC-018
 - AC-019
 - AC-020
+- AC-021
 - AC-022
 - AC-023
 - AC-024
 - AC-025
 - AC-026
 - AC-027
+- AC-028
+- AC-029
 - AC-030
 - AC-031
 - AC-032
@@ -1132,12 +1088,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
-  - type: manual
-    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
-    section: MFE Footer Verification
-    justification: Account, profile, and learning MFE surfaces require interactive
-      navigation to verify footer rendering; no headless script covers all four surfaces
-      currently
 - id: AC-004
   description: Favicon loads correctly (mereka icon, not Open edX default)
   verify:
@@ -1237,11 +1187,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
-  - type: manual
-    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
-    section: Login Page Visual Verification
-    justification: Visual confirmation that gradient, logo placement, and font rendering
-      match brand guidelines requires human judgment
 _unmapped:
 - AC-INT-001
 - AC-INT-002
@@ -1279,12 +1224,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Quality Gates Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
 - id: AC-002
   description: Given the `spec-lint` job runs, when specs in `specs/` have structural
     issues (missing frontmatter, missing required sections), then the job fails with
@@ -1363,12 +1302,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-dev-prod-image-parity.sh
     command: scripts/qa/verify-dev-prod-image-parity.sh
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Image Build Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
 - id: AC-010
   description: Given the openedx image is built, when it is pushed to Artifact Registry,
     then the job output contains the resolved image digest (sha256:...).
@@ -1381,12 +1314,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Image Build Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
 - id: AC-011
   description: Given the MFE image is built, when the branding verification runs,
     then it validates that the authn index.html contains the expected branding revision
@@ -1396,22 +1323,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Image Build Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
 - id: AC-012
   description: Given a manual dispatch with `build_openedx=true` and `image_tag=v1.2.3`,
     when the build completes, then the image is tagged as `openedx:v1.2.3` and `openedx:<short-sha>`.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Image Build Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-013
   description: Given the build workflow, when images are pushed, then no `:latest`
     tag is published to Artifact Registry.
@@ -1449,44 +1364,20 @@ acceptance_criteria:
   description: Given `update_gitops=true` and `target_environment=select-environment`,
     when the workflow runs, then it fails with an error requiring explicit environment
     selection.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: GitOps Deployment Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-016
   description: Given `update_gitops=true` and `target_environment=staging`, when `ENABLE_STAGING_ENV`
     is not set to `true`, then the workflow fails with a message indicating staging
     is disabled.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: GitOps Deployment Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-017
   description: Given `deploy_to_staging=true` is used in manual dispatch, when the
     workflow runs, then it fails with a deprecation error directing the user to `update_gitops`.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: GitOps Deployment Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-018
   description: Given `update_gitops=true` but `build_openedx=false`, when the workflow
     runs, then it fails requiring both builds for deterministic digest capture.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: GitOps Deployment Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-019
   description: 'Given the `release-evidence.yml` workflow is dispatched with valid
     tags, when it completes, then a `release-evidence-<env>-<run>` artifact is uploaded
@@ -1500,12 +1391,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-release-evidence-workflow.sh
     command: scripts/qa/verify-release-evidence-workflow.sh
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Release Process Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
 - id: AC-020
   description: Given the `policy-checks.yml` workflow is dispatched, when all verification
     scripts pass, then the workflow succeeds.
@@ -1539,55 +1424,25 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/infra/release-openedx-gitops.sh
     command: scripts/infra/release-openedx-gitops.sh
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Release Process Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: docs/operations/RELEASE_CHECKLIST.md
 - id: AC-022
   description: Given the `public-health-check.yml` runs on schedule, when branding
     is correct on prod and dev, then no failures are reported and logs are uploaded
     as artifacts.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Scheduled Operations Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-023
   description: Given the `operations-gates-runtime.yml` runs on schedule, when GKE
     authentication succeeds, then operations gates execute against the live cluster
     and artifacts are uploaded with 30-day retention.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Scheduled Operations Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-024
   description: Given the `dr-evidence-bundle.yml` runs on the 1st of the month, when
     GKE access is available, then a DR evidence bundle is generated and uploaded with
     120-day retention.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Scheduled Operations Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-025
   description: Given the iOS workflow is manually dispatched, when it completes successfully,
     then a signed IPA is uploaded to TestFlight via App Store Connect API.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: iOS Build Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-026
   description: Given the iOS workflow runs, when it completes (pass or fail), then
     SSH keys used for Match are cleaned up.
@@ -1622,120 +1477,54 @@ acceptance_criteria:
     (every 6h), when SSO credentials are valid, then the workflow successfully authenticates
     to both LMS and Studio (if configured) and uploads canary artifacts with 30-day
     retention.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: SSO Canary Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-030
   description: Given the SSO canary fails authentication, when the workflow completes,
     then artifacts (screenshots, logs) are uploaded showing the failure point for
     debugging.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: SSO Canary Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-031
   description: Given the `tutor-config-verify.yml` workflow runs when changes are
     made to `tutor_env/config.yml` or `infrastructure/tutor/**`, when all patches
     are correctly applied, then the workflow succeeds with verification passing for
     MySQL auth patch, MFE Node.js patch, multi-site domains, and custom apps.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Configuration Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-032
   description: Given the Tutor config verification runs, when required patches are
     missing, then the job fails with specific error messages identifying which patch
     (MySQL, MFE, domains, or apps) is not applied.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Configuration Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-033
   description: Given the patch idempotency check runs, when patches are applied twice,
     then the checksums of all generated files remain identical.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Configuration Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-034
   description: Given the Tutor config verification fails on a PR, when a developer
     views the PR, then a comment is posted with common issues and remediation steps.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Configuration Verification
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-035
   description: Given the `tutor-plugin-test.yml` workflow runs when changes are made
     to `infrastructure/tutor/plugins/**`, when the plugin code is valid, then the
     workflow succeeds with plugin syntax verification, enable/disable lifecycle tests,
     and integration tests passing.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Plugin Testing
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-036
   description: Given the plugin tests run, when the plugin patches are correctly applied,
     then the LMS settings file contains the expected plugin configuration (mfe_oauth_fix
     installed).
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Plugin Testing
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-037
   description: Given the plugin lifecycle test runs, when the plugin is enabled, disabled,
     and re-enabled, then all state transitions succeed without errors.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Tutor Plugin Testing
-    justification: Requires active GitHub Actions runner with repository secrets;
-      workflow dispatch cannot be fully automated in isolated test environment
-    file: N/A
+  verify: []
 - id: AC-038
   description: Given the integration test runs, when both plugin and apply-patches.sh
     are used together, then both sets of patches are present in the generated configuration.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: Plugin Integration Testing
-    justification: Requires triggering actual GitHub Actions workflow run and inspecting
-      its logs for plugin+patches integration result
-    file: N/A
+  verify: []
 - id: AC-039
   description: Given plugin tests fail on a PR, when a developer views the PR, then
     a comment is posted with plugin-specific troubleshooting guidance.
-  verify:
-  - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
-    section: PR Failure Comment Verification
-    justification: Requires triggering a real PR with a failing plugin test and verifying
-      the bot posts a troubleshooting comment
-    file: N/A
+  verify: []
 _unmapped:
 - AC-INT-001
 - AC-INT-002
@@ -1743,7 +1532,27 @@ _unmapped:
 - AC-INT-004
 - AC-003
 - AC-004
+- AC-012
+- AC-015
+- AC-016
+- AC-017
+- AC-018
+- AC-022
+- AC-023
+- AC-024
+- AC-025
 - AC-026
+- AC-029
+- AC-030
+- AC-031
+- AC-032
+- AC-033
+- AC-034
+- AC-035
+- AC-036
+- AC-037
+- AC-038
+- AC-039
 
 ---
 spec: content-libraries-v2_spec.md
@@ -1964,11 +1773,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Tenant Isolation Testing
-    justification: Requires multi-tenant test data and authenticated API calls across
-      tenant contexts
 - id: AC-CCR-002
   description: Given any service deployed in the mereka-lm
   verify:
@@ -1983,10 +1787,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Log Format Verification
-    justification: Requires running pods and log stream inspection via kubectl
 - id: AC-CCR-004
   description: Given any secret consumed by a service, whe
   verify:
@@ -2016,9 +1816,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: monitoring
-    metric: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30d]))
-    dashboard: 'Grafana: LMS Performance Dashboard'
 - id: AC-CCR-007
   description: Given a tenant offboarding request, when th
   verify:
@@ -2026,10 +1823,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Tenant Offboarding
-    justification: Requires actual tenant data and deletion workflow — not yet implemented
 - id: AC-CCR-008
   description: Given any service receiving external traffi
   verify:
@@ -2051,11 +1844,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Payment Idempotency Testing
-    justification: Requires ecommerce/purchase-gateway service with test transactions
-      — not yet implemented
 - id: AC-CCR-011
   description: Given any background job failure, when the
   verify:
@@ -2063,10 +1851,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Celery Worker Log Verification
-    justification: Requires running Celery workers with forced failure scenarios
 - id: AC-CCR-012
   description: Given a Redis Streams event is published, w
   verify:
@@ -2074,11 +1858,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Event Bus Verification
-    justification: Redis Streams event bus not yet implemented — deferred to Tier
-      4
 
 ---
 spec: data-migrations-kajabi-mct_spec.md
@@ -2208,11 +1987,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
-  - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
-    section: Pod Restart Recovery
-    justification: Requires intentional pod kill during active import; cannot be safely
-      automated in production GKE cluster
 - id: AC-015
   description: Given 109 Kajabi OLX tarballs, when `import_courses.py` runs against
     CMS, then MongoDB `modulestore.active_versions` increases by 109 and all courses
@@ -2306,13 +2080,7 @@ acceptance_criteria:
   description: Given MCT Programs configured in Discovery with ProgramCertificate
     records, when a user completes all courses in a program, then the Credentials
     service can issue a program certificate
-  verify:
-  - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
-    section: MCT Program Certificates
-    justification: ProgramCertificate verification requires Discovery admin UI navigation
-      and Credentials service API inspection; not scriptable without admin session
-      tokens
+  verify: []
 - id: AC-026
   description: Given 503 MCT videos with fresh Azure SAS URLs, when `upload_videos_to_mux.py`
     runs, then all 503 assets are created in Mux with proper titles and playback IDs
@@ -2367,21 +2135,11 @@ acceptance_criteria:
 - id: AC-032
   description: Given migration complete, when a sample of 10 courses is inspected
     via Studio UI, then course structure (sections, units, content) renders correctly
-  verify:
-  - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
-    section: Studio Course Spot-Check
-    justification: Visual rendering verification requires human inspection of Studio
-      UI for 10 sample courses to confirm section/unit/content display
+  verify: []
 - id: AC-033
   description: Given migration complete, when a sample of 5 users logs into the LMS,
     then their enrolled courses are visible in the dashboard
-  verify:
-  - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
-    section: User Login Spot-Check
-    justification: User login and dashboard verification requires browser-based interaction
-      with the LMS as specific users
+  verify: []
 - id: AC-034
   description: Given a database backup taken before import, when `tutor local do restore-db`
     runs, then Open edX reverts to pre-migration state
@@ -2390,11 +2148,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-migration-rollback.sh
     command: scripts/qa/verify-migration-rollback.sh
-  - type: manual
-    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
-    section: Full Rollback Test
-    justification: Full database restore is a destructive operation that must be tested
-      manually in a staging environment with operator oversight
 - id: AC-035
   description: Given the rollback script `rollback-openedx-imports.py`, when run with
     `--action unenroll --dry-run`, then it reports the number of enrollments that
@@ -2434,11 +2187,7 @@ acceptance_criteria:
   description: 'Given the Kajabi webhook receiver is running, when a `GET /healthz`
     request is made, then the service MUST return `{"status": "ok"}` with HTTP 200
     if `KAJABI_WEBHOOK_SECRET` is configured'
-  verify:
-  - type: automated
-    test_type: automated
-    file: services/kajabi-webhook/main.py
-    command: pytest services/kajabi-webhook/main.py
+  verify: []
 - id: AC-040
   description: Given a valid Kajabi webhook with correct HMAC signature, when `POST
     /webhooks/kajabi` is called, then the event MUST be appended to the correct NDJSON
@@ -2448,10 +2197,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Kajabi Webhook Testing
-    justification: Requires running webhook service and valid HMAC signature computation
 - id: AC-041
   description: Given a Kajabi webhook with an invalid or missing `X-Kajabi-Signature`,
     when `POST /webhooks/kajabi` is called, then the service MUST return HTTP 401
@@ -2460,10 +2205,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Kajabi Webhook Testing
-    justification: Requires running webhook service with crafted invalid signature
 - id: AC-042
   description: Given a Kajabi webhook payload missing the `event` key, when `POST
     /webhooks/kajabi` is called, then the service MUST return HTTP 400
@@ -2472,10 +2213,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Kajabi Webhook Testing
-    justification: Requires running webhook service with crafted payload
 - id: AC-043
   description: Given a Kajabi webhook with an unknown event type, when `POST /webhooks/kajabi`
     is called, then the event MUST be written to `unknown__{type}.ndjson` and HTTP
@@ -2485,10 +2222,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Kajabi Webhook Testing
-    justification: Requires running webhook service with non-standard event type
 - id: AC-044
   description: Given the Kajabi webhook receiver is running without `KAJABI_WEBHOOK_SECRET`,
     when `GET /healthz` is called, then the service MUST return HTTP 500
@@ -2497,10 +2230,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-migration-contracts.sh
     command: scripts/qa/verify-data-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/TROUBLESHOOTING.md
-    section: Kajabi Webhook Testing
-    justification: Requires running webhook service without secret env var
+_unmapped:
+- AC-025
+- AC-032
+- AC-033
+- AC-039
 
 ---
 spec: data-privacy-gdpr-compliance_spec.md
@@ -2969,6 +2703,124 @@ acceptance_criteria:
     `event_type: "deletion_step_completed"`, `deletion_request_id`, `user_id_hash`,
     `data_store`, `records_affected`, `verification_status: "passed"`'
   verify: []
+- id: AC-CONSENT-001
+  description: Given a user visits the LMS for the first time, when the page loads,
+    then a cookie consent banner MUST appear before any non-essential cookies are
+    set
+  verify: []
+- id: AC-CONSENT-002
+  description: 'Given a user interacts with the cookie consent banner, when they make
+    consent choices, then the system MUST store consent choices with: `consent_version`
+    (privacy policy version), `granted_at` (ISO 8601 timestamp), `collection_method`
+    ("banner"), `ip_address_hash` (SHA-256), and per-category consent status (analytics,
+    marketing, functional)'
+  verify: []
+- id: AC-CONSENT-003
+  description: Given a user has granted consent for a specific category, when they
+    revoke consent at any time via `/account/privacy/`, then the consent record MUST
+    be updated with `withdrawn_at` timestamp AND the withdrawal MUST take effect within
+    24 hours (cache invalidation)
+  verify: []
+- id: AC-CONSENT-004
+  description: Given the cookie consent banner is displayed, when the banner renders,
+    then the banner MUST NOT block page rendering (async load) AND the LMS core functionality
+    MUST remain accessible even if banner JavaScript fails to load
+  verify: []
+- id: AC-CONSENT-005
+  description: 'Given a user accepts the latest privacy policy version on login, when
+    the acceptance is recorded, then the audit trail MUST contain: `event_type: "privacy_policy_accepted"`,
+    `user_id_hash`, `policy_version`, `accepted_at` (timestamp), `ip_address_hash`'
+  verify: []
+- id: AC-CONSENT-006
+  description: Given a user logs in for the first time after a privacy policy update,
+    when they access any protected resource, then the system MUST present the latest
+    privacy policy version for acceptance before allowing access
+  verify: []
+- id: AC-CONSENT-007
+  description: Given the privacy policy version changes from v2.0 to v3.0, when the
+    update is deployed, then the system MUST support multi-language policy versions
+    (English, Malay, Chinese) with language selection based on user's `language_preference`
+    setting
+  verify: []
+- id: AC-CONSENT-008
+  description: Given consent is tracked for multiple purposes (analytics, marketing,
+    functional), when a user modifies consent for `analytics` purpose, then the consent
+    change MUST be tracked independently AND MUST NOT affect consent status for `marketing`
+    or `functional` purposes
+  verify: []
+- id: AC-CONSENT-009
+  description: 'Given consent records exist with version history, when an auditor
+    queries consent history for a user, then the system MUST return all consent versions
+    with: `purpose`, `granted` (boolean), `consent_version`, `granted_at`, `withdrawn_at`
+    (if applicable), ordered by `granted_at` descending'
+  verify: []
+- id: AC-CONSENT-010
+  description: Given the consent schema changes (e.g., new purpose "AI_training" added),
+    when the schema version increments, then the system MUST trigger re-consent for
+    all active users on next login AND MUST display a clear explanation of what changed
+  verify: []
+- id: AC-RETENTION-001
+  description: 'Given the PII classification matrix specifies retention periods for
+    each data category, when the automated data purge CronJob runs daily, then the
+    job MUST identify records past their retention period per classification matrix
+    rules (e.g., "ClickHouse analytics events: 365 days", "Inactive accounts: 24 months
+    no login")'
+  verify: []
+- id: AC-RETENTION-002
+  description: 'Given the retention enforcement CronJob runs in production, when purge
+    operations complete, then each purge operation MUST be logged in the audit trail
+    with: `event_type: "retention_purge_completed"`, `data_store`, `data_category`,
+    `records_purged_count`, `purge_duration_seconds`, `retention_policy_version`'
+  verify: []
+- id: AC-RETENTION-003
+  description: Given the retention enforcement CronJob is configured with dry-run
+    mode, when the job executes with `DRY_RUN=true`, then the job MUST identify records
+    eligible for purge AND log the planned actions WITHOUT actually deleting any data
+    AND output a summary report with record counts per data store
+  verify: []
+- id: AC-RETENTION-004
+  description: Given the retention enforcement job runs and encounters a data store
+    timeout (e.g., ClickHouse partition drop exceeds 30 minutes), when the timeout
+    occurs, then the job MUST log the failure, skip that data store, continue processing
+    remaining stores, and fire a Warning alert to the privacy operations team
+  verify: []
+- id: AC-COMPLIANCE-001
+  description: 'Given a compliance dashboard is deployed, when a `compliance_officer`
+    role user accesses the dashboard, then the dashboard MUST display: DSAR (Data
+    Subject Access Request) count (last 30 days, last 12 months), DSAR SLA compliance
+    percentage (requests completed within 30 days), deletion request pipeline status
+    (pending, processing, completed, failed counts), consent rate by category (percentage
+    of active users with consent granted for analytics, marketing, functional), data
+    retention compliance score (percentage of data stores with zero overdue purge
+    operations)'
+  verify: []
+- id: AC-COMPLIANCE-002
+  description: 'Given the DSAR count metric is displayed on the compliance dashboard,
+    when the metric is queried, then the system MUST aggregate: total export requests
+    submitted in the time range, total deletion requests submitted in the time range,
+    average completion time for export requests, average completion time for deletion
+    requests'
+  verify: []
+- id: AC-COMPLIANCE-003
+  description: 'Given the deletion request pipeline status is displayed, when a `privacy_admin`
+    user filters by `partially_completed` status, then the dashboard MUST show: request
+    ID, user identifier (hashed), submission date, elapsed days, failed data stores
+    (array), retry count, last retry timestamp, and a "Re-run" action button'
+  verify: []
+- id: AC-COMPLIANCE-004
+  description: 'Given the consent rate by category is calculated, when the metric
+    is rendered on the dashboard, then the system MUST compute: `(users_with_consent_granted_for_purpose
+    / total_active_users) * 100` for each purpose (analytics, marketing, functional),
+    with "active users" defined as users with login within the last 90 days'
+  verify: []
+- id: AC-COMPLIANCE-005
+  description: 'Given the data retention compliance score is displayed, when the score
+    is calculated, then the system MUST: (a) query each data store for records past
+    retention period, (b) flag any data store with overdue purge count > 0 as non-compliant,
+    (c) compute compliance score as `(compliant_data_stores / total_data_stores_with_retention_policy)
+    * 100`, (d) display the score with color coding (green ≥95%, yellow 90-94%, red
+    <90%)'
+  verify: []
 _unmapped:
 - AC-001
 - AC-002
@@ -3043,6 +2895,25 @@ _unmapped:
 - AC-AUDIT-002
 - AC-AUDIT-003
 - AC-AUDIT-004
+- AC-CONSENT-001
+- AC-CONSENT-002
+- AC-CONSENT-003
+- AC-CONSENT-004
+- AC-CONSENT-005
+- AC-CONSENT-006
+- AC-CONSENT-007
+- AC-CONSENT-008
+- AC-CONSENT-009
+- AC-CONSENT-010
+- AC-RETENTION-001
+- AC-RETENTION-002
+- AC-RETENTION-003
+- AC-RETENTION-004
+- AC-COMPLIANCE-001
+- AC-COMPLIANCE-002
+- AC-COMPLIANCE-003
+- AC-COMPLIANCE-004
+- AC-COMPLIANCE-005
 
 ---
 spec: design-tokens-system_spec.md
@@ -3164,12 +3035,7 @@ acceptance_criteria:
     with updated tokens, when `SYNC_FILE=1 ./scripts/branding/update-token-provenance.sh`
     is run, then `assets/branding/tokens.css` is overwritten with the upstream file
     and `tokens.provenance.json` is updated with the new commit SHA and file hash.
-  verify:
-  - type: manual
-    runbook: specs/design-tokens-system_spec.md
-    section: Rollout & Rollback > Syncing New Tokens from Figma
-    justification: Full sync workflow requires access to upstream bbbi-mereka-brand-assets
-      repository
+  verify: []
 - id: AC-012
   description: Given `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css`,
     when parsed, then it contains `--mereka-color-teal` defined as a value (direct
@@ -3184,6 +3050,8 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+_unmapped:
+- AC-011
 
 ---
 spec: disaster-recovery-business-continuity_spec.md
@@ -3333,11 +3201,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
-    section: DR Evidence Generation
-    justification: Requires human to initiate enterprise audit request and verify
-      completeness against client requirements
 - id: AC-012
   description: Given Velero backup fails, when the failure is detected, then an alert
     fires within 1 hour
@@ -3350,9 +3213,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: monitoring
-    metric: velero_backup_failure_total
-    dashboard: GCP Cloud Monitoring > Velero Alerts
 - id: AC-013
   description: Given restore-test has not succeeded in 45+ days, when `STRICT_RUNTIME=1
     ./scripts/qa/audit-velero-alert-pipeline.sh` runs, then it reports a stale-restore-test
@@ -3366,9 +3226,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: monitoring
-    metric: dr_restore_drill_age_days
-    dashboard: GCP Cloud Monitoring > Velero Alerts
 - id: AC-014
   description: Given `./scripts/qa/audit-velero-alert-pipeline.sh` runs, then it validates
     both backup-verification and restore-test freshness signals
@@ -3390,11 +3247,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
-    section: 'DR-002: Single PVC Data Corruption'
-    justification: Requires live cluster with simulated PVC failure; destructive test
-      cannot be fully automated against production
 - id: AC-016
   description: Given a full namespace loss (DR-003), when `velero restore create`
     is executed with `--namespace-mappings`, then all resources including PVCs are
@@ -3404,11 +3256,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
-    section: 'DR-003: Namespace Deletion/Corruption'
-    justification: Full namespace restore requires human approval gate and coordination;
-      tested during quarterly drills
 - id: AC-017
   description: Given a secret compromise (DR-006), when the secret rotation checklist
     is followed, then all affected secrets are rotated in Infisical, synced to GCP
@@ -3418,11 +3265,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
-    section: Full Rotation Procedure
-    justification: Secret rotation touches Infisical, GCP SM, and K8s in sequence;
-      requires human verification of non-disruption
 - id: AC-018
   description: Given complete cluster loss (DR-007), when the cluster rebuild procedure
     is followed, then platform availability is restored within 4 hours with data loss
@@ -3432,11 +3274,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
-    section: 'DR-007: Full Cluster Loss'
-    justification: Full cluster rebuild cannot be automated as a test; verified via
-      semi-annual tabletop exercise
 - id: AC-019
   description: Given a restore completes, when `kubectl exec mysql-pod -- mysql -e
     "SELECT COUNT(*) FROM openedx.auth_user"` is run, then the count is within 5%
@@ -3450,11 +3287,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: infrastructure/k8s/velero/restore-test-script.sh
     command: infrastructure/k8s/velero/restore-test-script.sh
-  - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
-    section: Data Integrity Verification
-    justification: 5% tolerance comparison requires baseline count from production
-      which varies over time
 - id: AC-020
   description: Given a restore completes, when `./scripts/qa/public-health-check.sh
     prod` runs, then LMS homepage, Studio login, Discovery, and Ecommerce health endpoints
@@ -3469,8 +3301,9 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
 - id: AC-021
-  description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
-    is run, then it produces valid manifests deployable to any GKE cluster
+  description: Given a restore drill runs, when PVCs are restored, then the restore-test
+    job MUST verify PV data integrity by comparing checksums of critical PVs (MySQL
+    data directory) pre-backup and post-restore
   verify:
   - type: automated
     test_type: shell_verification
@@ -3481,18 +3314,38 @@ acceptance_criteria:
     file: deploy/k8s/overlays/production/kustomization.yaml
     command: deploy/k8s/overlays/production/kustomization.yaml
 - id: AC-022
-  description: Given Velero backups are stored in GCS, when the backup bucket is inspected,
-    then it is configured for multi-region storage or cross-region replication
+  description: Given a PV checksum verification, when comparing pre-backup and post-restore
+    checksums, then they MUST match exactly for MySQL data files (ibdata1, ib_logfile*,
+    *.ibd)
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
-  - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
-    section: Cross-Region Readiness Verification
-    justification: GCS bucket configuration requires gcloud auth and varies by environment;
-      verified during Phase 3 implementation
+- id: AC-023
+  description: 'Given a restore drill completes, when drill evidence is archived,
+    then it MUST include: timestamp (ISO8601), PV checksum comparison results, pass/fail
+    status, and drill execution logs'
+  verify: []
+- id: AC-024
+  description: 'Given quarterly restore drill schedule, when the schedule is documented,
+    then it MUST specify: drill cadence (quarterly), responsible team, notification
+    window (1 week advance), and success criteria (all PVs verified, checksums match,
+    MySQL probe succeeds)'
+  verify: []
+- id: AC-025
+  description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
+    is run, then it produces valid manifests deployable to any GKE cluster
+  verify: []
+- id: AC-026
+  description: Given Velero backups are stored in GCS, when the backup bucket is inspected,
+    then it is configured for multi-region storage or cross-region replication
+  verify: []
+_unmapped:
+- AC-023
+- AC-024
+- AC-025
+- AC-026
 
 ---
 spec: ecommerce-purchase-gateway_spec.md
@@ -3510,10 +3363,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/checkout.py
-    command: pytest services/purchase-gateway/app/routers/checkout.py
 - id: AC-002
   description: Given a buyer with an existing LMS account completes Stripe Checkout,
     when the `checkout.session.completed` webhook fires, then the buyer is enrolled
@@ -3523,14 +3372,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/fulfillment.py
-    command: pytest services/purchase-gateway/app/services/fulfillment.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/lms_client.py
-    command: pytest services/purchase-gateway/app/services/lms_client.py
 - id: AC-003
   description: Given a buyer without an LMS account completes Stripe Checkout, when
     the `checkout.session.completed` webhook fires, then an entitlement is created
@@ -3540,10 +3381,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/fulfillment.py
-    command: pytest services/purchase-gateway/app/services/fulfillment.py
 - id: AC-004
   description: Given an expired Stripe Checkout Session, when the `checkout.session.expired`
     webhook fires, then the order status transitions to `expired` and no fulfillment
@@ -3553,10 +3390,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
 - id: AC-005
   description: Given a buyer cancels at Stripe Checkout, when they return to the cancel
     URL, then the order status remains `pending` (Stripe may expire it later) and
@@ -3570,10 +3403,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/checkout.py
-    command: pytest services/purchase-gateway/app/routers/checkout.py
 - id: AC-006
   description: Given a webhook request with a valid Stripe signature, when the gateway
     receives it, then HTTP 200 is returned within 500ms and the event is logged in
@@ -3587,10 +3416,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
 - id: AC-007
   description: Given a webhook request with an invalid signature, when the gateway
     receives it, then HTTP 400 is returned and the event is NOT logged
@@ -3599,10 +3424,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
 - id: AC-008
   description: Given the same Stripe event ID is received twice (retry), when the
     gateway processes it, then the second processing is a no-op and no duplicate order
@@ -3616,10 +3437,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
 - id: AC-009
   description: Given a `checkout.session.completed` event for a multi-tenant order
     (Stripe Connect), when the gateway processes it, then the order is associated
@@ -3707,14 +3524,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/refund.py
-    command: pytest services/purchase-gateway/app/services/refund.py
 - id: AC-016
   description: Given a fulfilled order, when a partial refund is processed in Stripe,
     then the order status transitions to `partially_refunded` and no enrollment is
@@ -3724,14 +3533,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/refund.py
-    command: pytest services/purchase-gateway/app/services/refund.py
 - id: AC-017
   description: Given a fulfilled order, when a `charge.dispute.created` webhook fires,
     then the order status transitions to `disputed` and an alert is fired to the finance
@@ -3741,14 +3542,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/dispute.py
-    command: pytest services/purchase-gateway/app/services/dispute.py
 - id: AC-018
   description: Given a disputed order where the merchant wins (`charge.dispute.closed`
     with `status=won`), then the order status is restored to its pre-dispute state
@@ -3758,14 +3551,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/dispute.py
-    command: pytest services/purchase-gateway/app/services/dispute.py
 - id: AC-019
   description: Given a fulfillment job that fails due to LMS API returning HTTP 503,
     when the worker retries, then it retries up to 10 times with exponential backoff
@@ -3775,14 +3560,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/admin.py
-    command: pytest services/purchase-gateway/app/routers/admin.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/fulfillment.py
-    command: pytest services/purchase-gateway/app/services/fulfillment.py
 - id: AC-020
   description: Given a fulfillment job that fails all 10 retries, when the max retries
     are exhausted, then the order transitions to `fulfillment_failed`, the job is
@@ -3792,14 +3569,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/admin.py
-    command: pytest services/purchase-gateway/app/routers/admin.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/fulfillment.py
-    command: pytest services/purchase-gateway/app/services/fulfillment.py
 - id: AC-021
   description: Given a fulfillment job for a user already enrolled in the course (LMS
     returns 409), when the worker processes it, then the line item is marked as `fulfilled`
@@ -3809,14 +3578,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/fulfillment.py
-    command: pytest services/purchase-gateway/app/services/fulfillment.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/lms_client.py
-    command: pytest services/purchase-gateway/app/services/lms_client.py
 - id: AC-022
   description: Given an enterprise tenant with a subscription, when `invoice.paid`
     fires for a renewal, then seat pack entitlements are replenished for the new billing
@@ -3826,26 +3587,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/models/offering.py
-    command: pytest services/purchase-gateway/app/models/offering.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/models/subscription.py
-    command: pytest services/purchase-gateway/app/models/subscription.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/admin.py
-    command: pytest services/purchase-gateway/app/routers/admin.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/subscriptions.py
-    command: pytest services/purchase-gateway/app/routers/subscriptions.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/subscription.py
-    command: pytest services/purchase-gateway/app/services/subscription.py
 - id: AC-023
   description: Given an enterprise tenant whose subscription payment fails, when `invoice.payment_failed`
     fires, then a grace period begins and the admin is notified. No access is revoked
@@ -3855,18 +3596,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/models/subscription.py
-    command: pytest services/purchase-gateway/app/models/subscription.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/subscriptions.py
-    command: pytest services/purchase-gateway/app/routers/subscriptions.py
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/services/subscription.py
-    command: pytest services/purchase-gateway/app/services/subscription.py
 - id: AC-024
   description: Given an enterprise admin for tenant A, when they call `GET /admin/api/v1/orders/`,
     then only orders for tenant A are returned (zero orders from tenant B)
@@ -3875,10 +3604,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/middleware/tenant.py
-    command: pytest services/purchase-gateway/app/middleware/tenant.py
 - id: AC-025
   description: Given tenants A and B, when admin A calls any admin API endpoint, then
     zero records from tenant B are returned
@@ -3887,10 +3612,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/middleware/tenant.py
-    command: pytest services/purchase-gateway/app/middleware/tenant.py
 - id: AC-026
   description: Given tenants A and B using Stripe Connect, when a webhook fires for
     tenant A's connected account, then the event is processed in tenant A's context
@@ -3951,10 +3672,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/main.py
-    command: pytest services/purchase-gateway/app/main.py
 - id: AC-030
   description: Given a fulfillment failure occurs, when the error is logged, then
     the log entry includes `order_uuid`, `tenant_id`, `offering_type`, `lms_resource_id`,
@@ -3994,10 +3711,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/main.py
-    command: pytest services/purchase-gateway/app/main.py
 - id: AC-033
   description: 'Given the gateway is running, when `curl http://payments-gateway:8000/health/`
     is called from within the cluster, then the response is HTTP 200 with `{"status":
@@ -4007,10 +3720,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/health.py
-    command: pytest services/purchase-gateway/app/routers/health.py
 - id: AC-034
   description: Given the service is deployed, its domain MUST use DNS-only Cloudflare
     mode with Let's Encrypt SSL (not Cloudflare proxy)
@@ -4025,23 +3734,11 @@ acceptance_criteria:
   description: Given the sending domain `academyv2.mereka.io`, when SES domain verification
     is checked, then DKIM, SPF, and DMARC all pass verification (verified via `dig`
     and SES console)
-  verify:
-  - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
-    section: ACE Pipeline Verification
-    justification: Requires active SES configuration with verified sender domain and
-      test recipient
-    file: scripts/infra/verify-ses-domain.sh
+  verify: []
 - id: AC-002
   description: Given the sending domain `academy.biji-biji.com`, when SES domain verification
     is checked, then DKIM, SPF, and DMARC all pass verification
-  verify:
-  - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
-    section: Email Template Rendering
-    justification: Requires sending actual test emails through SES to verify template
-      rendering across email clients
-    file: scripts/infra/verify-ses-domain.sh
+  verify: []
 - id: AC-003
   description: Given a learner triggers a password reset, when ACE dispatches the
     email, then the email is delivered via SES within 30 seconds and the `From` header
@@ -4251,6 +3948,8 @@ acceptance_criteria:
     device registrations for that user are deleted or anonymized
   verify: []
 _unmapped:
+- AC-001
+- AC-002
 - AC-003
 - AC-004
 - AC-005
@@ -4834,10 +4533,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-002
   description: Given a HubSpot webhook with an invalid signature, when the endpoint
     receives the request, then it MUST return `401 Unauthorized` and log the failure
@@ -4846,10 +4541,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-003
   description: Given a webhook from an unknown form GUID (not in allowlist), when
     the endpoint receives the request, then it MUST return `400 Bad Request` and log
@@ -4867,10 +4558,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-005
   description: Given a valid contactId, when the service fetches the contact profile
     from HubSpot, then it MUST use OAuth access token (not hardcoded PAT) and retry
@@ -4888,10 +4575,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-secrets.sh
     command: scripts/qa/verify-hubspot-secrets.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-006
   description: Given the OAuth access token is expired, when the service attempts
     to fetch a contact profile, then it MUST refresh the token using the refresh token
@@ -4935,10 +4618,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-011
   description: Given user creation succeeds, when the service enriches the profile,
     then it MUST call `PATCH /api/user/v1/accounts/{username}` with extended profile
@@ -4956,10 +4635,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-013
   description: Given a welcome email send, when the email is delivered, then it MUST
     include the generated password in plaintext (sent once, never stored)
@@ -4968,10 +4643,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: automated
-    test_type: integration
-    file: services/hubspot-webhook/functions/index.js
-    command: services/hubspot-webhook/functions/index.js
 - id: AC-HUB-014
   description: Given a successful welcome email, when the service schedules the reminder,
     then it MUST create a Redis job with the password encrypted (AES-256-GCM) and
@@ -5069,10 +4740,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: manual
-    runbook: specs/plans/external-registration-hubspot_testplan.md
-    section: 'Phase 5: Manual Verification > AC-HUB-023: Container security'
-    justification: Requires live K8s pod inspection with kubectl exec
 - id: AC-HUB-024
   description: Given the service is running, when the `/metrics` endpoint is queried,
     then it MUST return Prometheus metrics including `hubspot_webhook_requests_total`,
@@ -5104,11 +4771,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-hubspot-registration.sh
     command: scripts/qa/verify-hubspot-registration.sh
-  - type: manual
-    runbook: specs/plans/external-registration-hubspot_testplan.md
-    section: 'Phase 5: Manual Verification > AC-HUB-026: Alert firing'
-    justification: Requires Prometheus + Alertmanager deployed; simulate failure by
-      disabling Open edX API
 
 ---
 spec: forum-service-migration_spec.md
@@ -5145,12 +4807,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Thread Count Verification
-    justification: Requires access to MongoDB Atlas dashboard and comparison between
-      production snapshots before/after migration
-    file: docs/operations/FORUM_DATA_VERIFICATION.md
 - id: AC-003
   description: Given a random sample of 1000 posts, when comparing SHA-256 hashes
     of `body` + `author_id` + `created_at` between pre-migration and post-migration,
@@ -5160,12 +4816,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Content Hash Verification
-    justification: Requires MongoDB Atlas access for random sampling and custom script
-      to compute stable content hashes across 1000 posts
-    file: docs/operations/FORUM_DATA_VERIFICATION.md
 - id: AC-004
   description: Given existing vote records, when querying through the Python API,
     then vote counts for every thread and comment match the Ruby API responses exactly
@@ -5174,12 +4824,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Vote Count Verification
-    justification: Requires running both Python and Ruby forum instances against production
-      data to compare API responses
-    file: docs/operations/FORUM_DATA_VERIFICATION.md
 - id: AC-005
   description: Given the discussions MFE loading a course discussion page, when backed
     by the Python forum service, then all threads render with correct titles, authors,
@@ -5198,12 +4842,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Thread CRUD Operations
-    justification: Requires running LMS instance with authenticated user session and
-      populated course data to test end-to-end MFE functionality
-    file: docs/operations/FORUM_MFE_TESTING.md
 - id: AC-007
   description: Given a learner voting on a post, when the vote is processed by the
     Python forum service, then the vote count increments and persists across page
@@ -5213,12 +4851,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Vote Persistence Testing
-    justification: Requires running LMS instance with authenticated user session to
-      test vote interactions and persistence across browser refreshes
-    file: docs/operations/FORUM_MFE_TESTING.md
 - id: AC-008
   description: Given a moderator flagging a post for abuse, when processed by the
     Python forum service, then the flag is recorded and the post appears in the moderation
@@ -5228,12 +4860,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Moderation Queue Verification
-    justification: Requires running LMS instance with both regular user and moderator
-      accounts to test abuse flagging workflow
-    file: docs/operations/FORUM_MFE_TESTING.md
 - id: AC-009
   description: Given a search query for "assignment help" in a course, when processed
     by the Python forum service, then results include threads with matching titles
@@ -5243,12 +4869,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-service.sh
     command: scripts/qa/verify-forum-service.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Meilisearch Index Verification
-    justification: Requires running LMS instance with populated course forum data
-      indexed in Meilisearch to test search relevance
-    file: docs/operations/FORUM_MFE_TESTING.md
 - id: AC-010
   description: Given the LMS backend requesting user activity for a learner, when
     the Python forum service responds, then the activity list matches the Ruby service
@@ -5284,12 +4904,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-service.sh
     command: scripts/qa/verify-forum-service.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Production Health Check
-    justification: Requires production Kubernetes cluster with LMS deployment to verify
-      startup timing and health check behavior
-    file: docs/operations/DEPLOYMENT_RUNBOOK.md
 - id: AC-014
   description: Given the `apply-patches.sh` script is run after `tutor config save`,
     then no Ruby-specific forum patches are applied and Python-specific configuration
@@ -5307,12 +4921,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Performance Testing
-    justification: Requires sustained concurrent load generation against live forum
-      endpoints with realistic thread volumes
-    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
 - id: AC-016
   description: Given 20 concurrent search requests, when served by the Python forum,
     then p95 latency is <= 500ms
@@ -5321,12 +4929,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Performance Testing
-    justification: Requires sustained concurrent load generation against live forum
-      endpoints with realistic thread volumes
-    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
 - id: AC-017
   description: Given the Python forum pod running under normal load (10 req/s), when
     monitoring memory usage, then RSS stays below 512Mi
@@ -5335,12 +4937,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Performance Testing
-    justification: Requires sustained concurrent load generation against live forum
-      endpoints with realistic thread volumes
-    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
 - id: AC-018
   description: Given the Python forum service is deployed and the feature flag is
     enabled, when the flag `FORUM_USE_PYTHON_BACKEND` is set to `false`, then traffic
@@ -5350,12 +4946,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Rollback Procedure
-    justification: Requires documentation review and validation against production
-      deployment architecture for rollback feasibility
-    file: docs/operations/FORUM_ROLLBACK.md
 - id: AC-019
   description: Given a rollback to the Ruby service, when querying forum data, then
     all posts created during the Python service period are visible (because both services
@@ -5365,12 +4955,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Rollback Data Integrity
-    justification: Requires rollback scenario testing with production-like data to
-      verify data accessibility across forum service versions
-    file: docs/operations/FORUM_ROLLBACK.md
 - id: AC-020
   description: Given the Python forum service is running in production, when a forum
     auth failure occurs, then the `log-auth-failures-forum` alert fires within 60
@@ -5380,12 +4964,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Observability Verification
-    justification: Requires access to Grafana dashboard with accumulated forum metrics
-      data
-    file: docs/operations/OBSERVABILITY_VERIFICATION.md
 - id: AC-021
   description: Given the Python forum service is running, when Prometheus scrapes
     the `/metrics` endpoint (or the configured metrics path), then forum-specific
@@ -5395,12 +4973,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
-    section: Observability Verification
-    justification: Requires access to Grafana dashboard with accumulated forum metrics
-      data
-    file: docs/operations/OBSERVABILITY_VERIFICATION.md
 - id: AC-022
   description: Given a developer running `tutor local launch` with the Python forum
     plugin, when the forum container starts, then it connects to the local MongoDB
@@ -5939,35 +5511,17 @@ acceptance_criteria:
   description: 'Given a release candidate build, when submitted to the Apple App Store,
     then the submission includes: app description, screenshots (6.7" and 6.1" iPhones),
     privacy nutrition labels, and age rating'
-  verify:
-  - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
-    section: Push Notification Testing
-    justification: Requires physical mobile device with configured FCM/APNs credentials
-      for end-to-end push verification
-    file: N/A (manual verification)
+  verify: []
 - id: AC-036
   description: 'Given a release candidate build, when submitted to Google Play Store,
     then the submission includes: store listing, screenshots (phone), content rating
     questionnaire, and data safety form'
-  verify:
-  - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
-    section: Offline Mode Testing
-    justification: Requires mobile device in airplane mode to verify offline content
-      caching and sync behavior
-    file: N/A (manual verification)
+  verify: []
 - id: AC-037
   description: 'Given a production release is approved, when the app is published,
     then it uses a phased/staged rollout (iOS: phased release over 7 days; Android:
     staged rollout starting at 10%)'
-  verify:
-  - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
-    section: Deep Link Testing
-    justification: Requires mobile device with installed app to verify deep link routing
-      from email/web to native screens
-    file: N/A (manual verification)
+  verify: []
 _unmapped:
 - AC-001
 - AC-002
@@ -6003,6 +5557,9 @@ _unmapped:
 - AC-032
 - AC-033
 - AC-034
+- AC-035
+- AC-036
+- AC-037
 
 ---
 spec: mobile-apps-secrets-management_spec.md
@@ -6264,14 +5821,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/audit-atlas-allowlist-monitor.sh
     command: scripts/qa/audit-atlas-allowlist-monitor.sh
-  - type: monitoring
-    metric: mongodb_atlas_connections_current
-    dashboard: Atlas Console > Project > Cluster > Metrics > Connections
-  - type: manual
-    runbook: docs/operations/MONGODB_ATLAS_RUNBOOK.md
-    section: Verify Atlas Health > Active Connections
-    justification: Atlas monitoring dashboard requires Atlas console credentials not
-      available to CI; verified manually during deployment
 - id: AC-008
   description: '`pymongo[srv]` installed: `pip list | grep pymongo` shows extras'
   verify:
@@ -6373,11 +5922,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-body-limits.sh
     command: scripts/qa/verify-body-limits.sh
-  - type: manual
-    runbook: docs/operations/DOMAIN_MANAGEMENT.md
-    section: Verification > Profile Image Upload
-    justification: Full upload flow requires authenticated browser session with file
-      selection; curl can only test rejection path
 - id: AC-008
   description: Favicon loads correctly on all domains
   verify:
@@ -6626,11 +6170,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
-  - type: manual
-    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
-    section: Dashboard Verification
-    justification: Dashboard load time and visual correctness require human verification
-      in browser
 - id: AC-003
   description: 'LMS `/metrics` endpoint returns Prometheus metrics: `curl https://academyv2.mereka.io/metrics`'
   verify:
@@ -6696,11 +6235,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
-  - type: manual
-    runbook: docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
-    section: Alert Verification > OOM Simulation
-    justification: OOM simulation requires deliberate resource exhaustion which cannot
-      be safely automated in production
 - id: AC-007
   description: 'Log correlation works: Click trace ID in Grafana, jumps to Loki logs'
   verify:
@@ -6712,11 +6246,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
-  - type: manual
-    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
-    section: Trace-Log Correlation
-    justification: Click-through navigation from logs to traces requires visual verification
-      in Grafana UI
 - id: AC-008
   description: 'Metrics retention 30 days: Query old metrics: `rate(http_requests_total[30d])`'
   verify:
@@ -6728,6 +6257,48 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+- id: AC-LOG-001
+  description: Promtail DaemonSet is deployed and scraping logs from all pods in `mereka-lms`
+    namespace
+  verify: []
+- id: AC-LOG-002
+  description: Loki query `{namespace="mereka-lms"}` returns logs from all canonical
+    log sources (LMS, CMS, workers, MFE, discovery, ecommerce, credentials, forum,
+    notes)
+  verify: []
+- id: AC-LOG-003
+  description: 'All logs have required labels: `service`, `env`, `cluster`, `namespace`,
+    `hostname`, `severity`'
+  verify: []
+- id: AC-LOG-004
+  description: LMS and CMS logs are structured JSON with `timestamp`, `level`, `service`,
+    `message` fields
+  verify: []
+- id: AC-LOG-005
+  description: 'No email addresses are visible in Loki query results: `{namespace="mereka-lms"}
+    |~ "@.*\\.com"` returns zero results'
+  verify: []
+- id: AC-LOG-006
+  description: 'No passwords are visible in Loki query results: `{namespace="mereka-lms"}
+    |~ "(?i)password.*=.*[^*]"` returns zero results'
+  verify: []
+- id: AC-LOG-007
+  description: 'Logs older than 30 days are automatically deleted: query `{namespace="mereka-lms"}`
+    with time range `now-31d to now-30d` returns no results'
+  verify: []
+- id: AC-LOG-008
+  description: 'Tempo traces are retained for 7 days: traces older than 8 days are
+    not retrievable'
+  verify: []
+_unmapped:
+- AC-LOG-001
+- AC-LOG-002
+- AC-LOG-003
+- AC-LOG-004
+- AC-LOG-005
+- AC-LOG-006
+- AC-LOG-007
+- AC-LOG-008
 
 ---
 spec: observability-validation-requirements_spec.md
@@ -7180,8 +6751,6 @@ acceptance_criteria:
     test_type: automated
     file: infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
     command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
-  - type: manual
-    file: docs/operations/MIDDLEWARE_VERIFICATION.md
 
 ---
 spec: proctoring-integration_spec.md
@@ -7200,12 +6769,7 @@ acceptance_criteria:
   description: Given a Respondus LockDown Browser backend is configured, when a student
     accesses the exam URL from a standard browser, then the system detects the missing
     LockDown Browser and displays a download prompt
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Browser Lockdown
-    justification: Requires actual LockDown Browser software; cannot be automated
-      in CI
+  verify: []
 - id: AC-004
   description: Given a ProctorTrack backend is configured, when `on_review_callback()`
     receives an AI analysis result, then the exam attempt status is updated to `second_review_required`
@@ -7220,12 +6784,7 @@ acceptance_criteria:
   description: Given a course author in Studio, when they edit a subsection's exam
     settings, then they can select `proctored` as the exam type and choose from providers
     enabled for the enterprise customer
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Exam Setup
-    justification: Studio UI interaction; smoke test with browser automation when
-      implemented
+  verify: []
 - id: AC-007
   description: Given a proctored exam with `time_limit_minutes=60` and `due_date=2026-06-15T23:59:00Z`,
     when a student accesses the exam at 2026-06-16T00:00:01Z, then the exam is blocked
@@ -7265,21 +6824,12 @@ acceptance_criteria:
   description: Given a student on the pre-exam environment check page, when their
     webcam is blocked by browser permissions, then the check fails with the message
     "Please allow camera access in your browser settings"
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Environment Check
-    justification: Browser permission interaction; smoke test with browser automation
-      when implemented
+  verify: []
 - id: AC-015
   description: Given all environment checks pass, when the student reviews the results,
     then each component (webcam, microphone, screen share, browser, network) shows
     a green checkmark
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Environment Check
-    justification: Browser UI rendering; smoke test with browser automation when implemented
+  verify: []
 - id: AC-016
   description: Given the student's upload bandwidth is below 1.5 Mbps, when the network
     check runs, then it fails with a message indicating the minimum required bandwidth
@@ -7288,30 +6838,17 @@ acceptance_criteria:
   description: Given an exam configured with Respondus LockDown Browser, when a student
     is in the LockDown Browser, then the student cannot open other applications, copy/paste,
     take screenshots, or access other tabs
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Browser Lockdown
-    justification: Requires physical LockDown Browser installation; cannot automate
-      in CI
+  verify: []
 - id: AC-018
   description: Given an exam configured with Proctorio with `lock_fullscreen=true`
     and `disable_clipboard=true`, when the student takes the exam, then fullscreen
     mode is enforced and clipboard access is blocked
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Browser Lockdown
-    justification: Requires Proctorio extension; cannot automate in CI
+  verify: []
 - id: AC-019
   description: Given a student attempts to use a virtual machine to take a proctored
     exam, when the provider detects the VM, then the attempt is flagged with a `vm_detected`
     event
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Browser Lockdown
-    justification: Requires VM environment; manual verification only
+  verify: []
 - id: AC-020
   description: Given a student starts a proctored exam, when the exam timer begins,
     then the attempt state transitions from `ready_to_start` to `started` and the
@@ -7331,11 +6868,7 @@ acceptance_criteria:
   description: Given a proctoring provider outage during an active exam, when the
     student's recording stream fails, then the student's answers are preserved in
     browser session storage and a `reconnect` prompt is displayed
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Resilience
-    justification: Requires network interruption simulation; smoke test when implemented
+  verify: []
 - id: AC-024
   description: Given an attempt in `verified` state, when any action attempts to transition
     it to `started`, then the transition is rejected with an invalid state error
@@ -7399,11 +6932,7 @@ acceptance_criteria:
   description: 'Given a student is about to start a proctored exam, when the consent
     notice is displayed, then it includes: data collected, who accesses it, retention
     period, right to refuse, and contact information'
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > Compliance
-    justification: Content verification; smoke test with browser automation when implemented
+  verify: []
 - id: AC-037
   description: Given a student does not accept the consent notice, when they attempt
     to proceed, then the exam start is blocked and the student is informed they cannot
@@ -7413,17 +6942,14 @@ acceptance_criteria:
   description: Given a GDPR DSAR for a student, when the request is processed, then
     the system provides all proctoring session metadata and coordinates with the provider
     for recording access within 30 days
-  verify:
-  - type: manual
-    runbook: docs/runbooks/proctoring-operations-runbook.md
-    section: Verification > GDPR
-    justification: Requires provider coordination; manual verification with quarterly
-      audit
+  verify: []
 _unmapped:
 - AC-001
 - AC-002
+- AC-003
 - AC-004
 - AC-005
+- AC-006
 - AC-007
 - AC-008
 - AC-009
@@ -7431,10 +6957,16 @@ _unmapped:
 - AC-011
 - AC-012
 - AC-013
+- AC-014
+- AC-015
 - AC-016
+- AC-017
+- AC-018
+- AC-019
 - AC-020
 - AC-021
 - AC-022
+- AC-023
 - AC-024
 - AC-025
 - AC-026
@@ -7447,7 +6979,9 @@ _unmapped:
 - AC-033
 - AC-034
 - AC-035
+- AC-036
 - AC-037
+- AC-038
 
 ---
 spec: repository-structure_spec.md
@@ -7560,31 +7094,16 @@ acceptance_criteria:
   description: Given the production GKE cluster, when `kubectl get externalsecrets
     -n mereka-lms` is run, then both `openedx-secrets` and `database-secrets` show
     `STATUS=SecretSynced`.
-  verify:
-  - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
-    section: Verification > ExternalSecrets are synced
-    justification: Requires live GKE cluster access; cannot be verified in CI without
-      cluster credentials
+  verify: []
 - id: AC-002
   description: Given a Deployment (e.g., `lms`), when its pod spec is inspected, then
     `envFrom` references `openedx-secrets` and `database-secrets` via `secretRef`.
-  verify:
-  - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
-    section: Verification > Pods have envFrom referencing secrets
-    justification: Requires live GKE cluster access; K8sdeploy manifests reference
-      envFrom but runtime verificationneeds cluster
+  verify: []
 - id: AC-003
   description: Given a running LMS pod, when `echo $OPENEDX_SECRET_KEY` is executed
     inside the container, then a non-empty value is returned (confirming the pipeline
     delivers secrets to application code).
-  verify:
-  - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
-    section: Verification > Runtime health
-    justification: Requires live GKE cluster with running LMS pod; cannot be simulated
-      in CI
+  verify: []
 - id: AC-004
   description: Given the file `deploy/k8s/base/secrets/external-secrets.yaml`, when
     all `remoteRef.key` values are extracted, then every key starts with `MEREKA_LMS_`.
@@ -7648,10 +7167,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-secrets-inventory.sh
     command: scripts/qa/verify-secrets-inventory.sh
-  - type: manual
-    runbook: specs/secrets-management_spec.md
-    section: Verification > K8s secrets exist with correct key counts
-    justification: Live key count verification requirescluster access
 - id: AC-010
   description: 'Given the `database-secrets` K8s Secret in production, when its keys
     are listed, then exactly 7 keys are present: `MYSQL_ROOT_PASSWORD`, `OPENEDX_MYSQL_PASSWORD`,
@@ -7662,20 +7177,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-secrets-inventory.sh
     command: scripts/qa/verify-secrets-inventory.sh
-  - type: manual
-    runbook: specs/secrets-management_spec.md
-    section: Verification > K8s secrets exist with correct key counts
-    justification: Live key count verification requirescluster access
 - id: AC-011
   description: Given the Infisical path `/k8s/mereka-lms/atlas`, when its keys are
     listed, then `ATLAS_PUBLIC_KEY`, `ATLAS_PRIVATE_KEY`, `ATLAS_ORG_ID`, and `ATLAS_PROJECT_ID`
     exist.
-  verify:
-  - type: manual
-    runbook: docs/operations/INFISICAL_MEREKA_LMS_KEYS.md
-    section: Atlas Automation Keys
-    justification: Atlas path is not referenced in ExternalSecrets (not synced to
-      K8s); requires direct Infisical CLIaccess
+  verify: []
 - id: AC-012
   description: Given the entire `deploy/k8s/` directory, when scanned with `grep -r`
     for known secret patterns (excluding `secretKeyRef`, `secretRef`, `remoteRef`,
@@ -7701,12 +7207,7 @@ acceptance_criteria:
 - id: AC-013
   description: Given a test commit containing a hardcoded password pattern, when `git
     commit` is run with the pre-commit hook active, then the commit is blocked.
-  verify:
-  - type: manual
-    runbook: specs/secrets-management_spec.md
-    section: Acceptance Criteria > No Hardcoded Secrets> AC-013
-    justification: Pre-commit hook testing requires interactive git workflow; cannot
-      run in CI without staging actualfiles
+  verify: []
 - id: AC-014
   description: Given all JWT secret keys in `openedx-secrets` (`JWT_SECRET_KEY_LMS`,
     `JWT_SECRET_KEY_CMS`, `JWT_SECRET_KEY_DISCOVERY`, `JWT_SECRET_KEY_ECOMMERCE`,
@@ -7749,12 +7250,14 @@ acceptance_criteria:
     is run followed by `kubectl annotate externalsecret openedx-secrets -n mereka-lms
     force-sync=$(date +%s) --overwrite`, then pods restarted after the sync receive
     the new value.
-  verify:
-  - type: manual
-    runbook: docs/operations/SECRET_ROTATION_CHECKLIST.md
-    section: Full Rotation Procedure
-    justification: End-to-end rotation test requires live Infisical, GCP SM, GKE cluster,
-      and running pods; executedquarterly during game days
+  verify: []
+_unmapped:
+- AC-001
+- AC-002
+- AC-003
+- AC-011
+- AC-013
+- AC-018
 
 ---
 spec: slo-sla-service-level-management_spec.md
@@ -7867,9 +7370,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-slo-contracts.sh
     command: scripts/qa/verify-slo-contracts.sh
-  - type: monitoring
-    metric: mereka_slo_error_budget_remaining_ratio
-    dashboard: https://grafana.mereka.io/d/mereka-slo-overview
 - id: AC-009
   description: Given error budget drops below 50%, when the burn rate alert evaluates,
     then a Slack notification is sent to the engineering channel within 5 minutes
@@ -7882,11 +7382,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-slo-contracts.sh
     command: scripts/qa/verify-slo-contracts.sh
-  - type: manual
-    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
-    section: Verification > Simulate Budget Burn
-    justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe
-      to automate in production
 - id: AC-010
   description: Given error budget is >= 50% for all Tier 1 services, when a deployment
     pipeline runs, then the deployment gate check passes without manual approval
@@ -7921,11 +7416,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-regression-detection.sh
     command: scripts/qa/verify-regression-detection.sh
-  - type: manual
-    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
-    section: Verification > Simulate Latency Regression
-    justification: Requires injecting artificial latency in production to verify alert
-      fires within 15 minutes; not safe to automate
 - id: AC-014
   description: Given a deployment event, when regression is detected within 30 minutes
     of the deployment, then the alert annotation includes the deployment identifier
@@ -7944,20 +7434,44 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-regression-detection.sh
     command: scripts/qa/verify-regression-detection.sh
-  - type: monitoring
-    metric: mereka_slo_latency_p95_seconds
-    dashboard: https://grafana.mereka.io/d/mereka-slo-overview
+- id: AC-DRILL-001
+  description: Given the synthetic alert drill CronJob is deployed, when `kubectl
+    get cronjob -n mereka-lms synthetic-alert-drill` is run, then the CronJob exists
+    with schedule `0 9 * * 1` (every Monday at 09:00 UTC)
+  verify: []
+- id: AC-DRILL-002
+  description: Given a drill execution, when the drill script runs, then it POSTs
+    to Alertmanager API `/api/v1/alerts` with a test alert labeled `[DRILL] Alert
+    Delivery Test`
+  verify: []
+- id: AC-DRILL-003
+  description: Given a successful drill, when the drill completes, then a structured
+    log entry is written to Loki with `event=synthetic_alert_drill`, `status=success`,
+    and `delivery_timestamp`
+  verify: []
+- id: AC-DRILL-004
+  description: Given drill metrics are exposed, when Prometheus queries `mereka_alerting_drill_success_total`,
+    then a counter value is returned showing cumulative drill successes
+  verify: []
+- id: AC-DRILL-005
+  description: Given a missed drill (no delivery within 5 minutes), when the watchdog
+    timer expires, then a REAL P2 alert is triggered with subject `Alert Delivery
+    Pipeline Failure - Drill Not Received`
+  verify: []
+- id: AC-DRILL-006
+  description: Given the SLO dashboard, when viewing the "Alert Delivery Drills -
+    Last 30 Days" panel, then drill success/failure history is visible as a time series
+  verify: []
+- id: AC-DRILL-007
+  description: Given the drill alert is sent to Slack, when checking the `#ops-alerts`
+    channel, then the drill message appears within 2 minutes with clear `[DRILL]`
+    prefix
+  verify: []
 - id: AC-016
   description: Given a maintenance window is declared 72 hours in advance, when SLA
     availability is calculated for the month, then the maintenance window duration
     is excluded from both numerator and denominator
-  verify:
-  - type: manual
-    runbook: docs/operations/MAINTENANCE_WINDOWS.md
-    section: Verification > SLA Exclusion Test
-    justification: Requires declaring a real maintenance window and generating a monthly
-      report to verify exclusion; involves calendar-dependent data that cannot be
-      unit tested
+  verify: []
 - id: AC-017
   description: Given a maintenance window record, when the monthly SLA report is generated,
     then the maintenance window appears in the report with start time, end time, and
@@ -7967,42 +7481,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/generate-sla-report.sh
     command: scripts/qa/generate-sla-report.sh
-  - type: manual
-    runbook: docs/operations/SLA_REPORTING.md
-    section: Report Sections > Maintenance Windows
-    justification: Requires actual maintenance window data to verify start/end/scope
-      appear correctly; dry-run only checks section existence
 - id: AC-018
   description: Given a P1 incident is declared, when the on-call engineer acknowledges,
     then acknowledgement occurs within 15 minutes of alert firing
-  verify:
-  - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
-    section: Incident Response > P1 Acknowledgement
-    justification: Tests human response time to P1 alerts; requires a real or simulated
-      incident with on-call engineer availability
+  verify: []
 - id: AC-019
   description: 'Given a P1/P2 incident is resolved, when the postmortem is published,
     then it is published within 5 business days and contains: timeline, root cause,
     impact, remediation, and prevention sections'
-  verify:
-  - type: manual
-    runbook: docs/operations/INCIDENT_TEMPLATES.md
-    section: Postmortem > Required Sections Checklist
-    justification: Tests organizational process (postmortem published within 5 business
-      days with required sections); cannot be automated without incident tracking
-      system integration
+  verify: []
 - id: AC-020
   description: Given the on-call schedule, when any week is inspected, then a primary
     and secondary on-call engineer are assigned and no engineer has consecutive on-call
     duty exceeding 7 days
-  verify:
-  - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
-    section: Schedule Verification
-    justification: Requires inspecting on-call schedule for primary/secondary assignment
-      and consecutive-day limits; format depends on tool choice (Slack, PagerDuty,
-      wiki)
+  verify: []
 - id: AC-021
   description: Given a P1 alert fires, when the primary on-call does not acknowledge
     within 15 minutes, then the alert automatically escalates to the secondary on-call
@@ -8011,11 +7503,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-error-budget.sh
     command: scripts/qa/verify-error-budget.sh
-  - type: manual
-    runbook: docs/operations/ONCALL_ROTATION.md
-    section: Escalation > Auto-Escalation Test
-    justification: Full end-to-end escalation test requires primary on-call to be
-      unreachable for 15 minutes; automated check verifies Alertmanager config only
 - id: AC-022
   description: Given one month of production operation, when the monthly SLA report
     script runs, then a report is generated containing per-service availability, latency
@@ -8096,32 +7583,67 @@ acceptance_criteria:
     scheduled
   verify: []
 - id: AC-037
+  description: Given the Open edX SLO dashboard exists at `infrastructure/monitoring/dashboards/openedx-slo-dashboard.json`,
+    when it is deployed to GCP Monitoring, then it displays all Tier 1 SLO metrics
+    (LMS availability, CMS availability, latency P99/P95/P50, error rates, error budget)
+  verify: []
+- id: AC-038
+  description: 'Given the SLO dashboard, when viewed, then it includes a service ownership
+    panel displaying: primary owner, service tier, on-call rotation structure, and
+    escalation contacts (L1 through L4)'
+  verify: []
+- id: AC-039
+  description: Given the SLO dashboard, when viewed, then it includes direct links
+    to PrometheusRule definitions in `deploy/k8s/base/monitoring/prometheusrule-slo.yaml`
+  verify: []
+- id: AC-040
+  description: 'Given the SLO dashboard, when viewed, then it includes links to operational
+    runbooks: On-Call Observability Playbook, SLO/SLA Spec, Deployment Runbook, and
+    Troubleshooting Guide'
+  verify: []
+- id: AC-041
+  description: 'Given the SLO dashboard, when error budget panels are displayed, then
+    they use color thresholds: RED (< 10% or exhausted), YELLOW (10-25%), GREEN (>=
+    25%)'
+  verify: []
+- id: AC-042
   description: Given GCP uptime checks from multiple regions, when latency is measured
     for SLA purposes, then only the Asia-Pacific regional probe is used as the authoritative
     measurement
   verify: []
-- id: AC-038
+- id: AC-043
   description: Given a MySQL infrastructure failure causes LMS, CMS, and Forum to
     fail simultaneously, when error budgets are calculated, then downtime is attributed
     to MySQL only and dependent services' budgets are not consumed if they recover
     immediately after MySQL
   verify: []
-- id: AC-039
+- id: AC-044
   description: Given a maintenance window notification email fails to send, when the
     failure is detected, then operations is alerted within 1 hour and manual client
     outreach is triggered
   verify: []
-- id: AC-040
+- id: AC-045
   description: Given a rolling deployment causes transient 503 errors, when errors
     are < 0.1% of traffic and last < 1 minute, then they may be excluded from SLO
     calculation if documented in monthly report
   verify: []
-- id: AC-041
+- id: AC-046
   description: Given timestamp discrepancies between Prometheus and GCP Monitoring,
     when SLA is calculated, then the time measurement most favorable to the client
     is used
   verify: []
 _unmapped:
+- AC-DRILL-001
+- AC-DRILL-002
+- AC-DRILL-003
+- AC-DRILL-004
+- AC-DRILL-005
+- AC-DRILL-006
+- AC-DRILL-007
+- AC-016
+- AC-018
+- AC-019
+- AC-020
 - AC-024
 - AC-025
 - AC-026
@@ -8140,6 +7662,11 @@ _unmapped:
 - AC-039
 - AC-040
 - AC-041
+- AC-042
+- AC-043
+- AC-044
+- AC-045
+- AC-046
 
 ---
 spec: tutor-configuration-resilience_spec.md
@@ -8200,10 +7727,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_verify_patches.sh
-    command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-005
   description: Given a developer modifies `infrastructure/tutor/apply-patches.sh`
     and attempts to commit, when the pre-commit hook runs, then it executes `verify-tutor-patches.sh`
@@ -8221,10 +7744,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_pre_commit_hook.sh
-    command: tests/tutor/test_pre_commit_hook.sh
 - id: AC-TCR-006
   description: Given a pull request that modifies any file under `infrastructure/tutor/`,
     when the CI workflow runs, then it executes the full patch verification and reports
@@ -8243,10 +7762,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_verify_patches.sh
-    command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-008
   description: Given `tutor config save` is run without enabling the Mereka plugin
     and without running `apply-patches.sh`, when `verify-tutor-patches.sh` is executed,
@@ -8256,10 +7771,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_verify_patches.sh
-    command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-009
   description: Given the `apply-patches.sh` script is run twice consecutively, when
     the rendered templates are compared, then they are byte-identical (idempotency).
@@ -8272,10 +7783,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_idempotency.sh
-    command: tests/tutor/test_idempotency.sh
 - id: AC-TCR-010
   description: Given a Tutor version upgrade from 18.x to 21.x, when the CI workflow
     runs on the upgrade PR, then it reports which patches need adaptation and blocks
@@ -8285,11 +7792,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: manual
-    runbook: docs/operations/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
-    section: Tutor Version Upgrade Procedure
-    justification: Version upgrades are infrequent events requiring human judgment
-      on patch adaptation; CI catches failures but upgrade planning is manual
 - id: AC-TCR-011
   description: Given the patch manifest contains a patch with severity `critical`,
     when that patch fails verification, then the verification tool outputs the failure
@@ -8299,10 +7801,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_verify_patches.sh
-    command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-012
   description: Given the `make tutor-apply` command is run, then it executes `tutor
     config save`, enables the Mereka plugin, runs `apply-patches.sh`, runs `verify-tutor-patches.sh`,
@@ -8320,15 +7818,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_tutor_apply.sh
-    command: tests/tutor/test_tutor_apply.sh
-  - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
-    section: Full Configuration Apply
-    justification: End-to-end make tutor-apply requires Docker Compose stack; CI tests
-      individual steps but full pipeline needs Docker environment
 
 ---
 spec: tutor-configuration_spec.md
@@ -8396,11 +7885,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mfe-build-contract.sh
     command: scripts/qa/verify-mfe-build-contract.sh
-  - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
-    section: MFE Build Verification
-    justification: Full image build (15-20 min) cannot run in CI; script verifies
-      Dockerfile contract
 - id: AC-007
   description: MySQL 8 connections succeed without authentication errors
   verify:
@@ -8408,11 +7892,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-services.sh
     command: scripts/qa/verify-tutor-services.sh
-  - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
-    section: MySQL Authentication Verification
-    justification: Requires running MySQL 8 Docker container; cannot run in CI without
-      Docker-in-Docker
 - id: AC-008
   description: All three production domains (academyv2.mereka.io, academy.biji-biji.com,
     skillourfuture.academy.mereka.io) resolve and accept logins
@@ -8428,11 +7907,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-branding-render.sh
     command: scripts/qa/verify-tutor-branding-render.sh
-  - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
-    section: Visual Branding Verification
-    justification: Visual rendering requires browser inspection; automated checks
-      verify file presence only
 - id: AC-010
   description: '`tutor local dc ps` shows all services with status "Up"'
   verify:
@@ -8440,10 +7914,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-services.sh
     command: scripts/qa/verify-tutor-services.sh
-  - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
-    section: Service Health Verification
-    justification: Requires running Docker Compose stack; cannot run in standard CI
 
 ---
 spec: video-pipeline-delivery_spec.md
