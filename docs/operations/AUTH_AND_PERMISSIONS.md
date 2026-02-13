@@ -250,6 +250,25 @@ Notes:
   the safest approach is to **create a new enabled row** (do not try to edit old rows to
   disable them, that can create new versions and accidentally make a disabled version "current").
 
+### OIDC Provider Configuration Cleanup Policy
+
+**Problem**: OIDC provider configs (Django ConfigurationModel) accumulate multiple rows per site. If the latest row is disabled, `/auth/login/oidc/` returns 500.
+
+**Current Mitigation**:
+- `scripts/shared/multisite_bootstrap_django.py` creates a new enabled row if latest is disabled
+- `scripts/qa/verify-oidc-provider-configs.sh` asserts latest row is enabled/visible
+
+**Policy**:
+- DO NOT delete old disabled rows without explicit DBA approval
+- Old rows serve as audit trail for configuration changes
+- The bootstrap script handles automatic recovery from disabled states
+- Monitor row count growth quarterly (expected: 1-2 rows/site/quarter)
+
+**Guardrails**:
+- `verify-oidc-provider-configs.sh` runs in CI/pre-deployment gates
+- Bootstrap script only creates new rows when latest is disabled (prevents unbounded growth)
+- If row count exceeds 20 per site, investigate and consider archival
+
 ## What Does Not Sync (By Default)
 
 - Authentik groups do not automatically map to Open edX `is_staff`/`is_superuser`.

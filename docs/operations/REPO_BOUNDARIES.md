@@ -10,6 +10,19 @@ This document defines ownership boundaries to prevent drift, duplication, and re
 - No dedicated `staging` cluster is active right now.
 - Keep staging overlays as future-ready only; default operational path is `dev/local -> prod`.
 
+### Staging Environment Status
+
+The `staging` overlay (`deploy/k8s/overlays/staging/`) in bbi-infrastructure is archived/unused. The mereka-lms project operates with two environments only:
+
+| Environment | Infrastructure | Purpose |
+|-------------|---------------|---------|
+| Production | GKE (Google Kubernetes Engine) | Live at academyv2.mereka.io |
+| Development | Kind (VPS local K8s) | Dev at mereka.dev domains |
+
+Staging deployment is gated behind `ENABLE_STAGING_ENV=true` (default: false). No ArgoCD ApplicationSet references `staging` overlay for mereka-lms.
+
+**Verification**: `scripts/qa/audit-infra-mereka-lms-staging-references.sh --strict`
+
 ## Ownership Matrix
 
 | Concern | Canonical Repo | Why |

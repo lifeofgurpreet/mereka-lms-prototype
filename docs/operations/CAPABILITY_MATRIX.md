@@ -80,8 +80,8 @@
 
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **Aspects (Analytics Pipeline)** | IN-PROGRESS | — | K8s manifests exist in deploy/k8s/base/plugins/aspects/ | Spec: analytics-pipeline_spec.md (in_progress, 8 ACs) |
-| **Superset** | IN-PROGRESS | — | Part of Aspects | ClickHouse + Superset + Superset Worker |
+| **Aspects (Analytics Pipeline)** | DEFERRED | — | Plugin installed locally, not deployed | Spec: analytics-pipeline_spec.md (in_progress, 8 ACs). ADR-017: Deferred until core platform stable for 3+ months |
+| **Superset** | DEFERRED | — | Part of Aspects (not deployed) | ClickHouse + Superset + Superset Worker. See ADR-017 |
 | **Tracking Logs** | DEPLOYED | prod+dev | Standard Open edX | Event tracking to tracking.log |
 | **Course Analytics (Insights)** | UNKNOWN | — | — | Legacy Open edX Insights, status unknown |
 
@@ -89,8 +89,8 @@
 
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **iOS App** | DRAFT | — | Spec exists | Spec: mobile-apps-enterprise_spec.md (draft, 37 ACs) |
-| **Android App** | DRAFT | — | Spec exists | Spec: mobile-apps-enterprise_spec.md (draft, 37 ACs) |
+| **iOS App** | DRAFT | — | Spec exists, runtime status UNVERIFIED | Spec: mobile-apps-enterprise_spec.md (draft, 37 ACs). Setup docs exist but not verified in production |
+| **Android App** | DEFERRED | — | No infrastructure exists | ADR-016: Deferred until iOS app verified operational and user demand demonstrated |
 | **Mobile API Endpoints** | DEPLOYED | prod+dev | Standard Open edX API | LMS provides mobile API |
 | **Mobile Secrets Management** | DRAFT | — | Spec exists | Spec: mobile-apps-secrets-management_spec.md (draft, 25 ACs) |
 
@@ -252,9 +252,9 @@
 | Status | Count | Notes |
 |--------|-------|-------|
 | DEPLOYED | 87 | Core platform is production-ready |
-| IN-PROGRESS | 10 | Actively being implemented |
-| DRAFT | 10 | Design not finalized |
-| DEFERRED | 3 | Intentionally postponed |
+| IN-PROGRESS | 8 | Actively being implemented |
+| DRAFT | 9 | Design not finalized |
+| DEFERRED | 6 | Intentionally postponed (HubSpot, Proctoring, Android, Aspects x2, Superset) |
 | PLANNED | 0 | No planned-but-not-started items |
 | UNKNOWN | 8 | Needs verification |
 | **TOTAL** | **118** | Complete capability inventory |
