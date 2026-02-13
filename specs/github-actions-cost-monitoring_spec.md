@@ -4,6 +4,7 @@ type: spec
 status: approved
 owner: Platform Team
 last_updated: 2026-02-12
+version: "1.0.0"
 priority: high
 tier: 2
 depends_on:

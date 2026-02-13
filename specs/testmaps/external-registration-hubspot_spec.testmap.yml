@@ -1,0 +1,286 @@
+spec: external-registration-hubspot_spec.md
+acceptance_criteria:
+- id: AC-HUB-001
+  description: Given a valid HubSpot webhook POST with correct signature, when the
+    endpoint receives the request, then it MUST return `200 OK` within 2 seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-002
+  description: Given a HubSpot webhook with an invalid signature, when the endpoint
+    receives the request, then it MUST return `401 Unauthorized` and log the failure
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-003
+  description: Given a webhook from an unknown form GUID (not in allowlist), when
+    the endpoint receives the request, then it MUST return `400 Bad Request` and log
+    the unknown form
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-004
+  description: Given the feature flag `HUBSPOT_REGISTRATION_ENABLED=false`, when the
+    endpoint receives any request, then it MUST return `503 Service Unavailable`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-005
+  description: Given a valid contactId, when the service fetches the contact profile
+    from HubSpot, then it MUST use OAuth access token (not hardcoded PAT) and retry
+    up to 3 times on 5xx errors
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/scan-hubspot-credentials.sh
+    command: scripts/qa/scan-hubspot-credentials.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-secrets.sh
+    command: scripts/qa/verify-hubspot-secrets.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-006
+  description: Given the OAuth access token is expired, when the service attempts
+    to fetch a contact profile, then it MUST refresh the token using the refresh token
+    and retry the request
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-007
+  description: Given a HubSpot contact with multi-select fields (`;` delimited), when
+    the service parses the fields, then it MUST split them into arrays correctly
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-008
+  description: Given a new email address, when user creation is triggered, then the
+    service MUST call `GET /api/user/v1/accounts?email={email}` to check for duplicates
+    before creating
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-009
+  description: Given a duplicate email, when user creation is triggered, then the
+    service MUST skip creation, log a warning with email hash, and still send the
+    welcome email
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-010
+  description: 'Given a new user, when the service creates the account, then the username
+    MUST be unique (format: `{email_prefix}_{random_4_digit}`)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-011
+  description: Given user creation succeeds, when the service enriches the profile,
+    then it MUST call `PATCH /api/user/v1/accounts/{username}` with extended profile
+    fields including `hubspot_contact_id`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-012
+  description: Given a successful user creation, when the welcome email is sent, then
+    it MUST use the correct SendGrid template based on the form GUID language
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-013
+  description: Given a welcome email send, when the email is delivered, then it MUST
+    include the generated password in plaintext (sent once, never stored)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: automated
+    test_type: integration
+    file: services/hubspot-webhook/functions/index.js
+    command: services/hubspot-webhook/functions/index.js
+- id: AC-HUB-014
+  description: Given a successful welcome email, when the service schedules the reminder,
+    then it MUST create a Redis job with the password encrypted (AES-256-GCM) and
+    scheduled for 7 days later
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-015
+  description: Given a 7-day reminder job is due, when the periodic processor runs,
+    then it MUST send the reminder email using the correct language template and mark
+    the job completed
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-016
+  description: Given the same email is submitted twice within 24 hours, when both
+    webhooks are received, then only one user creation MUST occur (deduplication via
+    Redis)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-017
+  description: Given a deduplication key exists in Redis, when a webhook is received,
+    then the service MUST return `200 OK` immediately without processing
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-018
+  description: Given user creation fails after 3 retries, when the failure is logged,
+    then the webhook MUST be enqueued to the DLQ with full context (payload, error,
+    timestamp)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-019
+  description: Given a DLQ entry fails 3 retries, when the final retry fails, then
+    an error notification email MUST be sent to `ops@mereka.dev` with the entry details
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-020
+  description: Given an admin replays a DLQ entry via the admin API, when the replay
+    succeeds, then the entry MUST be marked as completed and removed from the DLQ
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-021
+  description: 'Given a signature verification failure, when the failure is logged,
+    then the log MUST NOT include the full request body (only metadata: timestamp,
+    source IP hash)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/scan-hubspot-credentials.sh
+    command: scripts/qa/scan-hubspot-credentials.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-022
+  description: Given any log entry, when it is written, then it MUST NOT contain plaintext
+    passwords, API keys, or full email addresses (use email hash)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/scan-hubspot-credentials.sh
+    command: scripts/qa/scan-hubspot-credentials.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-023
+  description: Given the container is deployed, when inspected, then the filesystem
+    MUST be read-only except for `/tmp` and the process MUST run as UID 1000 (non-root)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-k8s-security.sh
+    command: scripts/qa/verify-hubspot-k8s-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: manual
+    runbook: specs/plans/external-registration-hubspot_testplan.md
+    section: 'Phase 5: Manual Verification > AC-HUB-023: Container security'
+    justification: Requires live K8s pod inspection with kubectl exec
+- id: AC-HUB-024
+  description: Given the service is running, when the `/metrics` endpoint is queried,
+    then it MUST return Prometheus metrics including `hubspot_webhook_requests_total`,
+    `hubspot_user_creation_total`, `hubspot_email_sent_total`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-025
+  description: Given a webhook is processed, when the request completes, then a structured
+    JSON log entry MUST be emitted with `timestamp`, `level`, `contact_id`, `email_hash`,
+    `duration_ms`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+- id: AC-HUB-026
+  description: Given user creation success rate drops below 95% over 15 minutes, when
+    the alert condition is met, then a critical alert MUST fire and route to `#ops-alerts`
+    Slack channel
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-alerts.sh
+    command: scripts/qa/verify-hubspot-alerts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-hubspot-registration.sh
+    command: scripts/qa/verify-hubspot-registration.sh
+  - type: manual
+    runbook: specs/plans/external-registration-hubspot_testplan.md
+    section: 'Phase 5: Manual Verification > AC-HUB-026: Alert firing'
+    justification: Requires Prometheus + Alertmanager deployed; simulate failure by
+      disabling Open edX API
+

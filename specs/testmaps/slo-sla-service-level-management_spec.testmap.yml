@@ -1,0 +1,384 @@
+spec: slo-sla-service-level-management_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given the service tier table, when `kubectl get deploy -n mereka-lms`
+    is run, then every listed deployment maps to exactly one tier as defined in this
+    spec
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/lint-active-docs-env-model.sh
+    command: scripts/qa/lint-active-docs-env-model.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-site-id-hardening.sh
+    command: scripts/qa/verify-site-id-hardening.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sli-foundation.sh
+    command: scripts/qa/verify-sli-foundation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+- id: AC-002
+  description: Given each tier definition, when the availability SLO target is compared
+    to the external SLA target, then the SLO is strictly more stringent (higher percentage)
+    than the SLA for every tier
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sli-foundation.sh
+    command: scripts/qa/verify-sli-foundation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+- id: AC-003
+  description: Given LMS is running, when `curl -s https://academyv2.mereka.io/metrics
+    | grep http_request_duration_seconds` is run, then histogram buckets are returned
+    showing request latency distribution
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sli-foundation.sh
+    command: scripts/qa/verify-sli-foundation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+- id: AC-004
+  description: Given Prometheus is running, when `promtool query instant http://prometheus:9090
+    'mereka:http_requests:availability_ratio_5m{service="lms"}'` is executed, then
+    a value between 0 and 1 is returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sli-foundation.sh
+    command: scripts/qa/verify-sli-foundation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+- id: AC-005
+  description: 'Given all recording rules are deployed, when `kubectl get prometheusrule
+    -n mereka-lms -o yaml | grep "record: mereka:"` is run, then all recording rules
+    defined in this spec are present'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sli-foundation.sh
+    command: scripts/qa/verify-sli-foundation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+- id: AC-006
+  description: Given GCP uptime checks are active, when `gcloud monitoring uptime
+    list-configs --project=mereka-lms --format=json` is run, then checks exist for
+    all Tier 1 and Tier 2 service public endpoints
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sli-foundation.sh
+    command: scripts/qa/verify-sli-foundation.sh
+- id: AC-007
+  description: Given 30 days of metrics data, when the `mereka:slo:error_budget_remaining_ratio`
+    recording rule is queried for each service, then values are returned showing remaining
+    budget as a ratio between 0 and 1
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-error-budget.sh
+    command: scripts/qa/verify-error-budget.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+- id: AC-008
+  description: 'Given the SLO dashboard exists in Grafana, when `https://grafana.mereka.io/d/mereka-slo-overview`
+    is loaded, then panels display: per-service availability ratio, error budget remaining,
+    burn rate trend, and latency distributions'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-error-budget.sh
+    command: scripts/qa/verify-error-budget.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+  - type: monitoring
+    metric: mereka_slo_error_budget_remaining_ratio
+    dashboard: https://grafana.mereka.io/d/mereka-slo-overview
+- id: AC-009
+  description: Given error budget drops below 50%, when the burn rate alert evaluates,
+    then a Slack notification is sent to the engineering channel within 5 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-error-budget.sh
+    command: scripts/qa/verify-error-budget.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-contracts.sh
+    command: scripts/qa/verify-slo-contracts.sh
+  - type: manual
+    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    section: Verification > Simulate Budget Burn
+    justification: Requires scaling LMS to 0 replicas to trigger real alert; not safe
+      to automate in production
+- id: AC-010
+  description: Given error budget is >= 50% for all Tier 1 services, when a deployment
+    pipeline runs, then the deployment gate check passes without manual approval
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-deployment-gate.sh
+    command: scripts/qa/verify-deployment-gate.sh
+- id: AC-011
+  description: Given error budget is < 25% for any Tier 1 service, when a deployment
+    pipeline runs, then the gate check blocks deployment and requires documented approval
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-deployment-gate.sh
+    command: scripts/qa/verify-deployment-gate.sh
+- id: AC-012
+  description: 'Given an emergency deployment override occurs, when the override is
+    logged, then the log entry contains: approver, timestamp, justification, and deployment
+    identifier'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-deployment-gate.sh
+    command: scripts/qa/verify-deployment-gate.sh
+- id: AC-013
+  description: Given a stable 7-day latency baseline, when p95 latency exceeds 2x
+    the baseline for 15 consecutive minutes, then a P2 alert fires and is delivered
+    to on-call
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-regression-detection.sh
+    command: scripts/qa/verify-regression-detection.sh
+  - type: manual
+    runbook: docs/operations/SLO_DASHBOARDS_SETUP.md
+    section: Verification > Simulate Latency Regression
+    justification: Requires injecting artificial latency in production to verify alert
+      fires within 15 minutes; not safe to automate
+- id: AC-014
+  description: Given a deployment event, when regression is detected within 30 minutes
+    of the deployment, then the alert annotation includes the deployment identifier
+    and commit SHA
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-regression-detection.sh
+    command: scripts/qa/verify-regression-detection.sh
+- id: AC-015
+  description: Given deployment events are annotated in Grafana, when the SLO dashboard
+    is viewed, then vertical markers appear at each deployment timestamp on latency
+    and availability panels
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-regression-detection.sh
+    command: scripts/qa/verify-regression-detection.sh
+  - type: monitoring
+    metric: mereka_slo_latency_p95_seconds
+    dashboard: https://grafana.mereka.io/d/mereka-slo-overview
+- id: AC-016
+  description: Given a maintenance window is declared 72 hours in advance, when SLA
+    availability is calculated for the month, then the maintenance window duration
+    is excluded from both numerator and denominator
+  verify:
+  - type: manual
+    runbook: docs/operations/MAINTENANCE_WINDOWS.md
+    section: Verification > SLA Exclusion Test
+    justification: Requires declaring a real maintenance window and generating a monthly
+      report to verify exclusion; involves calendar-dependent data that cannot be
+      unit tested
+- id: AC-017
+  description: Given a maintenance window record, when the monthly SLA report is generated,
+    then the maintenance window appears in the report with start time, end time, and
+    scope
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/generate-sla-report.sh
+    command: scripts/qa/generate-sla-report.sh
+  - type: manual
+    runbook: docs/operations/SLA_REPORTING.md
+    section: Report Sections > Maintenance Windows
+    justification: Requires actual maintenance window data to verify start/end/scope
+      appear correctly; dry-run only checks section existence
+- id: AC-018
+  description: Given a P1 incident is declared, when the on-call engineer acknowledges,
+    then acknowledgement occurs within 15 minutes of alert firing
+  verify:
+  - type: manual
+    runbook: docs/operations/ONCALL_ROTATION.md
+    section: Incident Response > P1 Acknowledgement
+    justification: Tests human response time to P1 alerts; requires a real or simulated
+      incident with on-call engineer availability
+- id: AC-019
+  description: 'Given a P1/P2 incident is resolved, when the postmortem is published,
+    then it is published within 5 business days and contains: timeline, root cause,
+    impact, remediation, and prevention sections'
+  verify:
+  - type: manual
+    runbook: docs/operations/INCIDENT_TEMPLATES.md
+    section: Postmortem > Required Sections Checklist
+    justification: Tests organizational process (postmortem published within 5 business
+      days with required sections); cannot be automated without incident tracking
+      system integration
+- id: AC-020
+  description: Given the on-call schedule, when any week is inspected, then a primary
+    and secondary on-call engineer are assigned and no engineer has consecutive on-call
+    duty exceeding 7 days
+  verify:
+  - type: manual
+    runbook: docs/operations/ONCALL_ROTATION.md
+    section: Schedule Verification
+    justification: Requires inspecting on-call schedule for primary/secondary assignment
+      and consecutive-day limits; format depends on tool choice (Slack, PagerDuty,
+      wiki)
+- id: AC-021
+  description: Given a P1 alert fires, when the primary on-call does not acknowledge
+    within 15 minutes, then the alert automatically escalates to the secondary on-call
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-error-budget.sh
+    command: scripts/qa/verify-error-budget.sh
+  - type: manual
+    runbook: docs/operations/ONCALL_ROTATION.md
+    section: Escalation > Auto-Escalation Test
+    justification: Full end-to-end escalation test requires primary on-call to be
+      unreachable for 15 minutes; automated check verifies Alertmanager config only
+- id: AC-022
+  description: Given one month of production operation, when the monthly SLA report
+    script runs, then a report is generated containing per-service availability, latency
+    percentiles, error budget status, incident summary, and maintenance log
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/generate-sla-report.sh
+    command: scripts/qa/generate-sla-report.sh
+- id: AC-023
+  description: Given a generated SLA report, when reviewed for security, then it contains
+    no internal IP addresses, secret names, or infrastructure hostnames
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sla-report-security.sh
+    command: scripts/qa/verify-sla-report-security.sh
+- id: AC-024
+  description: Given a quarterly reporting period, when the quarterly SLA report is
+    generated, then it contains 90-day availability trends, performance regression
+    summary, capacity planning recommendations, and on-call health metrics
+  verify: []
+- id: AC-025
+  description: Given an enterprise client, when the monthly SLA report is distributed,
+    then it is delivered within 5 business days of month end using the standardized
+    report template
+  verify: []
+- id: AC-026
+  description: Given LMS is operational, when Prometheus queries `mereka_sli_lms_availability_ratio`,
+    then a value between 0 and 1 is returned representing current availability
+  verify: []
+- id: AC-027
+  description: Given CMS is operational, when Prometheus queries `mereka_sli_cms_latency_p95_seconds`,
+    then a value in seconds is returned representing p95 latency
+  verify: []
+- id: AC-028
+  description: Given all production services, when Prometheus recording rules are
+    evaluated, then each service has corresponding `mereka_sli_<service>_availability_ratio`
+    and `mereka_sli_<service>_error_budget_remaining_minutes` metrics
+  verify: []
+- id: AC-029
+  description: Given error budget is exhausted (< 0%), when the exhaustion is detected,
+    then a P1 incident is created, deployments are frozen (except remediation), and
+    engineering lead + VP/CTO are notified within 15 minutes
+  verify: []
+- id: AC-030
+  description: Given error budget is critical (< 10%), when deployment is attempted,
+    then VP/CTO approval is required and the gate check blocks deployment until approval
+    is documented
+  verify: []
+- id: AC-031
+  description: Given error budget is exhausted, when the reliability sprint begins,
+    then all feature work is paused and the team focuses exclusively on reliability
+    improvements until budget is restored to >= 10%
+  verify: []
+- id: AC-032
+  description: Given error budget consumption, when the SLO dashboard is viewed, then
+    projected recovery date is displayed based on current burn rate
+  verify: []
+- id: AC-033
+  description: Given an SLA breach is detected, when the breach notification fires,
+    then engineering lead, VP/CTO, and affected enterprise account managers are notified
+    within 1 hour
+  verify: []
+- id: AC-034
+  description: Given an SLA breach, when client communication begins, then the first
+    notification is sent within 1 hour, a detailed update within 4 hours, and a formal
+    postmortem within 5 business days
+  verify: []
+- id: AC-035
+  description: Given an SLA breach, when remediation plan is created, then it includes
+    root cause analysis, immediate fixes, long-term improvements, and timeline for
+    each, documented within 4 hours of breach detection
+  verify: []
+- id: AC-036
+  description: Given a Tier 1 service breaches SLA in 2 consecutive months, when the
+    second breach is confirmed, then an emergency architecture review is automatically
+    scheduled
+  verify: []
+- id: AC-037
+  description: Given GCP uptime checks from multiple regions, when latency is measured
+    for SLA purposes, then only the Asia-Pacific regional probe is used as the authoritative
+    measurement
+  verify: []
+- id: AC-038
+  description: Given a MySQL infrastructure failure causes LMS, CMS, and Forum to
+    fail simultaneously, when error budgets are calculated, then downtime is attributed
+    to MySQL only and dependent services' budgets are not consumed if they recover
+    immediately after MySQL
+  verify: []
+- id: AC-039
+  description: Given a maintenance window notification email fails to send, when the
+    failure is detected, then operations is alerted within 1 hour and manual client
+    outreach is triggered
+  verify: []
+- id: AC-040
+  description: Given a rolling deployment causes transient 503 errors, when errors
+    are < 0.1% of traffic and last < 1 minute, then they may be excluded from SLO
+    calculation if documented in monthly report
+  verify: []
+- id: AC-041
+  description: Given timestamp discrepancies between Prometheus and GCP Monitoring,
+    when SLA is calculated, then the time measurement most favorable to the client
+    is used
+  verify: []
+_unmapped:
+- AC-024
+- AC-025
+- AC-026
+- AC-027
+- AC-028
+- AC-029
+- AC-030
+- AC-031
+- AC-032
+- AC-033
+- AC-034
+- AC-035
+- AC-036
+- AC-037
+- AC-038
+- AC-039
+- AC-040
+- AC-041
+

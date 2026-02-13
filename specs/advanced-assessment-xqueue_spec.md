@@ -5,6 +5,7 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
@@ -107,6 +108,23 @@ Enterprise clients in regulated industries (finance, healthcare, engineering) ha
   - LTI-based external assessment tools from commercial providers
   - Adaptive learning or AI-driven question sequencing
   - Building custom XBlocks from scratch (we use existing open-source XBlocks)
+
+---
+
+### Proctoring Integration (Deferred)
+
+Proctoring features referenced in this spec are defined in `specs/proctoring-integration_spec.md` (Tier 8, status: `deferred`). Assessment features MUST function without proctoring enabled. Proctoring-dependent features MUST be gated behind the `ENABLE_PROCTORED_EXAMS` feature flag.
+
+**Proctoring-related features not included in this spec**:
+- Student identity verification (photo ID capture, facial recognition)
+- Browser lockdown enforcement (Respondus LockDown Browser, Proctorio)
+- Session recording (webcam, screen, audio)
+- Live proctoring or AI-based integrity monitoring
+- Proctor review workflows
+
+**Timed exams** (included in this spec) use the built-in Open edX timed exam subsystem with the "no-op" proctoring backend, which provides timer enforcement without any proctoring provider integration. Timed exams do NOT require the `ENABLE_PROCTORED_EXAMS` feature flag.
+
+**Exam security features** (included in this spec) such as randomized question order, answer shuffling, one-at-a-time display, and time limits are available without proctoring integration. These provide deterrence and basic integrity controls but do not verify student identity or detect cheating behavior.
 
 ## Non-goals
 

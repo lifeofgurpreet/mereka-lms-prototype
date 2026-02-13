@@ -5,6 +5,7 @@ status: "in_progress"
 owner: "migration-squad"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -549,12 +550,12 @@ A legacy Firebase Cloud Function that provisions users in the MCT (Mereka Career
 
 ## Open Questions
 
-- **OQ-001**: What is the long-term plan for Kajabi lesson HTML content? The API does not expose lesson body content. The `scrape_lessons.py` Playwright-based scraper exists but has not been run at scale. Should we scrape all 3,146 lessons or accept placeholder content in Open edX?
-- **OQ-002**: Should the Kajabi webhook receiver (`scripts/migrations/kajabi/webhook_app/`) be deployed to Cloud Run for real-time sync of new purchases/enrollments? If so, what is the SLA for sync latency?
-- **OQ-003**: What is the maintenance window for the next full re-migration? The Feb 2026 re-migration was done on a freshly rebuilt instance. Future re-migrations may need to preserve data created natively in Open edX.
-- **OQ-004**: Should MCT users who have no enrollments (i.e., registered but never enrolled in any course) be imported? Currently only enrolled users are imported for Kajabi; MCT imports all 69K users regardless.
-- **OQ-005**: What happens to MCT enrollment completion percentages? The transform preserves `completion_percentage` and `lessons_completed` in the enrollment CSV, but Open edX does not natively import historical completion data. Should we build a custom XBlock or tracking log injection to restore progress?
-- **OQ-006**: Are there courses with content in both Kajabi and MCT under different organizations? If so, how should cross-platform course deduplication work?
-- **OQ-007**: Kajabi has 4 courses without completion tags (DP, DT, AI, PKMU). How should certificates be handled for these courses? Manual issuance? Different completion criteria?
-- **OQ-008**: What is the target date for decommissioning Kajabi and MCT platforms? This determines the urgency of webhook deployment and incremental sync.
-- **OQ-009**: Should the migration produce an audit trail suitable for external compliance review? If so, what format and retention period?
+- ~~**OQ-001**~~: **RESOLVED**: Accept placeholder content for Kajabi lessons in v1. Scraping 3,146 lessons is high-effort with diminishing returns since courses are being rebuilt for Open edX. Scraper available if content recovery becomes business-critical.
+- ~~**OQ-002**~~: **RESOLVED**: No. Kajabi webhook receiver stays as a local script for batch sync. Real-time sync unnecessary since Kajabi is being decommissioned. Cloud Run deployment deferred.
+- **OQ-003**: What is the maintenance window for the next full re-migration? **STATUS**: Schedule during next quarterly maintenance window. Requires 4-hour window with read-only LMS mode.
+- ~~**OQ-004**~~: **RESOLVED**: No. Import only users with at least one enrollment from MCT. Non-enrolled users can self-register on Open edX if needed. Reduces import volume from 69K to active users only.
+- ~~**OQ-005**~~: **RESOLVED**: Store completion percentages in user profile metadata (custom field) for reference only. Do not inject tracking logs. Students restart courses in Open edX with fresh progress. Historical completion data preserved in migration audit archive.
+- ~~**OQ-006**~~: **RESOLVED**: No cross-platform deduplication. Kajabi and MCT courses are separate orgs in Open edX (org: kajabi, org: mct). Students enrolled in both platforms retain both enrollments.
+- ~~**OQ-007**~~: **RESOLVED**: Issue certificates manually for the 4 Kajabi courses without completion tags (DP, DT, AI, PKMU) based on Kajabi enrollment status. Create Studio completion criteria post-migration.
+- **OQ-008**: What is the target date for decommissioning Kajabi and MCT platforms? **STATUS**: Target Q4 2026 after all courses migrated, verified, and enterprise clients transitioned. Hard deadline pending business confirmation.
+- ~~**OQ-009**~~: **RESOLVED**: Yes. Migration produces NDJSON audit trail with SHA-256 checksums per batch. Retained 7 years in GCS archive bucket per cross-cutting compliance requirements.

@@ -1,0 +1,276 @@
+spec: email-notifications-pipeline_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given the sending domain `academyv2.mereka.io`, when SES domain verification
+    is checked, then DKIM, SPF, and DMARC all pass verification (verified via `dig`
+    and SES console)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: ACE Pipeline Verification
+    justification: Requires active SES configuration with verified sender domain and
+      test recipient
+    file: scripts/infra/verify-ses-domain.sh
+- id: AC-002
+  description: Given the sending domain `academy.biji-biji.com`, when SES domain verification
+    is checked, then DKIM, SPF, and DMARC all pass verification
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Email Template Rendering
+    justification: Requires sending actual test emails through SES to verify template
+      rendering across email clients
+    file: scripts/infra/verify-ses-domain.sh
+- id: AC-003
+  description: Given a learner triggers a password reset, when ACE dispatches the
+    email, then the email is delivered via SES within 30 seconds and the `From` header
+    shows `noreply@academyv2.mereka.io`
+  verify: []
+- id: AC-004
+  description: Given the custom MAIL FROM domain `mail.academyv2.mereka.io`, when
+    an email is sent, then the envelope sender aligns with the header sender (DMARC
+    alignment pass)
+  verify: []
+- id: AC-005
+  description: Given an enterprise tenant with `org_slug=acme`, when a course announcement
+    email is sent, then the `From` display name shows "Acme Corp via Mereka Academy"
+    and the sender address is `noreply@academyv2.mereka.io`
+  verify: []
+- id: AC-006
+  description: Given ACE configuration with channels `["django_email", "push", "in_app"]`,
+    when a `course_announcement` notification is triggered, then ACE dispatches to
+    all three channels for users with all channels enabled
+  verify: []
+- id: AC-007
+  description: Given a user who has disabled email for `course_announcement` but enabled
+    push and in_app, when a course announcement is published, then the user receives
+    push and in-app notifications but no email
+  verify: []
+- id: AC-008
+  description: Given a `password_reset` message type, when the user has disabled all
+    notification channels, then the email is still sent (system-critical, non-suppressible)
+  verify: []
+- id: AC-009
+  description: Given Celery workers processing the `edx.lms.core.default` queue, when
+    100 ACE messages are enqueued simultaneously, then all 100 are dispatched within
+    60 seconds
+  verify: []
+- id: AC-010
+  description: 'Given a learner with 5 unread notifications, when they call `GET /api/notifications/v1/unread-count/`,
+    then the response is `{"unread_count": 5}` with p95 latency <= 100ms'
+  verify: []
+- id: AC-011
+  description: Given 50 notifications for a user (30 read, 20 unread), when they call
+    `GET /api/notifications/v1/?read=false`, then only the 20 unread notifications
+    are returned, sorted by `created_at` descending
+  verify: []
+- id: AC-012
+  description: Given a notification with `expires_at` in the past, when the notification
+    list is queried, then the expired notification is not included in the response
+  verify: []
+- id: AC-013
+  description: 'Given a user calls `POST /api/notifications/v1/mark-all-read/`, when
+    the operation completes, then `GET /api/notifications/v1/unread-count/` returns
+    `{"unread_count": 0}`'
+  verify: []
+- id: AC-014
+  description: Given a user under `org_slug=acme`, when they query the notification
+    list, then they see only notifications with `org_slug=acme` (no cross-tenant leakage)
+  verify: []
+- id: AC-015
+  description: Given a device registers via `POST /api/mobile/v1/notifications/register/`
+    with a valid FCM token, when a `grade_posted` notification is triggered, then
+    the push notification is delivered to FCM within 60 seconds
+  verify: []
+- id: AC-016
+  description: Given a device token that FCM reports as `UNREGISTERED`, when a push
+    notification fails for that token, then the device record is marked `is_active=false`
+    and no further pushes are attempted
+  verify: []
+- id: AC-017
+  description: Given a user logs out and calls `DELETE /api/mobile/v1/notifications/register/`,
+    when a notification is subsequently triggered, then no push notification is sent
+    to the deregistered device
+  verify: []
+- id: AC-018
+  description: Given 1,000 push notifications queued for dispatch, when the batch
+    sender runs, then FCM receives batches of up to 500 messages each (2 API calls,
+    not 1,000)
+  verify: []
+- id: AC-019
+  description: Given a notification for `org_slug=acme`, when dispatch occurs, then
+    only devices with `org_slug=acme` receive the push (no cross-tenant delivery)
+  verify: []
+- id: AC-020
+  description: Given a new user with no preference records, when they call `GET /api/notifications/v1/preferences/`,
+    then default preferences are returned (all enabled except `bulk_campaign` email
+    which is disabled)
+  verify: []
+- id: AC-021
+  description: 'Given a user updates preferences via `PUT /api/notifications/v1/preferences/`
+    with `[{"message_type": "discussion_reply", "channel": "email", "enabled": false}]`,
+    when a discussion reply notification is triggered, then no email is sent but push
+    and in-app are sent'
+  verify: []
+- id: AC-022
+  description: Given a user clicks a one-click unsubscribe link in a `bulk_campaign`
+    email, when the signed token is valid and not expired, then `bulk_campaign` and
+    `course_announcement` email preferences are set to disabled without requiring
+    login
+  verify: []
+- id: AC-023
+  description: Given a preference change, when the audit log is queried, then it contains
+    the `user_id`, `old_value`, `new_value`, `consent_version`, `ip_address_hash`,
+    and `timestamp`
+  verify: []
+- id: AC-024
+  description: Given a `bulk_campaign` email, when the email headers are inspected,
+    then `List-Unsubscribe` and `List-Unsubscribe-Post` headers are present with a
+    valid one-click unsubscribe URL
+  verify: []
+- id: AC-025
+  description: Given a user with `language_preference=ms`, when an `enrollment_confirmation`
+    email is sent, then the subject and body are rendered in Malay
+  verify: []
+- id: AC-026
+  description: Given a user with `language_preference=zh-hans`, when a `grade_posted`
+    email is sent, then the subject and body are rendered in Simplified Chinese
+  verify: []
+- id: AC-027
+  description: Given a user with `language_preference=ja` (unsupported), when an email
+    is sent, then the template falls back to English (`en`)
+  verify: []
+- id: AC-028
+  description: Given a tenant `org_slug=acme` with `org_display_name="Acme Corp"`,
+    when an email template renders, then the branding variables show "Acme Corp" as
+    the organization name and the tenant's logo URL
+  verify: []
+- id: AC-029
+  description: Given an enterprise admin schedules a bulk campaign for 10,000 recipients
+    at 2026-02-15 09:00 UTC, when the scheduled time arrives, then the campaign begins
+    sending and completes within 30 minutes
+  verify: []
+- id: AC-030
+  description: Given a bulk campaign in `sending` status, when the admin clicks "Pause",
+    then sending stops and the campaign status changes to `paused`; when resumed,
+    sending continues from the next unsent recipient
+  verify: []
+- id: AC-031
+  description: Given a bulk campaign to 10,000 recipients where 500 have opted out
+    of `bulk_campaign` email, when the campaign completes, then 9,500 emails are sent
+    and the campaign metrics report 500 skipped
+  verify: []
+- id: AC-032
+  description: Given two tenants sending bulk campaigns simultaneously, when both
+    campaigns are active, then neither tenant exceeds 50 emails per second and the
+    combined rate does not exceed the SES account limit
+  verify: []
+- id: AC-033
+  description: Given SES reports a hard bounce for `user@example.com`, when the bounce
+    webhook processes the event, then `user@example.com` is added to the suppression
+    list and subsequent sends to that address are blocked
+  verify: []
+- id: AC-034
+  description: Given an email address with 3 soft bounces within 7 days, when the
+    third soft bounce is processed, then the address is added to the suppression list
+    as a hard bounce
+  verify: []
+- id: AC-035
+  description: Given SES reports a complaint for a `bulk_campaign` email, when the
+    complaint webhook processes the event, then the user's `bulk_campaign` email preference
+    is disabled and the address is added to the suppression list
+  verify: []
+- id: AC-036
+  description: Given the SES account bounce rate is 6% (above 5% threshold), when
+    the alert fires, then the ops team receives a critical alert via the configured
+    notification channel
+  verify: []
+- id: AC-037
+  description: Given a user with digest preference set to `daily` for `discussion_reply`,
+    when they receive 10 discussion replies throughout the day, then at 09:00 in their
+    timezone they receive one digest email summarizing all 10 replies grouped by course
+  verify: []
+- id: AC-038
+  description: Given a user on daily digest for `course_announcement`, when a course
+    announcement is published, then no immediate email is sent (push and in-app may
+    still be immediate), and the announcement appears in the next digest
+  verify: []
+- id: AC-039
+  description: Given 5 replies to the same discussion thread within one digest period,
+    when the digest renders, then one entry shows the thread title with "(5 new replies)"
+    instead of 5 separate entries
+  verify: []
+- id: AC-040
+  description: Given a `bulk_campaign` email is sent with open tracking enabled, when
+    the recipient opens the email, then an `open` event is recorded in the engagement
+    store with `campaign_id`, `user_id`, `timestamp`
+  verify: []
+- id: AC-041
+  description: Given a `bulk_campaign` email contains a tracked URL, when the recipient
+    clicks it, then a `click` event is recorded and the user is redirected to the
+    original URL within 200ms
+  verify: []
+- id: AC-042
+  description: Given an enterprise admin views the campaign analytics dashboard for
+    tenant `acme`, when they query campaign metrics, then they see only `acme` campaign
+    data (no cross-tenant analytics leakage)
+  verify: []
+- id: AC-043
+  description: Given a user has not explicitly opted into marketing communications,
+    when a `bulk_campaign` is sent, then the user does NOT receive the email
+  verify: []
+- id: AC-044
+  description: Given a user exercises their right to data export, when the export
+    is generated, then notification preferences and consent records are included in
+    the export archive
+  verify: []
+- id: AC-045
+  description: Given a user exercises their right to deletion, when the deletion pipeline
+    runs, then all notification records, preference records, consent records, and
+    device registrations for that user are deleted or anonymized
+  verify: []
+_unmapped:
+- AC-003
+- AC-004
+- AC-005
+- AC-006
+- AC-007
+- AC-008
+- AC-009
+- AC-010
+- AC-011
+- AC-012
+- AC-013
+- AC-014
+- AC-015
+- AC-016
+- AC-017
+- AC-018
+- AC-019
+- AC-020
+- AC-021
+- AC-022
+- AC-023
+- AC-024
+- AC-025
+- AC-026
+- AC-027
+- AC-028
+- AC-029
+- AC-030
+- AC-031
+- AC-032
+- AC-033
+- AC-034
+- AC-035
+- AC-036
+- AC-037
+- AC-038
+- AC-039
+- AC-040
+- AC-041
+- AC-042
+- AC-043
+- AC-044
+- AC-045
+

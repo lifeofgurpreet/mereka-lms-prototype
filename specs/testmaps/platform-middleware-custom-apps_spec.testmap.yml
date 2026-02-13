@@ -1,0 +1,263 @@
+spec: platform-middleware-custom-apps_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given an authenticated user with email in `MEREKA_PLATFORM_ADMIN_EMAILS`
+    but `is_staff=False`, when a request is processed, then the middleware sets `is_staff=True`
+    and calls `user.save()`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+- id: AC-002
+  description: Given an authenticated user with email in `MEREKA_PLATFORM_ADMIN_EMAILS`
+    and `is_staff=True`, when a request is processed, then the middleware does not
+    call `user.save()`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+- id: AC-003
+  description: Given an authenticated user with email NOT in `MEREKA_PLATFORM_ADMIN_EMAILS`,
+    when a request is processed, then the middleware does not modify `is_staff`, `is_superuser`,
+    or `is_active`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+- id: AC-004
+  description: Given a request to `apps.academyv2.mereka.io`, when the response sets
+    a `sessionid` cookie, then the cookie's `domain` attribute is `.academyv2.mereka.io`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+- id: AC-005
+  description: Given a request to `academy.biji-biji.com`, when the response sets
+    a `sessionid` cookie, then the cookie's `domain` attribute is `.biji-biji.com`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+- id: AC-006
+  description: Given a request to `apps.academy.biji-biji.com`, when the response
+    sets a `sessionid` cookie, then the cookie's `domain` attribute is `.biji-biji.com`
+    (not `.apps.academy.biji-biji.com`).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+- id: AC-007
+  description: Given a request to `localhost:8000`, when the response sets a `sessionid`
+    cookie, then the cookie has no `domain` attribute (host-only).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+- id: AC-008
+  description: Given `Site.objects.get_current(request)` is called with a request
+    to `apps.academyv2.mereka.io`, when the Sites table has a row with `domain="academyv2.mereka.io"`,
+    then the middleware returns that Site row.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+- id: AC-009
+  description: 'Given a request with `X-Forwarded-Proto: https,http`, when the middleware
+    processes it, then `request.META[''HTTP_X_FORWARDED_PROTO'']` is `"https"`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+- id: AC-010
+  description: 'Given a request with `CF-Visitor: {"scheme":"https"}`, when the middleware
+    processes it, then `request.META[''HTTP_X_FORWARDED_PROTO'']` is `"https"`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+- id: AC-011
+  description: 'Given a request to `/metrics` with `Host: 10.97.0.2:8000`, when the
+    middleware processes it, then `request.META[''HTTP_HOST'']` is rewritten to `MEREKA_LMS_DOMAIN`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+- id: AC-012
+  description: Given a request to `https://academyv2.mereka.io` with no `X-Forwarded-Proto`
+    header, when the middleware processes it, then `request.META['HTTP_X_FORWARDED_PROTO']`
+    is forced to `"https"`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py
+- id: AC-013
+  description: 'Given a request to `/api/mfe_context` that returns `{"contextData":
+    {"providers": []}}`, when the middleware processes it, then the response includes
+    a non-empty `providers` array with OAuth provider data.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+    command: pytest infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+- id: AC-014
+  description: Given an `OAuth2ProviderConfig` with `slug="oidc"` and `name="Authentik"`,
+    when the middleware injects it, then the provider's `name` field is `"Mereka"`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+    command: pytest infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+- id: AC-015
+  description: 'Given a request to `/api/mfe_context` that returns `{"contextData":
+    {"providers": [{"name": "Authentik", "id": "oa2-oidc"}]}}`, when the middleware
+    processes it, then the provider''s `name` is rewritten to `"Mereka"`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+    command: pytest infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+- id: AC-016
+  description: Given a request to `/api/user/v1/me`, when the middleware processes
+    it, then the response is not modified (middleware only intercepts `/api/mfe_context`).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+    command: pytest infrastructure/tutor/custom-apps/mfe_oauth_fix/middleware.py
+- id: AC-017
+  description: Given the LMS is running with `openedx_prometheus` in `INSTALLED_APPS`,
+    when a request to `/metrics` is made, then the response is HTTP 200 with content
+    type `text/plain`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/openedx_prometheus/apps.py
+    command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/apps.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+    command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+- id: AC-018
+  description: Given the `/metrics` endpoint, when Prometheus scrapes it, then metrics
+    include `django_http_requests_total_by_method`, `django_http_requests_latency_seconds`,
+    and `django_db_query_duration_seconds`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+    command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+- id: AC-019
+  description: The MerekaPlatformAdminMiddleware MUST be enabled only when `MEREKA_PLATFORM_ADMIN_EMAILS`
+    environment variable is non-empty.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+    command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+- id: AC-020
+  description: The openedx_prometheus app SHOULD be conditionally loaded based on
+    whether `django-prometheus` is installed (graceful degradation if missing).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-middleware.sh
+    command: scripts/qa/verify-platform-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/openedx_prometheus/apps.py
+    command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/apps.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+    command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+  - type: manual
+    file: docs/operations/MIDDLEWARE_VERIFICATION.md
+

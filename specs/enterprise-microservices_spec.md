@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 deployment_date: "2026-02-10"
 deployment_status: "production"
 depends_on:
@@ -111,6 +112,17 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 ---
 
 ## Requirements
+
+### Domain and SSL
+
+| Property | Value |
+|----------|-------|
+| External URL | `https://admin.academyv2.mereka.io` |
+| Cloudflare mode | DNS-only (gray cloud) |
+| SSL provider | Let's Encrypt via cert-manager |
+| Reason | Multi-level subdomain (`*.*.mereka.io`) not covered by Cloudflare Free SSL |
+
+See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirements.
 
 ### Functional
 
@@ -380,58 +392,59 @@ Mereka Academy's growth strategy depends on onboarding corporate clients who nee
 - [ ] AC-006: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:8000/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-007: Given enterprise MFEs are deployed, when `curl https://admin.academyv2.mereka.io/` is called, then the admin portal HTML is returned with HTTP 200
 - [ ] AC-008: Given enterprise MFEs are deployed, when `curl https://enterprise.academyv2.mereka.io/` is called, then the learner portal HTML is returned with HTTP 200
+- [ ] AC-009: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare proxy)
 
 ### Tenant Isolation
 
-- [ ] AC-009: Given enterprise customer A and enterprise customer B exist, when admin A calls `GET /api/v1/enterprise-catalogs/`, then only catalogs belonging to customer A are returned
-- [ ] AC-010: Given enterprise customer A with a subscription plan, when admin B calls `GET /api/v1/subscriptions/{plan_uuid_of_A}/`, then the response is HTTP 403 Forbidden
-- [ ] AC-011: Given enterprise customer A with enrolled learners, when admin B calls the enterprise-access API for customer A's UUID, then the response is HTTP 403 Forbidden
-- [ ] AC-012: Given a learner linked to enterprise customer A, when they browse the enterprise learner portal, then they see only courses from customer A's catalogs
-- [ ] AC-013: Given a user belonging to both enterprise customer A and B, when they select customer A in the learner portal, then no data or catalog from customer B is visible until they switch context
+- [ ] AC-010: Given enterprise customer A and enterprise customer B exist, when admin A calls `GET /api/v1/enterprise-catalogs/`, then only catalogs belonging to customer A are returned
+- [ ] AC-011: Given enterprise customer A with a subscription plan, when admin B calls `GET /api/v1/subscriptions/{plan_uuid_of_A}/`, then the response is HTTP 403 Forbidden
+- [ ] AC-012: Given enterprise customer A with enrolled learners, when admin B calls the enterprise-access API for customer A's UUID, then the response is HTTP 403 Forbidden
+- [ ] AC-013: Given a learner linked to enterprise customer A, when they browse the enterprise learner portal, then they see only courses from customer A's catalogs
+- [ ] AC-014: Given a user belonging to both enterprise customer A and B, when they select customer A in the learner portal, then no data or catalog from customer B is visible until they switch context
 
 ### License Management
 
-- [ ] AC-014: Given a subscription plan with 100 licenses and 50 assigned, when an admin assigns 51 more licenses, then the request fails with HTTP 422 and an error indicating insufficient seats
-- [ ] AC-015: Given a subscription plan with `should_auto_apply_licenses=true`, when an enterprise learner requests enrollment, then a license is automatically assigned and activated
-- [ ] AC-016: Given a license in `activated` state, when an admin revokes it, then the license state transitions to `revoked` and an enrollment revocation event is published
-- [ ] AC-017: Given a subscription plan with `is_revocation_cap_enabled=true` and `revoke_max_percentage=10` and 100 licenses, when an admin attempts to revoke the 11th license, then the request fails with HTTP 422 indicating revocation cap reached
-- [ ] AC-018: Given an email address already assigned a license in a plan, when the admin assigns a license to the same email again, then no duplicate license is created and the response indicates the existing assignment
+- [ ] AC-015: Given a subscription plan with 100 licenses and 50 assigned, when an admin assigns 51 more licenses, then the request fails with HTTP 422 and an error indicating insufficient seats
+- [ ] AC-016: Given a subscription plan with `should_auto_apply_licenses=true`, when an enterprise learner requests enrollment, then a license is automatically assigned and activated
+- [ ] AC-017: Given a license in `activated` state, when an admin revokes it, then the license state transitions to `revoked` and an enrollment revocation event is published
+- [ ] AC-018: Given a subscription plan with `is_revocation_cap_enabled=true` and `revoke_max_percentage=10` and 100 licenses, when an admin attempts to revoke the 11th license, then the request fails with HTTP 422 indicating revocation cap reached
+- [ ] AC-019: Given an email address already assigned a license in a plan, when the admin assigns a license to the same email again, then no duplicate license is created and the response indicates the existing assignment
 
 ### Enterprise Catalog
 
-- [ ] AC-019: Given an enterprise catalog with a content filter for subject "Technology", when `GET /api/v1/enterprise-catalogs/{uuid}/get_content_metadata/` is called, then only courses tagged with "Technology" subject are returned
-- [ ] AC-020: Given the catalog sync task has not run in 6 hours, when the Celery beat scheduler fires, then the sync task executes and updates content metadata from the LMS discovery service
-- [ ] AC-021: Given a course key "course-v1:Mereka+ENT101+2026", when `GET /api/v1/enterprise-catalogs/{uuid}/contains_content_items/?course_run_ids=course-v1:Mereka+ENT101+2026` is called, then the response indicates whether the course is in the catalog within 100ms
+- [ ] AC-020: Given an enterprise catalog with a content filter for subject "Technology", when `GET /api/v1/enterprise-catalogs/{uuid}/get_content_metadata/` is called, then only courses tagged with "Technology" subject are returned
+- [ ] AC-021: Given the catalog sync task has not run in 6 hours, when the Celery beat scheduler fires, then the sync task executes and updates content metadata from the LMS discovery service
+- [ ] AC-022: Given a course key "course-v1:Mereka+ENT101+2026", when `GET /api/v1/enterprise-catalogs/{uuid}/contains_content_items/?course_run_ids=course-v1:Mereka+ENT101+2026` is called, then the response indicates whether the course is in the catalog within 100ms
 
 ### Enterprise Access and Subsidy
 
-- [ ] AC-022: Given a learner with a PerLearnerEnrollmentCreditAccessPolicy limiting to 5 enrollments and already 5 enrollments, when the learner requests a 6th enrollment, then the `can-redeem` endpoint returns `false` with reason "per-learner enrollment limit reached"
-- [ ] AC-023: Given a subsidy with a starting balance of 10000 (cents) and 3000 already spent, when a transaction for 8000 is attempted, then it fails with insufficient balance error and the balance remains 7000
-- [ ] AC-024: Given a committed transaction for enrollment in course X, when the admin revokes the enrollment and a reversal is requested, then the subsidy balance is restored by the transaction amount
-- [ ] AC-025: Given a reversal is requested on an already-reversed transaction, when the API processes it, then the response is HTTP 200 (idempotent) and no balance change occurs
+- [ ] AC-023: Given a learner with a PerLearnerEnrollmentCreditAccessPolicy limiting to 5 enrollments and already 5 enrollments, when the learner requests a 6th enrollment, then the `can-redeem` endpoint returns `false` with reason "per-learner enrollment limit reached"
+- [ ] AC-024: Given a subsidy with a starting balance of 10000 (cents) and 3000 already spent, when a transaction for 8000 is attempted, then it fails with insufficient balance error and the balance remains 7000
+- [ ] AC-025: Given a committed transaction for enrollment in course X, when the admin revokes the enrollment and a reversal is requested, then the subsidy balance is restored by the transaction amount
+- [ ] AC-026: Given a reversal is requested on an already-reversed transaction, when the API processes it, then the response is HTTP 200 (idempotent) and no balance change occurs
 
 ### SSO/SAML
 
-- [ ] AC-026: Given enterprise customer "Acme Corp" with SAML IdP configured and `enable_slug_login=true`, when a user navigates to `https://academyv2.mereka.io/enterprise/login/acme-corp`, then they are redirected to the Acme Corp SAML IdP login page
-- [ ] AC-027: Given a successful SAML assertion from the Acme Corp IdP for a user not yet in the LMS, when the assertion is processed, then a new LMS user is created and linked to the Acme Corp enterprise customer
-- [ ] AC-028: Given a SAML assertion with `NotOnOrAfter` in the past, when the LMS processes the assertion, then the authentication is rejected and the user sees an error message
-- [ ] AC-029: Given enterprise customer A with SAML IdP "IdP-A" and enterprise customer B with SAML IdP "IdP-B", when a user authenticates via IdP-A, then they are linked to customer A only (no cross-tenant linking)
+- [ ] AC-027: Given enterprise customer "Acme Corp" with SAML IdP configured and `enable_slug_login=true`, when a user navigates to `https://academyv2.mereka.io/enterprise/login/acme-corp`, then they are redirected to the Acme Corp SAML IdP login page
+- [ ] AC-028: Given a successful SAML assertion from the Acme Corp IdP for a user not yet in the LMS, when the assertion is processed, then a new LMS user is created and linked to the Acme Corp enterprise customer
+- [ ] AC-029: Given a SAML assertion with `NotOnOrAfter` in the past, when the LMS processes the assertion, then the authentication is rejected and the user sees an error message
+- [ ] AC-030: Given enterprise customer A with SAML IdP "IdP-A" and enterprise customer B with SAML IdP "IdP-B", when a user authenticates via IdP-A, then they are linked to customer A only (no cross-tenant linking)
 
 ### Integrated Channels
 
-- [ ] AC-030: Given a Degreed integration configured for enterprise customer A with valid credentials, when the sync task runs, then course completion data for consenting learners of customer A is transmitted to the Degreed API
-- [ ] AC-031: Given a channel sync in dry-run mode, when the sync task runs, then no data is transmitted to the external system and the sync log indicates "dry-run"
-- [ ] AC-032: Given a channel sync that encounters a transient API error (HTTP 503), when the task retries, then it retries up to 5 times with exponential backoff before marking the sync as failed
+- [ ] AC-031: Given a Degreed integration configured for enterprise customer A with valid credentials, when the sync task runs, then course completion data for consenting learners of customer A is transmitted to the Degreed API
+- [ ] AC-032: Given a channel sync in dry-run mode, when the sync task runs, then no data is transmitted to the external system and the sync log indicates "dry-run"
+- [ ] AC-033: Given a channel sync that encounters a transient API error (HTTP 503), when the task retries, then it retries up to 5 times with exponential backoff before marking the sync as failed
 
 ### Secrets and Configuration
 
-- [ ] AC-033: Given all enterprise secrets are provisioned in Infisical at `/k8s/mereka-lms`, when ExternalSecrets syncs, then the `enterprise-secrets` K8s Secret contains all expected keys
-- [ ] AC-034: Given the enterprise-catalog service starts, when it reads its Django SECRET_KEY from the environment, then the value matches the Infisical secret `MEREKA_LMS_ENTERPRISE_CATALOG_SECRET_KEY`
+- [ ] AC-034: Given all enterprise secrets are provisioned in Infisical at `/k8s/mereka-lms`, when ExternalSecrets syncs, then the `enterprise-secrets` K8s Secret contains all expected keys
+- [ ] AC-035: Given the enterprise-catalog service starts, when it reads its Django SECRET_KEY from the environment, then the value matches the Infisical secret `MEREKA_LMS_ENTERPRISE_CATALOG_SECRET_KEY`
 
 ### Observability
 
-- [ ] AC-035: Given enterprise services are running, when `/metrics` is scraped by Prometheus, then enterprise-specific metrics (request count, latency histogram) are present
-- [ ] AC-036: Given a license assignment fails, when the error is logged, then the log entry includes `enterprise_customer_uuid`, `subscription_plan_uuid`, `error_type`, and `user_email_hash` (not the raw email)
+- [ ] AC-036: Given enterprise services are running, when `/metrics` is scraped by Prometheus, then enterprise-specific metrics (request count, latency histogram) are present
+- [ ] AC-037: Given a license assignment fails, when the error is logged, then the log entry includes `enterprise_customer_uuid`, `subscription_plan_uuid`, `error_type`, and `user_email_hash` (not the raw email)
 
 ---
 

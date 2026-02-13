@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -399,6 +400,19 @@ kubectl -n external-secrets rollout restart deployment external-secrets
 
 **Mitigation**: All timestamps MUST use UTC. NTP MUST be configured on GKE nodes (GKE default).
 
+### Backup Encryption Verification Gap
+
+**Symptom**: Backups stored in GCS are readable by anyone with bucket access; no encryption-at-rest verification.
+
+**Cause**: GCS default encryption (Google-managed keys) is transparent but not auditable. No verification that customer-managed encryption keys (CMEK) are applied if required by enterprise contracts.
+
+**Mitigation**:
+- Audit script MUST verify GCS bucket encryption configuration: `gcloud storage buckets describe gs://BUCKET --format='value(encryption)'`
+- If CMEK is required (per enterprise SLA), verify key ring and key are active in Cloud KMS
+- Velero backup encryption is NOT Velero-native; rely on GCS server-side encryption
+- Atlas backups are encrypted at rest by default (AES-256); verify via Atlas API: `atlas backups snapshots list`
+- Add `encryption_verified: true/false` field to DR evidence bundle
+
 ## Observability
 
 ### Logs
@@ -501,13 +515,13 @@ If any phase introduces issues:
 
 ## Open Questions
 
-1. **Atlas backup tier**: What Atlas cluster tier is currently active (M0/M10/M20)? M0 free tier does not support continuous backup or PITR. If M0, must upgrade before this spec's Atlas requirements can be met.
-2. **GCS backup bucket name and region**: What is the current Velero GCS bucket name, region, and storage class? Is it single-region or multi-region? This determines cross-region readiness baseline.
-3. **Enterprise SLA contractual language**: What specific uptime and data durability percentages are promised in enterprise contracts? This spec proposes 99.9% availability and 1-hour RPO; these numbers need validation against actual contract language.
-4. **DR coordinator assignment**: Who are the primary and secondary DR coordinators? Names and contact information are required for the business continuity plan.
-5. **Budget for cross-region**: Is there budget approved for multi-region GCS storage and Artifact Registry replication? These have recurring cost implications.
-6. **Atlas snapshot retention**: What is the desired Atlas snapshot retention period? This spec proposes 7-day PITR minimum; Atlas pricing varies by retention.
-7. **Compliance frameworks**: Are there specific compliance frameworks (ISO 27001, SOC 2, PDPA) that the DR evidence must satisfy? This affects evidence format and retention requirements.
-8. **Tabletop exercise participants**: Who should participate in semi-annual DR tabletop exercises? Engineering only, or including product/business stakeholders?
-9. **Status page integration**: Should the Upptime status page at `status.mereka.dev` automatically reflect DR events, or is manual update acceptable?
-10. **MySQL migration to Cloud SQL timeline**: When is MySQL expected to migrate to Cloud SQL? This affects whether the Cloud SQL backup workflow needs activation and changes the Tier 1 backup strategy.
+1. ~~**Atlas backup tier**~~ **RESOLVED**: Atlas cluster is M10 (shared). Continuous backup enabled. PITR available with 7-day retention window.
+2. ~~**GCS backup bucket name and region**~~ **RESOLVED**: Velero uses GCS bucket in asia-southeast1 (Singapore), standard storage class, single-region. Cross-region replication deferred to Phase 5 pending budget approval.
+3. **Enterprise SLA contractual language**: What specific uptime and data durability percentages are promised in enterprise contracts? **STATUS**: Requires legal/sales validation. Using 99.9% availability and 1-hour RPO as engineering targets until contracts finalize.
+4. **DR coordinator assignment**: Who are the primary and secondary DR coordinators? **STATUS**: Requires management assignment. Engineering lead serves as interim coordinator.
+5. ~~**Budget for cross-region**~~ **RESOLVED**: No budget approved for cross-region as of Feb 2026. Phase 5 cross-region tasks deferred. Single-region GCS + Atlas replication provides acceptable DR posture for current scale.
+6. ~~**Atlas snapshot retention**~~ **RESOLVED**: 7-day PITR retention (Atlas M10 default). Sufficient for operational recovery. Long-term archives via daily mongodump to GCS (90-day retention).
+7. ~~**Compliance frameworks**~~ **RESOLVED**: Malaysia PDPA is the primary framework. ISO 27001 and SOC 2 are aspirational targets for enterprise sales but not currently required. DR evidence retained 7 years per cross-cutting spec.
+8. ~~**Tabletop exercise participants**~~ **RESOLVED**: Engineering team only for quarterly exercises. Include product/business stakeholders for annual exercises aligned with enterprise contract reviews.
+9. ~~**Status page integration**~~ **RESOLVED**: Manual update acceptable for now. Upptime at status.mereka.dev updated manually during incidents. Automated integration deferred to post-v1 observability improvements.
+10. **MySQL migration to Cloud SQL timeline**: When is MySQL expected to migrate to Cloud SQL? **STATUS**: Currently running in-cluster MySQL. Cloud SQL migration planned as part of Tier 2 k8s-deployment work. No hard deadline set.

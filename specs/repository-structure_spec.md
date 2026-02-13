@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on: []
 links:
   related_docs:

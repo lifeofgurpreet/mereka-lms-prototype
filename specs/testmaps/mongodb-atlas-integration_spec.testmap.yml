@@ -1,0 +1,126 @@
+spec: mongodb-atlas-integration_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: '`tutor local logs lms | grep mongodb` shows SRV connection attempts'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-modulestore-path.sh
+    command: scripts/qa/verify-atlas-modulestore-path.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mongodb-atlas-integration.sh
+    command: scripts/qa/verify-mongodb-atlas-integration.sh
+- id: AC-002
+  description: '`kubectl logs -l app.kubernetes.io/name=lms | grep "Connected to MongoDB"`
+    succeeds'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-modulestore-path.sh
+    command: scripts/qa/verify-atlas-modulestore-path.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mongodb-atlas-integration.sh
+    command: scripts/qa/verify-mongodb-atlas-integration.sh
+- id: AC-003
+  description: Course creation in Studio persists to Atlas `openedx` database
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-data-persistence.sh
+    command: scripts/qa/verify-atlas-data-persistence.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-modulestore-path.sh
+    command: scripts/qa/verify-atlas-modulestore-path.sh
+- id: AC-004
+  description: Forum posts persist to Atlas `cs_comments_service` database
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-data-persistence.sh
+    command: scripts/qa/verify-atlas-data-persistence.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-modulestore-path.sh
+    command: scripts/qa/verify-atlas-modulestore-path.sh
+- id: AC-005
+  description: 'No local MongoDB container exists: `docker ps | grep mongodb` returns
+    nothing (local)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mongodb-atlas-integration.sh
+    command: scripts/qa/verify-mongodb-atlas-integration.sh
+- id: AC-006
+  description: 'No MongoDB StatefulSet exists: `kubectl get statefulset mongodb` returns
+    not found (K8s)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-atlas-modulestore-path.sh
+    command: scripts/qa/verify-atlas-modulestore-path.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mongodb-atlas-integration.sh
+    command: scripts/qa/verify-mongodb-atlas-integration.sh
+- id: AC-007
+  description: Atlas cluster shows active connections in monitoring dashboard
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/atlas-config-from-infisical.sh
+    command: scripts/infra/atlas-config-from-infisical.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/check-atlas-allowlist-vps.sh
+    command: scripts/infra/check-atlas-allowlist-vps.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/check-atlas-allowlist.sh
+    command: scripts/infra/check-atlas-allowlist.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-atlas-allowlist-vps.sh
+    command: scripts/infra/ensure-atlas-allowlist-vps.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/mongodb-atlas-cutover.sh
+    command: scripts/infra/mongodb-atlas-cutover.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/provision-atlas-cluster.sh
+    command: scripts/infra/provision-atlas-cluster.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/retire-legacy-mongodb.sh
+    command: scripts/infra/retire-legacy-mongodb.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-atlas-allowlist-monitor.sh
+    command: scripts/qa/audit-atlas-allowlist-monitor.sh
+  - type: monitoring
+    metric: mongodb_atlas_connections_current
+    dashboard: Atlas Console > Project > Cluster > Metrics > Connections
+  - type: manual
+    runbook: docs/operations/MONGODB_ATLAS_RUNBOOK.md
+    section: Verify Atlas Health > Active Connections
+    justification: Atlas monitoring dashboard requires Atlas console credentials not
+      available to CI; verified manually during deployment
+- id: AC-008
+  description: '`pymongo[srv]` installed: `pip list | grep pymongo` shows extras'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mongodb-atlas-integration.sh
+    command: scripts/qa/verify-mongodb-atlas-integration.sh
+- id: AC-009
+  description: 'DNS resolution succeeds: `nslookup cluster-mereka-lms.2pjex4s.mongodb.net`
+    returns results'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mongodb-atlas-integration.sh
+    command: scripts/qa/verify-mongodb-atlas-integration.sh
+

@@ -5,6 +5,7 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/multi-tenancy-architecture_spec.md"
   - "specs/secrets-management_spec.md"

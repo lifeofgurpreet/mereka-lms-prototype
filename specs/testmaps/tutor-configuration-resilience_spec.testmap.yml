@@ -1,0 +1,188 @@
+spec: tutor-configuration-resilience_spec.md
+acceptance_criteria:
+- id: AC-TCR-001
+  description: Given a clean checkout of the repository, when `pip install -e ./infrastructure/tutor/tutor-plugin-mereka`
+    is run, then the plugin installs without errors and `tutor plugins list` shows
+    `mereka` as available.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: unit
+    file: infrastructure/tutor/plugins/test_plugin.py
+    command: pytest infrastructure/tutor/plugins/test_plugin.py
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/tutor/plugins/verify-plugin.sh
+    command: infrastructure/tutor/plugins/verify-plugin.sh
+- id: AC-TCR-002
+  description: Given the Mereka plugin is enabled, when `tutor config save` is run,
+    then the rendered `production.py` contains `academy.biji-biji.com` in `ALLOWED_HOSTS`
+    without running `apply-patches.sh`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/tutor/plugins/verify-plugin.sh
+    command: infrastructure/tutor/plugins/verify-plugin.sh
+- id: AC-TCR-003
+  description: Given the Mereka plugin is enabled, when `tutor config save` is run,
+    then the rendered `docker-compose.yml` contains `mysql_native_password` without
+    running `apply-patches.sh`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/tutor/plugins/verify-plugin.sh
+    command: infrastructure/tutor/plugins/verify-plugin.sh
+- id: AC-TCR-004
+  description: Given the Mereka plugin is enabled and `apply-patches.sh` is run, when
+    `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml`
+    report PASS.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/verify-tutor-config.sh
+    command: scripts/infra/verify-tutor-config.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_verify_patches.sh
+    command: tests/tutor/test_verify_patches.sh
+- id: AC-TCR-005
+  description: Given a developer modifies `infrastructure/tutor/apply-patches.sh`
+    and attempts to commit, when the pre-commit hook runs, then it executes `verify-tutor-patches.sh`
+    and blocks the commit if any patch verification fails.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/tutor-config-rollback.sh
+    command: scripts/infra/tutor-config-rollback.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-config-safety.sh
+    command: scripts/qa/verify-tutor-config-safety.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_pre_commit_hook.sh
+    command: tests/tutor/test_pre_commit_hook.sh
+- id: AC-TCR-006
+  description: Given a pull request that modifies any file under `infrastructure/tutor/`,
+    when the CI workflow runs, then it executes the full patch verification and reports
+    per-patch pass/fail status in the PR checks.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+- id: AC-TCR-007
+  description: Given the verification script is run with `--json` flag, then the output
+    is valid JSON containing an array of objects with keys `id`, `description`, `status`,
+    `target_file`, and `severity`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_verify_patches.sh
+    command: tests/tutor/test_verify_patches.sh
+- id: AC-TCR-008
+  description: Given `tutor config save` is run without enabling the Mereka plugin
+    and without running `apply-patches.sh`, when `verify-tutor-patches.sh` is executed,
+    then it reports FAIL for all critical patches and exits with non-zero status.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_verify_patches.sh
+    command: tests/tutor/test_verify_patches.sh
+- id: AC-TCR-009
+  description: Given the `apply-patches.sh` script is run twice consecutively, when
+    the rendered templates are compared, then they are byte-identical (idempotency).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-config-safety.sh
+    command: scripts/qa/verify-tutor-config-safety.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_idempotency.sh
+    command: tests/tutor/test_idempotency.sh
+- id: AC-TCR-010
+  description: Given a Tutor version upgrade from 18.x to 21.x, when the CI workflow
+    runs on the upgrade PR, then it reports which patches need adaptation and blocks
+    merge until all patches pass verification.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: manual
+    runbook: docs/operations/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
+    section: Tutor Version Upgrade Procedure
+    justification: Version upgrades are infrequent events requiring human judgment
+      on patch adaptation; CI catches failures but upgrade planning is manual
+- id: AC-TCR-011
+  description: Given the patch manifest contains a patch with severity `critical`,
+    when that patch fails verification, then the verification tool outputs the failure
+    in red/bold formatting (terminal) and includes remediation steps.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_verify_patches.sh
+    command: tests/tutor/test_verify_patches.sh
+- id: AC-TCR-012
+  description: Given the `make tutor-apply` command is run, then it executes `tutor
+    config save`, enables the Mereka plugin, runs `apply-patches.sh`, runs `verify-tutor-patches.sh`,
+    and restarts services -- in that order, failing fast on any step.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/tutor-config-rollback.sh
+    command: scripts/infra/tutor-config-rollback.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-config-safety.sh
+    command: scripts/qa/verify-tutor-config-safety.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-resilience-full.sh
+    command: scripts/qa/verify-tutor-resilience-full.sh
+  - type: automated
+    test_type: shell_verification
+    file: tests/tutor/test_tutor_apply.sh
+    command: tests/tutor/test_tutor_apply.sh
+  - type: manual
+    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Full Configuration Apply
+    justification: End-to-end make tutor-apply requires Docker Compose stack; CI tests
+      individual steps but full pipeline needs Docker environment
+

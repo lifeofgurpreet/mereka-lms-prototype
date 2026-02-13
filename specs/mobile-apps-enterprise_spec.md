@@ -5,6 +5,7 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
@@ -449,6 +450,27 @@ Mobile is the primary access channel for learners across Mereka Academy's client
 - **Mobile API**: request volume, latency percentiles, error rate by endpoint
 - **Offline Mode**: download volume, sync success rate, average sync latency
 - **Multi-Tenant**: per-org active users, per-org crash rate, per-org API latency
+
+### Mobile-Specific Metrics
+
+- `app_crash_rate` (gauge, labels: `platform`, `app_version`, `org_slug`) -- crash-free sessions percentage
+- `api_response_time_mobile` (histogram, labels: `endpoint`, `platform`, `org_slug`) -- mobile-specific API latency
+- `push_notification_delivery_rate` (gauge, labels: `platform`, `org_slug`, `notification_type`) -- successful deliveries / sent
+- `offline_sync_success_rate` (gauge, labels: `platform`, `org_slug`) -- successful syncs / attempted syncs
+
+### Mobile-Specific Alerts
+
+- **Critical**: `app_crash_rate` > 1% for any platform/version combination sustained for 1 hour -- page oncall
+- **Warning**: `api_response_time_mobile` p95 exceeds 2x target latency for mobile endpoints (> 1 second for list endpoints) over 15 minutes -- notify channel
+- **Warning**: `push_notification_delivery_rate` < 95% for any org/platform over 1 hour -- notify channel
+- **Info**: `offline_sync_success_rate` < 90% for any org/platform over 24 hours -- notify mobile team
+
+### Mobile Health Dashboard
+
+- **Crash-Free Rate**: 7-day rolling crash-free session percentage by platform, app version, org
+- **API Performance**: Mobile API latency percentiles (p50, p95, p99) compared to web API, broken down by endpoint
+- **Push Delivery**: Notification send volume, delivery rate, open rate by type and platform
+- **Offline Sync**: Sync success rate, average sync duration, queue depth by platform
 
 ---
 

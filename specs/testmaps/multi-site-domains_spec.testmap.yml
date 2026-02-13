@@ -1,0 +1,109 @@
+spec: multi-site-domains_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: All three domains resolve to the LMS
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/apply-multisite-config.sh
+    command: scripts/infra/apply-multisite-config.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/list-openedx-hostnames.sh
+    command: scripts/qa/list-openedx-hostnames.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/map-openedx-host-routing.sh
+    command: scripts/qa/map-openedx-host-routing.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/microsite-onboarding-checklist.sh
+    command: scripts/qa/microsite-onboarding-checklist.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/run-multisite-governance-gates.sh
+    command: scripts/qa/run-multisite-governance-gates.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/smoke-test.sh
+    command: scripts/qa/smoke-test.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-multisite-config.sh
+    command: scripts/qa/verify-multisite-config.sh
+- id: AC-002
+  description: Login on `academyv2.mereka.io` persists session when navigating to
+    `apps.academyv2.mereka.io`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-session-persistence.sh
+    command: scripts/qa/verify-session-persistence.sh
+- id: AC-003
+  description: Login on `academy.biji-biji.com` works independently (separate session)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-session-persistence.sh
+    command: scripts/qa/verify-session-persistence.sh
+- id: AC-004
+  description: CSRF tokens are accepted from all three domains
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-csrf-multisite.sh
+    command: scripts/qa/verify-csrf-multisite.sh
+- id: AC-005
+  description: '`/api/mfe_config/v1` returns correct `LMS_BASE_URL` for each domain'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-config-contract.sh
+    command: scripts/qa/verify-mfe-config-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-multisite-config.sh
+    command: scripts/qa/verify-multisite-config.sh
+- id: AC-006
+  description: Studio is accessible at `studio.academyv2.mereka.io` only
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/smoke-test.sh
+    command: scripts/qa/smoke-test.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-isolation.sh
+    command: scripts/qa/verify-studio-isolation.sh
+- id: AC-007
+  description: Profile image upload from MFE succeeds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-body-limits.sh
+    command: scripts/qa/verify-body-limits.sh
+  - type: manual
+    runbook: docs/operations/DOMAIN_MANAGEMENT.md
+    section: Verification > Profile Image Upload
+    justification: Full upload flow requires authenticated browser session with file
+      selection; curl can only test rejection path
+- id: AC-008
+  description: Favicon loads correctly on all domains
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/smoke-test.sh
+    command: scripts/qa/smoke-test.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-favicon-multisite.sh
+    command: scripts/qa/verify-favicon-multisite.sh
+- id: AC-009
+  description: '`./scripts/qa/verify-oidc-provider-configs.sh --env prod` passes (enabled/visible
+    + non-empty effective secret + provider label contract)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oidc-provider-configs.sh
+    command: scripts/qa/verify-oidc-provider-configs.sh
+

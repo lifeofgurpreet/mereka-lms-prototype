@@ -5,6 +5,7 @@ status: "deferred"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-12"
+version: "1.0.0"
 deferred_reason: "SkillOurFuture/MCT migration only - deploy when ready to migrate MCT users"
 depends_on:
   - "specs/k8s-deployment_spec.md"

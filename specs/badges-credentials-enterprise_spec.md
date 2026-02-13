@@ -5,6 +5,7 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
@@ -115,6 +116,17 @@ For enterprise HR departments, badge data flowing into their talent management s
 ---
 
 ## Requirements
+
+### Domain and SSL
+
+| Property | Value |
+|----------|-------|
+| External URL | `https://badges.academyv2.mereka.io` |
+| Cloudflare mode | DNS-only (gray cloud) |
+| SSL provider | Let's Encrypt via cert-manager |
+| Reason | Multi-level subdomain (`*.*.mereka.io`) not covered by Cloudflare Free SSL |
+
+See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirements.
 
 ### Functional
 
@@ -320,61 +332,62 @@ For enterprise HR departments, badge data flowing into their talent management s
 - [ ] AC-002: Given the Badgr Server is running, when `curl http://badgr-server:8000/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-003: Given the Badgr Server is externally accessible, when `curl https://badges.academyv2.mereka.io/health/` is called, then the response is HTTP 200
 - [ ] AC-004: Given the badgr-worker Deployment is running, when `kubectl get deployment badgr-worker -n mereka-lms` is run, then the deployment exists with READY replicas >= 1
+- [ ] AC-005: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare proxy)
 
 ### Badge Issuance
 
-- [ ] AC-005: Given a course with an associated BadgeClass and a learner who completes the course, when the `COURSE_COMPLETION` event is processed, then a valid OpenBadges 2.0 assertion is created in Badgr Server and an email notification is sent to the learner within 60 seconds
-- [ ] AC-006: Given a program with an associated BadgeClass and a learner who completes all courses in the program, when the `PROGRAM_COMPLETION` event is processed, then a valid OpenBadges 2.0 assertion is created for the program badge
-- [ ] AC-007: Given a learner who has already earned a badge for course X, when the same learner completes course X again (re-enrollment), then no duplicate assertion is created and the existing assertion is returned
-- [ ] AC-008: Given an enterprise admin in the admin portal, when they submit a manual badge issuance request with a valid learner email and BadgeClass, then the badge is issued and the learner receives a notification email
-- [ ] AC-009: Given an enterprise admin uploads a CSV with 1000 badge issuance rows, when the bulk issuance is submitted, then all 1000 badges are issued within 10 minutes and a completion report is available in the admin portal
+- [ ] AC-006: Given a course with an associated BadgeClass and a learner who completes the course, when the `COURSE_COMPLETION` event is processed, then a valid OpenBadges 2.0 assertion is created in Badgr Server and an email notification is sent to the learner within 60 seconds
+- [ ] AC-007: Given a program with an associated BadgeClass and a learner who completes all courses in the program, when the `PROGRAM_COMPLETION` event is processed, then a valid OpenBadges 2.0 assertion is created for the program badge
+- [ ] AC-008: Given a learner who has already earned a badge for course X, when the same learner completes course X again (re-enrollment), then no duplicate assertion is created and the existing assertion is returned
+- [ ] AC-009: Given an enterprise admin in the admin portal, when they submit a manual badge issuance request with a valid learner email and BadgeClass, then the badge is issued and the learner receives a notification email
+- [ ] AC-010: Given an enterprise admin uploads a CSV with 1000 badge issuance rows, when the bulk issuance is submitted, then all 1000 badges are issued within 10 minutes and a completion report is available in the admin portal
 
 ### Multi-Tenant Isolation
 
-- [ ] AC-010: Given enterprise customer A and enterprise customer B both have BadgeClasses, when admin A calls `GET /api/v1/badges/enterprise/{uuid_A}/badge-classes/`, then only badge classes belonging to tenant A are returned
-- [ ] AC-011: Given enterprise customer A has issued badges, when admin B calls `GET /api/v1/badges/enterprise/{uuid_A}/assertions/`, then the response is HTTP 403 Forbidden
-- [ ] AC-012: Given enterprise customer A's issuer profile, when the badge assertion JSON is inspected, then the issuer name, logo, and URL reflect tenant A's branding, not Mereka Academy's default branding
-- [ ] AC-013: Given a learner belonging to both enterprise customer A and B, when they view their credential portfolio, then they see badges from both tenants clearly labeled by issuer
+- [ ] AC-011: Given enterprise customer A and enterprise customer B both have BadgeClasses, when admin A calls `GET /api/v1/badges/enterprise/{uuid_A}/badge-classes/`, then only badge classes belonging to tenant A are returned
+- [ ] AC-012: Given enterprise customer A has issued badges, when admin B calls `GET /api/v1/badges/enterprise/{uuid_A}/assertions/`, then the response is HTTP 403 Forbidden
+- [ ] AC-013: Given enterprise customer A's issuer profile, when the badge assertion JSON is inspected, then the issuer name, logo, and URL reflect tenant A's branding, not Mereka Academy's default branding
+- [ ] AC-014: Given a learner belonging to both enterprise customer A and B, when they view their credential portfolio, then they see badges from both tenants clearly labeled by issuer
 
 ### Public Verification
 
-- [ ] AC-014: Given a valid, non-revoked badge assertion, when `GET https://badges.academyv2.mereka.io/public/assertions/{uid}` is called without authentication, then the response is HTTP 200 with valid OpenBadges 2.0 assertion JSON and Content-Type `application/ld+json`
-- [ ] AC-015: Given a revoked badge assertion, when `GET https://badges.academyv2.mereka.io/public/assertions/{uid}` is called, then the response is HTTP 404 with a body indicating the assertion was revoked and the revocation date
-- [ ] AC-016: Given the public verification endpoint, when a request is made with `Origin: https://example.com`, then the response includes `Access-Control-Allow-Origin: *`
-- [ ] AC-017: Given the signing public key endpoint, when `GET https://badges.academyv2.mereka.io/.well-known/badgeclass-signing-key` is called, then the response contains the public key in PEM or JWK format
+- [ ] AC-015: Given a valid, non-revoked badge assertion, when `GET https://badges.academyv2.mereka.io/public/assertions/{uid}` is called without authentication, then the response is HTTP 200 with valid OpenBadges 2.0 assertion JSON and Content-Type `application/ld+json`
+- [ ] AC-016: Given a revoked badge assertion, when `GET https://badges.academyv2.mereka.io/public/assertions/{uid}` is called, then the response is HTTP 404 with a body indicating the assertion was revoked and the revocation date
+- [ ] AC-017: Given the public verification endpoint, when a request is made with `Origin: https://example.com`, then the response includes `Access-Control-Allow-Origin: *`
+- [ ] AC-018: Given the signing public key endpoint, when `GET https://badges.academyv2.mereka.io/.well-known/badgeclass-signing-key` is called, then the response contains the public key in PEM or JWK format
 
 ### Badge Revocation
 
-- [ ] AC-018: Given an enterprise admin revokes a badge assertion with reason "Employment terminated", when the revocation is processed, then the public assertion URL returns HTTP 404 with revocation metadata and the learner's portfolio shows "Revoked" status
-- [ ] AC-019: Given a bulk revocation of 500 assertions, when the revocation is submitted, then all 500 assertions are revoked within 5 minutes and the revocation list endpoint is updated
-- [ ] AC-020: Given a revoked badge that was blockchain-anchored, when the revocation list is checked, then the assertion UID appears in the revocation list but the on-chain anchor transaction is unchanged
+- [ ] AC-019: Given an enterprise admin revokes a badge assertion with reason "Employment terminated", when the revocation is processed, then the public assertion URL returns HTTP 404 with revocation metadata and the learner's portfolio shows "Revoked" status
+- [ ] AC-020: Given a bulk revocation of 500 assertions, when the revocation is submitted, then all 500 assertions are revoked within 5 minutes and the revocation list endpoint is updated
+- [ ] AC-021: Given a revoked badge that was blockchain-anchored, when the revocation list is checked, then the assertion UID appears in the revocation list but the on-chain anchor transaction is unchanged
 
 ### LinkedIn Integration
 
-- [ ] AC-021: Given a learner views a badge in their credential portfolio, when they click "Add to LinkedIn", then they are redirected to LinkedIn's certification add page with badge name, issuer organization, dates, and credential URL pre-populated
-- [ ] AC-022: Given a badge with a public assertion URL, when the URL is shared on LinkedIn or social media, then the page renders appropriate Open Graph metadata (title, description, badge image)
+- [ ] AC-022: Given a learner views a badge in their credential portfolio, when they click "Add to LinkedIn", then they are redirected to LinkedIn's certification add page with badge name, issuer organization, dates, and credential URL pre-populated
+- [ ] AC-023: Given a badge with a public assertion URL, when the URL is shared on LinkedIn or social media, then the page renders appropriate Open Graph metadata (title, description, badge image)
 
 ### Enterprise HR API
 
-- [ ] AC-023: Given a valid enterprise admin JWT for tenant A, when `GET /api/v1/badges/enterprise/{uuid_A}/assertions/?issued_after=2026-01-01&badge_class_id=xyz` is called, then only matching assertions for tenant A's learners are returned with pagination
-- [ ] AC-024: Given an enterprise admin registers a webhook URL, when a badge is issued to one of their learners, then the webhook endpoint receives a POST with `event_type: badge_issued` within 60 seconds
-- [ ] AC-025: Given a webhook delivery fails (HTTP 500), when the system retries, then it retries up to 5 times with exponential backoff and logs each failure
+- [ ] AC-024: Given a valid enterprise admin JWT for tenant A, when `GET /api/v1/badges/enterprise/{uuid_A}/assertions/?issued_after=2026-01-01&badge_class_id=xyz` is called, then only matching assertions for tenant A's learners are returned with pagination
+- [ ] AC-025: Given an enterprise admin registers a webhook URL, when a badge is issued to one of their learners, then the webhook endpoint receives a POST with `event_type: badge_issued` within 60 seconds
+- [ ] AC-026: Given a webhook delivery fails (HTTP 500), when the system retries, then it retries up to 5 times with exponential backoff and logs each failure
 
 ### Anti-Fraud
 
-- [ ] AC-026: Given a badge assertion, when the assertion JSON is inspected, then the `recipient.identity` field contains a SHA-256 hash of the email (not the plaintext email)
-- [ ] AC-027: Given more than 100 verification requests from a single IP within 1 minute, when the next request arrives, then the response is HTTP 429 with a Retry-After header
-- [ ] AC-028: Given more than 1000 verification requests for a single assertion within 1 hour, then an alert is triggered in the observability stack
+- [ ] AC-027: Given a badge assertion, when the assertion JSON is inspected, then the `recipient.identity` field contains a SHA-256 hash of the email (not the plaintext email)
+- [ ] AC-028: Given more than 100 verification requests from a single IP within 1 minute, when the next request arrives, then the response is HTTP 429 with a Retry-After header
+- [ ] AC-029: Given more than 1000 verification requests for a single assertion within 1 hour, then an alert is triggered in the observability stack
 
 ### Credential Analytics
 
-- [ ] AC-029: Given an enterprise admin accesses the badge analytics dashboard, when the page loads, then it displays total badges issued, sharing rate, verification count, and top badge classes for their tenant only
-- [ ] AC-030: Given an enterprise admin calls `GET /api/v1/badges/enterprise/{uuid}/analytics/`, then the response includes aggregate metrics scoped to the requesting tenant
+- [ ] AC-030: Given an enterprise admin accesses the badge analytics dashboard, when the page loads, then it displays total badges issued, sharing rate, verification count, and top badge classes for their tenant only
+- [ ] AC-031: Given an enterprise admin calls `GET /api/v1/badges/enterprise/{uuid}/analytics/`, then the response includes aggregate metrics scoped to the requesting tenant
 
 ### Observability
 
-- [ ] AC-031: Given the Badgr Server is running, when `/metrics` is scraped by Prometheus, then badge-specific metrics (issuance count, verification latency, queue depth) are present
-- [ ] AC-032: Given a badge issuance fails, when the error is logged, then the log entry includes `enterprise_customer_uuid`, `badge_class_id`, `learner_user_id`, `error_type`, and `correlation_id`
+- [ ] AC-032: Given the Badgr Server is running, when `/metrics` is scraped by Prometheus, then badge-specific metrics (issuance count, verification latency, queue depth) are present
+- [ ] AC-033: Given a badge issuance fails, when the error is logged, then the log entry includes `enterprise_customer_uuid`, `badge_class_id`, `learner_user_id`, `error_type`, and `correlation_id`
 
 ---
 

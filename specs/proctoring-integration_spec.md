@@ -5,6 +5,7 @@ status: "deferred"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"

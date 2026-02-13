@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -107,3 +107,26 @@ spec-coverage: ## Show spec coverage report (text)
 
 spec-compliance: ## Run automated tests and report spec compliance (repo-local only)
 	python3 scripts/qa/spec-tools/run_spec_compliance.py --mode local --timeout 30
+
+lint-specs: ## Fast spec lint only (Mereka rules, errors only)
+	python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error
+
+verify-specs: ## Verify @covers annotations match spec ACs
+	python3 scripts/qa/spec-tools/mereka_spec_verify.py specs/ --repo-root . \
+		--scan-dirs scripts/ tests/ \
+		--manual-file specs/manual_verifications.yaml
+
+validate-testmaps: ## Validate testmap YAML format
+	python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
+
+generate-testmaps: ## Generate testmaps from @covers annotations
+	python3 scripts/qa/spec-tools/discover_testmap.py \
+		--all-specs specs/ --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+		--manual-file specs/manual_verifications.yaml --repo-root . \
+		--format yaml --output specs/testmaps/all.testmap.yml
+
+check-fast: lint-specs validate-testmaps ## Fast quality gates (<30s)
+	@echo "Fast checks passed."
+
+check: lint-specs validate-testmaps verify-specs spec-coverage ## Full spec quality suite
+	@echo "All spec checks passed."

@@ -1,0 +1,227 @@
+spec: mobile-apps-enterprise_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given a new user on iOS, when they tap "Sign In", then the system browser
+    opens to the LMS OAuth authorize endpoint with PKCE parameters (`code_challenge`,
+    `code_challenge_method=S256`, `response_type=code`, `client_id=mereka-mobile-app`)
+  verify: []
+- id: AC-002
+  description: Given a new user on Android, when they tap "Sign In", then a Custom
+    Tab opens to the LMS OAuth authorize endpoint with identical PKCE parameters
+  verify: []
+- id: AC-003
+  description: Given a successful authorization code callback, when the app exchanges
+    the code for tokens, then the access token and refresh token are stored in platform-secure
+    storage (Keychain on iOS, EncryptedSharedPreferences on Android)
+  verify: []
+- id: AC-004
+  description: Given a stored access token with < 5 minutes remaining validity, when
+    the app makes an API call, then the token is refreshed proactively before the
+    call proceeds
+  verify: []
+- id: AC-005
+  description: Given a concurrent burst of 10 API calls during token refresh, when
+    the refresh is in-flight, then exactly one token refresh request is sent to the
+    backend (single-flight)
+  verify: []
+- id: AC-006
+  description: Given a 401 response from the API, when the refresh token is still
+    valid, then the app refreshes the token and retries the original request exactly
+    once
+  verify: []
+- id: AC-007
+  description: Given a failed token refresh (invalid/expired refresh token), when
+    the app detects the failure, then the user is redirected to the login screen and
+    all tokens are cleared
+  verify: []
+- id: AC-008
+  description: Given an authenticated user who taps "Logout", when logout completes,
+    then the refresh token is revoked server-side and all local tokens, cached user
+    data, and branding overrides are cleared
+  verify: []
+- id: AC-009
+  description: Given a freshly installed app after first login, when the user reaches
+    the dashboard, then the app requests push notification permission (not at app
+    launch, not before login)
+  verify: []
+- id: AC-010
+  description: Given notification permission granted, when the device token is obtained,
+    then the app registers it with the backend including `device_token`, `platform`,
+    `app_version`, and `org_slug`
+  verify: []
+- id: AC-011
+  description: Given a course announcement is published, when the backend sends a
+    push notification, then the notification appears in the system notification center
+    within 60 seconds
+  verify: []
+- id: AC-012
+  description: Given a notification with `type=assignment_due` and a valid `deep_link_url`,
+    when the user taps it, then the app navigates directly to the assignment within
+    the course
+  verify: []
+- id: AC-013
+  description: Given a user logs out, when logout completes, then the device token
+    is unregistered from the backend
+  verify: []
+- id: AC-014
+  description: Given the AASA file is served at `https://academyv2.mereka.io/.well-known/apple-app-site-association`,
+    when iOS validates it, then Universal Links are recognized for `academyv2.mereka.io`
+  verify: []
+- id: AC-015
+  description: Given the `assetlinks.json` is served at `https://academyv2.mereka.io/.well-known/assetlinks.json`,
+    when Android validates it, then App Links are recognized
+  verify: []
+- id: AC-016
+  description: Given a URL `https://academyv2.mereka.io/courses/course-v1:Mereka+101+2026/courseware/section1/`,
+    when the app receives it as a deep link, then it navigates to section1 of the
+    course
+  verify: []
+- id: AC-017
+  description: Given an unauthenticated user opens a deep link, when the link is received,
+    then the app stores the URL, presents login, and navigates to the stored URL after
+    successful authentication
+  verify: []
+- id: AC-018
+  description: Given a deep link to an unsupported path (e.g., `/admin/`), when the
+    app receives it, then it opens the URL in an in-app browser
+  verify: []
+- id: AC-019
+  description: Given a user taps "Download" on a course section, when the download
+    completes, then all video, HTML, and PDF content for that section is available
+    without network connectivity
+  verify: []
+- id: AC-020
+  description: Given a user completes a quiz while offline, when the device regains
+    connectivity, then the completion and score data sync to the backend within 60
+    seconds
+  verify: []
+- id: AC-021
+  description: Given the device has less than 500 MB free storage, when the user attempts
+    to start a download, then the app displays a storage warning before proceeding
+  verify: []
+- id: AC-022
+  description: Given downloaded content exists, when the user views "Manage Downloads",
+    then they see per-section storage usage and can delete individual sections
+  verify: []
+- id: AC-023
+  description: 'Given a download is in progress and the user backgrounds the app,
+    when the download completes in the background, then a local notification confirms
+    completion (iOS: background URLSession; Android: WorkManager)'
+  verify: []
+- id: AC-024
+  description: Given `org_slug=client-a` with branding config specifying `primary_color=#FF5733`,
+    when the app renders, then the navigation bar and primary UI elements use `#FF5733`
+  verify: []
+- id: AC-025
+  description: Given the branding config endpoint is unreachable and a cached config
+    exists, when the app launches, then it renders using the cached branding
+  verify: []
+- id: AC-026
+  description: Given the branding config endpoint is unreachable and no cache exists,
+    when the app launches, then it renders using default Mereka Academy branding
+  verify: []
+- id: AC-027
+  description: Given a user authenticated under `org_slug=client-a`, when they request
+    course listings, then they see only courses associated with `client-a` (no cross-tenant
+    leakage)
+  verify: []
+- id: AC-028
+  description: Given the app is running on a device, when it connects to `academyv2.mereka.io`,
+    then the TLS certificate is validated against pinned intermediate CA certificates
+  verify: []
+- id: AC-029
+  description: Given a certificate pin mismatch (MITM scenario), when the connection
+    fails, then the app displays a security warning and does not send any data
+  verify: []
+- id: AC-030
+  description: Given the app enters the background, when the OS captures a task-switcher
+    screenshot, then the screenshot shows a branded splash screen (not sensitive content)
+  verify: []
+- id: AC-031
+  description: Given a release build artifact, when inspected, then it contains no
+    debug logging statements, test API endpoints, or hardcoded credentials
+  verify: []
+- id: AC-032
+  description: Given a push to `mobile/ios/**` on the `main` branch, when the iOS
+    CI workflow triggers, then it produces a signed IPA and uploads it to TestFlight
+    without manual intervention
+  verify: []
+- id: AC-033
+  description: Given a push to `mobile/android/**` on the `main` branch, when the
+    Android CI workflow triggers, then it produces a signed AAB and uploads it to
+    Google Play Internal Testing without manual intervention
+  verify: []
+- id: AC-034
+  description: Given a new client `org_slug=new-client` is added to the branding configuration,
+    when the CI pipeline runs, then no code changes or pipeline modifications are
+    required (configuration-only onboarding)
+  verify: []
+- id: AC-035
+  description: 'Given a release candidate build, when submitted to the Apple App Store,
+    then the submission includes: app description, screenshots (6.7" and 6.1" iPhones),
+    privacy nutrition labels, and age rating'
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Testing
+    justification: Requires physical mobile device with configured FCM/APNs credentials
+      for end-to-end push verification
+    file: N/A (manual verification)
+- id: AC-036
+  description: 'Given a release candidate build, when submitted to Google Play Store,
+    then the submission includes: store listing, screenshots (phone), content rating
+    questionnaire, and data safety form'
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Offline Mode Testing
+    justification: Requires mobile device in airplane mode to verify offline content
+      caching and sync behavior
+    file: N/A (manual verification)
+- id: AC-037
+  description: 'Given a production release is approved, when the app is published,
+    then it uses a phased/staged rollout (iOS: phased release over 7 days; Android:
+    staged rollout starting at 10%)'
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Deep Link Testing
+    justification: Requires mobile device with installed app to verify deep link routing
+      from email/web to native screens
+    file: N/A (manual verification)
+_unmapped:
+- AC-001
+- AC-002
+- AC-003
+- AC-004
+- AC-005
+- AC-006
+- AC-007
+- AC-008
+- AC-009
+- AC-010
+- AC-011
+- AC-012
+- AC-013
+- AC-014
+- AC-015
+- AC-016
+- AC-017
+- AC-018
+- AC-019
+- AC-020
+- AC-021
+- AC-022
+- AC-023
+- AC-024
+- AC-025
+- AC-026
+- AC-027
+- AC-028
+- AC-029
+- AC-030
+- AC-031
+- AC-032
+- AC-033
+- AC-034
+

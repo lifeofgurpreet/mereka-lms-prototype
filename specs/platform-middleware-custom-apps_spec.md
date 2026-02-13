@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -408,10 +409,10 @@ kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c \
 
 ## Open Questions
 
-1. Should the MerekaPlatformAdminMiddleware apply to CMS as well as LMS? (Currently deployed to both via shared production settings.)
-2. Should the Sites framework patch be extracted to a separate middleware component or remain in MerekaCookieDomainMiddleware?
-3. Should the cookie domain rewriting support wildcards or regex patterns for future multi-tenant expansion?
-4. Should the MFEOAuthFixMiddleware cache OAuth provider queries for performance? (Currently queries database on every `/api/mfe_context` request.)
-5. Should the Prometheus `/metrics` endpoint require authentication via bearer token or IP whitelist?
-6. Should we add a health check endpoint (`/health`) that verifies all middleware is loaded correctly?
-7. How should we handle middleware version skew when rolling out new images (blue/green deployment, canary, or immediate cutover)?
+1. ~~Should the MerekaPlatformAdminMiddleware apply to CMS as well as LMS?~~ **RESOLVED**: Yes. Keep deployed to both via shared production settings. CMS admin needs the same platform-level controls (audit logging, rate limiting). No reason to diverge.
+2. ~~Should the Sites framework patch be extracted to a separate middleware component or remain in MerekaCookieDomainMiddleware?~~ **RESOLVED**: Remain in MerekaCookieDomainMiddleware. Extraction adds a component without benefit; the patch is 10 lines and tightly coupled to cookie domain logic.
+3. ~~Should the cookie domain rewriting support wildcards or regex patterns for future multi-tenant expansion?~~ **RESOLVED**: No wildcards/regex. Use explicit domain list from SiteConfiguration. Wildcards introduce security risks (cookie scope too broad). Each tenant domain added explicitly via Tutor config + apply-patches.sh.
+4. ~~Should the MFEOAuthFixMiddleware cache OAuth provider queries for performance?~~ **RESOLVED**: Yes. Cache OAuth provider lookup in Django per-request cache (request-scoped, not global). Eliminates repeated DB queries on `/api/mfe_context`. Implementation: `functools.lru_cache` with request lifecycle invalidation.
+5. ~~Should the Prometheus `/metrics` endpoint require authentication via bearer token or IP whitelist?~~ **RESOLVED**: IP whitelist via K8s NetworkPolicy. Only allow scraping from Prometheus pod CIDR. No bearer token needed for in-cluster access. External access blocked by default.
+6. ~~Should we add a health check endpoint (`/health`) that verifies all middleware is loaded correctly?~~ **RESOLVED**: No separate `/health` endpoint. Use existing `/heartbeat` (liveness) and `/readyz` (readiness) endpoints per cross-cutting-requirements_spec.md. Middleware loading verified by the application startup health check.
+7. ~~How should we handle middleware version skew when rolling out new images?~~ **RESOLVED**: Rolling update (K8s default). Middleware is backward-compatible by design (no breaking changes between versions). Blue/green adds operational complexity not justified for middleware updates.

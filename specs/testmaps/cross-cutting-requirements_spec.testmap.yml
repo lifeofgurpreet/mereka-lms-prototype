@@ -1,0 +1,125 @@
+spec: cross-cutting-requirements_spec.md
+acceptance_criteria:
+- id: AC-CCR-001
+  description: Given any API endpoint that returns tenant
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Tenant Isolation Testing
+    justification: Requires multi-tenant test data and authenticated API calls across
+      tenant contexts
+- id: AC-CCR-002
+  description: Given any service deployed in the mereka-lm
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+- id: AC-CCR-003
+  description: Given any service deployed in the mereka-lm
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Log Format Verification
+    justification: Requires running pods and log stream inspection via kubectl
+- id: AC-CCR-004
+  description: Given any secret consumed by a service, whe
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-secrets-hygiene.sh
+    command: scripts/qa/verify-k8s-secrets-hygiene.sh
+- id: AC-CCR-005
+  description: Given the pre-commit hook is installed, whe
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-secrets-management.sh
+    command: scripts/qa/verify-secrets-management.sh
+- id: AC-CCR-006
+  description: Given any production API endpoint, when mea
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: monitoring
+    metric: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30d]))
+    dashboard: 'Grafana: LMS Performance Dashboard'
+- id: AC-CCR-007
+  description: Given a tenant offboarding request, when th
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Tenant Offboarding
+    justification: Requires actual tenant data and deletion workflow — not yet implemented
+- id: AC-CCR-008
+  description: Given any service receiving external traffi
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+- id: AC-CCR-009
+  description: Given any new service being deployed, when
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+- id: AC-CCR-010
+  description: Given any write operation to financial data
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Payment Idempotency Testing
+    justification: Requires ecommerce/purchase-gateway service with test transactions
+      — not yet implemented
+- id: AC-CCR-011
+  description: Given any background job failure, when the
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Celery Worker Log Verification
+    justification: Requires running Celery workers with forced failure scenarios
+- id: AC-CCR-012
+  description: Given a Redis Streams event is published, w
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-cutting-requirements.sh
+    command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Event Bus Verification
+    justification: Redis Streams event bus not yet implemented — deferred to Tier
+      4
+

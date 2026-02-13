@@ -5,6 +5,7 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-13"
+version: "1.0.0"
 depends_on:
   - "specs/secrets-management_spec.md"
   - "specs/mobile-apps-enterprise_spec.md"

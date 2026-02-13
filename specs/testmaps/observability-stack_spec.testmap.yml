@@ -1,0 +1,143 @@
+spec: observability-stack_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: 'Prometheus scrapes all pods: `kubectl get servicemonitor -n mereka-lms`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/apply-monitoring-configs.sh
+    command: scripts/infra/apply-monitoring-configs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/verify-prometheus-integration.sh
+    command: scripts/infra/verify-prometheus-integration.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-observability.sh
+    command: scripts/qa/audit-observability.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+- id: AC-002
+  description: 'Grafana shows pod CPU/memory: Dashboard visible at `https://grafana.mereka.io`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-grafana-dashboard.sh
+    command: scripts/qa/audit-grafana-dashboard.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+  - type: manual
+    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
+    section: Dashboard Verification
+    justification: Dashboard load time and visual correctness require human verification
+      in browser
+- id: AC-003
+  description: 'LMS `/metrics` endpoint returns Prometheus metrics: `curl https://academyv2.mereka.io/metrics`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/validate-telemetry-connectivity.sh
+    command: scripts/infra/validate-telemetry-connectivity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-db-exporter-telemetry.sh
+    command: scripts/qa/audit-db-exporter-telemetry.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sentry-cli-contract.sh
+    command: scripts/qa/verify-sentry-cli-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-sentry-wiring.sh
+    command: scripts/qa/verify-sentry-wiring.sh
+- id: AC-004
+  description: 'Loki receives logs: `logcli query ''{namespace="mereka-lms"}'' --limit
+    10`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+- id: AC-005
+  description: 'Tempo receives traces: `tempo-cli query-trace <trace-id>`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+- id: AC-006
+  description: 'Alerts fire on OOM: Simulate OOM and verify alert in Slack'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-alert-routing.sh
+    command: scripts/qa/verify-alert-routing.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+  - type: manual
+    runbook: docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
+    section: Alert Verification > OOM Simulation
+    justification: OOM simulation requires deliberate resource exhaustion which cannot
+      be safely automated in production
+- id: AC-007
+  description: 'Log correlation works: Click trace ID in Grafana, jumps to Loki logs'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+  - type: manual
+    runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
+    section: Trace-Log Correlation
+    justification: Click-through navigation from logs to traces requires visual verification
+      in Grafana UI
+- id: AC-008
+  description: 'Metrics retention 30 days: Query old metrics: `rate(http_requests_total[30d])`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-contracts.sh
+    command: scripts/qa/verify-observability-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-stack.sh
+    command: scripts/qa/verify-observability-stack.sh
+

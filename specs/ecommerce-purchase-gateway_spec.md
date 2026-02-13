@@ -5,6 +5,7 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/enterprise-microservices_spec.md"
   - "specs/multi-tenancy-architecture_spec.md"
@@ -124,6 +125,17 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 ---
 
 ## Requirements
+
+### Domain and SSL
+
+| Property | Value |
+|----------|-------|
+| External URL | `https://shop.academyv2.mereka.io` |
+| Cloudflare mode | DNS-only (gray cloud) |
+| SSL provider | Let's Encrypt via cert-manager |
+| Reason | Multi-level subdomain (`*.*.mereka.io`) not covered by Cloudflare Free SSL |
+
+See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirements.
 
 ### Functional
 
@@ -445,6 +457,7 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 - [ ] AC-031: Given the gateway Deployment is applied, when `kubectl get deployments -n mereka-lms -l app.kubernetes.io/name=payments-gateway` is run, then the deployment shows READY replicas >= 1
 - [ ] AC-032: Given the gateway worker Deployment is applied, when `kubectl get deployments -n mereka-lms -l app.kubernetes.io/name=payments-worker` is run, then the deployment shows READY replicas >= 1
 - [ ] AC-033: Given the gateway is running, when `curl http://payments-gateway:8000/health/` is called from within the cluster, then the response is HTTP 200 with `{"status": "ok", "database": "ok", "redis": "ok", "stripe": "ok"}`
+- [ ] AC-034: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare proxy)
 
 ---
 
@@ -572,6 +585,28 @@ Revenue impact is direct: every course purchase, program enrollment, and enterpr
 - **Entitlement Tracker**: Unclaimed entitlements by tenant, claim rate, expiring entitlements (next 7 days), invitation email delivery success rate
 - **Webhook Monitor**: Events received by type, processing latency, duplicate event rate, signature failure count, event processing queue depth
 - **Reconciliation Report**: Daily discrepancy count, discrepancy types, last reconciliation run timestamp, trend over 30 days
+
+### Payment-Specific Metrics
+
+- `payment_success_rate` (gauge, labels: `tenant_id`, `offering_type`) -- successful payments / total payment attempts
+- `payment_processing_duration_seconds` (histogram, labels: `tenant_id`, `currency`) -- time from checkout creation to payment confirmation
+- `refund_processing_duration_seconds` (histogram, labels: `tenant_id`, `refund_type`) -- time from refund initiation to enrollment revocation
+- `cart_abandonment_rate` (gauge, labels: `tenant_id`, `offering_type`) -- checkout sessions created but not completed
+- `revenue_per_tenant` (gauge, labels: `tenant_id`, `currency`) -- total revenue by tenant (rolling 30 days)
+
+### Payment-Specific Alerts
+
+- **Critical**: `payment_success_rate` < 98% for any tenant over 15 minutes -- page oncall (payment processing failure)
+- **Critical**: `purchase_gateway_webhooks_received_total{processing_status="failed"}` > 0 for Stripe webhook delivery failures sustained over 10 minutes -- page oncall (revenue loss risk)
+- **Warning**: `refund_processing_duration_seconds` p95 > 24 hours -- notify finance team (slow refund processing)
+- **Info**: `cart_abandonment_rate` > 50% for any tenant over 7 days -- notify product team (UX friction in checkout)
+
+### Payment Health Dashboard
+
+- **Payment Success Rate**: 7-day rolling success rate by tenant, offering type, and payment method
+- **Processing Times**: Checkout latency, payment confirmation latency, refund processing time percentiles
+- **Revenue Tracking**: Daily revenue by tenant, currency breakdown, top-performing offerings, refund rate trend
+- **Stripe Webhook Health**: Delivery success rate, processing latency, event types received, signature validation failures
 
 ---
 

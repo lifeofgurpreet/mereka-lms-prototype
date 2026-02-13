@@ -1,0 +1,356 @@
+spec: k8s-deployment_spec.md
+acceptance_criteria:
+- id: AC-INT-001
+  description: Given `secrets-management_spec.md` ExternalSecrets are deployed, when
+    K8s deployments reference `openedx-secrets` and `database-secrets`, then all pods
+    reach Running state with no missing environment variable errors in logs.
+  verify: []
+- id: AC-INT-002
+  description: Given ExternalSecrets reach `SecretSynced` status, when LMS pods start,
+    then `kubectl exec lms-pod -- env | grep OPENEDX_SECRET_KEY` returns a non-empty
+    value matching the GCP Secret Manager source.
+  verify: []
+- id: AC-INT-003
+  description: Given a secret is rotated in Infisical and synced to GCP SM, when ExternalSecrets
+    refresh (within 1h) and pods restart, then new pods use the rotated value without
+    manual K8s Secret edits.
+  verify: []
+- id: AC-INT-004
+  description: Given `tutor-configuration_spec.md` patches are applied, when K8s manifests
+    reference MySQL, then MySQL Deployment includes `--mysql-native-password=ON` flag
+    and LMS connects without authentication errors.
+  verify: []
+- id: AC-INT-005
+  description: Given Tutor config includes multi-site domains (academy.biji-biji.com,
+    skillourfuture.academy.mereka.io), when LMS production settings are inspected
+    in the running pod, then `ALLOWED_HOSTS` contains all three domains.
+  verify: []
+- id: AC-001
+  description: Given the base Kustomize directory, when `kubectl kustomize deploy/k8s/overlays/local`
+    is run, then it renders without errors and all resources are in namespace `mereka-lms`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/apply-kind-overlay.sh
+    command: scripts/infra/apply-kind-overlay.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/setup-k8s-overrides.sh
+    command: scripts/infra/setup-k8s-overrides.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/verify-k8s-overrides.sh
+    command: scripts/infra/verify-k8s-overrides.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kustomize-no-deprecated-keys.sh
+    command: scripts/qa/verify-kustomize-no-deprecated-keys.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kustomize-render.sh
+    command: scripts/qa/verify-kustomize-render.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kustomize-structure.sh
+    command: scripts/qa/verify-kustomize-structure.sh
+- id: AC-002
+  description: Given the production overlay, when `kubectl kustomize deploy/k8s/overlays/production`
+    is run, then it renders without errors and all resources are in namespace `mereka-lms`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kustomize-render.sh
+    command: scripts/qa/verify-kustomize-render.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kustomize-structure.sh
+    command: scripts/qa/verify-kustomize-structure.sh
+- id: AC-003
+  description: Given a fresh cluster, when production manifests are applied, then
+    all 17 base Deployments reach Ready state within 10 minutes.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/bootstrap-kind-secrets.sh
+    command: scripts/infra/bootstrap-kind-secrets.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/kind-load-openedx-image.sh
+    command: scripts/infra/kind-load-openedx-image.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/verify-deployment.sh
+    command: scripts/infra/verify-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-live-cluster.sh
+    command: scripts/qa/verify-k8s-live-cluster.sh
+- id: AC-004
+  description: Given the production overlay, when LMS Deployment replicas are inspected,
+    then LMS has 2 replicas and LMS-Worker has 2 replicas.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-005
+  description: Given the local overlay, when Deployment replicas are inspected, then
+    all Deployments have exactly 1 replica.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-006
+  description: Given any LMS, CMS, or worker Deployment, when its envFrom is inspected,
+    then it references `openedx-secrets`, `database-secrets`, and `mereka-lms-runtime-secrets`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-007
+  description: Given the mysql Deployment, when its container args are inspected,
+    then `--mysql-native-password=ON` is present.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-008
+  description: Given the mysql Deployment, when its containers are inspected, then
+    a `mysqld-exporter` sidecar exists exposing port 9104.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-009
+  description: Given the redis Deployment, when its containers are inspected, then
+    a `redis-exporter` sidecar exists exposing port 9121.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-010
+  description: 'Given any application Deployment (lms, cms, workers, discovery, ecommerce,
+    credentials, notes, forum), when its security context is inspected, then `runAsUser:
+    1000` and `runAsGroup: 1000` are set.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-011
+  description: Given any container with a defined security context, when `allowPrivilegeEscalation`
+    is inspected, then it is `false`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-012
+  description: Given all manifests in `deploy/k8s/`, when scanned for hardcoded passwords
+    or API keys, then zero matches are found (excluding local dev overlay placeholder
+    values).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-secret-scan.sh
+    command: scripts/qa/verify-k8s-secret-scan.sh
+- id: AC-013
+  description: Given the base Services, when `kubectl get endpoints -n mereka-lms`
+    is run after Deployments are Ready, then no Service shows `<none>` for endpoints.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/fix-service-selectors.sh
+    command: scripts/infra/fix-service-selectors.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-live-cluster.sh
+    command: scripts/qa/verify-k8s-live-cluster.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-service-endpoints.sh
+    command: scripts/qa/verify-service-endpoints.sh
+- id: AC-014
+  description: Given each Service, when its selector is compared to the corresponding
+    Deployment's pod template labels, then selectors match and endpoints are populated.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-015
+  description: Given the base PVCs, when they are applied, then caddy (1Gi), elasticsearch
+    (2Gi), mysql (5Gi), and redis (1Gi) PVCs are created with ReadWriteOnce access
+    mode.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-016
+  description: 'Given stateful Deployments (elasticsearch, mysql, redis), when their
+    strategy is inspected, then `type: Recreate` is set.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-017
+  description: 'Given the production overlay, when Ingress resources are inspected,
+    then three Ingresses exist: openedx-lms, openedx-studio, openedx-mfe.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-018
+  description: 'Given any production Ingress, when its annotations are inspected,
+    then `cert-manager.io/cluster-issuer: letsencrypt-prod`, `nginx.ingress.kubernetes.io/ssl-redirect:
+    "true"`, and `nginx.ingress.kubernetes.io/proxy-body-size: 100m` are present.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-019
+  description: 'Given the openedx-lms Ingress, when its hosts are inspected, then
+    it includes: academyv2.mereka.io, preview.academyv2.mereka.io, academy.biji-biji.com,
+    discovery.academyv2.mereka.io, ecommerce.academyv2.mereka.io, notes.academyv2.mereka.io,
+    credentials.academyv2.mereka.io.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-020
+  description: Given production TLS, when certificates are inspected after Ingress
+    creation, then cert-manager has issued valid certificates for all declared hosts.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-live-cluster.sh
+    command: scripts/qa/verify-k8s-live-cluster.sh
+- id: AC-021
+  description: Given the ExternalSecrets, when `kubectl get externalsecrets -n mereka-lms`
+    is run, then `openedx-secrets` and `database-secrets` show `STATUS=SecretSynced`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-live-cluster.sh
+    command: scripts/qa/verify-k8s-live-cluster.sh
+- id: AC-022
+  description: 'Given any ExternalSecret, when its spec is inspected, then `refreshInterval:
+    1h`, `secretStoreRef.name: gcp-secret-manager`, and `target.deletionPolicy: Retain`
+    are set.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-externalsecrets.sh
+    command: scripts/qa/verify-k8s-externalsecrets.sh
+- id: AC-023
+  description: Given the openedx-secrets ExternalSecret, when its data mappings are
+    inspected, then all remote keys follow the `MEREKA_LMS_` prefix convention.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-externalsecrets.sh
+    command: scripts/qa/verify-k8s-externalsecrets.sh
+- id: AC-024
+  description: Given the base Kustomize rendering, when ConfigMaps are inspected,
+    then at least 13 ConfigMaps are generated (caddy-config, openedx-settings-lms,
+    openedx-settings-cms, openedx-config, openedx-uwsgi-config, openedx-theme-head-extra,
+    redis-config, discovery-settings, credentials-settings, ecommerce-settings, ecommerce-worker-settings,
+    mfe-caddy-config, notes-settings, xqueue-settings).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-025
+  description: Given the production overlay, when image tags are inspected, then no
+    image uses the `latest` tag.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-images.sh
+    command: scripts/qa/verify-k8s-images.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kustomize-structure.sh
+    command: scripts/qa/verify-kustomize-structure.sh
+- id: AC-026
+  description: Given the production overlay, when openedx image references are inspected,
+    then they point to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/` with date-prefixed
+    SHA tags.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-images.sh
+    command: scripts/qa/verify-k8s-images.sh
+- id: AC-027
+  description: Given the base monitoring resources, when they are applied, then ServiceMonitors
+    for lms, cms, mysql, and redis exist with 30-second scrape intervals.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-028
+  description: 'Given the PrometheusRule, when its alert rules are inspected, then
+    rules exist for: LMSPodDown, CMSPodDown, MySQLPodDown, RedisPodDown, OpenEdxCriticalDeploymentUnavailable,
+    and OpenEdxCrashLoopingContainers.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-029
+  description: Given the Promtail DaemonSet, when it is applied, then a Promtail pod
+    runs on every node in the cluster.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-live-cluster.sh
+    command: scripts/qa/verify-k8s-live-cluster.sh
+- id: AC-030
+  description: 'Given the Promtail DaemonSet, when its resource limits are inspected,
+    then requests are cpu: 50m, memory: 64Mi and limits are cpu: 200m, memory: 128Mi.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+- id: AC-031
+  description: Given the production cluster, when CronJobs are listed, then `auth-verify-prod`
+    and `cert-verify-prod` exist in `mereka-lms` namespace, and `backup-verification`
+    and `restore-test` exist in `velero` namespace.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-live-cluster.sh
+    command: scripts/qa/verify-k8s-live-cluster.sh
+- id: AC-032
+  description: Given the Aspects plugin, when its Deployments are inspected, then
+    ClickHouse, Superset, and Superset-Worker exist with health probes and resource
+    limits defined.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
+_unmapped:
+- AC-INT-001
+- AC-INT-002
+- AC-INT-003
+- AC-INT-004
+- AC-INT-005
+

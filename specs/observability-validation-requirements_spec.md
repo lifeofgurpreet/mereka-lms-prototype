@@ -5,6 +5,7 @@ status: "draft"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-13"
+version: "1.0.0"
 depends_on:
   - "specs/observability-stack_spec.md"
   - "specs/slo-sla-service-level-management_spec.md"

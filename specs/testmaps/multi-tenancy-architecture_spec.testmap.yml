@@ -1,0 +1,271 @@
+spec: multi-tenancy-architecture_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given a new enterprise client "Acme Corp", when the provisioning script
+    runs with `--slug=acme-corp --name="Acme Corp" --domain=acme.academyv2.mereka.io`,
+    then an `EnterpriseCustomer` record is created with a unique UUID, a Django `Site`
+    with the specified domain, and a `SiteConfiguration` with Mereka default values
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-model.sh
+    command: scripts/qa/verify-tenant-model.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning.sh
+    command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-tenant.sh
+    command: scripts/tenants/provision-tenant.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/models.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/models.py
+- id: AC-002
+  description: Given tenant "Acme Corp" exists, when the provisioning script runs
+    again with the same slug, then no duplicate records are created and the script
+    exits with a success message indicating "already provisioned"
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning.sh
+    command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-tenant.sh
+    command: scripts/tenants/provision-tenant.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/models.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/models.py
+- id: AC-003
+  description: Given tenant A (Acme) and tenant B (Beta), when admin A calls `GET
+    /api/v1/enterprise-catalogs/`, then zero catalogs belonging to tenant B are returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+- id: AC-004
+  description: Given tenant A and tenant B, when admin A calls `GET /api/v1/subscriptions/`
+    with tenant B's UUID in the path, then the response is HTTP 403
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+- id: AC-005
+  description: Given tenant A and tenant B, when admin A queries ClickHouse analytics
+    via Superset, then zero xAPI events with tenant B's UUID are visible
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+- id: AC-006
+  description: Given tenant A and tenant B, when a raw SQL query `SELECT * FROM enterprise_enterprisecustomer`
+    is executed by a non-superuser database role, then only the requesting service's
+    scoped records are returned (database user grants prevent cross-schema access
+    for enterprise service databases)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+- id: AC-007
+  description: Given a learner belonging to both tenant A and tenant B, when they
+    log into the enterprise learner portal and select tenant A, then only tenant A's
+    catalog, licenses, and enrollment data are visible
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+- id: AC-008
+  description: Given tenant "Acme Corp" with a custom logo configured in `SiteConfiguration`,
+    when a learner navigates to `acme.academyv2.mereka.io`, then the Acme Corp logo
+    is displayed (not the default Mereka logo)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+- id: AC-009
+  description: Given tenant "Acme Corp" with custom brand colors configured, when
+    the login page loads at `acme.academyv2.mereka.io`, then the primary brand color
+    matches the configured value
+  verify: []
+- id: AC-010
+  description: Given tenant "Acme Corp" with a custom footer configured, when any
+    page loads, then the footer displays Acme Corp branding (not default Mereka footer)
+  verify: []
+- id: AC-011
+  description: Given a tenant branding asset update (new logo), when `collectstatic`
+    is run, then the updated logo is served without requiring an image rebuild
+  verify: []
+- id: AC-012
+  description: Given tenant "Acme Corp" with domain `acme.academyv2.mereka.io`, when
+    a browser requests that domain, then the LMS responds with the correct Acme-branded
+    page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-middleware.sh
+    command: scripts/qa/verify-tenant-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/middleware.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/middleware.py
+- id: AC-013
+  description: Given tenant "Acme Corp" with a client-owned domain `learning.acmecorp.com`
+    configured as a CNAME, when a browser requests that domain, then the LMS responds
+    with the correct Acme-branded page and a valid SSL certificate
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-middleware.sh
+    command: scripts/qa/verify-tenant-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/middleware.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/middleware.py
+- id: AC-014
+  description: Given two tenants with different domains, when requests arrive simultaneously
+    for both domains, then each request resolves the correct `SiteConfiguration` based
+    on `Host` header
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-middleware.sh
+    command: scripts/qa/verify-tenant-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/middleware.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/middleware.py
+- id: AC-015
+  description: Given tenant "Acme Corp" with SAML IdP configured, when a user navigates
+    to `/enterprise/login/acme-corp`, then they are redirected to Acme's IdP
+  verify: []
+- id: AC-016
+  description: Given a successful SAML assertion from Acme's IdP for a new user, when
+    processed, then the user is auto-provisioned and linked to the Acme `EnterpriseCustomer`
+  verify: []
+- id: AC-017
+  description: Given tenant A's IdP and tenant B's IdP, when a user authenticates
+    via tenant A's IdP, then they are linked to tenant A only (no cross-tenant linking
+    from the SAML flow)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-org-role-ownership.sh
+    command: scripts/qa/verify-org-role-ownership.sh
+- id: AC-018
+  description: Given tenant "Acme Corp" with enrolled learners, when a learner completes
+    a course, then the xAPI event in ClickHouse includes `enterprise_customer_uuid`
+    matching Acme's UUID
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-org-role-ownership.sh
+    command: scripts/qa/verify-org-role-ownership.sh
+- id: AC-019
+  description: Given tenant "Acme Corp" admin in Superset, when they query the enrollment
+    dashboard, then row-level security filters ensure only Acme's data is visible
+  verify: []
+- id: AC-020
+  description: Given platform operator (superuser) in Superset, when they query the
+    cross-tenant overview dashboard, then aggregate data from all tenants is visible
+  verify: []
+- id: AC-021
+  description: Given valid provisioning inputs, when `scripts/tenants/provision-tenant.sh`
+    runs, then all required records (Site, SiteConfiguration, EnterpriseCustomer,
+    catalogs, subscriptions, access policies) are created within 15 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning.sh
+    command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-tenant.sh
+    command: scripts/tenants/provision-tenant.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+- id: AC-022
+  description: Given tenant "Acme Corp" is offboarded, when the offboarding script
+    completes data deletion, then `SELECT count(*) FROM enterprise_catalog WHERE enterprise_customer_uuid
+    = '{acme_uuid}'` returns 0 across all enterprise service databases
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-configmap.sh
+    command: scripts/qa/verify-tenant-configmap.sh
+- id: AC-023
+  description: Given tenant "Acme Corp" is offboarded, when ClickHouse is queried,
+    then zero events with Acme's UUID exist
+  verify: []
+- id: AC-024
+  description: 'Given a tenant offboarding action, when it completes, then an audit
+    log entry exists with: tenant UUID, action "offboarded", actor, timestamp'
+  verify: []
+- id: AC-025
+  description: Given tenants A and B are provisioned, when `scripts/qa/verify-tenant-isolation.sh
+    --tenant-a={uuid_a} --tenant-b={uuid_b}` runs, then all isolation checks pass
+    (API, portal, analytics, search)
+  verify:
+  - type: manual
+    runbook: docs/operations/MULTI_TENANCY_RUNBOOK.md
+    section: Tenant Isolation Verification
+    justification: Requires multiple authenticated sessions across different tenant
+      domains to verify data isolation boundaries
+    file: scripts/qa/verify-tenant-isolation.sh
+- id: AC-026
+  description: Given the nightly isolation test job runs, when any isolation check
+    fails, then a Critical alert is fired to the oncall channel
+  verify: []
+- id: AC-027
+  description: Given 10 active tenants, when enterprise catalog API queries are benchmarked,
+    then p95 latency remains <= 300ms (per enterprise-microservices spec)
+  verify: []
+- id: AC-028
+  description: Given 50 active tenants simulated in a load test, when concurrent API
+    requests are sent from 50 different tenant contexts, then no tenant's p95 latency
+    exceeds 120% of the single-tenant baseline
+  verify: []
+_unmapped:
+- AC-009
+- AC-010
+- AC-011
+- AC-015
+- AC-016
+- AC-019
+- AC-020
+- AC-023
+- AC-024
+- AC-026
+- AC-027
+- AC-028
+

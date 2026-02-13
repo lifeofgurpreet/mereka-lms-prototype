@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 completed_date: "2026-02-10"
 implementation_notes: |
   Migration completed via Tutor v18→v21 upgrade.
@@ -330,6 +331,19 @@ Existing forum data in MongoDB Atlas -- threads, posts, comments, votes, abuse f
 
 **Recovery**: If pool exhaustion occurs, stop the shadow Python service immediately. Reduce pool size and restart.
 
+### Dual-Run Write Conflict
+
+**Scenario**: During the dual-run phase, the Python forum (shadow mode) processes a write request that the Ruby forum also processes, causing duplicate posts or conflicting updates in the same MongoDB collection.
+
+**Detection**: MongoDB document count diverges between expected (single-writer) and actual (dual-writer) counts during shadow testing.
+
+**Mitigation**:
+- Shadow mode MUST be read-only: the Python forum in shadow mode receives mirrored requests but MUST NOT write to MongoDB. Use a read-only MongoDB connection string or a middleware that intercepts writes.
+- If shadow writes are needed for testing write-path correctness, use a separate MongoDB database (`cs_comments_service_shadow`) that is discarded after testing.
+- During actual cutover, traffic routing MUST be atomic: either all requests go to Ruby OR all go to Python, never both writing simultaneously.
+
+**Recovery**: If duplicate writes occur during shadow testing, the shadow database is discarded. Production data (Ruby writes) is unaffected.
+
 ### Rate Limits and Throttling
 
 **Scenario**: The Python forum does not implement the same rate limiting as the Ruby service, allowing abuse.
@@ -475,16 +489,16 @@ curl -s -o /dev/null -w "%{http_code}" https://apps.academyv2.mereka.io/discussi
 
 ## Open Questions
 
-1. **Python forum package version**: Which specific version of `openedx-forum` is compatible with Open edX Redwood? Has the upstream community published a stable release, or is it still in beta?
-2. **Tutor plugin status**: Does `tutor-forum` already support the Python backend, or do we need to use a separate plugin (e.g., `tutor-forum-python`)? What Tutor version introduces Python forum support?
-3. **Port change**: Does the Python forum service listen on port 4567 (matching Ruby) or port 8000 (Django default)? This affects K8s Service, Caddy, and Ingress configuration.
-4. **MongoDB schema delta**: Are there documented schema differences between the Ruby Mongoid models and the Python PyMongo models? Does upstream provide a migration script?
-5. **Elasticsearch compatibility**: Does the Python forum use the same Elasticsearch index mappings and query format as the Ruby service, or does it require a different Elasticsearch version?
-6. **Search backend**: Does the Python forum support Meilisearch or OpenSearch as alternatives to Elasticsearch? Should we plan to migrate search backends concurrently?
-7. **Discussions MFE API contract**: Has the discussions MFE been updated to support the Python forum's API responses? Are there known breaking changes in the API schema?
-8. **Performance benchmarks**: Has the upstream community published performance comparisons between the Ruby and Python forum services? What load profile was used?
-9. **Feature flag implementation**: Does Open edX provide a built-in mechanism for routing forum requests between backends, or do we need to implement the `FORUM_USE_PYTHON_BACKEND` flag ourselves?
-10. **Timeline pressure**: When does the upstream community plan to stop publishing the Ruby forum Docker image (`overhangio/openedx-forum`)? Is there a hard deprecation date?
-11. **MongoDB connection string format**: Does the Python forum support SRV connection strings natively via PyMongo, or does it require a standard connection string? (PyMongo supports SRV via `pymongo[srv]`, but the forum package must pass it correctly.)
-12. **Resource requirements**: What are the recommended CPU and memory requests/limits for the Python forum pod? Does it need more or fewer resources than the Ruby service?
-13. **Forum entrypoint script**: The current `apply-patches.sh` patches the Ruby forum's `docker-entrypoint.sh`. Does the Python forum have a similar entrypoint that needs patching, or is configuration entirely via environment variables?
+1. ~~**Python forum package version**~~ **RESOLVED**: openedx-forum v0.3.8, integrated into the LMS process (no separate service). Compatible with Tutor 21.0.0 (Ulmo).
+2. ~~**Tutor plugin status**~~ **RESOLVED**: Tutor 21.0.0 (Ulmo) includes native Python forum support via `tutor-forum` plugin. No separate plugin needed.
+3. ~~**Port change**~~ **RESOLVED**: The Python forum runs integrated within the LMS process (port 8000). No separate port needed. The Ruby service on port 4567 is the legacy architecture.
+4. **MongoDB schema delta**: Are there documented schema differences between the Ruby Mongoid models and the Python PyMongo models? Does upstream provide a migration script? **STATUS**: Needs investigation during Phase 1 dual-run testing.
+5. ~~**Elasticsearch compatibility**~~ **RESOLVED**: The Python forum uses Meilisearch (already deployed) instead of Elasticsearch. No Elasticsearch dependency.
+6. ~~**Search backend**~~ **RESOLVED**: Meilisearch is the search backend for the Python forum. Already deployed and configured for forum v2.
+7. **Discussions MFE API contract**: Has the discussions MFE been updated to support the Python forum's API responses? **STATUS**: Needs verification during Phase 1.
+8. **Performance benchmarks**: Has the upstream community published performance comparisons? **STATUS**: Will be measured during dual-run phase.
+9. ~~**Feature flag implementation**~~ **RESOLVED**: Tutor 21.0.0 provides `FORUM_USE_PYTHON_BACKEND` configuration. Set via `tutor config save --set FORUM_USE_PYTHON_BACKEND=true`.
+10. ~~**Timeline pressure**~~ **RESOLVED**: No hard deprecation date for Ruby forum image as of Feb 2026. Plan 6-month migration window with Python forum as primary by Q3 2026.
+11. ~~**MongoDB connection string format**~~ **RESOLVED**: PyMongo supports SRV connection strings natively. The forum package passes the connection string from environment variables; Atlas SRV format works.
+12. **Resource requirements**: What are the recommended CPU/memory for the Python forum? **STATUS**: Will be baselined during Phase 1 deployment. Expect lower than Ruby since it runs integrated in LMS process.
+13. ~~**Forum entrypoint script**~~ **RESOLVED**: Python forum has no separate entrypoint; it runs as a Django app within the LMS. Configuration via environment variables only. apply-patches.sh Ruby patches will be removed after migration.

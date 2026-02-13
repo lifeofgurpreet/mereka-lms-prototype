@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/observability-stack_spec.md"
 links:
@@ -173,6 +174,73 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
     | LMS/CMS pods | CPU request utilization | > 75% | > 90% |
     | LMS/CMS pods | Memory request utilization | > 80% | > 90% |
 
+#### Service-Specific SLI Implementations
+
+- The system MUST implement the following concrete SLI measurements per service:
+
+  **LMS (Learning Management System)**
+  - SLI metric name: `mereka_sli_lms_availability_ratio`
+  - Calculation formula: `1 - (rate(http_requests_total{service="lms", status=~"5.."}[5m]) / rate(http_requests_total{service="lms"}[5m]))`
+  - Data source: LMS `/metrics` endpoint (django-prometheus), scraped by Prometheus every 30 seconds
+  - Latency metric: `mereka_sli_lms_latency_p95_seconds` from `histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="lms"}[5m]))`
+  - Error budget calculation: `mereka_sli_lms_error_budget_remaining_minutes = (30d * 24h * 60m * 0.0005) - total_downtime_minutes` (Tier 1 SLO: 99.95%)
+
+  **CMS (Studio)**
+  - SLI metric name: `mereka_sli_cms_availability_ratio`
+  - Calculation formula: `1 - (rate(http_requests_total{service="cms", status=~"5.."}[5m]) / rate(http_requests_total{service="cms"}[5m]))`
+  - Data source: CMS `/metrics` endpoint (django-prometheus), scraped by Prometheus every 30 seconds
+  - Latency metric: `mereka_sli_cms_latency_p95_seconds` from `histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="cms"}[5m]))`
+  - Error budget calculation: `mereka_sli_cms_error_budget_remaining_minutes = (30d * 24h * 60m * 0.0005) - total_downtime_minutes` (Tier 1 SLO: 99.95%)
+
+  **MFE (Micro-Frontends)**
+  - SLI metric name: `mereka_sli_mfe_availability_ratio`
+  - Calculation formula: `1 - (rate(http_requests_total{service="mfe", status=~"5.."}[5m]) / rate(http_requests_total{service="mfe"}[5m]))`
+  - Data source: Caddy reverse proxy metrics (proxied requests to MFE endpoints), scraped by Prometheus every 30 seconds
+  - Latency metric: `mereka_sli_mfe_latency_p95_seconds` from Caddy request duration histograms
+  - Error budget calculation: `mereka_sli_mfe_error_budget_remaining_minutes = (30d * 24h * 60m * 0.001) - total_downtime_minutes` (Tier 2 SLO: 99.9%)
+
+  **Forum (openedx-forum)**
+  - SLI metric name: `mereka_sli_forum_availability_ratio`
+  - Calculation formula: `1 - (rate(http_requests_total{service="forum", status=~"5.."}[5m]) / rate(http_requests_total{service="forum"}[5m]))`
+  - Data source: Forum service metrics (if exposed), otherwise Caddy reverse proxy metrics for `/api/discussion/` endpoints
+  - Latency metric: `mereka_sli_forum_latency_p95_seconds` from request duration histograms
+  - Error budget calculation: `mereka_sli_forum_error_budget_remaining_minutes = (30d * 24h * 60m * 0.001) - total_downtime_minutes` (Tier 2 SLO: 99.9%)
+
+  **Ecommerce**
+  - SLI metric name: `mereka_sli_ecommerce_availability_ratio`
+  - Calculation formula: `1 - (rate(http_requests_total{service="ecommerce", status=~"5.."}[5m]) / rate(http_requests_total{service="ecommerce"}[5m]))`
+  - Data source: Ecommerce service `/metrics` endpoint, scraped by Prometheus every 30 seconds
+  - Latency metric: `mereka_sli_ecommerce_latency_p95_seconds` from request duration histograms
+  - Error budget calculation: `mereka_sli_ecommerce_error_budget_remaining_minutes = (30d * 24h * 60m * 0.001) - total_downtime_minutes` (Tier 2 SLO: 99.9%)
+
+  **Discovery**
+  - SLI metric name: `mereka_sli_discovery_availability_ratio`
+  - Calculation formula: `1 - (rate(http_requests_total{service="discovery", status=~"5.."}[5m]) / rate(http_requests_total{service="discovery"}[5m]))`
+  - Data source: Discovery API metrics endpoint, scraped by Prometheus every 30 seconds
+  - Latency metric: `mereka_sli_discovery_latency_p95_seconds` from request duration histograms
+  - Error budget calculation: `mereka_sli_discovery_error_budget_remaining_minutes = (30d * 24h * 60m * 0.001) - total_downtime_minutes` (Tier 2 SLO: 99.9%)
+
+  **MySQL (Cloud SQL)**
+  - SLI metric name: `mereka_sli_mysql_availability_ratio`
+  - Calculation formula: Derived from GCP Cloud SQL uptime monitoring API
+  - Data source: GCP Cloud Monitoring API, polled every 5 minutes
+  - Saturation metrics: `mereka_sli_mysql_connection_utilization_ratio` from `mysql_global_status_threads_connected / mysql_global_variables_max_connections` (mysqld-exporter)
+  - Error budget calculation: `mereka_sli_mysql_error_budget_remaining_minutes = (30d * 24h * 60m * 0.0005) - total_downtime_minutes` (Tier 1 SLO: 99.95%)
+
+  **Redis**
+  - SLI metric name: `mereka_sli_redis_availability_ratio`
+  - Calculation formula: `1 - (rate(redis_commands_failed_total[5m]) / rate(redis_commands_total[5m]))`
+  - Data source: Redis exporter metrics, scraped by Prometheus every 30 seconds
+  - Saturation metrics: `mereka_sli_redis_memory_utilization_ratio` from `redis_memory_used_bytes / redis_memory_max_bytes`
+  - Error budget calculation: `mereka_sli_redis_error_budget_remaining_minutes = (30d * 24h * 60m * 0.0005) - total_downtime_minutes` (Tier 1 SLO: 99.95%)
+
+  **Elasticsearch**
+  - SLI metric name: `mereka_sli_elasticsearch_availability_ratio`
+  - Calculation formula: Based on cluster health status (`green` = 1.0, `yellow` = 0.95, `red` = 0.0)
+  - Data source: Elasticsearch exporter metrics, scraped by Prometheus every 30 seconds
+  - Saturation metrics: `mereka_sli_elasticsearch_heap_utilization_ratio` from `elasticsearch_jvm_memory_used_bytes / elasticsearch_jvm_memory_max_bytes`
+  - Error budget calculation: `mereka_sli_elasticsearch_error_budget_remaining_minutes = (30d * 24h * 60m * 0.001) - total_downtime_minutes` (Tier 2 SLO: 99.9%)
+
 #### Error Budget Calculation and Tracking
 
 - The system MUST calculate error budgets on a 30-day rolling window for each service
@@ -197,6 +265,51 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 
 - The system MUST display error budget status on a dedicated Grafana dashboard (`Mereka LMS - SLO Overview`)
 - The system SHOULD display a 30-day trend of error budget consumption on the SLO dashboard
+
+#### Error Budget Exhaustion Procedures
+
+- The system MUST enforce the following procedures when error budget is exhausted or at risk:
+
+  **Budget Exhaustion (< 0% remaining)**
+  - The system MUST automatically trigger a P1 incident with title "Error Budget Exhausted: [Service]"
+  - The system MUST immediately notify: on-call engineer (page), engineering lead (Slack + email), VP/CTO (email)
+  - The system MUST freeze all non-incident-remediation deployments to the affected service
+  - The engineering team MUST enter "Reliability Sprint" mode: all feature work paused, focus on reliability improvements
+  - The system MUST schedule a post-incident review within 2 business days to identify root cause and prevention measures
+  - The system MUST NOT reset the error budget -- it refills naturally as the 30-day rolling window advances
+  - The reliability sprint MUST continue until error budget is restored to >= 10%
+
+  **Budget Critical (< 10% remaining)**
+  - The system MUST send daily Slack notifications to engineering channel with current budget status
+  - The system MUST require VP/CTO approval for any non-critical deployment
+  - The engineering lead MUST schedule a reliability review meeting within 3 business days
+  - The system MUST prioritize bug fixes and stability improvements over new feature development
+  - The system MUST produce a budget recovery plan documenting: root cause analysis, immediate mitigations, long-term improvements
+
+  **Budget Warning (10-25% remaining)**
+  - The system MUST require engineering lead + product approval for any deployment
+  - The system MUST increase monitoring alert sensitivity for the affected service (lower thresholds)
+  - The engineering lead MUST review recent incidents and identify patterns
+  - The system MUST document mitigations in the weekly engineering sync
+
+  **Budget Low (25-50% remaining)**
+  - The system MUST require engineering lead approval for deployments
+  - The system SHOULD trigger a proactive review of recent error trends
+  - The system SHOULD increase deployment testing rigor (extended canary periods, more validation checks)
+
+  **Budget Healthy (>= 50% remaining)**
+  - Normal deployment process applies (automated CI/CD)
+  - No special approvals required
+
+  **Incident Remediation Exception**
+  - Deployments that fix an active P1/P2 incident MUST be exempt from deployment freeze
+  - The incident commander MUST document the exception: incident ID, deployment justification, rollback plan
+  - The system MUST log the exception with structured fields: `{event: "deployment_freeze_override", reason: "incident_remediation", incident_id: "<id>", service: "<name>"}`
+
+  **Budget Recovery Tracking**
+  - The system MUST project error budget recovery time based on current burn rate
+  - The system MUST display projected recovery date on the SLO dashboard
+  - The system MUST send a notification when budget recovers to >= 25% (exits critical state)
 
 #### Deployment Gating
 
@@ -254,6 +367,62 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - The system MUST publish incident postmortems within 5 business days of P1/P2 resolution
 - Each postmortem MUST include: timeline, root cause, impact scope, remediation actions, and prevention measures
 - The system MUST maintain an incident log accessible to enterprise clients (sanitized of internal implementation details)
+
+#### SLA Breach Escalation Procedures
+
+- The system MUST define and enforce the following procedures when an SLA breach occurs or is imminent:
+
+  **SLA Breach Detection**
+  - The system MUST detect an SLA breach when any service's actual availability falls below the SLA target for the rolling 30-day window
+  - The system MUST detect an imminent SLA breach when projected availability (based on current burn rate) will fall below SLA target within 72 hours
+  - The system MUST immediately notify: engineering lead, VP/CTO, account manager for affected enterprise clients
+  - The system MUST automatically create a P1 incident with title "SLA Breach: [Service] - [Current Availability]"
+
+  **Immediate Response (Within 1 hour of breach detection)**
+  - Engineering lead MUST acknowledge the breach notification
+  - Engineering lead MUST assemble an incident response team (minimum: 2 engineers + incident commander)
+  - Incident commander MUST send initial notification to affected enterprise clients using the stakeholder communication template
+  - The team MUST identify all contributing incidents within the 30-day window
+  - The team MUST assess whether the breach is due to: single major incident, multiple smaller incidents, or chronic degradation
+
+  **Client Communication Timeline**
+  - **T+0 (Breach detection)**: Automated notification to internal stakeholders
+  - **T+1 hour**: Initial notification to affected enterprise clients (acknowledgement of breach, investigation started)
+  - **T+4 hours**: First detailed update to clients (preliminary root cause, remediation plan, timeline)
+  - **T+24 hours**: Remediation status update (progress on fixes, updated timeline)
+  - **T+5 business days**: Formal incident postmortem delivered to clients (full timeline, root cause, prevention measures)
+  - **T+10 business days**: Remediation completion report (all prevention measures implemented, SLA compliance restored)
+
+  **Remediation Requirements**
+  - The team MUST produce a detailed remediation plan within 4 hours of breach detection
+  - The remediation plan MUST include: root cause analysis, immediate fixes, long-term improvements, timeline for each
+  - All P1/P2 incidents contributing to the breach MUST have postmortems published
+  - The team MUST implement immediate mitigations within 24 hours to prevent further degradation
+  - The team MUST implement long-term improvements within 30 days (or document alternative timeline with justification)
+
+  **SLA Credit Calculation (If Contractual)**
+  - The system MUST calculate service credits based on the severity of the breach:
+    - Breach by 0.1-0.5%: [X]% service credit
+    - Breach by 0.5-1.0%: [Y]% service credit
+    - Breach by > 1.0%: [Z]% service credit
+  - Service credits MUST be proposed to the client within 5 business days of breach confirmation
+  - Service credits MUST be applied to the next billing cycle unless otherwise negotiated
+
+  **Executive Review**
+  - For any Tier 1 SLA breach, the VP/CTO MUST conduct an executive review within 5 business days
+  - The executive review MUST assess: technical root cause, process failures, organizational gaps
+  - The executive review MUST produce action items with owners and deadlines
+  - The engineering lead MUST report on action item completion in the next monthly SLA report
+
+  **Repeat Breach Escalation**
+  - If the same service breaches SLA in 2 consecutive months, the system MUST escalate to VP/CTO and schedule an emergency architecture review
+  - If the same service breaches SLA in 3 out of 6 months, the system MUST trigger a mandatory reliability sprint (minimum 2 weeks, all hands)
+  - The reliability sprint MUST not end until the service achieves 2 consecutive weeks of SLO compliance
+
+  **Client Relationship Management**
+  - Account managers MUST schedule a 1-on-1 call with affected enterprise clients within 3 business days of breach
+  - Account managers MUST offer additional support: dedicated technical account manager, increased monitoring, priority bug fixes
+  - If a client experiences 2 SLA breaches in a quarter, the VP/CTO MUST personally contact the client executive sponsor
 
 #### On-Call Rotation and Escalation
 
@@ -344,6 +513,243 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - The system MUST distribute monthly reports to enterprise account contacts within 5 business days of month end
 - Enterprise clients MUST receive quarterly business reviews including the SLA report within 10 business days of quarter end
 
+#### Reporting Templates
+
+- The system MUST use the following standardized templates for SLA reporting:
+
+  **Monthly SLA Compliance Report Template**
+
+  ```markdown
+  # Mereka Academy - Monthly SLA Compliance Report
+  **Reporting Period**: [Month Year] ([YYYY-MM-01] to [YYYY-MM-DD])
+  **Report Generated**: [ISO8601 timestamp]
+  **Report Version**: 1.0
+
+  ## Executive Summary
+  - Overall Platform Availability: [XX.XX]%
+  - SLA Compliance Status: [PASS/FAIL]
+  - Critical Incidents (P1): [N]
+  - Maintenance Windows: [N]
+  - Error Budget Status: [Healthy/Low/Critical/Exhausted]
+
+  ## Service-Level Metrics
+
+  ### Tier 1: Critical Services
+  | Service | SLO Target | Actual | SLA Target | Status | Error Budget Remaining |
+  |---------|-----------|--------|-----------|--------|----------------------|
+  | LMS | 99.95% | [XX.XX]% | 99.9% | [PASS/FAIL] | [XX.X] minutes |
+  | CMS | 99.95% | [XX.XX]% | 99.9% | [PASS/FAIL] | [XX.X] minutes |
+  | MySQL | 99.95% | [XX.XX]% | 99.9% | [PASS/FAIL] | [XX.X] minutes |
+  | Redis | 99.95% | [XX.XX]% | 99.9% | [PASS/FAIL] | [XX.X] minutes |
+  | Caddy | 99.95% | [XX.XX]% | 99.9% | [PASS/FAIL] | [XX.X] minutes |
+
+  ### Tier 2: Important Services
+  | Service | SLO Target | Actual | SLA Target | Status | Error Budget Remaining |
+  |---------|-----------|--------|-----------|--------|----------------------|
+  | MFE | 99.9% | [XX.XX]% | 99.5% | [PASS/FAIL] | [XX.X] minutes |
+  | Forum | 99.9% | [XX.XX]% | 99.5% | [PASS/FAIL] | [XX.X] minutes |
+  | Discovery | 99.9% | [XX.XX]% | 99.5% | [PASS/FAIL] | [XX.X] minutes |
+  | Ecommerce | 99.9% | [XX.XX]% | 99.5% | [PASS/FAIL] | [XX.X] minutes |
+  | Workers | 99.9% | [XX.XX]% | 99.5% | [PASS/FAIL] | [XX.X] minutes |
+
+  ### Tier 3: Optional Services
+  | Service | SLO Target | Actual | SLA Target | Status | Error Budget Remaining |
+  |---------|-----------|--------|-----------|--------|----------------------|
+  | Notes | 99.5% | [XX.XX]% | 99.0% | [PASS/FAIL] | [XX.X] hours |
+  | XQueue | 99.5% | [XX.XX]% | 99.0% | [PASS/FAIL] | [XX.X] hours |
+
+  ## Latency Performance
+
+  | Service | Endpoint Category | p50 Target | p50 Actual | p95 Target | p95 Actual | p99 Target | p99 Actual | Status |
+  |---------|------------------|-----------|-----------|-----------|-----------|-----------|-----------|--------|
+  | LMS | Page loads | 500ms | [XXX]ms | 2,000ms | [XXX]ms | 5,000ms | [XXX]ms | [PASS/FAIL] |
+  | CMS | Page loads | 800ms | [XXX]ms | 3,000ms | [XXX]ms | 8,000ms | [XXX]ms | [PASS/FAIL] |
+  | MFE | Page loads | 300ms | [XXX]ms | 1,000ms | [XXX]ms | 3,000ms | [XXX]ms | [PASS/FAIL] |
+  | API | REST endpoints | 200ms | [XXX]ms | 800ms | [XXX]ms | 2,000ms | [XXX]ms | [PASS/FAIL] |
+
+  ## Incident Summary
+
+  | Severity | Count | Total Duration | MTTR (Mean Time to Resolve) | Availability Impact |
+  |----------|-------|---------------|---------------------------|-------------------|
+  | P1 (Critical) | [N] | [XX] hours [YY] minutes | [XX] minutes | [XX.XX]% |
+  | P2 (High) | [N] | [XX] hours [YY] minutes | [XX] minutes | [XX.XX]% |
+  | P3 (Medium) | [N] | [XX] hours [YY] minutes | [XX] minutes | [XX.XX]% |
+  | P4 (Low) | [N] | N/A | N/A | 0.00% |
+
+  ### Top Incidents by Impact
+  1. [Incident ID]: [Brief description] - Duration: [XX] min - Impact: [XX.XX]%
+  2. [Incident ID]: [Brief description] - Duration: [XX] min - Impact: [XX.XX]%
+  3. [Incident ID]: [Brief description] - Duration: [XX] min - Impact: [XX.XX]%
+
+  ## Maintenance Windows
+
+  | Date | Start Time (UTC) | End Time (UTC) | Duration | Scope | Outcome |
+  |------|-----------------|----------------|----------|-------|---------|
+  | [YYYY-MM-DD] | [HH:MM] | [HH:MM] | [XX] minutes | [Description] | [Successful/Overrun/Cancelled] |
+
+  ## Error Budget Consumption
+
+  | Service | Budget Start | Budget Consumed | Budget Remaining | Burn Rate Trend |
+  |---------|-------------|----------------|-----------------|----------------|
+  | LMS | 21.6 min | [XX.X] min | [XX.X] min | [Increasing/Stable/Decreasing] |
+  | CMS | 21.6 min | [XX.X] min | [XX.X] min | [Increasing/Stable/Decreasing] |
+  | MFE | 43.8 min | [XX.X] min | [XX.X] min | [Increasing/Stable/Decreasing] |
+
+  ## Trend Comparison (vs Previous Month)
+
+  - Overall availability: [XX.XX]% ([+/- X.XX]% change)
+  - Total incidents: [N] ([+/- N] change)
+  - Mean time to resolve (P1/P2): [XX] minutes ([+/- XX] minutes change)
+  - Error budget consumption rate: [XX]% of monthly budget ([+/- XX]% change)
+
+  ## Recommendations
+  - [Action item based on observed trends]
+  - [Action item based on observed trends]
+  - [Action item based on observed trends]
+
+  ## Appendix
+  - Full incident log: [Link to sanitized incident log]
+  - Detailed metrics: [Link to Grafana dashboard snapshot]
+  - Methodology: [Link to this spec document]
+  ```
+
+  **Quarterly SLA Compliance Report Template**
+
+  ```markdown
+  # Mereka Academy - Quarterly SLA Compliance Report
+  **Reporting Period**: [Quarter] [Year] ([YYYY-MM-DD] to [YYYY-MM-DD])
+  **Report Generated**: [ISO8601 timestamp]
+  **Report Version**: 1.0
+
+  ## Executive Summary
+  - Overall Platform Availability (90-day): [XX.XX]%
+  - SLA Compliance Status: [PASS/FAIL]
+  - Total Incidents (P1/P2): [N]
+  - Total Maintenance Windows: [N]
+  - Error Budget Health Trend: [Improving/Stable/Declining]
+
+  ## 90-Day Availability Trend
+
+  | Service | Month 1 | Month 2 | Month 3 | Q Average | SLA Target | Status |
+  |---------|---------|---------|---------|-----------|-----------|--------|
+  | LMS | [XX.XX]% | [XX.XX]% | [XX.XX]% | [XX.XX]% | 99.9% | [PASS/FAIL] |
+  | CMS | [XX.XX]% | [XX.XX]% | [XX.XX]% | [XX.XX]% | 99.9% | [PASS/FAIL] |
+  | MFE | [XX.XX]% | [XX.XX]% | [XX.XX]% | [XX.XX]% | 99.5% | [PASS/FAIL] |
+
+  ## Performance Regression Summary
+
+  | Date | Service | Regression Type | Duration | Root Cause | Resolution |
+  |------|---------|----------------|----------|-----------|------------|
+  | [YYYY-MM-DD] | [Service] | Latency spike | [XX] min | [Brief cause] | [Brief resolution] |
+  | [YYYY-MM-DD] | [Service] | Error rate spike | [XX] min | [Brief cause] | [Brief resolution] |
+
+  ## Capacity Planning Recommendations
+
+  ### Infrastructure Saturation Trends
+  - MySQL connection utilization: [XX]% average ([+/- X]% vs prev quarter)
+  - Redis memory utilization: [XX]% average ([+/- X]% vs prev quarter)
+  - LMS/CMS CPU utilization: [XX]% average ([+/- X]% vs prev quarter)
+
+  ### Scaling Recommendations
+  1. [Recommendation based on saturation trends]
+  2. [Recommendation based on saturation trends]
+  3. [Recommendation based on saturation trends]
+
+  ## On-Call Health Metrics
+
+  | Metric | Q1 | Q2 | Q3 | Q4 | Trend |
+  |--------|----|----|----|----|-------|
+  | Total alerts | [N] | [N] | [N] | [N] | [Up/Down/Stable] |
+  | After-hours pages | [N] | [N] | [N] | [N] | [Up/Down/Stable] |
+  | Escalations to L2 | [N] | [N] | [N] | [N] | [Up/Down/Stable] |
+  | Mean time to acknowledge (P1) | [XX] min | [XX] min | [XX] min | [XX] min | [Up/Down/Stable] |
+
+  ## SLO Target Adjustment Recommendations
+
+  | Service | Current SLO | Current SLA | Observed Reliability | Recommendation | Justification |
+  |---------|------------|-------------|---------------------|---------------|---------------|
+  | [Service] | [XX.XX]% | [XX.XX]% | [XX.XX]% | [Maintain/Tighten/Loosen] | [Brief justification] |
+
+  ## Quarterly Business Review Topics
+  1. Platform reliability summary
+  2. Key incidents and learnings
+  3. Capacity planning and scaling roadmap
+  4. SLO target discussions and adjustments
+  5. Next quarter reliability focus areas
+
+  ## Appendix
+  - Monthly reports: [Links to 3 monthly reports]
+  - Detailed incident postmortems: [Links to P1/P2 postmortems]
+  - Grafana dashboard snapshots: [Links]
+  ```
+
+  **Stakeholder Communication Template (Incident)**
+
+  ```markdown
+  **Subject**: [Platform Status] [Service] - [Severity] Incident [ID]
+
+  **Status**: [Investigating/Identified/Monitoring/Resolved]
+  **Severity**: [P1/P2/P3]
+  **Impact**: [Brief description of user impact]
+  **Started**: [ISO8601 timestamp]
+  **Last Update**: [ISO8601 timestamp]
+
+  ## Current Status
+  [Brief description of current state]
+
+  ## Impact
+  - Affected services: [List]
+  - Affected users: [Scope - all users / specific tenant / subset]
+  - Functionality impact: [What users cannot do]
+
+  ## Timeline
+  - [HH:MM UTC]: [Event description]
+  - [HH:MM UTC]: [Event description]
+  - [HH:MM UTC]: [Event description]
+
+  ## Next Steps
+  - [Action being taken]
+  - [Estimated time to next update]
+
+  ## Contact
+  For questions, contact: [support email]
+  Status page: https://status.mereka.dev
+  ```
+
+  **Stakeholder Communication Template (Maintenance Window)**
+
+  ```markdown
+  **Subject**: [Scheduled Maintenance] Mereka Academy - [YYYY-MM-DD]
+
+  **Maintenance Window**: [YYYY-MM-DD HH:MM UTC] to [YYYY-MM-DD HH:MM UTC] (approximately [N] hours)
+  **Impact**: [Expected service availability during maintenance]
+  **Notification Date**: [YYYY-MM-DD] ([N] hours advance notice)
+
+  ## Purpose
+  [Brief description of maintenance purpose - e.g., database upgrade, security patching, infrastructure scaling]
+
+  ## Expected Impact
+  - Platform availability: [Full outage / Partial degradation / No downtime expected]
+  - Affected services: [List]
+  - User experience: [What users will experience]
+
+  ## Preparation
+  - We recommend: [Any user actions recommended before maintenance]
+  - Please save any work in progress before the maintenance window
+
+  ## Communication Plan
+  - 15 minutes before start: Status page updated to "maintenance in progress"
+  - During maintenance: Updates every 30 minutes on status page
+  - Upon completion: Final status update and confirmation of service restoration
+
+  ## Rollback Plan
+  If issues arise, we will: [Brief description of rollback procedure]
+
+  ## Contact
+  For questions before the maintenance window: [support email]
+  Status page: https://status.mereka.dev
+  ```
+
 ### Non-Functional Requirements
 
 #### Performance
@@ -424,6 +830,36 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 
 - [ ] AC-022: Given one month of production operation, when the monthly SLA report script runs, then a report is generated containing per-service availability, latency percentiles, error budget status, incident summary, and maintenance log
 - [ ] AC-023: Given a generated SLA report, when reviewed for security, then it contains no internal IP addresses, secret names, or infrastructure hostnames
+- [ ] AC-024: Given a quarterly reporting period, when the quarterly SLA report is generated, then it contains 90-day availability trends, performance regression summary, capacity planning recommendations, and on-call health metrics
+- [ ] AC-025: Given an enterprise client, when the monthly SLA report is distributed, then it is delivered within 5 business days of month end using the standardized report template
+
+### Service-Specific SLIs
+
+- [ ] AC-026: Given LMS is operational, when Prometheus queries `mereka_sli_lms_availability_ratio`, then a value between 0 and 1 is returned representing current availability
+- [ ] AC-027: Given CMS is operational, when Prometheus queries `mereka_sli_cms_latency_p95_seconds`, then a value in seconds is returned representing p95 latency
+- [ ] AC-028: Given all production services, when Prometheus recording rules are evaluated, then each service has corresponding `mereka_sli_<service>_availability_ratio` and `mereka_sli_<service>_error_budget_remaining_minutes` metrics
+
+### Error Budget Procedures
+
+- [ ] AC-029: Given error budget is exhausted (< 0%), when the exhaustion is detected, then a P1 incident is created, deployments are frozen (except remediation), and engineering lead + VP/CTO are notified within 15 minutes
+- [ ] AC-030: Given error budget is critical (< 10%), when deployment is attempted, then VP/CTO approval is required and the gate check blocks deployment until approval is documented
+- [ ] AC-031: Given error budget is exhausted, when the reliability sprint begins, then all feature work is paused and the team focuses exclusively on reliability improvements until budget is restored to >= 10%
+- [ ] AC-032: Given error budget consumption, when the SLO dashboard is viewed, then projected recovery date is displayed based on current burn rate
+
+### SLA Breach Procedures
+
+- [ ] AC-033: Given an SLA breach is detected, when the breach notification fires, then engineering lead, VP/CTO, and affected enterprise account managers are notified within 1 hour
+- [ ] AC-034: Given an SLA breach, when client communication begins, then the first notification is sent within 1 hour, a detailed update within 4 hours, and a formal postmortem within 5 business days
+- [ ] AC-035: Given an SLA breach, when remediation plan is created, then it includes root cause analysis, immediate fixes, long-term improvements, and timeline for each, documented within 4 hours of breach detection
+- [ ] AC-036: Given a Tier 1 service breaches SLA in 2 consecutive months, when the second breach is confirmed, then an emergency architecture review is automatically scheduled
+
+### Additional Edge Cases
+
+- [ ] AC-037: Given GCP uptime checks from multiple regions, when latency is measured for SLA purposes, then only the Asia-Pacific regional probe is used as the authoritative measurement
+- [ ] AC-038: Given a MySQL infrastructure failure causes LMS, CMS, and Forum to fail simultaneously, when error budgets are calculated, then downtime is attributed to MySQL only and dependent services' budgets are not consumed if they recover immediately after MySQL
+- [ ] AC-039: Given a maintenance window notification email fails to send, when the failure is detected, then operations is alerted within 1 hour and manual client outreach is triggered
+- [ ] AC-040: Given a rolling deployment causes transient 503 errors, when errors are < 0.1% of traffic and last < 1 minute, then they may be excluded from SLO calculation if documented in monthly report
+- [ ] AC-041: Given timestamp discrepancies between Prometheus and GCP Monitoring, when SLA is calculated, then the time measurement most favorable to the client is used
 
 ## Edge Cases
 
@@ -510,6 +946,77 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 - This composite SLI prevents "technically available but unusable" from counting as a healthy state
 - The latency-included availability MUST be reported alongside the pure HTTP availability in SLA reports
 
+### Multi-Region Latency Measurement
+
+**Symptom**: GCP uptime checks from different regions show inconsistent latency (Singapore probe shows 100ms, US probe shows 3000ms).
+
+**Cause**: The platform is deployed in `asia-southeast1` -- latency for probes from distant regions includes intercontinental network transit.
+
+**Mitigation**:
+- The system MUST use the regional probe closest to the deployment (Singapore/Asia region) as the authoritative latency measurement for SLA purposes
+- The system MUST document in SLA contracts that latency targets apply to Asia-Pacific region access only
+- The system SHOULD track latency from multiple regions for capacity planning but NOT count non-regional probes against SLA
+- If clients are primarily in a specific geography (e.g., Malaysia, Singapore, Indonesia), the system MUST configure GCP uptime checks to probe from those specific locations
+- For global clients, the system MUST negotiate separate regional latency targets in the SLA (e.g., < 2s p95 in APAC, < 5s p95 in EMEA/Americas)
+
+### Cascading Failure SLO Impact
+
+**Symptom**: MySQL goes down (Tier 1 service), causing LMS, CMS, Forum, Ecommerce to all fail simultaneously. All services breach SLO in the same window.
+
+**Cause**: Shared infrastructure failure creates correlated unavailability across dependent services.
+
+**Mitigation**:
+- The system MUST track infrastructure-level incidents separately from service-level incidents
+- When a Tier 1 infrastructure service (MySQL, Redis) fails, the system MUST attribute downtime to the infrastructure service only, not to all dependent services
+- The error budget for dependent services SHOULD NOT be consumed during an infrastructure-wide outage IF the dependent services resume normal operation immediately after infrastructure recovery
+- The system MUST document infrastructure dependencies in each service's SLO definition
+- The system MUST calculate "attributable downtime" for each service: total downtime MINUS downtime during infrastructure-wide incidents where the service had no independent failures
+- For SLA reporting, if an infrastructure failure causes multi-service outages, the report MUST clearly state: "All service downtime attributed to MySQL outage on [date]" rather than treating each service as independently failing
+- If a service experiences cascading failures due to insufficient retry/circuit-breaker logic (fails even after infrastructure recovers), the downtime MUST count against that service's error budget
+
+### Maintenance Window Notification Failure
+
+**Symptom**: Maintenance window is scheduled and declared, but notification email to enterprise clients fails to send due to email service issue.
+
+**Cause**: Dependency on external email delivery service (SendGrid, SES, etc.).
+
+**Mitigation**:
+- The system MUST use multiple notification channels for maintenance announcements: email (primary), status page update (mandatory), Slack notification (for internally-managed clients), SMS (for P1-tier clients)
+- The system MUST verify email delivery via delivery receipts or API confirmation
+- If email notification fails, the system MUST alert operations within 1 hour and trigger manual outreach to affected clients
+- The system MUST maintain a maintenance calendar on the status page (https://status.mereka.dev) as a backup notification mechanism
+- If notification fails and the maintenance window is within 72 hours, the system MUST consider rescheduling the maintenance to meet the 72-hour advance notice requirement
+- The system MUST log all notification attempts with delivery status in a structured format
+
+### SLO Measurement During Deployment
+
+**Symptom**: During a rolling deployment, 10% of requests go to pods that are still starting up (readiness probe not yet passing), causing transient 503 errors.
+
+**Cause**: Kubernetes routes traffic to pods before application is fully ready.
+
+**Mitigation**:
+- The system MUST configure readiness probes for all services to ensure pods only receive traffic when fully operational
+- The system MUST use preStop lifecycle hooks to gracefully drain connections before pod termination
+- The system MUST configure appropriate readiness probe settings: `initialDelaySeconds`, `periodSeconds`, `failureThreshold`
+- If deployment-related errors (503 from not-ready pods) occur, the system SHOULD NOT count them against availability SLO IF they are below 0.1% of total traffic
+- The system MUST monitor deployment success rate as a separate metric: `mereka_deployment_errors_total` (errors caused by deployment process itself)
+- For SLA reporting, deployment-related transient errors (< 1 minute duration, < 0.1% traffic impact) MAY be excluded if documented in the monthly report
+- If deployment-related errors exceed 0.1% of traffic or last > 1 minute, they MUST count fully against SLO
+
+### Clock Skew and Timestamp Inconsistencies
+
+**Symptom**: Prometheus shows an incident lasted 10 minutes, but GCP Cloud Monitoring shows 15 minutes, leading to SLA calculation discrepancies.
+
+**Cause**: Clock skew between Prometheus server, GCP infrastructure, and application pods.
+
+**Mitigation**:
+- The system MUST ensure all infrastructure uses NTP for time synchronization (GKE nodes sync automatically)
+- The system MUST use consistent time sources for SLI calculation (prefer Prometheus as single source of truth for internal SLOs, GCP Cloud Monitoring for external SLAs)
+- When discrepancies exist, the system MUST use the time measurement most favorable to the client for SLA purposes (longer uptime / shorter downtime)
+- The system MUST document the authoritative time source for each SLI in this spec
+- The system MUST alert if clock skew > 5 seconds is detected between Prometheus and GCP Monitoring
+- For incident postmortems, all timestamps MUST be normalized to UTC and sourced from a single system (Prometheus preferred)
+
 ## Observability
 
 ### Logs
@@ -546,11 +1053,37 @@ Enterprise clients purchasing Mereka Academy require contractual availability an
 | `SLOBudgetWarning` | P3 | 6h burn rate > 3x for any Tier 1/2 service | Slack engineering channel |
 | `SLOBudgetExhausted` | P1 | Error budget remaining < 0% for any Tier 1 service | Page primary + secondary on-call; notify Incident Commander |
 | `SLOBudgetLow` | P2 | Error budget remaining < 25% for any Tier 1 service | Slack engineering channel + email to engineering lead |
+| `SLOBudgetCritical` | P1 | Error budget remaining < 10% for any Tier 1 service | Page primary on-call; email VP/CTO |
 | `LatencyRegressionSpike` | P2 | p95 latency > 2x 7-day baseline for 15 minutes | Page primary on-call |
 | `LatencyRegressionDrift` | P3 | p95 latency > 1.5x 7-day baseline for 1 hour | Slack engineering channel |
 | `ErrorRateSpike` | P1 | 5xx error rate > 3x 7-day average for 10 minutes | Page primary + secondary on-call |
 | `SLIMeasurementDown` | P2 | No SLI data for any Tier 1 service for 10 minutes | Page primary on-call |
 | `MaintenanceWindowOverrun` | P3 | Maintenance window has reached 75% of declared duration | Slack operations channel |
+| `SLABreachImminent` | P1 | Projected 30-day availability will breach SLA within 72 hours at current burn rate | Page primary + secondary on-call; notify engineering lead |
+| `SLABreachConfirmed` | P1 | Actual 30-day availability has fallen below SLA target | Page all on-call; notify VP/CTO; create incident |
+| `ErrorBudgetRecoveryStalled` | P2 | Error budget < 25% for > 7 days with no recovery trend | Slack engineering channel; email engineering lead |
+
+**Alert Configuration Details**:
+
+- All SLO/SLA alerts MUST use multi-window burn rate calculations to reduce false positives:
+  - Fast burn window: 1 hour (detects rapid degradation)
+  - Slow burn window: 6 hours (detects gradual degradation)
+  - Alert fires only when BOTH windows exceed threshold simultaneously
+
+- Burn rate thresholds are calculated as multiples of the "normal" budget consumption rate:
+  - 1x burn rate = consuming error budget at exactly the rate that would exhaust it in 30 days
+  - 14.4x burn rate = consuming budget 14.4 times faster (would exhaust in ~2 days)
+  - 6x burn rate = consuming budget 6 times faster (would exhaust in ~5 days)
+
+- All alerts MUST include the following annotations:
+  - `summary`: Brief description of the alert
+  - `description`: Detailed explanation including current metric value, threshold, and affected service
+  - `runbook`: Link to runbook for this alert type (e.g., `docs/operations/runbooks/slo-budget-exhausted.md`)
+  - `dashboard`: Link to relevant Grafana dashboard for investigation
+  - `service`: Affected service name
+  - `tier`: Service tier (1, 2, or 3)
+  - `current_value`: Current metric value that triggered the alert
+  - `threshold`: Threshold that was exceeded
 
 ### Dashboards
 
@@ -561,6 +1094,122 @@ The system MUST create or update the following Grafana dashboards:
 | `Mereka LMS - SLO Overview` | `mereka-slo-overview` | Per-service availability (30-day rolling), error budget remaining (bar chart), burn rate trend (time series), latency percentiles by endpoint category, deployment annotations, maintenance window markers |
 | `Mereka LMS - SLO Detail` (per service) | `mereka-slo-detail-{service}` | Individual service deep-dive: availability ratio, error budget burn-down, latency histogram heatmap, error rate trend, saturation metrics, top slow endpoints |
 | `Mereka LMS - Error Budget` | `mereka-error-budget` | Budget remaining per tier (gauge), budget consumption timeline (stacked area), deployment freeze status (indicator), budget forecast (when budget hits zero at current burn rate) |
+| `Mereka LMS - SLA Compliance` | `mereka-sla-compliance` | SLA pass/fail status per service, days until next SLA breach at current burn rate, historical SLA compliance trend, incident impact summary |
+
+**Dashboard Panel Specifications**:
+
+**SLO Overview Dashboard** (`mereka-slo-overview`):
+1. **Service Availability Grid** (Stat panels)
+   - One panel per service showing current 30-day availability as percentage
+   - Color thresholds: Green (>= SLO target), Yellow (SLO target to SLA target), Red (< SLA target)
+   - Sparkline showing 7-day trend
+   - Drill-down link to service detail dashboard
+
+2. **Error Budget Status** (Bar gauge)
+   - Horizontal bar per service showing error budget remaining as percentage
+   - Color thresholds: Green (>= 50%), Yellow (25-50%), Orange (10-25%), Red (< 10%)
+   - Absolute minutes remaining displayed as text overlay
+
+3. **Burn Rate Trend** (Time series)
+   - Multi-line chart showing 1h and 6h burn rates for all Tier 1 services
+   - Horizontal threshold lines at 14.4x, 6x, 3x, 1x burn rate
+   - Annotations for deployment events
+   - Tooltips showing projected time to budget exhaustion
+
+4. **Latency Heatmap** (Heatmap)
+   - X-axis: Time (last 7 days)
+   - Y-axis: Service + endpoint category
+   - Color: p95 latency (green = within target, red = exceeding target)
+   - Allows quick identification of latency regressions
+
+5. **Incident Impact Timeline** (Time series with annotations)
+   - Shows platform-wide availability over last 30 days
+   - Annotations for each P1/P2 incident with duration and impact
+   - Maintenance windows shown as vertical shaded regions
+   - Deployment events shown as vertical markers
+
+6. **Deployment Freeze Status** (Stat panel)
+   - Current deployment policy based on error budget: Normal / Cautious / Restricted / Frozen
+   - Color: Green (Normal), Yellow (Cautious), Orange (Restricted), Red (Frozen)
+
+**SLO Detail Dashboard** (per service, e.g., `mereka-slo-detail-lms`):
+1. **Availability Gauge** (Gauge)
+   - Current 30-day availability
+   - Thresholds: SLO target, SLA target
+
+2. **Error Budget Burn-Down** (Time series)
+   - Line chart showing error budget remaining over last 30 days
+   - Projected trend line based on current burn rate
+   - Shaded regions for budget health zones
+
+3. **Request Rate** (Time series)
+   - Total requests per second
+   - Successful (2xx/3xx) vs failed (5xx) split
+
+4. **Latency Distribution** (Time series)
+   - Multi-line: p50, p75, p95, p99
+   - Horizontal lines for latency targets
+   - Deployment annotations
+
+5. **Error Rate** (Time series)
+   - 5xx error rate as percentage
+   - 5-minute rolling window
+   - Threshold lines for Warning and Critical
+
+6. **Top Slow Endpoints** (Table)
+   - Endpoint path, p95 latency, request count, error rate
+   - Sortable by latency
+   - Links to trace search in Tempo
+
+7. **Saturation Metrics** (Gauge panels)
+   - CPU utilization, memory utilization, connection pool usage
+   - Pod count and restart count
+
+**Error Budget Dashboard** (`mereka-error-budget`):
+1. **Budget Remaining by Tier** (Bar gauge)
+   - Grouped by tier (Tier 1, Tier 2, Tier 3)
+   - Shows absolute minutes remaining per service
+
+2. **Budget Consumption Timeline** (Stacked area chart)
+   - X-axis: Last 30 days
+   - Y-axis: Error budget consumed (minutes)
+   - Stack: Per-service contribution
+   - Allows identification of which services are consuming budget fastest
+
+3. **Deployment Freeze Indicator** (Stat panel)
+   - Current freeze status with color coding
+   - Time since last deployment
+   - Next allowed deployment window
+
+4. **Budget Forecast** (Time series with projection)
+   - Historical budget trend
+   - Projected trend based on current burn rate
+   - Estimated date when budget hits critical thresholds (25%, 10%, 0%)
+
+5. **Budget Policy Table** (Table)
+   - Service, current budget %, policy tier, approvals required, last deployment
+   - Color-coded by policy tier
+
+**SLA Compliance Dashboard** (`mereka-sla-compliance`):
+1. **SLA Pass/Fail Matrix** (Table)
+   - Service, SLA Target, Current Availability, Status (PASS/FAIL), Margin
+   - Color-coded rows (green = pass, red = fail)
+
+2. **Days to SLA Breach** (Stat panels)
+   - Per-service countdown: "X days until SLA breach at current burn rate"
+   - Shows "N/A" if currently passing with healthy margin
+
+3. **Historical SLA Compliance** (Time series)
+   - Rolling 30-day availability per service over last 180 days
+   - Horizontal line for SLA target
+   - Shaded regions where SLA was breached
+
+4. **Incident Impact Breakdown** (Pie chart)
+   - Percentage of total downtime attributed to: P1 incidents, P2 incidents, maintenance windows, infrastructure failures
+
+5. **Client-Facing Status** (Stat panel)
+   - "Platform SLA Status: COMPLIANT" or "Platform SLA Status: BREACH"
+   - Suitable for display on client-facing status page
 
 ## Rollout & Rollback
 

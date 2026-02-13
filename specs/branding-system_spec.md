@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/multi-site-domains_spec.md"
@@ -241,6 +242,18 @@ ls infrastructure/tutor/themes/mereka/lms/static/fonts/*.woff2
 tutor k8s exec lms ./manage.py lms collectstatic --noinput
 ```
 
+### WCAG Contrast Ratio Violation
+
+**Symptom**: Enterprise tenant's brand colors fail WCAG 2.1 AA contrast ratio (4.5:1 for normal text, 3:1 for large text)
+
+**Cause**: Tenant uploads brand colors that look good on their marketing site but fail accessibility standards against Open edX UI backgrounds. No automated check prevents this.
+
+**Mitigation**:
+- Validate contrast ratios at brand upload time using design-tokens-system_spec.md color validation
+- Reject color combinations that fail WCAG 2.1 AA with a human-readable error: "Your primary color #FF6600 on white background has contrast ratio 3.2:1 (minimum: 4.5:1)"
+- Provide a suggested accessible alternative using the nearest compliant color
+- CI visual regression tests MUST include Axe accessibility checks on branded pages
+
 ### Theme Cache Invalidation
 
 **Symptom**: Updated branding not visible after rebuild
@@ -333,9 +346,9 @@ tutor k8s restart lms cms
 
 ## Open Questions
 
-1. Should we version theme assets (e.g., logo-v2.png) to enable cache busting?
-2. How do we handle A/B testing of branding changes?
-3. Should we extract footer component to separate npm package?
-4. Do we need a design system spec for color palette, typography?
-5. Should we implement per-domain branding overrides via SiteConfiguration?
-6. How do we measure branding consistency compliance across services?
+1. ~~Should we version theme assets (e.g., logo-v2.png) to enable cache busting?~~ **RESOLVED**: Yes. Use content-hash filenames in webpack builds (e.g., `logo.a1b2c3.png`). MFE builds already produce hashed filenames. Comprehensive theme assets use git SHA as version suffix for CDN cache invalidation.
+2. ~~How do we handle A/B testing of branding changes?~~ **RESOLVED**: No A/B testing for branding in v1. Per-tenant branding via SiteConfiguration covers the multi-brand use case. A/B testing adds complexity not justified for current scale.
+3. ~~Should we extract footer component to separate npm package?~~ **RESOLVED**: No. Footer component is defined in branding-system_spec.md and implemented as a Tutor patch. Separate npm package adds maintenance burden without benefit since it only serves Mereka MFEs.
+4. ~~Do we need a design system spec for color palette, typography?~~ **RESOLVED**: Yes, tracked in design-tokens-system_spec.md (Tier 4). Design tokens define the canonical color palette, typography, and spacing used by the branding system.
+5. ~~Should we implement per-domain branding overrides via SiteConfiguration?~~ **RESOLVED**: Yes. SiteConfiguration already supports per-domain overrides in Open edX. Use `PLATFORM_NAME`, `LOGO_URL`, `FAVICON_URL` per Site. Required for multi-tenant branding per multi-tenancy-architecture_spec.md.
+6. ~~How do we measure branding consistency compliance across services?~~ **RESOLVED**: Visual regression testing via Playwright screenshots in CI. Compare MFE renders against golden screenshots stored in `scripts/qa/golden/`. Alert on >5% pixel diff. Implementation tracked in CI/CD pipeline spec.

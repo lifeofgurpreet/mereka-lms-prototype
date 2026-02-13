@@ -5,6 +5,7 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -131,8 +132,17 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 - The system MUST prevent direct database joins across tenant boundaries; cross-tenant aggregation MUST only be possible via platform-admin-level queries (superuser)
 - Redis cache keys MUST be namespaced by `enterprise_customer_uuid` where the cached data is tenant-specific (e.g., catalog content metadata, license counts)
 - The system MUST NOT share Redis cache entries across tenants for tenant-specific data; shared platform data (course metadata not scoped to a tenant) MAY use shared cache keys
-- MongoDB Atlas (modulestore) MUST NOT require per-tenant isolation at v1; content access control is enforced by the enterprise-catalog layer (content is shared, access is tenant-scoped)
-- The forum service (`cs_comments_service`) MUST scope discussion threads to the course context, which is implicitly tenant-scoped when courses are assigned to enterprise catalogs; the system SHOULD evaluate per-tenant forum isolation in a future revision if tenants share courses
+
+##### MongoDB Collection Isolation Model
+
+- Open edX uses a **shared-everything MongoDB model**: all tenants share the same MongoDB databases (`openedx` for modulestore, `cs_comments_service` for forum), with tenant isolation enforced at the **application layer** rather than at the database or collection level
+- The system MUST NOT implement per-tenant MongoDB databases or collections; all course data, forum data, and modulestore content reside in shared collections
+- Modulestore courses MUST be org-scoped, where the `org` field maps to the tenant; tenant isolation for course access MUST be enforced by the enterprise-catalog layer filtering courses by `org`
+- Forum posts MUST be course-scoped; since courses are tenant-scoped via enrollment and catalog assignment, forum data is implicitly tenant-scoped by course membership
+- The system MUST NOT rely on MongoDB-level access control (database users, collection-level permissions) for tenant isolation; all database access MUST go through the LMS/forum application layer with Django ORM queryset filtering
+- Given a MongoDB query for modulestore data (e.g., finding all courses), the application layer MUST filter by the `org` field to scope results to the requesting tenant
+- Given a forum query for discussion threads, the application layer MUST scope results to courses that the requesting tenant has access to via their enterprise catalog and enrollment records
+- Cross-tenant forum visibility (where tenants share a course): if two tenants include the same course in their catalogs, learners from both tenants enrolled in that course MAY see each other's forum posts; this is the expected behavior for shared course content. The system SHOULD support per-tenant forum isolation via course duplication (separate course runs per tenant) if a tenant requires private discussions
 
 #### Tenant Isolation -- Authentication and Authorization
 
@@ -270,6 +280,43 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 - The shared MySQL database architecture MUST support 50+ tenants without requiring database sharding at v1
 - If query performance degrades below acceptable thresholds at high tenant counts, the system SHOULD support horizontal read replicas for enterprise service databases
 - The system SHOULD support a migration path from shared-database to per-tenant-database isolation if regulatory or client requirements demand it in the future (this is a non-goal for v1 but the schema design should not preclude it)
+
+### EnterpriseCustomer Canonical Schema (v1.0)
+
+This section defines the canonical data model for the `EnterpriseCustomer` entity. All specs referencing enterprise tenant data MUST use this schema as the single source of truth. Individual specs SHOULD NOT redefine these fields; they SHOULD reference this section.
+
+| Field | Type | Source Spec | Description |
+|-------|------|-------------|-------------|
+| `uuid` | UUID (primary key) | multi-tenancy-architecture | Globally unique tenant identifier; canonical tenant boundary for all enterprise services |
+| `name` | string | enterprise-microservices | Display name for the enterprise organization |
+| `slug` | string (unique) | multi-tenancy-architecture | URL-safe identifier for tenant-specific routing (e.g., `/enterprise/login/{slug}`) |
+| `active` | boolean | multi-tenancy-architecture | Whether the tenant is currently active; `False` disables all enterprise features for this tenant |
+| `site_id` | FK (Django Site) | multi-tenancy-architecture | Link to Django Site record for per-tenant site configuration and domain routing |
+| `country` | string (ISO 3166-1) | multi-tenancy-architecture | Tenant's primary country code (for compliance, data residency planning, analytics) |
+| `contact_email` | email | multi-tenancy-architecture | Primary contact email for tenant (ops notifications, billing alerts) |
+| `identity_provider` | string (FK to IdP slug) | auth-sso-enterprise | SAML/OIDC identity provider slug linking to the tenant's SSO configuration |
+| `enable_data_sharing_consent` | boolean | enterprise-microservices | Whether the data sharing consent (DSC) framework is enabled for this tenant |
+| `enforce_data_sharing_consent` | boolean | enterprise-microservices | Whether DSC is required before enrollment completion data is visible to the tenant admin |
+| `enable_audit_enrollment` | boolean | enterprise-microservices | Whether learners can enroll in audit mode (free) for tenant-subsidized courses |
+| `enable_audit_data_reporting` | boolean | enterprise-microservices | Whether audit-mode enrollment data is reported to the tenant (typically disabled) |
+| `hide_course_original_price` | boolean | enterprise-microservices | Whether to hide the course's list price in the learner portal (enterprise-subsidized courses) |
+| `enable_portal_code_management_screen` | boolean | enterprise-microservices | Whether enterprise admins can manage coupon codes in the admin portal |
+| `enable_learner_portal` | boolean | enterprise-microservices | Whether the enterprise learner portal is enabled for this tenant |
+| `enable_integrated_customer_learner_portal_search` | boolean | enterprise-microservices | Whether enterprise catalog search is enabled in the learner portal |
+| `enable_analytics_screen` | boolean | enterprise-microservices | Whether the analytics dashboard is enabled in the admin portal for this tenant |
+| `sender_alias` | string | enterprise-microservices | Email sender alias for tenant-specific system emails (e.g., "Acme Learning Team") |
+| `enable_slug_login` | boolean | auth-sso-enterprise | Whether slug-based login routing (`/enterprise/login/{slug}`) is enabled for this tenant |
+| `branding_logo_url` | URL | badges-credentials-enterprise | Tenant's primary logo URL (used in badge issuer profiles, emails, and portal branding) |
+| `webhook_urls` | JSON (list of URLs) | badges-credentials-enterprise | Webhook endpoints for badge events (`badge_issued`, `badge_revoked`, etc.); used by badge system |
+| `issuer_profile` | JSON | badges-credentials-enterprise | Badge issuer profile metadata (name, description, email, logo) for OpenBadges assertions |
+| `stripe_connect_account_id` | string | ecommerce-purchase-gateway | Stripe Connect account ID for tenant-specific payment processing (if using Stripe Connect multi-tenant billing) |
+
+**Notes**:
+- Fields marked with `(FK)` are foreign keys or references to other models.
+- Additional tenant-specific configuration (SSO SAML metadata, catalog filters, access policies) is stored in related models (`SAMLProviderConfig`, `EnterpriseCatalog`, `SubsidyAccessPolicy`) linked via `enterprise_customer_uuid`.
+- Feature flags listed here are Django model fields on `EnterpriseCustomer`. Platform-wide feature flags (e.g., `ENABLE_ENTERPRISE_LEARNER_PORTAL`) are separate environment settings.
+- This schema is version-controlled. Breaking changes to these fields MUST be documented as a schema version increment (e.g., v2.0) and communicated across all dependent specs.
+- Specs that add new `EnterpriseCustomer` fields MUST update this canonical schema and increment the version number.
 
 ---
 

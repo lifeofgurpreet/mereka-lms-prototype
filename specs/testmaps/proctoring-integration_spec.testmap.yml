@@ -1,0 +1,265 @@
+spec: proctoring-integration_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given the `edx-proctoring` package is installed, when a proctoring
+    backend for Proctorio is registered, then `ProctoringBackendProvider.get_backend('proctorio')`
+    returns the Proctorio adapter instance
+  verify: []
+- id: AC-002
+  description: Given an Examity backend is configured with valid API credentials,
+    when `register_exam_attempt()` is called, then a corresponding exam record is
+    created in the Examity system and a `provider_session_id` is returned
+  verify: []
+- id: AC-003
+  description: Given a Respondus LockDown Browser backend is configured, when a student
+    accesses the exam URL from a standard browser, then the system detects the missing
+    LockDown Browser and displays a download prompt
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires actual LockDown Browser software; cannot be automated
+      in CI
+- id: AC-004
+  description: Given a ProctorTrack backend is configured, when `on_review_callback()`
+    receives an AI analysis result, then the exam attempt status is updated to `second_review_required`
+    if integrity score is below the configured threshold
+  verify: []
+- id: AC-005
+  description: Given a "no-op" backend is configured in a development environment,
+    when the full exam flow is executed, then all state transitions occur correctly
+    without contacting any external provider
+  verify: []
+- id: AC-006
+  description: Given a course author in Studio, when they edit a subsection's exam
+    settings, then they can select `proctored` as the exam type and choose from providers
+    enabled for the enterprise customer
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Exam Setup
+    justification: Studio UI interaction; smoke test with browser automation when
+      implemented
+- id: AC-007
+  description: Given a proctored exam with `time_limit_minutes=60` and `due_date=2026-06-15T23:59:00Z`,
+    when a student accesses the exam at 2026-06-16T00:00:01Z, then the exam is blocked
+    with a "deadline passed" message
+  verify: []
+- id: AC-008
+  description: Given an enterprise customer with only `proctorio` enabled, when a
+    course author attempts to select `examity` as the backend, then Studio displays
+    a validation error
+  verify: []
+- id: AC-009
+  description: Given a course with proctored exams is re-run, when the new course
+    run is created, then all proctored exam settings (type, time limit, backend, review
+    policy) are preserved in the new run
+  verify: []
+- id: AC-010
+  description: Given a student starting a proctored exam for the first time, when
+    the identity verification flow begins, then the system captures a photo ID image
+    via webcam and sends it to the provider for analysis
+  verify: []
+- id: AC-011
+  description: Given identity verification returns `failed`, when the student attempts
+    to proceed, then the exam is blocked and the student is offered up to 2 additional
+    verification attempts
+  verify: []
+- id: AC-012
+  description: Given identity verification returns `passed`, when the student proceeds,
+    then the verification result (passed, timestamp, provider reference) is stored
+    linked to `user_id` and `enterprise_customer_uuid`
+  verify: []
+- id: AC-013
+  description: Given a student has completed onboarding identity verification, when
+    they start a subsequent proctored exam, then the system verifies against the baseline
+    (facial recognition) without requiring full photo ID re-capture
+  verify: []
+- id: AC-014
+  description: Given a student on the pre-exam environment check page, when their
+    webcam is blocked by browser permissions, then the check fails with the message
+    "Please allow camera access in your browser settings"
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Environment Check
+    justification: Browser permission interaction; smoke test with browser automation
+      when implemented
+- id: AC-015
+  description: Given all environment checks pass, when the student reviews the results,
+    then each component (webcam, microphone, screen share, browser, network) shows
+    a green checkmark
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Environment Check
+    justification: Browser UI rendering; smoke test with browser automation when implemented
+- id: AC-016
+  description: Given the student's upload bandwidth is below 1.5 Mbps, when the network
+    check runs, then it fails with a message indicating the minimum required bandwidth
+  verify: []
+- id: AC-017
+  description: Given an exam configured with Respondus LockDown Browser, when a student
+    is in the LockDown Browser, then the student cannot open other applications, copy/paste,
+    take screenshots, or access other tabs
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires physical LockDown Browser installation; cannot automate
+      in CI
+- id: AC-018
+  description: Given an exam configured with Proctorio with `lock_fullscreen=true`
+    and `disable_clipboard=true`, when the student takes the exam, then fullscreen
+    mode is enforced and clipboard access is blocked
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires Proctorio extension; cannot automate in CI
+- id: AC-019
+  description: Given a student attempts to use a virtual machine to take a proctored
+    exam, when the provider detects the VM, then the attempt is flagged with a `vm_detected`
+    event
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Browser Lockdown
+    justification: Requires VM environment; manual verification only
+- id: AC-020
+  description: Given a student starts a proctored exam, when the exam timer begins,
+    then the attempt state transitions from `ready_to_start` to `started` and the
+    state change is logged with timestamp and user ID
+  verify: []
+- id: AC-021
+  description: Given a student submits a proctored exam, when the submission is processed,
+    then the attempt state transitions to `submitted` and the proctoring provider
+    is notified via `stop_exam_attempt()`
+  verify: []
+- id: AC-022
+  description: Given an exam attempt in `started` state for longer than `time_limit_minutes
+    + 30 minutes`, when the auto-expiry check runs, then the attempt transitions to
+    `timed_out` and the provider is notified
+  verify: []
+- id: AC-023
+  description: Given a proctoring provider outage during an active exam, when the
+    student's recording stream fails, then the student's answers are preserved in
+    browser session storage and a `reconnect` prompt is displayed
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Resilience
+    justification: Requires network interruption simulation; smoke test when implemented
+- id: AC-024
+  description: Given an attempt in `verified` state, when any action attempts to transition
+    it to `started`, then the transition is rejected with an invalid state error
+  verify: []
+- id: AC-025
+  description: Given 10 exam attempts in `second_review_required` state for enterprise
+    customer A and 5 for customer B, when reviewer R (authorized for customer A only)
+    accesses the review dashboard, then only the 10 attempts for customer A are visible
+  verify: []
+- id: AC-026
+  description: Given a reviewer selects an attempt, when they click "Reject" and enter
+    a reason (25 characters), then the attempt transitions to `rejected`, the reason
+    is stored, and the student is notified via email
+  verify: []
+- id: AC-027
+  description: Given a reviewer rejects an attempt, when a `proctoring_admin` user
+    accesses the attempt, then they can override the rejection to `verified` with
+    an audit log entry
+  verify: []
+- id: AC-028
+  description: Given an attempt has been in the review queue for longer than the enterprise's
+    `review_sla_hours`, when the review dashboard loads, then the attempt is highlighted
+    with an SLA warning
+  verify: []
+- id: AC-029
+  description: Given a proctored exam attempt transitions to `verified`, when the
+    gradebook sync runs, then the student's exam grade appears in the Open edX gradebook
+    within 5 minutes
+  verify: []
+- id: AC-030
+  description: Given a proctored exam attempt transitions to `rejected`, when the
+    gradebook sync runs, then the student's exam grade is set to 0 and the `proctoring_status`
+    field shows `rejected`
+  verify: []
+- id: AC-031
+  description: Given an instructor overrides a rejected attempt, when the override
+    is processed, then the original exam grade is restored and `proctoring_status`
+    changes to `verified` with an override audit entry
+  verify: []
+- id: AC-032
+  description: Given a proctored exam attempt is in `submitted` state (pending review),
+    when the student views their grades, then the exam shows as "Pending Proctoring
+    Review" with no numeric grade
+  verify: []
+- id: AC-033
+  description: Given enterprise customer A uses Examity and customer B uses Proctorio,
+    when students from both take exams simultaneously, then each student's session
+    is routed to their respective provider with no credential cross-contamination
+  verify: []
+- id: AC-034
+  description: Given enterprise customer A's proctoring configuration includes `review_sla_hours=12`,
+    when customer B's configuration has `review_sla_hours=48`, then SLA warnings on
+    the review dashboard use the correct per-customer threshold
+  verify: []
+- id: AC-035
+  description: Given a GDPR deletion request for a student in enterprise customer
+    A, when the deletion is processed, then only that student's proctoring data is
+    deleted; all other data (including other students in customer A) remains intact
+  verify: []
+- id: AC-036
+  description: 'Given a student is about to start a proctored exam, when the consent
+    notice is displayed, then it includes: data collected, who accesses it, retention
+    period, right to refuse, and contact information'
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Compliance
+    justification: Content verification; smoke test with browser automation when implemented
+- id: AC-037
+  description: Given a student does not accept the consent notice, when they attempt
+    to proceed, then the exam start is blocked and the student is informed they cannot
+    take the proctored exam without consent
+  verify: []
+- id: AC-038
+  description: Given a GDPR DSAR for a student, when the request is processed, then
+    the system provides all proctoring session metadata and coordinates with the provider
+    for recording access within 30 days
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > GDPR
+    justification: Requires provider coordination; manual verification with quarterly
+      audit
+_unmapped:
+- AC-001
+- AC-002
+- AC-004
+- AC-005
+- AC-007
+- AC-008
+- AC-009
+- AC-010
+- AC-011
+- AC-012
+- AC-013
+- AC-016
+- AC-020
+- AC-021
+- AC-022
+- AC-024
+- AC-025
+- AC-026
+- AC-027
+- AC-028
+- AC-029
+- AC-030
+- AC-031
+- AC-032
+- AC-033
+- AC-034
+- AC-035
+- AC-037
+

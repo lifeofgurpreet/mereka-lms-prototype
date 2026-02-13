@@ -5,6 +5,7 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -152,6 +153,18 @@ WHERE table = 'xapi_events_all';
 ALTER TABLE xapi_events_all DROP PARTITION '2023-01-01';
 ```
 
+### ClickHouse Disk Quota Exhaustion
+
+**Symptom**: ClickHouse silently stops accepting writes before disk is physically full
+
+**Cause**: ClickHouse's `max_bytes_to_merge_at_max_space_in_pool` and merge operations consume temporary disk beyond the data partition size. A 90% full disk can block merges and effectively halt writes.
+
+**Mitigation**:
+- Alert at 75% disk usage (warning) and 85% (critical) on the ClickHouse data volume
+- Configure `min_free_disk_space_bytes` to reserve 10GB for merge operations
+- Implement TTL-based partition dropping: `ALTER TABLE xapi_events_all MODIFY TTL event_date + INTERVAL 90 DAY`
+- Monitor `system.disks` table in Prometheus for proactive alerting
+
 ### Superset Query Timeout
 
 **Symptom**: Dashboard queries fail with timeout error
@@ -290,10 +303,10 @@ cat xapi_events.jsonl | tutor k8s exec -i clickhouse clickhouse-client --query "
 
 ## Open Questions
 
-1. What's the optimal event retention period (90 days vs 1 year)?
-2. Should we replicate ClickHouse across regions for disaster recovery?
-3. How do we handle schema evolution (new event fields)?
-4. Should we export aggregated metrics to Prometheus for alerting?
-5. Do we need real-time dashboards or is daily batch acceptable?
-6. Should we anonymize user IDs completely or use reversible hashing for support?
-7. What's the SLA for data deletion requests (24h, 7 days, 30 days)?
+1. ~~What's the optimal event retention period (90 days vs 1 year)?~~ **RESOLVED**: 90 days hot (ClickHouse), 1 year cold (GCS archive with Parquet export). Aligns with cross-cutting log retention pattern (30d hot / 90d cold) but extended for analytics value.
+2. ~~Should we replicate ClickHouse across regions for disaster recovery?~~ **RESOLVED**: No. Single-node ClickHouse is sufficient for current scale (<50 tenants). Daily GCS backup provides DR. Revisit when event volume exceeds 100M events/month.
+3. ~~How do we handle schema evolution (new event fields)?~~ **RESOLVED**: Use ClickHouse materialized views with schema versioning. New fields added as nullable columns; breaking changes via new table + materialized view migration. Document in ADR.
+4. ~~Should we export aggregated metrics to Prometheus for alerting?~~ **RESOLVED**: Yes. Grafana ClickHouse data source for dashboards; Prometheus recording rules for alerting on pre-aggregated metrics (e.g., enrollment_rate, completion_rate per tenant).
+5. ~~Do we need real-time dashboards or is daily batch acceptable?~~ **RESOLVED**: Daily batch for analytics dashboards. Real-time metrics for operational alerts only (via Prometheus, not ClickHouse).
+6. ~~Should we anonymize user IDs completely or use reversible hashing for support?~~ **RESOLVED**: Reversible hashing (HMAC-SHA256 with rotatable key stored in Infisical). Support team can de-anonymize with key access. Aligns with GDPR data-privacy spec pseudonymization requirements.
+7. ~~What's the SLA for data deletion requests (24h, 7 days, 30 days)?~~ **RESOLVED**: 30 days, consistent with cross-cutting tenant offboarding timeline and GDPR compliance spec.

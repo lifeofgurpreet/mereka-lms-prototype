@@ -5,6 +5,7 @@ status: "in_progress"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-12"
+version: "1.0.0"
 implementation_note: "Mux integration being handled by separate agent"
 depends_on:
   - "specs/repository-structure_spec.md"

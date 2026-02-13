@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-12"
+version: "1.0.0"
 implementation_note: "GitOps image tag sync improvements ongoing - see docs/operations/runbooks/GITOPS_WORKFLOW.md"
 depends_on:
   - "specs/repository-structure_spec.md"
@@ -459,6 +460,13 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 - **GKE auth failure in scheduled workflows**: Runtime workflows (`operations-gates-runtime`, `observability-audit`, `alert-routing-audit`) MUST handle GKE authentication failures gracefully. Non-strict mode (`strict_runtime=false`) SHOULD skip GKE-dependent checks and report them as warnings. Strict mode MUST fail the workflow.
 - **Rate limiting**: If GitHub API rate limits are hit during scheduled workflows (every 30 min health checks), the workflow SHOULD fail gracefully without cascading failures.
+
+### Concurrent Build Handling
+
+- **Concurrent pushes to same branch**: If two commits are pushed to the same branch within minutes, the build workflow MUST use `concurrency: { group: ${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true }` to cancel the older build. Only the latest commit's build should complete.
+- **Concurrent image pushes**: Two workflows pushing the same image tag simultaneously MUST NOT corrupt the registry. Artifact Registry handles this atomically (last writer wins). The GitOps update MUST use the latest digest.
+- **Concurrent GitOps updates**: If two builds complete simultaneously and both try to update `bbi-infrastructure`, the second push MUST fail (no force-push). The operator resolves by re-running the failed workflow, which picks up the latest state.
+- **Scheduled workflow overlap**: If a scheduled workflow run overlaps with the previous run (e.g., health check takes longer than the schedule interval), the new run SHOULD be skipped via `concurrency` group to avoid resource contention.
 
 ### Retry/Timeout Behavior
 

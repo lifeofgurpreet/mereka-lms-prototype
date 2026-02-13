@@ -1,0 +1,216 @@
+spec: video-pipeline-delivery_spec.md
+acceptance_criteria:
+- id: AC-VPD-001
+  description: Given a valid MP4 URL, when `upload_videos_to_mux.py` is executed,
+    then a Mux asset is created with status "preparing" or "ready" and a playback_id
+    is returned
+  verify: []
+- id: AC-VPD-002
+  description: Given 503 MCT videos, when the Mux upload results file (`mux_upload_complete.json`)
+    is checked, then all 503 entries have a non-null `mux_asset_id` and `mux_playback_id`
+  verify: []
+- id: AC-VPD-003
+  description: Given a new video upload from Studio, when the author submits a video
+    file, then a Mux direct upload URL is generated within 2 seconds and the file
+    upload begins
+  verify: []
+- id: AC-VPD-004
+  description: Given a batch upload of 10 videos, when the upload script runs, then
+    progress is saved every 10 videos and the script can resume from the last checkpoint
+  verify: []
+- id: AC-VPD-005
+  description: Given a Mux asset with status "ready", when the HLS URL `https://stream.mux.com/{PLAYBACK_ID}.m3u8`
+    is requested, then the response contains an HLS manifest with at least 3 quality
+    renditions
+  verify: []
+- id: AC-VPD-006
+  description: Given an Open edX course with a Video XBlock, when the learner loads
+    the unit page, then the video player displays a poster thumbnail and begins HLS
+    playback within 2 seconds on a 5 Mbps connection
+  verify: []
+- id: AC-VPD-007
+  description: Given a mobile learner on a 1 Mbps connection, when the HLS player
+    performs adaptive bitrate switching, then the video degrades to 240p without buffering
+  verify: []
+- id: AC-VPD-008
+  description: Given a video with an uploaded SRT subtitle in English, when the learner
+    enables captions, then English subtitles display synchronized with video playback
+  verify: []
+- id: AC-VPD-009
+  description: Given a video with text tracks where `srclang` is empty, when the Mux
+    asset is created, then the language_code defaults to "en"
+  verify: []
+- id: AC-VPD-010
+  description: Given a Vietnamese-localized course, when subtitle files in Vietnamese
+    are uploaded to Mux, then the language selector in the video player shows "Vietnamese"
+    as an option
+  verify: []
+- id: AC-VPD-011
+  description: Given a restricted course with `signed` playback policy, when an unenrolled
+    user attempts to play the video, then playback is denied with an appropriate error
+    message
+  verify: []
+- id: AC-VPD-012
+  description: Given a signed playback token with 12-hour expiry, when the token is
+    used after 12 hours, then Mux returns a 403 Forbidden response
+  verify: []
+- id: AC-VPD-013
+  description: Given the LMS HTML source, when inspected in browser DevTools, then
+    only Mux playback IDs are visible -- never Mux asset IDs or API credentials
+  verify: []
+- id: AC-VPD-014
+  description: Given a learner watching a video to completion, when the xAPI pipeline
+    is checked, then `played` and `completed` events exist in ClickHouse with the
+    correct video identifier
+  verify: []
+- id: AC-VPD-015
+  description: Given Mux Data is enabled, when the Mux dashboard is accessed, then
+    quality metrics (rebuffer ratio, TTFF, startup time) are visible for the last
+    7 days
+  verify: []
+- id: AC-VPD-016
+  description: Given a Superset dashboard for video engagement, when an instructor
+    views it, then per-video play rates and average completion percentages are displayed
+  verify: []
+- id: AC-VPD-017
+  description: Given the current catalog of 1,290 video-minutes, when Mux storage
+    charges are calculated after 90 days, then monthly storage cost is <= $1.55 (cold
+    storage discount applied)
+  verify: []
+- id: AC-VPD-018
+  description: Given 30,000 delivery minutes/month, when the Mux invoice is reviewed,
+    then delivery cost is $0.00 (within 100K free tier)
+  verify: []
+- id: AC-VPD-019
+  description: Given a monitoring alert rule, when monthly delivery minutes exceed
+    80,000, then a Slack/email alert is triggered
+  verify: []
+- id: AC-VPD-020
+  description: Given MUX_TOKEN_ID and MUX_TOKEN_SECRET in Infisical, when ExternalSecrets
+    syncs, then the secrets are available in the `mereka-lms` K8s namespace as a Secret
+    resource
+  verify: []
+- id: AC-VPD-021
+  description: Given the application codebase, when searched for Mux credentials,
+    then no hardcoded tokens are found (verified by pre-commit hook)
+  verify: []
+- id: AC-VPD-022
+  description: Given `video_mapping_openedx.json`, when cross-referenced with Mux
+    API `list assets`, then every mapped playback_id resolves to a valid, ready asset
+  verify: []
+- id: AC-VPD-023
+  description: Given the 30 course packages rebuilt with Mux Video XBlocks, when imported
+    into Open edX, then all video lessons play correctly with poster thumbnails
+  verify: []
+- id: AC-VPD-024
+  description: Given a Mux asset in "errored" state, when the Video XBlock renders,
+    then a poster image with "Video temporarily unavailable" text is shown instead
+    of a broken player
+  verify: []
+- id: AC-VPD-025
+  description: Given Mux API is unreachable, when the LMS page loads, then the page
+    renders fully with video placeholder -- no 500 errors or blank pages
+  verify: []
+- id: AC-VPD-026
+  description: Given the Video Operations Dashboard in Grafana, when accessed, then
+    it displays upload counts, processing queue depth, transcode success rate, and
+    API error rates
+  verify: []
+- id: AC-VPD-027
+  description: Given the Video Cost Dashboard in Grafana, when monthly delivery minutes
+    exceed 80,000, then the free tier usage percentage panel shows a visual warning
+    (orange/red threshold)
+  verify: []
+- id: AC-VPD-028
+  description: Given the Video Engagement Dashboard in Superset, when a course instructor
+    accesses it, then drop-off heatmaps show time-series data for where learners pause
+    or stop watching
+  verify: []
+- id: AC-VPD-029
+  description: Given Prometheus scraping Mux metrics, when `video_delivery_minutes_monthly`
+    is queried, then the value updates at least every 6 hours
+  verify: []
+- id: AC-VPD-030
+  description: 'Given an alert rule for `video_transcode_success_rate`, when the rate
+    drops below 95% for 6 hours, then a warning alert is sent to #ops-warnings Slack
+    channel'
+  verify: []
+- id: AC-VPD-031
+  description: Given a signed playback token generated server-side, when inspected,
+    then it contains a JWT with `exp` claim set to 12 hours from generation time
+  verify: []
+- id: AC-VPD-032
+  description: Given domain restriction is enabled (`MUX_ENABLE_DOMAIN_RESTRICTION=true`),
+    when a video is embedded on an external site (not academyv2.mereka.io or academy.biji-biji.com),
+    then Mux returns a 403 Forbidden response
+  verify: []
+- id: AC-VPD-033
+  description: Given a Mux signing key rotation in progress, when both old and new
+    keys are active, then videos can be played using tokens signed with either key
+    (dual-key support)
+  verify: []
+- id: AC-VPD-034
+  description: Given the signed URL generation endpoint `/api/video/playback-token/<playback_id>/`,
+    when called by an enrolled user, then a valid signed URL is returned in <100ms
+    (p95)
+  verify: []
+- id: AC-VPD-035
+  description: Given a video upload with an unsupported codec (e.g., HEVC), when the
+    upload is attempted, then the system rejects it with error message "Codec X is
+    not supported. Please use H.264/AAC MP4."
+  verify: []
+- id: AC-VPD-036
+  description: Given two course authors uploading videos with the same `mct_lesson_id`
+    simultaneously, when the upload script runs, then only one Mux asset is created
+    (no duplicates)
+  verify: []
+- id: AC-VPD-037
+  description: Given storage quota is exceeded, when a new video upload is attempted,
+    then the upload is queued and retried automatically after quota space becomes
+    available
+  verify: []
+- id: AC-VPD-038
+  description: Given a CDN edge serving a corrupted HLS manifest, when the Video XBlock
+    player retries with exponential backoff (1s, 2s, 4s), then playback succeeds on
+    retry or shows "Video unavailable" message after 3 failed attempts
+  verify: []
+_unmapped:
+- AC-VPD-001
+- AC-VPD-002
+- AC-VPD-003
+- AC-VPD-004
+- AC-VPD-005
+- AC-VPD-006
+- AC-VPD-007
+- AC-VPD-008
+- AC-VPD-009
+- AC-VPD-010
+- AC-VPD-011
+- AC-VPD-012
+- AC-VPD-013
+- AC-VPD-014
+- AC-VPD-015
+- AC-VPD-016
+- AC-VPD-017
+- AC-VPD-018
+- AC-VPD-019
+- AC-VPD-020
+- AC-VPD-021
+- AC-VPD-022
+- AC-VPD-023
+- AC-VPD-024
+- AC-VPD-025
+- AC-VPD-026
+- AC-VPD-027
+- AC-VPD-028
+- AC-VPD-029
+- AC-VPD-030
+- AC-VPD-031
+- AC-VPD-032
+- AC-VPD-033
+- AC-VPD-034
+- AC-VPD-035
+- AC-VPD-036
+- AC-VPD-037
+- AC-VPD-038
+

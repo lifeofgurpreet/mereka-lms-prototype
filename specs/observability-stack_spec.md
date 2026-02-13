@@ -5,6 +5,7 @@ status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
 last_updated: "2026-02-10"
+version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -233,6 +234,27 @@ kubectl port-forward -n mereka-lms svc/prometheus 9090
 kubectl exec -n mereka-lms lms-pod -- curl localhost:8000/metrics
 ```
 
+### Prometheus Self-Monitoring Blind Spot
+
+**Symptom**: Prometheus goes down and nobody is alerted because Prometheus IS the alerting system.
+
+**Cause**: Single Prometheus instance with no external watchdog. If Prometheus crashes, OOMs, or loses its storage volume, all alerting stops silently.
+
+**Mitigation**:
+- Deploy an external watchdog: GCP Cloud Monitoring uptime check on `https://prometheus.mereka.dev/-/healthy` (HTTP 200 expected)
+- Configure GCP alert policy to notify Slack `#ops-alerts` if Prometheus health check fails for > 2 minutes
+- Prometheus MUST expose `prometheus_tsdb_head_series` and `process_resident_memory_bytes` metrics; Grafana dashboard MUST show these
+- Set Prometheus memory limit to 80% of available pod memory to prevent node-level OOM
+- Use `--storage.tsdb.retention.size=15GB` (in addition to time-based retention) to prevent disk exhaustion
+
+**Recovery**:
+```bash
+# If Prometheus pod is in CrashLoopBackOff:
+kubectl -n mereka-lms delete pod -l app=prometheus  # Let K8s recreate
+# If WAL is corrupted:
+kubectl -n mereka-lms exec prometheus-pod -- promtool tsdb clean /prometheus
+```
+
 ## Observability
 
 ### Logs
@@ -244,11 +266,12 @@ kubectl exec -n mereka-lms lms-pod -- curl localhost:8000/metrics
 ### Metrics (Meta-Monitoring)
 
 Monitor the observability stack itself:
-- Prometheus query latency
-- Loki ingestion rate
-- Tempo trace ingestion rate
-- Grafana dashboard load time
-- Alert delivery success rate
+- `prometheus_tsdb_head_series` gauge: number of active time series (alert if > 500K)
+- `prometheus_engine_query_duration_seconds` histogram: query latency (alert if p95 > 10s)
+- `loki_ingester_streams_created_total` counter: Loki ingestion rate (alert if drops to 0 for 5 min)
+- `tempo_ingester_traces_created_total` counter: Tempo trace ingestion rate
+- Grafana dashboard load time: measured via Blackbox Exporter synthetic probe
+- `alertmanager_notifications_total{integration="slack"}` counter: alert delivery success rate (alert if `alertmanager_notifications_failed_total` > 0)
 
 ### Alerts
 
@@ -334,11 +357,11 @@ helm uninstall tempo -n mereka-lms
 
 ## Open Questions
 
-1. Should we use Thanos for long-term metrics storage (>30 days)?
-2. What's the optimal trace sampling rate (10%, 50%, 100%)?
-3. Should we enable Tempo's distributed tracing for cross-service calls (LMS -> Forum)?
-4. Do we need separate Prometheus for staging vs production?
-5. Should we export metrics to Google Cloud Monitoring for unified view?
-6. What's the alert escalation policy (Slack -> PagerDuty -> SMS)?
-7. Should we implement SLI/SLO dashboards (uptime, latency targets)?
-8. Do we need anomaly detection (e.g., sudden spike in error rate)?
+1. ~~Should we use Thanos for long-term metrics storage (>30 days)?~~ **RESOLVED**: No. 30-day Prometheus retention is sufficient for operational use. Export aggregated daily metrics to GCS Parquet for trend analysis. Thanos adds operational complexity not justified at current scale (<50 tenants).
+2. ~~What's the optimal trace sampling rate (10%, 50%, 100%)?~~ **RESOLVED**: 10% for normal traffic, 100% for error responses. Defined in cross-cutting-requirements_spec.md Section 2 (Traces). Revisit sampling rate when trace storage exceeds 50GB/month.
+3. ~~Should we enable Tempo's distributed tracing for cross-service calls (LMS -> Forum)?~~ **RESOLVED**: Yes. Tempo is deployed on VPS (port 3201 API, 4317 OTLP gRPC, 4318 OTLP HTTP). Enable trace propagation via `traceparent` header across LMS, Forum, Ecommerce, and XQueue.
+4. ~~Do we need separate Prometheus for staging vs production?~~ **RESOLVED**: No. Single Prometheus instance with environment label (`env=prod`, `env=dev`). Staging is not a separate environment; dev (Kind cluster) uses the same VPS observability stack.
+5. ~~Should we export metrics to Google Cloud Monitoring for unified view?~~ **RESOLVED**: No. Grafana is the single pane of glass. GCP Cloud Monitoring used only for GKE node-level alerts (already configured). No metric duplication needed.
+6. ~~What's the alert escalation policy (Slack -> PagerDuty -> SMS)?~~ **RESOLVED**: Critical alerts route to PagerDuty + Slack `#ops-alerts`. Warning alerts route to Slack `#ops-warnings`. No SMS tier. Defined in cross-cutting-requirements_spec.md Section 2 (Alerts).
+7. ~~Should we implement SLI/SLO dashboards (uptime, latency targets)?~~ **RESOLVED**: Yes. Covered by slo-sla-service-level-management_spec.md. SLO dashboard pack tracked in bead mereka-lms-8dbr.
+8. ~~Do we need anomaly detection (e.g., sudden spike in error rate)?~~ **RESOLVED**: No dedicated anomaly detection for v1. Prometheus alerting rules with threshold-based alerts are sufficient. Evaluate Grafana ML anomaly detection post-v1 when baseline traffic patterns are established.

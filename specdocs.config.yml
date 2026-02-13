@@ -27,15 +27,76 @@ required_specs:
     - "k8s-deployment"
     - "repository-structure"
     - "secrets-management"
-  missing_critical:
     - "tutor-configuration"
     - "multi-site-domains"
     - "mongodb-atlas-integration"
     - "branding-system"
     - "analytics-pipeline"
     - "observability-stack"
+    - "forum-service-migration"
+    - "auth-sso-enterprise"
+    - "ecommerce-purchase-gateway"
+    - "enterprise-microservices"
+    - "multi-tenancy-architecture"
+    - "ci-cd-pipeline"
+    - "disaster-recovery-business-continuity"
+    - "slo-sla-service-level-management"
+    - "platform-middleware-custom-apps"
+    - "cross-cutting-requirements"
+  missing_critical: []  # All critical specs now exist
 
 quality_gates:
   specs:
-    require_testmap: false
+    require_testmap: true  # Testmaps mandatory for all specs
     testmap_suffix: ".testmap.yml"
+    require_frontmatter: true
+    require_human_summary: true
+    require_nfr_section: true
+    require_cross_cutting_ref: true
+    max_ac_count: 50  # warn if spec has >50 ACs
+    ac_id_format: "AC-{PREFIX}-{NNN}"  # recommended format
+  docs:
+    require_adr_for_decisions: true
+    require_runbook_for_production: true
+
+lint_rules:
+  enabled:
+    - "SPEC-FM-001"   # Frontmatter present
+    - "SPEC-FM-002"   # Required frontmatter fields
+    - "SPEC-FM-003"   # Valid status values
+    - "MEREKA-REF-001"  # Cross-cutting spec reference
+    - "MEREKA-SEC-001"  # NFR section required
+    - "MEREKA-AC-001"   # Unique AC IDs
+  severity_overrides: {}
+
+verification:
+  scan_dirs:
+    - "scripts/"
+    - "tests/"
+    - "deploy/"
+    - "infrastructure/"
+    - "services/"
+  manual_file: "specs/manual_verifications.yaml"
+  testmaps_dir: "specs/testmaps/"
+  annotation_format:
+    covers: "# @covers AC-001, AC-002"
+    spec: "# @spec: feature_spec.md"
+  fail_under_coverage: 50  # percent
+
+templates:
+  spec: "specs/_TEMPLATE.md"
+  types:
+    - feature_spec
+    - migration_spec
+    - infrastructure_spec
+    - service_spec
+
+ci:
+  fast_checks:
+    - "lint-specs"
+    - "validate-testmaps"
+  full_checks:
+    - "lint-specs"
+    - "validate-testmaps"
+    - "spec-coverage"
+    - "spec-verify"

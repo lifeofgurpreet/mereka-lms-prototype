@@ -1,0 +1,189 @@
+spec: observability-validation-requirements_spec.md
+acceptance_criteria:
+- id: AC-OVR-001
+  description: Given the monitoring kustomization.yaml, when `grep servicemonitor
+    deploy/k8s/base/monitoring/kustomization.yaml` is run, then all deployed ServiceMonitor
+    filenames listed in the "Required ServiceMonitors" table are present
+  verify: []
+- id: AC-OVR-002
+  description: 'Given a running production cluster, when `kubectl get servicemonitor
+    -n mereka-lms -o json` is run, then ServiceMonitors exist for at minimum: `lms-metrics`,
+    `cms-metrics`, `mysql-metrics`, `redis-metrics`, `enterprise-catalog-metrics`,
+    `enterprise-access-metrics`, `enterprise-subsidy-metrics`'
+  verify: []
+- id: AC-OVR-003
+  description: Given any ServiceMonitor YAML file in `deploy/k8s/base/monitoring/`,
+    when the file is parsed, then `spec.endpoints[0].interval` is `30s` and `spec.endpoints[0].scrapeTimeout`
+    is <= `10s`
+  verify: []
+- id: AC-OVR-004
+  description: 'Given any ServiceMonitor YAML file, when labels are inspected, then
+    `app.kubernetes.io/component: monitoring` is present in `metadata.labels`'
+  verify: []
+- id: AC-OVR-005
+  description: Given the monitoring kustomization.yaml, when the file is parsed, then
+    all PrometheusRule filenames (`prometheusrule-lms.yaml`, `prometheusrule-enterprise.yaml`,
+    `prometheusrule-velero.yaml`, `prometheusrule-slo.yaml`, `prometheusrule-auth.yaml`)
+    are listed as resources
+  verify: []
+- id: AC-OVR-006
+  description: 'Given a running production cluster, when `kubectl get prometheusrule
+    -n mereka-lms -o json` is run, then resources exist for at minimum: `lms-alerts`,
+    `enterprise-alerts`, `velero-alerts`, `slo-recording-rules`, `auth-alerts`'
+  verify: []
+- id: AC-OVR-007
+  description: 'Given any PrometheusRule YAML file, when labels are inspected, then
+    `prometheus: kube-prometheus` is present in `metadata.labels`'
+  verify: []
+- id: AC-OVR-008
+  description: Given the PrometheusRule `lms-alerts`, when its alert rules are extracted,
+    then all alert names listed in the "prometheusrule-lms.yaml" table are present
+    (22 alerts)
+  verify: []
+- id: AC-OVR-009
+  description: Given the PrometheusRule `enterprise-alerts`, when its alert rules
+    are extracted, then all alert names listed in the "prometheusrule-enterprise.yaml"
+    table are present (12 alerts)
+  verify: []
+- id: AC-OVR-010
+  description: 'Given the PrometheusRule `slo-recording-rules`, when its alert rules
+    are extracted, then all SLO alert names are present: `SLOBudgetFastBurn`, `SLOBudgetSlowBurn`,
+    `SLOBudgetWarning`, `SLOBudgetExhausted`, `SLOBudgetLow`, `SLIMeasurementDown`'
+  verify: []
+- id: AC-OVR-011
+  description: Given any alert rule in any PrometheusRule, when its labels and annotations
+    are inspected, then `severity` label and `summary` + `description` annotations
+    are present
+  verify: []
+- id: AC-OVR-012
+  description: 'Given the PrometheusRule `slo-recording-rules`, when recording rules
+    are extracted, then rules exist for: `mereka:http_requests:availability_ratio_5m`,
+    `mereka:http_requests:availability_ratio_30m`, `mereka:http_requests:availability_ratio_1h`,
+    `mereka:http_requests:availability_ratio_6h` for both `lms` and `cms` services'
+  verify: []
+- id: AC-OVR-013
+  description: 'Given the PrometheusRule `slo-recording-rules`, when recording rules
+    are extracted, then rules exist for: `mereka:http_request_duration:p50_5m`, `mereka:http_request_duration:p95_5m`,
+    `mereka:http_request_duration:p99_5m` for both `lms` and `cms` services'
+  verify: []
+- id: AC-OVR-014
+  description: 'Given the PrometheusRule `slo-recording-rules`, when recording rules
+    are extracted, then rules exist for: `mereka:slo:burn_rate_5m`, `mereka:slo:burn_rate_30m`,
+    `mereka:slo:burn_rate_1h`, `mereka:slo:burn_rate_6h` for both `lms` and `cms`
+    services'
+  verify: []
+- id: AC-OVR-015
+  description: 'Given the PrometheusRule `slo-recording-rules`, when recording rules
+    are extracted, then rules exist for: `mereka:slo:error_budget_remaining_ratio`,
+    `mereka:slo:error_budget_remaining_minutes` for both `lms` and `cms` services'
+  verify: []
+- id: AC-OVR-016
+  description: Given a running Prometheus instance with django-prometheus data, when
+    `mereka:http_requests:availability_ratio_5m{service="lms"}` is queried, then a
+    numeric value between 0 and 1 is returned
+  verify: []
+- id: AC-OVR-017
+  description: Given the `infrastructure/monitoring/uptime/` directory, when all JSON
+    files are parsed, then every file is valid JSON with a `displayName` field
+  verify: []
+- id: AC-OVR-018
+  description: Given a running GCP project, when uptime checks are listed via `gcloud
+    monitoring uptime list-configs`, then every `displayName` from the repo uptime
+    directory has a matching GCP resource
+  verify: []
+- id: AC-OVR-019
+  description: Given the `infrastructure/monitoring/alerts/` directory, when all JSON
+    files are parsed (excluding legacy and unsupported), then every `displayName`
+    has a corresponding GCP alert policy
+  verify: []
+- id: AC-OVR-020
+  description: Given the `infrastructure/monitoring/logging-metrics/` directory, when
+    all JSON files are parsed, then every `name` field has a corresponding GCP log-based
+    metric
+  verify: []
+- id: AC-OVR-021
+  description: Given the `infrastructure/monitoring/dashboards/` directory, when all
+    JSON files are parsed (excluding legacy), then every `displayName` has a corresponding
+    GCP dashboard
+  verify: []
+- id: AC-OVR-022
+  description: Given the file `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`,
+    when parsed, then it is valid JSON with `required.panel_titles` and `required.query_fragments`
+    arrays
+  verify: []
+- id: AC-OVR-023
+  description: Given a running Grafana instance, when the dashboard with UID `bbi-app-mereka-lms`
+    is fetched via API, then all `required.panel_titles` from the contract are present
+    as panel titles in the dashboard
+  verify: []
+- id: AC-OVR-024
+  description: Given the file `scripts/qa/validate-observability-compliance.sh` exists,
+    when run with `--mode local`, then it performs all local-mode checks and exits
+    0 when all pass
+  verify: []
+- id: AC-OVR-025
+  description: Given the validation script, when run with `--mode local --json`, then
+    the output is valid JSON matching the compliance report schema defined in this
+    spec
+  verify: []
+- id: AC-OVR-026
+  description: Given a deliberately broken state (e.g., ServiceMonitor file missing
+    from kustomization.yaml), when the validation script is run with `--mode local
+    --strict`, then it exits non-zero and the report identifies the specific missing
+    resource
+  verify: []
+- id: AC-OVR-027
+  description: Given the validation script, when run with `--mode runtime`, then it
+    queries both kubectl and gcloud for live resource verification
+  verify: []
+- id: AC-OVR-028
+  description: Given a PR that modifies files in `deploy/k8s/base/monitoring/`, when
+    CI runs, then the validation script executes in local mode as a required check
+  verify: []
+- id: AC-OVR-029
+  description: Given a PR that removes a ServiceMonitor from kustomization.yaml without
+    adding a documented waiver, when CI runs the validation script, then the check
+    fails and blocks merge
+  verify: []
+- id: AC-OVR-030
+  description: Given every critical-severity alert in the cluster, when its configuration
+    is inspected, then it has a `for` duration of <= 5 minutes (critical alerts must
+    fire quickly)
+  verify: []
+- id: AC-OVR-031
+  description: Given every alert rule, when its `expr` is evaluated against the Prometheus
+    API, then it does not produce a PromQL syntax error
+  verify: []
+_unmapped:
+- AC-OVR-001
+- AC-OVR-002
+- AC-OVR-003
+- AC-OVR-004
+- AC-OVR-005
+- AC-OVR-006
+- AC-OVR-007
+- AC-OVR-008
+- AC-OVR-009
+- AC-OVR-010
+- AC-OVR-011
+- AC-OVR-012
+- AC-OVR-013
+- AC-OVR-014
+- AC-OVR-015
+- AC-OVR-016
+- AC-OVR-017
+- AC-OVR-018
+- AC-OVR-019
+- AC-OVR-020
+- AC-OVR-021
+- AC-OVR-022
+- AC-OVR-023
+- AC-OVR-024
+- AC-OVR-025
+- AC-OVR-026
+- AC-OVR-027
+- AC-OVR-028
+- AC-OVR-029
+- AC-OVR-030
+- AC-OVR-031
+
