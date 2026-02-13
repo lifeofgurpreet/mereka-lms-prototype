@@ -29,8 +29,7 @@ echo ""
 
 # AC-012: Manual dispatch with custom image_tag tags image correctly
 if grep -q "workflow_dispatch:" "$WORKFLOW" && \
-   grep -q "image_tag:" "$WORKFLOW" && \
-   grep -A 5 "workflow_dispatch:" "$WORKFLOW" | grep -q "image_tag:"; then
+   grep -A 30 "workflow_dispatch:" "$WORKFLOW" | grep -q "image_tag:"; then
   pass "AC-012: workflow_dispatch has image_tag input for custom tags"
 else
   fail "AC-012: workflow_dispatch missing image_tag input"

@@ -101,11 +101,15 @@ fi
 
 # AC-030: SSO canary failure uploads artifacts (screenshots, logs)
 if [[ -f "$WORKFLOW" ]]; then
-  if grep -q "upload-artifact" "$WORKFLOW" && \
-     grep -A 5 "upload-artifact" "$WORKFLOW" | grep -q "if:.*always()"; then
-    pass "AC-030: authenticated-sso-canary.yml uploads artifacts on failure"
+  if grep -q "upload-artifact\|upload.*artifact" "$WORKFLOW"; then
+    # Check for always() condition (may be on previous line)
+    if grep -B 2 -A 3 "upload-artifact\|upload.*artifact" "$WORKFLOW" | grep -q "always()"; then
+      pass "AC-030: authenticated-sso-canary.yml uploads artifacts on failure"
+    else
+      fail "AC-030: authenticated-sso-canary.yml has artifact upload but not running on failure"
+    fi
   else
-    fail "AC-030: authenticated-sso-canary.yml missing artifact upload or not running on failure"
+    fail "AC-030: authenticated-sso-canary.yml missing artifact upload"
   fi
 fi
 

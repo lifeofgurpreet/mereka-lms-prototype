@@ -29,7 +29,7 @@ echo ""
 
 # AC-031: Workflow succeeds when all patches applied
 if grep -q "apply-patches.sh" "$WORKFLOW" || grep -q "verify-tutor-config.sh" "$WORKFLOW"; then
-  if grep -q "verify.*MySQL" "$WORKFLOW" || grep -q "verify.*MFE.*Node" "$WORKFLOW"; then
+  if grep -Eq "Verify (MySQL|MFE|Node)" "$WORKFLOW"; then
     pass "AC-031: tutor-config-verify.yml runs apply-patches.sh and verifies patches"
   else
     fail "AC-031: Workflow runs patches but missing verification checks"

@@ -133,11 +133,11 @@ for deploy_name in "${required_deployments[@]}"; do
   fi
 
   # Check for envFrom with secretRef to openedx-secrets
-  has_openedx_secret=$(kubectl get deployment "$deploy_name" -n "$NAMESPACE" -o json 2>/dev/null | \
-    jq -r '.spec.template.spec.containers[].envFrom[]? | select(.secretRef.name == "openedx-secrets") | .secretRef.name' | \
-    grep -q "openedx-secrets" && echo "true" || echo "false")
+  # Capture jq output to variable first to avoid SIGPIPE with grep -q in pipefail
+  envfrom_output=$(kubectl get deployment "$deploy_name" -n "$NAMESPACE" -o json 2>/dev/null | \
+    jq -r '.spec.template.spec.containers[].envFrom[]? | select(.secretRef.name == "openedx-secrets") | .secretRef.name' 2>/dev/null || true)
 
-  if [[ "$has_openedx_secret" == "true" ]]; then
+  if [[ "$envfrom_output" == *"openedx-secrets"* ]]; then
     pass "AC-002: Deployment '$deploy_name' has envFrom secretRef to openedx-secrets"
   else
     fail "AC-002: Deployment '$deploy_name' missing envFrom secretRef to openedx-secrets"

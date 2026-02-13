@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# @spec: analytics-pipeline_spec.md
 # @covers AC-003, AC-004, AC-007, AC-008
+# @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
 # verify-analytics-retention.sh - Verify analytics pipeline configuration
@@ -41,9 +41,10 @@ skip() {
   SKIP=$((SKIP + 1))
 }
 
-echo "=== Analytics Pipeline: ClickHouse Retention Policy Verification ==="
-echo "Spec: analytics-pipeline_spec.md | AC-003"
+echo "=== Analytics Pipeline: Configuration Verification ==="
+echo "Spec: analytics-pipeline_spec.md | AC-003, AC-004, AC-007, AC-008"
 echo
+echo "=== AC-003: ClickHouse Retention Policy ==="
 
 # Check 1: Aspects K8s manifests exist
 if [[ -d "$ASPECTS_DIR" ]]; then
