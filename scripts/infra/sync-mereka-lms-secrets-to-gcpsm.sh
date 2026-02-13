@@ -206,9 +206,15 @@ main() {
   fi
   log "Infisical path: ${INFISICAL_PATH}"
 
-  mapfile -t keys < <(rg -o "key:\\s*(MEREKA_LMS_[A-Z0-9_]+)" "${EXTERNAL_SECRETS_FILE}" | awk '{print $2}' | sort -u)
+  # Discover all ExternalSecret YAML files (main + service-specific)
+  local all_es_files=("${EXTERNAL_SECRETS_FILE}")
+  while IFS= read -r f; do
+    [[ "$f" != "${EXTERNAL_SECRETS_FILE}" ]] && all_es_files+=("$f")
+  done < <(rg -l "kind: ExternalSecret" "${REPO_ROOT}/deploy" "${REPO_ROOT}/services" --glob '*.yaml' --glob '*.yml' 2>/dev/null || true)
+
+  mapfile -t keys < <(rg -o "key:\\s*(MEREKA_LMS_[A-Z0-9_]+)" "${all_es_files[@]}" | awk '{print $NF}' | sort -u)
   if [[ "${#keys[@]}" -eq 0 ]]; then
-    die "No keys found in ${EXTERNAL_SECRETS_FILE}"
+    die "No keys found in ExternalSecret files"
   fi
 
   log "Syncing ${#keys[@]} secrets from Infisical prod -> GCP Secret Manager..."

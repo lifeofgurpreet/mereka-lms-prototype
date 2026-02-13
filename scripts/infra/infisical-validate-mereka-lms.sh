@@ -89,8 +89,22 @@ if [[ -z "$INFISICAL_PROJECT_ID" ]]; then
   exit 1
 fi
 
-log "Collecting expected secret keys from external-secrets.yaml..."
-expected_keys=$(rg -o "MEREKA_LMS_[A-Z0-9_]+" "$EXTERNAL_SECRETS_FILE" | sort -u)
+log "Collecting expected secret keys from all ExternalSecret files..."
+# Discover all ExternalSecret YAML files (main + service-specific), excluding local dev overlays
+all_es_files=("$EXTERNAL_SECRETS_FILE")
+while IFS= read -r f; do
+  [[ "$f" != "$EXTERNAL_SECRETS_FILE" ]] && [[ "$f" != *"/overlays/local/"* ]] && all_es_files+=("$f")
+done < <(rg -l "kind: ExternalSecret" "${REPO_ROOT}/deploy" "${REPO_ROOT}/services" --glob '*.yaml' --glob '*.yml' 2>/dev/null || true)
+expected_keys=""
+for es_file in "${all_es_files[@]}"; do
+  if [[ -f "$es_file" ]]; then
+    keys_in_file=$(rg -o "MEREKA_LMS_[A-Z0-9_]+" "$es_file" || true)
+    if [[ -n "$keys_in_file" ]]; then
+      expected_keys="${expected_keys}${expected_keys:+$'\n'}${keys_in_file}"
+    fi
+  fi
+done
+expected_keys=$(printf "%s\n" "$expected_keys" | sort -u)
 
 log "Collecting actual secret keys from Infisical (${INFISICAL_PATH})..."
 tmpfile=$(mktemp)
