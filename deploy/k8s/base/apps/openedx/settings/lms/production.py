@@ -1145,3 +1145,108 @@ MFE_BRANDING_FROM_SITE_CONFIG = os.environ.get(
 # Register openedx_tenant_cache app
 if "openedx_tenant_cache" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_tenant_cache")
+
+# ── Multi-Tenant Phase 2: Cross-Tenant Isolation ────────────────────────
+# @spec: multi-tenancy-architecture_spec.md (Phase 2: Pilot + Isolation)
+# @covers: AC-TEN-007 through AC-TEN-013
+
+# Cross-tenant API isolation enforcement
+TENANT_ISOLATION_ENABLED = os.environ.get(
+    "TENANT_ISOLATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["TENANT_ISOLATION_ENABLED"] = TENANT_ISOLATION_ENABLED
+
+# Superset RLS enforcement for analytics dashboards
+SUPERSET_RLS_ENABLED = os.environ.get(
+    "SUPERSET_RLS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Pilot tenant domains (for ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS)
+PILOT_TENANT_DOMAINS = os.environ.get(
+    "PILOT_TENANT_DOMAINS", ""
+).split(",") if os.environ.get("PILOT_TENANT_DOMAINS") else []
+
+for domain in PILOT_TENANT_DOMAINS:
+    domain = domain.strip()
+    if domain and domain not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(domain)
+    if domain:
+        csrf_origin = f"https://{domain}"
+        if csrf_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(csrf_origin)
+
+# ── Multi-Tenant Phase 3: Operational Hardening ─────────────────────────
+# @spec: multi-tenancy-architecture_spec.md (Phase 3: Hardening)
+# @covers: AC-TEN-014 through AC-TEN-021
+
+# Offboarding grace period (PDPA/GDPR compliance)
+TENANT_OFFBOARD_GRACE_DAYS = int(os.environ.get(
+    "TENANT_OFFBOARD_GRACE_DAYS", "30"
+))
+
+# Nightly isolation test CronJob
+TENANT_NIGHTLY_ISOLATION_ENABLED = os.environ.get(
+    "TENANT_NIGHTLY_ISOLATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# ── Content Libraries v2: Feature Flags ─────────────────────────────────
+# @spec: content-libraries-v2 (Phase 0: Foundation Audit)
+# @covers: AC-LIB-004 — Feature flags all default False
+
+# Master switch for Content Libraries v2
+CONTENT_LIBRARIES_V2_ENABLED = os.environ.get(
+    "CONTENT_LIBRARIES_V2_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["CONTENT_LIBRARIES_V2_ENABLED"] = CONTENT_LIBRARIES_V2_ENABLED
+
+# Meilisearch-powered library content search
+LIBRARIES_SEARCH_ENABLED = os.environ.get(
+    "LIBRARIES_SEARCH_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_SEARCH_ENABLED"] = LIBRARIES_SEARCH_ENABLED
+
+# Library usage analytics tracking
+LIBRARIES_ANALYTICS_ENABLED = os.environ.get(
+    "LIBRARIES_ANALYTICS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_ANALYTICS_ENABLED"] = LIBRARIES_ANALYTICS_ENABLED
+
+# Bulk import/export of library components
+LIBRARIES_BULK_IMPORT_ENABLED = os.environ.get(
+    "LIBRARIES_BULK_IMPORT_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_BULK_IMPORT_ENABLED"] = LIBRARIES_BULK_IMPORT_ENABLED
+
+# Public read access to library content (no auth required)
+LIBRARIES_PUBLIC_READ_ENABLED = os.environ.get(
+    "LIBRARIES_PUBLIC_READ_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_PUBLIC_READ_ENABLED"] = LIBRARIES_PUBLIC_READ_ENABLED
+
+# GCS bucket for Blockstore (Content Libraries v2 storage backend)
+BLOCKSTORE_BUCKET_NAME = os.environ.get(
+    "BLOCKSTORE_BUCKET_NAME", "lms-blockstore"
+)
+
+# ── Content Libraries v2: Phase 1 Core ──────────────────────────────────
+# @spec: content-libraries-v2 (Phase 1: Platform Libraries)
+# @covers: AC-LIB-007 through AC-LIB-013
+
+# Library publish timeout (seconds) — AC-LIB-007 requires < 30s
+LIBRARY_PUBLISH_TIMEOUT_SECONDS = int(os.environ.get(
+    "LIBRARY_PUBLISH_TIMEOUT_SECONDS", "30"
+))
+
+# Soft-delete retention period (AC-LIB-009, AC-NEG-LIB-005)
+LIBRARY_SOFT_DELETE_RETENTION_DAYS = int(os.environ.get(
+    "LIBRARY_SOFT_DELETE_RETENTION_DAYS", "30"
+))
+
+# library_content XBlock default random pool size (AC-LIB-008)
+LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
+    "LIBRARY_CONTENT_DEFAULT_COUNT", "5"
+))
+
+# Register openedx_content_libraries app
+if "openedx_content_libraries" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_content_libraries")
