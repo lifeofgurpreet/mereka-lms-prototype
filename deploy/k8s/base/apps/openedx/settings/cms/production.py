@@ -143,10 +143,16 @@ DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 
 # Elasticsearch connection parameters
 ELASTIC_SEARCH_CONFIG = [{
-  
+
   "host": "elasticsearch",
   "port": 9200,
 }]
+
+# Meilisearch configuration (Content Libraries v2 search + content indexing)
+MEILISEARCH_ENABLED = True
+MEILISEARCH_URL = "http://meilisearch:7700"
+MEILISEARCH_INDEX_PREFIX = "tutor_"
+MEILISEARCH_API_KEY = os.environ.get("MEILISEARCH_API_KEY", "")
 
 # Common cache config
 CACHES = {
