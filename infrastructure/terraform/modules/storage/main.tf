@@ -39,3 +39,22 @@ resource "google_storage_bucket" "backup" {
   }
   labels = merge(var.labels, { purpose = "backup" })
 }
+
+resource "google_storage_bucket" "blockstore" {
+  name                        = "${local.base_name}-blockstore"
+  project                     = var.project_id
+  location                    = var.location
+  uniform_bucket_level_access = true
+  versioning {
+    enabled = true
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 365
+    }
+  }
+  labels = merge(var.labels, { purpose = "blockstore" })
+}
