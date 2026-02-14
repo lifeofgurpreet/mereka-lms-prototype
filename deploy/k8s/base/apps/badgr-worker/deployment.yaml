@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: badgr-worker
+  labels:
+    app.kubernetes.io/name: badgr-worker
+    app.kubernetes.io/component: badges
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/name: badgr-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: badgr-worker
+        app.kubernetes.io/component: badges
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: badgr-worker
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/badgr-server:latest
+          command: ["celery"]
+          args:
+            - "-A"
+            - "badgr.celery"
+            - "worker"
+            - "--loglevel=info"
+            - "--concurrency=2"
+            - "-Q"
+            - "celery"
+          envFrom:
+            - secretRef:
+                name: badgr-secrets
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: mainsite.settings
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false

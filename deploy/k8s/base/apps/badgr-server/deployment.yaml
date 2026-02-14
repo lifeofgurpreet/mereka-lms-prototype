@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: badgr-server
+  labels:
+    app.kubernetes.io/name: badgr-server
+    app.kubernetes.io/component: badges
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/name: badgr-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: badgr-server
+        app.kubernetes.io/component: badges
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+        - name: migrate
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/badgr-server:latest
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          envFrom:
+            - secretRef:
+                name: badgr-secrets
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: mainsite.settings
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+      containers:
+        - name: badgr-server
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/badgr-server:latest
+          ports:
+            - containerPort: 8150
+          envFrom:
+            - secretRef:
+                name: badgr-secrets
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: mainsite.settings
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 8150
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 8150
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
