@@ -199,6 +199,17 @@ if 'openedx_timed_exams.middleware.TimedExamEnforcementMiddleware' not in MIDDLE
         # Fallback: append to end if auth middleware not found
         MIDDLEWARE.append('openedx_timed_exams.middleware.TimedExamEnforcementMiddleware')
 
+# XQueue Graders - Python Code Sandbox (Assessment Phase 3)
+if 'openedx_xqueue_graders' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_xqueue_graders')
+
+# Feature flag for XQueue graders (default: true)
+ENABLE_XQUEUE_GRADERS = os.environ.get('ENABLE_XQUEUE_GRADERS', 'true').lower() == 'true'
+
+# XQueue grader configuration
+XQUEUE_GRADER_TIMEOUT_SECONDS = int(os.environ.get('XQUEUE_GRADER_TIMEOUT_SECONDS', '30'))
+XQUEUE_GRADER_MEMORY_LIMIT_MB = int(os.environ.get('XQUEUE_GRADER_MEMORY_LIMIT_MB', '256'))
+
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
 """,
