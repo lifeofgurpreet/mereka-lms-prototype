@@ -7,8 +7,10 @@ resources:
   - servicemonitor-mysql.yaml
   - servicemonitor-redis.yaml
   - servicemonitor-enterprise.yaml
+  - servicemonitor-xqueue.yaml
   - prometheusrule-lms.yaml
   - prometheusrule-enterprise.yaml
+  - prometheusrule-xqueue.yaml
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
   - prometheusrule-auth.yaml

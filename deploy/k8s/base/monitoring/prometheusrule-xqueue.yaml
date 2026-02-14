@@ -1,0 +1,82 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: xqueue-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: xqueue
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: openedx-xqueue
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: XQueuePodDown
+          expr: up{job="xqueue-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: xqueue
+          annotations:
+            summary: "XQueue pod is down"
+            description: "XQueue pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: XQueuePodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"xqueue-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: xqueue
+          annotations:
+            summary: "XQueue pod is restarting frequently"
+            description: "XQueue pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: XQueueMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: xqueue
+          annotations:
+            summary: "XQueue pod memory usage is high"
+            description: "XQueue pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its memory limit."
+
+        # CPU alerts
+        - alert: XQueueCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}[5m])
+              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
+              * container_spec_cpu_period{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: xqueue
+          annotations:
+            summary: "XQueue pod CPU usage is high"
+            description: "XQueue pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."
+
+        # Queue backlog alert
+        # NOTE: This uses kube_pod_info as a placeholder metric since we don't have a real queue depth metric yet.
+        # Replace this with actual queue depth metric (e.g., xqueue_submissions_pending) when available.
+        - alert: XQueueQueueBacklog
+          expr: |
+            count(kube_pod_info{namespace="mereka-lms", pod=~"xqueue-.*"}) > 100
+          for: 15m
+          labels:
+            severity: warning
+            component: xqueue
+          annotations:
+            summary: "XQueue has a large submission backlog"
+            description: "XQueue has more than 100 unprocessed submissions (retired=false) for over 15 minutes. This is a placeholder alert - replace with real queue depth metric when available."
