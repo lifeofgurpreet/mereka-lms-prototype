@@ -1045,3 +1045,50 @@ GDPR_DELETION_DEADLINE_DAYS = int(os.environ.get("GDPR_DELETION_DEADLINE_DAYS", 
 # Register openedx_email_digests app
 if "openedx_email_digests" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_email_digests")
+
+# ── Multi-Tenant Foundation ──────────────────────────────────────────────
+# @spec: multi-tenancy-architecture_spec.md (Phase 0: Foundation)
+# @covers: EnterpriseCustomer ↔ Site mapping, cache namespacing,
+#          xAPI tagging, feature flags, branding, metrics
+
+# Feature flags (default: off — explicit opt-in per tenant)
+ENABLE_MULTI_TENANT_BRANDING = os.environ.get(
+    "ENABLE_MULTI_TENANT_BRANDING", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_MULTI_TENANT_BRANDING"] = ENABLE_MULTI_TENANT_BRANDING
+
+ENABLE_TENANT_ANALYTICS_SCOPING = os.environ.get(
+    "ENABLE_TENANT_ANALYTICS_SCOPING", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_TENANT_ANALYTICS_SCOPING"] = ENABLE_TENANT_ANALYTICS_SCOPING
+
+# Redis cache namespace format: enterprise:{uuid}:{key_type}:{key_id}
+TENANT_CACHE_NAMESPACE_FORMAT = "enterprise:{uuid}:{key_type}:{key_id}"
+
+# EnterpriseCustomer ↔ Django Site mapping (site_id FK)
+ENTERPRISE_SITE_MAPPING_ENABLED = os.environ.get(
+    "ENTERPRISE_SITE_MAPPING_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# ClickHouse xAPI enterprise_customer_uuid column (nullable)
+XAPI_ENTERPRISE_UUID_ENABLED = os.environ.get(
+    "XAPI_ENTERPRISE_UUID_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Tenant branding assets directory
+TENANT_BRANDING_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
+    "themes", "mereka", "tenants"
+)
+
+# SiteConfiguration per-tenant JSON overlay support
+SITE_CONFIGURATION_TENANT_OVERLAYS = True
+
+# MFE branding injection from SiteConfiguration
+MFE_BRANDING_FROM_SITE_CONFIG = os.environ.get(
+    "MFE_BRANDING_FROM_SITE_CONFIG", "false"
+).lower() in ("true", "1", "yes")
+
+# Register openedx_tenant_cache app
+if "openedx_tenant_cache" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_tenant_cache")
