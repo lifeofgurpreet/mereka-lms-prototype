@@ -26,6 +26,8 @@ links:
 
 # Human Summary
 
+> **Android Deferral Notice (ADR-016, 2026-02-13)**: Android app development is deferred indefinitely. This spec documents the full iOS + Android contract for completeness, but only iOS items are in active development. Android sections are retained as design reference for when deferral is lifted. Revisit conditions: (1) iOS fully operational and verified, (2) User demand quantified, (3) This spec reaches APPROVED status, (4) Team capacity available.
+
 ## What we're building
 
 A production-grade mobile application platform (iOS and Android) for Mereka Academy that supports enterprise "many clients" deployment. Each client organization receives a branded mobile experience backed by a shared Open edX backend. The iOS app is already deployed to TestFlight with working CI/CD; the Android app has not yet started. This spec covers the full contract for both platforms: the mobile API surface, authentication flows, push notifications, deep linking, offline capabilities, multi-tenant branding, security hardening, and app store release procedures.
@@ -38,7 +40,7 @@ Mobile is the primary access channel for learners across Mereka Academy's client
 
 ## Success looks like
 
-- Both iOS and Android apps are available in their respective stores with automated CI/CD pipelines
+- iOS app is available in the App Store with automated CI/CD pipeline (Android deferred per ADR-016)
 - A new client can be onboarded (branding, configuration, store listing) within 2 business days without code changes
 - Push notifications reliably reach learners within 30 seconds of trigger
 - Deep links resolve correctly to specific courses, sections, and assignments
