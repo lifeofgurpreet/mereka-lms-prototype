@@ -1,0 +1,11 @@
+{{ promo_title }}
+
+Hi {{ user_name }},
+
+{{ promo_body }}
+
+{% if promo_url %}Learn more: {{ promo_url }}{% endif %}
+
+---
+{{ org_display_name }}
+Unsubscribe: {{ unsubscribe_url }}

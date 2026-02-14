@@ -1,0 +1,11 @@
+Enrollment Confirmation
+
+Hi {{ user_name }},
+
+You have been successfully enrolled in: {{ course_name }}
+{% if course_start_date %}Starts: {{ course_start_date }}{% endif %}
+
+Go to course: {{ course_url }}
+
+---
+{{ org_display_name }}

@@ -981,3 +981,33 @@ ACE_ENABLED_CHANNELS.append("push") if "push" not in ACE_ENABLED_CHANNELS else N
 # Register openedx_push_notifications app
 if "openedx_push_notifications" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_push_notifications")
+
+# ── Email Templates & Bulk Campaigns ─────────────────────────────────────
+# @spec: email-notifications-pipeline_spec.md (Phase 5: Templates + Bulk Campaigns)
+# @covers AC-025, AC-026, AC-027, AC-028, AC-029, AC-030, AC-031, AC-032
+
+# Feature flag — gate bulk campaigns globally
+NOTIFICATION_BULK_CAMPAIGNS_ENABLED = os.environ.get(
+    "NOTIFICATION_BULK_CAMPAIGNS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_BULK_CAMPAIGNS"] = NOTIFICATION_BULK_CAMPAIGNS_ENABLED
+
+# Per-tenant email rate limiting (token bucket: 50 emails/sec per tenant)
+EMAIL_RATE_LIMIT_PER_TENANT = int(os.environ.get("EMAIL_RATE_LIMIT_PER_TENANT", "50"))
+
+# Campaign batch processing
+CAMPAIGN_BATCH_SIZE = int(os.environ.get("CAMPAIGN_BATCH_SIZE", "100"))
+CAMPAIGN_RETRY_BACKOFF = 30  # Base: 30 seconds
+CAMPAIGN_RETRY_BACKOFF_MAX = 900  # Max: 15 minutes
+CAMPAIGN_RETRY_MAX = 5  # Max retries
+
+# Default branding (overridden per-tenant via TenantConfig)
+DEFAULT_ORG_DISPLAY_NAME = os.environ.get("DEFAULT_ORG_DISPLAY_NAME", "Mereka Academy")
+DEFAULT_ORG_LOGO_URL = os.environ.get("DEFAULT_ORG_LOGO_URL", "")
+DEFAULT_ORG_PRIMARY_COLOR = os.environ.get("DEFAULT_ORG_PRIMARY_COLOR", "#1a73e8")
+DEFAULT_ORG_ACCENT_COLOR = os.environ.get("DEFAULT_ORG_ACCENT_COLOR", "#4285f4")
+DEFAULT_ORG_SUPPORT_EMAIL = os.environ.get("DEFAULT_ORG_SUPPORT_EMAIL", "")
+
+# Register openedx_email_templates app
+if "openedx_email_templates" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_email_templates")

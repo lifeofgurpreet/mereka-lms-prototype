@@ -1,0 +1,11 @@
+We Miss You!
+
+Hi {{ user_name }},
+
+It's been a while since your last visit. Your courses are waiting for you.
+
+Continue learning: {{ platform_url }}
+
+---
+{{ org_display_name }}
+Unsubscribe: {{ unsubscribe_url }}
