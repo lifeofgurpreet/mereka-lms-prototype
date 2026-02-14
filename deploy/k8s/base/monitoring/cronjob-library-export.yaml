@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: library-export
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: library-export
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "0 3 * * *"  # Nightly at 3 AM UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: library-export
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: library-export
+              image: "$(OPENEDX_IMAGE)"
+              command:
+                - python
+                - manage.py
+                - lms
+                - backup_libraries
+              env:
+                - name: DJANGO_SETTINGS_MODULE
+                  value: lms.envs.production
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "1Gi"
+                  cpu: "500m"

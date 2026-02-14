@@ -1316,3 +1316,37 @@ if KAJABI_SSO_ENABLED:
     AUTHENTICATION_BACKENDS = list(AUTHENTICATION_BACKENDS) if isinstance(AUTHENTICATION_BACKENDS, tuple) else AUTHENTICATION_BACKENDS
     if "openedx_kajabi_sso.backend.KajabiSsoBackend" not in AUTHENTICATION_BACKENDS:
         AUTHENTICATION_BACKENDS.append("openedx_kajabi_sso.backend.KajabiSsoBackend")
+
+# ── Content Libraries v2: Phase 3 Scale, Search, Analytics ─────────────
+# @spec: content-libraries-v2 (Phase 3: Scale + Search + Analytics)
+# @covers: AC-LIB-020 through AC-LIB-025
+
+# Meilisearch integration for library search (AC-LIB-021)
+LIBRARY_SEARCH_ENABLED = os.environ.get(
+    "LIBRARY_SEARCH_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Usage analytics tracking (AC-LIB-022)
+LIBRARY_ANALYTICS_ENABLED = os.environ.get(
+    "LIBRARY_ANALYTICS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# GCS backup for library content (AC-LIB-023, AC-LIB-024)
+LIBRARY_BACKUP_ENABLED = os.environ.get(
+    "LIBRARY_BACKUP_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Backup retention days (AC-NEG-LIB-011)
+LIBRARY_BACKUP_RETENTION_DAYS = int(os.environ.get(
+    "LIBRARY_BACKUP_RETENTION_DAYS", "90"
+))
+
+# Performance: listing API pagination (AC-LIB-020)
+LIBRARY_LIST_PAGE_SIZE = int(os.environ.get(
+    "LIBRARY_LIST_PAGE_SIZE", "50"
+))
+
+# Performance: select_related/prefetch_related optimization
+LIBRARY_QUERY_OPTIMIZATION_ENABLED = os.environ.get(
+    "LIBRARY_QUERY_OPTIMIZATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
