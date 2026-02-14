@@ -12,3 +12,4 @@ resources:
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
   - prometheusrule-auth.yaml
+  - hpa-enterprise.yaml

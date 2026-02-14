@@ -176,3 +176,58 @@ spec:
           annotations:
             summary: "Enterprise Subsidy pod CPU usage is high"
             description: "Enterprise Subsidy pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."
+
+    - name: openedx-license-manager
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: LicenseManagerPodDown
+          expr: up{job="license-manager-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: license-manager
+          annotations:
+            summary: "License Manager pod is down"
+            description: "License Manager pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: LicenseManagerPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"license-manager-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: license-manager
+          annotations:
+            summary: "License Manager pod is restarting frequently"
+            description: "License Manager pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: LicenseManagerMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
+              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: license-manager
+          annotations:
+            summary: "License Manager pod memory usage is high"
+            description: "License Manager pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its memory limit."
+
+        # CPU alerts
+        - alert: LicenseManagerCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}[5m])
+              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
+              * container_spec_cpu_period{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: license-manager
+          annotations:
+            summary: "License Manager pod CPU usage is high"
+            description: "License Manager pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."
