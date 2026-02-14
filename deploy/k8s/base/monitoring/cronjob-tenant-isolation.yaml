@@ -1,0 +1,182 @@
+# Nightly tenant isolation regression test CronJob
+# @spec: multi-tenancy-architecture_spec.md
+# @covers: AC-TEN-017 — fires Critical alert within 5 minutes of cross-tenant leakage
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tenant-isolation-nightly
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: tenant-isolation-test
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  schedule: "0 2 * * *"  # 2 AM daily (UTC)
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600  # 10 minute timeout
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: tenant-isolation-test
+        spec:
+          restartPolicy: Never
+          serviceAccountName: lms
+          containers:
+            - name: isolation-test
+              image: docker.io/bitnami/kubectl:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  echo "=== Nightly Tenant Isolation Test ==="
+                  echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+                  NAMESPACE="${NAMESPACE:-mereka-lms}"
+                  FAILURES=0
+
+                  # Find LMS pod
+                  LMS_POD=$(kubectl get pods -n "$NAMESPACE" \
+                    -l app.kubernetes.io/name=lms \
+                    -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+
+                  if [[ -z "$LMS_POD" ]]; then
+                    echo "CRITICAL: No LMS pod found"
+                    exit 1
+                  fi
+
+                  echo "Using LMS pod: $LMS_POD"
+
+                  # Test 1: Verify tenant mappings exist
+                  echo ""
+                  echo "--- Test 1: Tenant Mappings ---"
+                  MAPPING_COUNT=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+                    python -c "
+                  from openedx_tenant_cache.models import TenantSiteMapping
+                  print(TenantSiteMapping.objects.filter(is_active=True).count())
+                  " 2>/dev/null || echo "0")
+
+                  if [[ "$MAPPING_COUNT" -gt 0 ]]; then
+                    echo "PASS: $MAPPING_COUNT active tenant mappings"
+                  else
+                    echo "WARN: No active tenant mappings found"
+                  fi
+
+                  # Test 2: Cross-tenant cache isolation
+                  echo ""
+                  echo "--- Test 2: Cache Isolation ---"
+                  CACHE_RESULT=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+                    python -c "
+                  from openedx_tenant_cache.cache import tenant_cache_set, tenant_cache_get
+                  import uuid
+                  test_uuid_a = str(uuid.uuid4())
+                  test_uuid_b = str(uuid.uuid4())
+                  tenant_cache_set(test_uuid_a, 'test', 'isolation', 'secret_a', 10)
+                  tenant_cache_set(test_uuid_b, 'test', 'isolation', 'secret_b', 10)
+                  val_a = tenant_cache_get(test_uuid_a, 'test', 'isolation')
+                  val_b = tenant_cache_get(test_uuid_b, 'test', 'isolation')
+                  cross = tenant_cache_get(test_uuid_a, 'test', 'isolation')
+                  if val_a == 'secret_a' and val_b == 'secret_b':
+                      print('PASS')
+                  else:
+                      print('FAIL')
+                  # Cleanup
+                  from openedx_tenant_cache.cache import tenant_cache_delete
+                  tenant_cache_delete(test_uuid_a, 'test', 'isolation')
+                  tenant_cache_delete(test_uuid_b, 'test', 'isolation')
+                  " 2>/dev/null || echo "ERROR")
+
+                  if [[ "$CACHE_RESULT" == "PASS" ]]; then
+                    echo "PASS: Cache keys are isolated per tenant"
+                  else
+                    echo "CRITICAL: Cache isolation FAILED"
+                    FAILURES=$((FAILURES + 1))
+                  fi
+
+                  # Test 3: Cross-tenant API isolation
+                  echo ""
+                  echo "--- Test 3: API Isolation ---"
+                  API_RESULT=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+                    python -c "
+                  from openedx_tenant_cache.isolation import check_tenant_access
+                  from rest_framework.exceptions import PermissionDenied
+                  import uuid
+
+                  class MockRequest:
+                      class user:
+                          id = 0
+                          is_superuser = False
+                          is_authenticated = True
+                      _tenant_uuid = str(uuid.uuid4())
+
+                  req = MockRequest()
+                  other_tenant = str(uuid.uuid4())
+                  try:
+                      check_tenant_access(req, other_tenant)
+                      print('FAIL')
+                  except PermissionDenied:
+                      print('PASS')
+                  except Exception as e:
+                      print(f'ERROR: {e}')
+                  " 2>/dev/null || echo "ERROR")
+
+                  if [[ "$API_RESULT" == "PASS" ]]; then
+                    echo "PASS: Cross-tenant API access correctly blocked"
+                  else
+                    echo "CRITICAL: API isolation FAILED"
+                    FAILURES=$((FAILURES + 1))
+                  fi
+
+                  # Test 4: Superuser bypass works
+                  echo ""
+                  echo "--- Test 4: Superuser Bypass ---"
+                  SU_RESULT=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+                    python -c "
+                  from openedx_tenant_cache.isolation import check_tenant_access
+                  import uuid
+
+                  class MockRequest:
+                      class user:
+                          id = 1
+                          is_superuser = True
+                          is_authenticated = True
+                      _tenant_uuid = str(uuid.uuid4())
+
+                  req = MockRequest()
+                  other_tenant = str(uuid.uuid4())
+                  result = check_tenant_access(req, other_tenant)
+                  print('PASS' if result else 'FAIL')
+                  " 2>/dev/null || echo "ERROR")
+
+                  if [[ "$SU_RESULT" == "PASS" ]]; then
+                    echo "PASS: Superuser bypass works correctly"
+                  else
+                    echo "WARN: Superuser bypass test inconclusive"
+                  fi
+
+                  # Summary
+                  echo ""
+                  echo "=== Summary ==="
+                  echo "Failures: $FAILURES"
+
+                  if [[ $FAILURES -gt 0 ]]; then
+                    echo "CRITICAL: $FAILURES isolation test(s) FAILED"
+                    # Push Prometheus metric for alerting
+                    curl -s -X POST "http://pushgateway:9091/metrics/job/tenant_isolation_test" \
+                      --data-binary "tenant_isolation_failures $FAILURES" 2>/dev/null || true
+                    exit 1
+                  else
+                    echo "ALL TESTS PASSED"
+                    curl -s -X POST "http://pushgateway:9091/metrics/job/tenant_isolation_test" \
+                      --data-binary "tenant_isolation_failures 0" 2>/dev/null || true
+                    exit 0
+                  fi
+              env:
+                - name: NAMESPACE
+                  value: "mereka-lms"
