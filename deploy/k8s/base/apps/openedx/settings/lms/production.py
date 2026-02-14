@@ -352,6 +352,39 @@ ORA2_FILE_RETENTION_DAYS = 180  # Keep file records for 180 days
 # Feature flag
 ENABLE_ORA2_OPERATIONS = os.environ.get('ENABLE_ORA2_OPERATIONS', 'true').lower() == 'true'
 
+# Timed Exams - Server-Side Enforcement & Accommodations (Assessment Phase 2)
+# Configure edx-proctoring for timed-only exams (no proctoring provider)
+PROCTORING_BACKENDS = {
+    'DEFAULT': 'null',  # No-op backend for timed-only exams
+}
+
+# Enable timed exams feature
+FEATURES['ENABLE_SPECIAL_EXAMS'] = True  # Timed exams + proctored exams
+FEATURES['ENABLE_TIMED_EXAMS'] = True  # Specifically enable timed exams
+
+# Server-side timer enforcement
+TIMED_EXAM_ENFORCE_SERVER_SIDE = True  # Server authoritative (not client timer)
+TIMED_EXAM_GRACE_PERIOD_SECONDS = 60  # 1 minute grace period after timer expires
+TIMED_EXAM_AUTO_SUBMIT_ON_EXPIRY = True  # Auto-submit when timer expires
+
+# Time extension defaults
+TIMED_EXAM_DEFAULT_MULTIPLIER = 1.5  # Default 1.5x for accommodations
+TIMED_EXAM_MAX_MULTIPLIER = 5.0  # Maximum 5x time extension allowed
+
+# Multi-device detection
+TIMED_EXAM_ENABLE_MULTI_DEVICE_DETECTION = True  # Block concurrent sessions
+TIMED_EXAM_DEVICE_FINGERPRINT_ENABLED = True  # Track device fingerprints
+
+# Grade release configuration
+TIMED_EXAM_DEFAULT_GRADE_RELEASE_MODE = 'window_close'  # Grades pending until window closes
+TIMED_EXAM_GRADE_HOLD_ENABLED = True  # Enable grade hold functionality
+
+# Session cleanup (for expired sessions)
+TIMED_EXAM_SESSION_CLEANUP_DAYS = 30  # Clean up sessions older than 30 days
+
+# Feature flag
+ENABLE_TIMED_EXAM_ENHANCEMENTS = os.environ.get('ENABLE_TIMED_EXAM_ENHANCEMENTS', 'true').lower() == 'true'
+
 # Change syslog-based loggers which don't work inside docker containers
 LOGGING["handlers"]["local"] = {
     "class": "logging.handlers.WatchedFileHandler",
