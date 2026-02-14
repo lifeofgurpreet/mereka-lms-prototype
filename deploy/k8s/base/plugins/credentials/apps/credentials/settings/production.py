@@ -129,7 +129,20 @@ EMAIL_HOST_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("SMTP_USE_TLS", "false").lower() == "true"
 
 USE_LEARNER_RECORD_MFE = True
-ENABLE_VERIFIABLE_CREDENTIALS = False
+ENABLE_VERIFIABLE_CREDENTIALS = True
+
+# Verifiable Credentials Configuration (CRED-020)
+VERIFIABLE_CREDENTIALS = {
+    "ISSUER_DID": f"did:web:{MEREKA_CREDENTIALS_DOMAIN}",
+    "ISSUER_NAME": PLATFORM_NAME,
+    "SIGNATURE_SUITE": "Ed25519Signature2020",
+    "SIGNING_KEY_ID": f"did:web:{MEREKA_CREDENTIALS_DOMAIN}#key-1",
+    "DID_DOCUMENT_URL": f"{MEREKA_SCHEME}://{MEREKA_CREDENTIALS_DOMAIN}/.well-known/did.json",
+    "REVOCATION_ENABLED": False,
+}
+
+# Ed25519 signing key (base64-encoded private key, synced from Infisical)
+VC_SIGNING_PRIVATE_KEY = os.environ.get("VC_SIGNING_PRIVATE_KEY", "")
 
 JWT_AUTH["JWT_ISSUER"] = f"{LMS_BASE_URL}/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"
@@ -160,6 +173,12 @@ for logger in LOGGING["loggers"].values():
     if "local" in logger["handlers"]:
         logger["handlers"].remove("local")
 _init_sentry("credentials")
+
+# Verifiable Credentials issuer app (DID document endpoint)
+import sys
+sys.path.insert(0, '/openedx')
+if 'credentials_vc_issuer' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('credentials_vc_issuer')
 
 # Hardening: platform admin enforcement + /admin/login -> /login redirect.
 MIDDLEWARE = list(MIDDLEWARE) + [
