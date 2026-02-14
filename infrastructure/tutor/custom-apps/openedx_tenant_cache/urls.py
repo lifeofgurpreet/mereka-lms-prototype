@@ -6,7 +6,12 @@ URL routing for tenant cache API.
 
 from django.urls import path
 
-from .views import TenantBrandingView, TenantListView
+from .views import (
+    TenantAnalyticsIsolationView,
+    TenantBrandingView,
+    TenantCatalogIsolationView,
+    TenantListView,
+)
 
 app_name = 'openedx_tenant_cache'
 
@@ -17,4 +22,6 @@ urlpatterns = [
         TenantBrandingView.as_view(),
         name='tenant-branding',
     ),
+    path('tenants/catalogs/', TenantCatalogIsolationView.as_view(), name='tenant-catalogs'),
+    path('tenants/analytics/', TenantAnalyticsIsolationView.as_view(), name='tenant-analytics'),
 ]

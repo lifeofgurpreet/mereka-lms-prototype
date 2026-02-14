@@ -1,0 +1,22 @@
+{
+  "tenant_slug": "acme",
+  "site_configuration": {
+    "PLATFORM_NAME": "Acme Corp Academy",
+    "SITE_NAME": "Acme Corp Academy",
+    "logo_url": "/static/tenants/acme/logos/logo.png",
+    "favicon_url": "/static/tenants/acme/favicons/favicon.ico",
+    "primary_color": "#e63946",
+    "secondary_color": "#457b9d",
+    "footer_text": "© Acme Corp",
+    "sender_alias": "Acme Corp Academy"
+  },
+  "mfe_config": {
+    "SITE_NAME": "Acme Corp Academy",
+    "LOGO_URL": "/static/tenants/acme/logos/logo.png",
+    "LOGO_TRADEMARK_URL": "/static/tenants/acme/logos/logo.png",
+    "LOGO_WHITE_URL": "/static/tenants/acme/logos/logo-white.png",
+    "FAVICON_URL": "/static/tenants/acme/favicons/favicon.ico",
+    "PRIMARY_COLOR": "#e63946",
+    "SECONDARY_COLOR": "#457b9d"
+  }
+}

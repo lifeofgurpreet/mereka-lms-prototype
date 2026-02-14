@@ -1,0 +1,22 @@
+{
+  "tenant_slug": "mereka",
+  "site_configuration": {
+    "PLATFORM_NAME": "Mereka Academy",
+    "SITE_NAME": "Mereka Academy",
+    "logo_url": "/static/mereka/images/mereka-logo.png",
+    "favicon_url": "/static/mereka/images/favicon.ico",
+    "primary_color": "#1a73e8",
+    "secondary_color": "#4285f4",
+    "footer_text": "© Mereka Academy",
+    "sender_alias": "Mereka Academy"
+  },
+  "mfe_config": {
+    "SITE_NAME": "Mereka Academy",
+    "LOGO_URL": "/static/mereka/images/mereka-logo.png",
+    "LOGO_TRADEMARK_URL": "/static/mereka/images/mereka-logo.png",
+    "LOGO_WHITE_URL": "/static/mereka/images/mereka-logo-white.png",
+    "FAVICON_URL": "/static/mereka/images/favicon.ico",
+    "PRIMARY_COLOR": "#1a73e8",
+    "SECONDARY_COLOR": "#4285f4"
+  }
+}

@@ -1112,3 +1112,32 @@ MFE_BRANDING_FROM_SITE_CONFIG = os.environ.get(
 # Register openedx_tenant_cache app
 if "openedx_tenant_cache" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_tenant_cache")
+
+# ── Multi-Tenant Phase 2: Cross-Tenant Isolation ────────────────────────
+# @spec: multi-tenancy-architecture_spec.md (Phase 2: Pilot + Isolation)
+# @covers: AC-TEN-007 through AC-TEN-013
+
+# Cross-tenant API isolation enforcement
+TENANT_ISOLATION_ENABLED = os.environ.get(
+    "TENANT_ISOLATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["TENANT_ISOLATION_ENABLED"] = TENANT_ISOLATION_ENABLED
+
+# Superset RLS enforcement for analytics dashboards
+SUPERSET_RLS_ENABLED = os.environ.get(
+    "SUPERSET_RLS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Pilot tenant domains (for ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS)
+PILOT_TENANT_DOMAINS = os.environ.get(
+    "PILOT_TENANT_DOMAINS", ""
+).split(",") if os.environ.get("PILOT_TENANT_DOMAINS") else []
+
+for domain in PILOT_TENANT_DOMAINS:
+    domain = domain.strip()
+    if domain and domain not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(domain)
+    if domain:
+        csrf_origin = f"https://{domain}"
+        if csrf_origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(csrf_origin)
