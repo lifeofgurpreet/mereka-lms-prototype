@@ -16,6 +16,7 @@ resources:
   - prometheusrule-auth.yaml
   - prometheusrule-email.yaml
   - prometheusrule-video.yaml
+  - prometheusrule-libraries.yaml
   - mux-exporter.yaml
   - servicemonitor-mux.yaml
   - hpa-enterprise.yaml

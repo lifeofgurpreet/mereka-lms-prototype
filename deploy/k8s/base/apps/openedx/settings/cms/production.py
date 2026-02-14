@@ -221,6 +221,9 @@ INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")
 DATABASE_ROUTERS.remove(
     "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"
 )
+# Content Libraries v2: ensure the app is installed (matches LMS production.py pattern)
+if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
+    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
 
 # Set uploaded media file path
 MEDIA_ROOT = "/openedx/media/"
