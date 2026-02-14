@@ -294,50 +294,74 @@ acceptance_criteria:
 - id: AC-VPD-031
   description: Given a signed playback token generated server-side, when inspected,
     then it contains a JWT with `exp` claim set to 12 hours from generation time
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-032
   description: Given domain restriction is enabled (`MUX_ENABLE_DOMAIN_RESTRICTION=true`),
     when a video is embedded on an external site (not academyv2.mereka.io or academy.biji-biji.com),
     then Mux returns a 403 Forbidden response
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-033
   description: Given a Mux signing key rotation in progress, when both old and new
     keys are active, then videos can be played using tokens signed with either key
     (dual-key support)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-034
   description: Given the signed URL generation endpoint `/api/video/playback-token/<playback_id>/`,
     when called by an enrolled user, then a valid signed URL is returned in <100ms
     (p95)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-035
   description: Given a video upload with an unsupported codec (e.g., HEVC), when the
     upload is attempted, then the system rejects it with error message "Codec X is
     not supported. Please use H.264/AAC MP4."
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-036
   description: Given two course authors uploading videos with the same `mct_lesson_id`
     simultaneously, when the upload script runs, then only one Mux asset is created
     (no duplicates)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-037
   description: Given storage quota is exceeded, when a new video upload is attempted,
     then the upload is queued and retried automatically after quota space becomes
     available
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 - id: AC-VPD-038
   description: Given a CDN edge serving a corrupted HLS manifest, when the Video XBlock
     player retries with exponential backoff (1s, 2s, 4s), then playback succeeds on
     retry or shows "Video unavailable" message after 3 failed attempts
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-video-content-protection.sh
+    command: scripts/qa/verify-video-content-protection.sh
 _unmapped:
 - AC-VPD-028
-- AC-VPD-031
-- AC-VPD-032
-- AC-VPD-033
-- AC-VPD-034
-- AC-VPD-035
-- AC-VPD-036
-- AC-VPD-037
-- AC-VPD-038
 
