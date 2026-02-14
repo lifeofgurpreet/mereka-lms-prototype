@@ -31,9 +31,9 @@ echo ""
 # 1. Required secrets exist
 echo "--- Required Secrets ---"
 REQUIRED_SECRETS=(
-  "openedx-secret"
-  "caddy-secret"
-  "openedx-config"
+  "openedx-secrets"
+  "database-secrets"
+  "enterprise-secrets"
 )
 for secret in "${REQUIRED_SECRETS[@]}"; do
   if kubectl get secret "$secret" -n "$NAMESPACE" &>/dev/null; then
@@ -110,8 +110,10 @@ if kubectl get externalsecrets -n "$NAMESPACE" &>/dev/null; then
   if [[ -n "$es_list" ]]; then
     while IFS= read -r line; do
       name=$(echo "$line" | awk '{print $1}')
-      status=$(echo "$line" | awk '{print $NF}')
-      if [[ "$status" == "SecretSynced" ]]; then
+      # ExternalSecrets output: NAME STORE-KIND STORE-NAME INTERVAL STATUS READY
+      # Check READY column ($NF) for "True" or STATUS column ($(NF-1)) for "SecretSynced"
+      ready=$(echo "$line" | awk '{print $NF}')
+      if [[ "$ready" == "True" ]]; then
         pass "ExternalSecret: $name"
       else
         fail "ExternalSecret: $name ($status)"
