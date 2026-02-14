@@ -31,6 +31,7 @@ NAME=""
 DOMAIN=""
 CONTACT_EMAIL=""
 COUNTRY=""
+ENTERPRISE_UUID=""
 DRY_RUN=0
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 
@@ -43,10 +44,12 @@ usage() {
   echo "  --domain        Primary domain (e.g. 'acme.academyv2.mereka.io')"
   echo ""
   echo "Optional:"
-  echo "  --contact-email Primary contact email"
-  echo "  --country       ISO 3166-1 alpha-2 country code (e.g. 'MY')"
-  echo "  --dry-run       Show what would be done without executing"
-  echo "  -h, --help      Show this help"
+  echo "  --contact-email     Primary contact email"
+  echo "  --country           ISO 3166-1 alpha-2 country code (e.g. 'MY')"
+  echo "  --enterprise-uuid   Existing EnterpriseCustomer UUID (auto-generated if empty)"
+  echo "  --from-env          Load configuration from .env file (e.g. scripts/tenants/mereka-tenant.env)"
+  echo "  --dry-run           Show what would be done without executing"
+  echo "  -h, --help          Show this help"
   exit 1
 }
 
@@ -58,6 +61,23 @@ while [[ $# -gt 0 ]]; do
     --domain) DOMAIN="$2"; shift 2 ;;
     --contact-email) CONTACT_EMAIL="$2"; shift 2 ;;
     --country) COUNTRY="$2"; shift 2 ;;
+    --enterprise-uuid) ENTERPRISE_UUID="$2"; shift 2 ;;
+    --from-env)
+      # Load from .env file
+      if [[ ! -f "$2" ]]; then
+        echo -e "${RED}ERROR${NC}: Environment file not found: $2"
+        exit 1
+      fi
+      # shellcheck source=/dev/null
+      source "$2"
+      SLUG="${TENANT_SLUG:-$SLUG}"
+      NAME="${TENANT_NAME:-$NAME}"
+      DOMAIN="${TENANT_DOMAIN:-$DOMAIN}"
+      CONTACT_EMAIL="${TENANT_CONTACT_EMAIL:-$CONTACT_EMAIL}"
+      COUNTRY="${TENANT_COUNTRY:-$COUNTRY}"
+      ENTERPRISE_UUID="${TENANT_ENTERPRISE_UUID:-$ENTERPRISE_UUID}"
+      shift 2
+      ;;
     --dry-run) DRY_RUN=1; shift ;;
     -h|--help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
@@ -78,11 +98,12 @@ fi
 
 echo "=== Tenant Provisioning ==="
 echo ""
-echo "  Slug:     $SLUG"
-echo "  Name:     $NAME"
-echo "  Domain:   $DOMAIN"
-echo "  Contact:  ${CONTACT_EMAIL:-<none>}"
-echo "  Country:  ${COUNTRY:-<none>}"
+echo "  Slug:             $SLUG"
+echo "  Name:             $NAME"
+echo "  Domain:           $DOMAIN"
+echo "  Contact:          ${CONTACT_EMAIL:-<none>}"
+echo "  Country:          ${COUNTRY:-<none>}"
+echo "  Enterprise UUID:  ${ENTERPRISE_UUID:-<auto-generate>}"
 echo ""
 
 if [[ $DRY_RUN -eq 1 ]]; then
@@ -94,6 +115,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
   echo "    --domain '$DOMAIN' \\"
   [[ -n "$CONTACT_EMAIL" ]] && echo "    --contact-email '$CONTACT_EMAIL' \\"
   [[ -n "$COUNTRY" ]] && echo "    --country '$COUNTRY' \\"
+  [[ -n "$ENTERPRISE_UUID" ]] && echo "    --enterprise-uuid '$ENTERPRISE_UUID' \\"
   echo ""
   echo "Post-provisioning steps:"
   echo "  1. Add DNS record: $DOMAIN → LMS load balancer"
@@ -123,6 +145,7 @@ if command -v kubectl &>/dev/null && kubectl get namespace "$NAMESPACE" &>/dev/n
   CMD_ARGS="--slug '$SLUG' --name '$NAME' --domain '$DOMAIN'"
   [[ -n "$CONTACT_EMAIL" ]] && CMD_ARGS="$CMD_ARGS --contact-email '$CONTACT_EMAIL'"
   [[ -n "$COUNTRY" ]] && CMD_ARGS="$CMD_ARGS --country '$COUNTRY'"
+  [[ -n "$ENTERPRISE_UUID" ]] && CMD_ARGS="$CMD_ARGS --enterprise-uuid '$ENTERPRISE_UUID'"
 
   # Run the management command
   kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
@@ -136,6 +159,7 @@ elif command -v tutor &>/dev/null; then
   CMD_ARGS="--slug $SLUG --name \"$NAME\" --domain $DOMAIN"
   [[ -n "$CONTACT_EMAIL" ]] && CMD_ARGS="$CMD_ARGS --contact-email $CONTACT_EMAIL"
   [[ -n "$COUNTRY" ]] && CMD_ARGS="$CMD_ARGS --country $COUNTRY"
+  [[ -n "$ENTERPRISE_UUID" ]] && CMD_ARGS="$CMD_ARGS --enterprise-uuid $ENTERPRISE_UUID"
 
   tutor local run lms bash -c "python manage.py lms provision_tenant $CMD_ARGS"
 
