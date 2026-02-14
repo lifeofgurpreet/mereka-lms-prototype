@@ -139,6 +139,18 @@ EMAIL_UNSUBSCRIBE_SECRET_KEY = os.environ.get('EMAIL_UNSUBSCRIBE_SECRET_KEY', SE
 # Rate limiting for preferences API (60 requests per minute per user)
 RATELIMIT_ENABLE = True
 RATELIMIT_USE_CACHE = 'default'
+
+# Mux Video Upload (Video Phase 3: Studio Upload Workflow)
+if 'openedx_mux_upload' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_mux_upload')
+
+# Feature flag for Mux Studio upload (default: false, enable in production after testing)
+ENABLE_MUX_STUDIO_UPLOAD = os.environ.get('ENABLE_MUX_STUDIO_UPLOAD', 'false').lower() == 'true'
+
+# Mux API credentials (synced from Infisical via ExternalSecrets)
+MUX_TOKEN_ID = os.environ.get('MUX_TOKEN_ID')
+MUX_TOKEN_SECRET = os.environ.get('MUX_TOKEN_SECRET')
+MUX_WEBHOOK_SECRET = os.environ.get('MUX_WEBHOOK_SECRET', '')  # Optional
 """,
     )
 )
@@ -243,10 +255,12 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/m
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_notifications /openedx/openedx_notifications
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_email_preferences /openedx/openedx_email_preferences
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_mux_upload /openedx/openedx_mux_upload
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/openedx_notifications
 RUN pip install -e /openedx/openedx_email_preferences
+RUN pip install -e /openedx/openedx_mux_upload
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
@@ -622,6 +636,9 @@ path('api/notifications/v1/', include('openedx_notifications.urls')),
 
 # Email preferences API (Email Phase 2)
 path('api/user/v1/preferences/email/', include('openedx_email_preferences.urls')),
+
+# Mux video upload API (Video Phase 3: Studio Upload Workflow)
+path('api/mux/upload/', include('openedx_mux_upload.urls')),
 """,
     )
 )
