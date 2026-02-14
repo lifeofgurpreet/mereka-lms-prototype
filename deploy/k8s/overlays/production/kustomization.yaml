@@ -14,6 +14,7 @@ resources:
 
 patches:
   - path: patches/remove-legacy-mongodb-service.yaml
+  - path: patches/resource-limits.yaml
 
 # Production-specific configurations
 
