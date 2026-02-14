@@ -1174,3 +1174,17 @@ for domain in PILOT_TENANT_DOMAINS:
         csrf_origin = f"https://{domain}"
         if csrf_origin not in CSRF_TRUSTED_ORIGINS:
             CSRF_TRUSTED_ORIGINS.append(csrf_origin)
+
+# ── Multi-Tenant Phase 3: Operational Hardening ─────────────────────────
+# @spec: multi-tenancy-architecture_spec.md (Phase 3: Hardening)
+# @covers: AC-TEN-014 through AC-TEN-021
+
+# Offboarding grace period (PDPA/GDPR compliance)
+TENANT_OFFBOARD_GRACE_DAYS = int(os.environ.get(
+    "TENANT_OFFBOARD_GRACE_DAYS", "30"
+))
+
+# Nightly isolation test CronJob
+TENANT_NIGHTLY_ISOLATION_ENABLED = os.environ.get(
+    "TENANT_NIGHTLY_ISOLATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")

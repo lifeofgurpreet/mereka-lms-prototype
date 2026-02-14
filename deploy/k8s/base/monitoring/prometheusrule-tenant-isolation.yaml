@@ -1,0 +1,49 @@
+# Alert rules for tenant isolation regression
+# @covers: AC-TEN-017 — Critical alert within 5 minutes
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: tenant-isolation-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: tenant-isolation-alerts
+    app.kubernetes.io/component: monitoring
+    release: prometheus
+spec:
+  groups:
+    - name: tenant-isolation
+      interval: 60s
+      rules:
+        - alert: TenantIsolationFailure
+          expr: tenant_isolation_failures > 0
+          for: 0m  # Fire immediately — P0 security
+          labels:
+            severity: critical
+            team: platform
+            category: security
+          annotations:
+            summary: "Cross-tenant isolation test FAILED"
+            description: |
+              The nightly tenant isolation test detected {{ $value }} failure(s).
+              This is a P0 security incident — cross-tenant data leakage may be occurring.
+
+              Immediate actions:
+              1. Check CronJob logs: kubectl logs -n mereka-lms -l app.kubernetes.io/name=tenant-isolation-test --tail=100
+              2. Verify cache isolation manually
+              3. Verify API isolation manually
+              4. Escalate to security team
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/operations/TROUBLESHOOTING.md"
+
+        - alert: TenantIsolationTestMissing
+          expr: absent(tenant_isolation_failures)
+          for: 26h  # Should run daily, alert if missing >26h
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Nightly tenant isolation test has not run"
+            description: |
+              The tenant isolation CronJob has not pushed metrics in over 26 hours.
+              The nightly test may be failing to start.
+
+              Check: kubectl get cronjob tenant-isolation-nightly -n mereka-lms
