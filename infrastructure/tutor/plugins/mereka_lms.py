@@ -170,6 +170,13 @@ ENABLE_MUX_SIGNED_PLAYBACK = os.environ.get('ENABLE_MUX_SIGNED_PLAYBACK', 'false
 MUX_SIGNING_KEY_ID = os.environ.get('MUX_SIGNING_KEY_ID')  # Mux signing key ID
 MUX_SIGNING_PRIVATE_KEY = os.environ.get('MUX_SIGNING_PRIVATE_KEY')  # RSA private key (PEM)
 
+# ORA2 Operations & Observability (Assessment Phase 1)
+if 'openedx_ora2_operations' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_ora2_operations')
+
+# Feature flag for ORA2 operations (default: true, enable for production monitoring)
+ENABLE_ORA2_OPERATIONS = os.environ.get('ENABLE_ORA2_OPERATIONS', 'true').lower() == 'true'
+
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
 """,
