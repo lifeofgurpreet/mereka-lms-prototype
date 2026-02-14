@@ -540,3 +540,21 @@ FEATURES["LIBRARIES_BULK_IMPORT_ENABLED"] = LIBRARIES_BULK_IMPORT_ENABLED
 BLOCKSTORE_BUCKET_NAME = os.environ.get(
     "BLOCKSTORE_BUCKET_NAME", "lms-blockstore"
 )
+
+# ── Content Libraries v2: Phase 1 Core ──────────────────────────────────
+# @spec: content-libraries-v2 (Phase 1: Platform Libraries)
+# @covers: AC-LIB-007 through AC-LIB-013
+
+# Library publish timeout (seconds)
+LIBRARY_PUBLISH_TIMEOUT_SECONDS = int(os.environ.get(
+    "LIBRARY_PUBLISH_TIMEOUT_SECONDS", "30"
+))
+
+# Soft-delete retention (days)
+LIBRARY_SOFT_DELETE_RETENTION_DAYS = int(os.environ.get(
+    "LIBRARY_SOFT_DELETE_RETENTION_DAYS", "30"
+))
+
+# Register openedx_content_libraries app
+if "openedx_content_libraries" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_content_libraries")

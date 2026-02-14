@@ -1227,3 +1227,26 @@ FEATURES["LIBRARIES_PUBLIC_READ_ENABLED"] = LIBRARIES_PUBLIC_READ_ENABLED
 BLOCKSTORE_BUCKET_NAME = os.environ.get(
     "BLOCKSTORE_BUCKET_NAME", "lms-blockstore"
 )
+
+# ── Content Libraries v2: Phase 1 Core ──────────────────────────────────
+# @spec: content-libraries-v2 (Phase 1: Platform Libraries)
+# @covers: AC-LIB-007 through AC-LIB-013
+
+# Library publish timeout (seconds) — AC-LIB-007 requires < 30s
+LIBRARY_PUBLISH_TIMEOUT_SECONDS = int(os.environ.get(
+    "LIBRARY_PUBLISH_TIMEOUT_SECONDS", "30"
+))
+
+# Soft-delete retention period (AC-LIB-009, AC-NEG-LIB-005)
+LIBRARY_SOFT_DELETE_RETENTION_DAYS = int(os.environ.get(
+    "LIBRARY_SOFT_DELETE_RETENTION_DAYS", "30"
+))
+
+# library_content XBlock default random pool size (AC-LIB-008)
+LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
+    "LIBRARY_CONTENT_DEFAULT_COUNT", "5"
+))
+
+# Register openedx_content_libraries app
+if "openedx_content_libraries" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_content_libraries")
