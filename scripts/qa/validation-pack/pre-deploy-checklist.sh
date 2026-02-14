@@ -116,7 +116,7 @@ if kubectl get externalsecrets -n "$NAMESPACE" &>/dev/null; then
       if [[ "$ready" == "True" ]]; then
         pass "ExternalSecret: $name"
       else
-        fail "ExternalSecret: $name ($status)"
+        fail "ExternalSecret: $name (Ready=$ready)"
       fi
     done <<< "$es_list"
   else
