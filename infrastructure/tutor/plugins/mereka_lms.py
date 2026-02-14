@@ -177,6 +177,28 @@ if 'openedx_ora2_operations' not in INSTALLED_APPS:
 # Feature flag for ORA2 operations (default: true, enable for production monitoring)
 ENABLE_ORA2_OPERATIONS = os.environ.get('ENABLE_ORA2_OPERATIONS', 'true').lower() == 'true'
 
+# Timed Exams - Server-Side Enforcement & Accommodations (Assessment Phase 2)
+if 'openedx_timed_exams' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_timed_exams')
+
+# Feature flag for timed exam enhancements (default: true)
+ENABLE_TIMED_EXAM_ENHANCEMENTS = os.environ.get('ENABLE_TIMED_EXAM_ENHANCEMENTS', 'true').lower() == 'true'
+
+# Add multi-device detection middleware (insert after authentication middleware)
+if 'openedx_timed_exams.middleware.TimedExamEnforcementMiddleware' not in MIDDLEWARE:
+    # Find authentication middleware and insert after it
+    auth_middleware_index = -1
+    for i, mw in enumerate(MIDDLEWARE):
+        if 'AuthenticationMiddleware' in mw:
+            auth_middleware_index = i
+            break
+
+    if auth_middleware_index >= 0:
+        MIDDLEWARE.insert(auth_middleware_index + 1, 'openedx_timed_exams.middleware.TimedExamEnforcementMiddleware')
+    else:
+        # Fallback: append to end if auth middleware not found
+        MIDDLEWARE.append('openedx_timed_exams.middleware.TimedExamEnforcementMiddleware')
+
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
 """,
