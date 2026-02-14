@@ -1301,6 +1301,31 @@ KAJABI_WELCOME_EMAIL_ENABLED = os.environ.get(
     "KAJABI_WELCOME_EMAIL_ENABLED", "true"
 ).lower() in ("true", "1", "yes")
 
+# ── Mobile Backend API ──────────────────────────────────────────────────
+# @spec: Mobile Backend API (mereka-lms-2gck)
+# @covers: AC-MOB-001 through AC-MOB-007
+
+# Register openedx_mobile_api app
+if "openedx_mobile_api" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_mobile_api")
+
+# Enable mobile API
+MOBILE_API_ENABLED = os.environ.get(
+    "MOBILE_API_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["MOBILE_API_ENABLED"] = MOBILE_API_ENABLED
+
+# FCM (Firebase Cloud Messaging) server key (AC-MOB-006 - stored in ExternalSecrets)
+FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY", "")
+
+# Mobile API performance settings (AC-MOB-001 - p95 <= 500ms)
+MOBILE_API_CACHE_TIMEOUT = int(os.environ.get("MOBILE_API_CACHE_TIMEOUT", "300"))
+
+# Mobile deep linking (AC-MOB-004, AC-MOB-005)
+IOS_APP_ID = os.environ.get("IOS_APP_ID", "TEAM_ID.io.mereka.academy")
+ANDROID_PACKAGE_NAME = os.environ.get("ANDROID_PACKAGE_NAME", "io.mereka.academy")
+ANDROID_SHA256_FINGERPRINT = os.environ.get("ANDROID_SHA256_FINGERPRINT", "")
+
 # ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
 # @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
 # @covers: AC-LIB-014 through AC-LIB-019

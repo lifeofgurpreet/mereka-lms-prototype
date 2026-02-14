@@ -1,0 +1,38 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "TEAM_ID.io.mereka.academy"
+        ],
+        "components": [
+          {
+            "/": "/courses/*",
+            "comment": "Course detail pages"
+          },
+          {
+            "/": "/dashboard",
+            "comment": "Learner dashboard"
+          },
+          {
+            "/": "/programs/*",
+            "comment": "Program pages"
+          },
+          {
+            "/": "/account/*",
+            "comment": "Account settings"
+          },
+          {
+            "/": "/profile/*",
+            "comment": "User profiles"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAM_ID.io.mereka.academy"
+    ]
+  }
+}
