@@ -338,3 +338,262 @@ def create_platform_templates_library(user=None):
     )
 
     return metadata
+
+
+# ── Phase 2: Tenant Libraries (AC-LIB-014 through AC-LIB-019) ──────────
+
+
+def get_tenant_libraries(tenant_uuid, include_public=True):
+    """
+    Get libraries for a specific tenant (AC-LIB-014, AC-LIB-015).
+
+    Returns libraries owned by the tenant, plus optionally
+    platform-global libraries (allow_public_read=True).
+
+    AC-NEG-LIB-007: Cross-tenant libraries are NOT included.
+    """
+    from .models import LibraryMetadata
+    from django.db.models import Q
+
+    query = Q(tenant_uuid=tenant_uuid, is_deleted=False)
+
+    if include_public:
+        query |= Q(allow_public_read=True, is_deleted=False)
+
+    return LibraryMetadata.objects.filter(query).distinct()
+
+
+def grant_library_role(library_key, user, role, granted_by=None):
+    """
+    Grant RBAC role to a user for a library (AC-LIB-016).
+
+    Roles:
+    - library_admin: Full control
+    - library_author: Edit content, publish
+    - library_reader: Read-only
+
+    Returns LibraryRole instance.
+    """
+    from .models import LibraryMetadata, LibraryRole
+
+    metadata = LibraryMetadata.objects.get(library_key=library_key, is_deleted=False)
+
+    role_obj, created = LibraryRole.objects.update_or_create(
+        library=metadata,
+        user=user,
+        defaults={
+            'role': role,
+            'granted_by': granted_by,
+        },
+    )
+
+    action = 'created' if created else 'updated'
+    logger.info(
+        "Library role %s: %s -> %s (%s) [granted by: %s]",
+        action, library_key, user.username, role,
+        granted_by.username if granted_by else 'system',
+    )
+
+    return role_obj
+
+
+def revoke_library_role(library_key, user, revoked_by=None):
+    """
+    Revoke RBAC role from a user (AC-LIB-017).
+
+    AC-LIB-017: Prevents removing the last admin.
+    Raises ValueError if attempting to remove the last admin.
+    """
+    from .models import LibraryMetadata, LibraryRole
+
+    metadata = LibraryMetadata.objects.get(library_key=library_key, is_deleted=False)
+
+    role_obj = LibraryRole.objects.get(library=metadata, user=user)
+
+    # Last-admin prevention (AC-LIB-017)
+    if role_obj.role == LibraryRole.ROLE_ADMIN:
+        admin_count = LibraryRole.objects.filter(
+            library=metadata,
+            role=LibraryRole.ROLE_ADMIN,
+        ).count()
+
+        if admin_count <= 1:
+            logger.warning(
+                "Blocked removal of last admin from library %s (user: %s)",
+                library_key, user.username,
+            )
+            raise ValueError(
+                "Cannot remove the last admin from a library. "
+                "Grant admin role to another user first."
+            )
+
+    role_obj.delete()
+
+    logger.info(
+        "Library role revoked: %s -> %s (%s) [revoked by: %s]",
+        library_key, user.username, role_obj.role,
+        revoked_by.username if revoked_by else 'system',
+    )
+
+
+def check_library_permission(library_key, user, required_role):
+    """
+    Check if a user has the required RBAC role for a library (AC-LIB-016).
+
+    Role hierarchy:
+    - library_admin >= library_author >= library_reader
+    - library_admin can do anything
+    - library_author can edit and publish
+    - library_reader can only read
+
+    Returns True if permission granted, False otherwise.
+    """
+    from .models import LibraryMetadata, LibraryRole
+
+    # Superusers bypass RBAC
+    if user.is_superuser:
+        return True
+
+    try:
+        metadata = LibraryMetadata.objects.get(library_key=library_key, is_deleted=False)
+        role_obj = LibraryRole.objects.get(library=metadata, user=user)
+    except (LibraryMetadata.DoesNotExist, LibraryRole.DoesNotExist):
+        return False
+
+    # Role hierarchy
+    role_levels = {
+        LibraryRole.ROLE_ADMIN: 3,
+        LibraryRole.ROLE_AUTHOR: 2,
+        LibraryRole.ROLE_READER: 1,
+    }
+
+    user_level = role_levels.get(role_obj.role, 0)
+    required_level = role_levels.get(required_role, 0)
+
+    return user_level >= required_level
+
+
+def enable_public_read(library_key, user):
+    """
+    Enable public read access for a library (AC-LIB-015).
+
+    Makes the library visible to all tenants.
+    Locks the setting after first enable to prevent reversal (AC-NEG-LIB-008).
+
+    Returns LibraryMetadata instance.
+    """
+    from .models import LibraryMetadata
+
+    metadata = LibraryMetadata.objects.get(library_key=library_key, is_deleted=False)
+
+    if not metadata.allow_public_read:
+        metadata.allow_public_read = True
+        metadata.allow_public_read_locked_at = timezone.now()
+        metadata.save(update_fields=['allow_public_read', 'allow_public_read_locked_at', 'updated_at'])
+
+        logger.warning(
+            "Library %s set to public read by %s (IRREVERSIBLE)",
+            library_key, user.username if user else 'system',
+        )
+
+    return metadata
+
+
+def disable_public_read(library_key, user):
+    """
+    Disable public read access for a library (AC-NEG-LIB-008).
+
+    REJECTS if the library has been forked by other tenants.
+    This prevents breaking existing references.
+
+    Raises ValueError if reversal is not allowed.
+    """
+    from .models import LibraryMetadata, LibraryCourseReference
+
+    metadata = LibraryMetadata.objects.get(library_key=library_key, is_deleted=False)
+
+    if not metadata.allow_public_read:
+        return metadata
+
+    # Check if locked (has been forked)
+    if metadata.allow_public_read_locked_at:
+        # Check for cross-tenant references
+        refs = LibraryCourseReference.objects.filter(library=metadata)
+        cross_tenant_refs = [
+            ref for ref in refs
+            if ref.library.tenant_uuid and
+            str(ref.library.tenant_uuid) != str(metadata.tenant_uuid)
+        ]
+
+        if cross_tenant_refs:
+            logger.warning(
+                "Blocked public read disable for library %s: "
+                "%d cross-tenant references exist",
+                library_key, len(cross_tenant_refs),
+            )
+            raise ValueError(
+                "Cannot disable public read: library has been forked by other tenants. "
+                "This operation would break existing references."
+            )
+
+    metadata.allow_public_read = False
+    metadata.save(update_fields=['allow_public_read', 'updated_at'])
+
+    logger.info(
+        "Library %s public read disabled by %s",
+        library_key, user.username if user else 'system',
+    )
+
+    return metadata
+
+
+def log_library_access(library, user, action, request=None,
+                        source_tenant=None, target_tenant=None):
+    """
+    Log library access events for security auditing (AC-LIB-018).
+
+    Actions:
+    - cross_tenant_attempt: User tried to access another tenant's library
+    - role_escalation_attempt: User tried to perform action above their role
+    - access_granted: Access was allowed
+    - access_denied: Access was denied
+
+    AC-NEG-LIB-007: All cross-tenant attempts are logged.
+    """
+    from .models import LibraryAccessLog
+
+    ip_address = None
+    request_path = ''
+
+    if request:
+        # Extract IP address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip_address = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip_address = request.META.get('REMOTE_ADDR')
+
+        request_path = request.path
+
+    log_entry = LibraryAccessLog.objects.create(
+        library=library,
+        user=user,
+        action=action,
+        source_tenant_uuid=source_tenant,
+        target_tenant_uuid=target_tenant,
+        request_path=request_path,
+        ip_address=ip_address,
+    )
+
+    # Security-critical events logged at WARNING level
+    if action in [
+        LibraryAccessLog.ACTION_CROSS_TENANT_ATTEMPT,
+        LibraryAccessLog.ACTION_ROLE_ESCALATION_ATTEMPT,
+    ]:
+        logger.warning(
+            "SECURITY: %s - user=%s, library=%s, source_tenant=%s, target_tenant=%s, ip=%s",
+            action, user.username, library.library_key if library else None,
+            source_tenant, target_tenant, ip_address,
+        )
+
+    return log_entry

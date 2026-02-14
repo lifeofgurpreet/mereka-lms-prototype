@@ -3,16 +3,18 @@ from django.contrib import admin
 from .models import (
     LibraryMetadata, LibraryVersion, LibraryComponent,
     LibraryCourseReference, BlockstoreReference,
+    LibraryRole, LibraryAccessLog,
 )
 
 
 @admin.register(LibraryMetadata)
 class LibraryMetadataAdmin(admin.ModelAdmin):
-    list_display = ['title', 'library_key', 'org', 'is_deleted',
+    list_display = ['title', 'library_key', 'org', 'tenant_uuid',
+                    'allow_public_read', 'is_deleted',
                     'published_component_count', 'last_published_at']
-    list_filter = ['is_deleted', 'org']
+    list_filter = ['is_deleted', 'org', 'allow_public_read']
     search_fields = ['library_key', 'title', 'org']
-    readonly_fields = ['id', 'created_at', 'updated_at']
+    readonly_fields = ['id', 'created_at', 'updated_at', 'allow_public_read_locked_at']
 
 
 @admin.register(LibraryVersion)
@@ -49,3 +51,21 @@ class BlockstoreReferenceAdmin(admin.ModelAdmin):
     list_filter = ['ref_type', 'is_orphaned']
     search_fields = ['bundle_uuid']
     readonly_fields = ['id', 'created_at']
+
+
+@admin.register(LibraryRole)
+class LibraryRoleAdmin(admin.ModelAdmin):
+    list_display = ['library', 'user', 'role', 'granted_by', 'granted_at']
+    list_filter = ['role']
+    search_fields = ['library__library_key', 'user__username']
+    readonly_fields = ['id', 'granted_at']
+
+
+@admin.register(LibraryAccessLog)
+class LibraryAccessLogAdmin(admin.ModelAdmin):
+    list_display = ['library', 'user', 'action', 'source_tenant_uuid',
+                    'target_tenant_uuid', 'ip_address', 'timestamp']
+    list_filter = ['action', 'timestamp']
+    search_fields = ['library__library_key', 'user__username', 'ip_address']
+    readonly_fields = ['id', 'timestamp']
+    date_hierarchy = 'timestamp'

@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import (
     LibraryMetadata, LibraryVersion, LibraryComponent,
     LibraryCourseReference, BlockstoreReference,
+    LibraryRole, LibraryAccessLog,
 )
 
 
@@ -11,12 +12,13 @@ class LibraryMetadataSerializer(serializers.ModelSerializer):
         model = LibraryMetadata
         fields = [
             'id', 'library_key', 'org', 'title', 'description',
+            'tenant_uuid', 'allow_public_read', 'allow_public_read_locked_at',
             'is_deleted', 'deleted_at',
             'last_published_at', 'draft_component_count',
             'published_component_count', 'retention_days',
             'created_at', 'updated_at',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'allow_public_read_locked_at']
 
 
 class LibraryVersionSerializer(serializers.ModelSerializer):
@@ -57,3 +59,37 @@ class LibraryCourseReferenceSerializer(serializers.ModelSerializer):
             'has_update_available', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class LibraryRoleSerializer(serializers.ModelSerializer):
+    """Serializer for LibraryRole (AC-LIB-016)."""
+    library_key = serializers.CharField(source='library.library_key', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    granted_by_username = serializers.CharField(
+        source='granted_by.username', read_only=True, allow_null=True
+    )
+
+    class Meta:
+        model = LibraryRole
+        fields = [
+            'id', 'library_key', 'username', 'role',
+            'granted_by_username', 'granted_at',
+        ]
+        read_only_fields = ['id', 'granted_at']
+
+
+class LibraryAccessLogSerializer(serializers.ModelSerializer):
+    """Serializer for LibraryAccessLog (AC-LIB-018)."""
+    library_key = serializers.CharField(
+        source='library.library_key', read_only=True, allow_null=True
+    )
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = LibraryAccessLog
+        fields = [
+            'id', 'library_key', 'username', 'action',
+            'source_tenant_uuid', 'target_tenant_uuid',
+            'request_path', 'ip_address', 'timestamp',
+        ]
+        read_only_fields = ['id', 'timestamp']
