@@ -1,0 +1,113 @@
+# Mux Delivery Monitor — Prometheus Exporter
+# Polls Mux API every 6 hours, exposes metrics on :8000/metrics
+#
+# @spec: video-pipeline-delivery_spec.md
+# @covers AC-VPD-029
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mux-delivery-monitor
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: mux-delivery-monitor
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mux-delivery-monitor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mux-delivery-monitor
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+        app.kubernetes.io/component: monitoring
+    spec:
+      containers:
+        - name: mux-monitor
+          image: python:3.11-slim
+          command: ["python3", "/app/mux_delivery_monitor.py"]
+          ports:
+            - name: metrics
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: MUX_TOKEN_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mereka-lms-runtime-secrets
+                  key: MUX_TOKEN_ID
+            - name: MUX_TOKEN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mereka-lms-runtime-secrets
+                  key: MUX_TOKEN_SECRET
+            - name: MUX_POLL_INTERVAL_SECONDS
+              value: "21600"   # 6 hours
+            - name: MUX_EXPORTER_PORT
+              value: "8000"
+          volumeMounts:
+            - name: monitor-script
+              mountPath: /app
+              readOnly: true
+          resources:
+            requests:
+              cpu: 5m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 3
+            periodSeconds: 30
+      volumes:
+        - name: monitor-script
+          configMap:
+            name: mux-delivery-monitor-script
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mux-delivery-monitor
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: mux-delivery-monitor
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+spec:
+  selector:
+    app.kubernetes.io/name: mux-delivery-monitor
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mux-delivery-monitor-script
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: mux-delivery-monitor
+    app.kubernetes.io/part-of: mereka-lms
+data:
+  mux_delivery_monitor.py: |
+    # This ConfigMap is generated from scripts/monitoring/mux_delivery_monitor.py
+    # To update: copy the script content here or use kustomize configMapGenerator
+    # See scripts/monitoring/mux_delivery_monitor.py for the source
+    # Placeholder — deploy pipeline should inject actual script

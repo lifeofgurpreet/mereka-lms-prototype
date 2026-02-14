@@ -1,0 +1,25 @@
+# ServiceMonitor for Mux Delivery Monitor
+#
+# @spec: video-pipeline-delivery_spec.md
+# @covers AC-VPD-029
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mux-delivery-monitor
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: mux-delivery-monitor
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mux-delivery-monitor
+  endpoints:
+    - port: metrics
+      interval: 300s   # Scrape every 5 min (metrics only change every 6h)
+      path: /metrics
+      scrapeTimeout: 10s
