@@ -9,6 +9,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-notifications.sh
     command: scripts/qa/verify-email-notifications.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-ses-infrastructure.sh
+    command: scripts/qa/verify-email-ses-infrastructure.sh
   - type: manual
     runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
@@ -23,6 +27,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-notifications.sh
     command: scripts/qa/verify-email-notifications.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-ses-infrastructure.sh
+    command: scripts/qa/verify-email-ses-infrastructure.sh
   - type: manual
     runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Template Rendering
@@ -33,17 +41,29 @@ acceptance_criteria:
   description: Given a learner triggers a password reset, when ACE dispatches the
     email, then the email is delivered via SES within 30 seconds and the `From` header
     shows `noreply@academyv2.mereka.io`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-ses-infrastructure.sh
+    command: scripts/qa/verify-email-ses-infrastructure.sh
 - id: AC-004
   description: Given the custom MAIL FROM domain `mail.academyv2.mereka.io`, when
     an email is sent, then the envelope sender aligns with the header sender (DMARC
     alignment pass)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-ses-infrastructure.sh
+    command: scripts/qa/verify-email-ses-infrastructure.sh
 - id: AC-005
   description: Given an enterprise tenant with `org_slug=acme`, when a course announcement
     email is sent, then the `From` display name shows "Acme Corp via Mereka Academy"
     and the sender address is `noreply@academyv2.mereka.io`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-ses-infrastructure.sh
+    command: scripts/qa/verify-email-ses-infrastructure.sh
 - id: AC-006
   description: Given ACE configuration with channels `["django_email", "push", "in_app"]`,
     when a `course_announcement` notification is triggered, then ACE dispatches to
@@ -189,22 +209,90 @@ acceptance_criteria:
   description: Given SES reports a hard bounce for `user@example.com`, when the bounce
     webhook processes the event, then `user@example.com` is added to the suppression
     list and subsequent sends to that address are blocked
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-bounce-handling.sh
+    command: scripts/qa/verify-email-bounce-handling.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/management/commands/process_ses_notification.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/management/commands/process_ses_notification.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/middleware.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/middleware.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/migrations/0001_initial.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/migrations/0001_initial.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
 - id: AC-034
   description: Given an email address with 3 soft bounces within 7 days, when the
     third soft bounce is processed, then the address is added to the suppression list
     as a hard bounce
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-bounce-handling.sh
+    command: scripts/qa/verify-email-bounce-handling.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/management/commands/process_ses_notification.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/management/commands/process_ses_notification.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/middleware.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/middleware.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/migrations/0001_initial.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/migrations/0001_initial.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
 - id: AC-035
   description: Given SES reports a complaint for a `bulk_campaign` email, when the
     complaint webhook processes the event, then the user's `bulk_campaign` email preference
     is disabled and the address is added to the suppression list
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-bounce-handling.sh
+    command: scripts/qa/verify-email-bounce-handling.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/management/commands/process_ses_notification.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/management/commands/process_ses_notification.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/middleware.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/middleware.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/migrations/0001_initial.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/migrations/0001_initial.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
+    command: pytest infrastructure/tutor/plugins/email-suppression/mereka_email_suppression/models.py
 - id: AC-036
   description: Given the SES account bounce rate is 6% (above 5% threshold), when
     the alert fires, then the ops team receives a critical alert via the configured
     notification channel
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-bounce-handling.sh
+    command: scripts/qa/verify-email-bounce-handling.sh
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/monitoring/prometheusrule-email.yaml
+    command: deploy/k8s/base/monitoring/prometheusrule-email.yaml
 - id: AC-037
   description: Given a user with digest preference set to `daily` for `discussion_reply`,
     when they receive 10 discussion replies throughout the day, then at 09:00 in their
@@ -250,9 +338,6 @@ acceptance_criteria:
     device registrations for that user are deleted or anonymized
   verify: []
 _unmapped:
-- AC-003
-- AC-004
-- AC-005
 - AC-006
 - AC-007
 - AC-008
@@ -277,10 +362,6 @@ _unmapped:
 - AC-030
 - AC-031
 - AC-032
-- AC-033
-- AC-034
-- AC-035
-- AC-036
 - AC-037
 - AC-038
 - AC-039

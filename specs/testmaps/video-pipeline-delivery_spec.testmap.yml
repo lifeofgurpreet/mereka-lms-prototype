@@ -84,7 +84,11 @@ acceptance_criteria:
 - id: AC-VPD-019
   description: Given a monitoring alert rule, when monthly delivery minutes exceed
     80,000, then a Slack/email alert is triggered
-  verify: []
+  verify:
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/monitoring/prometheusrule-video.yaml
+    command: deploy/k8s/base/monitoring/prometheusrule-video.yaml
 - id: AC-VPD-020
   description: Given MUX_TOKEN_ID and MUX_TOKEN_SECRET in Infisical, when ExternalSecrets
     syncs, then the secrets are available in the `mereka-lms` K8s namespace as a Secret
@@ -129,12 +133,24 @@ acceptance_criteria:
 - id: AC-VPD-029
   description: Given Prometheus scraping Mux metrics, when `video_delivery_minutes_monthly`
     is queried, then the value updates at least every 6 hours
-  verify: []
+  verify:
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/monitoring/mux-exporter.yaml
+    command: deploy/k8s/base/monitoring/mux-exporter.yaml
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/monitoring/servicemonitor-mux.yaml
+    command: deploy/k8s/base/monitoring/servicemonitor-mux.yaml
 - id: AC-VPD-030
   description: 'Given an alert rule for `video_transcode_success_rate`, when the rate
     drops below 95% for 6 hours, then a warning alert is sent to #ops-warnings Slack
     channel'
-  verify: []
+  verify:
+  - type: automated
+    test_type: automated
+    file: deploy/k8s/base/monitoring/prometheusrule-video.yaml
+    command: deploy/k8s/base/monitoring/prometheusrule-video.yaml
 - id: AC-VPD-031
   description: Given a signed playback token generated server-side, when inspected,
     then it contains a JWT with `exp` claim set to 12 hours from generation time
@@ -193,7 +209,6 @@ _unmapped:
 - AC-VPD-016
 - AC-VPD-017
 - AC-VPD-018
-- AC-VPD-019
 - AC-VPD-020
 - AC-VPD-021
 - AC-VPD-022
@@ -203,8 +218,6 @@ _unmapped:
 - AC-VPD-026
 - AC-VPD-027
 - AC-VPD-028
-- AC-VPD-029
-- AC-VPD-030
 - AC-VPD-031
 - AC-VPD-032
 - AC-VPD-033

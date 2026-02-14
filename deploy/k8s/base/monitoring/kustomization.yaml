@@ -14,4 +14,8 @@ resources:
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
   - prometheusrule-auth.yaml
+  - prometheusrule-email.yaml
+  - prometheusrule-video.yaml
+  - mux-exporter.yaml
+  - servicemonitor-mux.yaml
   - hpa-enterprise.yaml

@@ -1,0 +1,128 @@
+# @covers AC-036
+# @spec: email-notifications-pipeline_spec.md
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: email-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: email
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: email-delivery
+      interval: 30s
+      rules:
+        # AC-036: SES bounce rate alert (5% threshold)
+        - alert: EmailBounceRateHigh
+          expr: |
+            (
+              rate(ses_bounce_total[15m])
+              / clamp_min(rate(ses_send_total[15m]), 1)
+            ) > 0.05
+          for: 15m
+          labels:
+            severity: critical
+            component: email
+          annotations:
+            summary: "Email bounce rate exceeds 5%"
+            description: "Bounce rate is {{ $value | humanizePercentage }} over the last 15 minutes. SES reputation at risk."
+
+        # AC-036: SES complaint rate alert (0.1% threshold)
+        - alert: EmailComplaintRateHigh
+          expr: |
+            (
+              rate(ses_complaint_total[15m])
+              / clamp_min(rate(ses_send_total[15m]), 1)
+            ) > 0.001
+          for: 15m
+          labels:
+            severity: critical
+            component: email
+          annotations:
+            summary: "Email complaint rate exceeds 0.1%"
+            description: "Complaint rate is {{ $value | humanizePercentage }} over the last 15 minutes. SES reputation at risk."
+
+        # SES quota monitoring
+        - alert: SESQuotaNearLimit
+          expr: |
+            (
+              ses_quota_remaining
+              / clamp_min(ses_quota_max, 1)
+            ) < 0.10
+          for: 5m
+          labels:
+            severity: warning
+            component: email
+          annotations:
+            summary: "SES sending quota nearly exhausted"
+            description: "Only {{ $value | humanizePercentage }} of SES daily quota remaining."
+
+        # AC-003: Email delivery latency alert (30s threshold)
+        - alert: EmailDeliveryLatencyHigh
+          expr: |
+            histogram_quantile(
+              0.95,
+              rate(ses_delivery_duration_seconds_bucket[5m])
+            ) > 30
+          for: 10m
+          labels:
+            severity: warning
+            component: email
+          annotations:
+            summary: "Email delivery p95 latency exceeds 30 seconds"
+            description: "95th percentile email delivery time is {{ $value }}s over the last 10 minutes."
+
+        # Suppression list growth alert
+        - alert: EmailSuppressionListGrowthHigh
+          expr: |
+            increase(email_suppression_total[1h]) > 100
+          for: 5m
+          labels:
+            severity: warning
+            component: email
+          annotations:
+            summary: "Email suppression list growing rapidly"
+            description: "{{ $value }} addresses added to suppression list in the last hour. Check for data quality issues."
+
+        # SMTP relay pod availability
+        - alert: SMTPRelayPodDown
+          expr: up{namespace="mereka-lms", pod=~"smtp-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: email
+          annotations:
+            summary: "SMTP relay pod is down"
+            description: "SMTP relay pod {{ $labels.pod }} has been down for more than 5 minutes. Email delivery stopped."
+
+        # Exim queue size alert
+        - alert: EximQueueSizeHigh
+          expr: |
+            exim_queue_size{namespace="mereka-lms"} > 1000
+          for: 10m
+          labels:
+            severity: warning
+            component: email
+          annotations:
+            summary: "Exim mail queue size is high"
+            description: "Exim queue has {{ $value }} messages waiting. Check for delivery issues."
+
+        # Email send rate anomaly (sudden drop)
+        - alert: EmailSendRateDropped
+          expr: |
+            (
+              rate(ses_send_total[5m])
+              / clamp_min(rate(ses_send_total[5m] offset 1h), 1)
+            ) < 0.25
+          for: 10m
+          labels:
+            severity: warning
+            component: email
+          annotations:
+            summary: "Email send rate dropped significantly"
+            description: "Email send rate is {{ $value | humanizePercentage }} of normal. Possible application issue."
