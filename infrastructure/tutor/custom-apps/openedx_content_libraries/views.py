@@ -381,3 +381,65 @@ class LibraryPublicReadView(APIView):
         except ValueError as e:
             # Fork prevention (AC-NEG-LIB-008)
             return Response({'error': str(e)}, status=400)
+
+
+# ── Phase 3: Scale, Search, Analytics Views ────────────────────────────
+
+
+class LibrarySearchView(APIView):
+    """Search libraries and components via Meilisearch (AC-LIB-021)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        search_type = request.query_params.get('type', 'libraries')
+        library_key = request.query_params.get('library_key')
+        block_type = request.query_params.get('block_type')
+        limit = min(int(request.query_params.get('limit', 20)), 100)
+        offset = int(request.query_params.get('offset', 0))
+
+        # Get tenant UUID for isolation
+        tenant_uuid = None
+        tenant_isolation = getattr(settings, 'LIBRARY_TENANT_ISOLATION_ENABLED', False)
+        if tenant_isolation and not request.user.is_superuser:
+            try:
+                from openedx_tenant_cache.isolation import get_user_tenant_uuid
+                tenant_uuid = get_user_tenant_uuid(request.user)
+            except ImportError:
+                pass
+
+        from .search import search_libraries, search_components
+
+        if search_type == 'components':
+            result = search_components(
+                query, library_key=library_key, tenant_uuid=tenant_uuid,
+                block_type=block_type, limit=limit, offset=offset,
+            )
+        else:
+            result = search_libraries(
+                query, tenant_uuid=tenant_uuid, limit=limit, offset=offset,
+            )
+
+        return Response(result)
+
+
+class LibraryUsageReportView(APIView):
+    """Usage analytics for a library (AC-LIB-022)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, library_key):
+        from .analytics import get_library_usage_report
+        try:
+            report = get_library_usage_report(library_key)
+            return Response(report)
+        except LibraryMetadata.DoesNotExist:
+            return Response({'error': 'Library not found'}, status=404)
+
+
+class LibraryAnalyticsSummaryView(APIView):
+    """Analytics summary across all libraries."""
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        from .analytics import get_library_analytics_summary
+        return Response(get_library_analytics_summary())

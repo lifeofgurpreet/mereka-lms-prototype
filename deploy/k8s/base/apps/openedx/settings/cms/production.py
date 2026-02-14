@@ -572,3 +572,16 @@ LIBRARY_TENANT_ISOLATION_ENABLED = os.environ.get(
 LIBRARY_RBAC_ENABLED = os.environ.get(
     "LIBRARY_RBAC_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Content Libraries v2: Phase 3 Scale, Search, Analytics ─────────────
+# @covers: AC-LIB-020 through AC-LIB-025
+
+# Meilisearch for library search in Studio
+LIBRARY_SEARCH_ENABLED = os.environ.get(
+    "LIBRARY_SEARCH_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Performance: listing pagination
+LIBRARY_LIST_PAGE_SIZE = int(os.environ.get(
+    "LIBRARY_LIST_PAGE_SIZE", "50"
+))

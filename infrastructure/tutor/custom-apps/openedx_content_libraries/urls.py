@@ -5,6 +5,7 @@ from .views import (
     LibraryVersionListView, LibrarySoftDeleteView,
     LibraryUpdateNotificationsView, OrphanCheckView,
     LibraryRoleView, LibraryPublicReadView,
+    LibrarySearchView, LibraryUsageReportView, LibraryAnalyticsSummaryView,
 )
 
 app_name = 'openedx_content_libraries'
@@ -29,4 +30,12 @@ urlpatterns = [
          LibraryRoleView.as_view(), name='library-roles'),
     path('libraries/<path:library_key>/public-read/',
          LibraryPublicReadView.as_view(), name='library-public-read'),
+
+    # Phase 3: Scale, Search, Analytics (AC-LIB-020 through AC-LIB-025)
+    path('libraries/search/',
+         LibrarySearchView.as_view(), name='library-search'),
+    path('libraries/analytics/',
+         LibraryAnalyticsSummaryView.as_view(), name='library-analytics-summary'),
+    path('libraries/<path:library_key>/usage/',
+         LibraryUsageReportView.as_view(), name='library-usage-report'),
 ]
