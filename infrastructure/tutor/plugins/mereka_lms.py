@@ -114,6 +114,16 @@ if 'django_prometheus.middleware.PrometheusBeforeMiddleware' not in MIDDLEWARE:
     MIDDLEWARE.insert(0, 'django_prometheus.middleware.PrometheusBeforeMiddleware')
 if 'django_prometheus.middleware.PrometheusAfterMiddleware' not in MIDDLEWARE:
     MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
+
+# In-App Notifications (Email Phase 3)
+if 'openedx_notifications' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_notifications')
+
+# Configure ACE channels for in-app notifications
+ACE_ENABLED_CHANNELS = ["django_email", "in_app"]
+
+# Feature flag for in-app notifications (enable by default)
+NOTIFICATION_INAPP_ENABLED = True
 """,
     )
 )
@@ -216,8 +226,10 @@ hooks.Filters.ENV_PATCHES.add_item(
 # Copy custom apps
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_notifications /openedx/openedx_notifications
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/openedx_notifications
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
@@ -572,6 +584,21 @@ hooks.Filters.ENV_PATCHES.add_item(
 # DID document endpoint for Verifiable Credentials issuer (CRED-020)
 # Must be before other patterns to catch /.well-known/did.json
 path('', include('credentials_vc_issuer.urls')),
+""",
+    )
+)
+
+###############################################################################
+# LMS URL Patterns (In-App Notifications API)
+###############################################################################
+
+# Add notifications API to LMS URL patterns
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "lms-urlpatterns",
+        """
+# In-app notifications API (Email Phase 3)
+path('api/notifications/v1/', include('openedx_notifications.urls')),
 """,
     )
 )
