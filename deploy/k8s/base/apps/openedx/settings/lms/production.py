@@ -1188,3 +1188,42 @@ TENANT_OFFBOARD_GRACE_DAYS = int(os.environ.get(
 TENANT_NIGHTLY_ISOLATION_ENABLED = os.environ.get(
     "TENANT_NIGHTLY_ISOLATION_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Content Libraries v2: Feature Flags ─────────────────────────────────
+# @spec: content-libraries-v2 (Phase 0: Foundation Audit)
+# @covers: AC-LIB-004 — Feature flags all default False
+
+# Master switch for Content Libraries v2
+CONTENT_LIBRARIES_V2_ENABLED = os.environ.get(
+    "CONTENT_LIBRARIES_V2_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["CONTENT_LIBRARIES_V2_ENABLED"] = CONTENT_LIBRARIES_V2_ENABLED
+
+# Meilisearch-powered library content search
+LIBRARIES_SEARCH_ENABLED = os.environ.get(
+    "LIBRARIES_SEARCH_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_SEARCH_ENABLED"] = LIBRARIES_SEARCH_ENABLED
+
+# Library usage analytics tracking
+LIBRARIES_ANALYTICS_ENABLED = os.environ.get(
+    "LIBRARIES_ANALYTICS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_ANALYTICS_ENABLED"] = LIBRARIES_ANALYTICS_ENABLED
+
+# Bulk import/export of library components
+LIBRARIES_BULK_IMPORT_ENABLED = os.environ.get(
+    "LIBRARIES_BULK_IMPORT_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_BULK_IMPORT_ENABLED"] = LIBRARIES_BULK_IMPORT_ENABLED
+
+# Public read access to library content (no auth required)
+LIBRARIES_PUBLIC_READ_ENABLED = os.environ.get(
+    "LIBRARIES_PUBLIC_READ_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_PUBLIC_READ_ENABLED"] = LIBRARIES_PUBLIC_READ_ENABLED
+
+# GCS bucket for Blockstore (Content Libraries v2 storage backend)
+BLOCKSTORE_BUCKET_NAME = os.environ.get(
+    "BLOCKSTORE_BUCKET_NAME", "lms-blockstore"
+)

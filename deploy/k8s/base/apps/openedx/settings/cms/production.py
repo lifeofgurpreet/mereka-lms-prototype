@@ -513,3 +513,30 @@ if _cookie_middleware in MIDDLEWARE and _session_middleware in MIDDLEWARE:
 _social_exception_middleware = "social_django.middleware.SocialAuthExceptionMiddleware"
 if _social_exception_middleware not in MIDDLEWARE:
     MIDDLEWARE.append(_social_exception_middleware)
+
+# ── Content Libraries v2: Feature Flags ─────────────────────────────────
+# @spec: content-libraries-v2 (Phase 0: Foundation Audit)
+# @covers: AC-LIB-004 — Feature flags for CMS (library authoring)
+
+# Master switch for Content Libraries v2
+CONTENT_LIBRARIES_V2_ENABLED = os.environ.get(
+    "CONTENT_LIBRARIES_V2_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["CONTENT_LIBRARIES_V2_ENABLED"] = CONTENT_LIBRARIES_V2_ENABLED
+
+# Meilisearch-powered library content search (CMS)
+LIBRARIES_SEARCH_ENABLED = os.environ.get(
+    "LIBRARIES_SEARCH_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_SEARCH_ENABLED"] = LIBRARIES_SEARCH_ENABLED
+
+# Bulk import/export of library components (CMS authoring)
+LIBRARIES_BULK_IMPORT_ENABLED = os.environ.get(
+    "LIBRARIES_BULK_IMPORT_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["LIBRARIES_BULK_IMPORT_ENABLED"] = LIBRARIES_BULK_IMPORT_ENABLED
+
+# GCS bucket for Blockstore
+BLOCKSTORE_BUCKET_NAME = os.environ.get(
+    "BLOCKSTORE_BUCKET_NAME", "lms-blockstore"
+)
