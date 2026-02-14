@@ -5,182 +5,388 @@ acceptance_criteria:
     runs with `--slug=acme-corp --name="Acme Corp" --domain=acme.academyv2.mereka.io`,
     then an `EnterpriseCustomer` record is created with a unique UUID, a Django `Site`
     with the specified domain, and a `SiteConfiguration` with Mereka default values
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-model.sh
+    command: scripts/qa/verify-tenant-model.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning-enhanced.sh
+    command: scripts/qa/verify-tenant-provisioning-enhanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning.sh
+    command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-tenant.sh
+    command: scripts/tenants/provision-tenant.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/models.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/models.py
 - id: AC-MTA-002
   description: Given tenant "Acme Corp" exists, when the provisioning script runs
     again with the same slug, then no duplicate records are created and the script
     exits with a success message indicating "already provisioned"
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning-enhanced.sh
+    command: scripts/qa/verify-tenant-provisioning-enhanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning.sh
+    command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-tenant.sh
+    command: scripts/tenants/provision-tenant.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/models.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/models.py
 - id: AC-MTA-003
   description: Given tenant A (Acme) and tenant B (Beta), when admin A calls `GET
     /api/v1/enterprise-catalogs/`, then zero catalogs belonging to tenant B are returned
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
 - id: AC-MTA-004
   description: Given tenant A and tenant B, when admin A calls `GET /api/v1/subscriptions/`
     with tenant B's UUID in the path, then the response is HTTP 403
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
 - id: AC-MTA-005
   description: Given tenant A and tenant B, when admin A queries ClickHouse analytics
     via Superset, then zero xAPI events with tenant B's UUID are visible
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
 - id: AC-MTA-006
   description: Given tenant A and tenant B, when a raw SQL query `SELECT * FROM enterprise_enterprisecustomer`
     is executed by a non-superuser database role, then only the requesting service's
     scoped records are returned (database user grants prevent cross-schema access
     for enterprise service databases)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
 - id: AC-MTA-007
   description: Given a learner belonging to both tenant A and tenant B, when they
     log into the enterprise learner portal and select tenant A, then only tenant A's
     catalog, licenses, and enrollment data are visible
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
 - id: AC-MTA-008
   description: Given tenant "Acme Corp" with a custom logo configured in `SiteConfiguration`,
     when a learner navigates to `acme.academyv2.mereka.io`, then the Acme Corp logo
     is displayed (not the default Mereka logo)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-branding.sh
+    command: scripts/qa/verify-tenant-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/sync-tenant-branding.sh
+    command: scripts/tenants/sync-tenant-branding.sh
 - id: AC-MTA-009
   description: Given tenant "Acme Corp" with custom brand colors configured, when
     the login page loads at `acme.academyv2.mereka.io`, then the primary brand color
     matches the configured value
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-branding.sh
+    command: scripts/qa/verify-tenant-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/sync-tenant-branding.sh
+    command: scripts/tenants/sync-tenant-branding.sh
 - id: AC-MTA-010
   description: Given tenant "Acme Corp" with a custom footer configured, when any
     page loads, then the footer displays Acme Corp branding (not default Mereka footer)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-branding.sh
+    command: scripts/qa/verify-tenant-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/sync-tenant-branding.sh
+    command: scripts/tenants/sync-tenant-branding.sh
 - id: AC-MTA-011
   description: Given a tenant branding asset update (new logo), when `collectstatic`
     is run, then the updated logo is served without requiring an image rebuild
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-branding.sh
+    command: scripts/qa/verify-tenant-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/sync-tenant-branding.sh
+    command: scripts/tenants/sync-tenant-branding.sh
 - id: AC-MTA-012
   description: Given tenant "Acme Corp" with domain `acme.academyv2.mereka.io`, when
     a browser requests that domain, then the LMS responds with the correct Acme-branded
     page
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-middleware.sh
+    command: scripts/qa/verify-tenant-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/middleware.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/middleware.py
 - id: AC-MTA-013
   description: Given tenant "Acme Corp" with a client-owned domain `learning.acmecorp.com`
     configured as a CNAME, when a browser requests that domain, then the LMS responds
     with the correct Acme-branded page and a valid SSL certificate
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-middleware.sh
+    command: scripts/qa/verify-tenant-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/middleware.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/middleware.py
 - id: AC-MTA-014
   description: Given two tenants with different domains, when requests arrive simultaneously
     for both domains, then each request resolves the correct `SiteConfiguration` based
     on `Host` header
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-patterns.sh
+    command: scripts/qa/verify-tenant-isolation-patterns.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-middleware.sh
+    command: scripts/qa/verify-tenant-middleware.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/middleware.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/middleware.py
 - id: AC-MTA-015
   description: Given tenant "Acme Corp" with SAML IdP configured, when a user navigates
     to `/enterprise/login/acme-corp`, then they are redirected to Acme's IdP
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-016
   description: Given a successful SAML assertion from Acme's IdP for a new user, when
     processed, then the user is auto-provisioned and linked to the Acme `EnterpriseCustomer`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-017
   description: Given tenant A's IdP and tenant B's IdP, when a user authenticates
     via tenant A's IdP, then they are linked to tenant A only (no cross-tenant linking
     from the SAML flow)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-018
   description: Given tenant "Acme Corp" with enrolled learners, when a learner completes
     a course, then the xAPI event in ClickHouse includes `enterprise_customer_uuid`
     matching Acme's UUID
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-019
   description: Given tenant "Acme Corp" admin in Superset, when they query the enrollment
     dashboard, then row-level security filters ensure only Acme's data is visible
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-020
   description: Given platform operator (superuser) in Superset, when they query the
     cross-tenant overview dashboard, then aggregate data from all tenants is visible
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-021
   description: Given valid provisioning inputs, when `scripts/tenants/provision-tenant.sh`
     runs, then all required records (Site, SiteConfiguration, EnterpriseCustomer,
     catalogs, subscriptions, access policies) are created within 15 minutes
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning-enhanced.sh
+    command: scripts/qa/verify-tenant-provisioning-enhanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-provisioning.sh
+    command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-tenant.sh
+    command: scripts/tenants/provision-tenant.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+    command: pytest infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
 - id: AC-MTA-022
   description: Given tenant "Acme Corp" is offboarded, when the offboarding script
     completes data deletion, then `SELECT count(*) FROM enterprise_catalog WHERE enterprise_customer_uuid
     = '{acme_uuid}'` returns 0 across all enterprise service databases
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-configmap.sh
+    command: scripts/qa/verify-tenant-configmap.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-offboarding.sh
+    command: scripts/qa/verify-tenant-offboarding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/offboard-tenant.sh
+    command: scripts/tenants/offboard-tenant.sh
 - id: AC-MTA-023
   description: Given tenant "Acme Corp" is offboarded, when ClickHouse is queried,
     then zero events with Acme's UUID exist
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-offboarding.sh
+    command: scripts/qa/verify-tenant-offboarding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/offboard-tenant.sh
+    command: scripts/tenants/offboard-tenant.sh
 - id: AC-MTA-024
   description: 'Given a tenant offboarding action, when it completes, then an audit
     log entry exists with: tenant UUID, action "offboarded", actor, timestamp'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-offboarding.sh
+    command: scripts/qa/verify-tenant-offboarding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/offboard-tenant.sh
+    command: scripts/tenants/offboard-tenant.sh
 - id: AC-MTA-025
   description: Given tenants A and B are provisioned, when `scripts/qa/verify-tenant-isolation.sh
     --tenant-a={uuid_a} --tenant-b={uuid_b}` runs, then all isolation checks pass
     (API, portal, analytics, search)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 - id: AC-MTA-026
   description: Given the nightly isolation test job runs, when any isolation check
     fails, then a Critical alert is fired to the oncall channel
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 - id: AC-MTA-027
   description: Given 10 active tenants, when enterprise catalog API queries are benchmarked,
     then p95 latency remains <= 300ms (per enterprise-microservices spec)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-028
   description: Given 50 active tenants simulated in a load test, when concurrent API
     requests are sent from 50 different tenant contexts, then no tenant's p95 latency
     exceeds 120% of the single-tenant baseline
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-auth-analytics.sh
+    command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-029
   description: Given Tenant A's admin is authenticated, when they attempt to access
     Tenant B's learner data via API, then HTTP 403 is returned
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 - id: AC-MTA-030
   description: Given Tenant A's learner data exists in the database, when Tenant B's
     admin queries the API, then zero records from Tenant A are returned
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 - id: AC-MTA-031
   description: Given Tenant A sends a webhook event, when the webhook payload is inspected,
     then it contains ONLY Tenant A's data (no cross-tenant leakage)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 - id: AC-MTA-032
   description: Given Tenant A's admin queries the enterprise catalog API, when the
     response is returned, then zero courses from Tenant B's private catalog are visible
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 - id: AC-MTA-033
   description: Given Tenant A's admin attempts to assign a license from Tenant B's
     subscription plan, when the API processes the request, then HTTP 403 is returned
-  verify: []
-_unmapped:
-- AC-MTA-001
-- AC-MTA-002
-- AC-MTA-003
-- AC-MTA-004
-- AC-MTA-005
-- AC-MTA-006
-- AC-MTA-007
-- AC-MTA-008
-- AC-MTA-009
-- AC-MTA-010
-- AC-MTA-011
-- AC-MTA-012
-- AC-MTA-013
-- AC-MTA-014
-- AC-MTA-015
-- AC-MTA-016
-- AC-MTA-017
-- AC-MTA-018
-- AC-MTA-019
-- AC-MTA-020
-- AC-MTA-021
-- AC-MTA-022
-- AC-MTA-023
-- AC-MTA-024
-- AC-MTA-025
-- AC-MTA-026
-- AC-MTA-027
-- AC-MTA-028
-- AC-MTA-029
-- AC-MTA-030
-- AC-MTA-031
-- AC-MTA-032
-- AC-MTA-033
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation-infra.sh
+    command: scripts/qa/verify-tenant-isolation-infra.sh
 

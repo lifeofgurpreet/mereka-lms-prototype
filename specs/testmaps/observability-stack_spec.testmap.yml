@@ -21,6 +21,10 @@ acceptance_criteria:
     command: scripts/qa/verify-observability-contracts.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-observability-servicemonitors.sh
+    command: scripts/qa/verify-observability-servicemonitors.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
 - id: AC-002
@@ -106,6 +110,10 @@ acceptance_criteria:
     command: scripts/qa/verify-observability-contracts.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-observability-prometheusrules.sh
+    command: scripts/qa/verify-observability-prometheusrules.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
   - type: manual
@@ -143,43 +151,66 @@ acceptance_criteria:
 - id: AC-LOG-001
   description: Promtail DaemonSet is deployed and scraping logs from all pods in `mereka-lms`
     namespace
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-loki-deployment.sh
+    command: scripts/qa/verify-observability-loki-deployment.sh
 - id: AC-LOG-002
   description: Loki query `{namespace="mereka-lms"}` returns logs from all canonical
     log sources (LMS, CMS, workers, MFE, discovery, ecommerce, credentials, forum,
     notes)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-loki-log-sources.sh
+    command: scripts/qa/verify-observability-loki-log-sources.sh
 - id: AC-LOG-003
   description: 'All logs have required labels: `service`, `env`, `cluster`, `namespace`,
     `hostname`, `severity`'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-loki-labels.sh
+    command: scripts/qa/verify-observability-loki-labels.sh
 - id: AC-LOG-004
   description: LMS and CMS logs are structured JSON with `timestamp`, `level`, `service`,
     `message` fields
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-structured-logging.sh
+    command: scripts/qa/verify-observability-structured-logging.sh
 - id: AC-LOG-005
   description: 'No email addresses are visible in Loki query results: `{namespace="mereka-lms"}
     |~ "@.*\\.com"` returns zero results'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-pii-filtering.sh
+    command: scripts/qa/verify-observability-pii-filtering.sh
 - id: AC-LOG-006
   description: 'No passwords are visible in Loki query results: `{namespace="mereka-lms"}
     |~ "(?i)password.*=.*[^*]"` returns zero results'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-pii-filtering.sh
+    command: scripts/qa/verify-observability-pii-filtering.sh
 - id: AC-LOG-007
   description: 'Logs older than 30 days are automatically deleted: query `{namespace="mereka-lms"}`
     with time range `now-31d to now-30d` returns no results'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-retention.sh
+    command: scripts/qa/verify-observability-retention.sh
 - id: AC-LOG-008
   description: 'Tempo traces are retained for 7 days: traces older than 8 days are
     not retrievable'
-  verify: []
-_unmapped:
-- AC-LOG-001
-- AC-LOG-002
-- AC-LOG-003
-- AC-LOG-004
-- AC-LOG-005
-- AC-LOG-006
-- AC-LOG-007
-- AC-LOG-008
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-retention.sh
+    command: scripts/qa/verify-observability-retention.sh
 

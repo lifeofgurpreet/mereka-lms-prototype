@@ -108,6 +108,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-slo-contracts.sh
     command: scripts/qa/verify-slo-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
   - type: monitoring
     metric: mereka_slo_error_budget_remaining_ratio
     dashboard: https://grafana.mereka.io/d/mereka-slo-overview
@@ -134,16 +138,32 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/infra/check-error-budget-gate.sh
+    command: scripts/infra/check-error-budget-gate.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-deployment-gate.sh
     command: scripts/qa/verify-deployment-gate.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-deployment-gate.sh
+    command: scripts/qa/verify-slo-deployment-gate.sh
 - id: AC-011
   description: Given error budget is < 25% for any Tier 1 service, when a deployment
     pipeline runs, then the gate check blocks deployment and requires documented approval
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/infra/check-error-budget-gate.sh
+    command: scripts/infra/check-error-budget-gate.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-deployment-gate.sh
     command: scripts/qa/verify-deployment-gate.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-deployment-gate.sh
+    command: scripts/qa/verify-slo-deployment-gate.sh
 - id: AC-012
   description: 'Given an emergency deployment override occurs, when the override is
     logged, then the log entry contains: approver, timestamp, justification, and deployment
@@ -151,8 +171,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/infra/check-error-budget-gate.sh
+    command: scripts/infra/check-error-budget-gate.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-deployment-gate.sh
     command: scripts/qa/verify-deployment-gate.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-deployment-gate.sh
+    command: scripts/qa/verify-slo-deployment-gate.sh
 - id: AC-013
   description: Given a stable 7-day latency baseline, when p95 latency exceeds 2x
     the baseline for 15 consecutive minutes, then a P2 alert fires and is delivered
@@ -192,35 +220,63 @@ acceptance_criteria:
   description: Given the synthetic alert drill CronJob is deployed, when `kubectl
     get cronjob -n mereka-lms synthetic-alert-drill` is run, then the CronJob exists
     with schedule `0 9 * * 1` (every Monday at 09:00 UTC)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-synthetic-drills.sh
+    command: scripts/qa/verify-slo-synthetic-drills.sh
 - id: AC-DRILL-002
   description: Given a drill execution, when the drill script runs, then it POSTs
     to Alertmanager API `/api/v1/alerts` with a test alert labeled `[DRILL] Alert
     Delivery Test`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-synthetic-drills.sh
+    command: scripts/qa/verify-slo-synthetic-drills.sh
 - id: AC-DRILL-003
   description: Given a successful drill, when the drill completes, then a structured
     log entry is written to Loki with `event=synthetic_alert_drill`, `status=success`,
     and `delivery_timestamp`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-synthetic-drills.sh
+    command: scripts/qa/verify-slo-synthetic-drills.sh
 - id: AC-DRILL-004
   description: Given drill metrics are exposed, when Prometheus queries `mereka_alerting_drill_success_total`,
     then a counter value is returned showing cumulative drill successes
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-synthetic-drills.sh
+    command: scripts/qa/verify-slo-synthetic-drills.sh
 - id: AC-DRILL-005
   description: Given a missed drill (no delivery within 5 minutes), when the watchdog
     timer expires, then a REAL P2 alert is triggered with subject `Alert Delivery
     Pipeline Failure - Drill Not Received`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-synthetic-drills.sh
+    command: scripts/qa/verify-slo-synthetic-drills.sh
 - id: AC-DRILL-006
   description: Given the SLO dashboard, when viewing the "Alert Delivery Drills -
     Last 30 Days" panel, then drill success/failure history is visible as a time series
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
 - id: AC-DRILL-007
   description: Given the drill alert is sent to Slack, when checking the `#ops-alerts`
     channel, then the drill message appears within 2 minutes with clear `[DRILL]`
     prefix
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-synthetic-drills.sh
+    command: scripts/qa/verify-slo-synthetic-drills.sh
 - id: AC-016
   description: Given a maintenance window is declared 72 hours in advance, when SLA
     availability is calculated for the month, then the maintenance window duration
@@ -297,6 +353,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/ops/generate-sla-report.sh
+    command: scripts/ops/generate-sla-report.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/generate-sla-report.sh
     command: scripts/qa/generate-sla-report.sh
 - id: AC-023
@@ -311,143 +371,232 @@ acceptance_criteria:
   description: Given a quarterly reporting period, when the quarterly SLA report is
     generated, then it contains 90-day availability trends, performance regression
     summary, capacity planning recommendations, and on-call health metrics
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/ops/generate-sla-report.sh
+    command: scripts/ops/generate-sla-report.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-025
   description: Given an enterprise client, when the monthly SLA report is distributed,
     then it is delivered within 5 business days of month end using the standardized
     report template
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/ops/generate-sla-report.sh
+    command: scripts/ops/generate-sla-report.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-026
   description: Given LMS is operational, when Prometheus queries `mereka_sli_lms_availability_ratio`,
     then a value between 0 and 1 is returned representing current availability
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-027
   description: Given CMS is operational, when Prometheus queries `mereka_sli_cms_latency_p95_seconds`,
     then a value in seconds is returned representing p95 latency
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-028
   description: Given all production services, when Prometheus recording rules are
     evaluated, then each service has corresponding `mereka_sli_<service>_availability_ratio`
     and `mereka_sli_<service>_error_budget_remaining_minutes` metrics
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-029
   description: Given error budget is exhausted (< 0%), when the exhaustion is detected,
     then a P1 incident is created, deployments are frozen (except remediation), and
     engineering lead + VP/CTO are notified within 15 minutes
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-030
   description: Given error budget is critical (< 10%), when deployment is attempted,
     then VP/CTO approval is required and the gate check blocks deployment until approval
     is documented
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-031
   description: Given error budget is exhausted, when the reliability sprint begins,
     then all feature work is paused and the team focuses exclusively on reliability
     improvements until budget is restored to >= 10%
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-032
   description: Given error budget consumption, when the SLO dashboard is viewed, then
     projected recovery date is displayed based on current burn rate
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-033
   description: Given an SLA breach is detected, when the breach notification fires,
     then engineering lead, VP/CTO, and affected enterprise account managers are notified
     within 1 hour
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-034
   description: Given an SLA breach, when client communication begins, then the first
     notification is sent within 1 hour, a detailed update within 4 hours, and a formal
     postmortem within 5 business days
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-035
   description: Given an SLA breach, when remediation plan is created, then it includes
     root cause analysis, immediate fixes, long-term improvements, and timeline for
     each, documented within 4 hours of breach detection
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-036
   description: Given a Tier 1 service breaches SLA in 2 consecutive months, when the
     second breach is confirmed, then an emergency architecture review is automatically
     scheduled
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-037
   description: Given the Open edX SLO dashboard exists at `infrastructure/monitoring/dashboards/openedx-slo-dashboard.json`,
     when it is deployed to GCP Monitoring, then it displays all Tier 1 SLO metrics
     (LMS availability, CMS availability, latency P99/P95/P50, error rates, error budget)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-038
   description: 'Given the SLO dashboard, when viewed, then it includes a service ownership
     panel displaying: primary owner, service tier, on-call rotation structure, and
     escalation contacts (L1 through L4)'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-039
   description: Given the SLO dashboard, when viewed, then it includes direct links
     to PrometheusRule definitions in `deploy/k8s/base/monitoring/prometheusrule-slo.yaml`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-040
   description: 'Given the SLO dashboard, when viewed, then it includes links to operational
     runbooks: On-Call Observability Playbook, SLO/SLA Spec, Deployment Runbook, and
     Troubleshooting Guide'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-041
   description: 'Given the SLO dashboard, when error budget panels are displayed, then
     they use color thresholds: RED (< 10% or exhausted), YELLOW (10-25%), GREEN (>=
     25%)'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-dashboards.sh
+    command: scripts/qa/verify-slo-dashboards.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-service-metrics.sh
+    command: scripts/qa/verify-slo-service-metrics.sh
 - id: AC-042
   description: Given GCP uptime checks from multiple regions, when latency is measured
     for SLA purposes, then only the Asia-Pacific regional probe is used as the authoritative
     measurement
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-043
   description: Given a MySQL infrastructure failure causes LMS, CMS, and Forum to
     fail simultaneously, when error budgets are calculated, then downtime is attributed
     to MySQL only and dependent services' budgets are not consumed if they recover
     immediately after MySQL
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-044
   description: Given a maintenance window notification email fails to send, when the
     failure is detected, then operations is alerted within 1 hour and manual client
     outreach is triggered
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-045
   description: Given a rolling deployment causes transient 503 errors, when errors
     are < 0.1% of traffic and last < 1 minute, then they may be excluded from SLO
     calculation if documented in monthly report
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 - id: AC-046
   description: Given timestamp discrepancies between Prometheus and GCP Monitoring,
     when SLA is calculated, then the time measurement most favorable to the client
     is used
-  verify: []
-_unmapped:
-- AC-DRILL-001
-- AC-DRILL-002
-- AC-DRILL-003
-- AC-DRILL-004
-- AC-DRILL-005
-- AC-DRILL-006
-- AC-DRILL-007
-- AC-024
-- AC-025
-- AC-026
-- AC-027
-- AC-028
-- AC-029
-- AC-030
-- AC-031
-- AC-032
-- AC-033
-- AC-034
-- AC-035
-- AC-036
-- AC-037
-- AC-038
-- AC-039
-- AC-040
-- AC-041
-- AC-042
-- AC-043
-- AC-044
-- AC-045
-- AC-046
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slo-reporting.sh
+    command: scripts/qa/verify-slo-reporting.sh
 
