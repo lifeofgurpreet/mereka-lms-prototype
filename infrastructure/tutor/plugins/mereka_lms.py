@@ -546,6 +546,37 @@ location ^~ /profile/api/ {
 )
 
 ###############################################################################
+# Credentials Service Patches (Verifiable Credentials)
+###############################################################################
+
+# Install credentials_vc_issuer custom app
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "credentials-dockerfile-post-python-requirements",
+        """
+# Copy and install credentials_vc_issuer custom app
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/credentials_vc_issuer /openedx/credentials_vc_issuer
+RUN pip install -e /openedx/credentials_vc_issuer
+
+# Install cryptography for Ed25519 key operations
+RUN pip install cryptography>=41.0.0
+""",
+    )
+)
+
+# Add DID document endpoint to Credentials Service URLs
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "credentials-urlpatterns",
+        """
+# DID document endpoint for Verifiable Credentials issuer (CRED-020)
+# Must be before other patterns to catch /.well-known/did.json
+path('', include('credentials_vc_issuer.urls')),
+""",
+    )
+)
+
+###############################################################################
 # Plugin Initialization Hook
 ###############################################################################
 
