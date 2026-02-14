@@ -1,0 +1,320 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "ora2-operations",
+    "title": "ORA2 Operations & Observability",
+    "tags": ["ora2", "assessment", "open-response"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "graph",
+        "title": "ORA2 Submissions Rate",
+        "targets": [
+          {
+            "expr": "rate(ora2_submissions_total[5m])",
+            "legendFormat": "{{course_id}} - {{submission_type}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Submissions/sec"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "graph",
+        "title": "Peer Assessment Rate",
+        "targets": [
+          {
+            "expr": "rate(ora2_peer_assessments_total[5m])",
+            "legendFormat": "{{course_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Assessments/sec"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "type": "graph",
+        "title": "Staff Grading Queue Size",
+        "targets": [
+          {
+            "expr": "ora2_staff_grading_queue_size",
+            "legendFormat": "{{course_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Queue Size"},
+          {"show": false}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [50], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "max"},
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "1h",
+          "frequency": "5m",
+          "handler": 1,
+          "name": "Staff Grading Queue Alert",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "type": "graph",
+        "title": "ORA2 Storage Usage",
+        "targets": [
+          {
+            "expr": "(ora2_file_storage_used_bytes / ora2_file_storage_total_bytes) * 100",
+            "legendFormat": "Storage Usage %",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Usage", "max": 100, "min": 0},
+          {"show": false}
+        ],
+        "thresholds": [
+          {
+            "value": 90,
+            "colorMode": "critical",
+            "fill": true,
+            "line": true,
+            "op": "gt"
+          },
+          {
+            "value": 70,
+            "colorMode": "warning",
+            "fill": true,
+            "line": true,
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "type": "graph",
+        "title": "File Upload Rate by Type",
+        "targets": [
+          {
+            "expr": "rate(ora2_file_uploads_total{status=\"success\"}[5m])",
+            "legendFormat": "{{course_id}} - {{file_type}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Uploads/sec"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 6,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "type": "graph",
+        "title": "File Upload Rejection Rate",
+        "targets": [
+          {
+            "expr": "rate(ora2_file_uploads_total{status=~\"rejected_.*\"}[5m])",
+            "legendFormat": "{{course_id}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Rejections/sec"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 7,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "type": "graph",
+        "title": "Grade Propagation Success Rate",
+        "targets": [
+          {
+            "expr": "rate(ora2_grade_propagation_total{status=\"success\"}[5m]) / rate(ora2_grade_propagation_total[5m]) * 100",
+            "legendFormat": "{{course_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Success Rate", "max": 100, "min": 0},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 8,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "type": "graph",
+        "title": "Peer-to-Staff Fallback Rate",
+        "targets": [
+          {
+            "expr": "rate(ora2_fallback_to_staff_total[5m])",
+            "legendFormat": "{{course_id}} - {{fallback_reason}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ops", "label": "Fallbacks/sec"},
+          {"show": false}
+        ]
+      },
+      {
+        "id": 9,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32},
+        "type": "heatmap",
+        "title": "Submission Duration Distribution",
+        "targets": [
+          {
+            "expr": "sum(rate(ora2_submission_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "dataFormat": "tsbuckets"
+      },
+      {
+        "id": 10,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32},
+        "type": "heatmap",
+        "title": "Peer Assessment Duration Distribution",
+        "targets": [
+          {
+            "expr": "sum(rate(ora2_peer_assessment_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "dataFormat": "tsbuckets"
+      },
+      {
+        "id": 11,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40},
+        "type": "stat",
+        "title": "Total ORA2 Submissions (24h)",
+        "targets": [
+          {
+            "expr": "sum(increase(ora2_submissions_total[24h]))",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            },
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40},
+        "type": "stat",
+        "title": "Total Staff Grading Queue",
+        "targets": [
+          {
+            "expr": "sum(ora2_staff_grading_queue_size)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 25, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            },
+            "unit": "short"
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "course_id",
+          "type": "query",
+          "label": "Course",
+          "datasource": "Prometheus",
+          "query": "label_values(ora2_submissions_total, course_id)",
+          "refresh": 1,
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "time": {"from": "now-6h", "to": "now"}
+  }
+}

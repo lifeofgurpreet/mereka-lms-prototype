@@ -332,6 +332,26 @@ ORA2_FILEUPLOAD_ROOT = "/openedx/data/ora2"
 FILE_UPLOAD_STORAGE_BUCKET_NAME = "openedxuploads"
 ORA2_FILEUPLOAD_CACHE_NAME = "ora2-storage"
 
+# ORA2 Operations & Observability (Assessment Phase 1)
+# File upload restrictions
+ORA2_FILE_UPLOAD_TYPE_WHITELIST = ['pdf', 'docx', 'xlsx', 'pptx', 'jpg', 'jpeg', 'png', 'mp4']
+ORA2_MAX_FILE_SIZE = 10485760  # 10MB in bytes
+ORA2_MAX_FILES_PER_SUBMISSION = 5
+
+# Peer assessment configuration
+ORA2_PEER_ASSESSMENT_MUST_GRADE = 3  # Students must grade 3 peers
+ORA2_PEER_ASSESSMENT_MUST_BE_GRADED_BY = 3  # Students must be graded by 3 peers
+ORA2_PEER_CALIBRATION_ENABLED = True  # Enable calibration essays
+
+# Staff grading fallback
+ORA2_PEER_GRADING_TIMEOUT_DAYS = 7  # Fallback to staff after 7 days
+ORA2_FALLBACK_RETENTION_DAYS = 90  # Keep fallback records for 90 days
+ORA2_METRICS_RETENTION_DAYS = 365  # Keep metrics for 1 year
+ORA2_FILE_RETENTION_DAYS = 180  # Keep file records for 180 days
+
+# Feature flag
+ENABLE_ORA2_OPERATIONS = os.environ.get('ENABLE_ORA2_OPERATIONS', 'true').lower() == 'true'
+
 # Change syslog-based loggers which don't work inside docker containers
 LOGGING["handlers"]["local"] = {
     "class": "logging.handlers.WatchedFileHandler",
