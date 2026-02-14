@@ -1,0 +1,14 @@
+New Forum Activity
+
+Hi {{ user_name }},
+
+There's new activity in a discussion you're following:
+
+Thread: {{ thread_title }}
+Course: {{ course_name }}
+{% if reply_preview %}"{{ reply_preview }}"{% endif %}
+
+View discussion: {{ thread_url }}
+
+---
+{{ org_display_name }}

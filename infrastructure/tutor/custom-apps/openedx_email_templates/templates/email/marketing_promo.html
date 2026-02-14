@@ -1,0 +1,23 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>{% trans "Special Offer" %}</title></head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; padding: 20px 0;">
+    {% if org_logo_url %}<img src="{{ org_logo_url }}" alt="{{ org_display_name }}" style="max-height: 60px;">{% endif %}
+  </div>
+  <h1 style="color: {{ org_primary_color|default:'#1a73e8' }};">{{ promo_title }}</h1>
+  <p>{% trans "Hi" %} {{ user_name }},</p>
+  <div style="margin: 20px 0;">{{ promo_body }}</div>
+  {% if promo_url %}
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="{{ promo_url }}" style="background-color: {{ org_accent_color|default:'#4285f4' }}; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 4px;">{% trans "Learn More" %}</a>
+  </div>
+  {% endif %}
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+  <p style="font-size: 12px; color: #666;">
+    {{ org_display_name }} |
+    <a href="{{ unsubscribe_url }}">{% trans "Unsubscribe" %}</a>
+  </p>
+</body>
+</html>

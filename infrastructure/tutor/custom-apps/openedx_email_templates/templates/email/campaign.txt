@@ -1,0 +1,9 @@
+{{ campaign_subject }}
+
+{{ campaign_body }}
+
+{% if campaign_cta_url %}{{ campaign_cta_text|default:"Learn More" }}: {{ campaign_cta_url }}{% endif %}
+
+---
+{{ org_display_name }}
+Unsubscribe: {{ unsubscribe_url }}

@@ -1,0 +1,11 @@
+Grade Update
+
+Hi {{ user_name }},
+
+Your grade has been updated for: {{ course_name }}
+Grade: {{ grade_percent }}%
+
+View progress: {{ progress_url }}
+
+---
+{{ org_display_name }}

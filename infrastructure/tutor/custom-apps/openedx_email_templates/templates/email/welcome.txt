@@ -1,0 +1,13 @@
+Welcome to {{ org_display_name }}!
+
+Hi {{ user_name }},
+
+Welcome to the learning platform. We're excited to have you on board.
+
+Start exploring courses and begin your learning journey today.
+
+Visit: {{ platform_url }}
+
+---
+{{ org_display_name }}
+{% if org_support_email %}Support: {{ org_support_email }}{% endif %}
