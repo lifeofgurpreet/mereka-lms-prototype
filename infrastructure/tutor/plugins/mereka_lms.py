@@ -158,6 +158,20 @@ if 'openedx_video_analytics' not in INSTALLED_APPS:
 
 # Feature flag for video analytics (default: false, enable after validation)
 ENABLE_VIDEO_ANALYTICS = os.environ.get('ENABLE_VIDEO_ANALYTICS', 'false').lower() == 'true'
+
+# Video Content Protection (Video Phase 5: Signed Playback)
+if 'openedx_video_protection' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_video_protection')
+
+# Feature flag for signed playback (default: false, enable after E2E validation)
+ENABLE_MUX_SIGNED_PLAYBACK = os.environ.get('ENABLE_MUX_SIGNED_PLAYBACK', 'false').lower() == 'true'
+
+# Mux signing credentials (synced from Infisical via ExternalSecrets)
+MUX_SIGNING_KEY_ID = os.environ.get('MUX_SIGNING_KEY_ID')  # Mux signing key ID
+MUX_SIGNING_PRIVATE_KEY = os.environ.get('MUX_SIGNING_PRIVATE_KEY')  # RSA private key (PEM)
+
+# Optional: Domain restriction for playback (defaults to production domain)
+MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
 """,
     )
 )
@@ -264,12 +278,14 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_notifications /o
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_email_preferences /openedx/openedx_email_preferences
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_mux_upload /openedx/openedx_mux_upload
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_video_analytics /openedx/openedx_video_analytics
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_video_protection /openedx/openedx_video_protection
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/openedx_notifications
 RUN pip install -e /openedx/openedx_email_preferences
 RUN pip install -e /openedx/openedx_mux_upload
 RUN pip install -e /openedx/openedx_video_analytics
+RUN pip install -e /openedx/openedx_video_protection
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
@@ -651,6 +667,9 @@ path('api/mux/upload/', include('openedx_mux_upload.urls')),
 
 # Video analytics API (Video Phase 4: Analytics Integration)
 path('api/video/v1/', include('openedx_video_analytics.urls')),
+
+# Video content protection API (Video Phase 5: Signed Playback)
+path('api/mux/protection/', include('openedx_video_protection.urls')),
 """,
     )
 )
