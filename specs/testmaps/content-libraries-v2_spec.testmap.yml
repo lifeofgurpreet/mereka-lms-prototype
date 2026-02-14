@@ -53,17 +53,29 @@ acceptance_criteria:
   description: Given a library with 10 components, when a Library Author edits the
     content of component `intro-module` via the OLX update endpoint, then the component
     content is updated in draft and `has_unpublished_changes` remains `true`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-006
   description: Given a library with a `problem` type component, when a Library Author
     adds a `video` type component, then both components coexist in the library (mixed-type
     library support)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-007
   description: Given a library, when a user attempts to add a component of an XBlock
     type not installed on the platform, then the response is HTTP 400 with "XBlock
     type '{type}' is not installed"
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-008
   description: Given library `lib:Mereka:compliance-2026` with unpublished draft changes,
     when a Library Admin calls `POST /api/libraries/v2/lib:Mereka:compliance-2026/commit/`,
@@ -82,39 +94,67 @@ acceptance_criteria:
   description: Given library `lib:Mereka:compliance-2026` with no unpublished changes,
     when `POST /commit/` is called, then the response is HTTP 200 with a message "No
     changes to publish" and no new version record is created
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-010
   description: Given a library with 3 published versions, when a Library Admin calls
     the revert endpoint for version 2, then the library content reverts to the state
     of version 2 and `has_unpublished_changes` becomes `true` (the revert is staged
     as a draft, requiring another publish)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-011
   description: Given a library with a recently published component "quiz-1", when
     a course author views a course referencing that component in Studio, then Studio
     shows the published version of "quiz-1" (not any subsequent draft changes)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-012
   description: Given library `lib:Mereka:compliance-2026` with 20 published problem
     components, when a course author adds a `library_content` XBlock to a course unit
     and configures it with `source_library_id=lib:Mereka:compliance-2026` and `max_count=5`,
     then each learner sees 5 randomly selected problems from the library
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-013
   description: Given a `library_v2_ref` block in a course pointing to component "quiz-1"
     in library `lib:Mereka:compliance-2026`, when the library author updates and publishes
     "quiz-1", then Studio displays a notification on the course unit indicating "Library
     content has updates available"
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-014
   description: Given the notification from AC-013, when the course author clicks "Update
     from library", then the course unit receives the latest published version of "quiz-1"
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-015
   description: Given a library that is deleted after a course has synced its content,
     then the course retains its last-synced copies and continues to function without
     errors for learners
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-016
   description: 'Given a user who is a member of organization "Acme" (an enterprise
     tenant), when they call `GET /api/libraries/v2/`, then only libraries belonging
@@ -182,28 +222,48 @@ acceptance_criteria:
     "Mereka" searches for "compliance" in the library listing, then only libraries
     from "Mereka" (and public libraries) containing "compliance" in the title, description,
     or component content are returned
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-024
   description: Given a library with 100 components, when the listing API is called
     with `?page_size=20&page=3`, then components 41-60 are returned with pagination
     metadata
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-025
   description: Given a library component tagged with taxonomy tag "assessments > multiple-choice",
     when a user searches for libraries with tag "assessments", then the library containing
     that component appears in results
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-026
   description: Given library `lib:Mereka:compliance-2026` referenced by 3 courses,
     when `GET /api/libraries/v2/lib:Mereka:compliance-2026/links/` is called, then
     the response lists all 3 courses with their course keys and the specific components
     referenced
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-027
   description: 'Given a learner completing a problem sourced from library `lib:Mereka:compliance-2026`,
     when the xAPI event is emitted, then the event context includes `library_key:
     lib:Mereka:compliance-2026`'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-content-libraries-advanced.sh
+    command: scripts/qa/verify-content-libraries-advanced.sh
 - id: AC-028
   description: Given library `lib:Mereka:compliance-2026` with 50 components, when
     `GET /api/libraries/v2/lib:Mereka:compliance-2026/export/` is called, then a valid
@@ -263,20 +323,4 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/load-test-libraries.sh
     command: scripts/qa/load-test-libraries.sh
-_unmapped:
-- AC-005
-- AC-006
-- AC-007
-- AC-009
-- AC-010
-- AC-011
-- AC-012
-- AC-013
-- AC-014
-- AC-015
-- AC-023
-- AC-024
-- AC-025
-- AC-026
-- AC-027
 

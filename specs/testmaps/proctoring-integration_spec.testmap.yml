@@ -32,12 +32,20 @@ acceptance_criteria:
   description: Given a ProctorTrack backend is configured, when `on_review_callback()`
     receives an AI analysis result, then the exam attempt status is updated to `second_review_required`
     if integrity score is below the configured threshold
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-005
   description: Given a "no-op" backend is configured in a development environment,
     when the full exam flow is executed, then all state transitions occur correctly
     without contacting any external provider
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-006
   description: Given a course author in Studio, when they edit a subsection's exam
     settings, then they can select `proctored` as the exam type and choose from providers
@@ -74,27 +82,47 @@ acceptance_criteria:
   description: Given a course with proctored exams is re-run, when the new course
     run is created, then all proctored exam settings (type, time limit, backend, review
     policy) are preserved in the new run
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-010
   description: Given a student starting a proctored exam for the first time, when
     the identity verification flow begins, then the system captures a photo ID image
     via webcam and sends it to the provider for analysis
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-011
   description: Given identity verification returns `failed`, when the student attempts
     to proceed, then the exam is blocked and the student is offered up to 2 additional
     verification attempts
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-012
   description: Given identity verification returns `passed`, when the student proceeds,
     then the verification result (passed, timestamp, provider reference) is stored
     linked to `user_id` and `enterprise_customer_uuid`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-013
   description: Given a student has completed onboarding identity verification, when
     they start a subsequent proctored exam, then the system verifies against the baseline
     (facial recognition) without requiring full photo ID re-capture
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-014
   description: Given a student on the pre-exam environment check page, when their
     webcam is blocked by browser permissions, then the check fails with the message
@@ -117,7 +145,11 @@ acceptance_criteria:
 - id: AC-016
   description: Given the student's upload bandwidth is below 1.5 Mbps, when the network
     check runs, then it fails with a message indicating the minimum required bandwidth
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-017
   description: Given an exam configured with Respondus LockDown Browser, when a student
     is in the LockDown Browser, then the student cannot open other applications, copy/paste,
@@ -185,62 +217,110 @@ acceptance_criteria:
 - id: AC-024
   description: Given an attempt in `verified` state, when any action attempts to transition
     it to `started`, then the transition is rejected with an invalid state error
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-025
   description: Given 10 exam attempts in `second_review_required` state for enterprise
     customer A and 5 for customer B, when reviewer R (authorized for customer A only)
     accesses the review dashboard, then only the 10 attempts for customer A are visible
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-026
   description: Given a reviewer selects an attempt, when they click "Reject" and enter
     a reason (25 characters), then the attempt transitions to `rejected`, the reason
     is stored, and the student is notified via email
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-027
   description: Given a reviewer rejects an attempt, when a `proctoring_admin` user
     accesses the attempt, then they can override the rejection to `verified` with
     an audit log entry
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-028
   description: Given an attempt has been in the review queue for longer than the enterprise's
     `review_sla_hours`, when the review dashboard loads, then the attempt is highlighted
     with an SLA warning
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-029
   description: Given a proctored exam attempt transitions to `verified`, when the
     gradebook sync runs, then the student's exam grade appears in the Open edX gradebook
     within 5 minutes
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-030
   description: Given a proctored exam attempt transitions to `rejected`, when the
     gradebook sync runs, then the student's exam grade is set to 0 and the `proctoring_status`
     field shows `rejected`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-031
   description: Given an instructor overrides a rejected attempt, when the override
     is processed, then the original exam grade is restored and `proctoring_status`
     changes to `verified` with an override audit entry
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-032
   description: Given a proctored exam attempt is in `submitted` state (pending review),
     when the student views their grades, then the exam shows as "Pending Proctoring
     Review" with no numeric grade
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-033
   description: Given enterprise customer A uses Examity and customer B uses Proctorio,
     when students from both take exams simultaneously, then each student's session
     is routed to their respective provider with no credential cross-contamination
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-034
   description: Given enterprise customer A's proctoring configuration includes `review_sla_hours=12`,
     when customer B's configuration has `review_sla_hours=48`, then SLA warnings on
     the review dashboard use the correct per-customer threshold
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-035
   description: Given a GDPR deletion request for a student in enterprise customer
     A, when the deletion is processed, then only that student's proctoring data is
     deleted; all other data (including other students in customer A) remains intact
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-advanced.sh
+    command: scripts/qa/verify-proctoring-advanced.sh
 - id: AC-036
   description: 'Given a student is about to start a proctored exam, when the consent
     notice is displayed, then it includes: data collected, who accesses it, retention
@@ -277,25 +357,4 @@ acceptance_criteria:
     section: Verification > GDPR
     justification: Requires provider coordination; manual verification with quarterly
       audit
-_unmapped:
-- AC-004
-- AC-005
-- AC-009
-- AC-010
-- AC-011
-- AC-012
-- AC-013
-- AC-016
-- AC-024
-- AC-025
-- AC-026
-- AC-027
-- AC-028
-- AC-029
-- AC-030
-- AC-031
-- AC-032
-- AC-033
-- AC-034
-- AC-035
 
