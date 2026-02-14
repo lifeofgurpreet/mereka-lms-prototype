@@ -313,7 +313,7 @@ WEBPACK_CONFIG_PATH = "webpack.dev.config.js"
 
 # MFE-specific settings
 
-COURSE_AUTHORING_MICROFRONTEND_URL = "http://apps.localhost:2001/course-authoring"
+COURSE_AUTHORING_MICROFRONTEND_URL = "http://apps.localhost:2001/authoring"
 CORS_ORIGIN_WHITELIST.append("http://apps.localhost:2001")
 LOGIN_REDIRECT_WHITELIST.append("apps.localhost:2001")
 CSRF_TRUSTED_ORIGINS.append("http://apps.localhost:2001")

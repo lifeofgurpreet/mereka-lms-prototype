@@ -666,7 +666,7 @@ MFE_CONFIG["ACCOUNT_SETTINGS_URL"] = ACCOUNT_MICROFRONTEND_URL
 
 
 
-MFE_CONFIG["COURSE_AUTHORING_MICROFRONTEND_URL"] = f"{MEREKA_MFE_BASE_URL}/course-authoring"
+MFE_CONFIG["COURSE_AUTHORING_MICROFRONTEND_URL"] = f"{MEREKA_MFE_BASE_URL}/authoring"
 MFE_CONFIG["ENABLE_ASSETS_PAGE"] = "true"
 MFE_CONFIG["ENABLE_HOME_PAGE_COURSE_API_V2"] = "true"
 MFE_CONFIG["ENABLE_PROGRESS_GRAPH_SETTINGS"] = "true"
@@ -746,7 +746,7 @@ MFE_CONFIG_API_URLS = {
     'account': f"{MEREKA_MFE_BASE_URL}/account",
     'gradebook': f"{MEREKA_MFE_BASE_URL}/gradebook",
     'profile': f"{MEREKA_MFE_BASE_URL}/u",
-    'course-authoring': f"{MEREKA_MFE_BASE_URL}/course-authoring",
+    'course-authoring': f"{MEREKA_MFE_BASE_URL}/authoring",
     'communications': f"{MEREKA_MFE_BASE_URL}/communications",
     'discussions': f"{MEREKA_MFE_BASE_URL}/discussions",
     'learner-dashboard': f"{MEREKA_MFE_BASE_URL}/learner-dashboard",
