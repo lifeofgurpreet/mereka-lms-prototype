@@ -1011,3 +1011,37 @@ DEFAULT_ORG_SUPPORT_EMAIL = os.environ.get("DEFAULT_ORG_SUPPORT_EMAIL", "")
 # Register openedx_email_templates app
 if "openedx_email_templates" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_email_templates")
+
+# ── Email Digests & Analytics ────────────────────────────────────────────
+# @spec: email-notifications-pipeline_spec.md (Phase 6: Digests + Analytics)
+# @covers AC-037, AC-038, AC-039, AC-040, AC-041, AC-042
+
+# Feature flags (default: off for safe rollout)
+ENABLE_EMAIL_DIGESTS = os.environ.get(
+    "ENABLE_EMAIL_DIGESTS", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_EMAIL_DIGESTS"] = ENABLE_EMAIL_DIGESTS
+
+ENABLE_EMAIL_ANALYTICS = os.environ.get(
+    "ENABLE_EMAIL_ANALYTICS", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_EMAIL_ANALYTICS"] = ENABLE_EMAIL_ANALYTICS
+
+# Click tracking feature flag
+NOTIFICATION_CLICK_TRACKING_ENABLED = os.environ.get(
+    "NOTIFICATION_CLICK_TRACKING_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Digest scheduling (spec: 09:00 in user's timezone)
+DIGEST_DEFAULT_SEND_HOUR = int(os.environ.get("DIGEST_DEFAULT_SEND_HOUR", "9"))
+DIGEST_DEFAULT_TIMEZONE = os.environ.get("DIGEST_DEFAULT_TIMEZONE", "Asia/Kuala_Lumpur")
+
+# Engagement data retention (spec: 12 months)
+EMAIL_ANALYTICS_RETENTION_MONTHS = int(os.environ.get("EMAIL_ANALYTICS_RETENTION_MONTHS", "12"))
+
+# GDPR deletion deadline (spec: 30 days)
+GDPR_DELETION_DEADLINE_DAYS = int(os.environ.get("GDPR_DELETION_DEADLINE_DAYS", "30"))
+
+# Register openedx_email_digests app
+if "openedx_email_digests" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_email_digests")
