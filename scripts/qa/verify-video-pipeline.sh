@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # @spec: video-pipeline-delivery_spec.md
-# @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020, AC-021, AC-022, AC-023, AC-024, AC-025
+# @covers AC-VPD-001, AC-VPD-002, AC-VPD-003, AC-VPD-004, AC-VPD-005, AC-VPD-006, AC-VPD-007, AC-VPD-008, AC-VPD-009, AC-VPD-010, AC-VPD-011, AC-VPD-012, AC-VPD-013, AC-VPD-014, AC-VPD-015, AC-VPD-016, AC-VPD-017, AC-VPD-018, AC-VPD-019, AC-VPD-020, AC-VPD-021, AC-VPD-022, AC-VPD-023, AC-VPD-024, AC-VPD-025
 #
 # Comprehensive verification of the Video Pipeline & Delivery System (Mux integration).
 # Covers all 25 acceptance criteria from the spec.
