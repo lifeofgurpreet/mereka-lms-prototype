@@ -33,8 +33,26 @@ class LibraryMetadata(models.Model):
         help_text="Organization that owns this library"
     )
 
+    # Tenant isolation (AC-LIB-014)
+    tenant_uuid = models.UUIDField(
+        null=True, blank=True,
+        db_index=True,
+        help_text="Enterprise customer UUID for tenant isolation"
+    )
+
     title = models.CharField(max_length=500, help_text="Library display title")
     description = models.TextField(blank=True, default='')
+
+    # Public library support (AC-LIB-015)
+    allow_public_read = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Allow all tenants to read this library (platform-global)"
+    )
+    allow_public_read_locked_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Timestamp when public read was enabled (prevents reversal if forked)"
+    )
 
     # Soft-delete support (AC-LIB-009)
     is_deleted = models.BooleanField(default=False, db_index=True)
@@ -362,3 +380,139 @@ class BlockstoreReference(models.Model):
 
     def __str__(self):
         return f"{self.ref_type}: {self.bundle_uuid}"
+
+
+class LibraryRole(models.Model):
+    """
+    RBAC for content libraries (AC-LIB-016, AC-LIB-017).
+
+    Roles:
+    - library_admin: Full control (publish, manage roles, delete)
+    - library_author: Edit content, cannot publish or manage access
+    - library_reader: Read-only access, cannot modify or publish
+
+    AC-LIB-017: Removing the last admin is rejected.
+    AC-NEG-LIB-009: Role escalation prevention.
+    """
+    ROLE_ADMIN = 'library_admin'
+    ROLE_AUTHOR = 'library_author'
+    ROLE_READER = 'library_reader'
+
+    ROLE_CHOICES = [
+        (ROLE_ADMIN, 'Library Admin'),
+        (ROLE_AUTHOR, 'Library Author'),
+        (ROLE_READER, 'Library Reader'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    library = models.ForeignKey(
+        LibraryMetadata,
+        on_delete=models.CASCADE,
+        related_name='roles',
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='library_roles',
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default=ROLE_READER,
+    )
+
+    granted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='granted_library_roles',
+    )
+
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'openedx_content_libraries_role'
+        verbose_name = 'Library Role'
+        verbose_name_plural = 'Library Roles'
+        unique_together = [('library', 'user')]
+        ordering = ['library', 'role', 'user']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role} - {self.library.library_key}"
+
+
+class LibraryAccessLog(models.Model):
+    """
+    Security audit log for library access attempts (AC-LIB-018).
+
+    Tracks:
+    - Cross-tenant access attempts (AC-NEG-LIB-007)
+    - Role escalation attempts (AC-NEG-LIB-009)
+    - Access grants/denials
+    """
+    ACTION_CROSS_TENANT_ATTEMPT = 'cross_tenant_attempt'
+    ACTION_ROLE_ESCALATION_ATTEMPT = 'role_escalation_attempt'
+    ACTION_ACCESS_GRANTED = 'access_granted'
+    ACTION_ACCESS_DENIED = 'access_denied'
+
+    ACTION_CHOICES = [
+        (ACTION_CROSS_TENANT_ATTEMPT, 'Cross-tenant access attempt'),
+        (ACTION_ROLE_ESCALATION_ATTEMPT, 'Role escalation attempt'),
+        (ACTION_ACCESS_GRANTED, 'Access granted'),
+        (ACTION_ACCESS_DENIED, 'Access denied'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    library = models.ForeignKey(
+        LibraryMetadata,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='access_logs',
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    action = models.CharField(
+        max_length=30,
+        choices=ACTION_CHOICES,
+        db_index=True,
+    )
+
+    source_tenant_uuid = models.UUIDField(
+        null=True, blank=True,
+        help_text="Tenant UUID of the requesting user"
+    )
+
+    target_tenant_uuid = models.UUIDField(
+        null=True, blank=True,
+        help_text="Tenant UUID of the target library"
+    )
+
+    request_path = models.CharField(
+        max_length=500,
+        blank=True, default='',
+        help_text="API endpoint path"
+    )
+
+    ip_address = models.GenericIPAddressField(
+        null=True, blank=True,
+        help_text="IP address of the requester"
+    )
+
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = 'openedx_content_libraries_access_log'
+        verbose_name = 'Library Access Log'
+        verbose_name_plural = 'Library Access Logs'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.action} - {self.user.username} - {self.timestamp}"

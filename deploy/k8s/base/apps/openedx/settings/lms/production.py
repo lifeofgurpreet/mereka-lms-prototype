@@ -1250,3 +1250,27 @@ LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
 # Register openedx_content_libraries app
 if "openedx_content_libraries" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_content_libraries")
+
+# ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
+# @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
+# @covers: AC-LIB-014 through AC-LIB-019
+
+# Org-scoped library filtering (AC-LIB-014)
+LIBRARY_TENANT_ISOLATION_ENABLED = os.environ.get(
+    "LIBRARY_TENANT_ISOLATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Allow platform-global libraries (AC-LIB-015)
+LIBRARY_PUBLIC_READ_ENABLED = os.environ.get(
+    "LIBRARY_PUBLIC_READ_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# RBAC enforcement for library operations (AC-LIB-016)
+LIBRARY_RBAC_ENABLED = os.environ.get(
+    "LIBRARY_RBAC_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Security event logging for cross-tenant attempts (AC-LIB-018)
+LIBRARY_ACCESS_LOGGING_ENABLED = os.environ.get(
+    "LIBRARY_ACCESS_LOGGING_ENABLED", "false"
+).lower() in ("true", "1", "yes")
