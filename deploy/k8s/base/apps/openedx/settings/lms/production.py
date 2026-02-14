@@ -952,3 +952,32 @@ CORNERSTONE_SYNC_TIMEOUT = int(os.environ.get("CORNERSTONE_SYNC_TIMEOUT", "300")
 INTEGRATED_CHANNELS_API_CHUNK_SIZE = 500  # Max learners per sync batch (edge case: large enterprises)
 INTEGRATED_CHANNELS_TRANSMISSION_CHUNK_SIZE = 100  # Max records per API call to external system
 INTEGRATED_CHANNELS_LOG_PII = False  # Do NOT log learner emails (GDPR/PDPA compliance)
+
+# ── Push Notifications (FCM) ────────────────────────────────────────────
+# @spec: email-notifications-pipeline_spec.md (Phase 4: Push Notifications)
+# @covers AC-015, AC-016, AC-017, AC-018, AC-019
+
+# Feature flag — gated globally; enable per-tenant via Django admin.
+NOTIFICATION_PUSH_ENABLED = os.environ.get(
+    "ENABLE_PUSH_NOTIFICATIONS", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_PUSH_NOTIFICATIONS"] = NOTIFICATION_PUSH_ENABLED
+
+# Firebase Cloud Messaging (FCM) HTTP v1 API configuration
+FCM_PROJECT_ID = os.environ.get("FCM_PROJECT_ID", "")
+FCM_SERVICE_ACCOUNT_KEY = os.environ.get("MEREKA_LMS_FCM_SERVICE_ACCOUNT_KEY", "")
+
+# Push dispatch retry/backoff (spec: base 30s, max 15min, 5 retries)
+PUSH_NOTIFICATION_RETRY_BACKOFF = 30
+PUSH_NOTIFICATION_RETRY_BACKOFF_MAX = 900
+PUSH_NOTIFICATION_RETRY_MAX = 5
+
+# Batch size for FCM API calls (spec: up to 500 per request)
+PUSH_NOTIFICATION_BATCH_SIZE = 500
+
+# ACE channel configuration — add push channel
+ACE_ENABLED_CHANNELS.append("push") if "push" not in ACE_ENABLED_CHANNELS else None
+
+# Register openedx_push_notifications app
+if "openedx_push_notifications" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_push_notifications")
