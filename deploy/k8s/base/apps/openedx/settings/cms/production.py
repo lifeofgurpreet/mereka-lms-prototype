@@ -558,3 +558,17 @@ LIBRARY_SOFT_DELETE_RETENTION_DAYS = int(os.environ.get(
 # Register openedx_content_libraries app
 if "openedx_content_libraries" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_content_libraries")
+
+# ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
+# @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
+# @covers: AC-LIB-014 through AC-LIB-019
+
+# Org-scoped library filtering
+LIBRARY_TENANT_ISOLATION_ENABLED = os.environ.get(
+    "LIBRARY_TENANT_ISOLATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# RBAC enforcement
+LIBRARY_RBAC_ENABLED = os.environ.get(
+    "LIBRARY_RBAC_ENABLED", "false"
+).lower() in ("true", "1", "yes")
