@@ -1,4 +1,4 @@
-# @covers AC-012, AC-013, AC-014
+# @covers AC-MTA-012, AC-MTA-013, AC-MTA-014
 # @spec: multi-tenancy-architecture_spec.md
 """
 Tenant resolution middleware for Open edX multi-tenancy.

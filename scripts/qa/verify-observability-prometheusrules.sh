@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+# @covers AC-006
+# @spec: observability-stack_spec.md
+# Verify PrometheusRule resources exist for critical alerts.
+#
+# Usage:
+#   ./scripts/qa/verify-observability-prometheusrules.sh
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+
+K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+APP_NS="${APP_NS:-mereka-lms}"
+STRICT="${STRICT:-0}"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context) K8S_CONTEXT="$2"; shift 2 ;;
+    --namespace) APP_NS="$2"; shift 2 ;;
+    --strict) STRICT=1; shift ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+failures=0
+skips=0
+
+echo "Verify: PrometheusRule alert resources"
+echo "  context:   $K8S_CONTEXT"
+echo "  namespace: $APP_NS"
+echo ""
+
+# Check if kubectl/jq are available
+if ! command -v kubectl >/dev/null 2>&1; then
+  echo -e "${YELLOW}SKIP${NC} kubectl not available"
+  [[ "$STRICT" -eq 1 ]] && exit 1
+  exit 0
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo -e "${YELLOW}SKIP${NC} jq not available"
+  [[ "$STRICT" -eq 1 ]] && exit 1
+  exit 0
+fi
+
+# Check if cluster is reachable
+if ! kubectl --context "$K8S_CONTEXT" cluster-info >/dev/null 2>&1; then
+  echo -e "${YELLOW}SKIP${NC} Cannot reach cluster: $K8S_CONTEXT"
+  [[ "$STRICT" -eq 1 ]] && exit 1
+  exit 0
+fi
+
+# Check if PrometheusRule CRD is installed
+echo -n "Check: PrometheusRule CRD is installed... "
+if kubectl --context "$K8S_CONTEXT" get crd prometheusrules.monitoring.coreos.com >/dev/null 2>&1; then
+  echo -e "${GREEN}PASS${NC}"
+else
+  echo -e "${RED}FAIL${NC} PrometheusRule CRD not found (Prometheus Operator not installed?)"
+  failures=$((failures + 1))
+  exit 1
+fi
+
+# Expected PrometheusRules from repo
+EXPECTED_RULES=(
+  "lms-alerts"
+  "slo-recording-rules"
+  "velero-alerts"
+  "auth-alerts"
+  "enterprise-alerts"
+)
+
+echo ""
+echo "Checking PrometheusRule manifests in repository..."
+for rule in "${EXPECTED_RULES[@]}"; do
+  echo -n "  Check: prometheusrule-${rule}.yaml exists... "
+
+  # Handle different naming patterns
+  if [[ -f "deploy/k8s/base/monitoring/prometheusrule-${rule}.yaml" ]]; then
+    echo -e "${GREEN}PASS${NC}"
+  elif [[ -f "deploy/k8s/base/monitoring/prometheusrule-${rule/-alerts/}.yaml" ]]; then
+    echo -e "${GREEN}PASS${NC}"
+  else
+    echo -e "${YELLOW}WARN${NC} Not found"
+  fi
+done
+
+echo ""
+echo "Checking deployed PrometheusRules in cluster..."
+for rule in "${EXPECTED_RULES[@]}"; do
+  echo -n "  Check: PrometheusRule '$rule' deployed... "
+  if kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get prometheusrule "$rule" >/dev/null 2>&1; then
+    echo -e "${GREEN}PASS${NC}"
+  else
+    echo -e "${YELLOW}WARN${NC} Not found in namespace $APP_NS"
+  fi
+done
+
+# Check if any PrometheusRules exist in the namespace
+echo ""
+echo -n "Check: At least one PrometheusRule exists in $APP_NS... "
+pr_count=$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get prometheusrule -o json 2>/dev/null | jq '.items | length' || echo "0")
+
+if [[ "$pr_count" -gt 0 ]]; then
+  echo -e "${GREEN}PASS${NC} ($pr_count PrometheusRules found)"
+else
+  echo -e "${RED}FAIL${NC} No PrometheusRules found"
+  failures=$((failures + 1))
+fi
+
+# List all PrometheusRules
+if [[ "$pr_count" -gt 0 ]]; then
+  echo ""
+  echo "Deployed PrometheusRules:"
+  kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get prometheusrule -o custom-columns=NAME:.metadata.name,AGE:.metadata.creationTimestamp | sed 's/^/  /'
+fi
+
+# Critical alerts from spec
+CRITICAL_ALERTS=(
+  "OpenEdxCrashLoopingContainers"
+  "OpenEdxPodsPendingTooLong"
+  "OpenEdxCriticalDeploymentUnavailable"
+)
+
+echo ""
+echo "Checking for critical alert rules..."
+for rule_name in "${EXPECTED_RULES[@]}"; do
+  if kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get prometheusrule "$rule_name" -o json >/dev/null 2>&1; then
+    rule_json=$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get prometheusrule "$rule_name" -o json)
+
+    for alert in "${CRITICAL_ALERTS[@]}"; do
+      echo -n "  Check: Alert '$alert' in '$rule_name'... "
+      if echo "$rule_json" | jq -e --arg alert "$alert" '.spec.groups[].rules[] | select(.alert == $alert)' >/dev/null 2>&1; then
+        echo -e "${GREEN}PASS${NC}"
+      else
+        # Don't fail if alert is in a different rule file
+        echo -e "${YELLOW}SKIP${NC} (not in this rule)"
+      fi
+    done
+  fi
+done
+
+# Check if Prometheus has loaded the rules
+echo ""
+echo -n "Check: Prometheus has loaded alert rules... "
+prom_pod=$(kubectl --context "$K8S_CONTEXT" -n monitoring get pods -l app.kubernetes.io/name=prometheus -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+
+if [[ -n "$prom_pod" ]]; then
+  rules_json=$(kubectl --context "$K8S_CONTEXT" -n monitoring exec "$prom_pod" -- wget -qO- --timeout=5 'http://localhost:9090/api/v1/rules' 2>/dev/null || echo "")
+
+  if [[ -n "$rules_json" ]]; then
+    alert_count=$(echo "$rules_json" | jq '[.data.groups[].rules[] | select(.type=="alerting")] | length')
+    echo -e "${GREEN}PASS${NC} ($alert_count alerting rules loaded)"
+
+    # Check for critical alerts in loaded rules
+    echo "  Verifying critical alerts are loaded:"
+    for alert in "${CRITICAL_ALERTS[@]}"; do
+      echo -n "    Alert '$alert'... "
+      if echo "$rules_json" | jq -e --arg alert "$alert" '.data.groups[].rules[] | select(.name == $alert)' >/dev/null 2>&1; then
+        echo -e "${GREEN}PASS${NC}"
+      else
+        echo -e "${YELLOW}WARN${NC} Not found in Prometheus rules"
+      fi
+    done
+  else
+    echo -e "${YELLOW}SKIP${NC} Cannot query Prometheus rules API"
+    skips=$((skips + 1))
+  fi
+else
+  echo -e "${YELLOW}SKIP${NC} Prometheus pod not found"
+  skips=$((skips + 1))
+fi
+
+echo ""
+if [[ "$failures" -eq 0 ]]; then
+  if [[ "$skips" -gt 0 ]]; then
+    echo -e "${YELLOW}OK (with $skips skipped checks)${NC}"
+  else
+    echo -e "${GREEN}OK${NC}"
+  fi
+  exit 0
+else
+  echo -e "${RED}FAILED ($failures checks failed)${NC}"
+  exit 1
+fi

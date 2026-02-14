@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# @covers AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-012, AC-013, AC-014
+# @covers AC-MTA-003, AC-MTA-004, AC-MTA-005, AC-MTA-006, AC-MTA-007, AC-MTA-008, AC-MTA-012, AC-MTA-013, AC-MTA-014
 # @spec: multi-tenancy-architecture_spec.md
 # Verify that tenant isolation patterns exist in the codebase.
 # Checks for queryset filtering, middleware, and cache key namespacing.
-# AC-003..AC-007: Data isolation via queryset filtering.
+# AC-MTA-003..AC-MTA-007: Data isolation via queryset filtering.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

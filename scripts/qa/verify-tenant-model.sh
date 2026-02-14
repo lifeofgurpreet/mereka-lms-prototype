@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# @covers AC-001
+# @covers AC-MTA-001
 # @spec: multi-tenancy-architecture_spec.md
 # Verify TenantConfig model exists in the codebase.
-# AC-001: TenantConfig extends EnterpriseCustomer with a OneToOneField.
+# AC-MTA-001: TenantConfig extends EnterpriseCustomer with a OneToOneField.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

@@ -103,6 +103,10 @@ jobs:
         run: |
           ./scripts/branding/verify-token-drift.sh
 
+      - name: Verify design tokens (all 12 ACs)
+        run: |
+          ./scripts/qa/verify-design-tokens.sh
+
       - name: Verify token values in theme files
         run: |
           python3 -c "

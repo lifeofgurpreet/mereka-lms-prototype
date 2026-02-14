@@ -1,4 +1,4 @@
-# @covers AC-001, AC-002
+# @covers AC-MTA-001, AC-MTA-002
 # @spec: multi-tenancy-architecture_spec.md
 """
 Tenant configuration model extending Open edX EnterpriseCustomer.

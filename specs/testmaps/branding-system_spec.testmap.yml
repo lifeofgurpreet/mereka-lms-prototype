@@ -5,36 +5,44 @@ acceptance_criteria:
     (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io),
     when branding assets are deployed, then Mereka logo and custom footer render correctly
     on all three domains with zero Open edX default branding leakage.
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-multi-domain.sh
+    command: scripts/qa/verify-branding-multi-domain.sh
 - id: AC-INT-002
   description: Given multi-site domains are configured, when `scripts/branding/verify-branding-health.sh`
     runs in production, then it passes for all configured domains without domain-specific
     branding regressions.
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-multi-domain.sh
+    command: scripts/qa/verify-branding-multi-domain.sh
 - id: AC-INT-003
   description: Given `tutor-configuration_spec.md` apply-patches workflow syncs theme
     assets, when `tutor images build openedx` completes, then Mereka logo variants
     exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/`
     returns zero results.
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-asset-sync.sh
+    command: scripts/qa/verify-branding-asset-sync.sh
 - id: AC-001
   description: Mereka logo visible on LMS homepage
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/branding/verify-logo-setup.sh
-    command: scripts/branding/verify-logo-setup.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-logo-setup.sh
+    command: scripts/branding/verify-logo-setup.sh
 - id: AC-002
   description: Mereka logo visible on Studio homepage
   verify:
-  - type: automated
-    test_type: shell_verification
-    file: scripts/branding/verify-branding-health.sh
-    command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
@@ -43,6 +51,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-studio-branding.sh
     command: scripts/qa/verify-studio-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
 - id: AC-003
   description: Custom Mereka footer renders on all MFEs (authn, account, profile,
     learning)
@@ -51,42 +63,32 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
-  - type: manual
-    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
-    section: MFE Footer Verification
-    justification: Account, profile, and learning MFE surfaces require interactive
-      navigation to verify footer rendering; no headless script covers all four surfaces
-      currently
 - id: AC-004
   description: Favicon loads correctly (mereka icon, not Open edX default)
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/branding/verify-branding-health.sh
-    command: scripts/branding/verify-branding-health.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
 - id: AC-005
   description: Custom fonts load without Google Fonts fallback
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/branding/verify-branding-health.sh
-    command: scripts/branding/verify-branding-health.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
 - id: AC-006
   description: '`grep "fonts.googleapis.com" tutor_env/env/build/openedx/lms/static/css/*.css`
     returns 0 results'
   verify:
-  - type: automated
-    test_type: shell_verification
-    file: scripts/branding/verify-branding-health.sh
-    command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
@@ -95,9 +97,17 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-studio-authoring-branding.sh
     command: scripts/qa/verify-studio-authoring-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
 - id: AC-007
   description: '`scripts/branding/verify-branding-health.sh` exits 0'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-health.sh
+    command: scripts/qa/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
     file: scripts/branding/deploy-branded-image.sh
@@ -126,10 +136,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/branding/verify-branding-health.sh
     command: scripts/branding/verify-branding-health.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-branding-health.sh
-    command: scripts/qa/verify-branding-health.sh
 - id: AC-008
   description: Theme applies consistently across all domains (academyv2.mereka.io,
     academy.biji-biji.com)
@@ -143,16 +149,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/branding/verify-branding-health.sh
-    command: scripts/branding/verify-branding-health.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-studio-authoring-branding.sh
     command: scripts/qa/verify-studio-authoring-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
 - id: AC-010
   description: Login page shows Mereka branding (not default Open edX)
   verify:
@@ -160,13 +166,4 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
-  - type: manual
-    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
-    section: Login Page Visual Verification
-    justification: Visual confirmation that gradient, logo placement, and font rendering
-      match brand guidelines requires human judgment
-_unmapped:
-- AC-INT-001
-- AC-INT-002
-- AC-INT-003
 

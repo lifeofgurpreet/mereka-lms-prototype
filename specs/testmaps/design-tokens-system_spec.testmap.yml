@@ -9,6 +9,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/branding/verify-token-drift.sh
     command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-002
   description: Given `assets/branding/tokens.css`, when parsed, then all typography
     tokens (`--font-heading`, `--font-body`, `--text-h1`, etc.) are defined with valid
@@ -18,6 +22,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/branding/verify-token-drift.sh
     command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-003
   description: Given `assets/branding/tokens.css`, when parsed, then all spacing tokens
     (`--space-0` through `--space-24`) are defined with pixel values following the
@@ -53,6 +61,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-006
   description: Given `assets/branding/tokens.provenance.json["source_commit"]`, when
     validated, then it matches the 40-character lowercase git SHA pattern `[0-9a-f]{40}`.
@@ -65,6 +77,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-007
   description: Given `assets/branding/tokens.provenance.json["source_sha256"]`, when
     validated, then it matches the 64-character lowercase SHA256 pattern `[0-9a-f]{64}`.
@@ -77,6 +93,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-008
   description: Given `verify-token-drift.sh` is run, when `tokens.css` and `mereka-overrides.css`
     are in sync, then the script exits 0 with message "✓ Token drift + provenance
@@ -90,6 +110,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-009
   description: 'Given `tokens.css` defines `--color-teal: #2d898b` and `mereka-overrides.css`
     defines `--mereka-color-teal: #FFFFFF`, when `verify-token-drift.sh` is run, then
@@ -99,6 +123,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/branding/verify-token-drift.sh
     command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-010
   description: 'Given `tokens.css` content is modified but `tokens.provenance.json["source_sha256"]`
     is stale, when `verify-token-drift.sh` is run, then the script exits non-zero
@@ -112,12 +140,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 - id: AC-011
   description: Given the upstream repository at `/home/gurpreet/projects/bbbi-mereka-brand-assets`
     with updated tokens, when `SYNC_FILE=1 ./scripts/branding/update-token-provenance.sh`
     is run, then `assets/branding/tokens.css` is overwritten with the upstream file
     and `tokens.provenance.json` is updated with the new commit SHA and file hash.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
   - type: manual
     runbook: specs/design-tokens-system_spec.md
     section: Rollout & Rollback > Syncing New Tokens from Figma
@@ -137,4 +173,8 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-token-ci.sh
     command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
 

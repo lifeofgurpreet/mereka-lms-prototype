@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# @covers AC-012, AC-013, AC-014
+# @covers AC-MTA-012, AC-MTA-013, AC-MTA-014
 # @spec: multi-tenancy-architecture_spec.md
 # Verify TenantResolutionMiddleware exists and is referenced in settings patches.
-# AC-012, AC-013, AC-014: Tenant resolution from request hostname.
+# AC-MTA-012, AC-MTA-013, AC-MTA-014: Tenant resolution from request hostname.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

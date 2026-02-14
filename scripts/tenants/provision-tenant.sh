@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-001, AC-002, AC-021
+# @covers AC-MTA-001, AC-MTA-002, AC-MTA-021
 # @spec: multi-tenancy-architecture_spec.md
 # Provision a new tenant in the Open edX platform.
 #
