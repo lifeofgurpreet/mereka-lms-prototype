@@ -151,6 +151,13 @@ ENABLE_MUX_STUDIO_UPLOAD = os.environ.get('ENABLE_MUX_STUDIO_UPLOAD', 'false').l
 MUX_TOKEN_ID = os.environ.get('MUX_TOKEN_ID')
 MUX_TOKEN_SECRET = os.environ.get('MUX_TOKEN_SECRET')
 MUX_WEBHOOK_SECRET = os.environ.get('MUX_WEBHOOK_SECRET', '')  # Optional
+
+# Video Analytics (Video Phase 4: Analytics Integration)
+if 'openedx_video_analytics' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_video_analytics')
+
+# Feature flag for video analytics (default: false, enable after validation)
+ENABLE_VIDEO_ANALYTICS = os.environ.get('ENABLE_VIDEO_ANALYTICS', 'false').lower() == 'true'
 """,
     )
 )
@@ -256,11 +263,13 @@ COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /open
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_notifications /openedx/openedx_notifications
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_email_preferences /openedx/openedx_email_preferences
 COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_mux_upload /openedx/openedx_mux_upload
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_video_analytics /openedx/openedx_video_analytics
 RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/openedx_notifications
 RUN pip install -e /openedx/openedx_email_preferences
 RUN pip install -e /openedx/openedx_mux_upload
+RUN pip install -e /openedx/openedx_video_analytics
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
@@ -639,6 +648,9 @@ path('api/user/v1/preferences/email/', include('openedx_email_preferences.urls')
 
 # Mux video upload API (Video Phase 3: Studio Upload Workflow)
 path('api/mux/upload/', include('openedx_mux_upload.urls')),
+
+# Video analytics API (Video Phase 4: Analytics Integration)
+path('api/video/v1/', include('openedx_video_analytics.urls')),
 """,
     )
 )
