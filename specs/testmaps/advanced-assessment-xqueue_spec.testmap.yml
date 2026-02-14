@@ -83,7 +83,11 @@ acceptance_criteria:
     code grader worker deployed, when a student submits a Python code answer to an
     XQueue-backed problem, then the code is executed in a sandboxed environment and
     a grade result is returned within 30 seconds
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
 - id: AC-017
   description: 'Given a student submission containing an infinite loop, when the grader
     worker processes it, then the execution is terminated after the configured CPU
@@ -91,22 +95,38 @@ acceptance_criteria:
     timeout". Note: Additional security vectors that SHOULD be addressed include memory
     exhaustion (256MB limit), disk write outside /tmp, network access blocking, and
     fork bomb protection'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
 - id: AC-018
   description: Given a student submission containing `import os; os.system("rm -rf
     /")`, when the grader worker processes it, then the sandboxed environment blocks
     the system call and the student receives feedback indicating a security violation
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
 - id: AC-019
   description: Given the XQueue grader worker crashes during processing, when the
     visibility timeout (60 seconds) expires, then the submission reappears in the
     queue and is picked up by another worker
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
 - id: AC-020
   description: Given an XQueue-graded problem, when the grader returns a result, then
     the grade (scaled to the problem's maximum points) appears in the gradebook within
     5 minutes
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-xqueue-deployment.sh
+    command: scripts/qa/verify-xqueue-deployment.sh
 - id: AC-021
   description: 'Given a student submission containing `x = [0] * (256 * 1024 * 1024)`
     (256MB array allocation), when the grader worker processes it, then the execution
@@ -247,11 +267,6 @@ _unmapped:
 - AC-013
 - AC-014
 - AC-015
-- AC-016
-- AC-017
-- AC-018
-- AC-019
-- AC-020
 - AC-021
 - AC-022
 - AC-023

@@ -7,7 +7,11 @@ acceptance_criteria:
     compliance modules", "type": "complex"}`, then a library is created with key `lib:Mereka:compliance-2026`
     and the response includes `id`, `org`, `slug`, `title`, `has_unpublished_changes:
     false`, `allow_public_read: false`'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-olx-packages.sh
+    command: scripts/qa/verify-olx-packages.sh
 - id: AC-002
   description: Given library `lib:Mereka:compliance-2026` exists, when the same `POST`
     is sent with the same slug, then the response is HTTP 400 with an error indicating
@@ -24,7 +28,11 @@ acceptance_criteria:
     calls `POST /api/libraries/v2/lib:Mereka:compliance-2026/blocks/` with `{"block_type":
     "html", "definition_id": "intro-module"}`, then an HTML XBlock component is added
     to the library and `has_unpublished_changes` becomes `true`'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-olx-packages.sh
+    command: scripts/qa/verify-olx-packages.sh
 - id: AC-005
   description: Given a library with 10 components, when a Library Author edits the
     content of component `intro-module` via the OLX update endpoint, then the component
@@ -45,7 +53,11 @@ acceptance_criteria:
     when a Library Admin calls `POST /api/libraries/v2/lib:Mereka:compliance-2026/commit/`,
     then all draft changes are committed, `has_unpublished_changes` becomes `false`,
     and a version record is created with the publisher's username and timestamp
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-olx-packages.sh
+    command: scripts/qa/verify-olx-packages.sh
 - id: AC-009
   description: Given library `lib:Mereka:compliance-2026` with no unpublished changes,
     when `POST /commit/` is called, then the response is HTTP 200 with a message "No
@@ -148,12 +160,20 @@ acceptance_criteria:
   description: Given library `lib:Mereka:compliance-2026` with 50 components, when
     `GET /api/libraries/v2/lib:Mereka:compliance-2026/export/` is called, then a valid
     tar.gz OLX archive is returned containing all component content and metadata
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-olx-packages.sh
+    command: scripts/qa/verify-olx-packages.sh
 - id: AC-029
   description: 'Given a valid OLX archive exported from AC-028, when `POST /api/libraries/v2/import/`
     is called with the archive and `{"org": "Mereka", "slug": "compliance-restored"}`,
     then a new library is created with identical content to the original'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-olx-packages.sh
+    command: scripts/qa/verify-olx-packages.sh
 - id: AC-030
   description: Given an OLX archive containing a component of type `custom_xblock_v3`
     (not installed), when import is attempted, then the response is HTTP 400 listing
@@ -162,24 +182,33 @@ acceptance_criteria:
 - id: AC-031
   description: Given 100 libraries in organization "Mereka", when `GET /api/libraries/v2/?org=Mereka`
     is called, then the response is returned within 500ms at p95
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/load-test-libraries.sh
+    command: scripts/qa/load-test-libraries.sh
 - id: AC-032
   description: Given a library with 1,000 components, when `GET /api/libraries/v2/{library_key}/blocks/?page_size=50`
     is called, then the first page is returned within 1000ms at p95
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/load-test-libraries.sh
+    command: scripts/qa/load-test-libraries.sh
 - id: AC-033
   description: Given a library with 500 components, when the publish endpoint is called,
     then the operation completes within 30 seconds
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/load-test-libraries.sh
+    command: scripts/qa/load-test-libraries.sh
 _unmapped:
-- AC-001
 - AC-002
 - AC-003
-- AC-004
 - AC-005
 - AC-006
 - AC-007
-- AC-008
 - AC-009
 - AC-010
 - AC-011
@@ -199,10 +228,5 @@ _unmapped:
 - AC-025
 - AC-026
 - AC-027
-- AC-028
-- AC-029
 - AC-030
-- AC-031
-- AC-032
-- AC-033
 

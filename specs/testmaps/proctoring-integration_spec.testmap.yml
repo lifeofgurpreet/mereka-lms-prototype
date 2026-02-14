@@ -4,12 +4,20 @@ acceptance_criteria:
   description: Given the `edx-proctoring` package is installed, when a proctoring
     backend for Proctorio is registered, then `ProctoringBackendProvider.get_backend('proctorio')`
     returns the Proctorio adapter instance
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-002
   description: Given an Examity backend is configured with valid API credentials,
     when `register_exam_attempt()` is called, then a corresponding exam record is
     created in the Examity system and a `provider_session_id` is returned
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-003
   description: Given a Respondus LockDown Browser backend is configured, when a student
     accesses the exam URL from a standard browser, then the system detects the missing
@@ -35,6 +43,10 @@ acceptance_criteria:
     settings, then they can select `proctored` as the exam type and choose from providers
     enabled for the enterprise customer
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Exam Setup
@@ -44,12 +56,20 @@ acceptance_criteria:
   description: Given a proctored exam with `time_limit_minutes=60` and `due_date=2026-06-15T23:59:00Z`,
     when a student accesses the exam at 2026-06-16T00:00:01Z, then the exam is blocked
     with a "deadline passed" message
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-008
   description: Given an enterprise customer with only `proctorio` enabled, when a
     course author attempts to select `examity` as the backend, then Studio displays
     a validation error
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-009
   description: Given a course with proctored exams is re-run, when the new course
     run is created, then all proctored exam settings (type, time limit, backend, review
@@ -130,17 +150,29 @@ acceptance_criteria:
   description: Given a student starts a proctored exam, when the exam timer begins,
     then the attempt state transitions from `ready_to_start` to `started` and the
     state change is logged with timestamp and user ID
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-021
   description: Given a student submits a proctored exam, when the submission is processed,
     then the attempt state transitions to `submitted` and the proctoring provider
     is notified via `stop_exam_attempt()`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-022
   description: Given an exam attempt in `started` state for longer than `time_limit_minutes
     + 30 minutes`, when the auto-expiry check runs, then the attempt transitions to
     `timed_out` and the provider is notified
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-023
   description: Given a proctoring provider outage during an active exam, when the
     student's recording stream fails, then the student's answers are preserved in
@@ -214,6 +246,10 @@ acceptance_criteria:
     notice is displayed, then it includes: data collected, who accesses it, retention
     period, right to refuse, and contact information'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Compliance
@@ -222,33 +258,34 @@ acceptance_criteria:
   description: Given a student does not accept the consent notice, when they attempt
     to proceed, then the exam start is blocked and the student is informed they cannot
     take the proctored exam without consent
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
 - id: AC-038
   description: Given a GDPR DSAR for a student, when the request is processed, then
     the system provides all proctoring session metadata and coordinates with the provider
     for recording access within 30 days
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring.sh
+    command: scripts/qa/verify-proctoring.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > GDPR
     justification: Requires provider coordination; manual verification with quarterly
       audit
 _unmapped:
-- AC-001
-- AC-002
 - AC-004
 - AC-005
-- AC-007
-- AC-008
 - AC-009
 - AC-010
 - AC-011
 - AC-012
 - AC-013
 - AC-016
-- AC-020
-- AC-021
-- AC-022
 - AC-024
 - AC-025
 - AC-026
@@ -261,5 +298,4 @@ _unmapped:
 - AC-033
 - AC-034
 - AC-035
-- AC-037
 

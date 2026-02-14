@@ -105,6 +105,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-branding.sh
     command: scripts/qa/verify-tenant-branding.sh
   - type: automated
@@ -122,6 +126,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-branding.sh
     command: scripts/qa/verify-tenant-branding.sh
   - type: automated
@@ -132,6 +140,10 @@ acceptance_criteria:
   description: Given tenant "Acme Corp" with a custom footer configured, when any
     page loads, then the footer displays Acme Corp branding (not default Mereka footer)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tenant-branding.sh
@@ -146,6 +158,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-branding.sh
     command: scripts/qa/verify-tenant-branding.sh
   - type: automated
@@ -157,6 +173,10 @@ acceptance_criteria:
     a browser requests that domain, then the LMS responds with the correct Acme-branded
     page
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
@@ -176,6 +196,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
     command: scripts/qa/verify-tenant-isolation-patterns.sh
   - type: automated
@@ -191,6 +215,10 @@ acceptance_criteria:
     for both domains, then each request resolves the correct `SiteConfiguration` based
     on `Host` header
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
@@ -338,6 +366,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-auth-analytics.sh
     command: scripts/qa/verify-tenant-auth-analytics.sh
 - id: AC-MTA-028
@@ -345,6 +377,10 @@ acceptance_criteria:
     requests are sent from 50 different tenant contexts, then no tenant's p95 latency
     exceeds 120% of the single-tenant baseline
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-multi-tenancy.sh
+    command: scripts/qa/verify-multi-tenancy.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tenant-auth-analytics.sh

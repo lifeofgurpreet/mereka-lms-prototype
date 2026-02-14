@@ -8,6 +8,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/migrations/kajabi/export.sh
+    command: scripts/migrations/kajabi/export.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-kajabi-export.sh
     command: scripts/qa/verify-kajabi-export.sh
 - id: AC-002
@@ -15,6 +19,10 @@ acceptance_criteria:
     users, categories, courses, and enrollment data are exported to `exports/mct/`
     with row counts matching MCT platform statistics (within 1% tolerance)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/export.sh
+    command: scripts/migrations/mct/export.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-mct-export.sh
@@ -27,6 +35,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/migrations/kajabi/export.sh
+    command: scripts/migrations/kajabi/export.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-kajabi-completions-export.sh
     command: scripts/qa/verify-kajabi-completions-export.sh
 - id: AC-004
@@ -34,6 +46,10 @@ acceptance_criteria:
     --resources courses --force` runs, then fresh video URLs are exported that are
     valid for at least 6 hours
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/export.sh
+    command: scripts/migrations/mct/export.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-mct-video-urls.sh
@@ -236,12 +252,24 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/migrations/mct/verify_mux_upload.sh
+    command: scripts/migrations/mct/verify_mux_upload.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_video_mapping.sh
+    command: scripts/migrations/mct/verify_video_mapping.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-mux-video-upload.sh
     command: scripts/qa/verify-mux-video-upload.sh
 - id: AC-027
   description: Given 34 videos with VTT caption tracks, when uploaded to Mux, then
     caption tracks are associated with the corresponding Mux assets
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_mux_upload.sh
+    command: scripts/migrations/mct/verify_mux_upload.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-mux-video-upload.sh
@@ -251,6 +279,14 @@ acceptance_criteria:
     then Video XBlocks contain `https://stream.mux.com/{PLAYBACK_ID}.m3u8` source
     URLs
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_mux_upload.sh
+    command: scripts/migrations/mct/verify_mux_upload.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_video_mapping.sh
+    command: scripts/migrations/mct/verify_video_mapping.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-mct-olx-packages.sh

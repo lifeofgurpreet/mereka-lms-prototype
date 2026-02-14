@@ -5,6 +5,10 @@ acceptance_criteria:
     is checked, then DKIM, SPF, and DMARC all pass verification (verified via `dig`
     and SES console)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-notifications.sh
+    command: scripts/qa/verify-email-notifications.sh
   - type: manual
     runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
@@ -15,6 +19,10 @@ acceptance_criteria:
   description: Given the sending domain `academy.biji-biji.com`, when SES domain verification
     is checked, then DKIM, SPF, and DMARC all pass verification
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-notifications.sh
+    command: scripts/qa/verify-email-notifications.sh
   - type: manual
     runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Template Rendering
@@ -135,16 +143,28 @@ acceptance_criteria:
 - id: AC-026
   description: Given a user with `language_preference=zh-hans`, when a `grade_posted`
     email is sent, then the subject and body are rendered in Simplified Chinese
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-notifications.sh
+    command: scripts/qa/verify-email-notifications.sh
 - id: AC-027
   description: Given a user with `language_preference=ja` (unsupported), when an email
     is sent, then the template falls back to English (`en`)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-notifications.sh
+    command: scripts/qa/verify-email-notifications.sh
 - id: AC-028
   description: Given a tenant `org_slug=acme` with `org_display_name="Acme Corp"`,
     when an email template renders, then the branding variables show "Acme Corp" as
     the organization name and the tenant's logo URL
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-notifications.sh
+    command: scripts/qa/verify-email-notifications.sh
 - id: AC-029
   description: Given an enterprise admin schedules a bulk campaign for 10,000 recipients
     at 2026-02-15 09:00 UTC, when the scheduled time arrives, then the campaign begins
@@ -253,9 +273,6 @@ _unmapped:
 - AC-023
 - AC-024
 - AC-025
-- AC-026
-- AC-027
-- AC-028
 - AC-029
 - AC-030
 - AC-031
