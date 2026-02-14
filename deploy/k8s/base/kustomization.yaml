@@ -11,6 +11,8 @@ resources:
 - logging
 - apps/enterprise
 - apps/multi-tenancy
+- apps/lms
+- apps/cms
 - apps/badgr-server
 - apps/badgr-worker
 - ../../../services/purchase-gateway/k8s
