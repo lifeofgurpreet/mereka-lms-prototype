@@ -1,6 +1,6 @@
 # Resource limits for Tutor-managed deployments
-# Based on actual production usage (2026-02-14) with ~2x headroom for limits
-# Requests set near current usage to ensure proper scheduling
+# Based on actual production usage (2026-02-14)
+# Requests kept minimal (cluster at 99% CPU) — limits provide OOM/CPU protection
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -13,10 +13,10 @@ spec:
         - name: lms
           resources:
             requests:
-              cpu: 50m
-              memory: 512Mi
+              cpu: 10m
+              memory: 128Mi
             limits:
-              cpu: "1"
+              cpu: "2"
               memory: 2Gi
 ---
 apiVersion: apps/v1
@@ -30,8 +30,8 @@ spec:
         - name: lms-worker
           resources:
             requests:
-              cpu: 50m
-              memory: 512Mi
+              cpu: 10m
+              memory: 128Mi
             limits:
               cpu: "1"
               memory: 2Gi
@@ -47,8 +47,8 @@ spec:
         - name: cms
           resources:
             requests:
-              cpu: 50m
-              memory: 256Mi
+              cpu: 10m
+              memory: 128Mi
             limits:
               cpu: "1"
               memory: 1536Mi
@@ -64,8 +64,8 @@ spec:
         - name: cms-worker
           resources:
             requests:
-              cpu: 50m
-              memory: 512Mi
+              cpu: 10m
+              memory: 128Mi
             limits:
               cpu: "1"
               memory: 2Gi
@@ -81,8 +81,8 @@ spec:
         - name: caddy
           resources:
             requests:
-              cpu: 10m
-              memory: 32Mi
+              cpu: 5m
+              memory: 16Mi
             limits:
               cpu: 250m
               memory: 128Mi
@@ -98,8 +98,8 @@ spec:
         - name: mfe
           resources:
             requests:
-              cpu: 10m
-              memory: 32Mi
+              cpu: 5m
+              memory: 16Mi
             limits:
               cpu: 250m
               memory: 128Mi
@@ -115,10 +115,10 @@ spec:
         - name: mysql
           resources:
             requests:
-              cpu: 50m
-              memory: 512Mi
+              cpu: 10m
+              memory: 128Mi
             limits:
-              cpu: "1"
+              cpu: "2"
               memory: 2Gi
 ---
 apiVersion: apps/v1
@@ -132,8 +132,8 @@ spec:
         - name: redis
           resources:
             requests:
-              cpu: 10m
-              memory: 32Mi
+              cpu: 5m
+              memory: 16Mi
             limits:
               cpu: 250m
               memory: 128Mi
@@ -149,11 +149,11 @@ spec:
         - name: elasticsearch
           resources:
             requests:
-              cpu: 50m
-              memory: 1Gi
+              cpu: 10m
+              memory: 256Mi
             limits:
-              cpu: "1"
-              memory: 2Gi
+              cpu: "2"
+              memory: 3Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -166,8 +166,8 @@ spec:
         - name: meilisearch
           resources:
             requests:
-              cpu: 10m
-              memory: 64Mi
+              cpu: 5m
+              memory: 32Mi
             limits:
               cpu: 500m
               memory: 512Mi
@@ -183,8 +183,8 @@ spec:
         - name: discovery
           resources:
             requests:
-              cpu: 10m
-              memory: 128Mi
+              cpu: 5m
+              memory: 64Mi
             limits:
               cpu: 500m
               memory: 512Mi
@@ -200,8 +200,8 @@ spec:
         - name: credentials
           resources:
             requests:
-              cpu: 10m
-              memory: 128Mi
+              cpu: 5m
+              memory: 64Mi
             limits:
               cpu: 500m
               memory: 512Mi
@@ -217,8 +217,8 @@ spec:
         - name: ecommerce
           resources:
             requests:
-              cpu: 10m
-              memory: 256Mi
+              cpu: 5m
+              memory: 128Mi
             limits:
               cpu: 500m
               memory: 1Gi
@@ -234,8 +234,8 @@ spec:
         - name: ecommerce-worker
           resources:
             requests:
-              cpu: 10m
-              memory: 128Mi
+              cpu: 5m
+              memory: 64Mi
             limits:
               cpu: 500m
               memory: 512Mi
@@ -251,8 +251,8 @@ spec:
         - name: notes
           resources:
             requests:
-              cpu: 10m
-              memory: 64Mi
+              cpu: 5m
+              memory: 32Mi
             limits:
               cpu: 250m
               memory: 256Mi
@@ -268,8 +268,8 @@ spec:
         - name: smtp
           resources:
             requests:
-              cpu: 5m
-              memory: 16Mi
+              cpu: 1m
+              memory: 8Mi
             limits:
               cpu: 100m
               memory: 64Mi
@@ -285,16 +285,16 @@ spec:
         - name: xqueue
           resources:
             requests:
-              cpu: 10m
-              memory: 64Mi
+              cpu: 5m
+              memory: 32Mi
             limits:
               cpu: 500m
               memory: 256Mi
         - name: xqueue-consumer
           resources:
             requests:
-              cpu: 10m
-              memory: 64Mi
+              cpu: 5m
+              memory: 32Mi
             limits:
               cpu: 250m
               memory: 256Mi
