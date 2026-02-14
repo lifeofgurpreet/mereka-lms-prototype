@@ -4,17 +4,29 @@ acceptance_criteria:
   description: Given the PII registry at `specs/pii-registry.yml`, when the validation
     tool is run against all database schemas, then zero unregistered PII fields are
     flagged and zero registry entries reference non-existent fields
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-002
   description: Given a new database migration that adds a field containing PII, when
     the migration is submitted for review, then the CI pipeline requires the PII registry
     to be updated (validation tool returns non-zero exit code if field is not registered)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-003
   description: Given a new user registration, when the user completes the registration
     form, then consent records are created for all mandatory processing purposes with
     `granted=true` and for optional purposes according to user selection
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-004
   description: Given an authenticated user, when they visit `/account/privacy/`, then
     they see all consent purposes with their current consent status and can toggle
@@ -39,7 +51,11 @@ acceptance_criteria:
   description: Given an authenticated user submits a deletion request via `POST /api/v1/privacy/deletion-request/`,
     when the request is verified, then the deletion pipeline begins processing within
     48 hours
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-009
   description: 'Given a deletion pipeline runs for user X, when all stores are processed
     successfully, then: (a) `auth_user.email` is replaced with `retired_email_{hash}@retired.invalid`,
@@ -47,13 +63,21 @@ acceptance_criteria:
     record is deleted, (d) forum posts show `[deleted]` as author, (e) profile image
     is deleted from GCS, (f) Redis sessions are invalidated, (g) ClickHouse events
     for the user are deleted/anonymized, (h) Purchase Gateway `buyer_email` is anonymized'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-010
   description: 'Given a deletion pipeline completes, when the proof is generated,
     then the proof document contains: the deletion request ID, each data store name,
     the action taken (deleted/anonymized/retained with reason), the timestamp of completion,
     and a valid cryptographic signature'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-011
   description: Given a deletion request for a user with financial records within the
     7-year retention period, when the pipeline processes the Purchase Gateway, then
@@ -71,7 +95,11 @@ acceptance_criteria:
     when the export is generated, then a ZIP archive is produced containing `profile.json`,
     `enrollments.json`, `grades.json`, `certificates.json`, `forum_posts.json`, `notes.json`,
     `purchases.json`, `consents.json`, `audit_log.json`, and `README.md`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-014
   description: Given an export archive is generated, when the user accesses the download
     link, then the archive is encrypted and the download link expires after 48 hours
@@ -94,16 +122,28 @@ acceptance_criteria:
 - id: AC-018
   description: Given ClickHouse analytics events older than 365 days, when the retention
     enforcement job runs, then those partitions are dropped
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-019
   description: Given Loki log entries older than 30 days, when the Loki retention
     policy executes, then those entries are no longer queryable
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-020
   description: Given any consent change, deletion request, export request, or breach
     event, when the event occurs, then an audit trail entry is created within 1 second
     with a valid integrity hash linking to the previous entry
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-021
   description: Given an auditor runs the integrity verification tool against the audit
     trail, when no tampering has occurred, then the hash chain validates completely
@@ -117,7 +157,11 @@ acceptance_criteria:
   description: Given the PII leakage scanner detects raw email addresses in Loki log
     entries, when the scan completes, then a `breach_detected` audit entry is created
     and a Warning alert is fired to the privacy operations team
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-024
   description: Given a confirmed data breach affecting more than 100 users, when the
     incident commander classifies it as high severity, then the breach notification
@@ -128,17 +172,29 @@ acceptance_criteria:
   description: Given a Loki log query for raw email patterns (`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`),
     when the PII leakage scanner runs, then any log lines matching the pattern are
     flagged in the scan results
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-026
   description: Given ClickHouse `xapi_events_all` contains a field with unhashed email
     (violating the anonymization requirement), when the PII scanner runs, then the
     field is flagged as a critical PII leakage
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-027
   description: Given a `privacy_admin` user, when they call `GET /api/v1/privacy/compliance/consent-coverage/`,
     then the response includes the percentage of active users with consent records
     for each purpose
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-028
   description: Given one or more pending deletion requests, when the compliance dashboard
     is viewed, then each request shows its status, elapsed time, and SLA compliance
@@ -158,7 +214,11 @@ acceptance_criteria:
     pipeline completes across all data stores (MySQL, MongoDB Atlas, Redis, ClickHouse,
     GCS), then a cryptographic deletion certificate MUST be generated listing each
     data store, records deleted count, and SHA-256 hash of the deletion log
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-032
   description: Given a deletion pipeline execution where one data store fails (e.g.,
     MongoDB timeout), when the failure is detected, then all completed deletions MUST
@@ -182,13 +242,21 @@ acceptance_criteria:
     audit is conducted, then every PII-bearing field in production MUST be documented
     in the matrix with: data store name, PII sensitivity tier (critical/high/medium/low),
     legal basis for processing, retention period, access controls, and deletion mechanism'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-PRIVACY-002
   description: Given a database schema migration adds a new field containing PII (e.g.,
     `user_phone_verified_at`), when the migration is merged to main, then the PII
     classification matrix MUST be updated to include the new field before deployment,
     or CI MUST block the deployment
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-PRIVACY-003
   description: 'Given the PII classification matrix documents that `MySQL: auth_user.email`
     has retention period "Account lifetime" and deletion mechanism "Anonymize to retired_email_{hash}@retired.invalid",
@@ -269,7 +337,11 @@ acceptance_criteria:
     anonymized Stripe customer ID), `consents.json` (purpose, granted status, timestamps,
     consent version), `audit_log.json` (privacy-relevant events for user), `README.md`
     (human-readable explanation of archive structure, GDPR Article 20 reference)'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-EXPORT-004
   description: 'Given an export archive is generated, when the archive is downloaded,
     then the archive MUST be AES-256 encrypted with either: (a) user-provided password
@@ -322,7 +394,11 @@ acceptance_criteria:
     certificates revocation, (9) profile deletion, (10) user account anonymization,
     (11) SSO linkage deletion, (12) consent anonymization, (13) audit trail anonymization,
     (14) cache cleanup, (15) log flagging'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-DELETE-002
   description: Given the deletion pipeline processes data store X (e.g., MongoDB Atlas
     forum content), when the deletion step completes, then the pipeline MUST immediately
@@ -358,7 +434,11 @@ acceptance_criteria:
     auth_user WHERE id=X", verification_result: "retired_email_abc123@retired.invalid",
     completed_at: "..."}`, `certificate_signature` (HMAC-SHA256 using platform secret
     key from Infisical)'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-DELETE-006
   description: 'Given a deletion certificate is generated, when the certificate signature
     is verified by an independent auditor tool, then the tool MUST validate: (a) HMAC-SHA256
@@ -446,7 +526,11 @@ acceptance_criteria:
     then an audit trail entry MUST be logged with: `event_type: "export_requested"`,
     `user_id_hash`, `request_id`, `requested_at`, `requested_via` (API/preference
     center), `ip_address_hash`'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-AUDIT-002
   description: 'Given an export request completes, when the archive is ready, then
     an audit trail entry MUST be logged with: `event_type: "export_completed"`, `export_request_id`,
@@ -468,7 +552,11 @@ acceptance_criteria:
   description: Given a user visits the LMS for the first time, when the page loads,
     then a cookie consent banner MUST appear before any non-essential cookies are
     set
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-CONSENT-002
   description: 'Given a user interacts with the cookie consent banner, when they make
     consent choices, then the system MUST store consent choices with: `consent_version`
@@ -526,7 +614,11 @@ acceptance_criteria:
     job MUST identify records past their retention period per classification matrix
     rules (e.g., "ClickHouse analytics events: 365 days", "Inactive accounts: 24 months
     no login")'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-RETENTION-002
   description: 'Given the retention enforcement CronJob runs in production, when purge
     operations complete, then each purge operation MUST be logged in the audit trail
@@ -554,7 +646,11 @@ acceptance_criteria:
     of active users with consent granted for analytics, marketing, functional), data
     retention compliance score (percentage of data stores with zero overdue purge
     operations)'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-privacy-gdpr.sh
+    command: scripts/qa/verify-data-privacy-gdpr.sh
 - id: AC-COMPLIANCE-002
   description: 'Given the DSAR count metric is displayed on the compliance dashboard,
     when the metric is queried, then the system MUST aggregate: total export requests
@@ -583,42 +679,25 @@ acceptance_criteria:
     <90%)'
   verify: []
 _unmapped:
-- AC-001
-- AC-002
-- AC-003
 - AC-004
 - AC-005
 - AC-006
 - AC-007
-- AC-008
-- AC-009
-- AC-010
 - AC-011
 - AC-012
-- AC-013
 - AC-014
 - AC-015
 - AC-016
 - AC-017
-- AC-018
-- AC-019
-- AC-020
 - AC-021
 - AC-022
-- AC-023
 - AC-024
-- AC-025
-- AC-026
-- AC-027
 - AC-028
 - AC-029
 - AC-030
-- AC-031
 - AC-032
 - AC-033
 - AC-034
-- AC-PRIVACY-001
-- AC-PRIVACY-002
 - AC-PRIVACY-003
 - AC-PRIVACY-004
 - AC-PRIVACY-005
@@ -629,7 +708,6 @@ _unmapped:
 - AC-PRIVACY-010
 - AC-EXPORT-001
 - AC-EXPORT-002
-- AC-EXPORT-003
 - AC-EXPORT-004
 - AC-EXPORT-005
 - AC-EXPORT-006
@@ -637,11 +715,9 @@ _unmapped:
 - AC-EXPORT-008
 - AC-EXPORT-009
 - AC-EXPORT-010
-- AC-DELETE-001
 - AC-DELETE-002
 - AC-DELETE-003
 - AC-DELETE-004
-- AC-DELETE-005
 - AC-DELETE-006
 - AC-DELETE-007
 - AC-DELETE-008
@@ -652,11 +728,9 @@ _unmapped:
 - AC-PARTIAL-001
 - AC-PARTIAL-002
 - AC-PARTIAL-003
-- AC-AUDIT-001
 - AC-AUDIT-002
 - AC-AUDIT-003
 - AC-AUDIT-004
-- AC-CONSENT-001
 - AC-CONSENT-002
 - AC-CONSENT-003
 - AC-CONSENT-004
@@ -666,11 +740,9 @@ _unmapped:
 - AC-CONSENT-008
 - AC-CONSENT-009
 - AC-CONSENT-010
-- AC-RETENTION-001
 - AC-RETENTION-002
 - AC-RETENTION-003
 - AC-RETENTION-004
-- AC-COMPLIANCE-001
 - AC-COMPLIANCE-002
 - AC-COMPLIANCE-003
 - AC-COMPLIANCE-004
