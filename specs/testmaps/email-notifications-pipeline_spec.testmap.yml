@@ -133,29 +133,101 @@ acceptance_criteria:
   description: Given a new user with no preference records, when they call `GET /api/notifications/v1/preferences/`,
     then default preferences are returned (all enabled except `bulk_campaign` email
     which is disabled)
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-preferences.sh
+    command: scripts/qa/verify-email-preferences.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/serializers.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/serializers.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
 - id: AC-021
   description: 'Given a user updates preferences via `PUT /api/notifications/v1/preferences/`
     with `[{"message_type": "discussion_reply", "channel": "email", "enabled": false}]`,
     when a discussion reply notification is triggered, then no email is sent but push
     and in-app are sent'
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-preferences.sh
+    command: scripts/qa/verify-email-preferences.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/serializers.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/serializers.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
 - id: AC-022
   description: Given a user clicks a one-click unsubscribe link in a `bulk_campaign`
     email, when the signed token is valid and not expired, then `bulk_campaign` and
     `course_announcement` email preferences are set to disabled without requiring
     login
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-preferences.sh
+    command: scripts/qa/verify-email-preferences.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
 - id: AC-023
   description: Given a preference change, when the audit log is queried, then it contains
     the `user_id`, `old_value`, `new_value`, `consent_version`, `ip_address_hash`,
     and `timestamp`
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-preferences.sh
+    command: scripts/qa/verify-email-preferences.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
 - id: AC-024
   description: Given a `bulk_campaign` email, when the email headers are inspected,
     then `List-Unsubscribe` and `List-Unsubscribe-Post` headers are present with a
     valid one-click unsubscribe URL
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-preferences.sh
+    command: scripts/qa/verify-email-preferences.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/middleware.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/middleware.py
 - id: AC-025
   description: Given a user with `language_preference=ms`, when an `enrollment_confirmation`
     email is sent, then the subject and body are rendered in Malay
@@ -326,7 +398,19 @@ acceptance_criteria:
 - id: AC-043
   description: Given a user has not explicitly opted into marketing communications,
     when a `bulk_campaign` is sent, then the user does NOT receive the email
-  verify: []
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-email-preferences.sh
+    command: scripts/qa/verify-email-preferences.sh
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/models.py
+  - type: automated
+    test_type: automated
+    file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
+    command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/utils.py
 - id: AC-044
   description: Given a user exercises their right to data export, when the export
     is generated, then notification preferences and consent records are included in
@@ -352,11 +436,6 @@ _unmapped:
 - AC-017
 - AC-018
 - AC-019
-- AC-020
-- AC-021
-- AC-022
-- AC-023
-- AC-024
 - AC-025
 - AC-029
 - AC-030
@@ -368,7 +447,6 @@ _unmapped:
 - AC-040
 - AC-041
 - AC-042
-- AC-043
 - AC-044
 - AC-045
 
