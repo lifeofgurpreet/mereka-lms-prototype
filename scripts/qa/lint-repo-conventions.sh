@@ -172,6 +172,11 @@ check_grep_ability() {
         continue
       fi
 
+      # Skip patch files (strategic merge patches don't need standalone labels)
+      if [[ "$file" == *"/patches/"* ]]; then
+        continue
+      fi
+
       # Skip if file doesn't contain "kind:" (not a K8s manifest)
       if ! grep -q "^kind:" "$file" 2>/dev/null; then
         continue
