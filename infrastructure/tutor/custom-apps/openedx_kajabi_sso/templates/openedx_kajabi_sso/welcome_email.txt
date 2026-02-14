@@ -1,0 +1,30 @@
+Welcome to Mereka Academy!
+
+Hello {{ first_name }},
+
+Your Kajabi account has been successfully migrated to Mereka Academy's new learning platform. We're excited to have you continue your learning journey with us!
+
+YOUR ACCOUNT DETAILS
+--------------------
+Email: {{ email }}
+Login Method: Single Sign-On (SSO)
+
+GETTING STARTED
+---------------
+1. Visit {{ lms_url }}
+2. Use the "Sign in with SSO" option on the login page
+3. Enter your email address ({{ email }})
+4. You'll be automatically logged in using your Kajabi credentials
+
+NEED HELP?
+----------
+If you have any questions or need assistance with logging in, please contact our support team at {{ support_email }}.
+
+We're here to support your learning success!
+
+Best regards,
+The Mereka Academy Team
+
+---
+This is an automated message from Mereka Academy. Please do not reply to this email.
+If you believe you received this email in error, please contact {{ support_email }}.

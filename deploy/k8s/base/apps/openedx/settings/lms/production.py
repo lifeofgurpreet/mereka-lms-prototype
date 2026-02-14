@@ -1274,3 +1274,45 @@ LIBRARY_RBAC_ENABLED = os.environ.get(
 LIBRARY_ACCESS_LOGGING_ENABLED = os.environ.get(
     "LIBRARY_ACCESS_LOGGING_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+
+# ── Kajabi SSO/OAuth Integration ───────────────────────────────────────
+# @spec: kajabi-sso
+# @covers: AC-SSO-001 through AC-SSO-005
+
+# Enable Kajabi SSO backend (AC-SSO-001)
+KAJABI_SSO_ENABLED = os.environ.get(
+    "KAJABI_SSO_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# OAuth2 client slug for Kajabi SSO
+KAJABI_SSO_CLIENT_SLUG = os.environ.get(
+    "KAJABI_SSO_CLIENT_SLUG", "mereka-kajabi-sso"
+)
+
+# Welcome email settings (AC-SSO-005)
+KAJABI_WELCOME_EMAIL_ENABLED = os.environ.get(
+    "KAJABI_WELCOME_EMAIL_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+KAJABI_WELCOME_EMAIL_FROM = os.environ.get(
+    "KAJABI_WELCOME_EMAIL_FROM", "noreply@mereka.io"
+)
+
+KAJABI_WELCOME_EMAIL_SUPPORT = os.environ.get(
+    "KAJABI_WELCOME_EMAIL_SUPPORT", "support@mereka.io"
+)
+
+# SSO fallback — always keep email/password as fallback (AC-SSO-003)
+KAJABI_SSO_FALLBACK_ENABLED = True  # NEVER disable this
+
+# Register Kajabi SSO app
+if "openedx_kajabi_sso" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_kajabi_sso")
+
+# Add Kajabi SSO backend to authentication backends (AC-SSO-001, AC-SSO-003)
+# IMPORTANT: Placed AFTER default backends so email/password always works as fallback
+if KAJABI_SSO_ENABLED:
+    AUTHENTICATION_BACKENDS = list(AUTHENTICATION_BACKENDS) if isinstance(AUTHENTICATION_BACKENDS, tuple) else AUTHENTICATION_BACKENDS
+    if "openedx_kajabi_sso.backend.KajabiSsoBackend" not in AUTHENTICATION_BACKENDS:
+        AUTHENTICATION_BACKENDS.append("openedx_kajabi_sso.backend.KajabiSsoBackend")
