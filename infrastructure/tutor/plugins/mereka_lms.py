@@ -210,6 +210,27 @@ ENABLE_XQUEUE_GRADERS = os.environ.get('ENABLE_XQUEUE_GRADERS', 'true').lower() 
 XQUEUE_GRADER_TIMEOUT_SECONDS = int(os.environ.get('XQUEUE_GRADER_TIMEOUT_SECONDS', '30'))
 XQUEUE_GRADER_MEMORY_LIMIT_MB = int(os.environ.get('XQUEUE_GRADER_MEMORY_LIMIT_MB', '256'))
 
+# Advanced XBlocks - Drag-Drop, Math, Randomization (Assessment Phase 4)
+if 'openedx_advanced_xblocks' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('openedx_advanced_xblocks')
+
+# Feature flag for advanced XBlocks (default: true)
+ENABLE_ADVANCED_XBLOCKS = os.environ.get('ENABLE_ADVANCED_XBLOCKS', 'true').lower() == 'true'
+
+# Advanced XBlocks configuration
+# AC-ASS-024: Default randomized pool settings
+RANDOMIZED_POOL_DEFAULT_SIZE = int(os.environ.get('RANDOMIZED_POOL_DEFAULT_SIZE', '20'))
+RANDOMIZED_POOL_DEFAULT_SHOW = int(os.environ.get('RANDOMIZED_POOL_DEFAULT_SHOW', '10'))
+
+# AC-ASS-027: Answer shuffling (default: enabled)
+ENABLE_ANSWER_SHUFFLING = os.environ.get('ENABLE_ANSWER_SHUFFLING', 'true').lower() == 'true'
+
+# AC-ASS-028: Keyboard accessibility (default: enabled)
+ENABLE_KEYBOARD_ACCESSIBILITY = os.environ.get('ENABLE_KEYBOARD_ACCESSIBILITY', 'true').lower() == 'true'
+
+# Math input tolerance for grading (AC-ASS-023)
+MATH_INPUT_DEFAULT_TOLERANCE = float(os.environ.get('MATH_INPUT_DEFAULT_TOLERANCE', '0.01'))
+
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
 """,
