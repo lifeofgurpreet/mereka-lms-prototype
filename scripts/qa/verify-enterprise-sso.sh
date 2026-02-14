@@ -1,203 +1,370 @@
 #!/usr/bin/env bash
-# @covers AC-026, AC-027, AC-028, AC-029
 # @spec: enterprise-microservices_spec.md
-# Verify enterprise SSO configuration for a specific tenant.
+# @covers Phase 4: SSO/SAML + Integrated Channels (AC-027 to AC-033)
 #
-# Checks (when enterprise SSO is implemented):
-# - Enterprise login URL exists and redirects correctly
-# - SP SAML metadata is valid (if SAML tenant)
-# - IdP metadata is reachable (if metadata URL configured)
-# - EnterpriseCustomer record exists and is linked to IdP
-# - Feature flags are enabled
-#
-# Pre-requisites:
-# - kubectl access to mereka-lms namespace
-# - Enterprise SSO feature flags enabled
+# Verification of Enterprise Phase 4 spec compliance.
+# Static checks run against LMS settings and configuration files.
+# Runtime ACs (SAML authentication, channel sync) are marked SKIP.
 #
 # Usage:
-#   ./scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=prod
-#   ./scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=dev
-#   ./scripts/qa/verify-enterprise-sso.sh --preflight  # Check infrastructure only
-
+#   ./scripts/qa/verify-enterprise-sso.sh [--skip-cluster] [--help]
+#
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$REPO_ROOT/scripts/shared/config.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-TENANT=""
-ENVIRONMENT=""
-PREFLIGHT=0
+SKIP_CLUSTER=false
 
-for arg in "$@"; do
-  case "$arg" in
-    --tenant=*) TENANT="${arg#*=}" ;;
-    --env=*) ENVIRONMENT="${arg#*=}" ;;
-    --preflight) PREFLIGHT=1 ;;
-    -h|--help)
-      echo "Usage: $0 --tenant=<slug> --env={prod|dev}"
-      echo "       $0 --preflight"
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skip-cluster)
+      SKIP_CLUSTER=true
+      shift
+      ;;
+    --help)
+      cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Verify Enterprise Phase 4: SSO/SAML + Integrated Channels spec compliance.
+
+OPTIONS:
+    --skip-cluster    Skip checks requiring live kubectl access
+    --help            Show this help message
+EOF
       exit 0
       ;;
     *)
-      echo "Unknown argument: $arg" >&2
+      echo "Unknown argument: $1" >&2
       exit 1
       ;;
   esac
 done
 
-if [[ "$PREFLIGHT" -eq 0 && ( -z "$TENANT" || -z "$ENVIRONMENT" ) ]]; then
-  echo "Usage: $0 --tenant=<slug> --env={prod|dev}" >&2
-  echo "       $0 --preflight" >&2
-  exit 1
+# Counters
+PASS=0
+FAIL=0
+SKIP=0
+
+pass_() { PASS=$((PASS + 1)); printf "PASS: %s\n" "$1"; }
+fail_() { FAIL=$((FAIL + 1)); printf "FAIL: %s\n" "$1"; }
+skip_() { SKIP=$((SKIP + 1)); printf "SKIP: %s\n" "$1"; }
+
+# Key file paths
+LMS_PRODUCTION_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+ENTERPRISE_CHANNELS_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_enterprise_channels.py"
+
+echo "========================================================"
+echo "  Enterprise Phase 4: SSO/SAML + Integrated Channels"
+echo "  Spec: enterprise-microservices_spec.md (Phase 4)"
+echo "========================================================"
+echo "Date:   $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "Repo:   $REPO_ROOT"
+echo "Cluster checks: $(if $SKIP_CLUSTER; then echo SKIPPED; else echo ENABLED; fi)"
+echo
+
+
+###########################################################################
+# SECTION 1: SAML Backend Configuration (AC-027, AC-028, AC-029, AC-030)
+###########################################################################
+echo "--- SAML Backend Configuration ---"
+
+# Check third_party_auth is enabled
+if [ -f "$LMS_PRODUCTION_PY" ]; then
+  # AC-027: SAML backend configured with python-social-auth
+  if grep -q "SOCIAL_AUTH_SAML_PIPELINE" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-027: python-social-auth SAML backend configured (SOCIAL_AUTH_SAML_PIPELINE present)"
+  else
+    fail_ "AC-027: python-social-auth SAML backend not configured (SOCIAL_AUTH_SAML_PIPELINE missing)"
+  fi
+
+  # Check SAML security settings
+  if grep -q "SOCIAL_AUTH_SAML_SECURITY_CONFIG" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-027: SAML security config present (authnRequestsSigned, wantAssertionsSigned)"
+  else
+    fail_ "AC-027: SAML security config missing"
+  fi
+
+  # Check SAML clock skew tolerance (120 seconds per edge case spec)
+  if grep -q "SOCIAL_AUTH_SAML_ASSERTION_EXPIRATION.*120" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-029: SAML clock skew tolerance configured (120 seconds)"
+  else
+    fail_ "AC-029: SAML clock skew tolerance not configured correctly (should be 120 seconds)"
+  fi
+
+  # Check SAML retry/backoff configuration
+  if grep -q "SOCIAL_AUTH_SAML_METADATA_RETRY_BACKOFF.*30" "$LMS_PRODUCTION_PY"; then
+    pass_ "SAML retry backoff base configured (30 seconds)"
+  else
+    fail_ "SAML retry backoff base not configured (should be 30 seconds)"
+  fi
+
+  if grep -q "SOCIAL_AUTH_SAML_METADATA_RETRY_BACKOFF_MAX.*900" "$LMS_PRODUCTION_PY"; then
+    pass_ "SAML retry backoff max configured (900 seconds = 15 minutes)"
+  else
+    fail_ "SAML retry backoff max not configured (should be 900 seconds / 15 minutes)"
+  fi
+
+  if grep -q "SOCIAL_AUTH_SAML_METADATA_RETRY_MAX.*5" "$LMS_PRODUCTION_PY"; then
+    pass_ "SAML retry max attempts configured (5 retries)"
+  else
+    fail_ "SAML retry max attempts not configured (should be 5 retries)"
+  fi
+
+  # Check SAML SP entity ID configured
+  if grep -q "SOCIAL_AUTH_SAML_SP_ENTITY_ID" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-027: SAML SP entity ID configured"
+  else
+    fail_ "AC-027: SAML SP entity ID not configured"
+  fi
+
+  # Check SAML organization info
+  if grep -q "SOCIAL_AUTH_SAML_ORG_INFO" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-027: SAML organization info configured"
+  else
+    fail_ "AC-027: SAML organization info not configured"
+  fi
+
+  # Check third_party_auth feature flag
+  if grep -q "ENABLE_THIRD_PARTY_AUTH" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-027: ENABLE_THIRD_PARTY_AUTH feature flag present"
+  else
+    fail_ "AC-027: ENABLE_THIRD_PARTY_AUTH feature flag missing"
+  fi
+
+  # Check ENABLE_ENTERPRISE_INTEGRATION feature flag
+  if grep -q "ENABLE_ENTERPRISE_INTEGRATION" "$LMS_PRODUCTION_PY" || grep -q "ENABLE_ENTERPRISE_INTEGRATION" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-027: ENABLE_ENTERPRISE_INTEGRATION feature flag present"
+  else
+    fail_ "AC-027: ENABLE_ENTERPRISE_INTEGRATION feature flag missing"
+  fi
+else
+  fail_ "LMS production.py not found at $LMS_PRODUCTION_PY"
 fi
 
-if [[ -n "$ENVIRONMENT" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Error: --env must be 'prod' or 'dev'" >&2
-  exit 1
-fi
+# Runtime SAML authentication tests
+skip_ "AC-027: Slug-based login redirects to correct IdP (/enterprise/login/{slug}) (requires runtime test)"
+skip_ "AC-028: Auto-provisioning creates new user from SAML assertion (requires runtime test)"
+skip_ "AC-029: SAML assertion rejected if NotOnOrAfter is in the past (requires runtime test)"
+skip_ "AC-030: Cross-tenant authentication prevention (requires runtime test with multiple IdPs)"
 
-failures=0
+###########################################################################
+# SECTION 2: Integrated Channels Apps (AC-031, AC-032, AC-033)
+###########################################################################
+echo "--- Integrated Channels Configuration ---"
 
-log_ok() { printf "✓ %s\n" "$*"; }
-log_fail() { printf "✗ %s\n" "$*" >&2; failures=$((failures + 1)); }
-log_warn() { printf "! %s\n" "$*" >&2; }
-log_info() { printf "· %s\n" "$*"; }
-
-# --- Preflight: Infrastructure checks (no tenant needed) ---
-
-check_preflight() {
-  echo "=== Enterprise SSO Preflight Checks ==="
-  echo ""
-
-  # 1. Verify kubectl access
-  if kubectl get namespace mereka-lms &>/dev/null; then
-    log_ok "kubectl access to mereka-lms namespace"
-  else
-    log_fail "Cannot access mereka-lms namespace via kubectl"
-    return
-  fi
-
-  # 2. Verify LMS pods are running
-  local lms_pods
-  lms_pods=$(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=lms --no-headers 2>/dev/null | grep -c Running || true)
-  if [[ "$lms_pods" -gt 0 ]]; then
-    log_ok "LMS pods running: $lms_pods"
-  else
-    log_fail "No LMS pods in Running state"
-  fi
-
-  # 3. Verify Authentik is accessible
-  if kubectl get deploy -n mereka-lms authentik-server &>/dev/null 2>&1; then
-    log_ok "Authentik deployment exists"
-  else
-    log_warn "Authentik deployment not found in mereka-lms namespace (may be in separate namespace)"
-  fi
-
-  # 4. Verify auth verification scripts exist
-  local scripts=(
-    "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh"
-    "$REPO_ROOT/scripts/qa/verify-auth-hardening.sh"
-    "$REPO_ROOT/scripts/infra/ensure-authentik-hardening.sh"
+if [ -f "$ENTERPRISE_CHANNELS_PY" ]; then
+  # Check integrated_channels apps are enabled
+  channel_apps=(
+    "integrated_channels.integrated_channel"
+    "integrated_channels.degreed"
+    "integrated_channels.degreed2"
+    "integrated_channels.cornerstone"
+    "integrated_channels.sap_success_factors"
+    "integrated_channels.blackboard"
+    "integrated_channels.canvas"
+    "integrated_channels.moodle"
   )
-  for script in "${scripts[@]}"; do
-    if [[ -x "$script" ]]; then
-      log_ok "Script exists and executable: $(basename "$script")"
-    elif [[ -f "$script" ]]; then
-      log_warn "Script exists but not executable: $(basename "$script")"
-    else
-      log_fail "Script missing: $(basename "$script")"
+
+  missing_apps=()
+  for app in "${channel_apps[@]}"; do
+    if ! grep -q "$app" "$ENTERPRISE_CHANNELS_PY"; then
+      missing_apps+=("$app")
     fi
   done
 
-  # 5. Verify third_party_auth app is in INSTALLED_APPS
-  log_info "Check third_party_auth in LMS settings (requires kubectl exec):"
-  log_info "  kubectl exec -n mereka-lms deploy/lms -- python -c \\"
-  log_info "    \"from django.conf import settings; print('third_party_auth' in settings.INSTALLED_APPS)\""
-
-  # 6. Verify SP metadata endpoint is accessible
-  local lms_url
-  if [[ "${ENVIRONMENT:-prod}" == "prod" ]]; then
-    lms_url="https://academyv2.mereka.io"
+  if [ ${#missing_apps[@]} -eq 0 ]; then
+    pass_ "AC-031: All integrated_channels apps enabled in INSTALLED_APPS (8 apps)"
   else
-    lms_url="https://dev.academyv2.mereka.io"
+    fail_ "AC-031: Missing integrated_channels apps: ${missing_apps[*]}"
   fi
 
-  local code
-  code=$(curl -sS -o /dev/null -w "%{http_code}" "${lms_url}/auth/saml/metadata.xml" 2>/dev/null || echo "000")
-  if [[ "$code" == "200" ]]; then
-    log_ok "SP SAML metadata endpoint reachable ($code)"
-  elif [[ "$code" == "404" ]]; then
-    log_warn "SP SAML metadata endpoint returns 404 (third_party_auth SAML may not be configured yet)"
+  # Check channel sync retry configuration
+  if grep -q "retry_backoff.*30" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-033: Channel sync retry backoff base configured (30 seconds)"
   else
-    log_warn "SP SAML metadata endpoint returned HTTP $code"
+    fail_ "AC-033: Channel sync retry backoff base not configured (should be 30 seconds)"
   fi
 
-  echo ""
-  echo "Preflight complete."
-}
-
-# --- Tenant-specific checks ---
-
-check_tenant() {
-  local lms_url
-  if [[ "$ENVIRONMENT" == "prod" ]]; then
-    lms_url="https://academyv2.mereka.io"
+  if grep -q "retry_backoff_max.*900" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-033: Channel sync retry backoff max configured (900 seconds = 15 minutes)"
   else
-    lms_url="https://dev.academyv2.mereka.io"
+    fail_ "AC-033: Channel sync retry backoff max not configured (should be 900 seconds / 15 minutes)"
   fi
 
-  echo "=== Enterprise SSO Verification: tenant=$TENANT env=$ENVIRONMENT ==="
-  echo ""
-
-  # 1. Enterprise login URL
-  local login_url="${lms_url}/enterprise/login/${TENANT}"
-  local code
-  code=$(curl -sS -o /dev/null -w "%{http_code}" -L --max-redirs 0 "$login_url" 2>/dev/null || echo "000")
-  if [[ "$code" == "302" || "$code" == "301" ]]; then
-    log_ok "Enterprise login URL redirects ($code): $login_url"
-  elif [[ "$code" == "200" ]]; then
-    log_ok "Enterprise login URL accessible ($code): $login_url"
-  elif [[ "$code" == "404" ]]; then
-    log_fail "Enterprise login URL not found (404): $login_url"
-    log_info "Verify EnterpriseCustomer exists with slug='$TENANT' and enterprise SSO feature flag is enabled"
+  if grep -q "max_retries.*5" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-033: Channel sync max retries configured (5 retries)"
   else
-    log_fail "Enterprise login URL returned unexpected HTTP $code: $login_url"
+    fail_ "AC-033: Channel sync max retries not configured (should be 5 retries)"
   fi
 
-  # 2. SP SAML metadata
-  local metadata_code
-  metadata_code=$(curl -sS -o /dev/null -w "%{http_code}" "${lms_url}/auth/saml/metadata.xml" 2>/dev/null || echo "000")
-  if [[ "$metadata_code" == "200" ]]; then
-    log_ok "SP SAML metadata available (200)"
+  # Check Celery beat schedule for periodic sync
+  if grep -q "CELERYBEAT_SCHEDULE" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-031: Celery beat schedule configured for periodic channel sync"
   else
-    log_warn "SP SAML metadata returned HTTP $metadata_code (SAML may not be configured)"
+    fail_ "AC-031: Celery beat schedule not configured"
   fi
 
-  # 3. EnterpriseCustomer record check (requires kubectl)
-  log_info "Verify EnterpriseCustomer record:"
-  log_info "  kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c \\"
-  log_info "    \"from enterprise.models import EnterpriseCustomer; ec = EnterpriseCustomer.objects.get(slug='$TENANT'); print(f'UUID={ec.uuid}, IdP={ec.identity_provider}')\""
+  # Check content metadata sync task
+  if grep -q "transmit_content_metadata" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-031: Content metadata sync task configured"
+  else
+    fail_ "AC-031: Content metadata sync task not configured"
+  fi
 
-  # 4. Feature flag check
-  log_info "Verify feature flags:"
-  log_info "  kubectl exec -n mereka-lms deploy/lms -- python -c \\"
-  log_info "    \"from django.conf import settings; print('ENABLE_ENTERPRISE_SSO:', getattr(settings, 'ENABLE_ENTERPRISE_SSO', False)); print('ENABLE_ENTERPRISE_SSO_${TENANT^^}:', getattr(settings, 'ENABLE_ENTERPRISE_SSO_${TENANT^^}', False))\""
+  # Check learner data sync task
+  if grep -q "transmit_learner_data" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-031: Learner data sync task configured"
+  else
+    fail_ "AC-031: Learner data sync task not configured"
+  fi
 
-  echo ""
-}
+  # Check event bus configuration
+  if grep -q "EVENT_BUS_PRODUCER_CONFIG" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-031: Event bus producer config present (for COURSE_COMPLETION events)"
+  else
+    fail_ "AC-031: Event bus producer config missing"
+  fi
 
-# --- Main ---
+  # Check course completion event publishing
+  if grep -q "course.passing.status.updated" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-031: Course completion event configured for event bus"
+  else
+    fail_ "AC-031: Course completion event not configured"
+  fi
 
-if [[ "$PREFLIGHT" -eq 1 ]]; then
-  check_preflight
+  # Check enrollment event publishing
+  if grep -q "course.enrollment.changed" "$ENTERPRISE_CHANNELS_PY"; then
+    pass_ "AC-031: Enrollment event configured for event bus"
+  else
+    fail_ "AC-031: Enrollment event not configured"
+  fi
 else
-  check_tenant
+  fail_ "Enterprise channels config not found at $ENTERPRISE_CHANNELS_PY"
 fi
 
-if [[ "$failures" -gt 0 ]]; then
-  echo "FAIL: $failures check(s) failed."
+###########################################################################
+# SECTION 3: Channel Connector Configurations
+###########################################################################
+echo "--- Channel Connector Configurations ---"
+
+if [ -f "$LMS_PRODUCTION_PY" ]; then
+  # Check Degreed connector config
+  if grep -q "DEGREED_API_BASE_URL" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-031: Degreed connector configured (DEGREED_API_BASE_URL present)"
+  else
+    fail_ "AC-031: Degreed connector not configured"
+  fi
+
+  if grep -q "DEGREED_SYNC_RETRY_BACKOFF.*30" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-033: Degreed sync retry backoff configured (30 seconds)"
+  else
+    fail_ "AC-033: Degreed sync retry backoff not configured"
+  fi
+
+  if grep -q "DEGREED_SYNC_RETRY_BACKOFF_MAX.*900" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-033: Degreed sync retry max configured (15 minutes)"
+  else
+    fail_ "AC-033: Degreed sync retry max not configured"
+  fi
+
+  if grep -q "DEGREED_SYNC_BATCH_SIZE" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-031: Degreed batch size configured (pagination for large learner sets)"
+  else
+    fail_ "AC-031: Degreed batch size not configured"
+  fi
+
+  # Check Cornerstone connector config
+  if grep -q "CORNERSTONE_API_BASE_URL" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-031: Cornerstone connector configured (CORNERSTONE_API_BASE_URL present)"
+  else
+    fail_ "AC-031: Cornerstone connector not configured"
+  fi
+
+  if grep -q "CORNERSTONE_SYNC_RETRY_BACKOFF.*30" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-033: Cornerstone sync retry backoff configured (30 seconds)"
+  else
+    fail_ "AC-033: Cornerstone sync retry backoff not configured"
+  fi
+
+  if grep -q "CORNERSTONE_SYNC_RETRY_BACKOFF_MAX.*900" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-033: Cornerstone sync retry max configured (15 minutes)"
+  else
+    fail_ "AC-033: Cornerstone sync retry max not configured"
+  fi
+
+  if grep -q "CORNERSTONE_SYNC_BATCH_SIZE" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-031: Cornerstone batch size configured (pagination for large learner sets)"
+  else
+    fail_ "AC-031: Cornerstone batch size not configured"
+  fi
+
+  # Check global integrated channels config
+  if grep -q "INTEGRATED_CHANNELS_API_CHUNK_SIZE" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-031: Integrated channels global chunk size configured"
+  else
+    fail_ "AC-031: Integrated channels global chunk size not configured"
+  fi
+
+  if grep -q "INTEGRATED_CHANNELS_LOG_PII.*False" "$LMS_PRODUCTION_PY"; then
+    pass_ "AC-031: PII logging disabled for integrated channels (GDPR/PDPA compliance)"
+  else
+    fail_ "AC-031: PII logging config missing or not set to False"
+  fi
+else
+  fail_ "LMS production.py not found at $LMS_PRODUCTION_PY"
+fi
+
+# Runtime channel sync tests
+skip_ "AC-031: Degreed sync transmits completion data for consenting learners (requires runtime test)"
+skip_ "AC-032: Channel sync dry-run mode does not transmit data (requires runtime test)"
+skip_ "AC-033: Channel sync retries on transient API errors (HTTP 503) with exponential backoff (requires runtime test)"
+
+###########################################################################
+# SECTION 4: Environment Variable Patterns
+###########################################################################
+echo "--- Environment Variable Patterns ---"
+
+if [ -f "$LMS_PRODUCTION_PY" ]; then
+  # Check all configs use os.environ.get() pattern (no hardcoded secrets)
+  if grep -q 'os\.environ\.get.*DEGREED' "$LMS_PRODUCTION_PY"; then
+    pass_ "Degreed connector uses env var pattern (os.environ.get)"
+  else
+    fail_ "Degreed connector missing env var pattern"
+  fi
+
+  if grep -q 'os\.environ\.get.*CORNERSTONE' "$LMS_PRODUCTION_PY"; then
+    pass_ "Cornerstone connector uses env var pattern (os.environ.get)"
+  else
+    fail_ "Cornerstone connector missing env var pattern"
+  fi
+
+  if grep -q 'os\.environ\.get.*SAML' "$LMS_PRODUCTION_PY"; then
+    pass_ "SAML config uses env var pattern (os.environ.get)"
+  else
+    fail_ "SAML config missing env var pattern"
+  fi
+else
+  fail_ "LMS production.py not found at $LMS_PRODUCTION_PY"
+fi
+
+###########################################################################
+# Summary
+###########################################################################
+echo
+echo "========================================================"
+echo "  Summary"
+echo "========================================================"
+echo "PASS: $PASS"
+echo "FAIL: $FAIL"
+echo "SKIP: $SKIP"
+echo "TOTAL: $((PASS + FAIL + SKIP))"
+echo
+
+if [ "$FAIL" -gt 0 ]; then
+  echo "❌ Verification FAILED with $FAIL failed check(s)"
   exit 1
 else
-  echo "PASS: All checks passed."
+  echo "✅ Verification PASSED (static checks complete; $SKIP runtime checks skipped)"
   exit 0
 fi

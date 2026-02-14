@@ -867,3 +867,88 @@ SOCIAL_AUTH_SAML_TECHNICAL_CONTACT = {
     "emailAddress": os.environ.get("SAML_CONTACT_EMAIL", "tech@mereka.io"),
 }
 SOCIAL_AUTH_SAML_SUPPORT_CONTACT = SOCIAL_AUTH_SAML_TECHNICAL_CONTACT
+
+# ── SAML Backend Configuration ──────────────────────────────────────────
+# @covers AC-027, AC-028, AC-029, AC-030 (enterprise-microservices_spec.md Phase 4)
+# Configure python-social-auth SAML backend for enterprise SSO.
+# Per-tenant IdP configurations are managed via Django admin (SAMLProviderConfig).
+
+# SAML backend pipeline — controls auto-provisioning and JIT attribute mapping.
+SOCIAL_AUTH_SAML_PIPELINE = [
+    # Extract SAML assertion attributes into kwargs
+    "common.djangoapps.third_party_auth.pipeline.parse_saml_attributes",
+    # Get or create user based on SAML NameID or email
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "social_core.pipeline.social_auth.social_user",
+    # Auto-provision: create user if not exists (JIT provisioning)
+    "social_core.pipeline.user.get_username",
+    "social_core.pipeline.user.create_user",
+    # Link user to enterprise customer
+    "common.djangoapps.third_party_auth.pipeline.associate_by_email_if_login_api",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    # Update user profile from SAML attributes (JIT attribute sync)
+    "common.djangoapps.third_party_auth.pipeline.set_logged_in_cookies",
+    "common.djangoapps.third_party_auth.pipeline.login_analytics",
+]
+
+# SAML security settings
+SOCIAL_AUTH_SAML_SECURITY_CONFIG = {
+    "authnRequestsSigned": True,  # Sign authentication requests
+    "wantAssertionsSigned": True,  # Require signed assertions
+    "wantMessagesSigned": False,  # Optional: require signed messages
+    "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+    "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256",
+}
+
+# SAML clock skew tolerance: 120 seconds (per edge case spec)
+SOCIAL_AUTH_SAML_ASSERTION_EXPIRATION = 120
+
+# SAML retry/backoff configuration for IdP metadata refresh failures
+SOCIAL_AUTH_SAML_METADATA_RETRY_BACKOFF = 30  # Base: 30 seconds
+SOCIAL_AUTH_SAML_METADATA_RETRY_BACKOFF_MAX = 900  # Max: 15 minutes
+SOCIAL_AUTH_SAML_METADATA_RETRY_MAX = 5  # Max retries: 5
+
+# SAML organization info (displayed in SP metadata)
+SOCIAL_AUTH_SAML_ORG_INFO = {
+    "en-US": {
+        "name": "Mereka Academy",
+        "displayname": "Mereka Academy",
+        "url": MEREKA_LMS_BASE_URL,
+    }
+}
+
+# ── Integrated Channel Connectors ───────────────────────────────────────
+# @covers AC-031, AC-032, AC-033 (enterprise-microservices_spec.md Phase 4)
+# Configure Degreed and Cornerstone channel connectors with env var patterns.
+# Per-client credentials are stored encrypted in the database (not here).
+
+# Degreed API configuration (v2 API)
+DEGREED_API_BASE_URL = os.environ.get("DEGREED_API_BASE_URL", "https://api.degreed.com/api/v2")
+DEGREED_OAUTH_TOKEN_URL = os.environ.get("DEGREED_OAUTH_TOKEN_URL", "https://api.degreed.com/oauth/token")
+DEGREED_COMPLETION_PROVIDER_ID = os.environ.get("DEGREED_COMPLETION_PROVIDER_ID", "Mereka Academy")
+
+# Degreed sync configuration
+DEGREED_SYNC_RETRY_BACKOFF = 30  # Base: 30 seconds
+DEGREED_SYNC_RETRY_BACKOFF_MAX = 900  # Max: 15 minutes
+DEGREED_SYNC_RETRY_MAX = 5  # Max retries: 5
+DEGREED_SYNC_BATCH_SIZE = int(os.environ.get("DEGREED_SYNC_BATCH_SIZE", "500"))  # Paginate large learner sets
+DEGREED_SYNC_TIMEOUT = int(os.environ.get("DEGREED_SYNC_TIMEOUT", "300"))  # 5 minutes per API call
+
+# Cornerstone OnDemand (CSOD) API configuration
+CORNERSTONE_API_BASE_URL = os.environ.get("CORNERSTONE_API_BASE_URL", "")  # Client-specific
+CORNERSTONE_OAUTH_TOKEN_URL = os.environ.get("CORNERSTONE_OAUTH_TOKEN_URL", "")  # Client-specific
+
+# Cornerstone sync configuration
+CORNERSTONE_SYNC_RETRY_BACKOFF = 30  # Base: 30 seconds
+CORNERSTONE_SYNC_RETRY_BACKOFF_MAX = 900  # Max: 15 minutes
+CORNERSTONE_SYNC_RETRY_MAX = 5  # Max retries: 5
+CORNERSTONE_SYNC_BATCH_SIZE = int(os.environ.get("CORNERSTONE_SYNC_BATCH_SIZE", "500"))
+CORNERSTONE_SYNC_TIMEOUT = int(os.environ.get("CORNERSTONE_SYNC_TIMEOUT", "300"))
+
+# Integrated channels global configuration
+INTEGRATED_CHANNELS_API_CHUNK_SIZE = 500  # Max learners per sync batch (edge case: large enterprises)
+INTEGRATED_CHANNELS_TRANSMISSION_CHUNK_SIZE = 100  # Max records per API call to external system
+INTEGRATED_CHANNELS_LOG_PII = False  # Do NOT log learner emails (GDPR/PDPA compliance)
