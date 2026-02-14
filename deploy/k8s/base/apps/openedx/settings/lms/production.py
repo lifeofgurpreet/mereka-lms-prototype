@@ -429,6 +429,15 @@ FEATURES["ENABLE_DISCUSSION_SERVICE"] = False
 FEATURES["PREVENT_CONCURRENT_LOGINS"] = False
 FEATURES["ENABLE_CORS_HEADERS"] = True
 
+# Verifiable Credentials (W3C VC 2.0 + Open Badges v3.0)
+# @spec: specs/verifiable-credentials-types_spec.md (CRED-010)
+FEATURES["ENABLE_VERIFIABLE_CREDENTIALS"] = os.environ.get(
+    "ENABLE_VERIFIABLE_CREDENTIALS", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["ENABLE_LEARNER_CREDENTIAL_WALLET"] = os.environ.get(
+    "ENABLE_LEARNER_CREDENTIAL_WALLET", "false"
+).lower() in ("true", "1", "yes")
+
 # CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
@@ -623,7 +632,7 @@ MFE_CONFIG = {
     "USER_INFO_COOKIE_NAME": "user-info",
     "ACCESS_TOKEN_COOKIE_NAME": "edx-jwt-cookie-header-payload",
     "SUPPORT_URL_LEARNER_RECORDS": "",
-    "ENABLE_VERIFIABLE_CREDENTIALS": False,
+    "ENABLE_VERIFIABLE_CREDENTIALS": FEATURES.get("ENABLE_VERIFIABLE_CREDENTIALS", False),
     "SUPPORT_URL_VERIFIABLE_CREDENTIALS": "",
 }
 
