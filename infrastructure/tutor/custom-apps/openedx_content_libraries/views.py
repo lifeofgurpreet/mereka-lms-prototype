@@ -443,3 +443,103 @@ class LibraryAnalyticsSummaryView(APIView):
     def get(self, request):
         from .analytics import get_library_analytics_summary
         return Response(get_library_analytics_summary())
+
+
+# ── Phase 3-4: Multi-Tenant Scale + Hardening Views ───────────────────
+
+
+class LibraryQuotaView(APIView):
+    """View tenant library quotas (AC-LIB-026)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from .quotas import check_quota, get_tenant_quota
+
+        try:
+            from openedx_tenant_cache.isolation import get_user_tenant_uuid
+            tenant_uuid = get_user_tenant_uuid(request.user)
+        except ImportError:
+            tenant_uuid = None
+
+        if not tenant_uuid and not request.user.is_superuser:
+            return Response({'error': 'No tenant context'}, status=400)
+
+        if request.user.is_superuser:
+            tenant_uuid = request.query_params.get('tenant_uuid', tenant_uuid)
+
+        lib_allowed, lib_current, lib_max = check_quota(tenant_uuid, 'libraries')
+        comp_allowed, comp_current, comp_max = check_quota(tenant_uuid, 'components')
+
+        return Response({
+            'tenant_uuid': str(tenant_uuid),
+            'libraries': {
+                'current': lib_current,
+                'maximum': lib_max,
+                'remaining': lib_max - lib_current,
+            },
+            'components': {
+                'current': comp_current,
+                'maximum': comp_max,
+                'remaining': comp_max - comp_current,
+            },
+        })
+
+
+class LibraryExportImportView(APIView):
+    """Export/import libraries between tenants."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, library_key):
+        """Export a library for cross-tenant sharing."""
+        from .export_import import export_library_for_tenant
+
+        try:
+            from openedx_tenant_cache.isolation import get_user_tenant_uuid
+            tenant_uuid = get_user_tenant_uuid(request.user)
+        except ImportError:
+            tenant_uuid = None
+
+        try:
+            export_data = export_library_for_tenant(library_key, tenant_uuid)
+            return Response(export_data)
+        except LibraryMetadata.DoesNotExist:
+            return Response({'error': 'Library not found'}, status=404)
+        except PermissionError as e:
+            return Response({'error': str(e)}, status=403)
+
+    def post(self, request):
+        """Import a library into the current tenant."""
+        from .export_import import import_library_for_tenant
+
+        try:
+            from openedx_tenant_cache.isolation import get_user_tenant_uuid
+            tenant_uuid = get_user_tenant_uuid(request.user)
+        except ImportError:
+            tenant_uuid = None
+
+        export_data = request.data.get('export_data')
+        new_org = request.data.get('org')
+
+        if not export_data:
+            return Response({'error': 'export_data required'}, status=400)
+
+        try:
+            result = import_library_for_tenant(
+                export_data, tenant_uuid, new_org=new_org, user=request.user,
+            )
+            return Response(result, status=201)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+
+class LibrarySecurityAuditView(APIView):
+    """Run security audit on library content (AC-LIB-031)."""
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request, library_key):
+        from .sanitize import audit_library_content
+        try:
+            report = audit_library_content(library_key)
+            return Response(report)
+        except LibraryMetadata.DoesNotExist:
+            return Response({'error': 'Library not found'}, status=404)

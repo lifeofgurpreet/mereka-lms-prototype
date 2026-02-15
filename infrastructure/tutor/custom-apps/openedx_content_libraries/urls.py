@@ -6,6 +6,7 @@ from .views import (
     LibraryUpdateNotificationsView, OrphanCheckView,
     LibraryRoleView, LibraryPublicReadView,
     LibrarySearchView, LibraryUsageReportView, LibraryAnalyticsSummaryView,
+    LibraryQuotaView, LibraryExportImportView, LibrarySecurityAuditView,
 )
 
 app_name = 'openedx_content_libraries'
@@ -38,4 +39,14 @@ urlpatterns = [
          LibraryAnalyticsSummaryView.as_view(), name='library-analytics-summary'),
     path('libraries/<path:library_key>/usage/',
          LibraryUsageReportView.as_view(), name='library-usage-report'),
+
+    # Phase 3-4: Multi-Tenant Scale + Hardening (AC-LIB-026 through AC-LIB-032)
+    path('libraries/quotas/',
+         LibraryQuotaView.as_view(), name='library-quotas'),
+    path('libraries/import/',
+         LibraryExportImportView.as_view(), name='library-import'),
+    path('libraries/<path:library_key>/export/',
+         LibraryExportImportView.as_view(), name='library-export'),
+    path('libraries/<path:library_key>/security-audit/',
+         LibrarySecurityAuditView.as_view(), name='library-security-audit'),
 ]

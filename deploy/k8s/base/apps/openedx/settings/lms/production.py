@@ -1350,3 +1350,44 @@ LIBRARY_LIST_PAGE_SIZE = int(os.environ.get(
 LIBRARY_QUERY_OPTIMIZATION_ENABLED = os.environ.get(
     "LIBRARY_QUERY_OPTIMIZATION_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Content Libraries v2: Phase 3-4 Multi-Tenant Scale + Hardening ─────
+# @spec: content-libraries-v2 (Phase 3-4: Multi-Tenant Scale)
+# @covers: AC-LIB-026 through AC-LIB-032
+
+# Tenant library quotas (AC-LIB-026)
+LIBRARY_QUOTAS_ENABLED = os.environ.get(
+    "LIBRARY_QUOTAS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+LIBRARY_TENANT_MAX_LIBRARIES = int(os.environ.get(
+    "LIBRARY_TENANT_MAX_LIBRARIES", "100"
+))
+
+LIBRARY_TENANT_MAX_COMPONENTS = int(os.environ.get(
+    "LIBRARY_TENANT_MAX_COMPONENTS", "10000"
+))
+
+# Rate limiting per org (AC-LIB-029)
+LIBRARY_RATE_LIMITING_ENABLED = os.environ.get(
+    "LIBRARY_RATE_LIMITING_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+LIBRARY_RATE_LIMIT_PER_MINUTE = int(os.environ.get(
+    "LIBRARY_RATE_LIMIT_PER_MINUTE", "60"
+))
+
+# xAPI event tracking (AC-LIB-027)
+LIBRARY_XAPI_ENABLED = os.environ.get(
+    "LIBRARY_XAPI_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Content sanitization (AC-LIB-031, AC-NEG-LIB-014)
+LIBRARY_CONTENT_SANITIZATION_ENABLED = os.environ.get(
+    "LIBRARY_CONTENT_SANITIZATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Cross-tenant export/import
+LIBRARY_CROSS_TENANT_EXPORT_ENABLED = os.environ.get(
+    "LIBRARY_CROSS_TENANT_EXPORT_ENABLED", "false"
+).lower() in ("true", "1", "yes")
