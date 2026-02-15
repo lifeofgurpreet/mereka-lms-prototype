@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import MctVideoMapping, MigrationReport
+from .completion import VideoCompletionStatus
 
 
 @admin.register(MctVideoMapping)
@@ -51,3 +52,20 @@ class MigrationReportAdmin(admin.ModelAdmin):
         'is_complete',
     )
     ordering = ('-generated_at',)
+
+
+@admin.register(VideoCompletionStatus)
+class VideoCompletionStatusAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'video_id',
+        'course_key',
+        'completion_percentage',
+        'is_complete',
+        'play_count',
+        'updated_at',
+    )
+    list_filter = ('is_complete', 'course_key')
+    search_fields = ('video_id', 'course_key', 'user__username')
+    readonly_fields = ('first_played_at', 'completed_at', 'updated_at')
+    ordering = ('-updated_at',)

@@ -111,3 +111,9 @@ class MigrationReport(models.Model):
 
     def __str__(self):
         return f"MigrationReport({self.report_id}, {self.total_ready}/{self.total_expected} ready)"
+
+
+# Phase 2: Learner video completion tracking
+# Model is defined in completion.py for separation of concerns
+# Import it here so Django discovers it during migration
+from .completion import VideoCompletionStatus  # noqa: F401, E402
