@@ -64,12 +64,25 @@
         file_server
     }
     
-    @mfe_course-authoring {
+    # Legacy /course-authoring/ compat: serve from authoring dist (mereka-lms-18ik)
+    # The MFE build output is "authoring" but Tutor's default config uses "course-authoring".
+    # Both paths must work; the SPA's JS assets use /authoring/ absolute paths.
+    @mfe_course-authoring-compat {
         path /course-authoring /course-authoring/*
     }
-    handle @mfe_course-authoring {
+    handle @mfe_course-authoring-compat {
         uri strip_prefix /course-authoring
-        root * /openedx/dist/course-authoring
+        root * /openedx/dist/authoring
+        try_files /{path} /index.html
+        file_server
+    }
+
+    @mfe_authoring {
+        path /authoring /authoring/*
+    }
+    handle @mfe_authoring {
+        uri strip_prefix /authoring
+        root * /openedx/dist/authoring
         try_files /{path} /index.html
         file_server
     }
