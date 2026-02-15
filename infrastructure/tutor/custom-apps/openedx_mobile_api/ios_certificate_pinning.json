@@ -1,0 +1,47 @@
+{
+  "certificate_pinning": {
+    "description": "Certificate pinning configuration for iOS app (SSL/TLS security)",
+    "enabled": true,
+    "domains": [
+      {
+        "domain": "academyv2.mereka.io",
+        "pins": [
+          {
+            "type": "sha256",
+            "hash": "CERTIFICATE_HASH_PLACEHOLDER_1",
+            "description": "Primary certificate"
+          },
+          {
+            "type": "sha256",
+            "hash": "CERTIFICATE_HASH_PLACEHOLDER_2",
+            "description": "Backup certificate"
+          }
+        ],
+        "enforce": true
+      },
+      {
+        "domain": "apps.academyv2.mereka.io",
+        "pins": [
+          {
+            "type": "sha256",
+            "hash": "CERTIFICATE_HASH_PLACEHOLDER_1",
+            "description": "MFE certificate"
+          }
+        ],
+        "enforce": true
+      }
+    ],
+    "report_only": false,
+    "failure_mode": "block"
+  },
+  "security_policy": {
+    "allow_insecure_connections": false,
+    "require_certificate_transparency": true,
+    "minimum_tls_version": "1.2"
+  },
+  "notes": [
+    "Certificate hashes must be updated before production release",
+    "Use openssl to generate SHA-256 fingerprints:",
+    "openssl s_client -connect academyv2.mereka.io:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64"
+  ]
+}
