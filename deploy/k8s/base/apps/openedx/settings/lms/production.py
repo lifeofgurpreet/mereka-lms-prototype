@@ -1501,3 +1501,35 @@ LIBRARY_CONTENT_SANITIZATION_ENABLED = os.environ.get(
 LIBRARY_CROSS_TENANT_EXPORT_ENABLED = os.environ.get(
     "LIBRARY_CROSS_TENANT_EXPORT_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Video Pipeline: Phase 1 MCT Migration Validation ─────────────────
+# @spec: bead mereka-lms-ho3i
+# @covers: AC-VID-001 through AC-VID-006
+
+# Feature flag for video pipeline migration validation
+VIDEO_PIPELINE_ENABLED = os.environ.get(
+    "VIDEO_PIPELINE_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Mux playback URL base
+MUX_PLAYBACK_BASE_URL = os.environ.get(
+    "MUX_PLAYBACK_BASE_URL", "https://stream.mux.com"
+)
+
+# MCT migration batch identifier
+MCT_MIGRATION_BATCH = os.environ.get(
+    "MCT_MIGRATION_BATCH", "mct-2025-12-29"
+)
+
+# Expected total videos from MCT migration
+MCT_EXPECTED_VIDEO_COUNT = int(os.environ.get(
+    "MCT_EXPECTED_VIDEO_COUNT", "503"
+))
+
+# Playback health check timeout (seconds)
+VIDEO_PLAYBACK_CHECK_TIMEOUT = int(os.environ.get(
+    "VIDEO_PLAYBACK_CHECK_TIMEOUT", "10"
+))
+
+# Add openedx_video_pipeline to INSTALLED_APPS
+INSTALLED_APPS += ['openedx_video_pipeline']
