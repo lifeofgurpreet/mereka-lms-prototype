@@ -1533,3 +1533,43 @@ VIDEO_PLAYBACK_CHECK_TIMEOUT = int(os.environ.get(
 
 # Add openedx_video_pipeline to INSTALLED_APPS
 INSTALLED_APPS += ['openedx_video_pipeline']
+
+# ── Video Pipeline: Phase 2 — XBlock, Subtitles, Protection, Analytics ──
+# @spec: video-pipeline-delivery_spec.md (Phase 2)
+# @bead: mereka-lms-2tli
+
+# xAPI video events to ClickHouse/Aspects pipeline
+ENABLE_VIDEO_XAPI_EVENTS = os.environ.get(
+    "ENABLE_VIDEO_XAPI_EVENTS", "false"
+).lower() in ("true", "1", "yes")
+
+# Video analytics event recording
+ENABLE_VIDEO_ANALYTICS = os.environ.get(
+    "ENABLE_VIDEO_ANALYTICS", "false"
+).lower() in ("true", "1", "yes")
+
+# Mux signed playback for restricted courses
+ENABLE_MUX_SIGNED_PLAYBACK = os.environ.get(
+    "ENABLE_MUX_SIGNED_PLAYBACK", "false"
+).lower() in ("true", "1", "yes")
+
+# Mux signing key credentials (from ExternalSecrets)
+MUX_SIGNING_KEY_ID = os.environ.get("MUX_SIGNING_KEY_ID", "")
+MUX_SIGNING_PRIVATE_KEY = os.environ.get("MUX_SIGNING_PRIVATE_KEY", "")
+
+# Signed URL expiry (hours)
+MUX_SIGNED_URL_EXPIRY_HOURS = int(os.environ.get(
+    "MUX_SIGNED_URL_EXPIRY_HOURS", "12"
+))
+
+# Domain restriction for signed playback
+MUX_ENABLE_DOMAIN_RESTRICTION = os.environ.get(
+    "MUX_ENABLE_DOMAIN_RESTRICTION", "false"
+).lower() in ("true", "1", "yes")
+
+MUX_PLAYBACK_AUDIENCE = os.environ.get(
+    "MUX_PLAYBACK_AUDIENCE", "academyv2.mereka.io"
+)
+
+# Register video analytics and protection apps
+INSTALLED_APPS += ['openedx_video_analytics', 'openedx_video_protection']

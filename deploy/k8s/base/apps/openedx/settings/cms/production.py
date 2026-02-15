@@ -620,3 +620,11 @@ LIBRARY_CONTENT_SANITIZATION_ENABLED = os.environ.get(
 VIDEO_PIPELINE_ENABLED = os.environ.get(
     "VIDEO_PIPELINE_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Video Pipeline: Phase 2 — XBlock, Subtitles ─────────────────────
+# @bead: mereka-lms-2tli
+
+# Subtitle upload requires Mux API credentials (already in env)
+ENABLE_VIDEO_XAPI_EVENTS = os.environ.get(
+    "ENABLE_VIDEO_XAPI_EVENTS", "false"
+).lower() in ("true", "1", "yes")
