@@ -1104,6 +1104,12 @@ if "openedx_email_digests" not in INSTALLED_APPS:
 # @covers: EnterpriseCustomer ↔ Site mapping, cache namespacing,
 #          xAPI tagging, feature flags, branding, metrics
 
+# Master feature flag for multi-tenancy (AC-MTA-001 through AC-MTA-033)
+MULTI_TENANCY_ENABLED = os.environ.get(
+    "MULTI_TENANCY_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["MULTI_TENANCY_ENABLED"] = MULTI_TENANCY_ENABLED
+
 # Feature flags (default: off — explicit opt-in per tenant)
 ENABLE_MULTI_TENANT_BRANDING = os.environ.get(
     "ENABLE_MULTI_TENANT_BRANDING", "false"
