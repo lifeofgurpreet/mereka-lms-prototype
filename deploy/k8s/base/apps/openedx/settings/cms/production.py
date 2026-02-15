@@ -598,3 +598,11 @@ LIBRARY_QUOTAS_ENABLED = os.environ.get(
 LIBRARY_CONTENT_SANITIZATION_ENABLED = os.environ.get(
     "LIBRARY_CONTENT_SANITIZATION_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Video Pipeline: Phase 1 MCT Migration Validation ─────────────────
+# @covers: AC-VID-001 through AC-VID-006
+
+# Feature flag (CMS needs to know if video pipeline is active for Studio)
+VIDEO_PIPELINE_ENABLED = os.environ.get(
+    "VIDEO_PIPELINE_ENABLED", "false"
+).lower() in ("true", "1", "yes")
