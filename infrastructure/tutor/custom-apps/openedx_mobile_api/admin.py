@@ -3,6 +3,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import MobileDevice, MobileBrandingConfig, MobileAppVersion
+from .ios_auth import PKCEChallenge, MobileToken, APNsNotification
 
 
 @admin.register(MobileDevice)
@@ -196,3 +197,145 @@ class MobileAppVersionAdmin(admin.ModelAdmin):
             'border-radius: 3px;">ACTIVE</span>'
         )
     status_badge.short_description = "Status"
+
+
+@admin.register(PKCEChallenge)
+class PKCEChallengeAdmin(admin.ModelAdmin):
+    """Admin interface for PKCEChallenge."""
+
+    list_display = [
+        "state",
+        "user",
+        "code_challenge_method",
+        "expires_at",
+        "created_at",
+    ]
+    list_filter = ["code_challenge_method", "expires_at", "created_at"]
+    search_fields = ["state", "user__username"]
+    readonly_fields = ["code_verifier", "code_challenge", "state", "created_at"]
+
+    fieldsets = (
+        ("PKCE Parameters", {
+            "fields": ("code_verifier", "code_challenge", "code_challenge_method", "state")
+        }),
+        ("User", {
+            "fields": ("user",)
+        }),
+        ("Timestamps", {
+            "fields": ("expires_at", "created_at")
+        }),
+    )
+
+
+@admin.register(MobileToken)
+class MobileTokenAdmin(admin.ModelAdmin):
+    """Admin interface for MobileToken."""
+
+    list_display = [
+        "user",
+        "device_token_preview",
+        "is_active",
+        "expires_at",
+        "refresh_count",
+        "last_refreshed_at",
+    ]
+    list_filter = ["is_active", "created_at", "expires_at"]
+    search_fields = ["user__username", "device_token"]
+    readonly_fields = ["access_token", "refresh_token", "created_at", "updated_at"]
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        ("User", {
+            "fields": ("user", "device_token")
+        }),
+        ("Tokens", {
+            "fields": ("access_token", "refresh_token")
+        }),
+        ("Expiry", {
+            "fields": ("expires_at", "refresh_expires_at")
+        }),
+        ("Refresh Tracking", {
+            "fields": ("last_refreshed_at", "refresh_count")
+        }),
+        ("Status", {
+            "fields": ("is_active",)
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )
+
+    def device_token_preview(self, obj):
+        """Show truncated device token."""
+        if obj.device_token:
+            return f"{obj.device_token[:20]}..."
+        return "-"
+    device_token_preview.short_description = "Device Token"
+
+
+@admin.register(APNsNotification)
+class APNsNotificationAdmin(admin.ModelAdmin):
+    """Admin interface for APNsNotification."""
+
+    list_display = [
+        "notification_type",
+        "user",
+        "title_preview",
+        "delivery_status",
+        "sent_at",
+        "opened_at",
+    ]
+    list_filter = ["notification_type", "sent_at", "opened_at"]
+    search_fields = ["user__username", "title", "course_id"]
+    readonly_fields = ["created_at", "apns_response"]
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        ("User & Device", {
+            "fields": ("user", "device_token")
+        }),
+        ("Notification Content", {
+            "fields": ("notification_type", "title", "body")
+        }),
+        ("Deep Link (AC-MOB-012)", {
+            "fields": ("deep_link_url", "course_id", "content_id")
+        }),
+        ("Delivery Tracking", {
+            "fields": ("sent_at", "delivered_at", "opened_at", "apns_response")
+        }),
+        ("Timestamps", {
+            "fields": ("created_at",)
+        }),
+    )
+
+    def title_preview(self, obj):
+        """Show truncated title."""
+        if len(obj.title) > 50:
+            return f"{obj.title[:50]}..."
+        return obj.title
+    title_preview.short_description = "Title"
+
+    def delivery_status(self, obj):
+        """Display delivery status with badge."""
+        if obj.opened_at:
+            return format_html(
+                '<span style="background-color: green; color: white; padding: 3px 8px; '
+                'border-radius: 3px;">OPENED</span>'
+            )
+        elif obj.delivered_at:
+            return format_html(
+                '<span style="background-color: blue; color: white; padding: 3px 8px; '
+                'border-radius: 3px;">DELIVERED</span>'
+            )
+        elif obj.sent_at:
+            return format_html(
+                '<span style="background-color: orange; color: white; padding: 3px 8px; '
+                'border-radius: 3px;">SENT</span>'
+            )
+        else:
+            return format_html(
+                '<span style="background-color: gray; color: white; padding: 3px 8px; '
+                'border-radius: 3px;">PENDING</span>'
+            )
+    delivery_status.short_description = "Status"

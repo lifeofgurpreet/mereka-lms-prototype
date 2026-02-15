@@ -5,7 +5,7 @@ URL configuration for Mobile Backend API.
 @covers: AC-MOB-001, AC-MOB-002, AC-MOB-003
 """
 
-from django.urls import path
+from django.urls import path, include
 from .views import MobileBrandingConfigView, DeviceRegistrationView
 
 app_name = "mobile_api"
@@ -22,5 +22,10 @@ urlpatterns = [
         "notifications/register/",
         DeviceRegistrationView.as_view(),
         name="device-registration"
+    ),
+    # iOS-specific endpoints (Phase 2)
+    path(
+        "ios/",
+        include("openedx_mobile_api.ios_urls")
     ),
 ]

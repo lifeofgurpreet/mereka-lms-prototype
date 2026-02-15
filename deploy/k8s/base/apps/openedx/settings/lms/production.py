@@ -1326,6 +1326,41 @@ IOS_APP_ID = os.environ.get("IOS_APP_ID", "TEAM_ID.io.mereka.academy")
 ANDROID_PACKAGE_NAME = os.environ.get("ANDROID_PACKAGE_NAME", "io.mereka.academy")
 ANDROID_SHA256_FINGERPRINT = os.environ.get("ANDROID_SHA256_FINGERPRINT", "")
 
+# ── Mobile Phase 2: iOS Stabilization ──────────────────────────────────
+# @spec: Mobile Phase 2 - iOS Stabilization (mereka-lms-36f7)
+# @covers: AC-MOB-008 through AC-MOB-015
+
+# PKCE OAuth2 flow (AC-MOB-008)
+IOS_OAUTH_PKCE_ENABLED = os.environ.get(
+    "IOS_OAUTH_PKCE_ENABLED", "true"
+).lower() in ("true", "1", "yes")
+
+# Token lifecycle settings (AC-MOB-009, AC-MOB-010)
+IOS_ACCESS_TOKEN_LIFETIME = int(os.environ.get("IOS_ACCESS_TOKEN_LIFETIME", "3600"))  # 1 hour
+IOS_REFRESH_TOKEN_LIFETIME = int(os.environ.get("IOS_REFRESH_TOKEN_LIFETIME", "2592000"))  # 30 days
+IOS_TOKEN_REFRESH_THRESHOLD = int(os.environ.get("IOS_TOKEN_REFRESH_THRESHOLD", "300"))  # 5 minutes
+
+# APNs push notifications (AC-MOB-012)
+APNS_ENABLED = os.environ.get("APNS_ENABLED", "false").lower() in ("true", "1", "yes")
+APNS_CERTIFICATE_PATH = os.environ.get("APNS_CERTIFICATE_PATH", "")
+APNS_KEY_ID = os.environ.get("APNS_KEY_ID", "")
+APNS_TEAM_ID = os.environ.get("APNS_TEAM_ID", "")
+APNS_BUNDLE_ID = os.environ.get("APNS_BUNDLE_ID", "io.mereka.academy")
+APNS_USE_SANDBOX = os.environ.get("APNS_USE_SANDBOX", "true").lower() in ("true", "1", "yes")
+
+# Security settings (AC-MOB-014, AC-MOB-015)
+IOS_DISABLE_TOKEN_LOGGING = os.environ.get(
+    "IOS_DISABLE_TOKEN_LOGGING", "true"
+).lower() in ("true", "1", "yes")
+IOS_CLEAR_SNAPSHOT_ON_BACKGROUND = os.environ.get(
+    "IOS_CLEAR_SNAPSHOT_ON_BACKGROUND", "true"
+).lower() in ("true", "1", "yes")
+
+# Certificate pinning (security)
+IOS_CERTIFICATE_PINNING_ENABLED = os.environ.get(
+    "IOS_CERTIFICATE_PINNING_ENABLED", "true"
+).lower() in ("true", "1", "yes")
+
 # ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
 # @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
 # @covers: AC-LIB-014 through AC-LIB-019
