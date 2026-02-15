@@ -586,3 +586,27 @@ LIBRARY_TENANT_ISOLATION_ENABLED = os.environ.get(
 LIBRARY_RBAC_ENABLED = os.environ.get(
     "LIBRARY_RBAC_ENABLED", "false"
 ).lower() in ("true", "1", "yes")
+
+# ── Multi-Tenancy Architecture ─────────────────────────────────────────
+# @spec: multi-tenancy-architecture_spec.md (Phase 0 + Phase 1)
+# @covers: EnterpriseCustomer ↔ Site mapping, cache namespacing,
+#          xAPI tagging, feature flags, branding, metrics
+
+# Master feature flag for multi-tenancy (AC-MTA-001 through AC-MTA-033)
+MULTI_TENANCY_ENABLED = os.environ.get(
+    "MULTI_TENANCY_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["MULTI_TENANCY_ENABLED"] = MULTI_TENANCY_ENABLED
+
+# Feature flags (default: off — explicit opt-in per tenant)
+ENABLE_MULTI_TENANT_BRANDING = os.environ.get(
+    "ENABLE_MULTI_TENANT_BRANDING", "false"
+).lower() in ("true", "1", "yes")
+
+ENABLE_TENANT_ANALYTICS_SCOPING = os.environ.get(
+    "ENABLE_TENANT_ANALYTICS_SCOPING", "false"
+).lower() in ("true", "1", "yes")
+
+# Register tenant cache app
+if "openedx_tenant_cache" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_tenant_cache")
