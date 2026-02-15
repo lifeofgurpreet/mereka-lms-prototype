@@ -1251,6 +1251,81 @@ LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
 if "openedx_content_libraries" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_content_libraries")
 
+# ── Kajabi SSO/OAuth Integration ───────────────────────────────────────
+# @spec: Kajabi SSO Migration (mereka-lms-f98)
+# @covers: AC-SSO-001 through AC-SSO-005
+
+# Register openedx_kajabi_sso app
+if "openedx_kajabi_sso" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_kajabi_sso")
+
+# Enable Kajabi SSO
+KAJABI_SSO_ENABLED = os.environ.get(
+    "KAJABI_SSO_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["KAJABI_SSO_ENABLED"] = KAJABI_SSO_ENABLED
+
+# Kajabi OAuth2 credentials
+KAJABI_OAUTH2_KEY = os.environ.get("KAJABI_OAUTH2_KEY", "")
+KAJABI_OAUTH2_SECRET = os.environ.get("KAJABI_OAUTH2_SECRET", "")
+
+# Configure social-auth backends for Kajabi
+if KAJABI_SSO_ENABLED and KAJABI_OAUTH2_KEY and KAJABI_OAUTH2_SECRET:
+    # Add Kajabi OAuth2 backend to authentication backends
+    AUTHENTICATION_BACKENDS = list(AUTHENTICATION_BACKENDS) if AUTHENTICATION_BACKENDS else []
+
+    # Insert Kajabi backends at the beginning (highest priority)
+    if "openedx_kajabi_sso.backends.KajabiOAuth2Backend" not in AUTHENTICATION_BACKENDS:
+        AUTHENTICATION_BACKENDS.insert(0, "openedx_kajabi_sso.backends.KajabiOAuth2Backend")
+
+    # Add fallback backend after OAuth (AC-SSO-003)
+    if "openedx_kajabi_sso.backends.KajabiSSOFallbackBackend" not in AUTHENTICATION_BACKENDS:
+        AUTHENTICATION_BACKENDS.insert(1, "openedx_kajabi_sso.backends.KajabiSSOFallbackBackend")
+
+    # Social auth pipeline for Kajabi
+    SOCIAL_AUTH_KAJABI_KEY = KAJABI_OAUTH2_KEY
+    SOCIAL_AUTH_KAJABI_SECRET = KAJABI_OAUTH2_SECRET
+    SOCIAL_AUTH_KAJABI_SCOPE = ["read:user", "read:email"]
+
+    # Redirect URLs
+    LOGIN_REDIRECT_URL = os.environ.get("LOGIN_REDIRECT_URL", "/dashboard")
+    SOCIAL_AUTH_LOGIN_REDIRECT_URL = LOGIN_REDIRECT_URL
+
+# SSO fallback to email/password (AC-SSO-003)
+KAJABI_SSO_ALLOW_FALLBACK = os.environ.get(
+    "KAJABI_SSO_ALLOW_FALLBACK", "true"
+).lower() in ("true", "1", "yes")
+
+# Welcome email settings (AC-SSO-005)
+KAJABI_WELCOME_EMAIL_ENABLED = os.environ.get(
+    "KAJABI_WELCOME_EMAIL_ENABLED", "true"
+).lower() in ("true", "1", "yes")
+
+# ── Mobile Backend API ──────────────────────────────────────────────────
+# @spec: Mobile Backend API (mereka-lms-2gck)
+# @covers: AC-MOB-001 through AC-MOB-007
+
+# Register openedx_mobile_api app
+if "openedx_mobile_api" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_mobile_api")
+
+# Enable mobile API
+MOBILE_API_ENABLED = os.environ.get(
+    "MOBILE_API_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+FEATURES["MOBILE_API_ENABLED"] = MOBILE_API_ENABLED
+
+# FCM (Firebase Cloud Messaging) server key (AC-MOB-006 - stored in ExternalSecrets)
+FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY", "")
+
+# Mobile API performance settings (AC-MOB-001 - p95 <= 500ms)
+MOBILE_API_CACHE_TIMEOUT = int(os.environ.get("MOBILE_API_CACHE_TIMEOUT", "300"))
+
+# Mobile deep linking (AC-MOB-004, AC-MOB-005)
+IOS_APP_ID = os.environ.get("IOS_APP_ID", "TEAM_ID.io.mereka.academy")
+ANDROID_PACKAGE_NAME = os.environ.get("ANDROID_PACKAGE_NAME", "io.mereka.academy")
+ANDROID_SHA256_FINGERPRINT = os.environ.get("ANDROID_SHA256_FINGERPRINT", "")
+
 # ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
 # @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
 # @covers: AC-LIB-014 through AC-LIB-019

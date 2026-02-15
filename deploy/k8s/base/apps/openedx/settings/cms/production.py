@@ -559,6 +559,20 @@ LIBRARY_SOFT_DELETE_RETENTION_DAYS = int(os.environ.get(
 if "openedx_content_libraries" not in INSTALLED_APPS:
     INSTALLED_APPS.append("openedx_content_libraries")
 
+# ── Kajabi SSO/OAuth Integration ───────────────────────────────────────
+# @spec: Kajabi SSO Migration (mereka-lms-f98)
+# Register app for admin access (SSO primarily used on LMS)
+
+if "openedx_kajabi_sso" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_kajabi_sso")
+
+# ── Mobile Backend API ──────────────────────────────────────────────────
+# @spec: Mobile Backend API (mereka-lms-2gck)
+# Register app for admin access (API primarily used on LMS)
+
+if "openedx_mobile_api" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_mobile_api")
+
 # ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
 # @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
 # @covers: AC-LIB-014 through AC-LIB-019
