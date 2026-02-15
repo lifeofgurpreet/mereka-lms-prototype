@@ -516,3 +516,45 @@ class LibraryAccessLog(models.Model):
 
     def __str__(self):
         return f"{self.action} - {self.user.username} - {self.timestamp}"
+
+
+class TenantLibraryQuota(models.Model):
+    """
+    Per-tenant library quota configuration (AC-LIB-026).
+
+    Allows platform admins to set per-tenant limits for libraries
+    and components. Defaults are used if no record exists.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    tenant_uuid = models.UUIDField(
+        unique=True,
+        db_index=True,
+        help_text="Enterprise customer UUID"
+    )
+
+    max_libraries = models.IntegerField(
+        default=100,
+        help_text="Maximum number of libraries this tenant can create"
+    )
+
+    max_components = models.IntegerField(
+        default=10000,
+        help_text="Maximum total components across all libraries"
+    )
+
+    rate_limit_per_minute = models.IntegerField(
+        default=60,
+        help_text="Maximum API calls per minute for library operations"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'openedx_content_libraries_tenant_quota'
+        verbose_name = 'Tenant Library Quota'
+        verbose_name_plural = 'Tenant Library Quotas'
+
+    def __str__(self):
+        return f"Quota: {self.tenant_uuid} (libs={self.max_libraries}, comps={self.max_components})"

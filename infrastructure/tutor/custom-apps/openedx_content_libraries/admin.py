@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (
     LibraryMetadata, LibraryVersion, LibraryComponent,
     LibraryCourseReference, BlockstoreReference,
-    LibraryRole, LibraryAccessLog,
+    LibraryRole, LibraryAccessLog, TenantLibraryQuota,
 )
 
 
@@ -69,3 +69,11 @@ class LibraryAccessLogAdmin(admin.ModelAdmin):
     search_fields = ['library__library_key', 'user__username', 'ip_address']
     readonly_fields = ['id', 'timestamp']
     date_hierarchy = 'timestamp'
+
+
+@admin.register(TenantLibraryQuota)
+class TenantLibraryQuotaAdmin(admin.ModelAdmin):
+    list_display = ['tenant_uuid', 'max_libraries', 'max_components',
+                    'rate_limit_per_minute', 'updated_at']
+    search_fields = ['tenant_uuid']
+    readonly_fields = ['id', 'created_at', 'updated_at']

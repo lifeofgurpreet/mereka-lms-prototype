@@ -599,3 +599,16 @@ LIBRARY_SEARCH_ENABLED = os.environ.get(
 LIBRARY_LIST_PAGE_SIZE = int(os.environ.get(
     "LIBRARY_LIST_PAGE_SIZE", "50"
 ))
+
+# ── Content Libraries v2: Phase 3-4 Multi-Tenant Scale + Hardening ─────
+# @covers: AC-LIB-026 through AC-LIB-032
+
+# Tenant quotas in Studio
+LIBRARY_QUOTAS_ENABLED = os.environ.get(
+    "LIBRARY_QUOTAS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
+# Content sanitization
+LIBRARY_CONTENT_SANITIZATION_ENABLED = os.environ.get(
+    "LIBRARY_CONTENT_SANITIZATION_ENABLED", "false"
+).lower() in ("true", "1", "yes")
