@@ -235,3 +235,160 @@ def verify_mux_webhook_signature(
 
     # Constant-time comparison
     return hmac.compare_digest(signature, expected_signature)
+
+
+def create_asset_from_url(
+    url: str,
+    new_asset_settings: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """
+    Create a Mux asset from a video URL (server-to-server ingestion).
+
+    API Endpoint: POST /video/v1/assets
+
+    Args:
+        url (str): Video file URL (must be publicly accessible or signed)
+        new_asset_settings (dict, optional): Asset creation settings
+            (e.g., playback_policy, encoding_tier, passthrough metadata)
+
+    Returns:
+        dict: Mux asset response containing:
+            - id: Asset ID
+            - status: Asset status (preparing, ready, errored)
+            - playback_ids: List of playback IDs
+            - created_at: Creation timestamp
+
+    Raises:
+        requests.HTTPError: If Mux API request fails
+        ValueError: If MUX credentials not configured
+
+    Example:
+        >>> asset = create_asset_from_url(
+        ...     url='https://storage.googleapis.com/video.mp4',
+        ...     new_asset_settings={
+        ...         'playback_policy': ['public'],
+        ...         'encoding_tier': 'baseline'
+        ...     }
+        ... )
+        >>> asset_id = asset['id']
+
+    @covers: AC-VPD-001
+    """
+    headers = get_mux_auth_header()
+
+    payload = {
+        'input': url,
+    }
+
+    if new_asset_settings:
+        payload.update(new_asset_settings)
+
+    api_url = f'{MUX_API_BASE_URL}/video/v1/assets'
+
+    logger.info(f"Creating Mux asset from URL: url={url}, encoding_tier={new_asset_settings.get('encoding_tier', 'default')}")
+
+    response = requests.post(api_url, json=payload, headers=headers, timeout=10)
+    response.raise_for_status()
+
+    asset_data = response.json()['data']
+
+    logger.info(
+        f"Mux asset created: asset_id={asset_data['id']}, "
+        f"status={asset_data['status']}"
+    )
+
+    return asset_data
+
+
+def validate_video_format(filename: str, supported_formats: Optional[list] = None) -> bool:
+    """
+    Validate video file format.
+
+    Args:
+        filename (str): Video filename
+        supported_formats (list, optional): List of supported extensions
+            (default: ['mp4', 'mov', 'mkv', 'webm'])
+
+    Returns:
+        bool: True if format is supported
+
+    Raises:
+        ValueError: If format is not supported
+
+    Example:
+        >>> validate_video_format('lesson1.mp4')  # Returns True
+        >>> validate_video_format('lesson2.avi')  # Raises ValueError
+
+    @covers: AC-VPD-002
+    """
+    if supported_formats is None:
+        supported_formats = ['mp4', 'mov', 'mkv', 'webm']
+
+    from pathlib import Path
+    extension = Path(filename).suffix.lstrip('.').lower()
+
+    if extension not in supported_formats:
+        raise ValueError(
+            f"Unsupported video format: {extension}. "
+            f"Supported formats: {', '.join(supported_formats)}"
+        )
+
+    return True
+
+
+def wait_for_asset_ready(
+    asset_id: str,
+    max_wait_seconds: int = 600,
+    poll_interval: int = 5
+) -> Dict[str, Any]:
+    """
+    Poll Mux asset until it reaches 'ready' status.
+
+    Args:
+        asset_id (str): Mux asset ID
+        max_wait_seconds (int): Maximum time to wait (default: 600s = 10 minutes)
+        poll_interval (int): Seconds between status checks (default: 5s)
+
+    Returns:
+        dict: Asset data when status is 'ready'
+
+    Raises:
+        TimeoutError: If asset doesn't reach 'ready' within max_wait_seconds
+        ValueError: If asset status is 'errored'
+
+    Example:
+        >>> asset = wait_for_asset_ready('asset_id_123', max_wait_seconds=300)
+        >>> playback_id = asset['playback_ids'][0]['id']
+
+    @covers: AC-VPD-004
+    """
+    import time
+
+    logger.info(f"Waiting for asset to be ready: asset_id={asset_id}, max_wait={max_wait_seconds}s")
+
+    start_time = time.time()
+    elapsed = 0
+
+    while elapsed < max_wait_seconds:
+        asset = get_asset(asset_id)
+        status_val = asset['status']
+
+        logger.debug(f"Asset status: asset_id={asset_id}, status={status_val}, elapsed={elapsed}s")
+
+        if status_val == 'ready':
+            logger.info(f"Asset ready: asset_id={asset_id}, elapsed={elapsed}s")
+            return asset
+
+        if status_val == 'errored':
+            error_messages = asset.get('errors', {}).get('messages', [])
+            error_msg = '; '.join(error_messages) if error_messages else 'Unknown error'
+            raise ValueError(f"Asset processing failed: {error_msg}")
+
+        # Poll interval
+        time.sleep(poll_interval)
+        elapsed = time.time() - start_time
+
+    raise TimeoutError(
+        f"Asset did not reach 'ready' status within {max_wait_seconds}s. "
+        f"Current status: {asset.get('status', 'unknown')}"
+    )
