@@ -1,24 +1,28 @@
 ---
 title: "Tutor Plugin-Based Configuration Resilience"
 type: "adr"
-status: "proposed"
+status: "accepted"
 owner: "engineering"
-last_updated: "2026-02-10"
+last_updated: "2026-02-16"
 links:
   related_specs:
     - "specs/tutor-configuration-resilience_spec.md"
     - "specs/tutor-configuration_spec.md"
     - "specs/ci-cd-pipeline_spec.md"
     - "specs/cross-cutting-requirements_spec.md"
+    - "specs/branding-system_spec.md"
+  related_adrs:
+    - "docs/adr/014-mfe-branding-strategy.md"
 ---
 
 # ADR-006: Tutor Plugin-Based Configuration with Three-Layer Defense
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-02-10
+**Updated**: 2026-02-16
 **Deciders**: Platform Team
 
-<!-- Last verified: 2026-02-13 -->
+<!-- Last verified: 2026-02-16 -->
 
 ## Context
 
@@ -44,7 +48,7 @@ We will implement a **three-layer defense** to prevent configuration regressions
 
 ### Layer 1: Tutor Plugin (`tutor-plugin-mereka`)
 
-A proper Tutor plugin that uses Tutor's Python hook system (`Filters` and `Actions`) to apply configuration-level patches at template-render time. When `tutor config save` runs, the plugin's hooks fire automatically -- no manual step required. This eliminates the root cause for all patches that can be expressed as hook modifications.
+The plugin is the PRIMARY mechanism for configuration patches. A proper Tutor plugin that uses Tutor's Python hook system (`Filters` and `Actions`) to apply configuration-level patches at template-render time. When `tutor config save` runs, the plugin's hooks fire automatically -- no manual step required. This eliminates the root cause for all patches that can be expressed as hook modifications.
 
 Tutor provides hooks for:
 
@@ -54,7 +58,9 @@ Tutor provides hooks for:
 - `MFE_DOCKERFILE_*` hooks (modify MFE Dockerfile)
 - Various other extension points documented in the Tutor plugin API
 
-Not all patches can be expressed as hooks. File-copy operations (syncing theme assets, logo files, font files, custom app directories) require file-system access that occurs after template rendering. These remain in a reduced `apply-patches.sh`.
+**Scope**: Configuration patches (Django settings, Dockerfile modifications, build-time environment variables, component injection via hooks).
+
+`apply-patches.sh` is the COMPLEMENTARY mechanism for file-system operations (asset sync, theme directory setup). Neither replaces the other; they form a two-layer system. File-copy operations (syncing theme assets, logo files, font files, custom app directories) require file-system access that occurs after template rendering and cannot be expressed as Tutor hooks.
 
 ### Layer 2: Git Pre-Commit Hook
 

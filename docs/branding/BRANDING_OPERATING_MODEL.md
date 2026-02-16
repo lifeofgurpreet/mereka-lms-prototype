@@ -7,11 +7,14 @@ This is the canonical workflow for branding changes in Mereka LMS.
 
 1. `assets/branding/*` is the source input; runtime truth is `infrastructure/tutor/themes/mereka/*`.
 2. Any `tutor config save` must be followed by `./infrastructure/tutor/apply-patches.sh`.
+   - **Why**: Plugin handles configuration via Tutor hooks (automatic). Script handles asset sync (manual but required).
 3. No branding release is complete until both source and live gates pass.
 4. Production deploys are GitOps-managed; do not treat direct `kubectl set image` as source-of-truth.
 5. Drift is a defect: fix with rebuild+deploy, not by loosening checks.
 6. Run only one `tutor images build mfe` at a time; parallel runs cause cache contention and slow/fail builds.
 7. `./infrastructure/tutor/apply-patches.sh` is idempotent and required before every MFE/openedx build.
+   - **What it does**: Syncs theme assets (logos, fonts, SCSS), sets up theme directories, distributes font files.
+   - **What plugin does**: Django settings, MFE footer component, Google Fonts stripping, build config.
 
 ## Canonical Workflow
 

@@ -2,6 +2,25 @@
 
 This directory contains Tutor configuration overrides, custom themes, and patch scripts for the Mereka Academy Open edX deployment.
 
+## Plugin vs Script: Division of Responsibility
+
+The Mereka LMS theming system uses TWO complementary mechanisms:
+
+1. **Tutor Plugin** (`plugins/mereka_lms.py`) — PRIMARY for configuration patches
+   - Django settings (multi-site domains, enterprise integration)
+   - MFE footer component injection via Tutor hooks
+   - Google Fonts stripping from SCSS sources
+   - Build config (Node memory, npm retry logic)
+   - Delivered automatically via Tutor hooks (no manual step)
+
+2. **Patch Script** (`apply-patches.sh`) — COMPLEMENTARY for file-system operations
+   - Asset syncing (logos, fonts, SCSS files)
+   - Theme directory copying
+   - Font file distribution
+   - Required manual step after `tutor config save`
+
+**Both are required**. The plugin handles what can be expressed as Tutor hooks. The script handles what requires file-system access after template rendering.
+
 ## Directory Structure
 
 ```

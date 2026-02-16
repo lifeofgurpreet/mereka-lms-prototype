@@ -1011,84 +1011,9 @@ RUN pip install "pymongo[srv]" """,
             updated = updated.rstrip() + '\n\n' + tenancy_config + '\n'
 
     if path.name == "env.config.jsx":
+        # Remove Indigo default footer import (plugin-injected MerekaFooter replaces it)
         updated = updated.replace("import Footer from '@edly-io/indigo-frontend-component-footer';\n", "")
-        css_hook = "import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';\n"
-        css_target = css_hook + "import './mereka/mereka.scss';\n"
-        if "mereka/mereka.scss" not in updated:
-            if css_hook in updated:
-                updated = updated.replace(css_hook, css_target)
-            else:
-                # Some Tutor MFE templates use a simplified env.config.jsx without plugin-framework imports.
-                # Still import the theme so authn (and other MFEs) reliably ship branded CSS bundles.
-                get_config_import = "import { getConfig } from '@edx/frontend-platform';\n"
-                if get_config_import in updated:
-                    updated = updated.replace(get_config_import, get_config_import + "import './mereka/mereka.scss';\n", 1)
-        footer_component = textwrap.dedent(
-            r"""
-            const MerekaFooter = () => {
-              const config = getConfig();
-              const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
-              const siteName = config.SITE_NAME || 'Mereka Academy';
-              const coursesUrl = baseUrl ? `${baseUrl}/courses` : '/courses';
-              const dashboardUrl = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
-              const supportEmail = config.CONTACT_EMAIL || 'team@mereka.io';
-              const supportLink = `mailto:${supportEmail}`;
-              const currentYear = new Date().getFullYear();
-              const logoUrl = baseUrl ? `${baseUrl}/static/images/logo.png` : '';
-
-              return (
-                <footer className="mereka-footer" role="contentinfo">
-                  <div className="container-xl footer-primary">
-                    <div className="footer-brand">
-                      {logoUrl ? <img src={logoUrl} alt={`${siteName} logo`} /> : null}
-                      <p>
-                        Mereka Academy blends community, craftsmanship, and technology to help learners master
-                        the creative, digital, and entrepreneurial skills powering Southeast Asia.
-                      </p>
-                      <div className="footer-tags">
-                        <span>Future of Work</span>
-                        <span>Creative Tech</span>
-                        <span>Impact</span>
-                      </div>
-                    </div>
-                    <div className="footer-links">
-                      <h6>Explore</h6>
-                      <ul>
-                        <li><a href={coursesUrl}>Courses</a></li>
-                        <li><a href={dashboardUrl}>My learning</a></li>
-                        <li><a href="https://mereka.my" target="_blank" rel="noopener">Mereka main site</a></li>
-                        <li><a href="mailto:team@mereka.io">team@mereka.io</a></li>
-                      </ul>
-                    </div>
-                    <div className="footer-links">
-                      <h6>Support</h6>
-                      <ul>
-                        <li><a href="mailto:techadmin@biji-biji.com">techadmin@biji-biji.com</a></li>
-                        <li><a href={supportLink}>{supportEmail}</a></li>
-                        <li><a href="https://academyv2.mereka.io/help" target="_blank" rel="noopener">Help centre</a></li>
-                        <li><a href="https://academyv2.mereka.io/privacy" target="_blank" rel="noopener">Privacy</a></li>
-                      </ul>
-                    </div>
-                    <div className="footer-links">
-                      <h6>Partners</h6>
-                      <ul>
-                        <li><a href="https://biji-biji.com" target="_blank" rel="noopener">Biji-Biji Initiative</a></li>
-                        <li><a href="https://mereka.my/partner" target="_blank" rel="noopener">Partner with us</a></li>
-                        <li><a href="https://mereka.my/stories" target="_blank" rel="noopener">Stories</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="footer-bottom container-xl">
-                    <span>© {currentYear} Biji-Biji Initiative · {siteName}</span>
-                    <span>Powered by Open edX &amp; Tutor</span>
-                  </div>
-                </footer>
-              );
-            };
-            """
-        ).strip()
-        if "const MerekaFooter" not in updated:
-            updated = updated.replace("const themePluginSlot =", footer_component + "\n\nconst themePluginSlot =", 1)
+        # Wire the plugin-defined MerekaFooter into the footer slot
         updated = updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")
 
     if path.name == "lms.conf":
@@ -1212,79 +1137,29 @@ if [ -d "$MFE_INDIGO_DIR" ]; then
   cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
 fi
 
-# Tutor's MFE plugin uses a top-level env.config.jsx as the webpack entry adjunct for all MFEs.
-# Ensure it imports our theme so authn (and other MFEs) reliably ship branded CSS bundles.
+# Safety net: ensure SCSS import in top-level env.config.jsx (plugin normally handles this)
 MFE_ENV_CONFIG="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx"
 if [ -f "$MFE_ENV_CONFIG" ] && ! grep -q "mereka/mereka.scss" "$MFE_ENV_CONFIG"; then
   python - "$MFE_ENV_CONFIG" <<'PY'
-from __future__ import annotations
-
-import sys
 from pathlib import Path
+import sys
 
 path = Path(sys.argv[1])
 text = path.read_text(encoding="utf-8", errors="ignore")
 if "mereka/mereka.scss" in text:
     raise SystemExit(0)
 
-needle = "import { getConfig } from '@edx/frontend-platform';\n"
-insertion = needle + "import './mereka/mereka.scss';\n"
-if needle in text:
-    text = text.replace(needle, insertion, 1)
-else:
-    # Fallback: append after the first import block.
-    lines = text.splitlines(True)
-    out = []
-    inserted = False
-    for line in lines:
-        out.append(line)
-        if not inserted and line.startswith("import ") and line.rstrip().endswith(";"):
-            continue
-        if not inserted and not line.startswith("import "):
-            out.insert(len(out) - 1, "import './mereka/mereka.scss';\n")
-            inserted = True
-    text = "".join(out)
-
-path.write_text(text, encoding="utf-8")
-PY
-fi
-
-# Normalize any historical duplicate inserts (keep a single import next to getConfig).
-if [ -f "$MFE_ENV_CONFIG" ]; then
-  python - "$MFE_ENV_CONFIG" <<'PY'
-from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-lines = path.read_text(encoding="utf-8", errors="ignore").splitlines(True)
-import_line = "import './mereka/mereka.scss';\n"
-cleaned = [ln for ln in lines if ln != import_line]
-
-needle = "import { getConfig } from '@edx/frontend-platform';\n"
+# Insert after the first import line
+lines = text.splitlines(True)
 out = []
 inserted = False
-for ln in cleaned:
-    out.append(ln)
-    if not inserted and ln == needle:
-        out.append(import_line)
+for line in lines:
+    out.append(line)
+    if not inserted and line.startswith("import ") and line.rstrip().endswith(";"):
+        out.append("import './mereka/mereka.scss';\n")
         inserted = True
-
 if not inserted:
-    # Place after the last import if getConfig wasn't found.
-    out2 = []
-    last_import_idx = -1
-    for idx, ln in enumerate(out):
-        out2.append(ln)
-        if ln.startswith("import "):
-            last_import_idx = idx
-    if last_import_idx >= 0:
-        out2.insert(last_import_idx + 1, import_line)
-        out = out2
-    else:
-        out.insert(0, import_line)
-
+    out.insert(0, "import './mereka/mereka.scss';\n")
 path.write_text("".join(out), encoding="utf-8")
 PY
 fi

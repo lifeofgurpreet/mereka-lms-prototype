@@ -157,25 +157,14 @@
         try_files /index.html
         file_server
     }
-    
-    @mfe_orders {
-        path /orders /orders/*
+
+    # orders and payment MFEs are deprecated upstream (repos archived in openedx-unsupported).
+    # Proxy to our custom payments-gateway service (PostgreSQL-backed, Stripe integration).
+    reverse_proxy /orders* payments-gateway:8080 {
+        header_up Host {http.request.host}
     }
-    handle @mfe_orders {
-        uri strip_prefix /orders
-        root * /openedx/dist/orders
-        try_files /{path} /index.html
-        file_server
+    reverse_proxy /payment* payments-gateway:8080 {
+        header_up Host {http.request.host}
     }
-    
-    @mfe_payment {
-        path /payment /payment/*
-    }
-    handle @mfe_payment {
-        uri strip_prefix /payment
-        root * /openedx/dist/payment
-        try_files /{path} /index.html
-        file_server
-    }
-    
+
 }

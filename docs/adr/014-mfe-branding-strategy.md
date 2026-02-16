@@ -1,11 +1,11 @@
 # ADR-014: MFE Branding Strategy - Migration Path Analysis
 
-**Status**: 🔴 **NEEDS DECISION** - Requires user input before proceeding
+**Status**: ✅ **ACCEPTED**
 **Date**: 2026-02-12
 **Deciders**: Platform Team (Decision Owner: Gurpreet)
-**Related**: [ADR-012: No Runtime CSS Overlay](012-no-runtime-css-overlay.md), [FRONTEND_BRANDING_METHOD.md](../operations/FRONTEND_BRANDING_METHOD.md)
+**Related**: [ADR-012: No Runtime CSS Overlay](012-no-runtime-css-overlay.md), [FRONTEND_BRANDING_METHOD.md](../operations/FRONTEND_BRANDING_METHOD.md), [ADR-006: Tutor Plugin-Based Configuration](006-tutor-plugin-based-configuration.md)
 
-<!-- Last verified: 2026-02-13 -->
+<!-- Last verified: 2026-02-16 -->
 
 ---
 
@@ -15,9 +15,9 @@
 
 **Question**: Should we migrate to the standard npm brand package pattern (`@mereka/brand`)?
 
-**Answer**: Not decided yet. This ADR documents all options, trade-offs, and migration paths for future decision-making.
+**Decision**: **Option C: Phased Migration** — Plugin-first for configuration and component injection via Tutor hooks. Asset sync (logos, fonts, SCSS files) remains in apply-patches.sh as a complementary step. Migration to OEP-48 brand package deferred until next major Open edX release.
 
-**Recommendation**: Migrate in phases when branding changes are needed, not as a dedicated project.
+**Rationale**: Current approach works reliably. Plugin handles configuration automatically via Tutor hooks. Script handles file-system operations (asset sync, theme directories). Migration to full OEP-48 standard provides benefits but is not urgent given stable branding and low change frequency.
 
 ---
 
@@ -238,7 +238,13 @@ const config = {
 
 ---
 
-### Option C: Phased Migration (Recommended)
+## Decision
+
+**ACCEPTED**: Option C — Phased Migration
+
+Plugin delivers configuration and component injection via Tutor hooks. Asset sync (logos, fonts, SCSS files) remains in apply-patches.sh as a complementary step. Migration to OEP-48 brand package deferred until next major Open edX release.
+
+### Implementation Approach
 
 **Migrate incrementally as branding needs arise**
 
@@ -397,7 +403,7 @@ const config = {
 
 ---
 
-**Last Updated**: 2026-02-12
+**Last Updated**: 2026-02-16
 **Decision Owner**: Gurpreet
-**Status**: 🔴 NEEDS DECISION - All options documented, awaiting user input
+**Status**: ✅ ACCEPTED - Plugin-first configuration, SCSS overlay for visual branding
 **Revisit Date**: 2026-08-12 (6 months) or when next branding change occurs

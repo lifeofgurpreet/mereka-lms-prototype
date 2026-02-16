@@ -211,13 +211,20 @@ After intentional token updates, refresh and commit provenance metadata:
 ./infrastructure/tutor/apply-patches.sh
 ```
 
-This applies:
+**What the script does** (file-system operations):
+- Syncs theme assets (logos, fonts, SCSS files)
+- Copies assets to build directories
+- Sets up theme directory structure
+- Distributes font files to MFE build context
+
+**What the plugin does** (automatic via Tutor hooks):
 - MySQL 8 authentication fix
 - MFE Node 18 build toolchain
 - MFE npm retry + timeout hardening for transient network failures
 - Webpack memory limits
 - CSRF/CORS configuration
-- Custom Mereka footer for MFEs
+- Custom Mereka footer for MFEs (component injection)
+- Google Fonts stripping from SCSS sources
 
 ### Step 4: Build Docker Images
 

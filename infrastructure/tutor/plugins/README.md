@@ -6,7 +6,7 @@ This directory contains Tutor plugins that apply Mereka-specific customizations 
 
 ### `mereka_lms.py` (Main Plugin)
 
-The main plugin that consolidates all Mereka LMS customizations, replacing the need for `apply-patches.sh`.
+The main plugin that consolidates all Mereka LMS configuration customizations. Handles configuration patches via Tutor hooks. Works alongside `apply-patches.sh` which handles file-system operations (asset sync, theme directories).
 
 **What it does:**
 
@@ -105,17 +105,19 @@ tutor local run lms pip list | grep django-prometheus
 tutor local run lms python -c "import pymongo; from pymongo.srv_resolver import _SrvResolver; print('MongoDB SRV OK')"
 ```
 
-## Migration from `apply-patches.sh`
+## Division of Responsibility: Plugin vs Script
 
-The plugin replaces `apply-patches.sh`. Key differences:
+The plugin and `apply-patches.sh` form a complementary two-layer system:
 
-| Aspect | `apply-patches.sh` | `mereka_lms.py` Plugin |
-|--------|-------------------|------------------------|
+| Aspect | `apply-patches.sh` (File Operations) | `mereka_lms.py` Plugin (Configuration) |
+|--------|--------------------------------------|----------------------------------------|
+| **Purpose** | Asset sync, theme directories, file copying | Django settings, Dockerfile patches, build config |
 | **Execution** | Must run manually after `tutor config save` | Automatic when plugin is enabled |
-| **Maintenance** | 1000+ lines of bash + Python | Structured Python hooks |
-| **Idempotency** | Complex string replacement logic | Tutor handles merging |
-| **Version control** | External script patches Tutor internals | Native Tutor extension point |
-| **Debugging** | Hard to trace which patch failed | Clear hook names in logs |
+| **Scope** | File-system operations requiring direct file access | Configuration patches via Tutor hooks |
+| **Maintenance** | Bash scripts for copy/sync operations | Structured Python hooks |
+| **Idempotency** | Script-enforced idempotency checks | Tutor handles merging |
+| **Version control** | Asset sync workflow | Native Tutor extension point |
+| **Examples** | Logo sync, font distribution, SCSS copying | Multi-site domains, MFE footer component, Google Fonts stripping |
 
 ### Migration Steps
 
@@ -202,11 +204,12 @@ cat tutor_env/env/build/openedx/Dockerfile
 
 ## Known Issues
 
-1. **Theme assets not synced:** The plugin does NOT handle file copying (logos, fonts, SCSS). You still need to:
-   - Copy theme files to `tutor_env/env/build/openedx/themes/mereka/`
-   - Copy MFE assets to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
+1. **Theme assets not synced:** The plugin does NOT handle file copying (logos, fonts, SCSS). This is by design. File-system operations are handled by `apply-patches.sh`:
+   - Copies theme files to `tutor_env/env/build/openedx/themes/mereka/`
+   - Copies MFE assets to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
+   - Syncs logos, fonts, SCSS files from source to theme directories
 
-   This is intentional - Tutor's build context system handles theme copying automatically if files are in the right place.
+   Both the plugin (configuration via hooks) and the script (asset sync) are required and complementary.
 
 2. **Custom apps must exist:** The plugin expects custom apps to be at:
    - `./infrastructure/tutor/custom-apps/mfe_oauth_fix/`

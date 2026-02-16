@@ -46,11 +46,18 @@ Brand consistency directly affects learner trust and partner credibility. Mereka
 
 This spec covers the custom branding system for Mereka Academy, including theme assets, MFE branding, and verification gates to ensure consistent branding across LMS, Studio, and micro-frontends.
 
+**Architecture Note**: The branding system uses a plugin-first approach as documented in ADR-014:
+- **Plugin** (`infrastructure/tutor/plugins/mereka_lms.py`): Configuration patches (Django settings, MFE footer component, Google Fonts stripping, build config)
+- **Script** (`infrastructure/tutor/apply-patches.sh`): File-system operations (asset sync, theme directories, font distribution)
+
+Both are required and complementary.
+
 ## Non-goals
 
 - Multi-tenant white-labeling (future enhancement)
 - Dynamic theme switching via UI (themes applied at build time)
 - Brand asset CDN optimization (assets served from static files)
+- Migration to OEP-48 brand package in current release (deferred per ADR-014)
 
 ## Requirements
 
@@ -91,7 +98,7 @@ infrastructure/tutor/themes/mereka/
     └── templates/
 ```
 
-#### Asset Sync Workflow
+#### Asset Sync Workflow (Script-Delivered)
 
 - The system MUST run `./infrastructure/tutor/apply-patches.sh` to sync theme assets to build directory
 - The system MUST copy logo variants to `tutor_env/env/build/openedx/themes/mereka/lms/static/images/`
@@ -99,24 +106,34 @@ infrastructure/tutor/themes/mereka/
 - The system MUST sync templates to preserve Django template overrides
 - The system MUST sync MFE SCSS to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
 
-#### SASS Compilation
+**Note**: Asset sync is handled by `apply-patches.sh` (file-system operations). Configuration patches are handled by the Tutor plugin (automatic via hooks).
+
+#### SASS Compilation (Plugin-Delivered)
 
 - The system MUST compile custom theme SASS before default theme: `npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka`
-- The system MUST strip Google Fonts imports from SCSS sources before compilation
-- The system MUST strip residual Google Fonts imports from compiled CSS
+- The Tutor plugin MUST strip Google Fonts imports from SCSS sources before compilation (via `openedx-dockerfile-pre-assets` hook)
+- The Tutor plugin MUST strip residual Google Fonts imports from compiled CSS
 - The system MUST compile both LMS and Studio themes
+
+**Note**: Google Fonts stripping is delivered automatically via Tutor plugin hooks.
 
 #### MFE Branding
 
-- The system MUST import `mereka.scss` in MFE env.config.jsx
-- The system MUST replace default Indigo footer with custom `MerekaFooter` component
+**Plugin-Delivered (Configuration)**:
+- The Tutor plugin MUST inject custom `MerekaFooter` component via `mfe-dockerfile-post-npm-install` hook
 - The MerekaFooter MUST include:
   - Mereka Academy branding and tagline
   - Links to courses, dashboard, help center
   - Contact emails: team@mereka.io, techadmin@biji-biji.com
   - Partner links (Biji-Biji Initiative, Mereka main site)
   - Copyright notice and Open edX credit
-- The system MUST copy MFE theme fonts to build context
+- The plugin MUST import `mereka.scss` in MFE env.config.jsx
+
+**Script-Delivered (Assets)**:
+- The system MUST copy MFE theme fonts to build context (via `apply-patches.sh`)
+- The system MUST sync SCSS files to MFE build directory
+
+**Note**: MFE footer is implemented as hardcoded JS in env.config.jsx (injected via Tutor hook), not proper plugin framework slots. Future migration to plugin framework slots tracked in ADR-014.
 
 #### Branding Verification Gates
 

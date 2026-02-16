@@ -1,8 +1,10 @@
 """
 Tutor plugin for Mereka LMS customizations.
 
-This plugin consolidates all Mereka-specific patches and configurations,
-replacing the need for apply-patches.sh.
+This plugin consolidates Mereka-specific configuration patches that can be
+delivered via Tutor's template hook system. The companion apply-patches.sh
+script handles file-system operations (asset sync, theme copy) and content
+modifications that require find-and-replace on generated files.
 
 Patches included:
 - Multi-site domain configuration (biji-biji.com, skillourfuture.academy.mereka.io)
@@ -230,40 +232,6 @@ ENABLE_KEYBOARD_ACCESSIBILITY = os.environ.get('ENABLE_KEYBOARD_ACCESSIBILITY', 
 
 # Math input tolerance for grading (AC-ASS-023)
 MATH_INPUT_DEFAULT_TOLERANCE = float(os.environ.get('MATH_INPUT_DEFAULT_TOLERANCE', '0.01'))
-
-# Assessment Bulk Operations - Regrade, Export, Import, Security (Assessment Phase 5)
-if 'openedx_assessment_bulk' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_assessment_bulk')
-
-# Feature flag for assessment bulk operations (default: true)
-ENABLE_ASSESSMENT_BULK_OPS = os.environ.get('ENABLE_ASSESSMENT_BULK_OPS', 'true').lower() == 'true'
-
-# AC-ASS-029: Bulk regrade performance settings
-BULK_REGRADE_BATCH_SIZE = int(os.environ.get('BULK_REGRADE_BATCH_SIZE', '50'))
-BULK_REGRADE_CHECKPOINT_INTERVAL = int(os.environ.get('BULK_REGRADE_CHECKPOINT_INTERVAL', '100'))
-
-# AC-ASS-031: Multi-language support
-ASSESSMENT_LANGUAGES = os.environ.get('ASSESSMENT_LANGUAGES', 'en,ms,zh-hans').split(',')
-ASSESSMENT_DEFAULT_LANGUAGE = os.environ.get('ASSESSMENT_DEFAULT_LANGUAGE', 'en')
-
-# AC-ASS-032: show_correctness timing control
-SHOW_CORRECTNESS_ENFORCE_PAST_DUE = os.environ.get('SHOW_CORRECTNESS_ENFORCE_PAST_DUE', 'true').lower() == 'true'
-
-# AC-ASS-035: IP logging (default: enabled for compliance)
-ENABLE_EXAM_IP_LOGGING = os.environ.get('ENABLE_EXAM_IP_LOGGING', 'true').lower() == 'true'
-
-# AC-ASS-036: Grade access logging (default: enabled for security)
-ENABLE_GRADE_ACCESS_LOGGING = os.environ.get('ENABLE_GRADE_ACCESS_LOGGING', 'true').lower() == 'true'
-
-# Add middleware for IP logging and grade access control
-if ENABLE_EXAM_IP_LOGGING and 'openedx_assessment_bulk.middleware.ExamIPLoggingMiddleware' not in MIDDLEWARE:
-    MIDDLEWARE.append('openedx_assessment_bulk.middleware.ExamIPLoggingMiddleware')
-
-if ENABLE_GRADE_ACCESS_LOGGING and 'openedx_assessment_bulk.middleware.GradeAccessControlMiddleware' not in MIDDLEWARE:
-    MIDDLEWARE.append('openedx_assessment_bulk.middleware.GradeAccessControlMiddleware')
-
-if SHOW_CORRECTNESS_ENFORCE_PAST_DUE and 'openedx_assessment_bulk.middleware.ShowCorrectnessMiddleware' not in MIDDLEWARE:
-    MIDDLEWARE.append('openedx_assessment_bulk.middleware.ShowCorrectnessMiddleware')
 
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
@@ -609,7 +577,8 @@ const MerekaFooter = () => {
 };
 
 // Replace default footer with Mereka footer
-// (This gets inserted into the slot configuration elsewhere in env.config.jsx)
+// apply-patches.sh replaces the default <Footer /> RenderWidget with <MerekaFooter />
+// in the Indigo slot configuration (content modification that plugins can't do)
 """,
     )
 )

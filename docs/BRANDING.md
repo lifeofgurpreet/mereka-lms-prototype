@@ -222,8 +222,16 @@ Tune it via `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env`.
 
 - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` reuses the same tokens/fonts, then layers on navbar/button/card tweaks tailored to Paragon components. Fonts are bundled with each MFE, so there are no cross-origin font requests.
 - `scripts/branding/setup-mfe-branding.sh` is the one-stop helper for local development: it clones the upstream MFEs under `tutor_env/dev/`, copies the fonts into each `public/fonts/`, writes `src/styles/mereka.scss`, and ensures `src/index.scss` imports it.
-- The Indigo theme’s React plugin now renders a bespoke Mereka footer (links + contact info) by way of the `MerekaFooter` component injected ahead of the `footer_slot` widgets.
-- To bake the branding into Tutor’s production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
+
+### MFE Footer Component
+
+The custom Mereka footer is implemented via **hardcoded JavaScript in `env.config.jsx`** (injected via Tutor plugin hook), not the plugin framework slots:
+
+- The Tutor plugin (`infrastructure/tutor/plugins/mereka_lms.py`) injects the `MerekaFooter` React component directly into MFE build config via the `mfe-dockerfile-post-npm-install` hook.
+- Implementation uses hardcoded JS in `env.config.jsx` that defines the footer component inline.
+- **Future migration**: Proper plugin framework slots (as documented in OEP-48 and frontend-plugin-framework) would be the correct long-term approach. Current implementation is a pragmatic workaround until plugin framework adoption.
+
+- To bake the branding into Tutor's production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
 - Always run `./infrastructure/tutor/apply-patches.sh` immediately before `tutor images build mfe` (ensures idempotent theming copy and npm retry/timeouts).
 - Never run parallel `tutor images build mfe` commands; a single active build is the supported path.
 

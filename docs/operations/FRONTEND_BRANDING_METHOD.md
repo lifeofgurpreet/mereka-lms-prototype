@@ -5,7 +5,12 @@ _Audience: Developers + Operations • Owner: Platform Team • Last updated: 20
 
 **Question**: Are we using the tutor-contrib-paragon plugin for MFE theming?
 
-**Answer**: **NO**. We use a custom SCSS-based approach that manually bridges Mereka design tokens to Paragon CSS variables.
+**Answer**: **NO**. We use a two-layer approach:
+
+1. **Tutor Plugin** (`infrastructure/tutor/plugins/mereka_lms.py`) — Handles MFE footer component injection and Google Fonts stripping via Tutor hooks
+2. **SCSS Overlay** — Custom SCSS-based approach that manually bridges Mereka design tokens to Paragon CSS variables
+
+**Visual branding** via SCSS overlay; **component injection** via Tutor plugin.
 
 ---
 
@@ -19,9 +24,13 @@ Figma Design System
 mereka-design-tokens.css (CSS custom properties)
        ↓
 scss/_tokens.scss (SCSS variables + Paragon bridge)
-       ↓
-LMS/Studio/MFE assets (compiled CSS)
+       ↓                                ↓
+LMS/Studio/MFE assets (compiled CSS)   Tutor Plugin (MFE footer, Google Fonts stripping)
 ```
+
+**Two-Layer System**:
+- **Plugin** (`mereka_lms.py`): Configuration and component injection (MFE footer, Google Fonts stripping, build config)
+- **SCSS Overlay**: Visual branding (colors, typography, spacing via Paragon CSS variables)
 
 ### Key Files
 

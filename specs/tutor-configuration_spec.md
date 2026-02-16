@@ -43,6 +43,12 @@ Open edX on Tutor regenerates all Docker Compose, Dockerfile, and Django setting
 
 This spec covers the Tutor configuration save-patch-restart workflow required to maintain a working Open edX deployment. It ensures that local patches are consistently applied after every configuration change to prevent service failures.
 
+**Architecture Note**: Per ADR-006, the system uses a two-layer approach:
+- **Plugin** (`infrastructure/tutor/plugins/mereka_lms.py`): PRIMARY mechanism for configuration patches (automatic via Tutor hooks)
+- **Script** (`infrastructure/tutor/apply-patches.sh`): COMPLEMENTARY mechanism for file-system operations (manual but required)
+
+Both are required. Reference ADR-006 for full rationale.
+
 ## Non-goals
 
 - Upstream Tutor template contributions (handled separately)
@@ -60,42 +66,31 @@ This spec covers the Tutor configuration save-patch-restart workflow required to
 
 ### Critical Patches
 
-The `apply-patches.sh` script MUST apply the following patches:
+The following table shows the division of responsibility between plugin and script:
 
-#### MySQL Authentication
-- MUST set MySQL authentication plugin to `mysql_native_password` (not `caching_sha2_password`)
-- MUST add `MYSQL_ROOT_HOST: "%"` for remote root access
-- MUST replace `--mysql-native-password=ON` with `--default-authentication-plugin=mysql_native_password`
+| Patch Category | Delivered By | Mechanism |
+|----------------|-------------|-----------|
+| **MySQL Authentication** | Plugin | `ENV_PATCHES` hook on Docker Compose template |
+| **MFE Build Toolchain (Node 18)** | Plugin | `mfe-dockerfile-pre-npm-install` hook |
+| **Multi-Site Domain Support** | Plugin | `openedx-lms-production-settings` hook |
+| **MFE Footer Component** | Plugin | `mfe-dockerfile-post-npm-install` hook (hardcoded JS) |
+| **Google Fonts Stripping** | Plugin | `openedx-dockerfile-pre-assets` hook |
+| **Custom Apps (prometheus, oauth_fix)** | Plugin | `openedx-dockerfile-post-python-requirements` hook |
+| **Webpack Memory Limit** | Plugin | `openedx-dockerfile-pre-assets` hook |
+| **Theme Assets (logos, fonts)** | Script | File-system copy operations |
+| **Theme Directory Setup** | Script | Directory creation and sync |
+| **MFE SCSS Distribution** | Script | File copying to build context |
 
-#### MFE Build Toolchain
-- MUST upgrade MFE base image from Node 12 to Node 18
-- MUST add required build tools: `gcc g++ git libgl1 libxi6 make python3 python3-distutils`
-- MUST set webpack memory limit to 6144MB via `NODE_OPTIONS=--max-old-space-size=6144`
-- MUST add npm resilience with 3 retry attempts and increased timeouts
+The `apply-patches.sh` script MUST apply the following file-system patches:
 
-#### Multi-Site Domain Support
-- MUST add `academy.biji-biji.com` to `ALLOWED_HOSTS`
-- MUST add `skillourfuture.academy.mereka.io` to `ALLOWED_HOSTS`
-- MUST add corresponding HTTPS origins to `CSRF_TRUSTED_ORIGINS`
-
-#### Theme Integration
+#### Theme Integration (Script-Delivered)
 - MUST sync Mereka theme assets to build directory before image builds
 - MUST copy logo variants (PNG, SVG, favicon) to LMS and CMS themes
 - MUST sync font files (.woff2) to static directories
-- MUST compile SASS with custom theme: `npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka`
-- MUST strip Google Fonts imports from SCSS and compiled CSS
+- MUST copy SCSS files to theme directories
+- MUST set up theme directory structure
 
-#### Custom Applications
-- MUST install `mfe_oauth_fix` custom app to fix OAuth provider visibility
-- MUST install `openedx_prometheus` custom app for /metrics endpoint
-- MUST install `django-prometheus==2.3.1` for metrics instrumentation
-- MUST install `pymongo[srv]` for MongoDB Atlas SRV connection support
-
-#### Redwood Compatibility
-- MUST enable optional Redwood apps: `content_libraries`, `bookmarks`, `discussions`, `theming`
-- MUST use `python -m django` instead of `django-admin.py` for message compilation
-- MUST update i18n archive URL to `openedx-unsupported/openedx-i18n`
-- MUST skip legacy `requirements/edx/local.in` reinstall step
+**Note**: Other patches (MySQL auth, MFE build toolchain, multi-site domains, custom apps, Google Fonts stripping, Redwood compatibility) are delivered automatically via the Tutor plugin. See table above for full division of responsibility.
 
 ### Non-Functional Requirements
 

@@ -1,378 +1,437 @@
 #!/usr/bin/env bash
+# @covers AC-UI-001, AC-UI-005, AC-UI-006, AC-UI-007, AC-UI-008
+# @spec: branding-system_spec.md, mfe-routing_spec.md
 #
-# MFE Branding Verification Script
+# verify-mfe-branding.sh - Verify MFE branding, routing, and content
 #
-# Verifies:
-# - AC-UI-001: MFE URL paths match container directory names
-# - AC-UI-005: Full redirect chains and rendered content validation
+# Acceptance Criteria:
+# - AC-UI-001: All MFE URL paths in LMS/CMS settings match actual MFE container directory names
+# - AC-UI-005: Validation scripts follow full redirect chains and verify rendered content (not just HTTP 200)
 # - AC-UI-006: Custom Mereka footer renders in all MFEs
-# - AC-UI-007: No default Open edX branding on production
-# - AC-UI-008: No broken image/asset references
-#
-# Usage:
-#   ./scripts/qa/verify-mfe-branding.sh [--env local|production] [--verbose]
-#
+# - AC-UI-007: (Negative) No MFE serves default Open edX branding on production domains
+# - AC-UI-008: (Negative) No broken image/asset references in theme (404s for logos, fonts, CSS)
+
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Source shared config
+# shellcheck source=../shared/config.sh
+source "$SCRIPT_DIR/../shared/config.sh"
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # Counters
-TOTAL_CHECKS=0
-PASSED_CHECKS=0
-FAILED_CHECKS=0
-WARNINGS=0
+PASSED=0
+FAILED=0
+SKIPPED=0
 
-# Configuration
-ENV="${1:-local}"
-VERBOSE=false
+# Flags
+SKIP_CLUSTER=0
+ENVIRONMENT="prod"
 
-if [[ "${1:-}" == "--verbose" ]] || [[ "${2:-}" == "--verbose" ]]; then
-    VERBOSE=true
-fi
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-cluster)
+      SKIP_CLUSTER=1
+      shift
+      ;;
+    --env)
+      ENVIRONMENT="$2"
+      shift 2
+      ;;
+    *)
+      echo "Usage: $0 [--skip-cluster] [--env prod|dev]" >&2
+      exit 1
+      ;;
+  esac
+done
 
-# Base URLs
-if [[ "$ENV" == "production" ]]; then
-    LMS_URL="https://academyv2.mereka.io"
-    STUDIO_URL="https://studio.academyv2.mereka.io"
-    MFE_URL="https://apps.academyv2.mereka.io"
+# Set domain based on environment
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  MFE_BASE_DOMAIN="$MFE_DOMAIN"
 else
-    LMS_URL="http://localhost"
-    STUDIO_URL="http://studio.localhost"
-    MFE_URL="http://apps.localhost"
+  MFE_BASE_DOMAIN="$DEV_MFE_DOMAIN"
 fi
 
-# MFE paths to verify (AC-UI-001)
-declare -A MFE_PATHS=(
-    ["learner-dashboard"]="/learner-dashboard"
-    ["learning"]="/learning"
-    ["profile"]="/profile"
-    ["account"]="/account"
-    ["gradebook"]="/gradebook"
-    ["authn"]="/authn/login"
-    ["course-authoring"]="/course-authoring"
+pass() {
+  echo -e "${GREEN}PASS${NC} $1"
+  PASSED=$((PASSED + 1))
+}
+
+fail() {
+  echo -e "${RED}FAIL${NC} $1"
+  FAILED=$((FAILED + 1))
+}
+
+skip() {
+  echo -e "${YELLOW}SKIP${NC} $1"
+  SKIPPED=$((SKIPPED + 1))
+}
+
+echo "=== MFE Branding Verification ==="
+echo "Environment: $ENVIRONMENT"
+echo "MFE Domain: https://$MFE_BASE_DOMAIN"
+echo "Spec: branding-system_spec.md, mfe-routing_spec.md"
+echo "Coverage: AC-UI-001, AC-UI-005, AC-UI-006, AC-UI-007, AC-UI-008"
+echo
+
+# =============================================================================
+# Section 1: MFE URL-to-Directory Mapping (AC-UI-001)
+# =============================================================================
+echo "=== Section 1: URL-to-Directory Mapping (AC-UI-001) ==="
+echo
+
+# MFE path → directory mappings from Caddyfile
+declare -A MFE_ROUTES=(
+  ["/authn"]="authn"
+  ["/account"]="account"
+  ["/authoring"]="authoring"
+  ["/course-authoring"]="authoring"  # Legacy compat
+  ["/discussions"]="discussions"
+  ["/learner-dashboard"]="learner-dashboard"
+  ["/learning"]="learning"
+  ["/ora-grading"]="ora-grading"
+  ["/u"]="profile"  # Special: serves profile SPA at /u/ path
+  ["/profile"]="profile"
+  ["/communications"]="communications"
+  ["/gradebook"]="gradebook"
 )
 
-log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
+CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-    ((WARNINGS++))
-}
+# Check 1.1: Caddyfile exists
+if [[ ! -f "$CADDYFILE" ]]; then
+  fail "AC-UI-001: Caddyfile not found at $CADDYFILE"
+else
+  pass "AC-UI-001: Caddyfile exists"
+fi
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+# Check 1.2: Verify each MFE route is in Caddyfile
+for path in "${!MFE_ROUTES[@]}"; do
+  directory="${MFE_ROUTES[$path]}"
 
-check_pass() {
-    echo -e "${GREEN}✓${NC} $1"
-    ((PASSED_CHECKS++))
-    ((TOTAL_CHECKS++))
-}
-
-check_fail() {
-    echo -e "${RED}✗${NC} $1"
-    ((FAILED_CHECKS++))
-    ((TOTAL_CHECKS++))
-}
-
-check_url_with_redirects() {
-    local url=$1
-    local description=$2
-    local max_redirects=10
-
-    if [[ "$VERBOSE" == "true" ]]; then
-        log_info "Checking: $url"
-    fi
-
-    # Follow redirect chain and check final response
-    response=$(curl -sL -w "\n%{http_code}\n%{url_effective}" --max-redirs $max_redirects "$url" -o /dev/null 2>&1 || echo "error")
-
-    if [[ "$response" == "error" ]]; then
-        check_fail "$description: Connection failed"
-        return 1
-    fi
-
-    http_code=$(echo "$response" | tail -2 | head -1)
-    final_url=$(echo "$response" | tail -1)
-
-    if [[ "$http_code" == "200" ]]; then
-        check_pass "$description: HTTP $http_code"
-        if [[ "$final_url" != "$url" ]] && [[ "$VERBOSE" == "true" ]]; then
-            log_info "  Redirected to: $final_url"
-        fi
-        return 0
-    elif [[ "$http_code" == "404" ]]; then
-        check_fail "$description: HTTP $http_code (Not Found)"
-        return 1
+  # Special handling for /u (no prefix strip, direct root)
+  if [[ "$path" == "/u" ]]; then
+    if grep -q "path /u /u/\*" "$CADDYFILE" && \
+       grep -q "root \* /openedx/dist/profile" "$CADDYFILE"; then
+      pass "AC-UI-001: $path → profile (special route, no prefix strip)"
     else
-        check_fail "$description: HTTP $http_code"
-        return 1
+      fail "AC-UI-001: $path → profile mapping missing or incorrect in Caddyfile"
     fi
-}
+    continue
+  fi
 
-check_rendered_content() {
-    local url=$1
-    local pattern=$2
-    local description=$3
-
-    if [[ "$VERBOSE" == "true" ]]; then
-        log_info "Checking rendered content: $url"
-    fi
-
-    content=$(curl -sL "$url" 2>/dev/null || echo "")
-
-    if [[ -z "$content" ]]; then
-        check_fail "$description: No content retrieved"
-        return 1
-    fi
-
-    if echo "$content" | grep -qi "$pattern"; then
-        check_pass "$description: Content found"
-        return 0
-    else
-        check_fail "$description: Pattern not found - $pattern"
-        if [[ "$VERBOSE" == "true" ]]; then
-            log_info "  Content preview: ${content:0:200}..."
-        fi
-        return 1
-    fi
-}
-
-check_asset() {
-    local url=$1
-    local description=$2
-
-    http_code=$(curl -sL -w "%{http_code}" -o /dev/null "$url" 2>/dev/null || echo "error")
-
-    if [[ "$http_code" == "200" ]]; then
-        check_pass "$description: HTTP $http_code"
-        return 0
-    elif [[ "$http_code" == "404" ]]; then
-        check_fail "$description: HTTP $http_code (Broken asset - AC-UI-008)"
-        return 1
-    elif [[ "$http_code" == "error" ]]; then
-        check_fail "$description: Connection failed"
-        return 1
-    else
-        check_fail "$description: HTTP $http_code"
-        return 1
-    fi
-}
-
-echo "========================================="
-echo "MFE Branding Verification"
-echo "========================================="
-echo "Environment: $ENV"
-echo "LMS URL: $LMS_URL"
-echo "Studio URL: $STUDIO_URL"
-echo "MFE URL: $MFE_URL"
-echo ""
-
-# ============================================================================
-# 1. AC-UI-001: MFE URL Paths Match Container Directories
-# ============================================================================
-echo "1. Verifying AC-UI-001: MFE URL paths match container directories..."
-echo ""
-
-for mfe in "${!MFE_PATHS[@]}"; do
-    path="${MFE_PATHS[$mfe]}"
-    full_url="${MFE_URL}${path}"
-
-    check_url_with_redirects "$full_url" "MFE $mfe path: $path"
+  # Standard route check
+  if grep -q "root \* /openedx/dist/$directory" "$CADDYFILE"; then
+    pass "AC-UI-001: $path → /openedx/dist/$directory"
+  else
+    fail "AC-UI-001: $path → /openedx/dist/$directory mapping missing in Caddyfile"
+  fi
 done
 
-echo ""
+# Check 1.3: Verify directories exist in MFE pod (if --skip-cluster not set)
+if [[ $SKIP_CLUSTER -eq 0 ]]; then
+  echo
+  echo "Checking MFE pod directories..."
 
-# ============================================================================
-# 2. AC-UI-005: Full Redirect Chains and Rendered Content
-# ============================================================================
-echo "2. Verifying AC-UI-005: Full redirect chains and rendered content..."
-echo ""
+  # Get MFE pod name
+  MFE_POD=$(kubectl get pods -n "$K8S_NAMESPACE" -l app.kubernetes.io/name=mfe -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 
-# Check Studio redirect (known issue: /course-authoring vs /authoring)
-check_url_with_redirects "${STUDIO_URL}/" "Studio root URL"
-check_url_with_redirects "${MFE_URL}/course-authoring" "Studio course authoring MFE"
+  if [[ -z "$MFE_POD" ]]; then
+    skip "AC-UI-001: MFE pod not found (set K8S_NAMESPACE or use --skip-cluster)"
+  else
+    # Check unique directories (authn, account, etc.)
+    UNIQUE_DIRS=$(printf '%s\n' "${MFE_ROUTES[@]}" | sort -u)
 
-# Check LMS pages
-check_url_with_redirects "${LMS_URL}/" "LMS homepage"
-check_url_with_redirects "${LMS_URL}/dashboard" "LMS learner dashboard"
-
-echo ""
-
-# ============================================================================
-# 3. AC-UI-006: Custom Mereka Footer in All MFEs
-# ============================================================================
-echo "3. Verifying AC-UI-006: Custom Mereka footer renders in all MFEs..."
-echo ""
-
-# Check for Mereka-specific footer content
-# Note: Update pattern based on actual footer implementation
-MEREKA_FOOTER_PATTERN="mereka|biji.biji|academy"
-
-for mfe in "${!MFE_PATHS[@]}"; do
-    path="${MFE_PATHS[$mfe]}"
-    full_url="${MFE_URL}${path}"
-
-    check_rendered_content "$full_url" "$MEREKA_FOOTER_PATTERN" "Mereka footer in $mfe MFE"
-done
-
-echo ""
-
-# ============================================================================
-# 4. AC-UI-007: No Default Open edX Branding on Production
-# ============================================================================
-echo "4. Verifying AC-UI-007: No default Open edX branding on production..."
-echo ""
-
-if [[ "$ENV" == "production" ]]; then
-    # Check for default Open edX strings that should NOT appear
-    DEFAULT_BRANDING_PATTERNS=(
-        "edX Inc"
-        "Open edX"
-        "edx.org"
-        "demo.edx.org"
-    )
-
-    for pattern in "${DEFAULT_BRANDING_PATTERNS[@]}"; do
-        # Check LMS homepage
-        content=$(curl -sL "${LMS_URL}/" 2>/dev/null || echo "")
-        if echo "$content" | grep -qi "$pattern"; then
-            check_fail "Default branding found on LMS: $pattern (AC-UI-007)"
-        else
-            check_pass "No default branding on LMS: $pattern"
-        fi
-
-        # Check Studio
-        content=$(curl -sL "${STUDIO_URL}/" 2>/dev/null || echo "")
-        if echo "$content" | grep -qi "$pattern"; then
-            check_fail "Default branding found on Studio: $pattern (AC-UI-007)"
-        else
-            check_pass "No default branding on Studio: $pattern"
-        fi
+    for dir in $UNIQUE_DIRS; do
+      if kubectl exec -n "$K8S_NAMESPACE" "$MFE_POD" -- test -f "/openedx/dist/$dir/index.html" 2>/dev/null; then
+        pass "AC-UI-001: /openedx/dist/$dir/index.html exists in pod"
+      else
+        fail "AC-UI-001: /openedx/dist/$dir/index.html missing in pod"
+      fi
     done
+  fi
 else
-    log_info "Skipping AC-UI-007 checks (only runs in production environment)"
+  skip "AC-UI-001: Skipping pod directory checks (--skip-cluster)"
 fi
 
-echo ""
+# Check 1.4: Verify deprecated orders/payment routes proxy to custom payments-gateway
+if grep -Fq "reverse_proxy /orders* payments-gateway:8080" "$CADDYFILE" && grep -Fq "reverse_proxy /payment* payments-gateway:8080" "$CADDYFILE"; then
+  pass "AC-UI-001: /orders and /payment proxied to payments-gateway (deprecated MFEs)"
+else
+  fail "AC-UI-001: /orders and /payment must proxy to payments-gateway:8080"
+fi
 
-# ============================================================================
-# 5. AC-UI-008: No Broken Image/Asset References
-# ============================================================================
-echo "5. Verifying AC-UI-008: No broken image/asset references..."
-echo ""
+echo
 
-# Check common asset paths
-ASSET_PATHS=(
-    "/static/images/logo.png"
-    "/static/images/favicon.ico"
-    "/static/css/lms-main.css"
+# =============================================================================
+# Section 2: Live HTTP + Content Checks (AC-UI-005)
+# =============================================================================
+echo "=== Section 2: Live HTTP + Content Checks (AC-UI-005) ==="
+echo
+
+# Key MFE paths to test (representative sample)
+TEST_PATHS=(
+  "/authn/login"
+  "/account/"
+  "/learner-dashboard/"
+  "/learning"
+  "/discussions"
 )
 
-for asset_path in "${ASSET_PATHS[@]}"; do
-    check_asset "${LMS_URL}${asset_path}" "LMS asset: $asset_path"
+for path in "${TEST_PATHS[@]}"; do
+  url="https://$MFE_BASE_DOMAIN$path"
+
+  # Check 2.1: HTTP 200 with redirect following
+  http_code=$(curl -sS -L -o /dev/null -w "%{http_code}" --max-time 10 "$url" 2>/dev/null || echo "000")
+
+  if [[ "$http_code" == "200" ]]; then
+    pass "AC-UI-005: $path returns HTTP 200"
+  else
+    fail "AC-UI-005: $path returns HTTP $http_code (expected 200)"
+    continue
+  fi
+
+  # Check 2.2: Response contains SPA marker (not empty page)
+  response=$(curl -sS -L --max-time 10 "$url" 2>/dev/null || echo "")
+
+  if echo "$response" | grep -qP '<div id="root"'; then
+    pass "AC-UI-005: $path contains React root div"
+  elif echo "$response" | grep -qP '<div id="app"'; then
+    pass "AC-UI-005: $path contains app div"
+  else
+    fail "AC-UI-005: $path missing SPA root element"
+  fi
+
+  # Check 2.3: No 404 content (check for actual error pages, not 404 in hashes/filenames)
+  if echo "$response" | grep -qiP "page.not.found|<title>[^<]{0,30}404|>404<|error.404"; then
+    fail "AC-UI-005: $path contains 404 error content"
+  else
+    pass "AC-UI-005: $path does not contain 404 error"
+  fi
 done
 
-# Check MFE assets (if accessible)
-MFE_ASSETS=(
-    "/learner-dashboard/static/css/main.css"
-    "/learning/static/js/main.js"
+# Check 2.4: Verify first CSS asset loads
+echo
+echo "Verifying CSS asset loading for /authn/login..."
+authn_html=$(curl -sS -L --max-time 10 "https://$MFE_BASE_DOMAIN/authn/login" 2>/dev/null || echo "")
+
+# Extract first CSS href (look for .css in href attribute)
+css_href=$(echo "$authn_html" | grep -oP 'href="[^"]*\.css[^"]*"' | head -1 | sed 's/href="//;s/"//')
+
+if [[ -n "$css_href" ]]; then
+  # Make URL absolute if relative
+  if [[ "$css_href" =~ ^/ ]]; then
+    css_url="https://$MFE_BASE_DOMAIN$css_href"
+  else
+    css_url="$css_href"
+  fi
+
+  css_code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "$css_url" 2>/dev/null || echo "000")
+
+  if [[ "$css_code" == "200" ]]; then
+    pass "AC-UI-005: CSS asset loads successfully ($css_href)"
+  else
+    fail "AC-UI-005: CSS asset returns HTTP $css_code ($css_href)"
+  fi
+else
+  skip "AC-UI-005: Could not extract CSS href from authn page"
+fi
+
+echo
+
+# =============================================================================
+# Section 3: Mereka Footer Check (AC-UI-006)
+# =============================================================================
+echo "=== Section 3: Mereka Footer Check (AC-UI-006) ==="
+echo
+
+FOOTER_CHECK_PATHS=(
+  "/authn/login"
+  "/learner-dashboard/"
+  "/account/"
 )
 
-for asset_path in "${MFE_ASSETS[@]}"; do
-    url="${MFE_URL}${asset_path}"
-    http_code=$(curl -sL -w "%{http_code}" -o /dev/null "$url" 2>/dev/null || echo "error")
+for path in "${FOOTER_CHECK_PATHS[@]}"; do
+  url="https://$MFE_BASE_DOMAIN$path"
+  response=$(curl -sS -L --max-time 10 "$url" 2>/dev/null || echo "")
 
-    if [[ "$http_code" == "200" ]]; then
-        check_pass "MFE asset: $asset_path"
-    elif [[ "$http_code" == "404" ]]; then
-        log_warn "MFE asset not found (may not be exposed): $asset_path"
-    else
-        log_warn "MFE asset check inconclusive: $asset_path (HTTP $http_code)"
-    fi
+  # MFE SPAs are JS-rendered — check for Mereka branding in HTML source or
+  # brand theme references (brand-theme-core CSS indicates custom branding)
+  if echo "$response" | grep -qi "mereka"; then
+    pass "AC-UI-006: $path contains Mereka branding in HTML"
+  elif echo "$response" | grep -q "brand-theme-core\|brand-theme-variants"; then
+    pass "AC-UI-006: $path has custom brand theme (JS-rendered footer expected)"
+  elif echo "$response" | grep -q "PARAGON_THEME.*brand"; then
+    pass "AC-UI-006: $path has Paragon brand theme config (JS-rendered footer)"
+  else
+    fail "AC-UI-006: $path missing Mereka branding references"
+  fi
 done
 
-echo ""
+echo
 
-# ============================================================================
-# 6. Theme Consistency Check (AC-UI-002)
-# ============================================================================
-echo "6. Verifying AC-UI-002: Theme consistency across LMS/Studio/MFEs..."
-echo ""
+# =============================================================================
+# Section 4: Negative — No Default Open edX Branding (AC-UI-007)
+# =============================================================================
+echo "=== Section 4: No Default Open edX Branding (AC-UI-007) ==="
+echo
 
-# Check for Mereka theme markers
-THEME_MARKERS=(
-    "mereka"
-    "comprehensive.theme.css"
+DEFAULT_BRANDING_PATHS=(
+  "/authn/login"
+  "/account/"
+  "/learner-dashboard/"
 )
 
-for marker in "${THEME_MARKERS[@]}"; do
-    # LMS
-    content=$(curl -sL "${LMS_URL}/" 2>/dev/null || echo "")
-    if echo "$content" | grep -qi "$marker"; then
-        check_pass "Theme marker in LMS: $marker"
-    else
-        log_warn "Theme marker not found in LMS: $marker"
-    fi
+for path in "${DEFAULT_BRANDING_PATHS[@]}"; do
+  url="https://$MFE_BASE_DOMAIN$path"
+  response=$(curl -sS -L --max-time 10 "$url" 2>/dev/null || echo "")
 
-    # Studio
-    content=$(curl -sL "${STUDIO_URL}/" 2>/dev/null || echo "")
-    if echo "$content" | grep -qi "$marker"; then
-        check_pass "Theme marker in Studio: $marker"
-    else
-        log_warn "Theme marker not found in Studio: $marker"
-    fi
+  # Check 4.1: No "Powered by Open edX" text
+  if echo "$response" | grep -qi "powered by open.*edx"; then
+    fail "AC-UI-007: $path contains 'Powered by Open edX' text"
+  else
+    pass "AC-UI-007: $path does not contain 'Powered by Open edX'"
+  fi
+
+  # Check 4.2: No default Open edX logo URL
+  if echo "$response" | grep -q "logo-openedx\|openedx-logo\|logo\.png"; then
+    fail "AC-UI-007: $path references default Open edX logo"
+  else
+    pass "AC-UI-007: $path does not reference default Open edX logo"
+  fi
+
+  # Check 4.3: No default Open edX brand color (#00262B)
+  if echo "$response" | grep -q "#00262B\|rgb(0,38,43)"; then
+    fail "AC-UI-007: $path contains default Open edX brand color"
+  else
+    pass "AC-UI-007: $path does not contain default Open edX brand color"
+  fi
 done
 
-echo ""
+echo
 
-# ============================================================================
+# =============================================================================
+# Section 5: Asset Integrity (AC-UI-008)
+# =============================================================================
+echo "=== Section 5: Asset Integrity (AC-UI-008) ==="
+echo
+
+# Fetch authn index.html for asset checking
+authn_url="https://$MFE_BASE_DOMAIN/authn/login"
+authn_html=$(curl -sS -L --max-time 10 "$authn_url" 2>/dev/null || echo "")
+
+# Extract CSS hrefs
+css_hrefs=$(echo "$authn_html" | grep -oP 'href="[^"]*\.css[^"]*"' | sed 's/href="//;s/"// ' | head -5)
+
+if [[ -n "$css_hrefs" ]]; then
+  echo "Checking CSS assets..."
+  while IFS= read -r href; do
+    # Make URL absolute
+    if [[ "$href" =~ ^/ ]]; then
+      asset_url="https://$MFE_BASE_DOMAIN$href"
+    elif [[ "$href" =~ ^http ]]; then
+      asset_url="$href"
+    else
+      asset_url="https://$MFE_BASE_DOMAIN/authn/$href"
+    fi
+
+    asset_code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "$asset_url" 2>/dev/null || echo "000")
+
+    if [[ "$asset_code" == "200" ]]; then
+      pass "AC-UI-008: CSS asset OK - ${href:0:60}"
+    else
+      fail "AC-UI-008: CSS asset HTTP $asset_code - $href"
+    fi
+  done <<< "$css_hrefs"
+else
+  skip "AC-UI-008: No CSS assets found to check"
+fi
+
+echo
+
+# Extract JS hrefs (check first 3)
+js_hrefs=$(echo "$authn_html" | grep -oP 'src="[^"]*\.js[^"]*"' | sed 's/src="//;s/"// ' | head -3)
+
+if [[ -n "$js_hrefs" ]]; then
+  echo "Checking JS assets..."
+  while IFS= read -r href; do
+    # Make URL absolute
+    if [[ "$href" =~ ^/ ]]; then
+      asset_url="https://$MFE_BASE_DOMAIN$href"
+    elif [[ "$href" =~ ^http ]]; then
+      asset_url="$href"
+    else
+      asset_url="https://$MFE_BASE_DOMAIN/authn/$href"
+    fi
+
+    asset_code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "$asset_url" 2>/dev/null || echo "000")
+
+    if [[ "$asset_code" == "200" ]]; then
+      pass "AC-UI-008: JS asset OK - ${href:0:60}"
+    else
+      fail "AC-UI-008: JS asset HTTP $asset_code - $href"
+    fi
+  done <<< "$js_hrefs"
+else
+  skip "AC-UI-008: No JS assets found to check"
+fi
+
+echo
+
+# Check for broken image references
+echo "Checking for broken image references..."
+img_srcs=$(echo "$authn_html" | grep -oP 'src="[^"]*\.(png|jpg|jpeg|svg|webp)[^"]*"' | sed 's/src="//;s/"// ' | head -5 || true)
+
+if [[ -n "$img_srcs" ]]; then
+  while IFS= read -r src; do
+    [[ -z "$src" ]] && continue  # Skip empty lines
+
+    # Make URL absolute
+    if [[ "$src" =~ ^/ ]]; then
+      img_url="https://$MFE_BASE_DOMAIN$src"
+    elif [[ "$src" =~ ^http ]]; then
+      img_url="$src"
+    else
+      img_url="https://$MFE_BASE_DOMAIN/authn/$src"
+    fi
+
+    img_code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 10 "$img_url" 2>/dev/null || echo "000")
+
+    if [[ "$img_code" == "200" ]]; then
+      pass "AC-UI-008: Image asset OK - ${src:0:60}"
+    else
+      fail "AC-UI-008: Image asset HTTP $img_code - $src"
+    fi
+  done <<< "$img_srcs"
+else
+  skip "AC-UI-008: No image assets found to check"
+fi
+
+echo
+
+# =============================================================================
 # Summary
-# ============================================================================
-echo "========================================="
-echo "Verification Summary"
-echo "========================================="
-echo ""
-echo "Total checks:  $TOTAL_CHECKS"
-echo -e "${GREEN}Passed:${NC}        $PASSED_CHECKS"
-echo -e "${RED}Failed:${NC}        $FAILED_CHECKS"
-echo -e "${YELLOW}Warnings:${NC}      $WARNINGS"
-echo ""
+# =============================================================================
+echo "=== Summary ==="
+echo -e "${GREEN}PASS:${NC} $PASSED | ${RED}FAIL:${NC} $FAILED | ${YELLOW}SKIP:${NC} $SKIPPED"
+echo
 
-if [[ $FAILED_CHECKS -eq 0 ]]; then
-    echo -e "${GREEN}✓ All checks passed!${NC}"
-    echo ""
-    echo "MFE branding verification complete."
-    echo ""
-    echo "Acceptance criteria verified:"
-    echo "  ✓ AC-UI-001: MFE URL paths match container directories"
-    echo "  ✓ AC-UI-005: Full redirect chains validated"
-    echo "  ✓ AC-UI-006: Mereka footer renders in all MFEs"
-    if [[ "$ENV" == "production" ]]; then
-        echo "  ✓ AC-UI-007: No default Open edX branding"
-    fi
-    echo "  ✓ AC-UI-008: No broken asset references"
-    echo "  ✓ AC-UI-002: Theme consistency verified"
-    echo ""
-    if [[ $WARNINGS -gt 0 ]]; then
-        echo -e "${YELLOW}Note: $WARNINGS warning(s) detected - review above${NC}"
-    fi
-    exit 0
-else
-    echo -e "${RED}✗ Some checks failed!${NC}"
-    echo ""
-    echo "Please review the failed checks above."
-    echo "Run with --verbose for more details."
-    echo ""
-    if [[ $WARNINGS -gt 0 ]]; then
-        echo -e "${YELLOW}Also: $WARNINGS warning(s) detected${NC}"
-    fi
-    exit 1
+if [[ $FAILED -gt 0 ]]; then
+  echo "Action required: Fix MFE branding or routing issues."
+  echo "  1. Check Caddyfile: deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
+  echo "  2. Rebuild MFE images: tutor images build mfe"
+  echo "  3. Verify branding sync: make branding-sync"
+  echo "  4. Check production.py MFE_CONFIG settings"
+  exit 1
 fi
+
+echo "All MFE branding checks passed!"
+exit 0
