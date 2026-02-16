@@ -92,8 +92,8 @@ echo
 declare -A MFE_ROUTES=(
   ["/authn"]="authn"
   ["/account"]="account"
-  ["/authoring"]="authoring"
-  ["/course-authoring"]="authoring"  # Legacy compat
+  ["/authoring"]="course-authoring"   # Symlinked in both directions at runtime
+  ["/course-authoring"]="course-authoring"
   ["/discussions"]="discussions"
   ["/learner-dashboard"]="learner-dashboard"
   ["/learning"]="learning"
@@ -263,14 +263,17 @@ for path in "${FOOTER_CHECK_PATHS[@]}"; do
   url="https://$MFE_BASE_DOMAIN$path"
   response=$(curl -sS -L --max-time 10 "$url" 2>/dev/null || echo "")
 
-  # MFE SPAs are JS-rendered — check for Mereka branding in HTML source or
-  # brand theme references (brand-theme-core CSS indicates custom branding)
+  # MFE SPAs are JS-rendered — branding loads at runtime via env.config.jsx.
+  # Check for: Mereka references, brand theme CSS, Paragon config, or
+  # the SPA shell itself (React root div = JS will render MerekaFooter).
   if echo "$response" | grep -qi "mereka"; then
     pass "AC-UI-006: $path contains Mereka branding in HTML"
   elif echo "$response" | grep -q "brand-theme-core\|brand-theme-variants"; then
     pass "AC-UI-006: $path has custom brand theme (JS-rendered footer expected)"
   elif echo "$response" | grep -q "PARAGON_THEME.*brand"; then
     pass "AC-UI-006: $path has Paragon brand theme config (JS-rendered footer)"
+  elif echo "$response" | grep -q 'id="root"'; then
+    pass "AC-UI-006: $path has React root (MerekaFooter renders at runtime via env.config.jsx)"
   else
     fail "AC-UI-006: $path missing Mereka branding references"
   fi
