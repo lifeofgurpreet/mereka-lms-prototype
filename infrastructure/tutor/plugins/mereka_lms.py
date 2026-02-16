@@ -235,6 +235,23 @@ MATH_INPUT_DEFAULT_TOLERANCE = float(os.environ.get('MATH_INPUT_DEFAULT_TOLERANC
 
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
+
+# Multi-Tenancy Integration (Tenancy Epic Phase 1)
+if 'mereka_tenancy' not in INSTALLED_APPS:
+    INSTALLED_APPS.append('mereka_tenancy')
+
+# Add TenantResolutionMiddleware after AuthenticationMiddleware
+# This ensures tenant context is available for authenticated requests
+if 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
+    auth_middleware_index = -1
+    for i, mw in enumerate(MIDDLEWARE):
+        if 'AuthenticationMiddleware' in mw:
+            auth_middleware_index = i
+            break
+    if auth_middleware_index >= 0:
+        MIDDLEWARE.insert(auth_middleware_index + 1, 'mereka_tenancy.middleware.TenantResolutionMiddleware')
+    else:
+        MIDDLEWARE.append('mereka_tenancy.middleware.TenantResolutionMiddleware')
 """,
     )
 )
@@ -371,6 +388,14 @@ hooks.Filters.ENV_PATCHES.add_item(
 # Copy and install ALL custom apps (keep in sync with settings and custom-apps/)
 {_copy_lines}
 {_install_lines}
+
+# Copy and install mereka_tenancy multi-tenancy plugin
+# NOTE: Installed to /openedx/plugins/ instead of /openedx/ to enable proper namespacing
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN pip install -e /openedx/plugins/mereka_tenancy
+
+# Add /openedx/plugins to Python path via .pth file for proper module imports
+RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
