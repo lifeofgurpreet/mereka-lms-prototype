@@ -458,3 +458,12 @@ jobs:
             docker run --rm -v $(pwd):/src hadolint/hadolint:latest \
               hadolint /src/**/Dockerfile*
           fi
+
+  custom-app-drift:
+    name: Custom App Install Drift Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify custom apps (settings ↔ plugin ↔ directory)
+        run: ./scripts/qa/verify-custom-app-drift.sh
