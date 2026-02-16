@@ -10,7 +10,8 @@ setup(
     description='Multi-tenancy extensions for Open edX EnterpriseCustomer',
     author='Mereka Team',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=['mereka_tenancy', 'mereka_tenancy.management', 'mereka_tenancy.migrations'],
+    package_dir={'mereka_tenancy': '.'},
     install_requires=[],
     classifiers=[
         'Development Status :: 4 - Beta',
