@@ -1223,4 +1223,15 @@ else
   echo "⚠ Warning: Custom apps sync skipped (missing build context)."
 fi
 
+# Sync multi-tenancy plugin into build context for openedx image
+TENANCY_PLUGIN_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
+TENANCY_PLUGIN_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/plugins/multi-tenancy"
+if [ -d "$TENANCY_PLUGIN_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
+  mkdir -p "$(dirname "$TENANCY_PLUGIN_DEST")"
+  cp -R "$TENANCY_PLUGIN_SRC" "$TENANCY_PLUGIN_DEST"
+  echo "Multi-tenancy plugin synced to build context."
+else
+  echo "⚠ Warning: Multi-tenancy plugin sync skipped (missing build context)."
+fi
+
 echo "Applied local Tutor patches."
