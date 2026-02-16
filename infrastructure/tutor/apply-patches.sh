@@ -877,47 +877,13 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         if npm_install_marker in updated and "mv /openedx/edx-platform/node_modules" not in updated:
             updated = updated.replace(npm_install_marker, node_mv)
 
-    # Add custom apps to Dockerfile
+    # Custom apps Dockerfile wiring
+    # The mereka_lms.py plugin handles COPY + pip install for ALL custom apps
+    # via the openedx-dockerfile-post-python-requirements ENV_PATCH.
+    # This fallback only verifies the plugin has injected the block.
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        # Find the line where we copy themes and add our custom apps after it
-        copy_themes_marker = "COPY --chown=app:app themes/ /openedx/themes/"
-        copy_themes_marker_alt = "COPY --chown=app:app ./themes/ /openedx/themes"
-        custom_apps_block = """# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/mereka_tenancy"""
-        if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
-            marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
-            custom_apps_copy = f"""{marker}
-{custom_apps_block}"""
-            updated = updated.replace(marker, custom_apps_copy)
-        elif "mfe_oauth_fix" in updated and "openedx_prometheus" not in updated:
-            # Add prometheus app alongside existing mfe_oauth_fix
-            mfe_oauth_marker = "COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"
-            custom_apps_add = f"""{mfe_oauth_marker}
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/mereka_tenancy"""
-            updated = updated.replace(mfe_oauth_marker, custom_apps_add)
-        elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
-            # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
-            workdir_marker = "WORKDIR /openedx/edx-platform\n"
-            if workdir_marker in updated:
-                custom_app_insert = f"""# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/mereka_tenancy
-
-""" + workdir_marker
-                updated = updated.replace(workdir_marker, custom_app_insert, 1)
+        if "mfe_oauth_fix" not in updated:
+            print("  WARNING: Custom apps block missing from Dockerfile — plugin may not be loaded")
 
         # Install django-prometheus after pip install of base requirements
         # Also install pymongo SRV extras for MongoDB Atlas (dnspython)
