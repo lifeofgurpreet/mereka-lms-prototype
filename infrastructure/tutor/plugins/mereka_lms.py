@@ -330,25 +330,47 @@ ENV PYTHONPATH="/openedx/edx-platform"
 )
 
 # Install custom apps and dependencies
+# IMPORTANT: Every app referenced via INSTALLED_APPS in LMS/CMS settings MUST
+# appear here. Run scripts/qa/verify-custom-app-drift.sh to detect mismatches.
+_CUSTOM_APPS = [
+    "credentials_vc_issuer",
+    "mfe_oauth_fix",
+    "openedx_advanced_xblocks",
+    "openedx_assessment_bulk",
+    "openedx_content_libraries",
+    "openedx_email_digests",
+    "openedx_email_preferences",
+    "openedx_email_templates",
+    "openedx_kajabi_sso",
+    "openedx_mobile_api",
+    "openedx_mux_upload",
+    "openedx_notifications",
+    "openedx_ora2_operations",
+    "openedx_prometheus",
+    "openedx_push_notifications",
+    "openedx_tenant_cache",
+    "openedx_timed_exams",
+    "openedx_video_analytics",
+    "openedx_video_pipeline",
+    "openedx_video_protection",
+    "openedx_xqueue_graders",
+]
+
+_copy_lines = "\n".join(
+    f"COPY --chown=app:app ./infrastructure/tutor/custom-apps/{app} /openedx/{app}"
+    for app in _CUSTOM_APPS
+)
+_install_lines = "\n".join(
+    f"RUN pip install -e /openedx/{app}" for app in _CUSTOM_APPS
+)
+
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-dockerfile-post-python-requirements",
-        """
-# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_notifications /openedx/openedx_notifications
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_email_preferences /openedx/openedx_email_preferences
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_mux_upload /openedx/openedx_mux_upload
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_video_analytics /openedx/openedx_video_analytics
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_video_protection /openedx/openedx_video_protection
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/openedx_notifications
-RUN pip install -e /openedx/openedx_email_preferences
-RUN pip install -e /openedx/openedx_mux_upload
-RUN pip install -e /openedx/openedx_video_analytics
-RUN pip install -e /openedx/openedx_video_protection
+        f"""
+# Copy and install ALL custom apps (keep in sync with settings and custom-apps/)
+{_copy_lines}
+{_install_lines}
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
