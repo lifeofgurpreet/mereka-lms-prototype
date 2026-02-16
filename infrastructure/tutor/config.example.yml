@@ -16,7 +16,7 @@ PLUGINS:
   - discovery
   - mfe
   - notes
-  - ecommerce
+  - ecommerce  # DEPRECATED — legacy Oscar ecommerce, being replaced by purchase-gateway (services/purchase-gateway/)
   - xqueue
   - forum
   - aspects

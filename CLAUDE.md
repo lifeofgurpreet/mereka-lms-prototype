@@ -27,7 +27,14 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
   - Local: Docker Compose
   - Production: Google Kubernetes Engine (GKE), Cloud SQL, Artifact Registry
 - **Frontend**: Micro-frontends (MFEs) built on React, served via Caddy reverse proxy
-- **Services**: Discovery (course catalog), Forum (Python openedx-forum v0.3.8, integrated into LMS), Notes, Ecommerce, XQueue, Meilisearch (forum search)
+- **Services**:
+  - Discovery (course catalog)
+  - Forum (Python openedx-forum v0.3.8, integrated into LMS)
+  - Notes
+  - Ecommerce (legacy Oscar — deprecated, being replaced by Purchase Gateway)
+  - Purchase Gateway (custom FastAPI + PostgreSQL + Stripe — canonical ecommerce replacement)
+  - XQueue
+  - Meilisearch (forum search)
 
 ### Repository Structure
 ```

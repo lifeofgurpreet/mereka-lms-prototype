@@ -2,6 +2,8 @@
 
 <!-- Last verified: 2026-02-13 -->
 
+> **DEPRECATED**: This document covers theming for the legacy Oscar-based ecommerce service. The custom Purchase Gateway (`services/purchase-gateway/`) uses its own frontend and does not require Oscar template overrides. This document is retained for reference during the transition period.
+
 This document covers theming Open edX ecommerce templates for Mereka branding, including basket, checkout, receipt pages, and payment MFE integration.
 
 ## Ecommerce Architecture

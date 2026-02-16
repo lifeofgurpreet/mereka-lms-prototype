@@ -57,7 +57,7 @@ MFE apps:
 
 Shared ecosystem services (still part of the Open edX ecosystem):
 - `discovery.academyv2.mereka.io`
-- `ecommerce.academyv2.mereka.io`
+- `ecommerce.academyv2.mereka.io` (DEPRECATED — legacy Oscar ecommerce, being replaced by purchase-gateway)
 - `credentials.academyv2.mereka.io`
 - `notes.academyv2.mereka.io`
 - `forum.academyv2.mereka.io`
@@ -73,7 +73,7 @@ Public dev hostnames:
 - `studio.academyv2.mereka.dev`
 - `apps.academyv2.mereka.dev`
 - `discovery.academyv2.mereka.dev`
-- `ecommerce.academyv2.mereka.dev`
+- `ecommerce.academyv2.mereka.dev` (DEPRECATED — legacy Oscar ecommerce, being replaced by purchase-gateway)
 - `credentials.academyv2.mereka.dev`
 - `notes.academyv2.mereka.dev`
 - `forum.academyv2.mereka.dev`

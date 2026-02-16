@@ -164,6 +164,10 @@ an older HTML page after a deploy, it may reference an older hash that no longer
 new image. `verify-public-branding.sh` uses cache-busting for the homepage fetch to avoid
 false negatives; if you see real user impact, purge the CDN cache for `/` and retry.
 
+## Ecommerce Branding (Legacy)
+
+**Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). Legacy ecommerce theming (Oscar template overrides) is being phased out in favor of the purchase-gateway's own frontend. See `specs/ecommerce-purchase-gateway_spec.md` for the migration plan and `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for the architectural decision.
+
 ## Visual Snapshot (Screenshots)
 
 To avoid "HTML checks pass but UI regressed" problems, capture periodic screenshots of the key

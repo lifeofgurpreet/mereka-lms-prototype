@@ -1,6 +1,8 @@
 # Ecommerce OAuth 500 Troubleshooting
 _Audience: Platform Eng • Last updated: 2026-02-04_
 
+> **DEPRECATED**: This document covers the legacy Oscar-based ecommerce service (`overhangio/openedx-ecommerce`), which is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `specs/ecommerce-purchase-gateway_spec.md` for the migration plan. During the dual-stack transition period, these OAuth2 configurations remain active.
+
 Use this checklist when Ecommerce returns `500` during login or API calls. The most common cause is a mismatch between the LMS OAuth2 client config and the Ecommerce settings.
 
 ## ✅ Expected OAuth Clients in LMS

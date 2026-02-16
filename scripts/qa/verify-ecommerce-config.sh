@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# DEPRECATED: This script validates the legacy Oscar-based ecommerce service configuration.
+# It is retained during the dual-stack transition period.
+# For the replacement service, see: services/purchase-gateway/
+# Spec: specs/ecommerce-purchase-gateway_spec.md
+#
 # @covers AC-031
 # @spec: ecommerce-purchase-gateway_spec.md
 # Validate ecommerce OAuth + site configuration (non-secret checks).
