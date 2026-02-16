@@ -1021,6 +1021,18 @@ spec:
       containers:
         - name: mfe
           image: docker.io/overhangio/openedx-mfe:21.0.0-indigo
+          command: ["sh", "-c"]
+          args:
+            - |
+              # Normalize course-authoring directory name across image versions.
+              # Some images use "authoring", others use "course-authoring".
+              # Create symlinks so Caddyfile works with either layout.
+              if [ -d /openedx/dist/authoring ] && [ ! -e /openedx/dist/course-authoring ]; then
+                ln -s /openedx/dist/authoring /openedx/dist/course-authoring
+              elif [ -d /openedx/dist/course-authoring ] && [ ! -e /openedx/dist/authoring ]; then
+                ln -s /openedx/dist/course-authoring /openedx/dist/authoring
+              fi
+              exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
           ports:
             - containerPort: 8002
           volumeMounts:
