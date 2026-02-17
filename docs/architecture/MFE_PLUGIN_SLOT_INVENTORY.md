@@ -151,7 +151,7 @@ These slots are configured by the Indigo theme in the generated `env.config.jsx`
 | `org.openedx.frontend.account.id_verification_page.v1` | ID verification page |
 | `FooterSlot` | Footer (shared) |
 
-### Authoring MFE (`frontend-app-authoring`) — 17 slots
+### Authoring MFE (`frontend-app-authoring`) — 16 slots
 
 | Slot ID | Controls |
 |---------|----------|
