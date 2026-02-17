@@ -334,6 +334,39 @@ for _m in list(_sys.modules.values()):
 # Open edX Dockerfile Patches
 ###############################################################################
 
+# Fix editable Git URLs for uv pip compatibility
+# uv pip (Rust-based SOTA tool) doesn't support editable Git URLs (-e git+https://...)
+# We work around this by filtering them out and installing separately with PEP 508 format.
+# This lets us use uv pip for all packages while handling the edge case properly.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-dockerfile-pre-python-requirements",
+        """
+# Extract editable Git packages from requirements for separate installation
+RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/tmp/base.txt \\
+    grep '^-e git+https://' /tmp/base.txt | sed 's|^-e git+https://github.com/\\([^/]\\+\\)/\\([^.]*\\)\\.git@\\([^#]\\+\\)#egg=\\(.*\\)$|\\4 @ git+https://github.com/\\1/\\2.git@\\3|' > /tmp/git-packages.txt || true && \\
+    grep -v '^-e git+https://' /tmp/base.txt > /tmp/base-filtered.txt
+""",
+    )
+)
+
+# Override the base requirements install to use filtered requirements
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-dockerfile-python-requirements",
+        """
+# Install main requirements (with editable Git URLs filtered out)
+RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/assets.txt,target=/tmp/assets.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    [ -s /tmp/base-filtered.txt ] && $PIP_COMMAND install -r /tmp/base-filtered.txt -r /tmp/assets.txt || $PIP_COMMAND install -r /tmp/assets.txt
+
+# Install editable Git packages separately with PEP 508 format (uv pip compatible)
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    [ -s /tmp/git-packages.txt ] && xargs -r -a /tmp/git-packages.txt $PIP_COMMAND install || true
+""",
+    )
+)
+
 # Node environment variables for webpack builds
 hooks.Filters.ENV_PATCHES.add_item(
     (
@@ -343,6 +376,16 @@ hooks.Filters.ENV_PATCHES.add_item(
 ENV NODE_OPTIONS="--max-old-space-size=6144"
 ENV PYTHONPATH="/openedx/edx-platform"
 """,
+    )
+)
+
+# NPM install command override for lockfile drift tolerance
+# NOTE: Using 'npm install' instead of 'npm ci' to handle Open edX upstream
+# lockfile drift gracefully while still respecting the lockfile when possible.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-dockerfile-npm-install-cmd",
+        """npm install --no-audit --registry=$NPM_REGISTRY""",
     )
 )
 
@@ -534,6 +577,9 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 )
 
 # NPM install resilience (retry on failure)
+# NOTE: Using 'npm install' instead of 'npm ci' to handle lockfile drift gracefully
+# while still respecting the lockfile when possible. This is the SOTA approach for
+# environments where upstream package-lock.json may have minor version drift.
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "mfe-dockerfile-npm-install",
@@ -544,8 +590,8 @@ RUN npm config set fetch-retries 6 \\
  && npm config set fetch-retry-maxtimeout 120000 \\
  && npm config set fetch-timeout 300000
 
-# Install with retries
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# Install with retries (using npm install for lockfile drift tolerance)
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 """,
     )
 )

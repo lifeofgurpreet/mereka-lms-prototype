@@ -1281,6 +1281,15 @@ RUN pip install "pymongo[srv]" """,
             )
             updated = updated.replace(needle, replacement, 1)
 
+    # Disable django-pipeline UglifyJS compression during collectstatic.
+    # UglifyJS v2.6.1 cannot parse ES6+ syntax (arrow functions, template literals).
+    # Setting JS_COMPRESSOR to None still concatenates JS but skips minification.
+    # CMS already has this set by default; only LMS enables UglifyJS.
+    if path.name == "assets.py" and "derive_settings" in updated:
+        pipeline_patch = "PIPELINE['JS_COMPRESSOR'] = None\n"
+        if "JS_COMPRESSOR" not in updated:
+            updated = updated.rstrip() + "\n\n" + pipeline_patch
+
     # Fix collectstatic SuspiciousFileOperation in v21 asset builds.
     # The theming storage's safe_join fails on relative CSS paths that resolve outside STATIC_ROOT.
     # Monkey-patch safe_join in the canonical module AND in every module that already imported it
