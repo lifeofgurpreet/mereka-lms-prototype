@@ -264,6 +264,28 @@
 
 **Script**: `scripts/qa/verify-contrast-compliance.sh` (27 PASS / 0 FAIL)
 
+## WCAG Contrast Policy v2
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Contrast policy v2 documented (AC-WCAG2-001) | PASS | `docs/architecture/WCAG_CONTRAST_POLICY_V2.md` |
+| Complete token pair audit (AC-WCAG2-001) | PASS | 27 pairs documented with WCAG thresholds |
+| Layer discrepancy tracking (AC-WCAG2-001) | PASS | Teal + ink-500 drift Layer 2 vs Layer 3 |
+| Remediation plan documented (AC-WCAG2-001) | PASS | 5-phase plan: align layers, adjust canonical, rebuild |
+| Policy verifier exists (AC-WCAG2-002) | PASS | `scripts/qa/verify-wcag-contrast-v2.sh` (28 PASS / 0 FAIL) |
+| CI gate for policy contract (AC-WCAG2-003) | PASS | `monitoring-guardrails` job syntax check |
+| Known drift: teal Layer 2 vs Layer 3 | WARN | `#297F81` (L2) vs `#2d898b` (L3) — runtime 4.3:1 fails AA |
+| Known drift: ink-500 Layer 2 vs Layer 3 | WARN | `#737373` (L2) vs `#7B7B7B` (L3) — runtime 4.1:1 fails AA |
+
+**Script**: `scripts/qa/verify-wcag-contrast-v2.sh` (28 PASS / 0 FAIL)
+
+**Critical findings**:
+- **Layer 2 (SCSS) verification**: 27/27 PASS (verify-contrast-compliance.sh)
+- **Layer 3 (runtime) reality**: 2 FAIL (teal 4.3:1, ink-500 4.1:1 — both need ≥4.5:1)
+- **Gap**: Verification reads SCSS but browsers render runtime CSS with different values
+
+**Remediation priority**: HIGH — Runtime contrast fails affect real users with low vision
+
 ## Accessibility Conformance
 
 | Check | Status | Evidence |
