@@ -203,6 +203,7 @@ jobs:
           bash -n scripts/qa/verify-analytics-decision-gate.sh
           bash -n scripts/qa/verify-superset-runbook.sh
           bash -n scripts/qa/verify-analytics-drift-guardrails.sh
+          bash -n scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
 
       - name: Run local observability audit
         run: |

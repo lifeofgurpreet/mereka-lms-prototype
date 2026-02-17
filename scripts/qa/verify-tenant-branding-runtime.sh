@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-TBR-101, AC-TBR-102, AC-TBR-103
+# @spec: multi-tenancy-architecture_spec.md
 # Runtime verification of tenant branding system
 #
 # Usage:
