@@ -187,6 +187,31 @@
 
 **Script**: `scripts/qa/verify-contrast-compliance.sh` (27 PASS / 0 FAIL)
 
+## Accessibility Conformance
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Accessibility conformance policy documented | PASS | `docs/architecture/ACCESSIBILITY_CONFORMANCE_POLICY.md` |
+| Conformance verifier exists | PASS | `scripts/qa/verify-accessibility-conformance.sh` (20 PASS / 7 WARN) |
+| WCAG AA contrast gate (27 PASS) | PASS | AC-UIA11Y-001 |
+| Axe-core WCAG 2.1 AA gate (4 journeys) | PASS | AC-UIA11Y-002 (login, dashboard, courseware, discussions) |
+| Focus ring patterns in MFE SCSS | PASS | `:focus` rules in _tokens.scss, theme.scss |
+| outline:none paired with replacement | PASS | All 6 instances have box-shadow replacement |
+| Focus token defined | PASS | `--mereka-mfe-focus` token in mfe/mereka.scss |
+| Skip navigation link | WARN | Level A gap, documented in policy (Q2 2026) — AC-UIA11Y-005 |
+| ARIA landmarks complete | WARN | Level A gap, documented in policy (Q2 2026) — AC-UIA11Y-006 |
+| :focus-visible migration | WARN | Planned enhancement (Q2 2026) — AC-UIA11Y-004 |
+| CI gate for conformance | PASS | `monitoring-guardrails` CI job |
+
+**Script**: `scripts/qa/verify-accessibility-conformance.sh` (20 PASS / 0 FAIL / 7 WARN)
+
+**Known gaps** (documented in policy, not blocking):
+- **Skip navigation link** (Level A): Required for WCAG 2.1 SC 2.4.1, planned Q2 2026
+- **ARIA landmarks** (Level A): Missing `role="banner"` and `<main>`, planned Q2 2026
+- **:focus-visible migration**: Enhancement to improve keyboard navigation UX
+- **Paragon focus token bridge**: Standardize focus ring tokens across components
+- **Axe-core expansion**: Currently 4/11 MFE routes covered, expand to 11 total
+
 ## Tenant Branding Runtime
 
 | Check | Status | Evidence |
