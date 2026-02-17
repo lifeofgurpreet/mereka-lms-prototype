@@ -68,8 +68,12 @@
 | FPF dependency installed in MFE build | PASS | `@openedx/frontend-plugin-framework@^1.8.0` |
 | CI gate for slot wiring | PASS | `.github/workflows/ci.yml` mfe-footer-slot job |
 | Plugin-slot inventory documented | PASS | `docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` — 100+ slots across 14 MFEs |
+| Comprehensive wiring integrity check | PASS | `verify-plugin-slot-wiring.sh` (28 PASS) — plugin ↔ patches ↔ inventory |
+| CI gate for wiring integrity | PASS | `.github/workflows/ci.yml` plugin-slot-wiring job |
 
-**Script**: `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
+**Scripts**:
+- `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
+- `scripts/qa/verify-plugin-slot-wiring.sh` (28 PASS / 0 FAIL)
 
 ## Token Correctness
 
@@ -137,6 +141,9 @@
 
 # MFE route mapping drift (3464 guard)
 ./scripts/qa/verify-mfe-route-drift.sh
+
+# Plugin-slot wiring integrity (qp0k guard)
+./scripts/qa/verify-plugin-slot-wiring.sh
 
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline

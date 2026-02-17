@@ -169,6 +169,7 @@ jobs:
           bash -n scripts/qa/lint-active-docs-env-model.sh
           bash -n scripts/qa/verify-token-definitions.sh
           bash -n scripts/qa/verify-mfe-route-drift.sh
+          bash -n scripts/qa/verify-plugin-slot-wiring.sh
 
       - name: Run local observability audit
         run: |
@@ -487,6 +488,15 @@ jobs:
 
       - name: Verify all --mereka-* token references resolve
         run: ./scripts/qa/verify-token-definitions.sh
+
+  plugin-slot-wiring:
+    name: Plugin-Slot Wiring Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify plugin-slot wiring chain (plugin ↔ patches ↔ inventory)
+        run: ./scripts/qa/verify-plugin-slot-wiring.sh
 
   custom-app-drift:
     name: Custom App Install Drift Guard
