@@ -168,6 +168,7 @@ jobs:
           bash -n scripts/qa/verify-site-id-hardening.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
           bash -n scripts/qa/verify-token-definitions.sh
+          bash -n scripts/qa/verify-design-token-usage.sh
           bash -n scripts/qa/verify-mfe-route-drift.sh
           bash -n scripts/qa/verify-plugin-slot-wiring.sh
           bash -n scripts/qa/verify-contrast-compliance.sh
@@ -175,6 +176,8 @@ jobs:
           bash -n scripts/qa/verify-tenant-branding-contract.sh
           bash -n scripts/qa/verify-brand-pack-schema.sh
           bash -n scripts/qa/smoke-authenticated.sh
+          bash -n scripts/qa/verify-ui-accessibility.sh
+          bash -n scripts/qa/verify-legacy-ecommerce-ui-refs.sh
 
       - name: Run local observability audit
         run: |
@@ -546,6 +549,15 @@ jobs:
       - name: Verify custom apps (settings ↔ plugin ↔ directory)
         run: ./scripts/qa/verify-custom-app-drift.sh
 
+  design-token-usage:
+    name: Design Token Usage Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint for hardcoded colors
+        run: ./scripts/qa/verify-design-token-usage.sh
+
   frontend-version-truth:
     name: Frontend Version Truth (AC-UIVER-003)
     runs-on: ubuntu-latest
@@ -554,3 +566,37 @@ jobs:
 
       - name: Verify frontend version consistency (docs ↔ CI ↔ scripts ↔ K8s)
         run: ./scripts/qa/verify-frontend-version-truth.sh
+
+  legacy-ecommerce-guard:
+    name: Legacy Ecommerce UI Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for legacy ecommerce UI references
+        run: ./scripts/qa/verify-legacy-ecommerce-ui-refs.sh
+
+  accessibility-gates:
+    name: Accessibility Gates (syntax + structure)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-ui-accessibility.sh
+      - name: Verify axe journey coverage
+        run: |
+          # Ensure all 4 required journeys are defined
+          grep -q '/authn/login' scripts/qa/verify-ui-accessibility.sh
+          grep -q '/learner-dashboard/' scripts/qa/verify-ui-accessibility.sh
+          grep -q '/learning/' scripts/qa/verify-ui-accessibility.sh
+          grep -q '/discussions/' scripts/qa/verify-ui-accessibility.sh
+          echo "All 4 required journeys present"
+      - name: Verify visual regression page count
+        run: |
+          # Count page targets in visual regression script (should have 18+ entries in CRITICAL_PAGES)
+          PAGE_COUNT=$(grep -c '^\s*\["' scripts/qa/visual-regression-test.sh || echo 0)
+          echo "Visual regression covers ${PAGE_COUNT} page entries"
+          if [[ $PAGE_COUNT -lt 18 ]]; then
+            echo "ERROR: Expected at least 18 page entries, found $PAGE_COUNT"
+            exit 1
+          fi
+          echo "Page count verification passed (${PAGE_COUNT} pages)"
