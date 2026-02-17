@@ -248,12 +248,12 @@ verify_domain_config() {
     fi
   fi
 
-  # Check for brand color tokens (at least one --mereka-* token)
-  if echo "$response" | grep -q '"--mereka-color-'; then
+  # Check for brand color tokens (--mereka-color-* CSS vars or BRAND_* config keys)
+  if echo "$response" | grep -qE '"--mereka-color-|"BRAND_(PRIMARY|SECONDARY|ACCENT)"'; then
     has_brand_colors=1
     pass "AC-TBR-102: Brand color tokens present for ${domain}"
   else
-    warn "AC-TBR-102: No brand color tokens (--mereka-color-*) found for ${domain}"
+    warn "AC-TBR-102: No brand color tokens (--mereka-color-* or BRAND_*) found for ${domain}"
     echo "  URL: $config_url"
   fi
 
