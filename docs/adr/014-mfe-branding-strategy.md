@@ -475,11 +475,23 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 
 > **Note**: Slot availability depends on the MFE version. Check each MFE's source for `<PluginSlot id="...">` to discover available slots.
 
+### Implementation Status
+
+| Component | Status | Evidence |
+|-----------|--------|----------|
+| MerekaFooter defined in plugin | DONE | `mereka_lms.py` `mfe-env-config` patch |
+| PLUGIN_SLOTS forward-compatible registration | DONE | `mereka_lms.py` try/except block |
+| apply-patches.sh fallback (RenderWidget swap) | DONE | Defense-in-depth until PLUGIN_SLOTS filter ships |
+| FPF dependency in MFE build | DONE | `@openedx/frontend-plugin-framework@^1.8.0` |
+| Verification script | DONE | `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS) |
+| CI gate | DONE | `.github/workflows/ci.yml` `mfe-footer-slot` job |
+
 ### Blockers & Prerequisites
 
 - **Tutor 21+ required** — `tutormfe.hooks.PLUGIN_SLOTS` was introduced in Tutor v21
 - **MFE images must include FPF** — `@openedx/frontend-plugin-framework` must be in MFE dependencies (included by default in Ulmo)
 - **No blocker for current deployment** — current hardcoded approach works; migration is opportunistic
+- **When `PLUGIN_SLOTS` filter ships**: Remove the apply-patches.sh RenderWidget replacement and the `_PLUGIN_SLOTS_AVAILABLE` guard
 
 ---
 

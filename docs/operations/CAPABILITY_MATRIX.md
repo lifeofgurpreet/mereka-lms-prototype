@@ -136,12 +136,14 @@
 
 ## Ecommerce & Payments
 
+> **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. Legacy service remains active during transition.
+
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
-| **Open edX Ecommerce Service** | DEPLOYED | prod+dev | `kubectl get pod ecommerce-*` | Standard Open edX ecommerce |
-| **Purchase Gateway (Stripe → Open edX)** | IN-PROGRESS | — | `kubectl get pod payments-gateway-*` | Spec: ecommerce-purchase-gateway_spec.md (in_progress, 34 ACs). Pod: payments-gateway-b4f4f748b-c28l8 |
+| **Open edX Ecommerce Service (LEGACY)** | DEPLOYED | prod+dev | `kubectl get pod ecommerce-*` | Legacy Oscar ecommerce, being replaced. ADR-018 |
+| **Purchase Gateway (Stripe → Open edX)** | IN-PROGRESS | — | `kubectl get pod payments-gateway-*` | Spec: ecommerce-purchase-gateway_spec.md (in_progress, 34 ACs). Pod: payments-gateway-b4f4f748b-c28l8. REPLACES legacy Oscar |
 | **Stripe Integration** | IN-PROGRESS | — | Webhook endpoint exists | Part of purchase-gateway |
-| **Oscar-based Checkout** | DEPLOYED | prod+dev | Standard Open edX | Django Oscar integration |
+| **Oscar-based Checkout (LEGACY)** | DEPLOYED | prod+dev | Standard Open edX | Django Oscar integration, being replaced. ADR-018 |
 
 ## Integrations & External Services
 

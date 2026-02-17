@@ -459,6 +459,15 @@ jobs:
               hadolint /src/**/Dockerfile*
           fi
 
+  mfe-footer-slot:
+    name: MFE Footer Plugin-Slot Wiring
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify footer slot wiring (plugin + fallback)
+        run: ./scripts/qa/verify-mfe-footer-slot.sh
+
   custom-app-drift:
     name: Custom App Install Drift Guard
     runs-on: ubuntu-latest

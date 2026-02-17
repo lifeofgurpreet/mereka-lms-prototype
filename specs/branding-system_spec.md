@@ -134,7 +134,7 @@ infrastructure/tutor/themes/mereka/
 - The system MUST copy MFE theme fonts to build context (via `apply-patches.sh`)
 - The system MUST sync SCSS files to MFE build directory
 
-**Note**: MFE footer is currently implemented as hardcoded JS in env.config.jsx (injected via Tutor hook). The recommended migration path is to use `tutormfe.hooks.PLUGIN_SLOTS` with Direct plugins (not iFrame) for lightweight components like MerekaFooter that need MFE theme context. See ADR-014 "Plugin-First Migration" section for the operator workflow: discover slot → inject config via Tutor plugin → rebuild MFE image.
+**Note**: MFE footer is implemented via dual-path wiring: the Tutor plugin (`mereka_lms.py`) defines MerekaFooter and registers a forward-compatible `PLUGIN_SLOTS` entry for `footer_slot` (Direct plugin, not iFrame). Until `tutormfe.hooks.PLUGIN_SLOTS` ships, `apply-patches.sh` provides a fallback RenderWidget replacement. Verified by `scripts/qa/verify-mfe-footer-slot.sh` (CI gated). See ADR-014 "Plugin-First Migration" section for the operator workflow: discover slot → inject config via Tutor plugin → rebuild MFE image.
 
 #### Branding Verification Gates
 

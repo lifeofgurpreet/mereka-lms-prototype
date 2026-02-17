@@ -81,14 +81,14 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
    - Admin: https://discovery.academyv2.mereka.io/admin
    - Health: https://discovery.academyv2.mereka.io/health
 
-6. **Ecommerce (Custom Purchase Gateway)** - https://ecommerce.academyv2.mereka.io
+6. **Ecommerce** - https://ecommerce.academyv2.mereka.io
+   > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
    - Purpose: Course purchases, checkout, payment processing
-   - **IMPORTANT**: This is our CUSTOM purchase-gateway service (NOT Open edX Oscar/ecommerce)
-   - Architecture: FastAPI + PostgreSQL with Stripe integration
+   - **Current State**: Legacy Oscar service still deployed, being replaced by custom Purchase Gateway
+   - **Future**: Custom Purchase Gateway (FastAPI + PostgreSQL with Stripe integration)
    - Spec: `specs/ecommerce-purchase-gateway_spec.md`
-   - Note: Open edX ecommerce (Oscar) has been sunsetted and is NOT used
-   - Key paths: `/`, `/dashboard`, `/basket`, `/checkout`
-   - Admin: https://ecommerce.academyv2.mereka.io/admin
+   - Key paths: `/`, `/dashboard`, `/basket`, `/checkout` (legacy Oscar paths)
+   - Admin: https://ecommerce.academyv2.mereka.io/admin (legacy Oscar admin)
 
 7. **Credentials** - https://credentials.academyv2.mereka.io
    - Purpose: Digital certificates and badges
@@ -173,6 +173,7 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 **Shared Services** (6):
 5. **Discovery** - https://discovery.academyv2.mereka.dev
 6. **Ecommerce** - https://ecommerce.academyv2.mereka.dev
+   > **Note**: Legacy Oscar ecommerce, being replaced by Purchase Gateway. See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md`.
 7. **Credentials** - https://credentials.academyv2.mereka.dev
 8. **Forum** - https://forum.academyv2.mereka.dev
 9. **Notes API** - https://notes.academyv2.mereka.dev
@@ -193,6 +194,7 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 **Shared Services** (5):
 5. **Discovery** - http://discovery.localhost
 6. **Ecommerce** - http://ecommerce.localhost
+   > **Note**: Legacy Oscar ecommerce, being replaced by Purchase Gateway. See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md`.
 7. **Forum** - Embedded in LMS (no separate URL)
 8. **Notes API** - http://notes.localhost
 9. **XQueue** - http://xqueue.localhost
@@ -212,10 +214,12 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 
 **Shared Across Tenants**:
 - Discovery service (single catalog, filtered by organization)
-- Ecommerce service (single checkout, tenant-aware)
+- Ecommerce service (single checkout, tenant-aware) — legacy Oscar, being replaced by Purchase Gateway
 - Credentials service (single certificate issuer, tenant-branded)
 - Forum service (single API, course-scoped)
 - Authentik SSO (single OIDC provider, tenant-aware)
+
+> **Note**: Legacy Oscar ecommerce listed above is being replaced by custom Purchase Gateway. See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md`.
 
 ### Admin URLs per Tenant
 
@@ -223,7 +227,7 @@ This document lists ALL user-facing URLs in the Mereka LMS platform, organized b
 - LMS: https://academyv2.mereka.io/admin
 - Studio: https://studio.academyv2.mereka.io/admin
 - Discovery: https://discovery.academyv2.mereka.io/admin
-- Ecommerce: https://ecommerce.academyv2.mereka.io/admin
+- Ecommerce: https://ecommerce.academyv2.mereka.io/admin (legacy Oscar, being replaced)
 - Credentials: https://credentials.academyv2.mereka.io/admin
 
 **SkillOurFuture Admins**:

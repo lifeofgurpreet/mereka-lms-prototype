@@ -58,6 +58,18 @@
 | Baseline captured | PENDING | Awaiting stable runtime post-1zj8 fix |
 | Diff threshold configured | PASS | 5% pixel difference threshold |
 
+## Plugin-Slot Wiring
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| MerekaFooter defined in Tutor plugin | PASS | `mereka_lms.py` mfe-env-config patch |
+| PLUGIN_SLOTS forward-compatible registration | PASS | try/except for `tutormfe.hooks.PLUGIN_SLOTS` |
+| apply-patches.sh fallback wiring | PASS | RenderWidget replacement (defense-in-depth) |
+| FPF dependency installed in MFE build | PASS | `@openedx/frontend-plugin-framework@^1.8.0` |
+| CI gate for slot wiring | PASS | `.github/workflows/ci.yml` mfe-footer-slot job |
+
+**Script**: `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
+
 ## Build & Deploy Safety
 
 | Check | Status | Evidence |
@@ -90,6 +102,9 @@
 
 # Custom app drift (1zj8 guard)
 ./scripts/qa/verify-custom-app-drift.sh
+
+# Footer plugin-slot wiring
+./scripts/qa/verify-mfe-footer-slot.sh
 
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline
