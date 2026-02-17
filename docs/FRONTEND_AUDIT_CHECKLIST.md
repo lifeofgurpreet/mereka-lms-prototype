@@ -46,8 +46,13 @@
 | OpenEdX image pinned | PASS | `20260210-v21-mfe-only-b988d63` |
 | Version tracking doc maintained | PASS | `docs/architecture/MFE_VERSIONS.md` |
 | No `:latest` tags in deployment manifests | PASS | 0 occurrences in `deployments.yml` |
+| Version Baseline table documented | PASS | Tutor 18.2.2, Node 18.20.5, Python 3.12 |
+| Frontend version consistency (AC-UIVER-003) | PASS | docs ↔ CI ↔ scripts ↔ K8s verified |
+| Upgrade procedure documented (AC-UIVER-004) | PASS | 8-step procedure in MFE_VERSIONS.md |
 
-**Script**: `scripts/qa/verify-mfe-version-pinning.sh` (9 PASS / 0 FAIL)
+**Scripts**:
+- `scripts/qa/verify-mfe-version-pinning.sh` (9 PASS / 0 FAIL)
+- `scripts/qa/verify-frontend-version-truth.sh` (24+ PASS / 0 FAIL) — NEW: AC-UIVER-003
 
 ## Visual Regression
 
@@ -142,6 +147,9 @@
 
 # Version pinning (AC-UI-004)
 ./scripts/qa/verify-mfe-version-pinning.sh
+
+# Frontend version truth (AC-UIVER-003) — NEW: task 14ae
+./scripts/qa/verify-frontend-version-truth.sh
 
 # Custom app drift (1zj8 guard)
 ./scripts/qa/verify-custom-app-drift.sh
