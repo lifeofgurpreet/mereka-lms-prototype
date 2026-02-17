@@ -18,7 +18,7 @@ references staging has been archived at:
 - Studio: `https://studio.academyv2.mereka.io`
 - MFEs: `https://apps.academyv2.mereka.io`
 - Discovery: `https://discovery.academyv2.mereka.io`
-- Ecommerce: `https://ecommerce.academyv2.mereka.io`
+- Ecommerce: `https://ecommerce.academyv2.mereka.io` (legacy Oscar, being replaced by Purchase Gateway per ADR-018)
 - Notes: `https://notes.academyv2.mereka.io`
 - Credentials: `https://credentials.academyv2.mereka.io`
 - Forum: `https://forum.academyv2.mereka.io`

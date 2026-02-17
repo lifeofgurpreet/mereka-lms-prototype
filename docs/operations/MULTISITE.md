@@ -83,11 +83,26 @@ What the script does:
 - **Course Authors**: Must create courses under the correct org; violations surface on the wrong microsite.
 - **Change approvals**: Any domain, TLS, or theme change requires a release checklist sign-off (see `docs/operations/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`).
 
+**Tenant Brand Pack Workflow**
+
+For new tenants or brand updates, follow the **Fast-Path Brand Pack Flow**:
+
+1. **Create brand pack**: Copy template from `infrastructure/tutor/themes/mereka/tenants/_template/`
+2. **Validate**: Run `./scripts/tenants/validate-tenant-brand-pack.sh --slug <tenant-slug>`
+3. **Apply branding**: Run `collectstatic` to sync assets
+4. **Verify runtime**: Check MFE config API (`/api/v1/mfe_config`)
+
+**Reference**:
+- **Fast-Path Flow**: `docs/operations/TENANT_PROVISIONING.md#fast-path-brand-pack-flow`
+- **Schema Docs**: `docs/branding/TENANT_BRAND_PACK_SCHEMA.md`
+- **Contract**: `docs/branding/TENANT_BRANDING_CONTRACT.md`
+
 **Theming validation checklist**
 1. Sync assets: `make branding-sync`
 2. Verify logos: `./scripts/branding/verify-logo-setup.sh`
-3. Confirm `course_org_filter` + `THEME_NAME` in `infrastructure/tutor/multisite-sites.yml`
-4. Capture LMS/Studio/MFE screenshots for each microsite before release
+3. Validate brand pack: `./scripts/tenants/validate-tenant-brand-pack.sh`
+4. Confirm `course_org_filter` + `THEME_NAME` in `infrastructure/tutor/multisite-sites.yml`
+5. Capture LMS/Studio/MFE screenshots for each microsite before release
 
 ## 5. Content governance
 
@@ -106,7 +121,9 @@ What the script does:
 
 ## 7. Operational notes
 
-- Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce, and background services remain shared across all brands.
+- Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce (legacy Oscar, being replaced by Purchase Gateway), and background services remain shared across all brands.
+
+> **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details.
 - Forum is deployed at `forum.academyv2.mereka.io` (and `.dev`) but is **API-first**; the learner discussion UI is embedded inside LMS course pages, and moderation happens via Studio.
 - Any `tutor config save` run must be followed by `./infrastructure/tutor/apply-patches.sh` so the additional host headers stay injected.
 - Back up the database (`tutor local do backup-db` / `scripts/infra/backup-db.sh`) before rolling out further domain changes.

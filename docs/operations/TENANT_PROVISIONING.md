@@ -13,13 +13,14 @@ This document describes how to provision new tenants in the Mereka Academy multi
 2. [What is a Tenant?](#what-is-a-tenant)
 3. [Provisioning Process](#provisioning-process)
 4. [Mereka Academy - First Tenant](#mereka-academy---first-tenant)
-5. [Provisioning Steps Explained](#provisioning-steps-explained)
-6. [Idempotency Guarantees](#idempotency-guarantees)
-7. [Using .env Files for Repeatability](#using-env-files-for-repeatability)
-8. [xAPI Backfill Procedure](#xapi-backfill-procedure)
-9. [Post-Provisioning Checklist](#post-provisioning-checklist)
-10. [Troubleshooting](#troubleshooting)
-11. [Rollback/Offboarding](#rollbackoffboarding)
+5. [Fast-Path Brand Pack Flow](#fast-path-brand-pack-flow)
+6. [Provisioning Steps Explained](#provisioning-steps-explained)
+7. [Idempotency Guarantees](#idempotency-guarantees)
+8. [Using .env Files for Repeatability](#using-env-files-for-repeatability)
+9. [xAPI Backfill Procedure](#xapi-backfill-procedure)
+10. [Post-Provisioning Checklist](#post-provisioning-checklist)
+11. [Troubleshooting](#troubleshooting)
+12. [Rollback/Offboarding](#rollbackoffboarding)
 
 ---
 
@@ -127,6 +128,225 @@ TENANT_ENTERPRISE_UUID=   # Auto-generated on first run
 ```
 
 Review the output, then run without `--dry-run` to execute.
+
+---
+
+## Fast-Path Brand Pack Flow
+
+**Goal**: Streamlined workflow for creating, validating, and deploying tenant branding without image rebuild.
+
+**Audience**: Tenant Operations, Design Team, Platform Engineering
+
+**Prerequisites**:
+- Tenant provisioned via `provision_tenant` command (see [Provisioning Process](#provisioning-process))
+- Brand assets prepared (logo, favicon, colors)
+
+---
+
+### Step 1: Create Brand Pack
+
+```bash
+# Copy template to new tenant directory
+cp -r infrastructure/tutor/themes/mereka/tenants/_template \
+      infrastructure/tutor/themes/mereka/tenants/acme-corp
+
+# Edit branding.json with tenant-specific values
+vim infrastructure/tutor/themes/mereka/tenants/acme-corp/branding.json
+```
+
+**branding.json Example**:
+```json
+{
+  "slug": "acme-corp",
+  "name": "Acme Corporation",
+  "domain": "acme.academyv2.mereka.io",
+  "colors": {
+    "primary": "#FF5733"
+  },
+  "logos": {
+    "logo_url": "/static/themes/mereka/tenants/acme-corp/logos/logo.png",
+    "favicon_url": "/static/themes/mereka/tenants/acme-corp/favicons/favicon.ico"
+  },
+  "footer": {
+    "contact_email": "support@acme.com"
+  }
+}
+```
+
+**Reference**:
+- **Schema**: `specs/brand-pack-schema.json`
+- **Docs**: `docs/branding/TENANT_BRAND_PACK_SCHEMA.md`
+- **Template**: `infrastructure/tutor/themes/mereka/tenants/_template/`
+
+---
+
+### Step 2: Add Assets
+
+```bash
+# Upload logo (PNG/SVG, max 400×100px, <500KB)
+cp acme-logo.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo.png
+
+# Upload favicon (ICO/PNG, 32×32px or 64×64px, <500KB)
+cp acme-favicon.ico infrastructure/tutor/themes/mereka/tenants/acme-corp/favicons/favicon.ico
+
+# Optional: Square logo
+cp acme-logo-square.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-square.png
+
+# Optional: White logo (for dark backgrounds)
+cp acme-logo-white.png infrastructure/tutor/themes/mereka/tenants/acme-corp/logos/logo-white.png
+```
+
+**Asset Requirements**:
+- Formats: PNG, SVG (logos), ICO (favicon)
+- Max file size: 500KB per asset
+- Logo dimensions: Max 400×100px (horizontal), 200×200px (square)
+- Favicon dimensions: 32×32px or 64×64px
+
+---
+
+### Step 3: Validate Brand Pack
+
+```bash
+# Validate tenant brand pack structure and content
+./scripts/tenants/validate-tenant-brand-pack.sh --slug acme-corp
+
+# Expected output:
+# [PASS] branding.json exists
+# [PASS] branding.json is valid JSON
+# [PASS] All required fields present
+# [PASS] slug matches directory name (acme-corp)
+# [PASS] colors.primary is valid hex (#FF5733)
+# [PASS] logos.logo_url exists on disk
+# [PASS] logos.favicon_url exists on disk
+# ...
+# ✅ All checks passed
+```
+
+**What it checks**:
+- Directory structure (logos/, favicons/, css/)
+- JSON validity
+- Required fields present
+- Slug matches directory name and pattern
+- Colors are valid hex
+- Logo files exist and are <500KB
+- Footer links use HTTPS
+- Email format valid
+- Domain is valid FQDN
+
+---
+
+### Step 4: Apply Branding
+
+```bash
+# Option A: Sync to static directory (local development)
+tutor local run lms python manage.py lms collectstatic --noinput --clear --link
+
+# Option B: Sync to Kubernetes pods (production)
+kubectl exec -n mereka-lms deployment/lms -- \
+  python manage.py lms collectstatic --noinput --clear --link
+
+# Option C: Use branding sync script (recommended)
+./scripts/branding/sync-brand-assets.sh
+```
+
+**What happens**:
+- Brand pack assets copied to `/static/themes/mereka/tenants/<slug>/`
+- Assets served via Caddy/Nginx reverse proxy
+- No image rebuild required
+
+---
+
+### Step 5: Update Database Configuration
+
+```bash
+# Update tenant configuration in database (optional, if not set during provisioning)
+tutor local run lms python manage.py lms shell << 'EOF'
+from openedx_tenant_cache.models import TenantSiteMapping
+
+tenant = TenantSiteMapping.get_by_slug('acme-corp')
+config = tenant.site_config
+
+# Update colors
+config.values['primary_color'] = '#FF5733'
+
+# Update MFE logo URLs
+config.mfe_config['LOGO_URL'] = '/static/themes/mereka/tenants/acme-corp/logos/logo.png'
+config.mfe_config['FAVICON_URL'] = '/static/themes/mereka/tenants/acme-corp/favicons/favicon.ico'
+
+config.save()
+EOF
+```
+
+**Why**: Database config overrides file-based config at runtime.
+
+---
+
+### Step 6: Invalidate Cache
+
+```bash
+# Clear Redis cache for tenant (ensures immediate visibility)
+tutor local run lms python manage.py lms shell << 'EOF'
+from openedx_tenant_cache.cache import tenant_cache_clear
+
+tenant_uuid = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'  # Replace with actual UUID
+tenant_cache_clear(tenant_uuid)
+EOF
+```
+
+**Kubernetes**:
+```bash
+kubectl exec -n mereka-lms deployment/lms -- \
+  python manage.py lms shell -c "from openedx_tenant_cache.cache import tenant_cache_clear; tenant_cache_clear('tenant-uuid')"
+```
+
+---
+
+### Step 7: Runtime Verification
+
+```bash
+# Verify branding via MFE config API
+curl -H "Host: acme.academyv2.mereka.io" \
+  https://academyv2.mereka.io/api/v1/mfe_config | jq .
+
+# Expected output:
+# {
+#   "LOGO_URL": "https://acme.academyv2.mereka.io/static/themes/mereka/tenants/acme-corp/logos/logo.png",
+#   "FAVICON_URL": "https://acme.academyv2.mereka.io/static/themes/mereka/tenants/acme-corp/favicons/favicon.ico",
+#   "PRIMARY_COLOR": "#FF5733",
+#   "SITE_NAME": "Acme Corporation",
+#   ...
+# }
+
+# Run automated branding verifier
+./scripts/qa/verify-tenant-branding.sh acme-corp
+
+# Visual check (open in browser)
+# https://acme.academyv2.mereka.io
+```
+
+**Downtime**: Zero (static files served from existing pods, cache invalidation is instant)
+
+**Rollback**: Revert file upload, re-run collectstatic, invalidate cache again.
+
+---
+
+### Fast-Path Summary
+
+| Step | Command | Time |
+|------|---------|------|
+| 1. Create brand pack | `cp -r _template/ acme-corp/ && vim branding.json` | 5 min |
+| 2. Add assets | `cp logo.png favicons/favicon.ico` | 2 min |
+| 3. Validate | `./scripts/tenants/validate-tenant-brand-pack.sh --slug acme-corp` | 1 min |
+| 4. Apply branding | `tutor local run lms collectstatic` | 2 min |
+| 5. Update DB config | `python manage.py lms shell` | 2 min |
+| 6. Invalidate cache | `tenant_cache_clear(uuid)` | 1 min |
+| 7. Verify | `curl /api/v1/mfe_config` | 1 min |
+| **Total** | | **~15 min** |
+
+**Reference**:
+- **Contract**: `docs/branding/TENANT_BRANDING_CONTRACT.md` (fallback rules, ownership boundaries)
+- **Schema Docs**: `docs/branding/TENANT_BRAND_PACK_SCHEMA.md` (asset requirements, validation)
+- **Multi-site**: `docs/operations/MULTISITE.md` (DNS, TLS, domain mapping)
 
 ---
 

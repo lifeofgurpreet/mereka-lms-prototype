@@ -233,3 +233,48 @@ kubectl get endpoints -n mereka-lms
 # Auto-fix selector mismatches
 ./scripts/infra/fix-service-selectors.sh
 ```
+
+## Tenant Branding Runtime Verification
+
+**Symptom**: Runtime branding verification script reports failures or unexpected SITE_NAME values.
+
+**Common false positives:**
+
+1. **Cache TTL (5-minute Redis cache)**
+   - Wait 5 minutes after config change before re-running verification
+   - Clear cache: `tutor k8s exec lms -- ./manage.py lms shell -c "from django.core.cache import cache; cache.clear()"`
+
+2. **DNS propagation**
+   - New domains may take up to 30 minutes to resolve
+   - Verify DNS: `dig +short skillourfuture.academy.mereka.io`
+
+3. **MFE config endpoint returns default when ENABLE_MULTI_TENANT_BRANDING=False**
+   - Expected behavior: all checks will SKIP with message "Runtime not available"
+   - Enable in Tutor config: `tutor config save --set ENABLE_MULTI_TENANT_BRANDING=true`
+
+4. **Caddy routing**
+   - Verify domain is in Caddyfile: `grep skillourfuture deploy/k8s/base/apps/caddy/Caddyfile`
+   - Restart Caddy: `kubectl rollout restart deployment/caddy -n mereka-lms`
+
+**Known edge cases:**
+
+- **skillourfuture.academy.mereka.io requires multi-level subdomain SSL setup**
+  - See `docs/operations/MULTI_LEVEL_SUBDOMAIN_SSL.md` (if exists) or `docs/architecture/DOMAIN_SSL_MANAGEMENT.md`
+  - Cloudflare Free SSL only covers `*.mereka.io`, NOT `*.*.mereka.io`
+  - Use DNS-only (gray cloud) + Let's Encrypt via cert-manager
+
+- **Footer variants depend on window.location.hostname matching**
+  - If accessed via IP or proxy, variant falls back to default
+  - Verify: `curl -H "Host: academy.biji-biji.com" https://academyv2.mereka.io/api/mfe_config/v1 | grep SITE_NAME`
+
+**Verification script:**
+```bash
+# Check runtime branding for production
+./scripts/qa/verify-tenant-branding-runtime.sh --env prod
+
+# Check local development
+./scripts/qa/verify-tenant-branding-runtime.sh --env local
+
+# Manual MFE config check
+curl -s https://academyv2.mereka.io/api/mfe_config/v1 | grep -E 'SITE_NAME|LOGO_URL|--mereka-color'
+```
