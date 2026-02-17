@@ -173,6 +173,7 @@ jobs:
           bash -n scripts/qa/verify-contrast-compliance.sh
           bash -n scripts/qa/verify-frontend-version-truth.sh
           bash -n scripts/qa/verify-tenant-branding-contract.sh
+          bash -n scripts/qa/verify-brand-pack-schema.sh
 
       - name: Run local observability audit
         run: |
@@ -249,6 +250,16 @@ jobs:
       - name: Verify tenant branding contract compliance
         run: |
           ./scripts/qa/verify-tenant-branding-contract.sh
+
+  brand-pack-schema:
+    name: Brand Pack Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify brand pack schema compliance
+        run: |
+          ./scripts/qa/verify-brand-pack-schema.sh
 
   gitops-image-contract:
     name: GitOps Image Override Contract
