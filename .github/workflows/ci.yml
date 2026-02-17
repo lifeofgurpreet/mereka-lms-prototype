@@ -188,6 +188,7 @@ jobs:
           bash -n scripts/qa/verify-slot-matrix.sh
           bash -n scripts/qa/verify-interaction-state-contract.sh
           bash -n scripts/qa/verify-performance-budget.sh
+          bash -n scripts/qa/verify-footer-slot-migration.sh
 
       - name: Run local observability audit
         run: |
