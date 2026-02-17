@@ -177,6 +177,18 @@
 
 **Script**: `scripts/qa/smoke-authenticated.sh`
 
+## MFE-First Policy
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| MFE-first policy documented | PASS | `docs/architecture/MFE_FIRST_POLICY.md` |
+| Exception process documented | PASS | Included in policy doc |
+| Policy compliance verifier | PASS | `scripts/qa/verify-mfe-first-policy.sh` |
+| CI gate for policy compliance | PASS | `mfe-first-policy` CI job |
+| Plugin slot inventory maintained | PASS | `docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` (100+ slots) |
+
+**Script**: `scripts/qa/verify-mfe-first-policy.sh`
+
 ## Ecommerce Deprecation
 
 | Check | Status | Evidence |
@@ -230,4 +242,7 @@
 
 # Authenticated smoke tests (AC-SMOKE-001) — requires SSO credentials
 SSO_USERNAME=test@example.com SSO_PASSWORD=secret ./scripts/qa/smoke-authenticated.sh
+
+# MFE-first policy compliance (AC-UIMFE-002) — NEW: task 8rgu
+./scripts/qa/verify-mfe-first-policy.sh
 ```
