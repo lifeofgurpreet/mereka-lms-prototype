@@ -15,7 +15,7 @@ setup(
         'djangorestframework>=3.14',
         'PyJWT>=2.8.0',
         'cryptography>=41.0.0',  # For RSA key handling
-        'opaque-keys>=2.0.0',
+        'edx-opaque-keys>=2.0.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
