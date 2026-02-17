@@ -69,6 +69,23 @@
 - `scripts/qa/verify-mfe-version-pinning.sh` (9 PASS / 0 FAIL)
 - `scripts/qa/verify-frontend-version-truth.sh` (24+ PASS / 0 FAIL) — NEW: AC-UIVER-003
 
+## Interaction State Quality
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Interaction-state contract documented | PASS | docs/architecture/INTERACTION_STATE_CONTRACT.md |
+| MFE coverage matrix present | PASS | 11 MFEs tracked (authn, account, learning, profile, discussions, gradebook, learner-dashboard, communications, ora-grading, authoring, course-authoring) |
+| Interaction-state verifier exists | PASS | scripts/qa/verify-interaction-state-contract.sh (45 PASS / 0 FAIL) |
+| Design tokens cover all feedback states | PASS | _tokens.scss: success, warning, danger, info |
+| Paragon components documented | PASS | Spinner, Skeleton, Alert, Toast |
+| CI gate for interaction states | PASS | monitoring-guardrails CI job |
+| 4-state contract defined (AC-UISTATE-001) | PASS | Loading, Empty, Error, Success |
+| Design tokens enforced (AC-UISTATE-002) | PASS | No hardcoded colors in MFE SCSS |
+| Paragon components used (AC-UISTATE-003) | PASS | All MFEs use Paragon for interaction feedback |
+| MFE coverage tracked (AC-UISTATE-004) | PASS | Coverage matrix maintained |
+
+**Script**: `scripts/qa/verify-interaction-state-contract.sh` (45 PASS / 0 FAIL)
+
 ## Visual Regression
 
 | Check | Status | Notes |
@@ -269,6 +286,9 @@
 
 # MFE route mapping drift (3464 guard)
 ./scripts/qa/verify-mfe-route-drift.sh
+
+# Interaction state contract (AC-UISTATE-001..004)
+./scripts/qa/verify-interaction-state-contract.sh
 
 # Plugin-slot wiring integrity (qp0k guard)
 ./scripts/qa/verify-plugin-slot-wiring.sh
