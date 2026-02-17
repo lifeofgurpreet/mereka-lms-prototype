@@ -177,6 +177,7 @@ jobs:
           bash -n scripts/qa/verify-authenticated-ui-smoke.sh
           bash -n scripts/qa/verify-token-contrast.sh
           bash -n scripts/qa/verify-accessibility-conformance.sh
+          bash -n scripts/qa/verify-wcag-contrast-v2.sh
           bash -n scripts/qa/verify-frontend-version-truth.sh
           bash -n scripts/qa/verify-tenant-branding-contract.sh
           bash -n scripts/qa/verify-brand-pack-schema.sh
