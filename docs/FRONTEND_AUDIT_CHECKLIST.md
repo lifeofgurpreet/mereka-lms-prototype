@@ -190,12 +190,18 @@
 
 | Check | Status | Evidence |
 |-------|--------|----------|
-| Authenticated smoke harness exists | PASS | `scripts/qa/smoke-authenticated.sh` |
-| CI workflow for smoke tests | PASS | `.github/workflows/smoke-authenticated.yml` (manual dispatch) |
+| Authenticated smoke harness exists (AC-UIAUTH-001) | PASS | `scripts/qa/smoke-authenticated.sh` |
+| Visual regression authenticated support (AC-UIAUTH-002) | PASS | `--authenticated` flag, SSO credentials, graceful fallback |
+| CI workflow with artifacts (AC-UIAUTH-003) | PASS | Playwright install, secrets, artifact upload, visual regression |
+| Credentials documentation (AC-UIAUTH-004) | PASS | `docs/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md` |
 | SSO login flow tested | PASS | Playwright-based OIDC/Authentik login |
-| Post-login page checks | PASS | Dashboard, account, course player |
+| Post-login page checks | PASS | Dashboard, account, course player, profile |
+| Source-level verification | PASS | `scripts/qa/verify-authenticated-ui-smoke.sh` (CI gate) |
 
-**Script**: `scripts/qa/smoke-authenticated.sh`
+**Scripts**:
+- `scripts/qa/smoke-authenticated.sh` — Authenticated smoke tests
+- `scripts/qa/visual-regression-test.sh` — Visual regression with `--authenticated` support
+- `scripts/qa/verify-authenticated-ui-smoke.sh` — Source-level verification (@covers AC-UIAUTH-001..004)
 
 ## MFE-First Policy
 

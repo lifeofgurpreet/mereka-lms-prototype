@@ -33,3 +33,20 @@ jobs:
           SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
           SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
         run: ./scripts/qa/smoke-authenticated.sh --target "$SMOKE_TARGET"
+
+      - name: Run visual regression tests (authenticated)
+        if: success() || failure()
+        env:
+          SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
+          SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+        run: ./scripts/qa/visual-regression-test.sh --env production --authenticated || true
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-authenticated-artifacts
+          path: |
+            var/screenshots/
+            *.log
+          retention-days: 7

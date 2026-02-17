@@ -172,6 +172,7 @@ jobs:
           bash -n scripts/qa/verify-mfe-route-drift.sh
           bash -n scripts/qa/verify-plugin-slot-wiring.sh
           bash -n scripts/qa/verify-contrast-compliance.sh
+          bash -n scripts/qa/verify-authenticated-ui-smoke.sh
           bash -n scripts/qa/verify-token-contrast.sh
           bash -n scripts/qa/verify-frontend-version-truth.sh
           bash -n scripts/qa/verify-tenant-branding-contract.sh

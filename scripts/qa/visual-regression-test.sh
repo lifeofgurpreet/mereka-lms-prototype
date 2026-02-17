@@ -29,6 +29,7 @@ UPDATE_BASELINE=false
 ENV="local"
 VIEWPORT="desktop"
 DIFF_THRESHOLD=0.05  # 5% pixel difference threshold
+AUTHENTICATED=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -51,6 +52,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --viewport=*)
             VIEWPORT="${1#*=}"
+            shift
+            ;;
+        --authenticated)
+            AUTHENTICATED=true
             shift
             ;;
         *)
@@ -119,6 +124,15 @@ if [[ "$VIEWPORT" == "mobile" ]]; then
     CRITICAL_PAGES["mfe-authn-login-mobile"]="$MFE_URL/authn/login"
     CRITICAL_PAGES["mfe-learner-dashboard-mobile"]="$MFE_URL/learner-dashboard"
 fi
+
+# Authenticated pages (captured only when --authenticated flag is set)
+# These require SSO login to access
+declare -A AUTHENTICATED_PAGES=(
+    ["auth-learner-dashboard"]="$MFE_URL/learner-dashboard"
+    ["auth-account-settings"]="$MFE_URL/account"
+    ["auth-learning-page"]="$MFE_URL/learning"
+    ["auth-profile"]="$MFE_URL/profile"
+)
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -232,6 +246,130 @@ EOF
     fi
 }
 
+capture_authenticated_screenshot() {
+    local page_name=$1
+    local url=$2
+    local output_dir=$3
+
+    log_info "Capturing authenticated screenshot: $page_name (${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT})"
+    log_info "  URL: $url"
+
+    # Add viewport suffix to filename
+    local filename="${page_name}${VIEWPORT_SUFFIX}.png"
+
+    # Get credentials from environment
+    local sso_username="${SSO_USERNAME:-}"
+    local sso_password="${SSO_PASSWORD:-}"
+
+    if [[ -z "$sso_username" || -z "$sso_password" ]]; then
+        log_warn "SSO credentials not provided - skipping authenticated page: $page_name"
+        return 2
+    fi
+
+    # Create Playwright script with authentication
+    local script="$SCREENSHOTS_DIR/capture_auth_${page_name}.js"
+    cat > "$script" <<EOF
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+  const context = await browser.newContext({
+    viewport: { width: $VIEWPORT_WIDTH, height: $VIEWPORT_HEIGHT },
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+    ignoreHTTPSErrors: true
+  });
+  const page = await context.newPage();
+
+  try {
+    // Navigate to login page
+    const loginUrl = '$MFE_URL/authn/login';
+    await page.goto(loginUrl, { waitUntil: 'networkidle', timeout: 30000 });
+
+    // Wait for SSO redirect
+    await page.waitForTimeout(2000);
+
+    // Try to fill username
+    const usernameSelectors = ['#id_uid_field', 'input[name="uidField"]', 'input[name="username"]', 'input[type="email"]'];
+    let filled = false;
+    for (const sel of usernameSelectors) {
+      const el = await page.\$(sel);
+      if (el) {
+        await el.fill('$sso_username');
+        filled = true;
+        break;
+      }
+    }
+
+    if (!filled) {
+      console.error('Could not find username field');
+      process.exit(1);
+    }
+
+    // Submit username (Authentik has 2-step login)
+    const submitBtn = await page.\$('button[type="submit"]');
+    if (submitBtn) await submitBtn.click();
+    await page.waitForTimeout(2000);
+
+    // Fill password
+    const passwordSelectors = ['#id_password', 'input[name="password"]', 'input[type="password"]'];
+    filled = false;
+    for (const sel of passwordSelectors) {
+      const el = await page.\$(sel);
+      if (el) {
+        await el.fill('$sso_password');
+        filled = true;
+        break;
+      }
+    }
+
+    if (!filled) {
+      console.error('Could not find password field');
+      process.exit(1);
+    }
+
+    // Submit login
+    const loginBtn = await page.\$('button[type="submit"]');
+    if (loginBtn) await loginBtn.click();
+    await page.waitForNavigation({ waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+
+    // Navigate to target page
+    await page.goto('$url', { waitUntil: 'networkidle', timeout: 30000 });
+
+    // Wait for page to stabilize
+    await page.waitForTimeout(2000);
+
+    // Take screenshot
+    await page.screenshot({
+      path: '$output_dir/${filename}',
+      fullPage: true
+    });
+
+    console.log('Screenshot captured: $page_name');
+  } catch (error) {
+    console.error('Error capturing authenticated screenshot for $page_name:', error.message);
+    process.exit(1);
+  } finally {
+    await browser.close();
+  }
+})();
+EOF
+
+    # Execute Playwright script
+    if node "$script"; then
+        log_success "Screenshot captured: $page_name"
+        rm "$script"
+        return 0
+    else
+        log_error "Failed to capture authenticated screenshot: $page_name"
+        rm "$script"
+        return 1
+    fi
+}
+
 compare_screenshots() {
     local page_name=$1
 
@@ -337,6 +475,50 @@ for page_name in "${!CRITICAL_PAGES[@]}"; do
     fi
 done
 
+# Capture authenticated pages if --authenticated flag is set (AC-UIAUTH-002)
+if [[ "$AUTHENTICATED" == "true" ]]; then
+    log_info "Capturing authenticated pages..."
+    echo ""
+
+    AUTH_TOTAL=${#AUTHENTICATED_PAGES[@]}
+    AUTH_CAPTURED=0
+    AUTH_FAILED=0
+    AUTH_SKIPPED=0
+
+    for page_name in "${!AUTHENTICATED_PAGES[@]}"; do
+        url="${AUTHENTICATED_PAGES[$page_name]}"
+
+        if [[ "$UPDATE_BASELINE" == "true" ]]; then
+            # Capture baseline
+            result=0
+            capture_authenticated_screenshot "$page_name" "$url" "$BASELINE_DIR" || result=$?
+            case $result in
+                0) ((AUTH_CAPTURED++)) ;;
+                1) ((AUTH_FAILED++)) ;;
+                2) ((AUTH_SKIPPED++)) ;;
+            esac
+        else
+            # Capture current
+            result=0
+            capture_authenticated_screenshot "$page_name" "$url" "$CURRENT_DIR" || result=$?
+            case $result in
+                0) ((AUTH_CAPTURED++)) ;;
+                1) ((AUTH_FAILED++)) ;;
+                2) ((AUTH_SKIPPED++)) ;;
+            esac
+        fi
+    done
+
+    # Update totals
+    TOTAL_PAGES=$((TOTAL_PAGES + AUTH_TOTAL))
+    CAPTURED=$((CAPTURED + AUTH_CAPTURED))
+    FAILED_CAPTURE=$((FAILED_CAPTURE + AUTH_FAILED))
+
+    if [[ $AUTH_SKIPPED -gt 0 ]]; then
+        log_warn "Skipped $AUTH_SKIPPED authenticated pages (credentials not provided)"
+    fi
+fi
+
 echo ""
 
 if [[ "$UPDATE_BASELINE" == "true" ]]; then
@@ -379,6 +561,29 @@ else
                 ;;
         esac
     done
+
+    # Compare authenticated pages if --authenticated was used
+    if [[ "$AUTHENTICATED" == "true" ]]; then
+        log_info "Comparing authenticated screenshots..."
+        echo ""
+
+        for page_name in "${!AUTHENTICATED_PAGES[@]}"; do
+            result=0
+            compare_screenshots "$page_name" || result=$?
+
+            case $result in
+                0)
+                    ((PASSED++))
+                    ;;
+                1)
+                    ((REGRESSIONS++))
+                    ;;
+                2)
+                    ((SKIPPED++))
+                    ;;
+            esac
+        done
+    fi
 
     echo ""
 
