@@ -184,6 +184,7 @@ jobs:
           bash -n scripts/qa/verify-mfe-first-policy.sh
           bash -n scripts/qa/verify-tenant-branding-runtime.sh
           bash -n scripts/qa/verify-slot-matrix.sh
+          bash -n scripts/qa/verify-interaction-state-contract.sh
 
       - name: Run local observability audit
         run: |
