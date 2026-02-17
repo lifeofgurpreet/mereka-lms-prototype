@@ -141,6 +141,28 @@
 - `scripts/qa/verify-mfe-footer-slot.sh` (30+ PASS / 0 FAIL) — updated for v2
 - `scripts/qa/verify-plugin-slot-wiring.sh` (28 PASS / 0 FAIL)
 
+## Footer Slot Migration
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Migration contract documented (AC-FTSLOT-001) | PASS | `docs/architecture/FOOTER_SLOT_MIGRATION.md` |
+| MerekaFooter canonical source verified (AC-FTSLOT-002) | PASS | `mereka_lms.py` mfe-env-config patch (171 lines) |
+| Component parity drift detection (AC-FTSLOT-002) | PASS | 6 key identifiers (SITE_VARIANTS, zones) in both sources |
+| Migration debt metric tracked | PASS | 165 lines in apply-patches.sh (target: 12 → 0) |
+| CI gate for migration contract (AC-FTSLOT-003) | PASS | `monitoring-guardrails` job syntax check |
+| Dual-path defense-in-depth active | PASS | Plugin (canonical) + patches (fallback) |
+| PLUGIN_SLOTS forward-compat ready | PASS | ImportError guard activates when filter ships |
+
+**Script**: `scripts/qa/verify-footer-slot-migration.sh`
+
+**Migration phases**:
+1. **Current**: Dual-path (plugin + apply-patches.sh) — defense-in-depth
+2. **Phase 1**: Remove ImportError guard when PLUGIN_SLOTS filter ships
+3. **Phase 2**: Remove apply-patches.sh footer block (lines 1043-1207) after 2 weeks stable
+4. **Phase 3**: Remove safety nets (lines 1031-1042) after 6 months stable
+
+**Contract**: See `docs/architecture/FOOTER_SLOT_MIGRATION.md` for full migration lifecycle
+
 ## Token Correctness
 
 | Check | Status | Evidence |
