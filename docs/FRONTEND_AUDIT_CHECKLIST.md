@@ -61,7 +61,10 @@
 | Check | Status | Notes |
 |-------|--------|-------|
 | Screenshot capture script exists | PASS | `scripts/qa/visual-regression-test.sh` |
-| 10 critical pages defined | PASS | LMS homepage, login, dashboard, course player, studio, profile, etc. |
+| 20+ critical surfaces defined (desktop + mobile) | PASS | LMS, Studio, 10+ MFEs, desktop (1280x1024) + mobile (375x812) viewports |
+| Mobile viewport baselines | PASS | 375x812 viewport support added |
+| Axe-core accessibility checks | PASS | 4 core journeys: login, dashboard, courseware, discussions |
+| Visual regression runbook | PASS | docs/operations/VISUAL_REGRESSION_RUNBOOK.md |
 | Baseline captured | PENDING | Awaiting stable runtime post-1zj8 fix |
 | Diff threshold configured | PASS | 5% pixel difference threshold |
 
@@ -95,6 +98,20 @@
 | CI gate for token definitions | PASS | `.github/workflows/ci.yml` token-definitions job |
 
 **Script**: `scripts/qa/verify-token-definitions.sh` (10 PASS / 0 FAIL)
+
+## Token Usage Lint
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Hardcoded hex color lint | PASS | `verify-design-token-usage.sh` (8 PASS / 3 WARN) |
+| Brand token references via var() | PASS | 5 core tokens checked |
+| CI gate for token usage | PASS | `design-token-usage` CI job |
+| Paragon alignment documented | PASS | `docs/branding/PARAGON_TOKEN_ALIGNMENT.md` |
+| Token migration policy | PASS | Documented in PARAGON_TOKEN_ALIGNMENT.md |
+
+**Script**: `scripts/qa/verify-design-token-usage.sh`
+
+**Known warnings**: 3 files contain hardcoded hover state colors (#963365 - darker magenta for :hover/:focus). These are acceptable as they are derived from the brand primary color and provide appropriate visual feedback.
 
 ## Route Mapping Integrity
 
@@ -160,6 +177,18 @@
 
 **Script**: `scripts/qa/smoke-authenticated.sh`
 
+## Ecommerce Deprecation
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Legacy ecommerce inventory documented | PASS | `docs/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` |
+| Ecommerce splash page with basket/checkout links | WARN | Caddyfile line 162 (to be removed when gateway ready) |
+| Guard script for new legacy refs | PASS | `verify-legacy-ecommerce-ui-refs.sh` (10 PASS / 8 WARN) |
+| CI gate for ecommerce references | PASS | `legacy-ecommerce-guard` CI job |
+| ADR-018 decision documented | PASS | `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` |
+
+**Script**: `scripts/qa/verify-legacy-ecommerce-ui-refs.sh`
+
 ## Verification Commands
 
 ```bash
@@ -183,6 +212,9 @@
 
 # Token definition correctness (3klj guard)
 ./scripts/qa/verify-token-definitions.sh
+
+# Design token usage lint (AC-UITOKEN-002)
+./scripts/qa/verify-design-token-usage.sh
 
 # MFE route mapping drift (3464 guard)
 ./scripts/qa/verify-mfe-route-drift.sh

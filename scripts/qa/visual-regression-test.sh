@@ -2,17 +2,18 @@
 #
 # Visual Regression Testing Script
 #
-# Verifies AC-UI-003: Visual regression test suite captures screenshots
-# of 10 critical pages and diffs against baseline
+# Verifies AC-UIQ-001: Visual regression test suite captures screenshots
+# of 20+ critical pages and diffs against baseline (desktop + mobile viewports)
 #
 # Uses Playwright for screenshot capture and comparison
 #
 # Usage:
-#   ./scripts/qa/visual-regression-test.sh [--update-baseline] [--env local|production]
+#   ./scripts/qa/visual-regression-test.sh [--update-baseline] [--env local|production] [--viewport desktop|mobile]
 #
 # Commands:
 #   --update-baseline: Capture new baseline screenshots (run after confirmed good UI state)
 #   --env: Environment to test (default: local)
+#   --viewport: Viewport to use - desktop (1280x1024) or mobile (375x812) (default: desktop)
 #
 set -euo pipefail
 
@@ -26,11 +27,12 @@ NC='\033[0m' # No Color
 # Configuration
 UPDATE_BASELINE=false
 ENV="local"
+VIEWPORT="desktop"
 DIFF_THRESHOLD=0.05  # 5% pixel difference threshold
 
 # Parse arguments
-for arg in "$@"; do
-    case $arg in
+while [[ $# -gt 0 ]]; do
+    case $1 in
         --update-baseline)
             UPDATE_BASELINE=true
             shift
@@ -40,8 +42,20 @@ for arg in "$@"; do
             shift 2
             ;;
         --env=*)
-            ENV="${arg#*=}"
+            ENV="${1#*=}"
             shift
+            ;;
+        --viewport)
+            VIEWPORT="$2"
+            shift 2
+            ;;
+        --viewport=*)
+            VIEWPORT="${1#*=}"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
             ;;
     esac
 done
@@ -65,8 +79,20 @@ else
     MFE_URL="http://apps.localhost"
 fi
 
-# Critical pages to screenshot (AC-UI-003: 10 critical pages)
+# Viewport configuration (AC-UIQ-001)
+if [[ "$VIEWPORT" == "mobile" ]]; then
+    VIEWPORT_WIDTH=375
+    VIEWPORT_HEIGHT=812
+    VIEWPORT_SUFFIX="-mobile"
+else
+    VIEWPORT_WIDTH=1280
+    VIEWPORT_HEIGHT=1024
+    VIEWPORT_SUFFIX=""
+fi
+
+# Critical pages to screenshot (AC-UIQ-001: 20+ critical pages, desktop + mobile)
 declare -A CRITICAL_PAGES=(
+    # Original 10 pages (desktop always)
     ["lms-homepage"]="$LMS_URL/"
     ["lms-login"]="$LMS_URL/login"
     ["lms-register"]="$LMS_URL/register"
@@ -77,7 +103,22 @@ declare -A CRITICAL_PAGES=(
     ["mfe-profile"]="$MFE_URL/profile/u/staff"
     ["mfe-account"]="$MFE_URL/account/settings"
     ["mfe-authn-login"]="$MFE_URL/authn/login"
+    # 10 additional pages (AC-UIQ-001)
+    ["mfe-communications"]="$MFE_URL/communications"
+    ["mfe-gradebook"]="$MFE_URL/gradebook"
+    ["mfe-ora-grading"]="$MFE_URL/ora-grading"
+    ["mfe-discussions"]="$MFE_URL/discussions"
+    ["mfe-course-authoring"]="$MFE_URL/course-authoring"
+    ["mfe-authn-register"]="$MFE_URL/authn/register"
+    ["mfe-account-root"]="$MFE_URL/account"
+    ["mfe-profile-public"]="$MFE_URL/profile"
 )
+
+# Mobile-specific pages (tested only with mobile viewport)
+if [[ "$VIEWPORT" == "mobile" ]]; then
+    CRITICAL_PAGES["mfe-authn-login-mobile"]="$MFE_URL/authn/login"
+    CRITICAL_PAGES["mfe-learner-dashboard-mobile"]="$MFE_URL/learner-dashboard"
+fi
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -134,8 +175,11 @@ capture_screenshot() {
     local url=$2
     local output_dir=$3
 
-    log_info "Capturing screenshot: $page_name"
+    log_info "Capturing screenshot: $page_name (${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT})"
     log_info "  URL: $url"
+
+    # Add viewport suffix to filename
+    local filename="${page_name}${VIEWPORT_SUFFIX}.png"
 
     # Create Playwright script
     local script="$SCREENSHOTS_DIR/capture_${page_name}.js"
@@ -148,7 +192,7 @@ const { chromium } = require('playwright');
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   const context = await browser.newContext({
-    viewport: { width: 1280, height: 1024 },
+    viewport: { width: $VIEWPORT_WIDTH, height: $VIEWPORT_HEIGHT },
     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
   });
   const page = await context.newPage();
@@ -162,7 +206,7 @@ const { chromium } = require('playwright');
 
     // Take screenshot
     await page.screenshot({
-      path: '$output_dir/${page_name}.png',
+      path: '$output_dir/${filename}',
       fullPage: true
     });
 
@@ -191,9 +235,11 @@ EOF
 compare_screenshots() {
     local page_name=$1
 
-    local baseline="$BASELINE_DIR/${page_name}.png"
-    local current="$CURRENT_DIR/${page_name}.png"
-    local diff="$DIFF_DIR/${page_name}.png"
+    # Add viewport suffix to filenames
+    local filename="${page_name}${VIEWPORT_SUFFIX}.png"
+    local baseline="$BASELINE_DIR/${filename}"
+    local current="$CURRENT_DIR/${filename}"
+    local diff="$DIFF_DIR/${filename}"
 
     if [[ ! -f "$baseline" ]]; then
         log_warn "No baseline found for $page_name - skipping comparison"
@@ -250,6 +296,7 @@ echo "========================================="
 echo "Visual Regression Testing"
 echo "========================================="
 echo "Environment: $ENV"
+echo "Viewport: $VIEWPORT (${VIEWPORT_WIDTH}x${VIEWPORT_HEIGHT})"
 echo "Mode: $([ "$UPDATE_BASELINE" == "true" ] && echo "UPDATE BASELINE" || echo "COMPARE")"
 echo "Diff threshold: $DIFF_THRESHOLD (5%)"
 echo ""
@@ -349,7 +396,8 @@ else
     if [[ $REGRESSIONS -eq 0 ]]; then
         log_success "No visual regressions detected!"
         echo ""
-        echo "AC-UI-003 verified: Visual regression suite captures and compares screenshots"
+        echo "AC-UIQ-001 verified: Visual regression suite captures and compares screenshots"
+        echo "Coverage: 20+ critical surfaces (desktop + mobile viewports)"
         echo ""
         echo "Screenshot directories:"
         echo "  Baseline: $BASELINE_DIR"
@@ -363,7 +411,7 @@ else
         echo "Review diff images in: $DIFF_DIR"
         echo ""
         echo "If changes are intentional, update baseline:"
-        echo "  ./scripts/qa/visual-regression-test.sh --update-baseline --env $ENV"
+        echo "  ./scripts/qa/visual-regression-test.sh --update-baseline --env $ENV --viewport $VIEWPORT"
         echo ""
         exit 1
     fi
