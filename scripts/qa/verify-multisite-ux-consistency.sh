@@ -245,7 +245,8 @@ if command -v kubectl &>/dev/null; then
 
   if [[ -n "$MFE_POD" ]]; then
     # Check for hardcoded academyv2.mereka.io in MFE dist files
-    HARDCODED_COUNT=$(kubectl exec -n "$K8S_NAMESPACE" "$MFE_POD" -- grep -r "academyv2\.mereka\.io" /openedx/dist/ 2>/dev/null | wc -l || echo "0")
+    HARDCODED_OUTPUT=$(kubectl exec -n "$K8S_NAMESPACE" "$MFE_POD" -- grep -rc "academyv2\.mereka\.io" /openedx/dist/ 2>/dev/null || true)
+    HARDCODED_COUNT=$(echo "$HARDCODED_OUTPUT" | awk -F: '{s+=$NF} END {print s+0}')
 
     if [[ "$HARDCODED_COUNT" -eq 0 ]]; then
       do_pass "AC-MSUX-002: MFE build artifacts contain no hardcoded academyv2.mereka.io references"
