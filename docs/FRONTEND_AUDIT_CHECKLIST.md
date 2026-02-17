@@ -29,6 +29,31 @@
 
 **Script**: `scripts/qa/verify-theme-consistency.sh` (13 PASS / 0 FAIL)
 
+## Token Reference Integrity
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Token reference integrity contract documented | PASS | `docs/architecture/TOKEN_REFERENCE_INTEGRITY.md` |
+| All `var(--mereka-*)` references resolve (AC-UITKN-001) | PASS | Verifier checks all SCSS/CSS files |
+| All SCSS `$variable` references resolve (AC-UITKN-002) | PASS | Variables in `_tokens.scss` |
+| Cross-file token value consistency (AC-UITKN-003) | WARN | Teal drift: `#297F81` (SCSS) vs `#2d898b` (CSS runtime) |
+| CI gate blocks undefined references (AC-UITKN-004) | PASS | `monitoring-guardrails` job runs verifier |
+| Token inventory documented | PASS | 24 SCSS vars + 37 CSS custom properties |
+| MFE coverage tracked | PASS | 11 MFEs consuming token subsets |
+
+**Script**: `scripts/qa/verify-token-reference-integrity.sh` (expected: 15+ PASS / 0 FAIL / 1 WARN)
+
+**Verification command**:
+```bash
+./scripts/qa/verify-token-reference-integrity.sh
+```
+
+**Expected result**:
+- All `var(--mereka-*)` references resolve to definitions
+- All SCSS `$color-*`, `$mereka-*` variables resolve to declarations
+- Token value drift reported as warnings (to be fixed)
+- No undefined references (FAIL count = 0)
+
 ## Routing
 
 | Check | Status | Evidence |
