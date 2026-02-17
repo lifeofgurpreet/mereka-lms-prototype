@@ -43,6 +43,36 @@
 
 **Script**: `scripts/qa/verify-token-reference-integrity.sh` (expected: 15+ PASS / 0 FAIL / 1 WARN)
 
+## Token Generation Pipeline
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Pipeline contract documented (AC-TKPIPE-001) | PASS | `docs/architecture/TOKEN_GENERATION_PIPELINE.md` |
+| Multi-source drift detection (AC-TKPIPE-002) | PASS | Verifier extracts hex values from all 3 layers |
+| CI gate for new drift (AC-TKPIPE-003) | PASS | `monitoring-guardrails` job syntax check |
+| Known drift documented | PASS | Teal: `#2d898b` (L1) vs `#297f81` (L2 SCSS) |
+| Provenance tracking active | PASS | `tokens.provenance.json` SHA256 matches canonical |
+| Layer 1 token count sanity (>= 100) | PASS | 110 CSS custom properties in `tokens.css` |
+| Layer 2 SCSS variable count (>= 20) | PASS | 42 SCSS variables in `_tokens.scss` |
+| Namespace mapping documented | PASS | Layer 1 → Layer 2 → Layer 3 mapping table |
+
+**Script**: `scripts/qa/verify-token-generation-pipeline.sh` (expected: 7+ PASS / 0 FAIL / 2 WARN)
+
+**Verification command**:
+```bash
+./scripts/qa/verify-token-generation-pipeline.sh
+```
+
+**Expected result**:
+- All layers present (canonical tokens.css, SCSS bridge, runtime CSS)
+- Provenance SHA256 matches canonical file
+- Known drift reported as warnings (not failures)
+- Exit code 0 (warnings acceptable in Phase 1)
+
+**Known drift** (to be resolved in Phase 2):
+- **Teal**: `#2d898b` (Layer 1) vs `#297f81` (Layer 2 SCSS)
+- **Ink-500**: `#737373` (Layer 2 SCSS) vs `#7b7b7b` (Layer 3 runtime)
+
 **Verification command**:
 ```bash
 ./scripts/qa/verify-token-reference-integrity.sh
