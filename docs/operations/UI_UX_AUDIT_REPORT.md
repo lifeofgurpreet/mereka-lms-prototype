@@ -62,7 +62,7 @@ None. All critical findings are either fixed or tracked as MEDIUM (workarounds e
 |----|----------|----------|-------------|------------------|---------------|-------|--------|------------|
 | **F-001** | Medium | Hardcoded Domain | `DISCUSSIONS_MICROFRONTEND_URL` hardcoded to apps.academyv2.mereka.io | academy.biji-biji.com, skillourfuture | **FIXED** (PR #35) | Frontend | 30min (dynamic URL) | AC-MSUX-002 |
 | **F-002** | Medium | Hardcoded Domain | Nginx `proxy_set_header Host academyv2.mereka.io` breaks SiteConfiguration | academy.biji-biji.com, skillourfuture | **FIXED** (PR #35) | Platform Eng | 30min (use `$http_host`) | AC-MSUX-002 |
-| **F-006** | Medium | Visual Inconsistency | No brand color tokens (`--mereka-color-*`) in MFE config API | All | Tracked | Frontend | 2h (add tokens to MFE_CONFIG) | AC-UI-002 |
+| **F-006** | Medium | Visual Inconsistency | No brand color tokens (`--mereka-color-*`) in MFE config API | All | **FIXED** (PR #36) | Frontend | 2h (add tokens to MFE_CONFIG) | AC-UI-002 |
 | **F-010** | Medium | Ops Workflow | Zero-downtime brand-pack update workflow undocumented | All | Tracked | Platform Eng | 4h (test + document) | AC-TBR-005 |
 
 ### Low (Edge Cases)
