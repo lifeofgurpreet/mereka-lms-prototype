@@ -497,6 +497,30 @@
 
 **CI integration**: All 7 verifiers added to `.github/workflows/ci.yml` (syntax checks in `monitoring-guardrails` job)
 
+## Analytics Guardrails
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Analytics drift guardrails documented (AC-ADRIFT-001) | PASS | `docs/architecture/ANALYTICS_DRIFT_GUARDRAILS.md` |
+| Guardrails prevent accidental deployment (AC-ADRIFT-001) | PASS | No aspects images/pods/routes in production |
+| Drift detection verifier exists (AC-ADRIFT-002) | PASS | `scripts/qa/verify-analytics-drift-guardrails.sh` (14 PASS / 0 FAIL) |
+| Decision closure procedure documented (AC-ADRIFT-003) | PASS | 17-step procedure in guardrails doc |
+| Superset deployment runbook exists (AC-SUPRT-001) | PASS | `docs/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md` |
+| Runbook covers auth/dashboards/access/embedding (AC-SUPRT-001) | PASS | 6 sections + operational procedures |
+| Runbook verifier exists (AC-SUPRT-002) | PASS | `scripts/qa/verify-superset-runbook.sh` (21 PASS / 0 FAIL) |
+| CI gate for analytics guardrails | PASS | `monitoring-guardrails` CI job syntax check |
+| ADR-017 status gate enforced | PASS | Verifier checks ADR status = Deferred |
+| Analytics spec status gate enforced | PASS | Verifier checks spec status = in_progress |
+| Production kustomization clean | PASS | No aspects images/volumes in production overlay |
+
+**Scripts**:
+- `scripts/qa/verify-analytics-drift-guardrails.sh` — Drift detection and decision gate alignment
+- `scripts/qa/verify-superset-runbook.sh` — Superset deployment runbook contract verification
+
+**Deployment status**: DEFERRED (per ADR-017). Analytics infrastructure (Aspects/Superset/ClickHouse) is available but not deployed to production. Guardrails enforce deferral decision by blocking accidental deployment.
+
+**Decision closure**: When ADR-017 status changes from "Deferred" to "Accepted", follow the 17-step procedure in `ANALYTICS_DRIFT_GUARDRAILS.md` to formally deploy analytics.
+
 ## Verification Commands
 
 ```bash
@@ -550,4 +574,49 @@ SSO_USERNAME=test@example.com SSO_PASSWORD=secret ./scripts/qa/smoke-authenticat
 
 # Performance budgets (AC-UIPERF-001..003) — NEW: bead 16q0
 ./scripts/qa/verify-performance-budget.sh
+
+# Analytics decision gate (AC-ADGATE-001..003) — NEW: bead 2aze
+./scripts/qa/verify-analytics-decision-gate.sh
 ```
+
+## Analytics Decision Gate
+
+**Context**: Analytics deployment (Aspects/Superset) deferred per ADR-017. Decision gate ensures deferral is tracked, documented, and reviewed regularly.
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Decision gate contract documented | PASS | `docs/architecture/ANALYTICS_DECISION_GATE.md` |
+| ADR-017 status valid (Deferred or Accepted) | PASS | Status: Deferred (as of 2026-02-13) |
+| ADR-017 has last verified date | PASS | Comment: `<!-- Last verified: 2026-02-13 -->` |
+| Last review within 90 days | PASS | Verified 2026-02-17 (4 days ago) |
+| Decision matrix table complete | PASS | All 5 revisit conditions documented |
+| All 5 conditions have current status | PASS | 1 PARTIAL, 4 NOT MET (recommendation: KEEP DEFERRED) |
+| Aspects NOT deployed to production | PASS | 0 pods in mereka-lms namespace |
+| K8s manifests exist but inactive | PASS | `deploy/k8s/base/plugins/aspects/` exists, NOT in kustomization |
+| Analytics spec exists | PASS | `specs/analytics-pipeline_spec.md` (status: in_progress) |
+| Installation guide documented | PASS | `docs/analytics/ASPECTS_INSTALLATION.md` |
+| CI gate prevents stale decision | PASS | `monitoring-guardrails` CI job (syntax check) |
+
+**Script**: `scripts/qa/verify-analytics-decision-gate.sh` (expected: 10+ PASS / 0 FAIL / 2 WARN)
+
+**Verification command**:
+```bash
+./scripts/qa/verify-analytics-decision-gate.sh
+```
+
+**Expected result**:
+- All checks PASS (warnings acceptable)
+- ADR-017 last verified date within 90 days (WARN if stale)
+- No Aspects pods in production
+- K8s manifests exist but NOT in active kustomization
+
+**Revisit conditions** (from ADR-017):
+1. Core platform stable 3+ months (no critical incidents) → ⚠️ PARTIAL
+2. Course creators request learning analytics → ❌ NOT MET
+3. Team capacity for ClickHouse/Superset ops → ❌ NOT MET
+4. Analytics spec reaches APPROVED status → ❌ NOT MET
+5. Demonstrated use cases justify overhead → ❌ NOT MET
+
+**Next review**: 2026-05-17 (90 days from last review)
+
+**Current recommendation**: KEEP DEFERRED (all revisit conditions not met)

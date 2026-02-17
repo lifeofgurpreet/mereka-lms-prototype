@@ -200,6 +200,9 @@ jobs:
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-footer-slot-migration.sh
           bash -n scripts/qa/verify-multisite-ux-consistency.sh
+          bash -n scripts/qa/verify-analytics-decision-gate.sh
+          bash -n scripts/qa/verify-superset-runbook.sh
+          bash -n scripts/qa/verify-analytics-drift-guardrails.sh
 
       - name: Run local observability audit
         run: |
@@ -468,6 +471,7 @@ jobs:
             scripts/qa/verify-tutor-multisite-domains.sh
             scripts/qa/verify-mongodb-atlas-integration.sh
             scripts/qa/verify-atlas-data-persistence.sh
+            scripts/qa/verify-aspects-deployment-readiness.sh
             scripts/qa/verify-data-migration-contracts.sh
             scripts/qa/verify-forum-migration-contracts.sh
             scripts/qa/verify-dev-prod-secret-separation.sh
