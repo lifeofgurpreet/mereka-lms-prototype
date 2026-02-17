@@ -67,6 +67,7 @@
 | apply-patches.sh fallback wiring | PASS | RenderWidget replacement (defense-in-depth) |
 | FPF dependency installed in MFE build | PASS | `@openedx/frontend-plugin-framework@^1.8.0` |
 | CI gate for slot wiring | PASS | `.github/workflows/ci.yml` mfe-footer-slot job |
+| Plugin-slot inventory documented | PASS | `docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` — 100+ slots across 14 MFEs |
 
 **Script**: `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
 
