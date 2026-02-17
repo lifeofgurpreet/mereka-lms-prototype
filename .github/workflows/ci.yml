@@ -167,6 +167,8 @@ jobs:
           bash -n scripts/qa/verify-dev-prod-image-parity.sh
           bash -n scripts/qa/verify-site-id-hardening.sh
           bash -n scripts/qa/lint-active-docs-env-model.sh
+          bash -n scripts/qa/verify-token-definitions.sh
+          bash -n scripts/qa/verify-mfe-route-drift.sh
 
       - name: Run local observability audit
         run: |
@@ -467,6 +469,24 @@ jobs:
 
       - name: Verify footer slot wiring (plugin + fallback)
         run: ./scripts/qa/verify-mfe-footer-slot.sh
+
+  mfe-route-drift:
+    name: MFE Route Mapping Drift Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Caddyfile ↔ branding verifier route sync
+        run: ./scripts/qa/verify-mfe-route-drift.sh
+
+  token-definitions:
+    name: Token Definition Correctness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify all --mereka-* token references resolve
+        run: ./scripts/qa/verify-token-definitions.sh
 
   custom-app-drift:
     name: Custom App Install Drift Guard

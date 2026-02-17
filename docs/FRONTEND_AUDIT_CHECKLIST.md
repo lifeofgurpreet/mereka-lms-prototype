@@ -70,6 +70,31 @@
 
 **Script**: `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
 
+## Token Correctness
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| All --mereka-* token references resolve | PASS | `verify-token-definitions.sh` (10 PASS) |
+| tokens.css has >= 80 properties | PASS | 110 properties found |
+| tokens.css balanced braces | PASS | Structural check |
+| Key colors bridged in _tokens.scss | PASS | teal, magenta, blue |
+| No undefined --pgn-* references | PASS | All Paragon tokens bridged |
+| CI gate for token definitions | PASS | `.github/workflows/ci.yml` token-definitions job |
+
+**Script**: `scripts/qa/verify-token-definitions.sh` (10 PASS / 0 FAIL)
+
+## Route Mapping Integrity
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Caddyfile ↔ branding verifier routes in sync | PASS | `verify-mfe-route-drift.sh` (32 PASS) |
+| /authoring and /course-authoring both serve course-authoring | PASS | Dual-path check |
+| /u profile route serves profile directory | PASS | Special route check |
+| /orders and /payment proxy to payments-gateway | PASS | Deprecated route proxy check |
+| CI gate for route drift | PASS | `.github/workflows/ci.yml` mfe-route-drift job |
+
+**Script**: `scripts/qa/verify-mfe-route-drift.sh` (32 PASS / 0 FAIL)
+
 ## Build & Deploy Safety
 
 | Check | Status | Evidence |
@@ -105,6 +130,12 @@
 
 # Footer plugin-slot wiring
 ./scripts/qa/verify-mfe-footer-slot.sh
+
+# Token definition correctness (3klj guard)
+./scripts/qa/verify-token-definitions.sh
+
+# MFE route mapping drift (3464 guard)
+./scripts/qa/verify-mfe-route-drift.sh
 
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline
