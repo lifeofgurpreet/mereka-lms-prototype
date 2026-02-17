@@ -170,6 +170,7 @@ jobs:
           bash -n scripts/qa/verify-token-definitions.sh
           bash -n scripts/qa/verify-mfe-route-drift.sh
           bash -n scripts/qa/verify-plugin-slot-wiring.sh
+          bash -n scripts/qa/verify-contrast-compliance.sh
 
       - name: Run local observability audit
         run: |
@@ -497,6 +498,20 @@ jobs:
 
       - name: Verify plugin-slot wiring chain (plugin ↔ patches ↔ inventory)
         run: ./scripts/qa/verify-plugin-slot-wiring.sh
+
+  contrast-compliance:
+    name: WCAG 2.1 AA Contrast Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify contrast ratios (tokens ↔ WCAG AA thresholds)
+        run: ./scripts/qa/verify-contrast-compliance.sh
 
   custom-app-drift:
     name: Custom App Install Drift Guard

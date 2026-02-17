@@ -109,13 +109,26 @@
 | 21/21 custom apps in Docker image | PASS | Plugin `_CUSTOM_APPS` list |
 | Kustomize ConfigMap persistence | PASS | `configMapGenerator` with content hashing |
 
+## WCAG 2.1 AA Contrast Compliance
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| All text/background pairs meet AA thresholds | PASS | `verify-contrast-compliance.sh` (27 PASS) |
+| ink-500 remediated for 4.5:1 on neutral-100 | PASS | #7B7B7B → #737373 |
+| ink-300 remediated for 3:1 on neutral-100 | PASS | #AFADB2 → #929092 |
+| teal remediated for 4.5:1 link text | PASS | #2d898b → #297F81 |
+| Soft semantic colors tested as backgrounds | PASS | ink-900 on gold/sky/pink |
+| CI gate for contrast regression | PASS | `.github/workflows/ci.yml` contrast-compliance job |
+
+**Script**: `scripts/qa/verify-contrast-compliance.sh` (27 PASS / 0 FAIL)
+
 ## Release Blockers
 
 | Blocker | Status | Owner |
 |---------|--------|-------|
 | Custom app crashloops (1zj8) | FIXED (code) | WhiteCliff (runtime deploy) |
 | Visual regression baseline | PENDING | Requires stable runtime |
-| Accessibility audit | NOT STARTED | Future epic |
+| Accessibility audit (contrast) | PASS | WCAG AA contrast gate (1251) |
 | Performance baseline (LCP, FID) | NOT STARTED | Future epic |
 
 ## Verification Commands
@@ -144,6 +157,9 @@
 
 # Plugin-slot wiring integrity (qp0k guard)
 ./scripts/qa/verify-plugin-slot-wiring.sh
+
+# WCAG 2.1 AA contrast compliance (1251 guard)
+./scripts/qa/verify-contrast-compliance.sh
 
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline
