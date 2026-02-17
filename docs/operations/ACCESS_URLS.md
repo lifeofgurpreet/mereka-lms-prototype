@@ -42,6 +42,7 @@ Canonical hostname registry (prod + dev + kind-local):
 **Other Services (Local)**
 - **Discovery:** http://discovery.localhost
 - **Ecommerce:** http://ecommerce.localhost
+  > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
 - **Notes API:** http://notes.localhost (API only, no UI)
 - **XQueue:** http://xqueue.localhost
 - **Forum:** Integrated into LMS courses
@@ -113,6 +114,7 @@ Platform admins are enforced separately (see `docs/operations/ADMIN_LOGIN_GUIDE.
 **Other Services (GKE)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
+  > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
   - **Service Landing:** https://ecommerce.academyv2.mereka.io/ (branded root)
   - **Dashboard:** https://ecommerce.academyv2.mereka.io/dashboard/
   - **Basket:** https://ecommerce.academyv2.mereka.io/basket/
@@ -164,6 +166,7 @@ Platform admins are enforced separately (see `docs/operations/ADMIN_LOGIN_GUIDE.
 **Other Services (Dev)**
 - **Discovery:** https://discovery.academyv2.mereka.dev
 - **Ecommerce:** https://ecommerce.academyv2.mereka.dev
+  > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
   - **Service Landing:** https://ecommerce.academyv2.mereka.dev/ (branded root)
   - **Dashboard:** https://ecommerce.academyv2.mereka.dev/dashboard/
   - **Basket:** https://ecommerce.academyv2.mereka.dev/basket/
@@ -217,6 +220,7 @@ Platform admins are enforced separately (see `docs/operations/ADMIN_LOGIN_GUIDE.
 **Other Services (Production)**
 - **Discovery:** https://discovery.academyv2.mereka.io (shared service)
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io (shared service)
+  > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
 - **Credentials:** https://credentials.academyv2.mereka.io (shared service)
 - **Notes API:** https://notes.academyv2.mereka.io (shared service)
 
@@ -275,10 +279,12 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 
 ### Admin Access For Discovery/Credentials/Ecommerce
 
+> **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
+
 These services have their own Django Admin sites:
 - `https://discovery.academyv2.mereka.io/admin/`
 - `https://credentials.academyv2.mereka.io/admin/`
-- `https://ecommerce.academyv2.mereka.io/admin/`
+- `https://ecommerce.academyv2.mereka.io/admin/` (legacy Oscar ecommerce)
 
 Hardening behavior (expected):
 - If you hit `/admin/` or `/admin/login/` while not logged in, you are redirected to the SSO entrypoint (`/login/`).
@@ -359,10 +365,12 @@ VPS automation (installs cron for prod+dev checks, logs to `var/cron-public-heal
 - Studio root: `/`
 - MFE login: `/authn/login`
 - Discovery: `/health/`
-- Ecommerce: `/` + `/dashboard/` (root landing + OAuth redirect path)
+- Ecommerce: `/` + `/dashboard/` (root landing + OAuth redirect path) — legacy Oscar service
 - Credentials: `/health/`
 - Notes: `/`
 - Forum: `/` + `/heartbeat` (root landing + API health)
+
+> **Note**: Ecommerce endpoints refer to the legacy Oscar-based service, being replaced by Purchase Gateway. See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md`.
 
 ---
 

@@ -250,6 +250,8 @@ The target approach uses `tutormfe.hooks.PLUGIN_SLOTS` to register a **Direct pl
 4. **Deploy** — `tutor k8s restart mfe`
 5. **Verify** — confirm component renders on all MFE routes
 
+**Verification**: `./scripts/qa/verify-mfe-footer-slot.sh` (16 PASS — checks plugin definition, slot registration, fallback wiring, FPF dependency)
+
 See `docs/adr/014-mfe-branding-strategy.md` § "Plugin-First Migration" for full migration steps and available slots.
 
 - To bake the branding into Tutor's production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.

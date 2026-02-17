@@ -551,6 +551,48 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit -
 )
 
 ###############################################################################
+# MFE Plugin Slot Configuration (Footer)
+###############################################################################
+#
+# MIGRATION STATUS: Dual-path (env.config.jsx patch + apply-patches.sh fallback)
+#
+# Current approach (working):
+#   1. mfe-env-config patch defines MerekaFooter component inline
+#   2. apply-patches.sh replaces RenderWidget: <Footer /> → <MerekaFooter />
+#
+# Target approach (FPF slot-driven, ADR-014):
+#   When tutor-mfe exposes tutormfe.hooks.PLUGIN_SLOTS, register footer_slot
+#   override directly from Python — no apply-patches.sh string replacement needed.
+#
+# Forward-compatible registration (activates when tutor-mfe adds PLUGIN_SLOTS):
+try:
+    from tutormfe.hooks import PLUGIN_SLOTS  # type: ignore[import-not-found]
+
+    PLUGIN_SLOTS.add_item(
+        (
+            "footer_slot",
+            {
+                "keepDefault": False,
+                "plugins": [
+                    {
+                        "op": "PLUGIN_OPERATIONS.Replace",
+                        "widget": {
+                            "id": "mereka_footer",
+                            "type": "DIRECT_PLUGIN",
+                            "RenderWidget": "MerekaFooter",
+                        },
+                    }
+                ],
+            },
+        )
+    )
+    _PLUGIN_SLOTS_AVAILABLE = True
+except ImportError:
+    # tutormfe.hooks.PLUGIN_SLOTS not available in this Tutor version.
+    # Fall back to mfe-env-config patch + apply-patches.sh string replacement.
+    _PLUGIN_SLOTS_AVAILABLE = False
+
+###############################################################################
 # MFE Theme Patches (Indigo)
 ###############################################################################
 
@@ -561,7 +603,10 @@ hooks.Filters.ENV_PATCHES.add_item(
 // Import Mereka theme SCSS
 import './mereka/mereka.scss';
 
-// Custom Mereka footer component
+// Custom Mereka footer component (Direct plugin — see ADR-014)
+// This component is wired into footer_slot via one of two paths:
+//   1. tutormfe.hooks.PLUGIN_SLOTS (if available in this Tutor version)
+//   2. apply-patches.sh RenderWidget replacement (fallback)
 const MerekaFooter = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
@@ -622,10 +667,6 @@ const MerekaFooter = () => {
     </footer>
   );
 };
-
-// Replace default footer with Mereka footer
-// apply-patches.sh replaces the default <Footer /> RenderWidget with <MerekaFooter />
-// in the Indigo slot configuration (content modification that plugins can't do)
 """,
     )
 )

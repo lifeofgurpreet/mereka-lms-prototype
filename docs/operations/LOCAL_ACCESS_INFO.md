@@ -33,6 +33,7 @@ _Last updated: 2025-11-12_
 ### Other Services
 - **Discovery:** http://discovery.localhost
 - **Ecommerce:** http://ecommerce.localhost
+  > **Note**: Legacy Oscar ecommerce, being replaced by Purchase Gateway. See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md`.
 - **Notes API:** http://notes.localhost (API only)
 - **XQueue:** http://xqueue.localhost
 - **Superset (Analytics):** http://superset.localhost

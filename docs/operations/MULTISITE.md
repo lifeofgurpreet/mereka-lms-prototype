@@ -106,7 +106,9 @@ What the script does:
 
 ## 7. Operational notes
 
-- Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce, and background services remain shared across all brands.
+- Microsites cover the learner-facing LMS and MFEs only. Studio, Discovery, ecommerce (legacy Oscar, being replaced by Purchase Gateway), and background services remain shared across all brands.
+
+> **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details.
 - Forum is deployed at `forum.academyv2.mereka.io` (and `.dev`) but is **API-first**; the learner discussion UI is embedded inside LMS course pages, and moderation happens via Studio.
 - Any `tutor config save` run must be followed by `./infrastructure/tutor/apply-patches.sh` so the additional host headers stay injected.
 - Back up the database (`tutor local do backup-db` / `scripts/infra/backup-db.sh`) before rolling out further domain changes.
