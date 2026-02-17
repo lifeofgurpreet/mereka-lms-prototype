@@ -157,6 +157,26 @@
 
 **Script**: `scripts/qa/verify-contrast-compliance.sh` (27 PASS / 0 FAIL)
 
+## Tenant Branding Runtime
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Runtime branding verification script exists | PASS | `scripts/qa/verify-tenant-branding-runtime.sh` |
+| Per-domain SITE_NAME assertion (AC-TBR-101) | PENDING | Requires ENABLE_MULTI_TENANT_BRANDING=True |
+| Per-domain logo URL assertion (AC-TBR-102) | PENDING | Requires ENABLE_MULTI_TENANT_BRANDING=True |
+| Brand color tokens presence check (AC-TBR-102) | PENDING | Requires ENABLE_MULTI_TENANT_BRANDING=True |
+| Footer variant contract per domain (AC-TBR-103) | PENDING | Requires live endpoints |
+| Integration into governance gates (AC-TBR-104) | PASS | `run-multisite-governance-gates.sh` |
+| Troubleshooting section documented (AC-TBR-105) | PASS | `docs/operations/TROUBLESHOOTING.md` |
+| CI syntax check | PASS | `.github/workflows/ci.yml` monitoring-guardrails job |
+
+**Script**: `scripts/qa/verify-tenant-branding-runtime.sh`
+
+**Note**: This is a runtime check that requires live endpoints with `ENABLE_MULTI_TENANT_BRANDING=True`. When the runtime is not available, all checks are marked as SKIP (not FAIL). The script verifies:
+- academyv2.mereka.io → "Mereka Academy"
+- academy.biji-biji.com → "Biji-Biji Academy"
+- skillourfuture.academy.mereka.io → "Skill Our Future Academy"
+
 ## Release Blockers
 
 | Blocker | Status | Owner |
