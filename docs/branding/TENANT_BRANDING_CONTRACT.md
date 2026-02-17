@@ -217,7 +217,7 @@ infrastructure/tutor/themes/mereka/tenants/<slug>/
 │   └── favicon-64.png          # 64×64px PNG (optional)
 ├── styles/
 │   └── custom.css              # Tenant-specific CSS overrides (optional)
-└── config.json                 # Tenant branding metadata (optional)
+└── config.json                 # Tenant branding metadata (validated by specs/brand-pack-schema.json — see scripts/qa/verify-brand-pack-schema.sh)
 ```
 
 **config.json Example**:

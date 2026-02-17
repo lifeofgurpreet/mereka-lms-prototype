@@ -114,6 +114,16 @@
 | 21/21 custom apps in Docker image | PASS | Plugin `_CUSTOM_APPS` list |
 | Kustomize ConfigMap persistence | PASS | `configMapGenerator` with content hashing |
 
+## Tenant Branding
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Brand-pack schema exists and validates | PASS | `specs/brand-pack-schema.json` |
+| Template validates against schema | PASS | `scripts/tenants/brand-pack-template.json` |
+| CI gate for brand-pack validation | PASS | `.github/workflows/ci.yml` brand-pack-schema job |
+
+**Script**: `scripts/qa/verify-brand-pack-schema.sh`
+
 ## WCAG 2.1 AA Contrast Compliance
 
 | Check | Status | Evidence |
