@@ -178,6 +178,7 @@ jobs:
           bash -n scripts/qa/smoke-authenticated.sh
           bash -n scripts/qa/verify-ui-accessibility.sh
           bash -n scripts/qa/verify-legacy-ecommerce-ui-refs.sh
+          bash -n scripts/qa/verify-mfe-first-policy.sh
 
       - name: Run local observability audit
         run: |
@@ -600,3 +601,11 @@ jobs:
             exit 1
           fi
           echo "Page count verification passed (${PAGE_COUNT} pages)"
+
+  mfe-first-policy:
+    name: MFE-First Policy Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check MFE-first policy compliance
+        run: ./scripts/qa/verify-mfe-first-policy.sh
