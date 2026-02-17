@@ -690,6 +690,10 @@ MFE_CONFIG = {
     "SUPPORT_URL_LEARNER_RECORDS": "",
     "ENABLE_VERIFIABLE_CREDENTIALS": FEATURES.get("ENABLE_VERIFIABLE_CREDENTIALS", False),
     "SUPPORT_URL_VERIFIABLE_CREDENTIALS": "",
+    # Brand color tokens (consumed by MFE runtime for tenant-aware theming)
+    "BRAND_PRIMARY": "#2d898b",
+    "BRAND_SECONDARY": "#ab3b78",
+    "BRAND_ACCENT": "#295cad",
 }
 
 # MFE-specific settings
