@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-001
+# @covers AC-001, AC-TBR-104
 # @spec: multi-site-domains_spec.md
 # Unified multisite governance gate for domain/site config + org ownership.
 #

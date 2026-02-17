@@ -333,25 +333,55 @@
 - **Paragon focus token bridge**: Standardize focus ring tokens across components
 - **Axe-core expansion**: Currently 4/11 MFE routes covered, expand to 11 total
 
-## Tenant Branding Runtime
+## Tenant Branding Runtime Gate
 
 | Check | Status | Evidence |
 |-------|--------|----------|
-| Runtime branding verification script exists | PASS | `scripts/qa/verify-tenant-branding-runtime.sh` |
+| Runtime branding verification script exists (AC-TBR-101, AC-TBR-102, AC-TBR-103) | PASS | `scripts/qa/verify-tenant-branding-runtime.sh` |
 | Per-domain SITE_NAME assertion (AC-TBR-101) | PENDING | Requires ENABLE_MULTI_TENANT_BRANDING=True |
 | Per-domain logo URL assertion (AC-TBR-102) | PENDING | Requires ENABLE_MULTI_TENANT_BRANDING=True |
 | Brand color tokens presence check (AC-TBR-102) | PENDING | Requires ENABLE_MULTI_TENANT_BRANDING=True |
 | Footer variant contract per domain (AC-TBR-103) | PENDING | Requires live endpoints |
-| Integration into governance gates (AC-TBR-104) | PASS | `run-multisite-governance-gates.sh` |
-| Troubleshooting section documented (AC-TBR-105) | PASS | `docs/operations/TROUBLESHOOTING.md` |
+| Integration into governance gates (AC-TBR-104) | PASS | `run-multisite-governance-gates.sh` (line 117-122) |
+| Troubleshooting runbook documented (AC-TBR-105) | PASS | `docs/operations/TENANT_BRANDING_TROUBLESHOOTING.md` |
+| Troubleshooting doc verification (AC-TBR-105) | PASS | `scripts/qa/verify-tenant-branding-troubleshoot-docs.sh` |
 | CI syntax check | PASS | `.github/workflows/ci.yml` monitoring-guardrails job |
 
-**Script**: `scripts/qa/verify-tenant-branding-runtime.sh`
+**Scripts**:
+- `scripts/qa/verify-tenant-branding-runtime.sh` — Runtime verification (AC-TBR-101..103)
+- `scripts/qa/run-multisite-governance-gates.sh` — Governance gate integration (AC-TBR-104)
+- `scripts/qa/verify-tenant-branding-troubleshoot-docs.sh` — Troubleshooting doc verification (AC-TBR-105)
 
-**Note**: This is a runtime check that requires live endpoints with `ENABLE_MULTI_TENANT_BRANDING=True`. When the runtime is not available, all checks are marked as SKIP (not FAIL). The script verifies:
-- academyv2.mereka.io → "Mereka Academy"
-- academy.biji-biji.com → "Biji-Biji Academy"
-- skillourfuture.academy.mereka.io → "Skill Our Future Academy"
+**Current state**: Runtime checks SKIP until ENABLE_MULTI_TENANT_BRANDING=True. This is expected behavior.
+
+**Verification commands**:
+```bash
+# Check production runtime (requires live endpoints)
+./scripts/qa/verify-tenant-branding-runtime.sh --env prod
+
+# Check local development
+./scripts/qa/verify-tenant-branding-runtime.sh --env local
+
+# Verify troubleshooting documentation
+./scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
+
+# Run full multisite governance gates (includes runtime check)
+./scripts/qa/run-multisite-governance-gates.sh --env prod
+```
+
+**Expected result**:
+- When `ENABLE_MULTI_TENANT_BRANDING=False`: All runtime checks SKIP (exit 0)
+- When `ENABLE_MULTI_TENANT_BRANDING=True`: Domain-specific branding verified for:
+  - academyv2.mereka.io → "Mereka Academy"
+  - academy.biji-biji.com → "Biji-Biji Academy"
+  - skillourfuture.academy.mereka.io → "Skill Our Future Academy"
+
+**Troubleshooting**: See `docs/operations/TENANT_BRANDING_TROUBLESHOOTING.md` for:
+- False positives (cache TTL, DNS propagation)
+- Routing/cache edge cases (Caddy domain routing, MFE Host header passthrough)
+- Known issues (ENABLE_MULTI_TENANT_BRANDING flag, cookie domain conflicts, footer variant mismatch)
+- Configuration gaps (tenant not provisioned, placeholder UUIDs)
+- Escalation path
 
 ## Release Blockers
 
@@ -574,6 +604,12 @@ SSO_USERNAME=test@example.com SSO_PASSWORD=secret ./scripts/qa/smoke-authenticat
 
 # Performance budgets (AC-UIPERF-001..003) — NEW: bead 16q0
 ./scripts/qa/verify-performance-budget.sh
+
+# Analytics drift guardrails (AC-ADRIFT-001..003) — NEW: bead 2aze
+./scripts/qa/verify-analytics-drift-guardrails.sh
+
+# Superset deployment runbook (AC-SUPRT-001..002) — NEW: bead 2aze
+./scripts/qa/verify-superset-runbook.sh
 
 # Analytics decision gate (AC-ADGATE-001..003) — NEW: bead 2aze
 ./scripts/qa/verify-analytics-decision-gate.sh
