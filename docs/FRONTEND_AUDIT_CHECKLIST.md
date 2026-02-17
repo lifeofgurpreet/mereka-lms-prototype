@@ -48,6 +48,19 @@
 | OpenEdX image pinned | PASS | `20260210-v21-mfe-only-b988d63` |
 | Version tracking doc maintained | PASS | `docs/architecture/MFE_VERSIONS.md` |
 | No `:latest` tags in deployment manifests | PASS | 0 occurrences in `deployments.yml` |
+
+## Selector Hardening
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Selector hardening policy documented | PASS | `docs/architecture/SELECTOR_HARDENING_POLICY.md` |
+| Selector complexity verifier exists | PASS | `scripts/qa/verify-selector-hardening.sh` (3 PASS, 267 WARN) |
+| Slot-first migration readiness verified | PASS | `scripts/qa/verify-slot-migration-readiness.sh` (12 PASS, 1 WARN) |
+| CI gate for selector quality | PASS | `monitoring-guardrails` CI job (syntax check) |
+| Fragile selector ratio under threshold | PASS | 13% fragile selectors (204/1518), threshold 30% |
+| Footer slot actively wired | PASS | `org.openedx.frontend.layout.footer.v1` (AC-FOOTER-202) |
+| Slot inventory comprehensive | WARN | 41 slots documented (expected ≥80 from upstream) |
+| Migration opportunities tracked | PASS | 4 slot-wirable customizations documented |
 | Version Baseline table documented | PASS | Tutor 18.2.2, Node 18.20.5, Python 3.12 |
 | Frontend version consistency (AC-UIVER-003) | PASS | docs ↔ CI ↔ scripts ↔ K8s verified |
 | Upgrade procedure documented (AC-UIVER-004) | PASS | 8-step procedure in MFE_VERSIONS.md |
