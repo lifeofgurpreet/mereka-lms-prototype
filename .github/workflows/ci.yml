@@ -171,6 +171,8 @@ jobs:
           bash -n scripts/qa/verify-mfe-route-drift.sh
           bash -n scripts/qa/verify-plugin-slot-wiring.sh
           bash -n scripts/qa/verify-contrast-compliance.sh
+          bash -n scripts/qa/verify-frontend-version-truth.sh
+          bash -n scripts/qa/verify-tenant-branding-contract.sh
 
       - name: Run local observability audit
         run: |
@@ -237,6 +239,16 @@ jobs:
       - name: Run repository Atlas modulestore contract check
         run: |
           ./scripts/qa/verify-atlas-modulestore-path.sh --mode local
+
+  tenant-branding-contract:
+    name: Tenant Branding Contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tenant branding contract compliance
+        run: |
+          ./scripts/qa/verify-tenant-branding-contract.sh
 
   gitops-image-contract:
     name: GitOps Image Override Contract
@@ -521,3 +533,12 @@ jobs:
 
       - name: Verify custom apps (settings ↔ plugin ↔ directory)
         run: ./scripts/qa/verify-custom-app-drift.sh
+
+  frontend-version-truth:
+    name: Frontend Version Truth (AC-UIVER-003)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify frontend version consistency (docs ↔ CI ↔ scripts ↔ K8s)
+        run: ./scripts/qa/verify-frontend-version-truth.sh
