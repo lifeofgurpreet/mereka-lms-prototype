@@ -225,6 +225,14 @@ jobs:
         run: |
           ./scripts/qa/lint-active-docs-env-model.sh
 
+      - name: Verify selector hardening (syntax check only)
+        run: |
+          bash -n scripts/qa/verify-selector-hardening.sh
+
+      - name: Verify slot migration readiness (syntax check only)
+        run: |
+          bash -n scripts/qa/verify-slot-migration-readiness.sh
+
       - name: Generate offline monitoring plan
         run: |
           OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan | tee monitoring-plan.txt
