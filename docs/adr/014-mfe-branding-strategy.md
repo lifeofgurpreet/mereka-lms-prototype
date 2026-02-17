@@ -382,6 +382,107 @@ Plugin delivers configuration and component injection via Tutor hooks. Asset syn
 
 ---
 
+## Plugin-First Migration: FPF Slot-Driven Approach
+
+> Added 2026-02-17 — supplements the original Option C decision with concrete slot-driven implementation guidance.
+
+### Recommended Path
+
+**Tutor plugin + `tutormfe.hooks.PLUGIN_SLOTS`** — no MFE repo forks, no patch spaghetti.
+
+The Frontend Plugin Framework (FPF, OEP-65) provides named **slots** in every MFE where operators can inject, replace, or wrap React components without forking MFE repositories. Tutor exposes these slots via `tutormfe.hooks.PLUGIN_SLOTS`, so a Tutor plugin can register slot overrides that get written into `env.config.jsx` at build time.
+
+### Direct vs iFrame Plugin Decision Rule
+
+| Criteria | Direct Plugin | iFrame Plugin |
+|----------|:------------:|:-------------:|
+| Needs access to MFE React context (theme, auth, i18n) | **Use this** | No |
+| Lightweight component (<50 KB bundle) | **Use this** | No |
+| Component from a separate codebase / different framework | No | **Use this** |
+| Strict sandboxing required (untrusted third-party code) | No | **Use this** |
+| Performance-sensitive (no extra HTTP round-trip) | **Use this** | No |
+
+**For MerekaFooter**: Use **Direct Plugin** — it is a lightweight React component that needs access to the MFE theme context for consistent styling.
+
+### Migration Path: `env.config.jsx` Hardcoded → Slot-Driven
+
+**Current state** (hardcoded):
+```
+mereka_lms.py → mfe-dockerfile-post-npm-install hook
+  → writes env.config.jsx with inline MerekaFooter component
+  → footer defined as raw JS string in Python plugin
+```
+
+**Target state** (slot-driven):
+```
+mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
+  → registers footer_slot override with Direct plugin operation
+  → MerekaFooter component lives in a proper JS module
+  → env.config.jsx generated automatically by tutor-mfe
+```
+
+**Migration steps**:
+
+1. **Extract MerekaFooter to a standalone JS module**
+   - Move inline footer JS from `mereka_lms.py` to `infrastructure/tutor/plugins/mfe-plugins/MerekaFooter.jsx`
+   - This decouples the React component from the Python plugin string
+
+2. **Register via `PLUGIN_SLOTS` instead of raw file write**
+   ```python
+   # In mereka_lms.py
+   from tutormfe.hooks import PLUGIN_SLOTS
+
+   PLUGIN_SLOTS.add_item({
+       "footer_slot": {
+           "plugins": [{
+               "op": "PLUGIN_OPERATIONS.Replace",
+               "widget": {
+                   "id": "mereka_footer",
+                   "type": "DIRECT_PLUGIN",
+                   "RenderWidget": "MerekaFooter",
+                   "content": {
+                       "src": "/openedx/app/plugins/MerekaFooter.jsx"
+                   }
+               }
+           }]
+       }
+   })
+   ```
+
+3. **Remove the raw `env.config.jsx` injection** from the `mfe-dockerfile-post-npm-install` hook
+
+4. **Verify** — rebuild MFE image, confirm footer renders identically
+
+### Operator Workflow
+
+```
+1. Discover slot    → check MFE source for <PluginSlot> components
+                      or run: grep -r "PluginSlot" node_modules/@openedx/*/src/
+2. Inject config    → add PLUGIN_SLOTS entry in Tutor plugin (mereka_lms.py)
+3. Rebuild image    → tutor images build mfe
+4. Deploy           → tutor k8s restart mfe (or kubectl rollout restart)
+5. Verify           → curl the MFE route, confirm component renders
+```
+
+### Available Slots (as of Tutor 21 / Ulmo)
+
+| Slot Name | MFE | What It Controls |
+|-----------|-----|-----------------|
+| `footer_slot` | All MFEs | Footer component |
+| `header_slot` | All MFEs | Header/navbar component |
+| `logo_slot` | `frontend-component-header` | Logo in header |
+| `learning_help_sidebar_slot` | `frontend-app-learning` | Help panel in courseware |
+
+> **Note**: Slot availability depends on the MFE version. Check each MFE's source for `<PluginSlot id="...">` to discover available slots.
+
+### Blockers & Prerequisites
+
+- **Tutor 21+ required** — `tutormfe.hooks.PLUGIN_SLOTS` was introduced in Tutor v21
+- **MFE images must include FPF** — `@openedx/frontend-plugin-framework` must be in MFE dependencies (included by default in Ulmo)
+- **No blocker for current deployment** — current hardcoded approach works; migration is opportunistic
+
+---
+
 ## Related Documentation
 
 - **Current Method**: [FRONTEND_BRANDING_METHOD.md](../operations/FRONTEND_BRANDING_METHOD.md)
@@ -403,7 +504,7 @@ Plugin delivers configuration and component injection via Tutor hooks. Asset syn
 
 ---
 
-**Last Updated**: 2026-02-16
+**Last Updated**: 2026-02-17
 **Decision Owner**: Gurpreet
 **Status**: ✅ ACCEPTED - Plugin-first configuration, SCSS overlay for visual branding
 **Revisit Date**: 2026-08-12 (6 months) or when next branding change occurs

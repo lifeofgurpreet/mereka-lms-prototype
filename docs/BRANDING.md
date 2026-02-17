@@ -229,11 +229,28 @@ Tune it via `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env`.
 
 ### MFE Footer Component
 
-The custom Mereka footer is implemented via **hardcoded JavaScript in `env.config.jsx`** (injected via Tutor plugin hook), not the plugin framework slots:
+The custom Mereka footer is currently implemented via **hardcoded JavaScript in `env.config.jsx`** (injected via Tutor plugin hook):
 
 - The Tutor plugin (`infrastructure/tutor/plugins/mereka_lms.py`) injects the `MerekaFooter` React component directly into MFE build config via the `mfe-dockerfile-post-npm-install` hook.
 - Implementation uses hardcoded JS in `env.config.jsx` that defines the footer component inline.
-- **Future migration**: Proper plugin framework slots (as documented in OEP-48 and frontend-plugin-framework) would be the correct long-term approach. Current implementation is a pragmatic workaround until plugin framework adoption.
+
+**Recommended migration path** (plugin-first, per ADR-014):
+
+The target approach uses `tutormfe.hooks.PLUGIN_SLOTS` to register a **Direct plugin** (not iFrame) for `footer_slot`. This eliminates raw JS string injection in the Python plugin and lets the footer component live in a proper JSX module.
+
+| Decision | Rule |
+|----------|------|
+| Direct plugin | Component needs MFE theme/auth context, <50 KB bundle |
+| iFrame plugin | Sandboxed third-party code, separate framework |
+
+**Operator workflow** for slot-based customization:
+1. **Discover slot** — `grep -r "PluginSlot" node_modules/@openedx/*/src/`
+2. **Inject config** — add `PLUGIN_SLOTS` entry in `mereka_lms.py`
+3. **Rebuild image** — `tutor images build mfe`
+4. **Deploy** — `tutor k8s restart mfe`
+5. **Verify** — confirm component renders on all MFE routes
+
+See `docs/adr/014-mfe-branding-strategy.md` § "Plugin-First Migration" for full migration steps and available slots.
 
 - To bake the branding into Tutor's production MFE image: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
 - Always run `./infrastructure/tutor/apply-patches.sh` immediately before `tutor images build mfe` (ensures idempotent theming copy and npm retry/timeouts).

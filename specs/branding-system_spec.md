@@ -4,7 +4,7 @@ type: "feature_spec"
 status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-10"
+last_updated: "2026-02-17"
 version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
@@ -58,6 +58,7 @@ Both are required and complementary.
 - Dynamic theme switching via UI (themes applied at build time)
 - Brand asset CDN optimization (assets served from static files)
 - Migration to OEP-48 brand package in current release (deferred per ADR-014)
+- Full FPF slot migration in this release cycle (opportunistic per ADR-014, plugin-first section)
 
 ## Requirements
 
@@ -133,7 +134,7 @@ infrastructure/tutor/themes/mereka/
 - The system MUST copy MFE theme fonts to build context (via `apply-patches.sh`)
 - The system MUST sync SCSS files to MFE build directory
 
-**Note**: MFE footer is implemented as hardcoded JS in env.config.jsx (injected via Tutor hook), not proper plugin framework slots. Future migration to plugin framework slots tracked in ADR-014.
+**Note**: MFE footer is currently implemented as hardcoded JS in env.config.jsx (injected via Tutor hook). The recommended migration path is to use `tutormfe.hooks.PLUGIN_SLOTS` with Direct plugins (not iFrame) for lightweight components like MerekaFooter that need MFE theme context. See ADR-014 "Plugin-First Migration" section for the operator workflow: discover slot → inject config via Tutor plugin → rebuild MFE image.
 
 #### Branding Verification Gates
 
