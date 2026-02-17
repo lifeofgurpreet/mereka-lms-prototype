@@ -446,6 +446,29 @@
 - **No bundle size tracking** (P1): Bundle bloat goes unnoticed
 - **No Lighthouse CI** (P1): Can't validate budgets in CI
 
+## Multisite UX Consistency
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Multisite UX contract documented | PASS | `docs/architecture/MULTISITE_UX_CONSISTENCY.md` |
+| Hardcoded domain audit complete (AC-MSUX-001) | PASS | 3 HIGH-risk findings documented |
+| Multi-site contract rules defined (AC-MSUX-001) | PASS | 4 rules: no hardcoded domains, dynamic URLs, host-only cookies, relative links |
+| Configuration flow documented (AC-MSUX-001) | PASS | Browser → Caddy → LMS → MFE runtime |
+| Quick wins identified (AC-MSUX-001) | PASS | 3 fixes: DISCUSSIONS_MICROFRONTEND_URL, Caddy profile proxy, Nginx host header |
+| Hardcoded domain detection verifier (AC-MSUX-002) | PASS | `scripts/qa/verify-multisite-ux-consistency.sh` (15+ PASS / 0 FAIL) |
+| CI gate for new hardcoded references (AC-MSUX-003) | PASS | `monitoring-guardrails` CI job |
+| MFE_CONFIG uses dynamic base URLs | PASS | production.py uses MEREKA_LMS_BASE_URL variables |
+| Session/CSRF cookies are host-only | PASS | SESSION_COOKIE_DOMAIN = None, CSRF_COOKIE_DOMAIN = None |
+| Caddy preserves Host header | PASS | header_up Host {http.request.host} |
+| MerekaFooter uses runtime hostname | PASS | SITE_VARIANTS mapped by window.location.hostname |
+
+**Script**: `scripts/qa/verify-multisite-ux-consistency.sh`
+
+**Known issues** (documented in contract):
+- **DISCUSSIONS_MICROFRONTEND_URL hardcoded** (HIGH): Line 79 in mereka_lms.py
+- **Caddy profile proxy hardcoded** (HIGH): apps.academyv2.mereka.io only
+- **Nginx Host header hardcoded** (HIGH): proxy_set_header Host academyv2.mereka.io
+
 ## Verification Commands
 
 ```bash

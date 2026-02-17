@@ -192,6 +192,7 @@ jobs:
           bash -n scripts/qa/verify-interaction-state-contract.sh
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-footer-slot-migration.sh
+          bash -n scripts/qa/verify-multisite-ux-consistency.sh
 
       - name: Run local observability audit
         run: |
