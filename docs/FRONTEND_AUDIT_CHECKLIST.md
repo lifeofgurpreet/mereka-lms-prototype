@@ -232,6 +232,28 @@
 
 **Script**: `scripts/qa/verify-mfe-route-drift.sh` (32 PASS / 0 FAIL)
 
+## MFE Route-to-Dist Contract
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Route mapping table covers all 3 layers (Caddy, LMS, branding verifier) | PASS | Contract doc section with 11+ MFEs |
+| `verify-mfe-route-contract.sh` passes with 0 FAIL | PASS | 20+ PASS / 0 FAIL |
+| New MFE additions follow the contract (all 3 layers updated) | PASS | Contract includes migration guide |
+| Caddy directories have LMS URL settings | PASS | Verifier cross-checks all directories |
+| LMS MFE URLs have Caddy routes | PASS | Reverse check (settings → routes) |
+| Authoring dual-path verified | PASS | Both /authoring + /course-authoring → course-authoring |
+| Profile /u route verified | PASS | Serves profile dir, no prefix strip |
+| Deprecated MFE proxy routes verified | PASS | /orders + /payment → payments-gateway |
+| MFE config API route verified | PASS | /api/mfe_config/v1 + /login_refresh → LMS |
+| Account settings redirect verified | PASS | /account/settings → /account/ (302) |
+| CI gate for route contract | PASS | `monitoring-guardrails` CI job |
+
+**Scripts**:
+- `scripts/qa/verify-mfe-route-contract.sh` (20+ PASS / 0 FAIL) — NEW: 3-layer verification
+- `scripts/qa/verify-mfe-route-drift.sh` (32 PASS / 0 FAIL) — Existing drift guard
+
+**Contract**: `docs/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md`
+
 ## Build & Deploy Safety
 
 | Check | Status | Evidence |
