@@ -172,14 +172,17 @@ jobs:
           bash -n scripts/qa/verify-mfe-route-drift.sh
           bash -n scripts/qa/verify-plugin-slot-wiring.sh
           bash -n scripts/qa/verify-contrast-compliance.sh
+          bash -n scripts/qa/verify-token-contrast.sh
           bash -n scripts/qa/verify-frontend-version-truth.sh
           bash -n scripts/qa/verify-tenant-branding-contract.sh
           bash -n scripts/qa/verify-brand-pack-schema.sh
+          bash -n scripts/tenants/validate-tenant-brand-pack.sh
           bash -n scripts/qa/smoke-authenticated.sh
           bash -n scripts/qa/verify-ui-accessibility.sh
           bash -n scripts/qa/verify-legacy-ecommerce-ui-refs.sh
           bash -n scripts/qa/verify-mfe-first-policy.sh
           bash -n scripts/qa/verify-tenant-branding-runtime.sh
+          bash -n scripts/qa/verify-slot-matrix.sh
 
       - name: Run local observability audit
         run: |
