@@ -53,15 +53,15 @@ None. All critical findings are either fixed or tracked as MEDIUM (workarounds e
 | ID | Severity | Category | Description | Affected Domains | Current State | Owner | Effort | Related AC |
 |----|----------|----------|-------------|------------------|---------------|-------|--------|------------|
 | **F-005** | High | Missing Config | `ENABLE_MULTI_TENANT_BRANDING=False` blocks runtime branding | All | Open (feature flag disabled) | Platform Eng | 1h (config + restart) | AC-TBR-101 |
-| **F-007** | High | Functional Gap | admin.academyv2.mereka.io returns HTTP 400 (enterprise portal routing) | academyv2.mereka.io | Open (not provisioned) | Platform Eng | 2h (tenant provision) | AC-ENT-SSO-001 |
+| **F-007** | High | Functional Gap | admin.academyv2.mereka.io returns HTTP 400 (enterprise portal routing) | academyv2.mereka.io | **PARTIAL** (ALLOWED_HOSTS fixed, provisioning pending) | Platform Eng | 2h (tenant provision) | AC-ENT-SSO-001 |
 | **F-008** | High | Missing Config | Placeholder UUIDs in tenant code block activation | All | Open (needs real tenant UUIDs) | Platform Eng | 1h (search/replace + test) | AC-TBR-103 |
 
 ### Medium (UX Degradation)
 
 | ID | Severity | Category | Description | Affected Domains | Current State | Owner | Effort | Related AC |
 |----|----------|----------|-------------|------------------|---------------|-------|--------|------------|
-| **F-001** | Medium | Hardcoded Domain | `DISCUSSIONS_MICROFRONTEND_URL` hardcoded to apps.academyv2.mereka.io | academy.biji-biji.com, skillourfuture | Tracked (quick-win) | Frontend | 30min (dynamic URL) | AC-MSUX-002 |
-| **F-002** | Medium | Hardcoded Domain | Nginx `proxy_set_header Host academyv2.mereka.io` breaks SiteConfiguration | academy.biji-biji.com, skillourfuture | Tracked (quick-win) | Platform Eng | 30min (use `$http_host`) | AC-MSUX-002 |
+| **F-001** | Medium | Hardcoded Domain | `DISCUSSIONS_MICROFRONTEND_URL` hardcoded to apps.academyv2.mereka.io | academy.biji-biji.com, skillourfuture | **FIXED** (PR #35) | Frontend | 30min (dynamic URL) | AC-MSUX-002 |
+| **F-002** | Medium | Hardcoded Domain | Nginx `proxy_set_header Host academyv2.mereka.io` breaks SiteConfiguration | academy.biji-biji.com, skillourfuture | **FIXED** (PR #35) | Platform Eng | 30min (use `$http_host`) | AC-MSUX-002 |
 | **F-006** | Medium | Visual Inconsistency | No brand color tokens (`--mereka-color-*`) in MFE config API | All | Tracked | Frontend | 2h (add tokens to MFE_CONFIG) | AC-UI-002 |
 | **F-010** | Medium | Ops Workflow | Zero-downtime brand-pack update workflow undocumented | All | Tracked | Platform Eng | 4h (test + document) | AC-TBR-005 |
 
@@ -70,7 +70,7 @@ None. All critical findings are either fixed or tracked as MEDIUM (workarounds e
 | ID | Severity | Category | Description | Affected Domains | Current State | Owner | Effort | Related AC |
 |----|----------|----------|-------------|------------------|---------------|-------|--------|------------|
 | **F-004** | Low | Fixed/Pass | Session/CSRF cookies are host-only (multi-site compatible) | All | **FIXED** | - | - | AC-MSUX-002 |
-| **F-009** | Low | Missing Config | Footer SITE_VARIANTS only has 3 domains, no wildcard/fallback | Future tenants | Tracked | Frontend | 1h (add fallback logic) | AC-TBR-103 |
+| **F-009** | Low | Missing Config | Footer SITE_VARIANTS only has 3 domains, no wildcard/fallback | Future tenants | **FIXED** (PR #35) | Frontend | 1h (add fallback logic) | AC-TBR-103 |
 
 ---
 
@@ -507,13 +507,15 @@ tutor k8s restart
 ## Next Steps
 
 ### Immediate (This Sprint)
-1. **Quick Win #1**: Fix Nginx Host header (F-002) — 30min
-2. **Quick Win #2**: Fix Discussions URL (F-001) — 30min
-3. **Quick Win #3**: Replace placeholder UUIDs (F-008) — 1h
-4. Provision Mereka Academy tenant (F-007) — 2h
-5. Enable ENABLE_MULTI_TENANT_BRANDING (F-005) — 1h
+1. ~~**Quick Win #1**: Fix Nginx Host header (F-002)~~ — ✅ **DONE** (PR #35)
+2. ~~**Quick Win #2**: Fix Discussions URL (F-001)~~ — ✅ **DONE** (PR #35)
+3. ~~**Quick Win #4**: Add footer fallback logic (F-009)~~ — ✅ **DONE** (PR #35)
+4. ~~**Quick Win #5**: Add admin.academyv2.mereka.io to ALLOWED_HOSTS (F-007 partial)~~ — ✅ **DONE** (PR #35)
+5. **Quick Win #3**: Replace placeholder UUIDs (F-008) — 1h
+6. Provision Mereka Academy tenant (F-007) — 2h
+7. Enable ENABLE_MULTI_TENANT_BRANDING (F-005) — 1h
 
-**Total Sprint Effort**: ~5 hours
+**Total Sprint Effort**: ~4 hours remaining (4/9 quick wins completed)
 
 ### Next Sprint
 1. Add brand color tokens (F-006) — 2h

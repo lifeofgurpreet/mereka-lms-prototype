@@ -76,7 +76,8 @@ FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel
 # Ensure all courses use MFE by default
 DISCUSSIONS_MFE_ENABLED = True
 if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
-    DISCUSSIONS_MICROFRONTEND_URL = "https://apps.academyv2.mereka.io/discussions"
+    _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
+    DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
 if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
     DISCUSSIONS_MFE_FEEDBACK_URL = None
 
@@ -666,7 +667,7 @@ const MerekaFooter = () => {
     'academy.biji-biji.com': { brand: 'Biji-Biji Academy', copyrightHolder: 'Biji-Biji Initiative', whatsapp: '601135271981' },
     'skillourfuture.academy.mereka.io': { brand: 'Skill Our Future Academy', copyrightHolder: 'MEREKA', whatsapp: '601135271981' },
   };
-  const variant = SITE_VARIANTS[hostname] || { brand: siteName, copyrightHolder: 'MEREKA', whatsapp: '601135271981' };
+  const variant = SITE_VARIANTS[hostname] || { brand: (typeof config !== 'undefined' && config.SITE_NAME) || siteName || 'Mereka Academy', copyrightHolder: (typeof config !== 'undefined' && config.PLATFORM_NAME) || 'MEREKA', whatsapp: '601135271981' };
 
   const socialLinks = [
     { name: 'TikTok', url: 'https://www.tiktok.com/@mereka.io', icon: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z' },
@@ -904,7 +905,7 @@ location = /metrics {
 
 # MFE profile API proxy
 location ^~ /profile/api/ {
-    proxy_set_header Host academyv2.mereka.io;
+    proxy_set_header Host $http_host;
     proxy_redirect off;
     proxy_pass http://lms-backend;
 }
