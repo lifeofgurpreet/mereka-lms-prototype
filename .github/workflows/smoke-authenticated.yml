@@ -1,0 +1,35 @@
+name: Authenticated Smoke Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target URL to test'
+        required: false
+        default: 'https://academyv2.mereka.io'
+  # schedule:
+  #   - cron: '0 */6 * * *'  # Every 6 hours (enable when ready)
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-authenticated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run authenticated smoke tests
+        env:
+          SMOKE_TARGET: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
+          SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
+          SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+        run: ./scripts/qa/smoke-authenticated.sh --target "$SMOKE_TARGET"

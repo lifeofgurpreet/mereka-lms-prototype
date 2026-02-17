@@ -64,22 +64,102 @@ else
   do_fail "Footer missing mereka-footer CSS class"
 fi
 
-if grep -q 'team@mereka.io' "$PLUGIN"; then
-  do_pass "Footer includes team contact email"
-else
-  do_fail "Footer missing team contact email"
-fi
-
 if grep -q 'Biji-Biji Initiative' "$PLUGIN"; then
-  do_pass "Footer includes partner attribution"
+  do_pass "Footer includes partner attribution (Biji-Biji Initiative)"
 else
   do_fail "Footer missing partner attribution"
 fi
 
-if grep -q 'Open edX' "$PLUGIN"; then
-  do_pass "Footer includes Open edX credit"
+# v2 structural zones
+echo ""
+echo "--- Footer v2 Structural Zones ---"
+
+if grep -q 'footer-social' "$PLUGIN"; then
+  do_pass "v2 Zone 1: Social row present"
 else
-  do_fail "Footer missing Open edX credit"
+  do_fail "v2 Zone 1: Social row missing (footer-social)"
+fi
+
+if grep -q 'footer-nav' "$PLUGIN"; then
+  do_pass "v2 Zone 2: Nav strip present"
+else
+  do_fail "v2 Zone 2: Nav strip missing (footer-nav)"
+fi
+
+if grep -q 'footer-body' "$PLUGIN"; then
+  do_pass "v2 Zone 3: Column body present"
+else
+  do_fail "v2 Zone 3: Column body missing (footer-body)"
+fi
+
+if grep -q 'footer-legal' "$PLUGIN"; then
+  do_pass "v2 Zone 4: Legal bottom present"
+else
+  do_fail "v2 Zone 4: Legal bottom missing (footer-legal)"
+fi
+
+# Critical links
+if grep -q 'corporate.mereka.io' "$PLUGIN"; then
+  do_pass "Corporate links present"
+else
+  do_fail "Corporate links missing"
+fi
+
+if grep -q 'legal.mereka.io' "$PLUGIN"; then
+  do_pass "Legal links present (terms, privacy, cookies)"
+else
+  do_fail "Legal links missing"
+fi
+
+if grep -q 'wa.me' "$PLUGIN"; then
+  do_pass "WhatsApp CTA present"
+else
+  do_fail "WhatsApp CTA missing"
+fi
+
+# Per-site variant mapping
+if grep -q 'SITE_VARIANTS' "$PLUGIN"; then
+  do_pass "Per-site variant mapping present (AC-FOOTER-203)"
+else
+  do_fail "Per-site variant mapping missing (AC-FOOTER-203)"
+fi
+
+if grep -q 'academy.biji-biji.com' "$PLUGIN"; then
+  do_pass "Biji-Biji domain variant configured"
+else
+  do_fail "Biji-Biji domain variant missing"
+fi
+
+if grep -q 'skillourfuture' "$PLUGIN"; then
+  do_pass "Skill Our Future domain variant configured"
+else
+  do_fail "Skill Our Future domain variant missing"
+fi
+
+# App store badges (AC-FOOTER-204: no hotlinks)
+if grep -q 'apps.apple.com' "$PLUGIN"; then
+  do_pass "App Store link present"
+else
+  do_warn "App Store link not found"
+fi
+
+if grep -q 'play.google.com' "$PLUGIN"; then
+  do_pass "Google Play link present"
+else
+  do_warn "Google Play link not found"
+fi
+
+# WCAG: verify no hotlinked badge images
+if grep -q 'developer.apple.com/assets' "$PLUGIN"; then
+  do_fail "Hotlinked Apple badge image found (AC-FOOTER-204 violation)"
+else
+  do_pass "No hotlinked Apple badge (AC-FOOTER-204)"
+fi
+
+if grep -q 'upload.wikimedia.org' "$PLUGIN"; then
+  do_fail "Hotlinked Google badge image found (AC-FOOTER-204 violation)"
+else
+  do_pass "No hotlinked Google badge (AC-FOOTER-204)"
 fi
 
 # 5. Plugin-slot forward-compatible registration
@@ -140,6 +220,22 @@ if grep -q 'frontend-plugin-framework' "$PLUGIN"; then
   do_pass "frontend-plugin-framework installed in MFE build"
 else
   do_fail "frontend-plugin-framework not installed in MFE build"
+fi
+
+# Fallback sync check
+echo ""
+echo "--- Dual-Path Sync Check ---"
+
+if grep -q 'SITE_VARIANTS' "$PATCHES"; then
+  do_pass "apply-patches.sh has SITE_VARIANTS (synced with plugin)"
+else
+  do_fail "apply-patches.sh missing SITE_VARIANTS (out of sync)"
+fi
+
+if grep -q 'footer-social' "$PATCHES"; then
+  do_pass "apply-patches.sh has v2 zone structure (synced with plugin)"
+else
+  do_fail "apply-patches.sh missing v2 zone structure (out of sync)"
 fi
 
 echo ""
