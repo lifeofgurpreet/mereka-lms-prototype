@@ -46,8 +46,13 @@
 | OpenEdX image pinned | PASS | `20260210-v21-mfe-only-b988d63` |
 | Version tracking doc maintained | PASS | `docs/architecture/MFE_VERSIONS.md` |
 | No `:latest` tags in deployment manifests | PASS | 0 occurrences in `deployments.yml` |
+| Version Baseline table documented | PASS | Tutor 18.2.2, Node 18.20.5, Python 3.12 |
+| Frontend version consistency (AC-UIVER-003) | PASS | docs ↔ CI ↔ scripts ↔ K8s verified |
+| Upgrade procedure documented (AC-UIVER-004) | PASS | 8-step procedure in MFE_VERSIONS.md |
 
-**Script**: `scripts/qa/verify-mfe-version-pinning.sh` (9 PASS / 0 FAIL)
+**Scripts**:
+- `scripts/qa/verify-mfe-version-pinning.sh` (9 PASS / 0 FAIL)
+- `scripts/qa/verify-frontend-version-truth.sh` (24+ PASS / 0 FAIL) — NEW: AC-UIVER-003
 
 ## Visual Regression
 
@@ -67,8 +72,13 @@
 | apply-patches.sh fallback wiring | PASS | RenderWidget replacement (defense-in-depth) |
 | FPF dependency installed in MFE build | PASS | `@openedx/frontend-plugin-framework@^1.8.0` |
 | CI gate for slot wiring | PASS | `.github/workflows/ci.yml` mfe-footer-slot job |
+| Plugin-slot inventory documented | PASS | `docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` — 100+ slots across 14 MFEs |
+| Comprehensive wiring integrity check | PASS | `verify-plugin-slot-wiring.sh` (28 PASS) — plugin ↔ patches ↔ inventory |
+| CI gate for wiring integrity | PASS | `.github/workflows/ci.yml` plugin-slot-wiring job |
 
-**Script**: `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
+**Scripts**:
+- `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
+- `scripts/qa/verify-plugin-slot-wiring.sh` (28 PASS / 0 FAIL)
 
 ## Token Correctness
 
@@ -104,13 +114,26 @@
 | 21/21 custom apps in Docker image | PASS | Plugin `_CUSTOM_APPS` list |
 | Kustomize ConfigMap persistence | PASS | `configMapGenerator` with content hashing |
 
+## WCAG 2.1 AA Contrast Compliance
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| All text/background pairs meet AA thresholds | PASS | `verify-contrast-compliance.sh` (27 PASS) |
+| ink-500 remediated for 4.5:1 on neutral-100 | PASS | #7B7B7B → #737373 |
+| ink-300 remediated for 3:1 on neutral-100 | PASS | #AFADB2 → #929092 |
+| teal remediated for 4.5:1 link text | PASS | #2d898b → #297F81 |
+| Soft semantic colors tested as backgrounds | PASS | ink-900 on gold/sky/pink |
+| CI gate for contrast regression | PASS | `.github/workflows/ci.yml` contrast-compliance job |
+
+**Script**: `scripts/qa/verify-contrast-compliance.sh` (27 PASS / 0 FAIL)
+
 ## Release Blockers
 
 | Blocker | Status | Owner |
 |---------|--------|-------|
 | Custom app crashloops (1zj8) | FIXED (code) | WhiteCliff (runtime deploy) |
 | Visual regression baseline | PENDING | Requires stable runtime |
-| Accessibility audit | NOT STARTED | Future epic |
+| Accessibility audit (contrast) | PASS | WCAG AA contrast gate (1251) |
 | Performance baseline (LCP, FID) | NOT STARTED | Future epic |
 
 ## Verification Commands
@@ -125,6 +148,9 @@
 # Version pinning (AC-UI-004)
 ./scripts/qa/verify-mfe-version-pinning.sh
 
+# Frontend version truth (AC-UIVER-003) — NEW: task 14ae
+./scripts/qa/verify-frontend-version-truth.sh
+
 # Custom app drift (1zj8 guard)
 ./scripts/qa/verify-custom-app-drift.sh
 
@@ -136,6 +162,12 @@
 
 # MFE route mapping drift (3464 guard)
 ./scripts/qa/verify-mfe-route-drift.sh
+
+# Plugin-slot wiring integrity (qp0k guard)
+./scripts/qa/verify-plugin-slot-wiring.sh
+
+# WCAG 2.1 AA contrast compliance (1251 guard)
+./scripts/qa/verify-contrast-compliance.sh
 
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline

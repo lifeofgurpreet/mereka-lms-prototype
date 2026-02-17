@@ -466,14 +466,14 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 
 ### Available Slots (as of Tutor 21 / Ulmo)
 
-| Slot Name | MFE | What It Controls |
-|-----------|-----|-----------------|
-| `footer_slot` | All MFEs | Footer component |
-| `header_slot` | All MFEs | Header/navbar component |
-| `logo_slot` | `frontend-component-header` | Logo in header |
-| `learning_help_sidebar_slot` | `frontend-app-learning` | Help panel in courseware |
+| Slot Name | Namespaced ID | MFE | What It Controls |
+|-----------|---------------|-----|-----------------|
+| `footer_slot` | `org.openedx.frontend.layout.footer.v1` | All MFEs | Footer component (**ACTIVE — MerekaFooter**) |
+| `header_logo` | `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Logo in header |
+| `learning_help_slot` | `org.openedx.frontend.layout.header_learning_help.v1` | `frontend-app-learning` | Help panel in courseware |
+| `login_component` | `org.openedx.frontend.authn.login_component.v1` | `frontend-app-authn` | Login page component |
 
-> **Note**: Slot availability depends on the MFE version. Check each MFE's source for `<PluginSlot id="...">` to discover available slots.
+> **Complete inventory**: See [`docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md`](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md) for all 100+ slots across 14 MFEs.
 
 ### Implementation Status
 
