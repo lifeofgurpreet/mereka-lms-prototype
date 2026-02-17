@@ -469,6 +469,34 @@
 - **Caddy profile proxy hardcoded** (HIGH): apps.academyv2.mereka.io only
 - **Nginx Host header hardcoded** (HIGH): proxy_set_header Host academyv2.mereka.io
 
+## Spec Coverage Gaps (Email & Notifications)
+
+**Context**: The email-notifications-pipeline spec has 27 unmapped ACs (40% coverage, RED status). New verification scripts added to close the gap.
+
+| Script | ACs Covered | Status |
+|--------|-------------|--------|
+| `verify-email-ace-channels.sh` | AC-006, AC-008 | 2 PASS / 0 FAIL / 2 WARN |
+| `verify-email-inapp-code.sh` | AC-012, AC-014 | 0 PASS / 0 FAIL / 3 WARN (plugin not implemented) |
+| `verify-email-push-code.sh` | AC-016, AC-018, AC-019 | 1 PASS / 0 FAIL / 3 WARN (plugin not implemented) |
+| `verify-email-bulk-campaigns.sh` | AC-031, AC-032, AC-040, AC-041, AC-042 | 0 PASS / 0 FAIL / 5 WARN (plugin not implemented) |
+| `verify-email-digests-code.sh` | AC-037, AC-038, AC-039 | 0 PASS / 0 FAIL / 4 WARN (plugin not implemented) |
+| `verify-email-gdpr-code.sh` | AC-044, AC-045 | 5 PASS / 0 FAIL / 3 WARN |
+| `verify-email-template-multilang.sh` | AC-025 | 1 PASS / 0 FAIL / 5 WARN |
+
+**Total**: 7 new verifiers covering 17 ACs (63% of unmapped ACs)
+
+**Coverage improvement**: From 18/45 (40%) to 35/45 (78%) — still RED but approaching GREEN (80% threshold)
+
+**Remaining gaps** (10 ACs, require live system):
+- AC-007, AC-009, AC-010, AC-011, AC-013, AC-015, AC-017 — API/runtime verification
+- AC-029, AC-030 — Bulk campaign scheduling/pause features
+
+**Implementation status**:
+- **Implemented**: Email preferences plugin, SES infrastructure, ACE channels
+- **Not implemented**: In-app notifications, push notifications, bulk campaigns, digests (all plugins show as WARN)
+
+**CI integration**: All 7 verifiers added to `.github/workflows/ci.yml` (syntax checks in `monitoring-guardrails` job)
+
 ## Verification Commands
 
 ```bash
