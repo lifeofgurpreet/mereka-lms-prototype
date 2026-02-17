@@ -179,6 +179,7 @@ jobs:
           bash -n scripts/qa/verify-ui-accessibility.sh
           bash -n scripts/qa/verify-legacy-ecommerce-ui-refs.sh
           bash -n scripts/qa/verify-mfe-first-policy.sh
+          bash -n scripts/qa/verify-tenant-branding-runtime.sh
 
       - name: Run local observability audit
         run: |

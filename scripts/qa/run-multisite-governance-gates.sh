@@ -114,6 +114,13 @@ fi
 run_check "hostname registry drift ($ENV_SCOPE)" \
   ./scripts/qa/list-openedx-hostnames.sh --env "$ENV_SCOPE"
 
+# AC-TBR-104: Runtime tenant branding verification
+# This check requires live endpoints and is expected to SKIP when
+# ENABLE_MULTI_TENANT_BRANDING=False. Only fails if actual runtime
+# errors are detected (not just unavailability).
+run_check "tenant branding runtime ($ENV_SCOPE)" \
+  ./scripts/qa/verify-tenant-branding-runtime.sh --env "$ENV_SCOPE"
+
 echo ""
 if [[ "$failures" -eq 0 ]]; then
   echo "OK"
