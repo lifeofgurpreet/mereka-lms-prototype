@@ -19,7 +19,9 @@
 | Check | Status | Evidence |
 |-------|--------|----------|
 | LMS uses Mereka theme | PASS | `DEFAULT_SITE_THEME = mereka` (runtime confirmed) |
-| Custom MerekaFooter in all MFEs | PASS | Plugin + apply-patches.sh wiring verified |
+| Custom MerekaFooter v2 in all MFEs | PASS | 5 zones: social, nav, columns, legal (AC-FOOTER-202) |
+| Per-site footer variant mapping | PASS | 3 domains configured (AC-FOOTER-203) |
+| No hotlinked badge images | PASS | App store badges use local styled links (AC-FOOTER-204) |
 | No "Powered by Open edX" on production | PASS | AC-UI-007 negative checks |
 | No default Open edX logo references | PASS | AC-UI-007 checks |
 | Google Fonts stripped from SCSS | PASS | Plugin strips imports pre-asset build |
@@ -67,9 +69,10 @@
 
 | Check | Status | Evidence |
 |-------|--------|----------|
-| MerekaFooter defined in Tutor plugin | PASS | `mereka_lms.py` mfe-env-config patch |
+| MerekaFooter v2 defined in Tutor plugin | PASS | `mereka_lms.py` mfe-env-config patch — 5-zone dark footer |
 | PLUGIN_SLOTS forward-compatible registration | PASS | try/except for `tutormfe.hooks.PLUGIN_SLOTS` |
 | apply-patches.sh fallback wiring | PASS | RenderWidget replacement (defense-in-depth) |
+| Dual-path JSX sync verified | PASS | plugin ↔ patches identical (verify-mfe-footer-slot.sh) |
 | FPF dependency installed in MFE build | PASS | `@openedx/frontend-plugin-framework@^1.8.0` |
 | CI gate for slot wiring | PASS | `.github/workflows/ci.yml` mfe-footer-slot job |
 | Plugin-slot inventory documented | PASS | `docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md` — 100+ slots across 14 MFEs |
@@ -77,7 +80,7 @@
 | CI gate for wiring integrity | PASS | `.github/workflows/ci.yml` plugin-slot-wiring job |
 
 **Scripts**:
-- `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS / 0 FAIL)
+- `scripts/qa/verify-mfe-footer-slot.sh` (30+ PASS / 0 FAIL) — updated for v2
 - `scripts/qa/verify-plugin-slot-wiring.sh` (28 PASS / 0 FAIL)
 
 ## Token Correctness
@@ -146,6 +149,17 @@
 | Accessibility audit (contrast) | PASS | WCAG AA contrast gate (1251) |
 | Performance baseline (LCP, FID) | NOT STARTED | Future epic |
 
+## Authenticated Smoke Tests
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Authenticated smoke harness exists | PASS | `scripts/qa/smoke-authenticated.sh` |
+| CI workflow for smoke tests | PASS | `.github/workflows/smoke-authenticated.yml` (manual dispatch) |
+| SSO login flow tested | PASS | Playwright-based OIDC/Authentik login |
+| Post-login page checks | PASS | Dashboard, account, course player |
+
+**Script**: `scripts/qa/smoke-authenticated.sh`
+
 ## Verification Commands
 
 ```bash
@@ -181,4 +195,7 @@
 
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline
+
+# Authenticated smoke tests (AC-SMOKE-001) — requires SSO credentials
+SSO_USERNAME=test@example.com SSO_PASSWORD=secret ./scripts/qa/smoke-authenticated.sh
 ```
