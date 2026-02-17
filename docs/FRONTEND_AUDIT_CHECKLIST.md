@@ -282,6 +282,49 @@
 
 **Script**: `scripts/qa/verify-legacy-ecommerce-ui-refs.sh`
 
+## Copy/Terminology Consistency
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Copy/terminology contract documented | PASS | `docs/architecture/COPY_TERMINOLOGY_CONTRACT.md` |
+| Contract verification script exists | PASS | `scripts/qa/verify-copy-terminology.sh` (24 PASS / 0 FAIL / 6 WARN) |
+| No banned strings in templates (AC-UICOPY-001) | PASS | "Powered by Tutor", "Your Platform Name Here", "Example University" not found |
+| Known gap: footer.html "Powered by Open edX" | WARN | Documented gap at line 71, planned resolution Q2 2026 |
+| Canonical brand names configured (AC-UICOPY-002) | PASS | PLATFORM_NAME references canonical terms |
+| Multi-domain brand mapping (AC-UICOPY-003) | PASS | 3 domains mapped (academyv2.mereka.io, academy.biji-biji.com, skillourfuture) |
+| CI gate for copy/terminology regression | PASS | `monitoring-guardrails` CI job (syntax check) |
+
+**Script**: `scripts/qa/verify-copy-terminology.sh`
+
+**Known gaps** (documented in contract, not blocking):
+- **"Powered by Open edX and Tutor"** in `footer.html:71` — Footer redesign planned Q2 2026
+- **Multi-domain config warnings** — Some domain mappings exist only in runtime config, not all in source-controlled files
+- **PLATFORM_NAME in plugin** — Configuration is set at runtime via patches, not always in mereka_lms.py source
+
+## Performance Budgets
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Performance budgets documented | PASS | `docs/architecture/PERFORMANCE_BUDGETS.md` |
+| Web Vitals thresholds defined (AC-UIPERF-002) | PASS | LCP < 2.5s, FID < 100ms, CLS < 0.1, TTFB < 600ms |
+| Bundle size budgets defined (AC-UIPERF-002) | PASS | Initial load < 500KB gzipped, chunk < 250KB |
+| Cache-Control policy documented (AC-UIPERF-001) | PASS | Hashed assets, index.html, API responses |
+| Caddy cache requirements documented (AC-UIPERF-003) | PASS | Expected headers with examples |
+| Caddyfile cache headers implemented | WARN | Documented config gap — no cache headers yet |
+| Performance budget verifier exists | PASS | `scripts/qa/verify-performance-budget.sh` (41 PASS / 5 WARN) |
+| CI gate for performance budgets | PASS | `monitoring-guardrails` CI job |
+| Lighthouse CI setup | NOT STARTED | Planned — see PERFORMANCE_BUDGETS.md |
+| Bundle size tracking | NOT STARTED | Planned — webpack-bundle-analyzer setup |
+| Web Vitals RUM instrumentation | NOT STARTED | Planned — web-vitals library integration |
+
+**Script**: `scripts/qa/verify-performance-budget.sh`
+
+**Known gaps** (documented in budgets doc):
+- **No cache-control headers in Caddyfile** (P0): Every asset request hits origin, slow repeat loads
+- **No performance monitoring** (P0): Can't detect regressions
+- **No bundle size tracking** (P1): Bundle bloat goes unnoticed
+- **No Lighthouse CI** (P1): Can't validate budgets in CI
+
 ## Verification Commands
 
 ```bash
@@ -321,6 +364,9 @@
 # WCAG 2.1 AA contrast compliance (1251 guard)
 ./scripts/qa/verify-contrast-compliance.sh
 
+# Copy/terminology consistency (AC-UICOPY-001..003) — NEW: task 15lf
+./scripts/qa/verify-copy-terminology.sh
+
 # Visual regression (AC-UI-003) — requires Playwright
 ./scripts/qa/visual-regression-test.sh --update-baseline
 
@@ -329,4 +375,7 @@ SSO_USERNAME=test@example.com SSO_PASSWORD=secret ./scripts/qa/smoke-authenticat
 
 # MFE-first policy compliance (AC-UIMFE-002) — NEW: task 8rgu
 ./scripts/qa/verify-mfe-first-policy.sh
+
+# Performance budgets (AC-UIPERF-001..003) — NEW: bead 16q0
+./scripts/qa/verify-performance-budget.sh
 ```

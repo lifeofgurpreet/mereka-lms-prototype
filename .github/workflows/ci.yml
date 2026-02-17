@@ -186,6 +186,7 @@ jobs:
           bash -n scripts/qa/verify-tenant-branding-runtime.sh
           bash -n scripts/qa/verify-slot-matrix.sh
           bash -n scripts/qa/verify-interaction-state-contract.sh
+          bash -n scripts/qa/verify-performance-budget.sh
 
       - name: Run local observability audit
         run: |
@@ -234,6 +235,10 @@ jobs:
       - name: Verify slot migration readiness (syntax check only)
         run: |
           bash -n scripts/qa/verify-slot-migration-readiness.sh
+
+      - name: Verify copy/terminology consistency (syntax check only)
+        run: |
+          bash -n scripts/qa/verify-copy-terminology.sh
 
       - name: Generate offline monitoring plan
         run: |
