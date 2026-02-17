@@ -180,6 +180,13 @@ jobs:
           bash -n scripts/qa/verify-accessibility-conformance.sh
           bash -n scripts/qa/verify-wcag-contrast-v2.sh
           bash -n scripts/qa/verify-frontend-version-truth.sh
+          bash -n scripts/qa/verify-email-ace-channels.sh
+          bash -n scripts/qa/verify-email-inapp-code.sh
+          bash -n scripts/qa/verify-email-push-code.sh
+          bash -n scripts/qa/verify-email-bulk-campaigns.sh
+          bash -n scripts/qa/verify-email-digests-code.sh
+          bash -n scripts/qa/verify-email-gdpr-code.sh
+          bash -n scripts/qa/verify-email-template-multilang.sh
           bash -n scripts/qa/verify-tenant-branding-contract.sh
           bash -n scripts/qa/verify-brand-pack-schema.sh
           bash -n scripts/tenants/validate-tenant-brand-pack.sh
