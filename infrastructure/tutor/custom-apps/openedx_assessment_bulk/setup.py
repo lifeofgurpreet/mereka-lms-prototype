@@ -11,7 +11,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'Django>=3.2',
-        'opaque-keys>=2.0.0',
+        'edx-opaque-keys>=2.0.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

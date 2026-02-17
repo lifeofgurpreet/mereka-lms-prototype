@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'Django>=3.2',
         'xblock>=1.6.0',
-        'opaque-keys>=2.0.0',
+        'edx-opaque-keys>=2.0.0',
     ],
     entry_points={
         'xblock.v1': [
