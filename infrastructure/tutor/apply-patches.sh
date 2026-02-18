@@ -130,6 +130,7 @@ for target in targets:
     ]
     extra_csrf_origins = [
         "https://academy.biji-biji.com",
+        "https://apps.academy.biji-biji.com",
         "https://skillourfuture.academy.mereka.io",
     ]
 
@@ -198,7 +199,8 @@ for target in targets:
         # Ensure all courses use MFE by default
         DISCUSSIONS_MFE_ENABLED = True
         if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
-            DISCUSSIONS_MICROFRONTEND_URL = "https://apps.academyv2.mereka.io/discussions"
+            _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
+            DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
         if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
             DISCUSSIONS_MFE_FEEDBACK_URL = None
         """)
@@ -530,6 +532,25 @@ for target in targets:
         )
         return text
 
+    def ensure_mfe_new_relic_env(text):
+        # Ensure New Relic build control flag is carried into production stages.
+        # On MFE Dockerfiles, `ARG` scope does not reliably propagate into derived
+        # `FROM ... AS ...` stages, but an `ENV` value does.
+        if "ARG ENABLE_NEW_RELIC=" not in text:
+            return text
+
+        lines = text.splitlines()
+        updated_lines = []
+        for idx, line in enumerate(lines):
+            updated_lines.append(line)
+            if not line.startswith("ARG ENABLE_NEW_RELIC="):
+                continue
+            next_line = lines[idx + 1] if idx + 1 < len(lines) else ""
+            if "ENV ENABLE_NEW_RELIC=" in next_line:
+                continue
+            updated_lines.append("ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}")
+        return "\n".join(updated_lines) + ("\n" if text.endswith("\n") else "\n")
+
     def ensure_argocd_configmap_ignore(text):
         """
         Add ignoreDifferences for CSS ConfigMaps to prevent ArgoCD churn (mereka-lms-dcd).
@@ -547,6 +568,7 @@ for target in targets:
     updated = ensure_mfe_admin_console_redux_deps(updated)
     updated = ensure_mfe_course_authoring_directory_fix(updated)
     updated = ensure_mfe_cache_headers(updated)
+    updated = ensure_mfe_new_relic_env(updated)
 
     # Allow remote root access when using upstream MySQL images.
     if "MYSQL_ROOT_PASSWORD" in updated and "MYSQL_ROOT_HOST" not in updated:
@@ -598,9 +620,11 @@ for target in targets:
     # incorrectly import pkg_resources at build time without declaring it in their
     # build-system.requires (e.g. loremipsum). `--no-build-isolation` keeps
     # setuptools/pkg_resources available and prevents hard build failures.
+    # CRITICAL: uv pip does NOT support editable Git URLs (e.g. git+https://...#egg=foo).
+    # Use plain pip for base.txt/assets.txt which contain editable proctortrack dependency.
     updated = updated.replace(
         "$PIP_COMMAND install -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
-        "$PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+        "pip install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
     )
     updated = updated.replace(
         "$PIP_COMMAND install -r requirements/edx/development.txt",
@@ -649,12 +673,12 @@ for target in targets:
     env_block_spaces = "ENV PATH /openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV /openedx/venv/\nWORKDIR /openedx/edx-platform\n"
     env_block_equals = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nWORKDIR /openedx/edx-platform\n"
     env_block_short = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\n"
-    env_replacement = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\nWORKDIR /openedx/edx-platform\n"
+    env_replacement = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\nWORKDIR /openedx/edx-platform\n"
     updated = updated.replace(env_block_spaces, env_replacement)
     updated = updated.replace(env_block_equals, env_replacement)
     updated = updated.replace(
         env_block_short,
-        "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\n",
+        "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n",
     )
     updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=1536"\n', "")
     while "ENV PYTHONPATH=/openedx/edx-platform\nENV PYTHONPATH=/openedx/edx-platform\n" in updated:
@@ -843,6 +867,12 @@ RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx
     updated = updated.replace(
         "module.exports = [..._.values(optimizedConfig), ..._.values(requireCompatConfig)];",
         "module.exports = [..._.values(optimizedConfig)];",
+    )
+    # Fix collectstatic uglify-js parse error by disabling RequireJS r.js minification
+    # https://discuss.openedx.org/t/redwood-js-parse-error-occurs-with-manage-py-lms-collectstatic/14133
+    updated = updated.replace(
+        'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\n',
+        'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n',
     )
     updated = updated.replace(
         "derive_settings(__name__)\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
