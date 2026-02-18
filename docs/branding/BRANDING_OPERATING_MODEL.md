@@ -251,6 +251,47 @@ Direct DOM manipulation, monkey-patching, or injecting HTML/JS into MFE bundles 
 Run `./scripts/qa/verify-no-dom-overrides.sh` to confirm compliance.
 This gate runs in CI as job `no-dom-overrides`.
 
+## Non-Plugin Customization Exception Policy
+
+> AC-WC-009: Temporary exceptions for overrides that cannot yet use plugin/theme-first flows.
+
+**Rule**: Every non-plugin customization MUST have an exception entry. Exceptions expire
+automatically and become build blockers on their expiry date.
+
+### Exception Format
+
+Each exception must include:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| **Item** | Yes | Reference to `PLUGIN_MIGRATION_SURVEY.md` entry (e.g. C1, C3) |
+| **Reason** | Yes | Why plugin path is not available today |
+| **Owner** | Yes | Person responsible for migration |
+| **Expiry** | Yes | Date by which migration must complete (max 6 months) |
+| **Fallback** | Yes | What happens if expiry passes without migration |
+
+### Active Exceptions
+
+| Item | Reason | Owner | Expiry | Fallback |
+|------|--------|-------|--------|----------|
+| C3 (Node cache reuse) | No Tutor hook for pre-npm-install Dockerfile lines | Mereka Platform | 2026-Q4 | Accept slower builds; remove cache reuse |
+| C10 (New Relic ENV) | Low priority; plugin hook available but not wired | Mereka Platform | 2026-Q4 | Remove New Relic instrumentation |
+| F2 (setup-mfe-branding.sh) | Dev-only; production uses Dockerfile COPY | Mereka Frontend | 2026-Q3 | Document as dev-only in onboarding |
+
+### Exception Lifecycle
+
+1. **Filing**: Add entry to this table with all required fields
+2. **Review**: Monthly review during platform eng standup
+3. **Expiry**: On expiry date, either migrate or renew with justification
+4. **Enforcement**: `scripts/qa/check-forbidden-overrides.sh` warns on expired exceptions
+5. **Audit**: `docs/branding/PLUGIN_MIGRATION_SURVEY.md` tracks full inventory
+
+### Renewal Rules
+
+- Maximum 2 renewals per exception (total 18 months from first filing)
+- Each renewal requires written justification in PR description
+- Renewed exceptions must update the expiry date in this table
+
 ## What Was Hacky And How We Avoid It
 
 - Hacky pattern: manual one-off checks run ad-hoc by different agents.

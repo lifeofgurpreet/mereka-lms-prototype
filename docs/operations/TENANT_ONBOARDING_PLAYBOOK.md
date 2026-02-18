@@ -560,6 +560,86 @@ After every rollback, verify:
 
 ---
 
+## Plugin-First Customization Steps (AC-WC-011)
+
+> For new tenants (e.g. `skillourfuture.academy.mereka.io`), all customizations MUST
+> follow plugin/theme-first architecture. No direct DOM manipulation or new template
+> overrides.
+
+### Step 1: Create tenant brand pack
+
+```bash
+# Copy the tenant brand pack template
+cp -r infrastructure/tutor/themes/mereka/tenants/_template \
+      infrastructure/tutor/themes/mereka/tenants/skillourfuture
+
+# Populate brand assets
+# - logos/ (logo.svg, logo-dark.svg, favicon.ico)
+# - tokens.css (CSS custom properties for brand colors)
+# - config.json (SITE_NAME, copyrightHolder, whatsapp, etc.)
+```
+
+### Step 2: Register tenant in multisite config
+
+```bash
+# Add to multisite-sites.yml
+vim infrastructure/tutor/multisite-sites.yml
+# Add entry with domain, slug, brand, MFE config
+
+# Add to ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
+# This is handled by mereka_lms.py plugin — add domain to the tenant registry
+vim deploy/k8s/base/apps/tenant-registry-configmap.yaml
+```
+
+### Step 3: Configure SiteConfiguration (plugin-first)
+
+```bash
+# Use provision-tenant.sh — this creates Site + SiteConfiguration
+./scripts/tenants/provision-tenant.sh \
+  --slug skillourfuture \
+  --name "Skill Our Future Academy" \
+  --domain "skillourfuture.academy.mereka.io"
+```
+
+The provisioning script sets:
+- `SITE_NAME` from `--name`
+- `PLATFORM_NAME` from `--name`
+- `LMS_BASE_URL`, `LOGO_URL`, `FAVICON_URL` from domain + brand pack
+- Footer variant via `mereka_tenancy.TenantConfig`
+
+### Step 4: Customization rules for new tenants
+
+| Customization | Approved Method | Forbidden Method |
+|---------------|-----------------|------------------|
+| Logo/favicon | Brand pack `logos/` dir + `SiteConfiguration` | Direct template edit |
+| Colors | `tokens.css` custom properties | Inline CSS in templates |
+| Footer content | `TenantConfig` model + `MerekaFooter` variant | New Mako footer template |
+| Homepage hero | `SiteConfiguration` values | New `index_overlay.html` |
+| MFE styling | Tenant-scoped CSS variables in `mereka.scss` | `document.querySelector` |
+| Header tagline | `configuration_helpers.get_value('tagline')` | Hardcoded in `brand.html` |
+| Email templates | Open edX `MKTG_URL_OVERRIDES` + theming | Direct Mako edits |
+
+### Step 5: Verify with plugin-first gate
+
+```bash
+# Run the forbidden override check — should pass with no new overrides
+./scripts/qa/check-forbidden-overrides.sh
+
+# Run tenant-specific branding verification
+./scripts/qa/verify-tenant-branding-runtime.sh
+
+# Run full dry-run matrix
+./scripts/qa/tenant-onboarding-dryrun.sh --env prod
+```
+
+### Step 6: Document in migration survey
+
+After onboarding, update `docs/branding/PLUGIN_MIGRATION_SURVEY.md` if any
+new exceptions were needed. All exceptions must have an expiry date per the
+Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
+
+---
+
 ## Related Documents
 
 - `infrastructure/tutor/multisite-sites.yml` — Canonical site registry
@@ -569,3 +649,5 @@ After every rollback, verify:
 - `scripts/tenants/provision-tenant.sh` — Provisioning script
 - `specs/multi-site-domains_spec.md` — Domain configuration spec
 - `specs/multi-tenancy-architecture_spec.md` — Multi-tenancy architecture spec
+- `docs/branding/PLUGIN_MIGRATION_SURVEY.md` — Override inventory + migration status
+- `docs/branding/BRANDING_OPERATING_MODEL.md` — Exception policy for non-plugin overrides
