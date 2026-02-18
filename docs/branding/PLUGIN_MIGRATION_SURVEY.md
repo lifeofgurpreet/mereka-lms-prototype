@@ -173,6 +173,41 @@ The script can be retired (or reduced to asset-sync only) when:
 
 ---
 
+## Non-Plugin Exception Evidence Pack (AC-UI-004)
+
+Every item in Section C (SCRIPT-ONLY) that is not yet migrated requires evidence
+documenting the rationale for the exception and before/after gate outputs.
+
+### How to generate evidence
+
+```bash
+# 1. Run gates BEFORE any migration change
+./scripts/qa/verify-plugin-surface-matrix.sh \
+  --evidence-dir var/evidence/migration-before-$(date +%Y%m%d)
+
+# 2. Make the migration change (e.g., move C1 to plugin)
+
+# 3. Run gates AFTER the change
+./scripts/qa/verify-plugin-surface-matrix.sh \
+  --evidence-dir var/evidence/migration-after-$(date +%Y%m%d)
+
+# 4. Compare: diff the summary files
+diff var/evidence/migration-before-*/plugin-surface-matrix-summary.md \
+     var/evidence/migration-after-*/plugin-surface-matrix-summary.md
+```
+
+### Current exception rationale
+
+| Item | Rationale | Evidence |
+|------|-----------|---------|
+| C3 (Node cache reuse) | No Tutor hook for pre-npm-install Dockerfile lines. Build time 30+ min vs seconds. | `check-forbidden-overrides.sh` WARN on script size |
+| C10 (New Relic ENV) | Low priority; instrumentation optional | N/A — no gate failure |
+| F2 (setup-mfe-branding.sh) | Dev-only; production uses Dockerfile COPY | Verified: script not called in CI or production builds |
+
+See `docs/branding/BRANDING_OPERATING_MODEL.md` for the full exception policy with expiry dates.
+
+---
+
 ## Related Documents
 
 - `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` — MFE slot details
