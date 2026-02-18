@@ -223,6 +223,7 @@ jobs:
           bash -n scripts/qa/verify-copy-terminology.sh
           bash -n scripts/qa/verify-visual-smoke-baseline.sh
           bash -n scripts/qa/verify-tenant-ui-smoke.sh
+          bash -n scripts/qa/verify-tenant-isolation-evidence.sh
           bash -n scripts/qa/verify-visual-parity-checkpoints.sh
 
       - name: Run local observability audit
@@ -1016,6 +1017,25 @@ jobs:
         run: bash -n scripts/qa/verify-footer-slot-only.sh
       - name: Run footer slot-only verification (AC-FTR-301..305)
         run: ./scripts/qa/verify-footer-slot-only.sh
+
+  tenant-isolation-evidence:
+    name: Tenant Isolation Evidence Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'tenant') ||
+        contains(github.event.pull_request.title, 'isolation') ||
+        contains(github.event.pull_request.title, 'multisite') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'domain')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-tenant-isolation-evidence.sh
+      - name: Run tenant isolation evidence (AC-UI-201..205)
+        run: ./scripts/qa/verify-tenant-isolation-evidence.sh
 
   visual-parity-checkpoints:
     name: Visual Parity Checkpoints Gate
