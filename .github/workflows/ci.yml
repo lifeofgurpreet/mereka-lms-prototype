@@ -216,6 +216,7 @@ jobs:
           bash -n scripts/qa/verify-tenant-branding-matrix.sh
           bash -n scripts/qa/verify-footer-parity.sh
           bash -n scripts/qa/verify-mfe-routing-parity.sh
+          bash -n scripts/qa/verify-a11y-contrast-focus.sh
 
       - name: Run local observability audit
         run: |
@@ -835,3 +836,38 @@ jobs:
         run: bash -n scripts/qa/verify-mfe-routing-parity.sh
       - name: Run MFE routing parity verification
         run: ./scripts/qa/verify-mfe-routing-parity.sh
+
+  a11y-contrast-focus:
+    name: A11y Contrast + Focus-Visible Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'a11y') ||
+        contains(github.event.pull_request.title, 'accessibility') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'theme') ||
+        contains(github.event.pull_request.title, 'contrast') ||
+        contains(github.event.pull_request.title, 'focus') ||
+        contains(github.event.pull_request.title, 'tokens')
+      )
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-a11y-contrast-focus.sh
+
+      - name: Run contrast + focus-visible gate (AC-A11Y-001 through AC-A11Y-004)
+        run: ./scripts/qa/verify-a11y-contrast-focus.sh
+
+      - name: Upload a11y gate artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-contrast-focus-gate
+          path: var/a11y-contrast-focus-gate.txt
