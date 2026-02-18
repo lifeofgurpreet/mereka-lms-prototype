@@ -368,3 +368,47 @@ var/evidence/branding/YYYYMMDD-HHMMSS/
 | Brand color tokens absent | Tenant admin | P3 | Populate TenantConfig.branding_config |
 | Selector override expired | Frontend lead | P2 | Migrate to plugin-slot, update decision log |
 | Route 404 on live endpoint | DevOps | P1 | Check Caddy config + MFE pod dist dirs |
+
+---
+
+## Request-Path Diagnostics: admin / studio / apps (AC-WC-003)
+
+Use this triage table when 403 Forbidden or 405 Method Not Allowed errors appear on specific subdomains.
+
+### admin.academyv2.mereka.io (Django Admin)
+
+| Symptom | Likely Cause | Check | Fix |
+|---------|-------------|-------|-----|
+| 403 Forbidden | Hostname not in `ALLOWED_HOSTS` | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print([h for h in settings.ALLOWED_HOSTS if 'admin' in h])"` | Add `admin.academyv2.mereka.io` to `extra_lms_hosts` in `apply-patches.sh` |
+| 400 Bad Request | CSRF origin rejected | Check `CSRF_TRUSTED_ORIGINS` includes `https://admin.academyv2.mereka.io` | Add to `extra_csrf_origins` in `apply-patches.sh` |
+| 404 Not Found | Caddy route missing | `kubectl exec -n mereka-lms deploy/caddy -- grep -c admin /etc/caddy/Caddyfile` | Admin is proxied through LMS, not a separate route — check LMS pod health |
+| 302 redirect loop | Session cookie domain mismatch | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print(settings.SESSION_COOKIE_DOMAIN)"` | Must be `None` (host-only) |
+
+### studio.academyv2.mereka.io (CMS/Studio)
+
+| Symptom | Likely Cause | Check | Fix |
+|---------|-------------|-------|-----|
+| 403 CSRF | Studio CSRF mismatch | `kubectl exec -n mereka-lms deploy/cms -- python manage.py cms shell -c "from django.conf import settings; print(settings.CSRF_TRUSTED_ORIGINS)"` | Add Studio origin to CMS CSRF settings |
+| 302 infinite loop | Session cookie collision with LMS | Check `SESSION_COOKIE_NAME` is `studio_session_id` (NOT `sessionid`) | Set `SESSION_COOKIE_NAME = "studio_session_id"` in CMS settings |
+| 500 on OAuth2 callback | Stale session cookie | Clear browser cookies for Studio domain | Set `SESSION_COOKIE_SAMESITE = "None"` for cross-origin Authentik redirects |
+| 405 Method Not Allowed | POST to read-only endpoint | Check request method vs endpoint spec | Studio API may reject GET on POST-only endpoints — verify client code |
+
+### apps.academyv2.mereka.io (MFE)
+
+| Symptom | Likely Cause | Check | Fix |
+|---------|-------------|-------|-----|
+| 403 on API calls | CSRF cookie not sent cross-origin | Check `CSRF_COOKIE_DOMAIN` is `None` and MFE domain is in `CSRF_TRUSTED_ORIGINS` | Add `apps.academyv2.mereka.io` to `extra_csrf_origins` |
+| 404 on MFE route | Caddy route not mapped | `kubectl exec -n mereka-lms deploy/caddy -- grep "<route>" /etc/caddy/Caddyfile` | Add route to Caddyfile, rebuild MFE image |
+| 405 on API endpoint | Wrong HTTP method from MFE | Check MFE API client code | Usually a frontend bug — check `CORS_ORIGIN_WHITELIST` includes MFE domain |
+| Blank page / JS error | MFE dist dir missing | `kubectl exec -n mereka-lms deploy/mfe -- ls /openedx/dist/<app>/` | Rebuild MFE image with missing app included |
+| Redirect to /authn/login loop | Session expired or cookie rejected | Check `SafeSessionMiddleware` in LMS logs | Clear cookies; verify `SESSION_COOKIE_SAMESITE = "None"` |
+
+### Quick diagnostic command
+
+```bash
+# Check all three subdomains at once
+for host in admin.academyv2.mereka.io studio.academyv2.mereka.io apps.academyv2.mereka.io; do
+  code=$(curl -so /dev/null -w "%{http_code}" --max-time 10 "https://$host/" 2>/dev/null)
+  echo "$host: HTTP $code"
+done
+```
