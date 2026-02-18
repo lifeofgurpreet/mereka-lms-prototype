@@ -241,6 +241,7 @@ jobs:
           bash -n scripts/qa/verify-token-integrity-routing.sh
           bash -n scripts/qa/verify-selector-to-slot-migration.sh
           bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
+          bash -n scripts/qa/verify-a11y-regression-lane.sh
 
       - name: Run local observability audit
         run: |
@@ -1298,3 +1299,16 @@ jobs:
 
       - name: Verify authenticated smoke + WCAG AA contrast gates (bead 2dcy.3)
         run: ./scripts/qa/verify-authenticated-smoke-a11y.sh
+
+  a11y-regression-lane:
+    name: A11y Regression Lane (AC-FRONT-071..075)
+    runs-on: ubuntu-latest
+    needs: authenticated-smoke-a11y
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-a11y-regression-lane.sh
+
+      - name: Verify a11y regression lane (bead 2dcy.3.1)
+        run: ./scripts/qa/verify-a11y-regression-lane.sh
