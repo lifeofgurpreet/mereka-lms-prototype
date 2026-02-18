@@ -1242,3 +1242,15 @@ jobs:
           name: analytics-key-elimination-gate
           path: var/
           if-no-files-found: ignore
+
+  legacy-footer-removal:
+    name: Legacy Footer Removal (AC-UI-401..405)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-legacy-footer-removal.sh
+
+      - name: Verify legacy footer removal (bead 1rns)
+        run: ./scripts/qa/verify-legacy-footer-removal.sh

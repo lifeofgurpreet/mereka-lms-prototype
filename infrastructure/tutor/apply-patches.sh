@@ -1226,12 +1226,7 @@ RUN pip install "pymongo[srv]" """,
         ).strip()
         if "const MerekaFooter" not in updated:
             updated = updated.replace("const themePluginSlot =", footer_component + "\n\nconst themePluginSlot =", 1)
-        # MIGRATED-TO-SLOT: footer_slot (bead 2dcy.6, AC-FRONT-063)
-        # The RenderWidget string-rewrite is the fallback for Tutor versions that do not
-        # expose tutormfe.hooks.PLUGIN_SLOTS. The canonical slot registration lives in
-        # mereka_lms.py (PLUGIN_SLOTS.add_item for "footer_slot"). This line remains as
-        # the fallback for older Tutor versions where _PLUGIN_SLOTS_AVAILABLE == False.
-        updated = updated.replace("RenderWidget: <Footer />", "RenderWidget: <MerekaFooter />")
+        # Legacy footer string-rewrite removed (bead 1rns). Footer now via plugin slot only.
 
     if path.name == "lms.conf":
         anchor = "  server_name academyv2.mereka.io preview.academyv2.mereka.io;"
