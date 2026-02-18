@@ -210,6 +210,7 @@ jobs:
           bash -n scripts/qa/verify-analytics-key.sh
           bash -n scripts/qa/verify-footer-variant-matrix.sh
           bash -n scripts/qa/verify-no-dom-overrides.sh
+          bash -n scripts/qa/verify-migration-lock.sh
 
       - name: Run local observability audit
         run: |
@@ -714,6 +715,23 @@ jobs:
 
       - name: Verify no forbidden DOM overrides (AC-FTR-001 through AC-FTR-004)
         run: ./scripts/qa/verify-no-dom-overrides.sh
+
+  migration-lock:
+    name: Migration Lock Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'theme') ||
+        contains(github.event.pull_request.title, 'mfe') ||
+        contains(github.event.pull_request.title, 'slot') ||
+        contains(github.event.pull_request.title, 'migration')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run migration lock gate
+        run: ./scripts/qa/verify-migration-lock.sh
 
   tenant-branding-qa:
     name: Tenant Branding QA (Consolidated)

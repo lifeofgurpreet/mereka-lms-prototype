@@ -230,6 +230,24 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 - Account/Settings styling (P3, well-hardened)
 - Paragon global overrides (P3, very stable)
 
+## Migration Lock
+
+**Status**: LOCKED (Sprint S6, 2026-02-18)
+
+This register is the canonical inventory of all MFE DOM/CSS overrides.
+Any new override MUST:
+1. Be added to this register with full classification
+2. Include a `data-testid` fallback selector
+3. Have an approved migration path documented
+4. Pass `verify-migration-lock.sh` CI gate
+
+### Lock Enforcement
+
+CI job `migration-lock` runs `scripts/qa/verify-migration-lock.sh` on every PR touching:
+- `infrastructure/tutor/themes/mereka/mfe/mereka.scss`
+- `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`
+- `docs/branding/BRANDING_OPERATING_MODEL.md`
+
 ## Verification
 
 Run `./scripts/qa/verify-plugin-slot-migration-register.sh` to check:
