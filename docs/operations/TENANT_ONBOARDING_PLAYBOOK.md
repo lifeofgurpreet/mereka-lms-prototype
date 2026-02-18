@@ -256,6 +256,195 @@ git push
 6. **Footer branding**: MerekaFooter SITE_VARIANTS map provides per-domain brand text at runtime
 7. **Logo/theme**: All tenants currently share the `mereka` theme. Custom themes are Phase 2 scope.
 
+---
+
+## Verification Command Matrix (AC-US7-102)
+
+Run these commands after onboarding a new tenant. Each command must PASS before rollout.
+
+| # | Command | Scope | Expected | Fixture |
+|---|---------|-------|----------|---------|
+| 1 | `./scripts/qa/verify-tenant-branding-runtime.sh` | All domains | PASS 13+ / FAIL 0 | Checks SITE_NAME, LOGO_URL, LMS_BASE_URL, footer variant per domain |
+| 2 | `./scripts/qa/verify-mfe-branding.sh` | MFE pod + dist | PASS 47+ / FAIL 0 | Checks theme CSS, favicon, logo, brand color absence, asset integrity |
+| 3 | `./scripts/qa/verify-multisite-ux-consistency.sh` | Repo + pod | PASS 18+ / FAIL 0 | Checks for hardcoded domains, dynamic config, CI gates |
+| 4 | `./scripts/qa/verify-tenant-isolation.sh` | K8s cluster | PASS 42+ / FAIL 0 | Checks SiteConfiguration, org ownership, course filter |
+| 5 | `./scripts/qa/verify-mfe-route-smoke.sh` | All MFE routes | PASS 24+ / FAIL 0 | HTTP smoke for all Caddyfile routes + a11y checks |
+| 6 | Domain route smoke (inline) | 3 tenant hosts | HTTP 200 each | See below |
+
+### Domain route smoke (one-liner)
+
+```bash
+for domain in academyv2.mereka.io academy.biji-biji.com skillourfuture.academy.mereka.io; do
+  code=$(curl -so /dev/null -w "%{http_code}" "https://$domain/" 2>/dev/null)
+  mfe=$(curl -so /dev/null -w "%{http_code}" "https://$domain/api/mfe_config/v1" 2>/dev/null)
+  echo "$domain: LMS=$code MFE_CONFIG=$mfe"
+done
+```
+
+Expected: `LMS=200 MFE_CONFIG=200` for each domain.
+
+### Per-tenant MFE config fixture
+
+```bash
+# Extract key fields for evidence
+curl -s "https://<domain>/api/mfe_config/v1" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+for k in ['SITE_NAME', 'LMS_BASE_URL', 'LOGO_URL', 'FAVICON_URL']:
+    print(f'  {k}: {d.get(k, \"MISSING\")}')
+"
+```
+
+---
+
+## Drift Repair Commands (AC-US7-103)
+
+### SiteConfiguration drift
+
+**Symptom**: Domain returns wrong SITE_NAME or default Open edX branding.
+
+```bash
+# Check current SiteConfiguration
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+for sc in SiteConfiguration.objects.filter(enabled=True):
+    print(f'{sc.site.domain}: {sc.site_values.get(\"SITE_NAME\", \"UNSET\")}')
+"
+
+# Repair: re-provision the tenant
+./scripts/tenants/provision-tenant.sh \
+  --slug <slug> --name "<name>" --domain <domain>
+```
+
+**Owner**: Platform team. **Evidence**: Before/after output of SiteConfiguration query.
+
+### ALLOWED_HOSTS / CSRF drift
+
+**Symptom**: 400 Bad Request or 403 CSRF Forbidden on new domain.
+
+```bash
+# Check if domain is in ALLOWED_HOSTS
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "
+from django.conf import settings
+print([h for h in settings.ALLOWED_HOSTS if 'newclient' in h])
+print([o for o in settings.CSRF_TRUSTED_ORIGINS if 'newclient' in o])
+"
+
+# Repair: re-run apply-patches.sh and rebuild
+./infrastructure/tutor/apply-patches.sh
+# Then follow BRANDING_RELEASE_RUNBOOK.md for image rebuild + deploy
+```
+
+**Owner**: Infrastructure team. **Evidence**: grep output from production.py settings.
+
+### Footer variant missing
+
+**Symptom**: Footer shows "Mereka Academy" instead of tenant-specific brand.
+
+```bash
+# Check SITE_VARIANTS in MFE pod
+kubectl exec -n mereka-lms deploy/mfe -- \
+  grep -o "'[a-z.]*.mereka.io'" /openedx/env.config.js 2>/dev/null | sort -u
+
+# Repair: add domain to SITE_VARIANTS in mereka_lms.py, rebuild MFE image
+```
+
+**Owner**: Frontend team. **Evidence**: grep output showing domain presence/absence.
+
+---
+
+## CI / Manual Gate Checklist (AC-US7-104)
+
+Before rolling out a new tenant to production, ALL gates must pass:
+
+### Pre-merge gates (CI)
+
+- [ ] `bash -n scripts/qa/verify-tenant-branding-runtime.sh` — syntax valid
+- [ ] `bash -n scripts/qa/verify-mfe-branding.sh` — syntax valid
+- [ ] `bash -n scripts/qa/verify-tenant-isolation.sh` — syntax valid
+- [ ] PR approved by at least 1 reviewer
+
+### Post-merge gates (manual)
+
+- [ ] `verify-tenant-branding-runtime.sh` — PASS (all domains)
+- [ ] `verify-mfe-branding.sh` — PASS (MFE pod checks)
+- [ ] `verify-tenant-isolation.sh` — PASS (SiteConfiguration + org checks)
+- [ ] Domain route smoke — HTTP 200 for all tenant domains
+- [ ] MFE config fixture — correct SITE_NAME, LMS_BASE_URL, LOGO_URL per domain
+- [ ] `verify-gitops-drift.sh` — no drift between source and GitOps overlay
+
+### Artifact naming rules
+
+Evidence artifacts MUST follow this naming convention:
+
+```
+var/evidence/tenant-onboarding/<slug>-<YYYYMMDD>/
+├── tenant-branding-runtime.log
+├── mfe-branding.log
+├── tenant-isolation.log
+├── domain-smoke.log
+├── mfe-config-<domain>.json
+└── summary.md
+```
+
+---
+
+## Evidence Template (AC-US7-105)
+
+Copy this template for each tenant onboarding. Fill in results and attach to the PR or release notes.
+
+```markdown
+# Tenant Onboarding Evidence: <Tenant Name>
+
+**Date**: YYYY-MM-DD
+**Operator**: <name>
+**Domain**: <domain>
+**Slug**: <slug>
+**PR**: #<number>
+
+## Pre-Rollout Checklist
+
+| Gate | Result | Notes |
+|------|--------|-------|
+| DNS resolves | PASS/FAIL | `dig +short <domain>` |
+| SiteConfiguration created | PASS/FAIL | provision-tenant.sh output |
+| ALLOWED_HOSTS includes domain | PASS/FAIL | grep from production.py |
+| CSRF_TRUSTED_ORIGINS includes domain | PASS/FAIL | grep from production.py |
+| SITE_VARIANTS includes domain | PASS/FAIL | grep from env.config.js |
+
+## Post-Rollout Verification
+
+| Script | Result | Summary |
+|--------|--------|---------|
+| verify-tenant-branding-runtime.sh | PASS X / FAIL Y | |
+| verify-mfe-branding.sh | PASS X / FAIL Y | |
+| verify-tenant-isolation.sh | PASS X / FAIL Y | |
+| Domain route smoke | HTTP <code> | |
+
+## MFE Config Snapshot
+
+| Key | Value |
+|-----|-------|
+| SITE_NAME | |
+| LMS_BASE_URL | |
+| LOGO_URL | |
+| FAVICON_URL | |
+
+## Rollback Plan
+
+- [ ] Quick rollback tested (disable SiteConfiguration)
+- [ ] Full rollback path documented (git revert)
+
+## Sign-off
+
+- [ ] Platform team: <name>
+- [ ] Verified by: <name>
+```
+
+---
+
 ## Related Documents
 
 - `infrastructure/tutor/multisite-sites.yml` — Canonical site registry
