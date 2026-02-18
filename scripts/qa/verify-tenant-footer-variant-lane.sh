@@ -67,11 +67,9 @@ declare -a PRODUCTION_DOMAINS=(
 echo "--- AC-TF-001: Deterministic footer variant for ≥3 production domains ---"
 echo ""
 
-TF001_FAIL=0
 
 if [[ ! -f "$PLUGIN_FILE" ]]; then
   fail "AC-TF-001: Plugin file not found: infrastructure/tutor/plugins/mereka_lms.py"
-  TF001_FAIL=1
 else
   pass "AC-TF-001: Plugin file exists (infrastructure/tutor/plugins/mereka_lms.py)"
 
@@ -80,7 +78,6 @@ else
     pass "AC-TF-001: SITE_VARIANTS map defined in plugin"
   else
     fail "AC-TF-001: SITE_VARIANTS map not found in plugin"
-    TF001_FAIL=1
   fi
 
   # Each of the 3 production domains must be a key in SITE_VARIANTS
@@ -91,7 +88,6 @@ else
       DOMAIN_HITS=$((DOMAIN_HITS + 1))
     else
       fail "AC-TF-001: SITE_VARIANTS missing '${domain}'"
-      TF001_FAIL=1
     fi
   done
 
@@ -99,7 +95,6 @@ else
     pass "AC-TF-001: SITE_VARIANTS covers all 3 production domains (deterministic)"
   else
     fail "AC-TF-001: SITE_VARIANTS only covers $DOMAIN_HITS/3 production domains"
-    TF001_FAIL=1
   fi
 
   # Each domain entry must have brand, copyrightHolder, whatsapp (no nulls)
@@ -110,13 +105,11 @@ else
       pass "AC-TF-001: SITE_VARIANTS entries have required field '${field%:}'"
     else
       fail "AC-TF-001: SITE_VARIANTS entries missing required field '${field%:}'"
-      TF001_FAIL=1
     fi
   done
 
   if echo "$VARIANTS_BLOCK" | grep -qE ": null|: undefined"; then
     fail "AC-TF-001: SITE_VARIANTS contains null or undefined values (non-deterministic)"
-    TF001_FAIL=1
   else
     pass "AC-TF-001: No null/undefined values in SITE_VARIANTS (all fields deterministic)"
   fi
@@ -128,7 +121,6 @@ else
       pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value"
     else
       fail "AC-TF-001: Domain '${domain}' missing deterministic brand value"
-      TF001_FAIL=1
     fi
   done
 
@@ -137,20 +129,17 @@ else
     pass "AC-TF-001: Fallback variant present for unknown hostnames (|| operator)"
   else
     fail "AC-TF-001: Fallback variant missing — SITE_VARIANTS lookup has no || fallback"
-    TF001_FAIL=1
   fi
 fi
 
 # brand-config-schema.json must define footer.variant enum
 if [[ ! -f "$BRAND_SCHEMA" ]]; then
   fail "AC-TF-001: brand-config-schema.json not found — footer variant schema not defined"
-  TF001_FAIL=1
 else
   if grep -q '"variant"' "$BRAND_SCHEMA"; then
     pass "AC-TF-001: brand-config-schema.json defines footer.variant field"
   else
     fail "AC-TF-001: brand-config-schema.json missing footer.variant field"
-    TF001_FAIL=1
   fi
 
   # Schema enum covers the 3 production variants
@@ -159,12 +148,10 @@ else
       pass "AC-TF-001: Schema footer.variant enum includes '$variant_name'"
     else
       fail "AC-TF-001: Schema footer.variant enum missing '$variant_name'"
-      TF001_FAIL=1
     fi
   done
 fi
 
-[[ "$TF001_FAIL" -eq 0 ]] || true
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -173,7 +160,6 @@ echo ""
 echo "--- AC-TF-002: Variant selection traceability (config + runtime) ---"
 echo ""
 
-TF002_FAIL=0
 
 if [[ -f "$PLUGIN_FILE" ]]; then
   # Variant selection logic (the SITE_VARIANTS[hostname] lookup line)
@@ -181,7 +167,6 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     pass "AC-TF-002: Variant selection logic present in plugin (SITE_VARIANTS[hostname])"
   else
     fail "AC-TF-002: Variant selection logic not found in plugin"
-    TF002_FAIL=1
   fi
 
   # The hostname lookup must read window.location.hostname
@@ -189,7 +174,6 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     pass "AC-TF-002: Hostname read from window.location.hostname (browser-side, auditable)"
   else
     fail "AC-TF-002: window.location.hostname not found — traceability source unclear"
-    TF002_FAIL=1
   fi
 
   # config object is used for fallback (makes the fallback path traceable via MFE config endpoint)
@@ -204,7 +188,6 @@ fi
 # FOOTER_VARIANT_MATRIX.md documents the variant selection chain (source of truth chain)
 if [[ ! -f "$FOOTER_MATRIX_DOC" ]]; then
   fail "AC-TF-002: FOOTER_VARIANT_MATRIX.md missing — no config traceability documentation"
-  TF002_FAIL=1
 else
   pass "AC-TF-002: FOOTER_VARIANT_MATRIX.md exists (config traceability documented)"
 
@@ -212,7 +195,6 @@ else
     pass "AC-TF-002: Matrix doc documents SITE_VARIANTS as source of truth"
   else
     fail "AC-TF-002: Matrix doc does not document variant selection / source of truth chain"
-    TF002_FAIL=1
   fi
 
   if grep -qiE "mfe_config|api/mfe_config|runtime config" "$FOOTER_MATRIX_DOC"; then
@@ -225,7 +207,6 @@ fi
 # TENANT_FOOTER_VARIANT_LANE.md must document config + runtime traceability
 if [[ ! -f "$TENANT_FOOTER_LANE_DOC" ]]; then
   fail "AC-TF-002: TENANT_FOOTER_VARIANT_LANE.md missing — variant lane not documented"
-  TF002_FAIL=1
 else
   pass "AC-TF-002: TENANT_FOOTER_VARIANT_LANE.md exists"
 
@@ -233,18 +214,15 @@ else
     pass "AC-TF-002: Lane doc documents variant selection logic"
   else
     fail "AC-TF-002: Lane doc missing variant selection logic documentation"
-    TF002_FAIL=1
   fi
 
   if grep -qiE "runtime.*config|mfe_config|traceab" "$TENANT_FOOTER_LANE_DOC"; then
     pass "AC-TF-002: Lane doc documents runtime config endpoint traceability"
   else
     fail "AC-TF-002: Lane doc missing runtime config traceability documentation"
-    TF002_FAIL=1
   fi
 fi
 
-[[ "$TF002_FAIL" -eq 0 ]] || true
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -253,7 +231,6 @@ echo ""
 echo "--- AC-TF-003: Regression coverage (domain routing + brand markers) ---"
 echo ""
 
-TF003_FAIL=0
 
 # verify-footer-variant-matrix.sh is the primary offline regression check
 FOOTER_MATRIX_SCRIPT="$REPO_ROOT/scripts/qa/verify-footer-variant-matrix.sh"
@@ -268,7 +245,6 @@ if [[ -f "$FOOTER_MATRIX_SCRIPT" ]]; then
   fi
 else
   fail "AC-TF-003: verify-footer-variant-matrix.sh not found — domain routing regression not scripted"
-  TF003_FAIL=1
 fi
 
 # verify-tenant-branding-runtime.sh covers live domain routing (200/redirect/health)
@@ -282,7 +258,6 @@ if [[ -f "$RUNTIME_SCRIPT" ]]; then
       pass "AC-TF-003: Runtime script covers domain '$domain'"
     else
       fail "AC-TF-003: Runtime script missing domain '$domain'"
-      TF003_FAIL=1
     fi
   done
 
@@ -294,7 +269,6 @@ if [[ -f "$RUNTIME_SCRIPT" ]]; then
   fi
 else
   fail "AC-TF-003: verify-tenant-branding-runtime.sh not found — live domain routing check missing"
-  TF003_FAIL=1
 fi
 
 # public-health-check.sh provides the /health check regression
@@ -311,18 +285,15 @@ if [[ -f "$TENANT_FOOTER_LANE_DOC" ]]; then
     pass "AC-TF-003: Lane doc contains regression check matrix (HTTP status/health)"
   else
     fail "AC-TF-003: Lane doc missing regression check matrix (200/redirect/health)"
-    TF003_FAIL=1
   fi
 
   if grep -qiE "brand.*marker|brand.*visib|footer.*brand\|copyrightHolder\|whatsapp" "$TENANT_FOOTER_LANE_DOC"; then
     pass "AC-TF-003: Lane doc documents brand visibility markers for each domain"
   else
     fail "AC-TF-003: Lane doc missing brand visibility markers documentation"
-    TF003_FAIL=1
   fi
 else
   fail "AC-TF-003: TENANT_FOOTER_VARIANT_LANE.md missing — regression matrix not documented"
-  TF003_FAIL=1
 fi
 
 # Live mode: run HTTP probes for all 3 production domains
@@ -350,7 +321,6 @@ if [[ "$LIVE_MODE" == "1" ]]; then
   done
 fi
 
-[[ "$TF003_FAIL" -eq 0 ]] || true
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -359,12 +329,10 @@ echo ""
 echo "--- AC-TF-004: New tenant brand documentation completeness ---"
 echo ""
 
-TF004_FAIL=0
 
 # Primary source: TENANT_FOOTER_VARIANT_LANE.md (new ops doc for this bead)
 if [[ ! -f "$TENANT_FOOTER_LANE_DOC" ]]; then
   fail "AC-TF-004: TENANT_FOOTER_VARIANT_LANE.md missing — tenant onboarding guide not present"
-  TF004_FAIL=1
 else
   pass "AC-TF-004: TENANT_FOOTER_VARIANT_LANE.md exists"
 
@@ -373,7 +341,6 @@ else
     pass "AC-TF-004: Lane doc covers asset requirements (logos, favicon)"
   else
     fail "AC-TF-004: Lane doc missing asset requirements section"
-    TF004_FAIL=1
   fi
 
   # Tokens / palette section
@@ -381,7 +348,6 @@ else
     pass "AC-TF-004: Lane doc covers design tokens / palette configuration"
   else
     fail "AC-TF-004: Lane doc missing design tokens / palette section"
-    TF004_FAIL=1
   fi
 
   # Config section (SITE_VARIANTS update, tutor config)
@@ -389,7 +355,6 @@ else
     pass "AC-TF-004: Lane doc covers config steps (SITE_VARIANTS update)"
   else
     fail "AC-TF-004: Lane doc missing config steps (SITE_VARIANTS update)"
-    TF004_FAIL=1
   fi
 
   # Verification commands section
@@ -397,7 +362,6 @@ else
     pass "AC-TF-004: Lane doc includes verification commands"
   else
     fail "AC-TF-004: Lane doc missing verification commands"
-    TF004_FAIL=1
   fi
 
   # Step-by-step format (numbered checklist or steps)
@@ -412,7 +376,6 @@ else
     pass "AC-TF-004: Lane doc documents fallback rules for missing tenant config"
   else
     fail "AC-TF-004: Lane doc missing fallback rules for unknown hostnames"
-    TF004_FAIL=1
   fi
 fi
 
@@ -422,7 +385,6 @@ if [[ -f "$FOOTER_MATRIX_DOC" ]]; then
     pass "AC-TF-004: FOOTER_VARIANT_MATRIX.md has 'Adding a New Domain' section"
   else
     fail "AC-TF-004: FOOTER_VARIANT_MATRIX.md missing 'Adding a New Domain' section"
-    TF004_FAIL=1
   fi
 
   # Check for apply-patches.sh reference (config step)
@@ -452,10 +414,8 @@ if [[ -f "$BRAND_SCHEMA" ]]; then
   pass "AC-TF-004: brand-config-schema.json exists (machine-readable asset/token spec)"
 else
   fail "AC-TF-004: brand-config-schema.json missing — no machine-readable brand spec"
-  TF004_FAIL=1
 fi
 
-[[ "$TF004_FAIL" -eq 0 ]] || true
 echo ""
 
 # ---------------------------------------------------------------------------

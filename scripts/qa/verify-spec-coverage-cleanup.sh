@@ -74,14 +74,12 @@ KEY_SPECS=(
 )
 
 if [[ -f "$LINT_SCRIPT" ]]; then
-  LINT_FAIL=0
   for spec in "${KEY_SPECS[@]}"; do
     if [[ -f "$spec" ]]; then
       if python3 "$LINT_SCRIPT" "$spec" --severity-filter error >/dev/null 2>&1; then
         pass "AC-BEADS-002: $spec passes lint"
       else
         fail "AC-BEADS-002: $spec FAILED lint"
-        LINT_FAIL=1
       fi
     else
       warn "AC-BEADS-002: $spec not found (skip)"
