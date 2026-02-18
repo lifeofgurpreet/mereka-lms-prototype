@@ -218,6 +218,7 @@ jobs:
           bash -n scripts/qa/verify-mfe-routing-parity.sh
           bash -n scripts/qa/verify-a11y-contrast-focus.sh
           bash -n scripts/qa/verify-performance-budget.sh
+          bash -n scripts/qa/verify-copy-terminology.sh
 
       - name: Run local observability audit
         run: |
@@ -892,3 +893,23 @@ jobs:
         run: bash -n scripts/qa/verify-performance-budget.sh
       - name: Run performance budget verification (AC-UIPERF-001..003)
         run: ./scripts/qa/verify-performance-budget.sh
+
+  copy-terminology:
+    name: Copy/Terminology Consistency Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'copy') ||
+        contains(github.event.pull_request.title, 'terminology') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'theme') ||
+        contains(github.event.pull_request.title, 'footer') ||
+        contains(github.event.pull_request.title, 'mfe')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-copy-terminology.sh
+      - name: Run copy/terminology verification (AC-UICOPY-001..003)
+        run: ./scripts/qa/verify-copy-terminology.sh
