@@ -242,6 +242,8 @@ jobs:
           bash -n scripts/qa/verify-selector-to-slot-migration.sh
           bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
           bash -n scripts/qa/verify-a11y-regression-lane.sh
+          bash -n scripts/qa/verify-footer-slot-evidence-rollback.sh
+          bash -n scripts/qa/verify-analytics-hardening.sh
 
       - name: Run local observability audit
         run: |
@@ -1312,3 +1314,27 @@ jobs:
 
       - name: Verify a11y regression lane (bead 2dcy.3.1)
         run: ./scripts/qa/verify-a11y-regression-lane.sh
+
+  footer-slot-evidence-rollback:
+    name: Footer Slot Evidence and Rollback Guard (AC-FRONT-081..084)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-footer-slot-evidence-rollback.sh
+
+      - name: Verify footer slot evidence and rollback guard (bead 2dcy.8)
+        run: ./scripts/qa/verify-footer-slot-evidence-rollback.sh
+
+  analytics-hardening:
+    name: Analytics Hardening (AC-FRONT-051..055)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-analytics-hardening.sh
+
+      - name: Verify analytics token integrity and Segment injection hardening (bead 2dcy.5)
+        run: ./scripts/qa/verify-analytics-hardening.sh
