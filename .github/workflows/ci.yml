@@ -219,6 +219,7 @@ jobs:
           bash -n scripts/qa/verify-a11y-contrast-focus.sh
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-copy-terminology.sh
+          bash -n scripts/qa/verify-visual-smoke-baseline.sh
 
       - name: Run local observability audit
         run: |
@@ -913,3 +914,22 @@ jobs:
         run: bash -n scripts/qa/verify-copy-terminology.sh
       - name: Run copy/terminology verification (AC-UICOPY-001..003)
         run: ./scripts/qa/verify-copy-terminology.sh
+
+  visual-smoke-baseline:
+    name: Visual Smoke Baseline Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'visual') ||
+        contains(github.event.pull_request.title, 'screenshot') ||
+        contains(github.event.pull_request.title, 'smoke') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'regression')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-visual-smoke-baseline.sh
+      - name: Run visual smoke baseline verification (AC-VIS-001..004)
+        run: ./scripts/qa/verify-visual-smoke-baseline.sh
