@@ -431,6 +431,70 @@ fi
 
 echo ""
 
+# =============================================================================
+# Section 4: Live Dist Directory Validation (8jao.6)
+# =============================================================================
+echo "--- Live Dist Directory Validation (8jao.6) ---"
+
+CADDYFILE_LOCAL="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
+if [[ -f "$CADDYFILE_LOCAL" ]]; then
+  # Extract dist directory names from Caddyfile
+  DIST_DIRS=$(grep -oP '(?<=root \* /openedx/dist/)[a-z0-9_-]+' "$CADDYFILE_LOCAL" | sort -u)
+
+  if [[ -z "$DIST_DIRS" ]]; then
+    do_warn "8jao.6: No dist directories found in Caddyfile"
+  else
+    DIST_DIR_COUNT=$(echo "$DIST_DIRS" | wc -l)
+    do_pass "8jao.6: Parsed $DIST_DIR_COUNT dist directories from Caddyfile"
+
+    # Try to validate against live MFE pod
+    MFE_POD=$(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=mfe -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+
+    if [[ -z "$MFE_POD" ]]; then
+      do_warn "8jao.6: MFE pod not found — skipping live dist validation"
+    else
+      for dir in $DIST_DIRS; do
+        if kubectl exec -n mereka-lms "$MFE_POD" -- test -d "/openedx/dist/$dir" 2>/dev/null; then
+          do_pass "8jao.6: /openedx/dist/$dir exists in MFE pod"
+        else
+          do_warn "8jao.6: /openedx/dist/$dir MISSING in MFE pod (Caddyfile expects it)"
+        fi
+      done
+    fi
+  fi
+else
+  do_fail "8jao.6: Caddyfile not found at $CADDYFILE_LOCAL"
+fi
+echo ""
+
+# =============================================================================
+# Section 5: Selector Override Expiry Check (8jao.8)
+# =============================================================================
+echo "--- Selector Override Expiry Check (8jao.8) ---"
+
+DECISION_LOG="$REPO_ROOT/docs/architecture/MFE_SELECTOR_DECISION_LOG.md"
+if [[ -f "$DECISION_LOG" ]]; then
+  do_pass "8jao.8: Selector decision log exists"
+
+  # Check for expired entries
+  TODAY=$(date +%Y-%m-%d)
+  EXPIRED=0
+  while IFS='|' read -r _ id selector file approved expiry owner target status _; do
+    expiry=$(echo "$expiry" | xargs)
+    if [[ "$expiry" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && [[ "$expiry" < "$TODAY" ]]; then
+      do_warn "8jao.8: Selector override $id expired on $expiry — needs migration"
+      EXPIRED=$((EXPIRED + 1))
+    fi
+  done < <(grep "^| SEL-" "$DECISION_LOG")
+
+  if [[ "$EXPIRED" -eq 0 ]]; then
+    do_pass "8jao.8: No expired selector overrides"
+  fi
+else
+  do_warn "8jao.8: Selector decision log not found — create docs/architecture/MFE_SELECTOR_DECISION_LOG.md"
+fi
+echo ""
+
 # Cleanup
 rm -f "$CADDY_DIRS" "$CADDY_PATHS" "$LMS_MFE_URLS" "$LMS_API_URLS" "$VERIFIER_ROUTES"
 

@@ -19,10 +19,12 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Argument parsing
 ENV="prod"
+JSON_OUTPUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --env) ENV="${2:-prod}"; shift 2 ;;
-    *) echo "Usage: $0 [--env prod|dev]" >&2; exit 1 ;;
+    --env)  ENV="${2:-prod}"; shift 2 ;;
+    --json) JSON_OUTPUT=true; shift ;;
+    *) echo "Usage: $0 [--env prod|dev] [--json]" >&2; exit 1 ;;
   esac
 done
 
@@ -164,6 +166,28 @@ echo ""
 echo "=== Summary (AC-MFE-004) ==="
 echo -e "${GREEN}PASS:${NC} ${PASS}  ${RED}FAIL:${NC} ${FAIL}  ${YELLOW}WARN:${NC} ${WARN}"
 echo "Artifacts  : $ARTIFACT_DIR"
+echo ""
+
+# ─── JSON artifact output (8jao.7) ───
+JSON_FILE="$ARTIFACT_DIR/results.json"
+cat > "$JSON_FILE" <<JSONEOF
+{
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "domain": "$DOMAIN",
+  "mfe_base": "$MFE_BASE",
+  "summary": {
+    "pass": $PASS,
+    "fail": $FAIL,
+    "warn": $WARN
+  },
+  "artifact_dir": "$ARTIFACT_DIR"
+}
+JSONEOF
+echo "JSON results: $JSON_FILE"
+
+if [[ "$JSON_OUTPUT" == "true" ]]; then
+  cat "$JSON_FILE"
+fi
 echo ""
 
 if [[ "$FAIL" -gt 0 ]]; then
