@@ -445,6 +445,121 @@ Copy this template for each tenant onboarding. Fill in results and attach to the
 
 ---
 
+## One-Command Dry-Run Matrix (AC-ONB-201, AC-ONB-202)
+
+Run all verification gates for all 3 tenant domains with a single command:
+
+```bash
+# Full dry-run with evidence capture
+./scripts/qa/tenant-onboarding-dryrun.sh --env prod \
+  --evidence-dir "var/evidence/tenant-onboarding/dryrun-$(date +%Y%m%d)"
+
+# Quick dry-run (no evidence artifacts)
+./scripts/qa/tenant-onboarding-dryrun.sh --env prod
+```
+
+This runs in sequence:
+
+| Gate | Script | Artifact Name |
+|------|--------|---------------|
+| Tenant branding runtime | `verify-tenant-branding-runtime.sh` | `verify-tenant-branding-runtime.log` |
+| MFE branding | `verify-mfe-branding.sh --env prod` | `verify-mfe-branding.log` |
+| Multisite UX consistency | `verify-multisite-ux-consistency.sh --env prod` | `verify-multisite-ux-consistency.log` |
+| Post-deploy smoke | `verify-post-deploy-smoke.sh --env prod` | `post-deploy-smoke.log` |
+| MFE config fixture | curl + python3 per domain | `mfe-config-<domain>.json` |
+
+All artifacts are written to the `--evidence-dir` directory.
+
+---
+
+## Failure Triage Map (AC-ONB-203)
+
+When a verification gate fails, use this triage map to identify root cause and repair action.
+
+### Class 1: Branding Drift
+
+**Symptom**: `verify-tenant-branding-runtime.sh` reports wrong SITE_NAME or LOGO_URL for a domain.
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| SiteConfiguration values | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; [print(f'{sc.site.domain}: {sc.site_values.get(\"SITE_NAME\", \"UNSET\")}') for sc in SiteConfiguration.objects.filter(enabled=True)]"` | Correct SITE_NAME per domain |
+| MerekaFooter SITE_VARIANTS | `kubectl exec -n mereka-lms deploy/mfe -- grep -o "'[a-z.]*.mereka.io'" /openedx/env.config.js` | All tenant domains listed |
+| multisite-sites.yml | `grep "domain:" infrastructure/tutor/multisite-sites.yml` | All tenant domains present |
+
+**Repair**: Re-provision tenant (`provision-tenant.sh`) or rebuild MFE image (if SITE_VARIANTS missing).
+
+### Class 2: Route Drift
+
+**Symptom**: `verify-mfe-route-smoke.sh` or `verify-post-deploy-smoke.sh` reports HTTP 404/502 for MFE routes.
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| Caddy routes | `kubectl exec -n mereka-lms deploy/caddy -- cat /etc/caddy/Caddyfile \| grep -c "handle_path"` | All MFE routes mapped |
+| MFE pod running | `kubectl get deploy mfe -n mereka-lms -o jsonpath='{.status.readyReplicas}'` | ≥ 1 |
+| Endpoints populated | `kubectl get endpoints mfe -n mereka-lms` | Non-empty addresses |
+
+**Repair**: If Caddy routes missing → rebuild MFE image. If endpoints empty → fix service selectors (`scripts/infra/fix-service-selectors.sh`).
+
+### Class 3: Authn Route Mismatch
+
+**Symptom**: Login page returns 404, redirect loop, or CSRF error on tenant domain.
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| ALLOWED_HOSTS | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print([h for h in settings.ALLOWED_HOSTS])"` | All tenant domains present |
+| CSRF_TRUSTED_ORIGINS | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print([o for o in settings.CSRF_TRUSTED_ORIGINS])"` | All tenant HTTPS origins present |
+| SESSION_COOKIE_DOMAIN | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print(settings.SESSION_COOKIE_DOMAIN)"` | `None` (host-only) |
+| OIDC provider active | `./scripts/qa/verify-oidc-provider-configs.sh --env prod` | PASS |
+
+**Repair**: If domain missing from ALLOWED_HOSTS/CSRF → update `apply-patches.sh`, rebuild image. If cookie domain wrong → update settings, restart pods.
+
+---
+
+## One-Command Rollback Procedure (AC-ONB-204)
+
+### Quick rollback: Disable tenant SiteConfiguration
+
+```bash
+# One command — disables the tenant without image rebuild
+TENANT_DOMAIN="newclient.academy.mereka.io"
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "
+from django.contrib.sites.models import Site
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+site = Site.objects.get(domain='${TENANT_DOMAIN}')
+sc = SiteConfiguration.objects.get(site=site)
+sc.enabled = False
+sc.save()
+print(f'DISABLED SiteConfiguration for {site.domain}')
+"
+```
+
+### Post-rollback verification (one command)
+
+```bash
+# Verify all remaining tenants still work
+./scripts/qa/verify-post-deploy-smoke.sh --env prod \
+  --evidence-dir "var/evidence/rollback-$(date +%Y%m%d)"
+```
+
+### Full rollback: Revert code changes
+
+```bash
+# One command — revert last commit and push (ArgoCD auto-syncs)
+git revert HEAD --no-edit && git push origin main
+```
+
+### Rollback checklist output
+
+After every rollback, verify:
+
+- [ ] `verify-post-deploy-smoke.sh --env prod` → PASS (existing tenants unaffected)
+- [ ] `verify-tenant-branding-runtime.sh` → PASS (branding correct on remaining domains)
+- [ ] Domain route smoke → HTTP 200 for all non-rolled-back domains
+- [ ] Evidence captured in `var/evidence/rollback-<YYYYMMDD>/`
+
+---
+
 ## Related Documents
 
 - `infrastructure/tutor/multisite-sites.yml` — Canonical site registry
