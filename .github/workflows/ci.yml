@@ -228,6 +228,7 @@ jobs:
           bash -n scripts/qa/verify-visual-parity-checkpoints.sh
           bash -n scripts/qa/verify-ui-ux-hardening-bundle.sh
           bash -n scripts/qa/verify-multitenant-brand-platform.sh
+          bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
 
       - name: Run local observability audit
         run: |
@@ -1112,3 +1113,15 @@ jobs:
 
       - name: Verify multitenant brand platform (AC-MB-001..006)
         run: ./scripts/qa/verify-multitenant-brand-platform.sh
+
+  tenant-footer-variant-lane:
+    name: Tenant Footer Variant Lane
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
+
+      - name: Verify tenant footer variant lane (AC-TF-001..004)
+        run: ./scripts/qa/verify-tenant-footer-variant-lane.sh
