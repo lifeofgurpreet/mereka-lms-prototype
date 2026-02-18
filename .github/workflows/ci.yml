@@ -240,6 +240,7 @@ jobs:
           bash -n scripts/qa/verify-analytics-key-elimination.sh
           bash -n scripts/qa/verify-token-integrity-routing.sh
           bash -n scripts/qa/verify-selector-to-slot-migration.sh
+          bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
 
       - name: Run local observability audit
         run: |
@@ -1280,3 +1281,20 @@ jobs:
 
       - name: Verify selector-to-slot migration compliance (bead 2dcy.2)
         run: ./scripts/qa/verify-selector-to-slot-migration.sh
+
+  authenticated-smoke-a11y:
+    name: Authenticated Smoke & A11y Gates (AC-FRONT-031..034)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
+
+      - name: Verify authenticated smoke + WCAG AA contrast gates (bead 2dcy.3)
+        run: ./scripts/qa/verify-authenticated-smoke-a11y.sh
