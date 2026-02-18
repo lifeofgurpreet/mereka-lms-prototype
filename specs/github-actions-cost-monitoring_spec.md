@@ -72,6 +72,21 @@ All requirements are expressed as acceptance criteria below with normative langu
 
 ## Acceptance Criteria
 
+- [ ] AC-GAC-001: Given GitHub Actions workflows execute, when workflow runs complete, then total minutes consumed are tracked per workflow and cost is calculated based on runner type (Linux $0.008/min, macOS $0.08/min, Windows $0.016/min).
+- [ ] AC-GAC-002: Given workflows run throughout the day, when end of day (00:00 UTC) is reached, then an automated report is generated showing total minutes by workflow, day cost, month-to-date, projected month-end, and comparison to budget.
+- [ ] AC-GAC-003: Given workflow costs are being tracked, when cost thresholds are exceeded (80% / 100% / 150% of budget), then the appropriate Slack and/or email alerts are sent.
+- [ ] AC-GAC-004: Given workflows are configured, when a workflow job executes, then maximum durations are enforced (5 min for PR checks, 30 min for full verify, 45 min for builds) and jobs exceeding limits fail with a cost warning.
+- [ ] AC-GAC-005: Given workflow execution history, when weekly cost analysis runs, then automated recommendations identify high-cost workflows and suggest optimizations.
+- [ ] AC-GAC-006: Given monthly cost approaches the hard limit, when 95% of budget is consumed, then non-critical workflows are paused and the platform team is notified.
+- [ ] AC-GAC-007: Given Prometheus metrics are configured, when workflows execute, then `github_actions_workflow_duration_seconds`, `github_actions_workflow_cost_usd`, and `github_actions_monthly_budget_consumed_percent` metrics are exported.
+- [ ] AC-GAC-008: Given Grafana is configured, when operators view analytics, then the cost dashboard displays current spend vs budget, daily trend, top 5 expensive workflows, projected month-end cost, and month-over-month comparison.
+- [ ] AC-GAC-009: Given workflow execution history, when cost patterns deviate from normal (>50% day-over-day spike, new workflow >5% of budget, duration >2x), then anomaly alerts are sent to the platform team.
+- [ ] AC-GAC-010: Given repository configuration, when budget is defined via `.github/actions-budget.yml`, then monthly limit, hard limit, alert thresholds, and workflow duration limits are applied correctly.
+- [ ] AC-GAC-011: Given workflows are configured, when cost optimization settings are enabled, then cache strategy, concurrency limits, conditional execution, and self-hosted runner options are applied.
+- [ ] AC-GAC-012: Given workflows execute, when costs are calculated, then the calculated cost matches GitHub's billing within ±5%.
+- [ ] AC-GAC-013: Given a cost threshold is exceeded, when an alert is triggered, then notification is delivered within 5 minutes with current spend, triggering workflow, recommended actions, and dashboard link.
+- [ ] AC-GAC-014: Given cost monitoring is deployed, when operators access Grafana, then the cost dashboard is available at `/dashboards/github-actions-cost` and all panels render without errors.
+
 ### Functional Requirements
 
 #### AC-001: Workflow Cost Tracking

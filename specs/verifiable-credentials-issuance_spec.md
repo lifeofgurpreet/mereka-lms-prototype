@@ -3,6 +3,7 @@ title: "CRED-030: Issuance Flows"
 type: "feature_spec"
 status: "approved"
 owner: "engineering"
+vehicle: "talent_platform"
 last_updated: "2026-02-14"
 version: "1.0.0"
 depends_on:
@@ -10,6 +11,7 @@ depends_on:
   - "specs/verifiable-credentials-issuer_spec.md"
 links:
   related_specs:
+    - "specs/cross-cutting-requirements_spec.md"
     - "specs/verifiable-credentials-verification_spec.md"
 ---
 
@@ -18,6 +20,17 @@ links:
 ## What we're building
 
 The end-to-end flow from "learner earns credential" to "credential stored in wallet and shareable." This covers the Credentials Service issuance pipeline, the Learner Record MFE integration, and the Learner Credential Wallet (LCW) QR claim flow.
+
+## Scope
+
+Credential issuance pipeline, claim token lifecycle, Learner Record MFE integration, LinkedIn sharing, and OpenID4VCI readiness groundwork.
+
+## Non-goals
+
+- Credential revocation (deferred to v2)
+- Blockchain or decentralised storage
+- Native mobile wallet SDK integration (separate spec)
+- Bulk credential import from external systems
 
 ## Requirements
 

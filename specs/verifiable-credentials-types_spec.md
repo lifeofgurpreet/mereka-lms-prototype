@@ -3,6 +3,7 @@ title: "CRED-010: Credential Types & Mapping"
 type: "feature_spec"
 status: "approved"
 owner: "engineering"
+vehicle: "talent_platform"
 last_updated: "2026-02-14"
 version: "1.0.0"
 depends_on:
@@ -12,6 +13,7 @@ links:
   supersedes:
     - "specs/archive/badges-credentials-enterprise_spec.md.SUPERSEDED"
   related_specs:
+    - "specs/cross-cutting-requirements_spec.md"
     - "specs/verifiable-credentials-issuer_spec.md"
     - "specs/verifiable-credentials-issuance_spec.md"
     - "specs/verifiable-credentials-verification_spec.md"
@@ -48,6 +50,14 @@ No vendor fees. No Badgr. No Credly. Self-issued, self-hosted, standards-complia
 - Badge marketplace / cross-tenant badge discovery
 - Gamification (points, leaderboards)
 - Mobile app credential display (separate spec)
+
+## Non-goals
+
+- Blockchain anchoring or decentralised ledger integration
+- Revocation support (deferred to v2 via StatusList2021)
+- Badge marketplace or cross-tenant discovery
+- Gamification (points, leaderboards)
+- Mobile app credential display UI
 
 ---
 
