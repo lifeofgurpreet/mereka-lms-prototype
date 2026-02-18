@@ -204,6 +204,7 @@ jobs:
           bash -n scripts/qa/verify-superset-runbook.sh
           bash -n scripts/qa/verify-analytics-drift-guardrails.sh
           bash -n scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
+          bash -n scripts/qa/verify-analytics-key.sh
 
       - name: Run local observability audit
         run: |
@@ -647,3 +648,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check MFE-first policy compliance
         run: ./scripts/qa/verify-mfe-first-policy.sh
+
+  analytics-key-guard:
+    name: Analytics Key Injection Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify analytics key injection safety
+        run: ./scripts/qa/verify-analytics-key.sh
