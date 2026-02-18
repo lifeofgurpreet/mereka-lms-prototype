@@ -232,6 +232,7 @@ jobs:
           bash -n scripts/qa/verify-multitenant-brand-platform.sh
           bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
           bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
+          bash -n scripts/qa/verify-module-surface-validation.sh
 
       - name: Run local observability audit
         run: |
@@ -1148,6 +1149,18 @@ jobs:
           name: mfe-analytics-parity-gate
           path: var/
           if-no-files-found: ignore
+
+  module-surface-validation:
+    name: Module Surface Validation Pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-module-surface-validation.sh
+
+      - name: Verify module surface validation (AC-MOD-001..005)
+        run: ./scripts/qa/verify-module-surface-validation.sh
 
   release-deployment-choreography:
     name: Release Deployment Choreography (AC-DEP-001..004)
