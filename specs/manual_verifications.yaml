@@ -1263,3 +1263,1854 @@ entries:
   - type: monitoring
     metric: video_delivery_minutes_monthly
     dashboard: grafana://dashboards/video-cost
+# ---------------------------------------------------------------------------
+# Entries added by bead-1jci: spec coverage cleanup (2026-02-18)
+# ---------------------------------------------------------------------------
+# advanced-assessment-xqueue_spec.md — all 44 ACs (none previously covered)
+- id: AC-001
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 rubric configuration with 3 criteria, 4 options each, peer assessment 3 reviews required
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 Configuration
+    justification: Feature not yet implemented; requires Studio UI interaction and live course data
+- id: AC-002
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 peer grading — median score computed from 3 peer reviews displayed on submission page
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 Peer Grading
+    justification: Feature not yet implemented; requires populated peer review data in running LMS
+- id: AC-003
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 file upload — PDF up to 10 MB stored at /openedx/data/ora2/
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 File Upload
+    justification: Feature not yet implemented; requires live LMS with student session
+- id: AC-004
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 file upload — .exe upload rejected with validation error
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 File Upload Validation
+    justification: Feature not yet implemented; requires live LMS with student session
+- id: AC-005
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 rubric locked after first submission — Studio prevents modification
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 Rubric Locking
+    justification: Feature not yet implemented; requires Studio UI with active submissions
+- id: AC-006
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 peer calibration required before peer grading starts
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 Calibration
+    justification: Feature not yet implemented; requires live LMS with calibration configured
+- id: AC-007
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA Grading MFE displays 10 submissions in queue ordered by submission time
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA Grading MFE
+    justification: Feature not yet implemented; requires live MFE deployment with submissions
+- id: AC-008
+  spec: advanced-assessment-xqueue_spec.md
+  description: Staff grader submits grade via ORA Grading MFE and next submission loads
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA Grading MFE
+    justification: Feature not yet implemented; requires live MFE with authenticated staff session
+- id: AC-009
+  spec: advanced-assessment-xqueue_spec.md
+  description: Staff-submitted ORA2 grade appears in gradebook within 5 minutes
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 Gradebook Sync
+    justification: Feature not yet implemented; requires live LMS with gradebook integration
+- id: AC-010
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam with 60-minute countdown timer — no proctoring prompts
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exams
+    justification: Feature not yet implemented; requires live LMS with timed exam configured
+- id: AC-011
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam — accessible warning at 5 minutes remaining
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exams
+    justification: Feature not yet implemented; requires live LMS with running timed exam
+- id: AC-012
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam auto-submitted at 0:00 with "Time expired" message
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exam Auto-Submit
+    justification: Feature not yet implemented; requires live LMS with timer reaching zero
+- id: AC-013
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam — read-only view after auto-submit, cannot modify responses
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exam Post-Submit
+    justification: Feature not yet implemented; requires live LMS with auto-submitted exam
+- id: AC-014
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam — 30-minute extension results in 90 minutes total
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exam Extensions
+    justification: Feature not yet implemented; requires live LMS with instructor-granted extension
+- id: AC-015
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam — grade released immediately on early submit (no proctoring hold)
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exam Grading
+    justification: Feature not yet implemented; requires live LMS with timed exam grading
+- id: AC-016
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue code grader executes Python in sandbox and returns grade within 30 seconds
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Grader Verification
+    justification: Feature not yet implemented; requires XQueue service with grader worker deployed
+- id: AC-017
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader terminates infinite loop after CPU time limit with timeout message
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Security Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with sandbox configured
+- id: AC-018
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader blocks os.system("rm -rf /") with security violation message
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Security Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with seccomp/syscall filtering
+- id: AC-019
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue submission requeued after grader crash (visibility timeout expiry)
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Queue Resilience
+    justification: Feature not yet implemented; requires XQueue with configurable visibility timeout
+- id: AC-020
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grade scaled to problem's maximum points in gradebook within 5 minutes
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Gradebook Integration
+    justification: Feature not yet implemented; requires live LMS with XQueue grader integration
+- id: AC-021
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader terminates 256MB array allocation with memory limit message
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Memory Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with memory limit enforcement
+- id: AC-022
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader blocks fork bomb via seccomp syscall filtering
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Security Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with seccomp profile
+- id: AC-023
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader blocks network access with "Network access is not permitted" message
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Network Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with network namespace isolation
+- id: AC-024
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader restricts file reads to /tmp and submission directory only
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Filesystem Sandbox
+    justification: Feature not yet implemented; requires XQueue grader with filesystem restrictions
+- id: AC-025
+  spec: advanced-assessment-xqueue_spec.md
+  description: XQueue grader environment contains only PATH, HOME — no secrets in os.environ
+  verify:
+  - type: manual
+    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    section: XQueue Secret Isolation
+    justification: Feature not yet implemented; requires XQueue grader with minimal env vars
+- id: AC-026
+  spec: advanced-assessment-xqueue_spec.md
+  description: Drag-and-drop v2 and math expression input available in Studio component picker
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Advanced Components
+    justification: Feature not yet implemented; requires Studio with advanced components installed
+- id: AC-027
+  spec: advanced-assessment-xqueue_spec.md
+  description: Drag-and-drop v2 — keyboard-only navigation places all items correctly
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Drag-and-Drop Accessibility
+    justification: Feature not yet implemented; requires live LMS with drag-and-drop configured
+- id: AC-028
+  spec: advanced-assessment-xqueue_spec.md
+  description: Math expression grader marks (x+1)^2 as correct for x^2+2x+1
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Math Expression Grading
+    justification: Feature not yet implemented; requires live LMS with SymPy-based grader
+- id: AC-029
+  spec: advanced-assessment-xqueue_spec.md
+  description: Randomized problem pool of 20 shows different 10 to each student
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Randomized Assessments
+    justification: Feature not yet implemented; requires live LMS with randomized problem pool
+- id: AC-030
+  spec: advanced-assessment-xqueue_spec.md
+  description: Randomized question order — two students see questions in different order
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Randomized Question Order
+    justification: Feature not yet implemented; requires live LMS with order randomization configured
+- id: AC-031
+  spec: advanced-assessment-xqueue_spec.md
+  description: Answer shuffling — two students see answer options in different order
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Answer Shuffling
+    justification: Feature not yet implemented; requires live LMS with answer shuffling enabled
+- id: AC-032
+  spec: advanced-assessment-xqueue_spec.md
+  description: One-at-a-time display — questions 1 and 2 not accessible after reaching question 3
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: One-at-a-Time Exams
+    justification: Feature not yet implemented; requires live LMS with one-at-a-time mode
+- id: AC-033
+  spec: advanced-assessment-xqueue_spec.md
+  description: max_attempts=1 — submit button disabled after first attempt
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Attempt Limits
+    justification: Feature not yet implemented; requires live LMS with attempt limit set
+- id: AC-034
+  spec: advanced-assessment-xqueue_spec.md
+  description: Weighted grade (ORA2 20%, timed exam 40%, standard 40%) computed correctly
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Grade Weighting
+    justification: Feature not yet implemented; requires live LMS with all three graded components
+- id: AC-035
+  spec: advanced-assessment-xqueue_spec.md
+  description: Grade override from 70% to 85% reflected in gradebook with audit log
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Grade Overrides
+    justification: Feature not yet implemented; requires live LMS with instructor grade override
+- id: AC-036
+  spec: advanced-assessment-xqueue_spec.md
+  description: Bulk grade export CSV for 500-student course with required columns
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Bulk Grade Export
+    justification: Feature not yet implemented; requires live LMS with course enrollment data
+- id: AC-037
+  spec: advanced-assessment-xqueue_spec.md
+  description: Bulk regrade of 2000 submissions runs async without LMS degradation
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Bulk Regrade
+    justification: Feature not yet implemented; requires live LMS with 2000 submissions
+- id: AC-038
+  spec: advanced-assessment-xqueue_spec.md
+  description: Bulk CSV grade override imports 100 students with audit log per entry
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Bulk Grade Import
+    justification: Feature not yet implemented; requires live LMS with bulk import capability
+- id: AC-039
+  spec: advanced-assessment-xqueue_spec.md
+  description: Bulk regrade shows progress percentage and estimated time remaining
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Bulk Regrade Progress
+    justification: Feature not yet implemented; requires live LMS with async regrade job
+- id: AC-040
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 rubric displays Malay labels for user with Malay language preference
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 i18n
+    justification: Feature not yet implemented; requires live LMS with Malay translation configured
+- id: AC-041
+  spec: advanced-assessment-xqueue_spec.md
+  description: Timed exam timer announces "1 minute remaining" via ARIA live region for screen readers
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Timed Exam Accessibility
+    justification: Feature not yet implemented; requires live LMS with screen reader testing
+- id: AC-042
+  spec: advanced-assessment-xqueue_spec.md
+  description: Drag-and-drop v2 keyboard navigation — Tab to navigate, Enter/Space to drop
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Drag-and-Drop Keyboard Access
+    justification: Feature not yet implemented; requires live LMS with keyboard-only user testing
+- id: AC-043
+  spec: advanced-assessment-xqueue_spec.md
+  description: ORA2 final staff grade triggers email notification within 10 minutes
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: ORA2 Email Notifications
+    justification: Feature not yet implemented; requires live LMS with email pipeline configured
+- id: AC-044
+  spec: advanced-assessment-xqueue_spec.md
+  description: show_correctness=past_due — "Answer submitted" before due, correct answer shown after
+  verify:
+  - type: manual
+    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    section: Show Correctness Policy
+    justification: Feature not yet implemented; requires live LMS with show_correctness configured
+# ci-cd-pipeline_spec.md — missing ACs (INT-004, AC-003, AC-004)
+- id: AC-INT-004
+  spec: ci-cd-pipeline_spec.md
+  description: Given branding assets are synced via apply-patches.sh, when CI builds openedx image, then branding-preflight.sh
+    passes and verifies Mereka logo presence and Google Fonts absence in compiled artifacts
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Branding Preflight Verification
+    justification: Requires active GitHub Actions runner building the full openedx Docker image; cannot run image build in CI
+      without Docker-in-Docker
+    file: scripts/branding/run-branding-gates.sh
+- id: AC-003
+  spec: ci-cd-pipeline_spec.md
+  description: Given the lint job runs, when Python files in scripts/ or services/ have ruff violations, then the job fails
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: Quality Gates Verification
+    justification: Ruff lint gate is verified by running the CI workflow; individual Python files can be checked locally with
+      ruff check scripts/ services/
+    file: N/A
+- id: AC-004
+  spec: ci-cd-pipeline_spec.md
+  description: Given the validate-k8s job runs, when any YAML in deploy/k8s/ is not a valid Kubernetes manifest, then kubeconform
+    fails the job
+  verify:
+  - type: manual
+    runbook: docs/operations/CI_CD_RUNBOOK.md
+    section: K8s Validation Verification
+    justification: kubeconform gate is verified by running the CI workflow; manifest validation requires kubeconform binary
+      not present in all local environments
+    file: N/A
+# data-migrations-kajabi-mct_spec.md — missing AC-039
+- id: AC-039
+  spec: data-migrations-kajabi-mct_spec.md
+  description: Given the Kajabi webhook receiver is running, when a GET /healthz request is made, then the service MUST return
+    {"status":"ok"} with HTTP 200 if KAJABI_WEBHOOK_SECRET is configured
+  verify:
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: Kajabi Webhook Health Check
+    justification: Requires running webhook service with KAJABI_WEBHOOK_SECRET set; not deployable in stateless CI
+# data-privacy-gdpr-compliance_spec.md — all ACs (none previously covered)
+- id: AC-001
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PII registry validation tool flags zero unregistered PII fields and zero registry entries reference non-existent fields
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: PII Registry Validation
+    justification: Feature not yet implemented; PII registry and validation tool not yet created
+- id: AC-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: CI pipeline requires PII registry update when migration adds PII field
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: PII Registry CI Gate
+    justification: Feature not yet implemented; CI PII gate not yet created
+- id: AC-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: New user registration creates consent records for all mandatory and optional purposes per user selection
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Record Creation
+    justification: Feature not yet implemented; consent management system not yet deployed
+- id: AC-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Authenticated user at /account/privacy/ can view and toggle non-essential consents
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy Preferences UI
+    justification: Feature not yet implemented; privacy preferences UI not yet built
+- id: AC-005
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Analytics consent withdrawal stops event collection within 24h with audit entry
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Withdrawal
+    justification: Feature not yet implemented; analytics consent gating not yet implemented
+- id: AC-006
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: EU user sees cookie consent banner on first visit; no non-essential cookies before consent
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Cookie Consent Banner
+    justification: Feature not yet implemented; geo-targeted cookie banner not yet deployed
+- id: AC-007
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Analytics cookie revocation clears cookies and deactivates tracking pixel on next page load
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Cookie Revocation
+    justification: Feature not yet implemented; cookie consent revocation flow not yet built
+- id: AC-008
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion request via POST /api/v1/privacy/deletion-request/ begins processing within 48 hours
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure
+    justification: Feature not yet implemented; deletion request API not yet created
+- id: AC-009
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion pipeline anonymizes email, username, profile; deletes forum author, profile image, Redis sessions,
+    ClickHouse events, Purchase Gateway PII
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Deletion Pipeline Execution
+    justification: Feature not yet implemented; deletion pipeline not yet built
+- id: AC-010
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion pipeline produces cryptographic proof document with action per data store and valid signature
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Deletion Proof
+    justification: Feature not yet implemented; cryptographic deletion proof not yet implemented
+- id: AC-011
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion pipeline retains financial records within 7-year retention period with legal basis noted
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Retention-Based Deletion
+    justification: Feature not yet implemented; legal retention hold in deletion pipeline not yet built
+- id: AC-012
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion pipeline partial failure (MongoDB error) transitions request to partially_completed and fires alert
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Deletion Failure Handling
+    justification: Feature not yet implemented; partial failure handling in deletion pipeline not yet built
+- id: AC-013
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export request via POST /api/v1/privacy/export-request/ produces ZIP with all required files
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Data Portability
+    justification: Feature not yet implemented; export request API not yet created
+- id: AC-014
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export archive is encrypted and download link expires after 48 hours
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Export Security
+    justification: Feature not yet implemented; encrypted export with expiring link not yet built
+- id: AC-015
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Fourth export request within 30 days rejected with HTTP 429 and rate limit message
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Export Rate Limiting
+    justification: Feature not yet implemented; export rate limiter not yet built
+- id: AC-016
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Account inactive 18 months triggers reminder email warning of deletion at 24 months
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Enforcement
+    justification: Feature not yet implemented; retention enforcement job not yet created
+- id: AC-017
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Account inactive 24 months with no response to reminder enters deletion pipeline
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Enforcement
+    justification: Feature not yet implemented; automatic account deletion after 24 months not yet built
+- id: AC-018
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: ClickHouse events older than 365 days dropped by retention enforcement job
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: ClickHouse Retention
+    justification: Feature not yet implemented; ClickHouse partition TTL retention not yet configured
+- id: AC-019
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Loki log entries older than 30 days no longer queryable after retention policy executes
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Loki Retention
+    justification: Loki retention period needs periodic verification against configured retention; cannot automate without
+      time-travel testing
+- id: AC-020
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Audit trail entry created within 1 second with integrity hash linking to previous entry for any consent/deletion/export/breach
+    event
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Audit Trail
+    justification: Feature not yet implemented; append-only audit trail with hash chain not yet built
+- id: AC-021
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Audit trail integrity verification tool validates complete hash chain with zero broken links
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Audit Trail Integrity
+    justification: Feature not yet implemented; hash chain verification tool not yet built
+- id: AC-022
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: GCS copy of audit trail provides evidence of original entry when database entry is tampered
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Audit Trail GCS Backup
+    justification: Feature not yet implemented; GCS audit trail replication not yet configured
+- id: AC-023
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PII leakage scanner creates breach_detected audit entry and Warning alert on raw email in Loki
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: PII Leakage Scanning
+    justification: Feature not yet implemented; Loki PII leakage scanner not yet built
+- id: AC-024
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Confirmed breach >100 users auto-populates breach notification template with authority contact list
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Breach Notification
+    justification: Feature not yet implemented; breach notification workflow not yet built
+- id: AC-025
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PII leakage scanner flags Loki log lines matching raw email pattern
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: PII Leakage Scanning
+    justification: Feature not yet implemented; Loki PII log scanner not yet created
+- id: AC-026
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PII scanner flags unhashed email in ClickHouse xapi_events_all as critical leakage
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: ClickHouse PII Scanning
+    justification: Feature not yet implemented; ClickHouse schema PII scanner not yet built
+- id: AC-027
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Compliance dashboard GET /api/v1/privacy/compliance/consent-coverage/ returns percentage per purpose
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Compliance Dashboard
+    justification: Feature not yet implemented; compliance dashboard API not yet created
+- id: AC-028
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Compliance dashboard shows pending deletion requests with status, elapsed time, SLA compliance
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Compliance Dashboard
+    justification: Feature not yet implemented; deletion request SLA tracking not yet built
+- id: AC-029
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Analytics pipeline drops events for users who have withdrawn analytics consent before reaching ClickHouse
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent-Gated Analytics
+    justification: Feature not yet implemented; consent-gated analytics event filtering not yet built
+- id: AC-030
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Tenant offboarding processes all tenant user data through deletion or export pipeline per DPA terms
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Tenant Offboarding
+    justification: Feature not yet implemented; tenant offboarding data pipeline not yet built
+- id: AC-031
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Data processing agreements for all third-party processors listed in processor registry
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Third-Party DPA Registry
+    justification: Legal/operational verification; DPA registry maintained manually by privacy team
+- id: AC-032
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy impact assessment completed for all new features processing PII
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy Impact Assessment
+    justification: Organizational process; PIA completion verified during feature review, not automatable
+- id: AC-033
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent banner A/B test — variant with detailed purpose explanations increases opt-in rate
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Banner Optimization
+    justification: Feature not yet implemented; A/B testing infrastructure for consent banner not yet built
+- id: AC-034
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent management platform integrates with OneTrust for DPIA workflow
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: OneTrust Integration
+    justification: Feature not yet implemented; OneTrust integration not yet scoped
+- id: AC-035
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Cross-border data transfer mechanisms documented (SCCs) for Atlas US cluster
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Cross-Border Data Transfers
+    justification: Legal/operational verification; SCC documentation maintained by legal team
+- id: AC-036
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy notice updated within 30 days of any material change to data processing
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy Notice Updates
+    justification: Organizational process; privacy notice update cadence verified by privacy team
+- id: AC-037
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Annual privacy training completion rate >= 95% of staff who access personal data
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy Training
+    justification: Organizational process; training completion tracked in HR system, not automatable
+- id: AC-038
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Quarterly internal privacy audit covers all data flows and processing activities
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy Audit
+    justification: Organizational process; audit results documented in privacy register by DPO
+- id: AC-039
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Supervisory authority contact details maintained and verified quarterly
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Supervisory Authority Contacts
+    justification: Operational process; contact list maintained by privacy team, verified manually
+- id: AC-040
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Personal data inventory covers all databases, third-party processors, and backup systems
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Personal Data Inventory
+    justification: Organizational process; inventory maintained by privacy team and updated quarterly
+- id: AC-041
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: All staff accessing personal data have signed confidentiality agreements
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Staff Confidentiality
+    justification: HR/legal process; confidentiality agreement tracking maintained by HR system
+- id: AC-042
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Access controls reviewed and revalidated quarterly; stale access removed within 5 business days
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Access Control Review
+    justification: Operational process; quarterly access review conducted by security team
+- id: AC-043
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Backup encryption verified; restore test confirms data is accessible only with valid key
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Backup Encryption Verification
+    justification: Requires restore test from encrypted backup; conducted during quarterly DR drills
+- id: AC-044
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Vulnerability management — critical CVEs patched within 7 days, high within 30 days
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Vulnerability Management
+    justification: Operational process; patch cadence tracked in vulnerability management system
+- id: AC-045
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Penetration test conducted annually; findings remediated within agreed timeline
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Penetration Testing
+    justification: Annual engagement with third-party pen tester; results reviewed by security team
+- id: AC-046
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Security incident response plan tested annually with tabletop exercise
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Incident Response Testing
+    justification: Organizational process; tabletop exercise conducted annually with documented outcomes
+- id: AC-047
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy by design checklist completed for all new product features
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy by Design
+    justification: Product process; checklist completion verified during feature design review
+- id: AC-048
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Records of processing activities (ROPA) maintained and reviewed semi-annually
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: ROPA Maintenance
+    justification: Legal process; ROPA maintained by DPO and reviewed semi-annually
+- id: AC-049
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Data subject request portal accessible at /privacy/requests/ with form validation
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Portal
+    justification: Feature not yet implemented; data subject request portal not yet built
+- id: AC-050
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Data subject identity verification required before processing deletion or export request
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Identity Verification for DSRs
+    justification: Feature not yet implemented; DSR identity verification flow not yet built
+- id: AC-051
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: DSR status updates sent to data subject by email at each state transition
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: DSR Status Notifications
+    justification: Feature not yet implemented; DSR email notification pipeline not yet built
+- id: AC-052
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: DSR processing time tracked; alert fires if request approaches 30-day SLA
+  verify:
+  - type: monitoring
+    metric: dsr_processing_days
+    dashboard: grafana://dashboards/privacy-compliance
+- id: AC-053
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent withdrawal for analytics reflected in real-time event filtering within 1 minute
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Real-Time Consent Enforcement
+    justification: Feature not yet implemented; real-time consent propagation to event pipeline not yet built
+- id: AC-054
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Cross-tenant PII isolation — tenant A admin cannot query tenant B user data via privacy APIs
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Cross-Tenant Privacy Isolation
+    justification: Feature not yet implemented; tenant-scoped privacy API not yet built
+- id: AC-055
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy API rate limiting — 10 requests/minute per authenticated user
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy API Rate Limiting
+    justification: Feature not yet implemented; rate limiter for privacy API not yet configured
+- id: AC-056
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: All privacy API endpoints require authentication; unauthenticated requests return HTTP 401
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy API Authentication
+    justification: Feature not yet implemented; privacy API endpoints not yet created
+- id: AC-057
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion pipeline idempotent — re-running for already-deleted user does not produce errors
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Deletion Pipeline Idempotency
+    justification: Feature not yet implemented; idempotent deletion pipeline not yet built
+- id: AC-058
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export archive contains README.md explaining each file's contents and data schema
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Export Archive Documentation
+    justification: Feature not yet implemented; export archive documentation not yet written
+- id: AC-059
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PII fields in logs masked or omitted per structured logging policy
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Log PII Masking
+    justification: Requires inspection of structured logs in Loki for PII field patterns; not automatable without live log data
+- id: AC-060
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Database column-level encryption applied to highest-sensitivity PII fields
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Column-Level Encryption
+    justification: Feature not yet implemented; column-level encryption for PII not yet scoped
+- id: AC-061
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy engineering review required for all database schema changes adding PII columns
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Schema Change Review
+    justification: Organizational process; privacy engineering review enforced via PR template
+- id: AC-062
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent records retained for 7 years after consent was given or withdrawn
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Record Retention
+    justification: Feature not yet implemented; consent record retention policy not yet configured
+- id: AC-063
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion proof documents retained for 5 years for audit purposes
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Deletion Proof Retention
+    justification: Feature not yet implemented; deletion proof retention configuration not yet set
+- id: AC-064
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy compliance status dashboard summarises open DSRs, consent coverage, and breach history
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Privacy Compliance Dashboard
+    justification: Feature not yet implemented; privacy compliance dashboard not yet built
+- id: AC-065
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Annual privacy report submitted to management covering DSR volumes, breach incidents, and training completion
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Annual Privacy Report
+    justification: Organizational process; annual report prepared by DPO and submitted to management
+# disaster-recovery-business-continuity_spec.md — missing AC-024, AC-025, AC-026
+- id: AC-024
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Given quarterly restore drill schedule, when documented, then it MUST specify drill cadence (quarterly), responsible
+    team, notification window (1 week advance), and success criteria
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: Quarterly Restore Drill Schedule
+    justification: Requires documented drill schedule with all required fields; verified during quarterly DR planning cycle
+- id: AC-025
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Given Terraform/Kustomize configs exist, when kubectl kustomize deploy/k8s/overlays/production runs, then it
+    produces valid manifests deployable to any GKE cluster
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: Cluster Rebuild from Config
+    justification: Full cluster rebuild validation requires a target GKE cluster; kustomize build validates structure but
+      not full deployability without a live cluster
+    file: scripts/infra/fix-service-selectors.sh
+- id: AC-026
+  spec: disaster-recovery-business-continuity_spec.md
+  description: Given Velero backups are stored in GCS, when the backup bucket is inspected, then it is configured for multi-region
+    storage or cross-region replication
+  verify:
+  - type: manual
+    runbook: docs/operations/DISASTER_RECOVERY.md
+    section: Cross-Region Readiness Verification
+    justification: GCS bucket multi-region verification requires gcloud auth; verified during Phase 3 implementation and quarterly
+      DR review
+# ecommerce-purchase-gateway_spec.md — missing AC-034
+- id: AC-034
+  spec: ecommerce-purchase-gateway_spec.md
+  description: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare
+    proxy)
+  verify:
+  - type: manual
+    runbook: docs/operations/PURCHASE_GATEWAY_RUNBOOK.md
+    section: SSL Configuration Verification
+    justification: SSL mode is configured at DNS level (Cloudflare dashboard); not inspectable via Kubernetes manifests alone
+# email-notifications-pipeline_spec.md — missing ACs 003 through 045 (001, 002 already covered)
+- id: AC-003
+  spec: email-notifications-pipeline_spec.md
+  description: Password reset email delivered via SES within 30 seconds with From noreply@academyv2.mereka.io
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: ACE Pipeline Verification
+    justification: Feature not yet implemented; ACE email pipeline with SES not yet deployed
+- id: AC-004
+  spec: email-notifications-pipeline_spec.md
+  description: Custom MAIL FROM domain mail.academyv2.mereka.io aligns envelope and header sender (DMARC pass)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: DMARC Alignment Verification
+    justification: Requires sending actual test emails through SES with DMARC verification
+- id: AC-005
+  spec: email-notifications-pipeline_spec.md
+  description: Enterprise tenant org_slug=acme — From shows "Acme Corp via Mereka Academy" with correct sender
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Enterprise Tenant Email Branding
+    justification: Feature not yet implemented; per-tenant email branding not yet built
+- id: AC-006
+  spec: email-notifications-pipeline_spec.md
+  description: ACE dispatches to django_email, push, in_app channels for course_announcement
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Multi-Channel Dispatch
+    justification: Feature not yet implemented; ACE multi-channel pipeline not yet deployed
+- id: AC-007
+  spec: email-notifications-pipeline_spec.md
+  description: User with email disabled for course_announcement gets push and in_app but no email
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Channel Preference Enforcement
+    justification: Feature not yet implemented; preference-based channel filtering not yet built
+- id: AC-008
+  spec: email-notifications-pipeline_spec.md
+  description: password_reset email sent even when user has disabled all channels (system-critical)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Non-Suppressible System Emails
+    justification: Feature not yet implemented; non-suppressible email category not yet implemented
+- id: AC-009
+  spec: email-notifications-pipeline_spec.md
+  description: 100 ACE messages enqueued simultaneously all dispatched within 60 seconds via Celery
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Celery Queue Throughput
+    justification: Feature not yet implemented; requires running Celery workers with load test
+- id: AC-010
+  spec: email-notifications-pipeline_spec.md
+  description: GET /api/notifications/v1/unread-count/ returns correct count with p95 <= 100ms
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Notification API Verification
+    justification: Feature not yet implemented; in-app notification API not yet deployed
+- id: AC-011
+  spec: email-notifications-pipeline_spec.md
+  description: Notification list filtered by read=false returns only 20 unread, sorted by created_at descending
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Notification List Filtering
+    justification: Feature not yet implemented; in-app notification list API not yet deployed
+- id: AC-012
+  spec: email-notifications-pipeline_spec.md
+  description: Expired notification (expires_at in past) excluded from notification list response
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Notification Expiry
+    justification: Feature not yet implemented; notification expiry enforcement not yet built
+- id: AC-013
+  spec: email-notifications-pipeline_spec.md
+  description: POST /api/notifications/v1/mark-all-read/ sets unread count to 0
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Mark All Read
+    justification: Feature not yet implemented; mark-all-read API endpoint not yet created
+- id: AC-014
+  spec: email-notifications-pipeline_spec.md
+  description: Notification list for tenant acme shows only acme notifications (no cross-tenant leakage)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Tenant Notification Isolation
+    justification: Feature not yet implemented; tenant-scoped notification query not yet implemented
+- id: AC-015
+  spec: email-notifications-pipeline_spec.md
+  description: FCM push notification delivered within 60 seconds after grade_posted trigger
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Push Notification Delivery
+    justification: Feature not yet implemented; FCM push notification pipeline not yet deployed
+- id: AC-016
+  spec: email-notifications-pipeline_spec.md
+  description: Device with FCM UNREGISTERED token marked is_active=false; no further pushes sent
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Device Token Cleanup
+    justification: Feature not yet implemented; FCM token deregistration handling not yet built
+- id: AC-017
+  spec: email-notifications-pipeline_spec.md
+  description: Deleted device token after logout — no push notification sent to deregistered device
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Device Token Deregistration
+    justification: Feature not yet implemented; logout-triggered device deregistration not yet implemented
+- id: AC-018
+  spec: email-notifications-pipeline_spec.md
+  description: 1000 push notifications batched into groups of up to 500 (2 FCM API calls, not 1000)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: FCM Batch Sending
+    justification: Feature not yet implemented; FCM batch sender not yet implemented
+- id: AC-019
+  spec: email-notifications-pipeline_spec.md
+  description: Push notification for org_slug=acme delivered only to acme devices (no cross-tenant delivery)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Tenant Push Isolation
+    justification: Feature not yet implemented; tenant-scoped push dispatch not yet built
+- id: AC-020
+  spec: email-notifications-pipeline_spec.md
+  description: New user default preferences returned (all enabled except bulk_campaign email disabled)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Default Notification Preferences
+    justification: Feature not yet implemented; notification preferences API not yet created
+- id: AC-021
+  spec: email-notifications-pipeline_spec.md
+  description: User disables email for discussion_reply — no email sent but push and in_app still sent
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Preference-Based Dispatch
+    justification: Feature not yet implemented; per-channel preference enforcement not yet built
+- id: AC-022
+  spec: email-notifications-pipeline_spec.md
+  description: One-click unsubscribe link disables bulk_campaign and course_announcement email without login
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: One-Click Unsubscribe
+    justification: Feature not yet implemented; one-click unsubscribe via signed token not yet built
+- id: AC-023
+  spec: email-notifications-pipeline_spec.md
+  description: Preference change audit log contains user_id, old_value, new_value, consent_version, ip_address_hash, timestamp
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Preference Audit Log
+    justification: Feature not yet implemented; preference change audit logging not yet built
+- id: AC-024
+  spec: email-notifications-pipeline_spec.md
+  description: bulk_campaign email contains List-Unsubscribe and List-Unsubscribe-Post headers
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Bulk Campaign Headers
+    justification: Feature not yet implemented; bulk campaign email headers not yet configured
+- id: AC-025
+  spec: email-notifications-pipeline_spec.md
+  description: User with language_preference=ms receives enrollment_confirmation email in Malay
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Multilingual Email Templates
+    justification: Feature not yet implemented; Malay email templates not yet created
+- id: AC-026
+  spec: email-notifications-pipeline_spec.md
+  description: User with language_preference=zh-hans receives grade_posted email in Simplified Chinese
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Multilingual Email Templates
+    justification: Feature not yet implemented; Simplified Chinese email templates not yet created
+- id: AC-027
+  spec: email-notifications-pipeline_spec.md
+  description: User with language_preference=ja (unsupported) falls back to English template
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Language Fallback
+    justification: Feature not yet implemented; language fallback logic in email templates not yet built
+- id: AC-028
+  spec: email-notifications-pipeline_spec.md
+  description: Tenant org_slug=acme email template shows "Acme Corp" as org name with tenant logo URL
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Tenant Email Branding
+    justification: Feature not yet implemented; tenant-branded email template rendering not yet built
+- id: AC-029
+  spec: email-notifications-pipeline_spec.md
+  description: Bulk campaign scheduled for 10000 recipients starts at scheduled time and completes within 30 minutes
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Bulk Campaign Scheduling
+    justification: Feature not yet implemented; scheduled bulk campaign dispatch not yet built
+- id: AC-030
+  spec: email-notifications-pipeline_spec.md
+  description: Bulk campaign pause stops sending and resumes from next unsent recipient when resumed
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Bulk Campaign Pause/Resume
+    justification: Feature not yet implemented; campaign pause/resume control not yet built
+- id: AC-031
+  spec: email-notifications-pipeline_spec.md
+  description: Bulk campaign to 10000 recipients skips 500 opted-out users; metrics report 500 skipped
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Bulk Campaign Opt-Out Enforcement
+    justification: Feature not yet implemented; opt-out enforcement in bulk campaign dispatch not yet built
+- id: AC-032
+  spec: email-notifications-pipeline_spec.md
+  description: Simultaneous bulk campaigns from two tenants each stay within 50 emails/second per tenant
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Per-Tenant Rate Limiting
+    justification: Feature not yet implemented; per-tenant SES rate limiting not yet implemented
+- id: AC-033
+  spec: email-notifications-pipeline_spec.md
+  description: SES hard bounce adds address to suppression list; subsequent sends to that address blocked
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Bounce Handling
+    justification: Feature not yet implemented; SES bounce webhook processing not yet built
+- id: AC-034
+  spec: email-notifications-pipeline_spec.md
+  description: Three soft bounces within 7 days adds address to suppression list as hard bounce
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Soft Bounce Accumulation
+    justification: Feature not yet implemented; soft bounce accumulation logic not yet implemented
+- id: AC-035
+  spec: email-notifications-pipeline_spec.md
+  description: SES complaint for bulk_campaign disables user email preference and adds to suppression list
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Complaint Handling
+    justification: Feature not yet implemented; SES complaint webhook processing not yet built
+- id: AC-036
+  spec: email-notifications-pipeline_spec.md
+  description: SES bounce rate >5% fires critical alert to ops team
+  verify:
+  - type: monitoring
+    metric: ses_bounce_rate
+    dashboard: grafana://dashboards/email-notifications
+- id: AC-037
+  spec: email-notifications-pipeline_spec.md
+  description: User with daily digest for discussion_reply receives one digest at 09:00 local time summarising 10 replies
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Daily Digest Delivery
+    justification: Feature not yet implemented; digest scheduler and aggregator not yet built
+- id: AC-038
+  spec: email-notifications-pipeline_spec.md
+  description: Daily digest for course_announcement — no immediate email sent; announcement in next digest
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Digest Batching
+    justification: Feature not yet implemented; digest batching suppressing immediate email not yet built
+- id: AC-039
+  spec: email-notifications-pipeline_spec.md
+  description: Five replies to same thread in one digest period shown as one entry with "(5 new replies)"
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Digest Thread Grouping
+    justification: Feature not yet implemented; thread grouping in digest render not yet implemented
+- id: AC-040
+  spec: email-notifications-pipeline_spec.md
+  description: bulk_campaign open tracking records open event with campaign_id, user_id, timestamp
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Email Engagement Tracking
+    justification: Feature not yet implemented; SES open/click event tracking pipeline not yet built
+- id: AC-041
+  spec: email-notifications-pipeline_spec.md
+  description: Tracked URL click records click event and redirects user to original URL within 200ms
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Click Tracking
+    justification: Feature not yet implemented; click tracking redirect service not yet built
+- id: AC-042
+  spec: email-notifications-pipeline_spec.md
+  description: Enterprise admin campaign analytics for tenant acme shows only acme data (no cross-tenant leakage)
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Campaign Analytics Isolation
+    justification: Feature not yet implemented; tenant-scoped campaign analytics not yet built
+- id: AC-043
+  spec: email-notifications-pipeline_spec.md
+  description: User without explicit marketing opt-in does NOT receive bulk_campaign email
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: Marketing Opt-In Gate
+    justification: Feature not yet implemented; explicit opt-in requirement for bulk campaigns not yet implemented
+- id: AC-044
+  spec: email-notifications-pipeline_spec.md
+  description: User data export includes notification preferences and consent records
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: GDPR Data Export
+    justification: Feature not yet implemented; notification data export pipeline not yet built
+- id: AC-045
+  spec: email-notifications-pipeline_spec.md
+  description: Deletion pipeline deletes all notification records, preferences, consent records, and device registrations
+  verify:
+  - type: manual
+    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    section: GDPR Deletion
+    justification: Feature not yet implemented; notification data deletion in GDPR pipeline not yet built
+# enterprise-microservices_spec.md — missing AC-037
+- id: AC-037
+  spec: enterprise-microservices_spec.md
+  description: Given a license assignment fails, when the error is logged, then the log entry includes enterprise_customer_uuid,
+    subscription_plan_uuid, error_type, and user_email_hash (not raw email)
+  verify:
+  - type: manual
+    runbook: docs/operations/ENTERPRISE_MICROSERVICES_RUNBOOK.md
+    section: License Assignment Error Logging
+    justification: Requires running enterprise-subsidy service with a simulated license assignment failure; not available
+      without live enterprise data
+# k8s-deployment_spec.md — missing AC-INT-004 and AC-INT-005
+- id: AC-INT-004
+  spec: k8s-deployment_spec.md
+  description: Given tutor-configuration_spec.md patches are applied, when K8s manifests reference MySQL, then MySQL Deployment
+    includes --mysql-native-password=ON flag and LMS connects without authentication errors
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: MySQL Authentication Verification
+    justification: Requires running MySQL 8 pod in GKE; kubectl exec to verify flag; cannot run against live cluster in CI
+    file: scripts/infra/verify-tutor-config.sh
+- id: AC-INT-005
+  spec: k8s-deployment_spec.md
+  description: Given Tutor config includes multi-site domains, when LMS production settings are inspected in running pod,
+    then ALLOWED_HOSTS contains all three domains
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Multi-Site Domain Verification
+    justification: Requires running LMS pod with kubectl exec; cannot inspect runtime settings without live cluster access
+    file: scripts/qa/verify-tutor-multisite-domains.sh
+# mobile-apps-enterprise_spec.md — missing ACs 001 through 034 (035, 036, 037 already covered)
+- id: AC-001
+  spec: mobile-apps-enterprise_spec.md
+  description: iOS sign-in opens system browser to LMS OAuth authorize endpoint with PKCE parameters
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: OAuth PKCE Flow
+    justification: Feature not yet implemented; mobile app not yet developed
+- id: AC-002
+  spec: mobile-apps-enterprise_spec.md
+  description: Android sign-in opens Custom Tab to LMS OAuth authorize endpoint with PKCE parameters
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: OAuth PKCE Flow
+    justification: Feature not yet implemented; mobile app not yet developed
+- id: AC-003
+  spec: mobile-apps-enterprise_spec.md
+  description: Authorization code exchanged for tokens; tokens stored in Keychain (iOS) or EncryptedSharedPreferences (Android)
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Token Storage Security
+    justification: Feature not yet implemented; secure token storage not yet implemented in mobile app
+- id: AC-004
+  spec: mobile-apps-enterprise_spec.md
+  description: Access token with < 5 minutes remaining proactively refreshed before API call
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Token Refresh Logic
+    justification: Feature not yet implemented; proactive token refresh not yet implemented
+- id: AC-005
+  spec: mobile-apps-enterprise_spec.md
+  description: Concurrent burst of 10 API calls during token refresh results in exactly one refresh request (single-flight)
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Token Refresh Deduplication
+    justification: Feature not yet implemented; single-flight token refresh not yet implemented
+- id: AC-006
+  spec: mobile-apps-enterprise_spec.md
+  description: 401 API response with valid refresh token triggers token refresh and single retry of original request
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: 401 Retry Flow
+    justification: Feature not yet implemented; 401 retry with refresh not yet implemented
+- id: AC-007
+  spec: mobile-apps-enterprise_spec.md
+  description: Failed token refresh redirects to login screen and clears all tokens
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Token Failure Handling
+    justification: Feature not yet implemented; token failure handling not yet implemented
+- id: AC-008
+  spec: mobile-apps-enterprise_spec.md
+  description: Logout revokes refresh token server-side and clears all local tokens, cache, and branding overrides
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Logout Flow
+    justification: Feature not yet implemented; logout with server-side revocation not yet implemented
+- id: AC-009
+  spec: mobile-apps-enterprise_spec.md
+  description: Push notification permission requested after first login, not at app launch
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Permission
+    justification: Feature not yet implemented; mobile app push permission flow not yet built
+- id: AC-010
+  spec: mobile-apps-enterprise_spec.md
+  description: Device token registered with backend including device_token, platform, app_version, org_slug
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Device Registration
+    justification: Feature not yet implemented; device token registration API not yet built
+- id: AC-011
+  spec: mobile-apps-enterprise_spec.md
+  description: Course announcement push notification appears in system notification center within 60 seconds
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Push Notification Delivery
+    justification: Feature not yet implemented; requires physical device with FCM/APNs configured
+- id: AC-012
+  spec: mobile-apps-enterprise_spec.md
+  description: Tapping notification with deep_link_url navigates to assignment within course
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Notification Deep Linking
+    justification: Feature not yet implemented; notification deep link handling not yet implemented
+- id: AC-013
+  spec: mobile-apps-enterprise_spec.md
+  description: Logout unregisters device token from backend
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Device Token Deregistration on Logout
+    justification: Feature not yet implemented; logout-triggered device deregistration not yet implemented
+- id: AC-014
+  spec: mobile-apps-enterprise_spec.md
+  description: AASA file at /.well-known/apple-app-site-association enables Universal Links for academyv2.mereka.io
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Universal Links Verification
+    justification: Feature not yet implemented; AASA file not yet configured in LMS web server
+- id: AC-015
+  spec: mobile-apps-enterprise_spec.md
+  description: assetlinks.json at /.well-known/assetlinks.json enables Android App Links
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: App Links Verification
+    justification: Feature not yet implemented; assetlinks.json not yet configured in LMS web server
+- id: AC-016
+  spec: mobile-apps-enterprise_spec.md
+  description: Deep link to courseware URL navigates to correct section in app
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Deep Link Routing
+    justification: Feature not yet implemented; mobile app deep link routing not yet built
+- id: AC-017
+  spec: mobile-apps-enterprise_spec.md
+  description: Unauthenticated deep link stores URL, presents login, then navigates after authentication
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Authenticated Deep Link Flow
+    justification: Feature not yet implemented; stored URL post-login navigation not yet implemented
+- id: AC-018
+  spec: mobile-apps-enterprise_spec.md
+  description: Deep link to unsupported path (e.g. /admin/) opens in in-app browser
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Fallback Deep Link Handling
+    justification: Feature not yet implemented; in-app browser fallback not yet implemented
+- id: AC-019
+  spec: mobile-apps-enterprise_spec.md
+  description: Downloaded course section content available offline (video, HTML, PDF)
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Offline Content Download
+    justification: Feature not yet implemented; offline content download not yet implemented
+- id: AC-020
+  spec: mobile-apps-enterprise_spec.md
+  description: Offline quiz completion syncs score to backend within 60 seconds of connectivity restore
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Offline Sync
+    justification: Feature not yet implemented; offline-first sync layer not yet built
+- id: AC-021
+  spec: mobile-apps-enterprise_spec.md
+  description: Storage warning shown when device has < 500 MB free before download starts
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Download Storage Warning
+    justification: Feature not yet implemented; storage check before download not yet implemented
+- id: AC-022
+  spec: mobile-apps-enterprise_spec.md
+  description: Manage Downloads screen shows per-section storage usage with delete option
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Download Management UI
+    justification: Feature not yet implemented; download management screen not yet built
+- id: AC-023
+  spec: mobile-apps-enterprise_spec.md
+  description: Background download completes and fires local notification (iOS background URLSession, Android WorkManager)
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Background Download
+    justification: Feature not yet implemented; background download infrastructure not yet implemented
+- id: AC-024
+  spec: mobile-apps-enterprise_spec.md
+  description: org_slug=client-a with primary_color=#FF5733 renders nav bar and primary elements in that color
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Multi-Tenant Branding
+    justification: Feature not yet implemented; tenant branding in mobile app not yet built
+- id: AC-025
+  spec: mobile-apps-enterprise_spec.md
+  description: Branding config endpoint unreachable with cached config — renders using cached branding
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Branding Cache Fallback
+    justification: Feature not yet implemented; branding cache fallback not yet implemented
+- id: AC-026
+  spec: mobile-apps-enterprise_spec.md
+  description: Branding config endpoint unreachable with no cache — renders using default Mereka Academy branding
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Default Branding Fallback
+    justification: Feature not yet implemented; default branding fallback not yet implemented
+- id: AC-027
+  spec: mobile-apps-enterprise_spec.md
+  description: User authenticated under org_slug=client-a sees only client-a courses (no cross-tenant leakage)
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Tenant Course Isolation
+    justification: Feature not yet implemented; tenant-scoped course listing not yet implemented in mobile app
+- id: AC-028
+  spec: mobile-apps-enterprise_spec.md
+  description: App validates TLS certificate against pinned intermediate CA certificates for academyv2.mereka.io
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Certificate Pinning
+    justification: Feature not yet implemented; certificate pinning not yet implemented in mobile app
+- id: AC-029
+  spec: mobile-apps-enterprise_spec.md
+  description: Certificate pin mismatch shows security warning and prevents data transmission
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Certificate Pin Mismatch Handling
+    justification: Feature not yet implemented; MITM detection and warning not yet implemented
+- id: AC-030
+  spec: mobile-apps-enterprise_spec.md
+  description: Task-switcher screenshot shows branded splash screen (not sensitive content)
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Screenshot Protection
+    justification: Feature not yet implemented; screenshot masking in task switcher not yet implemented
+- id: AC-031
+  spec: mobile-apps-enterprise_spec.md
+  description: Release build contains no debug logs, test API endpoints, or hardcoded credentials
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Release Build Security Audit
+    justification: Feature not yet implemented; release build security audit process not yet established
+- id: AC-032
+  spec: mobile-apps-enterprise_spec.md
+  description: Push to mobile/ios/** on main produces signed IPA and uploads to TestFlight without manual intervention
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: iOS CI Pipeline
+    justification: Feature not yet implemented; iOS CI pipeline and TestFlight upload not yet configured
+- id: AC-033
+  spec: mobile-apps-enterprise_spec.md
+  description: Push to mobile/android/** on main produces signed AAB and uploads to Google Play Internal Testing
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Android CI Pipeline
+    justification: Feature not yet implemented; Android CI pipeline and Play Store upload not yet configured
+- id: AC-034
+  spec: mobile-apps-enterprise_spec.md
+  description: New client org_slug=new-client added to branding config — no code changes or pipeline modifications required
+  verify:
+  - type: manual
+    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    section: Configuration-Only Tenant Onboarding
+    justification: Feature not yet implemented; configuration-only tenant onboarding for mobile not yet built
+# proctoring-integration_spec.md — missing ACs not yet in manual_verifications
+# (AC-003, AC-006, AC-014, AC-015, AC-017, AC-018, AC-019, AC-023, AC-036, AC-038 already exist)
+- id: AC-001
+  spec: proctoring-integration_spec.md
+  description: ProctoringBackendProvider.get_backend('proctorio') returns Proctorio adapter when edx-proctoring is installed
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Backend Registration
+    justification: Feature not yet implemented; Proctorio backend adapter not yet integrated
+- id: AC-002
+  spec: proctoring-integration_spec.md
+  description: Examity backend register_exam_attempt() creates exam record and returns provider_session_id
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Examity Integration
+    justification: Requires valid Examity API credentials; not available in CI without live provider credentials
+- id: AC-004
+  spec: proctoring-integration_spec.md
+  description: ProctorTrack on_review_callback() updates attempt to second_review_required if integrity score below threshold
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > ProctorTrack Callback
+    justification: Requires valid ProctorTrack webhook payload; not available in CI without provider integration
+- id: AC-005
+  spec: proctoring-integration_spec.md
+  description: No-op backend completes full exam flow with correct state transitions in dev environment
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > No-op Backend
+    justification: Feature not yet implemented; no-op proctoring backend not yet configured in dev environment
+- id: AC-007
+  spec: proctoring-integration_spec.md
+  description: Proctored exam access blocked with deadline passed message after due_date
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Deadline Enforcement
+    justification: Feature not yet implemented; requires live LMS with proctored exam past its due date
+- id: AC-008
+  spec: proctoring-integration_spec.md
+  description: Studio validation error when course author selects provider not enabled for enterprise customer
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Provider Restriction
+    justification: Feature not yet implemented; Studio provider validation for enterprise customers not yet built
+- id: AC-009
+  spec: proctoring-integration_spec.md
+  description: Course re-run preserves proctored exam settings (type, time limit, backend, review policy)
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Course Re-Run
+    justification: Feature not yet implemented; proctoring settings preservation in course re-run not yet verified
+- id: AC-010
+  spec: proctoring-integration_spec.md
+  description: First-time proctored exam captures photo ID via webcam and sends to provider for analysis
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Identity Verification
+    justification: Requires physical webcam and live proctoring provider; cannot automate in CI
+- id: AC-011
+  spec: proctoring-integration_spec.md
+  description: Identity verification failure blocks exam and offers up to 2 additional verification attempts
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Identity Verification Failure
+    justification: Requires live proctoring provider returning failed status; cannot automate in CI
+- id: AC-012
+  spec: proctoring-integration_spec.md
+  description: Identity verification passed result stored with user_id and enterprise_customer_uuid
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Identity Verification Storage
+    justification: Feature not yet implemented; verification result storage not yet built
+- id: AC-013
+  spec: proctoring-integration_spec.md
+  description: Subsequent proctored exams verify against baseline (facial recognition) without re-capturing photo ID
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Baseline Facial Recognition
+    justification: Requires live proctoring provider with facial recognition; cannot automate in CI
+- id: AC-016
+  spec: proctoring-integration_spec.md
+  description: Network check fails with minimum bandwidth message when upload < 1.5 Mbps
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Environment Check
+    justification: Requires throttled network connection to trigger bandwidth failure message
+- id: AC-020
+  spec: proctoring-integration_spec.md
+  description: Exam start transitions attempt from ready_to_start to started with timestamped log entry
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Attempt State Machine
+    justification: Feature not yet implemented; attempt state transitions not yet logged
+- id: AC-021
+  spec: proctoring-integration_spec.md
+  description: Exam submission transitions attempt to submitted and notifies provider via stop_exam_attempt()
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Exam Submission
+    justification: Feature not yet implemented; provider notification on submission not yet integrated
+- id: AC-022
+  spec: proctoring-integration_spec.md
+  description: Attempt in started state > time_limit + 30 min auto-expires to timed_out with provider notification
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Auto-Expiry
+    justification: Feature not yet implemented; auto-expiry check and provider notification not yet built
+- id: AC-024
+  spec: proctoring-integration_spec.md
+  description: Transition from verified to started rejected with invalid state error
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > State Machine Enforcement
+    justification: Feature not yet implemented; invalid state transition guard not yet implemented
+- id: AC-025
+  spec: proctoring-integration_spec.md
+  description: Reviewer authorized for customer A only sees 10 attempts for customer A (not 5 for customer B)
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Review Dashboard Isolation
+    justification: Feature not yet implemented; reviewer dashboard with customer-scoped access not yet built
+- id: AC-026
+  spec: proctoring-integration_spec.md
+  description: Reviewer rejection with reason stores rejected state, reason, and notifies student via email
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Reviewer Rejection
+    justification: Feature not yet implemented; reviewer rejection flow not yet built
+- id: AC-027
+  spec: proctoring-integration_spec.md
+  description: proctoring_admin can override rejection to verified with audit log entry
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Admin Override
+    justification: Feature not yet implemented; proctoring admin override with audit log not yet built
+- id: AC-028
+  spec: proctoring-integration_spec.md
+  description: Attempt in review queue longer than enterprise review_sla_hours highlighted with SLA warning
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > SLA Warning
+    justification: Feature not yet implemented; SLA-aware review queue UI not yet built
+- id: AC-029
+  spec: proctoring-integration_spec.md
+  description: verified attempt — student grade appears in Open edX gradebook within 5 minutes
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Gradebook Sync
+    justification: Feature not yet implemented; gradebook sync triggered by proctoring state change not yet built
+- id: AC-030
+  spec: proctoring-integration_spec.md
+  description: rejected attempt — grade set to 0 and proctoring_status shows rejected in gradebook
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Rejected Grade
+    justification: Feature not yet implemented; grade set to 0 on rejection not yet built
+- id: AC-031
+  spec: proctoring-integration_spec.md
+  description: Instructor override of rejected attempt restores original grade and sets status to verified with audit entry
+  verify:
+  - type: manual
+    runbook: docs/operations/PROCTORING_RUNBOOK.md
+    section: Verification > Instructor Override
+    justification: Feature not yet implemented; instructor override with grade restore not yet built
+- id: AC-032
+  spec: proctoring-integration_spec.md
+  description: submitted (pending review) attempt shows "Pending Proctoring Review" with no numeric grade
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Pending Review Grade Display
+    justification: Feature not yet implemented; pending review grade display not yet implemented
+- id: AC-033
+  spec: proctoring-integration_spec.md
+  description: Customer A (Examity) and customer B (Proctorio) students routed to respective providers with no credential cross-contamination
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Multi-Provider Routing
+    justification: Feature not yet implemented; per-enterprise provider routing not yet built
+- id: AC-034
+  spec: proctoring-integration_spec.md
+  description: Per-customer review_sla_hours threshold used correctly for SLA warnings (12h for A, 48h for B)
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Per-Customer SLA
+    justification: Feature not yet implemented; per-customer SLA configuration not yet implemented
+- id: AC-035
+  spec: proctoring-integration_spec.md
+  description: GDPR deletion for student in customer A deletes only that student's proctoring data
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > GDPR
+    justification: Feature not yet implemented; scoped proctoring data deletion not yet built
+- id: AC-037
+  spec: proctoring-integration_spec.md
+  description: Student who does not accept consent notice is blocked from taking proctored exam
+  verify:
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Consent Gate
+    justification: Feature not yet implemented; consent gate for exam entry not yet built
+# slo-sla-service-level-management_spec.md — AC-016, AC-018, AC-019, AC-020 already covered above;
+# confirmed present in file — no new entries needed for this spec
+# video-pipeline-delivery_spec.md — missing AC-VPD-028
+- id: AC-VPD-028
+  spec: video-pipeline-delivery_spec.md
+  description: Given the Video Engagement Dashboard in Superset, when a course instructor accesses it, then drop-off heatmaps
+    show time-series data for where learners pause or stop watching
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: MV-005 Superset Dashboard
+    justification: Superset dashboard heatmap visual correctness requires human verification in browser with real viewing
+      session data
