@@ -215,6 +215,7 @@ jobs:
           bash -n scripts/qa/verify-enterprise-ui-review.sh
           bash -n scripts/qa/verify-tenant-branding-matrix.sh
           bash -n scripts/qa/verify-footer-parity.sh
+          bash -n scripts/qa/verify-footer-slot-only.sh
           bash -n scripts/qa/verify-mfe-routing-parity.sh
           bash -n scripts/qa/verify-a11y-contrast-focus.sh
           bash -n scripts/qa/verify-a11y-authenticated-routes.sh
@@ -975,3 +976,22 @@ jobs:
         run: bash -n scripts/qa/verify-visual-smoke-baseline.sh
       - name: Run visual smoke baseline verification (AC-VIS-001..004)
         run: ./scripts/qa/verify-visual-smoke-baseline.sh
+
+  footer-slot-only:
+    name: Footer Slot-Only Policy Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'footer') ||
+        contains(github.event.pull_request.title, 'slot') ||
+        contains(github.event.pull_request.title, 'plugin') ||
+        contains(github.event.pull_request.title, 'mfe') ||
+        contains(github.event.pull_request.title, 'branding')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-footer-slot-only.sh
+      - name: Run footer slot-only verification (AC-FTR-301..305)
+        run: ./scripts/qa/verify-footer-slot-only.sh
