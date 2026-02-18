@@ -701,3 +701,15 @@ jobs:
 
       - name: Verify footer variant matrix (AC-FTVAR-001 through AC-FTVAR-005)
         run: ./scripts/qa/verify-footer-variant-matrix.sh
+
+  tenant-branding-qa:
+    name: Tenant Branding QA (Consolidated)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/run-tenant-branding-qa.sh
+
+      - name: Run consolidated tenant branding QA (AC-TBQA-001 through AC-TBQA-005)
+        run: ./scripts/qa/run-tenant-branding-qa.sh
