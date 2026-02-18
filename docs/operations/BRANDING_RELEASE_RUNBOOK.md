@@ -381,8 +381,66 @@ find var/evidence/ -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
 
 ---
 
+## Release Template (AC-DEP-001)
+
+Copy this template for each release. Fill in values and attach to the release PR.
+
+```markdown
+# Release: <TAG>
+
+**Date**: YYYY-MM-DD
+**Operator**: <name>
+**HEAD**: <sha>
+**Branch**: main
+**Images**: openedx:<tag>, openedx-mfe:<tag>
+
+## Pre-Release Gates
+
+| Gate | Result | Evidence |
+|------|--------|---------|
+| Worktree fresh | PASS/FAIL | `worktree-freshness.log` |
+| Config parity | PASS/FAIL | `config-parity.log` |
+| Forbidden overrides | PASS/FAIL | `forbidden-overrides.log` |
+| GitOps drift | PASS/FAIL | `gitops-drift.log` |
+
+## Image Build
+
+| Image | Tag | Size | Build Time |
+|-------|-----|------|------------|
+| openedx | <tag> | | |
+| openedx-mfe | <tag> | | |
+
+## Post-Deploy Verification
+
+| Gate | Result | Evidence |
+|------|--------|---------|
+| Post-deploy smoke | PASS/FAIL | `post-deploy-smoke.log` |
+| Tenant branding | PASS/FAIL | `tenant-branding-runtime.log` |
+| ArgoCD status | Synced/Degraded | `argocd-status.log` |
+
+## Evidence Directory
+
+`var/evidence/release-<YYYYMMDD>/`
+
+## Sign-off
+
+- [ ] Builder: <name>
+- [ ] Verifier: <name>
+```
+
+### Generate evidence automatically
+
+```bash
+./scripts/qa/verify-release-readiness.sh --env prod
+# Or dry-run mode (does not fail on branding gates):
+./scripts/qa/verify-release-readiness.sh --env prod --dry-run
+```
+
+---
+
 ## Reference
 
+- Release readiness gate: `scripts/qa/verify-release-readiness.sh`
 - Canonical release orchestrator: `scripts/infra/release-openedx-gitops.sh`
 - Image override contract: `scripts/qa/verify-gitops-image-overrides.sh`
 - GitOps drift check: `scripts/qa/verify-gitops-drift.sh`
