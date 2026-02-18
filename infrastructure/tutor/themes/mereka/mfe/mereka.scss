@@ -2,7 +2,7 @@ $mereka-font-path: "../fonts";
 @import "./scss/theme";
 
 :root {
-  --mereka-mfe-branding-rev: "2026-02-08-pass4";
+  --mereka-mfe-branding-rev: "2026-02-18-us7";
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
   --mereka-mfe-surface: #ffffff;
@@ -208,13 +208,15 @@ label {
 
 /* Authn/login/register surfaces */
 /* BRITTLE: upstream authn MFE class naming - consolidated to data-testid where possible */
+/* [class*="auth-page"] removed 2026-02-18 (bead 115d.18): fully covered by [class*="authn"] + data-testid primary paths */
 [data-testid*="login-page"],
 [data-testid*="register-page"],
 [data-testid*="authn"],
 /* Fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="authn"] | no stable testid on all route entrypoints | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] | authn MFE emits this class on top-level wrapper | expires: 2026-Q3
 [class*="authn"],
-[class*="login-register"],
-[class*="auth-page"] {
+[class*="login-register"] {
   background: transparent;
 }
 
@@ -222,9 +224,10 @@ label {
 [data-testid*="register-page"] .pgn__card,
 [data-testid*="authn"] .pgn__card,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__card | authn MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card | login-register wrapper fallback | expires: 2026-Q3
 [class*="authn"] .pgn__card,
-[class*="login-register"] .pgn__card,
-[class*="auth-page"] .pgn__card {
+[class*="login-register"] .pgn__card {
   border-radius: 28px;
   border: 1px solid rgba(26, 22, 35, 0.1);
   box-shadow: 0 28px 72px rgba(26, 22, 35, 0.14);
@@ -234,9 +237,10 @@ label {
 [data-testid*="register-page"] .pgn__card-header,
 [data-testid*="authn"] .pgn__card-header,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__card-header | authn MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card-header | login-register wrapper fallback | expires: 2026-Q3
 [class*="authn"] .pgn__card-header,
-[class*="login-register"] .pgn__card-header,
-[class*="auth-page"] .pgn__card-header {
+[class*="login-register"] .pgn__card-header {
   background-image: linear-gradient(
     125deg,
     rgba(45, 137, 139, 0.14) 0%,
@@ -249,9 +253,10 @@ label {
 [data-testid*="register-page"] .pgn__btn--primary,
 [data-testid*="authn"] .pgn__btn--primary,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__btn--primary | authn MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__btn--primary | login-register wrapper fallback | expires: 2026-Q3
 [class*="authn"] .pgn__btn--primary,
-[class*="login-register"] .pgn__btn--primary,
-[class*="auth-page"] .pgn__btn--primary {
+[class*="login-register"] .pgn__btn--primary {
   min-height: 44px;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -261,9 +266,10 @@ label {
 [data-testid*="register-page"] .pgn__hyperlink,
 [data-testid*="authn"] .pgn__hyperlink,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink | authn MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink | login-register wrapper fallback | expires: 2026-Q3
 [class*="authn"] .pgn__hyperlink,
-[class*="login-register"] .pgn__hyperlink,
-[class*="auth-page"] .pgn__hyperlink {
+[class*="login-register"] .pgn__hyperlink {
   color: var(--mereka-color-blue);
   text-decoration: none;
   font-weight: 600;
@@ -276,12 +282,12 @@ label {
 [data-testid*="authn"] .pgn__hyperlink:hover,
 [data-testid*="authn"] .pgn__hyperlink:focus,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink:hover/focus | authn MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink:hover/focus | login-register wrapper fallback | expires: 2026-Q3
 [class*="authn"] .pgn__hyperlink:hover,
 [class*="authn"] .pgn__hyperlink:focus,
 [class*="login-register"] .pgn__hyperlink:hover,
-[class*="login-register"] .pgn__hyperlink:focus,
-[class*="auth-page"] .pgn__hyperlink:hover,
-[class*="auth-page"] .pgn__hyperlink:focus {
+[class*="login-register"] .pgn__hyperlink:focus {
   color: var(--mereka-color-teal);
   text-decoration: underline;
 }
@@ -292,6 +298,9 @@ label {
 [data-testid*="account-page"],
 [data-testid*="learner-dashboard"],
 /* Fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="account-settings"] | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] | no stable slot; account MFE secondary wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] | no stable slot; dashboard top-level wrapper | expires: 2026-Q3
 [class*="account-settings"],
 [class*="account-page"],
 [class*="learner-dashboard"] {
@@ -305,6 +314,9 @@ label {
 [data-testid*="account-page"] .card,
 [data-testid*="learner-dashboard"] .card,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__card | account MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__card | account MFE secondary wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__card | dashboard wrapper fallback | expires: 2026-Q3
 [class*="account-settings"] .pgn__card,
 [class*="account-page"] .pgn__card,
 [class*="learner-dashboard"] .pgn__card,
@@ -320,6 +332,9 @@ label {
 [data-testid*="account-page"] .pgn__form-control,
 [data-testid*="learner-dashboard"] .pgn__form-control,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__form-control | account MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__form-control | account MFE secondary wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__form-control | dashboard wrapper fallback | expires: 2026-Q3
 [class*="account-settings"] .pgn__form-control,
 [class*="account-page"] .pgn__form-control,
 [class*="learner-dashboard"] .pgn__form-control {
@@ -330,6 +345,9 @@ label {
 [data-testid*="account-page"] .pgn__btn,
 [data-testid*="learner-dashboard"] .pgn__btn,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__btn | account MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__btn | account MFE secondary wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__btn | dashboard wrapper fallback | expires: 2026-Q3
 [class*="account-settings"] .pgn__btn,
 [class*="account-page"] .pgn__btn,
 [class*="learner-dashboard"] .pgn__btn {
@@ -340,6 +358,9 @@ label {
 [data-testid*="account-page"] .pgn__alert,
 [data-testid*="learner-dashboard"] .pgn__alert,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__alert | account MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__alert | account MFE secondary wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__alert | dashboard wrapper fallback | expires: 2026-Q3
 [class*="account-settings"] .pgn__alert,
 [class*="account-page"] .pgn__alert,
 [class*="learner-dashboard"] .pgn__alert {
@@ -350,6 +371,9 @@ label {
 [data-testid*="account-page"] .pgn__dropdown-toggle,
 [data-testid*="learner-dashboard"] .pgn__dropdown-toggle,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__dropdown-toggle | account MFE wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__dropdown-toggle | account MFE secondary wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__dropdown-toggle | dashboard wrapper fallback | expires: 2026-Q3
 [class*="account-settings"] .pgn__dropdown-toggle,
 [class*="account-page"] .pgn__dropdown-toggle,
 [class*="learner-dashboard"] .pgn__dropdown-toggle {
@@ -361,6 +385,7 @@ label {
 [data-testid*="learner-dashboard"] [data-testid*="course"],
 [data-testid*="learner-dashboard"] [class*="course"],
 [class*="learner-dashboard"] [data-testid*="course"],
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] | no stable slot for course card; data-testid primary present | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] {
   border-radius: 20px;
   border: 1px solid rgba(26, 22, 35, 0.08);
@@ -372,6 +397,7 @@ label {
 [data-testid*="learner-dashboard"] [data-testid*="course"]:hover,
 [data-testid*="learner-dashboard"] [class*="course"]:hover,
 [class*="learner-dashboard"] [data-testid*="course"]:hover,
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"]:hover | no stable slot for course card hover; data-testid primary present | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"]:hover {
   box-shadow: 0 18px 48px rgba(26, 22, 35, 0.12);
 }
@@ -383,6 +409,8 @@ label {
 [data-testid*="learner-dashboard"] [class*="course-list"],
 [class*="learner-dashboard"] [data-testid*="course-grid"],
 [class*="learner-dashboard"] [data-testid*="course-list"],
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-grid"] | no stable slot; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] | no stable slot; data-testid primary present | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-grid"],
 [class*="learner-dashboard"] [class*="course-list"] {
   gap: 1rem;
@@ -392,6 +420,7 @@ label {
 [data-testid*="learner-dashboard"] [data-testid*="course"] img,
 [data-testid*="learner-dashboard"] [class*="course"] img,
 [class*="learner-dashboard"] [data-testid*="course"] img,
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] img | no stable slot for image; data-testid primary present | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] img {
   display: block;
   width: 100%;
@@ -407,6 +436,7 @@ label {
 /* BRITTLE: upstream learning MFE class naming - broadest selector, highest risk */
 [data-testid*="learning"],
 /* Fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="learning"] | no upstream slot for learning layout; P2 upstream request filed | expires: 2026-Q3
 [class*="learning"] {
   background: transparent;
 }
@@ -417,6 +447,8 @@ label {
 /* Fallback for routes without data-testid */
 [class*="learning"] [data-testid*="course-grid"],
 [class*="learning"] [data-testid*="course-list"],
+// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-grid"] | no stable slot for learning course grid; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-list"] | no stable slot for learning course list; data-testid primary present | expires: 2026-Q3
 [class*="learning"] [class*="course-grid"],
 [class*="learning"] [class*="course-list"] {
   /* Some layouts aren't flex/grid, so `gap` can be a no-op. Keep it anyway, but
@@ -431,6 +463,7 @@ label {
 [data-testid*="learning"] [data-testid*="my-courses"] .row > [class*="col"],
 /* Fallback for routes without data-testid */
 [class*="learning"] [data-testid*="my-courses"] .row > [class*="col"],
+// SELECTOR-EXCEPTION: [class*="learning"] [class*="my-courses"] .row > [class*="col"] | Bootstrap col is stable; my-courses class is brittle but no slot | expires: 2026-Q3
 [class*="learning"] [class*="my-courses"] .row > [class*="col"] {
   margin-bottom: 1.5rem !important;
 }
@@ -440,6 +473,7 @@ label {
 [data-testid*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) :is([data-testid*="course-card"], [data-testid*="course"]),
 /* Fallback for routes without data-testid */
 [class*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) :is([data-testid*="course-card"], [data-testid*="course"]),
+// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) :is([class*="course-card"]) | no upstream slot; outer data-testid paths present | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) :is([data-testid*="course-card"], [data-testid*="course"]),
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) :is([class*="course-card"]) {
   display: flex;
@@ -449,6 +483,7 @@ label {
 
 /* BRITTLE: learning MFE scope - fallback for routes without data-testid */
 [data-testid*="learning"] :is(.pgn__card, .card),
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) | no upstream slot for learning layout; inner selector is stable Paragon BEM | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) {
   border-radius: 20px;
   border: 1px solid rgba(26, 22, 35, 0.08);
@@ -462,6 +497,7 @@ label {
 /* Learning course cards often use Paragon Card ImageCap on the left; ensure it doesn't collapse. */
 /* BRITTLE: Paragon ImageCap internal classes (semi-stable, component-level) */
 [data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]),
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) | Paragon ImageCap semi-stable; no slot | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) {
   flex: 0 0 180px;
   width: 180px;
@@ -471,6 +507,7 @@ label {
 }
 
 [data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img,
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, ...) img | Paragon ImageCap img; no slot | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img {
   display: block;
   width: 100%;
@@ -487,6 +524,8 @@ label {
 /* BRITTLE: generic image/media classes - too broad, matches any class containing "image" or "media" */
 [data-testid*="learning"] :is(.pgn__card, .card) [class*="image"],
 [data-testid*="learning"] :is(.pgn__card, .card) [class*="media"],
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="image"] | too broad, but no stable BEM or testid for card media col | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="media"] | too broad, but no stable BEM or testid for card media col | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) [class*="image"],
 [class*="learning"] :is(.pgn__card, .card) [class*="media"] {
   min-width: 180px;
@@ -495,6 +534,8 @@ label {
 
 [data-testid*="learning"] :is(.pgn__card, .card) [class*="image"] img,
 [data-testid*="learning"] :is(.pgn__card, .card) [class*="media"] img,
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="image"] img | media col img; no stable alternative | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="media"] img | media col img; no stable alternative | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) [class*="image"] img,
 [class*="learning"] :is(.pgn__card, .card) [class*="media"] img {
   display: block;
@@ -511,12 +552,14 @@ label {
 /* BRITTLE: my-courses/discover section classes */
 [data-testid*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) > * + *,
 [class*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) > * + *,
+// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) > * + * | spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) > * + * {
   margin-top: 1.25rem;
 }
 
 [data-testid*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) .row > *,
 [class*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) .row > *,
+// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) .row > * | row spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) .row > * {
   margin-bottom: 1.25rem;
 }
@@ -526,6 +569,7 @@ label {
 [data-testid*="learner-dashboard"] [data-testid*="course-list"] > * + *,
 [data-testid*="learner-dashboard"] [class*="course-list"] > * + *,
 [class*="learner-dashboard"] [data-testid*="course-list"] > * + *,
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] > * + * | list spacing fallback; data-testid primary present | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-list"] > * + * {
   margin-top: 1rem;
 }
@@ -534,6 +578,7 @@ label {
 [data-testid*="learner-dashboard"] [data-testid*="course"] [class*="status"],
 [data-testid*="learner-dashboard"] [class*="course"] [class*="status"],
 [class*="learner-dashboard"] [data-testid*="course"] [class*="status"],
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] [class*="status"] | cosmetic badge; no testid for status pill | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] [class*="status"] {
   border-radius: 999px;
   background: rgba(45, 137, 139, 0.1);
@@ -549,6 +594,9 @@ label {
 [data-testid*="account-page"] h2,
 [data-testid*="learner-dashboard"] h1,
 [data-testid*="learner-dashboard"] h2,
+// SELECTOR-EXCEPTION: [class*="account-settings"] h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] h1/h2 | heading font; no slot for account page headings | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] h1/h2 | heading font; no slot for dashboard headings | expires: 2026-Q3
 [class*="account-settings"] h1,
 [class*="account-settings"] h2,
 [class*="account-page"] h1,
@@ -560,12 +608,13 @@ label {
 }
 
 /* Discussions/forum surfaces (MFE discussions is the learner-facing forum UI) */
-/* BRITTLE: upstream discussions MFE class naming - note redundant singular/plural */
+/* BRITTLE: upstream discussions MFE class naming */
+/* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18): fully covered by [class*="discussions"] plural + data-testid primary paths */
 [data-testid*="discussions"],
 [data-testid*="discussion"],
 /* Fallback for routes without data-testid */
-[class*="discussions"],
-[class*="discussion"] {
+// SELECTOR-EXCEPTION: [class*="discussions"] | no upstream slot; P3/cosmetic; data-testid primary present | expires: 2026-Q3
+[class*="discussions"] {
   background: transparent;
 }
 
@@ -574,10 +623,9 @@ label {
 [data-testid*="discussions"] .pgn__card,
 [data-testid*="discussion"] .pgn__card,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="discussions"] .card | P3/cosmetic; no slot; data-testid primary present | expires: 2026-Q3
 [class*="discussions"] .card,
-[class*="discussion"] .card,
-[class*="discussions"] .pgn__card,
-[class*="discussion"] .pgn__card {
+[class*="discussions"] .pgn__card {
   border-radius: 22px;
   border: 1px solid rgba(26, 22, 35, 0.09);
   box-shadow: var(--mereka-mfe-card-shadow);
@@ -586,8 +634,8 @@ label {
 [data-testid*="discussions"] a,
 [data-testid*="discussion"] a,
 /* BRITTLE: fallback for routes without data-testid */
-[class*="discussions"] a,
-[class*="discussion"] a {
+// SELECTOR-EXCEPTION: [class*="discussions"] a | P3/cosmetic link color; no slot | expires: 2026-Q3
+[class*="discussions"] a {
   color: var(--mereka-color-blue);
 }
 
@@ -596,10 +644,9 @@ label {
 [data-testid*="discussion"] a:hover,
 [data-testid*="discussion"] a:focus,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="discussions"] a:hover/focus | P3/cosmetic link hover; no slot | expires: 2026-Q3
 [class*="discussions"] a:hover,
-[class*="discussions"] a:focus,
-[class*="discussion"] a:hover,
-[class*="discussion"] a:focus {
+[class*="discussions"] a:focus {
   color: var(--mereka-color-teal);
 }
 
@@ -608,10 +655,9 @@ label {
 [data-testid*="discussions"] .pgn__btn--primary,
 [data-testid*="discussion"] .pgn__btn--primary,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="discussions"] .btn-primary | P3/cosmetic btn gradient; no slot | expires: 2026-Q3
 [class*="discussions"] .btn-primary,
-[class*="discussion"] .btn-primary,
-[class*="discussions"] .pgn__btn--primary,
-[class*="discussion"] .pgn__btn--primary {
+[class*="discussions"] .pgn__btn--primary {
   background-image: var(--mereka-mfe-gradient);
   border: none;
 }
@@ -621,10 +667,9 @@ label {
 [data-testid*="discussion"] h1,
 [data-testid*="discussion"] h2,
 /* BRITTLE: fallback for routes without data-testid */
+// SELECTOR-EXCEPTION: [class*="discussions"] h1/h2 | P3/cosmetic heading font; no slot | expires: 2026-Q3
 [class*="discussions"] h1,
-[class*="discussions"] h2,
-[class*="discussion"] h1,
-[class*="discussion"] h2 {
+[class*="discussions"] h2 {
   font-family: var(--mereka-font-heading);
   color: var(--mereka-color-ink-900);
 }

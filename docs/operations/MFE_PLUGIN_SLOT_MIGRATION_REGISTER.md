@@ -2,7 +2,7 @@
 
 > Inventory of all MFE customization points with migration paths to plugin-slot-first architecture.
 >
-> **Bead**: mereka-lms-8jao.9
+> **Bead**: mereka-lms-8jao.9 / mereka-lms-115d.18
 > **Last updated**: 2026-02-18
 > **Source**: MFE_SELECTOR_HARDENING_AUDIT.md + MFE_PLUGIN_SLOT_MATRIX.md
 
@@ -52,7 +52,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | All domains — logo size/placement |
 | **Priority** | P1 |
 | **Effort** | M (React component with tenant-aware logo URL) |
-| **Owner** | Mereka |
+| **Owner** | Mereka frontend team |
+| **Action** | Create `MerekaHeaderLogo` React component; wire via `env.config.jsx` slot |
+| **Target Date** | 2026-Q3 |
 | **Files** | `mereka.scss:34-47` |
 | **Migration path** | Create `MerekaHeaderLogo` component, wire via `env.config.jsx` slot |
 
@@ -62,15 +64,17 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="authn"]`, `[class*="login-register"]`, `[class*="auth-page"]` with `[data-testid*="authn"]` fallbacks |
+| **Current approach** | CSS overrides: `[class*="authn"]`, `[class*="login-register"]` with `[data-testid*="authn"]` primaries. `[class*="auth-page"]` **removed 2026-02-18** (bead 115d.18 — fully covered by authn + data-testid paths). |
 | **Target slot** | `org.openedx.frontend.authn.login_component.v1` |
-| **Status** | 🟡 CSS OVERRIDE — slot available, data-testid hardened |
-| **Risk** | Medium (3 brittle class selectors, but data-testid fallbacks added) |
+| **Status** | 🟡 CSS OVERRIDE — slot available, data-testid hardened, auth-page selector eliminated |
+| **Risk** | Low-Medium (2 brittle class selectors remain as fallback; data-testid primary paths cover all hardened routes) |
 | **Tenant impact** | All domains — login/register card styling |
 | **Priority** | P1 |
 | **Effort** | M (banner/card wrapper component) |
-| **Owner** | Mereka |
-| **Files** | `mereka.scss:209-263` |
+| **Owner** | Mereka frontend team |
+| **Action** | Create login banner widget; move card gradient + button styling to `login_component.v1` slot component |
+| **Target Date** | 2026-Q3 |
+| **Files** | `mereka.scss:209-290` |
 | **Migration path** | Create login banner widget, move card gradient + button styling to slot component |
 
 ---
@@ -86,7 +90,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | All domains — course cards, status pills, layout |
 | **Priority** | P1 |
 | **Effort** | L (multiple components: sidebar widget, empty state, course card styling) |
-| **Owner** | Mereka |
+| **Owner** | Mereka frontend team |
+| **Action** | Phase: (1) sidebar widget for tenant branding via `widget_sidebar.v1`, (2) empty state via `no_courses_view.v1`, (3) keep card CSS with data-testid as fallback |
+| **Target Date** | 2026-Q3 |
 | **Files** | `mereka.scss:289-560` |
 | **Migration path** | Phase: (1) sidebar widget for tenant branding, (2) empty state for onboarding, (3) keep card CSS with data-testid |
 
@@ -103,7 +109,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | All domains — course grid, card layout, image handling |
 | **Priority** | P2 (no slot available for layout) |
 | **Effort** | L (would need upstream slot proposal for course grid layout) |
-| **Owner** | Mereka / Upstream request |
+| **Owner** | Mereka / Upstream community |
+| **Action** | File upstream OEP/slot proposal for learning course grid layout. Until approved: keep CSS with data-testid hardening and `SELECTOR-EXCEPTION` annotations (expires 2026-Q3). |
+| **Target Date** | Upstream slot: TBD (community dependent). CSS exceptions: 2026-Q3 review. |
 | **Files** | `mereka.scss:406-522` |
 | **Migration path** | Keep CSS with data-testid hardening. Request upstream slot for learning course grid layout. Use `ProgressCertificateStatusSlot` for certificate area only. |
 
@@ -113,16 +121,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="discussions"]` + `[class*="discussion"]` + `[data-testid*="discussions"]` (9 blocks) |
+| **Current approach** | CSS overrides: `[class*="discussions"]` + `[data-testid*="discussions"]` (6 blocks). `[class*="discussion"]` singular **removed 2026-02-18** (bead 115d.18 — consolidated into plural form + data-testid primaries). |
 | **Target slot** | No slot available upstream |
-| **Status** | 🔴 CSS ONLY — no slot path |
-| **Risk** | Medium (data-testid hardened, dual singular/plural selectors) |
+| **Status** | 🔴 CSS ONLY — no slot path; singular/plural consolidated |
+| **Risk** | Low (data-testid hardened; plural-only fallback; P3/cosmetic) |
 | **Tenant impact** | All domains — forum card styling, link colors, headings |
 | **Priority** | P3 (cosmetic only, well-hardened) |
 | **Effort** | N/A (keep CSS) |
-| **Owner** | Mereka |
-| **Files** | `mereka.scss:562-630` |
-| **Migration path** | Keep CSS. Consolidate `[class*="discussion"]` singular into `[class*="discussions"]` plural only. |
+| **Owner** | Mereka frontend team |
+| **Action** | Keep CSS with `SELECTOR-EXCEPTION` annotations. Monitor upstream for discussions slot. |
+| **Target Date** | N/A — review exceptions at 2026-Q3 |
+| **Files** | `mereka.scss:610-680` |
+| **Migration path** | Keep CSS. `[class*="discussion"]` singular consolidated into `[class*="discussions"]` plural (done 2026-02-18). |
 
 ---
 
@@ -137,7 +147,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | All domains — form styling, card layout |
 | **Priority** | P3 (low risk, well-hardened) |
 | **Effort** | N/A (keep CSS) |
-| **Owner** | Mereka |
+| **Owner** | Mereka frontend team |
+| **Action** | Keep CSS with `SELECTOR-EXCEPTION` annotations. Monitor upstream for account settings slot. |
+| **Target Date** | N/A — review exceptions at 2026-Q3 |
 | **Files** | `mereka.scss:289-560` |
 | **Migration path** | Keep CSS with data-testid. Monitor upstream for account settings slot. |
 
@@ -154,7 +166,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | All domains — card radius, button gradient, alert colors |
 | **Priority** | P3 (keep as-is, very stable) |
 | **Effort** | N/A |
-| **Owner** | Mereka |
+| **Owner** | Mereka frontend team |
+| **Action** | Keep CSS as-is. Long-term: contribute Mereka theme to Paragon theme system. |
+| **Target Date** | N/A (stable) |
 | **Files** | `mereka.scss:63-194` |
 | **Migration path** | Keep CSS. Long-term: contribute Mereka theme to Paragon's theme system when available. |
 
@@ -171,7 +185,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | All domains — nav background, link colors, padding |
 | **Priority** | P2 |
 | **Effort** | S (mostly CSS custom properties, could move to token system) |
-| **Owner** | Mereka |
+| **Owner** | Mereka frontend team |
+| **Action** | Move nav colors to CSS custom properties in token system. Keep layout CSS. |
+| **Target Date** | 2026-Q3 |
 | **Files** | `mereka.scss:27-61` |
 | **Migration path** | Move colors to CSS custom properties already in token system. Keep layout CSS. |
 
@@ -188,26 +204,87 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Tenant impact** | Studio only |
 | **Priority** | P2 |
 | **Effort** | M (extend MerekaFooter to Studio context) |
-| **Owner** | Mereka |
+| **Owner** | Mereka frontend team |
+| **Action** | Create Studio-specific `MerekaStudioFooter` variant; wire via `studio_footer.v1` slot in `mereka_lms.py` |
+| **Target Date** | 2026-Q4 |
 | **Files** | N/A → `mereka_lms.py` |
 | **Migration path** | Create Studio-specific footer variant, wire via studio_footer.v1 slot |
 
 ---
 
+---
+
+## Selector Exception Register
+
+> Temporary exceptions to the slot-first policy. All exceptions require an expiry date and a reviewer-approved rollback path.
+>
+> **Policy**: Any `[class*="..."]` selector that cannot be replaced by a slot or stable Paragon BEM class must be listed here with:
+> 1. A `// SELECTOR-EXCEPTION: <reason> | expires: YYYY-QN` annotation in `mereka.scss`
+> 2. An entry in this register with owner, rationale, and rollback plan
+
+### Exception Register Table
+
+| Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
+|-----------------|-----|----------------------|---------|-------|---------------|
+| `[class*="authn"]` | authn | No stable data-testid on all entrypoints; `authn` is the wrapper class emitted by authn MFE | 2026-Q3 | Mereka frontend | Remove if `[data-testid*="authn"]` covers all routes in next authn MFE upgrade |
+| `[class*="login-register"]` | authn | authn MFE emits this class on top-level wrapper alongside `authn`; belt-and-suspenders fallback | 2026-Q3 | Mereka frontend | Remove once `login_component.v1` slot is wired |
+| `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
+| `[class*="account-page"]` | account | No upstream slot; account MFE secondary wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
+| `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |
+| `[class*="learning"]` | learning | No upstream slot for course grid layout; upstream slot proposal pending (see AC-US7-005) | 2026-Q3 | Mereka / Upstream | Remove once upstream `learning_course_grid.v1` or equivalent slot is approved |
+| `[class*="discussions"]` | discussions | No upstream slot; P3/cosmetic; data-testid primary present | 2026-Q3 | Mereka frontend | Keep indefinitely unless upstream slot emerges |
+| `[class*="course"]` (in dashboard/learning scope) | dashboard/learning | No stable slot for course card inner; data-testid primary present | 2026-Q3 | Mereka frontend | Remove once dashboard course card slot is upstream |
+| `[class*="image-cap"]`, `[class*="imagecap"]` | learning | Paragon ImageCap component internal classes; semi-stable | 2026-Q3 | Mereka frontend | Remove if Paragon exposes stable BEM for image cap |
+| `[class*="image"]`, `[class*="media"]` (in card scope) | learning | Too broad — no better alternative; scoped inside `.pgn__card` to limit blast radius | 2026-Q3 | Mereka frontend | Replace with explicit Paragon classes once Paragon card layout stabilizes |
+
+### Removed Exceptions (bead 115d.18, 2026-02-18)
+
+| Selector Pattern | Removed | Reason |
+|-----------------|---------|--------|
+| `[class*="auth-page"]` | 2026-02-18 | Fully covered by `[class*="authn"]` + `[data-testid*="authn"]` primary paths |
+| `[class*="discussion"]` (singular) | 2026-02-18 | Consolidated into `[class*="discussions"]` plural + data-testid primary paths (33% of singular blocks eliminated) |
+
+---
+
+## Unresolved Selectors (Cannot Be Slot-Migrated Yet)
+
+> These selectors have no viable slot migration path at this time. Each is tracked with rationale, date filed, and next review date.
+
+### US7-TICKET-001: Learning MFE Course Grid Layout Slot
+
+- **Selector**: `[class*="learning"]` (11 rule blocks)
+- **Filed**: 2026-02-18
+- **Rationale**: No upstream Open edX slot exists for the learning MFE course grid layout container. The `ProgressCertificateStatusSlot` covers only the certificate area, not the full layout. The `[class*="learning"]` selector is the broadest and most brittle in the file — it matches any element whose class contains the string "learning".
+- **Attempted alternatives**: `body.learning-mfe` (not emitted by upstream MFE), `[data-testid*="learning-page"]` (data-testid not consistently applied by upstream learning MFE).
+- **Next review**: 2026-Q3
+- **Resolution path**: File slot proposal with Open edX community for `org.openedx.frontend.learning.course_grid.v1`. Until approved, keep CSS with `SELECTOR-EXCEPTION` annotations and data-testid primary paths.
+- **Rollback**: If `[class*="learning"]` causes false positives (styling non-learning pages), narrow scope by adding `[data-page="learning"]` attribute via MFE config.
+
+### US7-TICKET-002: Discussions MFE Styling
+
+- **Selector**: `[class*="discussions"]` (6 rule blocks)
+- **Filed**: 2026-02-18
+- **Rationale**: No upstream slot available for discussions MFE styling. All rules are P3/cosmetic (card borders, link colors, heading font). `[class*="discussion"]` singular was eliminated (bead 115d.18); plural `[class*="discussions"]` remains as well-scoped fallback.
+- **Next review**: 2026-Q3
+- **Resolution path**: Monitor upstream discussions MFE for slot additions. Keep as CSS with data-testid primary + SELECTOR-EXCEPTION.
+- **Rollback**: Styles are cosmetic only — removing the `[class*="discussions"]` fallback would fall back to global Paragon defaults, which are acceptable.
+
+---
+
 ## Summary Matrix
 
-| # | Override | Slot Available | Status | Priority | Effort | Risk |
-|---|---------|---------------|--------|----------|--------|------|
-| 1 | Footer | ✅ footer.v1 | ✅ MIGRATED | Done | Done | Low |
-| 2 | Header Logo | ✅ header_logo.v1 | 🟡 CSS | P1 | M | Med |
-| 3 | Authn Branding | ✅ login_component.v1 | 🟡 CSS | P1 | M | Med |
-| 4 | Dashboard Layout | ✅ sidebar + no_courses | 🟡 CSS | P1 | L | High |
-| 5 | Learning Layout | ⚠️ Partial (cert only) | 🔴 CSS | P2 | L | Critical |
-| 6 | Discussions | ❌ None | 🔴 CSS | P3 | N/A | Med |
-| 7 | Account/Settings | ❌ None | 🟡 CSS | P3 | N/A | Med |
-| 8 | Paragon Globals | N/A (use tokens) | ✅ STABLE | P3 | N/A | Low |
-| 9 | Navbar | ⚠️ Partial (logo) | 🟡 CSS | P2 | S | Low |
-| 10 | Studio Footer | ✅ studio_footer.v1 | ⬜ NOT STARTED | P2 | M | N/A |
+| # | Override | Slot Available | Status | Priority | Effort | Risk | Owner | Target Date |
+|---|---------|---------------|--------|----------|--------|------|-------|-------------|
+| 1 | Footer | ✅ footer.v1 | ✅ MIGRATED | Done | Done | Low | Mereka | Done |
+| 2 | Header Logo | ✅ header_logo.v1 | 🟡 CSS | P1 | M | Med | Mereka frontend | 2026-Q3 |
+| 3 | Authn Branding | ✅ login_component.v1 | 🟡 CSS (auth-page removed) | P1 | M | Low-Med | Mereka frontend | 2026-Q3 |
+| 4 | Dashboard Layout | ✅ sidebar + no_courses | 🟡 CSS | P1 | L | High | Mereka frontend | 2026-Q3 |
+| 5 | Learning Layout | ⚠️ Partial (cert only) | 🔴 CSS | P2 | L | Critical | Mereka / Upstream | TBD (upstream) |
+| 6 | Discussions | ❌ None | 🔴 CSS (singular removed) | P3 | N/A | Low | Mereka frontend | 2026-Q3 review |
+| 7 | Account/Settings | ❌ None | 🟡 CSS | P3 | N/A | Med | Mereka frontend | 2026-Q3 review |
+| 8 | Paragon Globals | N/A (use tokens) | ✅ STABLE | P3 | N/A | Low | Mereka frontend | N/A |
+| 9 | Navbar | ⚠️ Partial (logo) | 🟡 CSS | P2 | S | Low | Mereka frontend | 2026-Q3 |
+| 10 | Studio Footer | ✅ studio_footer.v1 | ⬜ NOT STARTED | P2 | M | N/A | Mereka frontend | 2026-Q4 |
 
 ## Migration Roadmap
 
@@ -232,14 +309,28 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 ## Migration Lock
 
-**Status**: LOCKED (Sprint S6, 2026-02-18)
+**Status**: LOCKED (Sprint S6 / bead 115d.18, 2026-02-18)
 
 This register is the canonical inventory of all MFE DOM/CSS overrides.
 Any new override MUST:
-1. Be added to this register with full classification
+1. Be added to this register with full classification (including Owner, Action, Target Date)
 2. Include a `data-testid` fallback selector
 3. Have an approved migration path documented
 4. Pass `verify-migration-lock.sh` CI gate
+5. If brittle `[class*=]` is unavoidable, add a `// SELECTOR-EXCEPTION: <reason> | expires: YYYY-QN` annotation in SCSS
+
+### Rollback Policy
+
+If a selector change breaks production styling:
+1. Revert the SCSS commit: `git revert <sha> --no-edit`
+2. Restore previous exception annotation (with updated expiry)
+3. Update this register with the regression finding
+4. File a bug ticket with browser/MFE version that triggered the break
+
+Rollback windows per exception tier:
+- **P1 selectors** (authn, dashboard): 24h hotfix window
+- **P2 selectors** (learning): 72h — uses data-testid primary, class fallback only
+- **P3 selectors** (discussions, account): No SLA — cosmetic only, falls back to Paragon defaults
 
 ### Lock Enforcement
 

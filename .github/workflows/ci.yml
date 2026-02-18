@@ -587,7 +587,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify MFE selector hardening compliance (AC-SEL-001 through AC-SEL-005)
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-mfe-selector-hardening.sh
+
+      - name: Verify MFE selector hardening compliance (AC-US7-001 through AC-US7-005)
+        run: ./scripts/qa/verify-mfe-selector-hardening.sh
+
+  mfe-selector-hardening-pr:
+    name: MFE Selector Hardening Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'selector') ||
+        contains(github.event.pull_request.title, 'mfe') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'theme') ||
+        contains(github.event.pull_request.title, 'scss')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-mfe-selector-hardening.sh
+      - name: Run selector hardening verification (AC-US7-001..005)
         run: ./scripts/qa/verify-mfe-selector-hardening.sh
 
   plugin-slot-migration:
