@@ -332,3 +332,39 @@ curl -s https://skillourfuture.academy.mereka.io/api/mfe_config/v1 | python3 -m 
 - Surface matrix: `docs/operations/TENANT_BRANDING_SURFACE_MATRIX.md`
 - Branding runtime script: `scripts/qa/verify-tenant-branding-runtime.sh`
 - Governance gates: `scripts/qa/run-multisite-governance-gates.sh`
+
+---
+
+## Branding Evidence Pipeline
+
+### Running the Pipeline
+
+```bash
+# Full evidence pipeline (nightly / release-blocking)
+./scripts/qa/run-branding-evidence-pipeline.sh --env prod
+
+# With custom retention
+RETENTION_DAYS=90 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
+```
+
+### Evidence Directory Structure
+
+```
+var/evidence/branding/YYYYMMDD-HHMMSS/
+├── SUMMARY.md              # Markdown report (link in release notes)
+├── mfe-route-smoke.log     # MFE route HTTP smoke results
+├── tenant-branding-runtime.log  # Per-domain branding checks
+├── mfe-route-contract.log  # Route-to-dist contract
+├── mfe-route-drift.log     # Route mapping drift guard
+└── multisite-governance.log # Full governance gates
+```
+
+### Failure Taxonomy
+
+| Failure Type | Owner | Priority | Resolution |
+|-------------|-------|----------|------------|
+| MFE dist directory missing | Build engineer | P2 | Rebuild MFE image with missing app |
+| SITE_NAME fallback to "Open edX" | Tenant admin | P3 | Update Django Site display_name |
+| Brand color tokens absent | Tenant admin | P3 | Populate TenantConfig.branding_config |
+| Selector override expired | Frontend lead | P2 | Migrate to plugin-slot, update decision log |
+| Route 404 on live endpoint | DevOps | P1 | Check Caddy config + MFE pod dist dirs |
