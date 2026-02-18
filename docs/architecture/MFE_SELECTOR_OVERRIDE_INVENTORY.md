@@ -1,0 +1,147 @@
+# MFE Selector Override Inventory
+
+> Tracks CSS/JS selectors that override MFE default behavior. These are brittle
+> because MFE DOM structure changes on every Open edX release.
+>
+> **AC-MFE-005** — Document risky selector overrides and migration priority.
+> **Spec**: `mfe-branding-customization_spec.md`
+> **Last scanned**: 2026-02-18
+
+---
+
+## Risk Levels
+
+| Level | Definition | Action |
+|-------|-----------|--------|
+| **HIGH** | Targets auto-generated hash-based class names (e.g., `.css-1abc2de`) | Migrate to plugin-slot immediately |
+| **MEDIUM** | Targets Paragon component internals (`pgn__*`) or `[class*="..."]` wildcards that can shift | Track upstream; migrate when slot is available |
+| **LOW** | Targets stable semantic IDs, data attributes, or CSS custom properties | Monitor only |
+
+---
+
+## Current Overrides
+
+### 1. `infrastructure/tutor/themes/mereka/mfe/mereka.scss` (MFE-specific overrides)
+
+This is the primary risk file. It is injected into all MFEs via Tutor's MFE build hook.
+
+| Selector Pattern | Target MFE(s) | Risk | Notes |
+|-----------------|---------------|------|-------|
+| `.pgn__page-container`, `.pgn__btn--primary`, `.pgn__card`, `.pgn__modal-content`, etc. | All MFEs | **MEDIUM** | Paragon component classes are stable within a Paragon major version but change across major bumps |
+| `[data-testid*="login-page"] .pgn__card` | Authn MFE | **MEDIUM** | `data-testid` selectors are intended for tests, not production styling; Open edX may remove them |
+| `[class*="authn"] .pgn__btn--primary` | Authn MFE | **MEDIUM** | Wildcard class match; marked `# BRITTLE` in source |
+| `[class*="account-settings"] .pgn__form-control` | Account MFE | **MEDIUM** | Wildcard class match; marked `# BRITTLE` in source |
+| `[class*="learner-dashboard"] [data-testid*="course"]` | Learner Dashboard MFE | **MEDIUM** | Mixed data-testid + class wildcard; fragile nesting |
+| `[data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"])` | Learning MFE | **MEDIUM** | Deep compound selector; 3+ levels of combinators |
+| `[class*="discussions"] .pgn__card` | Discussions MFE | **MEDIUM** | Wildcard class match; marked `# BRITTLE` in source |
+
+**Total `# BRITTLE` annotations**: 10+ comment blocks in `mereka.scss`.
+
+**Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
+
+---
+
+### 2. `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` (LMS shell overrides)
+
+Applied to the LMS shell page that wraps MFEs (header/footer regions visible before MFE hydration).
+
+| Selector Pattern | Target Surface | Risk | Notes |
+|-----------------|----------------|------|-------|
+| `.header-global`, `.nav-global` | LMS shell header | **MEDIUM** | These are LMS legacy class names; subject to Open edX template refactors |
+| `.find-courses .search-facets .header-search-facets` | Course discovery | **MEDIUM** | 3-level nesting into LMS template structure |
+| `.footer-container`, `.footer-social`, `.footer-nav`, `.footer-logo-link`, `.footer-logo-img`, `.footer-brand-name`, etc. | LMS legacy footer | **MEDIUM** | ~30 footer selectors targeting the legacy Mako-rendered footer; migration to `footer-slot` in progress (8jao.9) |
+| `--mereka-*` CSS custom properties | All surfaces | **LOW** | Stable design token contract; no DOM coupling |
+
+---
+
+### 3. `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` (Common overrides)
+
+Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment). Same risk profile applies.
+
+---
+
+### 4. `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css` (Design tokens)
+
+| Selector Pattern | Target | Risk | Notes |
+|-----------------|--------|------|-------|
+| `:root { --color-* }` | All surfaces | **LOW** | Pure CSS custom properties; no DOM coupling; stable contract |
+
+---
+
+### 5. `infrastructure/tutor/plugins/mereka_lms.py` (Footer slot injection)
+
+| Override Method | Target | Risk | Notes |
+|----------------|--------|------|-------|
+| `footer_slot` via `PLUGIN_OPERATIONS.Replace` | All MFEs | **LOW** | Plugin-slot API is stable; this is the recommended migration path |
+| Inline `MerekaFooter` React component emitting `.footer-social`, `.footer-container`, etc. | All MFEs | **MEDIUM** | The emitted class names in the JSX are custom (not Paragon), so they are stable as long as we own the component |
+
+---
+
+## Migration Priority
+
+### Immediate (before next Tutor upgrade)
+
+1. **`[class*="..."]` wildcard fallbacks in `mereka.scss`** — marked `# BRITTLE` throughout the file.
+   These are fallback selectors added because `data-testid` attributes were absent at time of authoring.
+   **Action**: Audit each fallback block. If upstream now ships `data-testid`, remove the wildcard fallback.
+
+2. **`.header-global` / `.nav-global` in LMS overrides** — LMS template classes.
+   **Action**: Verify these class names still exist in the Tutor 21 (Ulmo) LMS templates.
+   If removed upstream, the selector is a no-op (silent regression).
+
+### Next release cycle
+
+3. **`pgn__*` selectors in `mereka.scss`** — Paragon 22 → 23 can rename component classes.
+   **Action**: Pin selectors to the Paragon version range tested. Add a CI check that fails if `pgn__` class names in use are not present in the installed Paragon package.
+
+4. **LMS legacy footer selectors** (`.footer-container`, `.footer-social`, etc.) — being actively replaced by the `footer-slot` plugin (8jao.9).
+   **Action**: Once `footer-slot` migration is complete, remove these ~30 selectors from `mereka-overrides.css`.
+
+### Monitor only
+
+5. **CSS custom properties (`--mereka-*`, `--color-*`)** — stable; no action needed.
+
+6. **`footer_slot` plugin wiring in `mereka_lms.py`** — plugin-slot API is stable across Tutor versions.
+
+---
+
+## Plugin-Slot Migration Status
+
+| Component | Current Method | Target Method | Status |
+|-----------|---------------|---------------|--------|
+| Footer | `footer_slot` plugin + CSS override fallback (`mereka-overrides.css`) | `footer_slot` plugin only | In progress (8jao.9) — CSS fallback to be removed after slot is fully verified |
+| Header | `.header-global` / `.nav-global` CSS override | `header-slot` plugin | Planned |
+| Logo | LMS theme asset path + `footer-logo-img` CSS | `logo-slot` plugin | Planned |
+| Auth page layout | `[class*="authn"]` CSS overrides in `mereka.scss` | Authn MFE plugin slot (when available) | Blocked — no slot exposed upstream yet |
+
+---
+
+## Verification Commands
+
+```bash
+# Find all CSS overrides targeting MFE components (Paragon + wildcard patterns)
+grep -rn 'pgn__\|paragon\|\[class\*=' \
+  infrastructure/tutor/themes/ \
+  --include="*.css" --include="*.scss"
+
+# Find BRITTLE annotations in the codebase
+grep -rn 'BRITTLE' infrastructure/tutor/themes/
+
+# Check plugin-slot registration status
+grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
+  infrastructure/tutor/plugins/
+
+# Run the MFE route smoke + branding gate
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+
+# Run the selector hardening check
+./scripts/qa/verify-mfe-selector-hardening.sh
+```
+
+---
+
+## Changelog
+
+| Date | Author | Change |
+|------|--------|--------|
+| 2026-02-18 | 8jao.5 | Initial inventory from live codebase scan (AC-MFE-005) |
