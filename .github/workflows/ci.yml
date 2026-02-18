@@ -236,6 +236,7 @@ jobs:
           bash -n scripts/qa/verify-postmerge-governance-closure.sh
           bash -n scripts/qa/verify-spec-coverage-cleanup.sh
           bash -n scripts/qa/verify-analytics-undefined-regression.sh
+          bash -n scripts/qa/verify-analytics-key-elimination.sh
 
       - name: Run local observability audit
         run: |
@@ -1203,3 +1204,23 @@ jobs:
 
       - name: Verify analytics undefined regression fix (bead 2dcy.7)
         run: ./scripts/qa/verify-analytics-undefined-regression.sh
+
+  analytics-key-elimination:
+    name: Analytics Key Elimination Guard (AC-UI-501..505)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-analytics-key-elimination.sh
+
+      - name: Verify analytics key elimination (bead 1h41)
+        run: ./scripts/qa/verify-analytics-key-elimination.sh
+
+      - name: Upload analytics key elimination gate artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analytics-key-elimination-gate
+          path: var/
+          if-no-files-found: ignore
