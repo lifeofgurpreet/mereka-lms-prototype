@@ -11,7 +11,7 @@ status: "draft"
 
 **Test Framework**: Shell scripts (bash), Python (pytest), GitHub Actions (act for local workflow testing)
 
-**Acceptance Criteria**: 28 ACs mapped to test cases
+**Acceptance Criteria**: 28 ACs mapped to test cases (AC-001 through AC-028, AC-INT-001 through AC-INT-004)
 **Edge Cases**: 14 edge cases with negative tests
 
 ---

@@ -9,6 +9,8 @@ last_updated: "2026-02-10"
 
 # Implementation Plan: Branding System
 
+**AC Coverage**: AC-001 through AC-020, AC-INT-001 through AC-INT-003 (from `specs/branding-system_spec.md`)
+
 **Source Spec**: `specs/branding-system_spec.md`
 **Tier**: 1 (Core Infrastructure)
 **Depends On**: Tier 0 (repository-structure, secrets-management, tutor-configuration, cross-cutting-requirements), multi-site-domains
