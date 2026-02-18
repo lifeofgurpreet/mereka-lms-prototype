@@ -2,7 +2,7 @@
 
 > Inventory of all MFE customization points with migration paths to plugin-slot-first architecture.
 >
-> **Bead**: mereka-lms-8jao.9 / mereka-lms-115d.18
+> **Bead**: mereka-lms-8jao.9 / mereka-lms-115d.18 / mereka-lms-115d.21
 > **Last updated**: 2026-02-18
 > **Source**: MFE_SELECTOR_HARDENING_AUDIT.md + MFE_PLUGIN_SLOT_MATRIX.md
 
@@ -37,7 +37,8 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Owner** | Mereka |
 | **Files** | `mereka_lms.py:~650-900` |
 | **Migration path** | Migration complete — dual-path wiring (RenderWidget + PLUGIN_SLOTS) |
-| **Verification** | `verify-mfe-footer-slot.sh`, `verify-footer-slot-migration.sh`, `verify-footer-variant-matrix.sh` |
+| **Verification** | `verify-mfe-footer-slot.sh`, `verify-footer-slot-migration.sh`, `verify-footer-variant-matrix.sh`, `verify-mfe-footer-fallbacks.sh` |
+| **Fallback paths** | Enterprise MFEs (admin-portal, learner-portal) use separate build pipeline without plugin-slot support — see `docs/operations/footer-slot-exceptions.md` for exception register (FTRX-EXC-001, FTRX-EXC-002). Studio CMS uses Mako templates (FTRX-EXC-003). |
 
 ---
 
@@ -350,4 +351,5 @@ Run `./scripts/qa/verify-plugin-slot-migration-register.sh` to check:
 ## References
 - [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
 - [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md)
+- [footer-slot-exceptions.md](footer-slot-exceptions.md) — Footer fallback exception register with visual evidence pack
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
