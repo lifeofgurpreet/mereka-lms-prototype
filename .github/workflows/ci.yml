@@ -238,6 +238,7 @@ jobs:
           bash -n scripts/qa/verify-spec-coverage-cleanup.sh
           bash -n scripts/qa/verify-analytics-undefined-regression.sh
           bash -n scripts/qa/verify-analytics-key-elimination.sh
+          bash -n scripts/qa/verify-token-integrity-routing.sh
 
       - name: Run local observability audit
         run: |
@@ -696,6 +697,18 @@ jobs:
 
       - name: Verify frontend version consistency (docs ↔ CI ↔ scripts ↔ K8s)
         run: ./scripts/qa/verify-frontend-version-truth.sh
+
+  token-integrity-routing:
+    name: Token Integrity and Routing Verification (AC-FRONT-011..015)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-token-integrity-routing.sh
+
+      - name: Verify token integrity + routing alignment
+        run: ./scripts/qa/verify-token-integrity-routing.sh
 
   legacy-ecommerce-guard:
     name: Legacy Ecommerce UI Guard
