@@ -278,3 +278,57 @@ kubectl get endpoints -n mereka-lms
 # Manual MFE config check
 curl -s https://academyv2.mereka.io/api/mfe_config/v1 | grep -E 'SITE_NAME|LOGO_URL|--mereka-color'
 ```
+
+---
+
+## Tenant Branding Runtime Verification
+
+### Common Issues
+
+**SITE_NAME shows "Open edX" instead of tenant name**
+- Check: `curl -s https://{domain}/api/mfe_config/v1 | grep SITE_NAME`
+- Fix: Verify the domain has a Django `Site` record with the correct `display_name`. Run:
+  ```bash
+  kubectl exec -n mereka-lms deploy/lms -- python -c "
+  from django.contrib.sites.models import Site
+  for s in Site.objects.all(): print(f'{s.domain} → {s.name}')
+  "
+  ```
+- If missing, create via Django admin or management command.
+
+**Logo returns default Open edX logo**
+- Check: `curl -s https://{domain}/api/mfe_config/v1 | grep LOGO_URL`
+- Fix: Verify theme assets exist at `/theming/asset/mereka/images/`. If 404, rebuild with `tutor images build openedx`.
+
+**Brand color tokens missing from MFE config**
+- This is expected in Phase 1. Brand colors require populating `branding_config` in each `TenantConfig` record.
+- To populate: `kubectl exec -n mereka-lms deploy/lms -- python -c "..." ` (update TenantConfig.branding_config)
+
+**Footer shows wrong variant**
+- Check: Verify `SITE_VARIANTS` in Caddy/LMS settings includes the domain.
+- Check: Verify footer template renders correctly: `curl -s https://{domain}/ | grep -i "footer"`
+
+**Runtime verification script fails with timeout**
+- Increase timeout: `CURL_TIMEOUT=30 ./scripts/qa/verify-tenant-branding-runtime.sh --env prod`
+- Check DNS: `dig +short {domain}`
+- Check ingress: `kubectl get ingress -n mereka-lms`
+
+### Verification Commands
+
+```bash
+# Full branding runtime check
+./scripts/qa/verify-tenant-branding-runtime.sh --env prod
+
+# Full governance gates (includes branding)
+./scripts/qa/run-multisite-governance-gates.sh --env prod
+
+# Per-domain MFE config
+curl -s https://academyv2.mereka.io/api/mfe_config/v1 | python3 -m json.tool
+curl -s https://academy.biji-biji.com/api/mfe_config/v1 | python3 -m json.tool
+curl -s https://skillourfuture.academy.mereka.io/api/mfe_config/v1 | python3 -m json.tool
+```
+
+### Reference
+- Surface matrix: `docs/operations/TENANT_BRANDING_SURFACE_MATRIX.md`
+- Branding runtime script: `scripts/qa/verify-tenant-branding-runtime.sh`
+- Governance gates: `scripts/qa/run-multisite-governance-gates.sh`

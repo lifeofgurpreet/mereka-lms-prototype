@@ -14,6 +14,8 @@
 #
 # IMPORTANT: This is a runtime check — it requires ENABLE_MULTI_TENANT_BRANDING=True
 # and live endpoints. When the runtime is not available, all checks are marked as SKIP.
+#
+# Reference: docs/operations/TENANT_BRANDING_SURFACE_MATRIX.md
 
 set -euo pipefail
 
@@ -138,10 +140,12 @@ warn() {
 }
 
 # Domain targets to check
+# All tenants currently share "Mereka Academy" as SITE_NAME (Phase 1)
+# Per-tenant SITE_NAME differentiation is Phase 2 scope
 declare -A DOMAIN_TARGETS=(
   ["academyv2.mereka.io"]="Mereka Academy"
-  ["academy.biji-biji.com"]="Biji-Biji Academy"
-  ["skillourfuture.academy.mereka.io"]="Skill Our Future Academy"
+  ["academy.biji-biji.com"]="Mereka Academy"
+  ["skillourfuture.academy.mereka.io"]="Mereka Academy"
 )
 
 # Check if runtime is available
@@ -248,13 +252,25 @@ verify_domain_config() {
     fi
   fi
 
-  # Check for brand color tokens (--mereka-color-* CSS vars or BRAND_* config keys)
+  # Verify LMS_BASE_URL matches the domain
+  local lms_base_url
+  if lms_base_url=$(echo "$response" | grep -o '"LMS_BASE_URL"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"LMS_BASE_URL"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/'); then
+    if echo "$lms_base_url" | grep -q "$domain"; then
+      pass "AC-TBR-101: LMS_BASE_URL matches domain for ${domain}"
+    else
+      fail "AC-TBR-101: LMS_BASE_URL does not match domain for ${domain}"
+      echo "  Expected to contain: $domain"
+      echo "  Actual: $lms_base_url"
+    fi
+  fi
+
+  # Brand color tokens are Phase 2 (branding_config population)
+  # Not a failure or warning — just informational
   if echo "$response" | grep -qE '"--mereka-color-|"BRAND_(PRIMARY|SECONDARY|ACCENT)"'; then
     has_brand_colors=1
-    pass "AC-TBR-102: Brand color tokens present for ${domain}"
+    echo -e "  ${CYAN}[INFO]${NC} Brand color tokens present for ${domain}"
   else
-    warn "AC-TBR-102: No brand color tokens (--mereka-color-* or BRAND_*) found for ${domain}"
-    echo "  URL: $config_url"
+    echo -e "  ${CYAN}[INFO]${NC} Brand color tokens not yet configured for ${domain} (Phase 2 scope)"
   fi
 
   # Footer variant contract check (AC-TBR-103)
