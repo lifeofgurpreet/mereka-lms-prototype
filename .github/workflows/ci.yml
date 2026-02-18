@@ -171,6 +171,7 @@ jobs:
           bash -n scripts/qa/verify-design-token-usage.sh
           bash -n scripts/qa/verify-token-reference-integrity.sh
           bash -n scripts/qa/verify-token-generation-pipeline.sh
+          bash -n scripts/qa/verify-branding-token-integrity.sh
           bash -n scripts/qa/verify-mfe-route-drift.sh
           bash -n scripts/qa/verify-mfe-route-contract.sh
           bash -n scripts/qa/verify-plugin-slot-wiring.sh
@@ -666,3 +667,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify analytics key injection safety
         run: ./scripts/qa/verify-analytics-key.sh
+
+  branding-token-integrity:
+    name: Branding Token Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify branding token integrity
+        run: ./scripts/qa/verify-branding-token-integrity.sh
