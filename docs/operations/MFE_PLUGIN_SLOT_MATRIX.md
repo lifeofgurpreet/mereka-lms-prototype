@@ -205,9 +205,16 @@ The MFE override layer (`infrastructure/tutor/themes/mereka/mfe/mereka.scss`) ha
 
 ---
 
+## Migration Register
+
+For the complete override-to-slot migration plan, see [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md).
+
+---
+
 ## References
 
 - **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+- **Migration Register**: [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md)
 - **Selector Hardening Audit**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
 - **ADR-014**: [MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)
 - **Verification Script**: [verify-plugin-slot-wiring.sh](../../scripts/qa/verify-plugin-slot-wiring.sh)
