@@ -3,7 +3,38 @@
 > Deterministic rollout path for LMS/MFE branding changes. Covers build, push, GitOps deploy,
 > verify, and rollback.
 >
-> AC-DEP-001, AC-DEP-002, AC-DEP-003, AC-DEP-004
+> AC-DEP-001, AC-DEP-002, AC-DEP-003, AC-DEP-004, AC-DEP-201, AC-DEP-202, AC-DEP-204, AC-DEP-205
+
+---
+
+## Quick Reference: One-Shot Deploy (AC-DEP-201)
+
+For UI/UX branding changes already merged to `main`, use this single command sequence:
+
+```bash
+# 1. Build + tag + push (one-shot)
+export TUTOR_ROOT="$(pwd)/tutor_env"
+source infrastructure/tutor/tutor-env.sh
+tutor images build openedx -a PIP_COMMAND=pip && tutor images build mfe
+
+TAG="$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)"
+GAR="asia-southeast1-docker.pkg.dev/mereka-lms/openedx"
+docker tag docker.io/overhangio/openedx:latest "${GAR}/openedx:${TAG}"
+docker tag docker.io/overhangio/openedx-mfe:latest "${GAR}/openedx-mfe:${TAG}"
+docker push "${GAR}/openedx:${TAG}" && docker push "${GAR}/openedx-mfe:${TAG}"
+
+# 2. GitOps rollout + verify (one-shot)
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${TAG}" --mfe-tag "${TAG}" \
+  --apply --commit --push --verify-runtime
+
+# 3. Post-deploy smoke matrix (mandatory)
+./scripts/qa/verify-post-deploy-smoke.sh --env prod \
+  --evidence-dir "var/evidence/release-$(date +%Y%m%d)"
+```
+
+---
 
 ## Pre-Flight Checklist
 
@@ -213,7 +244,31 @@ kubectl -n mereka-lms rollout status deployment/cms --timeout=120s
 
 ---
 
-## Release Notes Template
+## Post-Deploy Smoke Matrix (AC-DEP-204)
+
+After every deploy, run the post-deploy smoke matrix. All checks must PASS before marking rollout complete.
+
+```bash
+# Full smoke matrix (authn, LMS, Studio, 3+ MFEs, tenant domains, K8s pods)
+./scripts/qa/verify-post-deploy-smoke.sh --env prod \
+  --evidence-dir "var/evidence/release-$(date +%Y%m%d)"
+```
+
+The smoke matrix covers:
+
+| Category | Endpoints | Expected |
+|----------|-----------|----------|
+| LMS Core | homepage, heartbeat, mfe_config API | HTTP 200 |
+| Studio/CMS | homepage (302 → login), heartbeat | HTTP 302/200 |
+| Authn MFE | /authn/login, /authn/register | HTTP 200 |
+| MFE Routes (3+) | learner-dashboard, account, profile, course-about, discussions | HTTP 200 |
+| Tenant Domains | academy.biji-biji.com, skillourfuture.academy.mereka.io | HTTP 200 + correct SITE_NAME |
+| K8s Readiness | lms, cms, mfe deployments | ready == desired |
+| Image Tags | lms, cms, mfe containers | no `latest` tag |
+
+---
+
+## Release Notes Template (AC-DEP-202)
 
 ```markdown
 ## Release: Branding <TAG>
@@ -234,9 +289,10 @@ kubectl -n mereka-lms rollout status deployment/cms --timeout=120s
 **Verification**:
 - Evidence pipeline: PASS (5/5 gates)
 - Tenant domains: 3/3 HTTP 200
-- Post-deploy branding gates: PASS
+- Post-deploy smoke matrix: PASS (see evidence artifacts)
 - GitOps drift check: PASS
 
+**Evidence artifacts**: `var/evidence/release-<YYYYMMDD>/`
 **Rollback tag**: `<previous-known-good-tag>`
 ```
 
@@ -268,11 +324,71 @@ grep -o "'[a-z_]*'" /home/gurpreet/projects/k8s/bbi-infrastructure/apps/mereka-l
 
 ---
 
+## Evidence Retention Policy (AC-DEP-205)
+
+Evidence artifacts from rollouts and rollbacks MUST be retained for **30 days minimum**.
+
+### Directory structure
+
+```
+var/evidence/
+├── release-20260218/
+│   ├── post-deploy-smoke.log          # verify-post-deploy-smoke.sh output
+│   ├── branding-evidence-pipeline.log  # run-branding-evidence-pipeline.sh output
+│   ├── gitops-drift.log               # verify-gitops-drift.sh output
+│   ├── gitops-image-overrides.log     # verify-gitops-image-overrides.sh output
+│   ├── tenant-branding-runtime.log    # verify-tenant-branding-runtime.sh output
+│   └── summary.md                     # Release notes (copy of template above)
+└── rollback-20260218/
+    ├── pre-rollback-state.log          # Image tags + pod status before rollback
+    ├── rollback-commands.log           # Exact commands executed
+    ├── post-rollback-smoke.log         # verify-post-deploy-smoke.sh after rollback
+    └── incident-summary.md             # What broke, root cause, resolution
+```
+
+### Rollback evidence checklist
+
+After every rollback, capture:
+
+```bash
+# 1. Pre-rollback state
+EVIDENCE_DIR="var/evidence/rollback-$(date +%Y%m%d)"
+mkdir -p "$EVIDENCE_DIR"
+
+kubectl get deploy lms cms mfe -n mereka-lms \
+  -o jsonpath='{range .items[*]}{.metadata.name}: {.spec.template.spec.containers[0].image}{"\n"}{end}' \
+  > "$EVIDENCE_DIR/pre-rollback-state.log"
+
+# 2. Execute rollback (use Option A, B, or C from Step 5 above)
+# Record commands in rollback-commands.log
+
+# 3. Post-rollback verification
+./scripts/qa/verify-post-deploy-smoke.sh --env prod \
+  --evidence-dir "$EVIDENCE_DIR" 2>&1 | tee "$EVIDENCE_DIR/post-rollback-smoke.log"
+
+# 4. Document incident
+echo "# Rollback Incident $(date +%Y-%m-%d)" > "$EVIDENCE_DIR/incident-summary.md"
+echo "Describe: what broke, root cause, resolution" >> "$EVIDENCE_DIR/incident-summary.md"
+```
+
+### Cleanup
+
+Evidence older than 30 days MAY be archived or deleted:
+
+```bash
+find var/evidence/ -maxdepth 1 -type d -mtime +30 -exec rm -rf {} +
+```
+
+---
+
 ## Reference
 
 - Canonical release orchestrator: `scripts/infra/release-openedx-gitops.sh`
 - Image override contract: `scripts/qa/verify-gitops-image-overrides.sh`
+- GitOps drift check: `scripts/qa/verify-gitops-drift.sh`
+- Post-deploy smoke matrix: `scripts/qa/verify-post-deploy-smoke.sh`
 - Branding evidence pipeline: `scripts/qa/run-branding-evidence-pipeline.sh`
 - ADR-012 (no runtime CSS overlay): `docs/adr/012-no-runtime-css-overlay.md`
 - General release checklist: `docs/operations/RELEASE_CHECKLIST.md`
 - Tenant branding QA: `docs/operations/TENANT_BRANDING_QA_RUNBOOK.md`
+- Tenant onboarding playbook: `docs/operations/TENANT_ONBOARDING_PLAYBOOK.md`

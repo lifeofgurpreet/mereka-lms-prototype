@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-DEP-004
+# @covers AC-DEP-004, AC-DEP-203
 # @spec: branding-system_spec.md
 # verify-gitops-drift.sh — Check for drift between source repo and GitOps overlays.
 #
