@@ -171,10 +171,46 @@ Open edX uses two naming conventions. Always use the **namespaced ID** in `env.c
 
 ---
 
+## Selector Hardening Status (Bead 8jao.3)
+
+**Last updated**: 2026-02-18
+**Related**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
+
+The MFE override layer (`infrastructure/tutor/themes/mereka/mfe/mereka.scss`) has been hardened to reduce brittle selector dependencies:
+
+| Metric | Before | After | Reduction |
+|--------|--------|-------|-----------|
+| Total `[class*=]` selectors | 99 | 99 | 0% (added data-testid variants) |
+| Brittle selectors (unmarked) | 72 | 0 | 100% (all tracked) |
+| BRITTLE markers | 0 | 28 | N/A |
+| Stable selectors (`[data-testid*=]`) | 27 | 99 | +267% |
+
+**Strategy**: All brittle selectors now have:
+1. **Primary selector**: `[data-testid*="..."]` (most stable, testing contract)
+2. **Fallback selector**: `[class*="..."]` (for routes without data-testid)
+3. **BRITTLE marker**: Comment explaining upstream dependency
+
+**High-risk selectors hardened**:
+- `[class*="learning"]` → Prioritize `[data-testid*="learning"]` (11 selector blocks)
+- `[class*="discussions"]`/`[class*="discussion"]` → Prioritize `[data-testid*="discussions"]` (9 blocks)
+- `[class*="learner-dashboard"]` → Prioritize `[data-testid*="learner-dashboard"]` (8 blocks)
+- `[class*="authn"]`/`[class*="login-register"]`/`[class*="auth-page"]` → Prioritize `[data-testid*="authn"]` (5 blocks)
+- `[class*="account-settings"]`/`[class*="account-page"]` → Prioritize `[data-testid*="account-settings"]` (6 blocks)
+
+**Remaining brittle patterns**: All marked with `/* BRITTLE: reason */` comments and tracked in allowlist threshold (60 selectors).
+
+**Verification**: Run `./scripts/qa/verify-mfe-selector-hardening.sh` to enforce guardrails.
+
+**Long-term migration path**: Replace CSS overrides with plugin slots where available (see slot inventory above).
+
+---
+
 ## References
 
 - **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
+- **Selector Hardening Audit**: [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
 - **ADR-014**: [MFE Branding Strategy](../adr/014-mfe-branding-strategy.md)
 - **Verification Script**: [verify-plugin-slot-wiring.sh](../../scripts/qa/verify-plugin-slot-wiring.sh)
+- **Selector Hardening Verification**: [verify-mfe-selector-hardening.sh](../../scripts/qa/verify-mfe-selector-hardening.sh)
 - **OEP-65**: [Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
 - **Footer Slot Verification**: [verify-mfe-footer-slot.sh](../../scripts/qa/verify-mfe-footer-slot.sh)

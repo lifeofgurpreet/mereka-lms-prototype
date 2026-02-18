@@ -197,6 +197,7 @@ jobs:
           bash -n scripts/qa/verify-tenant-branding-runtime.sh
           bash -n scripts/qa/verify-slot-matrix.sh
           bash -n scripts/qa/verify-interaction-state-contract.sh
+          bash -n scripts/qa/verify-mfe-selector-hardening.sh
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-footer-slot-migration.sh
           bash -n scripts/qa/verify-multisite-ux-consistency.sh
@@ -565,6 +566,15 @@ jobs:
 
       - name: Verify plugin-slot wiring chain (plugin ↔ patches ↔ inventory)
         run: ./scripts/qa/verify-plugin-slot-wiring.sh
+
+  mfe-selector-hardening:
+    name: MFE Selector Hardening Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify MFE selector hardening compliance (AC-SEL-001 through AC-SEL-005)
+        run: ./scripts/qa/verify-mfe-selector-hardening.sh
 
   contrast-compliance:
     name: WCAG 2.1 AA Contrast Compliance
