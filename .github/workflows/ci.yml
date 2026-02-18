@@ -229,6 +229,7 @@ jobs:
           bash -n scripts/qa/verify-ui-ux-hardening-bundle.sh
           bash -n scripts/qa/verify-multitenant-brand-platform.sh
           bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
+          bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
 
       - name: Run local observability audit
         run: |
@@ -1125,3 +1126,23 @@ jobs:
 
       - name: Verify tenant footer variant lane (AC-TF-001..004)
         run: ./scripts/qa/verify-tenant-footer-variant-lane.sh
+
+  mfe-analytics-plugin-parity:
+    name: MFE Analytics + Plugin Parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
+
+      - name: Verify MFE analytics key guard + plugin entry point compliance (AC-AN-001..004)
+        run: ./scripts/qa/verify-mfe-analytics-plugin-parity.sh
+
+      - name: Upload analytics parity gate artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-analytics-parity-gate
+          path: var/
+          if-no-files-found: ignore
