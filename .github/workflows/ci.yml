@@ -199,6 +199,7 @@ jobs:
           bash -n scripts/qa/verify-slot-matrix.sh
           bash -n scripts/qa/verify-interaction-state-contract.sh
           bash -n scripts/qa/verify-mfe-selector-hardening.sh
+          bash -n scripts/qa/verify-mfe-footer-slot-migration.sh
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-footer-slot-migration.sh
           bash -n scripts/qa/verify-multisite-ux-consistency.sh
@@ -597,6 +598,23 @@ jobs:
 
       - name: Verify plugin-slot wiring chain (plugin ↔ patches ↔ inventory)
         run: ./scripts/qa/verify-plugin-slot-wiring.sh
+
+  mfe-footer-slot-migration:
+    name: MFE Footer/Slot Migration (AC-FRONT-061..065)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-mfe-footer-slot-migration.sh
+
+      - name: Verify MFE footer/slot migration compliance (AC-FRONT-061 through AC-FRONT-065)
+        run: ./scripts/qa/verify-mfe-footer-slot-migration.sh
 
   mfe-selector-hardening:
     name: MFE Selector Hardening Guard
