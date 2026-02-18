@@ -237,6 +237,12 @@ MATH_INPUT_DEFAULT_TOLERANCE = float(os.environ.get('MATH_INPUT_DEFAULT_TOLERANC
 # Optional: Domain restriction for playback (defaults to production domain)
 MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.mereka.io')
 
+# ── Segment analytics ──────────────────────────────────────────────────
+# Canonical key source for Segment.io analytics.
+# Set MEREKA_SEGMENT_KEY in environment/secrets to enable.
+# When empty or unset, Segment includes are skipped in footer template.
+SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
+
 # Multi-Tenancy Integration (Tenancy Epic Phase 1)
 if 'mereka_tenancy' not in INSTALLED_APPS:
     INSTALLED_APPS.append('mereka_tenancy')
