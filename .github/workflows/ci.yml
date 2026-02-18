@@ -212,6 +212,7 @@ jobs:
           bash -n scripts/qa/verify-no-dom-overrides.sh
           bash -n scripts/qa/verify-migration-lock.sh
           bash -n scripts/qa/verify-enterprise-ui-review.sh
+          bash -n scripts/qa/verify-tenant-branding-matrix.sh
 
       - name: Run local observability audit
         run: |
@@ -760,3 +761,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run enterprise UI review gate
         run: ./scripts/qa/verify-enterprise-ui-review.sh
+
+  tenant-branding-matrix:
+    name: Tenant Branding Matrix Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'tenant') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'multisite') ||
+        contains(github.event.pull_request.title, 'domain')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tenant branding matrix gate
+        run: ./scripts/qa/verify-tenant-branding-matrix.sh
