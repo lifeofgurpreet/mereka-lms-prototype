@@ -213,6 +213,7 @@ jobs:
           bash -n scripts/qa/verify-migration-lock.sh
           bash -n scripts/qa/verify-enterprise-ui-review.sh
           bash -n scripts/qa/verify-tenant-branding-matrix.sh
+          bash -n scripts/qa/verify-footer-parity.sh
 
       - name: Run local observability audit
         run: |
@@ -777,3 +778,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run tenant branding matrix gate
         run: ./scripts/qa/verify-tenant-branding-matrix.sh
+
+  footer-parity:
+    name: Footer Parity Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'footer') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'parity')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run footer parity gate
+        run: ./scripts/qa/verify-footer-parity.sh
