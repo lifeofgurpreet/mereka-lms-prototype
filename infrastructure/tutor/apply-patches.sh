@@ -1226,7 +1226,18 @@ RUN pip install "pymongo[srv]" """,
         ).strip()
         if "const MerekaFooter" not in updated:
             updated = updated.replace("const themePluginSlot =", footer_component + "\n\nconst themePluginSlot =", 1)
-        # Legacy footer string-rewrite removed (bead 1rns). Footer now via plugin slot only.
+        # MIGRATED-TO-SLOT: footer_slot
+        # Primary path: mereka_lms.py plugin slot wiring (PLUGIN_SLOTS.add_item footer_slot with RenderWidget: <MerekaFooter />)
+        # Fallback path: apply-patches.sh injects MerekaFooter component definition so env.config.jsx
+        #   can reference: { RenderWidget: <MerekaFooter /> } within themePluginSlot footer_slot entry.
+        # Rollback: revert mereka_lms.py PLUGIN_SLOTS entry and this patch block; restore IndigoFooter.
+        if "RenderWidget: <MerekaFooter />" not in updated and "const MerekaFooter" in updated:
+            # Fallback: wire MerekaFooter into the themePluginSlot footer_slot entry if plugin didn't render it
+            updated = updated.replace(
+                "RenderWidget: IndigoFooter,",
+                "RenderWidget: <MerekaFooter />,  // MIGRATED-TO-SLOT: footer_slot (fallback)",
+                1,
+            )
 
     if path.name == "lms.conf":
         anchor = "  server_name academyv2.mereka.io preview.academyv2.mereka.io;"
