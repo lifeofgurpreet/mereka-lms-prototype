@@ -223,6 +223,7 @@ jobs:
           bash -n scripts/qa/verify-copy-terminology.sh
           bash -n scripts/qa/verify-visual-smoke-baseline.sh
           bash -n scripts/qa/verify-tenant-ui-smoke.sh
+          bash -n scripts/qa/verify-visual-parity-checkpoints.sh
 
       - name: Run local observability audit
         run: |
@@ -1015,3 +1016,22 @@ jobs:
         run: bash -n scripts/qa/verify-footer-slot-only.sh
       - name: Run footer slot-only verification (AC-FTR-301..305)
         run: ./scripts/qa/verify-footer-slot-only.sh
+
+  visual-parity-checkpoints:
+    name: Visual Parity Checkpoints Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'visual') ||
+        contains(github.event.pull_request.title, 'parity') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'mfe') ||
+        contains(github.event.pull_request.title, 'checkpoint')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-visual-parity-checkpoints.sh
+      - name: Run visual parity checkpoints (AC-UI-101..106)
+        run: ./scripts/qa/verify-visual-parity-checkpoints.sh
