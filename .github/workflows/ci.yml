@@ -208,6 +208,7 @@ jobs:
           bash -n scripts/qa/verify-analytics-drift-guardrails.sh
           bash -n scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
           bash -n scripts/qa/verify-analytics-key.sh
+          bash -n scripts/qa/verify-footer-variant-matrix.sh
 
       - name: Run local observability audit
         run: |
@@ -691,3 +692,12 @@ jobs:
 
       - name: Verify branding token integrity
         run: ./scripts/qa/verify-branding-token-integrity.sh
+
+  footer-variant-matrix:
+    name: Footer Variant Matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify footer variant matrix (AC-FTVAR-001 through AC-FTVAR-005)
+        run: ./scripts/qa/verify-footer-variant-matrix.sh
