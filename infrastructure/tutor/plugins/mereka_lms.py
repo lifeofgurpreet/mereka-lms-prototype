@@ -604,7 +604,7 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 )
 
 ###############################################################################
-# MFE Plugin Slot Configuration (Footer)
+# MFE Plugin Slot Configuration
 ###############################################################################
 #
 # MIGRATION STATUS: Dual-path (env.config.jsx patch + apply-patches.sh fallback)
@@ -614,13 +614,23 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   2. apply-patches.sh replaces RenderWidget: <Footer /> → <MerekaFooter />
 #
 # Target approach (FPF slot-driven, ADR-014):
-#   When tutor-mfe exposes tutormfe.hooks.PLUGIN_SLOTS, register footer_slot
-#   override directly from Python — no apply-patches.sh string replacement needed.
+#   When tutor-mfe exposes tutormfe.hooks.PLUGIN_SLOTS, register slot
+#   overrides directly from Python — no apply-patches.sh string replacement needed.
+#
+# Slot inventory (bead 2dcy.6, AC-FRONT-062):
+#
+#   Slot ID            | Replaces                              | Fallback
+#   -------------------|---------------------------------------|-------------------------------
+#   footer_slot        | Default Indigo Footer component       | apply-patches.sh RenderWidget
+#   header_logo_slot   | Default header logo (MFE header bar)  | CSS via .navbar .navbar-brand
+#   learner_dashboard_sidebar_slot | Dashboard sidebar (if present) | SCSS scoped layout rules
 #
 # Forward-compatible registration (activates when tutor-mfe adds PLUGIN_SLOTS):
 try:
     from tutormfe.hooks import PLUGIN_SLOTS  # type: ignore[import-not-found]
 
+    # Slot 1: footer_slot — replaces default Indigo/OpenedX footer with MerekaFooter
+    # Fallback: apply-patches.sh RenderWidget replacement in env.config.jsx
     PLUGIN_SLOTS.add_item(
         (
             "footer_slot",
@@ -639,6 +649,49 @@ try:
             },
         )
     )
+
+    # Slot 2: header_logo_slot — replaces default MFE header logo with Mereka branded logo
+    # Fallback: CSS via .navbar .navbar-brand img selector (RISK: HIGH) in mereka.scss
+    PLUGIN_SLOTS.add_item(
+        (
+            "header_logo_slot",
+            {
+                "keepDefault": False,
+                "plugins": [
+                    {
+                        "op": "PLUGIN_OPERATIONS.Replace",
+                        "widget": {
+                            "id": "mereka_header_logo",
+                            "type": "DIRECT_PLUGIN",
+                            "RenderWidget": "MerekaHeaderLogo",
+                        },
+                    }
+                ],
+            },
+        )
+    )
+
+    # Slot 3: learner_dashboard.sidebar.v1 — injects Mereka support/CTA panel into dashboard sidebar
+    # Fallback: SCSS scoped layout rules under [data-testid*="learner-dashboard"] (RISK: HIGH)
+    PLUGIN_SLOTS.add_item(
+        (
+            "learner_dashboard.sidebar.v1",
+            {
+                "keepDefault": True,
+                "plugins": [
+                    {
+                        "op": "PLUGIN_OPERATIONS.Append",
+                        "widget": {
+                            "id": "mereka_dashboard_sidebar_cta",
+                            "type": "DIRECT_PLUGIN",
+                            "RenderWidget": "MerekaDashboardSidebarCTA",
+                        },
+                    }
+                ],
+            },
+        )
+    )
+
     _PLUGIN_SLOTS_AVAILABLE = True
 except ImportError:
     # tutormfe.hooks.PLUGIN_SLOTS not available in this Tutor version.

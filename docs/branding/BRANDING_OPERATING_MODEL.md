@@ -319,6 +319,72 @@ Each exception must include:
   - Uploads logs from `var/ci/*.log` as workflow artifacts.
   - Any strict parity failure is a release blocker until deploy drift is corrected.
 
+## Plugin Slot Migration
+
+_Added: 2026-02-18 (bead 2dcy.6 / AC-FRONT-064)_
+
+### Slot IDs in Use
+
+| Slot ID | What It Replaces | Registration | Fallback Strategy |
+|---------|-----------------|--------------|-------------------|
+| `footer_slot` | Default Indigo/OpenedX `<Footer />` component | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | `apply-patches.sh` `RenderWidget: <MerekaFooter />` string replacement |
+| `header_logo_slot` | Default MFE header bar logo | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | CSS via `.navbar .navbar-brand img` selector (RISK: HIGH in mereka.scss) |
+| `learner_dashboard.sidebar.v1` | Dashboard sidebar (append mode) | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | SCSS scoped layout rules under `[data-testid*="learner-dashboard"]` (RISK: HIGH) |
+
+### Fallback Strategy
+
+When `tutormfe.hooks.PLUGIN_SLOTS` is not available (older Tutor versions), the plugin falls back to:
+
+1. **footer_slot fallback**: `apply-patches.sh` replaces `RenderWidget: <Footer />` with `RenderWidget: <MerekaFooter />` in the generated `env.config.jsx`. This is a structural string-rewrite that is kept with a `# MIGRATED-TO-SLOT:` comment for traceability.
+2. **header_logo_slot fallback**: SCSS selectors `.navbar .navbar-brand img` apply logo sizing. Tagged `RISK: HIGH` in `mereka.scss` because `.navbar` is a structural class that breaks if Bootstrap or MFE renames it.
+3. **learner_dashboard.sidebar.v1 fallback**: SCSS scoped under `[data-testid*="learner-dashboard"]` provides layout rules. Tagged `RISK: HIGH` in `mereka.scss`.
+
+The `_PLUGIN_SLOTS_AVAILABLE` boolean in `mereka_lms.py` indicates whether the canonical slot path is active. Check at runtime with:
+
+```bash
+grep '_PLUGIN_SLOTS_AVAILABLE' infrastructure/tutor/plugins/mereka_lms.py
+```
+
+### Migration Status Table
+
+| Customization | Status | Slot ID | Notes |
+|---------------|--------|---------|-------|
+| Footer component | MIGRATED (dual-path) | `footer_slot` | Canonical; fallback path kept for Tutor compat |
+| Header logo | REGISTERED (pending slot availability) | `header_logo_slot` | MFE header slot may not be exposed yet |
+| Dashboard sidebar CTA | REGISTERED (pending slot availability) | `learner_dashboard.sidebar.v1` | Append mode; does not displace default sidebar |
+| Authn card styling | NOT MIGRATED | — | No stable authn slot upstream; tracked in `MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` |
+| Learning MFE layout | NOT MIGRATED | — | No upstream slot; P2 upstream request filed |
+| Course card grid/list | NOT MIGRATED | — | No upstream slot; SCSS fallback only |
+
+### Regression Check Procedure
+
+After any slot or SCSS change affecting authn or learner-dashboard routes:
+
+1. Verify syntax: `bash -n infrastructure/tutor/apply-patches.sh`
+2. Verify slot wiring: `./scripts/qa/verify-mfe-footer-slot.sh`
+3. Verify selector compliance: `./scripts/qa/verify-mfe-selector-hardening.sh`
+4. Verify no DOM overrides: `./scripts/qa/verify-no-dom-overrides.sh`
+5. Run source branding gate: `RUN_LIVE_GATE=0 ./scripts/branding/run-branding-gates.sh prod`
+6. For live cluster checks: `./scripts/qa/verify-mfe-footer-slot-migration.sh`
+
+For authn route spot checks, look for:
+- `[data-testid*="login-page"]` or `[data-testid*="authn"]` in rendered DOM
+- `MerekaFooter` in `env.config.jsx` (verify via `grep MerekaFooter tutor_env/env/plugins/mfe/build/mfe/env.config.jsx`)
+
+For learner dashboard spot checks:
+- `[data-testid*="learner-dashboard"]` in rendered DOM
+- Dashboard sidebar renders without layout collapse
+
+### Rollback Procedure
+
+If slot injection fails (MFE build error or runtime slot not rendering):
+
+1. **Immediate**: Revert to CSS-only fallback — SCSS selectors in `mereka.scss` already cover all high-risk surfaces with `RISK: HIGH` tags. No build change needed.
+2. **footer_slot failure**: The `apply-patches.sh` fallback (string replacement) is always active. Verify with `grep 'MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/env.config.jsx`.
+3. **Full rollback**: Set `_PLUGIN_SLOTS_AVAILABLE = False` in `mereka_lms.py` (by ensuring `PLUGIN_SLOTS` import fails gracefully via the existing `try/except ImportError` block).
+4. Rebuild MFE image: `tutor images build mfe`
+5. Verify: `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+
 ## Related Documents
 
 - `docs/branding/BRANDING_GUARDRAILS.md`
