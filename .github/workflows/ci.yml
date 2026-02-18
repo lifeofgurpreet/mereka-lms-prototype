@@ -222,6 +222,7 @@ jobs:
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-copy-terminology.sh
           bash -n scripts/qa/verify-visual-smoke-baseline.sh
+          bash -n scripts/qa/verify-tenant-ui-smoke.sh
 
       - name: Run local observability audit
         run: |
@@ -976,6 +977,25 @@ jobs:
         run: bash -n scripts/qa/verify-visual-smoke-baseline.sh
       - name: Run visual smoke baseline verification (AC-VIS-001..004)
         run: ./scripts/qa/verify-visual-smoke-baseline.sh
+
+  tenant-ui-smoke:
+    name: Tenant UI Smoke Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'tenant') ||
+        contains(github.event.pull_request.title, 'smoke') ||
+        contains(github.event.pull_request.title, 'visual') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'deploy')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-tenant-ui-smoke.sh
+      - name: Run tenant UI smoke verification (AC-UVIS-301..305)
+        run: ./scripts/qa/verify-tenant-ui-smoke.sh
 
   footer-slot-only:
     name: Footer Slot-Only Policy Gate
