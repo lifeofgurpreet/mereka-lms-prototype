@@ -234,6 +234,7 @@ jobs:
           bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
           bash -n scripts/qa/verify-module-surface-validation.sh
           bash -n scripts/qa/verify-postmerge-governance-closure.sh
+          bash -n scripts/qa/verify-spec-coverage-cleanup.sh
 
       - name: Run local observability audit
         run: |
