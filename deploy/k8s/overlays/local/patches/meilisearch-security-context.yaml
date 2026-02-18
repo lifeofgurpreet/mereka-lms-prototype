@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meilisearch
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: meilisearch
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true

@@ -24,6 +24,8 @@ patches:
   - path: patches/clustersecretstore-gcp.yaml
   - path: patches/openedx-secrets-dev.yaml
   - path: patches/database-secrets-dev.yaml
+  - path: patches/meilisearch-security-context.yaml
+  - path: patches/cms-memory-limits.yaml
   # forum-dev.yaml removed: Forum v2 runs in-process within LMS (no separate deployment)
 
 # Use local images
@@ -47,3 +49,21 @@ replicas:
     count: 1
   - name: cms-worker
     count: 1
+  # Enterprise services disabled — images require GCR auth not available in Kind
+  - name: enterprise-access
+    count: 0
+  - name: enterprise-access-worker
+    count: 0
+  - name: enterprise-admin-portal
+    count: 0
+  - name: enterprise-catalog
+    count: 0
+  - name: enterprise-catalog-worker
+    count: 0
+  - name: enterprise-learner-portal
+    count: 0
+  - name: enterprise-subsidy
+    count: 0
+  # Payments gateway disabled — image not loaded into Kind
+  - name: payments-gateway
+    count: 0
