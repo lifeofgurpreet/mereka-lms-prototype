@@ -233,6 +233,7 @@ jobs:
           bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
           bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
           bash -n scripts/qa/verify-module-surface-validation.sh
+          bash -n scripts/qa/verify-postmerge-governance-closure.sh
 
       - name: Run local observability audit
         run: |
@@ -1176,3 +1177,15 @@ jobs:
 
       - name: Verify release deployment choreography (AC-DEP-001..004)
         run: ./scripts/qa/verify-release-deployment-choreography.sh
+
+  postmerge-governance-closure:
+    name: Post-Merge Governance Closure (AC-POST-001..005)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-postmerge-governance-closure.sh
+
+      - name: Verify governance closure evidence pack (bead 8jao.23)
+        run: ./scripts/qa/verify-postmerge-governance-closure.sh
