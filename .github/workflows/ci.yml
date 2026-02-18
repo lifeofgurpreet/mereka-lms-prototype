@@ -235,6 +235,7 @@ jobs:
           bash -n scripts/qa/verify-module-surface-validation.sh
           bash -n scripts/qa/verify-postmerge-governance-closure.sh
           bash -n scripts/qa/verify-spec-coverage-cleanup.sh
+          bash -n scripts/qa/verify-analytics-undefined-regression.sh
 
       - name: Run local observability audit
         run: |
@@ -1190,3 +1191,15 @@ jobs:
 
       - name: Verify governance closure evidence pack (bead 8jao.23)
         run: ./scripts/qa/verify-postmerge-governance-closure.sh
+
+  analytics-undefined-regression:
+    name: Analytics Undefined Regression Guard (AC-FRONT-071..074)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-analytics-undefined-regression.sh
+
+      - name: Verify analytics undefined regression fix (bead 2dcy.7)
+        run: ./scripts/qa/verify-analytics-undefined-regression.sh
