@@ -37,7 +37,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Owner** | Mereka |
 | **Files** | `mereka_lms.py:~650-900` |
 | **Migration path** | Migration complete — dual-path wiring (RenderWidget + PLUGIN_SLOTS) |
-| **Verification** | `verify-mfe-footer-slot.sh`, `verify-footer-slot-migration.sh` |
+| **Verification** | `verify-mfe-footer-slot.sh`, `verify-footer-slot-migration.sh`, `verify-footer-variant-matrix.sh` |
 
 ---
 
