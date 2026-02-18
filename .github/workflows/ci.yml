@@ -203,6 +203,7 @@ jobs:
           bash -n scripts/qa/verify-footer-slot-migration.sh
           bash -n scripts/qa/verify-multisite-ux-consistency.sh
           bash -n scripts/qa/verify-plugin-slot-migration-register.sh
+          bash -n scripts/qa/verify-token-drift.sh
           bash -n scripts/qa/verify-analytics-decision-gate.sh
           bash -n scripts/qa/verify-superset-runbook.sh
           bash -n scripts/qa/verify-analytics-drift-guardrails.sh
@@ -697,6 +698,26 @@ jobs:
 
       - name: Verify branding token integrity
         run: ./scripts/qa/verify-branding-token-integrity.sh
+
+  token-drift:
+    name: Token Drift Guard
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      (
+        github.event_name == 'pull_request' &&
+        (
+          contains(github.event.pull_request.title, 'branding') ||
+          contains(github.event.pull_request.title, 'token') ||
+          contains(github.event.pull_request.title, 'theme') ||
+          contains(github.event.pull_request.title, 'mfe')
+        )
+      )
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify no undefined CSS variable references in theme files
+        run: ./scripts/qa/verify-token-drift.sh
 
   footer-variant-matrix:
     name: Footer Variant Matrix
