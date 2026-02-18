@@ -219,6 +219,7 @@ jobs:
           bash -n scripts/qa/verify-mfe-routing-parity.sh
           bash -n scripts/qa/verify-a11y-contrast-focus.sh
           bash -n scripts/qa/verify-a11y-authenticated-routes.sh
+          bash -n scripts/qa/verify-a11y-tenant-branding.sh
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-copy-terminology.sh
           bash -n scripts/qa/verify-visual-smoke-baseline.sh
@@ -1036,6 +1037,32 @@ jobs:
         run: bash -n scripts/qa/verify-tenant-isolation-evidence.sh
       - name: Run tenant isolation evidence (AC-UI-201..205)
         run: ./scripts/qa/verify-tenant-isolation-evidence.sh
+
+  a11y-tenant-branding:
+    name: A11y Tenant Branding Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'a11y') ||
+        contains(github.event.pull_request.title, 'accessibility') ||
+        contains(github.event.pull_request.title, 'tenant') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'contrast')
+      )
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-a11y-tenant-branding.sh
+
+      - name: Run a11y tenant branding gate (AC-A11Y-301..304)
+        run: ./scripts/qa/verify-a11y-tenant-branding.sh
 
   visual-parity-checkpoints:
     name: Visual Parity Checkpoints Gate
