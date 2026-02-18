@@ -217,6 +217,7 @@ jobs:
           bash -n scripts/qa/verify-footer-parity.sh
           bash -n scripts/qa/verify-mfe-routing-parity.sh
           bash -n scripts/qa/verify-a11y-contrast-focus.sh
+          bash -n scripts/qa/verify-performance-budget.sh
 
       - name: Run local observability audit
         run: |
@@ -871,3 +872,23 @@ jobs:
         with:
           name: a11y-contrast-focus-gate
           path: var/a11y-contrast-focus-gate.txt
+
+  performance-budget:
+    name: Frontend Performance Budget Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'performance') ||
+        contains(github.event.pull_request.title, 'perf') ||
+        contains(github.event.pull_request.title, 'cache') ||
+        contains(github.event.pull_request.title, 'bundle') ||
+        contains(github.event.pull_request.title, 'mfe') ||
+        contains(github.event.pull_request.title, 'caddy')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-performance-budget.sh
+      - name: Run performance budget verification (AC-UIPERF-001..003)
+        run: ./scripts/qa/verify-performance-budget.sh
