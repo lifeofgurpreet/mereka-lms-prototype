@@ -244,6 +244,8 @@ jobs:
           bash -n scripts/qa/verify-a11y-regression-lane.sh
           bash -n scripts/qa/verify-footer-slot-evidence-rollback.sh
           bash -n scripts/qa/verify-analytics-hardening.sh
+          bash -n scripts/qa/verify-tenant-config-handoff.sh
+          bash -n scripts/qa/verify-multi-tenant-branding-ops.sh
 
       - name: Run local observability audit
         run: |
@@ -1327,6 +1329,16 @@ jobs:
       - name: Verify footer slot evidence and rollback guard (bead 2dcy.8)
         run: ./scripts/qa/verify-footer-slot-evidence-rollback.sh
 
+  multi-tenant-branding-ops:
+    name: Multi-Tenant Branding Operations Model (AC-FRONT-041..044)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-multi-tenant-branding-ops.sh
+      - name: Verify multi-tenant branding operations model (bead 2dcy.4)
+        run: ./scripts/qa/verify-multi-tenant-branding-ops.sh
+
   analytics-hardening:
     name: Analytics Hardening (AC-FRONT-051..055)
     runs-on: ubuntu-latest
@@ -1338,3 +1350,13 @@ jobs:
 
       - name: Verify analytics token integrity and Segment injection hardening (bead 2dcy.5)
         run: ./scripts/qa/verify-analytics-hardening.sh
+
+  tenant-config-handoff:
+    name: Tenant Config Handoff (AC-UI-601..605)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-tenant-config-handoff.sh
+      - name: Verify tenant config handoff (bead 31yg)
+        run: ./scripts/qa/verify-tenant-config-handoff.sh
