@@ -203,6 +203,8 @@ jobs:
           bash -n scripts/qa/verify-footer-slot-migration.sh
           bash -n scripts/qa/verify-multisite-ux-consistency.sh
           bash -n scripts/qa/verify-plugin-slot-migration-register.sh
+          bash -n scripts/qa/verify-release-deployment-choreography.sh
+          bash -n scripts/infra/verify-release-preflight.sh
           bash -n scripts/qa/verify-token-drift.sh
           bash -n scripts/qa/verify-analytics-decision-gate.sh
           bash -n scripts/qa/verify-superset-runbook.sh
@@ -1146,3 +1148,18 @@ jobs:
           name: mfe-analytics-parity-gate
           path: var/
           if-no-files-found: ignore
+
+  release-deployment-choreography:
+    name: Release Deployment Choreography (AC-DEP-001..004)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check (choreography)
+        run: bash -n scripts/qa/verify-release-deployment-choreography.sh
+
+      - name: Syntax check (preflight)
+        run: bash -n scripts/infra/verify-release-preflight.sh
+
+      - name: Verify release deployment choreography (AC-DEP-001..004)
+        run: ./scripts/qa/verify-release-deployment-choreography.sh
