@@ -160,9 +160,69 @@ This creates:
 - EnterpriseCustomer record
 - TenantConfig record (multi-tenancy plugin)
 
+## Pre-Deploy Checklist (AC-EG-003)
+
+> Run this checklist BEFORE committing. Every box must be checked or explicitly N/A'd.
+
+### Brand policy
+
+- [ ] Brand pack validated: `./scripts/tenants/validate-tenant-brand-pack.sh --slug <slug>`
+- [ ] Logo/favicon placed in `infrastructure/tutor/themes/mereka/tenants/<slug>/logos/`
+- [ ] `tokens.css` color values pass WCAG AA contrast (4.5:1 min)
+- [ ] Exception policy reviewed — no new non-plugin overrides (or exception filed)
+
+### Cookie & session domains
+
+- [ ] `SESSION_COOKIE_DOMAIN` is `None` (host-only) — do NOT set to a wildcard
+- [ ] `SESSION_COOKIE_NAME` for CMS is `studio_session_id` (not `sessionid`)
+- [ ] New domain does NOT share cookies with existing tenants (different host)
+- [ ] If custom domain: verify Cloudflare SSL mode is DNS-only (gray cloud) for Let's Encrypt
+
+### CSRF trusted origins
+
+- [ ] Domain added to `extra_csrf_origins` in `apply-patches.sh`
+- [ ] Domain added to `mereka_lms.py` CSRF patch (dual-path)
+- [ ] `https://` prefix included (Django requires scheme)
+
+### Payment / ecommerce routing
+
+- [ ] If tenant needs payments: Stripe connected account or direct key configured
+- [ ] `ENABLE_GATEWAY_FULFILLMENT` scope reviewed (currently `false` — no action unless activating)
+- [ ] If tenant does NOT need payments: confirm no ecommerce routes exposed for this domain
+- [ ] Caddy block does NOT proxy `/payment/` path for non-payment tenants
+
+### OIDC / SSO callbacks
+
+- [ ] Authentik: new domain added as allowed redirect URI in the OAuth2 provider
+  ```bash
+  # Verify in Authentik admin: Application → Providers → openedx-lms → Redirect URIs
+  # Add: https://<new-domain>/auth/complete/authentik-oidc/
+  ```
+- [ ] If enterprise SSO (SAML): tenant-specific IdP metadata registered in `third_party_auth` via Django admin
+- [ ] If no SSO: confirm `DISABLE_ENTERPRISE_LOGIN` is `true` for this tenant's SiteConfiguration
+
+### K8s / infrastructure
+
+- [ ] `ALLOWED_HOSTS` includes new domain (both script and plugin paths)
+- [ ] Caddy block added for new domain (LMS proxy + health check)
+- [ ] Ingress annotation includes new domain (if using Nginx ingress)
+- [ ] Tenant registry ConfigMap updated (`deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml`)
+
+### Validation command
+
+```bash
+# One-command pre-flight — runs brand pack validation + config checks
+./scripts/tenants/validate-tenant-brand-pack.sh --slug <slug> --strict
+./scripts/qa/check-forbidden-overrides.sh
+./scripts/qa/ops-preflight.sh
+```
+
+---
+
 ## Step 7: Commit and Deploy
 
-Follow the merge-first protocol (see `docs/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md`):
+Follow the merge-first protocol (full details: `docs/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md`).
+Summary: all changes merge to `main` FIRST — ArgoCD auto-syncs within 3 minutes:
 
 ```bash
 # 1. Create feature branch
@@ -442,6 +502,21 @@ Copy this template for each tenant onboarding. Fill in results and attach to the
 - [ ] Platform team: <name>
 - [ ] Verified by: <name>
 ```
+
+### Automated evidence (AC-EG-004, AC-EG-007)
+
+Instead of filling the template manually, generate machine-readable evidence:
+
+```bash
+# Produces JSON + Markdown summary under var/evidence/tenant-onboarding/<slug>-<date>/
+./scripts/qa/tenant-onboarding-evidence.sh \
+  --slug skillourfuture \
+  --domain skillourfuture.academy.mereka.io \
+  --env prod
+```
+
+Output includes `evidence-summary.json` (machine-readable) and `evidence-summary.md` (human-readable).
+Attach the JSON to the PR for automated verification.
 
 ---
 

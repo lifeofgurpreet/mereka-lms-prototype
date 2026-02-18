@@ -227,6 +227,7 @@ jobs:
           bash -n scripts/qa/verify-tenant-isolation-evidence.sh
           bash -n scripts/qa/verify-visual-parity-checkpoints.sh
           bash -n scripts/qa/verify-ui-ux-hardening-bundle.sh
+          bash -n scripts/qa/verify-multitenant-brand-platform.sh
 
       - name: Run local observability audit
         run: |
@@ -1100,4 +1101,14 @@ jobs:
           name: ui-ux-hardening-bundle-gate
           path: var/ui-ux-hardening-bundle-gate.txt
 
+  multitenant-brand-platform:
+    name: Multitenant Brand Platform Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-multitenant-brand-platform.sh
+
+      - name: Verify multitenant brand platform (AC-MB-001..006)
+        run: ./scripts/qa/verify-multitenant-brand-platform.sh
