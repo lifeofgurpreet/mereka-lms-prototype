@@ -39,12 +39,12 @@ spec:
             - name: MUX_TOKEN_ID
               valueFrom:
                 secretKeyRef:
-                  name: mereka-lms-runtime-secrets
+                  name: openedx-secrets
                   key: MUX_TOKEN_ID
             - name: MUX_TOKEN_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: mereka-lms-runtime-secrets
+                  name: openedx-secrets
                   key: MUX_TOKEN_SECRET
             - name: MUX_POLL_INTERVAL_SECONDS
               value: "21600"   # 6 hours
