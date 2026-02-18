@@ -4,7 +4,7 @@ type: "feature_spec"
 status: "completed"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-10"
+last_updated: "2026-02-18"
 version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"
@@ -74,8 +74,8 @@ The system MUST support the following domains:
 | Domain | Purpose | MFE Subdomain |
 |--------|---------|---------------|
 | `academyv2.mereka.io` | Primary LMS | `apps.academyv2.mereka.io` |
-| `academy.biji-biji.com` | Partner branding | N/A (shares primary MFE) |
-| `skillourfuture.academy.mereka.io` | Program-specific | N/A (shares primary MFE) |
+| `academy.biji-biji.com` | Partner branding | `apps.academy.biji-biji.com` |
+| `skillourfuture.academy.mereka.io` | Program-specific | N/A (shares primary MFE via `apps.academyv2.mereka.io`) |
 
 ### Django Settings
 
@@ -85,9 +85,10 @@ The system MUST support the following domains:
 
 ### Cookie Configuration
 
-- The system MUST set `SESSION_COOKIE_DOMAIN = ".academyv2.mereka.io"` for cross-subdomain sessions
-- The system MUST set `CSRF_COOKIE_DOMAIN = ".academyv2.mereka.io"` for CSRF protection
-- The system SHOULD NOT set domain-specific cookies for biji-biji.com (different root domain)
+- The system MUST set `SESSION_COOKIE_DOMAIN = None` (host-only) so cookies work on all root domains
+- The system MUST set `CSRF_COOKIE_DOMAIN = None` (host-only) so CSRF tokens work on all root domains
+- Cross-subdomain session sharing between `academyv2.mereka.io` and `apps.academyv2.mereka.io` is handled by Caddy proxying `/login_refresh` and `/api/mfe_config/v1` to LMS with the original Host header preserved
+- The system SHOULD NOT set a static cookie domain (e.g., `.academyv2.mereka.io`) because it is invalid on `academy.biji-biji.com` and browsers will drop the cookie
 
 ### SiteConfiguration
 
@@ -168,6 +169,7 @@ grep CSRF_TRUSTED_ORIGINS tutor_env/env/apps/openedx/settings/lms/production.py
 # - https://academyv2.mereka.io
 # - https://apps.academyv2.mereka.io
 # - https://academy.biji-biji.com
+# - https://apps.academy.biji-biji.com
 # - https://skillourfuture.academy.mereka.io
 ```
 
@@ -179,9 +181,9 @@ grep CSRF_TRUSTED_ORIGINS tutor_env/env/apps/openedx/settings/lms/production.py
 
 **Recovery**:
 ```nginx
-# In apps/nginx/lms.conf
+# In apps/nginx/lms.conf — MUST preserve original Host for SiteConfiguration resolution
 location ^~ /profile/api/ {
-    proxy_set_header Host academyv2.mereka.io;
+    proxy_set_header Host $http_host;  # NOT hardcoded — preserves original domain
     proxy_redirect off;
     proxy_pass http://lms-backend;
 }
@@ -263,10 +265,10 @@ If multi-site config breaks primary domain:
 3. Restart: `tutor k8s restart`
 4. Verify primary domain works: `curl -I https://academyv2.mereka.io`
 
-## Open Questions
+## Resolved Questions
 
-1. Should we use separate SiteConfiguration for each domain or share one?
-2. How do we handle domain-specific branding overrides (logos, colors)?
-3. Should biji-biji.com users see Mereka branding or custom Biji-Biji branding?
-4. Do we need separate analytics tracking for each domain?
-5. Should we implement domain-based rate limiting?
+1. **Separate SiteConfiguration per domain**: YES — each domain has its own SiteConfiguration record in Django admin, enabling per-domain `SITE_NAME`, `LMS_BASE_URL`, and `MFE_BASE_URL` overrides. Defined in `infrastructure/tutor/multisite-sites.yml`.
+2. **Domain-specific branding**: Handled via `MerekaFooter` SITE_VARIANTS (runtime hostname → brand mapping) and per-tenant `THEME_NAME` in SiteConfiguration. Logo/colors share the `mereka` theme; text/footer vary by domain.
+3. **Biji-biji.com branding**: Same `mereka` theme, but MerekaFooter shows "Biji-Biji Academy" brand text and "Biji-Biji Initiative" copyright. See `infrastructure/tutor/plugins/mereka_lms.py` SITE_VARIANTS.
+4. **Separate analytics**: NOT YET — all domains share a single analytics pipeline. Domain-based segmentation can be added later via `http_host` grouping in Prometheus metrics.
+5. **Domain-based rate limiting**: NOT YET — rate limiting is applied globally. Per-domain limits can be added via Caddy `rate_limit` directive if needed.

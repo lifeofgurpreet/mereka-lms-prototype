@@ -148,7 +148,7 @@ const MerekaFooter = () => {
 
 | File | Line | Finding | Risk |
 |------|------|---------|------|
-| `mereka_lms.py` | 79 | `DISCUSSIONS_MICROFRONTEND_URL = "https://apps.academyv2.mereka.io/discussions"` | **HIGH** — Breaks discussions on `academy.biji-biji.com` |
+| `apply-patches.sh` | 200 | `DISCUSSIONS_MICROFRONTEND_URL` — **RESOLVED** (2026-02-18): now uses `MEREKA_MFE_BASE_URL` | ~~HIGH~~ **FIXED** |
 | `mereka_lms.py` | 823 | `apps.academyv2.mereka.io { reverse_proxy /profile/api/* lms:8000 { header_up Host academyv2.mereka.io } }` | **HIGH** — Caddy config hardcoded |
 | `mereka_lms.py` | 862 | `proxy_set_header Host academyv2.mereka.io;` | **HIGH** — Nginx proxy hardcoded |
 
@@ -209,7 +209,7 @@ kubectl exec -n mereka-lms <mfe-pod> -- \
 **Compliance**:
 - ✅ **MFE JavaScript**: Uses `getConfig()` to fetch runtime configuration
 - ✅ **env.config.jsx**: MerekaFooter reads `window.location.hostname` at runtime
-- 🔴 **FAIL**: `mereka_lms.py` line 79 hardcodes `DISCUSSIONS_MICROFRONTEND_URL`
+- ✅ **FIXED** (2026-02-18): `apply-patches.sh` now uses `MEREKA_MFE_BASE_URL` for `DISCUSSIONS_MICROFRONTEND_URL`
 
 ### Rule 2: All User-Facing URLs Must Come from MFE_CONFIG or Environment Variables
 
@@ -274,23 +274,23 @@ const baseUrl = getConfig().LMS_BASE_URL;
 
 ## Quick Wins
 
-### Fix 1: Dynamic Discussions MFE URL
+### Fix 1: Dynamic Discussions MFE URL — RESOLVED (2026-02-18)
 
-**File**: `infrastructure/tutor/plugins/mereka_lms.py:79`
+**File**: `infrastructure/tutor/apply-patches.sh` (patched into `lms/production.py`)
 
 **Before**:
 ```python
 DISCUSSIONS_MICROFRONTEND_URL = "https://apps.academyv2.mereka.io/discussions"
 ```
 
-**After**:
+**After** (applied in `apply-patches.sh`):
 ```python
-# Use dynamic MFE base URL
 if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
-    DISCUSSIONS_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/discussions"
+    _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
+    DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
 ```
 
-**Impact**: Discussions MFE now works on `academy.biji-biji.com`.
+**Impact**: Discussions MFE now works on `academy.biji-biji.com`. Uses dynamic `MEREKA_MFE_BASE_URL` variable.
 
 ### Fix 2: Dynamic Caddy Profile API Proxy
 
@@ -354,7 +354,21 @@ proxy_set_header Host $http_host;  # Preserve original host
 
 | Date | Author | Change |
 |------|--------|--------|
+| 2026-02-18 | Bead 8jao.16 | Domain hardening: fixed DISCUSSIONS_MICROFRONTEND_URL, CSRF origins, Caddyfile split docs, resolved spec contradictions |
 | 2026-02-17 | Bead 1rda | Initial audit — 3 HIGH-risk findings documented |
+
+---
+
+## Caddyfile Split: Local vs K8s
+
+**Important**: There are two separate Caddyfile configurations that diverge in multi-site behavior:
+
+| Surface | Path | Multi-site safe? |
+|---------|------|------------------|
+| **K8s production** | `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | YES — uses `{http.request.host}` |
+| **Tutor local** | Generated from `mereka_lms.py` caddy-caddyfile patch | PARTIAL — profile API block hardcoded to `apps.academyv2.mereka.io` |
+
+Developers testing locally with Tutor get different Caddy routing behavior than K8s production. The K8s Caddyfile is the canonical source of truth. The local Caddy block is acceptable for dev-only use since only `academyv2.mereka.io` is configured locally.
 
 ---
 

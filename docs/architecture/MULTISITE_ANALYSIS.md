@@ -1,4 +1,11 @@
 # Multi-Site Setup Analysis
+
+> **DEPRECATED (2026-02-18)**: This document is a point-in-time snapshot from 2025-11-12 and no longer reflects the current state. Multi-site is now fully configured in production with 3 tenants. For current status, see:
+> - **Live verification**: `scripts/qa/verify-multisite-config.sh`
+> - **UX consistency contract**: `docs/architecture/MULTISITE_UX_CONSISTENCY.md`
+> - **Site registry**: `infrastructure/tutor/multisite-sites.yml`
+> - **Tenant branding matrix**: `docs/operations/TENANT_BRANDING_SURFACE_MATRIX.md`
+
 _Critical: Local vs Production Comparison • Last updated: 2025-11-12_
 
 ## 🚨 Critical Findings
