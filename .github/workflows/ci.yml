@@ -239,6 +239,7 @@ jobs:
           bash -n scripts/qa/verify-analytics-undefined-regression.sh
           bash -n scripts/qa/verify-analytics-key-elimination.sh
           bash -n scripts/qa/verify-token-integrity-routing.sh
+          bash -n scripts/qa/verify-selector-to-slot-migration.sh
 
       - name: Run local observability audit
         run: |
@@ -1267,3 +1268,15 @@ jobs:
 
       - name: Verify legacy footer removal (bead 1rns)
         run: ./scripts/qa/verify-legacy-footer-removal.sh
+
+  selector-to-slot-migration:
+    name: Selector-to-Slot Migration (AC-FRONT-021..025)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-selector-to-slot-migration.sh
+
+      - name: Verify selector-to-slot migration compliance (bead 2dcy.2)
+        run: ./scripts/qa/verify-selector-to-slot-migration.sh
