@@ -16,16 +16,8 @@ PASS=0
 FAIL=0
 WARN=0
 
-check() {
-  local desc="$1"
-  if eval "$2"; then
-    echo "  PASS: $desc"
-    PASS=$((PASS + 1))
-  else
-    echo "  FAIL: $desc"
-    FAIL=$((FAIL + 1))
-  fi
-}
+pass_check() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
+fail_check() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 
 warn() {
   echo "  WARN: $1"
@@ -73,15 +65,14 @@ SCSS_SECTION_COUNT=$(grep -c '^/\* [A-Z]' "$MFE_SCSS" || echo 0)
 echo "  Register entries: $REGISTER_ENTRY_COUNT"
 echo "  SCSS surface sections: $SCSS_SECTION_COUNT"
 
-check "Register has at least 10 numbered entries" "[[ $REGISTER_ENTRY_COUNT -ge 10 ]]"
-check "SCSS section count >= 1 (has annotated surfaces)" "[[ $SCSS_SECTION_COUNT -ge 1 ]]"
+if [[ $REGISTER_ENTRY_COUNT -ge 10 ]]; then pass_check "Register has at least 10 numbered entries"; else fail_check "Register has at least 10 numbered entries"; fi
+if [[ $SCSS_SECTION_COUNT -ge 1 ]]; then pass_check "SCSS section count >= 1 (has annotated surfaces)"; else fail_check "SCSS section count >= 1 (has annotated surfaces)"; fi
 
 # AC-MIGLOCK-001 core: every register entry should have at least one SCSS selector block
 # We verify the ratio is reasonable — sections >= 1 per 4 register entries (conservative)
 EXPECTED_MIN=$(( REGISTER_ENTRY_COUNT / 4 ))
 if [[ $EXPECTED_MIN -lt 1 ]]; then EXPECTED_MIN=1; fi
-check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)" \
-  "[[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]"
+if [[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]; then pass_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; else fail_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; fi
 
 echo ""
 
@@ -107,8 +98,7 @@ UPPER=$(( REGISTER_ENTRY_COUNT * 3 ))
 if [[ $LOWER -lt 1 ]]; then LOWER=1; fi
 
 if [[ $UNIQUE_CLASS_TARGETS -ge $LOWER && $UNIQUE_CLASS_TARGETS -le $UPPER ]]; then
-  check "Unique class* patterns ($UNIQUE_CLASS_TARGETS) within expected range ($LOWER–$UPPER)" \
-    "true"
+  pass_check "Unique class* patterns ($UNIQUE_CLASS_TARGETS) within expected range ($LOWER–$UPPER)"
 elif [[ $UNIQUE_CLASS_TARGETS -lt $LOWER ]]; then
   warn "Unique class* patterns ($UNIQUE_CLASS_TARGETS) lower than register entries ($REGISTER_ENTRY_COUNT) — some entries may lack SCSS coverage"
   WARN=$((WARN + 1))
@@ -133,7 +123,7 @@ P0_TOTAL="${P0_TOTAL:-0}"
 echo "  Total P0 entries: $P0_TOTAL"
 
 if [[ -z "$P0_OPEN" ]]; then
-  check "No open P0 items in migration register" "true"
+  pass_check "No open P0 items in migration register"
 else
   echo "  FAIL: Open P0 items found:"
   echo "$P0_OPEN" | sed 's/^/    /'
@@ -187,17 +177,17 @@ echo "  [class*=] selectors: $CLASS_STAR_COUNT"
 echo "  [data-testid*=] selectors: $DATA_TESTID_COUNT"
 
 if [[ $CLASS_STAR_COUNT -eq 0 ]]; then
-  check "No class* selectors (fully hardened)" "true"
+  pass_check "No class* selectors (fully hardened)"
 else
   # Calculate ratio using integer arithmetic: ratio_pct = (data_testid * 100) / class_star
   RATIO_PCT=$(( DATA_TESTID_COUNT * 100 / CLASS_STAR_COUNT ))
   echo "  Coverage ratio: ${RATIO_PCT}%"
 
   if [[ $RATIO_PCT -ge 100 ]]; then
-    check "data-testid* coverage equals or exceeds class* count (${DATA_TESTID_COUNT} >= ${CLASS_STAR_COUNT})" "true"
+    pass_check "data-testid* coverage equals or exceeds class* count (${DATA_TESTID_COUNT} >= ${CLASS_STAR_COUNT})"
   elif [[ $RATIO_PCT -ge 90 ]]; then
     warn "data-testid* coverage is ${RATIO_PCT}% (below 100%, above 90% floor) — consider adding fallbacks"
-    check "data-testid* coverage >= 90% floor (${RATIO_PCT}%)" "true"
+    pass_check "data-testid* coverage >= 90% floor (${RATIO_PCT}%)"
   else
     echo "  FAIL: data-testid* coverage is ${RATIO_PCT}% — below 90% minimum (${DATA_TESTID_COUNT} vs ${CLASS_STAR_COUNT})"
     FAIL=$((FAIL + 1))
@@ -212,7 +202,7 @@ echo ""
 echo "Migration Lock doc section"
 
 if grep -q "^## Migration Lock" "$REGISTER_DOC"; then
-  check "Register contains 'Migration Lock' section" "true"
+  pass_check "Register contains 'Migration Lock' section"
 else
   warn "Register is missing '## Migration Lock' section — add it to document the lock status"
 fi

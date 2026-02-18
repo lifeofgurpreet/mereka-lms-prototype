@@ -21,16 +21,8 @@ PASS=0
 FAIL=0
 WARN=0
 
-check() {
-  local desc="$1"
-  if eval "$2"; then
-    echo "  PASS: $desc"
-    PASS=$((PASS + 1))
-  else
-    echo "  FAIL: $desc"
-    FAIL=$((FAIL + 1))
-  fi
-}
+pass_check() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
+fail_check() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 
 warn() {
   echo "  WARN: $1"
@@ -57,9 +49,9 @@ echo "AC-AN-001: Analytics key guard"
 # Check 1: Plugin configures SEGMENT_KEY from env var (not hardcoded)
 if [[ -f "$PLUGIN" ]]; then
   if grep -q 'SEGMENT_KEY.*os\.environ\.get.*MEREKA_SEGMENT_KEY' "$PLUGIN"; then
-    check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var" "true"
+    pass_check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
   else
-    check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var" "false"
+    fail_check "Plugin reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
   fi
 else
   warn "mereka_lms.py not found at $PLUGIN"
@@ -69,7 +61,7 @@ fi
 if [[ -f "$PLUGIN" ]]; then
   SEGMENT_LINE=$(grep 'SEGMENT_KEY.*os\.environ\.get' "$PLUGIN" || true)
   if echo "$SEGMENT_LINE" | grep -qF '""'; then
-    check "SEGMENT_KEY defaults to empty string (disabled by default)" "true"
+    pass_check "SEGMENT_KEY defaults to empty string (disabled by default)"
   else
     warn "SEGMENT_KEY default value may not be empty — review: $SEGMENT_LINE"
   fi
@@ -78,9 +70,9 @@ fi
 # Check 3: Footer template has sentinel guard before emitting Segment JS
 if [[ -f "$FOOTER" ]]; then
   if grep -q 'segment_key.*lower.*not in' "$FOOTER"; then
-    check "footer.html has sentinel guard (rejects placeholder keys)" "true"
+    pass_check "footer.html has sentinel guard (rejects placeholder keys)"
   else
-    check "footer.html has sentinel guard (rejects placeholder keys)" "false"
+    fail_check "footer.html has sentinel guard (rejects placeholder keys)"
   fi
 else
   warn "footer.html not found — skipping sentinel guard check"
@@ -97,9 +89,9 @@ if [[ -f "$FOOTER" ]]; then
     fi
   done
   if [[ "$SENTINELS_OK" == "true" ]]; then
-    check "Footer sentinel guard covers all known placeholder values" "true"
+    pass_check "Footer sentinel guard covers all known placeholder values"
   else
-    check "Footer sentinel guard covers all known placeholder values" "false"
+    fail_check "Footer sentinel guard covers all known placeholder values"
   fi
 fi
 
@@ -117,9 +109,9 @@ for f in "$PLUGIN" "$APPLY_PATCHES"; do
   fi
 done
 if [[ -z "$HARDCODED_KEY_HITS" ]]; then
-  check "No hardcoded Segment API keys in plugin or patches" "true"
+  pass_check "No hardcoded Segment API keys in plugin or patches"
 else
-  check "No hardcoded Segment API keys in plugin or patches" "false"
+  fail_check "No hardcoded Segment API keys in plugin or patches"
   echo "    Found: $HARDCODED_KEY_HITS"
 fi
 
@@ -138,7 +130,7 @@ if [[ -d "$THEME_DIR" ]]; then
     "$THEME_DIR" --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" \
     -l 2>/dev/null || true)
   if [[ -z "$UNDEF_ANALYTICS" ]]; then
-    check "No direct analytics.track/identify/page calls in theme JS files" "true"
+    pass_check "No direct analytics.track/identify/page calls in theme JS files"
   else
     warn "analytics.* calls found in theme JS — review for undefined token risk: $UNDEF_ANALYTICS"
   fi
@@ -151,9 +143,9 @@ if [[ -f "$FOOTER" ]]; then
   # The guard must wrap the segment-io include or script block
   GUARD_PRESENT=$(grep -c 'if segment_key' "$FOOTER" || true)
   if [[ "$GUARD_PRESENT" -ge 1 ]]; then
-    check "Footer Segment script is wrapped in 'if segment_key' guard" "true"
+    pass_check "Footer Segment script is wrapped in 'if segment_key' guard"
   else
-    check "Footer Segment script is wrapped in 'if segment_key' guard" "false"
+    fail_check "Footer Segment script is wrapped in 'if segment_key' guard"
   fi
 fi
 
@@ -164,9 +156,9 @@ UNDEF_TOKEN_HITS=$(grep -r \
   --include="*.py" --include="*.js" --include="*.jsx" --include="*.html" \
   -l 2>/dev/null || true)
 if [[ -z "$UNDEF_TOKEN_HITS" ]]; then
-  check "No analytics calls with literal undefined/null token values" "true"
+  pass_check "No analytics calls with literal undefined/null token values"
 else
-  check "No analytics calls with literal undefined/null token values" "false"
+  fail_check "No analytics calls with literal undefined/null token values"
   echo "    Files: $UNDEF_TOKEN_HITS"
 fi
 
@@ -176,7 +168,7 @@ if [[ -f "$APPLY_PATCHES" ]]; then
   FORBIDDEN_ANALYTICS=$(grep -n 'analytics.*admin\|/admin.*analytics\|analytics.*403\|analytics.*405' \
     "$APPLY_PATCHES" || true)
   if [[ -z "$FORBIDDEN_ANALYTICS" ]]; then
-    check "No analytics endpoints wired to forbidden/admin paths" "true"
+    pass_check "No analytics endpoints wired to forbidden/admin paths"
   else
     warn "Potential analytics path conflict in apply-patches.sh: $FORBIDDEN_ANALYTICS"
   fi
@@ -192,7 +184,7 @@ if [[ "${ANALYTICS_LIVE:-0}" == "1" ]]; then
     -d '{"event_type":"heartbeat"}' \
     --max-time 5 2>/dev/null || echo "000")
   if [[ "$ANALYTICS_STATUS" == "200" ]] || [[ "$ANALYTICS_STATUS" == "204" ]]; then
-    check "Live analytics event endpoint returns 2xx (status: $ANALYTICS_STATUS)" "true"
+    pass_check "Live analytics event endpoint returns 2xx (status: $ANALYTICS_STATUS)"
   elif [[ "$ANALYTICS_STATUS" == "000" ]]; then
     warn "Analytics endpoint unreachable (network timeout)"
   else
@@ -208,7 +200,11 @@ echo ""
 echo "AC-AN-003: MFE plugin entry point compliance"
 
 # Check 10: Migration register exists
-check "MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md exists" "[[ -f '$MIGRATION_REGISTER' ]]"
+if [[ -f "$MIGRATION_REGISTER" ]]; then
+  pass_check "MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md exists"
+else
+  fail_check "MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md exists"
+fi
 
 # Check 11: No forbidden DOM override patterns in MFE theme files
 MFE_THEME_DIR="$THEME_DIR/mfe"
@@ -217,30 +213,30 @@ if [[ -d "$MFE_THEME_DIR" ]]; then
     --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" \
     -l 2>/dev/null || true)
   if [[ -z "$DOM_HITS" ]]; then
-    check "No document.querySelector or innerHTML in MFE theme JS files" "true"
+    pass_check "No document.querySelector or innerHTML in MFE theme JS files"
   else
-    check "No document.querySelector or innerHTML in MFE theme JS files" "false"
+    fail_check "No document.querySelector or innerHTML in MFE theme JS files"
     echo "    Files: $DOM_HITS"
   fi
 else
-  check "No MFE theme JS directory to scan (safe baseline)" "true"
+  pass_check "No MFE theme JS directory to scan (safe baseline)"
 fi
 
 # Check 12: Footer slot uses PLUGIN_SLOTS (forward-compatible registration)
 if [[ -f "$PLUGIN" ]]; then
   if grep -q 'from tutormfe.hooks import PLUGIN_SLOTS' "$PLUGIN"; then
-    check "Plugin registers footer slot via PLUGIN_SLOTS (forward-compatible)" "true"
+    pass_check "Plugin registers footer slot via PLUGIN_SLOTS (forward-compatible)"
   else
-    check "Plugin registers footer slot via PLUGIN_SLOTS (forward-compatible)" "false"
+    fail_check "Plugin registers footer slot via PLUGIN_SLOTS (forward-compatible)"
   fi
 fi
 
 # Check 13: env.config patch uses mfe-env-config hook (canonical entry point)
 if [[ -f "$PLUGIN" ]]; then
   if grep -q '"mfe-env-config"' "$PLUGIN"; then
-    check "MFE theme patch uses canonical 'mfe-env-config' hook" "true"
+    pass_check "MFE theme patch uses canonical 'mfe-env-config' hook"
   else
-    check "MFE theme patch uses canonical 'mfe-env-config' hook" "false"
+    fail_check "MFE theme patch uses canonical 'mfe-env-config' hook"
   fi
 fi
 
@@ -249,24 +245,28 @@ if [[ -f "$APPLY_PATCHES" ]]; then
   BANNED_INJECT=$(grep -n 'document\.body\|document\.getElementById\|\.outerHTML\s*=' \
     "$APPLY_PATCHES" || true)
   if [[ -z "$BANNED_INJECT" ]]; then
-    check "No direct body/id DOM injection in apply-patches.sh" "true"
+    pass_check "No direct body/id DOM injection in apply-patches.sh"
   else
-    check "No direct body/id DOM injection in apply-patches.sh" "false"
+    fail_check "No direct body/id DOM injection in apply-patches.sh"
     echo "    Lines: $BANNED_INJECT"
   fi
 fi
 
 # Check 15: Cross-reference with verify-no-dom-overrides.sh results
 DOM_OVERRIDE_SCRIPT="$REPO_ROOT/scripts/qa/verify-no-dom-overrides.sh"
-check "verify-no-dom-overrides.sh exists (DOM policy enforced)" "[[ -f '$DOM_OVERRIDE_SCRIPT' ]]"
+if [[ -f "$DOM_OVERRIDE_SCRIPT" ]]; then
+  pass_check "verify-no-dom-overrides.sh exists (DOM policy enforced)"
+else
+  fail_check "verify-no-dom-overrides.sh exists (DOM policy enforced)"
+fi
 
 # Check 16: Migration register has at least 1 MIGRATED entry (progress evidence)
 if [[ -f "$MIGRATION_REGISTER" ]]; then
   MIGRATED_COUNT=$(grep -c "MIGRATED\|✅ MIGRATED" "$MIGRATION_REGISTER" || true)
   if [[ "$MIGRATED_COUNT" -ge 1 ]]; then
-    check "Migration register has at least 1 MIGRATED entry (count: $MIGRATED_COUNT)" "true"
+    pass_check "Migration register has at least 1 MIGRATED entry (count: $MIGRATED_COUNT)"
   else
-    check "Migration register has at least 1 MIGRATED entry" "false"
+    fail_check "Migration register has at least 1 MIGRATED entry"
   fi
 fi
 
@@ -274,9 +274,9 @@ fi
 if [[ -f "$MIGRATION_REGISTER" ]]; then
   P0_OPEN=$(grep -E "\| P0 \|" "$MIGRATION_REGISTER" | grep -v "Done\|MIGRATED\|✅" || true)
   if [[ -z "$P0_OPEN" ]]; then
-    check "No open P0 items in plugin-slot migration register" "true"
+    pass_check "No open P0 items in plugin-slot migration register"
   else
-    check "No open P0 items in plugin-slot migration register" "false"
+    fail_check "No open P0 items in plugin-slot migration register"
     echo "    Open P0 items:"
     echo "$P0_OPEN" | sed 's/^/      /'
   fi
@@ -290,33 +290,52 @@ echo ""
 echo "AC-AN-004: Evidence package and CI artifact structure"
 
 # Check 18: Analytics operational doc exists
-check "MFE_ANALYTICS_PLUGIN_PARITY.md doc exists" "[[ -f '$ANALYTICS_DOC' ]]"
+if [[ -f "$ANALYTICS_DOC" ]]; then
+  pass_check "MFE_ANALYTICS_PLUGIN_PARITY.md doc exists"
+else
+  fail_check "MFE_ANALYTICS_PLUGIN_PARITY.md doc exists"
+fi
 
 # Check 19: Doc covers key configuration architecture
 if [[ -f "$ANALYTICS_DOC" ]]; then
-  check "Doc covers analytics configuration architecture" \
-    "grep -q 'Analytics Configuration' '$ANALYTICS_DOC'"
-  check "Doc covers sentinel guard pattern" \
-    "grep -q 'sentinel\|Sentinel\|placeholder' '$ANALYTICS_DOC'"
-  check "Doc covers exception register" \
-    "grep -q 'Exception\|exception' '$ANALYTICS_DOC'"
-  check "Doc covers evidence package format" \
-    "grep -q 'evidence\|Evidence\|artifact' '$ANALYTICS_DOC'"
+  if grep -q 'Analytics Configuration' "$ANALYTICS_DOC"; then
+    pass_check "Doc covers analytics configuration architecture"
+  else
+    fail_check "Doc covers analytics configuration architecture"
+  fi
+  if grep -q 'sentinel\|Sentinel\|placeholder' "$ANALYTICS_DOC"; then
+    pass_check "Doc covers sentinel guard pattern"
+  else
+    fail_check "Doc covers sentinel guard pattern"
+  fi
+  if grep -q 'Exception\|exception' "$ANALYTICS_DOC"; then
+    pass_check "Doc covers exception register"
+  else
+    fail_check "Doc covers exception register"
+  fi
+  if grep -q 'evidence\|Evidence\|artifact' "$ANALYTICS_DOC"; then
+    pass_check "Doc covers evidence package format"
+  else
+    fail_check "Doc covers evidence package format"
+  fi
 fi
 
 # Check 20: CI workflow has analytics plugin parity job
 if [[ -f "$CI_WORKFLOW" ]]; then
-  check ".github/workflows/ci.yml contains 'mfe-analytics-plugin-parity' job" \
-    "grep -q 'mfe-analytics-plugin-parity' '$CI_WORKFLOW'"
+  if grep -q 'mfe-analytics-plugin-parity' "$CI_WORKFLOW"; then
+    pass_check ".github/workflows/ci.yml contains 'mfe-analytics-plugin-parity' job"
+  else
+    fail_check ".github/workflows/ci.yml contains 'mfe-analytics-plugin-parity' job"
+  fi
 else
-  check ".github/workflows/ci.yml exists" "false"
+  fail_check ".github/workflows/ci.yml exists"
 fi
 
 # Check 21: var/ directory pattern used for artifacts (consistent with CI)
 # CI jobs upload artifacts from var/ — verify this script would produce there
 VAR_DIR="$REPO_ROOT/var"
 if [[ -d "$VAR_DIR" ]] || grep -q 'var/' "$CI_WORKFLOW" 2>/dev/null; then
-  check "var/ artifact directory pattern is used in CI workflow" "true"
+  pass_check "var/ artifact directory pattern is used in CI workflow"
 else
   warn "var/ artifact directory not referenced in CI — evidence may not be captured"
 fi
@@ -326,9 +345,9 @@ if [[ -f "$CI_WORKFLOW" ]]; then
   ANALYTICS_IN_CI=$(grep -c 'verify-analytics\|analytics.*parity\|smoke-test-analytics' \
     "$CI_WORKFLOW" || true)
   if [[ "$ANALYTICS_IN_CI" -ge 1 ]]; then
-    check "Analytics scripts referenced in CI workflow (count: $ANALYTICS_IN_CI)" "true"
+    pass_check "Analytics scripts referenced in CI workflow (count: $ANALYTICS_IN_CI)"
   else
-    check "Analytics scripts referenced in CI workflow" "false"
+    fail_check "Analytics scripts referenced in CI workflow"
   fi
 fi
 

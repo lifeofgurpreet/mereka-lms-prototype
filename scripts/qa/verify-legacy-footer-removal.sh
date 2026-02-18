@@ -87,7 +87,7 @@ PY
   fi
 
   # Verify the removal comment block is present (documents what was done)
-  if grep -q 'REMOVED.*bead 1rns\|REMOVED (bead 1rns' "$PATCHES_FILE"; then
+  if grep -qi 'removed.*bead 1rns\|removed (bead 1rns' "$PATCHES_FILE"; then
     pass "AC-UI-401: Removal comment block (bead 1rns) present in apply-patches.sh"
   else
     warn "AC-UI-401: Removal comment block not found — expected '# REMOVED (bead 1rns' annotation"
