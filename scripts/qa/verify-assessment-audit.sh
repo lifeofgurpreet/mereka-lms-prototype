@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+# @covers AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015
+# @spec: advanced-assessment-xqueue_spec.md
 # Verification script for Assessment Infrastructure Audit (Phase 0)
+# Covers ORA2 (AC-001..009) and Timed Exams (AC-010..015) baseline checks
 #
-# @spec: specs/advanced-assessment-xqueue_spec.md
 # @audit: docs/architecture/ASSESSMENT_AUDIT.md
 #
 # Usage:

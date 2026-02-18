@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+# @covers AC-021, AC-022, AC-023, AC-024, AC-025
+# @spec: advanced-assessment-xqueue_spec.md
 # Verification script for Assessment Phase 3 — XQueue Grader Workers
+# Covers sandbox security (AC-021..025): memory limits, fork bombs, network, filesystem, env leakage
 #
-# @spec: specs/advanced-assessment-xqueue_spec.md
 # @phase: Assessment Phase 3
 #
 # Usage:

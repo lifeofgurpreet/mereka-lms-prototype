@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
+# @covers AC-026, AC-027, AC-028, AC-029, AC-030, AC-031, AC-032, AC-033, AC-034, AC-035, AC-036, AC-037, AC-038, AC-039, AC-040, AC-041, AC-042, AC-043, AC-044
+# @spec: advanced-assessment-xqueue_spec.md
 #
-# Verification Script for Assessment Bulk Operations (Assessment Phase 5)
+# Verification Script for Assessment Phases 4+5 (Advanced XBlocks + Bulk Operations)
 #
-# Verifies all 8 acceptance criteria:
-# - AC-ASS-029: Bulk regrade of 5000 students in <5 min with checkpoint/resume
-# - AC-ASS-030: Staff grade override audit trail
-# - AC-ASS-031: Malay language support for ORA2 rubrics
-# - AC-ASS-032: show_correctness=past_due timing control
-# - AC-ASS-033: Bulk grade export (CSV/JSON filtered by section/assignment)
-# - AC-ASS-034: Bulk grade import with validation and deduplication
-# - AC-ASS-035: IP logging for exam submissions
-# - AC-ASS-036: Grade data isolation (no leakage)
+# Covers:
+# - AC-026..033: Advanced XBlocks (drag-drop, math, randomized pools, exam config)
+# - AC-034..044: Bulk ops, security, multi-language, analytics, accessibility
 #
 # Usage:
 #   ./scripts/qa/verify-assessment-bulk.sh [--verbose]
