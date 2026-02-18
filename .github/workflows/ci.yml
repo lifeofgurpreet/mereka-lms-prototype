@@ -211,6 +211,7 @@ jobs:
           bash -n scripts/qa/verify-footer-variant-matrix.sh
           bash -n scripts/qa/verify-no-dom-overrides.sh
           bash -n scripts/qa/verify-migration-lock.sh
+          bash -n scripts/qa/verify-enterprise-ui-review.sh
 
       - name: Run local observability audit
         run: |
@@ -744,3 +745,18 @@ jobs:
 
       - name: Run consolidated tenant branding QA (AC-TBQA-001 through AC-TBQA-005)
         run: ./scripts/qa/run-tenant-branding-qa.sh
+
+  enterprise-ui-review:
+    name: Enterprise UI Review Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'enterprise') ||
+        contains(github.event.pull_request.title, 'branding') ||
+        contains(github.event.pull_request.title, 'brand')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run enterprise UI review gate
+        run: ./scripts/qa/verify-enterprise-ui-review.sh
