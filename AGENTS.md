@@ -1032,3 +1032,13 @@ git push                             # Push to remote
 ```
 
 <!-- end-bv-agent-instructions -->
+
+## Shared Skills Baseline (Centralized)
+
+This repo inherits shared agent skills from the VPS baseline:
+
+- `/home/gurpreet/docs/acfs/tools/team-skills.md`
+- `/home/gurpreet/projects/team-skills/AGENTS.md`
+- `/home/gurpreet/projects/team-skills/SKILLS.md`
+
+Do not duplicate long skill instructions here. Keep this AGENTS file project-specific and use progressive disclosure through the linked central docs.

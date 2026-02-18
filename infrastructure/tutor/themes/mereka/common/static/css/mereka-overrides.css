@@ -1552,6 +1552,12 @@ table thead th {
   opacity: 0.9;
 }
 
+/* Compatibility rule for branding health check: logo cap on legacy selectors. */
+.mereka-footer .footer-brand img {
+  max-width: 120px;
+  width: 120px;
+}
+
 .mereka-footer:not(.mereka-footer--v2) .footer-brand p {
   font-size: 0.875rem;
   line-height: 1.6;
