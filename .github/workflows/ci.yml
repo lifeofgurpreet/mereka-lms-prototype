@@ -217,6 +217,7 @@ jobs:
           bash -n scripts/qa/verify-footer-parity.sh
           bash -n scripts/qa/verify-mfe-routing-parity.sh
           bash -n scripts/qa/verify-a11y-contrast-focus.sh
+          bash -n scripts/qa/verify-a11y-authenticated-routes.sh
           bash -n scripts/qa/verify-performance-budget.sh
           bash -n scripts/qa/verify-copy-terminology.sh
           bash -n scripts/qa/verify-visual-smoke-baseline.sh
@@ -896,6 +897,25 @@ jobs:
         with:
           name: a11y-contrast-focus-gate
           path: var/a11y-contrast-focus-gate.txt
+
+  a11y-authenticated-routes:
+    name: A11y Authenticated Route Gate
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (
+        contains(github.event.pull_request.title, 'a11y') ||
+        contains(github.event.pull_request.title, 'accessibility') ||
+        contains(github.event.pull_request.title, 'landmark') ||
+        contains(github.event.pull_request.title, 'focus') ||
+        contains(github.event.pull_request.title, 'authenticated')
+      )
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-a11y-authenticated-routes.sh
+      - name: Run a11y authenticated route verification (AC-ACCSS-201..205)
+        run: ./scripts/qa/verify-a11y-authenticated-routes.sh
 
   performance-budget:
     name: Frontend Performance Budget Gate
