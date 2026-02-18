@@ -209,6 +209,7 @@ jobs:
           bash -n scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
           bash -n scripts/qa/verify-analytics-key.sh
           bash -n scripts/qa/verify-footer-variant-matrix.sh
+          bash -n scripts/qa/verify-no-dom-overrides.sh
 
       - name: Run local observability audit
         run: |
@@ -701,6 +702,18 @@ jobs:
 
       - name: Verify footer variant matrix (AC-FTVAR-001 through AC-FTVAR-005)
         run: ./scripts/qa/verify-footer-variant-matrix.sh
+
+  no-dom-overrides:
+    name: No DOM Overrides
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-no-dom-overrides.sh
+
+      - name: Verify no forbidden DOM overrides (AC-FTR-001 through AC-FTR-004)
+        run: ./scripts/qa/verify-no-dom-overrides.sh
 
   tenant-branding-qa:
     name: Tenant Branding QA (Consolidated)

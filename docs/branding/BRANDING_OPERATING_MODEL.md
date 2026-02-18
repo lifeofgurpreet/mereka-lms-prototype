@@ -220,6 +220,37 @@ Preferred deployment command:
      2) redeploy and confirm `Deployment/caddy` ready
      3) rerun `./scripts/infra/apply-kind-overlay.sh` (dev) or production GitOps rollout + gates
 
+## No DOM Override Policy
+
+**Rule**: All MFE customizations MUST use the Frontend Plugin Framework (FPF) plugin-slot system.
+Direct DOM manipulation, monkey-patching, or injecting HTML/JS into MFE bundles is forbidden.
+
+### Approved Override Points
+
+| Surface | Method | Example |
+|---------|--------|---------|
+| MFE footer | FPF plugin slot `footer.v1` | `MerekaFooter` component via `PLUGIN_SLOTS` |
+| MFE header logo | FPF plugin slot `header_logo.v1` | (P1 — migration pending) |
+| MFE styling | SCSS theme override (`mereka.scss`) | `[data-testid*="..."]` selectors preferred |
+| LMS templates | Mako template theming (`head-extra.html`, `footer.html`, `header/brand.html`) | Standard Open edX theming mechanism |
+| Studio templates | Mako template theming (`head-extra.html`) | Standard Open edX theming mechanism |
+| Build-time transforms | `apply-patches.sh` (idempotent, reviewed) | Google Fonts stripping, npm config |
+
+### Forbidden Patterns
+
+| Pattern | Why | Alternative |
+|---------|-----|-------------|
+| `document.querySelector()` in MFE overrides | Breaks on class rename | Use FPF plugin slot |
+| `innerHTML` injection into MFE DOM | XSS risk, brittle | Use React component via slot |
+| Patching MFE bundle JS/HTML post-build | Invalidates build hash | Use `env.config.jsx` config |
+| Adding `<script>` tags to MFE HTML | CSP violation risk | Use plugin slot or config |
+| `[class*="..."]` without `[data-testid*="..."]` fallback | Breaks on Paragon update | Add data-testid dual path |
+
+### Verification
+
+Run `./scripts/qa/verify-no-dom-overrides.sh` to confirm compliance.
+This gate runs in CI as job `no-dom-overrides`.
+
 ## What Was Hacky And How We Avoid It
 
 - Hacky pattern: manual one-off checks run ad-hoc by different agents.
@@ -255,3 +286,5 @@ Preferred deployment command:
 - `docs/BRANDING.md`
 - `docs/operations/THEME_DEPLOYMENT.md`
 - `docs/operations/OPENEDX_HOSTNAMES.md`
+- `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`
+- `docs/operations/FOOTER_VARIANT_MATRIX.md`
