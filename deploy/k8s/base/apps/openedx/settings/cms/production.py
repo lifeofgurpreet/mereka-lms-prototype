@@ -555,16 +555,20 @@ LIBRARY_SOFT_DELETE_RETENTION_DAYS = int(os.environ.get(
     "LIBRARY_SOFT_DELETE_RETENTION_DAYS", "30"
 ))
 
-# Register openedx_content_libraries app
-if "openedx_content_libraries" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_content_libraries")
+
 
 # ── Kajabi SSO/OAuth Integration ───────────────────────────────────────
 # @spec: Kajabi SSO Migration (mereka-lms-f98)
-# Register app for admin access (SSO primarily used on LMS)
-
+# Register app for admin access (SSO primarily used on LMS) only when package exists.
 if "openedx_kajabi_sso" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_kajabi_sso")
+    try:
+        import importlib.util
+
+        if importlib.util.find_spec("openedx_kajabi_sso") is not None:
+            INSTALLED_APPS.append("openedx_kajabi_sso")
+    except Exception:
+        # CMS images may not include this package; fail safe to avoid startup crash.
+        pass
 
 # ── Mobile Backend API ──────────────────────────────────────────────────
 # @spec: Mobile Backend API (mereka-lms-2gck)

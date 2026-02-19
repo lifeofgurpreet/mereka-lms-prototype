@@ -1260,9 +1260,7 @@ LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
     "LIBRARY_CONTENT_DEFAULT_COUNT", "5"
 ))
 
-# Register openedx_content_libraries app
-if "openedx_content_libraries" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_content_libraries")
+
 
 # ── Kajabi SSO/OAuth Integration ───────────────────────────────────────
 # @spec: Kajabi SSO Migration (mereka-lms-f98)
