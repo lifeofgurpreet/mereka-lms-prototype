@@ -37,11 +37,15 @@ __version__ = "1.0.0"
 hooks.Filters.CONFIG_DEFAULTS.add_items([
     ("MEREKA_LMS_VERSION", __version__),
     ("MEREKA_LMS_EXTRA_HOSTS", [
+        "admin.academyv2.mereka.io",
         "academy.biji-biji.com",
+        "enterprise.academyv2.mereka.io",
         "skillourfuture.academy.mereka.io",
     ]),
     ("MEREKA_LMS_EXTRA_CSRF_ORIGINS", [
+        "https://admin.academyv2.mereka.io",
         "https://academy.biji-biji.com",
+        "https://enterprise.academyv2.mereka.io",
         "https://skillourfuture.academy.mereka.io",
     ]),
     ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
@@ -444,8 +448,10 @@ hooks.Filters.ENV_PATCHES.add_item(
 COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there and should be importable
+# as top-level Django apps across CMS/LMS and worker processes.
+RUN printf '/openedx\n/openedx/plugins\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1

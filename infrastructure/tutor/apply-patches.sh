@@ -920,8 +920,9 @@ RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
         if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
             marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
             custom_apps_copy = f"""{marker}
@@ -937,8 +938,9 @@ RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
             updated = updated.replace(mfe_oauth_marker, custom_apps_add)
         elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
             # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
@@ -952,8 +954,9 @@ RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
 
 """ + workdir_marker
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)
