@@ -42,37 +42,26 @@ The same issue exists in `frontend-app-learner-portal-enterprise`: that portal c
 
 ---
 
-## Fix Already In Repo (Not Yet Deployed)
+## Fix Status (As of 2026-02-19)
 
-`deploy/k8s/base/apps/enterprise/mfe/admin-portal-deployment.yaml` contains a `sanitize-enterprise-index-html` initContainer that:
+Runtime stripping initContainers for enterprise portals were removed from manifests to avoid non-canonical patching.
+The canonical mitigation now relies on build-time configuration and deploy-time verification.
 
-1. Copies `/openedx/dist` to a clean dir
-2. Runs `awk` to strip any `<script>` block containing `NREUM`
-3. Replaces the dist dir with the cleaned version
+This means:
 
-```yaml
-initContainers:
-  - name: sanitize-enterprise-index-html
-    image: ...enterprise-admin-portal:latest
-    command: ["/bin/sh", "-c"]
-    args:
-      - |
-        awk '
-          ...strips <script> blocks containing NREUM...
-        ' /openedx/dist-clean/index.html > /tmp/index.html
-```
+- `deploy/k8s/base/apps/enterprise/mfe/admin-portal-deployment.yaml` should **not** contain `strip-nreum`.
+- `deploy/k8s/base/apps/enterprise/mfe/learner-portal-deployment.yaml` should **not** contain `strip-nreum`.
+- Live smoke and QA are expected to prove zero `undefined_license_key` by rebuilding/rolling images with fixed configuration.
 
-The same initContainer is present in `learner-portal-deployment.yaml`.
+### Why the Fix Can Be Delayed in Runtime
 
-### Why the Fix Is Not Live
+After removing runtime sanitization from manifests, correctness depends on image rollout:
 
-The live cluster pod is running a deployment that **pre-dates the initContainer addition** — ArgoCD has not yet synced this manifest to the cluster.
+- Rebuild enterprise MFE images with correct New Relic build-time configuration.
+- Push updated images and update GitOps image tags.
+- Roll out via GitOps and run the smoke script.
 
-**Verification** (run from cluster access):
-```bash
-kubectl get pod -n mereka-lms -l app.kubernetes.io/name=enterprise-admin-portal -o jsonpath='{.items[0].status.initContainerStatuses}'
-```
-If the initContainer is running, it will appear here. If empty — the deployed pod was created before the initContainer was added to the manifest.
+If the cluster still shows inline NREUM snippets, the active image is still pre-fix or using an old build.
 
 ---
 
@@ -83,13 +72,27 @@ If the initContainer is running, it will appear here. If empty — the deployed 
 | URL | HTTP | NREUM | Status |
 |-----|------|-------|--------|
 | `https://admin.academyv2.mereka.io/` | 200 | ❌ `undefined_license_key` present | FAIL |
-| `https://enterprise.academyv2.mereka.io/` | 200 | ❌ Full NR agent embedded | WARN |
+| `https://enterprise.academyv2.mereka.io/` | 200 | ❌ `undefined_license_key` present | FAIL |
 | `https://studio.academyv2.mereka.io/` | 200 | ✅ Not affected | PASS |
 | `https://academyv2.mereka.io/` | 200 | ✅ Not affected (guarded in footer.html) | PASS |
 
 ### Expected state after ArgoCD sync
 
-After the initContainer runs, the `index.html` served by the enterprise portals will have the NREUM `<script>` block stripped entirely. The portals will still be functional — NREUM was purely a monitoring agent injection with invalid keys.
+After rebuild and rollout, the `index.html` served by the enterprise portals should no longer include inline `NREUM` snippets with undefined placeholders. The portals remain functional; only invalid monitoring bootstrap configuration is removed.
+
+### Current verification (2026-02-19)
+
+```bash
+./scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+```
+
+Result from live check:
+
+- FAIL (7 pass / 2 fail / 0 skip)
+- `admin.academyv2.mereka.io` still returns inline `undefined_license_key`
+- `enterprise.academyv2.mereka.io` now still returns inline undefined New Relic placeholders
+- Manifest checks confirm no `strip-nreum` initContainer in enterprise deployments
+- Caddy route checks for `/api/mfe_config/v1` and `/login_refresh` are present
 
 ---
 
@@ -99,6 +102,14 @@ After the initContainer runs, the `index.html` served by the enterprise portals 
 # Confirm NREUM in admin portal (pre-fix):
 curl -s https://admin.academyv2.mereka.io/ | grep -o 'licenseKey:"[^"]*"'
 # Output: licenseKey:"undefined_license_key"
+
+# Confirm visual evidence bundle (fresh):
+ls -l docs/operations/evidence/screenshots/2026-02-19/{admin,apps,enterprise}.png
+file docs/operations/evidence/screenshots/2026-02-19/{admin,apps,enterprise}.png
+
+# Confirm NREUM placeholders in enterprise portal:
+curl -s https://enterprise.academyv2.mereka.io/ | rg -n "undefined_(license_key|account_id|application_id|agent_id)"
+# Output expected: undefined_account_id / undefined_application_id / undefined_license_key
 
 # LMS MFE config (no NR keys):
 curl -s "https://academyv2.mereka.io/api/mfe_config/v1?mfe=admin"
@@ -115,22 +126,19 @@ curl -s "https://academyv2.mereka.io/api/mfe_config/v1?mfe=admin"
 
 ## AC-UX-144: Decision — apply-patches vs Plugin Parity
 
-**Decision: initContainer sanitization (already in repo) is the correct minimal fix.**
+**Decision: canonical fix is build-time configuration + deploy verification (no initContainer runtime workaround).**
 
 Rationale:
-- `apply-patches.sh` is for build-time Tutor template patches; the enterprise MFE images are pre-built upstream containers (not built via `tutor images build`)
-- New Relic `ENABLE_NEW_RELIC=false` rebuild is the permanent fix, but requires a new enterprise MFE image build (tracked separately)
-- The initContainer approach is runtime, image-agnostic, and already approved in the repo
-- No LMS footer.html change needed — the existing guard in `footer.html` (line 89) already skips `undefined_license_key` for the LMS Segment/analytics footer template
+- `apply-patches.sh` remains the canonical path for Tutor-generated manifests and non-MFE services.
+- Enterprise MFEs are containerized separately; runtime HTML mutation is intentionally removed from the deployment manifest.
+- The build-time config path (`ENABLE_NEW_RELIC=false` or equivalent in enterprise MFE build config) should be enforced in the MFE image pipeline and evidenced by image rollout.
 
 **Action required (operator)**:
 ```bash
-# Trigger ArgoCD sync to deploy the sanitize initContainer:
-argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal
-argocd app sync mereka-lms --resource apps:Deployment:enterprise-learner-portal
+# Ensure enterprise MFE images are rebuilt with correct New Relic configuration and deployed by GitOps:
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag <tag> --mfe-tag <tag> --verify-runtime --apply
 ```
-
-Or wait for the next scheduled ArgoCD reconciliation.
 
 ---
 

@@ -67,7 +67,7 @@ echo ""
 
 # --- AC-DEP-102: Enterprise learner portal HTML ---
 echo "--- AC-DEP-102: Enterprise learner portal HTML clean ---"
-ENTERPRISE_HTML=$(curl -s --max-time "$TIMEOUT" "$ENTERPRISE_URL" 2>/dev/null | head -c 2048 || true)
+ENTERPRISE_HTML=$(curl -s --max-time "$TIMEOUT" "$ENTERPRISE_URL" 2>/dev/null || true)
 ENTERPRISE_STATUS="unknown"
 if tmp_enterprise=$(mktemp); then
   ENTERPRISE_STATUS=$(curl -s -L --max-time "$TIMEOUT" -o "$tmp_enterprise" -w '%{http_code}' "$ENTERPRISE_URL" 2>/dev/null || true)
@@ -82,11 +82,21 @@ fi
 if [ -z "$ENTERPRISE_HTML" ]; then
   skip_check "Enterprise portal unreachable ($ENTERPRISE_URL) — skip NREUM check"
 else
-  if echo "$ENTERPRISE_HTML" | grep -q 'undefined_license_key'; then
+  if printf '%s' "$ENTERPRISE_HTML" | grep -q 'undefined_license_key'; then
     fail_check "Enterprise portal HTML contains 'undefined_license_key'"
     echo "    Fix: argocd app sync mereka-lms --resource apps:Deployment:enterprise-learner-portal"
   else
     pass_check "Enterprise portal HTML has no 'undefined_license_key'"
+  fi
+
+  if printf '%s' "$ENTERPRISE_HTML" | grep -qE 'undefined_account_id|undefined_application_id|undefined_agent_id'; then
+    fail_check "Enterprise portal HTML contains other undefined New Relic placeholders"
+  fi
+
+  if printf '%s' "$ENTERPRISE_HTML" | grep -q 'NREUM'; then
+    warn_check "Enterprise portal HTML still has NREUM object (may be loader config, not undefined keys)"
+  else
+    pass_check "Enterprise portal HTML has no NREUM injection"
   fi
 fi
 
