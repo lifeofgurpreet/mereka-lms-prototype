@@ -221,6 +221,12 @@ http://admin.academyv2.mereka.io {
     request_body {
         max_size 2MB
     }
+    reverse_proxy /api/mfe_config/v1* lms:8000 {
+        header_up Host {http.request.host}
+    }
+    reverse_proxy /login_refresh* lms:8000 {
+        header_up Host {http.request.host}
+    }
     import proxy "enterprise-admin-portal:8002"
 }
 
@@ -228,6 +234,12 @@ http://admin.academyv2.mereka.io {
 http://enterprise.academyv2.mereka.io {
     request_body {
         max_size 2MB
+    }
+    reverse_proxy /api/mfe_config/v1* lms:8000 {
+        header_up Host {http.request.host}
+    }
+    reverse_proxy /login_refresh* lms:8000 {
+        header_up Host {http.request.host}
     }
     import proxy "enterprise-learner-portal:8002"
 }
