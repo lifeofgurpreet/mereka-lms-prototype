@@ -255,6 +255,36 @@ http://admin.academyv2.mereka.io {
     reverse_proxy /login_refresh* lms:8000 {
         header_up Host {http.request.host}
     }
+    # Enterprise service APIs — routed to internal K8s services via path prefix.
+    # Same-origin (admin subdomain) so no CORS complications.
+    handle /api/enterprise-catalog/* {
+        uri strip_prefix /api/enterprise-catalog
+        reverse_proxy enterprise-catalog:8160 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /api/enterprise-access/* {
+        uri strip_prefix /api/enterprise-access
+        reverse_proxy enterprise-access:18270 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /api/license-manager/* {
+        uri strip_prefix /api/license-manager
+        reverse_proxy license-manager:18170 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /api/enterprise-subsidy/* {
+        uri strip_prefix /api/enterprise-subsidy
+        reverse_proxy enterprise-subsidy:18280 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
     import proxy "enterprise-admin-portal:8002"
 }
 
