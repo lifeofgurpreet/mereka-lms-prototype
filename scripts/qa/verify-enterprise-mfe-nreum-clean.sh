@@ -34,14 +34,22 @@ echo ""
 echo "--- AC-DEP-102: Admin portal HTML clean ---"
 ADMIN_HTML=$(curl -s --max-time "$TIMEOUT" "$ADMIN_URL" 2>/dev/null || true)
 ADMIN_STATUS="unknown"
+ADMIN_SIZE=0
 if tmp_admin=$(mktemp); then
   ADMIN_STATUS=$(curl -s -L --max-time "$TIMEOUT" -o "$tmp_admin" -w '%{http_code}' "$ADMIN_URL" 2>/dev/null || true)
+  ADMIN_SIZE=$(stat -c '%s' "$tmp_admin" 2>/dev/null || echo 0)
   if [ "$ADMIN_STATUS" = "403" ] || [ "$ADMIN_STATUS" = "405" ]; then
     fail_check "Admin portal returned HTTP $ADMIN_STATUS ($ADMIN_URL)"
   elif [ -n "$ADMIN_STATUS" ] && [ "$ADMIN_STATUS" != "unknown" ] && printf '%s' "$ADMIN_STATUS" | grep -Eq '^[0-9]{3}$'; then
     pass_check "Admin portal HTTP status $ADMIN_STATUS ($ADMIN_URL)"
   fi
   rm -f "$tmp_admin"
+fi
+
+if [ "${ADMIN_SIZE}" -eq 0 ]; then
+  fail_check "Admin portal returned empty body (${ADMIN_SIZE} bytes)"
+else
+  pass_check "Admin portal returned ${ADMIN_SIZE} bytes"
 fi
 
 if [ -z "$ADMIN_HTML" ]; then
@@ -69,14 +77,22 @@ echo ""
 echo "--- AC-DEP-102: Enterprise learner portal HTML clean ---"
 ENTERPRISE_HTML=$(curl -s --max-time "$TIMEOUT" "$ENTERPRISE_URL" 2>/dev/null || true)
 ENTERPRISE_STATUS="unknown"
+ENTERPRISE_SIZE=0
 if tmp_enterprise=$(mktemp); then
   ENTERPRISE_STATUS=$(curl -s -L --max-time "$TIMEOUT" -o "$tmp_enterprise" -w '%{http_code}' "$ENTERPRISE_URL" 2>/dev/null || true)
+  ENTERPRISE_SIZE=$(stat -c '%s' "$tmp_enterprise" 2>/dev/null || echo 0)
   if [ "$ENTERPRISE_STATUS" = "403" ] || [ "$ENTERPRISE_STATUS" = "405" ]; then
     fail_check "Enterprise portal returned HTTP $ENTERPRISE_STATUS ($ENTERPRISE_URL)"
   elif [ -n "$ENTERPRISE_STATUS" ] && [ "$ENTERPRISE_STATUS" != "unknown" ] && printf '%s' "$ENTERPRISE_STATUS" | grep -Eq '^[0-9]{3}$'; then
     pass_check "Enterprise portal HTTP status $ENTERPRISE_STATUS ($ENTERPRISE_URL)"
   fi
   rm -f "$tmp_enterprise"
+fi
+
+if [ "${ENTERPRISE_SIZE}" -eq 0 ]; then
+  fail_check "Enterprise portal returned empty body (${ENTERPRISE_SIZE} bytes)"
+else
+  pass_check "Enterprise portal returned ${ENTERPRISE_SIZE} bytes"
 fi
 
 if [ -z "$ENTERPRISE_HTML" ]; then

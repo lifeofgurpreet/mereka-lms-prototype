@@ -3,48 +3,70 @@
 # Remove NREUM <script> blocks from an HTML file.
 # Usage: strip-nreum.sh /path/to/index.html
 #
-# Handles multi-line <script> blocks containing NREUM.
-# Used as a COPY+RUN step in enterprise MFE Dockerfiles to strip at build time.
+# Handles minified/inline scripts where multiple <script> tags can appear on a
+# single line and avoids line-by-line parser blind spots.
 
 set -eu
 
 HTML_FILE="${1:-/openedx/dist/index.html}"
+TMP_FILE="$(mktemp)"
 
 if [ ! -f "$HTML_FILE" ]; then
   echo "[strip-nreum] File not found: $HTML_FILE — skip"
+  rm -f "$TMP_FILE"
   exit 0
 fi
 
 awk '
-  BEGIN {in_script=0; buf=""; has_nreum=0}
-  {
-    if (in_script) {
-      buf = buf $0 "\n"
-      if ($0 ~ /NREUM/) { has_nreum = 1 }
-      if ($0 ~ /<\/script>/) {
-        if (!has_nreum) { printf "%s", buf }
-        in_script = 0; buf = ""; has_nreum = 0
-      }
-      next
+{
+  html = html $0 "\n"
+}
+END {
+  out = ""
+  rest = html
+  while (1) {
+    start = match(rest, /<script[^>]*>/)
+    if (start == 0) {
+      out = out rest
+      break
     }
-    if ($0 ~ /<script/) {
-      in_script = 1
-      has_nreum = ($0 ~ /NREUM/) ? 1 : 0
-      buf = $0 "\n"
-      if ($0 ~ /<\/script>/) {
-        if (!has_nreum) { printf "%s", buf }
-        in_script = 0; buf = ""; has_nreum = 0
-      }
-      next
-    }
-    print
-  }
-  END { if (in_script && !has_nreum) { printf "%s", buf } }
-' "$HTML_FILE" > /tmp/index-nreum-clean.html
 
-mv /tmp/index-nreum-clean.html "$HTML_FILE"
+    out = out substr(rest, 1, start - 1)
+    rest = substr(rest, start)
+
+    start_tag_len = RLENGTH
+    start_tag = substr(rest, 1, start_tag_len)
+    body_rest = substr(rest, start_tag_len + 1)
+
+    close_offset = index(body_rest, "</script>")
+    if (close_offset == 0) {
+      out = out rest
+      break
+    }
+
+    script_block = start_tag substr(body_rest, 1, close_offset - 1) "</script>"
+    rest = substr(body_rest, close_offset + 9)
+
+    if (index(script_block, "NREUM") == 0) {
+      out = out script_block
+    }
+  }
+  printf "%s", out
+}' "$HTML_FILE" > "$TMP_FILE"
+
+mv "$TMP_FILE" "$HTML_FILE"
 
 # Verify
+if [ ! -s "$HTML_FILE" ]; then
+  echo "[strip-nreum] ERROR: stripped file is empty"
+  exit 1
+fi
+
+if ! grep -qE '<!DOCTYPE html>|<html' "$HTML_FILE" 2>/dev/null; then
+  echo "[strip-nreum] ERROR: stripped file does not look like HTML"
+  exit 1
+fi
+
 if grep -q 'undefined_license_key' "$HTML_FILE" 2>/dev/null; then
   echo "[strip-nreum] ERROR: undefined_license_key still present after strip"
   exit 1

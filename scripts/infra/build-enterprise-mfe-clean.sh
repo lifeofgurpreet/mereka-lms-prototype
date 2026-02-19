@@ -36,6 +36,34 @@ FAIL=0
 pass_check() { echo "  [PASS] $1"; PASS=$((PASS + 1)); }
 fail_check() { echo "  [FAIL] $1"; FAIL=$((FAIL + 1)); }
 
+check_image_bundle() {
+  local image="$1"
+  local label="$2"
+
+  local size
+  local license_count
+
+  size="$(docker run --rm "$image" sh -c 'wc -c < /openedx/dist/index.html' 2>/dev/null || true)"
+  if [ -z "$size" ] || [ "$size" -eq 0 ]; then
+    fail_check "${label} — index.html is empty after strip"
+    return 1
+  fi
+
+  if ! docker run --rm "$image" sh -c 'grep -q "<html" /openedx/dist/index.html || grep -q "<!DOCTYPE html" /openedx/dist/index.html' >/dev/null 2>&1; then
+    fail_check "${label} — index.html does not contain HTML root marker"
+    return 1
+  fi
+
+  license_count="$(docker run --rm "$image" sh -c 'grep -c "undefined_license_key" /openedx/dist/index.html || true' 2>/dev/null || true)"
+  if [ "$license_count" = "0" ] || [ -z "$license_count" ]; then
+    pass_check "${label} — non-empty index without undefined_license_key"
+    return 0
+  fi
+
+  fail_check "${label} — undefined_license_key still present (${license_count} occurrences)"
+  return 1
+}
+
 echo "=== Enterprise MFE: Build-time NREUM strip ==="
 echo ""
 echo "  Source tag : ${SOURCE_TAG}"
@@ -65,12 +93,7 @@ docker build \
   "${DOCKERFILE_DIR}"
 
 # Verify clean locally before push
-ADMIN_CHECK=$(docker run --rm "${REGISTRY}/enterprise-admin-portal:${CLEAN_TAG}" \
-  sh -c 'grep -c "undefined_license_key" /openedx/dist/index.html || true' 2>/dev/null)
-if [ "${ADMIN_CHECK}" = "0" ] || [ -z "${ADMIN_CHECK}" ]; then
-  pass_check "enterprise-admin-portal:${CLEAN_TAG} — no undefined_license_key in built image"
-else
-  fail_check "enterprise-admin-portal:${CLEAN_TAG} — undefined_license_key still present (${ADMIN_CHECK} occurrences)"
+if ! check_image_bundle "${REGISTRY}/enterprise-admin-portal:${CLEAN_TAG}" "enterprise-admin-portal:${CLEAN_TAG}"; then
   exit 1
 fi
 
@@ -90,12 +113,7 @@ docker build \
   "${DOCKERFILE_DIR}"
 
 # Verify clean locally before push
-LEARNER_CHECK=$(docker run --rm "${REGISTRY}/enterprise-learner-portal:${CLEAN_TAG}" \
-  sh -c 'grep -c "undefined_license_key" /openedx/dist/index.html || true' 2>/dev/null)
-if [ "${LEARNER_CHECK}" = "0" ] || [ -z "${LEARNER_CHECK}" ]; then
-  pass_check "enterprise-learner-portal:${CLEAN_TAG} — no undefined_license_key in built image"
-else
-  fail_check "enterprise-learner-portal:${CLEAN_TAG} — undefined_license_key still present (${LEARNER_CHECK} occurrences)"
+if ! check_image_bundle "${REGISTRY}/enterprise-learner-portal:${CLEAN_TAG}" "enterprise-learner-portal:${CLEAN_TAG}"; then
   exit 1
 fi
 
