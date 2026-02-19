@@ -1,0 +1,91 @@
+# Domain overrides for rke2-nonprod staging environment
+#
+# TODO: Replace academyv2.staging.mereka.dev with the actual confirmed staging domain
+# before deploying. Ask bbi-infrastructure team for the target hostname.
+# Cloudflare Free SSL only covers *.mereka.dev (not *.*.mereka.dev), so:
+#   - DNS-only (gray cloud) + Let's Encrypt for multi-level subdomains
+#   - cert-manager with ClusterIssuer letsencrypt-prod handles TLS
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.staging.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.staging.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.staging.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.staging.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.staging.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.staging.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.staging.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.staging.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.staging.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.staging.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.staging.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.staging.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.staging.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.staging.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.staging.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.staging.mereka.dev

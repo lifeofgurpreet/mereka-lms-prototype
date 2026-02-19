@@ -1,0 +1,97 @@
+# TODO: Replace academyv2.staging.mereka.dev with actual staging domain
+# Note: Cloudflare Free SSL does not cover *.*.mereka.dev subdomains.
+# Use DNS-only (gray cloud) in Cloudflare + Let's Encrypt via cert-manager.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openedx-lms
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: openedx-lms
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: preview.academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: discovery.academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: ecommerce.academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: notes.academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: credentials.academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+    - host: forum.academyv2.staging.mereka.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - academyv2.staging.mereka.dev
+        - preview.academyv2.staging.mereka.dev
+        - discovery.academyv2.staging.mereka.dev
+        - ecommerce.academyv2.staging.mereka.dev
+        - notes.academyv2.staging.mereka.dev
+        - credentials.academyv2.staging.mereka.dev
+        - forum.academyv2.staging.mereka.dev
+      secretName: openedx-lms-tls
