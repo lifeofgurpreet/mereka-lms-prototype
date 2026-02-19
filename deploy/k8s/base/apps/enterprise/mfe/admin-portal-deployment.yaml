@@ -27,22 +27,26 @@ spec:
         app.kubernetes.io/component: enterprise
     spec:
       initContainers:
-        - name: sanitize-enterprise-index-html
+        # Step 1: copy the built MFE dist from the enterprise image to the shared emptyDir.
+        # The emptyDir is mounted at /openedx/dist-output (NOT /openedx/dist) so the
+        # image's own /openedx/dist is visible and can be copied.
+        - name: copy-dist
           image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal:latest
-          command:
-            - /bin/sh
-            - -c
+          command: [/bin/sh, -c]
           args:
-            - |
-              set -eu
-
-              # Copy image's /openedx/dist (NOT shadowed — emptyDir is at /openedx/dist-output)
-              # to the shared emptyDir, then strip the New Relic NREUM inline script block.
-              cp -a /openedx/dist/. /openedx/dist-output/
-
-              if [ -f /openedx/dist-output/index.html ]; then
-                python3 -c "import re; p='/openedx/dist-output/index.html'; h=open(p).read(); h2=re.sub(r'<script[^>]*>(?:(?!</script>).)*NREUM(?:(?!</script>).)*</script>','',h,flags=re.DOTALL); open(p,'w').write(h2); print('stripped:', 'NREUM' not in h2, 'size:', len(h2))"
-              fi
+            - cp -a /openedx/dist/. /openedx/dist-output/
+          volumeMounts:
+            - name: enterprise-admin-portal-dist
+              mountPath: /openedx/dist-output
+          securityContext:
+            allowPrivilegeEscalation: false
+        # Step 2: strip the New Relic NREUM inline <script> block from index.html.
+        # Uses python:3-alpine (has Python) to handle single-line minified HTML.
+        - name: strip-nreum
+          image: python:3-alpine
+          command: [python3, -c]
+          args:
+            - "import re; p='/openedx/dist-output/index.html'; h=open(p).read(); h2=re.sub(r'<script[^>]*>(?:(?!</script>).)*NREUM(?:(?!</script>).)*</script>','',h,flags=re.DOTALL); open(p,'w').write(h2); print('stripped:', 'NREUM' not in h2, 'size:', len(h2))"
           volumeMounts:
             - name: enterprise-admin-portal-dist
               mountPath: /openedx/dist-output
