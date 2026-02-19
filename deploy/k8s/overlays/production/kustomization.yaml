@@ -29,6 +29,13 @@ images:
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: b732a7d-20260210161437
+  # Enterprise MFE: pinned to NREUM-clean build (no initContainer workaround needed)
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+    newTag: nreum-clean-202602190645
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+    newTag: nreum-clean-202602190645
 
 # Production replica counts (higher for availability)
 replicas:

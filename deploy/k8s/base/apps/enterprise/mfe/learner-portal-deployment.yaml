@@ -26,32 +26,9 @@ spec:
         app.kubernetes.io/part-of: mereka-lms
         app.kubernetes.io/component: enterprise
     spec:
-      initContainers:
-        # Step 1: copy the built MFE dist from the enterprise image to the shared emptyDir.
-        # The emptyDir is mounted at /openedx/dist-output (NOT /openedx/dist) so the
-        # image's own /openedx/dist is visible and can be copied.
-        - name: copy-dist
-          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal:latest
-          command: [/bin/sh, -c]
-          args:
-            - cp -a /openedx/dist/. /openedx/dist-output/
-          volumeMounts:
-            - name: enterprise-learner-portal-dist
-              mountPath: /openedx/dist-output
-          securityContext:
-            allowPrivilegeEscalation: false
-        # Step 2: strip the New Relic NREUM inline <script> block from index.html.
-        # Uses python:3-alpine (has Python) to handle single-line minified HTML.
-        - name: strip-nreum
-          image: python:3-alpine
-          command: [python3, -c]
-          args:
-            - "import re; p='/openedx/dist-output/index.html'; h=open(p).read(); h2=re.sub(r'<script[^>]*>(?:(?!</script>).)*NREUM(?:(?!</script>).)*</script>','',h,flags=re.DOTALL); open(p,'w').write(h2); print('stripped:', 'NREUM' not in h2, 'size:', len(h2))"
-          volumeMounts:
-            - name: enterprise-learner-portal-dist
-              mountPath: /openedx/dist-output
-          securityContext:
-            allowPrivilegeEscalation: false
+      # No initContainers needed: image is built clean (no NREUM) via
+      # infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal.
+      # NREUM was stripped at build time; runtime HTML sanitization is not required.
       containers:
         - name: enterprise-learner-portal
           image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal:latest
@@ -88,16 +65,12 @@ spec:
           volumeMounts:
             - mountPath: /etc/caddy/
               name: caddy-config
-            - mountPath: /openedx/dist
-              name: enterprise-learner-portal-dist
             - mountPath: /openedx/dist/env.config.js
               name: mfe-env
               subPath: env.config.js
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
-        - name: enterprise-learner-portal-dist
-          emptyDir: {}
         - name: caddy-config
           configMap:
             name: enterprise-learner-portal-caddy-config

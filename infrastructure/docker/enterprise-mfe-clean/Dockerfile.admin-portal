@@ -1,0 +1,24 @@
+# Dockerfile.admin-portal
+# Build-time NREUM strip for enterprise-admin-portal.
+#
+# The upstream frontend-app-admin-portal image is built with ENABLE_NEW_RELIC=true
+# (Open edX CI default), which injects a New Relic browser agent snippet with
+# undefined_license_key placeholders into /openedx/dist/index.html.
+#
+# This Dockerfile creates a clean derivative image by stripping the NREUM <script>
+# block at build time, so the runtime K8s manifests require no initContainer workaround.
+#
+# Build (see scripts/infra/build-enterprise-mfe-clean.sh for wrapper):
+#   docker build -f Dockerfile.admin-portal \
+#     --build-arg SOURCE_TAG=latest \
+#     -t $REGISTRY/enterprise-admin-portal:nreum-clean-YYYYMMDD .
+
+ARG REGISTRY=asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+ARG SOURCE_TAG=latest
+FROM ${REGISTRY}/enterprise-admin-portal:${SOURCE_TAG}
+
+# Copy and run the NREUM strip script at build time
+COPY strip-nreum.sh /tmp/strip-nreum.sh
+RUN chmod +x /tmp/strip-nreum.sh \
+    && /tmp/strip-nreum.sh /openedx/dist/index.html \
+    && rm /tmp/strip-nreum.sh

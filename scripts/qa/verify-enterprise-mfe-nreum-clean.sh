@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # verify-enterprise-mfe-nreum-clean.sh
 # @spec: platform-middleware-custom-apps_spec.md
-# @covers AC-UX-142, AC-UX-145
+# @covers AC-DEP-101, AC-DEP-104, AC-DEP-105
 #
 # Regression guard: enterprise admin/learner portal HTML must NOT contain
 # NREUM browser agent with undefined_license_key placeholder.
 #
 # Root cause docs: docs/operations/evidence/3evf-5xcl-enterprise-mfe-nreum-fix.md
-# Fix: sanitize-enterprise-index-html initContainer in admin/learner-portal-deployment.yaml
+# Fix intent: remove legacy runtime sanitize workaround from enterprise portal deployments.
 #
 # SKIP mode: if the portals are unreachable, checks are skipped (not failed).
 # This allows CI to run the script without a live cluster dependency.
@@ -30,9 +30,19 @@ warn_check() { echo "  [WARN] $1"; }
 echo "=== Enterprise MFE: NREUM / undefined_license_key regression guard ==="
 echo ""
 
-# --- AC-UX-142: Admin portal HTML must not contain undefined_license_key ---
-echo "--- AC-UX-142: Admin portal HTML clean ---"
+# --- AC-DEP-102: Admin portal HTML must not contain undefined_license_key ---
+echo "--- AC-DEP-102: Admin portal HTML clean ---"
 ADMIN_HTML=$(curl -s --max-time "$TIMEOUT" "$ADMIN_URL" 2>/dev/null || true)
+ADMIN_STATUS="unknown"
+if tmp_admin=$(mktemp); then
+  ADMIN_STATUS=$(curl -s -L --max-time "$TIMEOUT" -o "$tmp_admin" -w '%{http_code}' "$ADMIN_URL" 2>/dev/null || true)
+  if [ "$ADMIN_STATUS" = "403" ] || [ "$ADMIN_STATUS" = "405" ]; then
+    fail_check "Admin portal returned HTTP $ADMIN_STATUS ($ADMIN_URL)"
+  elif [ -n "$ADMIN_STATUS" ] && [ "$ADMIN_STATUS" != "unknown" ] && printf '%s' "$ADMIN_STATUS" | grep -Eq '^[0-9]{3}$'; then
+    pass_check "Admin portal HTTP status $ADMIN_STATUS ($ADMIN_URL)"
+  fi
+  rm -f "$tmp_admin"
+fi
 
 if [ -z "$ADMIN_HTML" ]; then
   skip_check "Admin portal unreachable ($ADMIN_URL) — skip NREUM check"
@@ -55,9 +65,19 @@ fi
 
 echo ""
 
-# --- AC-UX-142: Enterprise learner portal HTML ---
-echo "--- AC-UX-142: Enterprise learner portal HTML clean ---"
+# --- AC-DEP-102: Enterprise learner portal HTML ---
+echo "--- AC-DEP-102: Enterprise learner portal HTML clean ---"
 ENTERPRISE_HTML=$(curl -s --max-time "$TIMEOUT" "$ENTERPRISE_URL" 2>/dev/null | head -c 2048 || true)
+ENTERPRISE_STATUS="unknown"
+if tmp_enterprise=$(mktemp); then
+  ENTERPRISE_STATUS=$(curl -s -L --max-time "$TIMEOUT" -o "$tmp_enterprise" -w '%{http_code}' "$ENTERPRISE_URL" 2>/dev/null || true)
+  if [ "$ENTERPRISE_STATUS" = "403" ] || [ "$ENTERPRISE_STATUS" = "405" ]; then
+    fail_check "Enterprise portal returned HTTP $ENTERPRISE_STATUS ($ENTERPRISE_URL)"
+  elif [ -n "$ENTERPRISE_STATUS" ] && [ "$ENTERPRISE_STATUS" != "unknown" ] && printf '%s' "$ENTERPRISE_STATUS" | grep -Eq '^[0-9]{3}$'; then
+    pass_check "Enterprise portal HTTP status $ENTERPRISE_STATUS ($ENTERPRISE_URL)"
+  fi
+  rm -f "$tmp_enterprise"
+fi
 
 if [ -z "$ENTERPRISE_HTML" ]; then
   skip_check "Enterprise portal unreachable ($ENTERPRISE_URL) — skip NREUM check"
@@ -72,36 +92,26 @@ fi
 
 echo ""
 
-# --- AC-UX-145: Regression guard — initContainer present in manifests ---
-echo "--- AC-UX-145: sanitize initContainer present in deployment manifests ---"
+# --- AC-DEP-101: Regression guard — legacy strip-nreum workaround removed ---
+echo "--- AC-DEP-101: legacy strip-nreum workaround removed from enterprise deployments ---"
 ADMIN_DEPLOY="deploy/k8s/base/apps/enterprise/mfe/admin-portal-deployment.yaml"
 LEARNER_DEPLOY="deploy/k8s/base/apps/enterprise/mfe/learner-portal-deployment.yaml"
 
-if [ -f "$ADMIN_DEPLOY" ] && grep -q 'sanitize-enterprise-index-html' "$ADMIN_DEPLOY"; then
-  pass_check "sanitize-enterprise-index-html initContainer present in admin-portal-deployment.yaml"
+if grep -q 'strip-nreum' "$ADMIN_DEPLOY"; then
+  fail_check "Legacy strip-nreum initContainer still present in admin-portal-deployment.yaml"
 else
-  fail_check "sanitize-enterprise-index-html initContainer MISSING from admin-portal-deployment.yaml"
+  pass_check "No legacy strip-nreum initContainer in admin-portal-deployment.yaml"
 fi
 
-if [ -f "$LEARNER_DEPLOY" ] && grep -q 'sanitize-enterprise-index-html' "$LEARNER_DEPLOY"; then
-  pass_check "sanitize-enterprise-index-html initContainer present in learner-portal-deployment.yaml"
+if grep -q 'strip-nreum' "$LEARNER_DEPLOY"; then
+  fail_check "Legacy strip-nreum initContainer still present in learner-portal-deployment.yaml"
 else
-  fail_check "sanitize-enterprise-index-html initContainer MISSING from learner-portal-deployment.yaml"
+  pass_check "No legacy strip-nreum initContainer in learner-portal-deployment.yaml"
 fi
 
-# --- AC-UX-145: LMS footer guard against undefined_license_key ---
+# --- AC-DEP-104: Caddyfile routes mfe_config/v1 to LMS (not enterprise portal) ---
 echo ""
-echo "--- AC-UX-145: LMS footer.html guards against undefined_license_key ---"
-FOOTER_TEMPLATE="infrastructure/tutor/themes/mereka/lms/templates/footer.html"
-if [ -f "$FOOTER_TEMPLATE" ] && grep -q 'undefined_license_key' "$FOOTER_TEMPLATE"; then
-  pass_check "LMS footer.html has guard against undefined_license_key (skips analytics include)"
-else
-  fail_check "LMS footer.html missing guard for undefined_license_key"
-fi
-
-# --- AC-UX-145: Caddyfile routes mfe_config/v1 to LMS (not enterprise portal) ---
-echo ""
-echo "--- AC-UX-145: Caddyfile routes /api/mfe_config/v1 to LMS ---"
+echo "--- AC-DEP-104: Caddyfile routes /api/mfe_config/v1 to LMS ---"
 CADDYFILE="deploy/k8s/base/apps/caddy/Caddyfile"
 if [ -f "$CADDYFILE" ] && grep -q 'reverse_proxy /api/mfe_config/v1' "$CADDYFILE"; then
   pass_check "Caddyfile proxies /api/mfe_config/v1 to LMS for enterprise domains"

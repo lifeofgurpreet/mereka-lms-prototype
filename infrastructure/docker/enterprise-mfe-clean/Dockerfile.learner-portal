@@ -1,0 +1,20 @@
+# Dockerfile.learner-portal
+# Build-time NREUM strip for enterprise-learner-portal.
+#
+# Same approach as Dockerfile.admin-portal — strips the inline New Relic browser
+# agent (NREUM) from the dist/index.html at Docker build time.
+#
+# Build (see scripts/infra/build-enterprise-mfe-clean.sh for wrapper):
+#   docker build -f Dockerfile.learner-portal \
+#     --build-arg SOURCE_TAG=latest \
+#     -t $REGISTRY/enterprise-learner-portal:nreum-clean-YYYYMMDD .
+
+ARG REGISTRY=asia-southeast1-docker.pkg.dev/mereka-lms/openedx
+ARG SOURCE_TAG=latest
+FROM ${REGISTRY}/enterprise-learner-portal:${SOURCE_TAG}
+
+# Copy and run the NREUM strip script at build time
+COPY strip-nreum.sh /tmp/strip-nreum.sh
+RUN chmod +x /tmp/strip-nreum.sh \
+    && /tmp/strip-nreum.sh /openedx/dist/index.html \
+    && rm /tmp/strip-nreum.sh
