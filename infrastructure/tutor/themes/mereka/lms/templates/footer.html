@@ -8,8 +8,6 @@
 %>
 <% footer = get_footer(is_secure=is_secure) %>
 <% icp_license_info = getattr(settings, 'ICP_LICENSE_INFO', {})%>
-<% segment_key = getattr(settings, "SEGMENT_KEY", "") or "" %>
-<% segment_key = str(segment_key).strip() if segment_key else "" %>
 <%namespace name='static' file='static_content.html'/>
 
 <div class="wrapper wrapper-footer mereka-footer">
@@ -86,10 +84,8 @@
 % if include_dependencies:
   <%static:js group='base_vendor'/>
   <%static:css group='style-vendor'/>
-  % if segment_key and segment_key.lower() not in ("undefined", "none", "null", "undefined_license_key", "your_segment_key_here", "change_me"):
-    <%include file="widgets/segment-io.html" />
-    <%include file="widgets/segment-io-footer.html" />
-  % endif
+  ## Segment/analytics injection removed from footer template (2k6k).
+  ## Analytics should be loaded via a Tutor plugin hook, not patched into the LMS theme footer.
 % endif
 % if footer_css_urls:
   % for url in footer_css_urls:
