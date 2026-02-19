@@ -103,7 +103,9 @@ check_contains() {
   local needle=$3
   local body
   body=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)
-  if printf '%s' "$body" | rg -F -q "$needle"; then
+  # Use rg directly on the variable via herestring to avoid SIGPIPE issues.
+  # printf '%s' "$body" | rg -q exits 141 with pipefail when rg finds a match early in a large body.
+  if rg -F -q "$needle" <<< "$body"; then
     printf "✓ %s\n" "$label"
   else
     printf "✗ %s (missing '%s')\n" "$label" "$needle" >&2
@@ -118,7 +120,7 @@ check_contains_any() {
   local body needle
   body=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)
   for needle in "$@"; do
-    if printf '%s' "$body" | rg -F -q "$needle"; then
+    if rg -F -q "$needle" <<< "$body"; then
       printf "✓ %s\n" "$label"
       return
     fi
@@ -496,8 +498,10 @@ echo "Branding level: ${BRANDING_LEVEL}"
 echo ""
 
 # HTML branding checks
-check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
-check_contains "https://${STUDIO_HOST}/" "Studio page includes 'Mereka'" "Mereka"
+# Use ?nocache=<ts> to bypass edge-cache so stale Cloudflare responses don't produce false negatives.
+_ts="$(date +%s)"
+check_contains "https://${BASE_DOMAIN}/?nocache=${_ts}" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
+check_contains "https://${STUDIO_HOST}/?nocache=${_ts}" "Studio page includes 'Mereka'" "Mereka"
 check_mfe_authn_surface "${MFE_HOST}"
 
 # Asset checks (theme assets)
