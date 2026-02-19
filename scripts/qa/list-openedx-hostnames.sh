@@ -86,6 +86,8 @@ print_expected() {
       "$CREDENTIALS_DOMAIN" \
       "$NOTES_DOMAIN" \
       "$FORUM_DOMAIN" \
+      "$ENTERPRISE_ADMIN_DOMAIN" \
+      "$ENTERPRISE_PORTAL_DOMAIN" \
       "$BIJI_DOMAIN" \
       "$BIJI_STUDIO_DOMAIN" \
       "$BIJI_MFE_DOMAIN" \

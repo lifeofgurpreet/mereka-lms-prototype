@@ -1,3 +1,130 @@
 spec: github-actions-cost-monitoring_spec.md
-acceptance_criteria: []
+acceptance_criteria:
+- id: AC-GAC-001
+  description: Given GitHub Actions workflows execute, when workflow runs complete,
+    then total minutes consumed are tracked per workflow and cost is calculated based
+    on runner type (Linux $0.008/min, macOS $0.08/min, Windows $0.016/min).
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Tracking
+    justification: GitHub Actions cost monitoring pipeline not yet deployed; requires
+      GitHub API integration
+- id: AC-GAC-002
+  description: Given workflows run throughout the day, when end of day (00:00 UTC)
+    is reached, then an automated report is generated showing total minutes by workflow,
+    day cost, month-to-date, projected month-end, and comparison to budget.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Tracking
+    justification: Daily cost report CronJob not yet implemented
+- id: AC-GAC-003
+  description: Given workflow costs are being tracked, when cost thresholds are exceeded
+    (80% / 100% / 150% of budget), then the appropriate Slack and/or email alerts
+    are sent.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Alerting
+    justification: Cost threshold alerting not yet implemented
+- id: AC-GAC-004
+  description: Given workflows are configured, when a workflow job executes, then
+    maximum durations are enforced (5 min for PR checks, 30 min for full verify, 45
+    min for builds) and jobs exceeding limits fail with a cost warning.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Controls
+    justification: Workflow timeout enforcement via actions-budget.yml not yet implemented
+- id: AC-GAC-005
+  description: Given workflow execution history, when weekly cost analysis runs, then
+    automated recommendations identify high-cost workflows and suggest optimizations.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Optimization
+    justification: Weekly cost analysis and recommendation engine not yet implemented
+- id: AC-GAC-006
+  description: Given monthly cost approaches the hard limit, when 95% of budget is
+    consumed, then non-critical workflows are paused and the platform team is notified.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Controls
+    justification: Automated workflow pausing at budget threshold not yet implemented
+- id: AC-GAC-007
+  description: Given Prometheus metrics are configured, when workflows execute, then
+    `github_actions_workflow_duration_seconds`, `github_actions_workflow_cost_usd`,
+    and `github_actions_monthly_budget_consumed_percent` metrics are exported.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Observability
+    justification: GitHub Actions Prometheus exporter not yet deployed
+- id: AC-GAC-008
+  description: Given Grafana is configured, when operators view analytics, then the
+    cost dashboard displays current spend vs budget, daily trend, top 5 expensive
+    workflows, projected month-end cost, and month-over-month comparison.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Observability
+    justification: Grafana dashboard for GitHub Actions cost not yet created
+- id: AC-GAC-009
+  description: Given workflow execution history, when cost patterns deviate from normal
+    (>50% day-over-day spike, new workflow >5% of budget, duration >2x), then anomaly
+    alerts are sent to the platform team.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Alerting
+    justification: Cost anomaly detection not yet implemented
+- id: AC-GAC-010
+  description: Given repository configuration, when budget is defined via `.github/actions-budget.yml`,
+    then monthly limit, hard limit, alert thresholds, and workflow duration limits
+    are applied correctly.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Controls
+    justification: actions-budget.yml configuration enforcement not yet implemented
+- id: AC-GAC-011
+  description: Given workflows are configured, when cost optimization settings are
+    enabled, then cache strategy, concurrency limits, conditional execution, and self-hosted
+    runner options are applied.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Optimization
+    justification: Automated optimization settings application not yet implemented
+- id: AC-GAC-012
+  description: Given workflows execute, when costs are calculated, then the calculated
+    cost matches GitHub's billing within ±5%.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Tracking
+    justification: Cost calculation accuracy validation requires live GitHub billing
+      data comparison
+- id: AC-GAC-013
+  description: Given a cost threshold is exceeded, when an alert is triggered, then
+    notification is delivered within 5 minutes with current spend, triggering workflow,
+    recommended actions, and dashboard link.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Alerting
+    justification: Alert delivery SLA requires live triggering to measure; not yet
+      implemented
+- id: AC-GAC-014
+  description: Given cost monitoring is deployed, when operators access Grafana, then
+    the cost dashboard is available at `/dashboards/github-actions-cost` and all panels
+    render without errors.
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Observability
+    justification: Grafana dashboard provisioning for GitHub Actions cost not yet
+      deployed
 
