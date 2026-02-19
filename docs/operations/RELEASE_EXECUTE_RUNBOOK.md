@@ -224,3 +224,61 @@ All routes respond 200 (pre-rollout, ArgoCD sync pending):
 | `docs/operations/evidence/69qz-enterprise-mfe-clean-build.md` | ✅ Committed |
 
 Full evidence: `docs/operations/evidence/69qz-enterprise-mfe-clean-build.md`
+
+---
+
+## Enterprise/Ecommerce Parity Evidence (3k12 / AC-PRT-101..105)
+
+> **Bead**: mereka-lms-3k12
+> **Date**: 2026-02-19
+
+### AC-PRT-102: Route smoke matrix (all hosts)
+
+All service hosts confirmed HTTP 200/302 (auth redirect where expected), zero `undefined_*` key leakage:
+
+| Host | HTTP | undefined_* | Status |
+|------|------|-------------|--------|
+| `academyv2.mereka.io` | 200 | 0 | PASS |
+| `studio.academyv2.mereka.io` | 200 | 0 | PASS |
+| `apps.academyv2.mereka.io/authn/login` | 200 | 0 | PASS |
+| `admin.academyv2.mereka.io` | 200 | 0 | PASS |
+| `enterprise.academyv2.mereka.io` | 200 | 0 | PASS |
+| `ecommerce.academyv2.mereka.io` | 200 | 0 | PASS |
+| `credentials.academyv2.mereka.io/health/` | 200 | 0 | PASS |
+| `discovery.academyv2.mereka.io` | 200 | 0 | PASS |
+
+### AC-PRT-104: Pre-merge gate
+
+```
+$ bash scripts/qa/check-enterprise-mfe-no-workaround.sh
+PASS: 12 | FAIL: 0
+RESULT: PASS — enterprise MFE manifests are clean (no runtime workaround)
+```
+
+### Pre-demo command
+
+```bash
+# One-liner full route check
+for URL in \
+  "https://academyv2.mereka.io/" \
+  "https://studio.academyv2.mereka.io/" \
+  "https://apps.academyv2.mereka.io/authn/login" \
+  "https://admin.academyv2.mereka.io/" \
+  "https://enterprise.academyv2.mereka.io/" \
+  "https://ecommerce.academyv2.mereka.io/" \
+  "https://credentials.academyv2.mereka.io/health/"; do
+  echo "$(curl -o /dev/null -s -w '%{http_code}' --max-time 10 "$URL") $URL"
+done
+
+# NREUM regression check
+bash scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+```
+
+### Known non-blocking gaps
+
+| Issue | Action |
+|-------|--------|
+| Enterprise portals NREUM: ArgoCD sync pending | `argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal` |
+| Credentials `/programs/` → 502 | Credentials worker may need restart |
+
+Full evidence: `docs/operations/evidence/3k12-parity-smoke.md`
