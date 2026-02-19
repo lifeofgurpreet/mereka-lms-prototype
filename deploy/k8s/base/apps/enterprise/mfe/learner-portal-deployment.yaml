@@ -41,49 +41,14 @@ spec:
               cp -a /openedx/dist/. /openedx/dist-output/
 
               if [ -f /openedx/dist-output/index.html ]; then
-                awk '
-                  BEGIN {in_script=0; buf=""; has_nreum=0}
-                  {
-                    if (in_script) {
-                      buf = buf $0 "\n"
-                      if ($0 ~ /NREUM/) {
-                        has_nreum = 1
-                      }
-                      if ($0 ~ /<\/script>/) {
-                        if (!has_nreum) {
-                          printf "%s", buf
-                        }
-                        in_script = 0
-                        buf = ""
-                        has_nreum = 0
-                      }
-                      next
-                    }
-
-                    if ($0 ~ /<script/) {
-                      in_script = 1
-                      has_nreum = ($0 ~ /NREUM/) ? 1 : 0
-                      buf = $0 "\n"
-                      if ($0 ~ /<\/script>/) {
-                        if (!has_nreum) {
-                          printf "%s", buf
-                        }
-                        in_script = 0
-                        buf = ""
-                        has_nreum = 0
-                      }
-                      next
-                    }
-
-                    print
-                  }
-                  END {
-                    if (in_script && !has_nreum) {
-                      printf "%s", buf
-                    }
-                  }
-                ' /openedx/dist-output/index.html > /tmp/index.html
-                mv /tmp/index.html /openedx/dist-output/index.html
+                python3 -c "
+import re
+p = '/openedx/dist-output/index.html'
+h = open(p).read()
+h2 = re.sub(r'<script[^>]*>(?:(?!</script>).)*NREUM(?:(?!</script>).)*</script>', '', h, flags=re.DOTALL)
+open(p, 'w').write(h2)
+print('NREUM stripped:', 'NREUM' not in h2, 'size:', len(h2))
+"
               fi
           volumeMounts:
             - name: enterprise-learner-portal-dist
