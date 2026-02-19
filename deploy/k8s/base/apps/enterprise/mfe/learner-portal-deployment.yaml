@@ -41,14 +41,7 @@ spec:
               cp -a /openedx/dist/. /openedx/dist-output/
 
               if [ -f /openedx/dist-output/index.html ]; then
-                python3 -c "
-import re
-p = '/openedx/dist-output/index.html'
-h = open(p).read()
-h2 = re.sub(r'<script[^>]*>(?:(?!</script>).)*NREUM(?:(?!</script>).)*</script>', '', h, flags=re.DOTALL)
-open(p, 'w').write(h2)
-print('NREUM stripped:', 'NREUM' not in h2, 'size:', len(h2))
-"
+                python3 -c "import re; p='/openedx/dist-output/index.html'; h=open(p).read(); h2=re.sub(r'<script[^>]*>(?:(?!</script>).)*NREUM(?:(?!</script>).)*</script>','',h,flags=re.DOTALL); open(p,'w').write(h2); print('stripped:', 'NREUM' not in h2, 'size:', len(h2))"
               fi
           volumeMounts:
             - name: enterprise-learner-portal-dist
