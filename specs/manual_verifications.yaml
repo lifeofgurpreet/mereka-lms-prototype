@@ -3603,3 +3603,75 @@ entries:
     runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
     section: Observability
     justification: Grafana dashboard provisioning for GitHub Actions cost not yet deployed
+- id: AC-INT-001
+  spec: ci-cd-pipeline_spec.md
+  description: K8s manifests pass validate-k8s.sh, CI builds and pushes images, production Kustomize overlay references new tags, kubectl apply succeeds without resource validation errors
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: Requires live CI pipeline run with new image build; validated each release via release-openedx-gitops.sh dry-run + ArgoCD sync
+- id: AC-INT-002
+  spec: ci-cd-pipeline_spec.md
+  description: CI deployment workflow verifies ExternalSecrets reach SecretSynced before declaring deployment success
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: ExternalSecret sync gate not yet implemented in CI pipeline; operator manually confirms kubectl get externalsecrets -n mereka-lms shows READY=True
+- id: AC-INT-003
+  spec: ci-cd-pipeline_spec.md
+  description: CI runs infisical-validate-mereka-lms.sh and fails if any required MEREKA_LMS_* key is missing or contains placeholder values
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Secrets Validation
+    justification: infisical-validate CI step not yet wired into GitHub Actions workflow; runs manually pre-deploy
+- id: AC-INT-001
+  spec: k8s-deployment_spec.md
+  description: ExternalSecrets deployed with openedx-secrets and database-secrets; all pods reach Running state with no missing env var errors
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — kubectl get pods -n mereka-lms shows all Running; ExternalSecrets READY=True
+- id: AC-INT-002
+  spec: k8s-deployment_spec.md
+  description: LMS pods start with OPENEDX_SECRET_KEY populated from GCP Secret Manager via ExternalSecrets
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — kubectl exec lms-pod confirms OPENEDX_SECRET_KEY is set and non-empty
+- id: AC-INT-003
+  spec: k8s-deployment_spec.md
+  description: Secret rotation in Infisical + GCP SM triggers ExternalSecret refresh within 1h; new pods use rotated value without manual K8s Secret edits
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Secret Rotation
+    justification: Secret rotation flow not yet end-to-end tested; ExternalSecret TTL=1h is configured but rotation test requires coordination with Infisical
+- id: AC-INT-001
+  spec: forum-service-migration_spec.md
+  description: Python forum starts and connects to Atlas cs_comments_service database without local MongoDB dependency, logs show successful SRV connection
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — Forum v2 (Python) running as part of LMS process, connects to Atlas SRV; kubectl logs lms confirms forum startup
+- id: AC-INT-002
+  spec: forum-service-migration_spec.md
+  description: Forum data in Atlas cs_comments_service matches Ruby forum baseline with zero data loss (row counts, content hashes)
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    section: Data Integrity
+    justification: Migration from Ruby to Python forum was done; full data integrity comparison requires Ruby baseline snapshot which was not captured pre-migration
+- id: AC-INT-003
+  spec: forum-service-migration_spec.md
+  description: kubectl get endpoints forum shows non-empty endpoints and forum API responds on configured port
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    section: Integration Tests
+    justification: Forum v2 runs in-process within LMS — no separate forum K8s service/endpoint; forum routes served via LMS caddy proxy on forum.academyv2.mereka.io

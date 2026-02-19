@@ -4,23 +4,44 @@ acceptance_criteria:
   description: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes
     images to Artifact Registry, then production Kustomize overlay references the
     new image tags and `kubectl apply` succeeds without resource validation errors.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: Requires live CI pipeline run with new image build; validated each
+      release via release-openedx-gitops.sh dry-run + ArgoCD sync
 - id: AC-INT-002
   description: Given K8s Deployments require specific ExternalSecrets, when CI deployment
     workflow runs, then it verifies ExternalSecrets reach `SecretSynced` before declaring
     deployment success.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: ExternalSecret sync gate not yet implemented in CI pipeline; operator
+      manually confirms kubectl get externalsecrets -n mereka-lms shows READY=True
 - id: AC-INT-003
   description: Given `secrets-management_spec.md` defines required secret keys, when
     CI runs secret validation (`infisical-validate-mereka-lms.sh`), then it fails
     the build if any required `MEREKA_LMS_*` key is missing or contains placeholder
     values in the target environment.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Secrets Validation
+    justification: infisical-validate CI step not yet wired into GitHub Actions workflow;
+      runs manually pre-deploy
 - id: AC-INT-004
   description: Given branding assets are synced via `apply-patches.sh`, when CI builds
     openedx image, then `branding-preflight.sh` passes and verifies Mereka logo presence
     and Google Fonts absence in compiled artifacts.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Branding Preflight Verification
+    justification: Requires active GitHub Actions runner building the full openedx
+      Docker image; cannot run image build in CI without Docker-in-Docker
+    file: scripts/branding/run-branding-gates.sh
 - id: AC-001
   description: Given a PR is opened against `main`, when CI runs, then all 12 CI jobs
     execute and their pass/fail status is reported as GitHub commit status checks.
@@ -30,7 +51,7 @@ acceptance_criteria:
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Quality Gates Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -59,11 +80,23 @@ acceptance_criteria:
 - id: AC-003
   description: Given the `lint` job runs, when Python files in `scripts/` or `services/`
     have ruff violations, then the job fails.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Quality Gates Verification
+    justification: Ruff lint gate is verified by running the CI workflow; individual
+      Python files can be checked locally with ruff check scripts/ services/
+    file: N/A
 - id: AC-004
   description: Given the `validate-k8s` job runs, when any YAML in `deploy/k8s/` is
     not a valid Kubernetes manifest, then kubeconform fails the job.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: K8s Validation Verification
+    justification: kubeconform gate is verified by running the CI workflow; manifest
+      validation requires kubeconform binary not present in all local environments
+    file: N/A
 - id: AC-005
   description: Given the `security-scan` job runs, when verified secrets are detected
     by TruffleHog, then the job fails and the finding is reported.
@@ -118,7 +151,7 @@ acceptance_criteria:
     file: scripts/qa/verify-dev-prod-image-parity.sh
     command: scripts/qa/verify-dev-prod-image-parity.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -136,7 +169,7 @@ acceptance_criteria:
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -151,7 +184,7 @@ acceptance_criteria:
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -165,7 +198,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-image-build.sh
     command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -213,7 +246,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-image-build.sh
     command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -228,7 +261,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-image-build.sh
     command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -242,7 +275,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-image-build.sh
     command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -256,7 +289,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-image-build.sh
     command: scripts/qa/verify-cicd-image-build.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -275,7 +308,7 @@ acceptance_criteria:
     file: scripts/qa/verify-release-evidence-workflow.sh
     command: scripts/qa/verify-release-evidence-workflow.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -318,7 +351,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-release-rollback.sh
     command: scripts/qa/verify-cicd-release-rollback.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -333,7 +366,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-scheduled-ops.sh
     command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -348,7 +381,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-scheduled-ops.sh
     command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -363,7 +396,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-scheduled-ops.sh
     command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -377,7 +410,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-ios-build.sh
     command: scripts/qa/verify-cicd-ios-build.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: iOS Build Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -426,7 +459,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-scheduled-ops.sh
     command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: SSO Canary Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -441,7 +474,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-scheduled-ops.sh
     command: scripts/qa/verify-cicd-scheduled-ops.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: SSO Canary Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -457,7 +490,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-config-workflow.sh
     command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -472,7 +505,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-config-workflow.sh
     command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -486,7 +519,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-config-workflow.sh
     command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -500,7 +533,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-config-workflow.sh
     command: scripts/qa/verify-cicd-tutor-config-workflow.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -516,7 +549,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-plugin-test.sh
     command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -531,7 +564,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-plugin-test.sh
     command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -545,7 +578,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-plugin-test.sh
     command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
     justification: Requires active GitHub Actions runner with repository secrets;
       workflow dispatch cannot be fully automated in isolated test environment
@@ -559,7 +592,7 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-plugin-test.sh
     command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Plugin Integration Testing
     justification: Requires triggering actual GitHub Actions workflow run and inspecting
       its logs for plugin+patches integration result
@@ -573,16 +606,9 @@ acceptance_criteria:
     file: scripts/qa/verify-cicd-tutor-plugin-test.sh
     command: scripts/qa/verify-cicd-tutor-plugin-test.sh
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: PR Failure Comment Verification
     justification: Requires triggering a real PR with a failing plugin test and verifying
       the bot posts a troubleshooting comment
     file: N/A
-_unmapped:
-- AC-INT-001
-- AC-INT-002
-- AC-INT-003
-- AC-INT-004
-- AC-003
-- AC-004
 

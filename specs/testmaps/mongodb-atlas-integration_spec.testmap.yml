@@ -104,7 +104,7 @@ acceptance_criteria:
     metric: mongodb_atlas_connections_current
     dashboard: Atlas Console > Project > Cluster > Metrics > Connections
   - type: manual
-    runbook: docs/operations/MONGODB_ATLAS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MONGODB_ATLAS_RUNBOOK.md
     section: Verify Atlas Health > Active Connections
     justification: Atlas monitoring dashboard requires Atlas console credentials not
       available to CI; verified manually during deployment

@@ -142,7 +142,7 @@ acceptance_criteria:
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
   - type: manual
-    runbook: docs/operations/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
     section: Tutor Version Upgrade Procedure
     justification: Version upgrades are infrequent events requiring human judgment
       on patch adaptation; CI catches failures but upgrade planning is manual
@@ -181,7 +181,7 @@ acceptance_criteria:
     file: tests/tutor/test_tutor_apply.sh
     command: tests/tutor/test_tutor_apply.sh
   - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: Full Configuration Apply
     justification: End-to-end make tutor-apply requires Docker Compose stack; CI tests
       individual steps but full pipeline needs Docker environment

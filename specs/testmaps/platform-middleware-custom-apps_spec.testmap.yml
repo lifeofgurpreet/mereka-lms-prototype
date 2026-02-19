@@ -259,5 +259,8 @@ acceptance_criteria:
     file: infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
     command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
   - type: manual
-    file: docs/operations/MIDDLEWARE_VERIFICATION.md
+    runbook: docs/operations/MODULE_SURFACE_VALIDATION_RUNBOOK.md
+    section: Prometheus Graceful Degradation
+    justification: Requires removing django-prometheus from a running LMS to verify
+      graceful degradation; cannot automate in CI
 

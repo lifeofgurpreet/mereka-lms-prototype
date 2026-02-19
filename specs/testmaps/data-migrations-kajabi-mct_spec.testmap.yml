@@ -392,6 +392,11 @@ acceptance_criteria:
     test_type: automated
     file: services/kajabi-webhook/main.py
     command: pytest services/kajabi-webhook/main.py
+  - type: manual
+    runbook: docs/migrations/VERIFICATION_CHECKLIST.md
+    section: Kajabi Webhook Health Check
+    justification: Requires running webhook service with KAJABI_WEBHOOK_SECRET set;
+      not deployable in stateless CI
 - id: AC-040
   description: Given a valid Kajabi webhook with correct HMAC signature, when `POST
     /webhooks/kajabi` is called, then the event MUST be appended to the correct NDJSON

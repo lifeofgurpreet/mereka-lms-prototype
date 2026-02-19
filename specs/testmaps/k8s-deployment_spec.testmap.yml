@@ -4,27 +4,54 @@ acceptance_criteria:
   description: Given `secrets-management_spec.md` ExternalSecrets are deployed, when
     K8s deployments reference `openedx-secrets` and `database-secrets`, then all pods
     reach Running state with no missing environment variable errors in logs.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — kubectl get pods -n mereka-lms shows
+      all Running; ExternalSecrets READY=True
 - id: AC-INT-002
   description: Given ExternalSecrets reach `SecretSynced` status, when LMS pods start,
     then `kubectl exec lms-pod -- env | grep OPENEDX_SECRET_KEY` returns a non-empty
     value matching the GCP Secret Manager source.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — kubectl exec lms-pod confirms OPENEDX_SECRET_KEY
+      is set and non-empty
 - id: AC-INT-003
   description: Given a secret is rotated in Infisical and synced to GCP SM, when ExternalSecrets
     refresh (within 1h) and pods restart, then new pods use the rotated value without
     manual K8s Secret edits.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Secret Rotation
+    justification: Secret rotation flow not yet end-to-end tested; ExternalSecret
+      TTL=1h is configured but rotation test requires coordination with Infisical
 - id: AC-INT-004
   description: Given `tutor-configuration_spec.md` patches are applied, when K8s manifests
     reference MySQL, then MySQL Deployment includes `--mysql-native-password=ON` flag
     and LMS connects without authentication errors.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: MySQL Authentication Verification
+    justification: Requires running MySQL 8 pod in GKE; kubectl exec to verify flag;
+      cannot run against live cluster in CI
+    file: scripts/infra/verify-tutor-config.sh
 - id: AC-INT-005
   description: Given Tutor config includes multi-site domains (academy.biji-biji.com,
     skillourfuture.academy.mereka.io), when LMS production settings are inspected
     in the running pod, then `ALLOWED_HOSTS` contains all three domains.
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/TROUBLESHOOTING.md
+    section: Multi-Site Domain Verification
+    justification: Requires running LMS pod with kubectl exec; cannot inspect runtime
+      settings without live cluster access
+    file: scripts/qa/verify-tutor-multisite-domains.sh
 - id: AC-001
   description: Given the base Kustomize directory, when `kubectl kustomize deploy/k8s/overlays/local`
     is run, then it renders without errors and all resources are in namespace `mereka-lms`.
@@ -347,10 +374,4 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-k8s-deployment-spec.sh
     command: scripts/qa/verify-k8s-deployment-spec.sh
-_unmapped:
-- AC-INT-001
-- AC-INT-002
-- AC-INT-003
-- AC-INT-004
-- AC-INT-005
 
