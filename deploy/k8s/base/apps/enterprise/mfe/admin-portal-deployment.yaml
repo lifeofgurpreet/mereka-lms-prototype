@@ -26,9 +26,79 @@ spec:
         app.kubernetes.io/part-of: mereka-lms
         app.kubernetes.io/component: enterprise
     spec:
+      initContainers:
+        - name: sanitize-enterprise-index-html
+          image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal:latest
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              set -eu
+
+              # Copy image's /openedx/dist (NOT shadowed — emptyDir is at /openedx/dist-output)
+              # to the shared emptyDir, then strip the New Relic NREUM inline script block.
+              cp -a /openedx/dist/. /openedx/dist-output/
+
+              if [ -f /openedx/dist-output/index.html ]; then
+                awk '
+                  BEGIN {in_script=0; buf=""; has_nreum=0}
+                  {
+                    if (in_script) {
+                      buf = buf $0 "\n"
+                      if ($0 ~ /NREUM/) {
+                        has_nreum = 1
+                      }
+                      if ($0 ~ /<\/script>/) {
+                        if (!has_nreum) {
+                          printf "%s", buf
+                        }
+                        in_script = 0
+                        buf = ""
+                        has_nreum = 0
+                      }
+                      next
+                    }
+
+                    if ($0 ~ /<script/) {
+                      in_script = 1
+                      has_nreum = ($0 ~ /NREUM/) ? 1 : 0
+                      buf = $0 "\n"
+                      if ($0 ~ /<\/script>/) {
+                        if (!has_nreum) {
+                          printf "%s", buf
+                        }
+                        in_script = 0
+                        buf = ""
+                        has_nreum = 0
+                      }
+                      next
+                    }
+
+                    print
+                  }
+                  END {
+                    if (in_script && !has_nreum) {
+                      printf "%s", buf
+                    }
+                  }
+                ' /openedx/dist-output/index.html > /tmp/index.html
+                mv /tmp/index.html /openedx/dist-output/index.html
+              fi
+          volumeMounts:
+            - name: enterprise-admin-portal-dist
+              mountPath: /openedx/dist-output
+          securityContext:
+            allowPrivilegeEscalation: false
       containers:
         - name: enterprise-admin-portal
           image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal:latest
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              exec /usr/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
           ports:
             - containerPort: 8002
               name: http
@@ -56,12 +126,16 @@ spec:
           volumeMounts:
             - mountPath: /etc/caddy/
               name: caddy-config
+            - mountPath: /openedx/dist
+              name: enterprise-admin-portal-dist
             - mountPath: /openedx/dist/env.config.js
               name: mfe-env
               subPath: env.config.js
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
+        - name: enterprise-admin-portal-dist
+          emptyDir: {}
         - name: caddy-config
           configMap:
             name: enterprise-admin-portal-caddy-config
