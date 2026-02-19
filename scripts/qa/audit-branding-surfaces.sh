@@ -173,7 +173,9 @@ check_mfe_authn_surface() {
       gap "MFE authn (${host}): could not fetch authn CSS"
     elif grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$css"; then
       if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$css"; then
-        gap "MFE authn (${host}): branding revision marker ${EXPECTED_MFE_BRANDING_REV} missing"
+        # Show deployed revision so operators know exact image version gap (rebuild MFE image to fix)
+        _deployed_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:"([^"]+)".*/\1/p' <<<"$css" | head -n 1)"
+        gap "MFE authn (${host}): branding revision marker ${EXPECTED_MFE_BRANDING_REV} missing (deployed: ${_deployed_rev:-unknown}; rebuild MFE image)"
       else
         ok "MFE authn (${host}): authn CSS branding markers present"
       fi
@@ -310,7 +312,9 @@ check_authn_proxy_surface() {
 
   if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$css"; then
     if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$css"; then
-      gap "${label}: authn css branding revision differs from source (${EXPECTED_MFE_BRANDING_REV})"
+      # Show deployed revision so operators know exact image version gap (rebuild MFE image to fix)
+      _deployed_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:"([^"]+)".*/\1/p' <<<"$css" | head -n 1)"
+      gap "${label}: authn css branding revision differs from source (source=${EXPECTED_MFE_BRANDING_REV}, deployed=${_deployed_rev:-unknown}; rebuild MFE image)"
     else
       ok "${label}: authn css branding markers present"
     fi
