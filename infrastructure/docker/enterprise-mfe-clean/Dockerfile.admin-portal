@@ -17,8 +17,11 @@ ARG REGISTRY=asia-southeast1-docker.pkg.dev/mereka-lms/openedx
 ARG SOURCE_TAG=latest
 FROM ${REGISTRY}/enterprise-admin-portal:${SOURCE_TAG}
 
-# Copy and run the NREUM strip script at build time
+# Copy and run cleanup/patch scripts at build time
 COPY strip-nreum.sh /tmp/strip-nreum.sh
+COPY patch-missing-env.sh /tmp/patch-missing-env.sh
 RUN chmod +x /tmp/strip-nreum.sh \
+    && chmod +x /tmp/patch-missing-env.sh \
     && /tmp/strip-nreum.sh /openedx/dist/index.html \
-    && rm /tmp/strip-nreum.sh
+    && /tmp/patch-missing-env.sh /openedx/dist \
+    && rm /tmp/strip-nreum.sh /tmp/patch-missing-env.sh

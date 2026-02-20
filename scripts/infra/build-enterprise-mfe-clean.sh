@@ -55,13 +55,33 @@ check_image_bundle() {
   fi
 
   license_count="$(docker run --rm "$image" sh -c 'grep -c "undefined_license_key" /openedx/dist/index.html || true' 2>/dev/null || true)"
-  if [ "$license_count" = "0" ] || [ -z "$license_count" ]; then
-    pass_check "${label} — non-empty index without undefined_license_key"
-    return 0
+  if [ "$license_count" != "0" ] && [ -n "$license_count" ]; then
+    fail_check "${label} — undefined_license_key still present (${license_count} occurrences)"
+    return 1
   fi
 
-  fail_check "${label} — undefined_license_key still present (${license_count} occurrences)"
-  return 1
+  if ! docker run --rm "$image" sh -c 'grep -q "src=\"/env.config.js\"" /openedx/dist/index.html' >/dev/null 2>&1; then
+    fail_check "${label} — index.html missing env.config.js script reference"
+    return 1
+  fi
+
+  local critical_placeholders=(
+    '"MISSING_ENV_VAR".BASE_URL'
+    '"MISSING_ENV_VAR".LICENSE_MANAGER_BASE_URL'
+    '"MISSING_ENV_VAR".ENTERPRISE_CATALOG_BASE_URL'
+    '"MISSING_ENV_VAR".ENTERPRISE_ACCESS_BASE_URL'
+    '"MISSING_ENV_VAR".ENTERPRISE_SUBSIDY_BASE_URL'
+  )
+  local placeholder
+  for placeholder in "${critical_placeholders[@]}"; do
+    if docker run --rm "$image" sh -c "grep -R --include='*.js' -q '$placeholder' /openedx/dist"; then
+      fail_check "${label} — unresolved critical placeholder remains: ${placeholder}"
+      return 1
+    fi
+  done
+
+  pass_check "${label} — index clean, env.config.js wired, placeholders resolved"
+  return 0
 }
 
 echo "=== Enterprise MFE: Build-time NREUM strip ==="

@@ -1,6 +1,7 @@
 #!/bin/sh
 # strip-nreum.sh
-# Remove NREUM <script> blocks from an HTML file.
+# Remove NREUM <script> blocks from an HTML file and ensure env.config.js
+# is loaded for runtime config.
 # Usage: strip-nreum.sh /path/to/index.html
 #
 # Handles minified/inline scripts where multiple <script> tags can appear on a
@@ -72,4 +73,35 @@ if grep -q 'undefined_license_key' "$HTML_FILE" 2>/dev/null; then
   exit 1
 fi
 
-echo "[strip-nreum] OK: $(wc -c < "$HTML_FILE") bytes, no undefined_license_key"
+# Ensure runtime config is loaded by enterprise MFEs.
+if ! grep -q 'src="/env.config.js"' "$HTML_FILE" 2>/dev/null; then
+  TMP_INJECT="$(mktemp)"
+  awk '
+  BEGIN { added = 0 }
+  {
+    line = $0
+    if (!added && index(line, "</head>") > 0) {
+      sub("</head>", "<script src=\"/env.config.js\"></script></head>", line)
+      added = 1
+    }
+    print line
+  }
+  END {
+    if (!added) exit 42
+  }' "$HTML_FILE" > "$TMP_INJECT" || {
+    code=$?
+    rm -f "$TMP_INJECT"
+    if [ "$code" -eq 42 ]; then
+      echo "[strip-nreum] ERROR: could not inject env.config.js (missing </head>)"
+    fi
+    exit 1
+  }
+  mv "$TMP_INJECT" "$HTML_FILE"
+fi
+
+if ! grep -q 'src="/env.config.js"' "$HTML_FILE" 2>/dev/null; then
+  echo "[strip-nreum] ERROR: env.config.js script is still missing"
+  exit 1
+fi
+
+echo "[strip-nreum] OK: $(wc -c < "$HTML_FILE") bytes, no undefined_license_key, env.config.js wired"
