@@ -242,7 +242,8 @@ fi
 
 # LMS Mako footer — "powered by" is present; check if Mereka name co-appears nearby
 if [[ -f "$LMS_FOOTER" ]]; then
-  POWERED_BY_LINE=$(grep -i "powered by" "$LMS_FOOTER" || true)
+  # Exclude Mako comment lines (##) — comments may reference the removed string for documentation
+  POWERED_BY_LINE=$(grep -i "powered by" "$LMS_FOOTER" | grep -v '^\s*##' || true)
   if [[ -z "$POWERED_BY_LINE" ]]; then
     pass "LMS Mako footer has no 'Powered by' string"
   else

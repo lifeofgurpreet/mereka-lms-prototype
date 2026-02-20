@@ -67,8 +67,12 @@
     </div>
 
     <div class="footer-bottom">
-      <span>© ${datetime.now().year} Biji-Biji Initiative · ${static.get_platform_name()}</span>
-      <span>${_('Powered by Open edX and Tutor')}</span>
+      ## Copyright holder: use platform name from SiteConfiguration / settings.PLATFORM_NAME.
+      ## When full multi-tenancy is live (bead 2rcf), replace with per-tenant copyrightHolder
+      ## from TenantConfig, matching the SITE_VARIANTS map in the MFE footer plugin.
+      <span>© ${datetime.now().year} ${static.get_platform_name()}</span>
+      ## "Powered by Open edX and Tutor" removed — white-label deployment.
+      ## Open edX trademark attribution is maintained in platform documentation per OEP-11.
       % if icp_license_info.get('icp_license'):
         <span class="icp">
           ${u"{text} ".format(text=icp_license_info.get('text'))}

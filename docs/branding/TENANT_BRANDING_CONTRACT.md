@@ -81,6 +81,8 @@ Each tenant in the Mereka Academy platform requires a **brand pack** — a colle
 
 ### 3. Footer Configuration
 
+> **See also**: [Footer Parity Contract](#footer-parity-contract) for the authoritative per-surface breakdown.
+
 | Field | Type | Max Length | Required | Fallback |
 |-------|------|------------|----------|----------|
 | **Footer Text** | Plaintext | 500 chars | ⚪ OPTIONAL | "© {year} {tenant_name}. All rights reserved." |
@@ -549,6 +551,116 @@ Tenant: acme-corp
 
 ---
 
+---
+
+## Footer Parity Contract
+
+_Added: 2026-02-20 (bead 1kwf + bz9p)_
+
+Defines the authoritative source of truth for each footer surface, the per-tenant field values,
+and the verification commands to confirm parity. This section replaces the informal footer notes
+previously scattered across audit documents.
+
+### Surface Map
+
+| Surface | Template / Source | Auth Source | Multi-tenant? | Status |
+|---------|------------------|-------------|---------------|--------|
+| **LMS Mako footer** | `themes/mereka/lms/templates/footer.html` | `SiteConfiguration.PLATFORM_NAME` | Partial (see note) | ✅ Source-complete; awaiting image rebuild |
+| **Studio footer** | `themes/mereka/cms/templates/widgets/footer.html` | Static (Mereka Academy) | No | ✅ Source-complete; awaiting image rebuild |
+| **MFE footer (all MFEs)** | `mereka_lms.py` → `MerekaFooter` component | `SITE_VARIANTS` hostname map | Yes | ✅ Source-complete; awaiting MFE image deploy |
+
+**LMS Mako note**: `static.get_platform_name()` reads `SiteConfiguration.get_value('PLATFORM_NAME')`,
+which Django Sites framework makes per-domain. This achieves partial multi-tenancy: the copyright
+holder tracks `PLATFORM_NAME`. Navigation links (emails, help URLs) remain Mereka-specific hardcodes
+until bead 2rcf (full TenantConfig) lands.
+
+### Per-Tenant Footer Fields (Current Production)
+
+| Tenant | Domain | MFE `brand` | MFE `copyrightHolder` | LMS copyright (`PLATFORM_NAME`) | Studio |
+|--------|--------|-------------|----------------------|----------------------------------|--------|
+| Mereka Academy | `academyv2.mereka.io` | Mereka Academy | MEREKA | Mereka Academy | Mereka Academy |
+| Biji-Biji Academy | `academy.biji-biji.com` | Biji-Biji Academy | Biji-Biji Initiative | Biji-Biji Academy | Mereka Academy |
+| Skill Our Future | `skillourfuture.academy.mereka.io` | Skill Our Future Academy | MEREKA | Skill Our Future Academy | Mereka Academy |
+
+**Note**: Studio footer is a single static template shared across all tenants (single Studio pod).
+It shows Mereka branding regardless of which domain the author navigated from. This is an accepted
+limitation until Studio subdomain routing per tenant is implemented (bead 3sxq, backlog).
+
+### Authoritative MFE Source (`mereka_lms.py` `SITE_VARIANTS`)
+
+```javascript
+const SITE_VARIANTS = {
+  'academyv2.mereka.io': {
+    brand: 'Mereka Academy',
+    copyrightHolder: 'MEREKA',
+    whatsapp: '601135271981',
+  },
+  'academy.biji-biji.com': {
+    brand: 'Biji-Biji Academy',
+    copyrightHolder: 'Biji-Biji Initiative',
+    whatsapp: '601135271981',
+  },
+  'skillourfuture.academy.mereka.io': {
+    brand: 'Skill Our Future Academy',
+    copyrightHolder: 'MEREKA',
+    whatsapp: '601135271981',
+  },
+};
+```
+
+**Update procedure**: Edit `mereka_lms.py`, rebuild MFE image, deploy. No DB change needed.
+SITE_VARIANTS is build-time configuration (not runtime-configurable). When bead 2rcf lands, these
+values will be superseded by `TenantConfig.copyrightHolder` read at render time.
+
+### Banned Strings
+
+No footer on any surface may contain these strings without Mereka co-branding context:
+
+- `Powered by Open edX` — white-label deployment; attribution in docs per OEP-11
+- `Powered by Tutor` — same as above
+- `Biji-Biji Initiative` on Mereka/SkillourfFuture surfaces
+
+Verification enforced by: `scripts/qa/verify-footer-parity.sh`
+
+### Verification Commands
+
+**Run all footer parity checks** (local, source-level):
+```bash
+./scripts/qa/verify-footer-parity.sh
+# Expected: PASS ≥32, FAIL 0, WARN 1 (accepted: Enterprise MFE)
+```
+
+**Per-tenant live verification** (run after image deploy):
+```bash
+# Mereka Academy
+curl -s https://academyv2.mereka.io/ | grep -i "powered by open edx" && echo FAIL || echo PASS
+
+# Biji-Biji Academy — LMS copyright
+curl -s https://academy.biji-biji.com/ | grep -i "Biji-Biji Initiative" && echo FOUND || echo MISSING
+
+# Skill Our Future — LMS copyright
+curl -s https://skillourfuture.academy.mereka.io/ | grep -i "Skill Our Future" && echo FOUND || echo MISSING
+
+# Studio (any domain — single pod)
+curl -s https://studio.academyv2.mereka.io/ | grep -i "powered by open edx" && echo FAIL || echo PASS
+```
+
+**Full post-deploy verification** (after WhiteCliff rebuilds and deploys images):
+```bash
+./scripts/qa/post-deploy-verify.sh prod
+# Check 1 (Studio white-label) + Check 3 (LMS CSS) must PASS
+```
+
+### Gap Register (Path to True Multi-Tenant Footer)
+
+| Gap | Surface | Current | Target | Owner Bead | Priority |
+|-----|---------|---------|--------|------------|----------|
+| Hardcoded nav links (emails, help URLs) | LMS Mako | Mereka-specific | `SiteConfiguration` per-domain | 2rcf | P2 |
+| Copyright holder source of truth | LMS Mako | `get_platform_name()` (global settings) | `TenantConfig.copyrightHolder` | 2rcf | P2 |
+| `SITE_VARIANTS` runtime vs build-time | MFE | Build-time constant | `TenantConfig` API at render | 2rcf | P3 |
+| Studio per-tenant footer | CMS | Single shared template | Subdomain-aware CMS routing | 3sxq | P3 (backlog) |
+| Enterprise MFE footer | Enterprise portals | Open edX default | `MerekaFooter` wired via env | backlog | P4 |
+
 ## Related Documents
 
 - **Provisioning Guide**: `docs/operations/TENANT_PROVISIONING.md`
@@ -564,4 +676,5 @@ Tenant: acme-corp
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-02-20 | Added Footer Parity Contract section; per-tenant field table; gap register; verification commands (bead 1kwf) | Claude Agent (BoldBadger) |
 | 2026-02-17 | Initial tenant branding contract | Claude Agent (task 2rg1) |
