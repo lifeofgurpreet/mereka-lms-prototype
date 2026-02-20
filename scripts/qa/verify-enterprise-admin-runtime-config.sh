@@ -105,6 +105,16 @@ for placeholder in "${CRITICAL_PLACEHOLDERS[@]}"; do
   fi
 done
 
+GENERIC_COUNT="$(grep -E -o '"MISSING_ENV_VAR"\.[A-Z0-9_]+' "$COMBINED_JS" 2>/dev/null | wc -l | tr -d ' ' || true)"
+if [ -z "$GENERIC_COUNT" ]; then
+  GENERIC_COUNT="0"
+fi
+if [ "$GENERIC_COUNT" != "0" ]; then
+  fail_check "Found unresolved generic MISSING_ENV_VAR placeholders in admin bundles ($GENERIC_COUNT)"
+else
+  pass_check "No unresolved generic MISSING_ENV_VAR placeholders in admin bundles"
+fi
+
 if grep -q 'undefined_license_key' "$COMBINED_JS" 2>/dev/null || printf '%s' "$ADMIN_HTML" | grep -q 'undefined_license_key'; then
   fail_check "Found undefined_license_key marker in served admin assets"
 else
