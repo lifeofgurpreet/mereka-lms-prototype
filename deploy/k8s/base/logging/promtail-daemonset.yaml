@@ -104,11 +104,12 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
-            type: Directory
+            # RKE2/containerd nodes may not have Docker paths; keep the mount
+            # non-fatal so Promtail can still run and scrape available logs.
+            type: DirectoryOrCreate
       tolerations:
         # Run on all nodes including master/control-plane
         - effect: NoSchedule
           operator: Exists
         - effect: NoExecute
           operator: Exists
-

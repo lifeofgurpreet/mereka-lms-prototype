@@ -29,6 +29,14 @@ images:
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: 20260208-mfe-discussions-pass4-c17df16
+  # Enterprise MFE: NREUM-clean + env placeholder patching (strip-nreum.sh + patch-missing-env.sh)
+  # Rebuilt 2026-02-20 after script hardening (ae7b125): env.config.js wired, MISSING_ENV_VAR patched
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+    newTag: nreum-clean-202602200416
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+    newTag: nreum-clean-202602200416
 
 # Production replica counts (higher for availability)
 replicas:

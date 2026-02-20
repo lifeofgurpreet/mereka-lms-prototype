@@ -134,6 +134,8 @@ spec:
             - --queues=enterprise_access.default
             - --max-tasks-per-child=100
             - --prefetch-multiplier=1
+            # Keep worker memory stable on single-node RKE2/nonprod footprints.
+            - --concurrency=2
             - --without-gossip
             - --without-mingle
           env:
