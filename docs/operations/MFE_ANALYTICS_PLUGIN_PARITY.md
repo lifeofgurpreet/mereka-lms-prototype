@@ -1,7 +1,7 @@
 # MFE Analytics + Plugin Parity
 
 > **Bead**: mereka-lms-115d.28
-> **Last updated**: 2026-02-18
+> **Last updated**: 2026-02-20 (updated post-2k6k: footer sentinel guard removed, plugin-first canonical)
 > **Covers**: AC-AN-001, AC-AN-002, AC-AN-003, AC-AN-004
 
 This document describes the analytics key validation architecture, MFE customization
@@ -31,28 +31,45 @@ SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
 - Default value is `""` (empty string). An unset variable disables analytics silently.
 - Never hardcode a Segment write key in source code or templates.
 
-### Footer Sentinel Guard
+### Injection Surface: Tutor Plugin Hook (Canonical — post-2k6k)
 
-The LMS footer template (`infrastructure/tutor/themes/mereka/lms/templates/footer.html`)
-wraps all Segment script emission in a guard that:
+> **Bead 2k6k change**: Segment script injection was removed from `footer.html` entirely.
+> The footer template is now analytics-free. Analytics injection is handled exclusively
+> via the Tutor plugin hook (`mereka_lms.py`).
 
-1. Checks `segment_key` is non-empty.
-2. Lowercases and compares against known placeholder/sentinel values.
-3. Only emits the Segment `<script>` block when both conditions pass.
+**Canonical injection path** (`infrastructure/tutor/plugins/mereka_lms.py`):
 
-**Sentinel values rejected by the guard**:
+The `SEGMENT_KEY` value is passed to the MFE bundle via `ENV_PATCHES` / `mfe-env-config`,
+which is the **only approved analytics injection surface**. No Segment code exists in any
+Mako template, footer, or theme file.
 
-| Value | Reason |
-|---|---|
-| `undefined` | JavaScript undefined coerced to string |
-| `none` | Python None coerced to string |
-| `null` | JSON null coerced to string |
-| `undefined_license_key` | Historic Segment placeholder value |
-| `your_segment_key_here` | Common documentation placeholder |
-| `change_me` | Generic secret placeholder |
+**Why this matters**:
+- `footer.html` has zero analytics code → no sentinel guards needed → no `undefined_license_key` possible from LMS templates
+- Analytics on MFE routes (authn, apps, admin) comes from MFE bundle only, not LMS shell
+- Regression = any `segment.io` or `analytics.load` reappearing in `footer.html`
 
-If `MEREKA_SEGMENT_KEY` is unset or set to any of these values, no analytics script
-is injected and no calls are made. This ensures AC-AN-001 compliance.
+**Verification** (offline):
+```bash
+# Confirm footer.html has no Segment code
+grep -E 'segment\.io|analytics\.js|analytics\.load|segment_key' \
+  infrastructure/tutor/themes/mereka/lms/templates/footer.html
+# Expected: no output (empty = PASS)
+
+# Confirm migration comment exists
+grep 'analytics.*removed\|removed.*analytics\|Tutor plugin hook\|2k6k' \
+  infrastructure/tutor/themes/mereka/lms/templates/footer.html
+# Expected: at least one line
+
+# Confirm plugin.py reads from env (not hardcoded)
+grep 'SEGMENT_KEY' infrastructure/tutor/plugins/mereka_lms.py
+# Expected: SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
+```
+
+**Automated check** (covers all three above):
+```bash
+bash scripts/qa/verify-analytics-undefined-regression.sh
+# Expected: AC-FRONT-072 checks PASS (checks 6-13)
+```
 
 ### Enabling Analytics
 
@@ -60,7 +77,11 @@ To enable Segment analytics in an environment:
 
 1. Set `MEREKA_SEGMENT_KEY` to the real Segment write key in Infisical (prod env, root path).
 2. Sync to GCP Secret Manager and ExternalSecrets as `MEREKA_LMS_MEREKA_SEGMENT_KEY`.
-3. Restart LMS pods. The footer template picks up the new key on next render.
+3. Restart LMS pods. The plugin hook picks up the new key on next render.
+
+> **Do not add analytics code to `footer.html`** — the plugin-first model requires all
+> analytics injection to go through `mereka_lms.py` hooks. Adding to the footer would
+> create a second injection surface and bypass key validation.
 
 ---
 
@@ -95,13 +116,27 @@ The `smoke-test-analytics.sh` script provides broader live coverage.
 
 ### Verifying No Sentinel Leakage
 
-```bash
-# Check footer.html sentinel guard
-grep 'segment_key.*lower.*not in' \
-  infrastructure/tutor/themes/mereka/lms/templates/footer.html
+> **Post-2k6k**: There is no sentinel guard in `footer.html` because there is no Segment
+> code in `footer.html` at all. The correct check is to assert *absence* of Segment code.
 
-# Verify SEGMENT_KEY source
+```bash
+# Confirm footer.html has NO Segment code (plugin-first state)
+if grep -qE 'segment\.io|analytics\.js|analytics\.load|segment_key' \
+    infrastructure/tutor/themes/mereka/lms/templates/footer.html; then
+  echo "FAIL: Segment code found in footer.html — remove it (plugin-first model)"
+else
+  echo "PASS: footer.html has no Segment code"
+fi
+
+# Verify SEGMENT_KEY source (plugin — env var only, no hardcoding)
 grep 'SEGMENT_KEY' infrastructure/tutor/plugins/mereka_lms.py
+# Expected: SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
+```
+
+**Automated (comprehensive)**:
+```bash
+bash scripts/qa/verify-analytics-undefined-regression.sh
+# All 24 checks should PASS
 ```
 
 ---
@@ -228,16 +263,17 @@ Symptom: No Segment network calls visible in browser DevTools.
 
 Diagnosis:
 1. Check `MEREKA_SEGMENT_KEY` is set in Infisical and synced to the pod.
-2. Confirm the value is not one of the sentinel strings listed above.
-3. Check the rendered `footer.html` source — if the Segment `<script>` block is absent,
-   the key guard is rejecting the value.
+2. Confirm the value is not empty string — empty = analytics disabled by design.
+3. **Note**: There is no `<script>` block in `footer.html` to check — analytics is
+   injected via the MFE bundle (Tutor plugin hook). Check the compiled MFE JS bundle
+   for the Segment script, not the LMS HTML.
 
 ```bash
 # Check pod environment
 kubectl exec -n mereka-lms deploy/lms -- env | grep SEGMENT
 
-# Check rendered footer in LMS
-curl -s https://academyv2.mereka.io/ | grep -i "segment"
+# Check MFE bundle for Segment (not footer.html)
+curl -s https://apps.academyv2.mereka.io/ | grep -i "segment"
 ```
 
 ### Segment Firing on All Routes (Unexpected)
