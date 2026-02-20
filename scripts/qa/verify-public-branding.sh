@@ -13,9 +13,15 @@ MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
 EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
 
+SOURCE_ONLY=0
+for _arg in "$@"; do
+  if [[ "$_arg" == "--source-only" ]]; then SOURCE_ONLY=1; fi
+done
+
 ENVIRONMENT="${1:-prod}"
+if [[ "$ENVIRONMENT" == "--source-only" ]]; then ENVIRONMENT="prod"; fi
 if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Usage: $0 [prod|dev]" >&2
+  echo "Usage: $0 [prod|dev] [--source-only]" >&2
   exit 1
 fi
 
@@ -516,6 +522,72 @@ check_credentials_health() {
     failures=$((failures + 1))
   fi
 }
+
+check_source_integrity() {
+  local ok=1 fail_label
+  fail_label() { printf "✗ %s\n" "$1" >&2; failures=$((failures + 1)); ok=0; }
+  ok_label() { printf "✓ %s\n" "$1"; }
+
+  # Template files
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" ]] \
+    && ok_label "LMS head-extra.html exists" || fail_label "LMS head-extra.html missing"
+  rg -qF "mereka/css/mereka-overrides.css" \
+    "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" 2>/dev/null \
+    && ok_label "LMS head-extra.html references correct CSS path (mereka/css/mereka-overrides.css)" \
+    || fail_label "LMS head-extra.html missing themed CSS path"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html" ]] \
+    && ok_label "CMS head-extra.html exists" || fail_label "CMS head-extra.html missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/header/brand.html" ]] \
+    && ok_label "LMS brand.html (logo override) exists" || fail_label "LMS brand.html missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html" ]] \
+    && ok_label "LMS footer.html exists" || fail_label "LMS footer.html missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html" ]] \
+    && ok_label "Studio footer widget exists" || fail_label "Studio footer widget missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/studio-main-v1.scss" ]] \
+    && ok_label "Studio SCSS (studio-main-v1.scss) exists" || fail_label "Studio SCSS missing"
+
+  # CSS source files
+  [[ -f "$COMMON_OVERRIDE_CSS" ]] \
+    && ok_label "common/mereka-overrides.css exists" || fail_label "common/mereka-overrides.css missing"
+  if [[ -f "$COMMON_OVERRIDE_CSS" ]]; then
+    local rev
+    rev="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
+    [[ -n "$rev" ]] \
+      && ok_label "common CSS has branding-rev marker (${rev})" \
+      || fail_label "common CSS missing --mereka-branding-rev marker"
+  fi
+  [[ -f "$MFE_THEME_SCSS" ]] \
+    && ok_label "MFE SCSS (mereka.scss) exists" || fail_label "MFE SCSS missing"
+  if [[ -f "$MFE_THEME_SCSS" ]]; then
+    local mfe_rev
+    mfe_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
+    [[ -n "$mfe_rev" ]] \
+      && ok_label "MFE SCSS has mfe-branding-rev marker (${mfe_rev})" \
+      || fail_label "MFE SCSS missing --mereka-mfe-branding-rev marker"
+  fi
+
+  # Static logo assets
+  local img_dir="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images"
+  [[ -f "$img_dir/logo.png" ]] \
+    && ok_label "logo.png exists in theme static" || fail_label "logo.png missing from theme static"
+  [[ -f "$img_dir/logo-horizontal.png" ]] \
+    && ok_label "logo-horizontal.png exists in theme static" || fail_label "logo-horizontal.png missing from theme static"
+  [[ -f "$img_dir/favicon.ico" ]] \
+    && ok_label "favicon.ico exists in theme static" || fail_label "favicon.ico missing from theme static"
+}
+
+if [[ "$SOURCE_ONLY" == "1" ]]; then
+  echo "Branding source integrity check (no live network calls)..."
+  echo ""
+  check_source_integrity
+  echo ""
+  if [[ $failures -gt 0 ]]; then
+    echo "${failures} source integrity checks failed." >&2
+    exit 1
+  fi
+  echo "All source integrity checks passed."
+  exit 0
+fi
 
 echo "Branding verification ($ENVIRONMENT) for ${BASE_DOMAIN}..."
 echo "Branding level: ${BRANDING_LEVEL}"

@@ -149,6 +149,29 @@ Live pod returns 404 because current image was built before patches were applied
 
 ---
 
+## Footer Architecture — Canonical Extension Surfaces
+
+Each application surface uses a different mechanism for footer rendering.
+**Do not introduce ad-hoc patch scripts** — use the canonical surfaces below.
+
+| Surface | Canonical source | Mechanism | Tenant behavior |
+|---------|-----------------|-----------|-----------------|
+| **LMS** (all domains) | `infrastructure/tutor/themes/mereka/lms/templates/footer.html` | Mako template override via Open edX Comprehensive Theming | Single template; multi-site copy via `PLATFORM_NAME` + per-site `SiteConfiguration` |
+| **Studio** (CMS) | `infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html` | Mako template override (canonical renderer) | White-label Studio footer; Mereka Academy + LMS link |
+| **MFEs** (authn, learning, account…) | `infrastructure/tutor/plugins/mereka_lms/plugin.py` → `MerekaFooter` | Tutor MFE plugin + FPF `footer_slot` Replace | `SITE_VARIANTS` map keyed by hostname; 4 domains configured |
+| **Enterprise portals** (admin, learner) | Open edX default footer (no `MerekaFooter` wiring) | N/A — enterprise portals unthemed | P4 backlog (WARN in `verify-footer-parity.sh`) |
+
+**Update trigger**: LMS/CMS footer changes require `tutor images build openedx` + rolling restart.
+MFE footer changes require `tutor images build mfe` + rolling restart.
+
+**Source verification** (CI-safe, no live network required):
+```bash
+./scripts/qa/verify-footer-parity.sh --source-only
+./scripts/qa/verify-studio-authoring-branding.sh prod --source-only
+```
+
+---
+
 ## Related Documents
 
 - **Branding per surface**: `docs/branding/BRANDING_OPERATOR_GUIDE.md`

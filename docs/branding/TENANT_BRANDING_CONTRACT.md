@@ -1,6 +1,6 @@
 # Tenant Branding Contract
 
-_Audience: Platform Engineering + Operations + Design • Last updated: 2026-02-17_
+_Audience: Platform Engineering + Operations + Design • Last updated: 2026-02-20_
 
 **Purpose**: Define required inputs, fallback rules, and ownership for tenant branding in Mereka Academy multi-tenant Open edX.
 
@@ -34,6 +34,40 @@ Each tenant in the Mereka Academy platform requires a **brand pack** — a colle
 - **Runtime overlay**: Tenant branding overlays platform defaults (no code changes)
 - **Zero-downtime updates**: Branding changes apply via config updates + cache invalidation (no image rebuild)
 - **Isolation**: Tenants cannot access or modify other tenants' branding
+
+---
+
+## Global vs Tenant-Specific vs Runtime-Configurable
+
+This table is the canonical decision reference for where branding changes belong and what they cost.
+
+| Knob | Scope | Change requires | Notes |
+|------|-------|----------------|-------|
+| **CSS design tokens** (`mereka-design-tokens.css`) | Global | `sync-brand-assets.sh` + image rebuild | All tenants share the same base palette |
+| **LMS footer content/structure** | Global | LMS image rebuild | Single Mako template; tenant copy via `SiteConfiguration.PLATFORM_NAME` |
+| **Studio footer** | Global | LMS image rebuild | CMS Mako template (`widgets/footer.html`) |
+| **MFE footer copy/links/copyright** | Per-tenant | `SITE_VARIANTS` update in plugin → MFE image rebuild | Keyed by hostname in `infrastructure/tutor/plugins/mereka_lms/plugin.py` |
+| **Platform-level color tokens** | Global | LMS + MFE image rebuild | Defined in `common/static/css/mereka-design-tokens.css` + MFE SCSS |
+| **Tenant logo (LMS/Studio)** | Per-tenant | Runtime (no rebuild) | `LOGO_URL` in `TenantSiteConfiguration.mfe_config` or `/theming/asset/` |
+| **Tenant favicon** | Per-tenant | Runtime (no rebuild) | `FAVICON_URL` in `TenantSiteConfiguration.mfe_config` |
+| **Tenant primary domain** | Per-tenant | DNS + Caddy config | Caddy block + Django `Site` model must both be updated |
+| **`PLATFORM_NAME`** | Per-tenant | Runtime (Django admin) | `Sites` → `Site Configuration` → `PLATFORM_NAME` value |
+| **MFE `SITE_NAME`** | Per-tenant | MFE image rebuild | Set in `SITE_VARIANTS` map (currently requires plugin update) |
+| **MFE `SUPPORT_EMAIL`** | Per-tenant | MFE image rebuild | Set in `SITE_VARIANTS` map |
+| **LMS SCSS/CSS overrides** | Global | LMS image rebuild | Theme-level; not per-tenant at runtime |
+| **Studio SCSS** | Global | LMS image rebuild | Same image as LMS theming |
+| **MFE CSS variables** | Global | MFE image rebuild | Compiled from `mfe/mereka.scss` |
+| **`--mereka-mfe-branding-rev`** | Global | MFE image rebuild | Version marker in `mfe/mereka.scss`; verified by `verify-public-branding.sh` |
+
+### Non-Goals
+
+The following are explicitly **not** supported by the tenant branding system:
+
+- **Per-tenant SCSS compilation**: All tenants share the same compiled CSS bundles. Custom colors must be implemented via CSS custom properties, not per-tenant SCSS builds.
+- **Per-tenant Mako templates**: LMS/CMS templates are compiled into the image; per-tenant template overrides are not supported at runtime.
+- **Tenant-controlled JavaScript**: Tenants cannot inject arbitrary JavaScript. All JS runs from the platform image.
+- **Sub-theme inheritance**: There is no "Biji-Biji theme" that inherits from "Mereka theme". All sites share one compiled theme.
+- **White-label MFE builds**: Enterprise portals (admin/learner) use the upstream Open edX default footer and are not wrapped in MerekaFooter (P4 backlog).
 
 ---
 
