@@ -33,10 +33,10 @@ images:
   # Rebuilt 2026-02-20 after script hardening (ae7b125): env.config.js wired, MISSING_ENV_VAR patched
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
-    newTag: nreum-clean-202602200322
+    newTag: nreum-clean-202602200416
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
-    newTag: nreum-clean-202602200322
+    newTag: nreum-clean-202602200416
 
 # Production replica counts (higher for availability)
 replicas:
