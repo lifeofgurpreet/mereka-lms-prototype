@@ -19,6 +19,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 LMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 CMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/footer.html"
+CMS_FOOTER_WIDGET="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html"
 ENTERPRISE_ENV="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"
 ENTERPRISE_KUSTOMIZE="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/kustomization.yaml"
 
@@ -95,18 +96,20 @@ else
   fi
 fi
 
-# CMS footer is optional (Studio is internal-only) — warn if absent, not fail
+# CMS footer widget override (canonical — cms/templates/widgets/footer.html is what Studio renders)
 echo ""
-echo "  [INFO] CMS footer check (Studio is internal — WARN only if missing)"
-if [[ -f "$CMS_FOOTER" ]]; then
-  pass "CMS footer template exists"
-  if grep -qi "mereka\|biji-biji" "$CMS_FOOTER"; then
-    pass "CMS footer template contains Mereka branding"
+echo "  [INFO] CMS footer widget check (cms/templates/widgets/footer.html is the rendering template)"
+if [[ -f "$CMS_FOOTER_WIDGET" ]]; then
+  pass "CMS footer widget override exists (canonical Studio footer)"
+  if grep -qi "mereka\|biji-biji" "$CMS_FOOTER_WIDGET"; then
+    pass "CMS footer widget contains Mereka branding"
   else
-    warn "CMS footer template exists but lacks explicit Mereka branding"
+    warn "CMS footer widget exists but lacks explicit Mereka branding"
   fi
+elif [[ -f "$CMS_FOOTER" ]]; then
+  warn "CMS footer at wrong path (cms/templates/footer.html) — upstream widgets/footer.html renders instead"
 else
-  warn "CMS footer template absent ($CMS_FOOTER) — Studio uses Open edX default footer (acceptable for internal use)"
+  fail "CMS footer widget missing — Studio renders upstream Open edX footer with 'Powered by Open edX'"
 fi
 
 echo ""
@@ -255,18 +258,38 @@ if [[ -f "$LMS_FOOTER" ]]; then
   fi
 fi
 
-# CMS footer — only check if it exists
+# CMS footer widget (canonical path — overrides cms/templates/widgets/footer.html upstream)
+# This is the file that actually renders in Studio. Must exist and must not have Open edX branding.
+if [[ -f "$CMS_FOOTER_WIDGET" ]]; then
+  pass "CMS footer widget override exists (cms/templates/widgets/footer.html)"
+  if grep -qi "mereka\|biji-biji" "$CMS_FOOTER_WIDGET"; then
+    pass "CMS footer widget has Mereka branding"
+  else
+    warn "CMS footer widget exists but lacks explicit Mereka branding"
+  fi
+  if grep -qi "powered by open edx\|footer-about-openedx\|open-edx-logo-tag" "$CMS_FOOTER_WIDGET"; then
+    fail "CMS footer widget has 'Powered by Open edX' — must be removed for white-label Studio"
+    grep -n -i "powered by\|footer-about-openedx\|open-edx-logo-tag" "$CMS_FOOTER_WIDGET" | sed 's/^/    /'
+  else
+    pass "CMS footer widget has no 'Powered by Open edX' (white-label Studio)"
+  fi
+else
+  fail "CMS footer widget override missing (cms/templates/widgets/footer.html) — Studio renders upstream Open edX footer"
+  echo "    Fix: create infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html"
+fi
+
+# CMS footer legacy file (cms/templates/footer.html — may not be the rendering template)
 if [[ -f "$CMS_FOOTER" ]]; then
   if grep -qi "powered by open edx" "$CMS_FOOTER"; then
     POWERED_LINE=$(grep -n -i "powered by" "$CMS_FOOTER" | head -1 | cut -d: -f1)
     CONTEXT=$(awk -v n="$POWERED_LINE" 'NR>=n-3 && NR<=n+3' "$CMS_FOOTER")
     if echo "$CONTEXT" | grep -qi "mereka\|biji-biji\|platform_name\|get_platform_name"; then
-      warn "CMS footer has 'Powered by Open edX' with Mereka co-branding nearby"
+      warn "CMS footer (cms/templates/footer.html) has 'Powered by Open edX' with co-branding"
     else
-      fail "CMS footer has standalone 'Powered by Open edX' with no Mereka co-branding"
+      fail "CMS footer (cms/templates/footer.html) has standalone 'Powered by Open edX'"
     fi
   else
-    pass "CMS footer has no standalone 'Powered by Open edX'"
+    pass "CMS footer (cms/templates/footer.html) has no 'Powered by Open edX'"
   fi
 fi
 
