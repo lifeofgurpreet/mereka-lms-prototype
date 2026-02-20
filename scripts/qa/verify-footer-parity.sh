@@ -295,6 +295,74 @@ if [[ -f "$CMS_FOOTER" ]]; then
 fi
 
 echo ""
+
+# -----------------------------------------------------------------------
+# AC-FTPAR-006: Positive allowlist — required content MUST be present
+# (guards against accidental blank/stubbed templates)
+# -----------------------------------------------------------------------
+echo "AC-FTPAR-006: Positive allowlist — required content present"
+
+# LMS footer must have at least one mereka.io link (not just branding classes)
+if [[ -f "$LMS_FOOTER" ]]; then
+  if grep -q "mereka\.io\|mereka\.my" "$LMS_FOOTER"; then
+    pass "LMS footer contains at least one mereka.io/mereka.my link"
+  else
+    fail "LMS footer has no mereka.io or mereka.my links — may be empty/stubbed"
+  fi
+
+  # LMS footer must have copyright year expression
+  # Use -E (ERE) so \( \) are literal parens; avoid BRE empty-group interpretation
+  if grep -qE "datetime\.now\(\)\.year|%Y|\{year\}" "$LMS_FOOTER"; then
+    pass "LMS footer has dynamic copyright year expression"
+  else
+    fail "LMS footer missing dynamic copyright year — may be hardcoded or removed"
+  fi
+
+  # LMS footer must NOT have hardcoded year (e.g. 2024 or 2025 as literal)
+  HARDCODED_YEAR=$(grep -oE "© [0-9]{4}" "$LMS_FOOTER" || true)
+  if [[ -n "$HARDCODED_YEAR" ]]; then
+    fail "LMS footer has hardcoded copyright year: ${HARDCODED_YEAR} — use datetime.now().year"
+  else
+    pass "LMS footer has no hardcoded copyright year"
+  fi
+fi
+
+# MFE plugin must have all 4 v2 structural zones
+if [[ -f "$PLUGIN" ]]; then
+  ZONE_COUNT=$(grep -c "Zone [1-4]:" "$PLUGIN" || true)
+  if [[ "$ZONE_COUNT" -ge 4 ]]; then
+    pass "MFE MerekaFooter has all 4 v2 structural zones ($ZONE_COUNT zone comments found)"
+  else
+    fail "MFE MerekaFooter missing v2 structural zones (found $ZONE_COUNT of 4 expected)"
+  fi
+
+  # Legal section must have copyright and at least one legal link
+  if grep -q "footer-legal" "$PLUGIN" && grep -q "privacy\|terms\|cookie" "$PLUGIN"; then
+    pass "MFE footer legal zone has copyright block and legal links"
+  else
+    fail "MFE footer legal zone missing copyright or legal links"
+  fi
+fi
+
+# CMS footer widget must have a copyright or brand statement (not just CSS classes)
+if [[ -f "$CMS_FOOTER_WIDGET" ]]; then
+  if grep -qi "Mereka Academy\|Mereka\|biji-biji\|academy" "$CMS_FOOTER_WIDGET"; then
+    pass "CMS footer widget has explicit brand content (not empty template)"
+  else
+    fail "CMS footer widget may be empty — no brand content found"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# WARN ALLOWLIST — accepted warnings (for CI interpretation)
+# -----------------------------------------------------------------------
+echo "WARN allowlist (accepted warnings — not gate failures):"
+echo "  WARN-001: Enterprise MFE portals use Open edX default footer (P4 backlog, no MerekaFooter wiring)"
+echo "  WARN-002: LMS nav links (emails, help URL) are Mereka-specific — multi-tenant via bead 2rcf"
+echo ""
+
 echo "========================================"
 echo "Footer parity: $PASS PASS / $FAIL FAIL / $WARN WARN"
 echo "========================================"
