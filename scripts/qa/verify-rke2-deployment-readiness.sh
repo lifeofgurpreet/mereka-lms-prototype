@@ -59,6 +59,41 @@ echo "========================================================"
 echo ""
 
 # -----------------------------------------------------------------------
+# BLOCKER 0: Kubecontext Separation Drift
+# Detects nonprod/staging contexts pointing at the same cluster target.
+# -----------------------------------------------------------------------
+echo "B0: Kubecontext Separation"
+
+if ! command -v kubectl >/dev/null 2>&1; then
+  skip_check "kubectl not available; cannot validate kubecontext separation"
+elif ! command -v jq >/dev/null 2>&1; then
+  skip_check "jq not available; cannot validate kubecontext separation"
+else
+  CFG_JSON="$(kubectl config view -o json 2>/dev/null || true)"
+  if [[ -z "$CFG_JSON" ]]; then
+    skip_check "kubectl config unavailable; cannot validate kubecontext separation"
+  else
+    NP_CLUSTER="$(echo "$CFG_JSON" | jq -r '.contexts[]? | select(.name=="rke2-nonprod") | .context.cluster' | head -1)"
+    ST_CLUSTER="$(echo "$CFG_JSON" | jq -r '.contexts[]? | select(.name=="rke2-staging") | .context.cluster' | head -1)"
+
+    if [[ -z "$NP_CLUSTER" || -z "$ST_CLUSTER" ]]; then
+      warn_check "Missing one or both contexts (rke2-nonprod/rke2-staging) in kubeconfig"
+    else
+      NP_SERVER="$(echo "$CFG_JSON" | jq -r --arg c "$NP_CLUSTER" '.clusters[]? | select(.name==$c) | .cluster.server' | head -1)"
+      ST_SERVER="$(echo "$CFG_JSON" | jq -r --arg c "$ST_CLUSTER" '.clusters[]? | select(.name==$c) | .cluster.server' | head -1)"
+
+      if [[ "$NP_CLUSTER" == "$ST_CLUSTER" || "$NP_SERVER" == "$ST_SERVER" ]]; then
+        fail_check "Context drift: rke2-nonprod and rke2-staging resolve to the same cluster target ($NP_CLUSTER / ${NP_SERVER:-unknown})"
+      else
+        pass_check "rke2-nonprod and rke2-staging map to distinct cluster targets"
+      fi
+    fi
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
 # BLOCKER 1: External Secret Store Mismatch
 # Checks that rke2-nonprod overlay uses infisical-secret-store, not gcp-secret-manager
 # -----------------------------------------------------------------------
@@ -126,12 +161,13 @@ if [[ "$MODE" == "live" ]]; then
     fail_check "[live] infisical-secret-store ClusterSecretStore is NOT Ready (status: ${INFISICAL_READY:-unknown})"
   fi
 
-  GCP_READY=$(KC get clustersecretstore gcp-secret-manager \
-    -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
-  if [[ "$GCP_READY" == "False" || -z "$GCP_READY" ]]; then
-    warn_check "[live] gcp-secret-manager ClusterSecretStore is NOT ready on rke2 (expected — Workload Identity unavailable)"
+  GCP_EXISTS=$(KC get clustersecretstore gcp-secret-manager -o name 2>/dev/null || echo "")
+  if [[ -z "$GCP_EXISTS" ]]; then
+    pass_check "[live] gcp-secret-manager ClusterSecretStore is absent on rke2 (expected)"
   else
-    warn_check "[live] gcp-secret-manager is unexpectedly Ready on rke2 — verify no Workload Identity misconfiguration"
+    GCP_READY=$(KC get clustersecretstore gcp-secret-manager \
+      -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
+    fail_check "[live] gcp-secret-manager ClusterSecretStore still present on rke2 (Ready=${GCP_READY:-unknown}) — remove from dev overlay"
   fi
 
   # Check all ExternalSecrets are SecretSynced
@@ -255,29 +291,30 @@ fi
 if [[ "$MODE" == "live" ]]; then
   echo "  [live] Checking imagePullSecret..."
 
-  # Check secret exists
-  PULL_SECRET_EXISTS=$(KC get secret artifact-registry-key -n "$NS" \
-    -o jsonpath='{.metadata.name}' 2>/dev/null || echo "")
-  if [[ -n "$PULL_SECRET_EXISTS" ]]; then
-    SECRET_TYPE=$(KC get secret artifact-registry-key -n "$NS" \
-      -o jsonpath='{.type}' 2>/dev/null || echo "")
-    if [[ "$SECRET_TYPE" == "kubernetes.io/dockerconfigjson" ]]; then
-      pass_check "[live] artifact-registry-key secret exists (type: kubernetes.io/dockerconfigjson)"
-    else
-      fail_check "[live] artifact-registry-key exists but type is $SECRET_TYPE (expected kubernetes.io/dockerconfigjson)"
-    fi
-  else
-    fail_check "[live] artifact-registry-key secret NOT found in $NS namespace"
-  fi
-
-  # Check default SA references it
+  # Check default SA references at least one dockerconfigjson pull secret
   SA_PULL_SECRETS=$(KC get serviceaccount default -n "$NS" \
     -o jsonpath='{.imagePullSecrets[*].name}' 2>/dev/null || echo "")
-  if echo "$SA_PULL_SECRETS" | grep -q 'artifact-registry-key'; then
-    pass_check "[live] Default ServiceAccount references artifact-registry-key in imagePullSecrets"
+  if [[ -n "${SA_PULL_SECRETS// }" ]]; then
+    pass_check "[live] Default ServiceAccount has imagePullSecrets configured ($SA_PULL_SECRETS)"
+
+    VALID_PULL_SECRET=false
+    for PULL_SECRET in $SA_PULL_SECRETS; do
+      SECRET_TYPE=$(KC get secret "$PULL_SECRET" -n "$NS" \
+        -o jsonpath='{.type}' 2>/dev/null || echo "")
+      if [[ "$SECRET_TYPE" == "kubernetes.io/dockerconfigjson" ]]; then
+        pass_check "[live] imagePullSecret $PULL_SECRET exists (dockerconfigjson)"
+        VALID_PULL_SECRET=true
+      else
+        warn_check "[live] imagePullSecret $PULL_SECRET missing or wrong type (${SECRET_TYPE:-missing})"
+      fi
+    done
+
+    if [[ "$VALID_PULL_SECRET" != "true" ]]; then
+      fail_check "[live] No valid dockerconfigjson imagePullSecret found on default ServiceAccount"
+    fi
   else
-    fail_check "[live] Default ServiceAccount does NOT reference artifact-registry-key — pods cannot pull private images"
-    echo "    Fix: kubectl --context $KUBECONTEXT patch serviceaccount default -n $NS -p '{\"imagePullSecrets\": [{\"name\": \"artifact-registry-key\"}]}'"
+    fail_check "[live] Default ServiceAccount has no imagePullSecrets configured — pods cannot pull private images"
+    echo "    Fix: kubectl --context $KUBECONTEXT patch serviceaccount default -n $NS -p '{\"imagePullSecrets\": [{\"name\": \"dev-image-puller\"}]}'"
   fi
 
   # Spot-check pod image pull status
@@ -406,20 +443,24 @@ echo "========================================================"
 
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
+  echo "  B0 (context separation): ensure kubeconfig contexts map to distinct clusters/servers"
+  echo "     Check: kubectl config get-contexts"
+  echo ""
   echo "Remediation:"
   echo "  B1 (secret store): Apply deploy/k8s/overlays/rke2-nonprod/ overlay"
-  echo "     Or manually patch ExternalSecrets: secretStoreRef.name: infisical-secret-store"
+  echo "     Ensure gcp-secret-manager ClusterSecretStore is absent from rke2 profile"
+  echo "     And ExternalSecrets use secretStoreRef.name: infisical-secret-store"
   echo ""
   echo "  B2 (alias keys): Verify infisical-secret-store remoteRef.key paths match Infisical"
   echo "     Check: kubectl --context rke2-nonprod describe externalsecret openedx-secrets -n mereka-lms"
   echo ""
   echo "  B3 (imagePullSecret):"
-  echo "     kubectl --context rke2-nonprod create secret docker-registry artifact-registry-key \\"
+  echo "     kubectl --context rke2-nonprod create secret docker-registry dev-image-puller \\"
   echo "       -n mereka-lms --docker-server=asia-southeast1-docker.pkg.dev \\"
   echo "       --docker-username=_json_key --docker-password=\"\$(cat /path/to/sa-key.json)\" \\"
   echo "       --docker-email=ci@mereka.io"
   echo "     kubectl --context rke2-nonprod patch serviceaccount default -n mereka-lms \\"
-  echo "       -p '{\"imagePullSecrets\": [{\"name\": \"artifact-registry-key\"}]}'"
+  echo "       -p '{\"imagePullSecrets\": [{\"name\": \"dev-image-puller\"}]}'"
   echo ""
   echo "  B4 (quota): kubectl --context rke2-nonprod describe nodes | grep -A 10 'Allocated resources'"
   echo ""
