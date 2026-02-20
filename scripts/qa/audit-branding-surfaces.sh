@@ -66,15 +66,25 @@ check_lms_overrides() {
     gap "${label}: host unreachable or returned empty response"
     return
   fi
+  # Two URL formats:
+  #  - Old (whitenoise hashed): /static/mereka/css/mereka-overrides.<hash>.css
+  #  - New (comprehensive theming, theme-name stripped): /static/css/mereka-overrides.css
   css_path="$(extract_first '/static/mereka/css/mereka-overrides[^"]*\.css' <<<"$html")"
+  if [[ -z "${css_path:-}" ]]; then
+    css_path="$(extract_first '/static/css/mereka-overrides[^"]*\.css' <<<"$html")"
+  fi
   if [[ -z "${css_path:-}" ]]; then
     gap "${label}: missing mereka-overrides.css link"
     return
   fi
 
   css="$(fetch "https://${host}${css_path}")"
+  # Fallback: if inline path 404s (whitenoise strips theme-prefix), try theming URL
+  if [[ -z "${css:-}" ]] || echo "$css" | grep -q "Page not found"; then
+    css="$(fetch "https://${host}/theming/asset/mereka/css/mereka-overrides.css")"
+  fi
   if [[ -z "${css:-}" ]]; then
-    gap "${label}: could not fetch override CSS (${css_path})"
+    gap "${label}: could not fetch override CSS (${css_path} — also tried theming URL)"
     return
   fi
   if [[ -n "$EXPECTED_BRANDING_REV" ]]; then

@@ -1,0 +1,31 @@
+✓ LMS (academyv2.mereka.io): branding revision marker 2026-02-10-pass1 present
+✓ LMS (academyv2.mereka.io): override CSS includes local fonts
+✓ LMS (academyv2.mereka.io): deep selectors present in override CSS
+✓ MFE authn (apps.academyv2.mereka.io): authn bundle shell present
+✗ MFE authn (apps.academyv2.mereka.io): branding revision marker 2026-02-18-us7 missing (deployed: 2026-02-08-pass4; rebuild MFE image)
+✓ MFE authn (apps.academyv2.mereka.io): mfe_config branding fields present
+✓ Biji Studio (studio.academy.biji-biji.com): studio CSS includes deep Studio selectors
+✓ Biji Studio (studio.academy.biji-biji.com): studio CSS has no Google font imports
+✓ MFE authn (apps.academy.biji-biji.com): authn bundle shell present
+✗ MFE authn (apps.academy.biji-biji.com): branding revision marker 2026-02-18-us7 missing (deployed: 2026-02-08-pass4; rebuild MFE image)
+✓ MFE authn (apps.academy.biji-biji.com): mfe_config branding fields present
+✓ Microsite (academy.biji-biji.com): branding revision marker 2026-02-10-pass1 present
+✓ Microsite (academy.biji-biji.com): override CSS includes local fonts
+✓ Microsite (academy.biji-biji.com): deep selectors present in override CSS
+✓ Microsite (skillourfuture.academy.mereka.io): branding revision marker 2026-02-10-pass1 present
+✓ Microsite (skillourfuture.academy.mereka.io): override CSS includes local fonts
+✓ Microsite (skillourfuture.academy.mereka.io): deep selectors present in override CSS
+✓ Studio (studio.academyv2.mereka.io): studio CSS includes deep Studio selectors
+✓ Studio (studio.academyv2.mereka.io): studio CSS has no Google font imports
+✓ Ecommerce root landing has branded content
+✓ Ecommerce dashboard (ecommerce.academyv2.mereka.io): authn bundle shell present
+✗ Ecommerce dashboard (ecommerce.academyv2.mereka.io): authn css branding revision differs from source (source=2026-02-18-us7, deployed=2026-02-08-pass4; rebuild MFE image)
+✓ Credentials admin (academyv2.mereka.io): authn bundle shell present
+✗ Credentials admin (academyv2.mereka.io): authn css branding revision differs from source (source=2026-02-18-us7, deployed=2026-02-08-pass4; rebuild MFE image)
+✓ Credentials root page has branded landing content
+✓ Credentials admin login reachable (200)
+✓ Credentials health payload shape OK
+✓ Forum heartbeat reachable (200)
+✓ Forum root reachable without auth (200)
+
+Branding surface audit: gaps=4 strict=0
