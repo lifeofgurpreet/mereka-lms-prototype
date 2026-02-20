@@ -987,6 +987,24 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         if npm_install_marker in updated and "mv /openedx/edx-platform/node_modules" not in updated:
             updated = updated.replace(npm_install_marker, node_mv)
 
+    # Fix mereka-overrides.css not appearing in staticfiles after collectstatic.
+    # collectstatic with tutor.assets settings uses ThemeFileSystemFinder but the
+    # COMPREHENSIVE_THEME_DIRS env var may not be consumed by the settings module at
+    # build time. Explicitly copy the CSS after rdfind so it's baked into the image.
+    if path.name == "Dockerfile" and "rdfind -makesymlinks" in updated and "mereka-overrides.css" not in updated:
+        rdfind_marker = "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/"
+        css_copy = (
+            "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/\n\n"
+            "# Ensure mereka theme CSS is baked into staticfiles (ThemeFileSystemFinder may\n"
+            "# skip it when tutor.assets settings don't read COMPREHENSIVE_THEME_DIRS from env).\n"
+            "RUN mkdir -p /openedx/staticfiles/css && \\\n"
+            "    cp -f /openedx/themes/mereka/lms/static/css/mereka-overrides.css \\\n"
+            "       /openedx/staticfiles/css/mereka-overrides.css || true && \\\n"
+            "    cp -f /openedx/themes/mereka/cms/static/css/mereka-overrides.css \\\n"
+            "       /openedx/staticfiles/css/mereka-overrides.css 2>/dev/null || true"
+        )
+        updated = updated.replace(rdfind_marker, css_copy)
+
     # Add custom apps to Dockerfile
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
         # Find the line where we copy themes and add our custom apps after it
