@@ -29,71 +29,68 @@ skip() { echo -e "${YELLOW}[SKIP]${NC} $1"; SKIP=$((SKIP + 1)); }
 echo "=== Analytics Key Injection Verification ==="
 echo ""
 
-# AC-ANAL-001: No sentinel keys in templates
+# AC-ANAL-001: footer.html must have NO Segment code (plugin-first canonical state post-2k6k)
+# Analytics injection moved to Tutor plugin hook (mereka_lms.py) in bead 2k6k.
+# Any reappearance of segment.io/analytics code in footer.html is a regression.
 FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 if [[ -f "$FOOTER" ]]; then
-  if grep -qi 'undefined_license_key' "$FOOTER"; then
-    # Check if it's in the guard or in the actual key extraction
-    if grep -q 'segment_key.lower() not in.*undefined_license_key' "$FOOTER"; then
-      pass "AC-ANAL-001: Sentinel guard includes 'undefined_license_key' rejection"
-    else
-      fail "AC-ANAL-001: footer.html contains 'undefined_license_key' literal outside guard"
-    fi
+  if grep -qE 'segment\.io|analytics\.js|analytics\.load|segment_key|undefined_license_key' "$FOOTER"; then
+    fail "AC-ANAL-001: footer.html has Segment/analytics code — regression from bead 2k6k plugin-first migration"
+    grep -nE 'segment\.io|analytics\.js|analytics\.load|segment_key|undefined_license_key' "$FOOTER" | sed 's/^/    /'
   else
-    fail "AC-ANAL-001: footer.html missing sentinel guard for 'undefined_license_key'"
+    pass "AC-ANAL-001: footer.html has no Segment/analytics code (plugin-first canonical state)"
   fi
 
-  # Check guard rejects known sentinels
-  if grep -qE 'segment_key.lower\(\) not in.*\("undefined".*"none".*"null"' "$FOOTER"; then
-    pass "AC-ANAL-001: Sentinel guard present with undefined/none/null rejection"
+  # Check that migration comment exists (confirms removal was intentional)
+  if grep -qE '2k6k|analytics.*removed|removed.*analytics|Tutor plugin hook' "$FOOTER"; then
+    pass "AC-ANAL-001: footer.html has 2k6k migration comment (intentional removal documented)"
   else
-    fail "AC-ANAL-001: No comprehensive sentinel guard found in footer.html"
+    skip "AC-ANAL-001: footer.html missing 2k6k migration comment — regression may be silent"
   fi
 else
   skip "AC-ANAL-001: footer.html not found"
 fi
 
-# AC-ANAL-002: No .lower() transform on segment key in rendering layer
-if [[ -f "$FOOTER" ]]; then
-  # Check the key extraction/normalization lines (not the guard comparison)
-  # The guard can use .lower() for comparison, but the key value itself should not be lowercased
-  # Look for lines that assign to segment_key but are NOT part of the guard condition
-  EXTRACTION_LINES=$(grep -n 'segment_key' "$FOOTER" | grep -v '% if' | grep -v 'include' || true)
-  if echo "$EXTRACTION_LINES" | grep '= .*segment_key' | grep -q '\.lower()'; then
-    fail "AC-ANAL-002: segment_key extraction uses .lower() — key case is mutated"
-    echo "  Lines:"
-    echo "$EXTRACTION_LINES" | grep '\.lower()' | sed 's/^/    /'
+# AC-ANAL-002: No .lower() transform on segment key in the plugin (canonical injection point)
+# Post-2k6k: segment_key logic lives in mereka_lms.py, not footer.html
+PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+if [[ -f "$PLUGIN" ]]; then
+  # Key must be used as-is from env var (no case mutation)
+  if grep -n 'SEGMENT_KEY' "$PLUGIN" | grep -v '^\s*#' | grep -q '\.lower()'; then
+    fail "AC-ANAL-002: SEGMENT_KEY uses .lower() in plugin — key case is mutated"
+    grep -n 'SEGMENT_KEY.*\.lower()' "$PLUGIN" | sed 's/^/    /'
   else
-    pass "AC-ANAL-002: segment_key extraction preserves original case"
+    pass "AC-ANAL-002: SEGMENT_KEY preserves original case in plugin (no .lower() mutation)"
   fi
 else
-  skip "AC-ANAL-002: footer.html not found"
+  skip "AC-ANAL-002: mereka_lms.py not found"
 fi
 
-# AC-ANAL-003: Segment injection uses canonical template extension points
+# AC-ANAL-003: Analytics injection uses canonical Tutor plugin hook (not footer template)
+# Post-2k6k: segment-io.html includes are no longer used in footer.html
 if [[ -f "$FOOTER" ]]; then
-  if grep -q 'segment-io.html' "$FOOTER" || grep -q 'segment-io-footer.html' "$FOOTER"; then
-    pass "AC-ANAL-003: Segment includes use standard widget templates"
+  if grep -qE 'segment-io\.html|segment-io-footer\.html' "$FOOTER"; then
+    fail "AC-ANAL-003: footer.html has segment-io template includes — regression (remove, use plugin hook)"
+    grep -nE 'segment-io\.html|segment-io-footer\.html' "$FOOTER" | sed 's/^/    /'
   else
-    skip "AC-ANAL-003: No segment-io includes found (Segment may be disabled)"
+    pass "AC-ANAL-003: footer.html has no segment-io template includes (plugin hook is canonical)"
   fi
 else
   skip "AC-ANAL-003: footer.html not found"
 fi
 
-# AC-ANAL-004: Single canonical key source
-if [[ -f "$FOOTER" ]]; then
-  FALLBACK_COUNT=$(grep -cE 'ANALYTICS_SEGMENT_KEY|EDXAPP_SEGMENT_KEY' "$FOOTER" || true)
+# AC-ANAL-004: Single canonical key source in plugin (not footer or other surfaces)
+if [[ -f "$PLUGIN" ]]; then
+  FALLBACK_COUNT=$(grep -cE 'ANALYTICS_SEGMENT_KEY|EDXAPP_SEGMENT_KEY' "$PLUGIN" || true)
   if [[ "$FALLBACK_COUNT" -gt 0 ]]; then
-    fail "AC-ANAL-004: footer.html has $FALLBACK_COUNT non-canonical key source references"
-    echo "  Expected: only SEGMENT_KEY (Tutor standard)"
-    echo "  Found:"
-    grep -n 'ANALYTICS_SEGMENT_KEY\|EDXAPP_SEGMENT_KEY' "$FOOTER" | sed 's/^/    /'
+    fail "AC-ANAL-004: plugin has $FALLBACK_COUNT non-canonical key source references"
+    echo "  Expected: only MEREKA_SEGMENT_KEY"
+    grep -n 'ANALYTICS_SEGMENT_KEY\|EDXAPP_SEGMENT_KEY' "$PLUGIN" | sed 's/^/    /'
   else
-    pass "AC-ANAL-004: Single canonical key source (SEGMENT_KEY only)"
+    pass "AC-ANAL-004: Single canonical key source (MEREKA_SEGMENT_KEY via env var)"
   fi
 else
-  skip "AC-ANAL-004: footer.html not found"
+  skip "AC-ANAL-004: mereka_lms.py not found"
 fi
 
 # AC-ANAL-005: Plugin sets SEGMENT_KEY from environment
@@ -116,10 +113,11 @@ echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC}
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Remediation steps:"
-  echo "1. Use only settings.SEGMENT_KEY as the canonical source"
-  echo "2. Remove .lower() from key extraction (preserve case)"
-  echo "3. Add sentinel guard for 'undefined_license_key' and other placeholders"
-  echo "4. Set MEREKA_SEGMENT_KEY in environment/secrets"
+  echo "1. footer.html must have ZERO analytics/Segment code (plugin-first model, bead 2k6k)"
+  echo "   If Segment code appeared in footer.html, remove it — redirect to mereka_lms.py plugin hook"
+  echo "2. Use only MEREKA_SEGMENT_KEY env var as the canonical key source (mereka_lms.py)"
+  echo "3. Do not lowercase SEGMENT_KEY — preserve case as read from env var"
+  echo "4. Set MEREKA_SEGMENT_KEY in Infisical/GCP SM to enable analytics"
   exit 1
 fi
 

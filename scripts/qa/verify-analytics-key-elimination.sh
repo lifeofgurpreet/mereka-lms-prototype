@@ -136,41 +136,35 @@ if [[ -f "$PLUGIN" ]]; then
   fi
 fi
 
-# Check 9: Footer template has sentinel guard (rejects undefined_license_key)
+# Check 9: Footer template must have NO Segment code (plugin-first canonical state post-2k6k)
+# Regression: any analytics code in footer.html violates plugin-first model
 if [[ -f "$FOOTER" ]]; then
-  if grep -q 'undefined_license_key' "$FOOTER"; then
-    pass_check "footer.html sentinel guard includes 'undefined_license_key' rejection"
+  if grep -qE 'segment\.io|analytics\.js|analytics\.load|segment_key|undefined_license_key' "$FOOTER"; then
+    fail_check "footer.html has no Segment/analytics code (plugin-first canonical state post-2k6k)"
+    grep -nE 'segment\.io|analytics\.js|analytics\.load|segment_key|undefined_license_key' "$FOOTER" | sed 's/^/    /'
   else
-    fail_check "footer.html sentinel guard includes 'undefined_license_key' rejection"
+    pass_check "footer.html has no Segment/analytics code (plugin-first canonical state post-2k6k)"
   fi
 else
   warn "footer.html not found at $FOOTER — theme may not be applied yet"
 fi
 
-# Check 10: Footer sentinel guard covers the full set of known placeholder values
+# Check 10: Footer has 2k6k migration comment (intentional removal documented)
 if [[ -f "$FOOTER" ]]; then
-  GUARD_LINE="$(grep 'segment_key.*lower.*not in' "$FOOTER" || true)"
-  ALL_SENTINELS=true
-  for sentinel in "undefined" "none" "null" "undefined_license_key" "your_segment_key_here" "change_me"; do
-    if ! echo "$GUARD_LINE" | grep -q "$sentinel"; then
-      ALL_SENTINELS=false
-      warn "Sentinel '$sentinel' missing from footer.html sentinel guard"
-    fi
-  done
-  if [[ "$ALL_SENTINELS" == "true" ]]; then
-    pass_check "footer.html sentinel guard covers all 6 known placeholder values"
+  if grep -qE '2k6k|analytics.*removed|removed.*analytics|Tutor plugin hook' "$FOOTER"; then
+    pass_check "footer.html has migration comment documenting 2k6k analytics removal"
   else
-    fail_check "footer.html sentinel guard covers all 6 known placeholder values"
+    warn "footer.html missing 2k6k migration comment — regression may be silent if analytics code re-added"
   fi
 fi
 
-# Check 11: Footer wraps Segment script in 'if segment_key' non-empty guard
+# Check 11: No segment-io template includes in footer.html (post-2k6k: plugin hook is canonical)
 if [[ -f "$FOOTER" ]]; then
-  GUARD_COUNT="$(grep -c 'if segment_key' "$FOOTER" || true)"
-  if [[ "$GUARD_COUNT" -ge 1 ]]; then
-    pass_check "footer.html wraps Segment includes in 'if segment_key' guard (count: $GUARD_COUNT)"
+  if grep -qE 'segment-io\.html|segment-io-footer\.html' "$FOOTER"; then
+    fail_check "footer.html has no segment-io template includes (post-2k6k: use Tutor plugin hook)"
+    grep -nE 'segment-io\.html|segment-io-footer\.html' "$FOOTER" | sed 's/^/    /'
   else
-    fail_check "footer.html wraps Segment includes in 'if segment_key' guard"
+    pass_check "footer.html has no segment-io template includes (Tutor plugin hook is canonical)"
   fi
 fi
 
@@ -242,12 +236,14 @@ if [[ -f "$FOOTER" ]]; then
   fi
 fi
 
-# Check 17: Guard comparison uses .lower() (correct: comparison only, not mutation)
-if [[ -f "$FOOTER" ]]; then
-  if grep -q 'segment_key.lower().*not in' "$FOOTER"; then
-    pass_check "footer.html guard uses .lower() for comparison only (not key mutation)"
+# Check 17: Plugin does not lowercase SEGMENT_KEY (comparison only, not mutation)
+# Post-2k6k: guard logic is in mereka_lms.py (empty string = disabled), not footer.html
+if [[ -f "$PLUGIN" ]]; then
+  if grep -n 'SEGMENT_KEY' "$PLUGIN" | grep -v '^\s*#' | grep -q '\.lower()'; then
+    fail_check "mereka_lms.py guard uses .lower() for comparison only (not key mutation)"
+    grep -n 'SEGMENT_KEY.*\.lower()' "$PLUGIN" | grep -v '^\s*#' | sed 's/^/    /'
   else
-    fail_check "footer.html guard uses .lower() for comparison only (not key mutation)"
+    pass_check "SEGMENT_KEY key preserved as-is in mereka_lms.py (no .lower() mutation)"
   fi
 fi
 
@@ -430,15 +426,15 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "             and a root-cause section explaining the injection failure chain."
   echo ""
   echo "  AC-UI-502: Ensure mereka_lms.py uses os.environ.get('MEREKA_SEGMENT_KEY', '')."
-  echo "             Ensure footer.html has sentinel guard rejecting all 6 placeholder"
-  echo "             values before emitting any Segment <script> block."
+  echo "             footer.html must have ZERO Segment/analytics code (plugin-first model, bead 2k6k)."
+  echo "             If Segment code re-appears in footer.html — remove it, use Tutor plugin hook."
   echo "             Ensure head-extra.html templates have no raw analytics injection."
   echo "             Grep infrastructure/ for literal undefined/null/sentinel assignments."
   echo ""
   echo "  AC-UI-503: Document the canonical key validation pattern in the evidence doc."
-  echo "             Confirm footer guard uses .lower() only on the comparison side —"
-  echo "             not on the stored segment_key value (no case mangling)."
+  echo "             SEGMENT_KEY guard is: empty string = analytics disabled (no footer guards needed)."
   echo "             State the precedence policy: env var → empty → analytics disabled."
+  echo "             Reference bead 2k6k: analytics moved from footer.html to mereka_lms.py plugin hook."
   echo ""
   echo "  AC-UI-504: Add 'analytics-key-elimination' job to .github/workflows/ci.yml."
   echo "             Add smoke check commands to the evidence doc covering all 3 hosts."
