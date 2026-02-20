@@ -25,10 +25,10 @@ images:
     newTag: mereka-brand-hotfix-full-v3
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: b732a7d-20260210161437
+    newTag: 1c66529-20260220023917
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: b732a7d-20260210161437
+    newTag: 1c66529-20260220023917
   # Enterprise MFE: pinned to NREUM-clean build (no initContainer workaround needed)
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
