@@ -80,11 +80,13 @@ check_lms_overrides() {
 
   css="$(fetch "https://${host}${css_path}")"
   # Fallback: if inline path 404s (whitenoise strips theme-prefix), try theming URL
-  if [[ -z "${css:-}" ]] || echo "$css" | grep -q "Page not found"; then
+  # Also guard against HTML 404 pages being returned as CSS content
+  _looks_like_html() { grep -qi '<!doctype html\|<html' <<<"$1"; }
+  if [[ -z "${css:-}" ]] || _looks_like_html "${css}"; then
     css="$(fetch "https://${host}/theming/asset/mereka/css/mereka-overrides.css")"
   fi
-  if [[ -z "${css:-}" ]]; then
-    gap "${label}: could not fetch override CSS (${css_path} — also tried theming URL)"
+  if [[ -z "${css:-}" ]] || _looks_like_html "${css}"; then
+    gap "${label}: override CSS unreachable (inline path 404, theming URL also 404 — pod may have static file regression)"
     return
   fi
   if [[ -n "$EXPECTED_BRANDING_REV" ]]; then

@@ -418,6 +418,30 @@ check_studio_brand_css() {
   fi
 }
 
+check_studio_footer_whitelist() {
+  # Checks the LIVE Studio HTML for absence of Open edX powered-by block.
+  # This catches regressions where the cms/templates/widgets/footer.html override
+  # is not applied (e.g. image not rebuilt after template fix).
+  local studio_host=$1
+  local label="${2:-Studio footer white-label}"
+  local ts html
+
+  ts="$(date +%s)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}/?nocache=${ts}" 2>/dev/null || true)"
+  if [[ -z "${html:-}" ]]; then
+    printf "✗ %s (studio unreachable)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  if printf '%s' "$html" | grep -Eqi 'footer-about-openedx|open-edx-logo-tag|Powered by Open edX'; then
+    printf "✗ %s (live Studio footer still shows 'Powered by Open edX' — image rebuild required)\n" "$label" >&2
+    failures=$((failures + 1))
+  else
+    printf "✓ %s\n" "$label"
+  fi
+}
+
 check_forum_heartbeat() {
   local forum_host=$1
   local code
@@ -519,6 +543,7 @@ check_any_follow_200 "Favicon asset (favicon.ico)" \
 # The homepage must stop using stock Indigo Google fonts and include brand fonts.
 check_homepage_brand_fonts "${BASE_DOMAIN}" "Homepage uses local brand fonts (no Google fonts)"
 check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no Google fonts)"
+check_studio_footer_whitelist "${STUDIO_HOST}" "Studio footer white-label (no 'Powered by Open edX')"
 
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
@@ -538,6 +563,7 @@ done
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_mfe_authn_surface "${BIJI_MFE_DOMAIN}"
   check_studio_brand_css "${BIJI_STUDIO_DOMAIN}" "Biji Studio uses themed CSS tokens/fonts (no Google fonts)"
+  check_studio_footer_whitelist "${BIJI_STUDIO_DOMAIN}" "Biji Studio footer white-label (no 'Powered by Open edX')"
 fi
 
 echo ""
