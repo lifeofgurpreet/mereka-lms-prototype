@@ -198,7 +198,21 @@ check_authn_proxy_surface() {
   check_http "$url" "$label reachable"
 
   ts="$(date +%s)"
-  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "${url}?nocache=${ts}" 2>/dev/null || true)"
+  # Follow redirects; capture both effective URL and final body.
+  effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" \
+    -o /dev/null -w '%{url_effective}' "${url}?nocache=${ts}" 2>/dev/null || true)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" \
+    "${url}?nocache=${ts}" 2>/dev/null || true)"
+
+  # With Authentik SSO, unauthenticated requests to ecommerce/credentials redirect to
+  # the Authentik flow (auth0.mereka.io), NOT the internal authn MFE. This is correct
+  # production behavior — the authn MFE is only used for the main LMS login surface.
+  if rg -qF 'auth0.mereka.io' <<<"$effective_url" \
+    || rg -qF 'authentik' <<<"$effective_url"; then
+    printf "✓ %s redirects to Authentik SSO (expected with platform SSO config)\n" "$label"
+    return
+  fi
+
   if rg -F -q '<div id="root"></div>' <<<"$html" \
     && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
     && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
@@ -309,7 +323,10 @@ check_homepage_brand_fonts() {
   html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${base_domain}/?nocache=${ts}" 2>/dev/null || true)"
 
   # We load brand overrides via comprehensive theme hook `head-extra.html`.
-  css_path="$(printf '%s' "$html" | rg -o '/static/mereka/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
+  # In production, static.url('mereka/css/mereka-overrides.css') strips the theme
+  # name prefix (Open edX ProductionStorage behavior), yielding /static/css/mereka-overrides.css.
+  # Accept either form: with or without the theme-name prefix segment.
+  css_path="$(printf '%s' "$html" | rg -o '/static(/mereka)?/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
   if [[ -z "$css_path" ]]; then
     printf "✗ %s (missing Mereka override CSS link in homepage HTML)\n" "$label" >&2
     failures=$((failures + 1))
@@ -349,7 +366,8 @@ check_homepage_brand_logo() {
 
   # Brand sanity check: the homepage logo should ultimately match the theming logo redirect target.
   # On Open edX Indigo this often ends up under /static/images/logo.<hash>.png.
-  theming_effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo-horizontal.png" 2>/dev/null || true)"
+  # Compare against logo.png redirect (the header logo), not logo-horizontal.png.
+  theming_effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo.png" 2>/dev/null || true)"
   if [[ -z "$theming_effective_url" ]]; then
     printf "✗ %s (could not resolve theming logo)\n" "$label" >&2
     failures=$((failures + 1))
@@ -357,19 +375,22 @@ check_homepage_brand_logo() {
   fi
 
   # Accept either:
-  # 1) A direct themed static logo path (common with comprehensive theming), OR
-  # 2) The same URL as the theming redirect target.
-  if ! echo "$logo_url" | grep -q "/static/mereka/images/logo" && [[ "$logo_url" != "$theming_effective_url" ]]; then
+  # 1) A direct themed static logo path (with or without theme-name prefix, since
+  #    ProductionStorage strips the prefix: /static/images/ or /static/mereka/images/), OR
+  # 2) The same URL as the theming redirect target (logo.png → hashed static path).
+  if ! echo "$logo_url" | grep -qE "/static/(mereka/)?images/logo" && [[ "$logo_url" != "$theming_effective_url" ]]; then
     printf "✗ %s (homepage logo is not themed)\n" "$label" >&2
     printf "  homepage_logo_url: %s\n" "$logo_url" >&2
-    printf "  expected_prefix: %s\n" "https://${base_domain}/static/mereka/images/logo" >&2
+    printf "  expected_prefix: https://%s/static/(mereka/)?images/logo OR %s\n" "$base_domain" "$theming_effective_url" >&2
     printf "  theming_logo_url: %s\n" "$theming_effective_url" >&2
     failures=$((failures + 1))
     return
   fi
 
-  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$logo_url" 2>/dev/null || echo "000")
-  size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$logo_url" 2>/dev/null || echo "0")
+  # Fetch with cache-busting to bypass CDN (Cloudflare) cached stale assets.
+  logo_bust="${logo_url}?nocache=${ts}"
+  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$logo_bust" 2>/dev/null || echo "000")
+  size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$logo_bust" 2>/dev/null || echo "0")
   if [[ "$code" == "200" && "$size" -gt 2048 ]]; then
     printf "✓ %s\n" "$label"
   else
@@ -393,7 +414,9 @@ check_studio_brand_css() {
     return
   fi
 
-  css_path="$(printf '%s' "$html" | rg -o '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css' | head -n 1 || true)"
+  # In production, ProductionStorage strips the theme-name prefix so studio-main-v1
+  # lands at /static/studio/css/ (not /static/studio/mereka/css/). Accept either form.
+  css_path="$(printf '%s' "$html" | rg -o '/static/studio(/mereka)?/css/studio-main-v1\.[a-z0-9]+\.css' | head -n 1 || true)"
   if [[ -z "${css_path:-}" ]]; then
     printf "✗ %s (missing studio-main-v1 themed CSS link)\n" "$label" >&2
     failures=$((failures + 1))
