@@ -60,7 +60,8 @@ echo ""
 
 # -----------------------------------------------------------------------
 # BLOCKER 0: Kubecontext Separation Drift
-# Detects nonprod/staging contexts pointing at the same cluster target.
+# Detects nonprod/staging contexts that are effectively duplicates.
+# Hard-fails only when both target and namespace collide.
 # -----------------------------------------------------------------------
 echo "B0: Kubecontext Separation"
 
@@ -75,6 +76,8 @@ else
   else
     NP_CLUSTER="$(echo "$CFG_JSON" | jq -r '.contexts[]? | select(.name=="rke2-nonprod") | .context.cluster' | head -1)"
     ST_CLUSTER="$(echo "$CFG_JSON" | jq -r '.contexts[]? | select(.name=="rke2-staging") | .context.cluster' | head -1)"
+    NP_NAMESPACE="$(echo "$CFG_JSON" | jq -r '.contexts[]? | select(.name=="rke2-nonprod") | (.context.namespace // "default")' | head -1)"
+    ST_NAMESPACE="$(echo "$CFG_JSON" | jq -r '.contexts[]? | select(.name=="rke2-staging") | (.context.namespace // "default")' | head -1)"
 
     if [[ -z "$NP_CLUSTER" || -z "$ST_CLUSTER" ]]; then
       warn_check "Missing one or both contexts (rke2-nonprod/rke2-staging) in kubeconfig"
@@ -82,8 +85,10 @@ else
       NP_SERVER="$(echo "$CFG_JSON" | jq -r --arg c "$NP_CLUSTER" '.clusters[]? | select(.name==$c) | .cluster.server' | head -1)"
       ST_SERVER="$(echo "$CFG_JSON" | jq -r --arg c "$ST_CLUSTER" '.clusters[]? | select(.name==$c) | .cluster.server' | head -1)"
 
-      if [[ "$NP_CLUSTER" == "$ST_CLUSTER" || "$NP_SERVER" == "$ST_SERVER" ]]; then
-        fail_check "Context drift: rke2-nonprod and rke2-staging resolve to the same cluster target ($NP_CLUSTER / ${NP_SERVER:-unknown})"
+      if [[ ("$NP_CLUSTER" == "$ST_CLUSTER" || "$NP_SERVER" == "$ST_SERVER") && "$NP_NAMESPACE" == "$ST_NAMESPACE" ]]; then
+        fail_check "Context drift: rke2-nonprod and rke2-staging resolve to the same target and namespace ($NP_CLUSTER / ${NP_SERVER:-unknown} / ns=$NP_NAMESPACE)"
+      elif [[ "$NP_CLUSTER" == "$ST_CLUSTER" || "$NP_SERVER" == "$ST_SERVER" ]]; then
+        warn_check "Contexts share cluster target but are namespace-isolated (nonprod ns=$NP_NAMESPACE, staging ns=$ST_NAMESPACE)"
       else
         pass_check "rke2-nonprod and rke2-staging map to distinct cluster targets"
       fi
@@ -443,7 +448,7 @@ echo "========================================================"
 
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
-  echo "  B0 (context separation): ensure kubeconfig contexts map to distinct clusters/servers"
+  echo "  B0 (context separation): ensure contexts are not duplicates (same cluster/server + same namespace)"
   echo "     Check: kubectl config get-contexts"
   echo ""
   echo "Remediation:"

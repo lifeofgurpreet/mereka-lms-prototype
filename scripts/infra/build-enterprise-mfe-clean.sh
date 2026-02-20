@@ -65,22 +65,27 @@ check_image_bundle() {
     return 1
   fi
 
-  local critical_placeholders=(
-    '"MISSING_ENV_VAR".BASE_URL'
-    '"MISSING_ENV_VAR".LICENSE_MANAGER_BASE_URL'
-    '"MISSING_ENV_VAR".ENTERPRISE_CATALOG_BASE_URL'
-    '"MISSING_ENV_VAR".ENTERPRISE_ACCESS_BASE_URL'
-    '"MISSING_ENV_VAR".ENTERPRISE_SUBSIDY_BASE_URL'
-  )
-  local placeholder
-  for placeholder in "${critical_placeholders[@]}"; do
-    if docker run --rm "$image" sh -c "find /openedx/dist -name '*.js' | xargs grep -q '$placeholder' 2>/dev/null"; then
-      fail_check "${label} — unresolved critical placeholder remains: ${placeholder}"
-      return 1
-    fi
-  done
+  local placeholder_count
+  placeholder_count="$(docker run --rm "$image" sh -c "find /openedx/dist -name '*.js' | xargs grep -E -o '\"MISSING_ENV_VAR\"\\.[A-Z0-9_]+' 2>/dev/null | wc -l | tr -d ' '" 2>/dev/null || true)"
+  if [ -z "$placeholder_count" ]; then
+    placeholder_count="0"
+  fi
+  if [ "$placeholder_count" != "0" ]; then
+    fail_check "${label} — unresolved MISSING_ENV_VAR placeholders remain in JS bundles (${placeholder_count})"
+    return 1
+  fi
 
-  pass_check "${label} — index clean, env.config.js wired, placeholders resolved"
+  local undefined_key_count
+  undefined_key_count="$(docker run --rm "$image" sh -c "grep -R -c 'undefined_license_key' /openedx/dist 2>/dev/null | awk -F: '{sum += \\$2} END {print sum+0}'" 2>/dev/null || true)"
+  if [ -z "$undefined_key_count" ]; then
+    undefined_key_count="0"
+  fi
+  if [ "$undefined_key_count" != "0" ]; then
+    fail_check "${label} — undefined_license_key still present in dist assets (${undefined_key_count})"
+    return 1
+  fi
+
+  pass_check "${label} — index clean, env.config.js wired, placeholders fully resolved"
   return 0
 }
 
