@@ -13,6 +13,18 @@ log_pass() { printf "✅ PASS: %s\n" "$1"; }
 log_fail() { printf "❌ FAIL: %s\n" "$1"; FAILED=1; }
 log_info() { printf "ℹ️  INFO: %s\n" "$1"; }
 
+http_code_from_pod() {
+  local pod="$1"
+  local port="$2"
+  local python_probe
+
+  python_probe="import urllib.request; exec(\"try:\\n print(urllib.request.urlopen('http://localhost:${port}/health/', timeout=5).getcode())\\nexcept Exception:\\n print('000')\")"
+
+  kubectl exec -n "$NAMESPACE" "$pod" -- python3 -c "$python_probe" 2>/dev/null \
+    || kubectl exec -n "$NAMESPACE" "$pod" -- python -c "$python_probe" 2>/dev/null \
+    || printf "000\n"
+}
+
 echo "═══════════════════════════════════════════════════════════"
 echo "  Enterprise Microservices Deployment Verification"
 echo "  Namespace: $NAMESPACE"
@@ -103,7 +115,7 @@ for svc_port in "${HEALTH_SERVICES[@]}"; do
   POD=$(kubectl get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=$SVC" --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
 
   if [ -n "$POD" ]; then
-    HTTP_CODE=$(kubectl exec -n "$NAMESPACE" "$POD" -- curl -s -o /dev/null -w "%{http_code}" "http://localhost:$PORT/health/" 2>/dev/null || echo "000")
+    HTTP_CODE=$(http_code_from_pod "$POD" "$PORT" | tr -d '\r\n')
     if [ "$HTTP_CODE" = "200" ]; then
       log_pass "$SVC /health/ returns 200"
     else
@@ -167,14 +179,15 @@ fi
 # Check 8: No ImagePullBackOff or CrashLoopBackOff
 echo
 echo "[8/10] Checking for common failure states..."
-IMAGE_PULL_ERRORS=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/component=enterprise --field-selector=status.phase!=Succeeded -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' 2>/dev/null | grep -o "ImagePullBackOff" | wc -l)
+WAITING_REASONS=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/component=enterprise --field-selector=status.phase!=Succeeded -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' 2>/dev/null || true)
+IMAGE_PULL_ERRORS=$(tr ' ' '\n' <<<"$WAITING_REASONS" | awk '$0=="ImagePullBackOff"{count++} END{print count+0}')
 if [ "$IMAGE_PULL_ERRORS" -eq 0 ]; then
   log_pass "No ImagePullBackOff errors"
 else
   log_fail "$IMAGE_PULL_ERRORS pods in ImagePullBackOff"
 fi
 
-CRASH_LOOPS=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/component=enterprise --field-selector=status.phase!=Succeeded -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' 2>/dev/null | grep -o "CrashLoopBackOff" | wc -l)
+CRASH_LOOPS=$(tr ' ' '\n' <<<"$WAITING_REASONS" | awk '$0=="CrashLoopBackOff"{count++} END{print count+0}')
 if [ "$CRASH_LOOPS" -eq 0 ]; then
   log_pass "No CrashLoopBackOff errors"
 else
