@@ -1,6 +1,4 @@
-# TODO: Replace academyv2.staging.mereka.dev with actual staging domain
-# Note: Cloudflare Free SSL does not cover *.*.mereka.dev subdomains.
-# Use DNS-only (gray cloud) in Cloudflare + Let's Encrypt via cert-manager.
+# rke2-nonprod dev hosts (DNS + cert-manager TLS).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -15,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: academyv2.staging.mereka.dev
+    - host: academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -25,7 +23,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: preview.academyv2.staging.mereka.dev
+    - host: preview.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -35,7 +33,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: discovery.academyv2.staging.mereka.dev
+    - host: discovery.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -45,7 +43,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: ecommerce.academyv2.staging.mereka.dev
+    - host: ecommerce.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -55,7 +53,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: notes.academyv2.staging.mereka.dev
+    - host: notes.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -65,7 +63,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: credentials.academyv2.staging.mereka.dev
+    - host: credentials.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -75,7 +73,7 @@ spec:
                 name: caddy
                 port:
                   number: 80
-    - host: forum.academyv2.staging.mereka.dev
+    - host: forum.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -87,11 +85,11 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - academyv2.staging.mereka.dev
-        - preview.academyv2.staging.mereka.dev
-        - discovery.academyv2.staging.mereka.dev
-        - ecommerce.academyv2.staging.mereka.dev
-        - notes.academyv2.staging.mereka.dev
-        - credentials.academyv2.staging.mereka.dev
-        - forum.academyv2.staging.mereka.dev
+        - academyv2.mereka.dev
+        - preview.academyv2.mereka.dev
+        - discovery.academyv2.mereka.dev
+        - ecommerce.academyv2.mereka.dev
+        - notes.academyv2.mereka.dev
+        - credentials.academyv2.mereka.dev
+        - forum.academyv2.mereka.dev
       secretName: openedx-lms-tls

@@ -1,10 +1,4 @@
-# Domain overrides for rke2-nonprod staging environment
-#
-# TODO: Replace academyv2.staging.mereka.dev with the actual confirmed staging domain
-# before deploying. Ask bbi-infrastructure team for the target hostname.
-# Cloudflare Free SSL only covers *.mereka.dev (not *.*.mereka.dev), so:
-#   - DNS-only (gray cloud) + Let's Encrypt for multi-level subdomains
-#   - cert-manager with ClusterIssuer letsencrypt-prod handles TLS
+# Domain overrides for rke2-nonprod dev environment.
 
 apiVersion: apps/v1
 kind: Deployment
@@ -17,15 +11,15 @@ spec:
         - name: lms
           env:
             - name: MEREKA_LMS_DOMAIN
-              value: academyv2.staging.mereka.dev
+              value: academyv2.mereka.dev
             - name: MEREKA_SCHEME
               value: https
             - name: MEREKA_COOKIE_DOMAIN
-              value: .academyv2.staging.mereka.dev
+              value: .academyv2.mereka.dev
             - name: LMS_BASE_URL
-              value: https://academyv2.staging.mereka.dev
+              value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
-              value: https://apps.academyv2.staging.mereka.dev
+              value: https://apps.academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -38,15 +32,15 @@ spec:
         - name: cms
           env:
             - name: MEREKA_LMS_DOMAIN
-              value: academyv2.staging.mereka.dev
+              value: academyv2.mereka.dev
             - name: MEREKA_SCHEME
               value: https
             - name: MEREKA_COOKIE_DOMAIN
-              value: .academyv2.staging.mereka.dev
+              value: .academyv2.mereka.dev
             - name: LMS_BASE_URL
-              value: https://academyv2.staging.mereka.dev
+              value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
-              value: https://apps.academyv2.staging.mereka.dev
+              value: https://apps.academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,15 +53,15 @@ spec:
         - name: lms-worker
           env:
             - name: MEREKA_LMS_DOMAIN
-              value: academyv2.staging.mereka.dev
+              value: academyv2.mereka.dev
             - name: MEREKA_SCHEME
               value: https
             - name: MEREKA_COOKIE_DOMAIN
-              value: .academyv2.staging.mereka.dev
+              value: .academyv2.mereka.dev
             - name: LMS_BASE_URL
-              value: https://academyv2.staging.mereka.dev
+              value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
-              value: https://apps.academyv2.staging.mereka.dev
+              value: https://apps.academyv2.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -80,12 +74,48 @@ spec:
         - name: cms-worker
           env:
             - name: MEREKA_LMS_DOMAIN
-              value: academyv2.staging.mereka.dev
+              value: academyv2.mereka.dev
             - name: MEREKA_SCHEME
               value: https
             - name: MEREKA_COOKIE_DOMAIN
-              value: .academyv2.staging.mereka.dev
+              value: .academyv2.mereka.dev
             - name: LMS_BASE_URL
-              value: https://academyv2.staging.mereka.dev
+              value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
-              value: https://apps.academyv2.staging.mereka.dev
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery
+spec:
+  template:
+    spec:
+      containers:
+        - name: discovery
+          env:
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: DISCOVERY_DOMAIN
+              value: discovery.academyv2.mereka.dev
+            - name: DISCOVERY_BASE_URL
+              value: https://discovery.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes
+spec:
+  template:
+    spec:
+      containers:
+        - name: notes
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: NOTES_DOMAIN
+              value: notes.academyv2.mereka.dev

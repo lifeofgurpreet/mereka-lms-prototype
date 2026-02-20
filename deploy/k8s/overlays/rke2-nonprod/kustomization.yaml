@@ -15,8 +15,7 @@ kind: Kustomization
 #   3. Default ServiceAccount patched: imagePullSecrets: [{name: artifact-registry-key}]
 #      OR each Deployment has spec.template.spec.imagePullSecrets set
 #
-# Domain: Replace __STAGING_DOMAIN__ with actual staging domain (e.g., academyv2.staging.mereka.dev)
-# before applying. The default placeholder prevents accidental deployment to wrong hosts.
+# Domain: rke2-nonprod dev hostnames use *.academyv2.mereka.dev.
 
 namespace: mereka-lms
 
@@ -32,8 +31,10 @@ generatorOptions:
 patches:
   # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store
   - path: patches/externalsecrets-infisical.yaml
-  # Override domain env vars for rke2-nonprod staging hosts
+  # Override domain env vars for rke2-nonprod dev hosts
   - path: patches/domain-env.yaml
+  # On single-node rke2, avoid maxSurge deadlocks for these single-replica services.
+  - path: patches/single-node-recreate-strategy.yaml
 
 # Minimal replicas for nonprod (same as local)
 replicas:
@@ -44,6 +45,10 @@ replicas:
   - name: lms-worker
     count: 1
   - name: cms-worker
+    count: 1
+  - name: discovery
+    count: 1
+  - name: notes
     count: 1
   # Enterprise services: set to 1 if images are accessible, else keep 0
   - name: enterprise-access

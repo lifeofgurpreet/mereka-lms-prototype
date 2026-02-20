@@ -1,4 +1,4 @@
-# TODO: Replace studio.academyv2.staging.mereka.dev with actual staging domain
+# rke2-nonprod dev host.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: studio.academyv2.staging.mereka.dev
+    - host: studio.academyv2.mereka.dev
       http:
         paths:
           - path: /
@@ -25,5 +25,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - studio.academyv2.staging.mereka.dev
+        - studio.academyv2.mereka.dev
       secretName: openedx-studio-tls

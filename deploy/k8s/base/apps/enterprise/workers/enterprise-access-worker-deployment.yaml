@@ -134,6 +134,7 @@ spec:
             - --queues=enterprise_access.default
             - --max-tasks-per-child=100
             - --prefetch-multiplier=1
+            - --concurrency=2
             - --without-gossip
             - --without-mingle
           env:

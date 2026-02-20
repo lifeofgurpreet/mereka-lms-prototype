@@ -2,6 +2,7 @@
 import logging
 import os
 import sys
+import importlib
 from cms.envs.production import *
 
 
@@ -47,8 +48,25 @@ def _init_sentry(service_name):
     sentry_sdk.set_tag("service", service_name)
 
 
-# Override SECRET_KEY from environment variable (required for K8s deployment)
-SECRET_KEY = os.environ.get("CMS_SECRET_KEY", "")
+def _module_available(module_name):
+    try:
+        importlib.import_module(module_name)
+        return True
+    except Exception:
+        return False
+
+
+# Override SECRET_KEY from environment variable (required for K8s deployment).
+# Nonprod fallback chain prevents hard crashes when legacy secret keys drift to
+# empty while JWT keys remain populated.
+SECRET_KEY = (
+    os.environ.get("CMS_SECRET_KEY")
+    or os.environ.get("OPENEDX_SECRET_KEY")
+    or os.environ.get("SECRET_KEY")
+    or os.environ.get("JWT_SECRET_KEY_CMS")
+    or os.environ.get("JWT_SECRET_KEY")
+    or ""
+)
 if not SECRET_KEY:
     raise ValueError("CMS_SECRET_KEY environment variable is required")
 
@@ -450,11 +468,23 @@ SOCIAL_AUTH_LOGIN_ERROR_URL = "/signin"
 SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 
 # Hardening: keep platform admins as staff/superuser and ensure CourseCreator (prevents drift).
-MIDDLEWARE = list(MIDDLEWARE) + [
-    "cms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
-    "cms.envs.tutor.mereka_multisite.MerekaStudioSigninRedirectMiddleware",
-    "cms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware",
-]
+MIDDLEWARE = list(MIDDLEWARE)
+_platform_admin_middleware = "cms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware"
+if _module_available("cms.envs.tutor.mereka_platform_admin"):
+    MIDDLEWARE.append(_platform_admin_middleware)
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _platform_admin_middleware)
+
+_cms_multisite_module = "cms.envs.tutor.mereka_multisite"
+if _module_available(_cms_multisite_module):
+    MIDDLEWARE.extend(
+        [
+            "cms.envs.tutor.mereka_multisite.MerekaStudioSigninRedirectMiddleware",
+            "cms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware",
+        ]
+    )
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _cms_multisite_module)
 
 # MFE-specific settings
 
@@ -494,8 +524,11 @@ else:
 # `next=http://...` URLs, causing Secure cookies to be dropped and OAuth callback
 # state validation to fail.
 _forwarded_headers_middleware = "cms.envs.tutor.mereka_forwarded_headers.MerekaForwardedHeadersMiddleware"
-if _forwarded_headers_middleware not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, _forwarded_headers_middleware)
+if _module_available("cms.envs.tutor.mereka_forwarded_headers"):
+    if _forwarded_headers_middleware not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, _forwarded_headers_middleware)
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _forwarded_headers_middleware)
 
 # Keep cookie-domain rewriting ahead of session middleware in request order so
 # it runs after session middleware in response order and can rewrite cookie
