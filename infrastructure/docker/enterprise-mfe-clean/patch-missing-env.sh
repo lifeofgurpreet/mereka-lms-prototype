@@ -19,7 +19,7 @@ replace_key() {
   key="$1"
   value="$2"
   pattern="\"MISSING_ENV_VAR\"\\.${key}"
-  count_before=$(grep -R --include='*.js' -o "$pattern" "$DIST_DIR" 2>/dev/null | wc -l | tr -d ' ')
+  count_before=$(find "$DIST_DIR" -name '*.js' | xargs grep -o "$pattern" 2>/dev/null | wc -l | tr -d ' ')
   if [ "${count_before:-0}" = "0" ]; then
     echo "[patch-env] INFO: $key not present in JS bundles"
     return 0
@@ -30,7 +30,7 @@ replace_key() {
     sed -i "s#\"MISSING_ENV_VAR\"\\.${key}#\"${value}\"#g" "$js"
   done
 
-  count_after=$(grep -R --include='*.js' -o "$pattern" "$DIST_DIR" 2>/dev/null | wc -l | tr -d ' ')
+  count_after=$(find "$DIST_DIR" -name '*.js' | xargs grep -o "$pattern" 2>/dev/null | wc -l | tr -d ' ')
   if [ "${count_after:-0}" != "0" ]; then
     echo "[patch-env] ERROR: unresolved placeholder remains for $key"
     exit 1

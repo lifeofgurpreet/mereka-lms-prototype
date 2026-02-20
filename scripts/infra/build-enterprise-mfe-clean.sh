@@ -74,7 +74,7 @@ check_image_bundle() {
   )
   local placeholder
   for placeholder in "${critical_placeholders[@]}"; do
-    if docker run --rm "$image" sh -c "grep -R --include='*.js' -q '$placeholder' /openedx/dist"; then
+    if docker run --rm "$image" sh -c "find /openedx/dist -name '*.js' | xargs grep -q '$placeholder' 2>/dev/null"; then
       fail_check "${label} — unresolved critical placeholder remains: ${placeholder}"
       return 1
     fi
