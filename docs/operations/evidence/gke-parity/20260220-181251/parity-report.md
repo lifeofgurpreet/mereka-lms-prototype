@@ -119,3 +119,33 @@ this times out (default 2m request timeout, 2m exec timeout), causing Comparison
 | RKE2 readiness --offline | PASS (10/0/1/9) |
 | RKE2 readiness --live | PASS (28/0/2/0) |
 | Kubecontext drift resolved | PASS |
+
+---
+
+## 6. Forum Heartbeat Fix (bead mereka-lms-1jsy.1)
+
+**Root cause**: GKE node IP `35.240.166.213` (and new node `35.240.243.39`) were missing from
+MongoDB Atlas IP allowlist. Node `hrv3` was added 4h37m ago during capacity emergency (PR #224),
+and `1umz` had its IP changed at some point. Atlas responds to non-allowlisted IPs with
+`TLSV1_ALERT_INTERNAL_ERROR` (TLS-layer rejection, not TCP RST), which caused `check_modulestore`
+to fail and forum heartbeat to return 503.
+
+**Diagnostic evidence**:
+- VPS (194.233.84.55) → Atlas: TLSv1.3 OK (IP in allowlist)
+- GKE LMS pod (35.240.166.213) → Atlas: TLSV1_ALERT_INTERNAL_ERROR (IP not in allowlist)
+
+**Fix**:
+- Added `35.240.166.213/32` and `35.240.243.39/32` to Atlas allowlist (project 690e7c787757f4238efc94d1)
+- New script `scripts/infra/ensure-atlas-allowlist-gke-nodes.sh` committed (commit 86d5666)
+- Hourly cron installed on VPS for ongoing drift prevention
+
+**Verification** (two consecutive checks):
+```
+forum.academyv2.mereka.io/heartbeat: 200
+{"modulestore": {"status": true}, "sql": {"status": true}}
+```
+
+AC-FORUM-001: ✅ Two consecutive 200s
+AC-FORUM-002: ✅ Root cause documented (IP allowlist drift, not routing miswire)
+AC-FORUM-003: ✅ Durable fix: ensure-atlas-allowlist-gke-nodes.sh + hourly cron
+AC-FORUM-004: ✅ Evidence in this bundle
