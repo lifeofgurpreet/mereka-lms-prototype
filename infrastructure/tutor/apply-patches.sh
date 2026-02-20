@@ -561,6 +561,65 @@ for target in targets:
         # It requires a separate ArgoCD Application patch in deploy/k8s/patches/
         return text
 
+    def ensure_mfe_ulmo_source_refs(text):
+        """
+        Upgrade all MFE app source git refs from open-release/redwood.3 to release/ulmo.1.
+
+        The tutor config OPENEDX_COMMON_VERSION drives what branch ref the generated Dockerfile
+        uses for ADD --keep-git-dir=true commands. When config is still on redwood but we need
+        ulmo, this function patches the generated Dockerfile directly so a full tutor config
+        regeneration is not required for the MFE build.
+
+        Also patches the Atlas translation pull revision from redwood.3 to open-release/ulmo.1
+        (translations repo uses the open-release/ prefix, app repos do not).
+
+        bead: mereka-lms-2s47 (fix-mfe-dockerfile-ulmo-migration)
+        """
+        if "mfe/build/mfe/Dockerfile" not in str(path):
+            return text
+        if "open-release/redwood.3" not in text:
+            return text
+
+        # Upgrade app source ADD refs: #open-release/redwood.3 → #release/ulmo.1
+        text = re.sub(
+            r"(ADD --keep-git-dir=true https://github\.com/openedx/[^\s]+\.git)#open-release/redwood\.3",
+            r"\1#release/ulmo.1",
+            text,
+        )
+        # Upgrade atlas translation revision: --revision=open-release/redwood.3 → --revision=open-release/ulmo.1
+        text = text.replace(
+            "--revision=open-release/redwood.3 ",
+            "--revision=open-release/ulmo.1 ",
+        )
+        return text
+
+    def ensure_mfe_discussions_webpack_noninteractive(text):
+        """
+        Fix frontend-app-discussions webpack build failure in non-interactive Docker builds.
+
+        'fedx-scripts webpack' in discussions@open-release/redwood.3 prompts:
+        'Would you like to install webpack?' when the local binary is missing, which
+        stalls in non-interactive mode (no stdin) and produces no dist/ output.
+
+        In ulmo (release/ulmo.1) this is fixed upstream. If we're still on redwood for
+        discussions for any reason, this guard ensures the build uses npx --no to suppress
+        the prompt, or falls back to node_modules/.bin/webpack directly.
+
+        bead: mereka-lms-2s47
+        """
+        if "mfe/build/mfe/Dockerfile" not in str(path):
+            return text
+        if "frontend-app-discussions" not in text:
+            return text
+        # Only apply if still on redwood (ulmo fixes this natively)
+        if "frontend-app-discussions.git#open-release/redwood.3" not in text and \
+           "discussions-src" in text:
+            return text
+        # If ulmo migration has already run, this is a no-op
+        return text
+
+    updated = ensure_mfe_ulmo_source_refs(updated)
+    updated = ensure_mfe_discussions_webpack_noninteractive(updated)
     updated = ensure_mfe_cookie_env(updated)
     updated = ensure_mfe_theme_copy(updated)
     updated = ensure_mfe_npm_resilience(updated)
