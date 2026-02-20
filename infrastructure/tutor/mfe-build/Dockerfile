@@ -63,7 +63,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 
 COPY --from=admin-console-src / /openedx/app
 
@@ -127,7 +127,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY indigo/env.config.jsx /openedx/app/
 COPY indigo/mereka /openedx/app/mereka
 COPY --from=authn-src / /openedx/app
@@ -192,7 +192,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 
 COPY --from=authoring-src / /openedx/app
 
@@ -257,7 +257,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=account-src / /openedx/app
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/ulmo.1 " pull_translations
@@ -320,7 +320,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 
 COPY --from=communications-src / /openedx/app
 
@@ -385,7 +385,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=discussions-src / /openedx/app
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/ulmo.1 " pull_translations
@@ -448,7 +448,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 
 COPY --from=gradebook-src / /openedx/app
 
@@ -513,7 +513,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=learner-dashboard-src / /openedx/app
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/ulmo.1 " pull_translations
@@ -577,7 +577,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=learning-src / /openedx/app
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/ulmo.1 " pull_translations
@@ -640,7 +640,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 
 COPY --from=ora-grading-src / /openedx/app
 
@@ -705,7 +705,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=profile-src / /openedx/app
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/ulmo.1 " pull_translations
@@ -768,7 +768,7 @@ ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 
 COPY --from=learner-record-src / /openedx/app
 

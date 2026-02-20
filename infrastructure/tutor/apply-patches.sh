@@ -386,7 +386,7 @@ for target in targets:
             text = text.replace(legacy_line, plugin_line)
         if plugin_line in text:
             return text
-        brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'"
+        brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'"
         if brand_line not in text:
             return text
         return text.replace(brand_line, f"{brand_line}\n{plugin_line}")
@@ -593,6 +593,26 @@ for target in targets:
         )
         return text
 
+    def ensure_mfe_brand_ulmo_version(text):
+        """
+        Upgrade the @edx/brand package alias from @edly-io/indigo-brand-openedx@^2.1.1
+        (redwood-era) to @^2.4.3 (ulmo/indigo target).
+
+        The upstream tutor-mfe Dockerfile pins ^2.1.1 which targets the redwood release.
+        Ulmo MFEs use paragon ^23.0.0; the matching brand package is ^2.4.3 (ulmo/indigo branch).
+        Without this upgrade, the brand CSS variables may be misaligned with ulmo paragon tokens.
+
+        bead: mereka-lms-2s47 (fix-mfe-dockerfile-ulmo-migration, AC-ULMO-004)
+        """
+        if "mfe/build/mfe/Dockerfile" not in str(path):
+            return text
+        # Upgrade brand pin: ^2.1.1 → ^2.4.3 regardless of --legacy-peer-deps presence
+        text = text.replace(
+            "@edly-io/indigo-brand-openedx@^2.1.1",
+            "@edly-io/indigo-brand-openedx@^2.4.3",
+        )
+        return text
+
     def ensure_mfe_discussions_webpack_noninteractive(text):
         """
         Fix frontend-app-discussions webpack build failure in non-interactive Docker builds.
@@ -619,6 +639,7 @@ for target in targets:
         return text
 
     updated = ensure_mfe_ulmo_source_refs(updated)
+    updated = ensure_mfe_brand_ulmo_version(updated)
     updated = ensure_mfe_discussions_webpack_noninteractive(updated)
     updated = ensure_mfe_cookie_env(updated)
     updated = ensure_mfe_theme_copy(updated)
