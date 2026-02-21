@@ -7,6 +7,7 @@ set -euo pipefail
 # @covers AC-FTPAR-004: Enterprise MFE deployments reference footer/env config
 # @covers AC-FTPAR-005: No "powered by Open edX" without Mereka co-branding in any footer
 # @covers AC-FTPAR-007: Live footer class + section markers present on all 3 production domains (--live)
+# @covers AC-FTPAR-008: Tenant footer data contract fields present in SITE_VARIANTS + LMS footer
 
 PASS=0
 FAIL=0
@@ -134,31 +135,31 @@ else
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
 
   for domain in "${DOMAINS[@]}"; do
-    # Each domain key line should have brand, copyrightHolder, whatsapp on the same line
-    # (they are inline objects: { brand: '...', copyrightHolder: '...', whatsapp: '...' })
-    DOMAIN_LINE=$(grep "'${domain}'" "$PLUGIN" || true)
+    # Extract the domain object block (from the domain key line to the closing '},')
+    # Supports both single-line and multi-line object formats
+    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*\}/" "$PLUGIN" | head -30)
 
-    if [[ -z "$DOMAIN_LINE" ]]; then
+    if [[ -z "$DOMAIN_BLOCK" ]]; then
       fail "Domain '${domain}' not found in SITE_VARIANTS"
       continue
     fi
 
     # brand field
-    if echo "$DOMAIN_LINE" | grep -q "brand: '"; then
+    if echo "$DOMAIN_BLOCK" | grep -q "brand: '"; then
       pass "Domain '${domain}' has non-empty brand"
     else
       fail "Domain '${domain}' missing or empty brand"
     fi
 
     # copyrightHolder field
-    if echo "$DOMAIN_LINE" | grep -q "copyrightHolder: '"; then
+    if echo "$DOMAIN_BLOCK" | grep -q "copyrightHolder: '"; then
       pass "Domain '${domain}' has non-empty copyrightHolder"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder"
     fi
 
     # whatsapp field
-    if echo "$DOMAIN_LINE" | grep -q "whatsapp: '"; then
+    if echo "$DOMAIN_BLOCK" | grep -q "whatsapp: '"; then
       pass "Domain '${domain}' has non-empty whatsapp"
     else
       fail "Domain '${domain}' missing or empty whatsapp"
@@ -359,6 +360,63 @@ if [[ -f "$CMS_FOOTER_WIDGET" ]]; then
     pass "CMS footer widget has explicit brand content (not empty template)"
   else
     fail "CMS footer widget may be empty — no brand content found"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# AC-FTPAR-008: Tenant footer data contract fields present in SITE_VARIANTS
+# Checks that all required contract fields exist for every tenant domain:
+# supportEmail, helpUrl, privacyUrl, termsUrl, cookiesUrl (in addition to
+# brand / copyrightHolder / whatsapp verified by AC-FTPAR-003)
+# -----------------------------------------------------------------------
+echo "AC-FTPAR-008: Tenant footer data contract fields (SITE_VARIANTS + LMS footer)"
+
+if [[ -f "$PLUGIN" ]]; then
+  CONTRACT_FIELDS=("supportEmail" "helpUrl" "privacyUrl" "termsUrl" "cookiesUrl")
+  DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
+
+  for domain in "${DOMAINS[@]}"; do
+    DOMAIN_BLOCK=$(awk "/'${domain}':/,/\}/" "$PLUGIN" | head -20)
+    if [[ -z "$DOMAIN_BLOCK" ]]; then
+      fail "Domain '${domain}' block not found for contract field check"
+      continue
+    fi
+    for field in "${CONTRACT_FIELDS[@]}"; do
+      if echo "$DOMAIN_BLOCK" | grep -q "${field}:"; then
+        pass "Domain '${domain}' has contract field '${field}'"
+      else
+        fail "Domain '${domain}' missing contract field '${field}'"
+      fi
+    done
+  done
+
+  # Fallback variant must also have all contract fields
+  FALLBACK_LINE=$(awk '/const variant = SITE_VARIANTS/,/\};/' "$PLUGIN" | head -15)
+  for field in "${CONTRACT_FIELDS[@]}"; do
+    if echo "$FALLBACK_LINE" | grep -q "${field}:"; then
+      pass "Fallback variant has contract field '${field}'"
+    else
+      fail "Fallback variant missing contract field '${field}'"
+    fi
+  done
+else
+  fail "Plugin file missing — cannot check SITE_VARIANTS contract fields"
+fi
+
+# LMS footer must use configuration_helpers for support email and help URL
+LMS_FOOTER_TPL="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
+if [[ -f "$LMS_FOOTER_TPL" ]]; then
+  if grep -q "configuration_helpers" "$LMS_FOOTER_TPL"; then
+    pass "LMS footer imports configuration_helpers (SiteConfiguration-aware)"
+  else
+    fail "LMS footer does not import configuration_helpers — support email/help URL are hardcoded"
+  fi
+  if grep -q "SUPPORT_EMAIL\|HELP_CENTER_URL" "$LMS_FOOTER_TPL"; then
+    pass "LMS footer reads SUPPORT_EMAIL / HELP_CENTER_URL from SiteConfiguration"
+  else
+    fail "LMS footer missing SiteConfiguration keys for support email / help URL"
   fi
 fi
 

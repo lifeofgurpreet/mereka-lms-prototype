@@ -5,6 +5,7 @@
   from django.utils.translation import gettext as _
   from lms.djangoapps.branding.api import get_footer
   from openedx.core.djangoapps.lang_pref.api import footer_language_selector_is_enabled
+  from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 %>
 <% footer = get_footer(is_secure=is_secure) %>
 <% icp_license_info = getattr(settings, 'ICP_LICENSE_INFO', {})%>
@@ -40,13 +41,15 @@
         </ul>
       </div>
 
+      <% support_email = configuration_helpers.get_value('SUPPORT_EMAIL', 'support@mereka.io') %>
+      <% help_url = configuration_helpers.get_value('HELP_CENTER_URL', 'https://help.mereka.io/') %>
+      <% privacy_url = configuration_helpers.get_value('PRIVACY_POLICY_URL', 'https://legal.mereka.io/privacy-policy/') %>
       <div class="footer-links">
         <h6>${_('Support')}</h6>
         <ul>
-          <li><a href="mailto:techadmin@biji-biji.com">techadmin@biji-biji.com</a></li>
-          <li><a href="mailto:support@mereka.io">support@mereka.io</a></li>
-          <li><a href="https://academyv2.mereka.io/help" target="_blank" rel="noopener">${_('Help centre')}</a></li>
-          <li><a href="https://academyv2.mereka.io/privacy" target="_blank" rel="noopener">${_('Privacy')}</a></li>
+          <li><a href="mailto:${support_email}">${support_email}</a></li>
+          <li><a href="${help_url}" target="_blank" rel="noopener">${_('Help centre')}</a></li>
+          <li><a href="${privacy_url}" target="_blank" rel="noopener">${_('Privacy')}</a></li>
         </ul>
       </div>
 
