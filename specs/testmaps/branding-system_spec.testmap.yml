@@ -61,6 +61,13 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-footer-parity.sh
+    command: scripts/qa/verify-footer-parity.sh
+    notes: "Source mode (no --live flag): checks MerekaFooter component, SITE_VARIANTS,
+      all 4 v2 structural zones, no 'Powered by Open edX', tenant contract fields.
+      Pass: 60/0/1/1 PASS/FAIL/WARN/SKIP. Add --live flag for live domain checks."
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
   - type: manual
@@ -146,6 +153,12 @@ acceptance_criteria:
   description: Theme applies consistently across all domains (academyv2.mereka.io,
     academy.biji-biji.com)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-footer-parity.sh
+    command: scripts/qa/verify-footer-parity.sh --live
+    notes: "Live mode: checks mereka-footer class + section markers on all 3 prod
+      domains. Deploy-gated until LMS image rebuild (WhiteCliff lane)."
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
