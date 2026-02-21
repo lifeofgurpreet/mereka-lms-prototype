@@ -59,12 +59,14 @@ for svc in mysql redis postgresql-payments; do
 done
 
 # Check PVCs are bound
-unbound=$(kubectl get pvc -n "$NAMESPACE" --no-headers 2>/dev/null | grep -v "Bound" | wc -l || echo "0")
-if [ "$unbound" -gt 0 ]; then
-  log "WARN: $unbound PVCs are not in Bound state"
-  kubectl get pvc -n "$NAMESPACE" --no-headers 2>/dev/null | grep -v "Bound"
+pvc_out=$(kubectl get pvc -n "$NAMESPACE" --no-headers 2>/dev/null || true)
+unbound_pvcs=$(printf '%s\n' "$pvc_out" | grep -v "Bound" | grep -v "^$" || true)
+if [ -n "$unbound_pvcs" ]; then
+  log "WARN: some PVCs are not Bound:"
+  printf '%s\n' "$unbound_pvcs"
+else
+  log "PVC check done (all Bound)"
 fi
-log "PVC check done ($unbound unbound)"
 
 # Check Velero backups (last backup within 2h)
 if [ "$SKIP_VELERO" = false ]; then
