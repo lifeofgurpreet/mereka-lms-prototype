@@ -6,14 +6,23 @@ set -euo pipefail
 # @covers AC-FTPAR-003: Footer copyright fields present for all SITE_VARIANTS domains
 # @covers AC-FTPAR-004: Enterprise MFE deployments reference footer/env config
 # @covers AC-FTPAR-005: No "powered by Open edX" without Mereka co-branding in any footer
+# @covers AC-FTPAR-007: Live footer class + section markers present on all 3 production domains (--live)
 
 PASS=0
 FAIL=0
 WARN=0
+SKIP=0
 
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
+skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
+
+# Parse flags
+LIVE_MODE=0
+for _arg in "$@"; do
+  if [[ "$_arg" == "--live" ]]; then LIVE_MODE=1; fi
+done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
@@ -356,6 +365,72 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
+# AC-FTPAR-007: Live footer content verification (requires --live flag)
+# Checks rendered HTML on all three production domains for structural
+# correctness: mereka-footer class, section markers, no "Powered by Open edX"
+# -----------------------------------------------------------------------
+echo "AC-FTPAR-007: Live footer content checks"
+
+if [[ "$LIVE_MODE" -eq 1 ]]; then
+  # @covers AC-FTPAR-007: live footer class + section markers present on all domains
+  LIVE_DOMAINS=(
+    "academyv2.mereka.io"
+    "academy.biji-biji.com"
+    "skillourfuture.academy.mereka.io"
+  )
+
+  for domain in "${LIVE_DOMAINS[@]}"; do
+    echo "  [domain: $domain]"
+    HTML=$(curl -sf --max-time 15 "https://${domain}" 2>/dev/null || true)
+    if [[ -z "$HTML" ]]; then
+      fail "${domain}: failed to fetch (curl error, timeout, or 5xx)"
+      continue
+    fi
+
+    # mereka-footer class must be present
+    if echo "$HTML" | grep -q "mereka-footer"; then
+      pass "${domain}: mereka-footer class present"
+    else
+      fail "${domain}: mereka-footer class NOT present (may be deployment gap — image rebuild required)"
+    fi
+
+    # No unbranded "Powered by Open edX"
+    if echo "$HTML" | grep -qi "powered by open edx"; then
+      fail "${domain}: contains 'Powered by Open edX'"
+    else
+      pass "${domain}: no unbranded 'Powered by Open edX'"
+    fi
+
+    # Copyright line present
+    if echo "$HTML" | grep -qE "©|&copy;|copyright|MEREKA|Biji-Biji"; then
+      pass "${domain}: copyright/brand line present"
+    else
+      fail "${domain}: copyright/brand line NOT present"
+    fi
+  done
+
+  # LMS structural section checks (single LMS pod serves all three domains)
+  echo "  [LMS structural sections: academyv2.mereka.io]"
+  LMS_HTML=$(curl -sf --max-time 15 "https://academyv2.mereka.io" 2>/dev/null || true)
+  if [[ -n "$LMS_HTML" ]]; then
+    for section in "Future of Work" "Creative Tech" "Explore" "Support" "Partners"; do
+      if echo "$LMS_HTML" | grep -q "$section"; then
+        pass "LMS footer section '${section}' present"
+      else
+        fail "LMS footer section '${section}' NOT present (may be image deployment gap)"
+      fi
+    done
+  else
+    warn "Could not fetch academyv2.mereka.io for section checks"
+  fi
+else
+  skip "AC-FTPAR-007 skipped — pass --live to run live footer content checks"
+  echo "  Usage: ./scripts/qa/verify-footer-parity.sh --live"
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
 # WARN ALLOWLIST — accepted warnings (for CI interpretation)
 # -----------------------------------------------------------------------
 echo "WARN allowlist (accepted warnings — not gate failures):"
@@ -364,6 +439,6 @@ echo "  WARN-002: LMS nav links (emails, help URL) are Mereka-specific — multi
 echo ""
 
 echo "========================================"
-echo "Footer parity: $PASS PASS / $FAIL FAIL / $WARN WARN"
+echo "Footer parity: $PASS PASS / $FAIL FAIL / $WARN WARN / $SKIP SKIP"
 echo "========================================"
 exit $((FAIL > 0 ? 1 : 0))
