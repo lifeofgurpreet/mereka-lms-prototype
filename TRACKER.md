@@ -32,6 +32,22 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T008 | Resolve Argo app stale Degraded | P0 | PARTIAL | 3bm2 | M | — | ArgoCD shows Degraded for fully-synced apps. Root cause in health check config; partially traced. |
 | T009 | RKE2 operational hardening | P0 | PARTIAL | aza7 | L | T007, T008 | PodDisruptionBudgets, resource limits, HPA baselines, runbook links for all critical workloads. |
 
+#### T007 Plan: ecommerce-worker CrashLoop
+
+**When ready** (K8s work deferred):
+1. `kubectl logs -n mereka-lms -l app=enterprise-access-worker --previous` — get crash reason
+2. Likely causes: missing env var, DB connection refused, or memory OOM (we already added `--concurrency=2`)
+3. Check if payments-gateway service exists in RKE2 namespace or if ecommerce-worker references a service that doesn't exist yet
+4. Fix config or resource limits, verify with `kubectl get pods -w`
+
+#### T008 Plan: ArgoCD stale Degraded
+
+**When ready**:
+1. `kubectl get app -n argocd -o yaml | grep -A5 health` — check health assessment rules
+2. Likely cause: custom health check lua script missing for a CRD, or a resource reports unhealthy status that ArgoCD doesn't know how to interpret
+3. Fix: add custom health check in ArgoCD ConfigMap, or fix the underlying resource health
+4. Verify: `argocd app get <name> --refresh`
+
 ---
 
 ## Phase 1: Stability & Testing
@@ -43,6 +59,18 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T010 | MFE Dockerfile Ulmo migration | P1 | PARTIAL | 2s47 | L | — | Systematically update all MFE source refs from `release/nutmeg` / `release/palm` to `release/ulmo.1`. Tracked in bead 2s47. |
+
+#### T010 Plan: MFE Ulmo migration
+
+**Problem**: MFE Dockerfiles and source refs may still point at older release branches (nutmeg/palm/quince). The Tutor Ulmo build expects `release/ulmo.1` tags. Stale refs cause build failures or silently ship old code.
+
+**Steps**:
+1. Inventory: grep all Dockerfiles, `apply-patches.sh`, and `mfe-build/Dockerfile` for MFE git refs (branch names, tags, commit SHAs)
+2. Cross-reference against Open edX Ulmo release tags for each MFE (learning, authn, discussions, profile, account, gradebook, etc.)
+3. Update refs to `release/ulmo.1` (or latest Ulmo-compatible tag)
+4. Build locally: `tutor images build mfe` and confirm all MFEs compile
+5. Run `verify-mfe-ulmo-migration.sh` (already exists) to confirm
+6. Update `infrastructure/tutor/mfe-build/README.md` with the ref table
 | T011 | Validate LMS on rke2-nonprod | P1 | PARTIAL | 5ngf.2 | M | T010 | Smoke tests, routing checks, cutover readiness gate. Evidence partially collected. |
 | T012 | RKE2 nonprod smoke + tenant route matrix | P1 | PARTIAL | 288f | M | T011 | Full tenant route matrix (all hostnames × HTTP methods × auth states). Partially captured. |
 | T013 | RKE2 LMS migration completion plan | P1 | PARTIAL | 5ngf | L | T011, T012 | Final cutover plan: DNS flip, rollback criteria, on-call schedule, post-cutover verification. |
@@ -63,12 +91,72 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T018 | Refactor apply-patches.sh into composable units | P1 | TODO | NEW | L | — | Script is 1666 lines. Split into per-concern patch files (mysql-auth, mfe-node, domains, etc.) called from a thin orchestrator. Reduces diff noise and merge conflicts. |
 | T019 | Add patch idempotency tests | P1 | TODO | NEW | M | T018 | Each patch module should be testable in isolation (run twice, same result). Add to `tests/tutor/`. |
 
+#### T018 Plan: apply-patches.sh refactor
+
+**Problem**: Single 1666-line Python-embedded-in-bash script. Every Tutor config change, branding tweak, or MFE update touches it. Merge conflicts are frequent. No tests. Failure mode is silent (patches silently don't apply if markers drift).
+
+**Current patch concerns** (audit needed to confirm exact count):
+- MySQL 8 auth plugin fix
+- MFE Node 18 build toolchain (g++, python3)
+- Extra domain names (biji-biji.com, skillourfuture)
+- Webpack memory limit (NODE_OPTIONS)
+- CSRF trusted origins + allowed hosts
+- Custom Mereka footer component for MFEs
+- Prometheus metrics integration
+- MongoDB Atlas SRV support
+- Custom apps COPY + pip install (mfe_oauth_fix, openedx_prometheus, mereka_tenancy)
+- Build optimizations and retry logic
+
+**Target architecture**:
+```
+infrastructure/tutor/patches/
+├── 00-mysql-auth.py
+├── 01-mfe-node-toolchain.py
+├── 02-extra-domains.py
+├── 03-webpack-memory.py
+├── 04-csrf-hosts.py
+├── 05-mereka-footer.py
+├── 06-prometheus.py
+├── 07-mongodb-atlas-srv.py
+├── 08-custom-apps.py
+├── 09-build-optimizations.py
+└── apply-all.sh          # thin orchestrator: loops patches, verifies each
+```
+
+**Steps**:
+1. Inventory: read apply-patches.sh, identify every discrete patch concern and its markers
+2. Extract: one `.py` file per concern, each with `apply(content) -> content` signature
+3. Orchestrator: `apply-all.sh` sources config, runs each patch, runs `verify-tutor-config.sh`
+4. Test: for each patch module, add a test in `tests/tutor/` that applies twice and asserts idempotency
+5. Migration: replace `apply-patches.sh` with `apply-all.sh`, update all docs and scripts that reference it
+
+**Risk**: High — this script is load-bearing. Must be done on a branch with before/after diff comparison of generated Tutor output. Run `tutor config save && apply-patches.sh` on both old and new, diff the results.
+
 ### 1d — Image Tag Drift
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T020 | Automate image tag promotion in Kustomize | P1 | TODO | NEW | M | — | Production Kustomize overlays have manually managed image tags. Add a CI step or script to bump tags from the built SHA on merge to main. |
 | T021 | Verify no `latest` tags in production overlays | P1 | TODO | NEW | S | T020 | `verify-no-latest-prod-tags.sh` exists but is not wired into CI as a blocking gate. Wire it. |
+
+#### T020 Plan: image tag automation
+
+**Problem**: `deploy/k8s/overlays/production/kustomization.yaml` has hardcoded image tags like `mereka-brand-hotfix-full-v3` and `1c66529-20260220023917`. Tags are bumped by hand in PRs. This caused the merge conflict in PR #90 and will keep causing conflicts.
+
+**Current state**: `build-tutor-images.yml` builds and pushes images tagged with git SHA. But nothing updates the Kustomize overlay to reference the new tag.
+
+**Options**:
+- **A) kustomize edit set image in CI** — after image push, a CI step runs `kustomize edit set image` and commits. Simple but creates auto-commits on main.
+- **B) Renovate/Dependabot for image tags** — external bot opens PRs when new tags appear in registry. More reviewable but adds latency.
+- **C) Script + manual trigger** — `scripts/infra/bump-image-tags.sh` queries Artifact Registry for latest SHA-tagged images and updates kustomization.yaml. Dev runs it, reviews diff, commits. Low-tech, high-control.
+
+**Recommendation**: Option C first (least risky, most transparent), graduate to A or B later.
+
+**Steps**:
+1. Write `scripts/infra/bump-image-tags.sh` that queries `gcloud artifacts docker tags list` for each image in kustomization.yaml
+2. Script outputs a diff preview before writing
+3. Add to `release-openedx-gitops.sh` as an optional step
+4. Wire T021: CI job that greps production kustomization for `:latest` and fails if found
 
 ### 1e — Python Test Coverage
 
@@ -103,6 +191,32 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T027 | Purchase gateway: complete Stripe integration | P2 | PARTIAL | NEW | L | — | FastAPI scaffold exists (`services/purchase-gateway/`). Stripe webhook handler, order lifecycle, and refund flow need completion per `specs/ecommerce-purchase-gateway_spec.md`. |
 | T028 | Purchase gateway: K8s production deployment | P2 | TODO | NEW | M | T027 | `k8s/` dir inside purchase-gateway exists but no ArgoCD Application manifest. Wire into `deploy/k8s/base/`. |
 | T029 | Deprecate Oscar ecommerce references | P2 | TODO | NEW | S | T028 | Audit and remove Oscar-era config from Tutor env and docs once purchase-gateway is live. |
+
+#### T027 Plan: purchase gateway completion
+
+**Problem**: Oscar ecommerce is legacy and being replaced by a custom FastAPI + PostgreSQL + Stripe service. The scaffold exists at `services/purchase-gateway/` but is incomplete. The spec exists at `specs/ecommerce-purchase-gateway_spec.md`.
+
+**What exists** (needs audit to confirm):
+- FastAPI app structure
+- Database models (probably SQLAlchemy/SQLModel)
+- K8s directory inside the service
+
+**What's likely missing**:
+- Stripe webhook handler (checkout.session.completed, payment_intent.succeeded, charge.refunded)
+- Order lifecycle state machine (pending → paid → fulfilled → refunded)
+- Enrollment trigger on successful payment (call Open edX enrollment API)
+- Refund flow
+- Admin dashboard or at minimum admin API
+- Tests
+
+**Steps**:
+1. Audit: read the spec and the existing code, produce a gap list
+2. Plan: break into sub-tasks with AC from the spec
+3. Implement: Stripe webhooks → order model → enrollment trigger → refund
+4. Test: unit tests for each handler, integration test with Stripe test mode
+5. Deploy: T028 handles K8s wiring
+
+**Dependency**: needs a product decision on pricing model (per-course? subscription? bundles?) before implementation can finish. Flag this early.
 
 ### 2c — Forum & Search
 
