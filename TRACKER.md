@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 51    |
-| TODO   | 24    |
+| DONE   | 55    |
+| TODO   | 20    |
 | PARTIAL| 16    |
 | BLOCKED| 3     |
 | **Total** | **94** |
@@ -31,7 +31,7 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T053 | Enforce org/repo allowed-actions policy | P0 | DONE | DR2:I-002 | M | T052 | ✓ Batch 3. Policy doc + verify-actions-pinned.sh script (203 refs validated). Wire into CI as follow-up. |
 | T005 | Add SBOM generation to CI | P0 | DONE | I09, DR2:I-003 | M | — | ✓ Batch 2. CycloneDX SBOM via Syft in build-tutor-images.yml, uploaded as workflow artifacts. |
 | T002 | Add pip-audit to CI (vuln gate) | P0 | DONE | I10, DR2:I-005 | S | — | ✓ Batch 1. pip-audit job added. Trivy split: CRITICAL=blocking, HIGH=info. .trivyignore created. |
-| T054 | Add build provenance/SLSA attestations | P0 | TODO | DR2:I-004 | M | T052, T092 | Generate SLSA-style provenance for OCI images using `slsa-github-generator` or `cosign attest`. Attach attestations alongside SBOMs. |
+| T054 | Add build provenance/SLSA attestations | P0 | DONE | DR2:I-004 | M | T052, T092 | ✓ Batch 9. cosign attest with keyless Sigstore signing. Provenance JSON artifacts. verify-slsa-provenance.sh (7 checks). Last P0 task! |
 | T006 | Configure OpenSSF Scorecard | P0 | DONE | I12 | S | — | ✓ Batch 1. scorecard.yml added, weekly + on push to main. |
 | T055 | Render Tutor env in CI (fix idempotency skip) | P0 | DONE | DR2:I-006 | M | — | ✓ Batch 1. CI renders tutor_env/ with .venv before tests. Opus fix: added venv creation for apply-patches.sh. |
 | T056 | Implement Cache-Control headers in MFE Caddyfile | P0 | DONE | DR2:I-008 | M | — | ✓ Batch 1+2. Default no-cache for all responses (covers SPA routes), hashed assets immutable, API no-store. |
@@ -306,7 +306,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T068 | Add PR template aligned to specs/rollout/verification | P2 | DONE | DR2:I-028 | S | — | ✓ Batch 1. `.github/PULL_REQUEST_TEMPLATE.md` with What/Why/Checklist/Infra/Verification sections. |
 | T069 | Branch protection + Scorecard alignment | P1 | DONE | DR2:I-029 | S | — | ✓ Batch 4. BRANCH_PROTECTION.md doc + verify-branch-protection.sh script (8 checks). Opus fix: removed phantom "Verify Actions Pinned" check, completed REQUIRED_CHECKS list. |
 | T070 | Add CODEOWNERS for infra-critical paths | P2 | DONE | DR2:I-030 | S | — | ✓ Batch 1. `CODEOWNERS` covering production overlays, workflows, secrets → @infra; tutor → @platform; specs → @engineering. |
-| T019 | Add patch idempotency tests | P1 | TODO | NEW | M | T018 | Each patch module should be testable in isolation (run twice, same result). Add to `tests/tutor/`. |
+| T019 | Add patch idempotency tests | P1 | DONE | NEW | M | T018 | ✓ Batch 9. verify-patch-idempotency.sh (23 duplicate markers, 10 targets). --tutor/--offline/--dry-run modes. CI workflow on infra changes. |
 | T021 | Verify no `latest` tags in production overlays | P1 | DONE | NEW | S | T020 | ✓ Batch 5. verify-image-tags.yml CI workflow (blocking). Opus fix: aligned checkout SHA to repo standard. |
 | T017 | Validate SITE_VARIANTS + multisite config | P1 | DONE | NEW | M | — | ✓ Batch 4. validate-multisite.yml CI workflow + validate-multisite-config.sh (7 sections, 12 checks). |
 | T071 | Add smoke tests for authn MFE config endpoint | P1 | DONE | DR2:I-035 | M | — | ✓ Batch 6. smoke-authn-mfe.sh (5 tests: login page, config endpoint, required keys, cookie domain, OAuth URIs) + CI workflow. Opus fix: mktemp cleanup, timeout-minutes. |
@@ -334,11 +334,11 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T014 | BoldBadger: RKE2 end-to-end rollout | P1 | PARTIAL | 3st7 | L | T009, T013 | Final hardening and handoff checklist for RKE2-nonprod as production-ready lane. |
 | T015 | Footer parity: port v2 footer into LMS/MFEs | P1 | TODO | 1kwf.1 | M | — | Plugin-first approach. Mereka Frontend v2 footer not yet ported into Tutor plugin or MFE slot. |
 | T016 | WhiteCliff brand/plugin parity lane | P1 | PARTIAL | 1kwf | L | T015 | Studio surfaces, footer, all MFE surfaces. Superset of T015. |
-| T018 | Refactor apply-patches.sh into composable units | P1 | TODO | NEW | L | — | Script is 1666 lines. Split into per-concern patch files (mysql-auth, mfe-node, domains, etc.) called from a thin orchestrator. Reduces diff noise and merge conflicts. |
+| T018 | Refactor apply-patches.sh into composable units | P1 | PARTIAL | NEW | L | — | Worktree ready: 10 patch modules in infrastructure/tutor/patches/. 41-line orchestrator. Needs thorough review before merge (critical script). |
 | T020 | Automate image tag promotion in Kustomize | P1 | DONE | NEW, DR2:I-007 | M | — | ✓ Batch 4. bump-image-tags.sh (queries Artifact Registry, dry-run default) + verify-no-latest-tags.sh. |
 | T024 | Scheduled park/unpark validation | P1 | DONE | NEW | S | — | ✓ Batch 3. Monthly CI job: shellcheck + bash -n + set -euo pipefail verification. |
 | T044 | Clarify Tutor 18.2.2 patch level | P3 | DONE | NEW, DR2:I-047 | S | T042 | ✓ Batch 6. Added "Current Version Pin" section to ADR-019 + verify-tutor-version-pin.sh (scans all files for version consistency, 14/14 PASS). |
-| T075 | Add ArgoCD drift detection + alerting | P2 | TODO | DR2:I-034 | M | — | Add alerting for ArgoCD "Synced but wrong" cases (drift between git and live). Cross-repo: bbi-infrastructure. Configure Prometheus alerting on `argocd_app_info` where sync_status=Synced but health_status!=Healthy. |
+| T075 | Add ArgoCD drift detection + alerting | P2 | DONE | DR2:I-034 | M | — | ✓ Batch 9. verify-argocd-drift.sh (offline/online per app). Scheduled 6h workflow with GitHub issue creation. ARGOCD_DRIFT.md runbook. |
 | T045 | MongoDB Atlas: dev seed script | P3 | DONE | NEW | M | — | ✓ Batch 7. seed-mongo-dev.sh + fixtures (openedx + forum) + MONGODB_DEV_SEED.md. Prod guard + dry-run. Opus review: PASS. |
 | T046 | MongoDB Atlas: connection health in CI | P3 | DONE | NEW | S | — | ✓ Batch 8. ATLAS_HEALTH.md + verify-atlas-health.sh (6 offline + 2 online checks) + atlas-health.yml (weekly). Opus review: PASS. |
 | T047 | Wire Credential/Notes service into smoke matrix | P3 | TODO | NEW | S | T011 | Both services are deployed but not in the post-deploy smoke checklist. Add to `scripts/qa/smoke-test.sh`. |
@@ -456,7 +456,7 @@ infrastructure/tutor/patches/
 | T037 | Atlas/Transifex translation pipeline | P2 | PARTIAL | I42, DR2:I-037 | M | — | Bilingual (EN/MS) mentioned in cross-cutting spec. Add `scripts/infra/sync-translations.sh` using `openedx-atlas` CLI. Add MFE locale file completeness check to CI. |
 | T076 | Implement Reusable LTI Store (Ulmo feature) | P2 | TODO | DR2:I-023 | L | T035 | Implement or verify the Reusable LTI Store feature introduced in Ulmo. Configure and test LTI tool persistence across course contexts. |
 | T077 | Add Policy-as-Code for pod security standards | P2 | TODO | DR2:I-024 | L | — | Implement Kyverno or Gatekeeper policies enforcing pod security standards (non-root, no privileged, seccomp). Cross-repo: bbi-infrastructure. |
-| T078 | ExternalSecrets refresh + failure alerting | P1 | TODO | DR2:I-040 | M | — | Add tests and Prometheus alerts for ExternalSecrets refresh failures and stale secrets (last sync > 2h). Cross-repo: bbi-infrastructure. |
+| T078 | ExternalSecrets refresh + failure alerting | P1 | DONE | DR2:I-040 | M | — | ✓ Batch 9. PrometheusRule: SyncFailure (critical, 10m) + StaleSync (warning, 2h). verify-eso-alerting.sh. ESO_ALERTING.md runbook. |
 | T079 | Analytics data retention as tested config | P2 | DONE | DR2:I-045 | M | — | ✓ Batch 6. ANALYTICS_DATA_RETENTION.md + analytics-retention-config.yaml (4 tiers, PDPA/GDPR) + verify-analytics-retention.sh (16 checks). Opus fix: set -e exit code capture. |
 | T080 | Add security incident runbook (supply-chain) | P2 | DONE | DR2:I-046 | M | — | ✓ Batch 3. Full runbook with P1-P4 severity, GitOps-safe rollback, comms templates, post-incident checklist. Opus review fixed GitOps violation + dep path. |
 | T081 | Create security exceptions register | P2 | DONE | DR2:I-048 | M | — | ✓ Batch 5. SECURITY_EXCEPTIONS.md register (3 seeded entries) + verify-security-exceptions.sh + CI workflow (blocking on expired). |
@@ -577,7 +577,7 @@ T058
 | I-001 | Pin GitHub Actions to commit SHAs | T052 | DONE |
 | I-002 | Enforce org/repo allowed-actions policy | T053 | DONE |
 | I-003 | SBOM for images (Syft/Anchore, OCI attestation) | T005 | DONE |
-| I-004 | Build provenance/SLSA attestations | T054 | TODO |
+| I-004 | Build provenance/SLSA attestations | T054 | DONE |
 | I-005 | Vuln scanning blocking for releases | T002 | DONE |
 | I-006 | Render Tutor env in CI (fix idempotency skip) | T055 | DONE |
 | I-007 | Digest pinning in production overlays | T020/T021 | DONE (T020) / TODO (T021) |
@@ -607,13 +607,13 @@ T058
 | I-031 | Publish release evidence bundle + retention policy | T082 | DONE |
 | I-032 | Pin runner images to ubuntu-24.04 | T063 | DONE |
 | I-033 | Replace PAT-based GitOps with GitHub App token | T062 | DONE |
-| I-034 | ArgoCD drift detection + alerting for "Synced but wrong" | T075 | TODO |
+| I-034 | ArgoCD drift detection + alerting for "Synced but wrong" | T075 | DONE |
 | I-035 | Smoke tests for authn MFE config + cookie domain | T071 | DONE |
 | I-036 | Automated tenant isolation tests | T072 | TODO |
 | I-037 | Translation pipeline (openedx-atlas + MFE locale checks) | T037 | PARTIAL (enriched) |
 | I-038 | Visual regression baseline governance | T073 | DONE |
 | I-039 | TTFS onboarding flow tests | T074 | DONE |
-| I-040 | ExternalSecrets refresh interval + failure alerting | T078 | TODO |
+| I-040 | ExternalSecrets refresh interval + failure alerting | T078 | DONE |
 | I-041 | Terraform drift detection (tfsec/checkov + plan output) | T004 | DONE |
 | I-042 | Trivy config scanning for K8s manifests + Terraform | T004 | DONE |
 | I-043 | Container hardening (non-root, read-only FS, seccomp) | T087 | TODO |
