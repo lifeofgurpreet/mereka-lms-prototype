@@ -1,13 +1,26 @@
 #!/usr/bin/env bash
-set -euo pipefail
-# @spec: bead-115d14
+# verify-footer-parity.sh — Verify Mereka v2 footer parity across LMS and MFEs.
+#
+# @spec: branding-system_spec.md
+# @covers AC-003, AC-007, AC-008
 # @covers AC-FTPAR-001: MFE footer component exists with SITE_VARIANTS
 # @covers AC-FTPAR-002: LMS Mako footer template exists and contains Mereka branding
 # @covers AC-FTPAR-003: Footer copyright fields present for all SITE_VARIANTS domains
 # @covers AC-FTPAR-004: Enterprise MFE deployments reference footer/env config
 # @covers AC-FTPAR-005: No "powered by Open edX" without Mereka co-branding in any footer
-# @covers AC-FTPAR-007: Live footer class + section markers present on all 3 production domains (--live)
+# @covers AC-FTPAR-007: Live footer class + section markers present on all 3 production domains (--live/--online)
 # @covers AC-FTPAR-008: Tenant footer data contract fields present in SITE_VARIANTS + LMS footer
+#
+# Usage:
+#   scripts/qa/verify-footer-parity.sh [--offline] [--online] [--live] [--lms-url URL] [--mfe-url URL]
+#
+# Modes:
+#   --offline  (default) Check source files: patch module, env.config.jsx template,
+#              SCSS imports, LMS theme template, branding assets.
+#   --online   Live URL checks: curl LMS homepage, MFE app, verify footer links.
+#   --live     Alias for --online (checks all three production domains directly).
+
+set -euo pipefail
 
 PASS=0
 FAIL=0
@@ -21,12 +34,31 @@ skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 
 # Parse flags
 LIVE_MODE=0
-for _arg in "$@"; do
-  if [[ "$_arg" == "--live" ]]; then LIVE_MODE=1; fi
+LMS_URL="https://academyv2.mereka.io"
+MFE_URL="https://apps.academyv2.mereka.io"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --live|--online) LIVE_MODE=1; shift ;;
+    --offline)       shift ;;  # default, no-op
+    --lms-url)       LMS_URL="$2"; shift 2 ;;
+    --mfe-url)       MFE_URL="$2"; shift 2 ;;
+    -h|--help)
+      sed -n '3,20p' "$0" | sed 's/^# \?//'
+      exit 0
+      ;;
+    *) echo "Unknown option: $1" >&2; exit 1 ;;
+  esac
 done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
+APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+MEREKA_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_INDIGO_RENDERED="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+MFE_ENV_CONFIG_RENDERED="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx"
+MFE_FONTS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts"
 LMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 CMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/footer.html"
 CMS_FOOTER_WIDGET="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html"
@@ -35,7 +67,154 @@ ENTERPRISE_KUSTOMIZE="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/kustomizati
 
 echo "========================================"
 echo "Footer Parity Verifier"
+echo "Repo: $REPO_ROOT"
 echo "========================================"
+echo ""
+
+# -----------------------------------------------------------------------
+# Offline: Patch module exists and is sourced in apply-patches.sh
+# -----------------------------------------------------------------------
+echo "[OFFLINE] Patch module and apply-patches.sh wiring"
+
+if [[ -f "$FOOTER_PATCH" ]]; then
+  pass "footer-component.sh patch module exists"
+else
+  fail "footer-component.sh patch module missing: $FOOTER_PATCH"
+fi
+
+if [[ -f "$APPLY_PATCHES" ]]; then
+  if grep -q "footer-component.sh" "$APPLY_PATCHES"; then
+    pass "apply-patches.sh sources footer-component.sh"
+  else
+    fail "apply-patches.sh does not source footer-component.sh"
+  fi
+  if grep -q "apply_footer_component_patch" "$APPLY_PATCHES"; then
+    pass "apply-patches.sh calls apply_footer_component_patch"
+  else
+    fail "apply-patches.sh does not call apply_footer_component_patch"
+  fi
+else
+  fail "apply-patches.sh not found: $APPLY_PATCHES"
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# Offline: MerekaFooter component in patch module
+# -----------------------------------------------------------------------
+echo "[OFFLINE] MerekaFooter component in patch module"
+
+if [[ -f "$FOOTER_PATCH" ]]; then
+  if grep -q "const MerekaFooter" "$FOOTER_PATCH"; then
+    pass "MerekaFooter component defined in footer-component.sh"
+  else
+    fail "MerekaFooter component not found in footer-component.sh"
+  fi
+  if grep -q "mereka-footer--v2" "$FOOTER_PATCH"; then
+    pass "v2 CSS class identifier present in patch module"
+  else
+    fail "mereka-footer--v2 CSS class missing from patch module"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# Offline: SCSS import wiring (env.config.jsx template + rendered files)
+# -----------------------------------------------------------------------
+echo "[OFFLINE] SCSS import wiring"
+
+if [[ -f "$FOOTER_PATCH" ]]; then
+  if grep -q "mereka/mereka.scss" "$FOOTER_PATCH"; then
+    pass "mereka.scss import injected by patch module"
+  else
+    fail "footer-component.sh does not inject mereka.scss import"
+  fi
+fi
+
+if [[ -f "$MEREKA_SCSS" ]]; then
+  pass "mereka.scss source file exists"
+else
+  fail "mereka.scss source file missing: $MEREKA_SCSS"
+fi
+
+if [[ -f "$MFE_INDIGO_RENDERED" ]]; then
+  if grep -q "mereka/mereka.scss" "$MFE_INDIGO_RENDERED"; then
+    pass "mereka.scss imported in rendered indigo/env.config.jsx"
+  else
+    fail "mereka.scss import missing from rendered indigo/env.config.jsx"
+  fi
+  if grep -q "const MerekaFooter" "$MFE_INDIGO_RENDERED"; then
+    pass "MerekaFooter component present in rendered indigo/env.config.jsx"
+  else
+    fail "MerekaFooter component missing from rendered indigo/env.config.jsx"
+  fi
+else
+  skip "Rendered indigo/env.config.jsx not found — run apply-patches.sh first"
+fi
+
+if [[ -f "$MFE_ENV_CONFIG_RENDERED" ]]; then
+  if grep -q "mereka/mereka.scss" "$MFE_ENV_CONFIG_RENDERED"; then
+    pass "mereka.scss imported in rendered top-level env.config.jsx"
+  else
+    fail "mereka.scss import missing from rendered top-level env.config.jsx"
+  fi
+else
+  skip "Rendered top-level env.config.jsx not found — run apply-patches.sh first"
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# Offline: Footer legal links in patch module
+# -----------------------------------------------------------------------
+echo "[OFFLINE] Footer legal links in patch module"
+
+if [[ -f "$FOOTER_PATCH" ]]; then
+  if grep -q "https://legal.mereka.io/privacy-policy/" "$FOOTER_PATCH"; then
+    pass "Privacy Policy link present in patch module"
+  else
+    fail "Privacy Policy link missing from patch module"
+  fi
+  if grep -q "https://legal.mereka.io/" "$FOOTER_PATCH"; then
+    pass "Terms of Use link present in patch module"
+  else
+    fail "Terms of Use link missing from patch module"
+  fi
+  if grep -q "https://legal.mereka.io/#cookie-policy" "$FOOTER_PATCH"; then
+    pass "Cookies Policy link present in patch module"
+  else
+    fail "Cookies Policy link missing from patch module"
+  fi
+  if grep -q "https://help.mereka.io/" "$FOOTER_PATCH"; then
+    pass "Help Centre link present in patch module"
+  else
+    fail "Help Centre link missing from patch module"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# Offline: Branding assets (logo, fonts — self-hosted, no Google Fonts)
+# -----------------------------------------------------------------------
+echo "[OFFLINE] Branding assets"
+
+if [[ -d "$MFE_FONTS_DIR" ]] && ls "$MFE_FONTS_DIR"/*.woff2 >/dev/null 2>&1; then
+  font_count="$(ls "$MFE_FONTS_DIR"/*.woff2 | wc -l | tr -d ' ')"
+  pass "MFE self-hosted fonts present ($font_count .woff2 files)"
+else
+  fail "MFE font directory missing or empty: $MFE_FONTS_DIR"
+fi
+
+if [[ -f "$FOOTER_PATCH" ]]; then
+  if grep -q "fonts.googleapis.com" "$FOOTER_PATCH" 2>/dev/null; then
+    fail "footer-component.sh references fonts.googleapis.com (privacy violation)"
+  else
+    pass "Footer patch module has no Google Fonts references"
+  fi
+fi
+
 echo ""
 
 # -----------------------------------------------------------------------
@@ -430,6 +609,9 @@ echo ""
 echo "AC-FTPAR-007: Live footer content checks"
 
 if [[ "$LIVE_MODE" -eq 1 ]]; then
+  echo "  LMS URL: $LMS_URL"
+  echo "  MFE URL: $MFE_URL"
+  echo ""
   # @covers AC-FTPAR-007: live footer class + section markers present on all domains
   LIVE_DOMAINS=(
     "academyv2.mereka.io"
@@ -497,6 +679,12 @@ echo "  WARN-002: LMS nav links (emails, help URL) are Mereka-specific — multi
 echo ""
 
 echo "========================================"
-echo "Footer parity: $PASS PASS / $FAIL FAIL / $WARN WARN / $SKIP SKIP"
+echo "Footer parity: PASS=$PASS FAIL=$FAIL WARN=$WARN SKIP=$SKIP"
 echo "========================================"
-exit $((FAIL > 0 ? 1 : 0))
+
+if [[ "$FAIL" -gt 0 ]]; then
+  echo "RESULT: FAIL ($FAIL failure(s))" >&2
+  exit 1
+fi
+echo "RESULT: PASS"
+exit 0
