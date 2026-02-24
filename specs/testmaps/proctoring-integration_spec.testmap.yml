@@ -7,8 +7,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Backend Registration
@@ -21,8 +29,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Examity Integration
@@ -37,6 +53,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -51,6 +75,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > ProctorTrack Callback
@@ -65,6 +97,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > No-op Backend
@@ -77,8 +117,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Exam Setup
@@ -91,8 +139,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Deadline Enforcement
@@ -105,8 +161,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Provider Restriction
@@ -121,6 +185,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Course Re-Run
@@ -135,6 +203,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Identity Verification
@@ -149,6 +221,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Identity Verification Failure
@@ -163,6 +239,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Identity Verification Storage
@@ -177,6 +257,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Baseline Facial Recognition
@@ -191,6 +275,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Environment Check
@@ -205,6 +293,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Environment Check
@@ -217,6 +309,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Environment Check
@@ -231,6 +327,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -245,6 +345,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -258,6 +362,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -269,8 +381,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Attempt State Machine
@@ -283,8 +403,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Exam Submission
@@ -295,6 +423,10 @@ acceptance_criteria:
     + 30 minutes`, when the auto-expiry check runs, then the attempt transitions to
     `timed_out` and the provider is notified
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
@@ -313,6 +445,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-environment.sh
     command: scripts/qa/verify-proctoring-environment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Resilience
@@ -325,6 +461,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > State Machine Enforcement
@@ -339,6 +479,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Review Dashboard Isolation
@@ -353,6 +497,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Reviewer Rejection
@@ -366,6 +514,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Admin Override
@@ -380,6 +532,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > SLA Warning
@@ -394,6 +550,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Gradebook Sync
@@ -408,6 +568,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Rejected Grade
@@ -422,6 +586,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/operations/runbooks/PROCTORING_RUNBOOK.md
     section: Verification > Instructor Override
@@ -436,6 +604,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Pending Review Grade Display
@@ -450,6 +622,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Multi-Provider Routing
@@ -464,6 +640,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Per-Customer SLA
@@ -478,6 +658,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > GDPR
@@ -488,6 +672,10 @@ acceptance_criteria:
     notice is displayed, then it includes: data collected, who accesses it, retention
     period, right to refuse, and contact information'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
@@ -503,6 +691,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
   - type: manual
@@ -515,6 +707,10 @@ acceptance_criteria:
     the system provides all proctoring session metadata and coordinates with the provider
     for recording access within 30 days
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-integration.sh
+    command: scripts/qa/verify-proctoring-integration.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh

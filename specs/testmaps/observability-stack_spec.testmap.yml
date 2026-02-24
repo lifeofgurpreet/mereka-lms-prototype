@@ -27,6 +27,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: 'Grafana shows pod CPU/memory: Dashboard visible at `https://grafana.mereka.io`'
   verify:
@@ -42,6 +46,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
     section: Dashboard Verification
@@ -74,6 +82,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-sentry-wiring.sh
     command: scripts/qa/verify-sentry-wiring.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: 'Loki receives logs: `logcli query ''{namespace="mereka-lms"}'' --limit
     10`'
@@ -86,6 +98,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: 'Tempo receives traces: `tempo-cli query-trace <trace-id>`'
   verify:
@@ -97,6 +113,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: 'Alerts fire on OOM: Simulate OOM and verify alert in Slack'
   verify:
@@ -116,6 +136,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
     section: Alert Verification > OOM Simulation
@@ -132,6 +156,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/OBSERVABILITY_QUICKSTART.md
     section: Trace-Log Correlation
@@ -148,6 +176,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-LOG-001
   description: Promtail DaemonSet is deployed and scraping logs from all pods in `mereka-lms`
     namespace

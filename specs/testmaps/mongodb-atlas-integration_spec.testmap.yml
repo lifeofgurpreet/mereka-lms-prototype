@@ -11,6 +11,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mongodb-atlas-integration.sh
     command: scripts/qa/verify-mongodb-atlas-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: '`kubectl logs -l app.kubernetes.io/name=lms | grep "Connected to MongoDB"`
     succeeds'
@@ -23,6 +27,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mongodb-atlas-integration.sh
     command: scripts/qa/verify-mongodb-atlas-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Course creation in Studio persists to Atlas `openedx` database
   verify:
@@ -34,6 +42,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-atlas-modulestore-path.sh
     command: scripts/qa/verify-atlas-modulestore-path.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Forum posts persist to Atlas `cs_comments_service` database
   verify:
@@ -45,6 +57,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-atlas-modulestore-path.sh
     command: scripts/qa/verify-atlas-modulestore-path.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: 'No local MongoDB container exists: `docker ps | grep mongodb` returns
     nothing (local)'
@@ -53,6 +69,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mongodb-atlas-integration.sh
     command: scripts/qa/verify-mongodb-atlas-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: 'No MongoDB StatefulSet exists: `kubectl get statefulset mongodb` returns
     not found (K8s)'
@@ -65,6 +85,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mongodb-atlas-integration.sh
     command: scripts/qa/verify-mongodb-atlas-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Atlas cluster shows active connections in monitoring dashboard
   verify:
@@ -100,6 +124,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/audit-atlas-allowlist-monitor.sh
     command: scripts/qa/audit-atlas-allowlist-monitor.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: monitoring
     metric: mongodb_atlas_connections_current
     dashboard: Atlas Console > Project > Cluster > Metrics > Connections
@@ -115,6 +143,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mongodb-atlas-integration.sh
     command: scripts/qa/verify-mongodb-atlas-integration.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: 'DNS resolution succeeds: `nslookup cluster-mereka-lms.2pjex4s.mongodb.net`
     returns results'

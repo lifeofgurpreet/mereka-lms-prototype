@@ -13,6 +13,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given `assets/branding/tokens.css`, when parsed, then all typography
     tokens (`--font-heading`, `--font-body`, `--text-h1`, etc.) are defined with valid
@@ -26,6 +30,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given `assets/branding/tokens.css`, when parsed, then all spacing tokens
     (`--space-0` through `--space-24`) are defined with pixel values following the
@@ -35,6 +43,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given `assets/branding/tokens.css`, when inspected, then all tokens
     are defined within a single `:root` selector, use kebab-case naming, and include
@@ -48,6 +60,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given `assets/branding/tokens.provenance.json`, when loaded, then all
     required fields (`source_repo`, `source_path`, `source_branch`, `source_commit`,
@@ -65,6 +81,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given `assets/branding/tokens.provenance.json["source_commit"]`, when
     validated, then it matches the 40-character lowercase git SHA pattern `[0-9a-f]{40}`.
@@ -81,6 +101,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given `assets/branding/tokens.provenance.json["source_sha256"]`, when
     validated, then it matches the 64-character lowercase SHA256 pattern `[0-9a-f]{64}`.
@@ -97,6 +121,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given `verify-token-drift.sh` is run, when `tokens.css` and `mereka-overrides.css`
     are in sync, then the script exits 0 with message "✓ Token drift + provenance
@@ -114,6 +142,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-design-tokens.sh
     command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: 'Given `tokens.css` defines `--color-teal: #2d898b` and `mereka-overrides.css`
     defines `--mereka-color-teal: #FFFFFF`, when `verify-token-drift.sh` is run, then

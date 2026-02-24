@@ -16,6 +16,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-olx-packages.sh
     command: scripts/qa/verify-olx-packages.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given library `lib:Mereka:compliance-2026` exists, when the same `POST`
     is sent with the same slug, then the response is HTTP 400 with an error indicating
@@ -25,6 +29,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-v2-enterprise.sh
     command: scripts/qa/verify-content-libraries-v2-enterprise.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given library `lib:Mereka:compliance-2026` with 5 components, when
     a Library Admin calls `DELETE /api/libraries/v2/lib:Mereka:compliance-2026/`,
@@ -35,6 +43,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-v2-enterprise.sh
     command: scripts/qa/verify-content-libraries-v2-enterprise.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: 'Given library `lib:Mereka:compliance-2026`, when a Library Author
     calls `POST /api/libraries/v2/lib:Mereka:compliance-2026/blocks/` with `{"block_type":
@@ -49,6 +61,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-olx-packages.sh
     command: scripts/qa/verify-olx-packages.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given a library with 10 components, when a Library Author edits the
     content of component `intro-module` via the OLX update endpoint, then the component
@@ -58,6 +74,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-advanced.sh
     command: scripts/qa/verify-content-libraries-advanced.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given a library with a `problem` type component, when a Library Author
     adds a `video` type component, then both components coexist in the library (mixed-type
@@ -67,6 +87,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-advanced.sh
     command: scripts/qa/verify-content-libraries-advanced.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given a library, when a user attempts to add a component of an XBlock
     type not installed on the platform, then the response is HTTP 400 with "XBlock
@@ -76,6 +100,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-advanced.sh
     command: scripts/qa/verify-content-libraries-advanced.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given library `lib:Mereka:compliance-2026` with unpublished draft changes,
     when a Library Admin calls `POST /api/libraries/v2/lib:Mereka:compliance-2026/commit/`,
@@ -90,6 +118,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-olx-packages.sh
     command: scripts/qa/verify-olx-packages.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given library `lib:Mereka:compliance-2026` with no unpublished changes,
     when `POST /commit/` is called, then the response is HTTP 200 with a message "No
@@ -190,6 +222,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-v2-enterprise.sh
     command: scripts/qa/verify-content-libraries-v2-enterprise.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-020
   description: Given enterprise tenant "Acme" with organization "AcmeCorp" and enterprise
     tenant "Beta" with organization "BetaCorp", when an Acme admin creates library
@@ -200,6 +236,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-v2-enterprise.sh
     command: scripts/qa/verify-content-libraries-v2-enterprise.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: 'Given a platform-global library `lib:Mereka:shared-templates` with
     `allow_public_read: true`, when a user from any enterprise tenant calls `GET /api/libraries/v2/`,
@@ -209,6 +249,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-content-libraries-v2-enterprise.sh
     command: scripts/qa/verify-content-libraries-v2-enterprise.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-022
   description: Given a Beta user, when they attempt to add a component from `lib:AcmeCorp:acme-training`
     to a course via Studio, then the operation is denied and a security event is logged

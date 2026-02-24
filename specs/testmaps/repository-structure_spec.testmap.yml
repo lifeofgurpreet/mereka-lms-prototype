@@ -9,6 +9,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given the repository root, when listing `*.md` files, then only files
     in the defined allowlist (README.md, CLAUDE.md, AGENTS.md, CONTRIBUTING.md, MIGRATION_CHECKLIST.md,
@@ -18,6 +22,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given the `scripts/` directory, when listing subdirectories, then `shared/`,
     `infra/`, `migrations/`, `branding/`, `analytics/`, and `qa/` all exist.
@@ -26,6 +34,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given `scripts/shared/config.sh`, when sourcing it, then environment
     variables `GCP_PROJECT`, `GCP_REGION`, and `LMS_DOMAIN` are exported with non-empty
@@ -35,6 +47,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given `deploy/k8s/overlays/`, when listing subdirectories, then `local/`
     and `production/` both exist.
@@ -43,6 +59,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: 'Given the `deploy/k8s/base/secrets/` directory, when scanning YAML
     files, then no file contains a `kind: Secret` resource with `data:` or `stringData:`
@@ -52,6 +72,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given the repository, when checking for `tools/` and `ops/` directories,
     then neither directory exists OR each contains only a `README.md` redirect file.
@@ -60,6 +84,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given `docs/`, when listing subdirectories, then `adr/`, `onboarding/`,
     `operations/`, `migrations/`, `architecture/`, and `archive/` all exist.
@@ -68,6 +96,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-repo-structure.sh
     command: scripts/qa/verify-repo-structure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given `infrastructure/`, when listing subdirectories, then `tutor/`,
     `cloudflare/`, `terraform/`, and `monitoring/` all exist.

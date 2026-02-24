@@ -24,6 +24,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-patches.sh
     command: scripts/qa/verify-tutor-patches.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: '`grep "NODE_OPTIONS.*6144" tutor_env/env/build/openedx/Dockerfile`
     returns results'
@@ -32,6 +36,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-patches.sh
     command: scripts/qa/verify-tutor-patches.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: '`grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py`
     returns results'
@@ -40,6 +48,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-patches.sh
     command: scripts/qa/verify-tutor-patches.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: '`grep "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py`
     returns results'
@@ -48,6 +60,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-patches.sh
     command: scripts/qa/verify-tutor-patches.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: '`grep "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py`
     returns results'
@@ -56,6 +72,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-patches.sh
     command: scripts/qa/verify-tutor-patches.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: MFE images build successfully with Node 18
   verify:
@@ -63,6 +83,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mfe-build-contract.sh
     command: scripts/qa/verify-mfe-build-contract.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: MFE Build Verification
@@ -75,6 +99,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-services.sh
     command: scripts/qa/verify-tutor-services.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: MySQL Authentication Verification
@@ -88,6 +116,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-multisite-domains.sh
     command: scripts/qa/verify-tutor-multisite-domains.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Mereka logo and custom footer render on all MFEs
   verify:

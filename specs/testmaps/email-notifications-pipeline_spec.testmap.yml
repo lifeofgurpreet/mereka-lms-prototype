@@ -13,6 +13,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ses-infrastructure.sh
     command: scripts/qa/verify-email-ses-infrastructure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
@@ -31,6 +35,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ses-infrastructure.sh
     command: scripts/qa/verify-email-ses-infrastructure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Template Rendering
@@ -46,6 +54,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ses-infrastructure.sh
     command: scripts/qa/verify-email-ses-infrastructure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
@@ -60,6 +72,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ses-infrastructure.sh
     command: scripts/qa/verify-email-ses-infrastructure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: DMARC Alignment Verification
@@ -73,6 +89,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ses-infrastructure.sh
     command: scripts/qa/verify-email-ses-infrastructure.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Enterprise Tenant Email Branding
@@ -87,6 +107,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ace-channels.sh
     command: scripts/qa/verify-email-ace-channels.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multi-Channel Dispatch
@@ -97,6 +121,10 @@ acceptance_criteria:
     push and in_app, when a course announcement is published, then the user receives
     push and in-app notifications but no email
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Channel Preference Enforcement
@@ -110,6 +138,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-ace-channels.sh
     command: scripts/qa/verify-email-ace-channels.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Non-Suppressible System Emails
@@ -234,6 +266,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-email-push-code.sh
     command: scripts/qa/verify-email-push-code.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Push Isolation
@@ -260,6 +296,10 @@ acceptance_criteria:
     test_type: automated
     file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
     command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Default Notification Preferences
@@ -283,6 +323,10 @@ acceptance_criteria:
     test_type: automated
     file: infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
     command: pytest infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/views.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Preference-Based Dispatch

@@ -13,6 +13,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given an authenticated user with email in `MEREKA_PLATFORM_ADMIN_EMAILS`
     and `is_staff=True`, when a request is processed, then the middleware does not
@@ -26,6 +30,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given an authenticated user with email NOT in `MEREKA_PLATFORM_ADMIN_EMAILS`,
     when a request is processed, then the middleware does not modify `is_staff`, `is_superuser`,
@@ -39,6 +47,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given a request to `apps.academyv2.mereka.io`, when the response sets
     a `sessionid` cookie, then the cookie's `domain` attribute is `.academyv2.mereka.io`.
@@ -51,6 +63,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given a request to `academy.biji-biji.com`, when the response sets
     a `sessionid` cookie, then the cookie's `domain` attribute is `.biji-biji.com`.
@@ -63,6 +79,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given a request to `apps.academy.biji-biji.com`, when the response
     sets a `sessionid` cookie, then the cookie's `domain` attribute is `.biji-biji.com`
@@ -76,6 +96,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given a request to `localhost:8000`, when the response sets a `sessionid`
     cookie, then the cookie has no `domain` attribute (host-only).
@@ -88,6 +112,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given `Site.objects.get_current(request)` is called with a request
     to `apps.academyv2.mereka.io`, when the Sites table has a row with `domain="academyv2.mereka.io"`,
@@ -101,6 +129,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: 'Given a request with `X-Forwarded-Proto: https,http`, when the middleware
     processes it, then `request.META[''HTTP_X_FORWARDED_PROTO'']` is `"https"`.'
@@ -242,6 +274,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
     command: pytest deploy/k8s/base/apps/openedx/settings/lms/mereka_platform_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-020
   description: The openedx_prometheus app SHOULD be conditionally loaded based on
     whether `django-prometheus` is installed (graceful degradation if missing).
@@ -258,6 +294,10 @@ acceptance_criteria:
     test_type: automated
     file: infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
     command: pytest infrastructure/tutor/custom-apps/openedx_prometheus/urls.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/MODULE_SURFACE_VALIDATION_RUNBOOK.md
     section: Prometheus Graceful Degradation

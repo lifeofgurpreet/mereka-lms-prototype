@@ -50,6 +50,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Quality Gates Verification
@@ -77,10 +81,18 @@ acceptance_criteria:
     test_type: unit
     file: scripts/qa/spec-tools/validate_testmap_format.py
     command: pytest scripts/qa/spec-tools/validate_testmap_format.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given the `lint` job runs, when Python files in `scripts/` or `services/`
     have ruff violations, then the job fails.
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Quality Gates Verification
@@ -91,6 +103,10 @@ acceptance_criteria:
   description: Given the `validate-k8s` job runs, when any YAML in `deploy/k8s/` is
     not a valid Kubernetes manifest, then kubeconform fails the job.
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: K8s Validation Verification
@@ -105,6 +121,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given the `prod-tag-guard` job runs, when any production overlay references
     a `:latest` tag, then the job fails.
@@ -117,6 +137,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-no-latest-prod-tags.sh
     command: scripts/qa/verify-no-latest-prod-tags.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given all CI jobs pass, when the PR is reviewed and approved, then
     the merge button is enabled.
@@ -125,6 +149,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
     command: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given a CI job fails, when a developer views the PR, then the merge
     button is disabled.
@@ -133,11 +161,23 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
     command: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given a push to `main` modifies `infrastructure/tutor/**`, when the
     build workflow triggers, then both openedx and MFE images are built, tagged with
     the git SHA and short SHA, and pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/`.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-bbi-infra.sh
+    command: scripts/qa/verify-binary-pinning-bbi-infra.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-pcp.sh
+    command: scripts/qa/verify-binary-pinning-pcp.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-build-workflow-contract.sh
@@ -150,6 +190,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-dev-prod-image-parity.sh
     command: scripts/qa/verify-dev-prod-image-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slsa-provenance.sh
+    command: scripts/qa/verify-slsa-provenance.sh
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
@@ -307,6 +351,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-release-evidence-workflow.sh
     command: scripts/qa/verify-release-evidence-workflow.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Release Process Verification
@@ -319,12 +367,28 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/infra/bump-image-tags.sh
+    command: scripts/infra/bump-image-tags.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-bbi-infra.sh
+    command: scripts/qa/verify-binary-pinning-bbi-infra.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-binary-pinning-pcp.sh
+    command: scripts/qa/verify-binary-pinning-pcp.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-build-workflow-contract.sh
     command: scripts/qa/verify-build-workflow-contract.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-no-latest-tags.sh
+    command: scripts/qa/verify-no-latest-tags.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-release-automation.sh
@@ -337,6 +401,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-release-workflow-invocation.sh
     command: scripts/qa/verify-release-workflow-invocation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-slsa-provenance.sh
+    command: scripts/qa/verify-slsa-provenance.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: Given a production rollback is needed, when the operator runs `release-openedx-gitops.sh`
     with prior known-good tags, then the rollback completes without building new images
@@ -350,6 +422,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cicd-release-rollback.sh
     command: scripts/qa/verify-cicd-release-rollback.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Release Process Verification

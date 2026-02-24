@@ -9,6 +9,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: PII Registry Validation
@@ -23,6 +27,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: PII Registry CI Gate
@@ -36,6 +44,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Consent Record Creation
@@ -46,6 +62,10 @@ acceptance_criteria:
     they see all consent purposes with their current consent status and can toggle
     non-essential consents
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Privacy Preferences UI
@@ -55,6 +75,10 @@ acceptance_criteria:
     is saved, then analytics event collection for that user stops within 24 hours
     and a `consent_withdrawn` audit entry is created
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Consent Withdrawal
@@ -64,6 +88,14 @@ acceptance_criteria:
     cookie consent banner is displayed and no non-essential cookies are set until
     consent is granted
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Cookie Consent Banner
@@ -74,6 +106,14 @@ acceptance_criteria:
     subsequently revoke it, then analytics cookies are cleared and the tracking pixel
     is deactivated on the next page load
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Cookie Revocation
@@ -88,6 +128,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Right to Erasure
@@ -155,6 +199,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Right to Data Portability
@@ -205,6 +253,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: ClickHouse Retention
@@ -218,6 +270,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Loki Retention
@@ -232,6 +292,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Audit Trail
@@ -242,6 +306,10 @@ acceptance_criteria:
     trail, when no tampering has occurred, then the hash chain validates completely
     with zero broken links
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Audit Trail Integrity
@@ -265,6 +333,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: PII Leakage Scanning
@@ -289,6 +361,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: PII Leakage Scanning
@@ -302,6 +378,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: ClickHouse PII Scanning
@@ -549,6 +629,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
 - id: AC-EXPORT-004
   description: 'Given an export archive is generated, when the archive is downloaded,
     then the archive MUST be AES-256 encrypted with either: (a) user-provided password
@@ -634,6 +718,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
 - id: AC-DELETE-002
   description: Given the deletion pipeline processes data store X (e.g., MongoDB Atlas
     forum content), when the deletion step completes, then the pipeline MUST immediately
@@ -859,6 +947,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-data-privacy-gdpr.sh
     command: scripts/qa/verify-data-privacy-gdpr.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
 - id: AC-CONSENT-002
   description: 'Given a user interacts with the cookie consent banner, when they make
     consent choices, then the system MUST store consent choices with: `consent_version`
@@ -866,6 +958,10 @@ acceptance_criteria:
     ("banner"), `ip_address_hash` (SHA-256), and per-category consent status (analytics,
     marketing, functional)'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-gdpr-compliance.sh
+    command: scripts/qa/verify-gdpr-compliance.sh
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Consent Management

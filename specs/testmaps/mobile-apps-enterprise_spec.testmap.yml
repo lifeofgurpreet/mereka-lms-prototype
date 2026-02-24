@@ -5,6 +5,14 @@ acceptance_criteria:
     opens to the LMS OAuth authorize endpoint with PKCE parameters (`code_challenge`,
     `code_challenge_method=S256`, `response_type=code`, `client_id=mereka-mobile-app`)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
@@ -13,6 +21,14 @@ acceptance_criteria:
   description: Given a new user on Android, when they tap "Sign In", then a Custom
     Tab opens to the LMS OAuth authorize endpoint with identical PKCE parameters
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
@@ -22,6 +38,14 @@ acceptance_criteria:
     the code for tokens, then the access token and refresh token are stored in platform-secure
     storage (Keychain on iOS, EncryptedSharedPreferences on Android)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Storage Security
@@ -32,6 +56,14 @@ acceptance_criteria:
     the app makes an API call, then the token is refreshed proactively before the
     call proceeds
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Logic
@@ -41,6 +73,10 @@ acceptance_criteria:
     the refresh is in-flight, then exactly one token refresh request is sent to the
     backend (single-flight)
   verify:
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Deduplication
@@ -51,6 +87,14 @@ acceptance_criteria:
     valid, then the app refreshes the token and retries the original request exactly
     once
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: 401 Retry Flow
@@ -60,6 +104,14 @@ acceptance_criteria:
     the app detects the failure, then the user is redirected to the login screen and
     all tokens are cleared
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Failure Handling
@@ -69,6 +121,14 @@ acceptance_criteria:
     then the refresh token is revoked server-side and all local tokens, cached user
     data, and branding overrides are cleared
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Logout Flow
@@ -79,6 +139,10 @@ acceptance_criteria:
     the dashboard, then the app requests push notification permission (not at app
     launch, not before login)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Permission
@@ -89,6 +153,10 @@ acceptance_criteria:
     then the app registers it with the backend including `device_token`, `platform`,
     `app_version`, and `org_slug`
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Device Registration
@@ -99,6 +167,10 @@ acceptance_criteria:
     push notification, then the notification appears in the system notification center
     within 60 seconds
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Delivery
@@ -109,6 +181,10 @@ acceptance_criteria:
     when the user taps it, then the app navigates directly to the assignment within
     the course
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Notification Deep Linking
@@ -118,6 +194,10 @@ acceptance_criteria:
   description: Given a user logs out, when logout completes, then the device token
     is unregistered from the backend
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Device Token Deregistration on Logout
@@ -127,6 +207,10 @@ acceptance_criteria:
   description: Given the AASA file is served at `https://academyv2.mereka.io/.well-known/apple-app-site-association`,
     when iOS validates it, then Universal Links are recognized for `academyv2.mereka.io`
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Universal Links Verification
@@ -136,6 +220,10 @@ acceptance_criteria:
   description: Given the `assetlinks.json` is served at `https://academyv2.mereka.io/.well-known/assetlinks.json`,
     when Android validates it, then App Links are recognized
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: App Links Verification
@@ -146,6 +234,10 @@ acceptance_criteria:
     when the app receives it as a deep link, then it navigates to section1 of the
     course
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Deep Link Routing
@@ -156,6 +248,10 @@ acceptance_criteria:
     then the app stores the URL, presents login, and navigates to the stored URL after
     successful authentication
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Authenticated Deep Link Flow
@@ -165,6 +261,10 @@ acceptance_criteria:
   description: Given a deep link to an unsupported path (e.g., `/admin/`), when the
     app receives it, then it opens the URL in an in-app browser
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Fallback Deep Link Handling
@@ -174,6 +274,14 @@ acceptance_criteria:
     completes, then all video, HTML, and PDF content for that section is available
     without network connectivity
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Content Download
@@ -183,6 +291,14 @@ acceptance_criteria:
     connectivity, then the completion and score data sync to the backend within 60
     seconds
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Sync
@@ -191,6 +307,14 @@ acceptance_criteria:
   description: Given the device has less than 500 MB free storage, when the user attempts
     to start a download, then the app displays a storage warning before proceeding
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Storage Warning
@@ -200,6 +324,10 @@ acceptance_criteria:
   description: Given downloaded content exists, when the user views "Manage Downloads",
     then they see per-section storage usage and can delete individual sections
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Management UI
@@ -210,6 +338,10 @@ acceptance_criteria:
     when the download completes in the background, then a local notification confirms
     completion (iOS: background URLSession; Android: WorkManager)'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Background Download
@@ -219,6 +351,10 @@ acceptance_criteria:
   description: Given `org_slug=client-a` with branding config specifying `primary_color=#FF5733`,
     when the app renders, then the navigation bar and primary UI elements use `#FF5733`
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Multi-Tenant Branding
@@ -228,6 +364,10 @@ acceptance_criteria:
   description: Given the branding config endpoint is unreachable and a cached config
     exists, when the app launches, then it renders using the cached branding
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Branding Cache Fallback
@@ -236,6 +376,10 @@ acceptance_criteria:
   description: Given the branding config endpoint is unreachable and no cache exists,
     when the app launches, then it renders using default Mereka Academy branding
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Default Branding Fallback
@@ -246,6 +390,10 @@ acceptance_criteria:
     course listings, then they see only courses associated with `client-a` (no cross-tenant
     leakage)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Tenant Course Isolation
@@ -255,6 +403,10 @@ acceptance_criteria:
   description: Given the app is running on a device, when it connects to `academyv2.mereka.io`,
     then the TLS certificate is validated against pinned intermediate CA certificates
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Certificate Pinning
@@ -264,6 +416,10 @@ acceptance_criteria:
   description: Given a certificate pin mismatch (MITM scenario), when the connection
     fails, then the app displays a security warning and does not send any data
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Certificate Pin Mismatch Handling
@@ -273,6 +429,10 @@ acceptance_criteria:
   description: Given the app enters the background, when the OS captures a task-switcher
     screenshot, then the screenshot shows a branded splash screen (not sensitive content)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Screenshot Protection
@@ -282,6 +442,10 @@ acceptance_criteria:
   description: Given a release build artifact, when inspected, then it contains no
     debug logging statements, test API endpoints, or hardcoded credentials
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Release Build Security Audit
@@ -292,6 +456,10 @@ acceptance_criteria:
     CI workflow triggers, then it produces a signed IPA and uploads it to TestFlight
     without manual intervention
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: iOS CI Pipeline
@@ -302,6 +470,10 @@ acceptance_criteria:
     Android CI workflow triggers, then it produces a signed AAB and uploads it to
     Google Play Internal Testing without manual intervention
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Android CI Pipeline
@@ -312,6 +484,10 @@ acceptance_criteria:
     when the CI pipeline runs, then no code changes or pipeline modifications are
     required (configuration-only onboarding)
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Configuration-Only Tenant Onboarding
@@ -322,6 +498,10 @@ acceptance_criteria:
     then the submission includes: app description, screenshots (6.7" and 6.1" iPhones),
     privacy nutrition labels, and age rating'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Testing
@@ -333,6 +513,10 @@ acceptance_criteria:
     then the submission includes: store listing, screenshots (phone), content rating
     questionnaire, and data safety form'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Mode Testing
@@ -344,6 +528,10 @@ acceptance_criteria:
     then it uses a phased/staged rollout (iOS: phased release over 7 days; Android:
     staged rollout starting at 10%)'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mobile-deployment.sh
+    command: scripts/qa/verify-mobile-deployment.sh
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Deep Link Testing

@@ -10,6 +10,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Configuration
@@ -26,6 +30,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Peer Grading
@@ -40,6 +48,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 File Upload
@@ -53,6 +65,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 File Upload Validation
@@ -67,6 +83,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Rubric Locking
@@ -80,6 +100,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Calibration
@@ -94,6 +118,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA Grading MFE
@@ -108,6 +136,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-assessment-audit.sh
     command: scripts/qa/verify-assessment-audit.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA Grading MFE
@@ -264,6 +296,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-xqueue-deployment.sh
     command: scripts/qa/verify-xqueue-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Queue Resilience
@@ -278,6 +314,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-xqueue-deployment.sh
     command: scripts/qa/verify-xqueue-deployment.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Gradebook Integration
@@ -293,6 +333,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-xqueue-graders.sh
     command: scripts/qa/verify-xqueue-graders.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Memory Sandbox

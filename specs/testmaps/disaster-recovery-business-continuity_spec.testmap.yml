@@ -13,6 +13,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given the hourly-critical schedule runs, when the backup completes,
     then `volumeSnapshotsCompleted` equals the number of Bound PVCs reported by `./scripts/qa/list-critical-backup-pvcs.sh`
@@ -29,6 +33,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given a Velero backup exists, when `BackupStorageLocation` is queried,
     then its phase is `Available`
@@ -41,6 +49,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given production namespaces, when all Deployments/StatefulSets are
     inspected, then no critical stateful service uses `emptyDir` for persistent data
@@ -53,6 +65,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given the monthly restore-test CronJob runs, when it completes, then
     a throwaway namespace is created, PVCs are restored to Bound state, and a MySQL
@@ -68,8 +84,16 @@ acceptance_criteria:
     command: scripts/qa/verify-disaster-recovery.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: shell_verification
     file: infrastructure/k8s/velero/restore-test-script.sh
     command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given a restore drill completes, when the throwaway namespace is inspected,
     then at least 1 PVC is in Bound state matching the source backup
@@ -82,6 +106,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: infrastructure/k8s/velero/restore-test-script.sh
     command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given a restore drill, when `./scripts/infra/fix-velero-restore-test.sh`
     executes, then the drill passes end-to-end including PV validation and MySQL probe
@@ -94,6 +122,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given the backup-verification CronJob, when it runs daily, then it
     confirms backup freshness within the last 2 hours for hourly schedule and 26 hours
@@ -107,6 +139,14 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given the DR evidence bundle workflow runs, when `STRICT_RUNTIME=1
     ./scripts/qa/build-dr-evidence-bundle.sh --tar` executes, then it produces a tarball
@@ -129,6 +169,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
 - id: AC-010
   description: Given GitHub Actions DR Evidence Bundle workflow, when it runs monthly
     (1st of month at 02:30 UTC), then artifacts are uploaded with 120-day retention
@@ -137,6 +181,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
 - id: AC-011
   description: Given an enterprise audit request, when DR evidence is requested, then
     a complete evidence bundle can be generated within 1 business day
@@ -262,6 +310,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: infrastructure/k8s/velero/restore-test-script.sh
     command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Data Integrity Verification
@@ -280,6 +332,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: Given a restore drill runs, when PVCs are restored, then the restore-test
     job MUST verify PV data integrity by comparing checksums of critical PVs (MySQL
@@ -297,6 +353,10 @@ acceptance_criteria:
     test_type: automated
     file: deploy/k8s/overlays/production/kustomization.yaml
     command: deploy/k8s/overlays/production/kustomization.yaml
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-022
   description: Given a PV checksum verification, when comparing pre-backup and post-restore
     checksums, then they MUST match exactly for MySQL data files (ibdata1, ib_logfile*,
@@ -324,12 +384,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cloud-sql-snapshots.sh
     command: scripts/qa/verify-cloud-sql-snapshots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
 - id: AC-024
   description: 'Given quarterly restore drill schedule, when the schedule is documented,
     then it MUST specify: drill cadence (quarterly), responsible team, notification
     window (1 week advance), and success criteria (all PVs verified, checksums match,
     MySQL probe succeeds)'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
   - type: manual
     runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Quarterly Restore Drill Schedule

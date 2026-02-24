@@ -17,6 +17,10 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/routers/checkout.py
     command: pytest services/purchase-gateway/app/routers/checkout.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given a buyer with an existing LMS account completes Stripe Checkout,
     when the `checkout.session.completed` webhook fires, then the buyer is enrolled
@@ -34,6 +38,10 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/services/lms_client.py
     command: pytest services/purchase-gateway/app/services/lms_client.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given a buyer without an LMS account completes Stripe Checkout, when
     the `checkout.session.completed` webhook fires, then an entitlement is created
@@ -47,11 +55,19 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/services/fulfillment.py
     command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given an expired Stripe Checkout Session, when the `checkout.session.expired`
     webhook fires, then the order status transitions to `expired` and no fulfillment
     occurs
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -60,6 +76,10 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/routers/webhooks.py
     command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given a buyer cancels at Stripe Checkout, when they return to the cancel
     URL, then the order status remains `pending` (Stripe may expire it later) and
@@ -71,12 +91,20 @@ acceptance_criteria:
     command: scripts/qa/verify-purchase-gateway-security.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
   - type: automated
     test_type: automated
     file: services/purchase-gateway/app/routers/checkout.py
     command: pytest services/purchase-gateway/app/routers/checkout.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given a webhook request with a valid Stripe signature, when the gateway
     receives it, then HTTP 200 is returned within 500ms and the event is logged in
@@ -88,16 +116,8 @@ acceptance_criteria:
     command: scripts/qa/verify-purchase-gateway-security.sh
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-purchase-gateway.sh
-    command: scripts/qa/verify-purchase-gateway.sh
-  - type: automated
-    test_type: automated
-    file: services/purchase-gateway/app/routers/webhooks.py
-    command: pytest services/purchase-gateway/app/routers/webhooks.py
-- id: AC-007
-  description: Given a webhook request with an invalid signature, when the gateway
-    receives it, then HTTP 400 is returned and the event is NOT logged
-  verify:
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -106,6 +126,30 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/routers/webhooks.py
     command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: Given a webhook request with an invalid signature, when the gateway
+    receives it, then HTTP 400 is returned and the event is NOT logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given the same Stripe event ID is received twice (retry), when the
     gateway processes it, then the second processing is a no-op and no duplicate order
@@ -117,12 +161,20 @@ acceptance_criteria:
     command: scripts/qa/verify-purchase-gateway-models.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
   - type: automated
     test_type: automated
     file: services/purchase-gateway/app/routers/webhooks.py
     command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given a `checkout.session.completed` event for a multi-tenant order
     (Stripe Connect), when the gateway processes it, then the order is associated
@@ -208,6 +260,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
   - type: automated
@@ -223,6 +279,10 @@ acceptance_criteria:
     then the order status transitions to `partially_refunded` and no enrollment is
     automatically revoked
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -242,6 +302,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
   - type: automated
@@ -257,6 +321,10 @@ acceptance_criteria:
     with `status=won`), then the order status is restored to its pre-dispute state
     and no enrollments are revoked
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -276,8 +344,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/auth.py
+    command: pytest services/purchase-gateway/app/auth.py
   - type: automated
     test_type: automated
     file: services/purchase-gateway/app/routers/admin.py
@@ -286,6 +362,10 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/services/fulfillment.py
     command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-020
   description: Given a fulfillment job that fails all 10 retries, when the max retries
     are exhausted, then the order transitions to `fulfillment_failed`, the job is
@@ -297,12 +377,20 @@ acceptance_criteria:
     command: scripts/qa/verify-purchase-gateway.sh
   - type: automated
     test_type: automated
+    file: services/purchase-gateway/app/auth.py
+    command: pytest services/purchase-gateway/app/auth.py
+  - type: automated
+    test_type: automated
     file: services/purchase-gateway/app/routers/admin.py
     command: pytest services/purchase-gateway/app/routers/admin.py
   - type: automated
     test_type: automated
     file: services/purchase-gateway/app/services/fulfillment.py
     command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: Given a fulfillment job for a user already enrolled in the course (LMS
     returns 409), when the worker processes it, then the line item is marked as `fulfilled`
@@ -320,6 +408,10 @@ acceptance_criteria:
     test_type: automated
     file: services/purchase-gateway/app/services/lms_client.py
     command: pytest services/purchase-gateway/app/services/lms_client.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-022
   description: Given an enterprise tenant with a subscription, when `invoice.paid`
     fires for a renewal, then seat pack entitlements are replenished for the new billing
@@ -376,6 +468,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
   - type: automated
@@ -386,6 +482,10 @@ acceptance_criteria:
   description: Given tenants A and B, when admin A calls any admin API endpoint, then
     zero records from tenant B are returned
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -409,6 +509,10 @@ acceptance_criteria:
     command: scripts/qa/verify-purchase-gateway-scaffold.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
 - id: AC-027
@@ -418,12 +522,20 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-oscar-deprecation.sh
+    command: scripts/qa/verify-oscar-deprecation.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway-k8s.sh
     command: scripts/qa/verify-purchase-gateway-k8s.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway-scaffold.sh
     command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -435,8 +547,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-oscar-deprecation.sh
+    command: scripts/qa/verify-oscar-deprecation.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway-security.sh
     command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -448,8 +568,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway-security.sh
     command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -486,6 +614,18 @@ acceptance_criteria:
     command: scripts/qa/verify-ecommerce-config.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-ecommerce-worker-health.sh
+    command: scripts/qa/verify-ecommerce-worker-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oscar-deprecation.sh
+    command: scripts/qa/verify-oscar-deprecation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
     command: scripts/qa/verify-purchase-gateway.sh
 - id: AC-032
@@ -493,6 +633,10 @@ acceptance_criteria:
     -n mereka-lms -l app.kubernetes.io/name=payments-worker` is run, then the deployment
     shows READY replicas >= 1
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh
@@ -506,6 +650,14 @@ acceptance_criteria:
     is called from within the cluster, then the response is HTTP 200 with `{"status":
     "ok", "database": "ok", "redis": "ok", "stripe": "ok"}`'
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-purchase-gateway.sh

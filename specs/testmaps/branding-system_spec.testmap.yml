@@ -38,8 +38,16 @@ acceptance_criteria:
     command: scripts/branding/verify-logo-setup.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Mereka logo visible on Studio homepage
   verify:
@@ -49,27 +57,40 @@ acceptance_criteria:
     command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-studio-branding.sh
     command: scripts/qa/verify-studio-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Custom Mereka footer renders on all MFEs (authn, account, profile,
     learning)
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-footer-parity.sh
     command: scripts/qa/verify-footer-parity.sh
-    notes: "Source mode (no --live flag): checks MerekaFooter component, SITE_VARIANTS,
-      all 4 v2 structural zones, no 'Powered by Open edX', tenant contract fields.
-      Pass: 60/0/1/1 PASS/FAIL/WARN/SKIP. Add --live flag for live domain checks."
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
     section: MFE Footer Verification
@@ -85,8 +106,16 @@ acceptance_criteria:
     command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Custom fonts load without Google Fonts fallback
   verify:
@@ -96,8 +125,16 @@ acceptance_criteria:
     command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: '`grep "fonts.googleapis.com" tutor_env/env/build/openedx/lms/static/css/*.css`
     returns 0 results'
@@ -108,12 +145,20 @@ acceptance_criteria:
     command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-studio-authoring-branding.sh
     command: scripts/qa/verify-studio-authoring-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: '`scripts/branding/verify-branding-health.sh` exits 0'
   verify:
@@ -147,22 +192,40 @@ acceptance_criteria:
     command: scripts/branding/verify-branding-health.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-branding-health.sh
     command: scripts/qa/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-footer-parity.sh
+    command: scripts/qa/verify-footer-parity.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Theme applies consistently across all domains (academyv2.mereka.io,
     academy.biji-biji.com)
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-footer-parity.sh
-    command: scripts/qa/verify-footer-parity.sh --live
-    notes: "Live mode: checks mereka-footer class + section markers on all 3 prod
-      domains. Deploy-gated until LMS image rebuild (WhiteCliff lane)."
+    command: scripts/qa/verify-footer-parity.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh
     command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Studio preview shows Mereka branding
   verify:
@@ -170,6 +233,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/branding/verify-branding-health.sh
     command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-public-branding.sh

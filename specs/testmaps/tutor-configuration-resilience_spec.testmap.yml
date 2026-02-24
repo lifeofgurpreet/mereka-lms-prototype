@@ -97,6 +97,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-patch-idempotency.sh
+    command: scripts/qa/verify-patch-idempotency.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
   - type: automated

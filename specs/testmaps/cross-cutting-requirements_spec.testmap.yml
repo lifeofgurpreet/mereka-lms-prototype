@@ -94,6 +94,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-cross-cutting-requirements.sh
     command: scripts/qa/verify-cross-cutting-requirements.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-translations.sh
+    command: scripts/qa/verify-translations.sh
   - type: manual
     runbook: docs/operations/TROUBLESHOOTING.md
     section: Payment Idempotency Testing

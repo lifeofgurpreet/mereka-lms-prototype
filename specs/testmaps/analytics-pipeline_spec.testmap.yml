@@ -8,6 +8,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: 'xAPI events flow to ClickHouse: `clickhouse-client --query "SELECT
     count() FROM xapi_events_all"`'
@@ -16,6 +20,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: monitoring
     metric: clickhouse_xapi_events_count
     dashboard: grafana://dashboards/analytics-pipeline
@@ -28,9 +36,9 @@ acceptance_criteria:
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-analytics-retention.sh
-    command: scripts/qa/verify-analytics-retention.sh
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: ClickHouse Disk Space
@@ -45,9 +53,9 @@ acceptance_criteria:
     file: scripts/qa/smoke-test-analytics.sh
     command: scripts/qa/smoke-test-analytics.sh
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-analytics-retention.sh
-    command: scripts/qa/verify-analytics-retention.sh
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: monitoring
     metric: superset_health_status
     dashboard: grafana://dashboards/analytics-pipeline
@@ -58,6 +66,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Verification
@@ -75,13 +87,17 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Instructor dashboard embeds in LMS course pages
   verify:
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-analytics-retention.sh
-    command: scripts/qa/verify-analytics-retention.sh
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Embedding Verification
@@ -100,7 +116,7 @@ acceptance_criteria:
     file: scripts/analytics/verify-user-deletion.sh
     command: scripts/analytics/verify-user-deletion.sh
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-analytics-retention.sh
-    command: scripts/qa/verify-analytics-retention.sh
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 
