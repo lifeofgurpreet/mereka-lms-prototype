@@ -79,7 +79,9 @@ SA_KEY_WORKFLOWS=()
 for wf in "${WORKFLOW_FILES[@]}"; do
   # Match actual YAML action input (credentials_json:) or secret reference (${{ secrets.GCP_SA_KEY }})
   # Excludes shell echo lines (which may mention these strings in documentation workflows)
-  if grep -vE '^\s*echo\s' "$wf" 2>/dev/null | grep -qE 'credentials_json\s*:|secrets\.GCP_SA_KEY'; then
+  # Use variable capture to avoid SIGPIPE from grep -q closing pipe early under pipefail
+  _filtered="$(grep -vE '^\s*echo\s' "$wf" 2>/dev/null || true)"
+  if grep -qE 'credentials_json\s*:|secrets\.GCP_SA_KEY' <<< "$_filtered"; then
     SA_KEY_WORKFLOWS+=("$(basename "$wf")")
   fi
 done
@@ -105,7 +107,8 @@ echo "== Section 3: WIF adoption (workload_identity_provider) =="
 WIF_WORKFLOWS=()
 for wf in "${WORKFLOW_FILES[@]}"; do
   # Match actual YAML key (workload_identity_provider:) not shell echo strings
-  if grep -vE '^\s*echo\s' "$wf" 2>/dev/null | grep -qE 'workload_identity_provider\s*:'; then
+  _filtered="$(grep -vE '^\s*echo\s' "$wf" 2>/dev/null || true)"
+  if grep -qE 'workload_identity_provider\s*:' <<< "$_filtered"; then
     WIF_WORKFLOWS+=("$(basename "$wf")")
   fi
 done
@@ -130,7 +133,8 @@ echo "== Section 4: google-github-actions/auth usage =="
 
 AUTH_ACTION_WORKFLOWS=()
 for wf in "${WORKFLOW_FILES[@]}"; do
-  if grep -vE '^\s*echo\s' "$wf" 2>/dev/null | grep -q 'google-github-actions/auth'; then
+  _filtered="$(grep -vE '^\s*echo\s' "$wf" 2>/dev/null || true)"
+  if grep -q 'google-github-actions/auth' <<< "$_filtered"; then
     AUTH_ACTION_WORKFLOWS+=("$(basename "$wf")")
   fi
 done
