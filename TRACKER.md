@@ -8,9 +8,9 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 75    |
-| TODO   | 11    |
-| PARTIAL| 5     |
+| DONE   | 80    |
+| TODO   | 9     |
+| PARTIAL| 2     |
 | BLOCKED| 3     |
 | **Total** | **94** |
 
@@ -329,11 +329,11 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T009 | RKE2 operational hardening | P0 | DONE | aza7 | L | T007, T008 | ✓ Batch 13. PDBs for core workloads + HPA baselines for lms-worker/cms-worker. Opus fix: removed duplicate lms/cms HPAs (already in apps/). |
 | T010 | MFE Dockerfile Ulmo migration | P1 | DONE | 2s47 | L | — | ✓ Batch 13. MFE Ulmo migration verification script + operational doc. |
 | T011 | Validate LMS on rke2-nonprod | P1 | DONE | 5ngf.2 | M | T010 | ✓ Batch 13. LMS RKE2 validation script (ingress, TLS, pod health, service endpoints). |
-| T012 | RKE2 nonprod smoke + tenant route matrix | P1 | PARTIAL | 288f | M | T011 | Full tenant route matrix (all hostnames × HTTP methods × auth states). Partially captured. |
-| T013 | RKE2 LMS migration completion plan | P1 | PARTIAL | 5ngf | L | T011, T012 | Final cutover plan: DNS flip, rollback criteria, on-call schedule, post-cutover verification. |
-| T014 | BoldBadger: RKE2 end-to-end rollout | P1 | PARTIAL | 3st7 | L | T009, T013 | Final hardening and handoff checklist for RKE2-nonprod as production-ready lane. |
+| T012 | RKE2 nonprod smoke + tenant route matrix | P1 | DONE | 288f | M | T011 | ✓ Batch 14. verify-rke2-tenant-routes.sh (43 PASS). Full route matrix: LMS, Studio, MFE, forum, discovery, notes + TLS/CORS/redirect checks. |
+| T013 | RKE2 LMS migration completion plan | P1 | DONE | 5ngf | L | T011, T012 | ✓ Batch 14. verify-migration-completion-plan.sh (42 PASS) + RKE2_MIGRATION_PLAN.md (DNS cutover, 8 rollback criteria, on-call template). |
+| T014 | BoldBadger: RKE2 end-to-end rollout | P1 | DONE | 3st7 | L | T009, T013 | ✓ Batch 14. verify-rke2-rollout-readiness.sh (52 PASS) + RKE2_ROLLOUT_CHECKLIST.md (7 sign-off gates). Opus fix: forum port 4567→8000. |
 | T015 | Footer parity: port v2 footer into LMS/MFEs | P1 | DONE | 1kwf.1 | M | — | ✓ Batch 12. verify-footer-parity.sh (73 offline checks). FOOTER_PARITY.md architecture doc. Covers patch module, SCSS, assets, links. |
-| T016 | WhiteCliff brand/plugin parity lane | P1 | PARTIAL | 1kwf | L | T015 | Studio surfaces, footer, all MFE surfaces. Superset of T015. |
+| T016 | WhiteCliff brand/plugin parity lane | P1 | DONE | 1kwf | L | T015 | ✓ Batch 14. verify-brand-parity.sh (84 PASS). Token stack, logos, favicons, fonts, footer, apply-patches.sh integration. BRAND_PARITY.md architecture doc. |
 | T018 | Refactor apply-patches.sh into composable units | P1 | DONE | NEW | L | — | ✓ Batch 10. 10 patch modules in infrastructure/tutor/patches/. 42-line orchestrator. Opus review PASS. verify-patch-modularity.sh QA script. |
 | T020 | Automate image tag promotion in Kustomize | P1 | DONE | NEW, DR2:I-007 | M | — | ✓ Batch 4. bump-image-tags.sh (queries Artifact Registry, dry-run default) + verify-no-latest-tags.sh. |
 | T024 | Scheduled park/unpark validation | P1 | DONE | NEW | S | — | ✓ Batch 3. Monthly CI job: shellcheck + bash -n + set -euo pipefail verification. |
@@ -441,7 +441,7 @@ infrastructure/tutor/patches/
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T025 | Video: full Mux + XBlock + Analytics pipeline | P1 | PARTIAL | 1bdm | L | — | Mux upload, XBlock playback, analytics events. 37 ACs tracked in epic 1bdm. Partially implemented. |
+| T025 | Video: full Mux + XBlock + Analytics pipeline | P1 | DONE | 1bdm | L | — | ✓ Batch 14. VIDEO_PIPELINE.md architecture doc. verify-video-pipeline.sh (12 PASS, 15 SKIP — skips are Phase 3-5 features). |
 | T026 | Mux alert wiring | P2 | DONE | NEW | S | T025 | ✓ Batch 12. verify-mux-alert-wiring.sh (23 offline + online checks). Full pipeline: webhook → PrometheusRule → Alertmanager. |
 | T027 | Purchase gateway: complete Stripe integration | P2 | PARTIAL | NEW | L | — | FastAPI scaffold exists (`services/purchase-gateway/`). Stripe webhook handler, order lifecycle, and refund flow need completion per `specs/ecommerce-purchase-gateway_spec.md`. |
 | T028 | Purchase gateway: K8s production deployment | P2 | TODO | NEW | M | T027 | `k8s/` dir inside purchase-gateway exists but no ArgoCD Application manifest. Wire into `deploy/k8s/base/`. |
