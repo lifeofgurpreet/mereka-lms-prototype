@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke forum-smoke lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -76,6 +76,10 @@ migrations-verify: ## Verify Kajabi migration imports
 
 qa-smoke: ## Run smoke tests
 	./scripts/qa/smoke-test.sh
+	./scripts/qa/verify-forum-smoke.sh --offline
+
+forum-smoke: ## Run forum service smoke tests (offline + optional online)
+	./scripts/qa/verify-forum-smoke.sh $(FORUM_SMOKE_ARGS)
 
 lint: ## Run linters (Python, Shell, JS)
 	ruff check scripts/ migrations/ services/ || true
