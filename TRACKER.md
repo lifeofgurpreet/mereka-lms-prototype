@@ -8,9 +8,9 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 55    |
-| TODO   | 20    |
-| PARTIAL| 16    |
+| DONE   | 60    |
+| TODO   | 18    |
+| PARTIAL| 13    |
 | BLOCKED| 3     |
 | **Total** | **94** |
 
@@ -310,7 +310,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T021 | Verify no `latest` tags in production overlays | P1 | DONE | NEW | S | T020 | ✓ Batch 5. verify-image-tags.yml CI workflow (blocking). Opus fix: aligned checkout SHA to repo standard. |
 | T017 | Validate SITE_VARIANTS + multisite config | P1 | DONE | NEW | M | — | ✓ Batch 4. validate-multisite.yml CI workflow + validate-multisite-config.sh (7 sections, 12 checks). |
 | T071 | Add smoke tests for authn MFE config endpoint | P1 | DONE | DR2:I-035 | M | — | ✓ Batch 6. smoke-authn-mfe.sh (5 tests: login page, config endpoint, required keys, cookie domain, OAuth URIs) + CI workflow. Opus fix: mktemp cleanup, timeout-minutes. |
-| T072 | Add automated tenant isolation tests | P1 | TODO | DR2:I-036 | L | T011 | Automated tests that verify tenant A cannot access tenant B's data for: auth tokens, analytics events, branding assets. |
+| T072 | Add automated tenant isolation tests | P1 | DONE | DR2:I-036 | L | T011 | ✓ Batch 10. verify-tenant-isolation-gates.sh: 26 offline + 8 online checks (middleware, model constraints, branding scope, cross-tenant auth, cookie isolation). tenant-isolation-check.yml CI workflow. |
 | T049 | E2E test framework (Playwright) | P3 | TODO | I26 | L | T011 | Only shell smoke tests exist. Add Playwright with 5 critical-path tests: login, enroll, play video, forum post, certificate. |
 | T050 | Wire E2E into post-deploy gate | P3 | TODO | NEW | S | T049 | Once Playwright exists, add as a blocking step in `release-evidence.yml`. |
 | T073 | Add visual regression baseline governance | P2 | DONE | DR2:I-038 | M | — | ✓ Batch 7. VISUAL_REGRESSION.md + verify-visual-baselines.sh + baselines.json seed. Opus review: PASS. |
@@ -334,7 +334,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T014 | BoldBadger: RKE2 end-to-end rollout | P1 | PARTIAL | 3st7 | L | T009, T013 | Final hardening and handoff checklist for RKE2-nonprod as production-ready lane. |
 | T015 | Footer parity: port v2 footer into LMS/MFEs | P1 | TODO | 1kwf.1 | M | — | Plugin-first approach. Mereka Frontend v2 footer not yet ported into Tutor plugin or MFE slot. |
 | T016 | WhiteCliff brand/plugin parity lane | P1 | PARTIAL | 1kwf | L | T015 | Studio surfaces, footer, all MFE surfaces. Superset of T015. |
-| T018 | Refactor apply-patches.sh into composable units | P1 | PARTIAL | NEW | L | — | Worktree ready: 10 patch modules in infrastructure/tutor/patches/. 41-line orchestrator. Needs thorough review before merge (critical script). |
+| T018 | Refactor apply-patches.sh into composable units | P1 | DONE | NEW | L | — | ✓ Batch 10. 10 patch modules in infrastructure/tutor/patches/. 42-line orchestrator. Opus review PASS. verify-patch-modularity.sh QA script. |
 | T020 | Automate image tag promotion in Kustomize | P1 | DONE | NEW, DR2:I-007 | M | — | ✓ Batch 4. bump-image-tags.sh (queries Artifact Registry, dry-run default) + verify-no-latest-tags.sh. |
 | T024 | Scheduled park/unpark validation | P1 | DONE | NEW | S | — | ✓ Batch 3. Monthly CI job: shellcheck + bash -n + set -euo pipefail verification. |
 | T044 | Clarify Tutor 18.2.2 patch level | P3 | DONE | NEW, DR2:I-047 | S | T042 | ✓ Batch 6. Added "Current Version Pin" section to ADR-019 + verify-tutor-version-pin.sh (scans all files for version consistency, 14/14 PASS). |
@@ -447,13 +447,13 @@ infrastructure/tutor/patches/
 | T028 | Purchase gateway: K8s production deployment | P2 | TODO | NEW | M | T027 | `k8s/` dir inside purchase-gateway exists but no ArgoCD Application manifest. Wire into `deploy/k8s/base/`. |
 | T029 | Deprecate Oscar ecommerce references | P2 | TODO | NEW | S | T028 | Audit and remove Oscar-era config from Tutor env and docs once purchase-gateway is live. |
 | T030 | Forum service: Meilisearch dependency validation | P2 | DONE | NEW | S | — | ✓ Batch 6. FORUM_MEILISEARCH.md (operational doc) + verify-forum-meilisearch.sh (8 offline checks: deployment, image pin, service, Django settings, env-based keys, ExternalSecrets). |
-| T031 | Forum service: smoke test in RKE2 | P2 | TODO | NEW | S | T030, T011 | Add forum to post-deploy smoke matrix (create thread, reply, search). |
+| T031 | Forum service: smoke test in RKE2 | P2 | DONE | NEW | S | T030, T011 | ✓ Batch 10. verify-forum-smoke.sh: 10 offline + 7 online checks. Forum v2 in-process validation, Meilisearch health, API endpoints. Wired into Makefile qa-smoke. |
 | T032 | Mobile: deploy enterprise mobile apps | P2 | PARTIAL | mci9 | L | T011 | 37 ACs in epic mci9. iOS TestFlight CI exists (`build-ios-app.yml`). Backend API and push notifications need completion. |
 | T033 | Mobile secrets runtime validation | P2 | TODO | NEW | S | T032 | `verify-mobile-secrets-runtime.sh` exists but not in CI. Wire as a post-deploy gate. |
 | T034 | GDPR cookie consent UI + user retirement pipeline | P2 | PARTIAL | I21, DR2:I-021 | M | — | Spec and policy exist but no cookie banner implemented. Enrich: add Open edX user retirement pipeline integration and custom service PII cleanup hooks (purchase-gateway, analytics). |
 | T035 | LTI integration guide + SAML config alignment | P2 | PARTIAL | I17, DR2:I-022, DR2:I-050 | S | — | LTI referenced in specs. Write `docs/integrations/LTI.md` with Open edX LTI consumer config steps. Add SAML config presence check and metadata endpoint verification. Align to official Open edX operator docs. |
-| T036 | Accessibility: WCAG 2.2 AA compliance | P2 | PARTIAL | I44, DR2:I-009 | M | — | Policy doc and manual scripts exist. Wire axe-core as automated CI check on key routes. Enrich: add Focus Not Obscured (SC 2.4.12), Target Size (SC 2.5.8), and Accessible Authentication (SC 3.3.8) beyond existing contrast checks. |
-| T037 | Atlas/Transifex translation pipeline | P2 | PARTIAL | I42, DR2:I-037 | M | — | Bilingual (EN/MS) mentioned in cross-cutting spec. Add `scripts/infra/sync-translations.sh` using `openedx-atlas` CLI. Add MFE locale file completeness check to CI. |
+| T036 | Accessibility: WCAG 2.2 AA compliance | P2 | DONE | I44, DR2:I-009 | M | — | ✓ Batch 10. accessibility-audit.yml CI workflow (axe-core, 5 routes, wcag22aa). verify-accessibility.sh: WCAG 2.2 SC 2.4.12/2.5.8/3.3.8 checks. Non-blocking initially. |
+| T037 | Atlas/Transifex translation pipeline | P2 | DONE | I42, DR2:I-037 | M | — | ✓ Batch 10. sync-translations.sh (openedx-atlas pull EN/MS, --dry-run/--check). verify-translations.sh (locale coverage >=80%). translation-check.yml CI workflow (weekly + on locale changes). |
 | T076 | Implement Reusable LTI Store (Ulmo feature) | P2 | TODO | DR2:I-023 | L | T035 | Implement or verify the Reusable LTI Store feature introduced in Ulmo. Configure and test LTI tool persistence across course contexts. |
 | T077 | Add Policy-as-Code for pod security standards | P2 | TODO | DR2:I-024 | L | — | Implement Kyverno or Gatekeeper policies enforcing pod security standards (non-root, no privileged, seccomp). Cross-repo: bbi-infrastructure. |
 | T078 | ExternalSecrets refresh + failure alerting | P1 | DONE | DR2:I-040 | M | — | ✓ Batch 9. PrometheusRule: SyncFailure (critical, 10m) + StaleSync (warning, 2h). verify-eso-alerting.sh. ESO_ALERTING.md runbook. |
