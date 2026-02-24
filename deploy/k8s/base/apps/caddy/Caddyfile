@@ -30,6 +30,8 @@
         header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
     }
 
+    # API proxy responses must never be cached by browsers or intermediaries.
+    header Cache-Control "no-store"
 
 }
 
