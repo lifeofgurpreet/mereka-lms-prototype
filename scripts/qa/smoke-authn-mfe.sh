@@ -113,6 +113,9 @@ fi
 
 check_deps
 
+TMPDIR=$(mktemp -d /tmp/smoke-authn-XXXXXX)
+trap 'rm -rf "${TMPDIR}"' EXIT
+
 echo -e "${BLUE}=== Authn MFE Smoke Tests ===${NC}"
 echo ""
 echo "  MFE URL : ${MFE_URL}"
@@ -125,7 +128,7 @@ echo ""
 
 echo -e "${BLUE}## Test 1: authn login page${NC}"
 
-AUTHN_RESPONSE=$(curl -s -o /tmp/smoke-authn-body.html \
+AUTHN_RESPONSE=$(curl -s -o ${TMPDIR}/body.html \
   -w "%{http_code}" \
   --max-time 15 \
   "${MFE_URL}/authn/login" 2>/dev/null || echo "000")
@@ -136,7 +139,7 @@ else
   fail "GET /authn/login returned HTTP ${AUTHN_RESPONSE} (expected 200)"
 fi
 
-if grep -qi "<html" /tmp/smoke-authn-body.html 2>/dev/null; then
+if grep -qi "<html" ${TMPDIR}/body.html 2>/dev/null; then
   pass "Response body is HTML"
 else
   fail "Response body does not look like HTML"
@@ -150,7 +153,7 @@ echo ""
 
 echo -e "${BLUE}## Test 2: MFE config endpoint${NC}"
 
-MFE_CONFIG_HTTP=$(curl -s -o /tmp/smoke-mfe-config.json \
+MFE_CONFIG_HTTP=$(curl -s -o ${TMPDIR}/config.json \
   -w "%{http_code}" \
   --max-time 15 \
   -H "Accept: application/json" \
@@ -163,9 +166,9 @@ else
 fi
 
 CONFIG_JSON=""
-if jq empty /tmp/smoke-mfe-config.json 2>/dev/null; then
+if jq empty ${TMPDIR}/config.json 2>/dev/null; then
   pass "Response body is valid JSON"
-  CONFIG_JSON="$(cat /tmp/smoke-mfe-config.json)"
+  CONFIG_JSON="$(cat ${TMPDIR}/config.json)"
 else
   fail "Response body is not valid JSON"
 fi
