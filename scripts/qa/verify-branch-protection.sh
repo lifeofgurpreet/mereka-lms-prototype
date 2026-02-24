@@ -172,8 +172,14 @@ else
   fi
 
   # Required check names
+  # These names must match the `name:` field of jobs in .github/workflows/
   REQUIRED_CHECKS=(
     "Spec Integrity Gates"
+    "Generated Docs Are Up To Date"
+    "Design Token Validation"
+    "Branding Preflight (Source)"
+    "Monitoring Guardrails"
+    "Lint"
     "Trivy — K8s Manifests"
     "Trivy — Terraform"
   )

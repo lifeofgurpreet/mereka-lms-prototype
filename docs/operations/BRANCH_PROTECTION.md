@@ -33,7 +33,6 @@ These check names must match the job names reported by GitHub Actions:
 | `Branding Preflight (Source)` | `ci.yml` | Branding gate |
 | `Monitoring Guardrails` | `ci.yml` | Alert routing lint |
 | `Lint` | `ci.yml` | Shell, Python, repo-structure lint |
-| `Verify Actions Pinned` | `ci.yml` | SHA-pinning policy (supply chain) |
 | `Trivy — K8s Manifests` | `iac-scan.yml` | K8s security scan |
 | `Trivy — Terraform` | `iac-scan.yml` | Terraform security scan |
 
@@ -126,7 +125,6 @@ gh api \
       "Branding Preflight (Source)",
       "Monitoring Guardrails",
       "Lint",
-      "Verify Actions Pinned",
       "Trivy — K8s Manifests",
       "Trivy — Terraform"
     ]
