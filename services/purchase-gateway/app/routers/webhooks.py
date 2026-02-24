@@ -164,8 +164,6 @@ async def stripe_webhook(
 ):
     """Handle incoming Stripe webhook events with idempotent processing."""
     payload = await request.body()
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
     try:
         event = stripe.Webhook.construct_event(
             payload, stripe_signature, settings.STRIPE_WEBHOOK_SECRET

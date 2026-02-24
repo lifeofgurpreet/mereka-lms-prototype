@@ -41,7 +41,6 @@ async def _find_order_by_dispute(dispute: dict, db: AsyncSession) -> Order | Non
     if not charge_id:
         return None
 
-    stripe.api_key = settings.STRIPE_SECRET_KEY
     charge = await asyncio.to_thread(stripe.Charge.retrieve, charge_id)
     payment_intent_id = charge.payment_intent
 

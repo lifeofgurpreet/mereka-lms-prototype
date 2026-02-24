@@ -57,8 +57,6 @@ async def create_checkout(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a Stripe Checkout Session for a given offering."""
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
     # Look up offering by UUID from DB to get stripe_price_id and details
     result = await db.execute(
         select(Offering).where(

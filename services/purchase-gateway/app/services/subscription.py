@@ -40,8 +40,6 @@ async def create_subscription(
     if not offering:
         raise ValueError(f"Offering {offering_id} not found")
 
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
     stripe_sub = await asyncio.to_thread(
         stripe.Subscription.create,
         customer=stripe_customer_id,

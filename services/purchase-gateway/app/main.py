@@ -3,6 +3,7 @@
 
 from contextlib import asynccontextmanager
 
+import stripe
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +19,8 @@ logger = structlog.get_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Set Stripe API key once at startup (not per-request)
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     logger.info("purchase_gateway.starting")
     yield
     await engine.dispose()
