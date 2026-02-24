@@ -1,0 +1,27 @@
+name: Aspects Version Compatibility
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'requirements*'
+      - 'tutor_env/config*'
+  schedule:
+    - cron: '0 6 * * 1'  # weekly on Monday at 06:00 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  aspects-compat:
+    name: Aspects Version Compatibility Check
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Run Aspects compatibility check
+        run: |
+          bash scripts/qa/verify-aspects-compat.sh
