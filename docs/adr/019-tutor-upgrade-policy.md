@@ -1,4 +1,4 @@
-# ADR-002: Tutor Upgrade Cadence and EOL Policy
+# ADR-019: Tutor Upgrade Cadence and EOL Policy
 
 **Status**: Accepted
 **Date**: 2026-02-24
