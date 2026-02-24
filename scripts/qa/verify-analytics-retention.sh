@@ -55,7 +55,8 @@ fi
 pass "Config file exists"
 
 # --- Parse and validate via Python ---
-python3 - "${CONFIG_FILE}" <<'PYEOF'
+PY_EXIT=0
+python3 - "${CONFIG_FILE}" <<'PYEOF' || PY_EXIT=$?
 import sys
 import datetime
 
@@ -214,8 +215,6 @@ if FAIL > 0:
     sys.exit(1)
 sys.exit(0)
 PYEOF
-
-PY_EXIT=$?
 
 echo ""
 if [[ $PY_EXIT -eq 0 && $FAIL -eq 0 ]]; then
