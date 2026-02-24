@@ -70,6 +70,55 @@ When a decision to upgrade is made, follow these steps on a spike branch:
 
 **Note**: These dates are estimates. The Open edX community does not publish hard EOL dates. Subscribe to the `openedx-announce` mailing list and monitor https://github.com/openedx/openedx-releases for official announcements.
 
+## Current Version Pin
+
+| Package | Version | Release Track |
+|---------|---------|---------------|
+| `tutor[full]` | **18.2.2** | Redwood |
+| `tutor-mfe` | **18.1.0** | Redwood |
+
+### Where the pin lives
+
+| Location | File | Line reference |
+|----------|------|----------------|
+| CI — image build | `.github/workflows/build-tutor-images.yml` | ~94, ~270 |
+| CI — config verify | `.github/workflows/tutor-config-verify.yml` | ~38, ~102, ~187, ~252 |
+| CI — plugin test | `.github/workflows/tutor-plugin-test.yml` | ~34, ~151, ~269 |
+| CI — general CI | `.github/workflows/ci.yml` | ~482, ~490 |
+| Dev setup script | `scripts/shared/setup-local.sh` | ~48 |
+| Onboarding docs | `docs/onboarding/QUICK_START_LOCAL.md` etc. | multiple |
+
+The canonical install command is:
+```bash
+pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+```
+
+### Checking for patch releases
+
+```bash
+# List all available Tutor patch releases on the 18.x line
+pip index versions "tutor[full]" 2>/dev/null | grep -oE '18\.[0-9]+\.[0-9]+'
+
+# Or check PyPI directly
+# https://pypi.org/project/tutor/#history
+
+# Similarly for tutor-mfe
+pip index versions "tutor-mfe" 2>/dev/null | grep -oE '18\.[0-9]+\.[0-9]+'
+```
+
+To verify all repo references are consistent, run:
+```bash
+./scripts/qa/verify-tutor-version-pin.sh
+```
+
+### Known documentation discrepancy
+
+`CLAUDE.md` (the project root instructions file) contains the line:
+
+> **Deployment Tool**: Tutor 21.0.0 (Ulmo)
+
+This is **incorrect**. The actual installed and pinned version is **18.2.2 (Redwood)**. The discrepancy exists because CLAUDE.md was partially updated to reference the latest upstream release without updating the version number. The ground truth is the pip install pins in `.github/workflows/build-tutor-images.yml` and `scripts/shared/setup-local.sh`. Do not update the CLAUDE.md version line without first completing the full upgrade process documented in the "Upgrade Process" section above.
+
 ## Consequences
 
 ### Positive
