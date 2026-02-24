@@ -1,0 +1,14 @@
+# Production GitOps overlays — require infra review
+deploy/k8s/overlays/production/ @Biji-Biji-Initiative/infra
+
+# GitHub Actions workflows — require infra review
+.github/workflows/ @Biji-Biji-Initiative/infra
+
+# Secrets configuration — require infra review
+deploy/k8s/base/secrets/ @Biji-Biji-Initiative/infra
+
+# Tutor patches and configuration — require platform review
+infrastructure/tutor/ @Biji-Biji-Initiative/platform
+
+# Specs — require engineering review
+specs/ @Biji-Biji-Initiative/engineering
