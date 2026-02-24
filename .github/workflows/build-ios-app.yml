@@ -11,15 +11,19 @@ on:
 env:
   BUNDLE_ID: 'com.mereka.academy.mobile'
 
+permissions: {}
+
 jobs:
   build-and-upload:
     runs-on: macos-latest
     timeout-minutes: 90
-    
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout mereka-lms
-        uses: actions/checkout@v4
-      
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
       - name: Clone OpenEdX iOS App
         run: |
           # Clone latest release tag (v2.2 Ulmo.1 - Swift 6)
@@ -28,78 +32,78 @@ jobs:
           LATEST_TAG=$(git describe --tags --abbrev=0)
           git checkout "$LATEST_TAG"
           echo "OpenEdX iOS version: $LATEST_TAG"
-      
+
       # ============================================
       # Environment setup (follow OpenEdX CI exactly)
       # ============================================
-      
+
       - name: Preflight - Print Environment
         run: |
           echo "=== System Info ==="
           sw_vers
           xcode-select -p
           xcodebuild -version
-          
+
           echo ""
           echo "=== Available Xcode Versions ==="
           ls -la /Applications | grep Xcode || true
-      
+
       - name: Cache Ruby gems
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
         with:
           path: ios-app/vendor/bundle
           key: ${{ runner.os }}-gems-${{ hashFiles('ios-app/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-
-      
+
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
         with:
           path: ios-app/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('ios-app/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
-      
+
       - name: Setup Environment
         run: |
           cd ios-app
-          
+
           # Install deps per OpenEdX CI
           brew update && brew install xcodegen git-lfs || true
-          
+
           # Update Gemfile to use latest fastlane (fixes UNIVERSAL filter bug)
           cat > Gemfile << 'EOF'
           source "https://rubygems.org"
           gem "fastlane", ">= 2.230.0"
           gem "xcode-install"
           EOF
-          
+
           # Remove old Gemfile.lock to allow fresh install
           rm -f Gemfile.lock
-          
+
           # Bundle setup with updated Gemfile
           bundle config path vendor/bundle
           bundle install --jobs 4 --retry 3
-          
+
           # Pod install
           pod install --repo-update
-      
+
       # ============================================
       # Configuration (using OpenEdX whitelabel script)
       # ============================================
-      
+
       - name: Create Mereka Config
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           # Create API/feature config
           mkdir -p ios-app/default_config/mereka
-          
+
           cat > ios-app/default_config/mereka/config.yaml << 'EOF'
           API_HOST_URL: "https://academyv2.mereka.io"
           OAUTH_CLIENT_ID: "mereka-mobile-app"
           DISCOVERY_BASE_URL: ""
-          
+
           FEATURES:
             PRE_LOGIN_EXPERIENCE_ENABLED: false
             COURSE_NESTED_LIST_ENABLED: true
@@ -107,7 +111,7 @@ jobs:
             COURSE_DATES_CALENDAR_SYNC: true
             WHAT_IS_NEW_ENABLED: true
             SOCIAL_AUTH_ENABLED: true
-          
+
           GOOGLE:
             ENABLED: false
           MICROSOFT:
@@ -124,18 +128,18 @@ jobs:
             ENABLED: false
           BRANCH:
             ENABLED: false
-          
+
           AGREEMENT_URLS:
             PRIVACY_POLICY_URL: "https://academyv2.mereka.io/privacy"
             TOS_URL: "https://academyv2.mereka.io/tos"
-          
+
           FEEDBACK_EMAIL: "team@mereka.io"
-          
+
           THEME:
             PRIMARY_COLOR: "#1A1A2E"
             ACCENT_COLOR: "#E94560"
           EOF
-          
+
           # Update the root config_settings.yaml to point to mereka config
           cat > ios-app/default_config/config_settings.yaml << 'EOF'
           config_directory: './default_config/mereka'
@@ -144,13 +148,13 @@ jobs:
             stage: 'prod'
             dev: 'prod'
           EOF
-          
+
           # Create the prod config directory structure
           mkdir -p ios-app/default_config/mereka/prod
-          
+
           # Move the config.yaml to prod folder
           mv ios-app/default_config/mereka/config.yaml ios-app/default_config/mereka/prod/shared.yaml
-          
+
           # Create ios.yaml with Firebase placeholders (needed for GoogleService-Info.plist generation)
           cat > ios-app/default_config/mereka/prod/ios.yaml << 'EOF'
           FIREBASE:
@@ -164,7 +168,7 @@ jobs:
             REVERSED_CLIENT_ID: "com.googleusercontent.apps.000000000000-placeholder"
             ANALYTICS_SOURCE: "none"
           EOF
-          
+
           # Create file_mappings.yaml (this is what process_config.py expects)
           cat > ios-app/default_config/mereka/prod/file_mappings.yaml << 'EOF'
           ios:
@@ -172,16 +176,16 @@ jobs:
               - ios.yaml
               - shared.yaml
           EOF
-          
+
           echo "Config structure created:"
           ls -laR ios-app/default_config/
-      
+
       - name: Configure Project with Whitelabel Script
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           cd ios-app
-          
+
           # Create whitelabel config for Mereka Academy
           # Note: OpenEdX uses configuration names like ReleaseProd, DebugProd, etc.
           cat > whitelabel_config.yaml << EOF
@@ -221,15 +225,15 @@ jobs:
                 product_name: "Mereka Academy"
                 env_config: 'dev'
           EOF
-          
+
           echo "=== Whitelabel Config ==="
           cat whitelabel_config.yaml
-          
+
           # Install whitelabel script dependencies in a venv
           python3 -m venv .whitelabel-venv
           source .whitelabel-venv/bin/activate
           pip install pyyaml pillow coloredlogs
-          
+
           # Run the whitelabel script to configure bundle ID and team
           # Try different argument formats since OpenEdX may have changed the interface
           python config_script/whitelabel.py whitelabel_config.yaml 2>/dev/null || \
@@ -237,7 +241,7 @@ jobs:
           python config_script/whitelabel.py --config-file whitelabel_config.yaml 2>/dev/null || \
           echo "Whitelabel script completed (may have warnings)"
           deactivate
-          
+
           # CRITICAL: Explicitly set DEVELOPMENT_TEAM in main project since whitelabel may have failed
           echo ""
           echo "=== Setting DEVELOPMENT_TEAM explicitly ==="
@@ -250,12 +254,12 @@ jobs:
             echo "DEVELOPMENT_TEAM set to ${TEAM_ID}"
             grep "DEVELOPMENT_TEAM" "$main_proj" | head -3
           fi
-          
+
           # CRITICAL: OpenEdX uses xcconfig files that OVERRIDE project.pbxproj settings
           # We must patch the xcconfig files directly to change the bundle ID
           echo ""
           echo "=== Patching xcconfig files for bundle ID ==="
-          
+
           # Find and patch all xcconfig files that set PRODUCT_BUNDLE_IDENTIFIER
           for xcconfig in $(find . -name "*.xcconfig" -type f 2>/dev/null); do
             if grep -q "PRODUCT_BUNDLE_IDENTIFIER" "$xcconfig"; then
@@ -265,7 +269,7 @@ jobs:
               grep "PRODUCT_BUNDLE_IDENTIFIER" "$xcconfig" || true
             fi
           done
-          
+
           # Also check the OpenEdX/Info.plist if it has hardcoded bundle ID
           if [ -f "OpenEdX/Info.plist" ]; then
             echo ""
@@ -278,7 +282,7 @@ jobs:
               echo "Info.plist uses build setting variable (good)"
             fi
           fi
-          
+
           # Verify the changes in xcconfig
           echo ""
           echo "=== Verifying Bundle ID in xcconfig files ==="
@@ -286,50 +290,50 @@ jobs:
             echo "$f:"
             grep "PRODUCT_BUNDLE_IDENTIFIER" "$f"
           done
-          
+
           # Verify the changes in project.pbxproj
           echo ""
           echo "=== Verifying Bundle ID in project.pbxproj ==="
           grep -E "PRODUCT_BUNDLE_IDENTIFIER = .*${BUNDLE_ID}" OpenEdX.xcodeproj/project.pbxproj | head -5 || echo "Bundle ID not found in project.pbxproj"
           grep "PRODUCT_BUNDLE_IDENTIFIER" OpenEdX.xcodeproj/project.pbxproj | head -10
-          
+
           # Update framework projects to completely disable code signing (they get signed when embedded)
           # This is the standard CI pattern for iOS frameworks
           echo ""
           echo "=== Configuring framework signing ==="
-          
+
           # Our custom frameworks - COMPLETELY DISABLE signing (they get signed when embedded in app)
           for framework_dir in WhatsNew Dashboard Course Profile Discovery Discussion Core Theme Authorization Downloads; do
             proj_path="${framework_dir}/${framework_dir}.xcodeproj/project.pbxproj"
             if [ -f "$proj_path" ]; then
               echo "Configuring ${framework_dir} to skip signing..."
-              
+
               # Replace ALL CODE_SIGN_STYLE with Manual
               sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$proj_path"
-              
+
               # Replace ALL CODE_SIGN_IDENTITY with "-" (means "don't sign")
               sed -i '' 's/CODE_SIGN_IDENTITY = "[^"]*";/CODE_SIGN_IDENTITY = "-";/g' "$proj_path"
-              
+
               # Set CODE_SIGNING_REQUIRED = NO and CODE_SIGNING_ALLOWED = NO for all build configs
               # These are the key settings that tell Xcode not to sign frameworks
               sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$proj_path"
               sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$proj_path"
-              
+
               # Clear provisioning profile
               sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "[^"]*";/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$proj_path"
-              
+
               # Add CODE_SIGNING_ALLOWED = NO after DEVELOPMENT_TEAM if not present
               # This catches cases where the setting doesn't exist
               if ! grep -q "CODE_SIGNING_ALLOWED" "$proj_path"; then
                 sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/&\n\t\t\t\tCODE_SIGNING_ALLOWED = NO;/g' "$proj_path"
               fi
-              
+
               echo "  ✓ ${framework_dir} configured"
             else
               echo "  ! ${framework_dir} project not found at $proj_path"
             fi
           done
-          
+
           # Configure main OpenEdX project for manual signing
           echo ""
           echo "=== Configuring main app for manual signing ==="
@@ -337,7 +341,7 @@ jobs:
           if [ -f "$main_proj" ]; then
             # Set ALL CODE_SIGN_STYLE to Manual
             sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$main_proj"
-            
+
             # INJECT PROVISIONING_PROFILE_SPECIFIER after DEVELOPMENT_TEAM (if not already present)
             # This adds the setting if it doesn't exist
             if ! grep -q "PROVISIONING_PROFILE_SPECIFIER" "$main_proj"; then
@@ -347,7 +351,7 @@ jobs:
               # Replace existing PROVISIONING_PROFILE_SPECIFIER
               sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "[^"]*";/PROVISIONING_PROFILE_SPECIFIER = "match AppStore '"${BUNDLE_ID}"'";/g' "$main_proj"
             fi
-            
+
             # INJECT CODE_SIGN_IDENTITY if not present or replace existing
             if ! grep -q "CODE_SIGN_IDENTITY" "$main_proj"; then
               echo "  Injecting CODE_SIGN_IDENTITY..."
@@ -355,7 +359,7 @@ jobs:
             else
               sed -i '' 's/CODE_SIGN_IDENTITY = "[^"]*";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$main_proj"
             fi
-            
+
             # Verify the changes
             echo "Checking CODE_SIGN_STYLE values:"
             grep "CODE_SIGN_STYLE" "$main_proj" | head -5
@@ -365,13 +369,13 @@ jobs:
             echo ""
             echo "Checking CODE_SIGN_IDENTITY values:"
             grep "CODE_SIGN_IDENTITY" "$main_proj" | head -5
-            
+
             echo "  ✓ Main app configured for manual signing"
           fi
-          
+
           echo ""
           echo "=== Framework signing configuration complete ==="
-          
+
           # Final verification - show all places where bundle ID is set
           echo ""
           echo "=== Final Bundle ID verification ==="
@@ -380,11 +384,11 @@ jobs:
           echo ""
           echo "Searching for ${BUNDLE_ID} (should find several):"
           grep -r "${BUNDLE_ID}" --include="*.xcconfig" --include="*.pbxproj" . 2>/dev/null | head -10 || echo "WARNING: Bundle ID not found!"
-      
+
       # ============================================
       # Signing setup
       # ============================================
-      
+
       - name: Setup SSH for Match
         env:
           MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
@@ -393,41 +397,41 @@ jobs:
           echo "$MATCH_DEPLOY_KEY" > ~/.ssh/match_key
           chmod 600 ~/.ssh/match_key
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          
+
           cat >> ~/.ssh/config << EOF
           Host github.com
             IdentityFile ~/.ssh/match_key
             IdentitiesOnly yes
           EOF
-      
+
       - name: Create Matchfile
         run: |
           cd ios-app
           mkdir -p fastlane
-          
+
           cat > fastlane/Matchfile << 'EOF'
           git_url("git@github.com:Biji-Biji-Initiative/ios-certificates.git")
           storage_mode("git")
           type("appstore")
           readonly(true)
           EOF
-      
+
       - name: Create CI Fastfile
         run: |
           cd ios-app
-          
+
           # Backup original Fastfile
           cp fastlane/Fastfile fastlane/Fastfile.original
-          
+
           # Create the correct CI Fastfile
           cat > fastlane/Fastfile << 'EOF'
           # Mereka Academy CI Fastfile
           # Proper approach: setup_ci + match + manual export_options
-          
+
           default_platform(:ios)
-          
+
           require "base64"
-          
+
           platform :ios do
             before_all do
               # Use xcodes plugin to select Xcode 16.4 (Swift 6)
@@ -435,11 +439,11 @@ jobs:
                 version: '16.4',
                 select_for_current_build_only: true,
               )
-              
+
               ENV["FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT"] = "180"
               ENV["FASTLANE_XCODE_LIST_TIMEOUT"] = "180"
             end
-            
+
             # API Key helper
             private_lane :asc_api_key do
               key_content = Base64.decode64(ENV.fetch("ASC_KEY_P8_BASE64"))
@@ -450,7 +454,7 @@ jobs:
                 in_house: false
               )
             end
-            
+
             # CI lane for TestFlight
             lane :ci_testflight do
               # Create temp keychain for CI
@@ -461,9 +465,9 @@ jobs:
                 unlock: true,
                 timeout: 3600
               )
-              
+
               api_key = asc_api_key
-              
+
               # Fetch signing certificates and profiles
               # Using force: true to regenerate profiles with any capability changes from the Developer Portal
               # Note: If this fails with "missing capabilities", enable them manually at:
@@ -480,7 +484,7 @@ jobs:
                 keychain_name: "fastlane_tmp_keychain",
                 keychain_password: "fastlane_tmp_keychain"
               )
-              
+
               # DEBUG: Dump profile entitlements to verify capabilities are present
               UI.message("=== Debugging: Checking installed profile entitlements ===")
               sh <<~BASH
@@ -513,7 +517,7 @@ jobs:
                 done
                 echo "=== Profile debug complete ==="
               BASH
-              
+
               # Build the app
               # Note: xcargs apply to BOTH archive AND export steps
               # - Archive needs: CODE_SIGN_STYLE, CODE_SIGN_IDENTITY, PROVISIONING_PROFILE_SPECIFIER for main app
@@ -543,7 +547,7 @@ jobs:
                   "CONFIG_DIRECTORY=mereka",
                 ].join(" ")
               )
-              
+
               # Upload to TestFlight
               upload_to_testflight(
                 api_key: api_key,
@@ -554,11 +558,11 @@ jobs:
             end
           end
           EOF
-      
+
       # ============================================
       # Build and Upload
       # ============================================
-      
+
       - name: Build and Upload to TestFlight
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -569,7 +573,7 @@ jobs:
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
         run: |
           cd ios-app
-          
+
           # CRITICAL: Override OpenEdX's Appfile which has org.openedx.app
           # This prevents pilot/upload_to_testflight from using the wrong bundle ID
           cat > fastlane/Appfile <<EOF
@@ -577,10 +581,10 @@ jobs:
           EOF
           echo "=== Appfile overridden with bundle ID: ${BUNDLE_ID} ==="
           cat fastlane/Appfile
-          
+
           # Use bundle exec fastlane (per OpenEdX CI approach)
           bundle exec fastlane ci_testflight
-      
+
       - name: Cleanup
         if: always()
         run: |

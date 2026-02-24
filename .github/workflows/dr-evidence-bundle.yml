@@ -13,20 +13,24 @@ on:
         default: true
         type: boolean
 
+permissions: {}
+
 jobs:
   dr-evidence:
     name: Build DR Evidence Bundle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install gcloud
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f  # v2
         with:
           project_id: mereka-lms
 
@@ -70,7 +74,7 @@ jobs:
 
       - name: Upload DR evidence artifacts
         if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: dr-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: |

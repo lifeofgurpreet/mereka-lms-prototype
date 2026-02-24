@@ -9,15 +9,19 @@ on:
       - 'infrastructure/tutor/plugins/**'
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   test-mfe-oauth-plugin:
     name: Test MFE OAuth Fix Plugin
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -127,12 +131,14 @@ jobs:
 
   test-plugin-lifecycle:
     name: Test Plugin Enable/Disable Lifecycle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -196,9 +202,11 @@ jobs:
 
   verify-custom-app-structure:
     name: Verify Custom App Structure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Check for custom app directory
         run: |
@@ -216,12 +224,14 @@ jobs:
 
   lint-plugins:
     name: Lint Plugin Code
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
 
@@ -239,12 +249,14 @@ jobs:
 
   integration-test:
     name: Integration Test - Plugin with Patches
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -299,14 +311,15 @@ jobs:
 
   post-failure-comment:
     name: Post PR Comment on Plugin Test Failure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test-mfe-oauth-plugin, test-plugin-lifecycle, lint-plugins, integration-test]
     if: failure() && github.event_name == 'pull_request'
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - name: Post failure comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7
         with:
           script: |
             const body = `## ❌ Tutor Plugin Tests Failed
