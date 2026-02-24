@@ -93,7 +93,7 @@ def test_checkout_request_rejects_disallowed_origin():
 @pytest.mark.asyncio
 @patch("app.routers.checkout.settings")
 @patch("app.routers.checkout.stripe")
-async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mock_db, client):
+async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mock_db):
     """create_checkout returns 404 when offering does not exist or is inactive."""
     from fastapi import HTTPException
 
