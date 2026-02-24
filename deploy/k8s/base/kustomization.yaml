@@ -46,6 +46,11 @@ labels:
     includeSelectors: false
 
 
+patchesStrategicMerge:
+# T087: Enforce non-root, read-only FS, capability drop, and RuntimeDefault
+# seccomp profile for all Deployments. Multi-doc file, matched by kind+name.
+- patches/container-hardening.yaml
+
 configMapGenerator:
 - name: caddy-config
   files:
