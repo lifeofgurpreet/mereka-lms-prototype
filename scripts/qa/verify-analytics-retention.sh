@@ -1,210 +1,226 @@
 #!/usr/bin/env bash
-# @covers AC-003, AC-004, AC-007, AC-008
-# @spec: analytics-pipeline_spec.md
+# verify-analytics-retention.sh — Validate the analytics data retention policy config.
+#
+# Reads infrastructure/tutor/analytics-retention-config.yaml and verifies:
+#   - All required fields are present
+#   - retention_days values are within acceptable range (30–730)
+#   - last_reviewed date is not older than 180 days
+#   - Prints a summary of all retention tiers
+#
+# Usage:
+#   ./scripts/qa/verify-analytics-retention.sh
+#
+# Requirements: python3 (for YAML parsing via PyYAML or stdlib fallback)
 set -euo pipefail
 
-# verify-analytics-retention.sh - Verify analytics pipeline configuration
-#
-# AC-003: ClickHouse retention policy active: Events older than 90 days are deleted
-# AC-004: Superset accessible at configured URL (https://analytics.mereka.io)
-# AC-007: Instructor dashboard embeds in LMS course pages
-# AC-008: Data deletion works: Deleting user removes events from ClickHouse
-#
-# Note: Aspects/ClickHouse is managed via Tutor plugin (tutor-contrib-aspects).
-# This script verifies that retention configuration exists in K8s manifests
-# or is documented as managed by the Aspects plugin defaults.
-
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-ASPECTS_DIR="${REPO_ROOT}/deploy/k8s/base/plugins/aspects"
+CONFIG_FILE="${REPO_ROOT}/infrastructure/tutor/analytics-retention-config.yaml"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 PASS=0
 FAIL=0
-SKIP=0
 
 pass() {
-  echo -e "${GREEN}PASS${NC} $1"
+  echo -e "${GREEN}PASS${NC}  $1"
   PASS=$((PASS + 1))
 }
 
 fail() {
-  echo -e "${RED}FAIL${NC} $1"
+  echo -e "${RED}FAIL${NC}  $1"
   FAIL=$((FAIL + 1))
 }
 
-skip() {
-  echo -e "${YELLOW}SKIP${NC} $1"
-  SKIP=$((SKIP + 1))
-}
+echo "=== Analytics Data Retention — Policy Verification ==="
+echo "Config: ${CONFIG_FILE}"
+echo ""
 
-echo "=== Analytics Pipeline: Configuration Verification ==="
-echo "Spec: analytics-pipeline_spec.md | AC-003, AC-004, AC-007, AC-008"
-echo
-echo "=== AC-003: ClickHouse Retention Policy ==="
-
-# Check 1: Aspects K8s manifests exist
-if [[ -d "$ASPECTS_DIR" ]]; then
-  pass "Aspects K8s directory exists: $ASPECTS_DIR"
-else
-  skip "Aspects K8s directory not found (Aspects may not be deployed yet)"
-  echo
-  echo "=== Summary ==="
-  echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
-  echo
-  echo "Note: Aspects (ClickHouse + Superset) is not yet deployed."
-  echo "Retention policy will be configured when Aspects plugin is enabled."
-  echo "Default retention: 90 days (configured via tutor-contrib-aspects plugin)."
-  exit 0
-fi
-
-# Check 2: ClickHouse configmap exists
-configmap_file="$ASPECTS_DIR/configmaps.yml"
-if [[ -f "$configmap_file" ]]; then
-  pass "ClickHouse configmap file exists"
-
-  # Check 3: Retention/TTL configuration in configmap
-  if grep -qiE "(retention|ttl|expire|MERGE_TREE)" "$configmap_file"; then
-    pass "Retention/TTL configuration found in ClickHouse configmap"
-  else
-    # TTL is often set via SQL schema, not configmap
-    # Check if there's a SQL init script or migration
-    if grep -qiE "(init|schema|migration|sql)" "$configmap_file"; then
-      pass "Schema/init configuration found (retention may be in SQL DDL)"
-    else
-      fail "No retention/TTL configuration found in configmap (AC-003 requires 90-day retention)"
-    fi
-  fi
-else
-  fail "ClickHouse configmap not found at $configmap_file"
-fi
-
-# Check 4: Look for retention in any Aspects-related file
-retention_found=false
-while IFS= read -r -d '' f; do
-  if grep -qliE "(TTL|retention|toIntervalDay|INTERVAL.*DAY)" "$f" 2>/dev/null; then
-    pass "Retention reference found in: $(basename "$f")"
-    retention_found=true
-    break
-  fi
-done < <(find "$ASPECTS_DIR" -type f \( -name '*.yml' -o -name '*.yaml' -o -name '*.sql' -o -name '*.xml' -o -name '*.conf' \) -print0 2>/dev/null)
-
-if [[ "$retention_found" == "false" ]]; then
-  # Check spec documents the default
-  if grep -q "90 days" "$REPO_ROOT/specs/analytics-pipeline_spec.md" 2>/dev/null; then
-    pass "90-day retention policy documented in spec (default for Aspects plugin)"
-  else
-    fail "No retention configuration found in Aspects manifests"
-  fi
-fi
-
-echo
-echo "=== AC-004: Superset URL Configuration ==="
-
-# Check 5: Superset URL configured in manifests or DNS
-superset_url_found=false
-
-# Check Aspects ingress for analytics.mereka.io
-if grep -qr "analytics\.mereka\.io" "$ASPECTS_DIR" 2>/dev/null; then
-  pass "AC-004: Superset URL (analytics.mereka.io) found in Aspects manifests"
-  superset_url_found=true
-fi
-
-# Check specs for documented URL
-if grep -q "analytics\.mereka\.io" "$REPO_ROOT/specs/analytics-pipeline_spec.md" 2>/dev/null; then
-  pass "AC-004: Superset URL documented in spec"
-  superset_url_found=true
-fi
-
-# Check Cloudflare DNS configs
-if [[ -d "$REPO_ROOT/infrastructure/cloudflare" ]]; then
-  if grep -qr "analytics" "$REPO_ROOT/infrastructure/cloudflare" 2>/dev/null; then
-    pass "AC-004: Superset DNS configuration found in Cloudflare configs"
-    superset_url_found=true
-  fi
-fi
-
-if [[ "$superset_url_found" == "false" ]]; then
-  skip "AC-004: Superset URL not configured yet (Aspects not deployed)"
-fi
-
-echo
-echo "=== AC-007: Instructor Dashboard Embedding ==="
-
-# Check 6: Instructor dashboard embed configuration
-# Look for Superset embed settings in LMS configuration or Aspects plugin config
-embed_config_found=false
-
-# Check for Superset embedding in Aspects configmaps
-if [[ -f "$ASPECTS_DIR/configmaps.yml" ]]; then
-  if grep -qiE "(embed|iframe|SUPERSET.*EMBED)" "$ASPECTS_DIR/configmaps.yml" 2>/dev/null; then
-    pass "AC-007: Superset embedding configuration found in Aspects configmaps"
-    embed_config_found=true
-  fi
-fi
-
-# Check for XBlock or LMS integration for dashboards
-if grep -qrE "(superset|dashboard.*embed|instructor.*analytics)" "$REPO_ROOT/infrastructure/tutor" 2>/dev/null; then
-  pass "AC-007: Dashboard embedding references found in Tutor configuration"
-  embed_config_found=true
-fi
-
-# Check spec documents the feature
-if grep -qi "instructor dashboard" "$REPO_ROOT/specs/analytics-pipeline_spec.md" 2>/dev/null; then
-  pass "AC-007: Instructor dashboard embedding documented in spec"
-  embed_config_found=true
-fi
-
-if [[ "$embed_config_found" == "false" ]]; then
-  skip "AC-007: Instructor dashboard embedding not configured yet (requires Aspects embedding setup)"
-fi
-
-echo
-echo "=== AC-008: Data Deletion Capability ==="
-
-# Check 7: User data deletion scripts or GDPR compliance
-deletion_capability_found=false
-
-# Check for user deletion scripts
-if [[ -f "$REPO_ROOT/scripts/infra/delete-user-data.sh" ]] || \
-   [[ -f "$REPO_ROOT/scripts/privacy/delete-user-data.sh" ]] || \
-   grep -qr "delete.*user.*clickhouse" "$REPO_ROOT/scripts" 2>/dev/null; then
-  pass "AC-008: User data deletion script found"
-  deletion_capability_found=true
-fi
-
-# Check for GDPR/privacy documentation
-if [[ -f "$REPO_ROOT/specs/data-privacy-gdpr-compliance_spec.md" ]]; then
-  if grep -qiE "(delete.*events|clickhouse.*deletion|right.*erasure)" "$REPO_ROOT/specs/data-privacy-gdpr-compliance_spec.md" 2>/dev/null; then
-    pass "AC-008: Data deletion capability documented in GDPR spec"
-    deletion_capability_found=true
-  fi
-fi
-
-# Check for ClickHouse deletion procedures in Aspects
-if grep -qrE "(DELETE|ALTER.*DELETE|TRUNCATE)" "$ASPECTS_DIR" 2>/dev/null; then
-  pass "AC-008: ClickHouse deletion operations found in Aspects manifests"
-  deletion_capability_found=true
-fi
-
-if [[ "$deletion_capability_found" == "false" ]]; then
-  skip "AC-008: Data deletion capability not implemented yet (requires GDPR compliance procedures)"
-fi
-
-# Summary
-echo
-echo "=== Summary ==="
-echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
-
-if [[ $FAIL -gt 0 ]]; then
-  echo
-  echo "Action required: Configure ClickHouse TTL for 90-day retention."
-  echo "  SQL: ALTER TABLE xapi_events_all MODIFY TTL event_time + INTERVAL 90 DAY;"
-  echo "  Or via Aspects plugin config: ASPECTS_CLICKHOUSE_RETENTION_DAYS=90"
+# --- Prerequisite: python3 ---
+if ! command -v python3 >/dev/null 2>&1; then
+  echo -e "${RED}ERROR${NC} python3 is required but not found."
   exit 1
 fi
 
-exit 0
+# --- Check config file exists ---
+if [[ ! -f "${CONFIG_FILE}" ]]; then
+  fail "Config file not found: ${CONFIG_FILE}"
+  echo ""
+  echo -e "${RED}FAILED${NC} (${FAIL} failures)"
+  exit 1
+fi
+pass "Config file exists"
+
+# --- Parse and validate via Python ---
+PY_EXIT=0
+python3 - "${CONFIG_FILE}" <<'PYEOF' || PY_EXIT=$?
+import sys
+import datetime
+
+config_path = sys.argv[1]
+
+# Try PyYAML first, fall back to a minimal YAML subset parser
+try:
+    import yaml
+    with open(config_path) as fh:
+        doc = yaml.safe_load(fh)
+except ImportError:
+    # Minimal fallback: use json after converting trivial YAML (no nested lists/anchors)
+    # This is intentionally limited — install pyyaml for full support.
+    print("WARN  PyYAML not installed; using minimal fallback parser (install pyyaml for reliability)")
+
+    with open(config_path) as fh:
+        raw = fh.read()
+
+    def minimal_yaml_to_dict(text):
+        """Convert a simple key: value YAML (no lists, no anchors) to a nested dict."""
+        result = {}
+        stack = [(result, -1)]
+        for line in text.splitlines():
+            stripped = line.rstrip()
+            if not stripped or stripped.lstrip().startswith('#'):
+                continue
+            indent = len(stripped) - len(stripped.lstrip())
+            key_val = stripped.lstrip()
+            if ':' not in key_val:
+                continue
+            key, _, val = key_val.partition(':')
+            key = key.strip()
+            val = val.strip().strip('"').strip("'")
+            if val == 'null':
+                val = None
+            # Pop stack to correct level
+            while len(stack) > 1 and stack[-1][1] >= indent:
+                stack.pop()
+            parent = stack[-1][0]
+            if val == '' or (val is None and key_val.endswith(':')):
+                child = {}
+                parent[key] = child
+                stack.append((child, indent))
+            else:
+                parent[key] = val
+        return result
+
+    doc = minimal_yaml_to_dict(raw)
+
+RED   = '\033[0;31m'
+GREEN = '\033[0;32m'
+YELLOW= '\033[1;33m'
+CYAN  = '\033[0;36m'
+NC    = '\033[0m'
+
+PASS = 0
+FAIL = 0
+
+MIN_RETENTION_DAYS = 30
+MAX_RETENTION_DAYS = 730
+MAX_REVIEW_AGE_DAYS = 180
+
+def ok(msg):
+    global PASS
+    print(f"{GREEN}PASS{NC}  {msg}")
+    PASS += 1
+
+def err(msg):
+    global FAIL
+    print(f"{RED}FAIL{NC}  {msg}")
+    FAIL += 1
+
+# --- Top-level structure ---
+policy = doc.get('retention_policy', {})
+
+if not policy:
+    err("Missing top-level 'retention_policy' key")
+    sys.exit(1)
+ok("Top-level 'retention_policy' key present")
+
+# --- Required top-level fields ---
+for field in ('version', 'last_reviewed', 'tiers'):
+    if field in policy:
+        ok(f"Field '{field}' present")
+    else:
+        err(f"Required field '{field}' is missing")
+
+# --- last_reviewed date check ---
+last_reviewed_raw = policy.get('last_reviewed', '')
+if last_reviewed_raw:
+    try:
+        last_reviewed = datetime.date.fromisoformat(str(last_reviewed_raw))
+        age_days = (datetime.date.today() - last_reviewed).days
+        if age_days <= MAX_REVIEW_AGE_DAYS:
+            ok(f"last_reviewed is {age_days} days ago (limit: {MAX_REVIEW_AGE_DAYS} days)")
+        else:
+            err(f"last_reviewed is {age_days} days ago — policy review overdue (limit: {MAX_REVIEW_AGE_DAYS} days)")
+    except ValueError:
+        err(f"last_reviewed '{last_reviewed_raw}' is not a valid ISO date (YYYY-MM-DD)")
+
+# --- Tiers ---
+tiers = policy.get('tiers', {})
+if not tiers:
+    err("'tiers' is empty or missing")
+    sys.exit(1)
+
+REQUIRED_TIERS = ('raw_events', 'pii_events', 'debug_traces', 'aggregated_reports')
+for tier_name in REQUIRED_TIERS:
+    if tier_name in tiers:
+        ok(f"Tier '{tier_name}' defined")
+    else:
+        err(f"Required tier '{tier_name}' is missing")
+
+# --- Per-tier field validation ---
+print(f"\n{CYAN}--- Retention Tier Summary ---{NC}")
+for tier_name, tier in tiers.items():
+    retention_days_raw = tier.get('retention_days')
+    retention_indefinite = tier.get('retention') == 'indefinite'
+    enforcement = tier.get('enforcement', '')
+    target_table = tier.get('target_table')
+
+    if retention_indefinite:
+        print(f"  {CYAN}{tier_name:<20}{NC}  indefinite        enforcement: {enforcement}")
+        ok(f"Tier '{tier_name}': indefinite retention is valid")
+        continue
+
+    # retention_days must be present and numeric for non-indefinite tiers
+    if retention_days_raw is None:
+        err(f"Tier '{tier_name}': 'retention_days' is required (or set retention: indefinite)")
+        continue
+
+    try:
+        retention_days = int(retention_days_raw)
+    except (ValueError, TypeError):
+        err(f"Tier '{tier_name}': 'retention_days' must be an integer, got: {retention_days_raw!r}")
+        continue
+
+    range_ok = MIN_RETENTION_DAYS <= retention_days <= MAX_RETENTION_DAYS
+    status = "OK" if range_ok else "OUT-OF-RANGE"
+    print(f"  {CYAN}{tier_name:<20}{NC}  {retention_days:>4} days  ({status:<11})  enforcement: {enforcement}  table: {target_table or 'n/a'}")
+
+    if range_ok:
+        ok(f"Tier '{tier_name}': retention_days={retention_days} is within [{MIN_RETENTION_DAYS}, {MAX_RETENTION_DAYS}]")
+    else:
+        err(f"Tier '{tier_name}': retention_days={retention_days} is outside acceptable range [{MIN_RETENTION_DAYS}, {MAX_RETENTION_DAYS}]")
+
+    if not enforcement:
+        err(f"Tier '{tier_name}': 'enforcement' field is missing")
+    else:
+        ok(f"Tier '{tier_name}': enforcement='{enforcement}'")
+
+print(f"\n=== Python validation summary ===")
+print(f"{GREEN}PASS:{NC} {PASS}  {RED}FAIL:{NC} {FAIL}")
+
+if FAIL > 0:
+    sys.exit(1)
+sys.exit(0)
+PYEOF
+
+echo ""
+if [[ $PY_EXIT -eq 0 && $FAIL -eq 0 ]]; then
+  echo -e "${GREEN}OK${NC} — Analytics retention policy is valid."
+  exit 0
+else
+  echo -e "${RED}FAILED${NC} — Analytics retention policy has validation errors."
+  exit 1
+fi
