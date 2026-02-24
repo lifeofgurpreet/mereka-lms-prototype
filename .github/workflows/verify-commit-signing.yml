@@ -1,0 +1,66 @@
+name: Verify Commit Signing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  verify-commit-signing:
+    name: Commit Signing Check (soft gate)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify commit signing
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-commit-signing.sh --count 20 --threshold 50 \
+            | tee var/ci/commit-signing-verify.log
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## Commit Signing Verification"
+            echo ""
+            echo "### What was checked"
+            echo "- Last 20 commits on this branch"
+            echo "- Signature status per commit (\`G\`=good, \`U\`=unknown key, \`X/Y\`=expired, \`N\`=unsigned, \`E/B\`=error)"
+            echo "- Soft-gate threshold: 50% signed"
+            echo ""
+            echo "### Gate mode"
+            echo "This check is currently **informational only** (\`continue-on-error: true\`)."
+            echo "It will not block merges during the adoption ramp-up period."
+            echo ""
+            echo "### Next steps"
+            echo "- See \`docs/operations/COMMIT_SIGNING.md\` for setup instructions"
+            echo "- GPG, SSH, or Sigstore Gitsign all produce valid signatures"
+            echo "- Migration plan: soft gate → hard gate timeline is in the doc above"
+            echo ""
+            if [[ -f var/ci/commit-signing-verify.log ]]; then
+              echo "### Script output"
+              echo "\`\`\`"
+              cat var/ci/commit-signing-verify.log
+              echo "\`\`\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: commit-signing-verify-logs
+          path: var/ci/commit-signing-verify.log
+          if-no-files-found: warn
