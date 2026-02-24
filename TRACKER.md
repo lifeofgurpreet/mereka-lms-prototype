@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 27    |
-| TODO   | 44    |
+| DONE   | 32    |
+| TODO   | 39    |
 | PARTIAL| 16    |
 | BLOCKED| 3     |
 | **Total** | **90** |
@@ -301,13 +301,13 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T022 | Add pytest coverage gate to CI | P1 | DONE | I24 | S | — | ✓ Batch 2. test-coverage job in ci.yml, 40% floor, non-blocking (continue-on-error). Placeholder tests in tests/test_placeholder.py. |
 | T023 | Add purchase-gateway unit tests | P1 | DONE | NEW | M | T022 | ✓ Batch 3. Tests for checkout, webhook handler, fulfillment, models. Opus review found naming + fixture issues, fixed. |
 | T065 | Add CodeQL SAST workflow | P1 | DONE | DR2:I-010 | M | — | ✓ Batch 2. codeql.yml for Python + JavaScript, SHA-pinned actions, weekly schedule + PR triggers, non-blocking. |
-| T066 | Establish spec coverage floor per PR | P1 | TODO | DR2:I-018 | M | — | Define a "spec coverage" metric (fraction of ACs with a corresponding test). Enforce a minimum floor per PR, ratchet upward each sprint, review in retro. |
-| T067 | Add Aspects version compatibility enforcement test | P1 | TODO | DR2:I-020 | M | — | Add a CI test that validates the deployed Aspects version is compatible with the target Open edX release. Prevents silent incompatibilities during upgrades. |
+| T066 | Establish spec coverage floor per PR | P1 | DONE | DR2:I-018 | M | — | ✓ Batch 5. verify-spec-coverage.sh (AC detection + testmap cross-ref, 40% floor default, 85% current). SPEC_COVERAGE.md with ratcheting guide. |
+| T067 | Add Aspects version compatibility enforcement test | P1 | DONE | DR2:I-020 | M | — | ✓ Batch 5. verify-aspects-compat.sh + aspects-compat.yml CI workflow (informational). Checks Redwood range >=0.70,<1.0. |
 | T068 | Add PR template aligned to specs/rollout/verification | P2 | DONE | DR2:I-028 | S | — | ✓ Batch 1. `.github/PULL_REQUEST_TEMPLATE.md` with What/Why/Checklist/Infra/Verification sections. |
 | T069 | Branch protection + Scorecard alignment | P1 | DONE | DR2:I-029 | S | — | ✓ Batch 4. BRANCH_PROTECTION.md doc + verify-branch-protection.sh script (8 checks). Opus fix: removed phantom "Verify Actions Pinned" check, completed REQUIRED_CHECKS list. |
 | T070 | Add CODEOWNERS for infra-critical paths | P2 | DONE | DR2:I-030 | S | — | ✓ Batch 1. `CODEOWNERS` covering production overlays, workflows, secrets → @infra; tutor → @platform; specs → @engineering. |
 | T019 | Add patch idempotency tests | P1 | TODO | NEW | M | T018 | Each patch module should be testable in isolation (run twice, same result). Add to `tests/tutor/`. |
-| T021 | Verify no `latest` tags in production overlays | P1 | TODO | NEW | S | T020 | `verify-no-latest-prod-tags.sh` exists but not wired into CI as a blocking gate. Wire it. Enforce digest-only refs in production overlays — no tag-only references allowed. |
+| T021 | Verify no `latest` tags in production overlays | P1 | DONE | NEW | S | T020 | ✓ Batch 5. verify-image-tags.yml CI workflow (blocking). Opus fix: aligned checkout SHA to repo standard. |
 | T017 | Validate SITE_VARIANTS + multisite config | P1 | DONE | NEW | M | — | ✓ Batch 4. validate-multisite.yml CI workflow + validate-multisite-config.sh (7 sections, 12 checks). |
 | T071 | Add smoke tests for authn MFE config endpoint | P1 | TODO | DR2:I-035 | M | — | Add automated checks for: authn MFE config endpoint returns valid JSON, cookie domain is correct for each tenant, OAuth redirect URIs match config. |
 | T072 | Add automated tenant isolation tests | P1 | TODO | DR2:I-036 | L | T011 | Automated tests that verify tenant A cannot access tenant B's data for: auth tokens, analytics events, branding assets. |
@@ -459,7 +459,7 @@ infrastructure/tutor/patches/
 | T078 | ExternalSecrets refresh + failure alerting | P1 | TODO | DR2:I-040 | M | — | Add tests and Prometheus alerts for ExternalSecrets refresh failures and stale secrets (last sync > 2h). Cross-repo: bbi-infrastructure. |
 | T079 | Analytics data retention as tested config | P2 | TODO | DR2:I-045 | M | — | Encode Aspects analytics data retention policy as configuration (lifecycle rules). Add CI test that validates retention config matches the documented policy. |
 | T080 | Add security incident runbook (supply-chain) | P2 | DONE | DR2:I-046 | M | — | ✓ Batch 3. Full runbook with P1-P4 severity, GitOps-safe rollback, comms templates, post-incident checklist. Opus review fixed GitOps violation + dep path. |
-| T081 | Create security exceptions register | P2 | TODO | DR2:I-048 | M | — | Create a tracked register of accepted security exceptions with expiry dates. Add a CI job that fails if any exception is past its expiry date. |
+| T081 | Create security exceptions register | P2 | DONE | DR2:I-048 | M | — | ✓ Batch 5. SECURITY_EXCEPTIONS.md register (3 seeded entries) + verify-security-exceptions.sh + CI workflow (blocking on expired). |
 
 #### T027 Plan: purchase gateway completion
 
@@ -496,7 +496,7 @@ infrastructure/tutor/patches/
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T042 | Document Tutor upgrade cadence + EOL policy | P3 | DONE | I05, DR2:I-019, DR2:I-047 | S | — | ✓ Batch 4. ADR-019 (renamed from 002 to avoid collision). Stay on Redwood, quarterly eval, pre-upgrade checklist, GitOps-safe rollback. |
-| T082 | Publish release evidence bundle + retention policy | P2 | TODO | DR2:I-031 | M | — | Define what constitutes a "release evidence bundle" (test results, SBOM, scan report, deploy log). Automate assembly in CI and define a retention policy (e.g., 90 days in GCS). |
+| T082 | Publish release evidence bundle + retention policy | P2 | DONE | DR2:I-031 | M | — | ✓ Batch 5. RELEASE_EVIDENCE.md + assemble-release-evidence.sh + release-evidence-bundle.yml. Opus fix: Python path + JSON injection. |
 | T083 | Standardize OpenTelemetry naming + dashboard contract tests | P2 | TODO | DR2:I-025 | M | — | Standardize OTEL metric/trace naming conventions. Add contract tests that verify dashboards reference only known metric names (prevents silent dashboard breakage on rename). |
 | T084 | Add Lighthouse CI + bundle budgets + INP metric | P2 | TODO | DR2:I-026 | M | — | Add Lighthouse CI to post-deploy pipeline. Define bundle size budgets per MFE. Update from FID → INP (Interaction to Next Paint) metric per Core Web Vitals v4. |
 | T085 | Formalize staging activation path | P2 | TODO | DR2:I-027 | L | — | Document and implement the promotion path from nonprod → staging → production in bbi-infrastructure. Cross-repo: bbi-infrastructure. |
@@ -587,9 +587,9 @@ T058
 | I-015 | Pin tool binary downloads in bbi-infrastructure CI | T057 | TODO |
 | I-016 | Pin tool binary downloads in platform-control-plane CI | T058 | TODO |
 | I-017 | Add GitHub Advanced Security secret scanning | T059 | DONE |
-| I-018 | Establish spec coverage floor per PR | T066 | TODO |
+| I-018 | Establish spec coverage floor per PR | T066 | DONE |
 | I-019 | Release track ADR (Redwood vs Ulmo decision) | T042 | DONE |
-| I-020 | Aspects version compatibility enforcement test | T067 | TODO |
+| I-020 | Aspects version compatibility enforcement test | T067 | DONE |
 | I-021 | User retirement PII pipeline | T034 | PARTIAL (enriched) |
 | I-022 | SAML config alignment + metadata endpoints | T035 | PARTIAL (enriched) |
 | I-023 | Implement Reusable LTI Store (Ulmo feature) | T076 | TODO |
@@ -600,7 +600,7 @@ T058
 | I-028 | Add repo-level PR template | T068 | DONE |
 | I-029 | Require PR reviews + status checks (Scorecard) | T069 | DONE |
 | I-030 | Add CODEOWNERS for infra-critical paths | T070 | DONE |
-| I-031 | Publish release evidence bundle + retention policy | T082 | TODO |
+| I-031 | Publish release evidence bundle + retention policy | T082 | DONE |
 | I-032 | Pin runner images to ubuntu-24.04 | T063 | DONE |
 | I-033 | Replace PAT-based GitOps with GitHub App token | T062 | TODO |
 | I-034 | ArgoCD drift detection + alerting for "Synced but wrong" | T075 | TODO |
@@ -617,6 +617,6 @@ T058
 | I-045 | Analytics data retention as tested config | T079 | TODO |
 | I-046 | Security incident runbook (supply-chain) | T080 | DONE |
 | I-047 | Ulmo upgrade spike (compat test suite + rollback plan) | T042/T044 | TODO (enriched) |
-| I-048 | Security exceptions register with expiry + CI enforcement | T081 | TODO |
+| I-048 | Security exceptions register with expiry + CI enforcement | T081 | DONE |
 | I-049 | Commit signing (Sigstore/GitHub) + CI verification | T064 | TODO |
 | I-050 | SSO/SAML/LTI docs aligned to official Open edX operator pages | T035 | PARTIAL (enriched) |
