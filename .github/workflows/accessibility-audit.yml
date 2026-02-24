@@ -1,0 +1,196 @@
+name: Accessibility Audit (axe-core)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/tutor/themes/**'
+      - 'infrastructure/tutor/plugins/**'
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target URL to scan (default: https://academyv2.mereka.io)"
+        required: false
+        default: "https://academyv2.mereka.io"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  axe-audit:
+    name: axe-core WCAG 2.2 AA Audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    continue-on-error: true
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '20'
+
+      - name: Install axe-core CLI
+        run: npm install -g @axe-core/cli@4.10.2
+
+      - name: Set target URL
+        run: |
+          TARGET="${{ github.event.inputs.target_url || 'https://academyv2.mereka.io' }}"
+          echo "TARGET_URL=${TARGET}" >> "$GITHUB_ENV"
+
+      - name: Run axe-core against key routes
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci/axe-reports
+
+          TARGET="${TARGET_URL}"
+
+          ROUTES=(
+            "/"
+            "/login"
+            "/register"
+            "/dashboard"
+            "/courses"
+          )
+
+          VIOLATIONS_TOTAL=0
+          REPORT_FILES=()
+
+          for route in "${ROUTES[@]}"; do
+            url="${TARGET}${route}"
+            safe_name="$(echo "${route}" | sed 's|/|-|g; s|^-||')"
+            if [[ -z "$safe_name" ]]; then safe_name="home"; fi
+            report_file="var/ci/axe-reports/axe-${safe_name}.json"
+
+            echo "--- Scanning: ${url} ---"
+
+            # Run axe CLI; capture exit code separately so we can collect results
+            axe "${url}" \
+              --tags wcag2a,wcag2aa,wcag22aa \
+              --reporter json \
+              --save "${report_file}" \
+              --timeout 30000 \
+              --chromium-path "$(which chromium-browser 2>/dev/null || which chromium 2>/dev/null || echo '')" \
+              2>/dev/null || true
+
+            REPORT_FILES+=("$report_file")
+
+            if [[ -f "$report_file" ]]; then
+              # Count violations in this report
+              VIOLS=$(python3 -c "
+          import json, sys
+          try:
+              data = json.load(open('${report_file}'))
+              results = data if isinstance(data, list) else [data]
+              total = sum(len(r.get('violations', [])) for r in results)
+              print(total)
+          except Exception:
+              print(0)
+          " 2>/dev/null || echo 0)
+              VIOLATIONS_TOTAL=$((VIOLATIONS_TOTAL + VIOLS))
+              echo "  violations found: ${VIOLS}"
+            else
+              echo "  (no report generated — URL may be unreachable)"
+            fi
+          done
+
+          echo ""
+          echo "=== Summary ==="
+          echo "Routes scanned : ${#ROUTES[@]}"
+          echo "Total violations: ${VIOLATIONS_TOTAL}"
+          echo "VIOLATIONS_TOTAL=${VIOLATIONS_TOTAL}" >> "$GITHUB_ENV"
+
+      - name: Combine reports into summary JSON
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 - << 'PYEOF'
+          import json, os, glob
+
+          reports = []
+          for path in sorted(glob.glob("var/ci/axe-reports/axe-*.json")):
+              try:
+                  data = json.load(open(path))
+                  results = data if isinstance(data, list) else [data]
+                  for r in results:
+                      url = r.get("url", os.path.basename(path))
+                      violations = r.get("violations", [])
+                      reports.append({
+                          "url": url,
+                          "violations": len(violations),
+                          "critical": sum(1 for v in violations if v.get("impact") == "critical"),
+                          "serious": sum(1 for v in violations if v.get("impact") == "serious"),
+                          "details": [
+                              {"id": v["id"], "impact": v.get("impact"), "description": v.get("description", ""), "nodes": len(v.get("nodes", []))}
+                              for v in violations
+                          ],
+                      })
+              except Exception as e:
+                  reports.append({"url": path, "error": str(e)})
+
+          with open("var/ci/axe-summary.json", "w") as f:
+              json.dump({"routes": reports, "total_violations": sum(r.get("violations", 0) for r in reports)}, f, indent=2)
+
+          print("Summary written to var/ci/axe-summary.json")
+          PYEOF
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## Accessibility Audit (axe-core WCAG 2.2 AA)"
+            echo ""
+            echo "**Target**: \`${TARGET_URL}\`"
+            echo "**Standard**: WCAG 2.2 AA (\`wcag2a\`, \`wcag2aa\`, \`wcag22aa\` tags)"
+            echo ""
+            echo "### Routes Scanned"
+            echo "- \`/\` (homepage)"
+            echo "- \`/login\`"
+            echo "- \`/register\`"
+            echo "- \`/dashboard\`"
+            echo "- \`/courses\`"
+            echo ""
+            if [[ -f "var/ci/axe-summary.json" ]]; then
+              python3 - << 'PYEOF'
+          import json
+          data = json.load(open("var/ci/axe-summary.json"))
+          total = data.get("total_violations", 0)
+          print(f"### Result: {total} total violation(s) found")
+          print()
+          print("| URL | Violations | Critical | Serious |")
+          print("|-----|-----------|----------|---------|")
+          for r in data.get("routes", []):
+              url = r.get("url", "—")
+              viols = r.get("violations", "—")
+              crit = r.get("critical", "—")
+              serious = r.get("serious", "—")
+              err = r.get("error", "")
+              if err:
+                  print(f"| {url} | ⚠ error | — | — |")
+              else:
+                  icon = "✅" if viols == 0 else "❌"
+                  print(f"| {icon} {url} | {viols} | {crit} | {serious} |")
+          PYEOF
+            else
+              echo "### Result: No summary available (axe CLI may not have reached URLs)"
+            fi
+            echo ""
+            echo "> **Note**: This job is \`continue-on-error: true\`. Violations are informational until gates are tightened."
+            echo ""
+            echo "Artifacts: \`axe-audit-reports\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload axe reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: axe-audit-reports
+          path: var/ci/axe-reports/
+          if-no-files-found: warn
