@@ -1,0 +1,64 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-seccomp-mereka-lms
+  labels:
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: security
+  annotations:
+    policies.kyverno.io/title: Require Seccomp Profile
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Requires all pods in the mereka-lms namespace to have a seccomp profile
+      set to RuntimeDefault or Localhost. Seccomp restricts the system calls
+      available to containers, reducing the kernel attack surface.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-seccomp-profile
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      validate:
+        message: >-
+          Pods in namespace mereka-lms must have a seccomp profile set to
+          RuntimeDefault or Localhost. Add securityContext.seccompProfile
+          with type RuntimeDefault to the pod spec.
+        anyPattern:
+          - spec:
+              securityContext:
+                seccompProfile:
+                  type: RuntimeDefault
+          - spec:
+              securityContext:
+                seccompProfile:
+                  type: Localhost
+          - spec:
+              containers:
+                - securityContext:
+                    seccompProfile:
+                      type: RuntimeDefault
+          - spec:
+              containers:
+                - securityContext:
+                    seccompProfile:
+                      type: Localhost

@@ -1,0 +1,87 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-non-root-mereka-lms
+  labels:
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: security
+  annotations:
+    policies.kyverno.io/title: Require Non-Root Containers
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Requires all containers in the mereka-lms namespace to run as a
+      non-root user (runAsNonRoot: true) and with a UID of at least 1000.
+      This prevents privilege escalation via UID 0.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      validate:
+        message: >-
+          Containers must set securityContext.runAsNonRoot: true. Found
+          container without runAsNonRoot in namespace mereka-lms.
+        pattern:
+          spec:
+            =(initContainers):
+              - =(securityContext):
+                  =(runAsNonRoot): true
+            containers:
+              - securityContext:
+                  runAsNonRoot: true
+    - name: require-run-as-user-1000-or-above
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      preconditions:
+        all:
+          - key: "{{ request.object.spec.securityContext.runAsUser || '' }}"
+            operator: NotEquals
+            value: ""
+      validate:
+        message: >-
+          Pod-level runAsUser must be >= 1000. System UIDs below 1000
+          are not permitted in namespace mereka-lms.
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.securityContext.runAsUser }}"
+                operator: LessThan
+                value: "1000"
