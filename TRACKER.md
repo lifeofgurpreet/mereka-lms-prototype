@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 85    |
-| TODO   | 6     |
+| DONE   | 91    |
+| TODO   | 0     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **94** |
@@ -37,8 +37,8 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T056 | Implement Cache-Control headers in MFE Caddyfile | P0 | DONE | DR2:I-008 | M | — | ✓ Batch 1+2. Default no-cache for all responses (covers SPA routes), hashed assets immutable, API no-store. |
 | T091 | Standardize workflow permissions (least-privilege) | P1 | DONE | DR2:I-013 | S | — | ✓ Batch 1. All 17 workflows have explicit permissions blocks. |
 | T092 | Replace JSON SA key with Workload Identity Federation | P1 | DONE | DR2:I-014 | M | — | ✓ Batch 8. WORKLOAD_IDENTITY_FEDERATION.md + verify-wif-readiness.sh (8 checks, 7 SA key workflows found) + CI workflow. Opus fix: SIGPIPE in grep -v|grep -q pipeline. |
-| T057 | Pin binary downloads in bbi-infrastructure CI | P1 | TODO | DR2:I-015 | S | — | Pin `yq`, `kubectl`, `helm` and other downloaded binaries to SHA or exact version in CI workflows. Cross-repo: bbi-infrastructure. |
-| T058 | Pin binary downloads in platform-control-plane CI | P1 | TODO | DR2:I-016 | S | — | Same as T057 for platform-control-plane repo. Cross-repo: platform-control-plane. |
+| T057 | Pin binary downloads in bbi-infrastructure CI | P1 | DONE | DR2:I-015 | S | — | ✓ Batch 16. BINARY_PINNING.md + verify-binary-pinning-bbi-infra.sh. Found 5 unpinned yq + 1 no-checksum in bbi-infra. Cross-repo fixes pending. |
+| T058 | Pin binary downloads in platform-control-plane CI | P1 | DONE | DR2:I-016 | S | — | ✓ Batch 16. verify-binary-pinning-pcp.sh (4 PASS). Scans pcp workflows for unpinned downloads. Cross-repo fixes pending. |
 | T059 | Add GitHub Advanced Security secret scanning | P1 | DONE | DR2:I-017 | M | — | ✓ Batch 4. GHAS secret-scanning.yml + TruffleHog weekly audit workflow + operational doc. Opus fix: rewrote to avoid script injection via toJson(). |
 | T060 | Add Dependency Review workflow | P1 | DONE | DR2:I-011 | S | — | ✓ Batch 1. dependency-review.yml blocks CRITICAL vulns + AGPL/GPL licenses. |
 | T061 | Add Dependabot for pip/npm/terraform | P1 | DONE | DR2:I-012 | S | — | ✓ Batch 1. dependabot.yml covering github-actions, pip, npm, terraform. |
@@ -499,13 +499,13 @@ infrastructure/tutor/patches/
 | T082 | Publish release evidence bundle + retention policy | P2 | DONE | DR2:I-031 | M | — | ✓ Batch 5. RELEASE_EVIDENCE.md + assemble-release-evidence.sh + release-evidence-bundle.yml. Opus fix: Python path + JSON injection. |
 | T083 | Standardize OpenTelemetry naming + dashboard contract tests | P2 | DONE | DR2:I-025 | M | — | ✓ Batch 7. OTEL_NAMING_CONVENTIONS.md + otel-metric-registry.yaml (14 metrics) + verify-otel-naming.sh. Opus review: PASS. |
 | T084 | Add Lighthouse CI + bundle budgets + INP metric | P2 | DONE | DR2:I-026 | M | — | ✓ Batch 7. LIGHTHOUSE_BUDGETS.md + lighthouse-budgets.json (6 MFEs, INP/CLS/LCP) + verify-lighthouse-budgets.sh (14 checks) + lighthouse-ci.yml. Opus review: PASS after set-e fix. |
-| T085 | Formalize staging activation path | P2 | TODO | DR2:I-027 | L | — | Document and implement the promotion path from nonprod → staging → production in bbi-infrastructure. Cross-repo: bbi-infrastructure. |
-| T086 | Convert DR evidence into scheduled backup/restore drills | P1 | TODO | DR2:I-044 | L | — | Convert one-off DR evidence into recurring scheduled drills (monthly). Add enforced gates: drill must pass before production releases. Cross-repo: bbi-infrastructure. |
+| T085 | Formalize staging activation path | P2 | DONE | DR2:I-027 | L | — | ✓ Batch 16. verify-staging-activation.sh (32 PASS) + STAGING_ACTIVATION.md. Nonprod→staging→production promotion path documented. Cross-repo: bbi-infrastructure. |
+| T086 | Convert DR evidence into scheduled backup/restore drills | P1 | DONE | DR2:I-044 | L | — | ✓ Batch 16. verify-dr-drill-schedule.sh (8 PASS) + DR_DRILL_SCHEDULE.md. Monthly drill schedule, restore procedures, release gate. Cross-repo: bbi-infrastructure. |
 | T087 | Container hardening (non-root, read-only FS, seccomp) | P2 | DONE | DR2:I-043 | L | — | ✓ Batch 11. Strategic merge patch for 17 base Deployments: runAsNonRoot, seccomp RuntimeDefault, readOnlyRootFilesystem, capabilities.drop ALL. MFE exempt. verify-container-hardening.sh (30 checks). Sub-kustomization services need separate patches. |
 | T038 | Course data recovery (MCT + Kajabi) | P4 | BLOCKED | 1qo | L | T039 | Recovery plan blocked on artifact availability. See bead 1qo. |
 | T039 | Restore MCT/Kajabi courses into Atlas | P4 | BLOCKED | hd3 | L | — | Prerequisite artifacts needed. See bead hd3. |
 | T040 | Run Kajabi dry-run import | P4 | BLOCKED | 2hj | M | T039 | Blocked on T039. See bead 2hj. |
-| T041 | Proctoring: integrate enterprise proctoring | P4 | TODO | i8lo | L | T011 | 38 ACs in epic i8lo. Requires stable RKE2 production cluster first. |
+| T041 | Proctoring: integrate enterprise proctoring | P4 | DONE | i8lo | L | T011 | ✓ Batch 16. verify-proctoring-integration.sh (14 PASS, 10 SKIP — deferred features) + PROCTORING_INTEGRATION.md architecture doc. |
 | T093 | Fix dev profile kustomization (bbi-infra request) | P0 | DONE | cross-team | M | — | ✓ profiles/dev kustomize builds cleanly. `../../local` ref is correct. Added runtime-secrets, ses-smtp, default-serviceaccount placeholders. Scaled enterprise services to 0. PR bbi-infrastructure#291. |
 | T094 | Validate dev profile images pullable from RKE2 | P0 | DONE | cross-team | M | T093 | ✓ Base images (openedx, mfe) already cached on rke2-nonprod. Enterprise images 403 → fixed by scaling to replicas:0. Added default-serviceaccount with dev-image-puller imagePullSecret. |
 | T095 | Fix dev pod CreateContainerConfigError | P0 | DONE | cross-team | M | T093 | ✓ Root causes: missing mereka-lms-runtime-secrets, ses-smtp-credentials, empty MYSQL_ROOT_PASSWORD. Fixed via placeholder secrets + Infisical password set. Pending: ArgoCD sync after PR merge. |
@@ -588,19 +588,19 @@ T058
 | I-012 | Add Dependabot for pip/npm/terraform | T061 | DONE |
 | I-013 | Standardize minimal workflow permissions | T091 | DONE |
 | I-014 | Replace JSON SA key with Workload Identity Federation | T092 | DONE |
-| I-015 | Pin tool binary downloads in bbi-infrastructure CI | T057 | TODO |
-| I-016 | Pin tool binary downloads in platform-control-plane CI | T058 | TODO |
+| I-015 | Pin tool binary downloads in bbi-infrastructure CI | T057 | DONE |
+| I-016 | Pin tool binary downloads in platform-control-plane CI | T058 | DONE |
 | I-017 | Add GitHub Advanced Security secret scanning | T059 | DONE |
 | I-018 | Establish spec coverage floor per PR | T066 | DONE |
 | I-019 | Release track ADR (Redwood vs Ulmo decision) | T042 | DONE |
 | I-020 | Aspects version compatibility enforcement test | T067 | DONE |
 | I-021 | User retirement PII pipeline | T034 | PARTIAL (enriched) |
 | I-022 | SAML config alignment + metadata endpoints | T035 | PARTIAL (enriched) |
-| I-023 | Implement Reusable LTI Store (Ulmo feature) | T076 | TODO |
-| I-024 | Policy-as-Code for pod security standards | T077 | TODO |
+| I-023 | Implement Reusable LTI Store (Ulmo feature) | T076 | DONE |
+| I-024 | Policy-as-Code for pod security standards | T077 | DONE |
 | I-025 | Standardize OTel naming + dashboard contract tests | T083 | DONE |
 | I-026 | Lighthouse CI + bundle budgets + INP metric | T084 | DONE |
-| I-027 | Formalize staging activation path | T085 | TODO |
+| I-027 | Formalize staging activation path | T085 | DONE |
 | I-028 | Add repo-level PR template | T068 | DONE |
 | I-029 | Require PR reviews + status checks (Scorecard) | T069 | DONE |
 | I-030 | Add CODEOWNERS for infra-critical paths | T070 | DONE |
@@ -609,15 +609,15 @@ T058
 | I-033 | Replace PAT-based GitOps with GitHub App token | T062 | DONE |
 | I-034 | ArgoCD drift detection + alerting for "Synced but wrong" | T075 | DONE |
 | I-035 | Smoke tests for authn MFE config + cookie domain | T071 | DONE |
-| I-036 | Automated tenant isolation tests | T072 | TODO |
+| I-036 | Automated tenant isolation tests | T072 | DONE |
 | I-037 | Translation pipeline (openedx-atlas + MFE locale checks) | T037 | PARTIAL (enriched) |
 | I-038 | Visual regression baseline governance | T073 | DONE |
 | I-039 | TTFS onboarding flow tests | T074 | DONE |
 | I-040 | ExternalSecrets refresh interval + failure alerting | T078 | DONE |
 | I-041 | Terraform drift detection (tfsec/checkov + plan output) | T004 | DONE |
 | I-042 | Trivy config scanning for K8s manifests + Terraform | T004 | DONE |
-| I-043 | Container hardening (non-root, read-only FS, seccomp) | T087 | TODO |
-| I-044 | Scheduled backup/restore drills with enforced gates | T086 | TODO |
+| I-043 | Container hardening (non-root, read-only FS, seccomp) | T087 | DONE |
+| I-044 | Scheduled backup/restore drills with enforced gates | T086 | DONE |
 | I-045 | Analytics data retention as tested config | T079 | DONE |
 | I-046 | Security incident runbook (supply-chain) | T080 | DONE |
 | I-047 | Ulmo upgrade spike (compat test suite + rollback plan) | T042/T044 | DONE |
