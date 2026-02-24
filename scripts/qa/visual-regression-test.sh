@@ -67,6 +67,7 @@ done
 
 # Directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../shared/config.sh" 2>/dev/null || true
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SCREENSHOTS_DIR="$PROJECT_ROOT/var/screenshots"
 BASELINE_DIR="$SCREENSHOTS_DIR/baseline"
@@ -75,9 +76,9 @@ DIFF_DIR="$SCREENSHOTS_DIR/diff"
 
 # Base URLs
 if [[ "$ENV" == "production" ]]; then
-    LMS_URL="https://academyv2.mereka.io"
-    STUDIO_URL="https://studio.academyv2.mereka.io"
-    MFE_URL="https://apps.academyv2.mereka.io"
+    LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
+    STUDIO_URL="https://${STUDIO_DOMAIN:-studio.academyv2.mereka.io}"
+    MFE_URL="https://${MFE_DOMAIN:-apps.academyv2.mereka.io}"
 else
     LMS_URL="http://localhost"
     STUDIO_URL="http://studio.localhost"

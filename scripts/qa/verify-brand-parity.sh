@@ -35,6 +35,9 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../shared/config.sh" 2>/dev/null || true
+
 PASS=0
 FAIL=0
 WARN=0
@@ -47,9 +50,9 @@ skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 
 # Parse flags
 LIVE_MODE=0
-LMS_URL="https://academyv2.mereka.io"
-STUDIO_URL="https://studio.academyv2.mereka.io"
-MFE_URL="https://apps.academyv2.mereka.io"
+LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
+STUDIO_URL="https://${STUDIO_DOMAIN:-studio.academyv2.mereka.io}"
+MFE_URL="https://${MFE_DOMAIN:-apps.academyv2.mereka.io}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in

@@ -17,6 +17,9 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../shared/config.sh" 2>/dev/null || true
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -34,7 +37,7 @@ if [[ "$ENV" == "local" ]]; then
   BASE_URL="http://localhost:8000"
   echo -e "${YELLOW}Testing against LOCAL environment: ${BASE_URL}${NC}"
 else
-  BASE_URL="https://academyv2.mereka.io"
+  BASE_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
   echo -e "${YELLOW}Testing against PRODUCTION environment: ${BASE_URL}${NC}"
 fi
 
