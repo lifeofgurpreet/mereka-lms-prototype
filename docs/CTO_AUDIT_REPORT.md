@@ -157,8 +157,11 @@ After completing 16 batches (91 tasks), the codebase has comprehensive verificat
 - [x] Fix stale Ruby forum references in active operational docs
 - [x] Fix broken LOCAL_SETUP_COMPLETE.md reference (created at repo root)
 - [x] Fix stale Ruby forum port references in active operational docs
+- [x] Add Purchase Gateway test suite (121 tests: auth, CRUD, webhooks, checkout)
+- [x] Regenerate all 34 testmaps (38/38 specs GREEN)
+- [x] Replace no-op enterprise worker health probes with celery inspect ping
+- [x] Remove dead code (stripe_service.py)
 - [ ] ~~Clean up duplicate verification scripts~~ (deferred — migration scripts are intentionally granular)
-- [ ] ~~Add Purchase Gateway admin endpoint tests~~ (deferred — needs test fixtures/mocking setup)
 
 ---
 
@@ -174,5 +177,7 @@ After completing 16 batches (91 tasks), the codebase has comprehensive verificat
 | K8s manifests validated | 120+ |
 | BLOCKER issues found | 4 |
 | Total actionable items | 31 |
-| **Items resolved** | **29** |
-| **Items deferred** | **2** (test coverage, migration script consolidation) |
+| **Items resolved** | **34** |
+| **Items deferred** | **1** (migration script consolidation — intentionally granular) |
+| Purchase Gateway tests | 121 (unit + integration) |
+| Spec coverage | 38/38 GREEN (100%) |
