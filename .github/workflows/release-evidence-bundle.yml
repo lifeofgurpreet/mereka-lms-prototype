@@ -1,0 +1,54 @@
+name: Release Evidence Bundle
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to assemble evidence for (tag, SHA, or branch)"
+        required: false
+        default: ""
+
+permissions: {}
+
+jobs:
+  assemble:
+    name: Assemble Release Evidence Bundle
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+          fetch-depth: 0  # full history needed for changelog generation
+
+      - name: Assemble evidence bundle
+        run: |
+          set -euo pipefail
+          # Resolve SHA for the checked-out ref
+          TARGET_SHA="$(git rev-parse HEAD)"
+          bash scripts/infra/assemble-release-evidence.sh "${TARGET_SHA}"
+
+      - name: Determine artifact name
+        id: artifact-name
+        run: |
+          set -euo pipefail
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          TAG="$(git tag --points-at HEAD | head -1 || true)"
+          if [[ -n "${TAG}" ]]; then
+            echo "name=release-evidence-${TAG}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=release-evidence-${SHORT_SHA}-run${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload release evidence artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.0
+        with:
+          name: ${{ steps.artifact-name.outputs.name }}
+          path: var/release-evidence/
+          retention-days: 90
+          if-no-files-found: error
