@@ -25,4 +25,5 @@ resources:
   - prometheusrule-libraries.yaml
   - mux-exporter.yaml
   - servicemonitor-mux.yaml
+  - prometheusrule-externalsecrets.yaml
   - hpa-enterprise.yaml
