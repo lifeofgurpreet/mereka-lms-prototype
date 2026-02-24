@@ -46,6 +46,247 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T004 | Pin Terraform providers + add IaC scanning | P0 | TODO | I14, DR2:I-041, DR2:I-042 | S | — | Add tfsec or checkov as a CI job against `infrastructure/terraform/`. Add Trivy config scan for K8s manifests. Pin all Terraform provider versions with `required_providers` + lockfile. |
 | T064 | Add commit signing (Sigstore/GitHub) | P3 | TODO | DR2:I-049 | M | — | Enable Sigstore keyless signing or GitHub's commit signing for merges to main. Verify signatures in CI as a soft gate initially. |
 
+### Sprint 1 Implementation Plans
+
+#### Swarm Batch 1 — mereka-lms only, no cross-repo, no RKE2
+
+**Agent assignment strategy**: T052+T091+T063 touch the same 17 workflow files — assign to ONE agent to avoid conflicts. Other tasks are independent files (new workflows, new config files, Caddyfile).
+
+---
+
+#### T001 Plan: Create SECURITY.md
+
+**Files**: `SECURITY.md` (new)
+
+**Content**: Standard vulnerability disclosure policy. Contact: `security@mereka.io`. Response timeline: acknowledge 48h, triage 5 business days, fix per severity (Critical: 7d, High: 30d, Medium: 90d). Scope: mereka-lms, bbi-infrastructure, platform-control-plane. Out of scope: upstream Open edX (report to openedx.org). Supported versions: latest release only.
+
+**Done when**: `SECURITY.md` exists at repo root with valid contact, timeline, and scope sections.
+
+---
+
+#### T052+T091+T063 Plan: Harden all 17 workflows (combined)
+
+**Files**: All 17 `.github/workflows/*.yml`:
+`ci.yml`, `build-tutor-images.yml`, `tutor-config-verify.yml`, `tutor-plugin-test.yml`, `policy-checks.yml`, `verify-specs.yml`, `authenticated-sso-canary.yml`, `smoke-authenticated.yml`, `build-ios-app.yml`, `cloud-sql-backup.yml`, `public-health-check.yml`, `release-evidence.yml`, `observability-audit.yml`, `alert-routing-audit.yml`, `operations-gates-runtime.yml`, `dr-evidence-bundle.yml`, `ios-testflight.yml`
+
+**T052 — Pin Actions to SHAs**:
+For each `uses:` line, resolve the current version tag to its commit SHA:
+- `actions/checkout@v4` → `actions/checkout@<sha>`
+- `actions/setup-python@v5` → `actions/setup-python@<sha>`
+- `actions/upload-artifact@v4` → `actions/upload-artifact@<sha>`
+- `actions/download-artifact@v4` → `actions/download-artifact@<sha>`
+- `actions/github-script@v7` → `actions/github-script@<sha>`
+- `actions/setup-node@v4` → `actions/setup-node@<sha>`
+- `google-github-actions/auth@v2` → `google-github-actions/auth@<sha>`
+- `docker/setup-buildx-action@v3` → `docker/setup-buildx-action@<sha>`
+- `aquasecurity/trivy-action@master` → `aquasecurity/trivy-action@<sha>`
+- `ludeeus/action-shellcheck@master` → `ludeeus/action-shellcheck@<sha>`
+- `trufflesecurity/trufflehog@main` → `trufflesecurity/trufflehog@<sha>`
+
+Add `# vX.Y.Z` comment after each SHA for readability.
+
+**T091 — Add permissions blocks**:
+Add top-level `permissions: {}` (deny-all default) to every workflow. Then add per-job permissions as needed:
+- Read-only jobs: `permissions: { contents: read }`
+- PR comment jobs: `permissions: { contents: read, pull-requests: write }`
+- Artifact upload: `permissions: { contents: read, actions: write }` (if needed)
+- `build-tutor-images.yml`: `permissions: { contents: write, packages: write }` (pushes images)
+- `cloud-sql-backup.yml`: `permissions: { contents: read, id-token: write }` (GCP auth)
+
+**T063 — Pin runners**:
+Replace all `runs-on: ubuntu-latest` with `runs-on: ubuntu-24.04`.
+
+**Done when**: All 17 workflows have (a) SHA-pinned actions with version comments, (b) explicit minimal permissions, (c) `ubuntu-24.04` runners. CI passes on the PR.
+
+---
+
+#### T006 Plan: OpenSSF Scorecard workflow
+
+**Files**: `.github/workflows/scorecard.yml` (new)
+
+**Content**:
+```yaml
+name: Scorecard
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6am UTC
+  push:
+    branches: [main]
+permissions:
+  security-events: write
+  id-token: write
+  contents: read
+  actions: read
+jobs:
+  analysis:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@<sha>  # pin
+      - uses: ossf/scorecard-action@<sha>  # pin
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - uses: github/codeql-action/upload-sarif@<sha>  # pin
+        with:
+          sarif_file: results.sarif
+```
+
+**Done when**: Workflow exists, passes on push to main, results visible in GitHub Security tab.
+
+---
+
+#### T060 Plan: Dependency Review workflow
+
+**Files**: `.github/workflows/dependency-review.yml` (new)
+
+**Content**: Use `actions/dependency-review-action` on `pull_request` events. Block PRs with CRITICAL/HIGH vulns. Allow license exceptions via config.
+
+**Done when**: Workflow exists, triggers on PRs, blocks known-vulnerable deps.
+
+---
+
+#### T061 Plan: Dependabot config
+
+**Files**: `.github/dependabot.yml` (new)
+
+**Content**:
+```yaml
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure/terraform/"
+    schedule:
+      interval: "monthly"
+```
+
+Note: `github-actions` ecosystem will auto-PR SHA pin updates — complements T052.
+
+**Done when**: File exists, Dependabot starts opening PRs within 24h.
+
+---
+
+#### T055 Plan: Fix Tutor env rendering in CI
+
+**Files**: `.github/workflows/ci.yml` (modify the tutor test job)
+
+**Problem**: `tests/tutor/test_idempotency.sh` exits early when `tutor_env/` doesn't exist. In CI, the tutor environment isn't rendered, so tests silently pass without actually running.
+
+**Fix**: In the CI job that runs tutor tests, add steps before test execution:
+1. `pip install "tutor[full]==18.2.2"`
+2. `export TUTOR_ROOT=$(pwd)/tutor_env`
+3. `tutor config save` — generates the tutor_env/ directory
+4. `./infrastructure/tutor/apply-patches.sh` — applies all patches
+5. Now run `tests/tutor/test_idempotency.sh`
+
+**Done when**: CI log shows idempotency tests actually executing (not skipping), and tests pass.
+
+---
+
+#### T056 Plan: MFE Caddyfile Cache-Control headers
+
+**Files**: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` (modify)
+
+**Changes**: Add `header` directives to each `file_server` block:
+- Hashed assets (`*.js`, `*.css` with hash in filename): `Cache-Control "public, max-age=31536000, immutable"`
+- `index.html` and `/`: `Cache-Control "no-cache"` (forces revalidation on deploy)
+- API proxy routes: `Cache-Control "no-store"`
+
+**Pattern**:
+```
+@hashed path *.js *.css *.woff2 *.png *.jpg *.svg
+header @hashed Cache-Control "public, max-age=31536000, immutable"
+header /index.html Cache-Control "no-cache"
+```
+
+**Done when**: Caddyfile has explicit Cache-Control for hashed assets, index.html, and API routes. `curl -I` against MFE assets returns correct headers.
+
+---
+
+#### T002 Plan: pip-audit + make Trivy blocking
+
+**Files**: `.github/workflows/ci.yml` (modify)
+
+**Changes**:
+1. Add pip-audit job: `pip install pip-audit && pip-audit --require-hashes --desc -r requirements.txt` (or from pyproject.toml)
+2. In `build-tutor-images.yml`: change Trivy `exit-code: 0` → `exit-code: 1` for CRITICAL severity. Keep HIGH as warning (exit-code: 0 but upload SARIF).
+3. Add `--ignorefile .trivyignore` support for documented exceptions.
+
+**Done when**: pip-audit runs in CI, Trivy blocks on CRITICAL vulns, `.trivyignore` exists (can be empty initially).
+
+---
+
+#### T003 Plan: .tool-versions
+
+**Files**: `.tool-versions` (new)
+
+**Content**:
+```
+python 3.12.8
+nodejs 18.20.4
+```
+
+Match versions to what CI currently uses in `actions/setup-python` and `actions/setup-node`.
+
+**Done when**: File exists, versions match CI.
+
+---
+
+#### T068 Plan: PR template
+
+**Files**: `.github/PULL_REQUEST_TEMPLATE.md` (new)
+
+**Content**: Checklist: What changed, Why, Specs updated (if applicable), Tests added/updated, Rollout plan (for infra changes), Verification steps.
+
+**Done when**: File exists, new PRs auto-populate the template.
+
+---
+
+#### T070 Plan: CODEOWNERS
+
+**Files**: `.github/CODEOWNERS` (new)
+
+**Content**:
+```
+# GitOps production overlays — require infra review
+deploy/k8s/overlays/production/ @Biji-Biji-Initiative/infra
+# GitHub Actions workflows — require infra review
+.github/workflows/ @Biji-Biji-Initiative/infra
+# Secrets configuration
+deploy/k8s/base/secrets/ @Biji-Biji-Initiative/infra
+# Tutor patches — require platform review
+infrastructure/tutor/ @Biji-Biji-Initiative/platform
+```
+
+**Done when**: File exists, GitHub shows required reviewers on PRs touching those paths. (Requires the GitHub teams to exist — may need to create them.)
+
+---
+
+## Swarm Batch 1: Task → Agent Assignment
+
+| Agent | Tasks | Files touched | Isolation |
+|-------|-------|---------------|-----------|
+| **workflow-hardener** | T052+T091+T063 | All 17 `.github/workflows/*.yml` | worktree |
+| **security-scaffolder** | T001, T068, T070 | `SECURITY.md`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/CODEOWNERS` | worktree |
+| **ci-gates** | T006, T060, T061 | 3 new workflow files + `dependabot.yml` | worktree |
+| **tutor-ci-fix** | T055, T002 | `ci.yml`, `build-tutor-images.yml` | worktree |
+| **caddyfile-headers** | T056 | `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | worktree |
+| **tooling** | T003 | `.tool-versions` | worktree |
+
+**Conflict risk**: workflow-hardener and tutor-ci-fix both touch `ci.yml`. Sequence: workflow-hardener first (bulk changes), tutor-ci-fix second (adds pip-audit job + Tutor rendering).
+
 ---
 
 ## Sprint 2: CI Quality Gates & Testing (P0–P1)
