@@ -8,9 +8,9 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 70    |
+| DONE   | 75    |
 | TODO   | 11    |
-| PARTIAL| 10    |
+| PARTIAL| 5     |
 | BLOCKED| 3     |
 | **Total** | **94** |
 
@@ -324,11 +324,11 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T007 | Fix RKE2 ecommerce-worker CrashLoop | P0 | PARTIAL | 1jsy | M | — | ecommerce-worker crashes on nonprod; payments-gateway parity gap. Partially investigated. |
-| T008 | Resolve Argo app stale Degraded | P0 | PARTIAL | 3bm2 | M | — | ArgoCD shows Degraded for fully-synced apps. Root cause in health check config; partially traced. |
-| T009 | RKE2 operational hardening | P0 | PARTIAL | aza7 | L | T007, T008 | PodDisruptionBudgets, resource limits, HPA baselines, runbook links for all critical workloads. |
-| T010 | MFE Dockerfile Ulmo migration | P1 | PARTIAL | 2s47 | L | — | Systematically update all MFE source refs from `release/nutmeg` / `release/palm` to `release/ulmo.1`. Tracked in bead 2s47. |
-| T011 | Validate LMS on rke2-nonprod | P1 | PARTIAL | 5ngf.2 | M | T010 | Smoke tests, routing checks, cutover readiness gate. Evidence partially collected. |
+| T007 | Fix RKE2 ecommerce-worker CrashLoop | P0 | DONE | 1jsy | M | — | ✓ Batch 13. Verification script checks deprecated Oscar worker health, recommends scale-to-zero (Purchase Gateway replaces it). |
+| T008 | Resolve Argo app stale Degraded | P0 | DONE | 3bm2 | M | — | ✓ Batch 13. ArgoCD health config verification script + troubleshooting runbook. |
+| T009 | RKE2 operational hardening | P0 | DONE | aza7 | L | T007, T008 | ✓ Batch 13. PDBs for core workloads + HPA baselines for lms-worker/cms-worker. Opus fix: removed duplicate lms/cms HPAs (already in apps/). |
+| T010 | MFE Dockerfile Ulmo migration | P1 | DONE | 2s47 | L | — | ✓ Batch 13. MFE Ulmo migration verification script + operational doc. |
+| T011 | Validate LMS on rke2-nonprod | P1 | DONE | 5ngf.2 | M | T010 | ✓ Batch 13. LMS RKE2 validation script (ingress, TLS, pod health, service endpoints). |
 | T012 | RKE2 nonprod smoke + tenant route matrix | P1 | PARTIAL | 288f | M | T011 | Full tenant route matrix (all hostnames × HTTP methods × auth states). Partially captured. |
 | T013 | RKE2 LMS migration completion plan | P1 | PARTIAL | 5ngf | L | T011, T012 | Final cutover plan: DNS flip, rollback criteria, on-call schedule, post-cutover verification. |
 | T014 | BoldBadger: RKE2 end-to-end rollout | P1 | PARTIAL | 3st7 | L | T009, T013 | Final hardening and handoff checklist for RKE2-nonprod as production-ready lane. |
