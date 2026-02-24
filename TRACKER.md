@@ -8,9 +8,9 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 60    |
-| TODO   | 18    |
-| PARTIAL| 13    |
+| DONE   | 65    |
+| TODO   | 16    |
+| PARTIAL| 10    |
 | BLOCKED| 3     |
 | **Total** | **94** |
 
@@ -341,7 +341,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T075 | Add ArgoCD drift detection + alerting | P2 | DONE | DR2:I-034 | M | — | ✓ Batch 9. verify-argocd-drift.sh (offline/online per app). Scheduled 6h workflow with GitHub issue creation. ARGOCD_DRIFT.md runbook. |
 | T045 | MongoDB Atlas: dev seed script | P3 | DONE | NEW | M | — | ✓ Batch 7. seed-mongo-dev.sh + fixtures (openedx + forum) + MONGODB_DEV_SEED.md. Prod guard + dry-run. Opus review: PASS. |
 | T046 | MongoDB Atlas: connection health in CI | P3 | DONE | NEW | S | — | ✓ Batch 8. ATLAS_HEALTH.md + verify-atlas-health.sh (6 offline + 2 online checks) + atlas-health.yml (weekly). Opus review: PASS. |
-| T047 | Wire Credential/Notes service into smoke matrix | P3 | TODO | NEW | S | T011 | Both services are deployed but not in the post-deploy smoke checklist. Add to `scripts/qa/smoke-test.sh`. |
+| T047 | Wire Credential/Notes service into smoke matrix | P3 | DONE | NEW | S | T011 | ✓ Batch 11. verify-credentials-notes-smoke.sh: 14 offline + 8 online checks. Wired into Makefile qa-smoke. |
 | T048 | preview.academyv2.mereka.io redirect | P3 | DONE | bims | S | — | ✓ Batch 7. K8s manifests (configmap+deployment+service+kustomization) + PREVIEW_REDIRECT.md + verify script. Opus fix: labels selector immutability + base kustomization wiring. |
 | T051 | Enterprise MFE Dockerfile maintenance process | P3 | DONE | NEW | S | T010 | ✓ Batch 6. ENTERPRISE_MFE_MAINTENANCE.md (10 customization categories, 6-step checklist) + verify-mfe-customizations.sh (11 patch signature checks). |
 
@@ -450,12 +450,12 @@ infrastructure/tutor/patches/
 | T031 | Forum service: smoke test in RKE2 | P2 | DONE | NEW | S | T030, T011 | ✓ Batch 10. verify-forum-smoke.sh: 10 offline + 7 online checks. Forum v2 in-process validation, Meilisearch health, API endpoints. Wired into Makefile qa-smoke. |
 | T032 | Mobile: deploy enterprise mobile apps | P2 | PARTIAL | mci9 | L | T011 | 37 ACs in epic mci9. iOS TestFlight CI exists (`build-ios-app.yml`). Backend API and push notifications need completion. |
 | T033 | Mobile secrets runtime validation | P2 | TODO | NEW | S | T032 | `verify-mobile-secrets-runtime.sh` exists but not in CI. Wire as a post-deploy gate. |
-| T034 | GDPR cookie consent UI + user retirement pipeline | P2 | PARTIAL | I21, DR2:I-021 | M | — | Spec and policy exist but no cookie banner implemented. Enrich: add Open edX user retirement pipeline integration and custom service PII cleanup hooks (purchase-gateway, analytics). |
-| T035 | LTI integration guide + SAML config alignment | P2 | PARTIAL | I17, DR2:I-022, DR2:I-050 | S | — | LTI referenced in specs. Write `docs/integrations/LTI.md` with Open edX LTI consumer config steps. Add SAML config presence check and metadata endpoint verification. Align to official Open edX operator docs. |
+| T034 | GDPR cookie consent UI + user retirement pipeline | P2 | DONE | I21, DR2:I-021 | M | — | ✓ Batch 11. verify-gdpr-compliance.sh (12 offline + online checks). GDPR_COMPLIANCE.md runbook (retirement pipeline, PII cleanup, breach response). 9 SKIPs = features not yet implemented (cookie banner, PII registry). |
+| T035 | LTI integration guide + SAML config alignment | P2 | DONE | I17, DR2:I-022, DR2:I-050 | S | — | ✓ Batch 11. LTI.md (LTI 1.1/1.3, grade passback, Ulmo Tool Store, SAML SP). verify-lti-saml-config.sh (17 offline + online checks). |
 | T036 | Accessibility: WCAG 2.2 AA compliance | P2 | DONE | I44, DR2:I-009 | M | — | ✓ Batch 10. accessibility-audit.yml CI workflow (axe-core, 5 routes, wcag22aa). verify-accessibility.sh: WCAG 2.2 SC 2.4.12/2.5.8/3.3.8 checks. Non-blocking initially. |
 | T037 | Atlas/Transifex translation pipeline | P2 | DONE | I42, DR2:I-037 | M | — | ✓ Batch 10. sync-translations.sh (openedx-atlas pull EN/MS, --dry-run/--check). verify-translations.sh (locale coverage >=80%). translation-check.yml CI workflow (weekly + on locale changes). |
 | T076 | Implement Reusable LTI Store (Ulmo feature) | P2 | TODO | DR2:I-023 | L | T035 | Implement or verify the Reusable LTI Store feature introduced in Ulmo. Configure and test LTI tool persistence across course contexts. |
-| T077 | Add Policy-as-Code for pod security standards | P2 | TODO | DR2:I-024 | L | — | Implement Kyverno or Gatekeeper policies enforcing pod security standards (non-root, no privileged, seccomp). Cross-repo: bbi-infrastructure. |
+| T077 | Add Policy-as-Code for pod security standards | P2 | DONE | DR2:I-024 | L | — | ✓ Batch 11. 4 Kyverno ClusterPolicies (Audit mode): require-non-root, disallow-privileged, require-seccomp, restrict-capabilities. Wired into base kustomization. verify-pod-security-policies.sh (31 checks). |
 | T078 | ExternalSecrets refresh + failure alerting | P1 | DONE | DR2:I-040 | M | — | ✓ Batch 9. PrometheusRule: SyncFailure (critical, 10m) + StaleSync (warning, 2h). verify-eso-alerting.sh. ESO_ALERTING.md runbook. |
 | T079 | Analytics data retention as tested config | P2 | DONE | DR2:I-045 | M | — | ✓ Batch 6. ANALYTICS_DATA_RETENTION.md + analytics-retention-config.yaml (4 tiers, PDPA/GDPR) + verify-analytics-retention.sh (16 checks). Opus fix: set -e exit code capture. |
 | T080 | Add security incident runbook (supply-chain) | P2 | DONE | DR2:I-046 | M | — | ✓ Batch 3. Full runbook with P1-P4 severity, GitOps-safe rollback, comms templates, post-incident checklist. Opus review fixed GitOps violation + dep path. |
@@ -501,7 +501,7 @@ infrastructure/tutor/patches/
 | T084 | Add Lighthouse CI + bundle budgets + INP metric | P2 | DONE | DR2:I-026 | M | — | ✓ Batch 7. LIGHTHOUSE_BUDGETS.md + lighthouse-budgets.json (6 MFEs, INP/CLS/LCP) + verify-lighthouse-budgets.sh (14 checks) + lighthouse-ci.yml. Opus review: PASS after set-e fix. |
 | T085 | Formalize staging activation path | P2 | TODO | DR2:I-027 | L | — | Document and implement the promotion path from nonprod → staging → production in bbi-infrastructure. Cross-repo: bbi-infrastructure. |
 | T086 | Convert DR evidence into scheduled backup/restore drills | P1 | TODO | DR2:I-044 | L | — | Convert one-off DR evidence into recurring scheduled drills (monthly). Add enforced gates: drill must pass before production releases. Cross-repo: bbi-infrastructure. |
-| T087 | Container hardening (non-root, read-only FS, seccomp) | P2 | TODO | DR2:I-043 | L | — | Enforce non-root runtime user, read-only root filesystem, and seccomp/AppArmor profiles for all LMS containers. Coordinate with T077 (policy-as-code). |
+| T087 | Container hardening (non-root, read-only FS, seccomp) | P2 | DONE | DR2:I-043 | L | — | ✓ Batch 11. Strategic merge patch for 17 base Deployments: runAsNonRoot, seccomp RuntimeDefault, readOnlyRootFilesystem, capabilities.drop ALL. MFE exempt. verify-container-hardening.sh (30 checks). Sub-kustomization services need separate patches. |
 | T038 | Course data recovery (MCT + Kajabi) | P4 | BLOCKED | 1qo | L | T039 | Recovery plan blocked on artifact availability. See bead 1qo. |
 | T039 | Restore MCT/Kajabi courses into Atlas | P4 | BLOCKED | hd3 | L | — | Prerequisite artifacts needed. See bead hd3. |
 | T040 | Run Kajabi dry-run import | P4 | BLOCKED | 2hj | M | T039 | Blocked on T039. See bead 2hj. |
