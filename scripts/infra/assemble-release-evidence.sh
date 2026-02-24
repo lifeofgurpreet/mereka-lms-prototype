@@ -72,10 +72,10 @@ if [[ -f "${KUSTOMIZATION}" ]]; then
     echo "# SHA: ${SHORT_SHA}  Tag: ${TAG:-n/a}  Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo ""
     # Extract images block (name + newName + newTag lines)
-    python3 - <<'PY'
+    python3 - "${KUSTOMIZATION}" <<'PY'
 import sys, pathlib, re
 
-path = pathlib.Path("deploy/k8s/overlays/production/kustomization.yaml")
+path = pathlib.Path(sys.argv[1])
 content = path.read_text()
 
 in_images = False
@@ -145,20 +145,23 @@ COMMITTER="$(git -C "${REPO_ROOT}" log -1 --format="%ae" "${SHA}" 2>/dev/null ||
 COMMIT_DATE="$(git -C "${REPO_ROOT}" log -1 --format="%cI" "${SHA}" 2>/dev/null || echo "unknown")"
 ASSEMBLED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-cat > "${BUNDLE_DIR}/bundle-metadata.json" <<JSON
-{
-  "schema_version": "1",
-  "assembled_at_utc": "${ASSEMBLED_AT}",
-  "git_sha": "${SHA}",
-  "git_sha_short": "${SHORT_SHA}",
-  "git_tag": "${TAG:-}",
-  "git_branch": "${BRANCH}",
-  "git_committer": "${COMMITTER}",
-  "git_commit_date": "${COMMIT_DATE}",
-  "assembled_by": "$(whoami)@$(hostname -s 2>/dev/null || echo unknown)",
-  "script": "scripts/infra/assemble-release-evidence.sh"
+python3 -c "
+import json, sys
+data = {
+    'schema_version': '1',
+    'assembled_at_utc': sys.argv[1],
+    'git_sha': sys.argv[2],
+    'git_sha_short': sys.argv[3],
+    'git_tag': sys.argv[4],
+    'git_branch': sys.argv[5],
+    'git_committer': sys.argv[6],
+    'git_commit_date': sys.argv[7],
+    'assembled_by': sys.argv[8],
+    'script': 'scripts/infra/assemble-release-evidence.sh',
 }
-JSON
+print(json.dumps(data, indent=2))
+" "${ASSEMBLED_AT}" "${SHA}" "${SHORT_SHA}" "${TAG:-}" "${BRANCH}" "${COMMITTER}" "${COMMIT_DATE}" "$(whoami)@$(hostname -s 2>/dev/null || echo unknown)" \
+  > "${BUNDLE_DIR}/bundle-metadata.json"
 ok "bundle-metadata.json"
 
 # ── 7. manifest.json with checksums ───────────────────────────────────
