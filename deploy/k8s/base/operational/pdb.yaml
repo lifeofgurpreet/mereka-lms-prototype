@@ -1,0 +1,81 @@
+---
+# PodDisruptionBudgets for critical services.
+# minAvailable: 1 ensures at least one pod survives voluntary disruptions
+# (node drains, rolling updates, cluster maintenance).
+#
+# Note: redis and mysql use strategy: Recreate so they always run as
+# single replicas. minAvailable: 1 still protects against accidental
+# concurrent evictions during node maintenance.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lms
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lms
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cms
+  labels:
+    app.kubernetes.io/name: cms
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cms
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: caddy
+  labels:
+    app.kubernetes.io/name: caddy
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: caddy
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: mereka-lms
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mysql
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/component: disruption-budget
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mysql
+      app.kubernetes.io/instance: mereka-lms

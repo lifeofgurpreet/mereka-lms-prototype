@@ -16,6 +16,7 @@ resources:
 - apps/preview-redirect
 - ../../../services/purchase-gateway/k8s
 - policies
+- operational
 
 # Custom Mereka-branded OpenEdX image
 images:
