@@ -39,6 +39,10 @@ on:
         type: string
         required: false
 
+concurrency:
+  group: build-tutor-images-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions: {}
 
 env:

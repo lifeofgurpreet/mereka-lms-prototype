@@ -512,7 +512,7 @@ jobs:
   validate-infisical:
     name: Validate Infisical Secrets (prod/dev)
     runs-on: ubuntu-24.04
-    if: ${{ secrets.INFISICAL_TOKEN != '' && secrets.INFISICAL_PROJECT_ID != '' }}
+    if: ${{ vars.HAS_INFISICAL == 'true' }}
     permissions:
       contents: read
     steps:

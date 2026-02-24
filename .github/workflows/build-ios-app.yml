@@ -1,12 +1,9 @@
+# DEPRECATED: Use ios-testflight.yml instead. This workflow is kept for reference only.
+# See CTO_AUDIT_REPORT.md issue #7.
 name: Build iOS App
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'mobile/ios/**'
-      - '.github/workflows/build-ios-app.yml'
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:  # Manual trigger only — push/PR triggers removed (deprecated)
 
 env:
   BUNDLE_ID: 'com.mereka.academy.mobile'

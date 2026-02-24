@@ -75,19 +75,19 @@ jobs:
           ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
 
       - name: Authenticate to GCP
-        if: ${{ secrets.GCP_SA_KEY != '' }}
+        if: ${{ vars.HAS_GCP_SA_KEY == 'true' }}
         uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install gcloud
-        if: ${{ secrets.GCP_SA_KEY != '' }}
+        if: ${{ vars.HAS_GCP_SA_KEY == 'true' }}
         uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f  # v2
         with:
           project_id: mereka-lms
 
       - name: Get GKE credentials
-        if: ${{ secrets.GCP_SA_KEY != '' }}
+        if: ${{ vars.HAS_GCP_SA_KEY == 'true' }}
         env:
           GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
           GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}

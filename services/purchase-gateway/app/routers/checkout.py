@@ -82,7 +82,7 @@ async def create_checkout(
         id=order_id,
         tenant_id=tenant_id,
         buyer_email=request.buyer_email,
-        stripe_checkout_session_id="pending",  # Updated after Stripe call
+        stripe_checkout_session_id=f"pending-{order_id}",  # Unique placeholder until Stripe responds
         status=OrderStatus.pending,
         total_cents=offering.price_cents,
         currency=offering.currency,

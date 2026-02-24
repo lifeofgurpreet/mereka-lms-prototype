@@ -2,6 +2,8 @@
 # @covers AC-002, AC-021
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import time
+
 import structlog
 import httpx
 
@@ -9,18 +11,22 @@ from app.config import settings
 
 logger = structlog.get_logger()
 
+# Module-level token cache (shared across all LMSClient instances)
+_token_cache: dict[str, str | float] = {"token": "", "expires_at": 0.0}
+_TOKEN_TTL_SECONDS = 3300  # 55 minutes (tokens typically valid for 1 hour)
+
 
 class LMSClient:
     """Client for interacting with the Open edX LMS APIs."""
 
     def __init__(self) -> None:
         self.base_url = settings.LMS_BASE_URL
-        self._token: str | None = None
 
     async def _get_token(self) -> str:
-        """Obtain OAuth2 access token via client credentials grant."""
-        if self._token:
-            return self._token
+        """Obtain OAuth2 access token via client credentials grant (cached with TTL)."""
+        now = time.monotonic()
+        if _token_cache["token"] and now < _token_cache["expires_at"]:
+            return str(_token_cache["token"])
 
         async with httpx.AsyncClient() as client:
             resp = await client.post(
@@ -33,8 +39,15 @@ class LMSClient:
                 timeout=10,
             )
             resp.raise_for_status()
-            self._token = resp.json()["access_token"]
-            return self._token
+            token = resp.json()["access_token"]
+            _token_cache["token"] = token
+            _token_cache["expires_at"] = now + _TOKEN_TTL_SECONDS
+            return token
+
+    def _invalidate_token(self) -> None:
+        """Clear cached token (e.g., on 401 response)."""
+        _token_cache["token"] = ""
+        _token_cache["expires_at"] = 0.0
 
     async def get_user_by_email(self, email: str) -> dict | None:
         """Look up an LMS user by email. Returns user dict or None."""
@@ -50,7 +63,7 @@ class LMSClient:
                 users = resp.json()
                 return users[0] if users else None
             if resp.status_code == 401:
-                self._token = None  # Refresh on next call
+                self._invalidate_token()
             return None
 
     async def enroll_user(self, username: str, course_id: str) -> bool:
@@ -75,7 +88,7 @@ class LMSClient:
                 # Already enrolled — idempotent success
                 return True
             if resp.status_code == 401:
-                self._token = None  # Refresh on next call
+                self._invalidate_token()
 
             logger.error(
                 "lms.enrollment_failed",

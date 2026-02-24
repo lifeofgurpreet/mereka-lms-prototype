@@ -79,10 +79,10 @@ jobs:
         working-directory: tests/e2e
         env:
           BASE_URL: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-          E2E_COURSE_ID: ${{ github.event.inputs.course_id || secrets.E2E_COURSE_ID }}
-          E2E_CERT_URL: ${{ secrets.E2E_CERT_URL }}
+          E2E_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          E2E_COURSE_ID: ${{ github.event.inputs.course_id || secrets.E2E_TEST_COURSE_ID }}
+          E2E_CERT_URL: ${{ secrets.E2E_TEST_CERT_URL }}
           CI: 'true'
         run: npx playwright test
 
