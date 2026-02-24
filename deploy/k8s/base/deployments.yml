@@ -51,6 +51,13 @@ spec:
           ports:
             - containerPort: 80
             - containerPort: 443
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
       volumes:
         - name: config
           configMap:
@@ -141,7 +148,11 @@ spec:
               subPath: uwsgi.ini
           resources:
             requests:
+              cpu: 500m
               memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -246,6 +257,13 @@ spec:
               name: settings-cms
             - mountPath: /openedx/config
               name: config
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -347,7 +365,11 @@ spec:
               subPath: uwsgi.ini
           resources:
             requests:
+              cpu: 500m
               memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -457,6 +479,13 @@ spec:
               name: settings-cms
             - mountPath: /openedx/config
               name: config
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -518,6 +547,13 @@ spec:
               value: "1"
           ports:
             - containerPort: 9200
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
           securityContext:
             allowPrivilegeEscalation: false
           volumeMounts:
@@ -576,6 +612,13 @@ spec:
                   key: MYSQL_ROOT_PASSWORD
           ports:
             - containerPort: 3306
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: data
@@ -658,6 +701,13 @@ spec:
                   key: RELAY_PASSWORD
             - name: HOSTNAME
               value: "mail.academyv2.mereka.io"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
 
 
 ---
@@ -699,6 +749,13 @@ spec:
           workingDir: /openedx/redis/data
           ports:
             - containerPort: 6379
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           volumeMounts:
             - mountPath: /openedx/redis/config/
               name: config
@@ -779,6 +836,13 @@ spec:
             - mountPath: /openedx/discovery/course_discovery/settings/tutor/mereka_platform_admin.py
               name: settings
               subPath: mereka_platform_admin.py
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -831,6 +895,13 @@ spec:
           volumeMounts:
             - mountPath: /openedx/ecommerce/ecommerce/settings/tutor/
               name: settings
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -878,6 +949,13 @@ spec:
           volumeMounts:
             - mountPath: /openedx/ecommerce_worker/ecommerce_worker/configuration/tutor/
               name: settings
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -930,6 +1008,13 @@ spec:
           volumeMounts:
             - mountPath: /openedx/credentials/credentials/settings/tutor/
               name: settings
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -984,6 +1069,13 @@ spec:
                   key: MEILISEARCH_MASTER_KEY
           ports:
             - containerPort: 7700
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1536Mi
           securityContext:
             allowPrivilegeEscalation: false
           volumeMounts:
@@ -1035,6 +1127,13 @@ spec:
               exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
           ports:
             - containerPort: 8002
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
           volumeMounts:
             - mountPath: /etc/caddy/
               name: config
@@ -1087,6 +1186,13 @@ spec:
             - mountPath: /app/edx-notes-api/notesserver/settings/tutor.py
               name: settings
               subPath: tutor.py
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
       volumes:
@@ -1131,6 +1237,13 @@ spec:
                 name: openedx-secrets
             - secretRef:
                 name: database-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
           volumeMounts:
             - mountPath: /openedx/xqueue/xqueue/tutor.py
               name: settings
@@ -1147,6 +1260,13 @@ spec:
                 name: openedx-secrets
             - secretRef:
                 name: database-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
           volumeMounts:
             - mountPath: /openedx/xqueue/xqueue/tutor.py
               name: settings
