@@ -1,0 +1,20 @@
+{
+  "name": "@mereka-lms/e2e-tests",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for Mereka Academy critical paths",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:prod": "BASE_URL=https://academyv2.mereka.io playwright test",
+    "test:dev": "BASE_URL=https://academyv2.mereka.dev playwright test",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

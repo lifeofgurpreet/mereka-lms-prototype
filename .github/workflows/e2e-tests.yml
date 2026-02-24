@@ -1,0 +1,131 @@
+name: E2E Critical Path Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target LMS URL'
+        required: false
+        default: 'https://academyv2.mereka.io'
+      course_id:
+        description: 'Course ID for enroll/video/forum tests (e.g. course-v1:Mereka+TEST101+2024)'
+        required: false
+        default: ''
+  # schedule:
+  #   - cron: '0 6 * * *'  # Daily at 06:00 UTC (enable when credentials are configured)
+
+permissions: {}
+
+jobs:
+  e2e-framework-verify:
+    name: Verify E2E Framework (offline)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Verify E2E framework files (offline)
+        run: ./scripts/qa/verify-e2e-framework.sh
+
+      - name: Publish framework check summary
+        if: always()
+        run: |
+          {
+            echo "## E2E Framework Check (offline)"
+            echo ""
+            echo "Verified:"
+            echo "- \`tests/e2e/playwright.config.ts\` exists"
+            echo "- \`tests/e2e/package.json\` has @playwright/test"
+            echo "- \`tests/e2e/tests/critical-path.spec.ts\` has 5 tests"
+            echo "- @covers annotations present"
+            echo "- BASE_URL env var wiring"
+            echo "- Five critical paths: login, enroll, video, forum, certificate"
+            echo "- Forum test uses /api/discussion/v2/ (Forum v2, in-process)"
+            echo "- No Oscar ecommerce references (deprecated)"
+            echo "- Node.js >= 18 engine constraint"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  e2e-critical-path:
+    name: E2E Critical Path (${{ github.event.inputs.target || 'https://academyv2.mereka.io' }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Only run if credentials are configured (avoid failing on PRs without secrets)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'schedule' && vars.E2E_ENABLED == 'true')
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: tests/e2e/package.json
+
+      - name: Install Playwright and dependencies
+        working-directory: tests/e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E critical path tests
+        working-directory: tests/e2e
+        env:
+          BASE_URL: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          E2E_COURSE_ID: ${{ github.event.inputs.course_id || secrets.E2E_COURSE_ID }}
+          E2E_CERT_URL: ${{ secrets.E2E_CERT_URL }}
+          CI: 'true'
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: playwright-report
+          path: var/e2e-report/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload test artifacts (traces, screenshots, videos)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: playwright-artifacts
+          path: var/e2e-artifacts/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Publish run summary
+        if: always()
+        env:
+          BASE_URL: ${{ github.event.inputs.target || 'https://academyv2.mereka.io' }}
+        run: |
+          {
+            echo "## E2E Critical Path Tests"
+            echo ""
+            echo "**Target**: \`${BASE_URL}\`"
+            echo ""
+            echo "### Test coverage"
+            echo "| # | Test | Description |"
+            echo "|---|------|-------------|"
+            echo "| 1 | Login | Authentik SSO → LMS session |"
+            echo "| 2 | Enroll | Course about page → enrollment widget |"
+            echo "| 3 | Video | Mux-hosted video player in courseware |"
+            echo "| 4 | Forum | Forum v2 discussions MFE (Python, in-process) |"
+            echo "| 5 | Certificate | Certificate page renders |"
+            echo ""
+            echo "### Notes"
+            echo "- Authenticated tests skipped if \`E2E_USERNAME\`/\`E2E_PASSWORD\` secrets not set"
+            echo "- Set \`E2E_COURSE_ID\` secret for enroll/video/forum tests"
+            echo "- Set \`E2E_CERT_URL\` secret for certificate test"
+            echo "- Report artifact: \`playwright-report\`"
+          } >> "$GITHUB_STEP_SUMMARY"

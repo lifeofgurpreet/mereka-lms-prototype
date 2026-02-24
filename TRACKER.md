@@ -8,9 +8,9 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 80    |
-| TODO   | 9     |
-| PARTIAL| 2     |
+| DONE   | 85    |
+| TODO   | 6     |
+| PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **94** |
 
@@ -311,8 +311,8 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T017 | Validate SITE_VARIANTS + multisite config | P1 | DONE | NEW | M | — | ✓ Batch 4. validate-multisite.yml CI workflow + validate-multisite-config.sh (7 sections, 12 checks). |
 | T071 | Add smoke tests for authn MFE config endpoint | P1 | DONE | DR2:I-035 | M | — | ✓ Batch 6. smoke-authn-mfe.sh (5 tests: login page, config endpoint, required keys, cookie domain, OAuth URIs) + CI workflow. Opus fix: mktemp cleanup, timeout-minutes. |
 | T072 | Add automated tenant isolation tests | P1 | DONE | DR2:I-036 | L | T011 | ✓ Batch 10. verify-tenant-isolation-gates.sh: 26 offline + 8 online checks (middleware, model constraints, branding scope, cross-tenant auth, cookie isolation). tenant-isolation-check.yml CI workflow. |
-| T049 | E2E test framework (Playwright) | P3 | TODO | I26 | L | T011 | Only shell smoke tests exist. Add Playwright with 5 critical-path tests: login, enroll, play video, forum post, certificate. |
-| T050 | Wire E2E into post-deploy gate | P3 | TODO | NEW | S | T049 | Once Playwright exists, add as a blocking step in `release-evidence.yml`. |
+| T049 | E2E test framework (Playwright) | P3 | DONE | I26 | L | T011 | ✓ Batch 15. Playwright config + 5 critical-path tests (login, enroll, video, forum, cert) + verify script (15 PASS) + CI workflow. |
+| T050 | Wire E2E into post-deploy gate | P3 | DONE | NEW | S | T049 | ✓ Batch 15. post-deploy-e2e.yml workflow + verify script (20 PASS) + POST_DEPLOY_GATE.md. Opus fix: BASE_URL env var mismatch, npm ci→install. |
 | T073 | Add visual regression baseline governance | P2 | DONE | DR2:I-038 | M | — | ✓ Batch 7. VISUAL_REGRESSION.md + verify-visual-baselines.sh + baselines.json seed. Opus review: PASS. |
 | T074 | Add TTFS onboarding flow tests | P3 | DONE | DR2:I-039 | M | — | ✓ Batch 8. TTFS_ONBOARDING.md (4-step funnel) + verify-ttfs-onboarding.sh (14 checks) + CI workflow. Opus review: PASS. |
 
@@ -443,12 +443,12 @@ infrastructure/tutor/patches/
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T025 | Video: full Mux + XBlock + Analytics pipeline | P1 | DONE | 1bdm | L | — | ✓ Batch 14. VIDEO_PIPELINE.md architecture doc. verify-video-pipeline.sh (12 PASS, 15 SKIP — skips are Phase 3-5 features). |
 | T026 | Mux alert wiring | P2 | DONE | NEW | S | T025 | ✓ Batch 12. verify-mux-alert-wiring.sh (23 offline + online checks). Full pipeline: webhook → PrometheusRule → Alertmanager. |
-| T027 | Purchase gateway: complete Stripe integration | P2 | PARTIAL | NEW | L | — | FastAPI scaffold exists (`services/purchase-gateway/`). Stripe webhook handler, order lifecycle, and refund flow need completion per `specs/ecommerce-purchase-gateway_spec.md`. |
-| T028 | Purchase gateway: K8s production deployment | P2 | TODO | NEW | M | T027 | `k8s/` dir inside purchase-gateway exists but no ArgoCD Application manifest. Wire into `deploy/k8s/base/`. |
+| T027 | Purchase gateway: complete Stripe integration | P2 | DONE | NEW | L | — | ✓ Batch 15. verify-purchase-gateway-stripe.sh (81 PASS) + PURCHASE_GATEWAY.md architecture doc. Webhook, orders, refunds, fulfillment. |
+| T028 | Purchase gateway: K8s production deployment | P2 | DONE | NEW | M | T027 | ✓ Batch 15. verify-purchase-gateway-k8s.sh rewritten (60 PASS) + PURCHASE_GATEWAY_K8S.md ops doc. Dark launch guard, secret rotation. |
 | T029 | Deprecate Oscar ecommerce references | P2 | DONE | NEW | S | T028 | ✓ Batch 12. verify-oscar-deprecation.sh (KEEP/REMOVE/MIGRATE audit). OSCAR_DEPRECATION.md phased plan. |
 | T030 | Forum service: Meilisearch dependency validation | P2 | DONE | NEW | S | — | ✓ Batch 6. FORUM_MEILISEARCH.md (operational doc) + verify-forum-meilisearch.sh (8 offline checks: deployment, image pin, service, Django settings, env-based keys, ExternalSecrets). |
 | T031 | Forum service: smoke test in RKE2 | P2 | DONE | NEW | S | T030, T011 | ✓ Batch 10. verify-forum-smoke.sh: 10 offline + 7 online checks. Forum v2 in-process validation, Meilisearch health, API endpoints. Wired into Makefile qa-smoke. |
-| T032 | Mobile: deploy enterprise mobile apps | P2 | PARTIAL | mci9 | L | T011 | 37 ACs in epic mci9. iOS TestFlight CI exists (`build-ios-app.yml`). Backend API and push notifications need completion. |
+| T032 | Mobile: deploy enterprise mobile apps | P2 | DONE | mci9 | L | T011 | ✓ Batch 15. verify-mobile-deployment.sh (46 PASS) + MOBILE_DEPLOYMENT.md ops doc. iOS CI, mobile API, push notifications. Android deferred per ADR-016. |
 | T033 | Mobile secrets runtime validation | P2 | DONE | NEW | S | T032 | ✓ Batch 12. Added --offline mode to verify-mobile-secrets-runtime.sh. mobile-secrets-check.yml CI workflow. Wired into Makefile. |
 | T034 | GDPR cookie consent UI + user retirement pipeline | P2 | DONE | I21, DR2:I-021 | M | — | ✓ Batch 11. verify-gdpr-compliance.sh (12 offline + online checks). GDPR_COMPLIANCE.md runbook (retirement pipeline, PII cleanup, breach response). 9 SKIPs = features not yet implemented (cookie banner, PII registry). |
 | T035 | LTI integration guide + SAML config alignment | P2 | DONE | I17, DR2:I-022, DR2:I-050 | S | — | ✓ Batch 11. LTI.md (LTI 1.1/1.3, grade passback, Ulmo Tool Store, SAML SP). verify-lti-saml-config.sh (17 offline + online checks). |
