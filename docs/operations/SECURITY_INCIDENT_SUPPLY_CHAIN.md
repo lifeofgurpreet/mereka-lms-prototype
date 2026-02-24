@@ -56,10 +56,21 @@ gcloud artifacts docker images list \
   asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx \
   --include-tags --sort-by ~UPDATE_TIME | head -10
 
-# Roll back LMS/CMS deployment
-kubectl set image deployment/lms \
+# Roll back LMS/CMS deployment via GitOps (preferred)
+# ⚠️  Direct kubectl mutations are blocked by Kyverno policy protect-gitops-managed-resources.
+# Update the image tag in git and force ArgoCD sync:
+cd deploy/k8s/overlays/production
+kustomize edit set image openedx=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<LAST_GOOD_SHA>
+git add . && git commit -m "fix(security): roll back to <LAST_GOOD_SHA> — INC-NNN"
+git push
+argocd app sync mereka-lms --force
+
+# Emergency bypass ONLY (if git push is impossible):
+kubectl --as=system:serviceaccount:argocd:argocd-application-controller \
+  set image deployment/lms \
   lms=asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:<LAST_GOOD_SHA> \
   -n mereka-lms
+# ⚠️  Follow up with a git commit within 5 minutes to prevent ArgoCD drift loop.
 
 # Verify rollback completed
 kubectl rollout status deployment/lms -n mereka-lms
@@ -67,12 +78,21 @@ kubectl rollout status deployment/lms -n mereka-lms
 
 ```bash
 # Step 2: Block the affected dependency from being installed in CI
-# Add to requirements/security-blocklist.txt (create if absent):
-echo "# BLOCKED: <package>==<version> — CVE-XXXX-XXXXX, see INC-NNN" \
-  >> requirements/security-blocklist.txt
-
-# In CI (GitHub Actions), add a pre-install check:
-# pip install safety && safety check --full-report
+# This repo uses Tutor (Docker-based). Dependencies are managed via Tutor patches.
+# Add a pip constraint to block the vulnerable package:
+#   Option A: Add to OPENEDX_EXTRA_PIP_REQUIREMENTS in tutor config
+#   Option B: Add a constraint in infrastructure/tutor/apply-patches.sh
+#
+# Example — add version exclusion to Tutor config:
+#   tutor config save --set 'OPENEDX_EXTRA_PIP_REQUIREMENTS=["<package>!=<bad_version>"]'
+#   ./infrastructure/tutor/apply-patches.sh
+#
+# For purchase-gateway (pip-based): add exclusion to requirements.lock
+#   echo "<package>!=<bad_version>" >> services/purchase-gateway/constraints.txt
+#
+# Track the block in the security exceptions register:
+echo "| $(date -I) | <package>==<version> | CVE-XXXX-XXXXX | INC-NNN | $(date -d '+90 days' -I) |" \
+  >> docs/operations/SECURITY_EXCEPTIONS.md
 ```
 
 ```bash
