@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: preview-redirect-html
+  labels:
+    app.kubernetes.io/name: preview-redirect
+    app.kubernetes.io/component: redirect-page
+    app.kubernetes.io/part-of: mereka-lms
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta http-equiv="refresh" content="3;url=https://academyv2.mereka.io/dashboard" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Redirecting — Mereka Academy</title>
+      <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          background-color: #1a1a2e;
+          color: #ffffff;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          padding: 1.5rem;
+        }
+        .card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;
+          padding: 2.5rem 3rem;
+          max-width: 520px;
+          width: 100%;
+          text-align: center;
+        }
+        h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; }
+        p  { font-size: 0.95rem; line-height: 1.6; color: rgba(255, 255, 255, 0.75); margin-bottom: 1.5rem; }
+        a  {
+          display: inline-block;
+          background: #e85d26;
+          color: #ffffff;
+          text-decoration: none;
+          padding: 0.65rem 1.6rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+        a:hover { opacity: 0.88; }
+        .notice { font-size: 0.8rem; margin-top: 1.25rem; color: rgba(255,255,255,0.45); }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>Redirecting to Academy Dashboard&hellip;</h1>
+        <p>
+          The preview URL has been retired. You are being redirected to the
+          main Academy dashboard.
+        </p>
+        <a href="https://academyv2.mereka.io/dashboard">Go to Dashboard</a>
+        <p class="notice">You will be redirected automatically in 3 seconds.</p>
+      </div>
+    </body>
+    </html>
