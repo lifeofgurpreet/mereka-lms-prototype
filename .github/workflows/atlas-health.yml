@@ -1,0 +1,61 @@
+name: MongoDB Atlas Health Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+
+permissions: {}
+
+jobs:
+  atlas-health:
+    name: Atlas SRV Connectivity Verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Verify Atlas configuration (offline / dry-run)
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-atlas-health.sh | tee var/ci/atlas-health.log
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## MongoDB Atlas Health Check"
+            echo ""
+            echo "### What was checked (offline)"
+            echo "- Atlas SRV hostname present in \`scripts/shared/config.sh\`"
+            echo "- ExternalSecret maps MongoDB password from GCP Secret Manager"
+            echo "- Atlas cluster hostname documented in \`docs/adr/001-mongodb-atlas.md\`"
+            echo "- MongoDB password injected via ExternalSecret (not hardcoded)"
+            echo "- SRV format (\`mongodb+srv://\`) referenced in config chain"
+            echo "- \`pymongo[srv]\` dependency referenced in \`infrastructure/tutor/apply-patches.sh\`"
+            echo ""
+            echo "### Live checks (not run in CI)"
+            echo "Live connectivity tests require \`MONGODB_URI\` credentials. Run manually:"
+            echo "\`\`\`bash"
+            echo "export MONGODB_URI=\"mongodb+srv://user:pass@cluster-mereka-lms.2pjex4s.mongodb.net/\""
+            echo "./scripts/qa/verify-atlas-health.sh --live"
+            echo "\`\`\`"
+            echo ""
+            echo "See \`docs/operations/ATLAS_HEALTH.md\` for full operational guidance."
+            echo ""
+            echo "Log artifacts: \`var/ci/atlas-health.log\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: atlas-health-logs
+          path: var/ci/atlas-health.log
+          if-no-files-found: warn
