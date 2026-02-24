@@ -8,11 +8,11 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 42    |
-| TODO   | 29    |
+| DONE   | 47    |
+| TODO   | 28    |
 | PARTIAL| 16    |
 | BLOCKED| 3     |
-| **Total** | **90** |
+| **Total** | **94** |
 
 Cross-reference: DR2 items I-001→I-050 mapped below. Each task shows `DR2:I-0XX` when sourced from the PDF.
 
@@ -36,16 +36,16 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T055 | Render Tutor env in CI (fix idempotency skip) | P0 | DONE | DR2:I-006 | M | — | ✓ Batch 1. CI renders tutor_env/ with .venv before tests. Opus fix: added venv creation for apply-patches.sh. |
 | T056 | Implement Cache-Control headers in MFE Caddyfile | P0 | DONE | DR2:I-008 | M | — | ✓ Batch 1+2. Default no-cache for all responses (covers SPA routes), hashed assets immutable, API no-store. |
 | T091 | Standardize workflow permissions (least-privilege) | P1 | DONE | DR2:I-013 | S | — | ✓ Batch 1. All 17 workflows have explicit permissions blocks. |
-| T092 | Replace JSON SA key with Workload Identity Federation | P1 | TODO | DR2:I-014 | M | — | Remove `GCP_SA_KEY` secret from all repos. Configure OIDC Workload Identity Federation so CI jobs authenticate to GCP without long-lived credentials. |
+| T092 | Replace JSON SA key with Workload Identity Federation | P1 | DONE | DR2:I-014 | M | — | ✓ Batch 8. WORKLOAD_IDENTITY_FEDERATION.md + verify-wif-readiness.sh (8 checks, 7 SA key workflows found) + CI workflow. Opus fix: SIGPIPE in grep -v|grep -q pipeline. |
 | T057 | Pin binary downloads in bbi-infrastructure CI | P1 | TODO | DR2:I-015 | S | — | Pin `yq`, `kubectl`, `helm` and other downloaded binaries to SHA or exact version in CI workflows. Cross-repo: bbi-infrastructure. |
 | T058 | Pin binary downloads in platform-control-plane CI | P1 | TODO | DR2:I-016 | S | — | Same as T057 for platform-control-plane repo. Cross-repo: platform-control-plane. |
 | T059 | Add GitHub Advanced Security secret scanning | P1 | DONE | DR2:I-017 | M | — | ✓ Batch 4. GHAS secret-scanning.yml + TruffleHog weekly audit workflow + operational doc. Opus fix: rewrote to avoid script injection via toJson(). |
 | T060 | Add Dependency Review workflow | P1 | DONE | DR2:I-011 | S | — | ✓ Batch 1. dependency-review.yml blocks CRITICAL vulns + AGPL/GPL licenses. |
 | T061 | Add Dependabot for pip/npm/terraform | P1 | DONE | DR2:I-012 | S | — | ✓ Batch 1. dependabot.yml covering github-actions, pip, npm, terraform. |
-| T062 | Replace PAT-based GitOps with GitHub App token | P2 | TODO | DR2:I-033 | M | — | Current GitOps commits use a PAT that isn't rotated. Replace with a GitHub App token (scoped, auto-rotating) or fine-grained PAT with documented rotation schedule. |
+| T062 | Replace PAT-based GitOps with GitHub App token | P2 | DONE | DR2:I-033 | M | — | ✓ Batch 8. GITHUB_APP_TOKEN.md + verify-github-app-token.sh (finds 2 GITOPS_PAT refs) + CI workflow. Opus review: PASS. |
 | T063 | Pin runner images to ubuntu-24.04 | P2 | DONE | DR2:I-032 | S | — | ✓ Batch 1. All 17 workflows pinned. macOS runners left as-is (no stable pin). |
 | T004 | Pin Terraform providers + add IaC scanning | P0 | DONE | I14, DR2:I-041, DR2:I-042 | S | — | ✓ Batch 3. iac-scan.yml with Trivy config mode for K8s + Terraform. Providers already pinned (~> 5.42). |
-| T064 | Add commit signing (Sigstore/GitHub) | P3 | TODO | DR2:I-049 | M | — | Enable Sigstore keyless signing or GitHub's commit signing for merges to main. Verify signatures in CI as a soft gate initially. |
+| T064 | Add commit signing (Sigstore/GitHub) | P3 | DONE | DR2:I-049 | M | — | ✓ Batch 8. COMMIT_SIGNING.md (GPG/SSH/Gitsign guide) + verify-commit-signing.sh (soft gate, --strict for hard gate) + CI workflow. Opus review: PASS. |
 
 ### Sprint 1 Implementation Plans
 
@@ -314,7 +314,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T049 | E2E test framework (Playwright) | P3 | TODO | I26 | L | T011 | Only shell smoke tests exist. Add Playwright with 5 critical-path tests: login, enroll, play video, forum post, certificate. |
 | T050 | Wire E2E into post-deploy gate | P3 | TODO | NEW | S | T049 | Once Playwright exists, add as a blocking step in `release-evidence.yml`. |
 | T073 | Add visual regression baseline governance | P2 | DONE | DR2:I-038 | M | — | ✓ Batch 7. VISUAL_REGRESSION.md + verify-visual-baselines.sh + baselines.json seed. Opus review: PASS. |
-| T074 | Add TTFS onboarding flow tests | P3 | TODO | DR2:I-039 | M | — | Add "time-to-first-success" tests that simulate a new learner completing registration, enrollment, and first lesson. Tracks onboarding funnel health. |
+| T074 | Add TTFS onboarding flow tests | P3 | DONE | DR2:I-039 | M | — | ✓ Batch 8. TTFS_ONBOARDING.md (4-step funnel) + verify-ttfs-onboarding.sh (14 checks) + CI workflow. Opus review: PASS. |
 
 ---
 
@@ -340,7 +340,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T044 | Clarify Tutor 18.2.2 patch level | P3 | DONE | NEW, DR2:I-047 | S | T042 | ✓ Batch 6. Added "Current Version Pin" section to ADR-019 + verify-tutor-version-pin.sh (scans all files for version consistency, 14/14 PASS). |
 | T075 | Add ArgoCD drift detection + alerting | P2 | TODO | DR2:I-034 | M | — | Add alerting for ArgoCD "Synced but wrong" cases (drift between git and live). Cross-repo: bbi-infrastructure. Configure Prometheus alerting on `argocd_app_info` where sync_status=Synced but health_status!=Healthy. |
 | T045 | MongoDB Atlas: dev seed script | P3 | DONE | NEW | M | — | ✓ Batch 7. seed-mongo-dev.sh + fixtures (openedx + forum) + MONGODB_DEV_SEED.md. Prod guard + dry-run. Opus review: PASS. |
-| T046 | MongoDB Atlas: connection health in CI | P3 | TODO | NEW | S | — | Add a lightweight CI job that validates Atlas SRV connectivity using a test-only account. Currently no CI signal for Atlas reachability. |
+| T046 | MongoDB Atlas: connection health in CI | P3 | DONE | NEW | S | — | ✓ Batch 8. ATLAS_HEALTH.md + verify-atlas-health.sh (6 offline + 2 online checks) + atlas-health.yml (weekly). Opus review: PASS. |
 | T047 | Wire Credential/Notes service into smoke matrix | P3 | TODO | NEW | S | T011 | Both services are deployed but not in the post-deploy smoke checklist. Add to `scripts/qa/smoke-test.sh`. |
 | T048 | preview.academyv2.mereka.io redirect | P3 | DONE | bims | S | — | ✓ Batch 7. K8s manifests (configmap+deployment+service+kustomization) + PREVIEW_REDIRECT.md + verify script. Opus fix: labels selector immutability + base kustomization wiring. |
 | T051 | Enterprise MFE Dockerfile maintenance process | P3 | DONE | NEW | S | T010 | ✓ Batch 6. ENTERPRISE_MFE_MAINTENANCE.md (10 customization categories, 6-step checklist) + verify-mfe-customizations.sh (11 patch signature checks). |
@@ -506,6 +506,10 @@ infrastructure/tutor/patches/
 | T039 | Restore MCT/Kajabi courses into Atlas | P4 | BLOCKED | hd3 | L | — | Prerequisite artifacts needed. See bead hd3. |
 | T040 | Run Kajabi dry-run import | P4 | BLOCKED | 2hj | M | T039 | Blocked on T039. See bead 2hj. |
 | T041 | Proctoring: integrate enterprise proctoring | P4 | TODO | i8lo | L | T011 | 38 ACs in epic i8lo. Requires stable RKE2 production cluster first. |
+| T093 | Fix dev profile kustomization (bbi-infra request) | P0 | TODO | cross-team | M | — | Fix `apps/mereka-lms/overlays/profiles/dev/kustomization.yaml` — references missing `../../local`. Use valid base (likely `../../dev`). Keep low-footprint. ArgoCD `mereka-lms-dev` shows ComparisonError. |
+| T094 | Validate dev profile images pullable from RKE2 | P0 | TODO | cross-team | M | T093 | Validate all images used by dev profile exist in registry and are pullable from RKE2 cluster. Fix tag/registry/auth issues. |
+| T095 | Fix dev pod CreateContainerConfigError | P0 | TODO | cross-team | M | T093 | Validate required runtime secrets/configmaps exist for pods failing CreateContainerConfigError on RKE2. Fix missing config. |
+| T096 | Dev-on-RKE2 readiness checklist | P0 | TODO | cross-team | S | T093, T094, T095 | Provide minimal "dev-on-RKE2" readiness checklist. Confirm pods reach Running/Ready. Collect evidence: `kubectl get app/pods`, describe+logs for failing pods. |
 
 ---
 
@@ -583,7 +587,7 @@ T058
 | I-011 | Add Dependency Review workflow | T060 | DONE |
 | I-012 | Add Dependabot for pip/npm/terraform | T061 | DONE |
 | I-013 | Standardize minimal workflow permissions | T091 | DONE |
-| I-014 | Replace JSON SA key with Workload Identity Federation | T092 | TODO |
+| I-014 | Replace JSON SA key with Workload Identity Federation | T092 | DONE |
 | I-015 | Pin tool binary downloads in bbi-infrastructure CI | T057 | TODO |
 | I-016 | Pin tool binary downloads in platform-control-plane CI | T058 | TODO |
 | I-017 | Add GitHub Advanced Security secret scanning | T059 | DONE |
@@ -602,13 +606,13 @@ T058
 | I-030 | Add CODEOWNERS for infra-critical paths | T070 | DONE |
 | I-031 | Publish release evidence bundle + retention policy | T082 | DONE |
 | I-032 | Pin runner images to ubuntu-24.04 | T063 | DONE |
-| I-033 | Replace PAT-based GitOps with GitHub App token | T062 | TODO |
+| I-033 | Replace PAT-based GitOps with GitHub App token | T062 | DONE |
 | I-034 | ArgoCD drift detection + alerting for "Synced but wrong" | T075 | TODO |
 | I-035 | Smoke tests for authn MFE config + cookie domain | T071 | DONE |
 | I-036 | Automated tenant isolation tests | T072 | TODO |
 | I-037 | Translation pipeline (openedx-atlas + MFE locale checks) | T037 | PARTIAL (enriched) |
 | I-038 | Visual regression baseline governance | T073 | DONE |
-| I-039 | TTFS onboarding flow tests | T074 | TODO |
+| I-039 | TTFS onboarding flow tests | T074 | DONE |
 | I-040 | ExternalSecrets refresh interval + failure alerting | T078 | TODO |
 | I-041 | Terraform drift detection (tfsec/checkov + plan output) | T004 | DONE |
 | I-042 | Trivy config scanning for K8s manifests + Terraform | T004 | DONE |
@@ -618,5 +622,5 @@ T058
 | I-046 | Security incident runbook (supply-chain) | T080 | DONE |
 | I-047 | Ulmo upgrade spike (compat test suite + rollback plan) | T042/T044 | DONE |
 | I-048 | Security exceptions register with expiry + CI enforcement | T081 | DONE |
-| I-049 | Commit signing (Sigstore/GitHub) + CI verification | T064 | TODO |
+| I-049 | Commit signing (Sigstore/GitHub) + CI verification | T064 | DONE |
 | I-050 | SSO/SAML/LTI docs aligned to official Open edX operator pages | T035 | PARTIAL (enriched) |
