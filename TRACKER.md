@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 37    |
-| TODO   | 34    |
+| DONE   | 42    |
+| TODO   | 29    |
 | PARTIAL| 16    |
 | BLOCKED| 3     |
 | **Total** | **90** |
@@ -313,7 +313,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T072 | Add automated tenant isolation tests | P1 | TODO | DR2:I-036 | L | T011 | Automated tests that verify tenant A cannot access tenant B's data for: auth tokens, analytics events, branding assets. |
 | T049 | E2E test framework (Playwright) | P3 | TODO | I26 | L | T011 | Only shell smoke tests exist. Add Playwright with 5 critical-path tests: login, enroll, play video, forum post, certificate. |
 | T050 | Wire E2E into post-deploy gate | P3 | TODO | NEW | S | T049 | Once Playwright exists, add as a blocking step in `release-evidence.yml`. |
-| T073 | Add visual regression baseline governance | P2 | TODO | DR2:I-038 | M | — | Define approval process for visual regression baseline images and add drift alerts (e.g., Percy or Chromatic). Prevents silent UI regressions from Tutor/MFE upgrades. |
+| T073 | Add visual regression baseline governance | P2 | DONE | DR2:I-038 | M | — | ✓ Batch 7. VISUAL_REGRESSION.md + verify-visual-baselines.sh + baselines.json seed. Opus review: PASS. |
 | T074 | Add TTFS onboarding flow tests | P3 | TODO | DR2:I-039 | M | — | Add "time-to-first-success" tests that simulate a new learner completing registration, enrollment, and first lesson. Tracks onboarding funnel health. |
 
 ---
@@ -339,10 +339,10 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T024 | Scheduled park/unpark validation | P1 | DONE | NEW | S | — | ✓ Batch 3. Monthly CI job: shellcheck + bash -n + set -euo pipefail verification. |
 | T044 | Clarify Tutor 18.2.2 patch level | P3 | DONE | NEW, DR2:I-047 | S | T042 | ✓ Batch 6. Added "Current Version Pin" section to ADR-019 + verify-tutor-version-pin.sh (scans all files for version consistency, 14/14 PASS). |
 | T075 | Add ArgoCD drift detection + alerting | P2 | TODO | DR2:I-034 | M | — | Add alerting for ArgoCD "Synced but wrong" cases (drift between git and live). Cross-repo: bbi-infrastructure. Configure Prometheus alerting on `argocd_app_info` where sync_status=Synced but health_status!=Healthy. |
-| T045 | MongoDB Atlas: dev seed script | P3 | TODO | NEW | M | — | Atlas is the only MongoDB option (no local fallback). Add a `scripts/infra/seed-mongo-dev.sh` that populates a dev Atlas cluster from fixtures so new devs don't need prod access. |
+| T045 | MongoDB Atlas: dev seed script | P3 | DONE | NEW | M | — | ✓ Batch 7. seed-mongo-dev.sh + fixtures (openedx + forum) + MONGODB_DEV_SEED.md. Prod guard + dry-run. Opus review: PASS. |
 | T046 | MongoDB Atlas: connection health in CI | P3 | TODO | NEW | S | — | Add a lightweight CI job that validates Atlas SRV connectivity using a test-only account. Currently no CI signal for Atlas reachability. |
 | T047 | Wire Credential/Notes service into smoke matrix | P3 | TODO | NEW | S | T011 | Both services are deployed but not in the post-deploy smoke checklist. Add to `scripts/qa/smoke-test.sh`. |
-| T048 | preview.academyv2.mereka.io redirect | P3 | TODO | bims | S | — | Add /dashboard redirect and explanation page per bead bims. |
+| T048 | preview.academyv2.mereka.io redirect | P3 | DONE | bims | S | — | ✓ Batch 7. K8s manifests (configmap+deployment+service+kustomization) + PREVIEW_REDIRECT.md + verify script. Opus fix: labels selector immutability + base kustomization wiring. |
 | T051 | Enterprise MFE Dockerfile maintenance process | P3 | DONE | NEW | S | T010 | ✓ Batch 6. ENTERPRISE_MFE_MAINTENANCE.md (10 customization categories, 6-step checklist) + verify-mfe-customizations.sh (11 patch signature checks). |
 
 #### T007 Plan: ecommerce-worker CrashLoop
@@ -497,8 +497,8 @@ infrastructure/tutor/patches/
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T042 | Document Tutor upgrade cadence + EOL policy | P3 | DONE | I05, DR2:I-019, DR2:I-047 | S | — | ✓ Batch 4. ADR-019 (renamed from 002 to avoid collision). Stay on Redwood, quarterly eval, pre-upgrade checklist, GitOps-safe rollback. |
 | T082 | Publish release evidence bundle + retention policy | P2 | DONE | DR2:I-031 | M | — | ✓ Batch 5. RELEASE_EVIDENCE.md + assemble-release-evidence.sh + release-evidence-bundle.yml. Opus fix: Python path + JSON injection. |
-| T083 | Standardize OpenTelemetry naming + dashboard contract tests | P2 | TODO | DR2:I-025 | M | — | Standardize OTEL metric/trace naming conventions. Add contract tests that verify dashboards reference only known metric names (prevents silent dashboard breakage on rename). |
-| T084 | Add Lighthouse CI + bundle budgets + INP metric | P2 | TODO | DR2:I-026 | M | — | Add Lighthouse CI to post-deploy pipeline. Define bundle size budgets per MFE. Update from FID → INP (Interaction to Next Paint) metric per Core Web Vitals v4. |
+| T083 | Standardize OpenTelemetry naming + dashboard contract tests | P2 | DONE | DR2:I-025 | M | — | ✓ Batch 7. OTEL_NAMING_CONVENTIONS.md + otel-metric-registry.yaml (14 metrics) + verify-otel-naming.sh. Opus review: PASS. |
+| T084 | Add Lighthouse CI + bundle budgets + INP metric | P2 | DONE | DR2:I-026 | M | — | ✓ Batch 7. LIGHTHOUSE_BUDGETS.md + lighthouse-budgets.json (6 MFEs, INP/CLS/LCP) + verify-lighthouse-budgets.sh (14 checks) + lighthouse-ci.yml. Opus review: PASS after set-e fix. |
 | T085 | Formalize staging activation path | P2 | TODO | DR2:I-027 | L | — | Document and implement the promotion path from nonprod → staging → production in bbi-infrastructure. Cross-repo: bbi-infrastructure. |
 | T086 | Convert DR evidence into scheduled backup/restore drills | P1 | TODO | DR2:I-044 | L | — | Convert one-off DR evidence into recurring scheduled drills (monthly). Add enforced gates: drill must pass before production releases. Cross-repo: bbi-infrastructure. |
 | T087 | Container hardening (non-root, read-only FS, seccomp) | P2 | TODO | DR2:I-043 | L | — | Enforce non-root runtime user, read-only root filesystem, and seccomp/AppArmor profiles for all LMS containers. Coordinate with T077 (policy-as-code). |
@@ -594,8 +594,8 @@ T058
 | I-022 | SAML config alignment + metadata endpoints | T035 | PARTIAL (enriched) |
 | I-023 | Implement Reusable LTI Store (Ulmo feature) | T076 | TODO |
 | I-024 | Policy-as-Code for pod security standards | T077 | TODO |
-| I-025 | Standardize OTel naming + dashboard contract tests | T083 | TODO |
-| I-026 | Lighthouse CI + bundle budgets + INP metric | T084 | TODO |
+| I-025 | Standardize OTel naming + dashboard contract tests | T083 | DONE |
+| I-026 | Lighthouse CI + bundle budgets + INP metric | T084 | DONE |
 | I-027 | Formalize staging activation path | T085 | TODO |
 | I-028 | Add repo-level PR template | T068 | DONE |
 | I-029 | Require PR reviews + status checks (Scorecard) | T069 | DONE |
@@ -607,7 +607,7 @@ T058
 | I-035 | Smoke tests for authn MFE config + cookie domain | T071 | DONE |
 | I-036 | Automated tenant isolation tests | T072 | TODO |
 | I-037 | Translation pipeline (openedx-atlas + MFE locale checks) | T037 | PARTIAL (enriched) |
-| I-038 | Visual regression baseline governance | T073 | TODO |
+| I-038 | Visual regression baseline governance | T073 | DONE |
 | I-039 | TTFS onboarding flow tests | T074 | TODO |
 | I-040 | ExternalSecrets refresh interval + failure alerting | T078 | TODO |
 | I-041 | Terraform drift detection (tfsec/checkov + plan output) | T004 | DONE |
