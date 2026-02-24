@@ -13,6 +13,7 @@ resources:
 - apps/multi-tenancy
 - apps/lms
 - apps/cms
+- apps/preview-redirect
 - ../../../services/purchase-gateway/k8s
 
 # Custom Mereka-branded OpenEdX image

@@ -98,7 +98,7 @@ echo "== Checking: resource size ceilings (JS < 2048 KB, CSS < 500 KB) =="
 JS_CEILING_KB=2048
 CSS_CEILING_KB=500
 
-python3 - "$BUDGET_FILE" "$JS_CEILING_KB" "$CSS_CEILING_KB" <<'PY'
+if python3 - "$BUDGET_FILE" "$JS_CEILING_KB" "$CSS_CEILING_KB" <<'PY'
 import json, sys
 
 data        = json.load(open(sys.argv[1]))
@@ -120,7 +120,7 @@ for v in violations:
   print(v, file=sys.stderr)
 sys.exit(1 if violations else 0)
 PY
-if [[ $? -eq 0 ]]; then
+then
   pass "all JS budgets <= ${JS_CEILING_KB} KB"
   pass "all CSS budgets <= ${CSS_CEILING_KB} KB"
 else
@@ -153,7 +153,7 @@ fi
 echo ""
 echo "== Checking: CLS budgets <= 100 (0.10) =="
 
-python3 - "$BUDGET_FILE" <<'PY'
+if python3 - "$BUDGET_FILE" <<'PY'
 import json, sys
 
 data       = json.load(open(sys.argv[1]))
@@ -171,7 +171,7 @@ for v in violations:
   print(v, file=sys.stderr)
 sys.exit(1 if violations else 0)
 PY
-if [[ $? -eq 0 ]]; then
+then
   pass "all CLS budgets <= 100 (0.10)"
 else
   fail "one or more CLS budgets exceed 0.10"
@@ -183,7 +183,7 @@ fi
 echo ""
 echo "== Checking: LCP budgets <= 2500 ms =="
 
-python3 - "$BUDGET_FILE" <<'PY'
+if python3 - "$BUDGET_FILE" <<'PY'
 import json, sys
 
 data       = json.load(open(sys.argv[1]))
@@ -201,7 +201,7 @@ for v in violations:
   print(v, file=sys.stderr)
 sys.exit(1 if violations else 0)
 PY
-if [[ $? -eq 0 ]]; then
+then
   pass "all LCP budgets <= 2500 ms"
 else
   fail "one or more LCP budgets exceed 2500 ms"
