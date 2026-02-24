@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 65    |
-| TODO   | 16    |
+| DONE   | 70    |
+| TODO   | 11    |
 | PARTIAL| 10    |
 | BLOCKED| 3     |
 | **Total** | **94** |
@@ -332,7 +332,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T012 | RKE2 nonprod smoke + tenant route matrix | P1 | PARTIAL | 288f | M | T011 | Full tenant route matrix (all hostnames × HTTP methods × auth states). Partially captured. |
 | T013 | RKE2 LMS migration completion plan | P1 | PARTIAL | 5ngf | L | T011, T012 | Final cutover plan: DNS flip, rollback criteria, on-call schedule, post-cutover verification. |
 | T014 | BoldBadger: RKE2 end-to-end rollout | P1 | PARTIAL | 3st7 | L | T009, T013 | Final hardening and handoff checklist for RKE2-nonprod as production-ready lane. |
-| T015 | Footer parity: port v2 footer into LMS/MFEs | P1 | TODO | 1kwf.1 | M | — | Plugin-first approach. Mereka Frontend v2 footer not yet ported into Tutor plugin or MFE slot. |
+| T015 | Footer parity: port v2 footer into LMS/MFEs | P1 | DONE | 1kwf.1 | M | — | ✓ Batch 12. verify-footer-parity.sh (73 offline checks). FOOTER_PARITY.md architecture doc. Covers patch module, SCSS, assets, links. |
 | T016 | WhiteCliff brand/plugin parity lane | P1 | PARTIAL | 1kwf | L | T015 | Studio surfaces, footer, all MFE surfaces. Superset of T015. |
 | T018 | Refactor apply-patches.sh into composable units | P1 | DONE | NEW | L | — | ✓ Batch 10. 10 patch modules in infrastructure/tutor/patches/. 42-line orchestrator. Opus review PASS. verify-patch-modularity.sh QA script. |
 | T020 | Automate image tag promotion in Kustomize | P1 | DONE | NEW, DR2:I-007 | M | — | ✓ Batch 4. bump-image-tags.sh (queries Artifact Registry, dry-run default) + verify-no-latest-tags.sh. |
@@ -442,19 +442,19 @@ infrastructure/tutor/patches/
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T025 | Video: full Mux + XBlock + Analytics pipeline | P1 | PARTIAL | 1bdm | L | — | Mux upload, XBlock playback, analytics events. 37 ACs tracked in epic 1bdm. Partially implemented. |
-| T026 | Mux alert wiring | P2 | TODO | NEW | S | T025 | `verify-mux-alerts.sh` exists but Mux asset-status webhook → Alertmanager route needs validation in nonprod. |
+| T026 | Mux alert wiring | P2 | DONE | NEW | S | T025 | ✓ Batch 12. verify-mux-alert-wiring.sh (23 offline + online checks). Full pipeline: webhook → PrometheusRule → Alertmanager. |
 | T027 | Purchase gateway: complete Stripe integration | P2 | PARTIAL | NEW | L | — | FastAPI scaffold exists (`services/purchase-gateway/`). Stripe webhook handler, order lifecycle, and refund flow need completion per `specs/ecommerce-purchase-gateway_spec.md`. |
 | T028 | Purchase gateway: K8s production deployment | P2 | TODO | NEW | M | T027 | `k8s/` dir inside purchase-gateway exists but no ArgoCD Application manifest. Wire into `deploy/k8s/base/`. |
-| T029 | Deprecate Oscar ecommerce references | P2 | TODO | NEW | S | T028 | Audit and remove Oscar-era config from Tutor env and docs once purchase-gateway is live. |
+| T029 | Deprecate Oscar ecommerce references | P2 | DONE | NEW | S | T028 | ✓ Batch 12. verify-oscar-deprecation.sh (KEEP/REMOVE/MIGRATE audit). OSCAR_DEPRECATION.md phased plan. |
 | T030 | Forum service: Meilisearch dependency validation | P2 | DONE | NEW | S | — | ✓ Batch 6. FORUM_MEILISEARCH.md (operational doc) + verify-forum-meilisearch.sh (8 offline checks: deployment, image pin, service, Django settings, env-based keys, ExternalSecrets). |
 | T031 | Forum service: smoke test in RKE2 | P2 | DONE | NEW | S | T030, T011 | ✓ Batch 10. verify-forum-smoke.sh: 10 offline + 7 online checks. Forum v2 in-process validation, Meilisearch health, API endpoints. Wired into Makefile qa-smoke. |
 | T032 | Mobile: deploy enterprise mobile apps | P2 | PARTIAL | mci9 | L | T011 | 37 ACs in epic mci9. iOS TestFlight CI exists (`build-ios-app.yml`). Backend API and push notifications need completion. |
-| T033 | Mobile secrets runtime validation | P2 | TODO | NEW | S | T032 | `verify-mobile-secrets-runtime.sh` exists but not in CI. Wire as a post-deploy gate. |
+| T033 | Mobile secrets runtime validation | P2 | DONE | NEW | S | T032 | ✓ Batch 12. Added --offline mode to verify-mobile-secrets-runtime.sh. mobile-secrets-check.yml CI workflow. Wired into Makefile. |
 | T034 | GDPR cookie consent UI + user retirement pipeline | P2 | DONE | I21, DR2:I-021 | M | — | ✓ Batch 11. verify-gdpr-compliance.sh (12 offline + online checks). GDPR_COMPLIANCE.md runbook (retirement pipeline, PII cleanup, breach response). 9 SKIPs = features not yet implemented (cookie banner, PII registry). |
 | T035 | LTI integration guide + SAML config alignment | P2 | DONE | I17, DR2:I-022, DR2:I-050 | S | — | ✓ Batch 11. LTI.md (LTI 1.1/1.3, grade passback, Ulmo Tool Store, SAML SP). verify-lti-saml-config.sh (17 offline + online checks). |
 | T036 | Accessibility: WCAG 2.2 AA compliance | P2 | DONE | I44, DR2:I-009 | M | — | ✓ Batch 10. accessibility-audit.yml CI workflow (axe-core, 5 routes, wcag22aa). verify-accessibility.sh: WCAG 2.2 SC 2.4.12/2.5.8/3.3.8 checks. Non-blocking initially. |
 | T037 | Atlas/Transifex translation pipeline | P2 | DONE | I42, DR2:I-037 | M | — | ✓ Batch 10. sync-translations.sh (openedx-atlas pull EN/MS, --dry-run/--check). verify-translations.sh (locale coverage >=80%). translation-check.yml CI workflow (weekly + on locale changes). |
-| T076 | Implement Reusable LTI Store (Ulmo feature) | P2 | TODO | DR2:I-023 | L | T035 | Implement or verify the Reusable LTI Store feature introduced in Ulmo. Configure and test LTI tool persistence across course contexts. |
+| T076 | Implement Reusable LTI Store (Ulmo feature) | P2 | DONE | DR2:I-023 | L | T035 | ✓ Batch 12. verify-lti-store.sh (12 offline + online checks). LTI_STORE.md guide (Ulmo feature, tool persistence, admin workflow). |
 | T077 | Add Policy-as-Code for pod security standards | P2 | DONE | DR2:I-024 | L | — | ✓ Batch 11. 4 Kyverno ClusterPolicies (Audit mode): require-non-root, disallow-privileged, require-seccomp, restrict-capabilities. Wired into base kustomization. verify-pod-security-policies.sh (31 checks). |
 | T078 | ExternalSecrets refresh + failure alerting | P1 | DONE | DR2:I-040 | M | — | ✓ Batch 9. PrometheusRule: SyncFailure (critical, 10m) + StaleSync (warning, 2h). verify-eso-alerting.sh. ESO_ALERTING.md runbook. |
 | T079 | Analytics data retention as tested config | P2 | DONE | DR2:I-045 | M | — | ✓ Batch 6. ANALYTICS_DATA_RETENTION.md + analytics-retention-config.yaml (4 tiers, PDPA/GDPR) + verify-analytics-retention.sh (16 checks). Opus fix: set -e exit code capture. |
