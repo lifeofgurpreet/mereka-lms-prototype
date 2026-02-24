@@ -1,0 +1,131 @@
+[
+  {
+    "_id": {
+      "$oid": "000000000000000000000001"
+    },
+    "_type": "org",
+    "org": "MerekaDemo",
+    "name": "Mereka Demo Organisation",
+    "short_name": "DEMO",
+    "description": "Fake organisation used for local dev seeding. NOT real data.",
+    "logo": "/static/images/logo.png",
+    "active": true,
+    "created_at": { "$date": "2025-01-01T00:00:00.000Z" },
+    "updated_at": { "$date": "2025-01-01T00:00:00.000Z" }
+  },
+  {
+    "_id": {
+      "$oid": "000000000000000000000002"
+    },
+    "_type": "definition",
+    "block_type": "course",
+    "fields": {
+      "display_name": "Demo Course: Introduction to Open edX (DEV SEED)",
+      "start": { "$date": "2025-06-01T00:00:00.000Z" },
+      "end": { "$date": "2026-12-31T00:00:00.000Z" },
+      "enrollment_start": { "$date": "2025-01-01T00:00:00.000Z" },
+      "enrollment_end": { "$date": "2026-12-31T00:00:00.000Z" },
+      "catalog_visibility": "both",
+      "language": "en",
+      "org": "MerekaDemo",
+      "number": "DEMO101",
+      "run": "2025_T1",
+      "invitation_only": false
+    },
+    "edit_info": {
+      "edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "edited_by": 1,
+      "subtree_edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "subtree_edited_by": 1
+    }
+  },
+  {
+    "_id": {
+      "$oid": "000000000000000000000003"
+    },
+    "_type": "definition",
+    "block_type": "chapter",
+    "fields": {
+      "display_name": "Week 1: Getting Started",
+      "visible_to_staff_only": false
+    },
+    "edit_info": {
+      "edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "edited_by": 1,
+      "subtree_edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "subtree_edited_by": 1
+    }
+  },
+  {
+    "_id": {
+      "$oid": "000000000000000000000004"
+    },
+    "_type": "definition",
+    "block_type": "sequential",
+    "fields": {
+      "display_name": "1.1 Welcome to the Course",
+      "visible_to_staff_only": false,
+      "graded": false
+    },
+    "edit_info": {
+      "edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "edited_by": 1,
+      "subtree_edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "subtree_edited_by": 1
+    }
+  },
+  {
+    "_id": {
+      "$oid": "000000000000000000000005"
+    },
+    "_type": "definition",
+    "block_type": "vertical",
+    "fields": {
+      "display_name": "Welcome Page"
+    },
+    "edit_info": {
+      "edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "edited_by": 1,
+      "subtree_edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "subtree_edited_by": 1
+    }
+  },
+  {
+    "_id": {
+      "$oid": "000000000000000000000006"
+    },
+    "_type": "definition",
+    "block_type": "html",
+    "fields": {
+      "display_name": "Course Introduction",
+      "data": "<h2>Welcome to the Demo Course</h2><p>This is a <strong>dev seed fixture</strong> — not real course content. Safe to wipe with <code>--obliterate</code>.</p>"
+    },
+    "edit_info": {
+      "edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "edited_by": 1,
+      "subtree_edited_on": { "$date": "2025-01-01T00:00:00.000Z" },
+      "subtree_edited_by": 1
+    }
+  },
+  {
+    "_id": {
+      "$oid": "000000000000000000000007"
+    },
+    "_type": "user.profile",
+    "username": "dev_seed_student",
+    "email": "dev-seed-student@example.invalid",
+    "name": "Dev Seed Student",
+    "language": "en",
+    "location": "Kuala Lumpur, MY",
+    "year_of_birth": 1990,
+    "gender": "o",
+    "level_of_education": "b",
+    "goals": "Learn Open edX platform basics for local dev work.",
+    "bio": "This is a fake test user created by the dev seed script. NOT a real user.",
+    "profile_image": {
+      "has_image": false,
+      "image_url_full": null
+    },
+    "date_joined": { "$date": "2025-01-01T00:00:00.000Z" }
+  }
+]
