@@ -316,8 +316,8 @@ kubectl port-forward -n mereka-lms svc/lms 8000:8000
 # CMS/Studio
 kubectl port-forward -n mereka-lms svc/cms 8000:8000
 
-# Forum
-kubectl port-forward -n mereka-lms svc/forum 4567:4567
+# Forum (v2 — runs in-process with LMS, no separate service)
+# Access via LMS: https://academyv2.mereka.io/api/discussion/v2/courses/
 
 # Analytics (Superset) - See docs/analytics/ANALYTICS_CONSOLE_ACCESS.md
 kubectl port-forward -n mereka-lms svc/superset 8088:8088
@@ -409,6 +409,6 @@ VPS automation (installs cron for prod+dev checks, logs to `var/cron-public-heal
 | Discovery | 8000 | `kubectl port-forward -n mereka-lms svc/discovery 8000:8000` | ✅ Running |
 | Ecommerce | 8000 | `kubectl port-forward -n mereka-lms svc/ecommerce 8000:8000` | ✅ Running |
 | Credentials | 8000 | `kubectl port-forward -n mereka-lms svc/credentials 8000:8000` | ✅ Running |
-| Forum | 4567 | `kubectl port-forward -n mereka-lms svc/forum 4567:4567` | ✅ Running |
+| Forum | (in-process) | Forum v2 runs inside LMS — no separate service | ✅ Via LMS |
 | Notes | 8000 | `kubectl port-forward -n mereka-lms svc/notes 8000:8000` | ✅ Running |
 | Analytics (Superset) | 8088 | `kubectl port-forward -n mereka-lms svc/superset 8088:8088` | ❌ Not deployed |

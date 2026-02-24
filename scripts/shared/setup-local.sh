@@ -43,7 +43,12 @@ else
     echo -e "${YELLOW}⚠️  Virtual environment already exists${NC}"
 fi
 
-source .venv/bin/activate
+if [[ -f .venv/bin/activate ]]; then
+    source .venv/bin/activate
+else
+    echo -e "${RED}ERROR: .venv/bin/activate not found. Run 'python3 -m venv .venv' first.${NC}"
+    exit 1
+fi
 pip install --upgrade pip --quiet
 pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0 --quiet
 echo -e "${GREEN}✅ Python environment ready${NC}"

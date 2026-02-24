@@ -124,29 +124,34 @@ After completing 16 batches (91 tasks), the codebase has comprehensive verificat
 
 ## Recommended Action Plan
 
-### Week 1: Security (P0)
-- [ ] Add authentication to Purchase Gateway admin/subscription/checkout endpoints
-- [ ] Wrap Stripe calls with `asyncio.to_thread()`
-- [ ] Register TenantMiddleware in Purchase Gateway
-- [ ] Fix post-deploy-e2e.yml workflow trigger name
+### Week 1: Security (P0) — DONE
+- [x] Add authentication to Purchase Gateway admin/subscription/checkout endpoints
+- [x] Wrap Stripe calls with `asyncio.to_thread()`
+- [x] Register TenantMiddleware in Purchase Gateway
+- [x] Fix post-deploy-e2e.yml workflow trigger name
 
-### Week 2: CI/CD Reliability (P1)
-- [ ] Standardize E2E secret names across workflows
-- [ ] Fix `secrets` in `if:` conditionals (use `vars`)
-- [ ] Archive duplicate `ios-testflight.yml`
-- [ ] Add concurrency controls to build workflows
-- [ ] Fix Purchase Gateway input validation and error handling
+### Week 2: CI/CD Reliability (P1) — DONE
+- [x] Standardize E2E secret names across workflows
+- [x] Fix `secrets` in `if:` conditionals (use `vars`)
+- [x] Archive duplicate `build-ios-app.yml` (ios-testflight.yml is canonical)
+- [x] Add concurrency controls to build workflows
+- [x] Fix Purchase Gateway input validation and error handling
+- [x] Fix checkout race condition (unique pending placeholder)
+- [x] Fix LMS OAuth token cache (module-level with TTL)
+- [x] Fix webhook 500 error leaking internal details
 
-### Week 3: Infrastructure Hardening (P1-P2)
+### Week 3: Infrastructure Hardening (P1-P2) — IN PROGRESS
 - [ ] Add resource limits to all K8s deployments
 - [ ] Add health probes to enterprise workers
-- [ ] Fix _common.sh venv guard
+- [x] Fix setup-local.sh venv guard (added [[ -f ]] check)
 - [ ] Add standard labels to Kyverno policies
 - [ ] Regenerate testmaps, verify spec coverage
+- [x] Fix Makefile lint target masking failures (removed `|| true`)
+- [x] Fix stale forum port 4567 references in ACCESS_URLS.md
 
 ### Week 4: Documentation & Cleanup (P2-P3)
 - [ ] Create incident response and on-call docs
-- [ ] Fix stale Ruby forum references
+- [x] Fix stale Ruby forum references in active operational docs
 - [ ] Clean up duplicate verification scripts
 - [ ] Add Purchase Gateway admin endpoint tests
 

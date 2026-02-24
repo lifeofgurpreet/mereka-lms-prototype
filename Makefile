@@ -90,9 +90,9 @@ credentials-notes-smoke: ## Run Credentials and Notes service smoke tests (offli
 	./scripts/qa/verify-credentials-notes-smoke.sh $(CREDENTIALS_NOTES_SMOKE_ARGS)
 
 lint: ## Run linters (Python, Shell, JS)
-	ruff check scripts/ migrations/ services/ || true
-	shellcheck scripts/**/*.sh || true
-	npm run lint || true
+	ruff check scripts/ migrations/ services/
+	shellcheck scripts/**/*.sh
+	npm run lint
 
 format: ## Format code (Python, Shell, JS)
 	ruff format scripts/ migrations/ services/ || true
