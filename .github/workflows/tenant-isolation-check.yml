@@ -1,0 +1,43 @@
+name: Tenant Isolation Check
+
+on:
+  push:
+    paths:
+      - "infrastructure/tutor/plugins/multi-tenancy/**"
+      - "deploy/k8s/base/apps/multi-tenancy/**"
+      - "deploy/k8s/base/monitoring/cronjob-tenant-isolation.yaml"
+      - "deploy/k8s/base/monitoring/prometheusrule-tenant-isolation.yaml"
+      - "scripts/qa/verify-tenant-isolation-gates.sh"
+      - "scripts/tenants/**"
+  pull_request:
+    paths:
+      - "infrastructure/tutor/plugins/multi-tenancy/**"
+      - "deploy/k8s/base/apps/multi-tenancy/**"
+      - "deploy/k8s/base/monitoring/cronjob-tenant-isolation.yaml"
+      - "deploy/k8s/base/monitoring/prometheusrule-tenant-isolation.yaml"
+      - "scripts/qa/verify-tenant-isolation-gates.sh"
+      - "scripts/tenants/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  tenant-isolation-offline:
+    name: Tenant Isolation Gates (offline)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Run tenant isolation checks (offline)
+        run: bash scripts/qa/verify-tenant-isolation-gates.sh --offline
+
+      - name: Upload verification log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: tenant-isolation-log
+          path: var/tenant-isolation-*.log
+          if-no-files-found: ignore
