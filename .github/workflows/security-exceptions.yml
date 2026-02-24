@@ -1,0 +1,28 @@
+name: Security Exceptions Expiry Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/operations/SECURITY_EXCEPTIONS.md'
+  schedule:
+    # Every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check-expiry:
+    name: Verify security exception expiry dates
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Verify security exceptions register
+        run: |
+          bash -n scripts/qa/verify-security-exceptions.sh
+          ./scripts/qa/verify-security-exceptions.sh
