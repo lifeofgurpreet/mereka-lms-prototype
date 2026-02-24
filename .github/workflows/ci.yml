@@ -483,9 +483,16 @@ jobs:
 
       - name: Render Tutor environment
         run: |
+          # apply-patches.sh (line 6) does: source .venv/bin/activate
+          # Create .venv so the script works in CI
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install "tutor[full]==18.2.2"
           export TUTOR_ROOT=$GITHUB_WORKSPACE/tutor_env
           tutor config save
           ./infrastructure/tutor/apply-patches.sh
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
 
       - name: Run tutor apply patches test
         run: bash tests/tutor/test_tutor_apply.sh
