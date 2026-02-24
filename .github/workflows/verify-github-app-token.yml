@@ -1,0 +1,28 @@
+name: Verify GitHub App Token Migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  verify-github-app-token:
+    name: Verify GitHub App Token Migration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Script syntax check
+        run: bash -n scripts/qa/verify-github-app-token.sh
+
+      - name: Verify GitHub App token migration status
+        run: ./scripts/qa/verify-github-app-token.sh --advisory
