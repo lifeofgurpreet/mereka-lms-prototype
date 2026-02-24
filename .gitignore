@@ -96,3 +96,10 @@ hubspot-webhook-mct/.env
 
 # Infisical CLI local config (never commit)
 .infisical.json
+
+# Agent Mail discovery files
+.agent-mail-project-id
+.agent-mail.yaml
+
+# Stray CLI artifacts
+--url
