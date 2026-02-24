@@ -392,6 +392,158 @@ jobs:
           name: mfe-branding-contract-log
           path: var/ci/verify-mfe-image-branding.log
 
+  slsa-provenance:
+    name: SLSA Provenance & Attestation
+    runs-on: ubuntu-24.04
+    needs: [build-openedx, build-mfe]
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-mfe.result == 'success') }}
+    permissions:
+      contents: read
+      id-token: write   # keyless signing via Sigstore OIDC
+      packages: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Generate provenance for OpenEdX image
+        if: ${{ needs.build-openedx.result == 'success' }}
+        env:
+          OPENEDX_DIGEST: ${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          TAG="${{ inputs.image_tag || github.sha }}"
+          IMAGE_REF="${{ env.REGISTRY }}/openedx@${OPENEDX_DIGEST}"
+
+          # Build in-toto provenance predicate
+          cat > var/ci/provenance-openedx.json <<PROVENANCE
+          {
+            "buildType": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/.github/workflows/build-tutor-images.yml",
+            "builder": {
+              "id": "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/${{ github.run_id }}"
+            },
+            "invocation": {
+              "configSource": {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/build-tutor-images.yml"
+              },
+              "environment": {
+                "github_actor": "${{ github.actor }}",
+                "github_event_name": "${{ github.event_name }}",
+                "github_run_id": "${{ github.run_id }}",
+                "github_run_attempt": "${{ github.run_attempt }}",
+                "runner_os": "Linux",
+                "runner_image": "ubuntu-24.04"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.run_id }}-${{ github.run_attempt }}",
+              "buildStartedOn": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "completeness": { "parameters": true, "environment": true, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" }
+              }
+            ],
+            "subject": [
+              {
+                "name": "${{ env.REGISTRY }}/openedx",
+                "digest": { "sha256": "${OPENEDX_DIGEST#sha256:}" }
+              }
+            ]
+          }
+          PROVENANCE
+
+          # Attest the image (keyless via Sigstore OIDC)
+          cosign attest --yes \
+            --predicate var/ci/provenance-openedx.json \
+            --type slsaprovenance \
+            "${IMAGE_REF}"
+
+          echo "### OpenEdX SLSA Provenance Attached" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate provenance for MFE image
+        if: ${{ needs.build-mfe.result == 'success' }}
+        env:
+          MFE_DIGEST: ${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          TAG="${{ inputs.image_tag || github.sha }}"
+          IMAGE_REF="${{ env.REGISTRY }}/mfe@${MFE_DIGEST}"
+
+          cat > var/ci/provenance-mfe.json <<PROVENANCE
+          {
+            "buildType": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/.github/workflows/build-tutor-images.yml",
+            "builder": {
+              "id": "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/${{ github.run_id }}"
+            },
+            "invocation": {
+              "configSource": {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/build-tutor-images.yml"
+              },
+              "environment": {
+                "github_actor": "${{ github.actor }}",
+                "github_event_name": "${{ github.event_name }}",
+                "github_run_id": "${{ github.run_id }}",
+                "github_run_attempt": "${{ github.run_attempt }}",
+                "runner_os": "Linux",
+                "runner_image": "ubuntu-24.04"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.run_id }}-${{ github.run_attempt }}",
+              "buildStartedOn": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "completeness": { "parameters": true, "environment": true, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" }
+              }
+            ],
+            "subject": [
+              {
+                "name": "${{ env.REGISTRY }}/mfe",
+                "digest": { "sha256": "${MFE_DIGEST#sha256:}" }
+              }
+            ]
+          }
+          PROVENANCE
+
+          cosign attest --yes \
+            --predicate var/ci/provenance-mfe.json \
+            --type slsaprovenance \
+            "${IMAGE_REF}"
+
+          echo "### MFE SLSA Provenance Attached" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload provenance artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        if: always()
+        with:
+          name: slsa-provenance
+          path: var/ci/provenance-*.json
+          retention-days: 90
+
   update-gitops:
     name: Update GitOps
     runs-on: ubuntu-24.04
