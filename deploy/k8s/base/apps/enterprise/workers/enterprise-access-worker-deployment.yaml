@@ -152,6 +152,28 @@ spec:
             limits:
               cpu: 250m
               memory: 512Mi
+          livenessProbe:
+            exec:
+              command:
+                - "celery"
+                - "--app=enterprise_access"
+                - "inspect"
+                - "ping"
+                - "--timeout=10"
+            initialDelaySeconds: 60
+            periodSeconds: 120
+            timeoutSeconds: 15
+          readinessProbe:
+            exec:
+              command:
+                - "celery"
+                - "--app=enterprise_access"
+                - "inspect"
+                - "ping"
+                - "--timeout=5"
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
           securityContext:
             allowPrivilegeEscalation: false
           volumeMounts:
