@@ -473,6 +473,20 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Tutor
+        run: pip install "tutor[full]==18.2.2"
+
+      - name: Render Tutor environment
+        run: |
+          export TUTOR_ROOT=$GITHUB_WORKSPACE/tutor_env
+          tutor config save
+          ./infrastructure/tutor/apply-patches.sh
+
       - name: Run tutor apply patches test
         run: bash tests/tutor/test_tutor_apply.sh
 
@@ -606,6 +620,30 @@ jobs:
             docker run --rm -v $(pwd):/src hadolint/hadolint:latest \
               hadolint /src/**/Dockerfile*
           fi
+
+  pip-audit:
+    name: Python dependency audit
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pip-audit and project deps
+        run: |
+          pip install pip-audit
+          pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
+
+      - name: Run pip-audit (dry-run, informational)
+        run: pip-audit --desc --fix --dry-run 2>&1 || true
+
+      - name: Run pip-audit (strict)
+        run: pip-audit --desc
 
   mfe-footer-slot:
     name: MFE Footer Plugin-Slot Wiring

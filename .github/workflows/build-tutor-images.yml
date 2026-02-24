@@ -163,21 +163,33 @@ jobs:
             && echo "PASS: /openedx/staticfiles/${HASHED_CSS} exists" | tee -a var/ci/verify-openedx-image-branding.log \
             || { echo "FAIL: /openedx/staticfiles/${HASHED_CSS} missing" | tee -a var/ci/verify-openedx-image-branding.log; exit 1; }
 
-      - name: Scan OpenEdX image for vulnerabilities
+      - name: Scan OpenEdX image for vulnerabilities (CRITICAL - blocking)
         uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
         with:
           image-ref: 'tutor_local/openedx:latest'
           format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL'
+          ignorefile: '.trivyignore'
+          output: 'var/ci/trivy-openedx-critical.txt'
+
+      - name: Scan OpenEdX image for vulnerabilities (HIGH - informational)
+        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
+        if: always()
+        with:
+          image-ref: 'tutor_local/openedx:latest'
+          format: 'table'
           exit-code: '0'
-          severity: 'CRITICAL,HIGH'
-          output: 'var/ci/trivy-openedx.txt'
+          severity: 'HIGH'
+          ignorefile: '.trivyignore'
+          output: 'var/ci/trivy-openedx-high.txt'
 
       - name: Upload Trivy OpenEdX scan results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         if: always()
         with:
           name: trivy-openedx-scan
-          path: var/ci/trivy-openedx.txt
+          path: var/ci/trivy-openedx-*.txt
 
       - name: Generate image metadata
         id: meta
@@ -284,21 +296,33 @@ jobs:
           scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest "${EXPECTED_MFE_BRANDING_REV}" \
             | tee var/ci/verify-mfe-image-branding.log
 
-      - name: Scan MFE image for vulnerabilities
+      - name: Scan MFE image for vulnerabilities (CRITICAL - blocking)
         uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
         with:
           image-ref: 'tutor_local/openedx-mfe:latest'
           format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL'
+          ignorefile: '.trivyignore'
+          output: 'var/ci/trivy-mfe-critical.txt'
+
+      - name: Scan MFE image for vulnerabilities (HIGH - informational)
+        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
+        if: always()
+        with:
+          image-ref: 'tutor_local/openedx-mfe:latest'
+          format: 'table'
           exit-code: '0'
-          severity: 'CRITICAL,HIGH'
-          output: 'var/ci/trivy-mfe.txt'
+          severity: 'HIGH'
+          ignorefile: '.trivyignore'
+          output: 'var/ci/trivy-mfe-high.txt'
 
       - name: Upload Trivy MFE scan results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         if: always()
         with:
           name: trivy-mfe-scan
-          path: var/ci/trivy-mfe.txt
+          path: var/ci/trivy-mfe-*.txt
 
       - name: Generate image metadata
         id: meta
