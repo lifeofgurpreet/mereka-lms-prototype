@@ -1,0 +1,43 @@
+name: Validate Multisite Config
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/tutor/multisite-sites.yml'
+      - 'infrastructure/tutor/multisite-sites.dev.yml'
+      - 'infrastructure/tutor/plugins/mereka_lms.py'
+      - 'scripts/qa/validate-multisite-config.sh'
+      - '.github/workflows/validate-multisite.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infrastructure/tutor/multisite-sites.yml'
+      - 'infrastructure/tutor/multisite-sites.dev.yml'
+      - 'infrastructure/tutor/plugins/mereka_lms.py'
+      - 'scripts/qa/validate-multisite-config.sh'
+      - '.github/workflows/validate-multisite.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  validate-multisite:
+    name: Validate SITE_VARIANTS and multisite config
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pyyaml
+        run: pip install --quiet pyyaml
+
+      - name: Run multisite config validation
+        run: bash scripts/qa/validate-multisite-config.sh
