@@ -8,7 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| TODO   | 71    |
+| DONE   | 12    |
+| TODO   | 59    |
 | PARTIAL| 16    |
 | BLOCKED| 3     |
 | **Total** | **90** |
@@ -25,24 +26,24 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T001 | Create SECURITY.md | P0 | TODO | I04 | S | — | Vulnerability disclosure policy: contact, timeline, scope. No file exists at all. |
-| T052 | Pin GitHub Actions to commit SHAs | P0 | TODO | DR2:I-001 | M | — | All 3 repos: mereka-lms, bbi-infrastructure, platform-control-plane. Replace version tags (`uses: actions/checkout@v4`) with immutable SHA refs to prevent tag-mutation attacks. |
+| T001 | Create SECURITY.md | P0 | DONE | I04 | S | — | Vulnerability disclosure policy: contact, timeline, scope. ✓ Batch 1. |
+| T052 | Pin GitHub Actions to commit SHAs | P0 | DONE | DR2:I-001 | M | — | ✓ Batch 1. 17 workflows pinned to SHAs. Cross-repo (bbi-infra, pcp) still TODO. |
 | T053 | Enforce org/repo allowed-actions policy | P0 | TODO | DR2:I-002 | M | T052 | Configure GitHub org-level "Allowed Actions" to blocklist unreviewed third-party actions; pair with SHA pinning. |
-| T005 | Add SBOM generation to CI | P0 | TODO | I09, DR2:I-003 | M | — | Add Syft step to `build-tutor-images.yml` generating CycloneDX SBOM per image. Attach to OCI image as attestation and store as a workflow artifact. No SBOM today. |
-| T002 | Add pip-audit to CI (vuln gate) | P0 | TODO | I10, DR2:I-005 | S | — | Trivy covers container layers but pyproject.toml deps have no Python-level audit. Add pip-audit AND make Trivy severity threshold blocking for releases. Define severity policy (CRITICAL=fail, HIGH=warn) and maintain exceptions register. |
+| T005 | Add SBOM generation to CI | P0 | DONE | I09, DR2:I-003 | M | — | ✓ Batch 2. CycloneDX SBOM via Syft in build-tutor-images.yml, uploaded as workflow artifacts. |
+| T002 | Add pip-audit to CI (vuln gate) | P0 | DONE | I10, DR2:I-005 | S | — | ✓ Batch 1. pip-audit job added. Trivy split: CRITICAL=blocking, HIGH=info. .trivyignore created. |
 | T054 | Add build provenance/SLSA attestations | P0 | TODO | DR2:I-004 | M | T052, T092 | Generate SLSA-style provenance for OCI images using `slsa-github-generator` or `cosign attest`. Attach attestations alongside SBOMs. |
-| T006 | Configure OpenSSF Scorecard | P0 | TODO | I12 | S | — | Add `.github/workflows/scorecard.yml`. Free signal on supply-chain posture; feeds into Dependency Review. |
-| T055 | Render Tutor env in CI (fix idempotency skip) | P0 | TODO | DR2:I-006 | M | — | CRITICAL: `tests/tutor/test_idempotency.sh` exits early if `tutor_env/` is missing in CI. Add a CI step that renders the Tutor environment before running idempotency tests so they don't silently skip. |
-| T056 | Implement Cache-Control headers in MFE Caddyfile | P0 | TODO | DR2:I-008 | M | — | Hashed assets: `Cache-Control: max-age=31536000, immutable`; `index.html`: `no-cache`; API responses: `no-store`. Prevents stale MFE code after deploys. |
-| T091 | Standardize workflow permissions (least-privilege) | P1 | TODO | DR2:I-013 | S | — | All GitHub Actions workflows must declare minimal `permissions:` block. Default `GITHUB_TOKEN` scope is too broad; enumerate `contents: read` etc. per job. |
+| T006 | Configure OpenSSF Scorecard | P0 | DONE | I12 | S | — | ✓ Batch 1. scorecard.yml added, weekly + on push to main. |
+| T055 | Render Tutor env in CI (fix idempotency skip) | P0 | DONE | DR2:I-006 | M | — | ✓ Batch 1. CI renders tutor_env/ with .venv before tests. Opus fix: added venv creation for apply-patches.sh. |
+| T056 | Implement Cache-Control headers in MFE Caddyfile | P0 | DONE | DR2:I-008 | M | — | ✓ Batch 1+2. Default no-cache for all responses (covers SPA routes), hashed assets immutable, API no-store. |
+| T091 | Standardize workflow permissions (least-privilege) | P1 | DONE | DR2:I-013 | S | — | ✓ Batch 1. All 17 workflows have explicit permissions blocks. |
 | T092 | Replace JSON SA key with Workload Identity Federation | P1 | TODO | DR2:I-014 | M | — | Remove `GCP_SA_KEY` secret from all repos. Configure OIDC Workload Identity Federation so CI jobs authenticate to GCP without long-lived credentials. |
 | T057 | Pin binary downloads in bbi-infrastructure CI | P1 | TODO | DR2:I-015 | S | — | Pin `yq`, `kubectl`, `helm` and other downloaded binaries to SHA or exact version in CI workflows. Cross-repo: bbi-infrastructure. |
 | T058 | Pin binary downloads in platform-control-plane CI | P1 | TODO | DR2:I-016 | S | — | Same as T057 for platform-control-plane repo. Cross-repo: platform-control-plane. |
 | T059 | Add GitHub Advanced Security secret scanning | P1 | TODO | DR2:I-017 | M | — | Enable GHAS secret scanning and push protection across all repos. Complements local pre-commit hook already in place. |
-| T060 | Add Dependency Review workflow | P1 | TODO | DR2:I-011 | S | — | Add `dependency-review.yml` that blocks PRs introducing known-vulnerable or license-incompatible deps. Uses GitHub's built-in dependency review action. |
-| T061 | Add Dependabot for pip/npm/terraform | P1 | TODO | DR2:I-012 | S | — | Add `.github/dependabot.yml` covering `pip` (pyproject.toml), `npm` (package.json), `terraform` (infrastructure/terraform/). |
+| T060 | Add Dependency Review workflow | P1 | DONE | DR2:I-011 | S | — | ✓ Batch 1. dependency-review.yml blocks CRITICAL vulns + AGPL/GPL licenses. |
+| T061 | Add Dependabot for pip/npm/terraform | P1 | DONE | DR2:I-012 | S | — | ✓ Batch 1. dependabot.yml covering github-actions, pip, npm, terraform. |
 | T062 | Replace PAT-based GitOps with GitHub App token | P2 | TODO | DR2:I-033 | M | — | Current GitOps commits use a PAT that isn't rotated. Replace with a GitHub App token (scoped, auto-rotating) or fine-grained PAT with documented rotation schedule. |
-| T063 | Pin runner images to ubuntu-24.04 | P2 | TODO | DR2:I-032 | S | — | Replace `runs-on: ubuntu-latest` with `runs-on: ubuntu-24.04` across all workflows in all repos to prevent silent runner image drift. |
+| T063 | Pin runner images to ubuntu-24.04 | P2 | DONE | DR2:I-032 | S | — | ✓ Batch 1. All 17 workflows pinned. macOS runners left as-is (no stable pin). |
 | T004 | Pin Terraform providers + add IaC scanning | P0 | TODO | I14, DR2:I-041, DR2:I-042 | S | — | Add tfsec or checkov as a CI job against `infrastructure/terraform/`. Add Trivy config scan for K8s manifests. Pin all Terraform provider versions with `required_providers` + lockfile. |
 | T064 | Add commit signing (Sigstore/GitHub) | P3 | TODO | DR2:I-049 | M | — | Enable Sigstore keyless signing or GitHub's commit signing for merges to main. Verify signatures in CI as a soft gate initially. |
 
@@ -295,16 +296,16 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T003 | Add .tool-versions for Python | P0 | TODO | I07 | S | — | CI pins `python-version: '3.12'` ad hoc in each job. Add `.tool-versions` (asdf/rtx) so local dev matches CI exactly. |
-| T043 | Pin requirements with uv lockfile | P3 | TODO | I08 | S | — | Main repo has no `requirements.lock`. Generate with `uv pip compile pyproject.toml -o requirements.lock` and commit. |
-| T022 | Add pytest coverage gate to CI | P1 | TODO | I24 | S | — | `pytest-cov` is in dev deps but no `--cov --cov-fail-under` in CI. Add a coverage job with a floor (suggest 60% to start). |
+| T003 | Add .tool-versions for Python | P0 | DONE | I07 | S | — | ✓ Batch 1. python 3.12.8, nodejs 20.18.1. |
+| T043 | Pin requirements with uv lockfile | P3 | DONE | I08 | S | — | ✓ Batch 2. requirements.lock generated by uv, committed. Test validates existence. |
+| T022 | Add pytest coverage gate to CI | P1 | DONE | I24 | S | — | ✓ Batch 2. test-coverage job in ci.yml, 40% floor, non-blocking (continue-on-error). Placeholder tests in tests/test_placeholder.py. |
 | T023 | Add purchase-gateway unit tests | P1 | TODO | NEW | M | T022 | `services/purchase-gateway/tests/` exists but coverage unknown. Add tests for Stripe webhook handler and order model. |
-| T065 | Add CodeQL SAST workflow | P1 | TODO | DR2:I-010 | M | — | Enable CodeQL analysis for Python and JavaScript where eligible. Integrate into PR checks as a non-blocking gate initially, escalate to blocking. |
+| T065 | Add CodeQL SAST workflow | P1 | DONE | DR2:I-010 | M | — | ✓ Batch 2. codeql.yml for Python + JavaScript, SHA-pinned actions, weekly schedule + PR triggers, non-blocking. |
 | T066 | Establish spec coverage floor per PR | P1 | TODO | DR2:I-018 | M | — | Define a "spec coverage" metric (fraction of ACs with a corresponding test). Enforce a minimum floor per PR, ratchet upward each sprint, review in retro. |
 | T067 | Add Aspects version compatibility enforcement test | P1 | TODO | DR2:I-020 | M | — | Add a CI test that validates the deployed Aspects version is compatible with the target Open edX release. Prevents silent incompatibilities during upgrades. |
-| T068 | Add PR template aligned to specs/rollout/verification | P2 | TODO | DR2:I-028 | S | — | Add `.github/PULL_REQUEST_TEMPLATE.md` with checklist: specs updated, tests added, rollout plan, verification steps. |
-| T069 | Branch protection + Scorecard alignment | P1 | TODO | DR2:I-029 | S | — | Enforce branch protection: require ≥1 review, passing status checks, no direct pushes to main. Tune for Scorecard: signed commits, stale review dismissal, no force-push. |
-| T070 | Add CODEOWNERS for infra-critical paths | P2 | TODO | DR2:I-030 | S | — | Add `CODEOWNERS` file covering GitOps overlays (`deploy/k8s/overlays/production/`), GitHub Actions workflows, and secrets configs. Require owner review for those paths. |
+| T068 | Add PR template aligned to specs/rollout/verification | P2 | DONE | DR2:I-028 | S | — | ✓ Batch 1. `.github/PULL_REQUEST_TEMPLATE.md` with What/Why/Checklist/Infra/Verification sections. |
+| T069 | Branch protection + Scorecard alignment | P1 | TODO | DR2:I-029 | S | — | Enforce branch protection: require ≥1 review, passing status checks, no direct pushes to main. Tune for Scorecard: signed commits, stale review dismissal, no force-push. NOTE: GitHub settings change, not code. |
+| T070 | Add CODEOWNERS for infra-critical paths | P2 | DONE | DR2:I-030 | S | — | ✓ Batch 1. `CODEOWNERS` covering production overlays, workflows, secrets → @infra; tutor → @platform; specs → @engineering. |
 | T019 | Add patch idempotency tests | P1 | TODO | NEW | M | T018 | Each patch module should be testable in isolation (run twice, same result). Add to `tests/tutor/`. |
 | T021 | Verify no `latest` tags in production overlays | P1 | TODO | NEW | S | T020 | `verify-no-latest-prod-tags.sh` exists but not wired into CI as a blocking gate. Wire it. Enforce digest-only refs in production overlays — no tag-only references allowed. |
 | T017 | Validate SITE_VARIANTS + multisite config | P1 | TODO | NEW | M | — | `multisite-sites.dev.yml` and `SITE_VARIANTS` dict need a CI validation job that catches schema drift. |
@@ -543,10 +544,10 @@ T082 (evidence bundle) ← T086 (DR drills)
 ## Quick Filters
 
 **Do next (unblocked P0/P1 TODOs, small effort)**:
-T001, T003, T006, T022, T024, T052, T057, T058, T060, T061, T063, T069, T091
+T022, T024, T057, T058, T065, T069, T092
 
 **Ready after first wave (deps on items above)**:
-T053 (needs T052), T021 (needs T020), T054 (needs T052+T092), T065 (needs T052)
+T053 (needs T052 ✓), T021 (needs T020), T054 (needs T052 ✓ + T092), T023 (needs T022)
 
 **Active bead work (PARTIAL)**:
 T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T025, T027, T032, T034
@@ -569,19 +570,19 @@ T058
 
 | DR2 ID | Title (abbreviated) | Tracker ID | Status |
 |--------|---------------------|------------|--------|
-| I-001 | Pin GitHub Actions to commit SHAs | T052 | TODO |
+| I-001 | Pin GitHub Actions to commit SHAs | T052 | DONE |
 | I-002 | Enforce org/repo allowed-actions policy | T053 | TODO |
-| I-003 | SBOM for images (Syft/Anchore, OCI attestation) | T005 | TODO (enriched) |
+| I-003 | SBOM for images (Syft/Anchore, OCI attestation) | T005 | DONE |
 | I-004 | Build provenance/SLSA attestations | T054 | TODO |
-| I-005 | Vuln scanning blocking for releases | T002 | TODO (enriched) |
-| I-006 | Render Tutor env in CI (fix idempotency skip) | T055 | TODO |
+| I-005 | Vuln scanning blocking for releases | T002 | DONE |
+| I-006 | Render Tutor env in CI (fix idempotency skip) | T055 | DONE |
 | I-007 | Digest pinning in production overlays | T020/T021 | TODO (enriched) |
-| I-008 | Cache-Control headers in MFE Caddyfile | T056 | TODO |
+| I-008 | Cache-Control headers in MFE Caddyfile | T056 | DONE |
 | I-009 | WCAG 2.2 AA (Focus Not Obscured, Target Size, etc.) | T036 | PARTIAL (enriched) |
-| I-010 | Enable CodeQL SAST workflow | T065 | TODO |
-| I-011 | Add Dependency Review workflow | T060 | TODO |
-| I-012 | Add Dependabot for pip/npm/terraform | T061 | TODO |
-| I-013 | Standardize minimal workflow permissions | T091 | TODO |
+| I-010 | Enable CodeQL SAST workflow | T065 | DONE |
+| I-011 | Add Dependency Review workflow | T060 | DONE |
+| I-012 | Add Dependabot for pip/npm/terraform | T061 | DONE |
+| I-013 | Standardize minimal workflow permissions | T091 | DONE |
 | I-014 | Replace JSON SA key with Workload Identity Federation | T092 | TODO |
 | I-015 | Pin tool binary downloads in bbi-infrastructure CI | T057 | TODO |
 | I-016 | Pin tool binary downloads in platform-control-plane CI | T058 | TODO |
@@ -596,11 +597,11 @@ T058
 | I-025 | Standardize OTel naming + dashboard contract tests | T083 | TODO |
 | I-026 | Lighthouse CI + bundle budgets + INP metric | T084 | TODO |
 | I-027 | Formalize staging activation path | T085 | TODO |
-| I-028 | Add repo-level PR template | T068 | TODO |
+| I-028 | Add repo-level PR template | T068 | DONE |
 | I-029 | Require PR reviews + status checks (Scorecard) | T069 | TODO |
-| I-030 | Add CODEOWNERS for infra-critical paths | T070 | TODO |
+| I-030 | Add CODEOWNERS for infra-critical paths | T070 | DONE |
 | I-031 | Publish release evidence bundle + retention policy | T082 | TODO |
-| I-032 | Pin runner images to ubuntu-24.04 | T063 | TODO |
+| I-032 | Pin runner images to ubuntu-24.04 | T063 | DONE |
 | I-033 | Replace PAT-based GitOps with GitHub App token | T062 | TODO |
 | I-034 | ArgoCD drift detection + alerting for "Synced but wrong" | T075 | TODO |
 | I-035 | Smoke tests for authn MFE config + cookie domain | T071 | TODO |
