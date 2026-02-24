@@ -12,7 +12,25 @@
         }
     }
 
-    
+    # Hashed static assets (webpack fingerprinted): safe to cache forever.
+    @hashed {
+        path *.js *.css *.woff *.woff2 *.ttf *.map *.png *.jpg *.jpeg *.gif *.svg *.ico *.webp
+    }
+    header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+    # HTML entry points and root paths: always revalidate so users get latest app shell.
+    @html {
+        path *.html /
+    }
+    header @html Cache-Control "no-cache"
+
+    # API proxy routes: never cache dynamic responses.
+    @api_proxy {
+        path /api/mfe_config/v1* /login_refresh* /orders* /payment*
+    }
+    header @api_proxy Cache-Control "no-store"
+
+
 
     reverse_proxy /api/mfe_config/v1* lms:8000 {
         # Preserve the original Host so LMS can resolve the correct SiteConfiguration
