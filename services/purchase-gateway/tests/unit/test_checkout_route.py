@@ -5,6 +5,7 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.offering import Offering, OfferingType
@@ -76,7 +77,7 @@ def test_checkout_request_rejects_disallowed_origin():
     """CheckoutRequest raises ValueError when success_url is from disallowed origin."""
     import pytest
 
-    with pytest.raises(Exception):  # pydantic ValidationError
+    with pytest.raises(ValidationError):
         CheckoutRequest(
             offering_uuid=uuid.UUID(int=1),
             buyer_email="buyer@example.com",
