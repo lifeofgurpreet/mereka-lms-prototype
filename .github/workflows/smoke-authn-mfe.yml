@@ -1,0 +1,19 @@
+name: Smoke - Authn MFE Config
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  smoke-authn-mfe:
+    name: Authn MFE Smoke Tests
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Run authn MFE smoke tests (dry-run)
+        run: ./scripts/qa/smoke-authn-mfe.sh --dry-run
