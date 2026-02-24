@@ -1,0 +1,87 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-capabilities-mereka-lms
+  labels:
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: security
+  annotations:
+    policies.kyverno.io/title: Restrict Linux Capabilities
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Requires containers in the mereka-lms namespace to drop ALL Linux
+      capabilities. Only NET_BIND_SERVICE may be explicitly added back (for
+      services that need to bind to ports below 1024). All other capabilities
+      increase the blast radius of a container compromise.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: drop-all-capabilities
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      validate:
+        message: >-
+          Containers in namespace mereka-lms must drop ALL capabilities.
+          Set securityContext.capabilities.drop: [ALL] on each container.
+        pattern:
+          spec:
+            =(initContainers):
+              - securityContext:
+                  capabilities:
+                    drop:
+                      - ALL
+            containers:
+              - securityContext:
+                  capabilities:
+                    drop:
+                      - ALL
+    - name: restrict-added-capabilities
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      validate:
+        message: >-
+          Containers in namespace mereka-lms may only add NET_BIND_SERVICE
+          capability. All other capabilities are prohibited.
+        deny:
+          conditions:
+            all:
+              - key: "{{ request.object.spec.containers[].securityContext.capabilities.add[] | [?@ != 'NET_BIND_SERVICE'] | length(@) }}"
+                operator: GreaterThan
+                value: "0"
