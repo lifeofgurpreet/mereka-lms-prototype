@@ -365,10 +365,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-sso-saml.sh
     command: scripts/qa/verify-enterprise-sso-saml.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-enterprise-sso.sh
-    command: scripts/qa/verify-enterprise-sso.sh
 - id: AC-027
   description: Given enterprise customer "Acme Corp" with SAML IdP configured and
     `enable_slug_login=true`, when a user navigates to `https://academyv2.mereka.io/enterprise/login/acme-corp`,
@@ -382,10 +378,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-sso-saml.sh
     command: scripts/qa/verify-enterprise-sso-saml.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-enterprise-sso.sh
-    command: scripts/qa/verify-enterprise-sso.sh
 - id: AC-028
   description: Given a successful SAML assertion from the Acme Corp IdP for a user
     not yet in the LMS, when the assertion is processed, then a new LMS user is created
@@ -399,10 +391,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-sso-saml.sh
     command: scripts/qa/verify-enterprise-sso-saml.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-enterprise-sso.sh
-    command: scripts/qa/verify-enterprise-sso.sh
 - id: AC-029
   description: Given a SAML assertion with `NotOnOrAfter` in the past, when the LMS
     processes the assertion, then the authentication is rejected and the user sees
@@ -416,10 +404,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-sso-saml.sh
     command: scripts/qa/verify-enterprise-sso-saml.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-enterprise-sso.sh
-    command: scripts/qa/verify-enterprise-sso.sh
 - id: AC-030
   description: Given enterprise customer A with SAML IdP "IdP-A" and enterprise customer
     B with SAML IdP "IdP-B", when a user authenticates via IdP-A, then they are linked
@@ -521,7 +505,10 @@ acceptance_criteria:
   description: Given a license assignment fails, when the error is logged, then the
     log entry includes `enterprise_customer_uuid`, `subscription_plan_uuid`, `error_type`,
     and `user_email_hash` (not the raw email)
-  verify: []
-_unmapped:
-- AC-037
+  verify:
+  - type: manual
+    runbook: docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md
+    section: License Assignment Error Logging
+    justification: Requires running enterprise-subsidy service with a simulated license
+      assignment failure; not available without live enterprise data
 

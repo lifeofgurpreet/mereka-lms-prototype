@@ -7,6 +7,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-video-phase3.sh
+    command: scripts/qa/verify-video-phase3.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-video-pipeline.sh
     command: scripts/qa/verify-video-pipeline.sh
 - id: AC-VPD-002
@@ -261,7 +265,12 @@ acceptance_criteria:
   description: Given the Video Engagement Dashboard in Superset, when a course instructor
     accesses it, then drop-off heatmaps show time-series data for where learners pause
     or stop watching
-  verify: []
+  verify:
+  - type: manual
+    runbook: specs/plans/video-pipeline-delivery_testplan.md
+    section: MV-005 Superset Dashboard
+    justification: Superset dashboard heatmap visual correctness requires human verification
+      in browser with real viewing session data
 - id: AC-VPD-029
   description: Given Prometheus scraping Mux metrics, when `video_delivery_minutes_monthly`
     is queried, then the value updates at least every 6 hours
@@ -362,6 +371,4 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-video-content-protection.sh
     command: scripts/qa/verify-video-content-protection.sh
-_unmapped:
-- AC-VPD-028
 

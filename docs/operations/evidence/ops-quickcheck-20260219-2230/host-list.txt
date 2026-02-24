@@ -1,0 +1,12 @@
+https://academyv2.mereka.io/
+https://academyv2.mereka.io/dashboard
+https://admin.academyv2.mereka.io/
+https://studio.academyv2.mereka.io/
+https://apps.academyv2.mereka.io/authn/login
+https://ecommerce.academyv2.mereka.io/dashboard
+https://credentials.academyv2.mereka.io/admin/login
+https://forum.academyv2.mereka.io/
+https://notes.academyv2.mereka.io/
+https://preview.academyv2.mereka.io/
+https://skillourfuture.academy.mereka.io/
+https://academy.biji-biji.com/

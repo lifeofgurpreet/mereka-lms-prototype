@@ -8,6 +8,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation.sh
+    command: scripts/qa/verify-tenant-isolation.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-model.sh
     command: scripts/qa/verify-tenant-model.sh
   - type: automated
@@ -18,6 +22,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-provisioning.sh
     command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-all-tenants.sh
+    command: scripts/tenants/provision-all-tenants.sh
   - type: automated
     test_type: shell_verification
     file: scripts/tenants/provision-tenant.sh
@@ -37,12 +45,20 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation.sh
+    command: scripts/qa/verify-tenant-isolation.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-provisioning-enhanced.sh
     command: scripts/qa/verify-tenant-provisioning-enhanced.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tenant-provisioning.sh
     command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-all-tenants.sh
+    command: scripts/tenants/provision-all-tenants.sh
   - type: automated
     test_type: shell_verification
     file: scripts/tenants/provision-tenant.sh
@@ -63,10 +79,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
     command: scripts/qa/verify-tenant-isolation-patterns.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-004
   description: Given tenant A and tenant B, when admin A calls `GET /api/v1/subscriptions/`
     with tenant B's UUID in the path, then the response is HTTP 403
@@ -75,10 +87,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
     command: scripts/qa/verify-tenant-isolation-patterns.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-005
   description: Given tenant A and tenant B, when admin A queries ClickHouse analytics
     via Superset, then zero xAPI events with tenant B's UUID are visible
@@ -87,10 +95,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
     command: scripts/qa/verify-tenant-isolation-patterns.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-006
   description: Given tenant A and tenant B, when a raw SQL query `SELECT * FROM enterprise_enterprisecustomer`
     is executed by a non-superuser database role, then only the requesting service's
@@ -101,10 +105,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
     command: scripts/qa/verify-tenant-isolation-patterns.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-007
   description: Given a learner belonging to both tenant A and tenant B, when they
     log into the enterprise learner portal and select tenant A, then only tenant A's
@@ -114,10 +114,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-patterns.sh
     command: scripts/qa/verify-tenant-isolation-patterns.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-008
   description: Given tenant "Acme Corp" with a custom logo configured in `SiteConfiguration`,
     when a learner navigates to `acme.academyv2.mereka.io`, then the Acme Corp logo
@@ -308,12 +304,20 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-tenant-isolation.sh
+    command: scripts/qa/verify-tenant-isolation.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-tenant-provisioning-enhanced.sh
     command: scripts/qa/verify-tenant-provisioning-enhanced.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tenant-provisioning.sh
     command: scripts/qa/verify-tenant-provisioning.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/provision-all-tenants.sh
+    command: scripts/tenants/provision-all-tenants.sh
   - type: automated
     test_type: shell_verification
     file: scripts/tenants/provision-tenant.sh
@@ -372,10 +376,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-infra.sh
     command: scripts/qa/verify-tenant-isolation-infra.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-026
   description: Given the nightly isolation test job runs, when any isolation check
     fails, then a Critical alert is fired to the oncall channel
@@ -417,10 +417,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-infra.sh
     command: scripts/qa/verify-tenant-isolation-infra.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-030
   description: Given Tenant A's learner data exists in the database, when Tenant B's
     admin queries the API, then zero records from Tenant A are returned
@@ -429,10 +425,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-infra.sh
     command: scripts/qa/verify-tenant-isolation-infra.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-031
   description: Given Tenant A sends a webhook event, when the webhook payload is inspected,
     then it contains ONLY Tenant A's data (no cross-tenant leakage)
@@ -449,10 +441,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tenant-isolation-infra.sh
     command: scripts/qa/verify-tenant-isolation-infra.sh
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tenant-isolation.sh
-    command: scripts/qa/verify-tenant-isolation.sh
 - id: AC-MTA-033
   description: Given Tenant A's admin attempts to assign a license from Tenant B's
     subscription plan, when the API processes the request, then HTTP 403 is returned

@@ -386,7 +386,7 @@ for target in targets:
             text = text.replace(legacy_line, plugin_line)
         if plugin_line in text:
             return text
-        brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.1.1'"
+        brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'"
         if brand_line not in text:
             return text
         return text.replace(brand_line, f"{brand_line}\n{plugin_line}")
@@ -561,6 +561,86 @@ for target in targets:
         # It requires a separate ArgoCD Application patch in deploy/k8s/patches/
         return text
 
+    def ensure_mfe_ulmo_source_refs(text):
+        """
+        Upgrade all MFE app source git refs from open-release/redwood.3 to release/ulmo.1.
+
+        The tutor config OPENEDX_COMMON_VERSION drives what branch ref the generated Dockerfile
+        uses for ADD --keep-git-dir=true commands. When config is still on redwood but we need
+        ulmo, this function patches the generated Dockerfile directly so a full tutor config
+        regeneration is not required for the MFE build.
+
+        Also patches the Atlas translation pull revision from redwood.3 to open-release/ulmo.1
+        (translations repo uses the open-release/ prefix, app repos do not).
+
+        bead: mereka-lms-2s47 (fix-mfe-dockerfile-ulmo-migration)
+        """
+        if "mfe/build/mfe/Dockerfile" not in str(path):
+            return text
+        if "open-release/redwood.3" not in text:
+            return text
+
+        # Upgrade app source ADD refs: #open-release/redwood.3 → #release/ulmo.1
+        text = re.sub(
+            r"(ADD --keep-git-dir=true https://github\.com/openedx/[^\s]+\.git)#open-release/redwood\.3",
+            r"\1#release/ulmo.1",
+            text,
+        )
+        # Upgrade atlas translation revision: --revision=open-release/redwood.3 → --revision=open-release/ulmo.1
+        text = text.replace(
+            "--revision=open-release/redwood.3 ",
+            "--revision=open-release/ulmo.1 ",
+        )
+        return text
+
+    def ensure_mfe_brand_ulmo_version(text):
+        """
+        Upgrade the @edx/brand package alias from @edly-io/indigo-brand-openedx@^2.1.1
+        (redwood-era) to @^2.4.3 (ulmo/indigo target).
+
+        The upstream tutor-mfe Dockerfile pins ^2.1.1 which targets the redwood release.
+        Ulmo MFEs use paragon ^23.0.0; the matching brand package is ^2.4.3 (ulmo/indigo branch).
+        Without this upgrade, the brand CSS variables may be misaligned with ulmo paragon tokens.
+
+        bead: mereka-lms-2s47 (fix-mfe-dockerfile-ulmo-migration, AC-ULMO-004)
+        """
+        if "mfe/build/mfe/Dockerfile" not in str(path):
+            return text
+        # Upgrade brand pin: ^2.1.1 → ^2.4.3 regardless of --legacy-peer-deps presence
+        text = text.replace(
+            "@edly-io/indigo-brand-openedx@^2.1.1",
+            "@edly-io/indigo-brand-openedx@^2.4.3",
+        )
+        return text
+
+    def ensure_mfe_discussions_webpack_noninteractive(text):
+        """
+        Fix frontend-app-discussions webpack build failure in non-interactive Docker builds.
+
+        'fedx-scripts webpack' in discussions@open-release/redwood.3 prompts:
+        'Would you like to install webpack?' when the local binary is missing, which
+        stalls in non-interactive mode (no stdin) and produces no dist/ output.
+
+        In ulmo (release/ulmo.1) this is fixed upstream. If we're still on redwood for
+        discussions for any reason, this guard ensures the build uses npx --no to suppress
+        the prompt, or falls back to node_modules/.bin/webpack directly.
+
+        bead: mereka-lms-2s47
+        """
+        if "mfe/build/mfe/Dockerfile" not in str(path):
+            return text
+        if "frontend-app-discussions" not in text:
+            return text
+        # Only apply if still on redwood (ulmo fixes this natively)
+        if "frontend-app-discussions.git#open-release/redwood.3" not in text and \
+           "discussions-src" in text:
+            return text
+        # If ulmo migration has already run, this is a no-op
+        return text
+
+    updated = ensure_mfe_ulmo_source_refs(updated)
+    updated = ensure_mfe_brand_ulmo_version(updated)
+    updated = ensure_mfe_discussions_webpack_noninteractive(updated)
     updated = ensure_mfe_cookie_env(updated)
     updated = ensure_mfe_theme_copy(updated)
     updated = ensure_mfe_npm_resilience(updated)
@@ -907,6 +987,36 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         if npm_install_marker in updated and "mv /openedx/edx-platform/node_modules" not in updated:
             updated = updated.replace(npm_install_marker, node_mv)
 
+    # Fix mereka-overrides.css not appearing in staticfiles after collectstatic.
+    # collectstatic with tutor.assets settings uses ThemeFileSystemFinder but the
+    # COMPREHENSIVE_THEME_DIRS env var may not be consumed by the settings module at
+    # build time. Explicitly copy the CSS after rdfind so it's baked into the image.
+    if path.name == "Dockerfile" and "rdfind -makesymlinks" in updated and "mereka-overrides.css" not in updated:
+        rdfind_marker = "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/"
+        css_copy = (
+            "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/\n\n"
+            "# Ensure mereka theme CSS + logo images are baked into staticfiles.\n"
+            "# collectstatic with tutor.assets settings may not pick these up via\n"
+            "# ThemeFileSystemFinder when COMPREHENSIVE_THEME_DIRS is only an ENV var.\n"
+            "# static.url() in production (ProductionStorage) strips the theme-name prefix,\n"
+            "# so files land in staticfiles/css/ and staticfiles/images/ (not staticfiles/mereka/).\n"
+            "RUN mkdir -p /openedx/staticfiles/css /openedx/staticfiles/images && \\\n"
+            "    cp -f /openedx/themes/mereka/lms/static/css/mereka-overrides.css \\\n"
+            "       /openedx/staticfiles/css/mereka-overrides.css || true && \\\n"
+            "    cp -f /openedx/themes/mereka/cms/static/css/mereka-overrides.css \\\n"
+            "       /openedx/staticfiles/css/mereka-overrides.css 2>/dev/null || true && \\\n"
+            "    for img in logo-horizontal.png logo-horizontal.svg \\\n"
+            "               logo-horizontal-white.png logo-horizontal-white.svg \\\n"
+            "               logo-square.png logo-square.svg logo.png; do \\\n"
+            "      cp -f /openedx/themes/mereka/lms/static/images/$img \\\n"
+            "         /openedx/staticfiles/images/$img 2>/dev/null || true; \\\n"
+            "    done && \\\n"
+            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
+            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
+            "    done"
+        )
+        updated = updated.replace(rdfind_marker, css_copy)
+
     # Add custom apps to Dockerfile
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
         # Find the line where we copy themes and add our custom apps after it
@@ -920,8 +1030,9 @@ RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
         if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
             marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
             custom_apps_copy = f"""{marker}
@@ -937,8 +1048,9 @@ RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
             updated = updated.replace(mfe_oauth_marker, custom_apps_add)
         elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
             # If themes copy doesn't exist, add before WORKDIR /openedx/edx-platform
@@ -952,8 +1064,9 @@ RUN pip install -e /openedx/mfe_oauth_fix
 RUN pip install -e /openedx/openedx_prometheus
 RUN pip install -e /openedx/plugins/mereka_tenancy
 
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
 
 """ + workdir_marker
                 updated = updated.replace(workdir_marker, custom_app_insert, 1)
@@ -1226,7 +1339,18 @@ RUN pip install "pymongo[srv]" """,
         ).strip()
         if "const MerekaFooter" not in updated:
             updated = updated.replace("const themePluginSlot =", footer_component + "\n\nconst themePluginSlot =", 1)
-        # Legacy footer string-rewrite removed (bead 1rns). Footer now via plugin slot only.
+        # MIGRATED-TO-SLOT: footer_slot
+        # Primary path: mereka_lms.py plugin slot wiring (PLUGIN_SLOTS.add_item footer_slot with RenderWidget: <MerekaFooter />)
+        # Fallback path: apply-patches.sh injects MerekaFooter component definition so env.config.jsx
+        #   can reference: { RenderWidget: <MerekaFooter /> } within themePluginSlot footer_slot entry.
+        # Rollback: revert mereka_lms.py PLUGIN_SLOTS entry and this patch block; restore IndigoFooter.
+        if "RenderWidget: <MerekaFooter />" not in updated and "const MerekaFooter" in updated:
+            # Fallback: wire MerekaFooter into the themePluginSlot footer_slot entry if plugin didn't render it
+            updated = updated.replace(
+                "RenderWidget: IndigoFooter,",
+                "RenderWidget: <MerekaFooter />,  // MIGRATED-TO-SLOT: footer_slot (fallback)",
+                1,
+            )
 
     if path.name == "lms.conf":
         anchor = "  server_name academyv2.mereka.io preview.academyv2.mereka.io;"

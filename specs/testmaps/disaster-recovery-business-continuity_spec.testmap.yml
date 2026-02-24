@@ -146,7 +146,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: DR Evidence Generation
     justification: Requires human to initiate enterprise audit request and verify
       completeness against client requirements
@@ -203,7 +203,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: 'DR-002: Single PVC Data Corruption'
     justification: Requires live cluster with simulated PVC failure; destructive test
       cannot be fully automated against production
@@ -217,7 +217,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: 'DR-003: Namespace Deletion/Corruption'
     justification: Full namespace restore requires human approval gate and coordination;
       tested during quarterly drills
@@ -245,7 +245,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: 'DR-007: Full Cluster Loss'
     justification: Full cluster rebuild cannot be automated as a test; verified via
       semi-annual tabletop exercise
@@ -263,7 +263,7 @@ acceptance_criteria:
     file: infrastructure/k8s/velero/restore-test-script.sh
     command: infrastructure/k8s/velero/restore-test-script.sh
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Data Integrity Verification
     justification: 5% tolerance comparison requires baseline count from production
       which varies over time
@@ -311,7 +311,7 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Cross-Region Readiness Verification
     justification: GCS bucket configuration requires gcloud auth and varies by environment;
       verified during Phase 3 implementation
@@ -329,17 +329,30 @@ acceptance_criteria:
     then it MUST specify: drill cadence (quarterly), responsible team, notification
     window (1 week advance), and success criteria (all PVs verified, checksums match,
     MySQL probe succeeds)'
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    section: Quarterly Restore Drill Schedule
+    justification: Requires documented drill schedule with all required fields; verified
+      during quarterly DR planning cycle
 - id: AC-025
   description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
     is run, then it produces valid manifests deployable to any GKE cluster
-  verify: []
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    section: Cluster Rebuild from Config
+    justification: Full cluster rebuild validation requires a target GKE cluster;
+      kustomize build validates structure but not full deployability without a live
+      cluster
+    file: scripts/infra/fix-service-selectors.sh
 - id: AC-026
   description: Given Velero backups are stored in GCS, when the backup bucket is inspected,
     then it is configured for multi-region storage or cross-region replication
-  verify: []
-_unmapped:
-- AC-024
-- AC-025
-- AC-026
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
+    section: Cross-Region Readiness Verification
+    justification: GCS bucket multi-region verification requires gcloud auth; verified
+      during Phase 3 implementation and quarterly DR review
 

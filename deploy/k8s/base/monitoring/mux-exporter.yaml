@@ -96,18 +96,3 @@ spec:
       port: 8000
       targetPort: metrics
       protocol: TCP
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mux-delivery-monitor-script
-  namespace: mereka-lms
-  labels:
-    app.kubernetes.io/name: mux-delivery-monitor
-    app.kubernetes.io/part-of: mereka-lms
-data:
-  mux_delivery_monitor.py: |
-    # This ConfigMap is generated from scripts/monitoring/mux_delivery_monitor.py
-    # To update: copy the script content here or use kustomize configMapGenerator
-    # See scripts/monitoring/mux_delivery_monitor.py for the source
-    # Placeholder — deploy pipeline should inject actual script

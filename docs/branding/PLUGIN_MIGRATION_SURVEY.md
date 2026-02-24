@@ -4,7 +4,7 @@
 >
 > **Bead**: mereka-lms-8jao.25
 > **AC**: AC-WC-007, AC-WC-008
-> **Last updated**: 2026-02-18
+> **Last updated**: 2026-02-20
 > **Related**: `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` (MFE-only subset)
 
 ## Scope
@@ -40,13 +40,14 @@ These live in `infrastructure/tutor/themes/mereka/` and use Open edX Comprehensi
 | # | Override | File | Status | Risk | Owner | Migration Plan |
 |---|----------|------|--------|------|-------|----------------|
 | A1 | LMS head-extra (fonts + CSS) | `lms/templates/head-extra.html` | THEME | Low | Mereka | Correct mechanism. No migration needed. |
-| A2 | LMS footer (full Mako replacement) | `lms/templates/footer.html` | THEME | Medium | Mereka | Correct for non-MFE pages. Hardcode brand copy → move to `SiteConfiguration`. |
+| A2 | LMS footer (full Mako replacement) | `lms/templates/footer.html` | THEME | Medium | Mereka | **Updated 2026-02-20 (1kwf)**: Copyright now dynamic via `get_platform_name()`; "Powered by Open edX" removed. Remaining gap: nav links (emails, help URLs) still Mereka-specific → bead 2rcf. |
 | A3 | LMS homepage hero | `lms/templates/index_overlay.html` | THEME | Medium | Mereka | Hardcoded "150+/45/18k" → drive from `SiteConfiguration` or CMS page. |
 | A4 | LMS header brand/logo | `lms/templates/header/brand.html` | THEME | Medium | Mereka | Hardcoded tagline → `configuration_helpers.get_value()`. |
 | A5 | Common head-extra (defensive copy) | `common/templates/head-extra.html` | THEME | Low | Mereka | Required for Mako namespace resolution. Keep in sync with A1. |
 | A6 | CMS head-extra (Studio fonts) | `cms/templates/head-extra.html` | THEME | Low | Mereka | Required copy for Studio. Keep in sync with A1. |
+| A7 | CMS footer widget (Studio white-label) | `cms/templates/widgets/footer.html` | THEME | Medium | Mereka | **Added 2026-02-20 (1kwf/bz9p)**: Override of upstream `widgets/footer.html` which contains "Powered by Open edX". This is the canonical Studio footer renderer. No "Powered by" in override. Awaiting image rebuild to go live. |
 
-**Summary**: All template overrides use the correct Comprehensive Theming mechanism. Items A2–A4 have hardcoded brand copy that should become config-driven (P2 priority).
+**Summary**: All template overrides use the correct Comprehensive Theming mechanism. Items A2 (partial) and A3–A4 have hardcoded brand copy that should become config-driven (P2 priority). A7 is new — blocks Studio white-label completion.
 
 ---
 
@@ -125,7 +126,7 @@ Detailed in `docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`. Summary:
 
 | # | Override | Status | Slot Available | Priority |
 |---|----------|--------|----------------|----------|
-| E1 | Footer (all MFEs) | MIGRATED | Yes | Done |
+| E1 | Footer (all MFEs) | MIGRATED | Yes | Done — **Updated 2026-02-20 (bz9p)**: SITE_VARIANTS verified in source; per-tenant `copyrightHolder` confirmed. Awaiting MFE image `1c66529-20260220023917` ArgoCD deploy for live-complete. |
 | E2 | Header logo | CSS OVERRIDE | Yes | P1 |
 | E3 | Auth page branding | CSS OVERRIDE | Yes | P1 |
 | E4 | Learner dashboard cards | CSS OVERRIDE | Partial | P2 |
@@ -157,8 +158,17 @@ See full details in `MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`.
 | **Immediate (Q2 2026)** | 0 | — |
 | **Q3 2026** | 9 | C1, C2, C4, C5, C6, C7, C8, C9, D-retirement |
 | **Q4 2026** | 2 | C3, C10 |
-| **Backlog** | 3 | A2→config, A3→config, A4→config |
-| **No action** | 28 | All THEME/MIGRATED items |
+| **Backlog** | 4 | A2→config (nav links remain; bead 2rcf), A3→config, A4→config, Enterprise MFE footer wiring |
+| **No action** | 29 | All THEME/MIGRATED items (incl. new A7) |
+
+## Debt Cleared (2026-02-20, bead 1kwf/bz9p)
+
+| Item | What Changed | Result |
+|------|-------------|--------|
+| A2 (LMS footer) | Copyright holder made dynamic (`get_platform_name()`); "Powered by Open edX" removed with OEP-11 comment | `verify-footer-parity.sh` AC-FTPAR-002/005 now PASS |
+| A7 (CMS footer widget) | Added `widgets/footer.html` override — Studio now shows Mereka footer, no "Powered by Open edX" | AC-FTPAR-005 CMS check now PASS (source); live on next image build |
+| E1 (MFE footer) | SITE_VARIANTS verified: 3 tenants, `copyrightHolder` per-tenant confirmed | AC-FTPAR-001/003 PASS; live pending ArgoCD sync |
+| verify-footer-parity.sh | Added Mako comment exclusion (`grep -v '^\s*##'`) to prevent false WARN on removed strings | 32 PASS / 0 FAIL / 1 WARN (down from 2 WARNs) |
 
 ## Retirement Criteria for apply-patches.sh
 

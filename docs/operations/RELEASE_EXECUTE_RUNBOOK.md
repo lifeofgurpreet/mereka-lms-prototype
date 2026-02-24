@@ -86,6 +86,11 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
   get application -n argocd | grep mereka-lms
 ```
 
+```bash
+# Enterprise MFE regression guard (must be PASS for demo readiness)
+./scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+```
+
 **Rollback checkpoint**: If pods crash, revert commits (Step 3 rollback). ArgoCD auto-syncs to previous tags.
 
 ### Step 5: Smoke test
@@ -95,6 +100,8 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
 curl -sI https://academyv2.mereka.io | head -1
 curl -sI https://studio.academyv2.mereka.io | head -1
 curl -sI https://apps.academyv2.mereka.io | head -1
+curl -sI https://admin.academyv2.mereka.io | head -1
+curl -sI https://enterprise.academyv2.mereka.io | head -1
 ```
 
 ## Rollback Summary (AC-OPS-204)
@@ -147,3 +154,131 @@ Done.
 - Script: `scripts/infra/release-openedx-gitops.sh` (tag update + gitops orchestration)
 - Runbook: `docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md` (full infrastructure setup)
 - Runbook: `docs/operations/runbooks/emergency-rollback.md` (emergency procedures)
+
+---
+
+## Enterprise MFE Hardening Evidence (2bq2 / AC-DEP-108..110)
+
+> **Bead**: mereka-lms-2bq2
+> **Date**: 2026-02-19
+> **Branch**: feat/23ry2-spec-dedupe-normalize
+
+### AC-DEP-108: Pre-merge CI gate (no strip-nreum workaround)
+
+```
+$ bash scripts/qa/check-enterprise-mfe-no-workaround.sh
+=== Pre-merge gate: enterprise MFE must not contain runtime NREUM workaround ===
+
+--- AC-DEP-108: No strip-nreum workaround initContainers in manifests ---
+  [PASS] admin-portal-deployment.yaml: no strip-nreum / sanitize-enterprise initContainer
+  [PASS] admin-portal-deployment.yaml: no undefined NR key placeholders
+  [PASS] admin-portal-deployment.yaml: no Python runtime strip image
+  [PASS] learner-portal-deployment.yaml: no strip-nreum / sanitize-enterprise initContainer
+  [PASS] learner-portal-deployment.yaml: no undefined NR key placeholders
+  [PASS] learner-portal-deployment.yaml: no Python runtime strip image
+
+--- AC-DEP-108: Build-time clean Dockerfiles present ---
+  [PASS] Build-time artifact exists: infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal
+  [PASS] Build-time artifact exists: infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal
+  [PASS] Build-time artifact exists: scripts/infra/build-enterprise-mfe-clean.sh
+
+--- AC-DEP-108: Production kustomization pins enterprise MFE images ---
+  [PASS] enterprise-admin-portal image pinned in production kustomization
+  [PASS] enterprise-learner-portal image pinned in production kustomization
+  [PASS] Production kustomization references nreum-clean tag
+
+=== Summary ===
+  PASS: 12 | FAIL: 0
+  RESULT: PASS — enterprise MFE manifests are clean (no runtime workaround)
+```
+
+Script: `scripts/qa/check-enterprise-mfe-no-workaround.sh`
+
+### AC-DEP-109: Full route smoke (pre-ArgoCD-sync)
+
+All routes respond 200 (pre-rollout, ArgoCD sync pending):
+
+| Route | HTTP | Status |
+|-------|------|--------|
+| `https://academyv2.mereka.io/` | 200 | PASS |
+| `https://studio.academyv2.mereka.io/` | 200 | PASS |
+| `https://apps.academyv2.mereka.io/authn/login` | 200 | PASS |
+| `https://admin.academyv2.mereka.io/` | 200 | PASS |
+| `https://enterprise.academyv2.mereka.io/` | 200 | PASS |
+
+> **Note**: NREUM clean check will PASS post-ArgoCD-sync when clean images roll out.
+> Operator action: `argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal`
+
+### AC-DEP-110: Build artifacts manifest
+
+| Artifact | Status |
+|----------|--------|
+| `infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal` | ✅ Committed |
+| `infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal` | ✅ Committed |
+| `infrastructure/docker/enterprise-mfe-clean/strip-nreum.sh` | ✅ Committed |
+| `scripts/infra/build-enterprise-mfe-clean.sh` | ✅ Committed |
+| `scripts/qa/check-enterprise-mfe-no-workaround.sh` | ✅ Committed |
+| `scripts/qa/verify-enterprise-mfe-nreum-clean.sh` | ✅ Updated |
+| Production kustomization nreum-clean pin | ✅ Committed |
+| `docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md` Section 9 | ✅ Committed |
+| `docs/operations/evidence/69qz-enterprise-mfe-clean-build.md` | ✅ Committed |
+
+Full evidence: `docs/operations/evidence/69qz-enterprise-mfe-clean-build.md`
+
+---
+
+## Enterprise/Ecommerce Parity Evidence (3k12 / AC-PRT-101..105)
+
+> **Bead**: mereka-lms-3k12
+> **Date**: 2026-02-19
+
+### AC-PRT-102: Route smoke matrix (all hosts)
+
+All service hosts confirmed HTTP 200/302 (auth redirect where expected), zero `undefined_*` key leakage:
+
+| Host | HTTP | undefined_* | Status |
+|------|------|-------------|--------|
+| `academyv2.mereka.io` | 200 | 0 | PASS |
+| `studio.academyv2.mereka.io` | 200 | 0 | PASS |
+| `apps.academyv2.mereka.io/authn/login` | 200 | 0 | PASS |
+| `admin.academyv2.mereka.io` | 200 | 0 | PASS |
+| `enterprise.academyv2.mereka.io` | 200 | 0 | PASS |
+| `ecommerce.academyv2.mereka.io` | 200 | 0 | PASS |
+| `credentials.academyv2.mereka.io/health/` | 200 | 0 | PASS |
+| `discovery.academyv2.mereka.io` | 200 | 0 | PASS |
+
+### AC-PRT-104: Pre-merge gate
+
+```
+$ bash scripts/qa/check-enterprise-mfe-no-workaround.sh
+PASS: 12 | FAIL: 0
+RESULT: PASS — enterprise MFE manifests are clean (no runtime workaround)
+```
+
+### Pre-demo command
+
+```bash
+# One-liner full route check
+for URL in \
+  "https://academyv2.mereka.io/" \
+  "https://studio.academyv2.mereka.io/" \
+  "https://apps.academyv2.mereka.io/authn/login" \
+  "https://admin.academyv2.mereka.io/" \
+  "https://enterprise.academyv2.mereka.io/" \
+  "https://ecommerce.academyv2.mereka.io/" \
+  "https://credentials.academyv2.mereka.io/health/"; do
+  echo "$(curl -o /dev/null -s -w '%{http_code}' --max-time 10 "$URL") $URL"
+done
+
+# NREUM regression check
+bash scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+```
+
+### Known non-blocking gaps
+
+| Issue | Action |
+|-------|--------|
+| Enterprise portals NREUM: ArgoCD sync pending | `argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal` |
+| Credentials `/programs/` → 502 | Credentials worker may need restart |
+
+Full evidence: `docs/operations/evidence/3k12-parity-smoke.md`

@@ -3,6 +3,7 @@ title: "CRED-050: Ops & Reliability"
 type: "feature_spec"
 status: "approved"
 owner: "engineering"
+vehicle: "talent_platform"
 last_updated: "2026-02-14"
 version: "1.0.0"
 depends_on:
@@ -12,8 +13,9 @@ depends_on:
   - "specs/verifiable-credentials-verification_spec.md"
 links:
   related_specs:
-    - "specs/slo-sla_spec.md"
-    - "specs/observability_spec.md"
+    - "specs/cross-cutting-requirements_spec.md"
+    - "specs/slo-sla-service-level-management_spec.md"
+    - "specs/observability-stack_spec.md"
 ---
 
 # CRED-050: Ops & Reliability
@@ -21,6 +23,17 @@ links:
 ## What we're building
 
 The operational layer that ensures the Verifiable Credentials system is observable, reliable, and recoverable. This covers Prometheus metrics, alerting rules, SLOs, operational runbooks, and the credential backfill/repair tooling.
+
+## Scope
+
+Prometheus metrics export, PrometheusRule alerting, SLO definitions, Grafana dashboard, operational runbooks, backfill management command, health checks, logging, and credential data retention policy.
+
+## Non-goals
+
+- Real-time streaming analytics (deferred)
+- Multi-region credential replication
+- External SIEM integration (out of scope for v1)
+- Automated credential audit trails beyond standard logging
 
 ## Requirements
 

@@ -1,0 +1,92 @@
+========================================
+Footer Parity Verifier
+========================================
+
+AC-FTPAR-001: MFE footer component exists with SITE_VARIANTS
+  PASS: Plugin file exists
+  PASS: MerekaFooter component defined in plugin
+  PASS: SITE_VARIANTS map defined in MerekaFooter
+  PASS: SITE_VARIANTS has >= 2 production domain entries (4 found)
+  PASS: Footer slot reference present in plugin (footer_slot / footer.v1 / mfe-env-config)
+
+AC-FTPAR-002: LMS Mako footer template with Mereka branding
+  PASS: LMS footer template exists
+  PASS: LMS footer template contains Mereka branding content
+  PASS: LMS footer template references Mereka logo or footer CSS class
+
+  [INFO] CMS footer widget check (cms/templates/widgets/footer.html is the rendering template)
+  PASS: CMS footer widget override exists (canonical Studio footer)
+  PASS: CMS footer widget contains Mereka branding
+
+AC-FTPAR-003: copyright fields present for all SITE_VARIANTS domains
+  PASS: Domain 'academyv2.mereka.io' has non-empty brand
+  PASS: Domain 'academyv2.mereka.io' has non-empty copyrightHolder
+  PASS: Domain 'academyv2.mereka.io' has non-empty whatsapp
+  PASS: Domain 'academy.biji-biji.com' has non-empty brand
+  PASS: Domain 'academy.biji-biji.com' has non-empty copyrightHolder
+  PASS: Domain 'academy.biji-biji.com' has non-empty whatsapp
+  PASS: Domain 'skillourfuture.academy.mereka.io' has non-empty brand
+  PASS: Domain 'skillourfuture.academy.mereka.io' has non-empty copyrightHolder
+  PASS: Domain 'skillourfuture.academy.mereka.io' has non-empty whatsapp
+  PASS: No null/undefined values in SITE_VARIANTS
+
+AC-FTPAR-004: Enterprise MFE deployments reference env config
+  PASS: Enterprise MFE env config exists (enterprise-mfe-env.js)
+  PASS: Enterprise MFE env config defines LMS_BASE_URL
+  PASS: Enterprise MFE kustomization.yaml exists
+  PASS: Enterprise kustomization references enterprise-mfe-env ConfigMap
+  PASS: Enterprise kustomization includes admin-portal-deployment.yaml
+  PASS: Enterprise kustomization includes learner-portal-deployment.yaml
+  WARN: Enterprise MFE env config does not wire MerekaFooter — enterprise portals use Open edX default footer (see FOOTER_PARITY_AUDIT.md recommendation #4)
+
+AC-FTPAR-005: No unbranded 'powered by Open edX' in footer files
+  PASS: MFE MerekaFooter body has no 'Powered by Open edX'
+  PASS: LMS Mako footer has no 'Powered by' string
+  PASS: CMS footer widget override exists (cms/templates/widgets/footer.html)
+  PASS: CMS footer widget has Mereka branding
+  PASS: CMS footer widget has no 'Powered by Open edX' (white-label Studio)
+  PASS: CMS footer (cms/templates/footer.html) has no 'Powered by Open edX'
+
+AC-FTPAR-006: Positive allowlist — required content present
+  PASS: LMS footer contains at least one mereka.io/mereka.my link
+  PASS: LMS footer has dynamic copyright year expression
+  PASS: LMS footer has no hardcoded copyright year
+  PASS: MFE MerekaFooter has all 4 v2 structural zones (4 zone comments found)
+  PASS: MFE footer legal zone has copyright block and legal links
+  PASS: CMS footer widget has explicit brand content (not empty template)
+
+AC-FTPAR-008: Tenant footer data contract fields (SITE_VARIANTS + LMS footer)
+  PASS: Domain 'academyv2.mereka.io' has contract field 'supportEmail'
+  PASS: Domain 'academyv2.mereka.io' has contract field 'helpUrl'
+  PASS: Domain 'academyv2.mereka.io' has contract field 'privacyUrl'
+  PASS: Domain 'academyv2.mereka.io' has contract field 'termsUrl'
+  PASS: Domain 'academyv2.mereka.io' has contract field 'cookiesUrl'
+  PASS: Domain 'academy.biji-biji.com' has contract field 'supportEmail'
+  PASS: Domain 'academy.biji-biji.com' has contract field 'helpUrl'
+  PASS: Domain 'academy.biji-biji.com' has contract field 'privacyUrl'
+  PASS: Domain 'academy.biji-biji.com' has contract field 'termsUrl'
+  PASS: Domain 'academy.biji-biji.com' has contract field 'cookiesUrl'
+  PASS: Domain 'skillourfuture.academy.mereka.io' has contract field 'supportEmail'
+  PASS: Domain 'skillourfuture.academy.mereka.io' has contract field 'helpUrl'
+  PASS: Domain 'skillourfuture.academy.mereka.io' has contract field 'privacyUrl'
+  PASS: Domain 'skillourfuture.academy.mereka.io' has contract field 'termsUrl'
+  PASS: Domain 'skillourfuture.academy.mereka.io' has contract field 'cookiesUrl'
+  PASS: Fallback variant has contract field 'supportEmail'
+  PASS: Fallback variant has contract field 'helpUrl'
+  PASS: Fallback variant has contract field 'privacyUrl'
+  PASS: Fallback variant has contract field 'termsUrl'
+  PASS: Fallback variant has contract field 'cookiesUrl'
+  PASS: LMS footer imports configuration_helpers (SiteConfiguration-aware)
+  PASS: LMS footer reads SUPPORT_EMAIL / HELP_CENTER_URL from SiteConfiguration
+
+AC-FTPAR-007: Live footer content checks
+  SKIP: AC-FTPAR-007 skipped — pass --live to run live footer content checks
+  Usage: ./scripts/qa/verify-footer-parity.sh --live
+
+WARN allowlist (accepted warnings — not gate failures):
+  WARN-001: Enterprise MFE portals use Open edX default footer (P4 backlog, no MerekaFooter wiring)
+  WARN-002: LMS nav links (emails, help URL) are Mereka-specific — multi-tenant via bead 2rcf
+
+========================================
+Footer parity: 60 PASS / 0 FAIL / 1 WARN / 1 SKIP
+========================================

@@ -1,0 +1,42 @@
+Branding verification (prod) for academyv2.mereka.io...
+Branding level: core
+
+✓ LMS homepage includes 'Mereka Academy'
+✓ Studio page includes 'Mereka'
+✓ MFE login reachable (200)
+✓ MFE auth page serves authn bundle shell
+✗ MFE auth CSS missing expected branding revision (2026-02-18-us7)
+✓ MFE config exposes Mereka site + logo branding
+✓ Logo asset (logo.png) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/logo.png, 50285 bytes)
+✓ Logo asset (logo-horizontal.png) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/logo-horizontal.png, 25753 bytes)
+✓ Favicon asset (favicon.ico) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/favicon.ico, 31842 bytes)
+✓ Homepage uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Studio uses themed CSS tokens/fonts (no Google fonts)
+✓ Studio uses themed CSS tokens/fonts (no Google fonts) (studio-main-v1 has no Google fonts)
+✓ Homepage logo matches brand assets
+✓ Forum heartbeat (200)
+✓ Forum root reachable without auth (200)
+✓ Ecommerce root landing is branded
+✓ Ecommerce dashboard reachable (200)
+✓ Ecommerce dashboard uses authn shell
+✗ Ecommerce dashboard authn CSS missing expected branding revision (2026-02-18-us7)
+✓ Credentials root landing is branded
+✓ Credentials admin login reachable (200)
+✓ Credentials health payload includes status fields
+✓ Credentials admin login reachable (200)
+✓ Credentials admin login uses authn shell
+✗ Credentials admin login authn CSS missing expected branding revision (2026-02-18-us7)
+✓ Microsite academy.biji-biji.com reachable (200)
+✓ Microsite academy.biji-biji.com uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Microsite academy.biji-biji.com logo matches brand assets
+✓ Microsite skillourfuture.academy.mereka.io reachable (200)
+✓ Microsite skillourfuture.academy.mereka.io uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Microsite skillourfuture.academy.mereka.io logo matches brand assets
+✓ MFE login reachable (200)
+✓ MFE auth page serves authn bundle shell
+✗ MFE auth CSS missing expected branding revision (2026-02-18-us7)
+✓ MFE config exposes Mereka site + logo branding
+✓ Biji Studio uses themed CSS tokens/fonts (no Google fonts)
+✓ Biji Studio uses themed CSS tokens/fonts (no Google fonts) (studio-main-v1 has no Google fonts)
+
+4 branding checks failed.

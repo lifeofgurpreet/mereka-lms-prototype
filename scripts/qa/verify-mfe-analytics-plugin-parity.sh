@@ -67,31 +67,26 @@ if [[ -f "$PLUGIN" ]]; then
   fi
 fi
 
-# Check 3: Footer template has sentinel guard before emitting Segment JS
+# Check 3: Footer template has NO Segment code (plugin-first canonical state post-2k6k)
+# Regression check: any reappearance of segment.io/analytics.load in footer is a violation
 if [[ -f "$FOOTER" ]]; then
-  if grep -q 'segment_key.*lower.*not in' "$FOOTER"; then
-    pass_check "footer.html has sentinel guard (rejects placeholder keys)"
+  if grep -qE 'segment\.io|analytics\.js|analytics\.load|segment_key' "$FOOTER"; then
+    fail_check "footer.html has no Segment code (plugin-first model — analytics via Tutor plugin hook only)"
+    grep -nE 'segment\.io|analytics\.js|analytics\.load|segment_key' "$FOOTER" | sed 's/^/    /'
   else
-    fail_check "footer.html has sentinel guard (rejects placeholder keys)"
+    pass_check "footer.html has no Segment code (plugin-first model — analytics via Tutor plugin hook only)"
   fi
 else
-  warn "footer.html not found — skipping sentinel guard check"
+  warn "footer.html not found — skipping plugin-first analytics check"
 fi
 
-# Check 4: Sentinel guard covers known placeholder values
+# Check 4: Footer has migration comment documenting 2k6k analytics removal
+# The comment confirms removal was intentional (not accidental)
 if [[ -f "$FOOTER" ]]; then
-  GUARD_LINE=$(grep 'segment_key.*lower.*not in' "$FOOTER" || true)
-  SENTINELS_OK=true
-  for sentinel in "undefined" "none" "null" "undefined_license_key" "your_segment_key_here" "change_me"; do
-    if ! echo "$GUARD_LINE" | grep -q "$sentinel"; then
-      SENTINELS_OK=false
-      warn "Sentinel '$sentinel' missing from footer guard"
-    fi
-  done
-  if [[ "$SENTINELS_OK" == "true" ]]; then
-    pass_check "Footer sentinel guard covers all known placeholder values"
+  if grep -qE '2k6k|analytics.*removed|removed.*analytics|Tutor plugin hook' "$FOOTER"; then
+    pass_check "footer.html has 2k6k migration comment (analytics removal documented)"
   else
-    fail_check "Footer sentinel guard covers all known placeholder values"
+    warn "footer.html missing 2k6k migration comment — regression may be silent if Segment code re-added"
   fi
 fi
 
@@ -138,14 +133,14 @@ else
   warn "Theme directory not found at $THEME_DIR"
 fi
 
-# Check 7: Footer template does not emit Segment script when key is empty
+# Check 7: Footer template has no Segment script block at all (post-2k6k plugin-first state)
+# Any 'if segment_key' guard in footer.html would imply Segment code is present — regression
 if [[ -f "$FOOTER" ]]; then
-  # The guard must wrap the segment-io include or script block
-  GUARD_PRESENT=$(grep -c 'if segment_key' "$FOOTER" || true)
-  if [[ "$GUARD_PRESENT" -ge 1 ]]; then
-    pass_check "Footer Segment script is wrapped in 'if segment_key' guard"
+  if grep -qE '<script[^>]*segment|if segment_key|segment\.io' "$FOOTER"; then
+    fail_check "footer.html has no Segment script block (plugin-first: analytics via Tutor plugin hook only)"
+    grep -nE '<script[^>]*segment|if segment_key|segment\.io' "$FOOTER" | sed 's/^/    /'
   else
-    fail_check "Footer Segment script is wrapped in 'if segment_key' guard"
+    pass_check "footer.html has no Segment script block (plugin-first: analytics via Tutor plugin hook only)"
   fi
 fi
 
@@ -360,9 +355,10 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Remediation:"
   echo "  AC-AN-001: Ensure SEGMENT_KEY is read from MEREKA_SEGMENT_KEY env var with empty default."
-  echo "             Add sentinel guard to footer.html for all known placeholder values."
+  echo "             footer.html must have NO Segment code (plugin-first model: analytics via Tutor plugin hook only)."
+  echo "             If Segment code appeared in footer.html, remove it — this is a regression from bead 2k6k."
   echo "  AC-AN-002: Remove any direct analytics.* calls with undefined/null tokens."
-  echo "             Wrap all Segment script emission in 'if segment_key' guards."
+  echo "             Analytics injection belongs exclusively in mereka_lms.py (Tutor plugin hook), not footer.html."
   echo "  AC-AN-003: Replace DOM overrides with plugin slot registrations."
   echo "             Use 'mfe-env-config' hook and PLUGIN_SLOTS for all MFE customizations."
   echo "  AC-AN-004: Create docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md."

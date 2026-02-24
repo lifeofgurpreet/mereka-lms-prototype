@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import importlib.util
 
 from credentials.settings.production import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from credentials.settings.utils import get_logger_config
@@ -177,8 +178,15 @@ _init_sentry("credentials")
 # Verifiable Credentials issuer app (DID document endpoint)
 import sys
 sys.path.insert(0, '/openedx')
-if 'credentials_vc_issuer' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('credentials_vc_issuer')
+_vc_issuer_spec = importlib.util.find_spec('credentials_vc_issuer')
+if _vc_issuer_spec is not None:
+    if 'credentials_vc_issuer' not in INSTALLED_APPS:
+        INSTALLED_APPS.append('credentials_vc_issuer')
+else:
+    logging.getLogger(__name__).warning(
+        "credentials_vc_issuer package is not installed; disabling verifiable credentials issuer wiring"
+    )
+    ENABLE_VERIFIABLE_CREDENTIALS = False
 
 # Hardening: platform admin enforcement + /admin/login -> /login redirect.
 MIDDLEWARE = list(MIDDLEWARE) + [

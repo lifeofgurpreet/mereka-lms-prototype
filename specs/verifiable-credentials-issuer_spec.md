@@ -3,6 +3,7 @@ title: "CRED-020: Issuer Identity, Keys, and Rotation"
 type: "feature_spec"
 status: "approved"
 owner: "engineering"
+vehicle: "talent_platform"
 last_updated: "2026-02-14"
 version: "1.0.0"
 depends_on:
@@ -10,6 +11,7 @@ depends_on:
   - "specs/secrets-management_spec.md"
 links:
   related_specs:
+    - "specs/cross-cutting-requirements_spec.md"
     - "specs/verifiable-credentials-issuance_spec.md"
     - "specs/verifiable-credentials-verification_spec.md"
 ---
@@ -19,6 +21,17 @@ links:
 ## What we're building
 
 The cryptographic identity layer for credential issuance. This defines how the Credentials Service identifies itself as an issuer, signs credentials, and enables long-term verification.
+
+## Scope
+
+`did:web` issuer identity, Ed25519/JWS signing, key storage in ExternalSecrets, key rotation procedure, and revocation strategy decision.
+
+## Non-goals
+
+- Automatic key rotation (manual only in v1)
+- Credential revocation in v1 (no `credentialStatus` field)
+- Hardware Security Module (HSM) integration (deferred)
+- Multi-signature or threshold signing
 
 ## Requirements
 

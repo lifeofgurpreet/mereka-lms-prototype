@@ -1,6 +1,12 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: mux-delivery-monitor-script
+    files:
+      - mux_delivery_monitor.py=./mux_delivery_monitor.py
 resources:
   - servicemonitor-lms.yaml
   - servicemonitor-cms.yaml

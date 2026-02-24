@@ -1,6 +1,3 @@
-# Manual and monitoring verification entries.
-# Automated entries are discovered from @covers annotations in code.
-# Generated from testmaps on 2026-02-11
 entries:
 - id: AC-002
   spec: analytics-pipeline_spec.md
@@ -14,7 +11,7 @@ entries:
   description: 'ClickHouse retention policy active: Events older than 90 days are deleted'
   verify:
   - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: ClickHouse Disk Space
     justification: Verifying actual TTL-based deletion requires inserting backdated data and waiting for merge cycle orforcing
       OPTIMIZE TABLE -- not automatable in a stateless CI run
@@ -30,7 +27,7 @@ entries:
   description: Pre-built dashboards visible in Superset forstaff users
   verify:
   - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Verification
     justification: Verifying dashboard load time < 5s andvisual correctness requires browser interaction that cannot be automated
       with kubectl alone
@@ -39,7 +36,7 @@ entries:
   description: Instructor dashboard embeds in LMS course pages
   verify:
   - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Embedding Verification
     justification: Dashboard embedding requires browser-based verification of iframe rendering within LMS course pages;no
       headless equivalent available in the current test infrastructure
@@ -70,7 +67,7 @@ entries:
   description: Learner in both tenants sees badges from both, labeled by issuer
   verify:
   - type: manual
-    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
+    runbook: docs/operations/runbooks/BADGES_CREDENTIALS_RUNBOOK.md
     section: Badge Issuing Verification
     justification: Visual UI verification requires browser interaction
 - id: AC-021
@@ -78,7 +75,7 @@ entries:
   description: Add to LinkedIn button redirects with correct parameters (name, org, dates, URL)
   verify:
   - type: manual
-    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
+    runbook: docs/operations/runbooks/BADGES_CREDENTIALS_RUNBOOK.md
     section: Credential Template Testing
     justification: Full LinkedIn integration requires interactive browser verification
 - id: AC-028
@@ -93,7 +90,7 @@ entries:
   description: Admin analytics dashboard shows total issued, sharing rate, verification count, top badge classes for tenant
   verify:
   - type: manual
-    runbook: docs/operations/BADGES_CREDENTIALS_RUNBOOK.md
+    runbook: docs/operations/runbooks/BADGES_CREDENTIALS_RUNBOOK.md
     section: Badge Revocation Testing
     justification: Dashboard visual verification requires browser interaction
 - id: AC-003
@@ -120,7 +117,7 @@ entries:
     reported as GitHub commit status checks
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Quality Gates Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -131,7 +128,7 @@ entries:
     and MFE images are built, tagged with the git SHA and short SHA, and pushed to asia-southeast1-docker.pkg.dev/mereka-lms/openedx/
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -142,7 +139,7 @@ entries:
     resolved image digest (sha256:...)
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -153,7 +150,7 @@ entries:
     contains the expected branding revision marker
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -164,7 +161,7 @@ entries:
     is tagged as openedx:v1.2.3 and openedx:<short-sha>
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -175,7 +172,7 @@ entries:
     an error requiring explicit environment selection
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -186,7 +183,7 @@ entries:
     workflow fails with a message indicating staging is disabled
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -197,7 +194,7 @@ entries:
     error directing the user to update_gitops
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -208,7 +205,7 @@ entries:
     for deterministic digest capture
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: GitOps Deployment Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -219,7 +216,7 @@ entries:
     artifact is uploaded containing: policy check logs, dry-run plan, resolved digests, and release-metadata.json'
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -230,7 +227,7 @@ entries:
     tags, then the rollback completes without building new images and pods converge within 10 minutes
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Release Process Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -241,7 +238,7 @@ entries:
     are reported and logs are uploaded as artifacts
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -252,7 +249,7 @@ entries:
     gates execute against the live cluster and artifacts are uploaded with 30-day retention
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -263,7 +260,7 @@ entries:
     bundle is generated and uploaded with 120-day retention
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Scheduled Operations Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -274,7 +271,7 @@ entries:
     to TestFlight via App Store Connect API
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: iOS Build Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -286,7 +283,7 @@ entries:
     30-day retention
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: SSO Canary Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -297,7 +294,7 @@ entries:
     are uploaded showing the failure point for debugging
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: SSO Canary Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -309,7 +306,7 @@ entries:
     Node.js patch, multi-site domains, and custom apps
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -320,7 +317,7 @@ entries:
     error messages identifying which patch (MySQL, MFE, domains, or apps) is not applied
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -331,7 +328,7 @@ entries:
     files remain identical
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -342,7 +339,7 @@ entries:
     with common issues and remediation steps
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Configuration Verification
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -354,7 +351,7 @@ entries:
     and integration tests passing
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -365,7 +362,7 @@ entries:
     the expected plugin configuration (mfe_oauth_fix installed)
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -376,7 +373,7 @@ entries:
     transitions succeed without errors
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Tutor Plugin Testing
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
@@ -387,7 +384,7 @@ entries:
     patches are present in the generated configuration
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Plugin Integration Testing
     justification: Requires triggering actual GitHub Actions workflow run and inspecting its logs for plugin+patches integration
       result
@@ -398,7 +395,7 @@ entries:
     troubleshooting guidance
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: PR Failure Comment Verification
     justification: Requires triggering a real PR with a failing plugin test and verifying the bot posts a troubleshooting
       comment
@@ -559,7 +556,7 @@ entries:
   description: Complete evidence bundle generated within 1 business day on request
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: DR Evidence Generation
     justification: Requires human to initiate enterprise audit request and verify completeness against client requirements
 - id: AC-012
@@ -581,7 +578,7 @@ entries:
   description: Single PVC restored from hourly backup within 30 minutes (DR-002)
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: 'DR-002: Single PVC Data Corruption'
     justification: Requires live cluster with simulated PVC failure; destructive test cannot be fully automated against production
 - id: AC-016
@@ -589,7 +586,7 @@ entries:
   description: Full namespace restore via velero restore create within 1 hour (DR-003)
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: 'DR-003: Namespace Deletion/Corruption'
     justification: Full namespace restore requires human approval gate and coordination; tested during quarterly drills
 - id: AC-017
@@ -605,7 +602,7 @@ entries:
   description: Full cluster rebuild within 4 hours with RPO <= 1 hour (DR-007)
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: 'DR-007: Full Cluster Loss'
     justification: Full cluster rebuild cannot be automated as a test; verified via semi-annual tabletop exercise
 - id: AC-019
@@ -613,7 +610,7 @@ entries:
   description: MySQL auth_user COUNT within 5% of pre-incident count post-restore
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Data Integrity Verification
     justification: 5% tolerance comparison requires baseline count from production which varies over time
 - id: AC-022
@@ -621,7 +618,7 @@ entries:
   description: GCS backup bucket is multi-region or has cross-region replication
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Cross-Region Readiness Verification
     justification: GCS bucket configuration requires gcloud auth and varies by environment; verified during Phase 3 implementation
 - id: AC-001
@@ -630,7 +627,7 @@ entries:
     all p...
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
     justification: Requires active SES configuration with verified sender domain and test recipient
     file: scripts/infra/verify-ses-domain.sh
@@ -640,7 +637,7 @@ entries:
     DMARC al...
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Template Rendering
     justification: Requires sending actual test emails through SES to verify template rendering across email clients
     file: scripts/infra/verify-ses-domain.sh
@@ -665,7 +662,7 @@ entries:
   description: Thread count preservation - N threads before = N threads after
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Thread Count Verification
     justification: Requires access to MongoDB Atlas dashboard and comparison between production snapshots before/after migration
     file: docs/operations/FORUM_DATA_VERIFICATION.md
@@ -674,7 +671,7 @@ entries:
   description: Content hash comparison - SHA-256 of 1000 random posts matches 100%
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Content Hash Verification
     justification: Requires MongoDB Atlas access for random sampling and custom script to compute stable content hashes across
       1000 posts
@@ -684,7 +681,7 @@ entries:
   description: Vote count preservation - vote counts match between Python and Ruby APIs
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Vote Count Verification
     justification: Requires running both Python and Ruby forum instances against production data to compare API responses
     file: docs/operations/FORUM_DATA_VERIFICATION.md
@@ -693,7 +690,7 @@ entries:
   description: Thread creation via MFE - new thread appears in listing within 5 seconds
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Thread CRUD Operations
     justification: Requires running LMS instance with authenticated user session and populated course data to test end-to-end
       MFE functionality
@@ -703,7 +700,7 @@ entries:
   description: Vote persistence - vote increments and persists across page refreshes
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Vote Persistence Testing
     justification: Requires running LMS instance with authenticated user session to test vote interactions and persistence
       across browser refreshes
@@ -713,7 +710,7 @@ entries:
   description: Abuse flagging - flag recorded and post appears in moderation queue
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Moderation Queue Verification
     justification: Requires running LMS instance with both regular user and moderator accounts to test abuse flagging workflow
     file: docs/operations/FORUM_MFE_TESTING.md
@@ -722,7 +719,7 @@ entries:
   description: Search functionality - search query returns relevant results via Meilisearch
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Meilisearch Index Verification
     justification: Requires running LMS instance with populated course forum data indexed in Meilisearch to test search relevance
     file: docs/operations/FORUM_MFE_TESTING.md
@@ -731,7 +728,7 @@ entries:
   description: Production health - LMS pod with Python forum starts and passes health checks <60s
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Production Health Check
     justification: Requires production Kubernetes cluster with LMS deployment to verify startup timing and health check behavior
     file: docs/operations/DEPLOYMENT_RUNBOOK.md
@@ -740,7 +737,7 @@ entries:
   description: Thread listing latency - p95 <=300ms under 50 concurrent requests
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Performance Testing
     justification: Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes
     file: docs/operations/FORUM_PERFORMANCE_TESTING.md
@@ -749,7 +746,7 @@ entries:
   description: Search latency - p95 <=500ms under 20 concurrent search requests
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Performance Testing
     justification: Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes
     file: docs/operations/FORUM_PERFORMANCE_TESTING.md
@@ -758,7 +755,7 @@ entries:
   description: Memory usage - LMS pod RSS stays below 512Mi under normal load (10 req/s)
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Performance Testing
     justification: Requires sustained concurrent load generation against live forum endpoints with realistic thread volumes
     file: docs/operations/FORUM_PERFORMANCE_TESTING.md
@@ -767,7 +764,7 @@ entries:
   description: Rollback procedure - documented steps to revert to Ruby forum if needed
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Rollback Procedure
     justification: Requires documentation review and validation against production deployment architecture for rollback feasibility
     file: docs/operations/FORUM_ROLLBACK.md
@@ -776,7 +773,7 @@ entries:
   description: Rollback data integrity - posts created during Python period visible after rollback
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Rollback Data Integrity
     justification: Requires rollback scenario testing with production-like data to verify data accessibility across forum
       service versions
@@ -786,7 +783,7 @@ entries:
   description: Auth failure alerts - log-auth-failures-forum alert fires on auth failure
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Observability Verification
     justification: Requires access to Grafana dashboard with accumulated forum metrics data
     file: docs/operations/OBSERVABILITY_VERIFICATION.md
@@ -795,7 +792,7 @@ entries:
   description: Prometheus metrics - forum-specific metrics present in /metrics endpoint
   verify:
   - type: manual
-    runbook: docs/operations/FORUM_SERVICE_RUNBOOK.md
+    runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Observability Verification
     justification: Requires access to Grafana dashboard with accumulated forum metrics data
     file: docs/operations/OBSERVABILITY_VERIFICATION.md
@@ -804,7 +801,7 @@ entries:
   description: 'Given a release candidate build, whensubmitted to the Apple App Store, then the submission includes: app description,...'
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Testing
     justification: Requires physical mobile device with configured FCM/APNs credentials for end-to-end push verification
     file: N/A (manual verification)
@@ -814,7 +811,7 @@ entries:
     scr...'
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Mode Testing
     justification: Requires mobile device in airplane mode to verify offline content caching and sync behavior
     file: N/A (manual verification)
@@ -824,7 +821,7 @@ entries:
     phased ...'
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Deep Link Testing
     justification: Requires mobile device with installed app to verify deep link routing from email/web to native screens
     file: N/A (manual verification)
@@ -836,7 +833,7 @@ entries:
     metric: mongodb_atlas_connections_current
     dashboard: Atlas Console > Project > Cluster > Metrics > Connections
   - type: manual
-    runbook: docs/operations/MONGODB_ATLAS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MONGODB_ATLAS_RUNBOOK.md
     section: Verify Atlas Health > Active Connections
     justification: Atlas monitoring dashboard requires Atlas console credentials not available to CI; verified manually during
       deployment
@@ -854,7 +851,7 @@ entries:
   description: Given tenants A and B are provisioned, when scripts/qa/verify-tenant-isolation.sh --tenant-a={uuid_a} --tenant-b={uui...
   verify:
   - type: manual
-    runbook: docs/operations/MULTI_TENANCY_RUNBOOK.md
+    runbook: docs/operations/runbooks/MULTI_TENANCY_RUNBOOK.md
     section: Tenant Isolation Verification
     justification: Requires multiple authenticated sessions across different tenant domains to verify data isolation boundaries
     file: scripts/qa/verify-tenant-isolation.sh
@@ -887,7 +884,10 @@ entries:
   description: openedx_prometheus app gracefully degrades if django-prometheus is not installed
   verify:
   - type: manual
-    file: docs/operations/MIDDLEWARE_VERIFICATION.md
+    runbook: docs/operations/MODULE_SURFACE_VALIDATION_RUNBOOK.md
+    section: Prometheus Graceful Degradation
+    justification: Requires removing django-prometheus from a running LMS to verify graceful degradation; cannot automate
+      in CI
 - id: AC-003
   spec: proctoring-integration_spec.md
   description: Respondus detects missing LockDown Browser and shows download prompt
@@ -1132,7 +1132,7 @@ entries:
   description: 'Tutor version upgrade PR: CI reports which patches need adaptation and blocks merge'
   verify:
   - type: manual
-    runbook: docs/operations/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_PLUGIN_MIGRATION_RUNBOOK.md
     section: Tutor Version Upgrade Procedure
     justification: Version upgrades are infrequent events requiring human judgment on patch adaptation; CI catches failures
       but upgrade planning is manual
@@ -1142,7 +1142,7 @@ entries:
     step
   verify:
   - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: Full Configuration Apply
     justification: End-to-end make tutor-apply requires Docker Compose stack; CI tests individual steps but full pipeline
       needs Docker environment
@@ -1151,7 +1151,7 @@ entries:
   description: MFE images build successfully with Node 18
   verify:
   - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: MFE Build Verification
     justification: Full image build (15-20 min) cannot run in CI; script verifies Dockerfile contract
 - id: AC-007
@@ -1159,7 +1159,7 @@ entries:
   description: MySQL 8 connections succeed without authentication errors
   verify:
   - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: MySQL Authentication Verification
     justification: Requires running MySQL 8 Docker container; cannot run in CI without Docker-in-Docker
 - id: AC-009
@@ -1167,7 +1167,7 @@ entries:
   description: Mereka logo and custom footer render on allMFEs
   verify:
   - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: Visual Branding Verification
     justification: Visual rendering requires browser inspection; automated checks verify file presence only
 - id: AC-010
@@ -1175,7 +1175,7 @@ entries:
   description: tutor local dc ps shows all services with status Up
   verify:
   - type: manual
-    runbook: docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md
+    runbook: docs/operations/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
     section: Service Health Verification
     justification: Requires running Docker Compose stack; cannot run in standard CI
 - id: AC-003
@@ -1263,16 +1263,12 @@ entries:
   - type: monitoring
     metric: video_delivery_minutes_monthly
     dashboard: grafana://dashboards/video-cost
-# ---------------------------------------------------------------------------
-# Entries added by bead-1jci: spec coverage cleanup (2026-02-18)
-# ---------------------------------------------------------------------------
-# advanced-assessment-xqueue_spec.md — all 44 ACs (none previously covered)
 - id: AC-001
   spec: advanced-assessment-xqueue_spec.md
   description: ORA2 rubric configuration with 3 criteria, 4 options each, peer assessment 3 reviews required
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Configuration
     justification: Feature not yet implemented; requires Studio UI interaction and live course data
 - id: AC-002
@@ -1280,7 +1276,7 @@ entries:
   description: ORA2 peer grading — median score computed from 3 peer reviews displayed on submission page
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Peer Grading
     justification: Feature not yet implemented; requires populated peer review data in running LMS
 - id: AC-003
@@ -1288,7 +1284,7 @@ entries:
   description: ORA2 file upload — PDF up to 10 MB stored at /openedx/data/ora2/
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 File Upload
     justification: Feature not yet implemented; requires live LMS with student session
 - id: AC-004
@@ -1296,7 +1292,7 @@ entries:
   description: ORA2 file upload — .exe upload rejected with validation error
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 File Upload Validation
     justification: Feature not yet implemented; requires live LMS with student session
 - id: AC-005
@@ -1304,7 +1300,7 @@ entries:
   description: ORA2 rubric locked after first submission — Studio prevents modification
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Rubric Locking
     justification: Feature not yet implemented; requires Studio UI with active submissions
 - id: AC-006
@@ -1312,7 +1308,7 @@ entries:
   description: ORA2 peer calibration required before peer grading starts
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Calibration
     justification: Feature not yet implemented; requires live LMS with calibration configured
 - id: AC-007
@@ -1320,7 +1316,7 @@ entries:
   description: ORA Grading MFE displays 10 submissions in queue ordered by submission time
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA Grading MFE
     justification: Feature not yet implemented; requires live MFE deployment with submissions
 - id: AC-008
@@ -1328,7 +1324,7 @@ entries:
   description: Staff grader submits grade via ORA Grading MFE and next submission loads
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA Grading MFE
     justification: Feature not yet implemented; requires live MFE with authenticated staff session
 - id: AC-009
@@ -1336,7 +1332,7 @@ entries:
   description: Staff-submitted ORA2 grade appears in gradebook within 5 minutes
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Gradebook Sync
     justification: Feature not yet implemented; requires live LMS with gradebook integration
 - id: AC-010
@@ -1344,7 +1340,7 @@ entries:
   description: Timed exam with 60-minute countdown timer — no proctoring prompts
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exams
     justification: Feature not yet implemented; requires live LMS with timed exam configured
 - id: AC-011
@@ -1352,7 +1348,7 @@ entries:
   description: Timed exam — accessible warning at 5 minutes remaining
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exams
     justification: Feature not yet implemented; requires live LMS with running timed exam
 - id: AC-012
@@ -1360,7 +1356,7 @@ entries:
   description: Timed exam auto-submitted at 0:00 with "Time expired" message
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Auto-Submit
     justification: Feature not yet implemented; requires live LMS with timer reaching zero
 - id: AC-013
@@ -1368,7 +1364,7 @@ entries:
   description: Timed exam — read-only view after auto-submit, cannot modify responses
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Post-Submit
     justification: Feature not yet implemented; requires live LMS with auto-submitted exam
 - id: AC-014
@@ -1376,7 +1372,7 @@ entries:
   description: Timed exam — 30-minute extension results in 90 minutes total
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Extensions
     justification: Feature not yet implemented; requires live LMS with instructor-granted extension
 - id: AC-015
@@ -1384,7 +1380,7 @@ entries:
   description: Timed exam — grade released immediately on early submit (no proctoring hold)
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Grading
     justification: Feature not yet implemented; requires live LMS with timed exam grading
 - id: AC-016
@@ -1392,7 +1388,7 @@ entries:
   description: XQueue code grader executes Python in sandbox and returns grade within 30 seconds
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Grader Verification
     justification: Feature not yet implemented; requires XQueue service with grader worker deployed
 - id: AC-017
@@ -1400,7 +1396,7 @@ entries:
   description: XQueue grader terminates infinite loop after CPU time limit with timeout message
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Security Sandbox
     justification: Feature not yet implemented; requires XQueue grader with sandbox configured
 - id: AC-018
@@ -1408,7 +1404,7 @@ entries:
   description: XQueue grader blocks os.system("rm -rf /") with security violation message
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Security Sandbox
     justification: Feature not yet implemented; requires XQueue grader with seccomp/syscall filtering
 - id: AC-019
@@ -1416,7 +1412,7 @@ entries:
   description: XQueue submission requeued after grader crash (visibility timeout expiry)
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Queue Resilience
     justification: Feature not yet implemented; requires XQueue with configurable visibility timeout
 - id: AC-020
@@ -1424,7 +1420,7 @@ entries:
   description: XQueue grade scaled to problem's maximum points in gradebook within 5 minutes
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Gradebook Integration
     justification: Feature not yet implemented; requires live LMS with XQueue grader integration
 - id: AC-021
@@ -1432,7 +1428,7 @@ entries:
   description: XQueue grader terminates 256MB array allocation with memory limit message
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Memory Sandbox
     justification: Feature not yet implemented; requires XQueue grader with memory limit enforcement
 - id: AC-022
@@ -1440,7 +1436,7 @@ entries:
   description: XQueue grader blocks fork bomb via seccomp syscall filtering
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Security Sandbox
     justification: Feature not yet implemented; requires XQueue grader with seccomp profile
 - id: AC-023
@@ -1448,7 +1444,7 @@ entries:
   description: XQueue grader blocks network access with "Network access is not permitted" message
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Network Sandbox
     justification: Feature not yet implemented; requires XQueue grader with network namespace isolation
 - id: AC-024
@@ -1456,7 +1452,7 @@ entries:
   description: XQueue grader restricts file reads to /tmp and submission directory only
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Filesystem Sandbox
     justification: Feature not yet implemented; requires XQueue grader with filesystem restrictions
 - id: AC-025
@@ -1464,7 +1460,7 @@ entries:
   description: XQueue grader environment contains only PATH, HOME — no secrets in os.environ
   verify:
   - type: manual
-    runbook: docs/operations/XQUEUE_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: XQueue Secret Isolation
     justification: Feature not yet implemented; requires XQueue grader with minimal env vars
 - id: AC-026
@@ -1472,7 +1468,7 @@ entries:
   description: Drag-and-drop v2 and math expression input available in Studio component picker
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Advanced Components
     justification: Feature not yet implemented; requires Studio with advanced components installed
 - id: AC-027
@@ -1480,7 +1476,7 @@ entries:
   description: Drag-and-drop v2 — keyboard-only navigation places all items correctly
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Drag-and-Drop Accessibility
     justification: Feature not yet implemented; requires live LMS with drag-and-drop configured
 - id: AC-028
@@ -1488,7 +1484,7 @@ entries:
   description: Math expression grader marks (x+1)^2 as correct for x^2+2x+1
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Math Expression Grading
     justification: Feature not yet implemented; requires live LMS with SymPy-based grader
 - id: AC-029
@@ -1496,7 +1492,7 @@ entries:
   description: Randomized problem pool of 20 shows different 10 to each student
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Randomized Assessments
     justification: Feature not yet implemented; requires live LMS with randomized problem pool
 - id: AC-030
@@ -1504,7 +1500,7 @@ entries:
   description: Randomized question order — two students see questions in different order
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Randomized Question Order
     justification: Feature not yet implemented; requires live LMS with order randomization configured
 - id: AC-031
@@ -1512,7 +1508,7 @@ entries:
   description: Answer shuffling — two students see answer options in different order
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Answer Shuffling
     justification: Feature not yet implemented; requires live LMS with answer shuffling enabled
 - id: AC-032
@@ -1520,7 +1516,7 @@ entries:
   description: One-at-a-time display — questions 1 and 2 not accessible after reaching question 3
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: One-at-a-Time Exams
     justification: Feature not yet implemented; requires live LMS with one-at-a-time mode
 - id: AC-033
@@ -1528,7 +1524,7 @@ entries:
   description: max_attempts=1 — submit button disabled after first attempt
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Attempt Limits
     justification: Feature not yet implemented; requires live LMS with attempt limit set
 - id: AC-034
@@ -1536,7 +1532,7 @@ entries:
   description: Weighted grade (ORA2 20%, timed exam 40%, standard 40%) computed correctly
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Grade Weighting
     justification: Feature not yet implemented; requires live LMS with all three graded components
 - id: AC-035
@@ -1544,7 +1540,7 @@ entries:
   description: Grade override from 70% to 85% reflected in gradebook with audit log
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Grade Overrides
     justification: Feature not yet implemented; requires live LMS with instructor grade override
 - id: AC-036
@@ -1552,7 +1548,7 @@ entries:
   description: Bulk grade export CSV for 500-student course with required columns
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Grade Export
     justification: Feature not yet implemented; requires live LMS with course enrollment data
 - id: AC-037
@@ -1560,7 +1556,7 @@ entries:
   description: Bulk regrade of 2000 submissions runs async without LMS degradation
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Regrade
     justification: Feature not yet implemented; requires live LMS with 2000 submissions
 - id: AC-038
@@ -1568,7 +1564,7 @@ entries:
   description: Bulk CSV grade override imports 100 students with audit log per entry
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Grade Import
     justification: Feature not yet implemented; requires live LMS with bulk import capability
 - id: AC-039
@@ -1576,7 +1572,7 @@ entries:
   description: Bulk regrade shows progress percentage and estimated time remaining
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Bulk Regrade Progress
     justification: Feature not yet implemented; requires live LMS with async regrade job
 - id: AC-040
@@ -1584,7 +1580,7 @@ entries:
   description: ORA2 rubric displays Malay labels for user with Malay language preference
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 i18n
     justification: Feature not yet implemented; requires live LMS with Malay translation configured
 - id: AC-041
@@ -1592,7 +1588,7 @@ entries:
   description: Timed exam timer announces "1 minute remaining" via ARIA live region for screen readers
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Timed Exam Accessibility
     justification: Feature not yet implemented; requires live LMS with screen reader testing
 - id: AC-042
@@ -1600,7 +1596,7 @@ entries:
   description: Drag-and-drop v2 keyboard navigation — Tab to navigate, Enter/Space to drop
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Drag-and-Drop Keyboard Access
     justification: Feature not yet implemented; requires live LMS with keyboard-only user testing
 - id: AC-043
@@ -1608,7 +1604,7 @@ entries:
   description: ORA2 final staff grade triggers email notification within 10 minutes
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: ORA2 Email Notifications
     justification: Feature not yet implemented; requires live LMS with email pipeline configured
 - id: AC-044
@@ -1616,27 +1612,26 @@ entries:
   description: show_correctness=past_due — "Answer submitted" before due, correct answer shown after
   verify:
   - type: manual
-    runbook: docs/operations/ASSESSMENT_RUNBOOK.md
+    runbook: docs/operations/runbooks/XQUEUE_HEALTH_RUNBOOK.md
     section: Show Correctness Policy
     justification: Feature not yet implemented; requires live LMS with show_correctness configured
-# ci-cd-pipeline_spec.md — missing ACs (INT-004, AC-003, AC-004)
 - id: AC-INT-004
   spec: ci-cd-pipeline_spec.md
   description: Given branding assets are synced via apply-patches.sh, when CI builds openedx image, then branding-preflight.sh
     passes and verifies Mereka logo presence and Google Fonts absence in compiled artifacts
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Branding Preflight Verification
-    justification: Requires active GitHub Actions runner building the full openedx Docker image; cannot run image build in CI
-      without Docker-in-Docker
+    justification: Requires active GitHub Actions runner building the full openedx Docker image; cannot run image build in
+      CI without Docker-in-Docker
     file: scripts/branding/run-branding-gates.sh
 - id: AC-003
   spec: ci-cd-pipeline_spec.md
   description: Given the lint job runs, when Python files in scripts/ or services/ have ruff violations, then the job fails
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: Quality Gates Verification
     justification: Ruff lint gate is verified by running the CI workflow; individual Python files can be checked locally with
       ruff check scripts/ services/
@@ -1647,12 +1642,11 @@ entries:
     fails the job
   verify:
   - type: manual
-    runbook: docs/operations/CI_CD_RUNBOOK.md
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
     section: K8s Validation Verification
     justification: kubeconform gate is verified by running the CI workflow; manifest validation requires kubeconform binary
       not present in all local environments
     file: N/A
-# data-migrations-kajabi-mct_spec.md — missing AC-039
 - id: AC-039
   spec: data-migrations-kajabi-mct_spec.md
   description: Given the Kajabi webhook receiver is running, when a GET /healthz request is made, then the service MUST return
@@ -1662,10 +1656,10 @@ entries:
     runbook: docs/migrations/VERIFICATION_CHECKLIST.md
     section: Kajabi Webhook Health Check
     justification: Requires running webhook service with KAJABI_WEBHOOK_SECRET set; not deployable in stateless CI
-# data-privacy-gdpr-compliance_spec.md — all ACs (none previously covered)
 - id: AC-001
   spec: data-privacy-gdpr-compliance_spec.md
-  description: PII registry validation tool flags zero unregistered PII fields and zero registry entries reference non-existent fields
+  description: PII registry validation tool flags zero unregistered PII fields and zero registry entries reference non-existent
+    fields
   verify:
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
@@ -2136,7 +2130,8 @@ entries:
   - type: manual
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Log PII Masking
-    justification: Requires inspection of structured logs in Loki for PII field patterns; not automatable without live log data
+    justification: Requires inspection of structured logs in Loki for PII field patterns; not automatable without live log
+      data
 - id: AC-060
   spec: data-privacy-gdpr-compliance_spec.md
   description: Database column-level encryption applied to highest-sensitivity PII fields
@@ -2185,14 +2180,13 @@ entries:
     runbook: docs/operations/PRIVACY_RUNBOOK.md
     section: Annual Privacy Report
     justification: Organizational process; annual report prepared by DPO and submitted to management
-# disaster-recovery-business-continuity_spec.md — missing AC-024, AC-025, AC-026
 - id: AC-024
   spec: disaster-recovery-business-continuity_spec.md
   description: Given quarterly restore drill schedule, when documented, then it MUST specify drill cadence (quarterly), responsible
     team, notification window (1 week advance), and success criteria
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Quarterly Restore Drill Schedule
     justification: Requires documented drill schedule with all required fields; verified during quarterly DR planning cycle
 - id: AC-025
@@ -2201,7 +2195,7 @@ entries:
     produces valid manifests deployable to any GKE cluster
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Cluster Rebuild from Config
     justification: Full cluster rebuild validation requires a target GKE cluster; kustomize build validates structure but
       not full deployability without a live cluster
@@ -2212,27 +2206,25 @@ entries:
     storage or cross-region replication
   verify:
   - type: manual
-    runbook: docs/operations/DISASTER_RECOVERY.md
+    runbook: docs/operations/runbooks/DISASTER_RECOVERY.md
     section: Cross-Region Readiness Verification
     justification: GCS bucket multi-region verification requires gcloud auth; verified during Phase 3 implementation and quarterly
       DR review
-# ecommerce-purchase-gateway_spec.md — missing AC-034
 - id: AC-034
   spec: ecommerce-purchase-gateway_spec.md
   description: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare
     proxy)
   verify:
   - type: manual
-    runbook: docs/operations/PURCHASE_GATEWAY_RUNBOOK.md
+    runbook: docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md
     section: SSL Configuration Verification
     justification: SSL mode is configured at DNS level (Cloudflare dashboard); not inspectable via Kubernetes manifests alone
-# email-notifications-pipeline_spec.md — missing ACs 003 through 045 (001, 002 already covered)
 - id: AC-003
   spec: email-notifications-pipeline_spec.md
   description: Password reset email delivered via SES within 30 seconds with From noreply@academyv2.mereka.io
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: ACE Pipeline Verification
     justification: Feature not yet implemented; ACE email pipeline with SES not yet deployed
 - id: AC-004
@@ -2240,7 +2232,7 @@ entries:
   description: Custom MAIL FROM domain mail.academyv2.mereka.io aligns envelope and header sender (DMARC pass)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: DMARC Alignment Verification
     justification: Requires sending actual test emails through SES with DMARC verification
 - id: AC-005
@@ -2248,7 +2240,7 @@ entries:
   description: Enterprise tenant org_slug=acme — From shows "Acme Corp via Mereka Academy" with correct sender
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Enterprise Tenant Email Branding
     justification: Feature not yet implemented; per-tenant email branding not yet built
 - id: AC-006
@@ -2256,7 +2248,7 @@ entries:
   description: ACE dispatches to django_email, push, in_app channels for course_announcement
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multi-Channel Dispatch
     justification: Feature not yet implemented; ACE multi-channel pipeline not yet deployed
 - id: AC-007
@@ -2264,7 +2256,7 @@ entries:
   description: User with email disabled for course_announcement gets push and in_app but no email
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Channel Preference Enforcement
     justification: Feature not yet implemented; preference-based channel filtering not yet built
 - id: AC-008
@@ -2272,7 +2264,7 @@ entries:
   description: password_reset email sent even when user has disabled all channels (system-critical)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Non-Suppressible System Emails
     justification: Feature not yet implemented; non-suppressible email category not yet implemented
 - id: AC-009
@@ -2280,7 +2272,7 @@ entries:
   description: 100 ACE messages enqueued simultaneously all dispatched within 60 seconds via Celery
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Celery Queue Throughput
     justification: Feature not yet implemented; requires running Celery workers with load test
 - id: AC-010
@@ -2288,7 +2280,7 @@ entries:
   description: GET /api/notifications/v1/unread-count/ returns correct count with p95 <= 100ms
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Notification API Verification
     justification: Feature not yet implemented; in-app notification API not yet deployed
 - id: AC-011
@@ -2296,7 +2288,7 @@ entries:
   description: Notification list filtered by read=false returns only 20 unread, sorted by created_at descending
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Notification List Filtering
     justification: Feature not yet implemented; in-app notification list API not yet deployed
 - id: AC-012
@@ -2304,7 +2296,7 @@ entries:
   description: Expired notification (expires_at in past) excluded from notification list response
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Notification Expiry
     justification: Feature not yet implemented; notification expiry enforcement not yet built
 - id: AC-013
@@ -2312,7 +2304,7 @@ entries:
   description: POST /api/notifications/v1/mark-all-read/ sets unread count to 0
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Mark All Read
     justification: Feature not yet implemented; mark-all-read API endpoint not yet created
 - id: AC-014
@@ -2320,7 +2312,7 @@ entries:
   description: Notification list for tenant acme shows only acme notifications (no cross-tenant leakage)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Notification Isolation
     justification: Feature not yet implemented; tenant-scoped notification query not yet implemented
 - id: AC-015
@@ -2328,7 +2320,7 @@ entries:
   description: FCM push notification delivered within 60 seconds after grade_posted trigger
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Push Notification Delivery
     justification: Feature not yet implemented; FCM push notification pipeline not yet deployed
 - id: AC-016
@@ -2336,7 +2328,7 @@ entries:
   description: Device with FCM UNREGISTERED token marked is_active=false; no further pushes sent
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Device Token Cleanup
     justification: Feature not yet implemented; FCM token deregistration handling not yet built
 - id: AC-017
@@ -2344,7 +2336,7 @@ entries:
   description: Deleted device token after logout — no push notification sent to deregistered device
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Device Token Deregistration
     justification: Feature not yet implemented; logout-triggered device deregistration not yet implemented
 - id: AC-018
@@ -2352,7 +2344,7 @@ entries:
   description: 1000 push notifications batched into groups of up to 500 (2 FCM API calls, not 1000)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: FCM Batch Sending
     justification: Feature not yet implemented; FCM batch sender not yet implemented
 - id: AC-019
@@ -2360,7 +2352,7 @@ entries:
   description: Push notification for org_slug=acme delivered only to acme devices (no cross-tenant delivery)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Push Isolation
     justification: Feature not yet implemented; tenant-scoped push dispatch not yet built
 - id: AC-020
@@ -2368,7 +2360,7 @@ entries:
   description: New user default preferences returned (all enabled except bulk_campaign email disabled)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Default Notification Preferences
     justification: Feature not yet implemented; notification preferences API not yet created
 - id: AC-021
@@ -2376,7 +2368,7 @@ entries:
   description: User disables email for discussion_reply — no email sent but push and in_app still sent
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Preference-Based Dispatch
     justification: Feature not yet implemented; per-channel preference enforcement not yet built
 - id: AC-022
@@ -2384,7 +2376,7 @@ entries:
   description: One-click unsubscribe link disables bulk_campaign and course_announcement email without login
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: One-Click Unsubscribe
     justification: Feature not yet implemented; one-click unsubscribe via signed token not yet built
 - id: AC-023
@@ -2392,7 +2384,7 @@ entries:
   description: Preference change audit log contains user_id, old_value, new_value, consent_version, ip_address_hash, timestamp
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Preference Audit Log
     justification: Feature not yet implemented; preference change audit logging not yet built
 - id: AC-024
@@ -2400,7 +2392,7 @@ entries:
   description: bulk_campaign email contains List-Unsubscribe and List-Unsubscribe-Post headers
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Headers
     justification: Feature not yet implemented; bulk campaign email headers not yet configured
 - id: AC-025
@@ -2408,7 +2400,7 @@ entries:
   description: User with language_preference=ms receives enrollment_confirmation email in Malay
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multilingual Email Templates
     justification: Feature not yet implemented; Malay email templates not yet created
 - id: AC-026
@@ -2416,7 +2408,7 @@ entries:
   description: User with language_preference=zh-hans receives grade_posted email in Simplified Chinese
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Multilingual Email Templates
     justification: Feature not yet implemented; Simplified Chinese email templates not yet created
 - id: AC-027
@@ -2424,7 +2416,7 @@ entries:
   description: User with language_preference=ja (unsupported) falls back to English template
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Language Fallback
     justification: Feature not yet implemented; language fallback logic in email templates not yet built
 - id: AC-028
@@ -2432,7 +2424,7 @@ entries:
   description: Tenant org_slug=acme email template shows "Acme Corp" as org name with tenant logo URL
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Tenant Email Branding
     justification: Feature not yet implemented; tenant-branded email template rendering not yet built
 - id: AC-029
@@ -2440,7 +2432,7 @@ entries:
   description: Bulk campaign scheduled for 10000 recipients starts at scheduled time and completes within 30 minutes
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Scheduling
     justification: Feature not yet implemented; scheduled bulk campaign dispatch not yet built
 - id: AC-030
@@ -2448,7 +2440,7 @@ entries:
   description: Bulk campaign pause stops sending and resumes from next unsent recipient when resumed
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Pause/Resume
     justification: Feature not yet implemented; campaign pause/resume control not yet built
 - id: AC-031
@@ -2456,7 +2448,7 @@ entries:
   description: Bulk campaign to 10000 recipients skips 500 opted-out users; metrics report 500 skipped
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bulk Campaign Opt-Out Enforcement
     justification: Feature not yet implemented; opt-out enforcement in bulk campaign dispatch not yet built
 - id: AC-032
@@ -2464,7 +2456,7 @@ entries:
   description: Simultaneous bulk campaigns from two tenants each stay within 50 emails/second per tenant
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Per-Tenant Rate Limiting
     justification: Feature not yet implemented; per-tenant SES rate limiting not yet implemented
 - id: AC-033
@@ -2472,7 +2464,7 @@ entries:
   description: SES hard bounce adds address to suppression list; subsequent sends to that address blocked
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Bounce Handling
     justification: Feature not yet implemented; SES bounce webhook processing not yet built
 - id: AC-034
@@ -2480,7 +2472,7 @@ entries:
   description: Three soft bounces within 7 days adds address to suppression list as hard bounce
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Soft Bounce Accumulation
     justification: Feature not yet implemented; soft bounce accumulation logic not yet implemented
 - id: AC-035
@@ -2488,7 +2480,7 @@ entries:
   description: SES complaint for bulk_campaign disables user email preference and adds to suppression list
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Complaint Handling
     justification: Feature not yet implemented; SES complaint webhook processing not yet built
 - id: AC-036
@@ -2503,7 +2495,7 @@ entries:
   description: User with daily digest for discussion_reply receives one digest at 09:00 local time summarising 10 replies
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Daily Digest Delivery
     justification: Feature not yet implemented; digest scheduler and aggregator not yet built
 - id: AC-038
@@ -2511,7 +2503,7 @@ entries:
   description: Daily digest for course_announcement — no immediate email sent; announcement in next digest
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Digest Batching
     justification: Feature not yet implemented; digest batching suppressing immediate email not yet built
 - id: AC-039
@@ -2519,7 +2511,7 @@ entries:
   description: Five replies to same thread in one digest period shown as one entry with "(5 new replies)"
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Digest Thread Grouping
     justification: Feature not yet implemented; thread grouping in digest render not yet implemented
 - id: AC-040
@@ -2527,7 +2519,7 @@ entries:
   description: bulk_campaign open tracking records open event with campaign_id, user_id, timestamp
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Email Engagement Tracking
     justification: Feature not yet implemented; SES open/click event tracking pipeline not yet built
 - id: AC-041
@@ -2535,7 +2527,7 @@ entries:
   description: Tracked URL click records click event and redirects user to original URL within 200ms
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Click Tracking
     justification: Feature not yet implemented; click tracking redirect service not yet built
 - id: AC-042
@@ -2543,7 +2535,7 @@ entries:
   description: Enterprise admin campaign analytics for tenant acme shows only acme data (no cross-tenant leakage)
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Campaign Analytics Isolation
     justification: Feature not yet implemented; tenant-scoped campaign analytics not yet built
 - id: AC-043
@@ -2551,7 +2543,7 @@ entries:
   description: User without explicit marketing opt-in does NOT receive bulk_campaign email
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: Marketing Opt-In Gate
     justification: Feature not yet implemented; explicit opt-in requirement for bulk campaigns not yet implemented
 - id: AC-044
@@ -2559,7 +2551,7 @@ entries:
   description: User data export includes notification preferences and consent records
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: GDPR Data Export
     justification: Feature not yet implemented; notification data export pipeline not yet built
 - id: AC-045
@@ -2567,21 +2559,19 @@ entries:
   description: Deletion pipeline deletes all notification records, preferences, consent records, and device registrations
   verify:
   - type: manual
-    runbook: docs/operations/EMAIL_NOTIFICATIONS_RUNBOOK.md
+    runbook: docs/operations/runbooks/EMAIL_NOTIFICATIONS_RUNBOOK.md
     section: GDPR Deletion
     justification: Feature not yet implemented; notification data deletion in GDPR pipeline not yet built
-# enterprise-microservices_spec.md — missing AC-037
 - id: AC-037
   spec: enterprise-microservices_spec.md
   description: Given a license assignment fails, when the error is logged, then the log entry includes enterprise_customer_uuid,
     subscription_plan_uuid, error_type, and user_email_hash (not raw email)
   verify:
   - type: manual
-    runbook: docs/operations/ENTERPRISE_MICROSERVICES_RUNBOOK.md
+    runbook: docs/operations/ENTERPRISE_SERVICES_RUNBOOK.md
     section: License Assignment Error Logging
     justification: Requires running enterprise-subsidy service with a simulated license assignment failure; not available
       without live enterprise data
-# k8s-deployment_spec.md — missing AC-INT-004 and AC-INT-005
 - id: AC-INT-004
   spec: k8s-deployment_spec.md
   description: Given tutor-configuration_spec.md patches are applied, when K8s manifests reference MySQL, then MySQL Deployment
@@ -2602,13 +2592,12 @@ entries:
     section: Multi-Site Domain Verification
     justification: Requires running LMS pod with kubectl exec; cannot inspect runtime settings without live cluster access
     file: scripts/qa/verify-tutor-multisite-domains.sh
-# mobile-apps-enterprise_spec.md — missing ACs 001 through 034 (035, 036, 037 already covered)
 - id: AC-001
   spec: mobile-apps-enterprise_spec.md
   description: iOS sign-in opens system browser to LMS OAuth authorize endpoint with PKCE parameters
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
     justification: Feature not yet implemented; mobile app not yet developed
 - id: AC-002
@@ -2616,7 +2605,7 @@ entries:
   description: Android sign-in opens Custom Tab to LMS OAuth authorize endpoint with PKCE parameters
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
     justification: Feature not yet implemented; mobile app not yet developed
 - id: AC-003
@@ -2624,7 +2613,7 @@ entries:
   description: Authorization code exchanged for tokens; tokens stored in Keychain (iOS) or EncryptedSharedPreferences (Android)
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Storage Security
     justification: Feature not yet implemented; secure token storage not yet implemented in mobile app
 - id: AC-004
@@ -2632,7 +2621,7 @@ entries:
   description: Access token with < 5 minutes remaining proactively refreshed before API call
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Logic
     justification: Feature not yet implemented; proactive token refresh not yet implemented
 - id: AC-005
@@ -2640,7 +2629,7 @@ entries:
   description: Concurrent burst of 10 API calls during token refresh results in exactly one refresh request (single-flight)
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Deduplication
     justification: Feature not yet implemented; single-flight token refresh not yet implemented
 - id: AC-006
@@ -2648,7 +2637,7 @@ entries:
   description: 401 API response with valid refresh token triggers token refresh and single retry of original request
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: 401 Retry Flow
     justification: Feature not yet implemented; 401 retry with refresh not yet implemented
 - id: AC-007
@@ -2656,7 +2645,7 @@ entries:
   description: Failed token refresh redirects to login screen and clears all tokens
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Failure Handling
     justification: Feature not yet implemented; token failure handling not yet implemented
 - id: AC-008
@@ -2664,7 +2653,7 @@ entries:
   description: Logout revokes refresh token server-side and clears all local tokens, cache, and branding overrides
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Logout Flow
     justification: Feature not yet implemented; logout with server-side revocation not yet implemented
 - id: AC-009
@@ -2672,7 +2661,7 @@ entries:
   description: Push notification permission requested after first login, not at app launch
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Permission
     justification: Feature not yet implemented; mobile app push permission flow not yet built
 - id: AC-010
@@ -2680,7 +2669,7 @@ entries:
   description: Device token registered with backend including device_token, platform, app_version, org_slug
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Device Registration
     justification: Feature not yet implemented; device token registration API not yet built
 - id: AC-011
@@ -2688,7 +2677,7 @@ entries:
   description: Course announcement push notification appears in system notification center within 60 seconds
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Push Notification Delivery
     justification: Feature not yet implemented; requires physical device with FCM/APNs configured
 - id: AC-012
@@ -2696,7 +2685,7 @@ entries:
   description: Tapping notification with deep_link_url navigates to assignment within course
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Notification Deep Linking
     justification: Feature not yet implemented; notification deep link handling not yet implemented
 - id: AC-013
@@ -2704,7 +2693,7 @@ entries:
   description: Logout unregisters device token from backend
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Device Token Deregistration on Logout
     justification: Feature not yet implemented; logout-triggered device deregistration not yet implemented
 - id: AC-014
@@ -2712,7 +2701,7 @@ entries:
   description: AASA file at /.well-known/apple-app-site-association enables Universal Links for academyv2.mereka.io
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Universal Links Verification
     justification: Feature not yet implemented; AASA file not yet configured in LMS web server
 - id: AC-015
@@ -2720,7 +2709,7 @@ entries:
   description: assetlinks.json at /.well-known/assetlinks.json enables Android App Links
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: App Links Verification
     justification: Feature not yet implemented; assetlinks.json not yet configured in LMS web server
 - id: AC-016
@@ -2728,7 +2717,7 @@ entries:
   description: Deep link to courseware URL navigates to correct section in app
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Deep Link Routing
     justification: Feature not yet implemented; mobile app deep link routing not yet built
 - id: AC-017
@@ -2736,7 +2725,7 @@ entries:
   description: Unauthenticated deep link stores URL, presents login, then navigates after authentication
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Authenticated Deep Link Flow
     justification: Feature not yet implemented; stored URL post-login navigation not yet implemented
 - id: AC-018
@@ -2744,7 +2733,7 @@ entries:
   description: Deep link to unsupported path (e.g. /admin/) opens in in-app browser
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Fallback Deep Link Handling
     justification: Feature not yet implemented; in-app browser fallback not yet implemented
 - id: AC-019
@@ -2752,7 +2741,7 @@ entries:
   description: Downloaded course section content available offline (video, HTML, PDF)
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Content Download
     justification: Feature not yet implemented; offline content download not yet implemented
 - id: AC-020
@@ -2760,7 +2749,7 @@ entries:
   description: Offline quiz completion syncs score to backend within 60 seconds of connectivity restore
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Sync
     justification: Feature not yet implemented; offline-first sync layer not yet built
 - id: AC-021
@@ -2768,7 +2757,7 @@ entries:
   description: Storage warning shown when device has < 500 MB free before download starts
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Storage Warning
     justification: Feature not yet implemented; storage check before download not yet implemented
 - id: AC-022
@@ -2776,7 +2765,7 @@ entries:
   description: Manage Downloads screen shows per-section storage usage with delete option
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Management UI
     justification: Feature not yet implemented; download management screen not yet built
 - id: AC-023
@@ -2784,7 +2773,7 @@ entries:
   description: Background download completes and fires local notification (iOS background URLSession, Android WorkManager)
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Background Download
     justification: Feature not yet implemented; background download infrastructure not yet implemented
 - id: AC-024
@@ -2792,7 +2781,7 @@ entries:
   description: org_slug=client-a with primary_color=#FF5733 renders nav bar and primary elements in that color
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Multi-Tenant Branding
     justification: Feature not yet implemented; tenant branding in mobile app not yet built
 - id: AC-025
@@ -2800,7 +2789,7 @@ entries:
   description: Branding config endpoint unreachable with cached config — renders using cached branding
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Branding Cache Fallback
     justification: Feature not yet implemented; branding cache fallback not yet implemented
 - id: AC-026
@@ -2808,7 +2797,7 @@ entries:
   description: Branding config endpoint unreachable with no cache — renders using default Mereka Academy branding
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Default Branding Fallback
     justification: Feature not yet implemented; default branding fallback not yet implemented
 - id: AC-027
@@ -2816,7 +2805,7 @@ entries:
   description: User authenticated under org_slug=client-a sees only client-a courses (no cross-tenant leakage)
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Tenant Course Isolation
     justification: Feature not yet implemented; tenant-scoped course listing not yet implemented in mobile app
 - id: AC-028
@@ -2824,7 +2813,7 @@ entries:
   description: App validates TLS certificate against pinned intermediate CA certificates for academyv2.mereka.io
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Certificate Pinning
     justification: Feature not yet implemented; certificate pinning not yet implemented in mobile app
 - id: AC-029
@@ -2832,7 +2821,7 @@ entries:
   description: Certificate pin mismatch shows security warning and prevents data transmission
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Certificate Pin Mismatch Handling
     justification: Feature not yet implemented; MITM detection and warning not yet implemented
 - id: AC-030
@@ -2840,7 +2829,7 @@ entries:
   description: Task-switcher screenshot shows branded splash screen (not sensitive content)
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Screenshot Protection
     justification: Feature not yet implemented; screenshot masking in task switcher not yet implemented
 - id: AC-031
@@ -2848,7 +2837,7 @@ entries:
   description: Release build contains no debug logs, test API endpoints, or hardcoded credentials
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Release Build Security Audit
     justification: Feature not yet implemented; release build security audit process not yet established
 - id: AC-032
@@ -2856,7 +2845,7 @@ entries:
   description: Push to mobile/ios/** on main produces signed IPA and uploads to TestFlight without manual intervention
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: iOS CI Pipeline
     justification: Feature not yet implemented; iOS CI pipeline and TestFlight upload not yet configured
 - id: AC-033
@@ -2864,7 +2853,7 @@ entries:
   description: Push to mobile/android/** on main produces signed AAB and uploads to Google Play Internal Testing
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Android CI Pipeline
     justification: Feature not yet implemented; Android CI pipeline and Play Store upload not yet configured
 - id: AC-034
@@ -2872,11 +2861,9 @@ entries:
   description: New client org_slug=new-client added to branding config — no code changes or pipeline modifications required
   verify:
   - type: manual
-    runbook: docs/operations/MOBILE_APPS_RUNBOOK.md
+    runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Configuration-Only Tenant Onboarding
     justification: Feature not yet implemented; configuration-only tenant onboarding for mobile not yet built
-# proctoring-integration_spec.md — missing ACs not yet in manual_verifications
-# (AC-003, AC-006, AC-014, AC-015, AC-017, AC-018, AC-019, AC-023, AC-036, AC-038 already exist)
 - id: AC-001
   spec: proctoring-integration_spec.md
   description: ProctoringBackendProvider.get_backend('proctorio') returns Proctorio adapter when edx-proctoring is installed
@@ -3058,7 +3045,7 @@ entries:
   description: Instructor override of rejected attempt restores original grade and sets status to verified with audit entry
   verify:
   - type: manual
-    runbook: docs/operations/PROCTORING_RUNBOOK.md
+    runbook: docs/operations/runbooks/PROCTORING_RUNBOOK.md
     section: Verification > Instructor Override
     justification: Feature not yet implemented; instructor override with grade restore not yet built
 - id: AC-032
@@ -3071,7 +3058,8 @@ entries:
     justification: Feature not yet implemented; pending review grade display not yet implemented
 - id: AC-033
   spec: proctoring-integration_spec.md
-  description: Customer A (Examity) and customer B (Proctorio) students routed to respective providers with no credential cross-contamination
+  description: Customer A (Examity) and customer B (Proctorio) students routed to respective providers with no credential
+    cross-contamination
   verify:
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
@@ -3101,9 +3089,6 @@ entries:
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Consent Gate
     justification: Feature not yet implemented; consent gate for exam entry not yet built
-# slo-sla-service-level-management_spec.md — AC-016, AC-018, AC-019, AC-020 already covered above;
-# confirmed present in file — no new entries needed for this spec
-# video-pipeline-delivery_spec.md — missing AC-VPD-028
 - id: AC-VPD-028
   spec: video-pipeline-delivery_spec.md
   description: Given the Video Engagement Dashboard in Superset, when a course instructor accesses it, then drop-off heatmaps
@@ -3114,3 +3099,579 @@ entries:
     section: MV-005 Superset Dashboard
     justification: Superset dashboard heatmap visual correctness requires human verification in browser with real viewing
       session data
+- id: AC-PRIVACY-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: 'Erasure verification: auth_user.email anonymized to retired_email_*@retired.invalid after RTBF'
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Requires live user deletion flow; verified by operator running retire_user and querying DB
+- id: AC-PRIVACY-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PII leakage scanner flags raw email in ClickHouse actor_mbox field
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: ClickHouse analytics pipeline not yet deployed; scanner tool not yet implemented
+- id: AC-PRIVACY-005
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: GCS profile-image blobs deleted and verified zero count after deletion pipeline
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: GCS deletion step requires operator action with gsutil; cannot be automated in CI
+- id: AC-PRIVACY-006
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: PostgreSQL orders.buyer_email anonymized while retaining financial fields for 7-year window
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Purchase Gateway deletion logic not yet implemented; requires legal retention review
+- id: AC-PRIVACY-007
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: MongoDB forum posts author_username anonymized to [deleted] with body retained
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Forum anonymization verified by operator querying MongoDB Atlas after retire_user run
+- id: AC-PRIVACY-008
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Redis session keys for user:{user_id}:* deleted and verified empty after pipeline
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Redis key deletion requires operator access; automated verification needs deletion pipeline implementation
+- id: AC-PRIVACY-009
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Loki logs expire within 30 days; deletion certificate notes no new PII logs post-deletion
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Log retention is time-based; PII scanner not yet implemented; operator verifies policy config only
+- id: AC-PRIVACY-010
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy impact assessment triggered and users notified when classification matrix retention period reduced
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: PIA workflow and user notification for policy changes not yet implemented
+- id: AC-EXPORT-001
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export pipeline aggregates data from all export_included data stores per classification matrix
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Data export pipeline (POST /api/v1/privacy/export-request/) not yet implemented
+- id: AC-EXPORT-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export pipeline retries failed stores 3x with backoff and produces partially_completed status
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export pipeline retry logic not yet implemented
+- id: AC-EXPORT-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export archive is AES-256 encrypted with user password or auto-generated key
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Archive encryption feature not yet implemented
+- id: AC-EXPORT-005
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Download link expires after 48h or single download; server file deleted within 1h of expiry
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export link expiry and file cleanup not yet implemented
+- id: AC-EXPORT-006
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Duplicate export request returns HTTP 409 with existing request ID
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export deduplication logic not yet implemented
+- id: AC-EXPORT-007
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: 'Rate limit: >3 export requests in 30 days returns HTTP 429 with Retry-After header'
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export rate limiting not yet implemented
+- id: AC-EXPORT-008
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export exceeding 72h SLA transitions to failed state and fires alert
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export SLA monitoring and alert not yet implemented
+- id: AC-EXPORT-009
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Audit trail entry created with export_downloaded event on archive download
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export audit trail not yet implemented
+- id: AC-EXPORT-010
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Large exports (500MB+) split into 200MB ZIP parts with manifest and SHA-256 checksums
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Multi-part export splitting not yet implemented
+- id: AC-DELETE-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Each deletion step verifies success by querying the data store for user identifiers
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Multi-store deletion pipeline with per-step verification not yet implemented
+- id: AC-DELETE-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion step failure triggers 3x retry with backoff; pipeline continues on failure
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Rollback / Incident Response
+    justification: Deletion pipeline retry orchestration not yet implemented
+- id: AC-DELETE-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Partially completed deletion can be re-run idempotently skipping completed stores
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Rollback / Incident Response
+    justification: Idempotent deletion re-run mechanism not yet implemented
+- id: AC-DELETE-006
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion certificate signature verifiable by independent auditor tool
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Deletion certificate signing and verification not yet implemented
+- id: AC-DELETE-007
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: 'Purchase Gateway orders within 7-year window: buyer_email anonymized, financial fields retained'
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Purchase Gateway GDPR deletion step not yet implemented; legal retention basis documented
+- id: AC-DELETE-008
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent records anonymized with username hashed; granted/timestamps retained per GDPR Art 7
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Consent record anonymization on deletion not yet implemented
+- id: AC-DELETE-009
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: GCS profile-image blobs listed, deleted, and verified zero for deleted user
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: GCS deletion step in pipeline not yet implemented; requires gsutil with service account
+- id: AC-DELETE-010
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Completion email sent to original address; address deleted from temp table after send
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Deletion completion notification workflow not yet implemented
+- id: AC-DELETE-011
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion request with in-flight order polls every 6h; escalates after 14 days
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: In-flight order handling in deletion pipeline not yet implemented
+- id: AC-DELETE-012
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Enterprise admin deletion triggers 7-day warning to tenant; proceeds after handover
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Enterprise admin handover workflow during deletion not yet implemented
+- id: AC-PARTIAL-001
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Partially completed deletion certificate includes failures array with error context
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Rollback / Incident Response
+    justification: Deletion certificate with failures array not yet implemented
+- id: AC-PARTIAL-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Export with failed ClickHouse retrieval includes MISSING_DATA.txt in archive
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Partial export with MISSING_DATA.txt not yet implemented
+- id: AC-PARTIAL-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Deletion pipeline re-run skips completed stores and updates certificate on success
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Rollback / Incident Response
+    justification: Idempotent re-run with certificate update not yet implemented
+- id: AC-AUDIT-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Audit trail entry logged with export_completed event including data stores and duration
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Subject Request Handling
+    justification: Export audit trail logging not yet implemented
+- id: AC-AUDIT-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Audit trail entry logged with deletion_processing_started event and estimated completion
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Deletion audit trail logging not yet implemented
+- id: AC-AUDIT-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Audit trail entry logged per store with deletion_step_completed event and verification status
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Right to Erasure (RTBF)
+    justification: Per-store audit trail logging in deletion pipeline not yet implemented
+- id: AC-CONSENT-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent stored with version, timestamp, method, IP hash, and per-category status
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Consent storage schema with all required fields not yet implemented
+- id: AC-CONSENT-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent withdrawal via /account/privacy/ updates record with withdrawn_at within 24h
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Self-service consent withdrawal endpoint not yet implemented
+- id: AC-CONSENT-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Cookie banner loads asynchronously and LMS core works even if banner JS fails
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Requires browser testing with JS disabled; not automatable in CI
+- id: AC-CONSENT-005
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Privacy policy acceptance logged with policy_version, timestamp, and IP hash
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Privacy policy acceptance audit trail not yet implemented
+- id: AC-CONSENT-006
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Updated privacy policy presented for acceptance on first login after version change
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Policy version gate middleware not yet implemented
+- id: AC-CONSENT-007
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Multi-language privacy policy versions supported (EN/MY/ZH) per user language preference
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Multi-language policy versions not yet implemented
+- id: AC-CONSENT-008
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Per-purpose consent change is tracked independently without affecting other purposes
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Granular per-purpose consent tracking not yet implemented
+- id: AC-CONSENT-009
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent history API returns all versions with purpose, status, and timestamps ordered by date
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Consent history API endpoint not yet implemented
+- id: AC-CONSENT-010
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Schema change (new purpose) triggers re-consent for all active users on next login
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Re-consent trigger on schema version change not yet implemented
+- id: AC-RETENTION-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Retention purge CronJob logs audit trail entry per purge operation with counts and duration
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Retention CronJob with audit trail logging not yet implemented
+- id: AC-RETENTION-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Retention CronJob dry-run mode identifies eligible records and logs plan without deleting
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Dry-run mode for retention CronJob not yet implemented
+- id: AC-RETENTION-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Retention job skips timed-out store, continues others, and fires Warning alert
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Retention job timeout handling and partial continuation not yet implemented
+- id: AC-COMPLIANCE-002
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Compliance dashboard DSAR metric aggregates export/deletion counts and avg completion times
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Compliance dashboard not yet implemented
+- id: AC-COMPLIANCE-003
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Dashboard shows partially_completed deletion requests with re-run action for privacy_admin
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Compliance dashboard with re-run action not yet implemented
+- id: AC-COMPLIANCE-004
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Consent rate by purpose calculated as consented/active_users*100 for analytics/marketing/functional
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Consent Management
+    justification: Consent rate metric computation not yet implemented
+- id: AC-COMPLIANCE-005
+  spec: data-privacy-gdpr-compliance_spec.md
+  description: Data retention compliance score computed per store with color-coded dashboard display
+  verify:
+  - type: manual
+    runbook: docs/operations/PRIVACY_RUNBOOK.md
+    section: Data Retention Verification
+    justification: Retention compliance score metric not yet implemented
+- id: AC-GAC-001
+  spec: github-actions-cost-monitoring_spec.md
+  description: Workflow minutes consumed tracked per workflow with cost calculated by runner type
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Tracking
+    justification: GitHub Actions cost monitoring pipeline not yet deployed; requires GitHub API integration
+- id: AC-GAC-002
+  spec: github-actions-cost-monitoring_spec.md
+  description: Daily automated cost report generated at 00:00 UTC with budget comparison
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Tracking
+    justification: Daily cost report CronJob not yet implemented
+- id: AC-GAC-003
+  spec: github-actions-cost-monitoring_spec.md
+  description: Slack/email alerts sent when cost thresholds exceeded (80%/100%/150% of budget)
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Alerting
+    justification: Cost threshold alerting not yet implemented
+- id: AC-GAC-004
+  spec: github-actions-cost-monitoring_spec.md
+  description: Max duration enforced per job type (5/30/45 min); jobs exceeding limit fail with cost warning
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Controls
+    justification: Workflow timeout enforcement via actions-budget.yml not yet implemented
+- id: AC-GAC-005
+  spec: github-actions-cost-monitoring_spec.md
+  description: Weekly analysis identifies high-cost workflows and produces optimization recommendations
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Optimization
+    justification: Weekly cost analysis and recommendation engine not yet implemented
+- id: AC-GAC-006
+  spec: github-actions-cost-monitoring_spec.md
+  description: Non-critical workflows paused when 95% of monthly budget consumed
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Controls
+    justification: Automated workflow pausing at budget threshold not yet implemented
+- id: AC-GAC-007
+  spec: github-actions-cost-monitoring_spec.md
+  description: Prometheus metrics exported for workflow duration, cost, and monthly budget consumed percent
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Observability
+    justification: GitHub Actions Prometheus exporter not yet deployed
+- id: AC-GAC-008
+  spec: github-actions-cost-monitoring_spec.md
+  description: Grafana cost dashboard shows spend vs budget, daily trend, top 5 workflows, and projections
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Observability
+    justification: Grafana dashboard for GitHub Actions cost not yet created
+- id: AC-GAC-009
+  spec: github-actions-cost-monitoring_spec.md
+  description: Anomaly alerts triggered on >50% day-over-day spike, new workflow >5% budget, or 2x duration
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Alerting
+    justification: Cost anomaly detection not yet implemented
+- id: AC-GAC-010
+  spec: github-actions-cost-monitoring_spec.md
+  description: Budget config in .github/actions-budget.yml applies limits and thresholds correctly
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Controls
+    justification: actions-budget.yml configuration enforcement not yet implemented
+- id: AC-GAC-011
+  spec: github-actions-cost-monitoring_spec.md
+  description: Cost optimization settings apply cache strategy, concurrency limits, and runner options
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Optimization
+    justification: Automated optimization settings application not yet implemented
+- id: AC-GAC-012
+  spec: github-actions-cost-monitoring_spec.md
+  description: Calculated cost matches GitHub billing within plus or minus 5 percent
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Cost Tracking
+    justification: Cost calculation accuracy validation requires live GitHub billing data comparison
+- id: AC-GAC-013
+  spec: github-actions-cost-monitoring_spec.md
+  description: Cost threshold alert delivered within 5 minutes with spend, workflow, actions, and dashboard link
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Alerting
+    justification: Alert delivery SLA requires live triggering to measure; not yet implemented
+- id: AC-GAC-014
+  spec: github-actions-cost-monitoring_spec.md
+  description: Cost dashboard available at /dashboards/github-actions-cost with all panels rendering
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/COST_MONITORING_RUNBOOK.md
+    section: Observability
+    justification: Grafana dashboard provisioning for GitHub Actions cost not yet deployed
+- id: AC-INT-001
+  spec: ci-cd-pipeline_spec.md
+  description: K8s manifests pass validate-k8s.sh, CI builds and pushes images, production Kustomize overlay references new tags, kubectl apply succeeds without resource validation errors
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: Requires live CI pipeline run with new image build; validated each release via release-openedx-gitops.sh dry-run + ArgoCD sync
+- id: AC-INT-002
+  spec: ci-cd-pipeline_spec.md
+  description: CI deployment workflow verifies ExternalSecrets reach SecretSynced before declaring deployment success
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Integration Tests
+    justification: ExternalSecret sync gate not yet implemented in CI pipeline; operator manually confirms kubectl get externalsecrets -n mereka-lms shows READY=True
+- id: AC-INT-003
+  spec: ci-cd-pipeline_spec.md
+  description: CI runs infisical-validate-mereka-lms.sh and fails if any required MEREKA_LMS_* key is missing or contains placeholder values
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/CI_CD_RUNBOOK.md
+    section: Secrets Validation
+    justification: infisical-validate CI step not yet wired into GitHub Actions workflow; runs manually pre-deploy
+- id: AC-INT-001
+  spec: k8s-deployment_spec.md
+  description: ExternalSecrets deployed with openedx-secrets and database-secrets; all pods reach Running state with no missing env var errors
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — kubectl get pods -n mereka-lms shows all Running; ExternalSecrets READY=True
+- id: AC-INT-002
+  spec: k8s-deployment_spec.md
+  description: LMS pods start with OPENEDX_SECRET_KEY populated from GCP Secret Manager via ExternalSecrets
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — kubectl exec lms-pod confirms OPENEDX_SECRET_KEY is set and non-empty
+- id: AC-INT-003
+  spec: k8s-deployment_spec.md
+  description: Secret rotation in Infisical + GCP SM triggers ExternalSecret refresh within 1h; new pods use rotated value without manual K8s Secret edits
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
+    section: Secret Rotation
+    justification: Secret rotation flow not yet end-to-end tested; ExternalSecret TTL=1h is configured but rotation test requires coordination with Infisical
+- id: AC-INT-001
+  spec: forum-service-migration_spec.md
+  description: Python forum starts and connects to Atlas cs_comments_service database without local MongoDB dependency, logs show successful SRV connection
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — Forum v2 (Python) running as part of LMS process, connects to Atlas SRV; kubectl logs lms confirms forum startup
+- id: AC-INT-002
+  spec: forum-service-migration_spec.md
+  description: Forum data in Atlas cs_comments_service matches Ruby forum baseline with zero data loss (row counts, content hashes)
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    section: Data Integrity
+    justification: Migration from Ruby to Python forum was done; full data integrity comparison requires Ruby baseline snapshot which was not captured pre-migration
+- id: AC-INT-003
+  spec: forum-service-migration_spec.md
+  description: kubectl get endpoints forum shows non-empty endpoints and forum API responds on configured port
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/FORUM_RUNBOOK.md
+    section: Integration Tests
+    justification: Forum v2 runs in-process within LMS — no separate forum K8s service/endpoint; forum routes served via LMS caddy proxy on forum.academyv2.mereka.io

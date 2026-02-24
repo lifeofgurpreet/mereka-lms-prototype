@@ -26,9 +26,18 @@ spec:
         app.kubernetes.io/part-of: mereka-lms
         app.kubernetes.io/component: enterprise
     spec:
+      # No initContainers needed: image is built clean (no NREUM) via
+      # infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal.
+      # NREUM was stripped at build time; runtime HTML sanitization is not required.
       containers:
         - name: enterprise-admin-portal
           image: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal:latest
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              exec /usr/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
           ports:
             - containerPort: 8002
               name: http

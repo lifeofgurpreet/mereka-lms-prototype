@@ -22,13 +22,13 @@ patches:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: mereka-brand
+    newTag: mereka-brand-hotfix-full-v3
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260208-mfe-discussions-pass4-c17df16
+    newTag: 1c66529-20260220023917
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260208-mfe-discussions-pass4-c17df16
+    newTag: 1c66529-20260220023917
   # Enterprise MFE: NREUM-clean + env placeholder patching (strip-nreum.sh + patch-missing-env.sh)
   # Rebuilt 2026-02-20 after script hardening (ae7b125): env.config.js wired, MISSING_ENV_VAR patched
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal

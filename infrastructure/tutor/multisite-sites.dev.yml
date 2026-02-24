@@ -29,4 +29,22 @@ sites:
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
-
+  - domain: preview.academyv2.mereka.dev
+    name: Mereka Academy Preview (Dev)
+    orgs:
+      - MEREKA
+    site_values:
+      domain: preview.academyv2.mereka.dev
+      site_name: Mereka Academy Preview (Dev)
+      platform_name: Mereka Academy (Dev)
+      LMS_ROOT_URL: https://preview.academyv2.mereka.dev
+      CMS_ROOT_URL: https://studio.academyv2.mereka.dev
+      MFE_BASE_URL: https://apps.academyv2.mereka.dev
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - MEREKA
+      logo_image: https://preview.academyv2.mereka.dev/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false

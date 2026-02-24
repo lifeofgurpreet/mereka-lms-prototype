@@ -2,6 +2,7 @@
 import logging
 import os
 import sys
+import importlib
 from lms.envs.production import *
 
 
@@ -47,8 +48,24 @@ def _init_sentry(service_name):
     sentry_sdk.set_tag("service", service_name)
 
 
-# Override SECRET_KEY from environment variable (required for K8s deployment)
-SECRET_KEY = os.environ.get("OPENEDX_SECRET_KEY", "")
+def _module_available(module_name):
+    try:
+        importlib.import_module(module_name)
+        return True
+    except Exception:
+        return False
+
+
+# Override SECRET_KEY from environment variable (required for K8s deployment).
+# Nonprod fallback chain prevents hard crashes when legacy secret keys drift to
+# empty while JWT keys remain populated.
+SECRET_KEY = (
+    os.environ.get("OPENEDX_SECRET_KEY")
+    or os.environ.get("SECRET_KEY")
+    or os.environ.get("JWT_SECRET_KEY_LMS")
+    or os.environ.get("JWT_SECRET_KEY")
+    or ""
+)
 if not SECRET_KEY:
     raise ValueError("OPENEDX_SECRET_KEY environment variable is required")
 
@@ -743,14 +760,28 @@ DISCUSSIONS_MFE_FEEDBACK_URL = None
 WRITABLE_GRADEBOOK_URL = f"{MEREKA_MFE_BASE_URL}/gradebook"
 
 # Hardening: keep platform admins as staff/superuser (prevents drift).
-MIDDLEWARE = list(MIDDLEWARE) + [
-    "lms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware",
-    "lms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware",
-    # Studio SSO uses LMS OAuth2 provider endpoints. MFEs authenticate via JWT
-    # cookies; legacy OAuth2 views still expect an authenticated request.user.
-    # Bridge JWT-cookie auth into request.user/session for `/oauth2/*` only.
-    "lms.envs.tutor.mereka_jwt_session.MerekaJwtToSessionBridgeMiddleware",
-]
+MIDDLEWARE = list(MIDDLEWARE)
+_platform_admin_middleware = "lms.envs.tutor.mereka_platform_admin.MerekaPlatformAdminMiddleware"
+if _module_available("lms.envs.tutor.mereka_platform_admin"):
+    MIDDLEWARE.append(_platform_admin_middleware)
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _platform_admin_middleware)
+
+_lms_multisite_module = "lms.envs.tutor.mereka_multisite"
+if _module_available(_lms_multisite_module):
+    MIDDLEWARE.append("lms.envs.tutor.mereka_multisite.MerekaCookieDomainMiddleware")
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _lms_multisite_module)
+
+# Studio SSO uses LMS OAuth2 provider endpoints. MFEs authenticate via JWT
+# cookies; legacy OAuth2 views still expect an authenticated request.user.
+# Bridge JWT-cookie auth into request.user/session for `/oauth2/*` only when
+# the optional helper module is present in this image.
+_jwt_bridge_middleware = "lms.envs.tutor.mereka_jwt_session.MerekaJwtToSessionBridgeMiddleware"
+if _module_available("lms.envs.tutor.mereka_jwt_session"):
+    MIDDLEWARE.append(_jwt_bridge_middleware)
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _jwt_bridge_middleware)
 
 
 
@@ -872,8 +903,11 @@ else:
 # Without this, Django may treat HTTPS requests as HTTP which can break URL
 # generation and callback flows in some proxy chains.
 _forwarded_headers_middleware = "lms.envs.tutor.mereka_forwarded_headers.MerekaForwardedHeadersMiddleware"
-if _forwarded_headers_middleware not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, _forwarded_headers_middleware)
+if _module_available("lms.envs.tutor.mereka_forwarded_headers"):
+    if _forwarded_headers_middleware not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, _forwarded_headers_middleware)
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _forwarded_headers_middleware)
 
 # OIDC hardening: the cookie-domain middleware must run after SessionMiddleware
 # has set session/csrf cookies on the response, otherwise OIDC state cookies
@@ -1260,9 +1294,7 @@ LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
     "LIBRARY_CONTENT_DEFAULT_COUNT", "5"
 ))
 
-# Register openedx_content_libraries app
-if "openedx_content_libraries" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_content_libraries")
+
 
 # ── Kajabi SSO/OAuth Integration ───────────────────────────────────────
 # @spec: Kajabi SSO Migration (mereka-lms-f98)

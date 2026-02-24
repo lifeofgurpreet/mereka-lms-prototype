@@ -1,6 +1,6 @@
 # Tenant Branding Contract
 
-_Audience: Platform Engineering + Operations + Design • Last updated: 2026-02-17_
+_Audience: Platform Engineering + Operations + Design • Last updated: 2026-02-20_
 
 **Purpose**: Define required inputs, fallback rules, and ownership for tenant branding in Mereka Academy multi-tenant Open edX.
 
@@ -34,6 +34,40 @@ Each tenant in the Mereka Academy platform requires a **brand pack** — a colle
 - **Runtime overlay**: Tenant branding overlays platform defaults (no code changes)
 - **Zero-downtime updates**: Branding changes apply via config updates + cache invalidation (no image rebuild)
 - **Isolation**: Tenants cannot access or modify other tenants' branding
+
+---
+
+## Global vs Tenant-Specific vs Runtime-Configurable
+
+This table is the canonical decision reference for where branding changes belong and what they cost.
+
+| Knob | Scope | Change requires | Notes |
+|------|-------|----------------|-------|
+| **CSS design tokens** (`mereka-design-tokens.css`) | Global | `sync-brand-assets.sh` + image rebuild | All tenants share the same base palette |
+| **LMS footer content/structure** | Global | LMS image rebuild | Single Mako template; tenant copy via `SiteConfiguration.PLATFORM_NAME` |
+| **Studio footer** | Global | LMS image rebuild | CMS Mako template (`widgets/footer.html`) |
+| **MFE footer copy/links/copyright** | Per-tenant | `SITE_VARIANTS` update in plugin → MFE image rebuild | Keyed by hostname in `infrastructure/tutor/plugins/mereka_lms/plugin.py` |
+| **Platform-level color tokens** | Global | LMS + MFE image rebuild | Defined in `common/static/css/mereka-design-tokens.css` + MFE SCSS |
+| **Tenant logo (LMS/Studio)** | Per-tenant | Runtime (no rebuild) | `LOGO_URL` in `TenantSiteConfiguration.mfe_config` or `/theming/asset/` |
+| **Tenant favicon** | Per-tenant | Runtime (no rebuild) | `FAVICON_URL` in `TenantSiteConfiguration.mfe_config` |
+| **Tenant primary domain** | Per-tenant | DNS + Caddy config | Caddy block + Django `Site` model must both be updated |
+| **`PLATFORM_NAME`** | Per-tenant | Runtime (Django admin) | `Sites` → `Site Configuration` → `PLATFORM_NAME` value |
+| **MFE `SITE_NAME`** | Per-tenant | MFE image rebuild | Set in `SITE_VARIANTS` map (currently requires plugin update) |
+| **MFE `SUPPORT_EMAIL`** | Per-tenant | MFE image rebuild | Set in `SITE_VARIANTS` map |
+| **LMS SCSS/CSS overrides** | Global | LMS image rebuild | Theme-level; not per-tenant at runtime |
+| **Studio SCSS** | Global | LMS image rebuild | Same image as LMS theming |
+| **MFE CSS variables** | Global | MFE image rebuild | Compiled from `mfe/mereka.scss` |
+| **`--mereka-mfe-branding-rev`** | Global | MFE image rebuild | Version marker in `mfe/mereka.scss`; verified by `verify-public-branding.sh` |
+
+### Non-Goals
+
+The following are explicitly **not** supported by the tenant branding system:
+
+- **Per-tenant SCSS compilation**: All tenants share the same compiled CSS bundles. Custom colors must be implemented via CSS custom properties, not per-tenant SCSS builds.
+- **Per-tenant Mako templates**: LMS/CMS templates are compiled into the image; per-tenant template overrides are not supported at runtime.
+- **Tenant-controlled JavaScript**: Tenants cannot inject arbitrary JavaScript. All JS runs from the platform image.
+- **Sub-theme inheritance**: There is no "Biji-Biji theme" that inherits from "Mereka theme". All sites share one compiled theme.
+- **White-label MFE builds**: Enterprise portals (admin/learner) use the upstream Open edX default footer and are not wrapped in MerekaFooter (P4 backlog).
 
 ---
 
@@ -80,6 +114,8 @@ Each tenant in the Mereka Academy platform requires a **brand pack** — a colle
 ---
 
 ### 3. Footer Configuration
+
+> **See also**: [Footer Parity Contract](#footer-parity-contract) for the authoritative per-surface breakdown.
 
 | Field | Type | Max Length | Required | Fallback |
 |-------|------|------------|----------|----------|
@@ -549,6 +585,116 @@ Tenant: acme-corp
 
 ---
 
+---
+
+## Footer Parity Contract
+
+_Added: 2026-02-20 (bead 1kwf + bz9p)_
+
+Defines the authoritative source of truth for each footer surface, the per-tenant field values,
+and the verification commands to confirm parity. This section replaces the informal footer notes
+previously scattered across audit documents.
+
+### Surface Map
+
+| Surface | Template / Source | Auth Source | Multi-tenant? | Status |
+|---------|------------------|-------------|---------------|--------|
+| **LMS Mako footer** | `themes/mereka/lms/templates/footer.html` | `SiteConfiguration.PLATFORM_NAME` | Partial (see note) | ✅ Source-complete; awaiting image rebuild |
+| **Studio footer** | `themes/mereka/cms/templates/widgets/footer.html` | Static (Mereka Academy) | No | ✅ Source-complete; awaiting image rebuild |
+| **MFE footer (all MFEs)** | `mereka_lms.py` → `MerekaFooter` component | `SITE_VARIANTS` hostname map | Yes | ✅ Source-complete; awaiting MFE image deploy |
+
+**LMS Mako note**: `static.get_platform_name()` reads `SiteConfiguration.get_value('PLATFORM_NAME')`,
+which Django Sites framework makes per-domain. This achieves partial multi-tenancy: the copyright
+holder tracks `PLATFORM_NAME`. Navigation links (emails, help URLs) remain Mereka-specific hardcodes
+until bead 2rcf (full TenantConfig) lands.
+
+### Per-Tenant Footer Fields (Current Production)
+
+| Tenant | Domain | MFE `brand` | MFE `copyrightHolder` | LMS copyright (`PLATFORM_NAME`) | Studio |
+|--------|--------|-------------|----------------------|----------------------------------|--------|
+| Mereka Academy | `academyv2.mereka.io` | Mereka Academy | MEREKA | Mereka Academy | Mereka Academy |
+| Biji-Biji Academy | `academy.biji-biji.com` | Biji-Biji Academy | Biji-Biji Initiative | Biji-Biji Academy | Mereka Academy |
+| Skill Our Future | `skillourfuture.academy.mereka.io` | Skill Our Future Academy | MEREKA | Skill Our Future Academy | Mereka Academy |
+
+**Note**: Studio footer is a single static template shared across all tenants (single Studio pod).
+It shows Mereka branding regardless of which domain the author navigated from. This is an accepted
+limitation until Studio subdomain routing per tenant is implemented (bead 3sxq, backlog).
+
+### Authoritative MFE Source (`mereka_lms.py` `SITE_VARIANTS`)
+
+```javascript
+const SITE_VARIANTS = {
+  'academyv2.mereka.io': {
+    brand: 'Mereka Academy',
+    copyrightHolder: 'MEREKA',
+    whatsapp: '601135271981',
+  },
+  'academy.biji-biji.com': {
+    brand: 'Biji-Biji Academy',
+    copyrightHolder: 'Biji-Biji Initiative',
+    whatsapp: '601135271981',
+  },
+  'skillourfuture.academy.mereka.io': {
+    brand: 'Skill Our Future Academy',
+    copyrightHolder: 'MEREKA',
+    whatsapp: '601135271981',
+  },
+};
+```
+
+**Update procedure**: Edit `mereka_lms.py`, rebuild MFE image, deploy. No DB change needed.
+SITE_VARIANTS is build-time configuration (not runtime-configurable). When bead 2rcf lands, these
+values will be superseded by `TenantConfig.copyrightHolder` read at render time.
+
+### Banned Strings
+
+No footer on any surface may contain these strings without Mereka co-branding context:
+
+- `Powered by Open edX` — white-label deployment; attribution in docs per OEP-11
+- `Powered by Tutor` — same as above
+- `Biji-Biji Initiative` on Mereka/SkillourfFuture surfaces
+
+Verification enforced by: `scripts/qa/verify-footer-parity.sh`
+
+### Verification Commands
+
+**Run all footer parity checks** (local, source-level):
+```bash
+./scripts/qa/verify-footer-parity.sh
+# Expected: PASS ≥32, FAIL 0, WARN 1 (accepted: Enterprise MFE)
+```
+
+**Per-tenant live verification** (run after image deploy):
+```bash
+# Mereka Academy
+curl -s https://academyv2.mereka.io/ | grep -i "powered by open edx" && echo FAIL || echo PASS
+
+# Biji-Biji Academy — LMS copyright
+curl -s https://academy.biji-biji.com/ | grep -i "Biji-Biji Initiative" && echo FOUND || echo MISSING
+
+# Skill Our Future — LMS copyright
+curl -s https://skillourfuture.academy.mereka.io/ | grep -i "Skill Our Future" && echo FOUND || echo MISSING
+
+# Studio (any domain — single pod)
+curl -s https://studio.academyv2.mereka.io/ | grep -i "powered by open edx" && echo FAIL || echo PASS
+```
+
+**Full post-deploy verification** (after WhiteCliff rebuilds and deploys images):
+```bash
+./scripts/qa/post-deploy-verify.sh prod
+# Check 1 (Studio white-label) + Check 3 (LMS CSS) must PASS
+```
+
+### Gap Register (Path to True Multi-Tenant Footer)
+
+| Gap | Surface | Current | Target | Owner Bead | Priority |
+|-----|---------|---------|--------|------------|----------|
+| Hardcoded nav links (emails, help URLs) | LMS Mako | Mereka-specific | `SiteConfiguration` per-domain | 2rcf | P2 |
+| Copyright holder source of truth | LMS Mako | `get_platform_name()` (global settings) | `TenantConfig.copyrightHolder` | 2rcf | P2 |
+| `SITE_VARIANTS` runtime vs build-time | MFE | Build-time constant | `TenantConfig` API at render | 2rcf | P3 |
+| Studio per-tenant footer | CMS | Single shared template | Subdomain-aware CMS routing | 3sxq | P3 (backlog) |
+| Enterprise MFE footer | Enterprise portals | Open edX default | `MerekaFooter` wired via env | backlog | P4 |
+
 ## Related Documents
 
 - **Provisioning Guide**: `docs/operations/TENANT_PROVISIONING.md`
@@ -564,4 +710,5 @@ Tenant: acme-corp
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-02-20 | Added Footer Parity Contract section; per-tenant field table; gap register; verification commands (bead 1kwf) | Claude Agent (BoldBadger) |
 | 2026-02-17 | Initial tenant branding contract | Claude Agent (task 2rg1) |

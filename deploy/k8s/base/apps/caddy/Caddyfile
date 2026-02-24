@@ -157,6 +157,18 @@ http://ecommerce.academyv2.mereka.io, http://ecommerce.academyv2.mereka.dev {
         }
     }
 
+    # Keep service-domain dashboard route aligned to the shared authn shell (branding + login UX).
+    handle /dashboard {
+        redir /dashboard/ 308
+    }
+    handle /dashboard/* {
+        rewrite * /authn/login
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+
     @ecommerce_root path /
     header @ecommerce_root Content-Type "text/html; charset=utf-8"
     respond @ecommerce_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mereka Ecommerce</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Mereka Ecommerce Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Checkout APIs are online. Use the dashboard for operator views, basket/checkout routes for learner purchase flow, and webhook endpoint for Stripe events.</p><p style='margin:0'><a href='/dashboard/' style='color:#295cad;font-weight:600;text-decoration:none'>Open dashboard</a><span style='opacity:.5'> · </span><a href='/basket/' style='color:#295cad;font-weight:600;text-decoration:none'>Open basket</a><span style='opacity:.5'> · </span><a href='/checkout/' style='color:#295cad;font-weight:600;text-decoration:none'>Open checkout</a></p></main></body></html>" 200
@@ -206,6 +218,22 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
         }
     }
 
+    # Keep service-domain admin login route aligned to the shared authn shell.
+    handle /admin/login {
+        rewrite * /authn/login
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /admin/login/* {
+        rewrite * /authn/login
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+
     @credentials_root path /
     header @credentials_root Content-Type "text/html; charset=utf-8"
     respond @credentials_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mereka Credentials</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Mereka Credentials Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Credential issuance APIs are online. Use the admin route for operator actions and the health route for service checks.</p><p style='margin:0'><a href='/admin/login/' style='color:#295cad;font-weight:600;text-decoration:none'>Open admin login</a><span style='opacity:.5'> · </span><a href='/health/' style='color:#295cad;font-weight:600;text-decoration:none'>Health endpoint</a></p></main></body></html>" 200
@@ -221,6 +249,42 @@ http://admin.academyv2.mereka.io {
     request_body {
         max_size 2MB
     }
+    reverse_proxy /api/mfe_config/v1* lms:8000 {
+        header_up Host {http.request.host}
+    }
+    reverse_proxy /login_refresh* lms:8000 {
+        header_up Host {http.request.host}
+    }
+    # Enterprise service APIs — routed to internal K8s services via path prefix.
+    # Same-origin (admin subdomain) so no CORS complications.
+    handle /api/enterprise-catalog/* {
+        uri strip_prefix /api/enterprise-catalog
+        reverse_proxy enterprise-catalog:8160 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /api/enterprise-access/* {
+        uri strip_prefix /api/enterprise-access
+        reverse_proxy enterprise-access:18270 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /api/license-manager/* {
+        uri strip_prefix /api/license-manager
+        reverse_proxy license-manager:18170 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+    handle /api/enterprise-subsidy/* {
+        uri strip_prefix /api/enterprise-subsidy
+        reverse_proxy enterprise-subsidy:18280 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
     import proxy "enterprise-admin-portal:8002"
 }
 
@@ -228,6 +292,12 @@ http://admin.academyv2.mereka.io {
 http://enterprise.academyv2.mereka.io {
     request_body {
         max_size 2MB
+    }
+    reverse_proxy /api/mfe_config/v1* lms:8000 {
+        header_up Host {http.request.host}
+    }
+    reverse_proxy /login_refresh* lms:8000 {
+        header_up Host {http.request.host}
     }
     import proxy "enterprise-learner-portal:8002"
 }

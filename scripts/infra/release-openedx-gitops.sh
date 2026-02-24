@@ -298,11 +298,13 @@ if not path.exists():
 targets = {
     "docker.io/overhangio/openedx": openedx_tag,
     "docker.io/overhangio/openedx-mfe": mfe_tag,
+    "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx": openedx_tag,
     "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe": mfe_tag,
 }
 digest_targets = {
     "docker.io/overhangio/openedx": openedx_digest,
     "docker.io/overhangio/openedx-mfe": mfe_digest,
+    "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx": openedx_digest,
     "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe": mfe_digest,
 }
 
@@ -527,7 +529,9 @@ UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
 INFRA_OVERLAY_REL="$INFRA_PROD_REL"
 APP_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
-INFRA_REQUIRED_NAMES="$APP_REQUIRED_NAMES"
+# bbi-infrastructure overlay has an extra "double-override" entry for the already-transformed
+# openedx image name (added to prevent kustomize base-image drift, ref fc34418)
+INFRA_REQUIRED_NAMES="$APP_REQUIRED_NAMES,asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
 
 if [[ "$TARGET_ENV" == "production" ]]; then
   UPDATE_APP_BASE=1

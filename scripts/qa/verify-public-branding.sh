@@ -13,9 +13,15 @@ MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
 EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
 
+SOURCE_ONLY=0
+for _arg in "$@"; do
+  if [[ "$_arg" == "--source-only" ]]; then SOURCE_ONLY=1; fi
+done
+
 ENVIRONMENT="${1:-prod}"
+if [[ "$ENVIRONMENT" == "--source-only" ]]; then ENVIRONMENT="prod"; fi
 if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-  echo "Usage: $0 [prod|dev]" >&2
+  echo "Usage: $0 [prod|dev] [--source-only]" >&2
   exit 1
 fi
 
@@ -103,7 +109,9 @@ check_contains() {
   local needle=$3
   local body
   body=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)
-  if printf '%s' "$body" | rg -F -q "$needle"; then
+  # Use rg directly on the variable via herestring to avoid SIGPIPE issues.
+  # printf '%s' "$body" | rg -q exits 141 with pipefail when rg finds a match early in a large body.
+  if rg -F -q "$needle" <<< "$body"; then
     printf "✓ %s\n" "$label"
   else
     printf "✗ %s (missing '%s')\n" "$label" "$needle" >&2
@@ -118,7 +126,7 @@ check_contains_any() {
   local body needle
   body=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)
   for needle in "$@"; do
-    if printf '%s' "$body" | rg -F -q "$needle"; then
+    if rg -F -q "$needle" <<< "$body"; then
       printf "✓ %s\n" "$label"
       return
     fi
@@ -190,7 +198,21 @@ check_authn_proxy_surface() {
   check_http "$url" "$label reachable"
 
   ts="$(date +%s)"
-  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "${url}?nocache=${ts}" 2>/dev/null || true)"
+  # Follow redirects; capture both effective URL and final body.
+  effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" \
+    -o /dev/null -w '%{url_effective}' "${url}?nocache=${ts}" 2>/dev/null || true)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" \
+    "${url}?nocache=${ts}" 2>/dev/null || true)"
+
+  # With Authentik SSO, unauthenticated requests to ecommerce/credentials redirect to
+  # the Authentik flow (auth0.mereka.io), NOT the internal authn MFE. This is correct
+  # production behavior — the authn MFE is only used for the main LMS login surface.
+  if rg -qF 'auth0.mereka.io' <<<"$effective_url" \
+    || rg -qF 'authentik' <<<"$effective_url"; then
+    printf "✓ %s redirects to Authentik SSO (expected with platform SSO config)\n" "$label"
+    return
+  fi
+
   if rg -F -q '<div id="root"></div>' <<<"$html" \
     && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
     && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
@@ -301,7 +323,10 @@ check_homepage_brand_fonts() {
   html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${base_domain}/?nocache=${ts}" 2>/dev/null || true)"
 
   # We load brand overrides via comprehensive theme hook `head-extra.html`.
-  css_path="$(printf '%s' "$html" | rg -o '/static/mereka/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
+  # In production, static.url('mereka/css/mereka-overrides.css') strips the theme
+  # name prefix (Open edX ProductionStorage behavior), yielding /static/css/mereka-overrides.css.
+  # Accept either form: with or without the theme-name prefix segment.
+  css_path="$(printf '%s' "$html" | rg -o '/static(/mereka)?/css/mereka-overrides[^"]*\.css' | head -n 1 || true)"
   if [[ -z "$css_path" ]]; then
     printf "✗ %s (missing Mereka override CSS link in homepage HTML)\n" "$label" >&2
     failures=$((failures + 1))
@@ -341,7 +366,8 @@ check_homepage_brand_logo() {
 
   # Brand sanity check: the homepage logo should ultimately match the theming logo redirect target.
   # On Open edX Indigo this often ends up under /static/images/logo.<hash>.png.
-  theming_effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo-horizontal.png" 2>/dev/null || true)"
+  # Compare against logo.png redirect (the header logo), not logo-horizontal.png.
+  theming_effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo.png" 2>/dev/null || true)"
   if [[ -z "$theming_effective_url" ]]; then
     printf "✗ %s (could not resolve theming logo)\n" "$label" >&2
     failures=$((failures + 1))
@@ -349,19 +375,22 @@ check_homepage_brand_logo() {
   fi
 
   # Accept either:
-  # 1) A direct themed static logo path (common with comprehensive theming), OR
-  # 2) The same URL as the theming redirect target.
-  if ! echo "$logo_url" | grep -q "/static/mereka/images/logo" && [[ "$logo_url" != "$theming_effective_url" ]]; then
+  # 1) A direct themed static logo path (with or without theme-name prefix, since
+  #    ProductionStorage strips the prefix: /static/images/ or /static/mereka/images/), OR
+  # 2) The same URL as the theming redirect target (logo.png → hashed static path).
+  if ! echo "$logo_url" | grep -qE "/static/(mereka/)?images/logo" && [[ "$logo_url" != "$theming_effective_url" ]]; then
     printf "✗ %s (homepage logo is not themed)\n" "$label" >&2
     printf "  homepage_logo_url: %s\n" "$logo_url" >&2
-    printf "  expected_prefix: %s\n" "https://${base_domain}/static/mereka/images/logo" >&2
+    printf "  expected_prefix: https://%s/static/(mereka/)?images/logo OR %s\n" "$base_domain" "$theming_effective_url" >&2
     printf "  theming_logo_url: %s\n" "$theming_effective_url" >&2
     failures=$((failures + 1))
     return
   fi
 
-  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$logo_url" 2>/dev/null || echo "000")
-  size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$logo_url" 2>/dev/null || echo "0")
+  # Fetch with cache-busting to bypass CDN (Cloudflare) cached stale assets.
+  logo_bust="${logo_url}?nocache=${ts}"
+  code=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{http_code}" "$logo_bust" 2>/dev/null || echo "000")
+  size=$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{size_download}" "$logo_bust" 2>/dev/null || echo "0")
   if [[ "$code" == "200" && "$size" -gt 2048 ]]; then
     printf "✓ %s\n" "$label"
   else
@@ -385,7 +414,9 @@ check_studio_brand_css() {
     return
   fi
 
-  css_path="$(printf '%s' "$html" | rg -o '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css' | head -n 1 || true)"
+  # In production, ProductionStorage strips the theme-name prefix so studio-main-v1
+  # lands at /static/studio/css/ (not /static/studio/mereka/css/). Accept either form.
+  css_path="$(printf '%s' "$html" | rg -o '/static/studio(/mereka)?/css/studio-main-v1\.[a-z0-9]+\.css' | head -n 1 || true)"
   if [[ -z "${css_path:-}" ]]; then
     printf "✗ %s (missing studio-main-v1 themed CSS link)\n" "$label" >&2
     failures=$((failures + 1))
@@ -413,6 +444,30 @@ check_studio_brand_css() {
     failures=$((failures + 1))
   else
     printf "✓ %s\n" "${label} (studio-main-v1 has no Google fonts)"
+  fi
+}
+
+check_studio_footer_whitelist() {
+  # Checks the LIVE Studio HTML for absence of Open edX powered-by block.
+  # This catches regressions where the cms/templates/widgets/footer.html override
+  # is not applied (e.g. image not rebuilt after template fix).
+  local studio_host=$1
+  local label="${2:-Studio footer white-label}"
+  local ts html
+
+  ts="$(date +%s)"
+  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${studio_host}/?nocache=${ts}" 2>/dev/null || true)"
+  if [[ -z "${html:-}" ]]; then
+    printf "✗ %s (studio unreachable)\n" "$label" >&2
+    failures=$((failures + 1))
+    return
+  fi
+
+  if printf '%s' "$html" | grep -Eqi 'footer-about-openedx|open-edx-logo-tag|Powered by Open edX'; then
+    printf "✗ %s (live Studio footer still shows 'Powered by Open edX' — image rebuild required)\n" "$label" >&2
+    failures=$((failures + 1))
+  else
+    printf "✓ %s\n" "$label"
   fi
 }
 
@@ -491,13 +546,81 @@ check_credentials_health() {
   fi
 }
 
+check_source_integrity() {
+  local ok=1 fail_label
+  fail_label() { printf "✗ %s\n" "$1" >&2; failures=$((failures + 1)); ok=0; }
+  ok_label() { printf "✓ %s\n" "$1"; }
+
+  # Template files
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" ]] \
+    && ok_label "LMS head-extra.html exists" || fail_label "LMS head-extra.html missing"
+  rg -qF "mereka/css/mereka-overrides.css" \
+    "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" 2>/dev/null \
+    && ok_label "LMS head-extra.html references correct CSS path (mereka/css/mereka-overrides.css)" \
+    || fail_label "LMS head-extra.html missing themed CSS path"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html" ]] \
+    && ok_label "CMS head-extra.html exists" || fail_label "CMS head-extra.html missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/header/brand.html" ]] \
+    && ok_label "LMS brand.html (logo override) exists" || fail_label "LMS brand.html missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html" ]] \
+    && ok_label "LMS footer.html exists" || fail_label "LMS footer.html missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html" ]] \
+    && ok_label "Studio footer widget exists" || fail_label "Studio footer widget missing"
+  [[ -f "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/studio-main-v1.scss" ]] \
+    && ok_label "Studio SCSS (studio-main-v1.scss) exists" || fail_label "Studio SCSS missing"
+
+  # CSS source files
+  [[ -f "$COMMON_OVERRIDE_CSS" ]] \
+    && ok_label "common/mereka-overrides.css exists" || fail_label "common/mereka-overrides.css missing"
+  if [[ -f "$COMMON_OVERRIDE_CSS" ]]; then
+    local rev
+    rev="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
+    [[ -n "$rev" ]] \
+      && ok_label "common CSS has branding-rev marker (${rev})" \
+      || fail_label "common CSS missing --mereka-branding-rev marker"
+  fi
+  [[ -f "$MFE_THEME_SCSS" ]] \
+    && ok_label "MFE SCSS (mereka.scss) exists" || fail_label "MFE SCSS missing"
+  if [[ -f "$MFE_THEME_SCSS" ]]; then
+    local mfe_rev
+    mfe_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
+    [[ -n "$mfe_rev" ]] \
+      && ok_label "MFE SCSS has mfe-branding-rev marker (${mfe_rev})" \
+      || fail_label "MFE SCSS missing --mereka-mfe-branding-rev marker"
+  fi
+
+  # Static logo assets
+  local img_dir="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images"
+  [[ -f "$img_dir/logo.png" ]] \
+    && ok_label "logo.png exists in theme static" || fail_label "logo.png missing from theme static"
+  [[ -f "$img_dir/logo-horizontal.png" ]] \
+    && ok_label "logo-horizontal.png exists in theme static" || fail_label "logo-horizontal.png missing from theme static"
+  [[ -f "$img_dir/favicon.ico" ]] \
+    && ok_label "favicon.ico exists in theme static" || fail_label "favicon.ico missing from theme static"
+}
+
+if [[ "$SOURCE_ONLY" == "1" ]]; then
+  echo "Branding source integrity check (no live network calls)..."
+  echo ""
+  check_source_integrity
+  echo ""
+  if [[ $failures -gt 0 ]]; then
+    echo "${failures} source integrity checks failed." >&2
+    exit 1
+  fi
+  echo "All source integrity checks passed."
+  exit 0
+fi
+
 echo "Branding verification ($ENVIRONMENT) for ${BASE_DOMAIN}..."
 echo "Branding level: ${BRANDING_LEVEL}"
 echo ""
 
 # HTML branding checks
-check_contains "https://${BASE_DOMAIN}/" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
-check_contains "https://${STUDIO_HOST}/" "Studio page includes 'Mereka'" "Mereka"
+# Use ?nocache=<ts> to bypass edge-cache so stale Cloudflare responses don't produce false negatives.
+_ts="$(date +%s)"
+check_contains "https://${BASE_DOMAIN}/?nocache=${_ts}" "LMS homepage includes 'Mereka Academy'" "Mereka Academy"
+check_contains "https://${STUDIO_HOST}/?nocache=${_ts}" "Studio page includes 'Mereka'" "Mereka"
 check_mfe_authn_surface "${MFE_HOST}"
 
 # Asset checks (theme assets)
@@ -515,6 +638,7 @@ check_any_follow_200 "Favicon asset (favicon.ico)" \
 # The homepage must stop using stock Indigo Google fonts and include brand fonts.
 check_homepage_brand_fonts "${BASE_DOMAIN}" "Homepage uses local brand fonts (no Google fonts)"
 check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no Google fonts)"
+check_studio_footer_whitelist "${STUDIO_HOST}" "Studio footer white-label (no 'Powered by Open edX')"
 
 # Homepage must actually be using brand logo content (not stock Open edX).
 check_homepage_brand_logo "${BASE_DOMAIN}" "Homepage logo matches brand assets"
@@ -534,6 +658,7 @@ done
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   check_mfe_authn_surface "${BIJI_MFE_DOMAIN}"
   check_studio_brand_css "${BIJI_STUDIO_DOMAIN}" "Biji Studio uses themed CSS tokens/fonts (no Google fonts)"
+  check_studio_footer_whitelist "${BIJI_STUDIO_DOMAIN}" "Biji Studio footer white-label (no 'Powered by Open edX')"
 fi
 
 echo ""

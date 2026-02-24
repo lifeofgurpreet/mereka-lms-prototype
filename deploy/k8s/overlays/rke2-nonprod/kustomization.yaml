@@ -1,0 +1,70 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# rke2-nonprod overlay — bbi-infrastructure dev/staging cluster
+#
+# Differences from production (GKE):
+#   - Secrets: uses infisical-secret-store (not gcp-secret-manager; no Workload Identity)
+#   - Images: pulled using artifact-registry-key imagePullSecret (no Workload Identity)
+#   - Domains: *.staging.mereka.dev (update to actual domain below)
+#   - ArgoCD: SSH-only to github.com (port 443 blocked by Cilium)
+#
+# IMPORTANT: Before deploying, ensure these manual prerequisites exist on rke2-nonprod:
+#   1. ClusterSecretStore infisical-secret-store (Valid/Ready)
+#   2. Secret artifact-registry-key in mereka-lms namespace (imagePullSecret for GCP AR)
+#   3. Default ServiceAccount patched: imagePullSecrets: [{name: artifact-registry-key}]
+#      OR each Deployment has spec.template.spec.imagePullSecrets set
+#
+# Domain: rke2-nonprod dev hostnames use *.academyv2.mereka.dev.
+
+namespace: mereka-lms
+
+resources:
+  - ../../base
+  - ingress-openedx-lms.yaml
+  - ingress-openedx-mfe.yaml
+  - ingress-openedx-studio.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store
+  - path: patches/externalsecrets-infisical.yaml
+  # Override domain env vars for rke2-nonprod dev hosts
+  - path: patches/domain-env.yaml
+  # On single-node rke2, avoid maxSurge deadlocks for these single-replica services.
+  - path: patches/single-node-recreate-strategy.yaml
+
+# Minimal replicas for nonprod (same as local)
+replicas:
+  - name: lms
+    count: 1
+  - name: cms
+    count: 1
+  - name: lms-worker
+    count: 1
+  - name: cms-worker
+    count: 1
+  - name: discovery
+    count: 1
+  - name: notes
+    count: 1
+  # Enterprise services: set to 1 if images are accessible, else keep 0
+  - name: enterprise-access
+    count: 1
+  - name: enterprise-access-worker
+    count: 1
+  - name: enterprise-admin-portal
+    count: 1
+  - name: enterprise-catalog
+    count: 1
+  - name: enterprise-catalog-worker
+    count: 1
+  - name: enterprise-learner-portal
+    count: 1
+  - name: enterprise-subsidy
+    count: 1
+  # Payments gateway: set to 1 when PostgreSQL is confirmed available
+  - name: payments-gateway
+    count: 1

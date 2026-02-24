@@ -9,6 +9,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Backend Registration
+    justification: Feature not yet implemented; Proctorio backend adapter not yet
+      integrated
 - id: AC-002
   description: Given an Examity backend is configured with valid API credentials,
     when `register_exam_attempt()` is called, then a corresponding exam record is
@@ -18,11 +23,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Examity Integration
+    justification: Requires valid Examity API credentials; not available in CI without
+      live provider credentials
 - id: AC-003
   description: Given a Respondus LockDown Browser backend is configured, when a student
     accesses the exam URL from a standard browser, then the system detects the missing
     LockDown Browser and displays a download prompt
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -37,6 +51,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > ProctorTrack Callback
+    justification: Requires valid ProctorTrack webhook payload; not available in CI
+      without provider integration
 - id: AC-005
   description: Given a "no-op" backend is configured in a development environment,
     when the full exam flow is executed, then all state transitions occur correctly
@@ -46,6 +65,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > No-op Backend
+    justification: Feature not yet implemented; no-op proctoring backend not yet configured
+      in dev environment
 - id: AC-006
   description: Given a course author in Studio, when they edit a subsection's exam
     settings, then they can select `proctored` as the exam type and choose from providers
@@ -69,6 +93,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Deadline Enforcement
+    justification: Feature not yet implemented; requires live LMS with proctored exam
+      past its due date
 - id: AC-008
   description: Given an enterprise customer with only `proctorio` enabled, when a
     course author attempts to select `examity` as the backend, then Studio displays
@@ -78,6 +107,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Provider Restriction
+    justification: Feature not yet implemented; Studio provider validation for enterprise
+      customers not yet built
 - id: AC-009
   description: Given a course with proctored exams is re-run, when the new course
     run is created, then all proctored exam settings (type, time limit, backend, review
@@ -87,6 +121,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Course Re-Run
+    justification: Feature not yet implemented; proctoring settings preservation in
+      course re-run not yet verified
 - id: AC-010
   description: Given a student starting a proctored exam for the first time, when
     the identity verification flow begins, then the system captures a photo ID image
@@ -96,6 +135,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Identity Verification
+    justification: Requires physical webcam and live proctoring provider; cannot automate
+      in CI
 - id: AC-011
   description: Given identity verification returns `failed`, when the student attempts
     to proceed, then the exam is blocked and the student is offered up to 2 additional
@@ -105,6 +149,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Identity Verification Failure
+    justification: Requires live proctoring provider returning failed status; cannot
+      automate in CI
 - id: AC-012
   description: Given identity verification returns `passed`, when the student proceeds,
     then the verification result (passed, timestamp, provider reference) is stored
@@ -114,6 +163,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Identity Verification Storage
+    justification: Feature not yet implemented; verification result storage not yet
+      built
 - id: AC-013
   description: Given a student has completed onboarding identity verification, when
     they start a subsequent proctored exam, then the system verifies against the baseline
@@ -123,11 +177,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Baseline Facial Recognition
+    justification: Requires live proctoring provider with facial recognition; cannot
+      automate in CI
 - id: AC-014
   description: Given a student on the pre-exam environment check page, when their
     webcam is blocked by browser permissions, then the check fails with the message
     "Please allow camera access in your browser settings"
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Environment Check
@@ -138,6 +201,10 @@ acceptance_criteria:
     then each component (webcam, microphone, screen share, browser, network) shows
     a green checkmark
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Environment Check
@@ -150,11 +217,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Environment Check
+    justification: Requires throttled network connection to trigger bandwidth failure
+      message
 - id: AC-017
   description: Given an exam configured with Respondus LockDown Browser, when a student
     is in the LockDown Browser, then the student cannot open other applications, copy/paste,
     take screenshots, or access other tabs
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -165,6 +241,10 @@ acceptance_criteria:
     and `disable_clipboard=true`, when the student takes the exam, then fullscreen
     mode is enforced and clipboard access is blocked
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -174,6 +254,10 @@ acceptance_criteria:
     exam, when the provider detects the VM, then the attempt is flagged with a `vm_detected`
     event
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Browser Lockdown
@@ -187,6 +271,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Attempt State Machine
+    justification: Feature not yet implemented; attempt state transitions not yet
+      logged
 - id: AC-021
   description: Given a student submits a proctored exam, when the submission is processed,
     then the attempt state transitions to `submitted` and the proctoring provider
@@ -196,6 +285,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Exam Submission
+    justification: Feature not yet implemented; provider notification on submission
+      not yet integrated
 - id: AC-022
   description: Given an exam attempt in `started` state for longer than `time_limit_minutes
     + 30 minutes`, when the auto-expiry check runs, then the attempt transitions to
@@ -205,11 +299,20 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Auto-Expiry
+    justification: Feature not yet implemented; auto-expiry check and provider notification
+      not yet built
 - id: AC-023
   description: Given a proctoring provider outage during an active exam, when the
     student's recording stream fails, then the student's answers are preserved in
     browser session storage and a `reconnect` prompt is displayed
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-proctoring-environment.sh
+    command: scripts/qa/verify-proctoring-environment.sh
   - type: manual
     runbook: docs/runbooks/proctoring-operations-runbook.md
     section: Verification > Resilience
@@ -222,6 +325,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > State Machine Enforcement
+    justification: Feature not yet implemented; invalid state transition guard not
+      yet implemented
 - id: AC-025
   description: Given 10 exam attempts in `second_review_required` state for enterprise
     customer A and 5 for customer B, when reviewer R (authorized for customer A only)
@@ -231,6 +339,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Review Dashboard Isolation
+    justification: Feature not yet implemented; reviewer dashboard with customer-scoped
+      access not yet built
 - id: AC-026
   description: Given a reviewer selects an attempt, when they click "Reject" and enter
     a reason (25 characters), then the attempt transitions to `rejected`, the reason
@@ -240,6 +353,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Reviewer Rejection
+    justification: Feature not yet implemented; reviewer rejection flow not yet built
 - id: AC-027
   description: Given a reviewer rejects an attempt, when a `proctoring_admin` user
     accesses the attempt, then they can override the rejection to `verified` with
@@ -249,6 +366,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Admin Override
+    justification: Feature not yet implemented; proctoring admin override with audit
+      log not yet built
 - id: AC-028
   description: Given an attempt has been in the review queue for longer than the enterprise's
     `review_sla_hours`, when the review dashboard loads, then the attempt is highlighted
@@ -258,6 +380,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > SLA Warning
+    justification: Feature not yet implemented; SLA-aware review queue UI not yet
+      built
 - id: AC-029
   description: Given a proctored exam attempt transitions to `verified`, when the
     gradebook sync runs, then the student's exam grade appears in the Open edX gradebook
@@ -267,6 +394,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Gradebook Sync
+    justification: Feature not yet implemented; gradebook sync triggered by proctoring
+      state change not yet built
 - id: AC-030
   description: Given a proctored exam attempt transitions to `rejected`, when the
     gradebook sync runs, then the student's exam grade is set to 0 and the `proctoring_status`
@@ -276,6 +408,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Rejected Grade
+    justification: Feature not yet implemented; grade set to 0 on rejection not yet
+      built
 - id: AC-031
   description: Given an instructor overrides a rejected attempt, when the override
     is processed, then the original exam grade is restored and `proctoring_status`
@@ -285,6 +422,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/operations/runbooks/PROCTORING_RUNBOOK.md
+    section: Verification > Instructor Override
+    justification: Feature not yet implemented; instructor override with grade restore
+      not yet built
 - id: AC-032
   description: Given a proctored exam attempt is in `submitted` state (pending review),
     when the student views their grades, then the exam shows as "Pending Proctoring
@@ -294,6 +436,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Pending Review Grade Display
+    justification: Feature not yet implemented; pending review grade display not yet
+      implemented
 - id: AC-033
   description: Given enterprise customer A uses Examity and customer B uses Proctorio,
     when students from both take exams simultaneously, then each student's session
@@ -303,6 +450,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Multi-Provider Routing
+    justification: Feature not yet implemented; per-enterprise provider routing not
+      yet built
 - id: AC-034
   description: Given enterprise customer A's proctoring configuration includes `review_sla_hours=12`,
     when customer B's configuration has `review_sla_hours=48`, then SLA warnings on
@@ -312,6 +464,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Per-Customer SLA
+    justification: Feature not yet implemented; per-customer SLA configuration not
+      yet implemented
 - id: AC-035
   description: Given a GDPR deletion request for a student in enterprise customer
     A, when the deletion is processed, then only that student's proctoring data is
@@ -321,6 +478,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring-advanced.sh
     command: scripts/qa/verify-proctoring-advanced.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > GDPR
+    justification: Feature not yet implemented; scoped proctoring data deletion not
+      yet built
 - id: AC-036
   description: 'Given a student is about to start a proctored exam, when the consent
     notice is displayed, then it includes: data collected, who accesses it, retention
@@ -343,6 +505,11 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-proctoring.sh
     command: scripts/qa/verify-proctoring.sh
+  - type: manual
+    runbook: docs/runbooks/proctoring-operations-runbook.md
+    section: Verification > Consent Gate
+    justification: Feature not yet implemented; consent gate for exam entry not yet
+      built
 - id: AC-038
   description: Given a GDPR DSAR for a student, when the request is processed, then
     the system provides all proctoring session metadata and coordinates with the provider

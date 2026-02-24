@@ -32,7 +32,7 @@ acceptance_criteria:
     file: scripts/qa/verify-analytics-retention.sh
     command: scripts/qa/verify-analytics-retention.sh
   - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: ClickHouse Disk Space
     justification: Verifying actual TTL-based deletion requires inserting backdated
       data and waiting for merge cycle orforcing OPTIMIZE TABLE -- not automatable
@@ -59,7 +59,7 @@ acceptance_criteria:
     file: scripts/qa/verify-analytics-pipeline.sh
     command: scripts/qa/verify-analytics-pipeline.sh
   - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Verification
     justification: Verifying dashboard load time < 5s andvisual correctness requires
       browser interaction that cannot be automated with kubectl alone
@@ -83,7 +83,7 @@ acceptance_criteria:
     file: scripts/qa/verify-analytics-retention.sh
     command: scripts/qa/verify-analytics-retention.sh
   - type: manual
-    runbook: docs/operations/ANALYTICS_RUNBOOK.md
+    runbook: docs/operations/runbooks/ANALYTICS_RUNBOOK.md
     section: Dashboard Embedding Verification
     justification: Dashboard embedding requires browser-based verification of iframe
       rendering within LMS course pages;no headless equivalent available in the current

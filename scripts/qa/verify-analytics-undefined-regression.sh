@@ -132,41 +132,33 @@ if [[ -f "$PLUGIN" ]]; then
   fi
 fi
 
-# Check 9: Footer template rejects undefined_license_key sentinel
+# Check 9: Footer template has NO Segment script block (plugin-first: analytics via Tutor hook)
+# Post-2k6k: Segment removed from footer entirely. Correct state = absence, not guarded presence.
 if [[ -f "$FOOTER" ]]; then
-  if grep -q 'undefined_license_key' "$FOOTER"; then
-    pass_check "footer.html sentinel guard includes 'undefined_license_key' rejection"
+  if grep -qE "segment\.io|analytics\.js|analytics\.load|segment_key" "$FOOTER"; then
+    fail_check "footer.html still contains Segment script block (must be removed — use Tutor plugin hook)"
   else
-    fail_check "footer.html sentinel guard includes 'undefined_license_key' rejection"
+    pass_check "footer.html has no Segment script block (plugin-first: analytics via Tutor hook)"
   fi
 else
   warn "footer.html not found at $FOOTER"
 fi
 
-# Check 10: Footer guard covers full set of sentinel values
+# Check 10: Footer comment confirms analytics moved to plugin hook (documents canonical approach)
 if [[ -f "$FOOTER" ]]; then
-  GUARD_LINE=$(grep 'segment_key.*lower.*not in' "$FOOTER" || true)
-  ALL_SENTINELS=true
-  for sentinel in "undefined" "none" "null" "undefined_license_key" "your_segment_key_here" "change_me"; do
-    if ! echo "$GUARD_LINE" | grep -q "$sentinel"; then
-      ALL_SENTINELS=false
-      warn "Sentinel '$sentinel' missing from footer.html guard"
-    fi
-  done
-  if [[ "$ALL_SENTINELS" == "true" ]]; then
-    pass_check "footer.html sentinel guard covers all 6 known placeholder values"
+  if grep -q "Tutor plugin hook\|plugin hook\|MIGRATED\|analytics.*removed\|removed.*analytics" "$FOOTER"; then
+    pass_check "footer.html comment confirms analytics moved to Tutor plugin hook"
   else
-    fail_check "footer.html sentinel guard covers all 6 known placeholder values"
+    warn "footer.html has no comment confirming analytics migration to plugin hook (add for auditability)"
   fi
 fi
 
-# Check 11: Footer wraps Segment script emission in non-empty key guard
+# Check 11: Footer has no undefined_license_key literal (regression guard)
 if [[ -f "$FOOTER" ]]; then
-  _guard_count=$(grep -c 'if segment_key' "$FOOTER" || true)
-  if [[ "$_guard_count" -ge 1 ]]; then
-    pass_check "footer.html wraps Segment includes in 'if segment_key' guard"
+  if grep -q 'undefined_license_key' "$FOOTER"; then
+    fail_check "footer.html contains 'undefined_license_key' literal (regression — must not appear)"
   else
-    fail_check "footer.html wraps Segment includes in 'if segment_key' guard"
+    pass_check "footer.html has no 'undefined_license_key' literal"
   fi
 fi
 

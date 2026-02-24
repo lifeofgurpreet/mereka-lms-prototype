@@ -517,7 +517,10 @@ acceptance_criteria:
 - id: AC-034
   description: Given the service is deployed, its domain MUST use DNS-only Cloudflare
     mode with Let's Encrypt SSL (not Cloudflare proxy)
-  verify: []
-_unmapped:
-- AC-034
+  verify:
+  - type: manual
+    runbook: docs/operations/runbooks/DEPLOYMENT_RUNBOOK.md
+    section: SSL Configuration Verification
+    justification: SSL mode is configured at DNS level (Cloudflare dashboard); not
+      inspectable via Kubernetes manifests alone
 

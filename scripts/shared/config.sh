@@ -48,6 +48,10 @@ export NOTES_DOMAIN="${NOTES_DOMAIN:-notes.${LMS_DOMAIN}}"
 export CREDENTIALS_DOMAIN="${CREDENTIALS_DOMAIN:-credentials.${LMS_DOMAIN}}"
 export FORUM_DOMAIN="${FORUM_DOMAIN:-forum.${LMS_DOMAIN}}"
 
+# Enterprise MFE domains
+export ENTERPRISE_ADMIN_DOMAIN="${ENTERPRISE_ADMIN_DOMAIN:-admin.${LMS_DOMAIN}}"
+export ENTERPRISE_PORTAL_DOMAIN="${ENTERPRISE_PORTAL_DOMAIN:-enterprise.${LMS_DOMAIN}}"
+
 # Alternative domains (multisite)
 export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"
 export SKILLOURFUTURE_DOMAIN="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"

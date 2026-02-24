@@ -3,6 +3,7 @@ title: "CRED-040: Verification"
 type: "feature_spec"
 status: "approved"
 owner: "engineering"
+vehicle: "talent_platform"
 last_updated: "2026-02-14"
 version: "1.0.0"
 depends_on:
@@ -11,6 +12,7 @@ depends_on:
   - "specs/verifiable-credentials-issuance_spec.md"
 links:
   related_specs:
+    - "specs/cross-cutting-requirements_spec.md"
     - "specs/verifiable-credentials-ops_spec.md"
 ---
 
@@ -19,6 +21,17 @@ links:
 ## What we're building
 
 A public verification endpoint that allows anyone — employers, universities, LinkedIn, or any OBv3-compliant verifier — to independently verify that a credential was issued by Mereka Academy and has not been tampered with. No login required. No vendor API key.
+
+## Scope
+
+Public verification endpoint, per-step verification checks (schema, issuer, signature, expiration, revocation), public credential page with Open Graph metadata, DID Document caching, and rate limiting.
+
+## Non-goals
+
+- Revocation checking in v1 (always returns "not_applicable")
+- Authenticating verifiers (endpoint is fully public)
+- Trusted verifier registry
+- Cross-platform credential translation (OBv3 only)
 
 ## Requirements
 

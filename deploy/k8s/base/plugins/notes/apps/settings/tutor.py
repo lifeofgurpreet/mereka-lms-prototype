@@ -4,7 +4,12 @@ import os
 MEREKA_LMS_DOMAIN = os.environ.get("MEREKA_LMS_DOMAIN", "academyv2.mereka.io")
 NOTES_DOMAIN = os.environ.get("NOTES_DOMAIN", f"notes.{MEREKA_LMS_DOMAIN}")
 
-SECRET_KEY = os.environ.get("NOTES_SECRET_KEY", "")
+SECRET_KEY = (
+    os.environ.get("NOTES_SECRET_KEY")
+    or os.environ.get("JWT_SECRET_KEY_NOTES")
+    or os.environ.get("JWT_SECRET_KEY")
+    or "mereka-notes-dev-fallback"
+)
 ALLOWED_HOSTS = [
     "notes",
     "notes.localhost",

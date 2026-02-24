@@ -7,6 +7,8 @@ status: "draft"
 
 # Implementation Tasks: Multi-Tenancy Architecture
 
+**AC Coverage**: AC-MTA-001 through AC-MTA-028 (28 ACs from `specs/multi-tenancy-architecture_spec.md`)
+
 **Source Spec**: `specs/multi-tenancy-architecture_spec.md`
 
 **Acceptance Criteria Count**: 28 ACs

@@ -165,7 +165,8 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
             overrides["LOGIN_URL"] = f"{lms_root}/login"
             overrides["LOGOUT_URL"] = f"{lms_root}/logout"
             overrides["MARKETING_SITE_BASE_URL"] = lms_root
-            overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = f"{lms_root}/login_refresh"
+            # Keep token refresh same-origin for MFEs to avoid cross-origin credential drops.
+            overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
             theme_name = (
                 rendered_values.get("THEME_NAME")
                 or rendered_values.get("DEFAULT_SITE_THEME")

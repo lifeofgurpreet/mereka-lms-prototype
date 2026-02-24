@@ -145,3 +145,74 @@ Modules:
 - Backup job success recorded.
 
 > Track outstanding tasks/issues in the repo’s issue tracker to keep the deployment plan auditable.
+
+---
+
+## 9. Enterprise MFE Build → Push → GitOps → Rollout
+
+### Overview
+
+Enterprise MFE images (`enterprise-admin-portal`, `enterprise-learner-portal`) are derivative builds
+of the upstream Open edX enterprise MFEs. They are built clean (no NREUM browser agent) via
+`infrastructure/docker/enterprise-mfe-clean/` and pinned in the production kustomization.
+
+**No runtime initContainer workaround is needed.** NREUM is stripped at Docker build time.
+
+### Build flow
+
+```bash
+# 1. Build NREUM-clean images and push to GCR
+bash scripts/infra/build-enterprise-mfe-clean.sh [source_tag]
+# Output: enterprise-admin-portal:nreum-clean-YYYYMMDDHHMI
+#         enterprise-learner-portal:nreum-clean-YYYYMMDDHHMI
+
+# 2. Note the generated tag (printed at end of script as "Clean tag: ...")
+CLEAN_TAG="nreum-clean-YYYYMMDDHHMI"  # replace with actual output
+
+# 3. Update production kustomization (deploy/k8s/overlays/production/kustomization.yaml):
+#    images:
+#      - name: .../enterprise-admin-portal
+#        newTag: $CLEAN_TAG
+#      - name: .../enterprise-learner-portal
+#        newTag: $CLEAN_TAG
+
+# 4. Commit + push + ArgoCD sync
+git add deploy/k8s/overlays/production/kustomization.yaml
+git commit -m "chore(enterprise-mfe): pin clean enterprise MFE images to $CLEAN_TAG"
+git push
+argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal
+argocd app sync mereka-lms --resource apps:Deployment:enterprise-learner-portal
+```
+
+### Post-deploy smoke
+
+```bash
+# Verify NREUM clean + HTTP 200 + routing
+bash scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+# Expected: PASS 9/0/0
+
+# Manual spot checks
+curl -sI https://admin.academyv2.mereka.io/
+curl -s https://admin.academyv2.mereka.io/ | grep -c ‘undefined_license_key’  # must be 0
+curl -s "https://admin.academyv2.mereka.io/api/mfe_config/v1?mfe=admin"       # must return JSON
+```
+
+### Rollback
+
+If the new clean image causes a regression (JS boot error, blank page):
+
+```bash
+# Pin back to prior tag or :latest
+# Edit deploy/k8s/overlays/production/kustomization.yaml
+argocd app sync mereka-lms --resource apps:Deployment:enterprise-admin-portal
+```
+
+### Background: why we build derivative images
+
+The upstream `enterprise-admin-portal` is built with `ENABLE_NEW_RELIC=true` (Open edX CI default).
+This injects New Relic browser agent with `undefined_license_key` placeholders at webpack build time.
+We do not have a New Relic license, so the placeholder keys caused unnecessary script noise.
+
+The `infrastructure/docker/enterprise-mfe-clean/` Dockerfiles extend the upstream images and remove
+the NREUM `<script>` block once at build time via `strip-nreum.sh`. See also:
+`docs/operations/evidence/69qz-enterprise-mfe-clean-build.md`
