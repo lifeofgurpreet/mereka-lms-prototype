@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 12    |
-| TODO   | 59    |
+| DONE   | 27    |
+| TODO   | 44    |
 | PARTIAL| 16    |
 | BLOCKED| 3     |
 | **Total** | **90** |
@@ -39,7 +39,7 @@ Audit baseline: 33 EXISTS (not tracked here) · 10 PARTIAL · 6 MISSING · 17 re
 | T092 | Replace JSON SA key with Workload Identity Federation | P1 | TODO | DR2:I-014 | M | — | Remove `GCP_SA_KEY` secret from all repos. Configure OIDC Workload Identity Federation so CI jobs authenticate to GCP without long-lived credentials. |
 | T057 | Pin binary downloads in bbi-infrastructure CI | P1 | TODO | DR2:I-015 | S | — | Pin `yq`, `kubectl`, `helm` and other downloaded binaries to SHA or exact version in CI workflows. Cross-repo: bbi-infrastructure. |
 | T058 | Pin binary downloads in platform-control-plane CI | P1 | TODO | DR2:I-016 | S | — | Same as T057 for platform-control-plane repo. Cross-repo: platform-control-plane. |
-| T059 | Add GitHub Advanced Security secret scanning | P1 | TODO | DR2:I-017 | M | — | Enable GHAS secret scanning and push protection across all repos. Complements local pre-commit hook already in place. |
+| T059 | Add GitHub Advanced Security secret scanning | P1 | DONE | DR2:I-017 | M | — | ✓ Batch 4. GHAS secret-scanning.yml + TruffleHog weekly audit workflow + operational doc. Opus fix: rewrote to avoid script injection via toJson(). |
 | T060 | Add Dependency Review workflow | P1 | DONE | DR2:I-011 | S | — | ✓ Batch 1. dependency-review.yml blocks CRITICAL vulns + AGPL/GPL licenses. |
 | T061 | Add Dependabot for pip/npm/terraform | P1 | DONE | DR2:I-012 | S | — | ✓ Batch 1. dependabot.yml covering github-actions, pip, npm, terraform. |
 | T062 | Replace PAT-based GitOps with GitHub App token | P2 | TODO | DR2:I-033 | M | — | Current GitOps commits use a PAT that isn't rotated. Replace with a GitHub App token (scoped, auto-rotating) or fine-grained PAT with documented rotation schedule. |
@@ -304,11 +304,11 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T066 | Establish spec coverage floor per PR | P1 | TODO | DR2:I-018 | M | — | Define a "spec coverage" metric (fraction of ACs with a corresponding test). Enforce a minimum floor per PR, ratchet upward each sprint, review in retro. |
 | T067 | Add Aspects version compatibility enforcement test | P1 | TODO | DR2:I-020 | M | — | Add a CI test that validates the deployed Aspects version is compatible with the target Open edX release. Prevents silent incompatibilities during upgrades. |
 | T068 | Add PR template aligned to specs/rollout/verification | P2 | DONE | DR2:I-028 | S | — | ✓ Batch 1. `.github/PULL_REQUEST_TEMPLATE.md` with What/Why/Checklist/Infra/Verification sections. |
-| T069 | Branch protection + Scorecard alignment | P1 | TODO | DR2:I-029 | S | — | Enforce branch protection: require ≥1 review, passing status checks, no direct pushes to main. Tune for Scorecard: signed commits, stale review dismissal, no force-push. NOTE: GitHub settings change, not code. |
+| T069 | Branch protection + Scorecard alignment | P1 | DONE | DR2:I-029 | S | — | ✓ Batch 4. BRANCH_PROTECTION.md doc + verify-branch-protection.sh script (8 checks). Opus fix: removed phantom "Verify Actions Pinned" check, completed REQUIRED_CHECKS list. |
 | T070 | Add CODEOWNERS for infra-critical paths | P2 | DONE | DR2:I-030 | S | — | ✓ Batch 1. `CODEOWNERS` covering production overlays, workflows, secrets → @infra; tutor → @platform; specs → @engineering. |
 | T019 | Add patch idempotency tests | P1 | TODO | NEW | M | T018 | Each patch module should be testable in isolation (run twice, same result). Add to `tests/tutor/`. |
 | T021 | Verify no `latest` tags in production overlays | P1 | TODO | NEW | S | T020 | `verify-no-latest-prod-tags.sh` exists but not wired into CI as a blocking gate. Wire it. Enforce digest-only refs in production overlays — no tag-only references allowed. |
-| T017 | Validate SITE_VARIANTS + multisite config | P1 | TODO | NEW | M | — | `multisite-sites.dev.yml` and `SITE_VARIANTS` dict need a CI validation job that catches schema drift. |
+| T017 | Validate SITE_VARIANTS + multisite config | P1 | DONE | NEW | M | — | ✓ Batch 4. validate-multisite.yml CI workflow + validate-multisite-config.sh (7 sections, 12 checks). |
 | T071 | Add smoke tests for authn MFE config endpoint | P1 | TODO | DR2:I-035 | M | — | Add automated checks for: authn MFE config endpoint returns valid JSON, cookie domain is correct for each tenant, OAuth redirect URIs match config. |
 | T072 | Add automated tenant isolation tests | P1 | TODO | DR2:I-036 | L | T011 | Automated tests that verify tenant A cannot access tenant B's data for: auth tokens, analytics events, branding assets. |
 | T049 | E2E test framework (Playwright) | P3 | TODO | I26 | L | T011 | Only shell smoke tests exist. Add Playwright with 5 critical-path tests: login, enroll, play video, forum post, certificate. |
@@ -335,7 +335,7 @@ infrastructure/tutor/ @Biji-Biji-Initiative/platform
 | T015 | Footer parity: port v2 footer into LMS/MFEs | P1 | TODO | 1kwf.1 | M | — | Plugin-first approach. Mereka Frontend v2 footer not yet ported into Tutor plugin or MFE slot. |
 | T016 | WhiteCliff brand/plugin parity lane | P1 | PARTIAL | 1kwf | L | T015 | Studio surfaces, footer, all MFE surfaces. Superset of T015. |
 | T018 | Refactor apply-patches.sh into composable units | P1 | TODO | NEW | L | — | Script is 1666 lines. Split into per-concern patch files (mysql-auth, mfe-node, domains, etc.) called from a thin orchestrator. Reduces diff noise and merge conflicts. |
-| T020 | Automate image tag promotion in Kustomize | P1 | TODO | NEW, DR2:I-007 | M | — | Production Kustomize overlays have manually managed image tags. Enforce digest-only refs in production overlays (no tag-only). Add a CI step or script to bump tags/digests from the built SHA on merge to main. |
+| T020 | Automate image tag promotion in Kustomize | P1 | DONE | NEW, DR2:I-007 | M | — | ✓ Batch 4. bump-image-tags.sh (queries Artifact Registry, dry-run default) + verify-no-latest-tags.sh. |
 | T024 | Scheduled park/unpark validation | P1 | DONE | NEW | S | — | ✓ Batch 3. Monthly CI job: shellcheck + bash -n + set -euo pipefail verification. |
 | T044 | Clarify Tutor 21.0.0 patch level | P3 | TODO | NEW, DR2:I-047 | S | T042 | Tutor Ulmo may have patch releases. Confirm pinned patch version in CI. Also: create a spike branch with compatibility test suite and rollback plan for next Ulmo upgrade. Document update process. |
 | T075 | Add ArgoCD drift detection + alerting | P2 | TODO | DR2:I-034 | M | — | Add alerting for ArgoCD "Synced but wrong" cases (drift between git and live). Cross-repo: bbi-infrastructure. Configure Prometheus alerting on `argocd_app_info` where sync_status=Synced but health_status!=Healthy. |
@@ -495,7 +495,7 @@ infrastructure/tutor/patches/
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T042 | Document Tutor upgrade cadence + EOL policy | P3 | TODO | I05, DR2:I-019, DR2:I-047 | S | — | Add `docs/adr/002-tutor-upgrade-policy.md` with explicit Redwood vs Ulmo decision, migration timeline, and who decides upgrades. Include Tutor EOL dates. |
+| T042 | Document Tutor upgrade cadence + EOL policy | P3 | DONE | I05, DR2:I-019, DR2:I-047 | S | — | ✓ Batch 4. ADR-019 (renamed from 002 to avoid collision). Stay on Redwood, quarterly eval, pre-upgrade checklist, GitOps-safe rollback. |
 | T082 | Publish release evidence bundle + retention policy | P2 | TODO | DR2:I-031 | M | — | Define what constitutes a "release evidence bundle" (test results, SBOM, scan report, deploy log). Automate assembly in CI and define a retention policy (e.g., 90 days in GCS). |
 | T083 | Standardize OpenTelemetry naming + dashboard contract tests | P2 | TODO | DR2:I-025 | M | — | Standardize OTEL metric/trace naming conventions. Add contract tests that verify dashboards reference only known metric names (prevents silent dashboard breakage on rename). |
 | T084 | Add Lighthouse CI + bundle budgets + INP metric | P2 | TODO | DR2:I-026 | M | — | Add Lighthouse CI to post-deploy pipeline. Define bundle size budgets per MFE. Update from FID → INP (Interaction to Next Paint) metric per Core Web Vitals v4. |
@@ -544,10 +544,10 @@ T082 (evidence bundle) ← T086 (DR drills)
 ## Quick Filters
 
 **Do next (unblocked P0/P1 TODOs, small effort)**:
-T022, T024, T057, T058, T065, T069, T092
+T057, T058, T092, T066, T081, T064, T062
 
 **Ready after first wave (deps on items above)**:
-T053 (needs T052 ✓), T021 (needs T020), T054 (needs T052 ✓ + T092), T023 (needs T022)
+T021 (needs T020 ✓), T054 (needs T052 ✓ + T092)
 
 **Active bead work (PARTIAL)**:
 T007, T008, T009, T010, T011, T012, T013, T014, T015, T016, T025, T027, T032, T034
@@ -576,7 +576,7 @@ T058
 | I-004 | Build provenance/SLSA attestations | T054 | TODO |
 | I-005 | Vuln scanning blocking for releases | T002 | DONE |
 | I-006 | Render Tutor env in CI (fix idempotency skip) | T055 | DONE |
-| I-007 | Digest pinning in production overlays | T020/T021 | TODO (enriched) |
+| I-007 | Digest pinning in production overlays | T020/T021 | DONE (T020) / TODO (T021) |
 | I-008 | Cache-Control headers in MFE Caddyfile | T056 | DONE |
 | I-009 | WCAG 2.2 AA (Focus Not Obscured, Target Size, etc.) | T036 | PARTIAL (enriched) |
 | I-010 | Enable CodeQL SAST workflow | T065 | DONE |
@@ -586,9 +586,9 @@ T058
 | I-014 | Replace JSON SA key with Workload Identity Federation | T092 | TODO |
 | I-015 | Pin tool binary downloads in bbi-infrastructure CI | T057 | TODO |
 | I-016 | Pin tool binary downloads in platform-control-plane CI | T058 | TODO |
-| I-017 | Add GitHub Advanced Security secret scanning | T059 | TODO |
+| I-017 | Add GitHub Advanced Security secret scanning | T059 | DONE |
 | I-018 | Establish spec coverage floor per PR | T066 | TODO |
-| I-019 | Release track ADR (Redwood vs Ulmo decision) | T042 | TODO (enriched) |
+| I-019 | Release track ADR (Redwood vs Ulmo decision) | T042 | DONE |
 | I-020 | Aspects version compatibility enforcement test | T067 | TODO |
 | I-021 | User retirement PII pipeline | T034 | PARTIAL (enriched) |
 | I-022 | SAML config alignment + metadata endpoints | T035 | PARTIAL (enriched) |
@@ -598,7 +598,7 @@ T058
 | I-026 | Lighthouse CI + bundle budgets + INP metric | T084 | TODO |
 | I-027 | Formalize staging activation path | T085 | TODO |
 | I-028 | Add repo-level PR template | T068 | DONE |
-| I-029 | Require PR reviews + status checks (Scorecard) | T069 | TODO |
+| I-029 | Require PR reviews + status checks (Scorecard) | T069 | DONE |
 | I-030 | Add CODEOWNERS for infra-critical paths | T070 | DONE |
 | I-031 | Publish release evidence bundle + retention policy | T082 | TODO |
 | I-032 | Pin runner images to ubuntu-24.04 | T063 | DONE |
