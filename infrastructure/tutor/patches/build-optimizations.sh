@@ -1,0 +1,686 @@
+#!/usr/bin/env bash
+# Patch: Build optimizations and openedx Dockerfile/settings patches.
+# Covers: pip retries, node cache reuse, compile-sass, collectstatic fixes,
+#         i18n fixes, custom apps, django settings (discussions, theme, oauth fix,
+#         tenancy), assets.py (JS_COMPRESSOR, safe_join), MFE cache headers,
+#         nginx health/profile endpoints, Caddy profile proxy.
+
+apply_build_optimizations_patch() {
+  local targets=(
+    "$OPENEDX_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
+    "$LMS_SETTINGS_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
+    "$LMS_ASSETS_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
+    "$CMS_ASSETS_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/build/openedx/settings/cms/assets.py"
+    "$NGINX_LMS_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/apps/nginx/lms.conf"
+    "$CADDY_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/apps/caddy/Caddyfile"
+  )
+
+  python - "${targets[@]}" <<'PY'
+from pathlib import Path
+import re
+import textwrap
+import sys
+
+targets = sys.argv[1:]
+
+for target in targets:
+    path = Path(target)
+    if not path.exists():
+        continue
+    original = path.read_text()
+    updated = original
+
+    # ── openedx Dockerfile patches ──────────────────────────────────────
+
+    # i18n archive URL fix
+    updated = updated.replace(
+        "https://github.com/openedx/openedx-i18n/archive/",
+        "https://github.com/openedx-unsupported/openedx-i18n/archive/",
+    )
+    updated = updated.replace(
+        "ARG OPENEDX_I18N_VERSION=open-release/redwood.master",
+        "ARG OPENEDX_I18N_VERSION=master",
+    )
+    updated = updated.replace(
+        "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
+        "ARG OPENEDX_I18N_VERSION=master",
+    )
+
+    # uv pip / no-build-isolation fixes
+    updated = updated.replace(
+        "$PIP_COMMAND install -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+        "pip install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+    )
+    updated = updated.replace(
+        "$PIP_COMMAND install -r requirements/edx/development.txt",
+        "$PIP_COMMAND install --no-build-isolation -r requirements/edx/development.txt",
+    )
+    updated = updated.replace(
+        "RUN pip install setuptools==44.1.0 pip==20.0.2 wheel==0.34.2",
+        "RUN pip install --upgrade pip==25.0.1 setuptools==75.3.0 wheel==0.45.1",
+    )
+
+    # pip install retry wrapping
+    updated = updated.replace(
+        "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    pip install -r /openedx/edx-platform/requirements/edx/base.txt",
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    )
+    updated = updated.replace(
+        "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    bash -o pipefail -c 'for attempt in 1 2 3; do \\n        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0 \\n        echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2 \\n        sleep 10 \\n    done; exit 1'",
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    )
+    updated = updated.replace(
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do
+        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0
+        echo "pip install attempt ${attempt} failed; retrying in 10s" >&2
+        sleep 10
+    done; exit 1'""",
+        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
+    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
+    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    )
+
+    # Local requirements removal
+    updated = updated.replace(
+        "# Re-install local requirements, otherwise egg-info folders are missing\nRUN pip install -r requirements/edx/local.in\n\n",
+        "# Local requirements list removed in Redwood; skip redundant reinstall step.\n",
+    )
+
+    # coursewarehistoryextended + optional apps
+    updated = updated.replace(
+        'INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")\nDATABASE_ROUTERS.remove(\n    "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"\n)\n',
+        'INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")\n# Mereka adjustments keep Redwood optional apps enabled\nDATABASE_ROUTERS.remove(\n    "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"\n)\nif "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]\nif "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.bookmarks.apps.BookmarksConfig"]\nif "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]\nif "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.theming.apps.ThemingConfig\"]\n',
+    )
+
+    # compilemessages fix
+    updated = updated.replace(
+        "RUN cd /openedx/locale/user && \\\n    django-admin.py compilemessages -v1",
+        "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/python -m django compilemessages -v1",
+    )
+    updated = updated.replace(
+        "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/django-admin.py compilemessages -v1",
+        "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/python -m django compilemessages -v1",
+    )
+
+    # compilejsi18n
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n\nRUN ./manage.py cms --settings=tutor.i18n compilejsi18n\n",
+        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n\n"
+        "RUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
+    )
+    updated = updated.replace(
+        "# Redwood skips manual compilejsi18n while content libraries mature.\n",
+        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n\n"
+        "RUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
+    )
+
+    # node_modules COPY path fix
+    updated = updated.replace(
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/edx-platform/node_modules /openedx/node_modules",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules",
+    )
+
+    # static bundles COPY (add then remove to normalize)
+    updated = updated.replace(
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\nCOPY --chown=app:app ./common/static/bundles /openedx/edx-platform/common/static/bundles\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+    )
+    updated = updated.replace(
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\nCOPY --chown=app:app ./common/static/bundles /openedx/edx-platform/common/static/bundles\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+        "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=nodejs-requirements /openedx/node_modules /openedx/node_modules\n\n# Symlink node_modules such that we can bind-mount the edx-platform repository",
+    )
+
+    # Node cache reuse block
+    old_node_block = """###### Install nodejs with nodeenv in /openedx/nodeenv
+FROM python AS nodejs-requirements
+ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
+
+# Install nodeenv with the version provided by edx-platform
+# https://github.com/openedx/edx-platform/blob/master/requirements/edx/base.txt
+RUN pip install nodeenv==1.8.0
+RUN nodeenv /openedx/nodeenv --node=18.20.1 --prebuilt
+
+# Install nodejs requirements
+ARG NPM_REGISTRY=https://registry.npmjs.org/
+WORKDIR /openedx/edx-platform
+RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx-platform/package.json \\
+    --mount=type=bind,from=edx-platform,source=/package-lock.json,target=/openedx/edx-platform/package-lock.json \\
+    --mount=type=bind,from=edx-platform,source=/scripts/copy-node-modules.sh,target=/openedx/edx-platform/scripts/copy-node-modules.sh \\
+    --mount=type=cache,target=/root/.npm,sharing=shared \\
+    npm clean-install --no-audit --registry=$NPM_REGISTRY
+"""
+    new_node_block = """###### Reuse upstream Redwood node artifacts to avoid local npm installs
+FROM docker.io/overhangio/openedx:18.2.2 AS openedx_node_cache
+
+###### Install nodejs with nodeenv in /openedx/nodeenv
+FROM python AS nodejs-requirements
+ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
+
+# Copy prebuilt nodeenv/node_modules instead of re-running npm clean-install
+COPY --from=openedx_node_cache /openedx/nodeenv /openedx/nodeenv
+COPY --from=openedx_node_cache /openedx/node_modules /openedx/node_modules
+WORKDIR /openedx/edx-platform
+RUN ln -s /openedx/node_modules /openedx/edx-platform/node_modules
+"""
+    updated = updated.replace(old_node_block, new_node_block)
+    old_node_block_template = """###### Install nodejs with nodeenv in /openedx/nodeenv
+FROM python AS nodejs-requirements
+ENV PATH=/openedx/nodeenv/bin:/openedx/venv/bin:${PATH}
+
+# Install nodeenv with the version provided by edx-platform
+# https://github.com/openedx/edx-platform/blob/master/requirements/edx/base.txt
+RUN pip install nodeenv==1.8.0
+RUN nodeenv /openedx/nodeenv --node=18.20.1 --prebuilt
+
+# Install nodejs requirements
+ARG NPM_REGISTRY={{ NPM_REGISTRY }}
+WORKDIR /openedx/edx-platform
+RUN --mount=type=bind,from=edx-platform,source=/package.json,target=/openedx/edx-platform/package.json \\
+    --mount=type=bind,from=edx-platform,source=/package-lock.json,target=/openedx/edx-platform/package-lock.json \\
+    --mount=type=bind,from=edx-platform,source=/scripts/copy-node-modules.sh,target=/openedx/edx-platform/scripts/copy-node-modules.sh \\
+    --mount=type=cache,target=/root/.npm,sharing=shared \\
+    npm clean-install --no-audit --registry=$NPM_REGISTRY
+"""
+    updated = updated.replace(old_node_block_template, new_node_block)
+
+    # postinstall fix
+    updated = updated.replace(
+        'RUN if [ ! -d /openedx/node_modules ] || [ -z "$(ls -A /openedx/node_modules)" ]; then npm run postinstall; else echo "npm run postinstall skipped (prebuilt node_modules)"; fi',
+        "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.",
+    )
+
+    # brand compile block (sass + google fonts strip)
+    brand_compile_block = (
+        "RUN python - <<'PY'\n"
+        "from pathlib import Path\n"
+        "import re\n"
+        "\n"
+        "# Studio (CMS) still tries to import Open Sans from Google fonts by default.\n"
+        "# We strip those imports at the SASS source so built CSS stays offline-friendly.\n"
+        "root = Path('/openedx/edx-platform')\n"
+        "patterns = [\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?https?://fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?//fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']https?://fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']//fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "]\n"
+        "changed = 0\n"
+        "for path in root.rglob('*.scss'):\n"
+        "    try:\n"
+        "        text = path.read_text(encoding='utf-8', errors='ignore')\n"
+        "    except Exception:\n"
+        "        continue\n"
+        "    updated = text\n"
+        "    for pat in patterns:\n"
+        "        updated = pat.sub('', updated)\n"
+        "    if updated != text:\n"
+        "        path.write_text(updated, encoding='utf-8')\n"
+        "        changed += 1\n"
+        "print(f'Stripped google font imports from {changed} scss files')\n"
+        "PY\n"
+        "RUN npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka && npm run compile-sass -- --skip-themes\n"
+        "RUN python - <<'PY'\n"
+        "from pathlib import Path\n"
+        "import re\n"
+        "\n"
+        "# Defense-in-depth: remove any residual Google font imports from compiled Studio CSS.\n"
+        "root = Path('/openedx/edx-platform')\n"
+        "patterns = [\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?https?://fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+url\\([\\\"\\']?//fonts[.]googleapis[.]com[^\\)]*\\)\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']https?://fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "    re.compile(r'@import\\s+[\\\"\\']//fonts[.]googleapis[.]com[^\\\"\\']*[\\\"\\']\\s*;?', re.I),\n"
+        "]\n"
+        "changed = 0\n"
+        "for path in root.rglob('studio-main-v1*.css'):\n"
+        "    try:\n"
+        "        text = path.read_text(encoding='utf-8', errors='ignore')\n"
+        "    except Exception:\n"
+        "        continue\n"
+        "    updated = text\n"
+        "    for pat in patterns:\n"
+        "        updated = pat.sub('', updated)\n"
+        "    if updated != text:\n"
+        "        path.write_text(updated, encoding='utf-8')\n"
+        "        changed += 1\n"
+        "print(f'Stripped google font imports from {changed} compiled studio css files')\n"
+        "PY"
+    )
+    compile_patch_marker = "Stripped google font imports from {changed} scss files"
+    if compile_patch_marker not in updated:
+        old_conditional_compile = (
+            'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi'
+        )
+        if old_conditional_compile in updated:
+            updated = updated.replace(old_conditional_compile, brand_compile_block, 1)
+        else:
+            current_compile_block = (
+                "RUN npm run compile-sass -- --skip-themes\n"
+                "RUN npm run webpack\n"
+            )
+            if current_compile_block in updated:
+                updated = updated.replace(current_compile_block, f"{brand_compile_block}\nRUN npm run webpack\n", 1)
+    if compile_patch_marker in updated:
+        updated = updated.replace("\nRUN npm run compile-sass -- --skip-default\n", "\n")
+        updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
+
+    # webpack conditional
+    webpack_conditional = (
+        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi'
+    )
+    updated = updated.replace("RUN npm run webpack", webpack_conditional)
+
+    # edx-platform cherry-pick removal
+    patch_block = """# Patch edx-platform
+# edx-proctoring security fix https://github.com/edx/edx-platform/pull/29347/
+RUN git fetch --depth=2 https://github.com/edx/edx-platform d61dcac29d1651956623c150be53a8bbe69e9346 \\
+  && git cherry-pick d61dcac29d1651956623c150be53a8bbe69e9346
+# Fix "from" address in course bulk emails
+# https://github.com/edx/edx-platform/pull/29001
+RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425d17cd62d1b3e9d1cab220e3fe7f \\
+  && git cherry-pick 01216d9e0637a2260b4c264bda2f22c1e34b38de \\
+  && git cherry-pick a057853a85560759d1d922b00db110207252c6a2 \\
+  && git cherry-pick 6b0e9f50e9425d17cd62d1b3e9d1cab220e3fe7f
+
+
+
+
+"""
+    updated = updated.replace(
+        patch_block,
+        "# Patch edx-platform\n# Redwood already bundles the required security/email fixes; cherry-picks disabled locally.\n\n",
+    )
+
+    # Tutor v21 node_modules path fix
+    if path.name == "Dockerfile" and "nodejs-requirements" in updated:
+        npm_install_marker = "npm clean-install --no-audit --registry=$NPM_REGISTRY"
+        node_mv = "npm clean-install --no-audit --registry=$NPM_REGISTRY\nRUN mv /openedx/edx-platform/node_modules /openedx/node_modules"
+        if npm_install_marker in updated and "mv /openedx/edx-platform/node_modules" not in updated:
+            updated = updated.replace(npm_install_marker, node_mv)
+
+    # mereka-overrides.css bake into staticfiles
+    if path.name == "Dockerfile" and "rdfind -makesymlinks" in updated and "mereka-overrides.css" not in updated:
+        rdfind_marker = "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/"
+        css_copy = (
+            "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/\n\n"
+            "# Ensure mereka theme CSS + logo images are baked into staticfiles.\n"
+            "# collectstatic with tutor.assets settings may not pick these up via\n"
+            "# ThemeFileSystemFinder when COMPREHENSIVE_THEME_DIRS is only an ENV var.\n"
+            "# static.url() in production (ProductionStorage) strips the theme-name prefix,\n"
+            "# so files land in staticfiles/css/ and staticfiles/images/ (not staticfiles/mereka/).\n"
+            "RUN mkdir -p /openedx/staticfiles/css /openedx/staticfiles/images && \\\n"
+            "    cp -f /openedx/themes/mereka/lms/static/css/mereka-overrides.css \\\n"
+            "       /openedx/staticfiles/css/mereka-overrides.css || true && \\\n"
+            "    cp -f /openedx/themes/mereka/cms/static/css/mereka-overrides.css \\\n"
+            "       /openedx/staticfiles/css/mereka-overrides.css 2>/dev/null || true && \\\n"
+            "    for img in logo-horizontal.png logo-horizontal.svg \\\n"
+            "               logo-horizontal-white.png logo-horizontal-white.svg \\\n"
+            "               logo-square.png logo-square.svg logo.png; do \\\n"
+            "      cp -f /openedx/themes/mereka/lms/static/images/$img \\\n"
+            "         /openedx/staticfiles/images/$img 2>/dev/null || true; \\\n"
+            "    done && \\\n"
+            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
+            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
+            "    done"
+        )
+        updated = updated.replace(rdfind_marker, css_copy)
+
+    # Custom apps block in Dockerfile
+    if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
+        copy_themes_marker = "COPY --chown=app:app themes/ /openedx/themes/"
+        copy_themes_marker_alt = "COPY --chown=app:app ./themes/ /openedx/themes"
+        custom_apps_block = """# Copy custom apps
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/plugins/mereka_tenancy
+
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+        if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
+            marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
+            custom_apps_copy = f"""{marker}
+{custom_apps_block}"""
+            updated = updated.replace(marker, custom_apps_copy)
+        elif "mfe_oauth_fix" in updated and "openedx_prometheus" not in updated:
+            mfe_oauth_marker = "COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"
+            custom_apps_add = f"""{mfe_oauth_marker}
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/plugins/mereka_tenancy
+
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth"""
+            updated = updated.replace(mfe_oauth_marker, custom_apps_add)
+        elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
+            workdir_marker = "WORKDIR /openedx/edx-platform\n"
+            if workdir_marker in updated:
+                custom_app_insert = f"""# Copy custom apps
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/plugins/mereka_tenancy
+
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN printf '/openedx\\n/openedx/plugins\\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+
+""" + workdir_marker
+                updated = updated.replace(workdir_marker, custom_app_insert, 1)
+
+        # django-prometheus pip install in Dockerfile
+        base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
+        if base_req_marker in updated:
+            if "django-prometheus" not in updated:
+                prometheus_install = base_req_marker + """\n\n# Install django-prometheus for metrics
+RUN pip install django-prometheus==2.3.1"""
+                updated = updated.replace(base_req_marker, prometheus_install)
+
+    # ── production.py patches ───────────────────────────────────────────
+
+    if path.name == "production.py":
+        def force_mfe_discussions_only(text):
+            if "lms/production.py" not in str(path):
+                return text
+            if "# Force MFE-only discussions (greenfield" in text:
+                return text
+            marker = 'FEATURES["ENABLE_DISCUSSION_SERVICE"] = True'
+            if marker not in text:
+                marker = 'FEATURES["ENABLE_DISCUSSION_SERVICE"] = False'
+            if marker not in text:
+                return text
+            mfe_config = textwrap.dedent("""
+
+            # Force MFE-only discussions (greenfield - no legacy views needed)
+            FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel
+
+            # Ensure all courses use MFE by default
+            DISCUSSIONS_MFE_ENABLED = True
+            if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
+                _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
+                DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
+            if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
+                DISCUSSIONS_MFE_FEEDBACK_URL = None
+            """)
+            lines = text.splitlines()
+            last_idx = None
+            for idx, line in enumerate(lines):
+                if marker in line and not line.strip().startswith("#"):
+                    last_idx = idx
+            if last_idx is not None:
+                lines.insert(last_idx + 1, mfe_config)
+                return "\n".join(lines)
+            return text
+
+        updated = force_mfe_discussions_only(updated)
+
+        # DEFAULT_SITE_THEME
+        if "DEFAULT_SITE_THEME" not in updated:
+            updated = updated.rstrip() + '\n\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
+
+        # MFE OAuth fix app
+        if "mfe_oauth_fix" not in updated:
+            mfe_oauth_fix_config = textwrap.dedent("""
+
+                # MFE OAuth Fix - Custom app to fix OAuth provider visibility
+                import sys
+                sys.path.insert(0, '/openedx')
+                INSTALLED_APPS.append('mfe_oauth_fix')
+
+                # Add middleware to fix /api/mfe_context responses
+                # Insert at the end of middleware stack so it processes responses
+                MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
+            """).strip()
+            updated = updated.rstrip() + '\n\n' + mfe_oauth_fix_config + '\n'
+
+        # mereka_tenancy multi-tenancy app
+        if "mereka_tenancy" not in updated:
+            tenancy_config = textwrap.dedent("""
+
+                # Mereka Multi-Tenancy -- tenant model extensions + resolution middleware
+                # See: specs/multi-tenancy-architecture_spec.md
+                import sys as _mt_sys
+                if '/openedx' not in _mt_sys.path:
+                    _mt_sys.path.insert(0, '/openedx')
+                if 'mereka_tenancy' not in INSTALLED_APPS:
+                    INSTALLED_APPS.append('mereka_tenancy')
+
+                # TenantResolutionMiddleware resolves hostname -> Site -> EnterpriseCustomer
+                # Insert after CurrentSiteMiddleware so Site is already resolved.
+                if 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
+                    _site_mw = 'django.contrib.sites.middleware.CurrentSiteMiddleware'
+                    if _site_mw in MIDDLEWARE:
+                        _idx = MIDDLEWARE.index(_site_mw) + 1
+                        MIDDLEWARE.insert(_idx, 'mereka_tenancy.middleware.TenantResolutionMiddleware')
+                    else:
+                        MIDDLEWARE.append('mereka_tenancy.middleware.TenantResolutionMiddleware')
+            """).strip()
+            updated = updated.rstrip() + '\n\n' + tenancy_config + '\n'
+
+    # ── assets.py patches ───────────────────────────────────────────────
+
+    if path.name == "assets.py" and "derive_settings" in updated:
+        # Ensure optional Redwood apps exist when collecting assets
+        updated = updated.replace(
+            "derive_settings(__name__)\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
+            "derive_settings(__name__)\n\n# Ensure optional Redwood apps exist when collecting assets\nif \"openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig\"]\nif \"openedx.core.djangoapps.bookmarks.apps.BookmarksConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.bookmarks.apps.BookmarksConfig\"]\nif \"openedx.core.djangoapps.discussions.apps.DiscussionsConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.discussions.apps.DiscussionsConfig\"]\nif \"openedx.core.djangoapps.theming.apps.ThemingConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.theming.apps.ThemingConfig\"]\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
+        )
+
+        # Disable django-pipeline UglifyJS compression
+        pipeline_patch = "PIPELINE['JS_COMPRESSOR'] = None\n"
+        if "JS_COMPRESSOR" not in updated:
+            updated = updated.rstrip() + "\n\n" + pipeline_patch
+
+        # Fix collectstatic SuspiciousFileOperation
+        safe_join_patch = (
+            "# Monkey-patch safe_join to be permissive during asset build.\n"
+            "import sys as _sys\n"
+            "import os.path as _osp\n"
+            "import django.utils._os as _os_mod\n"
+            "_orig_safe_join = _os_mod.safe_join\n"
+            "def _build_safe_join(base, *paths):\n"
+            "    return _osp.abspath(_osp.join(base, *paths))\n"
+            "_os_mod.safe_join = _build_safe_join\n"
+            "for _m in list(_sys.modules.values()):\n"
+            "    try:\n"
+            "        if getattr(_m, 'safe_join', None) is _orig_safe_join:\n"
+            "            _m.safe_join = _build_safe_join\n"
+            "    except Exception:\n"
+            "        pass\n"
+        )
+        if "_build_safe_join" not in updated:
+            updated = updated.rstrip() + "\n\n" + safe_join_patch
+
+    # ── lms.conf patches ────────────────────────────────────────────────
+
+    if path.name == "lms.conf":
+        # /health endpoint
+        if "location = /health" not in updated:
+            health_block = (
+                "  location = /health {\n"
+                "    default_type text/plain;\n"
+                "    return 200 \"ok\\n\";\n"
+                "  }\n\n"
+            )
+            marker = "  location / {"
+            if marker in updated:
+                updated = updated.replace(marker, health_block + marker, 1)
+
+        # /profile/api/ proxy
+        if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
+            pattern = re.compile(
+                r"(server_name apps\.academyv2\.mereka\.io;.*?)(\n  location / \{)",
+                re.S,
+            )
+            profile_proxy = (
+                "  location ^~ /profile/api/ {\n"
+                "    proxy_set_header Host academyv2.mereka.io;\n"
+                "    proxy_redirect off;\n"
+                "    proxy_pass http://lms-backend;\n"
+                "  }\n\n"
+            )
+            updated = pattern.sub(rf"\\1\n{profile_proxy}\\2", updated, count=1)
+
+    # ── Caddyfile patches ───────────────────────────────────────────────
+
+    if path.name == "Caddyfile":
+        # MFE cache headers
+        if "apps.academyv2.mereka.io" in updated:
+            if "Cache-Control" not in updated or "no-cache" not in updated:
+                needle = "apps.academyv2.mereka.io {"
+                if needle in updated:
+                    cache_config = """    # MFE cache headers to prevent stale blank pages (mereka-lms-2pne)
+    header {
+        # HTML: no-cache to prevent stale pages after deployment
+        @html {
+            path *.html /
+        }
+        Cache-Control "no-cache, no-store, must-revalidate" @html
+
+        # JS/CSS with content-hash: long cache + immutable
+        @static {
+            path *.js *.css *.woff2 *.woff *.ttf *.eot *.svg *.png *.jpg *.jpeg *.gif *.ico
+        }
+        Cache-Control "public, max-age=31536000, immutable" @static
+    }
+
+"""
+                    updated = updated.replace(needle, needle + "\n" + cache_config)
+
+        # /profile/api/ proxy in Caddy
+        if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
+            needle = "apps.academyv2.mereka.io {\n        reverse_proxy nginx:80"
+            replacement = (
+                "apps.academyv2.mereka.io {\n"
+                "        reverse_proxy /profile/api/* lms:8000 {\n"
+                "            header_up Host academyv2.mereka.io\n"
+                "        }\n"
+                "        reverse_proxy nginx:80"
+            )
+            updated = updated.replace(needle, replacement, 1)
+
+    if updated != original:
+        path.write_text(updated)
+PY
+
+  # ── File sync operations ────────────────────────────────────────────
+
+  # Sync logo files from theme source to build directory
+  echo "Syncing logo files from theme source to build directory..."
+  local THEME_BUILD_DIR="$REPO_ROOT/tutor_env/env/build/openedx/themes/mereka"
+  if [ -d "$THEME_BUILD_DIR" ]; then
+    mkdir -p "$THEME_BUILD_DIR/lms/static/images"
+    for logo_file in logo.png logo-horizontal.png logo-horizontal-white.png logo-square.png \
+                     logo-horizontal.svg logo-horizontal-white.svg logo-square.svg \
+                     favicon.ico; do
+      src_file="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images/$logo_file"
+      if [ -f "$src_file" ]; then
+        cp "$src_file" "$THEME_BUILD_DIR/lms/static/images/$logo_file"
+        echo "  Copied $logo_file to LMS theme"
+      fi
+    done
+
+    if [ -d "$THEME_BUILD_DIR/cms" ]; then
+      mkdir -p "$THEME_BUILD_DIR/cms/static/images"
+      for logo_file in logo.png logo-horizontal.png logo-horizontal-white.png logo-square.png \
+                       logo-horizontal.svg logo-horizontal-white.svg logo-square.svg \
+                       favicon.ico; do
+        src_file="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images/$logo_file"
+        if [ -f "$src_file" ]; then
+          cp "$src_file" "$THEME_BUILD_DIR/cms/static/images/$logo_file"
+          echo "  Copied $logo_file to CMS theme"
+        fi
+      done
+    fi
+    echo "Logo files synced successfully."
+
+    # Copy font assets
+    echo "Syncing font files from theme source to build directory..."
+    mkdir -p "$THEME_BUILD_DIR/lms/static/fonts"
+    if compgen -G "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/*.woff2" >/dev/null; then
+      cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/"*.woff2 "$THEME_BUILD_DIR/lms/static/fonts/"
+      echo "  Copied fonts to LMS theme"
+    else
+      echo "  No LMS fonts found to copy"
+    fi
+
+    if [ -d "$THEME_BUILD_DIR/cms" ]; then
+      mkdir -p "$THEME_BUILD_DIR/cms/static/fonts"
+      if compgen -G "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/*.woff2" >/dev/null; then
+        cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/"*.woff2 "$THEME_BUILD_DIR/cms/static/fonts/"
+        echo "  Copied fonts to CMS theme"
+      else
+        echo "  No CMS fonts found to copy"
+      fi
+    fi
+
+    # Sync theme templates/static overrides
+    echo "Syncing theme templates/static overrides to build directory..."
+    mkdir -p "$THEME_BUILD_DIR/common/templates" "$THEME_BUILD_DIR/common/static/css"
+    mkdir -p "$THEME_BUILD_DIR/lms/templates" "$THEME_BUILD_DIR/lms/static/css"
+    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/." "$THEME_BUILD_DIR/lms/templates/"
+    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css" ]; then
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/." "$THEME_BUILD_DIR/lms/static/css/"
+    fi
+    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates" ]; then
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/." "$THEME_BUILD_DIR/common/templates/"
+    fi
+    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css" ]; then
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/." "$THEME_BUILD_DIR/common/static/css/"
+    fi
+    if [ -d "$THEME_BUILD_DIR/cms" ]; then
+      mkdir -p "$THEME_BUILD_DIR/cms/templates" "$THEME_BUILD_DIR/cms/static/css" "$THEME_BUILD_DIR/cms/static/sass"
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/." "$THEME_BUILD_DIR/cms/templates/" 2>/dev/null || true
+      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css" ]; then
+        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/." "$THEME_BUILD_DIR/cms/static/css/"
+      fi
+      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass" ]; then
+        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/." "$THEME_BUILD_DIR/cms/static/sass/"
+      fi
+    fi
+  else
+    echo "Warning: Theme build directory not found. Logo sync skipped."
+  fi
+
+  # Sync custom apps into build context
+  local CUSTOM_APPS_SRC="$REPO_ROOT/infrastructure/tutor/custom-apps"
+  local CUSTOM_APPS_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/custom-apps"
+  if [ -d "$CUSTOM_APPS_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
+    mkdir -p "$CUSTOM_APPS_DEST"
+    cp -R "$CUSTOM_APPS_SRC/." "$CUSTOM_APPS_DEST/"
+    echo "Custom apps synced to build context."
+  else
+    echo "Warning: Custom apps sync skipped (missing build context)."
+  fi
+
+  # Sync multi-tenancy plugin into build context
+  local TENANCY_PLUGIN_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
+  local TENANCY_PLUGIN_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/plugins/multi-tenancy"
+  if [ -d "$TENANCY_PLUGIN_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
+    mkdir -p "$(dirname "$TENANCY_PLUGIN_DEST")"
+    cp -R "$TENANCY_PLUGIN_SRC" "$TENANCY_PLUGIN_DEST"
+    echo "Multi-tenancy plugin synced to build context."
+  else
+    echo "Warning: Multi-tenancy plugin sync skipped (missing build context)."
+  fi
+}
