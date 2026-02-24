@@ -2,16 +2,18 @@
 # @covers AC-022, AC-023
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import asyncio
 import uuid
 from datetime import UTC, datetime
 
 import stripe as stripe_lib
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import require_admin_api_key
 from app.config import settings
 from app.database import get_db
 from app.models.subscription import Subscription, SubscriptionStatus
@@ -28,13 +30,13 @@ class CreateSubscriptionRequest(BaseModel):
     tenant_id: uuid.UUID
     offering_id: uuid.UUID
     stripe_customer_id: str
-    seat_count: int = 1
+    seat_count: int = Field(default=1, ge=1)
     enterprise_customer_uuid: uuid.UUID | None = None
 
 
 class UpdateSubscriptionRequest(BaseModel):
     cancel: bool | None = None
-    seat_count: int | None = None
+    seat_count: int | None = Field(default=None, ge=1)
 
 
 class SubscriptionResponse(BaseModel):
@@ -63,6 +65,7 @@ class SubscriptionResponse(BaseModel):
 async def create_subscription_endpoint(
     request_body: CreateSubscriptionRequest,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_admin_api_key),
 ):
     """Create an enterprise subscription via Stripe."""
     if not settings.ENABLE_ENTERPRISE_SUBSCRIPTIONS:
@@ -109,6 +112,7 @@ async def update_subscription(
     request_body: UpdateSubscriptionRequest,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    _: str = Depends(require_admin_api_key),
 ):
     """Update subscription — cancel or change seat count."""
     result = await db.execute(select(Subscription).where(Subscription.id == subscription_id))
@@ -123,7 +127,8 @@ async def update_subscription(
     stripe_lib.api_key = settings.STRIPE_SECRET_KEY
 
     if request_body.cancel:
-        stripe_lib.Subscription.modify(
+        await asyncio.to_thread(
+            stripe_lib.Subscription.modify,
             subscription.stripe_subscription_id,
             cancel_at_period_end=True,
         )
@@ -135,8 +140,11 @@ async def update_subscription(
         )
 
     if request_body.seat_count is not None and request_body.seat_count != subscription.seat_count:
-        stripe_sub = stripe_lib.Subscription.retrieve(subscription.stripe_subscription_id)
-        stripe_lib.Subscription.modify(
+        stripe_sub = await asyncio.to_thread(
+            stripe_lib.Subscription.retrieve, subscription.stripe_subscription_id
+        )
+        await asyncio.to_thread(
+            stripe_lib.Subscription.modify,
             subscription.stripe_subscription_id,
             items=[{
                 "id": stripe_sub["items"]["data"][0]["id"],

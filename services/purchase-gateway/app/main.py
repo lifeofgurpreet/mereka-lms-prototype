@@ -10,6 +10,7 @@ from prometheus_client import make_asgi_app
 
 from app.config import settings
 from app.database import engine
+from app.middleware.tenant import TenantMiddleware
 from app.routers import admin, checkout, health, subscriptions, webhooks
 
 logger = structlog.get_logger()
@@ -39,6 +40,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["*"],
 )
+
+app.add_middleware(TenantMiddleware)
 
 # Routers
 app.include_router(health.router)

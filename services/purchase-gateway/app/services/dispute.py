@@ -2,6 +2,7 @@
 # @covers AC-017, AC-018
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import asyncio
 from datetime import UTC, datetime
 
 import stripe
@@ -41,7 +42,7 @@ async def _find_order_by_dispute(dispute: dict, db: AsyncSession) -> Order | Non
         return None
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    charge = stripe.Charge.retrieve(charge_id)
+    charge = await asyncio.to_thread(stripe.Charge.retrieve, charge_id)
     payment_intent_id = charge.payment_intent
 
     result = await db.execute(

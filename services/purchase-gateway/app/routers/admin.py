@@ -8,17 +8,18 @@ from datetime import UTC, datetime, timedelta
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth import require_admin_api_key
 from app.config import settings
 from app.database import get_db
 from app.models.entitlement import Entitlement, EntitlementStatus
 from app.models.offering import Offering, OfferingType
 from app.models.order import Order
 
-router = APIRouter(tags=["admin"])
+router = APIRouter(tags=["admin"], dependencies=[Depends(require_admin_api_key)])
 logger = structlog.get_logger()
 
 MAX_BULK_ASSIGN = 500
@@ -31,7 +32,7 @@ class CreateOfferingRequest(BaseModel):
     offering_type: OfferingType
     title: str
     description: str | None = None
-    price_cents: int
+    price_cents: int = Field(gt=0)
     currency: str = "USD"
     stripe_price_id: str
     lms_resource_id: str
@@ -43,7 +44,7 @@ class CreateOfferingRequest(BaseModel):
 class UpdateOfferingRequest(BaseModel):
     title: str | None = None
     description: str | None = None
-    price_cents: int | None = None
+    price_cents: int | None = Field(default=None, gt=0)
     active: bool | None = None
     metadata: dict | None = None
 

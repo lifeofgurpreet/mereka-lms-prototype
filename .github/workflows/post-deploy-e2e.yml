@@ -3,7 +3,7 @@ name: Post-Deploy E2E Gate
 on:
   workflow_run:
     workflows:
-      - "Build and Push Tutor Images"
+      - "Build Tutor Images"
     types:
       - completed
   workflow_dispatch:

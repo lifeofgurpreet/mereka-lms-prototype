@@ -1,6 +1,7 @@
 # @covers AC-001, AC-005
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import asyncio
 import uuid
 from urllib.parse import urlparse
 
@@ -89,7 +90,8 @@ async def create_checkout(
     )
 
     try:
-        session = stripe.checkout.Session.create(
+        session = await asyncio.to_thread(
+            stripe.checkout.Session.create,
             customer_email=request.buyer_email,
             mode="payment",
             line_items=[

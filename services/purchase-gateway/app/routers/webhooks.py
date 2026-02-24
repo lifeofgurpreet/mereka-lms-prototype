@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import stripe
 import structlog
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -264,6 +265,9 @@ async def stripe_webhook(
             await db.commit()
         except Exception:
             logger.error("webhook.failed_status_update_error", stripe_event_id=event_id)
-        raise
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "detail": "Webhook processing failed"},
+        )
 
     return {"status": "received"}

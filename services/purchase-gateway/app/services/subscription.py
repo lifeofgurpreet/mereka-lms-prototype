@@ -2,6 +2,7 @@
 # @covers AC-022, AC-023
 # @spec: ecommerce-purchase-gateway_spec.md
 
+import asyncio
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -41,7 +42,8 @@ async def create_subscription(
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    stripe_sub = stripe.Subscription.create(
+    stripe_sub = await asyncio.to_thread(
+        stripe.Subscription.create,
         customer=stripe_customer_id,
         items=[{"price": offering.stripe_price_id, "quantity": seat_count}],
         metadata={

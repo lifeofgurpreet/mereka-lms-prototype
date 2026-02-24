@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 
     # Application
     SECRET_KEY: str = ""
+    ADMIN_API_KEY: str = ""
     ALLOWED_ORIGINS: list[str] = [
         "https://academyv2.mereka.io",
         "https://apps.academyv2.mereka.io",
