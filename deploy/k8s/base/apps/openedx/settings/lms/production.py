@@ -1654,3 +1654,111 @@ MUX_PLAYBACK_AUDIENCE = os.environ.get(
 
 # Register video analytics and protection apps
 INSTALLED_APPS += ['openedx_video_analytics', 'openedx_video_protection']
+
+# ── Security Hardening (T119) ────────────────────────────────────────────────
+# Session and CSRF cookie flags.
+# SESSION_COOKIE_SECURE / CSRF_COOKIE_SECURE are already set above based on
+# MEREKA_SCHEME; we enforce them unconditionally here for production safety.
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False  # MFEs read the CSRF token from JS — must stay False
+
+# Content Security Policy.
+# Open edX ships django-csp (openedx/csp-middleware) but does not enable it by
+# default.  We configure it here in report-only mode first so that any directive
+# violations surface in browser DevTools / Sentry without blocking learners.
+# To enforce, set CSP_REPORT_ONLY=false after validating the report feed.
+CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "true").lower() not in ("false", "0", "no")
+
+_lms_url = MEREKA_LMS_BASE_URL
+_mfe_url = MEREKA_MFE_BASE_URL
+_studio_url = MEREKA_STUDIO_BASE_URL
+
+# Allowlist sources used by Open edX + Mereka MFEs.
+# 'unsafe-inline' is required for legacy Open edX inline scripts/styles;
+# remove it incrementally as Waffle flags migrate pages to MFEs.
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",  # Required by Open edX legacy courseware
+    "'unsafe-eval'",    # Required by some xblocks and the Studio MFE
+    _mfe_url,
+    "https://cdn.jsdelivr.net",
+    "https://cdnjs.cloudflare.com",
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",  # Required by Open edX legacy theming
+    _mfe_url,
+    "https://fonts.googleapis.com",
+    "https://cdn.jsdelivr.net",
+)
+CSP_FONT_SRC = (
+    "'self'",
+    _mfe_url,
+    "https://fonts.gstatic.com",
+    "data:",
+)
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+    "blob:",
+    _lms_url,
+    _mfe_url,
+    "https:",  # Courses embed images from many CDNs; restrict further over time
+)
+CSP_CONNECT_SRC = (
+    "'self'",
+    _lms_url,
+    _mfe_url,
+    _studio_url,
+    "https://www.google-analytics.com",
+    "https://sentry.io",
+)
+CSP_FRAME_SRC = (
+    "'self'",
+    _lms_url,
+    _mfe_url,
+    _studio_url,
+    "https://www.youtube.com",
+    "https://player.vimeo.com",
+)
+CSP_MEDIA_SRC = ("'self'", "blob:", "https:")
+CSP_OBJECT_SRC = ("'none'",)
+CSP_BASE_URI = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'self'",)
+
+# CSP violation report endpoint (optional; set to a Sentry CSP endpoint if available).
+_csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
+if _csp_report_uri:
+    CSP_REPORT_URI = _csp_report_uri
+
+# Rate limiting for authentication endpoints.
+# Open edX uses Django REST Framework throttling via openedx.core.lib.api.throttle.
+# These rates apply to anonymous and authenticated users respectively.
+REST_FRAMEWORK = dict(globals().get("REST_FRAMEWORK", {}))
+REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_CLASSES", [
+    "openedx.core.lib.api.throttle.ScopedRateThrottle",
+])
+REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_RATES", {})
+_throttle_rates = dict(REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"])
+# Auth endpoints: ~6 req/min burst for anon (≈30 per 5 min), 100/min for authenticated.
+_throttle_rates.setdefault("anon_burst",         os.environ.get("THROTTLE_ANON_BURST",         "6/min"))
+_throttle_rates.setdefault("user",               os.environ.get("THROTTLE_USER",               "100/min"))
+# Login-specific throttle (used by openedx.core.djangoapps.user_authn).
+_throttle_rates.setdefault("login_and_register",  os.environ.get("THROTTLE_LOGIN_AND_REGISTER",  "6/min"))
+# Password reset throttle.
+_throttle_rates.setdefault("password_reset",      os.environ.get("THROTTLE_PASSWORD_RESET",      "5/hour"))
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = _throttle_rates
+
+# Open edX specific login rate limit (separate from DRF; used by login view directly).
+# Limits: N failed login attempts per unit of time before lockout.
+LOGIN_THROTTLE_ENABLED = os.environ.get("LOGIN_THROTTLE_ENABLED", "true").lower() not in ("false", "0", "no")
+MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = int(os.environ.get("MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED", "10"))
+MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = int(
+    os.environ.get("MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS", "300")  # 5 minutes
+)
+# ── End Security Hardening ───────────────────────────────────────────────────

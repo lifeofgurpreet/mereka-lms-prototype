@@ -12,11 +12,13 @@
 :root {
   --mereka-branding-rev: "2026-02-25-wcag-aa";
 
+  /* BEGIN GENERATED — DO NOT EDIT (run generate-tokens-from-canonical.sh) */
+
   /* Typography */
   --mereka-font-body: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   --mereka-font-heading: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 
-  /* Palette (source: `scss/_tokens.scss`) */
+  /* Palette (source: assets/branding/tokens.css) */
   --mereka-color-ink-900: #000000;
   --mereka-color-ink-700: #4A494A;
   --mereka-color-ink-500: #6B6B6B;
@@ -97,6 +99,7 @@
   --font-heading: "Lato", sans-serif;
   --font-body: "Poppins", sans-serif;
 
+  --radius-none: 0px;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -107,6 +110,8 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* END GENERATED */
 }
 
 @font-face {

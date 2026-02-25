@@ -2,9 +2,9 @@
 
 **Purpose**: Define the single-source token generation pipeline architecture to eliminate multi-source drift.
 
-**Status**: ACTIVE (Phase 1: Contract + Drift Detection)
-**Last verified**: 2026-02-17
-**Acceptance Criteria**: AC-TKPIPE-001, AC-TKPIPE-002, AC-TKPIPE-003
+**Status**: ACTIVE (Phase 2 Complete: Generator script operational)
+**Last verified**: 2026-02-25
+**Acceptance Criteria**: AC-TKPIPE-001, AC-TKPIPE-002, AC-TKPIPE-003, AC-TKPIPE-004, AC-TKPIPE-005
 
 ---
 
@@ -77,77 +77,52 @@ FIGMA EXPORT (manual)          AUTO-GENERATED              AUTO-GENERATED
 
 **Status**: **COMPLETE** (2026-02-17)
 
-### Phase 2: Generator Script (Future)
+### Phase 2: Generator Script (COMPLETE 2026-02-25)
 
-**Tool**: `scripts/branding/generate-token-layers.sh` (NOT YET IMPLEMENTED)
+**Tool**: `scripts/branding/generate-tokens-from-canonical.sh`
 
 **Input**: `assets/branding/tokens.css`
 
-**Outputs**:
+**Outputs** (all 5 files regenerated from canonical):
 1. **SCSS bridge** (`infrastructure/tutor/themes/mereka/scss/_tokens.scss`):
-   - SCSS variable declarations: `$color-teal: #237072;`
-   - CSS custom property `:root` block: `--mereka-color-teal: #{$color-teal};`
-   - Preserve existing SCSS logic (Bootstrap overrides, semantic aliases)
+   - Emits SCSS variable declarations: `$color-teal: #237072;`
+   - Emits CSS custom property `:root` block: `--mereka-color-teal: #{$color-teal};`
+   - Preserves Bootstrap overrides and global CSS rules (body, h1-h6, a, .btn, .card)
 
-2. **Runtime CSS `:root` block** (embedded in `mereka-overrides.css`):
-   - CSS custom properties: `--mereka-color-teal: #237072;`
-   - Preserve existing runtime CSS rules (NOT the :root block)
+2. **Design tokens CSS** (`common/static/css/mereka-design-tokens.css`):
+   - Direct regeneration from tokens.css `:root` block (verbatim copy)
 
-**Algorithm**:
-```python
-# Pseudocode
-tokens_css = parse_css_custom_properties("assets/branding/tokens.css")
+3. **Runtime override files** (common, lms, cms `mereka-overrides.css`):
+   - Replaces the `:root { }` token block with values from tokens.css
+   - Preserves header comment and all CSS rules after the `:root` block
 
-# Generate SCSS variables
-for name, value in tokens_css.items():
-    scss_var = name.replace("--color-", "$color-")
-    emit(f"{scss_var}: {value};")
-
-# Generate CSS custom properties with namespace mapping
-namespace_map = {
-    "--color-teal": "--mereka-color-teal",
-    "--color-magenta": "--mereka-color-magenta",
-    "--color-blue": "--mereka-color-blue",
-    "--color-sky": "--mereka-color-sky",
-    "--color-burgundy": "--mereka-color-danger",
-    "--color-pink": "--mereka-color-danger-soft",
-    "--color-gold": "--mereka-color-warning",
-    "--color-forest": "--mereka-color-success",
-    "--color-black": "--mereka-color-ink-900",
-}
-emit(":root {")
-for canonical_name, mereka_name in namespace_map.items():
-    value = tokens_css[canonical_name]
-    emit(f"  {mereka_name}: {value};")
-emit("}")
-```
-
-**Preservation strategy**:
-- SCSS: Replace only variable declarations and `:root` block, keep Bootstrap overrides and semantic aliases
-- CSS: Replace only `:root` block in `mereka-overrides.css`, keep all other CSS rules
-
-**Migration checklist** (before Phase 2):
-1. Resolve current drift (decide canonical hex values)
-2. Write generator script with dry-run mode
-3. Validate generated output matches expected structure
-4. Run visual regression tests to ensure no visual changes
-5. Update `sync-brand-assets.sh` to invoke generator after token sync
-6. Deploy to staging, verify no visual regressions
-7. Deploy to production
-
-### Phase 3: CI Enforcement (Future)
-
-**Gate**: CI fails if any layer contains hardcoded hex values not present in Layer 1
-
-**Implementation**:
+**Usage**:
 ```bash
-# In .github/workflows/ci.yml
-- name: Verify token single-source
-  run: |
-    ./scripts/qa/verify-token-generation-pipeline.sh
+# Update all layers from tokens.css (after Figma export)
+./scripts/branding/generate-tokens-from-canonical.sh
+
+# Check mode (used by CI) — exits 1 if any layer is out of sync
+./scripts/branding/generate-tokens-from-canonical.sh --check
 ```
 
-**Exit criteria**: FAIL count > 0 means new independent hex definitions were introduced.
+**Preservation strategy** (using `BEGIN GENERATED` / `END GENERATED` markers):
+- SCSS: Markers wrap SCSS vars + `:root` block; Bootstrap overrides and CSS rules preserved after `END GENERATED`
+- CSS overrides: Markers inside `:root { }` wrap generated token values; header comment and all post-`:root` CSS preserved
+
+**Idempotent**: Running when everything is in sync produces no diff.
+
+### Phase 3: CI Enforcement (COMPLETE 2026-02-25)
+
+**Gate**: CI fails if any generated token layer is out of sync with `tokens.css`
+
+**Implementation** (in `design-token-validation` job, `.github/workflows/ci.yml`):
+```yaml
+- name: Verify generated token layers are in sync
+  run: |
+    ./scripts/branding/generate-tokens-from-canonical.sh --check
+```
+
+**Exit criteria**: Exit code 1 if any layer's generated block differs from what `tokens.css` would produce.
 
 ---
 

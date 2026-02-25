@@ -1,14 +1,59 @@
-# Production GitOps overlays — require infra review
-deploy/k8s/overlays/production/ @Biji-Biji-Initiative/infra
+# CODEOWNERS — Mereka LMS
+#
+# Every top-level directory has a designated owner.
+# Narrower rules (listed later) take precedence over broader rules.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# GitHub Actions workflows — require infra review
-.github/workflows/ @Biji-Biji-Initiative/infra
+# ---------------------------------------------------------------------------
+# Default: platform team owns anything not matched below
+# ---------------------------------------------------------------------------
+* @Biji-Biji-Initiative/platform
 
-# Secrets configuration — require infra review
-deploy/k8s/base/secrets/ @Biji-Biji-Initiative/infra
+# ---------------------------------------------------------------------------
+# Infrastructure & deployment
+# ---------------------------------------------------------------------------
+/deploy/ @Biji-Biji-Initiative/platform
+/deploy/k8s/overlays/production/ @Biji-Biji-Initiative/infra
+/deploy/k8s/base/secrets/ @Biji-Biji-Initiative/infra
+/infrastructure/ @Biji-Biji-Initiative/platform
 
-# Tutor patches and configuration — require platform review
-infrastructure/tutor/ @Biji-Biji-Initiative/platform
+# ---------------------------------------------------------------------------
+# Automation scripts
+# ---------------------------------------------------------------------------
+/scripts/ @Biji-Biji-Initiative/platform
 
-# Specs — require engineering review
-specs/ @Biji-Biji-Initiative/engineering
+# ---------------------------------------------------------------------------
+# Microservices — service owners
+# ---------------------------------------------------------------------------
+/services/ @Biji-Biji-Initiative/engineering
+/services/purchase-gateway/ @Biji-Biji-Initiative/platform
+/services/hubspot-webhook/ @Biji-Biji-Initiative/engineering
+
+# ---------------------------------------------------------------------------
+# Specifications — architecture team
+# ---------------------------------------------------------------------------
+/specs/ @Biji-Biji-Initiative/architecture
+/specdocs/ @Biji-Biji-Initiative/architecture
+
+# ---------------------------------------------------------------------------
+# Documentation — documentation team
+# ---------------------------------------------------------------------------
+/docs/ @Biji-Biji-Initiative/docs
+
+# ---------------------------------------------------------------------------
+# Branding & design assets — design team
+# ---------------------------------------------------------------------------
+/assets/ @Biji-Biji-Initiative/design
+/assets/branding/ @Biji-Biji-Initiative/design
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+/tests/ @Biji-Biji-Initiative/engineering
+
+# ---------------------------------------------------------------------------
+# GitHub Actions & repo configuration — infra review required
+# ---------------------------------------------------------------------------
+/.github/ @Biji-Biji-Initiative/infra
+/.github/workflows/ @Biji-Biji-Initiative/infra
+/.github/CODEOWNERS @Biji-Biji-Initiative/infra

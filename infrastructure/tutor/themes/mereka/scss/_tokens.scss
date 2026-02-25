@@ -1,5 +1,7 @@
 // Mereka → Paragon token bridge. Keeps the brand palette + typography in one place
 // so MFEs and the legacy LMS/Studio theme remain visually consistent.
+// BEGIN GENERATED — DO NOT EDIT (run generate-tokens-from-canonical.sh)
+// Mereka-specific palette (not in tokens.css)
 $color-ink-900: #000000;
 $color-ink-700: #4A494A;
 $color-ink-500: #6B6B6B;
@@ -8,6 +10,8 @@ $color-neutral-100: #FBFAFB;
 $color-neutral-75: #F5F5F5;
 $color-border: #DDDDDE;
 $color-border-strong: #7B7B7C;
+
+// Sourced from assets/branding/tokens.css
 $color-teal: #237072;
 $color-magenta: #ab3b78;
 $color-blue: #295cad;
@@ -16,34 +20,19 @@ $color-forest: #2c6e49;
 $color-gold: #f4be48;
 $color-burgundy: #8c002f;
 $color-pink: #cd89ae;
+$color-black: #000000;
+$color-white: #ffffff;
+
+$mereka-body-font: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$mereka-heading-font: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+// Semantic aliases
 $color-info: $color-blue;
 $color-info-soft: $color-sky;
 $color-success: $color-forest;
 $color-warning: $color-gold;
 $color-danger: $color-burgundy;
 $color-danger-soft: $color-pink;
-
-$mereka-body-font: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-$mereka-heading-font: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-
-$font-family-sans-serif: $mereka-body-font !default;
-$font-family-base: $mereka-body-font !default;
-$headings-font-family: $mereka-heading-font !default;
-$headings-font-weight: 600 !default;
-$body-color: $color-ink-900 !default;
-$body-bg: $color-neutral-100 !default;
-$link-color: $color-info !default;
-$link-hover-color: $color-teal !default;
-$primary: $color-magenta !default;
-$secondary: $color-teal !default;
-$success: $color-success !default;
-$info: $color-info !default;
-$warning: $color-warning !default;
-$danger: $color-danger !default;
-$border-color: $color-border !default;
-$btn-border-radius: 999px !default;
-$btn-border-radius-lg: 999px !default;
-$btn-border-radius-sm: 999px !default;
 
 :root {
   --mereka-font-body: #{$mereka-body-font};
@@ -83,6 +72,27 @@ $btn-border-radius-sm: 999px !default;
   --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
   --pgn-btn-border-radius: 999px;
 }
+// END GENERATED
+
+$font-family-sans-serif: $mereka-body-font !default;
+$font-family-base: $mereka-body-font !default;
+$headings-font-family: $mereka-heading-font !default;
+$headings-font-weight: 600 !default;
+$body-color: $color-ink-900 !default;
+$body-bg: $color-neutral-100 !default;
+$link-color: $color-info !default;
+$link-hover-color: $color-teal !default;
+$primary: $color-magenta !default;
+$secondary: $color-teal !default;
+$success: $color-success !default;
+$info: $color-info !default;
+$warning: $color-warning !default;
+$danger: $color-danger !default;
+$border-color: $color-border !default;
+$btn-border-radius: 999px !default;
+$btn-border-radius-lg: 999px !default;
+$btn-border-radius-sm: 999px !default;
+
 
 body {
   font-family: $mereka-body-font;

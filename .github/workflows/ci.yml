@@ -111,6 +111,10 @@ jobs:
         run: |
           ./scripts/branding/verify-token-drift.sh
 
+      - name: Verify generated token layers are in sync
+        run: |
+          ./scripts/branding/generate-tokens-from-canonical.sh --check
+
       - name: Verify design tokens (all 12 ACs)
         run: |
           ./scripts/qa/verify-design-tokens.sh
@@ -219,6 +223,7 @@ jobs:
           bash -n scripts/qa/verify-release-deployment-choreography.sh
           bash -n scripts/infra/verify-release-preflight.sh
           bash -n scripts/qa/verify-token-drift.sh
+          bash -n scripts/branding/generate-tokens-from-canonical.sh
           bash -n scripts/qa/verify-analytics-decision-gate.sh
           bash -n scripts/qa/verify-superset-runbook.sh
           bash -n scripts/qa/verify-analytics-drift-guardrails.sh

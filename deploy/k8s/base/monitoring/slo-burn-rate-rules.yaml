@@ -1,0 +1,487 @@
+---
+# SLO Burn-Rate Rules — MFE, Purchase Gateway, Forum
+# Spec: slo-sla-service-level-management_spec.md
+#
+# Complements prometheusrule-slo.yaml (which covers LMS/CMS Tier 1).
+# This file adds SLI recording rules and multi-window burn-rate alerts for:
+#   - MFE / Caddy (Tier 2, 99.5%, error_budget = 0.005)
+#   - Purchase Gateway (Tier 1, 99.95%, error_budget = 0.0005)
+#   - Forum in-LMS (Tier 3, 99.0%, error_budget = 0.01)
+#
+# Burn-rate alert thresholds per Google SRE Workbook §6:
+#   - Fast burn (1h+5m > 14.4×)  → P1 page
+#   - Slow burn (6h+30m > 6×)    → P2 ticket
+#   - Very slow burn (3d+6h > 1×) → P3 weekly review
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: slo-burn-rate-rules
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: slo
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    # ── SLI Recording Rules ───────────────────────────────────────────────
+    - name: sli.recording.rules.extended
+      interval: 30s
+      rules:
+
+        # ── MFE / Caddy Availability (Tier 2) ──────────────────────────
+        # Caddy exposes caddy_http_requests_total{code="..."} via /metrics.
+        # 5xx = server errors; exclude 4xx from denominator (client errors).
+        - record: mereka:http_requests:availability_ratio_5m
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[5m]))
+                /
+                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[5m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_30m
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[30m]))
+                /
+                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[30m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_1h
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[1h]))
+                /
+                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[1h])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_6h
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[6h]))
+                /
+                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[6h])), 1e-10)
+              ),
+              0
+            )
+
+        # ── Purchase Gateway Availability (Tier 1) ──────────────────────
+        # FastAPI instrumented via prometheus-fastapi-instrumentator.
+        # Metric: http_requests_total{handler,method,status_code}
+        - record: mereka:http_requests:availability_ratio_5m
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code=~"5.."}[5m]))
+                /
+                clamp_min(sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code!~"4.."}[5m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_30m
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code=~"5.."}[30m]))
+                /
+                clamp_min(sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code!~"4.."}[30m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_1h
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code=~"5.."}[1h]))
+                /
+                clamp_min(sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code!~"4.."}[1h])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_6h
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code=~"5.."}[6h]))
+                /
+                clamp_min(sum(rate(http_requests_total{job="purchase-gateway-metrics",status_code!~"4.."}[6h])), 1e-10)
+              ),
+              0
+            )
+
+        # ── Forum Availability (Tier 3, in-process with LMS) ────────────
+        # Forum runs in the LMS process. Filter by view label for forum paths.
+        # Uses django-prometheus via lms-metrics job.
+        - record: mereka:http_requests:availability_ratio_5m
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~"forum.*|thread.*|comment.*"}[5m]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4..",view=~"forum.*|thread.*|comment.*"}[5m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_30m
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~"forum.*|thread.*|comment.*"}[30m]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4..",view=~"forum.*|thread.*|comment.*"}[30m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_1h
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~"forum.*|thread.*|comment.*"}[1h]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4..",view=~"forum.*|thread.*|comment.*"}[1h])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_6h
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~"forum.*|thread.*|comment.*"}[6h]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4..",view=~"forum.*|thread.*|comment.*"}[6h])), 1e-10)
+              ),
+              0
+            )
+
+    # ── Burn Rate Recording Rules ─────────────────────────────────────────
+    - name: slo.recording.rules.extended
+      interval: 60s
+      rules:
+
+        # ── MFE Burn Rates (Tier 2: error_budget = 0.005) ──────────────
+        - record: mereka:slo:burn_rate_5m
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_5m{service="mfe"})
+            / 0.005
+
+        - record: mereka:slo:burn_rate_30m
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_30m{service="mfe"})
+            / 0.005
+
+        - record: mereka:slo:burn_rate_1h
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_1h{service="mfe"})
+            / 0.005
+
+        - record: mereka:slo:burn_rate_6h
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_6h{service="mfe"})
+            / 0.005
+
+        # ── Purchase Gateway Burn Rates (Tier 1: error_budget = 0.0005) ─
+        - record: mereka:slo:burn_rate_5m
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_5m{service="purchase-gateway"})
+            / 0.0005
+
+        - record: mereka:slo:burn_rate_30m
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_30m{service="purchase-gateway"})
+            / 0.0005
+
+        - record: mereka:slo:burn_rate_1h
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_1h{service="purchase-gateway"})
+            / 0.0005
+
+        - record: mereka:slo:burn_rate_6h
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_6h{service="purchase-gateway"})
+            / 0.0005
+
+        # ── Forum Burn Rates (Tier 3: error_budget = 0.01) ─────────────
+        - record: mereka:slo:burn_rate_5m
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_5m{service="forum"})
+            / 0.01
+
+        - record: mereka:slo:burn_rate_30m
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_30m{service="forum"})
+            / 0.01
+
+        - record: mereka:slo:burn_rate_1h
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_1h{service="forum"})
+            / 0.01
+
+        - record: mereka:slo:burn_rate_6h
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_6h{service="forum"})
+            / 0.01
+
+    # ── Error Budget Remaining (30-day window) ───────────────────────────
+    - name: slo.error-budget.rules.extended
+      interval: 5m
+      rules:
+
+        # MFE — Tier 2 (99.5%): total budget = 3.6 hours = 216 minutes
+        - record: mereka:slo:error_budget_remaining_ratio
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            clamp(
+              1 - (
+                sum(increase(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[30d]))
+                / clamp_min(sum(increase(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[30d])), 1)
+              ) / 0.005,
+              0, 1
+            )
+
+        - record: mereka:slo:error_budget_remaining_minutes
+          labels:
+            service: mfe
+            tier: "2"
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service="mfe",tier="2"} * 216
+
+        # Purchase Gateway — Tier 1 (99.95%): total budget = 21.6 minutes
+        - record: mereka:slo:error_budget_remaining_ratio
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            clamp(
+              1 - (
+                sum(increase(http_requests_total{job="purchase-gateway-metrics",status_code=~"5.."}[30d]))
+                / clamp_min(sum(increase(http_requests_total{job="purchase-gateway-metrics",status_code!~"4.."}[30d])), 1)
+              ) / 0.0005,
+              0, 1
+            )
+
+        - record: mereka:slo:error_budget_remaining_minutes
+          labels:
+            service: purchase-gateway
+            tier: "1"
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service="purchase-gateway",tier="1"} * 21.6
+
+        # Forum — Tier 3 (99.0%): total budget = 432 minutes = 7.2 hours
+        - record: mereka:slo:error_budget_remaining_ratio
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            clamp(
+              1 - (
+                sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5..",view=~"forum.*|thread.*|comment.*"}[30d]))
+                / clamp_min(sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4..",view=~"forum.*|thread.*|comment.*"}[30d])), 1)
+              ) / 0.01,
+              0, 1
+            )
+
+        - record: mereka:slo:error_budget_remaining_minutes
+          labels:
+            service: forum
+            tier: "3"
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service="forum",tier="3"} * 432
+
+    # ── Burn-Rate Alert Rules ─────────────────────────────────────────────
+    # Multi-window burn-rate alerting per Google SRE Workbook §6.
+    # Complements alerts in prometheusrule-slo.yaml (which covers LMS/CMS).
+    - name: slo.alert.rules.extended
+      rules:
+
+        # ── Fast Burn (P1): 1h+5m > 14.4× ────────────────────────────
+        # 2% of monthly budget consumed in 1 hour → page immediately.
+        - alert: SLOBudgetFastBurnExtended
+          expr: |
+            mereka:slo:burn_rate_1h{service=~"mfe|purchase-gateway|forum"} > 14.4
+            and
+            mereka:slo:burn_rate_5m{service=~"mfe|purchase-gateway|forum"} > 14.4
+          for: 2m
+          labels:
+            severity: critical
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service }} SLO fast burn rate exceeded (P1)"
+            description: >-
+              {{ $labels.service }} (tier {{ $labels.tier }}) is consuming error budget
+              at {{ $value | printf "%.1f" }}x the sustainable rate over the last hour.
+              At this rate, the 30-day error budget will be exhausted within hours.
+              Page on-call immediately.
+
+        # ── Slow Burn (P2): 6h+30m > 6× ─────────────────────────────
+        # 5% of monthly budget consumed in 6 hours → create ticket.
+        - alert: SLOBudgetSlowBurnExtended
+          expr: |
+            mereka:slo:burn_rate_6h{service=~"mfe|purchase-gateway|forum"} > 6
+            and
+            mereka:slo:burn_rate_30m{service=~"mfe|purchase-gateway|forum"} > 6
+          for: 5m
+          labels:
+            severity: warning
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service }} SLO slow burn rate exceeded (P2)"
+            description: >-
+              {{ $labels.service }} (tier {{ $labels.tier }}) is consuming error budget
+              at {{ $value | printf "%.1f" }}x the sustainable rate over the last 6 hours.
+              Create incident ticket and investigate within 2 hours.
+
+        # ── Very Slow Burn (P3): 6h burn > 1× for 3 days ─────────────
+        # Budget on track to fully exhaust by end of 30-day window.
+        - alert: SLOBudgetVerySlowBurnExtended
+          expr: |
+            mereka:slo:burn_rate_6h{service=~"mfe|purchase-gateway|forum"} > 1
+          for: 3h
+          labels:
+            severity: warning
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service }} SLO very slow burn (P3)"
+            description: >-
+              {{ $labels.service }} (tier {{ $labels.tier }}) burn rate {{ $value | printf "%.2f" }}x
+              sustained for 3+ hours. At this pace the monthly error budget will be exhausted
+              before month-end. Add to weekly review agenda.
+
+        # ── Budget Exhausted (P1) ──────────────────────────────────────
+        - alert: SLOBudgetExhaustedExtended
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service=~"mfe|purchase-gateway|forum"} <= 0
+          for: 5m
+          labels:
+            severity: critical
+            slo: error_budget
+          annotations:
+            summary: "{{ $labels.service }} error budget exhausted (P1)"
+            description: >-
+              {{ $labels.service }} (tier {{ $labels.tier }}) has consumed its entire 30-day
+              error budget. Deployment freeze active. Activate reliability sprint.
+              No feature deployments until budget recovers to ≥ 10%.
+
+        # ── Budget Low (P2): < 25% remaining ──────────────────────────
+        - alert: SLOBudgetLowExtended
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service=~"mfe|purchase-gateway|forum"} < 0.25
+            and
+            mereka:slo:error_budget_remaining_ratio{service=~"mfe|purchase-gateway|forum"} > 0
+          for: 10m
+          labels:
+            severity: warning
+            slo: error_budget
+          annotations:
+            summary: "{{ $labels.service }} error budget below 25% (P2)"
+            description: >-
+              {{ $labels.service }} (tier {{ $labels.tier }}) has only
+              {{ $value | humanizePercentage }} of its 30-day error budget remaining.
+              Restrict deployments to critical fixes only.
+
+        # ── SLI Measurement Gap ────────────────────────────────────────
+        - alert: SLIMeasurementDownExtended
+          expr: |
+            absent_over_time(mereka:http_requests:availability_ratio_5m{service="mfe"}[10m])
+            or
+            absent_over_time(mereka:http_requests:availability_ratio_5m{service="purchase-gateway"}[10m])
+          for: 1m
+          labels:
+            severity: warning
+            slo: measurement
+          annotations:
+            summary: "SLI measurement data missing for {{ $labels.service }}"
+            description: >-
+              No availability SLI data recorded for {{ $labels.service }} in the last 10 minutes.
+              Verify the ServiceMonitor is scraping the metrics endpoint and the job label is correct.

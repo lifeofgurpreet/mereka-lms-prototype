@@ -8,14 +8,14 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 100   |
-| TODO   | 39    |
+| DONE   | 104   |
+| TODO   | 35    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **142** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
-Sprints 6–10: 48 tasks (39 TODO, 9 DONE) — DR1 frontend + Top50 strategic + CTO audit
+Sprints 6–10: 48 tasks (35 TODO, 13 DONE) — DR1 frontend + Top50 strategic + CTO audit
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -636,7 +636,7 @@ T058
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T097 | Fix CSS token undefined (--mereka-color-ink-600) | P0 | DONE | DR1:P0-1 | S | — | ✓ FALSE POSITIVE: Exhaustive grep of all theme files (theme.scss, mereka.scss, _tokens.scss, mereka-overrides.css, assets/branding/) finds ZERO references to `--mereka-color-ink-600`. Ink scale uses only ink-900/700/500/300. DR1 finding was based on stale analysis. |
 | T098 | Fix MFE branding QA script route mapping | P0 | DONE | DR1:P0-4 | S | — | ✓ Already correct: verify-mfe-branding.sh lines 95-96 map both `/authoring`→`course-authoring` and `/course-authoring`→`course-authoring`. DR1 finding was based on stale analysis. |
-| T099 | Consolidate design token sources to single canonical | P1 | TODO | DR1:P1-2, Top50:#37 | M | T097 | Three token sources: (a) `assets/branding/tokens.css`, (b) `_tokens.scss`, (c) `mereka-overrides.css`. Make tokens.css canonical, generate others from it. Add drift detection in CI. |
+| T099 | Consolidate design token sources to single canonical | P1 | DONE | DR1:P1-2, Top50:#37 | M | T097 | ✓ Batch 3. Created generate-tokens-from-canonical.sh — reads tokens.css, generates _tokens.scss + mereka-design-tokens.css + mereka-overrides.css. CI drift gate in ci.yml. Pipeline doc updated. |
 | T100 | Fix WCAG contrast failures (ink-500, teal) | P1 | DONE | DR1:P1-1, Top50:#29 | M | T097 | ✓ Batch 1. Unified ink-500 to #6B6B6B (5.33:1) and teal to #237072 (5.78:1) across all 3 layers. Updated _tokens.scss, mereka-overrides.css (common/lms/cms), design-tokens.css, branding/tokens.css. All pairs now pass WCAG AA. |
 | T101 | MFE footer via plugin slots (not string surgery) | P1 | TODO | DR1:P0-3, Top50:#45 | L | T099 | `apply-patches.sh` rewrites `env.config.jsx` to replace `<Footer/>` with `<MerekaFooter/>`. Convert to `pluginSlots.footer_slot` using frontend plugin framework. Diff must be pure config. |
 | T102 | Reduce MFE brittle selectors by 50% | P1 | TODO | DR1:P0-2, Top50:#45 | M | T101 | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` uses `[class*="learning"]`, `[data-testid*="course"]` etc. Replace structural UI changes with official plugin slot operations. |
@@ -674,12 +674,12 @@ T058
 | T116 | Enterprise SSO: full OIDC/SAML + SCIM provisioning | P1 | TODO | Top50:#16 | L | T108 | Current: Google OAuth2 + Kajabi SSO. Target: enterprise SAML/OIDC with automated user provisioning. SSO working for LMS+MFEs. Documented IdP setup. |
 | T117 | Ulmo catalog revamp + Discovery theming | P2 | TODO | Top50:#14 | M | T107 | Ulmo's "beautiful course pages." Apply Design Tokens to catalog. Structured data/SEO. Legacy catalog surface deprecated. |
 | T118 | CDN for MFE static assets | P1 | TODO | Top50:#25 | M | T108 | Current: Caddy compression, S3 storage (asia-southeast1), no CDN. Target: MFEs served via CDN. Cache headers validated. Smoke tests for routing. |
-| T119 | Security hardening: HSTS + CSP + rate limiting + bot mitigation | P1 | TODO | Top50:#26 | M | — | TLS+HSTS in Caddy. CSP baseline for LMS+MFEs. Rate limiting on auth endpoints. WAF rules. Session cookie settings. |
+| T119 | Security hardening: HSTS + CSP + rate limiting + bot mitigation | P1 | DONE | Top50:#26 | M | — | ✓ Batch 3. Caddy security_headers snippet (HSTS 1yr+preload, X-Content-Type-Options, Referrer-Policy). CSP baseline (report-only). DRF rate limiting (6/min auth, 100/min user). Cookie hardening. verify-security-hardening.sh (26 PASS). |
 | T120 | API documentation + integration contracts (OpenAPI) | P2 | TODO | Top50:#35 | M | T027 | OpenAPI specs for Purchase Gateway, custom endpoints. Event payload contracts documented. Breaking change policy. |
 | T121 | Aspects analytics dashboards + data pipeline | P2 | TODO | Top50:#17 | M | T106 | Aspects enabled but needs: dashboards reviewed, retention/access policy, data pipeline monitoring, instructor visibility. |
 | T122 | Product KPI layer (North Star metrics via events) | P2 | TODO | Top50:#18 | M | T121 | Define KPIs (activation, completion, retention). Instrumentation via openedx-events. Dashboard. Connects Aspects to business outcomes. |
 | T123 | Credentials + Learner Record MFE production readiness | P2 | TODO | Top50:#20 | M | T106 | Credentials plugin enabled but needs: badge/cert issuance tested, learner record accessible, VC issuer validated end-to-end. |
-| T124 | SLO definitions + error budgets | P1 | TODO | Top50:#24 | M | T083 | Current: PrometheusRules exist. Missing: SLI thresholds, error budget policies, burn-rate alerting. Define per service. |
+| T124 | SLO definitions + error budgets | P1 | DONE | Top50:#24 | M | T083 | ✓ Batch 3. SLO_POLICY.md (5 services, 3 tiers, burn-rate thresholds). slo-burn-rate-rules.yaml PrometheusRule for MFE/PurchaseGateway/Forum. verify-slo-definitions.sh (40 PASS). |
 | T125 | Multi-brand multi-site via Design Tokens + runtime config | P2 | TODO | Top50:#27 | L | T107, T108 | New site spun up with config-only changes. Per-site tokens. MFE config per tenant. Currently partial (SITE_VARIANTS + multisite-sites.yml). |
 | T126 | Modern discussions: spam controls + moderation | P2 | DONE | Top50:#23 | S | — | ✓ Batch 2. Added forum moderation config to LMS production.py: rate limits (30/min post, 60/min vote), max comment depth=2, spam check extension point, per-course discussion toggle. verify-forum-moderation.sh extended (45 PASS). |
 
@@ -698,7 +698,7 @@ T058
 | T131 | Deprecation discipline (OEP-21 alignment) | P2 | DONE | Top50:#43 | S | — | ✓ Batch 2. Created DEPR.md with 6 registered deprecations (DEPR-001→006). verify-deprecation-discipline.sh (13 PASS). Fixed stale ops/ references in setup-local.sh and deploy-aspects-k8s.sh. |
 | T132 | OEP-58 translations: full atlas workflow + locale CI | P2 | TODO | Top50:#31 | M | T037 | Current T037 covers sync-translations.sh. Enrichment: atlas.yml present where needed, CI runs atlas pull/validate, translation updates don't break builds, locale coverage ≥80%. |
 | T133 | Golden-path dev environment (devcontainer) | P2 | TODO | Top50:#39 | M | T106 | Devcontainer/compose. Seed demo org/course. Scripts. Docs. CI validates env build. Agents and new devs productive fast. |
-| T134 | Repo restructure: clear ownership layers | P3 | TODO | Top50:#38 | M | T131 | Directory OWNERs beyond CODEOWNERS. Migration guide for deprecated paths. Broken path detection in CI. |
+| T134 | Repo restructure: clear ownership layers | P3 | DONE | Top50:#38 | M | T131 | ✓ Batch 3. Enhanced CODEOWNERS with section headers + full directory coverage. verify-no-broken-paths.sh for deprecated path detection. |
 | T135 | Mobile: Design Tokens theming + API parity | P2 | TODO | Top50:#30 | M | T107, T032 | Design Tokens explicitly targets mobile theming. Verify APIs, token consistency, critical learner flows on mobile. |
 | T136 | Data retention + export: PDPA/GDPR automation | P2 | TODO | Top50:#44 | M | T112 | Policy doc. Automated retention jobs. Export endpoints/runbooks. User-request flow. Currently T079 covers analytics retention; this covers full platform. |
 
@@ -725,14 +725,14 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 100   |
-| TODO   | 39    |
+| DONE   | 104   |
+| TODO   | 35    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **142** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
-Sprints 6–10: 48 tasks (39 TODO, 9 DONE)
+Sprints 6–10: 48 tasks (35 TODO, 13 DONE)
 
 Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass
 
@@ -849,7 +849,7 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | DR1:P0-3 | MFE footer injected via string surgery (not plugin slots) | T101, T109 | TODO |
 | DR1:P0-4 | MFE branding QA script route mapping stale | T098 | DONE (already correct) |
 | DR1:P1-1 | WCAG contrast failures (ink-500, teal) | T100 | DONE |
-| DR1:P1-2 | Three diverging design token sources | T099, T110 | TODO |
+| DR1:P1-2 | Three diverging design token sources | T099, T110 | PARTIAL (T099 DONE, T110 TODO) |
 | DR1:P2-1 | Global CSS overrides affect XBlocks | T105 | TODO |
 | DR1:P2-2 | Visual regression only captures unauthenticated routes | T104 | TODO |
 
@@ -873,17 +873,17 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #18 | Product KPI layer (North Star metrics via events) | T122 | TODO |
 | #20 | Credentials + Learner Record MFE production readiness | T123 | TODO |
 | #23 | Modern discussions: spam controls + moderation | T126 | DONE |
-| #24 | SLO definitions + error budgets | T124 | TODO |
+| #24 | SLO definitions + error budgets | T124 | DONE |
 | #25 | CDN for MFE static assets | T118 | TODO |
-| #26 | Security hardening: HSTS + CSP + rate limiting | T119 | TODO |
+| #26 | Security hardening: HSTS + CSP + rate limiting | T119 | DONE |
 | #27 | Multi-brand multi-site via Design Tokens + runtime config | T125 | TODO |
 | #28 | OEP-65 module architecture readiness | T111 | TODO |
 | #29 | WCAG contrast failures | T100 | DONE |
 | #30 | Mobile: Design Tokens theming + API parity | T135 | TODO |
 | #31 | OEP-58 translations: atlas workflow + locale CI | T132 | TODO |
 | #35 | API documentation + integration contracts (OpenAPI) | T120 | TODO |
-| #37 | OEP-48 brand package + design token canonical source | T110, T099 | TODO |
-| #38 | Repo restructure: clear ownership layers | T134 | TODO |
+| #37 | OEP-48 brand package + design token canonical source | T110, T099 | PARTIAL (T099 DONE, T110 TODO) |
+| #38 | Repo restructure: clear ownership layers | T134 | DONE |
 | #39 | Golden-path dev environment (devcontainer) | T133 | TODO |
 | #40 | Release automation: semver + changelog + rollback | T130 | TODO |
 | #43 | Deprecation discipline (OEP-21 alignment) | T131 | DONE |

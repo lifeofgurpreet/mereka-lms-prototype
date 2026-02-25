@@ -19,6 +19,7 @@ resources:
   - prometheusrule-xqueue.yaml
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
+  - slo-burn-rate-rules.yaml
   - prometheusrule-auth.yaml
   - prometheusrule-email.yaml
   - prometheusrule-video.yaml
