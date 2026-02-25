@@ -5,6 +5,8 @@
 #   ./scripts/qa/build-observability-parity-delta.sh --env prod --evidence-dir var/ci/parity-prod
 
 set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/observability-status.sh"
 
 ENV_LABEL=""
 EVIDENCE_DIR=""
@@ -74,7 +76,6 @@ mkdir -p "$(dirname "$OUT_JSON")"
 
 PASS=0
 FAIL=0
-STATUS_LINE_REGEX='(^|[^A-Za-z])(PASS|FAIL|WARN)([^A-Za-z]|$)'
 identity_env=""
 identity_profile=""
 identity_context=""
@@ -133,11 +134,13 @@ for f in "${REQUIRED_FILES[@]}"; do
 done
 
 if [[ -f "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt" ]]; then
-  if grep -Eq "$STATUS_LINE_REGEX" "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt"; then
+  if has_observability_status_line "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt"; then
     record pass "PARITY-009" "Correlation header evidence includes PASS/FAIL/WARN status"
   else
     record fail "PARITY-009" "Correlation header evidence missing PASS/FAIL/WARN status line"
   fi
+else
+  record fail "PARITY-009" "Correlation header evidence file missing"
 fi
 
 INDEX_FILE="$EVIDENCE_DIR/observability-first-class-runtime-evidence-index.json"
