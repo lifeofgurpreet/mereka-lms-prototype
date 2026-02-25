@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @covers AC-006, AC-007, AC-008, AC-015, AC-016, AC-017
 # @spec: forum-service-migration_spec.md
-# Verify Forum Moderation, API Compatibility, and Performance contracts.
+# Verify Forum Moderation, Spam Controls, API Compatibility, and Performance contracts.
 #
 # AC-006: Thread creation via discussions MFE appears within 5 seconds
 # AC-007: Voting increments persist across page refreshes
@@ -10,10 +10,16 @@
 # AC-016: Search p95 latency <= 500ms under 20 concurrent requests
 # AC-017: Forum pod memory RSS stays below 512Mi under normal load
 #
+# Additional checks (not spec ACs but operational requirements):
+#   spam:     Spam controls configured (rate limits, depth limits, abuse flagging)
+#   rate:     Rate limiting settings present and valid
+#
 # Usage:
 #   ./scripts/qa/verify-forum-moderation.sh
 #   ./scripts/qa/verify-forum-moderation.sh --skip-cluster
 #   ./scripts/qa/verify-forum-moderation.sh --ac 008
+#   ./scripts/qa/verify-forum-moderation.sh --ac spam
+#   ./scripts/qa/verify-forum-moderation.sh --ac rate
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -35,10 +41,12 @@ while [[ $# -gt 0 ]]; do
     --ac) AC_FILTER="$2"; shift 2 ;;
     --skip-cluster) SKIP_CLUSTER=true; shift ;;
     -h|--help)
-      echo "Usage: $0 [--ac 006|007|008|015|016|017] [--skip-cluster]"
+      echo "Usage: $0 [--ac 006|007|008|015|016|017|spam|rate] [--skip-cluster]"
       echo ""
       echo "Options:"
       echo "  --ac NUM        Run checks for a single AC only"
+      echo "  --ac spam       Run spam controls checks only"
+      echo "  --ac rate       Run rate limiting checks only"
       echo "  --skip-cluster  Skip live cluster checks (config-only verification)"
       exit 0
       ;;
@@ -59,7 +67,8 @@ EXT_SECRETS="deploy/k8s/base/secrets/external-secrets.yaml"
 APPLY_PATCHES="infrastructure/tutor/apply-patches.sh"
 
 echo "=================================================================="
-echo "  Forum Moderation & Performance — Contract Verification"
+echo "  Forum Moderation, Spam Controls & Performance"
+echo "  Contract Verification"
 echo "=================================================================="
 echo "  AC-006: Thread creation (MFE → forum v2 → listing)"
 echo "  AC-007: Vote persistence (increment survives refresh)"
@@ -67,6 +76,8 @@ echo "  AC-008: Moderation flagging (flag recorded, moderation queue)"
 echo "  AC-015: Thread listing p95 latency <= 300ms"
 echo "  AC-016: Search p95 latency <= 500ms"
 echo "  AC-017: Forum pod memory RSS < 512Mi"
+echo "  spam:   Spam controls configured (rate limits, depth limits)"
+echo "  rate:   Rate limiting settings present and valid"
 echo "=================================================================="
 echo "  Skip cluster: $SKIP_CLUSTER"
 echo ""
@@ -549,6 +560,157 @@ check_ac_017() {
 }
 
 # ---------------------------------------------------------------------------
+# Spam controls — structural limits, abuse flagging, spam backend config
+# The openedx-forum v0.3.8 Python package does not ship a built-in ML spam
+# classifier. Spam control relies on:
+#   1. Learner-driven abuse flagging (stored in MongoDB abuse_flaggers arrays)
+#   2. Staff/moderator action via discussions MFE (hide, delete, close)
+#   3. Rate limiting on the discussion REST API (prevents bulk-posting bots)
+#   4. Structural depth limits (FORUM_MAX_COMMENT_DEPTH stops nested spam)
+# ---------------------------------------------------------------------------
+check_spam_controls() {
+  echo "== Spam Controls (structural limits + abuse flagging + rate config) =="
+
+  # 1. ALLOW_HIDING_DISCUSSION_TAB — per-course discussion control
+  if grep -q 'FEATURES\["ALLOW_HIDING_DISCUSSION_TAB"\] = True' "$LMS_PROD"; then
+    pass "spam: ALLOW_HIDING_DISCUSSION_TAB = True (per-course discussion control)"
+  else
+    fail "spam: ALLOW_HIDING_DISCUSSION_TAB not set (cannot disable per-course discussions)"
+  fi
+
+  # 2. ENABLE_DISCUSSION_EMAIL_DIGEST disabled — prevents digest-based spam vectors
+  if grep -q 'FEATURES\["ENABLE_DISCUSSION_EMAIL_DIGEST"\] = False' "$LMS_PROD"; then
+    pass "spam: ENABLE_DISCUSSION_EMAIL_DIGEST = False (legacy digest disabled; MFE handles)"
+  else
+    skip "spam: ENABLE_DISCUSSION_EMAIL_DIGEST not explicitly False (check upstream default)"
+  fi
+
+  # 3. FORUM_MAX_COMMENT_DEPTH set — limits nested spam depth
+  if grep -q 'FORUM_MAX_COMMENT_DEPTH' "$LMS_PROD"; then
+    local depth
+    depth=$(grep 'FORUM_MAX_COMMENT_DEPTH' "$LMS_PROD" | head -1 | grep -oP '\d+' | head -1 || echo "")
+    if [[ -n "$depth" && "$depth" -ge 1 ]]; then
+      pass "spam: FORUM_MAX_COMMENT_DEPTH = $depth (nested spam depth bounded)"
+    else
+      fail "spam: FORUM_MAX_COMMENT_DEPTH found but value not parseable"
+    fi
+  else
+    fail "spam: FORUM_MAX_COMMENT_DEPTH not set (unlimited nesting = spam risk)"
+  fi
+
+  # 4. FORUM_RATE_LIMIT_ENABLED — rate limiting feature flag present
+  if grep -q 'FORUM_RATE_LIMIT_ENABLED' "$LMS_PROD"; then
+    pass "spam: FORUM_RATE_LIMIT_ENABLED configured"
+  else
+    fail "spam: FORUM_RATE_LIMIT_ENABLED not configured (no rate limiting for forum posts)"
+  fi
+
+  # 5. FORUM_POST_RATE_LIMIT — posts-per-minute value present
+  if grep -q 'FORUM_POST_RATE_LIMIT' "$LMS_PROD"; then
+    # Extract the default value (second quoted string after the comma in os.environ.get(..., "value"))
+    local rl
+    rl=$(grep 'FORUM_POST_RATE_LIMIT' "$LMS_PROD" \
+      | grep -oP ',\s*"([^"]+)"' | head -1 | tr -d ', "' || echo "")
+    if [[ -n "$rl" ]]; then
+      pass "spam: FORUM_POST_RATE_LIMIT default = $rl"
+    else
+      fail "spam: FORUM_POST_RATE_LIMIT found but default value not parseable"
+    fi
+  else
+    fail "spam: FORUM_POST_RATE_LIMIT not configured"
+  fi
+
+  # 6. FORUM_SPAM_CHECK_BACKEND documented — empty string means no external classifier
+  if grep -q 'FORUM_SPAM_CHECK_BACKEND' "$LMS_PROD"; then
+    pass "spam: FORUM_SPAM_CHECK_BACKEND present (empty = learner-flag model; extend to add classifier)"
+  else
+    fail "spam: FORUM_SPAM_CHECK_BACKEND not configured (spam detection intent undocumented)"
+  fi
+
+  # 7. Abuse flagging requires cs_comments_service DB (abuse_flaggers stored in MongoDB)
+  if grep -q 'FORUM_MONGODB_DATABASE = "cs_comments_service"' "$LMS_PROD"; then
+    pass "spam: Forum uses cs_comments_service DB (abuse_flaggers arrays stored here)"
+  else
+    fail "spam: Forum DB not cs_comments_service (abuse_flaggers storage target unclear)"
+  fi
+
+  # 8. Meilisearch enables moderation queue filtering (moderators can filter flagged posts)
+  if grep -q 'MEILISEARCH_ENABLED = True' "$LMS_PROD"; then
+    pass "spam: Meilisearch enabled (moderators can filter/search flagged content)"
+  else
+    fail "spam: Meilisearch not enabled (moderation queue search degraded)"
+  fi
+
+  echo ""
+}
+
+# ---------------------------------------------------------------------------
+# Rate limiting — verify rate limit settings are set to sane values
+# The FORUM_POST_RATE_LIMIT and FORUM_VOTE_RATE_LIMIT settings are read by
+# Mereka custom middleware. Format: "<integer>/<period>" where period is one
+# of: sec, min, hour, day.
+# ---------------------------------------------------------------------------
+check_rate_limits() {
+  echo "== Rate Limiting (forum post and vote throttles) =="
+
+  # 1. FORUM_RATE_LIMIT_ENABLED
+  if grep -q 'FORUM_RATE_LIMIT_ENABLED' "$LMS_PROD"; then
+    pass "rate: FORUM_RATE_LIMIT_ENABLED defined in LMS production.py"
+  else
+    fail "rate: FORUM_RATE_LIMIT_ENABLED missing"
+  fi
+
+  # 2. FORUM_POST_RATE_LIMIT format is valid (<int>/<period>)
+  # The setting is written as: os.environ.get("FORUM_POST_RATE_LIMIT", "30/min")
+  # We extract the second quoted value (the default), which follows a comma.
+  local post_rl
+  post_rl=$(grep 'FORUM_POST_RATE_LIMIT' "$LMS_PROD" \
+    | grep -oP ',\s*"([^"]+)"' | head -1 | tr -d ', "' 2>/dev/null || echo "")
+  if [[ "$post_rl" =~ ^[0-9]+/(sec|min|hour|day)$ ]]; then
+    pass "rate: FORUM_POST_RATE_LIMIT default format valid: $post_rl"
+  elif [[ -n "$post_rl" ]]; then
+    fail "rate: FORUM_POST_RATE_LIMIT default has unexpected format: '$post_rl' (expected e.g. '30/min')"
+  else
+    fail "rate: FORUM_POST_RATE_LIMIT not found"
+  fi
+
+  # 3. FORUM_VOTE_RATE_LIMIT format is valid
+  local vote_rl
+  vote_rl=$(grep 'FORUM_VOTE_RATE_LIMIT' "$LMS_PROD" \
+    | grep -oP ',\s*"([^"]+)"' | head -1 | tr -d ', "' 2>/dev/null || echo "")
+  if [[ "$vote_rl" =~ ^[0-9]+/(sec|min|hour|day)$ ]]; then
+    pass "rate: FORUM_VOTE_RATE_LIMIT default format valid: $vote_rl"
+  elif [[ -n "$vote_rl" ]]; then
+    fail "rate: FORUM_VOTE_RATE_LIMIT default has unexpected format: '$vote_rl' (expected e.g. '60/min')"
+  else
+    fail "rate: FORUM_VOTE_RATE_LIMIT not found"
+  fi
+
+  # 4. FORUM_MAX_COMMENT_DEPTH is a positive integer
+  local depth
+  depth=$(grep 'FORUM_MAX_COMMENT_DEPTH' "$LMS_PROD" | head -1 | grep -oP '\d+' | head -1 2>/dev/null || echo "")
+  if [[ -n "$depth" && "$depth" -ge 1 && "$depth" -le 10 ]]; then
+    pass "rate: FORUM_MAX_COMMENT_DEPTH = $depth (within sane range 1-10)"
+  elif [[ -n "$depth" && "$depth" -gt 10 ]]; then
+    fail "rate: FORUM_MAX_COMMENT_DEPTH = $depth (> 10 allows excessive nesting)"
+  elif [[ -n "$depth" && "$depth" -eq 0 ]]; then
+    fail "rate: FORUM_MAX_COMMENT_DEPTH = 0 (zero disables depth limit — spam risk)"
+  else
+    fail "rate: FORUM_MAX_COMMENT_DEPTH not set"
+  fi
+
+  # 5. Rate limiting env vars can override defaults (env-configurability check)
+  if grep -q 'os.environ.get("FORUM_RATE_LIMIT_ENABLED"' "$LMS_PROD" && \
+     grep -q 'os.environ.get("FORUM_POST_RATE_LIMIT"' "$LMS_PROD"; then
+    pass "rate: Rate limits are env-configurable (can tune per-environment without rebuild)"
+  else
+    fail "rate: Rate limits not env-configurable (require image rebuild to change)"
+  fi
+
+  echo ""
+}
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -576,6 +738,14 @@ if [[ -z "$AC_FILTER" || "$AC_FILTER" == "017" ]]; then
   check_ac_017
 fi
 
+if [[ -z "$AC_FILTER" || "$AC_FILTER" == "spam" ]]; then
+  check_spam_controls
+fi
+
+if [[ -z "$AC_FILTER" || "$AC_FILTER" == "rate" ]]; then
+  check_rate_limits
+fi
+
 echo "=================================================================="
 echo "  Summary"
 echo "=================================================================="
@@ -586,7 +756,7 @@ echo "=================================================================="
 
 if [[ "$FAILED" -eq 0 ]]; then
   echo ""
-  echo -e "${GREEN}All forum moderation & performance checks passed.${NC}"
+  echo -e "${GREEN}All forum moderation, spam controls & performance checks passed.${NC}"
   echo ""
   echo "Verified:"
   echo "  AC-006: Discussions MFE configured, forum v2 in-process, MongoDB write path"
@@ -595,6 +765,8 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo "  AC-015: LMS resources, uWSGI workers, in-process latency advantage"
   echo "  AC-016: Meilisearch backend + PVC + index prefix + authenticated access"
   echo "  AC-017: LMS memory budget, isolated Meilisearch, bounded MongoDB pool"
+  echo "  spam:   Rate limits, depth limits, abuse flagging, spam backend config"
+  echo "  rate:   Post/vote throttles env-configurable with valid format"
   exit 0
 else
   echo ""

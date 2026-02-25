@@ -115,6 +115,7 @@ allowed_root_md=(
   "CONTRIBUTING.md"
   "MIGRATION_CHECKLIST.md"
   "LOCAL_SETUP_COMPLETE.md"
+  "DEPR.md"
 )
 shopt -s nullglob
 root_mds=( *.md )

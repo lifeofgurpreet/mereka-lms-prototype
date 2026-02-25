@@ -56,7 +56,7 @@ echo ""
 
 # Step 3: Tutor Environment
 echo -e "${BLUE}Step 3: Configuring Tutor environment...${NC}"
-source ops/tutor-env.sh
+source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$REPO_ROOT/tutor_env"
 
 if [ ! -f "tutor_env/config.yml" ]; then

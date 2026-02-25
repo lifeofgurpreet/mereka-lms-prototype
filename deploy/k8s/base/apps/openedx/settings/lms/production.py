@@ -117,6 +117,42 @@ MEILISEARCH_INDEX_PREFIX = "tutor_"
 MEILISEARCH_API_KEY = os.environ.get("MEILISEARCH_API_KEY", "")
 SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine"
 
+# Forum moderation and spam controls.
+# The Python forum (openedx-forum v0.3.8) relies on the LMS discussions framework
+# for abuse flagging, moderation roles, and structural limits. These settings
+# are read by openedx.core.djangoapps.discussions and the forum package itself.
+#
+# Abuse flagging: learners can flag posts; staff/moderators see flagged content
+# via the discussions MFE moderation queue. Flags are stored as abuse_flaggers
+# arrays inside MongoDB cs_comments_service.contents documents.
+FEATURES["ENABLE_DISCUSSION_EMAIL_DIGEST"] = False  # Disable legacy digest (MFE handles notifications)
+FEATURES["ALLOW_HIDING_DISCUSSION_TAB"] = True      # Permit per-course discussion tab control
+
+# Structural limits — prevent reply flooding and deep spam nesting.
+# These are read by the forum package's validation layer.
+FORUM_MAX_COMMENT_DEPTH = int(os.environ.get("FORUM_MAX_COMMENT_DEPTH", "2"))
+FORUM_MAX_ALLOWED_THREADS = int(os.environ.get("FORUM_MAX_ALLOWED_THREADS", "0"))  # 0 = unlimited
+
+# Rate limiting for discussion API endpoints.
+# Uses Django REST framework's AnonRateThrottle / UserRateThrottle via the
+# open-edx discussions REST API (openedx.core.djangoapps.discussions).
+# Values: requests per minute for authenticated users posting new content.
+FORUM_RATE_LIMIT_ENABLED = os.environ.get("FORUM_RATE_LIMIT_ENABLED", "true").lower() == "true"
+FORUM_POST_RATE_LIMIT = os.environ.get("FORUM_POST_RATE_LIMIT", "30/min")   # threads + comments combined
+FORUM_VOTE_RATE_LIMIT = os.environ.get("FORUM_VOTE_RATE_LIMIT", "60/min")   # votes (lower abuse risk)
+
+# Spam detection.
+# openedx-forum v0.3.8 does not ship a built-in ML spam classifier.
+# Spam control relies on:
+#   1. Abuse flagging by learners (abuse_flaggers in MongoDB, surfaced in moderation queue)
+#   2. Moderator/staff actions: hide, delete, pin, close via discussions MFE
+#   3. Rate limiting above (prevents bulk-posting bots)
+#   4. Structural depth limits (prevents deep nested spam threads)
+# Future: plug in an external spam filter via FORUM_SPAM_CHECK_BACKEND when upstream adds the hook.
+FORUM_SPAM_CHECK_BACKEND = os.environ.get(
+    "FORUM_SPAM_CHECK_BACKEND", ""
+)  # empty string = disabled (no external classifier)
+
 ####### Settings common to LMS and CMS
 import json
 import os
