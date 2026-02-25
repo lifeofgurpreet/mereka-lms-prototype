@@ -56,7 +56,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-038 | P2 | Dashboards | Add onboarding dashboard: “Platform health in 5 panels” | OBS-036 | new dashboard json | dashboard deployed and linked in on-call playbook | planned |
 | OBS-039 | P2 | Dashboards | Add env comparison dashboard (dev vs nonprod vs prod) | OBS-005 | new dashboard json | same KPI appears side-by-side across environments | planned |
 | OBS-040 | P2 | Dashboards | Add dashboard snapshot export automation for incidents | OBS-038 | export script/workflow | incident workflow can attach snapshot artifact automatically | planned |
-| OBS-041 | P0 | Governance | Add CI lint for non-canonical observability command drift in `docs/` (global) | OBS-005 | lint script/workflow | CI blocks non-canonical runtime command references | planned |
+| OBS-041 | P0 | Governance | Add CI lint for non-canonical observability command drift in `docs/` (global) | OBS-005 | lint script/workflow | CI blocks non-canonical runtime command references | done |
 | OBS-042 | P1 | Governance | Add AC coverage map for observability scripts -> specs | OBS-041 | coverage map doc/json | each AC has at least one enforcing check mapped | planned |
 | OBS-043 | P1 | Governance | Add script contract tests for parity-delta/review/rollup tools | OBS-042 | test scripts | tools fail fast on malformed inputs and pass valid fixtures | planned |
 | OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | operations doc | retention windows defined and enforceable per artifact class | planned |

@@ -41,7 +41,7 @@ Repo integrity check:
 Runtime deployment coverage check:
 
 ```bash
-./scripts/qa/audit-observability.sh --mode runtime
+./scripts/qa/run-observability-first-class.sh --mode runtime
 ```
 
 DB exporter telemetry contract and runtime checks:
@@ -62,7 +62,7 @@ Grafana dashboard coverage check:
 Use strict mode when you want runtime freshness checks to fail hard (for CI gates or audits):
 
 ```bash
-STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+STRICT_RUNTIME=1 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
 ## Key Signals Added

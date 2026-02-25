@@ -130,7 +130,7 @@ Title: Create canonical tracker and execution dependencies
 ## 6) Evidence required before handoff
 
 - Manifest diff summary showing added/removed/retained monitoring resources.
-- Runtime check results from `scripts/qa/audit-observability.sh --mode runtime`.
+- Runtime check results from `scripts/qa/run-observability-first-class.sh --mode runtime`.
 - Metric scrape proof for newly added ServiceMonitors.
 - Alert presence proof from Prometheus rules endpoint or rule selector queries.
 - `/metrics` validation evidence from LMS and CMS.

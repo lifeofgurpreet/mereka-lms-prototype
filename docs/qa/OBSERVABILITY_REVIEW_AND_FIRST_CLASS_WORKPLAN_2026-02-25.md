@@ -104,7 +104,7 @@ Scope: Observability for Open edX (Mereka LMS) across local/dev/staging/prod and
 #### AC-OBS-002 (Service coverage)
 - [ ] Add ServiceMonitors for caddy, mfe, forum, discovery, ecommerce, credentials, and purchase-gateway in app repo and BBI mirror path.
 - [ ] Ensure scraping endpoints and pod/port targets are stable and tested.
-- [ ] Acceptance: `audit-observability.sh --mode runtime` (or equivalent) shows services present and scraped.
+- [ ] Acceptance: `run-observability-first-class.sh --mode runtime` (or equivalent) shows services present and scraped.
 
 #### AC-OBS-003 (Alerting coverage)
 - [ ] Add service-specific alert rules for missing surfaces and wire into reliability/routing policy.

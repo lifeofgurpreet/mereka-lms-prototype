@@ -113,8 +113,8 @@ jobs:
 
       - name: Validate active docs use canonical runtime observability command
         run: |
-          if rg -n "audit-observability\\.sh --mode (runtime|all)" docs/operations; then
-            echo "Non-canonical runtime observability commands found in active operations docs." >&2
+          if rg -n "audit-observability\\.sh --mode (runtime|all)" docs/operations docs/qa infrastructure/monitoring; then
+            echo "Non-canonical runtime observability commands found in active docs." >&2
             exit 1
           fi
 

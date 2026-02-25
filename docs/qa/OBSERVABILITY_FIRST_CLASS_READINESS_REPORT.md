@@ -276,7 +276,7 @@ Manual CI runtime path is now available in `.github/workflows/observability-comp
 ## 12) Parity execution status (2026-02-25)
 
 - Added canonical parity matrix: `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`.
-- CI now enforces active operations docs to use canonical runtime observability commands (fails on `audit-observability.sh --mode runtime|all` drift).
+- CI now enforces active operations/docs/runtime observability commands to use the canonical runner (`run-observability-first-class.sh`) and fails on non-canonical runtime command usage.
 - Runtime preflight now enforces parity mapping from `environment_label` to `dispatch_profile`:
   - `dev|nonprod -> nonprod`
   - `prod -> prod`

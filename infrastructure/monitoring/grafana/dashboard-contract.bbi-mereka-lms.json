@@ -1,55 +1,46 @@
 {
   "name": "Mereka LMS Grafana Dashboard Coverage Contract",
-  "dashboard_uid": "bbi-app-mereka-lms",
+  "dashboard_uid": "mereka-slo-overview",
   "required": {
     "datasources": [
       "prometheus"
     ],
     "panel_titles": [
-      "LMS",
-      "CMS (Studio)",
-      "Caddy",
-      "MySQL",
-      "Redis",
-      "LMS Availability (24h)",
-      "Auth Failures Over Time (by Service)",
-      "Recent Errors"
+      "Service Availability (30-day Rolling)",
+      "LMS Availability",
+      "CMS Availability",
+      "Deployment Policy",
+      "Ownership & Escalation",
+      "Error Budget Status",
+      "Error Budget Remaining (30d)",
+      "Error Budget Remaining (minutes)",
+      "Burn Rate Trend",
+      "Burn Rate - 1h Window (Tier 1)",
+      "Burn Rate - 6h Window (Tier 1)",
+      "LMS Latency (p50 / p95 / p99)",
+      "CMS Latency (p50 / p95 / p99)",
+      "Alert Delivery Drills",
+      "Alert Delivery Drills - Last 30 Days"
     ],
     "query_fragments": [
-      "kube_pod_status_phase",
-      "container_cpu_usage_seconds_total",
-      "container_memory_usage_bytes"
+      "mereka:http_requests:availability_ratio_5m",
+      "mereka:slo:error_budget_remaining_ratio",
+      "mereka:slo:burn_rate_1h",
+      "mereka:slo:burn_rate_6h",
+      "mereka:http_request_duration:p50_5m",
+      "mereka:http_request_duration:p95_5m",
+      "mereka:http_request_duration:p99_5m"
     ]
   },
   "recommended": {
-    "datasources": [
-      "prometheus-vps"
-    ],
+    "datasources": [],
     "panel_titles": [
-      "Velero Backup Verification",
-      "Velero Restore Drill",
-      "CrashLooping Pods",
-      "Pending Pods",
-      "Critical Deployment Availability",
-      "Synthetic Job Failures",
-      "MySQL Connection Utilization",
-      "MySQL Slow Queries",
-      "Redis Rejected Connections",
-      "Redis Evictions"
+      "Error Budget Status"
     ],
     "query_fragments": [
-      "kube_pod_container_status_waiting_reason",
-      "kube_deployment_status_replicas_unavailable",
-      "kube_job_status_failed",
-      "backup-verification",
-      "restore-test",
-      "auth-verify-prod",
-      "cert-verify-prod",
-      "mysql_global_status_threads_connected",
-      "mysql_global_variables_max_connections",
-      "mysql_global_status_slow_queries",
-      "redis_rejected_connections_total",
-      "redis_evicted_keys_total"
+      "mereka:http_requests:availability_ratio_5m",
+      "mereka:slo:error_budget_remaining_ratio",
+      "mereka:slo:burn_rate_1h"
     ]
   }
 }

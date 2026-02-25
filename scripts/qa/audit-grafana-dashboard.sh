@@ -12,7 +12,12 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-DASHBOARD_FILE="${DASHBOARD_FILE:-/home/gurpreet/projects/observability/dashboards/03-applications/bbi-mereka-lms.json}"
+DEFAULT_DASHBOARD_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboards/slo-overview.json"
+LEGACY_DASHBOARD_FILE="${HOME}/projects/observability/dashboards/03-applications/bbi-mereka-lms.json"
+DASHBOARD_FILE="${DASHBOARD_FILE:-$DEFAULT_DASHBOARD_FILE}"
+if [[ ! -f "$DASHBOARD_FILE" ]] && [[ -f "$LEGACY_DASHBOARD_FILE" ]]; then
+  DASHBOARD_FILE="$LEGACY_DASHBOARD_FILE"
+fi
 CONTRACT_FILE="${CONTRACT_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
 JSON_OUT=0
 STRICT_REQUIRED=0
@@ -107,12 +112,14 @@ collect_dashboard_data() {
   local datasources_file="$2"
   local queries_file="$3"
 
-  jq -r '.panels[]? | (.title // empty)' "$DASHBOARD_FILE" | sed '/^$/d' | sort -u >"$titles_file"
+  jq -r '.. | objects | (.title // empty)' "$DASHBOARD_FILE" | sed '/^$/d' | sort -u >"$titles_file"
   jq -r '
     [.. | objects | .datasource? // empty]
     | .[]
-    | if type=="string" then .
-      elif type=="object" then (.uid // .type // "")
+    | if type=="string" then
+        if (. | test("^\\$\\{?DS_PROMETHEUS\\}?$")) then "prometheus" else . end
+      elif type=="object" then
+        if has("uid") and (.uid | test("^\\$\\{?DS_PROMETHEUS\\}?$")) then "prometheus" else (.uid // .type // "") end
       else "" end
   ' "$DASHBOARD_FILE" | sed '/^$/d' | sort -u >"$datasources_file"
   jq -r '
