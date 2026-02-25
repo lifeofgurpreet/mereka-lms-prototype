@@ -227,7 +227,7 @@ Suggested policy gate:
   - `deploy/k8s/base/apps/openedx/settings/cms/mereka_forwarded_headers.py`
 - Added regression guard in `scripts/qa/verify-observability-validation.sh` to fail if the broken pod-IP regex reappears.
 - Upgraded `deploy/k8s/base/monitoring/verify.sh` to enforce runtime contract (`/metrics` must return `HTTP 200` for LMS and CMS).
-- Upgraded `scripts/qa/verify-observability-runtime.sh` to fail `AC-OVR-016` when LMS/CMS `/metrics` do not return `HTTP 200`.
+- Upgraded `scripts/qa/verify-observability-runtime.sh` to fail `AC-OVR-016` when LMS/CMS `/metrics` do not return `HTTP 200`, and added Prometheus payload-shape checks (`# HELP`/`# TYPE` markers plus numeric sample lines) to ensure observed data is scrape-safe.
 - Upgraded `scripts/qa/validate-observability-compliance.sh --mode runtime` to record explicit `AC-OVR-016` pass/fail for LMS/CMS `/metrics` endpoint health.
 - Removed stale documentation language that treated `/metrics -> 400` as expected behavior.
 
