@@ -10,6 +10,7 @@ set -euo pipefail
 DIR=""
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/observability-status.sh"
+TRACE_IDENTITY_REQUIRED="${OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY:-0}"
 
 usage() {
   cat <<'EOF'
@@ -58,6 +59,7 @@ check_runtime_bundle() {
   local correlation_txt="$DIR/observability-correlation-headers-runtime.txt"
   local verifier_md="$DIR/observability-runtime-verify-runtime.md"
   local preflight_md="$DIR/observability-runtime-preflight.md"
+  local tracing_txt="$DIR/observability-tracing-runtime.txt"
 
   if [[ ! -f "$index" ]]; then
     return 0
@@ -127,6 +129,28 @@ check_runtime_bundle() {
     fi
   else
     echo "FAIL runtime: required correlation header evidence file missing: $correlation_txt"
+    failures=$((failures + 1))
+  fi
+
+  if [[ -f "$tracing_txt" ]]; then
+    local tracing_identity
+    tracing_identity="$(extract_md_identity "$tracing_txt")"
+    if [[ -z "$tracing_identity" ]]; then
+      echo "FAIL runtime: tracing evidence identity missing in $tracing_txt"
+      failures=$((failures + 1))
+    elif [[ "$index_identity" != "$tracing_identity" ]]; then
+      echo "FAIL runtime: tracing evidence identity mismatch"
+      echo "  index:  $index_identity"
+      echo "  tracing: $tracing_identity"
+      failures=$((failures + 1))
+    fi
+
+    if ! has_observability_status_line "$tracing_txt"; then
+      echo "FAIL runtime: tracing evidence missing PASS/FAIL/WARN status lines in $tracing_txt"
+      failures=$((failures + 1))
+    fi
+  elif [[ "$TRACE_IDENTITY_REQUIRED" == "1" ]]; then
+    echo "FAIL runtime: required tracing evidence file missing: $tracing_txt"
     failures=$((failures + 1))
   fi
 

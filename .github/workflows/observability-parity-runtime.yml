@@ -50,16 +50,19 @@ jobs:
               K8S_CONTEXT="${OBS_PARITY_DEV_K8S_CONTEXT:-}"
               GCP_PROJECT_VALUE="${OBS_PARITY_DEV_GCP_PROJECT:-mereka-lms}"
               PROFILE="nonprod"
+              TRACING_REQUIRED="0"
               ;;
             nonprod)
               K8S_CONTEXT="${OBS_PARITY_NONPROD_K8S_CONTEXT:-}"
               GCP_PROJECT_VALUE="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
               PROFILE="nonprod"
+              TRACING_REQUIRED="1"
               ;;
             prod)
               K8S_CONTEXT="${OBS_PARITY_PROD_K8S_CONTEXT:-}"
               GCP_PROJECT_VALUE="${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}"
               PROFILE="prod"
+              TRACING_REQUIRED="0"
               ;;
             *)
               echo "Unsupported matrix env label: ${{ matrix.env_label }}" >&2
@@ -74,6 +77,8 @@ jobs:
           echo "OBS_GCP_PROJECT=$GCP_PROJECT_VALUE" >> "$GITHUB_ENV"
           echo "OBS_PROFILE=$PROFILE" >> "$GITHUB_ENV"
           echo "OBS_EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          echo "OBS_REQUIRE_TRACING_ARTIFACT=$TRACING_REQUIRED" >> "$GITHUB_ENV"
+          echo "OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY=$TRACING_REQUIRED" >> "$GITHUB_ENV"
 
           if [ -z "$K8S_CONTEXT" ]; then
             echo "Missing required environment context variable: OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT." >&2
@@ -138,6 +143,7 @@ jobs:
           OBSERVABILITY_EVIDENCE_DIR="$OBS_EVIDENCE_DIR" \
           ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
+          OBS_REQUIRE_TRACING_ARTIFACT="$OBS_REQUIRE_TRACING_ARTIFACT" \
           ./scripts/qa/build-observability-parity-delta.sh \
             --env "${{ matrix.env_label }}" \
             --evidence-dir "$OBS_EVIDENCE_DIR"
@@ -153,6 +159,7 @@ jobs:
       - name: Verify parity evidence identity contract
         if: always()
         run: |
+          OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY="$OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY" \
           ./scripts/qa/verify-observability-evidence-identity.sh \
             --dir "$OBS_EVIDENCE_DIR"
 
@@ -173,6 +180,7 @@ jobs:
             ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.md
             ${{ env.OBS_EVIDENCE_DIR }}/observability-first-class-runtime-evidence-index.json
             ${{ env.OBS_EVIDENCE_DIR }}/observability-correlation-headers-runtime.txt
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-tracing-runtime.txt
 
   parity-rollup:
     name: Parity rollup summary

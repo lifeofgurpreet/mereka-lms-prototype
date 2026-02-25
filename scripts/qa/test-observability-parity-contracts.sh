@@ -66,6 +66,7 @@ run_delta_case() {
   local env_label="$2"
   local evidence_dir="$3"
   local expect_exit_code="$4"
+  local tracing_required="${5:-0}"
   local out_dir="$TMP_ROOT/delta/$case_name/$env_label"
   local out_md="$out_dir/observability-parity-delta.md"
   local out_json="$out_dir/observability-parity-delta.json"
@@ -73,13 +74,23 @@ run_delta_case() {
   mkdir -p "$out_dir"
 
   set +e
-  "$SCRIPT_DIR/build-observability-parity-delta.sh" \
+  if [[ "$tracing_required" == "1" ]]; then
+    OBS_REQUIRE_TRACING_ARTIFACT=1 "$SCRIPT_DIR/build-observability-parity-delta.sh" \
+      --env "$env_label" \
+      --evidence-dir "$evidence_dir" \
+      --out-md "$out_md" \
+      --out-json "$out_json" \
+      >"$out_dir/stdout.log" \
+      2>"$out_dir/stderr.log"
+  else
+    "$SCRIPT_DIR/build-observability-parity-delta.sh" \
     --env "$env_label" \
     --evidence-dir "$evidence_dir" \
     --out-md "$out_md" \
     --out-json "$out_json" \
     >"$out_dir/stdout.log" \
     2>"$out_dir/stderr.log"
+  fi
   observed_status=$?
   set -e
 
@@ -217,15 +228,23 @@ run_identity_case() {
   local case_name="$1"
   local dir="$2"
   local expect_exit_code="$3"
+  local tracing_required="${4:-0}"
   local observed_status=0
   local out_dir="$TMP_ROOT/identity/$case_name"
   mkdir -p "$out_dir"
 
   set +e
-  "$SCRIPT_DIR/verify-observability-evidence-identity.sh" \
+  if [[ "$tracing_required" == "1" ]]; then
+    OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY=1 "$SCRIPT_DIR/verify-observability-evidence-identity.sh" \
     --dir "$dir" \
     >"$out_dir/stdout.log" \
     2>"$out_dir/stderr.log"
+  else
+    "$SCRIPT_DIR/verify-observability-evidence-identity.sh" \
+    --dir "$dir" \
+    >"$out_dir/stdout.log" \
+    2>"$out_dir/stderr.log"
+  fi
   observed_status=$?
   set -e
 
@@ -267,6 +286,7 @@ run_correlation_header_case() {
 run_delta_case "valid-dev" "dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_delta_case "valid-nonprod" "nonprod" "$FIXTURES_ROOT/valid/delta/nonprod" 0
 run_delta_case "valid-prod" "prod" "$FIXTURES_ROOT/valid/delta/prod" 0
+run_delta_case "invalid-nonprod-tracing-required-missing" "nonprod" "$FIXTURES_ROOT/valid/delta/nonprod" 1 1
 run_delta_case "invalid-missing-files" "dev" "$FIXTURES_ROOT/malformed/delta-missing-files/dev" 1
 run_delta_case "invalid-missing-correlation" "dev" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
 run_delta_case "invalid-correlation-status" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
@@ -287,6 +307,7 @@ run_rollup_case "valid-no-skip-enforced" "$FIXTURES_ROOT/valid/rollup" 0
 run_rollup_case "invalid-missing-artifacts" "$FIXTURES_ROOT/malformed/rollup-missing-parity-dev" 1
 
 run_identity_case "valid-dev" "$FIXTURES_ROOT/valid/delta/dev" 0
+run_identity_case "valid-nonprod-tracing-required-missing" "$FIXTURES_ROOT/valid/delta/nonprod" 1 1
 run_identity_case "invalid-missing-correlation" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
 run_identity_case "invalid-correlation-status" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
 run_identity_case "invalid-correlation-status-substring" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status-word/dev" 1

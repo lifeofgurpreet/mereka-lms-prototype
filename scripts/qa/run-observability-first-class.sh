@@ -69,6 +69,8 @@ COMPLIANCE_MD="$OUT_DIR/observability-compliance-${MODE}.md"
 RUNTIME_TXT="$OUT_DIR/observability-runtime-verify-${MODE}.txt"
 RUNTIME_MD="$OUT_DIR/observability-runtime-verify-${MODE}.md"
 CORRELATION_TXT="$OUT_DIR/observability-correlation-headers-${MODE}.txt"
+COVERAGE_TXT="$OUT_DIR/observability-logging-pipeline-${MODE}.txt"
+TRACING_TXT="$OUT_DIR/observability-tracing-${MODE}.txt"
 COVERAGE_JSON="$OUT_DIR/observability-coverage-${MODE}.json"
 COVERAGE_MD="$OUT_DIR/observability-coverage-${MODE}.md"
 INDEX_JSON="$OUT_DIR/observability-first-class-${MODE}-evidence-index.json"
@@ -127,6 +129,25 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   VERIFY_CORRELATION_GCP_PROJECT="$GCP_PROJECT_VALUE" \
   VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
   ./scripts/qa/verify-correlation-header-propagation.sh "${CORRELATION_ARGS[@]}" > "$CORRELATION_TXT"
+
+  echo "==> Running logging pipeline verification"
+  VERIFY_LOGGING_PIPELINE_RUNNER="run-observability-first-class" \
+  APP_NS="$APP_NAMESPACE" \
+  K8S_CONTEXT="$K8S_CONTEXT" \
+  VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE="$COVERAGE_TXT" \
+  ./scripts/qa/verify-logging-pipeline.sh $STRICT_FLAG > "$COVERAGE_TXT"
+
+  echo "==> Running tracing verification"
+  TRACING_TMP="$TRACING_TXT.tmp.$$"
+  APP_NS="$APP_NAMESPACE" \
+  K8S_CONTEXT="$K8S_CONTEXT" \
+  TEMPO_URL="${TEMPO_URL:-}" \
+  ./scripts/qa/verify-observability-tracing.sh $STRICT_FLAG > "$TRACING_TMP"
+  {
+    echo "- evidence_identity: env=$ENV_LABEL;profile=$DISPATCH_PROFILE;context=${K8S_CONTEXT:-default};project=$GCP_PROJECT_VALUE"
+    cat "$TRACING_TMP"
+  } > "$TRACING_TXT"
+  rm -f "$TRACING_TMP"
 fi
 
 echo "==> Building evidence index"
@@ -147,7 +168,13 @@ coverage_md = Path(${COVERAGE_MD@Q})
 
 files = [str(compliance_json), str(compliance_md), str(coverage_json), str(coverage_md)]
 if mode in ("runtime", "all"):
-    files.extend([str(runtime_txt), str(runtime_md), str(correlation_txt)])
+    files.extend([
+        str(runtime_txt),
+        str(runtime_md),
+        str(correlation_txt),
+        str(coverage_txt),
+        str(tracing_txt),
+    ])
 
 payload = {
     "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),

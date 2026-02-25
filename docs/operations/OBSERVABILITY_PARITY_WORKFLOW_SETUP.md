@@ -37,6 +37,8 @@ Shared cluster access variables (already used by other workflows):
 5. Rollup gate is strict no-skip (`--require-no-skips`), so dev/nonprod skips fail consolidated parity status.
 6. Scheduled runs now validate streak continuity with `scripts/qa/verify-parity-rollup-stability.sh` and require
    three consecutive scheduled successful rollups to satisfy sustained stability criteria.
+7. Non-production tracing pilot checks are strict in the nonprod lane by setting workflow runtime env
+   `OBS_REQUIRE_TRACING_ARTIFACT=1` and `OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY=1` during that lane only.
 
 ## Runtime Outputs Per Environment
 
@@ -51,6 +53,8 @@ Artifacts uploaded as `observability-parity-<env>`:
 7. `observability-runtime-verify-runtime.md`
 8. `observability-first-class-runtime-evidence-index.json`
 9. `observability-correlation-headers-runtime.txt`
+10. `observability-logging-pipeline-runtime.txt`
+11. `observability-tracing-runtime.txt`
 
 Consolidated rollup artifact:
 1. `observability-parity-rollup` (workflow artifact)
@@ -89,6 +93,14 @@ Top failures: <PARITY-xxx checks>
 Owner: <team/person>
 Target fix date: <YYYY-MM-DD>
 ```
+
+## Nonprod Tracing Evidence Step (Pilot Track)
+
+For each nonprod parity run, the nonprod lane must also ensure:
+
+1. `observability-logging-pipeline-runtime.txt` exists and includes all AC-LOG checks.
+2. `observability-tracing-runtime.txt` exists and documents the selected pilot tracing contract status.
+3. Pilot flow traceability evidence is captured in the weekly handoff (`docs/evidence/observability/`), including one trace path with matching request-id/log correlation.
 
 Automation note:
 - `scripts/qa/build-observability-parity-review.sh` now auto-generates

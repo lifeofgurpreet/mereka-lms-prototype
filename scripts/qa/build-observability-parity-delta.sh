@@ -80,6 +80,7 @@ identity_env=""
 identity_profile=""
 identity_context=""
 identity_project=""
+REQUIRE_TRACING_ARTIFACT="${OBS_REQUIRE_TRACING_ARTIFACT:-0}"
 RESULTS_FILE="$(mktemp -t obs-parity-delta.XXXXXX)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
 
@@ -132,6 +133,27 @@ for f in "${REQUIRED_FILES[@]}"; do
     record fail "PARITY-002" "Required artifact missing: $f"
   fi
 done
+
+TRACE_ARTIFACT="$EVIDENCE_DIR/observability-tracing-runtime.txt"
+if [[ -f "$TRACE_ARTIFACT" ]]; then
+  if [[ "$REQUIRE_TRACING_ARTIFACT" == "1" ]]; then
+    record pass "PARITY-011" "Required tracing evidence artifact present: observability-tracing-runtime.txt"
+  else
+    record pass "PARITY-011" "Tracing evidence artifact present (optional): observability-tracing-runtime.txt"
+  fi
+
+  if has_observability_status_line "$TRACE_ARTIFACT"; then
+    record pass "PARITY-012" "Tracing evidence includes PASS/FAIL/WARN status lines"
+  else
+    record fail "PARITY-012" "Tracing evidence missing PASS/FAIL/WARN status lines"
+  fi
+else
+  if [[ "$REQUIRE_TRACING_ARTIFACT" == "1" ]]; then
+    record fail "PARITY-011" "Required tracing evidence artifact missing: observability-tracing-runtime.txt"
+  else
+    record pass "PARITY-011" "Tracing evidence artifact is optional and currently missing: observability-tracing-runtime.txt"
+  fi
+fi
 
 if [[ -f "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt" ]]; then
   if has_observability_status_line "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt"; then
