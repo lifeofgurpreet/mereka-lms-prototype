@@ -74,8 +74,29 @@ mkdir -p "$(dirname "$OUT_JSON")"
 
 PASS=0
 FAIL=0
+identity_env=""
+identity_profile=""
+identity_context=""
+identity_project=""
 RESULTS_FILE="$(mktemp -t obs-parity-delta.XXXXXX)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
+
+extract_identity_field() {
+  local identity_payload="$1"
+  local field="$2"
+  local segment
+  local key
+
+  IFS=';' read -r -a identity_segments <<< "$identity_payload"
+  for segment in "${identity_segments[@]}"; do
+    key="${segment%%=*}"
+    if [[ "$key" == "$field" ]]; then
+      printf '%s' "${segment#*=}"
+      return 0
+    fi
+  done
+  return 1
+}
 
 record() {
   local status="$1"
@@ -116,8 +137,22 @@ if [[ -f "$INDEX_FILE" ]]; then
     identity="$(jq -r '.identity // ""' "$INDEX_FILE")"
     if [[ -n "$identity" ]]; then
       record pass "PARITY-004" "Evidence index contains identity"
-      identity_env="$(sed -n 's/^env=\([^;]*\);.*$/\1/p' <<<"$identity")"
-      identity_profile="$(sed -n 's/^env=[^;]*;profile=\([^;]*\);.*$/\1/p' <<<"$identity")"
+      identity_env="$(extract_identity_field "$identity" "env" || true)"
+      identity_profile="$(extract_identity_field "$identity" "profile" || true)"
+      identity_context="$(extract_identity_field "$identity" "context" || true)"
+      identity_project="$(extract_identity_field "$identity" "project" || true)"
+
+      if [[ -n "$identity_context" ]]; then
+        record pass "PARITY-007" "Identity context present"
+      else
+        record fail "PARITY-007" "Identity context missing"
+      fi
+
+      if [[ -n "$identity_project" ]]; then
+        record pass "PARITY-008" "Identity project present"
+      else
+        record fail "PARITY-008" "Identity project missing"
+      fi
 
       if [[ "$identity_env" == "$ENV_LABEL" ]]; then
         record pass "PARITY-005" "Identity env matches expected env ($ENV_LABEL)"
@@ -165,17 +200,21 @@ TOTAL=$((PASS + FAIL))
   fi
 } > "$OUT_MD"
 
-python3 - "$ENV_LABEL" "$EXPECTED_PROFILE" "$PASS" "$FAIL" "$TOTAL" "$RESULTS_FILE" > "$OUT_JSON" <<'PY'
+python3 - "$ENV_LABEL" "$EXPECTED_PROFILE" "$identity_env" "$identity_profile" "$identity_context" "$identity_project" "$PASS" "$FAIL" "$TOTAL" "$RESULTS_FILE" > "$OUT_JSON" <<'PY'
 import json
 import sys
 from datetime import datetime
 
 env_label = sys.argv[1]
 expected_profile = sys.argv[2]
-passed = int(sys.argv[3])
-failed = int(sys.argv[4])
-total = int(sys.argv[5])
-results_path = sys.argv[6]
+identity_env = sys.argv[3]
+identity_profile = sys.argv[4]
+identity_context = sys.argv[5]
+identity_project = sys.argv[6]
+passed = int(sys.argv[7])
+failed = int(sys.argv[8])
+total = int(sys.argv[9])
+results_path = sys.argv[10]
 
 checks = []
 with open(results_path, "r", encoding="utf-8") as f:
@@ -190,6 +229,12 @@ print(json.dumps({
     "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
     "environment": env_label,
     "expected_profile": expected_profile,
+    "identity": {
+        "env": identity_env,
+        "profile": identity_profile,
+        "context": identity_context,
+        "project": identity_project,
+    },
     "summary": {
         "pass": passed,
         "fail": failed,
