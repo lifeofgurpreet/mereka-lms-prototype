@@ -213,6 +213,38 @@ resource_exists() {
   return 1
 }
 
+resource_exists_with_alias() {
+  local resource_kind="$1"
+  local resource_name="$2"
+
+  local namespace
+  local -a candidates
+
+  candidates=("$resource_name")
+
+  if [[ "$resource_kind" == "servicemonitor" ]]; then
+    case "$resource_name" in
+      caddy-metrics)
+        candidates+=("caddy")
+        ;;
+      caddy)
+        candidates+=("caddy-metrics")
+        ;;
+    esac
+  fi
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    namespace="$(resource_exists "$resource_kind" "$candidate" || true)"
+    if [[ -n "$namespace" ]]; then
+      echo "${namespace}|${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 declare -A sm_file_set
 for sm in "${REQUIRED_SERVICE_MONITORS[@]}"; do
   sm_file_set[$sm]=1
@@ -282,9 +314,15 @@ fi
 if [[ "$has_runtime_access" -eq 1 ]]; then
   for sm in "${REQUIRED_SERVICE_MONITOR_RUNTIME[@]}"; do
     # Keep command substitution non-fatal in strict mode when a resource is absent.
-    runtime_ns="$(resource_exists servicemonitor "$sm" || true)"
-    if [[ -n "$runtime_ns" ]]; then
-      record pass "runtime" "service-monitor-live" "$sm" "found in namespace $runtime_ns"
+    runtime_hit="$(resource_exists_with_alias servicemonitor "$sm" || true)"
+    if [[ -n "$runtime_hit" ]]; then
+      runtime_ns="${runtime_hit%|*}"
+      runtime_name="${runtime_hit#*|}"
+      if [[ "$runtime_name" != "$sm" ]]; then
+        record pass "runtime" "service-monitor-live" "$sm" "found as alias '$runtime_name' in namespace $runtime_ns"
+      else
+        record pass "runtime" "service-monitor-live" "$sm" "found in namespace $runtime_ns"
+      fi
     else
       if [[ "$STRICT" == "1" ]]; then
         record fail "runtime" "service-monitor-live" "$sm" "missing in cluster"
