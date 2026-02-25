@@ -53,6 +53,7 @@ extract_md_identity() {
 check_runtime_bundle() {
   local index="$DIR/observability-first-class-runtime-evidence-index.json"
   local compliance_md="$DIR/observability-compliance-runtime.md"
+  local correlation_txt="$DIR/observability-correlation-headers-runtime.txt"
   local verifier_md="$DIR/observability-runtime-verify-runtime.md"
   local preflight_md="$DIR/observability-runtime-preflight.md"
 
@@ -99,6 +100,16 @@ check_runtime_bundle() {
       echo "  preflight: $preflight_identity"
       failures=$((failures + 1))
     fi
+  fi
+
+  if [[ -f "$correlation_txt" ]]; then
+    if ! grep -Eq 'PASS|FAIL|WARN' "$correlation_txt"; then
+      echo "FAIL runtime: correlation evidence missing PASS/FAIL/WARN status lines in $correlation_txt"
+      failures=$((failures + 1))
+    fi
+  else
+    echo "FAIL runtime: required correlation header evidence file missing: $correlation_txt"
+    failures=$((failures + 1))
   fi
 
   echo "OK   runtime evidence identity"
