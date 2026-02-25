@@ -131,6 +131,14 @@ for f in "${REQUIRED_FILES[@]}"; do
   fi
 done
 
+if [[ -f "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt" ]]; then
+  if grep -Eq 'PASS|FAIL|WARN' "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt"; then
+    record pass "PARITY-009" "Correlation header evidence includes PASS/FAIL/WARN status"
+  else
+    record fail "PARITY-009" "Correlation header evidence missing PASS/FAIL/WARN status line"
+  fi
+fi
+
 INDEX_FILE="$EVIDENCE_DIR/observability-first-class-runtime-evidence-index.json"
 if [[ -f "$INDEX_FILE" ]]; then
   if command -v jq >/dev/null 2>&1 && jq -e . "$INDEX_FILE" >/dev/null 2>&1; then
