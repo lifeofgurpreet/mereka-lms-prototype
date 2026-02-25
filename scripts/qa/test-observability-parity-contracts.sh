@@ -271,6 +271,8 @@ run_identity_case "invalid-correlation-status-substring" "$FIXTURES_ROOT/malform
 run_identity_case "invalid-correlation-empty" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-empty/dev" 1
 run_identity_case "invalid-correlation-lowercase" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-lowercase/dev" 1
 run_identity_case "invalid-correlation-missing-headers" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-missing-headers/dev" 1
+run_identity_case "invalid-correlation-missing-identity" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-missing-identity/dev" 1
+run_identity_case "invalid-correlation-identity-mismatch" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-identity-mismatch/dev" 1
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2
