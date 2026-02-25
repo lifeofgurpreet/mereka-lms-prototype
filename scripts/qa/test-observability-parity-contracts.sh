@@ -210,11 +210,40 @@ run_rollup_case() {
   log_result PASS "$case_name" "ok"
 }
 
+run_identity_case() {
+  local case_name="$1"
+  local dir="$2"
+  local expect_exit_code="$3"
+  local observed_status=0
+  local out_dir="$TMP_ROOT/identity/$case_name"
+  mkdir -p "$out_dir"
+
+  if ! "$SCRIPT_DIR/verify-observability-evidence-identity.sh" \
+    --dir "$dir" \
+    >"$out_dir/stdout.log" \
+    2>"$out_dir/stderr.log"; then
+    observed_status=$?
+  fi
+
+  if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
+    log_result FAIL "$case_name(identity)" "exit_code=$observed_status expected=$expect_exit_code"
+    return
+  fi
+
+  if [[ "$expect_exit_code" -ne 0 ]]; then
+    log_result PASS "$case_name(identity)" "expected failure observed"
+    return
+  fi
+
+  log_result PASS "$case_name(identity)" "ok"
+}
+
 run_delta_case "valid-dev" "dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_delta_case "valid-nonprod" "nonprod" "$FIXTURES_ROOT/valid/delta/nonprod" 0
 run_delta_case "valid-prod" "prod" "$FIXTURES_ROOT/valid/delta/prod" 0
 run_delta_case "invalid-missing-files" "dev" "$FIXTURES_ROOT/malformed/delta-missing-files/dev" 1
 run_delta_case "invalid-missing-correlation" "dev" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
+run_delta_case "invalid-correlation-status" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
 run_delta_case "invalid-identity-mismatch" "nonprod" "$FIXTURES_ROOT/malformed/delta-identity-mismatch/nonprod" 1
 
 run_review_case "valid" "dev" "$FIXTURES_ROOT/valid/review/dev/observability-parity-delta.json" 0
@@ -225,6 +254,9 @@ run_review_case "invalid-bad-json" "dev" "$FIXTURES_ROOT/malformed/review/bad-js
 run_rollup_case "valid" "$FIXTURES_ROOT/valid/rollup" 0
 run_rollup_case "valid-no-skip-enforced" "$FIXTURES_ROOT/valid/rollup" 0
 run_rollup_case "invalid-missing-artifacts" "$FIXTURES_ROOT/malformed/rollup-missing-parity-dev" 1
+
+run_identity_case "valid-dev" "$FIXTURES_ROOT/valid/delta/dev" 0
+run_identity_case "invalid-missing-correlation" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2
