@@ -130,6 +130,12 @@ jobs:
             --delta-json "$OBS_EVIDENCE_DIR/observability-parity-delta.json" \
             --out-md "$OBS_EVIDENCE_DIR/observability-parity-review.md"
 
+      - name: Verify parity evidence identity contract
+        if: always()
+        run: |
+          ./scripts/qa/verify-observability-evidence-identity.sh \
+            --dir "$OBS_EVIDENCE_DIR"
+
       - name: Upload parity artifacts
         if: always()
         uses: actions/upload-artifact@v4

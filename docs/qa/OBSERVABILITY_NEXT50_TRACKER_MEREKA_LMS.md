@@ -46,7 +46,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-028 | P1 | DB/cache | Add saturation forecast panel (7d trend) for MySQL/Redis | OBS-026 | dashboard update | forecast panels present and query-valid | planned |
 | OBS-029 | P1 | DB/cache | Add alert for persistent high connection-utilization with cooldown | OBS-026 | alert rule update | alert fires only on sustained condition; no flap | planned |
 | OBS-030 | P1 | DB/cache | Add atlas connectivity trend panel with failure histogram | OBS-006 | dashboard update | panel appears in contract and passes audit | planned |
-| OBS-031 | P0 | DR | Add strict identity verification to parity rollup artifacts | OBS-005 | rollup script update | rollup fails on identity mismatch across env artifacts | planned |
+| OBS-031 | P0 | DR | Add strict identity verification to parity rollup artifacts | OBS-005 | rollup script update | rollup fails on identity mismatch across env artifacts | done |
 | OBS-032 | P0 | DR | Add DR evidence manifest schema check (required files + hashes) | OBS-031 | DR script enhancement | bundle creation fails if manifest contract breaks | planned |
 | OBS-033 | P1 | DR | Add restore-drill trend panel (last 6 runs) | OBS-032 | dashboard panel | operator sees pass/fail trend in one view | planned |
 | OBS-034 | P1 | DR | Add RTO/RPO evidence fields to DR bundle manifest | OBS-032 | manifest extension | manifest includes measured RTO/RPO per drill | planned |
