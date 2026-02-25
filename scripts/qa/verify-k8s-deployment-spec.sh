@@ -465,7 +465,11 @@ check_alertrules() {
 
     local monitoring_dir="${BASE_DIR}/monitoring"
 
-    if find "$monitoring_dir" -name "*.yaml" -exec grep -l "kind: PrometheusRule" {} \; | grep -q .; then
+    # Capture to variable to avoid SIGPIPE when grep -q exits early
+    local found_files
+    found_files=$(find "$monitoring_dir" -name "*.yaml" -exec grep -l "kind: PrometheusRule" {} \; 2>/dev/null || echo "")
+
+    if [[ -n "$found_files" ]]; then
         pass "PrometheusRule found in monitoring directory"
     else
         fail "No PrometheusRule found in $monitoring_dir"
