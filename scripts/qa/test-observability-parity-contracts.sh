@@ -308,6 +308,7 @@ run_rollup_case "invalid-missing-artifacts" "$FIXTURES_ROOT/malformed/rollup-mis
 
 run_identity_case "valid-dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_identity_case "valid-nonprod-tracing-required-missing" "$FIXTURES_ROOT/valid/delta/nonprod" 1 1
+run_identity_case "invalid-nonprod-tracing-identity-mismatch" "$FIXTURES_ROOT/malformed/delta-tracing-identity-mismatch/nonprod" 1 1
 run_identity_case "invalid-missing-correlation" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
 run_identity_case "invalid-correlation-status" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
 run_identity_case "invalid-correlation-status-substring" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status-word/dev" 1
