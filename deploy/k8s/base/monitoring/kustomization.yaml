@@ -10,6 +10,7 @@ configMapGenerator:
 resources:
   - servicemonitor-caddy.yaml
   - servicemonitor-credentials.yaml
+  - servicemonitor-purchase-gateway.yaml
   - servicemonitor-lms.yaml
   - servicemonitor-cms.yaml
   - servicemonitor-discovery.yaml

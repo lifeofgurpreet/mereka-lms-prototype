@@ -61,6 +61,7 @@ REQUIRED_SMS=(
   "servicemonitor-mysql.yaml"
   "servicemonitor-redis.yaml"
   "servicemonitor-enterprise.yaml"
+  "servicemonitor-purchase-gateway.yaml"
   "servicemonitor-xqueue.yaml"
   "servicemonitor-mux.yaml"
   "servicemonitor-caddy.yaml"
@@ -116,6 +117,54 @@ for sm_file in "$MON_DIR"/servicemonitor-*.yaml; do
     pass "AC-OVR-004: $base has monitoring component label"
   else
     fail "AC-OVR-004: $base missing app.kubernetes.io/component: monitoring label"
+  fi
+done
+
+# AC-OVR-008: Validate scrape consistency across ServiceMonitors
+for sm_file in "$MON_DIR"/servicemonitor-*.yaml; do
+  [[ -f "$sm_file" ]] || continue
+  base=$(basename "$sm_file")
+
+  # Mux delivery monitor has a dedicated scrape shape and is excluded from generic
+  # app-service relabeling expectations.
+  if [[ "$base" == "servicemonitor-mux.yaml" ]]; then
+    skip "AC-OVR-008: $base uses dedicated delivery-monitor scrape contract"
+    continue
+  fi
+
+  if grep -q 'namespaceSelector:' "$sm_file" 2>/dev/null && \
+     grep -q 'matchNames:' "$sm_file" 2>/dev/null && \
+     grep -q '  - mereka-lms' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base has namespaceSelector=matchNames[mereka-lms]"
+  else
+    fail "AC-OVR-008: $base missing namespaceSelector.matchNames=mereka-lms"
+  fi
+
+  if grep -q 'path: /metrics' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base uses /metrics endpoint"
+  else
+    fail "AC-OVR-008: $base does not use /metrics endpoint"
+  fi
+
+  if grep -q 'targetLabel: pod' "$sm_file" 2>/dev/null && \
+     grep -q 'sourceLabels: \\[__meta_kubernetes_pod_name\\]' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base has pod relabel for pod identity"
+  else
+    fail "AC-OVR-008: $base missing pod relabeling on __meta_kubernetes_pod_name"
+  fi
+
+  if grep -q 'targetLabel: node' "$sm_file" 2>/dev/null && \
+     grep -q 'sourceLabels: \\[__meta_kubernetes_pod_node_name\\]' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base has pod relabel for node identity"
+  else
+    fail "AC-OVR-008: $base missing pod relabeling on __meta_kubernetes_pod_node_name"
+  fi
+
+  if grep -q 'targetLabel: namespace' "$sm_file" 2>/dev/null && \
+     grep -q 'sourceLabels: \\[__meta_kubernetes_namespace\\]' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base has pod relabel for namespace identity"
+  else
+    fail "AC-OVR-008: $base missing pod relabeling on __meta_kubernetes_namespace"
   fi
 done
 
