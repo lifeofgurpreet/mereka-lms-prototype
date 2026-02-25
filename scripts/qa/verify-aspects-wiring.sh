@@ -52,7 +52,14 @@ SETUP_DOC="${REPO_ROOT}/docs/operations/ASPECTS_ANALYTICS_SETUP.md"
 
 # Runtime flags
 SKIP_CLUSTER="${SKIP_CLUSTER:-0}"
-ASPECTS_WIRED="${ASPECTS_WIRED:-0}"
+# Auto-detect wired state from rke2-nonprod overlay (can be overridden via env)
+if [[ -z "${ASPECTS_WIRED:-}" ]]; then
+  if [[ -f "${NONPROD_KUSTOMIZATION}" ]] && grep -q "plugins/aspects" "${NONPROD_KUSTOMIZATION}"; then
+    ASPECTS_WIRED=1
+  else
+    ASPECTS_WIRED=0
+  fi
+fi
 
 # Detect kubectl availability
 KUBECTL_AVAILABLE=0
@@ -76,12 +83,12 @@ echo -e "${BLUE}-- Section 1: Manifest files and structure --${NC}"
 EXPECTED_MANIFESTS=(
   "kustomization.yaml"
   "configmaps.yml"
-  "secrets.yml"
   "volumes.yml"
   "services.yml"
   "deployments.yml"
   "jobs.yml"
   "ingress.yml"
+  "prometheusrule.yml"
 )
 
 if [[ ! -d "${ASPECTS_DIR}" ]]; then
@@ -99,7 +106,7 @@ fi
 
 # Kustomization references all manifest files
 if [[ -f "${ASPECTS_DIR}/kustomization.yaml" ]]; then
-  kustom_files=("configmaps.yml" "secrets.yml" "volumes.yml" "services.yml" "deployments.yml" "jobs.yml" "ingress.yml")
+  kustom_files=("configmaps.yml" "volumes.yml" "services.yml" "deployments.yml" "jobs.yml" "ingress.yml" "prometheusrule.yml")
   for f in "${kustom_files[@]}"; do
     if grep -q "${f}" "${ASPECTS_DIR}/kustomization.yaml"; then
       do_pass "  kustomization.yaml references: ${f}"
@@ -134,12 +141,12 @@ if [[ -f "${ASPECTS_DIR}/volumes.yml" ]]; then
   fi
 fi
 
-# Secret placeholder values are empty (not hardcoded)
-if [[ -f "${ASPECTS_DIR}/secrets.yml" ]]; then
-  if grep -qE 'clickhouse-password: ""' "${ASPECTS_DIR}/secrets.yml"; then
-    do_pass "  secrets.yml contains empty placeholder values (correct — ESO will populate)"
+# secrets.yml should NOT be in kustomization (ExternalSecrets manage the secret)
+if [[ -f "${ASPECTS_DIR}/kustomization.yaml" ]]; then
+  if grep -q "secrets.yml" "${ASPECTS_DIR}/kustomization.yaml"; then
+    do_fail "  kustomization.yaml still references secrets.yml — ExternalSecrets should manage aspects-secrets"
   else
-    do_fail "  secrets.yml may have non-empty values — must use ExternalSecret, not hardcoded values"
+    do_pass "  secrets.yml not in kustomization (correct — ExternalSecrets manage the secret)"
   fi
 fi
 
@@ -234,9 +241,10 @@ fi
 ASPECTS_SC_PATCH="${NONPROD_PATCHES_DIR}/aspects-storage-class.yaml"
 if [[ -f "${ASPECTS_SC_PATCH}" ]]; then
   do_pass "rke2-nonprod storage class patch exists: patches/aspects-storage-class.yaml"
-  # Confirm it does NOT use standard-rwo (which is GKE-specific)
-  if grep -q "standard-rwo" "${ASPECTS_SC_PATCH}"; then
-    do_fail "  aspects-storage-class.yaml still contains standard-rwo — update to rke2 storage class"
+  # Confirm storageClassName is NOT standard-rwo (which is GKE-specific)
+  # Use grep on non-comment lines only to avoid false positives from comments
+  if grep -v '^\s*#' "${ASPECTS_SC_PATCH}" | grep -q "standard-rwo"; then
+    do_fail "  aspects-storage-class.yaml uses standard-rwo as storageClassName — update to rke2 storage class"
   else
     do_pass "  storage class patch does not use standard-rwo (GKE-specific)"
   fi
@@ -245,23 +253,23 @@ else
   echo "         ACTION: Create patch per ASPECTS_WIRING_CHECKLIST.md Step 1.4"
 fi
 
-# rke2-nonprod: dev ingress override
-NONPROD_INGRESS="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/ingress-aspects-superset.yaml"
-if [[ -f "${NONPROD_INGRESS}" ]]; then
-  do_pass "rke2-nonprod dev ingress override exists: ingress-aspects-superset.yaml"
-  if grep -q "analytics.academyv2.mereka.dev" "${NONPROD_INGRESS}"; then
-    do_pass "  dev ingress uses correct host: analytics.academyv2.mereka.dev"
+# rke2-nonprod: dev ingress patch (overrides base ingress host from mereka.io to mereka.dev)
+NONPROD_INGRESS_PATCH="${NONPROD_PATCHES_DIR}/aspects-ingress-dev.yaml"
+if [[ -f "${NONPROD_INGRESS_PATCH}" ]]; then
+  do_pass "rke2-nonprod dev ingress patch exists: patches/aspects-ingress-dev.yaml"
+  if grep -q "analytics.academyv2.mereka.dev" "${NONPROD_INGRESS_PATCH}"; then
+    do_pass "  dev ingress patch uses correct host: analytics.academyv2.mereka.dev"
   else
-    do_fail "  dev ingress does not use analytics.academyv2.mereka.dev"
+    do_fail "  dev ingress patch does not use analytics.academyv2.mereka.dev"
   fi
-  if grep -q "analytics.academyv2.mereka.io" "${NONPROD_INGRESS}"; then
-    do_fail "  dev ingress references prod domain mereka.io — must use mereka.dev for rke2-nonprod"
+  if grep -q "analytics.academyv2.mereka.io" "${NONPROD_INGRESS_PATCH}"; then
+    do_fail "  dev ingress patch references prod domain mereka.io — must use mereka.dev for rke2-nonprod"
   else
-    do_pass "  dev ingress does not reference prod domain"
+    do_pass "  dev ingress patch does not reference prod domain"
   fi
 else
-  do_fail "rke2-nonprod dev ingress override missing: ingress-aspects-superset.yaml"
-  echo "         ACTION: Create file per ASPECTS_WIRING_CHECKLIST.md Step 1.6"
+  do_fail "rke2-nonprod dev ingress patch missing: patches/aspects-ingress-dev.yaml"
+  echo "         ACTION: Create patch per ASPECTS_WIRING_CHECKLIST.md Step 1.6"
 fi
 
 echo ""

@@ -4,7 +4,7 @@
 > **Last Updated**: 2026-02-25
 > **Depends on**: `docs/operations/ASPECTS_ANALYTICS_SETUP.md` (component overview)
 > **Deployment flow**: dev (rke2-nonprod / *.mereka.dev) → prod (GKE / *.mereka.io)
-> **Status**: OPERATOR ACTION REQUIRED — manifests exist but are NOT wired
+> **Status**: WIRED — manifests connected to kustomization graph, operator actions pending
 
 ---
 

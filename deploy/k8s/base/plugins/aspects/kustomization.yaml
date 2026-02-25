@@ -5,12 +5,12 @@ namespace: mereka-lms
 
 resources:
   - configmaps.yml
-  - secrets.yml
   - volumes.yml
   - services.yml
   - deployments.yml
   - jobs.yml
   - ingress.yml
+  - prometheusrule.yml
 
 labels:
   - includeSelectors: true

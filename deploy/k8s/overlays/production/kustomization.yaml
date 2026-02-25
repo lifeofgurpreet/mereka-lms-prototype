@@ -7,6 +7,7 @@ namespace: mereka-lms
 
 resources:
   - ../../base
+  - ../../base/plugins/aspects
   - ingress-openedx-lms.yaml
   - ingress-openedx-mfe.yaml
   - ingress-openedx-studio.yaml
@@ -47,4 +48,10 @@ replicas:
   - name: lms-worker
     count: 2
   - name: cms-worker
+    count: 1
+  - name: clickhouse
+    count: 1
+  - name: superset
+    count: 1
+  - name: superset-worker
     count: 1

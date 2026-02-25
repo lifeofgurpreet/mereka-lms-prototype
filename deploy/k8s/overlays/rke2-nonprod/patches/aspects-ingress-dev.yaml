@@ -1,0 +1,22 @@
+# Patch Superset ingress hostname from production (mereka.io) to dev (mereka.dev)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: superset
+  namespace: mereka-lms
+spec:
+  rules:
+    - host: analytics.academyv2.mereka.dev
+      http:
+        paths:
+          - backend:
+              service:
+                name: superset
+                port:
+                  number: 8088
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - analytics.academyv2.mereka.dev
+      secretName: superset-tls-dev

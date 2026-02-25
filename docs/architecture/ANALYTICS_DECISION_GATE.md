@@ -1,6 +1,6 @@
 # Analytics Decision Gate: Aspects/Superset Deployment
 
-**Status**: DEFERRED (as of 2026-02-13)
+**Status**: ACCEPTED (as of 2026-02-25)
 **Last Review**: 2026-02-17
 **Next Review**: 2026-05-17 (90 days)
 **Owner**: Platform Team
@@ -13,7 +13,7 @@
 
 The platform has **deferred** deployment of Aspects (Open edX native analytics) and Superset dashboards indefinitely. This decision gate document tracks the conditions under which we should revisit this decision and provides a framework for evaluating whether to keep the deferral or proceed with deployment.
 
-**Current Recommendation**: **KEEP DEFERRED** (all conditions reviewed 2026-02-17)
+**Current Recommendation**: **PROCEED** (owner override 2026-02-25)
 
 ---
 
@@ -356,3 +356,4 @@ This document satisfies the following acceptance criteria:
 |------|----------|--------|-------|
 | 2026-02-13 | Platform Team | DEFERRED | Initial deferral (ADR-017) |
 | 2026-02-17 | Platform Team | KEEP DEFERRED | All 5 conditions NOT MET; next review 2026-05-17 |
+| 2026-02-25 | Platform Owner | ACCEPTED | Owner override — deployment approved regardless of gate conditions |

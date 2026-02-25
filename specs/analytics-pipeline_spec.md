@@ -1,10 +1,10 @@
 ---
 title: "Analytics Pipeline (Aspects/Panorama)"
 type: "data_pipeline_spec"
-status: "in_progress"
+status: "approved"
 owner: "engineering"
 vehicle: "talent_platform"
-last_updated: "2026-02-10"
+last_updated: "2026-02-25"
 version: "1.0.0"
 depends_on:
   - "specs/repository-structure_spec.md"

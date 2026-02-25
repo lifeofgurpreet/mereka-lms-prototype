@@ -1,10 +1,10 @@
 # ADR-017: Analytics Target Decision (Aspects/Superset Deployment)
 
-**Status**: Deferred
+**Status**: Accepted
 **Date**: 2026-02-13
 **Deciders**: Platform Team
 
-<!-- Last verified: 2026-02-13 -->
+<!-- Last verified: 2026-02-25 -->
 
 ## Context
 
@@ -50,7 +50,7 @@ The platform requires analytics capabilities for learning insights (enrollments,
 
 ## Decision
 
-We are **deferring** Aspects deployment (and by extension, Superset-based learning analytics) indefinitely.
+We are **proceeding** with Aspects deployment. Initial deployment targets dev (rke2-nonprod), with production promotion after 2-week stability period.
 
 **Rationale**:
 - Core platform requires stabilization before adding analytics stack
@@ -185,3 +185,4 @@ If Aspects is deployed in the future, ensure:
 - `docs/analytics/ASPECTS_INSTALLATION.md` (deployment guide)
 - `docs/analytics/ASPECTS_VS_PANORAMA.md` (comparison with commercial alternative)
 - `docs/operations/CAPABILITY_MATRIX.md` (capability tracking)
+- `docs/operations/ASPECTS_WIRING_CHECKLIST.md` (deployment checklist)

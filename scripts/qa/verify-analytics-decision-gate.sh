@@ -133,10 +133,25 @@ if command -v kubectl >/dev/null 2>&1; then
     pod_list=$(kubectl get pods -n mereka-lms 2>/dev/null || echo "")
     aspects_pods=$(echo "$pod_list" | grep -c 'aspects\|clickhouse\|superset\|ralph' || echo 0)
     aspects_pods=$(echo "$aspects_pods" | tr -d '\n' | tr -d ' ')
+    # Determine ADR status
+    adr_pod_accepted=0
+    if [[ -f "$ADR" ]]; then
+      if grep -qi "Accepted" "$ADR"; then
+        adr_pod_accepted=1
+      fi
+    fi
     if [[ "$aspects_pods" -eq 0 ]]; then
-      do_pass "No Aspects pods deployed in production (expected state for deferral)"
+      if [[ "$adr_pod_accepted" -eq 1 ]]; then
+        do_warn "No Aspects pods deployed yet (ADR-017 Accepted — deployment pending)"
+      else
+        do_pass "No Aspects pods deployed in production (expected state for deferral)"
+      fi
     else
-      do_fail "Found $aspects_pods Aspects-related pods in production (should be 0 if deferred)"
+      if [[ "$adr_pod_accepted" -eq 1 ]]; then
+        do_pass "Found $aspects_pods Aspects-related pods (ADR-017 Accepted — deployment active)"
+      else
+        do_fail "Found $aspects_pods Aspects-related pods in production (should be 0 if deferred)"
+      fi
     fi
   else
     do_warn "kubectl configured but cluster not accessible (skip deployment check)"
@@ -157,15 +172,30 @@ if [[ -d "$ASPECTS_DIR" ]]; then
     do_warn "Aspects directory exists but no YAML manifests found"
   fi
 
-  # --- 11. Manifests NOT in active kustomization ---
+  # --- 11. Manifests in active kustomization match ADR status ---
   kustomize_file="deploy/k8s/overlays/production/kustomization.yaml"
   if [[ -f "$kustomize_file" ]]; then
-    # Capture output to variable first to avoid SIGPIPE with grep -q
+    # Determine ADR status to validate expected kustomization state
+    adr_is_accepted=0
+    if [[ -f "$ADR" ]]; then
+      adr_check=$(grep -i '^**Status' "$ADR" || true)
+      if echo "$adr_check" | grep -qi "Accepted"; then
+        adr_is_accepted=1
+      fi
+    fi
     kustomize_content=$(cat "$kustomize_file")
     if echo "$kustomize_content" | grep -q 'plugins/aspects'; then
-      do_fail "Aspects referenced in production kustomization (should NOT be active if deferred)"
+      if [[ "$adr_is_accepted" -eq 1 ]]; then
+        do_pass "Aspects in production kustomization (correct — ADR-017 Accepted)"
+      else
+        do_fail "Aspects referenced in production kustomization (should NOT be active if deferred)"
+      fi
     else
-      do_pass "Aspects NOT in production kustomization (correct for deferred state)"
+      if [[ "$adr_is_accepted" -eq 1 ]]; then
+        do_fail "Aspects NOT in production kustomization (ADR-017 Accepted — should be wired)"
+      else
+        do_pass "Aspects NOT in production kustomization (correct for deferred state)"
+      fi
     fi
   else
     do_warn "Production kustomization file not found (skip active deployment check)"

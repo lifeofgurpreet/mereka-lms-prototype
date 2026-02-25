@@ -190,13 +190,13 @@ else
   do_fail "[AC-ASPRD-002] ADR-017 missing: $ADR"
 fi
 
-# Check ADR-017 status is Deferred
+# Check ADR-017 status is Deferred or Accepted
 if [[ -f "$ADR" ]]; then
-  ADR_STATUS=$(grep "^**Status**:" "$ADR" | head -1 || echo "")
-  if echo "$ADR_STATUS" | grep -qi "Deferred"; then
-    do_pass "[AC-ASPRD-002] ADR-017 status is Deferred (as expected)"
+  ADR_STATUS=$(grep "^**Status" "$ADR" | head -1 || echo "")
+  if echo "$ADR_STATUS" | grep -qi "Deferred\|Accepted"; then
+    do_pass "[AC-ASPRD-002] ADR-017 status is valid: $ADR_STATUS"
   else
-    do_warn "[AC-ASPRD-002] ADR-017 status is not Deferred: $ADR_STATUS"
+    do_warn "[AC-ASPRD-002] ADR-017 status unexpected: $ADR_STATUS"
   fi
 fi
 
@@ -233,12 +233,27 @@ else
   do_fail "[AC-ASPRD-002] Only $MANIFEST_COUNT/${#EXPECTED_MANIFESTS[@]} Aspects manifests found"
 fi
 
-# Check production kustomization does NOT reference aspects
+# Check production kustomization aspects state matches ADR status
 if [[ -f "$PROD_KUSTOMIZATION" ]]; then
+  ADR_IS_ACCEPTED=0
+  if [[ -f "$ADR" ]]; then
+    adr_check=$(grep "^**Status" "$ADR" | head -1 || echo "")
+    if echo "$adr_check" | grep -qi "Accepted"; then
+      ADR_IS_ACCEPTED=1
+    fi
+  fi
   if grep -q "aspects" "$PROD_KUSTOMIZATION"; then
-    do_fail "[AC-ASPRD-002] Production kustomization references aspects (should NOT be deployed)"
+    if [[ "$ADR_IS_ACCEPTED" -eq 1 ]]; then
+      do_pass "[AC-ASPRD-002] Production kustomization references aspects (correct — ADR-017 Accepted)"
+    else
+      do_fail "[AC-ASPRD-002] Production kustomization references aspects (should NOT be deployed while ADR-017 is Deferred)"
+    fi
   else
-    do_pass "[AC-ASPRD-002] Production kustomization does NOT reference aspects (correct)"
+    if [[ "$ADR_IS_ACCEPTED" -eq 1 ]]; then
+      do_fail "[AC-ASPRD-002] Production kustomization does NOT reference aspects (ADR-017 is Accepted — should be wired)"
+    else
+      do_pass "[AC-ASPRD-002] Production kustomization does NOT reference aspects (correct for Deferred)"
+    fi
   fi
 else
   do_fail "[AC-ASPRD-002] Production kustomization missing: $PROD_KUSTOMIZATION"

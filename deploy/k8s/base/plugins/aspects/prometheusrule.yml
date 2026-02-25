@@ -1,0 +1,91 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: aspects-alerts
+  labels:
+    app.kubernetes.io/name: aspects-alerts
+    app.kubernetes.io/part-of: aspects
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: aspects.rules
+      rules:
+        # ClickHouse disk usage warning
+        - alert: ClickHouseDiskPressure
+          expr: |
+            (kubelet_volume_stats_used_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"}
+            / kubelet_volume_stats_capacity_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"})
+            > 0.75
+          for: 5m
+          labels:
+            severity: warning
+            service: aspects
+          annotations:
+            summary: "ClickHouse disk usage above 75%"
+            description: "ClickHouse PVC clickhouse-data is {{ $value | humanizePercentage }} full. Consider running TTL cleanup or expanding storage."
+
+        # ClickHouse disk usage critical
+        - alert: ClickHouseDiskCritical
+          expr: |
+            (kubelet_volume_stats_used_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"}
+            / kubelet_volume_stats_capacity_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"})
+            > 0.85
+          for: 2m
+          labels:
+            severity: critical
+            service: aspects
+          annotations:
+            summary: "ClickHouse disk usage above 85% - CRITICAL"
+            description: "ClickHouse PVC clickhouse-data is {{ $value | humanizePercentage }} full. Immediate action required: run TTL cleanup or expand storage."
+
+        # Superset pod unavailable
+        - alert: SupersetUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace="mereka-lms", deployment="superset"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            service: aspects
+          annotations:
+            summary: "Superset analytics dashboard is unavailable"
+            description: "Superset deployment has 0 available replicas for more than 5 minutes."
+
+        # ClickHouse pod unavailable
+        - alert: ClickHouseUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace="mereka-lms", deployment="clickhouse"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: aspects
+          annotations:
+            summary: "ClickHouse analytics data warehouse is unavailable"
+            description: "ClickHouse deployment has 0 available replicas for more than 2 minutes. Analytics data ingestion is halted."
+
+        # Superset worker unavailable
+        - alert: SupersetWorkerUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{namespace="mereka-lms", deployment="superset-worker"} == 0
+          for: 10m
+          labels:
+            severity: warning
+            service: aspects
+          annotations:
+            summary: "Superset background worker is unavailable"
+            description: "Superset worker deployment has 0 available replicas for more than 10 minutes. Scheduled reports and async queries will not run."
+
+        # ClickHouse high memory usage
+        - alert: ClickHouseHighMemory
+          expr: |
+            container_memory_working_set_bytes{namespace="mereka-lms", container="clickhouse"}
+            / container_spec_memory_limit_bytes{namespace="mereka-lms", container="clickhouse"}
+            > 0.85
+          for: 5m
+          labels:
+            severity: warning
+            service: aspects
+          annotations:
+            summary: "ClickHouse memory usage above 85%"
+            description: "ClickHouse container is using {{ $value | humanizePercentage }} of its memory limit."
