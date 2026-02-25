@@ -139,6 +139,12 @@ if [[ -f "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt" ]]; then
   else
     record fail "PARITY-009" "Correlation header evidence missing PASS/FAIL/WARN status line"
   fi
+
+  if has_observability_required_headers "$EVIDENCE_DIR/observability-correlation-headers-runtime.txt"; then
+    record pass "PARITY-010" "Correlation header evidence includes traceheader checks"
+  else
+    record fail "PARITY-010" "Correlation header evidence missing x-request-id or traceparent status checks"
+  fi
 else
   record fail "PARITY-009" "Correlation header evidence file missing"
 fi
@@ -216,7 +222,7 @@ TOTAL=$((PASS + FAIL))
 python3 - "$ENV_LABEL" "$EXPECTED_PROFILE" "$identity_env" "$identity_profile" "$identity_context" "$identity_project" "$PASS" "$FAIL" "$TOTAL" "$RESULTS_FILE" > "$OUT_JSON" <<'PY'
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 env_label = sys.argv[1]
 expected_profile = sys.argv[2]
@@ -239,7 +245,7 @@ with open(results_path, "r", encoding="utf-8") as f:
         checks.append({"id": check_id, "status": status, "message": message})
 
 print(json.dumps({
-    "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "environment": env_label,
     "expected_profile": expected_profile,
     "identity": {

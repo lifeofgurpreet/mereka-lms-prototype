@@ -78,8 +78,8 @@ ROWS_FILE="$(mktemp -t parity-rollup-rows.XXXXXX)"
 trap 'rm -f "$ROWS_FILE"' EXIT
 
 for env_label in "${envs[@]}"; do
-  delta_json_path="$(find "$ARTIFACTS_DIR" -type f -name "observability-parity-delta.json" | rg "parity-${env_label}" | head -n1 || true)"
-  review_md_path="$(find "$ARTIFACTS_DIR" -type f -name "observability-parity-review.md" | rg "parity-${env_label}" | head -n1 || true)"
+  delta_json_path="$(find "$ARTIFACTS_DIR" -type f -name "observability-parity-delta.json" | rg "/parity-${env_label}/" | head -n1 || true)"
+  review_md_path="$(find "$ARTIFACTS_DIR" -type f -name "observability-parity-review.md" | rg "/parity-${env_label}/" | head -n1 || true)"
   evidence_identity=""
   identity_env=""
   identity_profile=""
@@ -167,6 +167,7 @@ done
 
 python3 - "$ROWS_FILE" "$pass_count" "$fail_count" "$skip_count" "$identity_fail_count" "$REQUIRE_NO_SKIPS" > "$OUT_JSON" <<'PY'
 import json
+from datetime import datetime, timezone
 import sys
 from datetime import datetime
 
@@ -196,7 +197,7 @@ with open(rows_file, "r", encoding="utf-8") as f:
         })
 
 print(json.dumps({
-    "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "require_no_skips": require_no_skips,
     "summary": {
         "pass": pass_count,

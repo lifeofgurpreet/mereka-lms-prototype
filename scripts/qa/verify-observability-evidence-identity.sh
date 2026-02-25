@@ -49,7 +49,7 @@ failures=0
 
 extract_md_identity() {
   local f="$1"
-  grep -E '^- evidence_identity:' "$f" | head -n1 | sed 's/^- evidence_identity: //'
+  grep -E '^- evidence_identity:' "$f" | head -n1 | sed 's/^- evidence_identity: //' || true
 }
 
 check_runtime_bundle() {
@@ -107,6 +107,10 @@ check_runtime_bundle() {
   if [[ -f "$correlation_txt" ]]; then
     if ! has_observability_status_line "$correlation_txt"; then
       echo "FAIL runtime: correlation evidence missing PASS/FAIL/WARN status lines in $correlation_txt"
+      failures=$((failures + 1))
+    fi
+    if ! has_observability_required_headers "$correlation_txt"; then
+      echo "FAIL runtime: correlation evidence missing x-request-id or traceparent lines in $correlation_txt"
       failures=$((failures + 1))
     fi
   else

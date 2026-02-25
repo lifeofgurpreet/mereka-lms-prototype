@@ -56,6 +56,11 @@ if [[ ! -f "$DELTA_JSON" ]]; then
   exit 1
 fi
 
+if ! jq -e . "$DELTA_JSON" >/dev/null 2>&1; then
+  echo "Malformed delta JSON: $DELTA_JSON" >&2
+  exit 1
+fi
+
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required for parity review generation." >&2
   exit 1

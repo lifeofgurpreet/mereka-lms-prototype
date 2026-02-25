@@ -72,15 +72,16 @@ run_delta_case() {
   local observed_status=0
   mkdir -p "$out_dir"
 
-  if ! "$SCRIPT_DIR/build-observability-parity-delta.sh" \
+  set +e
+  "$SCRIPT_DIR/build-observability-parity-delta.sh" \
     --env "$env_label" \
     --evidence-dir "$evidence_dir" \
     --out-md "$out_md" \
     --out-json "$out_json" \
     >"$out_dir/stdout.log" \
-    2>"$out_dir/stderr.log"; then
-    observed_status=$?
-  fi
+    2>"$out_dir/stderr.log"
+  observed_status=$?
+  set -e
 
   if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
     log_result FAIL "$case_name($env_label)" "exit_code=$observed_status expected=$expect_exit_code"
@@ -125,14 +126,15 @@ run_review_case() {
   local observed_status=0
   mkdir -p "$out_dir"
 
-  if ! "$SCRIPT_DIR/build-observability-parity-review.sh" \
+  set +e
+  "$SCRIPT_DIR/build-observability-parity-review.sh" \
     --env "$env_label" \
     --delta-json "$delta_json" \
     --out-md "$out_md" \
     >"$out_dir/stdout.log" \
-    2>"$out_dir/stderr.log"; then
-    observed_status=$?
-  fi
+    2>"$out_dir/stderr.log"
+  observed_status=$?
+  set -e
 
   if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
     log_result FAIL "$case_name($env_label)" "exit_code=$observed_status expected=$expect_exit_code"
@@ -172,15 +174,16 @@ run_rollup_case() {
     extra_args+=("--require-no-skips")
   fi
 
-  if ! "$SCRIPT_DIR/build-observability-parity-rollup.sh" \
+  set +e
+  "$SCRIPT_DIR/build-observability-parity-rollup.sh" \
     --artifacts-dir "$artifacts_dir" \
     --out-md "$out_md" \
     --out-json "$out_json" \
     "${extra_args[@]}" \
     >"$out_dir/stdout.log" \
-    2>"$out_dir/stderr.log"; then
-    observed_status=$?
-  fi
+    2>"$out_dir/stderr.log"
+  observed_status=$?
+  set -e
 
   if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
     log_result FAIL "$case_name" "exit_code=$observed_status expected=$expect_exit_code"
@@ -218,12 +221,13 @@ run_identity_case() {
   local out_dir="$TMP_ROOT/identity/$case_name"
   mkdir -p "$out_dir"
 
-  if ! "$SCRIPT_DIR/verify-observability-evidence-identity.sh" \
+  set +e
+  "$SCRIPT_DIR/verify-observability-evidence-identity.sh" \
     --dir "$dir" \
     >"$out_dir/stdout.log" \
-    2>"$out_dir/stderr.log"; then
-    observed_status=$?
-  fi
+    2>"$out_dir/stderr.log"
+  observed_status=$?
+  set -e
 
   if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
     log_result FAIL "$case_name(identity)" "exit_code=$observed_status expected=$expect_exit_code"
@@ -247,6 +251,7 @@ run_delta_case "invalid-correlation-status" "dev" "$FIXTURES_ROOT/malformed/delt
 run_delta_case "invalid-correlation-status-substring" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status-word/dev" 1
 run_delta_case "invalid-correlation-empty" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-empty/dev" 1
 run_delta_case "invalid-correlation-lowercase" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-lowercase/dev" 1
+run_delta_case "invalid-correlation-missing-headers" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-missing-headers/dev" 1
 run_delta_case "valid-ansi" "dev" "$FIXTURES_ROOT/valid/delta-ansi/dev" 0
 run_delta_case "invalid-identity-mismatch" "nonprod" "$FIXTURES_ROOT/malformed/delta-identity-mismatch/nonprod" 1
 
@@ -265,6 +270,7 @@ run_identity_case "invalid-correlation-status" "$FIXTURES_ROOT/malformed/delta-i
 run_identity_case "invalid-correlation-status-substring" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status-word/dev" 1
 run_identity_case "invalid-correlation-empty" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-empty/dev" 1
 run_identity_case "invalid-correlation-lowercase" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-lowercase/dev" 1
+run_identity_case "invalid-correlation-missing-headers" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-missing-headers/dev" 1
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2
