@@ -136,9 +136,25 @@ if has_kubectl; then
     "purchase-gateway-metrics"
   )
   for sm in "${REQUIRED_LIVE_SMS[@]}"; do
-    if timeout "$KUBECTL_TIMEOUT" kubectl get servicemonitor "$sm" -n "$NAMESPACE" &>/dev/null; then
-      pass "AC-OVR-002: ServiceMonitor $sm exists in cluster"
-    else
+    SM_CANDIDATES=("$sm")
+    if [[ "$sm" == "caddy-metrics" ]]; then
+      SM_CANDIDATES+=("caddy")
+    fi
+
+    found_sm=0
+    for candidate in "${SM_CANDIDATES[@]}"; do
+      if timeout "$KUBECTL_TIMEOUT" kubectl get servicemonitor "$candidate" -n "$NAMESPACE" &>/dev/null; then
+        found_sm=1
+        if [[ "$candidate" == "$sm" ]]; then
+          pass "AC-OVR-002: ServiceMonitor $sm exists in cluster"
+        else
+          pass "AC-OVR-002: ServiceMonitor $sm exists as $candidate in cluster"
+        fi
+        break
+      fi
+    done
+
+    if [[ "$found_sm" -eq 0 ]]; then
       skip "AC-OVR-002: ServiceMonitor $sm not found in cluster"
     fi
   done

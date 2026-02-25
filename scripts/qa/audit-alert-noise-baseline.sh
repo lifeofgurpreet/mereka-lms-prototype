@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# Audit alert-noise baseline thresholds (local contract + optional runtime sample).
+#
+# Usage:
+#   ./scripts/qa/audit-alert-noise-baseline.sh --mode local
+#   ALERT_NOISE_RUNTIME_SOURCE=/path/to/sample.json ./scripts/qa/audit-alert-noise-baseline.sh --mode runtime
+#
+# Runtime sample JSON contract:
+# {
+#   "generated_at": "2026-02-25T00:00:00Z",
+#   "total_alerts": 100,
+#   "duplicate_alerts": 8,
+#   "false_positive_alerts": 6,
+#   "severity_buckets": {
+#     "critical": {"total": 8, "duplicate": 0, "false_positive": 0},
+#     "error": {"total": 14, "duplicate": 1, "false_positive": 1},
+#     "warning": {"total": 32, "duplicate": 5, "false_positive": 2}
+#   }
+# }
+
+set -euo pipefail
+
+MODE="local" # local|runtime
+STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
+CONFIG_PATH="${ALERT_NOISE_BASELINE_CONFIG:-infrastructure/monitoring/alert-noise-baseline.json}"
+RUNTIME_SOURCE="${ALERT_NOISE_RUNTIME_SOURCE:-}"
+
+usage() {
+  cat <<'EOF2'
+Usage: ./scripts/qa/audit-alert-noise-baseline.sh --mode local|runtime
+EOF2
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode)
+      MODE="${2:-local}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ "$MODE" != "local" && "$MODE" != "runtime" ]]; then
+  echo "Invalid --mode: $MODE" >&2
+  usage
+  exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq is required." >&2
+  exit 1
+fi
+
+if [[ ! -f "$CONFIG_PATH" ]]; then
+  echo "Baseline config missing: $CONFIG_PATH" >&2
+  exit 1
+fi
+
+jq -e '
+  .schema_version and
+  (.lookback_days | numbers and . > 0) and
+  (.minimum_sample_size | numbers and . > 0) and
+  (.thresholds.duplicate_alert_ratio_max | numbers and . >= 0 and . <= 1) and
+  (.thresholds.false_positive_ratio_max | numbers and . >= 0 and . <= 1) and
+  ((.thresholds.severity // {}) | type == "object") and
+  (all((.thresholds.severity | to_entries | .[]); .value.duplicate_alert_ratio_max | numbers and . >= 0 and . <= 1 and .value.false_positive_ratio_max | numbers and . >= 0 and . <= 1))
+' "$CONFIG_PATH" >/dev/null
+
+echo "OK   local: alert-noise baseline schema valid ($CONFIG_PATH)"
+
+if [[ "$MODE" == "local" ]]; then
+  exit 0
+fi
+
+if [[ -z "$RUNTIME_SOURCE" || ! -f "$RUNTIME_SOURCE" ]]; then
+  if [[ "$STRICT_RUNTIME" == "1" ]]; then
+    echo "Runtime source missing. Set ALERT_NOISE_RUNTIME_SOURCE=/path/to/sample.json" >&2
+    exit 1
+  fi
+  echo "SKIP runtime: ALERT_NOISE_RUNTIME_SOURCE not provided."
+  exit 0
+fi
+
+jq -e '
+  (.total_alerts | numbers and . >= 0) and
+  (.duplicate_alerts | numbers and . >= 0) and
+  (.false_positive_alerts | numbers and . >= 0)
+' "$RUNTIME_SOURCE" >/dev/null
+
+sample_total="$(jq -r '.total_alerts' "$RUNTIME_SOURCE")"
+sample_dup="$(jq -r '.duplicate_alerts' "$RUNTIME_SOURCE")"
+sample_fp="$(jq -r '.false_positive_alerts' "$RUNTIME_SOURCE")"
+
+min_n="$(jq -r '.minimum_sample_size' "$CONFIG_PATH")"
+dup_max="$(jq -r '.thresholds.duplicate_alert_ratio_max' "$CONFIG_PATH")"
+fp_max="$(jq -r '.thresholds.false_positive_ratio_max' "$CONFIG_PATH")"
+
+if [[ "$sample_total" -lt "$min_n" ]]; then
+  if [[ "$STRICT_RUNTIME" == "1" ]]; then
+    echo "Runtime sample size too small: total_alerts=$sample_total < minimum_sample_size=$min_n" >&2
+    exit 1
+  fi
+  echo "SKIP runtime: sample size too small ($sample_total < $min_n)."
+  exit 0
+fi
+
+overall_dup_ratio="$(awk -v d="$sample_dup" -v t="$sample_total" 'BEGIN{printf "%.6f", (t==0?0:d/t)}')"
+overall_fp_ratio="$(awk -v f="$sample_fp" -v t="$sample_total" 'BEGIN{printf "%.6f", (t==0?0:f/t)}')"
+
+overall_dup_ok="$(awk -v x="$overall_dup_ratio" -v m="$dup_max" 'BEGIN{print (x<=m ? 1 : 0)}')"
+overall_fp_ok="$(awk -v x="$overall_fp_ratio" -v m="$fp_max" 'BEGIN{print (x<=m ? 1 : 0)}')"
+
+if [[ "$overall_dup_ok" -eq 1 ]]; then
+  echo "OK   runtime: duplicate_alert_ratio=$overall_dup_ratio <= max=$dup_max"
+else
+  echo "FAIL runtime: duplicate_alert_ratio=$overall_dup_ratio > max=$dup_max" >&2
+  exit 1
+fi
+
+if [[ "$overall_fp_ok" -eq 1 ]]; then
+  echo "OK   runtime: false_positive_ratio=$overall_fp_ratio <= max=$fp_max"
+else
+  echo "FAIL runtime: false_positive_ratio=$overall_fp_ratio > max=$fp_max" >&2
+  exit 1
+fi
+
+severity_thresholds_present="$(jq -r '(.thresholds.severity // {} | to_entries | length)' "$CONFIG_PATH")"
+if [[ "$severity_thresholds_present" -gt 0 ]]; then
+  has_bucket_any="0"
+  while IFS= read -r severity; do
+    has_bucket_any="1"
+
+    severity_total="$(jq -r --arg s "$severity" '.severity_buckets[$s].total // empty' "$RUNTIME_SOURCE")"
+    severity_dup="$(jq -r --arg s "$severity" '.severity_buckets[$s].duplicate // empty' "$RUNTIME_SOURCE")"
+    severity_fp="$(jq -r --arg s "$severity" '.severity_buckets[$s].false_positive // empty' "$RUNTIME_SOURCE")"
+
+    if [[ -z "$severity_total" || -z "$severity_dup" || -z "$severity_fp" ]]; then
+      if [[ "$STRICT_RUNTIME" == "1" ]]; then
+        echo "FAIL runtime: severity '${severity}' not present in sample JSON" >&2
+        exit 1
+      fi
+      echo "SKIP runtime: severity '${severity}' not present in sample JSON"
+      continue
+    fi
+
+    severity_dup_ratio="$(awk -v d="$severity_dup" -v t="$severity_total" 'BEGIN{printf "%.6f", (t==0?0:d/t)}')"
+    severity_fp_ratio="$(awk -v f="$severity_fp" -v t="$severity_total" 'BEGIN{printf "%.6f", (t==0?0:f/t)}')"
+
+    severity_dup_max="$(jq -r --arg s "$severity" '.thresholds.severity[$s].duplicate_alert_ratio_max' "$CONFIG_PATH")"
+    severity_fp_max="$(jq -r --arg s "$severity" '.thresholds.severity[$s].false_positive_ratio_max' "$CONFIG_PATH")"
+
+    severity_dup_ok="$(awk -v x="$severity_dup_ratio" -v m="$severity_dup_max" 'BEGIN{print (x<=m ? 1 : 0)}')"
+    severity_fp_ok="$(awk -v x="$severity_fp_ratio" -v m="$severity_fp_max" 'BEGIN{print (x<=m ? 1 : 0)}')"
+
+    if [[ "$severity_dup_ok" -eq 1 ]]; then
+      echo "OK   runtime: severity=${severity} duplicate_alert_ratio=$severity_dup_ratio <= max=$severity_dup_max"
+    else
+      echo "FAIL runtime: severity=${severity} duplicate_alert_ratio=$severity_dup_ratio > max=$severity_dup_max" >&2
+      exit 1
+    fi
+
+    if [[ "$severity_fp_ok" -eq 1 ]]; then
+      echo "OK   runtime: severity=${severity} false_positive_ratio=$severity_fp_ratio <= max=$severity_fp_max"
+    else
+      echo "FAIL runtime: severity=${severity} false_positive_ratio=$severity_fp_ratio > max=$severity_fp_max" >&2
+      exit 1
+    fi
+  done < <(jq -r '.thresholds.severity | keys[]' "$CONFIG_PATH")
+
+  if [[ "$has_bucket_any" == "0" ]]; then
+    echo "OK   runtime: no severity thresholds configured"
+  fi
+fi
+
