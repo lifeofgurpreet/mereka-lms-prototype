@@ -40,6 +40,5 @@ if [[ "$MODE" == "local" ]]; then
   exit 0
 fi
 
-./scripts/qa/audit-observability.sh --mode runtime
+./scripts/qa/run-observability-first-class.sh --mode runtime
 echo "OK"
-

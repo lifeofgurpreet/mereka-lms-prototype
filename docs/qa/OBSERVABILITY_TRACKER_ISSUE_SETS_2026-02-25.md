@@ -1,5 +1,10 @@
 # Observability Tracker Issue Sets (Mereka LMS)
 
+> Status: Superseded for current execution flow.
+> This file is retained for historical tracker context only.
+> Active execution source of truth is `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
+> and `.github/workflows/observability-compliance.yml`.
+
 Date: 2026-02-25  
 Scope: Tracker-ready issue sets for first-class observability execution
 

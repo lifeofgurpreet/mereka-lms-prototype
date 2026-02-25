@@ -107,6 +107,33 @@ jobs:
             echo "WARN: unable to get GKE credentials; skipping runtime gates (strict_runtime=false)" >&2
           fi
 
+      - name: Build alert-noise runtime sample
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          INPUT_ALERT_NOISE_RUNTIME_SOURCE: ${{ github.event.inputs.alert_noise_runtime_source || vars.ALERT_NOISE_RUNTIME_SOURCE || '' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+        run: |
+          out="var/operations-gates/alert-noise-runtime-sample.json"
+          mkdir -p "$(dirname "$out")"
+
+          if [[ -n "$INPUT_ALERT_NOISE_RUNTIME_SOURCE" ]]; then
+            if [[ -f "$INPUT_ALERT_NOISE_RUNTIME_SOURCE" ]]; then
+              echo "Using explicit alert-noise runtime source: $INPUT_ALERT_NOISE_RUNTIME_SOURCE"
+              echo "ALERT_NOISE_RUNTIME_SOURCE=$INPUT_ALERT_NOISE_RUNTIME_SOURCE" >> "$GITHUB_ENV"
+              exit 0
+            fi
+
+            echo "WARN: provided alert-noise source is not readable: $INPUT_ALERT_NOISE_RUNTIME_SOURCE" >&2
+          fi
+
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            STRICT_RUNTIME=1 ./scripts/qa/build-alert-noise-runtime-sample.sh --out "$out"
+          else
+            ./scripts/qa/build-alert-noise-runtime-sample.sh --out "$out"
+          fi
+
+          echo "ALERT_NOISE_RUNTIME_SOURCE=$out" >> "$GITHUB_ENV"
+
       - name: Run consolidated operations gate
         if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         env:
@@ -114,6 +141,7 @@ jobs:
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
           INPUT_RUN_ALERT_ROUTING_AUDIT: ${{ github.event.inputs.run_alert_routing_audit || 'true' }}
           INPUT_RUN_AUTHENTICATED_SSO_CANARY: ${{ github.event.inputs.run_authenticated_sso_canary || vars.RUN_AUTHENTICATED_SSO_CANARY || 'false' }}
+          ALERT_NOISE_RUNTIME_SOURCE: ${{ env.ALERT_NOISE_RUNTIME_SOURCE }}
           SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
           SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
           SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
@@ -127,8 +155,10 @@ jobs:
         run: |
           if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
             export STRICT_RUNTIME=1
+            export ALERT_NOISE_REQUIRE_RUNTIME_SOURCE=1
           else
             export STRICT_RUNTIME=0
+            export ALERT_NOISE_REQUIRE_RUNTIME_SOURCE=0
           fi
 
           if [[ "$INPUT_RUN_ALERT_ROUTING_AUDIT" == "true" ]]; then

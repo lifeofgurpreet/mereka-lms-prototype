@@ -14,7 +14,8 @@ If this fails, user-facing impact is likely.
 ## Step 2: Monitoring Coverage Sanity
 
 ```bash
-./scripts/qa/audit-observability.sh --mode runtime
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ./scripts/qa/audit-velero-alert-pipeline.sh
 ./scripts/qa/verify-alert-routing.sh
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
@@ -72,7 +73,7 @@ Open in order:
 ## Step 5: Evidence Bundle
 
 Attach:
-- `audit-observability` JSON output
+- `observability-compliance-runtime.json` and `observability-first-class-runtime-evidence-index.json`
 - `audit-velero-alert-pipeline` output
 - `verify-alert-routing` output
 - `public-health-check` output

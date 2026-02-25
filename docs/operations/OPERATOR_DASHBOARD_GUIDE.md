@@ -95,7 +95,8 @@ PrometheusRules are deployed as K8s resources under `deploy/k8s/base/monitoring/
 
 Verify rules are loaded by Prometheus:
 ```bash
-./scripts/qa/audit-observability.sh --mode runtime
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
 ---
@@ -172,7 +173,7 @@ Operators use these scripts to confirm platform health without relying on UI das
 | `./scripts/qa/public-health-check.sh prod` | HTTP + cert checks for all prod public endpoints | No |
 | `CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod` | Same, plus SSL cert expiry check | No |
 | `./scripts/qa/audit-observability.sh --mode local` | Monitoring config integrity (repo) | No |
-| `./scripts/qa/audit-observability.sh --mode runtime` | PrometheusRules + synthetic CronJobs (live) | kubectl |
+| `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | Runtime-first observability evidence gate (compliance + runtime verifier + index) | kubectl + gcloud |
 | `./scripts/qa/audit-grafana-dashboard.sh --strict-required` | Grafana panel/query coverage contract | No |
 | `./scripts/qa/audit-velero-alert-pipeline.sh` | Velero alert freshness + route sanity | kubectl |
 | `./scripts/qa/verify-alert-routing.sh` | Alertmanager routing policies and channels | kubectl |

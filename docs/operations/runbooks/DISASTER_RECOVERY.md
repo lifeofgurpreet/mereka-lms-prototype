@@ -101,10 +101,12 @@ gh workflow run dr-evidence-bundle.yml
 **Required artifacts** (must all be present in the bundle):
 1. `audit-velero.json` — backup schedule health
 2. `audit-velero-alert-pipeline.json` — alert pipeline health
-3. `audit-observability-runtime.json` — monitoring coverage
-4. Latest `restore-test` job logs and `kubectl describe` output
-5. Restored PVC summary (bound count)
-6. MySQL probe result from restore job log
+3. `observability-compliance-runtime.json` — runtime observability compliance evidence
+4. `observability-first-class-runtime-evidence-index.json` — normalized runtime evidence index
+5. `audit-observability-runtime.json` — monitoring coverage (legacy compatibility alias)
+6. Latest `restore-test` job logs and `kubectl describe` output
+7. Restored PVC summary (bound count)
+8. MySQL probe result from restore job log
 
 **SLA**: Complete evidence bundle generated within 1 business day of request.
 

@@ -159,11 +159,13 @@ REQUIRE_VPS_PROM_DS=1 REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-tel
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended
 
-# Audit monitoring coverage (repo + runtime)
-./scripts/qa/audit-observability.sh --mode all
+# Audit monitoring coverage (repo + runtime, canonical)
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  ./scripts/qa/run-observability-first-class.sh --mode all --strict
 
 # Strict runtime audit (fails on stale Velero freshness checks)
-STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 # Consolidated operator release gate (auth + observability + Velero + Grafana)
 ./scripts/qa/run-operations-gates.sh --env both

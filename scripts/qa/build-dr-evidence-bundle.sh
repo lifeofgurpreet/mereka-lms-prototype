@@ -63,6 +63,36 @@ run_check() {
   fi
 }
 
+run_json_check() {
+  local name="$1"; shift
+  local json_file="$1"; shift
+  local log_file="$OUT_DIR/${name// /-}.log"
+  local rc
+
+  set +e
+  "$@" >"$json_file" 2>"$log_file"
+  rc=$?
+  set -e
+
+  if [[ "$rc" -eq 0 ]]; then
+    if command -v jq >/dev/null 2>&1; then
+      if jq -e . "$json_file" >/dev/null 2>&1; then
+        echo "OK   $name"
+      else
+        failures=$((failures + 1))
+        echo "FAIL $name"
+        echo "  Captured JSON is invalid: $json_file"
+      fi
+    else
+      echo "OK   $name"
+    fi
+  else
+    failures=$((failures + 1))
+    echo "FAIL $name"
+    tail -n 40 "$log_file" | sed 's/^/  /'
+  fi
+}
+
 echo "Build: DR evidence bundle"
 echo "  out_dir:        $OUT_DIR"
 echo "  context:        $K8S_CONTEXT"
@@ -70,17 +100,42 @@ echo "  velero_ns:      $VELERO_NS"
 echo "  strict_runtime: $STRICT_RUNTIME"
 echo ""
 
-run_check "audit-velero-json" \
+run_json_check "audit-velero-json" "$OUT_DIR/audit-velero.json" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" VELERO_NS="$VELERO_NS" \
   ./scripts/qa/audit-velero.sh --context "$K8S_CONTEXT" --velero-namespace "$VELERO_NS" --app-namespace mereka-lms --json
 
-run_check "audit-velero-alert-pipeline-json" \
+run_json_check "audit-velero-alert-pipeline-json" "$OUT_DIR/audit-velero-alert-pipeline.json" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" VELERO_NS="$VELERO_NS" \
   ./scripts/qa/audit-velero-alert-pipeline.sh --json
 
-run_check "audit-observability-runtime-json" \
-  env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" VELERO_NS="$VELERO_NS" \
-  ./scripts/qa/audit-observability.sh --mode runtime --json
+run_check "observability-first-class-runtime" \
+  env OBSERVABILITY_EVIDENCE_DIR="$OUT_DIR/observability-runtime" \
+  OBSERVABILITY_K8S_CONTEXT="$K8S_CONTEXT" \
+  OBSERVABILITY_GCP_PROJECT="${GCP_PROJECT:-mereka-lms}" \
+  OBSERVABILITY_ENV_LABEL="${OBSERVABILITY_ENV_LABEL:-prod}" \
+  OBSERVABILITY_DISPATCH_PROFILE="${OBSERVABILITY_DISPATCH_PROFILE:-prod}" \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+if [[ -f "$OUT_DIR/observability-runtime/observability-compliance-runtime.json" ]]; then
+  cp "$OUT_DIR/observability-runtime/observability-compliance-runtime.json" \
+    "$OUT_DIR/observability-compliance-runtime.json"
+  cp "$OUT_DIR/observability-runtime/observability-compliance-runtime.json" \
+    "$OUT_DIR/audit-observability-runtime.json"
+else
+  failures=$((failures + 1))
+  echo "FAIL observability-first-class-runtime: missing observability-compliance-runtime.json output"
+fi
+
+if [[ -f "$OUT_DIR/observability-runtime/observability-first-class-runtime-evidence-index.json" ]]; then
+  cp "$OUT_DIR/observability-runtime/observability-first-class-runtime-evidence-index.json" \
+    "$OUT_DIR/observability-first-class-runtime-evidence-index.json"
+else
+  failures=$((failures + 1))
+  echo "FAIL observability-first-class-runtime: missing observability-first-class-runtime-evidence-index.json output"
+fi
+
+run_check "verify-observability-evidence-identity" \
+  ./scripts/qa/verify-observability-evidence-identity.sh --dir "$OUT_DIR/observability-runtime"
 
 run_check "collect-velero-evidence" \
   env K8S_CONTEXT="$K8S_CONTEXT" VELERO_NS="$VELERO_NS" OUT_DIR="$OUT_DIR/velero" \

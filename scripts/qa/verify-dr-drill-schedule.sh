@@ -160,7 +160,13 @@ check_dr_evidence_script() {
     return
   fi
 
-  local required_outputs=("audit-velero.json" "audit-velero-alert-pipeline.json" "audit-observability-runtime.json")
+  local required_outputs=(
+    "audit-velero.json"
+    "audit-velero-alert-pipeline.json"
+    "audit-observability-runtime.json"
+    "observability-compliance-runtime.json"
+    "observability-first-class-runtime-evidence-index.json"
+  )
   local missing=0
   for output in "${required_outputs[@]}"; do
     if ! grep -q "$output" "$script"; then

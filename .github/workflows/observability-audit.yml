@@ -90,12 +90,15 @@ jobs:
           INPUT_MODE: ${{ github.event.inputs.mode || 'all' }}
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'false' }}
           INPUT_INCLUDE_LEGACY: ${{ github.event.inputs.include_legacy || 'false' }}
+          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
         run: |
           MODE="$INPUT_MODE"
           if [[ -z "$MODE" ]]; then MODE="all"; fi
 
+          STRICT_FLAG=""
           if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
             export STRICT_RUNTIME=1
+            STRICT_FLAG="--strict"
           else
             export STRICT_RUNTIME=0
           fi
@@ -106,11 +109,36 @@ jobs:
             export INCLUDE_LEGACY_MONITORING=0
           fi
 
-          ./scripts/qa/audit-observability.sh --mode "$MODE" --json | tee observability-audit-runtime.json
+          mkdir -p var/ci
+
+          if [[ "$MODE" == "local" ]]; then
+            ./scripts/qa/audit-observability.sh --mode local --json | tee observability-audit-runtime.json
+          else
+            OBSERVABILITY_ENV_LABEL=prod \
+            OBSERVABILITY_DISPATCH_PROFILE=prod \
+            OBSERVABILITY_K8S_CONTEXT="$(kubectl config current-context)" \
+            OBSERVABILITY_GCP_PROJECT="${GCP_PROJECT:-mereka-lms}" \
+            ./scripts/qa/run-observability-first-class.sh --mode "$MODE" $STRICT_FLAG
+
+            if [[ "$MODE" == "runtime" ]]; then
+              cp var/ci/observability-compliance-runtime.json observability-audit-runtime.json
+            else
+              cp var/ci/observability-compliance-all.json observability-audit-runtime.json
+            fi
+            cat observability-audit-runtime.json
+          fi
 
       - name: Upload runtime audit artifact
         if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: observability-audit-runtime
-          path: observability-audit-runtime.json
+          path: |
+            observability-audit-runtime.json
+            var/ci/observability-compliance-*.json
+            var/ci/observability-compliance-*.md
+            var/ci/observability-coverage-*.json
+            var/ci/observability-coverage-*.md
+            var/ci/observability-runtime-verify-*.txt
+            var/ci/observability-runtime-verify-*.md
+            var/ci/observability-first-class-*-evidence-index.json

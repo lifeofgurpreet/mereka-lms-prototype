@@ -1,5 +1,9 @@
 # Mereka LMS Observability Review & Implementation Blueprint (Execution Ready)
 
+> Status: Superseded (historical context only).
+> Use `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md` and
+> `.github/workflows/observability-compliance.yml` as the active execution contract.
+
 Date: 2026-02-25
 Scope: `mereka-lms` repository only, with downstream vendoring impact noted.
 

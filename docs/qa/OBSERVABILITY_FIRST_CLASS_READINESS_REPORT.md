@@ -2,9 +2,19 @@
 
 _Date: 2026-02-25_
 
+## Metadata
+
+- last_updated: 2026-02-25
+- owner: Mereka LMS platform team
+- canonical_workflow: `.github/workflows/observability-compliance.yml`
+- canonical_index: `docs/qa/OBSERVABILITY_CANONICAL_INDEX.md`
+
 ## 0) Objective
 
 This review is a planner-level inventory only. It identifies what is live in plans and manifests, what is partially done, and what is still missing before observability can be considered first-class across local/dev (staging-equivalent), non-production, and production.
+
+Canonical index:
+- `docs/qa/OBSERVABILITY_CANONICAL_INDEX.md`
 
 ## 1) What is already baked into plans
 
@@ -19,7 +29,8 @@ This review is a planner-level inventory only. It identifies what is live in pla
 - `scripts/qa/audit-observability.sh` (live + repo audit entrypoint).
 - `scripts/qa/verify-observability-stack.sh` (aggregates stack checks and delegates to audit tooling).
 - `scripts/qa/verify-observability-runtime.sh` (runtime contract verification scaffold with AC mapping).
-- `scripts/qa/audit-observability.sh` is wired into `ci.yml` and scheduled in `.github/workflows/observability-audit.yml`.
+- `scripts/qa/run-observability-first-class.sh` (canonical orchestrator for local/runtime/all evidence runs).
+- `.github/workflows/observability-audit.yml` now uses `run-observability-first-class.sh` for runtime/all scheduled runs and preserves `audit-observability.sh` for local-only mode.
 
 ## 2) What is live in repo manifests
 
@@ -27,9 +38,8 @@ This review is a planner-level inventory only. It identifies what is live in pla
 |---|---|---|
 | Monitoring base kustomization | `deploy/k8s/base/monitoring/kustomization.yaml` | Active |
 | ServiceMonitors included | `servicemonitor-lms`, `servicemonitor-cms`, `servicemonitor-mysql`, `servicemonitor-redis`, `servicemonitor-enterprise`, `servicemonitor-xqueue`, `servicemonitor-mux`, `servicemonitor-caddy`, `servicemonitor-mfe`, `servicemonitor-forum`, `servicemonitor-discovery`, `servicemonitor-ecommerce`, `servicemonitor-credentials`, `servicemonitor-purchase-gateway` | Mostly complete |
-| PrometheusRules included | `prometheusrule-lms`, `prometheusrule-credentials`, `prometheusrule-enterprise`, `prometheusrule-xqueue`, `prometheusrule-velero`, `prometheusrule-slo`, `prometheusrule-auth`, `prometheusrule-email`, `prometheusrule-video`, `prometheusrule-libraries`, `prometheusrule-externalsecrets`, `prometheusrule-tenant-isolation`, `prometheusrule-ora2`, `prometheusrule-caddy`, `prometheusrule-services`, `slo-burn-rate-rules.yaml` | Partial |
 | Service-level logs pipeline | `deploy/k8s/base/logging/promtail-*` via `deploy/k8s/base/logging/kustomization.yaml` and forwarded to `https://loki.mereka.dev` | Implemented |
-| LMS/CMS `/metrics` app-level signal quality | `deploy/k8s/base/monitoring/IMPLEMENTATION_STATUS.md` documents current response `HTTP 400` at `/metrics` | Not yet reliable |
+| LMS/CMS `/metrics` app-level signal quality | `/metrics -> HTTP 200` is enforced by `deploy/k8s/base/monitoring/verify.sh`, `scripts/qa/validate-observability-compliance.sh`, and `scripts/qa/verify-observability-runtime.sh` | Enforced |
 | Compliance script runtime | `scripts/qa/validate-observability-compliance.sh` is now implemented | Implemented |
 
 ## 3) Missing from live monitoring against spec requirements
@@ -223,24 +233,78 @@ Suggested policy gate:
 
 ### Runtime evidence commands (nonprod/prod)
 
-Use namespace-aware runtime checks with evidence output:
+Use namespace-aware runtime checks with first-class evidence output:
 
 ```bash
-VALIDATE_OBS_APP_NAMESPACE=mereka-lms \
-VALIDATE_OBS_EVIDENCE_FILE="docs/evidence/observability/nonprod-runtime-$(date -u +%Y-%m-%dT%H-%M-%SZ).md" \
-./scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json
-```
-
-```bash
-VERIFY_OBS_APP_NAMESPACE=mereka-lms \
-VERIFY_OBS_MONITORING_NAMESPACE=monitoring \
-VERIFY_OBS_EVIDENCE_FILE="docs/evidence/observability/nonprod-runtime-verify-$(date -u +%Y-%m-%dT%H-%M-%SZ).md" \
-./scripts/qa/verify-observability-runtime.sh
+OBSERVABILITY_ENV_LABEL=nonprod \
+OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+OBSERVABILITY_APP_NAMESPACE=mereka-lms \
+OBSERVABILITY_MONITORING_NAMESPACE=monitoring \
+OBSERVABILITY_EVIDENCE_DIR="docs/evidence/observability/nonprod-$(date -u +%Y-%m-%dT%H-%M-%SZ)" \
+./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
 Manual CI runtime path is now available in `.github/workflows/observability-compliance.yml`:
 - `workflow_dispatch` with `run_runtime=true`
 - `app_namespace` and `monitoring_namespace` inputs
 - optional `k8s_context` input to pin kubectl to a target cluster context
+- optional `require_k8s_context` input (`true|false`) to hard-fail preflight if context is omitted
+- `gcp_project` input to pin runtime gcloud checks to the intended project
+- optional `require_gcp_project` input (`true|false`) to hard-fail preflight if project input is empty
 - Runtime artifacts uploaded as `observability-compliance-runtime`
 - Workflow step summary now includes runtime compliance and verifier markdown evidence
+- Runtime preflight now records selected namespace/context/project into both summary and artifact (`var/ci/observability-runtime-preflight.md`)
+- Runtime preflight also records derived `dispatch_profile` (`prod`/`nonprod`/`custom`) with `profile_note` to classify artifacts quickly.
+- Runtime dispatch supports `expected_dispatch_profile` (`any|prod|nonprod|custom`) and preflight fails when derived profile does not match expectation.
+- Runtime dispatch includes `environment_label` (`dev|nonprod|prod|custom`) and this label is written into preflight/compliance/runtime evidence files for cross-run comparison.
+- All generated evidence markdown now includes a normalized `evidence_identity` line:
+  `env=<label>;profile=<dispatch_profile>;context=<k8s_context>;project=<gcp_project>`.
+- CI now generates machine-readable evidence index artifacts for ingestion:
+  - `var/ci/observability-first-class-local-evidence-index.json`
+  - `var/ci/observability-first-class-runtime-evidence-index.json`
+- CI now validates both evidence index files with `jq` schema checks and fails if required fields are missing.
+- CI now validates evidence bundle integrity by verifying every path listed in each index file exists before artifact upload.
+- Runtime CI now enforces identity consistency: preflight/compliance/runtime-verifier `evidence_identity` values must match.
+- Local CI now enforces identity consistency between local evidence index and compliance markdown `evidence_identity`.
+- Local CI now enforces canonical observability doc metadata keys (`last_updated`, `owner`, `canonical_workflow`, and cross-links) in the two canonical docs.
+- Observability CI evidence artifacts (`local` and `runtime`) now set `retention-days: 30` in upload policy.
+- Retention policy is centralized in workflow env as `EVIDENCE_RETENTION_DAYS` and reused by both upload steps.
+- Workflow preflight now enforces `EVIDENCE_RETENTION_DAYS` to be numeric and within `1..90` before evidence generation/upload.
+- Added `scripts/qa/run-observability-first-class.sh` as the canonical gate runner for local/runtime/all execution with deterministic evidence index output.
+- `.github/workflows/observability-compliance.yml` now executes the canonical runner in both local and runtime jobs to keep operator and CI execution paths aligned.
+
+## 12) Parity execution status (2026-02-25)
+
+- Added canonical parity matrix: `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`.
+- CI now enforces active operations docs to use canonical runtime observability commands (fails on `audit-observability.sh --mode runtime|all` drift).
+- Runtime preflight now enforces parity mapping from `environment_label` to `dispatch_profile`:
+  - `dev|nonprod -> nonprod`
+  - `prod -> prod`
+  - `custom -> custom`
+- Canonical runtime identity and parity model are now wired through:
+  - `docs/qa/OBSERVABILITY_CANONICAL_INDEX.md`
+  - `docs/operations/MONITORING.md`
+  - `.github/workflows/observability-compliance.yml`
+
+## 13) Parity gap register (2026-02-25)
+
+### Open gaps
+
+| Gap ID | Environment | Gap | Impact | Owner | Target |
+|---|---|---|---|---|---|
+| PAR-001 | dev | Scheduled parity workflow is implemented but remains pending env wiring and sustained cadence proof. Closure requires 3 consecutive scheduled rollups with no skipped environments. | Drift can go undetected until env wiring is completed. | Mereka LMS platform team | 2026-03-05 |
+| PAR-002 | nonprod | Parity delta/review/rollup artifacts are implemented but require sustained nonprod runtime execution. Closure requires 3 consecutive scheduled rollups with no parity delta failures. | Operators may miss trend-level parity regressions without weekly review discipline. | Mereka LMS platform team | 2026-03-07 |
+
+### Closed gaps
+
+| Gap ID | Environment | Closure | Owner | Closed date |
+|---|---|---|---|---|
+| PAR-C001 | all | Canonical runtime observability gate established via `scripts/qa/run-observability-first-class.sh` and wired into primary workflows/gates. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C002 | all | Runtime evidence identity normalization and consistency checks enforced in CI/runtime and DR evidence generation paths. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C003 | all | Active operations docs migrated to canonical runtime/all command contract; non-canonical drift now fails in observability compliance CI. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C004 | all | Environment-targeted parity automation + parity delta artifacts implemented: `.github/workflows/observability-parity-runtime.yml` + `scripts/qa/build-observability-parity-delta.sh`. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C005 | prod | Production parity workflow lane now fails fast when `OBS_PARITY_PROD_K8S_CONTEXT` is missing (no silent prod skip). | Mereka LMS platform team | 2026-02-25 |
+| PAR-C006 | all | Weekly parity review artifact is now auto-generated per env run (`observability-parity-review.md`) via `scripts/qa/build-observability-parity-review.sh`. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C007 | all | Matrix runs now publish a consolidated rollup artifact (`observability-parity-rollup.md/.json`) for single-view weekly parity review. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C008 | all | Alert-noise baseline is codified as an enforceable gate threshold (`infrastructure/monitoring/alert-noise-baseline.json`) and wired into `run-operations-gates.sh` via `audit-alert-noise-baseline.sh`. | Mereka LMS platform team | 2026-02-25 |
+| PAR-003 | prod | Runtime alert-noise sample is now generated in `.github/workflows/operations-gates-runtime.yml` via `scripts/qa/build-alert-noise-runtime-sample.sh` and passed to `run-operations-gates.sh` as `ALERT_NOISE_RUNTIME_SOURCE` in strict runtime mode. | Mereka LMS platform team | 2026-02-25 |

@@ -1,5 +1,9 @@
 # Mereka LMS Observability Review & Work Plan (Reviewer pass, no implementation)
 
+> Status: Superseded (historical context only).
+> Use `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md` and
+> `.github/workflows/observability-compliance.yml` as the active execution contract.
+
 Date: 2026-02-25
 Author: Codex (review/plan mode)
 Scope: Observability for Open edX (Mereka LMS) across local/dev/staging/prod and VPS/BBI boundaries.

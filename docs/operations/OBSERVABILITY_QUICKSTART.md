@@ -6,6 +6,10 @@ Use this when you need a fast answer to: "Is Mereka LMS healthy right now?"
 ## 1) Fast Checks (2-3 minutes)
 
 ```bash
+# Canonical first-class evidence run (local + runtime)
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  ./scripts/qa/run-observability-first-class.sh --mode all --strict
+
 # Public surfaces + certs
 CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 
@@ -16,7 +20,8 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 ./scripts/qa/audit-observability.sh --mode local
 
 # Runtime monitoring objects + synthetic cronjobs (requires cluster + gcloud auth)
-./scripts/qa/audit-observability.sh --mode runtime
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 # Velero alert pipeline + freshness/recency checks (repo + runtime)
 ./scripts/qa/audit-velero-alert-pipeline.sh
@@ -50,6 +55,14 @@ CHECK_TIMEOUT_SECONDS=900 ./scripts/qa/run-multisite-governance-gates.sh --env b
 # Optional Sentry gate:
 RUN_SENTRY_WIRING_AUDIT=1 SENTRY_AUDIT_MODE=local ./scripts/qa/run-operations-gates.sh --env both
 ```
+
+`run-operations-gates.sh` now executes observability checks through
+`scripts/qa/run-observability-first-class.sh` (runtime strict mode), so CI/manual/runtime evidence contracts stay aligned.
+
+`run-observability-first-class.sh` writes deterministic evidence artifacts into `var/ci/`:
+- compliance JSON/Markdown
+- runtime verification text/Markdown (runtime/all mode)
+- unified evidence index JSON with normalized identity labels
 
 If runtime mode fails while local mode passes, treat it as rollout drift (GitOps/runtime
 state has not picked up this repo commit yet), not as a source-contract failure.

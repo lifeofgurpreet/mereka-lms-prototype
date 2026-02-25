@@ -5,8 +5,8 @@
 #
 # This script exists primarily to satisfy spec testmap references and to provide
 # a single entrypoint for operators. Many observability checks require live
-# cluster access; those should be run via scripts/qa/audit-observability.sh and
-# related runtime gates.
+# cluster access; those should be run via scripts/qa/run-observability-first-class.sh
+# and related runtime gates.
 #
 # Usage:
 #   ./scripts/qa/verify-observability-stack.sh --mode local
@@ -35,7 +35,6 @@ if [[ "$MODE" == "local" ]]; then
 fi
 
 # runtime mode requires kubectl context
-./scripts/qa/audit-observability.sh --mode runtime
+./scripts/qa/run-observability-first-class.sh --mode runtime
 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 echo "OK"
-

@@ -12,6 +12,9 @@
 #   ./scripts/qa/audit-observability.sh
 #   ./scripts/qa/audit-observability.sh --json
 #   ./scripts/qa/audit-observability.sh --project mereka-lms --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   # Canonical runtime/all evidence gate:
+#   OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+#     ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 #
 set -euo pipefail
 
@@ -451,6 +454,12 @@ else
     echo "FAILED ($failures checks failed)" >&2
   else
     echo "OK"
+  fi
+  if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
+    echo
+    echo "Canonical runtime evidence gate:"
+    echo "  OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \\"
+    echo "    ./scripts/qa/run-observability-first-class.sh --mode ${MODE} --strict"
   fi
 fi
 

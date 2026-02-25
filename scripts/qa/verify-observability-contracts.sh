@@ -397,13 +397,13 @@ if [[ "$MODE" == "runtime" ]]; then
       report FAIL "Runtime: Prometheus pod not found in monitoring namespace"
     fi
 
-    # Delegate to existing audit scripts for deeper runtime coverage
+    # Delegate to canonical first-class observability gate for deeper runtime coverage
     echo ""
-    echo "=== Delegating to audit-observability.sh (runtime) ==="
-    if scripts/qa/audit-observability.sh --mode runtime; then
-      report PASS "audit-observability.sh runtime checks passed"
+    echo "=== Delegating to run-observability-first-class.sh (runtime) ==="
+    if scripts/qa/run-observability-first-class.sh --mode runtime; then
+      report PASS "run-observability-first-class.sh runtime checks passed"
     else
-      report FAIL "audit-observability.sh runtime checks failed"
+      report FAIL "run-observability-first-class.sh runtime checks failed"
     fi
   else
     report SKIP "Runtime: kubectl not available or cluster unreachable ($K8S_CONTEXT / $APP_NS)"

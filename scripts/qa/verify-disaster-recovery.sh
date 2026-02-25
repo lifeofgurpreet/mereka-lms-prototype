@@ -343,7 +343,13 @@ check_ac_009() {
   fi
 
   # Check that the script references required output files
-  local required_outputs=("audit-velero.json" "audit-velero-alert-pipeline.json" "audit-observability-runtime.json")
+  local required_outputs=(
+    "audit-velero.json"
+    "audit-velero-alert-pipeline.json"
+    "audit-observability-runtime.json"
+    "observability-compliance-runtime.json"
+    "observability-first-class-runtime-evidence-index.json"
+  )
   local missing=0
 
   for output in "${required_outputs[@]}"; do

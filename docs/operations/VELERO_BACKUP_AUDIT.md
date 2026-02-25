@@ -90,7 +90,7 @@ Fix path (implemented in this repo):
    ```
 5. Confirm freshness:
    ```bash
-   STRICT_RUNTIME=1 ./scripts/qa/audit-observability.sh --mode runtime
+   OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
    ```
 6. Confirm restore-test config contract:
    ```bash
@@ -121,7 +121,7 @@ condition.
 Current enforcement model:
 - `backup-verification` stale signal is handled by GCP policy + runtime checks.
 - `restore-test` stale signal is enforced by runtime freshness checks in:
-  - `./scripts/qa/audit-observability.sh --mode runtime`
+  - `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
   - `./scripts/qa/audit-velero-alert-pipeline.sh`
 
 ## Recommended Cadence
@@ -135,7 +135,9 @@ Monthly restore-drill evidence checklist:
 - attach:
   - `audit-velero.json`
   - `audit-velero-alert-pipeline.json`
-  - `audit-observability-runtime.json`
+  - `observability-compliance-runtime.json`
+  - `observability-first-class-runtime-evidence-index.json`
+  - `audit-observability-runtime.json` (legacy compatibility alias)
   - latest `restore-test` job logs/describe
   - restored PVC summary (bound count)
   - MySQL probe result from restore job log

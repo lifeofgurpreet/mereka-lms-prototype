@@ -17,6 +17,33 @@ STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 STRICT_WEBHOOK="${STRICT_WEBHOOK:-1}"
 RUN_ATLAS_VPS_AUDIT="${RUN_ATLAS_VPS_AUDIT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-900}"
+OBS_ENV_LABEL="${OBSERVABILITY_ENV_LABEL:-}"
+OBS_DISPATCH_PROFILE="${OBSERVABILITY_DISPATCH_PROFILE:-}"
+
+if [[ -z "$OBS_ENV_LABEL" ]]; then
+  if [[ "$K8S_CONTEXT" == *"nonprod"* ]]; then
+    OBS_ENV_LABEL="nonprod"
+  elif [[ "$K8S_CONTEXT" == *"prod"* ]]; then
+    OBS_ENV_LABEL="prod"
+  else
+    OBS_ENV_LABEL="custom"
+  fi
+fi
+
+if [[ -z "$OBS_DISPATCH_PROFILE" ]]; then
+  if [[ "$K8S_CONTEXT" == *"nonprod"* ]]; then
+    OBS_DISPATCH_PROFILE="nonprod"
+  elif [[ "$K8S_CONTEXT" == *"prod"* ]]; then
+    OBS_DISPATCH_PROFILE="prod"
+  else
+    OBS_DISPATCH_PROFILE="custom"
+  fi
+fi
+
+OBS_STRICT_FLAG=()
+if [[ "$STRICT_RUNTIME" == "1" ]]; then
+  OBS_STRICT_FLAG=(--strict)
+fi
 
 failures=0
 warnings=0
@@ -194,6 +221,8 @@ echo "  context:              $K8S_CONTEXT"
 echo "  strict runtime:       $STRICT_RUNTIME"
 echo "  strict webhook:       $STRICT_WEBHOOK"
 echo "  run atlas vps audit:  $RUN_ATLAS_VPS_AUDIT"
+echo "  obs env label:        $OBS_ENV_LABEL"
+echo "  obs dispatch profile: $OBS_DISPATCH_PROFILE"
 echo "  check timeout:        ${CHECK_TIMEOUT_SECONDS}s"
 echo ""
 
@@ -204,8 +233,11 @@ run_check "runtime: high-severity policies + channels are enabled" \
   check_runtime_high_severity_policies_and_channels
 
 run_check "runtime: observability audit" \
-  env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" \
-  ./scripts/qa/audit-observability.sh --mode runtime
+  env OBSERVABILITY_ENV_LABEL="$OBS_ENV_LABEL" \
+  OBSERVABILITY_DISPATCH_PROFILE="$OBS_DISPATCH_PROFILE" \
+  OBSERVABILITY_K8S_CONTEXT="$K8S_CONTEXT" \
+  OBSERVABILITY_GCP_PROJECT="$PROJECT" \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime "${OBS_STRICT_FLAG[@]}"
 
 run_check "runtime: velero alert pipeline audit" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" K8S_CONTEXT="$K8S_CONTEXT" \

@@ -147,6 +147,8 @@ jobs:
             ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-review.md
             ${{ env.OBS_EVIDENCE_DIR }}/observability-compliance-runtime.json
             ${{ env.OBS_EVIDENCE_DIR }}/observability-compliance-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-coverage-runtime.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-coverage-runtime.md
             ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.txt
             ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.md
             ${{ env.OBS_EVIDENCE_DIR }}/observability-first-class-runtime-evidence-index.json

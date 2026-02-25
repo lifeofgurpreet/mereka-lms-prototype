@@ -8,6 +8,31 @@ Reality-first (as of 2026-02-06):
 - Some older docs/templates reference **Cloud SQL** / **Memorystore**; treat those as **legacy** unless explicitly reintroduced.
 - Backups are driven by **Velero** (see `docs/operations/VELERO_BACKUP_AUDIT.md`).
 
+## Canonical Observability Commands
+
+Use these as the default operational entrypoints:
+
+```bash
+# Local contract checks (repo-only)
+./scripts/qa/audit-observability.sh --mode local
+
+# Runtime first-class gate (recommended)
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Full evidence run (local + runtime)
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  ./scripts/qa/run-observability-first-class.sh --mode all --strict
+```
+
+`run-observability-first-class.sh` is the canonical runtime contract because it emits:
+- runtime compliance JSON/Markdown
+- runtime verifier text/Markdown
+- normalized evidence index JSON
+
+Environment label/profile expectations are defined in:
+- `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`
+
 ## Dashboards
 
 ### BBI Observability Stack (Grafana)
@@ -97,7 +122,7 @@ Minimum recommended policies (edit thresholds as desired):
 | MySQL saturation high | `infrastructure/monitoring/alerts/mysql-saturation-high.json` | Warns on sustained high CPU/memory request utilization for MySQL pods. |
 | Redis saturation high | `infrastructure/monitoring/alerts/redis-saturation-high.json` | Warns on sustained high CPU/memory request utilization for Redis pods. |
 | Velero backup verification stale | `infrastructure/monitoring/alerts/velero-backup-verification-stale.json` | Critical stale approximation for daily verification cadence (implemented as `< 1 success over 24h for 6h`). |
-| Velero restore-test stale (runtime audit) | Runtime checks (`audit-observability`, `audit-velero-alert-pipeline`) | Enforced by CronJob freshness audits; long-window 45d stale cannot be expressed as a standard Cloud Monitoring threshold/absence alert condition. |
+| Velero restore-test stale (runtime audit) | Runtime checks (`run-observability-first-class`, `audit-velero-alert-pipeline`) | Enforced by CronJob freshness audits; long-window 45d stale cannot be expressed as a standard Cloud Monitoring threshold/absence alert condition. |
 
 Apply an alert with:
 `gcloud monitoring policies create --policy-from-file infrastructure/monitoring/alerts/https-cert-expiry.json --notification-channels=<channel-id>`
@@ -228,16 +253,17 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
 6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.
-7. **Observability posture audit** – run `./scripts/qa/audit-observability.sh --mode all` (or `--mode local` when offline) to verify coverage and deployment state.
+7. **Observability posture audit** – run `./scripts/qa/run-observability-first-class.sh --mode all --strict` (or `./scripts/qa/audit-observability.sh --mode local` when offline) to verify coverage and deployment state.
 8. **Velero alert pipeline audit** – run `./scripts/qa/audit-velero-alert-pipeline.sh` to validate log metrics/policies plus runtime CronJob freshness and hourly backup recency.
 9. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
 10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.
 11. **Alert routing verification** – run `./scripts/qa/verify-alert-routing.sh` for runtime policy/channel checks plus optional VPS webhook routing validation.
-12. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
-13. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
-14. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
-15. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
-16. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
+12. **Alert-noise baseline audit** – run `./scripts/qa/audit-alert-noise-baseline.sh --mode local` to enforce codified duplicate/false-positive thresholds from `infrastructure/monitoring/alert-noise-baseline.json`. For runtime enforcement, generate `var/operations-gates/alert-noise-runtime-sample.json` (or provide a canonical source file) and run `ALERT_NOISE_RUNTIME_SOURCE=<sample> ./scripts/qa/audit-alert-noise-baseline.sh --mode runtime`.
+13. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
+14. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
+15. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
+16. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
+17. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
 
 ## Certificate/SAN verification
 

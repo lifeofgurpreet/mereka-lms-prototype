@@ -26,6 +26,47 @@ on:
         required: false
         default: ""
         type: string
+      require_k8s_context:
+        description: "Fail preflight when k8s_context is empty"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      gcp_project:
+        description: "GCP project for runtime gcloud checks"
+        required: true
+        default: "mereka-lms"
+        type: string
+      require_gcp_project:
+        description: "Fail preflight when gcp_project is empty"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      expected_dispatch_profile:
+        description: "Optional expected derived profile (any|prod|nonprod|custom)"
+        required: true
+        default: "any"
+        type: choice
+        options:
+          - "any"
+          - "prod"
+          - "nonprod"
+          - "custom"
+      environment_label:
+        description: "Operator-provided environment tag for evidence (dev|nonprod|prod|custom)"
+        required: true
+        default: "nonprod"
+        type: choice
+        options:
+          - "dev"
+          - "nonprod"
+          - "prod"
+          - "custom"
   pull_request:
     branches: [main]
     paths:
@@ -37,9 +78,14 @@ on:
       - "scripts/qa/verify-observability-validation.sh"
       - "scripts/qa/verify-observability-runtime.sh"
       - "scripts/qa/audit-observability.sh"
+      - "scripts/qa/run-observability-first-class.sh"
+      - "scripts/qa/verify-observability-evidence-identity.sh"
 
 permissions:
   contents: read
+
+env:
+  EVIDENCE_RETENTION_DAYS: "30"
 
 jobs:
   observability-compliance-local:
@@ -49,22 +95,104 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - name: Run observability compliance script (strict local checks)
+      - name: Validate canonical observability doc metadata
         run: |
-          mkdir -p var/ci
-          VALIDATE_OBS_EVIDENCE_FILE=var/ci/observability-compliance-local.md \
-          ./scripts/qa/validate-observability-compliance.sh --mode local --strict --json > var/ci/observability-compliance-local.json
+          for f in \
+            docs/qa/OBSERVABILITY_CANONICAL_INDEX.md \
+            docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md \
+            docs/operations/OBSERVABILITY_PARITY_MATRIX.md; do
+            test -f "$f"
+            grep -q "last_updated:" "$f"
+            grep -q "owner:" "$f"
+            if [ "$f" != "docs/operations/OBSERVABILITY_PARITY_MATRIX.md" ]; then
+              grep -q "canonical_workflow:" "$f"
+            fi
+          done
+          grep -q "canonical_readiness_report:" docs/qa/OBSERVABILITY_CANONICAL_INDEX.md
+          grep -q "canonical_index:" docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md
+
+      - name: Validate active docs use canonical runtime observability command
+        run: |
+          if rg -n "audit-observability\\.sh --mode (runtime|all)" docs/operations; then
+            echo "Non-canonical runtime observability commands found in active operations docs." >&2
+            exit 1
+          fi
+
+      - name: Validate parity matrix command/profile contract
+        run: |
+          # Matrix must document canonical environment/profile pairs.
+          rg -q "OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod" docs/operations/OBSERVABILITY_PARITY_MATRIX.md
+          rg -q "OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod" docs/operations/OBSERVABILITY_PARITY_MATRIX.md
+          rg -q "OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod" docs/operations/OBSERVABILITY_PARITY_MATRIX.md
+
+          # Workflow preflight must enforce the same profile mapping rules.
+          rg -q "dev\\|nonprod" .github/workflows/observability-compliance.yml
+          rg -q "environment_label=prod requires dispatch_profile=prod" .github/workflows/observability-compliance.yml
+          rg -q "requires dispatch_profile=nonprod" .github/workflows/observability-compliance.yml
+
+      - name: Validate retention policy env
+        run: |
+          if ! [[ "${EVIDENCE_RETENTION_DAYS}" =~ ^[0-9]+$ ]]; then
+            echo "EVIDENCE_RETENTION_DAYS must be numeric, got '${EVIDENCE_RETENTION_DAYS}'" >&2
+            exit 1
+          fi
+          if [ "${EVIDENCE_RETENTION_DAYS}" -lt 1 ] || [ "${EVIDENCE_RETENTION_DAYS}" -gt 90 ]; then
+            echo "EVIDENCE_RETENTION_DAYS out of allowed range (1..90): ${EVIDENCE_RETENTION_DAYS}" >&2
+            exit 1
+          fi
+
+      - name: Run observability first-class gate (strict local)
+        run: |
+          OBSERVABILITY_ENV_LABEL=local \
+          OBSERVABILITY_DISPATCH_PROFILE=local \
+          ./scripts/qa/run-observability-first-class.sh --mode local --strict
           cat var/ci/observability-compliance-local.json
           cat var/ci/observability-compliance-local.md
+          cat var/ci/observability-coverage-local.json
+          cat var/ci/observability-coverage-local.md
+
+      - name: Build local evidence index
+        if: always()
+        run: |
+          cat var/ci/observability-first-class-local-evidence-index.json
+
+      - name: Validate local evidence index schema
+        if: always()
+        run: |
+          jq -e '
+            .generated_at and
+            .mode == "local" and
+            .identity and
+            (.files | type == "array" and length > 0)
+          ' var/ci/observability-first-class-local-evidence-index.json >/dev/null
+
+      - name: Validate local evidence bundle integrity
+        if: always()
+        run: |
+          while IFS= read -r f; do
+            if [ ! -f "$f" ]; then
+              echo "Indexed local evidence file is missing: $f" >&2
+              exit 1
+            fi
+          done < <(jq -r '.files[]' var/ci/observability-first-class-local-evidence-index.json)
+
+      - name: Validate local evidence identity consistency
+        if: always()
+        run: |
+          ./scripts/qa/verify-observability-evidence-identity.sh --dir var/ci
 
       - name: Upload observability compliance artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: observability-compliance-local
+          retention-days: ${{ fromJSON(env.EVIDENCE_RETENTION_DAYS) }}
           path: |
             var/ci/observability-compliance-local.json
             var/ci/observability-compliance-local.md
+            var/ci/observability-coverage-local.json
+            var/ci/observability-coverage-local.md
+            var/ci/observability-first-class-local-evidence-index.json
 
   observability-compliance-runtime:
     name: Runtime observability verification (manual)
@@ -74,24 +202,151 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - name: Run runtime observability compliance and verifier
-        env:
-          VALIDATE_OBS_APP_NAMESPACE: ${{ inputs.app_namespace }}
-          VALIDATE_OBS_K8S_CONTEXT: ${{ inputs.k8s_context }}
-          VERIFY_OBS_APP_NAMESPACE: ${{ inputs.app_namespace }}
-          VERIFY_OBS_MONITORING_NAMESPACE: ${{ inputs.monitoring_namespace }}
-          VERIFY_OBS_K8S_CONTEXT: ${{ inputs.k8s_context }}
+      - name: Validate retention policy env
+        run: |
+          if ! [[ "${EVIDENCE_RETENTION_DAYS}" =~ ^[0-9]+$ ]]; then
+            echo "EVIDENCE_RETENTION_DAYS must be numeric, got '${EVIDENCE_RETENTION_DAYS}'" >&2
+            exit 1
+          fi
+          if [ "${EVIDENCE_RETENTION_DAYS}" -lt 1 ] || [ "${EVIDENCE_RETENTION_DAYS}" -gt 90 ]; then
+            echo "EVIDENCE_RETENTION_DAYS out of allowed range (1..90): ${EVIDENCE_RETENTION_DAYS}" >&2
+            exit 1
+          fi
+
+      - name: Runtime preflight context summary
         run: |
           mkdir -p var/ci
-          VALIDATE_OBS_EVIDENCE_FILE=var/ci/observability-compliance-runtime.md \
-          ./scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json > var/ci/observability-compliance-runtime.json
+          K8S_CONTEXT_INPUT="${{ inputs.k8s_context }}"
+          REQUIRE_K8S_CONTEXT="${{ inputs.require_k8s_context }}"
+          GCP_PROJECT_INPUT="${{ inputs.gcp_project }}"
+          REQUIRE_GCP_PROJECT="${{ inputs.require_gcp_project }}"
+          EXPECTED_PROFILE="${{ inputs.expected_dispatch_profile }}"
+          ENVIRONMENT_LABEL="${{ inputs.environment_label }}"
+          if [ -z "$K8S_CONTEXT_INPUT" ]; then
+            CONTEXT_NOTE="k8s_context is empty; kubectl will use default current-context."
+          else
+            CONTEXT_NOTE="k8s_context explicitly set."
+          fi
+          if [ -z "$GCP_PROJECT_INPUT" ]; then
+            GCP_NOTE="gcp_project is empty; runtime gcloud checks cannot be pinned safely."
+          else
+            GCP_NOTE="gcp_project explicitly set."
+          fi
+          PROFILE="custom"
+          PROFILE_NOTE="Custom dispatch profile (verify inputs manually)."
+          if echo "$K8S_CONTEXT_INPUT" | grep -qi "nonprod"; then
+            PROFILE="nonprod"
+            PROFILE_NOTE="Derived from k8s_context containing 'nonprod'."
+          elif echo "$K8S_CONTEXT_INPUT" | grep -qi "prod"; then
+            PROFILE="prod"
+            PROFILE_NOTE="Derived from k8s_context containing 'prod'."
+          elif [ "$GCP_PROJECT_INPUT" = "mereka-lms" ]; then
+            PROFILE="prod"
+            PROFILE_NOTE="Derived from gcp_project=mereka-lms."
+          fi
+          {
+            echo "# Runtime Observability Preflight"
+            echo ""
+            echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- app_namespace: ${{ inputs.app_namespace }}"
+            echo "- monitoring_namespace: ${{ inputs.monitoring_namespace }}"
+            echo "- k8s_context: ${{ inputs.k8s_context }}"
+            echo "- require_k8s_context: ${{ inputs.require_k8s_context }}"
+            echo "- context_note: ${CONTEXT_NOTE}"
+            echo "- gcp_project: ${{ inputs.gcp_project }}"
+            echo "- require_gcp_project: ${{ inputs.require_gcp_project }}"
+            echo "- gcp_note: ${GCP_NOTE}"
+            echo "- dispatch_profile: ${PROFILE}"
+            echo "- profile_note: ${PROFILE_NOTE}"
+            echo "- expected_dispatch_profile: ${EXPECTED_PROFILE}"
+            echo "- environment_label: ${ENVIRONMENT_LABEL}"
+            echo "- evidence_identity: env=${ENVIRONMENT_LABEL};profile=${PROFILE};context=${K8S_CONTEXT_INPUT:-default};project=${GCP_PROJECT_INPUT}"
+          } > var/ci/observability-runtime-preflight.md
+          cat var/ci/observability-runtime-preflight.md
+          {
+            echo "## Observability Runtime Preflight"
+            echo ""
+            cat var/ci/observability-runtime-preflight.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$REQUIRE_K8S_CONTEXT" = "true" ] && [ -z "$K8S_CONTEXT_INPUT" ]; then
+            echo "Preflight failed: require_k8s_context=true but k8s_context is empty." >&2
+            exit 1
+          fi
+          if [ "$REQUIRE_GCP_PROJECT" = "true" ] && [ -z "$GCP_PROJECT_INPUT" ]; then
+            echo "Preflight failed: require_gcp_project=true but gcp_project is empty." >&2
+            exit 1
+          fi
+          if [ "$EXPECTED_PROFILE" != "any" ] && [ "$PROFILE" != "$EXPECTED_PROFILE" ]; then
+            echo "Preflight failed: expected_dispatch_profile=${EXPECTED_PROFILE} but derived dispatch_profile=${PROFILE}." >&2
+            exit 1
+          fi
+          case "$ENVIRONMENT_LABEL" in
+            dev|nonprod)
+              if [ "$PROFILE" != "nonprod" ]; then
+                echo "Preflight failed: environment_label=${ENVIRONMENT_LABEL} requires dispatch_profile=nonprod per parity matrix." >&2
+                exit 1
+              fi
+              ;;
+            prod)
+              if [ "$PROFILE" != "prod" ]; then
+                echo "Preflight failed: environment_label=prod requires dispatch_profile=prod per parity matrix." >&2
+                exit 1
+              fi
+              ;;
+            custom)
+              ;;
+            *)
+              echo "Preflight failed: unsupported environment_label=${ENVIRONMENT_LABEL}" >&2
+              exit 1
+              ;;
+          esac
+          echo "OBS_DISPATCH_PROFILE=$PROFILE" >> "$GITHUB_ENV"
 
-          VERIFY_OBS_EVIDENCE_FILE=var/ci/observability-runtime-verify.md \
-          ./scripts/qa/verify-observability-runtime.sh > var/ci/observability-runtime-verify.txt
-
+      - name: Run runtime observability compliance and verifier
+        env:
+          OBSERVABILITY_APP_NAMESPACE: ${{ inputs.app_namespace }}
+          OBSERVABILITY_MONITORING_NAMESPACE: ${{ inputs.monitoring_namespace }}
+          OBSERVABILITY_K8S_CONTEXT: ${{ inputs.k8s_context }}
+          OBSERVABILITY_GCP_PROJECT: ${{ inputs.gcp_project }}
+          OBSERVABILITY_ENV_LABEL: ${{ inputs.environment_label }}
+        run: |
+          OBSERVABILITY_DISPATCH_PROFILE="${OBS_DISPATCH_PROFILE:-custom}" \
+          ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
           cat var/ci/observability-compliance-runtime.json
           cat var/ci/observability-compliance-runtime.md
-          cat var/ci/observability-runtime-verify.md
+          cat var/ci/observability-coverage-runtime.json
+          cat var/ci/observability-coverage-runtime.md
+          cat var/ci/observability-runtime-verify-runtime.md
+
+      - name: Build runtime evidence index
+        if: always()
+        run: |
+          cat var/ci/observability-first-class-runtime-evidence-index.json
+
+      - name: Validate runtime evidence index schema
+        if: always()
+        run: |
+          jq -e '
+            .generated_at and
+            .mode == "runtime" and
+            .identity and
+            (.files | type == "array" and length > 0)
+          ' var/ci/observability-first-class-runtime-evidence-index.json >/dev/null
+
+      - name: Validate runtime evidence bundle integrity
+        if: always()
+        run: |
+          while IFS= read -r f; do
+            if [ ! -f "$f" ]; then
+              echo "Indexed runtime evidence file is missing: $f" >&2
+              exit 1
+            fi
+          done < <(jq -r '.files[]' var/ci/observability-first-class-runtime-evidence-index.json)
+
+      - name: Validate runtime evidence identity consistency
+        if: always()
+        run: |
+          ./scripts/qa/verify-observability-evidence-identity.sh --dir var/ci
 
       - name: Append runtime summary
         if: always()
@@ -107,10 +362,18 @@ jobs:
             echo ""
             echo "### Runtime Verifier Evidence"
             echo ""
-            if [ -f var/ci/observability-runtime-verify.md ]; then
-              cat var/ci/observability-runtime-verify.md
+            if [ -f var/ci/observability-runtime-verify-runtime.md ]; then
+              cat var/ci/observability-runtime-verify-runtime.md
             else
               echo "- runtime verifier markdown missing"
+            fi
+            echo ""
+            echo "### Evidence Index"
+            echo ""
+            if [ -f var/ci/observability-first-class-runtime-evidence-index.json ]; then
+              cat var/ci/observability-first-class-runtime-evidence-index.json
+            else
+              echo "- runtime evidence index missing"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -119,8 +382,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: observability-compliance-runtime
+          retention-days: ${{ fromJSON(env.EVIDENCE_RETENTION_DAYS) }}
           path: |
+            var/ci/observability-runtime-preflight.md
             var/ci/observability-compliance-runtime.json
             var/ci/observability-compliance-runtime.md
-            var/ci/observability-runtime-verify.txt
-            var/ci/observability-runtime-verify.md
+            var/ci/observability-coverage-runtime.json
+            var/ci/observability-coverage-runtime.md
+            var/ci/observability-runtime-verify-runtime.txt
+            var/ci/observability-runtime-verify-runtime.md
+            var/ci/observability-first-class-runtime-evidence-index.json

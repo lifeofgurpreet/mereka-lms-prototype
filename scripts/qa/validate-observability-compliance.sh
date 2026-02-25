@@ -24,6 +24,9 @@ RUNTIME_CMD_TIMEOUT="${VALIDATE_OBS_RUNTIME_CMD_TIMEOUT:-30}"
 APP_NAMESPACE="${VALIDATE_OBS_APP_NAMESPACE:-mereka-lms}"
 EVIDENCE_FILE="${VALIDATE_OBS_EVIDENCE_FILE:-}"
 K8S_CONTEXT="${VALIDATE_OBS_K8S_CONTEXT:-}"
+ENV_LABEL="${VALIDATE_OBS_ENV_LABEL:-unknown}"
+DISPATCH_PROFILE="${VALIDATE_OBS_DISPATCH_PROFILE:-custom}"
+GCP_PROJECT_LABEL="${GCP_PROJECT:-unknown}"
 
 usage() {
   cat <<'EOF'
@@ -431,7 +434,12 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
     echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo "- mode: $MODE"
     echo "- strict: $STRICT"
+    echo "- environment_label: $ENV_LABEL"
+    echo "- dispatch_profile: $DISPATCH_PROFILE"
     echo "- app_namespace: $APP_NAMESPACE"
+    echo "- k8s_context: ${K8S_CONTEXT:-default}"
+    echo "- gcp_project: $GCP_PROJECT_LABEL"
+    echo "- evidence_identity: env=${ENV_LABEL};profile=${DISPATCH_PROFILE};context=${K8S_CONTEXT:-default};project=${GCP_PROJECT_LABEL}"
     echo ""
     echo "## Summary"
     echo ""

@@ -16,6 +16,9 @@ FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-1}"
 FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
 RUN_ATLAS_ALLOWLIST_AUDIT="${RUN_ATLAS_ALLOWLIST_AUDIT:-0}"
 RUN_ALERT_ROUTING_AUDIT="${RUN_ALERT_ROUTING_AUDIT:-1}"
+RUN_ALERT_NOISE_AUDIT="${RUN_ALERT_NOISE_AUDIT:-1}"
+ALERT_NOISE_RUNTIME_SOURCE="${ALERT_NOISE_RUNTIME_SOURCE:-}"
+ALERT_NOISE_REQUIRE_RUNTIME_SOURCE="${ALERT_NOISE_REQUIRE_RUNTIME_SOURCE:-0}"
 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT="${ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT:-1}"
 RUN_MULTISITE_GOVERNANCE_AUDIT="${RUN_MULTISITE_GOVERNANCE_AUDIT:-1}"
 RUN_DB_EXPORTER_TELEMETRY_AUDIT="${RUN_DB_EXPORTER_TELEMETRY_AUDIT:-1}"
@@ -39,6 +42,7 @@ Env:
   FAIL_ON_LEGACY_MONGODB_SERVICE=1  Fail atlas gate if legacy mongodb Service exists
   RUN_ATLAS_ALLOWLIST_AUDIT=1    Also run VPS Atlas allowlist monitor audit
   RUN_ALERT_ROUTING_AUDIT=0      Skip one-command alert routing verification (enabled by default)
+  RUN_ALERT_NOISE_AUDIT=0        Skip alert-noise baseline threshold audit (enabled by default)
   ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0  Skip VPS-only atlas routing check inside alert-routing audit
   RUN_MULTISITE_GOVERNANCE_AUDIT=0  Skip explicit multisite governance gate (enabled by default)
   RUN_DB_EXPORTER_TELEMETRY_AUDIT=0  Skip db exporter telemetry contract/runtime audit (enabled by default)
@@ -70,6 +74,14 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
   echo "Invalid --env: $ENV_SCOPE" >&2
   usage
   exit 1
+fi
+
+OBS_ENV_LABEL="$ENV_SCOPE"
+OBS_DISPATCH_PROFILE="custom"
+if [[ "$ENV_SCOPE" == "prod" ]]; then
+  OBS_DISPATCH_PROFILE="prod"
+elif [[ "$ENV_SCOPE" == "dev" ]]; then
+  OBS_DISPATCH_PROFILE="nonprod"
 fi
 
 failures=0
@@ -197,12 +209,14 @@ echo "  fail_on_legacy_mongodb_service: $FAIL_ON_LEGACY_MONGODB_SERVICE"
 echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
 echo "  run_alert_routing_audit: $RUN_ALERT_ROUTING_AUDIT"
 echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
-echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
-echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
-echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
-echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
-echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
-echo "  run_authenticated_sso_canary: $RUN_AUTHENTICATED_SSO_CANARY"
+  echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
+  echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
+  echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
+  echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
+  echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
+  echo "  alert_noise_runtime_source: ${ALERT_NOISE_RUNTIME_SOURCE}"
+  echo "  alert_noise_require_runtime_source: $ALERT_NOISE_REQUIRE_RUNTIME_SOURCE"
+  echo "  run_authenticated_sso_canary: $RUN_AUTHENTICATED_SSO_CANARY"
 echo "  authenticated_sso_canary_require_secrets: $AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS"
 echo "  run_authentik_policy_exception_audit: $RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
@@ -255,7 +269,12 @@ run_check "atlas modulestore path guard" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" FAIL_ON_LEGACY_MONGODB="$FAIL_ON_LEGACY_MONGODB" FAIL_ON_LEGACY_MONGODB_SERVICE="$FAIL_ON_LEGACY_MONGODB_SERVICE" ./scripts/qa/verify-atlas-modulestore-path.sh --mode all
 
 run_check "observability runtime audit" \
-  env STRICT_RUNTIME="$STRICT_RUNTIME" ./scripts/qa/audit-observability.sh --mode runtime
+  env STRICT_RUNTIME="$STRICT_RUNTIME" \
+  OBSERVABILITY_ENV_LABEL="$OBS_ENV_LABEL" \
+  OBSERVABILITY_DISPATCH_PROFILE="$OBS_DISPATCH_PROFILE" \
+  OBSERVABILITY_K8S_CONTEXT="${K8S_CONTEXT:-}" \
+  OBSERVABILITY_GCP_PROJECT="${GCP_PROJECT:-mereka-lms}" \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 run_check "velero alert pipeline audit" \
   env STRICT_RUNTIME="$STRICT_RUNTIME" ./scripts/qa/audit-velero-alert-pipeline.sh
@@ -271,6 +290,20 @@ fi
 if [[ "$RUN_ALERT_ROUTING_AUDIT" == "1" ]]; then
   run_check "alert routing verification" \
     env STRICT_RUNTIME="$STRICT_RUNTIME" STRICT_WEBHOOK=1 RUN_ATLAS_VPS_AUDIT="$ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT" CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/verify-alert-routing.sh
+fi
+
+if [[ "$RUN_ALERT_NOISE_AUDIT" == "1" ]]; then
+  run_check "alert noise baseline audit (local)" \
+    ./scripts/qa/audit-alert-noise-baseline.sh --mode local
+
+  if [[ -n "$ALERT_NOISE_RUNTIME_SOURCE" ]]; then
+    run_check "alert noise baseline audit (runtime)" \
+      env STRICT_RUNTIME="$STRICT_RUNTIME" ALERT_NOISE_RUNTIME_SOURCE="$ALERT_NOISE_RUNTIME_SOURCE" \
+      ./scripts/qa/audit-alert-noise-baseline.sh --mode runtime
+  elif [[ "$ALERT_NOISE_REQUIRE_RUNTIME_SOURCE" == "1" ]]; then
+    run_check "alert noise baseline audit (runtime)" \
+      env STRICT_RUNTIME="$STRICT_RUNTIME" ./scripts/qa/audit-alert-noise-baseline.sh --mode runtime
+  fi
 fi
 
 write_summary_artifacts

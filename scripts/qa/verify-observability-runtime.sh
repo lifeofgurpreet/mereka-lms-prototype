@@ -25,6 +25,9 @@ VERIFY_RUNTIME_SCRIPT_TIMEOUT="${VERIFY_OBS_RUNTIME_SCRIPT_TIMEOUT:-60}"
 VERIFY_APP_NAMESPACE="${VERIFY_OBS_APP_NAMESPACE:-mereka-lms}"
 VERIFY_MONITORING_NAMESPACE="${VERIFY_OBS_MONITORING_NAMESPACE:-monitoring}"
 VERIFY_K8S_CONTEXT="${VERIFY_OBS_K8S_CONTEXT:-}"
+VERIFY_GCP_PROJECT="${VERIFY_OBS_GCP_PROJECT:-${GCP_PROJECT:-mereka-lms}}"
+VERIFY_ENV_LABEL="${VERIFY_OBS_ENV_LABEL:-unknown}"
+VERIFY_DISPATCH_PROFILE="${VERIFY_OBS_DISPATCH_PROFILE:-custom}"
 VERIFY_EVIDENCE_FILE="${VERIFY_OBS_EVIDENCE_FILE:-}"
 RESULTS_FILE="$(mktemp -t verify-observability-runtime.XXXXXX)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
@@ -54,6 +57,10 @@ kubectl_cmd() {
     else
         kubectl "$@"
     fi
+}
+
+gcloud_cmd() {
+    gcloud --project "$VERIFY_GCP_PROJECT" "$@"
 }
 
 run_missing_resource_negative_check() {
@@ -178,9 +185,9 @@ echo "==> AC-OVR-018: GCP uptime checks deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
-        UPTIME_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud monitoring uptime list-configs --format=json 2>/dev/null || echo '[]')"
+        UPTIME_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud_cmd monitoring uptime list-configs --format=json 2>/dev/null || echo '[]')"
     else
-        UPTIME_JSON="$(gcloud monitoring uptime list-configs --format=json 2>/dev/null || echo '[]')"
+        UPTIME_JSON="$(gcloud_cmd monitoring uptime list-configs --format=json 2>/dev/null || echo '[]')"
     fi
     UPTIME_COUNT="$(echo "$UPTIME_JSON" | jq '. | length' 2>/dev/null || echo 0)"
     set -e
@@ -201,9 +208,9 @@ echo "==> AC-OVR-019: GCP alert policies deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
-        ALERT_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud alpha monitoring policies list --format=json 2>/dev/null || echo '[]')"
+        ALERT_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud_cmd alpha monitoring policies list --format=json 2>/dev/null || echo '[]')"
     else
-        ALERT_JSON="$(gcloud alpha monitoring policies list --format=json 2>/dev/null || echo '[]')"
+        ALERT_JSON="$(gcloud_cmd alpha monitoring policies list --format=json 2>/dev/null || echo '[]')"
     fi
     ALERT_COUNT="$(echo "$ALERT_JSON" | jq '. | length' 2>/dev/null | tr -d '[:space:]' || echo 0)"
     set -e
@@ -223,9 +230,9 @@ echo "==> AC-OVR-020: GCP log-based metrics deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
-        METRIC_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud logging metrics list --format=json 2>/dev/null || echo '[]')"
+        METRIC_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud_cmd logging metrics list --format=json 2>/dev/null || echo '[]')"
     else
-        METRIC_JSON="$(gcloud logging metrics list --format=json 2>/dev/null || echo '[]')"
+        METRIC_JSON="$(gcloud_cmd logging metrics list --format=json 2>/dev/null || echo '[]')"
     fi
     METRIC_COUNT="$(echo "$METRIC_JSON" | jq '. | length' 2>/dev/null | tr -d '[:space:]' || echo 0)"
     set -e
@@ -245,9 +252,9 @@ echo "==> AC-OVR-021: GCP monitoring dashboards deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
-        DASHBOARD_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud monitoring dashboards list --format=json 2>/dev/null || echo '[]')"
+        DASHBOARD_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud_cmd monitoring dashboards list --format=json 2>/dev/null || echo '[]')"
     else
-        DASHBOARD_JSON="$(gcloud monitoring dashboards list --format=json 2>/dev/null || echo '[]')"
+        DASHBOARD_JSON="$(gcloud_cmd monitoring dashboards list --format=json 2>/dev/null || echo '[]')"
     fi
     DASHBOARD_COUNT="$(echo "$DASHBOARD_JSON" | jq '. | length' 2>/dev/null | tr -d '[:space:]' || echo 0)"
     set -e
@@ -472,6 +479,11 @@ if [[ -n "$VERIFY_EVIDENCE_FILE" ]]; then
         echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
         echo "- app_namespace: $VERIFY_APP_NAMESPACE"
         echo "- monitoring_namespace: $VERIFY_MONITORING_NAMESPACE"
+        echo "- gcp_project: $VERIFY_GCP_PROJECT"
+        echo "- environment_label: $VERIFY_ENV_LABEL"
+        echo "- dispatch_profile: $VERIFY_DISPATCH_PROFILE"
+        echo "- k8s_context: ${VERIFY_K8S_CONTEXT:-default}"
+        echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
         echo ""
         echo "## Summary"
         echo ""
