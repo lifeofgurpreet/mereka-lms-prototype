@@ -23,7 +23,7 @@ Date: 2026-02-25
 | `scripts/qa/build-observability-parity-rollup.sh` | AC-OVR-024, AC-OVR-025, AC-OVR-026 | Aggregates all environment parity deltas into release-ready rollup with optional no-skip enforcement |
 | `scripts/qa/run-observability-first-class.sh` | AC-OVR-024, AC-OVR-027, AC-OVR-028, AC-OVR-029 | Produces canonical parity evidence in runtime mode and supports strict enforcement workflows |
 | `scripts/qa/verify-observability-evidence-identity.sh` | AC-OVR-005, AC-OVR-006, AC-OVR-026 | Ensures identity fields and evidence hashes remain stable across generated artifacts |
-| `scripts/qa/verify-observability-structured-logging.sh` | AC-LOG-004 | LMS/CMS logs must include required structured fields (`timestamp`, `level`, `service`, `message`) |
+| `scripts/qa/verify-observability-structured-logging.sh` | AC-LOG-004 | LMS/CMS and worker logs must include structured fields (`timestamp`, `level`, `service`, `message`) and include correlation fields on configured severity levels |
 | `scripts/qa/verify-correlation-header-propagation.sh` | AC-007 | Caddy ingress forwards `X-Request-ID` and `traceparent` to backends |
 | `scripts/qa/test-verify-correlation-header-propagation.sh` | AC-007 | Unit-like script contract tests for positive/negative correlation-header scenarios, including import-order variations |
 

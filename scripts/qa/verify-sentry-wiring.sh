@@ -17,7 +17,8 @@ JSON_OUT=0
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 APP_NS="${APP_NS:-mereka-lms}"
-REQUIRED_DEPLOYS="${REQUIRED_DEPLOYS:-lms cms lms-worker cms-worker discovery ecommerce credentials ecommerce-worker}"
+REQUIRED_DEPLOYS="${REQUIRED_DEPLOYS:-lms cms lms-worker cms-worker discovery ecommerce credentials}"
+OPTIONAL_DEPLOYS="${OPTIONAL_DEPLOYS:-ecommerce-worker notes notes-worker forum forum-worker}"
 
 CHECK_NAMES=()
 CHECK_OK=()
@@ -182,6 +183,46 @@ PY' >/dev/null 2>&1; then
   return 0
 }
 
+runtime_optional_service_matrix() {
+  local missing_deploy=()
+  local missing_dsn=()
+  local missing_sdk=()
+  local d
+
+  for d in $OPTIONAL_DEPLOYS; do
+    if ! kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get deploy "$d" >/dev/null 2>&1; then
+      missing_deploy+=("$d")
+      continue
+    fi
+    if ! kubectl --context "$K8S_CONTEXT" -n "$APP_NS" exec "deploy/$d" -- sh -lc \
+      'test -n "${SENTRY_DSN:-}"' >/dev/null 2>&1; then
+      missing_dsn+=("$d")
+      continue
+    fi
+    if ! kubectl --context "$K8S_CONTEXT" -n "$APP_NS" exec "deploy/$d" -- sh -lc \
+      'python - <<'"'"'PY'"'"'
+import importlib.util
+raise SystemExit(0 if importlib.util.find_spec("sentry_sdk") else 1)
+PY' >/dev/null 2>&1; then
+      missing_sdk+=("$d")
+    fi
+  done
+
+  if [[ "${#missing_deploy[@]}" -gt 0 ]]; then
+    echo "WARN: Optional deployment(s) not yet present: ${missing_deploy[*]}"
+  fi
+
+  if [[ "${#missing_dsn[@]}" -gt 0 ]]; then
+    echo "WARN: Optional deployment(s) without SENTRY_DSN configured: ${missing_dsn[*]}"
+  fi
+
+  if [[ "${#missing_sdk[@]}" -gt 0 ]]; then
+    echo "WARN: Optional deployment(s) with SENTRY_DSN missing sentry_sdk: ${missing_sdk[*]}"
+  fi
+
+  return 0
+}
+
 if [[ "$JSON_OUT" -eq 0 ]]; then
   echo "Verify: Sentry wiring"
   echo "  mode:           $MODE"
@@ -189,6 +230,7 @@ if [[ "$JSON_OUT" -eq 0 ]]; then
   echo "  context:        $K8S_CONTEXT"
   echo "  app namespace:  $APP_NS"
   echo "  required deploys: $REQUIRED_DEPLOYS"
+  echo "  optional deploys: $OPTIONAL_DEPLOYS"
   echo
 fi
 
@@ -202,6 +244,7 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   run_check "runtime: required deployments exist" runtime_required_deployments_exist
   run_check "runtime: sentry dsn env present" runtime_sentry_env_present
   run_check "runtime: sentry sdk available where dsn set" runtime_sentry_sdk_available
+  run_check "runtime: optional sentry matrix checks" runtime_optional_service_matrix
 fi
 
 if [[ "$JSON_OUT" -eq 1 ]]; then

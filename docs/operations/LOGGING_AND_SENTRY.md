@@ -29,6 +29,10 @@ Sentry initialization is now guarded in production settings for:
 - Ecommerce + Ecommerce Worker
 - Credentials
 
+Runtime audit matrix:
+- Required services: `lms`, `cms`, `lms-worker`, `cms-worker`, `discovery`, `ecommerce`, `credentials`
+- Optional services: `ecommerce-worker`, `notes`, `notes-worker`, `forum`, `forum-worker`
+
 Behavior:
 - If `SENTRY_DSN` is empty: no-op (no Sentry init).
 - If `SENTRY_DSN` is set but `sentry_sdk` is unavailable: warning only, no crash.

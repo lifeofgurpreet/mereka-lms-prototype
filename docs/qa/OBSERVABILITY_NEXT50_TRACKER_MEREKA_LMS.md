@@ -36,8 +36,8 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-018 | P1 | SLO | Add burn-rate alerts for all Tier-1 journeys (multi-window) | OBS-017 | PrometheusRule updates | burn-rate alerts loaded and visible in Prometheus API | done |
 | OBS-019 | P1 | SLO | Add SLO dashboard contract section per journey | OBS-018 | dashboard contract update | audit script enforces journey SLO panels | done |
 | OBS-020 | P1 | SLO | Add SLO breach runbook links in alert annotations | OBS-018 | alert annotation updates | each SLO alert links to concrete remediation runbook | done |
-| OBS-021 | P1 | Logs/errors | Enforce structured log keys for critical failure classes | OBS-006 | logging contract doc + lints | CI fails on missing required log fields in key services | in_progress |
-| OBS-022 | P1 | Logs/errors | Expand Sentry runtime coverage matrix by service | OBS-021 | service matrix + audit rules | sentry wiring audit verifies all required services | in_progress |
+| OBS-021 | P1 | Logs/errors | Enforce structured log keys for critical failure classes | OBS-006 | logging contract doc + lints | CI fails on missing required log fields in key services | done |
+| OBS-022 | P1 | Logs/errors | Expand Sentry runtime coverage matrix by service | OBS-021 | service matrix + audit rules | sentry wiring audit verifies all required services | done |
 | OBS-023 | P1 | Logs/errors | Add correlation ID propagation checks across ingress->app | OBS-021 | runtime check script | check fails when correlation headers missing | done |
 | OBS-024 | P2 | Tracing | Define minimal tracing scope for Tier-1 flows | OBS-016 | tracing ADR | tracing scope approved with sampling policy | planned |
 | OBS-025 | P2 | Tracing | Pilot trace ingestion for one Tier-1 flow in nonprod | OBS-024 | nonprod tracing evidence | one flow trace appears end-to-end in selected backend | planned |

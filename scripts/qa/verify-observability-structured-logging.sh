@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # @covers AC-LOG-004
 # @spec: observability-stack_spec.md
-# Verify LMS and CMS logs are structured JSON with required fields.
+# Verify LMS/CMS logs are structured JSON with required fields.
+# Correlation identifiers are checked on error logs as an observability quality signal.
 #
 # Usage:
 #   ./scripts/qa/verify-observability-structured-logging.sh
@@ -13,6 +14,9 @@ cd "$REPO_ROOT"
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 APP_NS="${APP_NS:-mereka-lms}"
 STRICT="${STRICT:-0}"
+TARGET_SERVICES="${OBS_STRUCTURED_TARGET_SERVICES:-lms cms lms-worker cms-worker discovery ecommerce ecommerce-worker credentials notes}"
+CORRELATION_LEVELS="${OBS_STRUCTURED_CORRELATION_LEVELS:-ERROR,WARN,WARNING,CRITICAL,FATAL}"
+MAX_LOG_LINES="${MAX_LOG_LINES:-80}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -24,6 +28,7 @@ while [[ $# -gt 0 ]]; do
     --context) K8S_CONTEXT="$2"; shift 2 ;;
     --namespace) APP_NS="$2"; shift 2 ;;
     --strict) STRICT=1; shift ;;
+    --lines) MAX_LOG_LINES="$2"; shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
@@ -34,16 +39,18 @@ skips=0
 echo "Verify: Structured JSON logging"
 echo "  context:   $K8S_CONTEXT"
 echo "  namespace: $APP_NS"
+echo "  services:  $TARGET_SERVICES"
+echo "  levels for correlation enforcement: $CORRELATION_LEVELS"
+echo "  max lines: $MAX_LOG_LINES"
 echo ""
 
 REQUIRED_FIELDS=(
-  "timestamp"
-  "level"
-  "service"
-  "message"
+  "timestamp:.timestamp // .time // .\"@timestamp\" // .ts"
+  "level:.level // .severity // .levelname // .log.level"
+  "service:.service // .service.name // .logger // .logger_name // .name"
+  "message:.message // .msg // .event"
 )
 
-# Check if kubectl/jq are available
 if ! command -v kubectl >/dev/null 2>&1; then
   echo -e "${YELLOW}SKIP${NC} kubectl not available"
   [[ "$STRICT" -eq 1 ]] && exit 1
@@ -56,24 +63,55 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
 
-# Check if cluster is reachable
 if ! kubectl --context "$K8S_CONTEXT" cluster-info >/dev/null 2>&1; then
   echo -e "${YELLOW}SKIP${NC} Cannot reach cluster: $K8S_CONTEXT"
   [[ "$STRICT" -eq 1 ]] && exit 1
   exit 0
 fi
 
-# Services to check
-SERVICES=("lms" "cms")
+has_value() {
+  local json_line="$1"
+  local expr="$2"
+  printf '%s' "$json_line" | jq -e "($expr) != null and (($expr | tostring) != \"\")" >/dev/null 2>&1
+}
+
+has_correlation_field() {
+  local json_line="$1"
+  local expr="$2"
+  local value
+  value="$(printf '%s' "$json_line" | jq -r "$expr // empty" 2>/dev/null || true)"
+  [[ -n "$value" && "$value" != "null" ]]
+}
+
+SERVICES=()
+read -r -a SERVICES <<< "$TARGET_SERVICES"
+
+if [[ ${#SERVICES[@]} -eq 0 ]]; then
+  echo -e "${YELLOW}SKIP${NC} No services configured. Set OBS_STRUCTURED_TARGET_SERVICES."
+  exit 0
+fi
+
+CORRELATION_LEVELS_ARR=()
+IFS=',' read -r -a _raw_levels <<< "$CORRELATION_LEVELS"
+for level in "${_raw_levels[@]}"; do
+  normalized="$(printf '%s' "$level" | tr '[:lower:]' '[:upper:]' | xargs)"
+  [[ -n "$normalized" ]] && CORRELATION_LEVELS_ARR+=("$normalized")
+done
+
+is_correlation_level() {
+  local level="$1"
+  [[ -z "$level" ]] && return 1
+  for target in "${CORRELATION_LEVELS_ARR[@]}"; do
+    [[ "$level" == "$target" ]] && return 0
+  done
+  return 1
+}
 
 for svc in "${SERVICES[@]}"; do
   echo "Checking logs for service: $svc"
 
-  # Get a pod for this service
   pod=$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get pods -l "app.kubernetes.io/name=$svc" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-
   if [[ -z "$pod" ]]; then
-    # Try alternate label
     pod=$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" get pods -l "app=$svc" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
   fi
 
@@ -84,9 +122,7 @@ for svc in "${SERVICES[@]}"; do
   fi
 
   echo "  Found pod: $pod"
-
-  # Get recent logs
-  logs=$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" logs "$pod" --tail=50 2>/dev/null || echo "")
+  logs="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NS" logs "$pod" --tail="$MAX_LOG_LINES" 2>/dev/null || echo "")"
 
   if [[ -z "$logs" ]]; then
     echo -e "  ${YELLOW}SKIP${NC} No logs available from pod"
@@ -94,16 +130,42 @@ for svc in "${SERVICES[@]}"; do
     continue
   fi
 
-  # Try to parse logs as JSON
   json_count=0
   total_lines=0
+  error_missing_correlation=0
+  missing_required=0
+  field_missing=("0" "0" "0" "0")
+
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue
     total_lines=$((total_lines + 1))
 
-    # Try to parse as JSON
-    if echo "$line" | jq -e . >/dev/null 2>&1; then
-      json_count=$((json_count + 1))
+    if ! printf '%s' "$line" | jq -e . >/dev/null 2>&1; then
+      continue
+    fi
+
+    json_count=$((json_count + 1))
+
+    for i in "${!REQUIRED_FIELDS[@]}"; do
+      IFS=':' read -r field expr <<< "${REQUIRED_FIELDS[$i]}"
+      if ! has_value "$line" "$expr"; then
+        field_missing[$i]=1
+      fi
+    done
+
+    level="$(printf '%s' "$line" | jq -r '.level // .severity // .levelname // .log.level // empty' 2>/dev/null | tr '[:lower:]' '[:upper:]' || true)"
+    if is_correlation_level "$level"; then
+      has_request=0
+      has_trace=0
+      if has_correlation_field "$line" '(.request_id // .requestId // .request.id // .extra.request_id // .extra.requestId // .extra.request.id)'; then
+        has_request=1
+      fi
+      if has_correlation_field "$line" '(.trace_id // .trace // .traceparent // .trace.id // .extra.trace_id // .extra.traceparent // .extra.trace.id)'; then
+        has_trace=1
+      fi
+      if (( has_request == 0 || has_trace == 0 )); then
+        error_missing_correlation=$((error_missing_correlation + 1))
+      fi
     fi
   done <<< "$logs"
 
@@ -113,67 +175,49 @@ for svc in "${SERVICES[@]}"; do
     echo -e "${GREEN}PASS${NC} ($json_count/$total_lines lines, ${percentage}%)"
   else
     echo -e "${YELLOW}WARN${NC} No JSON logs found (might be using plain text format)"
-    # Not failing because this might be expected in some deployments
+    echo -e "  WARN: AC-LOG-004 enforcement expects JSON logs"
+    if [[ "$STRICT" -eq 1 ]]; then
+      failures=$((failures + 1))
+    fi
+    [[ -n "${SILENCE_NO_JSON:-}" ]] || true
   fi
 
-  # If we have JSON logs, check for required fields
   if [[ "$json_count" -gt 0 ]]; then
-    # Sample a JSON log line
-    sample_json=$(echo "$logs" | while IFS= read -r line; do
-      if echo "$line" | jq -e . >/dev/null 2>&1; then
-        echo "$line"
-        break
+    echo "  Checking required fields in JSON logs:"
+    for i in "${!REQUIRED_FIELDS[@]}"; do
+      IFS=':' read -r field expr <<< "${REQUIRED_FIELDS[$i]}"
+      echo -n "    Field '$field'... "
+      if [[ "${field_missing[$i]}" == "0" ]]; then
+        echo -e "${GREEN}PASS${NC}"
+      else
+        echo -e "${RED}FAIL${NC} Field '$field' missing from JSON logs"
+        missing_required=$((missing_required + 1))
       fi
-    done)
+    done
 
-    if [[ -n "$sample_json" ]]; then
-      echo "  Checking required fields in JSON logs:"
-      for field in "${REQUIRED_FIELDS[@]}"; do
-        echo -n "    Field '$field'... "
+    if [[ "$missing_required" -gt 0 ]]; then
+      failures=$((failures + missing_required))
+    fi
 
-        # Check for field or common variations
-        case "$field" in
-          "timestamp")
-            if echo "$sample_json" | jq -e '.timestamp // .time // ."@timestamp" // .ts' >/dev/null 2>&1; then
-              echo -e "${GREEN}PASS${NC}"
-            else
-              echo -e "${YELLOW}WARN${NC} Timestamp field not found (checked: timestamp, time, @timestamp, ts)"
-            fi
-            ;;
-          "level")
-            if echo "$sample_json" | jq -e '.level // .severity // .levelname' >/dev/null 2>&1; then
-              echo -e "${GREEN}PASS${NC}"
-            else
-              echo -e "${YELLOW}WARN${NC} Level field not found (checked: level, severity, levelname)"
-            fi
-            ;;
-          "service")
-            if echo "$sample_json" | jq -e '.service // .logger // .name' >/dev/null 2>&1; then
-              echo -e "${GREEN}PASS${NC}"
-            else
-              echo -e "${YELLOW}WARN${NC} Service field not found (checked: service, logger, name)"
-            fi
-            ;;
-          "message")
-            if echo "$sample_json" | jq -e '.message // .msg' >/dev/null 2>&1; then
-              echo -e "${GREEN}PASS${NC}"
-            else
-              echo -e "${RED}FAIL${NC} Message field is required"
-              failures=$((failures + 1))
-            fi
-            ;;
-        esac
-      done
+    if [[ "$error_missing_correlation" -gt 0 ]]; then
+      if [[ "$STRICT" -eq 1 ]]; then
+        echo -e "    ${RED}FAIL${NC} $error_missing_correlation error-class JSON logs missing request/trace correlation fields"
+        echo "      Expected: request correlation (request_id/requestId/request.id) and trace correlation (trace_id/traceparent/trace.id)"
+        failures=$((failures + error_missing_correlation))
+      else
+        echo -e "    ${YELLOW}WARN${NC} $error_missing_correlation error-class JSON logs missing request/trace correlation fields"
+        echo "      Expected: request correlation (request_id/requestId/request.id) and trace correlation (trace_id/traceparent/trace.id)"
+      fi
     fi
   fi
 
   echo ""
 done
 
-echo -e "${YELLOW}NOTE:${NC} Open edX may use plain text logging by default."
-echo "To enable structured JSON logging, configure Python logging formatters in LMS/CMS settings."
-
+echo -e "${YELLOW}NOTE:${NC} Open edX defaults may emit plain text in some code paths."
+echo "Open this script in strict mode when structured logging is required for first-class gates."
 echo ""
+
 if [[ "$failures" -eq 0 ]]; then
   if [[ "$skips" -gt 0 ]]; then
     echo -e "${YELLOW}OK (with $skips skipped checks)${NC}"
@@ -181,7 +225,7 @@ if [[ "$failures" -eq 0 ]]; then
     echo -e "${GREEN}OK${NC}"
   fi
   exit 0
-else
-  echo -e "${RED}FAILED ($failures checks failed)${NC}"
-  exit 1
 fi
+
+echo -e "${RED}FAILED ($failures checks failed)${NC}"
+exit 1
