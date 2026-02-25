@@ -66,6 +66,9 @@ run_case() {
 # Valid: proxy snippet defines both headers; direct reverse_proxy inherits via import.
 run_case "valid-proxy-snippet" "strict" 0 "evidence_identity" $'#:placeholder\n\n:80 {\n  route /health* /health\n  reverse_proxy https://backend.test {\n    import proxy\n  }\n}\n\n(proxy) {\n  header_up X-Request-ID {http.request.uuid}\n  header_up traceparent {http.request.header.traceparent}\n}\n\n'
 
+# Valid: snippet can be declared after reverse_proxy and still satisfy import.
+run_case "valid-proxy-snippet-after-reverse-proxy" "strict" 0 "evidence_identity" $'#:placeholder\n\n:80 {\n  reverse_proxy https://backend.test {\n    import proxy\n  }\n}\n\n(proxy) {\n  header_up X-Request-ID {http.request.uuid}\n  header_up traceparent {http.request.header.traceparent}\n}\n\n'
+
 # Non-strict mode remains non-fatal even when headers missing; this is contract behavior.
 run_case "missing-headers-nonstrict" "nonstrict" 0 "WARN" $'#:placeholder\n\n:80 {\n  reverse_proxy https://backend.test {\n    header_up Host {host}\n  }\n}\n\n(proxy) {\n  header_up X-Request-ID {http.request.uuid}\n  header_up traceparent {http.request.header.traceparent}\n}\n\n'
 

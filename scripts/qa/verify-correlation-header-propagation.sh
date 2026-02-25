@@ -2,6 +2,7 @@
 # @covers AC-007
 # @spec: observability-stack_spec.md
 # Verify Caddy ingress forwards request correlation headers to upstream services.
+# Supports both forward and reverse-order import usage for snippet definitions.
 #
 # Usage:
 #   ./scripts/qa/verify-correlation-header-propagation.sh [--strict]
@@ -107,11 +108,11 @@ i = 0
 
 while i < len(lines):
     line = lines[i]
-    if not snippet_found and re.match(r"^\(proxy\)\s*{", line):
-        snippet_found = True
+    if re.match(r"^\(proxy\)\s*{", line):
         block, end_idx = collect_block(lines, i)
         missing, _ = has_required_headers(block)
         snippet_headers = missing
+        snippet_found = True
         i = end_idx + 1
         continue
 
