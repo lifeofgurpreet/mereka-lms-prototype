@@ -155,7 +155,9 @@ Goal:
 Work items:
 1. Keep DR bundle on canonical observability artifacts:
    - `observability-compliance-runtime.json`
+   - `observability-runtime-verify-runtime.md`
    - `observability-first-class-runtime-evidence-index.json`
+   - `observability-correlation-headers-runtime.txt`
    - legacy alias retained for compatibility.
 2. Add monthly artifact review checklist with owners.
 3. Add retention and archival procedure for long-term compliance needs.

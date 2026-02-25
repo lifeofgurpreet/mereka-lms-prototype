@@ -122,7 +122,9 @@ Run the observability controls with strict evidence capture:
   - one completed monthly operator drill in the last 30 days with attendance artifact
 
 Store in release notes:
-- link to `var/ci/observability-compliance-runtime.json` and `var/ci/observability-parity-rollup.json`
+- link to `var/ci/observability-compliance-runtime.json`
+- link to `var/ci/observability-correlation-headers-runtime.txt`
+- link to `var/ci/observability-parity-rollup.json`
 - local parity review artifacts from each environment (`observability-parity-review.md`)
 - release owner and sign-off timestamp
 

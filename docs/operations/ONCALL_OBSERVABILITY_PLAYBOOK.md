@@ -73,7 +73,9 @@ Open in order:
 ## Step 5: Evidence Bundle
 
 Attach:
-- `observability-compliance-runtime.json` and `observability-first-class-runtime-evidence-index.json`
+- `observability-compliance-runtime.json`
+- `observability-first-class-runtime-evidence-index.json`
+- `observability-correlation-headers-runtime.txt`
 - `audit-velero-alert-pipeline` output
 - `verify-alert-routing` output
 - `public-health-check` output

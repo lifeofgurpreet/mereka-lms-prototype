@@ -28,6 +28,7 @@ OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
 `run-observability-first-class.sh` is the canonical runtime contract because it emits:
 - runtime compliance JSON/Markdown
 - runtime verifier text/Markdown
+- correlation header propagation log
 - normalized evidence index JSON
 
 Environment label/profile expectations are defined in:
@@ -263,7 +264,11 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
    - You can override those at runtime with `ALERT_NOISE_DUP_WINDOW_MINUTES` and `ALERT_NOISE_MIN_DUP_GROUP_SIZE`.
    - Runtime sample now includes `duplicate_detection` plus `duplicate_windows` records for triage of bursty alert storms.
 14. **Alert-noise severity contract** – required severities are `critical`, `error`, `warning`, each with dedicated duplicate and false-positive ratio maxima in `required_severities` and `thresholds.severity` within `infrastructure/monitoring/alert-noise-baseline.json`. Missing required severity buckets in runtime sample are an error when `STRICT_RUNTIME=1`.
-15. **Alert-noise mismatch visibility** – runtime audit emits a WARN when sample duplicate detection settings differ from baseline values so operators can catch script/CI drift before threshold checks.
+15. **False-positive classification feed contract** – operators can pass structured manual classifications through `ALERT_NOISE_FP_CLASSIFICATION_FEED` (JSON with `entries[].fingerprint` and `entries[].classification`). Feed entries with `classification: false_positive` are merged with alert labels for FP accounting.
+16. **Alert-noise mismatch visibility** – runtime audit emits:
+    - WARN when sample duplicate detection settings differ from baseline values
+    - WARN when false-positive classification feed is missing/malformed in strict mode
+    - WARN when runtime sample was built with a different feed than requested
 16. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
 17. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
 18. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.

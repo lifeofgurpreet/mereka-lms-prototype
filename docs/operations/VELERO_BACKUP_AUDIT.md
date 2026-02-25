@@ -137,6 +137,7 @@ Monthly restore-drill evidence checklist:
   - `audit-velero-alert-pipeline.json`
   - `observability-compliance-runtime.json`
   - `observability-first-class-runtime-evidence-index.json`
+  - `observability-correlation-headers-runtime.txt`
   - `audit-observability-runtime.json` (legacy compatibility alias)
   - latest `restore-test` job logs/describe
   - restored PVC summary (bound count)

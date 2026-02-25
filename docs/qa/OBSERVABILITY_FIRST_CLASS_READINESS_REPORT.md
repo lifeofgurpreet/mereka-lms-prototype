@@ -251,7 +251,12 @@ Manual CI runtime path is now available in `.github/workflows/observability-comp
 - optional `require_k8s_context` input (`true|false`) to hard-fail preflight if context is omitted
 - `gcp_project` input to pin runtime gcloud checks to the intended project
 - optional `require_gcp_project` input (`true|false`) to hard-fail preflight if project input is empty
-- Runtime artifacts uploaded as `observability-compliance-runtime`
+- Runtime artifacts uploaded as:
+  - `observability-compliance-runtime.json`
+  - `observability-compliance-runtime.md`
+  - `observability-runtime-verify-runtime.md`
+  - `observability-first-class-runtime-evidence-index.json`
+  - `observability-correlation-headers-runtime.txt`
 - Workflow step summary now includes runtime compliance and verifier markdown evidence
 - Runtime preflight now records selected namespace/context/project into both summary and artifact (`var/ci/observability-runtime-preflight.md`)
 - Runtime preflight also records derived `dispatch_profile` (`prod`/`nonprod`/`custom`) with `profile_note` to classify artifacts quickly.
