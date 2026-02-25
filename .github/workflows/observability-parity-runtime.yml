@@ -172,6 +172,7 @@ jobs:
             ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.txt
             ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.md
             ${{ env.OBS_EVIDENCE_DIR }}/observability-first-class-runtime-evidence-index.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-correlation-headers-runtime.txt
 
   parity-rollup:
     name: Parity rollup summary

@@ -55,6 +55,7 @@ Minimum release evidence required for `GO`:
 
 - `var/ci/observability-compliance-runtime.json`
 - `var/ci/observability-compliance-runtime.md`
+- `var/ci/observability-correlation-headers-runtime.txt`
 - `var/ci/observability-parity-rollup.json`
 - `var/ci/observability-parity-rollup.md`
 - `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md` (filled with dates, env list, and reviewer)

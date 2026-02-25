@@ -113,6 +113,7 @@ record() {
 REQUIRED_FILES=(
   "observability-compliance-runtime.json"
   "observability-runtime-verify-runtime.md"
+  "observability-correlation-headers-runtime.txt"
   "observability-first-class-runtime-evidence-index.json"
 )
 

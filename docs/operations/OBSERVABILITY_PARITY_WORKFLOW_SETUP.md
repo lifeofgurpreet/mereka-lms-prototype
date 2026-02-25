@@ -50,6 +50,7 @@ Artifacts uploaded as `observability-parity-<env>`:
 6. `observability-runtime-verify-runtime.txt`
 7. `observability-runtime-verify-runtime.md`
 8. `observability-first-class-runtime-evidence-index.json`
+9. `observability-correlation-headers-runtime.txt`
 
 Consolidated rollup artifact:
 1. `observability-parity-rollup` (workflow artifact)
