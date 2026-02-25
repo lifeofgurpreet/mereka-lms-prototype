@@ -145,6 +145,65 @@ run_script() {
   return 0
 }
 
+fetch_metrics_with_status() {
+  local namespace="$1"
+  local resource="$2"
+  local target="${3:-http://localhost:8000/metrics}"
+  local result=""
+  local status="000"
+  local split_token="__METRICS_SPLIT__"
+
+  if command -v timeout >/dev/null 2>&1; then
+    result="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl_cmd exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+  else
+    result="$(kubectl_cmd exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
+    printf '000%s' "$split_token"
+    return 0
+  fi
+
+  status="$(printf '%s' "$result" | tail -n1 | sed "s/^${split_token}://")"
+  body="$(printf '%s' "$result" | sed '$d')"
+  body="${body%$'\r'}"
+
+  printf '%s%s%s' "$status" "$split_token" "$body"
+}
+
+check_metrics_payload_shape() {
+  local component="$1"
+  local payload="$2"
+  local missing=0
+
+  if [[ -z "$payload" ]]; then
+    record_result fail "AC-OVR-016" "${component} /metrics body is empty"
+    return 1
+  fi
+
+  if ! printf '%s' "$payload" | grep -qE '^# HELP '; then
+    record_result fail "AC-OVR-016" "${component} /metrics body missing # HELP exposition block"
+    missing=$((missing + 1))
+  fi
+
+  if ! printf '%s' "$payload" | grep -qE '^# TYPE '; then
+    record_result fail "AC-OVR-016" "${component} /metrics body missing # TYPE exposition block"
+    missing=$((missing + 1))
+  fi
+
+  if ! printf '%s' "$payload" | grep -qE '^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^\n]*\})?[[:space:]]+[-+]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?([[:space:]]+[0-9]+)?$'; then
+    record_result fail "AC-OVR-016" "${component} /metrics body missing a Prometheus sample with numeric value"
+    missing=$((missing + 1))
+  fi
+
+  if [[ $missing -eq 0 ]]; then
+    record_result pass "AC-OVR-016" "${component} /metrics has valid Prometheus exposition structure"
+    return 0
+  fi
+
+  return 1
+}
+
 run_negative_control_check() {
   local temp_root
   local temp_monitoring_root
@@ -322,29 +381,35 @@ run_runtime_checks() {
   fi
   set -e
 
-  # AC-OVR-016 prerequisite: LMS/CMS metrics endpoints must be healthy.
+  # AC-OVR-016 prerequisite: LMS/CMS metrics endpoints must be healthy and Prometheus-shaped.
   set +e
-  local lms_metrics_code cms_metrics_code
-  if command -v timeout >/dev/null 2>&1; then
-    lms_metrics_code="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl_cmd exec -n "$APP_NAMESPACE" deploy/lms -- curl -s -o /dev/null -w '%{http_code}' localhost:8000/metrics 2>/dev/null || echo "000")"
-    cms_metrics_code="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl_cmd exec -n "$APP_NAMESPACE" deploy/cms -- curl -s -o /dev/null -w '%{http_code}' localhost:8000/metrics 2>/dev/null || echo "000")"
-  else
-    lms_metrics_code="$(kubectl_cmd exec -n "$APP_NAMESPACE" deploy/lms -- curl -s -o /dev/null -w '%{http_code}' localhost:8000/metrics 2>/dev/null || echo "000")"
-    cms_metrics_code="$(kubectl_cmd exec -n "$APP_NAMESPACE" deploy/cms -- curl -s -o /dev/null -w '%{http_code}' localhost:8000/metrics 2>/dev/null || echo "000")"
-  fi
-  set -e
+  local lms_metrics_result cms_metrics_result lms_metrics_code cms_metrics_code
+  local lms_metrics_payload cms_metrics_payload
+  local metrics_split="__METRICS_SPLIT__"
+
+  lms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/lms)"
+  cms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/cms)"
+  lms_metrics_code="${lms_metrics_result%%$metrics_split*}"
+  lms_metrics_payload="${lms_metrics_result#*$metrics_split}"
+  cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
+  cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
 
   if [[ "$lms_metrics_code" == "200" ]]; then
     record_result pass "AC-OVR-016" "LMS /metrics returned 200"
+    check_metrics_payload_shape "LMS" "$lms_metrics_payload"
   else
     record_result fail "AC-OVR-016" "LMS /metrics returned ${lms_metrics_code} (expected 200)"
+    record_result fail "AC-OVR-016" "LMS /metrics payload unavailable or invalid for Prometheus exposition validation"
   fi
 
   if [[ "$cms_metrics_code" == "200" ]]; then
     record_result pass "AC-OVR-016" "CMS /metrics returned 200"
+    check_metrics_payload_shape "CMS" "$cms_metrics_payload"
   else
     record_result fail "AC-OVR-016" "CMS /metrics returned ${cms_metrics_code} (expected 200)"
+    record_result fail "AC-OVR-016" "CMS /metrics payload unavailable or invalid for Prometheus exposition validation"
   fi
+  set -e
 
   run_script "AC-OVR-026" "$AUDIT_SCRIPT" "--mode runtime"
   run_script "AC-OVR-026" "$RUNTIME_SCRIPT"
