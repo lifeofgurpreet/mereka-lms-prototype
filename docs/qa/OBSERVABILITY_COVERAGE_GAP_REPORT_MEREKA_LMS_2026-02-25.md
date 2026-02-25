@@ -6,7 +6,7 @@ Date: 2026-02-25
 
 - last_updated: 2026-02-25
 - owner: Mereka LMS platform team
-- scope: dev/nonprod/prod ServiceMonitor + PrometheusRule coverage audit via first-class matrix
+- scope: dev/staging/prod ServiceMonitor + PrometheusRule coverage audit via first-class matrix
 - canonical_command: `./scripts/qa/build-observability-coverage-matrix.sh`
 
 ## Method
@@ -29,12 +29,12 @@ Date: 2026-02-25
 - local total checks: `53`
 - identity in generated artifact: `env=unknown;profile=custom;context=default;app_ns=mereka-lms;monitoring_ns=monitoring`
 
-### Runtime parity coverage (dev / nonprod / prod)
+### Runtime parity coverage (dev / staging / prod)
 
 Recent strict runtime passes with explicit contexts show:
 
-- staging (`rke2-staging`): pass=79 fail=0 skip=0 total=79
-- dev (`kind-dev`): pass=63 fail=16 skip=0 total=79
+- staging (`rke2-staging`): pass=70 fail=9 skip=0 total=79
+- dev (`kind-dev`): pass=64 fail=15 skip=0 total=79
 - prod (`gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`): pass=68 fail=11 skip=0 total=79
 
 `kind-dev` missing runtime objects:
@@ -42,7 +42,6 @@ Recent strict runtime passes with explicit contexts show:
 - ServiceMonitors:
   - `xqueue-metrics`
   - `mux-delivery-monitor`
-  - `caddy-metrics`
   - `mfe-metrics`
   - `forum-metrics`
   - `discovery-metrics`
@@ -57,6 +56,20 @@ Recent strict runtime passes with explicit contexts show:
   - `library-alerts`
   - `ora2-operations`
   - `credentials-alerts`
+
+`staging` missing runtime objects:
+
+- ServiceMonitors:
+  - `forum-metrics`
+  - `discovery-metrics`
+  - `ecommerce-metrics`
+  - `purchase-gateway-metrics`
+- PrometheusRules:
+  - `slo-recording-rules`
+  - `services-alerts`
+  - `video-alerts`
+  - `library-alerts`
+  - `ora2-operations`
 
 `prod` missing runtime objects:
 
@@ -84,8 +97,8 @@ No repo-only required objects are missing:
 
 | Environment | Owner | Gap | Target fix date | Evidence |
 |---|---|---|---|---|
-| dev | Mereka LMS observability owners | Runtime parity checks are generated for `kind-dev` with 16 missing runtime monitors/rules | 2026-02-28 | `var/ci/observability-coverage-dev-runtime.md` |
-| nonprod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification now succeeds with namespace-aware runtime lookup; strict check is pass/no-fail/no-skip | 2026-02-28 | `var/ci/observability-coverage-staging-runtime.md` |
+| dev | Mereka LMS observability owners | Runtime parity checks are generated for `kind-dev` with 15 missing runtime monitors/rules | 2026-02-28 | `var/ci/observability-coverage-dev-runtime.md` |
+| staging | Mereka LMS observability owners | Runtime parity checks on `rke2-staging` show 9 missing runtime monitors/rules | 2026-02-28 | `var/ci/observability-coverage-staging-runtime.md` |
 | prod | Mereka LMS observability owners | Runtime parity checks are generated for GKE with 11 missing runtime monitors/rules | 2026-02-28 | `var/ci/observability-coverage-prod-runtime.md` |
 
 ## Required action (immediate)
