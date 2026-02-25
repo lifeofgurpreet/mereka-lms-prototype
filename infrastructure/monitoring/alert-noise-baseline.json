@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.1.0",
+  "lookback_days": 7,
+  "minimum_sample_size": 20,
+  "thresholds": {
+    "duplicate_alert_ratio_max": 0.15,
+    "false_positive_ratio_max": 0.1,
+    "severity": {
+      "critical": {
+        "duplicate_alert_ratio_max": 0.05,
+        "false_positive_ratio_max": 0.01
+      },
+      "error": {
+        "duplicate_alert_ratio_max": 0.08,
+        "false_positive_ratio_max": 0.03
+      },
+      "warning": {
+        "duplicate_alert_ratio_max": 0.15,
+        "false_positive_ratio_max": 0.12
+      }
+    }
+  }
+}
