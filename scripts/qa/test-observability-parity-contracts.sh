@@ -242,6 +242,28 @@ run_identity_case() {
   log_result PASS "$case_name(identity)" "ok"
 }
 
+run_correlation_header_case() {
+  local case_name="$1"
+  local expect_exit_code="$2"
+  local out_dir="$TMP_ROOT/correlation-header/$case_name"
+  local observed_status=0
+  mkdir -p "$out_dir"
+
+  set +e
+  "$SCRIPT_DIR/test-verify-correlation-header-propagation.sh" \
+    >"$out_dir/stdout.log" \
+    2>"$out_dir/stderr.log"
+  observed_status=$?
+  set -e
+
+  if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
+    log_result FAIL "$case_name(correlation-header)" "exit_code=$observed_status expected=$expect_exit_code"
+    return
+  fi
+
+  log_result PASS "$case_name(correlation-header)" "ok"
+}
+
 run_delta_case "valid-dev" "dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_delta_case "valid-nonprod" "nonprod" "$FIXTURES_ROOT/valid/delta/nonprod" 0
 run_delta_case "valid-prod" "prod" "$FIXTURES_ROOT/valid/delta/prod" 0
@@ -273,6 +295,8 @@ run_identity_case "invalid-correlation-lowercase" "$FIXTURES_ROOT/malformed/delt
 run_identity_case "invalid-correlation-missing-headers" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-missing-headers/dev" 1
 run_identity_case "invalid-correlation-missing-identity" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-missing-identity/dev" 1
 run_identity_case "invalid-correlation-identity-mismatch" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-identity-mismatch/dev" 1
+
+run_correlation_header_case "verify-correlation-header-propagation" 0
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2

@@ -51,7 +51,8 @@ if [[ ! -f "$CADDYFILE" ]]; then
   exit 1
 fi
 
-python3 - "$CADDYFILE" <<'PY'
+status=0
+if python3 - "$CADDYFILE" <<'PY'
 import re
 import sys
 
@@ -69,12 +70,16 @@ def braces_delta(text: str) -> int:
 
 def has_required_headers(block_lines):
     present = set()
+    imports_proxy = False
     for line in block_lines:
+        if re.search(r"^\s*import\s+proxy\b", line):
+            imports_proxy = True
+            continue
         m = re.search(r"^\s*header_up\s+([^\s{]+)", line, re.IGNORECASE)
         if m:
             present.add(m.group(1).lower())
     missing = [h for h in required if h.lower() not in present]
-    return missing
+    return missing, imports_proxy
 
 def collect_block(lines, start_index):
     block = []
@@ -105,7 +110,7 @@ while i < len(lines):
     if not snippet_found and re.match(r"^\(proxy\)\s*{", line):
         snippet_found = True
         block, end_idx = collect_block(lines, i)
-        missing = has_required_headers(block)
+        missing, _ = has_required_headers(block)
         snippet_headers = missing
         i = end_idx + 1
         continue
@@ -132,8 +137,8 @@ if not direct_blocks:
     sys.exit(0)
 
 for line_no, block in direct_blocks:
-    missing = has_required_headers(block)
-    if missing:
+    missing, imports_proxy = has_required_headers(block)
+    if missing and not imports_proxy:
         bad_blocks.append((line_no, missing))
 
 if bad_blocks:
@@ -146,8 +151,12 @@ if bad_blocks:
 print("OK: Proxy snippet and direct reverse_proxy blocks forward required headers")
 sys.exit(0)
 PY
+then
+  status=0
+else
+  status=$?
+fi
 
-status=$?
 if [[ "$status" -ne 0 ]]; then
   echo -e "${RED}FAILED${NC} correlation header propagation check failed"
   if [[ "$STRICT" -eq 1 ]]; then
