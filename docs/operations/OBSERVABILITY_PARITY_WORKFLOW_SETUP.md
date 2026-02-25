@@ -13,6 +13,7 @@ Set these in GitHub repository variables:
 1. `OBS_PARITY_DEV_K8S_CONTEXT`
 2. `OBS_PARITY_NONPROD_K8S_CONTEXT`
 3. `OBS_PARITY_PROD_K8S_CONTEXT`
+4. `OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH` (optional, defaults to `1` for this workflow run)
 
 Optional project overrides:
 
@@ -30,8 +31,11 @@ Shared cluster access variables (already used by other workflows):
 
 1. Production parity cannot silently skip.
 2. If `OBS_PARITY_PROD_K8S_CONTEXT` is missing, the `prod` matrix lane fails.
-3. Rollup gate is strict no-skip (`--require-no-skips`), so dev/nonprod skips fail consolidated parity status.
-4. Scheduled runs now validate streak continuity with `scripts/qa/verify-parity-rollup-stability.sh` and require
+3. Parity run validates that the resolved context exists in kubeconfig and can answer `kubectl cluster-info`.
+4. In prod lane, when `OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH=1`, the kubeconfig `current-context` must exactly match
+   `OBS_PARITY_PROD_K8S_CONTEXT`.
+5. Rollup gate is strict no-skip (`--require-no-skips`), so dev/nonprod skips fail consolidated parity status.
+6. Scheduled runs now validate streak continuity with `scripts/qa/verify-parity-rollup-stability.sh` and require
    three consecutive scheduled successful rollups to satisfy sustained stability criteria.
 
 ## Runtime Outputs Per Environment

@@ -16,10 +16,10 @@ Execution mode: Tracker-ready implementation backlog
 
 | ID | Priority | Workstream | Task | Depends on | Deliverable | Definition of done | Status |
 |---|---|---|---|---|---|---|---|
-| OBS-001 | P0 | Parity | Wire `OBS_PARITY_DEV_K8S_CONTEXT` in GitHub variables | none | parity workflow var set | dev lane no longer skipped in scheduled parity workflow | planned |
-| OBS-002 | P0 | Parity | Wire `OBS_PARITY_NONPROD_K8S_CONTEXT` in GitHub variables | none | parity workflow var set | nonprod lane no longer skipped in scheduled parity workflow | planned |
-| OBS-003 | P0 | Parity | Validate `OBS_PARITY_PROD_K8S_CONTEXT` against current prod context | OBS-001 | runbook evidence | prod lane succeeds without context resolution errors | planned |
-| OBS-004 | P0 | Parity | Wire `OBS_PARITY_*_GCP_PROJECT` overrides where needed | OBS-001 | variable map in workflow setup doc | parity runs use expected project per env without manual override | planned |
+| OBS-001 | P0 | Parity | Wire `OBS_PARITY_DEV_K8S_CONTEXT` in GitHub variables | none | parity workflow var set | dev lane no longer skipped in scheduled parity workflow | done |
+| OBS-002 | P0 | Parity | Wire `OBS_PARITY_NONPROD_K8S_CONTEXT` in GitHub variables | none | parity workflow var set | nonprod lane no longer skipped in scheduled parity workflow | done |
+| OBS-003 | P0 | Parity | Validate `OBS_PARITY_PROD_K8S_CONTEXT` against current prod context | OBS-001 | runbook evidence | prod lane succeeds without context resolution errors | done |
+| OBS-004 | P0 | Parity | Wire `OBS_PARITY_*_GCP_PROJECT` overrides where needed | OBS-001 | variable map in workflow setup doc | parity runs use expected project per env without manual override | done |
 | OBS-005 | P0 | Parity | Enforce 3 consecutive no-skip/no-fail rollups and close PAR-001/PAR-002 | OBS-001, OBS-002 | readiness report update | three scheduled rollups pass and gaps marked closed | done |
 | OBS-006 | P0 | Coverage | Audit missing ServiceMonitor coverage vs required services in each env | OBS-005 | env gap report | report lists missing/extra monitors with owners and dates | done |
 | OBS-007 | P0 | Coverage | Add missing ServiceMonitors for uncovered critical workloads | OBS-006 | k8s manifests | runtime gate passes monitor presence for all critical services | done |
@@ -29,7 +29,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-011 | P0 | Alert quality | Wire runtime data feed for `ALERT_NOISE_RUNTIME_SOURCE` in CI | OBS-004 | workflow/env secret wiring | alert-noise runtime audit runs in strict mode in CI | done |
 | OBS-012 | P0 | Alert quality | Define severity-specific noise thresholds (`critical`, `error`, `warning`) | OBS-011 | updated baseline config + strict runtime validation | baseline schema includes required severities and per-severity thresholds | done |
 | OBS-013 | P1 | Alert quality | Add duplicate-alert detector by fingerprint/window | OBS-012 | script enhancement | runtime audit reports duplicate ratio by severity | done |
-| OBS-014 | P1 | Alert quality | Add false-positive classification inputs contract (manual/operator label feed) | OBS-012 | contract doc + parser | runtime audit ingests classification feed without schema errors | planned |
+| OBS-014 | P1 | Alert quality | Add false-positive classification inputs contract (manual/operator label feed) | OBS-012 | contract doc + parser | runtime audit ingests classification feed without schema errors | done |
 | OBS-015 | P0 | Alert quality | Close PAR-003 via codified threshold + strict runtime evidence | OBS-011, OBS-012 | readiness report update | PAR-003 moved to closed with evidence links | done |
 | OBS-016 | P0 | SLO | Define Tier-1 user journeys and owning SLI metrics | OBS-006 | SLO mapping doc | each Tier-1 journey mapped to explicit SLI query | planned |
 | OBS-017 | P0 | SLO | Implement missing SLI recording rules for uncovered journeys | OBS-016 | PrometheusRule updates | recording rules present and queryable in runtime | planned |

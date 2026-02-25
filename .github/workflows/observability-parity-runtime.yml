@@ -39,6 +39,7 @@ jobs:
       GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
       GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
       OBS_PARITY_REQUIRED_STREAK: "3"
+      OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH: "1"
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
@@ -75,23 +76,16 @@ jobs:
           echo "OBS_EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
 
           if [ -z "$K8S_CONTEXT" ]; then
-            echo "OBS_SKIP_REASON=Missing OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT variable" >> "$GITHUB_ENV"
-            echo "## Parity context missing" >&2
-            echo "Set OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT in repository variables to enable runtime parity for ${{ matrix.env_label }}." >&2
+            echo "Missing required environment context variable: OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT." >&2
+            echo "Set this repository variable to a valid kubectl context name and re-run parity." >&2
             exit 1
           fi
 
           if [ -z "$GCP_PROJECT_VALUE" ]; then
-            echo "OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT is required when configured for explicit per-env override." >&2
-            echo "Set OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT in repository variables or update workflow defaults." >&2
+            echo "Missing OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT override/value." >&2
+            echo "Set OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT in repository variables (or remove and use shared project defaults intentionally)." >&2
             exit 1
           fi
-
-      - name: Enforce production parity context presence
-        if: ${{ false }}
-        run: |
-          echo "Production parity run cannot be skipped. Configure OBS_PARITY_PROD_K8S_CONTEXT." >&2
-          exit 1
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed
@@ -108,6 +102,32 @@ jobs:
           gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
             --project "$OBS_GCP_PROJECT" \
             --zone "$GKE_CLUSTER_LOCATION"
+
+      - name: Validate selected kubectl context after kubeconfig refresh
+        run: |
+          echo "==> Validate context '$OBS_K8S_CONTEXT' is present in kubeconfig"
+          if ! kubectl config get-contexts -o name | rg -qx "$OBS_K8S_CONTEXT"; then
+            echo "Context '$OBS_K8S_CONTEXT' not found in kubeconfig after credential refresh." >&2
+            echo "Set OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT to an existing context and retry." >&2
+            exit 1
+          fi
+
+          echo "==> Validate context '$OBS_K8S_CONTEXT' can access API"
+          if ! kubectl --context "$OBS_K8S_CONTEXT" cluster-info >/dev/null; then
+            echo "kubectl cannot reach API through context '$OBS_K8S_CONTEXT'." >&2
+            echo "Check credentials and project/zone variables for this workflow lane." >&2
+            exit 1
+          fi
+
+          echo "==> Validate selected context is currently active for prod parity"
+          CURRENT_CONTEXT="$(kubectl config current-context)"
+          if [[ "${OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH}" == "1" && "${{ matrix.env_label }}" == "prod" ]]; then
+            if [[ "$CURRENT_CONTEXT" != "$OBS_K8S_CONTEXT" ]]; then
+              echo "Production context mismatch: expected '$OBS_K8S_CONTEXT' to be active, got '$CURRENT_CONTEXT'." >&2
+              echo "This blocks PROD parity because current run must execute against the configured prod context." >&2
+              exit 1
+            fi
+          fi
 
       - name: Run runtime parity gate and build parity delta
         run: |

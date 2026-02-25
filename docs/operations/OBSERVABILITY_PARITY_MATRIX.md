@@ -23,9 +23,9 @@ Define required observability parity across environments so runtime checks are d
 
 | Environment | Canonical command | Required identity labels | Required runtime dependencies | Required evidence artifacts |
 |---|---|---|---|---|
-| `dev` | `OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | `env=dev`, `profile=nonprod` | kubectl context + gcloud auth | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md`, `observability-first-class-runtime-evidence-index.json` |
-| `nonprod` | `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | `env=nonprod`, `profile=nonprod` | kubectl context + gcloud auth | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md`, `observability-first-class-runtime-evidence-index.json` |
-| `prod` | `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | `env=prod`, `profile=prod` | kubectl context + gcloud auth | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md`, `observability-first-class-runtime-evidence-index.json` |
+| `dev` | `OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_DEV_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | `env=dev`, `profile=nonprod` | `OBS_PARITY_DEV_K8S_CONTEXT` + kubectl context + gcloud auth | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md`, `observability-first-class-runtime-evidence-index.json` |
+| `nonprod` | `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | `env=nonprod`, `profile=nonprod` | `OBS_PARITY_NONPROD_K8S_CONTEXT` + kubectl context + gcloud auth | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md`, `observability-first-class-runtime-evidence-index.json` |
+| `prod` | `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict` | `env=prod`, `profile=prod` | `OBS_PARITY_PROD_K8S_CONTEXT` + kubeconfig current-context match + kubectl context + gcloud auth | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md`, `observability-first-class-runtime-evidence-index.json` |
 
 ## Baseline Coverage Requirements (All Environments)
 
@@ -69,6 +69,7 @@ Verify:
 2. evidence files are generated.
 3. `identity` in evidence index matches markdown `evidence_identity`.
 4. profile/label values match this matrix.
+5. for prod, the target context is active as the kubeconfig current context.
 
 ## Current Gap Tracking Template
 
