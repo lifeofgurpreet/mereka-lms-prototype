@@ -13,11 +13,11 @@ Date: 2026-02-25
 
 - repo coverage: `--mode local` against `deploy/k8s/base/monitoring`
 - runtime parity probes:
-  - `COVERAGE_ENV_LABEL=dev COVERAGE_DISPATCH_PROFILE=nonprod`
-  - `COVERAGE_ENV_LABEL=nonprod COVERAGE_DISPATCH_PROFILE=nonprod`
-  - `COVERAGE_ENV_LABEL=prod COVERAGE_DISPATCH_PROFILE=prod`
+  - `COVERAGE_ENV_LABEL=dev COVERAGE_DISPATCH_PROFILE=nonprod COVERAGE_K8S_CONTEXT=kind-dev`
+  - `COVERAGE_ENV_LABEL=staging COVERAGE_DISPATCH_PROFILE=nonprod COVERAGE_K8S_CONTEXT=rke2-staging`
+  - `COVERAGE_ENV_LABEL=prod COVERAGE_DISPATCH_PROFILE=prod COVERAGE_K8S_CONTEXT=gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
   - `--mode runtime`
-- strict: disabled for this pass (non-runtime contexts not currently enforced in this environment)
+- strict: enabled for these strict runtime passes.
 
 ## Snapshot (single-source evidence)
 
@@ -31,21 +31,15 @@ Date: 2026-02-25
 
 ### Runtime parity coverage (dev / nonprod / prod)
 
-All three parity lanes currently return the same outcome because runtime context is not injected in this analysis pass.
+Recent strict runtime passes with explicit contexts show:
 
-- pass count: `pass=53`
-- fail count: `fail=0`
-- skip count: `skip=27`
-- total checks: `80`
+- staging (`rke2-staging`): pass=79 fail=0 skip=0 total=79
+- dev (`kind-dev`): pass=63 fail=16 skip=0 total=79
+- prod (`gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`): pass=68 fail=11 skip=0 total=79
 
-Skipped runtime checks indicate each lane is currently unresolved at runtime object level:
+`kind-dev` missing runtime objects:
 
-- `service-monitor-live`
-  - `lms-metrics`
-  - `cms-metrics`
-  - `mysql-metrics`
-  - `redis-metrics`
-  - `enterprise-catalog-metrics`
+- ServiceMonitors:
   - `xqueue-metrics`
   - `mux-delivery-monitor`
   - `caddy-metrics`
@@ -55,17 +49,28 @@ Skipped runtime checks indicate each lane is currently unresolved at runtime obj
   - `ecommerce-metrics`
   - `credentials-metrics`
   - `purchase-gateway-metrics`
-- `prometheusrule-live`
-  - `lms-alerts`
-  - `enterprise-alerts`
-  - `velero-alerts`
-  - `slo-recording-rules`
-  - `auth-alerts`
+- PrometheusRules:
   - `caddy-alerts`
   - `services-alerts`
   - `video-alerts`
   - `email-alerts`
   - `library-alerts`
+  - `ora2-operations`
+  - `credentials-alerts`
+
+`prod` missing runtime objects:
+
+- ServiceMonitors:
+  - `caddy-metrics`
+  - `mfe-metrics`
+  - `forum-metrics`
+  - `discovery-metrics`
+  - `ecommerce-metrics`
+  - `credentials-metrics`
+  - `purchase-gateway-metrics`
+- PrometheusRules:
+  - `caddy-alerts`
+  - `services-alerts`
   - `ora2-operations`
   - `credentials-alerts`
 
@@ -79,9 +84,9 @@ No repo-only required objects are missing:
 
 | Environment | Owner | Gap | Target fix date | Evidence |
 |---|---|---|---|---|
-| dev | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification blocked (all runtime checks skip due missing/implicit context wiring in this pass) | 2026-02-28 | `var/ci/observability-coverage-dev-runtime.md` |
-| nonprod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification now succeeds with namespace-aware runtime lookup; strict check is pass/no-fail/no-skip | 2026-02-28 | `var/ci/observability-coverage-nonprod-runtime.md` |
-| prod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification blocked (all runtime checks skip due missing/implicit context wiring in this pass) | 2026-02-28 | `var/ci/observability-coverage-prod-runtime.md` |
+| dev | Mereka LMS observability owners | Runtime parity checks are generated for `kind-dev` with 16 missing runtime monitors/rules | 2026-02-28 | `var/ci/observability-coverage-dev-runtime.md` |
+| nonprod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification now succeeds with namespace-aware runtime lookup; strict check is pass/no-fail/no-skip | 2026-02-28 | `var/ci/observability-coverage-staging-runtime.md` |
+| prod | Mereka LMS observability owners | Runtime parity checks are generated for GKE with 11 missing runtime monitors/rules | 2026-02-28 | `var/ci/observability-coverage-prod-runtime.md` |
 
 ## Required action (immediate)
 
@@ -97,4 +102,4 @@ OBSERVABILITY_GCP_PROJECT=<dev-or-shared-project> \
 
 2. Confirm each environment emits no runtime skips and no runtime fails in `observability-coverage-<env>-runtime.json`.
 
-3. Close out parity gap and move `OBS-006` to done once runtime lanes produce concrete present/absent results.
+3. Close out parity gap and move `OBS-006` / `OBS-007` to done once runtime lanes produce concrete present/absent results and strict mode can pass in all environments.

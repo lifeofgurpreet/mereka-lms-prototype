@@ -281,7 +281,8 @@ fi
 # Runtime checks
 if [[ "$has_runtime_access" -eq 1 ]]; then
   for sm in "${REQUIRED_SERVICE_MONITOR_RUNTIME[@]}"; do
-    runtime_ns="$(resource_exists servicemonitor "$sm")"
+    # Keep command substitution non-fatal in strict mode when a resource is absent.
+    runtime_ns="$(resource_exists servicemonitor "$sm" || true)"
     if [[ -n "$runtime_ns" ]]; then
       record pass "runtime" "service-monitor-live" "$sm" "found in namespace $runtime_ns"
     else
@@ -294,7 +295,8 @@ if [[ "$has_runtime_access" -eq 1 ]]; then
   done
 
   for pr in "${REQUIRED_PROMETHEUSRULE_RUNTIME[@]}"; do
-    runtime_ns="$(resource_exists prometheusrules.monitoring.coreos.com "$pr")"
+    # Keep command substitution non-fatal in strict mode when a resource is absent.
+    runtime_ns="$(resource_exists prometheusrules.monitoring.coreos.com "$pr" || true)"
     if [[ -n "$runtime_ns" ]]; then
       record pass "runtime" "prometheusrule-live" "$pr" "found in namespace $runtime_ns"
     else
