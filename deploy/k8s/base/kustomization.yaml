@@ -33,7 +33,7 @@ namespace: mereka-lms
 # annotations added to all Resources
 # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/commonannotations/
 commonAnnotations:
-  app.kubernetes.io/version: 18.2.2
+  app.kubernetes.io/version: 21.0.0
 
 # labels (and label selectors) added to all Resources
 # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/labels/

@@ -9,9 +9,9 @@ DOCKER_IMAGE_MYSQL: docker.io/mysql:8.0
 MYSQL_ROOT_HOST: '%'
 MFE_DOCKER_IMAGE: openedx-mfe:nightly
 MFE_COMMON_VERSION: master
-OPENEDX_COMMON_VERSION: open-release/redwood.master
-OPENEDX_LMS_VERSION: open-release/redwood.master
-OPENEDX_CMS_VERSION: open-release/redwood.master
+OPENEDX_COMMON_VERSION: open-release/ulmo.1
+OPENEDX_LMS_VERSION: open-release/ulmo.1
+OPENEDX_CMS_VERSION: open-release/ulmo.1
 PLUGINS:
   - discovery
   - mfe

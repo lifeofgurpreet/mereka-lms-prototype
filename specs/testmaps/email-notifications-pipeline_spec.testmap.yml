@@ -52,6 +52,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-email-notifications-pipeline.sh
+    command: scripts/qa/verify-email-notifications-pipeline.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-email-ses-infrastructure.sh
     command: scripts/qa/verify-email-ses-infrastructure.sh
   - type: automated

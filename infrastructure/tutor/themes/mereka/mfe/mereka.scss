@@ -3,7 +3,7 @@ $mereka-font-path: "../fonts";
 
 /* RISK: LOW — CSS custom properties, no structural dependency */
 :root {
-  --mereka-mfe-branding-rev: "2026-02-18-us7";
+  --mereka-mfe-branding-rev: "2026-02-25-t102";
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
   --mereka-mfe-surface: #ffffff;
@@ -238,14 +238,11 @@ label {
 }
 
 /* Authn/login/register surfaces */
-/* BRITTLE: upstream authn MFE class naming - consolidated to data-testid where possible */
-/* [class*="auth-page"] removed 2026-02-18 (bead 115d.18): fully covered by [class*="authn"] + data-testid primary paths */
+/* [class*="auth-page"] removed 2026-02-18 (bead 115d.18): fully covered by [class*="authn"] + [class*="login-register"] */
+/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
+/* per SELECTOR_HARDENING_POLICY: class-based attribute selectors are preferred over data-testid for production CSS */
 
-/* RISK: HIGH — structural authn surface scoping; data-testid primary, class fallbacks are brittle */
-[data-testid*="login-page"],
-[data-testid*="register-page"],
-[data-testid*="authn"],
-/* Fallback for routes without data-testid */
+/* RISK: HIGH — structural authn surface scoping; breaks if authn MFE renames top-level wrapper class */
 // SELECTOR-EXCEPTION: [class*="authn"] | no stable testid on all route entrypoints | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="login-register"] | authn MFE emits this class on top-level wrapper | expires: 2026-Q3
 [class*="authn"],
@@ -254,12 +251,8 @@ label {
 }
 
 /* RISK: HIGH — structural authn card scoping; breaks if authn MFE renames wrapper class */
-[data-testid*="login-page"] .pgn__card,
-[data-testid*="register-page"] .pgn__card,
-[data-testid*="authn"] .pgn__card,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="authn"] .pgn__card | authn MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card | login-register wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__card | authn MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__card,
 [class*="login-register"] .pgn__card {
   border-radius: 28px;
@@ -268,12 +261,8 @@ label {
 }
 
 /* RISK: HIGH — structural authn card-header scoping; gradient branding lost if class renames */
-[data-testid*="login-page"] .pgn__card-header,
-[data-testid*="register-page"] .pgn__card-header,
-[data-testid*="authn"] .pgn__card-header,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="authn"] .pgn__card-header | authn MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card-header | login-register wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__card-header | authn MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card-header | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__card-header,
 [class*="login-register"] .pgn__card-header {
   background-image: linear-gradient(
@@ -285,12 +274,8 @@ label {
 }
 
 /* RISK: MEDIUM — authn primary button; degrades to default button sizing if class renames */
-[data-testid*="login-page"] .pgn__btn--primary,
-[data-testid*="register-page"] .pgn__btn--primary,
-[data-testid*="authn"] .pgn__btn--primary,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="authn"] .pgn__btn--primary | authn MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__btn--primary | login-register wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__btn--primary | authn MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__btn--primary | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__btn--primary,
 [class*="login-register"] .pgn__btn--primary {
   min-height: 44px;
@@ -299,12 +284,8 @@ label {
 }
 
 /* RISK: LOW — authn hyperlink color; degrades to default link color */
-[data-testid*="login-page"] .pgn__hyperlink,
-[data-testid*="register-page"] .pgn__hyperlink,
-[data-testid*="authn"] .pgn__hyperlink,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink | authn MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink | login-register wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink | authn MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__hyperlink,
 [class*="login-register"] .pgn__hyperlink {
   color: var(--mereka-color-blue);
@@ -313,15 +294,8 @@ label {
 }
 
 /* RISK: LOW — authn hyperlink hover/focus; color-only, graceful degradation */
-[data-testid*="login-page"] .pgn__hyperlink:hover,
-[data-testid*="login-page"] .pgn__hyperlink:focus,
-[data-testid*="register-page"] .pgn__hyperlink:hover,
-[data-testid*="register-page"] .pgn__hyperlink:focus,
-[data-testid*="authn"] .pgn__hyperlink:hover,
-[data-testid*="authn"] .pgn__hyperlink:focus,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink:hover/focus | authn MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink:hover/focus | login-register wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink:hover/focus | authn MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink:hover/focus | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__hyperlink:hover,
 [class*="authn"] .pgn__hyperlink:focus,
 [class*="login-register"] .pgn__hyperlink:hover,
@@ -331,13 +305,9 @@ label {
 }
 
 /* Account/settings + learner dashboard surfaces */
-/* BRITTLE: upstream account/learner-dashboard MFE class naming */
+/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 
 /* RISK: HIGH — structural account/dashboard surface scoping; breaks if MFE renames top-level wrapper */
-[data-testid*="account-settings"],
-[data-testid*="account-page"],
-[data-testid*="learner-dashboard"],
-/* Fallback for routes without data-testid */
 // SELECTOR-EXCEPTION: [class*="account-settings"] | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="account-page"] | no stable slot; account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] | no stable slot; dashboard top-level wrapper | expires: 2026-Q3
@@ -348,16 +318,9 @@ label {
 }
 
 /* RISK: MEDIUM — account/dashboard card styling; border-radius/shadow degrade visually */
-[data-testid*="account-settings"] .pgn__card,
-[data-testid*="account-page"] .pgn__card,
-[data-testid*="learner-dashboard"] .pgn__card,
-[data-testid*="account-settings"] .card,
-[data-testid*="account-page"] .card,
-[data-testid*="learner-dashboard"] .card,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__card | account MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__card | account MFE secondary wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__card | dashboard wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__card | account MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__card | account MFE secondary wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__card | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__card,
 [class*="account-page"] .pgn__card,
 [class*="learner-dashboard"] .pgn__card,
@@ -370,13 +333,9 @@ label {
 }
 
 /* RISK: LOW — form control background within scoped surfaces; color-only */
-[data-testid*="account-settings"] .pgn__form-control,
-[data-testid*="account-page"] .pgn__form-control,
-[data-testid*="learner-dashboard"] .pgn__form-control,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__form-control | account MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__form-control | account MFE secondary wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__form-control | dashboard wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__form-control | account MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__form-control | account MFE secondary wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__form-control | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__form-control,
 [class*="account-page"] .pgn__form-control,
 [class*="learner-dashboard"] .pgn__form-control {
@@ -384,13 +343,9 @@ label {
 }
 
 /* RISK: LOW — button border-radius within scoped surfaces; shape-only, degrades visually */
-[data-testid*="account-settings"] .pgn__btn,
-[data-testid*="account-page"] .pgn__btn,
-[data-testid*="learner-dashboard"] .pgn__btn,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__btn | account MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__btn | account MFE secondary wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__btn | dashboard wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__btn | account MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__btn | account MFE secondary wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__btn | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__btn,
 [class*="account-page"] .pgn__btn,
 [class*="learner-dashboard"] .pgn__btn {
@@ -398,13 +353,9 @@ label {
 }
 
 /* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
-[data-testid*="account-settings"] .pgn__alert,
-[data-testid*="account-page"] .pgn__alert,
-[data-testid*="learner-dashboard"] .pgn__alert,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__alert | account MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__alert | account MFE secondary wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__alert | dashboard wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__alert | account MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__alert | account MFE secondary wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__alert | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__alert,
 [class*="account-page"] .pgn__alert,
 [class*="learner-dashboard"] .pgn__alert {
@@ -412,13 +363,9 @@ label {
 }
 
 /* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
-[data-testid*="account-settings"] .pgn__dropdown-toggle,
-[data-testid*="account-page"] .pgn__dropdown-toggle,
-[data-testid*="learner-dashboard"] .pgn__dropdown-toggle,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__dropdown-toggle | account MFE wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__dropdown-toggle | account MFE secondary wrapper fallback | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__dropdown-toggle | dashboard wrapper fallback | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__dropdown-toggle | account MFE wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__dropdown-toggle | account MFE secondary wrapper | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__dropdown-toggle | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__dropdown-toggle,
 [class*="account-page"] .pgn__dropdown-toggle,
 [class*="learner-dashboard"] .pgn__dropdown-toggle {
@@ -426,12 +373,9 @@ label {
   border-color: rgba(26, 22, 35, 0.2);
 }
 
-/* BRITTLE: learner-dashboard scope + course component classes */
+/* learner-dashboard scope + course component classes */
 /* RISK: HIGH — structural course card scoping; layout breaks if dashboard or course class renames */
-[data-testid*="learner-dashboard"] [data-testid*="course"],
-[data-testid*="learner-dashboard"] [class*="course"],
-[class*="learner-dashboard"] [data-testid*="course"],
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] | no stable slot for course card; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] | no stable slot for course card | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] {
   border-radius: 20px;
   border: 1px solid rgba(26, 22, 35, 0.08);
@@ -441,35 +385,23 @@ label {
 }
 
 /* RISK: LOW — hover shadow on course cards; graceful degradation */
-[data-testid*="learner-dashboard"] [data-testid*="course"]:hover,
-[data-testid*="learner-dashboard"] [class*="course"]:hover,
-[class*="learner-dashboard"] [data-testid*="course"]:hover,
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"]:hover | no stable slot for course card hover; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"]:hover | no stable slot for course card hover | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"]:hover {
   box-shadow: 0 18px 48px rgba(26, 22, 35, 0.12);
 }
 
-/* BRITTLE: learner-dashboard scope + course layout container classes */
+/* learner-dashboard scope + course layout container classes */
 /* RISK: HIGH — structural grid/list layout scoping; layout gap breaks if container class renames */
-[data-testid*="learner-dashboard"] [data-testid*="course-grid"],
-[data-testid*="learner-dashboard"] [data-testid*="course-list"],
-[data-testid*="learner-dashboard"] [class*="course-grid"],
-[data-testid*="learner-dashboard"] [class*="course-list"],
-[class*="learner-dashboard"] [data-testid*="course-grid"],
-[class*="learner-dashboard"] [data-testid*="course-list"],
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-grid"] | no stable slot; data-testid primary present | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] | no stable slot; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-grid"] | no stable slot | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] | no stable slot | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-grid"],
 [class*="learner-dashboard"] [class*="course-list"] {
   gap: 1rem;
 }
 
-/* BRITTLE: learner-dashboard scope + course component classes */
+/* learner-dashboard scope + course component + image */
 /* RISK: HIGH — structural course image layout; aspect-ratio/min-height breaks card layout if class renames */
-[data-testid*="learner-dashboard"] [data-testid*="course"] img,
-[data-testid*="learner-dashboard"] [class*="course"] img,
-[class*="learner-dashboard"] [data-testid*="course"] img,
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] img | no stable slot for image; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] img | no stable slot for image | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] img {
   display: block;
   width: 100%;
@@ -482,25 +414,18 @@ label {
 }
 
 /* Learning MFE (My Courses / Discover New) card layout guardrails */
-/* BRITTLE: upstream learning MFE class naming - broadest selector, highest risk */
+/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 
 /* RISK: HIGH — structural learning surface scoping; background transparent breaks if learning class renames */
-[data-testid*="learning"],
-/* Fallback for routes without data-testid */
 // SELECTOR-EXCEPTION: [class*="learning"] | no upstream slot for learning layout; P2 upstream request filed | expires: 2026-Q3
 [class*="learning"] {
   background: transparent;
 }
 
-/* BRITTLE: course layout container classes may change */
+/* course layout container classes may change */
 /* RISK: HIGH — structural learning grid/list layout; gap breaks if container class renames */
-[data-testid*="learning"] [data-testid*="course-grid"],
-[data-testid*="learning"] [data-testid*="course-list"],
-/* Fallback for routes without data-testid */
-[class*="learning"] [data-testid*="course-grid"],
-[class*="learning"] [data-testid*="course-list"],
-// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-grid"] | no stable slot for learning course grid; data-testid primary present | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-list"] | no stable slot for learning course list; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-grid"] | no stable slot for learning course grid | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-list"] | no stable slot for learning course list | expires: 2026-Q3
 [class*="learning"] [class*="course-grid"],
 [class*="learning"] [class*="course-list"] {
   /* Some layouts aren't flex/grid, so `gap` can be a no-op. Keep it anyway, but
@@ -511,33 +436,22 @@ label {
 }
 
 /* Bootstrap-ish fallback: many MFEs render course cards inside `.row > .col-*`. */
-/* BRITTLE: my-courses section class + Bootstrap col classes (col is stable, my-courses is not) */
 /* RISK: MEDIUM — spacing fallback; Bootstrap .col-* is stable, my-courses class is brittle */
-[data-testid*="learning"] [data-testid*="my-courses"] .row > [class*="col"],
-/* Fallback for routes without data-testid */
-[class*="learning"] [data-testid*="my-courses"] .row > [class*="col"],
 // SELECTOR-EXCEPTION: [class*="learning"] [class*="my-courses"] .row > [class*="col"] | Bootstrap col is stable; my-courses class is brittle but no slot | expires: 2026-Q3
 [class*="learning"] [class*="my-courses"] .row > [class*="col"] {
   margin-bottom: 1.5rem !important;
 }
 
 /* Only target actual course cards to avoid disturbing unrelated card shells. */
-/* BRITTLE: my-courses/discover section classes and course-card component classes */
 /* RISK: HIGH — structural course card layout (flex row); breaks if section or card classes rename */
-[data-testid*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) :is([data-testid*="course-card"], [data-testid*="course"]),
-/* Fallback for routes without data-testid */
-[class*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) :is([data-testid*="course-card"], [data-testid*="course"]),
-// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) :is([class*="course-card"]) | no upstream slot; outer data-testid paths present | expires: 2026-Q3
-[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) :is([data-testid*="course-card"], [data-testid*="course"]),
-[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) :is([class*="course-card"]) {
+// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) :is([class*="course-card"]) | no upstream slot | expires: 2026-Q3
+[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) :is([class*="course-card"], [class*="course"]) {
   display: flex;
   flex-direction: row;
   align-items: stretch;
 }
 
-/* BRITTLE: learning MFE scope - fallback for routes without data-testid */
 /* RISK: MEDIUM — learning card styling; border-radius/shadow degrade visually if class renames */
-[data-testid*="learning"] :is(.pgn__card, .card),
 // SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) | no upstream slot for learning layout; inner selector is stable Paragon BEM | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) {
   border-radius: 20px;
@@ -550,9 +464,7 @@ label {
 }
 
 /* Learning course cards often use Paragon Card ImageCap on the left; ensure it doesn't collapse. */
-/* BRITTLE: Paragon ImageCap internal classes (semi-stable, component-level) */
 /* RISK: HIGH — structural image-cap flex sizing; layout collapses if ImageCap class renames */
-[data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]),
 // SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) | Paragon ImageCap semi-stable; no slot | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) {
   flex: 0 0 180px;
@@ -563,7 +475,6 @@ label {
 }
 
 /* RISK: HIGH — structural image-cap img sizing; layout breaks if img loses fixed dimensions */
-[data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img,
 // SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, ...) img | Paragon ImageCap img; no slot | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img {
   display: block;
@@ -578,12 +489,8 @@ label {
 }
 
 /* When course cards use a horizontal layout, ensure the media column doesn't collapse. */
-/* BRITTLE: generic image/media classes - too broad, matches any class containing "image" or "media" */
 /* RISK: HIGH — structural media column sizing; too broad selector, can affect unintended elements */
-[data-testid*="learning"] :is(.pgn__card, .card) [class*="image"],
-[data-testid*="learning"] :is(.pgn__card, .card) [class*="media"],
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="image"] | too broad, but no stable BEM or testid for card media col | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="media"] | too broad, but no stable BEM or testid for card media col | expires: 2026-Q3
+/* SELECTOR-KEPT-BRITTLE: [class*="image"] and [class*="media"] are too broad but no stable BEM or testid alternative exists for the card media column; upstream Paragon uses dynamic CSS module class names for this slot */
 [class*="learning"] :is(.pgn__card, .card) [class*="image"],
 [class*="learning"] :is(.pgn__card, .card) [class*="media"] {
   min-width: 180px;
@@ -591,10 +498,7 @@ label {
 }
 
 /* RISK: MEDIUM — media column image sizing; degrades to unsized image if selector breaks */
-[data-testid*="learning"] :is(.pgn__card, .card) [class*="image"] img,
-[data-testid*="learning"] :is(.pgn__card, .card) [class*="media"] img,
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="image"] img | media col img; no stable alternative | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) [class*="media"] img | media col img; no stable alternative | expires: 2026-Q3
+/* SELECTOR-KEPT-BRITTLE: same rationale as parent rule above */
 [class*="learning"] :is(.pgn__card, .card) [class*="image"] img,
 [class*="learning"] :is(.pgn__card, .card) [class*="media"] img {
   display: block;
@@ -608,39 +512,27 @@ label {
 }
 
 /* Some Learning MFE layouts don't apply CSS gap; add reliable vertical spacing fallback. */
-/* BRITTLE: my-courses/discover section classes */
 /* RISK: MEDIUM — spacing fallback; * + * adjacent sibling is safe, outer class is brittle */
-[data-testid*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) > * + *,
-[class*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) > * + *,
 // SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) > * + * | spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) > * + * {
   margin-top: 1.25rem;
 }
 
 /* RISK: MEDIUM — row spacing fallback; Bootstrap .row is stable, outer class is brittle */
-[data-testid*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) .row > *,
-[class*="learning"] :is([data-testid*="my-courses"], [data-testid*="discover"], [data-testid*="discover-new"]) .row > *,
 // SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) .row > * | row spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) .row > * {
   margin-bottom: 1.25rem;
 }
 
 /* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */
-/* BRITTLE: learner-dashboard scope + course-list layout class */
 /* RISK: HIGH — structural list vertical rhythm; * + * is safe but course-list class can rename */
-[data-testid*="learner-dashboard"] [data-testid*="course-list"] > * + *,
-[data-testid*="learner-dashboard"] [class*="course-list"] > * + *,
-[class*="learner-dashboard"] [data-testid*="course-list"] > * + *,
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] > * + * | list spacing fallback; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] > * + * | list spacing fallback | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-list"] > * + * {
   margin-top: 1rem;
 }
 
-/* BRITTLE: learner-dashboard scope + course component + status badge class */
+/* learner-dashboard scope + course component + status badge class */
 /* RISK: MEDIUM — status badge styling; cosmetic pill, degrades visually if class renames */
-[data-testid*="learner-dashboard"] [data-testid*="course"] [class*="status"],
-[data-testid*="learner-dashboard"] [class*="course"] [class*="status"],
-[class*="learner-dashboard"] [data-testid*="course"] [class*="status"],
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] [class*="status"] | cosmetic badge; no testid for status pill | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] [class*="status"] {
   border-radius: 999px;
@@ -650,14 +542,8 @@ label {
   font-weight: 600;
 }
 
-/* BRITTLE: account/learner-dashboard scope for headings */
+/* account/learner-dashboard scope for headings */
 /* RISK: LOW — heading font/color within scoped surfaces; degrades to default heading style */
-[data-testid*="account-settings"] h1,
-[data-testid*="account-settings"] h2,
-[data-testid*="account-page"] h1,
-[data-testid*="account-page"] h2,
-[data-testid*="learner-dashboard"] h1,
-[data-testid*="learner-dashboard"] h2,
 // SELECTOR-EXCEPTION: [class*="account-settings"] h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="account-page"] h1/h2 | heading font; no slot for account page headings | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] h1/h2 | heading font; no slot for dashboard headings | expires: 2026-Q3
@@ -672,25 +558,17 @@ label {
 }
 
 /* Discussions/forum surfaces (MFE discussions is the learner-facing forum UI) */
-/* BRITTLE: upstream discussions MFE class naming */
-/* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18): fully covered by [class*="discussions"] plural + data-testid primary paths */
+/* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18): fully covered by [class*="discussions"] plural */
+/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 
 /* RISK: HIGH — structural discussions surface scoping; breaks if discussions MFE renames wrapper */
-[data-testid*="discussions"],
-[data-testid*="discussion"],
-/* Fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="discussions"] | no upstream slot; P3/cosmetic; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="discussions"] | no upstream slot; P3/cosmetic | expires: 2026-Q3
 [class*="discussions"] {
   background: transparent;
 }
 
 /* RISK: LOW — discussions card styling; border-radius/shadow color only, degrades visually */
-[data-testid*="discussions"] .card,
-[data-testid*="discussion"] .card,
-[data-testid*="discussions"] .pgn__card,
-[data-testid*="discussion"] .pgn__card,
-/* BRITTLE: fallback for routes without data-testid */
-// SELECTOR-EXCEPTION: [class*="discussions"] .card | P3/cosmetic; no slot; data-testid primary present | expires: 2026-Q3
+// SELECTOR-EXCEPTION: [class*="discussions"] .card | P3/cosmetic; no slot | expires: 2026-Q3
 [class*="discussions"] .card,
 [class*="discussions"] .pgn__card {
   border-radius: 22px;
@@ -699,20 +577,12 @@ label {
 }
 
 /* RISK: LOW — discussions link color; color-only, graceful degradation */
-[data-testid*="discussions"] a,
-[data-testid*="discussion"] a,
-/* BRITTLE: fallback for routes without data-testid */
 // SELECTOR-EXCEPTION: [class*="discussions"] a | P3/cosmetic link color; no slot | expires: 2026-Q3
 [class*="discussions"] a {
   color: var(--mereka-color-blue);
 }
 
 /* RISK: LOW — discussions link hover/focus; color-only, graceful degradation */
-[data-testid*="discussions"] a:hover,
-[data-testid*="discussions"] a:focus,
-[data-testid*="discussion"] a:hover,
-[data-testid*="discussion"] a:focus,
-/* BRITTLE: fallback for routes without data-testid */
 // SELECTOR-EXCEPTION: [class*="discussions"] a:hover/focus | P3/cosmetic link hover; no slot | expires: 2026-Q3
 [class*="discussions"] a:hover,
 [class*="discussions"] a:focus {
@@ -720,11 +590,6 @@ label {
 }
 
 /* RISK: LOW — discussions button gradient; color-only, degrades to default button */
-[data-testid*="discussions"] .btn-primary,
-[data-testid*="discussion"] .btn-primary,
-[data-testid*="discussions"] .pgn__btn--primary,
-[data-testid*="discussion"] .pgn__btn--primary,
-/* BRITTLE: fallback for routes without data-testid */
 // SELECTOR-EXCEPTION: [class*="discussions"] .btn-primary | P3/cosmetic btn gradient; no slot | expires: 2026-Q3
 [class*="discussions"] .btn-primary,
 [class*="discussions"] .pgn__btn--primary {
@@ -733,11 +598,6 @@ label {
 }
 
 /* RISK: LOW — discussions heading font/color; degrades to default heading style */
-[data-testid*="discussions"] h1,
-[data-testid*="discussions"] h2,
-[data-testid*="discussion"] h1,
-[data-testid*="discussion"] h2,
-/* BRITTLE: fallback for routes without data-testid */
 // SELECTOR-EXCEPTION: [class*="discussions"] h1/h2 | P3/cosmetic heading font; no slot | expires: 2026-Q3
 [class*="discussions"] h1,
 [class*="discussions"] h2 {

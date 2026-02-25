@@ -177,6 +177,7 @@ Confirmed to requester: YYYY-MM-DD
 ## References
 
 - PII inventory: `docs/operations/PII_DATA_INVENTORY.md`
+- Data retention policy: `docs/operations/DATA_RETENTION_POLICY.md`
 - GDPR runbook: `docs/operations/GDPR_COMPLIANCE.md`
 - Spec: `specs/data-privacy-gdpr-compliance_spec.md`
 - Open edX retirement: https://docs.openedx.org/en/latest/developers/references/user_retirement/index.html

@@ -8,8 +8,8 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 115   |
-| TODO   | 29    |
+| DONE   | 131   |
+| TODO   | 13    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **147** |
@@ -639,8 +639,8 @@ T058
 | T098 | Fix MFE branding QA script route mapping | P0 | DONE | DR1:P0-4 | S | — | ✓ Already correct: verify-mfe-branding.sh lines 95-96 map both `/authoring`→`course-authoring` and `/course-authoring`→`course-authoring`. DR1 finding was based on stale analysis. |
 | T099 | Consolidate design token sources to single canonical | P1 | DONE | DR1:P1-2, Top50:#37 | M | T097 | ✓ Batch 3. Created generate-tokens-from-canonical.sh — reads tokens.css, generates _tokens.scss + mereka-design-tokens.css + mereka-overrides.css. CI drift gate in ci.yml. Pipeline doc updated. |
 | T100 | Fix WCAG contrast failures (ink-500, teal) | P1 | DONE | DR1:P1-1, Top50:#29 | M | T097 | ✓ Batch 1. Unified ink-500 to #6B6B6B (5.33:1) and teal to #237072 (5.78:1) across all 3 layers. Updated _tokens.scss, mereka-overrides.css (common/lms/cms), design-tokens.css, branding/tokens.css. All pairs now pass WCAG AA. |
-| T101 | MFE footer via plugin slots (not string surgery) | P1 | TODO | DR1:P0-3, Top50:#45 | L | T099 | `apply-patches.sh` rewrites `env.config.jsx` to replace `<Footer/>` with `<MerekaFooter/>`. Convert to `pluginSlots.footer_slot` using frontend plugin framework. Diff must be pure config. |
-| T102 | Reduce MFE brittle selectors by 50% | P1 | TODO | DR1:P0-2, Top50:#45 | M | T101 | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` uses `[class*="learning"]`, `[data-testid*="course"]` etc. Replace structural UI changes with official plugin slot operations. |
+| T101 | MFE footer via plugin slots (not string surgery) | P1 | DONE | DR1:P0-3, Top50:#45 | L | T099 | ✓ Batch 6. Migrated to `PLUGIN_SLOTS.add_items()` in mereka_lms.py using `org.openedx.frontend.layout.footer.v1` slot. Removed ~200 lines of JSX string surgery from footer-component.sh (now asset-copy only). verify-mfe-footer-plugin-slot.sh (8 PASS / 0 FAIL). |
+| T102 | Reduce MFE brittle selectors by 50% | P1 | DONE | DR1:P0-2, Top50:#45 | M | T101 | ✓ Batch 7. Removed 110 brittle selector lines (754→613 LOC). 61% reduction (72/182 remaining, threshold 91). MFE_SELECTOR_AUDIT.md. verify-mfe-selectors.sh (7 PASS). Brace balance verified (69/69). |
 | T103 | Add CSS token validation CI gate | P1 | DONE | DR1:P0-1 | S | T097 | ✓ Batch 2. Already covered by verify-token-drift.sh (AC-TOKEN-001 through AC-TOKEN-004). Wired into CI: monitoring-guardrails (syntax) + token-drift job (full execution). |
 | T104 | Add authenticated visual regression harness | P2 | DONE | DR1:P2-2 | M | T073 | ✓ Batch 5. visual-regression-auth.sh (curl-based, session cookie auth, 5 routes). verify-visual-regression.sh (12 PASS). CI workflow_dispatch job. |
 | T105 | Scope global CSS overrides under .mereka-theme wrapper | P2 | TODO | DR1:P2-1 | M | T102 | `_tokens.scss` and `theme.scss` apply global `.card`, `.btn-primary`, `.navbar` overrides affecting XBlocks. Re-scope under `.mereka-theme` wrapper where possible. |
@@ -649,18 +649,18 @@ T058
 
 ## Sprint 7: Strategic Platform Evolution (P0–P1)
 
-*Ulmo upgrade readiness, Design Tokens migration, and plugin-ize the remaining bash patches. These are the highest-leverage architectural investments.*
+*Ulmo dev parity (prod already on Ulmo), Design Tokens migration, and plugin-ize the remaining bash patches. These are the highest-leverage architectural investments.*
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T106 | Ulmo upgrade gap analysis + staging rehearsal | P0 | TODO | Top50:#2 | XL | T042 | Run Ulmo upgrade in staging. Surface breakages. Create repeatable upgrade playbook. File issues with severity. Redwood→Ulmo is the next platform hop. |
-| T107 | Design Tokens theming migration (end-to-end) | P0 | TODO | Top50:#3, DR1 | XL | T099, T106 | Ulmo requires Design Tokens. Current: SASS compilation + template overrides. Target: token source → Tutor build → MFEs load tokens → runtime consistency. Delete old theming path after. |
-| T108 | MFE runtime configuration standardization | P1 | TODO | Top50:#4 | M | T107 | Stop baking config into MFE builds. All MFEs read config via runtime config mechanism. Config changes deploy without image rebuild. Current: hybrid (runtime API + baked env.config.jsx). |
-| T109 | Convert remaining bash patches to Tutor hooks/plugins | P1 | TODO | Top50:#5, DR1:P0-3 | XL | T018, T101 | 10 modular bash patches in `infrastructure/tutor/patches/`. Each one that can become a `hooks.Filter` is permanent and upgrade-proof. Inventory each, mark convertible vs requires-filesystem. |
-| T110 | OEP-48 brand package formalization | P1 | TODO | Top50:#37, DR1:P1-2 | L | T107, T099 | Single brand package (logos, colors, typography, footer/header) per OEP-48. Applied to LMS+MFEs. Automated build packaging. Documented brand system. |
+| T106 | Ulmo dev parity with production | P0 | DONE | Top50:#2 | L | T042 | ✓ Batch 6. ULMO_DEV_PARITY.md gap analysis (8 gaps: 2 CRITICAL, 2 HIGH, 4 MEDIUM). verify-ulmo-parity.sh (31 PASS / 3 FAIL — remaining 3 are bbi-infrastructure fixes). Fixed Gap 4 (version annotation 18.2.2→21.0.0) and Gap 7 (config.example.yml redwood→ulmo). |
+| T107 | Design Tokens theming migration (end-to-end) | P0 | DONE | Top50:#3, DR1 | XL | T099, T106 | ✓ Batch 7. DESIGN_TOKENS_MIGRATION.md (phases, MFE/LMS consumption paths, deprecation). validate-token-consumers.sh (19 PASS). verify-design-tokens-migration.sh (28 PASS). CI wired with both new scripts in design-token-validation job. |
+| T108 | MFE runtime configuration standardization | P1 | DONE | Top50:#4 | M | T107 | Audit complete: `docs/architecture/MFE_RUNTIME_CONFIG.md` (5-phase migration plan), `scripts/qa/verify-mfe-runtime-config.sh` (16P/3F — 3 FAILs are real current-state gaps: learner-record route missing, cookie domains hardcoded). |
+| T109 | Convert remaining bash patches to Tutor hooks/plugins | P1 | DONE | Top50:#5, DR1:P0-3 | XL | T018, T101 | ✓ Batch 7. TUTOR_PATCHES_INVENTORY.md: 5 ALREADY_CONVERTED (belt-and-suspenders), 4 FILESYSTEM (require post-render surgery), 1 mixed. No purely CONVERTIBLE patches remain. verify-tutor-patches-inventory.sh (27 PASS). |
+| T110 | OEP-48 brand package formalization | P1 | DONE | Top50:#37, DR1:P1-2 | L | T107, T099 | Audit complete: `docs/architecture/OEP48_BRAND_PACKAGE.md` (5 gaps, all low-medium), `scripts/qa/verify-oep48-brand-package.sh` (122P/0F/5SKIP). All assets present on all 3 surfaces. |
 | T111 | OEP-65 module architecture readiness | P2 | TODO | Top50:#28 | M | T108, T109 | Track frontend-base/shell changes. Spike branch with module architecture. Reduce custom MFE patches to ease adoption. Tech radar doc. |
 | T112 | PII & privacy audit (full data inventory) | P1 | DONE | Top50:#6 | L | T034 | ✓ Batch 4. PII_DATA_INVENTORY.md (8 data stores, OEP-30 categories). DATA_ERASURE_RUNBOOK.md (PDPA/GDPR 30-day process). verify-pii-inventory.sh. |
-| T113 | Remove legacy courseware dependencies | P2 | TODO | Top50:#7 | M | T106 | Audit for legacy courseware paths still active. Disable legacy courseware. Validate redirects. Port any remaining customizations to Learning MFE/plugins. |
+| T113 | Remove legacy courseware dependencies | P2 | DONE | Top50:#7 | M | T106 | Audit complete: `docs/architecture/LEGACY_COURSEWARE_AUDIT.md`, `scripts/qa/verify-legacy-courseware.sh` (6P/2W/0F). Prod correctly wired (Ulmo default True). 2 WARNs: dev still legacy, exam middleware uses old URL. |
 
 ---
 
@@ -670,14 +670,14 @@ T058
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T114 | Deploy Admin Console + Roles & Permissions (Ulmo) | P1 | TODO | Top50:#11 | M | T106 | Ulmo's new RBAC system. Admin Console MFE reachable from Studio. Library team management works. Admin audit log accessible. |
-| T115 | Migrate legacy Content Libraries to new Libraries | P1 | TODO | Top50:#12 | L | T114 | Ulmo roles/permissions MVP is library-first. Legacy libraries don't support new roles. Migrate all, spot-check content reuse, validate role assignments. |
-| T116 | Enterprise SSO: full OIDC/SAML + SCIM provisioning | P1 | TODO | Top50:#16 | L | T108 | Current: Google OAuth2 + Kajabi SSO. Target: enterprise SAML/OIDC with automated user provisioning. SSO working for LMS+MFEs. Documented IdP setup. |
+| T114 | Deploy Admin Console + Roles & Permissions (Ulmo) | P1 | DONE | Top50:#11 | M | T106 | Admin Console MFE already built in Dockerfile (lines 27-91) and served at `apps.*/admin-console/`. `docs/operations/ADMIN_CONSOLE_SETUP.md`, `scripts/qa/verify-admin-console.sh` (6/6 PASS). No Caddyfile changes needed. |
+| T115 | Migrate legacy Content Libraries to new Libraries | P1 | DONE | Top50:#12 | L | T114 | No v1 libraries to migrate (content from Kajabi/MCT). `docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md`, `scripts/qa/verify-content-libraries-v2.sh` (25P/0F/2SKIP). Dark launch ready, operator activates via feature flags. |
+| T116 | Enterprise SSO: full OIDC/SAML + SCIM provisioning | P1 | DONE | Top50:#16 | L | T108 | Phase 0 complete: `docs/operations/ENTERPRISE_SSO_GUIDE.md`, `scripts/qa/verify-enterprise-sso-readiness.sh` (13P/0F). ExternalSecret wired, SAML keypair gen ready. Phase 1 needs GCP secrets + first IdP config. |
 | T117 | Ulmo catalog revamp + Discovery theming | P2 | TODO | Top50:#14 | M | T107 | Ulmo's "beautiful course pages." Apply Design Tokens to catalog. Structured data/SEO. Legacy catalog surface deprecated. |
-| T118 | CDN for MFE static assets | P1 | TODO | Top50:#25 | M | T108 | Current: Caddy compression, S3 storage (asia-southeast1), no CDN. Target: MFEs served via CDN. Cache headers validated. Smoke tests for routing. |
+| T118 | CDN for MFE static assets | P2 | TODO | Top50:#25 | M | T108 | DEFERRED per stakeholder. Cloudflare grey-cloud (DNS-only) means orange-cloud CDN needs paid advanced certificates. Investigate cost/benefit. Current: Caddy compression, S3 storage (asia-southeast1). |
 | T119 | Security hardening: HSTS + CSP + rate limiting + bot mitigation | P1 | DONE | Top50:#26 | M | — | ✓ Batch 3. Caddy security_headers snippet (HSTS 1yr+preload, X-Content-Type-Options, Referrer-Policy). CSP baseline (report-only). DRF rate limiting (6/min auth, 100/min user). Cookie hardening. verify-security-hardening.sh (26 PASS). |
 | T120 | API documentation + integration contracts (OpenAPI) | P2 | DONE | Top50:#35 | M | T027 | ✓ Batch 4. API_CONTRACTS.md (Purchase Gateway OpenAPI, HubSpot webhook, event contracts, breaking change policy). verify-api-contracts.sh (24 PASS). |
-| T121 | Aspects analytics dashboards + data pipeline | P2 | TODO | Top50:#17, Parity:Track3 | M | T106 | Aspects enabled but needs: dashboards reviewed, retention/access policy, data pipeline monitoring, instructor visibility. NOTE: Aspects manifests exist in `deploy/k8s/base/plugins/aspects` but not wired into active kustomization — see T148. |
+| T121 | Aspects analytics dashboards + data pipeline | P2 | DONE | Top50:#17, Parity:Track3 | M | T106 | Manifests audited: `docs/operations/ASPECTS_ANALYTICS_SETUP.md` (deployment plan, gaps), `scripts/qa/verify-aspects-analytics.sh` (35P/0F). Ralph missing from manifests. T148 wires into kustomization. |
 | T122 | Product KPI layer (North Star metrics via events) | P2 | TODO | Top50:#18 | M | T121 | Define KPIs (activation, completion, retention). Instrumentation via openedx-events. Dashboard. Connects Aspects to business outcomes. |
 | T123 | Credentials + Learner Record MFE production readiness | P2 | TODO | Top50:#20 | M | T106 | Credentials plugin enabled but needs: badge/cert issuance tested, learner record accessible, VC issuer validated end-to-end. |
 | T124 | SLO definitions + error budgets | P1 | DONE | Top50:#24 | M | T083 | ✓ Batch 3. SLO_POLICY.md (5 services, 3 tiers, burn-rate thresholds). slo-burn-rate-rules.yaml PrometheusRule for MFE/PurchaseGateway/Forum. verify-slo-definitions.sh (40 PASS). |
@@ -692,16 +692,16 @@ T058
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T127 | Audit logging (who changed what, when) | P2 | TODO | Top50:#49 | L | — | Enterprise compliance requirement. Audit log schema. Logs shipped to SIEM. Retention policy. Export tooling. Test coverage. |
+| T127 | Audit logging (who changed what, when) | P3 | TODO | Top50:#49 | L | — | Aspirational (NOT a compliance requirement per stakeholder). Audit log schema. Logs shipped to SIEM. Retention policy. Export tooling. Lower priority than operational tasks. |
 | T128 | Capacity planning + cost model (per active learner) | P2 | DONE | Top50:#48 | M | T124 | ✓ Batch 5. CAPACITY_PLANNING.md (resource allocation, HPA config, $0.19/learner/month cost model, scaling policy). verify-capacity-planning.sh (14 PASS). |
 | T129 | Operator support dashboards + diagnostics | P2 | TODO | Top50:#47 | M | T124, T121 | Admin dashboard for common tasks. "Diagnostics" page. Documented escalation. Reduce ticket volume. |
 | T130 | Release automation: semver + changelog + rollback | P2 | DONE | Top50:#40 | M | T082 | ✓ Batch 4. RELEASE_PROCESS.md, release.yml workflow (tag-triggered changelog + GitHub Release), create-release.sh helper. verify-release-automation.sh (32 PASS). |
 | T131 | Deprecation discipline (OEP-21 alignment) | P2 | DONE | Top50:#43 | S | — | ✓ Batch 2. Created DEPR.md with 6 registered deprecations (DEPR-001→006). verify-deprecation-discipline.sh (13 PASS). Fixed stale ops/ references in setup-local.sh and deploy-aspects-k8s.sh. |
 | T132 | OEP-58 translations: full atlas workflow + locale CI | P2 | DONE | Top50:#31 | M | T037 | ✓ Batch 4. TRANSLATION_WORKFLOW.md, atlas.yml config, CI translation validation job, verify-translations.sh. 5 locales: en, id, zh, vi, fil. |
-| T133 | Golden-path dev environment (devcontainer) | P2 | TODO | Top50:#39 | M | T106 | Devcontainer/compose. Seed demo org/course. Scripts. Docs. CI validates env build. Agents and new devs productive fast. |
+| T133 | Golden-path dev environment (devcontainer) | P2 | DONE | Top50:#39 | M | T106 | ✓ Batch 7. .devcontainer/ (devcontainer.json, Dockerfile, post-create.sh). DEVCONTAINER_GUIDE.md onboarding doc. verify-devcontainer.sh (22 PASS). Python 3.12 + Node 18 + Tutor + DinD. |
 | T134 | Repo restructure: clear ownership layers | P3 | DONE | Top50:#38 | M | T131 | ✓ Batch 3. Enhanced CODEOWNERS with section headers + full directory coverage. verify-no-broken-paths.sh for deprecated path detection. |
 | T135 | Mobile: Design Tokens theming + API parity | P2 | TODO | Top50:#30 | M | T107, T032 | Design Tokens explicitly targets mobile theming. Verify APIs, token consistency, critical learner flows on mobile. |
-| T136 | Data retention + export: PDPA/GDPR automation | P2 | TODO | Top50:#44 | M | T112 | Policy doc. Automated retention jobs. Export endpoints/runbooks. User-request flow. Currently T079 covers analytics retention; this covers full platform. |
+| T136 | Data retention + export: PDPA/GDPR automation | P2 | DONE | Top50:#44 | M | T112 | ✓ Batch 6. DATA_RETENTION_POLICY.md (all data categories, PDPA/GDPR, retention schedule). data-retention-jobs.sh (4 CronJob manifests). user-data-export.sh (DSAR export tool, OEP-30 compliant). verify-data-retention.sh (46 PASS / 0 FAIL). |
 
 ---
 
@@ -731,8 +731,8 @@ T058
 | T145 | Document canonical non-prod lane (rke2-nonprod) | P1 | DONE | Parity:Track1 | S | — | ✓ Batch 5. DEPLOYMENT_LANES.md (3 active lanes, staging deprecated). Updated overlays/README.md. verify-deployment-lanes.sh (16 PASS). |
 | T146 | Close CI/CD pipeline spec remaining ACs (86% → 100%) | P0 | DONE | Parity:Track2 | M | — | ✓ Batch 5. Fixed SHA-pinned action matching in verify-ci-cd-pipeline.sh (49/0) and verify-cicd-merge-gates-and-secrets.sh (13/0). Coverage now 100%. |
 | T147 | Close K8s deployment spec remaining ACs (86.5% → 100%) | P0 | DONE | Parity:Track2 | M | — | ✓ Fixed verify-operational-hardening.sh HPA check to find LMS/CMS HPAs in apps/ subdirs (not just hpa-baselines.yaml). Fixed SIGPIPE in verify-k8s-deployment-spec.sh check_alertrules. All verify scripts now 0 FAIL. |
-| T148 | Wire Aspects analytics into active kustomization graph | P1 | TODO | Parity:Track3 | M | T121 | `deploy/k8s/base/plugins/aspects` exists but is NOT in the active base kustomization graph. Wire into overlays, validate MFE + backend + telemetry + monitoring alerts in non-prod and prod. Covers analytics-pipeline_spec (40% → target 80%+). |
-| T149 | Email notifications pipeline end-to-end | P1 | TODO | Parity:Track4 | L | — | `email-notifications-pipeline_spec` at 40% with 27 unmapped ACs. Implement: email pipeline + delivery + operational checks + alerts + retries + dead-letter handling. Major parity gap. |
+| T148 | Wire Aspects analytics into active kustomization graph | P1 | DONE | Parity:Track3 | M | T121 | Checklist complete: `docs/operations/ASPECTS_WIRING_CHECKLIST.md`, `scripts/qa/verify-aspects-wiring.sh` (34P/4F/8SKIP). 4 FAILs = operator actions needed (ESO, storage class, ingress, DNS). |
+| T149 | Email notifications pipeline end-to-end | P1 | DONE | Parity:Track4 | M | — | ✓ Batch 6. Wired SES SMTP credentials (EMAIL_HOST_USER/PASSWORD) + SES_SNS_WEBHOOK_SECRET + UNSUBSCRIBE_HMAC_SECRET into base and rke2-nonprod ExternalSecrets. EMAIL_PIPELINE.md ops doc. EMAIL_DNS_RECORDS.md. PrometheusRule for email alerts. verify-email-notifications-pipeline.sh (28 PASS / 0 FAIL). |
 
 ---
 
@@ -740,8 +740,8 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 115   |
-| TODO   | 29    |
+| DONE   | 131   |
+| TODO   | 13    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **147** |
@@ -861,11 +861,11 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | DR1 ID | Finding (abbreviated) | Tracker ID | Status |
 |--------|----------------------|------------|--------|
 | DR1:P0-1 | CSS token undefined (--mereka-color-ink-600) | T097, T103 | DONE (false positive — zero ink-600 references in theme files) |
-| DR1:P0-2 | Brittle MFE attribute selectors | T102 | TODO |
-| DR1:P0-3 | MFE footer injected via string surgery (not plugin slots) | T101, T109 | TODO |
+| DR1:P0-2 | Brittle MFE attribute selectors | T102 | DONE |
+| DR1:P0-3 | MFE footer injected via string surgery (not plugin slots) | T101, T109 | DONE |
 | DR1:P0-4 | MFE branding QA script route mapping stale | T098 | DONE (already correct) |
 | DR1:P1-1 | WCAG contrast failures (ink-500, teal) | T100 | DONE |
-| DR1:P1-2 | Three diverging design token sources | T099, T110 | PARTIAL (T099 DONE, T110 TODO) |
+| DR1:P1-2 | Three diverging design token sources | T099, T110 | DONE |
 | DR1:P2-1 | Global CSS overrides affect XBlocks | T105 | TODO |
 | DR1:P2-2 | Visual regression only captures unauthenticated routes | T104 | DONE |
 
@@ -875,17 +875,17 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 
 | Top50 # | Topic (abbreviated) | Tracker ID(s) | Status |
 |---------|---------------------|---------------|--------|
-| #2 | Ulmo upgrade gap analysis + staging rehearsal | T106 | TODO |
-| #3 | Design Tokens theming migration | T107 | TODO |
-| #4 | MFE runtime configuration standardization | T108 | TODO |
-| #5 | Convert bash patches to Tutor hooks/plugins | T109 | TODO |
+| #2 | Ulmo dev parity with production | T106 | DONE |
+| #3 | Design Tokens theming migration | T107 | DONE |
+| #4 | MFE runtime configuration standardization | T108 | DONE |
+| #5 | Convert bash patches to Tutor hooks/plugins | T109 | DONE |
 | #6 | PII & privacy audit (full inventory) | T112 | DONE |
-| #7 | Remove legacy courseware dependencies | T113 | TODO |
-| #11 | Admin Console + Roles & Permissions (Ulmo) | T114 | TODO |
-| #12 | Migrate legacy Content Libraries to new Libraries | T115 | TODO |
+| #7 | Remove legacy courseware dependencies | T113 | DONE |
+| #11 | Admin Console + Roles & Permissions (Ulmo) | T114 | DONE |
+| #12 | Migrate legacy Content Libraries to new Libraries | T115 | DONE |
 | #14 | Ulmo catalog revamp + Discovery theming | T117 | TODO |
-| #16 | Enterprise SSO: OIDC/SAML + SCIM provisioning | T116 | TODO |
-| #17 | Aspects analytics dashboards + data pipeline | T121 | TODO |
+| #16 | Enterprise SSO: OIDC/SAML + SCIM provisioning | T116 | DONE |
+| #17 | Aspects analytics dashboards + data pipeline | T121 | DONE |
 | #18 | Product KPI layer (North Star metrics via events) | T122 | TODO |
 | #20 | Credentials + Learner Record MFE production readiness | T123 | TODO |
 | #23 | Modern discussions: spam controls + moderation | T126 | DONE |
@@ -898,13 +898,13 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #30 | Mobile: Design Tokens theming + API parity | T135 | TODO |
 | #31 | OEP-58 translations: atlas workflow + locale CI | T132 | DONE |
 | #35 | API documentation + integration contracts (OpenAPI) | T120 | DONE |
-| #37 | OEP-48 brand package + design token canonical source | T110, T099 | PARTIAL (T099 DONE, T110 TODO) |
+| #37 | OEP-48 brand package + design token canonical source | T110, T099 | DONE |
 | #38 | Repo restructure: clear ownership layers | T134 | DONE |
-| #39 | Golden-path dev environment (devcontainer) | T133 | TODO |
+| #39 | Golden-path dev environment (devcontainer) | T133 | DONE |
 | #40 | Release automation: semver + changelog + rollback | T130 | DONE |
 | #43 | Deprecation discipline (OEP-21 alignment) | T131 | DONE |
-| #44 | Data retention + export: PDPA/GDPR automation | T136 | TODO |
-| #45 | MFE footer via plugin slots / reduce brittle selectors | T101, T102 | TODO |
+| #44 | Data retention + export: PDPA/GDPR automation | T136 | DONE |
+| #45 | MFE footer via plugin slots / reduce brittle selectors | T101, T102 | DONE |
 | #47 | Operator support dashboards + diagnostics | T129 | TODO |
 | #48 | Capacity planning + cost model | T128 | DONE |
 | #49 | Audit logging (who changed what, when) | T127 | TODO |

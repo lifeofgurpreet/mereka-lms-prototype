@@ -143,6 +143,14 @@ jobs:
           print(f'OK: {len(colors)} key token values verified in theme files')
           "
 
+      - name: Validate token consumers reference canonical values
+        run: |
+          ./scripts/branding/validate-token-consumers.sh
+
+      - name: Verify design tokens migration completeness
+        run: |
+          ./scripts/qa/verify-design-tokens-migration.sh
+
   branding-preflight:
     name: Branding Preflight (Source)
     runs-on: ubuntu-24.04

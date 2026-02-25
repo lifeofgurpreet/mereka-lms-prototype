@@ -1,0 +1,71 @@
+{
+  "name": "Mereka LMS Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "latest",
+      "minikube": "none"
+    }
+  },
+  "containerEnv": {
+    "TUTOR_ROOT": "${containerWorkspaceFolder}/tutor_env"
+  },
+  "mounts": [
+    "source=mereka-lms-tutor-env,target=${containerWorkspaceFolder}/tutor_env,type=volume"
+  ],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [80, 443, 8000, 8001, 8002],
+  "portsAttributes": {
+    "80": {
+      "label": "LMS",
+      "onAutoForward": "notify"
+    },
+    "443": {
+      "label": "LMS HTTPS",
+      "onAutoForward": "ignore"
+    },
+    "8000": {
+      "label": "LMS (direct)",
+      "onAutoForward": "silent"
+    },
+    "8001": {
+      "label": "Studio (direct)",
+      "onAutoForward": "silent"
+    },
+    "8002": {
+      "label": "MFE (direct)",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "redhat.vscode-yaml",
+        "timonwong.shellcheck",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "editor.formatOnSave": true,
+        "yaml.schemas": {
+          "https://json.schemastore.org/kustomization": "**/kustomization.yaml"
+        },
+        "shellcheck.executablePath": "/usr/bin/shellcheck"
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}
