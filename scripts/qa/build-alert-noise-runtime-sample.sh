@@ -14,6 +14,7 @@ PROMETHEUS_CONTAINER="${ALERT_NOISE_PROMETHEUS_CONTAINER:-prometheus}"
 PROMETHEUS_URL_PATH="${ALERT_NOISE_PROMETHEUS_URL_PATH:-/api/v1/alerts}"
 PROMETHEUS_PORT="${ALERT_NOISE_PROMETHEUS_PORT:-9090}"
 PROMETHEUS_TIMEOUT="${ALERT_NOISE_PROMETHEUS_TIMEOUT:-15}"
+BASELINE_CONFIG="${ALERT_NOISE_BASELINE_CONFIG:-infrastructure/monitoring/alert-noise-baseline.json}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 
 FP_LABEL_KEY="${ALERT_NOISE_FP_LABEL_KEY:-alert_noise_classification}"
@@ -34,6 +35,9 @@ Environment:
   ALERT_NOISE_PROMETHEUS_CONTAINER     Prometheus container name (default: prometheus)
   ALERT_NOISE_PROMETHEUS_URL_PATH      Prometheus endpoint path (default: /api/v1/alerts)
   ALERT_NOISE_PROMETHEUS_PORT          Prometheus container port (default: 9090)
+  ALERT_NOISE_BASELINE_CONFIG          Baseline config path (default: infrastructure/monitoring/alert-noise-baseline.json)
+  ALERT_NOISE_DUP_WINDOW_MINUTES       Fingerprint duplicate window in minutes
+  ALERT_NOISE_MIN_DUP_GROUP_SIZE       Minimum duplicate group size for fingerprint windows
   ALERT_NOISE_FP_LABEL_KEY             Label key marking false-positive alerts
   ALERT_NOISE_FP_LABEL_VALUE           Label value marking false-positive alerts
   ALERT_NOISE_FP_ANNOTATION_KEY        Annotation key marking false-positive alerts
@@ -72,8 +76,14 @@ emit_fallback_sample() {
       "false_positive": 0
     }
   },
+  "duplicate_windows": [],
+  "duplicate_detection": {
+    "window_minutes": ${DUPLICATE_WINDOW_MINUTES},
+    "min_dup_group_size": ${MIN_DUP_GROUP_SIZE}
+  },
   "source": {
     "type": "fallback",
+    "baseline_config": "${BASELINE_CONFIG}",
     "note": "Unable to build live sample in current runtime context"
   }
 }
@@ -108,10 +118,39 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
   esac
+
 done
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required for alert noise sample build." >&2
+  exit 1
+fi
+
+if ! [[ -f "$BASELINE_CONFIG" ]]; then
+  echo "Baseline config missing: $BASELINE_CONFIG" >&2
+  exit 1
+fi
+
+DEFAULT_DUP_WINDOW_MINUTES="$(jq -r '.thresholds.duplicate_detection.fingerprint_window_minutes // 5' "$BASELINE_CONFIG")"
+DEFAULT_MIN_DUP_GROUP_SIZE="$(jq -r '.thresholds.duplicate_detection.min_dup_group_size // 2' "$BASELINE_CONFIG")"
+
+if [[ -z "$DEFAULT_DUP_WINDOW_MINUTES" || "$DEFAULT_DUP_WINDOW_MINUTES" == "null" ]]; then
+  DEFAULT_DUP_WINDOW_MINUTES="5"
+fi
+if [[ -z "$DEFAULT_MIN_DUP_GROUP_SIZE" || "$DEFAULT_MIN_DUP_GROUP_SIZE" == "null" ]]; then
+  DEFAULT_MIN_DUP_GROUP_SIZE="2"
+fi
+
+DUPLICATE_WINDOW_MINUTES="${ALERT_NOISE_DUP_WINDOW_MINUTES:-$DEFAULT_DUP_WINDOW_MINUTES}"
+MIN_DUP_GROUP_SIZE="${ALERT_NOISE_MIN_DUP_GROUP_SIZE:-$DEFAULT_MIN_DUP_GROUP_SIZE}"
+
+if ! [[ "$DUPLICATE_WINDOW_MINUTES" =~ ^[0-9]+$ ]] || [[ "$DUPLICATE_WINDOW_MINUTES" -le 0 ]]; then
+  echo "Invalid ALERT_NOISE_DUP_WINDOW_MINUTES: $DUPLICATE_WINDOW_MINUTES" >&2
+  exit 1
+fi
+
+if ! [[ "$MIN_DUP_GROUP_SIZE" =~ ^[0-9]+$ ]] || [[ "$MIN_DUP_GROUP_SIZE" -lt 2 ]]; then
+  echo "Invalid ALERT_NOISE_MIN_DUP_GROUP_SIZE: $MIN_DUP_GROUP_SIZE" >&2
   exit 1
 fi
 
@@ -160,11 +199,16 @@ fi
 
 mkdir -p "$(dirname "$OUT_FILE")"
 
-python3 - "$OUT_FILE" "$FP_LABEL_KEY" "$FP_LABEL_VAL" "$FP_ANNOTATION_KEY" "$FP_ANNOTATION_VAL" <<'PY'
+export ALERT_NOISE_DUP_WINDOW_MINUTES="$DUPLICATE_WINDOW_MINUTES"
+export ALERT_NOISE_MIN_DUP_GROUP_SIZE="$MIN_DUP_GROUP_SIZE"
+export ALERT_NOISE_BASELINE_CONFIG="$BASELINE_CONFIG"
+
+python3 - "$OUT_FILE" "$FP_LABEL_KEY" "$FP_LABEL_VAL" "$FP_ANNOTATION_KEY" "$FP_ANNOTATION_VAL" <<PY
 import json
+import os
 import sys
-from collections import defaultdict
-from datetime import datetime
+from collections import defaultdict, deque
+from datetime import datetime, timezone
 
 out_file = sys.argv[1]
 fp_label_key = sys.argv[2]
@@ -181,10 +225,25 @@ severity_buckets = {
     "warning": {"total": 0, "duplicate": 0, "false_positive": 0},
 }
 
-fingerprint_seen = defaultdict(int)
+window_minutes = int(os.environ.get("ALERT_NOISE_DUP_WINDOW_MINUTES", "5"))
+min_group_size = max(2, int(os.environ.get("ALERT_NOISE_MIN_DUP_GROUP_SIZE", "2")))
+window_seconds = window_minutes * 60
+
+fingerprint_windows = defaultdict(list)
 total_alerts = 0
 duplicate_alerts = 0
 false_positive_alerts = 0
+
+
+def parse_timestamp(value):
+    if not value:
+        return None
+    if value.endswith("Z"):
+        value = value[:-1] + "+00:00"
+    try:
+        return datetime.fromisoformat(value).astimezone(timezone.utc)
+    except Exception:
+        return None
 
 for alert in alerts:
     total_alerts += 1
@@ -202,10 +261,11 @@ for alert in alerts:
         label_items = sorted(labels.items())
         fingerprint = "|".join([f"{k}={v}" for k, v in label_items])
 
-    if fingerprint_seen[fingerprint] > 0:
-        duplicate_alerts += 1
-        severity_buckets[severity]["duplicate"] += 1
-    fingerprint_seen[fingerprint] += 1
+    started_at = parse_timestamp(alert.get("startsAt"))
+    if not started_at:
+        continue
+    event_time = int(started_at.timestamp())
+    fingerprint_windows[(fingerprint, severity)].append(event_time)
 
     is_fp = (
         str(labels.get(fp_label_key, "")).strip().lower() == fp_label_val.strip().lower()
@@ -215,6 +275,35 @@ for alert in alerts:
         false_positive_alerts += 1
         severity_buckets[severity]["false_positive"] += 1
 
+duplicate_windows = []
+for key in sorted(fingerprint_windows.keys()):
+    times = sorted(fingerprint_windows[key])
+    severity = key[1]
+    active_window = deque()
+    group_duplicates = 0
+    max_window_coverage = 0
+
+    for event_ts in times:
+        while active_window and event_ts - active_window[0] > window_seconds:
+            active_window.popleft()
+        active_window.append(event_ts)
+        if len(active_window) >= min_group_size:
+            dup_count = len(active_window) - 1
+            duplicate_alerts += dup_count
+            severity_buckets[severity]["duplicate"] += dup_count
+            group_duplicates += dup_count
+            max_window_coverage = max(max_window_coverage, len(active_window))
+
+    if group_duplicates > 0:
+        duplicate_windows.append({
+            "fingerprint": key[0],
+            "severity": severity,
+            "dup_events_in_window": group_duplicates,
+            "max_window_coverage": max_window_coverage,
+            "window_minutes": window_minutes,
+            "min_dup_group_size": min_group_size
+        })
+
 output = {
     "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
     "generated_by": "build-alert-noise-runtime-sample.sh",
@@ -222,16 +311,23 @@ output = {
     "duplicate_alerts": duplicate_alerts,
     "false_positive_alerts": false_positive_alerts,
     "severity_buckets": severity_buckets,
+    "duplicate_windows": duplicate_windows,
+    "duplicate_detection": {
+        "window_minutes": window_minutes,
+        "min_dup_group_size": min_group_size
+    },
     "source": {
         "type": "prometheus_api",
         "alert_count": len(alerts),
         "lookback_days": 0,
+        "baseline_config": os.environ.get("ALERT_NOISE_BASELINE_CONFIG", ""),
     },
 }
 
 with open(out_file, "w", encoding="utf-8") as fp:
-    fp.write(json.dumps(output, indent=2) + "\n")
+    fp.write(json.dumps(output, indent=2) + "\\n")
 PY
+
 
 echo "OK   wrote alert-noise runtime sample -> $OUT_FILE"
 echo "  generated: $(cat "$OUT_FILE")"

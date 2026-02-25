@@ -1,10 +1,19 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "lookback_days": 7,
   "minimum_sample_size": 20,
+  "required_severities": [
+    "critical",
+    "error",
+    "warning"
+  ],
   "thresholds": {
     "duplicate_alert_ratio_max": 0.15,
     "false_positive_ratio_max": 0.1,
+    "duplicate_detection": {
+      "fingerprint_window_minutes": 5,
+      "min_dup_group_size": 2
+    },
     "severity": {
       "critical": {
         "duplicate_alert_ratio_max": 0.05,

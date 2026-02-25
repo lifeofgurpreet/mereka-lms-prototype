@@ -99,7 +99,10 @@ fi
 jq -e '
   (.total_alerts | numbers and . >= 0) and
   (.duplicate_alerts | numbers and . >= 0) and
-  (.false_positive_alerts | numbers and . >= 0)
+  (.false_positive_alerts | numbers and . >= 0) and
+  (.duplicate_detection.window_minutes | numbers and . > 0) and
+  (.duplicate_detection.min_dup_group_size | numbers and . >= 2) and
+  (.duplicate_windows | type == "array")
 ' "$RUNTIME_SOURCE" >/dev/null
 
 required_severities=(
@@ -114,10 +117,18 @@ fi
 sample_total="$(jq -r '.total_alerts' "$RUNTIME_SOURCE")"
 sample_dup="$(jq -r '.duplicate_alerts' "$RUNTIME_SOURCE")"
 sample_fp="$(jq -r '.false_positive_alerts' "$RUNTIME_SOURCE")"
+sample_window="$(jq -r '.duplicate_detection.window_minutes // 0' "$RUNTIME_SOURCE")"
+sample_min_dup_group="$(jq -r '.duplicate_detection.min_dup_group_size // 0' "$RUNTIME_SOURCE")"
 
 min_n="$(jq -r '.minimum_sample_size' "$CONFIG_PATH")"
 dup_max="$(jq -r '.thresholds.duplicate_alert_ratio_max' "$CONFIG_PATH")"
 fp_max="$(jq -r '.thresholds.false_positive_ratio_max' "$CONFIG_PATH")"
+cfg_window="$(jq -r '.thresholds.duplicate_detection.fingerprint_window_minutes // 5' "$CONFIG_PATH")"
+cfg_min_dup_group="$(jq -r '.thresholds.duplicate_detection.min_dup_group_size // 2' "$CONFIG_PATH")"
+
+if [[ "$sample_window" != "$cfg_window" ]] || [[ "$sample_min_dup_group" != "$cfg_min_dup_group" ]]; then
+  echo "WARN runtime sample duplicate detection config mismatch: sample window=${sample_window},group=${sample_min_dup_group}; config window=${cfg_window},group=${cfg_min_dup_group}"
+fi
 
 if [[ "$sample_total" -lt "$min_n" ]]; then
   if [[ "$STRICT_RUNTIME" == "1" ]]; then
