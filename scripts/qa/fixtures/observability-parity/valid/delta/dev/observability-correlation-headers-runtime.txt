@@ -1,3 +1,7 @@
+- Correlation header propagation evidence
+- evidence_identity: env=dev;profile=nonprod;context=fixture-dev;project=fixture-project
+- generated_at: 1999-12-31T23:59:59Z
+- caddyfile: deploy/k8s/base/apps/caddy/Caddyfile
 Correlation header propagation checks: PASS
 - X-Request-ID: present
 - traceparent: present

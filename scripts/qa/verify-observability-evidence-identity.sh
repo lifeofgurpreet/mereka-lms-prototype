@@ -105,6 +105,18 @@ check_runtime_bundle() {
   fi
 
   if [[ -f "$correlation_txt" ]]; then
+    local correlation_identity
+    correlation_identity="$(extract_md_identity "$correlation_txt")"
+    if [[ -z "$correlation_identity" ]]; then
+      echo "FAIL runtime: correlation evidence identity missing in $correlation_txt"
+      failures=$((failures + 1))
+    elif [[ "$index_identity" != "$correlation_identity" ]]; then
+      echo "FAIL runtime: correlation identity mismatch"
+      echo "  index:      $index_identity"
+      echo "  correlation: $correlation_identity"
+      failures=$((failures + 1))
+    fi
+
     if ! has_observability_status_line "$correlation_txt"; then
       echo "FAIL runtime: correlation evidence missing PASS/FAIL/WARN status lines in $correlation_txt"
       failures=$((failures + 1))
