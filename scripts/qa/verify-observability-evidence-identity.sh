@@ -8,6 +8,7 @@
 set -euo pipefail
 
 DIR=""
+STATUS_LINE_REGEX='(^|[^A-Za-z])(PASS|FAIL|WARN)([^A-Za-z]|$)'
 
 usage() {
   cat <<'EOF'
@@ -103,7 +104,7 @@ check_runtime_bundle() {
   fi
 
   if [[ -f "$correlation_txt" ]]; then
-    if ! grep -Eq 'PASS|FAIL|WARN' "$correlation_txt"; then
+    if ! grep -Eq "$STATUS_LINE_REGEX" "$correlation_txt"; then
       echo "FAIL runtime: correlation evidence missing PASS/FAIL/WARN status lines in $correlation_txt"
       failures=$((failures + 1))
     fi

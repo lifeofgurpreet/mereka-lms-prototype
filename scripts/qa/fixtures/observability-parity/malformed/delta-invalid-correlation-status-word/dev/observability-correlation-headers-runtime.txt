@@ -1,0 +1,3 @@
+Correlation header propagation check executed.
+- FAILED: X-Request-ID not present
+Trace status=FAILED during header propagation.
