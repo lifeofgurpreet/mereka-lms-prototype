@@ -23,7 +23,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-005 | P0 | Parity | Enforce 3 consecutive no-skip/no-fail rollups and close PAR-001/PAR-002 | OBS-001, OBS-002 | readiness report update | three scheduled rollups pass and gaps marked closed | done |
 | OBS-006 | P0 | Coverage | Audit missing ServiceMonitor coverage vs required services in each env | OBS-005 | env gap report | report lists missing/extra monitors with owners and dates | done |
 | OBS-007 | P0 | Coverage | Add missing ServiceMonitors for uncovered critical workloads | OBS-006 | k8s manifests | runtime gate passes monitor presence for all critical services | done |
-| OBS-008 | P0 | Coverage | Add scrape label consistency checks to validation scripts | OBS-007 | script rule updates | validation fails if required labels/selectors drift | planned |
+| OBS-008 | P0 | Coverage | Add scrape label consistency checks to validation scripts | OBS-007 | script rule updates | validation fails if required labels/selectors drift | in_progress |
 | OBS-009 | P1 | Coverage | Add monitor endpoint latency/error budget panels for all critical services | OBS-007 | dashboard contract update | dashboard audit passes with new required panels | planned |
 | OBS-010 | P1 | Coverage | Add per-service metrics cardinality watchlist | OBS-007 | monitoring doc + alert rule | cardinality drift alert is present and tested | planned |
 | OBS-011 | P0 | Alert quality | Wire runtime data feed for `ALERT_NOISE_RUNTIME_SOURCE` in CI | OBS-004 | workflow/env secret wiring | alert-noise runtime audit runs in strict mode in CI | done |
