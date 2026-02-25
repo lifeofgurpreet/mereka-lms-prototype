@@ -161,19 +161,19 @@ else
   do_fail "Drift terminology missing"
 fi
 
-# 7. Specific drift pairs documented
+# 7. Unified color values documented (drift resolved 2026-02-25)
 echo ""
-echo "--- Known drift pairs documented ---"
-if grep -q "#297F81\|#297f81" "$POLICY" && grep -q "#2d898b" "$POLICY"; then
-  do_pass "Teal Layer 2 vs Layer 3 drift documented"
+echo "--- Unified color values documented (drift resolved) ---"
+if grep -q "#237072\|#237072" "$POLICY"; then
+  do_pass "Teal unified value #237072 documented"
 else
-  do_fail "Teal drift not documented"
+  do_fail "Teal unified value #237072 not documented in policy"
 fi
 
-if grep -q "#737373" "$POLICY" && grep -q "#7B7B7B\|#7b7b7b" "$POLICY"; then
-  do_pass "ink-500 Layer 2 vs Layer 3 drift documented"
+if grep -q "#6B6B6B\|#6b6b6b" "$POLICY"; then
+  do_pass "ink-500 unified value #6B6B6B documented"
 else
-  do_fail "ink-500 drift not documented"
+  do_fail "ink-500 unified value #6B6B6B not documented in policy"
 fi
 
 # 8. Remediation plan section exists

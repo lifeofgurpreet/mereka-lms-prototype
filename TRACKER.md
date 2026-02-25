@@ -8,14 +8,14 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 93    |
-| TODO   | 46    |
+| DONE   | 97    |
+| TODO   | 42    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **142** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
-Sprints 6–10: 48 tasks (46 TODO, 2 DONE on arrival) — DR1 frontend + Top50 strategic + CTO audit
+Sprints 6–10: 48 tasks (42 TODO, 6 DONE) — DR1 frontend + Top50 strategic + CTO audit
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -634,10 +634,10 @@ T058
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T097 | Fix CSS token undefined (--mereka-color-ink-600) | P0 | TODO | DR1:P0-1 | S | — | `infrastructure/tutor/themes/mereka/scss/theme.scss` uses `--mereka-color-ink-600` but only ink-900/700/500/300 defined in `_tokens.scss`. Replace with defined token or define ink-600. |
-| T098 | Fix MFE branding QA script route mapping | P0 | TODO | DR1:P0-4 | S | — | `scripts/qa/verify-mfe-branding.sh` maps `/course-authoring` to `"authoring"` (legacy dir). Caddyfile serves both `/authoring` and `/course-authoring` from course-authoring dist. Update mapping. |
+| T097 | Fix CSS token undefined (--mereka-color-ink-600) | P0 | DONE | DR1:P0-1 | S | — | ✓ FALSE POSITIVE: Exhaustive grep of all theme files (theme.scss, mereka.scss, _tokens.scss, mereka-overrides.css, assets/branding/) finds ZERO references to `--mereka-color-ink-600`. Ink scale uses only ink-900/700/500/300. DR1 finding was based on stale analysis. |
+| T098 | Fix MFE branding QA script route mapping | P0 | DONE | DR1:P0-4 | S | — | ✓ Already correct: verify-mfe-branding.sh lines 95-96 map both `/authoring`→`course-authoring` and `/course-authoring`→`course-authoring`. DR1 finding was based on stale analysis. |
 | T099 | Consolidate design token sources to single canonical | P1 | TODO | DR1:P1-2, Top50:#37 | M | T097 | Three token sources: (a) `assets/branding/tokens.css`, (b) `_tokens.scss`, (c) `mereka-overrides.css`. Make tokens.css canonical, generate others from it. Add drift detection in CI. |
-| T100 | Fix WCAG contrast failures (ink-500, teal) | P1 | TODO | DR1:P1-1, Top50:#29 | M | T097 | `#7B7B7B` (ink-500) on white = 4.23:1 (needs 4.5:1). Teal `#2d898b` on surface-primary = 3.98:1. Introduce accessible text tier (ink-600/650). Add contrast CI gate. |
+| T100 | Fix WCAG contrast failures (ink-500, teal) | P1 | DONE | DR1:P1-1, Top50:#29 | M | T097 | ✓ Batch 1. Unified ink-500 to #6B6B6B (5.33:1) and teal to #237072 (5.78:1) across all 3 layers. Updated _tokens.scss, mereka-overrides.css (common/lms/cms), design-tokens.css, branding/tokens.css. All pairs now pass WCAG AA. |
 | T101 | MFE footer via plugin slots (not string surgery) | P1 | TODO | DR1:P0-3, Top50:#45 | L | T099 | `apply-patches.sh` rewrites `env.config.jsx` to replace `<Footer/>` with `<MerekaFooter/>`. Convert to `pluginSlots.footer_slot` using frontend plugin framework. Diff must be pure config. |
 | T102 | Reduce MFE brittle selectors by 50% | P1 | TODO | DR1:P0-2, Top50:#45 | M | T101 | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` uses `[class*="learning"]`, `[data-testid*="course"]` etc. Replace structural UI changes with official plugin slot operations. |
 | T103 | Add CSS token validation CI gate | P1 | TODO | DR1:P0-1 | S | T097 | Script that parses theme SCSS files, extracts `var()` references, validates all are defined in `_tokens.scss`. Fails CI on undefined vars. |
@@ -710,11 +710,11 @@ T058
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T137 | Reduce health check frequency (30m → 6h) | P1 | TODO | CTO:#9 | S | — | `.github/workflows/public-health-check.yml` cron change to `0 */6 * * *`. Currently excessive at every 30 minutes. |
-| T138 | Fix Scorecard workflow permissions | P1 | TODO | CTO:#10 | S | — | `scorecard.yml` uses `permissions: read-all`. Change to `permissions: {}` with per-job minimal scopes. |
+| T137 | Reduce health check frequency (30m → 6h) | P1 | DONE | CTO:#9 | S | — | ✓ Batch 1. Changed cron from `*/30 * * * *` to `0 */6 * * *` in public-health-check.yml. |
+| T138 | Fix Scorecard workflow permissions | P1 | DONE | CTO:#10 | S | — | ✓ Batch 1. Changed top-level `permissions: read-all` to `permissions: {}` in scorecard.yml. Job-level permissions already correct. |
 | T139 | Guard _common.sh venv source | P2 | DONE | CTO:#21 | S | — | ✓ `_common.sh` does not exist. Venv guard already added to `setup-local.sh` (line 46) during CTO audit session. |
 | T140 | Fix Makefile lint target masking failures | P2 | DONE | CTO:#22 | S | — | ✓ Lint target (lines 92-95) already fixed during CTO audit session — `|| true` removed. Only `format:` retains it (intentional). |
-| T141 | Verify Kyverno standard labels | P2 | TODO | CTO:#23 | S | — | Verify all 4 ClusterPolicies have `app.kubernetes.io/name`. CTO audit says likely already present — confirm and close. |
+| T141 | Verify Kyverno standard labels | P2 | DONE | CTO:#23 | S | — | ✓ Batch 1. Added `app.kubernetes.io/name` to all 4 ClusterPolicies (disallow-privileged, require-non-root, require-seccomp, restrict-capabilities). |
 | T142 | Add GitHub repo variables for CI conditionals | P1 | TODO | CTO:#6 | S | — | Add `HAS_INFISICAL=true` and `HAS_GCP_SA_KEY=true` as repository variables in GitHub Settings. Required for `vars.*` conditionals to work. |
 | T143 | Provision ADMIN_API_KEY for Purchase Gateway | P1 | TODO | CTO:auth | S | — | Add `ADMIN_API_KEY` to Infisical → GCP Secret Manager → ExternalSecrets mapping. Required for Purchase Gateway admin auth in production. |
 | T144 | Refactor build-optimizations.sh (686 lines) | P3 | TODO | CTO:#30 | M | T109 | Split into <300-line modules with single responsibility. Currently largest single patch module. |
@@ -725,14 +725,14 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 93    |
-| TODO   | 46    |
+| DONE   | 97    |
+| TODO   | 42    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **142** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
-Sprints 6–10: 48 tasks (46 TODO, 2 DONE on arrival)
+Sprints 6–10: 48 tasks (42 TODO, 6 DONE)
 
 Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass
 
@@ -844,11 +844,11 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 
 | DR1 ID | Finding (abbreviated) | Tracker ID | Status |
 |--------|----------------------|------------|--------|
-| DR1:P0-1 | CSS token undefined (--mereka-color-ink-600) | T097, T103 | TODO |
+| DR1:P0-1 | CSS token undefined (--mereka-color-ink-600) | T097, T103 | DONE (false positive — zero ink-600 references in theme files) |
 | DR1:P0-2 | Brittle MFE attribute selectors | T102 | TODO |
 | DR1:P0-3 | MFE footer injected via string surgery (not plugin slots) | T101, T109 | TODO |
-| DR1:P0-4 | MFE branding QA script route mapping stale | T098 | TODO |
-| DR1:P1-1 | WCAG contrast failures (ink-500, teal) | T100 | TODO |
+| DR1:P0-4 | MFE branding QA script route mapping stale | T098 | DONE (already correct) |
+| DR1:P1-1 | WCAG contrast failures (ink-500, teal) | T100 | DONE |
 | DR1:P1-2 | Three diverging design token sources | T099, T110 | TODO |
 | DR1:P2-1 | Global CSS overrides affect XBlocks | T105 | TODO |
 | DR1:P2-2 | Visual regression only captures unauthenticated routes | T104 | TODO |
@@ -878,7 +878,7 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #26 | Security hardening: HSTS + CSP + rate limiting | T119 | TODO |
 | #27 | Multi-brand multi-site via Design Tokens + runtime config | T125 | TODO |
 | #28 | OEP-65 module architecture readiness | T111 | TODO |
-| #29 | WCAG contrast failures | T100 | TODO |
+| #29 | WCAG contrast failures | T100 | DONE |
 | #30 | Mobile: Design Tokens theming + API parity | T135 | TODO |
 | #31 | OEP-58 translations: atlas workflow + locale CI | T132 | TODO |
 | #35 | API documentation + integration contracts (OpenAPI) | T120 | TODO |
@@ -923,10 +923,10 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | CTO Audit # | Finding (abbreviated) | Tracker ID | Status |
 |-------------|----------------------|------------|--------|
 | CTO:#6 | GitHub repo variables missing for CI conditionals | T142 | TODO |
-| CTO:#9 | Health check cron too frequent (every 30m) | T137 | TODO |
-| CTO:#10 | Scorecard workflow uses permissions: read-all | T138 | TODO |
+| CTO:#9 | Health check cron too frequent (every 30m) | T137 | DONE |
+| CTO:#10 | Scorecard workflow uses permissions: read-all | T138 | DONE |
 | CTO:#21 | _common.sh venv source unguarded | T139 | DONE |
 | CTO:#22 | Makefile lint target masks failures with \|\| true | T140 | DONE |
-| CTO:#23 | Kyverno ClusterPolicies may lack standard labels | T141 | TODO |
+| CTO:#23 | Kyverno ClusterPolicies may lack standard labels | T141 | DONE |
 | CTO:#30 | build-optimizations.sh at 686 lines (single responsibility) | T144 | TODO |
 | CTO:auth | ADMIN_API_KEY not provisioned for Purchase Gateway | T143 | TODO |

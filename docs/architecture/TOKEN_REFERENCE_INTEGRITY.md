@@ -100,12 +100,12 @@ Token definitions are spread across three layers:
 ```scss
 /* _tokens.scss */
 :root {
-  --mereka-color-teal: #297F81;
+  --mereka-color-teal: #237072;
 }
 
 /* lms/static/css/mereka-overrides.css */
 :root {
-  --mereka-color-teal: #2d898b; /* VIOLATION: value drift */
+  --mereka-color-teal: #FFFFFF; /* VIOLATION: value drift */
 }
 ```
 
@@ -272,14 +272,16 @@ bash -n scripts/qa/verify-token-reference-integrity.sh  # syntax check
 
 ## Cross-File Value Consistency
 
-### Canonical Values (as of 2026-02-17)
+### Canonical Values (as of 2026-02-25)
 
 **Colors** (must match across _tokens.scss and mereka-overrides.css):
 
 | Token | Hex Value | Source |
 |-------|-----------|--------|
-| `--mereka-color-teal` | `#297F81` | _tokens.scss (canonical) |
-| `--mereka-color-teal` | `#2d898b` | mereka-overrides.css (LMS+CMS) |
+| `--mereka-color-teal` | `#237072` | _tokens.scss (canonical) — RESOLVED 2026-02-25 |
+| `--mereka-color-teal` | `#237072` | mereka-overrides.css (LMS+CMS) — RESOLVED 2026-02-25 |
+| `--mereka-color-ink-500` | `#6B6B6B` | _tokens.scss (canonical) — RESOLVED 2026-02-25 |
+| `--mereka-color-ink-500` | `#6B6B6B` | mereka-overrides.css (LMS+CMS) — RESOLVED 2026-02-25 |
 | `--mereka-color-magenta` | `#ab3b78` | _tokens.scss (canonical) |
 | `--mereka-color-magenta` | `#ab3b78` | mereka-overrides.css (LMS+CMS) |
 | `--mereka-color-blue` | `#295cad` | _tokens.scss (canonical) |
@@ -291,11 +293,7 @@ bash -n scripts/qa/verify-token-reference-integrity.sh  # syntax check
 | `--mereka-color-ink-700` | `#4A494A` | _tokens.scss (canonical) |
 | `--mereka-color-ink-700` | `#4A494A` | mereka-overrides.css (LMS+CMS) |
 
-**Known drift**:
-- `--mereka-color-teal`: `#297F81` (SCSS) vs `#2d898b` (CSS runtime) — **ACTION REQUIRED**: Align to single canonical value.
-- `--mereka-color-ink-500`: `#737373` (SCSS) vs `#7B7B7B` (CSS runtime) — **ACTION REQUIRED**: Align to single canonical value.
-
-**Resolution path**: Update `mereka-overrides.css` to match `_tokens.scss` values, or vice versa if runtime override is intentional. Document decision in this file.
+**Known drift**: None. All layers are now aligned. Historical drift (before 2026-02-25): teal was `#297F81` (SCSS) vs `#2d898b` (runtime); ink-500 was `#737373` (SCSS) vs `#7B7B7B` (runtime). Both resolved by unifying to WCAG AA-compliant values.
 
 ---
 

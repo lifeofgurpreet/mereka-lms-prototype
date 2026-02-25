@@ -4,6 +4,7 @@ kind: ClusterPolicy
 metadata:
   name: disallow-privileged-mereka-lms
   labels:
+    app.kubernetes.io/name: disallow-privileged-mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: security
   annotations:

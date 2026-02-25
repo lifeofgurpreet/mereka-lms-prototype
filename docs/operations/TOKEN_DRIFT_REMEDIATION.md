@@ -50,7 +50,7 @@ The Mereka ink scale uses **four levels only**. ink-600 does **not** exist:
 |-------|-------|-----|
 | `--mereka-color-ink-900` | `#000000` | Primary text, headings |
 | `--mereka-color-ink-700` | `#4A494A` | Secondary text, nav links |
-| `--mereka-color-ink-500` | `#7B7B7B` | Tertiary text, captions, labels |
+| `--mereka-color-ink-500` | `#6B6B6B` | Tertiary text, captions, labels |
 | `--mereka-color-ink-300` | `#AFADB2` | Placeholder text, disabled state |
 
 **If you reach for `--mereka-color-ink-600`, use `--mereka-color-ink-700` instead.**
@@ -59,7 +59,7 @@ The Mereka ink scale uses **four levels only**. ink-600 does **not** exist:
 
 | Token | Value |
 |-------|-------|
-| `--mereka-color-teal` | `#2d898b` |
+| `--mereka-color-teal` | `#237072` |
 | `--mereka-color-magenta` | `#ab3b78` |
 | `--mereka-color-blue` | `#295cad` |
 | `--mereka-color-sky` | `#94d1e4` |

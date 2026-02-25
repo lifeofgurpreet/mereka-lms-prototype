@@ -196,7 +196,7 @@ fi
 # ---------------------------------------------------------------------------
 # AC-009: verify-token-drift.sh detects color value drift (structural check)
 #   We verify the script contains the required_pairs logic that would detect
-#   a mismatch like --color-teal=#2d898b vs --mereka-color-teal=#FFFFFF.
+#   a mismatch like --color-teal=#237072 vs --mereka-color-teal=#FFFFFF.
 #   We do NOT modify live files to test destructive drift.
 # ---------------------------------------------------------------------------
 if [[ ! -f "$DRIFT_SCRIPT" ]]; then

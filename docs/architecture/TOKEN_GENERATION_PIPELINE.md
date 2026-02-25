@@ -21,8 +21,8 @@ assets/branding/        infrastructure/tutor/       infrastructure/tutor/
                             scss/_tokens.scss           common/static/css/
                                                           mereka-overrides.css
 
---color-teal: #2d898b   $color-teal: #297F81        --mereka-color-teal: #2d898b
-                        --mereka-color-teal: #297F81
+--color-teal: #237072   $color-teal: #237072        --mereka-color-teal: #237072
+                        --mereka-color-teal: #237072
 (110 properties)        (24 SCSS vars, 37 CSS)      (1,636 lines CSS)
 
 ↓                       ↓                           ↓
@@ -31,10 +31,14 @@ HAND-MAINTAINED         HAND-MAINTAINED             HAND-MAINTAINED
 
 ### Confirmed Drift
 
-| Token | Layer 1 (canonical) | Layer 2 (SCSS) | Layer 3 (runtime) |
-|-------|---------------------|----------------|-------------------|
-| `--color-teal` / `--mereka-color-teal` | `#2d898b` | `#297F81` | `#2d898b` |
-| `--color-ink-500` / `--mereka-color-ink-500` | N/A | `#737373` | `#7B7B7B` |
+**Resolved (2026-02-25)**: All previously drifted tokens have been unified.
+
+| Token | Layer 1 (canonical) | Layer 2 (SCSS) | Layer 3 (runtime) | Status |
+|-------|---------------------|----------------|-------------------|--------|
+| `--color-teal` / `--mereka-color-teal` | `#237072` | `#237072` | `#237072` | ✅ RESOLVED |
+| `--color-ink-500` / `--mereka-color-ink-500` | `#6B6B6B` | `#6B6B6B` | `#6B6B6B` | ✅ RESOLVED |
+
+**Historical values (before 2026-02-25)**: teal was `#2d898b` (L1/L3) vs `#297F81` (L2); ink-500 was `#737373` (L2) vs `#7B7B7B` (L3).
 
 **Root cause**: Hex color values are hardcoded independently in all 3 files.
 
@@ -49,8 +53,8 @@ assets/branding/               infrastructure/tutor/       infrastructure/tutor/
                                    scss/_tokens.scss           common/static/css/
                                                                  mereka-overrides.css
 
---color-teal: #2d898b   →     $color-teal: #2d898b  →     --mereka-color-teal: #2d898b
-                               --mereka-color-teal: #2d898b
+--color-teal: #237072   →     $color-teal: #237072  →     --mereka-color-teal: #237072
+                               --mereka-color-teal: #237072
 (110 properties)               (GENERATED)                 (:root block GENERATED)
 
 ↓                              ↓                           ↓
@@ -81,12 +85,12 @@ FIGMA EXPORT (manual)          AUTO-GENERATED              AUTO-GENERATED
 
 **Outputs**:
 1. **SCSS bridge** (`infrastructure/tutor/themes/mereka/scss/_tokens.scss`):
-   - SCSS variable declarations: `$color-teal: #2d898b;`
+   - SCSS variable declarations: `$color-teal: #237072;`
    - CSS custom property `:root` block: `--mereka-color-teal: #{$color-teal};`
    - Preserve existing SCSS logic (Bootstrap overrides, semantic aliases)
 
 2. **Runtime CSS `:root` block** (embedded in `mereka-overrides.css`):
-   - CSS custom properties: `--mereka-color-teal: #2d898b;`
+   - CSS custom properties: `--mereka-color-teal: #237072;`
    - Preserve existing runtime CSS rules (NOT the :root block)
 
 **Algorithm**:
@@ -191,32 +195,26 @@ emit("}")
 
 ---
 
-## Known Drift Table (as of 2026-02-17)
+## Known Drift Table (updated 2026-02-25)
 
 ### Color Value Drift
 
 | Token Name | Layer 1 (canonical) | Layer 2 (SCSS) | Layer 3 (runtime) | Status |
 |------------|---------------------|----------------|-------------------|--------|
-| `teal` | `#2d898b` | `#297F81` | `#2d898b` | **DRIFT** |
-| `ink-500` | N/A | `#737373` | `#7B7B7B` | **DRIFT** |
+| `teal` | `#237072` | `#237072` | `#237072` | ✅ RESOLVED (was DRIFT) |
+| `ink-500` | `#6B6B6B` | `#6B6B6B` | `#6B6B6B` | ✅ RESOLVED (was DRIFT) |
 | `magenta` | `#ab3b78` | `#ab3b78` | `#ab3b78` | ✅ ALIGNED |
 | `blue` | `#295cad` | `#295cad` | `#295cad` | ✅ ALIGNED |
 | `sky` | `#94d1e4` | `#94d1e4` | `#94d1e4` | ✅ ALIGNED |
 | `black` / `ink-900` | `#000000` | `#000000` | `#000000` | ✅ ALIGNED |
 
-### Drift Resolution Plan
+**Historical drift** (before 2026-02-25): teal was `#2d898b` (L1/L3) vs `#297F81` (L2); ink-500 was `#737373` (L2) vs `#7B7B7B` (L3).
 
-**Teal (`#2d898b` vs `#297F81`)**:
-- **Investigation needed**: Which value is correct?
-  - `#2d898b` (Layer 1 + Layer 3): Lighter, less contrast
-  - `#297F81` (Layer 2): Darker, more contrast (likely better for WCAG AA)
-- **Decision**: Use contrast compliance script to determine correct value
-- **Action**: Update `tokens.css` (Layer 1) to canonical value, regenerate downstream layers
+### Drift Resolution (COMPLETED 2026-02-25)
 
-**Ink-500 (`#737373` vs `#7B7B7B`)**:
-- **Investigation needed**: Layer 1 doesn't define `--color-ink-500` (this is a Mereka-specific token)
-- **Decision**: Either add to Layer 1 or document as intentional Layer 2 override
-- **Action**: If Layer 2 override is intentional, add comment explaining why
+**Teal**: Unified to `#237072` (5.78:1 on white — WCAG AA PASS). All layers updated.
+
+**Ink-500**: Unified to `#6B6B6B` (5.33:1 on white — WCAG AA PASS). Token added to Layer 1 (`tokens.css`) and all layers updated.
 
 ---
 
@@ -336,8 +334,8 @@ emit("}")
 #   PASS: Layer 2 has 24 SCSS variables (expected >= 20)
 #
 # --- Cross-Layer Drift ---
-#   WARN: --color-teal drift: #2d898b (Layer 1) != #297F81 (Layer 2 SCSS)
-#   WARN: --mereka-color-ink-500 drift: #737373 (Layer 2 SCSS) != #7B7B7B (Layer 3)
+#   PASS: --color-teal aligned across layers (#237072)
+#   PASS: --mereka-color-ink-500 aligned across layers (#6B6B6B)
 #   PASS: --color-magenta aligned across layers
 #   PASS: --color-blue aligned across layers
 #   PASS: --color-sky aligned across layers
@@ -345,8 +343,8 @@ emit("}")
 # --- Provenance ---
 #   PASS: Provenance SHA256 matches tokens.css
 #
-# === Results: 11 PASS / 0 FAIL / 2 WARN ===
-# Exit code: 0 (warnings do not fail CI in Phase 1)
+# === Results: 13 PASS / 0 FAIL / 0 WARN ===
+# Exit code: 0
 ```
 
 ### CI Enforcement

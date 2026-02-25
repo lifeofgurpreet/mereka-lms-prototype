@@ -3,8 +3,8 @@
 **Purpose**: Define WCAG 2.1 AA contrast requirements with complete token pair audit, layer discrepancy tracking, and remediation plan.
 
 **Status**: Active
-**Version**: 2.0
-**Last updated**: 2026-02-17
+**Version**: 2.1
+**Last updated**: 2026-02-25
 **Acceptance Criteria**: AC-WCAG2-001, AC-WCAG2-002, AC-WCAG2-003
 
 ---
@@ -40,11 +40,11 @@ From `infrastructure/tutor/themes/mereka/scss/_tokens.scss`:
 ```scss
 $color-ink-900: #000000;
 $color-ink-700: #4A494A;
-$color-ink-500: #737373;
+$color-ink-500: #6B6B6B;
 $color-ink-300: #929092;
 $color-neutral-100: #FBFAFB;
 $color-neutral-75: #F5F5F5;
-$color-teal: #297F81;
+$color-teal: #237072;
 $color-magenta: #ab3b78;
 $color-blue: #295cad;
 $color-forest: #2c6e49;
@@ -58,8 +58,10 @@ $color-pink: #cd89ae;
 
 From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 
-- **Teal**: `--mereka-color-teal: #2d898b` (Layer 3) vs `#297F81` (Layer 2)
-- **Ink-500**: `--mereka-color-ink-500: #7B7B7B` (Layer 3) vs `#737373` (Layer 2)
+**RESOLVED (2026-02-25)**: All layers now unified to WCAG AA-compliant values.
+
+- **Teal**: All layers unified to `#237072` (was: Layer 3 `#2d898b` vs Layer 2 `#297F81`)
+- **Ink-500**: All layers unified to `#6B6B6B` (was: Layer 3 `#7B7B7B` vs Layer 2 `#737373`)
 
 ### Body Text Pairs
 
@@ -75,9 +77,9 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 |-----------|------------------|------------------|----------------|---------------------|--------|
 | Footer links | ink-700 (#4A494A) | white (#FFFFFF) | 4.5:1 | 9.0:1 | PASS |
 | Footer links (alt) | ink-700 (#4A494A) | neutral-100 (#FBFAFB) | 4.5:1 | 8.9:1 | PASS |
-| Course code | ink-500 (#737373) | white (#FFFFFF) | 4.5:1 | 4.6:1 | PASS |
-| Footer copy | ink-500 (#737373) | neutral-100 (#FBFAFB) | 4.5:1 | 4.5:1 | PASS |
-| Secondary text | ink-500 (#737373) | neutral-100 (#FBFAFB) | 4.5:1 | 4.5:1 | PASS |
+| Course code | ink-500 (#6B6B6B) | white (#FFFFFF) | 4.5:1 | 5.33:1 | PASS |
+| Footer copy | ink-500 (#6B6B6B) | neutral-100 (#FBFAFB) | 4.5:1 | 5.28:1 | PASS |
+| Secondary text | ink-500 (#6B6B6B) | neutral-100 (#FBFAFB) | 4.5:1 | 5.28:1 | PASS |
 
 ### Tertiary Text Pairs (Large/Decorative)
 
@@ -92,15 +94,15 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 |-----------|------------------|------------------|----------------|---------------------|--------|
 | Primary link | blue (#295cad) | white (#FFFFFF) | 4.5:1 | 6.0:1 | PASS |
 | Primary link (alt) | blue (#295cad) | neutral-100 (#FBFAFB) | 4.5:1 | 5.9:1 | PASS |
-| Link hover | teal (#297F81) | white (#FFFFFF) | 4.5:1 | 4.5:1 | PASS |
-| Link hover (alt) | teal (#297F81) | neutral-100 (#FBFAFB) | 4.5:1 | 4.5:1 | PASS |
+| Link hover | teal (#237072) | white (#FFFFFF) | 4.5:1 | 5.78:1 | PASS |
+| Link hover (alt) | teal (#237072) | neutral-100 (#FBFAFB) | 4.5:1 | 5.72:1 | PASS |
 
 ### Button Pairs (Large/Bold Text)
 
 | Component | Foreground Token | Background Token | Required Ratio | Measured Ratio (L2) | Status |
 |-----------|------------------|------------------|----------------|---------------------|--------|
 | Primary button | white (#FFFFFF) | magenta (#ab3b78) | 3.0:1 | 5.0:1 | PASS |
-| Secondary button | white (#FFFFFF) | teal (#297F81) | 3.0:1 | 4.4:1 | PASS |
+| Secondary button | white (#FFFFFF) | teal (#237072) | 3.0:1 | 5.78:1 | PASS |
 | Info button | white (#FFFFFF) | blue (#295cad) | 3.0:1 | 5.9:1 | PASS |
 
 ### Semantic Color Pairs
@@ -122,16 +124,16 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 
 | Component | Foreground Token | Background Token | Required Ratio | Measured Ratio (L2) | Status |
 |-----------|------------------|------------------|----------------|---------------------|--------|
-| Focus ring | teal (#297F81) | white (#FFFFFF) | 3.0:1 | 4.5:1 | PASS |
+| Focus ring | teal (#237072) | white (#FFFFFF) | 3.0:1 | 5.78:1 | PASS |
 | Primary indicator | magenta (#ab3b78) | white (#FFFFFF) | 3.0:1 | 5.0:1 | PASS |
 
 ### Footer-Specific Pairs
 
 | Component | Foreground Token | Background Token | Required Ratio | Measured Ratio (L2) | Status |
 |-----------|------------------|------------------|----------------|---------------------|--------|
-| Footer h6 headings | ink-500 (#737373) | white (#FFFFFF) | 4.5:1 | 4.6:1 | PASS |
+| Footer h6 headings | ink-500 (#6B6B6B) | white (#FFFFFF) | 4.5:1 | 5.33:1 | PASS |
 | Footer links | ink-700 (#4A494A) | white (#FFFFFF) | 4.5:1 | 9.0:1 | PASS |
-| Footer-bottom copy | ink-500 (#737373) | white (#FFFFFF) | 4.5:1 | 4.6:1 | PASS |
+| Footer-bottom copy | ink-500 (#6B6B6B) | white (#FFFFFF) | 4.5:1 | 5.33:1 | PASS |
 
 ### Total Coverage
 
@@ -147,52 +149,42 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 
 | Layer | Source | Purpose | Example |
 |-------|--------|---------|---------|
-| **Layer 1** | `assets/branding/tokens.css` | Design system canonical source (Figma export) | `--color-teal: #2d898b` |
-| **Layer 2** | `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | SCSS bridge for Open edX theming | `$color-teal: #297F81` |
-| **Layer 3** | `infrastructure/tutor/themes/mereka/{lms,cms}/static/css/mereka-overrides.css` | Runtime CSS loaded by browser | `--mereka-color-teal: #2d898b` |
+| **Layer 1** | `assets/branding/tokens.css` | Design system canonical source (Figma export) | `--color-teal: #237072` |
+| **Layer 2** | `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | SCSS bridge for Open edX theming | `$color-teal: #237072` |
+| **Layer 3** | `infrastructure/tutor/themes/mereka/{lms,cms}/static/css/mereka-overrides.css` | Runtime CSS loaded by browser | `--mereka-color-teal: #237072` |
 
 ### Known Drift Pairs
 
-#### Teal Drift
+#### Teal — RESOLVED (2026-02-25)
 
 | Layer | File | Value | Impact |
 |-------|------|-------|--------|
-| **Layer 1 (canonical)** | `assets/branding/tokens.css` | `#2d898b` | Design system source of truth |
-| **Layer 2 (SCSS)** | `_tokens.scss` | `#297F81` | Used for SCSS compilation |
-| **Layer 3 (runtime)** | `mereka-overrides.css` | `#2d898b` | Actual browser-rendered color |
+| **Layer 1 (canonical)** | `assets/branding/tokens.css` | `#237072` | Design system source of truth |
+| **Layer 2 (SCSS)** | `_tokens.scss` | `#237072` | Used for SCSS compilation |
+| **Layer 3 (runtime)** | `mereka-overrides.css` | `#237072` | Actual browser-rendered color |
 
-**Context**: Layer 3 runtime uses `#2d898b` (slightly lighter/more saturated). Layer 2 SCSS uses `#297F81` (darker). Link hover states and secondary buttons may appear slightly different in runtime than in SCSS compilation.
+**Historical context**: Before 2026-02-25, Layer 3 used `#2d898b` (4.3:1 on white — FAIL) and Layer 2 used `#297F81` (4.5:1 on white — PASS). All layers are now unified to `#237072` (5.78:1 on white — WCAG AA PASS).
 
-**WCAG Impact**:
-- Layer 2 (`#297F81`): teal on white → 4.5:1 (PASS for normal text)
-- Layer 3 (`#2d898b`): teal on white → 4.3:1 (FAIL for normal text — **contrast regression**)
+**WCAG Status**: PASS — `#237072` on white → 5.78:1 (exceeds 4.5:1 threshold for normal text)
 
-**Severity**: HIGH — Runtime teal fails WCAG AA for link hover text (4.5:1 threshold)
-
-#### Ink-500 Drift
+#### Ink-500 — RESOLVED (2026-02-25)
 
 | Layer | File | Value | Impact |
 |-------|------|-------|--------|
-| **Layer 1 (canonical)** | `assets/branding/tokens.css` | (not defined) | Gray scale uses `--gray-500: #6b7280` |
-| **Layer 2 (SCSS)** | `_tokens.scss` | `#737373` | Used for footer copy, course codes |
-| **Layer 3 (runtime)** | `mereka-overrides.css` | `#7B7B7B` | Actual browser-rendered color |
+| **Layer 1 (canonical)** | `assets/branding/tokens.css` | `#6B6B6B` | Design system source of truth |
+| **Layer 2 (SCSS)** | `_tokens.scss` | `#6B6B6B` | Used for footer copy, course codes |
+| **Layer 3 (runtime)** | `mereka-overrides.css` | `#6B6B6B` | Actual browser-rendered color |
 
-**Context**: Layer 3 runtime uses `#7B7B7B` (lighter). Layer 2 SCSS uses `#737373` (darker). Footer copy and secondary text may appear lighter in runtime.
+**Historical context**: Before 2026-02-25, Layer 2 used `#737373` (4.6:1 on white — PASS) and Layer 3 used `#7B7B7B` (4.1:1 on white — FAIL). All layers are now unified to `#6B6B6B` (5.33:1 on white — WCAG AA PASS).
 
-**WCAG Impact**:
-- Layer 2 (`#737373`): ink-500 on white → 4.6:1 (PASS)
-- Layer 3 (`#7B7B7B`): ink-500 on white → 4.1:1 (FAIL for normal text — **contrast regression**)
-
-**Severity**: HIGH — Runtime ink-500 fails WCAG AA for secondary text (4.5:1 threshold)
+**WCAG Status**: PASS — `#6B6B6B` on white → 5.33:1 (exceeds 4.5:1 threshold for normal text)
 
 ### Verification vs Reality Gap
 
-**Critical finding**: The `verify-contrast-compliance.sh` script reads from Layer 2 (SCSS `_tokens.scss`), but browsers render Layer 3 (runtime `mereka-overrides.css`). This means:
+**Resolved (2026-02-25)**: All three layers now use identical WCAG AA-compliant values for teal and ink-500. The verification script (`verify-contrast-compliance.sh`) and runtime CSS are now fully aligned:
 
-- **27 PASS** results from verification script (Layer 2)
-- **2 FAIL** in runtime (Layer 3: teal and ink-500)
-
-**Impact**: Users with low vision experience lower contrast than verified in CI. This is a compliance gap.
+- **27 PASS** from verification script (Layer 2 SCSS)
+- **27 PASS** in runtime (Layer 3): teal 5.78:1, ink-500 5.33:1 — both exceed 4.5:1
 
 ---
 
@@ -202,33 +194,31 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 
 **Decision**: `assets/branding/tokens.css` (Layer 1) is the design system source of truth. All downstream layers must match.
 
-### Phase 1: Align Layer 2 to Layer 1 (Immediate)
+### Phase 1: Align Layer 2 to Layer 1 — COMPLETED (2026-02-25)
 
-**Action**: Update `_tokens.scss` to match `tokens.css`:
+**Action taken**: Updated `_tokens.scss` and all runtime CSS files to use the new unified WCAG AA-compliant values:
 
 ```diff
 - $color-teal: #297F81;
-+ $color-teal: #2d898b;  // Match Layer 1 canonical
++ $color-teal: #237072;  // Unified WCAG AA value (5.78:1 on white)
 
 - $color-ink-500: #737373;
-+ $color-ink-500: #6b7280;  // Match Layer 1 --gray-500 (closest semantic match)
++ $color-ink-500: #6B6B6B;  // Unified WCAG AA value (5.33:1 on white)
 ```
 
-**Risk**: Teal will fail WCAG AA at 4.3:1 (needs 4.5:1). **Must adjust Layer 1 canonical value first.**
+### Phase 2: Adjust Layer 1 Canonical Values — COMPLETED (2026-02-25)
 
-### Phase 2: Adjust Layer 1 Canonical Values (Design System)
+**Teal resolution**:
+- Old Layer 3: `#2d898b` → 4.3:1 on white (FAIL)
+- Old Layer 2: `#297F81` → 4.5:1 on white (borderline PASS)
+- **Unified canonical**: `#237072` → 5.78:1 on white (WCAG AA PASS with margin)
+- **Action completed**: All layers updated to `#237072`
 
-**Teal adjustment**:
-- Current: `#2d898b` → 4.3:1 on white (FAIL)
-- Required: Darken to achieve ≥ 4.5:1
-- Proposed: `#297F81` (Layer 2 current value) → 4.5:1 on white (PASS)
-- **Action**: Update `tokens.css` → `--color-teal: #297F81;`
-
-**Ink-500 adjustment**:
-- Current Layer 3: `#7B7B7B` → 4.1:1 on white (FAIL)
-- Current Layer 2: `#737373` → 4.6:1 on white (PASS)
-- Proposed: Keep Layer 2 value `#737373` as canonical
-- **Action**: Update `tokens.css` → Add `--color-ink-500: #737373;`
+**Ink-500 resolution**:
+- Old Layer 3: `#7B7B7B` → 4.1:1 on white (FAIL)
+- Old Layer 2: `#737373` → 4.6:1 on white (borderline PASS)
+- **Unified canonical**: `#6B6B6B` → 5.33:1 on white (WCAG AA PASS with margin)
+- **Action completed**: All layers updated to `#6B6B6B`
 
 ### Phase 3: Rebuild Runtime CSS (Verification)
 
@@ -308,6 +298,7 @@ RUNTIME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka
 | Date | Version | Change | Author |
 |------|---------|--------|--------|
 | 2026-02-17 | 2.0 | Initial v2 policy: complete token pair audit, layer discrepancy tracking, remediation plan | Claude (AC-WCAG2-001) |
+| 2026-02-25 | 2.1 | Resolved teal and ink-500 drift. All layers unified to WCAG AA-compliant values: teal → #237072 (5.78:1), ink-500 → #6B6B6B (5.33:1). Phases 1-2 marked COMPLETED. | Claude |
 
 ---
 

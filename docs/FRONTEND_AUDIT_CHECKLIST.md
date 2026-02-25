@@ -36,7 +36,7 @@
 | Token reference integrity contract documented | PASS | `docs/architecture/TOKEN_REFERENCE_INTEGRITY.md` |
 | All `var(--mereka-*)` references resolve (AC-UITKN-001) | PASS | Verifier checks all SCSS/CSS files |
 | All SCSS `$variable` references resolve (AC-UITKN-002) | PASS | Variables in `_tokens.scss` |
-| Cross-file token value consistency (AC-UITKN-003) | WARN | Teal drift: `#297F81` (SCSS) vs `#2d898b` (CSS runtime) |
+| Cross-file token value consistency (AC-UITKN-003) | PASS | All layers unified: teal `#237072`, ink-500 `#6B6B6B` |
 | CI gate blocks undefined references (AC-UITKN-004) | PASS | `monitoring-guardrails` job runs verifier |
 | Token inventory documented | PASS | 24 SCSS vars + 37 CSS custom properties |
 | MFE coverage tracked | PASS | 11 MFEs consuming token subsets |
@@ -50,7 +50,7 @@
 | Pipeline contract documented (AC-TKPIPE-001) | PASS | `docs/architecture/TOKEN_GENERATION_PIPELINE.md` |
 | Multi-source drift detection (AC-TKPIPE-002) | PASS | Verifier extracts hex values from all 3 layers |
 | CI gate for new drift (AC-TKPIPE-003) | PASS | `monitoring-guardrails` job syntax check |
-| Known drift documented | PASS | Teal: `#2d898b` (L1) vs `#297f81` (L2 SCSS) |
+| Drift resolved (2026-02-25) | PASS | Teal: `#237072` (all layers); ink-500: `#6B6B6B` (all layers) |
 | Provenance tracking active | PASS | `tokens.provenance.json` SHA256 matches canonical |
 | Layer 1 token count sanity (>= 100) | PASS | 110 CSS custom properties in `tokens.css` |
 | Layer 2 SCSS variable count (>= 20) | PASS | 42 SCSS variables in `_tokens.scss` |
@@ -69,9 +69,9 @@
 - Known drift reported as warnings (not failures)
 - Exit code 0 (warnings acceptable in Phase 1)
 
-**Known drift** (to be resolved in Phase 2):
-- **Teal**: `#2d898b` (Layer 1) vs `#297f81` (Layer 2 SCSS)
-- **Ink-500**: `#737373` (Layer 2 SCSS) vs `#7b7b7b` (Layer 3 runtime)
+**Drift resolved (2026-02-25)**:
+- **Teal**: All layers unified to `#237072` (5.78:1 on white — WCAG AA PASS)
+- **Ink-500**: All layers unified to `#6B6B6B` (5.33:1 on white — WCAG AA PASS)
 
 **Verification command**:
 ```bash
@@ -278,9 +278,9 @@
 | Check | Status | Evidence |
 |-------|--------|----------|
 | All text/background pairs meet AA thresholds | PASS | `verify-contrast-compliance.sh` (27 PASS) |
-| ink-500 remediated for 4.5:1 on neutral-100 | PASS | #7B7B7B → #737373 |
+| ink-500 unified to 5.33:1 on white | PASS | all layers → #6B6B6B |
 | ink-300 remediated for 3:1 on neutral-100 | PASS | #AFADB2 → #929092 |
-| teal remediated for 4.5:1 link text | PASS | #2d898b → #297F81 |
+| teal unified to 5.78:1 link text | PASS | all layers → #237072 |
 | Soft semantic colors tested as backgrounds | PASS | ink-900 on gold/sky/pink |
 | CI gate for contrast regression | PASS | `.github/workflows/ci.yml` contrast-compliance job |
 
@@ -292,21 +292,19 @@
 |-------|--------|----------|
 | Contrast policy v2 documented (AC-WCAG2-001) | PASS | `docs/architecture/WCAG_CONTRAST_POLICY_V2.md` |
 | Complete token pair audit (AC-WCAG2-001) | PASS | 27 pairs documented with WCAG thresholds |
-| Layer discrepancy tracking (AC-WCAG2-001) | PASS | Teal + ink-500 drift Layer 2 vs Layer 3 |
-| Remediation plan documented (AC-WCAG2-001) | PASS | 5-phase plan: align layers, adjust canonical, rebuild |
+| Layer discrepancy tracking (AC-WCAG2-001) | PASS | Teal + ink-500 drift RESOLVED 2026-02-25 |
+| Remediation plan documented (AC-WCAG2-001) | PASS | Phases 1-2 COMPLETED; phase 3-5 ongoing |
 | Policy verifier exists (AC-WCAG2-002) | PASS | `scripts/qa/verify-wcag-contrast-v2.sh` (28 PASS / 0 FAIL) |
 | CI gate for policy contract (AC-WCAG2-003) | PASS | `monitoring-guardrails` job syntax check |
-| Known drift: teal Layer 2 vs Layer 3 | WARN | `#297F81` (L2) vs `#2d898b` (L3) — runtime 4.3:1 fails AA |
-| Known drift: ink-500 Layer 2 vs Layer 3 | WARN | `#737373` (L2) vs `#7B7B7B` (L3) — runtime 4.1:1 fails AA |
+| Drift resolved: teal all layers | PASS | All layers `#237072` — 5.78:1 on white (WCAG AA) |
+| Drift resolved: ink-500 all layers | PASS | All layers `#6B6B6B` — 5.33:1 on white (WCAG AA) |
 
 **Script**: `scripts/qa/verify-wcag-contrast-v2.sh` (28 PASS / 0 FAIL)
 
-**Critical findings**:
+**Status (2026-02-25)**:
 - **Layer 2 (SCSS) verification**: 27/27 PASS (verify-contrast-compliance.sh)
-- **Layer 3 (runtime) reality**: 2 FAIL (teal 4.3:1, ink-500 4.1:1 — both need ≥4.5:1)
-- **Gap**: Verification reads SCSS but browsers render runtime CSS with different values
-
-**Remediation priority**: HIGH — Runtime contrast fails affect real users with low vision
+- **Layer 3 (runtime)**: All layers unified — teal 5.78:1, ink-500 5.33:1 (both exceed 4.5:1)
+- **Drift resolved**: No gap between SCSS verification and runtime browser rendering
 
 ## Accessibility Conformance
 

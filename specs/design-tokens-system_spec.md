@@ -105,7 +105,7 @@ The token system MUST define tokens in the following categories:
 - The file MUST include a header comment with source URL (`https://www.figma.com/design/jBO2FrTslM4wocrRzwQaPo/mereka.io-Design-System`) and generation date.
 - The file MUST group tokens by category with section headers (`/* COLORS - Primary */`, etc.).
 - Token names MUST use kebab-case (`--color-teal`, not `--colorTeal` or `--color_teal`).
-- Color values MUST be lowercase hex codes (`#2d898b`, not `#2D898B`).
+- Color values MUST be lowercase hex codes (`#237072`, not `#237072` with uppercase letters).
 
 #### Provenance Tracking (AC-005 to AC-007)
 
@@ -205,7 +205,7 @@ The token system MUST define tokens in the following categories:
 ### Drift Detection
 
 - [ ] AC-008: Given `verify-token-drift.sh` is run, when `tokens.css` and `mereka-overrides.css` are in sync, then the script exits 0 with message "✓ Token drift + provenance checks passed."
-- [ ] AC-009: Given `tokens.css` defines `--color-teal: #2d898b` and `mereka-overrides.css` defines `--mereka-color-teal: #FFFFFF`, when `verify-token-drift.sh` is run, then the script exits non-zero with error "drift: --color-teal=#2d898b != --mereka-color-teal=#FFFFFF".
+- [ ] AC-009: Given `tokens.css` defines `--color-teal: #237072` and `mereka-overrides.css` defines `--mereka-color-teal: #FFFFFF`, when `verify-token-drift.sh` is run, then the script exits non-zero with error "drift: --color-teal=#237072 != --mereka-color-teal=#FFFFFF".
 - [ ] AC-010: Given `tokens.css` content is modified but `tokens.provenance.json["source_sha256"]` is stale, when `verify-token-drift.sh` is run, then the script exits non-zero with error "tokens.css sha256 drift: provenance=<old> actual=<new>".
 
 ### Token Sync Workflow
@@ -293,7 +293,7 @@ vim infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css
 
 ### Whitespace Normalization False Positive
 
-**Symptom**: `verify-token-drift.sh` reports drift for `--color-teal: #2d898b` vs `--mereka-color-teal: #2d898b` (visually identical).
+**Symptom**: `verify-token-drift.sh` reports drift for `--color-teal: #237072` vs `--mereka-color-teal: #237072` (visually identical).
 
 **Cause**: The verification script uses `re.sub(r"\s+", " ", value.strip())` to normalize whitespace, which should catch this. If it doesn't, there may be non-visible characters (tabs, zero-width spaces).
 
@@ -467,7 +467,7 @@ grep -i '#[0-9a-f]\{6\}' infrastructure/tutor/themes/mereka/common/static/css/me
 
 1. Should token sync be automated via CI/CD (e.g., GitHub Actions cron job that polls the upstream repo for changes)?
 2. Should we version tokens (e.g., `tokens-v2.css`) to support A/B testing of design changes?
-3. Should we generate TypeScript/JavaScript token exports for MFE usage (e.g., `tokens.ts` with `export const colorTeal = "#2d898b"`)?
+3. Should we generate TypeScript/JavaScript token exports for MFE usage (e.g., `tokens.ts` with `export const colorTeal = "#237072"`)?
 4. Should we add semantic token layers (e.g., `--semantic-primary` → `var(--color-teal)`) to decouple usage from implementation?
 5. Should we enforce WCAG contrast ratio verification in the drift script (requires color pair testing, not just individual token validation)?
 6. Should we extract provenance tracking to a separate JSON schema with validation?

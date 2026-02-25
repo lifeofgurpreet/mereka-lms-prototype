@@ -147,9 +147,9 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
-  description: 'Given `tokens.css` defines `--color-teal: #2d898b` and `mereka-overrides.css`
+  description: 'Given `tokens.css` defines `--color-teal: #237072` and `mereka-overrides.css`
     defines `--mereka-color-teal: #FFFFFF`, when `verify-token-drift.sh` is run, then
-    the script exits non-zero with error "drift: --color-teal=#2d898b != --mereka-color-teal=#FFFFFF".'
+    the script exits non-zero with error "drift: --color-teal=#237072 != --mereka-color-teal=#FFFFFF".'
   verify:
   - type: automated
     test_type: shell_verification

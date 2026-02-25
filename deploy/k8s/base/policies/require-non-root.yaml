@@ -4,6 +4,7 @@ kind: ClusterPolicy
 metadata:
   name: require-non-root-mereka-lms
   labels:
+    app.kubernetes.io/name: require-non-root-mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: security
   annotations:

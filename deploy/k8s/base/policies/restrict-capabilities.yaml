@@ -4,6 +4,7 @@ kind: ClusterPolicy
 metadata:
   name: restrict-capabilities-mereka-lms
   labels:
+    app.kubernetes.io/name: restrict-capabilities-mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: security
   annotations:

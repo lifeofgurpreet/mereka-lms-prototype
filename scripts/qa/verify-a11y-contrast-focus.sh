@@ -182,9 +182,9 @@ else
   check_pair "danger text (burgundy on surface)"      "$COLOR_BURGUNDY" "$SURFACE" 4.5 "normal text"
 
   # ── mereka-badge: teal text on teal/12 background
-  # Effective background is ~rgba(45,137,139,0.12) blended onto white (#fbfafb).
-  # We approximate the blend: badge_bg ≈ mix(#2d898b, #fbfafb, 12%) = #eef5f5
-  BADGE_BG_APPROX="#eef5f5"
+  # Effective background is ~rgba(35,112,114,0.12) blended onto white (#fbfafb).
+  # We approximate the blend: badge_bg ≈ mix(#237072, #fbfafb, 12%) = #eef4f5
+  BADGE_BG_APPROX="#eef4f5"
   if [[ -n "$COLOR_TEAL" ]]; then
     RATIO_BADGE=$(compute_contrast "$COLOR_TEAL" "$BADGE_BG_APPROX")
     PASSES_BADGE=$(python3 -c "print('yes' if float('$RATIO_BADGE') >= 3.0 else 'no')" 2>/dev/null || echo "no")
