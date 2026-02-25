@@ -1,0 +1,197 @@
+name: Observability Parity Runtime
+
+on:
+  schedule:
+    - cron: '15 3 * * *'
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Environment target (dev|nonprod|prod|all)"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - dev
+          - nonprod
+          - prod
+          - all
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-parity:
+    name: Runtime parity (${{ matrix.env_label }})
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.target_environment == 'all' || github.event.inputs.target_environment == matrix.env_label }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        env_label: [dev, nonprod, prod]
+    env:
+      OBS_PARITY_DEV_K8S_CONTEXT: ${{ vars.OBS_PARITY_DEV_K8S_CONTEXT }}
+      OBS_PARITY_NONPROD_K8S_CONTEXT: ${{ vars.OBS_PARITY_NONPROD_K8S_CONTEXT }}
+      OBS_PARITY_PROD_K8S_CONTEXT: ${{ vars.OBS_PARITY_PROD_K8S_CONTEXT }}
+      OBS_PARITY_DEV_GCP_PROJECT: ${{ vars.OBS_PARITY_DEV_GCP_PROJECT }}
+      OBS_PARITY_NONPROD_GCP_PROJECT: ${{ vars.OBS_PARITY_NONPROD_GCP_PROJECT }}
+      OBS_PARITY_PROD_GCP_PROJECT: ${{ vars.OBS_PARITY_PROD_GCP_PROJECT }}
+      GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+      GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+      GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+      OBS_PARITY_REQUIRED_STREAK: "3"
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Resolve parity target config
+        run: |
+          case "${{ matrix.env_label }}" in
+            dev)
+              K8S_CONTEXT="${OBS_PARITY_DEV_K8S_CONTEXT:-}"
+              GCP_PROJECT_VALUE="${OBS_PARITY_DEV_GCP_PROJECT:-mereka-lms}"
+              PROFILE="nonprod"
+              ;;
+            nonprod)
+              K8S_CONTEXT="${OBS_PARITY_NONPROD_K8S_CONTEXT:-}"
+              GCP_PROJECT_VALUE="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+              PROFILE="nonprod"
+              ;;
+            prod)
+              K8S_CONTEXT="${OBS_PARITY_PROD_K8S_CONTEXT:-}"
+              GCP_PROJECT_VALUE="${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}"
+              PROFILE="prod"
+              ;;
+            *)
+              echo "Unsupported matrix env label: ${{ matrix.env_label }}" >&2
+              exit 1
+              ;;
+          esac
+
+          EVIDENCE_DIR="var/ci/parity-${{ matrix.env_label }}"
+          mkdir -p "$EVIDENCE_DIR"
+
+          echo "OBS_K8S_CONTEXT=$K8S_CONTEXT" >> "$GITHUB_ENV"
+          echo "OBS_GCP_PROJECT=$GCP_PROJECT_VALUE" >> "$GITHUB_ENV"
+          echo "OBS_PROFILE=$PROFILE" >> "$GITHUB_ENV"
+          echo "OBS_EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+
+          if [ -z "$K8S_CONTEXT" ]; then
+            echo "OBS_SKIP_REASON=Missing OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT variable" >> "$GITHUB_ENV"
+            echo "## Parity context missing" >&2
+            echo "Set OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT in repository variables to enable runtime parity for ${{ matrix.env_label }}." >&2
+            exit 1
+          fi
+
+          if [ -z "$GCP_PROJECT_VALUE" ]; then
+            echo "OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT is required when configured for explicit per-env override." >&2
+            echo "Set OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT in repository variables or update workflow defaults." >&2
+            exit 1
+          fi
+
+      - name: Enforce production parity context presence
+        if: ${{ false }}
+        run: |
+          echo "Production parity run cannot be skipped. Configure OBS_PARITY_PROD_K8S_CONTEXT." >&2
+          exit 1
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gcloud
+        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f
+        with:
+          project_id: ${{ env.OBS_GCP_PROJECT }}
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
+            --project "$OBS_GCP_PROJECT" \
+            --zone "$GKE_CLUSTER_LOCATION"
+
+      - name: Run runtime parity gate and build parity delta
+        run: |
+          OBSERVABILITY_ENV_LABEL="${{ matrix.env_label }}" \
+          OBSERVABILITY_DISPATCH_PROFILE="$OBS_PROFILE" \
+          OBSERVABILITY_K8S_CONTEXT="$OBS_K8S_CONTEXT" \
+          OBSERVABILITY_GCP_PROJECT="$OBS_GCP_PROJECT" \
+          OBSERVABILITY_EVIDENCE_DIR="$OBS_EVIDENCE_DIR" \
+          ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+          ./scripts/qa/build-observability-parity-delta.sh \
+            --env "${{ matrix.env_label }}" \
+            --evidence-dir "$OBS_EVIDENCE_DIR"
+
+      - name: Build weekly parity review template
+        if: always()
+        run: |
+          ./scripts/qa/build-observability-parity-review.sh \
+            --env "${{ matrix.env_label }}" \
+            --delta-json "$OBS_EVIDENCE_DIR/observability-parity-delta.json" \
+            --out-md "$OBS_EVIDENCE_DIR/observability-parity-review.md"
+
+      - name: Upload parity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-parity-${{ matrix.env_label }}
+          path: |
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-delta.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-delta.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-review.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-compliance-runtime.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-compliance-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.txt
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-first-class-runtime-evidence-index.json
+
+  parity-rollup:
+    name: Parity rollup summary
+    runs-on: ubuntu-24.04
+    needs: [runtime-parity]
+    env:
+      OBS_PARITY_REQUIRED_STREAK: "3"
+    if: always()
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Download parity artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: observability-parity-*
+          path: var/ci/parity-artifacts
+          merge-multiple: false
+
+      - name: Build parity rollup
+        run: |
+          ./scripts/qa/build-observability-parity-rollup.sh \
+            --artifacts-dir var/ci/parity-artifacts \
+            --out-md var/ci/observability-parity-rollup.md \
+            --out-json var/ci/observability-parity-rollup.json \
+            --require-no-skips
+          cat var/ci/observability-parity-rollup.md
+          {
+            echo "## Observability Parity Rollup"
+            echo ""
+            cat var/ci/observability-parity-rollup.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify parity rollout stability
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          ./scripts/qa/verify-parity-rollup-stability.sh \
+            --rollup-json var/ci/observability-parity-rollup.json \
+            --required-consecutive "${OBS_PARITY_REQUIRED_STREAK}" \
+            --workflow-file ".github/workflows/observability-parity-runtime.yml" \
+            --workflow-runs-lookback 20 \
+            --out-json var/ci/observability-parity-stability.json
+
+      - name: Upload parity rollup artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-parity-rollup
+          path: |
+            var/ci/observability-parity-rollup.md
+            var/ci/observability-parity-rollup.json
+            var/ci/observability-parity-stability.json
