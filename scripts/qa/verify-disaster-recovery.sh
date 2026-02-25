@@ -349,6 +349,7 @@ check_ac_009() {
     "audit-observability-runtime.json"
     "observability-compliance-runtime.json"
     "observability-first-class-runtime-evidence-index.json"
+    "observability-correlation-headers-runtime.txt"
   )
   local missing=0
 

@@ -166,6 +166,7 @@ check_dr_evidence_script() {
     "audit-observability-runtime.json"
     "observability-compliance-runtime.json"
     "observability-first-class-runtime-evidence-index.json"
+    "observability-correlation-headers-runtime.txt"
   )
   local missing=0
   for output in "${required_outputs[@]}"; do
