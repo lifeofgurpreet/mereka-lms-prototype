@@ -245,6 +245,7 @@ run_delta_case "invalid-missing-files" "dev" "$FIXTURES_ROOT/malformed/delta-mis
 run_delta_case "invalid-missing-correlation" "dev" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
 run_delta_case "invalid-correlation-status" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
 run_delta_case "invalid-correlation-status-substring" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status-word/dev" 1
+run_delta_case "invalid-correlation-empty" "dev" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-empty/dev" 1
 run_delta_case "invalid-identity-mismatch" "nonprod" "$FIXTURES_ROOT/malformed/delta-identity-mismatch/nonprod" 1
 
 run_review_case "valid" "dev" "$FIXTURES_ROOT/valid/review/dev/observability-parity-delta.json" 0
@@ -260,6 +261,7 @@ run_identity_case "valid-dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_identity_case "invalid-missing-correlation" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
 run_identity_case "invalid-correlation-status" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
 run_identity_case "invalid-correlation-status-substring" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status-word/dev" 1
+run_identity_case "invalid-correlation-empty" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-empty/dev" 1
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2
