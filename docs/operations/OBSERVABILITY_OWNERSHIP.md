@@ -63,3 +63,19 @@ This document defines who owns each observability layer and how changes are sync
 - Offline plan is generated and attached (CI artifact).
 - If change touches Velero coverage, run strict runtime audit and confirm freshness status for `backup-verification` and `restore-test`.
 - Docs updated (`MONITORING.md`, quickstart/runbooks as needed).
+
+## Alert Rule Ownership and Change Control
+
+- For any change to critical or high-severity alert rules, the owning service lead must acknowledge planned behavior in review before merge.
+- A release cannot close if a critical alert rule change lacks:
+  - owner name
+  - expected impact summary
+  - rollback condition
+  - validation command and evidence result
+- If multiple services share the same alert rule file, each affected service owner must add a comment with acceptance in the PR.
+- Use `docs/operations/OBSERVABILITY_OWNERSHIP.md` as the canonical owner source and keep owners aligned with `ALERT_TUNING_SOP.md` runtime priorities.
+
+Minimum approval evidence for each high-severity rule change:
+- PR comment with explicit owner consent in the change ticket/issue.
+- `./scripts/qa/verify-alert-routing.sh` result proving route still lands in the correct channel.
+- Update log in release evidence bundle and include in incident postmortem if the change causes detection behavior change.

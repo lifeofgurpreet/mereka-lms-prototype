@@ -57,15 +57,15 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-039 | P2 | Dashboards | Add env comparison dashboard (dev vs nonprod vs prod) | OBS-005 | new dashboard json | same KPI appears side-by-side across environments | planned |
 | OBS-040 | P2 | Dashboards | Add dashboard snapshot export automation for incidents | OBS-038 | export script/workflow | incident workflow can attach snapshot artifact automatically | planned |
 | OBS-041 | P0 | Governance | Add CI lint for non-canonical observability command drift in `docs/` (global) | OBS-005 | lint script/workflow | CI blocks non-canonical runtime command references | done |
-| OBS-042 | P1 | Governance | Add AC coverage map for observability scripts -> specs | OBS-041 | coverage map doc/json | each AC has at least one enforcing check mapped | planned |
-| OBS-043 | P1 | Governance | Add script contract tests for parity-delta/review/rollup tools | OBS-042 | test scripts | tools fail fast on malformed inputs and pass valid fixtures | planned |
-| OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | operations doc | retention windows defined and enforceable per artifact class | planned |
-| OBS-045 | P1 | Governance | Add “observability release checklist” gate to deployment playbook | OBS-041 | release checklist doc | release process requires observability sign-off step | planned |
-| OBS-046 | P1 | Ops | Add weekly parity review issue template in repo | OBS-005 | template markdown | weekly review can be opened in <2 minutes with standard fields | planned |
-| OBS-047 | P1 | Ops | Add incident postmortem section for observability misses | OBS-046 | postmortem template update | postmortems classify monitoring detection gap explicitly | planned |
-| OBS-048 | P2 | Ops | Add operator training drill for alert triage with evidence artifacts | OBS-046 | drill runbook | drill completed once per month with attendance log | planned |
-| OBS-049 | P2 | Ops | Add service owner ack process for new alert rules | OBS-014 | process doc | no new high-severity alert merges without owner ack | planned |
-| OBS-050 | P0 | Ops | Publish “Observability GA” readiness gate (exit criteria for roadmap) | OBS-005, OBS-015, OBS-020, OBS-035, OBS-041 | readiness decision doc | explicit go/no-go with objective evidence links | planned |
+| OBS-042 | P1 | Governance | Add AC coverage map for observability scripts -> specs | OBS-041 | coverage map doc/json | each AC has at least one enforcing check mapped | done |
+| OBS-043 | P1 | Governance | Add script contract tests for parity-delta/review/rollup tools | OBS-042 | scripts/qa/test-observability-parity-contracts.sh | tools fail fast on malformed inputs and pass valid fixtures | done |
+| OBS-044 | P1 | Governance | Add artifact retention policy matrix (CI + long-term archive) | OBS-032 | docs/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md | retention windows defined and enforceable per artifact class | done |
+| OBS-045 | P1 | Governance | Add "observability release checklist" gate to deployment playbook | OBS-041 | docs/operations/RELEASE_CHECKLIST.md | release process requires observability sign-off step | done |
+| OBS-046 | P1 | Ops | Add weekly parity review issue template in repo | OBS-005 | template markdown | weekly review can be opened in <2 minutes with standard fields | done |
+| OBS-047 | P1 | Ops | Add incident postmortem section for observability misses | OBS-046 | postmortem template update | postmortems classify monitoring detection gap explicitly | done |
+| OBS-048 | P2 | Ops | Add operator training drill for alert triage with evidence artifacts | OBS-046 | drill runbook | drill completed once per month with attendance log | done |
+| OBS-049 | P2 | Ops | Add service owner ack process for new alert rules | OBS-014 | process doc | no new high-severity alert merges without owner ack | done |
+| OBS-050 | P0 | Ops | Publish “Observability GA” readiness gate (exit criteria for roadmap) | OBS-005, OBS-015, OBS-020, OBS-035, OBS-041 | readiness decision doc | explicit go/no-go with objective evidence links | done |
 
 ## Execution Order Recommendation
 

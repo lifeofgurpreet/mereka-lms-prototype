@@ -64,6 +64,11 @@ Closure criteria for parity gaps:
 1. PAR-001 closes only after 3 consecutive scheduled rollups with no skipped environments.
 2. PAR-002 closes only after 3 consecutive scheduled rollups with no parity delta failures.
 
+Weekly reviews must be captured with the repo issue template:
+
+- `docs` location: `/.github/ISSUE_TEMPLATE/observability-parity-review.md`
+- Issue title format: `Observability Parity Review - Week of <YYYY-MM-DD>`
+
 Artifacts now include:
 1. `observability-parity-stability.json` (from `verify-parity-rollup-stability.sh`)
 2. `observability-parity-rollup.md/json`

@@ -95,7 +95,40 @@ Do not use direct `kubectl set image` for normal production rollouts.
   (no pod crashes, no log errors). Only post-deploy branding verification catches them.
   See [ADR-012](../adr/012-no-runtime-css-overlay.md).
 
-## 7. Rollback
+## 7. Observability and Parity Sign-off (MANDATORY)
+
+Run the observability controls with strict evidence capture:
+
+- `./scripts/qa/run-observability-first-class.sh --mode local --strict`
+- `./scripts/qa/build-observability-parity-delta.sh --env dev --evidence-dir var/ci/parity-dev`
+- `./scripts/qa/build-observability-parity-delta.sh --env nonprod --evidence-dir var/ci/parity-nonprod`
+- `./scripts/qa/build-observability-parity-delta.sh --env prod --evidence-dir var/ci/parity-prod`
+- `./scripts/qa/build-observability-parity-rollup.sh --artifacts-dir var/ci/parity-artifacts --out-md var/ci/observability-parity-rollup.md --out-json var/ci/observability-parity-rollup.json --require-no-skips`
+- `./scripts/qa/verify-observability-evidence-identity.sh --dir var/ci`
+- `./scripts/qa/verify-observability-evidence-identity.sh --dir var/ci/parity-dev`
+- `./scripts/qa/verify-observability-evidence-identity.sh --dir var/ci/parity-nonprod`
+- `./scripts/qa/verify-observability-evidence-identity.sh --dir var/ci/parity-prod`
+- `./scripts/qa/test-observability-parity-contracts.sh`
+- `./scripts/qa/build-observability-coverage-matrix.sh --mode runtime --strict --out-json var/ci/observability-coverage-runtime.json --out-md var/ci/observability-coverage-runtime.md`
+
+### 7.1 Observability GA Gate
+
+- `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md`
+- Sign-off fields:
+  - evidence bundle links are attached and complete
+  - no open high-severity observability gaps
+  - parity rollup trend stability shows `PAR-001`/`PAR-002` closed
+  - alert ownership ack is recorded for all critical rule changes since prior release
+  - one completed monthly operator drill in the last 30 days with attendance artifact
+
+Store in release notes:
+- link to `var/ci/observability-compliance-runtime.json` and `var/ci/observability-parity-rollup.json`
+- local parity review artifacts from each environment (`observability-parity-review.md`)
+- release owner and sign-off timestamp
+
+Release does not pass if any of the above checks fails or if required evidence links are missing.
+
+## 8. Rollback
 
 If production is unhealthy:
 1. Re-run release orchestrator with prior known-good tags.

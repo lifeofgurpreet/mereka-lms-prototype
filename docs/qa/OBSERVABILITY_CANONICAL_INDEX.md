@@ -8,6 +8,7 @@ Date: 2026-02-25
 - owner: Mereka LMS platform team
 - canonical_workflow: `.github/workflows/observability-compliance.yml`
 - canonical_readiness_report: `docs/qa/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`
+- observability_ga_gate: `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md`
 - canonical_roadmap: `docs/operations/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
 
 ## Canonical Sources (active)
@@ -17,8 +18,11 @@ Date: 2026-02-25
 - Strategy/phase planning source of truth:
   - `docs/operations/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
   - `docs/operations/OBSERVABILITY_PARITY_MATRIX.md`
+  - `docs/qa/OBSERVABILITY_SCRIPT_AC_COVERAGE_MAP.md`
+  - `docs/operations/OBSERVABILITY_ARTIFACT_RETENTION_MATRIX.md`
   - `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`
   - `docs/qa/OBSERVABILITY_NEXT50_TRACKER_MEREKA_LMS.md`
+  - `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md`
 - Execution/gating source of truth:
   - `.github/workflows/observability-compliance.yml`
   - `.github/workflows/observability-parity-runtime.yml`
@@ -30,6 +34,7 @@ Date: 2026-02-25
   - `scripts/qa/build-observability-parity-delta.sh`
   - `scripts/qa/build-observability-parity-review.sh`
   - `scripts/qa/build-observability-parity-rollup.sh`
+  - `scripts/qa/test-observability-parity-contracts.sh`
   - `scripts/qa/audit-alert-noise-baseline.sh`
   - `scripts/qa/build-alert-noise-runtime-sample.sh`
   - `scripts/qa/verify-observability-evidence-identity.sh`

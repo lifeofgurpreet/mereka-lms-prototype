@@ -71,6 +71,7 @@ Every P1/P2 postmortem MUST be published within 5 business days of resolution an
 - [ ] **Impact**: Quantified scope — users affected, requests failed, data implications, SLA impact
 - [ ] **Remediation**: What was done to resolve the incident (immediate fix)
 - [ ] **Prevention**: Action items to prevent recurrence, each with owner and due date
+- [ ] **Monitoring Detection Gap**: For incidents where detection lag occurred, explain which checks/alerts/rules missed early detection
 
 **Verification procedure**:
 
@@ -118,6 +119,13 @@ Every P1/P2 postmortem MUST be published within 5 business days of resolution an
 - **Data loss**: <none | description>
 - **SLA impact**: <minutes of downtime against error budget>
 - **Services affected**: <list>
+
+## Monitoring Detection Gap
+
+- **Detection pathway hit?**: <Yes | Partial | Late | Missed>
+- **Missed signal**: <alert/rule/dashboard that should have caught this sooner>
+- **Root cause of gap**: <query drift, rule ownership gap, annotation missing, routing change, no synthetic coverage>
+- **Preventive controls added**: <new alert, tighter threshold, owner/process requirement, drill case>
 
 ## Remediation
 
