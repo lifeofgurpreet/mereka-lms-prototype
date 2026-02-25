@@ -375,6 +375,14 @@ jobs:
             else
               echo "- runtime evidence index missing"
             fi
+            echo ""
+            echo "### Correlation Header Evidence"
+            echo ""
+            if [ -f var/ci/observability-correlation-headers-runtime.txt ]; then
+              cat var/ci/observability-correlation-headers-runtime.txt
+            else
+              echo "- correlation header evidence missing"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload runtime observability artifacts
@@ -391,4 +399,5 @@ jobs:
             var/ci/observability-coverage-runtime.md
             var/ci/observability-runtime-verify-runtime.txt
             var/ci/observability-runtime-verify-runtime.md
+            var/ci/observability-correlation-headers-runtime.txt
             var/ci/observability-first-class-runtime-evidence-index.json
