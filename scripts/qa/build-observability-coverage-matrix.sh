@@ -164,13 +164,11 @@ has_runtime_access=0
 if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   if command -v kubectl >/dev/null 2>&1; then
     set +e
-    if command -v timeout >/dev/null 2>&1; then
-      timeout "$TIMEOUT_SECONDS" kubectl_cmd get namespace "$APP_NAMESPACE" >/dev/null 2>&1
-      rc=$?
-    else
-      kubectl_cmd get namespace "$APP_NAMESPACE" >/dev/null 2>&1
-      rc=$?
-    fi
+    # Keep the probe resilient in minimal shells where `timeout` may be absent.
+    # `kubectl --request-timeout` is available in all supported clients and avoids
+    # shell-level command lookup pitfalls.
+    kubectl_cmd --request-timeout "${TIMEOUT_SECONDS}s" get namespace "$APP_NAMESPACE" >/dev/null 2>&1
+    rc=$?
     set -e
     if [[ $rc -eq 0 ]]; then
       has_runtime_access=1
@@ -189,6 +187,31 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     fi
   fi
 fi
+
+runtime_namespaces() {
+  local ns
+  if [[ -n "${APP_NAMESPACE}" ]]; then
+    printf '%s\n' "$APP_NAMESPACE"
+  fi
+  if [[ -n "${MONITORING_NAMESPACE}" && "${MONITORING_NAMESPACE}" != "${APP_NAMESPACE}" ]]; then
+    printf '%s\n' "$MONITORING_NAMESPACE"
+  fi
+}
+
+resource_exists() {
+  local resource_kind="$1"
+  local resource_name="$2"
+
+  local ns
+  for ns in $(runtime_namespaces); do
+    if kubectl_cmd get "$resource_kind" "$resource_name" -n "$ns" >/dev/null 2>&1; then
+      echo "$ns"
+      return 0
+    fi
+  done
+
+  return 1
+}
 
 declare -A sm_file_set
 for sm in "${REQUIRED_SERVICE_MONITORS[@]}"; do
@@ -258,8 +281,9 @@ fi
 # Runtime checks
 if [[ "$has_runtime_access" -eq 1 ]]; then
   for sm in "${REQUIRED_SERVICE_MONITOR_RUNTIME[@]}"; do
-    if kubectl_cmd get servicemonitor "$sm" -n "$MONITORING_NAMESPACE" >/dev/null 2>&1; then
-      record pass "runtime" "service-monitor-live" "$sm" "found in namespace $MONITORING_NAMESPACE"
+    runtime_ns="$(resource_exists servicemonitor "$sm")"
+    if [[ -n "$runtime_ns" ]]; then
+      record pass "runtime" "service-monitor-live" "$sm" "found in namespace $runtime_ns"
     else
       if [[ "$STRICT" == "1" ]]; then
         record fail "runtime" "service-monitor-live" "$sm" "missing in cluster"
@@ -270,8 +294,9 @@ if [[ "$has_runtime_access" -eq 1 ]]; then
   done
 
   for pr in "${REQUIRED_PROMETHEUSRULE_RUNTIME[@]}"; do
-    if kubectl_cmd get prometheusrule "$pr" -n "$MONITORING_NAMESPACE" >/dev/null 2>&1; then
-      record pass "runtime" "prometheusrule-live" "$pr" "found in namespace $MONITORING_NAMESPACE"
+    runtime_ns="$(resource_exists prometheusrules.monitoring.coreos.com "$pr")"
+    if [[ -n "$runtime_ns" ]]; then
+      record pass "runtime" "prometheusrule-live" "$pr" "found in namespace $runtime_ns"
     else
       if [[ "$STRICT" == "1" ]]; then
         record fail "runtime" "prometheusrule-live" "$pr" "missing in cluster"

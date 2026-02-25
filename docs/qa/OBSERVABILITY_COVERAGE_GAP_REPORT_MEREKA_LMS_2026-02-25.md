@@ -80,7 +80,7 @@ No repo-only required objects are missing:
 | Environment | Owner | Gap | Target fix date | Evidence |
 |---|---|---|---|---|
 | dev | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification blocked (all runtime checks skip due missing/implicit context wiring in this pass) | 2026-02-28 | `var/ci/observability-coverage-dev-runtime.md` |
-| nonprod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification blocked (all runtime checks skip due missing/implicit context wiring in this pass) | 2026-02-28 | `var/ci/observability-coverage-nonprod-runtime.md` |
+| nonprod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification now succeeds with namespace-aware runtime lookup; strict check is pass/no-fail/no-skip | 2026-02-28 | `var/ci/observability-coverage-nonprod-runtime.md` |
 | prod | Mereka LMS observability owners | Runtime ServiceMonitor/PrometheusRule verification blocked (all runtime checks skip due missing/implicit context wiring in this pass) | 2026-02-28 | `var/ci/observability-coverage-prod-runtime.md` |
 
 ## Required action (immediate)
@@ -98,4 +98,3 @@ OBSERVABILITY_GCP_PROJECT=<dev-or-shared-project> \
 2. Confirm each environment emits no runtime skips and no runtime fails in `observability-coverage-<env>-runtime.json`.
 
 3. Close out parity gap and move `OBS-006` to done once runtime lanes produce concrete present/absent results.
-
