@@ -113,6 +113,25 @@ done
 for sm_file in "$MON_DIR"/servicemonitor-*.yaml; do
   [[ -f "$sm_file" ]] || continue
   base=$(basename "$sm_file")
+
+  if grep -q 'app.kubernetes.io/name:' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-004: $base has app.kubernetes.io/name label"
+  else
+    fail "AC-OVR-004: $base missing app.kubernetes.io/name label"
+  fi
+
+  if grep -q 'app.kubernetes.io/instance:' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-004: $base has app.kubernetes.io/instance label"
+  else
+    fail "AC-OVR-004: $base missing app.kubernetes.io/instance label"
+  fi
+
+  if grep -q 'app.kubernetes.io/part-of:' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-004: $base has app.kubernetes.io/part-of label"
+  else
+    fail "AC-OVR-004: $base missing app.kubernetes.io/part-of label"
+  fi
+
   if grep -q 'app.kubernetes.io/component: monitoring' "$sm_file" 2>/dev/null; then
     pass "AC-OVR-004: $base has monitoring component label"
   else
