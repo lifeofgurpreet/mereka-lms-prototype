@@ -257,6 +257,7 @@ run_rollup_case "invalid-missing-artifacts" "$FIXTURES_ROOT/malformed/rollup-mis
 
 run_identity_case "valid-dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_identity_case "invalid-missing-correlation" "$FIXTURES_ROOT/malformed/delta-missing-correlation/dev" 1
+run_identity_case "invalid-correlation-status" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-status/dev" 1
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2
