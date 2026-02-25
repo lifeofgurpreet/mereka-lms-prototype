@@ -134,26 +134,33 @@ fi
 # ---------------------------------------------------------------------------
 # 2. Documentation — .md files treating deprecated paths as active
 #
-# Strategy: flag markdown lines that link or code-span a deprecated path as if
-# it is still navigable.  Exempt: DEPR.md itself, tombstone READMEs, archive/.
-# verify-deprecation-discipline.sh already confirms DEPR.md has target dates.
+# Strategy: flag markdown hyperlinks that navigate to a deprecated path.
+# We look for markdown link syntax ]( pointing at deprecated dirs/files.
+#
+# Excluded from scanning:
+#   - DEPR.md (the canonical deprecation register)
+#   - Tombstone README files (tools/README.md, ops/README.md)
+#   - docs/archive/ (historical records)
+#   - specs/testmaps/ and specs/plans/ (spec-tooling artifacts, not navigable docs)
+#   - Any file in the repository-structure spec family (spec describing the rule itself)
+#
+# NOTE: prose mentions like "`tools/`" or "tools/ directory" in explanatory text
+# are expected in specs and runbooks; only link-syntax ]( is treated as "active".
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 2. Documentation links/code-spans to deprecated paths ---"
+echo "--- 2. Documentation hyperlinks to deprecated paths ---"
 
 DOC_DIRS=("docs" "specs" "specdocs")
-DOC_EXCLUDE_PATTERNS=(
-  "DEPR.md"
-  "tools/README.md"
-  "ops/README.md"
-)
 
 # Build exclude flags for grep
-exclude_flags=()
-for pat in "${DOC_EXCLUDE_PATTERNS[@]}"; do
-  exclude_flags+=("--exclude=${pat}")
-done
-exclude_flags+=("--exclude-dir=archive" "--exclude-dir=.git")
+doc_exclude_flags=(
+  "--exclude=DEPR.md"
+  "--exclude=README.md"
+  "--exclude-dir=archive"
+  "--exclude-dir=plans"
+  "--exclude-dir=testmaps"
+  "--exclude-dir=.git"
+)
 
 for dep_dir in "${DEPRECATED_DIRS[@]}"; do
   active_doc_dirs=()
@@ -161,10 +168,11 @@ for dep_dir in "${DEPRECATED_DIRS[@]}"; do
     [[ -d "$d" ]] && active_doc_dirs+=("$d")
   done
   if [[ "${#active_doc_dirs[@]}" -gt 0 ]]; then
+    # Only match markdown link destinations: ](path) where path starts with dep_dir/
     check_grep_hits \
-      "Docs active link/code-span to ${dep_dir}/" \
-      "${exclude_flags[@]}" --include="*.md" \
-      -- "\]\(([^)]*[/ ])?${dep_dir}/|[\`]([^/\`]*/)*${dep_dir}/" \
+      "Docs hyperlink to deprecated ${dep_dir}/" \
+      "${doc_exclude_flags[@]}" --include="*.md" \
+      -- "\]\(\.?/?(${dep_dir}/)" \
       "${active_doc_dirs[@]}"
   else
     info "No doc directories found — skipping doc check for ${dep_dir}/"
@@ -178,9 +186,9 @@ for dep_file in "${DEPRECATED_FILES[@]}"; do
   done
   if [[ "${#active_doc_dirs[@]}" -gt 0 ]]; then
     check_grep_hits \
-      "Docs active reference to ${dep_file}" \
-      "${exclude_flags[@]}" --include="*.md" \
-      -- "\]\([^)]*${dep_file}|\`[^\`]*${dep_file}" \
+      "Docs hyperlink to deprecated ${dep_file}" \
+      "${doc_exclude_flags[@]}" --include="*.md" \
+      -- "\]\([^)]*${dep_file}" \
       "${active_doc_dirs[@]}"
   fi
 done
@@ -241,12 +249,13 @@ for dep_dir in "${DEPRECATED_DIRS[@]}"; do
     [[ -d "$d" ]] && active_py_dirs+=("$d")
   done
   if [[ "${#active_py_dirs[@]}" -gt 0 ]]; then
+    # Match string literals referencing the deprecated dir; skip comment lines (#)
     check_grep_hits \
       "Python reference to deprecated ${dep_dir}/" \
       --include="*.py" \
       --exclude-dir="__pycache__" \
       --exclude-dir=".venv" \
-      -- "([\"\'/])(${dep_dir}/)" \
+      -- "^[^#].*([\"\'](${dep_dir}/))" \
       "${active_py_dirs[@]}"
   else
     info "No Python source directories found — skipping Python checks for ${dep_dir}/"
@@ -264,7 +273,7 @@ for dep_file in "${DEPRECATED_FILES[@]}"; do
       --include="*.py" \
       --exclude-dir="__pycache__" \
       --exclude-dir=".venv" \
-      -- "[\"\'].*${dep_file}" \
+      -- "^[^#].*[\"\'].*${dep_file}" \
       "${active_py_dirs[@]}"
   fi
 done

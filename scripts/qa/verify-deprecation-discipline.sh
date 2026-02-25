@@ -123,8 +123,9 @@ check_no_deprecated_ref() {
   for dir in "${ACTIVE_SCRIPT_DIRS[@]}"; do
     [[ -d "$dir" ]] || continue
     while IFS= read -r -d '' f; do
-      # Skip this script, markdown files, and DEPR.md
+      # Skip this script, the broken-paths script, markdown files, and DEPR.md
       [[ "$f" == *"verify-deprecation-discipline.sh" ]] && continue
+      [[ "$f" == *"verify-no-broken-paths.sh" ]] && continue
       [[ "$f" == *.md ]] && continue
       [[ "$f" == *DEPR* ]] && continue
       found_files+=("$f")

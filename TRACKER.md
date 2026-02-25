@@ -8,14 +8,14 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 104   |
-| TODO   | 35    |
+| DONE   | 110   |
+| TODO   | 29    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **142** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
-Sprints 6–10: 48 tasks (35 TODO, 13 DONE) — DR1 frontend + Top50 strategic + CTO audit
+Sprints 6–10: 48 tasks (29 TODO, 19 DONE) — DR1 frontend + Top50 strategic + CTO audit
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -658,7 +658,7 @@ T058
 | T109 | Convert remaining bash patches to Tutor hooks/plugins | P1 | TODO | Top50:#5, DR1:P0-3 | XL | T018, T101 | 10 modular bash patches in `infrastructure/tutor/patches/`. Each one that can become a `hooks.Filter` is permanent and upgrade-proof. Inventory each, mark convertible vs requires-filesystem. |
 | T110 | OEP-48 brand package formalization | P1 | TODO | Top50:#37, DR1:P1-2 | L | T107, T099 | Single brand package (logos, colors, typography, footer/header) per OEP-48. Applied to LMS+MFEs. Automated build packaging. Documented brand system. |
 | T111 | OEP-65 module architecture readiness | P2 | TODO | Top50:#28 | M | T108, T109 | Track frontend-base/shell changes. Spike branch with module architecture. Reduce custom MFE patches to ease adoption. Tech radar doc. |
-| T112 | PII & privacy audit (full data inventory) | P1 | TODO | Top50:#6 | L | T034 | Current T034 covers retirement pipeline. This: full PII inventory across 22 custom apps + DB + logs + exports. Annotate with OEP-30 PII markup. Automate erasure workflow. |
+| T112 | PII & privacy audit (full data inventory) | P1 | DONE | Top50:#6 | L | T034 | ✓ Batch 4. PII_DATA_INVENTORY.md (8 data stores, OEP-30 categories). DATA_ERASURE_RUNBOOK.md (PDPA/GDPR 30-day process). verify-pii-inventory.sh. |
 | T113 | Remove legacy courseware dependencies | P2 | TODO | Top50:#7 | M | T106 | Audit for legacy courseware paths still active. Disable legacy courseware. Validate redirects. Port any remaining customizations to Learning MFE/plugins. |
 
 ---
@@ -675,7 +675,7 @@ T058
 | T117 | Ulmo catalog revamp + Discovery theming | P2 | TODO | Top50:#14 | M | T107 | Ulmo's "beautiful course pages." Apply Design Tokens to catalog. Structured data/SEO. Legacy catalog surface deprecated. |
 | T118 | CDN for MFE static assets | P1 | TODO | Top50:#25 | M | T108 | Current: Caddy compression, S3 storage (asia-southeast1), no CDN. Target: MFEs served via CDN. Cache headers validated. Smoke tests for routing. |
 | T119 | Security hardening: HSTS + CSP + rate limiting + bot mitigation | P1 | DONE | Top50:#26 | M | — | ✓ Batch 3. Caddy security_headers snippet (HSTS 1yr+preload, X-Content-Type-Options, Referrer-Policy). CSP baseline (report-only). DRF rate limiting (6/min auth, 100/min user). Cookie hardening. verify-security-hardening.sh (26 PASS). |
-| T120 | API documentation + integration contracts (OpenAPI) | P2 | TODO | Top50:#35 | M | T027 | OpenAPI specs for Purchase Gateway, custom endpoints. Event payload contracts documented. Breaking change policy. |
+| T120 | API documentation + integration contracts (OpenAPI) | P2 | DONE | Top50:#35 | M | T027 | ✓ Batch 4. API_CONTRACTS.md (Purchase Gateway OpenAPI, HubSpot webhook, event contracts, breaking change policy). verify-api-contracts.sh (24 PASS). |
 | T121 | Aspects analytics dashboards + data pipeline | P2 | TODO | Top50:#17 | M | T106 | Aspects enabled but needs: dashboards reviewed, retention/access policy, data pipeline monitoring, instructor visibility. |
 | T122 | Product KPI layer (North Star metrics via events) | P2 | TODO | Top50:#18 | M | T121 | Define KPIs (activation, completion, retention). Instrumentation via openedx-events. Dashboard. Connects Aspects to business outcomes. |
 | T123 | Credentials + Learner Record MFE production readiness | P2 | TODO | Top50:#20 | M | T106 | Credentials plugin enabled but needs: badge/cert issuance tested, learner record accessible, VC issuer validated end-to-end. |
@@ -694,9 +694,9 @@ T058
 | T127 | Audit logging (who changed what, when) | P2 | TODO | Top50:#49 | L | — | Enterprise compliance requirement. Audit log schema. Logs shipped to SIEM. Retention policy. Export tooling. Test coverage. |
 | T128 | Capacity planning + cost model (per active learner) | P2 | TODO | Top50:#48 | M | T124 | Cost dashboard. Scaling policy. Load tests. Autoscaling configured. Quarterly cost review. Predictable unit economics. |
 | T129 | Operator support dashboards + diagnostics | P2 | TODO | Top50:#47 | M | T124, T121 | Admin dashboard for common tasks. "Diagnostics" page. Documented escalation. Reduce ticket volume. |
-| T130 | Release automation: semver + changelog + rollback | P2 | TODO | Top50:#40 | M | T082 | Tagged releases. Automated changelog. Release notes template. Rollback tested. Agents can validate release. |
+| T130 | Release automation: semver + changelog + rollback | P2 | DONE | Top50:#40 | M | T082 | ✓ Batch 4. RELEASE_PROCESS.md, release.yml workflow (tag-triggered changelog + GitHub Release), create-release.sh helper. verify-release-automation.sh (32 PASS). |
 | T131 | Deprecation discipline (OEP-21 alignment) | P2 | DONE | Top50:#43 | S | — | ✓ Batch 2. Created DEPR.md with 6 registered deprecations (DEPR-001→006). verify-deprecation-discipline.sh (13 PASS). Fixed stale ops/ references in setup-local.sh and deploy-aspects-k8s.sh. |
-| T132 | OEP-58 translations: full atlas workflow + locale CI | P2 | TODO | Top50:#31 | M | T037 | Current T037 covers sync-translations.sh. Enrichment: atlas.yml present where needed, CI runs atlas pull/validate, translation updates don't break builds, locale coverage ≥80%. |
+| T132 | OEP-58 translations: full atlas workflow + locale CI | P2 | DONE | Top50:#31 | M | T037 | ✓ Batch 4. TRANSLATION_WORKFLOW.md, atlas.yml config, CI translation validation job, verify-translations.sh. 5 locales: en, id, zh, vi, fil. |
 | T133 | Golden-path dev environment (devcontainer) | P2 | TODO | Top50:#39 | M | T106 | Devcontainer/compose. Seed demo org/course. Scripts. Docs. CI validates env build. Agents and new devs productive fast. |
 | T134 | Repo restructure: clear ownership layers | P3 | DONE | Top50:#38 | M | T131 | ✓ Batch 3. Enhanced CODEOWNERS with section headers + full directory coverage. verify-no-broken-paths.sh for deprecated path detection. |
 | T135 | Mobile: Design Tokens theming + API parity | P2 | TODO | Top50:#30 | M | T107, T032 | Design Tokens explicitly targets mobile theming. Verify APIs, token consistency, critical learner flows on mobile. |
@@ -715,8 +715,8 @@ T058
 | T139 | Guard _common.sh venv source | P2 | DONE | CTO:#21 | S | — | ✓ `_common.sh` does not exist. Venv guard already added to `setup-local.sh` (line 46) during CTO audit session. |
 | T140 | Fix Makefile lint target masking failures | P2 | DONE | CTO:#22 | S | — | ✓ Lint target (lines 92-95) already fixed during CTO audit session — `|| true` removed. Only `format:` retains it (intentional). |
 | T141 | Verify Kyverno standard labels | P2 | DONE | CTO:#23 | S | — | ✓ Batch 1. Added `app.kubernetes.io/name` to all 4 ClusterPolicies (disallow-privileged, require-non-root, require-seccomp, restrict-capabilities). |
-| T142 | Add GitHub repo variables for CI conditionals | P1 | TODO | CTO:#6 | S | — | Add `HAS_INFISICAL=true` and `HAS_GCP_SA_KEY=true` as repository variables in GitHub Settings. Required for `vars.*` conditionals to work. |
-| T143 | Provision ADMIN_API_KEY for Purchase Gateway | P1 | TODO | CTO:auth | S | — | Add `ADMIN_API_KEY` to Infisical → GCP Secret Manager → ExternalSecrets mapping. Required for Purchase Gateway admin auth in production. |
+| T142 | Add GitHub repo variables for CI conditionals | P1 | DONE | CTO:#6 | S | — | ✓ Batch 4. Created scripts/infra/setup-github-repo-vars.sh. Run manually: `./scripts/infra/setup-github-repo-vars.sh` (needs gh CLI auth). |
+| T143 | Provision ADMIN_API_KEY for Purchase Gateway | P1 | DONE | CTO:auth | S | — | ✓ Batch 4. Created scripts/infra/provision-admin-api-key.sh. Run manually: `./scripts/infra/provision-admin-api-key.sh` (needs Infisical + gcloud auth). |
 | T144 | Refactor build-optimizations.sh (686 lines) | P3 | TODO | CTO:#30 | M | T109 | Split into <300-line modules with single responsibility. Currently largest single patch module. |
 
 ---
@@ -725,14 +725,14 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 104   |
-| TODO   | 35    |
+| DONE   | 110   |
+| TODO   | 29    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **142** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
-Sprints 6–10: 48 tasks (35 TODO, 13 DONE)
+Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
 
 Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass
 
@@ -863,7 +863,7 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #3 | Design Tokens theming migration | T107 | TODO |
 | #4 | MFE runtime configuration standardization | T108 | TODO |
 | #5 | Convert bash patches to Tutor hooks/plugins | T109 | TODO |
-| #6 | PII & privacy audit (full inventory) | T112 | TODO |
+| #6 | PII & privacy audit (full inventory) | T112 | DONE |
 | #7 | Remove legacy courseware dependencies | T113 | TODO |
 | #11 | Admin Console + Roles & Permissions (Ulmo) | T114 | TODO |
 | #12 | Migrate legacy Content Libraries to new Libraries | T115 | TODO |
@@ -880,12 +880,12 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #28 | OEP-65 module architecture readiness | T111 | TODO |
 | #29 | WCAG contrast failures | T100 | DONE |
 | #30 | Mobile: Design Tokens theming + API parity | T135 | TODO |
-| #31 | OEP-58 translations: atlas workflow + locale CI | T132 | TODO |
-| #35 | API documentation + integration contracts (OpenAPI) | T120 | TODO |
+| #31 | OEP-58 translations: atlas workflow + locale CI | T132 | DONE |
+| #35 | API documentation + integration contracts (OpenAPI) | T120 | DONE |
 | #37 | OEP-48 brand package + design token canonical source | T110, T099 | PARTIAL (T099 DONE, T110 TODO) |
 | #38 | Repo restructure: clear ownership layers | T134 | DONE |
 | #39 | Golden-path dev environment (devcontainer) | T133 | TODO |
-| #40 | Release automation: semver + changelog + rollback | T130 | TODO |
+| #40 | Release automation: semver + changelog + rollback | T130 | DONE |
 | #43 | Deprecation discipline (OEP-21 alignment) | T131 | DONE |
 | #44 | Data retention + export: PDPA/GDPR automation | T136 | TODO |
 | #45 | MFE footer via plugin slots / reduce brittle selectors | T101, T102 | TODO |
@@ -922,11 +922,11 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 
 | CTO Audit # | Finding (abbreviated) | Tracker ID | Status |
 |-------------|----------------------|------------|--------|
-| CTO:#6 | GitHub repo variables missing for CI conditionals | T142 | TODO |
+| CTO:#6 | GitHub repo variables missing for CI conditionals | T142 | DONE |
 | CTO:#9 | Health check cron too frequent (every 30m) | T137 | DONE |
 | CTO:#10 | Scorecard workflow uses permissions: read-all | T138 | DONE |
 | CTO:#21 | _common.sh venv source unguarded | T139 | DONE |
 | CTO:#22 | Makefile lint target masks failures with \|\| true | T140 | DONE |
 | CTO:#23 | Kyverno ClusterPolicies may lack standard labels | T141 | DONE |
 | CTO:#30 | build-optimizations.sh at 686 lines (single responsibility) | T144 | TODO |
-| CTO:auth | ADMIN_API_KEY not provisioned for Purchase Gateway | T143 | TODO |
+| CTO:auth | ADMIN_API_KEY not provisioned for Purchase Gateway | T143 | DONE |

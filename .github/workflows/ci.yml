@@ -1583,3 +1583,123 @@ jobs:
         run: bash -n scripts/qa/verify-tenant-config-handoff.sh
       - name: Verify tenant config handoff (bead 31yg)
         run: ./scripts/qa/verify-tenant-config-handoff.sh
+
+  translation-validation:
+    name: OEP-58 Translation Validation
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        with:
+          python-version: '3.12'
+
+      - name: Syntax check
+        run: bash -n scripts/qa/verify-translations.sh
+
+      - name: Verify atlas.yml and translation workflow infrastructure
+        run: |
+          set -euo pipefail
+          # atlas.yml must exist at repo root
+          [[ -f atlas.yml ]] || { echo "FAIL: atlas.yml missing from repo root"; exit 1; }
+          echo "PASS: atlas.yml present"
+          # TRANSLATION_WORKFLOW.md must exist
+          [[ -f docs/operations/TRANSLATION_WORKFLOW.md ]] || { echo "FAIL: TRANSLATION_WORKFLOW.md missing"; exit 1; }
+          echo "PASS: TRANSLATION_WORKFLOW.md present"
+          # sync-translations.sh must exist and be executable
+          [[ -x scripts/infra/sync-translations.sh ]] || { echo "FAIL: sync-translations.sh missing or not executable"; exit 1; }
+          echo "PASS: sync-translations.sh is executable"
+          # atlas.yml must reference all OEP-58 locales
+          for locale in en id zh_CN vi fil; do
+            grep -q "$locale" atlas.yml || { echo "FAIL: atlas.yml missing locale: $locale"; exit 1; }
+            echo "PASS: atlas.yml references locale: $locale"
+          done
+
+      - name: Validate .po file syntax (if present)
+        run: |
+          set -euo pipefail
+          PO_FILES=$(find tutor_env/env/build/openedx/locale -name "*.po" 2>/dev/null || true)
+          if [[ -z "$PO_FILES" ]]; then
+            echo "SKIP: No .po files found (locale directory not in repo — expected)"
+            exit 0
+          fi
+          FAIL=0
+          while IFS= read -r po; do
+            # Validate UTF-8 encoding and basic msgfmt parseable structure
+            if python3 -c "
+          import sys
+          try:
+              with open(sys.argv[1], encoding='utf-8') as f:
+                  content = f.read()
+              # Basic check: must have msgid and msgstr pairs
+              if 'msgid' not in content or 'msgstr' not in content:
+                  print(f'FAIL: {sys.argv[1]} missing msgid/msgstr pairs')
+                  sys.exit(1)
+              print(f'PASS: {sys.argv[1]}')
+          except UnicodeDecodeError as e:
+              print(f'FAIL: {sys.argv[1]} is not valid UTF-8: {e}')
+              sys.exit(1)
+          " "$po"; then
+              :
+            else
+              FAIL=$((FAIL + 1))
+            fi
+          done <<< "$PO_FILES"
+          [[ $FAIL -eq 0 ]] || exit 1
+
+      - name: Validate MFE messages.json syntax (if present)
+        run: |
+          set -euo pipefail
+          JSON_FILES=$(find infrastructure/tutor/themes/mereka/mfe -name "messages.json" 2>/dev/null || true)
+          if [[ -z "$JSON_FILES" ]]; then
+            echo "SKIP: No messages.json files found (MFE locales not yet pulled)"
+            exit 0
+          fi
+          FAIL=0
+          while IFS= read -r json; do
+            if python3 -c "
+          import json, sys
+          try:
+              with open(sys.argv[1]) as f:
+                  data = json.load(f)
+              # Check for broken Python format strings: %(name)s patterns
+              content = open(sys.argv[1]).read()
+              import re
+              # Detect unclosed format placeholders
+              broken = re.findall(r'%\([^)]*$', content)
+              if broken:
+                  print(f'FAIL: {sys.argv[1]} has broken format string(s)')
+                  sys.exit(1)
+              print(f'PASS: {sys.argv[1]}')
+          except json.JSONDecodeError as e:
+              print(f'FAIL: {sys.argv[1]} is not valid JSON: {e}')
+              sys.exit(1)
+          " "$json"; then
+              :
+            else
+              FAIL=$((FAIL + 1))
+            fi
+          done <<< "$JSON_FILES"
+          [[ $FAIL -eq 0 ]] || exit 1
+
+      - name: Run offline translation verification
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-translations.sh --offline | tee var/ci/translation-validation.log || true
+          # Fail only if verify script exits non-zero on FAIL lines (not SKIP/WARN)
+          grep -q "^FAIL\b\|✗ FAIL" var/ci/translation-validation.log && {
+            echo "::error::Translation verification found failures — see log above"
+            exit 1
+          } || echo "Translation verification passed (SKIP/WARN are acceptable)"
+
+      - name: Upload translation validation log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: translation-validation-log
+          path: var/ci/translation-validation.log
+          if-no-files-found: warn

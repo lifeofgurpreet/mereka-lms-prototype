@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # @covers AC-CCR-010
 # @spec: cross-cutting-requirements_spec.md
-# Verify translation completeness for Mereka Academy bilingual (EN/MS) support.
+# Verify translation completeness for Mereka Academy OEP-58 locale support.
+#
+# Supported locales: en (primary), id, zh_CN, vi, fil
 #
 # Checks:
-#   1. MFE locale directories exist for target languages (en, ms)
-#   2. Malay (ms) locale files have >= 80% key coverage vs English (en)
-#   3. Platform locale directory exists and contains ms .po files
-#   4. Theme templates scanned for hardcoded English strings (warning only)
+#   1. atlas.yml is present at repo root
+#   2. TRANSLATION_WORKFLOW.md exists
+#   3. sync-translations.sh exists and is executable
+#   4. MFE locale directories exist for target languages
+#   5. Non-English locale files have >= 80% key coverage vs English
+#   6. Platform locale directory exists and contains .po files
+#   7. Theme templates scanned for hardcoded English strings (warning only)
 #
 # Usage:
 #   ./scripts/qa/verify-translations.sh [--offline]
@@ -65,7 +70,8 @@ MFE_LOCALE_DIR="${REPO_ROOT}/infrastructure/tutor/themes/mereka/mfe"
 PLATFORM_LOCALE_DIR="${REPO_ROOT}/tutor_env/env/build/openedx/locale"
 THEME_DIR="${REPO_ROOT}/infrastructure/tutor/themes/mereka"
 
-TARGET_LANGS=("en" "ms")
+# OEP-58 supported locales (en = source, others require >= 80% coverage)
+TARGET_LANGS=("en" "id" "zh_CN" "vi" "fil")
 COVERAGE_THRESHOLD=80
 
 # ---------------------------------------------------------------------------
@@ -95,6 +101,46 @@ PY
 }
 
 # ---------------------------------------------------------------------------
+# Section 0: Workflow infrastructure (atlas.yml, docs, sync script)
+# ---------------------------------------------------------------------------
+echo "=== Section 0: Translation workflow infrastructure ==="
+
+# atlas.yml at repo root
+if [[ -f "${REPO_ROOT}/atlas.yml" ]]; then
+  pass "atlas.yml present at repo root"
+else
+  fail "atlas.yml missing from repo root (required for OEP-58 atlas pull)"
+fi
+
+# TRANSLATION_WORKFLOW.md
+if [[ -f "${REPO_ROOT}/docs/operations/TRANSLATION_WORKFLOW.md" ]]; then
+  pass "docs/operations/TRANSLATION_WORKFLOW.md exists"
+else
+  fail "docs/operations/TRANSLATION_WORKFLOW.md missing"
+fi
+
+# sync-translations.sh is present and executable
+SYNC_SCRIPT="${REPO_ROOT}/scripts/infra/sync-translations.sh"
+if [[ -f "$SYNC_SCRIPT" ]]; then
+  if [[ -x "$SYNC_SCRIPT" ]]; then
+    pass "scripts/infra/sync-translations.sh exists and is executable"
+  else
+    fail "scripts/infra/sync-translations.sh exists but is not executable"
+  fi
+else
+  fail "scripts/infra/sync-translations.sh missing"
+fi
+
+# CI workflow for translation validation
+if [[ -f "${REPO_ROOT}/.github/workflows/translation-check.yml" ]]; then
+  pass ".github/workflows/translation-check.yml present"
+else
+  warn ".github/workflows/translation-check.yml missing (CI validation not configured)"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # Section 1: MFE locale directories exist
 # ---------------------------------------------------------------------------
 echo "=== Section 1: MFE locale directories ==="
@@ -106,13 +152,10 @@ else
   fail "  Run: ./scripts/infra/sync-translations.sh --dry-run  (then live pull)"
 fi
 
-# Check that at least one app locale directory has both en and ms
+# Check that at least one app locale directory has en and each non-English locale
 EN_DIRS=0
-MS_DIRS=0
 while IFS= read -r -d '' en_dir; do
   EN_DIRS=$((EN_DIRS + 1))
-  ms_dir="$(dirname "$en_dir")/ms"
-  [[ -d "$ms_dir" ]] && MS_DIRS=$((MS_DIRS + 1))
 done < <(find "$MFE_LOCALE_DIR" -type d -name "en" -print0 2>/dev/null)
 
 if [[ "$EN_DIRS" -gt 0 ]]; then
@@ -121,25 +164,32 @@ else
   warn "No MFE en locale directories found under ${MFE_LOCALE_DIR}"
 fi
 
-if [[ "$MS_DIRS" -gt 0 ]]; then
-  pass "MFE ms locale directories found: ${MS_DIRS}"
-else
-  warn "No MFE ms locale directories found (translations not pulled yet?)"
-fi
+# Check each non-en OEP-58 locale directory is present
+for lang in "${TARGET_LANGS[@]}"; do
+  [[ "$lang" == "en" ]] && continue
+  lang_dir_count=0
+  while IFS= read -r -d '' d; do
+    lang_dir_count=$((lang_dir_count + 1))
+  done < <(find "$MFE_LOCALE_DIR" -type d -name "$lang" -print0 2>/dev/null)
+  if [[ "$lang_dir_count" -gt 0 ]]; then
+    pass "MFE ${lang} locale directories found: ${lang_dir_count}"
+  else
+    warn "No MFE ${lang} locale directories found (translations not pulled yet?)"
+  fi
+done
 
 echo ""
 
 # ---------------------------------------------------------------------------
-# Section 2: MFE locale key coverage (ms >= COVERAGE_THRESHOLD% of en)
+# Section 2: MFE locale key coverage (all non-en >= COVERAGE_THRESHOLD% of en)
 # ---------------------------------------------------------------------------
-echo "=== Section 2: MFE Malay (ms) key coverage ==="
+echo "=== Section 2: MFE OEP-58 locale key coverage ==="
 
 ANY_MFE_CHECKED=false
 
 while IFS= read -r -d '' en_file; do
   mfe_app_dir="$(dirname "$(dirname "$en_file")")"
   app_name="$(basename "$mfe_app_dir")"
-  ms_file="${mfe_app_dir}/ms/messages.json"
 
   en_count="$(count_json_keys "$en_file")"
   ANY_MFE_CHECKED=true
@@ -149,19 +199,24 @@ while IFS= read -r -d '' en_file; do
     continue
   fi
 
-  if [[ ! -f "$ms_file" ]]; then
-    fail "${app_name}: ms/messages.json missing (${ms_file})"
-    continue
-  fi
+  for lang in "${TARGET_LANGS[@]}"; do
+    [[ "$lang" == "en" ]] && continue
+    lang_file="${mfe_app_dir}/${lang}/messages.json"
 
-  ms_count="$(count_json_keys "$ms_file")"
-  coverage=$(( ms_count * 100 / en_count ))
+    if [[ ! -f "$lang_file" ]]; then
+      fail "${app_name}: ${lang}/messages.json missing"
+      continue
+    fi
 
-  if [[ "$coverage" -ge "$COVERAGE_THRESHOLD" ]]; then
-    pass "${app_name}: ms coverage ${ms_count}/${en_count} keys (${coverage}%)"
-  else
-    fail "${app_name}: ms coverage ${ms_count}/${en_count} keys (${coverage}% < ${COVERAGE_THRESHOLD}%)"
-  fi
+    lang_count="$(count_json_keys "$lang_file")"
+    coverage=$(( lang_count * 100 / en_count ))
+
+    if [[ "$coverage" -ge "$COVERAGE_THRESHOLD" ]]; then
+      pass "${app_name}/${lang}: ${lang_count}/${en_count} keys (${coverage}%)"
+    else
+      fail "${app_name}/${lang}: ${lang_count}/${en_count} keys (${coverage}% < ${COVERAGE_THRESHOLD}%)"
+    fi
+  done
 done < <(find "$MFE_LOCALE_DIR" -path "*/en/messages.json" -print0 2>/dev/null)
 
 if [[ "$ANY_MFE_CHECKED" == "false" ]]; then

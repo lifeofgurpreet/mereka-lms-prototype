@@ -1,93 +1,267 @@
 #!/usr/bin/env bash
+# Verify release automation artefacts are present and well-formed.
+#
+# Checks:
+#   1. docs/operations/RELEASE_PROCESS.md exists
+#   2. .github/workflows/release.yml exists and is triggered on tag push
+#   3. scripts/infra/create-release.sh exists and is executable
+#   4. Recent commits follow conventional commit format (informational)
+#
 # @covers AC-020
 # @spec: ci-cd-pipeline_spec.md
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
-RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
-BUILD_WORKFLOW="$WORKFLOWS_DIR/build-tutor-images.yml"
-BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
+
+RELEASE_PROCESS_DOC="$REPO_ROOT/docs/operations/RELEASE_PROCESS.md"
+RELEASE_WORKFLOW="$REPO_ROOT/.github/workflows/release.yml"
+CREATE_RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/create-release.sh"
+
 RELEASE_INVOKE_CHECKER="$REPO_ROOT/scripts/qa/verify-release-workflow-invocation.sh"
 RELEASE_DRY_RUN_CHECKER="$REPO_ROOT/scripts/qa/verify-release-dry-run-contract.sh"
 RELEASE_EVIDENCE_WORKFLOW_CHECKER="$REPO_ROOT/scripts/qa/verify-release-evidence-workflow.sh"
-
-echo "Checking release automation contract for explicit target environment..."
+BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
+RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
+BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
 
 violations=0
 
-# Any workflow invoking release-openedx-gitops.sh must pass --target-env.
-while IFS= read -r workflow_file; do
-  if rg -n '\./scripts/infra/release-openedx-gitops\.sh' "$workflow_file" >/dev/null; then
-    if ! rg -n -- '--target-env' "$workflow_file" >/dev/null; then
-      echo "❌ Missing --target-env in workflow ${workflow_file#"$REPO_ROOT"/}"
-      violations=1
-    fi
+pass() { echo "  PASS  $*"; }
+fail() { echo "  FAIL  $*"; violations=1; }
+warn() { echo "  WARN  $*"; }
+
+echo "=== Release Automation Verification ==="
+echo ""
+
+# ---------------------------------------------------------------------------
+# 1. RELEASE_PROCESS.md
+# ---------------------------------------------------------------------------
+echo "--- Release process document ---"
+
+if [[ -f "${RELEASE_PROCESS_DOC}" ]]; then
+  pass "docs/operations/RELEASE_PROCESS.md exists"
+else
+  fail "docs/operations/RELEASE_PROCESS.md is MISSING"
+fi
+
+# Spot-check key sections
+for section in "Semantic Versioning" "Release Cadence" "Release Checklist" \
+               "Rollback Procedure" "Hotfix Process" "Conventional Commit"; do
+  if [[ -f "${RELEASE_PROCESS_DOC}" ]] && grep -qF "${section}" "${RELEASE_PROCESS_DOC}"; then
+    pass "RELEASE_PROCESS.md contains '${section}'"
+  else
+    fail "RELEASE_PROCESS.md is missing section '${section}'"
   fi
-done < <(find "$WORKFLOWS_DIR" -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+done
 
-# build-tutor-images must force explicit target selection during manual dispatch.
-if ! rg -n "target_environment:" "$BUILD_WORKFLOW" >/dev/null; then
-  echo "❌ Missing target_environment input in ${BUILD_WORKFLOW#"$REPO_ROOT"/}"
-  violations=1
-fi
-if ! rg -n "default:[[:space:]]*select-environment" "$BUILD_WORKFLOW" >/dev/null; then
-  echo "❌ target_environment default is not select-environment in ${BUILD_WORKFLOW#"$REPO_ROOT"/}"
-  violations=1
-fi
+echo ""
 
-# release-openedx script must enforce explicit --target-env in CI mode.
-if ! rg -n 'TARGET_ENV_SET' "$RELEASE_SCRIPT" >/dev/null; then
-  echo "❌ Missing TARGET_ENV_SET guard variable in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
-  violations=1
-fi
-if ! rg -n 'CI mode requires explicit --target-env' "$RELEASE_SCRIPT" >/dev/null; then
-  echo "❌ Missing CI explicit --target-env guard in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
-  violations=1
-fi
-if ! rg -n 'CI production apply requires both --openedx-digest and --mfe-digest' "$RELEASE_SCRIPT" >/dev/null; then
-  echo "❌ Missing CI production digest safety gate in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
-  violations=1
+# ---------------------------------------------------------------------------
+# 2. release.yml workflow
+# ---------------------------------------------------------------------------
+echo "--- Release workflow ---"
+
+if [[ -f "${RELEASE_WORKFLOW}" ]]; then
+  pass ".github/workflows/release.yml exists"
+else
+  fail ".github/workflows/release.yml is MISSING"
 fi
 
-# release-openedx script should support optional digest pinning flags.
-if ! rg -n -- '--openedx-digest' "$RELEASE_SCRIPT" >/dev/null; then
-  echo "❌ Missing --openedx-digest support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
-  violations=1
-fi
-if ! rg -n -- '--mfe-digest' "$RELEASE_SCRIPT" >/dev/null; then
-  echo "❌ Missing --mfe-digest support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
-  violations=1
-fi
-if ! rg -n -- '--require-digests' "$RELEASE_SCRIPT" >/dev/null; then
-  echo "❌ Missing --require-digests support in ${RELEASE_SCRIPT#"$REPO_ROOT"/}"
-  violations=1
+if [[ -f "${RELEASE_WORKFLOW}" ]]; then
+  if grep -qE "tags:" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml triggers on tags"
+  else
+    fail "release.yml does not trigger on tag push"
+  fi
+
+  if grep -qE "'v\[0-9\]" "${RELEASE_WORKFLOW}" || grep -qE '"v\[0-9\]' "${RELEASE_WORKFLOW}"; then
+    pass "release.yml tag pattern restricts to semver (v*)"
+  else
+    fail "release.yml missing semver tag filter pattern"
+  fi
+
+  if grep -q "gh release create" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml uses 'gh release create'"
+  else
+    fail "release.yml does not use 'gh release create'"
+  fi
+
+  if grep -q "contents: write" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml grants 'contents: write' permission"
+  else
+    fail "release.yml missing 'contents: write' permission for release creation"
+  fi
+
+  if grep -q "fetch-depth: 0" "${RELEASE_WORKFLOW}"; then
+    pass "release.yml uses full git history (fetch-depth: 0)"
+  else
+    fail "release.yml missing fetch-depth: 0 (needed for git log changelog)"
+  fi
 fi
 
-if [[ ! -f "$BUILD_WORKFLOW_CONTRACT" ]]; then
-  echo "❌ Missing build workflow contract checker: ${BUILD_WORKFLOW_CONTRACT#"$REPO_ROOT"/}"
-  violations=1
+echo ""
+
+# ---------------------------------------------------------------------------
+# 3. create-release.sh
+# ---------------------------------------------------------------------------
+echo "--- Release helper script ---"
+
+if [[ -f "${CREATE_RELEASE_SCRIPT}" ]]; then
+  pass "scripts/infra/create-release.sh exists"
+else
+  fail "scripts/infra/create-release.sh is MISSING"
 fi
 
-if [[ ! -f "$RELEASE_INVOKE_CHECKER" ]]; then
-  echo "❌ Missing release invocation checker: ${RELEASE_INVOKE_CHECKER#"$REPO_ROOT"/}"
-  violations=1
+if [[ -x "${CREATE_RELEASE_SCRIPT}" ]]; then
+  pass "scripts/infra/create-release.sh is executable"
+else
+  fail "scripts/infra/create-release.sh is NOT executable (run: chmod +x ${CREATE_RELEASE_SCRIPT})"
 fi
 
-if [[ ! -f "$RELEASE_DRY_RUN_CHECKER" ]]; then
-  echo "❌ Missing release dry-run checker: ${RELEASE_DRY_RUN_CHECKER#"$REPO_ROOT"/}"
-  violations=1
+if [[ -f "${CREATE_RELEASE_SCRIPT}" ]]; then
+  if grep -q "set -euo pipefail" "${CREATE_RELEASE_SCRIPT}"; then
+    pass "create-release.sh has set -euo pipefail"
+  else
+    fail "create-release.sh missing 'set -euo pipefail'"
+  fi
+
+  if grep -qE '\^v\[0-9\]' "${CREATE_RELEASE_SCRIPT}"; then
+    pass "create-release.sh validates semver format"
+  else
+    fail "create-release.sh missing semver validation"
+  fi
+
+  if grep -q "git tag -a" "${CREATE_RELEASE_SCRIPT}"; then
+    pass "create-release.sh creates annotated tags"
+  else
+    fail "create-release.sh does not create annotated tags"
+  fi
+
+  if grep -q "git push origin" "${CREATE_RELEASE_SCRIPT}"; then
+    pass "create-release.sh pushes tag to origin"
+  else
+    fail "create-release.sh does not push tag to origin"
+  fi
+
+  if grep -q "Rollback" "${CREATE_RELEASE_SCRIPT}"; then
+    pass "create-release.sh prints rollback command"
+  else
+    fail "create-release.sh does not print rollback command"
+  fi
 fi
 
-if [[ ! -f "$RELEASE_EVIDENCE_WORKFLOW_CHECKER" ]]; then
-  echo "❌ Missing release evidence workflow checker: ${RELEASE_EVIDENCE_WORKFLOW_CHECKER#"$REPO_ROOT"/}"
-  violations=1
+echo ""
+
+# ---------------------------------------------------------------------------
+# 4. Conventional commit check (informational, non-blocking)
+# ---------------------------------------------------------------------------
+echo "--- Conventional commit format (recent commits, informational) ---"
+
+CONV_PATTERN='^(feat|fix|docs|refactor|chore|test|perf|ci)(\(.+\))?!?:'
+RECENT_TOTAL=20
+RECENT_COMMITS="$(git -C "${REPO_ROOT}" log --oneline -"${RECENT_TOTAL}" --pretty=format:'%s' 2>/dev/null || true)"
+CONV_COUNT=0
+NON_CONV_COUNT=0
+
+while IFS= read -r subject; do
+  [[ -z "${subject}" ]] && continue
+  if echo "${subject}" | grep -qE "${CONV_PATTERN}"; then
+    CONV_COUNT=$((CONV_COUNT + 1))
+  else
+    NON_CONV_COUNT=$((NON_CONV_COUNT + 1))
+  fi
+done <<< "${RECENT_COMMITS}"
+
+if [[ $((CONV_COUNT + NON_CONV_COUNT)) -eq 0 ]]; then
+  warn "Could not read recent commits (empty repo?)"
+elif [[ "${NON_CONV_COUNT}" -eq 0 ]]; then
+  pass "All ${CONV_COUNT} recent commits follow conventional commit format"
+elif [[ "${CONV_COUNT}" -ge $((RECENT_TOTAL / 2)) ]]; then
+  warn "${NON_CONV_COUNT}/${RECENT_TOTAL} recent commits do not follow conventional commits (informational)"
+else
+  warn "Fewer than half of recent ${RECENT_TOTAL} commits follow conventional commits (changelog quality may be low)"
 fi
 
-if [[ "$violations" -ne 0 ]]; then
-  echo "Release automation contract failed."
+echo ""
+
+# ---------------------------------------------------------------------------
+# 5. Existing release automation contract (from original verify-release-automation.sh)
+# ---------------------------------------------------------------------------
+echo "--- Release orchestrator contract ---"
+
+if [[ -f "${RELEASE_SCRIPT}" ]]; then
+  # Any workflow invoking release-openedx-gitops.sh must pass --target-env
+  WORKFLOWS_DIR="$REPO_ROOT/.github/workflows"
+  while IFS= read -r workflow_file; do
+    if grep -q '\./scripts/infra/release-openedx-gitops\.sh' "${workflow_file}" 2>/dev/null; then
+      if ! grep -q -- '--target-env' "${workflow_file}" 2>/dev/null; then
+        fail "Missing --target-env in workflow ${workflow_file#"$REPO_ROOT"/}"
+      fi
+    fi
+  done < <(find "${WORKFLOWS_DIR}" -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+
+  if grep -q 'TARGET_ENV_SET' "${RELEASE_SCRIPT}" 2>/dev/null; then
+    pass "release-openedx-gitops.sh has TARGET_ENV_SET guard"
+  else
+    fail "release-openedx-gitops.sh missing TARGET_ENV_SET guard"
+  fi
+
+  if grep -q 'CI mode requires explicit --target-env' "${RELEASE_SCRIPT}" 2>/dev/null; then
+    pass "release-openedx-gitops.sh guards CI --target-env"
+  else
+    fail "release-openedx-gitops.sh missing CI explicit --target-env guard"
+  fi
+
+  if grep -q 'CI production apply requires both --openedx-digest and --mfe-digest' "${RELEASE_SCRIPT}" 2>/dev/null; then
+    pass "release-openedx-gitops.sh guards CI production digest"
+  else
+    fail "release-openedx-gitops.sh missing CI production digest safety gate"
+  fi
+
+  for flag in '--openedx-digest' '--mfe-digest' '--require-digests'; do
+    if grep -q -- "${flag}" "${RELEASE_SCRIPT}" 2>/dev/null; then
+      pass "release-openedx-gitops.sh supports ${flag}"
+    else
+      fail "release-openedx-gitops.sh missing ${flag} support"
+    fi
+  done
+else
+  warn "release-openedx-gitops.sh not found — skipping orchestrator checks"
+fi
+
+if [[ -f "${BUILD_WORKFLOW}" ]]; then
+  if grep -q "target_environment:" "${BUILD_WORKFLOW}"; then
+    pass "build-tutor-images.yml has target_environment input"
+  else
+    fail "build-tutor-images.yml missing target_environment input"
+  fi
+
+  if grep -q "default:.*select-environment" "${BUILD_WORKFLOW}"; then
+    pass "build-tutor-images.yml target_environment defaults to select-environment"
+  else
+    fail "build-tutor-images.yml target_environment default is not select-environment"
+  fi
+fi
+
+for checker_file in "${BUILD_WORKFLOW_CONTRACT}" "${RELEASE_INVOKE_CHECKER}" \
+                    "${RELEASE_DRY_RUN_CHECKER}" "${RELEASE_EVIDENCE_WORKFLOW_CHECKER}"; do
+  checker_name="${checker_file#"$REPO_ROOT"/}"
+  if [[ -f "${checker_file}" ]]; then
+    pass "${checker_name} exists"
+  else
+    fail "${checker_name} is MISSING"
+  fi
+done
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# Final result
+# ---------------------------------------------------------------------------
+if [[ "${violations}" -ne 0 ]]; then
+  echo "Release automation verification FAILED."
   exit 1
 fi
 
-echo "✅ Release automation contract passed."
+echo "Release automation verification PASSED."
