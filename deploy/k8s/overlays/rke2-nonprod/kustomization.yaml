@@ -33,8 +33,6 @@ patches:
   - path: patches/externalsecrets-infisical.yaml
   # Override domain env vars for rke2-nonprod dev hosts
   - path: patches/domain-env.yaml
-  # On single-node rke2, avoid maxSurge deadlocks for these single-replica services.
-  - path: patches/single-node-recreate-strategy.yaml
 
 # Minimal replicas for nonprod (same as local)
 replicas:
