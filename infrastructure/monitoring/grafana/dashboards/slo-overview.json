@@ -581,6 +581,245 @@
     },
     {
       "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 },
+      "id": 105,
+      "title": "Tier-1 Journey SLOs",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "30-day error budget remaining for LMS login journey SLO.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 0.10 },
+              { "color": "yellow", "value": 0.25 },
+              { "color": "green", "value": 0.50 }
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 39 },
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Journey SLO (Login) 30-day Error Budget",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mereka:slo:journey_error_budget_remaining_ratio{journey=\"journey_lms_login\",tier=\"1\"}",
+          "legendFormat": "Login",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "30-day error budget remaining for LMS course access journey SLO.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 0.10 },
+              { "color": "yellow", "value": 0.25 },
+              { "color": "green", "value": 0.50 }
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 39 },
+      "id": 13,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Journey SLO (Course Access) 30-day Error Budget",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mereka:slo:journey_error_budget_remaining_ratio{journey=\"journey_lms_course_access\",tier=\"1\"}",
+          "legendFormat": "Course Access",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "30-day error budget remaining for CMS authoring journey SLO.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 0.10 },
+              { "color": "yellow", "value": 0.25 },
+              { "color": "green", "value": 0.50 }
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 39 },
+      "id": 14,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Journey SLO (CMS Authoring) 30-day Error Budget",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mereka:slo:journey_error_budget_remaining_ratio{journey=\"journey_cms_authoring\",tier=\"1\"}",
+          "legendFormat": "CMS Authoring",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "30-day error budget remaining for purchase checkout journey SLO.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 0.10 },
+              { "color": "yellow", "value": 0.25 },
+              { "color": "green", "value": 0.50 }
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 39 },
+      "id": 15,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Journey SLO (Purchase Checkout) 30-day Error Budget",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mereka:slo:journey_error_budget_remaining_ratio{journey=\"journey_purchase_checkout\",tier=\"1\"}",
+          "legendFormat": "Purchase Checkout",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "30-day error budget remaining for purchase webhook journey SLO.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 0.10 },
+              { "color": "yellow", "value": 0.25 },
+              { "color": "green", "value": 0.50 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 39 },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "title": "Journey SLO (Purchase Webhook) 30-day Error Budget",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mereka:slo:journey_error_budget_remaining_ratio{journey=\"journey_purchase_webhook\",tier=\"1\"}",
+          "legendFormat": "Purchase Webhook",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
       "id": 104,
       "title": "Alert Delivery Drills",

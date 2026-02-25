@@ -34,7 +34,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-016 | P0 | SLO | Define Tier-1 user journeys and owning SLI metrics | OBS-006 | SLO mapping doc | each Tier-1 journey mapped to explicit SLI query | done |
 | OBS-017 | P0 | SLO | Implement missing SLI recording rules for uncovered journeys | OBS-016 | PrometheusRule updates | recording rules present and queryable in runtime | done |
 | OBS-018 | P1 | SLO | Add burn-rate alerts for all Tier-1 journeys (multi-window) | OBS-017 | PrometheusRule updates | burn-rate alerts loaded and visible in Prometheus API | done |
-| OBS-019 | P1 | SLO | Add SLO dashboard contract section per journey | OBS-018 | dashboard contract update | audit script enforces journey SLO panels | planned |
+| OBS-019 | P1 | SLO | Add SLO dashboard contract section per journey | OBS-018 | dashboard contract update | audit script enforces journey SLO panels | done |
 | OBS-020 | P1 | SLO | Add SLO breach runbook links in alert annotations | OBS-018 | alert annotation updates | each SLO alert links to concrete remediation runbook | done |
 | OBS-021 | P1 | Logs/errors | Enforce structured log keys for critical failure classes | OBS-006 | logging contract doc + lints | CI fails on missing required log fields in key services | planned |
 | OBS-022 | P1 | Logs/errors | Expand Sentry runtime coverage matrix by service | OBS-021 | service matrix + audit rules | sentry wiring audit verifies all required services | planned |
