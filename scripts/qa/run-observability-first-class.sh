@@ -68,6 +68,7 @@ COMPLIANCE_JSON="$OUT_DIR/observability-compliance-${MODE}.json"
 COMPLIANCE_MD="$OUT_DIR/observability-compliance-${MODE}.md"
 RUNTIME_TXT="$OUT_DIR/observability-runtime-verify-${MODE}.txt"
 RUNTIME_MD="$OUT_DIR/observability-runtime-verify-${MODE}.md"
+CORRELATION_TXT="$OUT_DIR/observability-correlation-headers-${MODE}.txt"
 COVERAGE_JSON="$OUT_DIR/observability-coverage-${MODE}.json"
 COVERAGE_MD="$OUT_DIR/observability-coverage-${MODE}.md"
 INDEX_JSON="$OUT_DIR/observability-first-class-${MODE}-evidence-index.json"
@@ -113,6 +114,20 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   VERIFY_OBS_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
   VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
   ./scripts/qa/verify-observability-runtime.sh > "$RUNTIME_TXT"
+
+  echo "==> Running correlation header propagation check"
+  CORRELATION_ARGS=()
+  if [[ "$STRICT" == "1" ]]; then
+    CORRELATION_ARGS+=(--strict)
+  fi
+  STRICT="$STRICT" \
+  VERIFY_CORRELATION_EVIDENCE_FILE="$CORRELATION_TXT" \
+  VERIFY_CORRELATION_ENV_LABEL="$ENV_LABEL" \
+  VERIFY_CORRELATION_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
+  VERIFY_CORRELATION_K8S_CONTEXT="$K8S_CONTEXT" \
+  VERIFY_CORRELATION_GCP_PROJECT="$GCP_PROJECT_VALUE" \
+  VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
+  ./scripts/qa/verify-correlation-header-propagation.sh "${CORRELATION_ARGS[@]}" > "$CORRELATION_TXT"
 fi
 
 echo "==> Building evidence index"
@@ -127,17 +142,18 @@ compliance_json = Path(${COMPLIANCE_JSON@Q})
 compliance_md = Path(${COMPLIANCE_MD@Q})
 runtime_txt = Path(${RUNTIME_TXT@Q})
 runtime_md = Path(${RUNTIME_MD@Q})
+correlation_txt = Path(${CORRELATION_TXT@Q})
 coverage_json = Path(${COVERAGE_JSON@Q})
 coverage_md = Path(${COVERAGE_MD@Q})
 
 files = [str(compliance_json), str(compliance_md), str(coverage_json), str(coverage_md)]
 if mode in ("runtime", "all"):
-    files.extend([str(runtime_txt), str(runtime_md)])
+    files.extend([str(runtime_txt), str(runtime_md), str(correlation_txt)])
 
 payload = {
     "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
     "mode": mode,
-    "strict": bool(${STRICT}),
+    "strict": bool(int("${STRICT}")),
     "identity": (
         "env=${ENV_LABEL};"
         "profile=${DISPATCH_PROFILE};"
