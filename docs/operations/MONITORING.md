@@ -259,11 +259,12 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.
 11. **Alert routing verification** – run `./scripts/qa/verify-alert-routing.sh` for runtime policy/channel checks plus optional VPS webhook routing validation.
 12. **Alert-noise baseline audit** – run `./scripts/qa/audit-alert-noise-baseline.sh --mode local` to enforce codified duplicate/false-positive thresholds from `infrastructure/monitoring/alert-noise-baseline.json`. For runtime enforcement, generate `var/operations-gates/alert-noise-runtime-sample.json` (or provide a canonical source file) and run `ALERT_NOISE_RUNTIME_SOURCE=<sample> ./scripts/qa/audit-alert-noise-baseline.sh --mode runtime`.
-13. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
-14. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
-15. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
-16. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
-17. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
+13. **Alert-noise severity contract** – required severities are `critical`, `error`, `warning`, each with dedicated duplicate and false-positive ratio maxima in `required_severities` and `thresholds.severity` within `infrastructure/monitoring/alert-noise-baseline.json`. Missing required severity buckets in runtime sample are an error when `STRICT_RUNTIME=1`.
+14. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
+15. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
+16. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
+17. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
+18. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
 
 ## Certificate/SAN verification
 

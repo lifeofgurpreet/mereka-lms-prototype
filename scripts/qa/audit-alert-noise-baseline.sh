@@ -69,10 +69,16 @@ jq -e '
   .schema_version and
   (.lookback_days | numbers and . > 0) and
   (.minimum_sample_size | numbers and . > 0) and
+  (.required_severities | type == "array" and length >= 1) and
+  ((.required_severities | unique | length) == (.required_severities | length)) and
+  (all(.required_severities[]; . == "critical" or . == "error" or . == "warning")) and
   (.thresholds.duplicate_alert_ratio_max | numbers and . >= 0 and . <= 1) and
   (.thresholds.false_positive_ratio_max | numbers and . >= 0 and . <= 1) and
   ((.thresholds.severity // {}) | type == "object") and
-  (all((.thresholds.severity | to_entries | .[]); .value.duplicate_alert_ratio_max | numbers and . >= 0 and . <= 1 and .value.false_positive_ratio_max | numbers and . >= 0 and . <= 1))
+  (all((.required_severities // [])[] as $severity; .thresholds.severity[$severity] )) and
+  (all((.thresholds.severity | to_entries | .[]); .value.duplicate_alert_ratio_max | numbers and . >= 0 and . <= 1 and .value.false_positive_ratio_max | numbers and . >= 0 and . <= 1)) and
+  (all((.required_severities // [])[] as $severity; .thresholds.severity[$severity] != null and .thresholds.severity[$severity].duplicate_alert_ratio_max >= 0 and .thresholds.severity[$severity].false_positive_ratio_max >= 0)) and
+  (((.required_severities | sort) | unique) == ((.thresholds.severity | keys | sort) | unique))
 ' "$CONFIG_PATH" >/dev/null
 
 echo "OK   local: alert-noise baseline schema valid ($CONFIG_PATH)"
@@ -95,6 +101,15 @@ jq -e '
   (.duplicate_alerts | numbers and . >= 0) and
   (.false_positive_alerts | numbers and . >= 0)
 ' "$RUNTIME_SOURCE" >/dev/null
+
+required_severities=(
+  $(jq -r '.required_severities[]' "$CONFIG_PATH")
+)
+
+if [[ "${#required_severities[@]}" -eq 0 ]]; then
+  echo "FAIL runtime: required_severities must contain at least one severity" >&2
+  exit 1
+fi
 
 sample_total="$(jq -r '.total_alerts' "$RUNTIME_SOURCE")"
 sample_dup="$(jq -r '.duplicate_alerts' "$RUNTIME_SOURCE")"
@@ -135,20 +150,17 @@ fi
 
 severity_thresholds_present="$(jq -r '(.thresholds.severity // {} | to_entries | length)' "$CONFIG_PATH")"
 if [[ "$severity_thresholds_present" -gt 0 ]]; then
-  has_bucket_any="0"
-  while IFS= read -r severity; do
-    has_bucket_any="1"
-
+  for severity in "${required_severities[@]}"; do
     severity_total="$(jq -r --arg s "$severity" '.severity_buckets[$s].total // empty' "$RUNTIME_SOURCE")"
     severity_dup="$(jq -r --arg s "$severity" '.severity_buckets[$s].duplicate // empty' "$RUNTIME_SOURCE")"
     severity_fp="$(jq -r --arg s "$severity" '.severity_buckets[$s].false_positive // empty' "$RUNTIME_SOURCE")"
 
     if [[ -z "$severity_total" || -z "$severity_dup" || -z "$severity_fp" ]]; then
       if [[ "$STRICT_RUNTIME" == "1" ]]; then
-        echo "FAIL runtime: severity '${severity}' not present in sample JSON" >&2
+        echo "FAIL runtime: required severity '${severity}' missing from severity_buckets in runtime sample" >&2
         exit 1
       fi
-      echo "SKIP runtime: severity '${severity}' not present in sample JSON"
+      echo "SKIP runtime: required severity '${severity}' missing from sample"
       continue
     fi
 
@@ -174,10 +186,5 @@ if [[ "$severity_thresholds_present" -gt 0 ]]; then
       echo "FAIL runtime: severity=${severity} false_positive_ratio=$severity_fp_ratio > max=$severity_fp_max" >&2
       exit 1
     fi
-  done < <(jq -r '.thresholds.severity | keys[]' "$CONFIG_PATH")
-
-  if [[ "$has_bucket_any" == "0" ]]; then
-    echo "OK   runtime: no severity thresholds configured"
-  fi
+  done
 fi
-
