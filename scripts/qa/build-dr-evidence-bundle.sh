@@ -201,7 +201,7 @@ if [[ -f "$OUT_DIR/observability-runtime/observability-correlation-headers-runti
 else
   echo "FAIL observability-first-class-runtime: missing observability-correlation-headers-runtime.txt output"
 fi
-record_manifest_artifact "$OUT_DIR/observability-correlation-headers-runtime.txt" false "Observability runtime correlation header propagation output"
+record_manifest_artifact "$OUT_DIR/observability-correlation-headers-runtime.txt" true "Observability runtime correlation header propagation output"
 
 run_check "verify-observability-evidence-identity" \
   ./scripts/qa/verify-observability-evidence-identity.sh --dir "$OUT_DIR/observability-runtime"
