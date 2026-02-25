@@ -6,6 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: ora2-operations
     app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
 spec:
   groups:
     - name: ora2-storage

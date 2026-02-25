@@ -8,23 +8,34 @@ configMapGenerator:
     files:
       - mux_delivery_monitor.py=./mux_delivery_monitor.py
 resources:
+  - servicemonitor-caddy.yaml
+  - servicemonitor-credentials.yaml
   - servicemonitor-lms.yaml
   - servicemonitor-cms.yaml
+  - servicemonitor-discovery.yaml
+  - servicemonitor-ecommerce.yaml
+  - servicemonitor-forum.yaml
   - servicemonitor-mysql.yaml
+  - servicemonitor-mfe.yaml
   - servicemonitor-redis.yaml
   - servicemonitor-enterprise.yaml
   - servicemonitor-xqueue.yaml
+  - prometheusrule-caddy.yaml
+  - prometheusrule-credentials.yaml
+  - prometheusrule-email.yaml
+  - prometheusrule-libraries.yaml
   - prometheusrule-lms.yaml
+  - prometheusrule-ora2.yaml
   - prometheusrule-enterprise.yaml
+  - prometheusrule-services.yaml
   - prometheusrule-xqueue.yaml
+  - prometheusrule-tenant-isolation.yaml
   - prometheusrule-velero.yaml
   - prometheusrule-slo.yaml
-  - slo-burn-rate-rules.yaml
   - prometheusrule-auth.yaml
-  - prometheusrule-email.yaml
-  - prometheusrule-video.yaml
-  - prometheusrule-libraries.yaml
+  - slo-burn-rate-rules.yaml
   - mux-exporter.yaml
   - servicemonitor-mux.yaml
+  - prometheusrule-video.yaml
   - prometheusrule-externalsecrets.yaml
   - hpa-enterprise.yaml

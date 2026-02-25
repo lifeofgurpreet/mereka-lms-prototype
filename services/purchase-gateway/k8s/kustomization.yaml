@@ -7,5 +7,6 @@ resources:
   - postgresql-service.yaml
   - deployment.yaml
   - service.yaml
+  - servicemonitor-purchase-gateway.yaml
   - hpa.yaml
   - external-secrets.yaml

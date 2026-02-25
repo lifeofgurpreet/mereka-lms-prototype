@@ -13,6 +13,10 @@ set -euo pipefail
 PASS=0; FAIL=0; SKIP=0
 NAMESPACE="mereka-lms"
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+KUST="${VERIFY_OBS_KUSTOMIZATION_PATH:-$REPO_ROOT/deploy/k8s/base/monitoring/kustomization.yaml}"
+MON_DIR="${VERIFY_OBS_MONITORING_DIR:-$REPO_ROOT/deploy/k8s/base/monitoring}"
+KUBECTL_TIMEOUT="${VERIFY_OBS_KUBECTL_TIMEOUT:-5}"
+SKIP_LIVE_CHECKS="${VERIFY_OBS_SKIP_LIVE_CHECKS:-0}"
 
 pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
 fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
@@ -20,8 +24,13 @@ skip() { echo "  SKIP: $1"; SKIP=$((SKIP + 1)); }
 
 _HAS_KUBECTL=""
 has_kubectl() {
+  if [[ -n "${SKIP_LIVE_CHECKS}" && "$SKIP_LIVE_CHECKS" == "1" ]]; then
+    _HAS_KUBECTL="no"
+    return 1
+  fi
+
   if [[ -z "$_HAS_KUBECTL" ]]; then
-    if command -v kubectl &>/dev/null && timeout 5 kubectl cluster-info &>/dev/null 2>&1; then
+    if command -v kubectl &>/dev/null && timeout "$KUBECTL_TIMEOUT" kubectl cluster-info &>/dev/null 2>&1; then
       _HAS_KUBECTL="yes"
     else
       _HAS_KUBECTL="no"
@@ -30,8 +39,15 @@ has_kubectl() {
   [[ "$_HAS_KUBECTL" == "yes" ]]
 }
 
-KUST="$REPO_ROOT/deploy/k8s/base/monitoring/kustomization.yaml"
-MON_DIR="$REPO_ROOT/deploy/k8s/base/monitoring"
+if [[ ! -f "$KUST" ]]; then
+  fail "AC-OVR-001: kustomization.yaml not found at $KUST"
+  exit 1
+fi
+
+if [[ ! -d "$MON_DIR" ]]; then
+  fail "AC-OVR-001: monitoring directory not found at $MON_DIR"
+  exit 1
+fi
 
 echo "=== Observability Validation Requirements Verification ==="
 echo ""
@@ -47,6 +63,12 @@ REQUIRED_SMS=(
   "servicemonitor-enterprise.yaml"
   "servicemonitor-xqueue.yaml"
   "servicemonitor-mux.yaml"
+  "servicemonitor-caddy.yaml"
+  "servicemonitor-mfe.yaml"
+  "servicemonitor-forum.yaml"
+  "servicemonitor-discovery.yaml"
+  "servicemonitor-ecommerce.yaml"
+  "servicemonitor-credentials.yaml"
 )
 
 if [[ -f "$KUST" ]]; then
@@ -105,9 +127,16 @@ if has_kubectl; then
     "mysql-metrics"
     "redis-metrics"
     "enterprise-catalog-metrics"
+    "caddy-metrics"
+    "mfe-metrics"
+    "forum-metrics"
+    "discovery-metrics"
+    "ecommerce-metrics"
+    "credentials-metrics"
+    "purchase-gateway-metrics"
   )
   for sm in "${REQUIRED_LIVE_SMS[@]}"; do
-    if kubectl get servicemonitor "$sm" -n "$NAMESPACE" &>/dev/null; then
+    if timeout "$KUBECTL_TIMEOUT" kubectl get servicemonitor "$sm" -n "$NAMESPACE" &>/dev/null; then
       pass "AC-OVR-002: ServiceMonitor $sm exists in cluster"
     else
       skip "AC-OVR-002: ServiceMonitor $sm not found in cluster"
@@ -128,6 +157,14 @@ REQUIRED_PRS=(
   "prometheusrule-velero.yaml"
   "prometheusrule-slo.yaml"
   "prometheusrule-auth.yaml"
+  "prometheusrule-caddy.yaml"
+  "prometheusrule-services.yaml"
+  "prometheusrule-video.yaml"
+  "prometheusrule-email.yaml"
+  "prometheusrule-libraries.yaml"
+  "prometheusrule-ora2.yaml"
+  "prometheusrule-tenant-isolation.yaml"
+  "prometheusrule-credentials.yaml"
 )
 
 if [[ -f "$KUST" ]]; then
@@ -161,9 +198,16 @@ if has_kubectl; then
     "velero-alerts"
     "slo-recording-rules"
     "auth-alerts"
+    "caddy-alerts"
+    "services-alerts"
+    "video-alerts"
+    "email-alerts"
+    "library-alerts"
+    "ora2-operations"
+    "credentials-alerts"
   )
   for pr in "${REQUIRED_LIVE_PRS[@]}"; do
-    if kubectl get prometheusrule "$pr" -n "$NAMESPACE" &>/dev/null; then
+    if timeout "$KUBECTL_TIMEOUT" kubectl get prometheusrule "$pr" -n "$NAMESPACE" &>/dev/null; then
       pass "AC-OVR-006: PrometheusRule $pr exists in cluster"
     else
       skip "AC-OVR-006: PrometheusRule $pr not found in cluster"
@@ -217,6 +261,48 @@ if [[ -f "$pr_ent" ]]; then
   done
 else
   fail "AC-OVR-009: prometheusrule-enterprise.yaml not found"
+fi
+
+# AC-OVR-008: caddy alert names (sample)
+pr_caddy="$MON_DIR/prometheusrule-caddy.yaml"
+if [[ -f "$pr_caddy" ]]; then
+  CADDY_ALERTS=(
+    "CaddyDown"
+    "CaddyHighErrorRate"
+    "CaddyHighLatency"
+  )
+  for alert in "${CADDY_ALERTS[@]}"; do
+    if grep -qE "alert:\\s*${alert}" "$pr_caddy"; then
+      pass "AC-OVR-008: Alert $alert defined in prometheusrule-caddy.yaml"
+    else
+      fail "AC-OVR-008: Alert $alert NOT found in prometheusrule-caddy.yaml"
+    fi
+  done
+else
+  fail "AC-OVR-008: prometheusrule-caddy.yaml not found"
+fi
+
+# AC-OVR-008: shared services alert names (sample)
+pr_services="$MON_DIR/prometheusrule-services.yaml"
+if [[ -f "$pr_services" ]]; then
+  SERVICE_ALERTS=(
+    "ForumPodDown"
+    "DiscoveryPodDown"
+    "EcommercePodDown"
+    "CredentialsPodDown"
+    "MFEPodDown"
+    "PurchaseGatewayPodDown"
+    "PurchaseGatewayHighErrorRate"
+  )
+  for alert in "${SERVICE_ALERTS[@]}"; do
+    if grep -qE "alert:\\s*${alert}" "$pr_services"; then
+      pass "AC-OVR-008: Alert $alert defined in prometheusrule-services.yaml"
+    else
+      fail "AC-OVR-008: Alert $alert NOT found in prometheusrule-services.yaml"
+    fi
+  done
+else
+  fail "AC-OVR-008: prometheusrule-services.yaml not found"
 fi
 
 # AC-OVR-010: SLO recording-rules alerts
@@ -399,7 +485,34 @@ fi
 
 echo ""
 
-# ── Section 8: Critical Alert Duration (AC-OVR-030) ──
+# ── Section 8: Metrics Host-Rewrite Guardrail (AC-OVR-012) ──
+echo "--- Metrics Host-Rewrite Guardrail (AC-OVR-012) ---"
+
+lms_middleware="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py"
+cms_middleware="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/mereka_forwarded_headers.py"
+expected_ip_regex='re.match(r"^\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?$", raw_host or "")'
+broken_ip_regex='re.match(r"^\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?$", raw_host or "")'
+
+for middleware_file in "$lms_middleware" "$cms_middleware"; do
+  base="$(basename "$middleware_file")"
+  if [[ ! -f "$middleware_file" ]]; then
+    fail "AC-OVR-012: $base not found"
+    continue
+  fi
+  if grep -Fq "$broken_ip_regex" "$middleware_file"; then
+    fail "AC-OVR-012: $base contains incorrectly escaped pod-IP regex for /metrics host rewrite"
+    continue
+  fi
+  if grep -Fq "$expected_ip_regex" "$middleware_file"; then
+    pass "AC-OVR-012: $base has valid pod-IP regex for /metrics host rewrite"
+  else
+    fail "AC-OVR-012: $base missing expected pod-IP regex for /metrics host rewrite"
+  fi
+done
+
+echo ""
+
+# ── Section 9: Critical Alert Duration (AC-OVR-030) ──
 echo "--- Critical Alert Duration (AC-OVR-030) ---"
 
 # Check that critical-severity alerts have for <= 5m

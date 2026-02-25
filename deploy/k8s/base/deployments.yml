@@ -51,6 +51,7 @@ spec:
           ports:
             - containerPort: 80
             - containerPort: 443
+            - containerPort: 2019
           resources:
             requests:
               cpu: 50m

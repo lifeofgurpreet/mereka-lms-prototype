@@ -5,9 +5,9 @@
 
 ## Summary
 
-ServiceMonitors and PrometheusRules are in place for Open edX LMS/CMS and now include
-MySQL/Redis exporter telemetry wiring. Open edX app-level `/metrics` still depends on
-django-prometheus image rollout.
+ServiceMonitors and PrometheusRules are in place for Open edX LMS/CMS and include
+MySQL/Redis exporter telemetry wiring. Open edX app-level `/metrics` integration is
+present in repo and must be validated as `HTTP 200` at runtime for each rollout.
 
 ## What Was Implemented
 
@@ -53,19 +53,15 @@ Updated `services.yml` to add named ports:
 
 ## Current Limitations
 
-### Open edX Does Not Expose Prometheus Metrics
+### Runtime parity can still drift if image/config rollout is stale
 
-**Investigation findings**:
-```bash
-# Test result
-$ kubectl exec -n mereka-lms deploy/lms -- curl localhost:8000/metrics
-HTTP/1.1 400 Bad Request
+When runtime image or settings drift occurs, `/metrics` can regress and break SLI
+recording even though manifests remain present.
 
-# Log entry
-GET /metrics => generated 143 bytes in 1183 msecs (HTTP/1.1 400)
-```
-
-**Root cause**: Django's `prometheus_client` is not installed or configured in Open edX.
+Current contract:
+- LMS `/metrics` MUST return `HTTP 200`
+- CMS `/metrics` MUST return `HTTP 200`
+- ServiceMonitors MUST remain `UP` in Prometheus targets for `lms-metrics` and `cms-metrics`
 
 ### What Metrics Are Available Today
 
@@ -225,8 +221,8 @@ deploy/k8s/base/monitoring/
 ├── README.md                       # Overview and next steps
 ├── IMPLEMENTATION_STATUS.md        # This file
 ├── kustomization.yaml              # Kustomize resources
-├── servicemonitor-lms.yaml         # LMS metrics scraping (non-functional until metrics enabled)
-├── servicemonitor-cms.yaml         # CMS metrics scraping (non-functional until metrics enabled)
+├── servicemonitor-lms.yaml         # LMS metrics scraping
+├── servicemonitor-cms.yaml         # CMS metrics scraping
 ├── servicemonitor-mysql.yaml       # MySQL exporter metrics scraping
 ├── servicemonitor-redis.yaml       # Redis exporter metrics scraping
 └── prometheusrule-lms.yaml         # Alert rules (functional, uses kubelet metrics)
@@ -236,5 +232,5 @@ deploy/k8s/base/monitoring/
 
 Create these beads for next steps:
 
-1. **mereka-lms-76j**: Enable django-prometheus in Open edX image
+1. **mereka-lms-76j**: Keep django-prometheus and openedx_prometheus integration healthy in runtime rollouts
 2. **mereka-lms-76m**: Create Grafana dashboards for Open edX metrics

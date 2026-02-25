@@ -20,6 +20,6 @@ spec:
       app.kubernetes.io/name: mux-delivery-monitor
   endpoints:
     - port: metrics
-      interval: 300s   # Scrape every 5 min (metrics only change every 6h)
+      interval: 30s
       path: /metrics
       scrapeTimeout: 10s

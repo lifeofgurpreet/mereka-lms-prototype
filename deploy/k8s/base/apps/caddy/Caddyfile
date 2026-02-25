@@ -1,6 +1,7 @@
 # Global configuration
 {
     auto_https off
+    admin 0.0.0.0:2019
 }
 
 # proxy directive snippet (with logging) to be used as follows:

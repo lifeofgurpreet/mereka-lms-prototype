@@ -1,62 +1,67 @@
 #!/usr/bin/env bash
-# Verify Open edX monitoring setup
+# Verify Open edX monitoring runtime contract.
 set -euo pipefail
+
+NAMESPACE="${VERIFY_MON_NS:-mereka-lms}"
+MONITORING_NS="${VERIFY_MON_MONITORING_NS:-monitoring}"
+TIMEOUT_SECS="${VERIFY_MON_TIMEOUT:-20}"
+FAIL=0
+
+pass() { echo "PASS: $1"; }
+fail() { echo "FAIL: $1"; FAIL=$((FAIL + 1)); }
+
+run_kubectl() {
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$TIMEOUT_SECS" kubectl "$@"
+  else
+    kubectl "$@"
+  fi
+}
 
 echo "=== Open edX Monitoring Verification ==="
 echo
 
 echo "1. Checking ServiceMonitors..."
-kubectl get servicemonitor -n mereka-lms
+run_kubectl get servicemonitor -n "$NAMESPACE" >/dev/null && pass "ServiceMonitors listable in $NAMESPACE" || fail "Cannot list ServiceMonitors in $NAMESPACE"
 echo
 
 echo "2. Checking PrometheusRules..."
-kubectl get prometheusrule -n mereka-lms
+run_kubectl get prometheusrule -n "$NAMESPACE" >/dev/null && pass "PrometheusRules listable in $NAMESPACE" || fail "Cannot list PrometheusRules in $NAMESPACE"
 echo
 
 echo "3. Checking service endpoints..."
-kubectl get endpoints -n mereka-lms lms cms
+run_kubectl get endpoints -n "$NAMESPACE" lms cms >/dev/null && pass "LMS/CMS endpoints exist" || fail "LMS/CMS endpoints missing"
 echo
 
-echo "4. Testing LMS metrics endpoint (expected: 400 Bad Request until django-prometheus is installed)..."
-if kubectl exec -n mereka-lms deploy/lms -- curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" localhost:8000/metrics 2>/dev/null; then
-  echo "✓ LMS pod is reachable"
+echo "4. Testing LMS /metrics endpoint (expected: HTTP 200)..."
+LMS_CODE="$(run_kubectl exec -n "$NAMESPACE" deploy/lms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
+if [[ "$LMS_CODE" == "200" ]]; then
+  pass "LMS /metrics returned 200"
 else
-  echo "✗ LMS pod is not reachable"
+  fail "LMS /metrics returned $LMS_CODE (expected 200)"
 fi
 echo
 
-echo "5. Testing CMS metrics endpoint (expected: 400 Bad Request until django-prometheus is installed)..."
-if kubectl exec -n mereka-lms deploy/cms -- curl -s -o /dev/null -w "HTTP Status: %{http_code}\n" localhost:8000/metrics 2>/dev/null; then
-  echo "✓ CMS pod is reachable"
+echo "5. Testing CMS /metrics endpoint (expected: HTTP 200)..."
+CMS_CODE="$(run_kubectl exec -n "$NAMESPACE" deploy/cms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
+if [[ "$CMS_CODE" == "200" ]]; then
+  pass "CMS /metrics returned 200"
 else
-  echo "✗ CMS pod is not reachable"
+  fail "CMS /metrics returned $CMS_CODE (expected 200)"
 fi
 echo
 
 echo "6. Checking if Prometheus Operator is running..."
-kubectl get pods -n monitoring -l app.kubernetes.io/name=prometheus
-echo
-
-echo "7. Checking existing metrics (should show kubelet metrics)..."
-echo "Sample query: container_memory_working_set_bytes for LMS"
-kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090 &
-PF_PID=$!
-sleep 3
-if curl -s "http://localhost:9090/api/v1/query?query=container_memory_working_set_bytes{namespace='mereka-lms',pod=~'lms-.*'}" | jq -r '.status' 2>/dev/null; then
-  echo "✓ Prometheus is accessible and returning metrics"
-else
-  echo "✗ Prometheus query failed (may need to wait for scrape)"
-fi
-kill $PF_PID 2>/dev/null || true
+run_kubectl get pods -n "$MONITORING_NS" -l app.kubernetes.io/name=prometheus >/dev/null \
+  && pass "Prometheus pod(s) discovered in $MONITORING_NS" \
+  || fail "Prometheus pod(s) not found in $MONITORING_NS"
 echo
 
 echo "=== Summary ==="
-echo "✓ ServiceMonitors created (but /metrics returns 400 - django-prometheus not installed)"
-echo "✓ PrometheusRules created (using kubelet metrics)"
-echo "✓ Services updated with named ports"
-echo
-echo "Next steps:"
-echo "1. Enable django-prometheus in Open edX image (see IMPLEMENTATION_STATUS.md)"
-echo "2. Port-forward to Prometheus UI: kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090"
-echo "3. Check targets: http://localhost:9090/targets (search for 'lms-metrics')"
-echo "4. Check alerts: http://localhost:9090/alerts"
+if [[ "$FAIL" -eq 0 ]]; then
+  echo "PASS: monitoring runtime contract satisfied"
+  exit 0
+fi
+
+echo "FAIL: monitoring runtime contract has $FAIL failing check(s)"
+exit 1

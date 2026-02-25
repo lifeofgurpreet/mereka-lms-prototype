@@ -20,21 +20,82 @@ NC='\033[0m' # No Color
 PASS=0
 FAIL=0
 SKIP=0
+VERIFY_CMD_TIMEOUT="${VERIFY_OBS_CMD_TIMEOUT:-45}"
+VERIFY_RUNTIME_SCRIPT_TIMEOUT="${VERIFY_OBS_RUNTIME_SCRIPT_TIMEOUT:-60}"
+VERIFY_APP_NAMESPACE="${VERIFY_OBS_APP_NAMESPACE:-mereka-lms}"
+VERIFY_MONITORING_NAMESPACE="${VERIFY_OBS_MONITORING_NAMESPACE:-monitoring}"
+VERIFY_K8S_CONTEXT="${VERIFY_OBS_K8S_CONTEXT:-}"
+VERIFY_EVIDENCE_FILE="${VERIFY_OBS_EVIDENCE_FILE:-}"
+RESULTS_FILE="$(mktemp -t verify-observability-runtime.XXXXXX)"
+trap 'rm -f "$RESULTS_FILE"' EXIT
 
 # Helper functions
 pass() {
     echo -e "${GREEN}[PASS]${NC} $1"
-    ((PASS++))
+    PASS=$((PASS + 1))
+    printf 'pass\t%s\n' "$1" >> "$RESULTS_FILE"
 }
 
 fail() {
     echo -e "${RED}[FAIL]${NC} $1"
-    ((FAIL++))
+    FAIL=$((FAIL + 1))
+    printf 'fail\t%s\n' "$1" >> "$RESULTS_FILE"
 }
 
 skip() {
     echo -e "${YELLOW}[SKIP]${NC} $1"
-    ((SKIP++))
+    SKIP=$((SKIP + 1))
+    printf 'skip\t%s\n' "$1" >> "$RESULTS_FILE"
+}
+
+kubectl_cmd() {
+    if [[ -n "$VERIFY_K8S_CONTEXT" ]]; then
+        kubectl --context "$VERIFY_K8S_CONTEXT" "$@"
+    else
+        kubectl "$@"
+    fi
+}
+
+run_missing_resource_negative_check() {
+    local validation_script="scripts/qa/verify-observability-validation.sh"
+    local temp_root
+    local monitoring_root
+    local kustomization
+    local output
+    local rc=0
+    local missing_sm="servicemonitor-enterprise.yaml"
+
+    if [[ ! -x "$validation_script" ]]; then
+        skip "AC-OVR-026: scripts/qa/verify-observability-validation.sh not executable"
+        return 0
+    fi
+
+    temp_root="$(mktemp -d -t observability-negative.XXXXXX)"
+    monitoring_root="$temp_root/deploy/k8s/base/monitoring"
+
+    mkdir -p "$(dirname "$monitoring_root")"
+    cp -a "deploy/k8s/base/monitoring" "$temp_root/deploy/k8s/base/"
+    kustomization="$monitoring_root/kustomization.yaml"
+    sed -i "/$missing_sm/d" "$kustomization"
+
+    set +e
+    output="$( \
+      VERIFY_OBS_KUSTOMIZATION_PATH="$kustomization" \
+      VERIFY_OBS_MONITORING_DIR="$monitoring_root" \
+      "$validation_script" 2>&1 \
+    )"
+    rc=$?
+    set -e
+
+    rm -rf "$temp_root"
+
+    if [[ $rc -ne 0 ]] && echo "$output" | grep -q "${missing_sm} NOT listed in kustomization.yaml"; then
+        pass "AC-OVR-026: Negative-control check exits non-zero when required ServiceMonitor entry is missing"
+    elif [[ $rc -eq 0 ]]; then
+        fail "AC-OVR-026: Negative-control check passed even when required ServiceMonitor was removed"
+    else
+        fail "AC-OVR-026: Negative-control output did not include expected ServiceMonitor missing check"
+    fi
 }
 
 echo "========================================================="
@@ -46,29 +107,83 @@ echo ""
 echo "==> AC-OVR-016: Prometheus recording rules producing numeric data (0-1 range)"
 if command -v kubectl >/dev/null 2>&1; then
     # Try to get Prometheus pod
-    PROM_POD=$(kubectl get pods -n monitoring -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        PROM_POD="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    else
+        PROM_POD="$(kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    fi
+    set -e
 
     if [[ -n "$PROM_POD" ]]; then
         # Query recording rule
-        if kubectl exec -n monitoring "$PROM_POD" -c prometheus -- \
-            wget -q -O- "http://localhost:9090/api/v1/query?query=mereka:http_requests:availability_ratio_5m" 2>/dev/null | \
-            grep -q '"status":"success"'; then
-            pass "AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data"
+        set +e
+        if command -v timeout >/dev/null 2>&1; then
+            if timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+                wget -q -O- "http://localhost:9090/api/v1/query?query=mereka:http_requests:availability_ratio_5m" 2>/dev/null | \
+                grep -q '"status":"success"'; then
+                pass "AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data"
+            else
+                skip "AC-OVR-016: Recording rule exists but may not have data yet (scrape warm-up or rollout delay)"
+            fi
         else
-            skip "AC-OVR-016: Recording rule exists but may not have data yet (requires django-prometheus)"
+            if kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+                wget -q -O- "http://localhost:9090/api/v1/query?query=mereka:http_requests:availability_ratio_5m" 2>/dev/null | \
+                grep -q '"status":"success"'; then
+                pass "AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data"
+            else
+                skip "AC-OVR-016: Recording rule exists but may not have data yet (scrape warm-up or rollout delay)"
+            fi
         fi
+        set -e
     else
-        skip "AC-OVR-016: Prometheus pod not found in monitoring namespace"
+        skip "AC-OVR-016: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE} namespace"
     fi
 else
     skip "AC-OVR-016: kubectl not available (requires live cluster access)"
+fi
+
+# AC-OVR-016 (prerequisite): LMS/CMS /metrics endpoints must return HTTP 200
+echo ""
+echo "==> AC-OVR-016: LMS/CMS /metrics endpoints return HTTP 200"
+if command -v kubectl >/dev/null 2>&1; then
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        LMS_CODE="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/lms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
+        CMS_CODE="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/cms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
+    else
+        LMS_CODE="$(kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/lms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
+        CMS_CODE="$(kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/cms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
+    fi
+    set -e
+
+    if [[ "$LMS_CODE" == "200" ]]; then
+        pass "AC-OVR-016: LMS /metrics returned 200"
+    else
+        fail "AC-OVR-016: LMS /metrics returned $LMS_CODE (expected 200)"
+    fi
+
+    if [[ "$CMS_CODE" == "200" ]]; then
+        pass "AC-OVR-016: CMS /metrics returned 200"
+    else
+        fail "AC-OVR-016: CMS /metrics returned $CMS_CODE (expected 200)"
+    fi
+else
+    skip "AC-OVR-016: kubectl not available (cannot verify LMS/CMS /metrics)"
 fi
 
 # AC-OVR-018: GCP uptime checks
 echo ""
 echo "==> AC-OVR-018: GCP uptime checks deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
-    UPTIME_COUNT=$(gcloud monitoring uptime list-configs --format=json 2>/dev/null | jq '. | length' || echo 0)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        UPTIME_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud monitoring uptime list-configs --format=json 2>/dev/null || echo '[]')"
+    else
+        UPTIME_JSON="$(gcloud monitoring uptime list-configs --format=json 2>/dev/null || echo '[]')"
+    fi
+    UPTIME_COUNT="$(echo "$UPTIME_JSON" | jq '. | length' 2>/dev/null || echo 0)"
+    set -e
     EXPECTED_UPTIME=$(find infrastructure/monitoring/uptime/*.json 2>/dev/null | wc -l || echo 0)
 
     if [[ "$UPTIME_COUNT" -ge "$EXPECTED_UPTIME" ]]; then
@@ -84,7 +199,14 @@ fi
 echo ""
 echo "==> AC-OVR-019: GCP alert policies deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
-    ALERT_COUNT=$(gcloud alpha monitoring policies list --format=json 2>/dev/null | jq '. | length' || echo 0)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        ALERT_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud alpha monitoring policies list --format=json 2>/dev/null || echo '[]')"
+    else
+        ALERT_JSON="$(gcloud alpha monitoring policies list --format=json 2>/dev/null || echo '[]')"
+    fi
+    ALERT_COUNT="$(echo "$ALERT_JSON" | jq '. | length' 2>/dev/null | tr -d '[:space:]' || echo 0)"
+    set -e
 
     if [[ "$ALERT_COUNT" -gt 0 ]]; then
         pass "AC-OVR-019: GCP has $ALERT_COUNT alert policies deployed"
@@ -99,7 +221,14 @@ fi
 echo ""
 echo "==> AC-OVR-020: GCP log-based metrics deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
-    METRIC_COUNT=$(gcloud logging metrics list --format=json 2>/dev/null | jq '. | length' || echo 0)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        METRIC_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud logging metrics list --format=json 2>/dev/null || echo '[]')"
+    else
+        METRIC_JSON="$(gcloud logging metrics list --format=json 2>/dev/null || echo '[]')"
+    fi
+    METRIC_COUNT="$(echo "$METRIC_JSON" | jq '. | length' 2>/dev/null | tr -d '[:space:]' || echo 0)"
+    set -e
 
     if [[ "$METRIC_COUNT" -gt 0 ]]; then
         pass "AC-OVR-020: GCP has $METRIC_COUNT log-based metrics deployed"
@@ -114,7 +243,14 @@ fi
 echo ""
 echo "==> AC-OVR-021: GCP monitoring dashboards deployed"
 if command -v gcloud >/dev/null 2>&1 && gcloud auth list 2>/dev/null | grep -q ACTIVE; then
-    DASHBOARD_COUNT=$(gcloud monitoring dashboards list --format=json 2>/dev/null | jq '. | length' || echo 0)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        DASHBOARD_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" gcloud monitoring dashboards list --format=json 2>/dev/null || echo '[]')"
+    else
+        DASHBOARD_JSON="$(gcloud monitoring dashboards list --format=json 2>/dev/null || echo '[]')"
+    fi
+    DASHBOARD_COUNT="$(echo "$DASHBOARD_JSON" | jq '. | length' 2>/dev/null | tr -d '[:space:]' || echo 0)"
+    set -e
 
     if [[ "$DASHBOARD_COUNT" -gt 0 ]]; then
         pass "AC-OVR-021: GCP has $DASHBOARD_COUNT monitoring dashboards deployed"
@@ -130,24 +266,52 @@ echo ""
 echo "==> AC-OVR-023: Grafana dashboard bbi-app-mereka-lms exists with required panels"
 GRAFANA_URL="${GRAFANA_URL:-https://grafana.mereka.io}"
 GRAFANA_TOKEN="${GRAFANA_API_TOKEN:-}"
+GRAFANA_DASHBOARD_CONTRACT_PATH="${GRAFANA_DASHBOARD_CONTRACT_PATH:-infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
 
 if [[ -n "$GRAFANA_TOKEN" ]]; then
-    DASHBOARD_JSON=$(curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
-        "$GRAFANA_URL/api/dashboards/uid/bbi-app-mereka-lms" 2>/dev/null)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        DASHBOARD_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
+            "$GRAFANA_URL/api/dashboards/uid/bbi-app-mereka-lms" 2>/dev/null)"
+    else
+        DASHBOARD_JSON="$(curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
+            "$GRAFANA_URL/api/dashboards/uid/bbi-app-mereka-lms" 2>/dev/null)"
+    fi
+    set -e
 
     if echo "$DASHBOARD_JSON" | jq -e '.dashboard' >/dev/null 2>&1; then
-        # Check for required panels from contract
-        REQUIRED_PANELS=("LMS" "CMS" "Caddy" "MySQL" "Redis")
+        # Check required panels and query fragments from contract
+        REQUIRED_PANELS=("LMS" "CMS (Studio)" "Caddy" "MySQL" "Redis")
+        REQUIRED_QUERY_FRAGMENTS=("kube_pod_status_phase" "container_cpu_usage_seconds_total" "container_memory_usage_bytes")
+
+        if [[ -f "$GRAFANA_DASHBOARD_CONTRACT_PATH" ]] && command -v jq >/dev/null 2>&1; then
+            mapfile -t contract_panels < <(jq -r '.required.panel_titles[]?' "$GRAFANA_DASHBOARD_CONTRACT_PATH" 2>/dev/null)
+            mapfile -t contract_fragments < <(jq -r '.required.query_fragments[]?' "$GRAFANA_DASHBOARD_CONTRACT_PATH" 2>/dev/null)
+            if [[ "${#contract_panels[@]}" -gt 0 ]]; then
+                REQUIRED_PANELS=("${contract_panels[@]}")
+            fi
+            if [[ "${#contract_fragments[@]}" -gt 0 ]]; then
+                REQUIRED_QUERY_FRAGMENTS=("${contract_fragments[@]}")
+            fi
+        fi
+
         MISSING=0
         for panel in "${REQUIRED_PANELS[@]}"; do
-            if ! echo "$DASHBOARD_JSON" | jq -e ".dashboard.panels[] | select(.title | contains(\"$panel\"))" >/dev/null 2>&1; then
+            if ! echo "$DASHBOARD_JSON" | jq -e --arg panel "$panel" '.dashboard.panels[] | select(.title == $panel)' >/dev/null 2>&1; then
                 fail "AC-OVR-023: Required panel '$panel' not found in dashboard"
-                ((MISSING++))
+                MISSING=$((MISSING + 1))
+            fi
+        done
+
+        for fragment in "${REQUIRED_QUERY_FRAGMENTS[@]}"; do
+            if ! echo "$DASHBOARD_JSON" | jq -e --arg fragment "$fragment" '.dashboard.panels[].targets[]?.expr | select(strings | contains($fragment))' >/dev/null 2>&1; then
+                fail "AC-OVR-023: Required query fragment '$fragment' not found in dashboard expressions"
+                MISSING=$((MISSING + 1))
             fi
         done
 
         if [[ $MISSING -eq 0 ]]; then
-            pass "AC-OVR-023: Dashboard bbi-app-mereka-lms has all required panels"
+            pass "AC-OVR-023: Dashboard bbi-app-mereka-lms has required panels and query fragments"
         fi
     else
         fail "AC-OVR-023: Dashboard bbi-app-mereka-lms not found in Grafana"
@@ -161,28 +325,62 @@ echo ""
 echo "==> AC-OVR-025: Validation script produces valid JSON with --json flag"
 if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
     # Run in JSON mode and validate output
-    if OUTPUT=$(scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null); then
-        if echo "$OUTPUT" | jq -e '.summary.total_checks' >/dev/null 2>&1; then
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+      OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+        timeout "$VERIFY_RUNTIME_SCRIPT_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
+    else
+      OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+        scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
+    fi
+    if [[ $? -eq 0 ]]; then
+        if echo "$OUTPUT" | jq -e '.summary.total' >/dev/null 2>&1; then
             pass "AC-OVR-025: Validation script produces valid JSON output"
         else
             fail "AC-OVR-025: Validation script JSON output is malformed"
         fi
     else
-        skip "AC-OVR-025: Validation script not yet implemented (TODO)"
+        fail "AC-OVR-025: Validation script failed in --json mode"
     fi
+    set -e
 else
-    skip "AC-OVR-025: scripts/qa/validate-observability-compliance.sh not found (TODO)"
+    skip "AC-OVR-025: scripts/qa/validate-observability-compliance.sh not found"
 fi
 
 # AC-OVR-026: Validation script detects missing resources
 echo ""
 echo "==> AC-OVR-026: Validation script exits non-zero when resources are missing"
-skip "AC-OVR-026: Requires deliberate test environment with missing ServiceMonitor (manual test)"
+run_missing_resource_negative_check
 
 # AC-OVR-027: Validation script --mode runtime queries kubectl and gcloud
 echo ""
 echo "==> AC-OVR-027: Validation script runtime mode queries kubectl and gcloud"
-skip "AC-OVR-027: Requires validate-observability-compliance.sh with --mode runtime (TODO)"
+if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
+    if command -v kubectl >/dev/null 2>&1 && command -v gcloud >/dev/null 2>&1; then
+        set +e
+        if command -v timeout >/dev/null 2>&1; then
+          OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+            timeout "$VERIFY_RUNTIME_SCRIPT_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json 2>/dev/null)"
+        else
+          OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+            scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json 2>/dev/null)"
+        fi
+        if [[ $? -eq 0 ]]; then
+            if echo "$OUTPUT" | jq -e '.checks[] | select(.id=="AC-OVR-027")' >/dev/null 2>&1; then
+                pass "AC-OVR-027: Runtime compliance mode validates kubectl and gcloud checks"
+            else
+                fail "AC-OVR-027: Runtime compliance output does not include AC-OVR-027 checks"
+            fi
+        else
+            fail "AC-OVR-027: Validation script failed in runtime mode"
+        fi
+        set -e
+    else
+        skip "AC-OVR-027: kubectl or gcloud not available"
+    fi
+else
+    skip "AC-OVR-027: scripts/qa/validate-observability-compliance.sh not found"
+fi
 
 # AC-OVR-028: CI runs validation script on monitoring file changes
 echo ""
@@ -194,24 +392,47 @@ if [[ -f ".github/workflows/observability-compliance.yml" ]]; then
         fail "AC-OVR-028: CI workflow exists but does not run validation script"
     fi
 else
-    skip "AC-OVR-028: CI workflow for observability compliance not yet created (TODO)"
+    fail "AC-OVR-028: CI workflow for observability compliance not yet created"
 fi
 
 # AC-OVR-029: CI blocks merge when ServiceMonitor is removed
 echo ""
 echo "==> AC-OVR-029: CI blocks merge when ServiceMonitor is removed from kustomization"
-skip "AC-OVR-029: Requires CI integration test with deliberate removal (manual verification)"
+if [[ -f ".github/workflows/observability-compliance.yml" ]]; then
+    if grep -q "pull_request:" .github/workflows/observability-compliance.yml \
+        && grep -q "deploy/k8s/base/monitoring" .github/workflows/observability-compliance.yml \
+        && grep -q "validate-observability-compliance.sh --mode local --strict" .github/workflows/observability-compliance.yml; then
+        pass "AC-OVR-029: CI workflow enforces merge-blocking observability checks on monitoring changes"
+    else
+        fail "AC-OVR-029: CI workflow does not gate monitoring-path changes with strict observability validation"
+    fi
+else
+    fail "AC-OVR-029: CI workflow for observability compliance not yet created"
+fi
 
 # AC-OVR-031: Alert rules have valid PromQL (no syntax errors)
 echo ""
 echo "==> AC-OVR-031: All alert PromQL expressions are valid (no syntax errors)"
 if command -v kubectl >/dev/null 2>&1; then
-    PROM_POD=$(kubectl get pods -n monitoring -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        PROM_POD="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    else
+        PROM_POD="$(kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    fi
+    set -e
 
     if [[ -n "$PROM_POD" ]]; then
         # Get all alert rules from Prometheus
-        RULES_JSON=$(kubectl exec -n monitoring "$PROM_POD" -c prometheus -- \
-            wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)
+        set +e
+        if command -v timeout >/dev/null 2>&1; then
+            RULES_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+                wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
+        else
+            RULES_JSON="$(kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+                wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
+        fi
+        set -e
 
         if echo "$RULES_JSON" | jq -e '.data.groups[].rules[] | select(.type=="alerting")' >/dev/null 2>&1; then
             # Count alerts with health=ok
@@ -227,7 +448,7 @@ if command -v kubectl >/dev/null 2>&1; then
             skip "AC-OVR-031: No alert rules loaded in Prometheus yet"
         fi
     else
-        skip "AC-OVR-031: Prometheus pod not found in monitoring namespace"
+        skip "AC-OVR-031: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE} namespace"
     fi
 else
     skip "AC-OVR-031: kubectl not available (requires live cluster access)"
@@ -242,6 +463,32 @@ echo -e "${GREEN}PASS: $PASS${NC}"
 echo -e "${RED}FAIL: $FAIL${NC}"
 echo -e "${YELLOW}SKIP: $SKIP${NC}"
 echo "Total: $((PASS + FAIL + SKIP))"
+
+if [[ -n "$VERIFY_EVIDENCE_FILE" ]]; then
+    mkdir -p "$(dirname "$VERIFY_EVIDENCE_FILE")"
+    {
+        echo "# Observability Runtime Verification Evidence"
+        echo ""
+        echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "- app_namespace: $VERIFY_APP_NAMESPACE"
+        echo "- monitoring_namespace: $VERIFY_MONITORING_NAMESPACE"
+        echo ""
+        echo "## Summary"
+        echo ""
+        echo "- pass: $PASS"
+        echo "- fail: $FAIL"
+        echo "- skip: $SKIP"
+        echo "- total: $((PASS + FAIL + SKIP))"
+        echo ""
+        echo "## Failed Checks"
+        echo ""
+        if awk -F $'\t' '$1=="fail"{exit 0} END{exit 1}' "$RESULTS_FILE"; then
+            awk -F $'\t' '$1=="fail"{printf("- %s\n", $2)}' "$RESULTS_FILE"
+        else
+            echo "- none"
+        fi
+    } > "$VERIFY_EVIDENCE_FILE"
+fi
 
 if [[ $FAIL -gt 0 ]]; then
     exit 1

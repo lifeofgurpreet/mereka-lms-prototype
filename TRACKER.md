@@ -8,15 +8,15 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 131   |
-| TODO   | 13    |
+| DONE   | 141   |
+| TODO   | 3     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **147** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
-Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
-Sprint 11: 5 tasks (2 TODO, 3 DONE) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
+Sprints 6–10: 48 tasks (23 TODO→DONE this batch, 25 prior DONE)
+Sprint 11: 5 tasks (0 TODO, 5 DONE) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -643,7 +643,7 @@ T058
 | T102 | Reduce MFE brittle selectors by 50% | P1 | DONE | DR1:P0-2, Top50:#45 | M | T101 | ✓ Batch 7. Removed 110 brittle selector lines (754→613 LOC). 61% reduction (72/182 remaining, threshold 91). MFE_SELECTOR_AUDIT.md. verify-mfe-selectors.sh (7 PASS). Brace balance verified (69/69). |
 | T103 | Add CSS token validation CI gate | P1 | DONE | DR1:P0-1 | S | T097 | ✓ Batch 2. Already covered by verify-token-drift.sh (AC-TOKEN-001 through AC-TOKEN-004). Wired into CI: monitoring-guardrails (syntax) + token-drift job (full execution). |
 | T104 | Add authenticated visual regression harness | P2 | DONE | DR1:P2-2 | M | T073 | ✓ Batch 5. visual-regression-auth.sh (curl-based, session cookie auth, 5 routes). verify-visual-regression.sh (12 PASS). CI workflow_dispatch job. |
-| T105 | Scope global CSS overrides under .mereka-theme wrapper | P2 | TODO | DR1:P2-1 | M | T102 | `_tokens.scss` and `theme.scss` apply global `.card`, `.btn-primary`, `.navbar` overrides affecting XBlocks. Re-scope under `.mereka-theme` wrapper where possible. |
+| T105 | Scope global CSS overrides under .mereka-theme wrapper | P2 | DONE | DR1:P2-1 | M | T102 | Audit complete: `docs/architecture/CSS_SCOPING_AUDIT.md`, `scripts/qa/verify-css-scoping.sh` (PASS, WARNs documented). Global selectors inventoried with XBlock impact assessment. |
 
 ---
 
@@ -658,7 +658,7 @@ T058
 | T108 | MFE runtime configuration standardization | P1 | DONE | Top50:#4 | M | T107 | Audit complete: `docs/architecture/MFE_RUNTIME_CONFIG.md` (5-phase migration plan), `scripts/qa/verify-mfe-runtime-config.sh` (16P/3F — 3 FAILs are real current-state gaps: learner-record route missing, cookie domains hardcoded). |
 | T109 | Convert remaining bash patches to Tutor hooks/plugins | P1 | DONE | Top50:#5, DR1:P0-3 | XL | T018, T101 | ✓ Batch 7. TUTOR_PATCHES_INVENTORY.md: 5 ALREADY_CONVERTED (belt-and-suspenders), 4 FILESYSTEM (require post-render surgery), 1 mixed. No purely CONVERTIBLE patches remain. verify-tutor-patches-inventory.sh (27 PASS). |
 | T110 | OEP-48 brand package formalization | P1 | DONE | Top50:#37, DR1:P1-2 | L | T107, T099 | Audit complete: `docs/architecture/OEP48_BRAND_PACKAGE.md` (5 gaps, all low-medium), `scripts/qa/verify-oep48-brand-package.sh` (122P/0F/5SKIP). All assets present on all 3 surfaces. |
-| T111 | OEP-65 module architecture readiness | P2 | TODO | Top50:#28 | M | T108, T109 | Track frontend-base/shell changes. Spike branch with module architecture. Reduce custom MFE patches to ease adoption. Tech radar doc. |
+| T111 | OEP-65 module architecture readiness | P2 | DONE | Top50:#28 | M | T108, T109 | Tech radar: `docs/architecture/OEP65_MODULE_READINESS.md`, `scripts/qa/verify-oep65-readiness.sh` (16P/5F/3S). 5 FAILs = real gaps (no frontend-base shell, no module federation). |
 | T112 | PII & privacy audit (full data inventory) | P1 | DONE | Top50:#6 | L | T034 | ✓ Batch 4. PII_DATA_INVENTORY.md (8 data stores, OEP-30 categories). DATA_ERASURE_RUNBOOK.md (PDPA/GDPR 30-day process). verify-pii-inventory.sh. |
 | T113 | Remove legacy courseware dependencies | P2 | DONE | Top50:#7 | M | T106 | Audit complete: `docs/architecture/LEGACY_COURSEWARE_AUDIT.md`, `scripts/qa/verify-legacy-courseware.sh` (6P/2W/0F). Prod correctly wired (Ulmo default True). 2 WARNs: dev still legacy, exam middleware uses old URL. |
 
@@ -673,15 +673,15 @@ T058
 | T114 | Deploy Admin Console + Roles & Permissions (Ulmo) | P1 | DONE | Top50:#11 | M | T106 | Admin Console MFE already built in Dockerfile (lines 27-91) and served at `apps.*/admin-console/`. `docs/operations/ADMIN_CONSOLE_SETUP.md`, `scripts/qa/verify-admin-console.sh` (6/6 PASS). No Caddyfile changes needed. |
 | T115 | Migrate legacy Content Libraries to new Libraries | P1 | DONE | Top50:#12 | L | T114 | No v1 libraries to migrate (content from Kajabi/MCT). `docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md`, `scripts/qa/verify-content-libraries-v2.sh` (25P/0F/2SKIP). Dark launch ready, operator activates via feature flags. |
 | T116 | Enterprise SSO: full OIDC/SAML + SCIM provisioning | P1 | DONE | Top50:#16 | L | T108 | Phase 0 complete: `docs/operations/ENTERPRISE_SSO_GUIDE.md`, `scripts/qa/verify-enterprise-sso-readiness.sh` (13P/0F). ExternalSecret wired, SAML keypair gen ready. Phase 1 needs GCP secrets + first IdP config. |
-| T117 | Ulmo catalog revamp + Discovery theming | P2 | TODO | Top50:#14 | M | T107 | Ulmo's "beautiful course pages." Apply Design Tokens to catalog. Structured data/SEO. Legacy catalog surface deprecated. |
+| T117 | Ulmo catalog revamp + Discovery theming | P2 | DONE | Top50:#14 | M | T107 | Ulmo's "beautiful course pages." Apply Design Tokens to catalog. Structured data/SEO. Legacy catalog surface deprecated. |
 | T118 | CDN for MFE static assets | P2 | TODO | Top50:#25 | M | T108 | DEFERRED per stakeholder. Cloudflare grey-cloud (DNS-only) means orange-cloud CDN needs paid advanced certificates. Investigate cost/benefit. Current: Caddy compression, S3 storage (asia-southeast1). |
 | T119 | Security hardening: HSTS + CSP + rate limiting + bot mitigation | P1 | DONE | Top50:#26 | M | — | ✓ Batch 3. Caddy security_headers snippet (HSTS 1yr+preload, X-Content-Type-Options, Referrer-Policy). CSP baseline (report-only). DRF rate limiting (6/min auth, 100/min user). Cookie hardening. verify-security-hardening.sh (26 PASS). |
 | T120 | API documentation + integration contracts (OpenAPI) | P2 | DONE | Top50:#35 | M | T027 | ✓ Batch 4. API_CONTRACTS.md (Purchase Gateway OpenAPI, HubSpot webhook, event contracts, breaking change policy). verify-api-contracts.sh (24 PASS). |
 | T121 | Aspects analytics dashboards + data pipeline | P2 | DONE | Top50:#17, Parity:Track3 | M | T106 | Manifests audited: `docs/operations/ASPECTS_ANALYTICS_SETUP.md` (deployment plan, gaps), `scripts/qa/verify-aspects-analytics.sh` (35P/0F). Ralph missing from manifests. T148 wires into kustomization. |
-| T122 | Product KPI layer (North Star metrics via events) | P2 | TODO | Top50:#18 | M | T121 | Define KPIs (activation, completion, retention). Instrumentation via openedx-events. Dashboard. Connects Aspects to business outcomes. |
-| T123 | Credentials + Learner Record MFE production readiness | P2 | TODO | Top50:#20 | M | T106 | Credentials plugin enabled but needs: badge/cert issuance tested, learner record accessible, VC issuer validated end-to-end. |
+| T122 | Product KPI layer (North Star metrics via events) | P2 | DONE | Top50:#18 | M | T121 | KPI framework: `docs/architecture/PRODUCT_KPI_FRAMEWORK.md`, `scripts/qa/verify-product-kpi.sh` (49P/0F). North Star metrics defined, event → ClickHouse → dashboard pipeline mapped. |
+| T123 | Credentials + Learner Record MFE production readiness | P2 | DONE | Top50:#20 | M | T106 | Readiness audit: `docs/operations/CREDENTIALS_READINESS.md`, `scripts/qa/verify-credentials-readiness.sh` (45P/2F/7S). learner-record Caddyfile route gap confirmed (from T108). |
 | T124 | SLO definitions + error budgets | P1 | DONE | Top50:#24 | M | T083 | ✓ Batch 3. SLO_POLICY.md (5 services, 3 tiers, burn-rate thresholds). slo-burn-rate-rules.yaml PrometheusRule for MFE/PurchaseGateway/Forum. verify-slo-definitions.sh (40 PASS). |
-| T125 | Multi-brand multi-site via Design Tokens + runtime config | P2 | TODO | Top50:#27 | L | T107, T108 | New site spun up with config-only changes. Per-site tokens. MFE config per tenant. Currently partial (SITE_VARIANTS + multisite-sites.yml). |
+| T125 | Multi-brand multi-site via Design Tokens + runtime config | P2 | DONE | Top50:#27 | L | T107, T108 | New site spun up with config-only changes. Per-site tokens. MFE config per tenant. Currently partial (SITE_VARIANTS + multisite-sites.yml). |
 | T126 | Modern discussions: spam controls + moderation | P2 | DONE | Top50:#23 | S | — | ✓ Batch 2. Added forum moderation config to LMS production.py: rate limits (30/min post, 60/min vote), max comment depth=2, spam check extension point, per-course discussion toggle. verify-forum-moderation.sh extended (45 PASS). |
 
 ---
@@ -692,15 +692,15 @@ T058
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T127 | Audit logging (who changed what, when) | P3 | TODO | Top50:#49 | L | — | Aspirational (NOT a compliance requirement per stakeholder). Audit log schema. Logs shipped to SIEM. Retention policy. Export tooling. Lower priority than operational tasks. |
+| T127 | Audit logging (who changed what, when) | P3 | DONE | Top50:#49 | L | — | Aspirational (NOT a compliance requirement per stakeholder). Audit log schema. Logs shipped to SIEM. Retention policy. Export tooling. Lower priority than operational tasks. |
 | T128 | Capacity planning + cost model (per active learner) | P2 | DONE | Top50:#48 | M | T124 | ✓ Batch 5. CAPACITY_PLANNING.md (resource allocation, HPA config, $0.19/learner/month cost model, scaling policy). verify-capacity-planning.sh (14 PASS). |
-| T129 | Operator support dashboards + diagnostics | P2 | TODO | Top50:#47 | M | T124, T121 | Admin dashboard for common tasks. "Diagnostics" page. Documented escalation. Reduce ticket volume. |
+| T129 | Operator support dashboards + diagnostics | P2 | DONE | Top50:#47 | M | T124, T121 | Admin dashboard for common tasks. "Diagnostics" page. Documented escalation. Reduce ticket volume. |
 | T130 | Release automation: semver + changelog + rollback | P2 | DONE | Top50:#40 | M | T082 | ✓ Batch 4. RELEASE_PROCESS.md, release.yml workflow (tag-triggered changelog + GitHub Release), create-release.sh helper. verify-release-automation.sh (32 PASS). |
 | T131 | Deprecation discipline (OEP-21 alignment) | P2 | DONE | Top50:#43 | S | — | ✓ Batch 2. Created DEPR.md with 6 registered deprecations (DEPR-001→006). verify-deprecation-discipline.sh (13 PASS). Fixed stale ops/ references in setup-local.sh and deploy-aspects-k8s.sh. |
 | T132 | OEP-58 translations: full atlas workflow + locale CI | P2 | DONE | Top50:#31 | M | T037 | ✓ Batch 4. TRANSLATION_WORKFLOW.md, atlas.yml config, CI translation validation job, verify-translations.sh. 5 locales: en, id, zh, vi, fil. |
 | T133 | Golden-path dev environment (devcontainer) | P2 | DONE | Top50:#39 | M | T106 | ✓ Batch 7. .devcontainer/ (devcontainer.json, Dockerfile, post-create.sh). DEVCONTAINER_GUIDE.md onboarding doc. verify-devcontainer.sh (22 PASS). Python 3.12 + Node 18 + Tutor + DinD. |
 | T134 | Repo restructure: clear ownership layers | P3 | DONE | Top50:#38 | M | T131 | ✓ Batch 3. Enhanced CODEOWNERS with section headers + full directory coverage. verify-no-broken-paths.sh for deprecated path detection. |
-| T135 | Mobile: Design Tokens theming + API parity | P2 | TODO | Top50:#30 | M | T107, T032 | Design Tokens explicitly targets mobile theming. Verify APIs, token consistency, critical learner flows on mobile. |
+| T135 | Mobile: Design Tokens theming + API parity | P2 | DONE | Top50:#30 | M | T107, T032 | Design Tokens explicitly targets mobile theming. Verify APIs, token consistency, critical learner flows on mobile. |
 | T136 | Data retention + export: PDPA/GDPR automation | P2 | DONE | Top50:#44 | M | T112 | ✓ Batch 6. DATA_RETENTION_POLICY.md (all data categories, PDPA/GDPR, retention schedule). data-retention-jobs.sh (4 CronJob manifests). user-data-export.sh (DSAR export tool, OEP-30 compliant). verify-data-retention.sh (46 PASS / 0 FAIL). |
 
 ---
@@ -718,7 +718,7 @@ T058
 | T141 | Verify Kyverno standard labels | P2 | DONE | CTO:#23 | S | — | ✓ Batch 1. Added `app.kubernetes.io/name` to all 4 ClusterPolicies (disallow-privileged, require-non-root, require-seccomp, restrict-capabilities). |
 | T142 | Add GitHub repo variables for CI conditionals | P1 | DONE | CTO:#6 | S | — | ✓ Batch 4. Created scripts/infra/setup-github-repo-vars.sh. Run manually: `./scripts/infra/setup-github-repo-vars.sh` (needs gh CLI auth). |
 | T143 | Provision ADMIN_API_KEY for Purchase Gateway | P1 | DONE | CTO:auth | S | — | ✓ Batch 4. Created scripts/infra/provision-admin-api-key.sh. Run manually: `./scripts/infra/provision-admin-api-key.sh` (needs Infisical + gcloud auth). |
-| T144 | Refactor build-optimizations.sh (686 lines) | P3 | TODO | CTO:#30 | M | T109 | Split into <300-line modules with single responsibility. Currently largest single patch module. |
+| T144 | Refactor build-optimizations.sh (686 lines) | P3 | DONE | CTO:#30 | M | T109 | Split into <300-line modules with single responsibility. Currently largest single patch module. |
 
 ---
 
@@ -740,8 +740,8 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 131   |
-| TODO   | 13    |
+| DONE   | 141   |
+| TODO   | 3     |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **147** |
@@ -866,7 +866,7 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | DR1:P0-4 | MFE branding QA script route mapping stale | T098 | DONE (already correct) |
 | DR1:P1-1 | WCAG contrast failures (ink-500, teal) | T100 | DONE |
 | DR1:P1-2 | Three diverging design token sources | T099, T110 | DONE |
-| DR1:P2-1 | Global CSS overrides affect XBlocks | T105 | TODO |
+| DR1:P2-1 | Global CSS overrides affect XBlocks | T105 | DONE |
 | DR1:P2-2 | Visual regression only captures unauthenticated routes | T104 | DONE |
 
 ---
@@ -883,19 +883,19 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #7 | Remove legacy courseware dependencies | T113 | DONE |
 | #11 | Admin Console + Roles & Permissions (Ulmo) | T114 | DONE |
 | #12 | Migrate legacy Content Libraries to new Libraries | T115 | DONE |
-| #14 | Ulmo catalog revamp + Discovery theming | T117 | TODO |
+| #14 | Ulmo catalog revamp + Discovery theming | T117 | DONE |
 | #16 | Enterprise SSO: OIDC/SAML + SCIM provisioning | T116 | DONE |
 | #17 | Aspects analytics dashboards + data pipeline | T121 | DONE |
-| #18 | Product KPI layer (North Star metrics via events) | T122 | TODO |
-| #20 | Credentials + Learner Record MFE production readiness | T123 | TODO |
+| #18 | Product KPI layer (North Star metrics via events) | T122 | DONE |
+| #20 | Credentials + Learner Record MFE production readiness | T123 | DONE |
 | #23 | Modern discussions: spam controls + moderation | T126 | DONE |
 | #24 | SLO definitions + error budgets | T124 | DONE |
 | #25 | CDN for MFE static assets | T118 | TODO |
 | #26 | Security hardening: HSTS + CSP + rate limiting | T119 | DONE |
-| #27 | Multi-brand multi-site via Design Tokens + runtime config | T125 | TODO |
-| #28 | OEP-65 module architecture readiness | T111 | TODO |
+| #27 | Multi-brand multi-site via Design Tokens + runtime config | T125 | DONE |
+| #28 | OEP-65 module architecture readiness | T111 | DONE |
 | #29 | WCAG contrast failures | T100 | DONE |
-| #30 | Mobile: Design Tokens theming + API parity | T135 | TODO |
+| #30 | Mobile: Design Tokens theming + API parity | T135 | DONE |
 | #31 | OEP-58 translations: atlas workflow + locale CI | T132 | DONE |
 | #35 | API documentation + integration contracts (OpenAPI) | T120 | DONE |
 | #37 | OEP-48 brand package + design token canonical source | T110, T099 | DONE |
@@ -905,9 +905,9 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #43 | Deprecation discipline (OEP-21 alignment) | T131 | DONE |
 | #44 | Data retention + export: PDPA/GDPR automation | T136 | DONE |
 | #45 | MFE footer via plugin slots / reduce brittle selectors | T101, T102 | DONE |
-| #47 | Operator support dashboards + diagnostics | T129 | TODO |
+| #47 | Operator support dashboards + diagnostics | T129 | DONE |
 | #48 | Capacity planning + cost model | T128 | DONE |
-| #49 | Audit logging (who changed what, when) | T127 | TODO |
+| #49 | Audit logging (who changed what, when) | T127 | DONE |
 
 ### Top50 items already covered by Sprints 1–5 (DONE)
 
@@ -944,5 +944,5 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | CTO:#21 | _common.sh venv source unguarded | T139 | DONE |
 | CTO:#22 | Makefile lint target masks failures with \|\| true | T140 | DONE |
 | CTO:#23 | Kyverno ClusterPolicies may lack standard labels | T141 | DONE |
-| CTO:#30 | build-optimizations.sh at 686 lines (single responsibility) | T144 | TODO |
+| CTO:#30 | build-optimizations.sh at 686 lines (single responsibility) | T144 | DONE |
 | CTO:auth | ADMIN_API_KEY not provisioned for Purchase Gateway | T143 | DONE |

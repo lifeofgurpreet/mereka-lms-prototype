@@ -4,9 +4,11 @@ This directory contains Prometheus Operator resources for monitoring Open edX se
 
 ## Status
 
-**UPDATED (2026-02-04)**: Prometheus metrics integration has been implemented via **Bead mereka-lms-2s8**.
+**UPDATED (2026-02-25)**: Prometheus metrics integration is present in repo and enforced as a runtime contract.
 
-The `/metrics` endpoint will be functional after rebuilding the Open edX image with django-prometheus integration.
+Runtime contract for observability readiness:
+- LMS `/metrics` MUST return `HTTP 200`
+- CMS `/metrics` MUST return `HTTP 200`
 
 ## Resources Created
 
@@ -35,9 +37,9 @@ Django-prometheus has been integrated into the Open edX image:
 4. **Endpoint exposed**: `/metrics` accessible via nginx configuration
 5. **Documentation**: See `infrastructure/tutor/README.md` and custom app README
 
-### Activating Metrics
+### Activating Metrics (when rollout image is stale)
 
-**Rebuild the Open edX image** (required to include django-prometheus):
+If runtime does not expose `/metrics` as expected, rebuild and roll out Open edX image:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"

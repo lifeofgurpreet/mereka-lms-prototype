@@ -26,6 +26,17 @@ spec:
             summary: "Enterprise Catalog pod is down"
             description: "Enterprise Catalog pod {{ $labels.pod }} has been down for more than 5 minutes."
 
+        # Compatibility alias for legacy alert contract
+        - alert: EnterpriseCatalogDown
+          expr: up{job="enterprise-catalog-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: enterprise-catalog
+          annotations:
+            summary: "Enterprise Catalog pod is down"
+            description: "Enterprise Catalog pod {{ $labels.pod }} has been down for more than 5 minutes."
+
         - alert: EnterpriseCatalogPodRestarting
           expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"enterprise-catalog-.*"}[15m]) > 0
           for: 5m
@@ -81,6 +92,17 @@ spec:
             summary: "Enterprise Access pod is down"
             description: "Enterprise Access pod {{ $labels.pod }} has been down for more than 5 minutes."
 
+        # Compatibility alias for legacy alert contract
+        - alert: EnterpriseAccessDown
+          expr: up{job="enterprise-access-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: enterprise-access
+          annotations:
+            summary: "Enterprise Access pod is down"
+            description: "Enterprise Access pod {{ $labels.pod }} has been down for more than 5 minutes."
+
         - alert: EnterpriseAccessPodRestarting
           expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"enterprise-access-.*"}[15m]) > 0
           for: 5m
@@ -127,6 +149,17 @@ spec:
       rules:
         # Pod availability alerts
         - alert: EnterpriseSubsidyPodDown
+          expr: up{job="enterprise-subsidy-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: enterprise-subsidy
+          annotations:
+            summary: "Enterprise Subsidy pod is down"
+            description: "Enterprise Subsidy pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        # Compatibility alias for legacy alert contract
+        - alert: EnterpriseSubsidyDown
           expr: up{job="enterprise-subsidy-metrics", namespace="mereka-lms"} == 0
           for: 5m
           labels:

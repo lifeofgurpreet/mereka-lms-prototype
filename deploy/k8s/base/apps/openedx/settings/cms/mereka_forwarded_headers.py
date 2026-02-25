@@ -51,7 +51,7 @@ class MerekaForwardedHeadersMiddleware:
                 path = ""
             if path == "/metrics":
                 raw_host = (meta.get("HTTP_HOST") or "").split(",", 1)[0].strip().lower()
-                if re.match(r"^\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?$", raw_host or ""):
+                if re.match(r"^\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?$", raw_host or ""):
                     meta["HTTP_HOST"] = os.environ.get("MEREKA_STUDIO_DOMAIN", "studio.academyv2.mereka.io")
 
             for key in ("HTTP_X_FORWARDED_PROTO", "HTTP_X_FORWARDED_PORT", "HTTP_X_FORWARDED_HOST"):

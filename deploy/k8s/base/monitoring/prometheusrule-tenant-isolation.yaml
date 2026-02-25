@@ -8,6 +8,7 @@ metadata:
   labels:
     app.kubernetes.io/name: tenant-isolation-alerts
     app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
     release: prometheus
 spec:
   groups:

@@ -1,0 +1,126 @@
+name: Observability Compliance
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_runtime:
+        description: "Run runtime observability checks (requires kubectl/gcloud auth)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      app_namespace:
+        description: "Application namespace for LMS/CMS checks"
+        required: true
+        default: "mereka-lms"
+        type: string
+      monitoring_namespace:
+        description: "Monitoring namespace for Prometheus checks"
+        required: true
+        default: "monitoring"
+        type: string
+      k8s_context:
+        description: "kubectl context for runtime checks (optional)"
+        required: false
+        default: ""
+        type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - "deploy/k8s/base/monitoring/**"
+      - "deploy/k8s/base/monitoring/kustomization.yaml"
+      - "infrastructure/monitoring/**"
+      - ".github/workflows/observability-compliance.yml"
+      - "scripts/qa/validate-observability-compliance.sh"
+      - "scripts/qa/verify-observability-validation.sh"
+      - "scripts/qa/verify-observability-runtime.sh"
+      - "scripts/qa/audit-observability.sh"
+
+permissions:
+  contents: read
+
+jobs:
+  observability-compliance-local:
+    name: Validate observability monitoring manifests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Run observability compliance script (strict local checks)
+        run: |
+          mkdir -p var/ci
+          VALIDATE_OBS_EVIDENCE_FILE=var/ci/observability-compliance-local.md \
+          ./scripts/qa/validate-observability-compliance.sh --mode local --strict --json > var/ci/observability-compliance-local.json
+          cat var/ci/observability-compliance-local.json
+          cat var/ci/observability-compliance-local.md
+
+      - name: Upload observability compliance artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-compliance-local
+          path: |
+            var/ci/observability-compliance-local.json
+            var/ci/observability-compliance-local.md
+
+  observability-compliance-runtime:
+    name: Runtime observability verification (manual)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_runtime == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Run runtime observability compliance and verifier
+        env:
+          VALIDATE_OBS_APP_NAMESPACE: ${{ inputs.app_namespace }}
+          VALIDATE_OBS_K8S_CONTEXT: ${{ inputs.k8s_context }}
+          VERIFY_OBS_APP_NAMESPACE: ${{ inputs.app_namespace }}
+          VERIFY_OBS_MONITORING_NAMESPACE: ${{ inputs.monitoring_namespace }}
+          VERIFY_OBS_K8S_CONTEXT: ${{ inputs.k8s_context }}
+        run: |
+          mkdir -p var/ci
+          VALIDATE_OBS_EVIDENCE_FILE=var/ci/observability-compliance-runtime.md \
+          ./scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json > var/ci/observability-compliance-runtime.json
+
+          VERIFY_OBS_EVIDENCE_FILE=var/ci/observability-runtime-verify.md \
+          ./scripts/qa/verify-observability-runtime.sh > var/ci/observability-runtime-verify.txt
+
+          cat var/ci/observability-compliance-runtime.json
+          cat var/ci/observability-compliance-runtime.md
+          cat var/ci/observability-runtime-verify.md
+
+      - name: Append runtime summary
+        if: always()
+        run: |
+          {
+            echo "## Observability Runtime Summary"
+            echo ""
+            if [ -f var/ci/observability-compliance-runtime.md ]; then
+              cat var/ci/observability-compliance-runtime.md
+            else
+              echo "- runtime compliance markdown missing"
+            fi
+            echo ""
+            echo "### Runtime Verifier Evidence"
+            echo ""
+            if [ -f var/ci/observability-runtime-verify.md ]; then
+              cat var/ci/observability-runtime-verify.md
+            else
+              echo "- runtime verifier markdown missing"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload runtime observability artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observability-compliance-runtime
+          path: |
+            var/ci/observability-compliance-runtime.json
+            var/ci/observability-compliance-runtime.md
+            var/ci/observability-runtime-verify.txt
+            var/ci/observability-runtime-verify.md

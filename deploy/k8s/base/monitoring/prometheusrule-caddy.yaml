@@ -1,0 +1,54 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: caddy-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: caddy
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: openedx-caddy
+      interval: 30s
+      rules:
+        - alert: CaddyDown
+          expr: up{job="caddy-metrics", namespace="mereka-lms"} == 0
+          for: 3m
+          labels:
+            severity: critical
+            component: caddy
+          annotations:
+            summary: "Caddy is down"
+            description: "Caddy pod {{ $labels.pod }} has been down for more than 3 minutes."
+
+        - alert: CaddyHighErrorRate
+          expr: |
+            (
+              sum(rate(caddy_http_requests_total{job="caddy-metrics", code=~"5.."}[5m]))
+              / clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics"}[5m])), 1e-10)
+            ) > 0.01
+          for: 5m
+          labels:
+            severity: critical
+            component: caddy
+          annotations:
+            summary: "Caddy 5xx error rate is high"
+            description: "Caddy 5xx ratio is {{ $value | humanizePercentage }} over 5 minutes, above 1% threshold."
+
+        - alert: CaddyHighLatency
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum(rate(caddy_http_request_duration_seconds_bucket{job="caddy-metrics"}[5m])) by (le)
+            ) > 2
+          for: 10m
+          labels:
+            severity: warning
+            component: caddy
+          annotations:
+            summary: "Caddy upstream latency is high"
+            description: "Caddy p95 request duration is {{ $value }}s over 5 minutes, above 2s threshold."
