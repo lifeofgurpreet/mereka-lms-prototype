@@ -17,9 +17,15 @@ spec:
         app.kubernetes.io/part-of: aspects
     spec:
       restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
       containers:
         - name: sync
           image: docker.io/python:3.11-slim
+          securityContext:
+            allowPrivilegeEscalation: false
           command:
             - /bin/bash
             - -c
@@ -27,7 +33,8 @@ spec:
               set -e
 
               echo "=== Installing dependencies ==="
-              pip install --quiet mysql-connector-python clickhouse-connect
+              pip install --quiet --user mysql-connector-python clickhouse-connect
+              export PATH="$HOME/.local/bin:$PATH"
 
               echo "=== Running data sync ==="
               python3 << 'PYTHON_SCRIPT'
@@ -280,15 +287,22 @@ spec:
             app.kubernetes.io/part-of: aspects
         spec:
           restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            fsGroup: 1000
           containers:
             - name: sync
               image: docker.io/python:3.11-slim
+              securityContext:
+                allowPrivilegeEscalation: false
               command:
                 - /bin/bash
                 - -c
                 - |
                   set -e
-                  pip install --quiet mysql-connector-python clickhouse-connect
+                  pip install --quiet --user mysql-connector-python clickhouse-connect
+                  export PATH="$HOME/.local/bin:$PATH"
                   python3 << 'PYTHON_SCRIPT'
                   import os
                   import mysql.connector
