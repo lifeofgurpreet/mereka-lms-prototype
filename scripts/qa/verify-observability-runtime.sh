@@ -63,6 +63,65 @@ gcloud_cmd() {
     gcloud --project "$VERIFY_GCP_PROJECT" "$@"
 }
 
+fetch_metrics_with_status() {
+    local namespace="$1"
+    local resource="$2"
+    local target="${3:-http://localhost:8000/metrics}"
+    local result=""
+    local status="000"
+    local body=""
+    local split_token="__METRICS_SPLIT__"
+
+    if command -v timeout >/dev/null 2>&1; then
+        result="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$namespace" "$resource" --             sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    else
+        result="$(kubectl_cmd exec -n "$namespace" "$resource" --             sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    fi
+
+    if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
+        printf '000%s' "$split_token"
+        return 0
+    fi
+
+    status="$(printf '%s' "$result" | tail -n1 | sed "s/^${split_token}://")"
+    body="$(printf '%s' "$result" | sed '$d')"
+    body="${body%$'\r'}"
+
+    printf '%s%s%s' "$status" "$split_token" "$body"
+}
+
+check_metrics_payload_shape() {
+    local component="$1"
+    local payload="$2"
+    local missing=0
+
+    if [[ -z "$payload" ]]; then
+        fail "AC-OVR-016: ${component} /metrics body is empty"
+        return 1
+    fi
+
+    if ! printf '%s' "$payload" | grep -qE '^# HELP '; then
+        fail "AC-OVR-016: ${component} /metrics body missing # HELP exposition block"
+        missing=$((missing + 1))
+    fi
+
+    if ! printf '%s' "$payload" | grep -qE '^# TYPE '; then
+        fail "AC-OVR-016: ${component} /metrics body missing # TYPE exposition block"
+        missing=$((missing + 1))
+    fi
+
+    if ! printf '%s' "$payload" | grep -qE '^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^\n]*\})?[[:space:]]+[-+]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?([[:space:]]+[0-9]+)?$'; then
+        fail "AC-OVR-016: ${component} /metrics body missing a Prometheus sample with numeric value"
+        missing=$((missing + 1))
+    fi
+
+    if [[ $missing -eq 0 ]]; then
+        pass "AC-OVR-016: ${component} /metrics has valid Prometheus exposition structure"
+    fi
+
+    return "$missing"
+}
+
 run_missing_resource_negative_check() {
     local validation_script="scripts/qa/verify-observability-validation.sh"
     local temp_root
@@ -152,26 +211,27 @@ fi
 
 # AC-OVR-016 (prerequisite): LMS/CMS /metrics endpoints must return HTTP 200
 echo ""
-echo "==> AC-OVR-016: LMS/CMS /metrics endpoints return HTTP 200"
+echo "==> AC-OVR-016: LMS/CMS /metrics endpoint returns valid Prometheus exposition payload"
 if command -v kubectl >/dev/null 2>&1; then
     set +e
-    if command -v timeout >/dev/null 2>&1; then
-        LMS_CODE="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/lms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
-        CMS_CODE="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/cms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
-    else
-        LMS_CODE="$(kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/lms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
-        CMS_CODE="$(kubectl_cmd exec -n "$VERIFY_APP_NAMESPACE" deploy/cms -- curl -s -o /dev/null -w "%{http_code}" localhost:8000/metrics 2>/dev/null || echo "000")"
-    fi
+    LMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms)"
+    LMS_CODE="${LMS_RESULT%%__METRICS_SPLIT__*}"
+    LMS_METRICS="${LMS_RESULT#*__METRICS_SPLIT__}"
+    CMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms)"
+    CMS_CODE="${CMS_RESULT%%__METRICS_SPLIT__*}"
+    CMS_METRICS="${CMS_RESULT#*__METRICS_SPLIT__}"
     set -e
 
     if [[ "$LMS_CODE" == "200" ]]; then
         pass "AC-OVR-016: LMS /metrics returned 200"
+        check_metrics_payload_shape "LMS" "$LMS_METRICS"
     else
         fail "AC-OVR-016: LMS /metrics returned $LMS_CODE (expected 200)"
     fi
 
     if [[ "$CMS_CODE" == "200" ]]; then
         pass "AC-OVR-016: CMS /metrics returned 200"
+        check_metrics_payload_shape "CMS" "$CMS_METRICS"
     else
         fail "AC-OVR-016: CMS /metrics returned $CMS_CODE (expected 200)"
     fi
