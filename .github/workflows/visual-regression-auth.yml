@@ -1,0 +1,57 @@
+name: Visual Regression (Authenticated)
+
+# Manually triggered only — requires live LMS credentials.
+# Run after a deployment to verify protected routes are accessible
+# and contain the expected page markers.
+on:
+  workflow_dispatch:
+    inputs:
+      lms_url:
+        description: 'LMS base URL to test against'
+        required: false
+        default: 'https://academyv2.mereka.io'
+      course_id:
+        description: 'Optional: course ID for /courses/<id>/course/ and Studio /course/<id>'
+        required: false
+        default: ''
+      environment:
+        description: 'Target environment label (for logging only)'
+        required: false
+        default: 'production'
+
+permissions: {}
+
+jobs:
+  visual-regression-auth:
+    name: Authenticated route checks (${{ github.event.inputs.environment || 'production' }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Make scripts executable
+        run: chmod +x scripts/qa/visual-regression-auth.sh scripts/qa/verify-visual-regression.sh
+
+      - name: Verify harness structure
+        run: scripts/qa/verify-visual-regression.sh
+
+      - name: Run authenticated visual regression
+        env:
+          LMS_URL:      ${{ github.event.inputs.lms_url || 'https://academyv2.mereka.io' }}
+          LMS_USERNAME: ${{ secrets.LMS_USERNAME }}
+          LMS_PASSWORD: ${{ secrets.LMS_PASSWORD }}
+          COURSE_ID:    ${{ github.event.inputs.course_id }}
+        run: |
+          args=(
+            --base-url  "$LMS_URL"
+            --username  "$LMS_USERNAME"
+            --password  "$LMS_PASSWORD"
+          )
+          if [[ -n "${COURSE_ID:-}" ]]; then
+            args+=(--course-id "$COURSE_ID")
+          fi
+          scripts/qa/visual-regression-auth.sh "${args[@]}"

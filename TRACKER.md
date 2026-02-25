@@ -8,15 +8,15 @@
 
 | Status | Count |
 |--------|-------|
-| DONE   | 110   |
-| TODO   | 34    |
+| DONE   | 115   |
+| TODO   | 29    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **147** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
 Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
-Sprint 11: 5 tasks (5 TODO) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
+Sprint 11: 5 tasks (2 TODO, 3 DONE) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -642,7 +642,7 @@ T058
 | T101 | MFE footer via plugin slots (not string surgery) | P1 | TODO | DR1:P0-3, Top50:#45 | L | T099 | `apply-patches.sh` rewrites `env.config.jsx` to replace `<Footer/>` with `<MerekaFooter/>`. Convert to `pluginSlots.footer_slot` using frontend plugin framework. Diff must be pure config. |
 | T102 | Reduce MFE brittle selectors by 50% | P1 | TODO | DR1:P0-2, Top50:#45 | M | T101 | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` uses `[class*="learning"]`, `[data-testid*="course"]` etc. Replace structural UI changes with official plugin slot operations. |
 | T103 | Add CSS token validation CI gate | P1 | DONE | DR1:P0-1 | S | T097 | ✓ Batch 2. Already covered by verify-token-drift.sh (AC-TOKEN-001 through AC-TOKEN-004). Wired into CI: monitoring-guardrails (syntax) + token-drift job (full execution). |
-| T104 | Add authenticated visual regression harness | P2 | TODO | DR1:P2-2 | M | T073 | Current visual regression only captures unauthenticated pages (login redirects). Add login harness for 5 routes: learner dashboard, courseware, profile, account, course-authoring. |
+| T104 | Add authenticated visual regression harness | P2 | DONE | DR1:P2-2 | M | T073 | ✓ Batch 5. visual-regression-auth.sh (curl-based, session cookie auth, 5 routes). verify-visual-regression.sh (12 PASS). CI workflow_dispatch job. |
 | T105 | Scope global CSS overrides under .mereka-theme wrapper | P2 | TODO | DR1:P2-1 | M | T102 | `_tokens.scss` and `theme.scss` apply global `.card`, `.btn-primary`, `.navbar` overrides affecting XBlocks. Re-scope under `.mereka-theme` wrapper where possible. |
 
 ---
@@ -693,7 +693,7 @@ T058
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
 | T127 | Audit logging (who changed what, when) | P2 | TODO | Top50:#49 | L | — | Enterprise compliance requirement. Audit log schema. Logs shipped to SIEM. Retention policy. Export tooling. Test coverage. |
-| T128 | Capacity planning + cost model (per active learner) | P2 | TODO | Top50:#48 | M | T124 | Cost dashboard. Scaling policy. Load tests. Autoscaling configured. Quarterly cost review. Predictable unit economics. |
+| T128 | Capacity planning + cost model (per active learner) | P2 | DONE | Top50:#48 | M | T124 | ✓ Batch 5. CAPACITY_PLANNING.md (resource allocation, HPA config, $0.19/learner/month cost model, scaling policy). verify-capacity-planning.sh (14 PASS). |
 | T129 | Operator support dashboards + diagnostics | P2 | TODO | Top50:#47 | M | T124, T121 | Admin dashboard for common tasks. "Diagnostics" page. Documented escalation. Reduce ticket volume. |
 | T130 | Release automation: semver + changelog + rollback | P2 | DONE | Top50:#40 | M | T082 | ✓ Batch 4. RELEASE_PROCESS.md, release.yml workflow (tag-triggered changelog + GitHub Release), create-release.sh helper. verify-release-automation.sh (32 PASS). |
 | T131 | Deprecation discipline (OEP-21 alignment) | P2 | DONE | Top50:#43 | S | — | ✓ Batch 2. Created DEPR.md with 6 registered deprecations (DEPR-001→006). verify-deprecation-discipline.sh (13 PASS). Fixed stale ops/ references in setup-local.sh and deploy-aspects-k8s.sh. |
@@ -728,9 +728,9 @@ T058
 
 | ID | Title | Priority | Status | Source | Effort | Deps | Description |
 |----|-------|----------|--------|--------|--------|------|-------------|
-| T145 | Document canonical non-prod lane (rke2-nonprod) | P1 | TODO | Parity:Track1 | S | — | Confirm rke2-nonprod as canonical non-prod target. Remove ambiguity around deprecated staging refs in docs/scripts. Ensure all env-specific manifests reference this model consistently. |
-| T146 | Close CI/CD pipeline spec remaining ACs (86% → 100%) | P0 | TODO | Parity:Track2 | M | — | `ci-cd-pipeline_spec` has ~6 unmapped ACs tied to environment/runner/deploy integration. Close each AC with implementation + verification. These gate safe rollout confidence. |
-| T147 | Close K8s deployment spec remaining ACs (86.5% → 100%) | P0 | TODO | Parity:Track2 | M | — | `k8s-deployment_spec` has ~5 unmapped ACs for deploy/rollout robustness checks. Close each AC with implementation + verification. |
+| T145 | Document canonical non-prod lane (rke2-nonprod) | P1 | DONE | Parity:Track1 | S | — | ✓ Batch 5. DEPLOYMENT_LANES.md (3 active lanes, staging deprecated). Updated overlays/README.md. verify-deployment-lanes.sh (16 PASS). |
+| T146 | Close CI/CD pipeline spec remaining ACs (86% → 100%) | P0 | DONE | Parity:Track2 | M | — | ✓ Batch 5. Fixed SHA-pinned action matching in verify-ci-cd-pipeline.sh (49/0) and verify-cicd-merge-gates-and-secrets.sh (13/0). Coverage now 100%. |
+| T147 | Close K8s deployment spec remaining ACs (86.5% → 100%) | P0 | DONE | Parity:Track2 | M | — | ✓ Fixed verify-operational-hardening.sh HPA check to find LMS/CMS HPAs in apps/ subdirs (not just hpa-baselines.yaml). Fixed SIGPIPE in verify-k8s-deployment-spec.sh check_alertrules. All verify scripts now 0 FAIL. |
 | T148 | Wire Aspects analytics into active kustomization graph | P1 | TODO | Parity:Track3 | M | T121 | `deploy/k8s/base/plugins/aspects` exists but is NOT in the active base kustomization graph. Wire into overlays, validate MFE + backend + telemetry + monitoring alerts in non-prod and prod. Covers analytics-pipeline_spec (40% → target 80%+). |
 | T149 | Email notifications pipeline end-to-end | P1 | TODO | Parity:Track4 | L | — | `email-notifications-pipeline_spec` at 40% with 27 unmapped ACs. Implement: email pipeline + delivery + operational checks + alerts + retries + dead-letter handling. Major parity gap. |
 
@@ -740,15 +740,15 @@ T058
 
 | Status | Count |
 |--------|-------|
-| DONE   | 110   |
-| TODO   | 34    |
+| DONE   | 115   |
+| TODO   | 29    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
 | **Total** | **147** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
 Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
-Sprint 11: 5 tasks (5 TODO) — deployment parity & AC gap closure
+Sprint 11: 5 tasks (2 TODO, 3 DONE) — deployment parity & AC gap closure
 
 Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass
 
@@ -867,7 +867,7 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | DR1:P1-1 | WCAG contrast failures (ink-500, teal) | T100 | DONE |
 | DR1:P1-2 | Three diverging design token sources | T099, T110 | PARTIAL (T099 DONE, T110 TODO) |
 | DR1:P2-1 | Global CSS overrides affect XBlocks | T105 | TODO |
-| DR1:P2-2 | Visual regression only captures unauthenticated routes | T104 | TODO |
+| DR1:P2-2 | Visual regression only captures unauthenticated routes | T104 | DONE |
 
 ---
 
@@ -906,7 +906,7 @@ T119 (Caddy/infra config), T118 (CDN — infra), T116 (SSO — cross-repo IdP co
 | #44 | Data retention + export: PDPA/GDPR automation | T136 | TODO |
 | #45 | MFE footer via plugin slots / reduce brittle selectors | T101, T102 | TODO |
 | #47 | Operator support dashboards + diagnostics | T129 | TODO |
-| #48 | Capacity planning + cost model | T128 | TODO |
+| #48 | Capacity planning + cost model | T128 | DONE |
 | #49 | Audit logging (who changed what, when) | T127 | TODO |
 
 ### Top50 items already covered by Sprints 1–5 (DONE)

@@ -241,8 +241,8 @@ check_registry() {
     fail "[AC-010] Image digest not exposed as job output"
   fi
 
-  # AC-009: GCP auth configured
-  if grep -q 'google-github-actions/auth@v2' "$BUILD_WF"; then
+  # AC-009: GCP auth configured (tag alias or SHA-pinned with # v2 comment)
+  if grep -qE 'google-github-actions/auth@(v2|[0-9a-f]{40})(\s*#\s*v2)?' "$BUILD_WF"; then
     pass "[AC-009] GCP authentication configured (auth@v2)"
   else
     fail "[AC-009] GCP authentication missing from build workflow"

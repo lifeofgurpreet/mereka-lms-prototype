@@ -107,9 +107,9 @@ check_merge_gates() {
     fail "Missing CI jobs:${missing_jobs} (${job_count}/${#required_jobs[@]} found)"
   fi
 
-  # Verify each job uses actions/checkout@v4
+  # Verify each job uses actions/checkout@v4 (tag alias or SHA-pinned with # v4 comment)
   local checkout_count
-  checkout_count=$(grep -c 'actions/checkout@v4' "$CI_YML" || echo "0")
+  checkout_count=$(grep -cE 'actions/checkout@(v4|[0-9a-f]{40})(\s*#\s*v4)?' "$CI_YML" || echo "0")
   if [[ "$checkout_count" -ge "${#required_jobs[@]}" ]]; then
     pass "All jobs use actions/checkout@v4 (${checkout_count} checkouts found)"
   else

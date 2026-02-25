@@ -2,28 +2,41 @@
 
 This directory contains Kustomize overlays for different deployment environments.
 
+See **`docs/operations/DEPLOYMENT_LANES.md`** for the canonical reference on active lanes,
+promotion path, and differences between environments.
+
+## Active Lanes
+
+| Overlay | Cluster | Domain | Secrets | Status |
+|---------|---------|--------|---------|--------|
+| `local` | Kind / Minikube | `localhost` | dev literals | Active |
+| `rke2-nonprod` | RKE2 VPS (`154.26.132.35`) | `*.academyv2.mereka.dev` | Infisical | Active — canonical non-prod |
+| `production` | GKE (`bbi-k8`) | `*.academyv2.mereka.io` | GCP Secret Manager | Active |
+| ~~`staging`~~ | *(never activated)* | — | — | **DEPRECATED** |
+
+## Promotion Path
+
+```
+local → rke2-nonprod → production
+```
+
 ## Usage
 
 ```bash
-# Deploy to production
+# Deploy to production (via ArgoCD GitOps — do not apply directly)
 kubectl apply -k deploy/k8s/overlays/production
+
+# Deploy to rke2-nonprod (via ArgoCD GitOps — do not apply directly)
+kubectl apply -k deploy/k8s/overlays/rke2-nonprod
 
 # Deploy locally (Kind/Minikube)
 kubectl apply -k deploy/k8s/overlays/local
-
 ```
-
-## Environments
-
-| Environment | Description | Replicas |
-|-------------|-------------|----------|
-| `local` | Local development (Kind/Minikube) | 1 each |
-| `production` | Production GKE cluster | 2 LMS, 1 CMS |
 
 ## Customizing
 
 Each overlay can be customized with:
-- `images` - Container image tags
-- `replicas` - Pod counts
-- `patches` - Environment-specific patches
-- `configMapGenerator` - Environment-specific config
+- `images` — Container image tags
+- `replicas` — Pod counts
+- `patches` — Environment-specific patches
+- `configMapGenerator` — Environment-specific config
