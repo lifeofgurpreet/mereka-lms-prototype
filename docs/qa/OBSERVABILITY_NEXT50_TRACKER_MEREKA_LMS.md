@@ -28,7 +28,7 @@ Execution mode: Tracker-ready implementation backlog
 | OBS-010 | P1 | Coverage | Add per-service metrics cardinality watchlist | OBS-007 | monitoring doc + alert rule | cardinality drift alert is present and tested | planned |
 | OBS-011 | P0 | Alert quality | Wire runtime data feed for `ALERT_NOISE_RUNTIME_SOURCE` in CI | OBS-004 | workflow/env secret wiring | alert-noise runtime audit runs in strict mode in CI | done |
 | OBS-012 | P0 | Alert quality | Define severity-specific noise thresholds (`critical`, `error`, `warning`) | OBS-011 | updated baseline config + strict runtime validation | baseline schema includes required severities and per-severity thresholds | done |
-| OBS-013 | P1 | Alert quality | Add duplicate-alert detector by fingerprint/window | OBS-012 | script enhancement | runtime audit reports duplicate ratio by severity | planned |
+| OBS-013 | P1 | Alert quality | Add duplicate-alert detector by fingerprint/window | OBS-012 | script enhancement | runtime audit reports duplicate ratio by severity | done |
 | OBS-014 | P1 | Alert quality | Add false-positive classification inputs contract (manual/operator label feed) | OBS-012 | contract doc + parser | runtime audit ingests classification feed without schema errors | planned |
 | OBS-015 | P0 | Alert quality | Close PAR-003 via codified threshold + strict runtime evidence | OBS-011, OBS-012 | readiness report update | PAR-003 moved to closed with evidence links | done |
 | OBS-016 | P0 | SLO | Define Tier-1 user journeys and owning SLI metrics | OBS-006 | SLO mapping doc | each Tier-1 journey mapped to explicit SLI query | planned |

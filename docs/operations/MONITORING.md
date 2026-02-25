@@ -259,12 +259,16 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.
 11. **Alert routing verification** – run `./scripts/qa/verify-alert-routing.sh` for runtime policy/channel checks plus optional VPS webhook routing validation.
 12. **Alert-noise baseline audit** – run `./scripts/qa/audit-alert-noise-baseline.sh --mode local` to enforce codified duplicate/false-positive thresholds from `infrastructure/monitoring/alert-noise-baseline.json`. For runtime enforcement, generate `var/operations-gates/alert-noise-runtime-sample.json` (or provide a canonical source file) and run `ALERT_NOISE_RUNTIME_SOURCE=<sample> ./scripts/qa/audit-alert-noise-baseline.sh --mode runtime`.
-13. **Alert-noise severity contract** – required severities are `critical`, `error`, `warning`, each with dedicated duplicate and false-positive ratio maxima in `required_severities` and `thresholds.severity` within `infrastructure/monitoring/alert-noise-baseline.json`. Missing required severity buckets in runtime sample are an error when `STRICT_RUNTIME=1`.
-14. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
-15. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
-16. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
-17. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
-18. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
+13. **Alert-noise duplicate-window contract** – duplicate detection uses the rolling window from `thresholds.duplicate_detection` in `infrastructure/monitoring/alert-noise-baseline.json`: `fingerprint_window_minutes` (default `5`) and `min_dup_group_size` (default `2`).
+   - You can override those at runtime with `ALERT_NOISE_DUP_WINDOW_MINUTES` and `ALERT_NOISE_MIN_DUP_GROUP_SIZE`.
+   - Runtime sample now includes `duplicate_detection` plus `duplicate_windows` records for triage of bursty alert storms.
+14. **Alert-noise severity contract** – required severities are `critical`, `error`, `warning`, each with dedicated duplicate and false-positive ratio maxima in `required_severities` and `thresholds.severity` within `infrastructure/monitoring/alert-noise-baseline.json`. Missing required severity buckets in runtime sample are an error when `STRICT_RUNTIME=1`.
+15. **Alert-noise mismatch visibility** – runtime audit emits a WARN when sample duplicate detection settings differ from baseline values so operators can catch script/CI drift before threshold checks.
+16. **DB exporter telemetry audit** – run `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`; after rollout enforce runtime presence with `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`.
+17. **Atlas modulestore guard** – run `./scripts/qa/verify-atlas-modulestore-path.sh --mode all` before rollout to prevent accidental fallback to in-cluster MongoDB.
+18. **DR evidence bundle** – run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` (or use `.github/workflows/dr-evidence-bundle.yml`) for audit-ready artifacts.
+19. **Single-command release gate** – run `./scripts/qa/run-operations-gates.sh --env both` before declaring platform health green.
+20. **Automated runtime gate** – `.github/workflows/operations-gates-runtime.yml` runs every 6h (and manually) with CI-safe settings (`ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0`).
 
 ## Certificate/SAN verification
 
