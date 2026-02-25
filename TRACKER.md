@@ -2,20 +2,21 @@
 
 **Last updated**: 2026-02-25
 **Branch**: main
-**Sources**: Internal audit · DR2 research review · DR1 frontend review · Top50 strategic priorities · CTO audit pass
+**Sources**: Internal audit · DR2 research review · DR1 frontend review · Top50 strategic priorities · CTO audit pass · Deployment parity review
 
 ## Summary
 
 | Status | Count |
 |--------|-------|
 | DONE   | 110   |
-| TODO   | 29    |
+| TODO   | 34    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
-| **Total** | **142** |
+| **Total** | **147** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
-Sprints 6–10: 48 tasks (29 TODO, 19 DONE) — DR1 frontend + Top50 strategic + CTO audit
+Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
+Sprint 11: 5 tasks (5 TODO) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -676,7 +677,7 @@ T058
 | T118 | CDN for MFE static assets | P1 | TODO | Top50:#25 | M | T108 | Current: Caddy compression, S3 storage (asia-southeast1), no CDN. Target: MFEs served via CDN. Cache headers validated. Smoke tests for routing. |
 | T119 | Security hardening: HSTS + CSP + rate limiting + bot mitigation | P1 | DONE | Top50:#26 | M | — | ✓ Batch 3. Caddy security_headers snippet (HSTS 1yr+preload, X-Content-Type-Options, Referrer-Policy). CSP baseline (report-only). DRF rate limiting (6/min auth, 100/min user). Cookie hardening. verify-security-hardening.sh (26 PASS). |
 | T120 | API documentation + integration contracts (OpenAPI) | P2 | DONE | Top50:#35 | M | T027 | ✓ Batch 4. API_CONTRACTS.md (Purchase Gateway OpenAPI, HubSpot webhook, event contracts, breaking change policy). verify-api-contracts.sh (24 PASS). |
-| T121 | Aspects analytics dashboards + data pipeline | P2 | TODO | Top50:#17 | M | T106 | Aspects enabled but needs: dashboards reviewed, retention/access policy, data pipeline monitoring, instructor visibility. |
+| T121 | Aspects analytics dashboards + data pipeline | P2 | TODO | Top50:#17, Parity:Track3 | M | T106 | Aspects enabled but needs: dashboards reviewed, retention/access policy, data pipeline monitoring, instructor visibility. NOTE: Aspects manifests exist in `deploy/k8s/base/plugins/aspects` but not wired into active kustomization — see T148. |
 | T122 | Product KPI layer (North Star metrics via events) | P2 | TODO | Top50:#18 | M | T121 | Define KPIs (activation, completion, retention). Instrumentation via openedx-events. Dashboard. Connects Aspects to business outcomes. |
 | T123 | Credentials + Learner Record MFE production readiness | P2 | TODO | Top50:#20 | M | T106 | Credentials plugin enabled but needs: badge/cert issuance tested, learner record accessible, VC issuer validated end-to-end. |
 | T124 | SLO definitions + error budgets | P1 | DONE | Top50:#24 | M | T083 | ✓ Batch 3. SLO_POLICY.md (5 services, 3 tiers, burn-rate thresholds). slo-burn-rate-rules.yaml PrometheusRule for MFE/PurchaseGateway/Forum. verify-slo-definitions.sh (40 PASS). |
@@ -721,18 +722,33 @@ T058
 
 ---
 
+## Sprint 11: Deployment Parity & AC Gap Closure (P0–P1)
+
+*From DEPLOYMENT_PARITY_AND_AC_GAP_REVIEW.md. Canonical non-prod = rke2-nonprod (staging overlay deprecated). Close spec coverage gaps before claiming env parity.*
+
+| ID | Title | Priority | Status | Source | Effort | Deps | Description |
+|----|-------|----------|--------|--------|--------|------|-------------|
+| T145 | Document canonical non-prod lane (rke2-nonprod) | P1 | TODO | Parity:Track1 | S | — | Confirm rke2-nonprod as canonical non-prod target. Remove ambiguity around deprecated staging refs in docs/scripts. Ensure all env-specific manifests reference this model consistently. |
+| T146 | Close CI/CD pipeline spec remaining ACs (86% → 100%) | P0 | TODO | Parity:Track2 | M | — | `ci-cd-pipeline_spec` has ~6 unmapped ACs tied to environment/runner/deploy integration. Close each AC with implementation + verification. These gate safe rollout confidence. |
+| T147 | Close K8s deployment spec remaining ACs (86.5% → 100%) | P0 | TODO | Parity:Track2 | M | — | `k8s-deployment_spec` has ~5 unmapped ACs for deploy/rollout robustness checks. Close each AC with implementation + verification. |
+| T148 | Wire Aspects analytics into active kustomization graph | P1 | TODO | Parity:Track3 | M | T121 | `deploy/k8s/base/plugins/aspects` exists but is NOT in the active base kustomization graph. Wire into overlays, validate MFE + backend + telemetry + monitoring alerts in non-prod and prod. Covers analytics-pipeline_spec (40% → target 80%+). |
+| T149 | Email notifications pipeline end-to-end | P1 | TODO | Parity:Track4 | L | — | `email-notifications-pipeline_spec` at 40% with 27 unmapped ACs. Implement: email pipeline + delivery + operational checks + alerts + retries + dead-letter handling. Major parity gap. |
+
+---
+
 ## Updated Summary
 
 | Status | Count |
 |--------|-------|
 | DONE   | 110   |
-| TODO   | 29    |
+| TODO   | 34    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
-| **Total** | **142** |
+| **Total** | **147** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
 Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
+Sprint 11: 5 tasks (5 TODO) — deployment parity & AC gap closure
 
 Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass
 
