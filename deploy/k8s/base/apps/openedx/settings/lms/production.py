@@ -363,6 +363,12 @@ if "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED
     INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]
 if "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:
     INSTALLED_APPS += ["openedx.core.djangoapps.theming.apps.ThemingConfig"]
+try:
+    import openedx_advanced_xblocks  # noqa: F401
+    if "openedx_advanced_xblocks.apps.AdvancedXBlocksConfig" not in INSTALLED_APPS:
+        INSTALLED_APPS += ["openedx_advanced_xblocks.apps.AdvancedXBlocksConfig"]
+except ImportError:
+    pass
 
 # Set uploaded media file path
 MEDIA_ROOT = "/openedx/media/"
@@ -1108,9 +1114,13 @@ PUSH_NOTIFICATION_BATCH_SIZE = 500
 # ACE channel configuration — add push channel
 ACE_ENABLED_CHANNELS.append("push") if "push" not in ACE_ENABLED_CHANNELS else None
 
-# Register openedx_push_notifications app
-if "openedx_push_notifications" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_push_notifications")
+# Register openedx_push_notifications app (only if installed in the image)
+try:
+    import openedx_push_notifications  # noqa: F401
+    if "openedx_push_notifications" not in INSTALLED_APPS:
+        INSTALLED_APPS.append("openedx_push_notifications")
+except ImportError:
+    pass
 
 # ── Email Templates & Bulk Campaigns ─────────────────────────────────────
 # @spec: email-notifications-pipeline_spec.md (Phase 5: Templates + Bulk Campaigns)
@@ -1737,11 +1747,11 @@ if _csp_report_uri:
     CSP_REPORT_URI = _csp_report_uri
 
 # Rate limiting for authentication endpoints.
-# Open edX uses Django REST Framework throttling via openedx.core.lib.api.throttle.
+# Use DRF native throttle class path for compatibility across Open edX releases.
 # These rates apply to anonymous and authenticated users respectively.
 REST_FRAMEWORK = dict(globals().get("REST_FRAMEWORK", {}))
 REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_CLASSES", [
-    "openedx.core.lib.api.throttle.ScopedRateThrottle",
+    "rest_framework.throttling.ScopedRateThrottle",
 ])
 REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_RATES", {})
 _throttle_rates = dict(REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"])
