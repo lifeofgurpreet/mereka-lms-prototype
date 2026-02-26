@@ -76,6 +76,99 @@ add_recommended_warning() {
   recommended_warnings+=("$1")
 }
 
+to_minutes_from_range() {
+  local token="$1"
+  local value unit minutes
+
+  token="${token#[}"
+  token="${token%]}"
+  value="${token%[smhdwy]}"
+  unit="${token: -1}"
+
+  case "$unit" in
+    s) minutes="$(awk "BEGIN{print int($value/60)}")" ;;
+    m) minutes="$value" ;;
+    h) minutes="$(awk "BEGIN{print $value * 60}")" ;;
+    d) minutes="$(awk "BEGIN{print $value * 1440}")" ;;
+    w) minutes="$(awk "BEGIN{print $value * 10080}")" ;;
+    *) minutes="" ;;
+  esac
+
+  printf '%s' "$minutes"
+}
+
+query_freshness_window_met() {
+  local query="$1"
+  local max_minutes="$2"
+  local minutes
+
+  [[ "$max_minutes" -le 0 ]] && return 0
+  [[ "$query" == *"\$__rate_interval"* ]] && return 0
+  [[ "$query" == *"\$__interval"* ]] && return 0
+  [[ "$query" == *"\$__range"* ]] && return 0
+
+  local range
+  while IFS= read -r range; do
+    [[ -z "$range" ]] && continue
+    minutes="$(to_minutes_from_range "$range")"
+    [[ -z "$minutes" ]] && continue
+    if (( minutes <= max_minutes )); then
+      return 0
+    fi
+  done < <(grep -oE '\[[0-9]+[smhdwy]\]' <<<"$query")
+
+  return 1
+}
+
+check_panel_ownership_and_freshness() {
+  local titles_file="$1"
+  local panel_spec
+  local title owner max_staleness query_file
+
+  while IFS= read -r panel_spec; do
+    [[ -z "$panel_spec" ]] && continue
+
+    title="$(jq -r '.title // empty' <<<"$panel_spec")"
+    owner="$(jq -r '.owner // empty' <<<"$panel_spec")"
+    max_staleness="$(jq -r '.max_staleness_minutes // 0' <<<"$panel_spec")"
+
+    if [[ -z "$title" ]]; then
+      add_required_error "Contract panel spec missing title"
+      continue
+    fi
+
+    if [[ -z "$owner" ]]; then
+      add_required_error "Missing required panel owner in contract for: $title"
+      continue
+    fi
+
+    if ! contains_exact_line "$title" "$titles_file"; then
+      add_required_error "Missing required panel title: $title (contract metadata)"
+      continue
+    fi
+
+    query_file="$(mktemp -t panel-queries.XXXXXX)"
+    jq -r --arg t "$title" '.. | objects | select(.title == $t and has("targets")) | .targets[]? | (.expr? // .query? // .rawSql? // empty)' "$DASHBOARD_FILE" >"$query_file"
+
+    if [[ ! -s "$query_file" ]]; then
+      add_required_error "Panel has no query payload in dashboard: $title"
+      rm -f "$query_file"
+      continue
+    fi
+
+    if [[ "$max_staleness" != "0" ]] && ! {
+      while IFS= read -r tmp_q; do
+        [[ -z "$tmp_q" ]] && continue
+        query_freshness_window_met "$tmp_q" "$max_staleness" && break
+      done <"$query_file"
+    }; then
+      add_required_error "Panel freshness check failed for '$title' (max_staleness_minutes=$max_staleness)"
+    fi
+
+    rm -f "$query_file"
+  done < <(jq -c '.required.panels[]?' "$CONTRACT_FILE" 2>/dev/null || true)
+}
+
 check_dashboard_files() {
   [[ -f "$CONTRACT_FILE" ]] || add_required_error "Contract file missing: $CONTRACT_FILE"
   [[ -f "$DASHBOARD_FILE" ]] || add_required_error "Dashboard file missing: $DASHBOARD_FILE"
@@ -187,6 +280,7 @@ if [[ "${#required_errors[@]}" -eq 0 ]]; then
   queries_file="${tmpdir}/queries.txt"
   collect_dashboard_data "$titles_file" "$datasources_file" "$queries_file"
   check_required_items "$titles_file" "$datasources_file" "$queries_file"
+  check_panel_ownership_and_freshness "$titles_file"
   check_recommended_items "$titles_file" "$datasources_file" "$queries_file"
 fi
 

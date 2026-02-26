@@ -166,21 +166,21 @@ for sm_file in "$MON_DIR"/servicemonitor-*.yaml; do
   fi
 
   if grep -q 'targetLabel: pod' "$sm_file" 2>/dev/null && \
-     grep -q 'sourceLabels: \\[__meta_kubernetes_pod_name\\]' "$sm_file" 2>/dev/null; then
+     grep -Fq 'sourceLabels: [__meta_kubernetes_pod_name]' "$sm_file" 2>/dev/null; then
     pass "AC-OVR-008: $base has pod relabel for pod identity"
   else
     fail "AC-OVR-008: $base missing pod relabeling on __meta_kubernetes_pod_name"
   fi
 
   if grep -q 'targetLabel: node' "$sm_file" 2>/dev/null && \
-     grep -q 'sourceLabels: \\[__meta_kubernetes_pod_node_name\\]' "$sm_file" 2>/dev/null; then
+     grep -Fq 'sourceLabels: [__meta_kubernetes_pod_node_name]' "$sm_file" 2>/dev/null; then
     pass "AC-OVR-008: $base has pod relabel for node identity"
   else
     fail "AC-OVR-008: $base missing pod relabeling on __meta_kubernetes_pod_node_name"
   fi
 
   if grep -q 'targetLabel: namespace' "$sm_file" 2>/dev/null && \
-     grep -q 'sourceLabels: \\[__meta_kubernetes_namespace\\]' "$sm_file" 2>/dev/null; then
+     grep -Fq 'sourceLabels: [__meta_kubernetes_namespace]' "$sm_file" 2>/dev/null; then
     pass "AC-OVR-008: $base has pod relabel for namespace identity"
   else
     fail "AC-OVR-008: $base missing pod relabeling on __meta_kubernetes_namespace"

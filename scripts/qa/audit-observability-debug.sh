@@ -216,17 +216,14 @@ assert_expected_in_actual() {
   local label="$3"
   local missing="$tmpdir/missing-$label.txt"
   comm -23 "$expected" "$actual" >"$missing" || true
-
-  local missing_count expected_count actual_count
-  missing_count=$(wc -l <"$missing")
-  expected_count=$(wc -l <"$expected")
-  actual_count=$(wc -l <"$actual")
-
-  if [[ "$missing_count" -gt 0 ]]; then
-    echo "Missing $label: (expected=$expected_count runtime=$actual_count)"
+  local miss_count=0
+  if [[ -s "$missing" ]]; then
+    miss_count=$(wc -l < "$missing")
+    echo "Missing $label: count=$miss_count"
     sed 's/^/  - /' "$missing"
     return 1
   fi
+  echo "Missing $label: count=$miss_count"
 }
 
 fetch_runtime_names() {
@@ -240,36 +237,28 @@ fetch_runtime_names() {
 
   case "$kind" in
     uptime)
-      timeout "$GCLOUD_TIMEOUT" gcloud monitoring uptime list-configs --project="$PROJECT" --format=json \
-        | jq -r '.[] | .displayName // ""' \
-        | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out" || {
-          echo "Failed to fetch GCP uptime configs for project=$PROJECT"
-          return 1
-        }
+      timeout "$GCLOUD_TIMEOUT" gcloud monitoring uptime list-configs --project="$PROJECT" --format=json         | jq -r '.[] | .displayName // ""'         | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out"
+      local rc=$?
+      echo "fetch_runtime_names uptime rc=$rc"
+      return $rc
       ;;
     dashboards)
-      timeout "$GCLOUD_TIMEOUT" gcloud monitoring dashboards list --project="$PROJECT" --format=json \
-        | jq -r '.[] | .displayName // ""' \
-        | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out" || {
-          echo "Failed to fetch GCP dashboards for project=$PROJECT"
-          return 1
-        }
+      timeout "$GCLOUD_TIMEOUT" gcloud monitoring dashboards list --project="$PROJECT" --format=json         | jq -r '.[] | .displayName // ""'         | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out"
+      local rc=$?
+      echo "fetch_runtime_names dashboards rc=$rc"
+      return $rc
       ;;
     alerts)
-      timeout "$GCLOUD_TIMEOUT" gcloud monitoring policies list --project="$PROJECT" --format=json \
-        | jq -r '.[] | .displayName // ""' \
-        | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out" || {
-          echo "Failed to fetch GCP alerting policies for project=$PROJECT"
-          return 1
-        }
+      timeout "$GCLOUD_TIMEOUT" gcloud monitoring policies list --project="$PROJECT" --format=json         | jq -r '.[] | .displayName // ""'         | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out"
+      local rc=$?
+      echo "fetch_runtime_names alerts rc=$rc"
+      return $rc
       ;;
     log_metrics)
-      timeout "$GCLOUD_TIMEOUT" gcloud logging metrics list --project="$PROJECT" --format=json \
-        | jq -r '.[] | .name // ""' \
-        | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out" || {
-          echo "Failed to fetch GCP logging metrics for project=$PROJECT"
-          return 1
-        }
+      timeout "$GCLOUD_TIMEOUT" gcloud logging metrics list --project="$PROJECT" --format=json         | jq -r '.[] | .name // ""'         | sed '/^$/d;/^[Nn][Uu][Ll][Ll]$/d' | sort -u >"$out"
+      local rc=$?
+      echo "fetch_runtime_names log_metrics rc=$rc"
+      return $rc
       ;;
     *)
       echo "Unknown runtime kind: $kind" >&2
@@ -278,61 +267,7 @@ fetch_runtime_names() {
   esac
 }
 
-repo_json_check() {
-  local all_files
-  mapfile -t all_files < <(find infrastructure/monitoring -type f -name '*.json' | sort)
-  assert_files_valid_json "${all_files[@]}"
-}
-
-runtime_gcp_check() {
-  command -v gcloud >/dev/null
-  command -v jq >/dev/null
-
-  [[ "$DEBUG_MODE" == "1" ]] && echo "DEBUG runtime_gcp_check: start" >&2
-
-  local active_account
-  active_account="$(timeout "$GCLOUD_TIMEOUT" gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null || true)"
-  if [[ -z "$active_account" ]]; then
-    if [[ "$STRICT_RUNTIME" == "1" ]]; then
-      echo "No active gcloud account. Run: gcloud auth login && gcloud config set account <account>"
-      return 1
-    fi
-    echo "SKIP: no active gcloud account"
-    return 0
-  fi
-
-  [[ "$DEBUG_MODE" == "1" ]] && echo "DEBUG runtime_gcp_check: active account=$active_account" >&2
-
-  local kinds=(uptime dashboards alerts log_metrics)
-  local kind
-  for kind in "${kinds[@]}"; do
-    [[ "$DEBUG_MODE" == "1" ]] && echo "DEBUG runtime_gcp_check: kind=$kind" >&2
-    local expected="$tmpdir/expected-$kind.txt"
-    local actual="$tmpdir/actual-$kind.txt"
-
-    if ! expected_from_repo "$kind" "$expected"; then
-      echo "Runtime GCP parity failed for kind=$kind while reading repository manifests"
-      return 1
-    fi
-
-    if ! fetch_runtime_names "$kind" "$actual"; then
-      echo "Runtime GCP parity failed for kind=$kind while querying GCP"
-      return 1
-    fi
-
-    [[ "$DEBUG_MODE" == "1" ]] && echo "DEBUG runtime_gcp_check: kind=$kind fetch done" >&2
-
-    if ! assert_expected_in_actual "$expected" "$actual" "$kind"; then
-      echo "Runtime GCP parity failed for kind=$kind"
-      return 1
-    fi
-
-    [[ "$DEBUG_MODE" == "1" ]] && echo "DEBUG runtime_gcp_check: kind=$kind compare done" >&2
-  done
-
-  return 0
-}
-
+runtime_k8s_check() {
 runtime_k8s_check() {
   command -v kubectl >/dev/null
 

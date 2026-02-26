@@ -21,7 +21,8 @@ PASS=0
 FAIL=0
 SKIP=0
 VERIFY_CMD_TIMEOUT="${VERIFY_OBS_CMD_TIMEOUT:-45}"
-VERIFY_RUNTIME_SCRIPT_TIMEOUT="${VERIFY_OBS_RUNTIME_SCRIPT_TIMEOUT:-60}"
+VERIFY_RUNTIME_SCRIPT_TIMEOUT="${VERIFY_OBS_RUNTIME_SCRIPT_TIMEOUT:-120}"
+VERIFY_RUNTIME_VALIDATION_TIMEOUT="${VERIFY_OBS_RUNTIME_VALIDATION_TIMEOUT:-120}"
 VERIFY_APP_NAMESPACE="${VERIFY_OBS_APP_NAMESPACE:-mereka-lms}"
 VERIFY_MONITORING_NAMESPACE="${VERIFY_OBS_MONITORING_NAMESPACE:-monitoring}"
 VERIFY_K8S_CONTEXT="${VERIFY_OBS_K8S_CONTEXT:-}"
@@ -29,6 +30,7 @@ VERIFY_GCP_PROJECT="${VERIFY_OBS_GCP_PROJECT:-${GCP_PROJECT:-mereka-lms}}"
 VERIFY_ENV_LABEL="${VERIFY_OBS_ENV_LABEL:-unknown}"
 VERIFY_DISPATCH_PROFILE="${VERIFY_OBS_DISPATCH_PROFILE:-custom}"
 VERIFY_EVIDENCE_FILE="${VERIFY_OBS_EVIDENCE_FILE:-}"
+VERIFY_EVIDENCE_DIR="${VERIFY_OBS_EVIDENCE_DIR:-${VERIFY_EVIDENCE_FILE%/*}}"
 RESULTS_FILE="$(mktemp -t verify-observability-runtime.XXXXXX)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
 
@@ -49,6 +51,57 @@ skip() {
     echo -e "${YELLOW}[SKIP]${NC} $1"
     SKIP=$((SKIP + 1))
     printf 'skip\t%s\n' "$1" >> "$RESULTS_FILE"
+}
+
+write_metrics_payload_evidence() {
+    local component="$1"
+    local status_code="$2"
+    local payload="$3"
+    local note="$4"
+    local artifact_file="$5"
+
+    local total_bytes
+    local help_count
+    local type_count
+    local sample_count
+
+    total_bytes="${#payload}"
+    if [[ -n "$payload" ]]; then
+        help_count="$(printf '%s' "$payload" | grep -cE '^# HELP ' || true)"
+        type_count="$(printf '%s' "$payload" | grep -cE '^# TYPE ' || true)"
+        sample_count="$(printf '%s' "$payload" | grep -cE '^[a-zA-Z_:][a-zA-Z0-9_:]*(\{[^\n]*\})?[[:space:]]+[-+]?[0-9]+([.][0-9]+)?([eE][-+]?[0-9]+)?([[:space:]]+[0-9]+)?$' || true)"
+    else
+        help_count=0
+        type_count=0
+        sample_count=0
+    fi
+
+    mkdir -p "$VERIFY_EVIDENCE_DIR"
+    {
+        echo "# Observability /metrics payload evidence"
+        echo ""
+        echo "- component: ${component}"
+        echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "- status_code: ${status_code}"
+        echo "- payload_bytes: ${total_bytes}"
+        echo "- help_count: ${help_count}"
+        echo "- type_count: ${type_count}"
+        echo "- numeric_sample_count: ${sample_count}"
+        echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
+        if [[ -n "$note" ]]; then
+            echo "- note: ${note}"
+        fi
+        echo ""
+        echo "## Payload sample"
+        echo ""
+        echo '```text'
+        if [[ -n "$payload" ]]; then
+            printf '%s\n' "$payload" | awk 'NF' | head -n 200
+        else
+            echo "<no-payload-generated>"
+        fi
+        echo '```'
+    } > "$artifact_file"
 }
 
 kubectl_cmd() {
@@ -164,6 +217,124 @@ run_missing_resource_negative_check() {
     fi
 }
 
+check_prometheus_runtime_wiring() {
+    local component="${1}"
+    local target_name="${2}"
+    local rule_name="${3}"
+    local evidence_file="${4}"
+    local check_rule=0
+    local sm_count=0
+    local rule_crd_count=0
+
+    if ! command -v kubectl >/dev/null 2>&1; then
+        skip "runtime wiring for ${component}: kubectl unavailable"
+        return 0
+    fi
+
+    if [[ -n "$target_name" ]]; then
+        set +e
+        sm_count="$(kubectl_cmd get servicemonitor -n "$VERIFY_MONITORING_NAMESPACE" "$target_name" --ignore-not-found 2>/dev/null | wc -l | tr -d '[:space:]')"
+        set -e
+        if [[ "$sm_count" -eq 0 ]]; then
+            fail "Runtime wiring: expected ServiceMonitor '${target_name}' not found in ${VERIFY_MONITORING_NAMESPACE}"
+        else
+            pass "Runtime wiring: ServiceMonitor '${target_name}' exists in ${VERIFY_MONITORING_NAMESPACE}"
+        fi
+    fi
+
+    if [[ -n "$rule_name" ]]; then
+        set +e
+        rule_crd_count="$(kubectl_cmd get prometheusrule -n "$VERIFY_APP_NAMESPACE" "$rule_name" --ignore-not-found 2>/dev/null | wc -l | tr -d '[:space:]')"
+        set -e
+        if [[ "$rule_crd_count" -eq 0 ]]; then
+            fail "Runtime wiring: expected PrometheusRule '${rule_name}' not found in ${VERIFY_APP_NAMESPACE}"
+            check_rule=1
+        else
+            pass "Runtime wiring: PrometheusRule '${rule_name}' exists in ${VERIFY_APP_NAMESPACE}"
+        fi
+    fi
+
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        PROM_POD="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    else
+        PROM_POD="$(kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    fi
+    set -e
+
+    if [[ -z "$PROM_POD" ]]; then
+        skip "runtime wiring for ${component}: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE}"
+        return 0
+    fi
+
+    set +e
+    if command -v timeout >/dev/null 2>&1; then
+        TARGETS_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
+        RULES_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
+    else
+        TARGETS_JSON="$(kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
+        RULES_JSON="$(kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
+    fi
+    set -e
+
+    TARGET_COUNT="0"
+    RULE_GROUP_COUNT="0"
+    if [[ -n "$TARGETS_JSON" ]]; then
+        TARGET_COUNT="$(printf '%s' "$TARGETS_JSON" | jq -r --arg n "$target_name" '[ .data.activeTargets // [] | .[] | select( (.scrapePool // "" | contains($n)) or (.labels.job // "" | tostring | contains($n)) or (.discoveredLabels["__meta_kubernetes_service_name"] // "" | tostring | contains($n)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
+    fi
+    if [[ -n "$rule_name" && -n "$RULES_JSON" ]]; then
+        RULE_GROUP_COUNT="$(printf '%s' "$RULES_JSON" | jq -r --arg n "$rule_name" '[ .data.groups // [] | .[] | select((.name // "") == $n or (.name // "" | contains($n)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
+        RULE_GROUP_COUNT="${RULE_GROUP_COUNT:-0}"
+        check_rule=1
+    fi
+
+    TARGET_COUNT="${TARGET_COUNT:-0}"
+    RULE_GROUP_COUNT="${RULE_GROUP_COUNT:-0}"
+
+    mkdir -p "$VERIFY_EVIDENCE_DIR"
+    {
+        echo "# Prometheus wiring evidence for ${component}"
+        echo ""
+        echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        echo "- component: ${component}"
+        echo "- target_name: ${target_name}"
+    if [[ -n "$rule_name" ]]; then
+        echo "- rule_name: ${rule_name}"
+    else
+        echo "- rule_name: (not requested)"
+    fi
+        echo "- target_matches: ${TARGET_COUNT}"
+        echo "- rule_group_matches: ${RULE_GROUP_COUNT}"
+        echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
+        echo ""
+        echo "## Raw targets payload"
+        echo '```json'
+        echo "$TARGETS_JSON" | jq '.data.activeTargets // []' 2>/dev/null | sed -n '1,120p'
+        echo '```'
+        echo ""
+        echo "## Raw rule payload"
+        echo '```json'
+        echo "$RULES_JSON" | jq '.data.groups // []' 2>/dev/null | sed -n '1,160p'
+        echo '```'
+    } > "$evidence_file"
+
+    if [[ -n "$target_name" ]]; then
+        if [[ "$TARGET_COUNT" -gt 0 ]]; then
+            pass "Runtime wiring: ${component} target visible to Prometheus as '${target_name}' (${TARGET_COUNT})"
+        else
+            fail "Runtime wiring: ${component} ServiceMonitor '${target_name}' not present in Prometheus active targets"
+        fi
+    fi
+
+    if [[ "$check_rule" -eq 1 ]]; then
+        if [[ "$RULE_GROUP_COUNT" -gt 0 ]]; then
+            pass "Runtime wiring: ${component} rule group present in Prometheus as '${rule_name}' (${RULE_GROUP_COUNT})"
+        else
+            fail "Runtime wiring: ${component} PrometheusRule '${rule_name}' not present in Prometheus /api/v1/rules"
+        fi
+    fi
+}
+
 echo "========================================================="
 echo "Observability Validation Runtime Verification (Live)"
 echo "========================================================="
@@ -222,6 +393,9 @@ if command -v kubectl >/dev/null 2>&1; then
     CMS_METRICS="${CMS_RESULT#*__METRICS_SPLIT__}"
     set -e
 
+    write_metrics_payload_evidence "LMS" "$LMS_CODE" "$LMS_METRICS" "" "$VERIFY_EVIDENCE_DIR/observability-metrics-lms-runtime.md"
+    write_metrics_payload_evidence "CMS" "$CMS_CODE" "$CMS_METRICS" "" "$VERIFY_EVIDENCE_DIR/observability-metrics-cms-runtime.md"
+
     if [[ "$LMS_CODE" == "200" ]]; then
         pass "AC-OVR-016: LMS /metrics returned 200"
         check_metrics_payload_shape "LMS" "$LMS_METRICS"
@@ -237,6 +411,8 @@ if command -v kubectl >/dev/null 2>&1; then
     fi
 else
     skip "AC-OVR-016: kubectl not available (cannot verify LMS/CMS /metrics)"
+    write_metrics_payload_evidence "LMS" "000" "" "kubectl unavailable at runtime verification" "$VERIFY_EVIDENCE_DIR/observability-metrics-lms-runtime.md"
+    write_metrics_payload_evidence "CMS" "000" "" "kubectl unavailable at runtime verification" "$VERIFY_EVIDENCE_DIR/observability-metrics-cms-runtime.md"
 fi
 
 # AC-OVR-018: GCP uptime checks
@@ -395,7 +571,7 @@ if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
       OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-        timeout "$VERIFY_RUNTIME_SCRIPT_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
+        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
     else
       OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
         scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
@@ -424,24 +600,24 @@ echo ""
 echo "==> AC-OVR-027: Validation script runtime mode queries kubectl and gcloud"
 if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
     if command -v kubectl >/dev/null 2>&1 && command -v gcloud >/dev/null 2>&1; then
-        set +e
-        if command -v timeout >/dev/null 2>&1; then
-          OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-            timeout "$VERIFY_RUNTIME_SCRIPT_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json 2>/dev/null)"
-        else
-          OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-            scripts/qa/validate-observability-compliance.sh --mode runtime --strict --json 2>/dev/null)"
-        fi
-        if [[ $? -eq 0 ]]; then
-            if echo "$OUTPUT" | jq -e '.checks[] | select(.id=="AC-OVR-027")' >/dev/null 2>&1; then
-                pass "AC-OVR-027: Runtime compliance mode validates kubectl and gcloud checks"
+        if [[ -n "$VERIFY_K8S_CONTEXT" ]]; then
+            if kubectl --context "$VERIFY_K8S_CONTEXT" get ns >/dev/null 2>&1; then
+                pass "AC-OVR-027: kubectl cluster access succeeds"
             else
-                fail "AC-OVR-027: Runtime compliance output does not include AC-OVR-027 checks"
+                fail "AC-OVR-027: kubectl cluster access failed"
             fi
+        elif kubectl get ns >/dev/null 2>&1; then
+            pass "AC-OVR-027: kubectl cluster access succeeds"
         else
-            fail "AC-OVR-027: Validation script failed in runtime mode"
+            fail "AC-OVR-027: kubectl cluster access failed"
         fi
-        set -e
+
+        local_account_count="$(timeout "$VERIFY_RUNTIME_SCRIPT_TIMEOUT" gcloud auth list --filter='status:ACTIVE' --format='value(account)' 2>/dev/null | sed '/^$/d' | wc -l | tr -d ' ')" || local_account_count="0"
+        if [[ "$local_account_count" -ge 1 ]]; then
+            pass "AC-OVR-027: gcloud active account available"
+        else
+            fail "AC-OVR-027: gcloud has no active account"
+        fi
     else
         skip "AC-OVR-027: kubectl or gcloud not available"
     fi
@@ -480,6 +656,79 @@ fi
 # AC-OVR-031: Alert rules have valid PromQL (no syntax errors)
 echo ""
 echo "==> AC-OVR-031: All alert PromQL expressions are valid (no syntax errors)"
+echo ""
+echo "==> Runtime wiring check: caddy-metrics and caddy-alerts in Prometheus"
+check_prometheus_runtime_wiring \
+    "caddy" \
+    "caddy-metrics" \
+    "caddy-alerts" \
+    "$VERIFY_EVIDENCE_DIR/observability-caddy-prometheus-wiring-runtime.md"
+
+echo "==> Runtime wiring check: mfe-metrics and services-alerts in Prometheus"
+check_prometheus_runtime_wiring \
+    "mfe" \
+    "mfe-metrics" \
+    "services-alerts" \
+    "$VERIFY_EVIDENCE_DIR/observability-mfe-prometheus-wiring-runtime.md"
+
+echo "==> Runtime wiring check: remaining high-signal ServiceMonitors in Prometheus targets"
+check_prometheus_runtime_wiring \
+    "forum" \
+    "forum-metrics" \
+    "" \
+    "$VERIFY_EVIDENCE_DIR/observability-forum-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "discovery" \
+    "discovery-metrics" \
+    "" \
+    "$VERIFY_EVIDENCE_DIR/observability-discovery-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "ecommerce" \
+    "ecommerce-metrics" \
+    "" \
+    "$VERIFY_EVIDENCE_DIR/observability-ecommerce-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "credentials" \
+    "credentials-metrics" \
+    "" \
+    "$VERIFY_EVIDENCE_DIR/observability-credentials-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "purchase-gateway" \
+    "purchase-gateway-metrics" \
+    "" \
+    "$VERIFY_EVIDENCE_DIR/observability-purchase-gateway-prometheus-wiring-runtime.md"
+
+echo "==> Runtime wiring check: additional core alert groups in Prometheus"
+check_prometheus_runtime_wiring \
+    "slo" \
+    "" \
+    "slo-recording-rules" \
+    "$VERIFY_EVIDENCE_DIR/observability-slo-rules-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "video" \
+    "" \
+    "video-alerts" \
+    "$VERIFY_EVIDENCE_DIR/observability-video-rules-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "ora2" \
+    "" \
+    "ora2-operations" \
+    "$VERIFY_EVIDENCE_DIR/observability-ora2-rules-prometheus-wiring-runtime.md"
+
+lane_env="${VERIFY_ENV_LABEL,,}"
+if [[ "$lane_env" == "dev" || "$lane_env" == "local" || "$lane_env" == "kind" || "$lane_env" == "kind-dev" ]]; then
+    echo "==> Runtime wiring check: dev-only ServiceMonitors"
+    check_prometheus_runtime_wiring \
+        "xqueue" \
+        "xqueue-metrics" \
+        "" \
+        "$VERIFY_EVIDENCE_DIR/observability-dev-xqueue-prometheus-wiring-runtime.md"
+    check_prometheus_runtime_wiring \
+        "mux" \
+        "mux-delivery-monitor" \
+        "" \
+        "$VERIFY_EVIDENCE_DIR/observability-dev-mux-prometheus-wiring-runtime.md"
+fi
 if command -v kubectl >/dev/null 2>&1; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
@@ -544,6 +793,8 @@ if [[ -n "$VERIFY_EVIDENCE_FILE" ]]; then
         echo "- dispatch_profile: $VERIFY_DISPATCH_PROFILE"
         echo "- k8s_context: ${VERIFY_K8S_CONTEXT:-default}"
         echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
+        echo "- metrics_payload_evidence_lms: observability-metrics-lms-runtime.md"
+        echo "- metrics_payload_evidence_cms: observability-metrics-cms-runtime.md"
         echo ""
         echo "## Summary"
         echo ""

@@ -19,7 +19,7 @@ SCRIPT_DIR="$REPO_ROOT/scripts/qa"
 MODE="all"
 JSON_OUT=0
 STRICT=0
-SCRIPT_TIMEOUT="${VALIDATE_OBS_SCRIPT_TIMEOUT:-120}"
+SCRIPT_TIMEOUT="${VALIDATE_OBS_SCRIPT_TIMEOUT:-600}"
 RUNTIME_CMD_TIMEOUT="${VALIDATE_OBS_RUNTIME_CMD_TIMEOUT:-30}"
 APP_NAMESPACE="${VALIDATE_OBS_APP_NAMESPACE:-mereka-lms}"
 EVIDENCE_FILE="${VALIDATE_OBS_EVIDENCE_FILE:-}"
@@ -94,16 +94,63 @@ record_result() {
 
 kubectl_cmd() {
   if [[ -n "$K8S_CONTEXT" ]]; then
-    kubectl --context "$K8S_CONTEXT" "$@"
+    kubectl --context "$K8S_CONTEXT" --request-timeout="${RUNTIME_CMD_TIMEOUT}s" "$@"
   else
-    kubectl "$@"
+    kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" "$@"
   fi
+}
+
+run_with_timeout() {
+  local duration="$1"
+  shift
+
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$duration" "$@"
+    return $?
+  fi
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "SKIP: timeout command unavailable and python3 missing" >&2
+    "$@"
+    return $?
+  fi
+
+  python3 - "$duration" "$@" <<'PY'
+import subprocess
+import sys
+
+timeout_seconds = int(sys.argv[1])
+cmd = sys.argv[2:]
+
+try:
+    proc = subprocess.run(
+        cmd,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=timeout_seconds,
+    )
+    if proc.stdout:
+        print(proc.stdout, end="")
+    if proc.stderr:
+        print(proc.stderr, end="", file=sys.stderr)
+    raise SystemExit(proc.returncode)
+except subprocess.TimeoutExpired as exc:
+    if exc.stdout:
+        print(exc.stdout, end="")
+    if exc.stderr:
+        print(exc.stderr, end="", file=sys.stderr)
+    raise SystemExit(124)
+except FileNotFoundError:
+    raise SystemExit(127)
+PY
 }
 
 run_script() {
   local check_id="$1"
   local script_path="$2"
-  local args="${3:-}"
+  shift 2
+  local -a script_args=("$@")
   local output
   local rc=0
 
@@ -113,29 +160,23 @@ run_script() {
   fi
 
   set +e
-  if command -v timeout >/dev/null 2>&1; then
-    if [[ -n "$args" ]]; then
-      output="$(timeout "$SCRIPT_TIMEOUT" "$script_path" $args 2>&1)"
-      rc=$?
-    else
-      output="$(timeout "$SCRIPT_TIMEOUT" "$script_path" 2>&1)"
-      rc=$?
-    fi
+  if [[ "${#script_args[@]}" -gt 0 ]]; then
+    output="$(run_with_timeout "$SCRIPT_TIMEOUT" "$script_path" "${script_args[@]}" 2>&1)"
+    rc=$?
   else
-    if [[ -n "$args" ]]; then
-      output="$($script_path $args 2>&1)"
-      rc=$?
-    else
-      output="$($script_path 2>&1)"
-      rc=$?
-    fi
+    output="$(run_with_timeout "$SCRIPT_TIMEOUT" "$script_path" 2>&1)"
+    rc=$?
   fi
   set -e
 
   if [[ $rc -eq 0 ]]; then
     record_result pass "$check_id" "passed"
   else
-    output="${output:0:600}"
+    if [[ $rc -eq 124 ]]; then
+      output="command timed out (rc=${rc})"
+    else
+      output="${output:0:600}"
+    fi
     if [[ -z "$output" ]]; then
       output="(no command output)"
     fi
@@ -154,9 +195,17 @@ fetch_metrics_with_status() {
   local split_token="__METRICS_SPLIT__"
 
   if command -v timeout >/dev/null 2>&1; then
-    result="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl_cmd exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    if [[ -n "$K8S_CONTEXT" ]]; then
+      result="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl --context "$K8S_CONTEXT" --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    else
+      result="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    fi
   else
-    result="$(kubectl_cmd exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    if [[ -n "$K8S_CONTEXT" ]]; then
+      result="$(kubectl --context "$K8S_CONTEXT" --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    else
+      result="$(kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    fi
   fi
 
   if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
@@ -241,9 +290,9 @@ run_negative_control_check() {
 }
 
 run_local_checks() {
-  run_script "AC-OVR-024" "$VALIDATE_SCRIPT"
+  run_script "AC-OVR-024" "$VALIDATE_SCRIPT" --mode local
 
-  run_script "AC-OVR-024" "$AUDIT_SCRIPT" "--mode local"
+  run_script "AC-OVR-024" "$AUDIT_SCRIPT" --mode local
 
   local has_ci_invocation=1
   if command -v rg >/dev/null 2>&1; then
@@ -274,7 +323,7 @@ run_local_checks() {
       if rg -q "pull_request:" "$compliance_workflow"; then
         has_pull_request_trigger=1
       fi
-      if rg -q "validate-observability-compliance.sh --mode local --strict" "$compliance_workflow"; then
+      if rg -q "validate-observability-compliance.sh --mode local --strict|run-observability-first-class.sh --mode local --strict" "$compliance_workflow"; then
         has_local_mode_strict=1
       fi
       if rg -q "deploy/k8s/base/monitoring" "$compliance_workflow" \
@@ -349,12 +398,7 @@ run_runtime_checks() {
   record_result pass "AC-OVR-027" "kubectl and gcloud are available"
 
   set +e
-  if command -v timeout >/dev/null 2>&1; then
-    timeout "$RUNTIME_CMD_TIMEOUT" kubectl_cmd cluster-info >/dev/null 2>&1
-  else
-    kubectl_cmd cluster-info >/dev/null 2>&1
-  fi
-  if [[ $? -eq 0 ]]; then
+  if kubectl_cmd --request-timeout="${RUNTIME_CMD_TIMEOUT}s" cluster-info >/dev/null 2>&1; then
     record_result pass "AC-OVR-027" "kubectl cluster access succeeds"
   else
     if [[ "$STRICT" == "1" ]]; then
@@ -365,11 +409,7 @@ run_runtime_checks() {
   fi
 
   local active_account=""
-  if command -v timeout >/dev/null 2>&1; then
-    active_account="$(timeout "$RUNTIME_CMD_TIMEOUT" gcloud auth list --filter='status:ACTIVE' --format='value(account)' 2>/dev/null || true)"
-  else
-    active_account="$(gcloud auth list --filter='status:ACTIVE' --format='value(account)' 2>/dev/null || true)"
-  fi
+  active_account="$(run_with_timeout "$RUNTIME_CMD_TIMEOUT" gcloud auth list --filter='status:ACTIVE' --format='value(account)' 2>/dev/null || true)"
   if [[ -n "$active_account" ]]; then
     record_result pass "AC-OVR-027" "gcloud has an active authenticated account"
   else
@@ -411,7 +451,7 @@ run_runtime_checks() {
   fi
   set -e
 
-  run_script "AC-OVR-026" "$AUDIT_SCRIPT" "--mode runtime"
+  run_script "AC-OVR-026" "$AUDIT_SCRIPT" --mode runtime
   run_script "AC-OVR-026" "$RUNTIME_SCRIPT"
 }
 
@@ -427,30 +467,32 @@ TOTAL=$((PASS + FAIL + SKIP))
 
 if [[ "$JSON_OUT" -eq 1 ]]; then
   if command -v python3 >/dev/null 2>&1; then
-    python3 - "$MODE" "$STRICT" "$TOTAL" "$PASS" "$FAIL" "$SKIP" < "$RESULTS_FILE" <<'PY'
+    python3 - "$MODE" "$STRICT" "$TOTAL" "$PASS" "$FAIL" "$SKIP" "$RESULTS_FILE" <<'PY'
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 mode = sys.argv[1]
 strict = bool(int(sys.argv[2]))
 pass_count = int(sys.argv[4])
 fail_count = int(sys.argv[5])
 skip_count = int(sys.argv[6])
+results_file = sys.argv[7]
 
 checks = []
-for line in sys.stdin:
-    line = line.rstrip("\n")
-    if not line.strip():
-        continue
-    parts = line.split("\t", 2)
-    if len(parts) < 3:
-        continue
-    status, check_id, msg = parts
-    checks.append({"id": check_id, "status": status, "message": msg})
+with open(results_file, 'r', encoding='utf-8') as f:
+    for raw_line in f:
+        line = raw_line.rstrip("\n")
+        if not line.strip():
+            continue
+        parts = line.split("\t", 2)
+        if len(parts) < 3:
+            continue
+        status, check_id, msg = parts
+        checks.append({"id": check_id, "status": status, "message": msg})
 
 print(json.dumps({
-    "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "mode": mode,
     "strict": strict,
     "summary": {

@@ -24,6 +24,7 @@ MODE="local" # local|runtime
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 CONFIG_PATH="${ALERT_NOISE_BASELINE_CONFIG:-infrastructure/monitoring/alert-noise-baseline.json}"
 RUNTIME_SOURCE="${ALERT_NOISE_RUNTIME_SOURCE:-}"
+CLASSIFICATION_FEED="${ALERT_NOISE_FP_CLASSIFICATION_FEED:-}"
 
 usage() {
   cat <<'EOF2'
@@ -96,12 +97,39 @@ if [[ -z "$RUNTIME_SOURCE" || ! -f "$RUNTIME_SOURCE" ]]; then
   exit 0
 fi
 
+if [[ -n "$CLASSIFICATION_FEED" ]]; then
+  if [[ ! -f "$CLASSIFICATION_FEED" ]]; then
+    echo "WARN: ALERT_NOISE_FP_CLASSIFICATION_FEED points to missing file: $CLASSIFICATION_FEED" >&2
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      exit 1
+    fi
+  else
+    if ! jq -e '
+      type == "object" and
+      (.entries | type == "array") and
+      (all(.entries[]?; (.fingerprint | type == "string") and (.fingerprint | length > 0) and (.classification | type == "string") and (.classification == "false_positive" or .classification == "suppress")))
+    ' "$CLASSIFICATION_FEED" >/dev/null; then
+      echo "WARN: malformed ALERT_NOISE_FP_CLASSIFICATION_FEED: $CLASSIFICATION_FEED" >&2
+      if [[ "$STRICT_RUNTIME" == "1" ]]; then
+        exit 1
+      fi
+    fi
+  fi
+fi
+
 jq -e '
   (.total_alerts | numbers and . >= 0) and
   (.duplicate_alerts | numbers and . >= 0) and
   (.false_positive_alerts | numbers and . >= 0) and
+  (((.false_positive_summary // {}) | type == "object") and
+    (((.false_positive_summary.label_matches // 0) | numbers and . >= 0)) and
+    (((.false_positive_summary.feed_matches // 0) | numbers and . >= 0))) and
   (.duplicate_detection.window_minutes | numbers and . > 0) and
   (.duplicate_detection.min_dup_group_size | numbers and . >= 2) and
+  (((.classification_feed // {}) | type == "object")) and
+  (((.classification_feed.entries_total // 0) | numbers and . >= 0)) and
+  (((.classification_feed.entries_accepted // 0) | numbers and . >= 0)) and
+  (((.classification_feed.entries_rejected // 0) | numbers and . >= 0)) and
   (.duplicate_windows | type == "array")
 ' "$RUNTIME_SOURCE" >/dev/null
 
@@ -119,6 +147,7 @@ sample_dup="$(jq -r '.duplicate_alerts' "$RUNTIME_SOURCE")"
 sample_fp="$(jq -r '.false_positive_alerts' "$RUNTIME_SOURCE")"
 sample_window="$(jq -r '.duplicate_detection.window_minutes // 0' "$RUNTIME_SOURCE")"
 sample_min_dup_group="$(jq -r '.duplicate_detection.min_dup_group_size // 0' "$RUNTIME_SOURCE")"
+sample_feed="$(jq -r '.classification_feed.path // ""' "$RUNTIME_SOURCE")"
 
 min_n="$(jq -r '.minimum_sample_size' "$CONFIG_PATH")"
 dup_max="$(jq -r '.thresholds.duplicate_alert_ratio_max' "$CONFIG_PATH")"
@@ -128,6 +157,10 @@ cfg_min_dup_group="$(jq -r '.thresholds.duplicate_detection.min_dup_group_size /
 
 if [[ "$sample_window" != "$cfg_window" ]] || [[ "$sample_min_dup_group" != "$cfg_min_dup_group" ]]; then
   echo "WARN runtime sample duplicate detection config mismatch: sample window=${sample_window},group=${sample_min_dup_group}; config window=${cfg_window},group=${cfg_min_dup_group}"
+fi
+
+if [[ -n "$CLASSIFICATION_FEED" && -n "$sample_feed" && "$sample_feed" != "$CLASSIFICATION_FEED" ]]; then
+  echo "WARN runtime sample consumed different false-positive feed than requested: expected=${CLASSIFICATION_FEED}, sample=${sample_feed}"
 fi
 
 if [[ "$sample_total" -lt "$min_n" ]]; then

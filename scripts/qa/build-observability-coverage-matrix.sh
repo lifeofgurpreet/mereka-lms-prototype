@@ -92,6 +92,7 @@ REQUIRED_SERVICE_MONITORS=(
   "servicemonitor-discovery.yaml"
   "servicemonitor-ecommerce.yaml"
   "servicemonitor-credentials.yaml"
+  "servicemonitor-purchase-gateway.yaml"
 )
 
 REQUIRED_SERVICE_MONITOR_RUNTIME=(

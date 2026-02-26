@@ -2,7 +2,8 @@
 # Build an environment parity delta report from first-class runtime evidence.
 #
 # Usage:
-#   ./scripts/qa/build-observability-parity-delta.sh --env prod --evidence-dir var/ci/parity-prod
+#   ./scripts/qa/build-observability-parity-delta.sh --env prod --evidence-dir var/ci/parity-prod \
+#     [--expected-context <k8s-context>] [--expected-project <gcp-project>] [--out-md <path>] [--out-json <path>]
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,10 +13,12 @@ ENV_LABEL=""
 EVIDENCE_DIR=""
 OUT_MD=""
 OUT_JSON=""
+EXPECTED_CONTEXT=""
+EXPECTED_PROJECT=""
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/qa/build-observability-parity-delta.sh --env dev|nonprod|prod|custom --evidence-dir <path> [--out-md <path>] [--out-json <path>]
+Usage: ./scripts/qa/build-observability-parity-delta.sh --env dev|nonprod|prod|custom --evidence-dir <path> [--expected-context <k8s-context>] [--expected-project <gcp-project>] [--out-md <path>] [--out-json <path>]
 EOF
 }
 
@@ -35,6 +38,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --out-json)
       OUT_JSON="${2:-}"
+      shift 2
+      ;;
+    --expected-context)
+      EXPECTED_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    --expected-project)
+      EXPECTED_PROJECT="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -117,6 +128,8 @@ REQUIRED_FILES=(
   "observability-compliance-runtime.json"
   "observability-runtime-verify-runtime.md"
   "observability-correlation-headers-runtime.txt"
+  "observability-metrics-lms-runtime.md"
+  "observability-metrics-cms-runtime.md"
   "observability-first-class-runtime-evidence-index.json"
 )
 
@@ -206,6 +219,22 @@ if [[ -f "$INDEX_FILE" ]]; then
       else
         record fail "PARITY-006" "Identity profile mismatch: expected=$EXPECTED_PROFILE actual=${identity_profile:-<empty>}"
       fi
+
+      if [[ -n "$EXPECTED_CONTEXT" ]]; then
+        if [[ "$identity_context" == "$EXPECTED_CONTEXT" ]]; then
+          record pass "PARITY-013" "Identity context matches lane contract ($EXPECTED_CONTEXT)"
+        else
+          record fail "PARITY-013" "Identity context mismatch: expected=$EXPECTED_CONTEXT actual=${identity_context:-<empty>}"
+        fi
+      fi
+
+      if [[ -n "$EXPECTED_PROJECT" ]]; then
+        if [[ "$identity_project" == "$EXPECTED_PROJECT" ]]; then
+          record pass "PARITY-014" "Identity project matches lane contract ($EXPECTED_PROJECT)"
+        else
+          record fail "PARITY-014" "Identity project mismatch: expected=$EXPECTED_PROJECT actual=${identity_project:-<empty>}"
+        fi
+      fi
     else
       record fail "PARITY-004" "Evidence index identity missing"
     fi
@@ -224,6 +253,12 @@ TOTAL=$((PASS + FAIL))
   echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "- environment: $ENV_LABEL"
   echo "- expected_profile: $EXPECTED_PROFILE"
+  if [[ -n "$EXPECTED_CONTEXT" ]]; then
+    echo "- expected_context: $EXPECTED_CONTEXT"
+  fi
+  if [[ -n "$EXPECTED_PROJECT" ]]; then
+    echo "- expected_project: $EXPECTED_PROJECT"
+  fi
   echo "- evidence_dir: $EVIDENCE_DIR"
   echo ""
   echo "## Summary"
@@ -241,21 +276,23 @@ TOTAL=$((PASS + FAIL))
   fi
 } > "$OUT_MD"
 
-python3 - "$ENV_LABEL" "$EXPECTED_PROFILE" "$identity_env" "$identity_profile" "$identity_context" "$identity_project" "$PASS" "$FAIL" "$TOTAL" "$RESULTS_FILE" > "$OUT_JSON" <<'PY'
+python3 - "$ENV_LABEL" "$EXPECTED_PROFILE" "$EXPECTED_CONTEXT" "$EXPECTED_PROJECT" "$identity_env" "$identity_profile" "$identity_context" "$identity_project" "$PASS" "$FAIL" "$TOTAL" "$RESULTS_FILE" > "$OUT_JSON" <<'PY'
 import json
 import sys
 from datetime import datetime, timezone
 
 env_label = sys.argv[1]
 expected_profile = sys.argv[2]
-identity_env = sys.argv[3]
-identity_profile = sys.argv[4]
-identity_context = sys.argv[5]
-identity_project = sys.argv[6]
-passed = int(sys.argv[7])
-failed = int(sys.argv[8])
-total = int(sys.argv[9])
-results_path = sys.argv[10]
+expected_context = sys.argv[3]
+expected_project = sys.argv[4]
+identity_env = sys.argv[5]
+identity_profile = sys.argv[6]
+identity_context = sys.argv[7]
+identity_project = sys.argv[8]
+passed = int(sys.argv[9])
+failed = int(sys.argv[10])
+total = int(sys.argv[11])
+results_path = sys.argv[12]
 
 checks = []
 with open(results_path, "r", encoding="utf-8") as f:
@@ -270,6 +307,8 @@ print(json.dumps({
     "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "environment": env_label,
     "expected_profile": expected_profile,
+    "expected_context": expected_context,
+    "expected_project": expected_project,
     "identity": {
         "env": identity_env,
         "profile": identity_profile,

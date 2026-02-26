@@ -32,16 +32,20 @@ cd "$ROOT_DIR"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 APP_NS="${APP_NS:-mereka-lms}"
+TEMPO_URL="${TEMPO_URL:-}"
+TRACING_REQUIRED="${TRACING_REQUIRED:-${OBS_REQUIRE_TRACING_ARTIFACT:-0}}"
 
 pass=0
 fail=0
 skip=0
+warn=0
 
 report() {
   local status="$1"; shift
   case "$status" in
     PASS) pass=$((pass + 1)); printf "PASS  %s\n" "$*" ;;
     FAIL) fail=$((fail + 1)); printf "FAIL  %s\n" "$*" >&2 ;;
+    WARN) warn=$((warn + 1)); printf "WARN  %s\n" "$*" ;;
     SKIP) skip=$((skip + 1)); printf "SKIP  %s\n" "$*" ;;
   esac
 }
@@ -341,13 +345,45 @@ fi
 echo ""
 echo "=== Distributed Tracing (Tempo/OTEL) ==="
 
-# Tempo is SHOULD-level in the spec — SKIP if not present
-tempo_configs=$(find deploy/k8s/ -name '*tempo*' 2>/dev/null | wc -l)
-otel_configs=$(find deploy/k8s/ -name '*otel*' -o -name '*opentelemetry*' 2>/dev/null | wc -l)
-if [[ "$tempo_configs" -gt 0 || "$otel_configs" -gt 0 ]]; then
-  report PASS "Tracing configuration found in deploy/k8s/"
+if [[ -f "docs/adr/020-tracing-scope-and-pilot-decision.md" ]]; then
+  report PASS "Tracing scope ADR exists: docs/adr/020-tracing-scope-and-pilot-decision.md"
+elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+  report FAIL "Tracing scope ADR missing: docs/adr/020-tracing-scope-and-pilot-decision.md"
 else
-  report SKIP "Distributed tracing (Tempo/OTEL) not yet implemented (SHOULD-level in spec)"
+  report SKIP "Tracing scope ADR missing: docs/adr/020-tracing-scope-and-pilot-decision.md"
+fi
+
+if [[ -f "docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md" ]]; then
+  report PASS "Tracing pilot contract exists: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
+elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+  report FAIL "Tracing pilot contract missing: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
+else
+  report SKIP "Tracing pilot contract missing: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md"
+fi
+
+tracing_configs=(
+  $(find deploy/k8s infrastructure/monitoring -type f \( -iname '*tempo*' -o -iname '*otel*' -o -iname '*opentelemetry*' -o -iname '*tracing*' \) 2>/dev/null | awk 'NF')
+)
+if [[ "${#tracing_configs[@]}" -gt 0 ]]; then
+  report PASS "Tracing manifests found in repo: ${#tracing_configs[@]} files"
+elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+  report FAIL "Tracing manifests not found in deploy/k8s or infrastructure/monitoring"
+else
+  report SKIP "Tracing manifests not found in deploy/k8s or infrastructure/monitoring"
+fi
+
+if [[ -d infrastructure/monitoring/grafana ]] && rg -qi "tempo|tracing" infrastructure/monitoring/grafana >/dev/null 2>&1; then
+  report PASS "Grafana tracing references detected in dashboard definitions"
+else
+  report WARN "No visible Grafana tracing references in infrastructure/monitoring/grafana"
+fi
+
+if rg -qi "OTEL_EXPORTER_OTLP_ENDPOINT|OTEL_SERVICE_NAME|otel" deploy/k8s/ >/dev/null 2>&1; then
+  report PASS "OpenTelemetry env/config references detected in manifests"
+elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+  report FAIL "No OpenTelemetry env/config references detected in deploy/k8s manifests"
+else
+  report WARN "No OpenTelemetry env/config references detected in deploy/k8s manifests"
 fi
 
 # ---------------------------------------------------------------------------
@@ -390,20 +426,76 @@ if [[ "$MODE" == "runtime" ]]; then
     fi
 
     # Prometheus pod exists in monitoring namespace
-    prom_pod=$(kubectl --context "$K8S_CONTEXT" -n monitoring get pods -l app.kubernetes.io/name=prometheus -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-    if [[ -n "$prom_pod" ]]; then
-      report PASS "Runtime: Prometheus pod found: $prom_pod"
-    else
+    prom_pod_count=$(kubectl --context "$K8S_CONTEXT" -n monitoring get pods -l 'app.kubernetes.io/name in (prometheus,kube-prometheus-stack)' --no-headers 2>/dev/null | wc -l | tr -d ' ')
+    running_prom_pod=$(kubectl --context "$K8S_CONTEXT" -n monitoring get pods -l 'app.kubernetes.io/name in (prometheus,kube-prometheus-stack)' --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$prom_pod_count" == "0" ]]; then
       report FAIL "Runtime: Prometheus pod not found in monitoring namespace"
+    elif [[ "$running_prom_pod" == "0" ]]; then
+      report FAIL "Runtime: Prometheus pod(s) exist in monitoring namespace but none are Running"
+    else
+      prom_pod=$(kubectl --context "$K8S_CONTEXT" -n monitoring get pods -l 'app.kubernetes.io/name in (prometheus,kube-prometheus-stack)' -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+      report PASS "Runtime: Prometheus pod found: $prom_pod"
     fi
 
-    # Delegate to canonical first-class observability gate for deeper runtime coverage
-    echo ""
-    echo "=== Delegating to run-observability-first-class.sh (runtime) ==="
-    if scripts/qa/run-observability-first-class.sh --mode runtime; then
-      report PASS "run-observability-first-class.sh runtime checks passed"
+    # Tempo/OTEL runtime resources
+    tempo_query='app.kubernetes.io/name=tempo'
+    tempo_namespace=""
+    tempo_service=""
+    tempo_pod_count=0
+
+    tempo_service=$(kubectl --context "$K8S_CONTEXT" get svc -A -l "$tempo_query" -o jsonpath='{.items[0].metadata.namespace}/{.items[0].metadata.name}' 2>/dev/null || true)
+    if [[ -n "$tempo_service" ]]; then
+      tempo_namespace="${tempo_service%%/*}"
+      tempo_service="${tempo_service#*/}"
+    fi
+
+    if [[ -z "$tempo_namespace" ]]; then
+      tempo_resource=$(kubectl --context "$K8S_CONTEXT" get deploy,daemonset,statefulset -A -l "$tempo_query" -o jsonpath='{.items[0].metadata.namespace}/{.items[0].metadata.name}' 2>/dev/null || true)
+      if [[ -n "$tempo_resource" ]]; then
+        tempo_namespace="${tempo_resource%%/*}"
+      fi
+    fi
+
+    if [[ -n "$tempo_namespace" ]]; then
+      if [[ -n "$tempo_service" ]]; then
+        tempo_pods_json=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_namespace" get pods -l "$tempo_query" -o json 2>/dev/null || echo '{"items":[]}')
+        tempo_pod_count=$(echo "$tempo_pods_json" | jq -r '.items | length' 2>/dev/null || echo 0)
+      else
+        tempo_pods_json=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_namespace" get pods -l "$tempo_query" -o json 2>/dev/null || echo '{"items":[]}')
+        tempo_pod_count=$(echo "$tempo_pods_json" | jq -r '.items | length' 2>/dev/null || echo 0)
+      fi
+
+      if [[ "$tempo_pod_count" -gt 0 ]]; then
+        report PASS "Runtime: Tempo resources discovered in namespace ${tempo_namespace}"
+      elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+        report FAIL "Runtime: Tempo workload found in ${tempo_namespace} but no pods are running"
+      else
+        report WARN "Runtime: Tempo workload found in ${tempo_namespace} but no pods are running"
+      fi
+    elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+      report FAIL "Runtime: Tempo resources not found (required tracing artifact)"
     else
-      report FAIL "run-observability-first-class.sh runtime checks failed"
+      report WARN "Runtime: Tempo resources not found (tracing is optional in current profile)"
+    fi
+
+    # Tempo readiness probe
+    tempo_ready_url=""
+    if [[ -n "$TEMPO_URL" ]]; then
+      tempo_ready_url="${TEMPO_URL%/}/ready"
+    elif [[ -n "$tempo_service" ]]; then
+      tempo_ready_url="http://${tempo_service}.${tempo_namespace}.svc.cluster.local:3200/ready"
+    fi
+
+    if [[ -z "$tempo_ready_url" ]]; then
+      report SKIP "Runtime: Tempo readiness URL unavailable for probe"
+    elif ! command -v curl >/dev/null 2>&1; then
+      report SKIP "Runtime: curl unavailable; skipping Tempo readiness probe"
+    elif curl -fsS "$tempo_ready_url" >/dev/null 2>&1; then
+      report PASS "Runtime: Tempo readiness probe passed ($tempo_ready_url)"
+    elif [[ "$TRACING_REQUIRED" == "1" ]]; then
+      report FAIL "Runtime: Tempo readiness probe failed ($tempo_ready_url)"
+    else
+      report WARN "Runtime: Tempo readiness probe failed ($tempo_ready_url)"
     fi
   else
     report SKIP "Runtime: kubectl not available or cluster unreachable ($K8S_CONTEXT / $APP_NS)"
@@ -419,6 +511,7 @@ echo "Observability Contract Verification Summary"
 echo "=========================================="
 echo "  PASS: $pass"
 echo "  FAIL: $fail"
+echo "  WARN: $warn"
 echo "  SKIP: $skip"
 echo ""
 

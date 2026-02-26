@@ -21,6 +21,7 @@ FP_LABEL_KEY="${ALERT_NOISE_FP_LABEL_KEY:-alert_noise_classification}"
 FP_LABEL_VAL="${ALERT_NOISE_FP_LABEL_VALUE:-false_positive}"
 FP_ANNOTATION_KEY="${ALERT_NOISE_FP_ANNOTATION_KEY:-alert_noise_classification}"
 FP_ANNOTATION_VAL="${ALERT_NOISE_FP_ANNOTATION_VALUE:-false_positive}"
+FP_CLASSIFICATION_FEED="${ALERT_NOISE_FP_CLASSIFICATION_FEED:-}"
 
 usage() {
   cat <<'EOF'
@@ -42,6 +43,7 @@ Environment:
   ALERT_NOISE_FP_LABEL_VALUE           Label value marking false-positive alerts
   ALERT_NOISE_FP_ANNOTATION_KEY        Annotation key marking false-positive alerts
   ALERT_NOISE_FP_ANNOTATION_VALUE      Annotation value marking false-positive alerts
+  ALERT_NOISE_FP_CLASSIFICATION_FEED    Optional JSON feed of manual/operator false-positive classifications
   STRICT_RUNTIME=1                     Fail hard when sample cannot be built
 EOF
 }
@@ -59,6 +61,10 @@ emit_fallback_sample() {
   "total_alerts": 0,
   "duplicate_alerts": 0,
   "false_positive_alerts": 0,
+  "false_positive_summary": {
+    "label_matches": 0,
+    "feed_matches": 0
+  },
   "severity_buckets": {
     "critical": {
       "total": 0,
@@ -85,6 +91,12 @@ emit_fallback_sample() {
     "type": "fallback",
     "baseline_config": "${BASELINE_CONFIG}",
     "note": "Unable to build live sample in current runtime context"
+  },
+  "classification_feed": {
+    "source": "${FP_CLASSIFICATION_FEED}",
+    "entries_used": 0,
+    "entries_accepted": 0,
+    "entries_rejected": 0
   }
 }
 EOF_JSON
@@ -129,6 +141,14 @@ fi
 if ! [[ -f "$BASELINE_CONFIG" ]]; then
   echo "Baseline config missing: $BASELINE_CONFIG" >&2
   exit 1
+fi
+
+if [[ -n "$FP_CLASSIFICATION_FEED" ]] && ! [[ -f "$FP_CLASSIFICATION_FEED" ]]; then
+  echo "WARN: false-positive classification feed missing: $FP_CLASSIFICATION_FEED" >&2
+  if [[ "$STRICT_RUNTIME" == "1" ]]; then
+    exit 1
+  fi
+  FP_CLASSIFICATION_FEED=""
 fi
 
 DEFAULT_DUP_WINDOW_MINUTES="$(jq -r '.thresholds.duplicate_detection.fingerprint_window_minutes // 5' "$BASELINE_CONFIG")"
@@ -202,6 +222,8 @@ mkdir -p "$(dirname "$OUT_FILE")"
 export ALERT_NOISE_DUP_WINDOW_MINUTES="$DUPLICATE_WINDOW_MINUTES"
 export ALERT_NOISE_MIN_DUP_GROUP_SIZE="$MIN_DUP_GROUP_SIZE"
 export ALERT_NOISE_BASELINE_CONFIG="$BASELINE_CONFIG"
+export STRICT_RUNTIME="$STRICT_RUNTIME"
+export ALERT_NOISE_FP_CLASSIFICATION_FEED="$FP_CLASSIFICATION_FEED"
 
 python3 - "$OUT_FILE" "$FP_LABEL_KEY" "$FP_LABEL_VAL" "$FP_ANNOTATION_KEY" "$FP_ANNOTATION_VAL" <<PY
 import json
@@ -215,6 +237,8 @@ fp_label_key = sys.argv[2]
 fp_label_val = sys.argv[3]
 fp_annot_key = sys.argv[4]
 fp_annot_val = sys.argv[5]
+strict_runtime = (os.environ.get("STRICT_RUNTIME", "0") == "1")
+fp_feed_path = os.environ.get("ALERT_NOISE_FP_CLASSIFICATION_FEED", "")
 
 payload = json.load(sys.stdin)
 alerts = payload.get("data", []) or []
@@ -233,7 +257,68 @@ fingerprint_windows = defaultdict(list)
 total_alerts = 0
 duplicate_alerts = 0
 false_positive_alerts = 0
+false_positive_by_label = 0
+false_positive_by_feed = 0
 
+feed_entries_total = 0
+feed_entries_accepted = 0
+feed_entries_rejected = 0
+feed_by_fingerprint = {}
+
+
+def load_classification_feed(path, strict):
+    if not path:
+        return 0, 0, 0, {}
+
+    try:
+        with open(path, "r", encoding="utf-8") as fp:
+            feed = json.load(fp)
+    except Exception as exc:
+        print(f"WARN: failed to parse classification feed '{path}': {exc}", file=sys.stderr)
+        if strict:
+            raise
+        return 0, 0, 0, {}
+
+    entries = feed.get("entries")
+    if not isinstance(entries, list):
+        print(f"WARN: classification feed '{path}' missing required entries array", file=sys.stderr)
+        if strict:
+            raise SystemExit(1)
+        return 0, 0, 0, {}
+
+    map_by_fp = {}
+    entries_total = 0
+    entries_accepted = 0
+    entries_rejected = 0
+    for entry in entries:
+        if not isinstance(entry, dict):
+            entries_rejected += 1
+            continue
+        fingerprint = str(entry.get("fingerprint", "")).strip()
+        classification = str(entry.get("classification", "")).strip().lower()
+        entries_total += 1
+        if not fingerprint:
+            entries_rejected += 1
+            continue
+        if classification not in {"false_positive", "suppress"}:
+            entries_rejected += 1
+            continue
+        map_by_fp[fingerprint] = {
+            "classification": classification,
+            "reason": str(entry.get("reason", "")).strip(),
+            "owner": str(entry.get("owner", "")).strip(),
+            "expires_at": str(entry.get("expires_at", "")).strip(),
+            "source": str(entry.get("source", "manual")).strip() or "manual",
+        }
+        entries_accepted += 1
+
+    if strict and entries_rejected > 0:
+        raise SystemExit(1)
+
+    return entries_total, entries_accepted, entries_rejected, map_by_fp
+
+
+feed_entries_total, feed_entries_accepted, feed_entries_rejected, feed_by_fingerprint = load_classification_feed(fp_feed_path, strict_runtime)
 
 def parse_timestamp(value):
     if not value:
@@ -271,9 +356,23 @@ for alert in alerts:
         str(labels.get(fp_label_key, "")).strip().lower() == fp_label_val.strip().lower()
         or str(annotations.get(fp_annot_key, "")).strip().lower() == fp_annot_val.strip().lower()
     )
+    is_fp_from_feed = False
+    feed_entry = feed_by_fingerprint.get(fingerprint)
+    if feed_entry and feed_entry.get("classification") in {"false_positive", "suppress"}:
+        is_fp_from_feed = True
+
     if is_fp:
+        false_positive_by_label += 1
+        if not is_fp_from_feed:
+            false_positive_alerts += 1
+            severity_buckets[severity]["false_positive"] += 1
+    if is_fp_from_feed and not is_fp:
+        false_positive_by_feed += 1
         false_positive_alerts += 1
         severity_buckets[severity]["false_positive"] += 1
+    if is_fp and is_fp_from_feed:
+        false_positive_by_label += 1
+        false_positive_by_feed += 1
 
 duplicate_windows = []
 for key in sorted(fingerprint_windows.keys()):
@@ -310,6 +409,10 @@ output = {
     "total_alerts": total_alerts,
     "duplicate_alerts": duplicate_alerts,
     "false_positive_alerts": false_positive_alerts,
+    "false_positive_summary": {
+        "label_matches": false_positive_by_label,
+        "feed_matches": false_positive_by_feed,
+    },
     "severity_buckets": severity_buckets,
     "duplicate_windows": duplicate_windows,
     "duplicate_detection": {
@@ -321,6 +424,12 @@ output = {
         "alert_count": len(alerts),
         "lookback_days": 0,
         "baseline_config": os.environ.get("ALERT_NOISE_BASELINE_CONFIG", ""),
+    },
+    "classification_feed": {
+        "path": fp_feed_path,
+        "entries_total": feed_entries_total,
+        "entries_accepted": feed_entries_accepted,
+        "entries_rejected": feed_entries_rejected,
     },
 }
 

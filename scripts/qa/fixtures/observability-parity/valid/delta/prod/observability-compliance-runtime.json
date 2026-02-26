@@ -1,0 +1,5 @@
+{
+  "generated_at": "2026-02-25T01:00:00Z",
+  "status": "pass",
+  "evidence_identity": "env=prod;profile=prod;context=fixture-prod;project=fixture-project"
+}
