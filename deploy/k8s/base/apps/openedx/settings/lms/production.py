@@ -355,6 +355,22 @@ INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")
 DATABASE_ROUTERS.remove(
     "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"
 )
+def _safe_add_app(app_path):
+    """Add an app to INSTALLED_APPS only if importable (guards optional packages)."""
+    module_name = app_path.split(".")[0] if "." in app_path else app_path
+    # Skip import check for openedx.core.djangoapps (always in platform)
+    if app_path.startswith("openedx.core.djangoapps.") or app_path.startswith("common.djangoapps."):
+        if app_path not in INSTALLED_APPS:
+            INSTALLED_APPS.append(app_path)
+        return True
+    try:
+        __import__(module_name)
+        if app_path not in INSTALLED_APPS:
+            INSTALLED_APPS.append(app_path)
+        return True
+    except ImportError:
+        return False
+
 if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
     INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
 if "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:
@@ -1148,9 +1164,8 @@ DEFAULT_ORG_PRIMARY_COLOR = os.environ.get("DEFAULT_ORG_PRIMARY_COLOR", "#1a73e8
 DEFAULT_ORG_ACCENT_COLOR = os.environ.get("DEFAULT_ORG_ACCENT_COLOR", "#4285f4")
 DEFAULT_ORG_SUPPORT_EMAIL = os.environ.get("DEFAULT_ORG_SUPPORT_EMAIL", "")
 
-# Register openedx_email_templates app
-if "openedx_email_templates" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_email_templates")
+# Register openedx_email_templates app (optional)
+_safe_add_app("openedx_email_templates")
 
 # ── Email Digests & Analytics ────────────────────────────────────────────
 # @spec: email-notifications-pipeline_spec.md (Phase 6: Digests + Analytics)
@@ -1182,9 +1197,8 @@ EMAIL_ANALYTICS_RETENTION_MONTHS = int(os.environ.get("EMAIL_ANALYTICS_RETENTION
 # GDPR deletion deadline (spec: 30 days)
 GDPR_DELETION_DEADLINE_DAYS = int(os.environ.get("GDPR_DELETION_DEADLINE_DAYS", "30"))
 
-# Register openedx_email_digests app
-if "openedx_email_digests" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_email_digests")
+# Register openedx_email_digests app (optional)
+_safe_add_app("openedx_email_digests")
 
 # ── Multi-Tenant Foundation ──────────────────────────────────────────────
 # @spec: multi-tenancy-architecture_spec.md (Phase 0: Foundation)
@@ -1235,9 +1249,8 @@ MFE_BRANDING_FROM_SITE_CONFIG = os.environ.get(
     "MFE_BRANDING_FROM_SITE_CONFIG", "false"
 ).lower() in ("true", "1", "yes")
 
-# Register openedx_tenant_cache app
-if "openedx_tenant_cache" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_tenant_cache")
+# Register openedx_tenant_cache app (optional)
+_safe_add_app("openedx_tenant_cache")
 
 # ── Multi-Tenant Phase 2: Cross-Tenant Isolation ────────────────────────
 # @spec: multi-tenancy-architecture_spec.md (Phase 2: Pilot + Isolation)
@@ -1346,9 +1359,8 @@ LIBRARY_CONTENT_DEFAULT_COUNT = int(os.environ.get(
 # @spec: Kajabi SSO Migration (mereka-lms-f98)
 # @covers: AC-SSO-001 through AC-SSO-005
 
-# Register openedx_kajabi_sso app
-if "openedx_kajabi_sso" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_kajabi_sso")
+# Register openedx_kajabi_sso app (optional)
+_safe_add_app("openedx_kajabi_sso")
 
 # Enable Kajabi SSO
 KAJABI_SSO_ENABLED = os.environ.get(
@@ -1396,9 +1408,8 @@ KAJABI_WELCOME_EMAIL_ENABLED = os.environ.get(
 # @spec: Mobile Backend API (mereka-lms-2gck)
 # @covers: AC-MOB-001 through AC-MOB-007
 
-# Register openedx_mobile_api app
-if "openedx_mobile_api" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_mobile_api")
+# Register openedx_mobile_api app (optional)
+_safe_add_app("openedx_mobile_api")
 
 # Enable mobile API
 MOBILE_API_ENABLED = os.environ.get(
@@ -1507,9 +1518,8 @@ KAJABI_WELCOME_EMAIL_SUPPORT = os.environ.get(
 # SSO fallback — always keep email/password as fallback (AC-SSO-003)
 KAJABI_SSO_FALLBACK_ENABLED = True  # NEVER disable this
 
-# Register Kajabi SSO app
-if "openedx_kajabi_sso" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_kajabi_sso")
+# Register Kajabi SSO app (optional, may already be registered above)
+_safe_add_app("openedx_kajabi_sso")
 
 # Add Kajabi SSO backend to authentication backends (AC-SSO-001, AC-SSO-003)
 # IMPORTANT: Placed AFTER default backends so email/password always works as fallback
@@ -1622,8 +1632,8 @@ VIDEO_PLAYBACK_CHECK_TIMEOUT = int(os.environ.get(
     "VIDEO_PLAYBACK_CHECK_TIMEOUT", "10"
 ))
 
-# Add openedx_video_pipeline to INSTALLED_APPS
-INSTALLED_APPS += ['openedx_video_pipeline']
+# Add openedx_video_pipeline to INSTALLED_APPS (optional)
+_safe_add_app("openedx_video_pipeline")
 
 # ── Video Pipeline: Phase 2 — XBlock, Subtitles, Protection, Analytics ──
 # @spec: video-pipeline-delivery_spec.md (Phase 2)
@@ -1662,8 +1672,9 @@ MUX_PLAYBACK_AUDIENCE = os.environ.get(
     "MUX_PLAYBACK_AUDIENCE", "academyv2.mereka.io"
 )
 
-# Register video analytics and protection apps
-INSTALLED_APPS += ['openedx_video_analytics', 'openedx_video_protection']
+# Register video analytics and protection apps (optional)
+_safe_add_app("openedx_video_analytics")
+_safe_add_app("openedx_video_protection")
 
 # ── Security Hardening (T119) ────────────────────────────────────────────────
 # Session and CSRF cookie flags.
