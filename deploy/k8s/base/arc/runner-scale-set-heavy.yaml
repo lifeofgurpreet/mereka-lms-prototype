@@ -1,0 +1,196 @@
+---
+# Heavy RunnerScaleSet — label: mereka-k8s-heavy-builders
+#
+# Purpose: build-tutor-images.yml, Playwright E2E, heavy compute.
+# Uses Docker-in-Docker (DinD) sidecar for image builds.
+# Persistent PVCs provide cross-run Docker layer and dependency caches.
+#
+# PVC caching strategy:
+#   arc-docker-cache (50Gi): Docker BuildKit layer cache (type=local).
+#     Mounted at /cache/docker inside DinD sidecar.
+#     Tutor build uses: --cache-from=type=local,src=/cache/docker
+#                       --cache-to=type=local,dest=/cache/docker,mode=max
+#     Effect: Tutor builds drop from 30-45 min → ~5 min on warm cache.
+#
+#   arc-dep-cache (10Gi): npm/pip/Playwright browser cache.
+#     Mounted at /cache/deps inside the runner container.
+#     Workflows symlink ~/.cache → /cache/deps subdirs as needed.
+#     Effect: Playwright browser download (300MB) cached across runs.
+#
+# IMPORTANT: PVCs use storageClassName: local-path (rke2-nonprod default).
+# This binds to a single node. If heavy jobs must run on a specific node,
+# add a nodeSelector matching the node where local-path volumes provision.
+#
+# Usage in workflows:
+#   jobs:
+#     build-images:
+#       runs-on: mereka-k8s-heavy-builders
+#
+# Ref: https://github.com/actions/actions-runner-controller/blob/main/docs/adrs/adr-3-dind.md
+apiVersion: actions.github.com/v1alpha1
+kind: AutoscalingRunnerSet
+metadata:
+  name: mereka-k8s-heavy-builders
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: mereka-k8s-heavy-builders
+    app.kubernetes.io/component: runner-scale-set
+    app.kubernetes.io/part-of: mereka-ci
+    runner-tier: heavy
+spec:
+  githubConfigUrl: https://github.com/Biji-Biji-Initiative/mereka-lms
+  githubConfigSecret: arc-github-app-secret
+
+  # Heavy builds are serial by nature (RAM-bound). Max 3 concurrent.
+  minRunners: 0
+  maxRunners: 3
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mereka-k8s-heavy-builders
+        app.kubernetes.io/component: runner-pod
+        app.kubernetes.io/part-of: mereka-ci
+        runner-tier: heavy
+    spec:
+      automountServiceAccountToken: false
+
+      # DinD requires a privileged sidecar. The main runner container stays
+      # unprivileged and communicates with Docker via DOCKER_HOST TCP socket.
+      # NOTE: No init container for DinD readiness. Init containers run BEFORE
+      # sidecar containers start, so waiting for the DinD daemon in an init
+      # container would deadlock (daemon never starts until init completes).
+      # Workflow steps should use a retry loop if they need Docker immediately:
+      #   until docker info >/dev/null 2>&1; do sleep 1; done
+
+      containers:
+        # Main runner container — runs the workflow steps
+        - name: runner
+          image: ghcr.io/actions/actions-runner:2.321.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2376
+            - name: DOCKER_TLS_CERTDIR
+              value: /certs
+            - name: DOCKER_TLS_VERIFY
+              value: "1"
+            - name: DOCKER_CERT_PATH
+              value: /certs/client
+            - name: RUNNER_TOOL_CACHE
+              value: /opt/hostedtoolcache
+            - name: RUNNER_WORK_DIR
+              value: /runner/_work
+            # Point pip/npm caches at the persistent PVC path
+            - name: PIP_CACHE_DIR
+              value: /cache/deps/pip
+            - name: npm_config_cache
+              value: /cache/deps/npm
+            - name: PLAYWRIGHT_BROWSERS_PATH
+              value: /cache/deps/playwright
+          resources:
+            requests:
+              cpu: "1"
+              memory: 4Gi
+            limits:
+              cpu: "4"
+              memory: 12Gi
+          volumeMounts:
+            - name: work
+              mountPath: /runner/_work
+            - name: dind-certs-client
+              mountPath: /certs/client
+              readOnly: true
+            - name: dep-cache
+              mountPath: /cache/deps
+
+        # Docker-in-Docker sidecar — provides Docker daemon for image builds
+        - name: dind
+          image: docker:24-dind
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: /certs
+          args:
+            - --storage-driver=overlay2
+            # Point Docker data root at the persistent cache PVC
+            - --data-root=/cache/docker/daemon
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 8Gi
+          volumeMounts:
+            - name: dind-certs-server
+              mountPath: /certs/server
+            - name: dind-certs-client
+              mountPath: /certs/client
+            - name: docker-cache
+              mountPath: /cache/docker
+
+      volumes:
+        # Ephemeral work dir — destroyed per job (clean checkout every time)
+        - name: work
+          emptyDir: {}
+
+        # TLS certificates for DinD TCP socket (auto-generated by dind container)
+        - name: dind-certs-server
+          emptyDir: {}
+        - name: dind-certs-client
+          emptyDir: {}
+
+        # Persistent Docker layer cache — survives pod restarts
+        # 50Gi accommodates multiple Tutor image layer sets
+        - name: docker-cache
+          persistentVolumeClaim:
+            claimName: arc-docker-cache
+
+        # Persistent dependency cache (npm, pip, Playwright browsers)
+        - name: dep-cache
+          persistentVolumeClaim:
+            claimName: arc-dep-cache
+
+---
+# PVC: Docker BuildKit layer cache
+# Used by: DinD sidecar (--data-root=/cache/docker/daemon)
+# Tutor build caching via: --cache-from=type=local,src=/cache/docker/buildkit
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arc-docker-cache
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: arc-docker-cache
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: mereka-ci
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+# PVC: npm / pip / Playwright browser cache
+# Shared across runs to avoid re-downloading 300MB+ of browser binaries.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arc-dep-cache
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: arc-dep-cache
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: mereka-ci
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi

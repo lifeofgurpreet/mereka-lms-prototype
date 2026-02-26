@@ -1,0 +1,21 @@
+---
+# arc-systems: hosts the ARC controller (gha-runner-scale-set-controller)
+# Managed by Helm. Kustomize references this namespace so it exists before Helm runs.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arc-systems
+  labels:
+    app.kubernetes.io/name: arc-systems
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: mereka-ci
+---
+# arc-runners: ephemeral runner pods spawn here (one pod per queued job)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arc-runners
+  labels:
+    app.kubernetes.io/name: arc-runners
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: mereka-ci
