@@ -451,7 +451,7 @@ RUN pip install -e /openedx/plugins/mereka_tenancy
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there and should be importable
 # as top-level Django apps across CMS/LMS and worker processes.
-RUN printf '/openedx\n/openedx/plugins\n' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+RUN echo '/openedx' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth && echo '/openedx/plugins' >> /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
 
 # Install django-prometheus for metrics
 RUN pip install django-prometheus==2.3.1
@@ -466,10 +466,33 @@ RUN pip install "pymongo[srv]"
 )
 
 # Custom theme SASS compilation (strip Google Fonts imports)
+# NOTE: The Tutor template COPYs ./themes/ AFTER pre-assets hooks and BEFORE collectstatic.
+# But compile-sass needs the theme present. So we COPY the theme early here.
+# The later COPY ./themes/ will overwrite with the same files — safe and idempotent.
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-dockerfile-pre-assets",
         """
+# Early-copy the mereka theme so it exists when compile-sass runs.
+# Tutor's standard COPY ./themes/ happens AFTER pre-assets hooks, but we need
+# the theme present for SASS compilation. The later COPY overwrites with same files.
+COPY --chown=app:app ./themes/mereka/ /openedx/themes/mereka/
+
+# Ensure LMS SASS entry points exist (mirrors CMS pattern with studio-main-v1.scss).
+# Without these, compile-sass --theme mereka skips LMS entirely.
+RUN test -f /openedx/themes/mereka/lms/static/sass/lms-main-v1.scss || { \
+      echo '// LMS V1 entrypoint with Mereka branding overlays.' > /openedx/themes/mereka/lms/static/sass/lms-main-v1.scss && \
+      echo "@import '"'"'build-base-v1'"'"';" >> /openedx/themes/mereka/lms/static/sass/lms-main-v1.scss && \
+      echo "@import '"'"'build-lms-v1'"'"';" >> /openedx/themes/mereka/lms/static/sass/lms-main-v1.scss && \
+      echo '@import "../../../scss/theme";' >> /openedx/themes/mereka/lms/static/sass/lms-main-v1.scss && \
+      echo "Created lms-main-v1.scss entry point"; } && \
+    test -f /openedx/themes/mereka/lms/static/sass/lms-main-v1-rtl.scss || { \
+      echo '// LMS V1 RTL entrypoint with Mereka branding overlays.' > /openedx/themes/mereka/lms/static/sass/lms-main-v1-rtl.scss && \
+      echo "@import '"'"'build-base-v1-rtl'"'"';" >> /openedx/themes/mereka/lms/static/sass/lms-main-v1-rtl.scss && \
+      echo "@import '"'"'build-lms-v1'"'"';" >> /openedx/themes/mereka/lms/static/sass/lms-main-v1-rtl.scss && \
+      echo '@import "../../../scss/theme";' >> /openedx/themes/mereka/lms/static/sass/lms-main-v1-rtl.scss && \
+      echo "Created lms-main-v1-rtl.scss entry point"; }
+
 # Strip Google font imports from SCSS files before compilation
 RUN python - <<'PY'
 from pathlib import Path

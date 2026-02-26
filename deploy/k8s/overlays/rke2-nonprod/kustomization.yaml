@@ -25,6 +25,10 @@ resources:
   - ingress-openedx-lms.yaml
   - ingress-openedx-mfe.yaml
   - ingress-openedx-studio.yaml
+  # NOTE: ARC resources (deploy/k8s/base/arc/) are NOT included here because this overlay
+  # sets namespace: mereka-lms which would override arc-systems/arc-runners namespaces.
+  # Apply ARC separately: kubectl apply -k deploy/k8s/base/arc/
+  # See: docs/operations/CI_CD_RUNNERS.md for the full deploy sequence.
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -36,6 +40,8 @@ patches:
   - path: patches/domain-env.yaml
   - path: patches/aspects-storage-class.yaml
   - path: patches/aspects-ingress-dev.yaml
+  # enterprise-catalog-worker: Recreate strategy + probe hardening (from infra agent handoff)
+  - path: patches/enterprise-catalog-worker-nonprod.yaml
 
 # Minimal replicas for nonprod (same as local)
 replicas:
