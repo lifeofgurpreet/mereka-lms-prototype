@@ -9,14 +9,15 @@
 | Status | Count |
 |--------|-------|
 | DONE   | 141   |
-| TODO   | 3     |
+| TODO   | 10    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
-| **Total** | **147** |
+| **Total** | **154** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED) — internal audit + DR2
 Sprints 6–10: 48 tasks (23 TODO→DONE this batch, 25 prior DONE)
 Sprint 11: 5 tasks (0 TODO, 5 DONE) — deployment parity & AC gap closure — DR1 frontend + Top50 strategic + CTO audit
+Sprint 12: 7 tasks (7 TODO, 0 DONE) — CI pipeline cost optimization (DevOps review)
 
 Cross-references: DR2 items I-001→I-050 · DR1 findings P0-1→P2-2 · Top50 items #1→#50 · CTO audit #1→#31
 
@@ -736,21 +737,38 @@ T058
 
 ---
 
+## Sprint 12: CI Pipeline Cost Optimization (P1–P2)
+
+*From external DevOps review. 48 workflow files, ~$56/month estimated spend. Seven-phase plan to reduce to ~$2.40/month via consolidation, caching, and self-hosted runners (ARC). Full analysis: `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md`. Implementation tracker: `docs/operations/CI_OPTIMIZATION_TRACKER.md`.*
+
+| ID | Title | Priority | Status | Source | Effort | Deps | Description |
+|----|-------|----------|--------|--------|--------|------|-------------|
+| T150 | CI cost: ARC infrastructure + manifests | P1 | TODO | DevOps-Review | M | — | Deploy Actions Runner Controller to rke2-nonprod. Helm charts, GitHub App, RunnerScaleSets (standard + heavy-builders with DinD+PVC). See CI_OPTIMIZATION_TRACKER.md Phase 1. |
+| T151 | CI cost: Immediate cost drop (triggers, concurrency, artifacts) | P1 | TODO | DevOps-Review | S | — | iOS→manual trigger, concurrency on PR workflows, artifact hygiene, cron frequency reduction. See CI_OPTIMIZATION_TRACKER.md Phase 2. |
+| T152 | CI cost: Composite actions & caching | P1 | TODO | DevOps-Review | M | T151 | Create .github/actions/ composites (gcp-gke-auth, setup-python-env, setup-playwright). Refactor all workflows to use them. See CI_OPTIMIZATION_TRACKER.md Phase 3. |
+| T153 | CI cost: Workflow consolidation (merge & flatten) | P1 | TODO | DevOps-Review | M | T152 | Merge verify-specs→ci.yml, flatten to 3-4 jobs, consolidate tenant/a11y gates. See CI_OPTIMIZATION_TRACKER.md Phase 4. |
+| T154 | CI cost: Heavy workload migration to ARC | P2 | TODO | DevOps-Review | M | T150, T153 | Migrate build-tutor-images + E2E + crons to K8s runners. Docker layer caching via PVC. See CI_OPTIMIZATION_TRACKER.md Phase 5. |
+| T155 | CI cost: Cron schedule rationalization | P2 | TODO | DevOps-Review | S | T153 | Reduce 6-hourly→daily, merge observability audits, event-driven triggers, remove continue-on-error. See CI_OPTIMIZATION_TRACKER.md Phase 6. |
+| T156 | CI cost: Documentation & spec alignment | P2 | TODO | DevOps-Review | S | T153, T155 | Update specs, docs, markdown references for renamed/merged workflows. See CI_OPTIMIZATION_TRACKER.md Phase 7. |
+
+---
+
 ## Updated Summary
 
 | Status | Count |
 |--------|-------|
 | DONE   | 141   |
-| TODO   | 3     |
+| TODO   | 10    |
 | PARTIAL| 0     |
 | BLOCKED| 3     |
-| **Total** | **147** |
+| **Total** | **154** |
 
 Sprints 1–5: 94 tasks (91 DONE, 3 BLOCKED)
-Sprints 6–10: 48 tasks (29 TODO, 19 DONE)
-Sprint 11: 5 tasks (2 TODO, 3 DONE) — deployment parity & AC gap closure
+Sprints 6–10: 48 tasks (45 DONE, 3 TODO)
+Sprint 11: 5 tasks (5 DONE) — deployment parity & AC gap closure
+Sprint 12: 7 tasks (7 TODO) — CI pipeline cost optimization (DevOps review)
 
-Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass
+Sources: Internal audit · DR2 (I-001→I-050) · DR1 frontend review · Top50 strategic priorities · CTO audit pass · DevOps review
 
 ---
 
