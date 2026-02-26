@@ -82,23 +82,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      - name: Set up Playwright
+        uses: ./.github/actions/setup-playwright
         with:
-          node-version: "18"
+          node-version: '18'
 
-      - name: Install Playwright and dependencies
+      - name: Install npm dependencies
         run: |
           set -euo pipefail
-          if [[ -f tests/e2e/package.json ]]; then
-            cd tests/e2e && npm install
-          else
-            mkdir -p tests/e2e && cd tests/e2e
-            npm init -y
-            npm install --save-dev @playwright/test@1.50.0
-          fi
-          cd tests/e2e 2>/dev/null || true
-          npx playwright install --with-deps chromium
+          cd tests/e2e && npm ci
 
       - name: Verify E2E secrets are present
         run: |
@@ -214,14 +206,14 @@ jobs:
           || echo "WARN: Could not post commit status (non-fatal)"
 
       - name: Upload E2E artifacts
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: post-deploy-e2e-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             var/e2e-results/
             tests/e2e/test-results/
-          retention-days: 30
+          retention-days: 3
           if-no-files-found: warn
 
   notify-on-failure:

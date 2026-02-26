@@ -1,0 +1,187 @@
+# ── Verification scripts run on every PR + push ─────────────────────────────
+# Sourced from: ci.yml static-validation job (replaces both static + full).
+# One entry per line. Inline flags are supported (e.g. --skip-infra).
+# Lines starting with # and blank lines are ignored.
+
+# ── Repository structure & documentation ────────────────────────────────────
+scripts/qa/verify-repo-structure.sh
+scripts/qa/verify-documentation-standards.sh
+scripts/qa/verify-documentation-links.sh
+
+# ── Secrets & security (static) ─────────────────────────────────────────────
+scripts/qa/verify-no-hardcoded-secrets.sh
+scripts/qa/verify-secrets-naming-convention.sh
+scripts/qa/verify-dev-prod-secret-separation.sh
+scripts/qa/verify-secrets-management.sh
+scripts/qa/verify-secrets-inventory.sh
+
+# ── Kubernetes & GitOps ──────────────────────────────────────────────────────
+scripts/qa/verify-k8s-deployment-spec.sh
+scripts/qa/verify-k8s-externalsecrets.sh
+scripts/qa/verify-k8s-images.sh
+scripts/qa/verify-k8s-secrets-hygiene.sh
+scripts/qa/verify-kustomize-no-deprecated-keys.sh
+scripts/qa/verify-kustomize-render.sh
+scripts/qa/verify-no-latest-prod-tags.sh
+scripts/qa/verify-gitops-image-overrides.sh --skip-infra
+scripts/qa/verify-dev-prod-image-parity.sh
+scripts/qa/verify-deployment-gate.sh
+
+# ── Multisite & multi-tenancy ────────────────────────────────────────────────
+scripts/qa/verify-multisite-config.sh
+scripts/qa/verify-tutor-multisite-domains.sh
+scripts/qa/verify-csrf-multisite.sh
+scripts/qa/verify-favicon-multisite.sh
+scripts/qa/verify-site-id-hardening.sh
+
+# ── MongoDB Atlas ────────────────────────────────────────────────────────────
+scripts/qa/verify-mongodb-atlas-integration.sh
+scripts/qa/verify-atlas-data-persistence.sh
+scripts/qa/verify-atlas-modulestore-path.sh
+
+# ── Observability & monitoring (static) ─────────────────────────────────────
+scripts/qa/verify-observability-stack.sh
+scripts/qa/verify-sentry-wiring.sh
+scripts/qa/verify-sentry-cli-contract.sh
+scripts/qa/verify-alert-routing.sh
+scripts/qa/verify-sli-foundation.sh
+scripts/qa/verify-error-budget.sh
+scripts/qa/lint-active-docs-env-model.sh
+
+# ── CI/CD pipeline contracts ─────────────────────────────────────────────────
+scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+scripts/qa/verify-build-workflow-contract.sh
+scripts/qa/verify-release-automation.sh
+scripts/qa/verify-release-workflow-invocation.sh
+scripts/qa/verify-release-dry-run-contract.sh
+scripts/qa/verify-release-evidence-workflow.sh
+scripts/qa/verify-release-deployment-choreography.sh
+
+# ── MFE contracts ────────────────────────────────────────────────────────────
+scripts/qa/verify-mfe-build-contract.sh
+scripts/qa/verify-mfe-build-prereqs.sh
+scripts/qa/verify-mfe-config-contract.sh
+scripts/qa/verify-mfe-footer-slot.sh
+scripts/qa/verify-mfe-route-drift.sh
+scripts/qa/verify-mfe-route-contract.sh
+scripts/qa/verify-mfe-footer-slot-migration.sh
+scripts/qa/verify-mfe-selector-hardening.sh
+scripts/qa/verify-mfe-routing-parity.sh
+scripts/qa/verify-mfe-first-policy.sh
+scripts/qa/verify-mfe-analytics-plugin-parity.sh
+
+# ── Auth & SSO ───────────────────────────────────────────────────────────────
+scripts/qa/verify-auth-hardening.sh
+scripts/qa/verify-oidc-provider-configs.sh
+scripts/qa/verify-oidc-cookie-middleware-order.sh
+scripts/qa/verify-oidc-user-password-state.sh
+scripts/qa/verify-jwt-uniqueness.sh
+scripts/qa/verify-cms-oauth2-secret-present.sh
+
+# ── Branding & design tokens ─────────────────────────────────────────────────
+scripts/qa/verify-design-tokens.sh
+scripts/qa/verify-design-tokens-migration.sh
+scripts/qa/verify-design-token-usage.sh
+scripts/qa/verify-token-definitions.sh
+scripts/qa/verify-token-drift.sh
+scripts/qa/verify-token-reference-integrity.sh
+scripts/qa/verify-token-generation-pipeline.sh
+scripts/qa/verify-branding-token-integrity.sh
+scripts/qa/verify-token-integrity-routing.sh
+scripts/qa/verify-token-contrast.sh
+scripts/qa/verify-aspects-deployment-readiness.sh
+scripts/branding/verify-token-drift.sh
+scripts/branding/validate-token-consumers.sh
+
+# ── Accessibility & WCAG ─────────────────────────────────────────────────────
+scripts/qa/verify-contrast-compliance.sh
+scripts/qa/verify-a11y-contrast-focus.sh
+scripts/qa/verify-a11y-authenticated-routes.sh
+scripts/qa/verify-a11y-tenant-branding.sh
+scripts/qa/verify-wcag-contrast-v2.sh
+scripts/qa/verify-accessibility-conformance.sh
+
+# ── Forum & migrations ───────────────────────────────────────────────────────
+scripts/qa/verify-forum-service.sh
+scripts/qa/verify-forum-migration-contracts.sh
+scripts/qa/verify-data-migration-contracts.sh
+
+# ── UI / UX / Tenant ─────────────────────────────────────────────────────────
+scripts/qa/verify-tenant-branding-contract.sh
+scripts/qa/verify-brand-pack-schema.sh
+scripts/tenants/validate-tenant-brand-pack.sh
+scripts/qa/verify-tenant-branding-matrix.sh
+scripts/qa/verify-tenant-ui-smoke.sh
+scripts/qa/verify-tenant-isolation-evidence.sh
+scripts/qa/verify-tenant-footer-variant-lane.sh
+scripts/qa/verify-tenant-config-handoff.sh
+scripts/qa/run-tenant-branding-qa.sh
+scripts/qa/verify-multitenant-brand-platform.sh
+scripts/qa/verify-multi-tenant-branding-ops.sh
+scripts/qa/verify-footer-variant-matrix.sh
+scripts/qa/verify-footer-parity.sh
+scripts/qa/verify-footer-slot-only.sh
+scripts/qa/verify-footer-slot-evidence-rollback.sh
+scripts/qa/verify-no-dom-overrides.sh
+scripts/qa/verify-migration-lock.sh
+scripts/qa/verify-enterprise-ui-review.sh
+scripts/qa/verify-visual-smoke-baseline.sh
+scripts/qa/verify-visual-parity-checkpoints.sh
+scripts/qa/verify-ui-ux-hardening-bundle.sh
+scripts/qa/verify-performance-budget.sh
+scripts/qa/verify-copy-terminology.sh
+scripts/qa/verify-plugin-slot-wiring.sh
+scripts/qa/verify-plugin-slot-migration-register.sh
+scripts/qa/verify-frontend-version-truth.sh
+scripts/qa/verify-custom-app-drift.sh
+scripts/qa/verify-legacy-ecommerce-ui-refs.sh
+scripts/qa/verify-slot-matrix.sh
+scripts/qa/verify-interaction-state-contract.sh
+scripts/qa/verify-module-surface-validation.sh
+scripts/qa/verify-postmerge-governance-closure.sh
+scripts/qa/verify-spec-coverage-cleanup.sh
+scripts/qa/verify-analytics-key.sh
+scripts/qa/verify-analytics-undefined-regression.sh
+scripts/qa/verify-analytics-key-elimination.sh
+scripts/qa/verify-analytics-hardening.sh
+scripts/qa/verify-analytics-decision-gate.sh
+scripts/qa/verify-analytics-drift-guardrails.sh
+scripts/qa/verify-selector-to-slot-migration.sh
+scripts/qa/verify-legacy-footer-removal.sh
+scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
+scripts/qa/verify-multisite-ux-consistency.sh
+scripts/infra/verify-release-preflight.sh
+
+# ── Enterprise ───────────────────────────────────────────────────────────────
+scripts/qa/verify-enterprise-service-deployment.sh
+scripts/qa/verify-enterprise-secrets.sh
+scripts/qa/verify-enterprise-catalog.sh
+scripts/qa/verify-enterprise-access-subsidy.sh
+scripts/qa/verify-enterprise-license-management.sh
+scripts/qa/verify-enterprise-integrated-channels.sh
+scripts/qa/verify-enterprise-tenant-isolation.sh
+scripts/qa/verify-enterprise-sso-saml.sh
+scripts/qa/verify-enterprise-observability.sh
+
+# ── Tutor config verification (merged from ci-scripts-full.txt) ────────────
+scripts/qa/verify-tutor-patches.sh
+scripts/qa/verify-idempotency.sh
+
+# ── Live branding (requires built artifacts) ────────────────────────────────
+scripts/qa/verify-public-branding.sh
+scripts/qa/verify-studio-authoring-branding.sh
+scripts/qa/verify-tutor-branding-render.sh
+scripts/qa/verify-mfe-image-branding.sh
+
+# ── Kajabi migration data (data-dependent) ──────────────────────────────────
+scripts/qa/verify-kajabi-export.sh
+scripts/qa/verify-kajabi-transform.sh
+scripts/qa/verify-kajabi-olx-packages.sh
+scripts/qa/verify-kajabi-thumbnails.sh
+scripts/qa/verify-kajabi-completions-export.sh
+
+# ── MCT migration data (data-dependent) ────────────────────────────────────
+scripts/qa/verify-mct-export.sh
+scripts/qa/verify-mct-transform.sh
+scripts/qa/verify-mct-olx-packages.sh
+scripts/qa/verify-mct-video-urls.sh

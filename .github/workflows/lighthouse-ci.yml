@@ -10,7 +10,6 @@ jobs:
     name: Verify Lighthouse Budgets
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    continue-on-error: true
     permissions:
       contents: read
     steps:
@@ -51,4 +50,5 @@ jobs:
         with:
           name: lighthouse-budget-verify-logs
           path: var/ci/lighthouse-budget-verify.log
+          retention-days: 3
           if-no-files-found: warn

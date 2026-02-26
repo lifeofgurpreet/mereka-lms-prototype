@@ -15,6 +15,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-patches:
     name: Verify Patches Applied
@@ -24,11 +28,11 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
-          cache: 'pip'
+          install-base-deps: 'false'
 
       - name: Install Tutor and dependencies
         run: |
@@ -79,6 +83,7 @@ jobs:
             tutor_env/env/local/docker-compose.yml
             tutor_env/env/build/openedx/Dockerfile
             tutor_env/env/apps/openedx/settings/lms/production.py
+          retention-days: 3
 
   verify-multi-site-domains:
     name: Verify Multi-Site Domains
@@ -88,11 +93,11 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
-          cache: 'pip'
+          install-base-deps: 'false'
 
       - name: Install Tutor and dependencies
         run: |
@@ -173,11 +178,11 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
-          cache: 'pip'
+          install-base-deps: 'false'
 
       - name: Install Tutor and dependencies
         run: |
@@ -238,11 +243,11 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
-          cache: 'pip'
+          install-base-deps: 'false'
 
       - name: Install Tutor and dependencies
         run: |

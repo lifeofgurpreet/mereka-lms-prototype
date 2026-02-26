@@ -1,0 +1,42 @@
+name: 'Set up Python environment'
+description: 'Install Python with pip cache and base QA dependencies'
+
+inputs:
+  python-version:
+    description: 'Python version to install'
+    required: false
+    default: '3.12'
+  requirements-file:
+    description: 'Path to requirements file for pip install + cache key hashing'
+    required: false
+    default: 'requirements-ci.txt'
+  extra-deps:
+    description: 'Additional pip packages (only for one-off deps not in a requirements file)'
+    required: false
+    default: ''
+  install-base-deps:
+    description: 'Install from requirements-file (set false to skip)'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+        cache-dependency-path: ${{ inputs.requirements-file }}
+
+    - name: Install dependencies from requirements file
+      if: ${{ inputs.install-base-deps == 'true' }}
+      shell: bash
+      run: |
+        pip install -U pip
+        pip install -r ${{ inputs.requirements-file }}
+
+    - name: Install extra dependencies
+      if: ${{ inputs.extra-deps != '' }}
+      shell: bash
+      run: pip install ${{ inputs.extra-deps }}

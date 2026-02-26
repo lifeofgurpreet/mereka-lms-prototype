@@ -1,0 +1,3 @@
+# Tutor build dependencies — used by build-tutor-images.yml
+tutor[full]==18.2.2
+tutor-mfe==18.1.0

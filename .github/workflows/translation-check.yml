@@ -27,7 +27,6 @@ jobs:
     name: Verify Translation Completeness (EN/MS)
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    continue-on-error: true
     permissions:
       contents: read
     steps:
@@ -83,4 +82,5 @@ jobs:
         with:
           name: translation-check-logs
           path: var/ci/translation-check.log
+          retention-days: 3
           if-no-files-found: warn

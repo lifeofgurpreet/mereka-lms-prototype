@@ -1,0 +1,6 @@
+# Base CI/QA dependencies — used by setup-python-env composite action
+# Hash this file for pip cache key: cache-dependency-path
+pyyaml
+ruff
+yamllint
+jinja2

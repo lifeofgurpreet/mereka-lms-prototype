@@ -42,11 +42,22 @@ deploy/k8s/               # Kubernetes manifests
   ├── base/               # Base Kustomize resources
   │   ├── secrets/        # ExternalSecrets (synced from Infisical)
   │   ├── apps/           # App-specific configs
+  │   ├── arc/            # Actions Runner Controller (self-hosted CI runners)
   │   └── plugins/        # Plugin configs (discovery, ecommerce, etc.)
   └── overlays/           # Environment-specific overlays
       ├── local/          # Local Kind/Minikube
       ├── staging/        # Legacy (reference only)
       └── production/     # Production GKE
+
+.github/
+  ├── actions/            # Composite actions (DRY building blocks)
+  │   ├── gcp-gke-auth/   # GCP auth + GKE credentials (used by 9 workflows)
+  │   ├── setup-python-env/ # Python + pip cache + base QA deps
+  │   └── setup-playwright/ # Node + Playwright + browser cache
+  ├── workflows/          # 43 workflow files
+  ├── run-scripts-parallel.sh  # xargs -P parallel script runner
+  ├── ci-scripts-static.txt    # 132 scripts for static-validation job
+  └── ci-scripts-full.txt      # 69 scripts for full-verification job (push only)
 
 infrastructure/           # Infrastructure-as-code
   ├── tutor/              # Tutor configs, patches, themes
@@ -60,7 +71,7 @@ scripts/                  # Automation organized by domain
   ├── migrations/         # Kajabi/MCT data migration
   ├── branding/           # Theme sync scripts
   ├── analytics/          # Analytics exports
-  └── qa/                 # Smoke tests
+  └── qa/                 # Smoke tests + 200+ verification scripts
 
 specs/                    # Specifications (machine-checkable intent)
   ├── secrets-management.md
@@ -70,7 +81,7 @@ specs/                    # Specifications (machine-checkable intent)
 docs/                     # Documentation by category
   ├── adr/                # Architecture Decision Records
   ├── onboarding/         # Setup guides (start here)
-  ├── operations/         # Runbooks, troubleshooting
+  ├── operations/         # Runbooks, troubleshooting, CI/CD docs
   ├── migrations/         # Migration playbooks
   ├── architecture/       # System design docs
   └── archive/            # Historical session reports
@@ -102,6 +113,27 @@ tutor_env/                # Generated Tutor state (gitignored)
 - `tutor images build mfe` → builds micro-frontends with Node 18 patch
 - Images pushed to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx`
 - Local builds tag as `latest`, cloud builds tag with git SHA
+
+**CI/CD Pipeline Architecture**:
+- `ci.yml` is the main workflow — **5 consolidated jobs** (was 74 micro-jobs)
+  - `static-validation`: 132 scripts via `xargs -P` parallel runner
+  - `tutor-config-tests`: Tutor rendering + idempotency checks
+  - `security-scans`: TruffleHog (HEAD only) + pip-audit
+  - `test-coverage`: Python tests with coverage
+  - `full-verification` (push-to-main only): 69 additional scripts
+- Script lists live in `.github/ci-scripts-static.txt` and `.github/ci-scripts-full.txt`
+- `.github/run-scripts-parallel.sh` runs scripts via `xargs -P` with PASS/FAIL/TIMEOUT tracking
+- 3 composite actions in `.github/actions/` eliminate boilerplate across workflows
+- `daily-infrastructure-audit.yml` merges observability + alert routing + parity checks
+
+**Actions Runner Controller (ARC)**:
+- Manifests: `deploy/k8s/base/arc/` (namespaces, Helm values, RunnerScaleSets, PVCs)
+- Two runner pools: `mereka-k8s-runners` (2CPU/4GB, lightweight) and `mereka-k8s-heavy-builders` (4CPU/12GB + DinD sidecar)
+- Deployed separately from main overlay (`kubectl apply -k deploy/k8s/base/arc/`) because the overlay's namespace transformer would override ARC's `arc-systems`/`arc-runners` namespaces
+- Authenticates via GitHub App (secret `arc-github-app-secret` in `arc-runners` namespace)
+- Heavy runners have persistent PVC caches: `arc-docker-cache` (50Gi) and `arc-dep-cache` (10Gi)
+- Full setup guide: `docs/operations/CI_CD_RUNNERS.md`
+- Optimization tracker: `docs/operations/CI_OPTIMIZATION_TRACKER.md`
 
 **MongoDB Atlas (No Local MongoDB)**:
 - **Cluster**: `cluster-mereka-lms.2pjex4s.mongodb.net`
@@ -201,6 +233,28 @@ kubectl get svc caddy -n mereka-lms                     # 3. LoadBalancer status
 # View logs
 kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=50
 kubectl logs -n mereka-lms -l app.kubernetes.io/name=caddy --tail=50
+```
+
+### CI/CD & ARC
+```bash
+# Check ARC controller and runners
+kubectl get pods -n arc-systems                        # ARC controller
+kubectl get autoscalingrunnersets -n arc-runners        # Runner scale sets
+kubectl get pods -n arc-runners                        # Active runner pods (empty when idle)
+kubectl get pvc -n arc-runners                         # Cache PVCs
+
+# Run the parallel script runner locally (tests CI logic)
+.github/run-scripts-parallel.sh .github/ci-scripts-static.txt 4 120
+
+# Adding a new verification script to CI:
+# 1. Add script path to .github/ci-scripts-static.txt (or ci-scripts-full.txt for push-only)
+# 2. Scripts must exit 0 on success, non-zero on failure
+# 3. Scripts get 120s timeout by default
+
+# Workflow changes — use composite actions, don't duplicate:
+#   GCP auth:    uses: ./.github/actions/gcp-gke-auth
+#   Python env:  uses: ./.github/actions/setup-python-env
+#   Playwright:  uses: ./.github/actions/setup-playwright
 ```
 
 ### Code Quality
@@ -446,6 +500,9 @@ Running verification checks...
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
 - **Architecture**: `docs/architecture/`
 - **ADRs**: `docs/adr/` (Architecture Decision Records)
+- **CI/CD Runners**: `docs/operations/CI_CD_RUNNERS.md` (ARC setup, runner labels, PVC caching)
+- **CI/CD Optimization**: `docs/operations/CI_OPTIMIZATION_TRACKER.md` (phase tracker)
+- **CI/CD Cost Analysis**: `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md`
 - **Repo Guidelines**: `AGENTS.md` (complements this file)
 
 ## Specifications
@@ -482,6 +539,10 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 7. **Using old paths** (`tools/`, `ops/`) → These are deprecated, use `scripts/` and `infrastructure/`
 8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets
    - **Note**: Pre-commit hook will block commits with hardcoded secrets
+9. **Adding verification scripts without updating CI** → Script exists but never runs in CI
+   - **Fix**: Add the script path to `.github/ci-scripts-static.txt` (PR gate) or `.github/ci-scripts-full.txt` (push-to-main)
+10. **Duplicating GCP auth / Python setup in workflows** → Use composite actions in `.github/actions/`
+11. **Including ARC manifests in rke2-nonprod overlay** → The overlay's `namespace: mereka-lms` transformer overrides ARC namespaces. Apply ARC separately: `kubectl apply -k deploy/k8s/base/arc/`
 
 ## Getting Help
 

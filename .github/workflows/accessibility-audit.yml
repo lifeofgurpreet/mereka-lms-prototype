@@ -193,4 +193,5 @@ jobs:
         with:
           name: axe-audit-reports
           path: var/ci/axe-reports/
+          retention-days: 3
           if-no-files-found: warn

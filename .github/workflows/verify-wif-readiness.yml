@@ -60,4 +60,5 @@ jobs:
         with:
           name: wif-readiness-logs
           path: var/ci/wif-readiness.log
+          retention-days: 3
           if-no-files-found: warn

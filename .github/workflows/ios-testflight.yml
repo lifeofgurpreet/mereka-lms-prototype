@@ -8,11 +8,8 @@ name: iOS TestFlight Deployment
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'ios/**'
-      - '.github/workflows/ios-testflight.yml'
+    tags:
+      - 'v*-ios'
   workflow_dispatch:
 
 env:
@@ -131,7 +128,7 @@ jobs:
           path: |
             ios/build/*.ipa
             ios/build/*.xcarchive/dSYMs
-          retention-days: 30
+          retention-days: 3
 
       - name: Notify on success
         if: success()

@@ -1,0 +1,38 @@
+name: 'Set up Playwright'
+description: 'Install Node.js, Playwright Chromium, and cache browser binaries'
+
+inputs:
+  node-version:
+    description: 'Node.js version'
+    required: false
+    default: '18'
+  playwright-version:
+    description: 'Playwright version to install (e.g. 1.50.0). Empty string means use the version resolved from the local package.json.'
+    required: false
+    default: '1.50.0'
+  npm-cache-dependency-path:
+    description: 'Path to package.json (or package-lock.json) used to key the npm dependency cache. Leave empty to skip npm caching.'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.npm-cache-dependency-path != '' && 'npm' || '' }}
+        cache-dependency-path: ${{ inputs.npm-cache-dependency-path }}
+
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ inputs.playwright-version }}-${{ runner.os }}
+
+    - name: Install Playwright Chromium (with system deps)
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: npx playwright@${{ inputs.playwright-version }} install --with-deps chromium

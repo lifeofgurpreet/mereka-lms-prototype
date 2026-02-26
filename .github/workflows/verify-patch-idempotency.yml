@@ -60,3 +60,4 @@ jobs:
             tutor_env/env/plugins/mfe/build/mfe/Dockerfile
             tutor_env/env/local/docker-compose.yml
             tutor_env/env/apps/caddy/Caddyfile
+          retention-days: 3

@@ -58,4 +58,5 @@ jobs:
         with:
           name: atlas-health-logs
           path: var/ci/atlas-health.log
+          retention-days: 3
           if-no-files-found: warn

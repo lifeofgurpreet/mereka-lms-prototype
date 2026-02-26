@@ -50,5 +50,5 @@ jobs:
         with:
           name: ${{ steps.artifact-name.outputs.name }}
           path: var/release-evidence/
-          retention-days: 90
+          retention-days: 30
           if-no-files-found: error

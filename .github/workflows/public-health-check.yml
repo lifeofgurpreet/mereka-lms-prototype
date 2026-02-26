@@ -60,4 +60,5 @@ jobs:
         with:
           name: public-health-and-branding-logs
           path: var/ci/*.log
+          retention-days: 3
           if-no-files-found: warn

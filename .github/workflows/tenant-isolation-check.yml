@@ -40,4 +40,5 @@ jobs:
         with:
           name: tenant-isolation-log
           path: var/tenant-isolation-*.log
+          retention-days: 3
           if-no-files-found: ignore

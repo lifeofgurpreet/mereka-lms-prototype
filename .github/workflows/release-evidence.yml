@@ -35,9 +35,11 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+        uses: ./.github/actions/gcp-gke-auth
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          skip_gke: 'true'
+          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |
@@ -115,3 +117,4 @@ jobs:
         with:
           name: release-evidence-${{ inputs.target_environment }}-${{ github.run_number }}
           path: var/release-evidence/
+          retention-days: 30

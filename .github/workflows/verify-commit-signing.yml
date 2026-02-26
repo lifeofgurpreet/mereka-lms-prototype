@@ -63,4 +63,5 @@ jobs:
         with:
           name: commit-signing-verify-logs
           path: var/ci/commit-signing-verify.log
+          retention-days: 3
           if-no-files-found: warn

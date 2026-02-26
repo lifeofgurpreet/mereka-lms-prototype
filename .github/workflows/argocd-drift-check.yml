@@ -2,7 +2,12 @@ name: ArgoCD Drift Check
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 2 * * *"
+  workflow_run:
+    workflows:
+      - "Build Tutor Images"
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       app:
@@ -53,6 +58,7 @@ jobs:
         with:
           name: argocd-drift-offline-logs
           path: var-drift-*.log
+          retention-days: 3
           if-no-files-found: warn
 
   online-drift-check:
@@ -63,31 +69,16 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Install gcloud
-        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f  # v2
-        with:
-          project_id: bbi-k8
-
-      - name: Get GKE credentials
+      - name: Authenticate to GCP and get GKE credentials
         id: gke-auth
-        env:
-          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
-          GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
-          GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
-        run: |
-          if gcloud container clusters get-credentials "$GKE_CLUSTER_NAME" \
-            --project "$GKE_CLUSTER_PROJECT" \
-            --zone "$GKE_CLUSTER_LOCATION"; then
-            echo "has_cluster=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_cluster=false" >> "$GITHUB_OUTPUT"
-            echo "WARN: unable to get GKE credentials; skipping online checks" >&2
-          fi
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          gcloud_project: bbi-k8
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          strict_runtime: 'false'
 
       - name: Run online drift check (prod)
         if: ${{ steps.gke-auth.outputs.has_cluster == 'true' && (github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-prod' || github.event_name == 'schedule') }}
@@ -100,6 +91,7 @@ jobs:
         with:
           name: argocd-drift-online-logs
           path: var-drift-*.log
+          retention-days: 3
           if-no-files-found: warn
 
   alert-on-drift:

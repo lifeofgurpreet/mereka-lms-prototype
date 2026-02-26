@@ -1,3 +1,5 @@
+# @covers AC-RS-001, AC-RS-002, AC-RS-003, AC-RS-004
+# @spec: repository-structure_spec.md
 name: CI
 
 on:
@@ -5,26 +7,99 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  spec-lint:
-    name: Spec Integrity Gates
+  # ============================================================================
+  # Job 1: static-validation
+  # Runs on every PR and push. Replaces 65+ micro-jobs:
+  #   spec-lint, generated-docs, design-token-validation, branding-preflight,
+  #   monitoring-guardrails, atlas-modulestore-guardrails, tenant-branding-contract,
+  #   brand-pack-schema, gitops-image-contract, prod-tag-guard, lint, validate-k8s,
+  #   validate-tutor-config, validate-infisical, verify-static, security-scan,
+  #   pip-audit, mfe-footer-slot, mfe-route-drift, token-definitions,
+  #   plugin-slot-wiring, mfe-footer-slot-migration, mfe-selector-hardening,
+  #   mfe-selector-hardening-pr, plugin-slot-migration, contrast-compliance,
+  #   custom-app-drift, design-token-usage, frontend-version-truth,
+  #   token-integrity-routing, legacy-ecommerce-guard, accessibility-gates,
+  #   mfe-first-policy, analytics-key-guard, branding-token-integrity,
+  #   token-drift, footer-variant-matrix, no-dom-overrides, migration-lock,
+  #   tenant-branding-qa, enterprise-ui-review, tenant-branding-matrix,
+  #   footer-parity, mfe-routing-parity, a11y-contrast-focus,
+  #   a11y-authenticated-routes, performance-budget, copy-terminology,
+  #   visual-smoke-baseline, tenant-ui-smoke, footer-slot-only,
+  #   tenant-isolation-evidence, a11y-tenant-branding, visual-parity-checkpoints,
+  #   ui-ux-hardening-bundle, multitenant-brand-platform,
+  #   tenant-footer-variant-lane, mfe-analytics-plugin-parity,
+  #   module-surface-validation, release-deployment-choreography,
+  #   postmerge-governance-closure, analytics-undefined-regression,
+  #   analytics-key-elimination, legacy-footer-removal, selector-to-slot-migration,
+  #   multi-tenant-branding-ops, analytics-hardening, tenant-config-handoff,
+  #   translation-validation, and verify-specs.yml fast-verification.
+  # ============================================================================
+  static-validation:
+    name: Static Validation
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
-        run: pip install pyyaml
+      # ── Install kubeconform (cached) ──────────────────────────────────────
+      - name: Cache kubeconform
+        id: cache-kubeconform
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c6158d  # v4
+        with:
+          path: /usr/local/bin/kubeconform
+          key: kubeconform-v0.6.4-linux-amd64
 
+      - name: Install kubeconform
+        if: steps.cache-kubeconform.outputs.cache-hit != 'true'
+        run: |
+          wget -q https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz
+          tar xzf kubeconform-linux-amd64.tar.gz
+          sudo mv kubeconform /usr/local/bin/
+          rm kubeconform-linux-amd64.tar.gz
+
+      # ── Phase A: Shell script syntax check (all scripts in parallel) ───────
+      - name: Syntax check all shell scripts
+        run: |
+          find scripts/ -name '*.sh' -type f | xargs -P8 bash -n
+          bash -n infrastructure/tutor/apply-patches.sh
+          echo "All shell script syntax checks passed"
+
+      # ── Phase B: Linting ──────────────────────────────────────────────────
+      - name: Lint Python files
+        run: ruff check scripts/ services/
+
+      - name: Lint YAML files
+        run: yamllint -c .yamllint.yml infrastructure/ deploy/
+
+      - name: Lint shell scripts (shellcheck)
+        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca  # master
+        with:
+          scandir: './scripts'
+          severity: warning
+
+      - name: Validate Kubernetes manifests
+        run: |
+          find deploy/k8s -name '*.yml' -o -name '*.yaml' | \
+            xargs kubeconform -strict -ignore-missing-schemas
+
+      # ── Phase B (continued): Spec linting ─────────────────────────────────
       - name: Lint specs
         run: python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error
 
@@ -34,295 +109,155 @@ jobs:
       - name: Validate testmap format
         run: python3 scripts/qa/spec-tools/validate_testmap_format.py specs/testmaps/
 
-      - name: Coverage report
+      - name: Spec coverage report
         run: |
           mkdir -p var
           python3 scripts/qa/spec-tools/spec_coverage_report.py \
             --specs-dir specs/ --testmaps-dir specs/testmaps/ --repo-root . \
             --format markdown --output var/spec-coverage.md --fail-under 80
 
-      - name: Upload coverage artifact
+      - name: Upload spec coverage artifact
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: spec-coverage
           path: var/spec-coverage.md
+          retention-days: 3
 
-  generated-docs:
-    name: Generated Docs Are Up To Date
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      # ── Phase B (continued): PR spec coverage report (fast-verification) ──
+      - name: Spec coverage report for PR
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p var
+          python3 scripts/qa/spec-tools/spec_coverage_report.py \
+            --specs-dir specs/ \
+            --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+            --manual-file specs/manual_verifications.yaml \
+            --repo-root . \
+            --format markdown \
+            --output var/spec-coverage-pr.md
+
+      - name: Upload PR coverage artifact
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: spec-coverage-pr
+          path: var/spec-coverage-pr.md
+          retention-days: 3
+
+      - name: Markdown linting
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint docs/ specs/ --ignore docs/archive/ || true
+
+      # ── Phase C: Run all static verification scripts in parallel ──────────
+      - name: Run static verification scripts
+        run: bash .github/run-scripts-parallel.sh .github/ci-scripts-static.txt 4 120
+
+      - name: Generate aggregate summary report
+        if: always()
+        run: |
+          mkdir -p var
+          SUMMARY_FILE="var/verification-summary.md"
+          echo "# Verification Summary" > "$SUMMARY_FILE"
+          echo "" >> "$SUMMARY_FILE"
+          echo "**Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> "$SUMMARY_FILE"
+          echo "**Commit**: ${{ github.sha }}" >> "$SUMMARY_FILE"
+          echo "**Branch**: ${{ github.ref_name }}" >> "$SUMMARY_FILE"
+          echo "" >> "$SUMMARY_FILE"
+          echo "## Script Results" >> "$SUMMARY_FILE"
+          echo "" >> "$SUMMARY_FILE"
+          if [[ -f var/ci-results/summary.txt ]]; then
+            PASS=$(grep -c "^PASS"    var/ci-results/summary.txt || true)
+            FAIL=$(grep -c "^FAIL"    var/ci-results/summary.txt || true)
+            TIMEOUTS=$(grep -c "^TIMEOUT" var/ci-results/summary.txt || true)
+            SKIPS=$(grep -c "^SKIP"   var/ci-results/summary.txt || true)
+            TOTAL=$((PASS + FAIL + TIMEOUTS + SKIPS))
+            echo "| Metric | Count |" >> "$SUMMARY_FILE"
+            echo "|--------|-------|" >> "$SUMMARY_FILE"
+            echo "| Passed | $PASS |" >> "$SUMMARY_FILE"
+            echo "| Failed | $FAIL |" >> "$SUMMARY_FILE"
+            echo "| Timeout | $TIMEOUTS |" >> "$SUMMARY_FILE"
+            echo "| Skipped | $SKIPS |" >> "$SUMMARY_FILE"
+            echo "| Total | $TOTAL |" >> "$SUMMARY_FILE"
+            echo "" >> "$SUMMARY_FILE"
+            if [[ $((PASS + FAIL + TIMEOUTS)) -gt 0 ]]; then
+              SUCCESS_RATE=$(awk "BEGIN {printf \"%.1f\", ($PASS / ($PASS + $FAIL + $TIMEOUTS)) * 100}")
+              echo "**Success Rate**: ${SUCCESS_RATE}% (${PASS}/$((PASS + FAIL + TIMEOUTS)))" >> "$SUMMARY_FILE"
+            fi
+            echo "" >> "$SUMMARY_FILE"
+            echo "## Per-Script Results" >> "$SUMMARY_FILE"
+            echo '```' >> "$SUMMARY_FILE"
+            cat var/ci-results/summary.txt >> "$SUMMARY_FILE"
+            echo '```' >> "$SUMMARY_FILE"
+          else
+            echo "_No results file found_" >> "$SUMMARY_FILE"
+          fi
+          echo "" >> "$SUMMARY_FILE"
+          echo "---" >> "$SUMMARY_FILE"
+          echo "*Generated by ci.yml static-validation job*" >> "$SUMMARY_FILE"
+          cat "$SUMMARY_FILE"
+
+      - name: Upload CI results artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: ci-results
+          path: var/ci-results/
+          retention-days: 3
+
+      - name: Upload verification summary artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: verification-summary
+          path: var/verification-summary.md
+          retention-days: 90
+
+      # ── Phase D: A11y sequential chain (R5 dependency preserved) ──────────
+      - name: Verify authenticated smoke + WCAG AA contrast gates
+        run: |
+          bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
+          ./scripts/qa/verify-authenticated-smoke-a11y.sh
+
+      - name: Verify a11y regression lane (depends on smoke-a11y above)
+        run: |
+          bash -n scripts/qa/verify-a11y-regression-lane.sh
+          ./scripts/qa/verify-a11y-regression-lane.sh
+
+      # ── Phase E: Validation checks (extracted scripts) ────────────────────
+      - name: Validate design token syntax
+        run: python3 scripts/qa/check-design-token-syntax.py
+
+      - name: Validate tokens.provenance.json
+        run: python3 scripts/qa/check-tokens-provenance.py
+
+      - name: Validate token values in theme files
+        run: python3 scripts/qa/check-token-values-in-theme.py
+
+      - name: Validate config.example.yml
+        run: python3 scripts/qa/check-config-example-yaml.py
 
       - name: Verify OPENEDX_HOSTNAMES.md is generated and current
         run: |
           ./scripts/gen/update-openedx-hostnames-doc.sh
           git diff --exit-code -- docs/operations/OPENEDX_HOSTNAMES.md
 
-  design-token-validation:
-    name: Design Token Validation
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - name: Verify axe journey coverage
+        run: bash scripts/qa/check-axe-journey-coverage.sh
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Validate tokens.css syntax
-        run: |
-          python3 -c "
-          import re, sys
-          css = open('assets/branding/tokens.css').read()
-          if ':root' not in css:
-              print('FAIL: tokens.css missing :root selector'); sys.exit(1)
-          # Check balanced braces
-          if css.count('{') != css.count('}'):
-              print('FAIL: tokens.css has unbalanced braces'); sys.exit(1)
-          # Check all properties end with semicolons
-          props = re.findall(r'--[a-z0-9_-]+\s*:', css)
-          if len(props) < 80:
-              print(f'FAIL: tokens.css only has {len(props)} properties (expected >= 80)'); sys.exit(1)
-          print(f'OK: tokens.css has {len(props)} token definitions')
-          "
-
-      - name: Validate tokens.provenance.json
-        run: |
-          python3 -c "
-          import json, re, sys
-          p = json.load(open('assets/branding/tokens.provenance.json'))
-          required = ['source_repo','source_path','source_branch','source_commit','source_sha256','synced_at_utc']
-          missing = [k for k in required if not p.get(k)]
-          if missing:
-              print(f'FAIL: provenance missing keys: {missing}'); sys.exit(1)
-          if not re.fullmatch(r'[0-9a-f]{40}', p['source_commit']):
-              print('FAIL: source_commit is not a valid 40-char SHA'); sys.exit(1)
-          if not re.fullmatch(r'[0-9a-f]{64}', p['source_sha256']):
-              print('FAIL: source_sha256 is not a valid 64-char SHA256'); sys.exit(1)
-          print('OK: tokens.provenance.json is valid')
-          "
-
-      - name: Verify token drift (tokens.css vs overrides)
-        run: |
-          ./scripts/branding/verify-token-drift.sh
+      - name: Verify visual regression page count
+        run: bash scripts/qa/check-visual-regression-page-count.sh
 
       - name: Verify generated token layers are in sync
+        run: ./scripts/branding/generate-tokens-from-canonical.sh --check
+
+      - name: Run source-only branding gate
         run: |
-          ./scripts/branding/generate-tokens-from-canonical.sh --check
-
-      - name: Verify design tokens (all 12 ACs)
-        run: |
-          ./scripts/qa/verify-design-tokens.sh
-
-      - name: Verify token values in theme files
-        run: |
-          python3 -c "
-          import re, sys
-          tokens_css = open('assets/branding/tokens.css').read()
-          overrides = open('infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css').read()
-          mfe_scss = open('infrastructure/tutor/themes/mereka/mfe/mereka.scss').read()
-          # Extract color hex values from tokens.css
-          colors = dict(re.findall(r'(--color-(?:teal|magenta|blue|sky))\s*:\s*(#[0-9a-fA-F]{6})', tokens_css))
-          fails = []
-          for name, val in colors.items():
-              if val.lower() not in overrides.lower():
-                  fails.append(f'{name}={val} missing from mereka-overrides.css')
-              if val.lower() not in mfe_scss.lower():
-                  # MFE uses var() references, check for the token name instead
-                  alias = name.replace('--color-', '--mereka-color-')
-                  if alias not in mfe_scss:
-                      fails.append(f'{name} / {alias} not referenced in mfe/mereka.scss')
-          if fails:
-              for f in fails: print(f'FAIL: {f}')
-              sys.exit(1)
-          print(f'OK: {len(colors)} key token values verified in theme files')
-          "
-
-      - name: Validate token consumers reference canonical values
-        run: |
-          ./scripts/branding/validate-token-consumers.sh
-
-      - name: Verify design tokens migration completeness
-        run: |
-          ./scripts/qa/verify-design-tokens-migration.sh
-
-  branding-preflight:
-    name: Branding Preflight (Source)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Run source-only branding gate (deep)
-        run: |
-          RUN_LIVE_GATE=0 \
-          BRANDING_LEVEL=deep \
-          ./scripts/branding/run-branding-gates.sh prod
-
-  monitoring-guardrails:
-    name: Monitoring Guardrails
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify script syntax
-        run: |
-          bash -n scripts/infra/apply-monitoring-configs.sh
-          bash -n scripts/qa/audit-observability.sh
-          bash -n scripts/qa/run-operations-gates.sh
-          bash -n scripts/qa/verify-gitops-image-overrides.sh
-          bash -n scripts/qa/verify-alert-routing.sh
-          bash -n scripts/qa/build-dr-evidence-bundle.sh
-          bash -n scripts/infra/release-openedx-gitops.sh
-          bash -n scripts/qa/verify-release-automation.sh
-          bash -n scripts/qa/verify-build-workflow-contract.sh
-          bash -n scripts/qa/verify-release-workflow-invocation.sh
-          bash -n scripts/qa/verify-release-dry-run-contract.sh
-          bash -n scripts/qa/verify-release-evidence-workflow.sh
-          bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
-          bash -n scripts/qa/verify-dev-prod-image-parity.sh
-          bash -n scripts/qa/verify-site-id-hardening.sh
-          bash -n scripts/qa/lint-active-docs-env-model.sh
-          bash -n scripts/qa/verify-token-definitions.sh
-          bash -n scripts/qa/verify-design-token-usage.sh
-          bash -n scripts/qa/verify-token-reference-integrity.sh
-          bash -n scripts/qa/verify-token-generation-pipeline.sh
-          bash -n scripts/qa/verify-branding-token-integrity.sh
-          bash -n scripts/qa/verify-mfe-route-drift.sh
-          bash -n scripts/qa/verify-mfe-route-contract.sh
-          bash -n scripts/qa/verify-plugin-slot-wiring.sh
-          bash -n scripts/qa/verify-contrast-compliance.sh
-          bash -n scripts/qa/verify-authenticated-ui-smoke.sh
-          bash -n scripts/qa/verify-token-contrast.sh
-          bash -n scripts/qa/verify-accessibility-conformance.sh
-          bash -n scripts/qa/verify-wcag-contrast-v2.sh
-          bash -n scripts/qa/verify-frontend-version-truth.sh
-          bash -n scripts/qa/verify-email-ace-channels.sh
-          bash -n scripts/qa/verify-email-inapp-code.sh
-          bash -n scripts/qa/verify-email-push-code.sh
-          bash -n scripts/qa/verify-email-bulk-campaigns.sh
-          bash -n scripts/qa/verify-email-digests-code.sh
-          bash -n scripts/qa/verify-email-gdpr-code.sh
-          bash -n scripts/qa/verify-email-template-multilang.sh
-          bash -n scripts/qa/verify-tenant-branding-contract.sh
-          bash -n scripts/qa/verify-brand-pack-schema.sh
-          bash -n scripts/tenants/validate-tenant-brand-pack.sh
-          bash -n scripts/qa/smoke-authenticated.sh
-          bash -n scripts/qa/verify-ui-accessibility.sh
-          bash -n scripts/qa/verify-legacy-ecommerce-ui-refs.sh
-          bash -n scripts/qa/verify-mfe-first-policy.sh
-          bash -n scripts/qa/verify-tenant-branding-runtime.sh
-          bash -n scripts/qa/verify-slot-matrix.sh
-          bash -n scripts/qa/verify-interaction-state-contract.sh
-          bash -n scripts/qa/verify-mfe-selector-hardening.sh
-          bash -n scripts/qa/verify-mfe-footer-slot-migration.sh
-          bash -n scripts/qa/verify-performance-budget.sh
-          bash -n scripts/qa/verify-footer-slot-migration.sh
-          bash -n scripts/qa/verify-multisite-ux-consistency.sh
-          bash -n scripts/qa/verify-plugin-slot-migration-register.sh
-          bash -n scripts/qa/verify-release-deployment-choreography.sh
-          bash -n scripts/infra/verify-release-preflight.sh
-          bash -n scripts/qa/verify-token-drift.sh
-          bash -n scripts/branding/generate-tokens-from-canonical.sh
-          bash -n scripts/qa/verify-analytics-decision-gate.sh
-          bash -n scripts/qa/verify-superset-runbook.sh
-          bash -n scripts/qa/verify-analytics-drift-guardrails.sh
-          bash -n scripts/qa/verify-tenant-branding-troubleshoot-docs.sh
-          bash -n scripts/qa/verify-analytics-key.sh
-          bash -n scripts/qa/verify-footer-variant-matrix.sh
-          bash -n scripts/qa/verify-no-dom-overrides.sh
-          bash -n scripts/qa/verify-migration-lock.sh
-          bash -n scripts/qa/verify-enterprise-ui-review.sh
-          bash -n scripts/qa/verify-tenant-branding-matrix.sh
-          bash -n scripts/qa/verify-footer-parity.sh
-          bash -n scripts/qa/verify-footer-slot-only.sh
-          bash -n scripts/qa/verify-mfe-routing-parity.sh
-          bash -n scripts/qa/verify-a11y-contrast-focus.sh
-          bash -n scripts/qa/verify-a11y-authenticated-routes.sh
-          bash -n scripts/qa/verify-a11y-tenant-branding.sh
-          bash -n scripts/qa/verify-performance-budget.sh
-          bash -n scripts/qa/verify-copy-terminology.sh
-          bash -n scripts/qa/verify-visual-smoke-baseline.sh
-          bash -n scripts/qa/verify-tenant-ui-smoke.sh
-          bash -n scripts/qa/verify-tenant-isolation-evidence.sh
-          bash -n scripts/qa/verify-visual-parity-checkpoints.sh
-          bash -n scripts/qa/verify-ui-ux-hardening-bundle.sh
-          bash -n scripts/qa/verify-multitenant-brand-platform.sh
-          bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
-          bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
-          bash -n scripts/qa/verify-module-surface-validation.sh
-          bash -n scripts/qa/verify-postmerge-governance-closure.sh
-          bash -n scripts/qa/verify-spec-coverage-cleanup.sh
-          bash -n scripts/qa/verify-analytics-undefined-regression.sh
-          bash -n scripts/qa/verify-analytics-key-elimination.sh
-          bash -n scripts/qa/verify-token-integrity-routing.sh
-          bash -n scripts/qa/verify-selector-to-slot-migration.sh
-          bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
-          bash -n scripts/qa/verify-a11y-regression-lane.sh
-          bash -n scripts/qa/verify-footer-slot-evidence-rollback.sh
-          bash -n scripts/qa/verify-analytics-hardening.sh
-          bash -n scripts/qa/verify-tenant-config-handoff.sh
-          bash -n scripts/qa/verify-multi-tenant-branding-ops.sh
+          RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod
 
       - name: Run local observability audit
-        run: |
-          ./scripts/qa/audit-observability.sh --mode local
-
-      - name: Verify release automation contract
-        run: |
-          ./scripts/qa/verify-release-automation.sh
-
-      - name: Verify build workflow contract
-        run: |
-          ./scripts/qa/verify-build-workflow-contract.sh
-
-      - name: Verify release workflow invocation flags
-        run: |
-          bash ./scripts/qa/verify-release-workflow-invocation.sh
-
-      - name: Verify release dry-run contract
-        run: |
-          ./scripts/qa/verify-release-dry-run-contract.sh
-
-      - name: Verify release evidence workflow contract
-        run: |
-          ./scripts/qa/verify-release-evidence-workflow.sh
-
-      - name: Verify no deprecated kustomize keys
-        run: |
-          ./scripts/qa/verify-kustomize-no-deprecated-keys.sh
-
-      - name: Verify dev/prod image parity
-        run: |
-          ./scripts/qa/verify-dev-prod-image-parity.sh
-
-      - name: Verify SITE_ID hardening contract
-        run: |
-          ./scripts/qa/verify-site-id-hardening.sh
-
-      - name: Lint active docs env model wording
-        run: |
-          ./scripts/qa/lint-active-docs-env-model.sh
-
-      - name: Verify selector hardening (syntax check only)
-        run: |
-          bash -n scripts/qa/verify-selector-hardening.sh
-
-      - name: Verify slot migration readiness (syntax check only)
-        run: |
-          bash -n scripts/qa/verify-slot-migration-readiness.sh
-
-      - name: Verify copy/terminology consistency (syntax check only)
-        run: |
-          bash -n scripts/qa/verify-copy-terminology.sh
+        run: ./scripts/qa/audit-observability.sh --mode local
 
       - name: Generate offline monitoring plan
         run: |
@@ -333,179 +268,151 @@ jobs:
       - name: Upload monitoring plan artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
-          name: monitoring-offline-plan
+          name: monitoring-offline-plan-static
           path: monitoring-plan.txt
+          retention-days: 3
 
-  atlas-modulestore-guardrails:
-    name: Atlas Modulestore Guardrails
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - name: Run Atlas modulestore contract check
+        run: ./scripts/qa/verify-atlas-modulestore-path.sh --mode local
 
-      - name: Verify Atlas guard script syntax
+      # ── Phase F: Infisical validation (conditional) ────────────────────────
+      - name: Validate Infisical secrets
+        if: ${{ vars.HAS_INFISICAL == 'true' }}
+        env:
+          INFISICAL_DOMAIN: https://secrets.mereka.io/api
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
+          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
         run: |
-          bash -n scripts/qa/verify-atlas-modulestore-path.sh
+          npm i -g @infisical/cli
+          STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
+          STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
 
-      - name: Run repository Atlas modulestore contract check
+      # ── Phase G: Translation validation ───────────────────────────────────
+      - name: Verify atlas.yml and translation infrastructure
+        run: bash scripts/qa/check-atlas-translation-infra.sh
+
+      - name: Validate .po file syntax (if present)
+        run: python3 scripts/qa/check-po-file-syntax.py
+
+      - name: Validate MFE messages.json syntax (if present)
+        run: python3 scripts/qa/check-messages-json-syntax.py
+
+      - name: Run offline translation verification
         run: |
-          ./scripts/qa/verify-atlas-modulestore-path.sh --mode local
+          set -euo pipefail
+          mkdir -p var/ci
+          bash -n scripts/qa/verify-translations.sh
+          ./scripts/qa/verify-translations.sh --offline | tee var/ci/translation-validation.log || true
+          grep -q "^FAIL\b\|✗ FAIL" var/ci/translation-validation.log && {
+            echo "::error::Translation verification found failures — see log above"
+            exit 1
+          } || echo "Translation verification passed (SKIP/WARN are acceptable)"
 
-  tenant-branding-contract:
-    name: Tenant Branding Contract
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify tenant branding contract compliance
-        run: |
-          ./scripts/qa/verify-tenant-branding-contract.sh
-
-  brand-pack-schema:
-    name: Brand Pack Schema Validation
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify brand pack schema compliance
-        run: |
-          ./scripts/qa/verify-brand-pack-schema.sh
-
-  gitops-image-contract:
-    name: GitOps Image Override Contract
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify image override contract (repo-local)
-        run: |
-          ./scripts/qa/verify-gitops-image-overrides.sh --skip-infra
-
-  prod-tag-guard:
-    name: Production Tag Guard
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify no mutable latest tags in prod overlays
-        run: |
-          bash -n scripts/qa/verify-no-latest-prod-tags.sh
-          ./scripts/qa/verify-no-latest-prod-tags.sh
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Upload translation validation log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
-          python-version: '3.12'
+          name: translation-validation-log
+          path: var/ci/translation-validation.log
+          if-no-files-found: warn
+          retention-days: 3
 
-      - name: Install dependencies
-        run: |
-          pip install ruff yamllint
-
-      - name: Lint Python files
-        run: |
-          ruff check scripts/ services/
-
-      - name: Lint YAML files
-        run: |
-          yamllint -c .yamllint.yml infrastructure/ deploy/
-
-      - name: Lint shell scripts
-        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca  # master
+      # ── PR comment: spec verification summary ─────────────────────────────
+      - name: Post PR comment with spec verification summary
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7
         with:
-          scandir: './scripts'
-          severity: warning
+          script: |
+            const fs = require('fs');
+            let coverageContent = '';
+            try {
+              coverageContent = fs.readFileSync('var/spec-coverage-pr.md', 'utf8');
+            } catch (error) {
+              coverageContent = '_Coverage report not available_';
+            }
+            const jobResult = '${{ job.status }}';
+            const statusEmoji = jobResult === 'success' ? '✅' : '❌';
+            const body = `## ${statusEmoji} CI Static Validation
 
-  validate-k8s:
-    name: Validate Kubernetes Manifests
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+            **Job result**: ${jobResult}
 
-      - name: Install kubeconform
-        run: |
-          wget -q https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz
-          tar xzf kubeconform-linux-amd64.tar.gz
-          sudo mv kubeconform /usr/local/bin/
+            ### Spec Coverage
 
-      - name: Validate Kubernetes manifests
-        run: |
-          find deploy/k8s -name '*.yml' -o -name '*.yaml' | \
-            xargs kubeconform -strict -ignore-missing-schemas
+            <details>
+            <summary>View coverage report</summary>
 
-  validate-tutor-config:
-    name: Validate Tutor Config
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+            ${coverageContent}
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
+            </details>
 
-      - name: Validate config.example.yml
-        run: |
-          python3 -c "
-          import yaml
-          with open('infrastructure/tutor/config.example.yml') as f:
-              config = yaml.safe_load(f)
-              print(f'✅ Config has {len(config)} top-level keys')
-          "
+            ### Next Steps
 
-      - name: Check patch script syntax
-        run: |
-          bash -n infrastructure/tutor/apply-patches.sh
-          echo "✅ Patch script syntax valid"
+            ${jobResult === 'success'
+              ? '- ✅ Static validation passed\n- Full verification will run on merge to main'
+              : '- ❌ Some checks failed — review workflow logs\n- Fix issues before merging'}
 
+            ---
+            *Automated by ci.yml static-validation job*
+            `;
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('CI Static Validation')
+            );
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+
+  # ============================================================================
+  # Job 2: tutor-config-tests
+  # Renders a full Tutor environment + applies patches + runs test suite.
+  # Replaces: tutor-config-tests, validate-tutor-config from old ci.yml.
+  # ============================================================================
   tutor-config-tests:
     name: Tutor Configuration Tests
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
+          install-base-deps: 'false'
 
       - name: Install Tutor
-        run: pip install "tutor[full]==18.2.2"
-
-      - name: Render Tutor environment
         run: |
-          # apply-patches.sh (line 6) does: source .venv/bin/activate
-          # Create .venv so the script works in CI
           python3 -m venv .venv
           source .venv/bin/activate
-          pip install "tutor[full]==18.2.2"
-          export TUTOR_ROOT=$GITHUB_WORKSPACE/tutor_env
-          tutor config save
-          ./infrastructure/tutor/apply-patches.sh
+          pip install -U pip
+          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
+
+      - name: Render Tutor environment + apply patches
         env:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          source .venv/bin/activate
+          export TUTOR_ROOT="${{ github.workspace }}/tutor_env"
+          tutor config save
+          ./infrastructure/tutor/apply-patches.sh
 
       - name: Run tutor apply patches test
         run: bash tests/tutor/test_tutor_apply.sh
@@ -522,142 +429,56 @@ jobs:
       - name: Run tutor edge cases test
         run: bash tests/tutor/test_edge_cases.sh
 
-  validate-infisical:
-    name: Validate Infisical Secrets (prod/dev)
-    runs-on: ubuntu-24.04
-    if: ${{ vars.HAS_INFISICAL == 'true' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - name: Validate config.example.yml structure
+        run: python3 scripts/qa/check-config-example-yaml.py
 
-      - name: Set up Node (Infisical CLI)
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
-        with:
-          node-version: '20'
-
-      - name: Install Infisical CLI
-        run: npm i -g @infisical/cli
-
-      - name: Validate secrets in Infisical (strict)
-        env:
-          INFISICAL_DOMAIN: https://secrets.mereka.io/api
-          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
-          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
+      - name: Generate offline monitoring plan
         run: |
-          STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
-          STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
+          OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan | tee monitoring-plan.txt
+          grep -q "Offline plan complete" monitoring-plan.txt
+          grep -q "gcloud monitoring" monitoring-plan.txt
 
-  verify-static:
-    name: Static Verification Scripts
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Upload monitoring plan artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
-          python-version: '3.12'
+          name: monitoring-offline-plan
+          path: monitoring-plan.txt
+          retention-days: 3
 
-      - name: Install dependencies
-        run: pip install pyyaml
-
-      - name: Run static verification scripts
-        run: |
-          PASS=0
-          FAIL=0
-          SKIP=0
-          SCRIPTS=(
-            scripts/qa/verify-repo-structure.sh
-            scripts/qa/verify-no-hardcoded-secrets.sh
-            scripts/qa/verify-secrets-naming-convention.sh
-            scripts/qa/verify-k8s-deployment-spec.sh
-            scripts/qa/verify-k8s-externalsecrets.sh
-            scripts/qa/verify-k8s-images.sh
-            scripts/qa/verify-k8s-secrets-hygiene.sh
-            scripts/qa/verify-kustomize-no-deprecated-keys.sh
-            scripts/qa/verify-multisite-config.sh
-            scripts/qa/verify-tutor-multisite-domains.sh
-            scripts/qa/verify-mongodb-atlas-integration.sh
-            scripts/qa/verify-atlas-data-persistence.sh
-            scripts/qa/verify-aspects-deployment-readiness.sh
-            scripts/qa/verify-data-migration-contracts.sh
-            scripts/qa/verify-forum-migration-contracts.sh
-            scripts/qa/verify-dev-prod-secret-separation.sh
-            scripts/qa/verify-no-latest-prod-tags.sh
-            scripts/qa/verify-sli-foundation.sh
-            scripts/qa/verify-error-budget.sh
-            scripts/qa/verify-sentry-wiring.sh
-            scripts/qa/verify-sentry-cli-contract.sh
-            scripts/qa/verify-observability-stack.sh
-            scripts/qa/verify-cicd-merge-gates-and-secrets.sh
-            scripts/qa/verify-build-workflow-contract.sh
-            scripts/qa/verify-mfe-build-contract.sh
-            scripts/qa/verify-mfe-build-prereqs.sh
-            scripts/qa/verify-mfe-config-contract.sh
-          )
-          for f in "${SCRIPTS[@]}"; do
-            if [[ ! -f "$f" ]]; then
-              echo "SKIP $f (not found)"
-              SKIP=$((SKIP + 1))
-              continue
-            fi
-            if output=$(timeout 60 bash "$f" 2>&1); then
-              echo "PASS $(basename "$f")"
-              PASS=$((PASS + 1))
-            else
-              echo "FAIL $(basename "$f")"
-              echo "$output" | tail -10
-              FAIL=$((FAIL + 1))
-            fi
-          done
-          echo ""
-          echo "=== Results: $PASS passed, $FAIL failed, $SKIP skipped ==="
-          if [[ $FAIL -gt 0 ]]; then
-            echo "::error::$FAIL static verification script(s) failed"
-            exit 1
-          fi
-
-  security-scan:
-    name: Security Scan
+  # ============================================================================
+  # Job 3: security-scans
+  # TruffleHog (HEAD only), Hadolint on all Dockerfiles, pip-audit.
+  # Replaces: security-scan, pip-audit from old ci.yml.
+  # ============================================================================
+  security-scans:
+    name: Security Scans
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Check for secrets in code
+      - name: TruffleHog secret scan (HEAD only, verified only)
         uses: trufflesecurity/trufflehog@be889fa341b7a3b1c8d5fbd9e5c6ab378f417da8  # main
         with:
           path: ./
           extra_args: --only-verified
 
-      - name: Check Dockerfiles
-        run: |
-          if find . -name 'Dockerfile*' | head -1 | grep -q .; then
-            docker run --rm -v $(pwd):/src hadolint/hadolint:latest \
-              hadolint /src/**/Dockerfile*
-          fi
+      - name: Hadolint Dockerfile lint
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf  # v3.1.0
+        with:
+          recursive: true
 
-  pip-audit:
-    name: Python dependency audit
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python for pip-audit
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
+          install-base-deps: 'false'
+          extra-deps: 'pip-audit'
 
-      - name: Install pip-audit and project deps
-        run: |
-          pip install pip-audit
-          pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
+      - name: Install project deps (optional)
+        run: pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
 
       - name: Run pip-audit (dry-run, informational)
         run: pip-audit --desc --fix --dry-run 2>&1 || true
@@ -665,27 +486,33 @@ jobs:
       - name: Run pip-audit (strict)
         run: pip-audit --desc
 
+  # ============================================================================
+  # Job 4: test-coverage
+  # Python test suite with coverage enforcement. Non-blocking (continue-on-error).
+  # Kept exactly as-is from original ci.yml.
+  # ============================================================================
   test-coverage:
     name: Python test coverage
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
+          install-base-deps: 'false'
+          extra-deps: 'pytest pytest-cov'
 
-      - name: Install dependencies
-        run: |
-          pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
-          pip install pytest pytest-cov
+      - name: Install project deps (optional)
+        run: pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
 
       - name: Run tests with coverage
         run: pytest --cov=. --cov-report=term-missing --cov-fail-under=40 -q
-        continue-on-error: true  # Start as non-blocking, remove once coverage improves
+        continue-on-error: true  # Non-blocking until coverage improves
 
       - name: Upload coverage report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
@@ -693,1021 +520,5 @@ jobs:
         with:
           name: coverage-report
           path: .coverage
+          retention-days: 3
 
-  mfe-footer-slot:
-    name: MFE Footer Plugin-Slot Wiring
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify footer slot wiring (plugin + fallback)
-        run: ./scripts/qa/verify-mfe-footer-slot.sh
-
-  mfe-route-drift:
-    name: MFE Route Mapping Drift Guard
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify Caddyfile ↔ branding verifier route sync
-        run: ./scripts/qa/verify-mfe-route-drift.sh
-
-  token-definitions:
-    name: Token Definition Correctness
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify all --mereka-* token references resolve
-        run: ./scripts/qa/verify-token-definitions.sh
-
-  plugin-slot-wiring:
-    name: Plugin-Slot Wiring Integrity
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify plugin-slot wiring chain (plugin ↔ patches ↔ inventory)
-        run: ./scripts/qa/verify-plugin-slot-wiring.sh
-
-  mfe-footer-slot-migration:
-    name: MFE Footer/Slot Migration (AC-FRONT-061..065)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-mfe-footer-slot-migration.sh
-
-      - name: Verify MFE footer/slot migration compliance (AC-FRONT-061 through AC-FRONT-065)
-        run: ./scripts/qa/verify-mfe-footer-slot-migration.sh
-
-  mfe-selector-hardening:
-    name: MFE Selector Hardening Guard
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-mfe-selector-hardening.sh
-
-      - name: Verify MFE selector hardening compliance (AC-US7-001 through AC-US7-005)
-        run: ./scripts/qa/verify-mfe-selector-hardening.sh
-
-  mfe-selector-hardening-pr:
-    name: MFE Selector Hardening Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'selector') ||
-        contains(github.event.pull_request.title, 'mfe') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'theme') ||
-        contains(github.event.pull_request.title, 'scss')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-mfe-selector-hardening.sh
-      - name: Run selector hardening verification (AC-US7-001..005)
-        run: ./scripts/qa/verify-mfe-selector-hardening.sh
-
-  plugin-slot-migration:
-    name: Plugin-Slot Migration Register
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify plugin-slot migration register
-        run: ./scripts/qa/verify-plugin-slot-migration-register.sh
-
-  contrast-compliance:
-    name: WCAG 2.1 AA Contrast Compliance
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Verify contrast ratios (tokens ↔ WCAG AA thresholds)
-        run: ./scripts/qa/verify-contrast-compliance.sh
-
-  custom-app-drift:
-    name: Custom App Install Drift Guard
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify custom apps (settings ↔ plugin ↔ directory)
-        run: ./scripts/qa/verify-custom-app-drift.sh
-
-  design-token-usage:
-    name: Design Token Usage Lint
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Lint for hardcoded colors
-        run: ./scripts/qa/verify-design-token-usage.sh
-
-  frontend-version-truth:
-    name: Frontend Version Truth (AC-UIVER-003)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify frontend version consistency (docs ↔ CI ↔ scripts ↔ K8s)
-        run: ./scripts/qa/verify-frontend-version-truth.sh
-
-  token-integrity-routing:
-    name: Token Integrity and Routing Verification (AC-FRONT-011..015)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-token-integrity-routing.sh
-
-      - name: Verify token integrity + routing alignment
-        run: ./scripts/qa/verify-token-integrity-routing.sh
-
-  legacy-ecommerce-guard:
-    name: Legacy Ecommerce UI Guard
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Check for legacy ecommerce UI references
-        run: ./scripts/qa/verify-legacy-ecommerce-ui-refs.sh
-
-  accessibility-gates:
-    name: Accessibility Gates (syntax + structure)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-ui-accessibility.sh
-      - name: Verify axe journey coverage
-        run: |
-          # Ensure all 4 required journeys are defined
-          grep -q '/authn/login' scripts/qa/verify-ui-accessibility.sh
-          grep -q '/learner-dashboard/' scripts/qa/verify-ui-accessibility.sh
-          grep -q '/learning/' scripts/qa/verify-ui-accessibility.sh
-          grep -q '/discussions/' scripts/qa/verify-ui-accessibility.sh
-          echo "All 4 required journeys present"
-      - name: Verify visual regression page count
-        run: |
-          # Count page targets in visual regression script (should have 18+ entries in CRITICAL_PAGES)
-          PAGE_COUNT=$(grep -c '^\s*\["' scripts/qa/visual-regression-test.sh || echo 0)
-          echo "Visual regression covers ${PAGE_COUNT} page entries"
-          if [[ $PAGE_COUNT -lt 18 ]]; then
-            echo "ERROR: Expected at least 18 page entries, found $PAGE_COUNT"
-            exit 1
-          fi
-          echo "Page count verification passed (${PAGE_COUNT} pages)"
-
-  mfe-first-policy:
-    name: MFE-First Policy Compliance
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Check MFE-first policy compliance
-        run: ./scripts/qa/verify-mfe-first-policy.sh
-
-  analytics-key-guard:
-    name: Analytics Key Injection Guard
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Verify analytics key injection safety
-        run: ./scripts/qa/verify-analytics-key.sh
-
-  branding-token-integrity:
-    name: Branding Token Integrity
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Verify branding token integrity
-        run: ./scripts/qa/verify-branding-token-integrity.sh
-
-  token-drift:
-    name: Token Drift Guard
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'push' ||
-      (
-        github.event_name == 'pull_request' &&
-        (
-          contains(github.event.pull_request.title, 'branding') ||
-          contains(github.event.pull_request.title, 'token') ||
-          contains(github.event.pull_request.title, 'theme') ||
-          contains(github.event.pull_request.title, 'mfe')
-        )
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify no undefined CSS variable references in theme files
-        run: ./scripts/qa/verify-token-drift.sh
-
-  footer-variant-matrix:
-    name: Footer Variant Matrix
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Verify footer variant matrix (AC-FTVAR-001 through AC-FTVAR-005)
-        run: ./scripts/qa/verify-footer-variant-matrix.sh
-
-  no-dom-overrides:
-    name: No DOM Overrides
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-no-dom-overrides.sh
-
-      - name: Verify no forbidden DOM overrides (AC-FTR-001 through AC-FTR-004)
-        run: ./scripts/qa/verify-no-dom-overrides.sh
-
-  migration-lock:
-    name: Migration Lock Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'theme') ||
-        contains(github.event.pull_request.title, 'mfe') ||
-        contains(github.event.pull_request.title, 'slot') ||
-        contains(github.event.pull_request.title, 'migration')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Run migration lock gate
-        run: ./scripts/qa/verify-migration-lock.sh
-
-  tenant-branding-qa:
-    name: Tenant Branding QA (Consolidated)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/run-tenant-branding-qa.sh
-
-      - name: Run consolidated tenant branding QA (AC-TBQA-001 through AC-TBQA-005)
-        run: ./scripts/qa/run-tenant-branding-qa.sh
-
-  enterprise-ui-review:
-    name: Enterprise UI Review Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'enterprise') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'brand')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Run enterprise UI review gate
-        run: ./scripts/qa/verify-enterprise-ui-review.sh
-
-  tenant-branding-matrix:
-    name: Tenant Branding Matrix Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'tenant') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'multisite') ||
-        contains(github.event.pull_request.title, 'domain')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Run tenant branding matrix gate
-        run: ./scripts/qa/verify-tenant-branding-matrix.sh
-
-  footer-parity:
-    name: Footer Parity Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'footer') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'parity')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Run footer parity gate
-        run: ./scripts/qa/verify-footer-parity.sh
-
-  mfe-routing-parity:
-    name: MFE Routing Parity (AC-ROUTE-001..004)
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'mfe') ||
-        contains(github.event.pull_request.title, 'caddy') ||
-        contains(github.event.pull_request.title, 'routing') ||
-        contains(github.event.pull_request.title, 'route') ||
-        contains(github.event.pull_request.title, 'authoring') ||
-        contains(github.event.pull_request.title, 'course-authoring')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-mfe-routing-parity.sh
-      - name: Run MFE routing parity verification
-        run: ./scripts/qa/verify-mfe-routing-parity.sh
-
-  a11y-contrast-focus:
-    name: A11y Contrast + Focus-Visible Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'a11y') ||
-        contains(github.event.pull_request.title, 'accessibility') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'theme') ||
-        contains(github.event.pull_request.title, 'contrast') ||
-        contains(github.event.pull_request.title, 'focus') ||
-        contains(github.event.pull_request.title, 'tokens')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-a11y-contrast-focus.sh
-
-      - name: Run contrast + focus-visible gate (AC-A11Y-001 through AC-A11Y-004)
-        run: ./scripts/qa/verify-a11y-contrast-focus.sh
-
-      - name: Upload a11y gate artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: a11y-contrast-focus-gate
-          path: var/a11y-contrast-focus-gate.txt
-
-  a11y-authenticated-routes:
-    name: A11y Authenticated Route Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'a11y') ||
-        contains(github.event.pull_request.title, 'accessibility') ||
-        contains(github.event.pull_request.title, 'landmark') ||
-        contains(github.event.pull_request.title, 'focus') ||
-        contains(github.event.pull_request.title, 'authenticated')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-a11y-authenticated-routes.sh
-      - name: Run a11y authenticated route verification (AC-ACCSS-201..205)
-        run: ./scripts/qa/verify-a11y-authenticated-routes.sh
-
-  performance-budget:
-    name: Frontend Performance Budget Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'performance') ||
-        contains(github.event.pull_request.title, 'perf') ||
-        contains(github.event.pull_request.title, 'cache') ||
-        contains(github.event.pull_request.title, 'bundle') ||
-        contains(github.event.pull_request.title, 'mfe') ||
-        contains(github.event.pull_request.title, 'caddy')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-performance-budget.sh
-      - name: Run performance budget verification (AC-UIPERF-001..003)
-        run: ./scripts/qa/verify-performance-budget.sh
-
-  copy-terminology:
-    name: Copy/Terminology Consistency Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'copy') ||
-        contains(github.event.pull_request.title, 'terminology') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'theme') ||
-        contains(github.event.pull_request.title, 'footer') ||
-        contains(github.event.pull_request.title, 'mfe')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-copy-terminology.sh
-      - name: Run copy/terminology verification (AC-UICOPY-001..003)
-        run: ./scripts/qa/verify-copy-terminology.sh
-
-  visual-smoke-baseline:
-    name: Visual Smoke Baseline Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'visual') ||
-        contains(github.event.pull_request.title, 'screenshot') ||
-        contains(github.event.pull_request.title, 'smoke') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'regression')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-visual-smoke-baseline.sh
-      - name: Run visual smoke baseline verification (AC-VIS-001..004)
-        run: ./scripts/qa/verify-visual-smoke-baseline.sh
-
-  tenant-ui-smoke:
-    name: Tenant UI Smoke Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'tenant') ||
-        contains(github.event.pull_request.title, 'smoke') ||
-        contains(github.event.pull_request.title, 'visual') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'deploy')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-tenant-ui-smoke.sh
-      - name: Run tenant UI smoke verification (AC-UVIS-301..305)
-        run: ./scripts/qa/verify-tenant-ui-smoke.sh
-
-  footer-slot-only:
-    name: Footer Slot-Only Policy Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'footer') ||
-        contains(github.event.pull_request.title, 'slot') ||
-        contains(github.event.pull_request.title, 'plugin') ||
-        contains(github.event.pull_request.title, 'mfe') ||
-        contains(github.event.pull_request.title, 'branding')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-footer-slot-only.sh
-      - name: Run footer slot-only verification (AC-FTR-301..305)
-        run: ./scripts/qa/verify-footer-slot-only.sh
-
-  tenant-isolation-evidence:
-    name: Tenant Isolation Evidence Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'tenant') ||
-        contains(github.event.pull_request.title, 'isolation') ||
-        contains(github.event.pull_request.title, 'multisite') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'domain')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-tenant-isolation-evidence.sh
-      - name: Run tenant isolation evidence (AC-UI-201..205)
-        run: ./scripts/qa/verify-tenant-isolation-evidence.sh
-
-  a11y-tenant-branding:
-    name: A11y Tenant Branding Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'a11y') ||
-        contains(github.event.pull_request.title, 'accessibility') ||
-        contains(github.event.pull_request.title, 'tenant') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'contrast')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-a11y-tenant-branding.sh
-
-      - name: Run a11y tenant branding gate (AC-A11Y-301..304)
-        run: ./scripts/qa/verify-a11y-tenant-branding.sh
-
-  visual-parity-checkpoints:
-    name: Visual Parity Checkpoints Gate
-    runs-on: ubuntu-24.04
-    if: |
-      github.event_name == 'pull_request' &&
-      (
-        contains(github.event.pull_request.title, 'visual') ||
-        contains(github.event.pull_request.title, 'parity') ||
-        contains(github.event.pull_request.title, 'branding') ||
-        contains(github.event.pull_request.title, 'mfe') ||
-        contains(github.event.pull_request.title, 'checkpoint')
-      )
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-visual-parity-checkpoints.sh
-      - name: Run visual parity checkpoints (AC-UI-101..106)
-        run: ./scripts/qa/verify-visual-parity-checkpoints.sh
-
-  ui-ux-hardening-bundle:
-    name: UI/UX Hardening Bundle Gate
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-ui-ux-hardening-bundle.sh
-      - name: Run UI/UX hardening bundle verification (AC-HB-001..006)
-        run: ./scripts/qa/verify-ui-ux-hardening-bundle.sh
-      - name: Upload hardening gate artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: ui-ux-hardening-bundle-gate
-          path: var/ui-ux-hardening-bundle-gate.txt
-
-  multitenant-brand-platform:
-    name: Multitenant Brand Platform Gate
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-multitenant-brand-platform.sh
-
-      - name: Verify multitenant brand platform (AC-MB-001..006)
-        run: ./scripts/qa/verify-multitenant-brand-platform.sh
-
-  tenant-footer-variant-lane:
-    name: Tenant Footer Variant Lane
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-tenant-footer-variant-lane.sh
-
-      - name: Verify tenant footer variant lane (AC-TF-001..004)
-        run: ./scripts/qa/verify-tenant-footer-variant-lane.sh
-
-  mfe-analytics-plugin-parity:
-    name: MFE Analytics + Plugin Parity
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-mfe-analytics-plugin-parity.sh
-
-      - name: Verify MFE analytics key guard + plugin entry point compliance (AC-AN-001..004)
-        run: ./scripts/qa/verify-mfe-analytics-plugin-parity.sh
-
-      - name: Upload analytics parity gate artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: mfe-analytics-parity-gate
-          path: var/
-          if-no-files-found: ignore
-
-  module-surface-validation:
-    name: Module Surface Validation Pack
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-module-surface-validation.sh
-
-      - name: Verify module surface validation (AC-MOD-001..005)
-        run: ./scripts/qa/verify-module-surface-validation.sh
-
-  release-deployment-choreography:
-    name: Release Deployment Choreography (AC-DEP-001..004)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check (choreography)
-        run: bash -n scripts/qa/verify-release-deployment-choreography.sh
-
-      - name: Syntax check (preflight)
-        run: bash -n scripts/infra/verify-release-preflight.sh
-
-      - name: Verify release deployment choreography (AC-DEP-001..004)
-        run: ./scripts/qa/verify-release-deployment-choreography.sh
-
-  postmerge-governance-closure:
-    name: Post-Merge Governance Closure (AC-POST-001..005)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-postmerge-governance-closure.sh
-
-      - name: Verify governance closure evidence pack (bead 8jao.23)
-        run: ./scripts/qa/verify-postmerge-governance-closure.sh
-
-  analytics-undefined-regression:
-    name: Analytics Undefined Regression Guard (AC-FRONT-071..074)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-analytics-undefined-regression.sh
-
-      - name: Verify analytics undefined regression fix (bead 2dcy.7)
-        run: ./scripts/qa/verify-analytics-undefined-regression.sh
-
-  analytics-key-elimination:
-    name: Analytics Key Elimination Guard (AC-UI-501..505)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-analytics-key-elimination.sh
-
-      - name: Verify analytics key elimination (bead 1h41)
-        run: ./scripts/qa/verify-analytics-key-elimination.sh
-
-      - name: Upload analytics key elimination gate artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: analytics-key-elimination-gate
-          path: var/
-          if-no-files-found: ignore
-
-  legacy-footer-removal:
-    name: Legacy Footer Removal (AC-UI-401..405)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-legacy-footer-removal.sh
-
-      - name: Verify legacy footer removal (bead 1rns)
-        run: ./scripts/qa/verify-legacy-footer-removal.sh
-
-  selector-to-slot-migration:
-    name: Selector-to-Slot Migration (AC-FRONT-021..025)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-selector-to-slot-migration.sh
-
-      - name: Verify selector-to-slot migration compliance (bead 2dcy.2)
-        run: ./scripts/qa/verify-selector-to-slot-migration.sh
-
-  authenticated-smoke-a11y:
-    name: Authenticated Smoke & A11y Gates (AC-FRONT-031..034)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
-
-      - name: Verify authenticated smoke + WCAG AA contrast gates (bead 2dcy.3)
-        run: ./scripts/qa/verify-authenticated-smoke-a11y.sh
-
-  a11y-regression-lane:
-    name: A11y Regression Lane (AC-FRONT-071..075)
-    runs-on: ubuntu-24.04
-    needs: authenticated-smoke-a11y
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-a11y-regression-lane.sh
-
-      - name: Verify a11y regression lane (bead 2dcy.3.1)
-        run: ./scripts/qa/verify-a11y-regression-lane.sh
-
-  footer-slot-evidence-rollback:
-    name: Footer Slot Evidence and Rollback Guard (AC-FRONT-081..084)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-footer-slot-evidence-rollback.sh
-
-      - name: Verify footer slot evidence and rollback guard (bead 2dcy.8)
-        run: ./scripts/qa/verify-footer-slot-evidence-rollback.sh
-
-  multi-tenant-branding-ops:
-    name: Multi-Tenant Branding Operations Model (AC-FRONT-041..044)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-multi-tenant-branding-ops.sh
-      - name: Verify multi-tenant branding operations model (bead 2dcy.4)
-        run: ./scripts/qa/verify-multi-tenant-branding-ops.sh
-
-  analytics-hardening:
-    name: Analytics Hardening (AC-FRONT-051..055)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-analytics-hardening.sh
-
-      - name: Verify analytics token integrity and Segment injection hardening (bead 2dcy.5)
-        run: ./scripts/qa/verify-analytics-hardening.sh
-
-  tenant-config-handoff:
-    name: Tenant Config Handoff (AC-UI-601..605)
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-tenant-config-handoff.sh
-      - name: Verify tenant config handoff (bead 31yg)
-        run: ./scripts/qa/verify-tenant-config-handoff.sh
-
-  translation-validation:
-    name: OEP-58 Translation Validation
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
-        with:
-          python-version: '3.12'
-
-      - name: Syntax check
-        run: bash -n scripts/qa/verify-translations.sh
-
-      - name: Verify atlas.yml and translation workflow infrastructure
-        run: |
-          set -euo pipefail
-          # atlas.yml must exist at repo root
-          [[ -f atlas.yml ]] || { echo "FAIL: atlas.yml missing from repo root"; exit 1; }
-          echo "PASS: atlas.yml present"
-          # TRANSLATION_WORKFLOW.md must exist
-          [[ -f docs/operations/TRANSLATION_WORKFLOW.md ]] || { echo "FAIL: TRANSLATION_WORKFLOW.md missing"; exit 1; }
-          echo "PASS: TRANSLATION_WORKFLOW.md present"
-          # sync-translations.sh must exist and be executable
-          [[ -x scripts/infra/sync-translations.sh ]] || { echo "FAIL: sync-translations.sh missing or not executable"; exit 1; }
-          echo "PASS: sync-translations.sh is executable"
-          # atlas.yml must reference all OEP-58 locales
-          for locale in en id zh_CN vi fil; do
-            grep -q "$locale" atlas.yml || { echo "FAIL: atlas.yml missing locale: $locale"; exit 1; }
-            echo "PASS: atlas.yml references locale: $locale"
-          done
-
-      - name: Validate .po file syntax (if present)
-        run: |
-          set -euo pipefail
-          PO_FILES=$(find tutor_env/env/build/openedx/locale -name "*.po" 2>/dev/null || true)
-          if [[ -z "$PO_FILES" ]]; then
-            echo "SKIP: No .po files found (locale directory not in repo — expected)"
-            exit 0
-          fi
-          FAIL=0
-          while IFS= read -r po; do
-            # Validate UTF-8 encoding and basic msgfmt parseable structure
-            if python3 -c "
-          import sys
-          try:
-              with open(sys.argv[1], encoding='utf-8') as f:
-                  content = f.read()
-              # Basic check: must have msgid and msgstr pairs
-              if 'msgid' not in content or 'msgstr' not in content:
-                  print(f'FAIL: {sys.argv[1]} missing msgid/msgstr pairs')
-                  sys.exit(1)
-              print(f'PASS: {sys.argv[1]}')
-          except UnicodeDecodeError as e:
-              print(f'FAIL: {sys.argv[1]} is not valid UTF-8: {e}')
-              sys.exit(1)
-          " "$po"; then
-              :
-            else
-              FAIL=$((FAIL + 1))
-            fi
-          done <<< "$PO_FILES"
-          [[ $FAIL -eq 0 ]] || exit 1
-
-      - name: Validate MFE messages.json syntax (if present)
-        run: |
-          set -euo pipefail
-          JSON_FILES=$(find infrastructure/tutor/themes/mereka/mfe -name "messages.json" 2>/dev/null || true)
-          if [[ -z "$JSON_FILES" ]]; then
-            echo "SKIP: No messages.json files found (MFE locales not yet pulled)"
-            exit 0
-          fi
-          FAIL=0
-          while IFS= read -r json; do
-            if python3 -c "
-          import json, sys
-          try:
-              with open(sys.argv[1]) as f:
-                  data = json.load(f)
-              # Check for broken Python format strings: %(name)s patterns
-              content = open(sys.argv[1]).read()
-              import re
-              # Detect unclosed format placeholders
-              broken = re.findall(r'%\([^)]*$', content)
-              if broken:
-                  print(f'FAIL: {sys.argv[1]} has broken format string(s)')
-                  sys.exit(1)
-              print(f'PASS: {sys.argv[1]}')
-          except json.JSONDecodeError as e:
-              print(f'FAIL: {sys.argv[1]} is not valid JSON: {e}')
-              sys.exit(1)
-          " "$json"; then
-              :
-            else
-              FAIL=$((FAIL + 1))
-            fi
-          done <<< "$JSON_FILES"
-          [[ $FAIL -eq 0 ]] || exit 1
-
-      - name: Run offline translation verification
-        run: |
-          set -euo pipefail
-          mkdir -p var/ci
-          ./scripts/qa/verify-translations.sh --offline | tee var/ci/translation-validation.log || true
-          # Fail only if verify script exits non-zero on FAIL lines (not SKIP/WARN)
-          grep -q "^FAIL\b\|✗ FAIL" var/ci/translation-validation.log && {
-            echo "::error::Translation verification found failures — see log above"
-            exit 1
-          } || echo "Translation verification passed (SKIP/WARN are acceptable)"
-
-      - name: Upload translation validation log
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-        with:
-          name: translation-validation-log
-          path: var/ci/translation-validation.log
-          if-no-files-found: warn

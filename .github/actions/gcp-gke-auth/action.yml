@@ -1,0 +1,92 @@
+name: 'Authenticate to GCP and GKE'
+description: 'Sets up GCP auth, gcloud CLI, and optionally fetches GKE cluster credentials'
+
+inputs:
+  gcp_sa_key:
+    description: 'GCP Service Account JSON key'
+    required: true
+  gcloud_project:
+    description: 'Project ID to set as gcloud default (used for gcloud CLI; may differ from GKE cluster project)'
+    required: false
+    default: 'mereka-lms'
+  gke_project:
+    description: 'GKE cluster project ID (used for get-credentials)'
+    required: false
+    default: 'bbi-k8'
+  gke_location:
+    description: 'GKE cluster location (zone or region)'
+    required: false
+    default: 'asia-southeast1-c'
+  gke_cluster:
+    description: 'GKE cluster name'
+    required: false
+    default: 'bbi-k8-cluster'
+  skip_gke:
+    description: >
+      Skip GKE credential fetching (GCP auth + gcloud only).
+      Set true for workflows that only need gcloud CLI (e.g. Docker Artifact Registry auth, Cloud SQL).
+    required: false
+    default: 'false'
+  skip_gcloud:
+    description: >
+      Skip gcloud CLI setup entirely (GCP auth only).
+      Set true for workflows that call gcloud directly via the already-authenticated SDK.
+    required: false
+    default: 'false'
+  strict_runtime:
+    description: >
+      Fail the action if GKE credentials cannot be fetched.
+      When false, sets has_cluster=false and CAN_RUN_RUNTIME=false instead of failing.
+    required: false
+    default: 'false'
+
+outputs:
+  has_cluster:
+    description: 'Whether GKE cluster credentials were successfully fetched (true/false)'
+    value: ${{ steps.resolve-cluster.outputs.has_cluster }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+      with:
+        credentials_json: ${{ inputs.gcp_sa_key }}
+
+    - name: Install gcloud
+      if: ${{ inputs.skip_gcloud != 'true' }}
+      uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f  # v2
+      with:
+        project_id: ${{ inputs.gcloud_project }}
+
+    - name: Get GKE credentials and resolve has_cluster output
+      id: resolve-cluster
+      shell: bash
+      env:
+        GKE_CLUSTER: ${{ inputs.gke_cluster }}
+        GKE_PROJECT: ${{ inputs.gke_project }}
+        GKE_LOCATION: ${{ inputs.gke_location }}
+        SKIP_GKE: ${{ inputs.skip_gke }}
+        SKIP_GCLOUD: ${{ inputs.skip_gcloud }}
+        STRICT_RUNTIME: ${{ inputs.strict_runtime }}
+      run: |
+        # When GKE fetch is intentionally skipped, surface a defined output immediately.
+        if [[ "$SKIP_GKE" == "true" || "$SKIP_GCLOUD" == "true" ]]; then
+          echo "has_cluster=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        if gcloud container clusters get-credentials "$GKE_CLUSTER" \
+          --project "$GKE_PROJECT" \
+          --zone "$GKE_LOCATION"; then
+          echo "has_cluster=true" >> "$GITHUB_OUTPUT"
+          echo "CAN_RUN_RUNTIME=true" >> "$GITHUB_ENV"
+        else
+          echo "has_cluster=false" >> "$GITHUB_OUTPUT"
+          echo "CAN_RUN_RUNTIME=false" >> "$GITHUB_ENV"
+          if [[ "$STRICT_RUNTIME" == "true" ]]; then
+            echo "ERROR: unable to get GKE credentials (set strict_runtime=false to skip runtime checks)" >&2
+            exit 1
+          fi
+          echo "WARN: unable to get GKE credentials; runtime checks will be skipped (strict_runtime=false)" >&2
+        fi

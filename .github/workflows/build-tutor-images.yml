@@ -88,25 +88,21 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
 
-      - name: Install Tutor
-        run: |
-          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
-          tutor --version
-
-      - name: Configure Docker memory
-        run: |
-          # Tutor builds need significant memory
-          echo "DOCKER_OPTS=--memory=12g --memory-swap=16g" >> $GITHUB_ENV
+      - name: Verify Tutor version
+        run: tutor --version
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+        uses: ./.github/actions/gcp-gke-auth
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          skip_gke: 'true'
+          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |
@@ -182,33 +178,49 @@ jobs:
           path: var/ci/sbom-openedx.cdx.json
           retention-days: 90
 
-      - name: Scan OpenEdX image for vulnerabilities (CRITICAL - blocking)
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
-        with:
-          image-ref: 'tutor_local/openedx:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL'
-          ignorefile: '.trivyignore'
-          output: 'var/ci/trivy-openedx-critical.txt'
+      - name: Install Trivy CLI
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
 
-      - name: Scan OpenEdX image for vulnerabilities (HIGH - informational)
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
-        if: always()
-        with:
-          image-ref: 'tutor_local/openedx:latest'
-          format: 'table'
-          exit-code: '0'
-          severity: 'HIGH'
-          ignorefile: '.trivyignore'
-          output: 'var/ci/trivy-openedx-high.txt'
+      - name: Scan OpenEdX image for vulnerabilities
+        run: |
+          mkdir -p var/ci
+          trivy image \
+            --format json \
+            --output var/ci/trivy-openedx.json \
+            --ignorefile .trivyignore \
+            --severity CRITICAL,HIGH \
+            tutor_local/openedx:latest
+
+          # Fail the build if any CRITICAL vulns are present
+          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
+          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+
+          # Emit human-readable HIGH summary for the artifact
+          jq -r '
+            ["Severity","PkgName","VulnerabilityID","Title"],
+            ((.Results // [])[] | .Vulnerabilities // []
+              | .[]
+              | select(.Severity == "HIGH")
+              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
+            | @tsv' var/ci/trivy-openedx.json \
+            > var/ci/trivy-openedx-high-summary.txt || true
+
+          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
+            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in openedx image." >&2
+            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
+              var/ci/trivy-openedx.json >&2
+            exit 1
+          fi
 
       - name: Upload Trivy OpenEdX scan results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         if: always()
         with:
           name: trivy-openedx-scan
-          path: var/ci/trivy-openedx-*.txt
+          path: var/ci/trivy-openedx*
+          retention-days: 3
 
       - name: Generate image metadata
         id: meta
@@ -248,6 +260,7 @@ jobs:
         with:
           name: openedx-branding-contract-log
           path: var/ci/verify-openedx-image-branding.log
+          retention-days: 3
 
   build-mfe:
     name: Build MFE Image
@@ -264,20 +277,21 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
 
-      - name: Install Tutor
-        run: |
-          pip install "tutor[full]==18.2.2" tutor-mfe==18.1.0
-          tutor --version
+      - name: Verify Tutor version
+        run: tutor --version
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+        uses: ./.github/actions/gcp-gke-auth
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          skip_gke: 'true'
+          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |
@@ -330,33 +344,49 @@ jobs:
           path: var/ci/sbom-mfe.cdx.json
           retention-days: 90
 
-      - name: Scan MFE image for vulnerabilities (CRITICAL - blocking)
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
-        with:
-          image-ref: 'tutor_local/openedx-mfe:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL'
-          ignorefile: '.trivyignore'
-          output: 'var/ci/trivy-mfe-critical.txt'
+      - name: Install Trivy CLI
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
 
-      - name: Scan MFE image for vulnerabilities (HIGH - informational)
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # master
-        if: always()
-        with:
-          image-ref: 'tutor_local/openedx-mfe:latest'
-          format: 'table'
-          exit-code: '0'
-          severity: 'HIGH'
-          ignorefile: '.trivyignore'
-          output: 'var/ci/trivy-mfe-high.txt'
+      - name: Scan MFE image for vulnerabilities
+        run: |
+          mkdir -p var/ci
+          trivy image \
+            --format json \
+            --output var/ci/trivy-mfe.json \
+            --ignorefile .trivyignore \
+            --severity CRITICAL,HIGH \
+            tutor_local/openedx-mfe:latest
+
+          # Fail the build if any CRITICAL vulns are present
+          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
+          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+
+          # Emit human-readable HIGH summary for the artifact
+          jq -r '
+            ["Severity","PkgName","VulnerabilityID","Title"],
+            ((.Results // [])[] | .Vulnerabilities // []
+              | .[]
+              | select(.Severity == "HIGH")
+              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
+            | @tsv' var/ci/trivy-mfe.json \
+            > var/ci/trivy-mfe-high-summary.txt || true
+
+          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
+            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in mfe image." >&2
+            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
+              var/ci/trivy-mfe.json >&2
+            exit 1
+          fi
 
       - name: Upload Trivy MFE scan results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         if: always()
         with:
           name: trivy-mfe-scan
-          path: var/ci/trivy-mfe-*.txt
+          path: var/ci/trivy-mfe*
+          retention-days: 3
 
       - name: Generate image metadata
         id: meta
@@ -395,6 +425,7 @@ jobs:
         with:
           name: mfe-branding-contract-log
           path: var/ci/verify-mfe-image-branding.log
+          retention-days: 3
 
   slsa-provenance:
     name: SLSA Provenance & Attestation
@@ -412,9 +443,11 @@ jobs:
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
 
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+        uses: ./.github/actions/gcp-gke-auth
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          skip_gke: 'true'
+          skip_gcloud: 'true'
 
       - name: Configure Docker for Artifact Registry
         run: |

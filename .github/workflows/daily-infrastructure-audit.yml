@@ -1,0 +1,433 @@
+name: Daily Infrastructure Audit
+
+# Merged from:
+#   - observability-audit.yml       (local + runtime observability)
+#   - alert-routing-audit.yml       (alert routing verification)
+#   - observability-parity-runtime.yml  (3-env parity matrix)
+# Rationale: 1 GCP auth + 1 VM spin-up instead of 3.
+# Per-job failure semantics preserved (see R3 in CI_OPTIMIZATION_TRACKER.md).
+
+on:
+  schedule:
+    # Daily at 01:00 UTC (formerly: observability-audit @ 01:00, alert-routing @ 03:00, parity @ 03:15)
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      # --- Observability audit inputs ---
+      mode:
+        description: "Observability audit mode"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - local
+          - runtime
+          - all
+      obs_strict_runtime:
+        description: "Fail if runtime dependencies (gcloud/k8s) are unavailable (observability audit)"
+        required: false
+        default: false
+        type: boolean
+      include_legacy:
+        description: "Include legacy Cloud SQL monitoring templates"
+        required: false
+        default: false
+        type: boolean
+      # --- Alert routing audit inputs ---
+      alert_strict_runtime:
+        description: "Fail when runtime dependencies are unavailable (alert routing)"
+        required: false
+        default: true
+        type: boolean
+      # --- Parity inputs ---
+      target_environment:
+        description: "Parity environment target (dev|nonprod|prod|all)"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - dev
+          - nonprod
+          - prod
+          - all
+
+permissions: {}
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1: observability-audits — local + runtime observability + alert routing
+  # Merges former local-audits (no GCP) and runtime-audits (needs GCP) into one VM.
+  # Local audit runs first (before GCP auth) to fail fast on static issues.
+  # strict_runtime semantics DIFFER between the two audit types:
+  #   - observability-audit: strict_runtime defaults FALSE (graceful — continue if no GKE)
+  #   - alert-routing-audit: strict_runtime defaults TRUE  (hard fail if no GKE)
+  # Both are preserved via per-step env vars (obs_strict_runtime vs alert_strict_runtime).
+  # ─────────────────────────────────────────────────────────────────────────────
+  observability-audits:
+    name: Observability Audits (Local + Runtime + Alert Routing)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      # ── Local observability audit (no GCP needed — runs first for fast feedback) ─
+      - name: Run local observability audit
+        run: |
+          ./scripts/qa/audit-observability.sh --mode local --json | tee observability-audit-local.json
+
+      - name: Upload local audit artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          # Preserve original artifact name from observability-audit.yml
+          name: observability-audit-local
+          path: observability-audit-local.json
+          retention-days: 3
+
+      # GCP auth: use the most permissive default (graceful) to avoid blocking the whole
+      # job when the cluster is temporarily unreachable. Each audit step applies its own
+      # strict_runtime semantics to govern whether it should hard-fail on unavailability.
+      - name: Authenticate to GCP and get GKE credentials
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          gcloud_project: mereka-lms
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          # Use obs strict_runtime as the auth-level gate (graceful default = false)
+          strict_runtime: ${{ github.event.inputs.obs_strict_runtime || 'false' }}
+
+      # ── Observability runtime audit (strict_runtime defaults false) ───────────
+      - name: Run runtime/local observability audit bundle
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          INPUT_MODE: ${{ github.event.inputs.mode || 'all' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.obs_strict_runtime || 'false' }}
+          INPUT_INCLUDE_LEGACY: ${{ github.event.inputs.include_legacy || 'false' }}
+          GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+        run: |
+          MODE="$INPUT_MODE"
+          if [[ -z "$MODE" ]]; then MODE="all"; fi
+
+          STRICT_FLAG=""
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+            STRICT_FLAG="--strict"
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          if [[ "$INPUT_INCLUDE_LEGACY" == "true" ]]; then
+            export INCLUDE_LEGACY_MONITORING=1
+          else
+            export INCLUDE_LEGACY_MONITORING=0
+          fi
+
+          mkdir -p var/ci
+
+          if [[ "$MODE" == "local" ]]; then
+            ./scripts/qa/audit-observability.sh --mode local --json | tee observability-audit-runtime.json
+          else
+            OBSERVABILITY_ENV_LABEL=prod \
+            OBSERVABILITY_DISPATCH_PROFILE=prod \
+            OBSERVABILITY_K8S_CONTEXT="$(kubectl config current-context)" \
+            OBSERVABILITY_GCP_PROJECT="${GCP_PROJECT:-mereka-lms}" \
+            ./scripts/qa/run-observability-first-class.sh --mode "$MODE" $STRICT_FLAG
+
+            if [[ "$MODE" == "runtime" ]]; then
+              cp var/ci/observability-compliance-runtime.json observability-audit-runtime.json
+            else
+              cp var/ci/observability-compliance-all.json observability-audit-runtime.json
+            fi
+            cat observability-audit-runtime.json
+          fi
+
+      - name: Upload observability runtime audit artifact
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          # Preserve original artifact name from observability-audit.yml
+          name: observability-audit-runtime
+          path: |
+            observability-audit-runtime.json
+            var/ci/observability-compliance-*.json
+            var/ci/observability-compliance-*.md
+            var/ci/observability-coverage-*.json
+            var/ci/observability-coverage-*.md
+            var/ci/observability-runtime-verify-*.txt
+            var/ci/observability-runtime-verify-*.md
+            var/ci/observability-first-class-*-evidence-index.json
+          retention-days: 3
+
+      # ── Alert routing audit (strict_runtime defaults true) ────────────────────
+      # If CAN_RUN_RUNTIME is false (GCP auth failed), alert_strict_runtime=true
+      # means we want this to hard-fail. We signal that by explicitly exiting non-zero.
+      - name: Enforce strict runtime gate for alert routing
+        if: ${{ env.CAN_RUN_RUNTIME != 'true' && (github.event.inputs.alert_strict_runtime || 'true') == 'true' }}
+        run: |
+          echo "ERROR: GCP/GKE auth failed and alert_strict_runtime=true. Alert routing audit requires live cluster access." >&2
+          exit 1
+
+      - name: Run alert routing audit
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.alert_strict_runtime || 'true' }}
+        run: |
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          RUN_ATLAS_VPS_AUDIT=0 ./scripts/qa/verify-alert-routing.sh | tee alert-routing-audit.txt
+
+      - name: Upload alert routing audit artifact
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          # Preserve original artifact name from alert-routing-audit.yml (includes run_id for dedup)
+          name: alert-routing-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: alert-routing-audit.txt
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 3: parity-check — 3-env parity matrix (needs GCP per lane)
+  # Corresponds to: observability-parity-runtime.yml runtime-parity matrix job
+  # GCP project handling differs per lane (computed from per-lane env vars).
+  # fail-fast: false preserved so all 3 lanes always run.
+  # ─────────────────────────────────────────────────────────────────────────────
+  parity-check:
+    name: Runtime parity (${{ matrix.env_label }})
+    if: ${{ github.event_name == 'schedule' || github.event.inputs.target_environment == 'all' || github.event.inputs.target_environment == matrix.env_label || github.event.inputs.target_environment == '' }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        env_label: [dev, nonprod, prod]
+    env:
+      OBS_PARITY_DEV_K8S_CONTEXT: ${{ vars.OBS_PARITY_DEV_K8S_CONTEXT }}
+      OBS_PARITY_NONPROD_K8S_CONTEXT: ${{ vars.OBS_PARITY_NONPROD_K8S_CONTEXT }}
+      OBS_PARITY_PROD_K8S_CONTEXT: ${{ vars.OBS_PARITY_PROD_K8S_CONTEXT }}
+      OBS_PARITY_DEV_GCP_PROJECT: ${{ vars.OBS_PARITY_DEV_GCP_PROJECT }}
+      OBS_PARITY_NONPROD_GCP_PROJECT: ${{ vars.OBS_PARITY_NONPROD_GCP_PROJECT }}
+      OBS_PARITY_PROD_GCP_PROJECT: ${{ vars.OBS_PARITY_PROD_GCP_PROJECT }}
+      GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+      GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
+      GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+      OBS_PARITY_REQUIRED_STREAK: "3"
+      OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH: "1"
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Resolve parity target config
+        run: |
+          case "${{ matrix.env_label }}" in
+            dev)
+              K8S_CONTEXT="${OBS_PARITY_DEV_K8S_CONTEXT:-}"
+              GCP_PROJECT_VALUE="${OBS_PARITY_DEV_GCP_PROJECT:-mereka-lms}"
+              PROFILE="nonprod"
+              TRACING_REQUIRED="0"
+              ;;
+            nonprod)
+              K8S_CONTEXT="${OBS_PARITY_NONPROD_K8S_CONTEXT:-}"
+              GCP_PROJECT_VALUE="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+              PROFILE="nonprod"
+              TRACING_REQUIRED="1"
+              ;;
+            prod)
+              K8S_CONTEXT="${OBS_PARITY_PROD_K8S_CONTEXT:-}"
+              GCP_PROJECT_VALUE="${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}"
+              PROFILE="prod"
+              TRACING_REQUIRED="0"
+              ;;
+            *)
+              echo "Unsupported matrix env label: ${{ matrix.env_label }}" >&2
+              exit 1
+              ;;
+          esac
+
+          EVIDENCE_DIR="var/ci/parity-${{ matrix.env_label }}"
+          mkdir -p "$EVIDENCE_DIR"
+
+          echo "OBS_K8S_CONTEXT=$K8S_CONTEXT" >> "$GITHUB_ENV"
+          echo "OBS_GCP_PROJECT=$GCP_PROJECT_VALUE" >> "$GITHUB_ENV"
+          echo "OBS_PROFILE=$PROFILE" >> "$GITHUB_ENV"
+          echo "OBS_EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          echo "OBS_REQUIRE_TRACING_ARTIFACT=$TRACING_REQUIRED" >> "$GITHUB_ENV"
+          echo "OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY=$TRACING_REQUIRED" >> "$GITHUB_ENV"
+
+          if [ -z "$K8S_CONTEXT" ]; then
+            echo "Missing required environment context variable: OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT." >&2
+            echo "Set this repository variable to a valid kubectl context name and re-run parity." >&2
+            exit 1
+          fi
+
+          if [ -z "$GCP_PROJECT_VALUE" ]; then
+            echo "Missing OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT override/value." >&2
+            echo "Set OBS_PARITY_${{ matrix.env_label }}_GCP_PROJECT in repository variables (or remove and use shared project defaults intentionally)." >&2
+            exit 1
+          fi
+
+      # GCP project is per-lane (computed above from OBS_GCP_PROJECT env var).
+      # strict_runtime=true: parity lanes always require live cluster access.
+      - name: Authenticate to GCP and get GKE credentials
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          gcloud_project: ${{ env.OBS_GCP_PROJECT }}
+          gke_project: ${{ env.OBS_GCP_PROJECT }}
+          gke_location: ${{ env.GKE_CLUSTER_LOCATION }}
+          gke_cluster: ${{ env.GKE_CLUSTER_NAME }}
+          strict_runtime: 'true'
+
+      - name: Validate selected kubectl context after kubeconfig refresh
+        run: |
+          echo "==> Validate context '$OBS_K8S_CONTEXT' is present in kubeconfig"
+          if ! kubectl config get-contexts -o name | rg -qx "$OBS_K8S_CONTEXT"; then
+            echo "Context '$OBS_K8S_CONTEXT' not found in kubeconfig after credential refresh." >&2
+            echo "Set OBS_PARITY_${{ matrix.env_label }}_K8S_CONTEXT to an existing context and retry." >&2
+            exit 1
+          fi
+
+          echo "==> Validate context '$OBS_K8S_CONTEXT' can access API"
+          if ! kubectl --context "$OBS_K8S_CONTEXT" cluster-info >/dev/null; then
+            echo "kubectl cannot reach API through context '$OBS_K8S_CONTEXT'." >&2
+            echo "Check credentials and project/zone variables for this workflow lane." >&2
+            exit 1
+          fi
+
+          echo "==> Validate selected context is currently active for prod parity"
+          CURRENT_CONTEXT="$(kubectl config current-context)"
+          if [[ "${OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH}" == "1" && "${{ matrix.env_label }}" == "prod" ]]; then
+            if [[ "$CURRENT_CONTEXT" != "$OBS_K8S_CONTEXT" ]]; then
+              echo "Production context mismatch: expected '$OBS_K8S_CONTEXT' to be active, got '$CURRENT_CONTEXT'." >&2
+              echo "This blocks PROD parity because current run must execute against the configured prod context." >&2
+              exit 1
+            fi
+          fi
+
+      - name: Run runtime parity gate and build parity delta
+        run: |
+          ./scripts/qa/verify-observability-parity-lane-contract.sh \
+            --env-label "${{ matrix.env_label }}" \
+            --dispatch-profile "$OBS_PROFILE" \
+            --k8s-context "$OBS_K8S_CONTEXT" \
+            --gcp-project "$OBS_GCP_PROJECT" \
+            --out-json "$OBS_EVIDENCE_DIR/observability-parity-lane-contract.json" \
+            --out-md "$OBS_EVIDENCE_DIR/observability-parity-lane-contract.md"
+
+          OBSERVABILITY_ENV_LABEL="${{ matrix.env_label }}" \
+          OBSERVABILITY_DISPATCH_PROFILE="$OBS_PROFILE" \
+          OBSERVABILITY_K8S_CONTEXT="$OBS_K8S_CONTEXT" \
+          OBSERVABILITY_GCP_PROJECT="$OBS_GCP_PROJECT" \
+          OBSERVABILITY_EVIDENCE_DIR="$OBS_EVIDENCE_DIR" \
+          ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+          OBS_REQUIRE_TRACING_ARTIFACT="$OBS_REQUIRE_TRACING_ARTIFACT" \
+          ./scripts/qa/build-observability-parity-delta.sh \
+            --env "${{ matrix.env_label }}" \
+            --evidence-dir "$OBS_EVIDENCE_DIR" \
+            --expected-context "$OBS_K8S_CONTEXT" \
+            --expected-project "$OBS_GCP_PROJECT"
+
+      - name: Build weekly parity review template
+        if: always()
+        run: |
+          ./scripts/qa/build-observability-parity-review.sh \
+            --env "${{ matrix.env_label }}" \
+            --delta-json "$OBS_EVIDENCE_DIR/observability-parity-delta.json" \
+            --out-md "$OBS_EVIDENCE_DIR/observability-parity-review.md"
+
+      - name: Verify parity evidence identity contract
+        if: always()
+        run: |
+          OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY="$OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY" \
+          ./scripts/qa/verify-observability-evidence-identity.sh \
+            --dir "$OBS_EVIDENCE_DIR"
+
+      - name: Upload parity artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          # Preserve original artifact naming from observability-parity-runtime.yml
+          name: observability-parity-${{ matrix.env_label }}
+          retention-days: 3
+          path: |
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-delta.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-delta.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-review.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-lane-contract.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-parity-lane-contract.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-compliance-runtime.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-compliance-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-coverage-runtime.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-coverage-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.txt
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-runtime-verify-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-first-class-runtime-evidence-index.json
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-correlation-headers-runtime.txt
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-tracing-runtime.txt
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-metrics-lms-runtime.md
+            ${{ env.OBS_EVIDENCE_DIR }}/observability-metrics-cms-runtime.md
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Parity rollup — waits for all 3 matrix lanes, builds cross-env summary
+  # Corresponds to: observability-parity-runtime.yml parity-rollup job
+  # ─────────────────────────────────────────────────────────────────────────────
+  parity-rollup:
+    name: Parity rollup summary
+    runs-on: ubuntu-24.04
+    needs: [parity-check]
+    env:
+      OBS_PARITY_REQUIRED_STREAK: "3"
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Download parity artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: observability-parity-*
+          path: var/ci/parity-artifacts
+          merge-multiple: false
+
+      - name: Build parity rollup
+        run: |
+          ./scripts/qa/build-observability-parity-rollup.sh \
+            --artifacts-dir var/ci/parity-artifacts \
+            --out-md var/ci/observability-parity-rollup.md \
+            --out-json var/ci/observability-parity-rollup.json \
+            --require-no-skips
+          cat var/ci/observability-parity-rollup.md
+          {
+            echo "## Observability Parity Rollup"
+            echo ""
+            cat var/ci/observability-parity-rollup.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify parity rollout stability
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          ./scripts/qa/verify-parity-rollup-stability.sh \
+            --rollup-json var/ci/observability-parity-rollup.json \
+            --required-consecutive "${OBS_PARITY_REQUIRED_STREAK}" \
+            --workflow-file ".github/workflows/daily-infrastructure-audit.yml" \
+            --workflow-runs-lookback 20 \
+            --out-json var/ci/observability-parity-stability.json
+
+      - name: Upload parity rollup artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          # Preserve original artifact name from observability-parity-runtime.yml
+          name: observability-parity-rollup
+          retention-days: 3
+          path: |
+            var/ci/observability-parity-rollup.md
+            var/ci/observability-parity-rollup.json
+            var/ci/observability-parity-stability.json

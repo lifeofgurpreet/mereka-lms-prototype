@@ -24,13 +24,11 @@ jobs:
           echo "This workflow is legacy and runs only when ENABLE_CLOUD_SQL_BACKUPS=true."
           echo "If production uses in-cluster MySQL (PVC + Velero), keep it disabled."
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+        uses: ./.github/actions/gcp-gke-auth
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-      - name: Install gcloud
-        uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f  # v2
-        with:
-          project_id: mereka-lms
+          gcp_sa_key: ${{ secrets.GCP_SA_KEY }}
+          gcloud_project: mereka-lms
+          skip_gke: 'true'
       - name: Run backup script
         env:
           PROJECT: mereka-lms

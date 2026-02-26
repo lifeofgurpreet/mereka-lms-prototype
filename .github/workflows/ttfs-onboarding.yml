@@ -10,7 +10,6 @@ jobs:
     name: Verify TTFS Onboarding Funnel Config
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    continue-on-error: true
     permissions:
       contents: read
     steps:
@@ -56,4 +55,5 @@ jobs:
         with:
           name: ttfs-onboarding-verify-logs
           path: var/ci/ttfs-onboarding-verify.log
+          retention-days: 3
           if-no-files-found: warn
