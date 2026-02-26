@@ -21,4 +21,14 @@ spec:
       path: /metrics
       interval: 30s
       scrapeTimeout: 10s
+      podRelabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - action: replace
+          sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
       scheme: http
