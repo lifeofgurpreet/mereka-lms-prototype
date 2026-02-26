@@ -24,6 +24,7 @@ resources:
   - ../../base/plugins/aspects
   - ingress-openedx-lms.yaml
   - ingress-openedx-mfe.yaml
+  - ingress-openedx-mfeconfig-compat.yaml
   - ingress-openedx-studio.yaml
   # NOTE: ARC resources (deploy/k8s/base/arc/) are NOT included here because this overlay
   # sets namespace: mereka-lms which would override arc-systems/arc-runners namespaces.
