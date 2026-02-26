@@ -30,7 +30,7 @@ Canonical index:
 - `scripts/qa/verify-observability-stack.sh` (aggregates stack checks and delegates to audit tooling).
 - `scripts/qa/verify-observability-runtime.sh` (runtime contract verification scaffold with AC mapping).
 - `scripts/qa/run-observability-first-class.sh` (canonical orchestrator for local/runtime/all evidence runs).
-- `.github/workflows/observability-audit.yml` now uses `run-observability-first-class.sh` for runtime/all scheduled runs and preserves `audit-observability.sh` for local-only mode.
+- `.github/workflows/daily-infrastructure-audit.yml` now uses `run-observability-first-class.sh` for runtime/all scheduled runs and preserves `audit-observability.sh` for local-only mode. (Previously `observability-audit.yml` — merged in Phase 6.4.)
 
 ## 2) What is live in repo manifests
 
@@ -155,10 +155,43 @@ Acceptance basis: release readiness semantics captured in tracker and documented
 
 Done when parity policy is explicit, reviewed, and referenced in handoff checks.
 
+### Issue set G — Runtime object deployment and lane closure for OBS-053..057
+
+Title: `OBS-OBS-RT-07: Close remaining runtime object gaps (caddy/mfe/forum/discovery/ecommerce/credentials/purchase-gateway + rules + dev lane deltas)`
+
+Scope: deploy or confirm presence of remaining required runtime wiring objects and validate per-lane evidence through canonical runtime runner.
+
+Current status: ready for closure once lane evidence is collected.
+
+Status: in_progress
+
+Acceptance basis:
+- `scripts/qa/verify-observability-runtime.sh` explicitly checks:
+  - `caddy-metrics` + `caddy-alerts`
+  - `mfe-metrics` + `services-alerts`
+  - `forum-metrics`, `discovery-metrics`, `ecommerce-metrics`, `credentials-metrics`, `purchase-gateway-metrics`
+  - `slo-recording-rules`, `video-alerts`, `ora2-operations`
+  - `xqueue-metrics`, `mux-delivery-monitor` for `dev/kind/local` lanes only
+- `verify-observability-runtime.sh` writes per-object evidence under `VERIFY_EVIDENCE_DIR`:
+  - `observability-caddy-prometheus-wiring-runtime.md`
+  - `observability-mfe-prometheus-wiring-runtime.md`
+  - `observability-forum-prometheus-wiring-runtime.md`
+  - `observability-discovery-prometheus-wiring-runtime.md`
+  - `observability-ecommerce-prometheus-wiring-runtime.md`
+  - `observability-credentials-prometheus-wiring-runtime.md`
+  - `observability-purchase-gateway-prometheus-wiring-runtime.md`
+  - `observability-slo-rules-prometheus-wiring-runtime.md`
+  - `observability-video-rules-prometheus-wiring-runtime.md`
+  - `observability-ora2-rules-prometheus-wiring-runtime.md`
+  - `observability-dev-xqueue-prometheus-wiring-runtime.md`
+  - `observability-dev-mux-prometheus-wiring-runtime.md`
+- Each closure includes matching evidence in `observability-first-class-runtime-evidence-index.json` and `/metrics` payload artifacts.
+
 ## 6) Suggested execution order
 
 1. Complete issue set E to make LMS/CMS metrics reliable for SLO computation.
 2. Complete issue set F with environment/process updates in the same sprint.
+3. Close issue set G with per-lane runtime evidence bundles before claiming AC completion.
 
 ## 7) Non-production parity baseline for observability today
 
@@ -191,7 +224,7 @@ None of these currently declares dedicated ownership for observability AC closur
 ### Recommended tracker structure (no repo implementation required now)
 
 1. Create one parent tracker issue for observability compliance completion.
-2. Split into exactly the existing issue sets A–F as children.
+2. Split into exactly the existing issue sets A–G as children.
 3. Add dependencies from parity/readiness parents (`aza7`, `3bm2`, `5ngf`, `3st7`, `288f`) to this new parent where overlap exists.
 
 Suggested parent title:
@@ -307,7 +340,7 @@ Manual CI runtime path is now available in `.github/workflows/observability-comp
 | PAR-C001 | all | Canonical runtime observability gate established via `scripts/qa/run-observability-first-class.sh` and wired into primary workflows/gates. | Mereka LMS platform team | 2026-02-25 |
 | PAR-C002 | all | Runtime evidence identity normalization and consistency checks enforced in CI/runtime and DR evidence generation paths. | Mereka LMS platform team | 2026-02-25 |
 | PAR-C003 | all | Active operations docs migrated to canonical runtime/all command contract; non-canonical drift now fails in observability compliance CI. | Mereka LMS platform team | 2026-02-25 |
-| PAR-C004 | all | Environment-targeted parity automation + parity delta artifacts implemented: `.github/workflows/observability-parity-runtime.yml` + `scripts/qa/build-observability-parity-delta.sh`. | Mereka LMS platform team | 2026-02-25 |
+| PAR-C004 | all | Environment-targeted parity automation + parity delta artifacts implemented: `.github/workflows/daily-infrastructure-audit.yml` (parity lane; previously `observability-parity-runtime.yml` — merged in Phase 6.4) + `scripts/qa/build-observability-parity-delta.sh`. | Mereka LMS platform team | 2026-02-25 |
 | PAR-C005 | prod | Production parity workflow lane now fails fast when `OBS_PARITY_PROD_K8S_CONTEXT` is missing (no silent prod skip). | Mereka LMS platform team | 2026-02-25 |
 | PAR-C006 | all | Weekly parity review artifact is now auto-generated per env run (`observability-parity-review.md`) via `scripts/qa/build-observability-parity-review.sh`. | Mereka LMS platform team | 2026-02-25 |
 | PAR-C007 | all | Matrix runs now publish a consolidated rollup artifact (`observability-parity-rollup.md/.json`) for single-view weekly parity review. | Mereka LMS platform team | 2026-02-25 |

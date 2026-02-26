@@ -4,7 +4,9 @@ Date: 2026-02-25
 
 ## Purpose
 
-Configure and operate `.github/workflows/observability-parity-runtime.yml` for sustained dev/nonprod/prod parity verification.
+Configure and operate `.github/workflows/daily-infrastructure-audit.yml` for sustained dev/nonprod/prod parity verification.
+
+> **Note**: The parity logic previously lived in `.github/workflows/observability-parity-runtime.yml`, which was merged into `daily-infrastructure-audit.yml` in Phase 6.4 of the CI optimization plan. All configuration variables and behavior described here still apply to the consolidated workflow.
 
 ## Required Repository Variables
 
@@ -39,6 +41,9 @@ Shared cluster access variables (already used by other workflows):
    three consecutive scheduled successful rollups to satisfy sustained stability criteria.
 7. Non-production tracing pilot checks are strict in the nonprod lane by setting workflow runtime env
    `OBS_REQUIRE_TRACING_ARTIFACT=1` and `OBS_EVIDENCE_REQUIRE_TRACING_IDENTITY=1` during that lane only.
+8. Dashboard parity scope is explicit: runtime parity checks validate only GCP-native dashboards by default and
+   intentionally skip Grafana-only files (`video-cost.json`, `video-operations.json`) unless
+   `OBSERVABILITY_INCLUDE_GRAFANA_DASHBOARDS=1` is explicitly set.
 
 ## Runtime Outputs Per Environment
 
@@ -107,3 +112,15 @@ Automation note:
   `observability-parity-review.md` from the delta JSON for each environment run.
 - `scripts/qa/build-observability-parity-rollup.sh` now consolidates per-environment
   parity outputs into a single run-level rollup summary.
+
+## GCP Dashboard Remediation (OBS-051)
+
+When runtime parity reports missing GCP dashboards, run the canonical remediation in this repo:
+
+```bash
+./scripts/infra/apply-monitoring-configs.sh plan
+./scripts/infra/apply-monitoring-configs.sh apply
+```
+
+Plan first to confirm generated create/delete operations, then apply. Afterward, rerun the same parity lane and confirm the
+failure is resolved before marking `OBS-051` closed.

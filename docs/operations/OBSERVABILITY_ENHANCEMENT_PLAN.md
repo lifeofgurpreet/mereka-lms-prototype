@@ -74,7 +74,7 @@ Reality-first:
   - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
   - `scripts/qa/audit-grafana-dashboard.sh`
 - Added CI automation:
-  - `.github/workflows/observability-audit.yml`
+  - `.github/workflows/daily-infrastructure-audit.yml` (consolidated; previously `observability-audit.yml` — merged in Phase 6.4)
   - PR guardrails in `.github/workflows/ci.yml`
 
 ---
@@ -175,7 +175,7 @@ Only implement if the team wants formal burn‑rate enforcement.
 ### 5) Wire notification channels for log-based alerts
 **Status:** Done for GCP alert policies. End-to-end validation is now one command:
 - `./scripts/qa/verify-alert-routing.sh`
-- CI runtime audit: `.github/workflows/alert-routing-audit.yml`
+- CI runtime audit: `.github/workflows/daily-infrastructure-audit.yml` (alert routing lane; previously `alert-routing-audit.yml` — merged in Phase 6.4)
 - Atlas allowlist webhook routing is enforced via `STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh` (latest strict audit pass: 2026-02-08).
 - High-severity routing contract now enforces both `ERROR` and `CRITICAL` policy/channel validation.
 

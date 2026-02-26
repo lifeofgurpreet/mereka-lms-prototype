@@ -40,8 +40,8 @@ time of pinning for quick auditing.
 | `actions/cache` | `0057852bfaa89a56745cba8c7296529d2fc39830` | v4 | ios-testflight.yml, build-ios-app.yml |
 | `actions/checkout` | `34e114876b0b11c390a56381ad16ebd13914f8d5` | v4 | all workflows |
 | `actions/dependency-review-action` | `05fe4576374b728f0c523d6a13d64c25081e0803` | v4.8.3 | dependency-review.yml |
-| `actions/download-artifact` | `d3f86a106a0bac45b974a628896c90dbdf5c8093` | v4 | verify-specs.yml |
-| `actions/github-script` | `f28e40c7f34bde8b3046d885e986cb6290c5673b` | v7 | tutor-config-verify.yml, tutor-plugin-test.yml, verify-specs.yml |
+| `actions/download-artifact` | `d3f86a106a0bac45b974a628896c90dbdf5c8093` | v4 | ci.yml |
+| `actions/github-script` | `f28e40c7f34bde8b3046d885e986cb6290c5673b` | v7 | tutor-config-verify.yml, tutor-plugin-test.yml, ci.yml |
 | `actions/setup-node` | `49933ea5288caeca8642d1e84afbd3f7d6820020` | v4 | ci.yml, smoke-authenticated.yml |
 | `actions/setup-python` | `a26af69be951a213d495a4c3e4e4022e16d87065` | v5 | ci.yml, build-tutor-images.yml, and others |
 | `actions/upload-artifact` | `ea165f8d65b6e75b540449e92b4886f43607fa02` | v4 | ci.yml, build-tutor-images.yml, and others |

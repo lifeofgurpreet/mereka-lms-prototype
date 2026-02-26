@@ -206,5 +206,5 @@ Expected outputs:
 ## Immediate Next Actions
 
 1. Keep `OBSERVABILITY_PARITY_MATRIX.md` current with required/actual per environment.
-2. Review and tune `observability-parity-runtime.yml` matrix variables (`OBS_PARITY_*_K8S_CONTEXT`, `OBS_PARITY_*_GCP_PROJECT`) for each environment.
+2. Review and tune `daily-infrastructure-audit.yml` parity matrix variables (`OBS_PARITY_*_K8S_CONTEXT`, `OBS_PARITY_*_GCP_PROJECT`) for each environment. (Previously configured in `observability-parity-runtime.yml` — merged in Phase 6.4.)
 3. Promote parity rollup artifacts into weekly operator review and close PAR-001/PAR-002 after 3 consecutive no-skip/no-fail scheduled rollups.

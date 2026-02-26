@@ -234,20 +234,23 @@ Scheduled workflows consume minutes even when code hasn't changed.
 
 2. **Use external monitoring**: Move health checks to Prometheus/Grafana (no GitHub Actions minutes)
 
-### Use Self-Hosted Runners (Future)
+### Self-Hosted Runners via ARC (Implemented)
 
-Self-hosted runners consume zero GitHub Actions minutes. Consider deploying runners on GCP VMs for frequent workflows.
+Actions Runner Controller (ARC) provisions ephemeral Kubernetes runners on the existing RKE2 cluster.
+These runners consume **zero GitHub Actions minutes** — compute runs on sunk-cost infrastructure.
 
-**Pros**:
-- Zero cost for runner time
-- Faster builds (closer to GCP resources)
-- Unlimited concurrency
+Two runner pools are deployed:
 
-**Cons**:
-- Operational overhead (runner maintenance, security updates)
-- GCP VM costs (but cheaper than GitHub Actions paid minutes)
+| Label | Use for | Estimated saving |
+|-------|---------|-----------------|
+| `mereka-k8s-runners` | Cron audits, linting, spec verification | Eliminates ~$20–30/month of scheduled workflow minutes |
+| `mereka-k8s-heavy-builders` | Tutor image builds, E2E Playwright | Eliminates ~$30–40/month of heavy compute minutes |
 
-**When to consider**: If monthly usage exceeds included minutes consistently.
+**Expected outcome**: Monthly GitHub Actions cost drops from ~$56 to near-zero after Phase 5 migration
+(see `docs/operations/CI_OPTIMIZATION_TRACKER.md` Phase 5 tasks for the per-workflow migration checklist).
+
+For ARC setup details, runner labels, PVC caching strategy, and troubleshooting, see:
+`docs/operations/CI_CD_RUNNERS.md`
 
 ## Workflow Cost Attribution
 
@@ -307,6 +310,8 @@ A Grafana dashboard can visualize GitHub Actions usage trends.
 - **CI/CD Pipeline Spec**: `specs/ci-cd-pipeline_spec.md` - Workflow definitions and gates
 - **CI/CD Setup**: `docs/operations/CI_CD_SETUP.md` - GitHub Actions configuration
 - **Release Checklist**: `docs/operations/RELEASE_CHECKLIST.md` - Deployment workflows
+- **Cost Optimization Analysis**: `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md` - Expert review findings and phased plan
+- **Optimization Tracker**: `docs/operations/CI_OPTIMIZATION_TRACKER.md` - Implementation tasks with file mappings
 
 ## Verification Script
 

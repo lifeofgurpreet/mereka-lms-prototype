@@ -207,8 +207,7 @@ The following workflows currently use `credentials_json: ${{ secrets.GCP_SA_KEY 
 | `build-tutor-images.yml` | Builds and pushes images to Artifact Registry |
 | `cloud-sql-backup.yml` | Cloud SQL backup operations |
 | `release-evidence.yml` | Release evidence bundle generation |
-| `observability-audit.yml` | Observability stack audit |
-| `alert-routing-audit.yml` | Alert routing verification |
+| `daily-infrastructure-audit.yml` | Observability audit + alert routing + env parity (consolidated from `observability-audit.yml`, `alert-routing-audit.yml`, `observability-parity-runtime.yml` in Phase 6.4) |
 | `dr-evidence-bundle.yml` | DR evidence collection |
 | `operations-gates-runtime.yml` | Runtime operations gates |
 
@@ -220,7 +219,7 @@ Run `scripts/qa/verify-wif-readiness.sh` to get the current count.
 
 1. Complete GCP setup (pool, provider, SA binding)
 2. Add `GCP_WIF_PROVIDER` and `GCP_WIF_SA` to GitHub repository variables
-3. Update **one low-risk workflow** (e.g., `observability-audit.yml`) to use WIF
+3. Update **one low-risk workflow** (e.g., `daily-infrastructure-audit.yml`) to use WIF
 4. Keep `GCP_SA_KEY` secret in GitHub Secrets
 5. Verify the updated workflow authenticates successfully
 6. Run `scripts/qa/verify-wif-readiness.sh` to track progress

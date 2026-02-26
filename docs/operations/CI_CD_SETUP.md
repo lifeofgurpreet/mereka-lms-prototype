@@ -14,7 +14,7 @@ This repository uses GitHub Actions for CI/CD with the following workflows:
 | `build-tutor-images.yml` | Push to main (tutor changes), manual | Build and push OpenEdX/MFE images |
 | `build-ios-app.yml` | Manual | Build iOS app for TestFlight |
 | `cloud-sql-backup.yml` | Legacy, gated | Cloud SQL exports (only relevant if/when MySQL runs in Cloud SQL). Enable by setting repo variable `ENABLE_CLOUD_SQL_BACKUPS=true`. |
-| `observability-audit.yml` | Daily schedule, manual | Runs observability audits and uploads JSON artifacts. |
+| `daily-infrastructure-audit.yml` | Daily schedule, manual | Consolidated observability + alert routing + env parity audits (merged from `observability-audit.yml`, `alert-routing-audit.yml`, `observability-parity-runtime.yml` in Phase 6.4). |
 | `authenticated-sso-canary.yml` | Every 6h, manual | Credentialed OIDC login + post-login session checks (LMS, MFEs, Studio). |
 
 ## Required Secrets
@@ -182,16 +182,22 @@ Digest strictness:
 - Use `--require-digests` to fail fast unless both `--openedx-digest` and `--mfe-digest` are provided.
 - Additional safety gate: in CI, any `production` run with `--apply` fails if digests are missing.
 
-### Observability Audit (`observability-audit.yml`)
+### Daily Infrastructure Audit (`daily-infrastructure-audit.yml`)
+
+> **Note**: This workflow consolidates three previously separate daily workflows:
+> `observability-audit.yml`, `alert-routing-audit.yml`, and `observability-parity-runtime.yml`
+> (merged in Phase 6.4 of the CI optimization plan). See `docs/operations/CI_OPTIMIZATION_TRACKER.md`.
 
 Runs:
 - Daily (scheduled)
 - Manually via workflow dispatch
 
 What it does:
-1. Runs `./scripts/qa/audit-observability.sh --mode local`
+1. Runs `./scripts/qa/audit-observability.sh --mode local` (observability audit)
 2. Runs runtime audit when `GCP_SA_KEY` is available
 3. Uploads JSON artifacts (`observability-audit-local`, `observability-audit-runtime`)
+4. Runs alert routing verification (`scripts/qa/verify-alert-routing.sh`)
+5. Runs dev/nonprod/prod parity checks across all three environment lanes
 
 Optional repo variables for runtime cluster access:
 - `GKE_CLUSTER_PROJECT` (default: `bbi-k8`)
@@ -273,3 +279,29 @@ The OpenEdX build requires significant memory. If builds fail:
 2. Verify the CI service account in `GCP_SA_KEY` has GKE access in the **cluster project** (default: `bbi-k8`)
    (recommended roles: `roles/container.clusterViewer` or `roles/container.developer`)
 3. Check pod events: `kubectl describe pod -n mereka-lms -l app.kubernetes.io/name=lms`
+
+## Self-Hosted Runners (ARC)
+
+The repository uses Actions Runner Controller (ARC) to provision ephemeral Kubernetes-native runners,
+eliminating GitHub-hosted runner costs for scheduled and heavy workloads.
+
+Two runner scale sets are defined:
+
+| Label | Node size | Use for |
+|-------|-----------|---------|
+| `mereka-k8s-runners` | 2 CPU / 4 GB RAM | Linting, spec verification, cron audits, lightweight checks |
+| `mereka-k8s-heavy-builders` | 4 CPU / 12 GB RAM + DinD sidecar | Image builds (Tutor/MFE), Playwright E2E, heavy compute |
+
+ARC manifests live in `deploy/k8s/base/arc/`. They are applied standalone (not through the overlay)
+because ARC uses its own namespaces (`arc-systems`, `arc-runners`) that must not be overridden by the
+`mereka-lms` namespace transformer.
+
+For full setup instructions (GitHub App creation, Helm install, PVC caching, security model, and
+troubleshooting), see `docs/operations/CI_CD_RUNNERS.md`.
+
+## See Also
+
+- **Runner Setup (ARC)**: `docs/operations/CI_CD_RUNNERS.md`
+- **Cost Monitoring**: `docs/operations/GITHUB_ACTIONS_COST_MONITORING.md`
+- **Cost Optimization Plan**: `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md`
+- **Optimization Tracker**: `docs/operations/CI_OPTIMIZATION_TRACKER.md`

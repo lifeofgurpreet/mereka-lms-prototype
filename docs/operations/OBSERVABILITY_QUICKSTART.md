@@ -67,6 +67,18 @@ RUN_SENTRY_WIRING_AUDIT=1 SENTRY_AUDIT_MODE=local ./scripts/qa/run-operations-ga
 If runtime mode fails while local mode passes, treat it as rollout drift (GitOps/runtime
 state has not picked up this repo commit yet), not as a source-contract failure.
 
+If parity fails only because a GCP dashboard is missing, run:
+
+```bash
+./scripts/infra/apply-monitoring-configs.sh plan
+./scripts/infra/apply-monitoring-configs.sh apply
+```
+
+Use plan output as an artifact, then confirm the same parity lane passes.
+
+To include the Grafana-only dashboard artifacts in local parity checks temporarily,
+set `OBSERVABILITY_INCLUDE_GRAFANA_DASHBOARDS=1`.
+
 Automated equivalent:
 - `.github/workflows/public-health-check.yml` runs strict prod branding parity + dev branding gate and uploads logs.
 
@@ -155,6 +167,10 @@ Legacy-only templates (Cloud SQL) are skipped by default:
 ```bash
 INCLUDE_LEGACY_MONITORING=1 ./scripts/infra/apply-monitoring-configs.sh apply
 ```
+
+For parity checks, the dashboard scope intentionally excludes
+`infrastructure/monitoring/dashboards/video-cost.json` and
+`infrastructure/monitoring/dashboards/video-operations.json` (Grafana-only).
 
 ## 5) Incident Triage Order
 

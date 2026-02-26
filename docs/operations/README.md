@@ -42,3 +42,11 @@ Runbooks, troubleshooting guides, and operational procedures for managing the Me
 ### Local Development
 - [`LOCAL_PRODUCTION_PARITY.md`](LOCAL_PRODUCTION_PARITY.md) - Parity guide
 - [`LOCAL_WORK_REMAINING.md`](LOCAL_WORK_REMAINING.md) - Current tasks
+
+### CI/CD & Cost Optimization
+- [`CI_CD_SETUP.md`](CI_CD_SETUP.md) - GitHub Actions workflows overview, secrets, and self-hosted runner setup
+- [`CI_CD_RUNNERS.md`](CI_CD_RUNNERS.md) - ARC self-hosted runner architecture, GitHub App setup, PVC caching, troubleshooting
+- [`GITHUB_ACTIONS_COST_MONITORING.md`](GITHUB_ACTIONS_COST_MONITORING.md) - Usage monitoring, budget thresholds, alert setup
+- [`CI_PIPELINE_COST_OPTIMIZATION.md`](CI_PIPELINE_COST_OPTIMIZATION.md) - Analysis and rationale for the optimization plan
+- [`CI_OPTIMIZATION_TRACKER.md`](CI_OPTIMIZATION_TRACKER.md) - Phase-by-phase implementation tracker with file mappings
+- [`WORKLOAD_IDENTITY_FEDERATION.md`](WORKLOAD_IDENTITY_FEDERATION.md) - WIF migration guide (replaces JSON SA key in CI)

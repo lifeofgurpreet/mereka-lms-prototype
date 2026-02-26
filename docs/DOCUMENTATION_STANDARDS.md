@@ -324,7 +324,7 @@ All documentation changes are automatically verified in CI/CD:
   - Migrations
   - Enterprise services
 
-See [`.github/workflows/verify-specs.yml`](../.github/workflows/verify-specs.yml) for complete workflow configuration.
+See [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) for complete workflow configuration (spec verification is handled in the `static-validation` and `full-verification` jobs; the former `verify-specs.yml` was merged into `ci.yml` in Phase 4 consolidation).
 
 ### Local Verification
 

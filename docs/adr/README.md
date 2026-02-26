@@ -19,6 +19,7 @@ This directory contains Architecture Decision Records (ADRs) documenting signifi
 | [ADR-011](011-convention-based-spec-verification.md) | Convention-Based Spec Verification (V3) | Accepted | 2026-02-11 |
 | [ADR-012](012-no-runtime-css-overlay.md) | Eliminate Runtime CSS ConfigMap Overlay | Accepted | 2026-02-10 |
 | [ADR-013](013-studio-sso-bypass-middleware.md) | Studio SSO Bypass Middleware | Accepted | 2026-02-12 |
+| [ADR-020](020-tracing-scope-and-pilot-decision.md) | Tracing Scope and Pilot Decision | Accepted | 2026-02-25 |
 
 ## ADR Template
 

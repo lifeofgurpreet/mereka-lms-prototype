@@ -15,7 +15,7 @@ Use this file as the front door to the Mereka Academy Open edX docs. Each link b
 
 **Contributing documentation?**
 - **[DOCUMENTATION_STANDARDS.md](DOCUMENTATION_STANDARDS.md)** - Documentation standards, CI automation, and style guide
-- **[.github/workflows/verify-specs.yml](../.github/workflows/verify-specs.yml)** - Automated verification workflow
+- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** - Automated verification workflow (spec verification absorbed from the former `verify-specs.yml` in Phase 4 consolidation)
 
 ---
 

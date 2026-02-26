@@ -23,21 +23,26 @@ Date: 2026-02-25
   - `docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md`
   - `docs/qa/OBSERVABILITY_NEXT50_TRACKER_MEREKA_LMS.md`
   - `docs/operations/OBSERVABILITY_GA_READINESS_GATE.md`
+  - `docs/qa/OBS-PILOT-TRACING-01.md`
 - Execution/gating source of truth:
   - `.github/workflows/observability-compliance.yml`
-  - `.github/workflows/observability-parity-runtime.yml`
+  - `.github/workflows/daily-infrastructure-audit.yml` (env parity lane; previously `observability-parity-runtime.yml` — merged in Phase 6.4)
 - Runtime/local verification scripts:
   - `scripts/qa/validate-observability-compliance.sh`
+  - `scripts/qa/build-observability-tracing-pilot-bundle.sh`
   - `scripts/qa/verify-observability-runtime.sh`
   - `scripts/qa/verify-observability-validation.sh`
   - `scripts/qa/run-observability-first-class.sh`
   - `scripts/qa/build-observability-parity-delta.sh`
   - `scripts/qa/build-observability-parity-review.sh`
   - `scripts/qa/build-observability-parity-rollup.sh`
+  - `scripts/qa/verify-correlation-header-propagation.sh`
   - `scripts/qa/test-observability-parity-contracts.sh`
   - `scripts/qa/audit-alert-noise-baseline.sh`
   - `scripts/qa/build-alert-noise-runtime-sample.sh`
   - `scripts/qa/verify-observability-evidence-identity.sh`
+- Run-time noise operations contract:
+  - `docs/operations/ALERT_NOISE_CLASSIFICATION_FEED.md`
 
 ## Superseded/Context Docs (historical reference only)
 
