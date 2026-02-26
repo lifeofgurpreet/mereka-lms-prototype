@@ -50,6 +50,11 @@ patches:
   - path: patches/enterprise-catalog-worker-nonprod.yaml
   # payments-gateway: switch to infisical + DEV Stripe keys
   - path: patches/payments-gateway-secrets-infisical.yaml
+    target:
+      group: external-secrets.io
+      version: v1beta1
+      kind: ExternalSecret
+      name: payments-gateway-secrets
 
 # Minimal replicas for nonprod (same as local)
 replicas:
