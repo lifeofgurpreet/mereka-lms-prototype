@@ -111,8 +111,16 @@ acceptance_criteria:
     command: scripts/qa/verify-observability-contracts.sh
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-observability-tracing.sh
+    command: scripts/qa/verify-observability-tracing.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
   - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
@@ -157,6 +165,18 @@ acceptance_criteria:
     file: scripts/qa/verify-observability-stack.sh
     command: scripts/qa/verify-observability-stack.sh
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-observability-tracing.sh
+    command: scripts/qa/verify-observability-tracing.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-correlation-header-propagation.sh
+    command: scripts/qa/verify-correlation-header-propagation.sh
+  - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
@@ -188,6 +208,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-loki-deployment.sh
     command: scripts/qa/verify-observability-loki-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-002
   description: Loki query `{namespace="mereka-lms"}` returns logs from all canonical
     log sources (LMS, CMS, workers, MFE, discovery, ecommerce, credentials, forum,
@@ -197,6 +221,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-loki-log-sources.sh
     command: scripts/qa/verify-observability-loki-log-sources.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-003
   description: 'All logs have required labels: `service`, `env`, `cluster`, `namespace`,
     `hostname`, `severity`'
@@ -205,6 +233,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-loki-labels.sh
     command: scripts/qa/verify-observability-loki-labels.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-004
   description: LMS and CMS logs are structured JSON with `timestamp`, `level`, `service`,
     `message` fields
@@ -213,6 +245,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-structured-logging.sh
     command: scripts/qa/verify-observability-structured-logging.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-005
   description: 'No email addresses are visible in Loki query results: `{namespace="mereka-lms"}
     |~ "@.*\\.com"` returns zero results'
@@ -221,6 +257,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-pii-filtering.sh
     command: scripts/qa/verify-observability-pii-filtering.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-006
   description: 'No passwords are visible in Loki query results: `{namespace="mereka-lms"}
     |~ "(?i)password.*=.*[^*]"` returns zero results'
@@ -229,6 +269,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-pii-filtering.sh
     command: scripts/qa/verify-observability-pii-filtering.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-007
   description: 'Logs older than 30 days are automatically deleted: query `{namespace="mereka-lms"}`
     with time range `now-31d to now-30d` returns no results'
@@ -237,6 +281,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-retention.sh
     command: scripts/qa/verify-observability-retention.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh
 - id: AC-LOG-008
   description: 'Tempo traces are retained for 7 days: traces older than 8 days are
     not retrievable'
@@ -245,4 +293,7 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-retention.sh
     command: scripts/qa/verify-observability-retention.sh
-
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-logging-pipeline.sh
+    command: scripts/qa/verify-logging-pipeline.sh

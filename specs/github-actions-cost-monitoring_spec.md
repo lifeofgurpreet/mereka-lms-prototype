@@ -16,7 +16,7 @@ links:
     - "specs/ci-cd-pipeline_spec.md"
   related_docs:
     - "docs/operations/runbooks/CI_CD_RUNBOOK.md"
-    - ".github/workflows/verify-specs.yml"
+    - ".github/workflows/ci.yml"
 ---
 
 # GitHub Actions Cost Monitoring
@@ -148,8 +148,8 @@ All requirements are expressed as acceptance criteria below with normative langu
 **When** workflows execute
 **Then** metrics MUST be exported:
 ```
-github_actions_workflow_duration_seconds{workflow="verify-specs",conclusion="success"}
-github_actions_workflow_cost_usd{workflow="verify-specs",runner="ubuntu-latest"}
+github_actions_workflow_duration_seconds{workflow="ci",conclusion="success"}
+github_actions_workflow_cost_usd{workflow="ci",runner="ubuntu-latest"}
 github_actions_monthly_budget_consumed_percent{month="2026-02"}
 ```
 
@@ -199,7 +199,7 @@ budget:
       recipients: ["#platform-alerts", "platform-team@mereka.io"]
 
   workflow_limits:
-    "verify-specs.yml":
+    "ci.yml":
       max_duration_minutes: 30
       priority: high
     "build-openedx.yml":
@@ -467,7 +467,7 @@ kubectl patch cronjob -n mereka-lms github-actions-cost-tracker -p '{"spec":{"su
 
 ## Related Documentation
 
-- `.github/workflows/verify-specs.yml` - Main verification workflow
+- `.github/workflows/ci.yml` - Main CI workflow (includes verification; `verify-specs.yml` merged into `ci.yml` in Phase 4)
 - `docs/operations/runbooks/CI_CD_RUNBOOK.md` - CI/CD operations
 - `specs/ci-cd-pipeline_spec.md` - CI/CD requirements
 - [GitHub Actions Billing](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions)
