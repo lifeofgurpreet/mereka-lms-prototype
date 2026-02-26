@@ -29,6 +29,8 @@
     reverse_proxy {args[0]} {
         header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
         header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
     }
 
     # API proxy responses must never be cached by browsers or intermediaries.
@@ -157,6 +159,8 @@ http://ecommerce.academyv2.mereka.io, http://ecommerce.academyv2.mereka.dev {
         reverse_proxy mfe:8002 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
 
@@ -169,6 +173,8 @@ http://ecommerce.academyv2.mereka.io, http://ecommerce.academyv2.mereka.dev {
         reverse_proxy mfe:8002 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
 
@@ -218,6 +224,8 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
         reverse_proxy mfe:8002 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
 
@@ -227,6 +235,8 @@ http://credentials.academyv2.mereka.io, http://credentials.academyv2.mereka.dev 
         reverse_proxy mfe:8002 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
     handle /admin/login/* {
@@ -252,12 +262,16 @@ http://admin.academyv2.mereka.io {
     request_body {
         max_size 2MB
     }
-    reverse_proxy /api/mfe_config/v1* lms:8000 {
-        header_up Host {http.request.host}
-    }
-    reverse_proxy /login_refresh* lms:8000 {
-        header_up Host {http.request.host}
-    }
+        reverse_proxy /api/mfe_config/v1* lms:8000 {
+            header_up Host {http.request.host}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+        reverse_proxy /login_refresh* lms:8000 {
+            header_up Host {http.request.host}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
     # Enterprise service APIs — routed to internal K8s services via path prefix.
     # Same-origin (admin subdomain) so no CORS complications.
     handle /api/enterprise-catalog/* {
@@ -265,6 +279,8 @@ http://admin.academyv2.mereka.io {
         reverse_proxy enterprise-catalog:8160 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
     handle /api/enterprise-access/* {
@@ -272,6 +288,8 @@ http://admin.academyv2.mereka.io {
         reverse_proxy enterprise-access:18270 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
     handle /api/license-manager/* {
@@ -279,6 +297,8 @@ http://admin.academyv2.mereka.io {
         reverse_proxy license-manager:18170 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
     handle /api/enterprise-subsidy/* {
@@ -286,6 +306,8 @@ http://admin.academyv2.mereka.io {
         reverse_proxy enterprise-subsidy:18280 {
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
         }
     }
     import proxy "enterprise-admin-portal:8002"
@@ -298,9 +320,13 @@ http://enterprise.academyv2.mereka.io {
     }
     reverse_proxy /api/mfe_config/v1* lms:8000 {
         header_up Host {http.request.host}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
     }
     reverse_proxy /login_refresh* lms:8000 {
         header_up Host {http.request.host}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
     }
     import proxy "enterprise-learner-portal:8002"
 }

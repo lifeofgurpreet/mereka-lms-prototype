@@ -16,6 +16,41 @@ spec:
     - host: apps.academyv2.mereka.dev
       http:
         paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /csrf
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /login_refresh
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
           - path: /
             pathType: Prefix
             backend:

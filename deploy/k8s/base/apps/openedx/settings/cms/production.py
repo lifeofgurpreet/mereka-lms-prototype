@@ -109,6 +109,14 @@ MEREKA_LMS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}"
 MEREKA_STUDIO_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_STUDIO_DOMAIN}"
 MEREKA_MFE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
 
+# Keep canonical LMS/CMS roots aligned to domain env contract in every environment.
+# Without this override, inherited cms.envs.production defaults can leak .io links
+# into nonprod Studio pages even when MEREKA_* domain env vars are set to .dev.
+LMS_BASE = MEREKA_LMS_DOMAIN
+LMS_ROOT_URL = MEREKA_LMS_BASE_URL
+CMS_BASE = MEREKA_STUDIO_DOMAIN
+CMS_ROOT_URL = MEREKA_STUDIO_BASE_URL
+
 # MongoDB modulestore connection.
 #
 # Target state is MongoDB Atlas, but we keep an explicit in-cluster fallback for
