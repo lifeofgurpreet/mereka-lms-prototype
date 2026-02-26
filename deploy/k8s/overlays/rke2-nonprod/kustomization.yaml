@@ -30,6 +30,12 @@ resources:
   # Apply ARC separately: kubectl apply -k deploy/k8s/base/arc/
   # See: docs/operations/CI_CD_RUNNERS.md for the full deploy sequence.
 
+# Override image tag for nonprod (base transforms docker.io/overhangio/openedx
+# to asia-southeast1-docker.pkg.dev/... — overlay must match the transformed name)
+images:
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
+    newTag: mereka-brand
+
 generatorOptions:
   disableNameSuffixHash: true
 
