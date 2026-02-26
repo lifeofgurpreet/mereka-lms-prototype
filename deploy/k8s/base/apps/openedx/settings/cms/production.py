@@ -240,8 +240,24 @@ DATABASE_ROUTERS.remove(
     "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"
 )
 # Content Libraries v2: ensure the app is installed (matches LMS production.py pattern)
+def _safe_add_app(app_path):
+    """Add an app to INSTALLED_APPS only if importable (guards optional packages)."""
+    module_name = app_path.split(".")[0] if "." in app_path else app_path
+    if app_path.startswith("openedx.core.djangoapps.") or app_path.startswith("common.djangoapps."):
+        if app_path not in INSTALLED_APPS:
+            INSTALLED_APPS.append(app_path)
+        return True
+    try:
+        __import__(module_name)
+        if app_path not in INSTALLED_APPS:
+            INSTALLED_APPS.append(app_path)
+        return True
+    except ImportError:
+        return False
+
 if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
     INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
+_safe_add_app("openedx_advanced_xblocks.apps.AdvancedXBlocksConfig")
 
 # Set uploaded media file path
 MEDIA_ROOT = "/openedx/media/"
@@ -607,8 +623,7 @@ if "openedx_kajabi_sso" not in INSTALLED_APPS:
 # @spec: Mobile Backend API (mereka-lms-2gck)
 # Register app for admin access (API primarily used on LMS)
 
-if "openedx_mobile_api" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_mobile_api")
+_safe_add_app("openedx_mobile_api")
 
 # ── Content Libraries v2: Phase 2 Tenant Isolation ─────────────────────
 # @spec: content-libraries-v2 (Phase 2: Tenant Libraries)
@@ -686,6 +701,5 @@ ENABLE_TENANT_ANALYTICS_SCOPING = os.environ.get(
     "ENABLE_TENANT_ANALYTICS_SCOPING", "false"
 ).lower() in ("true", "1", "yes")
 
-# Register tenant cache app
-if "openedx_tenant_cache" not in INSTALLED_APPS:
-    INSTALLED_APPS.append("openedx_tenant_cache")
+# Register tenant cache app (optional)
+_safe_add_app("openedx_tenant_cache")
