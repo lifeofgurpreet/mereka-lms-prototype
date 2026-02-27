@@ -141,6 +141,8 @@ if [[ "$STRICT" == "1" ]]; then
 fi
 
 echo "==> Running observability compliance script"
+STEP_FAILURES=0
+set +e
 run_with_timeout "$SCRIPT_TIMEOUT" env \
   VALIDATE_OBS_APP_NAMESPACE="$APP_NAMESPACE" \
   VALIDATE_OBS_K8S_CONTEXT="$K8S_CONTEXT" \
@@ -150,6 +152,11 @@ run_with_timeout "$SCRIPT_TIMEOUT" env \
   GCP_PROJECT="$GCP_PROJECT_VALUE" \
   VALIDATE_OBS_RUNTIME_CMD_TIMEOUT="$K8S_CMD_TIMEOUT" \
   ./scripts/qa/validate-observability-compliance.sh --mode "$MODE" $STRICT_FLAG --json > "$COMPLIANCE_JSON"
+COMPLIANCE_RC=$?
+if [[ "$COMPLIANCE_RC" -ne 0 ]]; then
+  STEP_FAILURES=$((STEP_FAILURES + 1))
+fi
+set -e
 
 echo "==> Building coverage matrix"
 COVERAGE_STRICT_FLAG=""
@@ -157,6 +164,7 @@ if [[ "$STRICT" == "1" ]]; then
   COVERAGE_STRICT_FLAG="--strict"
 fi
 
+set +e
 run_with_timeout "$SCRIPT_TIMEOUT" env \
   COVERAGE_MONITORING_NAMESPACE="$MONITORING_NAMESPACE" \
   COVERAGE_APP_NAMESPACE="$APP_NAMESPACE" \
@@ -168,51 +176,80 @@ run_with_timeout "$SCRIPT_TIMEOUT" env \
   --out-json "$COVERAGE_JSON" \
   --out-md "$COVERAGE_MD" \
   $COVERAGE_STRICT_FLAG
+COVERAGE_RC=$?
+if [[ "$COVERAGE_RC" -ne 0 ]]; then
+  STEP_FAILURES=$((STEP_FAILURES + 1))
+fi
+set -e
 
 if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   echo "==> Running runtime observability verification"
+  set +e
   run_with_timeout "$SCRIPT_TIMEOUT" env \
-  VERIFY_OBS_APP_NAMESPACE="$APP_NAMESPACE" \
-  VERIFY_OBS_MONITORING_NAMESPACE="$MONITORING_NAMESPACE" \
-  VERIFY_OBS_K8S_CONTEXT="$K8S_CONTEXT" \
-  VERIFY_OBS_GCP_PROJECT="$GCP_PROJECT_VALUE" \
-  VERIFY_OBS_ENV_LABEL="$ENV_LABEL" \
-  VERIFY_OBS_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
-  VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
-  VERIFY_OBS_EVIDENCE_DIR="$OUT_DIR" \
+    VERIFY_OBS_APP_NAMESPACE="$APP_NAMESPACE" \
+    VERIFY_OBS_MONITORING_NAMESPACE="$MONITORING_NAMESPACE" \
+    VERIFY_OBS_K8S_CONTEXT="$K8S_CONTEXT" \
+    VERIFY_OBS_GCP_PROJECT="$GCP_PROJECT_VALUE" \
+    VERIFY_OBS_ENV_LABEL="$ENV_LABEL" \
+    VERIFY_OBS_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
+    VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
+    VERIFY_OBS_EVIDENCE_DIR="$OUT_DIR" \
     ./scripts/qa/verify-observability-runtime.sh > "$RUNTIME_TXT"
+  RUNTIME_RC=$?
+  if [[ "$RUNTIME_RC" -ne 0 ]]; then
+    STEP_FAILURES=$((STEP_FAILURES + 1))
+  fi
+  set -e
 
   echo "==> Running correlation header propagation check"
   CORRELATION_ARGS=()
   if [[ "$STRICT" == "1" ]]; then
     CORRELATION_ARGS+=(--strict)
   fi
+  set +e
   run_with_timeout "$SCRIPT_TIMEOUT" env \
-  STRICT="$STRICT" \
-  VERIFY_CORRELATION_ENV_LABEL="$ENV_LABEL" \
-  VERIFY_CORRELATION_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
-  VERIFY_CORRELATION_K8S_CONTEXT="$K8S_CONTEXT" \
-  VERIFY_CORRELATION_GCP_PROJECT="$GCP_PROJECT_VALUE" \
-  VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
-  ./scripts/qa/verify-correlation-header-propagation.sh "${CORRELATION_ARGS[@]}" > "$CORRELATION_TXT"
+    STRICT="$STRICT" \
+    VERIFY_CORRELATION_ENV_LABEL="$ENV_LABEL" \
+    VERIFY_CORRELATION_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
+    VERIFY_CORRELATION_K8S_CONTEXT="$K8S_CONTEXT" \
+    VERIFY_CORRELATION_GCP_PROJECT="$GCP_PROJECT_VALUE" \
+    VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
+    ./scripts/qa/verify-correlation-header-propagation.sh "${CORRELATION_ARGS[@]}" > "$CORRELATION_TXT"
+  CORRELATION_RC=$?
+  if [[ "$CORRELATION_RC" -ne 0 ]]; then
+    STEP_FAILURES=$((STEP_FAILURES + 1))
+  fi
+  set -e
 
   echo "==> Running logging pipeline verification"
+  set +e
   run_with_timeout "$SCRIPT_TIMEOUT" env \
-  VERIFY_LOGGING_PIPELINE_RUNNER="run-observability-first-class" \
-  VERIFY_LOGGING_PIPELINE_ENV_LABEL="$ENV_LABEL" \
-  VERIFY_LOGGING_PIPELINE_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
-  APP_NS="$APP_NAMESPACE" \
-  K8S_CONTEXT="$K8S_CONTEXT" \
-  VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE="$COVERAGE_TXT" \
-  ./scripts/qa/verify-logging-pipeline.sh $STRICT_FLAG > "$COVERAGE_TXT"
+    VERIFY_LOGGING_PIPELINE_RUNNER="run-observability-first-class" \
+    VERIFY_LOGGING_PIPELINE_ENV_LABEL="$ENV_LABEL" \
+    VERIFY_LOGGING_PIPELINE_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
+    APP_NS="$APP_NAMESPACE" \
+    K8S_CONTEXT="$K8S_CONTEXT" \
+    VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE="$COVERAGE_TXT" \
+    ./scripts/qa/verify-logging-pipeline.sh $STRICT_FLAG > "$COVERAGE_TXT"
+  LOGGING_RC=$?
+  if [[ "$LOGGING_RC" -ne 0 ]]; then
+    STEP_FAILURES=$((STEP_FAILURES + 1))
+  fi
+  set -e
 
   echo "==> Running tracing verification"
   TRACING_TMP="$TRACING_TXT.tmp.$$"
+  set +e
   run_with_timeout "$SCRIPT_TIMEOUT" env \
-  APP_NS="$APP_NAMESPACE" \
-  K8S_CONTEXT="$K8S_CONTEXT" \
-  TEMPO_URL="${TEMPO_URL:-}" \
-  ./scripts/qa/verify-observability-tracing.sh $STRICT_FLAG > "$TRACING_TMP"
+    APP_NS="$APP_NAMESPACE" \
+    K8S_CONTEXT="$K8S_CONTEXT" \
+    TEMPO_URL="${TEMPO_URL:-}" \
+    ./scripts/qa/verify-observability-tracing.sh $STRICT_FLAG > "$TRACING_TMP"
+  TRACING_RC=$?
+  if [[ "$TRACING_RC" -ne 0 ]]; then
+    STEP_FAILURES=$((STEP_FAILURES + 1))
+  fi
+  set -e
 
   {
     echo "- evidence_identity: env=$ENV_LABEL;profile=$DISPATCH_PROFILE;context=${K8S_CONTEXT:-default};project=$GCP_PROJECT_VALUE"
@@ -293,4 +330,10 @@ Path(${INDEX_JSON@Q}).write_text(json.dumps(payload, indent=2) + "\n", encoding=
 PY
 
 echo "==> Observability first-class run complete"
+
+echo "runtime_step_failures=${STEP_FAILURES}"
 echo "evidence_index=$INDEX_JSON"
+
+if [[ "$STEP_FAILURES" -gt 0 ]]; then
+  exit 1
+fi
