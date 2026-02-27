@@ -25,7 +25,10 @@ OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
 ./scripts/qa/run-operations-gates.sh --env both
 ```
 
-Use `OBSERVABILITY_DISPATCH_PROFILE=prod` for production incidents.
+Use production lane mapping for production incidents:
+- `OBSERVABILITY_ENV_LABEL=prod`
+- `OBSERVABILITY_DISPATCH_PROFILE=prod`
+- `OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT`
 
 If this fails, monitoring blind spots may exist; fix coverage first.
 
@@ -37,7 +40,7 @@ Use this when AC-OVR-016 is failing in strict runtime output.
 # Re-run strict runtime gate with lane identity
 OBSERVABILITY_ENV_LABEL=<lane> \
   OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-  OBSERVABILITY_K8S_CONTEXT=<lane-context> \
+  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 # Quick mounted settings-map inventory
