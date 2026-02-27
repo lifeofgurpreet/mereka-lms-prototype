@@ -13,6 +13,8 @@ K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 APP_NS="${APP_NS:-mereka-lms}"
 STRICT="${STRICT:-0}"
 RUNNER="${VERIFY_LOGGING_PIPELINE_RUNNER:-unknown}"
+EVIDENCE_FILE="${VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE:-}"
+EVIDENCE_CAPTURE=""
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -64,6 +66,15 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -n "$EVIDENCE_FILE" ]]; then
+  mkdir -p "$(dirname "$EVIDENCE_FILE")"
+  EVIDENCE_CAPTURE="$(mktemp)"
+  trap 'rm -f "$EVIDENCE_CAPTURE"' EXIT
+
+  exec > >(tee "$EVIDENCE_CAPTURE")
+  exec 2> >(tee -a "$EVIDENCE_CAPTURE" >&2)
+fi
 
 report() {
   local status="$1"
@@ -122,6 +133,29 @@ run_check() {
   return $rc
 }
 
+write_evidence() {
+  local status_label="${1:-UNKNOWN}"
+  if [[ -z "$EVIDENCE_FILE" || -z "$EVIDENCE_CAPTURE" ]]; then
+    return 0
+  fi
+
+  {
+    echo "# Logging Pipeline Verification Evidence"
+    echo ""
+    echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "- app_namespace: $APP_NS"
+    echo "- k8s_context: $K8S_CONTEXT"
+    echo "- strict: $STRICT"
+    echo "- runner: $RUNNER"
+    echo "- status: $status_label"
+    echo "- evidence_identity: env=${ENV_LABEL:-unknown};profile=${DISPATCH_PROFILE:-custom};context=${K8S_CONTEXT:-default}"
+    echo ""
+    echo "## Logging pipeline checks"
+    echo ""
+    sed 's/\x1B\[[0-9;]*[mK]//g' "$EVIDENCE_CAPTURE"
+  } > "$EVIDENCE_FILE"
+}
+
 echo "Checking logging pipeline evidence"
 echo "  context:   $K8S_CONTEXT"
 echo "  namespace: $APP_NS"
@@ -161,13 +195,16 @@ echo "FAIL:   $FAIL_COUNT"
 
 if [[ "$STRICT" == "1" && "$FAIL_COUNT" -gt 0 ]]; then
   echo -e "${RED}FAILED (strict mode)${NC}"
+  write_evidence "failed_strict"
   exit 1
 fi
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo -e "${YELLOW}OK (warnings present)${NC}"
+  write_evidence "warnings"
   exit 0
 fi
 
 echo -e "${GREEN}OK${NC}"
+write_evidence "pass"
 exit 0
