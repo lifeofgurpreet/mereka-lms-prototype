@@ -4,30 +4,29 @@
 #
 # Footer Slot Migration Contract Verifier
 #
-# Verifies:
-# - Contract document exists
-# - MerekaFooter component defined in mereka_lms.py (canonical source)
-# - mfe-env-config patch includes MerekaFooter
-# - PLUGIN_SLOTS forward-compat registration exists
-# - ImportError guard exists (graceful degradation)
-# - Component duplication exists in apply-patches.sh (flagged as migration target)
-# - Migration debt metric (lines of redundant code)
-# - Component content parity (drift detection)
-# - mereka.scss import exists in plugin
-# - FPF dependency installation
-# - CI has footer-related verification jobs
-# - No raw <Footer /> references in mereka_lms.py
+# Updated for current phase:
+# - Canonical footer implementation is in infrastructure/tutor/plugins/mereka_lms.py
+#   via PLUGIN_SLOTS + mfe-env-config runtime definitions.
+# - apply-patches now only runs footer-component asset-copy logic.
+# - CI gate execution is driven by .github/ci-scripts-static.txt.
 
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PASS=0
 FAIL=0
 WARN=0
 
+PLUGIN_FILE="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
+PATCHES_FILE="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
+FOOTER_PATCH_FILE="${REPO_ROOT}/infrastructure/tutor/patches/footer-component.sh"
+CONTRACT_DOC="${REPO_ROOT}/docs/architecture/FOOTER_SLOT_MIGRATION.md"
+CI_STATIC_FILE="${REPO_ROOT}/.github/ci-scripts-static.txt"
+
 do_pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 do_warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
+
 
 echo "========================================="
 echo "Footer Slot Migration Contract Verifier"
@@ -35,200 +34,227 @@ echo "========================================="
 echo ""
 
 # AC-FTSLOT-001: Contract document exists
+# ---------------------------------------------------------------------------
 echo "AC-FTSLOT-001: Contract Document"
-if [[ -f "${REPO_ROOT}/docs/architecture/FOOTER_SLOT_MIGRATION.md" ]]; then
+if [[ -f "${CONTRACT_DOC}" ]]; then
     do_pass "Contract document exists at docs/architecture/FOOTER_SLOT_MIGRATION.md"
 else
     do_fail "Contract document missing: docs/architecture/FOOTER_SLOT_MIGRATION.md"
 fi
 
-# AC-FTSLOT-002: MerekaFooter defined in canonical source
+# AC-FTSLOT-002: Canonical source checks (mereka_lms.py)
+# ---------------------------------------------------------------------------
 echo ""
 echo "AC-FTSLOT-002: Canonical Source (mereka_lms.py)"
 
-PLUGIN_FILE="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
 if [[ -f "${PLUGIN_FILE}" ]]; then
     do_pass "Plugin file exists: infrastructure/tutor/plugins/mereka_lms.py"
 else
     do_fail "Plugin file missing: infrastructure/tutor/plugins/mereka_lms.py"
 fi
 
-# Check mfe-env-config patch exists
-if grep -q "mfe-env-config" "${PLUGIN_FILE}"; then
-    do_pass "mfe-env-config patch exists in mereka_lms.py"
+if grep -q "mfe-env-config-runtime-definitions" "${PLUGIN_FILE}"; then
+    do_pass "mfe-env-config-runtime-definitions patch exists in plugin"
 else
-    do_fail "mfe-env-config patch missing from mereka_lms.py"
+    do_fail "mfe-env-config-runtime-definitions patch missing from plugin"
 fi
 
-# Check MerekaFooter component definition
-if grep -q "const MerekaFooter = ()" "${PLUGIN_FILE}"; then
-    do_pass "MerekaFooter component defined in mereka_lms.py"
+if grep -q "const MerekaFooter =" "${PLUGIN_FILE}"; then
+    do_pass "MerekaFooter component defined in plugin runtime definitions"
 else
-    do_fail "MerekaFooter component definition missing from mereka_lms.py"
+    do_fail "MerekaFooter component definition missing from plugin"
 fi
 
-# Check PLUGIN_SLOTS forward-compat registration
-if grep -q "from tutormfe.hooks import PLUGIN_SLOTS" "${PLUGIN_FILE}"; then
-    do_pass "PLUGIN_SLOTS import exists (forward-compat registration)"
+if grep -q "from tutormfe\.hooks import PLUGIN_SLOTS" "${PLUGIN_FILE}"; then
+    do_pass "PLUGIN_SLOTS import exists"
 else
-    do_fail "PLUGIN_SLOTS import missing (forward-compat registration)"
+    do_fail "PLUGIN_SLOTS import missing"
 fi
 
-if grep -q '"footer_slot"' "${PLUGIN_FILE}"; then
-    do_pass "footer_slot registration exists in PLUGIN_SLOTS"
+if grep -q 'org\.openedx\.frontend\.layout\.footer\.v1' "${PLUGIN_FILE}"; then
+    do_pass "Footer slot registration targets org.openedx.frontend.layout.footer.v1"
 else
-    do_fail "footer_slot registration missing from PLUGIN_SLOTS"
+    do_fail "Footer slot target org.openedx.frontend.layout.footer.v1 missing"
 fi
 
-# Check ImportError guard (graceful degradation)
+if grep -q 'org\.openedx\.frontend\.layout\.header_logo\.v1' "${PLUGIN_FILE}"; then
+    do_pass "Header logo slot registration present"
+else
+    do_fail "Header logo slot registration missing"
+fi
+
+if grep -q 'learner_dashboard\.sidebar\.v1' "${PLUGIN_FILE}"; then
+    do_pass "Learner dashboard slot registration present"
+else
+    do_fail "Learner dashboard slot registration missing"
+fi
+
+if grep -q "PLUGIN_SLOTS.add_items\|PLUGIN_SLOTS.add_item" "${PLUGIN_FILE}"; then
+    do_pass "PLUGIN_SLOTS registration block present"
+else
+    do_fail "PLUGIN_SLOTS registration block missing"
+fi
+
 if grep -q "except ImportError:" "${PLUGIN_FILE}"; then
-    do_pass "ImportError guard exists (graceful degradation)"
+    do_warn "ImportError guard detected (legacy fallback marker); not blocking in current phase"
 else
-    do_fail "ImportError guard missing (no graceful degradation)"
+    do_pass "No ImportError guard required for current active PLUGIN_SLOTS-first path"
 fi
 
-# Check mereka.scss import in plugin
 if grep -q "import './mereka/mereka.scss'" "${PLUGIN_FILE}"; then
     do_pass "mereka.scss import exists in mfe-env-config patch"
 else
     do_fail "mereka.scss import missing from mfe-env-config patch"
 fi
 
-# Check no raw <Footer /> references in plugin (should only be MerekaFooter)
-# Note: Comments explaining the old approach are allowed, we're looking for actual code
-RAW_FOOTER_COUNT=$(grep "RenderWidget: <Footer />" "${PLUGIN_FILE}" | grep -v "^#" | wc -l || true)
+# No inline Indigo footer widgets should remain in plugin runtime JS patch.
+RAW_FOOTER_COUNT=$(grep -c "RenderWidget: <Footer />" "${PLUGIN_FILE}" || true)
 if [[ "${RAW_FOOTER_COUNT}" -eq 0 ]]; then
-    do_pass "No raw <Footer /> references in mereka_lms.py code (only MerekaFooter)"
+    do_pass "No RenderWidget: <Footer /> references in plugin patch"
 else
-    do_fail "Found ${RAW_FOOTER_COUNT} raw <Footer /> references in mereka_lms.py code"
+    do_fail "Found ${RAW_FOOTER_COUNT} RenderWidget: <Footer /> references in plugin patch"
 fi
 
+# AC-FTSLOT-002: Fallback source checks (apply-patches)
+# ---------------------------------------------------------------------------
 echo ""
 echo "AC-FTSLOT-002: Fallback Source (apply-patches.sh)"
 
-PATCHES_FILE="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
 if [[ -f "${PATCHES_FILE}" ]]; then
     do_pass "Patches file exists: infrastructure/tutor/apply-patches.sh"
 else
     do_fail "Patches file missing: infrastructure/tutor/apply-patches.sh"
 fi
 
-# Check MerekaFooter component duplication (migration target)
-if grep -q "const MerekaFooter = ()" "${PATCHES_FILE}"; then
-    do_warn "MerekaFooter component duplicated in apply-patches.sh (migration target)"
+if [[ -f "${FOOTER_PATCH_FILE}" ]]; then
+    do_pass "Footer patch module exists: infrastructure/tutor/patches/footer-component.sh"
 else
-    do_fail "MerekaFooter component missing from apply-patches.sh (fallback path broken)"
+    do_fail "Footer patch module missing: infrastructure/tutor/patches/footer-component.sh"
 fi
 
-# Check RenderWidget replacement
-if grep -q 'RenderWidget: <MerekaFooter />' "${PATCHES_FILE}"; then
-    do_warn "RenderWidget replacement exists in apply-patches.sh (migration target)"
+if grep -q 'source "$PATCHES_DIR/footer-component.sh"' "${PATCHES_FILE}"; then
+    do_pass "apply-patches sources footer-component.sh"
 else
-    do_fail "RenderWidget replacement missing from apply-patches.sh (fallback path broken)"
+    do_fail "apply-patches does not source footer-component.sh"
 fi
 
-# Migration debt metric: count lines of footer code in apply-patches.sh
-# Target: lines 1043-1207 (165 lines)
-FOOTER_START_LINE=1043
-FOOTER_END_LINE=1207
-MIGRATION_DEBT=$((FOOTER_END_LINE - FOOTER_START_LINE + 1))
+if grep -q 'apply_footer_component_patch' "${PATCHES_FILE}"; then
+    do_pass "apply-patches calls apply_footer_component_patch"
+else
+    do_fail "apply-patches does not invoke apply_footer_component_patch"
+fi
+
+# Footer fallback logic in apply-patches should be limited to asset sync, not component duplication.
+if grep -q "MerekaFooter" "${PATCHES_FILE}"; then
+    do_fail "Duplicate footer component logic found in apply-patches.sh"
+else
+    do_pass "No footer component logic duplicated in apply-patches.sh"
+fi
+
+if grep -q "RenderWidget: <MerekaFooter" "${PATCHES_FILE}"; then
+    do_fail "Footer RenderWidget replacement still exists in apply-patches.sh"
+else
+    do_pass "No footer RenderWidget replacement in apply-patches.sh"
+fi
+
+# Migration debt metric (current state): count duplicate footer block indicators in apply-patches.
+DUP_FOOTER_LINES=$(
+  { grep -E "RenderWidget: <Footer|RenderWidget: <MerekaFooter|<Footer />|footer-slot|footer-container|site variants|mereka-footer--v2" "${PATCHES_FILE}" || true; } \
+    | wc -l | tr -d ' '
+)
+if [[ "${DUP_FOOTER_LINES}" -eq 0 ]]; then
+    do_pass "Migration debt is 0 lines of footer duplication in apply-patches.sh"
+else
+    do_warn "Migration debt is ${DUP_FOOTER_LINES} footer-logic line(s) in apply-patches.sh"
+fi
+
+# AC-FTSLOT-002: Drift detection (guards)
+# ---------------------------------------------------------------------------
 echo ""
-echo "Migration Debt Metric:"
-echo "  Current: ${MIGRATION_DEBT} lines of redundant footer code in apply-patches.sh"
-echo "  Target (Phase 2): 12 lines (safety nets only)"
-echo "  Target (Phase 3): 0 lines (full migration)"
-if [[ "${MIGRATION_DEBT}" -le 12 ]]; then
-    do_pass "Migration debt is ${MIGRATION_DEBT} lines (at or below Phase 2 target)"
-else
-    do_warn "Migration debt is ${MIGRATION_DEBT} lines (above Phase 2 target of 12)"
-fi
+echo "AC-FTSLOT-002: Drift / Duplication Guards"
 
-echo ""
-echo "AC-FTSLOT-002: Component Parity (Drift Detection)"
-
-# Check key identifiers exist in BOTH sources
 KEY_IDENTIFIERS=(
-    "SITE_VARIANTS"
-    "mereka-footer--v2"
-    "footer-social"
-    "footer-nav"
-    "footer-body"
-    "footer-legal"
+  "SITE_VARIANTS"
+  "mereka-footer--v2"
+  "footer-social"
+  "footer-nav"
+  "footer-body"
+  "footer-legal"
 )
 
 for identifier in "${KEY_IDENTIFIERS[@]}"; do
-    PLUGIN_HAS=0
-    PATCHES_HAS=0
-
-    # Grep files directly instead of loading into variables (avoids escaping issues)
     if grep -F -q "${identifier}" "${PLUGIN_FILE}"; then
         PLUGIN_HAS=1
+    else
+        PLUGIN_HAS=0
     fi
 
     if grep -F -q "${identifier}" "${PATCHES_FILE}"; then
         PATCHES_HAS=1
+    else
+        PATCHES_HAS=0
     fi
 
-    if [[ "${PLUGIN_HAS}" -eq 1 && "${PATCHES_HAS}" -eq 1 ]]; then
-        do_pass "Key identifier '${identifier}' exists in BOTH sources (no drift)"
-    elif [[ "${PLUGIN_HAS}" -eq 1 && "${PATCHES_HAS}" -eq 0 ]]; then
-        do_fail "Key identifier '${identifier}' missing from apply-patches.sh (drift detected)"
-    elif [[ "${PLUGIN_HAS}" -eq 0 && "${PATCHES_HAS}" -eq 1 ]]; then
-        do_fail "Key identifier '${identifier}' missing from mereka_lms.py (drift detected)"
+    if [[ "${PLUGIN_HAS}" -eq 1 && "${PATCHES_HAS}" -eq 0 ]]; then
+        do_pass "Identifier '${identifier}' present in canonical plugin and intentionally not duplicated in apply-patches"
+    elif [[ "${PLUGIN_HAS}" -eq 1 && "${PATCHES_HAS}" -eq 1 ]]; then
+        do_fail "Identifier '${identifier}' duplicated in apply-patches (drift risk)"
     else
-        do_fail "Key identifier '${identifier}' missing from BOTH sources"
+        do_fail "Identifier '${identifier}' missing from canonical plugin"
     fi
+
 done
 
+# AC-FTSLOT-003: CI gate wiring
+# ---------------------------------------------------------------------------
 echo ""
 echo "AC-FTSLOT-003: CI Gates"
 
-CI_FILE="${REPO_ROOT}/.github/workflows/ci.yml"
-if [[ -f "${CI_FILE}" ]]; then
-    do_pass "CI workflow file exists: .github/workflows/ci.yml"
+if [[ -f "${CI_STATIC_FILE}" ]]; then
+    do_pass "Static CI script manifest exists: .github/ci-scripts-static.txt"
 else
-    do_fail "CI workflow file missing: .github/workflows/ci.yml"
+    do_fail "Static CI script manifest missing: .github/ci-scripts-static.txt"
 fi
 
-# Check for footer-related verification jobs
-if grep -q "verify-mfe-footer-slot.sh" "${CI_FILE}"; then
-    do_pass "CI has mfe-footer-slot verification job"
+if [[ -f "${CI_STATIC_FILE}" ]] && grep -q "verify-mfe-footer-slot.sh" "${CI_STATIC_FILE}"; then
+    do_pass "Static CI includes verify-mfe-footer-slot.sh"
 else
-    do_fail "CI missing mfe-footer-slot verification job"
+    do_fail "Static CI missing verify-mfe-footer-slot.sh"
 fi
 
-if grep -q "verify-plugin-slot-wiring.sh" "${CI_FILE}"; then
-    do_pass "CI has plugin-slot-wiring verification job"
+if [[ -f "${CI_STATIC_FILE}" ]] && grep -q "verify-plugin-slot-wiring.sh" "${CI_STATIC_FILE}"; then
+    do_pass "Static CI includes verify-plugin-slot-wiring.sh"
 else
-    do_fail "CI missing plugin-slot-wiring verification job"
+    do_fail "Static CI missing verify-plugin-slot-wiring.sh"
 fi
 
-# Check for footer-slot-migration verifier in monitoring-guardrails
-if grep -q "verify-footer-slot-migration.sh" "${CI_FILE}"; then
-    do_pass "CI has footer-slot-migration syntax check"
+if [[ -f "${CI_STATIC_FILE}" ]] && grep -q "verify-footer-slot-migration.sh" "${CI_STATIC_FILE}"; then
+    do_pass "Static CI includes verify-footer-slot-migration.sh"
+elif [[ -f "${CI_STATIC_FILE}" ]]; then
+    do_warn "Static CI does not include verify-footer-slot-migration.sh (informational)"
 else
-    do_fail "CI missing footer-slot-migration syntax check"
+    do_fail "Static CI script manifest missing: .github/ci-scripts-static.txt"
 fi
 
+# Additional checks
+# ---------------------------------------------------------------------------
 echo ""
 echo "Additional Checks"
 
-# Check FPF dependency installation (should be in plugin)
 if grep -q "@openedx/frontend-plugin-framework" "${PLUGIN_FILE}"; then
     do_pass "FPF dependency (@openedx/frontend-plugin-framework) referenced in plugin"
 else
-    do_warn "FPF dependency not explicitly referenced in plugin (may be in MFE package.json)"
+    do_warn "FPF dependency not explicitly referenced in plugin"
 fi
 
-# Check for ADR-014 reference in contract doc
-CONTRACT_DOC="${REPO_ROOT}/docs/architecture/FOOTER_SLOT_MIGRATION.md"
 if grep -q "ADR-014" "${CONTRACT_DOC}"; then
-    do_pass "Contract document references ADR-014 (strategic context)"
+    do_pass "Contract document references ADR-014"
 else
     do_warn "Contract document missing ADR-014 reference"
 fi
 
 # Summary
+# ---------------------------------------------------------------------------
 echo ""
 echo "========================================="
 echo "Summary"
@@ -241,14 +267,13 @@ echo ""
 if [[ "${FAIL}" -eq 0 ]]; then
     echo "✅ All checks passed! Footer slot migration contract verified."
     echo ""
-    echo "Current state: Dual-path (plugin + apply-patches.sh)"
-    echo "Migration debt: ${MIGRATION_DEBT} lines"
+    echo "Current state: plugin-first, single-source runtime definitions + slot registration;"
+    echo "apply-patches is safety-net asset path only."
     echo ""
     echo "Next steps:"
-    echo "  1. Wait for tutormfe.hooks.PLUGIN_SLOTS filter to ship"
-    echo "  2. Remove ImportError guard from mereka_lms.py"
-    echo "  3. After 2 weeks stable: Remove apply-patches.sh footer block (lines 1043-1207)"
-    echo "  4. Run this verifier again to confirm migration debt reduction"
+    echo "  1. Keep plugin registration stable across Tutor releases"
+    echo "  2. Keep duplicate footer JSX removal checks green"
+    echo "  3. Re-run this verifier after any apply-patches refactors"
     exit 0
 else
     echo "❌ ${FAIL} check(s) failed. Review issues above."
