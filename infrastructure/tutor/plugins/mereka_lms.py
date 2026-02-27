@@ -795,17 +795,34 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.layout.      | Default Indigo/OpenedX footer
 #     footer.v1                       |
 #   header_logo_slot                  | Default header logo (MFE header bar)
+#     -> canonical: org.openedx.frontend.layout.header_logo.v1
 #   learner_dashboard.sidebar.v1      | Dashboard sidebar (if present)
 #
 from tutormfe.hooks import PLUGIN_SLOTS
 
-# Slot 1: footer — hides the Indigo default footer, inserts MerekaFooter.
+# Slot 1: header logo — replaces the Indigo default header logo.
+# Slot 2: footer — hides the Indigo default footer, inserts MerekaFooter.
 # MerekaFooter is defined in the mfe-env-config-runtime-definitions patch below.
 # The slot name matches the canonical Open edX FPF slot ID used by tutorindigo.
 for _mfe in [
     "all",
 ]:
     PLUGIN_SLOTS.add_items([
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_logo.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Replace,
+                widget: {
+                    id: 'mereka_header_logo',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaHeaderLogo,
+                },
+            },
+            """,
+        ),
         (
             _mfe,
             "org.openedx.frontend.layout.footer.v1",
@@ -846,6 +863,50 @@ hooks.Filters.ENV_PATCHES.add_item(
         "mfe-env-config-runtime-definitions",
         """
 {% raw %}
+const getMerekaVariant = (hostname, config) => {
+  const normalizedHostname = (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\./, '');
+  const fallbackBrand = (typeof config !== 'undefined' && config.SITE_NAME) || 'Mereka Academy';
+
+  const variants = {
+    'academyv2.mereka.io': {
+      brand: 'Mereka Academy',
+      logoUrl: '/static/images/logo-horizontal.svg',
+    },
+    'academy.biji-biji.com': {
+      brand: 'Biji-Biji Academy',
+      logoUrl: '/static/images/logo-horizontal.svg',
+    },
+    'skillourfuture.academy.mereka.io': {
+      brand: 'Skill Our Future Academy',
+      logoUrl: '/static/images/logo-horizontal.svg',
+    },
+  };
+
+  return variants[normalizedHostname] || {
+    brand: fallbackBrand,
+    logoUrl: '/static/images/logo-horizontal.svg',
+  };
+};
+
+const getLogoHref = (baseUrl) => {
+  return baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
+};
+
+// Custom Mereka header-logo component (Direct plugin — registered via header_logo slot)
+// Wired into org.openedx.frontend.layout.header_logo.v1 by PLUGIN_SLOTS in mereka_lms.py
+const MerekaHeaderLogo = () => {
+  const config = getConfig();
+  const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+
+  return (
+    <a href={getLogoHref(baseUrl)} aria-label={`${variant.brand} dashboard`} className="mereka-header-logo">
+      <img src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl} alt={`${variant.brand} logo`} />
+    </a>
+  );
+};
+
 // Custom Mereka footer component (Direct plugin — registered via footer_slot)
 // Wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaFooter = () => {
