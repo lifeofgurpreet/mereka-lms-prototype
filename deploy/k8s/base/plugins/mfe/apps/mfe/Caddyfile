@@ -59,7 +59,7 @@
 		path /theme/*
 	}
 	handle @mfe_theme_assets {
-		root * /openedx/dist/theme
+		root * /openedx/dist
 		file_server
 	}
 

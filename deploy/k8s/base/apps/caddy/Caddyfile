@@ -33,8 +33,27 @@
         header_up traceparent {http.request.header.traceparent}
     }
 
-    # API proxy responses must never be cached by browsers or intermediaries.
-    header Cache-Control "no-store"
+    # Default: require revalidation on every request. This covers HTML pages and
+    # API responses while still allowing conditional 304s via ETag/Last-Modified.
+    header Cache-Control "no-cache"
+
+    # Hashed static assets (Django ManifestStaticFilesStorage): safe to cache long-term.
+    @static_hashed {
+        path /static/* /theming/asset/*
+    }
+    header @static_hashed Cache-Control "public, max-age=31536000, immutable"
+
+    # Media uploads (profile images, course assets): cache with short revalidation.
+    @media_assets {
+        path /media/*
+    }
+    header @media_assets Cache-Control "public, max-age=3600"
+
+    # Sensitive API endpoints: never cache.
+    @api_no_store {
+        path /api/* /oauth2/* /login* /logout* /admin/*
+    }
+    header @api_no_store Cache-Control "no-store"
 
 }
 
