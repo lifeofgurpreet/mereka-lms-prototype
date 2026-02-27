@@ -38,9 +38,9 @@ Plugin slots are named extension points in MFE React components. Operators injec
 |----------|-------|
 | **Scope** | Shared header shell (`frontend-component-header`) |
 | **Our component** | `MerekaHeaderLogo` |
-| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` (namespaced slot id, optional shorthand id for compat) |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
 | **Forward-compat** | Keeps override stable while inheriting Indigo header structure |
-| **Operation** | `PLUGIN_OPERATIONS.Replace` via `header_logo_slot` |
+| **Operation** | `PLUGIN_OPERATIONS.Replace` |
 | **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
 | **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
 
@@ -50,11 +50,11 @@ Plugin slots are named extension points in MFE React components. Operators injec
 |----------|-------|
 | **Scope** | All MFEs (shared `frontend-component-footer`) |
 | **Our component** | `MerekaFooter` |
-| **Wiring mechanism** | Dual-path: `mereka_lms.py` mfe-env-config patch + `apply-patches.sh` RenderWidget swap |
-| **Forward-compat** | `PLUGIN_SLOTS.add_item("footer_slot", ...)` registered (inactive until tutor-mfe ships the filter) |
-| **Operation** | `PLUGIN_OPERATIONS.Replace` with `keepDefault: false` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Forward-compat** | `PLUGIN_SLOTS.add_items` registration in `mereka_lms.py` (active on Tutor 21+/Ulmo) |
+| **Operation** | `PLUGIN_OPERATIONS.Hide` + `PLUGIN_OPERATIONS.Insert` |
 | **Verification** | `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS) |
-| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py:560-610`, `infrastructure/tutor/apply-patches.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py:760-840` |
 
 ---
 

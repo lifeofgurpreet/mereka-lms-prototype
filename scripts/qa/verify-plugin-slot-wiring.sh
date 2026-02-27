@@ -2,12 +2,10 @@
 # verify-plugin-slot-wiring.sh — Comprehensive FPF plugin-slot wiring verification
 #
 # Validates that the Mereka plugin-slot configuration chain is consistent:
-#   mereka_lms.py → apply-patches.sh → env.config.jsx → MFE runtime
-#
-# This script verifies SOURCE INTEGRITY only (no cluster access needed).
+#   mereka_lms.py → render-time MFE env.config.jsx template values → runtime slots
 #
 # Usage: ./scripts/qa/verify-plugin-slot-wiring.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
@@ -48,31 +46,38 @@ else
   do_fail "PLUGIN_SLOTS import missing"
 fi
 
-if grep -q 'PLUGIN_SLOTS.add_item' "$PLUGIN"; then
-  do_pass "PLUGIN_SLOTS.add_item call present"
+if grep -q 'PLUGIN_SLOTS.add_items\|PLUGIN_SLOTS.add_item' "$PLUGIN"; then
+  do_pass "PLUGIN_SLOTS registration call present (add_item or add_items)"
 else
-  do_fail "PLUGIN_SLOTS.add_item call missing"
+  do_fail "No PLUGIN_SLOTS add_item/add_items registration found"
 fi
 
-# 2b. footer_slot is the registered target
-if grep -q '"footer_slot"' "$PLUGIN"; then
-  do_pass "footer_slot registered as slot target"
+# 2b. Canonical slot IDs are registered
+if grep -q '"org.openedx.frontend.layout.footer.v1"' "$PLUGIN"; then
+  do_pass "Footer slot registered as footer.v1"
 else
-  do_fail "footer_slot not found in PLUGIN_SLOTS registration"
+  do_fail "Footer canonical slot not found in PLUGIN_SLOTS registration"
 fi
 
-# 2c. Fallback flag pattern
-if grep -q '_PLUGIN_SLOTS_AVAILABLE' "$PLUGIN"; then
-  do_pass "Fallback detection flag (_PLUGIN_SLOTS_AVAILABLE) defined"
+if grep -q '"org.openedx.frontend.layout.header_logo.v1"' "$PLUGIN"; then
+  do_pass "Header logo slot registered as header_logo.v1"
 else
-  do_warn "Fallback detection flag missing"
+  do_fail "Header logo canonical slot not found in PLUGIN_SLOTS registration"
 fi
 
-# 2d. try/except guard for ImportError
-if grep -q 'except ImportError' "$PLUGIN"; then
-  do_pass "ImportError guard for PLUGIN_SLOTS (graceful fallback)"
+# learner_dashboard.sidebar.v1 is optional; warn when absent so the script remains
+# accurate while acknowledging current implementation scope.
+if grep -q '"learner_dashboard.sidebar.v1"' "$PLUGIN"; then
+  do_pass "Learner-dashboard slot registered as learner_dashboard.sidebar.v1"
 else
-  do_fail "Missing ImportError guard — will crash on Tutor versions without PLUGIN_SLOTS"
+  do_warn "learner_dashboard.sidebar.v1 slot not yet registered in mereka_lms.py"
+fi
+
+# 2c. Plugin defines runtime helper components used by slot registrations
+if grep -q 'const MerekaHeaderLogo' "$PLUGIN"; then
+  do_pass "MerekaHeaderLogo component defined for header_logo slot"
+else
+  do_fail "MerekaHeaderLogo component missing"
 fi
 
 # ── 3. Plugin: MerekaFooter component ─────────────────────────────────
@@ -98,7 +103,7 @@ else
 fi
 
 # 3a. Footer semantic content
-for check in 'role="contentinfo"' 'mereka-footer' 'team@mereka.io'; do
+for check in 'role="contentinfo"' 'mereka-footer' 'supportEmail'; do
   if grep -q "$check" "$PLUGIN"; then
     do_pass "Footer contains '$check'"
   else
@@ -110,32 +115,32 @@ done
 echo ""
 echo "--- Patch chain (apply-patches.sh) ---"
 
-# 4a. env.config.jsx patching
-if grep -q 'env.config.jsx' "$PATCHES"; then
-  do_pass "apply-patches.sh targets env.config.jsx"
+# 4a. Slot runtime definitions are in plugin, not patch file
+if grep -q 'mfe-env-config-runtime-definitions' "$PLUGIN"; then
+  do_pass "Slot component definitions are injected via plugin hooks"
 else
-  do_fail "apply-patches.sh does not reference env.config.jsx"
+  do_fail "Plugin runtime definition hook for slot components missing"
 fi
 
-# 4b. RenderWidget replacement (defense-in-depth)
-if grep -q 'RenderWidget.*MerekaFooter' "$PATCHES"; then
-  do_pass "RenderWidget→MerekaFooter fallback in apply-patches.sh"
+# 4b. No string-surgery fallback remains in patches
+if grep -q 'RenderWidget.*MerekaFooter\|RenderWidget: <Footer />' "$PATCHES"; then
+  do_fail "String-surgery fallback still present in apply-patches.sh"
 else
-  do_fail "RenderWidget→MerekaFooter fallback missing"
+  do_pass "No RenderWidget→MerekaFooter string-surgery fallback in apply-patches.sh"
 fi
 
-# 4c. MerekaFooter backup definition in patches
+# 4c. Single-source plugin definition (preferred path)
 if grep -q 'const MerekaFooter' "$PATCHES"; then
-  do_pass "MerekaFooter defined in apply-patches.sh (defense-in-depth)"
+  do_warn "MerekaFooter is still defined in apply-patches.sh (legacy fallback path)"
 else
-  do_warn "MerekaFooter not defined in apply-patches.sh (single-source risk)"
+  do_pass "MerekaFooter intentionally defined only in plugin runtime definitions"
 fi
 
-# 4d. SCSS theme import injection
-if grep -q 'mereka/mereka.scss' "$PATCHES"; then
-  do_pass "SCSS theme import (mereka.scss) present in patch chain"
+# 4d. SCSS theme import injection is via plugin env-config patch
+if grep -q "mfe-env-config-buildtime-imports" "$PLUGIN" && grep -q 'mereka/mereka.scss' "$PLUGIN"; then
+  do_pass "mereka.scss import is injected via plugin env-config hook"
 else
-  do_fail "SCSS theme import missing from patch chain"
+  do_fail "mereka.scss import not found in plugin env-config buildtime hook"
 fi
 
 # 4e. FPF framework import

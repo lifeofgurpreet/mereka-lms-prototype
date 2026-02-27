@@ -15,9 +15,9 @@
 
 **Question**: Should we migrate to the standard npm brand package pattern (`@mereka/brand`)?
 
-**Decision**: **Option C: Phased Migration** — Plugin-first for configuration and component injection via Tutor hooks. Asset sync (logos, fonts, SCSS files) remains in apply-patches.sh as a complementary step. Migration to OEP-48 brand package deferred until next major Open edX release.
+**Decision**: **Option C: Phased Migration** — Plugin-first configuration and component injection is now active via Tutor hooks. Branding assets continue to be synced through existing tutor patch/theme workflows, while slot-driven overrides are fully handled in `mereka_lms.py`.
 
-**Rationale**: Current approach works reliably. Plugin handles configuration automatically via Tutor hooks. Script handles file-system operations (asset sync, theme directories). Migration to full OEP-48 standard provides benefits but is not urgent given stable branding and low change frequency.
+**Rationale**: Current approach works reliably. Plugin hooks handle runtime wiring and overrides, while theme assets are maintained in canonical plugin/theme sources and synced during Tutor patch flows. OEP-48-style packaging remains a future optimization.
 
 ---
 
@@ -25,9 +25,9 @@
 
 ### What We Have (As of 2026-02-12)
 
-**Approach**: Hybrid 2-layer theming
-1. **Base layer**: MFEs use default `@edx/brand` → `@openedx/brand-openedx@^1.2.2`
-2. **Override layer**: Custom SCSS injected via `scripts/branding/setup-mfe-branding.sh`
+**Approach**: Plugin-and-theme driven theming
+1. **Base layer**: MFEs consume shared theme tokens and local slot-driven runtime overrides from Tutor.
+2. **Override layer**: SCSS/theme token overlays and brand assets are synchronized from canonical sources and injected by Tutor patch hooks.
 
 **MFE Coverage**:
 | MFE | Branding Applied | Usage |
@@ -169,11 +169,11 @@ import { PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
 
 const config = {
   pluginSlots: {
-    footer_slot: {
+    "org.openedx.frontend.layout.footer.v1": {
       plugins: [{
         op: PLUGIN_OPERATIONS.Replace,
         widget: { id: 'custom_footer', RenderWidget: CustomFooter }
-      }]
+      }],
     }
   }
 };
@@ -242,7 +242,7 @@ const config = {
 
 **ACCEPTED**: Option C — Phased Migration
 
-Plugin delivers configuration and component injection via Tutor hooks. Asset sync (logos, fonts, SCSS files) remains in apply-patches.sh as a complementary step. Migration to OEP-48 brand package deferred until next major Open edX release.
+Plugin delivers configuration and component injection via Tutor hooks. Branding assets remain synced through existing Tutor/theme workflows; slot-based runtime override is now the active path in `mereka_lms.py`.
 
 ### Implementation Approach
 
@@ -416,7 +416,7 @@ mereka_lms.py → mfe-dockerfile-post-npm-install hook
 **Target state** (slot-driven):
 ```
 mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
-  → registers footer_slot override with Direct plugin operation
+  → registers footer.v1 slot override with Direct plugin operation
   → MerekaFooter component lives in a proper JS module
   → env.config.jsx generated automatically by tutor-mfe
 ```
@@ -427,31 +427,54 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
    - Move inline footer JS from `mereka_lms.py` to `infrastructure/tutor/plugins/mfe-plugins/MerekaFooter.jsx`
    - This decouples the React component from the Python plugin string
 
-2. **Register via `PLUGIN_SLOTS` instead of raw file write**
+2. **Register via `PLUGIN_SLOTS` slot APIs (current runtime implementation)**
    ```python
    # In mereka_lms.py
    from tutormfe.hooks import PLUGIN_SLOTS
 
-   PLUGIN_SLOTS.add_item({
-       "footer_slot": {
-           "plugins": [{
-               "op": "PLUGIN_OPERATIONS.Replace",
-               "widget": {
-                   "id": "mereka_footer",
-                   "type": "DIRECT_PLUGIN",
-                   "RenderWidget": "MerekaFooter",
-                   "content": {
-                       "src": "/openedx/app/plugins/MerekaFooter.jsx"
-                   }
-               }
-           }]
-       }
-   })
+   PLUGIN_SLOTS.add_items([
+       (
+           _mfe,
+           "org.openedx.frontend.layout.header_logo.v1",
+           """
+           {
+               op: PLUGIN_OPERATIONS.Replace,
+               widget: {
+                   id: 'mereka_header_logo',
+                   type: DIRECT_PLUGIN,
+                   RenderWidget: MerekaHeaderLogo,
+               },
+           },
+           """,
+       ),
+       (
+           _mfe,
+           "org.openedx.frontend.layout.footer.v1",
+           """
+           {
+               op: PLUGIN_OPERATIONS.Hide,
+               widgetId: 'default_contents',
+           },
+           {
+               op: PLUGIN_OPERATIONS.Insert,
+               widget: {
+                   id: 'mereka_footer',
+                   type: DIRECT_PLUGIN,
+                   RenderWidget: MerekaFooter,
+               },
+           },
+           """,
+       ),
+   ])
    ```
 
-3. **Remove the raw `env.config.jsx` injection** from the `mfe-dockerfile-post-npm-install` hook
+3. **Keep runtime definitions colocated with slot registration**
+   - `mfe-env-config-buildtime-imports` injects `import './mereka/mereka.scss'`.
+   - `mfe-env-config-runtime-definitions` injects `MerekaHeaderLogo` and `MerekaFooter` components used by the slots.
 
-4. **Verify** — rebuild MFE image, confirm footer renders identically
+4. **Verify** — rebuild MFE image, confirm slot components render identically
+
+5. **Note** — this path intentionally avoids string-replacement fallbacks in patch scripts.
 
 ### Operator Workflow
 
@@ -468,8 +491,8 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 
 | Slot Name | Namespaced ID | MFE | What It Controls |
 |-----------|---------------|-----|-----------------|
-| `footer_slot` | `org.openedx.frontend.layout.footer.v1` | All MFEs | Footer component (**ACTIVE — MerekaFooter**) |
-| `header_logo` | `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Logo in header |
+| `org.openedx.frontend.layout.footer.v1` | `org.openedx.frontend.layout.footer.v1` | All MFEs | Footer component (**ACTIVE — MerekaFooter**) |
+| `org.openedx.frontend.layout.header_logo.v1` | `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Logo in header |
 | `learning_help_slot` | `org.openedx.frontend.layout.header_learning_help.v1` | `frontend-app-learning` | Help panel in courseware |
 | `login_component` | `org.openedx.frontend.authn.login_component.v1` | `frontend-app-authn` | Login page component |
 
@@ -481,7 +504,7 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 |-----------|--------|----------|
 | MerekaFooter defined in plugin | DONE | `mereka_lms.py` `mfe-env-config` patch |
 | PLUGIN_SLOTS forward-compatible registration | DONE | `mereka_lms.py` try/except block |
-| apply-patches.sh fallback (RenderWidget swap) | DONE | Defense-in-depth until PLUGIN_SLOTS filter ships |
+| Tutor plugin slot wiring | DONE | `PLUGIN_SLOTS` + runtime component definitions in `mereka_lms.py` |
 | FPF dependency in MFE build | DONE | `@openedx/frontend-plugin-framework@^1.8.0` |
 | Verification script | DONE | `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS) |
 | CI gate | DONE | `.github/workflows/ci.yml` `mfe-footer-slot` job |
@@ -490,8 +513,8 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 
 - **Tutor 21+ required** — `tutormfe.hooks.PLUGIN_SLOTS` was introduced in Tutor v21
 - **MFE images must include FPF** — `@openedx/frontend-plugin-framework` must be in MFE dependencies (included by default in Ulmo)
-- **No blocker for current deployment** — current hardcoded approach works; migration is opportunistic
-- **When `PLUGIN_SLOTS` filter ships**: Remove the apply-patches.sh RenderWidget replacement and the `_PLUGIN_SLOTS_AVAILABLE` guard
+- **No blocker for current deployment** — slot-driven overrides are active and stable.
+- **Fallback code removed**: string-replacement fallback in `apply-patches.sh` has been removed from the active path.
 
 ---
 
@@ -516,7 +539,7 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
 
 ---
 
-**Last Updated**: 2026-02-17
+**Last Updated**: 2026-02-27
 **Decision Owner**: Gurpreet
 **Status**: ✅ ACCEPTED - Plugin-first configuration, SCSS overlay for visual branding
 **Revisit Date**: 2026-08-12 (6 months) or when next branding change occurs
