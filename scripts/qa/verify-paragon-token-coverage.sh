@@ -11,6 +11,9 @@ MFE_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 CORE_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
 MEREKA_THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
 AUDIT_DOC="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+MISSING_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv"
+DEFINES_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv"
+DEFINED_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -221,7 +224,8 @@ from pathlib import Path
 import re
 
 text = Path(__import__('sys').argv[1]).read_text(encoding='utf-8')
-tokens = sorted(set(re.findall(r'var\((--pgn-[^)\s]+)', text)))
+without_defs = re.sub(r"--pgn-[A-Za-z0-9_-]+\s*:[^;{}]*;", "", text)
+tokens = sorted(set(re.findall(r"var\(\s*(--pgn-[A-Za-z0-9_-]+)\s*(?:,|\))", without_defs)))
 print(len(tokens))
 print('\n'.join(tokens[:5]))
 print('…')
@@ -246,6 +250,36 @@ if [[ -f "$AUDIT_DOC" ]]; then
   fi
 else
   fail "PARAGON v22 token audit doc missing"
+fi
+
+if [[ -f "$MISSING_TSV" ]]; then
+  if [[ -s "$MISSING_TSV" ]]; then
+    pass "Consumed+missing token TSV is present"
+  else
+    warn "Consumed+missing token TSV is empty"
+  fi
+else
+  fail "Consumed+missing token TSV missing"
+fi
+
+if [[ -f "$DEFINES_TSV" ]]; then
+  if [[ -s "$DEFINES_TSV" ]]; then
+    pass "Defined-only token TSV is present"
+  else
+    warn "Defined-only token TSV is empty"
+  fi
+else
+  fail "Defined-only token TSV missing"
+fi
+
+if [[ -f "$DEFINED_TSV" ]]; then
+  if [[ -s "$DEFINED_TSV" ]]; then
+    pass "Consumed+defined token TSV is present"
+  else
+    warn "Consumed+defined token TSV is empty"
+  fi
+else
+  fail "Consumed+defined token TSV missing"
 fi
 
 echo -e "\n${BLUE}Summary${NC}"
