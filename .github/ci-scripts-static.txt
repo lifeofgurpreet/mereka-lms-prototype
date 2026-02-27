@@ -89,6 +89,7 @@ scripts/qa/verify-token-reference-integrity.sh
 scripts/qa/verify-token-generation-pipeline.sh
 scripts/qa/verify-branding-token-integrity.sh
 scripts/qa/verify-paragon-theme-urls.sh
+scripts/qa/verify-paragon-token-coverage.sh
 scripts/qa/verify-token-integrity-routing.sh
 scripts/qa/verify-token-contrast.sh
 scripts/qa/verify-aspects-deployment-readiness.sh
