@@ -16,6 +16,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+MFE_NODE_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
 TUTOR_ENV="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 
 PASS=0
@@ -55,16 +56,14 @@ section "apply-patches.sh MFE patch sections"
 if [[ ! -f "$APPLY_PATCHES" ]]; then
   check_fail "apply-patches.sh not found at $APPLY_PATCHES"
 else
-  # Use fixed-string matching (grep -F) to avoid ERE special-character issues
-  # with strings like g++, --max-old-space-size, etc.
+  # Use fixed-string matching (grep -F) to avoid ERE special-character issues.
   declare -A PATCH_SIGNATURES=(
-    ["Node 18 toolchain lock"]="FROM docker.io/node:18-bullseye-slim"
+    ["Node 24 toolchain lock"]="FROM docker.io/node:24.11.0-bullseye-slim"
     ["g++ python3 toolchain extension"]="gcc g++ git libgl1 libxi6 make python3 python3-distutils"
-    ["NODE_OPTIONS webpack memory limit"]="max-old-space-size=6144"
     ["Mereka theme copy (indigo/mereka)"]="COPY indigo/mereka /openedx/app/mereka"
-    ["NPM resilience retry loop"]="npm clean-install attempt"
+    ["NPM resilience retry loop"]="npm clean-install attempt \${attempt} failed"
     ["Cookie domain ENV injection"]="SESSION_COOKIE_DOMAIN"
-    ["Frontend plugin framework install"]="frontend-plugin-framework"
+    ["Frontend plugin framework install"]="frontend-plugin-framework@^1.8.0"
     ["Indigo brand ulmo pin (2.4.3)"]="indigo-brand-openedx@^2.4.3"
     ["Admin console Redux deps"]="ensure_mfe_admin_console_redux_deps"
     ["Course-authoring symlink fix"]="ensure_mfe_course_authoring_directory_fix"
@@ -73,7 +72,7 @@ else
 
   for label in "${!PATCH_SIGNATURES[@]}"; do
     pattern="${PATCH_SIGNATURES[$label]}"
-    if grep -qF "$pattern" "$APPLY_PATCHES" 2>/dev/null; then
+    if grep -qF "$pattern" "$APPLY_PATCHES" "$MFE_NODE_PATCH" "$TUTOR_ENV" 2>/dev/null; then
       check_pass "$label"
     else
       check_fail "$label — pattern not found: $pattern"
@@ -85,15 +84,17 @@ fi
 # 2. List all MFE-related function names from apply-patches.sh
 # ---------------------------------------------------------------------------
 
-section "MFE patch function inventory (apply-patches.sh)"
+section "MFE patch function inventory (MFE patch scripts)"
 
-if [[ -f "$APPLY_PATCHES" ]]; then
+if [[ -f "$MFE_NODE_PATCH" ]]; then
   echo "  Detected MFE-related functions:"
-  grep -E "^[[:space:]]*def ensure_mfe_" "$APPLY_PATCHES" \
+  grep -E "^[[:space:]]*def ensure_mfe_" "$MFE_NODE_PATCH" \
     | sed 's/[[:space:]]*def //; s/(.*$//' \
     | while read -r fn; do
         echo "    - $fn"
       done
+else
+  check_warn "MFE patch helper functions not found"
 fi
 
 # ---------------------------------------------------------------------------
@@ -108,20 +109,13 @@ if [[ ! -f "$TUTOR_ENV" ]]; then
 else
   echo "  Found: $TUTOR_ENV"
 
-  # Check NODE_OPTIONS is set
-  if grep -q 'NODE_OPTIONS=.*max-old-space-size=6144' "$TUTOR_ENV" 2>/dev/null; then
-    check_pass "NODE_OPTIONS=--max-old-space-size=6144 present in MFE Dockerfile"
-  else
-    check_fail "NODE_OPTIONS not raised to 6144 in MFE Dockerfile — apply-patches.sh may not have run"
-  fi
-
-  # Check Node 18 base image
-  if grep -q 'FROM docker.io/node:18-bullseye-slim' "$TUTOR_ENV" 2>/dev/null; then
-    check_pass "Node 18 base image pinned in MFE Dockerfile"
+  # Check Node 24+ base image
+  if grep -qE '^FROM docker.io/node:([2-9][0-9]|[1-9][0-9]{1,})' "$TUTOR_ENV" 2>/dev/null; then
+    check_pass "Node 24+ base image present in MFE Dockerfile"
   else
     NODE_LINE=$(grep '^FROM.*node:' "$TUTOR_ENV" 2>/dev/null | head -1 || true)
     if [[ -n "$NODE_LINE" ]]; then
-      check_fail "Node image is not pinned to node:18-bullseye-slim — found: $NODE_LINE"
+      check_fail "Node image is not pinned to Node 24+ — found: $NODE_LINE"
     else
       check_fail "No FROM node: line found in MFE Dockerfile"
     fi
@@ -131,7 +125,7 @@ else
   if grep -q 'g++' "$TUTOR_ENV" 2>/dev/null; then
     check_pass "g++ toolchain present in MFE Dockerfile"
   else
-    check_fail "g++ not found in MFE Dockerfile — Node 18 toolchain patch missing"
+    check_fail "g++ not found in MFE Dockerfile — Node toolchain patch missing"
   fi
 
   # Check Mereka theme copy
