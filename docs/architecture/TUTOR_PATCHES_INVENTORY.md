@@ -101,6 +101,19 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 ---
 
+### `brand-package.sh`
+
+| Field | Value |
+|-------|-------|
+| LOC | 22 |
+| Classification | `FILESYSTEM` |
+| What it does | Copies the OEP-48 brand package from `infrastructure/tutor/brand-mereka/` into `tutor_env/env/plugins/mfe/build/mfe/indigo/brand-mereka/`. Pure filesystem operation. |
+| Tutor hook equivalent | None. The MFE Dockerfile `COPY` and `npm install @edx/brand@file:./brand-mereka` require the package to physically exist in the build context. |
+| Why it must stay bash | Filesystem operations. Cannot be expressed as a Tutor filter. |
+| Notes | Added 2026-02-27 for OEP-48 brand package support (FE-001). |
+
+---
+
 ### `prometheus-metrics.sh`
 
 | Field | Value |
@@ -152,6 +165,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | `mfe-node.sh` | FILESYSTEM | Active — MFE Dockerfile surgery |
 | `webpack-memory.sh` | FILESYSTEM | Active — memory limits + dedup |
 | `footer-component.sh` | FILESYSTEM | Active — asset sync to build context |
+| `brand-package.sh` | FILESYSTEM | Active — OEP-48 brand package sync to MFE build context |
 | `build-optimizations.sh` | FILESYSTEM | Active — 25+ transforms on rendered files |
 | `mysql-auth.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
 | `domain-names.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |

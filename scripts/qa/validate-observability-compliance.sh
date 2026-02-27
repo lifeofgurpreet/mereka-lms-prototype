@@ -203,6 +203,16 @@ run_script() {
   return 0
 }
 
+normalize_host_value() {
+  local value="${1:-}"
+
+  value="${value//$'\r'/}"
+  value="${value//$'\n'/}"
+  value="${value//\"/}"
+  value="${value// /}"
+  printf '%s' "$value"
+}
+
 fetch_metrics_with_status() {
   local namespace="$1"
   local resource="$2"
@@ -264,12 +274,34 @@ read_metrics_host() {
   local config_file="$3"
   local key_name="$4"
   local resolved_host=""
+  local -a fallback_keys=("$key_name")
+  local key=""
+
+  case "$key_name" in
+    LMS_BASE)
+      fallback_keys+=("LMS_HOST" "SITE_HOST" "OPENEDX_HOSTNAME" "CMS_BASE")
+      ;;
+    CMS_BASE)
+      fallback_keys+=("CMS_HOST" "SITE_HOST" "OPENEDX_HOSTNAME" "LMS_BASE")
+      ;;
+    *)
+      fallback_keys+=("${key_name%_BASE}_HOST" "OPENEDX_HOSTNAME")
+      ;;
+  esac
+
+  for key in "${fallback_keys[@]}"; do
+    resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+      sh -lc "grep -E \"^${key}:\" '$config_file' 2>/dev/null | tail -n 1 | awk '{print \$2}'" 2>/dev/null || true)"
+    resolved_host="$(normalize_host_value "$resolved_host")"
+    if [[ -n "$resolved_host" ]]; then
+      echo "$resolved_host"
+      return 0
+    fi
+  done
 
   resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
-    sh -lc "grep -E \"^${key_name}:\" '$config_file' | tail -n 1 | awk '{print \$2}' | tr -d '\"'" 2>/dev/null || true)"
-
-  resolved_host="${resolved_host//$'\r'/}"
-  resolved_host="${resolved_host//$'\n'/}"
+    sh -lc "printenv | awk -F= '/^(LMS_BASE|CMS_BASE|LMS_HOST|CMS_HOST|OPENEDX_HOSTNAME)=/ {print \$2; exit}'" 2>/dev/null || true)"
+  resolved_host="$(normalize_host_value "$resolved_host")"
   echo "$resolved_host"
 }
 

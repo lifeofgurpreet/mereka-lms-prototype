@@ -82,6 +82,7 @@ FILESYSTEM_PATCHES=(
   "webpack-memory.sh"
   "footer-component.sh"
   "build-optimizations.sh"
+  "brand-package.sh"
 )
 
 for patch_name in "${FILESYSTEM_PATCHES[@]}"; do

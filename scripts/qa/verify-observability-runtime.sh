@@ -548,10 +548,57 @@ gcloud_cmd() {
     gcloud --project "$VERIFY_GCP_PROJECT" "$@"
 }
 
+normalize_host_value() {
+    local value="${1:-}"
+    value="${value//$'\r'/}"
+    value="${value//$'\n'/}"
+    value="${value//\"/}"
+    value="${value// /}"
+    printf '%s' "$value"
+}
+
+read_metrics_host() {
+    local namespace="$1"
+    local resource="$2"
+    local config_file="$3"
+    local key_name="$4"
+    local resolved_host=""
+    local -a fallback_keys=("$key_name")
+    local key=""
+
+    case "$key_name" in
+        LMS_BASE)
+            fallback_keys+=("LMS_HOST" "SITE_HOST" "OPENEDX_HOSTNAME" "CMS_BASE")
+            ;;
+        CMS_BASE)
+            fallback_keys+=("CMS_HOST" "SITE_HOST" "OPENEDX_HOSTNAME" "LMS_BASE")
+            ;;
+        *)
+            fallback_keys+=("${key_name%_BASE}_HOST" "OPENEDX_HOSTNAME")
+            ;;
+    esac
+
+    for key in "${fallback_keys[@]}"; do
+        resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+            sh -lc "grep -E \"^${key}:\" '$config_file' 2>/dev/null | tail -n 1 | awk '{print \$2}'" 2>/dev/null || true)"
+        resolved_host="$(normalize_host_value "$resolved_host")"
+        if [[ -n "$resolved_host" ]]; then
+            echo "$resolved_host"
+            return 0
+        fi
+    done
+
+    resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+        sh -lc "printenv | awk -F= '/^(LMS_BASE|CMS_BASE|LMS_HOST|CMS_HOST|OPENEDX_HOSTNAME)=/ {print \\$2; exit}' 2>/dev/null || true" 2>/dev/null || true)"
+    resolved_host="$(normalize_host_value "$resolved_host")"
+    echo "$resolved_host"
+}
+
 fetch_metrics_with_status() {
     local namespace="$1"
     local resource="$2"
     local target="${3:-/metrics}"
+    local metrics_host="${4:-}"
     local result=""
     local status="000"
     local body=""
@@ -563,6 +610,8 @@ fetch_metrics_with_status() {
     local fetch_url=""
     local target_arg_used=""
     local remote_script=""
+    local host_header=""
+    local host_header_wget=""
 
     if [[ "$target" == http://* || "$target" == https://* ]]; then
         path_candidates=("$target")
@@ -591,14 +640,22 @@ fetch_metrics_with_status() {
             target_arg_used="$path_candidate"
         fi
 
+        if [[ -n "$metrics_host" ]]; then
+            host_header="-H 'Host: ${metrics_host}'"
+            host_header_wget="--header='Host: ${metrics_host}'"
+        else
+            host_header=""
+            host_header_wget=""
+        fi
+
         remote_script="$(cat <<'EOF'
 tmp_body=$(mktemp)
 tmp_hdr=$(mktemp)
 tmp_status=000
 if command -v curl >/dev/null 2>&1; then
-  tmp_status=$(curl -s -m __TIMEOUT__s -o "$tmp_body" -D "$tmp_hdr" -w '%{http_code}' '__URL__' 2>/dev/null || echo 000)
+  tmp_status=$(curl -s -m __TIMEOUT__s __HOST_HEADER__ -o "$tmp_body" -D "$tmp_hdr" -w '%{http_code}' '__URL__' 2>/dev/null || echo 000)
 elif command -v wget >/dev/null 2>&1; then
-  tmp_status=$(wget --server-response --quiet --timeout=__TIMEOUT__ -O - '__URL__' >"$tmp_body" 2>"$tmp_hdr" && awk 'BEGIN{code="000"} /^  HTTP\// {code=$2} END{print code}' "$tmp_hdr" 2>/dev/null | tr -d '[:space:]' || echo 000)
+  tmp_status=$(wget --server-response --quiet __HOST_HEADER_WGET__ --timeout=__TIMEOUT__ -O - '__URL__' >"$tmp_body" 2>"$tmp_hdr" && awk 'BEGIN{code="000"} /^  HTTP\// {code=$2} END{print code}' "$tmp_hdr" 2>/dev/null | tr -d '[:space:]' || echo 000)
 else
   tmp_status=000
 fi
@@ -611,6 +668,8 @@ printf '%s\n__SPLIT__:%s\n' "$body_content" "$tmp_status"
 EOF
 )"
         remote_script="${remote_script/__TIMEOUT__/$VERIFY_CMD_TIMEOUT}"
+        remote_script="${remote_script/__HOST_HEADER__/$host_header}"
+        remote_script="${remote_script/__HOST_HEADER_WGET__/$host_header_wget}"
         remote_script="${remote_script/__URL__/$fetch_url}"
         remote_script="${remote_script/__SPLIT__/$split_token}"
 
@@ -893,12 +952,15 @@ echo ""
 echo "==> AC-OVR-016: LMS/CMS /metrics endpoint returns valid Prometheus exposition payload"
 if command -v kubectl >/dev/null 2>&1; then
     set +e
-    LMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms)"
+    lms_metrics_host="$(read_metrics_host "$VERIFY_APP_NAMESPACE" deploy/lms /openedx/config/lms.env.yml LMS_BASE)"
+    cms_metrics_host="$(read_metrics_host "$VERIFY_APP_NAMESPACE" deploy/cms /openedx/config/cms.env.yml CMS_BASE)"
+
+    LMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms /metrics "$lms_metrics_host")"
     LMS_CODE="${LMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
     LMS_REST="${LMS_RESULT#*${METRICS_SPLIT_TOKEN}}"
     LMS_PATH="${LMS_REST%%${METRICS_SPLIT_TOKEN}*}"
     LMS_METRICS="${LMS_REST#*${METRICS_SPLIT_TOKEN}}"
-    CMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms)"
+    CMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms /metrics "$cms_metrics_host")"
     CMS_CODE="${CMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
     CMS_REST="${CMS_RESULT#*${METRICS_SPLIT_TOKEN}}"
     CMS_PATH="${CMS_REST%%${METRICS_SPLIT_TOKEN}*}"
