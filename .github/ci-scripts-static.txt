@@ -7,6 +7,7 @@
 scripts/qa/verify-repo-structure.sh
 scripts/qa/verify-documentation-standards.sh
 scripts/qa/verify-documentation-links.sh
+scripts/qa/verify-runbook-testmap-contract.sh
 
 # ── Secrets & security (static) ─────────────────────────────────────────────
 scripts/qa/verify-no-hardcoded-secrets.sh
