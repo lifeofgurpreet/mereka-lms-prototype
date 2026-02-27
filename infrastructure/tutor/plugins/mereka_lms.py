@@ -798,6 +798,11 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.layout.studio_footer.v1 | Default Studio footer (studio MFE)
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
+#   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
+#   org.openedx.frontend.learning.course_outline_sidebar.v1 | Learning course sidebar content
+#   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
+#   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
+#   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
 #
 from tutormfe.hooks import PLUGIN_SLOTS
 
@@ -886,6 +891,81 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearnerSidebarWidget,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learner_dashboard.no_courses_view.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Replace,
+                widget: {
+                    id: 'mereka_no_courses_view',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaNoCoursesView,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_outline_sidebar.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_course_outline_sidebar',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCourseOutlineSidebar,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.progress_certificate_status.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_progress_certificate_status',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaProgressCertificateStatus,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.account.additional_profile_fields.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_additional_profile_fields',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAdditionalProfileFields,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.profile.additional_profile_fields.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_profile_additional_fields',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAdditionalProfileFields,
                 },
             },
             """,
@@ -1130,6 +1210,83 @@ const MerekaLearnerSidebarWidget = () => {
       <a href={coursesPath} className="d-block mb-1">My Courses</a>
       <a href="/help/" className="d-block">Support</a>
     </div>
+  );
+};
+
+// Learner-dashboard empty-state override for no enrolled courses.
+// Wired into org.openedx.frontend.learner_dashboard.no_courses_view.v1.
+const MerekaNoCoursesView = () => {
+  const config = getConfig();
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
+  const discoverPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
+
+  return (
+    <div className="mereka-no-courses-view p-4 text-center">
+      <h2 className="h4 mb-3">Welcome to your learner dashboard</h2>
+      <p className="mereka-no-courses-view__message mb-3">
+        Your dashboard is ready, but you are not enrolled in any courses yet.
+      </p>
+      <div className="mereka-no-courses-view__actions">
+        <a href={discoverPath} className="btn btn-brand me-2 mb-2">Discover courses</a>
+        <a href={dashboardPath} className="btn btn-outline-primary mb-2">Back to dashboard</a>
+      </div>
+    </div>
+  );
+};
+
+// Learning course-outline sidebar branding card inserted into course-outline-sidebar slot.
+// Wired into org.openedx.frontend.learning.course_outline_sidebar.v1.
+const MerekaCourseOutlineSidebar = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+
+  return (
+    <aside className="mereka-course-outline-sidebar mb-3 border rounded p-3">
+      <h3 className="h6 mb-2">{variant.brand} Course Hub</h3>
+      <p className="small text-muted mb-3">
+        Use this area to find support resources while learning.
+      </p>
+      <a href="/help/" className="d-inline-block">Help centre</a>
+    </aside>
+  );
+};
+
+// Learning progress certificate status branding and context card.
+// Wired into org.openedx.frontend.learning.progress_certificate_status.v1.
+const MerekaProgressCertificateStatus = ({ courseId }) => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const safeCourseId = typeof courseId === 'string' ? courseId : '';
+
+  return (
+    <div className="mereka-progress-certificate-status my-3 p-3 rounded"
+         style={{ backgroundColor: 'var(--mereka-bg-surface-alt)', border: '1px solid var(--mereka-border)' }}>
+      <p className="mb-1 fw-semibold">Progress snapshot</p>
+      <p className="mb-0 small text-muted">
+        {variant.brand} Learning —{safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate.
+      </p>
+    </div>
+  );
+};
+
+// Enterprise profile section for account/profile additional profile field slots.
+// Wired into org.openedx.frontend.account.additional_profile_fields.v1 and
+// org.openedx.frontend.profile.additional_profile_fields.v1.
+const MerekaAdditionalProfileFields = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+
+  return (
+    <section className="mereka-additional-profile-fields mb-3">
+      <h2 className="h5 mb-2">Enterprise profile details</h2>
+      <p className="small mb-3">For {variant.brand} workplace setups, these fields are preconfigured by your admin team.</p>
+      <ul className="mereka-additional-profile-fields__list list-unstyled mb-0">
+        <li className="mb-2">Organization: <strong>Mereka Academy</strong></li>
+        <li className="mb-2">Job title: <strong>—</strong></li>
+        <li className="mb-2">Department: <strong>—</strong></li>
+      </ul>
+    </section>
   );
 };
 
