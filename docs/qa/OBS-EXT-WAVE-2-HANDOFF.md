@@ -1,7 +1,7 @@
 # OBS-EXT-HANDOFF-2026-02-27: Observability Wave-2 Runtime Closure Handoff
 
 **Owner:** Observability Team / Platform SRE
-**Status:** ready_for_implementation
+**Status:** in_progress
 **Target date:** 2026-03-06
 **Depends on:** `OBS-053..057`, `OBS-058`, and `docs/qa/OBSERVABILITY_NEXT50_TRACKER_MEREKA_LMS.md`
 
@@ -62,3 +62,22 @@ If a lane fails an object-specific check:
 - Promote strict mode outcomes into next release checklist (`docs/operations/RELEASE_CHECKLIST.md`).
 - Produce one end-to-end `observability-first-class-runtime-evidence-index.json` trend artifact per lane for operations handover.
 - Start `OBS-024` completion path if tracer path evidence remains open.
+
+
+## Strict-mode closure gate (OBS-EXT-069)
+
+For `OBS-EXT-069`, run this exact sequence per lane before flipping handoff status:
+
+1. Capture strict runtime verifier output with explicit command:
+   - `OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+2. Confirm these required files exist and contain the strict markers:
+   - `var/ci/observability-compliance-runtime.json` (or lane-specific evidence folder)
+   - `var/ci/observability-runtime-verify-runtime.md`
+   - `var/ci/observability-first-class-runtime-evidence-index.json`
+3. Validate AC-OVR-025 determinism:
+   - open `observability-compliance-runtime.json` and verify `checks` contains `AC-OVR-025` with `status == "pass"`.
+   - confirm output is machine-parseable JSON without trailing log pollution.
+4. Validate AC-OVR-029 strict-gate behavior:
+   - open `.github/workflows/observability-compliance.yml`
+   - verify `pull_request` exists and enforces strict local mode with monitoring path constraints.
+5. Only when both ACs are green in the strict run may you close `OBS-EXT-069`.

@@ -88,7 +88,7 @@ Execution mode: Tracker-ready implementation backlog
 - AC-OVR-016 (`LMS/CMS /metrics`) still fails in live runtime payload checks (`status_code: 000` for observed paths).
 - LMS runtime still appears to use stock settings path and not repo-applied app instrumentation in the live pod, so `django_prometheus`/`openedx_prometheus` wiring is not guaranteed from runtime images.
 - CMS has partial middleware/install presence but still lacks consistent `/metrics` exposure semantics in the checked runtime lane.
-- AC-OVR-025 (`validate-observability-compliance.sh --json`) and AC-OVR-029 strict gating behavior are still unreliable under current strict workflow expectations.
+- AC-OVR-025 (`validate-observability-compliance.sh --json`) and AC-OVR-029 strict gating behavior were unreliable, but runtime verifier now enforces strict JSON extraction/path handling; re-run strict wave to confirm closure.
 - Continue with sequencing: first close runtime app-metrics drift, then close coverage objects (`OBS-053..057`), then harden strict JSON/parity gating.
 
 
@@ -121,7 +121,7 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
 8. **OBS-EXT-068 — Finish OBS-057 (P1, planned)**
    - Definition of done: dev-only monitor coverage includes `xqueue-metrics` and `mux-delivery-monitor` checks with no accidental nonprod/prod regressions.
 
-9. **OBS-EXT-069 — Stabilize strict runtime/compliance JSON and deterministic fail behavior (P1, planned)**
+9. **OBS-EXT-069 — Stabilize strict runtime/compliance JSON and deterministic fail behavior (P1, in_progress)**
    - Definition of done: `AC-OVR-025` and `AC-OVR-029` pass consistently with strict mode and canonical runner outputs remain machine-parseable.
 
 10. **OBS-EXT-070 — Publish implementation handoff epic (P0, planned)**

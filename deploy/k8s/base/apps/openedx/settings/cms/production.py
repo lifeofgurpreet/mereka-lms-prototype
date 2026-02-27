@@ -108,6 +108,16 @@ MEREKA_COOKIE_DOMAIN = os.environ.get("MEREKA_COOKIE_DOMAIN", f".{MEREKA_LMS_DOM
 MEREKA_LMS_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}"
 MEREKA_STUDIO_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_STUDIO_DOMAIN}"
 MEREKA_MFE_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_MFE_DOMAIN}"
+MEREKA_AUTH_DOMAIN = os.environ.get("MEREKA_AUTH_DOMAIN", "auth0.mereka.io")
+MEREKA_AUTH_BASE_URL = f"{MEREKA_SCHEME}://{MEREKA_AUTH_DOMAIN}"
+MEREKA_OIDC_PROVIDER_SLUG = os.environ.get("MEREKA_OIDC_PROVIDER_SLUG", "mereka-lms")
+
+# Keep OIDC provider routing aligned with environment domains. Base env.yml uses
+# production defaults, so nonprod overlays must override via MEREKA_AUTH_DOMAIN.
+SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = (
+    f"{MEREKA_AUTH_BASE_URL}/application/o/{MEREKA_OIDC_PROVIDER_SLUG}"
+)
+OAUTH_OIDC_ISSUER = f"{MEREKA_LMS_BASE_URL}/oauth2"
 
 # Keep canonical LMS/CMS roots aligned to domain env contract in every environment.
 # Without this override, inherited cms.envs.production defaults can leak .io links

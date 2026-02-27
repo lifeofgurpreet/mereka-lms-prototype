@@ -31,6 +31,9 @@ VERIFY_ENV_LABEL="${VERIFY_OBS_ENV_LABEL:-unknown}"
 VERIFY_DISPATCH_PROFILE="${VERIFY_OBS_DISPATCH_PROFILE:-custom}"
 VERIFY_EVIDENCE_FILE="${VERIFY_OBS_EVIDENCE_FILE:-}"
 VERIFY_EVIDENCE_DIR="${VERIFY_OBS_EVIDENCE_DIR:-${VERIFY_EVIDENCE_FILE%/*}}"
+if [[ -z "$VERIFY_EVIDENCE_DIR" ]]; then
+  VERIFY_EVIDENCE_DIR="$REPO_ROOT/var/ci"
+fi
 RESULTS_FILE="$(mktemp -t verify-observability-runtime.XXXXXX)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
 
@@ -112,6 +115,60 @@ kubectl_cmd() {
     fi
 }
 
+kubectl_cmd_with_timeout() {
+    local timeout_cmd=( )
+    if command -v timeout >/dev/null 2>&1; then
+        timeout_cmd=(timeout "$VERIFY_CMD_TIMEOUT")
+    fi
+
+    local context_args=( )
+    if [[ -n "$VERIFY_K8S_CONTEXT" ]]; then
+        context_args=(--context "$VERIFY_K8S_CONTEXT")
+    fi
+
+    "${timeout_cmd[@]}" kubectl "${context_args[@]}" "$@"
+}
+
+extract_json_payload() {
+    local output="$1"
+    local json_payload=""
+
+    if command -v python3 >/dev/null 2>&1; then
+        json_payload="$(printf '%s' "$output" | python3 - <<'PY'
+import sys
+
+text = sys.stdin.read()
+start = text.find("{")
+if start == -1:
+    sys.exit(1)
+
+depth = 0
+end = -1
+for idx, ch in enumerate(text[start:], start):
+    if ch == "{":
+        depth += 1
+    elif ch == "}":
+        depth -= 1
+        if depth == 0:
+            end = idx
+            break
+
+if end == -1:
+    sys.exit(1)
+
+print(text[start:end + 1])
+PY
+        )"
+    fi
+
+    if [[ -z "$json_payload" ]]; then
+        # Fallback: take the last top-level JSON-looking block from plain text output.
+        json_payload="$(printf '%s' "$output" | awk 'BEGIN{found=0; depth=0} /\{/{found=1} found{print} /^$/&&found{exit}')"
+    fi
+
+    printf '%s' "$json_payload"
+}
+
 gcloud_cmd() {
     gcloud --project "$VERIFY_GCP_PROJECT" "$@"
 }
@@ -125,11 +182,7 @@ fetch_metrics_with_status() {
     local body=""
     local split_token="__METRICS_SPLIT__"
 
-    if command -v timeout >/dev/null 2>&1; then
-        result="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$namespace" "$resource" --             sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-    else
-        result="$(kubectl_cmd exec -n "$namespace" "$resource" --             sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-    fi
+    result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" --             sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
 
     if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
         printf '000%s' "$split_token"
@@ -255,11 +308,7 @@ check_prometheus_runtime_wiring() {
     fi
 
     set +e
-    if command -v timeout >/dev/null 2>&1; then
-        PROM_POD="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
-    else
-        PROM_POD="$(kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
-    fi
+    PROM_POD="$(kubectl_cmd_with_timeout get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
     set -e
 
     if [[ -z "$PROM_POD" ]]; then
@@ -268,13 +317,8 @@ check_prometheus_runtime_wiring() {
     fi
 
     set +e
-    if command -v timeout >/dev/null 2>&1; then
-        TARGETS_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
-        RULES_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
-    else
-        TARGETS_JSON="$(kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
-        RULES_JSON="$(kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
-    fi
+    TARGETS_JSON="$(kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
+    RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
     set -e
 
     TARGET_COUNT="0"
@@ -345,33 +389,19 @@ echo "==> AC-OVR-016: Prometheus recording rules producing numeric data (0-1 ran
 if command -v kubectl >/dev/null 2>&1; then
     # Try to get Prometheus pod
     set +e
-    if command -v timeout >/dev/null 2>&1; then
-        PROM_POD="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
-    else
-        PROM_POD="$(kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
-    fi
+    PROM_POD="$(kubectl_cmd_with_timeout get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
     set -e
 
     if [[ -n "$PROM_POD" ]]; then
         # Query recording rule
         set +e
-        if command -v timeout >/dev/null 2>&1; then
-            if timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+        if kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
                 wget -q -O- "http://localhost:9090/api/v1/query?query=mereka:http_requests:availability_ratio_5m" 2>/dev/null | \
                 grep -q '"status":"success"'; then
                 pass "AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data"
             else
                 skip "AC-OVR-016: Recording rule exists but may not have data yet (scrape warm-up or rollout delay)"
             fi
-        else
-            if kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
-                wget -q -O- "http://localhost:9090/api/v1/query?query=mereka:http_requests:availability_ratio_5m" 2>/dev/null | \
-                grep -q '"status":"success"'; then
-                pass "AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data"
-            else
-                skip "AC-OVR-016: Recording rule exists but may not have data yet (scrape warm-up or rollout delay)"
-            fi
-        fi
         set -e
     else
         skip "AC-OVR-016: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE} namespace"
@@ -571,19 +601,26 @@ if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
       OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
+        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json --strict 2>/dev/null)"
     else
       OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-        scripts/qa/validate-observability-compliance.sh --mode local --json 2>/dev/null)"
+        scripts/qa/validate-observability-compliance.sh --mode local --json --strict 2>/dev/null)"
     fi
     if [[ $? -eq 0 ]]; then
-        if echo "$OUTPUT" | jq -e '.summary.total' >/dev/null 2>&1; then
+        VALIDATE_JSON_PAYLOAD="$(extract_json_payload "$OUTPUT")"
+        if [[ -n "$VALIDATE_JSON_PAYLOAD" ]] && echo "$VALIDATE_JSON_PAYLOAD" | jq -e '.summary.total' >/dev/null 2>&1; then
             pass "AC-OVR-025: Validation script produces valid JSON output"
         else
             fail "AC-OVR-025: Validation script JSON output is malformed"
+            if [[ -n "$OUTPUT" ]]; then
+                skip "AC-OVR-025 tail output: $(printf '%s' "${OUTPUT}" | tail -n 5 | tr '\n' ' ')"
+            fi
         fi
     else
         fail "AC-OVR-025: Validation script failed in --json mode"
+        if [[ -n "$OUTPUT" ]]; then
+            skip "AC-OVR-025 command output (last 5 lines): $(printf '%s' "${OUTPUT}" | tail -n 5 | tr '\n' ' ')"
+        fi
     fi
     set -e
 else
@@ -731,23 +768,14 @@ if [[ "$lane_env" == "dev" || "$lane_env" == "local" || "$lane_env" == "kind" ||
 fi
 if command -v kubectl >/dev/null 2>&1; then
     set +e
-    if command -v timeout >/dev/null 2>&1; then
-        PROM_POD="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
-    else
-        PROM_POD="$(kubectl_cmd get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
-    fi
+    PROM_POD="$(kubectl_cmd_with_timeout get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
     set -e
 
     if [[ -n "$PROM_POD" ]]; then
         # Get all alert rules from Prometheus
         set +e
-        if command -v timeout >/dev/null 2>&1; then
-            RULES_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
-                wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
-        else
-            RULES_JSON="$(kubectl_cmd exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
-                wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
-        fi
+        RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+            wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
         set -e
 
         if echo "$RULES_JSON" | jq -e '.data.groups[].rules[] | select(.type=="alerting")' >/dev/null 2>&1; then

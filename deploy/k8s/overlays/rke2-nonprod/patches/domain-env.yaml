@@ -20,6 +20,8 @@ spec:
               value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
               value: https://apps.academyv2.mereka.dev
+            - name: MEREKA_AUTH_DOMAIN
+              value: auth0.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -41,6 +43,8 @@ spec:
               value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
               value: https://apps.academyv2.mereka.dev
+            - name: MEREKA_AUTH_DOMAIN
+              value: auth0.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -62,6 +66,8 @@ spec:
               value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
               value: https://apps.academyv2.mereka.dev
+            - name: MEREKA_AUTH_DOMAIN
+              value: auth0.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -83,6 +89,8 @@ spec:
               value: https://academyv2.mereka.dev
             - name: MFE_BASE_URL
               value: https://apps.academyv2.mereka.dev
+            - name: MEREKA_AUTH_DOMAIN
+              value: auth0.mereka.dev
 ---
 apiVersion: apps/v1
 kind: Deployment
