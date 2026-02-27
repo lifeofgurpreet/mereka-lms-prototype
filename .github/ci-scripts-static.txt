@@ -66,6 +66,7 @@ scripts/qa/verify-mfe-footer-slot.sh
 scripts/qa/verify-mfe-route-drift.sh
 scripts/qa/verify-mfe-route-contract.sh
 scripts/qa/verify-mfe-footer-slot-migration.sh
+scripts/qa/verify-footer-slot-migration.sh
 scripts/qa/verify-mfe-selector-hardening.sh
 scripts/qa/verify-mfe-routing-parity.sh
 scripts/qa/verify-mfe-first-policy.sh
