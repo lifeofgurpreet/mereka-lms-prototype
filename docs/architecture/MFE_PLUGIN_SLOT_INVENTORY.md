@@ -24,13 +24,25 @@ Plugin slots are named extension points in MFE React components. Operators injec
 
 | Status | Count | Meaning |
 |--------|-------|---------|
-| ACTIVE | 1 | Mereka overrides the default component |
+| ACTIVE | 2 | They override default components |
 | INDIGO | 3 | Indigo theme wires it; we inherit |
 | AVAILABLE | 100+ | Slot exists upstream; not wired |
 
 ---
 
 ## 1. Slots We Override (ACTIVE)
+
+### `org.openedx.frontend.layout.header_logo.v1` — Header Logo
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Shared header shell (`frontend-component-header`) |
+| **Our component** | `MerekaHeaderLogo` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` (namespaced slot id, optional shorthand id for compat) |
+| **Forward-compat** | Keeps override stable while inheriting Indigo header structure |
+| **Operation** | `PLUGIN_OPERATIONS.Replace` via `header_logo_slot` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
 
 ### `org.openedx.frontend.layout.footer.v1` — Footer
 
