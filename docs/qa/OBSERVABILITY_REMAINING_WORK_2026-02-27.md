@@ -22,10 +22,10 @@ The remaining gap is now primarily **runtime parity and deployment synchronizati
    - Enforce nonprod/prod lane identity explicitly before every strict run:
      - `lane`, `OBSERVABILITY_ENV_LABEL`, `OBSERVABILITY_DISPATCH_PROFILE`, `OBSERVABILITY_K8S_CONTEXT`, `OBSERVABILITY_GCP_PROJECT`.
    - Generate and archive `observability-first-class-runtime-evidence-index.json`.
-   - Run and record `evidence_identity` equality check on:
-     - `var/ci/observability-compliance-runtime.json`
-     - `var/ci/observability-runtime-verify-runtime.md`
-     - `var/ci/observability-first-class-runtime-evidence-index.json`.
+- Run and record `evidence_identity` equality check on:
+  - `var/ci/observability-compliance-runtime.json`
+  - `var/ci/observability-runtime-verify-runtime.txt`
+  - `var/ci/observability-first-class-runtime-evidence-index.json`.
 
 2. **Close LMS `/metrics` contract (AC-OVR-016)**
    - Require strict nonprod proof: `status_code: 200`, non-zero `# HELP`, `# TYPE`, numeric samples.

@@ -5,9 +5,22 @@ Close remaining first-class observability blockers in a strict lane-safe sequenc
 
 ## Current state (single-source)
 
-- Last runtime strict status (`var/ci/observability-compliance-runtime.json`): `pass 4 / fail 5 / skip 0`.
-- Last legacy nonprod strict output (`var/ci/runtime-nonprod-check/observability-compliance-runtime.json`): `pass 4 / fail 5 / skip 0`.
-- Lane-run summary artifact (`var/ci/rke2-nonprod-runtime-check/observability-runtime-verify-runtime.md`): `pass 9 / fail 28 / skip 2` and currently reports `evidence_identity=env=rke2-nonprod;profile=rke2-nonprod;context=rke2-nonprod;project=mereka-lms` with both LMS/CMS metric payload files present.
+- Latest strict run snapshot (2026-02-27T11:08:53Z):
+  - Command: `OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=kind-dev OBSERVABILITY_GCP_PROJECT=mereka-lms ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+  - Result: `pass` summary in coverage `66/81` (failures: `15`), step failures: `4`.
+  - `step_results=var/ci/observability-first-class-runtime-step-results.md`
+  - `observability-compliance-runtime.json`: `pass 4 / fail 5 / skip 0` (`AC-OVR-016` / `/metrics` payload and `AC-OVR-026` parser noise still failing)
+  - `observability-runtime-verify-runtime.txt`: `AC-OVR-016` reports `LMS /metrics` and `CMS /metrics` both `status_code: 000`.
+  - Evidence identity used: `env=dev;profile=nonprod;context=kind-dev;project=mereka-lms`.
+- Important artifact naming note: this run writes `var/ci/observability-runtime-verify-runtime.txt` (not `.md`). Keep docs and checks aligned to `.txt` in all new commands.
+- Blocking evidence remains:
+  - `var/ci/observability-metrics-lms-runtime.md`: `status_code=000`, zero payload counters.
+  - `var/ci/observability-metrics-cms-runtime.md`: `status_code=000`, zero payload counters.
+  - `var/ci/observability-logging-pipeline-runtime.txt`: promtail pods `0/0`, no log-source JSON guarantees.
+  - `var/ci/observability-coverage-runtime.md`: runtime misses now:
+    - `xqueue-metrics`, `mux-delivery-monitor`, `mfe-metrics`, `forum-metrics`, `discovery-metrics`, `ecommerce-metrics`, `credentials-metrics`, `purchase-gateway-metrics`
+    - Prometheus rules: `caddy-alerts`, `services-alerts`, `video-alerts`, `email-alerts`, `library-alerts`, `ora2-operations`, `credentials-alerts`
+- Last legacy nonprod strict output (`var/ci/runtime-nonprod-check/observability-compliance-runtime.json`) remains from a previous path/context and is not the active handoff evidence set.
 - Blocking status remains: LMS/CMS `/metrics` response for active strict lanes still 000 in runtime compliance; metric payload counters in `observability-metrics-*-runtime.md` remain zero, and caddy/mfe wiring target/rule match evidence is zero.
 - Current acceptance condition before any lane progression: one consistent strict run with AC-OVR-016 passing and stable identity strings across all evidence artifacts.
 
@@ -96,7 +109,7 @@ Use `lane="dev"` or `lane="nonprod"` for nonprod profile and `lane="prod"` for p
 
 Then verify these artifacts exist and pass:
 - `var/ci/observability-compliance-runtime.json`
-- `var/ci/observability-runtime-verify-runtime.md`
+- `var/ci/observability-runtime-verify-runtime.txt`
 - `var/ci/observability-first-class-runtime-evidence-index.json`
 - `var/ci/observability-metrics-lms-runtime.md`
 - `var/ci/observability-metrics-cms-runtime.md`

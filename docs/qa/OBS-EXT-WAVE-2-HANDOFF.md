@@ -18,6 +18,12 @@ Close the remaining first-class observability blockers in the non-prod/dev/prod 
 - `OBS-EXT-070` is the implementation parent handoff and evidence aggregator only.
 - Excludes new feature expansion (tempo/correlation roadmap) beyond current AC envelope.
 
+### Current strict-run signal
+
+- Lane snapshot: `dev` (`kind-dev`) with `nonprod` dispatch profile
+- Command: `OBSERVABILITY_ENV_LABEL=dev OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=kind-dev OBSERVABILITY_GCP_PROJECT=mereka-lms ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+- Result: coverage remains `66 pass / 15 fail / 0 skip`; AC blockers are still `AC-OVR-016` (`/metrics` 000) and strict parse noise around `AC-OVR-026`.
+
 ## Execution sequence (lane mode)
 
 1. `OBS-EXT-061` — close runtime app-metrics image/manifest drift.
@@ -68,7 +74,7 @@ Use `lane="dev"` or `lane="nonprod"` for nonprod profile and `lane="prod"` for p
 ## Exit criteria per lane
 
 - `var/ci/observability-compliance-runtime.json`
-- `var/ci/observability-runtime-verify-runtime.md`
+- `var/ci/observability-runtime-verify-runtime.txt`
 - `var/ci/observability-first-class-runtime-evidence-index.json`
 - `var/ci/observability-metrics-lms-runtime.md` and `var/ci/observability-metrics-cms-runtime.md`
 - lane-specific per-object evidence files for each resource family above.
@@ -76,7 +82,7 @@ Use `lane="dev"` or `lane="nonprod"` for nonprod profile and `lane="prod"` for p
 - `evidence_identity` tuple must be identical for preflight, compliance, runtime verify, and index outputs.
 
 Failure handling add-on:
-- If `observability-runtime-verify-runtime.md` is missing, rerun strict command after clearing only stale files for that specific lane folder.
+- If `observability-runtime-verify-runtime.txt` is missing, rerun strict command after clearing only stale files for that specific lane folder.
 
 ## Failure handling
 
@@ -101,7 +107,7 @@ For `OBS-EXT-069`, run this exact sequence per lane before flipping handoff stat
    - `lane="nonprod"; OBSERVABILITY_ENV_LABEL="${lane}"; case "${lane}" in dev|nonprod) OBSERVABILITY_DISPATCH_PROFILE="nonprod"; OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT";; prod) OBSERVABILITY_DISPATCH_PROFILE="prod"; OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT";; esac; if [ "${lane}" = prod ] && [ -n "$OBS_PARITY_PROD_GCP_PROJECT" ]; then OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"; else OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"; fi; ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
 2. Confirm these required files exist and contain the strict markers:
    - `var/ci/observability-compliance-runtime.json` (or lane-specific evidence folder)
-   - `var/ci/observability-runtime-verify-runtime.md`
+   - `var/ci/observability-runtime-verify-runtime.txt`
    - `var/ci/observability-first-class-runtime-evidence-index.json`
 3. Validate AC-OVR-025 determinism:
    - open `observability-compliance-runtime.json` and verify `checks` contains `AC-OVR-025` with `status == "pass"`.
