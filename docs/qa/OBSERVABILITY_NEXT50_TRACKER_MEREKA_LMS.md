@@ -150,6 +150,31 @@ Required artifacts to close each wave:
 2. Then P1 tasks by workstream.
 3. Then P2 optimization tasks.
 
+## Priority Next Steps After Current Commit (Lane-safe, execute one ticket at a time)
+
+- **Priority A — unblock runtime app instrumentation evidence**
+  - `OBS-EXT-061` / `OBS-EXT-062` / `OBS-EXT-063`
+  - Must finish with `LMS/CMS /metrics` payload checks returning `200` and valid Prometheus samples in all lanes.
+
+- **Priority B — close remaining runtime object coverage**
+  - `OBS-053`, `OBS-054`, `OBS-055`, `OBS-056`, `OBS-057`
+  - Must finish in order, each with fresh per-lane evidence from
+    `run-observability-first-class.sh --mode runtime --strict`.
+
+- **Priority C — gate hardening + handoff finalization**
+  - `OBS-069` (`AC-OVR-025`, `AC-OVR-029` strict determinism)
+  - `OBS-070` (implementation parent handoff closure): all child rows linked with evidence IDs and exit criteria.
+
+- **Priority D — evidence retention and trending**
+  - Re-run strict scheduled parity rollup after each wave and capture 3 consecutive non-failing windows to close `PAR-001`/`PAR-002`.
+  - Archive evidence artifacts with lane/dispatch hash and timestamp for operator trend review.
+
+### Hard stop rules
+
+- Do not progress to `Priority B` until `Priority A` has a clean lane signal in at least one nonprod proof run.
+- Do not progress to `Priority C` until all `OBS-053..057` blockers are evidence-closed in `nonprod`, then `prod`, then `dev`.
+- Do not modify unrelated service or application behavior from these tickets (observability-only scope).
+
 ## Runtime Recovery Wave (2026-02-26 evidence-driven, large tasks)
 
 | ID | Priority | Workstream | Task | Depends on | Deliverable | Definition of done | Status |
