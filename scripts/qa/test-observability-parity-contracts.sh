@@ -283,6 +283,42 @@ run_correlation_header_case() {
   log_result PASS "$case_name(correlation-header)" "ok"
 }
 
+run_lane_contract_case() {
+  local case_name="$1"
+  local env_label="$2"
+  local dispatch_profile="$3"
+  local k8s_context="$4"
+  local gcp_project="$5"
+  local expect_exit_code="$6"
+  local out_dir="$TMP_ROOT/lane-contract/$case_name"
+  local out_log="$out_dir/stdout.log"
+  local err_log="$out_dir/stderr.log"
+  local observed_status=0
+  mkdir -p "$out_dir"
+
+  set +e
+  "$SCRIPT_DIR/verify-observability-parity-lane-contract.sh" \
+    --env-label "$env_label" \
+    --dispatch-profile "$dispatch_profile" \
+    --k8s-context "$k8s_context" \
+    --gcp-project "$gcp_project" \
+    >"$out_log" 2>"$err_log"
+  observed_status=$?
+  set -e
+
+  if [[ "$observed_status" -ne "$expect_exit_code" ]]; then
+    log_result FAIL "$case_name(lane-contract)" "exit_code=$observed_status expected=$expect_exit_code"
+    return
+  fi
+
+  if [[ "$expect_exit_code" -ne 0 && ! -s "$err_log" ]]; then
+    log_result FAIL "$case_name(lane-contract)" "expected failure output"
+    return
+  fi
+
+  log_result PASS "$case_name(lane-contract)" "ok"
+}
+
 run_delta_case "valid-dev" "dev" "$FIXTURES_ROOT/valid/delta/dev" 0
 run_delta_case "valid-nonprod" "nonprod" "$FIXTURES_ROOT/valid/delta/nonprod" 0
 run_delta_case "valid-prod" "prod" "$FIXTURES_ROOT/valid/delta/prod" 0
@@ -319,6 +355,12 @@ run_identity_case "invalid-correlation-missing-identity" "$FIXTURES_ROOT/malform
 run_identity_case "invalid-correlation-identity-mismatch" "$FIXTURES_ROOT/malformed/delta-invalid-correlation-identity-mismatch/dev" 1
 
 run_correlation_header_case "verify-correlation-header-propagation" 0
+
+run_lane_contract_case "valid-dev" "dev" "nonprod" "rke2-nonprod" "mereka-lms" 0
+run_lane_contract_case "valid-prod" "prod" "prod" "gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" "mereka-lms" 0
+run_lane_contract_case "invalid-dev-profile" "dev" "prod" "rke2-nonprod" "mereka-lms" 1
+run_lane_contract_case "invalid-missing-context" "nonprod" "nonprod" "" "mereka-lms" 1
+run_lane_contract_case "invalid-missing-gcp" "nonprod" "nonprod" "rke2-nonprod" "" 1
 
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "Result: FAIL ($FAIL_COUNT of $TOTAL_COUNT checks failed)" >&2
