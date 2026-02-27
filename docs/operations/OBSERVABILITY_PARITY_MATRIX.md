@@ -83,10 +83,10 @@ Any temporary difference must include:
 Run for each environment:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<dev|nonprod|prod> \
+OBSERVABILITY_ENV_LABEL=<lane> \
 OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-OBSERVABILITY_K8S_CONTEXT=<context> \
-OBSERVABILITY_GCP_PROJECT=<project> \
+OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
+OBSERVABILITY_GCP_PROJECT=$OBS_PARITY_<LANE>_GCP_PROJECT \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
