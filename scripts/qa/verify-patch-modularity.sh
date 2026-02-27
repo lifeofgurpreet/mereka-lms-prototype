@@ -15,14 +15,10 @@ fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 
 # Expected patch files and their corresponding function names
 declare -A PATCH_FILES=(
-  [mysql-auth.sh]=apply_mysql_auth_patch
+  # Legacy modules retained as filesystem patches
   [mfe-node.sh]=apply_mfe_node_patch
-  [domain-names.sh]=apply_domain_names_patch
   [webpack-memory.sh]=apply_webpack_memory_patch
-  [csrf-origins.sh]=apply_csrf_origins_patch
   [footer-component.sh]=apply_footer_component_patch
-  [prometheus-metrics.sh]=apply_prometheus_metrics_patch
-  [mongodb-atlas.sh]=apply_mongodb_atlas_patch
   [build-optimizations.sh]=apply_build_optimizations_patch
 )
 
