@@ -18,10 +18,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given all enterprise services are deployed, when `kubectl get endpoints
     -n mereka-lms` is run, then each enterprise service has non-empty endpoints
@@ -38,10 +34,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: 'Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8000/health/`
     is called from within the cluster, then the response is HTTP 200 with `{"status":
@@ -59,10 +51,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given the license-manager service is running, when `curl http://license-manager:8000/health/`
     is called from within the cluster, then the response is HTTP 200
@@ -79,10 +67,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given the enterprise-access service is running, when `curl http://enterprise-access:8000/health/`
     is called from within the cluster, then the response is HTTP 200
@@ -99,10 +83,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:8000/health/`
     is called from within the cluster, then the response is HTTP 200
@@ -119,10 +99,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given enterprise MFEs are deployed, when `curl https://admin.academyv2.mereka.io/`
     is called, then the admin portal HTML is returned with HTTP 200
@@ -139,10 +115,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given enterprise MFEs are deployed, when `curl https://enterprise.academyv2.mereka.io/`
     is called, then the learner portal HTML is returned with HTTP 200
@@ -159,10 +131,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given the service is deployed, its domain MUST use DNS-only Cloudflare
     mode with Let's Encrypt SSL (not Cloudflare proxy)
@@ -305,10 +273,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-catalog.sh
     command: scripts/qa/verify-enterprise-catalog.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-020
   description: Given an enterprise catalog with a content filter for subject "Technology",
     when `GET /api/v1/enterprise-catalogs/{uuid}/get_content_metadata/` is called,
@@ -322,10 +286,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-catalog.sh
     command: scripts/qa/verify-enterprise-catalog.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: Given the catalog sync task has not run in 6 hours, when the Celery
     beat scheduler fires, then the sync task executes and updates content metadata
@@ -339,10 +299,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enterprise-catalog.sh
     command: scripts/qa/verify-enterprise-catalog.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-022
   description: Given a course key "course-v1:Mereka+ENT101+2026", when `GET /api/v1/enterprise-catalogs/{uuid}/contains_content_items/?course_run_ids=course-v1:Mereka+ENT101+2026`
     is called, then the response indicates whether the course is in the catalog within

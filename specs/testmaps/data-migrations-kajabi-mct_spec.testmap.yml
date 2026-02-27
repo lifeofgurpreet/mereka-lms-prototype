@@ -14,10 +14,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-kajabi-export.sh
     command: scripts/qa/verify-kajabi-export.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given valid MCT Azure AD credentials, when `mct-export.mjs` runs, then
     users, categories, courses, and enrollment data are exported to `exports/mct/`
@@ -31,10 +27,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mct-export.sh
     command: scripts/qa/verify-mct-export.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given Kajabi completion tags exist, when `kajabi-export-completions.mjs`
     runs with `filter[has_tag_id]`, then completion records are exported with correct
@@ -49,10 +41,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-kajabi-completions-export.sh
     command: scripts/qa/verify-kajabi-completions-export.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given MCT video content with Azure SAS tokens, when `mct-export.mjs
     --resources courses --force` runs, then fresh video URLs are exported that are
@@ -66,10 +54,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mct-video-urls.sh
     command: scripts/qa/verify-mct-video-urls.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given Kajabi NDJSON exports, when `transform_data.py` runs, then `users_import.csv`
     contains only users with at least one enrollment (approximately 73K, not 326K
@@ -79,10 +63,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-kajabi-transform.sh
     command: scripts/qa/verify-kajabi-transform.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given Kajabi NDJSON exports, when `prepare_openedx_imports.py` runs,
     then `enrollments_import.csv` contains deduplicated (email, course_id) pairs
@@ -91,10 +71,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-kajabi-transform.sh
     command: scripts/qa/verify-kajabi-transform.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given MCT NDJSON exports, when `transform_data.py` runs with category-level
     mapping, then exactly 30 course packages are generated (not 81 or 178)
@@ -103,10 +79,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mct-transform.sh
     command: scripts/qa/verify-mct-transform.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given MCT enrollment data (2.3M raw records), when deduplication runs,
     then unique (user, category) pairs total approximately 441K records
@@ -115,10 +87,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mct-transform.sh
     command: scripts/qa/verify-mct-transform.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given Kajabi course structure data, when `build_course_packages.py`
     runs, then 109 OLX tarballs are generated with correct course keys in `course-v1:MEREKA+MEKA-{id}+RUN-{id}`
@@ -223,10 +191,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enrollment-import-counts.sh
     command: scripts/qa/verify-enrollment-import-counts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-020
   description: Given MCT enrollment CSV (~441K unique pairs), when batched import
     runs, then Open edX enrollment count increases by at least 440K (allowing for
@@ -236,10 +200,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enrollment-import-counts.sh
     command: scripts/qa/verify-enrollment-import-counts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: Given an enrollment record where the user email is not found in Open
     edX, when the import processes that record, then it is skipped with a log entry
@@ -249,10 +209,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-enrollment-skip-handling.sh
     command: scripts/qa/verify-enrollment-skip-handling.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-022
   description: Given an enrollment record where the course key is not found in Open
     edX, when the import processes that record, then it is skipped with a log entry

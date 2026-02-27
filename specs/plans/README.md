@@ -10,7 +10,7 @@ Each spec produces three artifacts:
 |------|---------|
 | `<name>_plan.md` | Implementation task breakdown with dependencies, complexity estimates, and file paths |
 | `<name>_testplan.md` | Test matrix covering unit, integration, E2E, and verification tests |
-| `../testmaps/<name>_testmap.yaml` | Machine-readable YAML mapping spec ACs to test types and file paths |
+| `../testmaps/<name>_spec.testmap.yml` | Machine-readable YAML mapping spec ACs to test types and file paths |
 
 ## Conventions
 
@@ -58,5 +58,5 @@ use spec-planner to generate implementation tasks from specs/<name>_spec.md
 # Verify all plans exist
 ls specs/plans/*_plan.md | wc -l       # expect: 25
 ls specs/plans/*_testplan.md | wc -l   # expect: 25
-ls specs/testmaps/*_testmap.yaml | wc -l  # expect: 25
+ls specs/testmaps/*_spec.testmap.yml | wc -l  # expect: 25
 ```

@@ -31,10 +31,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-multisite-config.sh
     command: scripts/qa/verify-multisite-config.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Login on `academyv2.mereka.io` persists session when navigating to
     `apps.academyv2.mereka.io`
@@ -43,10 +39,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-session-persistence.sh
     command: scripts/qa/verify-session-persistence.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Login on `academy.biji-biji.com` works independently (separate session)
   verify:
@@ -54,10 +46,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-session-persistence.sh
     command: scripts/qa/verify-session-persistence.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: CSRF tokens are accepted from all three domains
   verify:
@@ -65,10 +53,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-csrf-multisite.sh
     command: scripts/qa/verify-csrf-multisite.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: '`/api/mfe_config/v1` returns correct `LMS_BASE_URL` for each domain'
   verify:
@@ -80,10 +64,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-multisite-config.sh
     command: scripts/qa/verify-multisite-config.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Studio is accessible at `studio.academyv2.mereka.io` only
   verify:
@@ -95,10 +75,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-studio-isolation.sh
     command: scripts/qa/verify-studio-isolation.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Profile image upload from MFE succeeds
   verify:
@@ -106,10 +82,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-body-limits.sh
     command: scripts/qa/verify-body-limits.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/DOMAIN_MANAGEMENT.md
     section: Verification > Profile Image Upload
@@ -126,10 +98,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-favicon-multisite.sh
     command: scripts/qa/verify-favicon-multisite.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: '`./scripts/qa/verify-oidc-provider-configs.sh --env prod` passes (enabled/visible
     + non-empty effective secret + provider label contract)'

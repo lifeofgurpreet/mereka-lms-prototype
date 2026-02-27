@@ -331,11 +331,11 @@ These manual tests are documented in the runbook (`docs/runbooks/proctoring-oper
 
 ## Testmap Integration
 
-All tests in this plan are mapped to acceptance criteria in `specs/testmaps/proctoring-integration_testmap.yaml` for traceability and automated coverage verification.
+All tests in this plan are mapped to acceptance criteria in `specs/testmaps/proctoring-integration_spec.testmap.yml` for traceability and automated coverage verification.
 
 Verify coverage:
 ```bash
-python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/proctoring-integration_testmap.yaml
+python ~/projects/team-skills/plugins/core/skills/specs-vs-docs/tools/check_test_coverage.py specs/testmaps/proctoring-integration_spec.testmap.yml
 ```
 
 ---

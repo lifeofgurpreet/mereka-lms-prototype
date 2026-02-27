@@ -46,12 +46,18 @@ Generated from `depends_on` frontmatter in spec files.
 | design-tokens-system_spec.md | 12 | Design Tokens System |
 | multi-tenancy-architecture_spec.md | 28 | Multi-Tenancy Architecture |
 | slo-sla-service-level-management_spec.md | 23 | SLO/SLA Definitions & Service Level Management |
+| oep48-brand-package_spec.md | 37 | OEP-48 Brand Package *(depends on: branding-system, design-tokens-system)* |
+| mfe-plugin-slots_spec.md | 29 | MFE Plugin Slots Activation *(depends on: branding-system, oep48-brand-package)* |
+| frontend-accessibility_spec.md | 26 | Frontend Accessibility *(depends on: branding-system, mfe-plugin-slots)* |
+| studio-customization_spec.md | 28 | Studio Customization *(depends on: branding-system, multi-tenancy-architecture)* |
+| frontend-performance-budgets_spec.md | 30 | Frontend Performance Budgets *(depends on: branding-system, oep48-brand-package)* |
 
 ## Tier 5
 
 | Spec | ACs | Title |
 |------|-----|-------|
 | auth-sso-enterprise_spec.md | 45 | Authentication & SSO Enterprise Integration |
+| paragon-design-tokens-migration_spec.md | 41 | Paragon Design Tokens Migration *(depends on: oep48-brand-package, design-tokens-system)* |
 
 ## Tier 6
 
@@ -83,4 +89,4 @@ Generated from `depends_on` frontmatter in spec files.
 |------|-----|-------|
 | data-privacy-gdpr-compliance_spec.md | 30 | Data Privacy & GDPR Compliance |
 
-**Total**: 31 specs, 769 ACs, 10 tiers
+**Total**: 40 specs, 960+ ACs, 10 tiers *(6 new frontend specs added 2026-02-27)*
