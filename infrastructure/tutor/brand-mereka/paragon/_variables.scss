@@ -1,0 +1,22 @@
+// Mereka Academy brand overrides for Paragon/Bootstrap
+// Source of truth: assets/branding/tokens.css
+//
+// DEPRECATED: These SCSS variables are deprecated in Paragon v23+.
+// Use paragon/tokens.json for new implementations.
+
+$font-family-sans-serif: 'Poppins', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !default;
+$headings-font-family: 'Lato', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !default;
+
+$primary: #ab3b78 !default;
+$secondary: #237072 !default;
+$success: #2c6e49 !default;
+$info: #295cad !default;
+$warning: #f4be48 !default;
+$danger: #8c002f !default;
+
+$link-color: #295cad !default;
+$link-hover-color: #237072 !default;
+
+$btn-border-radius: 9999px !default;
+$btn-border-radius-sm: 9999px !default;
+$btn-border-radius-lg: 9999px !default;
