@@ -182,7 +182,11 @@ fetch_metrics_with_status() {
     local body=""
     local split_token="__METRICS_SPLIT__"
 
-    result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" --             sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+    result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" --         sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
+
+    if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
+        result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" --             sh -lc "if command -v wget >/dev/null 2>&1; then              tmp_body=\$(mktemp);               tmp_hdr=\$(mktemp);               wget -q -O "\$tmp_body" --timeout ${VERIFY_CMD_TIMEOUT} '${target}' 2>"\$tmp_hdr";               code=\$(awk 'BEGIN{code="000"} /^  HTTP\//{code=\$2} END{print code}' "\$tmp_hdr" 2>/dev/null | tr -d '[:space:]');               body=\$(cat "\$tmp_body");               rm -f "\$tmp_body" "\$tmp_hdr";               printf '%s\n${split_token}:%s\n' "\$body" "\${code:-000}";             else               printf '${split_token}:000\n';             fi") 2>/dev/null || true)"
+    fi
 
     if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
         printf '000%s' "$split_token"
