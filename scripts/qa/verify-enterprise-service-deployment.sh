@@ -9,6 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="mereka-lms"
 PASS=0; FAIL=0
+ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
@@ -51,9 +52,15 @@ echo "Namespace: $NAMESPACE"
 echo
 
 # ---------------------------------------------------------------------------
-# AC-001: Enterprise deployments exist with READY replicas >= 1
+# AC-001: Enterprise deployments exist with healthy readiness.
+# Default contract: READY replicas MUST equal desired replicas.
+# Compatibility mode: set ALLOW_PARTIAL_READY=1 to accept READY >= 1.
 # ---------------------------------------------------------------------------
-echo "[AC-001] Verifying enterprise deployments have READY replicas >= 1..."
+if [[ "$ALLOW_PARTIAL_READY" == "1" ]]; then
+  echo "[AC-001] Verifying enterprise deployments have READY replicas >= 1 (compat mode)..."
+else
+  echo "[AC-001] Verifying enterprise deployments have READY replicas equal desired..."
+fi
 EXPECTED_DEPS=(
   enterprise-catalog
   enterprise-catalog-worker
@@ -69,10 +76,18 @@ for dep in "${EXPECTED_DEPS[@]}"; do
   READY=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
   DESIRED=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
   if [[ -z "$READY" ]]; then READY=0; fi
-  if [[ "$READY" -ge 1 ]]; then
+  if [[ -z "$DESIRED" ]]; then DESIRED=0; fi
+  if [[ "$ALLOW_PARTIAL_READY" == "1" ]]; then
+    if [[ "$READY" -ge 1 ]]; then
+      pass "AC-001: $dep ${READY}/${DESIRED} ready (compat mode)"
+    else
+      fail "AC-001: $dep ${READY}/${DESIRED} ready (need >= 1 in compat mode)"
+      AC001_OK=false
+    fi
+  elif [[ "$READY" -eq "$DESIRED" && "$DESIRED" -ge 1 ]]; then
     pass "AC-001: $dep ${READY}/${DESIRED} ready"
   else
-    fail "AC-001: $dep ${READY}/${DESIRED} ready (need >= 1)"
+    fail "AC-001: $dep ${READY}/${DESIRED} ready (expected full readiness)"
     AC001_OK=false
   fi
 done
