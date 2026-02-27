@@ -3,7 +3,7 @@
 ## Source
 - Source core theme: `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`
 - Theme bridge: `infrastructure/tutor/themes/mereka/scss/_tokens.scss`
-- Generated on: 2026-02-27T21:15:58Z (UTC)
+- Generated on: 2026-02-27T21:26:17Z (UTC)
 - Command: `python3 scripts/qa/paragon-v22-token-audit.py --write`
 
 ## Method
