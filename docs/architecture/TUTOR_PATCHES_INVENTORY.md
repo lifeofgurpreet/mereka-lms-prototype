@@ -3,7 +3,7 @@
 This document classifies every patch module in `infrastructure/tutor/patches/` and describes
 its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plugins/mereka_lms.py`.
 
-**Maintained as of**: 2026-02-25
+**Maintained as of**: 2026-02-27
 
 ## Classification Key
 
@@ -12,6 +12,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | `CONVERTIBLE` | Logic can live entirely in an `ENV_PATCHES` (or other Tutor filter) hook and survive `tutor config save` without any post-render surgery. |
 | `FILESYSTEM` | Requires `cp`, `mkdir`, or regex surgery on _already-rendered_ files in `tutor_env/`. Cannot be expressed as a Tutor template patch alone. |
 | `ALREADY_CONVERTED` | The logical equivalent already exists in `mereka_lms.py` via an `ENV_PATCHES` hook; the bash patch now only guards against mismatches in the rendered output (belt-and-suspenders or legacy idempotency). |
+| `REMOVED` | Fully migrated to `mereka_lms.py` plugin and deleted from `patches/`. No bash equivalent remains. |
 
 ---
 
@@ -34,12 +35,9 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 66 |
-| Classification | `ALREADY_CONVERTED` |
-| What it does | 1. Adds `MYSQL_ROOT_HOST: "%"` after `MYSQL_ROOT_PASSWORD` in `docker-compose.yml`. 2. Replaces `--mysql-native-password=ON` with `--default-authentication-plugin=mysql_native_password`. Targets both the upstream Tutor template and the rendered `tutor_env/` copy. |
-| Tutor hook equivalent | `hooks.Filters.ENV_PATCHES` → patch name `"mysql-docker-compose"` in `mereka_lms.py` (line 897–907). |
-| Why still in bash | Belt-and-suspenders for the rendered `tutor_env/env/local/docker-compose.yml` file in case the ENV_PATCHES hook is not yet active or the plugin was installed after the first `tutor config save`. Also normalises any brace-syntax regressions from prior runs. |
-| Risk of full removal | MEDIUM — removing the bash patch is safe only after confirming the plugin is always enabled before `tutor config save`. |
+| Classification | `REMOVED` (2026-02-27) |
+| What it did | 1. Added `MYSQL_ROOT_HOST: "%"` after `MYSQL_ROOT_PASSWORD` in `docker-compose.yml`. 2. Replaced `--mysql-native-password=ON` with `--default-authentication-plugin=mysql_native_password`. |
+| Migrated to | `hooks.Filters.ENV_PATCHES` → patch name `"mysql-docker-compose"` in `mereka_lms.py`. |
 
 ---
 
@@ -60,12 +58,9 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 105 |
-| Classification | `ALREADY_CONVERTED` |
-| What it does | Adds `academy.biji-biji.com` and `skillourfuture.academy.mereka.io` to: 1. `ALLOWED_HOSTS` in `production.py`. 2. `server_name` in `nginx/lms.conf`. 3. Caddy LMS proxy blocks in `Caddyfile`. Operates on both upstream templates and rendered `tutor_env/` copies. |
-| Tutor hook equivalent | `openedx-lms-production-settings` patch (ALLOWED_HOSTS, line 63–68), `nginx-lms-config` patch (line 958–988), `caddy-caddyfile` patch (line 914–952) in `mereka_lms.py` — all three are `ALREADY_CONVERTED`. |
-| Why still in bash | Belt-and-suspenders for the rendered copies. The plugin patches are authoritative for new renders; the bash patch guards the current `tutor_env/` state. |
-| Risk of full removal | LOW — safe to remove once the plugin is confirmed always-enabled before config save. The extra hosts are fully expressed in `mereka_lms.py` `CONFIG_DEFAULTS` + ENV_PATCHES. |
+| Classification | `REMOVED` (2026-02-27) |
+| What it did | Added `academy.biji-biji.com` and `skillourfuture.academy.mereka.io` to ALLOWED_HOSTS, nginx server_name, and Caddy proxy blocks. |
+| Migrated to | `openedx-lms-production-settings`, `nginx-lms-config`, `caddy-caddyfile` ENV_PATCHES in `mereka_lms.py`. |
 
 ---
 
@@ -86,12 +81,9 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 47 |
-| Classification | `ALREADY_CONVERTED` |
-| What it does | Appends `CSRF_TRUSTED_ORIGINS.append(...)` entries for biji-biji.com and skillourfuture to `production.py`. Anchors on the existing Mereka-generated origin line. Targets both template and rendered copy. |
-| Tutor hook equivalent | `openedx-lms-production-settings` ENV_PATCH includes CSRF_TRUSTED_ORIGINS loop (lines 66–68) in `mereka_lms.py`. The full set of extra CSRF origins is in `MEREKA_LMS_EXTRA_CSRF_ORIGINS` config default. |
-| Why still in bash | Patches the rendered `tutor_env/` file after the fact; required when the plugin was added after the initial config save. |
-| Risk of full removal | LOW — safe once plugin is always-enabled before config save. |
+| Classification | `REMOVED` (2026-02-27) |
+| What it did | Appended `CSRF_TRUSTED_ORIGINS.append(...)` entries for biji-biji.com and skillourfuture to `production.py`. |
+| Migrated to | `openedx-lms-production-settings` ENV_PATCH with `MEREKA_LMS_EXTRA_CSRF_ORIGINS` config default in `mereka_lms.py`. |
 
 ---
 
@@ -113,12 +105,9 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 68 |
-| Classification | `ALREADY_CONVERTED` |
-| What it does | 1. Injects `django_prometheus` and `openedx_prometheus` into `INSTALLED_APPS`, adds Prometheus middleware wrapping in `production.py`. 2. Adds `/metrics` nginx location block to `lms.conf`. Targets both templates and rendered copies. |
-| Tutor hook equivalent | `openedx-lms-production-settings` ENV_PATCH covers Prometheus INSTALLED_APPS + middleware (lines 110–123 of plugin). `nginx-lms-config` ENV_PATCH covers the `/metrics` nginx block (lines 971–978). `openedx-dockerfile-post-python-requirements` installs `django-prometheus==2.3.1`. |
-| Why still in bash | Belt-and-suspenders on rendered files. Also guards against the production.py sentinel check — the bash patch checks `"django_prometheus" not in updated` so it's idempotent if the ENV_PATCH already applied. |
-| Risk of full removal | LOW — plugin covers all three insertion points. |
+| Classification | `REMOVED` (2026-02-27) |
+| What it did | Injected `django_prometheus` into INSTALLED_APPS + middleware, added `/metrics` nginx block. |
+| Migrated to | `openedx-lms-production-settings` (INSTALLED_APPS, middleware), `nginx-lms-config` (/metrics block), `openedx-dockerfile-post-python-requirements` (pip install) in `mereka_lms.py`. |
 
 ---
 
@@ -139,12 +128,9 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 46 |
-| Classification | `ALREADY_CONVERTED` |
-| What it does | Adds `RUN pip install "pymongo[srv]"` to the openedx Dockerfile after the base requirements install step. Targets both template and rendered copy. |
-| Tutor hook equivalent | `openedx-dockerfile-post-python-requirements` ENV_PATCH includes `RUN pip install "pymongo[srv]"` (line 463 of plugin). |
-| Why still in bash | Belt-and-suspenders on rendered `tutor_env/env/build/openedx/Dockerfile`. Also piggybacks on the `django-prometheus` sentinel to find the right anchor line. |
-| Risk of full removal | LOW — fully covered by the plugin patch. |
+| Classification | `REMOVED` (2026-02-27) |
+| What it did | Added `RUN pip install "pymongo[srv]"` to the openedx Dockerfile for Atlas SRV connections. |
+| Migrated to | `openedx-dockerfile-post-python-requirements` ENV_PATCH in `mereka_lms.py`. |
 
 ---
 
@@ -152,32 +138,27 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 209 |
-| Classification | `FILESYSTEM` |
-| What it does | 1. Injects a `(security_headers)` Caddy named snippet before the first site block in the Caddyfile. 2. Appends a Django security settings block (session cookie flags, CSP in report-only mode, DRF rate limiting, Open edX login throttle) to `production.py`. Targets both templates and rendered copies. Guards via sentinel strings. |
-| Tutor hook equivalent | The Django settings block could become a `"openedx-lms-production-settings"` ENV_PATCH. The Caddy snippet injection cannot be expressed as an additive patch because it must be inserted _before_ the first site block (not appended); Tutor's `caddy-caddyfile` patch appends to the end of the file. |
-| Why Caddy part must stay bash | The `(security_headers)` snippet is a named snippet that must appear before site blocks. Tutor ENV_PATCHES for Caddyfile append to the end after all site blocks. Inserting before site blocks requires the positional regex approach in this patch. |
-| Risk of settings conversion | LOW — the Django settings block (CSP, throttling) is a clean append and could be an ENV_PATCH. |
-| Risk of Caddy conversion | HIGH — would require a new Tutor template extension point or a restructured Caddyfile template. |
-| Recommended action | Convert the `production.py` section to an `openedx-lms-production-settings` ENV_PATCH; keep the Caddyfile injection as bash. |
+| Classification | `REMOVED` (2026-02-27) |
+| What it did | 1. Injected `(security_headers)` Caddy snippet. 2. Appended Django security settings (session cookies, CSP report-only, DRF rate limiting, login throttle). |
+| Migrated to | Django settings migrated to `openedx-lms-production-settings` ENV_PATCH in `mereka_lms.py`. Caddy security headers moved to static K8s Caddyfile at `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`. |
 
 ---
 
 ## Summary Table
 
-| Patch | LOC | Classification | Already in plugin? | Removable from bash? |
-|-------|-----|----------------|--------------------|----------------------|
-| `_common.sh` | 98 | N/A (harness) | N/A | No |
-| `mysql-auth.sh` | 66 | ALREADY_CONVERTED | Yes (mysql-docker-compose) | LOW risk |
-| `mfe-node.sh` | 334 | FILESYSTEM | Partial | No |
-| `domain-names.sh` | 105 | ALREADY_CONVERTED | Yes (3 patches) | LOW risk |
-| `webpack-memory.sh` | 74 | FILESYSTEM | Partial | No (cleanup needed) |
-| `csrf-origins.sh` | 47 | ALREADY_CONVERTED | Yes (production-settings) | LOW risk |
-| `footer-component.sh` | 25 | FILESYSTEM | N/A (file copy) | No |
-| `prometheus-metrics.sh` | 68 | ALREADY_CONVERTED | Yes (settings + nginx) | LOW risk |
-| `build-optimizations.sh` | 686 | FILESYSTEM | Partial | No |
-| `mongodb-atlas.sh` | 46 | ALREADY_CONVERTED | Yes (post-requirements) | LOW risk |
-| `security-hardening.sh` | 209 | FILESYSTEM (Caddy) / CONVERTIBLE (Django settings) | No | Partial (Django settings only) |
+| Patch | Classification | Status |
+|-------|----------------|--------|
+| `_common.sh` | N/A (harness) | Active — required by all FILESYSTEM patches |
+| `mfe-node.sh` | FILESYSTEM | Active — MFE Dockerfile surgery |
+| `webpack-memory.sh` | FILESYSTEM | Active — memory limits + dedup |
+| `footer-component.sh` | FILESYSTEM | Active — asset sync to build context |
+| `build-optimizations.sh` | FILESYSTEM | Active — 25+ transforms on rendered files |
+| `mysql-auth.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
+| `domain-names.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
+| `csrf-origins.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
+| `prometheus-metrics.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
+| `mongodb-atlas.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
+| `security-hardening.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` + K8s Caddyfile |
 
 ---
 
@@ -211,19 +192,13 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 
 ---
 
-## Decision: No New Conversions This Sprint
+## History: Patch Consolidation (2026-02-27)
 
-After auditing all 10 patch modules, only the Django-settings portion of `security-hardening.sh`
-is a clear low-risk conversion candidate. However, the `openedx-lms-production-settings`
-ENV_PATCH in `mereka_lms.py` is already large (200+ lines). Adding a 100-line CSP/throttling
-block to it would be safe but not strictly necessary — the bash patch already applies it
-idempotently and guards via a sentinel string (`"Security Hardening (T119)"`).
+Six `ALREADY_CONVERTED` patches were fully removed from `infrastructure/tutor/patches/`:
+`mysql-auth.sh`, `domain-names.sh`, `csrf-origins.sh`, `prometheus-metrics.sh`,
+`mongodb-atlas.sh`, and `security-hardening.sh`. All functionality was already present in
+`mereka_lms.py` via `ENV_PATCHES` hooks.
 
-**Conclusion**: The FILESYSTEM patches must remain in bash. The ALREADY_CONVERTED patches
-provide belt-and-suspenders coverage for stale rendered files. No conversions are required
-at this time without breaking changes to `apply-patches.sh`.
-
-If `security-hardening.sh` Django settings are converted in a future sprint:
-- Target hook: `openedx-lms-production-settings`
-- Sentinel to remove from bash: `"Security Hardening (T119)"`
-- Caddy snippet injection MUST remain in bash (positional, not appendable)
+**Remaining 5 active patches** are all `FILESYSTEM` classification — they require regex surgery
+on rendered files or physical file copies into build contexts, which cannot be expressed as
+Tutor hooks. These must remain in bash.

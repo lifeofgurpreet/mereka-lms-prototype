@@ -195,14 +195,14 @@ run_offline_checks() {
   local apply_patches="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
   local patches_dir="$REPO_ROOT/infrastructure/tutor/patches"
   if [[ -f "$apply_patches" ]]; then
-    # mysql_native_password lives in patches/mysql-auth.sh (sourced by apply-patches.sh)
+    # mysql_native_password lives in mereka_lms.py plugin (ENV_PATCHES mysql-docker-compose)
     if grep -rq "mysql_native_password\|mysql-native-password" "$apply_patches" "$patches_dir" 2>/dev/null; then
       pass_check "tutor patches contain mysql_native_password configuration"
     else
       fail_check "tutor patches missing mysql_native_password configuration"
     fi
 
-    # CSRF_TRUSTED_ORIGINS lives in patches/csrf-origins.sh
+    # CSRF_TRUSTED_ORIGINS lives in mereka_lms.py plugin (ENV_PATCHES openedx-lms-production-settings)
     if grep -rq "CSRF_TRUSTED_ORIGINS\|csrf.origins\|csrf-origins" "$apply_patches" "$patches_dir" 2>/dev/null; then
       pass_check "tutor patches contain CSRF_TRUSTED_ORIGINS configuration"
     else

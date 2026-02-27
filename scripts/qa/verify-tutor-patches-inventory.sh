@@ -50,24 +50,25 @@ while IFS= read -r -d '' patch_file; do
 done < <(find "$PATCHES_DIR" -maxdepth 1 -name "*.sh" -print0 | sort -z)
 
 ###############################################################################
-# Check 3: ALREADY_CONVERTED patches have a hook in mereka_lms.py
-#
-# Maps each ALREADY_CONVERTED patch to an expected string that must appear
-# in mereka_lms.py.
+# Check 3: REMOVED patches must NOT exist on disk but their hooks must
+# still be present in mereka_lms.py (functionality was migrated).
 ###############################################################################
-declare -A CONVERTED_CHECKS
-CONVERTED_CHECKS["mysql-auth.sh"]="mysql-docker-compose"
-CONVERTED_CHECKS["domain-names.sh"]="caddyfile"
-CONVERTED_CHECKS["csrf-origins.sh"]="MEREKA_LMS_EXTRA_CSRF_ORIGINS"
-CONVERTED_CHECKS["prometheus-metrics.sh"]="django_prometheus"
-CONVERTED_CHECKS["mongodb-atlas.sh"]="pymongo\[srv\]"
+declare -A REMOVED_CHECKS
+REMOVED_CHECKS["mysql-auth.sh"]="mysql-docker-compose"
+REMOVED_CHECKS["domain-names.sh"]="caddyfile"
+REMOVED_CHECKS["csrf-origins.sh"]="MEREKA_LMS_EXTRA_CSRF_ORIGINS"
+REMOVED_CHECKS["prometheus-metrics.sh"]="django_prometheus"
+REMOVED_CHECKS["mongodb-atlas.sh"]="pymongo\[srv\]"
+REMOVED_CHECKS["security-hardening.sh"]="SESSION_COOKIE_SECURE"
 
-for patch_name in "${!CONVERTED_CHECKS[@]}"; do
-  expected="${CONVERTED_CHECKS[$patch_name]}"
-  if grep -qE "$expected" "$PLUGIN" 2>/dev/null; then
-    _pass "converted patch covered in plugin: $patch_name -> $expected"
+for patch_name in "${!REMOVED_CHECKS[@]}"; do
+  expected="${REMOVED_CHECKS[$patch_name]}"
+  if [[ -f "$PATCHES_DIR/$patch_name" ]]; then
+    _fail "removed patch still exists on disk: $patch_name (should have been deleted)"
+  elif grep -qE "$expected" "$PLUGIN" 2>/dev/null; then
+    _pass "removed patch migrated to plugin: $patch_name -> $expected"
   else
-    _fail "converted patch NOT found in plugin: $patch_name -> expected '$expected' in $PLUGIN"
+    _fail "removed patch hook NOT found in plugin: $patch_name -> expected '$expected' in $PLUGIN"
   fi
 done
 
