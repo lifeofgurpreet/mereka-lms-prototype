@@ -794,9 +794,8 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   ----------------------------------|--------------------------------------
 #   org.openedx.frontend.layout.      | Default Indigo/OpenedX footer
 #     footer.v1                       |
-#   header_logo_slot                  | Default header logo (MFE header bar)
-#     -> canonical: org.openedx.frontend.layout.header_logo.v1
-#   learner_dashboard.sidebar.v1      | Dashboard sidebar (if present)
+#   org.openedx.frontend.layout.header_logo.v1 | Default header logo (MFE header bar)
+#   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #
 from tutormfe.hooks import PLUGIN_SLOTS
 
@@ -838,6 +837,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaFooter,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learner_dashboard.widget_sidebar.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learner_sidebar_widget',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearnerSidebarWidget,
                 },
             },
             """,
@@ -904,6 +918,24 @@ const MerekaHeaderLogo = () => {
     <a href={getLogoHref(baseUrl)} aria-label={`${variant.brand} dashboard`} className="mereka-header-logo">
       <img src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl} alt={`${variant.brand} logo`} />
     </a>
+  );
+};
+
+// Custom learner-dashboard sidebar widget for branded links and support prompts.
+// Registered via org.openedx.frontend.learner_dashboard.widget_sidebar.v1.
+const MerekaLearnerSidebarWidget = () => {
+  const config = getConfig();
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
+  const coursesPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
+
+  return (
+    <div className="mereka-learner-sidebar-widget">
+      <p className="h5 mb-2">Mereka quick links</p>
+      <a href={dashboardPath} className="d-block mb-1">Dashboard</a>
+      <a href={coursesPath} className="d-block mb-1">My Courses</a>
+      <a href="/help/" className="d-block">Support</a>
+    </div>
   );
 };
 

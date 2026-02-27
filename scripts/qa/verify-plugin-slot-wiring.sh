@@ -65,12 +65,13 @@ else
   do_fail "Header logo canonical slot not found in PLUGIN_SLOTS registration"
 fi
 
-# learner_dashboard.sidebar.v1 is optional; warn when absent so the script remains
-# accurate while acknowledging current implementation scope.
-if grep -q '"learner_dashboard.sidebar.v1"' "$PLUGIN"; then
-  do_pass "Learner-dashboard slot registered as learner_dashboard.sidebar.v1"
+# learner_dashboard.widget_sidebar.v1 is a planned learner-dashboard widget slot.
+# Warn when absent so the script remains accurate while acknowledging
+# implementation scope.
+if grep -q '"org.openedx.frontend.learner_dashboard.widget_sidebar.v1"' "$PLUGIN"; then
+  do_pass "Learner-dashboard slot registered as org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
 else
-  do_warn "learner_dashboard.sidebar.v1 slot not yet registered in mereka_lms.py"
+  do_warn "org.openedx.frontend.learner_dashboard.widget_sidebar.v1 slot not yet registered in mereka_lms.py"
 fi
 
 # 2c. Plugin defines runtime helper components used by slot registrations
