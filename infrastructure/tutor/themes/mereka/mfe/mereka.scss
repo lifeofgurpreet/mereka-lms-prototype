@@ -269,9 +269,9 @@ label {
 // SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__card,
 [class*="login-register"] .pgn__card {
-  border-radius: 28px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.1);
-  box-shadow: 0 28px 72px rgb(var(--mereka-color-ink-deep-rgb) / 0.14);
+  border-radius: var(--mereka-mfe-authn-card-radius, 28px);
+  border: var(--mereka-mfe-authn-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.1));
+  box-shadow: var(--mereka-mfe-authn-card-shadow, 0 28px 72px rgb(var(--mereka-color-ink-deep-rgb) / 0.14));
 }
 
 /* RISK: HIGH — structural authn card-header scoping; gradient branding lost if class renames */
@@ -341,8 +341,8 @@ label {
 [class*="account-settings"] .card,
 [class*="account-page"] .card,
 [class*="learner-dashboard"] .card {
-  border-radius: 24px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  border-radius: var(--mereka-mfe-card-radius, 24px);
+  border: var(--mereka-mfe-card-border, 1px solid var(--mereka-mfe-border));
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
@@ -391,8 +391,8 @@ label {
 /* RISK: HIGH — structural course card scoping; layout breaks if dashboard or course class renames */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] | no stable slot for course card | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] {
-  border-radius: 20px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  border-radius: var(--mereka-mfe-compact-card-radius, 20px);
+  border: var(--mereka-mfe-compact-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
   background: var(--pgn-color-white);
   min-width: 0;
   overflow: hidden;
@@ -401,7 +401,7 @@ label {
 /* RISK: LOW — hover shadow on course cards; graceful degradation */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"]:hover | no stable slot for course card hover | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"]:hover {
-  box-shadow: 0 18px 48px rgb(var(--mereka-color-ink-deep-rgb) / 0.12);
+  box-shadow: var(--mereka-mfe-compact-card-shadow-hover, 0 18px 48px rgb(var(--mereka-color-ink-deep-rgb) / 0.12));
 }
 
 /* learner-dashboard scope + course layout container classes */
@@ -442,28 +442,28 @@ label {
 [class*="learning"] [class*="course-list"] {
   /* Some layouts aren't flex/grid, so `gap` can be a no-op. Keep it anyway, but
      also add margin-based fallbacks below. */
-  gap: 1.5rem;
-  row-gap: 1.5rem;
-  column-gap: 1.5rem;
+  gap: var(--mereka-mfe-compact-list-gap, 1.5rem);
+  row-gap: var(--mereka-mfe-compact-list-gap, 1.5rem);
+  column-gap: var(--mereka-mfe-compact-list-gap, 1.5rem);
 }
 
 /* Bootstrap-ish fallback: many MFEs render course cards inside `.row > .col-*`. */
 /* RISK: MEDIUM — spacing fallback; Bootstrap .col-* is stable, my-courses class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] [class*="my-courses"] .row > [class*="col"] | Bootstrap col is stable; my-courses class is brittle but no slot | expires: 2026-Q3
 [class*="learning"] [class*="my-courses"] .row > [class*="col"] {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--mereka-mfe-compact-list-gap, 1.5rem);
 }
 
 /* RISK: MEDIUM — learning card styling; border-radius/shadow degrade visually if class renames */
 // SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) | no upstream slot for learning layout; inner selector is stable Paragon BEM | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) {
-  border-radius: 20px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
-  box-shadow: var(--mereka-mfe-card-shadow);
+  border-radius: var(--mereka-mfe-compact-card-radius, 20px);
+  border: var(--mereka-mfe-compact-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
+  box-shadow: var(--mereka-mfe-compact-card-shadow, var(--mereka-mfe-card-shadow));
   background: var(--pgn-color-white);
   overflow: hidden;
   /* Fallback vertical rhythm when the parent container doesn't support `gap`. */
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--mereka-mfe-compact-list-gap, 1.5rem);
 }
 
 /* Learning course cards and media should stay responsive; keep brand radius/shadow only. */
@@ -498,20 +498,20 @@ label {
 /* RISK: MEDIUM — spacing fallback; * + * adjacent sibling is safe, outer class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) > * + * | spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) > * + * {
-  margin-top: 1.25rem;
+  margin-top: var(--mereka-mfe-compact-vertical-gap, 1.25rem);
 }
 
 /* RISK: MEDIUM — row spacing fallback; Bootstrap .row is stable, outer class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) .row > * | row spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) .row > * {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--mereka-mfe-compact-vertical-gap, 1.25rem);
 }
 
 /* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */
 /* RISK: HIGH — structural list vertical rhythm; * + * is safe but course-list class can rename */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] > * + * | list spacing fallback | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-list"] > * + * {
-  margin-top: 1rem;
+  margin-top: var(--mereka-mfe-course-list-gap, 1rem);
 }
 
 /* learner-dashboard scope + course component + status badge class */
@@ -554,8 +554,8 @@ label {
 // SELECTOR-EXCEPTION: [class*="discussions"] .card | P3/cosmetic; no slot | expires: 2026-Q3
 [class*="discussions"] .card,
 [class*="discussions"] .pgn__card {
-  border-radius: 22px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.09);
+  border-radius: var(--mereka-mfe-discussions-card-radius, 22px);
+  border: var(--mereka-mfe-discussions-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.09));
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
