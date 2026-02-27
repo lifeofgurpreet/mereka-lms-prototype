@@ -1,0 +1,31 @@
+# Temporary workflow to verify ARC self-hosted runners
+# DELETE after confirming runners work
+name: Test ARC Runners
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-standard:
+    runs-on: mereka-k8s-runners
+    steps:
+      - name: Runner info
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "OS: $(uname -a)"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep Mem | awk '{print $2}')"
+          echo "Disk: $(df -h / | tail -1 | awk '{print $4}')"
+          echo "SUCCESS: Standard runner works!"
+
+  test-heavy:
+    runs-on: mereka-k8s-heavy-builders
+    steps:
+      - name: Runner info
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "OS: $(uname -a)"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep Mem | awk '{print $2}')"
+          echo "Disk: $(df -h / | tail -1 | awk '{print $4}')"
+          echo "SUCCESS: Heavy builder runner works!"
