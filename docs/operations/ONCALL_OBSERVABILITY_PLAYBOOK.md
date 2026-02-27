@@ -24,7 +24,50 @@ OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
 
 If this fails, monitoring blind spots may exist; fix coverage first.
 
-## Step 3: Core Dashboards
+## Step 3: LMS/CMS /metrics and settings-map triage
+
+Use this when AC-OVR-016 is failing in strict runtime output.
+
+```bash
+# Re-run strict runtime gate with lane identity
+OBSERVABILITY_ENV_LABEL=<lane> \
+  OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
+  OBSERVABILITY_K8S_CONTEXT=<lane-context> \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Quick mounted settings-map inventory
+LMS_CONFIGMAPS=$(kubectl -n mereka-lms get deploy lms -o json \
+  | jq -r '.spec.template.spec.volumes[]? | select(.configMap.name | tostring | startswith("openedx-settings-")) | .configMap.name' | sort -u)
+CMS_CONFIGMAPS=$(kubectl -n mereka-lms get deploy cms -o json \
+  | jq -r '.spec.template.spec.volumes[]? | select(.configMap.name | tostring | startswith("openedx-settings-")) | .configMap.name' | sort -u)
+
+printf 'LMS configmaps:
+%s
+' "$LMS_CONFIGMAPS"
+printf 'CMS configmaps:
+%s
+' "$CMS_CONFIGMAPS"
+
+# Prove marker presence in live mounted maps
+for cm in $LMS_CONFIGMAPS $CMS_CONFIGMAPS; do
+  echo "==> $cm"
+  kubectl -n mereka-lms get configmap "$cm" -o json \
+    | jq -r '.data["production.py"] // empty + "\n" + (.data["development.py"] // empty) + "\n" + (.data["test.py"] // empty)' \
+    | rg -n "openedx_prometheus|PrometheusBeforeMiddleware|PrometheusAfterMiddleware|ROOT_URLCONF_OVERRIDES|_metrics_urlconf" || true
+  done
+
+# If only stale maps contain traffic and fresh maps are missing markers
+kubectl -n mereka-lms get configmaps -l app.kubernetes.io/name=openedx --no-headers=true -o custom-columns=NAME:.metadata.name
+```
+
+Close criteria:
+- both LMS and CMS `/metrics` checks show `status_code: 200` in metrics payload artifacts
+- payload checks show `# HELP`, `# TYPE`, and numeric samples
+- AC-OVR-016 marker probe points to healthy maps in live pods
+- no stale, non-hashed map versions remain in workload wiring
+- after rollback/rollout, rerun Step 2 until checks are clean
+
+## Step 4: Core Dashboards
 
 Open in order:
 1. `Mereka LMS - Public Endpoints`
@@ -32,7 +75,7 @@ Open in order:
 3. `Mereka LMS - GKE`
 4. `Mereka LMS - Auth`
 
-## Step 4: Fast Branching by Signal
+## Step 5: Fast Branching by Signal
 
 - Storage signal (`stateful-storage-errors`):
   - inspect MySQL/Redis/Elasticsearch logs
@@ -70,7 +113,7 @@ Open in order:
 - Auth/TLS synthetic failures:
   - run auth/cert verify scripts and check redirect/cert drift
 
-## Step 5: Evidence Bundle
+## Step 6: Evidence Bundle
 
 Attach:
 - `observability-compliance-runtime.json`
@@ -83,7 +126,7 @@ Attach:
 - any `audit-velero` output if data-risk
 - DR bundle path (if generated): `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
 
-## Step 6: Recurring Operator Drill (Monthly)
+## Step 7: Recurring Operator Drill (Monthly)
 
 Drill objective: prove a full observability-driven incident response path from first alert to runbook close in one sitting.
 

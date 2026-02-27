@@ -138,6 +138,8 @@ check_openedx_settings_metrics_wiring() {
     local component="$1"
     local deploy_name="$2"
     local configmap_names=()
+    local deduped_configmap_names=()
+    local marker_counts=()
     local cfg_json=""
     local marker_hit=0
     local checked_count=0
@@ -171,6 +173,29 @@ check_openedx_settings_metrics_wiring() {
 
     for fallback_map in "${configmap_names[@]}"; do
         [[ -z "$fallback_map" ]] && continue
+
+        local map_already_seen=0
+        for existing_map in "${deduped_configmap_names[@]:-}"; do
+            if [[ "$existing_map" == "$fallback_map" ]]; then
+                map_already_seen=1
+                break
+            fi
+        done
+
+        if [[ "$map_already_seen" -eq 0 ]]; then
+            deduped_configmap_names+=("$fallback_map")
+        fi
+    done
+
+    if [[ ${#deduped_configmap_names[@]} -eq 0 ]]; then
+        fail "AC-OVR-016: ${component} deployment '$deploy_name' has no valid openedx-settings configmap candidates"
+        return 1
+    fi
+
+    configmap_names=("${deduped_configmap_names[@]}")
+
+    for fallback_map in "${configmap_names[@]}"; do
+        [[ -z "$fallback_map" ]] && continue
         set +e
         cfg_json="$(kubectl_cmd_with_timeout get configmap "$fallback_map" -n "$VERIFY_APP_NAMESPACE" -o json 2>/dev/null)"
         local cfg_rc=$?
@@ -182,9 +207,11 @@ check_openedx_settings_metrics_wiring() {
         checked_count=$((checked_count + 1))
         local marker_count
         marker_count="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware"))] | length' 2>/dev/null | tr -d '[:space:]')"
+        marker_counts+=("$fallback_map=$marker_count")
         if [[ "$marker_count" != "" && "$marker_count" -gt 0 ]]; then
             marker_hit=1
             pass "AC-OVR-016: ${component} settings configmap '$fallback_map' includes prom metrics wiring markers ($marker_count)"
+            echo "AC-OVR-016: ${component} settings configmaps checked: ${configmap_names[*]}"
             break
         fi
     done
@@ -198,6 +225,8 @@ check_openedx_settings_metrics_wiring() {
         return 1
     fi
 
+    echo "AC-OVR-016: ${component} settings configmaps checked: ${configmap_names[*]}"
+    echo "AC-OVR-016: ${component} marker probe summary: ${marker_counts[*]}"
     fail "AC-OVR-016: ${component} settings configmaps do not include prom metrics wiring markers (checked ${checked_count} map(s))"
     return 1
 }
