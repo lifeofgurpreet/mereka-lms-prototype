@@ -60,6 +60,7 @@ check_runtime_bundle() {
   local verifier_md="$DIR/observability-runtime-verify-runtime.md"
   local preflight_md="$DIR/observability-runtime-preflight.md"
   local tracing_txt="$DIR/observability-tracing-runtime.txt"
+  local logging_pipeline_txt="$DIR/observability-logging-pipeline-runtime.txt"
 
   if [[ ! -f "$index" ]]; then
     return 0
@@ -151,6 +152,28 @@ check_runtime_bundle() {
     fi
   elif [[ "$TRACE_IDENTITY_REQUIRED" == "1" ]]; then
     echo "FAIL runtime: required tracing evidence file missing: $tracing_txt"
+    failures=$((failures + 1))
+  fi
+
+  if [[ -f "$logging_pipeline_txt" ]]; then
+    local logging_pipeline_identity
+    logging_pipeline_identity="$(extract_md_identity "$logging_pipeline_txt")"
+    if [[ -z "$logging_pipeline_identity" ]]; then
+      echo "FAIL runtime: logging pipeline evidence identity missing in $logging_pipeline_txt"
+      failures=$((failures + 1))
+    elif [[ "$index_identity" != "$logging_pipeline_identity" ]]; then
+      echo "FAIL runtime: logging pipeline evidence identity mismatch"
+      echo "  index: $index_identity"
+      echo "  logging_pipeline: $logging_pipeline_identity"
+      failures=$((failures + 1))
+    fi
+
+    if ! has_observability_status_line "$logging_pipeline_txt"; then
+      echo "FAIL runtime: logging pipeline evidence missing PASS/FAIL/WARN status lines in $logging_pipeline_txt"
+      failures=$((failures + 1))
+    fi
+  else
+    echo "FAIL runtime: required logging pipeline evidence file missing: $logging_pipeline_txt"
     failures=$((failures + 1))
   fi
 
