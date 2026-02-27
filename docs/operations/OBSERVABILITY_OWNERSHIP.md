@@ -30,10 +30,10 @@ This document defines who owns each observability layer and how changes are sync
 4. Apply to GCP Monitoring:
    - `./scripts/infra/apply-monitoring-configs.sh apply`
 5. Verify deployed coverage:
-   - `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+  - `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
    - `./scripts/qa/audit-db-exporter-telemetry.sh --mode local`
    - Post-rollout deep validation: `STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime`
-   - For release gates / deep audits: `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+  - For release gates / deep audits: `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
    - For Velero pipeline gate: `STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh --json`
    - For routing gate: `./scripts/qa/verify-alert-routing.sh`
    - For Atlas modulestore path gate: `./scripts/qa/verify-atlas-modulestore-path.sh --mode all`

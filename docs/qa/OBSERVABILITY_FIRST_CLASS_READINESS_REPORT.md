@@ -269,13 +269,16 @@ Suggested policy gate:
 Use namespace-aware runtime checks with first-class evidence output:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=nonprod \
-OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+OBSERVABILITY_ENV_LABEL=<nonprod|prod> \
+OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
+OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
 OBSERVABILITY_APP_NAMESPACE=mereka-lms \
 OBSERVABILITY_MONITORING_NAMESPACE=monitoring \
-OBSERVABILITY_EVIDENCE_DIR="docs/evidence/observability/nonprod-$(date -u +%Y-%m-%dT%H-%M-%SZ)" \
+OBSERVABILITY_EVIDENCE_DIR="docs/evidence/observability/<lane>-$(date -u +%Y-%m-%dT%H-%M-%SZ)" \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
+
+Use `nonprod` profile for `lane=dev`/`nonprod` and `prod` profile for `lane=prod`.
 
 Manual CI runtime path is now available in `.github/workflows/observability-compliance.yml`:
 - `workflow_dispatch` with `run_runtime=true`

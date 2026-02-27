@@ -90,7 +90,7 @@ Fix path (implemented in this repo):
    ```
 5. Confirm freshness:
    ```bash
-   OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+   OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
    ```
 6. Confirm restore-test config contract:
    ```bash
@@ -121,7 +121,7 @@ condition.
 Current enforcement model:
 - `backup-verification` stale signal is handled by GCP policy + runtime checks.
 - `restore-test` stale signal is enforced by runtime freshness checks in:
-  - `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+  - `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
   - `./scripts/qa/audit-velero-alert-pipeline.sh`
 
 ## Recommended Cadence

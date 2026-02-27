@@ -147,8 +147,13 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
 Use this exact check after each closure wave:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+OBSERVABILITY_ENV_LABEL=<lane> \
+OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
+OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
+./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
+
+Use `nonprod` for `lane=dev|nonprod`; use `prod` for `lane=prod`.
 
 Required artifacts to close each wave:
 - Hand-off issue set: `docs/qa/OBS-EXT-WAVE-2-HANDOFF.md` for implementation sequencing and sign-off closure criteria.

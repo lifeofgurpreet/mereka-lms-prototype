@@ -11,7 +11,7 @@ Close the remaining first-class observability blockers in the non-prod/dev/prod 
 
 ## Scope
 
-- P0 execution closure tasks only: `OBS-EXT-061` through `OBS-EXT-062` and `OBS-EXT-064` through `OBS-EXT-068`.
+- P0 execution closure tasks only: `OBS-EXT-061`, `OBS-EXT-062`, `OBS-EXT-063` and `OBS-EXT-064` through `OBS-EXT-068`.
 - P1 strict-mode hardening: `OBS-EXT-069`.
 - `OBS-EXT-070` is the implementation parent handoff and evidence aggregator only.
 - Excludes new feature expansion (tempo/correlation roadmap) beyond current AC envelope.
@@ -33,12 +33,12 @@ Close the remaining first-class observability blockers in the non-prod/dev/prod 
 
 ```bash
 OBSERVABILITY_ENV_LABEL=<lane> \
-OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
 OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
-Use `lane=dev` then `nonprod` then `prod` where environment is available.
+Use `lane=<dev|nonprod|prod>` and set `OBSERVABILITY_DISPATCH_PROFILE` to match the lane profile (`nonprod` for dev/nonprod, `prod` for production).
 
 ## Exit criteria per lane
 
@@ -69,7 +69,7 @@ If a lane fails an object-specific check:
 For `OBS-EXT-069`, run this exact sequence per lane before flipping handoff status:
 
 1. Capture strict runtime verifier output with explicit command:
-   - `OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+   - `OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
 2. Confirm these required files exist and contain the strict markers:
    - `var/ci/observability-compliance-runtime.json` (or lane-specific evidence folder)
    - `var/ci/observability-runtime-verify-runtime.md`

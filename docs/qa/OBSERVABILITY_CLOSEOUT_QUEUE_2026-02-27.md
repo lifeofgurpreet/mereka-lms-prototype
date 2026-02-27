@@ -44,6 +44,7 @@ OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
 OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
+Use `OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod>` and set `nonprod` for `dev`/`nonprod`, `prod` for `prod`.
 
 Then verify these artifacts exist and pass:
 - `var/ci/observability-compliance-runtime.json`

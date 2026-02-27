@@ -17,12 +17,15 @@ If AC-OVR-016 is active, use `docs/qa/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md
 
 ```bash
 OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ./scripts/qa/audit-velero-alert-pipeline.sh
 ./scripts/qa/verify-alert-routing.sh
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ./scripts/qa/run-operations-gates.sh --env both
 ```
+
+Use `OBSERVABILITY_DISPATCH_PROFILE=prod` for production incidents.
 
 If this fails, monitoring blind spots may exist; fix coverage first.
 

@@ -5,9 +5,20 @@ Use this when you need a fast answer to: "Is Mereka LMS healthy right now?"
 
 ## 1) Fast Checks (2-3 minutes)
 
+Use the same template and swap lane/profile mapping:
+
+- `nonprod`/`dev` lane → `OBSERVABILITY_ENV_LABEL=nonprod` and `OBSERVABILITY_DISPATCH_PROFILE=nonprod` with `OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT`
+- `prod` lane → `OBSERVABILITY_ENV_LABEL=prod` and `OBSERVABILITY_DISPATCH_PROFILE=prod` with `OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT`
+
 ```bash
 # Canonical first-class evidence run (local + runtime)
 OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
+  ./scripts/qa/run-observability-first-class.sh --mode all --strict
+
+# Canonical production parity run
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode all --strict
 
 # Public surfaces + certs
@@ -21,6 +32,12 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 
 # Runtime monitoring objects + synthetic cronjobs (requires cluster + gcloud auth)
 OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Production lane strict runtime equivalent
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 # Velero alert pipeline + freshness/recency checks (repo + runtime)
