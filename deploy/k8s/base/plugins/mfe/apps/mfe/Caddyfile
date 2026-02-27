@@ -2,6 +2,7 @@
 	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
 	header X-Content-Type-Options "nosniff"
 	header X-Frame-Options "DENY"
+	header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https:; font-src 'self' data:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self';"
 	header Referrer-Policy "strict-origin-when-cross-origin"
 	header Permissions-Policy "camera=(), microphone=(), geolocation=()"
 }

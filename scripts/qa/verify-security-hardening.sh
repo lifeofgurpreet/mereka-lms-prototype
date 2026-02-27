@@ -97,7 +97,7 @@ check_pattern "$PLUGIN_FILE" "REST_FRAMEWORK.setdefault(\"DEFAULT_THROTTLE_RATES
 # ── 2. Caddy security headers (static k8s Caddyfile) ─────────────────────
 check_file_exists "$MFE_CADDYFILE" "MFE static k8s Caddyfile"
 if [[ -f "$MFE_CADDYFILE" ]]; then
-  for header in "Strict-Transport-Security" "X-Content-Type-Options" "X-Frame-Options" "Referrer-Policy" "Permissions-Policy"; do
+  for header in "Strict-Transport-Security" "X-Content-Type-Options" "X-Frame-Options" "Content-Security-Policy" "Referrer-Policy" "Permissions-Policy"; do
     check_pattern "$MFE_CADDYFILE" "$header" "MFE Caddyfile includes $header"
   done
 
