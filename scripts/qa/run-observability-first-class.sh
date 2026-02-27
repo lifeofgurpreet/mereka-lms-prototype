@@ -122,6 +122,13 @@ except FileNotFoundError:
 PY
 }
 
+record_step_result() {
+  local step_name="$1"
+  local return_code="$2"
+  STEP_FAILURES=$((STEP_FAILURES + (return_code != 0)))
+  STEP_RESULTS+=("${step_name}:$([ "$return_code" -eq 0 ] && echo PASS || echo "FAIL(rc=$return_code)")")
+}
+
 COMPLIANCE_JSON="$OUT_DIR/observability-compliance-${MODE}.json"
 COMPLIANCE_MD="$OUT_DIR/observability-compliance-${MODE}.md"
 RUNTIME_TXT="$OUT_DIR/observability-runtime-verify-${MODE}.txt"
@@ -134,6 +141,7 @@ RUNTIME_METRICS_CMS="$OUT_DIR/observability-metrics-cms-runtime.md"
 COVERAGE_JSON="$OUT_DIR/observability-coverage-${MODE}.json"
 COVERAGE_MD="$OUT_DIR/observability-coverage-${MODE}.md"
 INDEX_JSON="$OUT_DIR/observability-first-class-${MODE}-evidence-index.json"
+STEP_RESULTS_MD="$OUT_DIR/observability-first-class-${MODE}-step-results.md"
 
 STRICT_FLAG=""
 if [[ "$STRICT" == "1" ]]; then
@@ -154,12 +162,7 @@ run_with_timeout "$SCRIPT_TIMEOUT" env \
   VALIDATE_OBS_RUNTIME_CMD_TIMEOUT="$K8S_CMD_TIMEOUT" \
   ./scripts/qa/validate-observability-compliance.sh --mode "$MODE" $STRICT_FLAG --json > "$COMPLIANCE_JSON"
 COMPLIANCE_RC=$?
-if [[ "$COMPLIANCE_RC" -ne 0 ]]; then
-  STEP_FAILURES=$((STEP_FAILURES + 1))
-  STEP_RESULTS+=("observability-compliance:FAIL(rc=$COMPLIANCE_RC)")
-else
-  STEP_RESULTS+=("observability-compliance:PASS")
-fi
+record_step_result "observability-compliance" "$COMPLIANCE_RC"
 set -e
 
 echo "==> Building coverage matrix"
@@ -181,12 +184,7 @@ run_with_timeout "$SCRIPT_TIMEOUT" env \
   --out-md "$COVERAGE_MD" \
   $COVERAGE_STRICT_FLAG
 COVERAGE_RC=$?
-if [[ "$COVERAGE_RC" -ne 0 ]]; then
-  STEP_FAILURES=$((STEP_FAILURES + 1))
-  STEP_RESULTS+=("observability-coverage-matrix:FAIL(rc=$COVERAGE_RC)")
-else
-  STEP_RESULTS+=("observability-coverage-matrix:PASS")
-fi
+record_step_result "observability-coverage-matrix" "$COVERAGE_RC"
 set -e
 
 if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
@@ -203,12 +201,7 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     VERIFY_OBS_EVIDENCE_DIR="$OUT_DIR" \
     ./scripts/qa/verify-observability-runtime.sh > "$RUNTIME_TXT"
   RUNTIME_RC=$?
-  if [[ "$RUNTIME_RC" -ne 0 ]]; then
-    STEP_FAILURES=$((STEP_FAILURES + 1))
-    STEP_RESULTS+=("verify-observability-runtime:FAIL(rc=$RUNTIME_RC)")
-  else
-    STEP_RESULTS+=("verify-observability-runtime:PASS")
-  fi
+  record_step_result "verify-observability-runtime" "$RUNTIME_RC"
   set -e
 
   echo "==> Running correlation header propagation check"
@@ -226,12 +219,7 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     VERIFY_OBS_EVIDENCE_FILE="$RUNTIME_MD" \
     ./scripts/qa/verify-correlation-header-propagation.sh "${CORRELATION_ARGS[@]}" > "$CORRELATION_TXT"
   CORRELATION_RC=$?
-  if [[ "$CORRELATION_RC" -ne 0 ]]; then
-    STEP_FAILURES=$((STEP_FAILURES + 1))
-    STEP_RESULTS+=("verify-correlation-headers:FAIL(rc=$CORRELATION_RC)")
-  else
-    STEP_RESULTS+=("verify-correlation-headers:PASS")
-  fi
+  record_step_result "verify-correlation-headers" "$CORRELATION_RC"
   set -e
 
   echo "==> Running logging pipeline verification"
@@ -245,12 +233,7 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE="$COVERAGE_TXT" \
     ./scripts/qa/verify-logging-pipeline.sh $STRICT_FLAG > "$COVERAGE_TXT"
   LOGGING_RC=$?
-  if [[ "$LOGGING_RC" -ne 0 ]]; then
-    STEP_FAILURES=$((STEP_FAILURES + 1))
-    STEP_RESULTS+=("verify-logging-pipeline:FAIL(rc=$LOGGING_RC)")
-  else
-    STEP_RESULTS+=("verify-logging-pipeline:PASS")
-  fi
+  record_step_result "verify-logging-pipeline" "$LOGGING_RC"
   set -e
 
   echo "==> Running tracing verification"
@@ -262,12 +245,7 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
     TEMPO_URL="${TEMPO_URL:-}" \
     ./scripts/qa/verify-observability-tracing.sh $STRICT_FLAG > "$TRACING_TMP"
   TRACING_RC=$?
-  if [[ "$TRACING_RC" -ne 0 ]]; then
-    STEP_FAILURES=$((STEP_FAILURES + 1))
-    STEP_RESULTS+=("verify-tracing:FAIL(rc=$TRACING_RC)")
-  else
-    STEP_RESULTS+=("verify-tracing:PASS")
-  fi
+  record_step_result "verify-tracing" "$TRACING_RC"
   set -e
 
   {
@@ -296,9 +274,16 @@ coverage_txt = Path(${COVERAGE_TXT@Q})
 lms_payload = Path(${RUNTIME_METRICS_LMS@Q})
 cms_payload = Path(${RUNTIME_METRICS_CMS@Q})
 tracing_txt = Path(${TRACING_TXT@Q})
+step_results_md = Path(${STEP_RESULTS_MD@Q})
 env_label = ${ENV_LABEL@Q}.lower()
 
-files = [str(compliance_json), str(compliance_md), str(coverage_json), str(coverage_md)]
+files = [
+    str(compliance_json),
+    str(compliance_md),
+    str(coverage_json),
+    str(coverage_md),
+    str(step_results_md),
+]
 if mode in ("runtime", "all"):
     files.extend([
         str(runtime_txt),
@@ -354,6 +339,24 @@ echo "==> Observability first-class run complete"
 for STEP_RESULT in "${STEP_RESULTS[@]}"; do
   echo "step_result=${STEP_RESULT}"
 done
+
+echo "step_results=$STEP_RESULTS_MD"
+
+{
+  echo "# Observability First-Class Step Results"
+  echo
+  echo "- mode: ${MODE}"
+  echo "- strict: ${STRICT}"
+  echo
+  echo "| step | status |"
+  echo "| --- | --- |"
+
+  for STEP_RESULT in "${STEP_RESULTS[@]}"; do
+    step_name="${STEP_RESULT%%:*}"
+    step_status="${STEP_RESULT#*:}"
+    echo "| ${step_name} | ${step_status} |"
+  done
+} > "$STEP_RESULTS_MD"
 
 echo "runtime_step_failures=${STEP_FAILURES}"
 echo "evidence_index=$INDEX_JSON"
