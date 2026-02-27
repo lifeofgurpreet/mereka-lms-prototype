@@ -25,6 +25,7 @@
   --mereka-color-ink-300: #AFADB2;
   --mereka-color-teal: #237072;
   --mereka-color-magenta: #ab3b78;
+  --mereka-color-magenta-dark: #963365;
   --mereka-color-blue: #295cad;
   --mereka-color-sky: #94d1e4;
   --mereka-color-surface-primary: #FBFAFB;
@@ -275,8 +276,8 @@ button.btn.btn-primary {
 .btn-brand:focus,
 button.btn.btn-primary:hover,
 button.btn.btn-primary:focus {
-  background-color: #963365;
-  border-color: #963365;
+  background-color: var(--mereka-color-magenta-dark);
+  border-color: var(--mereka-color-magenta-dark);
 }
 
 .header-global,
@@ -1164,8 +1165,8 @@ button.btn.btn-primary:focus {
 
 .wrapper-content .action-primary:hover,
 .wrapper-content .action-primary:focus {
-  background-color: #963365;
-  border-color: #963365;
+  background-color: var(--mereka-color-magenta-dark);
+  border-color: var(--mereka-color-magenta-dark);
   color: #fff;
 }
 
