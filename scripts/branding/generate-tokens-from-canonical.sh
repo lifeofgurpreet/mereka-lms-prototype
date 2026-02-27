@@ -184,6 +184,7 @@ def build_scss_generated_block() -> str:
     lines.append("  --mereka-color-ink-300: #{$color-ink-300};\n")
     lines.append("  --mereka-color-teal: #{$color-teal};\n")
     lines.append("  --mereka-color-magenta: #{$color-magenta};\n")
+    lines.append(f"  --mereka-color-magenta-dark: {token_or_default('--color-magenta-dark', '#8a2f60')};\n")
     lines.append("  --mereka-color-blue: #{$color-blue};\n")
     lines.append("  --mereka-teal: #{$color-teal};\n")
     lines.append("  --mereka-magenta: #{$color-magenta};\n")
@@ -456,6 +457,7 @@ def build_overrides_root_block() -> str:
     for cname, mname in [
         ("--color-teal",     "--mereka-color-teal"),
         ("--color-magenta",  "--mereka-color-magenta"),
+        ("--color-magenta-dark", "--mereka-color-magenta-dark"),
         ("--color-blue",     "--mereka-color-blue"),
         ("--color-sky",      "--mereka-color-sky"),
     ]:
