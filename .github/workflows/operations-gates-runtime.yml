@@ -29,6 +29,16 @@ on:
         required: false
         default: false
         type: boolean
+      run_enterprise_runtime_audit:
+        description: "Run enterprise service + SSO runtime gates (prod/both only)"
+        required: false
+        default: true
+        type: boolean
+      enterprise_readiness_tenant:
+        description: "Tenant slug for enterprise SSO readiness gate"
+        required: false
+        default: "mereka"
+        type: string
 
 permissions: {}
 
@@ -123,6 +133,8 @@ jobs:
           INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
           INPUT_RUN_ALERT_ROUTING_AUDIT: ${{ github.event.inputs.run_alert_routing_audit || 'true' }}
           INPUT_RUN_AUTHENTICATED_SSO_CANARY: ${{ github.event.inputs.run_authenticated_sso_canary || vars.RUN_AUTHENTICATED_SSO_CANARY || 'false' }}
+          INPUT_RUN_ENTERPRISE_RUNTIME_AUDIT: ${{ github.event.inputs.run_enterprise_runtime_audit || 'true' }}
+          INPUT_ENTERPRISE_READINESS_TENANT: ${{ github.event.inputs.enterprise_readiness_tenant || vars.ENTERPRISE_READINESS_TENANT || 'mereka' }}
           ALERT_NOISE_RUNTIME_SOURCE: ${{ env.ALERT_NOISE_RUNTIME_SOURCE }}
           ALERT_NOISE_FP_CLASSIFICATION_FEED: ${{ vars.ALERT_NOISE_FP_CLASSIFICATION_FEED || '' }}
           SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
@@ -176,6 +188,13 @@ jobs:
           else
             export RUN_AUTHENTICATED_SSO_CANARY=0
           fi
+
+          if [[ "$INPUT_RUN_ENTERPRISE_RUNTIME_AUDIT" == "true" ]]; then
+            export RUN_ENTERPRISE_RUNTIME_AUDIT=1
+          else
+            export RUN_ENTERPRISE_RUNTIME_AUDIT=0
+          fi
+          export ENTERPRISE_READINESS_TENANT="$INPUT_ENTERPRISE_READINESS_TENANT"
 
           ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
 

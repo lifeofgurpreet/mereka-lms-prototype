@@ -28,6 +28,8 @@ SENTRY_AUDIT_MODE="${SENTRY_AUDIT_MODE:-local}" # local|runtime|all
 RUN_AUTHENTICATED_SSO_CANARY="${RUN_AUTHENTICATED_SSO_CANARY:-0}"
 AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS="${AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS:-0}"
 RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT="${RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT:-1}"
+RUN_ENTERPRISE_RUNTIME_AUDIT="${RUN_ENTERPRISE_RUNTIME_AUDIT:-1}"
+ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -52,6 +54,8 @@ Env:
   RUN_AUTHENTICATED_SSO_CANARY=1 Run credentialed browser SSO canary check
   AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1  Fail if canary creds are missing
   RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT=1  Audit Authentik policy exceptions (runtime; enabled by default)
+  RUN_ENTERPRISE_RUNTIME_AUDIT=1  Run enterprise runtime readiness gates in prod/both
+  ENTERPRISE_READINESS_TENANT=mereka  Tenant slug used by enterprise SSO readiness gate
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -209,16 +213,18 @@ echo "  fail_on_legacy_mongodb_service: $FAIL_ON_LEGACY_MONGODB_SERVICE"
 echo "  run_atlas_allowlist_audit: $RUN_ATLAS_ALLOWLIST_AUDIT"
 echo "  run_alert_routing_audit: $RUN_ALERT_ROUTING_AUDIT"
 echo "  alert_routing_run_atlas_vps_audit: $ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT"
-  echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
-  echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
-  echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
-  echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
-  echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
-  echo "  alert_noise_runtime_source: ${ALERT_NOISE_RUNTIME_SOURCE}"
-  echo "  alert_noise_require_runtime_source: $ALERT_NOISE_REQUIRE_RUNTIME_SOURCE"
-  echo "  run_authenticated_sso_canary: $RUN_AUTHENTICATED_SSO_CANARY"
+echo "  run_multisite_governance_audit: $RUN_MULTISITE_GOVERNANCE_AUDIT"
+echo "  run_db_exporter_telemetry_audit: $RUN_DB_EXPORTER_TELEMETRY_AUDIT"
+echo "  db_exporter_audit_mode: $DB_EXPORTER_AUDIT_MODE"
+echo "  run_sentry_wiring_audit: $RUN_SENTRY_WIRING_AUDIT"
+echo "  sentry_audit_mode: $SENTRY_AUDIT_MODE"
+echo "  alert_noise_runtime_source: ${ALERT_NOISE_RUNTIME_SOURCE}"
+echo "  alert_noise_require_runtime_source: $ALERT_NOISE_REQUIRE_RUNTIME_SOURCE"
+echo "  run_authenticated_sso_canary: $RUN_AUTHENTICATED_SSO_CANARY"
 echo "  authenticated_sso_canary_require_secrets: $AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS"
 echo "  run_authentik_policy_exception_audit: $RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT"
+echo "  run_enterprise_runtime_audit: $RUN_ENTERPRISE_RUNTIME_AUDIT"
+echo "  enterprise_readiness_tenant: $ENTERPRISE_READINESS_TENANT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
@@ -255,6 +261,14 @@ fi
 
 run_check "auth + permissions + multisite audit" \
   env CHECK_TIMEOUT_SECONDS="$CHECK_TIMEOUT_SECONDS" ./scripts/qa/audit-auth-access.sh --mode all --env "$ENV_SCOPE"
+
+if [[ "$RUN_ENTERPRISE_RUNTIME_AUDIT" == "1" && ( "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ) ]]; then
+  run_check "enterprise service deployment (prod)" \
+    ./scripts/qa/verify-enterprise-service-deployment.sh
+
+  run_check "enterprise SSO readiness (prod)" \
+    ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode cluster --tenant "$ENTERPRISE_READINESS_TENANT"
+fi
 
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
   run_check "cert-manager readiness (prod)" \

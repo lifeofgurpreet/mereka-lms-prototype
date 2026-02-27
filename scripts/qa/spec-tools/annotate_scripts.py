@@ -33,11 +33,20 @@ def normalize_spec_name(raw: str) -> str:
     return name
 
 
+def iter_testmap_files(testmaps_dir: Path):
+    """Yield testmap files in canonical and legacy naming formats."""
+    files = set()
+    for pattern in ("*.testmap.yml", "*.testmap.yaml", "*_testmap.yaml"):
+        files.update(testmaps_dir.glob(pattern))
+    for tm_path in sorted(files):
+        yield tm_path
+
+
 def build_file_index(testmaps_dir: Path) -> dict[str, dict]:
     """Build reverse index: {file_path: {specs: {spec_name: set[ac_id]}}}."""
     index: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
 
-    for tm_path in sorted(testmaps_dir.glob("*_testmap.yaml")):
+    for tm_path in iter_testmap_files(testmaps_dir):
         try:
             data = yaml.safe_load(tm_path.read_text())
         except Exception as e:
