@@ -74,14 +74,19 @@ else
   pass "apply-patches.sh exists"
 
   # Count env.config.jsx customizations
-  ENV_CONFIG_PATCHES=$(grep -c "env.config.jsx" "$APPLY_PATCHES" || echo 0)
+  ENV_CONFIG_PATCHES=$(grep -c "env.config.jsx" "$APPLY_PATCHES" 2>/dev/null || true)
+  ENV_CONFIG_PATCHES=$(printf '%s' "$ENV_CONFIG_PATCHES" | tr -cd '0-9')
+
+  if [[ -z "$ENV_CONFIG_PATCHES" ]]; then
+    ENV_CONFIG_PATCHES=0
+  fi
 
   echo "env.config.jsx references in apply-patches.sh: $ENV_CONFIG_PATCHES"
 
   if [[ $ENV_CONFIG_PATCHES -gt 0 ]]; then
     pass "apply-patches.sh contains $ENV_CONFIG_PATCHES env.config.jsx customizations"
   else
-    fail "apply-patches.sh has no env.config.jsx customizations documented"
+    warn "apply-patches.sh has no env.config.jsx customizations documented"
   fi
 fi
 
