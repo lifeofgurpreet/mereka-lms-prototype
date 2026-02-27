@@ -4,11 +4,12 @@
 **Prerequisite**: Phase A complete (FE-003, FE-004, FE-013, FE-014, FE-016 all DONE)
 **Specs**: `specs/oep48-brand-package_spec.md`, `specs/paragon-design-tokens-migration_spec.md`
 
-**Status**: Phase B is PARTIALLY COMPLETE. An implementor agent has already created:
-- `infrastructure/tutor/brand-mereka/` — the OEP-48 brand package (Task B1 DONE)
-- `infrastructure/tutor/patches/brand-package.sh` — the build-context sync script (Task B2 partially done)
+**Status**: Phase B is COMPLETE.
 
-**Remaining work**: Tasks B3 (hardcoded color elimination) and B4 (Paragon token bridging) are NOT YET DONE.
+- `infrastructure/tutor/brand-mereka/` — the OEP-48 brand package (Task B1 DONE)
+- `infrastructure/tutor/plugins/mereka_lms.py` + `infrastructure/tutor/apply-patches.sh` + `infrastructure/tutor/patches/brand-package.sh` — MFE brand package wiring (Task B2 DONE)
+- `infrastructure/tutor/themes/mereka/mfe/mereka.scss` — hardcoded values replaced with token references (Task B3 DONE)
+- `infrastructure/tutor/themes/mereka/scss/_tokens.scss` + `assets/branding/tokens.css` — remaining Paragon token slots bridged (Task B4 DONE)
 
 **Phase B Review Findings (CRITICAL — already fixed)**:
 - RGB values in `_tokens.scss` were wrong: `--mereka-color-teal-rgb` was `45 137 139` (corrected to `35 112 114`), `--mereka-color-indigo-rgb` was `39 110 241` (corrected to `41 92 173`)
