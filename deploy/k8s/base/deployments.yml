@@ -127,6 +127,9 @@ spec:
             - secretRef:
                 name: openedx-secrets
             - secretRef:
+                name: enterprise-sso-secrets
+                optional: true
+            - secretRef:
                 name: database-secrets
             - secretRef:
                 name: mereka-lms-runtime-secrets
@@ -255,6 +258,9 @@ spec:
             - secretRef:
                 name: openedx-secrets
             - secretRef:
+                name: enterprise-sso-secrets
+                optional: true
+            - secretRef:
                 name: database-secrets
             - secretRef:
                 name: mereka-lms-runtime-secrets
@@ -351,6 +357,9 @@ spec:
           envFrom:
             - secretRef:
                 name: openedx-secrets
+            - secretRef:
+                name: enterprise-sso-secrets
+                optional: true
             - secretRef:
                 name: database-secrets
             - secretRef:
@@ -484,6 +493,9 @@ spec:
           envFrom:
             - secretRef:
                 name: openedx-secrets
+            - secretRef:
+                name: enterprise-sso-secrets
+                optional: true
             - secretRef:
                 name: database-secrets
             - secretRef:

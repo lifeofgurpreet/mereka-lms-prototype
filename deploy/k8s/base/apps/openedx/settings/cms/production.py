@@ -553,6 +553,12 @@ else:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
+    _metrics_urlconf = "openedx_prometheus.urls"
+    if _module_available(_metrics_urlconf):
+        ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+        if _metrics_urlconf not in ROOT_URLCONF_OVERRIDES:
+            ROOT_URLCONF_OVERRIDES.insert(0, _metrics_urlconf)
+
 # Forwarded-header hardening: normalize multi-valued X-Forwarded-* headers.
 # Without this, Django may treat HTTPS requests as HTTP and Studio can generate
 # `next=http://...` URLs, causing Secure cookies to be dropped and OAuth callback

@@ -967,6 +967,12 @@ else:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
+    _metrics_urlconf = "openedx_prometheus.urls"
+    if _module_available(_metrics_urlconf):
+        ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+        if _metrics_urlconf not in ROOT_URLCONF_OVERRIDES:
+            ROOT_URLCONF_OVERRIDES.insert(0, _metrics_urlconf)
+
 # Forwarded-header hardening: normalize multi-valued X-Forwarded-* headers.
 # Without this, Django may treat HTTPS requests as HTTP which can break URL
 # generation and callback flows in some proxy chains.
@@ -1005,9 +1011,31 @@ except ImportError:
 if not any("third_party_auth" in app for app in INSTALLED_APPS):
     INSTALLED_APPS.append("common.djangoapps.third_party_auth")
 
-# Enable third-party auth feature flag (required for enterprise login routing).
-FEATURES.setdefault("ENABLE_THIRD_PARTY_AUTH", True)
-FEATURES.setdefault("ENABLE_ENTERPRISE_INTEGRATION", True)
+# Some Open edX builds define SAMLConfiguration.KEY_FIELDS as ("site_id", "slug")
+# while saml_metadata_view passes a Site object. Normalize Site -> site_id to avoid
+# false-disabled checks that cause /auth/saml/metadata.xml to return 404.
+try:
+    from common.djangoapps.third_party_auth.models import SAMLConfiguration as _SAMLConfiguration
+except Exception:
+    _SAMLConfiguration = None
+
+if _SAMLConfiguration is not None and not getattr(_SAMLConfiguration, "_mereka_is_enabled_site_fix", False):
+    _saml_original_is_enabled = _SAMLConfiguration.is_enabled.__func__
+
+    @classmethod
+    def _mereka_saml_is_enabled(cls, site_or_id, *key_fields):
+        if hasattr(site_or_id, "id"):
+            site_or_id = site_or_id.id
+        return _saml_original_is_enabled(cls, site_or_id, *key_fields)
+
+    _SAMLConfiguration.is_enabled = _mereka_saml_is_enabled
+    _SAMLConfiguration._mereka_is_enabled_site_fix = True
+
+# Enable third-party auth + enterprise integration unconditionally.
+# Some upstream defaults initialize these keys to False before this file runs;
+# use direct assignment to guarantee runtime behavior.
+FEATURES["ENABLE_THIRD_PARTY_AUTH"] = True
+FEATURES["ENABLE_ENTERPRISE_INTEGRATION"] = True
 
 # SAML SP certificate and private key — injected from ExternalSecrets.
 # These override the SAMLConfiguration model values, allowing key rotation
