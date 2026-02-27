@@ -17,11 +17,11 @@ process to maintain those customizations across Tutor version bumps.
 
 The following categories of customizations are currently applied:
 
-### 1. Node 18 Toolchain Lock
+### 1. Node 24 Toolchain Lock
 
 Upstream Tutor templates target different Node major versions depending on the
 release track (Node 12 → 18 → 24+). We pin all MFE build stages to
-`node:18-bullseye-slim` and extend the system package list with the full C++
+`node:24.11.0-bullseye-slim` and extend the system package list with the full C++
 build toolchain required by native Node modules:
 
 ```

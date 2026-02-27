@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # https://hub.docker.com/_/node/tags
-FROM docker.io/node:18-bullseye-slim AS base
+FROM docker.io/node:24.11.0-bullseye-slim AS base
 
 RUN apt update \
   && apt install -y git \
@@ -911,5 +911,4 @@ COPY --from=ora-grading-prod /openedx/app/dist /openedx/dist/ora-grading
 COPY --from=profile-prod /openedx/app/dist /openedx/dist/profile
 
 COPY --from=learner-record-prod /openedx/app/dist /openedx/dist/learner-record
-
 

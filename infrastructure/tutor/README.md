@@ -87,7 +87,7 @@ This script applies necessary patches to Tutor-generated templates. It must be r
 
 Tutor generates templates from scratch on every `config save`, losing any manual modifications. This script re-applies required changes:
 
-1. **Node 18 toolchain**: Upgrades MFE builds from Node 12 to Node 18 with required build tools (g++, python3)
+1. **Node 24 toolchain**: Upgrades MFE builds from earlier LTS defaults to Node 24.11.0 with required build tools (g++, python3)
 2. **MySQL 8 authentication**: Changes default authentication plugin to `mysql_native_password`
 3. **Multi-site domains**: Adds extra domain names (biji-biji.com, skillourfuture.academy.mereka.io)
 4. **Webpack memory**: Increases Node memory limit to 6144MB for asset compilation
@@ -296,7 +296,7 @@ tutor local restart
 
 **Symptom**: `error gyp ERR! stack Error: not found: g++`
 
-**Cause**: Node 18 requires C++ build toolchain
+**Cause**: Node 24 builds of MFE dependencies require C++ toolchain
 
 **Fix**: `apply-patches.sh` adds `g++, python3, python3-distutils` to MFE Dockerfile
 

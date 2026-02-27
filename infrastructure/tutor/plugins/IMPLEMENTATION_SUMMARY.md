@@ -19,7 +19,7 @@ Converted the 1065-line `apply-patches.sh` bash script into a proper 555-line Tu
 | **Asset Settings** | Optional apps, safe_join monkey-patch | `openedx-lms-assets-settings`, `openedx-cms-assets-settings` |
 | **Open edX Build** | Node memory, custom apps, dependencies, SASS compilation | `openedx-dockerfile-pre-assets`, `openedx-dockerfile-post-python-requirements` |
 | **Webpack** | Terser optimization | `webpack-prod-config` |
-| **MFE Build** | Node 18 toolchain, cookie domains, plugin framework, npm resilience | `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install` |
+| **MFE Build** | Node 24 toolchain, cookie domains, plugin framework, npm resilience | `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install` |
 | **MFE Theme** | Mereka footer, SCSS imports | `mfe-env-config` |
 | **MySQL** | Authentication plugin fix | `mysql-docker-compose` |
 | **Caddy** | Multi-domain blocks, profile API proxy | `caddy-caddyfile` |
@@ -148,7 +148,7 @@ Plugin System Architecture:
    - Offline-friendly CSS
 
 6. **MFE Build**
-   - Node 18 toolchain (gcc, g++, python3)
+   - Node 24 toolchain (gcc, g++, python3)
    - npm install retry logic (3 attempts)
    - frontend-plugin-framework with legacy peer deps
    - Cookie domain environment variables

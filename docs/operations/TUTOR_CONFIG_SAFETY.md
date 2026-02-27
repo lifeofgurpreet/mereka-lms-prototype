@@ -86,7 +86,7 @@ Run after any `tutor config save`:
 **Checks performed:**
 - ✓ Multi-site domain configuration (biji-biji.com, skillourfuture)
 - ✓ MySQL authentication fix
-- ✓ MFE Node 18 toolchain
+- ✓ MFE Node 24 toolchain
 - ✓ MFE cookie domain config
 - ✓ Custom Mereka footer
 - ✓ Forum MongoDB Atlas SRV
@@ -150,7 +150,7 @@ IMPORTANT: Did you run apply-patches.sh?
 
 Patches applied:
   • MySQL authentication fix
-  • MFE Node 18 toolchain
+  • MFE Node 24 toolchain
   • Multi-site domain configuration
   • Custom Mereka footer
   • Prometheus metrics integration

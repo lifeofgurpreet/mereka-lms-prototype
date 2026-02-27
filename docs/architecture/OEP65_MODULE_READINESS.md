@@ -129,7 +129,7 @@ the `mfe_config` API response, where the LMS already serves correct values per
 ### Gap 3 — Dockerfile Surgery Inhibits Upstream Adoption (Medium Priority)
 
 **Current state**: `mfe-node.sh` (334 LOC) applies regex surgery to the Tutor-generated MFE
-Dockerfile to: change the base image to `node:18-bullseye-slim`, inject toolchain packages, add
+Dockerfile to: change the base image to `node:24.11.0-bullseye-slim`, inject toolchain packages, add
 cookie ARGs, add brand package installs, and rewrite branch refs. `build-optimizations.sh`
 (686 LOC) further patches the openedx Dockerfile with positional insertions.
 

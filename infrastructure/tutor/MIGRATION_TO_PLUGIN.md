@@ -23,7 +23,7 @@ This guide explains how to migrate from the manual `apply-patches.sh` script to 
 - Custom app integration (mfe_oauth_fix, openedx_prometheus)
 - Prometheus metrics setup
 - MySQL 8 authentication fix
-- MFE Node 18 toolchain
+- MFE Node 24 toolchain
 - Node memory limit increase
 - npm install retry logic
 - SASS compilation with theme support
