@@ -187,7 +187,13 @@ if core_text:
 if not pgn_lines:
     raise SystemExit("No --pgn-* properties found in _tokens.scss")
 
-payload = ":root {\n" + "\n".join(pgn_lines) + "\n}\n"
+payload = (
+    "/* Generated oleh build-tokens.sh for PARAGON_THEME_URLS brand override. */\n"
+    "/* The light variant is intentionally identical to this file while we remain light-mode only. */\n"
+    ":root {\n"
+    + "\n".join(pgn_lines)
+    + "\n}\n"
+)
 PATH_BRAND.write_text(payload, encoding="utf-8")
 PATH_BRAND.with_name("mereka-brand-light.min.css").write_text(payload, encoding="utf-8")
 PY
