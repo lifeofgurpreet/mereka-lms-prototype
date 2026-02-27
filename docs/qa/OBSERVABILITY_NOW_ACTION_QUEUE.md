@@ -59,6 +59,10 @@ This is blocking strict execution continuity because the first-class wrapper exi
 - This is meant to remove template-path skew for `/metrics` in dev/nonprod rendered settings maps.
 - Next required step is image/config regeneration + rollout in the target lane before the next strict observability run.
 
+### Runtime check hardening applied
+- `AC-OVR-016` runtime probes now retry `/metrics` without `Host` header if a configured host returns `400`, reducing false negatives when `DisallowedHost` policy is triggered during pod-call checks.
+- This keeps the acceptance gate focused on actual Prometheus payload availability instead of header-policy variance.
+
 ## Current blocking signal
 - AC-OVR-016 is failing in strict runtime (`PASS 4 / FAIL 5 / SKIP 0`):
   - LMS `/metrics` previously `status_code=000`, then `400`, then `500` as host and DB state shift.

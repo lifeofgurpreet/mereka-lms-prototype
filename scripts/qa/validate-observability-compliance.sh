@@ -541,6 +541,18 @@ run_runtime_checks() {
   cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
   cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
 
+  if [[ "$lms_metrics_code" == "400" && -n "$lms_metrics_host" ]]; then
+    lms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/lms "http://localhost:8000/metrics" "")"
+    lms_metrics_code="${lms_metrics_result%%$metrics_split*}"
+    lms_metrics_payload="${lms_metrics_result#*$metrics_split}"
+  fi
+
+  if [[ "$cms_metrics_code" == "400" && -n "$cms_metrics_host" ]]; then
+    cms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/cms "http://localhost:8000/metrics" "")"
+    cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
+    cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
+  fi
+
   if [[ "$lms_metrics_code" == "200" ]]; then
     record_result pass "AC-OVR-016" "LMS /metrics returned 200"
     check_metrics_payload_shape "LMS" "$lms_metrics_payload"

@@ -957,11 +957,26 @@ if command -v kubectl >/dev/null 2>&1; then
 
     LMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms /metrics "$lms_metrics_host")"
     LMS_CODE="${LMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
+    if [[ "$LMS_CODE" == "400" && -n "$lms_metrics_host" ]]; then
+        LMS_RESULT_NOHOST="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms /metrics "")"
+        if [[ "${LMS_RESULT_NOHOST%%${METRICS_SPLIT_TOKEN}*}" == "200" ]]; then
+            LMS_RESULT="$LMS_RESULT_NOHOST"
+        fi
+    fi
+
     LMS_REST="${LMS_RESULT#*${METRICS_SPLIT_TOKEN}}"
     LMS_PATH="${LMS_REST%%${METRICS_SPLIT_TOKEN}*}"
     LMS_METRICS="${LMS_REST#*${METRICS_SPLIT_TOKEN}}"
+
     CMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms /metrics "$cms_metrics_host")"
     CMS_CODE="${CMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
+    if [[ "$CMS_CODE" == "400" && -n "$cms_metrics_host" ]]; then
+        CMS_RESULT_NOHOST="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms /metrics "")"
+        if [[ "${CMS_RESULT_NOHOST%%${METRICS_SPLIT_TOKEN}*}" == "200" ]]; then
+            CMS_RESULT="$CMS_RESULT_NOHOST"
+        fi
+    fi
+
     CMS_REST="${CMS_RESULT#*${METRICS_SPLIT_TOKEN}}"
     CMS_PATH="${CMS_REST%%${METRICS_SPLIT_TOKEN}*}"
     CMS_METRICS="${CMS_REST#*${METRICS_SPLIT_TOKEN}}"
