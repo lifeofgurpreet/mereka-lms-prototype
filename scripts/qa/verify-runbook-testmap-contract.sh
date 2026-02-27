@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # @covers AC-RS-004
 # @spec: repository-structure_spec.md
-# Enforce runbook testmap reference contract.
+# Enforce docs testmap reference contract.
 #
 # Contract:
-# - docs/runbooks/*.md MUST NOT reference legacy *_testmap.yaml/.yml names
+# - non-archive docs MUST NOT reference legacy *_testmap.yaml/.yml names
 # - Any explicit "Testmap" reference MUST point to specs/testmaps/*.testmap.yml
 # - Referenced testmap files MUST exist
 set -euo pipefail
@@ -16,21 +16,21 @@ failures=0
 pass() { echo "[PASS] $*"; }
 fail() { echo "[FAIL] $*"; failures=$((failures + 1)); }
 
-RUNBOOK_DIR="docs/runbooks"
+DOCS_DIR="docs"
 
-if [[ ! -d "$RUNBOOK_DIR" ]]; then
-  fail "runbook directory missing: $RUNBOOK_DIR"
+if [[ ! -d "$DOCS_DIR" ]]; then
+  fail "docs directory missing: $DOCS_DIR"
   echo
-  echo "✗ $failures runbook testmap contract check(s) failed"
+  echo "✗ $failures docs testmap contract check(s) failed"
   exit 1
 fi
 
-# Legacy naming drift should never appear again in runbooks.
-if rg -n '_testmap\\.ya?ml|\\.testmap\\.yaml' "$RUNBOOK_DIR" >/dev/null 2>&1; then
-  fail "runbooks contain legacy testmap naming (_testmap.yaml/.yml or .testmap.yaml)"
-  rg -n '_testmap\\.ya?ml|\\.testmap\\.yaml' "$RUNBOOK_DIR" || true
+# Legacy naming drift should never appear again in live docs.
+if rg -n '_testmap\\.ya?ml|\\.testmap\\.yaml' "$DOCS_DIR" --glob '!docs/archive/**' >/dev/null 2>&1; then
+  fail "live docs contain legacy testmap naming (_testmap.yaml/.yml or .testmap.yaml)"
+  rg -n '_testmap\\.ya?ml|\\.testmap\\.yaml' "$DOCS_DIR" --glob '!docs/archive/**' || true
 else
-  pass "runbooks contain no legacy testmap naming"
+  pass "live docs contain no legacy testmap naming"
 fi
 
 # Validate explicit Testmap references.
@@ -39,9 +39,11 @@ mapfile -t refs < <(
 import pathlib
 import re
 
-root = pathlib.Path('docs/runbooks')
-pat = re.compile(r"Testmap\*\*:\s*`([^`]+)`")
-for md in sorted(root.glob('*.md')):
+root = pathlib.Path('docs')
+pat = re.compile(r"\*\*Testmap\*\*:\s*`([^`]+)`", re.IGNORECASE)
+for md in sorted(root.rglob('*.md')):
+    if 'archive' in md.parts:
+        continue
     text = md.read_text(encoding='utf-8', errors='ignore')
     for m in pat.finditer(text):
         print(f"{md}:{m.group(1)}")
@@ -49,9 +51,9 @@ PY
 )
 
 if [[ "${#refs[@]}" -eq 0 ]]; then
-  fail "no explicit Testmap references found under $RUNBOOK_DIR"
+  fail "no explicit Testmap references found under live docs"
 else
-  pass "found ${#refs[@]} explicit Testmap reference(s) under $RUNBOOK_DIR"
+  pass "found ${#refs[@]} explicit Testmap reference(s) under live docs"
 fi
 
 for ref in "${refs[@]:-}"; do

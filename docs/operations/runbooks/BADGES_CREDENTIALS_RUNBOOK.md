@@ -4,8 +4,8 @@ _Audience: Platform Eng + Academic Operations • Owner: Engineering Lead • La
 This runbook covers operational procedures for badges and credentials management.
 
 > **Status**: Badges and credentials are **not yet implemented** (Tier 5). This runbook documents target-state procedures.
-> **Spec**: `specs/badges-credentials-enterprise_spec.md`
-> **Testmap**: `specs/testmaps/badges-credentials-enterprise_spec.testmap.yml`
+> **Spec**: `specs/verifiable-credentials-ops_spec.md`
+> **Testmap**: `specs/testmaps/verifiable-credentials-ops_spec.testmap.yml`
 
 ## Prerequisites
 
