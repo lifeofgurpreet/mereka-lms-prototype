@@ -1,283 +1,274 @@
-# Frontend Phase C: Runtime Theming — Implementor Prompt
+# Frontend Phase C: Token Grounding + BEM Hardening — Implementor Prompt
 
-**Date**: 2026-02-27
+**Date**: 2026-02-27 (revised)
 **Prerequisite**: Phase B complete (FE-001, FE-011, FE-012 all DONE)
-**Specs**: `specs/paragon-design-tokens-migration_spec.md` (Phases 2 and 3)
+**Specs**: `specs/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`
+
+---
+
+## Key Insight: Paragon v22 Token Reality
+
+The original Phase C assumed most BEM overrides could be replaced with `--pgn-*` component tokens. **This is wrong for Paragon v22.**
+
+A comprehensive audit of the compiled Paragon CSS (`core.min.css`, 2,310 tokens) reveals:
+
+- Paragon v22 exposes **2,310 CSS custom properties**, but component-level tokens are incomplete
+- It **DOES** consume: semantic colors (`--pgn-color-primary`, `--pgn-btn-bg`), typography, spacing, button radius
+- It **DOES NOT** consume: card shadow/border-radius, form control padding/height, modal shadows, dropdown shadows, breadcrumb/tab styling
+
+**Bottom line**: Only ~12 of the 35 BEM overrides can be replaced with tokens. The rest MUST remain as CSS rules. Attempting to define tokens Paragon doesn't read creates dead CSS that silently fails.
+
+This revised Phase C is restructured around this reality.
 
 ---
 
 ## Objective
 
-Scope C to the verified Paragon v22 runtime-token path. Complete **C1** (token-audit) before token replacement, and only finalize **C3** (PARAGON_THEME_URLS activation) after **Phase B3/B4** + verified token bridging are in place.
-
-Priorities:
-1. **C1**: Generate a verified list of consumed Paragon token names from the built `core.min.css`/`light.min.css` artifacts.
-2. **C2**: Keep Paragon-ready overrides in `mereka.scss` only where no consumed token exists; replace only against consumed tokens.
-3. **C3**: Confirm Caddy/plugin plumbing is complete before turning `MEREKA_PARAGON_THEME_ENABLED` on.
-
-The dependency ordering is therefore: FE-012 + FE-011 readiness, then **C1**, then **C2**, then **C3**.
+1. **Audit** which `--pgn-*` tokens Paragon v22 actually reads (Task C1 — required first)
+2. **Replace** BEM overrides where Paragon reads the token (Task C2 — safe replacements only)
+3. **Harden** remaining BEM overrides with `var()` references instead of hex (Task C3 — from Phase B3)
+4. **Wire** PARAGON_THEME_URLS for runtime theming (Task C4 — only after tokens are stable)
+5. **Verify** with CI script (Task C5)
 
 ---
 
-## Background: What is PARAGON_THEME_URLS?
+## Task C1: Paragon v22 Token Audit (REQUIRED FIRST)
 
-Open edX MFEs built on `@edx/frontend-platform` support an environment variable called `PARAGON_THEME_URLS`. When set, the MFE runtime fetches compiled CSS from the specified URLs at page load and injects them into the document head. This CSS contains `--pgn-*` custom properties that override Paragon's default theme tokens.
+### Why this must come first
 
-The structure is:
+The original prompt listed ~60 `--pgn-*` component tokens to add. Most of these are **aspirational** — Paragon v22 doesn't read them. Adding tokens Paragon ignores is worse than useless: it gives a false sense of coverage and makes the BEM override removal fail silently (no visual effect, but the override is gone).
 
-```json
-{
-  "core": {
-    "urls": {
-      "default": "https://apps.academyv2.mereka.io/theme/core.min.css",
-      "brandOverride": "https://apps.academyv2.mereka.io/theme/mereka-brand.min.css"
-    }
-  },
-  "variants": {
-    "light": {
-      "urls": {
-        "default": "https://apps.academyv2.mereka.io/theme/light.min.css",
-        "brandOverride": "https://apps.academyv2.mereka.io/theme/mereka-brand-light.min.css"
-      }
-    }
-  }
-}
+### What to do
+
+1. **Read** the compiled Paragon CSS at `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`
+2. **Extract** every `var(--pgn-*)` reference — these are the properties Paragon actually reads
+3. **Cross-reference** against our `_tokens.scss` `:root` block to find gaps
+4. **Produce** a definitive list of tokens in three categories:
+
+| Category | Description | Action |
+|----------|-------------|--------|
+| **CONSUMED & DEFINED** | Paragon reads it, we define it | No action needed |
+| **CONSUMED & MISSING** | Paragon reads it, we don't define it (using Paragon default) | Evaluate: does Mereka need a different value? |
+| **DEFINED & IGNORED** | We define it, Paragon doesn't read it | Remove or document as "for custom CSS only" |
+
+### Expected findings (from preliminary analysis)
+
+**Tokens Paragon v22 DOES consume** (we should ensure these are correct):
+
+```
+--pgn-color-primary          ← our #ab3b78 (magenta)
+--pgn-color-secondary        ← our #237072 (teal)
+--pgn-color-success          ← our #2c6e49 (forest)
+--pgn-color-info             ← our #295cad (blue)
+--pgn-color-warning          ← our #f4be48 (gold)
+--pgn-color-danger           ← our #8c002f (burgundy)
+--pgn-font-family-sans-serif ← our Poppins/Lato stack
+--pgn-heading-font-family    ← our Lato/Poppins stack
+--pgn-btn-border-radius      ← our 999px (pill buttons)
+--pgn-link-color             ← our #295cad
+--pgn-link-hover-color       ← our #237072
+--pgn-body-bg                ← our #FBFAFB
+--pgn-body-color             ← our #000000
+--pgn-border-color           ← our #DDDDDE
+--pgn-btn-bg                 ← consumed for button backgrounds
+--pgn-btn-border-color       ← consumed for button borders
+--pgn-btn-color              ← consumed for button text
+--pgn-alert-bg               ← consumed for alert backgrounds
+--pgn-alert-border-color     ← consumed for alert borders
+--pgn-form-control-*         ← extensive form control tokens
 ```
 
-- `core.urls.default` — the base Paragon theme CSS (can be the stock Paragon output).
-- `core.urls.brandOverride` — Mereka-specific token overrides that layer on top. This is the file we compile from our JSON token pipeline.
-- `variants.light` — light mode variant (we use light mode only; dark mode is out of scope).
+**Tokens Paragon v22 DOES NOT consume** (BEM overrides must remain):
 
-**Why this matters**: Currently, brand CSS (`mereka.scss`) is compiled into every MFE image at Webpack build time. Changing a brand color requires rebuilding all MFE images (15-20 min) and redeploying. With `PARAGON_THEME_URLS`, the brand CSS is fetched at page load from a CDN URL. Updating the brand requires only rebuilding the token CSS file (seconds) and invalidating CDN cache.
+```
+--pgn-card-border-radius     ← NOT consumed (card uses hardcoded SCSS)
+--pgn-card-box-shadow        ← NOT consumed
+--pgn-modal-border-radius    ← NOT consumed
+--pgn-dropdown-box-shadow    ← NOT consumed
+--pgn-tab-border-radius      ← NOT consumed
+```
+
+### Output artifact
+
+Create `docs/architecture/PARAGON_V22_TOKEN_AUDIT.md` with the full three-category list. This becomes the source of truth for all subsequent token work.
 
 ---
 
-## Background: What is "Token-Based" Theming?
+## Task C2: Replace BEM Overrides Where Tokens Are Consumed (~12 overrides)
 
-Currently, `mereka.scss` targets Paragon BEM class names directly (e.g., `.pgn__btn--primary`, `.pgn__card`, `.pgn__alert--info`) to apply brand styling. This is fragile because Paragon can rename or restructure these classes.
+### Decision framework
 
-**Token-based theming** means controlling component appearance through CSS custom properties (`--pgn-*`) that Paragon components read internally. Instead of:
+For each of the 35 BEM overrides in `mereka.scss`:
+
+```
+IF Paragon reads the token (confirmed in C1 audit)
+  → Define the token in _tokens.scss
+  → Remove the BEM override from mereka.scss
+  → Test visually
+
+ELSE IF the override only uses colors/shadows (not structural)
+  → Keep the BEM override
+  → Replace hardcoded hex with var(--mereka-*) references (Task C3)
+
+ELSE (structural: display, flex, padding, sizing)
+  → Keep the BEM override as-is
+```
+
+### Likely safe replacements (confirm with C1 audit)
+
+| # | Override | Replacement Token | Confidence |
+|---|---------|-------------------|-----------|
+| 1 | `.pgn__page-container` background | `--pgn-body-bg` | HIGH — Paragon reads this |
+| 4 | `.pgn__btn--secondary` color | `--pgn-btn-color` variants | HIGH |
+| 5 | `.pgn__btn--secondary:hover` color | `--pgn-btn-hover-color` | HIGH |
+| 6 | `.pgn__form-control` border-color | `--pgn-form-control-border-color` | HIGH |
+| 7 | `.pgn__form-control:focus` border-color, box-shadow | `--pgn-form-control-focus-*` | HIGH |
+| 8 | `.pgn__form-label` font-weight, color | `--pgn-form-label-*` | MEDIUM — verify |
+| 12 | `.pgn__alert` border-color | `--pgn-alert-border-color` | HIGH |
+| 13-16 | `.pgn__alert--{variant}` bg, border | `--pgn-alert-{variant}-bg/border` | HIGH |
+
+### Likely NOT replaceable (keep as BEM + var())
+
+| # | Override | Why | Action |
+|---|---------|-----|--------|
+| 2 | `.pgn__btn--primary` gradient | Paragon has no gradient token | Keep BEM, use var(--mereka-*) for colors |
+| 3 | `.pgn__btn--primary:hover` transform | Not tokenizable | Keep BEM |
+| 9 | `.pgn__card` border-radius, shadow | No card component tokens in v22 | Keep BEM, use var(--mereka-*) |
+| 10-11 | `.pgn__card-header/footer` | No card section tokens | Keep BEM, use var(--mereka-*) |
+| 17 | `.pgn__modal-content` border-radius | No modal component tokens | Keep BEM, use var(--mereka-*) |
+| 18 | `.pgn__dropdown-menu` | No dropdown component tokens | Keep BEM, use var(--mereka-*) |
+| 19-20 | `.pgn__tabs` | No tab component tokens | Keep BEM, use var(--mereka-*) |
+| 21-25 | Authn scoped overrides | Surface-specific, must remain | Keep BEM, use var(--mereka-*) |
+| 31-33 | Learning scoped overrides | Structural sizing | Keep as-is |
+
+---
+
+## Task C3: Harden Remaining BEM Overrides with var() References
+
+This is the **practical alternative** to token replacement for the ~23 overrides that must stay as BEM rules. Instead of:
 
 ```scss
-/* BEM override — fragile, breaks if Paragon renames the class */
-.pgn__btn--primary {
-  background-image: linear-gradient(120deg, #ab3b78, #237072, #295cad);
-  border: none;
-  box-shadow: 0 12px 30px rgba(41, 92, 173, 0.3);
+/* BAD: hardcoded hex in BEM override */
+.pgn__card {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
 }
 ```
 
-You define component tokens in JSON:
+Use:
 
-```json
-{
-  "button": {
-    "primary": {
-      "background": { "value": "linear-gradient(120deg, {global.color.magenta} 0%, {global.color.teal} 60%, {global.color.blue} 100%)" },
-      "border": { "value": "none" },
-      "box-shadow": { "value": "0 12px 30px rgba({global.color.blue-rgb}, 0.3)" }
-    },
-    "border-radius": { "value": "{global.radius.full}" }
-  }
+```scss
+/* GOOD: var() references — single source of truth, brand changes propagate */
+.pgn__card {
+  border-radius: var(--mereka-card-radius, 24px);
+  border: 1px solid var(--mereka-mfe-border);
+  box-shadow: var(--mereka-mfe-card-shadow);
 }
 ```
 
-The style-dictionary pipeline compiles these into `--pgn-*` CSS custom properties in a `:root` block. Paragon components consume the custom properties natively. No BEM class targeting needed.
+### What this achieves
 
-**Limitation**: Not all visual properties in `mereka.scss` can be expressed as tokens. Properties like `display`, `flex`, `gap`, `padding`, `margin`, `aspect-ratio`, `object-fit`, `min-width`, `max-width`, `min-height` are structural layout overrides. These MUST remain as CSS rules (retained overrides). The goal is to eliminate token-expressible overrides (colors, border-radius, box-shadow, font-family, font-weight) and retain only structural ones.
+- **Single source of truth**: All brand values in `_tokens.scss` `:root` block
+- **Runtime changeable**: Changing `--mereka-mfe-card-shadow` in `:root` updates all cards
+- **Upgrade-safe**: When Paragon v23+ adds component tokens, we can remove BEM overrides one-by-one
+- **No risk**: The BEM override still applies, just reads from a variable instead of hardcoding
 
----
+### New tokens to add to _tokens.scss
 
-## Task C1: Audit Paragon v22 token consumption before edits (FE-010 prerequisite)
+Add these to the `:root` block for use by hardened BEM overrides:
 
-### What to do
+```scss
+:root {
+  /* ... existing tokens ... */
 
-Do not modify `mereka.scss` and do not enable runtime theming until we have evidence of which `--pgn-*` tokens Paragon actually consumes.
-
-1. Ensure token artifacts exist:
-   - `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`
-   - `infrastructure/tutor/themes/mereka/mfe/theme/light.min.css`
-   - `infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css`
-2. Build a consumed-token list from compiled CSS:
-
-```bash
-rg --text -o -- '--pgn-[a-zA-Z0-9_-]+' infrastructure/tutor/themes/mereka/mfe/theme/core.min.css infrastructure/tutor/themes/mereka/mfe/theme/light.min.css |
-sed -E 's/.*(--pgn-[A-Za-z0-9_-]+).*/\1/' |
-  sort -u > /tmp/pgn-consumed-vars.txt
+  /* Component-specific tokens for BEM override hardening.
+     These are NOT consumed by Paragon v22 — they're for our own CSS overrides.
+     When Paragon v23+ adds native support, migrate from BEM → token. */
+  --mereka-card-radius: 24px;
+  --mereka-card-border: 1px solid var(--mereka-mfe-border);
+  --mereka-card-shadow: var(--mereka-mfe-card-shadow);
+  --mereka-modal-radius: 24px;
+  --mereka-dropdown-radius: 16px;
+  --mereka-dropdown-shadow: 0 16px 40px rgb(var(--mereka-color-ink-deep-rgb) / 0.12);
+  --mereka-form-radius: 16px;
+  --mereka-alert-radius: 16px;
+  --mereka-tab-radius: 999px;
+  --mereka-btn-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
+  --mereka-btn-shadow: 0 12px 30px rgb(var(--mereka-color-blue-rgb) / 0.3);
+  --mereka-btn-shadow-hover: 0 18px 40px rgb(var(--mereka-color-blue-rgb) / 0.4);
+}
 ```
 
-3. For each `.pgn__*` override in `mereka.scss`, map each property to one of:
-   - **CONSUMES** (token exists and is referenced by compiled Paragon CSS),
-   - **STRUCTURAL** (layout/transform/gap/spacing behavior cannot be tokenized),
-   - **UNVERIFIED** (needs follow-up).
-4. Keep replacements limited to the confirmed **CONSUMES** set.
+**Naming convention**: `--mereka-*` (not `--pgn-*`) because these are OUR tokens for OUR overrides, not Paragon-consumed properties.
 
-**Important**: This is the blocker step. FE-010 should not proceed on unverified token names.
+### Rules for the implementor
 
-### Practical guardrails
-
- - Keep `MEREKA_PARAGON_THEME_ENABLED` false while running this audit.
- - Treat plugin/Caddy changes from older prompts as pre-existing work; only rework them if they are missing.
-
-### Output
-
-Create/refresh a small list in the working folder (e.g., `/tmp/pgn-consumed-vars.txt`) and reference it in PR notes so everyone uses the same source of truth.
+1. Every hex value in `mereka.scss` must become a `var()` reference
+2. Use `--mereka-*` tokens (our namespace) for values Paragon doesn't read
+3. Use `--pgn-*` tokens for values Paragon DOES read (confirmed by C1 audit)
+4. Add fallback values: `var(--mereka-card-radius, 24px)` so the override works even if the token isn't loaded
+5. DO NOT remove any BEM selectors in this task — only swap literal values for var() references
+6. Run `grep -nE '#[0-9a-fA-F]{3,8}' infrastructure/tutor/themes/mereka/mfe/mereka.scss` after — target: 0 matches outside comments
 
 ---
 
-## Task C2: Replace BEM Selector Overrides with Verified Tokens (FE-010)
+## Task C4: Configure PARAGON_THEME_URLS (FE-015) — After C1-C3 Are Stable
+
+### Why deferred
+
+PARAGON_THEME_URLS serves compiled CSS containing `--pgn-*` tokens at runtime. This only makes sense AFTER:
+- C1 confirms which tokens Paragon reads
+- C2 defines the correct token values
+- C3 ensures all BEM overrides use var() (so they're runtime-changeable)
 
 ### What to do
 
-Use the consumed-token list produced in C1.
-
-The current 35-line inventory below is a starting point, not an execution order.
-Reclassify each entry as CONSUMES/STRUCTURAL/UNVERIFIED based on `/tmp/pgn-consumed-vars.txt` before deleting or keeping any rule.
-If no token exists in the consumed list for a property in that selector, keep the override as **RETAIN**.
-
-Systematically evaluate every BEM selector override in `mereka.scss` and either:
-1. **Replace** it with a component token in `_tokens.scss`/JSON (add a `--pgn-*` custom property only if confirmed consumed), OR
-2. **Retain** it with justification (structural override or confirmed non-consumable token)
-
-### Complete Inventory of BEM Selector Overrides
-
-Below is every `.pgn__*` selector (and its paired Bootstrap selector where applicable) in `mereka.scss`, with the recommended disposition.
-
-#### Global Component Overrides (no MFE scoping)
-
-| # | Line | Selector | Properties | Disposition |
-|---|------|----------|-----------|-------------|
-| 1 | 25-28 | `.pgn__page-container, .page-container` | `background: transparent` | **REPLACE** with token `--pgn-body-bg` or retain as a simple 1-line structural override |
-| 2 | 79-83 | `.pgn__btn--primary` | `background-image` (gradient), `border: none`, `box-shadow` | **PARTIAL** — gradient is not a standard token; add `--pgn-btn-primary-bg`, `--pgn-btn-primary-border`, `--pgn-btn-primary-box-shadow` tokens. Gradient value may need to stay as CSS. |
-| 3 | 88-92 | `.pgn__btn--primary:hover, :focus` | `transform`, `box-shadow` | **RETAIN** — `transform: translateY(-1px)` is structural (not tokenizable). Shadow color can be tokenized. |
-| 4 | 109-112 | `.pgn__btn--secondary, .pgn__btn--link` | `color` | **REPLACE** with `--pgn-btn-secondary-color` / `--pgn-btn-link-color` tokens |
-| 5 | 115-120 | `.pgn__btn--secondary:hover/:focus, .pgn__btn--link:hover/:focus` | `color` | **REPLACE** with hover/focus token variants |
-| 6 | 123-128 | `.pgn__form-control, .form-control` | `border-radius: 16px`, `border-color`, `box-shadow: none` | **REPLACE** with `--pgn-form-control-border-radius`, `--pgn-form-control-border-color` tokens |
-| 7 | 131-135 | `.pgn__form-control:focus, .form-control:focus` | `border-color`, `box-shadow` (focus ring) | **REPLACE** with `--pgn-form-control-focus-border-color`, `--pgn-form-control-focus-box-shadow` tokens |
-| 8 | 138-142 | `.pgn__form-label, label` | `font-weight: 600`, `color` | **REPLACE** with `--pgn-form-label-font-weight`, `--pgn-form-label-color` tokens |
-| 9 | 147-151 | `.pgn__card` (+ `.card`, `.shadow-lg`) | `border-radius: 24px`, `border`, `box-shadow` | **REPLACE** with `--pgn-card-border-radius`, `--pgn-card-border-color`, `--pgn-card-box-shadow` tokens |
-| 10 | 154-158 | `.pgn__card-header, .card-header` | `background`, `border-bottom` | **REPLACE** with `--pgn-card-header-bg`, `--pgn-card-header-border-color` tokens |
-| 11 | 161-165 | `.pgn__card-footer, .card-footer` | `background`, `border-top` | **REPLACE** with `--pgn-card-footer-bg`, `--pgn-card-footer-border-color` tokens |
-| 12 | 168-171 | `.pgn__alert` | `border-radius: 16px`, `border` | **REPLACE** with `--pgn-alert-border-radius`, `--pgn-alert-border-color` tokens |
-| 13 | 174-177 | `.pgn__alert--info` | `background`, `border-color` | **REPLACE** with `--pgn-alert-info-bg`, `--pgn-alert-info-border-color` tokens |
-| 14 | 180-183 | `.pgn__alert--success` | `background`, `border-color` | **REPLACE** with `--pgn-alert-success-bg`, `--pgn-alert-success-border-color` tokens |
-| 15 | 186-189 | `.pgn__alert--warning` | `background`, `border-color` | **REPLACE** with `--pgn-alert-warning-bg`, `--pgn-alert-warning-border-color` tokens |
-| 16 | 192-195 | `.pgn__alert--danger` | `background`, `border-color` | **REPLACE** with `--pgn-alert-danger-bg`, `--pgn-alert-danger-border-color` tokens |
-| 17 | 198-202 | `.pgn__modal-content` | `border-radius: 24px`, `border`, `box-shadow` | **REPLACE** with `--pgn-modal-border-radius`, `--pgn-modal-border-color`, `--pgn-modal-box-shadow` tokens |
-| 18 | 206-209 | `.pgn__dropdown-menu` (+ `.dropdown-menu`) | `border-radius: 16px`, `border`, `box-shadow` | **REPLACE** with `--pgn-dropdown-border-radius`, `--pgn-dropdown-border-color`, `--pgn-dropdown-box-shadow` tokens |
-| 19 | 214-216 | `.pgn__tabs .nav-link` | `border-radius: 999px` | **REPLACE** with `--pgn-tab-border-radius` token |
-| 20 | 220-224 | `.pgn__tabs .nav-link.active` | `background-image` (gradient), `color`, `border-color` | **PARTIAL** — gradient may need to stay as CSS; `color` and `border-color` are tokenizable |
-
-#### Authn MFE Scoped Overrides
-
-| # | Line | Selector | Properties | Disposition |
-|---|------|----------|-----------|-------------|
-| 21 | 256-261 | `[class*="authn"] .pgn__card` | `border-radius: 28px`, `border`, `box-shadow` | **RETAIN** — surface-scoped structural override; token covers global `.pgn__card` but authn needs a larger radius |
-| 22 | 266-274 | `[class*="authn"] .pgn__card-header` | `background-image` (gradient) | **RETAIN** — surface-specific gradient, not a global token |
-| 23 | 279-284 | `[class*="authn"] .pgn__btn--primary` | `min-height: 44px`, `font-weight`, `letter-spacing` | **RETAIN** — `min-height` is structural; font-weight could be tokenized but the scoping makes it authn-specific |
-| 24 | 289-294 | `[class*="authn"] .pgn__hyperlink` | `color`, `text-decoration`, `font-weight` | **RETAIN** — scoped override for authn surface only |
-| 25 | 299-305 | `[class*="authn"] .pgn__hyperlink:hover/:focus` | `color`, `text-decoration` | **RETAIN** — scoped override for authn surface only |
-
-#### Account/Dashboard MFE Scoped Overrides
-
-| # | Line | Selector | Properties | Disposition |
-|---|------|----------|-----------|-------------|
-| 26 | 324-333 | `[class*="account-*"] .pgn__card` | `border-radius`, `border`, `box-shadow` | **REPLACE** (once global `.pgn__card` token works, these redundant scoped overrides can be removed) |
-| 27 | 339-343 | `[class*="account-*"] .pgn__form-control` | `background` | **REPLACE** with `--pgn-form-control-bg` token |
-| 28 | 349-353 | `[class*="account-*"] .pgn__btn` | `border-radius: 999px` | **REPLACE** (already covered by global `--pgn-btn-border-radius: 999px` token) |
-| 29 | 359-363 | `[class*="account-*"] .pgn__alert` | `border-radius: 16px` | **REPLACE** (already covered by global `--pgn-alert-border-radius` token) |
-| 30 | 369-374 | `[class*="account-*"] .pgn__dropdown-toggle` | `border-radius: 999px`, `border-color` | **REPLACE** (covered by global dropdown token) |
-
-#### Learning MFE Scoped Overrides
-
-| # | Line | Selector | Properties | Disposition |
-|---|------|----------|-----------|-------------|
-| 31 | 445-453 | `[class*="learning"] :is(.pgn__card, .card)` | `border-radius`, `border`, `box-shadow`, `background`, `overflow`, `margin-bottom` | **PARTIAL** — radius/border/shadow tokenizable; `overflow: hidden` and `margin-bottom` are structural, RETAIN those |
-| 32 | 456-466 | `[class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, ...)` | `max-width`, `width`, `min-width` | **RETAIN** — entirely structural (sizing) |
-| 33 | 478-481 | `[class*="learning"] :is(.pgn__card, .card)` (media query) | `min-width: 0` | **RETAIN** — structural responsive fix |
-
-#### Discussions MFE Scoped Overrides
-
-| # | Line | Selector | Properties | Disposition |
-|---|------|----------|-----------|-------------|
-| 34 | 541-546 | `[class*="discussions"] .pgn__card` | `border-radius: 22px`, `border`, `box-shadow` | **REPLACE** (once global `.pgn__card` token works) |
-| 35 | 563-567 | `[class*="discussions"] .pgn__btn--primary` | `background-image` (gradient), `border: none` | **REPLACE** (once global `.pgn__btn--primary` token works) |
-
-### Summary Count
-
-| Disposition | Count | Description |
-|------------|-------|-------------|
-| **REPLACE** (fully tokenizable) | ~20 | Can be eliminated by adding `--pgn-*` component tokens |
-| **PARTIAL** (some props tokenizable) | ~4 | Some properties become tokens, structural props remain |
-| **RETAIN** (structural or surface-scoped) | ~11 | Cannot be expressed as tokens; remain as CSS overrides |
-
-### How to implement the replacements
-
-For each "REPLACE" override:
-
-1. **Add the `--pgn-*` token** to `_tokens.scss` `:root` block (and later to the JSON token pipeline). Example for card:
-   ```scss
-   :root {
-     /* existing tokens ... */
-     --pgn-card-border-radius: 24px;
-     --pgn-card-box-shadow: 0 25px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
-     --pgn-card-border-color: rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
-   }
+1. **Add config defaults** to `mereka_lms.py`:
+   ```python
+   ("MEREKA_PARAGON_THEME_ENABLED", False),
+   ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
    ```
 
-2. **Verify Paragon reads the token**. Check whether Paragon's Card component actually reads `--pgn-card-border-radius` (or `var(--pgn-card-border-radius)`) in its SCSS. If Paragon does NOT read this specific token name, you have two options:
-   - a) The token override still works if it matches the CSS custom property Paragon generates (inspect the MFE in browser DevTools to find the actual property name).
-   - b) If no Paragon token exists for that property, the BEM override must be RETAINED until Paragon adds token support.
+2. **Inject PARAGON_THEME_URLS** into `MFE_CONFIG` dict in LMS production settings:
+   ```python
+   if {{ MEREKA_PARAGON_THEME_ENABLED }}:
+       _theme_base = "{{ MEREKA_PARAGON_THEME_CDN_BASE }}"
+       MFE_CONFIG["PARAGON_THEME_URLS"] = {
+           "core": {
+               "urls": {
+                   "default": f"{_theme_base}/core.min.css",
+                   "brandOverride": f"{_theme_base}/mereka-brand.min.css",
+               }
+           },
+           "variants": {
+               "light": {
+                   "urls": {
+                       "default": f"{_theme_base}/light.min.css",
+                       "brandOverride": f"{_theme_base}/mereka-brand-light.min.css",
+                   }
+               }
+           },
+       }
+   ```
 
-3. **Remove the BEM rule** from `mereka.scss` only after the token is confirmed by C1 and a visual check.
+3. **Caddy route** already exists: `@mfe_theme_assets` handler in MFE Caddyfile serves `/theme/*` from `/openedx/dist` (fixed in Phase B review). No changes needed.
 
-4. **Test visually** in each affected MFE to confirm no regression.
+4. **Generate `mereka-brand.min.css`**: Update `scripts/branding/build-tokens.sh` to extract all `--pgn-*` properties from `_tokens.scss` into a standalone CSS file. This is the `brandOverride` CSS.
 
-### Token names to add
+5. **`mereka-brand-light.min.css`** is identical to `mereka-brand.min.css` because we only support light mode. Add a comment in the file and in the build script explaining this.
 
-Use consumed-list as the **only** source of candidate token names:
+6. **Feature flag**: Ship with `MEREKA_PARAGON_THEME_ENABLED: false`. Enable only after visual QA confirms no regressions.
 
-```bash
-cat /tmp/pgn-consumed-vars.txt | sort | sed -n '1,200p'
-```
+### Rollback
 
-**CRITICAL**: Do NOT guess token names or introduce names not present in the consumed list.
-If a desired property is not tokenized in Paragon v22, keep it as a `RETAIN` rule in `mereka.scss` (with `var(--mereka-*)` where applicable).
-
-### Alternative path for top-level header/footer surfaces
-
-Where header/footer branding is repeatedly force-styled in `mereka.scss`, prefer FPF `header_slot` / `footer_slot` overrides in a later phase instead of brittle gradient/text overrides.
-
----
-
-## Task C3: Enable PARAGON_THEME_URLS runtime delivery (FE-015)
-
-After C1 + C2 complete, verify the runtime theme delivery path end-to-end before turning on `MEREKA_PARAGON_THEME_ENABLED`.
-
-### What to verify first
-
-1. Confirm `infrastructure/tutor/plugins/mereka_lms.py` injects `PARAGON_THEME_URLS` (or add this now if missing).
-2. Confirm Caddy serves `/theme/*` from the MFE static layer.
-3. Confirm `scripts/branding/build-tokens.sh` outputs:
-   - `core.min.css`
-   - `light.min.css`
-   - `mereka-brand.min.css`
-   - `mereka-brand-light.min.css`
-
-### Activation
-
-Only after token audit + replacement validation:
-
-1. Set `MEREKA_PARAGON_THEME_ENABLED=true` in Tutor config.
-2. `tutor config save && ./infrastructure/tutor/apply-patches.sh`
-3. Rebuild/release MFE image with fresh `indigo/theme/` assets synced.
-4. Capture one runtime validation request that confirms the URLs are returned in `MFE_CONFIG` and loaded in the MFE.
+Set `MEREKA_PARAGON_THEME_ENABLED: false` in Tutor config. MFEs fall back to build-time SCSS branding. No image rebuild needed.
 
 ---
 
-## Task C4: Add Verification Script
+## Task C5: Verification Script + CI
 
-Create `scripts/qa/verify-paragon-theme-urls.sh`:
+Create `scripts/qa/verify-paragon-token-coverage.sh`:
 
 ```bash
 #!/usr/bin/env bash
@@ -285,91 +276,130 @@ Create `scripts/qa/verify-paragon-theme-urls.sh`:
 # @spec: paragon-design-tokens-migration_spec
 set -euo pipefail
 
-# 1. Verify mereka_lms.py contains PARAGON_THEME_URLS config
-# 2. Verify theme CSS files exist in expected location
-# 3. Verify theme CSS contains `--pgn-color-primary`
-# 4. Verify consumed-token list from C1 is used in `mereka-brand.min.css`
-# 5. Verify Caddyfile has route for /theme/* (or mfe_theme_css handler)
+PASS=0; FAIL=0; SKIP=0
+pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
+fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
+skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
+
+TOKENS="infrastructure/tutor/themes/mereka/scss/_tokens.scss"
+MFE_CSS="infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+PLUGIN="infrastructure/tutor/plugins/mereka_lms.py"
+
+echo "=== Paragon Token Coverage ==="
+
+# 1. _tokens.scss defines core semantic tokens
+for token in '--pgn-color-primary' '--pgn-color-secondary' \
+             '--pgn-font-family-sans-serif' '--pgn-btn-border-radius'; do
+  if grep -qF "$token" "$TOKENS"; then
+    pass "$token defined in _tokens.scss"
+  else
+    fail "$token MISSING from _tokens.scss"
+  fi
+done
+
+# 2. mereka.scss has zero hardcoded hex values (outside comments)
+HEX_COUNT=$(grep -vE '^\s*//' "$MFE_CSS" | grep -cE '#[0-9a-fA-F]{3,8}' || true)
+if [ "$HEX_COUNT" -eq 0 ]; then
+  pass "No hardcoded hex values in mereka.scss"
+else
+  fail "$HEX_COUNT hardcoded hex values remain in mereka.scss"
+fi
+
+# 3. mereka.scss uses var() for all color/shadow values
+VAR_COUNT=$(grep -c 'var(--' "$MFE_CSS" || true)
+if [ "$VAR_COUNT" -ge 30 ]; then
+  pass "mereka.scss uses $VAR_COUNT var() references (target: >= 30)"
+else
+  fail "mereka.scss has only $VAR_COUNT var() references (target: >= 30)"
+fi
+
+# 4. Plugin has PARAGON_THEME_URLS infrastructure
+if grep -q 'PARAGON_THEME' "$PLUGIN"; then
+  pass "PARAGON_THEME config exists in plugin"
+else
+  skip "PARAGON_THEME not yet configured (Phase C4)"
+fi
+
+# 5. Token audit doc exists
+if [ -f "docs/architecture/PARAGON_V22_TOKEN_AUDIT.md" ]; then
+  pass "Paragon v22 token audit document exists"
+else
+  fail "Missing docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+fi
+
+# 6. No --pgn-* tokens that Paragon doesn't consume (dead tokens)
+DEAD_TOKENS=0
+for token in '--pgn-card-box-shadow' '--pgn-modal-box-shadow' \
+             '--pgn-dropdown-box-shadow' '--pgn-tab-border-radius'; do
+  if grep -qF "$token:" "$TOKENS"; then
+    echo "  WARN: $token defined but Paragon v22 doesn't consume it"
+    DEAD_TOKENS=$((DEAD_TOKENS + 1))
+  fi
+done
+if [ "$DEAD_TOKENS" -eq 0 ]; then
+  pass "No dead --pgn-* tokens (Paragon v22 doesn't consume them)"
+else
+  fail "$DEAD_TOKENS dead --pgn-* tokens found — use --mereka-* namespace instead"
+fi
+
+echo ""
+echo "=== Summary: $PASS PASS, $FAIL FAIL, $SKIP SKIP ==="
+[ "$FAIL" -eq 0 ]
 ```
 
-Add the script to `.github/ci-scripts-static.txt`.
-
----
-
-## Verification
-
-After all tasks:
-
-1. **Token audit complete**: `/tmp/pgn-consumed-vars.txt` exists and is used to drive C2 decisions
-2. **PARAGON_THEME_URLS in plugin**: `grep -c 'PARAGON_THEME_URLS' infrastructure/tutor/plugins/mereka_lms.py` returns >= 1
-3. **Theme CSS exists**: `ls infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css`
-4. **Theme CSS has tokens**: `grep -c '\-\-pgn-' infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css` returns >= 100
-5. **`mereka.scss` is scoped by audit outcome**: retained entries are only `STRUCTURAL` or surface-scoped overrides not in the audit-consumed set
-6. **Runtime URL control**: confirm `MEREKA_PARAGON_THEME_ENABLED` can be toggled off without removing image-built branding fallback
-7. **No visual regressions**: Manually check authn, dashboard, learning, discussions MFEs
-8. **BEM override count**: `grep -c '\.pgn__' infrastructure/tutor/themes/mereka/mfe/mereka.scss` should be significantly reduced from the current ~35 unique `.pgn__*` selectors
-9. **CI passes**: Run `scripts/qa/verify-paragon-theme-urls.sh` and all existing branding scripts
+Add to `.github/ci-scripts-static.txt`.
 
 ---
 
 ## Files to Modify
 
-| File | Action |
-|------|--------|
-| `infrastructure/tutor/plugins/mereka_lms.py` | MODIFY (add PARAGON_THEME_URLS config + LMS settings patch) |
-| `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | MODIFY (add component-level `--pgn-*` tokens to `:root` block) |
-| `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | MODIFY (remove BEM overrides replaced by tokens) |
-| `scripts/branding/build-tokens.sh` | MODIFY (output mereka-brand.min.css with all `--pgn-*` tokens) |
-| `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | MODIFY (verify/add `/theme/*` route if needed) |
-| `scripts/qa/verify-paragon-theme-urls.sh` | CREATE |
-| `.github/ci-scripts-static.txt` | MODIFY (add new verification script) |
-| `infrastructure/tutor/themes/mereka/mfe/theme/` | CREATE (directory for compiled theme CSS) |
+| File | Action | Task |
+|------|--------|------|
+| `docs/architecture/PARAGON_V22_TOKEN_AUDIT.md` | CREATE | C1 |
+| `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | MODIFY (add `--mereka-*` component tokens) | C2, C3 |
+| `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | MODIFY (remove tokenizable BEM, harden rest with var()) | C2, C3 |
+| `infrastructure/tutor/plugins/mereka_lms.py` | MODIFY (add PARAGON_THEME_URLS config) | C4 |
+| `scripts/branding/build-tokens.sh` | MODIFY (output mereka-brand.min.css) | C4 |
+| `scripts/qa/verify-paragon-token-coverage.sh` | CREATE | C5 |
+| `.github/ci-scripts-static.txt` | MODIFY (add new script) | C5 |
 
 ## Files to READ First
 
 | File | Why |
 |------|-----|
-| `specs/paragon-design-tokens-migration_spec.md` | Full spec with acceptance criteria for Phases 2-3 |
-| `infrastructure/tutor/plugins/mereka_lms.py` | Understand existing MFE config injection (lines 660-860) |
-| `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | All 583 lines — the BEM overrides to evaluate |
-| `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | Current `--pgn-*` token bridge (lines 59-134) |
-| `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | Existing theme CSS handler (lines 48-55) |
-| `docs/architecture/MFE_RUNTIME_CONFIG.md` | How MFE runtime config works (mfe_config API) |
-| `scripts/branding/build-tokens.sh` | Current token build script (if exists from Phase B) |
+| `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css` | **THE** source of truth for what Paragon v22 consumes (2,310 tokens) |
+| `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | All BEM overrides to evaluate |
+| `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | Current token bridge |
+| `specs/paragon-design-tokens-migration_spec.md` | Spec acceptance criteria |
+| `specs/mfe-plugin-slots_spec.md` | FPF slots for Phase D header branding |
+| `docs/architecture/MFE_RUNTIME_CONFIG.md` | MFE config API mechanics |
 
 ---
 
 ## Commit Strategy
 
-Make 4 separate commits:
+5 commits (one per task):
 
-1. `feat: configure PARAGON_THEME_URLS in Tutor plugin for runtime CDN theming (FE-015)`
-2. `feat: add compiled theme CSS and Caddy serving route (FE-015)`
-3. `refactor: replace BEM selector overrides with Paragon component tokens (FE-010)`
-4. `test: add PARAGON_THEME_URLS verification script (FE-015)`
+1. `docs: Paragon v22 token audit — consumed vs aspirational tokens (FE-010)`
+2. `refactor: replace BEM overrides with Paragon tokens where consumed (FE-010)`
+3. `refactor: harden remaining BEM overrides with var() references (FE-011)`
+4. `feat: configure PARAGON_THEME_URLS in Tutor plugin (FE-015)`
+5. `test: add Paragon token coverage verification script`
 
 ---
 
-## Rollback Plan
+## Phase D Preview (NOT in scope for Phase C)
 
-If runtime theming causes visual regressions:
+The following are identified but deferred to Phase D:
 
-1. Set `MEREKA_PARAGON_THEME_ENABLED: false` in Tutor config
-2. Run `tutor config save && ./infrastructure/tutor/apply-patches.sh && tutor local restart`
-3. MFEs fall back to the SCSS-compiled branding (which remains intact during Phase C)
-4. No image rebuild required — MFEs check for `PARAGON_THEME_URLS` at runtime and skip if absent
-
-If BEM override removal causes regressions:
-
-1. `git checkout HEAD~1 -- infrastructure/tutor/themes/mereka/mfe/mereka.scss`
-2. Rebuild MFE image to restore the original BEM overrides
-3. The token definitions in `_tokens.scss` are harmless (unused custom properties) and do not need to be reverted
+- **FPF Plugin Slots**: Use `header_slot` and `footer_slot` to inject custom React header/footer components. This replaces the most fragile BEM overrides (header gradient, logo injection, nav styling) with a supported extension mechanism. See `specs/mfe-plugin-slots_spec.md`.
+- **style-dictionary JSON pipeline**: Replace the SCSS-to-CSS extraction in `build-tokens.sh` with a proper JSON → CSS pipeline using `style-dictionary`. This enables multi-format output (CSS, SCSS, JSON, iOS, Android).
+- **Dark mode**: Add `variants.dark` to PARAGON_THEME_URLS. Currently out of scope (light mode only).
+- **Performance budgets in CI**: Add Lighthouse CI with LCP < 2.5s, bundle < 300KB gzipped, theme CSS < 50KB targets.
 
 ---
 
 ## Audit Intelligence (2026-02-27)
-
-These findings from a comprehensive frontend architectural audit should inform Phase C implementation decisions:
 
 ### Dependency Constraints
 - **React**: MFEs are locked to React 17 by Paragon v22. Do NOT attempt React 18+ features (concurrent mode, useTransition, etc.)
@@ -383,19 +413,7 @@ These findings from a comprehensive frontend architectural audit should inform P
 - Verification: `scripts/qa/verify-caddy-cache-policy.sh` (12 checks)
 
 ### brand-core.css vs brand-light.css Identity
-- The audit found that `brand-core.css` and `brand-light.css` are byte-identical. This is expected because we only support light mode. When generating `mereka-brand.min.css` and `mereka-brand-light.min.css`, it's OK for them to be identical for now. Add a comment explaining this.
-
-### Frontend Plugin Framework (FPF) for Header Branding
-- Paragon v22 supports FPF plugin slots including `header_slot` and `footer_slot`
-- **Phase D opportunity**: Instead of CSS-only header branding, use FPF slots to inject a fully custom React header with Mereka logo, navigation, and gradient
-- This is NOT part of Phase C — mention it as future work
-- Reference: `specs/mfe-plugin-slots_spec.md`
-
-### Performance Budget Targets
-- LCP (Largest Contentful Paint): < 2.5s on 4G mobile
-- Total JS bundle per MFE: < 300KB gzipped
-- Theme CSS: < 50KB (ideally < 20KB — just custom properties)
-- Font loading: woff2 only, `font-display: swap`, preconnect to font origin
+- `brand-core.css` and `brand-light.css` are byte-identical. This is expected because we only support light mode. When generating `mereka-brand.min.css` and `mereka-brand-light.min.css`, it's OK for them to be identical for now. Add a comment explaining this.
 
 ### Accessibility Constraints
 - All color tokens MUST pass WCAG 2.1 AA contrast (4.5:1 for text, 3:1 for large text/UI)
@@ -403,3 +421,9 @@ These findings from a comprehensive frontend architectural audit should inform P
   - `#f4be48` (gold/warning) on white fails AA — use on dark backgrounds only or darken to `#c99a00`
   - `#94d1e4` (sky/info-soft) on white fails AA — use as background only, not text
 - Run contrast checks on any new token color values before committing
+
+### Performance Budget Targets
+- LCP (Largest Contentful Paint): < 2.5s on 4G mobile
+- Total JS bundle per MFE: < 300KB gzipped
+- Theme CSS: < 50KB (ideally < 20KB — just custom properties)
+- Font loading: woff2 only, `font-display: swap`, preconnect to font origin
