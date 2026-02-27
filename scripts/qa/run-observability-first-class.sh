@@ -199,6 +199,8 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   echo "==> Running logging pipeline verification"
   run_with_timeout "$SCRIPT_TIMEOUT" env \
   VERIFY_LOGGING_PIPELINE_RUNNER="run-observability-first-class" \
+  VERIFY_LOGGING_PIPELINE_ENV_LABEL="$ENV_LABEL" \
+  VERIFY_LOGGING_PIPELINE_DISPATCH_PROFILE="$DISPATCH_PROFILE" \
   APP_NS="$APP_NAMESPACE" \
   K8S_CONTEXT="$K8S_CONTEXT" \
   VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE="$COVERAGE_TXT" \

@@ -15,6 +15,9 @@ STRICT="${STRICT:-0}"
 RUNNER="${VERIFY_LOGGING_PIPELINE_RUNNER:-unknown}"
 EVIDENCE_FILE="${VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE:-}"
 EVIDENCE_CAPTURE=""
+# Add identity defaults for runtime evidence compatibility.
+EVIDENCE_ENV_LABEL="${VERIFY_LOGGING_PIPELINE_ENV_LABEL:-${ENV_LABEL:-unknown}}"
+EVIDENCE_DISPATCH_PROFILE="${VERIFY_LOGGING_PIPELINE_DISPATCH_PROFILE:-${DISPATCH_PROFILE:-custom}}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -38,6 +41,8 @@ Options:
 
 Environment:
   VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE   Optional evidence file for redirected output
+  VERIFY_LOGGING_PIPELINE_ENV_LABEL      Evidence env label (optional)
+  VERIFY_LOGGING_PIPELINE_DISPATCH_PROFILE Evidence dispatch profile (optional)
 EOF
 }
 
@@ -149,7 +154,7 @@ write_evidence() {
     echo "- strict: $STRICT"
     echo "- runner: $RUNNER"
     echo "- status: $status_label"
-    echo "- evidence_identity: env=${ENV_LABEL:-unknown};profile=${DISPATCH_PROFILE:-custom};context=${K8S_CONTEXT:-default}"
+    echo "- evidence_identity: env=${EVIDENCE_ENV_LABEL};profile=${EVIDENCE_DISPATCH_PROFILE};context=${K8S_CONTEXT:-default}"
     echo ""
     echo "## Logging pipeline checks"
     echo ""
