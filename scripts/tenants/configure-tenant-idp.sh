@@ -228,6 +228,12 @@ elif hasattr(EnterpriseCustomer, "modified"):
 else:
     ec = ec_qs.first()
 if ec is None:
+    if DRY_RUN:
+        print(
+            f"DRY-RUN: EnterpriseCustomer slug='{TENANT_SLUG}' not found yet; "
+            "would configure IdP after tenant provisioning is applied"
+        )
+        sys.exit(0)
     print(f"ERROR: EnterpriseCustomer slug='{TENANT_SLUG}' not found")
     sys.exit(2)
 if ec.site_id is None:
