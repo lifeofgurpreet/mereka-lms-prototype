@@ -67,6 +67,55 @@
   --leading-body: 1.5;
 
   /* ===========================================
+     PARAGON COMPATIBILITY TOKENS
+     =========================================== */
+  --pgn-font-size-sm: 0.875rem;
+  --pgn-font-size-base: 1rem;
+  --pgn-font-size-lg: 1.125rem;
+
+  --pgn-line-height-sm: 1.5;
+  --pgn-line-height-base: 1.5;
+  --pgn-line-height-lg: 1.5;
+
+  --pgn-spacing-1: 0.25rem;
+  --pgn-spacing-2: 0.5rem;
+  --pgn-spacing-3: 1rem;
+  --pgn-spacing-4: 1.5rem;
+  --pgn-spacing-5: 3rem;
+  --pgn-spacing-6: 4.5rem;
+
+  --pgn-spacing-spacer-0: 0;
+  --pgn-spacing-spacer-1: 0.25rem;
+  --pgn-spacing-spacer-2: 0.5rem;
+  --pgn-spacing-spacer-3: 1rem;
+  --pgn-spacing-spacer-4: 1.5rem;
+  --pgn-spacing-spacer-5: 3rem;
+  --pgn-spacing-spacer-6: 4.5rem;
+
+  --pgn-border-radius-sm: 0.25rem;
+  --pgn-border-radius: 0.375rem;
+  --pgn-border-radius-lg: 0.425rem;
+
+  --pgn-elevation-1: var(--shadow-sm);
+  --pgn-elevation-2: var(--shadow-md);
+  --pgn-elevation-3: var(--shadow-lg);
+  --pgn-elevation-4: var(--shadow-xl);
+
+  --pgn-color-primary-100: var(--pgn-color-primary-base);
+  --pgn-color-primary-200: var(--pgn-color-primary-base);
+  --pgn-color-primary-300: var(--pgn-color-primary-base);
+  --pgn-color-primary-500: var(--pgn-color-primary-base);
+  --pgn-color-primary-400: var(--pgn-color-primary-base);
+
+  --pgn-zindex-dropdown: 1000;
+  --pgn-zindex-modal: 1050;
+  --pgn-zindex-popover: 1060;
+  --pgn-zindex-tooltip: 1070;
+
+  --pgn-transition-base: all 0.2s ease-in-out 0s normal;
+  --pgn-transition-fade: opacity 0.15s linear 0s normal;
+
+  /* ===========================================
      SPACING
      =========================================== */
   --space-0: 0px;
