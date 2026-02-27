@@ -142,6 +142,7 @@ fi
 
 echo "==> Running observability compliance script"
 STEP_FAILURES=0
+STEP_RESULTS=()
 set +e
 run_with_timeout "$SCRIPT_TIMEOUT" env \
   VALIDATE_OBS_APP_NAMESPACE="$APP_NAMESPACE" \
@@ -155,6 +156,9 @@ run_with_timeout "$SCRIPT_TIMEOUT" env \
 COMPLIANCE_RC=$?
 if [[ "$COMPLIANCE_RC" -ne 0 ]]; then
   STEP_FAILURES=$((STEP_FAILURES + 1))
+  STEP_RESULTS+=("observability-compliance:FAIL(rc=$COMPLIANCE_RC)")
+else
+  STEP_RESULTS+=("observability-compliance:PASS")
 fi
 set -e
 
@@ -179,6 +183,9 @@ run_with_timeout "$SCRIPT_TIMEOUT" env \
 COVERAGE_RC=$?
 if [[ "$COVERAGE_RC" -ne 0 ]]; then
   STEP_FAILURES=$((STEP_FAILURES + 1))
+  STEP_RESULTS+=("observability-coverage-matrix:FAIL(rc=$COVERAGE_RC)")
+else
+  STEP_RESULTS+=("observability-coverage-matrix:PASS")
 fi
 set -e
 
@@ -198,6 +205,9 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   RUNTIME_RC=$?
   if [[ "$RUNTIME_RC" -ne 0 ]]; then
     STEP_FAILURES=$((STEP_FAILURES + 1))
+    STEP_RESULTS+=("verify-observability-runtime:FAIL(rc=$RUNTIME_RC)")
+  else
+    STEP_RESULTS+=("verify-observability-runtime:PASS")
   fi
   set -e
 
@@ -218,6 +228,9 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   CORRELATION_RC=$?
   if [[ "$CORRELATION_RC" -ne 0 ]]; then
     STEP_FAILURES=$((STEP_FAILURES + 1))
+    STEP_RESULTS+=("verify-correlation-headers:FAIL(rc=$CORRELATION_RC)")
+  else
+    STEP_RESULTS+=("verify-correlation-headers:PASS")
   fi
   set -e
 
@@ -234,6 +247,9 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   LOGGING_RC=$?
   if [[ "$LOGGING_RC" -ne 0 ]]; then
     STEP_FAILURES=$((STEP_FAILURES + 1))
+    STEP_RESULTS+=("verify-logging-pipeline:FAIL(rc=$LOGGING_RC)")
+  else
+    STEP_RESULTS+=("verify-logging-pipeline:PASS")
   fi
   set -e
 
@@ -248,6 +264,9 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   TRACING_RC=$?
   if [[ "$TRACING_RC" -ne 0 ]]; then
     STEP_FAILURES=$((STEP_FAILURES + 1))
+    STEP_RESULTS+=("verify-tracing:FAIL(rc=$TRACING_RC)")
+  else
+    STEP_RESULTS+=("verify-tracing:PASS")
   fi
   set -e
 
@@ -330,6 +349,10 @@ Path(${INDEX_JSON@Q}).write_text(json.dumps(payload, indent=2) + "\n", encoding=
 PY
 
 echo "==> Observability first-class run complete"
+
+for STEP_RESULT in "${STEP_RESULTS[@]}"; do
+  echo "step_result=${STEP_RESULT}"
+done
 
 echo "runtime_step_failures=${STEP_FAILURES}"
 echo "evidence_index=$INDEX_JSON"
