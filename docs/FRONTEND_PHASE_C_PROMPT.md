@@ -8,9 +8,14 @@
 
 ## Objective
 
-Enable runtime CDN theming via `PARAGON_THEME_URLS` so that brand color/typography changes propagate to all MFEs without rebuilding Docker images. Then systematically replace the BEM selector overrides in `mereka.scss` with Paragon design token equivalents so that component appearance is controlled at the token level rather than by targeting fragile class names.
+Scope C to the verified Paragon v22 runtime-token path. Complete **C1** (token-audit) before token replacement, and only finalize **C3** (PARAGON_THEME_URLS activation) after **Phase B3/B4** + verified token bridging are in place.
 
-The dependency chain is: **FE-015** (set PARAGON_THEME_URLS) then **FE-010** (replace BEM overrides with tokens).
+Priorities:
+1. **C1**: Generate a verified list of consumed Paragon token names from the built `core.min.css`/`light.min.css` artifacts.
+2. **C2**: Keep Paragon-ready overrides in `mereka.scss` only where no consumed token exists; replace only against consumed tokens.
+3. **C3**: Confirm Caddy/plugin plumbing is complete before turning `MEREKA_PARAGON_THEME_ENABLED` on.
+
+The dependency ordering is therefore: FE-012 + FE-011 readiness, then **C1**, then **C2**, then **C3**.
 
 ---
 
@@ -83,123 +88,56 @@ The style-dictionary pipeline compiles these into `--pgn-*` CSS custom propertie
 
 ---
 
-## Task C1: Configure PARAGON_THEME_URLS in Tutor Plugin (FE-015)
+## Task C1: Audit Paragon v22 token consumption before edits (FE-010 prerequisite)
 
 ### What to do
 
-Modify `infrastructure/tutor/plugins/mereka_lms.py` to inject `PARAGON_THEME_URLS` into the MFE runtime configuration. The MFEs read this from the `mfe_config` API response at page load.
+Do not modify `mereka.scss` and do not enable runtime theming until we have evidence of which `--pgn-*` tokens Paragon actually consumes.
 
-### Step 1: Add config defaults
-
-In the `CONFIG_DEFAULTS` section (around line 37), add:
-
-```python
-("MEREKA_PARAGON_THEME_ENABLED", False),
-("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
-```
-
-### Step 2: Add MFE runtime config injection
-
-Add a new `openedx-lms-production-settings` patch (or extend the existing one) that injects `PARAGON_THEME_URLS` into the MFE config API response. The LMS serves MFE config via `MFE_CONFIG` dict in Django settings:
-
-```python
-# In the openedx-lms-production-settings patch:
-if {{ MEREKA_PARAGON_THEME_ENABLED }}:
-    _theme_base = "{{ MEREKA_PARAGON_THEME_CDN_BASE }}"
-    MFE_CONFIG["PARAGON_THEME_URLS"] = {
-        "core": {
-            "urls": {
-                "default": f"{_theme_base}/core.min.css",
-                "brandOverride": f"{_theme_base}/mereka-brand.min.css",
-            }
-        },
-        "variants": {
-            "light": {
-                "urls": {
-                    "default": f"{_theme_base}/light.min.css",
-                    "brandOverride": f"{_theme_base}/mereka-brand-light.min.css",
-                }
-            }
-        },
-    }
-```
-
-**Key detail**: The CDN base should be a relative path (`/theme`) for local development. For production, it resolves against the MFE origin (`https://apps.academyv2.mereka.io/theme/...`). The Caddyfile already serves static assets from the MFE container, so we need a Caddy route to serve theme CSS files.
-
-### Step 3: Add Caddy route for theme CSS
-
-The Caddyfile at `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` already has a `@mfe_theme_css` handler (lines 48-55) that serves theme CSS from `/openedx/dist/`. Verify this handler correctly serves the compiled theme CSS files. If the theme CSS files are placed at a different path (e.g., `/openedx/dist/theme/`), add a new handler:
-
-```
-@theme_css {
-    path /theme/*
-}
-handle @theme_css {
-    root * /openedx/dist
-    file_server
-}
-```
-
-### Step 4: Include compiled theme CSS in MFE image
-
-Add a Dockerfile hook (`mfe-dockerfile-post-npm-install` or a new hook) that copies the compiled token CSS into the MFE static asset directory:
-
-```dockerfile
-# Copy compiled Paragon theme CSS into MFE dist
-COPY indigo/theme/ /openedx/dist/theme/
-```
-
-This requires the `build-tokens.sh` script (from Phase B4 / the token pipeline spec) to output files to `infrastructure/tutor/themes/mereka/mfe/theme/` which then gets synced into the Tutor build context by `apply-patches.sh`.
-
-### Step 5: Build the compiled theme CSS files
-
-Create or update `scripts/branding/build-tokens.sh` to produce four CSS files:
-
-| File | Contents |
-|------|----------|
-| `core.min.css` | Paragon's default core theme CSS (copy from Paragon npm package) |
-| `mereka-brand.min.css` | Mereka token overrides: all `--pgn-*` custom properties in `:root` |
-| `light.min.css` | Light variant core (copy from Paragon) |
-| `mereka-brand-light.min.css` | Mereka light variant overrides (same as brand for now; dark mode is out of scope) |
-
-The `mereka-brand.min.css` file should contain the `:root` block from `_tokens.scss` lines 59-134 (all `--pgn-*` properties) compiled into a standalone CSS file. This is the file that replaces build-time SCSS compilation for brand tokens.
-
-**Build script approach**:
+1. Ensure token artifacts exist:
+   - `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`
+   - `infrastructure/tutor/themes/mereka/mfe/theme/light.min.css`
+   - `infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css`
+2. Build a consumed-token list from compiled CSS:
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Extract --pgn-* custom properties from _tokens.scss into standalone CSS
-# (Later phases will use style-dictionary JSON pipeline instead)
-OUTPUT_DIR="infrastructure/tutor/themes/mereka/mfe/theme"
-mkdir -p "$OUTPUT_DIR"
-
-# Generate mereka-brand.min.css from existing --pgn-* tokens
-cat > "$OUTPUT_DIR/mereka-brand.min.css" << 'CSSEOF'
-:root {
-  /* Auto-generated from _tokens.scss --pgn-* properties */
-  --pgn-color-primary: #ab3b78;
-  --pgn-color-secondary: #237072;
-  /* ... all --pgn-* properties from _tokens.scss ... */
-}
-CSSEOF
-
-# Copy Paragon core CSS from node_modules (during MFE build)
-# or create minimal placeholder for now
+rg --text -o -- '--pgn-[a-zA-Z0-9_-]+' infrastructure/tutor/themes/mereka/mfe/theme/core.min.css infrastructure/tutor/themes/mereka/mfe/theme/light.min.css |
+sed -E 's/.*(--pgn-[A-Za-z0-9_-]+).*/\1/' |
+  sort -u > /tmp/pgn-consumed-vars.txt
 ```
 
-**Important**: This is a transitional approach. The full style-dictionary JSON pipeline (spec Phase 1) will replace this manual extraction. For now, the goal is to get `PARAGON_THEME_URLS` working with CSS extracted from our existing `_tokens.scss`.
+3. For each `.pgn__*` override in `mereka.scss`, map each property to one of:
+   - **CONSUMES** (token exists and is referenced by compiled Paragon CSS),
+   - **STRUCTURAL** (layout/transform/gap/spacing behavior cannot be tokenized),
+   - **UNVERIFIED** (needs follow-up).
+4. Keep replacements limited to the confirmed **CONSUMES** set.
+
+**Important**: This is the blocker step. FE-010 should not proceed on unverified token names.
+
+### Practical guardrails
+
+ - Keep `MEREKA_PARAGON_THEME_ENABLED` false while running this audit.
+ - Treat plugin/Caddy changes from older prompts as pre-existing work; only rework them if they are missing.
+
+### Output
+
+Create/refresh a small list in the working folder (e.g., `/tmp/pgn-consumed-vars.txt`) and reference it in PR notes so everyone uses the same source of truth.
 
 ---
 
-## Task C2: Replace BEM Selector Overrides with Token Equivalents (FE-010)
+## Task C2: Replace BEM Selector Overrides with Verified Tokens (FE-010)
 
 ### What to do
 
+Use the consumed-token list produced in C1.
+
+The current 35-line inventory below is a starting point, not an execution order.
+Reclassify each entry as CONSUMES/STRUCTURAL/UNVERIFIED based on `/tmp/pgn-consumed-vars.txt` before deleting or keeping any rule.
+If no token exists in the consumed list for a property in that selector, keep the override as **RETAIN**.
+
 Systematically evaluate every BEM selector override in `mereka.scss` and either:
-1. **Replace** it with a component token in `_tokens.scss` (add a `--pgn-*` custom property), OR
-2. **Retain** it with justification (structural override not expressible as a token)
+1. **Replace** it with a component token in `_tokens.scss`/JSON (add a `--pgn-*` custom property only if confirmed consumed), OR
+2. **Retain** it with justification (structural override or confirmed non-consumable token)
 
 ### Complete Inventory of BEM Selector Overrides
 
@@ -291,43 +229,49 @@ For each "REPLACE" override:
    - a) The token override still works if it matches the CSS custom property Paragon generates (inspect the MFE in browser DevTools to find the actual property name).
    - b) If no Paragon token exists for that property, the BEM override must be RETAINED until Paragon adds token support.
 
-3. **Remove the BEM rule** from `mereka.scss` once the token is confirmed working.
+3. **Remove the BEM rule** from `mereka.scss` only after the token is confirmed by C1 and a visual check.
 
 4. **Test visually** in each affected MFE to confirm no regression.
 
-### Token names to research
+### Token names to add
 
-Before adding tokens, inspect the Paragon source or the compiled MFE CSS in browser DevTools to find the actual CSS custom property names Paragon uses. Common patterns:
+Use consumed-list as the **only** source of candidate token names:
 
-```
---pgn-btn-primary-bg
---pgn-btn-primary-border-color
---pgn-btn-primary-color
---pgn-btn-border-radius
---pgn-card-border-radius
---pgn-card-border-color
---pgn-card-box-shadow-*
---pgn-alert-border-radius
---pgn-alert-{variant}-bg
---pgn-alert-{variant}-border-color
---pgn-modal-border-radius
---pgn-dropdown-border-radius
---pgn-form-control-border-radius
---pgn-form-control-border-color
---pgn-form-control-focus-border-color
---pgn-form-control-focus-box-shadow
---pgn-form-label-color
---pgn-form-label-font-weight
---pgn-tab-border-radius
+```bash
+cat /tmp/pgn-consumed-vars.txt | sort | sed -n '1,200p'
 ```
 
-**CRITICAL**: Do NOT guess token names. Check the actual Paragon v22 source code or inspect running MFEs. Paragon may use different naming conventions (e.g., `--pgn-color-primary` vs `--pgn-btn-primary-bg`). Wrong token names silently fail — the CSS property is set but Paragon never reads it.
+**CRITICAL**: Do NOT guess token names or introduce names not present in the consumed list.
+If a desired property is not tokenized in Paragon v22, keep it as a `RETAIN` rule in `mereka.scss` (with `var(--mereka-*)` where applicable).
+
+### Alternative path for top-level header/footer surfaces
+
+Where header/footer branding is repeatedly force-styled in `mereka.scss`, prefer FPF `header_slot` / `footer_slot` overrides in a later phase instead of brittle gradient/text overrides.
 
 ---
 
-## Task C3: Update build-tokens.sh for New Tokens (FE-015 cont.)
+## Task C3: Enable PARAGON_THEME_URLS runtime delivery (FE-015)
 
-After adding component tokens in Task C2, update `scripts/branding/build-tokens.sh` to include all new `--pgn-*` tokens in `mereka-brand.min.css`. The compiled CSS file served via `PARAGON_THEME_URLS` must contain every `--pgn-*` custom property from `_tokens.scss`.
+After C1 + C2 complete, verify the runtime theme delivery path end-to-end before turning on `MEREKA_PARAGON_THEME_ENABLED`.
+
+### What to verify first
+
+1. Confirm `infrastructure/tutor/plugins/mereka_lms.py` injects `PARAGON_THEME_URLS` (or add this now if missing).
+2. Confirm Caddy serves `/theme/*` from the MFE static layer.
+3. Confirm `scripts/branding/build-tokens.sh` outputs:
+   - `core.min.css`
+   - `light.min.css`
+   - `mereka-brand.min.css`
+   - `mereka-brand-light.min.css`
+
+### Activation
+
+Only after token audit + replacement validation:
+
+1. Set `MEREKA_PARAGON_THEME_ENABLED=true` in Tutor config.
+2. `tutor config save && ./infrastructure/tutor/apply-patches.sh`
+3. Rebuild/release MFE image with fresh `indigo/theme/` assets synced.
+4. Capture one runtime validation request that confirms the URLs are returned in `MFE_CONFIG` and loaded in the MFE.
 
 ---
 
@@ -343,8 +287,8 @@ set -euo pipefail
 
 # 1. Verify mereka_lms.py contains PARAGON_THEME_URLS config
 # 2. Verify theme CSS files exist in expected location
-# 3. Verify theme CSS contains --pgn-color-primary
-# 4. Verify theme CSS contains at least 100 --pgn-* properties
+# 3. Verify theme CSS contains `--pgn-color-primary`
+# 4. Verify consumed-token list from C1 is used in `mereka-brand.min.css`
 # 5. Verify Caddyfile has route for /theme/* (or mfe_theme_css handler)
 ```
 
@@ -356,13 +300,15 @@ Add the script to `.github/ci-scripts-static.txt`.
 
 After all tasks:
 
-1. **PARAGON_THEME_URLS in plugin**: `grep -c 'PARAGON_THEME_URLS' infrastructure/tutor/plugins/mereka_lms.py` returns >= 1
-2. **Theme CSS exists**: `ls infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css`
-3. **Theme CSS has tokens**: `grep -c '\-\-pgn-' infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css` returns >= 100
-4. **mereka.scss reduced**: `wc -l infrastructure/tutor/themes/mereka/mfe/mereka.scss` is less than the current 583 lines (target: < 200 lines after removing tokenizable overrides)
-5. **No removed scoped overrides break**: Manually check authn, dashboard, learning, discussions MFEs for visual regressions
-6. **BEM override count**: `grep -c '\.pgn__' infrastructure/tutor/themes/mereka/mfe/mereka.scss` should be significantly reduced from the current ~35 unique `.pgn__*` selectors
-7. **CI passes**: Run `scripts/qa/verify-paragon-theme-urls.sh` and all existing branding scripts
+1. **Token audit complete**: `/tmp/pgn-consumed-vars.txt` exists and is used to drive C2 decisions
+2. **PARAGON_THEME_URLS in plugin**: `grep -c 'PARAGON_THEME_URLS' infrastructure/tutor/plugins/mereka_lms.py` returns >= 1
+3. **Theme CSS exists**: `ls infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css`
+4. **Theme CSS has tokens**: `grep -c '\-\-pgn-' infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css` returns >= 100
+5. **`mereka.scss` is scoped by audit outcome**: retained entries are only `STRUCTURAL` or surface-scoped overrides not in the audit-consumed set
+6. **Runtime URL control**: confirm `MEREKA_PARAGON_THEME_ENABLED` can be toggled off without removing image-built branding fallback
+7. **No visual regressions**: Manually check authn, dashboard, learning, discussions MFEs
+8. **BEM override count**: `grep -c '\.pgn__' infrastructure/tutor/themes/mereka/mfe/mereka.scss` should be significantly reduced from the current ~35 unique `.pgn__*` selectors
+9. **CI passes**: Run `scripts/qa/verify-paragon-theme-urls.sh` and all existing branding scripts
 
 ---
 
