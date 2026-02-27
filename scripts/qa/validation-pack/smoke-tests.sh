@@ -43,10 +43,12 @@ SERVICES=(
 
 # Enterprise services
 ENTERPRISE_SERVICES=(
-  "enterprise-catalog:8000:/health/"
+  # enterprise-catalog exposes /health/ on 8160
+  "enterprise-catalog:8160:/health/"
   "enterprise-access:18270:/health/"
   "enterprise-subsidy:18280:/health/"
-  "license-manager:8000:/health/"
+  # license-manager exposes /health/ on 18170
+  "license-manager:18170:/health/"
 )
 
 check_service() {

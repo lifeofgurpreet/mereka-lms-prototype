@@ -10,6 +10,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="mereka-lms"
 PASS=0; FAIL=0
 ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
+WAIT_FOR_STEADY_SECONDS="${WAIT_FOR_STEADY_SECONDS:-120}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
@@ -77,6 +78,14 @@ for dep in "${EXPECTED_DEPS[@]}"; do
   DESIRED=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
   if [[ -z "$READY" ]]; then READY=0; fi
   if [[ -z "$DESIRED" ]]; then DESIRED=0; fi
+  if [[ "$ALLOW_PARTIAL_READY" != "1" && "$WAIT_FOR_STEADY_SECONDS" -gt 0 && "$READY" -ne "$DESIRED" ]]; then
+    info "AC-001: $dep currently ${READY}/${DESIRED}; waiting up to ${WAIT_FOR_STEADY_SECONDS}s for steady state"
+    kubectl rollout status deployment/"$dep" -n "$NAMESPACE" --timeout="${WAIT_FOR_STEADY_SECONDS}s" >/dev/null 2>&1 || true
+    READY=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+    DESIRED=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
+    [[ -z "$READY" ]] && READY=0
+    [[ -z "$DESIRED" ]] && DESIRED=0
+  fi
   if [[ "$ALLOW_PARTIAL_READY" == "1" ]]; then
     if [[ "$READY" -ge 1 ]]; then
       pass "AC-001: $dep ${READY}/${DESIRED} ready (compat mode)"

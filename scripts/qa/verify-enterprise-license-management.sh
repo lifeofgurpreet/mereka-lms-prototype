@@ -3,14 +3,14 @@
 # @spec: enterprise-microservices_spec.md
 # verify-enterprise-license-management.sh
 # Covers: AC-014 through AC-018 (License Management)
-# Note: license-manager is deferred (no upstream Docker image).
-# This script verifies infrastructure readiness and manifest correctness.
+# Uses runtime probes against deployed enterprise services.
 # Exit 0 = all checks pass, exit 1 = failures
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="mereka-lms"
 ENTERPRISE_DIR="$REPO_ROOT/deploy/k8s/base/apps/enterprise"
+LM_PORT=18170
 PASS=0; FAIL=0
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
@@ -19,8 +19,21 @@ fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 
 echo "=== Enterprise License Management Verification (AC-014..AC-018) ==="
-echo "Note: license-manager service is deferred. Checking infrastructure readiness."
+echo "Runtime mode: probing deployed license-manager service endpoints"
 echo
+
+pod_http() {
+  local pod="$1" url="$2"
+  kubectl exec -n "$NAMESPACE" "$pod" -- python3 -c "
+import urllib.request, urllib.error
+try:
+    r = urllib.request.urlopen('$url', timeout=10)
+    print(r.status)
+except urllib.error.HTTPError as e:
+    print(e.code)
+except Exception:
+    print('000')" 2>/dev/null | tr -d '[:space:]'
+}
 
 # ---------------------------------------------------------------------------
 # Common: Check if license-manager is deployed or deferred
@@ -41,7 +54,7 @@ echo "[AC-014] Verifying license pool limit enforcement infrastructure..."
 
 if [[ "$LM_DEPLOYED" == "true" ]]; then
   # Test the subscriptions endpoint requires authentication
-  HTTP=$(kubectl exec -n "$NAMESPACE" "$LM_POD" -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/subscriptions/ 2>/dev/null || echo "000")
+  HTTP=$(pod_http "$LM_POD" "http://localhost:${LM_PORT}/api/v1/subscriptions/")
   if [[ "$HTTP" == "401" || "$HTTP" == "403" ]]; then
     pass "AC-014: License manager API enforces authentication"
   else
@@ -66,9 +79,9 @@ echo "[AC-015] Verifying auto-apply license infrastructure..."
 
 if [[ "$LM_DEPLOYED" == "true" ]]; then
   # Check auto-apply endpoint exists
-  HTTP=$(kubectl exec -n "$NAMESPACE" "$LM_POD" -- curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/ 2>/dev/null || echo "000")
-  if [[ "$HTTP" != "000" ]]; then
-    pass "AC-015: License manager API root responds (auto-apply routing active)"
+  HTTP=$(pod_http "$LM_POD" "http://localhost:${LM_PORT}/api/v1/")
+  if [[ "$HTTP" =~ ^[1-5][0-9][0-9]$ && "$HTTP" != "000" ]]; then
+    pass "AC-015: License manager API root responds (HTTP $HTTP; auto-apply routing active)"
   else
     fail "AC-015: License manager API unreachable"
   fi

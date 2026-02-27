@@ -117,6 +117,12 @@ spec:
               secretKeyRef:
                 name: openedx-secrets
                 key: JWT_SECRET_KEY_CMS
+          # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
+          - name: XQUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: XQUEUE_LMS_PASSWORD
           # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
           - name: SOCIAL_AUTH_OIDC_SECRET
             valueFrom:
@@ -248,6 +254,12 @@ spec:
               secretKeyRef:
                 name: openedx-secrets
                 key: JWT_SECRET_KEY_CMS
+          # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
+          - name: XQUEUE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: XQUEUE_LMS_PASSWORD
           # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
           - name: SOCIAL_AUTH_OIDC_SECRET
             valueFrom:

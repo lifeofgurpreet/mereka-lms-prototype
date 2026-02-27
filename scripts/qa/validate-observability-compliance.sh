@@ -207,19 +207,25 @@ fetch_metrics_with_status() {
   local namespace="$1"
   local resource="$2"
   local target="${3:-http://localhost:8000/metrics}"
+  local metrics_host="$4"
   local result=""
   local status="000"
   local split_token="__METRICS_SPLIT__"
   local probe_cmd
   local -a timeout_cmd=()
   local -a kubectl_cmd=()
+  local host_header=""
+
+  if [[ -n "$metrics_host" ]]; then
+    host_header="-H 'Host: ${metrics_host}' "
+  fi
 
   probe_cmd="if command -v curl >/dev/null 2>&1; then \
-curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'; \
+curl -s -m ${RUNTIME_CMD_TIMEOUT}s ${host_header}-w '\n${split_token}:%{http_code}\n' '${target}'; \
 elif command -v wget >/dev/null 2>&1; then \
 tmp_body=\$(mktemp); \
 tmp_hdr=\$(mktemp); \
-wget -q -O \"\$tmp_body\" --timeout ${RUNTIME_CMD_TIMEOUT} '${target}' 2>\"\$tmp_hdr\"; \
+wget -q -O \"\$tmp_body\" --timeout ${RUNTIME_CMD_TIMEOUT} ${metrics_host:+--header=\"Host: ${metrics_host}\"} '${target}' 2>\"\$tmp_hdr\"; \
 code=\$(awk 'BEGIN{code=\"000\"} /^  HTTP\\//{code=\$2} END{print code}' \"\$tmp_hdr\" 2>/dev/null | tr -d '[:space:]'); \
 body=\$(cat \"\$tmp_body\"); \
 rm -f \"\$tmp_body\" \"\$tmp_hdr\"; \
@@ -250,6 +256,21 @@ fi"
   body="${body%$'\r'}"
 
   printf '%s%s%s' "$status" "$split_token" "$body"
+}
+
+read_metrics_host() {
+  local namespace="$1"
+  local resource="$2"
+  local config_file="$3"
+  local key_name="$4"
+  local resolved_host=""
+
+  resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+    sh -lc "grep -E \"^${key_name}:\" '$config_file' | tail -n 1 | awk '{print \$2}' | tr -d '\"'" 2>/dev/null || true)"
+
+  resolved_host="${resolved_host//$'\r'/}"
+  resolved_host="${resolved_host//$'\n'/}"
+  echo "$resolved_host"
 }
 
 check_metrics_payload_shape() {
@@ -468,9 +489,21 @@ run_runtime_checks() {
   local lms_metrics_result cms_metrics_result lms_metrics_code cms_metrics_code
   local lms_metrics_payload cms_metrics_payload
   local metrics_split="__METRICS_SPLIT__"
+  local lms_metrics_host=""
+  local cms_metrics_host=""
 
-  lms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/lms)"
-  cms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/cms)"
+  lms_metrics_host="$(read_metrics_host "$APP_NAMESPACE" deploy/lms /openedx/config/lms.env.yml LMS_BASE)"
+  cms_metrics_host="$(read_metrics_host "$APP_NAMESPACE" deploy/cms /openedx/config/cms.env.yml CMS_BASE)"
+
+  if [[ -z "$lms_metrics_host" ]]; then
+    lms_metrics_host="localhost"
+  fi
+  if [[ -z "$cms_metrics_host" ]]; then
+    cms_metrics_host="localhost"
+  fi
+
+  lms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/lms "http://localhost:8000/metrics" "$lms_metrics_host")"
+  cms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/cms "http://localhost:8000/metrics" "$cms_metrics_host")"
   lms_metrics_code="${lms_metrics_result%%$metrics_split*}"
   lms_metrics_payload="${lms_metrics_result#*$metrics_split}"
   cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
