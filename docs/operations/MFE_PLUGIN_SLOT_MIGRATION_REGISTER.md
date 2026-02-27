@@ -46,18 +46,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS override in `mereka.scss` (`.navbar .navbar-brand img { height: 32px }`) |
+| **Current approach** | Plugin slot in `mereka_lms.py` (`MerekaHeaderLogo`) with compatibility sizing in `.mereka-header-logo` |
 | **Target slot** | `org.openedx.frontend.layout.header_logo.v1` |
-| **Status** | 🟡 CSS OVERRIDE — slot available but not wired |
-| **Risk** | Medium (class `.navbar-brand` is Bootstrap, relatively stable) |
+| **Status** | ✅ MIGRATED — slot active with compatibility sizing |
+| **Risk** | Low (slot API is stable; fallback selectors are minimal) |
 | **Tenant impact** | All domains — logo size/placement |
-| **Priority** | P1 |
-| **Effort** | M (React component with tenant-aware logo URL) |
+| **Priority** | Done |
+| **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Create `MerekaHeaderLogo` React component; wire via `env.config.jsx` slot |
-| **Target Date** | 2026-Q3 |
-| **Files** | `mereka.scss:34-47` |
-| **Migration path** | Create `MerekaHeaderLogo` component, wire via `env.config.jsx` slot |
+| **Action** | Keep slot component active and keep `.mereka-header-logo` styling as compatibility surface |
+| **Target Date** | Done |
+| **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Migration path** | Slot registration already complete; scoped SCSS kept for layout consistency |
 
 ---
 
@@ -65,18 +65,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="authn"]`, `[class*="login-register"]` with `[data-testid*="authn"]` primaries. `[class*="auth-page"]` **removed 2026-02-18** (bead 115d.18 — fully covered by authn + data-testid paths). |
+| **Current approach** | Slot-backed component in `mereka_lms.py` (`MerekaAuthnLoginBranding`) plus compatibility selectors in `mereka.scss` for wrappers with `login-register`/`authn` |
 | **Target slot** | `org.openedx.frontend.authn.login_component.v1` |
-| **Status** | 🟡 CSS OVERRIDE — slot available, data-testid hardened, auth-page selector eliminated |
-| **Risk** | Low-Medium (2 brittle class selectors remain as fallback; data-testid primary paths cover all hardened routes) |
+| **Status** | ✅ MIGRATED — slot active with compatibility CSS |
+| **Risk** | Low-Medium (slot + compatibility selectors currently retained) |
 | **Tenant impact** | All domains — login/register card styling |
-| **Priority** | P1 |
-| **Effort** | M (banner/card wrapper component) |
+| **Priority** | Done |
+| **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Create login banner widget; move card gradient + button styling to `login_component.v1` slot component |
-| **Target Date** | 2026-Q3 |
-| **Files** | `mereka.scss:209-290` |
-| **Migration path** | Create login banner widget, move card gradient + button styling to slot component |
+| **Action** | Keep slot component active; keep compatibility selectors only as fallback |
+| **Target Date** | Done |
+| **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Migration path** | Slot registration already complete; wrapper selectors retained for fallback |
 
 ---
 
@@ -179,7 +179,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | Direct Bootstrap/Paragon class overrides: `.navbar`, `.navbar .navbar-brand`, `.navbar .nav-link` |
+| **Current approach** | Direct Bootstrap/Paragon class overrides: `.navbar`, `.navbar .nav-link`, `.navbar .dropdown-toggle` |
 | **Target slot** | `org.openedx.frontend.layout.header_logo.v1` (partial — logo only) |
 | **Status** | 🟡 CSS OVERRIDE — stable Bootstrap classes |
 | **Risk** | Low (Bootstrap naming convention, widely used) |
@@ -198,18 +198,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | Not customized (default Open edX) |
+| **Current approach** | Plugin slot in `mereka_lms.py` (`MerekaStudioFooter`) |
 | **Target slot** | `org.openedx.frontend.layout.studio_footer.v1` |
-| **Status** | ⬜ NOT STARTED — slot available |
-| **Risk** | N/A (no current override) |
+| **Status** | ✅ MIGRATED — dual-path active |
+| **Risk** | Low |
 | **Tenant impact** | Studio only |
-| **Priority** | P2 |
-| **Effort** | M (extend MerekaFooter to Studio context) |
+| **Priority** | Done |
+| **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Create Studio-specific `MerekaStudioFooter` variant; wire via `studio_footer.v1` slot in `mereka_lms.py` |
-| **Target Date** | 2026-Q4 |
-| **Files** | N/A → `mereka_lms.py` |
-| **Migration path** | Create Studio-specific footer variant, wire via studio_footer.v1 slot |
+| **Action** | Keep slot component active |
+| **Target Date** | Done |
+| **Files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+| **Migration path** | Slot registration complete |
 
 ---
 
@@ -228,7 +228,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
 |-----------------|-----|----------------------|---------|-------|---------------|
 | `[class*="authn"]` | authn | No stable data-testid on all entrypoints; `authn` is the wrapper class emitted by authn MFE | 2026-Q3 | Mereka frontend | Remove if `[data-testid*="authn"]` covers all routes in next authn MFE upgrade |
-| `[class*="login-register"]` | authn | authn MFE emits this class on top-level wrapper alongside `authn`; belt-and-suspenders fallback | 2026-Q3 | Mereka frontend | Remove once `login_component.v1` slot is wired |
+| `[class*="login-register"]` | authn | authn MFE emits this class on top-level wrapper alongside `authn`; retained while compatibility path is still active | 2026-Q3 | Mereka frontend | Remove once slot-only styling proves stable |
 | `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 | `[class*="account-page"]` | account | No upstream slot; account MFE secondary wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 | `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |

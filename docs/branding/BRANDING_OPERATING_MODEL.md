@@ -230,7 +230,7 @@ Direct DOM manipulation, monkey-patching, or injecting HTML/JS into MFE bundles 
 | Surface | Method | Example |
 |---------|--------|---------|
 | MFE footer | FPF plugin slot `footer.v1` | `MerekaFooter` component via `PLUGIN_SLOTS` |
-| MFE header logo | FPF plugin slot `header_logo.v1` | (P1 — migration pending) |
+| MFE header logo | FPF plugin slot `header_logo.v1` | `MerekaHeaderLogo` component via `PLUGIN_SLOTS` |
 | MFE styling | SCSS theme override (`mereka.scss`) | `[data-testid*="..."]` selectors preferred |
 | LMS templates | Mako template theming (`head-extra.html`, `footer.html`, `header/brand.html`) | Standard Open edX theming mechanism |
 | Studio templates | Mako template theming (`head-extra.html`) | Standard Open edX theming mechanism |
@@ -328,7 +328,7 @@ _Added: 2026-02-18 (bead 2dcy.6 / AC-FRONT-064)_
 | Slot ID | What It Replaces | Registration | Fallback Strategy |
 |---------|-----------------|--------------|-------------------|
 | `footer_slot` | Default Indigo/OpenedX `<Footer />` component | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | `apply-patches.sh` `RenderWidget: <MerekaFooter />` string replacement |
-| `header_logo_slot` | Default MFE header bar logo | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | CSS via `.navbar .navbar-brand img` selector (RISK: HIGH in mereka.scss) |
+| `header_logo_slot` | Default MFE header bar logo | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | Scoped `.mereka-header-logo` fallback sizing in `mereka.scss` |
 | `learner_dashboard.sidebar.v1` | Dashboard sidebar (append mode) | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | SCSS scoped layout rules under `[data-testid*="learner-dashboard"]` (RISK: HIGH) |
 
 ### Fallback Strategy
@@ -336,8 +336,7 @@ _Added: 2026-02-18 (bead 2dcy.6 / AC-FRONT-064)_
 When `tutormfe.hooks.PLUGIN_SLOTS` is not available (older Tutor versions), the plugin falls back to:
 
 1. **footer_slot fallback**: `apply-patches.sh` replaces `RenderWidget: <Footer />` with `RenderWidget: <MerekaFooter />` in the generated `env.config.jsx`. This is a structural string-rewrite that is kept with a `# MIGRATED-TO-SLOT:` comment for traceability.
-2. **header_logo_slot fallback**: SCSS selectors `.navbar .navbar-brand img` apply logo sizing. Tagged `RISK: HIGH` in `mereka.scss` because `.navbar` is a structural class that breaks if Bootstrap or MFE renames it.
-3. **learner_dashboard.sidebar.v1 fallback**: SCSS scoped under `[data-testid*="learner-dashboard"]` provides layout rules. Tagged `RISK: HIGH` in `mereka.scss`.
+2. **learner_dashboard.sidebar.v1 fallback**: SCSS scoped under `[data-testid*="learner-dashboard"]` provides layout rules. Tagged `RISK: HIGH` in `mereka.scss`.
 
 The `_PLUGIN_SLOTS_AVAILABLE` boolean in `mereka_lms.py` indicates whether the canonical slot path is active. Check at runtime with:
 
@@ -350,9 +349,9 @@ grep '_PLUGIN_SLOTS_AVAILABLE' infrastructure/tutor/plugins/mereka_lms.py
 | Customization | Status | Slot ID | Notes |
 |---------------|--------|---------|-------|
 | Footer component | MIGRATED (dual-path) | `footer_slot` | Canonical; fallback path kept for Tutor compat |
-| Header logo | REGISTERED (pending slot availability) | `header_logo_slot` | MFE header slot may not be exposed yet |
-| Dashboard sidebar CTA | REGISTERED (pending slot availability) | `learner_dashboard.sidebar.v1` | Append mode; does not displace default sidebar |
-| Authn card styling | NOT MIGRATED | — | No stable authn slot upstream; tracked in `MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` |
+| Header logo | MIGRATED (dual-path) | `header_logo_slot` | Canonical; component via slot |
+| Dashboard sidebar CTA | PARTIAL (slot + fallback) | `learner_dashboard.sidebar.v1` | Slot drives secondary surface; compatibility SCSS retained |
+| Authn card styling | MIGRATED (dual-path) | `org.openedx.frontend.authn.login_component.v1` | Slot active; compatibility CSS retained |
 | Learning MFE layout | NOT MIGRATED | — | No upstream slot; P2 upstream request filed |
 | Course card grid/list | NOT MIGRATED | — | No upstream slot; SCSS fallback only |
 

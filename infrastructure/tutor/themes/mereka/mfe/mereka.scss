@@ -35,23 +35,6 @@ body {
   padding: var(--mereka-mfe-navbar-padding, 0.85rem 1.5rem);
 }
 
-/* RISK: HIGH — .navbar .navbar-brand is a structural nav slot; breaks if Bootstrap renames it */
-.navbar .navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--mereka-mfe-navbar-brand-gap, 0.75rem);
-  font-family: var(--mereka-font-heading);
-  font-weight: var(--mereka-mfe-brand-font-weight, 600);
-  font-size: var(--mereka-mfe-brand-font-size, 1rem);
-  color: var(--mereka-color-ink-900);
-}
-
-/* RISK: MEDIUM — img inside navbar-brand; degrades to unsized logo if selector breaks */
-.navbar .navbar-brand img {
-  height: var(--mereka-mfe-navbar-logo-height, 32px);
-  width: auto;
-}
-
 /* RISK: MEDIUM — header logo slot override class from runtime plugin component.
  * Aligns sizing and layout to avoid regression if the default MFE brand markup changes.
  */
