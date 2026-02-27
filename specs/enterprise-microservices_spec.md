@@ -388,7 +388,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 - [ ] AC-001: Given the K8s manifests are applied, when `kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterprise` is run, then deployments for enterprise-catalog, license-manager, enterprise-access, and enterprise-subsidy are listed and each deployment has `READY == DESIRED` (steady-state full readiness)
 - [ ] AC-002: Given all enterprise services are deployed, when `kubectl get endpoints -n mereka-lms` is run, then each enterprise service has non-empty endpoints
-- [ ] AC-003: Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8000/health/` is called from within the cluster, then the response is HTTP 200 with `{"status": "ok"}`
+- [ ] AC-003: Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8160/health/` is called from within the cluster, then the response is HTTP 200 with `{"status": "ok"}`
 - [ ] AC-004: Given the license-manager service is running, when `curl http://license-manager:18170/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-005: Given the enterprise-access service is running, when `curl http://enterprise-access:18270/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-006: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:18280/health/` is called from within the cluster, then the response is HTTP 200

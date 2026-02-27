@@ -35,7 +35,7 @@ acceptance_criteria:
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
 - id: AC-003
-  description: 'Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8000/health/`
+  description: 'Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8160/health/`
     is called from within the cluster, then the response is HTTP 200 with `{"status":
     "ok"}`'
   verify:
