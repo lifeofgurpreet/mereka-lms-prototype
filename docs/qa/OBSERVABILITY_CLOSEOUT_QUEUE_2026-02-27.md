@@ -7,7 +7,7 @@ Close remaining first-class observability blockers in a strict lane-safe sequenc
 
 - Last runtime strict status (`var/ci/observability-compliance-runtime.json`): `pass 4 / fail 5 / skip 0`.
 - Last legacy nonprod strict output (`var/ci/runtime-nonprod-check/observability-compliance-runtime.json`): `pass 4 / fail 5 / skip 0`.
-- Lane-run summary artifact (`var/ci/rke2-nonprod-runtime-check/observability-runtime-verify-runtime.txt`): `pass 9 / fail 28 / skip 2` and currently reports `evidence_identity=env=rke2-nonprod;profile=rke2-nonprod;context=rke2-nonprod;project=mereka-lms` with both LMS/CMS metric payload files present.
+- Lane-run summary artifact (`var/ci/rke2-nonprod-runtime-check/observability-runtime-verify-runtime.md`): `pass 9 / fail 28 / skip 2` and currently reports `evidence_identity=env=rke2-nonprod;profile=rke2-nonprod;context=rke2-nonprod;project=mereka-lms` with both LMS/CMS metric payload files present.
 - Blocking status remains: LMS/CMS `/metrics` response for active strict lanes still 000 in runtime compliance; metric payload counters in `observability-metrics-*-runtime.md` remain zero, and caddy/mfe wiring target/rule match evidence is zero.
 - Current acceptance condition before any lane progression: one consistent strict run with AC-OVR-016 passing and stable identity strings across all evidence artifacts.
 
@@ -24,8 +24,10 @@ Hard stop before each wave:
    - target namespace and profile in `OBSERVABILITY_DISPATCH_PROFILE`
 2. Confirm runtime output file ownership and identity fields are preserved:
    - `observability-first-class-runtime-evidence-index.json`
+   - `evidence_identity` must match across preflight, compliance, verifier, and index outputs.
 
 3. Confirm no lane artifacts were stale (timestamp older than run window) before rerunning a previously passed wave.
+   - If stale timestamps exist, remove only stale files for that specific lane evidence folder before rerun.
 
 ## Next 10 Large Tasks (in order)
 
