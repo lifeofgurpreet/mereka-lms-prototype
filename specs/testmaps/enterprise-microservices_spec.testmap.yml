@@ -4,7 +4,7 @@ acceptance_criteria:
   description: Given the K8s manifests are applied, when `kubectl get deployments
     -n mereka-lms -l app.kubernetes.io/component=enterprise` is run, then deployments
     for enterprise-catalog, license-manager, enterprise-access, and enterprise-subsidy
-    are listed with READY replicas >= 1
+    are listed and each deployment reports READY equal to DESIRED replicas
   verify:
   - type: automated
     test_type: shell_verification
@@ -52,7 +52,7 @@ acceptance_criteria:
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
 - id: AC-004
-  description: Given the license-manager service is running, when `curl http://license-manager:8000/health/`
+  description: Given the license-manager service is running, when `curl http://license-manager:18170/health/`
     is called from within the cluster, then the response is HTTP 200
   verify:
   - type: automated
@@ -68,7 +68,7 @@ acceptance_criteria:
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
 - id: AC-005
-  description: Given the enterprise-access service is running, when `curl http://enterprise-access:8000/health/`
+  description: Given the enterprise-access service is running, when `curl http://enterprise-access:18270/health/`
     is called from within the cluster, then the response is HTTP 200
   verify:
   - type: automated
@@ -84,7 +84,7 @@ acceptance_criteria:
     file: scripts/qa/verify-enterprise-service-deployment.sh
     command: scripts/qa/verify-enterprise-service-deployment.sh
 - id: AC-006
-  description: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:8000/health/`
+  description: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:18280/health/`
     is called from within the cluster, then the response is HTTP 200
   verify:
   - type: automated
@@ -511,4 +511,3 @@ acceptance_criteria:
     section: License Assignment Error Logging
     justification: Requires running enterprise-subsidy service with a simulated license
       assignment failure; not available without live enterprise data
-

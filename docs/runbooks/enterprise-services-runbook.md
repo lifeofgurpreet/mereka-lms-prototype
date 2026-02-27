@@ -1,5 +1,5 @@
 # Enterprise Microservices Runbook
-_Audience: Platform Eng + Enterprise Operations • Owner: Engineering Lead • Last updated: 2026-02-10_
+_Audience: Platform Eng + Enterprise Operations • Owner: Engineering Lead • Last updated: 2026-02-27_
 
 This runbook covers operational procedures for the enterprise microservices suite.
 
@@ -19,33 +19,40 @@ This runbook covers operational procedures for the enterprise microservices suit
 ## Onboarding a New Enterprise Customer
 
 ### Procedure
-1. Create `EnterpriseCustomer` record via Django admin:
-   - Navigate to `/admin/enterprise/enterprisecustomer/add/`
-   - Fill in: Name, UUID (auto-generated), Slug, Site
-   - Set: Active=True, Enable audit enrollment=True
-2. Configure enterprise catalog:
+1. Run deterministic onboarding workflow in dry-run mode:
    ```bash
-   kubectl exec -n mereka-lms -l app.kubernetes.io/name=enterprise-catalog -- \
-     python manage.py create_catalog \
-       --enterprise-customer-uuid <uuid> \
-       --title "Client Catalog" \
-       --content-filter '{"content_type":"course"}'
+   ./scripts/tenants/onboard-enterprise-tenant.sh \
+     --slug client-corp \
+     --name "Client Corp" \
+     --domain client.academyv2.mereka.io \
+     --idp-type saml \
+     --idp-slug tpa-saml-client-corp \
+     --display-name "Client Corp SAML" \
+     --metadata-url "https://idp.client-corp.com/metadata.xml" \
+     --entity-id "https://idp.client-corp.com/entity" \
+     --dry-run
    ```
-3. Create license pool (if applicable):
+2. Apply onboarding workflow:
    ```bash
-   kubectl exec -n mereka-lms -l app.kubernetes.io/name=license-manager -- \
-     python manage.py create_subscription_plan \
-       --enterprise-customer-uuid <uuid> \
-       --licenses 100 \
-       --expiration-date 2025-12-31
+   ./scripts/tenants/onboard-enterprise-tenant.sh \
+     --slug client-corp \
+     --name "Client Corp" \
+     --domain client.academyv2.mereka.io \
+     --idp-type saml \
+     --idp-slug tpa-saml-client-corp \
+     --display-name "Client Corp SAML" \
+     --metadata-url "https://idp.client-corp.com/metadata.xml" \
+     --entity-id "https://idp.client-corp.com/entity" \
+     --apply
    ```
-4. Configure SSO/SAML (if required):
-   - Add IdP metadata URL in Django admin
-   - Set entity ID and SSO URL
-   - Test SSO login with test user
-5. Grant admin access to client contact:
-   - Add user to enterprise admin role
-   - Send invite to enterprise admin portal
+3. Verify enterprise runtime gates:
+   ```bash
+   ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode all --tenant client-corp
+   STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 ./scripts/qa/verify-multisite-config.sh prod
+   ./scripts/qa/verify-enterprise-service-deployment.sh
+   ./scripts/migrations/run-verification-pipeline.sh
+   ```
+4. Configure enterprise catalogs/license pools and role assignments as required by the customer onboarding plan.
 
 ### Acceptance
 - Enterprise customer appears in admin portal

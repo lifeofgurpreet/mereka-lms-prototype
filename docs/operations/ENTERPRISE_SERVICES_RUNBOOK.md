@@ -650,6 +650,44 @@ kubectl run curl-test --rm -i --image=curlimages/curl --restart=Never -n mereka-
 
 ---
 
+## License Assignment Error Logging
+
+Use this procedure when validating AC-037 for enterprise license-assignment failures.
+
+### Goal
+
+Confirm failure logs include:
+- `enterprise_customer_uuid`
+- `subscription_plan_uuid`
+- `error_type`
+- `user_email_hash`
+
+Confirm logs do **not** include raw learner email addresses.
+
+### Procedure
+
+```bash
+# 1) Trigger a controlled assignment failure in non-production (or dedicated test tenant).
+# Example causes: invalid plan UUID, exhausted seat pool, or revoked customer state.
+
+# 2) Capture recent license-manager and enterprise-subsidy logs
+kubectl logs -n mereka-lms deploy/license-manager --since=15m | tee /tmp/license-manager.log
+kubectl logs -n mereka-lms deploy/enterprise-subsidy --since=15m | tee /tmp/enterprise-subsidy.log
+
+# 3) Verify required fields are present on failure lines
+grep -E "enterprise_customer_uuid|subscription_plan_uuid|error_type|user_email_hash" /tmp/license-manager.log /tmp/enterprise-subsidy.log
+
+# 4) Verify raw email addresses are not logged
+grep -E -i "[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}" /tmp/license-manager.log /tmp/enterprise-subsidy.log
+```
+
+### Expected Result
+
+- At least one failure log line contains all required fields.
+- `grep` for raw email addresses returns no matches for assignment-failure log entries.
+
+---
+
 ## Quick Reference
 
 ### Pod Names to Service Names

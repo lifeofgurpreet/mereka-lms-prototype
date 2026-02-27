@@ -1,9 +1,9 @@
 # Tenant Provisioning Runbook
-_Audience: Platform Eng + Operations • Owner: Engineering Lead • Last updated: 2026-02-10_
+_Audience: Platform Eng + Operations • Owner: Engineering Lead • Last updated: 2026-02-27_
 
 This runbook covers operational procedures for multi-tenant provisioning and management.
 
-> **Status**: Multi-tenancy architecture foundation is **in progress** (Tier 4.1). TenantConfig model, middleware, and provisioning command are implemented.
+> **Status**: Multi-tenancy provisioning is operational with deterministic onboarding scripts and strict runtime gates.
 > **Spec**: `specs/multi-tenancy-architecture_spec.md`
 > **Testmap**: `specs/testmaps/multi-tenancy-architecture_spec.testmap.yml`
 
@@ -19,17 +19,43 @@ This runbook covers operational procedures for multi-tenant provisioning and man
 ## Provisioning a New Tenant (End-to-End)
 
 ### Automated Provisioning (Preferred)
+Run the deterministic tenant workflow script end-to-end. Start with dry-run, then apply.
+
 ```bash
-# Provision all core records in one command (idempotent — safe to re-run):
-kubectl exec -n mereka-lms -l app.kubernetes.io/name=lms -- \
-  python manage.py lms provision_tenant \
-    --slug client-corp \
-    --name "Client Corp" \
-    --domain client.academyv2.mereka.io \
-    --contact-email admin@clientcorp.com \
-    --country MY
+# 1) Dry-run (required before apply)
+./scripts/tenants/onboard-enterprise-tenant.sh \
+  --slug client-corp \
+  --name "Client Corp" \
+  --domain client.academyv2.mereka.io \
+  --idp-type saml \
+  --idp-slug tpa-saml-client-corp \
+  --display-name "Client Corp SAML" \
+  --metadata-url "https://idp.client-corp.com/metadata.xml" \
+  --entity-id "https://idp.client-corp.com/entity" \
+  --dry-run
+
+# 2) Apply
+./scripts/tenants/onboard-enterprise-tenant.sh \
+  --slug client-corp \
+  --name "Client Corp" \
+  --domain client.academyv2.mereka.io \
+  --idp-type saml \
+  --idp-slug tpa-saml-client-corp \
+  --display-name "Client Corp SAML" \
+  --metadata-url "https://idp.client-corp.com/metadata.xml" \
+  --entity-id "https://idp.client-corp.com/entity" \
+  --apply
 ```
-This creates: Django Site, SiteConfiguration, EnterpriseCustomer, and TenantConfig in one step.
+
+The workflow performs tenant provisioning, enterprise/site mapping sync, IdP configuration, branding scaffold sync, migration verification, and runtime readiness checks.
+
+### Required Post-Apply Verification (Strict)
+```bash
+./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode all --tenant client-corp
+STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 ./scripts/qa/verify-multisite-config.sh prod
+./scripts/qa/verify-enterprise-service-deployment.sh
+./scripts/migrations/run-verification-pipeline.sh
+```
 
 ### Manual Procedure (Alternative)
 1. **Create Site and SiteConfiguration**:

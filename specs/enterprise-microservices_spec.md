@@ -386,12 +386,12 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 
 ### Service Deployment
 
-- [ ] AC-001: Given the K8s manifests are applied, when `kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterprise` is run, then deployments for enterprise-catalog, license-manager, enterprise-access, and enterprise-subsidy are listed with READY replicas >= 1
+- [ ] AC-001: Given the K8s manifests are applied, when `kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterprise` is run, then deployments for enterprise-catalog, license-manager, enterprise-access, and enterprise-subsidy are listed and each deployment has `READY == DESIRED` (steady-state full readiness)
 - [ ] AC-002: Given all enterprise services are deployed, when `kubectl get endpoints -n mereka-lms` is run, then each enterprise service has non-empty endpoints
 - [ ] AC-003: Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8000/health/` is called from within the cluster, then the response is HTTP 200 with `{"status": "ok"}`
-- [ ] AC-004: Given the license-manager service is running, when `curl http://license-manager:8000/health/` is called from within the cluster, then the response is HTTP 200
-- [ ] AC-005: Given the enterprise-access service is running, when `curl http://enterprise-access:8000/health/` is called from within the cluster, then the response is HTTP 200
-- [ ] AC-006: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:8000/health/` is called from within the cluster, then the response is HTTP 200
+- [ ] AC-004: Given the license-manager service is running, when `curl http://license-manager:18170/health/` is called from within the cluster, then the response is HTTP 200
+- [ ] AC-005: Given the enterprise-access service is running, when `curl http://enterprise-access:18270/health/` is called from within the cluster, then the response is HTTP 200
+- [ ] AC-006: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:18280/health/` is called from within the cluster, then the response is HTTP 200
 - [ ] AC-007: Given enterprise MFEs are deployed, when `curl https://admin.academyv2.mereka.io/` is called, then the admin portal HTML is returned with HTTP 200
 - [ ] AC-008: Given enterprise MFEs are deployed, when `curl https://enterprise.academyv2.mereka.io/` is called, then the learner portal HTML is returned with HTTP 200
 - [ ] AC-009: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare proxy)
