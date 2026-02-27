@@ -74,6 +74,18 @@ else
   do_warn "org.openedx.frontend.learner_dashboard.widget_sidebar.v1 slot not yet registered in mereka_lms.py"
 fi
 
+if grep -q '"org.openedx.frontend.layout.header_desktop_main_menu.v1"' "$PLUGIN"; then
+  do_pass "Desktop header main menu slot registered as org.openedx.frontend.layout.header_desktop_main_menu.v1"
+else
+  do_warn "Desktop header main menu slot not registered in mereka_lms.py"
+fi
+
+if grep -q '"org.openedx.frontend.layout.header_mobile_main_menu.v1"' "$PLUGIN"; then
+  do_pass "Mobile header main menu slot registered as org.openedx.frontend.layout.header_mobile_main_menu.v1"
+else
+  do_warn "Mobile header main menu slot not registered in mereka_lms.py"
+fi
+
 # 2c. Plugin defines runtime helper components used by slot registrations
 if grep -q 'const MerekaHeaderLogo' "$PLUGIN"; then
   do_pass "MerekaHeaderLogo component defined for header_logo slot"
