@@ -30,6 +30,7 @@ AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS="${AUTHENTICATED_SSO_CANARY_REQUIRE_SEC
 RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT="${RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT:-1}"
 RUN_ENTERPRISE_RUNTIME_AUDIT="${RUN_ENTERPRISE_RUNTIME_AUDIT:-1}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
+RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT="${RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-1200}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/operations-gates/${STAMP}}"
@@ -56,6 +57,7 @@ Env:
   RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT=1  Audit Authentik policy exceptions (runtime; enabled by default)
   RUN_ENTERPRISE_RUNTIME_AUDIT=1  Run enterprise runtime readiness gates in prod/both
   ENTERPRISE_READINESS_TENANT=mereka  Tenant slug used by enterprise SSO readiness gate
+  RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT=1  Run static enterprise readiness integrity guard
   CHECK_TIMEOUT_SECONDS=1200      Per-check timeout in seconds
   ARTIFACT_DIR=var/...            Directory for per-check logs
 EOF
@@ -225,9 +227,15 @@ echo "  authenticated_sso_canary_require_secrets: $AUTHENTICATED_SSO_CANARY_REQU
 echo "  run_authentik_policy_exception_audit: $RUN_AUTHENTIK_POLICY_EXCEPTION_AUDIT"
 echo "  run_enterprise_runtime_audit: $RUN_ENTERPRISE_RUNTIME_AUDIT"
 echo "  enterprise_readiness_tenant: $ENTERPRISE_READINESS_TENANT"
+echo "  run_enterprise_readiness_integrity_audit: $RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
+
+if [[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_AUDIT" == "1" ]]; then
+  run_check "enterprise readiness integrity (static)" \
+    ./scripts/qa/verify-enterprise-readiness-integrity.sh
+fi
 
 if [[ "$RUN_MULTISITE_GOVERNANCE_AUDIT" == "1" ]]; then
   run_check "multisite governance gate" \

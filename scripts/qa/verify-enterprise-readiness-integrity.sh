@@ -49,6 +49,7 @@ SERVICE_DEPLOY="scripts/qa/verify-enterprise-service-deployment.sh"
 LICENSE_MGMT="scripts/qa/verify-enterprise-license-management.sh"
 RUNBOOK_TENANT="docs/runbooks/tenant-provisioning-runbook.md"
 RUNBOOK_ENTERPRISE="docs/runbooks/enterprise-services-runbook.md"
+ONBOARD_SCRIPT="scripts/tenants/onboard-enterprise-tenant.sh"
 
 # 1) Port truth (AC-003 contract alignment)
 assert_contains "$SPEC_FILE" 'AC-003:.*enterprise-catalog:8160/health/' \
@@ -113,6 +114,26 @@ assert_not_contains "$RUNBOOK_TENANT" '_testmap\.ya?ml' \
   "tenant provisioning runbook has no legacy _testmap.yaml reference"
 assert_not_contains "$RUNBOOK_ENTERPRISE" '_testmap\.ya?ml' \
   "enterprise services runbook has no legacy _testmap.yaml reference"
+
+# 7) Deterministic enterprise onboarding workflow contract
+assert_contains "$ONBOARD_SCRIPT" '\[1/6\] Provision/reconcile tenant' \
+  "onboarding workflow includes step 1/6 tenant provisioning"
+assert_contains "$ONBOARD_SCRIPT" '\[2/6\] Sync SiteConfiguration ENTERPRISE_CUSTOMER_UUID mapping' \
+  "onboarding workflow includes step 2/6 enterprise-site mapping sync"
+assert_contains "$ONBOARD_SCRIPT" '\[3/6\] Configure tenant IdP' \
+  "onboarding workflow includes step 3/6 tenant IdP configuration"
+assert_contains "$ONBOARD_SCRIPT" '\[4/6\] Sync tenant branding scaffold' \
+  "onboarding workflow includes step 4/6 branding scaffold sync"
+assert_contains "$ONBOARD_SCRIPT" '\[5/6\] Run migration verification pipeline' \
+  "onboarding workflow includes step 5/6 migration verification"
+assert_contains "$ONBOARD_SCRIPT" '\[6/6\] Run runtime readiness gates' \
+  "onboarding workflow includes step 6/6 runtime readiness gates"
+assert_contains "$ONBOARD_SCRIPT" 'run-verification-pipeline\.sh' \
+  "onboarding workflow invokes migration verification pipeline"
+assert_contains "$ONBOARD_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
+  "onboarding workflow invokes enterprise SSO readiness gate"
+assert_contains "$ONBOARD_SCRIPT" 'STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1' \
+  "onboarding workflow enforces strict enterprise site mapping in prod runtime gate"
 
 echo
 if [[ "$failures" -eq 0 ]]; then

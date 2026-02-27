@@ -29,6 +29,8 @@ APPLY=0
 COMMIT=0
 PUSH=0
 VERIFY_RUNTIME=0
+ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD="${ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD:-1}"
+RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD="${RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD:-1}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
@@ -66,6 +68,10 @@ Options:
   --commit              Commit changed files in app + GitOps repos (requires --apply).
   --push                Push app + GitOps repos (requires --commit).
   --verify-runtime      Poll Argo + deployment image until target tag is live.
+  --skip-enterprise-site-mapping-guard
+                       Skip STRICT multisite enterprise UUID runtime preflight.
+  --skip-enterprise-readiness-integrity-guard
+                       Skip static enterprise readiness integrity preflight.
 
   --k8s-context NAME    Kubernetes context for runtime verification.
   --argocd-namespace NS ArgoCD namespace (default: argocd).
@@ -159,6 +165,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --verify-runtime)
       VERIFY_RUNTIME=1
+      shift
+      ;;
+    --skip-enterprise-site-mapping-guard)
+      ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD=0
+      shift
+      ;;
+    --skip-enterprise-readiness-integrity-guard)
+      RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD=0
       shift
       ;;
     --k8s-context)
@@ -438,6 +452,10 @@ pat = re.compile(
 )
 match = pat.search(content)
 if not match:
+    vendored_pat = re.compile(r"^\s*-\s*deploy/k8s/base\s*$", re.MULTILINE)
+    if vendored_pat.search(content):
+        print(f"= {path}: vendored base mode detected (resources: deploy/k8s/base); skipping base ref bump")
+        raise SystemExit(0)
     raise SystemExit(f"{path}: could not locate mereka-lms base ref URL")
 
 old_sha = match.group(2)
@@ -568,6 +586,30 @@ echo "Require digests: $([[ "$REQUIRE_DIGESTS" -eq 1 ]] && echo yes || echo no)"
 echo "Update app base image overrides: $([[ "$UPDATE_APP_BASE" -eq 1 ]] && echo yes || echo no)"
 echo "Update GitOps base ref: $([[ "$UPDATE_BASE_REF" -eq 1 ]] && echo yes || echo no)"
 echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"
+echo "Enterprise site mapping guard: $([[ "$ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise readiness integrity guard: $([[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+
+run_enterprise_release_preflights() {
+  if [[ "$TARGET_ENV" != "production" || "$APPLY" -ne 1 ]]; then
+    return 0
+  fi
+
+  echo "Running production enterprise preflight guards..."
+  if [[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/qa/verify-enterprise-readiness-integrity.sh"
+  else
+    echo "= skipped static integrity guard (--skip-enterprise-readiness-integrity-guard)"
+  fi
+
+  if [[ "$ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD" -eq 1 ]]; then
+    STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 \
+      "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" prod
+  else
+    echo "= skipped enterprise site mapping runtime guard (--skip-enterprise-site-mapping-guard)"
+  fi
+}
+
+run_enterprise_release_preflights
 
 if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
   update_image_tags_file \
