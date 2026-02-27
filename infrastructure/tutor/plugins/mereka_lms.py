@@ -680,6 +680,19 @@ RUN apt-get update && apt-get install -y \\
     )
 )
 
+# Install local OEP-48 brand package for MFEs.
+# We ship the package in tutor_env/plugins/mfe/build/mfe/indigo/brand-mereka and
+# alias it as @edx/brand for all frontend app builds.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "mfe-dockerfile-pre-npm-install",
+        """
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+""",
+    )
+)
+
 # Cookie domain environment variables
 hooks.Filters.ENV_PATCHES.add_item(
     (
