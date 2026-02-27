@@ -206,11 +206,21 @@ check_openedx_settings_metrics_wiring() {
 
         checked_count=$((checked_count + 1))
         local marker_count
-        marker_count="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware"))] | length' 2>/dev/null | tr -d '[:space:]')"
-        marker_counts+=("$fallback_map=$marker_count")
+        local marker_file_csv=""
+        marker_count="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware"))] | length' 2>/dev/null | tr -d '[:space:]' )"
+        marker_file_csv="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.key == "production.py" or .key == "development.py" or .key == "test.py") | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware")) | .key] | unique | join(",")' 2>/dev/null | tr -d '[:space:]')"
+        if [[ -z "$marker_file_csv" || "$marker_file_csv" == "null" ]]; then
+            marker_file_csv=""
+        fi
+
+        marker_counts+=("$fallback_map=$marker_count:${marker_file_csv:-none}")
         if [[ "$marker_count" != "" && "$marker_count" -gt 0 ]]; then
             marker_hit=1
-            pass "AC-OVR-016: ${component} settings configmap '$fallback_map' includes prom metrics wiring markers ($marker_count)"
+            if [[ -n "$marker_file_csv" ]]; then
+                pass "AC-OVR-016: ${component} settings configmap '$fallback_map' includes prom metrics wiring markers ($marker_count) in ${marker_file_csv}"
+            else
+                pass "AC-OVR-016: ${component} settings configmap '$fallback_map' includes prom metrics wiring markers ($marker_count)"
+            fi
             echo "AC-OVR-016: ${component} settings configmaps checked: ${configmap_names[*]}"
             break
         fi
