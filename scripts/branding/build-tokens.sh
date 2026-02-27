@@ -28,12 +28,75 @@ write_core_theme() {
     "$REPO_ROOT/node_modules/@openedx/paragon/dist/css/core.css"
   )
 
+  local copied=0
   for candidate in "${core_sources[@]}"; do
     if [[ -f "$candidate" ]]; then
       cp "$candidate" "$target"
-      return
+      copied=1
+      break
     fi
   done
+
+  if [[ "$copied" -eq 1 ]]; then
+    return
+  fi
+
+  python3 - "$target" <<'PY'
+from pathlib import Path
+import json
+import io
+import sys
+import tarfile
+import urllib.request
+
+OUTPUT = Path(sys.argv[1])
+registry_url = "https://registry.npmjs.org/@openedx/paragon"
+try:
+    with urllib.request.urlopen(registry_url, timeout=15) as response:
+        metadata = json.load(response)
+except Exception:
+    raise SystemExit(1)
+
+version = metadata.get("dist-tags", {}).get("latest")
+if not version:
+    raise SystemExit(1)
+
+version_payload = metadata.get("versions", {}).get(version, {})
+tarball_url = version_payload.get("dist", {}).get("tarball")
+if not tarball_url:
+    raise SystemExit(1)
+
+try:
+    with urllib.request.urlopen(tarball_url, timeout=30) as tarball_response:
+        tar_data = tarball_response.read()
+except Exception:
+    raise SystemExit(1)
+
+core_members = [
+    "package/dist/core.min.css",
+    "package/dist/core.css",
+]
+
+try:
+    tar = tarfile.open(fileobj=io.BytesIO(tar_data), mode="r:gz")
+except Exception:
+    raise SystemExit(1)
+
+for member in core_members:
+    try:
+        source = tar.extractfile(member)
+    except (KeyError, AttributeError):
+        source = None
+    if source is not None:
+        OUTPUT.write_bytes(source.read())
+        break
+else:
+    raise SystemExit(1)
+PY
+
+  if [[ "$?" -eq 0 && -s "$target" ]]; then
+    return
+  fi
 
   cat > "$target" <<'CSS'
 :root {
