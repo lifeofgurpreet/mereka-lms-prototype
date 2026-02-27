@@ -17,11 +17,19 @@ Use these as the default operational entrypoints:
 ./scripts/qa/audit-observability.sh --mode local
 
 # Runtime first-class gate (recommended)
-OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Production runtime lane (GKE)
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 # Full evidence run (local + runtime)
-OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
+  ./scripts/qa/run-observability-first-class.sh --mode all --strict
+
+# Full evidence run for production gate
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode all --strict
 ```
 
@@ -254,7 +262,7 @@ Create via Console (Monitoring → Alerting) or `gcloud monitoring policies crea
 4. **CI health checks** – `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
 5. **Optional VPS cron** – use `scripts/infra/setup-vps-health-cron.sh` (installs `cron-public-health-check.sh`) only if you want local log files; CI remains the source of truth.
 6. **Auth alert remediation** – see `docs/operations/AUTH_ALERT_RUNBOOK.md` for a mapping from each auth alert to the exact verification and fix commands.
-7. **Observability posture audit** – run `./scripts/qa/run-observability-first-class.sh --mode all --strict` (or `./scripts/qa/audit-observability.sh --mode local` when offline) to verify coverage and deployment state.
+7. **Observability posture audit** – run lane-appropriate first-class command(s) for target env (`nonprod` or `prod`) with explicit context variables, or `./scripts/qa/audit-observability.sh --mode local` when offline, to verify coverage and deployment state.
 8. **Velero alert pipeline audit** – run `./scripts/qa/audit-velero-alert-pipeline.sh` to validate log metrics/policies plus runtime CronJob freshness and hourly backup recency.
 9. **Grafana coverage audit** – run `./scripts/qa/audit-grafana-dashboard.sh --strict-required` before rollout; use `--strict-recommended` when hardening dashboards.
 10. **Atlas allowlist monitor audit (VPS)** – run `./scripts/qa/audit-atlas-allowlist-monitor.sh`; use `STRICT_WEBHOOK=1` for production-ready routing enforcement.

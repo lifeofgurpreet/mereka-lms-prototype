@@ -102,8 +102,13 @@ gcloud monitoring policies create \
 ./scripts/qa/audit-observability.sh --mode local
 
 # Audit runtime deployment state (requires cluster + gcloud auth)
-OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Production gate equivalent
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
 ```
 
 ## Telemetry Path & Datasource Connectivity

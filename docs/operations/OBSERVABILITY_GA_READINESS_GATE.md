@@ -23,7 +23,9 @@ Decision options are based on objective evidence only:
 
 ### 1) Compliance and identity integrity
 
-- `run-observability-first-class.sh --mode runtime --strict` passes for target env(s).
+- `run-observability-first-class.sh --mode runtime --strict` passes for target env(s), invoked with lane-safe profile/context variables:
+  - Nonprod: `OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+  - Prod: `OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_PROD_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
 - `verify-observability-evidence-identity.sh` passes for `var/ci`, `var/ci/parity-dev`, `var/ci/parity-nonprod`, and `var/ci/parity-prod`.
 - `test-observability-parity-contracts.sh` passes.
 
