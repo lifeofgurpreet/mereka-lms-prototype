@@ -41,6 +41,19 @@
     }
     header @api_proxy Cache-Control "no-store"
 
+    # Route theme CSS requested at root path by MFE runtime injection to the matching
+    # mounted MFE directory. Each application serves its own hashed theme assets under
+    # /openedx/dist/<mfe-name>, but the generated PARAGON_THEME filenames are
+    # relative. Without this mapping, root requests resolve to empty responses.
+    @mfe_theme_css {
+        path_regexp theme_css ^/(?:brand|paragon)-theme-[^/]+\.css$
+    }
+    handle @mfe_theme_css {
+        root * /openedx/dist
+        try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+        file_server
+    }
+
     # Profile API calls from the Profile MFE route through LMS domain routing.
     @mfe_profile_api {
         path /profile/api/*

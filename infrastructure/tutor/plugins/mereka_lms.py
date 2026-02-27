@@ -9,7 +9,7 @@ modifications that require find-and-replace on generated files.
 Patches included:
 - Multi-site domain configuration (biji-biji.com, skillourfuture.academy.mereka.io)
 - MySQL 8 authentication plugin fix
-- MFE Node 18 build toolchain
+- MFE Node 24 build toolchain
 - Forum MongoDB SRV connection support
 - Caddy multi-domain configuration
 - LMS/CMS settings (CSRF, sessions, enterprise integration)
@@ -667,12 +667,12 @@ optimization: {
 # MFE Dockerfile Patches
 ###############################################################################
 
-# Node 18 build toolchain
+# Node 24 build toolchain
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "mfe-dockerfile-pre-npm-install",
         """
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \\
     gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
     && rm -rf /var/lib/apt/lists/*
@@ -1099,7 +1099,8 @@ apps.academyv2.mereka.io{$default_site_port} {
     import security_headers
 
     reverse_proxy /profile/api/* lms:8000 {
-        header_up Host academyv2.mereka.io
+        # Preserve incoming host for tenant-aware SiteConfiguration resolution
+        header_up Host {http.request.host}
     }
 
     reverse_proxy /api/mfe_config/v1* lms:8000 {

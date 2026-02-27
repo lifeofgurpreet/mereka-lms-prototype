@@ -108,13 +108,13 @@ patches:
     required: true
 
   # MFE Configuration
-  - id: mfe-node-18
-    name: "MFE Node 18 Base Image"
+  - id: mfe-node-24
+    name: "MFE Node 24 Base Image"
     category: mfe-build
-    description: "Updates MFE Dockerfile to use Node 18 instead of Node 12"
+    description: "Updates MFE Dockerfile to use Node 24 instead of Node 12"
     target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F 'docker.io/node:18' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "docker.io/node:18"
+    verify_command: "grep -F 'docker.io/node:24.11.0-bullseye-slim' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    verify_pattern: "docker.io/node:24.11.0-bullseye-slim"
     severity: critical
     required: false  # Only if MFE plugin is installed
 

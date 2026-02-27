@@ -534,7 +534,7 @@ RUN pip install django-prometheus==2.3.1"""
             )
             profile_proxy = (
                 "  location ^~ /profile/api/ {\n"
-                "    proxy_set_header Host academyv2.mereka.io;\n"
+                "    proxy_set_header Host $http_host;\n"
                 "    proxy_redirect off;\n"
                 "    proxy_pass http://lms-backend;\n"
                 "  }\n\n"
@@ -573,7 +573,7 @@ RUN pip install django-prometheus==2.3.1"""
             replacement = (
                 "apps.academyv2.mereka.io {\n"
                 "        reverse_proxy /profile/api/* lms:8000 {\n"
-                "            header_up Host academyv2.mereka.io\n"
+                "            header_up Host {http.request.host}\n"
                 "        }\n"
                 "        reverse_proxy nginx:80"
             )

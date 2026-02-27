@@ -57,7 +57,7 @@ done < <(find "$PATCHES_DIR" -maxdepth 1 -name "*.sh" -print0 | sort -z)
 ###############################################################################
 declare -A CONVERTED_CHECKS
 CONVERTED_CHECKS["mysql-auth.sh"]="mysql-docker-compose"
-CONVERTED_CHECKS["domain-names.sh"]="caddy-caddyfile"
+CONVERTED_CHECKS["domain-names.sh"]="caddyfile"
 CONVERTED_CHECKS["csrf-origins.sh"]="MEREKA_LMS_EXTRA_CSRF_ORIGINS"
 CONVERTED_CHECKS["prometheus-metrics.sh"]="django_prometheus"
 CONVERTED_CHECKS["mongodb-atlas.sh"]="pymongo\[srv\]"
@@ -81,7 +81,6 @@ FILESYSTEM_PATCHES=(
   "webpack-memory.sh"
   "footer-component.sh"
   "build-optimizations.sh"
-  "security-hardening.sh"
 )
 
 for patch_name in "${FILESYSTEM_PATCHES[@]}"; do
