@@ -189,3 +189,4 @@ scripts/qa/verify-mct-export.sh
 scripts/qa/verify-mct-transform.sh
 scripts/qa/verify-mct-olx-packages.sh
 scripts/qa/verify-mct-video-urls.sh
+scripts/qa/verify-caddy-cache-policy.sh
