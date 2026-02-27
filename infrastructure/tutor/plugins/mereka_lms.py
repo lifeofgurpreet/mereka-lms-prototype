@@ -856,6 +856,56 @@ for _mfe in [
             },
             """,
         ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_desktop_main_menu.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaMenuItems(
+                    widget,
+                    [
+                        {
+                            type: 'item',
+                            href: '/dashboard',
+                            content: 'Dashboard',
+                        },
+                        {
+                            type: 'item',
+                            href: '/dashboard/courses',
+                            content: 'Courses',
+                        },
+                    ],
+                ),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_mobile_main_menu.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaMenuItems(
+                    widget,
+                    [
+                        {
+                            type: 'item',
+                            href: '/dashboard',
+                            content: 'Dashboard',
+                        },
+                        {
+                            type: 'item',
+                            href: '/dashboard/courses',
+                            content: 'Courses',
+                        },
+                    ],
+                ),
+            },
+            """,
+        ),
     ])
 
 ###############################################################################
@@ -904,6 +954,39 @@ const getMerekaVariant = (hostname, config) => {
 
 const getLogoHref = (baseUrl) => {
   return baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
+};
+
+const withMerekaMenuItems = (widget, menuItems = []) => {
+  const widgetProps = (widget && widget.RenderWidget && widget.RenderWidget.props) || {};
+  const defaultMenu = widgetProps.menu;
+
+  if (!Array.isArray(defaultMenu) || !Array.isArray(menuItems)) {
+    return widget;
+  }
+
+  if (defaultMenu.length === 0) {
+    return {
+      ...widget,
+      content: {
+        ...(widget.content || {}),
+        menu: menuItems,
+      },
+    };
+  }
+
+  const existingHrefs = new Set(defaultMenu.map((item) => (item && item.href ? item.href : item)));
+  const sanitizedMenuItems = menuItems.filter((item) => item && item.href && !existingHrefs.has(item.href));
+  if (sanitizedMenuItems.length === 0) {
+    return widget;
+  }
+
+  return {
+    ...widget,
+    content: {
+      ...(widget.content || {}),
+      menu: [...defaultMenu, ...sanitizedMenuItems],
+    },
+  };
 };
 
 // Custom Mereka header-logo component (Direct plugin — registered via header_logo slot)

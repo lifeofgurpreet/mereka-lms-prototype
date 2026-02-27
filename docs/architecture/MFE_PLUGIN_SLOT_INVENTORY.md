@@ -24,7 +24,7 @@ Plugin slots are named extension points in MFE React components. Operators injec
 
 | Status | Count | Meaning |
 |--------|-------|---------|
-| ACTIVE | 2 | They override default components |
+| ACTIVE | 4 | They override default components |
 | INDIGO | 3 | Indigo theme wires it; we inherit |
 | AVAILABLE | 100+ | Slot exists upstream; not wired |
 
@@ -55,6 +55,30 @@ Plugin slots are named extension points in MFE React components. Operators injec
 | **Operation** | `PLUGIN_OPERATIONS.Hide` + `PLUGIN_OPERATIONS.Insert` |
 | **Verification** | `scripts/qa/verify-mfe-footer-slot.sh` (16 PASS) |
 | **Key files** | `infrastructure/tutor/plugins/mereka_lms.py:760-840` |
+
+### `org.openedx.frontend.layout.header_desktop_main_menu.v1` — Desktop Main Menu
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Shared header shell (`frontend-component-header`) |
+| **Our behavior** | Append branded links while preserving defaults |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Forward-compat** | Uses `PLUGIN_OPERATIONS.Modify` on `default_contents` to merge links |
+| **Operation** | `PLUGIN_OPERATIONS.Modify` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.layout.header_mobile_main_menu.v1` — Mobile Main Menu
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Shared header shell (`frontend-component-header`) |
+| **Our behavior** | Append branded links while preserving defaults |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Forward-compat** | Uses `PLUGIN_OPERATIONS.Modify` on `default_contents` to merge links |
+| **Operation** | `PLUGIN_OPERATIONS.Modify` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
 
 ---
 
