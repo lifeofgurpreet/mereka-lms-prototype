@@ -1256,6 +1256,45 @@ if "openedx_prometheus" in INSTALLED_APPS:
     )
 )
 
+# CMS development settings patch (metrics parity with production).
+# Keep this in sync with production CMS metrics wiring so nonprod/dev also has /metrics.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-cms-development-settings",
+        """
+# Safe module loading helper for CMS
+def _safe_add_app(app_name):
+    if app_name not in INSTALLED_APPS:
+        try:
+            __import__(app_name.split('.')[0])
+            INSTALLED_APPS.append(app_name)
+        except ImportError:
+            pass
+
+# Prometheus metrics + URL exposure for CMS
+try:
+    __import__('django_prometheus')
+    if "django_prometheus" not in INSTALLED_APPS:
+        INSTALLED_APPS.insert(0, "django_prometheus")
+except ImportError:
+    pass
+
+_safe_add_app("openedx_prometheus")
+
+if "django_prometheus" in INSTALLED_APPS:
+    if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+    if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+        MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+
+if "openedx_prometheus" in INSTALLED_APPS:
+    ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+    if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
+        ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
+""",
+    )
+)
+
 ###############################################################################
 # Plugin Initialization Hook
 ###############################################################################

@@ -54,6 +54,11 @@ This is blocking strict execution continuity because the first-class wrapper exi
 - 000 response in both LMS/CMS `/metrics` payload files indicates the runtime probe is not reaching a scrapeable Prometheus endpoint in this lane.
 - Caddy and MFE wiring evidence currently shows zero Prometheus target and rule matches (`target_matches: 0`, `rule_group_matches: 0`) in nonprod runtime evidence.
 
+### Code-level unblock landed (ready for strict redeploy)
+- CMS metrics parity patch is now added for `openedx-cms-development-settings` in `infrastructure/tutor/plugins/mereka_lms.py`, mirroring production CMS wiring.
+- This is meant to remove template-path skew for `/metrics` in dev/nonprod rendered settings maps.
+- Next required step is image/config regeneration + rollout in the target lane before the next strict observability run.
+
 ## Current blocking signal
 - AC-OVR-016 is failing in strict runtime (`PASS 4 / FAIL 5 / SKIP 0`):
   - LMS `/metrics` previously `status_code=000`, then `400`, then `500` as host and DB state shift.
