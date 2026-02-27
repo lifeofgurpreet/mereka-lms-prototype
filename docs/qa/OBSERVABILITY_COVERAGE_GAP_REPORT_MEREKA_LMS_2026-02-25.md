@@ -108,8 +108,8 @@ No repo-only required objects are missing:
 ```bash
 OBSERVABILITY_ENV_LABEL=dev \
 OBSERVABILITY_DISPATCH_PROFILE=nonprod \
-OBSERVABILITY_K8S_CONTEXT=<dev-context> \
-OBSERVABILITY_GCP_PROJECT=<dev-or-shared-project> \
+OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_DEV_K8S_CONTEXT" \
+OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_DEV_GCP_PROJECT" \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
