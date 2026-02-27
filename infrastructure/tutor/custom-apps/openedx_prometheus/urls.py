@@ -11,7 +11,8 @@ try:
     from django_prometheus import exports as prometheus_exports
 
     urlpatterns = [
-        path('', prometheus_exports.ExportToDjangoView, name='prometheus-metrics'),
+        path('metrics/', prometheus_exports.ExportToDjangoView, name='prometheus-metrics-slash'),
+        path('metrics', prometheus_exports.ExportToDjangoView, name='prometheus-metrics'),
     ]
 except ImportError:
     # django-prometheus not installed, provide empty urlpatterns

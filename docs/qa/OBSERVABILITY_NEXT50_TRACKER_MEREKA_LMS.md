@@ -88,6 +88,8 @@ Execution mode: Tracker-ready implementation backlog
 - AC-OVR-016 (`LMS/CMS /metrics`) still fails in live runtime payload checks (`status_code: 000` for observed paths).
 - LMS runtime still appears to use stock settings path and not repo-applied app instrumentation in the live pod, so `django_prometheus`/`openedx_prometheus` wiring is not guaranteed from runtime images.
 - CMS has partial middleware/install presence but still lacks consistent `/metrics` exposure semantics in the checked runtime lane.
+- `infrastructure/tutor/custom-apps/openedx_prometheus/urls.py` now exposes both `metrics` and `metrics/`; rerun strict runtime checks to verify route normalization closes CMS/LMS payload path ambiguity.
+- `scripts/qa/verify-observability-runtime.sh` now uses namespace fallback for both ServiceMonitor and PrometheusRule lookups (monitoring/app namespaces + all-namespace fallback with duplicate-match detection) to remove a false-negative class in wiring checks. Runtime verification still needs a live re-run to confirm closure.
 - AC-OVR-025 (`validate-observability-compliance.sh --json`) and AC-OVR-029 strict gating behavior were unreliable, but runtime verifier now enforces strict JSON extraction/path handling; re-run strict wave to confirm closure.
 - Continue with sequencing: first close runtime app-metrics drift, then close coverage objects (`OBS-053..057`), then harden strict JSON/parity gating.
 
@@ -98,10 +100,12 @@ Execution mode: Tracker-ready implementation backlog
 This is the next ordered 10-task handoff in terms of implementation scope, not micro-steps. Keep each task in lane mode: close one ticket, rerun proof command, then move to the next.
 
 1. **OBS-EXT-061 — Close app-metrics image drift (P0, in_progress)**
-   - Definition of done: LMS/CMS pods in dev/nonprod/prod show expected `/metrics` settings wiring and middleware chain from repo-produced manifests; evidence from `observability-metrics-lms-runtime.md` and `observability-metrics-cms-runtime.md` both shows status_code `200`.
+  - Definition of done: LMS/CMS pods in dev/nonprod/prod show expected `/metrics` settings wiring and middleware chain from repo-produced manifests; evidence from `observability-metrics-lms-runtime.md` and `observability-metrics-cms-runtime.md` both shows status_code `200`.
+   - Current implementation status: Django route now exposes both `metrics` and `metrics/`; remaining closure requires strict live runtime proof in all lanes.
 
 2. **OBS-EXT-062 — Make LMS metrics endpoint contract concrete (P0, in_progress)**
-   - Definition of done: `openedx_prometheus.urls` is explicitly mounted at `/metrics` in runtime URLConf and `/metrics` returns Prometheus exposition with both `# HELP` and numeric sample rows.
+  - Definition of done: `openedx_prometheus.urls` is explicitly mounted at `/metrics` in runtime URLConf and `/metrics` returns Prometheus exposition with both `# HELP` and numeric sample rows.
+   - Current implementation status: URLConf contract now includes explicit `/metrics` and trailing-slash variant; verification still requires `status_code: 200` + sample payload evidence in live strict run.
 
 3. **OBS-EXT-063 — Normalize CMS metrics route and ServiceMonitor alignment (P0, planned)**
    - Definition of done: CMS `/metrics` route exists with service/monitor naming matching the lane, and runtime check emits `status_code: 200` for CMS with valid sample payload.
@@ -126,6 +130,14 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
 
 10. **OBS-EXT-070 — Publish implementation handoff epic (P0, planned)**
     - Definition of done: one parent issue set in tracker references `OBS-053..057`, `OBS-EXT-061..069`, and `OBS-058` with explicit evidence paths + closure criteria.
+
+### Current execution state (2026-02-27)
+
+- OBS-EXT-061 / OBS-EXT-062 moved from blocked state to **implementation in progress**:
+  - LMS/CMS `ROOT_URLCONF_OVERRIDES` now includes `openedx_prometheus.urls` in runtime settings.
+  - `infrastructure/tutor/custom-apps/openedx_prometheus/urls.py` now exposes the endpoint at `/metrics` explicitly.
+  - `scripts/qa/verify-observability-runtime.sh` now includes path-aware `/metrics` payload capture (`status_code` + `metric_path` + body), dual `/metrics`/`/metrics/` probing, and curl-first + wget fallback; remains unverified against live lanes until next strict run.
+- Keep `OBS-EXT-063` as next verification target; validate both `/metrics` endpoints via strict runtime command before closing.
 
 ### Lane command for every wave
 
