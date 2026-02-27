@@ -218,10 +218,33 @@ class Command(BaseCommand):
 
         existing = EnterpriseCustomer.objects.filter(slug=slug).first()
         if existing:
-            self.stdout.write(
-                f"  EnterpriseCustomer already exists: {existing.name} "
-                f"(uuid={existing.uuid})"
-            )
+            updates = []
+            if existing.site_id != site.id:
+                old_domain = getattr(existing.site, "domain", f"site_id={existing.site_id}")
+                existing.site = site
+                updates.append("site")
+                self.stdout.write(
+                    f"  Updated EnterpriseCustomer site mapping: {old_domain} -> {site.domain}"
+                )
+            if contact_email and existing.contact_email != contact_email:
+                existing.contact_email = contact_email
+                updates.append("contact_email")
+            if country and existing.country != country:
+                existing.country = country
+                updates.append("country")
+            if not existing.active:
+                existing.active = True
+                updates.append("active")
+            if updates:
+                existing.save(update_fields=updates)
+                self.stdout.write(
+                    f"  EnterpriseCustomer updated: {existing.name} (fields: {', '.join(updates)})"
+                )
+            else:
+                self.stdout.write(
+                    f"  EnterpriseCustomer already exists: {existing.name} "
+                    f"(uuid={existing.uuid})"
+                )
             return existing
 
         ec = EnterpriseCustomer.objects.create(

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Patch: MFE Node 18 base image, toolchain, cookie env, theme copy,
+# Patch: MFE Node 24.11.0 base image, toolchain, cookie env, theme copy,
 #        npm resilience, plugin framework, admin-console redux, course-authoring fix,
 #        new relic env, ulmo source refs, brand version, discussions webpack fix.
 
@@ -304,10 +304,10 @@ for target in targets:
             return text
         return text
 
-    # Ensure MFEs build against Node 18 with the required toolchain.
+    # Ensure MFEs build against Node 24 with the required toolchain.
     updated = re.sub(
         r"^FROM\s+(?:docker[.]io/)?node:[^ \t\r\n]+",
-        "FROM docker.io/node:18-bullseye-slim",
+        "FROM docker.io/node:24.11.0-bullseye-slim",
         updated,
         flags=re.MULTILINE,
     )

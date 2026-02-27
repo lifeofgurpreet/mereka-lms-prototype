@@ -70,6 +70,38 @@
   --pgn-border-color: var(--mereka-color-border);
   --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
   --pgn-btn-border-radius: 999px;
+  --pgn-spacing-spacer-base: 1rem;
+  --pgn-spacing-spacer-0: 0;
+  --pgn-spacing-spacer-1: 0.25rem;
+  --pgn-spacing-spacer-2: 0.5rem;
+  --pgn-spacing-spacer-3: 1rem;
+  --pgn-spacing-spacer-4: 1.5rem;
+  --pgn-spacing-spacer-5: 3rem;
+  --pgn-spacing-spacer-6: 4.5rem;
+  --pgn-typography-font-size-xs: 0.75rem;
+  --pgn-color-white: #ffffff;
+  --pgn-color-black: #000000;
+  --pgn-color-gray-base: var(--mereka-color-ink-900);
+  --pgn-color-gray-500: #6b7280;
+  --pgn-color-gray-700: #374151;
+  --pgn-color-light-200: #e5e7eb;
+  --pgn-color-light-500: #6b7280;
+  --pgn-color-dark-200: #111827;
+  --pgn-color-primary-base: var(--mereka-color-magenta);
+  --pgn-color-primary-400: var(--mereka-color-magenta);
+  --pgn-color-primary-500: var(--mereka-color-magenta);
+  --pgn-color-primary-700: var(--mereka-color-danger);
+  --pgn-color-info-base: var(--mereka-color-info);
+  --pgn-color-info-200: var(--mereka-color-info-soft);
+  --pgn-color-info-300: var(--mereka-color-info-soft);
+  --pgn-color-info-500: var(--mereka-color-info);
+  --pgn-color-info-700: var(--mereka-color-info);
+  --pgn-color-brand-base: var(--mereka-color-magenta);
+  --pgn-color-brand-700: var(--mereka-color-danger);
+  --pgn-color-accent-a: var(--mereka-color-sky);
+  --pgn-color-accent-b: var(--mereka-color-info);
+  --pgn-color-red: var(--mereka-color-danger);
+  --pgn-elevation-box-shadow-level-2: var(--shadow-md);
 
   /*
     Design-system aliases

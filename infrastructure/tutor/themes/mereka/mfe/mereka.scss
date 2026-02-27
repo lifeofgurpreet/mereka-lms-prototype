@@ -400,17 +400,15 @@ label {
 }
 
 /* learner-dashboard scope + course component + image */
-/* RISK: HIGH — structural course image layout; aspect-ratio/min-height breaks card layout if class renames */
+/* RISK: LOW — learner-dashboard course image sizing should defer to native component defaults. */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] img | no stable slot for image | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  height: auto;
   object-fit: cover;
   object-position: center;
-  /* Guardrail: some learner-dashboard list layouts can collapse the image height. */
-  aspect-ratio: 16 / 9;
-  height: auto;
-  min-height: 96px;
 }
 
 /* Learning MFE (My Courses / Discover New) card layout guardrails */
@@ -439,16 +437,7 @@ label {
 /* RISK: MEDIUM — spacing fallback; Bootstrap .col-* is stable, my-courses class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] [class*="my-courses"] .row > [class*="col"] | Bootstrap col is stable; my-courses class is brittle but no slot | expires: 2026-Q3
 [class*="learning"] [class*="my-courses"] .row > [class*="col"] {
-  margin-bottom: 1.5rem !important;
-}
-
-/* Only target actual course cards to avoid disturbing unrelated card shells. */
-/* RISK: HIGH — structural course card layout (flex row); breaks if section or card classes rename */
-// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) :is([class*="course-card"]) | no upstream slot | expires: 2026-Q3
-[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) :is([class*="course-card"], [class*="course"]) {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
+  margin-bottom: 1.5rem;
 }
 
 /* RISK: MEDIUM — learning card styling; border-radius/shadow degrade visually if class renames */
@@ -463,52 +452,32 @@ label {
   margin-bottom: 1.5rem;
 }
 
-/* Learning course cards often use Paragon Card ImageCap on the left; ensure it doesn't collapse. */
-/* RISK: HIGH — structural image-cap flex sizing; layout collapses if ImageCap class renames */
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) | Paragon ImageCap semi-stable; no slot | expires: 2026-Q3
-[class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) {
-  flex: 0 0 180px;
-  width: 180px;
-  max-width: 42%;
-  min-width: 160px;
-  flex-shrink: 0;
+/* Learning course cards and media should stay responsive; keep brand radius/shadow only. */
+[class*="learning"] :is(.pgn__card, .card) :is(
+  .pgn__card-image-cap,
+  [class*="image-cap"],
+  [class*="imagecap"],
+  [class*="image"],
+  [class*="media"]
+) {
+  max-width: 100%;
+  width: 100%;
+  min-width: 0;
 }
 
-/* RISK: HIGH — structural image-cap img sizing; layout breaks if img loses fixed dimensions */
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, ...) img | Paragon ImageCap img; no slot | expires: 2026-Q3
-[class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"], [class*="imagecap"]) img {
+[class*="learning"] :is(.pgn__card, .card) :is([class*="image"] img, [class*="media"] img) {
   display: block;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  /* Left-rail images should fill the rail; aspect-ratio from the generic rule can squash. */
-  aspect-ratio: auto;
-  min-height: 100%;
+  width: auto;
+  max-width: 100%;
+  height: auto;
   object-fit: cover;
   object-position: center;
 }
 
-/* When course cards use a horizontal layout, ensure the media column doesn't collapse. */
-/* RISK: HIGH — structural media column sizing; too broad selector, can affect unintended elements */
-/* SELECTOR-KEPT-BRITTLE: [class*="image"] and [class*="media"] are too broad but no stable BEM or testid alternative exists for the card media column; upstream Paragon uses dynamic CSS module class names for this slot */
-[class*="learning"] :is(.pgn__card, .card) [class*="image"],
-[class*="learning"] :is(.pgn__card, .card) [class*="media"] {
-  min-width: 180px;
-  flex-shrink: 0;
-}
-
-/* RISK: MEDIUM — media column image sizing; degrades to unsized image if selector breaks */
-/* SELECTOR-KEPT-BRITTLE: same rationale as parent rule above */
-[class*="learning"] :is(.pgn__card, .card) [class*="image"] img,
-[class*="learning"] :is(.pgn__card, .card) [class*="media"] img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 112px;
-  max-height: 180px;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  object-position: center;
+@media (max-width: 767px) {
+  [class*="learning"] :is(.pgn__card, .card) {
+    min-width: 0;
+  }
 }
 
 /* Some Learning MFE layouts don't apply CSS gap; add reliable vertical spacing fallback. */

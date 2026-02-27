@@ -47,6 +47,7 @@ hooks.Filters.CONFIG_DEFAULTS.add_items([
         "https://academy.biji-biji.com",
         "https://enterprise.academyv2.mereka.io",
         "https://skillourfuture.academy.mereka.io",
+        "https://apps.academy.biji-biji.com",
     ]),
     ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
     ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
@@ -70,6 +71,94 @@ CSRF_TRUSTED_ORIGINS.append("{{ origin }}")
 # Session and CSRF cookie domains for multi-site support
 SESSION_COOKIE_DOMAIN = "{{ MEREKA_SESSION_COOKIE_DOMAIN }}"
 CSRF_COOKIE_DOMAIN = "{{ MEREKA_CSRF_COOKIE_DOMAIN }}"
+
+# Security hardening.
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+
+CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "true").lower() not in ("false", "0", "no")
+
+_lms_url = MEREKA_LMS_BASE_URL
+_mfe_url = MEREKA_MFE_BASE_URL
+_studio_url = MEREKA_STUDIO_BASE_URL
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    _mfe_url,
+    "https://cdn.jsdelivr.net",
+    "https://cdnjs.cloudflare.com",
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
+)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    _mfe_url,
+    "https://fonts.googleapis.com",
+    "https://cdn.jsdelivr.net",
+)
+CSP_FONT_SRC = (
+    "'self'",
+    _mfe_url,
+    "https://fonts.gstatic.com",
+    "data:",
+)
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+    "blob:",
+    _lms_url,
+    _mfe_url,
+    "https:",
+)
+CSP_CONNECT_SRC = (
+    "'self'",
+    _lms_url,
+    _mfe_url,
+    _studio_url,
+    "https://www.google-analytics.com",
+    "https://sentry.io",
+)
+CSP_FRAME_SRC = (
+    "'self'",
+    _lms_url,
+    _mfe_url,
+    _studio_url,
+    "https://www.youtube.com",
+    "https://player.vimeo.com",
+)
+CSP_MEDIA_SRC = ("'self'", "blob:", "https:")
+CSP_OBJECT_SRC = ("'none'",)
+CSP_BASE_URI = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'self'",)
+
+_csp_report_uri = os.environ.get("CSP_REPORT_URI", "")
+if _csp_report_uri:
+    CSP_REPORT_URI = _csp_report_uri
+
+REST_FRAMEWORK = dict(globals().get("REST_FRAMEWORK", {}))
+REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_CLASSES", [
+    "openedx.core.lib.api.throttle.ScopedRateThrottle",
+])
+REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_RATES", {})
+_throttle_rates = dict(REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"])
+_throttle_rates.setdefault("anon_burst", os.environ.get("THROTTLE_ANON_BURST", "6/min"))
+_throttle_rates.setdefault("user", os.environ.get("THROTTLE_USER", "100/min"))
+_throttle_rates.setdefault("login_and_register", os.environ.get("THROTTLE_LOGIN_AND_REGISTER", "6/min"))
+_throttle_rates.setdefault("password_reset", os.environ.get("THROTTLE_PASSWORD_RESET", "5/hour"))
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = _throttle_rates
+
+FEATURES["ENABLE_ACCOUNT_ACTIVATION_EMAIL_LINK"] = True
+LOGIN_THROTTLE_ENABLED = os.environ.get("LOGIN_THROTTLE_ENABLED", "true").lower() not in ("false", "0", "no")
+MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED = int(os.environ.get("MAX_FAILED_LOGIN_ATTEMPTS_ALLOWED", "10"))
+MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS = int(
+    os.environ.get("MAX_FAILED_LOGIN_ATTEMPTS_LOCKOUT_PERIOD_SECS", "300")
+)
 
 # Enterprise integration
 FEATURES["ENABLE_ENTERPRISE_INTEGRATION"] = True
@@ -121,6 +210,10 @@ if 'django_prometheus.middleware.PrometheusBeforeMiddleware' not in MIDDLEWARE:
     MIDDLEWARE.insert(0, 'django_prometheus.middleware.PrometheusBeforeMiddleware')
 if 'django_prometheus.middleware.PrometheusAfterMiddleware' not in MIDDLEWARE:
     MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
+
+ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 
 # In-App Notifications (Email Phase 3)
 if 'openedx_notifications' not in INSTALLED_APPS:
@@ -704,6 +797,7 @@ hooks.Filters.ENV_PATCHES.add_item(
     (
         "mfe-env-config-runtime-definitions",
         """
+{% raw %}
 // Custom Mereka footer component (Direct plugin — registered via footer_slot)
 // Wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaFooter = () => {
@@ -818,14 +912,37 @@ const MerekaFooter = () => {
   ];
 
   const SocialIcon = ({ d }) => (
-    <svg style={{ width: '20px', height: '20px' }} fill="currentColor" viewBox="0 0 24 24"><path d={d} /></svg>
+    <svg
+      className="mereka-footer__social-icon"
+      style={socialIconStyle}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path d={d} />
+    </svg>
   );
 
   const WhatsAppIcon = () => (
-    <svg style={{ width: '20px', height: '20px', color: '#25D366' }} fill="currentColor" viewBox="0 0 24 24">
+    <svg
+      className="mereka-footer__social-icon"
+      style={whatsappIconStyle}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+    >
       <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
     </svg>
   );
+
+  const socialIconStyle = {
+    width: '20px',
+    height: '20px',
+  };
+
+  const whatsappIconStyle = {
+    width: '20px',
+    height: '20px',
+    color: '#25D366',
+  };
 
   return (
     <footer className="mereka-footer mereka-footer--v2" role="contentinfo">
@@ -909,6 +1026,7 @@ const MerekaFooter = () => {
     </footer>
   );
 };
+{% endraw %}
 """,
     )
 )
@@ -936,11 +1054,24 @@ command: mysqld --default-authentication-plugin=mysql_native_password
 # Add extra LMS host blocks to Caddyfile
 hooks.Filters.ENV_PATCHES.add_item(
     (
-        "caddy-caddyfile",
+        "caddyfile",
         """
+(security_headers) {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        X-XSS-Protection "0"
+    }
+}
+
 # Additional LMS sites
 {% for host in MEREKA_LMS_EXTRA_HOSTS %}
 {{ host }}{$default_site_port} {
+    import security_headers
+
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -963,12 +1094,17 @@ hooks.Filters.ENV_PATCHES.add_item(
 }
 {% endfor %}
 
-# MFE proxy: Forward /profile/api/* to LMS for profile API
-apps.academyv2.mereka.io {
+# MFE proxy: Forward selected MFE API paths to LMS for correct host context
+apps.academyv2.mereka.io{$default_site_port} {
+    import security_headers
+
     reverse_proxy /profile/api/* lms:8000 {
         header_up Host academyv2.mereka.io
     }
-    reverse_proxy nginx:80
+
+    reverse_proxy /api/mfe_config/v1* lms:8000 {
+        header_up Host {http.request.host}
+    }
 }
 """,
     )
@@ -1064,6 +1200,30 @@ path('api/video/v1/', include('openedx_video_analytics.urls')),
 
 # Video content protection API (Video Phase 5: Signed Playback)
 path('api/mux/protection/', include('openedx_video_protection.urls')),
+""",
+    )
+)
+
+# CMS production settings patch (metrics + URL exposure in Studio)
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "openedx-cms-production-settings",
+        """
+# Prometheus metrics + URL exposure for CMS
+if "django_prometheus" not in INSTALLED_APPS:
+    INSTALLED_APPS.insert(0, "django_prometheus")
+
+if "openedx_prometheus" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("openedx_prometheus")
+
+if "django_prometheus.middleware.PrometheusBeforeMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.insert(0, "django_prometheus.middleware.PrometheusBeforeMiddleware")
+if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
+
+ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
+    ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 """,
     )
 )

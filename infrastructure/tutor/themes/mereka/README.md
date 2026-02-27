@@ -1,24 +1,81 @@
 # Mereka Theme Kit
+_Last updated: 2026-02-27_
 
 Shared palette, typography, and utility styles that bring Open edX surfaces closer to mereka.io without diverging from Paragon defaults. The goal is to keep colors, fonts, and spacing consistent across:
 
-1. Legacy LMS/Studio (via Tutor’s custom theme pipeline).
+1. Legacy LMS/Studio (via Tutor's comprehensive theme pipeline).
 2. Micro-frontends (by importing the same SCSS tokens).
 3. Ancillary services (Discovery, AuthN, etc.) as they come online.
+
+> **Tutor plugin**: All theme integration (Dockerfile hooks, config defaults, FPF slots) is managed by `infrastructure/tutor/plugins/mereka_lms.py`. The plugin copies this theme directory into the Docker image at build time via the `openedx-dockerfile-pre-assets` hook.
 
 ## Structure
 
 ```
 infrastructure/tutor/themes/mereka/
-├── README.md
-├── scss/                  # Source of truth for fonts/tokens/utilities
-│   ├── _fonts.scss        # Font-face declarations (path overridable via $mereka-font-path)
-│   ├── _tokens.scss       # Brand palette + Paragon variable bridge
-│   └── theme.scss         # Minimal utility classes / gradient helpers
-├── common/static/fonts/   # Compiled fonts used by LMS/Studio
-├── lms/static/sass/       # Tutor theme entrypoint
-└── cms/static/sass/       # Tutor theme entrypoint
+├── README.md                    # This file
+├── scss/                        # Source of truth for fonts/tokens/utilities
+│   ├── _fonts.scss              # Font-face declarations (path overridable via $mereka-font-path)
+│   ├── _tokens.scss             # Brand palette + Paragon variable bridge
+│   └── theme.scss               # Minimal utility classes / gradient helpers
+├── common/
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── mereka-design-tokens.css  # CSS custom properties (proto-tokens)
+│   │   │   └── mereka-overrides.css      # Global CSS overrides
+│   │   ├── fonts/               # Poppins + Lato WOFF2 (shared by LMS/Studio)
+│   │   └── images/              # Logos, favicons (all variants)
+│   └── templates/
+│       └── head-extra.html      # Injected into <head> (fonts, tokens CSS)
+├── lms/
+│   ├── static/
+│   │   ├── css/mereka-overrides.css  # LMS-specific CSS overrides
+│   │   ├── fonts/               # LMS font copies
+│   │   ├── images/              # LMS logo/favicon copies
+│   │   └── sass/
+│   │       ├── lms-main-v1.scss      # LMS SCSS entry point (REQUIRED)
+│   │       ├── lms-main-v1-rtl.scss  # LMS RTL entry point
+│   │       ├── theme.scss            # LMS theme SCSS
+│   │       └── partials/
+│   │           ├── _variables.scss   # Paragon variable overrides
+│   │           └── _custom.scss      # Custom LMS rules
+│   └── templates/
+│       ├── footer.html           # LMS footer template
+│       ├── head-extra.html       # LMS <head> injection
+│       ├── header/brand.html     # Header logo/brand block
+│       └── index_overlay.html    # Homepage hero overlay
+├── cms/
+│   ├── static/
+│   │   ├── css/mereka-overrides.css  # CMS-specific CSS overrides
+│   │   ├── fonts/               # CMS font copies
+│   │   ├── images/              # CMS logo/favicon copies
+│   │   └── sass/
+│   │       ├── studio-main-v1.scss      # CMS SCSS entry point (REQUIRED)
+│   │       ├── studio-main-v1-rtl.scss  # CMS RTL entry point
+│   │       └── theme.scss               # CMS theme SCSS
+│   └── templates/
+│       ├── footer.html           # CMS footer template
+│       ├── head-extra.html       # CMS <head> injection
+│       └── widgets/footer.html   # CMS widget footer
+├── mfe/                          # MFE-specific brand assets
+│   ├── fonts/                    # Font copies for MFE builds
+│   ├── images/                   # Logo/favicon copies for MFE builds
+│   └── mereka.scss               # MFE SCSS import entry point
+└── tenants/                      # Multi-tenant overrides (future)
+    ├── README.md
+    └── _template/                # Template for new tenant brands
+        ├── css/.gitkeep
+        ├── favicons/.gitkeep
+        └── logos/.gitkeep
 ```
+
+## SCSS Entry Points (Critical)
+
+The LMS and CMS **require** specific SCSS entry points for `compile-sass --theme mereka` to work:
+- **LMS**: `lms/static/sass/lms-main-v1.scss` (and `-rtl` variant)
+- **CMS**: `cms/static/sass/studio-main-v1.scss` (and `-rtl` variant)
+
+Without these files, `compile-sass` silently skips the theme. The `mereka_lms.py` plugin creates them if missing via the `openedx-dockerfile-pre-assets` hook.
 
 ## Using With Tutor (LMS/Studio)
 
@@ -28,28 +85,30 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 source infrastructure/tutor/tutor-env.sh
 tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
 tutor config save --set THEME_NAME=mereka
+./infrastructure/tutor/apply-patches.sh   # CRITICAL: always run after config save
 tutor images build openedx
 tutor local start -d
 ```
 
-Tutor copies everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes`, so the LMS/Studio entrypoints simply include the shared `scss/theme.scss`. Use `tutor local run lms ./manage.py lms collectstatic` if you need to force asset rebuilds during local development.
+Tutor copies everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes`, so the LMS/Studio entry points simply include the shared `scss/theme.scss`. Use `tutor local run lms ./manage.py lms collectstatic` if you need to force asset rebuilds during local development.
 
 ## Consuming In MFEs
 
-Inside each `frontend-app-*` directory:
+MFE branding is handled via the `mereka_lms.py` plugin which:
+1. Copies fonts/images from `mfe/` into the MFE Docker image
+2. Injects SCSS overrides via the `mfe-dockerfile-post-npm-install` hook
+3. Wires the `MerekaFooter` component via Frontend Plugin Framework slots
 
-```scss
-// src/styles/mereka.scss
-$mereka-font-path: "~@mereka/theme/fonts"; // set to wherever the fonts live for that app
-@import "../../../../../infrastructure/tutor/themes/mereka/scss/theme";
-```
+For development, run `./scripts/branding/setup-mfe-branding.sh` to set up local MFE branding.
 
-Then import `src/styles/mereka.scss` from the MFE’s `src/index.scss`. The `$mereka-font-path` variable ensures the compiled bundle points at the right font directory (e.g., `/public/fonts` when building MFEs, `/static/mereka/fonts` when running under Tutor).
+## Future: OEP-48 Brand Package
+
+The current approach (SCSS overrides + build-time injection) will be superseded by an OEP-48 compliant `@edx/brand` package at `infrastructure/tutor/brand-mereka/`. See:
+- [oep48-brand-package_spec.md](../../../../specs/oep48-brand-package_spec.md)
+- [paragon-design-tokens-migration_spec.md](../../../../specs/paragon-design-tokens-migration_spec.md)
 
 ## Keeping Assets In Sync
 
 1. Drop updated fonts/logos/favicons into `assets/branding/`.
-2. Run `./scripts/branding/sync-brand-assets.sh` (or `make branding-sync`) to refresh the theme copies under `infrastructure/tutor/themes/mereka/`.
-3. Commit both locations so MFEs (which read from `assets/branding/`) and LMS/Studio (which serve from `infrastructure/tutor/themes/mereka/common/static/fonts`) stay consistent.
-
-Add new global patterns (e.g., hero backgrounds, footer partials) under `infrastructure/tutor/themes/mereka/common/` so they are easy to reuse across both LMS and Studio templates later in the rollout.
+2. Run `./scripts/branding/sync-brand-assets.sh` (or `make branding-sync`) to refresh the theme copies.
+3. Commit both locations so MFEs (which read from `assets/branding/`) and LMS/Studio (which serve from theme directories) stay consistent.
