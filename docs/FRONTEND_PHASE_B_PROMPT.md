@@ -4,6 +4,18 @@
 **Prerequisite**: Phase A complete (FE-003, FE-004, FE-013, FE-014, FE-016 all DONE)
 **Specs**: `specs/oep48-brand-package_spec.md`, `specs/paragon-design-tokens-migration_spec.md`
 
+**Status**: Phase B is PARTIALLY COMPLETE. An implementor agent has already created:
+- `infrastructure/tutor/brand-mereka/` — the OEP-48 brand package (Task B1 DONE)
+- `infrastructure/tutor/patches/brand-package.sh` — the build-context sync script (Task B2 partially done)
+
+**Remaining work**: Tasks B3 (hardcoded color elimination) and B4 (Paragon token bridging) are NOT YET DONE.
+
+**Phase B Review Findings (CRITICAL — already fixed)**:
+- RGB values in `_tokens.scss` were wrong: `--mereka-color-teal-rgb` was `45 137 139` (corrected to `35 112 114`), `--mereka-color-indigo-rgb` was `39 110 241` (corrected to `41 92 173`)
+- Duplicate `--pgn-spacing-spacer-*` tokens (7 lines) and duplicate `--pgn-color-primary-400/500` declarations were removed
+- MFE Caddy `/theme/*` handler had double path nesting bug (root was `/openedx/dist/theme`, corrected to `/openedx/dist`)
+- Outer Caddy had blanket `Cache-Control: no-store` killing static asset caching (replaced with tiered policy)
+
 ---
 
 ## Objective

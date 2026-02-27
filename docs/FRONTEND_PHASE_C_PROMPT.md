@@ -418,3 +418,42 @@ If BEM override removal causes regressions:
 1. `git checkout HEAD~1 -- infrastructure/tutor/themes/mereka/mfe/mereka.scss`
 2. Rebuild MFE image to restore the original BEM overrides
 3. The token definitions in `_tokens.scss` are harmless (unused custom properties) and do not need to be reverted
+
+---
+
+## Audit Intelligence (2026-02-27)
+
+These findings from a comprehensive frontend architectural audit should inform Phase C implementation decisions:
+
+### Dependency Constraints
+- **React**: MFEs are locked to React 17 by Paragon v22. Do NOT attempt React 18+ features (concurrent mode, useTransition, etc.)
+- **Webpack 5**: Asset pipeline uses webpack 5 (not Vite). All build optimizations must target webpack.
+- **Paragon v22 (Ulmo)**: This is the version bundled with Tutor v21. Do NOT upgrade Paragon independently — it's tied to the Open edX release.
+
+### Caching Architecture (FIXED in Phase B review)
+- Outer Caddy now has tiered caching: `immutable` for `/static/*` and `/theming/asset/*`, `no-cache` default, `no-store` for `/api/*`/`/oauth2/*`/`/login*`/`/admin*`
+- MFE Caddy already has its own tiered caching (lines 28-42 in MFE Caddyfile)
+- Theme CSS files served via `/theme/*` will get the MFE Caddy's `@hashed` matcher — add `.css` to the hashed extensions if not already present
+- Verification: `scripts/qa/verify-caddy-cache-policy.sh` (12 checks)
+
+### brand-core.css vs brand-light.css Identity
+- The audit found that `brand-core.css` and `brand-light.css` are byte-identical. This is expected because we only support light mode. When generating `mereka-brand.min.css` and `mereka-brand-light.min.css`, it's OK for them to be identical for now. Add a comment explaining this.
+
+### Frontend Plugin Framework (FPF) for Header Branding
+- Paragon v22 supports FPF plugin slots including `header_slot` and `footer_slot`
+- **Phase D opportunity**: Instead of CSS-only header branding, use FPF slots to inject a fully custom React header with Mereka logo, navigation, and gradient
+- This is NOT part of Phase C — mention it as future work
+- Reference: `specs/mfe-plugin-slots_spec.md`
+
+### Performance Budget Targets
+- LCP (Largest Contentful Paint): < 2.5s on 4G mobile
+- Total JS bundle per MFE: < 300KB gzipped
+- Theme CSS: < 50KB (ideally < 20KB — just custom properties)
+- Font loading: woff2 only, `font-display: swap`, preconnect to font origin
+
+### Accessibility Constraints
+- All color tokens MUST pass WCAG 2.1 AA contrast (4.5:1 for text, 3:1 for large text/UI)
+- The Mereka palette has known contrast challenges:
+  - `#f4be48` (gold/warning) on white fails AA — use on dark backgrounds only or darken to `#c99a00`
+  - `#94d1e4` (sky/info-soft) on white fails AA — use as background only, not text
+- Run contrast checks on any new token color values before committing
