@@ -31,6 +31,8 @@ PUSH=0
 VERIFY_RUNTIME=0
 ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD="${ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD:-1}"
 RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD="${RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD:-1}"
+RUN_ENTERPRISE_SSO_RUNTIME_GUARD="${RUN_ENTERPRISE_SSO_RUNTIME_GUARD:-1}"
+ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
@@ -72,6 +74,10 @@ Options:
                        Skip STRICT multisite enterprise UUID runtime preflight.
   --skip-enterprise-readiness-integrity-guard
                        Skip static enterprise readiness integrity preflight.
+  --skip-enterprise-sso-runtime-guard
+                       Skip enterprise SSO runtime readiness preflight.
+  --enterprise-readiness-tenant SLUG
+                       Tenant slug used for enterprise SSO runtime readiness preflight.
 
   --k8s-context NAME    Kubernetes context for runtime verification.
   --argocd-namespace NS ArgoCD namespace (default: argocd).
@@ -174,6 +180,14 @@ while [[ $# -gt 0 ]]; do
     --skip-enterprise-readiness-integrity-guard)
       RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD=0
       shift
+      ;;
+    --skip-enterprise-sso-runtime-guard)
+      RUN_ENTERPRISE_SSO_RUNTIME_GUARD=0
+      shift
+      ;;
+    --enterprise-readiness-tenant)
+      ENTERPRISE_READINESS_TENANT="${2:-}"
+      shift 2
       ;;
     --k8s-context)
       K8S_CONTEXT="${2:-}"
@@ -588,6 +602,8 @@ echo "Update GitOps base ref: $([[ "$UPDATE_BASE_REF" -eq 1 ]] && echo yes || ec
 echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"
 echo "Enterprise site mapping guard: $([[ "$ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise readiness integrity guard: $([[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise SSO runtime guard: $([[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
 
 run_enterprise_release_preflights() {
   if [[ "$TARGET_ENV" != "production" || "$APPLY" -ne 1 ]]; then
@@ -606,6 +622,13 @@ run_enterprise_release_preflights() {
       "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" prod
   else
     echo "= skipped enterprise site mapping runtime guard (--skip-enterprise-site-mapping-guard)"
+  fi
+
+  if [[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/qa/verify-enterprise-sso-readiness.sh" \
+      --env prod --mode cluster --tenant "$ENTERPRISE_READINESS_TENANT"
+  else
+    echo "= skipped enterprise SSO runtime guard (--skip-enterprise-sso-runtime-guard)"
   fi
 }
 

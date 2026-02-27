@@ -22,7 +22,7 @@ assert_contains() {
   local file="$1"
   local pattern="$2"
   local msg="$3"
-  if rg -n --pcre2 "$pattern" "$file" >/dev/null 2>&1; then
+  if rg -n --pcre2 -- "$pattern" "$file" >/dev/null 2>&1; then
     pass "$msg"
   else
     fail "$msg"
@@ -33,7 +33,7 @@ assert_not_contains() {
   local file="$1"
   local pattern="$2"
   local msg="$3"
-  if rg -n --pcre2 "$pattern" "$file" >/dev/null 2>&1; then
+  if rg -n --pcre2 -- "$pattern" "$file" >/dev/null 2>&1; then
     fail "$msg"
   else
     pass "$msg"
@@ -50,6 +50,7 @@ LICENSE_MGMT="scripts/qa/verify-enterprise-license-management.sh"
 RUNBOOK_TENANT="docs/runbooks/tenant-provisioning-runbook.md"
 RUNBOOK_ENTERPRISE="docs/runbooks/enterprise-services-runbook.md"
 ONBOARD_SCRIPT="scripts/tenants/onboard-enterprise-tenant.sh"
+RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 
 # 1) Port truth (AC-003 contract alignment)
 assert_contains "$SPEC_FILE" 'AC-003:.*enterprise-catalog:8160/health/' \
@@ -134,6 +135,16 @@ assert_contains "$ONBOARD_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
   "onboarding workflow invokes enterprise SSO readiness gate"
 assert_contains "$ONBOARD_SCRIPT" 'STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1' \
   "onboarding workflow enforces strict enterprise site mapping in prod runtime gate"
+
+# 8) Production release orchestration guard contract
+assert_contains "$RELEASE_SCRIPT" 'RUN_ENTERPRISE_SSO_RUNTIME_GUARD=' \
+  "release workflow exposes enterprise SSO runtime guard toggle"
+assert_contains "$RELEASE_SCRIPT" '--skip-enterprise-sso-runtime-guard' \
+  "release workflow supports explicit skip flag for enterprise SSO runtime guard"
+assert_contains "$RELEASE_SCRIPT" '--enterprise-readiness-tenant' \
+  "release workflow supports tenant override for enterprise readiness"
+assert_contains "$RELEASE_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
+  "release workflow invokes enterprise SSO readiness check in production preflight"
 
 echo
 if [[ "$failures" -eq 0 ]]; then
