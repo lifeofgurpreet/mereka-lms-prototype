@@ -130,7 +130,8 @@ run_check() {
     report WARN "$description: non-strict run captured warnings (script exit $rc)"
   fi
 
-  return $rc
+  # Keep executor flow in non-strict mode while still tracking strict violations.
+  return 0
 }
 
 write_evidence() {
