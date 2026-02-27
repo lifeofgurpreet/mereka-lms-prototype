@@ -54,6 +54,15 @@
 		file_server
 	}
 
+	# Runtime PARAGON theme assets are now emitted to /theme/*.min.css in MFE image.
+	@mfe_theme_assets {
+		path /theme/*
+	}
+	handle @mfe_theme_assets {
+		root * /openedx/dist/theme
+		file_server
+	}
+
 	# Profile API calls from the Profile MFE route through LMS domain routing.
 	@mfe_profile_api {
 		path /profile/api/*

@@ -49,6 +49,8 @@ hooks.Filters.CONFIG_DEFAULTS.add_items([
         "https://skillourfuture.academy.mereka.io",
         "https://apps.academy.biji-biji.com",
     ]),
+    ("MEREKA_PARAGON_THEME_ENABLED", False),
+    ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
     ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
     ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
 ])
@@ -356,6 +358,28 @@ if 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
         MIDDLEWARE.insert(auth_middleware_index + 1, 'mereka_tenancy.middleware.TenantResolutionMiddleware')
     else:
         MIDDLEWARE.append('mereka_tenancy.middleware.TenantResolutionMiddleware')
+
+# Optional runtime Paragon theme URL wiring.
+# Consumers can disable by setting MEREKA_PARAGON_THEME_ENABLED=False.
+if "{{ MEREKA_PARAGON_THEME_ENABLED }}".lower() == "true":
+    _theme_base = "{{ MEREKA_PARAGON_THEME_CDN_BASE }}"
+    MFE_CONFIG.setdefault("PARAGON_THEME_URLS", {})
+    MFE_CONFIG["PARAGON_THEME_URLS"] = {
+        "core": {
+            "urls": {
+                "default": f"{_theme_base}/core.min.css",
+                "brandOverride": f"{_theme_base}/mereka-brand.min.css",
+            }
+        },
+        "variants": {
+            "light": {
+                "urls": {
+                    "default": f"{_theme_base}/light.min.css",
+                    "brandOverride": f"{_theme_base}/mereka-brand-light.min.css",
+                }
+            },
+        },
+    }
 """,
     )
 )
@@ -689,6 +713,17 @@ hooks.Filters.ENV_PATCHES.add_item(
         """
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+""",
+    )
+)
+
+# Copy generated runtime theme assets into the MFE container.
+# PARAGON_THEME_URLS points to /theme/* on the MFE origin.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "mfe-dockerfile-post-npm-install",
+        """
+COPY indigo/theme /openedx/dist/theme
 """,
     )
 )
