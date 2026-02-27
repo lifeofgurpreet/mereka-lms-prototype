@@ -52,6 +52,20 @@ body {
   width: auto;
 }
 
+/* RISK: MEDIUM — header logo slot override class from runtime plugin component.
+ * Aligns sizing and layout to avoid regression if the default MFE brand markup changes.
+ */
+.mereka-header-logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mereka-header-logo img {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
 /* RISK: MEDIUM — Bootstrap nav-link / dropdown-toggle; degrades visually on rename */
 .navbar .nav-link,
 .navbar .dropdown-toggle {
