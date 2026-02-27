@@ -43,10 +43,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-smoke.sh
     command: scripts/qa/verify-forum-smoke.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: 'Given N threads in MongoDB before migration, when migration completes,
     then `db.contents.count({_type: "CommentThread"})` returns exactly N'
@@ -55,10 +51,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Thread Count Verification
@@ -74,10 +66,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Content Hash Verification
@@ -92,10 +80,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Vote Count Verification
@@ -115,10 +99,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-smoke.sh
     command: scripts/qa/verify-forum-smoke.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given a learner creating a new thread via the discussions MFE, when
     the Python forum service processes the request, then the thread appears in the
@@ -128,10 +108,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Thread CRUD Operations
@@ -147,10 +123,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Vote Persistence Testing
@@ -166,10 +138,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-moderation.sh
     command: scripts/qa/verify-forum-moderation.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Moderation Queue Verification
@@ -323,10 +291,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Rollback Data Integrity
@@ -342,10 +306,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-migration-contracts.sh
     command: scripts/qa/verify-forum-migration-contracts.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Observability Verification
@@ -365,10 +325,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-forum-smoke.sh
     command: scripts/qa/verify-forum-smoke.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/FORUM_SERVICE_RUNBOOK.md
     section: Observability Verification

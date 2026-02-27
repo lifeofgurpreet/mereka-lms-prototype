@@ -40,6 +40,22 @@ kubectl get secret -n mereka-lms mobile-secrets -o jsonpath='{.data.MOBILE_FCM_S
 
 ---
 
+## Token Refresh Deduplication
+
+### Procedure
+1. Sign in on a test device and capture an access token close to expiry.
+2. Trigger 10 concurrent API requests from the app (or a test harness) while token refresh is required.
+3. Inspect LMS OAuth logs and client telemetry for refresh calls during the burst.
+4. Confirm only one refresh request is emitted and all pending API requests reuse the refreshed token.
+5. Repeat once with simulated refresh failure to confirm requests fail cleanly and user is redirected to login.
+
+### Acceptance
+- Exactly one token refresh request is issued for a concurrent burst.
+- Pending requests are replayed after refresh without duplicate refresh traffic.
+- Refresh failure clears local auth state and prompts re-authentication.
+
+---
+
 ## Push Notification Testing
 
 ### Procedure

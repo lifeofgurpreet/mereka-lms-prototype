@@ -9,10 +9,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
@@ -25,10 +21,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: OAuth PKCE Flow
@@ -42,10 +34,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Storage Security
@@ -60,10 +48,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Logic
@@ -73,15 +57,13 @@ acceptance_criteria:
     the refresh is in-flight, then exactly one token refresh request is sent to the
     backend (single-flight)
   verify:
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
   - type: manual
+    test_type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Refresh Deduplication
     justification: Feature not yet implemented; single-flight token refresh not yet
       implemented
+    file: N/A (manual verification)
 - id: AC-006
   description: Given a 401 response from the API, when the refresh token is still
     valid, then the app refreshes the token and retries the original request exactly
@@ -91,10 +73,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: 401 Retry Flow
@@ -108,10 +86,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Token Failure Handling
@@ -125,10 +99,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Logout Flow
@@ -278,10 +248,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Content Download
@@ -295,10 +261,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Offline Sync
@@ -311,10 +273,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-mobile-deployment.sh
     command: scripts/qa/verify-mobile-deployment.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
   - type: manual
     runbook: docs/operations/runbooks/MOBILE_APPS_RUNBOOK.md
     section: Download Storage Warning
@@ -538,4 +496,3 @@ acceptance_criteria:
     justification: Requires mobile device with installed app to verify deep link routing
       from email/web to native screens
     file: N/A (manual verification)
-
