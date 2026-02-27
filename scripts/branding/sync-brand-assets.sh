@@ -21,6 +21,7 @@ OVERRIDES_SRC="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/m
 OVERRIDES_LMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
 OVERRIDES_CMS_DEST="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 BRAND_REPO_TOKENS="/home/gurpreet/projects/bbbi-mereka-brand-assets/brands/mereka/tokens/tokens.css"
+BRAND_PACKAGE_SYNC="$REPO_ROOT/scripts/branding/sync-brand-package.sh"
 
 if [[ ! -d "$SRC_FONTS" ]]; then
   echo "Missing font source directory: $SRC_FONTS" >&2
@@ -69,5 +70,10 @@ for asset in logo-horizontal.png logo-horizontal.svg logo-horizontal-white.png l
     echo "  ✓ Copied $asset"
   fi
 done
+
+# Keep OEP-48 local brand package asset bundle in sync as well.
+if [[ -x "$BRAND_PACKAGE_SYNC" ]]; then
+  "$BRAND_PACKAGE_SYNC"
+fi
 
 echo "Brand assets synced to theme directories."
