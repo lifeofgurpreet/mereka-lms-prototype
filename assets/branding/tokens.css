@@ -87,6 +87,16 @@
   /* ===========================================
      MFE SURFACE TOKENS
      =========================================== */
+  --mereka-mfe-navbar-padding: 0.85rem 1.5rem;
+  --mereka-mfe-navbar-mobile-padding: 0.75rem 1rem;
+  --mereka-mfe-navbar-brand-gap: 0.75rem;
+  --mereka-mfe-navbar-logo-height: 32px;
+  --mereka-mfe-pill-radius: 999px;
+  --mereka-mfe-authn-cta-min-height: 44px;
+  --mereka-mfe-nav-item-font-weight: 500;
+  --mereka-mfe-brand-font-weight: 600;
+  --mereka-mfe-emphasis-font-weight: 700;
+  --mereka-mfe-badge-font-weight: 600;
   --mereka-mfe-authn-card-radius: 28px;
   --mereka-mfe-authn-card-border: 1px solid rgba(26, 22, 35, 0.10);
   --mereka-mfe-authn-card-shadow: 0 28px 72px rgba(26, 22, 35, 0.14);

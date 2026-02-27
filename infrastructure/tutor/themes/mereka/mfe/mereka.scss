@@ -32,23 +32,23 @@ body {
   background: var(--pgn-color-white);
   border-bottom: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
   box-shadow: 0 10px 30px rgb(var(--mereka-color-ink-deep-rgb) / 0.05);
-  padding: 0.85rem 1.5rem;
+  padding: var(--mereka-mfe-navbar-padding, 0.85rem 1.5rem);
 }
 
 /* RISK: HIGH — .navbar .navbar-brand is a structural nav slot; breaks if Bootstrap renames it */
 .navbar .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--mereka-mfe-navbar-brand-gap, 0.75rem);
   font-family: var(--mereka-font-heading);
-  font-weight: 600;
+  font-weight: var(--mereka-mfe-brand-font-weight, 600);
   font-size: 1rem;
   color: var(--mereka-color-ink-900);
 }
 
 /* RISK: MEDIUM — img inside navbar-brand; degrades to unsized logo if selector breaks */
 .navbar .navbar-brand img {
-  height: 32px;
+  height: var(--mereka-mfe-navbar-logo-height, 32px);
   width: auto;
 }
 
@@ -62,14 +62,14 @@ body {
 
 .mereka-header-logo img {
   display: block;
-  height: 32px;
+  height: var(--mereka-mfe-navbar-logo-height, 32px);
   width: auto;
 }
 
 /* RISK: MEDIUM — Bootstrap nav-link / dropdown-toggle; degrades visually on rename */
 .navbar .nav-link,
 .navbar .dropdown-toggle {
-  font-weight: 500;
+  font-weight: var(--mereka-mfe-nav-item-font-weight, 500);
   color: var(--mereka-color-ink-700);
   transition: color 150ms ease;
 }
@@ -245,7 +245,7 @@ label {
   background-color: rgb(var(--mereka-color-teal-rgb) / 0.12);
   color: var(--mereka-color-teal);
   padding: 0.25rem 0.85rem;
-  border-radius: 999px;
+  border-radius: var(--mereka-mfe-pill-radius, 999px);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -292,8 +292,8 @@ label {
 // SELECTOR-EXCEPTION: [class*="login-register"] .pgn__btn--primary | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__btn--primary,
 [class*="login-register"] .pgn__btn--primary {
-  min-height: 44px;
-  font-weight: 700;
+  min-height: var(--mereka-mfe-authn-cta-min-height, 44px);
+  font-weight: var(--mereka-mfe-emphasis-font-weight, 700);
   letter-spacing: 0.01em;
 }
 
@@ -363,7 +363,7 @@ label {
 [class*="account-settings"] .pgn__btn,
 [class*="account-page"] .pgn__btn,
 [class*="learner-dashboard"] .pgn__btn {
-  border-radius: 999px;
+  border-radius: var(--mereka-mfe-pill-radius, 999px);
 }
 
 /* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
@@ -373,7 +373,7 @@ label {
 [class*="account-settings"] .pgn__alert,
 [class*="account-page"] .pgn__alert,
 [class*="learner-dashboard"] .pgn__alert {
-  border-radius: 16px;
+  border-radius: var(--mereka-mfe-alert-radius, 16px);
 }
 
 /* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
@@ -518,11 +518,11 @@ label {
 /* RISK: MEDIUM — status badge styling; cosmetic pill, degrades visually if class renames */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] [class*="status"] | cosmetic badge; no testid for status pill | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] [class*="status"] {
-  border-radius: 999px;
+  border-radius: var(--mereka-mfe-pill-radius, 999px);
   background: rgb(var(--mereka-color-teal-rgb) / 0.1);
   color: var(--mereka-color-teal);
   padding: 0.1rem 0.55rem;
-  font-weight: 600;
+  font-weight: var(--mereka-mfe-badge-font-weight, 600);
 }
 
 /* account/learner-dashboard scope for headings */
@@ -591,6 +591,6 @@ label {
 /* RISK: LOW — responsive navbar padding; degrades to desktop padding only */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0.75rem 1rem;
+    padding: var(--mereka-mfe-navbar-mobile-padding, 0.75rem 1rem);
   }
 }
