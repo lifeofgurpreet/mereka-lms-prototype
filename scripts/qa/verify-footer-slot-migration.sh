@@ -83,7 +83,7 @@ else
     do_fail "Header logo slot registration missing"
 fi
 
-if grep -q 'learner_dashboard\.sidebar\.v1' "${PLUGIN_FILE}"; then
+if grep -Eq 'org\.openedx\.frontend\.learner_dashboard\.(widget_sidebar|sidebar)\.v1' "${PLUGIN_FILE}"; then
     do_pass "Learner dashboard slot registration present"
 else
     do_fail "Learner dashboard slot registration missing"
