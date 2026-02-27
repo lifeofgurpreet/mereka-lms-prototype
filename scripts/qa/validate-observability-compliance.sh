@@ -193,20 +193,35 @@ fetch_metrics_with_status() {
   local result=""
   local status="000"
   local split_token="__METRICS_SPLIT__"
+  local probe_cmd
+  local -a timeout_cmd=()
+  local -a kubectl_cmd=()
+
+  probe_cmd="if command -v curl >/dev/null 2>&1; then \
+curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'; \
+elif command -v wget >/dev/null 2>&1; then \
+tmp_body=\$(mktemp); \
+tmp_hdr=\$(mktemp); \
+wget -q -O \"\$tmp_body\" --timeout ${RUNTIME_CMD_TIMEOUT} '${target}' 2>\"\$tmp_hdr\"; \
+code=\$(awk 'BEGIN{code=\"000\"} /^  HTTP\\//{code=\$2} END{print code}' \"\$tmp_hdr\" 2>/dev/null | tr -d '[:space:]'); \
+body=\$(cat \"\$tmp_body\"); \
+rm -f \"\$tmp_body\" \"\$tmp_hdr\"; \
+printf '%s\n${split_token}:%s\n' \"\$body\" \"\${code:-000}\"; \
+else \
+printf '${split_token}:000\n'; \
+fi"
 
   if command -v timeout >/dev/null 2>&1; then
-    if [[ -n "$K8S_CONTEXT" ]]; then
-      result="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl --context "$K8S_CONTEXT" --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-    else
-      result="$(timeout "$RUNTIME_CMD_TIMEOUT" kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-    fi
-  else
-    if [[ -n "$K8S_CONTEXT" ]]; then
-      result="$(kubectl --context "$K8S_CONTEXT" --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-    else
-      result="$(kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "curl -s -m ${RUNTIME_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-    fi
+    timeout_cmd=(timeout "$RUNTIME_CMD_TIMEOUT")
   fi
+
+  if [[ -n "$K8S_CONTEXT" ]]; then
+    kubectl_cmd=(kubectl --context "$K8S_CONTEXT" --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "$probe_cmd")
+  else
+    kubectl_cmd=(kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "$probe_cmd")
+  fi
+
+  result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>/dev/null || true)"
 
   if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
     printf '000%s' "$split_token"
