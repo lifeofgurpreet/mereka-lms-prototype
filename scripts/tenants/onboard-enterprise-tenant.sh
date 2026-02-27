@@ -36,6 +36,7 @@ OIDC_USERINFO_URL=""
 RUN_MIGRATION_VERIFICATION=1
 RUN_RUNTIME_GATES=1
 RUN_INTEGRITY_GUARD=1
+RUN_SCHEMA_GUARD=1
 DRY_RUN=1
 
 usage() {
@@ -69,6 +70,7 @@ Flow controls:
   --skip-migration-verification
   --skip-runtime-gates
   --skip-integrity-guard
+  --skip-schema-guard
   --apply                             Apply changes (default dry-run)
   --dry-run                           Preview only (default)
 USAGE
@@ -98,6 +100,7 @@ while [[ $# -gt 0 ]]; do
     --skip-migration-verification) RUN_MIGRATION_VERIFICATION=0; shift ;;
     --skip-runtime-gates) RUN_RUNTIME_GATES=0; shift ;;
     --skip-integrity-guard) RUN_INTEGRITY_GUARD=0; shift ;;
+    --skip-schema-guard) RUN_SCHEMA_GUARD=0; shift ;;
     --apply) DRY_RUN=0; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -203,9 +206,15 @@ fi
 if [[ "$RUN_RUNTIME_GATES" -eq 1 ]]; then
   echo "[6/6] Run runtime readiness gates"
   if [[ "$DRY_RUN" -eq 1 ]]; then
+    if [[ "$RUN_SCHEMA_GUARD" -eq 1 ]]; then
+      echo "DRY-RUN: would run scripts/tenants/repair-enterprise-schema.sh --env $ENVIRONMENT"
+    fi
     echo "DRY-RUN: would run scripts/qa/verify-enterprise-sso-readiness.sh --env $ENVIRONMENT --tenant $SLUG"
     echo "DRY-RUN: would run scripts/qa/verify-multisite-config.sh $ENVIRONMENT"
   else
+    if [[ "$RUN_SCHEMA_GUARD" -eq 1 ]]; then
+      "$REPO_ROOT/scripts/tenants/repair-enterprise-schema.sh" --env "$ENVIRONMENT"
+    fi
     "$REPO_ROOT/scripts/qa/verify-enterprise-sso-readiness.sh" --env "$ENVIRONMENT" --tenant "$SLUG"
     if [[ "$ENVIRONMENT" == "prod" ]]; then
       STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 \

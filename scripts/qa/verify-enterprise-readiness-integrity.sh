@@ -135,10 +135,14 @@ assert_contains "$ONBOARD_SCRIPT" 'run-verification-pipeline\.sh' \
   "onboarding workflow invokes migration verification pipeline"
 assert_contains "$ONBOARD_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
   "onboarding workflow invokes enterprise SSO readiness gate"
+assert_contains "$ONBOARD_SCRIPT" 'repair-enterprise-schema\.sh' \
+  "onboarding workflow invokes enterprise schema integrity check before runtime readiness"
 assert_contains "$ONBOARD_SCRIPT" 'STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1' \
   "onboarding workflow enforces strict enterprise site mapping in prod runtime gate"
 assert_contains "$ONBOARD_SCRIPT" '--skip-integrity-guard' \
   "onboarding workflow supports explicit skip flag for integrity preflight"
+assert_contains "$ONBOARD_SCRIPT" '--skip-schema-guard' \
+  "onboarding workflow supports explicit skip flag for schema guard"
 
 # 8) Production release orchestration guard contract
 assert_contains "$RELEASE_SCRIPT" 'RUN_ENTERPRISE_SSO_RUNTIME_GUARD=' \
@@ -147,6 +151,10 @@ assert_contains "$RELEASE_SCRIPT" '--skip-enterprise-sso-runtime-guard' \
   "release workflow supports explicit skip flag for enterprise SSO runtime guard"
 assert_contains "$RELEASE_SCRIPT" '--enterprise-readiness-tenant' \
   "release workflow supports tenant override for enterprise readiness"
+assert_contains "$RELEASE_SCRIPT" '--skip-enterprise-schema-guard' \
+  "release workflow supports explicit skip flag for enterprise schema guard"
+assert_contains "$RELEASE_SCRIPT" 'repair-enterprise-schema\.sh' \
+  "release workflow invokes enterprise schema integrity check in production preflight"
 assert_contains "$RELEASE_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
   "release workflow invokes enterprise SSO readiness check in production preflight"
 
