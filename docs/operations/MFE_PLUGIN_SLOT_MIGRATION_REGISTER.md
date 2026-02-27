@@ -277,29 +277,29 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | # | Override | Slot Available | Status | Priority | Effort | Risk | Owner | Target Date |
 |---|---------|---------------|--------|----------|--------|------|-------|-------------|
 | 1 | Footer | ✅ footer.v1 | ✅ MIGRATED | Done | Done | Low | Mereka | Done |
-| 2 | Header Logo | ✅ header_logo.v1 | 🟡 CSS | P1 | M | Med | Mereka frontend | 2026-Q3 |
-| 3 | Authn Branding | ✅ login_component.v1 | 🟡 CSS (auth-page removed) | P1 | M | Low-Med | Mereka frontend | 2026-Q3 |
+| 2 | Header Logo | ✅ header_logo.v1 | ✅ MIGRATED | P1 | M | Med | Mereka frontend | Done |
+| 3 | Authn Branding | ✅ login_component.v1 | ✅ MIGRATED | P1 | M | Low-Med | Mereka frontend | Done |
 | 4 | Dashboard Layout | ✅ sidebar + no_courses | 🟡 CSS | P1 | L | High | Mereka frontend | 2026-Q3 |
 | 5 | Learning Layout | ⚠️ Partial (cert only) | 🔴 CSS | P2 | L | Critical | Mereka / Upstream | TBD (upstream) |
 | 6 | Discussions | ❌ None | 🔴 CSS (singular removed) | P3 | N/A | Low | Mereka frontend | 2026-Q3 review |
 | 7 | Account/Settings | ❌ None | 🟡 CSS | P3 | N/A | Med | Mereka frontend | 2026-Q3 review |
 | 8 | Paragon Globals | N/A (use tokens) | ✅ STABLE | P3 | N/A | Low | Mereka frontend | N/A |
 | 9 | Navbar | ⚠️ Partial (logo) | 🟡 CSS | P2 | S | Low | Mereka frontend | 2026-Q3 |
-| 10 | Studio Footer | ✅ studio_footer.v1 | ⬜ NOT STARTED | P2 | M | N/A | Mereka frontend | 2026-Q4 |
+| 10 | Studio Footer | ✅ studio_footer.v1 | ✅ MIGRATED | P2 | M | N/A | Mereka frontend | Done |
 
 ## Migration Roadmap
 
 ### Now (Sprint S6)
 - [x] Footer → `footer.v1` (DONE)
 - [x] All selectors hardened with data-testid fallbacks (DONE, 8jao.3)
+- [x] Header Logo → `header_logo.v1` (DONE)
+- [x] Authn Branding → `login_component.v1` (DONE)
+- [x] Studio Footer → `studio_footer.v1` (DONE)
 
 ### Next Sprint
-- [ ] Header Logo → `header_logo.v1` (P1, M)
-- [ ] Authn Branding → `login_component.v1` (P1, M)
 - [ ] Dashboard sidebar → `widget_sidebar.v1` (P1, L)
 
 ### Backlog
-- [ ] Studio Footer → `studio_footer.v1` (P2, M)
 - [ ] Navbar tokens migration (P2, S)
 - [ ] Learning layout — request upstream slot (P2, L)
 

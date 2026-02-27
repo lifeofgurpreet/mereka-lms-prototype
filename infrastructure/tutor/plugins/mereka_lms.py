@@ -795,12 +795,16 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.layout.      | Default Indigo/OpenedX footer
 #     footer.v1                       |
 #   org.openedx.frontend.layout.header_logo.v1 | Default header logo (MFE header bar)
+#   org.openedx.frontend.layout.studio_footer.v1 | Default Studio footer (studio MFE)
+#   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #
 from tutormfe.hooks import PLUGIN_SLOTS
 
 # Slot 1: header logo — replaces the Indigo default header logo.
 # Slot 2: footer — hides the Indigo default footer, inserts MerekaFooter.
+# Slot 3: studio footer — inserts studio-themed footer variant.
+# Slot 4: authn login component — prepends a brand splash above the login form.
 # MerekaFooter is defined in the mfe-env-config-runtime-definitions patch below.
 # The slot name matches the canonical Open edX FPF slot ID used by tutorindigo.
 for _mfe in [
@@ -837,6 +841,36 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaFooter,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.studio_footer.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_studio_footer',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaStudioFooter,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authn.login_component.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authn_login_component',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthnLoginBranding,
                 },
             },
             """,
@@ -1001,6 +1035,64 @@ const MerekaHeaderLogo = () => {
     <a href={getLogoHref(baseUrl)} aria-label={`${variant.brand} dashboard`} className="mereka-header-logo">
       <img src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl} alt={`${variant.brand} logo`} />
     </a>
+  );
+};
+
+const MerekaAuthnLoginBranding = () => {
+  const config = getConfig();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+
+  return (
+    <div
+      className="mereka-authn-login-branding"
+      style={{
+        marginBottom: '1rem',
+        textAlign: 'center',
+      }}
+    >
+      <a href="/" className="mereka-authn-login-branding__logo" style={{ display: 'inline-flex' }}>
+        <img
+          src={variant.logoUrl}
+          alt={`${variant.brand} logo`}
+          style={{
+            maxWidth: '320px',
+            width: '75%',
+            maxHeight: '72px',
+            objectFit: 'contain',
+          }}
+        />
+      </a>
+      <h2 style={{ marginTop: '1rem', marginBottom: '0.35rem' }}>
+        Welcome back
+      </h2>
+      <p style={{ margin: 0, color: 'var(--mereka-color-ink-700)' }}>
+        Sign in to continue with your {variant.brand} workspace.
+      </p>
+    </div>
+  );
+};
+
+const MerekaStudioFooter = () => {
+  const config = getConfig();
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const siteName = config.SITE_NAME || 'Mereka Studio';
+
+  return (
+    <footer className="mereka-studio-footer" role="contentinfo">
+      <div style={{ padding: '1.25rem 1rem', textAlign: 'center' }}>
+        <a href={baseUrl || '/'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+          <img
+            src="/static/images/logo-horizontal.svg"
+            alt={`${siteName} logo`}
+            style={{ maxWidth: '220px', width: '100%' }}
+          />
+        </a>
+        <p style={{ margin: 0, color: 'var(--mereka-color-ink-700)' }}>
+          Built for creators. Built for teams. Built for growth.
+        </p>
+      </div>
+    </footer>
   );
 };
 
