@@ -5,7 +5,7 @@ This runbook covers operational procedures for multi-tenant provisioning and man
 
 > **Status**: Multi-tenancy architecture foundation is **in progress** (Tier 4.1). TenantConfig model, middleware, and provisioning command are implemented.
 > **Spec**: `specs/multi-tenancy-architecture_spec.md`
-> **Testmap**: `specs/testmaps/multi-tenancy-architecture_testmap.yaml`
+> **Testmap**: `specs/testmaps/multi-tenancy-architecture_spec.testmap.yml`
 
 ## Prerequisites
 

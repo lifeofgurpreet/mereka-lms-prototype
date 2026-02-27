@@ -1,5 +1,7 @@
 # Multi-Brand Multi-Site Architecture
 
+_Last updated: 2026-02-27_
+
 **Status**: Partially implemented. Core infrastructure exists; per-tenant token overrides and
 MFE SITE_VARIANTS runtime migration are gaps.
 

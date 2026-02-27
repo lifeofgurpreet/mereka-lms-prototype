@@ -5,7 +5,7 @@ This runbook covers operational procedures for the enterprise microservices suit
 
 > **Status**: Enterprise microservices are **deployed in production** (Tier 1).
 > **Spec**: `specs/enterprise-microservices_spec.md`
-> **Testmap**: `specs/testmaps/enterprise-microservices_testmap.yaml`
+> **Testmap**: `specs/testmaps/enterprise-microservices_spec.testmap.yml`
 
 ## Prerequisites
 

@@ -4,7 +4,7 @@ _Audience: Platform Eng + SRE • Owner: Engineering Lead • Last updated: 2026
 This runbook covers operational procedures for MongoDB Atlas integration with Mereka Academy.
 
 > **Spec**: `specs/mongodb-atlas-integration_spec.md`
-> **Testmap**: `specs/testmaps/mongodb-atlas-integration_testmap.yaml`
+> **Testmap**: `specs/testmaps/mongodb-atlas-integration_spec.testmap.yml`
 > **ADR**: `docs/adr/001-mongodb-atlas.md`
 
 ## Architecture

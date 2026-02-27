@@ -4,7 +4,7 @@ _Audience: Platform Eng • Owner: Engineering Lead • Last updated: 2026-02-10
 This runbook covers operational procedures for the email notifications pipeline.
 
 > **Spec**: `specs/email-notifications-pipeline_spec.md`
-> **Testmap**: `specs/testmaps/email-notifications-pipeline_testmap.yaml`
+> **Testmap**: `specs/testmaps/email-notifications-pipeline_spec.testmap.yml`
 
 ## Prerequisites
 

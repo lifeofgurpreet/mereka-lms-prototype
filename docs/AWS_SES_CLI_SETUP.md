@@ -1,5 +1,7 @@
 # AWS SES CLI Setup - Complete
 
+_Last updated: 2026-02-27_
+
 **Date**: 2026-02-03
 **Status**: ✅ Operational
 

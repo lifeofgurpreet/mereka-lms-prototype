@@ -17,7 +17,7 @@ Define required observability parity across environments so runtime checks are d
 
 `evidence_identity` must follow:
 
-`env=<label>;profile=<dispatch_profile>;context=<k8s_context>;project=<gcp_project>`
+`env=${label};profile=${dispatch_profile};context=${k8s_context};project=${gcp_project}`
 
 ## Environment Matrix
 
@@ -31,9 +31,9 @@ Define required observability parity across environments so runtime checks are d
 
 | Lane | `OBSERVABILITY_ENV_LABEL` | `OBSERVABILITY_DISPATCH_PROFILE` | K8s context variable | GCP project variable | Identity expectation | Project override contract |
 |---|---|---|---|---|---|---|
-| `dev` | `dev` | `nonprod` | `OBS_PARITY_DEV_K8S_CONTEXT` | `OBS_PARITY_DEV_GCP_PROJECT` (optional) | `env=dev;profile=nonprod;context=<value of OBS_PARITY_DEV_K8S_CONTEXT>` | required only when dev traffic lives in a non-default project |
-| `nonprod` | `nonprod` | `nonprod` | `OBS_PARITY_NONPROD_K8S_CONTEXT` | `OBS_PARITY_NONPROD_GCP_PROJECT` (optional) | `env=nonprod;profile=nonprod;context=<value of OBS_PARITY_NONPROD_K8S_CONTEXT>` | required only for non-prod project routing |
-| `prod` | `prod` | `prod` | `OBS_PARITY_PROD_K8S_CONTEXT` | `OBS_PARITY_PROD_GCP_PROJECT` (optional) | `env=prod;profile=prod;context=<value of OBS_PARITY_PROD_K8S_CONTEXT>` | default remains `mereka-lms` if unset |
+| `dev` | `dev` | `nonprod` | `OBS_PARITY_DEV_K8S_CONTEXT` | `OBS_PARITY_DEV_GCP_PROJECT` (optional) | `env=dev;profile=nonprod;context=${OBS_PARITY_DEV_K8S_CONTEXT};project=${OBS_PARITY_DEV_GCP_PROJECT:-mereka-lms}` | required only when dev traffic lives in a non-default project |
+| `nonprod` | `nonprod` | `nonprod` | `OBS_PARITY_NONPROD_K8S_CONTEXT` | `OBS_PARITY_NONPROD_GCP_PROJECT` (optional) | `env=nonprod;profile=nonprod;context=${OBS_PARITY_NONPROD_K8S_CONTEXT};project=${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}` | required only for non-prod project routing |
+| `prod` | `prod` | `prod` | `OBS_PARITY_PROD_K8S_CONTEXT` | `OBS_PARITY_PROD_GCP_PROJECT` (optional) | `env=prod;profile=prod;context=${OBS_PARITY_PROD_K8S_CONTEXT};project=${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}` | default remains `mereka-lms` if unset |
 
 Update lane evidence when `dev/nonprod/prod` matrix entries change in GitHub Actions variables. Proof should include:
 
@@ -83,10 +83,29 @@ Any temporary difference must include:
 Run for each environment:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<lane> \
-OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
-OBSERVABILITY_GCP_PROJECT=$OBS_PARITY_<LANE>_GCP_PROJECT \
+OBSERVABILITY_ENV_LABEL="nonprod"
+
+case "$OBSERVABILITY_ENV_LABEL" in
+  prod)
+    OBSERVABILITY_DISPATCH_PROFILE="prod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT"
+    OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}"
+    ;;
+  dev|nonprod)
+    OBSERVABILITY_DISPATCH_PROFILE="nonprod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT"
+    OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+    ;;
+  *)
+    echo "Unsupported OBSERVABILITY_ENV_LABEL=$OBSERVABILITY_ENV_LABEL"
+    exit 1
+    ;;
+esac
+
+OBSERVABILITY_ENV_LABEL="$OBSERVABILITY_ENV_LABEL" \
+OBSERVABILITY_DISPATCH_PROFILE="$OBSERVABILITY_DISPATCH_PROFILE" \
+OBSERVABILITY_K8S_CONTEXT="$OBSERVABILITY_K8S_CONTEXT" \
+OBSERVABILITY_GCP_PROJECT="$OBSERVABILITY_GCP_PROJECT" \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 

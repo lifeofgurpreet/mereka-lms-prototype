@@ -3,6 +3,7 @@
 **Status**: COMPLETE (as of 2026-02-20, bead mereka-lms-2s47)
 **Target release**: `release/ulmo.1` / `open-release/ulmo.1`
 **Tutor version**: 21.0.0 (Ulmo)
+**Default Node.js**: 24.11.0 (confirmed for Ulmo; we currently patch to 18.20.5 — upgrade tracked in [FRONTEND_TRACKER.md](../FRONTEND_TRACKER.md) FE-016)
 **Verification script**: `scripts/qa/verify-mfe-ulmo-migration.sh`
 
 ---

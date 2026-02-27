@@ -269,16 +269,36 @@ Suggested policy gate:
 Use namespace-aware runtime checks with first-class evidence output:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<nonprod|prod> \
-OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
-OBSERVABILITY_APP_NAMESPACE=mereka-lms \
-OBSERVABILITY_MONITORING_NAMESPACE=monitoring \
-OBSERVABILITY_EVIDENCE_DIR="docs/evidence/observability/<lane>-$(date -u +%Y-%m-%dT%H-%M-%SZ)" \
+lane="nonprod" # dev | nonprod | prod
+
+OBSERVABILITY_ENV_LABEL="${lane}"
+case "${lane}" in
+  dev|nonprod)
+    OBSERVABILITY_DISPATCH_PROFILE="nonprod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT"
+    ;;
+  prod)
+    OBSERVABILITY_DISPATCH_PROFILE="prod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT"
+    ;;
+  *)
+    echo "Unknown lane: ${lane}" >&2
+    exit 1
+    ;;
+esac
+
+OBSERVABILITY_APP_NAMESPACE=mereka-lms
+OBSERVABILITY_MONITORING_NAMESPACE=monitoring
+OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+if [ "${lane}" = prod ] && [ -n "${OBS_PARITY_PROD_GCP_PROJECT:-}" ]; then
+  OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"
+fi
+
+OBSERVABILITY_EVIDENCE_DIR="docs/evidence/observability/${lane}-$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
-Use `nonprod` profile for `lane=dev`/`nonprod` and `prod` profile for `lane=prod`.
+Use `lane="dev"` or `lane="nonprod"` for `nonprod` profile and `lane="prod"` for `prod` profile.
 
 Manual CI runtime path is now available in `.github/workflows/observability-compliance.yml`:
 - `workflow_dispatch` with `run_runtime=true`
@@ -299,7 +319,7 @@ Manual CI runtime path is now available in `.github/workflows/observability-comp
 - Runtime dispatch supports `expected_dispatch_profile` (`any|prod|nonprod|custom`) and preflight fails when derived profile does not match expectation.
 - Runtime dispatch includes `environment_label` (`dev|nonprod|prod|custom`) and this label is written into preflight/compliance/runtime evidence files for cross-run comparison.
 - All generated evidence markdown now includes a normalized `evidence_identity` line:
-  `env=<label>;profile=<dispatch_profile>;context=<k8s_context>;project=<gcp_project>`.
+  `env=${lane};profile=${OBSERVABILITY_DISPATCH_PROFILE};context=${OBSERVABILITY_K8S_CONTEXT};project=${OBSERVABILITY_GCP_PROJECT}`.
 - CI now generates machine-readable evidence index artifacts for ingestion:
   - `var/ci/observability-first-class-local-evidence-index.json`
   - `var/ci/observability-first-class-runtime-evidence-index.json`

@@ -1,6 +1,7 @@
 # MFE OAuth Fix Deployment Guide
 
-<!-- Last verified: 2026-02-13 -->
+<!-- Last verified: 2026-02-27 -->
+<!-- Related: docs/architecture/MFE_RUNTIME_CONFIG.md, specs/auth-sso-enterprise_spec.md -->
 
 ## Problem Summary
 

@@ -1,5 +1,6 @@
 # Task 3: SES SMTP Deliverability - Troubleshooting Guide
-_Audience: Infrastructure Team • Owner: Infra • Last updated: 2025-11-12_
+
+_Last updated: 2026-02-27_
 
 ## Problem Statement
 

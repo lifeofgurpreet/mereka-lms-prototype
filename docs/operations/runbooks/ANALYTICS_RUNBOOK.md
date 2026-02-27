@@ -15,7 +15,7 @@ This runbook covers operational procedures for the analytics pipeline.
 > **To deploy Aspects**: Follow `docs/analytics/ASPECTS_INSTALLATION.md`
 >
 > **Spec**: `specs/analytics-pipeline_spec.md`
-> **Testmap**: `specs/testmaps/analytics-pipeline_testmap.yaml`
+> **Testmap**: `specs/testmaps/analytics-pipeline_spec.testmap.yml`
 >
 > <!-- Last deployment status check: 2026-02-13 (docs audit) -->
 

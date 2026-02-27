@@ -147,9 +147,10 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
 Use this exact check after each closure wave:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<lane> \
-OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
+OBSERVABILITY_ENV_LABEL=nonprod \
+OBSERVABILITY_DISPATCH_PROFILE=nonprod \
+OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
+OBSERVABILITY_GCP_PROJECT=${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms} \
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
@@ -226,7 +227,7 @@ Required artifacts to close each wave:
 ### Runtime-object evidence checks (per lane)
 
 - Execute:
-  - `OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+  - `lane="nonprod"; OBSERVABILITY_ENV_LABEL="${lane}"; case "${lane}" in dev|nonprod) OBSERVABILITY_DISPATCH_PROFILE="nonprod"; OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT";; prod) OBSERVABILITY_DISPATCH_PROFILE="prod"; OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT";; esac; if [ "${lane}" = prod ] && [ -n "${OBS_PARITY_PROD_GCP_PROJECT:-}" ]; then OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"; else OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"; fi; ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
 - Then attach these artifacts for closure review:
   - `observability-runtime-verify-runtime.md` (must include `Runtime wiring check` lines for each object)
   - `observability-first-class-runtime-evidence-index.json` (identity check must match)

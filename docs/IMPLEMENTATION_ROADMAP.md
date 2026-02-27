@@ -1,5 +1,7 @@
 # Mereka LMS Implementation Roadmap
 
+_Last updated: 2026-02-27_
+
 **Status**: ~70% mapped as of 2026-02-12 (Sprint 1+2 complete)
 **Goal**: 100% coverage across all 31 specifications
 

@@ -5,7 +5,7 @@ This runbook covers operational procedures for the Purchase Gateway (Stripe inte
 
 > **Status**: Purchase Gateway is **not yet implemented** (Tier 2). This runbook documents target-state procedures.
 > **Spec**: `specs/ecommerce-purchase-gateway_spec.md`
-> **Testmap**: `specs/testmaps/ecommerce-purchase-gateway_testmap.yaml`
+> **Testmap**: `specs/testmaps/ecommerce-purchase-gateway_spec.testmap.yml`
 
 ## Prerequisites
 

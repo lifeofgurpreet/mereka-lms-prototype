@@ -72,7 +72,7 @@ The authn MFE respects `MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"]`. This is current
 | Script | Status | Purpose |
 |---|---|---|
 | `scripts/tenants/generate-saml-keypair.sh` | Ready | Generate SAML SP keypair |
-| `scripts/tenants/configure-tenant-idp.sh` | Stub (TODO) | Wrap Django management commands to configure IdP |
+| `scripts/tenants/configure-tenant-idp.sh` | Implemented | Configures SAML/OIDC provider and links EnterpriseCustomer.identity_provider |
 | `scripts/tenants/provision-tenant.sh` | Ready | Provision enterprise tenant |
 
 ---
@@ -135,11 +135,10 @@ ec.identity_provider = "tpa-saml-acme-corp"  # third_party_auth slug
 ec.save()
 ```
 
-### 4. Implement `configure-tenant-idp.sh`
+### 4. Use `configure-tenant-idp.sh`
 
-The script at `scripts/tenants/configure-tenant-idp.sh` is currently a TODO stub. It needs to wrap:
-- `python manage.py lms create_or_update_saml_provider` (or equivalent management command)
-- Django admin API calls for `EnterpriseCustomer.identity_provider` linkage
+Use `scripts/tenants/configure-tenant-idp.sh` to create/update tenant SAML/OIDC provider config and link
+`EnterpriseCustomer.identity_provider` in one step.
 
 ### 5. SP Metadata Endpoint
 
@@ -311,7 +310,7 @@ A `SecretSyncedError` condition indicates the GCP secret does not exist.
 | `infrastructure/tutor/plugins/mereka_lms.py` | Plugin: `ENABLE_ENTERPRISE_INTEGRATION`, `DISABLE_ENTERPRISE_LOGIN` |
 | `deploy/k8s/base/secrets/external-secrets.yaml` | `enterprise-sso-secrets` ExternalSecret definition |
 | `scripts/tenants/generate-saml-keypair.sh` | SAML SP keypair generator |
-| `scripts/tenants/configure-tenant-idp.sh` | IdP configuration helper (TODO stub) |
+| `scripts/tenants/configure-tenant-idp.sh` | IdP configuration helper (implemented) |
 | `scripts/tenants/provision-tenant.sh` | Create EnterpriseCustomer + TenantConfig |
 | `scripts/qa/verify-enterprise-sso-readiness.sh` | Phase 0 SSO readiness verification (auth-sso-enterprise_spec.md AC-043) |
 | `scripts/qa/verify-enterprise-sso.sh` | Enterprise integrated channels verification (enterprise-microservices_spec.md Phase 4) |

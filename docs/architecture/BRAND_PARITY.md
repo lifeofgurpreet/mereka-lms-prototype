@@ -1,5 +1,7 @@
 # Brand Parity Architecture (WhiteCliff Lane)
 
+_Last updated: 2026-02-27_
+
 > **Spec**: `specs/branding-system_spec.md`
 > **Verification**: `scripts/qa/verify-brand-parity.sh`
 > **Related**: `docs/architecture/FOOTER_PARITY.md`, `docs/BRANDING.md`

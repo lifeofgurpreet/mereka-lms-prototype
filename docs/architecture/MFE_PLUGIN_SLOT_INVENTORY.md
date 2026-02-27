@@ -1,8 +1,8 @@
 # MFE Plugin-Slot Inventory & Migration Map
 
 **Purpose**: Comprehensive inventory of all FPF (Frontend Plugin Framework) plugin slots available in Open edX Tutor 21 (Ulmo), with Mereka Academy's current wiring status and migration roadmap.
-**Last verified**: 2026-02-17
-**Related**: [ADR-014: MFE Branding Strategy](../adr/014-mfe-branding-strategy.md), [OEP-65: FPF](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
+**Last verified**: 2026-02-27
+**Related**: [ADR-014: MFE Branding Strategy](../adr/014-mfe-branding-strategy.md), [OEP-65: FPF](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html), [mfe-plugin-slots_spec.md](../../specs/mfe-plugin-slots_spec.md)
 
 ---
 

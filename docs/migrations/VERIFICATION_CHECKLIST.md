@@ -4,7 +4,7 @@ _Audience: Platform Eng + Data Team • Owner: Engineering Lead • Last updated
 This checklist covers manual verification procedures for Kajabi and MCT data migrations.
 
 > **Spec**: `specs/data-migrations-kajabi-mct_spec.md`
-> **Testmap**: `specs/testmaps/data-migrations-kajabi-mct_testmap.yaml`
+> **Testmap**: `specs/testmaps/data-migrations-kajabi-mct_spec.testmap.yml`
 
 ## Prerequisites
 

@@ -5,7 +5,7 @@ This runbook covers operational procedures for proctoring integration in Mereka 
 
 > **Status**: Proctoring is **not yet implemented** (Tier 5). This runbook documents target-state procedures.
 > **Spec**: `specs/proctoring-integration_spec.md`
-> **Testmap**: `specs/testmaps/proctoring-integration_testmap.yaml`
+> **Testmap**: `specs/testmaps/proctoring-integration_spec.testmap.yml`
 
 ## Prerequisites
 

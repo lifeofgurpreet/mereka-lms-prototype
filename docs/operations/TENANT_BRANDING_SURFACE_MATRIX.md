@@ -1,5 +1,7 @@
 # Tenant Branding Surface Matrix
 
+_Last updated: 2026-02-27_
+
 > Source of truth for per-domain branding verification. Consumed by `scripts/qa/verify-tenant-branding-runtime.sh`.
 
 ## Domain Registry

@@ -1,5 +1,7 @@
 # Devcontainer Guide
 
+_Last updated: 2026-02-27_
+
 _One-click dev environment for Mereka LMS_
 
 ## Prerequisites

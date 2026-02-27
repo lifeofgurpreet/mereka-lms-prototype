@@ -1,5 +1,7 @@
 # Aspects Analytics - Deployment Status
 
+_Last updated: 2026-02-27_
+
 ## Current Status
 
 ✅ **Aspects services are deployed and mostly running!**

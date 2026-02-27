@@ -4,7 +4,7 @@ _Audience: Platform Eng + DevOps • Owner: Engineering Lead • Last updated: 2
 This runbook covers manual verification procedures for CI/CD pipeline components that cannot be fully automated in CI due to requiring active GitHub Actions runners, repository secrets, or live infrastructure.
 
 > **Spec**: `specs/ci-cd-pipeline_spec.md`
-> **Testmap**: `specs/testmaps/ci-cd-pipeline_testmap.yaml`
+> **Testmap**: `specs/testmaps/ci-cd-pipeline_spec.testmap.yml`
 
 ## Prerequisites
 

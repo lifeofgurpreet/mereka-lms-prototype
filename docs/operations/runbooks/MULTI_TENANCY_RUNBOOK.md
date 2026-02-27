@@ -5,7 +5,7 @@ This runbook covers operational procedures for multi-tenancy architecture verifi
 
 > **Status**: Multi-tenancy is **partially implemented** (Tier 4.1). Core tenant isolation via Open edX Organizations is operational. Full enterprise tenant management is in progress.
 > **Spec**: `specs/multi-tenancy-architecture_spec.md`
-> **Testmap**: `specs/testmaps/multi-tenancy-architecture_testmap.yaml`
+> **Testmap**: `specs/testmaps/multi-tenancy-architecture_spec.testmap.yml`
 
 ## Prerequisites
 

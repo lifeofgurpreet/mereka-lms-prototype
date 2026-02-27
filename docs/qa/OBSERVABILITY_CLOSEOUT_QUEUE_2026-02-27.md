@@ -6,13 +6,13 @@ Close remaining first-class observability blockers in a strict lane-safe sequenc
 ## Execution doctrine (non-negotiable)
 - One ticket per lane wave.
 - No merge/push from this lane until evidence from strict runtime first-class command is attached.
-- Keep evidence identity consistent: `env=<lane>;profile=<profile>;context=<context>;project=<project>`.
+- Keep evidence identity consistent: `env=${lane};profile=${OBSERVABILITY_DISPATCH_PROFILE};context=${OBSERVABILITY_K8S_CONTEXT};project=${OBSERVABILITY_GCP_PROJECT}`.
 - Do not patch dev-only services outside explicit `dev` lane tasks.
 
 Hard stop before each wave:
 
 1. Confirm lane identity variables resolve:
-   - `OBS_PARITY_<LANE>_K8S_CONTEXT`
+   - `OBS_PARITY_NONPROD_K8S_CONTEXT` for `lane=dev`/`nonprod`, `OBS_PARITY_PROD_K8S_CONTEXT` for `lane=prod`
    - target namespace and profile in `OBSERVABILITY_DISPATCH_PROFILE`
 2. Confirm runtime output file ownership and identity fields are preserved:
    - `observability-first-class-runtime-evidence-index.json`
@@ -39,12 +39,32 @@ Hard stop before each wave:
 Run exactly this after each ticket closure attempt:
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<lane> \
-OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
+lane="nonprod" # dev | nonprod | prod
+
+OBSERVABILITY_ENV_LABEL="${lane}"
+case "${lane}" in
+  dev|nonprod)
+    OBSERVABILITY_DISPATCH_PROFILE="nonprod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT"
+    ;;
+  prod)
+    OBSERVABILITY_DISPATCH_PROFILE="prod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT"
+    ;;
+  *)
+    echo "Unknown lane: ${lane}" >&2
+    exit 1
+    ;;
+esac
+
+OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+if [ "${lane}" = prod ] && [ -n "${OBS_PARITY_PROD_GCP_PROJECT:-}" ]; then
+  OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"
+fi
+
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
-Use `OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod>` and set `nonprod` for `dev`/`nonprod`, `prod` for `prod`.
+Use `lane="dev"` or `lane="nonprod"` for nonprod profile and `lane="prod"` for production profile.
 
 Then verify these artifacts exist and pass:
 - `var/ci/observability-compliance-runtime.json`

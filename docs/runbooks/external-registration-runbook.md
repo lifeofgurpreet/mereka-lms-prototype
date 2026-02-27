@@ -5,7 +5,7 @@ This runbook covers operational procedures for the HubSpot-to-Open edX registrat
 
 > **Status**: External registration is **not yet implemented** (Tier 3). This runbook documents target-state procedures.
 > **Spec**: `specs/external-registration-hubspot_spec.md`
-> **Testmap**: `specs/testmaps/external-registration-hubspot_testmap.yaml`
+> **Testmap**: `specs/testmaps/external-registration-hubspot_spec.testmap.yml`
 
 ## Prerequisites
 

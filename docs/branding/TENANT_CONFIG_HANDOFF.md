@@ -1,5 +1,6 @@
 # Tenant Config Handoff Guide
 
+_Last updated: 2026-02-27_
 _Audience: Platform Engineering, Tenant Onboarding_
 _Bead: 31yg_
 _ACs: AC-UI-601, AC-UI-602, AC-UI-603, AC-UI-604, AC-UI-605_

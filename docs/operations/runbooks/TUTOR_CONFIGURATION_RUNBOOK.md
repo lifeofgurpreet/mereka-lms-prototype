@@ -4,7 +4,7 @@ _Audience: Platform Eng • Owner: Engineering Lead • Last updated: 2026-02-10
 This runbook covers manual verification procedures for Tutor configuration that require a running Docker Compose or Kubernetes environment.
 
 > **Spec**: `specs/tutor-configuration_spec.md` and `specs/tutor-configuration-resilience_spec.md`
-> **Testmaps**: `specs/testmaps/tutor-configuration_testmap.yaml`, `specs/testmaps/tutor-configuration-resilience_testmap.yaml`
+> **Testmaps**: `specs/testmaps/tutor-configuration_spec.testmap.yml`, `specs/testmaps/tutor-configuration-resilience_spec.testmap.yml`
 
 ## Prerequisites
 

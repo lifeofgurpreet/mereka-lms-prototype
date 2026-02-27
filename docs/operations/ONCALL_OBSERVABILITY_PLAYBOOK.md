@@ -16,9 +16,26 @@ If this fails, user-facing impact is likely.
 If AC-OVR-016 is active, use `docs/qa/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md` and execute `OBS-EXT-061` then `OBS-EXT-063` as the hard stop before other coverage runs.
 
 ```bash
-OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
-  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_NONPROD_K8S_CONTEXT \
-  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+export OBSERVABILITY_ENV_LABEL="nonprod"
+
+case "$OBSERVABILITY_ENV_LABEL" in
+  prod)
+    export OBSERVABILITY_DISPATCH_PROFILE="prod"
+    export OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT"
+    export OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}"
+    ;;
+  dev|nonprod)
+    export OBSERVABILITY_DISPATCH_PROFILE="nonprod"
+    export OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT"
+    export OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+    ;;
+  *)
+    echo "Unsupported OBSERVABILITY_ENV_LABEL=$OBSERVABILITY_ENV_LABEL"
+    exit 1
+    ;;
+esac
+
+./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ./scripts/qa/audit-velero-alert-pipeline.sh
 ./scripts/qa/verify-alert-routing.sh
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
@@ -38,10 +55,26 @@ Use this when AC-OVR-016 is failing in strict runtime output.
 
 ```bash
 # Re-run strict runtime gate with lane identity
-OBSERVABILITY_ENV_LABEL=<lane> \
-  OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-  OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
-  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+export OBSERVABILITY_ENV_LABEL="prod"
+
+case "$OBSERVABILITY_ENV_LABEL" in
+  prod)
+    export OBSERVABILITY_DISPATCH_PROFILE="prod"
+    export OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT"
+    export OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_PROD_GCP_PROJECT:-mereka-lms}"
+    ;;
+  dev|nonprod)
+    export OBSERVABILITY_DISPATCH_PROFILE="nonprod"
+    export OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT"
+    export OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+    ;;
+  *)
+    echo "Unsupported OBSERVABILITY_ENV_LABEL=$OBSERVABILITY_ENV_LABEL"
+    exit 1
+    ;;
+esac
+
+./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 
 # Quick mounted settings-map inventory
 LMS_CONFIGMAPS=$(kubectl -n mereka-lms get deploy lms -o json \

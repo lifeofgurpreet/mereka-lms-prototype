@@ -1,5 +1,7 @@
 # Branding & MFE Release Runbook
 
+_Last updated: 2026-02-27_
+
 > Deterministic rollout path for LMS/MFE branding changes. Covers build, push, GitOps deploy,
 > verify, and rollback.
 >

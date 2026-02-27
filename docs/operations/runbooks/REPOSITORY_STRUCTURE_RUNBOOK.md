@@ -4,7 +4,7 @@ _Audience: All Engineers • Owner: Engineering Lead • Last updated: 2026-02-1
 This runbook covers manual verification procedures for repository structure compliance.
 
 > **Spec**: `specs/repository-structure_spec.md`
-> **Testmap**: `specs/testmaps/repository-structure_testmap.yaml`
+> **Testmap**: `specs/testmaps/repository-structure_spec.testmap.yml`
 
 ---
 

@@ -1,6 +1,8 @@
 # Local/Production Parity Strategy
 _For Coding Agents • Last updated: 2025-11-12_
 
+> **NOTE (2026-02-27)**: Production is now on GKE with rke2-nonprod as the development cluster. This doc may need updating to reflect the current 3-tier environment (local → rke2-nonprod → GKE prod).
+
 ## 🎯 Overview
 
 This document outlines the strategy for maintaining parity between local development and production/dev environments. **The goal:** Ensure what works locally will work in production, and vice versa.

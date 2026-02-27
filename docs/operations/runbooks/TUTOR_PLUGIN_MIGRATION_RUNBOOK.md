@@ -4,7 +4,7 @@ _Audience: Platform Eng • Owner: Engineering Lead • Last updated: 2026-02-10
 This runbook covers procedures for Tutor version upgrades and plugin migration.
 
 > **Spec**: `specs/tutor-configuration-resilience_spec.md`
-> **Testmap**: `specs/testmaps/tutor-configuration-resilience_testmap.yaml`
+> **Testmap**: `specs/testmaps/tutor-configuration-resilience_spec.testmap.yml`
 > **ADR**: `docs/adr/006-tutor-plugin-based-configuration.md`
 
 ## Prerequisites

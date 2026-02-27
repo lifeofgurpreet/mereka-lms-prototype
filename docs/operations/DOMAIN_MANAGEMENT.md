@@ -4,7 +4,7 @@ _Audience: Platform Eng + SRE • Owner: Engineering Lead • Last updated: 2026
 This runbook covers operational procedures for multi-site domain management.
 
 > **Spec**: `specs/multi-site-domains_spec.md`
-> **Testmap**: `specs/testmaps/multi-site-domains_testmap.yaml`
+> **Testmap**: `specs/testmaps/multi-site-domains_spec.testmap.yml`
 
 ## Production Domains
 

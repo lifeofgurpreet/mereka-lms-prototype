@@ -32,13 +32,33 @@ Close the remaining first-class observability blockers in the non-prod/dev/prod 
 ## Required command for each closure wave
 
 ```bash
-OBSERVABILITY_ENV_LABEL=<lane> \
-OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> \
-OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT \
+lane="nonprod" # dev | nonprod | prod
+
+OBSERVABILITY_ENV_LABEL="${lane}"
+case "${lane}" in
+  dev|nonprod)
+    OBSERVABILITY_DISPATCH_PROFILE="nonprod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT"
+    ;;
+  prod)
+    OBSERVABILITY_DISPATCH_PROFILE="prod"
+    OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT"
+    ;;
+  *)
+    echo "Unknown lane: ${lane}" >&2
+    exit 1
+    ;;
+esac
+
+OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"
+if [ "${lane}" = prod ] && [ -n "${OBS_PARITY_PROD_GCP_PROJECT:-}" ]; then
+  OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"
+fi
+
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
 ```
 
-Use `lane=<dev|nonprod|prod>` and set `OBSERVABILITY_DISPATCH_PROFILE` to match the lane profile (`nonprod` for dev/nonprod, `prod` for production).
+Use `lane="dev"` or `lane="nonprod"` for nonprod profile and `lane="prod"` for production.
 
 ## Exit criteria per lane
 
@@ -69,7 +89,7 @@ If a lane fails an object-specific check:
 For `OBS-EXT-069`, run this exact sequence per lane before flipping handoff status:
 
 1. Capture strict runtime verifier output with explicit command:
-   - `OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=<nonprod|prod> OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
+   - `lane="nonprod"; OBSERVABILITY_ENV_LABEL="${lane}"; case "${lane}" in dev|nonprod) OBSERVABILITY_DISPATCH_PROFILE="nonprod"; OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_NONPROD_K8S_CONTEXT";; prod) OBSERVABILITY_DISPATCH_PROFILE="prod"; OBSERVABILITY_K8S_CONTEXT="$OBS_PARITY_PROD_K8S_CONTEXT";; esac; if [ "${lane}" = prod ] && [ -n "$OBS_PARITY_PROD_GCP_PROJECT" ]; then OBSERVABILITY_GCP_PROJECT="$OBS_PARITY_PROD_GCP_PROJECT"; else OBSERVABILITY_GCP_PROJECT="${OBS_PARITY_NONPROD_GCP_PROJECT:-mereka-lms}"; fi; ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`
 2. Confirm these required files exist and contain the strict markers:
    - `var/ci/observability-compliance-runtime.json` (or lane-specific evidence folder)
    - `var/ci/observability-runtime-verify-runtime.md`

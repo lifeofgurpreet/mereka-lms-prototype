@@ -1,5 +1,7 @@
 # Enterprise MFE Dockerfile Maintenance
 
+_Last updated: 2026-02-27_
+
 ## Overview
 
 Enterprise portals built on Open edX use micro-frontends (MFEs) that require

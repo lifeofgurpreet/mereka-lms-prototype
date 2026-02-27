@@ -1,6 +1,8 @@
 # Cloudflare DNS Checklist
 _Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-09-05_
 
+> **STALE WARNING (2026-02-27)**: This document has not been verified in 5+ months. The GKE IP, DNS records, and proxy settings may have changed. Verify against live Cloudflare dashboard before relying on this doc.
+
 Target load balancer IP: **34.177.83.168** (GKE ingress for `academyv2.mereka.io`).
 
 ## Required Records

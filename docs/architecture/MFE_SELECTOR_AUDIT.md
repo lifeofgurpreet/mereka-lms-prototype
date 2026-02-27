@@ -1,5 +1,7 @@
 # MFE Selector Audit — T102
 
+> **Authoritative**: This is the canonical selector audit. It supersedes [MFE_SELECTOR_HARDENING_AUDIT.md](../operations/MFE_SELECTOR_HARDENING_AUDIT.md) (2026-02-18).
+
 **Date**: 2026-02-25
 **Task**: T102 — Reduce MFE brittle selectors by 50%
 **Author**: Automated (Claude / implementor agent)

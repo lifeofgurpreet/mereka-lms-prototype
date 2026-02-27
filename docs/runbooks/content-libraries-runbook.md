@@ -5,7 +5,7 @@ This runbook covers operational procedures for Content Libraries v2 (Blockstore-
 
 > **Status**: Content Libraries v2 is enabled but not yet fully deployed (Tier 3). This runbook documents target-state procedures.
 > **Spec**: `specs/content-libraries-v2_spec.md`
-> **Testmap**: `specs/testmaps/content-libraries-v2_testmap.yaml`
+> **Testmap**: `specs/testmaps/content-libraries-v2_spec.testmap.yml`
 
 ## Prerequisites
 

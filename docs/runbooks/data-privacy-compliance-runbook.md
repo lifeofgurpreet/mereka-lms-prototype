@@ -5,7 +5,7 @@ This runbook covers operational procedures for GDPR/PDPA compliance, data deleti
 
 > **Status**: Compliance framework is **not yet implemented** (Tier 5). This runbook documents target-state procedures.
 > **Spec**: `specs/data-privacy-gdpr-compliance_spec.md`
-> **Testmap**: `specs/testmaps/data-privacy-gdpr-compliance_testmap.yaml`
+> **Testmap**: `specs/testmaps/data-privacy-gdpr-compliance_spec.testmap.yml`
 
 ## Prerequisites
 

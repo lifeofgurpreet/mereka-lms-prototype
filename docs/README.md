@@ -1,5 +1,5 @@
 # Documentation Index
-_Audience: Everyone • Owner: Infra Team • Last verified: 2026-02-12_
+_Audience: Everyone • Owner: Infra Team • Last verified: 2026-02-27_
 
 Use this file as the front door to the Mereka Academy Open edX docs. Each link below includes a short description plus the last-known verification date so you can see freshness at a glance.
 
@@ -131,16 +131,16 @@ Fast lookup references for common tasks:
 | [`operations/LOCAL_ACCESS_INFO.md`](operations/LOCAL_ACCESS_INFO.md) | Local development URLs and credentials | 2025-11-12 |
 | [`operations/LOCAL_PRODUCTION_PARITY.md`](operations/LOCAL_PRODUCTION_PARITY.md) | Local/production parity guide | 2025-11-12 |
 | [`operations/LOCAL_WORK_REMAINING.md`](operations/LOCAL_WORK_REMAINING.md) | Current local development tasks | 2025-11-12 |
-| [`operations/MFE_LOGIN_FIX.md`](operations/MFE_LOGIN_FIX.md) | MFE authentication troubleshooting | 2025-11-12 |
-| [`operations/MFE_REBUILD_SUCCESS.md`](operations/MFE_REBUILD_SUCCESS.md) | MFE rebuild documentation | 2025-11-12 |
+| ~~`operations/MFE_LOGIN_FIX.md`~~ | Archived → `archive/MFE_LOGIN_FIX.md` | — |
+| ~~`operations/MFE_REBUILD_SUCCESS.md`~~ | Archived → `archive/MFE_REBUILD_SUCCESS.md` | — |
 | [`operations/DISCOVERY_DEMO_COURSE_SETUP.md`](operations/DISCOVERY_DEMO_COURSE_SETUP.md) | Full setup guide for Discovery service and demo courses | 2026-02-03 |
 | [`operations/MONGODB_PERMISSIONS_ISSUE.md`](operations/MONGODB_PERMISSIONS_ISSUE.md) | MongoDB Atlas permissions issue and resolution | 2026-02-03 |
 | [`operations/DJANGO_RAW_SQL_BYPASS.md`](operations/DJANGO_RAW_SQL_BYPASS.md) | Bypass Django signals with raw SQL (when Celery broker unavailable) | 2025-12-29 |
-| [`operations/GCP_ROADMAP.md`](operations/GCP_ROADMAP.md) | Cloud architecture plan and outstanding infra tasks | 2025-10-15 |
+| [`operations/GCP_ROADMAP.md`](operations/GCP_ROADMAP.md) | Cloud architecture plan and outstanding infra tasks | 2025-10-15 ⚠️ STALE |
 | [`operations/MONITORING.md`](operations/MONITORING.md) | Stack monitoring and alerting strategy | 2026-02-06 |
-| [`operations/CLOUDFLARE_DNS.md`](operations/CLOUDFLARE_DNS.md) | DNS zones plus automation via Cloudflare API | 2025-09-05 |
-| [`operations/SECRETS_SNAPSHOT.md`](operations/SECRETS_SNAPSHOT.md) | Inventory of non-git secrets and how they're stored | 2025-08-22 |
-| [`operations/MULTISITE.md`](operations/MULTISITE.md) | Microsite strategy and shared theme tokens | 2025-09-10 |
+| [`operations/CLOUDFLARE_DNS.md`](operations/CLOUDFLARE_DNS.md) | DNS zones plus automation via Cloudflare API | 2025-09-05 ⚠️ STALE |
+| [`operations/SECRETS_SNAPSHOT.md`](operations/SECRETS_SNAPSHOT.md) | Inventory of non-git secrets and how they're stored | 2026-02-06 |
+| [`operations/MULTISITE.md`](operations/MULTISITE.md) | Microsite strategy and shared theme tokens | 2025-09-10 ⚠️ STALE |
 
 ## 📊 Migrations
 
@@ -207,12 +207,16 @@ Fast lookup references for common tasks:
 | [`status/PARITY_ISSUES_FOUND.md`](status/PARITY_ISSUES_FOUND.md) | Local/production parity issues | 2025-11-12 |
 | [`status/TASK2_STATUS.md`](status/TASK2_STATUS.md) | Task 2 status tracker | 2025-11-12 |
 
-## 🎨 Branding & Style
+## 🎨 Branding & Frontend
 
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
 | [`BRANDING.md`](BRANDING.md) | **Mereka branding system** - Color palette, typography, assets, verification, MFE integration, troubleshooting | 2026-02-11 |
-| [`BRANDING_PLAN.md`](BRANDING_PLAN.md) | Status tracker for the cross-surface branding rollout | 2025-11-08 |
+| [`BRANDING_PLAN.md`](BRANDING_PLAN.md) | Status tracker for the cross-surface branding rollout (Phases 1-5) | 2026-02-27 |
+| [`FRONTEND_TRACKER.md`](FRONTEND_TRACKER.md) | **Frontend strategy tracker** - 27 tasks across 5 phases, health scorecard, dependency graph | 2026-02-27 |
+| [`FRONTEND_ORCHESTRATOR_WORKLOG.md`](FRONTEND_ORCHESTRATOR_WORKLOG.md) | Frontend doc/spec quality worklog (orchestrator tasks) | 2026-02-27 |
+| [`FRONTEND_IMPLEMENTER_PROMPT.md`](FRONTEND_IMPLEMENTER_PROMPT.md) | Ready-to-use prompt for frontend Phase A implementation | 2026-02-27 |
+| [`MFE_COMPLETE_LIST.md`](MFE_COMPLETE_LIST.md) | Complete list of 12 configured + enterprise MFEs | 2026-02-27 |
 | [`STYLE_GUIDE.md`](STYLE_GUIDE.md) | Documentation conventions (metadata, folder layout, cross-links) | 2025-11-09 |
 
 ## 📚 Reference
@@ -220,8 +224,7 @@ Fast lookup references for common tasks:
 | Doc | Purpose | Last Verified |
 | --- | --- | --- |
 | [`MONGODB_ATLAS.md`](MONGODB_ATLAS.md) | MongoDB Atlas migration and cutover guide | 2025-11-09 |
-| [`KAJABI_API_ENDPOINTS.md`](KAJABI_API_ENDPOINTS.md) | Kajabi API endpoint reference | 2025-11-12 |
-| [`MFE_COMPLETE_LIST.md`](MFE_COMPLETE_LIST.md) | Complete list of micro-frontends | 2025-11-12 |
+| ~~`KAJABI_API_ENDPOINTS.md`~~ | Archived → `archive/KAJABI_API_ENDPOINTS.md` | — |
 | [`COURSE_IMPORT_GUIDE.md`](COURSE_IMPORT_GUIDE.md) | Course import procedures | 2025-11-12 |
 | [`PRODUCTION_VERIFICATION_CHECKLIST.md`](PRODUCTION_VERIFICATION_CHECKLIST.md) | Production verification checklist | 2025-11-12 |
 | [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md) | Quick reference guide | 2025-11-12 |
@@ -237,11 +240,21 @@ Fast lookup references for common tasks:
 
 ## 📦 Archive
 
-Historical and deprecated documentation:
+Historical and deprecated documentation (moved here during audits):
 
-- [`archive/CRITICAL_FINDINGS.md`](archive/CRITICAL_FINDINGS.md)
-- [`archive/FINAL_STATUS_REPORT.md`](archive/FINAL_STATUS_REPORT.md)
-- [`archive/IMPROVEMENTS_SUMMARY.md`](archive/IMPROVEMENTS_SUMMARY.md)
+- `archive/CLICKUP_TASK_LIST.md` — Task tracking (ephemeral)
+- `archive/CLICKUP_TASK_LIST_BUSINESS.md` — Task tracking (ephemeral)
+- `archive/CRITICAL_FINDINGS.md` — Historical findings
+- `archive/FINAL_STATUS_REPORT.md` — Historical report
+- `archive/GITHUB_SECRETS_READY.md` — Setup checklist (completed)
+- `archive/IMPROVEMENTS_SUMMARY.md` — Historical summary
+- `archive/KAJABI_API_ENDPOINTS.md` — Kajabi API reference (migration complete)
+- `archive/KAJABI_LESSON_CONTENT_FIX.md` — Kajabi fix (migration complete)
+- `archive/MFE_LOGIN_FIX.md` — MFE login fix (resolved)
+- `archive/MFE_REBUILD_SUCCESS.md` — MFE rebuild report (resolved)
+- `archive/TASK2_COMPLETION_REPORT.md` — Sprint tracking (ephemeral)
+- `archive/TASK2_STATUS.md` — Sprint tracking (ephemeral)
+- `archive/TASK3_SES_SETUP_COMPLETE.md` — SES setup (completed)
 
 ---
 

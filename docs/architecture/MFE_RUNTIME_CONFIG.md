@@ -1,5 +1,7 @@
 # MFE Runtime Configuration
 
+_Last updated: 2026-02-27_
+
 This document describes how Micro-Frontend (MFE) configuration is managed in the
 Mereka LMS deployment, distinguishing between what is baked into the image at build
 time and what is fetched at runtime, and providing a migration plan to move toward

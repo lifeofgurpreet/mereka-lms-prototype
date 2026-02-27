@@ -1,5 +1,7 @@
 # Legacy Courseware Audit
 
+_Last updated: 2026-02-27_
+
 ## Background
 
 Open edX has two distinct learning experiences:

@@ -16,7 +16,7 @@ The Mereka Academy platform has 31 specifications defining 769 acceptance criter
 Prior approaches used manually-authored YAML testmap files:
 
 ```yaml
-# specs/testmaps/k8s-deployment_testmap.yaml
+# specs/testmaps/k8s-deployment_spec.testmap.yml
 coverage:
   - ac_id: AC-001
     test_file: scripts/qa/verify-k8s-namespace.sh

@@ -1,6 +1,8 @@
 # Multi-site LMS Playbook
 _Audience: Platform Eng + Design • Owner: Infra Team • Last verified: 2025-09-10_
 
+> **STALE WARNING (2026-02-27)**: This doc predates the comprehensive multi-site guide. See `operations/guides/MULTI_SITE_GUIDE.md` for the current authoritative reference. This file may contain outdated DNS or config details.
+
 This guide captures the steps required to attach additional branded experiences to the canonical `academyv2.mereka.io` Tutor deployment. It covers DNS, Tutor templating changes, database bootstrap, and validation.
 
 > **Microsite boundary:** `academy.biji-biji.com` and `skillourfuture.academy.mereka.io` are distinct client tenants with their own organizations and catalogs. Treat them as separate brands, not aliases.

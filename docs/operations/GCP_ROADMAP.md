@@ -1,6 +1,8 @@
 # GCP Deployment Roadmap
 _Audience: Platform Eng + Leadership • Owner: Infra Team • Last verified: 2025-10-15_
 
+> **STALE WARNING (2026-02-27)**: This roadmap is 4+ months old. GKE production is now live. Many items may be completed or superseded. Cross-reference with `docs/operations/guides/K8S_OPERATIONS_GUIDE.md` for current state.
+
 The goal is to migrate the nightly Open edX stack managed by Tutor to Google Cloud Platform while keeping the local sandbox as the source of truth.
 
 ## Project scaffolding
