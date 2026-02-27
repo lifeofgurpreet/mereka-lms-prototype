@@ -42,12 +42,16 @@ if [[ -z "$SOURCE" ]]; then
 fi
 
 if [[ "$SOURCE" == "kajabi" ]]; then
-  ENROLLMENTS_CSV="scripts/migrations/kajabi/output/enrollments.csv"
+  ENROLLMENTS_CSV="scripts/migrations/kajabi/output/openedx/enrollments_import.csv"
+  if [[ ! -f "$ENROLLMENTS_CSV" ]]; then
+    ENROLLMENTS_CSV="scripts/migrations/kajabi/output/enrollments.csv"
+  fi
   MIN_ROWS=140000
   MAX_ROWS=155000
   EXPECTED="~147K"
 elif [[ "$SOURCE" == "mct" ]]; then
   ENROLLMENTS_CSV="exports/mct/enrollments_deduped.csv"
+  COURSES_NDJSON="exports/mct/courses.ndjson"
   # Fallback to checking NDJSON directly
   if [[ ! -f "$ENROLLMENTS_CSV" ]]; then
     ENROLLMENTS_CSV="exports/mct/enrollments.ndjson"
@@ -80,20 +84,96 @@ if [[ "$ENROLLMENTS_CSV" =~ \.csv$ ]]; then
     fail "Enrollments CSV missing required columns"
   fi
 
-  # Check for deduplication
-  total_lines=$(tail -n +2 "$ENROLLMENTS_CSV" | wc -l | tr -d ' ')
-  unique_lines=$(tail -n +2 "$ENROLLMENTS_CSV" | sort -u | wc -l | tr -d ' ')
-
-  if [[ "$total_lines" -eq "$unique_lines" ]]; then
-    pass "Enrollments CSV is deduplicated"
+  if [[ "$SOURCE" == "kajabi" ]]; then
+    unique_pairs=$(
+      awk -F, '
+        NR == 1 {
+          for (i = 1; i <= NF; i++) {
+            key = tolower($i)
+            gsub(/\r/, "", key)
+            col[key] = i
+          }
+          next
+        }
+        {
+          email = (("email" in col) ? tolower($(col["email"])) : "")
+          course_id = (("course_id" in col) ? $(col["course_id"]) : "")
+          gsub(/\r/, "", email)
+          gsub(/\r/, "", course_id)
+          if (email != "" && course_id != "") {
+            print email "," course_id
+          }
+        }
+      ' "$ENROLLMENTS_CSV" \
+        | sort -u \
+        | wc -l \
+        | tr -d ' '
+    )
+    pass "Kajabi unique (email, course_id) pairs: $unique_pairs"
+    row_count="$unique_pairs"
   else
-    fail "Enrollments CSV has $((total_lines - unique_lines)) duplicate rows"
+    # Check for deduplication on MCT prepared CSV.
+    total_lines=$(tail -n +2 "$ENROLLMENTS_CSV" | wc -l | tr -d ' ')
+    unique_lines=$(tail -n +2 "$ENROLLMENTS_CSV" | sort -u | wc -l | tr -d ' ')
+
+    if [[ "$total_lines" -eq "$unique_lines" ]]; then
+      pass "Enrollments CSV is deduplicated"
+    else
+      fail "Enrollments CSV has $((total_lines - unique_lines)) duplicate rows"
+    fi
   fi
 
 elif [[ "$ENROLLMENTS_CSV" =~ \.ndjson$ ]]; then
-  # For NDJSON, estimate unique pairs
-  echo "[INFO] Counting unique (user, course) pairs from NDJSON (this may take a moment)..."
-  row_count=$(jq -r '[.user_id // .email, .course_id // .category_id] | @csv' "$ENROLLMENTS_CSV" 2>/dev/null | sort -u | wc -l | tr -d ' ')
+  # For MCT NDJSON fallback, compute unique (user, category) pairs by joining
+  # enrollments.courseId -> courses.CategoryId to reflect transform semantics.
+  echo "[INFO] Counting unique (user, category) pairs from NDJSON (this may take a moment)..."
+  if [[ "$SOURCE" != "mct" ]]; then
+    fail "NDJSON fallback is only supported for MCT in this verifier"
+    exit 1
+  fi
+  if [[ ! -f "$COURSES_NDJSON" ]]; then
+    fail "MCT courses file missing for category join: $COURSES_NDJSON"
+    exit 1
+  fi
+  row_count=$(python3 - "$ENROLLMENTS_CSV" "$COURSES_NDJSON" <<'PY'
+import json
+import sys
+
+enrollments_path = sys.argv[1]
+courses_path = sys.argv[2]
+
+course_to_category = {}
+with open(courses_path, "r", encoding="utf-8") as handle:
+    for line in handle:
+        line = line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        course_id = row.get("Id")
+        category_id = row.get("CategoryId")
+        if course_id is None or category_id is None:
+            continue
+        course_to_category[str(course_id)] = str(category_id)
+
+pairs = set()
+with open(enrollments_path, "r", encoding="utf-8") as handle:
+    for line in handle:
+        line = line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        email = (row.get("Contact") or row.get("email") or "").strip().lower()
+        course_id = row.get("courseId") or row.get("course_id")
+        if not email or course_id is None:
+            continue
+        category_id = course_to_category.get(str(course_id))
+        if not category_id:
+            continue
+        pairs.add((email, category_id))
+
+print(len(pairs))
+PY
+)
 else
   fail "Unknown file format: $ENROLLMENTS_CSV"
   exit 1

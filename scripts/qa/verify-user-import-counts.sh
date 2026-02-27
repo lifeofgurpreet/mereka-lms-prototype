@@ -42,7 +42,10 @@ if [[ -z "$SOURCE" ]]; then
 fi
 
 if [[ "$SOURCE" == "kajabi" ]]; then
-  USERS_CSV="scripts/migrations/kajabi/output/users.csv"
+  USERS_CSV="scripts/migrations/kajabi/output/openedx/users_import.csv"
+  if [[ ! -f "$USERS_CSV" ]]; then
+    USERS_CSV="scripts/migrations/kajabi/output/users.csv"
+  fi
   MIN_ROWS=70000
   MAX_ROWS=80000
   EXPECTED="~73K"

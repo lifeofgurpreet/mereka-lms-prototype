@@ -26,8 +26,16 @@ if [[ "${1:-}" == "--check-enrollments" ]]; then
 fi
 
 OUTPUT_DIR="scripts/migrations/kajabi/output"
-USERS_CSV="$OUTPUT_DIR/users.csv"
-ENROLLMENTS_CSV="$OUTPUT_DIR/enrollments.csv"
+USERS_CSV="$OUTPUT_DIR/openedx/users_import.csv"
+ENROLLMENTS_CSV="$OUTPUT_DIR/openedx/enrollments_import.csv"
+
+# Backwards compatibility with older transform output paths.
+if [[ ! -f "$USERS_CSV" ]]; then
+  USERS_CSV="$OUTPUT_DIR/users.csv"
+fi
+if [[ ! -f "$ENROLLMENTS_CSV" ]]; then
+  ENROLLMENTS_CSV="$OUTPUT_DIR/enrollments.csv"
+fi
 
 # Check users.csv (AC-005)
 if [[ "$CHECK_ENROLLMENTS" -eq 0 ]]; then
@@ -76,14 +84,35 @@ if [[ "$CHECK_ENROLLMENTS" -eq 1 ]]; then
       fail "Enrollments CSV missing required columns"
     fi
 
-    # Check for deduplication (no exact duplicate lines)
-    total_lines=$(tail -n +2 "$ENROLLMENTS_CSV" | wc -l | tr -d ' ')
-    unique_lines=$(tail -n +2 "$ENROLLMENTS_CSV" | sort -u | wc -l | tr -d ' ')
-
-    if [[ "$total_lines" -eq "$unique_lines" ]]; then
-      pass "Enrollments CSV is deduplicated ($unique_lines unique pairs)"
+    # Validate deduplication by (email, course_id) pair.
+    unique_pairs=$(
+      awk -F, '
+        NR == 1 {
+          for (i = 1; i <= NF; i++) {
+            key = tolower($i)
+            gsub(/\r/, "", key)
+            col[key] = i
+          }
+          next
+        }
+        {
+          email = (("email" in col) ? tolower($(col["email"])) : "")
+          course_id = (("course_id" in col) ? $(col["course_id"]) : "")
+          gsub(/\r/, "", email)
+          gsub(/\r/, "", course_id)
+          if (email != "" && course_id != "") {
+            print email "," course_id
+          }
+        }
+      ' "$ENROLLMENTS_CSV" \
+        | sort -u \
+        | wc -l \
+        | tr -d ' '
+    )
+    if [[ "$unique_pairs" -ge 140000 && "$unique_pairs" -le 155000 ]]; then
+      pass "Enrollments CSV has $unique_pairs unique (email, course_id) pairs (~147K expected)"
     else
-      fail "Enrollments CSV has $((total_lines - unique_lines)) duplicate rows"
+      fail "Enrollments CSV unique (email, course_id) pairs = $unique_pairs (expected ~147K)"
     fi
   fi
 fi

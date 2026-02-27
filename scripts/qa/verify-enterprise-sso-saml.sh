@@ -172,27 +172,74 @@ echo
 echo "[AC-029] Verifying SAML tenant isolation infrastructure..."
 
 if [[ -n "$LMS_POD" ]]; then
-  # Verify EnterpriseCustomer model has identity_provider field
+  # Verify enterprise IdP linkage model availability (modern relation or legacy field/property).
   IDP_FIELD_CHECK=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- python3 -c "
 $DJANGO_SETUP
 try:
     from enterprise.models import EnterpriseCustomer
-    fields = [f.name for f in EnterpriseCustomer._meta.get_fields()]
-    if 'identity_provider' in fields or 'identity_providers' in fields:
-        print('ok')
+    concrete_fields = {f.name for f in EnterpriseCustomer._meta.get_fields() if getattr(f, 'concrete', False)}
+    has_legacy_field = 'identity_provider' in concrete_fields
+    has_property = isinstance(getattr(EnterpriseCustomer, 'identity_provider', None), property)
+    has_link_model = False
+    try:
+        from enterprise.models import EnterpriseCustomerIdentityProvider
+        has_link_model = EnterpriseCustomerIdentityProvider is not None
+    except Exception:
+        pass
+    if has_link_model or has_legacy_field or has_property:
+        print(f'ok:link_model={has_link_model},legacy_field={has_legacy_field},property={has_property}')
     else:
-        print('field_missing')
+        print('missing')
 except ImportError:
     print('import_error')
 except Exception as e:
     print(f'error: {e}')
 " 2>/dev/null || echo "error")
-  if [[ "$IDP_FIELD_CHECK" == "ok" ]]; then
-    pass "AC-029: EnterpriseCustomer has identity_provider field (per-tenant IdP binding)"
-  elif [[ "$IDP_FIELD_CHECK" == "field_missing" ]]; then
-    info "AC-029: identity_provider field not found (may use different field name)"
+  if [[ "$IDP_FIELD_CHECK" == ok:* ]]; then
+    pass "AC-029: Enterprise IdP linkage model available (${IDP_FIELD_CHECK#ok:})"
+  elif [[ "$IDP_FIELD_CHECK" == "missing" ]]; then
+    fail "AC-029: No supported Enterprise IdP linkage model found"
   else
     fail "AC-029: EnterpriseCustomer model check failed ($IDP_FIELD_CHECK)"
+  fi
+
+  # Verify DB schema integrity for whichever enterprise IdP linkage model is active.
+  IDP_SCHEMA_CHECK=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- python3 -c "
+$DJANGO_SETUP
+from django.db import connection
+from enterprise.models import EnterpriseCustomer
+issues = []
+concrete_fields = {f.name for f in EnterpriseCustomer._meta.get_fields() if getattr(f, 'concrete', False)}
+with connection.cursor() as cursor:
+    customer_cols = {c.name for c in connection.introspection.get_table_description(cursor, 'enterprise_enterprisecustomer')}
+
+if 'identity_provider' in concrete_fields and 'identity_provider' not in customer_cols:
+    issues.append('enterprise_enterprisecustomer.identity_provider')
+
+try:
+    from enterprise.models import EnterpriseCustomerIdentityProvider
+    with connection.cursor() as cursor:
+        table_names = set(connection.introspection.table_names(cursor))
+    table = 'enterprise_enterprisecustomeridentityprovider'
+    if table not in table_names:
+        issues.append(table)
+    else:
+        with connection.cursor() as cursor:
+            link_cols = {c.name for c in connection.introspection.get_table_description(cursor, table)}
+        for req in ('provider_id', 'enterprise_customer_id'):
+            if req not in link_cols:
+                issues.append(f'{table}.{req}')
+except Exception:
+    pass
+
+print('ok' if not issues else ('missing:' + ','.join(issues)))
+" 2>/dev/null || echo "error")
+  if [[ "$IDP_SCHEMA_CHECK" == "ok" ]]; then
+    pass "AC-029: enterprise IdP linkage schema integrity checks passed"
+  elif [[ "$IDP_SCHEMA_CHECK" == missing:* ]]; then
+    fail "AC-029: enterprise IdP linkage schema missing (${IDP_SCHEMA_CHECK#missing:})"
+  else
+    fail "AC-029: Could not validate enterprise schema ($IDP_SCHEMA_CHECK)"
   fi
 
   # Verify multiple SAML IdP support (each enterprise can have its own)

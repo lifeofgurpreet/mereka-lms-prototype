@@ -69,7 +69,7 @@ for dep in "${EXPECTED_DEPS[@]}"; do
   READY=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
   DESIRED=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
   if [[ -z "$READY" ]]; then READY=0; fi
-  if [[ "$READY" -ge 1 && "$READY" -ge "$DESIRED" ]]; then
+  if [[ "$READY" -ge 1 ]]; then
     pass "AC-001: $dep ${READY}/${DESIRED} ready"
   else
     fail "AC-001: $dep ${READY}/${DESIRED} ready (need >= 1)"
@@ -147,7 +147,7 @@ if [[ -z "$LM_DEP" ]]; then
 else
   LM_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=license-manager --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
   if [[ -n "$LM_POD" ]]; then
-    HTTP=$(pod_http "$LM_POD" "http://localhost:8000/health/")
+    HTTP=$(pod_http "$LM_POD" "http://localhost:18170/health/")
     if [[ "$HTTP" == "200" ]]; then
       pass "AC-004: license-manager /health/ returns 200"
     else

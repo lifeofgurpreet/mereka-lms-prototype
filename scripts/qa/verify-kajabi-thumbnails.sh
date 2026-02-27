@@ -43,18 +43,74 @@ fi
 
 # Check CSV header
 header=$(head -1 "$MANIFEST_FILE")
-if [[ "$header" =~ course_id && "$header" =~ thumbnail_url ]]; then
-  pass "Manifest has course_id and thumbnail_url columns"
+if [[ "$header" =~ (course_id|kajabi_course_id) ]]; then
+  pass "Manifest has course identifier column"
 else
-  fail "Manifest missing required columns"
+  fail "Manifest missing course identifier column"
+fi
+has_thumbnail_url=0
+has_image_filename=0
+if [[ "$header" =~ thumbnail_url ]]; then
+  has_thumbnail_url=1
+fi
+if [[ "$header" =~ image_filename ]]; then
+  has_image_filename=1
+fi
+if [[ "$has_thumbnail_url" -eq 1 || "$has_image_filename" -eq 1 ]]; then
+  pass "Manifest has thumbnail_url or image_filename column"
+else
+  fail "Manifest missing both thumbnail_url and image_filename columns"
 fi
 
-# Check for non-empty thumbnail URLs
-empty_urls=$(tail -n +2 "$MANIFEST_FILE" | awk -F, '{print $2}' | grep -c "^$" || true)
-if [[ "$empty_urls" -eq 0 ]]; then
-  pass "All courses have thumbnail URLs"
-else
-  fail "$empty_urls courses have empty thumbnail URLs"
+# Check for non-empty thumbnail references
+if [[ "$has_thumbnail_url" -eq 1 ]]; then
+  empty_urls=$(awk -F, '
+    NR == 1 {
+      for (i = 1; i <= NF; i++) {
+        key = tolower($i)
+        gsub(/\r/, "", key)
+        col[key] = i
+      }
+      next
+    }
+    {
+      value = (("thumbnail_url" in col) ? $(col["thumbnail_url"]) : "")
+      gsub(/\r/, "", value)
+      if (value == "") {
+        empty += 1
+      }
+    }
+    END { print empty + 0 }
+  ' "$MANIFEST_FILE")
+  if [[ "$empty_urls" -eq 0 ]]; then
+    pass "All courses have thumbnail URLs"
+  else
+    fail "$empty_urls courses have empty thumbnail URLs"
+  fi
+elif [[ "$has_image_filename" -eq 1 ]]; then
+  missing_files=$(awk -F, '
+    NR == 1 {
+      for (i = 1; i <= NF; i++) {
+        key = tolower($i)
+        gsub(/\r/, "", key)
+        col[key] = i
+      }
+      next
+    }
+    {
+      value = (("image_filename" in col) ? $(col["image_filename"]) : "")
+      gsub(/\r/, "", value)
+      if (value == "") {
+        empty += 1
+      }
+    }
+    END { print empty + 0 }
+  ' "$MANIFEST_FILE")
+  if [[ "$missing_files" -eq 0 ]]; then
+    pass "All courses have image filenames for local thumbnail cache"
+  else
+    fail "$missing_files courses have empty image filenames"
+  fi
 fi
 
 # Check thumbnails directory (if downloads have been run)

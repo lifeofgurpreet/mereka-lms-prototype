@@ -64,6 +64,12 @@ else
   )
 fi
 
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING:-1}"
+else
+  REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING:-0}"
+fi
+
 export DOMAINS_CSV
 DOMAINS_CSV=$(IFS=, ; echo "${DOMAINS[*]}")
 
@@ -120,7 +126,7 @@ print(json.dumps(expected, sort_keys=True))
 PY
 )
 
-kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" EXPECTED_JSON="${EXPECTED_JSON}" python - <<'PY'
+kubectl "${CONTEXT_ARGS[@]}" exec -i -n "${NAMESPACE}" deploy/lms -- env DOMAINS="${DOMAINS_CSV}" STRICT="${STRICT}" EXPECTED_JSON="${EXPECTED_JSON}" REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING}" python - <<'PY'
 import os
 import sys
 import json
@@ -134,6 +140,12 @@ from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 domains = [d.strip() for d in os.environ.get("DOMAINS", "").split(",") if d.strip()]
 strict = os.environ.get("STRICT", "0") == "1"
 expected = json.loads(os.environ.get("EXPECTED_JSON", "{}") or "{}")
+require_site_mapping = os.environ.get("REQUIRE_ENTERPRISE_SITE_MAPPING", "0") == "1"
+
+try:
+    from enterprise.models import EnterpriseCustomer
+except Exception:
+    EnterpriseCustomer = None
 
 missing = []
 bad = []
@@ -193,6 +205,33 @@ for domain in domains:
             f"{domain}: course_org_filter expected={','.join(exp_orgs)} "
             f"got={','.join(org_filter_norm) if org_filter_norm else 'unset'}"
         )
+
+    if EnterpriseCustomer is None:
+        if require_site_mapping:
+            bad.append(f"{domain}: enterprise app unavailable, cannot validate tenant-site mapping")
+        continue
+
+    # EnterpriseCustomer may use a non-integer PK (uuid) in some builds,
+    # so avoid ordering by a hardcoded "id" field.
+    ec_qs = EnterpriseCustomer.objects.filter(site=site)
+    if hasattr(EnterpriseCustomer, "created"):
+        ec = ec_qs.order_by("-created").first()
+    elif hasattr(EnterpriseCustomer, "modified"):
+        ec = ec_qs.order_by("-modified").first()
+    else:
+        ec = ec_qs.first()
+    cfg_uuid = str(values.get("ENTERPRISE_CUSTOMER_UUID", "")).strip()
+    if ec is None:
+        if require_site_mapping:
+            bad.append(f"{domain}: no EnterpriseCustomer linked to this Site (site_id={site.id})")
+        continue
+    expected_uuid = str(ec.uuid)
+    if cfg_uuid != expected_uuid:
+        bad.append(
+            f"{domain}: ENTERPRISE_CUSTOMER_UUID expected={expected_uuid} got={cfg_uuid or 'unset'}"
+        )
+    else:
+        print(f"{domain}: enterprise_uuid={expected_uuid} mapping=ok")
 
 if bad:
     for line in bad:

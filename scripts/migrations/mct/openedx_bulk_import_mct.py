@@ -260,6 +260,7 @@ def import_enrollments(csv_path: str, settings_module: str, start: int, limit: i
     from django.contrib.auth import get_user_model
     from opaque_keys.edx.keys import CourseKey
     from common.djangoapps.student.models import CourseEnrollment
+    from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
     stats = ImportStats(start_offset=start)
     User = get_user_model()
@@ -289,6 +290,12 @@ def import_enrollments(csv_path: str, settings_module: str, start: int, limit: i
                     print(f"Row {idx}: Invalid course_id {course_id}: {err}")
                 continue
 
+            if not CourseOverview.objects.filter(id=course_key).exists():
+                stats.skipped += 1
+                if stats.skipped <= 10 or idx % 5000 == 0:
+                    print(f"Row {idx}: Course not found for key {course_id}, skipping")
+                continue
+
             mode = (row.get("mode") or "audit").strip() or "audit"
             is_active = str(row.get("is_active", "true")).lower() not in ("false", "0")
 
@@ -298,7 +305,16 @@ def import_enrollments(csv_path: str, settings_module: str, start: int, limit: i
             existing = CourseEnrollment.objects.filter(user=user, course_id=course_key).first()
             created = existing is None
 
-            enrollment = CourseEnrollment.get_or_create_enrollment(user, course_key)
+            try:
+                enrollment = CourseEnrollment.get_or_create_enrollment(user, course_key)
+            except Exception as err:
+                message = str(err).lower()
+                if "course" in message and ("not found" in message or "does not exist" in message):
+                    stats.skipped += 1
+                    if stats.skipped <= 10 or idx % 5000 == 0:
+                        print(f"Row {idx}: Enrollment skipped for missing course {course_id}: {err}")
+                    continue
+                raise
             if enrollment.mode != mode:
                 enrollment.change_mode(mode)
 

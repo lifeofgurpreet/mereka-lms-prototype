@@ -42,13 +42,43 @@ fi
 
 pass "Valid JSON format"
 
-# Count total assets
-if jq -e 'type == "object"' "$MUX_UPLOAD_FILE" >/dev/null 2>&1; then
-  # Object format: {video_id: {mux_data}}
+# Count total assets.
+# Supported formats:
+#  1) Summary object: {"total_videos": 503, "successful": 500, ...}
+#  2) Object map: {"video_id": {"playback_id": "..."}}
+#  3) Array: [{"video_id": "...", "playback_id": "..."}]
+json_type=$(jq -r 'type' "$MUX_UPLOAD_FILE")
+asset_count=0
+has_asset_details=0
+
+if [[ "$json_type" == "object" ]]; then
+  if jq -e 'has("total_videos")' "$MUX_UPLOAD_FILE" >/dev/null 2>&1; then
+    asset_count=$(jq -r '.total_videos // 0' "$MUX_UPLOAD_FILE")
+    successful_count=$(
+      jq -r '
+        if (.successful | type) == "array" then .successful | length
+        elif (.successful | type) == "number" then .successful
+        else 0 end
+      ' "$MUX_UPLOAD_FILE"
+    )
+    failed_count=$(
+      jq -r '
+        if (.failed | type) == "array" then .failed | length
+        elif (.failed | type) == "number" then .failed
+        else 0 end
+      ' "$MUX_UPLOAD_FILE"
+    )
+    pass "Mux summary format detected (successful=$successful_count failed=$failed_count)"
+    if [[ "$successful_count" -gt 0 ]]; then
+      has_asset_details=1
+    fi
+  else
+    asset_count=$(jq 'length' "$MUX_UPLOAD_FILE")
+    has_asset_details=1
+  fi
+elif [[ "$json_type" == "array" ]]; then
   asset_count=$(jq 'length' "$MUX_UPLOAD_FILE")
-elif jq -e 'type == "array"' "$MUX_UPLOAD_FILE" >/dev/null 2>&1; then
-  # Array format: [{video_id, mux_data}]
-  asset_count=$(jq 'length' "$MUX_UPLOAD_FILE")
+  has_asset_details=1
 else
   fail "Unexpected JSON structure in $MUX_UPLOAD_FILE"
   exit 1
@@ -62,24 +92,48 @@ else
   fail "Mux assets: $asset_count (expected 503)"
 fi
 
-# Check for playback IDs in sample assets
-sample_with_playback=0
-sample_count=$((asset_count < 10 ? asset_count : 10))
-
-for i in $(seq 0 $((sample_count - 1))); do
-  playback_id=$(jq -r ".[$i].playback_id // empty" "$MUX_UPLOAD_FILE" 2>/dev/null || true)
-  if [[ -n "$playback_id" && "$playback_id" != "null" ]]; then
-    sample_with_playback=$((sample_with_playback + 1))
+if [[ "$has_asset_details" -eq 1 && "$asset_count" -gt 0 ]]; then
+  # Check for playback IDs in sample assets.
+  sample_with_playback=$(
+    jq '
+      if type == "array" then
+        .[:10]
+      elif type == "object" then
+        if has("successful") and (.successful | type) == "array" then
+          .successful[:10]
+        else
+          to_entries[:10] | map(.value)
+        end
+      else
+        []
+      end
+      | map(.playback_id // .mux_playback_id // .mux_data.playback_id // empty)
+      | map(select(type == "string" and length > 0))
+      | length
+    ' "$MUX_UPLOAD_FILE" 2>/dev/null || echo 0
+  )
+  sample_count=$((asset_count < 10 ? asset_count : 10))
+  if [[ "$sample_with_playback" -gt 0 ]]; then
+    pass "Playback IDs found in $sample_with_playback/$sample_count sample assets"
+  else
+    fail "No playback IDs found in sample assets"
   fi
-done
-
-if [[ "$sample_with_playback" -gt 0 ]]; then
-  pass "Playback IDs found in $sample_with_playback/$sample_count sample assets"
 else
-  fail "No playback IDs found in sample assets"
+  if [[ -n "${successful_count:-}" && "$successful_count" -ge 500 && "$successful_count" -le 503 ]]; then
+    pass "Summary confirms successful uploads: $successful_count"
+  else
+    fail "Summary missing expected successful upload count (~500)"
+  fi
 fi
 
 # Check captions (AC-027)
+if [[ "$CHECK_CAPTIONS" -eq 1 ]]; then
+  if [[ "$has_asset_details" -ne 1 ]]; then
+    echo "[INFO] Caption detail check skipped: summary-only mux_upload_complete.json"
+    CHECK_CAPTIONS=0
+  fi
+fi
+
 if [[ "$CHECK_CAPTIONS" -eq 1 ]]; then
   # Count assets with caption tracks
   caption_count=$(jq '[.[] | select(.caption_tracks or .text_tracks)] | length' "$MUX_UPLOAD_FILE" 2>/dev/null || echo 0)

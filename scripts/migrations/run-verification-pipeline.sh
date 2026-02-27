@@ -40,8 +40,10 @@ TOTAL_FAILED=0
 echo -e "${BLUE}=== Migration Verification Pipeline ===${NC}"
 echo -e "Started: $(date '+%Y-%m-%d %H:%M:%S')\n"
 
-# Verification scripts in workflow order
-VERIFICATION_SCRIPTS=(
+# Verification jobs in workflow order.
+# Some QA scripts require explicit arguments; include them here so the pipeline
+# reflects real verification coverage instead of failing on missing flags.
+VERIFICATION_JOBS=(
   # Export phase
   "verify-kajabi-export.sh"
   "verify-mct-export.sh"
@@ -50,24 +52,30 @@ VERIFICATION_SCRIPTS=(
 
   # Transform phase
   "verify-kajabi-transform.sh"
+  "verify-kajabi-transform.sh --check-enrollments"
   "verify-mct-transform.sh"
   "verify-kajabi-olx-packages.sh"
   "verify-mct-olx-packages.sh"
 
   # User import phase
-  "verify-user-import-counts.sh"
+  "verify-user-import-counts.sh --source kajabi"
+  "verify-user-import-counts.sh --source mct"
   "verify-cross-system-identity.sh"
 
   # Course import phase
-  "verify-course-import-counts.sh"
-  "verify-course-structure-sample.sh"
+  "verify-course-import-counts.sh --source kajabi"
+  "verify-course-import-counts.sh --source mct"
+  "verify-course-structure-sample.sh --source kajabi"
+  "verify-course-structure-sample.sh --source mct --course basic-microsoft"
 
   # Enrollment phase
-  "verify-enrollment-import-counts.sh"
-  "verify-enrollment-skip-handling.sh"
+  "verify-enrollment-import-counts.sh --source kajabi"
+  "verify-enrollment-import-counts.sh --source mct"
+  "verify-enrollment-skip-handling.sh --check user-not-found"
+  "verify-enrollment-skip-handling.sh --check course-not-found"
 
   # Certificate phase
-  "verify-certificate-issuance.sh"
+  "verify-certificate-issuance.sh --source kajabi --check-counts"
 
   # Video phase
   "verify-mux-video-upload.sh"
@@ -81,25 +89,34 @@ VERIFICATION_SCRIPTS=(
 
 # Function to run a verification script
 run_verification() {
-  local script_name="$1"
+  local job="$1"
+  local script_name="${job%% *}"
   local script_path="$QA_DIR/$script_name"
+  local log_name
+  local -a cmd_parts
+  local display_name="$job"
+  log_name="$(echo "$job" | tr ' /=' '---' | tr -cd '[:alnum:]._-')"
 
   # Check if script exists
   if [[ ! -f "$script_path" ]]; then
-    echo -e "${YELLOW}⚠ SKIP${NC}  $script_name (not found)"
+    echo -e "${YELLOW}⚠ SKIP${NC}  $display_name (not found)"
     RESULTS+=("SKIP")
+    VERIFICATION_LABELS+=("$display_name")
     DURATIONS+=("0")
     return
   fi
 
-  echo -e "${BLUE}▶ RUN${NC}   $script_name"
+  echo -e "${BLUE}▶ RUN${NC}   $display_name"
 
   # Run script and capture exit code
   local start_time
   start_time=$(date +%s)
 
+  read -r -a cmd_parts <<< "$job"
+  cmd_parts[0]="$QA_DIR/${cmd_parts[0]}"
+
   set +e
-  "$script_path" > "$OUTPUT_DIR/${script_name}.log" 2>&1
+  "${cmd_parts[@]}" > "$OUTPUT_DIR/${log_name}.log" 2>&1
   local exit_code=$?
   set -e
 
@@ -109,22 +126,24 @@ run_verification() {
 
   # Record result
   if [[ $exit_code -eq 0 ]]; then
-    echo -e "${GREEN}✓ PASS${NC}  $script_name (${duration}s)"
+    echo -e "${GREEN}✓ PASS${NC}  $display_name (${duration}s)"
     RESULTS+=("PASS")
     TOTAL_PASSED=$((TOTAL_PASSED + 1))
   else
-    echo -e "${RED}✗ FAIL${NC}  $script_name (exit code: $exit_code, ${duration}s)"
+    echo -e "${RED}✗ FAIL${NC}  $display_name (exit code: $exit_code, ${duration}s)"
     RESULTS+=("FAIL")
     TOTAL_FAILED=$((TOTAL_FAILED + 1))
   fi
 
+  VERIFICATION_LABELS+=("$display_name")
   DURATIONS+=("$duration")
   echo ""
 }
 
 # Run all verification scripts
-for script in "${VERIFICATION_SCRIPTS[@]}"; do
-  run_verification "$script"
+declare -a VERIFICATION_LABELS
+for job in "${VERIFICATION_JOBS[@]}"; do
+  run_verification "$job"
 done
 
 # Calculate total duration
@@ -138,7 +157,7 @@ done
   echo "=== Migration Verification Pipeline Summary ==="
   echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
   echo ""
-  echo "Total Scripts: ${#VERIFICATION_SCRIPTS[@]}"
+  echo "Total Scripts: ${#VERIFICATION_JOBS[@]}"
   echo "Passed: $TOTAL_PASSED"
   echo "Failed: $TOTAL_FAILED"
   echo "Total Duration: ${TOTAL_DURATION}s"
@@ -148,9 +167,9 @@ done
   printf "%-50s %-10s %-10s\n" "Script" "Result" "Duration"
   printf "%-50s %-10s %-10s\n" "------" "------" "--------"
 
-  for i in "${!VERIFICATION_SCRIPTS[@]}"; do
+  for i in "${!VERIFICATION_LABELS[@]}"; do
     printf "%-50s %-10s %-10s\n" \
-      "${VERIFICATION_SCRIPTS[$i]}" \
+      "${VERIFICATION_LABELS[$i]}" \
       "${RESULTS[$i]}" \
       "${DURATIONS[$i]}s"
   done
@@ -166,7 +185,7 @@ echo ""
 printf "%-50s %-10s %-10s\n" "Script" "Result" "Duration"
 printf "%-50s %-10s %-10s\n" "------" "------" "--------"
 
-for i in "${!VERIFICATION_SCRIPTS[@]}"; do
+for i in "${!VERIFICATION_LABELS[@]}"; do
   result="${RESULTS[$i]}"
   color="$NC"
 
@@ -177,13 +196,13 @@ for i in "${!VERIFICATION_SCRIPTS[@]}"; do
   esac
 
   printf "%-50s ${color}%-10s${NC} %-10s\n" \
-    "${VERIFICATION_SCRIPTS[$i]}" \
+    "${VERIFICATION_LABELS[$i]}" \
     "$result" \
     "${DURATIONS[$i]}s"
 done
 
 echo ""
-echo -e "${BLUE}Total:${NC} ${#VERIFICATION_SCRIPTS[@]} scripts"
+echo -e "${BLUE}Total:${NC} ${#VERIFICATION_JOBS[@]} scripts"
 echo -e "${GREEN}Passed:${NC} $TOTAL_PASSED"
 echo -e "${RED}Failed:${NC} $TOTAL_FAILED"
 echo -e "${BLUE}Duration:${NC} ${TOTAL_DURATION}s"
@@ -198,7 +217,6 @@ else
   echo -e "${GREEN}Pipeline passed: All scripts succeeded${NC}"
   exit 0
 fi
-
 
 
 

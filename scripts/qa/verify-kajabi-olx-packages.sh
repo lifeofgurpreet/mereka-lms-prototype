@@ -20,6 +20,8 @@ pass() { echo "[PASS] $*"; }
 fail() { echo "[FAIL] $*"; failures=$((failures + 1)); }
 
 PACKAGE_DIR="scripts/migrations/kajabi/output/course_packages"
+MANIFEST_FILE="$PACKAGE_DIR/course_packages_manifest.csv"
+shopt -s nullglob
 
 # Check directory exists
 if [[ ! -d "$PACKAGE_DIR" ]]; then
@@ -29,8 +31,9 @@ fi
 
 pass "Course packages directory exists: $PACKAGE_DIR"
 
-# Count .tar.gz files
-package_count=$(find "$PACKAGE_DIR" -name "*.tar.gz" | wc -l | tr -d ' ')
+# Count .tar.gz files (recursive; package layout is nested by slug)
+mapfile -t tarballs < <(find "$PACKAGE_DIR" -type f -name "*.tar.gz" | sort)
+package_count="${#tarballs[@]}"
 
 if [[ "$package_count" -eq 109 ]]; then
   pass "Exactly 109 OLX packages found"
@@ -38,29 +41,43 @@ else
   fail "Found $package_count packages (expected 109)"
 fi
 
-# Check course key format in filenames
-invalid_format=0
-for tarball in "$PACKAGE_DIR"/*.tar.gz; do
-  basename=$(basename "$tarball" .tar.gz)
-
-  # Expected format: course-v1:MEREKA+MEKA-{id}+RUN-{id}
-  if [[ "$basename" =~ ^course-v1:MEREKA\+MEKA-[0-9]+\+RUN-[0-9]+$ ]]; then
-    : # Valid format
-  else
-    fail "Invalid course key format: $basename"
-    invalid_format=$((invalid_format + 1))
-  fi
-done
-
-if [[ "$invalid_format" -eq 0 ]]; then
-  pass "All course keys match format: course-v1:MEREKA+MEKA-{id}+RUN-{id}"
+# Check course key format from manifest (canonical source of generated keys).
+if [[ ! -f "$MANIFEST_FILE" ]]; then
+  fail "Course package manifest missing: $MANIFEST_FILE"
 else
-  fail "$invalid_format packages have invalid course key format"
+  pass "Course package manifest exists: $MANIFEST_FILE"
+  invalid_format=$(
+    python3 - "$MANIFEST_FILE" <<'PY'
+import csv
+import re
+import sys
+
+path = sys.argv[1]
+bad = 0
+with open(path, newline="", encoding="utf-8") as handle:
+    reader = csv.DictReader(handle)
+    for row in reader:
+        org = (row.get("org") or "").strip()
+        number = (row.get("course_number") or "").strip()
+        run = (row.get("run") or "").strip()
+        if org != "MEREKA" or not re.match(r"^MEKA-[0-9]+$", number) or not re.match(r"^RUN-[0-9]+$", run):
+            bad += 1
+print(bad)
+PY
+  )
+  if [[ "$invalid_format" -eq 0 ]]; then
+    pass "All manifest rows match course-v1:MEREKA+MEKA-{id}+RUN-{id} components"
+  else
+    fail "$invalid_format manifest rows have invalid org/course_number/run values"
+  fi
 fi
 
 # Validate OLX structure in sample tarballs
 sample_count=0
-for tarball in "$PACKAGE_DIR"/*.tar.gz; do
+if [[ "${#tarballs[@]}" -eq 0 ]]; then
+  fail "No .tar.gz files found in $PACKAGE_DIR"
+fi
+for tarball in "${tarballs[@]}"; do
   if [[ "$sample_count" -ge 3 ]]; then
     break
   fi
@@ -73,17 +90,28 @@ for tarball in "$PACKAGE_DIR"/*.tar.gz; do
     continue
   }
 
-  # Check for required OLX files
-  course_dir=$(find "$temp_dir" -type d -name "course" | head -1)
-  if [[ -z "$course_dir" ]]; then
-    fail "No course/ directory in $(basename "$tarball")"
+  # Check for required OLX files/directories.
+  has_course_xml=0
+  has_chapter_dir=0
+  has_sequential_dir=0
+  has_vertical_dir=0
+  if find "$temp_dir" -type f -name "course.xml" | head -1 | grep -q .; then
+    has_course_xml=1
+  fi
+  if find "$temp_dir" -type d -name "chapter" | head -1 | grep -q .; then
+    has_chapter_dir=1
+  fi
+  if find "$temp_dir" -type d -name "sequential" | head -1 | grep -q .; then
+    has_sequential_dir=1
+  fi
+  if find "$temp_dir" -type d -name "vertical" | head -1 | grep -q .; then
+    has_vertical_dir=1
+  fi
+
+  if [[ "$has_course_xml" -eq 1 && "$has_chapter_dir" -eq 1 && "$has_sequential_dir" -eq 1 && "$has_vertical_dir" -eq 1 ]]; then
+    pass "Valid OLX structure in $(basename "$tarball")"
   else
-    # Check for course.xml
-    if [[ -f "$course_dir/course.xml" || -f "$course_dir/../course.xml" ]]; then
-      pass "Valid OLX structure in $(basename "$tarball")"
-    else
-      fail "Missing course.xml in $(basename "$tarball")"
-    fi
+    fail "Invalid OLX structure in $(basename "$tarball")"
   fi
 
   rm -rf "$temp_dir"

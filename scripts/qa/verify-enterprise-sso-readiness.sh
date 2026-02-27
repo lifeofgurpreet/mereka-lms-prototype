@@ -13,7 +13,7 @@
 #     1. ExternalSecret definition contains all four enterprise-sso-secrets keys
 #     2. ENABLE_ENTERPRISE_INTEGRATION flag is set in mereka_lms.py
 #     3. SAML keypair generation script exists and is executable
-#     4. configure-tenant-idp.sh exists (even if stub)
+#     4. configure-tenant-idp.sh exists and is implemented
 #     5. OIDC cookie middleware order guard passes (OIDC session prerequisite)
 #     6. DISABLE_ENTERPRISE_LOGIN present in lms/production.py MFE_CONFIG
 #     7. auth-sso-enterprise_spec.md exists
@@ -217,10 +217,14 @@ if [[ "$MODE" == "repo" || "$MODE" == "all" ]]; then
     skip "generate-saml-keypair.sh executable check (file missing)"
   fi
 
-  # --- configure-tenant-idp.sh exists ---
+  # --- configure-tenant-idp.sh exists and is implemented ---
   IDP_SCRIPT="$REPO_ROOT/scripts/tenants/configure-tenant-idp.sh"
   if [[ -f "$IDP_SCRIPT" ]]; then
-    pass "configure-tenant-idp.sh exists"
+    if grep -q "TODO: implement verification" "$IDP_SCRIPT"; then
+      fail "configure-tenant-idp.sh exists but is still a TODO stub"
+    else
+      pass "configure-tenant-idp.sh exists and is implemented"
+    fi
   else
     fail "configure-tenant-idp.sh not found at $IDP_SCRIPT"
   fi
@@ -356,6 +360,38 @@ print('ok' if f.get('ENABLE_ENTERPRISE_INTEGRATION') else 'disabled')
       else
         fail "Could not verify ENABLE_ENTERPRISE_INTEGRATION ($RUNTIME_FLAG)"
       fi
+
+      # Enterprise schema integrity (runtime table columns required by current model)
+      SCHEMA_CHECK=$(kube exec -n "$NAMESPACE" "$LMS_POD" -- \
+        python3 -c "
+import os, json
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.production')
+os.environ.setdefault('SERVICE_VARIANT', 'lms')
+import django; django.setup()
+from django.db import connection
+from enterprise.models import EnterpriseCustomer
+
+required_candidates = [
+  'identity_provider',
+  'enable_career_engagement_network_on_learner_portal',
+]
+model_fields = {f.name for f in EnterpriseCustomer._meta.get_fields()}
+required = [c for c in required_candidates if c in model_fields]
+with connection.cursor() as cursor:
+    cols = {c.name for c in connection.introspection.get_table_description(cursor, 'enterprise_enterprisecustomer')}
+missing = [c for c in required if c not in cols]
+if missing:
+    print('missing:' + ','.join(missing))
+else:
+    print('ok:' + ','.join(required))
+" 2>/dev/null || echo \"error\")
+      if [[ "$SCHEMA_CHECK" == ok:* ]]; then
+        pass "enterprise_enterprisecustomer schema matches required runtime fields (${SCHEMA_CHECK#ok:})"
+      elif [[ "$SCHEMA_CHECK" == missing:* ]]; then
+        fail "enterprise_enterprisecustomer missing runtime columns (${SCHEMA_CHECK#missing:})"
+      else
+        fail "Could not verify enterprise schema integrity ($SCHEMA_CHECK)"
+      fi
     fi
 
     # --- SAML SP metadata endpoint (AC-005) ---
@@ -365,7 +401,7 @@ print('ok' if f.get('ENABLE_ENTERPRISE_INTEGRATION') else 'disabled')
     if [[ "$SAML_META_HTTP" == "200" ]]; then
       pass "SAML SP metadata endpoint HTTP 200 ($SAML_META_URL) [AC-005]"
     elif [[ "$SAML_META_HTTP" == "404" ]]; then
-      fail "SAML SP metadata endpoint HTTP 404 — no SAMLProviderConfig configured yet [AC-005]"
+      fail "SAML SP metadata endpoint HTTP 404 — SAMLConfiguration may be missing/disabled for this site [AC-005]"
     elif [[ "$SAML_META_HTTP" == "000" ]]; then
       fail "SAML SP metadata endpoint unreachable (timeout/DNS) [AC-005]"
     else
@@ -413,7 +449,7 @@ if [[ -n "$TENANT" ]]; then
       fail "Enterprise login URL returned HTTP $ENT_HTTP for tenant '$TENANT'"
     fi
 
-    # EnterpriseCustomer record + identity_provider
+    # EnterpriseCustomer record + IdP linkage
     LMS_POD=$(kube get pods -n "$NAMESPACE" \
       -l app.kubernetes.io/name=lms \
       --field-selector=status.phase=Running \
@@ -421,7 +457,7 @@ if [[ -n "$TENANT" ]]; then
 
     if [[ -z "$LMS_POD" ]]; then
       skip "No running LMS pod — skipping EnterpriseCustomer checks"
-      skip "identity_provider field check (no pod)"
+      skip "enterprise IdP linkage check (no pod)"
     else
       EC_CHECK=$(kube exec -n "$NAMESPACE" "$LMS_POD" -- \
         python3 -c "
@@ -434,10 +470,41 @@ try:
     ec = EnterpriseCustomer.objects.filter(slug='${TENANT}').first()
     if not ec:
         print('not_found')
-    elif ec.identity_provider:
-        print('ok:' + str(ec.identity_provider))
     else:
-        print('no_idp')
+        provider = ''
+        linkage_model = 'none'
+
+        # Preferred linkage in newer enterprise versions.
+        try:
+            from enterprise.models import EnterpriseCustomerIdentityProvider
+            links = EnterpriseCustomerIdentityProvider.objects.filter(enterprise_customer=ec)
+            link = links.order_by('-default_provider', '-created').first()
+            if link and getattr(link, 'provider_id', ''):
+                provider = str(link.provider_id)
+                linkage_model = 'enterprise_customer_identity_providers'
+        except Exception:
+            pass
+
+        # Legacy fallback when identity_provider is a concrete DB field.
+        if not provider:
+            concrete_fields = {f.name for f in EnterpriseCustomer._meta.get_fields() if getattr(f, 'concrete', False)}
+            if 'identity_provider' in concrete_fields:
+                candidate = str(getattr(ec, 'identity_provider') or '')
+                if candidate:
+                    provider = candidate
+                    linkage_model = 'identity_provider_field'
+
+        # Property fallback for backwards compatibility.
+        if not provider:
+            candidate = str(getattr(ec, 'identity_provider', '') or '')
+            if candidate:
+                provider = candidate
+                linkage_model = 'identity_provider_property'
+
+        if provider:
+            print('ok:' + provider + ':' + linkage_model)
+        else:
+            print('no_idp')
 except Exception as e:
     print('error:' + str(e))
 " 2>/dev/null || echo "error:exec_failed")
@@ -445,10 +512,12 @@ except Exception as e:
       if [[ "$EC_CHECK" == "not_found" ]]; then
         fail "EnterpriseCustomer slug='$TENANT' NOT found — run provision-tenant.sh first"
       elif [[ "$EC_CHECK" == "no_idp" ]]; then
-        fail "EnterpriseCustomer '$TENANT' exists but identity_provider is NOT set (configure IdP in Django admin)"
+        fail "EnterpriseCustomer '$TENANT' exists but no IdP linkage is configured (configure tenant IdP mapping)"
       elif [[ "$EC_CHECK" == ok:* ]]; then
-        IDP_SLUG="${EC_CHECK#ok:}"
-        pass "EnterpriseCustomer '$TENANT' exists, identity_provider='$IDP_SLUG'"
+        LINK_DETAIL="${EC_CHECK#ok:}"
+        IDP_SLUG="$(cut -d: -f1 <<<"$LINK_DETAIL")"
+        LINK_MODEL="$(cut -d: -f2 <<<"$LINK_DETAIL")"
+        pass "EnterpriseCustomer '$TENANT' exists, idp='$IDP_SLUG' (linkage=$LINK_MODEL)"
       else
         fail "EnterpriseCustomer check failed: $EC_CHECK"
       fi

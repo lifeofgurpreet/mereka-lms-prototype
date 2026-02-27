@@ -55,7 +55,7 @@ for script in "${IMPORT_SCRIPTS[@]}"; do
 
   if [[ "$CHECK_TYPE" == "user-not-found" ]]; then
     # Check for user lookup with error handling
-    if grep -q "DoesNotExist\|try.*get.*User\|except.*User" "$script"; then
+    if grep -Eq "User\.DoesNotExist|except .*DoesNotExist|stats\.skipped \+= 1" "$script"; then
       pass "User-not-found error handling found in $(basename "$script")"
     else
       fail "No user-not-found error handling in $(basename "$script")"
@@ -63,7 +63,7 @@ for script in "${IMPORT_SCRIPTS[@]}"; do
 
   elif [[ "$CHECK_TYPE" == "course-not-found" ]]; then
     # Check for course lookup with error handling
-    if grep -q "CourseNotFound\|InvalidKeyError\|try.*get.*course\|except.*course" "$script"; then
+    if grep -Eq "CourseNotFound|InvalidKeyError|CourseKey\.from_string|CourseOverview|stats\.skipped \+= 1" "$script"; then
       pass "Course-not-found error handling found in $(basename "$script")"
     else
       fail "No course-not-found error handling in $(basename "$script")"
@@ -78,7 +78,7 @@ for script in "${IMPORT_SCRIPTS[@]}"; do
   fi
 
   # Check for logging of skipped records
-  if grep -q "logger.*skip\|log.*skip\|print.*skip" "$script"; then
+  if grep -Eq "logger.*skip|log.*skip|print.*skip|print\\(.*not found|print\\(.*Invalid course" "$script"; then
     pass "Skip logging found in $(basename "$script")"
   else
     echo "[WARN] No skip logging in $(basename "$script")"

@@ -19,6 +19,7 @@ SCRIPT_DIR="$REPO_ROOT/scripts/qa"
 MODE="all"
 JSON_OUT=0
 STRICT=0
+JSON_ONLY=0
 SCRIPT_TIMEOUT="${VALIDATE_OBS_SCRIPT_TIMEOUT:-600}"
 RUNTIME_CMD_TIMEOUT="${VALIDATE_OBS_RUNTIME_CMD_TIMEOUT:-30}"
 APP_NAMESPACE="${VALIDATE_OBS_APP_NAMESPACE:-mereka-lms}"
@@ -64,6 +65,22 @@ if [[ "$MODE" != "local" && "$MODE" != "runtime" && "$MODE" != "all" ]]; then
   echo "Invalid mode: $MODE" >&2
   usage
   exit 1
+fi
+
+if [[ "$JSON_OUT" -eq 1 ]]; then
+  JSON_ONLY="${VALIDATE_OBS_JSON_ONLY:-0}"
+else
+  JSON_ONLY=0
+fi
+
+JSON_STDOUT=1
+if [[ "$JSON_OUT" -eq 1 && "$JSON_ONLY" == "1" ]]; then
+  # Keep raw JSON on FD 3 and suppress all console chatter so runtime parsers
+  # get deterministic payloads in strict mode.
+  exec 3>&1
+  exec 1>/dev/null
+  exec 2>/dev/null
+  JSON_STDOUT=3
 fi
 
 VALIDATE_SCRIPT="$SCRIPT_DIR/verify-observability-validation.sh"
@@ -285,11 +302,21 @@ run_negative_control_check() {
   sed -i "/$missing_sm/d" "$temp_kustomization"
 
   set +e
-  output="$(
-    VERIFY_OBS_KUSTOMIZATION_PATH="$temp_kustomization" \
-    VERIFY_OBS_MONITORING_DIR="$temp_monitoring_root" \
-    "$VALIDATE_SCRIPT" 2>&1
-  )"
+  if [[ "$STRICT" == "1" ]]; then
+    output="$(
+      VERIFY_OBS_KUSTOMIZATION_PATH="$temp_kustomization" \
+      VERIFY_OBS_MONITORING_DIR="$temp_monitoring_root" \
+      VERIFY_OBS_SKIP_LIVE_CHECKS="1" \
+      "$VALIDATE_SCRIPT" --mode local --strict 2>&1
+    )"
+  else
+    output="$(
+      VERIFY_OBS_KUSTOMIZATION_PATH="$temp_kustomization" \
+      VERIFY_OBS_MONITORING_DIR="$temp_monitoring_root" \
+      VERIFY_OBS_SKIP_LIVE_CHECKS="1" \
+      "$VALIDATE_SCRIPT" --mode local 2>&1
+    )"
+  fi
   rc=$?
   set -e
 
@@ -482,7 +509,8 @@ TOTAL=$((PASS + FAIL + SKIP))
 
 if [[ "$JSON_OUT" -eq 1 ]]; then
   if command -v python3 >/dev/null 2>&1; then
-    python3 - "$MODE" "$STRICT" "$TOTAL" "$PASS" "$FAIL" "$SKIP" "$RESULTS_FILE" <<'PY'
+    if [[ "$JSON_STDOUT" -eq 3 ]]; then
+      python3 - "$MODE" "$STRICT" "$TOTAL" "$PASS" "$FAIL" "$SKIP" "$RESULTS_FILE" >&3 <<'PY'
 import json
 import sys
 from datetime import datetime, timezone
@@ -519,19 +547,75 @@ print(json.dumps({
     "checks": checks,
 }, indent=2, sort_keys=False))
 PY
+    else
+      python3 - "$MODE" "$STRICT" "$TOTAL" "$PASS" "$FAIL" "$SKIP" "$RESULTS_FILE" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+
+mode = sys.argv[1]
+strict = bool(int(sys.argv[2]))
+pass_count = int(sys.argv[4])
+fail_count = int(sys.argv[5])
+skip_count = int(sys.argv[6])
+results_file = sys.argv[7]
+
+checks = []
+with open(results_file, 'r', encoding='utf-8') as f:
+    for raw_line in f:
+        line = raw_line.rstrip("\n")
+        if not line.strip():
+            continue
+        parts = line.split("\t", 2)
+        if len(parts) < 3:
+            continue
+        status, check_id, msg = parts
+        checks.append({"id": check_id, "status": status, "message": msg})
+
+print(json.dumps({
+    "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "mode": mode,
+    "strict": strict,
+    "summary": {
+        "pass": pass_count,
+        "fail": fail_count,
+        "skip": skip_count,
+        "total": len(checks),
+    },
+    "checks": checks,
+}, indent=2, sort_keys=False))
+PY
+    fi
   else
-    echo '{'
-    echo '  "generated_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",'
-    echo '  "mode": "'$MODE'",'
-    echo '  "strict": '$([[ "$STRICT" == "1" ]] && echo true || echo false)','
-    echo '  "summary": {'
-    echo '    "pass": '$PASS','
-    echo '    "fail": '$FAIL','
-    echo '    "skip": '$SKIP','
-    echo '    "total": '$TOTAL
-    echo '  },'
-    echo '  "checks": []'
-    echo '}'
+    if [[ "$JSON_STDOUT" -eq 3 ]]; then
+      {
+        echo '{'
+        echo '  "generated_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",'
+        echo '  "mode": "'$MODE'",'
+        echo '  "strict": '$([[ "$STRICT" == "1" ]] && echo true || echo false)','
+        echo '  "summary": {'
+        echo '    "pass": '$PASS','
+        echo '    "fail": '$FAIL','
+        echo '    "skip": '$SKIP','
+        echo '    "total": '$TOTAL
+        echo '  },'
+        echo '  "checks": []'
+        echo '}'
+      } >&3
+    else
+      echo '{'
+      echo '  "generated_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",'
+      echo '  "mode": "'$MODE'",'
+      echo '  "strict": '$([[ "$STRICT" == "1" ]] && echo true || echo false)','
+      echo '  "summary": {'
+      echo '    "pass": '$PASS','
+      echo '    "fail": '$FAIL','
+      echo '    "skip": '$SKIP','
+      echo '    "total": '$TOTAL
+      echo '  },'
+      echo '  "checks": []'
+      echo '}'
+    fi
   fi
 else
   echo "=== Observability Compliance Report ==="

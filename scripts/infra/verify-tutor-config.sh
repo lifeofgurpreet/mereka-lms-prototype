@@ -156,7 +156,7 @@ print_section "Checking MFE Configuration"
 
 MFE_DOCKERFILE="$TUTOR_ENV/env/plugins/mfe/build/mfe/Dockerfile"
 if [[ -f "$MFE_DOCKERFILE" ]]; then
-  pattern_in_file "docker.io/node:18" "$MFE_DOCKERFILE" "MFE Node 18 base image"
+  pattern_in_file "docker.io/node:24.11.0-bullseye-slim" "$MFE_DOCKERFILE" "MFE Node 24 base image"
   regex_in_file "gcc g\+\+ git" "$MFE_DOCKERFILE" "MFE build toolchain (g++)"
   pattern_in_file "python3" "$MFE_DOCKERFILE" "MFE Python 3 dependency"
   pattern_in_file "SESSION_COOKIE_DOMAIN" "$MFE_DOCKERFILE" "MFE cookie domain config"
@@ -220,9 +220,24 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "ENV NODE_OPTIONS=\"--max-old-space-size=6144\"" "$OPENEDX_DOCKERFILE" "Node memory limit increased"
   pattern_in_file "ENV PYTHONPATH=/openedx/edx-platform" "$OPENEDX_DOCKERFILE" "PYTHONPATH set"
 
-  # Check for resilient npm/pip installs (retry logic)
-  regex_in_file "for attempt in 1 2 3.*npm clean-install" "$OPENEDX_DOCKERFILE" "Resilient npm install with retries"
-  regex_in_file "for attempt in 1 2 3.*pip install" "$OPENEDX_DOCKERFILE" "Resilient pip install with retries"
+  # Check for npm/pip install resilience strategy.
+  # Upstream patches evolved over time from explicit retry loops to
+  # direct install commands in recent Tutor/Open edX branches.
+  if grep -qE "for attempt in 1 2 3.*npm clean-install" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "Resilient npm install with retries"
+  elif grep -qE "npm clean-install --no-audit --registry=" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "Resilient npm install command (single-run)"
+  else
+    check_fail "NPM install command with lockfile tolerance not found in $OPENEDX_DOCKERFILE"
+  fi
+
+  if grep -qE "for attempt in 1 2 3.*pip install" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "Resilient pip install with retries"
+  elif grep -qE "pip install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "Fallback pip install command"
+  else
+    check_fail "Python requirements install command with lockfile handling not found in $OPENEDX_DOCKERFILE"
+  fi
 fi
 
 # Check webpack config for optimization

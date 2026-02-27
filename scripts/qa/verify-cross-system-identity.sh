@@ -42,11 +42,23 @@ pass "Both user export files exist"
 # Extract sample emails from each source
 echo "[INFO] Extracting sample emails..."
 
-kajabi_emails=$(tail -n +2 "$KAJABI_USERS" | awk -F, '{print $1}' | tr -d '"' | sort | head -1000)
-mct_emails=$(jq -r '.email // .EmailAddress // .email_address' "$MCT_USERS" 2>/dev/null | sort | head -1000)
+tmp_dir=$(mktemp -d)
+trap 'rm -rf "$tmp_dir"' EXIT
+
+tail -n +2 "$KAJABI_USERS" \
+  | awk -F, '{print $1}' \
+  | tr -d '"' \
+  | sed '/^[[:space:]]*$/d' \
+  | sort -u \
+  | sed -n '1,1000p' > "$tmp_dir/kajabi_emails.txt"
+
+jq -r '.email // .EmailAddress // .email_address // empty' "$MCT_USERS" 2>/dev/null \
+  | sed '/^[[:space:]]*$/d' \
+  | sort -u \
+  | sed -n '1,1000p' > "$tmp_dir/mct_emails.txt"
 
 # Find overlapping emails in samples
-overlap_count=$(comm -12 <(echo "$kajabi_emails") <(echo "$mct_emails") | wc -l | tr -d ' ')
+overlap_count=$(comm -12 "$tmp_dir/kajabi_emails.txt" "$tmp_dir/mct_emails.txt" | wc -l | tr -d ' ')
 
 if [[ "$overlap_count" -gt 0 ]]; then
   pass "Found $overlap_count overlapping emails in sample sets"
