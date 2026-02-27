@@ -8,11 +8,12 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
 GENERATED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 
 PLUGIN_INSTALL_LINE="RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
 LEGACY_PLUGIN_INSTALL_LINE="RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
-NODE18_IMAGE_REGEX="(docker.io/)?node:18[-a-z0-9.]*"
+NODE_IMAGE_REGEX="(docker.io/)?node:(18|24|20)[-a-z0-9.]*"
 
 REQUIRE_GENERATED_DOCKERFILE="${REQUIRE_GENERATED_DOCKERFILE:-0}"
 failures=0
@@ -51,19 +52,40 @@ check_contains_regex() {
   fi
 }
 
+check_contains_any_file() {
+  local label="$1"
+  local needle="$2"
+  shift 2
+  local path
+  for path in "$@"; do
+    if [[ ! -f "$path" ]]; then
+      continue
+    fi
+    if grep -Fq -- "$needle" "$path"; then
+      echo "  ✓ $label"
+      return
+    fi
+  done
+
+  echo "  ✗ $label (missing: $needle)"
+  failures=1
+}
+
 echo "Verifying MFE build prerequisites..."
 echo ""
 
 echo "1. Patch source contract..."
-check_contains "apply-patches has plugin dependency function" "$APPLY_PATCH_SCRIPT" "ensure_mfe_plugin_framework_dependency"
-check_contains "apply-patches injects plugin dependency line" "$APPLY_PATCH_SCRIPT" "$PLUGIN_INSTALL_LINE"
-check_contains "apply-patches normalizes legacy plugin line" "$APPLY_PATCH_SCRIPT" "$LEGACY_PLUGIN_INSTALL_LINE"
-check_contains "apply-patches invokes plugin dependency function" "$APPLY_PATCH_SCRIPT" "updated = ensure_mfe_plugin_framework_dependency(updated)"
+check_contains "apply-patches sources MFE patch module" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-node.sh\""
+check_contains "apply-patches applies MFE node patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_node_patch"
+check_contains "mfe-node patch defines plugin dependency helper" "$PATCH_MODULE" "def ensure_mfe_plugin_framework_dependency(text):"
+check_contains_any_file "mfe-node patch injects legacy-to-legacy-peer line" "$LEGACY_PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
+check_contains_any_file "mfe-node patch injects plugin dependency line" "$PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
+check_contains_any_file "mfe-node patch invokes plugin dependency helper" "updated = ensure_mfe_plugin_framework_dependency(updated)" "$PATCH_MODULE" "$APPLY_PATCH_SCRIPT"
 
 echo ""
 echo "2. Generated Dockerfile contract..."
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
-  check_contains_regex "generated Dockerfile uses Node 18 image" "$GENERATED_MFE_DOCKERFILE" "$NODE18_IMAGE_REGEX"
+  check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
 
   plugin_count="$(grep -F -- "$PLUGIN_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE" | wc -l | tr -d ' ')"

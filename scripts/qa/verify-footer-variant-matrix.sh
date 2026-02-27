@@ -88,20 +88,55 @@ if [[ -f "$PLUGIN" ]]; then
     pass "No null/undefined values in SITE_VARIANTS entries"
   fi
 
-  # Check brand values are non-empty strings for each domain
-  for domain in "academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io"; do
-    DOMAIN_LINE=$(grep "'${domain}'" "$PLUGIN" || true)
-    if echo "$DOMAIN_LINE" | grep -q "brand: '"; then
+# Check brand values are non-empty strings for each domain
+extract_variant_field() {
+  local domain="$1"
+  local field_name="$2"
+  python3 - "$PLUGIN" "$domain" "$field_name" <<'PY'
+import re
+import sys
+
+path, domain, field = sys.argv[1:4]
+text = open(path, encoding="utf-8").read()
+
+block_match = re.search(r"const SITE_VARIANTS = \{(.*?)\n\s*\};", text, re.S)
+if not block_match:
+    raise SystemExit(1)
+
+variants = block_match.group(1)
+entry_pattern = rf"['\"]{re.escape(domain)}['\"]\s*:\s*\{{(.*?)\n\s*\}},"
+entry_match = re.search(entry_pattern, variants, re.S)
+if not entry_match:
+    raise SystemExit(2)
+
+entry = entry_match.group(1)
+pattern = rf"{re.escape(field)}\s*:\s*'([^'\\]|\\.)*'"
+field_match = re.search(pattern, entry)
+if not field_match:
+    raise SystemExit(3)
+
+value = re.search(r"'([^'\\]|\\.)*'", field_match.group(0)).group(0)[1:-1]
+if value:
+    print("found")
+else:
+    raise SystemExit(4)
+PY
+}
+
+for domain in "academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io"; do
+    if extract_variant_field "$domain" "brand" >/dev/null 2>&1; then
       pass "Domain '${domain}' has non-empty brand value"
     else
       fail "Domain '${domain}' missing or empty brand value"
     fi
-    if echo "$DOMAIN_LINE" | grep -q "copyrightHolder: '"; then
+
+    if extract_variant_field "$domain" "copyrightHolder" >/dev/null 2>&1; then
       pass "Domain '${domain}' has non-empty copyrightHolder value"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder value"
     fi
-    if echo "$DOMAIN_LINE" | grep -q "whatsapp: '"; then
+
+    if extract_variant_field "$domain" "whatsapp" >/dev/null 2>&1; then
       pass "Domain '${domain}' has non-empty whatsapp value"
     else
       fail "Domain '${domain}' missing or empty whatsapp value"
@@ -173,12 +208,16 @@ if [[ -f "$PLUGIN" ]]; then
     fail "Fallback variant missing — SITE_VARIANTS lookup has no || fallback"
   fi
 
-  # Confirm fallback references config.SITE_NAME (dynamic, not hardcoded)
-  FALLBACK_LINE=$(grep "SITE_VARIANTS\[hostname\]" "$PLUGIN" || true)
-  if echo "$FALLBACK_LINE" | grep -q "config\.SITE_NAME\|config\.PLATFORM_NAME\|siteName"; then
+  # Confirm fallback references dynamic config values (SITE_NAME / PLATFORM_NAME)
+  FALLBACK_BLOCK=$(awk '
+    /SITE_VARIANTS\[hostname\] \|\|/ { in_fallback=1; next }
+    in_fallback && /^\s*\}\s*,?$/ { in_fallback=0 }
+    in_fallback { print }
+  ' "$PLUGIN" || true)
+  if echo "$FALLBACK_BLOCK" | grep -q "config\.SITE_NAME\|config\.PLATFORM_NAME\|siteName"; then
     pass "Fallback variant uses dynamic config values (SITE_NAME / PLATFORM_NAME)"
   else
-    warn "Fallback variant may not reference config.SITE_NAME — review line"
+    warn "Fallback variant may not reference config.SITE_NAME — review fallback block"
   fi
 fi
 

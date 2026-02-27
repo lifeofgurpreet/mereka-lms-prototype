@@ -3,7 +3,7 @@
 # @covers AC-TBQA-001, AC-TBQA-002, AC-TBQA-003, AC-TBQA-004, AC-TBQA-005
 #
 # Consolidated tenant branding QA runner.
-# Executes all 8 tenant branding verification suites and produces a unified
+# Executes all tenant branding verification suites (9 total) and produces a unified
 # summary table with per-suite PASS/FAIL/WARN counts.
 #
 # Usage:
@@ -16,6 +16,13 @@
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+RUN_BRANDING_GATES_LIVE="${RUN_BRANDING_GATES_LIVE:-1}"
+if [[ "$RUN_BRANDING_GATES_LIVE" == "1" ]]; then
+  BRANDING_GATES_COMMAND="scripts/branding/run-branding-gates.sh"
+else
+  BRANDING_GATES_COMMAND="RUN_LIVE_GATE=0 scripts/branding/run-branding-gates.sh"
+fi
 
 # ── colour helpers ──────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
@@ -33,17 +40,17 @@ SUITE_FAIL=()
 SUITE_WARN=()
 
 # ── suite runner ─────────────────────────────────────────────────────────────
-# AC-TBQA-001: single command runs all 8 verification suites
+# AC-TBQA-001: single command runs all 9 tenant branding verification suites
 # AC-TBQA-005: idempotent — no side-effects, pure read operations
 run_suite() {
   local label="$1"
-  local script="$2"
+  local command="$2"
 
   echo ""
   echo -e "${CYAN}── ${label} ──${NC}"
   local output
   local exit_code=0
-  output=$("$REPO_ROOT/$script" 2>&1) || exit_code=$?
+  output=$(bash -lc "cd '$REPO_ROOT' && $command" 2>&1) || exit_code=$?
   echo "$output"
 
   # AC-TBQA-004: parse PASS / FAIL / WARN counts from summary line
@@ -104,16 +111,18 @@ echo    "Tenant Branding QA — Consolidated Runner"
 echo -e "========================================${NC}"
 echo    "Repo: $REPO_ROOT"
 echo    "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+echo    "Live branding gates: $RUN_BRANDING_GATES_LIVE"
 
-# ── AC-TBQA-001: run all 8 suites in order ───────────────────────────────────
+# ── AC-TBQA-001: run all 9 suites in order ───────────────────────────────────
 run_suite "Analytics Key (8jao.1)"          "scripts/qa/verify-analytics-key.sh"
 run_suite "Selector Hardening (8jao.3)"     "scripts/qa/verify-mfe-selector-hardening.sh"
 run_suite "Token Integrity (8jao.4)"        "scripts/qa/verify-branding-token-integrity.sh"
 run_suite "Plugin Slot Register (8jao.9)"   "scripts/qa/verify-plugin-slot-migration-register.sh"
 run_suite "Footer Variant Matrix (8jao.10)" "scripts/qa/verify-footer-variant-matrix.sh"
+run_suite "RTL Theme Assets"                "scripts/qa/verify-rtl-theme-assets.sh"
 run_suite "Tenant Branding Runtime"         "scripts/qa/verify-tenant-branding-runtime.sh"
-run_suite "Branding Gates"                  "scripts/branding/run-branding-gates.sh"
-run_suite "Multisite Governance"            "scripts/qa/run-multisite-governance-gates.sh"
+run_suite "Branding Gates"                  "$BRANDING_GATES_COMMAND"
+run_suite "Multisite Governance"            "SKIP_DEV_ON_BOTH=1 scripts/qa/run-multisite-governance-gates.sh --env both"
 
 # ── AC-TBQA-004: consolidated summary table ──────────────────────────────────
 echo ""

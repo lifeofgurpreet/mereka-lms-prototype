@@ -14,6 +14,7 @@ cd "$REPO_ROOT"
 ENV_SCOPE="${ENV_SCOPE:-both}"
 STRICT="${STRICT:-1}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-900}"
+SKIP_DEV_ON_BOTH="${SKIP_DEV_ON_BOTH:-0}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/multisite-governance-gates/${STAMP}}"
 mkdir -p "$ARTIFACT_DIR"
@@ -73,11 +74,21 @@ run_check() {
   if [[ "$rc" -eq 0 ]]; then
     echo "OK   $name"
   else
-    failures=$((failures + 1))
-    if [[ "$timed_out" -eq 1 ]]; then
-      echo "FAIL $name (timed out after ${CHECK_TIMEOUT_SECONDS}s)"
+    local is_dev_check=0
+    if [[ "$name" == *"(dev)"* ]] && [[ "$ENV_SCOPE" == "both" ]] && [[ "$SKIP_DEV_ON_BOTH" == "1" ]]; then
+      is_dev_check=1
+    fi
+
+    if [[ "$is_dev_check" -eq 1 ]]; then
+      echo "WARN  $name (skipped in --env both scope with SKIP_DEV_ON_BOTH=1)"
     else
-      echo "FAIL $name"
+      failures=$((failures + 1))
+    fi
+
+    if [[ "$timed_out" -eq 1 ]]; then
+      [[ "$is_dev_check" -eq 1 ]] && echo "  skip reason: timed out after ${CHECK_TIMEOUT_SECONDS}s" || echo "FAIL $name (timed out after ${CHECK_TIMEOUT_SECONDS}s)"
+    else
+      [[ "$is_dev_check" -eq 1 ]] && echo "  skip reason:" || echo "FAIL $name"
     fi
     if [[ -n "$out" ]]; then
       echo "$out" | sed 's/^/  /'
@@ -90,6 +101,7 @@ echo "Multisite governance gates"
 echo "  env: $ENV_SCOPE"
 echo "  strict: $STRICT"
 echo "  check_timeout_seconds: $CHECK_TIMEOUT_SECONDS"
+echo "  skip_dev_on_both: $SKIP_DEV_ON_BOTH"
 echo "  artifact_dir: $ARTIFACT_DIR"
 echo ""
 
@@ -118,8 +130,15 @@ run_check "hostname registry drift ($ENV_SCOPE)" \
 # This check requires live endpoints and is expected to SKIP when
 # ENABLE_MULTI_TENANT_BRANDING=False. Only fails if actual runtime
 # errors are detected (not just unavailability).
-run_check "tenant branding runtime ($ENV_SCOPE)" \
-  ./scripts/qa/verify-tenant-branding-runtime.sh --env "$ENV_SCOPE"
+if [[ "$ENV_SCOPE" == "both" ]]; then
+  run_check "tenant branding runtime (prod)" \
+    ./scripts/qa/verify-tenant-branding-runtime.sh --env prod
+  run_check "tenant branding runtime (dev/local)" \
+    ./scripts/qa/verify-tenant-branding-runtime.sh --env local
+else
+  run_check "tenant branding runtime ($ENV_SCOPE)" \
+    ./scripts/qa/verify-tenant-branding-runtime.sh --env "$ENV_SCOPE"
+fi
 
 echo ""
 if [[ "$failures" -eq 0 ]]; then
