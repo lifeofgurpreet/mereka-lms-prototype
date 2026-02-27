@@ -3,6 +3,14 @@
 ## Goal
 Close remaining first-class observability blockers in a strict lane-safe sequence (dev/kind → rke2-nonprod → prod), without touching non-observability application behavior.
 
+## Current state (single-source)
+
+- Last runtime strict status (`var/ci/observability-compliance-runtime.json`): `pass 4 / fail 5 / skip 0`.
+- Last legacy nonprod strict output (`var/ci/runtime-nonprod-check/observability-compliance-runtime.json`): `pass 4 / fail 5 / skip 0`.
+- Lane-run summary artifact (`var/ci/rke2-nonprod-runtime-check/observability-runtime-verify-runtime.txt`): `pass 9 / fail 28 / skip 2` and currently reports `evidence_identity=env=rke2-nonprod;profile=rke2-nonprod;context=rke2-nonprod;project=mereka-lms` with both LMS/CMS metric payload files present.
+- Blocking status remains: LMS/CMS `/metrics` response for active strict lanes still 000 in runtime compliance; metric payload counters in `observability-metrics-*-runtime.md` remain zero, and caddy/mfe wiring target/rule match evidence is zero.
+- Current acceptance condition before any lane progression: one consistent strict run with AC-OVR-016 passing and stable identity strings across all evidence artifacts.
+
 ## Execution doctrine (non-negotiable)
 - One ticket per lane wave.
 - No merge/push from this lane until evidence from strict runtime first-class command is attached.
@@ -33,6 +41,24 @@ Hard stop before each wave:
 | 8 | OBS-EXT-069 | nonprod (pilot wave), then prod | `AC-OVR-025` and `AC-OVR-029` pass in strict mode consistently with parseable `observability-compliance-runtime.json`; no schema mismatch and no non-JSON stderr pollution. |
 | 9 | OBS-070 | all lanes | Publish final handoff artifact set linking `OBS-053..057`, `OBS-061..069`, and open exception list for `OBS-060`; owners confirmed for each blocked item. |
 | 10 | Parity closeout | nonprod → prod (3 consecutive windows) | `PAR-001` and `PAR-002` rollups close after three consecutive no-skip/no-fail strict windows with identical identity context. |
+
+
+## Execution acceptance matrix for the next 10 large tasks
+
+| Task | Primary owner | Must-have evidence | Pass condition |
+|---|---|---|---|
+| OBS-EXT-061 | platform/apps + SRE | `observability-metrics-lms-runtime.md`, `observability-metrics-cms-runtime.md` | LMS/CMS `/metrics` probe returns 200 and exposition has `# HELP`, `# TYPE`, numeric samples |
+| OBS-EXT-062 | platform/apps | same as above | `ROOT_URLCONF_OVERRIDES` includes `openedx_prometheus.urls` and `/metrics`/`/metrics/` probes return 200 |
+| OBS-EXT-063 | SRE | `observability-cms-prometheus-wiring-runtime.md`, `observability-lms-prometheus-wiring-runtime.md` | CMS and LMS wiring target/rule matches both > 0 |
+| OBS-EXT-064 | platform/observability | `observability-caddy-prometheus-wiring-runtime.md` | caddy target and `caddy-alerts` rule group detected and loaded |
+| OBS-EXT-065 | platform/observability | `observability-mfe-prometheus-wiring-runtime.md` | mfe target and `services-alerts` rule group detected and loaded |
+| OBS-EXT-066 | platform/observability | per-service wiring MD files | forum/discovery/ecommerce/credentials/purchase-gateway ServiceMonitors in activeTargets |
+| OBS-EXT-067 | platform/observability | `observability-slo-rules-prometheus-wiring-runtime.md`, `observability-video-rules-prometheus-wiring-runtime.md`, `observability-ora2-rules-prometheus-wiring-runtime.md` | `slo-recording-rules`, `video-alerts`, `ora2-operations` in `/api/v1/rules` |
+| OBS-EXT-068 | platform/observability | `observability-dev-xqueue-prometheus-wiring-runtime.md`, `observability-dev-mux-prometheus-wiring-runtime.md` | dev-only objects present in dev and intentionally absent elsewhere |
+| OBS-EXT-069 | release ops | `observability-compliance-runtime.json`, `observability-runtime-verify-runtime.md` | AC-OVR-025/029 strict JSON parse + deterministic identity schema |
+| OBS-070 | release ops | handoff bundle docs + evidence index | all child ACs linked, owners assigned, exception criteria published |
+| PAR closeout | release ops | rollup artifacts (3 windows) | `PAR-001` and `PAR-002` closed with no-skip/no-fail for nonprod/prod |
+
 
 ## Lane command sequence
 
@@ -73,6 +99,16 @@ Then verify these artifacts exist and pass:
 - `var/ci/observability-metrics-lms-runtime.md`
 - `var/ci/observability-metrics-cms-runtime.md`
 - component wiring evidence files referenced by the active ticket (for example `observability-caddy-prometheus-wiring-runtime.md`, `observability-mfe-prometheus-wiring-runtime.md`, ...).
+
+
+## Most recent executed blocker evidence (2026-02-27)
+
+- `./scripts/qa/validate-observability-compliance.sh --mode runtime --json` (non-strict) output now explicitly reports:
+  - LMS `/metrics`: `status=fail`, `expected 200`, got `000`.
+  - CMS `/metrics`: `status=fail`, `expected 200`, got `000`.
+  - Prometheus payload validation fails for both endpoints (`help/type/sample` unavailable).
+  - AC-OVR-026 pass/fail message contains inline runtime verification text, which is evidence-noise and should be treated as a parser determinism issue before `AC-OVR-025`/`AC-OVR-029` can be closed.
+- Compliance JSON now fails fast with exit code 1 and blocks downstream runtime verification and first-class evidence-index generation.
 
 ## Known hard stops
 
