@@ -136,8 +136,8 @@ body {
 /* RISK: MEDIUM — Paragon form control BEM + Bootstrap; border-radius/color degrade visually */
 .pgn__form-control,
 .form-control {
-  border-radius: 16px;
-  border-color: rgb(var(--mereka-color-ink-deep-rgb) / 0.2);
+  border-radius: var(--mereka-mfe-form-control-radius, 16px);
+  border-color: var(--pgn-form-control-border-color);
   box-shadow: none;
 }
 
@@ -159,8 +159,8 @@ label {
 .card,
 .shadow-lg,
 .pgn__card {
-  border-radius: 24px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  border-radius: var(--mereka-mfe-card-radius, 24px);
+  border: var(--mereka-mfe-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
@@ -180,7 +180,7 @@ label {
 
 /* RISK: LOW — Paragon alert BEM; border-radius/border color only */
 .pgn__alert {
-  border-radius: 16px;
+  border-radius: var(--mereka-mfe-alert-radius, 16px);
   border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
 }
 
@@ -210,23 +210,23 @@ label {
 
 /* RISK: MEDIUM — Paragon modal BEM; border-radius degrade visually on rename */
 .pgn__modal-content {
-  border-radius: 24px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
+  border-radius: var(--mereka-mfe-modal-radius, 24px);
+  border: var(--mereka-mfe-modal-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10));
   box-shadow: 0 30px 90px rgb(var(--mereka-color-ink-deep-rgb) / 0.18);
 }
 
 /* RISK: LOW — Bootstrap/Paragon dropdown; border-radius/shadow color only */
 .dropdown-menu,
 .pgn__dropdown-menu {
-  border-radius: 16px;
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
-  box-shadow: 0 20px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.14);
+  border-radius: var(--mereka-mfe-dropdown-radius, 16px);
+  border: var(--mereka-mfe-dropdown-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10));
+  box-shadow: var(--mereka-mfe-dropdown-shadow, 0 20px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.14));
 }
 
 /* RISK: LOW — Bootstrap/Paragon tabs; border-radius shape only */
 .nav-tabs .nav-link,
 .pgn__tabs .nav-link {
-  border-radius: 999px;
+  border-radius: var(--mereka-mfe-tab-radius, 999px);
 }
 
 /* RISK: LOW — active tab gradient; color/background only */
