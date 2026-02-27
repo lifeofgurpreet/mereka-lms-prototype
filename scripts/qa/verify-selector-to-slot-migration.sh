@@ -65,7 +65,7 @@ if [[ -f "$PLUGIN_FILE" ]]; then
   done
 
   # learner dashboard sidebar slot is optional while it is still pending in code
-  if grep -q 'learner_dashboard.sidebar.v1' "$PLUGIN_FILE"; then
+  if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE"; then
     pass_check "AC-FRONT-022: learner-dashboard sidebar slot is registered"
   else
     warn_check "AC-FRONT-022: learner-dashboard sidebar slot not yet registered (legacy CSS fallback may still be needed)"

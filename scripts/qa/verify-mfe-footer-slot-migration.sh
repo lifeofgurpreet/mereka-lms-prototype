@@ -116,7 +116,7 @@ else
     fail "AC-FRONT-062: Header logo canonical slot not registered in mereka_lms.py"
   fi
 
-  if grep -q 'learner_dashboard.sidebar.v1' "$PLUGIN_FILE"; then
+  if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE"; then
     pass "AC-FRONT-062: learner-dashboard sidebar slot registered"
   else
     warn "AC-FRONT-062: learner-dashboard sidebar slot not yet registered (CSS fallback path active)"
