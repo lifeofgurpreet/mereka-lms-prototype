@@ -35,6 +35,7 @@ OIDC_USERINFO_URL=""
 
 RUN_MIGRATION_VERIFICATION=1
 RUN_RUNTIME_GATES=1
+RUN_INTEGRITY_GUARD=1
 DRY_RUN=1
 
 usage() {
@@ -67,6 +68,7 @@ Optional IdP fields:
 Flow controls:
   --skip-migration-verification
   --skip-runtime-gates
+  --skip-integrity-guard
   --apply                             Apply changes (default dry-run)
   --dry-run                           Preview only (default)
 USAGE
@@ -95,6 +97,7 @@ while [[ $# -gt 0 ]]; do
 
     --skip-migration-verification) RUN_MIGRATION_VERIFICATION=0; shift ;;
     --skip-runtime-gates) RUN_RUNTIME_GATES=0; shift ;;
+    --skip-integrity-guard) RUN_INTEGRITY_GUARD=0; shift ;;
     --apply) DRY_RUN=0; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -121,6 +124,12 @@ fi
 echo "=== Enterprise Tenant Onboarding Workflow ==="
 echo "slug=$SLUG name=$NAME domain=$DOMAIN env=$ENVIRONMENT idp_type=$IDP_TYPE dry_run=$DRY_RUN"
 echo ""
+
+if [[ "$RUN_INTEGRITY_GUARD" -eq 1 ]]; then
+  echo "[0/6] Run enterprise readiness integrity preflight"
+  "$REPO_ROOT/scripts/qa/verify-enterprise-readiness-integrity.sh"
+  echo ""
+fi
 
 provision_cmd=(
   "$REPO_ROOT/scripts/tenants/provision-tenant.sh"

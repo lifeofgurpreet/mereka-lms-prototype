@@ -119,6 +119,8 @@ assert_not_contains "$RUNBOOK_ENTERPRISE" '_testmap\.ya?ml' \
 # 7) Deterministic enterprise onboarding workflow contract
 assert_contains "$ONBOARD_SCRIPT" '\[1/6\] Provision/reconcile tenant' \
   "onboarding workflow includes step 1/6 tenant provisioning"
+assert_contains "$ONBOARD_SCRIPT" '\[0/6\] Run enterprise readiness integrity preflight' \
+  "onboarding workflow includes step 0/6 integrity preflight"
 assert_contains "$ONBOARD_SCRIPT" '\[2/6\] Sync SiteConfiguration ENTERPRISE_CUSTOMER_UUID mapping' \
   "onboarding workflow includes step 2/6 enterprise-site mapping sync"
 assert_contains "$ONBOARD_SCRIPT" '\[3/6\] Configure tenant IdP' \
@@ -135,6 +137,8 @@ assert_contains "$ONBOARD_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
   "onboarding workflow invokes enterprise SSO readiness gate"
 assert_contains "$ONBOARD_SCRIPT" 'STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1' \
   "onboarding workflow enforces strict enterprise site mapping in prod runtime gate"
+assert_contains "$ONBOARD_SCRIPT" '--skip-integrity-guard' \
+  "onboarding workflow supports explicit skip flag for integrity preflight"
 
 # 8) Production release orchestration guard contract
 assert_contains "$RELEASE_SCRIPT" 'RUN_ENTERPRISE_SSO_RUNTIME_GUARD=' \
