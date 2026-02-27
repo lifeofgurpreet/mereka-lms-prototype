@@ -369,6 +369,33 @@ check_observability() {
     pass "Observability: All PrometheusRule files follow naming convention"
   fi
 
+  # Check observability docs for unresolved lane/context placeholders
+  local placeholder_violations=0
+  local file_list
+  if [[ -d docs/qa && -d docs/operations ]]; then
+    file_list=$(find docs/qa docs/operations \
+      -type f \
+      -name '*.md' \
+      \( -iname '*observability*' -o -iname '*OBSERVABILITY*' -o -iname '*parity*' -o -iname '*ONCALL*' \) \
+      | sort -u)
+
+    if [[ -n "$file_list" ]]; then
+      while IFS= read -r doc; do
+        local placeholder_hits
+        placeholder_hits="$(rg -n -E '<[A-Za-z0-9._-]+-context>|<[A-Za-z0-9._-]+-project>|<dev-or-shared-project>|<lane-context>' "$doc" 2>/dev/null || true)"
+        if [[ -n "$placeholder_hits" ]]; then
+          echo "[FAIL] Observability docs still contain unresolved placeholders: $doc"
+          echo "$placeholder_hits" | sed 's/^/  /'
+          placeholder_violations=$((placeholder_violations + 1))
+        fi
+      done <<< "$file_list"
+    fi
+  fi
+
+  if [[ $placeholder_violations -eq 0 ]]; then
+    pass "Observability: No unresolved context/project placeholders in observability docs"
+  fi
+
   # Check QA scripts produce structured output (informational only, don't spam warnings)
   # Just provide a summary
   local structured_count=0
