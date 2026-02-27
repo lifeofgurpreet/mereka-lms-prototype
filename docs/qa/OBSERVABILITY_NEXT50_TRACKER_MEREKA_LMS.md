@@ -81,6 +81,69 @@ Execution mode: Tracker-ready implementation backlog
 9. Produce the first pilot evidence artifact bundle (`docs/evidence/observability/`), including one canonical flow trace ID + log correlation proof.
 10. Prepare handoff ticket set `OBS-PILOT-TRACING-01` in docs/qa tracker for implementation agents with explicit acceptance gates and ownership. **Done** (`docs/qa/OBS-PILOT-TRACING-01.md`)
 
+
+## Runtime Blocking Findings (2026-02-27 evidence)
+
+- `verify-observability-runtime.sh` on `rke2-nonprod` remains with `PASS 8 / FAIL 29 / SKIP 2`.
+- AC-OVR-016 (`LMS/CMS /metrics`) still fails in live runtime payload checks (`status_code: 000` for observed paths).
+- LMS runtime still appears to use stock settings path and not repo-applied app instrumentation in the live pod, so `django_prometheus`/`openedx_prometheus` wiring is not guaranteed from runtime images.
+- CMS has partial middleware/install presence but still lacks consistent `/metrics` exposure semantics in the checked runtime lane.
+- AC-OVR-025 (`validate-observability-compliance.sh --json`) and AC-OVR-029 strict gating behavior are still unreliable under current strict workflow expectations.
+- Continue with sequencing: first close runtime app-metrics drift, then close coverage objects (`OBS-053..057`), then harden strict JSON/parity gating.
+
+
+
+## Systematic Execution Wave 2 — Handoff Queue (2026-02-27)
+
+This is the next ordered 10-task handoff in terms of implementation scope, not micro-steps. Keep each task in lane mode: close one ticket, rerun proof command, then move to the next.
+
+1. **OBS-EXT-061 — Close app-metrics image drift (P0, in_progress)**
+   - Definition of done: LMS/CMS pods in dev/nonprod/prod show expected `/metrics` settings wiring and middleware chain from repo-produced manifests; evidence from `observability-metrics-lms-runtime.md` and `observability-metrics-cms-runtime.md` both shows status_code `200`.
+
+2. **OBS-EXT-062 — Make LMS metrics endpoint contract concrete (P0, in_progress)**
+   - Definition of done: `openedx_prometheus.urls` is explicitly mounted at `/metrics` in runtime URLConf and `/metrics` returns Prometheus exposition with both `# HELP` and numeric sample rows.
+
+3. **OBS-EXT-063 — Normalize CMS metrics route and ServiceMonitor alignment (P0, planned)**
+   - Definition of done: CMS `/metrics` route exists with service/monitor naming matching the lane, and runtime check emits `status_code: 200` for CMS with valid sample payload.
+
+4. **OBS-EXT-064 — Finish OBS-053 (P0, planned)**
+   - Definition of done: `caddy-metrics` + `caddy-alerts` deployed and visible across dev/nonprod/prod in monitor targets and runtime evidence objects.
+
+5. **OBS-EXT-065 — Finish OBS-054 (P0, planned)**
+   - Definition of done: `mfe-metrics` ServiceMonitor + `services-alerts` PrometheusRule exist in each parity lane where required and pass strict runtime verification.
+
+6. **OBS-EXT-066 — Finish OBS-055 (P1, planned)**
+   - Definition of done: Surface service monitors for Forum/Discovery/Ecommerce/Credentials/Purchase Gateway are present and confirmed in Prometheus scrape targets per lane profile.
+
+7. **OBS-EXT-067 — Finish OBS-056 (P1, planned)**
+   - Definition of done: Rule sets (`caddy-alerts`, `slo-recording-rules`, `video-alerts`, `ora2-operations`) appear in `/api/v1/rules` and match expected object names in proof evidence.
+
+8. **OBS-EXT-068 — Finish OBS-057 (P1, planned)**
+   - Definition of done: dev-only monitor coverage includes `xqueue-metrics` and `mux-delivery-monitor` checks with no accidental nonprod/prod regressions.
+
+9. **OBS-EXT-069 — Stabilize strict runtime/compliance JSON and deterministic fail behavior (P1, planned)**
+   - Definition of done: `AC-OVR-025` and `AC-OVR-029` pass consistently with strict mode and canonical runner outputs remain machine-parseable.
+
+10. **OBS-EXT-070 — Publish implementation handoff epic (P0, planned)**
+    - Definition of done: one parent issue set in tracker references `OBS-053..057`, `OBS-EXT-061..069`, and `OBS-058` with explicit evidence paths + closure criteria.
+
+### Lane command for every wave
+
+Use this exact check after each closure wave:
+
+```bash
+OBSERVABILITY_ENV_LABEL=<lane> OBSERVABILITY_DISPATCH_PROFILE=nonprod OBSERVABILITY_K8S_CONTEXT=$OBS_PARITY_<LANE>_K8S_CONTEXT ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+```
+
+Required artifacts to close each wave:
+- Hand-off issue set: `docs/qa/OBS-EXT-WAVE-2-HANDOFF.md` for implementation sequencing and sign-off closure criteria.
+- `observability-compliance-runtime.json`
+- `observability-runtime-verify-runtime.md`
+- `observability-first-class-runtime-evidence-index.json`
+- `observability-metrics-lms-runtime.md`
+- `observability-metrics-cms-runtime.md`
+- relevant per-object evidence file(s)
+
 ## Execution Order Recommendation
 
 1. P0 tasks first: `OBS-001..OBS-008`, `OBS-011`, `OBS-015..OBS-017`, `OBS-026..OBS-027`, `OBS-031..OBS-032`, `OBS-041`, `OBS-050`.
