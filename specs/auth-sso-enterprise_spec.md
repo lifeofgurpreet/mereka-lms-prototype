@@ -104,7 +104,7 @@ This spec also addresses critical security gaps: there is no formal contract for
 - The Open edX `third_party_auth` Django app supports multiple simultaneous SAML and OIDC providers with per-site configuration (confirmed in Open edX Redwood)
 - Each enterprise client has an existing SAML 2.0 or OIDC-compliant identity provider that their IT team can configure (metadata exchange, redirect URIs, attribute mapping)
 - Authentik (`auth0.mereka.io`) remains the platform-level identity provider for non-enterprise users and platform administrators
-- The `EnterpriseCustomer` model's `identity_provider` field is the canonical link between a tenant and their IdP configuration slug in `third_party_auth`
+- Enterprise IdP linkage is represented by either `EnterpriseCustomerIdentityProvider` (preferred on newer enterprise builds) or the legacy `EnterpriseCustomer.identity_provider` field, and each tenant resolves to exactly one default IdP slug for login routing
 - Open edX's `python-social-auth` pipeline supports custom steps for tenant-scoped JIT provisioning and role mapping
 - The existing K8s secrets management pipeline (Infisical -> GCP Secret Manager -> ExternalSecrets -> K8s Secrets) can handle per-tenant SAML signing certificates and OIDC client secrets
 - Enterprise clients will provide SAML metadata URLs (preferred) or static XML files; OIDC clients will provide discovery endpoint URLs
@@ -122,7 +122,7 @@ This spec also addresses critical security gaps: there is no formal contract for
 - The system MUST support configuring multiple independent SAML 2.0 Identity Providers, one per enterprise tenant, using the Open edX `third_party_auth` `SAMLProviderConfig` model
 - The system MUST support configuring multiple independent OIDC providers, one per enterprise tenant, using the Open edX `third_party_auth` `OAuth2ProviderConfig` model
 - The system MUST support the following enterprise IdP platforms: Active Directory Federation Services (ADFS), Microsoft Entra ID (Azure AD), Okta, Google Workspace, PingFederate, and any standards-compliant SAML 2.0 or OIDC provider
-- The system MUST associate each enterprise IdP configuration with exactly one `EnterpriseCustomer` via the `identity_provider` field on the `EnterpriseCustomer` model
+- The system MUST associate each enterprise IdP configuration with exactly one `EnterpriseCustomer` via enterprise linkage models (`EnterpriseCustomerIdentityProvider` when available, with legacy `identity_provider` field compatibility)
 - The system MUST support SP-initiated SAML SSO: the LMS generates an `AuthnRequest`, redirects the user to the tenant's IdP, and processes the `Response` at the Assertion Consumer Service (ACS) endpoint
 - The system MUST support slug-based IdP routing: `https://{lms_host}/enterprise/login/{tenant_slug}` MUST redirect the user to the correct tenant's IdP (SAML or OIDC)
 - The system MUST support the Open edX third-party-auth login hint mechanism: `/auth/login/{backend}/?auth_entry=login&next=...` with the correct backend name for each tenant's provider

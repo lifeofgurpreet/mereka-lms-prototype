@@ -1,8 +1,8 @@
 # Enterprise SSO Guide
 
 > **Spec**: `specs/auth-sso-enterprise_spec.md`
-> **Status**: Phase 0 complete — infrastructure in place, no live enterprise IdP yet
-> **Last updated**: 2026-02-25
+> **Status**: Runtime-ready baseline with deterministic tenant onboarding + readiness gates
+> **Last updated**: 2026-02-27
 
 ---
 
@@ -10,23 +10,23 @@
 
 This guide documents the Enterprise SSO posture for Mereka Academy. It covers:
 
-- What Phase 0 provides today (infrastructure foundation)
-- What Phase 1 (full SSO) requires to be built
+- Current runtime baseline and prerequisites
+- Deterministic onboarding flow for new enterprise tenants
 - Operator runbook for adding a new enterprise IdP
 
 **Current auth architecture:**
 
 ```
 Non-enterprise users  →  Authentik OIDC (auth0.mereka.io)  →  LMS
-Enterprise users      →  [Phase 1: per-tenant SAML/OIDC]   →  LMS  (not live yet)
+Enterprise users      →  Per-tenant SAML/OIDC via third_party_auth → LMS
 Platform admins       →  Authentik OIDC + MerekaPlatformAdminMiddleware
 ```
 
 ---
 
-## Phase 0: What Is In Place Today
+## Current Runtime Baseline
 
-Phase 0 was completed as infrastructure groundwork. The following is present in the repo and deployed to production:
+The following controls are implemented in repo automation and runtime verification:
 
 ### Django App — `third_party_auth`
 
@@ -61,7 +61,7 @@ Defined in `deploy/k8s/base/secrets/external-secrets.yaml`. Syncs four secrets f
 | `OIDC_ENTERPRISE_CLIENT_SECRET` | `MEREKA_LMS_OIDC_ENTERPRISE_CLIENT_SECRET` | Template OIDC client secret |
 | `SCIM_BEARER_TOKEN` | `MEREKA_LMS_SCIM_BEARER_TOKEN` | SCIM provisioning bearer token |
 
-**Status**: ExternalSecret definition exists. The GCP secrets themselves are NOT yet populated (keys have not been generated and stored yet).
+**Status**: ExternalSecret definition is present and enforced by readiness checks (`verify-enterprise-sso-readiness.sh`).
 
 ### Feature Flag — `DISABLE_ENTERPRISE_LOGIN`
 
@@ -72,14 +72,15 @@ The authn MFE respects `MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"]`. This is current
 | Script | Status | Purpose |
 |---|---|---|
 | `scripts/tenants/generate-saml-keypair.sh` | Ready | Generate SAML SP keypair |
-| `scripts/tenants/configure-tenant-idp.sh` | Implemented | Configures SAML/OIDC provider and links EnterpriseCustomer.identity_provider |
+| `scripts/tenants/configure-tenant-idp.sh` | Implemented | Configures SAML/OIDC provider and links EnterpriseCustomer via relation model or legacy field |
 | `scripts/tenants/provision-tenant.sh` | Ready | Provision enterprise tenant |
+| `scripts/tenants/onboard-enterprise-tenant.sh` | Implemented | Deterministic end-to-end onboarding workflow with verification gates |
 
 ---
 
-## Phase 1: What Must Be Built for Full SSO
+## Deterministic Onboarding Workflow (Production)
 
-The following are required to onboard the first enterprise IdP. They are defined as Acceptance Criteria in `specs/auth-sso-enterprise_spec.md` but not yet implemented.
+Use `scripts/tenants/onboard-enterprise-tenant.sh` as the canonical path for onboarding enterprise tenants.
 
 ### 1. Populate SAML Secrets (Operator Action)
 
@@ -203,9 +204,7 @@ Authorization URL, Token URL, User Info URL: from IdP discovery endpoint
 
 ### Step 3: Link to EnterpriseCustomer
 
-In Django Admin: **Enterprise > Enterprise Customers > {Tenant} > identity_provider**
-
-Set to the slug created in Step 2.
+Use `configure-tenant-idp.sh` (or onboarding script) to create linkage. Runtime uses `EnterpriseCustomerIdentityProvider` when available, with legacy `identity_provider` compatibility.
 
 ### Step 4: Enable per-tenant Feature Flag
 
@@ -259,7 +258,7 @@ For testing without a real enterprise IdP, use a free SAML IdP simulator such as
 - **Do not reuse SP signing keys across tenants.** Each tenant should have a dedicated keypair. The current ExternalSecret stores one shared keypair; for production multi-tenant use, extend the ExternalSecret with per-tenant keys (e.g., `MEREKA_LMS_SAML_SP_KEY_ACME_CORP`).
 - **SAML assertions with SHA-1 signatures MUST be rejected.** Open edX's `python-social-auth` rejects SHA-1 by default; do not override this.
 - **Assertion replay prevention** is handled by `python-social-auth`'s Redis-backed assertion ID cache (TTL = assertion validity window). Confirm Redis is healthy before enabling enterprise SSO.
-- **Cross-tenant isolation**: The `EnterpriseCustomer.identity_provider` field enforces which IdP can authenticate to which tenant. Never configure a shared IdP slug for multiple tenants.
+- **Cross-tenant isolation**: Enterprise IdP linkage (preferred: `EnterpriseCustomerIdentityProvider`, legacy: `identity_provider`) enforces which IdP can authenticate to which tenant. Never configure a shared IdP slug for multiple tenants.
 - **SCIM bearer tokens** should be rotated annually per `docs/operations/SECRET_ROTATION_CHECKLIST.md`.
 
 ---
@@ -293,7 +292,7 @@ Check that `ENABLE_THIRD_PARTY_AUTH=True` in LMS settings and that the `SAMLProv
 
 ### `enterprise-sso-secrets` K8s secret is missing
 
-The GCP secrets have not been populated yet. Follow Step 1 in "Phase 1: What Must Be Built". Run:
+Enterprise SSO runtime checks require populated SAML/OIDC secrets. Verify status and sync:
 ```bash
 kubectl get externalsecret enterprise-sso-secrets -n mereka-lms -o yaml | grep -A5 "status:"
 ```
@@ -312,7 +311,7 @@ A `SecretSyncedError` condition indicates the GCP secret does not exist.
 | `scripts/tenants/generate-saml-keypair.sh` | SAML SP keypair generator |
 | `scripts/tenants/configure-tenant-idp.sh` | IdP configuration helper (implemented) |
 | `scripts/tenants/provision-tenant.sh` | Create EnterpriseCustomer + TenantConfig |
-| `scripts/qa/verify-enterprise-sso-readiness.sh` | Phase 0 SSO readiness verification (auth-sso-enterprise_spec.md AC-043) |
+| `scripts/qa/verify-enterprise-sso-readiness.sh` | Enterprise SSO readiness verification (auth-sso-enterprise_spec.md AC-043) |
 | `scripts/qa/verify-enterprise-sso.sh` | Enterprise integrated channels verification (enterprise-microservices_spec.md Phase 4) |
 | `scripts/qa/verify-auth-hardening.sh` | Full auth hardening suite runner |
 | `docs/operations/AUTH_HARDENING_SPEC.md` | Auth hardening decisions and implementation |

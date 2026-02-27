@@ -121,7 +121,7 @@ Without this spec, the branding system has no framework for per-tenant themes, t
 - The system MUST support a tenant having multiple associated domains (e.g., `acme.academyv2.mereka.io` and `learning.acmecorp.com`) mapped to the same Django Site
 - The system MUST support a user belonging to multiple tenants simultaneously via `EnterpriseCustomerUser` records, one per tenant-user pair
 - The system MUST support `PendingEnterpriseCustomerUser` records for users invited to a tenant but not yet registered in the LMS
-- The system MUST maintain a tenant configuration record that includes at minimum: `uuid`, `name`, `slug`, `active` (boolean), `site_id`, `country`, `contact_email`, `identity_provider` (SAML/OIDC slug), and all enterprise feature flags enumerated in `specs/enterprise-microservices_spec.md`
+- The system MUST maintain a tenant configuration record that includes at minimum: `uuid`, `name`, `slug`, `active` (boolean), `site_id`, `country`, `contact_email`, enterprise IdP linkage slug (via `EnterpriseCustomerIdentityProvider` or legacy `identity_provider`), and all enterprise feature flags enumerated in `specs/enterprise-microservices_spec.md`
 
 #### Tenant Isolation -- Data Segregation
 
@@ -296,7 +296,7 @@ This section defines the canonical data model for the `EnterpriseCustomer` entit
 | `site_id` | FK (Django Site) | multi-tenancy-architecture | Link to Django Site record for per-tenant site configuration and domain routing |
 | `country` | string (ISO 3166-1) | multi-tenancy-architecture | Tenant's primary country code (for compliance, data residency planning, analytics) |
 | `contact_email` | email | multi-tenancy-architecture | Primary contact email for tenant (ops notifications, billing alerts) |
-| `identity_provider` | string (FK to IdP slug) | auth-sso-enterprise | SAML/OIDC identity provider slug linking to the tenant's SSO configuration |
+| `identity_provider` (legacy) / `EnterpriseCustomerIdentityProvider.provider_id` (preferred) | string (IdP slug linkage) | auth-sso-enterprise | SAML/OIDC identity provider slug linking to the tenant's SSO configuration |
 | `enable_data_sharing_consent` | boolean | enterprise-microservices | Whether the data sharing consent (DSC) framework is enabled for this tenant |
 | `enforce_data_sharing_consent` | boolean | enterprise-microservices | Whether DSC is required before enrollment completion data is visible to the tenant admin |
 | `enable_audit_enrollment` | boolean | enterprise-microservices | Whether learners can enroll in audit mode (free) for tenant-subsidized courses |

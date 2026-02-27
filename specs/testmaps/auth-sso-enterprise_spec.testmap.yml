@@ -9,10 +9,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
   description: Given an enterprise tenant "Beta Inc" with an Azure AD OIDC provider
     configured, when a user navigates to `https://academyv2.mereka.io/enterprise/login/beta-inc`,
@@ -30,10 +26,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-oidc-user-password-state.sh
     command: scripts/qa/verify-oidc-user-password-state.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-003
   description: Given two enterprise tenants with different IdPs, when a user authenticates
     via Acme's IdP, then the resulting `EnterpriseCustomerUser` record links to Acme
@@ -43,10 +35,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
   description: Given Authentik is configured as the default OIDC provider, when a
     non-enterprise user navigates to `/auth/login/oidc/`, then they are redirected
@@ -56,10 +44,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given a tenant with SAML IdP configured, when the LMS SP metadata is
     requested at `/auth/saml/metadata.xml`, then valid SP metadata is returned containing
@@ -73,10 +57,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/tenants/generate-saml-keypair.sh
     command: scripts/tenants/generate-saml-keypair.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_checkout_route.py
-    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-006
   description: Given a valid SAML assertion from Acme's IdP, when the assertion signature
     is verified and time window is valid, then the user is authenticated and a session
@@ -86,10 +66,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
   description: Given a SAML assertion with an expired `NotOnOrAfter` timestamp (beyond
     clock skew tolerance), when processed, then the assertion is rejected and a security
@@ -99,10 +75,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-008
   description: Given a SAML assertion that has already been processed (replay), when
     the same assertion ID is submitted again, then the assertion is rejected with
@@ -112,10 +84,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
-    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-009
   description: Given a SAML assertion signed with SHA-1, when processed, then the
     assertion is rejected and a security event is logged indicating weak signature
@@ -232,10 +200,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-020
   description: Given a learner session, when the session has been idle for more than
     120 minutes (configurable), then the next request returns HTTP 302 to the login
@@ -245,10 +209,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-021
   description: Given a staff user session, when the session has been active for more
     than 8 hours (configurable) regardless of activity, then the next request returns
@@ -258,10 +218,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-auth-sso-enterprise.sh
     command: scripts/qa/verify-auth-sso-enterprise.sh
-  - type: automated
-    test_type: unit
-    file: services/purchase-gateway/tests/unit/test_fulfillment.py
-    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-022
   description: 'Given a user clicks "Sign Out", when the logout completes, then: (a)
     the server-side session is destroyed, (b) session cookies are cleared, (c) the

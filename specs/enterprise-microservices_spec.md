@@ -164,7 +164,7 @@ See `specs/cross-cutting-requirements_spec.md` for platform-wide TLS requirement
 #### Enterprise Customer (Tenant) Data Model
 
 - Each enterprise client MUST be represented as an `EnterpriseCustomer` record in the LMS database with a globally unique UUID (`enterprise_customer_uuid`)
-- The `EnterpriseCustomer` record MUST include: `uuid`, `name`, `slug`, `active` (boolean), `site_id` (FK to Django Site), `enable_data_sharing_consent`, `enforce_data_sharing_consent`, `enable_audit_enrollment`, `enable_audit_data_reporting`, `country`, `hide_course_original_price`, `enable_portal_code_management_screen`, `enable_learner_portal`, `enable_integrated_customer_learner_portal_search`, `enable_analytics_screen`, `sender_alias`, `identity_provider` (slug linking to SAML IdP), `enable_slug_login`
+- The `EnterpriseCustomer` record MUST include: `uuid`, `name`, `slug`, `active` (boolean), `site_id` (FK to Django Site), `enable_data_sharing_consent`, `enforce_data_sharing_consent`, `enable_audit_enrollment`, `enable_audit_data_reporting`, `country`, `hide_course_original_price`, `enable_portal_code_management_screen`, `enable_learner_portal`, `enable_integrated_customer_learner_portal_search`, `enable_analytics_screen`, `sender_alias`, `enable_slug_login`; enterprise IdP linkage MUST be available via `EnterpriseCustomerIdentityProvider` (preferred) or legacy `identity_provider` compatibility
 - Enterprise customer membership MUST be tracked via `EnterpriseCustomerUser` records linking `enterprise_customer_uuid` to `user_id` (LMS auth_user.id)
 - The system MUST support a user belonging to multiple enterprise customers (multi-org learners)
 - The system MUST support `PendingEnterpriseCustomerUser` records for learners invited but not yet registered

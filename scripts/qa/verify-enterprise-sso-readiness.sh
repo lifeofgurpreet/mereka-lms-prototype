@@ -33,7 +33,7 @@
 #   Per-tenant (requires --tenant and kubectl):
 #    18.  Enterprise login URL responds (redirects to IdP or landing page)
 #    19.  EnterpriseCustomer record exists for the tenant slug
-#    20.  identity_provider field is populated on the EnterpriseCustomer
+#    20.  Enterprise IdP linkage is configured (link table or legacy field)
 #
 # Usage:
 #   # Repo-only checks (no cluster needed — fastest):
