@@ -127,6 +127,7 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
 
 9. **OBS-EXT-069 — Stabilize strict runtime/compliance JSON and deterministic fail behavior (P1, in_progress)**
    - Definition of done: `AC-OVR-025` and `AC-OVR-029` pass consistently with strict mode and canonical runner outputs remain machine-parseable.
+   - Current implementation status: `validate-observability-compliance.sh` now supports deterministic JSON-only strict output (`VALIDATE_OBS_JSON_ONLY=1`) and `verify-observability-runtime.sh` now consumes it with stronger JSON payload extraction. `run-observability-first-class.sh` now publishes all per-component wiring evidence files in the runtime evidence index so downstream identity and CI integrity checks remain complete. Strict re-run evidence still needed.
 
 10. **OBS-EXT-070 — Publish implementation handoff epic (P0, planned)**
     - Definition of done: one parent issue set in tracker references `OBS-053..057`, `OBS-EXT-061..069`, and `OBS-058` with explicit evidence paths + closure criteria.
@@ -138,6 +139,7 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
   - `infrastructure/tutor/custom-apps/openedx_prometheus/urls.py` now exposes the endpoint at `/metrics` explicitly.
   - `scripts/qa/verify-observability-runtime.sh` now includes path-aware `/metrics` payload capture (`status_code` + `metric_path` + body), dual `/metrics`/`/metrics/` probing, and curl-first + wget fallback; remains unverified against live lanes until next strict run.
 - Keep `OBS-EXT-063` as next verification target; validate both `/metrics` endpoints via strict runtime command before closing.
+- `OBS-EXT-069` has parser and evidence-index hardening implemented; next action is proof runs in nonprod/runtime to close with `observability-compliance-runtime.json`, `observability-first-class-runtime-evidence-index.json`, and all wired component artifact files (per `observability-first-class-evidence-index-hardening-2026-02-27.md`).
 
 ### Lane command for every wave
 
@@ -241,3 +243,8 @@ If a lane fails on one object:
 - verify namespace scoping in `deploy/k8s/base/monitoring/kustomization.yaml`,
 - validate resource name consistency in overlays for that lane,
 - rerun only the targeted deployment wave and re-run the same runtime command.
+
+## Reference for next execution sprint
+
+For the strict, lane-safe next-wave task runbook, use:
+- `docs/qa/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md`
