@@ -2,8 +2,7 @@
 # verify-mfe-footer-slot.sh — Verify MFE footer plugin-slot wiring is correct
 #
 # Checks that the MerekaFooter component is properly defined in the Tutor
-# plugin and that the slot wiring (either PLUGIN_SLOTS or apply-patches.sh
-# fallback) is in place. Runs without cluster access.
+# plugin and that the active slot wiring path is in place. Runs without cluster access.
 #
 # Usage: ./scripts/qa/verify-mfe-footer-slot.sh
 set -uo pipefail
@@ -172,10 +171,10 @@ else
   do_fail "PLUGIN_SLOTS registration missing from plugin"
 fi
 
-if grep -q 'footer_slot' "$PLUGIN"; then
-  do_pass "footer_slot target defined"
+if grep -q '"org.openedx.frontend.layout.footer.v1"' "$PLUGIN"; then
+  do_pass "Namespaced footer slot target defined"
 else
-  do_fail "footer_slot target missing"
+  do_fail "Namespaced footer slot target missing"
 fi
 
 if grep -q 'DIRECT_PLUGIN' "$PLUGIN"; then
@@ -185,9 +184,7 @@ else
 fi
 
 if grep -q '_PLUGIN_SLOTS_AVAILABLE' "$PLUGIN"; then
-  do_pass "Fallback flag (_PLUGIN_SLOTS_AVAILABLE) defined"
-else
-  do_warn "Fallback flag not found — cannot detect slot availability"
+  do_warn "Legacy fallback detection flag still present"
 fi
 
 # 6. Fallback wiring in apply-patches.sh
@@ -198,15 +195,15 @@ if [ -f "$PATCHES" ]; then
   do_pass "apply-patches.sh exists"
 
   if grep -q 'RenderWidget.*MerekaFooter' "$PATCHES"; then
-    do_pass "apply-patches.sh has RenderWidget→MerekaFooter fallback"
+    do_warn "Legacy RenderWidget→MerekaFooter fallback is present in apply-patches.sh"
   else
-    do_fail "apply-patches.sh missing RenderWidget→MerekaFooter fallback"
+    do_pass "No RenderWidget→MerekaFooter fallback in apply-patches.sh (active path is plugin-driven)"
   fi
 
   if grep -q 'const MerekaFooter' "$PATCHES"; then
-    do_pass "apply-patches.sh has MerekaFooter definition (defense-in-depth)"
+    do_warn "Legacy MerekaFooter backup still exists in apply-patches.sh"
   else
-    do_warn "apply-patches.sh missing MerekaFooter definition backup"
+    do_pass "No legacy MerekaFooter backup in apply-patches.sh (plugin-only path)"
   fi
 else
   do_fail "apply-patches.sh not found"
@@ -227,15 +224,15 @@ echo ""
 echo "--- Dual-Path Sync Check ---"
 
 if grep -q 'SITE_VARIANTS' "$PATCHES"; then
-  do_pass "apply-patches.sh has SITE_VARIANTS (synced with plugin)"
+  do_warn "Legacy SITE_VARIANTS appears in apply-patches.sh"
 else
-  do_fail "apply-patches.sh missing SITE_VARIANTS (out of sync)"
+  do_pass "SITE_VARIANTS is plugin-scoped (no duplicate literal fallback in patches)"
 fi
 
-if grep -q 'footer-social' "$PATCHES"; then
-  do_pass "apply-patches.sh has v2 zone structure (synced with plugin)"
+if grep -q 'footer-social' "$PATCHES" && grep -q 'footer-nav' "$PATCHES"; then
+  do_warn "Legacy v2 zone structure exists in apply-patches.sh"
 else
-  do_fail "apply-patches.sh missing v2 zone structure (out of sync)"
+  do_pass "Footer v2 zone structure is plugin-scoped (no duplicate path in apply-patches.sh)"
 fi
 
 echo ""
