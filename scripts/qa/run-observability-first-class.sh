@@ -64,6 +64,23 @@ if [[ "$MODE" != "local" && "$MODE" != "runtime" && "$MODE" != "all" ]]; then
   exit 1
 fi
 
+if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
+  if [[ -z "$K8S_CONTEXT" ]]; then
+    echo "Missing required OBSERVABILITY_K8S_CONTEXT for runtime/all checks." >&2
+    exit 1
+  fi
+
+  if ! ./scripts/qa/verify-observability-parity-lane-contract.sh \
+    --env-label "$ENV_LABEL" \
+    --dispatch-profile "$DISPATCH_PROFILE" \
+    --k8s-context "$K8S_CONTEXT" \
+    --gcp-project "$GCP_PROJECT_VALUE"; then
+    echo "Lane contract validation failed; aborting observability run." >&2
+    exit 1
+  fi
+  echo
+fi
+
 mkdir -p "$OUT_DIR"
 
 run_with_timeout() {
@@ -220,6 +237,7 @@ coverage_md = Path(${COVERAGE_MD@Q})
 lms_payload = Path(${RUNTIME_METRICS_LMS@Q})
 cms_payload = Path(${RUNTIME_METRICS_CMS@Q})
 tracing_txt = Path(${TRACING_TXT@Q})
+env_label = ${ENV_LABEL@Q}.lower()
 
 files = [str(compliance_json), str(compliance_md), str(coverage_json), str(coverage_md)]
 if mode in ("runtime", "all"):
@@ -232,6 +250,29 @@ if mode in ("runtime", "all"):
         str(coverage_txt),
         str(tracing_txt),
     ])
+
+    runtime_wiring_evidence = [
+        "observability-lms-prometheus-wiring-runtime.md",
+        "observability-cms-prometheus-wiring-runtime.md",
+        "observability-caddy-prometheus-wiring-runtime.md",
+        "observability-mfe-prometheus-wiring-runtime.md",
+        "observability-forum-prometheus-wiring-runtime.md",
+        "observability-discovery-prometheus-wiring-runtime.md",
+        "observability-ecommerce-prometheus-wiring-runtime.md",
+        "observability-credentials-prometheus-wiring-runtime.md",
+        "observability-purchase-gateway-prometheus-wiring-runtime.md",
+        "observability-slo-rules-prometheus-wiring-runtime.md",
+        "observability-video-rules-prometheus-wiring-runtime.md",
+        "observability-ora2-rules-prometheus-wiring-runtime.md",
+    ]
+
+    if env_label in ("dev", "local", "kind", "kind-dev"):
+        runtime_wiring_evidence.extend([
+            "observability-dev-xqueue-prometheus-wiring-runtime.md",
+            "observability-dev-mux-prometheus-wiring-runtime.md",
+        ])
+
+    files.extend([str(out_dir / f) for f in runtime_wiring_evidence])
 
 payload = {
     "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
