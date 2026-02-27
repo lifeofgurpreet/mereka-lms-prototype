@@ -6,6 +6,7 @@
 - `AC-OVR-016` remains the top blocker: LMS/CMS `/metrics` are not yet returning Prometheus-safe payloads in strict run evidence.
 - Runtime wiring evidence for caddy/mfe/forum/discovery/ecommerce/credentials/purchase-gateway and rules sets is incomplete in live lane snapshots.
 - Evidence identity is still only stable when lane env vars are explicitly set for every run.
+- Most recent evidence artifact folder in this sequence is `var/ci` (non-lane-specific) unless a lane directory is configured by runner output.
 
 ## What is now confirmed in code
 
@@ -19,8 +20,12 @@ The remaining gap is now primarily **runtime parity and deployment synchronizati
 
 1. **Lane hardening**
    - Enforce nonprod/prod lane identity explicitly before every strict run:
-     `OBSERVABILITY_ENV_LABEL`, `OBSERVABILITY_DISPATCH_PROFILE`, `OBSERVABILITY_K8S_CONTEXT`, `OBSERVABILITY_GCP_PROJECT`.
+     - `lane`, `OBSERVABILITY_ENV_LABEL`, `OBSERVABILITY_DISPATCH_PROFILE`, `OBSERVABILITY_K8S_CONTEXT`, `OBSERVABILITY_GCP_PROJECT`.
    - Generate and archive `observability-first-class-runtime-evidence-index.json`.
+   - Run and record `evidence_identity` equality check on:
+     - `var/ci/observability-compliance-runtime.json`
+     - `var/ci/observability-runtime-verify-runtime.md`
+     - `var/ci/observability-first-class-runtime-evidence-index.json`.
 
 2. **Close LMS `/metrics` contract (AC-OVR-016)**
    - Require strict nonprod proof: `status_code: 200`, non-zero `# HELP`, `# TYPE`, numeric samples.
@@ -49,6 +54,9 @@ The remaining gap is now primarily **runtime parity and deployment synchronizati
 
 9. **Strict determinism cleanup (AC-OVR-025/029)**
    - Validate strict runs consistently produce machine-parseable JSON and no mixed stdout/stderr failure blob in `observability-compliance-runtime.json`.
+   - Validate parse guard:
+     - `jq -e '.checks[] | select(.id=="AC-OVR-025" and .status=="pass")' var/ci/observability-compliance-runtime.json`
+     - `jq -e '.checks[] | select(.id=="AC-OVR-029" and .status=="pass")' var/ci/observability-compliance-runtime.json`
 
 10. **Wave release handoff**
     - Close tasks in priority order and attach evidence matrix + exception log before any non-runtime lane claim.
@@ -58,4 +66,3 @@ The remaining gap is now primarily **runtime parity and deployment synchronizati
 - Do not promote to next wave until AC-OVR-016 passes on LMS and CMS in one nonprod strict run.
 - Do not promote coverage gates until per-object wiring evidence files exist and report non-zero target/rule matches.
 - Keep `OBSERVABILITY_*` lane variables part of your runbook and CI docs so evidence identity never falls back to `unknown/custom`.
-

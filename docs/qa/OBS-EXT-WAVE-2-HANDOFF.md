@@ -5,6 +5,8 @@
 **Target date:** 2026-03-06
 **Depends on:** `OBS-053..057`, `OBS-058`, and `docs/qa/OBSERVABILITY_NEXT50_TRACKER_MEREKA_LMS.md`
 
+**Single source for this wave:** `docs/qa/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md`
+
 ## Purpose
 
 Close the remaining first-class observability blockers in the non-prod/dev/prod parity lanes in strict lane order, then harden strict mode gating behavior.
@@ -56,18 +58,25 @@ if [ "${lane}" = prod ] && [ -n "${OBS_PARITY_PROD_GCP_PROJECT:-}" ]; then
 fi
 
 ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Required pre-run guard
+test -n "${lane}" -n "${OBSERVABILITY_ENV_LABEL}" -n "${OBSERVABILITY_DISPATCH_PROFILE}" -n "${OBSERVABILITY_K8S_CONTEXT}"
 ```
 
 Use `lane="dev"` or `lane="nonprod"` for nonprod profile and `lane="prod"` for production.
 
 ## Exit criteria per lane
 
-- `observability-compliance-runtime.json`
-- `observability-runtime-verify-runtime.md`
-- `observability-first-class-runtime-evidence-index.json`
-- `observability-metrics-lms-runtime.md` and `observability-metrics-cms-runtime.md`
+- `var/ci/observability-compliance-runtime.json`
+- `var/ci/observability-runtime-verify-runtime.md`
+- `var/ci/observability-first-class-runtime-evidence-index.json`
+- `var/ci/observability-metrics-lms-runtime.md` and `var/ci/observability-metrics-cms-runtime.md`
 - lane-specific per-object evidence files for each resource family above.
 - `evidence_identity` equality check must pass between preflight, compliance, and runtime verifier outputs.
+- `evidence_identity` tuple must be identical for preflight, compliance, runtime verify, and index outputs.
+
+Failure handling add-on:
+- If `observability-runtime-verify-runtime.md` is missing, rerun strict command after clearing only stale files for that specific lane folder.
 
 ## Failure handling
 
@@ -97,7 +106,18 @@ For `OBS-EXT-069`, run this exact sequence per lane before flipping handoff stat
 3. Validate AC-OVR-025 determinism:
    - open `observability-compliance-runtime.json` and verify `checks` contains `AC-OVR-025` with `status == "pass"`.
    - confirm output is machine-parseable JSON without trailing log pollution.
+   - `jq -e '.checks[] | select(.id=="AC-OVR-025" and .status=="pass")' var/ci/observability-compliance-runtime.json`
 4. Validate AC-OVR-029 strict-gate behavior:
    - open `.github/workflows/observability-compliance.yml`
    - verify `pull_request` exists and enforces strict local mode with monitoring path constraints.
-5. Only when both ACs are green in the strict run may you close `OBS-EXT-069`.
+   - `grep -n "AC-OVR-029\\|strict" .github/workflows/observability-compliance.yml`
+5. Confirm strict payload health:
+   - `jq -e '.summary.fail == 0' var/ci/observability-compliance-runtime.json`
+6. Only when both ACs are green in the strict run may you close `OBS-EXT-069`.
+
+## Completion evidence template
+
+Before closing any ticket in this handoff:
+- Confirm `evidence_identity` is identical across all lane artifacts.
+- Confirm the required evidence file set is present for that ticket.
+- Confirm `observability-first-class-runtime-evidence-index.json` lists the ticket-specific wire-up files.
