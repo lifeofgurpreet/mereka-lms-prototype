@@ -178,12 +178,18 @@ for target in targets:
         legacy_line = "RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
         if legacy_line in text:
             text = text.replace(legacy_line, plugin_line)
-        if plugin_line in text:
+        if plugin_line in text and "RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka" in text:
             return text
-        brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'"
-        if brand_line not in text:
+
+        local_brand_line = "RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka"
+        legacy_brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'"
+        if legacy_brand_line in text:
+            text = text.replace(legacy_brand_line, local_brand_line)
+
+        if local_brand_line in text or plugin_line in text:
             return text
-        return text.replace(brand_line, f"{brand_line}\n{plugin_line}")
+
+        return text
 
     def ensure_mfe_admin_console_redux_deps(text):
         if "FROM base AS admin-console-common" not in text:
