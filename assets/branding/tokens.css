@@ -93,13 +93,20 @@
   --mereka-mfe-navbar-logo-height: 32px;
   --mereka-mfe-pill-radius: 999px;
   --mereka-mfe-authn-cta-min-height: 44px;
+  --mereka-mfe-nav-link-transition: 150ms ease;
+  --mereka-mfe-brand-font-size: 1rem;
   --mereka-mfe-nav-item-font-weight: 500;
   --mereka-mfe-brand-font-weight: 600;
   --mereka-mfe-emphasis-font-weight: 700;
   --mereka-mfe-badge-font-weight: 600;
+  --mereka-mfe-badge-gap: 0.35rem;
+  --mereka-mfe-badge-padding: 0.25rem 0.85rem;
+  --mereka-mfe-badge-letter-spacing: 0.08em;
+  --mereka-mfe-authn-link-letter-spacing: 0.01em;
   --mereka-mfe-authn-card-radius: 28px;
   --mereka-mfe-authn-card-border: 1px solid rgba(26, 22, 35, 0.10);
   --mereka-mfe-authn-card-shadow: 0 28px 72px rgba(26, 22, 35, 0.14);
+  --mereka-mfe-status-badge-padding: 0.1rem 0.55rem;
 
   --mereka-mfe-compact-card-radius: 20px;
   --mereka-mfe-compact-card-border: 1px solid rgba(26, 22, 35, 0.08);
@@ -108,6 +115,7 @@
   --mereka-mfe-compact-list-gap: 1.5rem;
   --mereka-mfe-compact-vertical-gap: 1.25rem;
   --mereka-mfe-course-list-gap: 1rem;
+  --mereka-mfe-course-grid-gap: 1rem;
 
   --mereka-mfe-discussions-card-radius: 22px;
   --mereka-mfe-discussions-card-border: 1px solid rgba(26, 22, 35, 0.09);

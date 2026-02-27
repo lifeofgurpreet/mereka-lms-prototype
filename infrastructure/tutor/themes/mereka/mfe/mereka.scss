@@ -42,7 +42,7 @@ body {
   gap: var(--mereka-mfe-navbar-brand-gap, 0.75rem);
   font-family: var(--mereka-font-heading);
   font-weight: var(--mereka-mfe-brand-font-weight, 600);
-  font-size: 1rem;
+  font-size: var(--mereka-mfe-brand-font-size, 1rem);
   color: var(--mereka-color-ink-900);
 }
 
@@ -71,7 +71,7 @@ body {
 .navbar .dropdown-toggle {
   font-weight: var(--mereka-mfe-nav-item-font-weight, 500);
   color: var(--mereka-color-ink-700);
-  transition: color 150ms ease;
+  transition: color var(--mereka-mfe-nav-link-transition, 150ms ease);
 }
 
 /* RISK: LOW — hover/focus color only; graceful degradation */
@@ -151,7 +151,7 @@ body {
 /* RISK: LOW — Paragon form label BEM + Bootstrap label; font/color only */
 .pgn__form-label,
 label {
-  font-weight: 600;
+  font-weight: var(--mereka-mfe-brand-font-weight, 600);
   color: var(--mereka-color-ink-700);
 }
 
@@ -241,14 +241,14 @@ label {
 .mereka-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--mereka-mfe-badge-gap, 0.35rem);
   background-color: rgb(var(--mereka-color-teal-rgb) / 0.12);
   color: var(--mereka-color-teal);
-  padding: 0.25rem 0.85rem;
+  padding: var(--mereka-mfe-badge-padding, 0.25rem 0.85rem);
   border-radius: var(--mereka-mfe-pill-radius, 999px);
-  font-size: 0.75rem;
+  font-size: var(--pgn-font-size-sm);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--mereka-mfe-badge-letter-spacing, 0.08em);
 }
 
 /* Authn/login/register surfaces */
@@ -294,7 +294,7 @@ label {
 [class*="login-register"] .pgn__btn--primary {
   min-height: var(--mereka-mfe-authn-cta-min-height, 44px);
   font-weight: var(--mereka-mfe-emphasis-font-weight, 700);
-  letter-spacing: 0.01em;
+  letter-spacing: var(--mereka-mfe-authn-link-letter-spacing, 0.01em);
 }
 
 /* RISK: LOW — authn hyperlink color; degrades to default link color */
@@ -304,7 +304,7 @@ label {
 [class*="login-register"] .pgn__hyperlink {
   color: var(--mereka-color-blue);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: var(--mereka-mfe-brand-font-weight, 600);
 }
 
 /* RISK: LOW — authn hyperlink hover/focus; color-only, graceful degradation */
@@ -383,7 +383,7 @@ label {
 [class*="account-settings"] .pgn__dropdown-toggle,
 [class*="account-page"] .pgn__dropdown-toggle,
 [class*="learner-dashboard"] .pgn__dropdown-toggle {
-  border-radius: 999px;
+  border-radius: var(--mereka-mfe-pill-radius, 999px);
   border-color: rgb(var(--mereka-color-ink-deep-rgb) / 0.2);
 }
 
@@ -410,7 +410,7 @@ label {
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] | no stable slot | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-grid"],
 [class*="learner-dashboard"] [class*="course-list"] {
-  gap: 1rem;
+  gap: var(--mereka-mfe-course-grid-gap, 1rem);
 }
 
 /* learner-dashboard scope + course component + image */
@@ -521,7 +521,7 @@ label {
   border-radius: var(--mereka-mfe-pill-radius, 999px);
   background: rgb(var(--mereka-color-teal-rgb) / 0.1);
   color: var(--mereka-color-teal);
-  padding: 0.1rem 0.55rem;
+  padding: var(--mereka-mfe-status-badge-padding, 0.1rem 0.55rem);
   font-weight: var(--mereka-mfe-badge-font-weight, 600);
 }
 
