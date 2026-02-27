@@ -83,6 +83,9 @@
   --pgn-spacing-5: 3rem;
   --pgn-spacing-6: 4.5rem;
 
+  --pgn-border-color: #ddddde;
+  --pgn-form-control-border-color: #ddddde;
+
   --pgn-spacing-spacer-0: 0;
   --pgn-spacing-spacer-1: 0.25rem;
   --pgn-spacing-spacer-2: 0.5rem;

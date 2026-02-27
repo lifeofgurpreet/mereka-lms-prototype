@@ -68,6 +68,7 @@
   --pgn-font-family-sans-serif: var(--mereka-font-body);
   --pgn-heading-font-family: var(--mereka-font-heading);
   --pgn-border-color: var(--mereka-color-border);
+  --pgn-form-control-border-color: #ddddde;
   --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
   --pgn-btn-border-radius: 999px;
   --pgn-spacing-spacer-base: 1rem;
