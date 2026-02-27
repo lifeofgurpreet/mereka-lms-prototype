@@ -192,6 +192,39 @@ Expected outputs:
 2. Updated runtime runbooks with env-scoped canonical commands.
 3. Gap closure report appended to `OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md`.
 
+## Blocking Defect Register
+
+1. **Critical (P0): LMS/CMS `/metrics` endpoint not contract-compliant in live prod render**
+   - **Observed:** `deploy/lms` / `deploy/cms` are not returning valid Prometheus payload from `/metrics` in one runtime path, and configmap snapshots show stale variants without current route wiring markers.
+   - **Hypothesis:** Live settings configmaps (`openedx-settings-lms-patched-...` and `openedx-settings-cms-...`) are out of sync with the current source render.
+   - **Impact:** Prometheus scraping can silently pass only intermittently and runtime gates cannot reliably reflect reality.
+   - **Owner:** Platform SRE + Observability.
+   - **Remediation:** Reconcile rendered settings through the normal GitOps release path and verify with strict runtime evidence.
+
+2. **Critical (P0): Drift between source render and deployed settings**
+   - **Observed:** Source config in `deploy/k8s/base/apps/openedx/settings/*.py` now contains latest Prometheus patch wiring.
+   - **Hypothesis:** Deployment is using a previously rendered configmap; expected marker lines (`openedx_prometheus.urls` in `ROOT_URLCONF_OVERRIDES`) are missing in live payload.
+   - **Owner:** Platform CI/Delivery.
+   - **Remediation:** Add source fingerprint/required-marker assertion to runtime evidence and treat mismatch as high severity.
+
+3. **High (P1): Environment signal-parity ambiguity**
+   - **Observed:** Nonprod/prod command context and identity labels can be misapplied in ad-hoc checks.
+   - **Impact:** false confidence in partial environment checks.
+   - **Remediation:** Enforce single source for env/context/profile identity inputs across strict gates and documented runbooks.
+
+## Execution Track (next 10 large tasks)
+
+1. Complete `/metrics` source-to-runtime reconciliation in the live lane with one GitOps-sourced rollout.
+2. Add required-settings fingerprint check in strict runtime evidence for LMS/CMS.
+3. Add direct `/metrics` functional check with DisallowedHost-safe pod-call flow. ✅ (runtime check path now captures payload + validation path in `scripts/qa/verify-observability-runtime.sh`).
+4. Add gate-level assertion that `openedx-settings-lms|cms` live payload includes `openedx_prometheus` + root override markers. ✅ (implemented marker check in `scripts/qa/verify-observability-runtime.sh`).
+5. Expand parity matrix for nonprod and prod `/metrics` evidence shape and required labels.
+6. Expand Phase 2 coverage map with explicit LMS/CMS route-contract tests.
+7. Add owner/date/impact tags to every observability defect in this roadmap.
+8. Add runbook page for `/metrics` + Prometheus wiring triage.
+9. Enforce no-stale-metrics-gate in `run-observability-first-class.sh` execution path.
+10. Close residual evidence debt in `OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md` with pass/no-pass proof links.
+
 ## Risk Register (Current)
 
 1. Environment ambiguity risk:

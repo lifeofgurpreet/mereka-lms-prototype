@@ -31,6 +31,7 @@ VERIFY_ENV_LABEL="${VERIFY_OBS_ENV_LABEL:-unknown}"
 VERIFY_DISPATCH_PROFILE="${VERIFY_OBS_DISPATCH_PROFILE:-custom}"
 VERIFY_EVIDENCE_FILE="${VERIFY_OBS_EVIDENCE_FILE:-}"
 VERIFY_EVIDENCE_DIR="${VERIFY_OBS_EVIDENCE_DIR:-${VERIFY_EVIDENCE_FILE%/*}}"
+METRICS_SPLIT_TOKEN='__METRICS_SPLIT__'
 if [[ -z "$VERIFY_EVIDENCE_DIR" ]]; then
   VERIFY_EVIDENCE_DIR="$REPO_ROOT/var/ci"
 fi
@@ -62,6 +63,7 @@ write_metrics_payload_evidence() {
     local payload="$3"
     local note="$4"
     local artifact_file="$5"
+    local metric_path="$6"
 
     local total_bytes
     local help_count
@@ -86,6 +88,9 @@ write_metrics_payload_evidence() {
         echo "- component: ${component}"
         echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
         echo "- status_code: ${status_code}"
+        if [[ -n "$metric_path" ]]; then
+            echo "- metric_path: ${metric_path}"
+        fi
         echo "- payload_bytes: ${total_bytes}"
         echo "- help_count: ${help_count}"
         echo "- type_count: ${type_count}"
@@ -129,44 +134,375 @@ kubectl_cmd_with_timeout() {
     "${timeout_cmd[@]}" kubectl "${context_args[@]}" "$@"
 }
 
+check_openedx_settings_metrics_wiring() {
+    local component="$1"
+    local deploy_name="$2"
+    local configmap_names=()
+    local cfg_json=""
+    local marker_hit=0
+    local checked_count=0
+    local fallback_map=""
+
+    if ! command -v kubectl >/dev/null 2>&1; then
+        skip "${component} settings wiring check requires kubectl"
+        return 0
+    fi
+
+    set +e
+    local volume_json
+    volume_json="$(kubectl_cmd_with_timeout get deploy "$deploy_name" -n "$VERIFY_APP_NAMESPACE" -o json 2>/dev/null)"
+    local volume_rc=$?
+    set -e
+
+    if [[ $volume_rc -ne 0 || -z "$volume_json" ]]; then
+        fail "AC-OVR-016: ${component} deployment '$deploy_name' is not reachable for settings map detection"
+        return 1
+    fi
+
+    mapfile -t configmap_names < <(printf '%s' "$volume_json" | jq -r --arg c "$deploy_name" '.spec.template.spec.volumes[]? | select(.configMap.name | tostring | startswith("openedx-settings-" + $c)) | .configMap.name' 2>/dev/null)
+    if [[ ${#configmap_names[@]} -eq 0 ]]; then
+        mapfile -t configmap_names < <(printf '%s' "$volume_json" | jq -r '.spec.template.spec.volumes[]? | select(.configMap.name | tostring | startswith("openedx-settings-")) | .configMap.name' 2>/dev/null)
+    fi
+
+    if [[ ${#configmap_names[@]} -eq 0 ]]; then
+        fail "AC-OVR-016: ${component} deployment '$deploy_name' has no openedx-settings configmap references"
+        return 1
+    fi
+
+    for fallback_map in "${configmap_names[@]}"; do
+        [[ -z "$fallback_map" ]] && continue
+        set +e
+        cfg_json="$(kubectl_cmd_with_timeout get configmap "$fallback_map" -n "$VERIFY_APP_NAMESPACE" -o json 2>/dev/null)"
+        local cfg_rc=$?
+        set -e
+        if [[ $cfg_rc -ne 0 || -z "$cfg_json" ]]; then
+            continue
+        fi
+
+        checked_count=$((checked_count + 1))
+        local marker_count
+        marker_count="$(printf '%s' "$cfg_json" | jq -r '[.data // {} | to_entries[]? | select(.value | contains("openedx_prometheus.urls") or contains("_metrics_urlconf") or contains("django_prometheus.middleware.PrometheusBeforeMiddleware") or contains("django_prometheus.middleware.PrometheusAfterMiddleware"))] | length' 2>/dev/null | tr -d '[:space:]')"
+        if [[ "$marker_count" != "" && "$marker_count" -gt 0 ]]; then
+            marker_hit=1
+            pass "AC-OVR-016: ${component} settings configmap '$fallback_map' includes prom metrics wiring markers ($marker_count)"
+            break
+        fi
+    done
+
+    if [[ "$marker_hit" -eq 1 ]]; then
+        return 0
+    fi
+
+    if [[ "$checked_count" -eq 0 ]]; then
+        fail "AC-OVR-016: ${component} settings configmaps were not readable for marker verification"
+        return 1
+    fi
+
+    fail "AC-OVR-016: ${component} settings configmaps do not include prom metrics wiring markers (checked ${checked_count} map(s))"
+    return 1
+}
+
+resolve_prometheus_pod() {
+    local pod_name=""
+    local probe_namespace=""
+    PROM_POD_NAMESPACE=""
+
+    probe_namespace="$VERIFY_MONITORING_NAMESPACE"
+    pod_name="$(kubectl_cmd_with_timeout get pods -n "$probe_namespace" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    if [[ -n "$pod_name" ]]; then
+        PROM_POD_NAMESPACE="$probe_namespace"
+        printf '%s\n' "$pod_name"
+        return 0
+    fi
+
+    probe_namespace="$VERIFY_APP_NAMESPACE"
+    pod_name="$(kubectl_cmd_with_timeout get pods -n "$probe_namespace" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    if [[ -n "$pod_name" ]]; then
+        PROM_POD_NAMESPACE="$probe_namespace"
+        printf '%s\n' "$pod_name"
+        return 0
+    fi
+
+    printf ''
+}
+
+resolve_service_monitor() {
+    local target_name="$1"
+    local namespace_list=()
+    local probe_namespaces=("$VERIFY_MONITORING_NAMESPACE" "$VERIFY_APP_NAMESPACE")
+    local known_matches=()
+    local all_matches=()
+    local namespace=""
+    local line=""
+    local line_name=""
+
+    SM_MATCH_COUNT=0
+    SM_MATCH_NAMESPACES=""
+    SM_RESOLVED_NAMESPACE=""
+    if [[ -z "$target_name" ]]; then
+        printf ''
+        return 1
+    fi
+
+    # Deduplicate candidate namespaces
+    for namespace in "${probe_namespaces[@]}"; do
+        [[ -z "$namespace" ]] && continue
+        case " ${namespace_list[*]:-} " in
+            *" ${namespace} "*) ;;
+            *) namespace_list+=("$namespace") ;;
+        esac
+    done
+
+    # First check known namespaces in deterministic order.
+    for namespace in "${namespace_list[@]}"; do
+        if kubectl_cmd_with_timeout get servicemonitor -n "$namespace" "$target_name" --ignore-not-found -o name >/dev/null 2>&1; then
+            known_matches+=("$namespace")
+        fi
+    done
+
+    if [[ "${#known_matches[@]}" -gt 0 ]]; then
+        SM_MATCH_COUNT="${#known_matches[@]}"
+        SM_MATCH_NAMESPACES="$(printf '%s, ' "${known_matches[@]}" | sed 's/, $//')"
+
+        if [[ "${#known_matches[@]}" -eq 1 ]]; then
+            SM_RESOLVED_NAMESPACE="${known_matches[0]}"
+            printf '%s\n' "${SM_RESOLVED_NAMESPACE}"
+            return 0
+        fi
+
+        return 2
+    fi
+
+    # Fallback across all namespaces if not found in known namespaces.
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        namespace="${line%%/*}"
+        line_name="${line##*/}"
+
+        # expected format: <namespace>/servicemonitor.monitoring.coreos.com/<name>
+        if [[ "$line_name" == "$target_name" ]]; then
+            all_matches+=("$namespace")
+        fi
+    done < <(kubectl_cmd_with_timeout get servicemonitor -A -o name --ignore-not-found 2>/dev/null)
+
+    if [[ "${#all_matches[@]}" -eq 0 ]]; then
+        printf ''
+        return 1
+    fi
+
+    # Deduplicate fallback namespace list.
+    namespace_list=()
+    for namespace in "${all_matches[@]}"; do
+        case " ${namespace_list[*]:-} " in
+            *" ${namespace} "*) ;;
+            *) namespace_list+=("$namespace") ;;
+        esac
+    done
+
+    SM_MATCH_COUNT="${#namespace_list[@]}"
+    SM_MATCH_NAMESPACES="$(printf '%s, ' "${namespace_list[@]}" | sed 's/, $//')"
+
+    if [[ "${#namespace_list[@]}" -eq 1 ]]; then
+        SM_RESOLVED_NAMESPACE="${namespace_list[0]}"
+        printf '%s\n' "${SM_RESOLVED_NAMESPACE}"
+        return 0
+    fi
+
+    return 2
+}
+
+resolve_prometheus_rule() {
+    local target_name="$1"
+    local namespace_list=()
+    local probe_namespaces=("$VERIFY_MONITORING_NAMESPACE" "$VERIFY_APP_NAMESPACE")
+    local known_matches=()
+    local all_matches=()
+    local namespace=""
+    local line=""
+    local line_name=""
+
+    PR_MATCH_COUNT=0
+    PR_MATCH_NAMESPACES=""
+    PR_RESOLVED_NAMESPACE=""
+    if [[ -z "$target_name" ]]; then
+        printf ''
+        return 1
+    fi
+
+    # Deduplicate candidate namespaces.
+    for namespace in "${probe_namespaces[@]}"; do
+        [[ -z "$namespace" ]] && continue
+        case " ${namespace_list[*]:-} " in
+            *" ${namespace} "*) ;;
+            *) namespace_list+=("$namespace") ;;
+        esac
+    done
+
+    # Check known namespaces in order.
+    for namespace in "${namespace_list[@]}"; do
+        if kubectl_cmd_with_timeout get prometheusrule -n "$namespace" "$target_name" --ignore-not-found -o name >/dev/null 2>&1; then
+            known_matches+=("$namespace")
+        fi
+    done
+
+    if [[ "${#known_matches[@]}" -gt 0 ]]; then
+        PR_MATCH_COUNT="${#known_matches[@]}"
+        PR_MATCH_NAMESPACES="$(printf '%s, ' "${known_matches[@]}" | sed 's/, $//')"
+
+        if [[ "${#known_matches[@]}" -eq 1 ]]; then
+            PR_RESOLVED_NAMESPACE="${known_matches[0]}"
+            printf '%s\n' "${PR_RESOLVED_NAMESPACE}"
+            return 0
+        fi
+
+        return 2
+    fi
+
+    # Fallback across all namespaces when not found in known namespaces.
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        namespace="${line%%/*}"
+        line_name="${line##*/}"
+
+        # expected format: <namespace>/prometheusrule.monitoring.coreos.com/<name>
+        if [[ "$line_name" == "$target_name" ]]; then
+            all_matches+=("$namespace")
+        fi
+    done < <(kubectl_cmd_with_timeout get prometheusrule -A -o name --ignore-not-found 2>/dev/null)
+
+    if [[ "${#all_matches[@]}" -eq 0 ]]; then
+        printf ''
+        return 1
+    fi
+
+    namespace_list=()
+    for namespace in "${all_matches[@]}"; do
+        case " ${namespace_list[*]:-} " in
+            *" ${namespace} "*) ;;
+            *) namespace_list+=("$namespace") ;;
+        esac
+    done
+
+    PR_MATCH_COUNT="${#namespace_list[@]}"
+    PR_MATCH_NAMESPACES="$(printf '%s, ' "${namespace_list[@]}" | sed 's/, $//')"
+
+    if [[ "${#namespace_list[@]}" -eq 1 ]]; then
+        PR_RESOLVED_NAMESPACE="${namespace_list[0]}"
+        printf '%s\n' "${PR_RESOLVED_NAMESPACE}"
+        return 0
+    fi
+
+    return 2
+}
+
 extract_json_payload() {
     local output="$1"
     local json_payload=""
+    local trimmed=""
+
+    trimmed="$(printf '%s' "$output" | sed 's/[[:space:]]*$//')"
+
+    if [[ -n "$trimmed" && "${trimmed:0:1}" == "{" && "${trimmed: -1}" == "}" ]]; then
+        if command -v python3 >/dev/null 2>&1; then
+            json_payload="$(printf '%s' "$trimmed" | python3 - <<'PY'
+import json
+import sys
+
+text = sys.stdin.read().strip()
+try:
+    json.loads(text)
+except Exception:
+    sys.exit(0)
+
+print(text)
+PY
+)"
+            if [[ -n "$json_payload" ]]; then
+                printf '%s' "$json_payload"
+                return 0
+            fi
+        fi
+    fi
 
     if command -v python3 >/dev/null 2>&1; then
-        json_payload="$(printf '%s' "$output" | python3 - <<'PY'
+        json_payload="$(printf '%s' "$trimmed" | python3 - <<'PY'
+import json
 import sys
 
 text = sys.stdin.read()
-start = text.find("{")
-if start == -1:
-    sys.exit(1)
+starts = [idx for idx, ch in enumerate(text) if ch == '{']
 
-depth = 0
-end = -1
-for idx, ch in enumerate(text[start:], start):
-    if ch == "{":
-        depth += 1
-    elif ch == "}":
-        depth -= 1
-        if depth == 0:
-            end = idx
-            break
+for start in reversed(starts):
+    depth = 0
+    end = -1
+    for idx, ch in enumerate(text[start:], start):
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                end = idx
+                break
+    if end == -1:
+        continue
 
-if end == -1:
-    sys.exit(1)
+    candidate = text[start:end + 1].strip()
+    try:
+        json.loads(candidate)
+    except Exception:
+        continue
 
-print(text[start:end + 1])
+    print(candidate)
+    sys.exit(0)
+
+sys.exit(1)
 PY
-        )"
+    )"
     fi
 
     if [[ -z "$json_payload" ]]; then
         # Fallback: take the last top-level JSON-looking block from plain text output.
-        json_payload="$(printf '%s' "$output" | awk 'BEGIN{found=0; depth=0} /\{/{found=1} found{print} /^$/&&found{exit}')"
+        json_payload="$(printf '%s' "$trimmed" | awk 'BEGIN{found=0; depth=0} /\{/{found=1} found{print} /^$/&&found{exit}')"
     fi
 
     printf '%s' "$json_payload"
+}
+
+validate_observability_compliance_json() {
+    local payload="$1"
+
+    if [[ -z "$payload" ]]; then
+        echo "json_payload_missing"
+        return 1
+    fi
+
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "jq_missing"
+        return 1
+    fi
+
+    if ! printf '%s' "$payload" | jq -e '
+        (type == "object")
+        and (has("generated_at"))
+        and (has("mode"))
+        and (has("strict"))
+        and (has("summary"))
+        and (has("checks"))
+        and (.summary | type == "object")
+        and (.summary.pass | type == "number")
+        and (.summary.fail | type == "number")
+        and (.summary.skip | type == "number")
+        and (.summary.total | type == "number")
+        and (.checks | type == "array")
+        and (.checks | map(has("id") and has("status") and has("message")) | all)
+        and (.checks | length == .summary.total)
+        and (.checks | all((.id | type == "string") and (.status | type == "string") and (.message | type == "string")))
+    ' >/dev/null 2>&1; then
+        echo "schema_mismatch"
+        return 1
+    fi
+
+    return 0
 }
 
 gcloud_cmd() {
@@ -176,28 +512,97 @@ gcloud_cmd() {
 fetch_metrics_with_status() {
     local namespace="$1"
     local resource="$2"
-    local target="${3:-http://localhost:8000/metrics}"
+    local target="${3:-/metrics}"
     local result=""
     local status="000"
     local body=""
-    local split_token="__METRICS_SPLIT__"
+    local payload_path=""
+    local split_token="$METRICS_SPLIT_TOKEN"
+    local path_candidates=( )
+    local attempts=( )
+    local path_candidate=""
+    local fetch_url=""
+    local target_arg_used=""
+    local remote_script=""
 
-    result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" --         sh -lc "curl -s -m ${VERIFY_CMD_TIMEOUT}s -w '\n${split_token}:%{http_code}\n' '${target}'" 2>/dev/null || true)"
-
-    if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
-        result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" --             sh -lc "if command -v wget >/dev/null 2>&1; then              tmp_body=\$(mktemp);               tmp_hdr=\$(mktemp);               wget -q -O "\$tmp_body" --timeout ${VERIFY_CMD_TIMEOUT} '${target}' 2>"\$tmp_hdr";               code=\$(awk 'BEGIN{code="000"} /^  HTTP\//{code=\$2} END{print code}' "\$tmp_hdr" 2>/dev/null | tr -d '[:space:]');               body=\$(cat "\$tmp_body");               rm -f "\$tmp_body" "\$tmp_hdr";               printf '%s\n${split_token}:%s\n' "\$body" "\${code:-000}";             else               printf '${split_token}:000\n';             fi") 2>/dev/null || true)"
+    if [[ "$target" == http://* || "$target" == https://* ]]; then
+        path_candidates=("$target")
+    else
+        path_candidates=(
+            "$target"
+            "${target%/}/"
+        )
     fi
 
+    for path_candidate in "${path_candidates[@]}"; do
+        [[ -z "$path_candidate" ]] && continue
+        if [[ -z "${attempts[*]}" ]]; then
+            attempts+=("$path_candidate")
+        elif ! printf '%s' "${attempts[*]}" | grep -qxF "$path_candidate"; then
+            attempts+=("$path_candidate")
+        fi
+    done
+
+    for path_candidate in "${attempts[@]}"; do
+        if [[ "$path_candidate" == http://* || "$path_candidate" == https://* ]]; then
+            fetch_url="$path_candidate"
+            target_arg_used="$path_candidate"
+        else
+            fetch_url="http://localhost:8000${path_candidate}"
+            target_arg_used="$path_candidate"
+        fi
+
+        remote_script="$(cat <<'EOF'
+tmp_body=$(mktemp)
+tmp_hdr=$(mktemp)
+tmp_status=000
+if command -v curl >/dev/null 2>&1; then
+  tmp_status=$(curl -s -m __TIMEOUT__s -o "$tmp_body" -D "$tmp_hdr" -w '%{http_code}' '__URL__' 2>/dev/null || echo 000)
+elif command -v wget >/dev/null 2>&1; then
+  tmp_status=$(wget --server-response --quiet --timeout=__TIMEOUT__ -O - '__URL__' >"$tmp_body" 2>"$tmp_hdr" && awk 'BEGIN{code="000"} /^  HTTP\// {code=$2} END{print code}' "$tmp_hdr" 2>/dev/null | tr -d '[:space:]' || echo 000)
+else
+  tmp_status=000
+fi
+if [ -z "$tmp_status" ]; then
+  tmp_status=000
+fi
+body_content=$(cat "$tmp_body" 2>/dev/null || true)
+rm -f "$tmp_body" "$tmp_hdr"
+printf '%s\n__SPLIT__:%s\n' "$body_content" "$tmp_status"
+EOF
+)"
+        remote_script="${remote_script/__TIMEOUT__/$VERIFY_CMD_TIMEOUT}"
+        remote_script="${remote_script/__URL__/$fetch_url}"
+        remote_script="${remote_script/__SPLIT__/$split_token}"
+
+        result="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- sh -lc "$remote_script" 2>/dev/null || true)"
+
+        if [[ -n "$result" ]] && printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
+            break
+        fi
+    done
+
     if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
-        printf '000%s' "$split_token"
+        printf '%s%s%s%s%s' "000" "$split_token" "not-attempted" "$split_token" ""
         return 0
     fi
 
     status="$(printf '%s' "$result" | tail -n1 | sed "s/^${split_token}://")"
     body="$(printf '%s' "$result" | sed '$d')"
+    payload_path="$target_arg_used"
+
+    if [[ "$payload_path" == http://* || "$payload_path" == https://* ]]; then
+        payload_path="${payload_path#http://localhost:8000}"
+        payload_path="${payload_path#https://localhost:8000}"
+    fi
+
+    if [[ -z "$payload_path" ]]; then
+        payload_path="/"
+    fi
+
     body="${body%$'\r'}"
 
-    printf '%s%s%s' "$status" "$split_token" "$body"
+    printf '%s%s%s%s%s' "$status" "$split_token" "$payload_path" "$split_token" "$body"
 }
 
 check_metrics_payload_shape() {
@@ -280,8 +685,14 @@ check_prometheus_runtime_wiring() {
     local rule_name="${3}"
     local evidence_file="${4}"
     local check_rule=0
-    local sm_count=0
+    local sm_namespace="${VERIFY_MONITORING_NAMESPACE}"
+    local sm_namespace_evidence=""
     local rule_crd_count=0
+    local rule_namespace=""
+    local rule_namespace_evidence=""
+    local rule_resolve_rc=0
+    local sm_resolve_rc=0
+    local sm_namespace_candidate=""
 
     if ! command -v kubectl >/dev/null 2>&1; then
         skip "runtime wiring for ${component}: kubectl unavailable"
@@ -290,39 +701,56 @@ check_prometheus_runtime_wiring() {
 
     if [[ -n "$target_name" ]]; then
         set +e
-        sm_count="$(kubectl_cmd get servicemonitor -n "$VERIFY_MONITORING_NAMESPACE" "$target_name" --ignore-not-found 2>/dev/null | wc -l | tr -d '[:space:]')"
+        sm_namespace_candidate="$(resolve_service_monitor "$target_name")"
+        sm_resolve_rc=$?
+        sm_namespace_evidence="${SM_MATCH_NAMESPACES:-$VERIFY_MONITORING_NAMESPACE}"
         set -e
-        if [[ "$sm_count" -eq 0 ]]; then
-            fail "Runtime wiring: expected ServiceMonitor '${target_name}' not found in ${VERIFY_MONITORING_NAMESPACE}"
+
+        if [[ "$sm_resolve_rc" -eq 0 ]]; then
+            sm_namespace="$sm_namespace_candidate"
+            pass "Runtime wiring: ServiceMonitor '${target_name}' exists in ${sm_namespace}"
+            sm_namespace_evidence="${sm_namespace}"
+        elif [[ "$sm_resolve_rc" -eq 1 ]]; then
+            fail "Runtime wiring: expected ServiceMonitor '${target_name}' not found in ${VERIFY_MONITORING_NAMESPACE}/${VERIFY_APP_NAMESPACE} (all-namespace fallback checked)"
+            sm_namespace_evidence="${VERIFY_MONITORING_NAMESPACE}/${VERIFY_APP_NAMESPACE}"
         else
-            pass "Runtime wiring: ServiceMonitor '${target_name}' exists in ${VERIFY_MONITORING_NAMESPACE}"
+            fail "Runtime wiring: ServiceMonitor '${target_name}' exists in multiple namespaces (${SM_MATCH_NAMESPACES:-unknown}); resolve_service_monitor requires deterministic single match"
         fi
+
     fi
 
     if [[ -n "$rule_name" ]]; then
         set +e
-        rule_crd_count="$(kubectl_cmd get prometheusrule -n "$VERIFY_APP_NAMESPACE" "$rule_name" --ignore-not-found 2>/dev/null | wc -l | tr -d '[:space:]')"
+        rule_namespace="$(resolve_prometheus_rule "$rule_name")"
+        rule_resolve_rc=$?
+        rule_crd_count="${PR_MATCH_COUNT:-0}"
+        rule_namespace_evidence="${PR_MATCH_NAMESPACES:-$VERIFY_MONITORING_NAMESPACE}"
         set -e
-        if [[ "$rule_crd_count" -eq 0 ]]; then
-            fail "Runtime wiring: expected PrometheusRule '${rule_name}' not found in ${VERIFY_APP_NAMESPACE}"
+
+        if [[ "$rule_resolve_rc" -eq 0 ]]; then
+            pass "Runtime wiring: PrometheusRule '${rule_name}' exists in ${rule_namespace}"
             check_rule=1
+        elif [[ "$rule_resolve_rc" -eq 1 ]]; then
+            fail "Runtime wiring: expected PrometheusRule '${rule_name}' not found in ${VERIFY_MONITORING_NAMESPACE}/${VERIFY_APP_NAMESPACE} (all-namespace fallback checked)"
+            check_rule=0
         else
-            pass "Runtime wiring: PrometheusRule '${rule_name}' exists in ${VERIFY_APP_NAMESPACE}"
+            fail "Runtime wiring: PrometheusRule '${rule_name}' exists in multiple namespaces (${PR_MATCH_NAMESPACES:-unknown}); expected single definition"
+            check_rule=0
         fi
     fi
 
     set +e
-    PROM_POD="$(kubectl_cmd_with_timeout get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    PROM_POD="$(resolve_prometheus_pod)"
     set -e
 
     if [[ -z "$PROM_POD" ]]; then
-        skip "runtime wiring for ${component}: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE}"
+        skip "runtime wiring for ${component}: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE}/${VERIFY_APP_NAMESPACE}"
         return 0
     fi
 
     set +e
-    TARGETS_JSON="$(kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
-    RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
+    TARGETS_JSON="$(kubectl_cmd_with_timeout exec -n "$PROM_POD_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
+    RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$PROM_POD_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
     set -e
 
     TARGET_COUNT="0"
@@ -330,10 +758,9 @@ check_prometheus_runtime_wiring() {
     if [[ -n "$TARGETS_JSON" ]]; then
         TARGET_COUNT="$(printf '%s' "$TARGETS_JSON" | jq -r --arg n "$target_name" '[ .data.activeTargets // [] | .[] | select( (.scrapePool // "" | contains($n)) or (.labels.job // "" | tostring | contains($n)) or (.discoveredLabels["__meta_kubernetes_service_name"] // "" | tostring | contains($n)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
     fi
-    if [[ -n "$rule_name" && -n "$RULES_JSON" ]]; then
+    if [[ "$check_rule" -eq 1 && -n "$RULES_JSON" ]]; then
         RULE_GROUP_COUNT="$(printf '%s' "$RULES_JSON" | jq -r --arg n "$rule_name" '[ .data.groups // [] | .[] | select((.name // "") == $n or (.name // "" | contains($n)) ) ] | length' 2>/dev/null | tr -d '[:space:]')"
         RULE_GROUP_COUNT="${RULE_GROUP_COUNT:-0}"
-        check_rule=1
     fi
 
     TARGET_COUNT="${TARGET_COUNT:-0}"
@@ -346,11 +773,18 @@ check_prometheus_runtime_wiring() {
         echo "- generated_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
         echo "- component: ${component}"
         echo "- target_name: ${target_name}"
-    if [[ -n "$rule_name" ]]; then
-        echo "- rule_name: ${rule_name}"
-    else
-        echo "- rule_name: (not requested)"
-    fi
+        if [[ -n "$target_name" ]]; then
+            echo "- target_namespace: ${sm_namespace_evidence:-${VERIFY_MONITORING_NAMESPACE}}"
+        else
+            echo "- target_namespace: (not requested)"
+        fi
+        if [[ -n "$rule_name" ]]; then
+            echo "- rule_name: ${rule_name}"
+            echo "- rule_namespace: ${rule_namespace_evidence:-${VERIFY_MONITORING_NAMESPACE}}"
+        else
+            echo "- rule_name: (not requested)"
+            echo "- rule_namespace: (not requested)"
+        fi
         echo "- target_matches: ${TARGET_COUNT}"
         echo "- rule_group_matches: ${RULE_GROUP_COUNT}"
         echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
@@ -393,13 +827,14 @@ echo "==> AC-OVR-016: Prometheus recording rules producing numeric data (0-1 ran
 if command -v kubectl >/dev/null 2>&1; then
     # Try to get Prometheus pod
     set +e
-    PROM_POD="$(kubectl_cmd_with_timeout get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    PROM_POD="$(resolve_prometheus_pod)"
+    PROM_NAMESPACE="${PROM_POD_NAMESPACE:-$VERIFY_MONITORING_NAMESPACE}"
     set -e
 
     if [[ -n "$PROM_POD" ]]; then
         # Query recording rule
         set +e
-        if kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+        if kubectl_cmd_with_timeout exec -n "$PROM_NAMESPACE" "$PROM_POD" -c prometheus -- \
                 wget -q -O- "http://localhost:9090/api/v1/query?query=mereka:http_requests:availability_ratio_5m" 2>/dev/null | \
                 grep -q '"status":"success"'; then
                 pass "AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data"
@@ -408,7 +843,7 @@ if command -v kubectl >/dev/null 2>&1; then
             fi
         set -e
     else
-        skip "AC-OVR-016: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE} namespace"
+        skip "AC-OVR-016: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE}/${VERIFY_APP_NAMESPACE} namespace"
     fi
 else
     skip "AC-OVR-016: kubectl not available (requires live cluster access)"
@@ -420,15 +855,19 @@ echo "==> AC-OVR-016: LMS/CMS /metrics endpoint returns valid Prometheus exposit
 if command -v kubectl >/dev/null 2>&1; then
     set +e
     LMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms)"
-    LMS_CODE="${LMS_RESULT%%__METRICS_SPLIT__*}"
-    LMS_METRICS="${LMS_RESULT#*__METRICS_SPLIT__}"
+    LMS_CODE="${LMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
+    LMS_REST="${LMS_RESULT#*${METRICS_SPLIT_TOKEN}}"
+    LMS_PATH="${LMS_REST%%${METRICS_SPLIT_TOKEN}*}"
+    LMS_METRICS="${LMS_REST#*${METRICS_SPLIT_TOKEN}}"
     CMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms)"
-    CMS_CODE="${CMS_RESULT%%__METRICS_SPLIT__*}"
-    CMS_METRICS="${CMS_RESULT#*__METRICS_SPLIT__}"
+    CMS_CODE="${CMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
+    CMS_REST="${CMS_RESULT#*${METRICS_SPLIT_TOKEN}}"
+    CMS_PATH="${CMS_REST%%${METRICS_SPLIT_TOKEN}*}"
+    CMS_METRICS="${CMS_REST#*${METRICS_SPLIT_TOKEN}}"
     set -e
 
-    write_metrics_payload_evidence "LMS" "$LMS_CODE" "$LMS_METRICS" "" "$VERIFY_EVIDENCE_DIR/observability-metrics-lms-runtime.md"
-    write_metrics_payload_evidence "CMS" "$CMS_CODE" "$CMS_METRICS" "" "$VERIFY_EVIDENCE_DIR/observability-metrics-cms-runtime.md"
+    write_metrics_payload_evidence "LMS" "$LMS_CODE" "$LMS_METRICS" "" "$VERIFY_EVIDENCE_DIR/observability-metrics-lms-runtime.md" "$LMS_PATH"
+    write_metrics_payload_evidence "CMS" "$CMS_CODE" "$CMS_METRICS" "" "$VERIFY_EVIDENCE_DIR/observability-metrics-cms-runtime.md" "$CMS_PATH"
 
     if [[ "$LMS_CODE" == "200" ]]; then
         pass "AC-OVR-016: LMS /metrics returned 200"
@@ -445,9 +884,12 @@ if command -v kubectl >/dev/null 2>&1; then
     fi
 else
     skip "AC-OVR-016: kubectl not available (cannot verify LMS/CMS /metrics)"
-    write_metrics_payload_evidence "LMS" "000" "" "kubectl unavailable at runtime verification" "$VERIFY_EVIDENCE_DIR/observability-metrics-lms-runtime.md"
-    write_metrics_payload_evidence "CMS" "000" "" "kubectl unavailable at runtime verification" "$VERIFY_EVIDENCE_DIR/observability-metrics-cms-runtime.md"
+    write_metrics_payload_evidence "LMS" "000" "" "kubectl unavailable at runtime verification" "$VERIFY_EVIDENCE_DIR/observability-metrics-lms-runtime.md" "/metrics"
+    write_metrics_payload_evidence "CMS" "000" "" "kubectl unavailable at runtime verification" "$VERIFY_EVIDENCE_DIR/observability-metrics-cms-runtime.md" "/metrics"
 fi
+
+check_openedx_settings_metrics_wiring "LMS" "lms"
+check_openedx_settings_metrics_wiring "CMS" "cms"
 
 # AC-OVR-018: GCP uptime checks
 echo ""
@@ -601,29 +1043,45 @@ fi
 echo ""
 echo "==> AC-OVR-025: Validation script produces valid JSON with --json flag"
 if [[ -f "scripts/qa/validate-observability-compliance.sh" ]]; then
-    # Run in JSON mode and validate output
+    # Run in JSON mode and validate output deterministically
+    VALIDATE_RC=0
+    VALIDATE_OUTPUT=""
     set +e
     if command -v timeout >/dev/null 2>&1; then
-      OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json --strict 2>/dev/null)"
+      VALIDATE_OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+        VALIDATE_OBS_JSON_ONLY=1 \
+        timeout "$VERIFY_RUNTIME_VALIDATION_TIMEOUT" scripts/qa/validate-observability-compliance.sh --mode local --json --strict 2>&1)"
+      VALIDATE_RC=$?
     else
-      OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
-        scripts/qa/validate-observability-compliance.sh --mode local --json --strict 2>/dev/null)"
+      VALIDATE_OUTPUT="$(VALIDATE_OBS_APP_NAMESPACE="$VERIFY_APP_NAMESPACE" \
+        VALIDATE_OBS_JSON_ONLY=1 \
+        scripts/qa/validate-observability-compliance.sh --mode local --json --strict 2>&1)"
+      VALIDATE_RC=$?
     fi
-    if [[ $? -eq 0 ]]; then
-        VALIDATE_JSON_PAYLOAD="$(extract_json_payload "$OUTPUT")"
-        if [[ -n "$VALIDATE_JSON_PAYLOAD" ]] && echo "$VALIDATE_JSON_PAYLOAD" | jq -e '.summary.total' >/dev/null 2>&1; then
-            pass "AC-OVR-025: Validation script produces valid JSON output"
-        else
-            fail "AC-OVR-025: Validation script JSON output is malformed"
-            if [[ -n "$OUTPUT" ]]; then
-                skip "AC-OVR-025 tail output: $(printf '%s' "${OUTPUT}" | tail -n 5 | tr '\n' ' ')"
-            fi
+
+    if [[ $VALIDATE_RC -ne 0 ]]; then
+        fail "AC-OVR-025: validate-observability-compliance.sh failed in --json mode (rc=${VALIDATE_RC})"
+        if [[ -n "$VALIDATE_OUTPUT" ]]; then
+            skip "AC-OVR-025: output_excerpt=$(printf '%s' "${VALIDATE_OUTPUT}" | tail -n 5 | tr '\n' ' ')"
         fi
     else
-        fail "AC-OVR-025: Validation script failed in --json mode"
-        if [[ -n "$OUTPUT" ]]; then
-            skip "AC-OVR-025 command output (last 5 lines): $(printf '%s' "${OUTPUT}" | tail -n 5 | tr '\n' ' ')"
+        VALIDATE_JSON_PAYLOAD="$(extract_json_payload "$VALIDATE_OUTPUT")"
+        JSON_SCHEMA_RESULT="$(validate_observability_compliance_json "$VALIDATE_JSON_PAYLOAD")"
+
+        if [[ "$JSON_SCHEMA_RESULT" == "schema_mismatch" ]]; then
+            fail "AC-OVR-025: JSON schema validation failed: missing required fields or wrong structure"
+            if [[ -n "$VALIDATE_OUTPUT" ]]; then
+                skip "AC-OVR-025: output_excerpt=$(printf '%s' "${VALIDATE_OUTPUT}" | tail -n 5 | tr '\n' ' ')"
+            fi
+        elif [[ "$JSON_SCHEMA_RESULT" == "jq_missing" ]]; then
+            fail "AC-OVR-025: jq dependency required for strict JSON schema validation"
+        elif [[ "$JSON_SCHEMA_RESULT" == "json_payload_missing" ]]; then
+            fail "AC-OVR-025: JSON output was not found in validation output"
+        else
+            pass "AC-OVR-025: Validation script emits schema-valid JSON"
+            if [[ -n "$VERIFY_EVIDENCE_FILE" ]]; then
+                echo "${VALIDATE_JSON_PAYLOAD}" > "$VERIFY_EVIDENCE_DIR/observability-compliance-runtime.json"
+            fi
         fi
     fi
     set -e
@@ -698,6 +1156,18 @@ fi
 echo ""
 echo "==> AC-OVR-031: All alert PromQL expressions are valid (no syntax errors)"
 echo ""
+echo ">> Runtime wiring check: LMS and CMS metrics/alerts in Prometheus"
+check_prometheus_runtime_wiring \
+    "LMS" \
+    "lms-metrics" \
+    "lms-alerts" \
+    "$VERIFY_EVIDENCE_DIR/observability-lms-prometheus-wiring-runtime.md"
+check_prometheus_runtime_wiring \
+    "CMS" \
+    "cms-metrics" \
+    "lms-alerts" \
+    "$VERIFY_EVIDENCE_DIR/observability-cms-prometheus-wiring-runtime.md"
+
 echo "==> Runtime wiring check: caddy-metrics and caddy-alerts in Prometheus"
 check_prometheus_runtime_wiring \
     "caddy" \
@@ -772,13 +1242,14 @@ if [[ "$lane_env" == "dev" || "$lane_env" == "local" || "$lane_env" == "kind" ||
 fi
 if command -v kubectl >/dev/null 2>&1; then
     set +e
-    PROM_POD="$(kubectl_cmd_with_timeout get pods -n "$VERIFY_MONITORING_NAMESPACE" -l app.kubernetes.io/name=prometheus -o name 2>/dev/null | head -1)"
+    PROM_POD="$(resolve_prometheus_pod)"
+    PROM_NAMESPACE="${PROM_POD_NAMESPACE:-$VERIFY_MONITORING_NAMESPACE}"
     set -e
 
     if [[ -n "$PROM_POD" ]]; then
         # Get all alert rules from Prometheus
         set +e
-        RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$VERIFY_MONITORING_NAMESPACE" "$PROM_POD" -c prometheus -- \
+        RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$PROM_NAMESPACE" "$PROM_POD" -c prometheus -- \
             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
         set -e
 
@@ -796,7 +1267,7 @@ if command -v kubectl >/dev/null 2>&1; then
             skip "AC-OVR-031: No alert rules loaded in Prometheus yet"
         fi
     else
-        skip "AC-OVR-031: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE} namespace"
+        skip "AC-OVR-031: Prometheus pod not found in ${VERIFY_MONITORING_NAMESPACE}/${VERIFY_APP_NAMESPACE} namespace"
     fi
 else
     skip "AC-OVR-031: kubectl not available (requires live cluster access)"
