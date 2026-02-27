@@ -13,6 +13,8 @@ If this fails, user-facing impact is likely.
 
 ## Step 2: Monitoring Coverage Sanity
 
+If AC-OVR-016 is active, use `docs/qa/OBSERVABILITY_CLOSEOUT_QUEUE_2026-02-27.md` and execute `OBS-EXT-061` then `OBS-EXT-063` as the hard stop before other coverage runs.
+
 ```bash
 OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod \
   ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
