@@ -107,8 +107,9 @@ This is the next ordered 10-task handoff in terms of implementation scope, not m
   - Definition of done: `openedx_prometheus.urls` is explicitly mounted at `/metrics` in runtime URLConf and `/metrics` returns Prometheus exposition with both `# HELP` and numeric sample rows.
    - Current implementation status: URLConf contract now includes explicit `/metrics` and trailing-slash variant; verification still requires `status_code: 200` + sample payload evidence in live strict run.
 
-3. **OBS-EXT-063 — Normalize CMS metrics route and ServiceMonitor alignment (P0, planned)**
-   - Definition of done: CMS `/metrics` route exists with service/monitor naming matching the lane, and runtime check emits `status_code: 200` for CMS with valid sample payload.
+3. **OBS-EXT-063 — Normalize CMS metrics route and ServiceMonitor alignment (P0, in_progress)**
+  - Definition of done: CMS `/metrics` route exists with service/monitor naming matching the lane, and runtime checks emit `status_code: 200` for CMS with valid Prometheus exposition (`# HELP`, `# TYPE`, numeric sample count).
+   - Current implementation status: awaiting strict nonprod/prod evidence closure; route/path is validated via runtime payload probing and wiring checks.
 
 4. **OBS-EXT-064 — Finish OBS-053 (P0, planned)**
    - Definition of done: `caddy-metrics` + `caddy-alerts` deployed and visible across dev/nonprod/prod in monitor targets and runtime evidence objects.

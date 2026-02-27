@@ -9,12 +9,22 @@ Close remaining first-class observability blockers in a strict lane-safe sequenc
 - Keep evidence identity consistent: `env=<lane>;profile=<profile>;context=<context>;project=<project>`.
 - Do not patch dev-only services outside explicit `dev` lane tasks.
 
+Hard stop before each wave:
+
+1. Confirm lane identity variables resolve:
+   - `OBS_PARITY_<LANE>_K8S_CONTEXT`
+   - target namespace and profile in `OBSERVABILITY_DISPATCH_PROFILE`
+2. Confirm runtime output file ownership and identity fields are preserved:
+   - `observability-first-class-runtime-evidence-index.json`
+
+3. Confirm no lane artifacts were stale (timestamp older than run window) before rerunning a previously passed wave.
+
 ## Next 10 Large Tasks (in order)
 
 | Step | Ticket | Lane target | Definition of done |
 |---|---|---|---|
 | 1 | OBS-EXT-061 | nonprod → prod (same pattern) | `LMS/CMS /metrics` route checks produce `status_code: 200` in strict runtime wave and payload samples in `observability-metrics-lms-runtime.md` / `observability-metrics-cms-runtime.md` with `# HELP`, `# TYPE`, and numeric samples. |
-| 2 | OBS-EXT-063 | nonprod → prod | Prometheus rule for LMS/CMS (`lms-alerts`) and route visibility pass for `observability-cms-prometheus-wiring-runtime.md` with target + rule hit count > 0. |
+| 2 | OBS-EXT-063 | nonprod → prod | CMS `/metrics` path and route contract are normalised; `observability-metrics-cms-runtime.md` shows `status_code: 200` + valid payload; `observability-cms-prometheus-wiring-runtime.md` and `observability-lms-prometheus-wiring-runtime.md` both show CMS/LMS monitoring target+rule hits.
 | 3 | OBS-EXT-064 | nonprod → prod | `caddy-metrics` exists in expected namespace and `caddy-alerts` present in Prometheus `/api/v1/rules` with evidence in `observability-caddy-prometheus-wiring-runtime.md` and index. |
 | 4 | OBS-EXT-065 | nonprod → prod | `mfe-metrics` + `services-alerts` both visible in target/rules evidence; no drift in object names across namespaces. |
 | 5 | OBS-EXT-066 | nonprod → prod | High-signal ServiceMonitors for forum/discovery/ecommerce/credentials/purchase-gateway present and counted in `activeTargets`. |
@@ -49,10 +59,26 @@ Then verify these artifacts exist and pass:
 2. Do not move to `OBS-EXT-068` before core coverage (`OBS-063` through `OBS-067`) is clear.
 3. Do not move to handoff (`OBS-070`) until lane evidence identity is stable across all artifact files.
 
+### Wave 2.1 evidence acceptance checks for OBS-EXT-063
+
+After each `OBS-EXT-063` run:
+
+- `observability-metrics-cms-runtime.md`:
+  - `status_code: 200`
+  - payload counters for `# HELP`, `# TYPE`, and numeric sample rows
+  - `metric_path` shows `/metrics` or `/metrics/`
+- `observability-cms-prometheus-wiring-runtime.md`:
+  - target match count > 0 for `cms-metrics`
+  - rule match count > 0 for `cms-alerts`
+- `observability-lms-prometheus-wiring-runtime.md`:
+  - no regression vs previously passing LMS targets/rules
+- `observability-first-class-runtime-evidence-index.json`:
+  - includes all expected file names for LMS/CMS metrics and wiring evidence
+  - identity strings are equal across preflight, compliance, and wiring outputs
+
 ## Operator ownership
 
 - **Observability runtime wave owner:** platform SRE
 - **App instrumentation owner (LMS/CMS):** platform/apps
 - **Workflow and evidence owner:** release operations
 - **Exception log owner:** on-call lead at run close
-
