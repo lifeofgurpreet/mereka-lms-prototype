@@ -908,7 +908,7 @@ for _mfe in [
                         {
                             type: 'item',
                             href: '/dashboard/courses',
-                            content: 'Courses',
+                            content: 'Discover Courses',
                         },
                     ],
                 ),
@@ -933,7 +933,7 @@ for _mfe in [
                         {
                             type: 'item',
                             href: '/dashboard/courses',
-                            content: 'Courses',
+                            content: 'Discover Courses',
                         },
                     ],
                 ),
@@ -969,20 +969,28 @@ const getMerekaVariant = (hostname, config) => {
     'academyv2.mereka.io': {
       brand: 'Mereka Academy',
       logoUrl: '/static/images/logo-horizontal.svg',
+      mobileLogoUrl: '/static/images/logo-square.svg',
+      helpUrl: 'https://help.mereka.io/',
     },
     'academy.biji-biji.com': {
       brand: 'Biji-Biji Academy',
       logoUrl: '/static/images/logo-horizontal.svg',
+      mobileLogoUrl: '/static/images/logo-square.svg',
+      helpUrl: 'https://help.mereka.io/',
     },
     'skillourfuture.academy.mereka.io': {
       brand: 'Skill Our Future Academy',
       logoUrl: '/static/images/logo-horizontal.svg',
+      mobileLogoUrl: '/static/images/logo-square.svg',
+      helpUrl: 'https://help.mereka.io/',
     },
   };
 
   return variants[normalizedHostname] || {
     brand: fallbackBrand,
     logoUrl: '/static/images/logo-horizontal.svg',
+    mobileLogoUrl: '/static/images/logo-square.svg',
+    helpUrl: '/help/',
   };
 };
 
@@ -993,6 +1001,15 @@ const getLogoHref = (baseUrl) => {
 const withMerekaMenuItems = (widget, menuItems = []) => {
   const widgetProps = (widget && widget.RenderWidget && widget.RenderWidget.props) || {};
   const defaultMenu = widgetProps.menu;
+  const config = getConfig();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const menuItemsWithSupport = [
+    ...menuItems,
+    ...(typeof variant?.helpUrl === 'string' && variant.helpUrl
+      ? [{ type: 'item', href: variant.helpUrl, content: 'Support' }]
+      : []),
+  ];
 
   if (!Array.isArray(defaultMenu) || !Array.isArray(menuItems)) {
     return widget;
@@ -1003,13 +1020,13 @@ const withMerekaMenuItems = (widget, menuItems = []) => {
       ...widget,
       content: {
         ...(widget.content || {}),
-        menu: menuItems,
+        menu: menuItemsWithSupport,
       },
     };
   }
 
   const existingHrefs = new Set(defaultMenu.map((item) => (item && item.href ? item.href : item)));
-  const sanitizedMenuItems = menuItems.filter((item) => item && item.href && !existingHrefs.has(item.href));
+  const sanitizedMenuItems = menuItemsWithSupport.filter((item) => item && item.href && !existingHrefs.has(item.href));
   if (sanitizedMenuItems.length === 0) {
     return widget;
   }
@@ -1030,10 +1047,12 @@ const MerekaHeaderLogo = () => {
   const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
+  const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
+  const selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;
 
   return (
     <a href={getLogoHref(baseUrl)} aria-label={`${variant.brand} dashboard`} className="mereka-header-logo">
-      <img src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl} alt={`${variant.brand} logo`} />
+      <img src={baseUrl ? `${baseUrl}${selectedLogo}` : selectedLogo} alt={`${variant.brand} logo`} />
     </a>
   );
 };
