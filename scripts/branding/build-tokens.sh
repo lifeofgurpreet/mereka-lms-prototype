@@ -45,19 +45,22 @@ CSS
 write_core_theme "$OUTPUT_DIR/core.min.css"
 cp "$OUTPUT_DIR/core.min.css" "$OUTPUT_DIR/light.min.css"
 
-python3 - "$TOKENS_SCSS" "$OUTPUT_DIR/mereka-brand.min.css" <<'PY'
+CORE_THEME="$OUTPUT_DIR/core.min.css"
+python3 - "$TOKENS_SCSS" "$OUTPUT_DIR/mereka-brand.min.css" "$CORE_THEME" <<'PY'
 from pathlib import Path
 import re
 import sys
 
 PATH_TOKENS = Path(sys.argv[1])
 PATH_BRAND = Path(sys.argv[2])
+PATH_CORE = Path(sys.argv[3]) if len(sys.argv) > 3 else None
 
 text = PATH_TOKENS.read_text(encoding="utf-8")
 
 var_def_re = re.compile(r"^\s*\$([A-Za-z0-9_-]+):\s*(.+?)\s*;\s*$")
 var_ref_re = re.compile(r"#\{\$([A-Za-z0-9_-]+)\}")
 var_plain_re = re.compile(r"\$([A-Za-z0-9_-]+)")
+pgn_decl_re = re.compile(r"(--pgn-[A-Za-z0-9_-]+)\s*:\s*([^;{}]+)")
 
 vars = {}
 for line in text.splitlines():
@@ -82,6 +85,8 @@ if not root_match:
     raise SystemExit("Unable to locate :root block in _tokens.scss")
 
 pgn_lines = []
+seen = set()
+
 for raw in root_match.group(1).splitlines():
     line = raw.rstrip()
     stripped = line.strip()
@@ -98,8 +103,23 @@ for raw in root_match.group(1).splitlines():
     resolved = var_ref_re.sub(lambda m: resolve_var(m.group(1)), value)
     resolved = var_plain_re.sub(lambda m: resolve_var(m.group(1)), resolved)
 
-    # Keep all CSS functions/variables untouched, only expand SCSS interpolation.
+    seen.add(name)
     pgn_lines.append(f"  {name}: {resolved};")
+
+core_text = ""
+if PATH_CORE is not None and PATH_CORE.exists():
+    core_text = PATH_CORE.read_text(encoding="utf-8")
+
+if core_text:
+    for raw in re.finditer(pgn_decl_re, core_text):
+        name = raw.group(1)
+        if name in seen:
+            continue
+        value = raw.group(2).strip()
+        if not value:
+            continue
+        seen.add(name)
+        pgn_lines.append(f"  {name}: {value.strip()};")
 
 if not pgn_lines:
     raise SystemExit("No --pgn-* properties found in _tokens.scss")
