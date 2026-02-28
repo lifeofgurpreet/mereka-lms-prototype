@@ -676,8 +676,12 @@ echo "========================================================"
 echo "OEP-48 Brand Package: PASS=${PASS} FAIL=${FAIL} WARN=${WARN} SKIP=${SKIP}"
 echo "========================================================"
 echo ""
-echo "Remaining SKIP items are documented OEP-48 gaps (not blocking failures)."
-echo "See: docs/architecture/OEP48_BRAND_PACKAGE.md — Gap Analysis section."
+if [[ "${SKIP}" -gt 0 ]]; then
+  echo "Remaining SKIP items are documented OEP-48 gaps (not blocking failures)."
+  echo "See: docs/architecture/OEP48_BRAND_PACKAGE.md — Gap Analysis section."
+else
+  echo "No remaining OEP-48 gap SKIPs in this verifier."
+fi
 echo ""
 
 if [[ "${FAIL}" -gt 0 ]]; then

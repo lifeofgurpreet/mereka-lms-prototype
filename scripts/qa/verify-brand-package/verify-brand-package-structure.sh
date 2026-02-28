@@ -28,13 +28,17 @@ fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
 
 required_files=(
   "$BRAND_DIR/package.json"
+  "$BRAND_DIR/logo.js"
   "$BRAND_DIR/logo.svg"
   "$BRAND_DIR/logo-white.svg"
+  "$BRAND_DIR/logo_white.svg"
   "$BRAND_DIR/logo-trademark.svg"
   "$BRAND_DIR/logo.png"
   "$BRAND_DIR/logo-white.png"
+  "$BRAND_DIR/logo_white.png"
   "$BRAND_DIR/logo-trademark.png"
   "$BRAND_DIR/favicon.ico"
+  "$BRAND_DIR/favicon.png"
   "$BRAND_DIR/paragon/_fonts.scss"
   "$BRAND_DIR/paragon/core.scss"
   "$BRAND_DIR/paragon/_overrides.scss"
@@ -112,6 +116,7 @@ if [[ -d "$BRAND_DIR" ]]; then
   actual_files="$(find "$BRAND_DIR" -type f | sed "s#^$BRAND_DIR/##" | LC_ALL=C sort)"
   expected_files="$((cat <<'LIST'
 favicon.ico
+favicon.png
 fonts/Lato-Black.woff2
 fonts/Lato-BlackItalic.woff2
 fonts/Lato-Bold.woff2
@@ -123,10 +128,13 @@ fonts/Poppins-Regular.woff2
 fonts/Poppins-SemiBold.woff2
 logo-white.png
 logo-white.svg
+logo.js
 logo-trademark.png
 logo-trademark.svg
 logo.png
 logo.svg
+logo_white.png
+logo_white.svg
 package.json
 paragon/_overrides.scss
 paragon/_variables.scss
@@ -255,6 +263,40 @@ done
 if [[ "$logo_parity_ok" -eq 1 ]]; then
   pass "AC-BRAND-009 brand logos/icons are byte-identical to LMS theme sources"
   pass "AC-BRAND-INT-001 brand package logo copies are consistent with LMS theme"
+fi
+
+# AC-BRAND-009 alias parity checks (underscore and favicon.png aliases)
+if [[ -f "$BRAND_DIR/logo-white.png" && -f "$BRAND_DIR/logo_white.png" ]]; then
+  if cmp -s "$BRAND_DIR/logo-white.png" "$BRAND_DIR/logo_white.png"; then
+    pass "AC-BRAND-009 logo_white.png alias matches logo-white.png"
+  else
+    fail "AC-BRAND-009 logo_white.png alias does not match logo-white.png"
+  fi
+fi
+if [[ -f "$BRAND_DIR/logo-white.svg" && -f "$BRAND_DIR/logo_white.svg" ]]; then
+  if cmp -s "$BRAND_DIR/logo-white.svg" "$BRAND_DIR/logo_white.svg"; then
+    pass "AC-BRAND-009 logo_white.svg alias matches logo-white.svg"
+  else
+    fail "AC-BRAND-009 logo_white.svg alias does not match logo-white.svg"
+  fi
+fi
+if [[ -f "$THEME_IMAGES_DIR/favicon-256x256.png" && -f "$BRAND_DIR/favicon.png" ]]; then
+  if cmp -s "$THEME_IMAGES_DIR/favicon-256x256.png" "$BRAND_DIR/favicon.png"; then
+    pass "AC-BRAND-009 favicon.png alias matches theme favicon-256x256.png"
+  else
+    fail "AC-BRAND-009 favicon.png alias does not match theme favicon-256x256.png"
+  fi
+fi
+
+# AC-BRAND-003/compat: logo.js exports canonical assets for @edx/brand consumers
+if [[ -f "$BRAND_DIR/logo.js" ]]; then
+  if grep -q "logo_white.png" "$BRAND_DIR/logo.js" \
+    && grep -q "logo-trademark.png" "$BRAND_DIR/logo.js" \
+    && grep -q "favicon.png" "$BRAND_DIR/logo.js"; then
+    pass "AC-BRAND-003 logo.js exports canonical logo/favicons"
+  else
+    fail "AC-BRAND-003 logo.js missing one or more canonical exports"
+  fi
 fi
 
 # AC-BRAND-010 exact font inventory

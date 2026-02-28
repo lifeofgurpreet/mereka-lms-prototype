@@ -2,7 +2,7 @@
   "name": "@edx/brand-mereka",
   "version": "1.0.0",
   "description": "Mereka Academy OEP-48 brand package for Open edX MFEs",
-  "main": ".",
+  "main": "./logo.js",
   "scripts": {
     "build-tokens": "paragon build-tokens ./paragon/tokens.json ./paragon",
     "build-scss": "paragon build-scss ./paragon/core.scss ./paragon",
