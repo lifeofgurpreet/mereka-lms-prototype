@@ -85,7 +85,9 @@ jobs:
   build-openedx:
     name: Build OpenEdX Image
     runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'heavy-builder' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
-    timeout-minutes: 180
+    # Keep outer timeout comfortably above inner image-build timeout (170m)
+    # so pre/post-build checks and artifact upload have recovery headroom.
+    timeout-minutes: 200
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_openedx }}
     permissions:
