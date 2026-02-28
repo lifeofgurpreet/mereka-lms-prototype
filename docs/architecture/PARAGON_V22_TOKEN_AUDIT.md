@@ -3,7 +3,7 @@
 ## Source
 - Source core theme: `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`
 - Theme bridge: `infrastructure/tutor/themes/mereka/scss/_tokens.scss`
-- Generated on: 2026-02-28T00:48:05Z (UTC)
+- Generated on: 2026-02-28T02:35:17Z (UTC)
 - Command: `python3 scripts/qa/paragon-v22-token-audit.py --write`
 
 ## Method
@@ -148,5 +148,6 @@
 - Re-audit whenever `core.min.css` changes (Theme URL runtime path update).
 
 ## Migration Boundary Statement
-- Paragon v22 **does not consume** many component-level `--pgn-*` tokens that are often assumed to be active (for example card shadow/radius and modal/dropdown box-shadow families).
-- Where Paragon does not consume these tokens, visual behavior **must remain as CSS rules** in `infrastructure/tutor/themes/mereka/mfe/mereka.scss` until upstream component token support exists.
+- Paragon v22 does not currently consume many component-level `--pgn-*` tokens that were previously assumed active (examples: card radius/shadow families, modal/dropdown shadows).
+- Keep these visual behaviors as explicit CSS rules in `infrastructure/tutor/themes/mereka/mfe/mereka.scss` until component-level token support lands upstream.
+- Re-validate both `core.min.css` and this audit whenever the Paragon version changes.
