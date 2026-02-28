@@ -146,7 +146,10 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          tutor images build openedx
+          if ! timeout 170m tutor images build openedx; then
+            echo "OpenedX image build timed out or failed after timeout guard" >&2
+            exit 1
+          fi
           kill "$HEARTBEAT_PID" 2>/dev/null || true
           trap - EXIT
 
@@ -342,7 +345,10 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          tutor images build mfe
+          if ! timeout 110m tutor images build mfe; then
+            echo "MFE image build timed out or failed after timeout guard" >&2
+            exit 1
+          fi
           kill "$HEARTBEAT_PID" 2>/dev/null || true
           trap - EXIT
 
