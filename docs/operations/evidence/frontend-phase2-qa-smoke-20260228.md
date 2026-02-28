@@ -335,3 +335,22 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
   - placeholder/caption contrast pair (`ink-300` on surface) below 4.5:1, documented as decorative-only exception
   - one `box-shadow:none` occurrence inside minified core CSS focus context (review note retained)
 - Artifact updated: `var/a11y-contrast-focus-gate.txt`
+
+## Addendum — Selector + Scoping Gate Refresh
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-mfe-selector-hardening.sh
+./scripts/qa/verify-css-scoping.sh
+```
+
+### Results
+
+- `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
+  - Non-comment `[class*=]` selector lines remain at `0`.
+  - `SELECTOR-EXCEPTION` annotations remain at `0` (slot-only hardening state).
+- `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
+  - Confirms dead wildcard MFE scopes remain absent (`authn`, `learner-dashboard`, `learning`, `discussions`).
+  - Confirms token bridge + revision marker contracts remain intact.
+- Artifact updated: `var/css-scoping-gate.txt`
