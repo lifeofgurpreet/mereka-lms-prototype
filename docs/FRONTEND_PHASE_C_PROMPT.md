@@ -23,7 +23,7 @@
 
 ### Critical Context
 
-**The brand package SCSS is dead in Ulmo.** Paragon v23+ MFEs do NOT `@import` from `@edx/brand`. The `_variables.scss` SCSS variables (`$primary`, `$secondary`) have zero effect. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties (`:root { --pgn-color-primary: ... }`).
+**The brand package SCSS is dead in Ulmo.** Paragon v23+ MFEs do NOT `@import` from `@edx/brand`. The `_variables.scss` SCSS variables (`$primary`, `$secondary`) have zero effect. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties (`:root { --pgn-color-primary-base: ... }`).
 
 The brand package is an **asset container** (logos, images, favicon). Keep SCSS files for OEP-48 compliance but do not treat them as the color/font source of truth.
 
@@ -36,7 +36,7 @@ The original Phase C assumed most BEM overrides could be replaced with `--pgn-*`
 A comprehensive audit of the compiled Paragon CSS (`core.min.css`, 2,310 tokens) reveals:
 
 - Paragon v22 exposes **2,310 CSS custom properties**, but component-level tokens are incomplete
-- It **DOES** consume: semantic colors (`--pgn-color-primary`, `--pgn-btn-bg`), typography, spacing, button radius
+- It **DOES** consume: semantic colors (`--pgn-color-primary-base`, `--pgn-btn-bg`), typography, spacing, button radius
 - It **DOES NOT** consume: card shadow/border-radius, form control padding/height, modal shadows, dropdown shadows, breadcrumb/tab styling
 
 **Bottom line**: Only ~12 of the 35 BEM overrides can be replaced with tokens. The rest MUST remain as CSS rules. Attempting to define tokens Paragon doesn't read creates dead CSS that silently fails.
@@ -79,14 +79,14 @@ The original prompt listed ~60 `--pgn-*` component tokens to add. Most of these 
 **Tokens Paragon v22 DOES consume** (we should ensure these are correct):
 
 ```
---pgn-color-primary          ← our #ab3b78 (magenta)
---pgn-color-secondary        ← our #237072 (teal)
---pgn-color-success          ← our #2c6e49 (forest)
---pgn-color-info             ← our #295cad (blue)
---pgn-color-warning          ← our #f4be48 (gold)
---pgn-color-danger           ← our #8c002f (burgundy)
---pgn-font-family-sans-serif ← our Poppins/Lato stack
---pgn-heading-font-family    ← our Lato/Poppins stack
+--pgn-color-primary-base     ← our #ab3b78 (magenta)
+--pgn-color-secondary-base   ← our #237072 (teal)
+--pgn-color-success-base     ← our #2c6e49 (forest)
+--pgn-color-info-base        ← our #295cad (blue)
+--pgn-color-warning-base     ← our #f4be48 (gold)
+--pgn-color-danger-base      ← our #8c002f (burgundy)
+--pgn-typography-font-family-sans-serif ← our Poppins/Lato stack
+--pgn-typography-headings-font-family   ← our Lato/Poppins stack
 --pgn-btn-border-radius      ← our 999px (pill buttons)
 --pgn-link-color             ← our #295cad
 --pgn-link-hover-color       ← our #237072
@@ -311,8 +311,8 @@ PLUGIN="infrastructure/tutor/plugins/mereka_lms.py"
 echo "=== Paragon Token Coverage ==="
 
 # 1. _tokens.scss defines core semantic tokens
-for token in '--pgn-color-primary' '--pgn-color-secondary' \
-             '--pgn-font-family-sans-serif' '--pgn-btn-border-radius'; do
+for token in '--pgn-color-primary-base' '--pgn-color-secondary-base' \
+             '--pgn-typography-font-family-sans-serif' '--pgn-btn-border-radius'; do
   if grep -qF "$token" "$TOKENS"; then
     pass "$token defined in _tokens.scss"
   else
@@ -424,18 +424,18 @@ deferred to Phase D for rewrite or slot migration.
 
 ---
 
-## Token Naming Gaps (2026-02-28)
+## Token Naming Status (2026-02-28)
 
-Our `_tokens.scss` uses short-form names that may not match Paragon v22's canonical names.
-See `docs/architecture/PARAGON_V22_TOKEN_AUDIT.md` §Token Naming Gap Analysis.
+Canonical Paragon v22 naming is now the enforced source of truth in frontend token gates.
+See `docs/architecture/PARAGON_V22_TOKEN_AUDIT.md` and
+`scripts/qa/verify-design-tokens-migration.sh`.
 
-Key mismatches:
-- `--pgn-color-primary` → canonical is `--pgn-color-primary-base` (we define both, so OK)
-- `--pgn-border-radius` → canonical is `--pgn-size-border-radius-base` (NOT defined — gap)
-- `--pgn-font-family-sans-serif` → canonical is `--pgn-typography-font-family-sans-serif` (NOT defined — gap)
-
-The "Defined & Ignored" tokens in the audit are genuinely ignored by Paragon. Phase C
-should focus only on the "Consumed & Defined" set (30 tokens that Paragon actually reads).
+Current policy:
+- Use canonical names only (for example, `--pgn-color-primary-base` and
+  `--pgn-typography-font-family-sans-serif`)
+- Do not define or reference short-form legacy names (`--pgn-color-primary`,
+  `--pgn-font-family-sans-serif`, `--pgn-border-radius`)
+- Keep work focused on the "Consumed & Defined" token set that Paragon actually reads
 
 ---
 
