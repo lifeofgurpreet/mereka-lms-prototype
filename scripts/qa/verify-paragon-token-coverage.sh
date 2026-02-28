@@ -9,6 +9,7 @@ PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 TOKENS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 MFE_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 CORE_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
+LIGHT_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.min.css"
 MEREKA_THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
 AUDIT_DOC="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
 MISSING_TSV="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_MISSING.tsv"
@@ -88,6 +89,26 @@ if [[ -f "$CORE_THEME" ]]; then
   fi
 fi
 
+check_file "$LIGHT_THEME" "light.min.css"
+if [[ -f "$LIGHT_THEME" ]]; then
+  LIGHT_SIZE=$(wc -c < "$LIGHT_THEME")
+  if [[ "$LIGHT_SIZE" -gt 64 && "$LIGHT_SIZE" -le 8192 ]]; then
+    pass "light.min.css exists (${LIGHT_SIZE} bytes) and is within light-delta budget (<=8192)"
+  elif [[ "$LIGHT_SIZE" -gt 8192 ]]; then
+    fail "light.min.css is bloated (${LIGHT_SIZE} bytes; expected <=8192 for light delta)"
+  else
+    fail "light.min.css is unexpectedly small (${LIGHT_SIZE} bytes)"
+  fi
+fi
+
+if [[ -f "$CORE_THEME" && -f "$LIGHT_THEME" ]]; then
+  if cmp -s "$CORE_THEME" "$LIGHT_THEME"; then
+    fail "light.min.css must differ from core.min.css (core/light payload collapse detected)"
+  else
+    pass "light.min.css differs from core.min.css (delta contract preserved)"
+  fi
+fi
+
 if [[ -d "$MEREKA_THEME_DIR" ]]; then
   pass "Theme directory exists: infrastructure/tutor/themes/mereka/mfe/theme"
 else
@@ -127,7 +148,7 @@ if [[ -f "$BRAND_THEME" && -f "$BRAND_LIGHT_THEME" ]]; then
   if cmp -s "$BRAND_THEME" "$BRAND_LIGHT_THEME"; then
     pass "Brand/min light themes are synchronized"
   else
-    warn "mereka-brand-light.min.css differs from mereka-brand.min.css"
+    fail "mereka-brand-light.min.css differs from mereka-brand.min.css (unexpected drift)"
   fi
 fi
 

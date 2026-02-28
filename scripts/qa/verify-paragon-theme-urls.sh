@@ -151,6 +151,27 @@ else
   warn "mereka-brand.min.css size is ${brand_size} bytes (exceeds delta-size budget; investigate token bloat)"
 fi
 
+light_size=$(wc -c < "$THEME_DIR/light.min.css")
+if [[ "$light_size" -gt 64 && "$light_size" -le 8192 ]]; then
+  pass "light.min.css size is ${light_size} bytes (light-delta budget <=8192)"
+elif [[ "$light_size" -gt 8192 ]]; then
+  fail "light.min.css is bloated (${light_size} bytes; expected <=8192 for light delta)"
+else
+  fail "light.min.css is unexpectedly small (${light_size} bytes)"
+fi
+
+if cmp -s "$THEME_DIR/core.min.css" "$THEME_DIR/light.min.css"; then
+  fail "light.min.css must differ from core.min.css (core/light payload collapse detected)"
+else
+  pass "light.min.css differs from core.min.css (delta contract preserved)"
+fi
+
+if cmp -s "$THEME_DIR/mereka-brand.min.css" "$THEME_DIR/mereka-brand-light.min.css"; then
+  pass "mereka-brand-light.min.css is byte-identical to mereka-brand.min.css"
+else
+  fail "mereka-brand-light.min.css differs from mereka-brand.min.css (unexpected drift)"
+fi
+
 echo ""
 echo "2b) Token compilation hook presence"
 if [[ -x "$BUILD_TOKENS_SCRIPT" ]]; then

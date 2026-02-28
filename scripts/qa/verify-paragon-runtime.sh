@@ -309,7 +309,7 @@ if [[ -f "$LIGHT_THEME_CSS" ]]; then
   if [[ "$light_size" -le "$MAX_LIGHT_THEME_BYTES" ]]; then
     pass "Light theme CSS size ${light_size}B is within budget (${MAX_LIGHT_THEME_BYTES}B)"
   else
-    warn "Light theme CSS size ${light_size}B exceeds delta budget (${MAX_LIGHT_THEME_BYTES}B)"
+    fail "Light theme CSS size ${light_size}B exceeds delta budget (${MAX_LIGHT_THEME_BYTES}B)"
   fi
 else
   fail "Light theme CSS missing: ${LIGHT_THEME_CSS#$REPO_ROOT/}"
