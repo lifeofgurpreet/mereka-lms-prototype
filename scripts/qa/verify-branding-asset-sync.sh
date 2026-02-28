@@ -193,26 +193,35 @@ if [[ ! -f "$APPLY_PATCHES" ]]; then
   fail "apply-patches.sh not found at $APPLY_PATCHES"
 else
   pass "apply-patches.sh exists"
+  if grep -q 'source "\$PATCHES_DIR/mfe-node.sh"' "$APPLY_PATCHES"; then
+    pass "apply-patches sources mfe-node patch module"
+  else
+    fail "apply-patches missing source for mfe-node.sh"
+  fi
+  if grep -q 'source "\$PATCHES_DIR/brand-package.sh"' "$APPLY_PATCHES"; then
+    pass "apply-patches sources brand-package patch module"
+  else
+    fail "apply-patches missing source for brand-package.sh"
+  fi
 
-  # Check for asset sync commands
-  SYNC_PATTERNS=(
-    "cp.*logo.*png"
-    "cp.*fonts.*woff2"
-    "mereka.scss"
-  )
+  SYNC_BRAND_ASSETS="$REPO_ROOT/scripts/branding/sync-brand-assets.sh"
+  SYNC_BRAND_PACKAGE="$REPO_ROOT/scripts/branding/sync-brand-package.sh"
 
-  SYNC_FOUND=0
-  SYNC_MISSING=0
-
-  for pattern in "${SYNC_PATTERNS[@]}"; do
-    if grep -qE "$pattern" "$APPLY_PATCHES"; then
-      pass "Asset sync logic present for: $pattern"
-      SYNC_FOUND=$((SYNC_FOUND + 1))
-    else
-      skip "Asset sync pattern not found: $pattern (may use different approach)"
-      SYNC_MISSING=$((SYNC_MISSING + 1))
-    fi
-  done
+  if [[ -x "$SYNC_BRAND_ASSETS" ]]; then
+    pass "sync-brand-assets.sh exists and is executable"
+  else
+    fail "sync-brand-assets.sh missing or not executable"
+  fi
+  if [[ -x "$SYNC_BRAND_PACKAGE" ]]; then
+    pass "sync-brand-package.sh exists and is executable"
+  else
+    fail "sync-brand-package.sh missing or not executable"
+  fi
+  if grep -q 'BRAND_PACKAGE_SYNC=' "$SYNC_BRAND_ASSETS" && grep -q '"\$BRAND_PACKAGE_SYNC"' "$SYNC_BRAND_ASSETS"; then
+    pass "sync-brand-assets.sh invokes sync-brand-package.sh in the asset pipeline"
+  else
+    fail "sync-brand-assets.sh does not invoke sync-brand-package.sh"
+  fi
 fi
 
 # Check 7: Verify CMS theme assets also synced
@@ -242,13 +251,12 @@ fi
 echo
 echo -e "${BLUE}Checking SASS compilation configuration...${NC}"
 
-# Check if build logs or patches mention Google Fonts stripping
-if grep -q "strip.*google.*fonts" "$APPLY_PATCHES" 2>/dev/null; then
-  pass "Google Fonts stripping logic present in apply-patches.sh"
-elif grep -q "fonts.googleapis.com" "$APPLY_PATCHES" 2>/dev/null; then
-  pass "Google Fonts handling present in apply-patches.sh"
+# Check if build patches mention Google Fonts stripping/handling.
+if rg -q "strip.*google.*fonts|fonts\\.googleapis\\.com|fonts\\.gstatic\\.com" \
+  "$REPO_ROOT/infrastructure/tutor/patches" "$APPLY_PATCHES" 2>/dev/null; then
+  pass "Google Fonts handling logic present in Tutor patch/apply scripts"
 else
-  skip "Google Fonts stripping logic not explicitly found (may be implicit)"
+  skip "Google Fonts stripping logic not explicitly found in patch/apply scripts (may be implicit)"
 fi
 
 # Check 9: Verify DEFAULT_SITE_THEME setting
