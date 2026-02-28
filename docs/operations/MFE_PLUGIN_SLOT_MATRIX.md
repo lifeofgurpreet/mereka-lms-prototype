@@ -4,7 +4,7 @@
 
 **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — This document is a derived view focused on operational planning and migration tracking.
 
-**Last updated**: 2026-02-17
+**Last updated**: 2026-02-28
 **Covers**: Bead 1aj1 AC-UISLOT-001 through AC-UISLOT-005
 
 ---
@@ -15,16 +15,21 @@ This table lists all plugin slots currently wired by Mereka Academy or inherited
 
 | Slot ID | Target MFE | Operation Type | Plugin Type | Owner | Rollout Priority | Status |
 |---------|-----------|----------------|-------------|-------|------------------|--------|
-| `org.openedx.frontend.layout.footer.v1` | All MFEs (shared) | Replace | Direct | Mereka | P0 (Live) | **ACTIVE** |
+| `org.openedx.frontend.layout.footer.v1` | All MFEs (shared) | Hide + Insert | Direct | Mereka | P0 (Live) | **ACTIVE** |
 | `desktop_secondary_menu_slot` | account, discussions, learner-dashboard, profile | Insert | Direct | Indigo | N/A | INDIGO |
 | `mobile_header_slot` | account, discussions, learner-dashboard, profile | Replace | Direct | Indigo | N/A | INDIGO |
 | `learning_help_slot` | frontend-app-learning | Insert | Direct | Indigo | N/A | INDIGO |
-| `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Replace | Direct | Mereka (proposed) | P1 | AVAILABLE |
-| `org.openedx.frontend.layout.studio_footer.v1` | Frontend-app-authoring | Replace | Direct | Mereka (proposed) | P1 | AVAILABLE |
-| `org.openedx.frontend.authn.login_component.v1` | Frontend-app-authn | Insert | Direct | Mereka (proposed) | P1 | AVAILABLE |
-| `org.openedx.frontend.learner_dashboard.widget_sidebar.v1` | Frontend-app-learner-dashboard | Insert | Direct | Mereka (proposed) | P2 | AVAILABLE |
-| `org.openedx.frontend.learner_dashboard.no_courses_view.v1` | Frontend-app-learner-dashboard | Replace | Direct | Mereka (proposed) | P2 | AVAILABLE |
-| `ProgressCertificateStatusSlot` | Frontend-app-learning | Insert | Direct | Mereka (proposed) | P2 | AVAILABLE |
+| `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Replace | Direct | Mereka | P1 | **ACTIVE** |
+| `org.openedx.frontend.layout.studio_footer.v1` | Frontend-app-authoring | Insert | Direct | Mereka | P1 | **ACTIVE** |
+| `org.openedx.frontend.authn.login_component.v1` | Frontend-app-authn | Insert | Direct | Mereka | P1 | **ACTIVE** |
+| `org.openedx.frontend.learner_dashboard.widget_sidebar.v1` | Frontend-app-learner-dashboard | Insert | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.learner_dashboard.no_courses_view.v1` | Frontend-app-learner-dashboard | Replace | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.layout.header_desktop_main_menu.v1` | Header desktop | Modify | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.layout.header_mobile_main_menu.v1` | Header mobile | Modify | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.learning.course_outline_sidebar.v1` | Learning | Insert | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.learning.progress_certificate_status.v1` | Learning | Insert | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.account.additional_profile_fields.v1` | Account | Insert | Direct | Mereka | P2 | **ACTIVE** |
+| `org.openedx.frontend.profile.additional_profile_fields.v1` | Profile | Insert | Direct | Mereka | P2 | **ACTIVE** |
 
 **Legend**:
 - **ACTIVE**: Mereka overrides deployed in production
@@ -45,9 +50,10 @@ This section maps current hardcoded customizations in `env.config.jsx` to their 
 | Dark mode toggle (Indigo) | Generated `env.config.jsx` | `desktop_secondary_menu_slot` | No action needed (inherited) |
 | Mobile header override (Indigo) | Generated `env.config.jsx` | `mobile_header_slot` | No action needed (inherited) |
 | Learning help button (Indigo) | Generated `env.config.jsx` | `learning_help_slot` | No action needed (inherited) |
-| Custom logo (planned) | Manual CSS override | `org.openedx.frontend.layout.header_logo.v1` | Replace CSS with slot-based React component |
-| Studio footer branding (planned) | N/A | `org.openedx.frontend.layout.studio_footer.v1` | Extend MerekaFooter to Studio context |
-| Login banner (planned) | N/A | `org.openedx.frontend.authn.login_component.v1` | Create BannerWidget for auth flow |
+| Custom logo | Manual CSS override (legacy) | `org.openedx.frontend.layout.header_logo.v1` | Complete — migrated to plugin-slot-driven `MerekaHeaderLogo` |
+| Studio footer branding | N/A (legacy) | `org.openedx.frontend.layout.studio_footer.v1` | Complete — active in `mereka_lms.py` |
+| Login banner | N/A (legacy) | `org.openedx.frontend.authn.login_component.v1` | Complete — active `MerekaAuthnLoginBranding` widget |
+| Learning sidebar + progress certificate area | N/A (legacy) | `org.openedx.frontend.learning.course_outline_sidebar.v1`, `org.openedx.frontend.learning.progress_certificate_status.v1` | Complete — active `MerekaCourseOutlineSidebar` and `MerekaProgressCertificateStatus` widgets |
 
 ### Migration Checklist
 

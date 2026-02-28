@@ -1,7 +1,7 @@
 # MFE Plugin-Slot Inventory & Migration Map
 
 **Purpose**: Comprehensive inventory of all FPF (Frontend Plugin Framework) plugin slots available in Open edX Tutor 21 (Ulmo), with Mereka Academy's current wiring status and migration roadmap.
-**Last verified**: 2026-02-27
+**Last verified**: 2026-02-28
 **Related**: [ADR-014: MFE Branding Strategy](../adr/014-mfe-branding-strategy.md), [OEP-65: FPF](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html), [mfe-plugin-slots_spec.md](../../specs/mfe-plugin-slots_spec.md)
 
 ---
@@ -24,7 +24,7 @@ Plugin slots are named extension points in MFE React components. Operators injec
 
 | Status | Count | Meaning |
 |--------|-------|---------|
-| ACTIVE | 4 | They override default components |
+| ACTIVE | 12 | They override or extend default components |
 | INDIGO | 3 | Indigo theme wires it; we inherit |
 | AVAILABLE | 100+ | Slot exists upstream; not wired |
 
@@ -77,6 +77,94 @@ Plugin slots are named extension points in MFE React components. Operators injec
 | **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
 | **Forward-compat** | Uses `PLUGIN_OPERATIONS.Modify` on `default_contents` to merge links |
 | **Operation** | `PLUGIN_OPERATIONS.Modify` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.learner_dashboard.widget_sidebar.v1` — Learner Sidebar Widget
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Learner dashboard sidebar |
+| **Our component** | `MerekaLearnerSidebarWidget` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.learner_dashboard.no_courses_view.v1` — Learner Empty-State View
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Learner dashboard no-courses route |
+| **Our component** | `MerekaNoCoursesView` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Replace` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.learning.course_outline_sidebar.v1` — Learning Sidebar Slot
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Learning sidebar panel |
+| **Our component** | `MerekaCourseOutlineSidebar` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.learning.progress_certificate_status.v1` — Learning Certificate Progress Slot
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Learning progress + certificate display |
+| **Our component** | `MerekaProgressCertificateStatus` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.account.additional_profile_fields.v1` — Account Profile Fields
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Account profile UI |
+| **Our component** | `MerekaAdditionalProfileFields` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.profile.additional_profile_fields.v1` — Profile Additional Fields
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Profile page |
+| **Our component** | `MerekaAdditionalProfileFields` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.layout.studio_footer.v1` — Studio Footer
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Studio footer |
+| **Our component** | `MerekaStudioFooter` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
+| **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
+| **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+
+### `org.openedx.frontend.authn.login_component.v1` — Authn Login Banner
+
+| Property | Value |
+|----------|-------|
+| **Scope** | Authn login page |
+| **Our component** | `MerekaAuthnLoginBranding` |
+| **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
+| **Operation** | `PLUGIN_OPERATIONS.Insert` |
 | **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
 | **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
 
@@ -289,17 +377,17 @@ These slots are configured by the Indigo theme in the generated `env.config.jsx`
 
 | Slot | MFE | Why | Effort |
 |------|-----|-----|--------|
-| `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Replace Open edX logo with Mereka logo globally | Low |
-| `org.openedx.frontend.layout.studio_footer.v1` | Footer (Studio) | Extend MerekaFooter to Studio authoring | Low |
-| `org.openedx.frontend.authn.login_component.v1` | Authn | Add Mereka branding banner to login page | Medium |
+| `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Replace Open edX logo with Mereka logo globally | ✅ Completed |
+| `org.openedx.frontend.layout.studio_footer.v1` | Footer (Studio) | Extend MerekaFooter to Studio authoring | ✅ Completed |
+| `org.openedx.frontend.authn.login_component.v1` | Authn | Add Mereka branding banner to login page | ✅ Completed |
 
 ### Priority 2: Learner Experience Enhancement
 
 | Slot | MFE | Why | Effort |
 |------|-----|-----|-----|
-| `org.openedx.frontend.learner_dashboard.widget_sidebar.v1` | Learner Dashboard | Custom sidebar widgets (announcements, progress) | Medium |
-| `org.openedx.frontend.learner_dashboard.no_courses_view.v1` | Learner Dashboard | Branded empty state with course recommendations | Low |
-| `ProgressCertificateStatusSlot` | Learning | Custom certificate display with Mereka branding | Medium |
+| `org.openedx.frontend.learner_dashboard.widget_sidebar.v1` | Learner Dashboard | Custom sidebar widgets (announcements, progress) | ✅ Completed |
+| `org.openedx.frontend.learner_dashboard.no_courses_view.v1` | Learner Dashboard | Branded empty state with course recommendations | ✅ Completed |
+| `org.openedx.frontend.learning.progress_certificate_status.v1` | Learning | Custom certificate display with Mereka branding | ✅ Completed |
 
 ### Priority 3: Studio Customization (operator-facing)
 
