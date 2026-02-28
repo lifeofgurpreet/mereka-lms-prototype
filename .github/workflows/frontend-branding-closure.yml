@@ -44,7 +44,7 @@ on:
       run_npm_start_smoke_gate:
         description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
         required: true
-        default: false
+        default: true
         type: boolean
       run_screenshot_gate:
         description: "Capture public branding screenshots as closure evidence"
