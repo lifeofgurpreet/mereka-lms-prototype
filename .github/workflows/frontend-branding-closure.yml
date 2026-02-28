@@ -26,6 +26,16 @@ on:
         required: true
         default: true
         type: boolean
+      run_paragon_budget_gate:
+        description: "Run Paragon runtime theme CSS budget gate"
+        required: true
+        default: true
+        type: boolean
+      run_email_template_gate:
+        description: "Run transactional/marketing email branding gate"
+        required: true
+        default: true
+        type: boolean
       learning_path:
         description: "Optional learning route path for smoke checks"
         required: false
@@ -54,6 +64,8 @@ jobs:
           CROSS_BROWSER_MATRIX="${{ inputs.cross_browser_matrix || 'true' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
+          RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
+          RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
 
           args=(--env "$TARGET_ENV" --frontend-only)
@@ -69,6 +81,8 @@ jobs:
           RUN_A11Y=1 \
           RUN_SCREENSHOTS=0 \
           RUN_PERFORMANCE=$([[ "$RUN_PERF" == "true" ]] && echo 1 || echo 0) \
+          RUN_PARAGON_THEME_BUDGET=$([[ "$RUN_PARAGON_BUDGET" == "true" ]] && echo 1 || echo 0) \
+          RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
           LEARNING_PATH="$LEARNING_PATH" \
           ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
 
@@ -85,6 +99,8 @@ jobs:
             echo "- Cross-browser matrix: \`${{ inputs.cross_browser_matrix || 'true' }}\`"
             echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
             echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
+            echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
+            echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
             if [[ -n "$LATEST" ]]; then
               echo "- Evidence directory: \`$LATEST\`"
