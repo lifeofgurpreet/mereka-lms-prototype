@@ -3,7 +3,7 @@
 > Inventory of all MFE customization points with migration paths to plugin-slot-first architecture.
 >
 > **Bead**: mereka-lms-8jao.9 / mereka-lms-115d.18 / mereka-lms-115d.21
-> **Last updated**: 2026-02-18
+> **Last updated**: 2026-02-28
 > **Source**: MFE_SELECTOR_HARDENING_AUDIT.md + MFE_PLUGIN_SLOT_MATRIX.md
 
 ## Migration Register
@@ -141,10 +141,10 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="account-settings"]`, `[class*="account-page"]` + `[data-testid*="account"]` (6 blocks) |
+| **Current approach** | CSS overrides: `[class*="account-settings"]` + `[data-testid*="account"]` |
 | **Target slot** | No slot available upstream |
 | **Status** | 🟡 CSS OVERRIDE — data-testid hardened, no slot |
-| **Risk** | Medium (6 blocks, data-testid fallbacks in place) |
+| **Risk** | Medium (data-testid fallbacks in place) |
 | **Tenant impact** | All domains — form styling, card layout |
 | **Priority** | P3 (low risk, well-hardened) |
 | **Effort** | N/A (keep CSS) |
@@ -230,7 +230,6 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="authn"]` | authn | No stable data-testid on all entrypoints; `authn` is the wrapper class emitted by authn MFE | 2026-Q3 | Mereka frontend | Remove if `[data-testid*="authn"]` covers all routes in next authn MFE upgrade |
 | `[class*="login-register"]` | authn | authn MFE emits this class on top-level wrapper alongside `authn`; retained while compatibility path is still active | 2026-Q3 | Mereka frontend | Remove once slot-only styling proves stable |
 | `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
-| `[class*="account-page"]` | account | No upstream slot; account MFE secondary wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 | `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |
 | `[class*="learning"]` | learning | No upstream slot for course grid layout; upstream slot proposal pending (see AC-US7-005) | 2026-Q3 | Mereka / Upstream | Remove once upstream `learning_course_grid.v1` or equivalent slot is approved |
 | `[class*="discussions"]` | discussions | No upstream slot; P3/cosmetic; data-testid primary present | 2026-Q3 | Mereka frontend | Keep indefinitely unless upstream slot emerges |
@@ -244,6 +243,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 |-----------------|---------|--------|
 | `[class*="auth-page"]` | 2026-02-18 | Fully covered by `[class*="authn"]` + `[data-testid*="authn"]` primary paths |
 | `[class*="discussion"]` (singular) | 2026-02-18 | Consolidated into `[class*="discussions"]` plural + data-testid primary paths (33% of singular blocks eliminated) |
+| `[class*="account-page"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 
 ---
 
