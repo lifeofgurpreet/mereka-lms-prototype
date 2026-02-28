@@ -8,6 +8,8 @@ BUILD_MFE="${BUILD_MFE:-false}"
 BUILD_OPENEDX="${BUILD_OPENEDX:-true}"
 TARGET_ENV="${TARGET_ENV:-production}"
 CANCEL_ALL_IN_PROGRESS=0
+WAIT_FOR_RESULT=0
+WAIT_TIMEOUT_MINUTES="${WAIT_TIMEOUT_MINUTES:-240}"
 
 usage() {
   cat <<'EOF'
@@ -24,6 +26,8 @@ Environment overrides:
 
 Options:
   --cancel-all-in-progress   Cancel all in-progress workflow_dispatch runs on branch.
+  --wait                     Wait for the newly-dispatched run to reach terminal state.
+  --wait-timeout-minutes N   Max wait time for --wait (default: 240).
 
 Example:
   ./scripts/infra/recover-stale-build-tutor-images.sh --branch build/tenantfix-20260228-r5
@@ -39,6 +43,14 @@ while [[ $# -gt 0 ]]; do
     --cancel-all-in-progress)
       CANCEL_ALL_IN_PROGRESS=1
       shift
+      ;;
+    --wait)
+      WAIT_FOR_RESULT=1
+      shift
+      ;;
+    --wait-timeout-minutes)
+      WAIT_TIMEOUT_MINUTES="${2:-}"
+      shift 2
       ;;
     -h|--help)
       usage
@@ -118,3 +130,26 @@ echo "Latest runs on $BRANCH:"
 gh run list --workflow "$WORKFLOW" --branch "$BRANCH" --limit 5 \
   --json databaseId,status,conclusion,createdAt,headSha,event \
 | jq -r '.[] | [.databaseId, .status, (.conclusion // ""), .event, .headSha, .createdAt] | @tsv'
+
+if [[ "$WAIT_FOR_RESULT" -eq 1 ]]; then
+  latest_run_id="$(
+    gh run list --workflow "$WORKFLOW" --branch "$BRANCH" --limit 1 --json databaseId \
+      | jq -r '.[0].databaseId // empty'
+  )"
+  if [[ -z "$latest_run_id" ]]; then
+    echo "Unable to determine latest run id for branch $BRANCH" >&2
+    exit 1
+  fi
+
+  echo
+  echo "Waiting for run $latest_run_id (timeout: ${WAIT_TIMEOUT_MINUTES}m)"
+  if ! timeout "${WAIT_TIMEOUT_MINUTES}m" gh run watch "$latest_run_id" --interval 30; then
+    echo "Timed out waiting for run $latest_run_id" >&2
+    exit 1
+  fi
+
+  echo
+  echo "Final run summary:"
+  gh run view "$latest_run_id" --json status,conclusion,headSha,url,jobs \
+    | jq -r '"run=\(.url)\nstatus=\(.status)\nconclusion=\(.conclusion // "")\nheadSha=\(.headSha)\n", (.jobs[] | "job=\(.name)\tstatus=\(.status)\tconclusion=\(.conclusion // "")")'
+fi
