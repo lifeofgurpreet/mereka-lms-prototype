@@ -73,6 +73,14 @@ for wf_path in sorted(workflows_dir.glob("*.y*ml")):
                     f"{wf_path.name}::{job_name}::{step_name} missing flags: {', '.join(missing)}"
                 )
 
+            if all(flag in run for flag in ("--apply", "--commit", "--push")):
+                has_runtime_verify = "--verify-runtime" in run or '"${EXTRA_ARGS[@]}"' in run
+                if not has_runtime_verify:
+                    step_name = (step or {}).get("name", f"step#{idx}")
+                    violations.append(
+                        f"{wf_path.name}::{job_name}::{step_name} missing production runtime verify wiring"
+                    )
+
 if invocations == 0:
     violations.append("No workflow step invokes ./scripts/infra/release-openedx-gitops.sh")
 
