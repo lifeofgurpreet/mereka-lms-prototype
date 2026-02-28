@@ -281,7 +281,7 @@ PARAGON_THEME_URLS serves compiled CSS containing `--pgn-*` tokens at runtime. T
 
 5. **`mereka-brand-light.min.css`** is identical to `mereka-brand.min.css` because we only support light mode. Add a comment in the file and in the build script explaining this.
 
-6. **Feature flag**: Ship with `MEREKA_PARAGON_THEME_ENABLED: false`. Enable only after visual QA confirms no regressions.
+6. **Feature flag**: Runtime theme is now default-on (`MEREKA_PARAGON_THEME_ENABLED: true`). Keep the toggle for controlled rollback and environment overrides.
 
 ### Rollback
 
