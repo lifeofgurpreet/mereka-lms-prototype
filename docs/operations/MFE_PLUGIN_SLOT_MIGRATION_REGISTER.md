@@ -86,18 +86,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="learner-dashboard"]` + `[data-testid*="learner-dashboard"]` (8 blocks) |
+| **Current approach** | Slot components in `mereka_lms.py` (`MerekaLearnerSidebarWidget`, `MerekaNoCoursesView`) with generic tokenized card styles in `mereka.scss` |
 | **Target slot** | `org.openedx.frontend.learner_dashboard.widget_sidebar.v1`, `...no_courses_view.v1` |
-| **Status** | 🟡 CSS OVERRIDE — partial slot path (sidebar + empty state) |
-| **Risk** | High (broad class selector, 8 blocks affected) |
+| **Status** | ✅ SLOT-FIRST — sidebar/empty-state slot path active; dashboard wildcard selectors removed |
+| **Risk** | Medium (remaining visual parity comes from shared `.card`/`.pgn__card` tokenized rules) |
 | **Tenant impact** | All domains — course cards, status pills, layout |
-| **Priority** | P1 |
-| **Effort** | L (multiple components: sidebar widget, empty state, course card styling) |
+| **Priority** | Done |
+| **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Phase: (1) sidebar widget for tenant branding via `widget_sidebar.v1`, (2) empty state via `no_courses_view.v1`, (3) keep card CSS with data-testid as fallback |
-| **Target Date** | 2026-Q3 |
-| **Files** | `mereka.scss:289-560` |
-| **Migration path** | Phase: (1) sidebar widget for tenant branding, (2) empty state for onboarding, (3) keep card CSS with data-testid |
+| **Action** | Keep slot widgets active and prevent reintroduction of dead dashboard wildcard selectors |
+| **Target Date** | Done |
+| **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Migration path** | Slot widgets are live; dashboard-scoped wildcard fallback was removed after dead-selector audit |
 
 ---
 
@@ -105,18 +105,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="learning"]` + `[data-testid*="learning"]` (11 blocks) — HIGHEST RISK |
+| **Current approach** | Slot component for progress/certificate context (`MerekaProgressCertificateStatus`) plus generic tokenized Paragon/Bootstrap component styling |
 | **Target slot** | No direct slot — `ProgressCertificateStatusSlot` covers one section |
-| **Status** | 🔴 CSS ONLY — no adequate slot path |
-| **Risk** | Critical (broadest selector, 11 blocks, any class with "learning" matches) |
+| **Status** | ✅ DEAD WILDCARD REMOVED — no active `[class*="learning"]` selectors remain |
+| **Risk** | Medium (full layout slots still not available upstream) |
 | **Tenant impact** | All domains — course grid, card layout, image handling |
-| **Priority** | P2 (no slot available for layout) |
-| **Effort** | L (would need upstream slot proposal for course grid layout) |
+| **Priority** | Done (for wildcard cleanup) |
+| **Effort** | Done (for wildcard cleanup) |
 | **Owner** | Mereka / Upstream community |
-| **Action** | File upstream OEP/slot proposal for learning course grid layout. Until approved: keep CSS with data-testid hardening and `SELECTOR-EXCEPTION` annotations (expires 2026-Q3). |
-| **Target Date** | Upstream slot: TBD (community dependent). CSS exceptions: 2026-Q3 review. |
-| **Files** | `mereka.scss:406-522` |
-| **Migration path** | Keep CSS with data-testid hardening. Request upstream slot for learning course grid layout. Use `ProgressCertificateStatusSlot` for certificate area only. |
+| **Action** | Track upstream slot expansion for full learning layout; keep current slot insertion and shared tokenized rules |
+| **Target Date** | Upstream slot: TBD (community dependent) |
+| **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Migration path** | Wildcard learning selectors removed; keep slot insertion and avoid selector reintroduction |
 
 ---
 
@@ -124,18 +124,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="discussions"]` + `[data-testid*="discussions"]` (6 blocks). `[class*="discussion"]` singular **removed 2026-02-18** (bead 115d.18 — consolidated into plural form + data-testid primaries). |
+| **Current approach** | Generic tokenized Paragon component styling only (no discussions-specific wildcard selectors) |
 | **Target slot** | No slot available upstream |
-| **Status** | 🔴 CSS ONLY — no slot path; singular/plural consolidated |
-| **Risk** | Low (data-testid hardened; plural-only fallback; P3/cosmetic) |
+| **Status** | ✅ DEAD WILDCARD REMOVED — discussions wildcard selectors removed from active CSS |
+| **Risk** | Low (no discussions-specific brittle selectors remain) |
 | **Tenant impact** | All domains — forum card styling, link colors, headings |
-| **Priority** | P3 (cosmetic only, well-hardened) |
+| **Priority** | Done (for wildcard cleanup) |
 | **Effort** | N/A (keep CSS) |
 | **Owner** | Mereka frontend team |
-| **Action** | Keep CSS with `SELECTOR-EXCEPTION` annotations. Monitor upstream for discussions slot. |
-| **Target Date** | N/A — review exceptions at 2026-Q3 |
-| **Files** | `mereka.scss:610-680` |
-| **Migration path** | Keep CSS. `[class*="discussion"]` singular consolidated into `[class*="discussions"]` plural (done 2026-02-18). |
+| **Action** | Keep discussions coverage through shared tokenized component rules; monitor upstream for dedicated slots |
+| **Target Date** | Done (for wildcard cleanup) |
+| **Files** | `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Migration path** | Discussions wildcard selectors removed after dead-selector audit; regression blocked in `verify-mfe-selector-hardening.sh` |
 
 ---
 
@@ -183,16 +183,16 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 |-------|-------|
 | **Current approach** | Direct Bootstrap/Paragon class overrides: `.navbar`, `.navbar .nav-link`, `.navbar .dropdown-toggle` |
 | **Target slot** | `org.openedx.frontend.layout.header_logo.v1` (partial — logo only) |
-| **Status** | 🟡 CSS OVERRIDE — stable Bootstrap classes |
+| **Status** | ✅ TOKENIZED CSS — navbar colors/shadows/spacing use `var(--mereka-*)` contract |
 | **Risk** | Low (Bootstrap naming convention, widely used) |
 | **Tenant impact** | All domains — nav background, link colors, padding |
-| **Priority** | P2 |
-| **Effort** | S (mostly CSS custom properties, could move to token system) |
+| **Priority** | Done |
+| **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Move nav colors to CSS custom properties in token system. Keep layout CSS. |
-| **Target Date** | 2026-Q3 |
+| **Action** | Keep tokenized navbar styles and prevent hardcoded color regressions |
+| **Target Date** | Done |
 | **Files** | `mereka.scss:27-61` |
-| **Migration path** | Move colors to CSS custom properties already in token system. Keep layout CSS. |
+| **Migration path** | Migration complete; navbar uses tokenized values with shared fallback contract |
 
 ---
 
@@ -289,16 +289,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 ### Now (Sprint S6)
 - [x] Footer → `footer.v1` (DONE)
-- [x] All selectors hardened with data-testid fallbacks (DONE, 8jao.3)
+- [x] Dead-selector cleanup + selector exception hardening (DONE, 115d.18 + Phase C follow-ups)
 - [x] Header Logo → `header_logo.v1` (DONE)
 - [x] Authn Branding → `login_component.v1` (DONE)
 - [x] Studio Footer → `studio_footer.v1` (DONE)
+- [x] Dashboard sidebar + no-courses slots wired (`widget_sidebar.v1`, `no_courses_view.v1`) (DONE)
+- [x] Navbar token migration (DONE)
 
 ### Next Sprint
-- [ ] Dashboard sidebar → `widget_sidebar.v1` (P1, L)
+- [ ] Learning layout upstream slot expansion proposal (course grid/surface-level slots)
 
 ### Backlog
-- [ ] Navbar tokens migration (P2, S)
+- [ ] Optional: replace remaining structural navbar CSS with slot-owned React shell if upstream adds header layout slots
 
 ### Keep as CSS
 - Account/Settings styling (P3, well-hardened)
