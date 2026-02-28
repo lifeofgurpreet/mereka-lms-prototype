@@ -32,7 +32,7 @@ body {
   background: var(--pgn-color-white);
   border-bottom: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
   box-shadow: 0 10px 30px rgb(var(--mereka-color-ink-deep-rgb) / 0.05);
-  padding: var(--mereka-mfe-navbar-padding, 0.85rem 1.5rem);
+  padding: var(--mereka-mfe-navbar-padding);
 }
 
 /* RISK: MEDIUM — header logo slot override class from runtime plugin component.
@@ -45,16 +45,16 @@ body {
 
 .mereka-header-logo img {
   display: block;
-  height: var(--mereka-mfe-navbar-logo-height, 32px);
+  height: var(--mereka-mfe-navbar-logo-height);
   width: auto;
 }
 
 /* RISK: MEDIUM — Bootstrap nav-link / dropdown-toggle; degrades visually on rename */
 .navbar .nav-link,
 .navbar .dropdown-toggle {
-  font-weight: var(--mereka-mfe-nav-item-font-weight, 500);
+  font-weight: var(--mereka-mfe-nav-item-font-weight);
   color: var(--mereka-color-ink-700);
-  transition: color var(--mereka-mfe-nav-link-transition, 150ms ease);
+  transition: color var(--mereka-mfe-nav-link-transition);
 }
 
 /* RISK: LOW — hover/focus color only; graceful degradation */
@@ -127,7 +127,7 @@ body {
 /* RISK: MEDIUM — Paragon form control BEM + Bootstrap; border-radius/color degrade visually */
 .pgn__form-control,
 .form-control {
-  border-radius: var(--mereka-mfe-form-control-radius, 16px);
+  border-radius: var(--mereka-mfe-form-control-radius);
   border-color: var(--pgn-form-control-border-color);
   box-shadow: none;
 }
@@ -142,7 +142,7 @@ body {
 /* RISK: LOW — Paragon form label BEM + Bootstrap label; font/color only */
 .pgn__form-label,
 label {
-  font-weight: var(--mereka-mfe-brand-font-weight, 600);
+  font-weight: var(--mereka-mfe-brand-font-weight);
   color: var(--mereka-color-ink-700);
 }
 
@@ -150,8 +150,8 @@ label {
 .card,
 .shadow-lg,
 .pgn__card {
-  border-radius: var(--mereka-mfe-card-radius, 24px);
-  border: var(--mereka-mfe-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
+  border-radius: var(--mereka-mfe-card-radius);
+  border: var(--mereka-mfe-card-border);
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
@@ -171,7 +171,7 @@ label {
 
 /* RISK: LOW — Paragon alert BEM; border-radius/border color only */
 .pgn__alert {
-  border-radius: var(--mereka-mfe-alert-radius, 16px);
+  border-radius: var(--mereka-mfe-alert-radius);
   border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
 }
 
@@ -201,23 +201,23 @@ label {
 
 /* RISK: MEDIUM — Paragon modal BEM; border-radius degrade visually on rename */
 .pgn__modal-content {
-  border-radius: var(--mereka-mfe-modal-radius, 24px);
-  border: var(--mereka-mfe-modal-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10));
+  border-radius: var(--mereka-mfe-modal-radius);
+  border: var(--mereka-mfe-modal-border);
   box-shadow: 0 30px 90px rgb(var(--mereka-color-ink-deep-rgb) / 0.18);
 }
 
 /* RISK: LOW — Bootstrap/Paragon dropdown; border-radius/shadow color only */
 .dropdown-menu,
 .pgn__dropdown-menu {
-  border-radius: var(--mereka-mfe-dropdown-radius, 16px);
-  border: var(--mereka-mfe-dropdown-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10));
-  box-shadow: var(--mereka-mfe-dropdown-shadow, 0 20px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.14));
+  border-radius: var(--mereka-mfe-dropdown-radius);
+  border: var(--mereka-mfe-dropdown-border);
+  box-shadow: var(--mereka-mfe-dropdown-shadow);
 }
 
 /* RISK: LOW — Bootstrap/Paragon tabs; border-radius shape only */
 .nav-tabs .nav-link,
 .pgn__tabs .nav-link {
-  border-radius: var(--mereka-mfe-tab-radius, 999px);
+  border-radius: var(--mereka-mfe-tab-radius);
 }
 
 /* RISK: LOW — active tab gradient; color/background only */
@@ -232,14 +232,14 @@ label {
 .mereka-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--mereka-mfe-badge-gap, 0.35rem);
+  gap: var(--mereka-mfe-badge-gap);
   background-color: rgb(var(--mereka-color-teal-rgb) / 0.12);
   color: var(--mereka-color-teal);
-  padding: var(--mereka-mfe-badge-padding, 0.25rem 0.85rem);
-  border-radius: var(--mereka-mfe-pill-radius, 999px);
+  padding: var(--mereka-mfe-badge-padding);
+  border-radius: var(--mereka-mfe-pill-radius);
   font-size: var(--pgn-font-size-sm);
   text-transform: uppercase;
-  letter-spacing: var(--mereka-mfe-badge-letter-spacing, 0.08em);
+  letter-spacing: var(--mereka-mfe-badge-letter-spacing);
 }
 
 /* Authn/login/register surfaces */
@@ -260,9 +260,9 @@ label {
 // SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__card,
 [class*="login-register"] .pgn__card {
-  border-radius: var(--mereka-mfe-authn-card-radius, 28px);
-  border: var(--mereka-mfe-authn-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.1));
-  box-shadow: var(--mereka-mfe-authn-card-shadow, 0 28px 72px rgb(var(--mereka-color-ink-deep-rgb) / 0.14));
+  border-radius: var(--mereka-mfe-authn-card-radius);
+  border: var(--mereka-mfe-authn-card-border);
+  box-shadow: var(--mereka-mfe-authn-card-shadow);
 }
 
 /* RISK: HIGH — structural authn card-header scoping; gradient branding lost if class renames */
@@ -283,9 +283,9 @@ label {
 // SELECTOR-EXCEPTION: [class*="login-register"] .pgn__btn--primary | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__btn--primary,
 [class*="login-register"] .pgn__btn--primary {
-  min-height: var(--mereka-mfe-authn-cta-min-height, 44px);
-  font-weight: var(--mereka-mfe-emphasis-font-weight, 700);
-  letter-spacing: var(--mereka-mfe-authn-link-letter-spacing, 0.01em);
+  min-height: var(--mereka-mfe-authn-cta-min-height);
+  font-weight: var(--mereka-mfe-emphasis-font-weight);
+  letter-spacing: var(--mereka-mfe-authn-link-letter-spacing);
 }
 
 /* RISK: LOW — authn hyperlink color; degrades to default link color */
@@ -295,7 +295,7 @@ label {
 [class*="login-register"] .pgn__hyperlink {
   color: var(--mereka-color-blue);
   text-decoration: none;
-  font-weight: var(--mereka-mfe-brand-font-weight, 600);
+  font-weight: var(--mereka-mfe-brand-font-weight);
 }
 
 /* RISK: LOW — authn hyperlink hover/focus; color-only, graceful degradation */
@@ -332,8 +332,8 @@ label {
 [class*="account-settings"] .card,
 [class*="account-page"] .card,
 [class*="learner-dashboard"] .card {
-  border-radius: var(--mereka-mfe-card-radius, 24px);
-  border: var(--mereka-mfe-card-border, 1px solid var(--mereka-mfe-border));
+  border-radius: var(--mereka-mfe-card-radius);
+  border: var(--mereka-mfe-card-border);
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
@@ -354,7 +354,7 @@ label {
 [class*="account-settings"] .pgn__btn,
 [class*="account-page"] .pgn__btn,
 [class*="learner-dashboard"] .pgn__btn {
-  border-radius: var(--mereka-mfe-pill-radius, 999px);
+  border-radius: var(--mereka-mfe-pill-radius);
 }
 
 /* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
@@ -364,7 +364,7 @@ label {
 [class*="account-settings"] .pgn__alert,
 [class*="account-page"] .pgn__alert,
 [class*="learner-dashboard"] .pgn__alert {
-  border-radius: var(--mereka-mfe-alert-radius, 16px);
+  border-radius: var(--mereka-mfe-alert-radius);
 }
 
 /* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
@@ -374,7 +374,7 @@ label {
 [class*="account-settings"] .pgn__dropdown-toggle,
 [class*="account-page"] .pgn__dropdown-toggle,
 [class*="learner-dashboard"] .pgn__dropdown-toggle {
-  border-radius: var(--mereka-mfe-pill-radius, 999px);
+  border-radius: var(--mereka-mfe-pill-radius);
   border-color: rgb(var(--mereka-color-ink-deep-rgb) / 0.2);
 }
 
@@ -382,8 +382,8 @@ label {
 /* RISK: HIGH — structural course card scoping; layout breaks if dashboard or course class renames */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] | no stable slot for course card | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] {
-  border-radius: var(--mereka-mfe-compact-card-radius, 20px);
-  border: var(--mereka-mfe-compact-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
+  border-radius: var(--mereka-mfe-compact-card-radius);
+  border: var(--mereka-mfe-compact-card-border);
   background: var(--pgn-color-white);
   min-width: 0;
   overflow: hidden;
@@ -392,7 +392,7 @@ label {
 /* RISK: LOW — hover shadow on course cards; graceful degradation */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"]:hover | no stable slot for course card hover | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"]:hover {
-  box-shadow: var(--mereka-mfe-compact-card-shadow-hover, 0 18px 48px rgb(var(--mereka-color-ink-deep-rgb) / 0.12));
+  box-shadow: var(--mereka-mfe-compact-card-shadow-hover);
 }
 
 /* learner-dashboard scope + course layout container classes */
@@ -401,7 +401,7 @@ label {
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] | no stable slot | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-grid"],
 [class*="learner-dashboard"] [class*="course-list"] {
-  gap: var(--mereka-mfe-course-grid-gap, 1rem);
+  gap: var(--mereka-mfe-course-grid-gap);
 }
 
 /* learner-dashboard scope + course component + image */
@@ -433,28 +433,28 @@ label {
 [class*="learning"] [class*="course-list"] {
   /* Some layouts aren't flex/grid, so `gap` can be a no-op. Keep it anyway, but
      also add margin-based fallbacks below. */
-  gap: var(--mereka-mfe-compact-list-gap, 1.5rem);
-  row-gap: var(--mereka-mfe-compact-list-gap, 1.5rem);
-  column-gap: var(--mereka-mfe-compact-list-gap, 1.5rem);
+  gap: var(--mereka-mfe-compact-list-gap);
+  row-gap: var(--mereka-mfe-compact-list-gap);
+  column-gap: var(--mereka-mfe-compact-list-gap);
 }
 
 /* Bootstrap-ish fallback: many MFEs render course cards inside `.row > .col-*`. */
 /* RISK: MEDIUM — spacing fallback; Bootstrap .col-* is stable, my-courses class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] [class*="my-courses"] .row > [class*="col"] | Bootstrap col is stable; my-courses class is brittle but no slot | expires: 2026-Q3
 [class*="learning"] [class*="my-courses"] .row > [class*="col"] {
-  margin-bottom: var(--mereka-mfe-compact-list-gap, 1.5rem);
+  margin-bottom: var(--mereka-mfe-compact-list-gap);
 }
 
 /* RISK: MEDIUM — learning card styling; border-radius/shadow degrade visually if class renames */
 // SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) | no upstream slot for learning layout; inner selector is stable Paragon BEM | expires: 2026-Q3
 [class*="learning"] :is(.pgn__card, .card) {
-  border-radius: var(--mereka-mfe-compact-card-radius, 20px);
-  border: var(--mereka-mfe-compact-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
-  box-shadow: var(--mereka-mfe-compact-card-shadow, var(--mereka-mfe-card-shadow));
+  border-radius: var(--mereka-mfe-compact-card-radius);
+  border: var(--mereka-mfe-compact-card-border);
+  box-shadow: var(--mereka-mfe-compact-card-shadow);
   background: var(--pgn-color-white);
   overflow: hidden;
   /* Fallback vertical rhythm when the parent container doesn't support `gap`. */
-  margin-bottom: var(--mereka-mfe-compact-list-gap, 1.5rem);
+  margin-bottom: var(--mereka-mfe-compact-list-gap);
 }
 
 /* Learning course cards and media should stay responsive; keep brand radius/shadow only. */
@@ -489,31 +489,31 @@ label {
 /* RISK: MEDIUM — spacing fallback; * + * adjacent sibling is safe, outer class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) > * + * | spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) > * + * {
-  margin-top: var(--mereka-mfe-compact-vertical-gap, 1.25rem);
+  margin-top: var(--mereka-mfe-compact-vertical-gap);
 }
 
 /* RISK: MEDIUM — row spacing fallback; Bootstrap .row is stable, outer class is brittle */
 // SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) .row > * | row spacing fallback; no slot available | expires: 2026-Q3
 [class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) .row > * {
-  margin-bottom: var(--mereka-mfe-compact-vertical-gap, 1.25rem);
+  margin-bottom: var(--mereka-mfe-compact-vertical-gap);
 }
 
 /* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */
 /* RISK: HIGH — structural list vertical rhythm; * + * is safe but course-list class can rename */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] > * + * | list spacing fallback | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course-list"] > * + * {
-  margin-top: var(--mereka-mfe-course-list-gap, 1rem);
+  margin-top: var(--mereka-mfe-course-list-gap);
 }
 
 /* learner-dashboard scope + course component + status badge class */
 /* RISK: MEDIUM — status badge styling; cosmetic pill, degrades visually if class renames */
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] [class*="status"] | cosmetic badge; no testid for status pill | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] [class*="status"] {
-  border-radius: var(--mereka-mfe-pill-radius, 999px);
+  border-radius: var(--mereka-mfe-pill-radius);
   background: rgb(var(--mereka-color-teal-rgb) / 0.1);
   color: var(--mereka-color-teal);
-  padding: var(--mereka-mfe-status-badge-padding, 0.1rem 0.55rem);
-  font-weight: var(--mereka-mfe-badge-font-weight, 600);
+  padding: var(--mereka-mfe-status-badge-padding);
+  font-weight: var(--mereka-mfe-badge-font-weight);
 }
 
 /* account/learner-dashboard scope for headings */
@@ -545,8 +545,8 @@ label {
 // SELECTOR-EXCEPTION: [class*="discussions"] .card | P3/cosmetic; no slot | expires: 2026-Q3
 [class*="discussions"] .card,
 [class*="discussions"] .pgn__card {
-  border-radius: var(--mereka-mfe-discussions-card-radius, 22px);
-  border: var(--mereka-mfe-discussions-card-border, 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.09));
+  border-radius: var(--mereka-mfe-discussions-card-radius);
+  border: var(--mereka-mfe-discussions-card-border);
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
@@ -582,6 +582,6 @@ label {
 /* RISK: LOW — responsive navbar padding; degrades to desktop padding only */
 @media (max-width: 768px) {
   .navbar {
-    padding: var(--mereka-mfe-navbar-mobile-padding, 0.75rem 1rem);
+    padding: var(--mereka-mfe-navbar-mobile-padding);
   }
 }
