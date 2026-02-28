@@ -418,7 +418,7 @@ DOM elements in Ulmo MFEs. See `docs/architecture/MFE_SELECTOR_OVERRIDE_INVENTOR
 §Dead Selector Audit for the full table.
 
 **Implication for Phase C**: Do NOT spend time hardening dead selectors with `var()`.
-Task C3 should only apply to LIVE selectors (currently only `[class*="account-settings"]`
+Task C3 should only apply to LIVE selectors (currently explicit `.page__account-settings`
 and all `.pgn__*` component selectors are confirmed live). Dead selectors should be
 deferred to Phase D for rewrite or slot migration.
 

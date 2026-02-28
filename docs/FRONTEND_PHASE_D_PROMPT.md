@@ -41,7 +41,7 @@ A DOM audit reveals that ~60% of the scoped `[class*="..."]` selectors in `merek
 | `[class*="my-courses"]` | **DEAD** |
 | `[class*="discover"]` | **DEAD** |
 | `[class*="discussions"]` | **DEAD** |
-| `[class*="account-settings"]` | **LIVE** (matches `page__account-settings`) |
+| `.page__account-settings` | **LIVE** (explicit class in Account MFE wrapper) |
 
 This fundamentally changes Phase D's approach: instead of migrating CSS overrides to slots,
 we must first **find the actual DOM class names** and rewrite selectors, OR bypass CSS

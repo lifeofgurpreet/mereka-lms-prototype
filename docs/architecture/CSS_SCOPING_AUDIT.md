@@ -10,9 +10,9 @@
 ## 2026-02-28 Addendum (Dead Selector Cleanup)
 
 - `[class*="authn"]`, `[class*="learner-dashboard"]`, `[class*="learning"]`, and `[class*="discussions"]` fallback blocks were removed from `mereka.scss` after live DOM verification showed they were dead selectors.
-- Remaining wildcard scope is `"[class*=\"account-settings\"]"` with explicit `SELECTOR-EXCEPTION` annotations and expiry notes in source.
+- Remaining account scope now uses explicit `.page__account-settings` (wildcard removed) with `SELECTOR-EXCEPTION` annotations and expiry notes in source.
 - QA contract now enforces this directly in active selectors (comments are ignored by the gate):
-  - live scope present: `class*="account-settings"`
+  - live scope present: `.page__account-settings`
   - dead scopes absent: `authn`, `learner-dashboard`, `learning`, `discussions`
 - Global runtime/base selector hardening (`body`, headings, links, primary buttons) was completed on 2026-02-28 via `body:not(.courseware)` scoping in `common/mereka-overrides.css` and `scss/_base.scss`.
 - Sections 1.2–1.6 and older gap notes are historical context from the pre-hardening snapshot; rely on Section 5 summary + `verify-css-scoping.sh` as current truth.
@@ -322,10 +322,10 @@ body {
 
 ### 3.8 MFE Surface Scopes (post-cleanup baseline)
 
-Active wildcard scope is now limited to `[class*="account-settings"]` (with documented `SELECTOR-EXCEPTION` annotations in source). Dead wildcard scopes (`authn`, `learner-dashboard`, `learning`, `discussions`) were removed.
+Active account scope is `.page__account-settings` with documented `SELECTOR-EXCEPTION` annotations in source. Dead wildcard scopes (`authn`, `learner-dashboard`, `learning`, `discussions`) were removed.
 
 **XBlock impact**: None — MFE route-level wrappers are outside LMS XBlock rendering.
-**Recommendation**: KEEP `account-settings` temporarily (exception-tracked), continue Phase D migration toward slot/explicit wrapper replacements.
+**Recommendation**: KEEP explicit account scope temporarily (exception-tracked), continue Phase D migration toward slot-first replacements.
 
 ---
 
@@ -501,7 +501,7 @@ These rules demonstrate the correct approach and should be used as templates whe
 | Studio views | `.view-container .xblock-render .xblock { ... }` | Scoped to Studio editor context |
 | Discovery page | `.find-courses .discovery-button { ... }` | Scoped to /courses page only |
 | Dashboard | `.dashboard .listing-courses { ... }` | Scoped to learner dashboard only |
-| MFE surface | `[class*="account-settings"] .pgn__card { ... }` | Scoped to active MFE route wrapper |
+| MFE surface | `.page__account-settings .pgn__card { ... }` | Scoped to active MFE route wrapper |
 
 ---
 

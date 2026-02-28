@@ -380,7 +380,8 @@ The following research was completed as a follow-up to this audit:
 **~60% of scoped `[class*="..."]` selectors in `mereka.scss` are phantom CSS.**
 
 A DOM inspection of Ulmo MFEs revealed that most class-based wildcard selectors (lines 250-570)
-match no actual DOM element. Only `[class*="account-settings"]` is confirmed live.
+match no actual DOM element. The remaining LIVE account scope was migrated to explicit
+`.page__account-settings` (wildcard removed).
 
 Full table: `docs/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md` §Dead Selector Audit.
 
