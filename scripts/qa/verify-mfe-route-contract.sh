@@ -253,6 +253,7 @@ declare -A SETTING_TO_DIR=(
   ["LEARNING_MICROFRONTEND_URL"]="learning"
   ["ORA_GRADING_MICROFRONTEND_URL"]="ora-grading"
   ["PROFILE_MICROFRONTEND_URL"]="profile"
+  ["ORDER_HISTORY_MICROFRONTEND_URL"]="__orders_proxy__"
 )
 
 while IFS= read -r setting; do
@@ -264,7 +265,13 @@ while IFS= read -r setting; do
 
   expected_dir="${SETTING_TO_DIR[$setting]}"
 
-  if grep -q "/openedx/dist/$expected_dir" "$CADDYFILE"; then
+  if [[ "$expected_dir" == "__orders_proxy__" ]]; then
+    if grep -Fq "reverse_proxy /orders* payments-gateway:8080" "$CADDYFILE"; then
+      do_pass "AC-MFERT-002: LMS setting $setting has Caddy proxy /orders* → payments-gateway"
+    else
+      do_fail "AC-MFERT-002: LMS setting $setting missing Caddy proxy /orders* → payments-gateway"
+    fi
+  elif grep -q "/openedx/dist/$expected_dir" "$CADDYFILE"; then
     do_pass "AC-MFERT-002: LMS setting $setting has Caddy route to $expected_dir"
   else
     do_fail "AC-MFERT-002: LMS setting $setting has no Caddy route to $expected_dir"
