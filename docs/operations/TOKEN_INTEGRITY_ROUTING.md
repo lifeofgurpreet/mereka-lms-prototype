@@ -144,7 +144,7 @@ Coverage: AC-FRONT-011, AC-FRONT-012, AC-FRONT-013, AC-FRONT-014, AC-FRONT-015
 
 --- AC-FRONT-011/012: Token reference integrity (var(--mereka-*)) ---
 
-  Collected 28 unique --mereka-* token definitions from canonical sources
+  Collected 104 unique --mereka-* token definitions from canonical sources
 
   [PASS] AC-FRONT-011: All var(--mereka-*) references resolve to defined tokens
   [PASS] AC-FRONT-012: Reproducible check passed — no undefined token references detected
@@ -177,7 +177,7 @@ Coverage: AC-FRONT-011, AC-FRONT-012, AC-FRONT-013, AC-FRONT-014, AC-FRONT-015
 
   [PASS] AC-FRONT-015: Rollback procedure documented in evidence doc
 
-=== Results: 17 PASS / 0 FAIL / 2 WARN ===
+=== Results: 21 PASS / 0 FAIL / 2 WARN ===
 ```
 
 The two WARNs are expected on a dev machine where `communications` and `gradebook` appear in the
