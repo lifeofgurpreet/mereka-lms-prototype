@@ -26,16 +26,20 @@ RAW_HEX_COLORS=0
 
 echo "Scanning SCSS/CSS files in $THEME_DIR..."
 
-# Find all SCSS and CSS files (excluding node_modules, generated files)
+# Find SCSS/CSS source files only (exclude generated/runtime artifacts)
 SCSS_FILES=$(find "$THEME_DIR" -type f \( -name "*.scss" -o -name "*.css" \) \
   ! -path "*/node_modules/*" \
   ! -path "*/dist/*" \
-  ! -path "*/build/*" 2>/dev/null || true)
+  ! -path "*/build/*" \
+  ! -path "*/mfe/theme/*.min.css" \
+  ! -path "*/static/css/mereka-overrides.css" \
+  ! -path "*/static/css/mereka-design-tokens.css" 2>/dev/null || true)
 
 if [[ -z "$SCSS_FILES" ]]; then
   fail "No SCSS/CSS files found in $THEME_DIR"
 else
   pass "Found SCSS/CSS files to scan"
+  echo "  Source file count: $(echo "$SCSS_FILES" | wc -l | tr -d ' ')"
 fi
 
 # ---------------------------------------------------------------------------
@@ -86,12 +90,14 @@ for file in $SCSS_FILES; do
   matches=$(grep -nE '\[data-testid' "$file" || true)
 
   if [[ -n "$matches" ]]; then
-    line_count=$(echo "$matches" | wc -l)
-    DATA_TESTID_SELECTORS=$((DATA_TESTID_SELECTORS + line_count))
-    echo "$matches" | while IFS=: read -r lineno line; do
+    while IFS=: read -r lineno line; do
+      if echo "$line" | grep -qE '^\s*(//|/\*|\*)'; then
+        continue
+      fi
+      DATA_TESTID_SELECTORS=$((DATA_TESTID_SELECTORS + 1))
       warn "data-testid used as styling hook in $file:$lineno"
       echo "      $line"
-    done
+    done <<< "$matches"
   fi
 done
 
@@ -125,6 +131,16 @@ for file in $SCSS_FILES; do
 
   if [[ -n "$matches" ]]; then
     while IFS=: read -r lineno line; do
+      # Ignore comments.
+      if echo "$line" | grep -qE '^\s*(//|/\*|\*)'; then
+        continue
+      fi
+
+      # Token declarations are expected to define raw hex values.
+      if echo "$line" | grep -qE '^\s*(--[a-zA-Z0-9_-]+|\$[a-zA-Z0-9_-]+)\s*:\s*#[0-9a-fA-F]{3,8}\b'; then
+        continue
+      fi
+
       # Skip if line contains var(--mereka-*) or $color-*
       if echo "$line" | grep -qE 'var\(--mereka-|var\(--color-|\$color-|\$mereka-'; then
         continue
