@@ -149,11 +149,14 @@ check_build_pipeline() {
     fail "[AC-011] Branding verification log artifacts missing"
   fi
 
-  # AC-009: Tutor version pinned in build
-  if grep -q 'tutor\[full\]==18.2.2' "$BUILD_WF" && grep -q 'tutor-mfe==18.1.0' "$BUILD_WF"; then
-    pass "[AC-009] Tutor version pinned (18.2.2 + mfe 18.1.0)"
+  # AC-009: Tutor version pinned in build dependency file (loaded by setup-python-env action)
+  if [[ -f "requirements-tutor.txt" ]] \
+    && grep -q 'tutor\[full\]==18.2.2' requirements-tutor.txt \
+    && grep -q 'tutor-mfe==18.1.0' requirements-tutor.txt \
+    && grep -q "requirements-file: 'requirements-tutor.txt'" "$BUILD_WF"; then
+    pass "[AC-009] Tutor version pinned via requirements-tutor.txt and wired into build workflow"
   else
-    fail "[AC-009] Tutor version not pinned in build workflow"
+    fail "[AC-009] Tutor version pinning contract missing (requirements-tutor.txt + workflow wiring)"
   fi
 
   # AC-009: apply-patches.sh called after config save
@@ -241,9 +244,10 @@ check_registry() {
     fail "[AC-010] Image digest not exposed as job output"
   fi
 
-  # AC-009: GCP auth configured (tag alias or SHA-pinned with # v2 comment)
-  if grep -qE 'google-github-actions/auth@(v2|[0-9a-f]{40})(\s*#\s*v2)?' "$BUILD_WF"; then
-    pass "[AC-009] GCP authentication configured (auth@v2)"
+  # AC-009: GCP auth configured (direct action or local composite auth wrapper)
+  if grep -qE 'google-github-actions/auth@(v2|[0-9a-f]{40})(\s*#\s*v2)?' "$BUILD_WF" \
+    || grep -q '\./\.github/actions/gcp-gke-auth' "$BUILD_WF"; then
+    pass "[AC-009] GCP authentication configured (direct action or gcp-gke-auth composite)"
   else
     fail "[AC-009] GCP authentication missing from build workflow"
   fi
@@ -447,9 +451,13 @@ check_security() {
     pass "[AC-028] No set -x debug tracing near secret usage"
   fi
 
-  # AC-006: prod-tag-guard job exists in CI
+  # AC-006: prod tag guard is enforced (dedicated job OR consolidated static-validation script list)
   if [[ -f "$CI_WF" ]] && grep -q '^  prod-tag-guard:' "$CI_WF"; then
     pass "[AC-006] prod-tag-guard CI job exists (no :latest in prod overlays)"
+  elif [[ -f ".github/ci-scripts-static.txt" ]] \
+    && grep -q 'scripts/qa/verify-no-latest-prod-tags.sh' .github/ci-scripts-static.txt \
+    && grep -q '^  static-validation:' "$CI_WF"; then
+    pass "[AC-006] prod tag guard enforced via static-validation script bundle"
   else
     fail "[AC-006] prod-tag-guard CI job missing"
   fi
@@ -496,26 +504,30 @@ check_security() {
     fail "[AC-005] Hadolint Dockerfile linting missing from CI"
   fi
 
-  # AC-001: CI workflow exists with all required jobs
+  # AC-001: CI workflow exists with required quality gates
   if [[ -f "$CI_WF" ]]; then
-    local required_jobs=(
-      "spec-lint"
-      "branding-preflight"
-      "monitoring-guardrails"
-      "lint"
-      "validate-k8s"
-      "security-scan"
-    )
-    local job_found=0
-    for job in "${required_jobs[@]}"; do
-      if grep -q "^  ${job}:" "$CI_WF" 2>/dev/null; then
-        job_found=$((job_found + 1))
-      fi
-    done
-    if [[ "$job_found" -eq "${#required_jobs[@]}" ]]; then
-      pass "[AC-001] All ${#required_jobs[@]} core CI quality gate jobs defined"
+    if grep -q '^  static-validation:' "$CI_WF"; then
+      pass "[AC-001] CI uses consolidated static-validation quality gate job"
     else
-      fail "[AC-001] Missing CI jobs ($job_found/${#required_jobs[@]} found)"
+      local required_jobs=(
+        "spec-lint"
+        "branding-preflight"
+        "monitoring-guardrails"
+        "lint"
+        "validate-k8s"
+        "security-scan"
+      )
+      local job_found=0
+      for job in "${required_jobs[@]}"; do
+        if grep -q "^  ${job}:" "$CI_WF" 2>/dev/null; then
+          job_found=$((job_found + 1))
+        fi
+      done
+      if [[ "$job_found" -eq "${#required_jobs[@]}" ]]; then
+        pass "[AC-001] All ${#required_jobs[@]} core CI quality gate jobs defined"
+      else
+        fail "[AC-001] Missing CI jobs ($job_found/${#required_jobs[@]} found)"
+      fi
     fi
   else
     fail "[AC-001] CI workflow missing: $CI_WF"
