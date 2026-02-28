@@ -1,0 +1,13 @@
+{
+  "tabs": {
+    "border-radius": {
+      "value": "{global.radius.full}"
+    },
+    "active-bg": {
+      "value": "{alias.color.primary}"
+    },
+    "active-text": {
+      "value": "{global.color.white}"
+    }
+  }
+}

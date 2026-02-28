@@ -1,0 +1,13 @@
+{
+  "navbar": {
+    "height-logo": {
+      "value": "{global.sizing.navbarLogoHeight}"
+    },
+    "padding-x": {
+      "value": "{global.spacing.6}"
+    },
+    "padding-y": {
+      "value": "{global.spacing.3}"
+    }
+  }
+}

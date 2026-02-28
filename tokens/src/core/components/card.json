@@ -1,0 +1,16 @@
+{
+  "card": {
+    "border-radius": {
+      "value": "{global.radius.xl}"
+    },
+    "border-color": {
+      "value": "{alias.color.border}"
+    },
+    "shadow": {
+      "value": "{global.shadow.lg}"
+    },
+    "background": {
+      "value": "{alias.color.surface}"
+    }
+  }
+}

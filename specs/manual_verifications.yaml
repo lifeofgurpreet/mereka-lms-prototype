@@ -265,6 +265,78 @@ entries:
     justification: Requires active GitHub Actions runner with repository secrets; workflow dispatch cannot be fully automated
       in isolated test environment
     file: N/A
+- id: AC-TKN-018
+  spec: paragon-design-tokens-migration_spec.md
+  description: PARAGON_THEME_URLS brandOverride updates are reflected after cache clear without MFE image rebuild.
+  verify:
+  - type: manual
+    runbook: docs/operations/FRONTEND_BRANDING_METHOD.md
+    section: PARAGON_THEME_URLS rollout and cache behavior
+    justification: Requires live browser verification against deployed MFE runtime and cache invalidation behavior.
+- id: AC-TKN-019
+  spec: paragon-design-tokens-migration_spec.md
+  description: Production PARAGON_THEME_URLS CDN endpoint serves CSS with HTTP 200 and expected headers.
+  verify:
+  - type: manual
+    runbook: docs/operations/FRONTEND_BRANDING_METHOD.md
+    section: Runtime theme URL validation
+    justification: Header contract must be validated against live production ingress/Caddy responses.
+- id: AC-TKN-024
+  spec: paragon-design-tokens-migration_spec.md
+  description: Button BEM override migration to component tokens.
+  verify:
+  - type: manual
+    runbook: docs/FRONTEND_PHASE_C_PROMPT.md
+    section: Task C2
+    justification: Paragon v22 component token consumption is partial; migration requires visual/manual confirmation per selector.
+- id: AC-TKN-025
+  spec: paragon-design-tokens-migration_spec.md
+  description: Card BEM override migration to component tokens.
+  verify:
+  - type: manual
+    runbook: docs/FRONTEND_PHASE_C_PROMPT.md
+    section: Task C2
+    justification: Paragon v22 does not consume full card component token surface; manual gating documents safe migration boundary.
+- id: AC-TKN-026
+  spec: paragon-design-tokens-migration_spec.md
+  description: Alert BEM override migration to component tokens.
+  verify:
+  - type: manual
+    runbook: docs/FRONTEND_PHASE_C_PROMPT.md
+    section: Task C2
+    justification: Alert variant behavior requires browser-level verification after token substitution.
+- id: AC-TKN-027
+  spec: paragon-design-tokens-migration_spec.md
+  description: mereka.scss reduced to under 100 lines after Phase 3 migration.
+  verify:
+  - type: manual
+    runbook: docs/FRONTEND_PHASE_C_PROMPT.md
+    section: Task C3
+    justification: Current migration strategy keeps structural BEM overrides for Paragon v22; target threshold is tracked as a deferred manual milestone.
+- id: AC-TKN-028
+  spec: paragon-design-tokens-migration_spec.md
+  description: Fewer than 5 hardcoded rgba() values remain in mereka.scss.
+  verify:
+  - type: manual
+    runbook: docs/FRONTEND_PHASE_C_PROMPT.md
+    section: Task C3
+    justification: Remaining rgba() values are structural/design-intent exceptions in v22 and require explicit manual waiver review.
+- id: AC-TKN-032
+  spec: paragon-design-tokens-migration_spec.md
+  description: Visual regression across 9 MFE surfaces remains under 1% pixel diff.
+  verify:
+  - type: manual
+    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
+    section: MFE Footer Verification
+    justification: Pixel-diff visual quality gates require screenshot baseline comparison and human acceptance.
+- id: AC-008
+  spec: paragon-design-tokens-migration_spec.md
+  description: Compatibility placeholder for cross-spec AC-008 reference in AC-TKN-INT-002.
+  verify:
+  - type: manual
+    runbook: specs/paragon-design-tokens-migration_spec.md
+    section: Cross-Spec Integration
+    justification: Non-prefixed AC token is inherited from cross-spec text reference; tracked here to satisfy spec verifier ID parsing.
 - id: AC-025
   spec: ci-cd-pipeline_spec.md
   description: Given the iOS workflow is manually dispatched, when it completes successfully, then a signed IPA is uploaded

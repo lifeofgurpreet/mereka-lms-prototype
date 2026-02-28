@@ -1,0 +1,347 @@
+{
+  "global": {
+    "color": {
+      "black": {
+        "value": "#000000"
+      },
+      "white": {
+        "value": "#ffffff"
+      },
+      "teal": {
+        "value": "#237072"
+      },
+      "magenta": {
+        "value": "#ab3b78"
+      },
+      "magentaDark": {
+        "value": "#8a2f60"
+      },
+      "blue": {
+        "value": "#295cad"
+      },
+      "burgundy": {
+        "value": "#8c002f"
+      },
+      "pink": {
+        "value": "#cd89ae"
+      },
+      "sky": {
+        "value": "#94d1e4"
+      },
+      "orange": {
+        "value": "#e18437"
+      },
+      "gold": {
+        "value": "#f4be48"
+      },
+      "mint": {
+        "value": "#8fbec2"
+      },
+      "periwinkle": {
+        "value": "#7f9dce"
+      },
+      "forest": {
+        "value": "#2c6e49"
+      },
+      "success": {
+        "value": "#2c6e49"
+      },
+      "successLight": {
+        "value": "#8fbec2"
+      },
+      "warning": {
+        "value": "#f4be48"
+      },
+      "warningDark": {
+        "value": "#e18437"
+      },
+      "error": {
+        "value": "#8c002f"
+      },
+      "errorLight": {
+        "value": "#cd89ae"
+      },
+      "info": {
+        "value": "#295cad"
+      },
+      "infoLight": {
+        "value": "#94d1e4"
+      },
+      "ink900": {
+        "value": "#000000"
+      },
+      "ink700": {
+        "value": "#4a494a"
+      },
+      "ink500": {
+        "value": "#6b6b6b"
+      },
+      "ink300": {
+        "value": "#929092"
+      },
+      "surfacePrimary": {
+        "value": "#fbfafb"
+      },
+      "surfaceSecondary": {
+        "value": "#f5f5f5"
+      },
+      "border": {
+        "value": "#ddddde"
+      },
+      "borderStrong": {
+        "value": "#7b7b7c"
+      }
+    },
+    "typography": {
+      "fontFamilyBody": {
+        "value": "'Poppins', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      },
+      "fontFamilyHeading": {
+        "value": "'Lato', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      },
+      "fontFamilyVideo": {
+        "value": "'Open Sans', sans-serif"
+      },
+      "fontSizeDisplay": {
+        "value": "48px"
+      },
+      "fontSizeH1": {
+        "value": "36px"
+      },
+      "fontSizeH2": {
+        "value": "28px"
+      },
+      "fontSizeH3": {
+        "value": "24px"
+      },
+      "fontSizeH4": {
+        "value": "20px"
+      },
+      "fontSizeBodyLg": {
+        "value": "18px"
+      },
+      "fontSizeBody": {
+        "value": "16px"
+      },
+      "fontSizeBodySm": {
+        "value": "14px"
+      },
+      "fontSizeCaption": {
+        "value": "12px"
+      },
+      "lineHeightDisplay": {
+        "value": "1.2"
+      },
+      "lineHeightHeading": {
+        "value": "1.25"
+      },
+      "lineHeightBody": {
+        "value": "1.5"
+      },
+      "fontWeightRegular": {
+        "value": "400"
+      },
+      "fontWeightMedium": {
+        "value": "500"
+      },
+      "fontWeightSemiBold": {
+        "value": "600"
+      },
+      "fontWeightBold": {
+        "value": "700"
+      },
+      "letterSpacingBadge": {
+        "value": "0.08em"
+      }
+    },
+    "spacing": {
+      "0": {
+        "value": "0px"
+      },
+      "1": {
+        "value": "4px"
+      },
+      "2": {
+        "value": "8px"
+      },
+      "3": {
+        "value": "12px"
+      },
+      "4": {
+        "value": "16px"
+      },
+      "5": {
+        "value": "20px"
+      },
+      "6": {
+        "value": "24px"
+      },
+      "8": {
+        "value": "32px"
+      },
+      "10": {
+        "value": "40px"
+      },
+      "12": {
+        "value": "48px"
+      },
+      "16": {
+        "value": "64px"
+      },
+      "20": {
+        "value": "80px"
+      },
+      "24": {
+        "value": "96px"
+      },
+      "28": {
+        "value": "112px"
+      }
+    },
+    "sizing": {
+      "avatarXs": {
+        "value": "24px"
+      },
+      "avatarSm": {
+        "value": "36px"
+      },
+      "avatarMd": {
+        "value": "42px"
+      },
+      "avatarLg": {
+        "value": "64px"
+      },
+      "avatarXl": {
+        "value": "72px"
+      },
+      "avatar2xl": {
+        "value": "96px"
+      },
+      "iconSm": {
+        "value": "16px"
+      },
+      "iconMd": {
+        "value": "20px"
+      },
+      "iconLg": {
+        "value": "24px"
+      },
+      "iconXl": {
+        "value": "32px"
+      },
+      "buttonHeightDefault": {
+        "value": "36px"
+      },
+      "buttonHeightLarge": {
+        "value": "48px"
+      },
+      "buttonPaddingDefaultY": {
+        "value": "12px"
+      },
+      "buttonPaddingDefaultX": {
+        "value": "16px"
+      },
+      "buttonPaddingLargeY": {
+        "value": "16px"
+      },
+      "buttonPaddingLargeX": {
+        "value": "24px"
+      },
+      "navbarLogoHeight": {
+        "value": "32px"
+      },
+      "authnCtaMinHeight": {
+        "value": "44px"
+      }
+    },
+    "shadow": {
+      "sm": {
+        "value": "0 1px 2px rgba(0,0,0,0.05)"
+      },
+      "md": {
+        "value": "0 4px 6px rgba(0,0,0,0.1)"
+      },
+      "lg": {
+        "value": "0 10px 15px rgba(0,0,0,0.1)"
+      },
+      "xl": {
+        "value": "0 20px 25px rgba(0,0,0,0.15)"
+      }
+    },
+    "zIndex": {
+      "base": {
+        "value": 0
+      },
+      "dropdown": {
+        "value": 1000
+      },
+      "sticky": {
+        "value": 1020
+      },
+      "fixed": {
+        "value": 1030
+      },
+      "modalBackdrop": {
+        "value": 1040
+      },
+      "modal": {
+        "value": 1050
+      },
+      "popover": {
+        "value": 1060
+      },
+      "tooltip": {
+        "value": 1070
+      }
+    },
+    "animation": {
+      "durationFast": {
+        "value": "120ms"
+      },
+      "durationBase": {
+        "value": "200ms"
+      },
+      "durationSlow": {
+        "value": "320ms"
+      },
+      "easingStandard": {
+        "value": "ease-in-out"
+      },
+      "easingIn": {
+        "value": "ease-in"
+      },
+      "easingOut": {
+        "value": "ease-out"
+      },
+      "transitionBase": {
+        "value": "all 0.2s ease-in-out 0s normal"
+      },
+      "transitionFade": {
+        "value": "opacity 0.15s linear 0s normal"
+      },
+      "transitionTransform": {
+        "value": "transform 0.2s ease-in-out 0s normal"
+      }
+    },
+    "radius": {
+      "none": {
+        "value": "0px"
+      },
+      "sm": {
+        "value": "4px"
+      },
+      "md": {
+        "value": "8px"
+      },
+      "lg": {
+        "value": "12px"
+      },
+      "xl": {
+        "value": "16px"
+      },
+      "full": {
+        "value": "9999px"
+      }
+    }
+  }
+}

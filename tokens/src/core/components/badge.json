@@ -1,0 +1,16 @@
+{
+  "badge": {
+    "border-radius": {
+      "value": "{global.radius.full}"
+    },
+    "padding-y": {
+      "value": "{global.spacing.1}"
+    },
+    "padding-x": {
+      "value": "{global.spacing.3}"
+    },
+    "font-size": {
+      "value": "{global.typography.fontSizeCaption}"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-TKN-016, AC-TKN-020, AC-TKN-021, AC-TKN-029
+# @covers AC-TKN-016, AC-TKN-020, AC-TKN-021, AC-TKN-029, AC-TKN-033, AC-TKN-034
 # @spec: paragon-design-tokens-migration_spec.md
 set -euo pipefail
 
@@ -7,6 +7,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 CADDY_FILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
+APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+BUILD_TOKENS_SCRIPT="$REPO_ROOT/scripts/branding/build-tokens.sh"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
 THEME_FILES=(
   "core.min.css"
@@ -78,6 +80,13 @@ else
   else
     fail "MEREKA_PARAGON_THEME_ENABLED not found in mereka_lms.py"
   fi
+
+  if grep -q "MEREKA_PARAGON_THEME_CDN_BASE" "$PLUGIN_FILE" \
+    && grep -q "PARAGON_THEME_URLS" "$PLUGIN_FILE"; then
+    pass "AC-TKN-034 plugin source contains PARAGON_THEME_URLS render inputs"
+  else
+    fail "AC-TKN-034 plugin source missing PARAGON_THEME_URLS render inputs"
+  fi
 fi
 
 echo ""
@@ -127,6 +136,24 @@ elif [[ "$pgn_count" -ge 80 ]]; then
   warn "mereka-brand.min.css has ${pgn_count} --pgn-* properties (below 100 for full migration, above transitional minimum)"
 else
   fail "mereka-brand.min.css has only ${pgn_count} --pgn-* properties (minimum required: 80)"
+fi
+
+echo ""
+echo "2b) Token compilation hook presence"
+if [[ -x "$BUILD_TOKENS_SCRIPT" ]]; then
+  pass "AC-TKN-033 build token script exists and is executable"
+else
+  fail "AC-TKN-033 missing executable token build script: scripts/branding/build-tokens.sh"
+fi
+
+if [[ -f "$APPLY_PATCHES" ]]; then
+  if grep -q "apply_brand_package_patch" "$APPLY_PATCHES"; then
+    pass "AC-TKN-034 apply-patches includes branding patch execution"
+  else
+    fail "AC-TKN-034 apply-patches missing brand patch execution"
+  fi
+else
+  fail "AC-TKN-034 missing infrastructure/tutor/apply-patches.sh"
 fi
 
 echo ""
