@@ -34,6 +34,7 @@ scripts/qa/verify-tutor-multisite-domains.sh
 scripts/qa/verify-csrf-multisite.sh
 scripts/qa/verify-favicon-multisite.sh
 scripts/qa/verify-site-id-hardening.sh
+scripts/qa/verify-critical-testmap-scope.sh
 
 # ── MongoDB Atlas ────────────────────────────────────────────────────────────
 scripts/qa/verify-mongodb-atlas-integration.sh
