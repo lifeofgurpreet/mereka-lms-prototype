@@ -348,6 +348,9 @@ RETENTION_DAYS=90 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
 
 # Frontend closure-only lane (cross-browser + a11y + performance)
 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser
+
+# Single-browser smoke lane with screenshot artifacts (authn/learning/account/profile)
+./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --learning-path /learning
 ```
 
 ### Evidence Directory Structure

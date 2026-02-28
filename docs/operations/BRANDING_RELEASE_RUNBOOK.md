@@ -178,6 +178,11 @@ kubectl get deploy lms cms mfe -n mereka-lms \
   --frontend-only \
   --cross-browser
 
+# Single-browser smoke + screenshots lane (authn/learning/account/profile surfaces)
+./scripts/qa/verify-npm-start-mfe-smoke.sh \
+  --base-url https://academyv2.mereka.io \
+  --learning-path /learning
+
 # Check all tenant domains return HTTP 200
 for domain in academyv2.mereka.io academy.biji-biji.com; do
   echo "$domain: $(curl -s -o /dev/null -w '%{http_code}' "https://${domain}/")"

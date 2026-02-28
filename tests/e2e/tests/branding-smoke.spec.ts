@@ -9,6 +9,7 @@ const BASE_MFE_ROUTES: RouteConfig[] = [
   { label: 'authn-login', path: '/authn/login' },
   { label: 'learner-dashboard', path: '/learner-dashboard/' },
   { label: 'account-settings', path: '/account/settings' },
+  { label: 'profile-home', path: '/profile/u/' },
 ];
 
 const LEARNING_ROUTE = (process.env.BRANDING_LEARNING_PATH ?? '').trim();
