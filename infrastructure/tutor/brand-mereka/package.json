@@ -3,23 +3,8 @@
   "version": "1.0.0",
   "description": "Mereka Academy OEP-48 brand package for Open edX MFEs",
   "main": ".",
-  "exports": {
-    ".": ".",
-    "./logo.svg": "./logo.svg",
-    "./logo-white.svg": "./logo-white.svg",
-    "./logo.png": "./logo.png",
-    "./logo-white.png": "./logo-white.png",
-    "./favicon.ico": "./favicon.ico",
-    "./paragon/fonts.scss": "./paragon/fonts.scss",
-    "./paragon/_variables.scss": "./paragon/_variables.scss",
-    "./paragon/_overrides.scss": "./paragon/_overrides.scss",
-    "./paragon/tokens.json": "./paragon/tokens.json",
-    "./paragon/images/card-imagecap-fallback.png": "./paragon/images/card-imagecap-fallback.png",
-    "./logo-trademark.svg": "./logo-trademark.svg",
-    "./logo-trademark.png": "./logo-trademark.png"
-  },
   "peerDependencies": {
-    "@openedx/paragon": ">=21.0.0"
+    "@openedx/paragon": ">=22.0.0 <24.0.0"
   },
   "license": "AGPL-3.0"
 }

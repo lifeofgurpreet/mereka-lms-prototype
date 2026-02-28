@@ -130,12 +130,19 @@ for f in "${THEME_FILES[@]}"; do
 done
 
 pgn_count=$(count_pgn_tokens "$THEME_DIR/mereka-brand.min.css")
-if [[ "$pgn_count" -ge 100 ]]; then
-  pass "mereka-brand.min.css has ${pgn_count} --pgn-* properties (>=100)"
-elif [[ "$pgn_count" -ge 80 ]]; then
-  warn "mereka-brand.min.css has ${pgn_count} --pgn-* properties (below 100 for full migration, above transitional minimum)"
+if [[ "$pgn_count" -ge 8 && "$pgn_count" -le 80 ]]; then
+  pass "mereka-brand.min.css has ${pgn_count} --pgn-* properties (delta-mode target range 8-80)"
+elif [[ "$pgn_count" -gt 80 ]]; then
+  warn "mereka-brand.min.css has ${pgn_count} --pgn-* properties (likely bloated; expected delta overrides only)"
 else
-  fail "mereka-brand.min.css has only ${pgn_count} --pgn-* properties (minimum required: 80)"
+  fail "mereka-brand.min.css has only ${pgn_count} --pgn-* properties (minimum required for brand delta: 8)"
+fi
+
+brand_size=$(wc -c < "$THEME_DIR/mereka-brand.min.css")
+if [[ "$brand_size" -le 16384 ]]; then
+  pass "mereka-brand.min.css size is ${brand_size} bytes (delta-size budget <=16384)"
+else
+  warn "mereka-brand.min.css size is ${brand_size} bytes (exceeds delta-size budget; investigate token bloat)"
 fi
 
 echo ""

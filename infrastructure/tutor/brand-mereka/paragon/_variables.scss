@@ -1,8 +1,9 @@
 // Mereka Academy brand overrides for Paragon/Bootstrap
 // Source of truth: assets/branding/tokens.css
 //
-// DEPRECATED: These SCSS variables are deprecated in Paragon v23+.
-// Use paragon/tokens.json for new implementations.
+// Compatibility-only for legacy import paths.
+// Ulmo-era MFEs (Paragon v23+) do not import @edx/brand SCSS variables at runtime.
+// Active theming is driven by CSS custom properties from themes/mereka/scss/_tokens.scss.
 
 $font-family-sans-serif: 'Poppins', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !default;
 $headings-font-family: 'Lato', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !default;

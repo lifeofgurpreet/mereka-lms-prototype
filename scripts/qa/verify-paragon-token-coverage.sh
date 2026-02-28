@@ -97,8 +97,10 @@ BRAND_LIGHT_THEME="$MEREKA_THEME_DIR/mereka-brand-light.min.css"
 
 if [[ -f "$BRAND_THEME" ]]; then
   BRAND_SIZE=$(wc -c < "$BRAND_THEME")
-  if [[ "$BRAND_SIZE" -gt 256 ]]; then
-    pass "mereka-brand.min.css exists (${BRAND_SIZE} bytes)"
+  if [[ "$BRAND_SIZE" -gt 256 && "$BRAND_SIZE" -le 16384 ]]; then
+    pass "mereka-brand.min.css exists (${BRAND_SIZE} bytes) and is within delta-size budget"
+  elif [[ "$BRAND_SIZE" -gt 16384 ]]; then
+    fail "mereka-brand.min.css is bloated (${BRAND_SIZE} bytes; expected <=16384 for delta bundle)"
   else
     fail "mereka-brand.min.css is unexpectedly small (${BRAND_SIZE} bytes)"
   fi
@@ -108,8 +110,10 @@ fi
 
 if [[ -f "$BRAND_LIGHT_THEME" ]]; then
   BRAND_LIGHT_SIZE=$(wc -c < "$BRAND_LIGHT_THEME")
-  if [[ "$BRAND_LIGHT_SIZE" -gt 256 ]]; then
-    pass "mereka-brand-light.min.css exists (${BRAND_LIGHT_SIZE} bytes)"
+  if [[ "$BRAND_LIGHT_SIZE" -gt 256 && "$BRAND_LIGHT_SIZE" -le 16384 ]]; then
+    pass "mereka-brand-light.min.css exists (${BRAND_LIGHT_SIZE} bytes) and is within delta-size budget"
+  elif [[ "$BRAND_LIGHT_SIZE" -gt 16384 ]]; then
+    fail "mereka-brand-light.min.css is bloated (${BRAND_LIGHT_SIZE} bytes; expected <=16384 for delta bundle)"
   else
     fail "mereka-brand-light.min.css is unexpectedly small (${BRAND_LIGHT_SIZE} bytes)"
   fi

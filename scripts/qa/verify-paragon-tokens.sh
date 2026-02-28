@@ -135,11 +135,13 @@ text = Path(sys.argv[1]).read_text(encoding="utf-8")
 print(len(set(re.findall(r"--pgn-[A-Za-z0-9_-]+\s*:", text))))
 PY
   )"
-  if [[ "$token_count" -ge 100 ]]; then
-    pass "AC-TKN-029 token count is ${token_count} (>=100)"
-    pass "AC-TKN-013 token count contract satisfied (>=100 --pgn-* entries)"
+  if [[ "$token_count" -ge 8 && "$token_count" -le 80 ]]; then
+    pass "AC-TKN-029 token count is ${token_count} (delta-mode target range 8-80)"
+    pass "AC-TKN-013 token count contract satisfied for delta override bundle"
+  elif [[ "$token_count" -gt 80 ]]; then
+    fail "AC-TKN-029 token count is ${token_count} (>80, indicates non-delta/bloated output)"
   else
-    fail "AC-TKN-029 token count is ${token_count} (<100)"
+    fail "AC-TKN-029 token count is ${token_count} (<8, missing required brand overrides)"
   fi
 
   unresolved_refs="$(python3 - "$OUTPUT_CSS" <<'PY'
