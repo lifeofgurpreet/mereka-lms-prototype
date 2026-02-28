@@ -14,8 +14,8 @@
   --pgn-font-family-sans-serif: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --pgn-heading-font-family: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --pgn-border-color: #DDDDDE;
-  --pgn-form-control-border-color: #ddddde;
-  --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
+  --pgn-form-control-border-color: var(--mereka-color-border);
+  --pgn-border-color-translucent: rgb(var(--mereka-color-black-rgb) / 0.12);
   --pgn-btn-border-radius: 999px;
   --pgn-btn-color: var(--mereka-color-ink-700);
   --pgn-btn-hover-color: var(--mereka-color-ink-900);
@@ -23,8 +23,8 @@
   --pgn-alert-border-color: var(--mereka-mfe-border);
   --pgn-spacing-spacer-base: 1rem;
   --pgn-typography-font-size-xs: 0.75rem;
-  --pgn-color-white: #fff;
-  --pgn-color-black: #000;
+  --pgn-color-white: var(--mereka-color-white);
+  --pgn-color-black: var(--mereka-black);
   --pgn-color-gray-base: #000000;
   --pgn-color-gray-500: #6b7280;
   --pgn-color-gray-700: #374151;
@@ -80,7 +80,7 @@
   --pgn-zindex-tooltip: 1070;
   --pgn-transition-base: all 0.2s ease-in-out 0s normal;
   --pgn-transition-fade: opacity 0.15s linear 0s normal;
-  --pgn-elevation-box-shadow-level-2: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --pgn-elevation-box-shadow-level-2: 0 4px 6px rgb(var(--mereka-color-black-rgb) / 0.1);
   --pgn-size-border-width: 1px;
   --pgn-size-border-radius-base: 0.375rem;
   --pgn-size-border-radius-lg: 0.425rem;

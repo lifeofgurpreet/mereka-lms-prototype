@@ -204,7 +204,7 @@ label {
 .pgn__modal-content {
   border-radius: var(--mereka-mfe-modal-radius);
   border: var(--mereka-mfe-modal-border);
-  box-shadow: 0 30px 90px rgb(var(--mereka-color-ink-deep-rgb) / 0.18);
+  box-shadow: var(--mereka-mfe-modal-shadow);
 }
 
 /* RISK: LOW — Bootstrap/Paragon dropdown; border-radius/shadow color only */
