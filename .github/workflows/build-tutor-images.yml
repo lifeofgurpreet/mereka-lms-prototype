@@ -157,10 +157,16 @@ jobs:
       - name: Build OpenEdX image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
-          # Prefer lower peak-memory Docker build mode for OpenEdX image on
-          # GitHub-hosted runners to avoid abrupt OOM kills during layer export.
-          export DOCKER_BUILDKIT=0
-          export COMPOSE_DOCKER_CLI_BUILD=0
+          # Prefer lower peak-memory Docker build mode on GitHub-hosted runners
+          # to avoid abrupt OOM kills during layer export.
+          # Keep BuildKit enabled on self-hosted runners for better cache reuse.
+          if [[ "${RUNNER_ENVIRONMENT:-}" == "github-hosted" ]]; then
+            export DOCKER_BUILDKIT=0
+            export COMPOSE_DOCKER_CLI_BUILD=0
+            echo "GitHub-hosted runner detected: BuildKit disabled for stability."
+          else
+            echo "Self-hosted runner detected: BuildKit remains enabled."
+          fi
           (
             while true; do
               echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."

@@ -79,8 +79,10 @@ echo -e "\n${BLUE}Theme asset checks${NC}"
 check_file "$CORE_THEME" "core.min.css"
 if [[ -f "$CORE_THEME" ]]; then
   CORE_SIZE=$(wc -c < "$CORE_THEME")
-  if [[ "$CORE_SIZE" -gt 1024 ]]; then
-    pass "core.min.css has content (${CORE_SIZE} bytes)"
+  if [[ "$CORE_SIZE" -gt 1024 && "$CORE_SIZE" -le 614400 ]]; then
+    pass "core.min.css has content (${CORE_SIZE} bytes) and is within size budget (<=614400)"
+  elif [[ "$CORE_SIZE" -gt 614400 ]]; then
+    fail "core.min.css exceeds size budget (${CORE_SIZE} bytes; expected <=614400)"
   else
     fail "core.min.css is unexpectedly small (${CORE_SIZE} bytes)"
   fi
