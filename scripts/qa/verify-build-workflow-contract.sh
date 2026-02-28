@@ -102,6 +102,16 @@ if ! rg -n -- '--require-digests' "$BUILD_WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'EXTRA_ARGS\+\=\(--verify-runtime --wait-seconds 900\)' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ build workflow missing production runtime verification args (--verify-runtime --wait-seconds 900)"
+  violations=1
+fi
+
+if ! rg -n '"\$\{EXTRA_ARGS\[@\]\}"' "$BUILD_WORKFLOW" >/dev/null; then
+  echo "❌ build workflow does not forward EXTRA_ARGS to release-openedx-gitops.sh"
+  violations=1
+fi
+
 # Build workflow must not publish mutable latest tags to Artifact Registry.
 if rg -n 'docker push .*:latest([[:space:]]|$)' "$BUILD_WORKFLOW" >/dev/null; then
   echo "❌ build workflow publishes mutable :latest tags"

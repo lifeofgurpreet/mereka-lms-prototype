@@ -286,6 +286,12 @@ check_gitops() {
     fail "[AC-014] GitOps missing --apply --commit --push flags"
   fi
 
+  if grep -q -- '--verify-runtime --wait-seconds 900' "$BUILD_WF"; then
+    pass "[AC-014] Production GitOps path wires --verify-runtime with explicit wait budget"
+  else
+    fail "[AC-014] Missing production runtime verification wiring (--verify-runtime --wait-seconds 900)"
+  fi
+
   # AC-014: Digest pinning supported (--require-digests)
   if grep -q -- '--require-digests' "$BUILD_WF"; then
     pass "[AC-014] Digest pinning supported (--require-digests flag)"
