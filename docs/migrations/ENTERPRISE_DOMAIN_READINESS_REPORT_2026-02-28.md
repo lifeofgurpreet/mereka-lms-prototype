@@ -44,7 +44,7 @@ Result summary:
 Observed failure pattern:
 - All enterprise services are reachable with non-empty endpoints and healthy runtime probes.
 - External and in-cluster admin/learner enterprise portals return HTTP 200.
-- Remaining blocker: `enterprise-access` is not at full desired steady state (`1/3 ready` during verification), so AC-001 strict readiness still fails.
+- Remaining blocker: some enterprise API deployments (`enterprise-catalog`, `enterprise-access`) are not consistently at full desired steady state during peak scheduling windows, so AC-001 strict readiness can fail even while health endpoints are green.
 
 Context note:
 - Running this check without an explicit context can produce misleading results if the active kube context is a local/dev cluster.
@@ -92,7 +92,7 @@ Interpretation:
 
 1. **Enterprise service plane is live, but not fully at desired steady state**
 - Enterprise services and portals are actively serving in production context.
-- Remaining strict readiness issue is concentrated in `enterprise-access` desired-vs-ready convergence (`1/3` during validation).
+- Remaining strict readiness issue is concentrated in scheduler-driven replica convergence for `enterprise-catalog`/`enterprise-access` under CPU request pressure.
 - This is an SRE/rollout stabilization item, not an architecture absence.
 
 2. **Runbook status mismatch**
@@ -105,8 +105,8 @@ Interpretation:
 
 ## Recommended execution sequence (systematic)
 
-1. **Stabilize enterprise-access rollout to full desired readiness**
-- Resolve why `enterprise-access` remains below desired replicas in prod context.
+1. **Stabilize enterprise API rollout to full desired readiness**
+- Resolve why `enterprise-catalog`/`enterprise-access` intermittently remain below desired replicas in prod context.
 - Re-run AC-001..AC-008 check with explicit production context until full green.
 
 2. **Lock runtime truth into release gates**
@@ -127,5 +127,5 @@ Interpretation:
 ## Decision summary
 
 - **Foundation is strong** (spec coverage + SSO + tenant wiring).
-- **Primary blocker is enterprise-access steady-state convergence under strict AC-001 readiness**.
+- **Primary blocker is enterprise API steady-state convergence under strict AC-001 readiness**.
 - **Next milestone** should be: full AC-001..AC-008 green in explicit prod context, then pilot tenant go-live.

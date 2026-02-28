@@ -21,6 +21,15 @@ pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 
+pending_reason_summary() {
+  local app_name="$1"
+  # Aggregate recent FailedScheduling reasons for pending pods of this app label.
+  kubectl get events -n "$NAMESPACE" --field-selector=reason=FailedScheduling,type=Warning \
+    --sort-by=.lastTimestamp -o jsonpath='{range .items[*]}{.involvedObject.kind}{"|"}{.involvedObject.name}{"|"}{.message}{"\n"}{end}' 2>/dev/null \
+    | awk -F'|' -v app="$app_name" '$1=="Pod" && $2 ~ app {print $3}' \
+    | tail -n 5
+}
+
 usage() {
   cat <<'EOF'
 Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--skip-runtime-checks] [--allow-parked-services] [-h|--help]
@@ -190,6 +199,13 @@ for dep in "${EXPECTED_DEPS[@]}"; do
     pass "AC-001: $dep ${READY}/${DESIRED} ready"
   else
     fail "AC-001: $dep ${READY}/${DESIRED} ready (expected full readiness)"
+    SCHED_REASONS="$(pending_reason_summary "$dep" || true)"
+    if [[ -n "$SCHED_REASONS" ]]; then
+      info "AC-001: $dep scheduler diagnostics (recent FailedScheduling)"
+      while IFS= read -r line; do
+        [[ -n "$line" ]] && info "  - $line"
+      done <<< "$SCHED_REASONS"
+    fi
     AC001_OK=false
   fi
 done
