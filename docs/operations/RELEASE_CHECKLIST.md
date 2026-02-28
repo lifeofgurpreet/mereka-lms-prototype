@@ -71,6 +71,10 @@ Staging note:
   --apply --commit --push --verify-runtime
 ```
 
+By default, production release postflights now enforce strict runtime PARAGON theme contract checks
+(`verify-paragon-runtime.sh --require-runtime`) against `https://apps.academyv2.mereka.io`.
+Use `--paragon-runtime-url <origin>` to override; use `--skip-paragon-runtime-guard` only for controlled emergencies.
+
 Branding/theme release option (requires Cloudflare credentials):
 
 ```bash

@@ -123,6 +123,31 @@ Use the canonical release orchestrator (AC-DEP-002: exact commands for gitops ro
   --purge-frontend-cache
 ```
 
+`release-openedx-gitops.sh` now enforces runtime PARAGON theme readiness by default during production postflights:
+
+- `verify-paragon-runtime.sh --require-runtime`
+- Runtime origin default: `https://apps.academyv2.mereka.io`
+
+Emergency-only overrides:
+
+```bash
+# Override runtime theme origin for validation
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${TAG}" \
+  --mfe-tag "${TAG}" \
+  --apply --commit --push --verify-runtime \
+  --paragon-runtime-url "https://apps.academyv2.mereka.io"
+
+# Skip PARAGON runtime guard only for controlled emergency releases
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${TAG}" \
+  --mfe-tag "${TAG}" \
+  --apply --commit --push --verify-runtime \
+  --skip-paragon-runtime-guard
+```
+
 ### Manual GitOps update (if release-openedx-gitops.sh is unavailable)
 
 ```bash
