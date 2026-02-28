@@ -160,14 +160,18 @@ check_mfe_authn_surface() {
     printf "✗ MFE auth page missing app CSS link\n" >&2
     failures=$((failures + 1))
   else
+    local actual_mfe_rev
     authn_css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${mfe_host}${authn_css_path}?nocache=${ts}" 2>/dev/null || true)"
+    actual_mfe_rev="$(printf '%s' "$authn_css" | sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1 || true)"
     if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$authn_css"; then
       if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$authn_css"; then
         if [[ "${STRICT_MFE_BRANDING_REV:-0}" == "1" ]]; then
           printf "✗ MFE auth CSS missing expected branding revision (%s)\n" "$EXPECTED_MFE_BRANDING_REV" >&2
+          printf "  debug: actual_mfe_branding_rev=%s\n" "${actual_mfe_rev:-<missing>}" >&2
           failures=$((failures + 1))
         else
-          printf "✓ MFE auth CSS includes Mereka branding markers (revision differs from local source)\n"
+          printf "✓ MFE auth CSS includes Mereka branding markers (revision differs from local source: expected=%s actual=%s)\n" \
+            "$EXPECTED_MFE_BRANDING_REV" "${actual_mfe_rev:-<missing>}"
         fi
       else
         printf "✓ MFE auth CSS includes Mereka branding markers\n"
@@ -230,14 +234,18 @@ check_authn_proxy_surface() {
     return
   fi
 
+  local actual_mfe_rev
   authn_css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${host}${authn_css_path}?nocache=${ts}" 2>/dev/null || true)"
+  actual_mfe_rev="$(printf '%s' "$authn_css" | sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1 || true)"
   if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$authn_css"; then
     if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$authn_css"; then
       if [[ "${STRICT_MFE_BRANDING_REV:-0}" == "1" ]]; then
         printf "✗ %s authn CSS missing expected branding revision (%s)\n" "$label" "$EXPECTED_MFE_BRANDING_REV" >&2
+        printf "  debug: actual_mfe_branding_rev=%s\n" "${actual_mfe_rev:-<missing>}" >&2
         failures=$((failures + 1))
       else
-        printf "✓ %s authn CSS includes Mereka branding markers (revision differs from local source)\n" "$label"
+        printf "✓ %s authn CSS includes Mereka branding markers (revision differs from local source: expected=%s actual=%s)\n" \
+          "$label" "$EXPECTED_MFE_BRANDING_REV" "${actual_mfe_rev:-<missing>}"
       fi
     else
       printf "✓ %s authn CSS includes Mereka branding markers\n" "$label"
@@ -255,9 +263,10 @@ check_authn_proxy_surface() {
 check_css_fonts() {
   local url=$1
   local label=$2
-  local css
+  local css actual_rev
   local rev_ok=1
   css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$url" 2>/dev/null || true)"
+  actual_rev="$(printf '%s' "$css" | sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1 || true)"
   if [[ -n "$EXPECTED_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_BRANDING_REV" <<<"$css"; then
     rev_ok=0
   fi
@@ -305,6 +314,7 @@ check_css_fonts() {
       "$ok_poppins" "$ok_lato" "$ok_poppins_file" "$ok_lato_file" "$ok_footer" "$ok_footer_img" >&2
     if [[ "$rev_ok" == "0" ]]; then
       printf "  debug: expected_branding_rev=%s not found in live CSS\n" "$EXPECTED_BRANDING_REV" >&2
+      printf "  debug: actual_branding_rev=%s\n" "${actual_rev:-<missing>}" >&2
       echo "  hint: Production is likely running an older openedx image." >&2
     fi
     failures=$((failures + 1))
