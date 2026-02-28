@@ -7,7 +7,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 RENDERED_ENV="${RENDERED_ENV:-$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx}"
-EXPECTED_SLOT_IDS="${EXPECTED_SLOT_IDS:-org.openedx.frontend.layout.header_logo.v1,org.openedx.frontend.layout.footer.v1,org.openedx.frontend.layout.studio_footer.v1,org.openedx.frontend.authoring.course_outline_header.v1,org.openedx.frontend.authn.login_component.v1,org.openedx.frontend.learner_dashboard.widget_sidebar.v1,org.openedx.frontend.learner_dashboard.no_courses_view.v1,org.openedx.frontend.learner_dashboard.dashboard_header.v1,org.openedx.frontend.learner_dashboard.course_card.v1,org.openedx.frontend.learning.course_outline_sidebar.v1,org.openedx.frontend.learning.progress_certificate_status.v1,org.openedx.frontend.learning.course_header.v1,org.openedx.frontend.learning.course_tabs.v1,org.openedx.frontend.account.account_settings_tab.v1,org.openedx.frontend.account.additional_profile_fields.v1,org.openedx.frontend.profile.additional_profile_fields.v1,org.openedx.frontend.layout.header_desktop_main_menu.v1,org.openedx.frontend.layout.header_mobile_main_menu.v1}"
+EXPECTED_SLOT_IDS="${EXPECTED_SLOT_IDS:-org.openedx.frontend.layout.header_logo.v1,org.openedx.frontend.layout.footer.v1,org.openedx.frontend.layout.studio_footer.v1,org.openedx.frontend.authoring.course_outline_header.v1,org.openedx.frontend.authn.login_component.v1,org.openedx.frontend.learner_dashboard.widget_sidebar.v1,org.openedx.frontend.learner_dashboard.no_courses_view.v1,org.openedx.frontend.learner_dashboard.dashboard_header.v1,org.openedx.frontend.learner_dashboard.course_card.v1,org.openedx.frontend.learning.course_outline_sidebar.v1,org.openedx.frontend.learning.progress_certificate_status.v1,org.openedx.frontend.learning.course_header.v1,org.openedx.frontend.learning.course_tabs.v1,org.openedx.frontend.catalog.catalog_header.v1,org.openedx.frontend.account.account_settings_tab.v1,org.openedx.frontend.account.additional_profile_fields.v1,org.openedx.frontend.profile.additional_profile_fields.v1,org.openedx.frontend.layout.header_desktop_main_menu.v1,org.openedx.frontend.layout.header_mobile_main_menu.v1}"
 STRICT_RENDERED_SLOTS="${STRICT_RENDERED_SLOTS:-0}"
 CHECK_RENDERED_SLOTS="${CHECK_RENDERED_SLOTS:-0}"
 
@@ -72,6 +72,7 @@ declare -A SLOT_BINDING_MARKERS=(
   ["org.openedx.frontend.learning.progress_certificate_status.v1"]="mereka_progress_certificate_status"
   ["org.openedx.frontend.learning.course_header.v1"]="mereka_learning_course_header"
   ["org.openedx.frontend.learning.course_tabs.v1"]="mereka_learning_course_tabs_hint"
+  ["org.openedx.frontend.catalog.catalog_header.v1"]="mereka_catalog_header"
   ["org.openedx.frontend.account.account_settings_tab.v1"]="mereka_account_settings_tab_shell"
   ["org.openedx.frontend.account.additional_profile_fields.v1"]="mereka_additional_profile_fields"
   ["org.openedx.frontend.profile.additional_profile_fields.v1"]="mereka_profile_additional_fields"

@@ -360,6 +360,14 @@ label {
   font-size: var(--pgn-typography-font-size-sm);
 }
 
+/* RISK: LOW — slot-owned catalog/discovery header surface */
+.mereka-catalog-header-slot {
+  padding: 1rem;
+  border: 1px solid var(--mereka-mfe-border);
+  border-radius: var(--mereka-mfe-card-radius);
+  background: var(--mereka-mfe-surface-muted);
+}
+
 /* RISK: LOW — slot-owned studio authoring outline header */
 .mereka-authoring-course-outline-header {
   border: 1px solid var(--mereka-mfe-border);
@@ -372,6 +380,11 @@ label {
   border: 1px solid var(--mereka-mfe-border);
   border-radius: var(--mereka-mfe-card-radius);
   background: var(--mereka-mfe-surface-muted);
+}
+
+.mereka-account-settings-tab-shell .h5 {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
 }
 
 /* Authn/login/register surfaces */
@@ -391,15 +404,6 @@ label {
 
 /* [class*="learner-dashboard"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
 /* [class*="learning"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
-
-/* account scope for headings */
-/* RISK: LOW — heading font/color within scoped surfaces; degrades to default heading style */
-// SELECTOR-EXCEPTION: .page__account-settings h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
-.page__account-settings h1,
-.page__account-settings h2 {
-  font-family: var(--mereka-font-heading);
-  color: var(--mereka-color-ink-900);
-}
 
 /* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18). */
 /* [class*="discussions"] plural removed 2026-02-28 (dead selector audit, no live DOM matches). */

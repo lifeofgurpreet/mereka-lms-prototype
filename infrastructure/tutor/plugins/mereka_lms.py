@@ -811,6 +811,7 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
 #   org.openedx.frontend.learning.course_header.v1 | Learning course header banner
 #   org.openedx.frontend.learning.course_tabs.v1 | Learning tabs helper strip
+#   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.account.account_settings_tab.v1 | Account settings branded tab shell
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
@@ -1022,6 +1023,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearningCourseTabsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.catalog.catalog_header.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_catalog_header',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCatalogHeader,
                 },
             },
             """,
@@ -1444,6 +1460,23 @@ const MerekaLearningCourseTabsHint = () => {
     <div className="mereka-learning-course-tabs-hint mb-2">
       <span>Track your progress, discussions, and key dates in one place.</span>
     </div>
+  );
+};
+
+// Catalog/discovery header slot for branded discovery context.
+// Wired into org.openedx.frontend.catalog.catalog_header.v1.
+const MerekaCatalogHeader = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+
+  return (
+    <section className="mereka-catalog-header-slot mb-3">
+      <span className="mereka-badge mb-2">Explore</span>
+      <h2 className="h4 mb-1">Discover programs from {variant.brand}</h2>
+      <p className="mb-0 small text-muted">
+        Browse curated learning pathways and enrol when you are ready.
+      </p>
+    </section>
   );
 };
 

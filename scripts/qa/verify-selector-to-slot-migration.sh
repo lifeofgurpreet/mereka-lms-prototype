@@ -108,6 +108,7 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     "org.openedx.frontend.learner_dashboard.course_card.v1"
     "org.openedx.frontend.learning.course_header.v1"
     "org.openedx.frontend.learning.course_tabs.v1"
+    "org.openedx.frontend.catalog.catalog_header.v1"
     "org.openedx.frontend.account.account_settings_tab.v1"
   )
   for slot in "${required_slots[@]}"; do
