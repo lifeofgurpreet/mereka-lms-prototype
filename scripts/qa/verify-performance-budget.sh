@@ -223,7 +223,6 @@ if grep -qi "Current Gaps" "$BUDGET_DOC"; then
 
   # Check for known gaps
   known_gaps=(
-    "No cache-control headers"
     "No performance monitoring"
     "No bundle size"
     "No Lighthouse"
@@ -236,6 +235,12 @@ if grep -qi "Current Gaps" "$BUDGET_DOC"; then
       do_warn "Gap may be missing: $gap"
     fi
   done
+
+  if grep -Ei "cache-control.*monitor|runtime.*cache-control.*monitor" "$BUDGET_DOC"; then
+    do_pass "Cache-control monitoring/drift gap is documented"
+  else
+    do_warn "Cache-control monitoring/drift gap may be missing"
+  fi
 else
   do_warn "Current Gaps section not found (recommended for transparency)"
 fi

@@ -163,7 +163,7 @@ Current Caddyfile location: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 
 ### Required Header Configuration
 
-**Expected configuration** (not yet implemented):
+**Reference configuration pattern**:
 
 ```caddyfile
 :8002 {
@@ -240,7 +240,7 @@ Current Caddyfile location: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 3. **Caddy reverse_proxy API headers**: Use `header_down` in `reverse_proxy` blocks to set response cache headers
 4. **Content-addressable detection**: Caddy can't detect hashes automatically, so cache ALL static assets in MFE dist directories (safe because MFE build always hashes)
 
-**Current gap**: Caddyfile currently has NO cache-control headers. This is documented as a known issue in this contract.
+**Current posture**: Caddyfile includes route-level cache-control headers. Keep this contract focused on preventing drift between documented policy and runtime behavior.
 
 ---
 
@@ -248,7 +248,7 @@ Current Caddyfile location: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 
 | Gap | Impact | Priority |
 |-----|--------|----------|
-| **No cache-control headers in Caddyfile** | Every asset request hits origin, slow repeat loads | P0 |
+| **No continuous runtime cache-control monitoring** | Header drift can regress cache hit rates without immediate detection | P1 |
 | **No performance monitoring** | Can't detect regressions | P0 |
 | **No bundle size tracking** | Bundle bloat goes unnoticed | P1 |
 | **No Lighthouse CI** | Can't validate performance budgets in CI | P1 |
@@ -256,7 +256,7 @@ Current Caddyfile location: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 | **No CDN in front of Caddy** | Can't leverage edge caching yet | P2 |
 
 **Next steps**:
-1. Add cache-control headers to Caddyfile (AC-UIPERF-003)
+1. Keep Caddy cache-control policy drift-free via static + runtime verification (AC-UIPERF-003)
 2. Set up Lighthouse CI in GitHub Actions
 3. Add `web-vitals` library to MFE builds for RUM
 4. Configure webpack-bundle-analyzer in build pipeline
