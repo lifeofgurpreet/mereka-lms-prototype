@@ -307,24 +307,19 @@ label {
 /* per SELECTOR_HARDENING_POLICY: class-based attribute selectors are preferred over data-testid for production CSS */
 /* [class*="authn"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
 
-/* Account/settings + learner dashboard surfaces */
+/* Account/settings surfaces */
 /* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 
-/* RISK: HIGH — structural account/dashboard surface scoping; breaks if MFE renames top-level wrapper */
+/* RISK: HIGH — structural account surface scoping; breaks if MFE renames top-level wrapper */
 // SELECTOR-EXCEPTION: [class*="account-settings"] | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] | no stable slot; dashboard top-level wrapper | expires: 2026-Q3
-[class*="account-settings"],
-[class*="learner-dashboard"] {
+[class*="account-settings"] {
   background: transparent;
 }
 
-/* RISK: MEDIUM — account/dashboard card styling; border-radius/shadow degrade visually */
+/* RISK: MEDIUM — account card styling; border-radius/shadow degrade visually */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__card | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__card | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__card,
-[class*="learner-dashboard"] .pgn__card,
-[class*="account-settings"] .card,
-[class*="learner-dashboard"] .card {
+[class*="account-settings"] .card {
   border-radius: var(--mereka-mfe-card-radius);
   border: var(--mereka-mfe-card-border);
   box-shadow: var(--mereka-mfe-card-shadow);
@@ -332,183 +327,37 @@ label {
 
 /* RISK: LOW — form control background within scoped surfaces; color-only */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__form-control | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__form-control | dashboard wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__form-control,
-[class*="learner-dashboard"] .pgn__form-control {
+[class*="account-settings"] .pgn__form-control {
   background: var(--pgn-color-white);
 }
 
 /* RISK: LOW — button border-radius within scoped surfaces; shape-only, degrades visually */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__btn | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__btn | dashboard wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__btn,
-[class*="learner-dashboard"] .pgn__btn {
+[class*="account-settings"] .pgn__btn {
   border-radius: var(--mereka-mfe-pill-radius);
 }
 
 /* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__alert | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__alert | dashboard wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__alert,
-[class*="learner-dashboard"] .pgn__alert {
+[class*="account-settings"] .pgn__alert {
   border-radius: var(--mereka-mfe-alert-radius);
 }
 
 /* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__dropdown-toggle | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__dropdown-toggle | dashboard wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__dropdown-toggle,
-[class*="learner-dashboard"] .pgn__dropdown-toggle {
+[class*="account-settings"] .pgn__dropdown-toggle {
   border-radius: var(--mereka-mfe-pill-radius);
   border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
 }
 
-/* learner-dashboard scope + course component classes */
-/* RISK: HIGH — structural course card scoping; layout breaks if dashboard or course class renames */
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] | no stable slot for course card | expires: 2026-Q3
-[class*="learner-dashboard"] [class*="course"] {
-  border-radius: var(--mereka-mfe-compact-card-radius);
-  border: var(--mereka-mfe-compact-card-border);
-  background: var(--pgn-color-white);
-  min-width: 0;
-  overflow: hidden;
-}
+/* [class*="learner-dashboard"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
+/* [class*="learning"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
 
-/* RISK: LOW — hover shadow on course cards; graceful degradation */
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"]:hover | no stable slot for course card hover | expires: 2026-Q3
-[class*="learner-dashboard"] [class*="course"]:hover {
-  box-shadow: var(--mereka-mfe-compact-card-shadow-hover);
-}
-
-/* learner-dashboard scope + course layout container classes */
-/* RISK: HIGH — structural grid/list layout scoping; layout gap breaks if container class renames */
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-grid"] | no stable slot | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] | no stable slot | expires: 2026-Q3
-[class*="learner-dashboard"] [class*="course-grid"],
-[class*="learner-dashboard"] [class*="course-list"] {
-  gap: var(--mereka-mfe-course-grid-gap);
-}
-
-/* learner-dashboard scope + course component + image */
-/* RISK: LOW — learner-dashboard course image sizing should defer to native component defaults. */
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] img | no stable slot for image | expires: 2026-Q3
-[class*="learner-dashboard"] [class*="course"] img {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  object-fit: cover;
-  object-position: center;
-}
-
-/* Learning MFE (My Courses / Discover New) card layout guardrails */
-/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
-
-/* RISK: HIGH — structural learning surface scoping; background transparent breaks if learning class renames */
-// SELECTOR-EXCEPTION: [class*="learning"] | no upstream slot for learning layout; P2 upstream request filed | expires: 2026-Q3
-[class*="learning"] {
-  background: transparent;
-}
-
-/* course layout container classes may change */
-/* RISK: HIGH — structural learning grid/list layout; gap breaks if container class renames */
-// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-grid"] | no stable slot for learning course grid | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learning"] [class*="course-list"] | no stable slot for learning course list | expires: 2026-Q3
-[class*="learning"] [class*="course-grid"],
-[class*="learning"] [class*="course-list"] {
-  /* Some layouts aren't flex/grid, so `gap` can be a no-op. Keep it anyway, but
-     also add margin-based fallbacks below. */
-  gap: var(--mereka-mfe-compact-list-gap);
-  row-gap: var(--mereka-mfe-compact-list-gap);
-  column-gap: var(--mereka-mfe-compact-list-gap);
-}
-
-/* Bootstrap-ish fallback: many MFEs render course cards inside `.row > .col-*`. */
-/* RISK: MEDIUM — spacing fallback; Bootstrap .col-* is stable, my-courses class is brittle */
-// SELECTOR-EXCEPTION: [class*="learning"] [class*="my-courses"] .row > [class*="col"] | Bootstrap col is stable; my-courses class is brittle but no slot | expires: 2026-Q3
-[class*="learning"] [class*="my-courses"] .row > [class*="col"] {
-  margin-bottom: var(--mereka-mfe-compact-list-gap);
-}
-
-/* RISK: MEDIUM — learning card styling; border-radius/shadow degrade visually if class renames */
-// SELECTOR-EXCEPTION: [class*="learning"] :is(.pgn__card, .card) | no upstream slot for learning layout; inner selector is stable Paragon BEM | expires: 2026-Q3
-[class*="learning"] :is(.pgn__card, .card) {
-  border-radius: var(--mereka-mfe-compact-card-radius);
-  border: var(--mereka-mfe-compact-card-border);
-  box-shadow: var(--mereka-mfe-compact-card-shadow);
-  background: var(--pgn-color-white);
-  overflow: hidden;
-  /* Fallback vertical rhythm when the parent container doesn't support `gap`. */
-  margin-bottom: var(--mereka-mfe-compact-list-gap);
-}
-
-/* Learning course cards and media should stay responsive; keep brand radius/shadow only. */
-[class*="learning"] :is(.pgn__card, .card) :is(
-  .pgn__card-image-cap,
-  [class*="image-cap"],
-  [class*="imagecap"],
-  [class*="image"],
-  [class*="media"]
-) {
-  max-width: 100%;
-  width: 100%;
-  min-width: 0;
-}
-
-[class*="learning"] :is(.pgn__card, .card) :is([class*="image"] img, [class*="media"] img) {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  object-fit: cover;
-  object-position: center;
-}
-
-@media (max-width: 767px) {
-  [class*="learning"] :is(.pgn__card, .card) {
-    min-width: 0;
-  }
-}
-
-/* Some Learning MFE layouts don't apply CSS gap; add reliable vertical spacing fallback. */
-/* RISK: MEDIUM — spacing fallback; * + * adjacent sibling is safe, outer class is brittle */
-// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) > * + * | spacing fallback; no slot available | expires: 2026-Q3
-[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) > * + * {
-  margin-top: var(--mereka-mfe-compact-vertical-gap);
-}
-
-/* RISK: MEDIUM — row spacing fallback; Bootstrap .row is stable, outer class is brittle */
-// SELECTOR-EXCEPTION: [class*="learning"] :is([class*="my-courses"]...) .row > * | row spacing fallback; no slot available | expires: 2026-Q3
-[class*="learning"] :is([class*="my-courses"], [class*="discover"], [class*="discover-new"]) .row > * {
-  margin-bottom: var(--mereka-mfe-compact-vertical-gap);
-}
-
-/* Fallback spacing: ensure list layouts still have vertical rhythm even if gap isn't applied. */
-/* RISK: HIGH — structural list vertical rhythm; * + * is safe but course-list class can rename */
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course-list"] > * + * | list spacing fallback | expires: 2026-Q3
-[class*="learner-dashboard"] [class*="course-list"] > * + * {
-  margin-top: var(--mereka-mfe-course-list-gap);
-}
-
-/* learner-dashboard scope + course component + status badge class */
-/* RISK: MEDIUM — status badge styling; cosmetic pill, degrades visually if class renames */
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] [class*="status"] | cosmetic badge; no testid for status pill | expires: 2026-Q3
-[class*="learner-dashboard"] [class*="course"] [class*="status"] {
-  border-radius: var(--mereka-mfe-pill-radius);
-  background: var(--mereka-mfe-status-pill-bg, rgb(var(--mereka-color-teal-rgb) / 0.1));
-  color: var(--mereka-color-teal);
-  padding: var(--mereka-mfe-status-badge-padding);
-  font-weight: var(--mereka-mfe-badge-font-weight);
-}
-
-/* account/learner-dashboard scope for headings */
+/* account scope for headings */
 /* RISK: LOW — heading font/color within scoped surfaces; degrades to default heading style */
 // SELECTOR-EXCEPTION: [class*="account-settings"] h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="learner-dashboard"] h1/h2 | heading font; no slot for dashboard headings | expires: 2026-Q3
 [class*="account-settings"] h1,
-[class*="account-settings"] h2,
-[class*="learner-dashboard"] h1,
-[class*="learner-dashboard"] h2 {
+[class*="account-settings"] h2 {
   font-family: var(--mereka-font-heading);
   color: var(--mereka-color-ink-900);
 }

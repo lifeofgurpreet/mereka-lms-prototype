@@ -65,7 +65,7 @@ check_mfe_token_stack_imports() {
 check_selector_absent_noncomment() {
   local label="$1"
   local path="$2"
-  local regex="$3"
+  local needle="$3"
 
   if [[ ! -f "$path" ]]; then
     echo "  ✗ $label (missing file: $path)"
@@ -73,26 +73,25 @@ check_selector_absent_noncomment() {
     return
   fi
 
-  if python3 - "$path" "$regex" <<'PY'
-import re
+  if python3 - "$path" "$needle" <<'PY'
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
-pattern = re.compile(sys.argv[2])
+needle = sys.argv[2]
 
 for line in path.read_text(encoding="utf-8").splitlines():
     stripped = line.strip()
     if not stripped or stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
         continue
-    if pattern.search(line):
+    if needle in line:
         raise SystemExit(1)
 raise SystemExit(0)
 PY
   then
     echo "  ✓ $label"
   else
-    echo "  ✗ $label (found forbidden selector pattern: $regex)"
+    echo "  ✗ $label (found forbidden selector pattern: $needle)"
     failures=1
   fi
 }
@@ -163,11 +162,11 @@ check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
 check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
 check_contains "MFE theme styles Paragon modal" "$MFE_SCSS" '.pgn__modal-content'
 check_contains "MFE theme styles authn slot component" "$MFE_SCSS" '.mereka-authn-login-branding'
-check_selector_absent_noncomment "MFE authn wildcard selectors removed" "$MFE_SCSS" '\\[class\\*=\"authn\"\\]'
+check_selector_absent_noncomment "MFE authn wildcard selectors removed" "$MFE_SCSS" '[class*="authn"]'
 check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
-check_contains "MFE theme targets learner dashboard surfaces" "$MFE_SCSS" 'learner-dashboard'
-check_contains "MFE learner dashboard status pill styling" "$MFE_SCSS" '[class*="status"]'
-check_selector_absent_noncomment "MFE discussions wildcard selectors removed" "$MFE_SCSS" '\\[class\\*=\"discussions\"\\]'
+check_selector_absent_noncomment "MFE learner-dashboard wildcard selectors removed" "$MFE_SCSS" '[class*="learner-dashboard"]'
+check_selector_absent_noncomment "MFE learning wildcard selectors removed" "$MFE_SCSS" '[class*="learning"]'
+check_selector_absent_noncomment "MFE discussions wildcard selectors removed" "$MFE_SCSS" '[class*="discussions"]'
 check_contains "Caddy ecommerce root landing is branded" "$CADDYFILE" 'Mereka Ecommerce Service'
 # Forum v2 runs in-process (no separate Caddy block) - skip forum landing check
 

@@ -228,11 +228,6 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
 |-----------------|-----|----------------------|---------|-------|---------------|
 | `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
-| `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |
-| `[class*="learning"]` | learning | No upstream slot for course grid layout; upstream slot proposal pending (see AC-US7-005) | 2026-Q3 | Mereka / Upstream | Remove once upstream `learning_course_grid.v1` or equivalent slot is approved |
-| `[class*="course"]` (in dashboard/learning scope) | dashboard/learning | No stable slot for course card inner; data-testid primary present | 2026-Q3 | Mereka frontend | Remove once dashboard course card slot is upstream |
-| `[class*="image-cap"]`, `[class*="imagecap"]` | learning | Paragon ImageCap component internal classes; semi-stable | 2026-Q3 | Mereka frontend | Remove if Paragon exposes stable BEM for image cap |
-| `[class*="image"]`, `[class*="media"]` (in card scope) | learning | Too broad — no better alternative; scoped inside `.pgn__card` to limit blast radius | 2026-Q3 | Mereka frontend | Replace with explicit Paragon classes once Paragon card layout stabilizes |
 
 ### Removed Exceptions (bead 115d.18, 2026-02-18)
 
@@ -244,6 +239,11 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="login-register"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="discussions"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="authn"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="learner-dashboard"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="learning"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="course"]` (dashboard/learning scope) | 2026-02-28 | Removed with dead dashboard/learning selector branch; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="image-cap"]`, `[class*="imagecap"]` | 2026-02-28 | Removed with dead learning selector branch; scoped media fallback no longer needed |
+| `[class*="image"]`, `[class*="media"]` (card scope) | 2026-02-28 | Removed with dead learning selector branch; scoped media fallback no longer needed |
 
 ---
 
@@ -251,15 +251,12 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 > These selectors have no viable slot migration path at this time. Each is tracked with rationale, date filed, and next review date.
 
-### US7-TICKET-001: Learning MFE Course Grid Layout Slot
+### US7-TICKET-001: Learning MFE Course Grid Layout Slot (Closed)
 
 - **Selector**: `[class*="learning"]` (11 rule blocks)
-- **Filed**: 2026-02-18
-- **Rationale**: No upstream Open edX slot exists for the learning MFE course grid layout container. The `ProgressCertificateStatusSlot` covers only the certificate area, not the full layout. The `[class*="learning"]` selector is the broadest and most brittle in the file — it matches any element whose class contains the string "learning".
-- **Attempted alternatives**: `body.learning-mfe` (not emitted by upstream MFE), `[data-testid*="learning-page"]` (data-testid not consistently applied by upstream learning MFE).
-- **Next review**: 2026-Q3
-- **Resolution path**: File slot proposal with Open edX community for `org.openedx.frontend.learning.course_grid.v1`. Until approved, keep CSS with `SELECTOR-EXCEPTION` annotations and data-testid primary paths.
-- **Rollback**: If `[class*="learning"]` causes false positives (styling non-learning pages), narrow scope by adding `[data-page="learning"]` attribute via MFE config.
+- **Closed**: 2026-02-28
+- **Resolution**: Removed after dead-selector audit confirmed no live DOM matches in Ulmo learning surfaces.
+- **Guardrail**: `scripts/qa/verify-mfe-selector-hardening.sh` now fails if `[class*="learning"]` is reintroduced.
 
 ### US7-TICKET-002: Discussions MFE Styling (Closed)
 
@@ -277,9 +274,9 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | 1 | Footer | ✅ footer.v1 | ✅ MIGRATED | Done | Done | Low | Mereka | Done |
 | 2 | Header Logo | ✅ header_logo.v1 | ✅ MIGRATED | P1 | M | Med | Mereka frontend | Done |
 | 3 | Authn Branding | ✅ login_component.v1 | ✅ MIGRATED | P1 | M | Low-Med | Mereka frontend | Done |
-| 4 | Dashboard Layout | ✅ sidebar + no_courses | 🟡 CSS | P1 | L | High | Mereka frontend | 2026-Q3 |
-| 5 | Learning Layout | ⚠️ Partial (cert only) | 🔴 CSS | P2 | L | Critical | Mereka / Upstream | TBD (upstream) |
-| 6 | Discussions | ❌ None | 🔴 CSS (singular removed) | P3 | N/A | Low | Mereka frontend | 2026-Q3 review |
+| 4 | Dashboard Layout | ✅ sidebar + no_courses | ✅ wildcard fallback removed | P1 | L | Medium | Mereka frontend | Done |
+| 5 | Learning Layout | ✅ progress_certificate_status | ✅ wildcard fallback removed | P2 | L | Medium | Mereka / Upstream | Done |
+| 6 | Discussions | ❌ None | ✅ wildcard fallback removed | P3 | N/A | Low | Mereka frontend | Done |
 | 7 | Account/Settings | ❌ None | 🟡 CSS | P3 | N/A | Med | Mereka frontend | 2026-Q3 review |
 | 8 | Paragon Globals | N/A (use tokens) | ✅ STABLE | P3 | N/A | Low | Mereka frontend | N/A |
 | 9 | Navbar | ⚠️ Partial (logo) | 🟡 CSS | P2 | S | Low | Mereka frontend | 2026-Q3 |
@@ -299,10 +296,8 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 ### Backlog
 - [ ] Navbar tokens migration (P2, S)
-- [ ] Learning layout — request upstream slot (P2, L)
 
 ### Keep as CSS
-- Discussions styling (P3, well-hardened)
 - Account/Settings styling (P3, well-hardened)
 - Paragon global overrides (P3, very stable)
 
