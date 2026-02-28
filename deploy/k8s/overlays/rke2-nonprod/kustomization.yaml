@@ -40,6 +40,13 @@ images:
 generatorOptions:
   disableNameSuffixHash: true
 
+configMapGenerator:
+  - name: openedx-config
+    behavior: merge
+    files:
+      - config/cms.env.yml
+      - config/lms.env.yml
+
 patches:
   # Switch all ExternalSecrets from gcp-secret-manager to infisical-secret-store
   - path: patches/externalsecrets-infisical.yaml

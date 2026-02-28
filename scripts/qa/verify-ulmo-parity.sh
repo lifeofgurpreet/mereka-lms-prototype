@@ -38,6 +38,9 @@ CONFIG_EXAMPLE="${REPO_ROOT}/infrastructure/tutor/config.example.yml"
 DOMAIN_ENV_PATCH="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/patches/domain-env.yaml"
 INFISICAL_PATCH="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/patches/externalsecrets-infisical.yaml"
 LMS_ENV_YML="${REPO_ROOT}/deploy/k8s/base/apps/openedx/config/lms.env.yml"
+CMS_ENV_YML="${REPO_ROOT}/deploy/k8s/base/apps/openedx/config/cms.env.yml"
+RKE2_LMS_ENV_YML="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/config/lms.env.yml"
+RKE2_CMS_ENV_YML="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/config/cms.env.yml"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 
 PASS=0
@@ -247,26 +250,68 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# Section 6: lms.env.yml hardcoded domain gap (Gap 1)
+# Section 6: openedx-config env override for rke2-nonprod (Gap 1)
 # ---------------------------------------------------------------------------
-echo "--- Section 6: lms.env.yml domain gap (Gap 1) ---"
+echo "--- Section 6: openedx-config domain override for rke2-nonprod (Gap 1) ---"
 
 if [[ ! -f "$LMS_ENV_YML" ]]; then
-  skip "lms.env.yml not found — cannot check for hardcoded domain"
+  skip "Base lms.env.yml not found — cannot validate openedx-config override"
 else
   if grep -q "academyv2.mereka.io" "$LMS_ENV_YML"; then
-    fail "lms.env.yml is hardcoded to academyv2.mereka.io — rke2-nonprod needs a ConfigMap patch to override (Gap 1)"
+    pass "Base lms.env.yml is production-scoped (expected); overlay must provide rke2-nonprod override"
   else
-    pass "lms.env.yml does not contain hardcoded production domain"
+    skip "Base lms.env.yml does not contain academyv2.mereka.io; checking overlay override anyway"
   fi
 
-  # Check that SESSION_COOKIE_DOMAIN is present (requires patching for rke2)
-  if grep -q "SESSION_COOKIE_DOMAIN" "$LMS_ENV_YML"; then
-    COOKIE_DOMAIN=$(grep "SESSION_COOKIE_DOMAIN" "$LMS_ENV_YML" | head -1 | awk '{print $2}' | tr -d '"' || true)
-    if echo "$COOKIE_DOMAIN" | grep -q "mereka.io"; then
-      fail "SESSION_COOKIE_DOMAIN in lms.env.yml is set to prod domain ($COOKIE_DOMAIN) — rke2-nonprod sessions will fail (Gap 1)"
+  if [[ ! -f "$RKE2_LMS_ENV_YML" || ! -f "$RKE2_CMS_ENV_YML" ]]; then
+    fail "rke2-nonprod openedx-config override files missing (expected: overlays/rke2-nonprod/config/{lms,cms}.env.yml)"
+  else
+    pass "rke2-nonprod openedx-config override files exist"
+  fi
+
+  if grep -A4 "name: openedx-config" "$KUSTOMIZATION_RKE2" | grep -q "behavior: merge"; then
+    pass "rke2-nonprod kustomization merges openedx-config via configMapGenerator"
+  else
+    fail "rke2-nonprod kustomization missing openedx-config merge behavior"
+  fi
+
+  if grep -q "config/lms.env.yml" "$KUSTOMIZATION_RKE2" && grep -q "config/cms.env.yml" "$KUSTOMIZATION_RKE2"; then
+    pass "rke2-nonprod kustomization references overlay lms/cms env config files"
+  else
+    fail "rke2-nonprod kustomization does not reference overlay lms/cms env config files"
+  fi
+
+  if [[ -f "$RKE2_LMS_ENV_YML" ]]; then
+    if grep -q "academyv2.mereka.dev" "$RKE2_LMS_ENV_YML"; then
+      pass "rke2 lms.env.yml targets academyv2.mereka.dev"
     else
-      pass "SESSION_COOKIE_DOMAIN: $COOKIE_DOMAIN"
+      fail "rke2 lms.env.yml does not target academyv2.mereka.dev"
+    fi
+    if grep -q 'SESSION_COOKIE_DOMAIN: ".academyv2.mereka.dev"' "$RKE2_LMS_ENV_YML"; then
+      pass "rke2 lms.env.yml sets SESSION_COOKIE_DOMAIN=.academyv2.mereka.dev"
+    else
+      fail "rke2 lms.env.yml has incorrect SESSION_COOKIE_DOMAIN"
+    fi
+    if grep -q 'OAUTH_OIDC_ISSUER: "https://academyv2.mereka.dev/oauth2"' "$RKE2_LMS_ENV_YML"; then
+      pass "rke2 lms.env.yml sets OAUTH_OIDC_ISSUER to .dev domain"
+    else
+      fail "rke2 lms.env.yml has incorrect OAUTH_OIDC_ISSUER"
+    fi
+  fi
+
+  if [[ -f "$RKE2_CMS_ENV_YML" ]]; then
+    if grep -q "studio.academyv2.mereka.dev" "$RKE2_CMS_ENV_YML"; then
+      pass "rke2 cms.env.yml targets studio.academyv2.mereka.dev"
+    else
+      fail "rke2 cms.env.yml does not target studio.academyv2.mereka.dev"
+    fi
+  fi
+
+  if [[ -f "$CMS_ENV_YML" ]]; then
+    if grep -q 'SESSION_COOKIE_DOMAIN: ".academyv2.mereka.io"' "$CMS_ENV_YML"; then
+      pass "Base cms.env.yml remains production-scoped; overlay handles nonprod override"
+    else
+      skip "Base cms.env.yml is not production-scoped; overlay validation still enforced"
     fi
   fi
 fi

@@ -134,7 +134,7 @@ and `release/ulmo.1` for Atlas translation pulls — this is correct.
 
 ## Known Gaps
 
-### Gap 1 (CRITICAL): `lms.env.yml` / `cms.env.yml` hardcoded to production domain
+### Gap 1 (RESOLVED 2026-02-28): `openedx-config` nonprod domain override
 
 **File**: `deploy/k8s/base/apps/openedx/config/lms.env.yml`,
 `deploy/k8s/base/apps/openedx/config/cms.env.yml`
@@ -152,8 +152,13 @@ from the env YAML at startup. On rke2-nonprod these will be production values.
 Authentication, session cookies, and OIDC redirects will point to
 `academyv2.mereka.io` even when the pod is running on `academyv2.mereka.dev`.
 
-**Fix needed**: Add a `configMapGenerator` override or strategic merge patch in the
-rke2-nonprod overlay to replace the env YAML content for the dev domain.
+**Fix implemented**: `deploy/k8s/overlays/rke2-nonprod/kustomization.yaml` now merges
+`openedx-config` with overlay-specific files:
+- `deploy/k8s/overlays/rke2-nonprod/config/lms.env.yml`
+- `deploy/k8s/overlays/rke2-nonprod/config/cms.env.yml`
+
+These files set `academyv2.mereka.dev` roots, `.academyv2.mereka.dev` cookie domain,
+and `.dev` OIDC issuer values for nonprod runtime.
 
 ---
 
@@ -275,9 +280,9 @@ Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
 
 ### mereka-lms repo
 
-- [ ] **Gap 1**: Add ConfigMap patch for `lms.env.yml` / `cms.env.yml` to rke2-nonprod
-  overlay (swap `academyv2.mereka.io` → `academyv2.mereka.dev`, fix
-  `SESSION_COOKIE_DOMAIN`, `OAUTH_OIDC_ISSUER`, `PREVIEW_LMS_BASE`)
+- [x] **Gap 1**: Added `configMapGenerator` merge for `openedx-config` in rke2-nonprod
+  using `overlays/rke2-nonprod/config/{lms,cms}.env.yml` (`.dev` roots, cookie domain,
+  OIDC issuer, preview base)
 - [ ] **Gap 2**: Add `images:` block to `deploy/k8s/overlays/rke2-nonprod/kustomization.yaml`
   pinning `openedx-mfe` to `1c66529-20260220023917` (matches production)
 - [ ] **Gap 3**: Add `enterprise-admin-portal` and `enterprise-learner-portal` image pins
