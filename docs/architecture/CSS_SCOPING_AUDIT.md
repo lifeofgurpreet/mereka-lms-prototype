@@ -1,8 +1,19 @@
 # CSS Scoping Audit — Mereka Theme Global Overrides
 
-**Status**: AUDIT COMPLETE — do not modify CSS/SCSS (see T105)
+**Status**: AUDIT COMPLETE (living reference for T105/T106 follow-ups)
 **Audited**: 2026-02-25
+**Last updated**: 2026-02-28
 **Scope**: All SCSS/CSS in `infrastructure/tutor/themes/mereka/`
+
+---
+
+## 2026-02-28 Addendum (Dead Selector Cleanup)
+
+- `[class*="authn"]`, `[class*="learner-dashboard"]`, `[class*="learning"]`, and `[class*="discussions"]` fallback blocks were removed from `mereka.scss` after live DOM verification showed they were dead selectors.
+- Remaining wildcard scope is `"[class*=\"account-settings\"]"` with explicit `SELECTOR-EXCEPTION` annotations and expiry notes in source.
+- QA contract now enforces this directly in active selectors (comments are ignored by the gate):
+  - live scope present: `class*="account-settings"`
+  - dead scopes absent: `authn`, `learner-dashboard`, `learning`, `discussions`
 
 ---
 
@@ -307,12 +318,12 @@ body {
 
 ---
 
-### 3.8 MFE Surface Scopes (lines 248–606)
+### 3.8 MFE Surface Scopes (post-cleanup baseline)
 
-All rules in `[class*="authn"]`, `[class*="account-settings"]`, `[class*="learner-dashboard"]`, `[class*="learning"]`, `[class*="discussions"]` are already scoped.
+Active wildcard scope is now limited to `[class*="account-settings"]` (with documented `SELECTOR-EXCEPTION` annotations in source). Dead wildcard scopes (`authn`, `learner-dashboard`, `learning`, `discussions`) were removed.
 
-**XBlock impact**: None — these are MFE route-level wrappers.
-**Recommendation**: KEEP. Already scoped.
+**XBlock impact**: None — MFE route-level wrappers are outside LMS XBlock rendering.
+**Recommendation**: KEEP `account-settings` temporarily (exception-tracked), continue Phase D migration toward slot/explicit wrapper replacements.
 
 ---
 
