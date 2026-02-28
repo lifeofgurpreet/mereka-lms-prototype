@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # @covers AC-TKN-001, AC-TKN-002, AC-TKN-003, AC-TKN-004, AC-TKN-005
 # @covers AC-TKN-006, AC-TKN-007, AC-TKN-008, AC-TKN-009, AC-TKN-015
+# @covers AC-TKN-INT-001
 # @spec: paragon-design-tokens-migration_spec.md
 set -euo pipefail
 
@@ -11,6 +12,7 @@ ALIAS_JSON="$REPO_ROOT/tokens/src/core/alias.json"
 COMPONENTS_DIR="$REPO_ROOT/tokens/src/core/components"
 STYLE_DICT_CFG="$REPO_ROOT/style-dictionary.config.js"
 BUILD_SCRIPT="$REPO_ROOT/scripts/branding/build-tokens.sh"
+SYNC_JSON_SCRIPT="$REPO_ROOT/scripts/branding/sync-tokens-to-json.sh"
 OUTPUT_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 
@@ -36,6 +38,7 @@ require_file "$GLOBAL_JSON" "AC-TKN-001 global tokens file"
 require_file "$ALIAS_JSON" "AC-TKN-003 alias tokens file"
 require_file "$STYLE_DICT_CFG" "AC-TKN-009 style-dictionary config"
 require_file "$BUILD_SCRIPT" "AC-TKN-009 build script"
+require_file "$SYNC_JSON_SCRIPT" "AC-TKN-INT-001 token css -> json sync script"
 
 if [[ -d "$COMPONENTS_DIR" ]]; then
   pass "AC-TKN-008 components directory exists"
@@ -250,6 +253,16 @@ if [[ -x "$BUILD_SCRIPT" ]]; then
   else
     fail "AC-TKN-015 output CSS missing expected computed color value"
   fi
+fi
+
+if [[ -x "$SYNC_JSON_SCRIPT" ]]; then
+  if "$SYNC_JSON_SCRIPT" --check >/dev/null; then
+    pass "AC-TKN-INT-001 sync-tokens-to-json --check passes (no css->json drift)"
+  else
+    fail "AC-TKN-INT-001 sync-tokens-to-json --check failed (css->json drift detected)"
+  fi
+else
+  fail "AC-TKN-INT-001 sync script is not executable"
 fi
 
 echo ""
