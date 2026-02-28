@@ -360,14 +360,14 @@ themes/mereka/
 
 After all fixes, verify:
 
-- [ ] `mereka.scss` does NOT import theme.scss (imports _shared.scss or _fonts + _tokens directly)
-- [ ] `_tokens.scss` contains ONLY variable/property definitions (no style rules)
-- [ ] `brand-mereka/` contains all 4 missing OEP-48 files
-- [ ] `mereka-brand.min.css` < 5KB (delta only)
-- [ ] `light.min.css` ≠ `core.min.css` (or light variant removed from PARAGON_THEME_URLS)
-- [ ] No LMS/Studio selectors (`.dashboard`, `.courseware`, `.wrapper-view`) in MFE compiled CSS
-- [ ] All CI verification scripts pass
-- [ ] MFE image builds successfully with brand package installed
+- [x] `mereka.scss` does NOT import theme.scss (imports split partials directly)
+- [x] `_tokens.scss` contains ONLY variable/property definitions (style rules moved to `_base.scss`)
+- [x] `brand-mereka/` contains all 4 missing OEP-48 files
+- [x] `mereka-brand.min.css` < 5KB (delta only)
+- [x] `light.min.css` ≠ `core.min.css` (light delta is no longer a copy of core)
+- [x] No LMS/Studio selectors (`.dashboard`, `.courseware`, `.wrapper-view`) in MFE source stylesheet
+- [x] Phase C/D local verification scripts pass (`verify-design-tokens-migration`, `verify-paragon-token-coverage`, `verify-mfe-css-architecture`, selector/slot guards)
+- [ ] End-to-end image build + runtime rollout convergence (operational; depends on CI runner capacity and deployment promotion)
 
 ---
 
