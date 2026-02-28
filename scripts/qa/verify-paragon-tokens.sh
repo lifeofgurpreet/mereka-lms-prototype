@@ -86,28 +86,28 @@ else
 fi
 
 if [[ -f "$OUTPUT_CSS" ]]; then
-  if check_contains_token "--pgn-color-primary"; then
-    pass "AC-TKN-030 required token present: --pgn-color-primary"
+  if check_contains_token "--pgn-color-primary-base"; then
+    pass "AC-TKN-030 required canonical token present: --pgn-color-primary-base"
   else
-    fail "AC-TKN-030 missing required token: --pgn-color-primary"
+    fail "AC-TKN-030 missing required canonical token: --pgn-color-primary-base"
   fi
 
-  if check_contains_token "--pgn-color-secondary"; then
-    pass "AC-TKN-011 required token present: --pgn-color-secondary"
+  if check_contains_token "--pgn-color-secondary-base"; then
+    pass "AC-TKN-011 required canonical token present: --pgn-color-secondary-base"
   else
-    fail "AC-TKN-011 missing required token: --pgn-color-secondary"
+    fail "AC-TKN-011 missing required canonical token: --pgn-color-secondary-base"
   fi
 
-  if check_token_value "--pgn-color-primary" "$expected_primary"; then
-    pass "AC-TKN-010 --pgn-color-primary resolves to canonical magenta (${expected_primary})"
+  if check_token_value "--pgn-color-primary-base" "$expected_primary"; then
+    pass "AC-TKN-010 --pgn-color-primary-base resolves to canonical magenta (${expected_primary})"
   else
-    fail "AC-TKN-010 --pgn-color-primary does not match canonical magenta (${expected_primary})"
+    fail "AC-TKN-010 --pgn-color-primary-base does not match canonical magenta (${expected_primary})"
   fi
 
-  if check_token_value "--pgn-color-secondary" "$expected_secondary"; then
-    pass "AC-TKN-011 --pgn-color-secondary resolves to canonical teal (${expected_secondary})"
+  if check_token_value "--pgn-color-secondary-base" "$expected_secondary"; then
+    pass "AC-TKN-011 --pgn-color-secondary-base resolves to canonical teal (${expected_secondary})"
   else
-    fail "AC-TKN-011 --pgn-color-secondary does not match canonical teal (${expected_secondary})"
+    fail "AC-TKN-011 --pgn-color-secondary-base does not match canonical teal (${expected_secondary})"
   fi
 
   if python3 - "$OUTPUT_CSS" <<'PY'
@@ -116,14 +116,33 @@ import re
 import sys
 
 css = Path(sys.argv[1]).read_text(encoding="utf-8").lower()
-matches = re.findall(r"--pgn-font-family-sans-serif:\s*([^;]+);", css)
-if not matches or not any("poppins" in v for v in matches):
+font_tokens = [
+    "--pgn-font-family-sans-serif",
+    "--pgn-typography-font-family-sans-serif",
+    "--pgn-typography-font-family-base",
+]
+
+found_font_value = False
+for token in font_tokens:
+    matches = re.findall(rf"{re.escape(token)}:\s*([^;]+);", css)
+    if not matches:
+        continue
+    for value in matches:
+        if "poppins" in value:
+            found_font_value = True
+        elif "var(--pgn-font-family-sans-serif)" in value:
+            # Accept indirect canonical alias when the base family token is also set.
+            base = re.findall(r"--pgn-font-family-sans-serif:\s*([^;]+);", css)
+            if any("poppins" in v for v in base):
+                found_font_value = True
+
+if not found_font_value:
     raise SystemExit(1)
 PY
   then
-    pass "AC-TKN-012 --pgn-font-family-sans-serif contains Poppins"
+    pass "AC-TKN-012 font-family tokens resolve to Poppins"
   else
-    fail "AC-TKN-012 --pgn-font-family-sans-serif missing or does not contain Poppins"
+    fail "AC-TKN-012 font-family token overrides missing or do not resolve to Poppins"
   fi
 
   token_count="$(python3 - "$OUTPUT_CSS" <<'PY'

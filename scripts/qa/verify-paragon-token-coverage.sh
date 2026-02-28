@@ -191,9 +191,9 @@ if [[ -f "$TOKENS_FILE" ]]; then
 
   # Ensure core semantic tokens are declared
   for token in \
-    '--pgn-color-primary' \
-    '--pgn-color-secondary' \
-    '--pgn-font-family-sans-serif' \
+    '--pgn-color-primary-base' \
+    '--pgn-color-secondary-base' \
+    '--pgn-typography-font-family-sans-serif' \
     '--pgn-btn-border-radius' \
     '--pgn-link-color' \
     '--pgn-link-hover-color' \

@@ -109,10 +109,10 @@ for f in "${THEME_FILES[@]}"; do
   # Keep runtime theme payload checks focused on override files.
   case "$f" in
     mereka-brand.min.css|mereka-brand-light.min.css)
-      if grep -q -- "--pgn-color-primary" "$path"; then
-        pass "Brand theme file includes --pgn-color-primary: $f"
+      if grep -q -- "--pgn-color-primary-base" "$path"; then
+        pass "Brand theme file includes canonical --pgn-color-primary-base: $f"
       else
-        fail "Brand theme file missing --pgn-color-primary: $f"
+        fail "Brand theme file missing canonical --pgn-color-primary-base: $f"
       fi
 
       if [[ ! -s "$path" ]]; then
