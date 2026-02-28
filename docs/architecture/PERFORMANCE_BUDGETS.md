@@ -236,8 +236,8 @@ Current Caddyfile location: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 
 **Key implementation notes**:
 1. **Per-route static asset matching**: Use `@static` matcher within each MFE handle block
-2. **Index.html exception**: Explicitly override cache for `index.html` in each route
-3. **API response headers**: Use `header_down` in `reverse_proxy` blocks to set response cache headers
+2. **Caddy index.html exception**: Explicitly override cache for `index.html` in each route
+3. **Caddy reverse_proxy API headers**: Use `header_down` in `reverse_proxy` blocks to set response cache headers
 4. **Content-addressable detection**: Caddy can't detect hashes automatically, so cache ALL static assets in MFE dist directories (safe because MFE build always hashes)
 
 **Current gap**: Caddyfile currently has NO cache-control headers. This is documented as a known issue in this contract.
