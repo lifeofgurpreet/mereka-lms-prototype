@@ -319,3 +319,19 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
   - `notes.academyv2.mereka.io`
   - `academy.biji-biji.com` + associated Studio/MFE routes
   - `skillourfuture.academy.mereka.io`
+
+## Addendum — Accessibility Gate Refresh
+
+### Command Run
+
+```bash
+./scripts/qa/verify-a11y-contrast-focus.sh
+```
+
+### Result
+
+- Gate summary: `PASS=29`, `WARN=2`, `FAIL=0` (non-blocking warnings only)
+- Current non-blocking warnings:
+  - placeholder/caption contrast pair (`ink-300` on surface) below 4.5:1, documented as decorative-only exception
+  - one `box-shadow:none` occurrence inside minified core CSS focus context (review note retained)
+- Artifact updated: `var/a11y-contrast-focus-gate.txt`
