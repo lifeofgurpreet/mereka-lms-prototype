@@ -40,6 +40,21 @@ TOTAL_WARN=0
 TOTAL_SKIP=0
 GATE_RESULTS=()
 
+extract_count() {
+  local key="$1"
+  local text="$2"
+  local plain_text
+  local val
+  # Strip ANSI escapes so colored summaries like "PASS:" are parseable.
+  plain_text="$(printf '%s\n' "$text" | sed -E $'s/\x1B\\[[0-9;]*[A-Za-z]//g')"
+  val="$(echo "$plain_text" | grep -Eo "${key}[=:][[:space:]]*[0-9]+" | tail -1 | grep -Eo '[0-9]+' || true)"
+  if [[ -z "$val" ]]; then
+    echo "0"
+  else
+    echo "$val"
+  fi
+}
+
 run_gate() {
   local label="$1"
   local script="$2"
@@ -59,13 +74,14 @@ run_gate() {
 
   echo "$output"
 
-  # Extract summary line (PASS/FAIL/WARN counts)
-  local summary_line
-  summary_line="$(echo "$output" | grep -oE 'PASS=[0-9]+ FAIL=[0-9]+' | tail -1 || true)"
-
   local gate_pass gate_fail
-  gate_pass="$(echo "$summary_line" | grep -oE 'PASS=[0-9]+' | grep -oE '[0-9]+' || echo "0")"
-  gate_fail="$(echo "$summary_line" | grep -oE 'FAIL=[0-9]+' | grep -oE '[0-9]+' || echo "0")"
+  gate_pass="$(extract_count "PASS" "$output")"
+  gate_fail="$(extract_count "FAIL" "$output")"
+
+  # Some gates fail without printing FAIL=<n>; count that as a failure.
+  if [[ "$exit_code" -ne 0 && "$gate_fail" -eq 0 ]]; then
+    gate_fail=1
+  fi
 
   TOTAL_PASS=$((TOTAL_PASS + gate_pass))
   TOTAL_FAIL=$((TOTAL_FAIL + gate_fail))

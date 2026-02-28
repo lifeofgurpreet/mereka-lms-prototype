@@ -9,11 +9,15 @@
 #   AC-UITKN-004: CI gate blocks undefined token references
 #
 # Usage: ./scripts/qa/verify-token-reference-integrity.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 CONTRACT_DOC="$REPO_ROOT/docs/architecture/TOKEN_REFERENCE_INTEGRITY.md"
+COMMON_DESIGN_TOKENS="$THEME_DIR/common/static/css/mereka-design-tokens.css"
+COMMON_OVERRIDES="$THEME_DIR/common/static/css/mereka-overrides.css"
+LMS_OVERRIDES="$THEME_DIR/lms/static/css/mereka-overrides.css"
+CMS_OVERRIDES="$THEME_DIR/cms/static/css/mereka-overrides.css"
 
 PASS=0
 FAIL=0
@@ -58,8 +62,10 @@ echo "--- Token definitions (--mereka-*) ---"
 MEREKA_TOKENS=$(mktemp)
 
 grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$THEME_DIR/scss/_tokens.scss" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
-grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$THEME_DIR/lms/static/css/mereka-overrides.css" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
-grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$THEME_DIR/cms/static/css/mereka-overrides.css" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$COMMON_DESIGN_TOKENS" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$COMMON_OVERRIDES" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$LMS_OVERRIDES" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$CMS_OVERRIDES" 2>/dev/null | sort -u >> "$MEREKA_TOKENS" || true
 
 sort -u "$MEREKA_TOKENS" -o "$MEREKA_TOKENS"
 MEREKA_DEF_COUNT=$(wc -l < "$MEREKA_TOKENS")
@@ -71,8 +77,10 @@ echo "--- Token definitions (--pgn-*) ---"
 PGN_TOKENS=$(mktemp)
 
 grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$THEME_DIR/scss/_tokens.scss" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
-grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$THEME_DIR/lms/static/css/mereka-overrides.css" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
-grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$THEME_DIR/cms/static/css/mereka-overrides.css" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
+grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$COMMON_DESIGN_TOKENS" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
+grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$COMMON_OVERRIDES" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
+grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$LMS_OVERRIDES" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
+grep -oP '(?<=  )--pgn-[a-z0-9_-]+(?=:)' "$CMS_OVERRIDES" 2>/dev/null | sort -u >> "$PGN_TOKENS" || true
 
 sort -u "$PGN_TOKENS" -o "$PGN_TOKENS"
 PGN_DEF_COUNT=$(wc -l < "$PGN_TOKENS")
@@ -100,10 +108,8 @@ UNDEFINED_MEREKA=0
 CHECKED_MEREKA=0
 
 while IFS= read -r file; do
-  while IFS=: read -r line_num match; do
-    token=$(echo "$match" | grep -oP '(?<=var\()--mereka-[a-z0-9_-]+' | head -1)
+  while IFS= read -r token; do
     test -z "$token" && continue
-
     CHECKED_MEREKA=$((CHECKED_MEREKA + 1))
 
     if grep -qxF -- "$token" "$MEREKA_TOKENS"; then
@@ -114,10 +120,16 @@ while IFS= read -r file; do
       continue
     fi
 
+    line_num="$(grep -n -m1 -F "var(${token}" "$file" 2>/dev/null | cut -d: -f1 || true)"
+    line_num="${line_num:-?}"
     do_fail "Undefined --mereka-* token: $token in $(basename "$file"):$line_num"
     UNDEFINED_MEREKA=$((UNDEFINED_MEREKA + 1))
-  done < <(grep -n 'var(--mereka-' "$file" 2>/dev/null || true)
-done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(grep -oP 'var\(--mereka-[a-z0-9_-]+' "$file" 2>/dev/null | sed 's/^var(//' | sort -u)
+done < <(find "$THEME_DIR" \
+  \( -name '*.scss' -o -name '*.css' \) \
+  -not -path '*/node_modules/*' \
+  -not -path '*/mfe/theme/*' \
+  2>/dev/null)
 
 if [ "$UNDEFINED_MEREKA" -eq 0 ]; then
   do_pass "All $CHECKED_MEREKA var(--mereka-*) references resolve (AC-UITKN-001)"
@@ -130,10 +142,8 @@ UNDEFINED_PGN=0
 CHECKED_PGN=0
 
 while IFS= read -r file; do
-  while IFS=: read -r line_num match; do
-    token=$(echo "$match" | grep -oP '(?<=var\()--pgn-[a-z0-9_-]+' | head -1)
+  while IFS= read -r token; do
     test -z "$token" && continue
-
     CHECKED_PGN=$((CHECKED_PGN + 1))
 
     if grep -qxF -- "$token" "$PGN_TOKENS"; then
@@ -144,10 +154,16 @@ while IFS= read -r file; do
       continue
     fi
 
+    line_num="$(grep -n -m1 -F "var(${token}" "$file" 2>/dev/null | cut -d: -f1 || true)"
+    line_num="${line_num:-?}"
     do_warn "Paragon token not bridged: $token in $(basename "$file"):$line_num"
     UNDEFINED_PGN=$((UNDEFINED_PGN + 1))
-  done < <(grep -n 'var(--pgn-' "$file" 2>/dev/null || true)
-done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(grep -oP 'var\(--pgn-[a-z0-9_-]+' "$file" 2>/dev/null | sed 's/^var(//' | sort -u)
+done < <(find "$THEME_DIR" \
+  \( -name '*.scss' -o -name '*.css' \) \
+  -not -path '*/node_modules/*' \
+  -not -path '*/mfe/theme/*' \
+  2>/dev/null)
 
 if [ "$UNDEFINED_PGN" -eq 0 ]; then
   do_pass "All $CHECKED_PGN var(--pgn-*) references resolve"
@@ -160,14 +176,8 @@ UNDEFINED_SCSS=0
 CHECKED_SCSS=0
 
 while IFS= read -r file; do
-  while IFS=: read -r line_num match; do
-    var=$(echo "$match" | grep -oP '(?<=\$)(color-|mereka-)[a-z0-9_-]+' | head -1)
+  while IFS= read -r var; do
     test -z "$var" && continue
-
-    if echo "$match" | grep -qP '\$'"$var"'\s*:'; then
-      continue
-    fi
-
     CHECKED_SCSS=$((CHECKED_SCSS + 1))
 
     if grep -qxF -- "$var" "$SCSS_VARS"; then
@@ -179,10 +189,12 @@ while IFS= read -r file; do
       continue
     fi
 
+    line_num="$(grep -n -m1 -P "\\$$var\\b" "$file" 2>/dev/null | cut -d: -f1 || true)"
+    line_num="${line_num:-?}"
     do_fail "Undefined SCSS variable: \$$var in $(basename "$file"):$line_num"
     UNDEFINED_SCSS=$((UNDEFINED_SCSS + 1))
-  done < <(grep -n '\$\(color-\|mereka-\)' "$file" 2>/dev/null || true)
-done < <(find "$THEME_DIR" -name '*.scss' -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(grep -oP '\$(color-|mereka-)[a-z0-9_-]+' "$file" 2>/dev/null | sed 's/^\$//' | sort -u)
+done < <(find "$THEME_DIR" -name '*.scss' -not -path '*/node_modules/*' -not -path '*/mfe/theme/*' 2>/dev/null)
 
 if [ "$UNDEFINED_SCSS" -eq 0 ]; then
   do_pass "All $CHECKED_SCSS SCSS variable references resolve (AC-UITKN-002)"
@@ -195,8 +207,10 @@ VALUE_DRIFT=0
 
 TOKENS_VALUES=$(mktemp)
 grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$THEME_DIR/scss/_tokens.scss" 2>/dev/null >> "$TOKENS_VALUES" || true
-grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$THEME_DIR/lms/static/css/mereka-overrides.css" 2>/dev/null >> "$TOKENS_VALUES" || true
-grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$THEME_DIR/cms/static/css/mereka-overrides.css" 2>/dev/null >> "$TOKENS_VALUES" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$COMMON_DESIGN_TOKENS" 2>/dev/null >> "$TOKENS_VALUES" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$COMMON_OVERRIDES" 2>/dev/null >> "$TOKENS_VALUES" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$LMS_OVERRIDES" 2>/dev/null >> "$TOKENS_VALUES" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+:\s*#[0-9a-fA-F]{3,6}' "$CMS_OVERRIDES" 2>/dev/null >> "$TOKENS_VALUES" || true
 
 sed -i 's/#\([0-9a-fA-F]\+\)/#\L\1/' "$TOKENS_VALUES"
 
@@ -220,8 +234,10 @@ echo "--- Duplicate token definitions ---"
 DUPLICATES_FOUND=0
 
 for file in "$THEME_DIR/scss/_tokens.scss" \
-            "$THEME_DIR/lms/static/css/mereka-overrides.css" \
-            "$THEME_DIR/cms/static/css/mereka-overrides.css"; do
+            "$COMMON_DESIGN_TOKENS" \
+            "$COMMON_OVERRIDES" \
+            "$LMS_OVERRIDES" \
+            "$CMS_OVERRIDES"; do
   test -f "$file" || continue
 
   tokens=$(grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$file" 2>/dev/null | sort)

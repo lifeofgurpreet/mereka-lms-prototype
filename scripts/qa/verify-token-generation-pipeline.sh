@@ -5,7 +5,7 @@
 #
 # Phase 1: Contract + drift detection (warnings, not failures)
 # Phase 3: CI enforcement (fail on new drift)
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CONTRACT_DOC="$REPO_ROOT/docs/architecture/TOKEN_GENERATION_PIPELINE.md"

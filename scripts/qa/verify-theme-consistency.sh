@@ -7,7 +7,7 @@
 # - MFEs: custom footer, branding assets, no default Open edX branding
 #
 # Usage: ./scripts/qa/verify-theme-consistency.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"

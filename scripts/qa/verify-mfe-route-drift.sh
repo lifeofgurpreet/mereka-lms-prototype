@@ -6,7 +6,7 @@
 #   2. Expected MFE directory names
 #
 # Usage: ./scripts/qa/verify-mfe-route-drift.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"

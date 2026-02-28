@@ -5,7 +5,7 @@
 # matches version pins in CI workflows, setup scripts, and K8s manifests.
 #
 # Usage: ./scripts/qa/verify-frontend-version-truth.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 MFE_VERSIONS_DOC="$REPO_ROOT/docs/architecture/MFE_VERSIONS.md"

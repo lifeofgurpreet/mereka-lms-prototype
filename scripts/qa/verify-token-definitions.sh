@@ -6,11 +6,13 @@
 # mereka-overrides.css, or self-defined in the same file).
 #
 # Usage: ./scripts/qa/verify-token-definitions.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
+COMMON_DESIGN_TOKENS="$THEME_DIR/common/static/css/mereka-design-tokens.css"
+COMMON_OVERRIDES="$THEME_DIR/common/static/css/mereka-overrides.css"
 
 PASS=0
 FAIL=0
@@ -31,7 +33,10 @@ DEFINED_TOKENS=$(mktemp)
 grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$THEME_DIR/scss/_tokens.scss" 2>/dev/null >> "$DEFINED_TOKENS" || true
 
 # From mereka-overrides.css (runtime override definitions)
-grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$THEME_DIR/common/static/css/mereka-overrides.css" 2>/dev/null >> "$DEFINED_TOKENS" || true
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$COMMON_OVERRIDES" 2>/dev/null >> "$DEFINED_TOKENS" || true
+
+# From generated design tokens file (canonical runtime token source)
+grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$COMMON_DESIGN_TOKENS" 2>/dev/null >> "$DEFINED_TOKENS" || true
 
 # From theme.scss (self-defined tokens like gradients, radii)
 grep -oP '(?<=  )--mereka-[a-z0-9_-]+(?=:)' "$THEME_DIR/scss/theme.scss" 2>/dev/null >> "$DEFINED_TOKENS" || true
@@ -54,7 +59,7 @@ while IFS= read -r file; do
   # Extract all var(--mereka-*) references from this file
   while IFS=: read -r line_num match; do
     # Extract token name from var(--mereka-something)
-    token=$(echo "$match" | grep -oP '(?<=var\()--mereka-[a-z0-9_-]+' | head -1)
+    token="$(grep -oPm1 '(?<=var\()--mereka-[a-z0-9_-]+' <<<"$match" || true)"
     [ -z "$token" ] && continue
 
     # Check if token is defined
@@ -133,13 +138,15 @@ echo "--- Paragon token bridge ---"
 PGN_UNDEFINED=0
 while IFS= read -r file; do
   while IFS=: read -r line_num match; do
-    token=$(echo "$match" | grep -oP '(?<=var\()--pgn-[a-z0-9_-]+' | head -1)
+    token="$(grep -oPm1 '(?<=var\()--pgn-[a-z0-9_-]+' <<<"$match" || true)"
     [ -z "$token" ] && continue
     # Check if defined in same file or mereka-overrides.css
     if grep -q -- "^[[:space:]]*${token}:" "$file" 2>/dev/null; then
       : # Self-defined
-    elif grep -q -- "^[[:space:]]*${token}:" "$THEME_DIR/common/static/css/mereka-overrides.css" 2>/dev/null; then
+    elif grep -q -- "^[[:space:]]*${token}:" "$COMMON_OVERRIDES" 2>/dev/null; then
       : # Defined in overrides
+    elif grep -q -- "^[[:space:]]*${token}:" "$COMMON_DESIGN_TOKENS" 2>/dev/null; then
+      : # Defined in generated design tokens
     else
       do_warn "Paragon token $token referenced but not bridged ($(basename "$file"):$line_num)"
       PGN_UNDEFINED=$((PGN_UNDEFINED + 1))
