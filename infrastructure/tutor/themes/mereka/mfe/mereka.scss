@@ -32,6 +32,7 @@ body {
 }
 
 /* RISK: HIGH — .navbar is a structural layout class; breaks on Bootstrap or Paragon rename */
+// BRITTLE: .navbar shell selector remains until header shell is fully slot-scoped across MFEs (target: 2026-Q3).
 .navbar {
   background: var(--pgn-color-white);
   border-bottom: 1px solid var(--mereka-mfe-navbar-divider, rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
@@ -42,6 +43,7 @@ body {
 /* RISK: MEDIUM — header logo slot override class from runtime plugin component.
  * Aligns sizing and layout to avoid regression if the default MFE brand markup changes.
  */
+// BRITTLE: .mereka-header-logo sizing is tied to current header container constraints (target: 2026-Q3).
 .mereka-header-logo {
   display: inline-flex;
   align-items: center;
@@ -54,6 +56,7 @@ body {
 }
 
 /* RISK: MEDIUM — Bootstrap nav-link / dropdown-toggle; degrades visually on rename */
+// BRITTLE: .navbar child selectors depend on upstream header DOM shape (target: 2026-Q3).
 .navbar .nav-link,
 .navbar .dropdown-toggle {
   font-weight: var(--mereka-mfe-nav-item-font-weight);
@@ -120,6 +123,11 @@ body {
   color: var(--pgn-btn-color);
 }
 
+/* RISK: LOW — global Paragon button shape tokenization; degrades to Paragon defaults if class changes */
+.pgn__btn {
+  border-radius: var(--mereka-mfe-pill-radius);
+}
+
 /* RISK: LOW — hover/focus color only; graceful degradation */
 .pgn__btn--secondary:hover,
 .pgn__btn--secondary:focus,
@@ -133,6 +141,7 @@ body {
 .form-control {
   border-radius: var(--mereka-mfe-form-control-radius);
   border-color: var(--pgn-form-control-border-color);
+  background: var(--pgn-color-white);
   box-shadow: none;
 }
 
@@ -216,6 +225,12 @@ label {
   border-radius: var(--mereka-mfe-dropdown-radius);
   border: var(--mereka-mfe-dropdown-border);
   box-shadow: var(--mereka-mfe-dropdown-shadow);
+}
+
+/* RISK: LOW — Paragon dropdown toggle shape/border color only */
+.pgn__dropdown-toggle {
+  border-radius: var(--mereka-mfe-pill-radius);
+  border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
 }
 
 /* RISK: LOW — Bootstrap/Paragon tabs; border-radius shape only */
@@ -313,40 +328,6 @@ label {
 // SELECTOR-EXCEPTION: .page__account-settings | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
 .page__account-settings {
   background: transparent;
-}
-
-/* RISK: MEDIUM — account card styling; border-radius/shadow degrade visually */
-// SELECTOR-EXCEPTION: .page__account-settings .pgn__card | account MFE wrapper | expires: 2026-Q3
-.page__account-settings .pgn__card,
-.page__account-settings .card {
-  border-radius: var(--mereka-mfe-card-radius);
-  border: var(--mereka-mfe-card-border);
-  box-shadow: var(--mereka-mfe-card-shadow);
-}
-
-/* RISK: LOW — form control background within scoped surfaces; color-only */
-// SELECTOR-EXCEPTION: .page__account-settings .pgn__form-control | account MFE wrapper | expires: 2026-Q3
-.page__account-settings .pgn__form-control {
-  background: var(--pgn-color-white);
-}
-
-/* RISK: LOW — button border-radius within scoped surfaces; shape-only, degrades visually */
-// SELECTOR-EXCEPTION: .page__account-settings .pgn__btn | account MFE wrapper | expires: 2026-Q3
-.page__account-settings .pgn__btn {
-  border-radius: var(--mereka-mfe-pill-radius);
-}
-
-/* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
-// SELECTOR-EXCEPTION: .page__account-settings .pgn__alert | account MFE wrapper | expires: 2026-Q3
-.page__account-settings .pgn__alert {
-  border-radius: var(--mereka-mfe-alert-radius);
-}
-
-/* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
-// SELECTOR-EXCEPTION: .page__account-settings .pgn__dropdown-toggle | account MFE wrapper | expires: 2026-Q3
-.page__account-settings .pgn__dropdown-toggle {
-  border-radius: var(--mereka-mfe-pill-radius);
-  border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
 }
 
 /* [class*="learner-dashboard"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
