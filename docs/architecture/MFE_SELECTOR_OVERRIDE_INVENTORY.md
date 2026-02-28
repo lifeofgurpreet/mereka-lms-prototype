@@ -29,13 +29,13 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 |-----------------|---------------|------|-------|
 | `.pgn__page-container`, `.pgn__btn--primary`, `.pgn__card`, `.pgn__modal-content`, etc. | All MFEs | **MEDIUM** | Paragon component classes are stable within a Paragon major version but change across major bumps |
 | `[data-testid*="login-page"] .pgn__card` | Authn MFE | **MEDIUM** | `data-testid` selectors are intended for tests, not production styling; Open edX may remove them |
-| `[class*="authn"] .pgn__btn--primary` | Authn MFE | **MEDIUM** | Wildcard class match; marked `# BRITTLE` in source |
-| `[class*="account-settings"] .pgn__form-control` | Account MFE | **MEDIUM** | Wildcard class match; marked `# BRITTLE` in source |
+| `[class*="authn"] .pgn__btn--primary` | Authn MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
+| `[class*="account-settings"] .pgn__form-control` | Account MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
 | `[class*="learner-dashboard"] [data-testid*="course"]` | Learner Dashboard MFE | **MEDIUM** | Mixed data-testid + class wildcard; fragile nesting |
 | `[data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"])` | Learning MFE | **MEDIUM** | Deep compound selector; 3+ levels of combinators |
-| `[class*="discussions"] .pgn__card` | Discussions MFE | **MEDIUM** | Wildcard class match; marked `# BRITTLE` in source |
+| `[class*="discussions"] .pgn__card` | Discussions MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
 
-**Total `# BRITTLE` annotations**: 10+ comment blocks in `mereka.scss`.
+**Total selector exception annotations**: ~40 comment blocks in `mereka.scss`.
 
 **Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
 
@@ -83,7 +83,7 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 
 ### Immediate (before next Tutor upgrade)
 
-1. **`[class*="..."]` wildcard fallbacks in `mereka.scss`** — marked `# BRITTLE` throughout the file.
+1. **`[class*="..."]` wildcard fallbacks in `mereka.scss`** — tracked as `SELECTOR-EXCEPTION` with explicit expiry and rationale.
    These are fallback selectors added because `data-testid` attributes were absent at time of authoring.
    **Action**: Audit each fallback block. If upstream now ships `data-testid`, remove the wildcard fallback.
 
