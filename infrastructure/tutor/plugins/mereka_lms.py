@@ -227,20 +227,10 @@ if 'django_prometheus' in INSTALLED_APPS:
     if 'django_prometheus.middleware.PrometheusAfterMiddleware' not in MIDDLEWARE:
         MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
 
-ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
-if 'openedx_prometheus' in INSTALLED_APPS and "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
-    ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
-
-# Register URL patterns for optional modules via ROOT_URLCONF_OVERRIDES
-for _url_mod in [
-    ('openedx_notifications', 'openedx_notifications.urls'),
-    ('openedx_email_preferences', 'openedx_email_preferences.urls'),
-    ('openedx_mux_upload', 'openedx_mux_upload.urls'),
-    ('openedx_video_analytics', 'openedx_video_analytics.urls'),
-    ('openedx_video_protection', 'openedx_video_protection.urls'),
-]:
-    if _url_mod[0] in INSTALLED_APPS and _url_mod[1] not in ROOT_URLCONF_OVERRIDES:
-        ROOT_URLCONF_OVERRIDES.append(_url_mod[1])
+# NOTE: URL patterns for custom modules are registered via Open edX's plugin
+# URL system (PluginURLs in each app's AppConfig.plugin_app). This uses
+# get_plugin_url_patterns(ProjectType.LMS) in lms/urls.py to auto-discover
+# URLs from INSTALLED_APPS. No manual URL wiring needed here.
 
 # In-App Notifications (Email Phase 3)
 _safe_add_app('openedx_notifications')
@@ -1708,10 +1698,8 @@ if "django_prometheus" in INSTALLED_APPS:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
-if "openedx_prometheus" in INSTALLED_APPS:
-    ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
-    if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
-        ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
+# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
+# No manual ROOT_URLCONF_OVERRIDES needed.
 """,
     )
 )
@@ -1747,10 +1735,7 @@ if "django_prometheus" in INSTALLED_APPS:
     if "django_prometheus.middleware.PrometheusAfterMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.append("django_prometheus.middleware.PrometheusAfterMiddleware")
 
-if "openedx_prometheus" in INSTALLED_APPS:
-    ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
-    if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
-        ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
+# NOTE: Prometheus URLs are registered via PluginURLs in openedx_prometheus/apps.py.
 """,
     )
 )

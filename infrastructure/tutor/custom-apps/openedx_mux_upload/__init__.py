@@ -8,3 +8,4 @@ Django app for Mux-powered video upload workflow in Open edX Studio.
 """
 
 __version__ = '1.0.0'
+default_app_config = 'openedx_mux_upload.apps.MuxUploadConfig'
