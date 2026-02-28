@@ -31,6 +31,32 @@ function getMfeBaseUrl(lmsBaseUrl: string): string {
 type ThemeContractMode = 'runtime-theme-urls' | 'embedded-theme-files';
 
 async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<ThemeContractMode> {
+  // Prefer the rendered authn shell as the source of truth for theme loading mode.
+  // /api/mfe_config/v1 payload shape can vary across Open edX releases.
+  const authnShellResponse = await page.request.get(`${mfeBaseUrl}/authn/login`);
+  const authnShellStatus = authnShellResponse.status();
+  if (authnShellStatus >= 200 && authnShellStatus < 500) {
+    const authnShellHtml = await authnShellResponse.text();
+    const runtimeThemeFromHtml = authnShellHtml.includes('/theme/core.min.css')
+      && authnShellHtml.includes('/theme/mereka-brand.min.css');
+    if (runtimeThemeFromHtml) {
+      for (const cssPath of ['/theme/core.min.css', '/theme/mereka-brand.min.css']) {
+        const cssResponse = await page.request.get(`${mfeBaseUrl}${cssPath}`);
+        expect(cssResponse.status()).toBeGreaterThanOrEqual(200);
+        expect(cssResponse.status()).toBeLessThan(400);
+        expect((cssResponse.headers()['content-type'] || '').toLowerCase()).toContain('text/css');
+      }
+      return 'runtime-theme-urls';
+    }
+
+    const embeddedThemeFromHtml = /paragon-theme-core\.[a-z0-9]+\.css/i.test(authnShellHtml)
+      && /brand-theme-core\.[a-z0-9]+\.css/i.test(authnShellHtml);
+    if (embeddedThemeFromHtml) {
+      return 'embedded-theme-files';
+    }
+  }
+
+  // Fallback for older shells where authn markers are absent.
   const mfeConfigResponse = await page.request.get(`${mfeBaseUrl}/api/mfe_config/v1`);
   expect(mfeConfigResponse.status()).toBeGreaterThanOrEqual(200);
   expect(mfeConfigResponse.status()).toBeLessThan(500);
