@@ -40,8 +40,10 @@ on:
         required: false
 
 concurrency:
-  group: build-tutor-images-${{ github.ref }}
-  cancel-in-progress: true
+  # Keep push runs preemptive, but do not let manual workflow_dispatch runs
+  # cancel each other (or get canceled by a push run) on long image builds.
+  group: build-tutor-images-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 permissions: {}
 
