@@ -100,6 +100,27 @@ AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh pr
 - `verify-migration-lock.sh`: `PASS=9`, `FAIL=0`
 - `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
 
+## Addendum — Cross-Browser Re-Run After Slot Source Alignment
+
+### Command Run
+
+```bash
+./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
+```
+
+### Runtime Results
+
+- Total: `9 passed`, `0 failed` in `2.8m`
+- Projects passed:
+  - `chromium` (authn-login, learner-dashboard, account-settings)
+  - `firefox` (authn-login, learner-dashboard, account-settings)
+  - `mobile-chrome` (authn-login, learner-dashboard, account-settings)
+- WebKit/mobile-Safari:
+  - Auto-disabled by launcher probe because host dependencies are not installed on this runner.
+  - This remains a host-environment prerequisite, not an app-level regression.
+- Log:
+  - `var/qa/cross-browser-branding-smoke-prod-20260228T163310Z.log`
+
 ### Policy Outcome
 
 - Legacy `.page__account-settings` wrapper selector is removed from active CSS.
