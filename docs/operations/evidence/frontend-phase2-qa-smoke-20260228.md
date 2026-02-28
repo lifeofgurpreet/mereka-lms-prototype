@@ -63,3 +63,45 @@ This evidence run captures frontend branding smoke artifacts and QA gate outputs
 
 - Cross-browser live UI verification (Chrome/Firefox/Safari + mobile viewport) remains a separate runtime/manual tranche.
 - MFE image rebuild + deployment verification remains required for production runtime confirmation.
+
+## Addendum — Slot Expansion + Selector Exception Retirement
+
+### Additional Commands Run
+
+```bash
+AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/verify-mfe-plugin-slots.sh
+./scripts/qa/verify-selector-to-slot-migration.sh
+./scripts/qa/verify-mfe-footer-slot-migration.sh
+./scripts/qa/verify-mfe-selector-hardening.sh
+./scripts/qa/verify-no-dom-overrides.sh
+./scripts/qa/verify-migration-lock.sh
+./scripts/qa/verify-css-scoping.sh
+```
+
+### Additional Artifacts
+
+- Screenshot bundle: `var/screenshots/prod/20260228T150928Z`
+- Screenshot count: `20` PNG files
+
+### Additional Results
+
+- `verify-mfe-plugin-slots.sh`: `PASS=50`, `WARN=0`, `FAIL=0`
+  - Slot registry now verifies 23 namespaced slot IDs, including:
+    - `learner_dashboard.course_card_action.v1`
+    - `catalog.catalog_card.v1`
+    - `catalog.catalog_filters.v1`
+    - `account.account_settings_field.v1`
+- `verify-selector-to-slot-migration.sh`: `PASS=32`, `FAIL=0`
+- `verify-mfe-footer-slot-migration.sh`: `PASS=42`, `FAIL=0`
+- `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
+- `verify-no-dom-overrides.sh`: `PASS=14`, `FAIL=0`
+- `verify-migration-lock.sh`: `PASS=9`, `FAIL=0`
+- `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
+
+### Policy Outcome
+
+- Legacy `.page__account-settings` wrapper selector is removed from active CSS.
+- Account styling path is now slot-owned through:
+  - `org.openedx.frontend.account.account_settings_tab.v1`
+  - `org.openedx.frontend.account.account_settings_field.v1`
