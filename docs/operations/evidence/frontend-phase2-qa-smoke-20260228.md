@@ -426,6 +426,7 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 
 - Verifier logic fix applied first:
   - Replaced `echo "$html" | grep -q` checks with here-strings (`grep -q ... <<<"$html"`) to avoid `pipefail`/SIGPIPE false negatives on large pages.
+  - Restored `--source-only` flag as an explicit alias of offline mode for doc/runbook compatibility.
 - Current live status after fix:
   - `PASS=88`, `FAIL=3`, `WARN=1`, `SKIP=0`
   - Remaining failures are all real and consistent across domains:

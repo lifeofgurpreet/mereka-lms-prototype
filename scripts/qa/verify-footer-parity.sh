@@ -12,10 +12,11 @@
 # @covers AC-FTPAR-008: Tenant footer data contract fields present in SITE_VARIANTS + LMS footer
 #
 # Usage:
-#   scripts/qa/verify-footer-parity.sh [--offline] [--online] [--live] [--lms-url URL] [--mfe-url URL]
+#   scripts/qa/verify-footer-parity.sh [--offline|--source-only] [--online] [--live] [--lms-url URL] [--mfe-url URL]
 #
 # Modes:
-#   --offline  (default) Check source files: plugin slot/runtime wiring, patch module
+#   --offline / --source-only
+#              (default) Check source files: plugin slot/runtime wiring, patch module
 #              asset sync, env.config.jsx template, LMS theme template, branding assets.
 #   --online   Live URL checks: curl LMS homepage, MFE app, verify footer links.
 #   --live     Alias for --online (checks all three production domains directly).
@@ -43,7 +44,8 @@ MFE_URL="https://${MFE_DOMAIN:-apps.academyv2.mereka.io}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --live|--online) LIVE_MODE=1; shift ;;
-    --offline)       shift ;;  # default, no-op
+    --offline|--source-only)
+                     shift ;;  # default, no-op
     --lms-url)       LMS_URL="$2"; shift 2 ;;
     --mfe-url)       MFE_URL="$2"; shift 2 ;;
     -h|--help)
