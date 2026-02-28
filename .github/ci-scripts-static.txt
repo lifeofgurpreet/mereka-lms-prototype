@@ -95,6 +95,9 @@ scripts/qa/verify-paragon-token-coverage.sh
 scripts/qa/verify-paragon-tokens.sh
 scripts/qa/verify-paragon-json-token-hierarchy.sh
 scripts/qa/verify-paragon-runtime-deferred.sh
+scripts/qa/verify-font-loading.sh
+scripts/qa/verify-css-branding-overhead.sh
+scripts/qa/verify-caddy-cache-headers.sh
 scripts/qa/verify-brand-package/verify-brand-package-structure.sh
 scripts/qa/verify-brand-package-runtime.sh --allow-missing-image
 scripts/qa/verify-token-integrity-routing.sh
@@ -128,6 +131,8 @@ scripts/qa/verify-tenant-config-handoff.sh
 scripts/qa/run-tenant-branding-qa.sh
 scripts/qa/verify-multitenant-brand-platform.sh
 scripts/qa/verify-multi-tenant-branding-ops.sh
+scripts/qa/verify-mfe-plugin-slots.sh
+scripts/qa/verify-studio-customization.sh
 scripts/qa/verify-footer-variant-matrix.sh
 scripts/qa/verify-footer-parity.sh
 scripts/qa/verify-footer-slot-only.sh
