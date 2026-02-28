@@ -191,6 +191,22 @@ assert_template_has_marker \
   "org_support_email" \
   "Welcome template footer retains support contact link"
 assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/password_reset.txt" \
+  "Support: {{ org_support_email }}" \
+  "Password reset text template retains support contact footer"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/enrollment.txt" \
+  "Support: {{ org_support_email }}" \
+  "Enrollment text template retains support contact footer"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/welcome.txt" \
+  "Support: {{ org_support_email }}" \
+  "Welcome text template retains support contact footer"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/account_activation.txt" \
+  "Support: {{ org_support_email }}" \
+  "Account activation text template retains support contact footer"
+assert_template_has_marker \
   "$EMAIL_TEMPLATE_ROOT/account_activation.html" \
   "linear-gradient(120deg" \
   "Account activation template has branded gradient header shell"

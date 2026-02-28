@@ -8,3 +8,4 @@ Please visit this link to activate your account:
 
 ---
 {{ org_display_name }}
+{% if org_support_email %}Support: {{ org_support_email }}{% endif %}
