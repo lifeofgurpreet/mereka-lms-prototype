@@ -413,3 +413,25 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
   - Validates legal/support URLs from plugin runtime definitions (not patch script literals).
 - Remaining warning is expected backlog:
   - enterprise MFE env config not yet wired to `MerekaFooter` (tracked as non-blocking warning).
+
+## Addendum — Footer Live Verification (Runtime Drift)
+
+### Command Run
+
+```bash
+./scripts/qa/verify-footer-parity.sh --live
+```
+
+### Result
+
+- Verifier logic fix applied first:
+  - Replaced `echo "$html" | grep -q` checks with here-strings (`grep -q ... <<<"$html"`) to avoid `pipefail`/SIGPIPE false negatives on large pages.
+- Current live status after fix:
+  - `PASS=88`, `FAIL=3`, `WARN=1`, `SKIP=0`
+  - Remaining failures are all real and consistent across domains:
+    - `academyv2.mereka.io`: contains `Powered by Open edX`
+    - `academy.biji-biji.com`: contains `Powered by Open edX`
+    - `skillourfuture.academy.mereka.io`: contains `Powered by Open edX`
+- Interpretation:
+  - Source footer template is clean (no non-comment powered-by string), but runtime HTML still renders it.
+  - This is a deployment/runtime parity gap (stale image or stale rendered theme), not a source-verifier bug.

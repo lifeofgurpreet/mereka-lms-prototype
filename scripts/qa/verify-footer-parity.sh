@@ -333,21 +333,21 @@ else
     fi
 
     # brand field
-    if echo "$DOMAIN_BLOCK" | grep -q "brand: '"; then
+    if grep -q "brand: '" <<<"$DOMAIN_BLOCK"; then
       pass "Domain '${domain}' has non-empty brand"
     else
       fail "Domain '${domain}' missing or empty brand"
     fi
 
     # copyrightHolder field
-    if echo "$DOMAIN_BLOCK" | grep -q "copyrightHolder: '"; then
+    if grep -q "copyrightHolder: '" <<<"$DOMAIN_BLOCK"; then
       pass "Domain '${domain}' has non-empty copyrightHolder"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder"
     fi
 
     # whatsapp field
-    if echo "$DOMAIN_BLOCK" | grep -q "whatsapp: '"; then
+    if grep -q "whatsapp: '" <<<"$DOMAIN_BLOCK"; then
       pass "Domain '${domain}' has non-empty whatsapp"
     else
       fail "Domain '${domain}' missing or empty whatsapp"
@@ -355,7 +355,7 @@ else
   done
 
   # Confirm no null/undefined values in the MEREKA_SITE_VARIANTS block
-  if echo "$VARIANTS_BLOCK" | grep -qE ": null|: undefined"; then
+  if grep -qE ": null|: undefined" <<<"$VARIANTS_BLOCK"; then
     fail "MEREKA_SITE_VARIANTS contains null or undefined values"
   else
     pass "No null/undefined values in MEREKA_SITE_VARIANTS"
@@ -429,7 +429,7 @@ if [[ -f "$PLUGIN" ]]; then
     warn "Could not determine MerekaFooter boundaries for 'powered by' check"
   else
     FOOTER_BODY=$(awk -v s="$FOOTER_START" -v e="$FOOTER_END" 'NR>=s && NR<=e' "$PLUGIN")
-    if echo "$FOOTER_BODY" | grep -qi "powered by open edx"; then
+    if grep -qi "powered by open edx" <<<"$FOOTER_BODY"; then
       fail "MFE MerekaFooter body contains unbranded 'Powered by Open edX'"
     else
       pass "MFE MerekaFooter body has no 'Powered by Open edX'"
@@ -448,7 +448,7 @@ if [[ -f "$LMS_FOOTER" ]]; then
     POWERED_BY_LINE_NUMBER=$(grep -n -i "powered by" "$LMS_FOOTER" | head -1 | cut -d: -f1)
     # Look ±3 lines around the "powered by" line for Mereka co-branding
     CONTEXT=$(awk -v n="$POWERED_BY_LINE_NUMBER" 'NR>=n-3 && NR<=n+3' "$LMS_FOOTER")
-    if echo "$CONTEXT" | grep -qi "mereka\|biji-biji\|platform_name\|get_platform_name"; then
+    if grep -qi "mereka\|biji-biji\|platform_name\|get_platform_name" <<<"$CONTEXT"; then
       warn "LMS Mako footer has 'Powered by Open edX' — Mereka name appears nearby (partial co-branding). Recommend removing per FOOTER_PARITY_AUDIT.md"
     else
       fail "LMS Mako footer has standalone 'Powered by Open edX' with no Mereka co-branding — see FOOTER_PARITY_AUDIT.md recommendation #2"
@@ -481,7 +481,7 @@ if [[ -f "$CMS_FOOTER" ]]; then
   if grep -qi "powered by open edx" "$CMS_FOOTER"; then
     POWERED_LINE=$(grep -n -i "powered by" "$CMS_FOOTER" | head -1 | cut -d: -f1)
     CONTEXT=$(awk -v n="$POWERED_LINE" 'NR>=n-3 && NR<=n+3' "$CMS_FOOTER")
-    if echo "$CONTEXT" | grep -qi "mereka\|biji-biji\|platform_name\|get_platform_name"; then
+    if grep -qi "mereka\|biji-biji\|platform_name\|get_platform_name" <<<"$CONTEXT"; then
       warn "CMS footer (cms/templates/footer.html) has 'Powered by Open edX' with co-branding"
     else
       fail "CMS footer (cms/templates/footer.html) has standalone 'Powered by Open edX'"
@@ -573,7 +573,7 @@ if [[ -f "$PLUGIN" ]]; then
       continue
     fi
     for field in "${CONTRACT_FIELDS[@]}"; do
-      if echo "$DOMAIN_BLOCK" | grep -q "${field}:"; then
+      if grep -q "${field}:" <<<"$DOMAIN_BLOCK"; then
         pass "Domain '${domain}' has contract field '${field}'"
       else
         fail "Domain '${domain}' missing contract field '${field}'"
@@ -588,7 +588,7 @@ if [[ -f "$PLUGIN" ]]; then
       | head -20
   )"
   for field in "${CONTRACT_FIELDS[@]}"; do
-    if echo "$FALLBACK_BLOCK" | grep -q "${field}:"; then
+    if grep -q "${field}:" <<<"$FALLBACK_BLOCK"; then
       pass "Fallback variant has contract field '${field}'"
     else
       fail "Fallback variant missing contract field '${field}'"
@@ -642,21 +642,21 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
     fi
 
     # mereka-footer class must be present
-    if echo "$HTML" | grep -q "mereka-footer"; then
+    if grep -q "mereka-footer" <<<"$HTML"; then
       pass "${domain}: mereka-footer class present"
     else
       fail "${domain}: mereka-footer class NOT present (may be deployment gap — image rebuild required)"
     fi
 
     # No unbranded "Powered by Open edX"
-    if echo "$HTML" | grep -qi "powered by open edx"; then
+    if grep -qi "powered by open edx" <<<"$HTML"; then
       fail "${domain}: contains 'Powered by Open edX'"
     else
       pass "${domain}: no unbranded 'Powered by Open edX'"
     fi
 
     # Copyright line present
-    if echo "$HTML" | grep -qE "©|&copy;|copyright|MEREKA|Biji-Biji"; then
+    if grep -qE "©|&copy;|copyright|MEREKA|Biji-Biji" <<<"$HTML"; then
       pass "${domain}: copyright/brand line present"
     else
       fail "${domain}: copyright/brand line NOT present"
@@ -668,7 +668,7 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
   LMS_HTML=$(curl -sf --max-time 15 "https://academyv2.mereka.io" 2>/dev/null || true)
   if [[ -n "$LMS_HTML" ]]; then
     for section in "Future of Work" "Creative Tech" "Explore" "Support" "Partners"; do
-      if echo "$LMS_HTML" | grep -q "$section"; then
+      if grep -q "$section" <<<"$LMS_HTML"; then
         pass "LMS footer section '${section}' present"
       else
         fail "LMS footer section '${section}' NOT present (may be image deployment gap)"
