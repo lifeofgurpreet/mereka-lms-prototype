@@ -33,6 +33,7 @@ ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD="${ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD:-
 RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD="${RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD:-1}"
 RUN_ENTERPRISE_SSO_RUNTIME_GUARD="${RUN_ENTERPRISE_SSO_RUNTIME_GUARD:-1}"
 RUN_ENTERPRISE_SCHEMA_GUARD="${RUN_ENTERPRISE_SCHEMA_GUARD:-1}"
+RUN_ENTERPRISE_RUNTIME_APP_GUARD="${RUN_ENTERPRISE_RUNTIME_APP_GUARD:-1}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
@@ -77,6 +78,8 @@ Options:
                        Skip static enterprise readiness integrity preflight.
   --skip-enterprise-sso-runtime-guard
                        Skip enterprise SSO runtime readiness preflight.
+  --skip-enterprise-runtime-app-guard
+                       Skip enterprise runtime app wiring preflight.
   --skip-enterprise-schema-guard
                        Skip enterprise schema integrity preflight.
   --enterprise-readiness-tenant SLUG
@@ -186,6 +189,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-enterprise-sso-runtime-guard)
       RUN_ENTERPRISE_SSO_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-enterprise-runtime-app-guard)
+      RUN_ENTERPRISE_RUNTIME_APP_GUARD=0
       shift
       ;;
     --skip-enterprise-schema-guard)
@@ -610,6 +617,7 @@ echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"
 echo "Enterprise site mapping guard: $([[ "$ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise readiness integrity guard: $([[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise SSO runtime guard: $([[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise runtime app guard: $([[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise schema guard: $([[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
 
@@ -636,6 +644,13 @@ run_enterprise_release_preflights() {
     "$REPO_ROOT/scripts/tenants/repair-enterprise-schema.sh" --env prod
   else
     echo "= skipped enterprise schema guard (--skip-enterprise-schema-guard)"
+  fi
+
+  if [[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/qa/verify-enterprise-runtime-app-wiring.sh" \
+      --env prod --context "$K8S_CONTEXT" --strict
+  else
+    echo "= skipped enterprise runtime app wiring guard (--skip-enterprise-runtime-app-guard)"
   fi
 
   if [[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]]; then

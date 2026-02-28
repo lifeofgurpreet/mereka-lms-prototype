@@ -226,12 +226,17 @@ if [[ "$RUN_RUNTIME_GATES" -eq 1 ]]; then
     if [[ "$RUN_SCHEMA_GUARD" -eq 1 ]]; then
       echo "DRY-RUN: would run scripts/tenants/repair-enterprise-schema.sh --env $ENVIRONMENT"
     fi
+    echo "DRY-RUN: would run scripts/qa/verify-enterprise-runtime-app-wiring.sh --env $ENVIRONMENT --context $K8S_CONTEXT_EFFECTIVE --strict"
     echo "DRY-RUN: would run scripts/qa/verify-enterprise-sso-readiness.sh --env $ENVIRONMENT --tenant $SLUG"
     echo "DRY-RUN: would run scripts/qa/verify-multisite-config.sh $ENVIRONMENT"
   else
     if [[ "$RUN_SCHEMA_GUARD" -eq 1 ]]; then
       "$REPO_ROOT/scripts/tenants/repair-enterprise-schema.sh" --env "$ENVIRONMENT"
     fi
+    "$REPO_ROOT/scripts/qa/verify-enterprise-runtime-app-wiring.sh" \
+      --env "$ENVIRONMENT" \
+      --context "$K8S_CONTEXT_EFFECTIVE" \
+      --strict
     "$REPO_ROOT/scripts/qa/verify-enterprise-sso-readiness.sh" --env "$ENVIRONMENT" --tenant "$SLUG"
     if [[ "$ENVIRONMENT" == "prod" ]]; then
       STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 \

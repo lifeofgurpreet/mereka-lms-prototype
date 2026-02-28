@@ -51,6 +51,7 @@ RUNBOOK_TENANT="docs/runbooks/tenant-provisioning-runbook.md"
 RUNBOOK_ENTERPRISE="docs/runbooks/enterprise-services-runbook.md"
 ONBOARD_SCRIPT="scripts/tenants/onboard-enterprise-tenant.sh"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
+RUNTIME_APP_GUARD="scripts/qa/verify-enterprise-runtime-app-wiring.sh"
 
 # 1) Port truth (AC-003 contract alignment)
 assert_contains "$SPEC_FILE" 'AC-003:.*enterprise-catalog:8160/health/' \
@@ -135,6 +136,8 @@ assert_contains "$ONBOARD_SCRIPT" 'run-verification-pipeline\.sh' \
   "onboarding workflow invokes migration verification pipeline"
 assert_contains "$ONBOARD_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
   "onboarding workflow invokes enterprise SSO readiness gate"
+assert_contains "$ONBOARD_SCRIPT" 'verify-enterprise-runtime-app-wiring\.sh' \
+  "onboarding workflow invokes enterprise runtime app wiring gate"
 assert_contains "$ONBOARD_SCRIPT" 'repair-enterprise-schema\.sh' \
   "onboarding workflow invokes enterprise schema integrity check before runtime readiness"
 assert_contains "$ONBOARD_SCRIPT" 'STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1' \
@@ -147,8 +150,12 @@ assert_contains "$ONBOARD_SCRIPT" '--skip-schema-guard' \
 # 8) Production release orchestration guard contract
 assert_contains "$RELEASE_SCRIPT" 'RUN_ENTERPRISE_SSO_RUNTIME_GUARD=' \
   "release workflow exposes enterprise SSO runtime guard toggle"
+assert_contains "$RELEASE_SCRIPT" 'RUN_ENTERPRISE_RUNTIME_APP_GUARD=' \
+  "release workflow exposes enterprise runtime app wiring guard toggle"
 assert_contains "$RELEASE_SCRIPT" '--skip-enterprise-sso-runtime-guard' \
   "release workflow supports explicit skip flag for enterprise SSO runtime guard"
+assert_contains "$RELEASE_SCRIPT" '--skip-enterprise-runtime-app-guard' \
+  "release workflow supports explicit skip flag for enterprise runtime app wiring guard"
 assert_contains "$RELEASE_SCRIPT" '--enterprise-readiness-tenant' \
   "release workflow supports tenant override for enterprise readiness"
 assert_contains "$RELEASE_SCRIPT" '--skip-enterprise-schema-guard' \
@@ -157,6 +164,20 @@ assert_contains "$RELEASE_SCRIPT" 'repair-enterprise-schema\.sh' \
   "release workflow invokes enterprise schema integrity check in production preflight"
 assert_contains "$RELEASE_SCRIPT" 'verify-enterprise-sso-readiness\.sh' \
   "release workflow invokes enterprise SSO readiness check in production preflight"
+assert_contains "$RELEASE_SCRIPT" 'verify-enterprise-runtime-app-wiring\.sh' \
+  "release workflow invokes enterprise runtime app wiring check in production preflight"
+
+# 9) Runtime app wiring guard script exists and is executable
+if [[ -f "$RUNTIME_APP_GUARD" ]]; then
+  pass "runtime app wiring guard script exists"
+  if [[ -x "$RUNTIME_APP_GUARD" ]]; then
+    pass "runtime app wiring guard script is executable"
+  else
+    fail "runtime app wiring guard script is not executable"
+  fi
+else
+  fail "runtime app wiring guard script is missing"
+fi
 
 echo
 if [[ "$failures" -eq 0 ]]; then
