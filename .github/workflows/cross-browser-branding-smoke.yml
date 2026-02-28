@@ -47,6 +47,34 @@ jobs:
 
           ./scripts/qa/verify-cross-browser-branding-smoke.sh "${args[@]}"
 
+      - name: Summarize smoke results
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LOG_FILE="$(ls -1t var/qa/cross-browser-branding-smoke-*.log 2>/dev/null | head -1 || true)"
+          {
+            echo "## Cross-Browser Branding Smoke"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Cross-browser requested: \`${{ inputs.cross_browser || 'true' }}\`"
+            if [[ -n "$LOG_FILE" ]]; then
+              echo "- Log file: \`$LOG_FILE\`"
+              if grep -q "WebKit launch probe failed" "$LOG_FILE"; then
+                echo "- WebKit status: auto-disabled (host dependencies unavailable)"
+              else
+                echo "- WebKit status: enabled"
+              fi
+              PASS_LINE="$(grep -E '[0-9]+ passed' "$LOG_FILE" | tail -1 || true)"
+              if [[ -n "$PASS_LINE" ]]; then
+                echo "- Playwright summary: \`$PASS_LINE\`"
+              fi
+            else
+              echo "- Log file: not found"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload QA logs
         if: always()
         uses: actions/upload-artifact@v4
