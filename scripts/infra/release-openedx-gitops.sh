@@ -36,6 +36,8 @@ RUN_ENTERPRISE_SCHEMA_GUARD="${RUN_ENTERPRISE_SCHEMA_GUARD:-1}"
 RUN_ENTERPRISE_RUNTIME_APP_GUARD="${RUN_ENTERPRISE_RUNTIME_APP_GUARD:-1}"
 RUN_BRANDING_RUNTIME_GUARD="${RUN_BRANDING_RUNTIME_GUARD:-1}"
 RUN_BRANDING_SURFACE_AUDIT="${RUN_BRANDING_SURFACE_AUDIT:-1}"
+RUN_MFE_ROUTE_RUNTIME_GUARD="${RUN_MFE_ROUTE_RUNTIME_GUARD:-1}"
+RUN_MFE_ROUTE_SMOKE_GUARD="${RUN_MFE_ROUTE_SMOKE_GUARD:-1}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
@@ -88,6 +90,10 @@ Options:
                        Skip post-rollout runtime branding verification guard.
   --skip-branding-surface-audit
                        Skip strict branding surface audit after runtime branding verification.
+  --skip-mfe-route-runtime-guard
+                       Skip strict runtime MFE route contract verification guard.
+  --skip-mfe-route-smoke-guard
+                       Skip runtime MFE route HTTP smoke guard.
   --enterprise-readiness-tenant SLUG
                        Tenant slug used for enterprise SSO runtime readiness preflight.
 
@@ -211,6 +217,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-branding-surface-audit)
       RUN_BRANDING_SURFACE_AUDIT=0
+      shift
+      ;;
+    --skip-mfe-route-runtime-guard)
+      RUN_MFE_ROUTE_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-mfe-route-smoke-guard)
+      RUN_MFE_ROUTE_SMOKE_GUARD=0
       shift
       ;;
     --enterprise-readiness-tenant)
@@ -673,6 +687,8 @@ echo "Enterprise runtime app guard: $([[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq
 echo "Enterprise schema guard: $([[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Branding runtime guard: $([[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Branding surface audit: $([[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]] && echo enabled || echo skipped)"
+echo "MFE route runtime guard: $([[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "MFE route smoke guard: $([[ "$RUN_MFE_ROUTE_SMOKE_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
 
 run_enterprise_release_preflights() {
@@ -736,6 +752,21 @@ run_branding_release_postflights() {
       "$REPO_ROOT/scripts/qa/audit-branding-surfaces.sh" prod --strict
   elif [[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 0 ]]; then
     echo "= skipped branding surface audit (--skip-branding-surface-audit)"
+  fi
+
+  if [[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production MFE route runtime contract verification..."
+    "$REPO_ROOT/scripts/qa/verify-mfe-route-contract.sh" \
+      --context "$K8S_CONTEXT" --namespace "$APP_NAMESPACE" --strict-runtime
+  else
+    echo "= skipped MFE route runtime guard (--skip-mfe-route-runtime-guard)"
+  fi
+
+  if [[ "$RUN_MFE_ROUTE_SMOKE_GUARD" -eq 1 ]]; then
+    echo "Running production MFE route smoke verification..."
+    "$REPO_ROOT/scripts/qa/verify-mfe-route-smoke.sh" --env prod
+  else
+    echo "= skipped MFE route smoke guard (--skip-mfe-route-smoke-guard)"
   fi
 }
 

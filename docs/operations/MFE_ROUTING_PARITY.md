@@ -182,6 +182,26 @@ Expected output:
 All MFE routing parity checks passed.
 ```
 
+### Strict runtime contract check (release guard)
+
+```bash
+./scripts/qa/verify-mfe-route-contract.sh \
+  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --namespace mereka-lms \
+  --strict-runtime
+```
+
+`--strict-runtime` fails the check when the verifier cannot read runtime Caddy state
+(for example missing MFE pod or inaccessible `/etc/caddy/Caddyfile`), avoiding false-green releases.
+
+### Runtime route smoke check (release guard)
+
+```bash
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+```
+
+This check now fails if a route returns `200` with an empty body (stale route config pattern).
+
 ### Check authoring dual-path specifically (AC-ROUTE-002)
 
 ```bash

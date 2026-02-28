@@ -12,7 +12,9 @@
 # This is MORE comprehensive than verify-mfe-route-drift.sh because it adds
 # the LMS settings layer cross-check.
 #
-# Usage: ./scripts/qa/verify-mfe-route-contract.sh
+# Usage:
+#   ./scripts/qa/verify-mfe-route-contract.sh
+#   ./scripts/qa/verify-mfe-route-contract.sh --context <k8s-context> --namespace <ns> --strict-runtime
 
 set -euo pipefail
 
@@ -26,13 +28,73 @@ PASS=0
 FAIL=0
 WARN=0
 
+K8S_CONTEXT="${K8S_CONTEXT:-}"
+K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  verify-mfe-route-contract.sh [options]
+
+Options:
+  --context NAME       Kubernetes context for runtime checks.
+  --namespace NAME     Kubernetes namespace for runtime checks (default: mereka-lms).
+  --strict-runtime     Fail when runtime checks cannot execute (missing pod/Caddyfile access).
+  --help               Show this help.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context)
+      K8S_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    --namespace)
+      K8S_NAMESPACE="${2:-}"
+      shift 2
+      ;;
+    --strict-runtime)
+      STRICT_RUNTIME=1
+      shift
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
 do_pass() { PASS=$((PASS + 1)); echo "  PASS  $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL  $1"; }
 do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
+do_runtime_gate_warn_or_fail() {
+  if [[ "$STRICT_RUNTIME" -eq 1 ]]; then
+    do_fail "$1"
+  else
+    do_warn "$1"
+  fi
+}
+
+KUBECTL_CMD=(kubectl)
+if [[ -n "$K8S_CONTEXT" ]]; then
+  KUBECTL_CMD+=(--context "$K8S_CONTEXT")
+fi
 
 echo "=== MFE Route-to-Dist Contract Verification ==="
 echo "Spec: mfe-branding-customization_spec.md"
 echo "Coverage: AC-MFERT-001, AC-MFERT-002, AC-MFERT-003"
+echo "Runtime namespace: $K8S_NAMESPACE"
+if [[ -n "$K8S_CONTEXT" ]]; then
+  echo "Runtime context: $K8S_CONTEXT"
+fi
+echo "Strict runtime mode: $([[ "$STRICT_RUNTIME" -eq 1 ]] && echo enabled || echo disabled)"
 echo ""
 
 # =============================================================================
@@ -459,16 +521,16 @@ if [[ -f "$CADDYFILE_LOCAL" ]]; then
     do_pass "8jao.6: Parsed $DIST_DIR_COUNT dist directories from Caddyfile"
 
     # Try to validate against live MFE pod
-    MFE_POD=$(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=mfe -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+    MFE_POD=$("${KUBECTL_CMD[@]}" get pods -n "$K8S_NAMESPACE" -l app.kubernetes.io/name=mfe -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 
     if [[ -z "$MFE_POD" ]]; then
-      do_warn "8jao.6: MFE pod not found — skipping live dist validation"
+      do_runtime_gate_warn_or_fail "8jao.6: MFE pod not found in namespace '$K8S_NAMESPACE' — skipping live dist validation"
     else
       for dir in $DIST_DIRS; do
-        if kubectl exec -n mereka-lms "$MFE_POD" -- test -d "/openedx/dist/$dir" 2>/dev/null; then
+        if "${KUBECTL_CMD[@]}" exec -n "$K8S_NAMESPACE" "$MFE_POD" -- test -d "/openedx/dist/$dir" 2>/dev/null; then
           do_pass "8jao.6: /openedx/dist/$dir exists in MFE pod"
         else
-          do_warn "8jao.6: /openedx/dist/$dir MISSING in MFE pod (Caddyfile expects it)"
+          do_runtime_gate_warn_or_fail "8jao.6: /openedx/dist/$dir MISSING in MFE pod (Caddyfile expects it)"
         fi
       done
 
@@ -476,7 +538,7 @@ if [[ -f "$CADDYFILE_LOCAL" ]]; then
       # repository-declared route path matchers (catches stale rollouts).
       RUNTIME_CADDY=$(mktemp)
       RUNTIME_PATHS=$(mktemp)
-      if kubectl exec -n mereka-lms "$MFE_POD" -- cat /etc/caddy/Caddyfile > "$RUNTIME_CADDY" 2>/dev/null; then
+      if "${KUBECTL_CMD[@]}" exec -n "$K8S_NAMESPACE" "$MFE_POD" -- cat /etc/caddy/Caddyfile > "$RUNTIME_CADDY" 2>/dev/null; then
         do_pass "8jao.7: Retrieved runtime /etc/caddy/Caddyfile from MFE pod"
         grep -oP '(?<=path )/[a-z0-9_-]+(?= )' "$RUNTIME_CADDY" | sort -u > "$RUNTIME_PATHS"
 
@@ -488,7 +550,7 @@ if [[ -f "$CADDYFILE_LOCAL" ]]; then
           fi
         done < "$CADDY_PATHS"
       else
-        do_warn "8jao.7: Could not read runtime /etc/caddy/Caddyfile from MFE pod"
+        do_runtime_gate_warn_or_fail "8jao.7: Could not read runtime /etc/caddy/Caddyfile from MFE pod"
       fi
     fi
   fi

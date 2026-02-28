@@ -297,10 +297,19 @@ grep -oP '\["/[a-z0-9_-]+"\]="[a-z0-9_-]+"' \
 
 **Script**: `scripts/qa/verify-mfe-route-contract.sh`
 
+**Runtime enforcement command**:
+```bash
+./scripts/qa/verify-mfe-route-contract.sh \
+  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --namespace mereka-lms \
+  --strict-runtime
+```
+
 **Runs**:
 - Pre-commit (recommended)
 - CI on every PR (enforced)
 - Nightly cron (defense-in-depth)
+- `scripts/infra/release-openedx-gitops.sh` production postflight (default enabled)
 
 **Coverage (AC-MFERT-002)**:
 - Every Caddy directory has a corresponding LMS URL setting
