@@ -54,6 +54,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] Add architecture guardrails in CI for MFE CSS boundaries (`verify-mfe-css-architecture.sh`) and reduced-motion transform safety (`verify-mfe-reduced-motion.sh`).
 - [x] Migrate SCSS token overrides to JSON design tokens (Paragon v23+) — [spec](../specs/paragon-design-tokens-migration_spec.md)
 - [x] Enable PARAGON_THEME_URLS for runtime CDN theming (default enabled; still operator-overridable via `MEREKA_PARAGON_THEME_ENABLED`).
+- [x] Enforce post-rollout runtime branding verification in `scripts/infra/release-openedx-gitops.sh` (strict `verify-public-branding` + surface audit, with explicit emergency skip flags).
 - [x] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
 - [x] Consolidate slot variant fallback contract across header/footer components (single runtime map with unknown-host fallback branch).
 - [x] Upgrade Node 18 → 24 (Ulmo default).
