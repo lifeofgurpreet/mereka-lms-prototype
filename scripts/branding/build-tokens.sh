@@ -11,6 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 OUTPUT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
+CANONICAL_TOKENS="$REPO_ROOT/assets/branding/tokens.css"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -109,7 +110,7 @@ write_core_theme "$OUTPUT_DIR/core.min.css"
 cp "$OUTPUT_DIR/core.min.css" "$OUTPUT_DIR/light.min.css"
 
 CORE_THEME="$OUTPUT_DIR/core.min.css"
-python3 - "$TOKENS_SCSS" "$OUTPUT_DIR/mereka-brand.min.css" "$CORE_THEME" <<'PY'
+python3 - "$TOKENS_SCSS" "$OUTPUT_DIR/mereka-brand.min.css" "$CORE_THEME" "$CANONICAL_TOKENS" <<'PY'
 from pathlib import Path
 import re
 import sys
@@ -117,6 +118,7 @@ import sys
 PATH_TOKENS = Path(sys.argv[1])
 PATH_BRAND = Path(sys.argv[2])
 PATH_CORE = Path(sys.argv[3]) if len(sys.argv) > 3 else None
+PATH_CANONICAL = Path(sys.argv[4]) if len(sys.argv) > 4 else None
 
 text = PATH_TOKENS.read_text(encoding="utf-8")
 
@@ -183,6 +185,21 @@ if core_text:
             continue
         seen.add(name)
         pgn_lines.append(f"  {name}: {value.strip()};")
+
+# Keep canonical brand color literals present for verification parity with tokens.css.
+color_lines = []
+if PATH_CANONICAL is not None and PATH_CANONICAL.exists():
+    canonical_text = PATH_CANONICAL.read_text(encoding="utf-8")
+    for match in re.finditer(r"(--[A-Za-z0-9_-]+):\s*(#[0-9A-Fa-f]{6})\s*;", canonical_text):
+        name, value = match.group(1), match.group(2)
+        token_name = name.replace("--", "--brand-")
+        if token_name in seen:
+            continue
+        seen.add(token_name)
+        color_lines.append(f"  {token_name}: {value};")
+
+if color_lines:
+    pgn_lines.extend(color_lines)
 
 if not pgn_lines:
     raise SystemExit("No --pgn-* properties found in _tokens.scss")
