@@ -9,6 +9,8 @@ mkdir -p "$ARTIFACT_DIR"
 ENVIRONMENT="prod"
 CROSS_BROWSER=0
 WEBKIT_ENABLED=1
+LEARNING_PATH=""
+REQUIRE_RUNTIME_THEME=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -20,9 +22,21 @@ while [[ $# -gt 0 ]]; do
       CROSS_BROWSER=1
       shift
       ;;
+    --learning-path)
+      if [[ $# -lt 2 ]]; then
+        echo "--learning-path requires a value" >&2
+        exit 2
+      fi
+      LEARNING_PATH="${2:-}"
+      shift 2
+      ;;
+    --require-runtime-theme)
+      REQUIRE_RUNTIME_THEME=1
+      shift
+      ;;
     *)
       echo "Unknown arg: $1" >&2
-      echo "Usage: $0 [--env prod|dev] [--cross-browser]" >&2
+      echo "Usage: $0 [--env prod|dev] [--cross-browser] [--learning-path /learning/... ] [--require-runtime-theme]" >&2
       exit 2
       ;;
   esac
@@ -87,6 +101,8 @@ echo "Running branding smoke tests (env=$ENVIRONMENT, cross_browser=$CROSS_BROWS
 set -o pipefail
 PW_CROSS_BROWSER="$CROSS_BROWSER" \
 PW_ENABLE_WEBKIT="$WEBKIT_ENABLED" \
+BRANDING_LEARNING_PATH="$LEARNING_PATH" \
+REQUIRE_RUNTIME_THEME_URLS="$REQUIRE_RUNTIME_THEME" \
 BASE_URL="$BASE_URL" \
 npx playwright test tests/branding-smoke.spec.ts --reporter=list | tee "$artifact"
 
