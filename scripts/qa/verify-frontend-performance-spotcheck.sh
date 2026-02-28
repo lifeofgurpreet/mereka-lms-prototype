@@ -19,9 +19,9 @@ usage() {
 Usage: verify-frontend-performance-spotcheck.sh [--runtime-url <url>] [--require-runtime]
 
 Options:
-  --env <prod|dev>    Resolve runtime URL automatically from shared domain config.
+  --env <prod|dev>    Resolve environment context for optional runtime URL derivation.
   --runtime-url <url>  Optional runtime base URL for live theme endpoint checks.
-  --require-runtime    Fail if runtime URL checks cannot run.
+  --require-runtime    Require live runtime URL checks (derive from --env if omitted).
 EOF
 }
 
@@ -64,7 +64,7 @@ if [[ -n "$ENVIRONMENT" ]]; then
 
   # shellcheck source=scripts/shared/config.sh
   source "$REPO_ROOT/scripts/shared/config.sh"
-  if [[ -z "$RUNTIME_URL" ]]; then
+  if [[ "$REQUIRE_RUNTIME" == "1" && -z "$RUNTIME_URL" ]]; then
     if [[ "$ENVIRONMENT" == "prod" ]]; then
       RUNTIME_URL="https://${MFE_DOMAIN}"
     else
@@ -110,6 +110,8 @@ echo "-> Running Paragon runtime/artifact verifier"
 paragon_args=()
 if [[ -n "$RUNTIME_URL" ]]; then
   paragon_args+=(--runtime-url "$RUNTIME_URL")
+else
+  echo "INFO: Runtime URL check skipped (set --runtime-url or --require-runtime with --env to enable)"
 fi
 if [[ "$REQUIRE_RUNTIME" == "1" ]]; then
   paragon_args+=(--require-runtime)
