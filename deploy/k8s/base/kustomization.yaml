@@ -22,10 +22,10 @@ resources:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: mereka-brand-hotfix-full-v3
+    newTag: mereka-brand
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: b732a7d-20260210161437
+    newTag: 1c66529-20260220023917
 
 # namespace to deploy all Resources to
 namespace: mereka-lms

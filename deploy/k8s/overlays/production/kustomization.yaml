@@ -23,7 +23,7 @@ patches:
 images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
-    newTag: mereka-brand-hotfix-full-v3
+    newTag: mereka-brand
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: 1c66529-20260220023917
