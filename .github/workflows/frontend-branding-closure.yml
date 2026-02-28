@@ -36,6 +36,11 @@ on:
         required: true
         default: true
         type: boolean
+      run_selector_hardening_gate:
+        description: "Run MFE selector hardening regression gate"
+        required: true
+        default: true
+        type: boolean
       learning_path:
         description: "Optional learning route path for smoke checks"
         required: false
@@ -66,6 +71,7 @@ jobs:
           RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
           RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
           RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
+          RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
 
           args=(--env "$TARGET_ENV" --frontend-only)
@@ -83,6 +89,7 @@ jobs:
           RUN_PERFORMANCE=$([[ "$RUN_PERF" == "true" ]] && echo 1 || echo 0) \
           RUN_PARAGON_THEME_BUDGET=$([[ "$RUN_PARAGON_BUDGET" == "true" ]] && echo 1 || echo 0) \
           RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
+          RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
           LEARNING_PATH="$LEARNING_PATH" \
           ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
 
@@ -101,6 +108,7 @@ jobs:
             echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
             echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
             echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
+            echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
             if [[ -n "$LATEST" ]]; then
               echo "- Evidence directory: \`$LATEST\`"
