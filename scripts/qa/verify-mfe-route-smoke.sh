@@ -70,10 +70,14 @@ echo -e "${CYAN}--- AC-MFE-001: Caddyfile Route Mapping ---${NC}"
 declare -a EXPECTED_ROUTES=(
   "authn"
   "account"
+  "authoring"
   "course-authoring"
   "discussions"
+  "learner-dashboard"
+  "learner-record"
   "learning"
   "profile"
+  "u"
   "gradebook"
   "communications"
   "ora-grading"
@@ -101,10 +105,14 @@ declare -A SMOKE_PATHS=(
   ["/authn/login"]="200"
   ["/authn/register"]="200"
   ["/account/"]="200"
+  ["/authoring/"]="200"
   ["/course-authoring/"]="200"
+  ["/learner-dashboard/"]="200"
+  ["/learner-record/"]="200"
   ["/learning/"]="200"
   ["/discussions/"]="200"
   ["/profile/"]="200"
+  ["/u/test-user"]="200"
 )
 
 for path in "${!SMOKE_PATHS[@]}"; do
@@ -128,7 +136,8 @@ echo ""
 # ─── AC-MFE-003: Lightweight a11y checks ───────────────────────────────────
 echo -e "${CYAN}--- AC-MFE-003: Lightweight A11y Checks ---${NC}"
 
-# Artifact files created by the smoke step above
+# Artifact files created by the smoke step above.
+# Keep this list to pages that consistently return stable HTML shells with non-empty titles.
 declare -a A11Y_ROUTES=("authn-login" "account" "learning")
 
 for route_file in "${A11Y_ROUTES[@]}"; do

@@ -7,7 +7,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 RENDERED_ENV="${RENDERED_ENV:-$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx}"
-EXPECTED_SLOT_IDS="${EXPECTED_SLOT_IDS:-org.openedx.frontend.layout.footer.v1}"
+EXPECTED_SLOT_IDS="${EXPECTED_SLOT_IDS:-org.openedx.frontend.layout.header_logo.v1,org.openedx.frontend.layout.footer.v1,org.openedx.frontend.layout.studio_footer.v1,org.openedx.frontend.authn.login_component.v1,org.openedx.frontend.learner_dashboard.widget_sidebar.v1,org.openedx.frontend.learner_dashboard.no_courses_view.v1,org.openedx.frontend.learning.course_outline_sidebar.v1,org.openedx.frontend.learning.progress_certificate_status.v1,org.openedx.frontend.account.additional_profile_fields.v1,org.openedx.frontend.profile.additional_profile_fields.v1,org.openedx.frontend.layout.header_desktop_main_menu.v1,org.openedx.frontend.layout.header_mobile_main_menu.v1}"
+STRICT_RENDERED_SLOTS="${STRICT_RENDERED_SLOTS:-0}"
 
 PASS=0
 FAIL=0
@@ -34,7 +35,8 @@ fi
 source_slot_count="$(python3 - "$PLUGIN_FILE" <<'PY'
 import re, sys
 text = open(sys.argv[1], encoding="utf-8").read()
-slots = set(re.findall(r"org\.openedx\.frontend\.layout\.[A-Za-z0-9_.-]+", text))
+# Canonical FPF slot id shape: org.openedx.frontend.<path>.vN
+slots = set(re.findall(r"org\.openedx\.frontend\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+\.v[0-9]+", text))
 print(len(slots))
 PY
 )"
@@ -57,15 +59,26 @@ done
 
 if [[ -f "$RENDERED_ENV" ]]; then
   pass "Rendered env config exists: ${RENDERED_ENV#$REPO_ROOT/}"
+  rendered_missing=0
   for slot in "${expected[@]}"; do
     slot="$(echo "$slot" | xargs)"
     [[ -z "$slot" ]] && continue
     if rg -qF "$slot" "$RENDERED_ENV"; then
       pass "Expected slot present in rendered env config: $slot"
     else
-      warn "Expected slot not found in rendered env config (may require tutor config/image rebuild): $slot"
+      rendered_missing=$((rendered_missing + 1))
+      if [[ "$STRICT_RENDERED_SLOTS" == "1" ]]; then
+        warn "Expected slot not found in rendered env config: $slot"
+      fi
     fi
   done
+  if [[ "$rendered_missing" -gt 0 ]]; then
+    if [[ "$STRICT_RENDERED_SLOTS" == "1" ]]; then
+      warn "Rendered env config is missing $rendered_missing expected slot ID(s)"
+    else
+      warn "Rendered env config missing $rendered_missing expected slot ID(s); run tutor config save + apply-patches + mfe rebuild to refresh runtime output"
+    fi
+  fi
 else
   warn "Rendered env config missing (skipping runtime slot check): ${RENDERED_ENV#$REPO_ROOT/}"
 fi
@@ -73,4 +86,3 @@ fi
 echo ""
 echo "=== Summary: PASS=$PASS WARN=$WARN FAIL=$FAIL ==="
 [[ "$FAIL" -eq 0 ]]
-

@@ -122,7 +122,7 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 | Footer (MFE) | `org.openedx.frontend.layout.footer.v1` slot | `footer-slot` plugin only | Implemented in `mereka_lms.py` |
 | Header logo (MFE) | `org.openedx.frontend.layout.header_logo.v1` slot | `header-logo-slot` | Implemented in `mereka_lms.py` |
 | Logo paths | LMS/MFE theme asset + CSS overrides in shell / `mereka.scss` | `logo-slot` (MFE), theme asset fallback (LMS) | Planned for LMS shell; plugin is in MFE shell |
-| Auth page layout | Dead selectors removed; `login_component.v1` slot available | Authn MFE plugin slot injection | Slot available but not yet wired — Phase D candidate |
+| Auth page layout | Dead selectors removed; `login_component.v1` slot active | Authn MFE plugin slot injection | Implemented in `mereka_lms.py` via `MerekaAuthnLoginBranding` |
 
 ---
 
