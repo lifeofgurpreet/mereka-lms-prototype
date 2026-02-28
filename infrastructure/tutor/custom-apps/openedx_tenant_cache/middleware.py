@@ -24,7 +24,12 @@ class TenantCacheMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         """Resolve tenant UUID from request and attach to request object."""
+        # Backward-compatible private attributes.
         request._tenant_uuid = None
+        request._tenant_slug = None
+        # Public aliases used by newer middleware and helpers.
+        request.tenant_uuid = None
+        request.tenant_slug = None
         request._tenant_start_time = time.monotonic()
 
         try:
@@ -34,8 +39,11 @@ class TenantCacheMiddleware(MiddlewareMixin):
             from .models import TenantSiteMapping
             mapping = TenantSiteMapping.get_by_site(current_site)
             if mapping:
-                request._tenant_uuid = str(mapping.enterprise_customer_uuid)
+                tenant_uuid = str(mapping.enterprise_customer_uuid)
+                request._tenant_uuid = tenant_uuid
+                request.tenant_uuid = tenant_uuid
                 request._tenant_slug = mapping.slug
+                request.tenant_slug = mapping.slug
         except Exception:
             pass  # Non-tenant request; proceed without tenant context
 

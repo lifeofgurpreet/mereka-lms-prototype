@@ -22,8 +22,12 @@ class TenantResolutionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Public tenant context used by newer code paths.
         request.tenant_uuid = None
         request.tenant_slug = None
+        # Backward-compatible aliases used by existing tenant-cache helpers.
+        request._tenant_uuid = None
+        request._tenant_slug = None
 
         host = request.get_host().split(":")[0]
 
@@ -47,7 +51,9 @@ class TenantResolutionMiddleware:
                         "ENTERPRISE_CUSTOMER_UUID"
                     )
                     if enterprise_uuid:
-                        request.tenant_uuid = enterprise_uuid
+                        tenant_uuid = str(enterprise_uuid)
+                        request.tenant_uuid = tenant_uuid
+                        request._tenant_uuid = tenant_uuid
                         # Attempt to resolve slug from TenantConfig.
                         try:
                             from mereka_tenancy.models import TenantConfig
@@ -58,6 +64,7 @@ class TenantResolutionMiddleware:
                             ).first()
                             if tc:
                                 request.tenant_slug = tc.slug
+                                request._tenant_slug = tc.slug
                         except Exception:
                             logger.debug(
                                 "TenantConfig lookup failed for uuid=%s",
@@ -69,7 +76,8 @@ class TenantResolutionMiddleware:
 
         response = self.get_response(request)
 
-        if request.tenant_uuid:
-            response["X-Tenant-ID"] = str(request.tenant_uuid)
+        tenant_uuid = request.tenant_uuid or request._tenant_uuid
+        if tenant_uuid:
+            response["X-Tenant-ID"] = str(tenant_uuid)
 
         return response

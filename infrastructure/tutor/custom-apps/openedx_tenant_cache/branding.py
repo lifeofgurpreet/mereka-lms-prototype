@@ -114,13 +114,13 @@ def inject_mfe_branding(request, mfe_config_dict):
     on top of default platform MFE configuration.
 
     Args:
-        request: Django HttpRequest (with _tenant_uuid from middleware)
+        request: Django HttpRequest (with tenant_uuid/_tenant_uuid from middleware)
         mfe_config_dict: Base MFE config dict to augment
 
     Returns:
         Modified mfe_config_dict with tenant branding overlay
     """
-    tenant_uuid = getattr(request, '_tenant_uuid', None)
+    tenant_uuid = getattr(request, 'tenant_uuid', None) or getattr(request, '_tenant_uuid', None)
     if not tenant_uuid:
         return mfe_config_dict
 

@@ -23,10 +23,13 @@ def get_request_tenant_uuid(request):
     """
     Get the tenant UUID for the current request.
 
-    Returns the enterprise_customer_uuid attached by TenantCacheMiddleware,
+    Returns the enterprise_customer_uuid attached by tenant middleware,
     or None for non-tenant requests.
     """
-    return getattr(request, '_tenant_uuid', None)
+    return (
+        getattr(request, 'tenant_uuid', None)
+        or getattr(request, '_tenant_uuid', None)
+    )
 
 
 def get_user_tenant_uuid(user):
@@ -132,7 +135,7 @@ class TenantIsolationMixin:
         """
         Override to extract the target tenant UUID from the request.
 
-        Default: uses _tenant_uuid from middleware.
+        Default: uses tenant UUID from middleware.
         """
         return get_request_tenant_uuid(request)
 
