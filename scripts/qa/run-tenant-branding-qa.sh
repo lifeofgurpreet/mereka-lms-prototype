@@ -116,6 +116,27 @@ run_suite() {
     fi
   fi
 
+  # Fallback: count bracket-style result lines ([PASS]/[FAIL]/[WARN]).
+  if [[ "$pass" == "-" ]]; then
+    local bracket_pass bracket_fail bracket_warn
+    bracket_pass=$(echo "$clean_output" | grep -c '\[PASS\]' || true)
+    bracket_fail=$(echo "$clean_output" | grep -c '\[FAIL\]' || true)
+    bracket_warn=$(echo "$clean_output" | grep -c '\[WARN\]' || true)
+    if [[ "$bracket_pass" -gt 0 || "$bracket_fail" -gt 0 || "$bracket_warn" -gt 0 ]]; then
+      pass="$bracket_pass"
+      fail="$bracket_fail"
+      warn="$bracket_warn"
+    fi
+  fi
+
+  # Normalize missing warn/fail fields when a pass count was parsed.
+  if [[ "$pass" != "-" && "$fail" == "-" ]]; then
+    fail="0"
+  fi
+  if [[ "$pass" != "-" && "$warn" == "-" ]]; then
+    warn="0"
+  fi
+
   SUITE_NAMES+=("$label")
   SUITE_EXITS+=("$exit_code")
   SUITE_PASS+=("$pass")
