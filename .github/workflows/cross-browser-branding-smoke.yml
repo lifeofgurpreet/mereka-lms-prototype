@@ -16,6 +16,16 @@ on:
         required: true
         default: true
         type: boolean
+      learning_path:
+        description: "Optional learning route path to include in smoke checks (e.g. /learning)"
+        required: false
+        default: "/learning"
+        type: string
+      require_runtime_theme:
+        description: "Require PARAGON_THEME_URLS runtime mode (/theme/*.min.css) instead of embedded fallback mode"
+        required: true
+        default: false
+        type: boolean
   schedule:
     - cron: "0 3 * * *"
 
@@ -39,10 +49,18 @@ jobs:
 
           TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
           CROSS_BROWSER="${{ inputs.cross_browser || 'true' }}"
+          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
 
           args=(--env "$TARGET_ENV")
           if [[ "$CROSS_BROWSER" == "true" ]]; then
             args+=(--cross-browser)
+          fi
+          if [[ -n "$LEARNING_PATH" ]]; then
+            args+=(--learning-path "$LEARNING_PATH")
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
           fi
 
           ./scripts/qa/verify-cross-browser-branding-smoke.sh "${args[@]}"
@@ -59,6 +77,8 @@ jobs:
             echo
             echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
             echo "- Cross-browser requested: \`${{ inputs.cross_browser || 'true' }}\`"
+            echo "- Learning route: \`${{ inputs.learning_path || '/learning' }}\`"
+            echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
             if [[ -n "$LOG_FILE" ]]; then
               echo "- Log file: \`$LOG_FILE\`"
               if grep -q "WebKit launch probe failed" "$LOG_FILE"; then
