@@ -5,6 +5,16 @@
 **Covers**: `AC-UISEL-001`, `AC-UISEL-002`
 **Related**: [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md), [MFE_FIRST_POLICY.md](./MFE_FIRST_POLICY.md)
 
+> **2026-02-28 status note**: This document captures the pre-Phase C/T102 policy baseline and includes historical examples.
+> Current production selector contracts are enforced by:
+> - `scripts/qa/verify-mfe-selector-hardening.sh`
+> - `scripts/qa/verify-selector-to-slot-migration.sh`
+> - `scripts/qa/verify-no-dom-overrides.sh`
+>
+> For current truth, prefer:
+> - [MFE_SELECTOR_OVERRIDE_INVENTORY.md](./MFE_SELECTOR_OVERRIDE_INVENTORY.md)
+> - [FPF_PLUGIN_SLOT_REGISTRY.md](./FPF_PLUGIN_SLOT_REGISTRY.md)
+
 ---
 
 ## Problem Statement
