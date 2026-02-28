@@ -13,6 +13,7 @@ ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
 ALLOW_PARKED_SERVICES="${ALLOW_PARKED_SERVICES:-0}"
 WAIT_FOR_STEADY_SECONDS="${WAIT_FOR_STEADY_SECONDS:-120}"
 KUBE_CONTEXT=""
+ENV_NAME=""
 SKIP_RUNTIME_CHECKS=0
 TMP_KUBECONFIG=""
 
@@ -49,9 +50,10 @@ report_node_cpu_request_pressure() {
 
 usage() {
   cat <<'EOF'
-Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--skip-runtime-checks] [--allow-parked-services] [-h|--help]
+Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--env <prod|dev>] [--skip-runtime-checks] [--allow-parked-services] [-h|--help]
 
 Options:
+  --env <prod|dev>       Resolve kubectl context automatically.
   --skip-runtime-checks  Skip all kubectl-dependent runtime checks and return early.
   --allow-parked-services  Treat an all-zero enterprise replica profile as an explicit parked state (exit 0).
 EOF
@@ -67,6 +69,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --context)
       KUBE_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    --env)
+      ENV_NAME="${2:-}"
       shift 2
       ;;
     --skip-runtime-checks)
@@ -88,6 +94,17 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -n "$ENV_NAME" ]]; then
+  case "$ENV_NAME" in
+    prod) KUBE_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" ;;
+    dev) KUBE_CONTEXT="kind-dev" ;;
+    *)
+      echo "Invalid --env: $ENV_NAME (expected prod|dev)" >&2
+      exit 1
+      ;;
+  esac
+fi
 
 if [[ "$SKIP_RUNTIME_CHECKS" -eq 1 ]]; then
   echo "Skipping enterprise service deployment runtime checks (--skip-runtime-checks)"
