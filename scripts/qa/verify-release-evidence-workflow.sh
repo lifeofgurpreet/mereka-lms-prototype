@@ -71,6 +71,21 @@ if ! rg -n 'runtime_theme_url' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'run_npm_start_smoke' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing run_npm_start_smoke input"
+  violations=1
+fi
+
+if ! rg -n 'learning_path' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing learning_path input"
+  violations=1
+fi
+
+if ! rg -n 'npm_start_project' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing npm_start_project input"
+  violations=1
+fi
+
 if ! rg -n './scripts/qa/verify-paragon-runtime\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing frontend runtime theme contract step"
   violations=1
@@ -83,6 +98,11 @@ fi
 
 if ! rg -n -- '--require-runtime' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow runtime contract step missing strict-mode support (--require-runtime)"
+  violations=1
+fi
+
+if ! rg -n './scripts/qa/verify-npm-start-mfe-smoke\.sh' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing npm-start smoke lane step"
   violations=1
 fi
 
@@ -103,6 +123,21 @@ fi
 
 if ! rg -n '"runtime_theme_url": "\$\{\{ inputs\.runtime_theme_url \|\| '\'''\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing runtime_theme_url field"
+  violations=1
+fi
+
+if ! rg -n '"run_npm_start_smoke": "\$\{\{ inputs\.run_npm_start_smoke \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing run_npm_start_smoke field"
+  violations=1
+fi
+
+if ! rg -n '"learning_path": "\$\{\{ inputs\.learning_path \|\| '\''/learning'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing learning_path field"
+  violations=1
+fi
+
+if ! rg -n '"npm_start_project": "\$\{\{ inputs\.npm_start_project \|\| '\''chromium'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing npm_start_project field"
   violations=1
 fi
 
