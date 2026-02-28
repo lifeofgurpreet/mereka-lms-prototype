@@ -93,7 +93,10 @@ if [ ! -f "$BUILD_WORKFLOW" ]; then
 else
   do_pass "build-tutor-images.yml exists"
 
-  # Check Tutor version in workflow
+  # Check Tutor version pin in workflow.
+  # Supported patterns:
+  #   1) Inline pin: pip install "tutor[full]==X.Y.Z" "tutor-mfe==A.B.C"
+  #   2) Requirements file pin via setup-python-env action.
   if grep -q "pip install.*tutor\[full\]==" "$BUILD_WORKFLOW"; then
     workflow_tutor=$(grep "pip install.*tutor\[full\]==" "$BUILD_WORKFLOW" | head -1 | sed -E 's/.*tutor\[full\]==([0-9.]+).*/\1/')
     if [ "$workflow_tutor" = "$doc_tutor_version" ]; then
@@ -108,8 +111,35 @@ else
     else
       do_fail "CI MFE plugin version ($workflow_mfe_plugin) != docs ($doc_mfe_plugin_version)"
     fi
+  elif grep -q "requirements-file:" "$BUILD_WORKFLOW"; then
+    requirements_file=$(grep "requirements-file:" "$BUILD_WORKFLOW" | head -1 | sed -E "s/.*requirements-file:[[:space:]]*'?(\"?)([^'\"[:space:]]+).*/\2/")
+    requirements_path="$REPO_ROOT/$requirements_file"
+
+    if [ -f "$requirements_path" ]; then
+      do_pass "CI workflow pins via requirements file: $requirements_file"
+
+      workflow_tutor=$(grep -E '^tutor\[full\]==[0-9.]+' "$requirements_path" | head -1 | sed -E 's/^tutor\[full\]==([0-9.]+).*/\1/')
+      if [ -n "$workflow_tutor" ] && [ "$workflow_tutor" = "$doc_tutor_version" ]; then
+        do_pass "CI Tutor version matches docs: $workflow_tutor"
+      elif [ -n "$workflow_tutor" ]; then
+        do_fail "CI Tutor version ($workflow_tutor) != docs ($doc_tutor_version)"
+      else
+        do_fail "CI requirements file missing tutor[full] pin: $requirements_file"
+      fi
+
+      workflow_mfe_plugin=$(grep -E '^tutor-mfe==[0-9.]+' "$requirements_path" | head -1 | sed -E 's/^tutor-mfe==([0-9.]+).*/\1/')
+      if [ -n "$workflow_mfe_plugin" ] && [ "$workflow_mfe_plugin" = "$doc_mfe_plugin_version" ]; then
+        do_pass "CI MFE plugin version matches docs: $workflow_mfe_plugin"
+      elif [ -n "$workflow_mfe_plugin" ]; then
+        do_fail "CI MFE plugin version ($workflow_mfe_plugin) != docs ($doc_mfe_plugin_version)"
+      else
+        do_fail "CI requirements file missing tutor-mfe pin: $requirements_file"
+      fi
+    else
+      do_fail "CI workflow references missing requirements file: $requirements_file"
+    fi
   else
-    do_fail "No Tutor version pin found in build-tutor-images.yml"
+    do_fail "No Tutor version pin found in build-tutor-images.yml (inline pip or requirements-file)"
   fi
 
   # Check Python version in workflow
