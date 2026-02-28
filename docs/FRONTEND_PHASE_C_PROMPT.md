@@ -411,11 +411,40 @@ Add to `.github/ci-scripts-static.txt`.
 
 ---
 
+## CRITICAL WARNING: Dead Selectors (2026-02-28)
+
+**~60% of scoped `[class*="..."]` selectors in `mereka.scss` are DEAD** — they match no
+DOM elements in Ulmo MFEs. See `docs/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md`
+§Dead Selector Audit for the full table.
+
+**Implication for Phase C**: Do NOT spend time hardening dead selectors with `var()`.
+Task C3 should only apply to LIVE selectors (currently only `[class*="account-settings"]`
+and all `.pgn__*` component selectors are confirmed live). Dead selectors should be
+deferred to Phase D for rewrite or slot migration.
+
+---
+
+## Token Naming Gaps (2026-02-28)
+
+Our `_tokens.scss` uses short-form names that may not match Paragon v22's canonical names.
+See `docs/architecture/PARAGON_V22_TOKEN_AUDIT.md` §Token Naming Gap Analysis.
+
+Key mismatches:
+- `--pgn-color-primary` → canonical is `--pgn-color-primary-base` (we define both, so OK)
+- `--pgn-border-radius` → canonical is `--pgn-size-border-radius-base` (NOT defined — gap)
+- `--pgn-font-family-sans-serif` → canonical is `--pgn-typography-font-family-sans-serif` (NOT defined — gap)
+
+The "Defined & Ignored" tokens in the audit are genuinely ignored by Paragon. Phase C
+should focus only on the "Consumed & Defined" set (30 tokens that Paragon actually reads).
+
+---
+
 ## Phase D Preview (NOT in scope for Phase C)
 
 The following are identified but deferred to Phase D:
 
-- **FPF Plugin Slots**: Use `header_slot` and `footer_slot` to inject custom React header/footer components. This replaces the most fragile BEM overrides (header gradient, logo injection, nav styling) with a supported extension mechanism. See `specs/mfe-plugin-slots_spec.md`.
+- **Dead Selector Rewrite**: ~60% of `[class*="..."]` selectors are phantom CSS. Phase D must inspect actual DOM class names and rewrite selectors or migrate to plugin slots. See `docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md` for the 98 available FPF slots.
+- **FPF Plugin Slots**: Use `header_slot` and `footer_slot` to inject custom React header/footer components. This replaces the most fragile BEM overrides (header gradient, logo injection, nav styling) with a supported extension mechanism. See `specs/mfe-plugin-slots_spec.md`. Full slot inventory at `docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md`.
 - **style-dictionary JSON pipeline**: Replace the SCSS-to-CSS extraction in `build-tokens.sh` with a proper JSON → CSS pipeline using `style-dictionary`. This enables multi-format output (CSS, SCSS, JSON, iOS, Android).
 - **Dark mode**: Add `variants.dark` to PARAGON_THEME_URLS. Currently out of scope (light mode only).
 - **Performance budgets in CI**: Add Lighthouse CI with LCP < 2.5s, bundle < 300KB gzipped, theme CSS < 50KB targets.

@@ -153,6 +153,61 @@ grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
 
 ---
 
+## CRITICAL: Dead Selector Audit (2026-02-28)
+
+> **Finding**: A DOM class audit of Ulmo MFEs reveals that most `[class*="..."]` scoped
+> selectors in `mereka.scss` are **PHANTOM** — they match **no actual DOM element** in
+> the running MFEs. The CSS compiles and ships, but the rules never apply.
+
+### Methodology
+
+Inspected the actual top-level wrapper class names emitted by each Ulmo MFE at runtime
+(DOM inspection of built MFE bundles). Compared against `[class*="..."]` selectors in
+`mereka.scss` lines 250-570.
+
+### Results
+
+| Selector | Target MFE | Status | Actual DOM class | Lines |
+|----------|-----------|--------|------------------|-------|
+| `[class*="authn"]` | Authn | **DEAD** | No element has "authn" in its class attribute. Authn MFE uses Paragon layout components with `pgn__` classes. | 258-314 |
+| `[class*="login-register"]` | Authn | **DEAD** | Same — no element contains "login-register" substring. | 258-314 |
+| `[class*="account-settings"]` | Account | **LIVE** | Matches `page__account-settings` wrapper div. | 324-384 |
+| `[class*="account-page"]` | Account | **DEAD** | No element contains "account-page" substring in Ulmo Account MFE. | 324-384 |
+| `[class*="learner-dashboard"]` | Learner Dashboard | **DEAD** | Dashboard MFE uses Paragon `pgn__page-container` — no "learner-dashboard" class. | 324-522 |
+| `[class*="learning"]` | Learning | **DEAD** | Learning MFE uses generic Paragon layout — no element has "learning" in class. | 429-504 |
+| `[class*="my-courses"]` | Learning | **DEAD** | Not present as a class in the DOM. | 449, 496 |
+| `[class*="discover"]` | Learning | **DEAD** | Not present as a class in the DOM. | 496-503 |
+| `[class*="course-grid"]` | Learner Dashboard / Learning | **DEAD** | Nested under dead parent scope — even if this class existed, parent match fails. | 407, 437 |
+| `[class*="course-list"]` | Learner Dashboard / Learning | **DEAD** | Same — nested under dead parent. | 407, 437 |
+| `[class*="discussions"]` | Discussions | **DEAD** | Discussions MFE uses `pgn__` layout — no "discussions" class on any element. | 545-568 |
+
+### Impact Assessment
+
+- **~60% of mereka.scss lines 250-570 are dead CSS** — they compile, ship in every MFE bundle, but apply to nothing.
+- **Only `[class*="account-settings"]`** is confirmed LIVE (matches `page__account-settings`).
+- **Estimated dead CSS weight**: ~5-8KB uncompressed per MFE build.
+- **Risk**: Zero runtime risk (dead CSS is harmless). But it creates a false sense of branding coverage — developers think these surfaces are styled when they are not.
+
+### Implications for Phase C/D
+
+1. **Do NOT spend time hardening dead selectors** — they need to be replaced, not var()-ified.
+2. **Phase D must find the ACTUAL class names** on each MFE surface and rewrite selectors accordingly, OR migrate entirely to FPF plugin slots.
+3. **Authn MFE** is the highest priority — login/register is the first page users see, and ALL authn selectors are dead.
+4. **Learner Dashboard** is second priority — course cards, grid layout, status badges are all dead.
+
+### Recommended Actions
+
+| Priority | Action | Est. |
+|----------|--------|------|
+| **P0** | Inspect live Authn MFE DOM, find actual wrapper classes, rewrite selectors | 2 hr |
+| **P0** | Inspect live Learner Dashboard DOM, find actual wrapper classes | 2 hr |
+| **P1** | Inspect Learning MFE DOM for course card/grid classes | 1 hr |
+| **P1** | Inspect Discussions MFE DOM | 30 min |
+| **P2** | Remove dead `[class*="account-page"]` selector (account-settings is sufficient) | 15 min |
+| **P3** | Consider replacing ALL scoped selectors with FPF plugin slot injection | Phase D |
+
+---
+
 ## Changelog
 
 | Date | Author | Change |
@@ -161,3 +216,4 @@ grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
 | 2026-02-25 | 2dcy.6 | T102 selector hardening audit baseline captured in `MFE_SELECTOR_AUDIT.md` (data-testid selectors removed) |
 | 2026-02-28 | codex | Realigned inventory with live T102 state and updated migration rationale |
 | 2026-02-28 | codex | Added Phase D `SAFE_TO_SLOT` / `NEEDS_KEEP` classification for header/footer/authn selectors and slot-owned surfaces |
+| 2026-02-28 | opus | **CRITICAL**: Dead selector audit — ~60% of scoped selectors are phantom CSS matching no DOM elements |

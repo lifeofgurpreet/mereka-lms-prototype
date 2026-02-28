@@ -58,6 +58,8 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 > **Architecture note (2026-02-28)**: Brand package `_variables.scss` is **dead in Ulmo** — Paragon v23+ ignores SCSS variables. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties. See [deep audit §3 CRIT-1](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-1-brand-package-scss-variables-are-dead).
 
+> **Dead selector warning (2026-02-28)**: ~60% of scoped `[class*="..."]` CSS selectors in `mereka.scss` are **phantom CSS** — they match no actual DOM element in Ulmo MFEs. See [selector inventory §Dead Selector Audit](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md#critical-dead-selector-audit-2026-02-28). The token naming gap analysis is at [token audit §Naming Gap](architecture/PARAGON_V22_TOKEN_AUDIT.md#token-naming-gap-analysis-2026-02-28). A registry of 98 FPF plugin slots is at [FPF registry](architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
+
 ## QA & Documentation
 - [ ] Cross-browser + mobile smoke tests (Chrome, Edge, Safari, Firefox, iOS, Android).
 - [ ] Accessibility scan (contrast, focus order) on key pages.

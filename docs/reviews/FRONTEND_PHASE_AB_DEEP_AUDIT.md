@@ -371,7 +371,38 @@ After all fixes, verify:
 
 ---
 
-## 11. Sources
+## 11. Follow-Up Research (2026-02-28 Phase C/D)
+
+The following research was completed as a follow-up to this audit:
+
+### Dead Selector Audit
+
+**~60% of scoped `[class*="..."]` selectors in `mereka.scss` are phantom CSS.**
+
+A DOM inspection of Ulmo MFEs revealed that most class-based wildcard selectors (lines 250-570)
+match no actual DOM element. Only `[class*="account-settings"]` is confirmed live.
+
+Full table: `docs/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md` §Dead Selector Audit.
+
+### Paragon v22 Token Naming Gaps
+
+Our `_tokens.scss` uses short-form names (e.g., `--pgn-color-primary`) while Paragon v22's
+canonical names use longer forms (e.g., `--pgn-color-primary-base`). We define both forms
+for colors, but border-radius and typography tokens are missing their canonical equivalents.
+
+Full analysis: `docs/architecture/PARAGON_V22_TOKEN_AUDIT.md` §Token Naming Gap Analysis.
+
+### FPF Plugin Slot Registry
+
+98 plugin slots are available across all Ulmo MFEs. We currently use 4 (header logo, footer,
+authn login, various brand surfaces). Key finding: the Learner Dashboard has 6 slots
+including `course_card.v1` which could replace all dead dashboard card selectors.
+
+Full inventory: `docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md`.
+
+---
+
+## 12. Sources
 
 - [OEP-48: Brand Customization](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0048-brand-customization.html)
 - [openedx/brand-openedx](https://github.com/openedx/brand-openedx) — reference implementation

@@ -146,7 +146,78 @@
   - `docs/architecture/PARAGON_V22_TOKEN_AUDIT_DEFINED_IGNORED.tsv`
   - `docs/architecture/PARAGON_V22_TOKEN_AUDIT_CONSUMED_DEFINED.tsv`
 
+## Token Naming Gap Analysis (2026-02-28)
+
+### Short-Form vs Canonical v22 Names
+
+Our `_tokens.scss` uses **short-form** token names. Paragon v22's `replace-variables.js`
+build step rewrites SCSS variables to `var(--pgn-*)` using **canonical long-form** names.
+Some of our definitions may not match what Paragon actually consumes.
+
+| Our Token (short-form) | Canonical v22 Name | Match? |
+|------------------------|--------------------|--------|
+| `--pgn-color-primary` | `--pgn-color-primary-base` | **MISMATCH** — v22 uses `-base` suffix |
+| `--pgn-color-secondary` | `--pgn-color-secondary-base` | **MISMATCH** |
+| `--pgn-color-success` | `--pgn-color-success-base` | **MISMATCH** |
+| `--pgn-color-info` | `--pgn-color-info-base` | **MISMATCH** |
+| `--pgn-color-warning` | `--pgn-color-warning-base` | **MISMATCH** |
+| `--pgn-color-danger` | `--pgn-color-danger-base` | **MISMATCH** |
+| `--pgn-border-radius` | `--pgn-size-border-radius-base` | **MISMATCH** — uses `size-` prefix |
+| `--pgn-border-radius-lg` | `--pgn-size-border-radius-lg` | **MISMATCH** |
+| `--pgn-border-radius-sm` | `--pgn-size-border-radius-sm` | **MISMATCH** |
+| `--pgn-font-family-sans-serif` | `--pgn-typography-font-family-sans-serif` | **MISMATCH** — uses `typography-` prefix |
+| `--pgn-font-size-base` | `--pgn-typography-font-size-base` | **MISMATCH** |
+| `--pgn-line-height-base` | `--pgn-typography-line-height-base` | **MISMATCH** |
+| `--pgn-color-primary-base` | `--pgn-color-primary-base` | MATCH |
+| `--pgn-color-primary-700` | `--pgn-color-primary-700` | MATCH |
+| `--pgn-btn-color` | `--pgn-btn-color` | MATCH |
+| `--pgn-btn-hover-color` | `--pgn-btn-hover-color` | MATCH |
+| `--pgn-alert-bg` | `--pgn-alert-bg` | MATCH |
+| `--pgn-link-color` | `--pgn-link-color` | MATCH |
+| `--pgn-body-bg` | `--pgn-body-bg` | MATCH |
+| `--pgn-body-color` | `--pgn-body-color` | MATCH |
+
+### Why This Matters
+
+The `replace-variables.js` build step in Paragon v22 rewrites SCSS `$variable` references
+to `var(--pgn-*)` using the canonical token map. If we define `--pgn-color-primary` but
+Paragon's compiled CSS uses `var(--pgn-color-primary-base)`, our override has **no effect**.
+
+However, our `_tokens.scss` **also defines `--pgn-color-primary-base`** (line 41), so the
+canonical name IS covered for colors. The short-form duplicates (`--pgn-color-primary`,
+`--pgn-color-secondary`, etc.) in the "Defined & Ignored" section above are indeed ignored
+by Paragon — they're dead weight.
+
+### Recommendation
+
+1. **Keep canonical `-base` suffixed tokens** — these are what Paragon reads.
+2. **Remove short-form duplicates** from `_tokens.scss` (e.g., `--pgn-color-primary` when
+   `--pgn-color-primary-base` is already defined with the same value).
+3. **Add missing canonical names** for border-radius, typography, and spacing families
+   if we want Paragon to pick up our values for those properties.
+4. **Verify with core.min.css**: The "Consumed & Defined" section above is the definitive
+   list of what Paragon actually reads from our `:root` block.
+
+### Paragon v22 Token Architecture
+
+```
+SCSS authoring → $primary, $secondary, $font-family-sans-serif
+    ↓
+replace-variables.js (build step)
+    ↓
+Compiled CSS → var(--pgn-color-primary-base), var(--pgn-typography-font-family-sans-serif)
+    ↓
+Runtime → reads from :root { --pgn-color-primary-base: ... }
+```
+
+The `replace-variables.js` step is the key — it maps old SCSS variable names to new
+CSS custom property names using a fixed lookup table. Our `:root` must define the
+OUTPUT names (right column), not the INPUT names (left column).
+
+---
+
 ## Guidance for Phase C
 - Prioritize replacing BEM overrides only where token replacement is known to take effect.
 - For `--pgn-*` tokens in `defined+ignored`, prefer explicit `--mereka-*` overrides in our own CSS.
 - Re-audit whenever `core.min.css` changes (Theme URL runtime path update).
+- **CRITICAL**: ~60% of scoped `[class*="..."]` selectors are DEAD — see `MFE_SELECTOR_OVERRIDE_INVENTORY.md` §Dead Selector Audit. Do NOT invest in hardening selectors that match nothing.
