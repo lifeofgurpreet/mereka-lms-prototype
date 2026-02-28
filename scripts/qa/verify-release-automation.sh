@@ -23,6 +23,7 @@ RELEASE_DRY_RUN_CHECKER="$REPO_ROOT/scripts/qa/verify-release-dry-run-contract.s
 RELEASE_EVIDENCE_WORKFLOW_CHECKER="$REPO_ROOT/scripts/qa/verify-release-evidence-workflow.sh"
 NPM_START_SMOKE_WORKFLOW_CHECKER="$REPO_ROOT/scripts/qa/verify-npm-start-smoke-workflow.sh"
 FRONTEND_CLOSURE_WORKFLOW_CHECKER="$REPO_ROOT/scripts/qa/verify-frontend-branding-closure-workflow.sh"
+CROSS_BROWSER_WORKFLOW_CHECKER="$REPO_ROOT/scripts/qa/verify-cross-browser-branding-workflow.sh"
 BUILD_WORKFLOW_CONTRACT="$REPO_ROOT/scripts/qa/verify-build-workflow-contract.sh"
 RELEASE_SCRIPT="$REPO_ROOT/scripts/infra/release-openedx-gitops.sh"
 BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
@@ -260,7 +261,8 @@ fi
 
 for checker_file in "${BUILD_WORKFLOW_CONTRACT}" "${RELEASE_INVOKE_CHECKER}" \
                     "${RELEASE_DRY_RUN_CHECKER}" "${RELEASE_EVIDENCE_WORKFLOW_CHECKER}" \
-                    "${NPM_START_SMOKE_WORKFLOW_CHECKER}" "${FRONTEND_CLOSURE_WORKFLOW_CHECKER}"; do
+                    "${NPM_START_SMOKE_WORKFLOW_CHECKER}" "${FRONTEND_CLOSURE_WORKFLOW_CHECKER}" \
+                    "${CROSS_BROWSER_WORKFLOW_CHECKER}"; do
   checker_name="${checker_file#"$REPO_ROOT"/}"
   if [[ -f "${checker_file}" ]]; then
     pass "${checker_name} exists"
