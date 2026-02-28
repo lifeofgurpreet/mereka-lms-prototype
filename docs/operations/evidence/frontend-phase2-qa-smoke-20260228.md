@@ -138,6 +138,21 @@ AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh pr
   - INP/FID policy
   - CLS and LCP budget constraints
 
+## Addendum — Unified Performance Spot-Check Wrapper
+
+### Command Run
+
+```bash
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+```
+
+### Result
+
+- Wrapper summary: `PASS=2`, `FAIL=0`
+- Includes:
+  - `verify-lighthouse-budgets.sh` (`PASSED=14`, `FAILED=0`)
+  - `verify-paragon-runtime.sh` (artifact/budget checks pass; runtime URL checks remain warning-only unless `--runtime-url` is supplied)
+
 ### Policy Outcome
 
 - Legacy `.page__account-settings` wrapper selector is removed from active CSS.

@@ -269,8 +269,8 @@ jobs:
         run: |
           RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod
 
-      - name: Verify Paragon theme artifact budgets
-        run: ./scripts/qa/verify-paragon-runtime.sh
+      - name: Run frontend performance spot-check
+        run: ./scripts/qa/verify-frontend-performance-spotcheck.sh
 
       - name: Run local observability audit
         run: ./scripts/qa/audit-observability.sh --mode local
