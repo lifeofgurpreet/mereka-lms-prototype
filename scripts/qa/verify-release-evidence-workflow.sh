@@ -21,8 +21,8 @@ if [[ ! -x "$REPO_ROOT/scripts/infra/resolve-image-digest.sh" ]]; then
   violations=1
 fi
 
-if ! rg -n 'uses:[[:space:]]*google-github-actions/auth@' "$WORKFLOW" >/dev/null; then
-  echo "❌ release-evidence workflow missing google-github-actions/auth step"
+if ! rg -n -e 'uses:[[:space:]]*google-github-actions/auth@' -e 'uses:[[:space:]]*\./\.github/actions/gcp-gke-auth' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing GCP auth step (google-github-actions/auth or local gcp-gke-auth action)"
   violations=1
 fi
 

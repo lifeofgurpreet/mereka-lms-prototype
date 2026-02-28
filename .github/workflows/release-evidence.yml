@@ -80,6 +80,8 @@ jobs:
             --openedx-digest "${{ steps.digests.outputs.openedx_digest }}" \
             --mfe-digest "${{ steps.digests.outputs.mfe_digest }}" \
             --require-digests \
+            --purge-frontend-cache \
+            --frontend-cache-env auto \
             | tee var/release-evidence/release-dry-run.log
 
       - name: Write release metadata
