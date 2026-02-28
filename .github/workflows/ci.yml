@@ -269,6 +269,9 @@ jobs:
         run: |
           RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod
 
+      - name: Verify certificate branding surfaces
+        run: ./scripts/qa/verify-certificate-branding.sh
+
       - name: Run frontend performance spot-check
         run: ./scripts/qa/verify-frontend-performance-spotcheck.sh
 
