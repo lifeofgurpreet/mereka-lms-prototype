@@ -33,31 +33,42 @@ else
   pass "live docs contain no legacy testmap naming"
 fi
 
-# Validate explicit Testmap references.
+# Validate testmap path references in live docs.
 mapfile -t refs < <(
   python3 - <<'PY'
 import pathlib
 import re
 
 root = pathlib.Path('docs')
-pat = re.compile(r"\*\*Testmap\*\*:\s*`([^`]+)`", re.IGNORECASE)
+explicit_pat = re.compile(r"\*\*Testmap\*\*:\s*`([^`]+)`", re.IGNORECASE)
+path_pat = re.compile(r"(specs/testmaps/[A-Za-z0-9._/-]*testmap[A-Za-z0-9._/-]*)")
 for md in sorted(root.rglob('*.md')):
     if 'archive' in md.parts:
         continue
     text = md.read_text(encoding='utf-8', errors='ignore')
-    for m in pat.finditer(text):
+    # Strictly-labeled Testmap references
+    for m in explicit_pat.finditer(text):
+        print(f"{md}:{m.group(1)}")
+    # Any direct path-like testmap references in live docs
+    for m in path_pat.finditer(text):
         print(f"{md}:{m.group(1)}")
 PY
 )
 
 if [[ "${#refs[@]}" -eq 0 ]]; then
-  fail "no explicit Testmap references found under live docs"
+  fail "no testmap path references found under live docs"
 else
-  pass "found ${#refs[@]} explicit Testmap reference(s) under live docs"
+  pass "found ${#refs[@]} testmap path reference(s) under live docs"
 fi
 
+declare -A seen_refs=()
 for ref in "${refs[@]:-}"; do
   [[ -z "$ref" ]] && continue
+  if [[ -n "${seen_refs[$ref]:-}" ]]; then
+    continue
+  fi
+  seen_refs["$ref"]=1
+
   src_file="${ref%%:*}"
   testmap_path="${ref#*:}"
 
