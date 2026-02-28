@@ -184,6 +184,8 @@ kubectl get deploy lms cms mfe -n mereka-lms \
   --env prod \
   --frontend-only \
   --cross-browser
+# To enforce Safari/WebKit availability in CI (no fallback disable):
+#   set STRICT_WEBKIT=1 (or workflow input require_webkit=true)
 
 # Single-browser smoke + screenshots lane (authn/learning/account/profile surfaces)
 ./scripts/qa/verify-npm-start-mfe-smoke.sh \

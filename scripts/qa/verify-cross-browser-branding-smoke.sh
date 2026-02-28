@@ -9,6 +9,7 @@ mkdir -p "$ARTIFACT_DIR"
 ENVIRONMENT="prod"
 CROSS_BROWSER=0
 WEBKIT_ENABLED=1
+STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
 LEARNING_PATH=""
 REQUIRE_RUNTIME_THEME=0
 
@@ -34,9 +35,13 @@ while [[ $# -gt 0 ]]; do
       REQUIRE_RUNTIME_THEME=1
       shift
       ;;
+    --strict-webkit)
+      STRICT_WEBKIT=1
+      shift
+      ;;
     *)
       echo "Unknown arg: $1" >&2
-      echo "Usage: $0 [--env prod|dev] [--cross-browser] [--learning-path /learning/... ] [--require-runtime-theme]" >&2
+      echo "Usage: $0 [--env prod|dev] [--cross-browser] [--learning-path /learning/... ] [--require-runtime-theme] [--strict-webkit]" >&2
       exit 2
       ;;
   esac
@@ -50,6 +55,11 @@ case "$ENVIRONMENT" in
     exit 2
     ;;
 esac
+
+if [[ "$STRICT_WEBKIT" -eq 1 && "$CROSS_BROWSER" -ne 1 ]]; then
+  echo "ERROR: --strict-webkit requires --cross-browser" >&2
+  exit 2
+fi
 
 if [[ ! -f "$E2E_DIR/package.json" ]]; then
   echo "tests/e2e/package.json not found" >&2
@@ -66,9 +76,14 @@ fi
 if [[ "$CROSS_BROWSER" -eq 1 ]]; then
   echo "Installing Playwright browsers: chromium firefox webkit"
   if ! npx playwright install chromium firefox webkit; then
-    echo "WARN: WebKit install failed (likely missing host deps); falling back to chromium+firefox projects"
-    WEBKIT_ENABLED=0
-    npx playwright install chromium firefox
+    if [[ "$STRICT_WEBKIT" -eq 1 ]]; then
+      echo "ERROR: WebKit install failed and strict mode is enabled"
+      exit 1
+    else
+      echo "WARN: WebKit install failed (likely missing host deps); falling back to chromium+firefox projects"
+      WEBKIT_ENABLED=0
+      npx playwright install chromium firefox
+    fi
   fi
 
   if [[ "$WEBKIT_ENABLED" -eq 1 ]]; then
@@ -84,8 +99,13 @@ const { webkit } = require('@playwright/test');
 });
 NODE
     then
-      echo "WARN: WebKit launch probe failed; disabling webkit/mobile-safari projects for this run"
-      WEBKIT_ENABLED=0
+      if [[ "$STRICT_WEBKIT" -eq 1 ]]; then
+        echo "ERROR: WebKit launch probe failed and strict mode is enabled"
+        exit 1
+      else
+        echo "WARN: WebKit launch probe failed; disabling webkit/mobile-safari projects for this run"
+        WEBKIT_ENABLED=0
+      fi
     fi
   fi
 else
@@ -97,7 +117,7 @@ fi
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 artifact="$ARTIFACT_DIR/cross-browser-branding-smoke-${ENVIRONMENT}-${timestamp}.log"
 
-echo "Running branding smoke tests (env=$ENVIRONMENT, cross_browser=$CROSS_BROWSER, webkit_enabled=$WEBKIT_ENABLED)"
+echo "Running branding smoke tests (env=$ENVIRONMENT, cross_browser=$CROSS_BROWSER, webkit_enabled=$WEBKIT_ENABLED, strict_webkit=$STRICT_WEBKIT)"
 set -o pipefail
 PW_CROSS_BROWSER="$CROSS_BROWSER" \
 PW_ENABLE_WEBKIT="$WEBKIT_ENABLED" \

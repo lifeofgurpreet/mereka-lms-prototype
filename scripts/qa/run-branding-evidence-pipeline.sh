@@ -30,6 +30,7 @@ RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
 CROSS_BROWSER="${CROSS_BROWSER:-0}"
 LEARNING_PATH="${LEARNING_PATH:-/learning}"
 REQUIRE_RUNTIME_THEME="${REQUIRE_RUNTIME_THEME:-0}"
+STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
 NPM_START_BASE_URL="${NPM_START_BASE_URL:-}"
 NPM_START_PROJECT="${NPM_START_PROJECT:-chromium}"
 NPM_START_HEADED="${NPM_START_HEADED:-0}"
@@ -70,6 +71,7 @@ Environment toggles:
                             Timeout for npm-start smoke gate (default: 900)
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
+  STRICT_WEBKIT=0|1         Require WebKit success in cross-browser gate (default: 0)
   A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
   A11Y_ARGS="<args>"        A11y script args (default: --offline)
   LEARNING_PATH=/learning   Optional learning route path for smoke checks
@@ -143,6 +145,7 @@ echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
 echo "Require runtime theme mode: $REQUIRE_RUNTIME_THEME"
+echo "Require WebKit in cross-browser gate: $STRICT_WEBKIT"
 echo "Started: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
 
@@ -239,6 +242,9 @@ if [[ "$RUN_CROSS_BROWSER" == "1" ]]; then
   fi
   if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
     cross_browser_args+=(--require-runtime-theme)
+  fi
+  if [[ "$STRICT_WEBKIT" == "1" ]]; then
+    cross_browser_args+=(--strict-webkit)
   fi
   run_gate "cross-browser-branding-smoke" \
     ./scripts/qa/verify-cross-browser-branding-smoke.sh "${cross_browser_args[@]}"
@@ -351,6 +357,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - Cross-browser matrix requested: ${CROSS_BROWSER}
 - Learning route: ${LEARNING_PATH}
 - Runtime theme strict mode: ${REQUIRE_RUNTIME_THEME}
+- WebKit strict mode: ${STRICT_WEBKIT}
 - Baseline multisite/route gates enabled: ${RUN_BASELINE_GATES}
 - A11y gate enabled: ${RUN_A11Y}
 - A11y script: ${A11Y_SCRIPT}

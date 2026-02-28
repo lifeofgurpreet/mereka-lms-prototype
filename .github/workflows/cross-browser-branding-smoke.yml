@@ -26,6 +26,11 @@ on:
         required: true
         default: false
         type: boolean
+      require_webkit:
+        description: "Fail if WebKit cannot install/launch (instead of fallback-disable)"
+        required: true
+        default: false
+        type: boolean
   schedule:
     - cron: "0 3 * * *"
 
@@ -51,6 +56,7 @@ jobs:
           CROSS_BROWSER="${{ inputs.cross_browser || 'true' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
 
           args=(--env "$TARGET_ENV")
           if [[ "$CROSS_BROWSER" == "true" ]]; then
@@ -61,6 +67,9 @@ jobs:
           fi
           if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
             args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_WEBKIT" == "true" ]]; then
+            args+=(--strict-webkit)
           fi
 
           ./scripts/qa/verify-cross-browser-branding-smoke.sh "${args[@]}"
@@ -79,6 +88,7 @@ jobs:
             echo "- Cross-browser requested: \`${{ inputs.cross_browser || 'true' }}\`"
             echo "- Learning route: \`${{ inputs.learning_path || '/learning' }}\`"
             echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
             if [[ -n "$LOG_FILE" ]]; then
               echo "- Log file: \`$LOG_FILE\`"
               if grep -q "WebKit launch probe failed" "$LOG_FILE"; then

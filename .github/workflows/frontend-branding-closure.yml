@@ -21,6 +21,11 @@ on:
         required: true
         default: false
         type: boolean
+      require_webkit:
+        description: "Fail closure run if WebKit cannot install/launch in cross-browser gate"
+        required: true
+        default: false
+        type: boolean
       run_performance_gate:
         description: "Run frontend performance spot-check gate"
         required: true
@@ -88,12 +93,14 @@ jobs:
           TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
           CROSS_BROWSER_MATRIX="${{ inputs.cross_browser_matrix || 'true' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
           RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
           RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
           RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
           RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
           RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
           RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
+          STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
           NPM_START_BASE_URL="${{ inputs.npm_start_base_url || '' }}"
           NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
@@ -115,6 +122,7 @@ jobs:
           RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
           RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
           RUN_NPM_START_SMOKE=$([[ "$RUN_NPM_START_SMOKE" == "true" ]] && echo 1 || echo 0) \
+          STRICT_WEBKIT="$STRICT_WEBKIT" \
           RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
           NPM_START_BASE_URL="$NPM_START_BASE_URL" \
           NPM_START_PROJECT="$NPM_START_PROJECT" \
@@ -133,6 +141,7 @@ jobs:
             echo "- Environment: \`${{ inputs.target_environment || 'prod' }}\`"
             echo "- Cross-browser matrix: \`${{ inputs.cross_browser_matrix || 'true' }}\`"
             echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
             echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
             echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
             echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
