@@ -395,3 +395,21 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
   - `verify-lighthouse-budgets.sh`: `PASSED=14`, `FAILED=0`
   - `verify-paragon-runtime.sh`: now `WARN=2` (down from prior `WARN=3`)
+
+## Addendum — Footer Parity Verifier Realignment
+
+### Command Run
+
+```bash
+./scripts/qa/verify-footer-parity.sh
+```
+
+### Result
+
+- Gate summary: `PASS=77`, `FAIL=0`, `WARN=1`, `SKIP=1`
+- Verifier was realigned to current architecture:
+  - Enforces plugin-slot footer path (`MEREKA_SITE_VARIANTS` + `getMerekaVariant`) instead of legacy `SITE_VARIANTS` checks.
+  - Treats `footer-component.sh` as asset-sync only (fails if legacy JSX injection is reintroduced).
+  - Validates legal/support URLs from plugin runtime definitions (not patch script literals).
+- Remaining warning is expected backlog:
+  - enterprise MFE env config not yet wired to `MerekaFooter` (tracked as non-blocking warning).

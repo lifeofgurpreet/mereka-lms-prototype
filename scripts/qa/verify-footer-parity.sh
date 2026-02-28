@@ -15,8 +15,8 @@
 #   scripts/qa/verify-footer-parity.sh [--offline] [--online] [--live] [--lms-url URL] [--mfe-url URL]
 #
 # Modes:
-#   --offline  (default) Check source files: patch module, env.config.jsx template,
-#              SCSS imports, LMS theme template, branding assets.
+#   --offline  (default) Check source files: plugin slot/runtime wiring, patch module
+#              asset sync, env.config.jsx template, LMS theme template, branding assets.
 #   --online   Live URL checks: curl LMS homepage, MFE app, verify footer links.
 #   --live     Alias for --online (checks all three production domains directly).
 
@@ -103,20 +103,20 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# Offline: MerekaFooter component in patch module
+# Offline: legacy env.config JSX surgery must NOT be in patch module
 # -----------------------------------------------------------------------
-echo "[OFFLINE] MerekaFooter component in patch module"
+echo "[OFFLINE] Patch module migration guard (no legacy footer JSX surgery)"
 
 if [[ -f "$FOOTER_PATCH" ]]; then
   if grep -q "const MerekaFooter" "$FOOTER_PATCH"; then
-    pass "MerekaFooter component defined in footer-component.sh"
+    fail "footer-component.sh still injects const MerekaFooter (legacy path should be removed)"
   else
-    fail "MerekaFooter component not found in footer-component.sh"
+    pass "footer-component.sh does not inject const MerekaFooter (plugin-slot path active)"
   fi
   if grep -q "mereka-footer--v2" "$FOOTER_PATCH"; then
-    pass "v2 CSS class identifier present in patch module"
+    fail "footer-component.sh still contains mereka-footer--v2 markup hooks (legacy path should be removed)"
   else
-    fail "mereka-footer--v2 CSS class missing from patch module"
+    pass "footer-component.sh contains no legacy footer markup hooks"
   fi
 fi
 
@@ -129,9 +129,9 @@ echo "[OFFLINE] SCSS import wiring"
 
 if [[ -f "$FOOTER_PATCH" ]]; then
   if grep -q "mereka/mereka.scss" "$FOOTER_PATCH"; then
-    pass "mereka.scss import injected by patch module"
+    pass "footer-component.sh syncs mereka.scss into Indigo build context"
   else
-    fail "footer-component.sh does not inject mereka.scss import"
+    fail "footer-component.sh does not sync mereka.scss into Indigo build context"
   fi
 fi
 
@@ -169,30 +169,30 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# Offline: Footer legal links in patch module
+# Offline: Footer legal links in plugin runtime definitions
 # -----------------------------------------------------------------------
-echo "[OFFLINE] Footer legal links in patch module"
+echo "[OFFLINE] Footer legal links in plugin runtime definitions"
 
-if [[ -f "$FOOTER_PATCH" ]]; then
-  if grep -q "https://legal.mereka.io/privacy-policy/" "$FOOTER_PATCH"; then
-    pass "Privacy Policy link present in patch module"
+if [[ -f "$PLUGIN" ]]; then
+  if grep -q "https://legal.mereka.io/privacy-policy/" "$PLUGIN"; then
+    pass "Privacy Policy link present in plugin runtime definitions"
   else
-    fail "Privacy Policy link missing from patch module"
+    fail "Privacy Policy link missing from plugin runtime definitions"
   fi
-  if grep -q "https://legal.mereka.io/" "$FOOTER_PATCH"; then
-    pass "Terms of Use link present in patch module"
+  if grep -q "https://legal.mereka.io/" "$PLUGIN"; then
+    pass "Terms of Use link present in plugin runtime definitions"
   else
-    fail "Terms of Use link missing from patch module"
+    fail "Terms of Use link missing from plugin runtime definitions"
   fi
-  if grep -q "https://legal.mereka.io/#cookie-policy" "$FOOTER_PATCH"; then
-    pass "Cookies Policy link present in patch module"
+  if grep -q "https://legal.mereka.io/#cookie-policy" "$PLUGIN"; then
+    pass "Cookies Policy link present in plugin runtime definitions"
   else
-    fail "Cookies Policy link missing from patch module"
+    fail "Cookies Policy link missing from plugin runtime definitions"
   fi
-  if grep -q "https://help.mereka.io/" "$FOOTER_PATCH"; then
-    pass "Help Centre link present in patch module"
+  if grep -q "https://help.mereka.io/" "$PLUGIN"; then
+    pass "Help Centre link present in plugin runtime definitions"
   else
-    fail "Help Centre link missing from patch module"
+    fail "Help Centre link missing from plugin runtime definitions"
   fi
 fi
 
@@ -221,9 +221,9 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTPAR-001: MFE footer component exists with SITE_VARIANTS
+# AC-FTPAR-001: MFE footer component exists with site variants
 # -----------------------------------------------------------------------
-echo "AC-FTPAR-001: MFE footer component exists with SITE_VARIANTS"
+echo "AC-FTPAR-001: MFE footer component exists with site variants"
 
 if [[ ! -f "$PLUGIN" ]]; then
   fail "Plugin file missing: infrastructure/tutor/plugins/mereka_lms.py"
@@ -237,20 +237,25 @@ else
     fail "MerekaFooter component not found in plugin"
   fi
 
-  # SITE_VARIANTS map present
-  VARIANTS_CONTENT=$(grep -o "const SITE_VARIANTS = {" "$PLUGIN" || true)
-  if [[ -n "$VARIANTS_CONTENT" ]]; then
-    pass "SITE_VARIANTS map defined in MerekaFooter"
+  # Canonical variant map present
+  if grep -q "const MEREKA_SITE_VARIANTS = {" "$PLUGIN"; then
+    pass "MEREKA_SITE_VARIANTS map defined in plugin runtime definitions"
   else
-    fail "SITE_VARIANTS map not found in plugin"
+    fail "MEREKA_SITE_VARIANTS map not found in plugin"
   fi
 
-  # Minimum 2 SITE_VARIANTS entries (we have 3 production domains)
+  if grep -q "const getMerekaVariant = " "$PLUGIN"; then
+    pass "getMerekaVariant runtime resolver present"
+  else
+    fail "getMerekaVariant runtime resolver missing"
+  fi
+
+  # Minimum 2 production domain entries (we expect 3)
   DOMAIN_COUNT=$(grep -c "'academyv2.mereka.io'\|'academy.biji-biji.com'\|'skillourfuture.academy.mereka.io'" "$PLUGIN" || true)
   if [[ "$DOMAIN_COUNT" -ge 2 ]]; then
-    pass "SITE_VARIANTS has >= 2 production domain entries ($DOMAIN_COUNT found)"
+    pass "MEREKA_SITE_VARIANTS has >= 2 production domain entries ($DOMAIN_COUNT found)"
   else
-    fail "SITE_VARIANTS has fewer than 2 domain entries ($DOMAIN_COUNT found)"
+    fail "MEREKA_SITE_VARIANTS has fewer than 2 domain entries ($DOMAIN_COUNT found)"
   fi
 
   # footer.v1 slot reference (either direct PLUGIN_SLOTS or mfe-env-config patch)
@@ -307,22 +312,23 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTPAR-003: Footer copyright fields present for all SITE_VARIANTS domains
+# AC-FTPAR-003: Footer copyright fields present for all site-variant domains
 # -----------------------------------------------------------------------
-echo "AC-FTPAR-003: copyright fields present for all SITE_VARIANTS domains"
+echo "AC-FTPAR-003: copyright fields present for all site-variant domains"
 
 if [[ ! -f "$PLUGIN" ]]; then
-  fail "Plugin file missing — cannot check SITE_VARIANTS copyright fields"
+  fail "Plugin file missing — cannot check site-variant copyright fields"
 else
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
 
   for domain in "${DOMAINS[@]}"; do
     # Extract the domain object block (from the domain key line to the closing '},')
     # Supports both single-line and multi-line object formats
-    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*\}/" "$PLUGIN" | head -30)
+    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*},/" <<<"$VARIANTS_BLOCK")
 
     if [[ -z "$DOMAIN_BLOCK" ]]; then
-      fail "Domain '${domain}' not found in SITE_VARIANTS"
+      fail "Domain '${domain}' not found in MEREKA_SITE_VARIANTS"
       continue
     fi
 
@@ -348,12 +354,11 @@ else
     fi
   done
 
-  # Confirm no null/undefined values in the SITE_VARIANTS block
-  VARIANTS_BLOCK=$(awk '/const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+  # Confirm no null/undefined values in the MEREKA_SITE_VARIANTS block
   if echo "$VARIANTS_BLOCK" | grep -qE ": null|: undefined"; then
-    fail "SITE_VARIANTS contains null or undefined values"
+    fail "MEREKA_SITE_VARIANTS contains null or undefined values"
   else
-    pass "No null/undefined values in SITE_VARIANTS"
+    pass "No null/undefined values in MEREKA_SITE_VARIANTS"
   fi
 fi
 
@@ -548,19 +553,21 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTPAR-008: Tenant footer data contract fields present in SITE_VARIANTS
+# AC-FTPAR-008: Tenant footer data contract fields present in site variants
 # Checks that all required contract fields exist for every tenant domain:
 # supportEmail, helpUrl, privacyUrl, termsUrl, cookiesUrl (in addition to
 # brand / copyrightHolder / whatsapp verified by AC-FTPAR-003)
 # -----------------------------------------------------------------------
-echo "AC-FTPAR-008: Tenant footer data contract fields (SITE_VARIANTS + LMS footer)"
+echo "AC-FTPAR-008: Tenant footer data contract fields (MEREKA_SITE_VARIANTS + LMS footer)"
 
 if [[ -f "$PLUGIN" ]]; then
   CONTRACT_FIELDS=("supportEmail" "helpUrl" "privacyUrl" "termsUrl" "cookiesUrl")
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
 
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+
   for domain in "${DOMAINS[@]}"; do
-    DOMAIN_BLOCK=$(awk "/'${domain}':/,/\}/" "$PLUGIN" | head -20)
+    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*},/" <<<"$VARIANTS_BLOCK")
     if [[ -z "$DOMAIN_BLOCK" ]]; then
       fail "Domain '${domain}' block not found for contract field check"
       continue
@@ -574,10 +581,14 @@ if [[ -f "$PLUGIN" ]]; then
     done
   done
 
-  # Fallback variant must also have all contract fields
-  FALLBACK_LINE=$(awk '/const variant = SITE_VARIANTS/,/\};/' "$PLUGIN" | head -15)
+  # Fallback return object must also have all contract fields
+  FALLBACK_BLOCK="$(
+    awk '/const getMerekaVariant = /,/^};/' "$PLUGIN" \
+      | awk '/return \{/,/^\s*\};/' \
+      | head -20
+  )"
   for field in "${CONTRACT_FIELDS[@]}"; do
-    if echo "$FALLBACK_LINE" | grep -q "${field}:"; then
+    if echo "$FALLBACK_BLOCK" | grep -q "${field}:"; then
       pass "Fallback variant has contract field '${field}'"
     else
       fail "Fallback variant missing contract field '${field}'"
