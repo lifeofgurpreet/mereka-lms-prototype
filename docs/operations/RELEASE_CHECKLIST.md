@@ -36,6 +36,8 @@ Run `.github/workflows/release-evidence.yml` (`workflow_dispatch`) with:
 - `openedx_tag`
 - `mfe_tag`
 - `target_environment`
+- `require_runtime_theme` (`true` once PARAGON_THEME_URLS rollout is expected live)
+- `runtime_theme_url` (optional override; empty uses environment default)
 
 Keep the uploaded artifact with release notes/change record.
 
