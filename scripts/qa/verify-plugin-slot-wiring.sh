@@ -53,38 +53,27 @@ else
 fi
 
 # 2b. Canonical slot IDs are registered
-if grep -q '"org.openedx.frontend.layout.footer.v1"' "$PLUGIN"; then
-  do_pass "Footer slot registered as footer.v1"
-else
-  do_fail "Footer canonical slot not found in PLUGIN_SLOTS registration"
-fi
-
-if grep -q '"org.openedx.frontend.layout.header_logo.v1"' "$PLUGIN"; then
-  do_pass "Header logo slot registered as header_logo.v1"
-else
-  do_fail "Header logo canonical slot not found in PLUGIN_SLOTS registration"
-fi
-
-# learner_dashboard.widget_sidebar.v1 is a planned learner-dashboard widget slot.
-# Warn when absent so the script remains accurate while acknowledging
-# implementation scope.
-if grep -q '"org.openedx.frontend.learner_dashboard.widget_sidebar.v1"' "$PLUGIN"; then
-  do_pass "Learner-dashboard slot registered as org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
-else
-  do_warn "org.openedx.frontend.learner_dashboard.widget_sidebar.v1 slot not yet registered in mereka_lms.py"
-fi
-
-if grep -q '"org.openedx.frontend.layout.header_desktop_main_menu.v1"' "$PLUGIN"; then
-  do_pass "Desktop header main menu slot registered as org.openedx.frontend.layout.header_desktop_main_menu.v1"
-else
-  do_warn "Desktop header main menu slot not registered in mereka_lms.py"
-fi
-
-if grep -q '"org.openedx.frontend.layout.header_mobile_main_menu.v1"' "$PLUGIN"; then
-  do_pass "Mobile header main menu slot registered as org.openedx.frontend.layout.header_mobile_main_menu.v1"
-else
-  do_warn "Mobile header main menu slot not registered in mereka_lms.py"
-fi
+required_slots=(
+  "org.openedx.frontend.layout.footer.v1"
+  "org.openedx.frontend.layout.header_logo.v1"
+  "org.openedx.frontend.layout.studio_footer.v1"
+  "org.openedx.frontend.authn.login_component.v1"
+  "org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
+  "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
+  "org.openedx.frontend.layout.header_desktop_main_menu.v1"
+  "org.openedx.frontend.layout.header_mobile_main_menu.v1"
+  "org.openedx.frontend.learning.course_outline_sidebar.v1"
+  "org.openedx.frontend.learning.progress_certificate_status.v1"
+  "org.openedx.frontend.account.additional_profile_fields.v1"
+  "org.openedx.frontend.profile.additional_profile_fields.v1"
+)
+for slot in "${required_slots[@]}"; do
+  if grep -q "\"${slot}\"" "$PLUGIN"; then
+    do_pass "Required slot registered: ${slot}"
+  else
+    do_fail "Required slot missing in mereka_lms.py: ${slot}"
+  fi
+done
 
 # 2c. Plugin defines runtime helper components used by slot registrations
 if grep -q 'const MerekaHeaderLogo' "$PLUGIN"; then
@@ -167,20 +156,17 @@ fi
 echo ""
 echo "--- Consistency checks ---"
 
-# 5a. Both sources define the same component name
-PLUGIN_FOOTER=$(grep -o 'const [A-Z][a-zA-Z]*Footer' "$PLUGIN" | head -1 || true)
-PATCHES_FOOTER=$(grep -o 'const [A-Z][a-zA-Z]*Footer' "$PATCHES" | head -1 || true)
-
-if [ -n "$PLUGIN_FOOTER" ] && [ -n "$PATCHES_FOOTER" ]; then
-  if [ "$PLUGIN_FOOTER" = "$PATCHES_FOOTER" ]; then
-    do_pass "Plugin and patches define same footer component ($PLUGIN_FOOTER)"
-  else
-    do_fail "Footer component name mismatch: plugin=$PLUGIN_FOOTER, patches=$PATCHES_FOOTER"
-  fi
-elif [ -n "$PLUGIN_FOOTER" ]; then
-  do_pass "Footer component defined in plugin ($PLUGIN_FOOTER)"
+# 5a. Footer components are defined in plugin-only runtime definitions
+if grep -q 'const MerekaFooter' "$PLUGIN" && grep -q 'const MerekaStudioFooter' "$PLUGIN"; then
+  do_pass "Plugin defines both MerekaFooter and MerekaStudioFooter components"
 else
-  do_fail "No footer component found in either source"
+  do_fail "Plugin is missing one or more footer components (MerekaFooter/MerekaStudioFooter)"
+fi
+
+if grep -q 'const [A-Z][a-zA-Z]*Footer' "$PATCHES"; then
+  do_warn "Footer component declarations found in apply-patches.sh (legacy duplication risk)"
+else
+  do_pass "No footer component declarations in apply-patches.sh"
 fi
 
 # 5b. Indigo footer import removal (prevents duplicate footers)

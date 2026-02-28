@@ -103,24 +103,27 @@ else
     fail "AC-FRONT-062: No PLUGIN_SLOTS registration calls found in mereka_lms.py"
   fi
 
-  # Check for the required canonical slots
-  if grep -q 'org.openedx.frontend.layout.footer.v1' "$PLUGIN_FILE"; then
-    pass "AC-FRONT-062: Footer canonical slot registered"
-  else
-    fail "AC-FRONT-062: Footer canonical slot not registered in mereka_lms.py"
-  fi
-
-  if grep -q 'org.openedx.frontend.layout.header_logo.v1' "$PLUGIN_FILE"; then
-    pass "AC-FRONT-062: Header logo canonical slot registered"
-  else
-    fail "AC-FRONT-062: Header logo canonical slot not registered in mereka_lms.py"
-  fi
-
-  if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE"; then
-    pass "AC-FRONT-062: learner-dashboard sidebar slot registered"
-  else
-    warn "AC-FRONT-062: learner-dashboard sidebar slot not yet registered (CSS fallback path active)"
-  fi
+  required_slots=(
+    "org.openedx.frontend.layout.footer.v1"
+    "org.openedx.frontend.layout.header_logo.v1"
+    "org.openedx.frontend.layout.studio_footer.v1"
+    "org.openedx.frontend.authn.login_component.v1"
+    "org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
+    "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
+    "org.openedx.frontend.layout.header_desktop_main_menu.v1"
+    "org.openedx.frontend.layout.header_mobile_main_menu.v1"
+    "org.openedx.frontend.learning.course_outline_sidebar.v1"
+    "org.openedx.frontend.learning.progress_certificate_status.v1"
+    "org.openedx.frontend.account.additional_profile_fields.v1"
+    "org.openedx.frontend.profile.additional_profile_fields.v1"
+  )
+  for slot in "${required_slots[@]}"; do
+    if grep -q "$slot" "$PLUGIN_FILE"; then
+      pass "AC-FRONT-062: Required slot registered (${slot})"
+    else
+      fail "AC-FRONT-062: Required slot missing in mereka_lms.py (${slot})"
+    fi
+  done
 
 fi
 
