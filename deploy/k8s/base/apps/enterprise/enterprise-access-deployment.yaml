@@ -112,7 +112,7 @@ spec:
                   key: ENTERPRISE_ACCESS_OAUTH2_SECRET
           resources:
             requests:
-              cpu: 50m
+              cpu: 10m
               memory: 128Mi
             limits:
               cpu: 200m
@@ -132,7 +132,7 @@ spec:
               value: /config/enterprise_access.yml
           resources:
             requests:
-              cpu: 100m
+              cpu: 50m
               memory: 256Mi
             limits:
               cpu: 500m
