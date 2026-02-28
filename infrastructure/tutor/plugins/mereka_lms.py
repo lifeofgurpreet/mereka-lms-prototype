@@ -1046,36 +1046,73 @@ hooks.Filters.ENV_PATCHES.add_item(
         "mfe-env-config-runtime-definitions",
         """
 {% raw %}
+const normalizeHostname = (hostname) => {
+  return (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\\./, '');
+};
+
+// Tenant branding + footer data contract.
+// Add tenant-specific overrides by hostname key.
+const MEREKA_SITE_VARIANTS = {
+  'academyv2.mereka.io': {
+    brand: 'Mereka Academy',
+    logoUrl: '/static/images/logo-horizontal.svg',
+    mobileLogoUrl: '/static/images/logo-square.svg',
+    helpUrl: 'https://help.mereka.io/',
+    copyrightHolder: 'MEREKA',
+    whatsapp: '601135271981',
+    supportEmail: 'support@mereka.io',
+    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
+    termsUrl: 'https://legal.mereka.io/',
+    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
+  },
+  'academy.biji-biji.com': {
+    brand: 'Biji-Biji Academy',
+    logoUrl: '/static/images/logo-horizontal.svg',
+    mobileLogoUrl: '/static/images/logo-square.svg',
+    helpUrl: 'https://help.mereka.io/',
+    copyrightHolder: 'Biji-Biji Initiative',
+    whatsapp: '601135271981',
+    supportEmail: 'techadmin@biji-biji.com',
+    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
+    termsUrl: 'https://legal.mereka.io/',
+    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
+  },
+  'skillourfuture.academy.mereka.io': {
+    brand: 'Skill Our Future Academy',
+    logoUrl: '/static/images/logo-horizontal.svg',
+    mobileLogoUrl: '/static/images/logo-square.svg',
+    helpUrl: 'https://help.mereka.io/',
+    copyrightHolder: 'MEREKA',
+    whatsapp: '601135271981',
+    supportEmail: 'support@mereka.io',
+    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
+    termsUrl: 'https://legal.mereka.io/',
+    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
+  },
+};
+
 const getMerekaVariant = (hostname, config) => {
-  const normalizedHostname = (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\./, '');
+  const normalizedHostname = normalizeHostname(hostname);
   const fallbackBrand = (typeof config !== 'undefined' && config.SITE_NAME) || 'Mereka Academy';
+  const fallbackPlatform = (typeof config !== 'undefined' && config.PLATFORM_NAME) || 'MEREKA';
+  const knownVariant = MEREKA_SITE_VARIANTS[normalizedHostname];
 
-  const variants = {
-    'academyv2.mereka.io': {
-      brand: 'Mereka Academy',
-      logoUrl: '/static/images/logo-horizontal.svg',
-      mobileLogoUrl: '/static/images/logo-square.svg',
-      helpUrl: 'https://help.mereka.io/',
-    },
-    'academy.biji-biji.com': {
-      brand: 'Biji-Biji Academy',
-      logoUrl: '/static/images/logo-horizontal.svg',
-      mobileLogoUrl: '/static/images/logo-square.svg',
-      helpUrl: 'https://help.mereka.io/',
-    },
-    'skillourfuture.academy.mereka.io': {
-      brand: 'Skill Our Future Academy',
-      logoUrl: '/static/images/logo-horizontal.svg',
-      mobileLogoUrl: '/static/images/logo-square.svg',
-      helpUrl: 'https://help.mereka.io/',
-    },
-  };
+  if (knownVariant) {
+    return knownVariant;
+  }
 
-  return variants[normalizedHostname] || {
+  // Unknown host fallback: keep shell rendering deterministic for dev/staging/new tenants.
+  return {
     brand: fallbackBrand,
     logoUrl: '/static/images/logo-horizontal.svg',
     mobileLogoUrl: '/static/images/logo-square.svg',
-    helpUrl: '/help/',
+    helpUrl: 'https://help.mereka.io/',
+    copyrightHolder: fallbackPlatform,
+    whatsapp: '601135271981',
+    supportEmail: 'support@mereka.io',
+    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
+    termsUrl: 'https://legal.mereka.io/',
+    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   };
 };
 
@@ -1129,7 +1166,7 @@ const withMerekaMenuItems = (widget, menuItems = []) => {
 // Wired into org.openedx.frontend.layout.header_logo.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaHeaderLogo = () => {
   const config = getConfig();
-  const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
+  const baseUrl = (typeof config !== 'undefined' && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\\/$/, '');
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
   const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
@@ -1179,7 +1216,7 @@ const MerekaAuthnLoginBranding = () => {
 
 const MerekaStudioFooter = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
   const siteName = config.SITE_NAME || 'Mereka Studio';
 
   return (
@@ -1204,7 +1241,7 @@ const MerekaStudioFooter = () => {
 // Registered via org.openedx.frontend.learner_dashboard.widget_sidebar.v1.
 const MerekaLearnerSidebarWidget = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
   const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
   const coursesPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
 
@@ -1222,7 +1259,7 @@ const MerekaLearnerSidebarWidget = () => {
 // Wired into org.openedx.frontend.learner_dashboard.no_courses_view.v1.
 const MerekaNoCoursesView = () => {
   const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
   const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
   const discoverPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
 
@@ -1300,59 +1337,11 @@ const MerekaAdditionalProfileFields = () => {
 const MerekaFooter = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
-  const siteName = config.SITE_NAME || 'Mereka Academy';
   const currentYear = new Date().getFullYear();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const logoUrl = baseUrl ? baseUrl + '/static/images/logo.png' : '';
-
-  // Tenant footer data contract.
-  // Fields: brand, copyrightHolder, whatsapp (identity)
-  //         supportEmail, helpUrl (support section)
-  //         privacyUrl, termsUrl, cookiesUrl (legal section)
-  // Add new tenant by adding a hostname key. All fields have safe defaults in the fallback below.
-  const SITE_VARIANTS = {
-    'academyv2.mereka.io': {
-      brand: 'Mereka Academy',
-      copyrightHolder: 'MEREKA',
-      whatsapp: '601135271981',
-      supportEmail: 'support@mereka.io',
-      helpUrl: 'https://help.mereka.io/',
-      privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-      termsUrl: 'https://legal.mereka.io/',
-      cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
-    },
-    'academy.biji-biji.com': {
-      brand: 'Biji-Biji Academy',
-      copyrightHolder: 'Biji-Biji Initiative',
-      whatsapp: '601135271981',
-      supportEmail: 'techadmin@biji-biji.com',
-      helpUrl: 'https://help.mereka.io/',
-      privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-      termsUrl: 'https://legal.mereka.io/',
-      cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
-    },
-    'skillourfuture.academy.mereka.io': {
-      brand: 'Skill Our Future Academy',
-      copyrightHolder: 'MEREKA',
-      whatsapp: '601135271981',
-      supportEmail: 'support@mereka.io',
-      helpUrl: 'https://help.mereka.io/',
-      privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-      termsUrl: 'https://legal.mereka.io/',
-      cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
-    },
-  };
-  // Safe defaults — used when hostname is not in SITE_VARIANTS (dev, staging, new tenants)
-  const variant = SITE_VARIANTS[hostname] || {
-    brand: (typeof config !== 'undefined' && config.SITE_NAME) || siteName || 'Mereka Academy',
-    copyrightHolder: (typeof config !== 'undefined' && config.PLATFORM_NAME) || 'MEREKA',
-    whatsapp: '601135271981',
-    supportEmail: 'support@mereka.io',
-    helpUrl: 'https://help.mereka.io/',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
-  };
+  const variant = getMerekaVariant(hostname, config);
+  const logoPath = variant.logoUrl || '/static/images/logo-horizontal.svg';
+  const logoUrl = baseUrl ? `${baseUrl}${logoPath}` : logoPath;
 
   const socialLinks = [
     { name: 'TikTok', url: 'https://www.tiktok.com/@mereka.io', icon: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z' },
