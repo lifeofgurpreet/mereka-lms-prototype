@@ -11,11 +11,55 @@ NAMESPACE="mereka-lms"
 PASS=0; FAIL=0
 ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
 WAIT_FOR_STEADY_SECONDS="${WAIT_FOR_STEADY_SECONDS:-120}"
+KUBE_CONTEXT=""
+TMP_KUBECONFIG=""
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
+
+usage() {
+  cat <<'EOF'
+Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [-h|--help]
+EOF
+}
+
+cleanup() {
+  if [[ -n "$TMP_KUBECONFIG" && -f "$TMP_KUBECONFIG" ]]; then
+    rm -f "$TMP_KUBECONFIG"
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context)
+      KUBE_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -n "$KUBE_CONTEXT" ]]; then
+  if ! command -v kubectl >/dev/null 2>&1; then
+    echo "kubectl is required when --context is provided" >&2
+    exit 1
+  fi
+  TMP_KUBECONFIG="$(mktemp)"
+  trap cleanup EXIT
+  kubectl config view --raw > "$TMP_KUBECONFIG"
+  KUBECONFIG="$TMP_KUBECONFIG" kubectl config use-context "$KUBE_CONTEXT" >/dev/null
+  export KUBECONFIG="$TMP_KUBECONFIG"
+fi
 
 # HTTP check via python3 urllib (curl not available in all enterprise containers)
 pod_http() {
@@ -50,6 +94,9 @@ except Exception:
 
 echo "=== Enterprise Service Deployment Verification (AC-001..AC-008) ==="
 echo "Namespace: $NAMESPACE"
+if [[ -n "$KUBE_CONTEXT" ]]; then
+  echo "Context: $KUBE_CONTEXT"
+fi
 echo
 
 # ---------------------------------------------------------------------------

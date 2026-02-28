@@ -38,6 +38,7 @@ MIDDLEWARE_FILE="${MULTI_TENANCY_PLUGIN}/middleware.py"
 MODELS_FILE="${MULTI_TENANCY_PLUGIN}/models.py"
 MIGRATIONS_DIR="${MULTI_TENANCY_PLUGIN}/migrations"
 APPLY_PATCHES="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
+MEREKA_PLUGIN="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
 TENANT_REGISTRY="${REPO_ROOT}/deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml"
 TENANT_THEMES="${REPO_ROOT}/infrastructure/tutor/themes/mereka/tenants"
 ISOLATION_CRONJOB="${REPO_ROOT}/deploy/k8s/base/monitoring/cronjob-tenant-isolation.yaml"
@@ -110,25 +111,27 @@ run_offline_checks() {
   fi
 
   # ------------------------------------------------------------------
-  # 2. Middleware is wired into MIDDLEWARE stack via apply-patches.sh
+  # 2. Middleware is wired into runtime settings
   # ------------------------------------------------------------------
-  echo "--- Middleware wiring in apply-patches.sh ---"
-  if [[ ! -f "$APPLY_PATCHES" ]]; then
-    fail "apply-patches.sh not found: ${APPLY_PATCHES}"
-  elif grep -q "mereka_tenancy.middleware.TenantResolutionMiddleware" "$APPLY_PATCHES"; then
-    pass "TenantResolutionMiddleware wired into MIDDLEWARE via apply-patches.sh"
+  echo "--- Middleware wiring in runtime settings ---"
+  if [[ -f "$MEREKA_PLUGIN" ]] && grep -q "mereka_tenancy.middleware.TenantResolutionMiddleware" "$MEREKA_PLUGIN"; then
+    pass "TenantResolutionMiddleware wired in mereka_lms.py runtime patch"
+  elif [[ -f "$APPLY_PATCHES" ]] && grep -q "mereka_tenancy.middleware.TenantResolutionMiddleware" "$APPLY_PATCHES"; then
+    pass "TenantResolutionMiddleware wired via apply-patches.sh"
   else
-    fail "TenantResolutionMiddleware not found in apply-patches.sh MIDDLEWARE section"
+    fail "TenantResolutionMiddleware wiring not found in mereka_lms.py or apply-patches.sh"
   fi
 
   # ------------------------------------------------------------------
-  # 3. mereka_tenancy is in INSTALLED_APPS via apply-patches.sh
+  # 3. mereka_tenancy is in INSTALLED_APPS wiring
   # ------------------------------------------------------------------
   echo "--- INSTALLED_APPS: mereka_tenancy ---"
-  if [[ -f "$APPLY_PATCHES" ]] && grep -q "mereka_tenancy" "$APPLY_PATCHES"; then
-    pass "mereka_tenancy present in apply-patches.sh (added to INSTALLED_APPS)"
+  if [[ -f "$MEREKA_PLUGIN" ]] && grep -q "mereka_tenancy" "$MEREKA_PLUGIN"; then
+    pass "mereka_tenancy present in mereka_lms.py runtime patching"
+  elif [[ -f "$APPLY_PATCHES" ]] && grep -q "mereka_tenancy" "$APPLY_PATCHES"; then
+    pass "mereka_tenancy present in apply-patches.sh"
   else
-    fail "mereka_tenancy not referenced in apply-patches.sh"
+    fail "mereka_tenancy not referenced in runtime wiring"
   fi
 
   # ------------------------------------------------------------------
@@ -353,6 +356,7 @@ run_online_checks() {
   local lms_pod
   lms_pod=$($kctl get pods -n "$NAMESPACE" \
     -l app.kubernetes.io/name=lms \
+    --field-selector=status.phase=Running \
     -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 
   if [[ -z "$lms_pod" ]]; then
@@ -364,9 +368,8 @@ run_online_checks() {
     skip "Cross-tenant token rejection (no LMS pod)"
   else
     local lms_phase
-    lms_phase=$($kctl get pods -n "$NAMESPACE" \
-      -l app.kubernetes.io/name=lms \
-      -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "")
+    lms_phase=$($kctl get pod -n "$NAMESPACE" "$lms_pod" \
+      -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
     if [[ "$lms_phase" == "Running" ]]; then
       pass "LMS pod is Running (${lms_pod})"
     else
@@ -451,7 +454,9 @@ except Exception as e:
       grep -r "enterprise_customer_uuid\|tenant_id\|ENTERPRISE_CUSTOMER_UUID" \
       /openedx/edx-platform/lms/envs/production.py \
       /openedx/edx-platform/lms/djangoapps/courseware/context_processor.py \
-      2>/dev/null | wc -l || echo "0")
+      2>/dev/null | wc -l || true)
+    tracking_check="${tracking_check//$'\n'/}"
+    [[ -z "$tracking_check" ]] && tracking_check=0
 
     if [[ "$tracking_check" -gt 0 ]]; then
       pass "enterprise_customer_uuid / tenant_id referenced in LMS production settings"
@@ -546,7 +551,9 @@ except Exception as e:
     local tenant_count
     tenant_count=$($kctl get configmap tenant-registry -n "$NAMESPACE" \
       -o jsonpath='{.data.tenants\.yaml}' 2>/dev/null | \
-      grep -c "^- slug:" 2>/dev/null || echo "0")
+      grep -c "^- slug:" 2>/dev/null || true)
+    tenant_count="${tenant_count//$'\n'/}"
+    [[ -z "$tenant_count" ]] && tenant_count=0
     if [[ "$tenant_count" -ge 1 ]]; then
       pass "tenant-registry has ${tenant_count} tenant entry(ies)"
     else

@@ -33,6 +33,7 @@ EXPORT_DIR=""
 FORCE_DELETE=0
 GRACE_DAYS=30
 ACTOR="${USER:-unknown}"
+CONTEXT_OVERRIDE=""
 
 usage() {
   echo "Usage: $0 --slug SLUG [OPTIONS]"
@@ -45,6 +46,7 @@ usage() {
   echo "  --force-delete  Execute data deletion (only after grace period)"
   echo "  --grace-days N  Grace period in days (default: 30)"
   echo "  --actor ACTOR   Who initiated offboarding (default: \$USER)"
+  echo "  --context NAME  kubectl context override (optional)"
   echo "  --dry-run       Show what would be done without executing"
   echo "  -h, --help      Show this help"
   exit 1
@@ -57,6 +59,7 @@ while [[ $# -gt 0 ]]; do
     --force-delete) FORCE_DELETE=1; shift ;;
     --grace-days) GRACE_DAYS="$2"; shift 2 ;;
     --actor) ACTOR="$2"; shift 2 ;;
+    --context) CONTEXT_OVERRIDE="$2"; shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
     -h|--help) usage ;;
     *) echo "Unknown option: $1"; usage ;;
@@ -99,27 +102,48 @@ if [[ $DRY_RUN -eq 1 ]]; then
   echo ""
 fi
 
+context_args=()
+if [[ -n "$CONTEXT_OVERRIDE" ]]; then
+  context_args+=(--context "$CONTEXT_OVERRIDE")
+elif [[ -n "${K8S_CONTEXT:-}" ]]; then
+  context_args+=(--context "$K8S_CONTEXT")
+fi
+
 # Detect execution context (K8s vs local Tutor).
-if command -v kubectl &>/dev/null && kubectl get namespace "$NAMESPACE" &>/dev/null 2>&1; then
+if command -v kubectl &>/dev/null && kubectl "${context_args[@]}" get namespace "$NAMESPACE" &>/dev/null 2>&1; then
   echo "Detected Kubernetes environment (namespace: $NAMESPACE)"
   echo ""
 
-  LMS_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-  if [[ -z "$LMS_POD" ]]; then
-    echo -e "${RED}ERROR${NC}: No LMS pod found in namespace $NAMESPACE"
-    exit 1
+  TARGET_DEPLOY="lms"
+  MGMT_VARIANT="lms"
+  if ! kubectl "${context_args[@]}" exec -n "$NAMESPACE" deploy/lms -- \
+      bash -lc "python manage.py lms help | grep -qE '^\\s*offboard_tenant$'" >/dev/null 2>&1; then
+    if kubectl "${context_args[@]}" exec -n "$NAMESPACE" deploy/cms -- \
+      bash -lc "python manage.py cms help | grep -qE '^\\s*offboard_tenant$'" >/dev/null 2>&1; then
+      TARGET_DEPLOY="cms"
+      MGMT_VARIANT="cms"
+    else
+      echo -e "${RED}ERROR${NC}: offboard_tenant command not found in LMS or CMS runtime"
+      exit 1
+    fi
   fi
 
-  echo "Using LMS pod: $LMS_POD"
+  TARGET_POD=$(kubectl "${context_args[@]}" get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=${TARGET_DEPLOY}" --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  if [[ -z "$TARGET_POD" ]]; then
+    echo -e "${RED}ERROR${NC}: No running ${TARGET_DEPLOY} pod found in namespace $NAMESPACE"
+    exit 1
+  fi
+  echo "Using ${TARGET_DEPLOY^^} pod: $TARGET_POD"
+  echo "Command variant: manage.py ${MGMT_VARIANT} offboard_tenant"
   echo ""
 
-  kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
-    python manage.py lms offboard_tenant $CMD_ARGS
+  kubectl "${context_args[@]}" exec -n "$NAMESPACE" "$TARGET_POD" -- \
+    python manage.py "${MGMT_VARIANT}" offboard_tenant $CMD_ARGS
 
   # Copy export files out of the pod if not dry run.
   if [[ $DRY_RUN -eq 0 ]]; then
     mkdir -p "$EXPORT_DIR"
-    kubectl cp "$NAMESPACE/$LMS_POD:$EXPORT_DIR/" "$EXPORT_DIR/" 2>/dev/null || true
+    kubectl "${context_args[@]}" cp "$NAMESPACE/$TARGET_POD:$EXPORT_DIR/" "$EXPORT_DIR/" 2>/dev/null || true
     echo ""
     echo "Export files copied to: $EXPORT_DIR/"
   fi

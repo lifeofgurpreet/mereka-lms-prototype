@@ -10,6 +10,53 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOTAL_PASS=0; TOTAL_FAIL=0
+KUBE_CONTEXT=""
+TMP_KUBECONFIG=""
+
+usage() {
+  cat <<'EOF'
+Usage: verify-enterprise-all-acs.sh [--context <kubectl-context>] [-h|--help]
+
+Runs all enterprise AC verification suites (AC-001..AC-036).
+When --context is provided, suites execute against that exact kube context.
+EOF
+}
+
+cleanup() {
+  if [[ -n "$TMP_KUBECONFIG" && -f "$TMP_KUBECONFIG" ]]; then
+    rm -f "$TMP_KUBECONFIG"
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context)
+      KUBE_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -n "$KUBE_CONTEXT" ]]; then
+  if ! command -v kubectl >/dev/null 2>&1; then
+    echo "kubectl is required when --context is provided" >&2
+    exit 1
+  fi
+  TMP_KUBECONFIG="$(mktemp)"
+  trap cleanup EXIT
+  kubectl config view --raw > "$TMP_KUBECONFIG"
+  KUBECONFIG="$TMP_KUBECONFIG" kubectl config use-context "$KUBE_CONTEXT" >/dev/null
+  export KUBECONFIG="$TMP_KUBECONFIG"
+fi
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 
@@ -18,6 +65,9 @@ echo "║  Enterprise Microservices — Full AC Verification Suite      ║"
 echo "║  Coverage: AC-001 through AC-036 (automated criteria)        ║"
 echo "║  Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)                            ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
+if [[ -n "$KUBE_CONTEXT" ]]; then
+  echo "Context: $KUBE_CONTEXT"
+fi
 echo
 
 SUITES=(

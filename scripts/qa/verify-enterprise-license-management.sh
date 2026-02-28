@@ -12,14 +12,61 @@ NAMESPACE="mereka-lms"
 ENTERPRISE_DIR="$REPO_ROOT/deploy/k8s/base/apps/enterprise"
 LM_PORT=18170
 PASS=0; FAIL=0
+KUBE_CONTEXT=""
+TMP_KUBECONFIG=""
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 
+usage() {
+  cat <<'EOF'
+Usage: verify-enterprise-license-management.sh [--context <kubectl-context>] [-h|--help]
+EOF
+}
+
+cleanup() {
+  if [[ -n "$TMP_KUBECONFIG" && -f "$TMP_KUBECONFIG" ]]; then
+    rm -f "$TMP_KUBECONFIG"
+  fi
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context)
+      KUBE_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -n "$KUBE_CONTEXT" ]]; then
+  if ! command -v kubectl >/dev/null 2>&1; then
+    echo "kubectl is required when --context is provided" >&2
+    exit 1
+  fi
+  TMP_KUBECONFIG="$(mktemp)"
+  trap cleanup EXIT
+  kubectl config view --raw > "$TMP_KUBECONFIG"
+  KUBECONFIG="$TMP_KUBECONFIG" kubectl config use-context "$KUBE_CONTEXT" >/dev/null
+  export KUBECONFIG="$TMP_KUBECONFIG"
+fi
+
 echo "=== Enterprise License Management Verification (AC-014..AC-018) ==="
 echo "Runtime mode: probing deployed license-manager service endpoints"
+if [[ -n "$KUBE_CONTEXT" ]]; then
+  echo "Context: $KUBE_CONTEXT"
+fi
 echo
 
 pod_http() {
@@ -63,7 +110,9 @@ if [[ "$LM_DEPLOYED" == "true" ]]; then
 else
   info "AC-014: license-manager not deployed. Checking database provisioning..."
   # Verify license_manager database exists in secrets (DB_NAME referenced)
-  SECRET_EXISTS=$(kubectl get secret enterprise-secrets -n "$NAMESPACE" -o jsonpath='{.data}' 2>/dev/null | grep -c "MYSQL_LICENSE_MANAGER\|LICENSE_MANAGER" || echo "0")
+  SECRET_EXISTS=$(kubectl get secret enterprise-secrets -n "$NAMESPACE" -o jsonpath='{.data}' 2>/dev/null | grep -c "MYSQL_LICENSE_MANAGER\|LICENSE_MANAGER" || true)
+  SECRET_EXISTS="${SECRET_EXISTS//$'\n'/}"
+  [[ -z "$SECRET_EXISTS" ]] && SECRET_EXISTS=0
   if [[ "$SECRET_EXISTS" -gt 0 ]]; then
     pass "AC-014: License manager database credentials provisioned in enterprise-secrets"
   else

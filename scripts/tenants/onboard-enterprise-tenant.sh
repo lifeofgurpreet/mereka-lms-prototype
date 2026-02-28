@@ -20,6 +20,7 @@ DOMAIN=""
 CONTACT_EMAIL=""
 COUNTRY=""
 ENVIRONMENT="prod"
+CONTEXT_OVERRIDE=""
 
 IDP_TYPE=""
 IDP_SLUG=""
@@ -53,6 +54,7 @@ Optional tenant fields:
   --contact-email <email>
   --country <iso2>
   --env prod|dev
+  --context <kube-context>
 
 Optional IdP fields:
   --idp-slug <slug>
@@ -84,6 +86,7 @@ while [[ $# -gt 0 ]]; do
     --contact-email) CONTACT_EMAIL="$2"; shift 2 ;;
     --country) COUNTRY="$2"; shift 2 ;;
     --env) ENVIRONMENT="$2"; shift 2 ;;
+    --context) CONTEXT_OVERRIDE="$2"; shift 2 ;;
 
     --idp-type) IDP_TYPE="$2"; shift 2 ;;
     --idp-slug) IDP_SLUG="$2"; shift 2 ;;
@@ -124,8 +127,19 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   exit 1
 fi
 
+DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+DEFAULT_DEV_CTX="kind-dev"
+K8S_CONTEXT_EFFECTIVE="$CONTEXT_OVERRIDE"
+if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
+  if [[ "$ENVIRONMENT" == "prod" ]]; then
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
+  else
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_DEV_CTX}"
+  fi
+fi
+
 echo "=== Enterprise Tenant Onboarding Workflow ==="
-echo "slug=$SLUG name=$NAME domain=$DOMAIN env=$ENVIRONMENT idp_type=$IDP_TYPE dry_run=$DRY_RUN"
+echo "slug=$SLUG name=$NAME domain=$DOMAIN env=$ENVIRONMENT context=$K8S_CONTEXT_EFFECTIVE idp_type=$IDP_TYPE dry_run=$DRY_RUN"
 echo ""
 
 if [[ "$RUN_INTEGRITY_GUARD" -eq 1 ]]; then
@@ -136,6 +150,7 @@ fi
 
 provision_cmd=(
   "$REPO_ROOT/scripts/tenants/provision-tenant.sh"
+  --context "$K8S_CONTEXT_EFFECTIVE"
   --slug "$SLUG"
   --name "$NAME"
   --domain "$DOMAIN"
@@ -147,12 +162,14 @@ provision_cmd=(
 mapping_cmd=(
   "$REPO_ROOT/scripts/tenants/sync-tenant-enterprise-mapping.sh"
   --env "$ENVIRONMENT"
+  --context "$K8S_CONTEXT_EFFECTIVE"
 )
 [[ "$DRY_RUN" -eq 1 ]] && mapping_cmd+=(--dry-run) || mapping_cmd+=(--apply)
 
 idp_cmd=(
   "$REPO_ROOT/scripts/tenants/configure-tenant-idp.sh"
   --env "$ENVIRONMENT"
+  --context "$K8S_CONTEXT_EFFECTIVE"
   --tenant-slug "$SLUG"
   --idp-type "$IDP_TYPE"
 )
@@ -218,9 +235,9 @@ if [[ "$RUN_RUNTIME_GATES" -eq 1 ]]; then
     "$REPO_ROOT/scripts/qa/verify-enterprise-sso-readiness.sh" --env "$ENVIRONMENT" --tenant "$SLUG"
     if [[ "$ENVIRONMENT" == "prod" ]]; then
       STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 \
-        "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" "$ENVIRONMENT"
+        "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" "$ENVIRONMENT" --context "$K8S_CONTEXT_EFFECTIVE"
     else
-      STRICT=1 "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" "$ENVIRONMENT"
+      STRICT=1 "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" "$ENVIRONMENT" --context "$K8S_CONTEXT_EFFECTIVE"
     fi
   fi
   echo ""

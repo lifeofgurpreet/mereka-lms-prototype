@@ -34,6 +34,7 @@ COUNTRY=""
 ENTERPRISE_UUID=""
 DRY_RUN=0
 NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
+CONTEXT_OVERRIDE=""
 
 usage() {
   echo "Usage: $0 --slug SLUG --name NAME --domain DOMAIN [OPTIONS]"
@@ -48,6 +49,7 @@ usage() {
   echo "  --country           ISO 3166-1 alpha-2 country code (e.g. 'MY')"
   echo "  --enterprise-uuid   Existing EnterpriseCustomer UUID (auto-generated if empty)"
   echo "  --from-env          Load configuration from .env file (e.g. scripts/tenants/mereka-tenant.env)"
+  echo "  --context NAME      kubectl context override (optional)"
   echo "  --dry-run           Show what would be done without executing"
   echo "  -h, --help          Show this help"
   exit 1
@@ -62,6 +64,7 @@ while [[ $# -gt 0 ]]; do
     --contact-email) CONTACT_EMAIL="$2"; shift 2 ;;
     --country) COUNTRY="$2"; shift 2 ;;
     --enterprise-uuid) ENTERPRISE_UUID="$2"; shift 2 ;;
+    --context) CONTEXT_OVERRIDE="$2"; shift 2 ;;
     --from-env)
       # Load from .env file
       if [[ ! -f "$2" ]]; then
@@ -127,19 +130,40 @@ if [[ $DRY_RUN -eq 1 ]]; then
   exit 0
 fi
 
+context_args=()
+if [[ -n "$CONTEXT_OVERRIDE" ]]; then
+  context_args+=(--context "$CONTEXT_OVERRIDE")
+elif [[ -n "${K8S_CONTEXT:-}" ]]; then
+  context_args+=(--context "$K8S_CONTEXT")
+fi
+
 # Detect execution context (K8s vs local Tutor)
-if command -v kubectl &>/dev/null && kubectl get namespace "$NAMESPACE" &>/dev/null 2>&1; then
+if command -v kubectl &>/dev/null && kubectl "${context_args[@]}" get namespace "$NAMESPACE" &>/dev/null 2>&1; then
   echo "Detected Kubernetes environment (namespace: $NAMESPACE)"
   echo ""
 
-  # Find an LMS pod
-  LMS_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=lms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
-  if [[ -z "$LMS_POD" ]]; then
-    echo -e "${RED}ERROR${NC}: No LMS pod found in namespace $NAMESPACE"
-    exit 1
+  # Determine whether provision_tenant is available in LMS or CMS runtime.
+  TARGET_DEPLOY="lms"
+  MGMT_VARIANT="lms"
+  if ! kubectl "${context_args[@]}" exec -n "$NAMESPACE" deploy/lms -- \
+      bash -lc "python manage.py lms help | grep -qE '^\\s*provision_tenant$'" >/dev/null 2>&1; then
+    if kubectl "${context_args[@]}" exec -n "$NAMESPACE" deploy/cms -- \
+      bash -lc "python manage.py cms help | grep -qE '^\\s*provision_tenant$'" >/dev/null 2>&1; then
+      TARGET_DEPLOY="cms"
+      MGMT_VARIANT="cms"
+    else
+      echo -e "${RED}ERROR${NC}: provision_tenant command not found in LMS or CMS runtime"
+      exit 1
+    fi
   fi
 
-  echo "Using LMS pod: $LMS_POD"
+  TARGET_POD=$(kubectl "${context_args[@]}" get pods -n "$NAMESPACE" -l "app.kubernetes.io/name=${TARGET_DEPLOY}" --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  if [[ -z "$TARGET_POD" ]]; then
+    echo -e "${RED}ERROR${NC}: No running ${TARGET_DEPLOY} pod found in namespace $NAMESPACE"
+    exit 1
+  fi
+  echo "Using ${TARGET_DEPLOY^^} pod: $TARGET_POD"
+  echo "Command variant: manage.py ${MGMT_VARIANT} provision_tenant"
 
   # Build command args
   CMD_ARGS="--slug '$SLUG' --name '$NAME' --domain '$DOMAIN'"
@@ -148,8 +172,8 @@ if command -v kubectl &>/dev/null && kubectl get namespace "$NAMESPACE" &>/dev/n
   [[ -n "$ENTERPRISE_UUID" ]] && CMD_ARGS="$CMD_ARGS --enterprise-uuid '$ENTERPRISE_UUID'"
 
   # Run the management command
-  kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
-    bash -c "python manage.py lms provision_tenant $CMD_ARGS"
+  kubectl "${context_args[@]}" exec -n "$NAMESPACE" "$TARGET_POD" -- \
+    bash -c "python manage.py ${MGMT_VARIANT} provision_tenant $CMD_ARGS"
 
 elif command -v tutor &>/dev/null; then
   echo "Detected Tutor environment"

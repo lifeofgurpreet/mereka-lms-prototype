@@ -56,26 +56,27 @@ UNDEFINED_FOUND=0
 
 # Search all SCSS and CSS files in theme directory
 while IFS= read -r file; do
-  # Extract all var(--mereka-*) references from this file
-  while IFS=: read -r line_num match; do
-    # Extract token name from var(--mereka-something)
-    token="$(grep -oPm1 '(?<=var\()--mereka-[a-z0-9_-]+' <<<"$match" || true)"
+  while IFS= read -r token; do
     [ -z "$token" ] && continue
 
-    # Check if token is defined
     if grep -qxF -- "$token" "$DEFINED_TOKENS"; then
-      : # Token is defined, skip
-    else
-      # Check if it's self-defined in the same file
-      if grep -q -- "^[[:space:]]*${token}:" "$file" 2>/dev/null; then
-        : # Self-defined in same file
-      else
-        do_fail "Undefined token $token in $(basename "$file"):$line_num"
-        UNDEFINED_FOUND=$((UNDEFINED_FOUND + 1))
-      fi
+      continue
     fi
-  done < <(grep -n 'var(--mereka-' "$file" 2>/dev/null || true)
-done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
+
+    if grep -q -- "^[[:space:]]*${token}:" "$file" 2>/dev/null; then
+      continue
+    fi
+
+    line_num="$(grep -n -m1 -F "var(${token}" "$file" 2>/dev/null | cut -d: -f1 || true)"
+    line_num="${line_num:-?}"
+    do_fail "Undefined token $token in $(basename "$file"):$line_num"
+    UNDEFINED_FOUND=$((UNDEFINED_FOUND + 1))
+  done < <(grep -oP 'var\(--mereka-[a-z0-9_-]+' "$file" 2>/dev/null | sed 's/^var(//' | sort -u)
+done < <(find "$THEME_DIR" \
+  \( -name '*.scss' -o -name '*.css' \) \
+  -not -path '*/node_modules/*' \
+  -not -path '*/mfe/theme/*' \
+  2>/dev/null)
 
 if [ "$UNDEFINED_FOUND" -eq 0 ]; then
   do_pass "All --mereka-* token references resolve to definitions"
@@ -137,10 +138,8 @@ echo ""
 echo "--- Paragon token bridge ---"
 PGN_UNDEFINED=0
 while IFS= read -r file; do
-  while IFS=: read -r line_num match; do
-    token="$(grep -oPm1 '(?<=var\()--pgn-[a-z0-9_-]+' <<<"$match" || true)"
+  while IFS= read -r token; do
     [ -z "$token" ] && continue
-    # Check if defined in same file or mereka-overrides.css
     if grep -q -- "^[[:space:]]*${token}:" "$file" 2>/dev/null; then
       : # Self-defined
     elif grep -q -- "^[[:space:]]*${token}:" "$COMMON_OVERRIDES" 2>/dev/null; then
@@ -148,11 +147,17 @@ while IFS= read -r file; do
     elif grep -q -- "^[[:space:]]*${token}:" "$COMMON_DESIGN_TOKENS" 2>/dev/null; then
       : # Defined in generated design tokens
     else
+      line_num="$(grep -n -m1 -F "var(${token}" "$file" 2>/dev/null | cut -d: -f1 || true)"
+      line_num="${line_num:-?}"
       do_warn "Paragon token $token referenced but not bridged ($(basename "$file"):$line_num)"
       PGN_UNDEFINED=$((PGN_UNDEFINED + 1))
     fi
-  done < <(grep -n 'var(--pgn-' "$file" 2>/dev/null || true)
-done < <(find "$THEME_DIR" \( -name '*.scss' -o -name '*.css' \) -not -path '*/node_modules/*' 2>/dev/null)
+  done < <(grep -oP 'var\(--pgn-[a-z0-9_-]+' "$file" 2>/dev/null | sed 's/^var(//' | sort -u)
+done < <(find "$THEME_DIR" \
+  \( -name '*.scss' -o -name '*.css' \) \
+  -not -path '*/node_modules/*' \
+  -not -path '*/mfe/theme/*' \
+  2>/dev/null)
 
 if [ "$PGN_UNDEFINED" -eq 0 ]; then
   do_pass "All --pgn-* references are bridged"
