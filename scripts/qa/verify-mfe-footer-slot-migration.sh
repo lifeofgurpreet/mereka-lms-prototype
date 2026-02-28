@@ -227,87 +227,88 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# AC-FRONT-065: Authn and learner-dashboard route coverage verified
+# AC-FRONT-065: Authn + learner-dashboard coverage uses slots; dead selectors stay removed
 # ---------------------------------------------------------------------------
-echo "--- AC-FRONT-065: Authn + Learner Dashboard Route Coverage ---"
+echo "--- AC-FRONT-065: Authn + Learner Dashboard Coverage Contract ---"
 
 if [[ ! -f "$SCSS_FILE" ]]; then
-  fail "AC-FRONT-065: mereka.scss not found — cannot verify route coverage"
+  fail "AC-FRONT-065: mereka.scss not found — cannot verify coverage contract"
 else
-  # Check authn route selectors present
-  AUTHN_SELECTORS=$(grep -E 'class\*="authn"|class\*="login-register"|authn\"|login-register\"' \
-    "$SCSS_FILE" | wc -l | tr -d ' ' || true)
-  echo "  Authn selector coverage lines: $AUTHN_SELECTORS"
-
-  if [[ "$AUTHN_SELECTORS" -ge 2 ]]; then
-    pass "AC-FRONT-065: Found authn selector coverage in mereka.scss ($AUTHN_SELECTORS line(s))"
-  else
-    fail "AC-FRONT-065: Insufficient authn selector coverage in mereka.scss ($AUTHN_SELECTORS)"
-  fi
-
-  # Check learner-dashboard route selectors present
-  DASHBOARD_SELECTORS=$(grep -E 'class\*="account-settings"|class\*="account-page"|class\*="learner-dashboard"' \
-    "$SCSS_FILE" | wc -l | tr -d ' ' || true)
-  echo "  Learner dashboard selector coverage lines: $DASHBOARD_SELECTORS"
-
-  if [[ "$DASHBOARD_SELECTORS" -ge 3 ]]; then
-    pass "AC-FRONT-065: Found learner-dashboard selector coverage in mereka.scss ($DASHBOARD_SELECTORS line(s))"
-  else
-    fail "AC-FRONT-065: Insufficient learner-dashboard selector coverage in mereka.scss ($DASHBOARD_SELECTORS)"
-  fi
-
-  # Check that authn selectors have RISK tags (confirms they were reviewed).
-  # Strategy: look for a /* RISK: HIGH */ comment within 30 lines before any
-  # authn-related selector, or on the same comment block line.
-  AUTHN_HIGH_RISK=$(python3 -c "
-scss = open('$SCSS_FILE').read()
-lines = scss.splitlines()
-authn_keywords = ('authn', 'login-page', 'register-page', 'login-register')
+  ACTIVE_AUTHN_WILDCARDS=$(python3 - "$SCSS_FILE" <<'PY'
+import re, sys
+lines = open(sys.argv[1]).read().splitlines()
 count = 0
-for idx, line in enumerate(lines):
-    if not any(kw in line for kw in authn_keywords):
+for line in lines:
+    s = line.strip()
+    if s.startswith('//') or s.startswith('/*') or s.startswith('*') or not s:
         continue
-    # Look back up to 30 lines for a RISK: HIGH comment
-    window = lines[max(0, idx - 30):idx + 1]
-    if any('RISK: HIGH' in w for w in window):
+    if re.search(r'class\*=\"(authn|login-register)\"', line):
         count += 1
-        break  # at least one is enough
 print(count)
-" 2>/dev/null || echo "0")
-
-  if [[ "$AUTHN_HIGH_RISK" -ge 1 ]]; then
-    pass "AC-FRONT-065: Authn surfaces have HIGH-risk tags ($AUTHN_HIGH_RISK block(s))"
+PY
+)
+  echo "  Active authn wildcard selector lines: $ACTIVE_AUTHN_WILDCARDS"
+  if [[ "$ACTIVE_AUTHN_WILDCARDS" -eq 0 ]]; then
+    pass "AC-FRONT-065: Authn wildcard selectors are absent from active CSS (dead-selector cleanup preserved)"
   else
-    fail "AC-FRONT-065: No HIGH-risk tags found for authn surfaces (expected >= 1)"
+    fail "AC-FRONT-065: Authn wildcard selectors regressed into active CSS ($ACTIVE_AUTHN_WILDCARDS)"
   fi
 
-  # Check dashboard surfaces have RISK tags
-  DASHBOARD_HIGH_RISK=$(python3 -c "
-import re
-scss = open('$SCSS_FILE').read()
-sections = re.split(r'/\* RISK:', scss)
+  ACTIVE_DASH_WILDCARDS=$(python3 - "$SCSS_FILE" <<'PY'
+import re, sys
+lines = open(sys.argv[1]).read().splitlines()
 count = 0
-for s in sections:
-    if s.startswith('HIGH') and ('learner-dashboard' in s or 'course-grid' in s or 'course-list' in s or 'course-card' in s or 'course.*img' in s):
+for line in lines:
+    s = line.strip()
+    if s.startswith('//') or s.startswith('/*') or s.startswith('*') or not s:
+        continue
+    if re.search(r'class\*=\"learner-dashboard\"', line):
         count += 1
-# Also count structural learner-dashboard blocks
-count += len(re.findall(r'RISK: HIGH[^\n]*\n.*learner-dashboard', scss))
-print(min(count, 99))
-" 2>/dev/null || echo "0")
-
-  if [[ "$DASHBOARD_HIGH_RISK" -ge 1 ]]; then
-    pass "AC-FRONT-065: Dashboard surfaces have HIGH-risk tags ($DASHBOARD_HIGH_RISK block(s))"
+print(count)
+PY
+)
+  echo "  Active learner-dashboard wildcard selector lines: $ACTIVE_DASH_WILDCARDS"
+  if [[ "$ACTIVE_DASH_WILDCARDS" -eq 0 ]]; then
+    pass "AC-FRONT-065: Learner-dashboard wildcard selectors are absent from active CSS"
   else
-    warn "AC-FRONT-065: Dashboard HIGH-risk tag count unclear ($DASHBOARD_HIGH_RISK) — manual verification recommended"
+    fail "AC-FRONT-065: Learner-dashboard wildcard selectors regressed into active CSS ($ACTIVE_DASH_WILDCARDS)"
   fi
 
-  # Verify plugin file references authn/dashboard via slot OR env-config coverage
+  ACCOUNT_SCOPE_LINES=$(python3 - "$SCSS_FILE" <<'PY'
+import re, sys
+lines = open(sys.argv[1]).read().splitlines()
+count = 0
+for line in lines:
+    s = line.strip()
+    if s.startswith('//') or s.startswith('/*') or s.startswith('*') or not s:
+        continue
+    if re.search(r'class\*=\"account-settings\"|\.page__account-settings', line):
+        count += 1
+print(count)
+PY
+)
+  echo "  Active account-settings scope lines: $ACCOUNT_SCOPE_LINES"
+  if [[ "$ACCOUNT_SCOPE_LINES" -ge 1 ]]; then
+    pass "AC-FRONT-065: Account settings surface retains scoped CSS coverage"
+  else
+    fail "AC-FRONT-065: Missing scoped account settings coverage in active CSS"
+  fi
+
   if [[ -f "$PLUGIN_FILE" ]]; then
-    if grep -q 'mfe-env-config\|mereka.scss\|authn\|learner.dashboard' "$PLUGIN_FILE"; then
-      pass "AC-FRONT-065: Plugin file references authn/dashboard surface coverage"
+    if grep -q 'org.openedx.frontend.authn.login_component.v1' "$PLUGIN_FILE"; then
+      pass "AC-FRONT-065: Authn login component slot is registered"
     else
-      warn "AC-FRONT-065: Plugin file has no explicit authn/dashboard reference (coverage via SCSS)"
+      fail "AC-FRONT-065: Authn login component slot not registered"
     fi
+
+    if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE" && \
+       grep -q 'org.openedx.frontend.learner_dashboard.no_courses_view.v1' "$PLUGIN_FILE"; then
+      pass "AC-FRONT-065: Learner dashboard slots are registered (sidebar + no-courses view)"
+    else
+      fail "AC-FRONT-065: Learner dashboard slot coverage incomplete in plugin"
+    fi
+  else
+    fail "AC-FRONT-065: mereka_lms.py not found — cannot verify slot coverage"
   fi
 fi
 
@@ -324,7 +325,7 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "3. Keep apply-patches.sh free of structural footer/layout string rewrites"
   echo "4. Add 'Plugin Slot Migration' section to docs/branding/BRANDING_OPERATING_MODEL.md"
   echo "   documenting canonical slot IDs, fallback/exception paths, and rollback procedure"
-  echo "5. Ensure authn and learner-dashboard selectors are present and RISK-tagged in mereka.scss"
+  echo "5. Keep dead authn/dashboard wildcard selectors removed; enforce slot coverage in mereka_lms.py"
   exit 1
 fi
 
