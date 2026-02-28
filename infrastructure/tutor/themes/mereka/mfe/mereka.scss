@@ -400,8 +400,8 @@ label {
 /* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 
 /* .page__account-settings removed 2026-02-28: account styling is now slot-owned
- * via org.openedx.frontend.account.account_settings_tab.v1 and
- * org.openedx.frontend.account.account_settings_field.v1.
+ * via org.openedx.frontend.account.id_verification_page.v1 and
+ * org.openedx.frontend.account.additional_profile_fields.v1.
  */
 
 /* [class*="learner-dashboard"] removed 2026-02-28 (dead selector audit, no live DOM matches). */
