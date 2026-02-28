@@ -21,6 +21,7 @@ RUN_A11Y="${RUN_A11Y:-1}"
 RUN_PERFORMANCE="${RUN_PERFORMANCE:-1}"
 RUN_CERTIFICATE_BRANDING="${RUN_CERTIFICATE_BRANDING:-1}"
 RUN_EMAIL_TEMPLATE_BRANDING="${RUN_EMAIL_TEMPLATE_BRANDING:-1}"
+RUN_PARAGON_THEME_BUDGET="${RUN_PARAGON_THEME_BUDGET:-1}"
 RUN_SLOT_COVERAGE="${RUN_SLOT_COVERAGE:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
@@ -50,6 +51,8 @@ Environment toggles:
                             Enable/disable certificate/email branding gate (default: 1)
   RUN_EMAIL_TEMPLATE_BRANDING=0|1
                             Enable/disable email template branding gate (default: 1)
+  RUN_PARAGON_THEME_BUDGET=0|1
+                            Enable/disable Paragon theme CSS size/token budget gate (default: 1)
   RUN_SLOT_COVERAGE=0|1     Enable/disable FPF slot coverage truth gate (default: 1)
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
@@ -119,6 +122,7 @@ echo "A11y gate enabled: $RUN_A11Y"
 echo "Performance gate enabled: $RUN_PERFORMANCE"
 echo "Certificate branding gate enabled: $RUN_CERTIFICATE_BRANDING"
 echo "Email template branding gate enabled: $RUN_EMAIL_TEMPLATE_BRANDING"
+echo "Paragon theme budget gate enabled: $RUN_PARAGON_THEME_BUDGET"
 echo "Slot coverage gate enabled: $RUN_SLOT_COVERAGE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
@@ -246,7 +250,15 @@ else
   skip_gate "frontend-performance-spotcheck" "RUN_PERFORMANCE=0"
 fi
 
-# --- Gate 10: Certificate + Email Branding Contract ---
+# --- Gate 10: Paragon Theme Budget Contract ---
+if [[ "$RUN_PARAGON_THEME_BUDGET" == "1" ]]; then
+  run_gate "paragon-theme-budget" \
+    ./scripts/qa/verify-paragon-token-coverage.sh
+else
+  skip_gate "paragon-theme-budget" "RUN_PARAGON_THEME_BUDGET=0"
+fi
+
+# --- Gate 11: Certificate + Email Branding Contract ---
 if [[ "$RUN_CERTIFICATE_BRANDING" == "1" ]]; then
   run_gate "certificate-branding" \
     ./scripts/qa/verify-certificate-branding.sh
@@ -254,7 +266,7 @@ else
   skip_gate "certificate-branding" "RUN_CERTIFICATE_BRANDING=0"
 fi
 
-# --- Gate 11: Email Template Branding Contract ---
+# --- Gate 12: Email Template Branding Contract ---
 if [[ "$RUN_EMAIL_TEMPLATE_BRANDING" == "1" ]]; then
   run_gate "email-template-branding" \
     ./scripts/qa/verify-email-template-multilang.sh
@@ -262,7 +274,7 @@ else
   skip_gate "email-template-branding" "RUN_EMAIL_TEMPLATE_BRANDING=0"
 fi
 
-# --- Gate 12: Public Screenshot Capture (optional operator evidence) ---
+# --- Gate 13: Public Screenshot Capture (optional operator evidence) ---
 if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
   run_gate "capture-branding-screenshots" \
     ./scripts/qa/capture-branding-screenshots.sh "$ENV"
@@ -296,6 +308,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - A11y script: ${A11Y_SCRIPT}
 - A11y args: ${A11Y_ARGS}
 - Performance gate enabled: ${RUN_PERFORMANCE}
+- Paragon theme budget gate enabled: ${RUN_PARAGON_THEME_BUDGET}
 - Certificate branding gate enabled: ${RUN_CERTIFICATE_BRANDING}
 - Email template branding gate enabled: ${RUN_EMAIL_TEMPLATE_BRANDING}
 - Slot coverage gate enabled: ${RUN_SLOT_COVERAGE}
