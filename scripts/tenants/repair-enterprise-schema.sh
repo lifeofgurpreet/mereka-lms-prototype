@@ -62,17 +62,24 @@ django.setup()
 from django.db import connection
 from enterprise.models import EnterpriseCustomer
 
-required_candidates = [
+required_fields = [
     "identity_provider",
     "enable_career_engagement_network_on_learner_portal",
 ]
+
 model_fields = {f.name for f in EnterpriseCustomer._meta.get_fields()}
-required = [c for c in required_candidates if c in model_fields]
+model_missing = [field for field in required_fields if field not in model_fields]
 with connection.cursor() as cursor:
-    cols = {c.name for c in connection.introspection.get_table_description(cursor, "enterprise_enterprisecustomer")}
-missing = [c for c in required if c not in cols]
-print(json.dumps({"required": required, "missing": missing}, sort_keys=True))
-if missing:
+    db_columns = {c.name for c in connection.introspection.get_table_description(cursor, "enterprise_enterprisecustomer")}
+db_missing = [field for field in required_fields if field not in db_columns]
+
+print(json.dumps({
+    "required": required_fields,
+    "model_missing": model_missing,
+    "db_missing": db_missing,
+}, sort_keys=True))
+
+if model_missing or db_missing:
     raise SystemExit(2)
 PY
 }
@@ -86,9 +93,15 @@ if [[ "$APPLY" -eq 1 ]]; then
 fi
 
 echo "Checking enterprise schema integrity..."
-if check_schema; then
-  echo "PASS: enterprise schema is aligned with required model fields"
+if output=$(check_schema 2>&1); then
+  echo "PASS: enterprise schema is aligned with required fields"
+  echo "$output"
 else
+  status=$?
   echo "FAIL: enterprise schema drift remains"
+  echo "$output"
+  if [[ $status -eq 2 ]]; then
+    echo "Required fields must exist in both model and DB: identity_provider, enable_career_engagement_network_on_learner_portal"
+  fi
   exit 1
 fi
