@@ -1,6 +1,10 @@
 # MFE Selector Audit — T102
 
 > **Authoritative**: This is the canonical selector audit. It supersedes [MFE_SELECTOR_HARDENING_AUDIT.md](../operations/MFE_SELECTOR_HARDENING_AUDIT.md) (2026-02-18).
+>
+> **2026-02-28 Update**: Parts of this document are now historical. For current selector reality (including dead-selector removals for `authn`, `learner-dashboard`, `learning`, `discussions`), use:
+> - [MFE_SELECTOR_OVERRIDE_INVENTORY.md](./MFE_SELECTOR_OVERRIDE_INVENTORY.md)
+> - [FPF_PLUGIN_SLOT_REGISTRY.md](./FPF_PLUGIN_SLOT_REGISTRY.md)
 
 **Date**: 2026-02-25
 **Task**: T102 — Reduce MFE brittle selectors by 50%
