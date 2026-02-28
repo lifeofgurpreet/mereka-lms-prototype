@@ -36,6 +36,32 @@ check_contains() {
   fi
 }
 
+check_mfe_token_stack_imports() {
+  local label="$1"
+  local path="$2"
+
+  if [[ ! -f "$path" ]]; then
+    echo "  ✗ $label (missing file: $path)"
+    failures=1
+    return
+  fi
+
+  if grep -q -- '@import "./scss/theme";' "$path"; then
+    echo "  ✓ $label (legacy theme import)"
+    return
+  fi
+
+  if grep -q -- '@import "./scss/fonts";' "$path" \
+    && grep -q -- '@import "./scss/tokens";' "$path" \
+    && grep -q -- '@import "./scss/base";' "$path"; then
+    echo "  ✓ $label (split fonts/tokens/base imports)"
+    return
+  fi
+
+  echo "  ✗ $label (missing legacy theme import or split shared stack imports)"
+  failures=1
+}
+
 echo "Verifying Mereka branding health..."
 echo ""
 
@@ -96,7 +122,7 @@ check_contains "CMS theme imports shared tokens" "$CMS_THEME_SCSS" '@import "../
 check_file "CMS runtime overrides CSS" "$CMS_OVERRIDE_CSS"
 check_contains "CMS head-extra links runtime overrides" "$CMS_HEAD_EXTRA_TEMPLATE" "mereka/css/mereka-overrides.css"
 check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
-check_contains "MFE theme imports shared tokens" "$MFE_SCSS" '@import "./scss/theme";'
+check_mfe_token_stack_imports "MFE theme imports shared token stack" "$MFE_SCSS"
 check_contains "MFE theme exports branding revision marker" "$MFE_SCSS" '--mereka-mfe-branding-rev'
 check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
 check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
