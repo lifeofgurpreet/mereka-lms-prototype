@@ -29,6 +29,45 @@ fi
 ts="$(date -u +%Y%m%dT%H%M%SZ)"
 OUT_DIR="$REPO_ROOT/var/screenshots/${ENVIRONMENT}/${ts}"
 mkdir -p "$OUT_DIR"
+AB_TIMEOUT_SECONDS="${AGENT_BROWSER_TIMEOUT_SECONDS:-45}"
+
+ab_run() {
+  timeout --foreground "${AB_TIMEOUT_SECONDS}s" agent-browser "$@" 2>&1
+}
+
+ab() {
+  local out status uid session cmd
+  cmd="$*"
+  if out="$(ab_run "$@")"; then
+    [[ -n "$out" ]] && echo "$out"
+    return 0
+  fi
+  status=$?
+  if [[ "$status" -eq 124 ]]; then
+    echo "agent-browser timed out after ${AB_TIMEOUT_SECONDS}s: ${cmd}" >&2
+    return 124
+  fi
+  if grep -q "Daemon failed to start" <<<"$out"; then
+    uid="$(id -u)"
+    session="${AGENT_BROWSER_SESSION:-default}"
+    rm -f \
+      "/run/user/${uid}/agent-browser/${session}.sock" \
+      "/tmp/agent-browser-runtime-${uid}/agent-browser/${session}.sock" \
+      2>/dev/null || true
+    sleep 1
+    if out="$(ab_run "$@")"; then
+      [[ -n "$out" ]] && echo "$out"
+      return 0
+    fi
+    status=$?
+    if [[ "$status" -eq 124 ]]; then
+      echo "agent-browser timed out after ${AB_TIMEOUT_SECONDS}s (retry): ${cmd}" >&2
+      return 124
+    fi
+  fi
+  echo "$out" >&2
+  return "$status"
+}
 
 base_lms="$LMS_DOMAIN"
 base_studio="$STUDIO_DOMAIN"
@@ -57,6 +96,7 @@ declare -a URLS=(
   "lms-courses|https://${base_lms}/courses"
   "studio-home|https://${base_studio}/"
   "mfe-authn-login|https://${base_mfe}/authn/login"
+  "mfe-learning|https://${base_mfe}/learning/"
   "mfe-account|https://${base_mfe}/account/"
   "mfe-account-settings|https://${base_mfe}/account/settings"
   "mfe-learner-dashboard|https://${base_mfe}/learner-dashboard/"
@@ -90,7 +130,7 @@ sanitize() {
 }
 
 echo "Capturing screenshots to: $OUT_DIR"
-agent-browser set viewport 1440 900 >/dev/null
+ab set viewport 1440 900 >/dev/null
 
 for entry in "${URLS[@]}"; do
   label="${entry%%|*}"
@@ -98,11 +138,11 @@ for entry in "${URLS[@]}"; do
   file="$OUT_DIR/$(sanitize "$label").png"
 
   echo "- $label: $url"
-  agent-browser open "$url" >/dev/null
-  agent-browser wait --load networkidle >/dev/null || true
-  agent-browser screenshot --full "$file" >/dev/null
+  ab open "$url" >/dev/null
+  ab wait --load networkidle >/dev/null || true
+  ab screenshot --full "$file" >/dev/null
 done
 
-agent-browser close >/dev/null || true
+ab close >/dev/null || true
 
 echo "OK"
