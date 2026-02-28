@@ -3,7 +3,9 @@ _Audience: Platform Eng + Enterprise Operations • Owner: Engineering Lead • 
 
 This runbook covers operational procedures for the enterprise microservices suite.
 
-> **Status**: Enterprise microservices are **deployed in production** (Tier 1).
+> **Status**: Enterprise microservices are deployed with two operational profiles:
+> - **active profile**: services scaled up and serving traffic
+> - **parked profile**: services intentionally scaled to `0` until activation window
 > **Spec**: `specs/enterprise-microservices_spec.md`
 > **Testmap**: `specs/testmaps/enterprise-microservices_spec.testmap.yml`
 
@@ -51,6 +53,10 @@ This runbook covers operational procedures for the enterprise microservices suit
    STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 ./scripts/qa/verify-multisite-config.sh prod
    ./scripts/qa/verify-enterprise-service-deployment.sh
    ./scripts/migrations/run-verification-pipeline.sh
+   ```
+   If environment is intentionally parked (all enterprise deployments at `replicas=0`), use:
+   ```bash
+   ./scripts/qa/verify-enterprise-service-deployment.sh --allow-parked-services
    ```
 4. Configure enterprise catalogs/license pools and role assignments as required by the customer onboarding plan.
 

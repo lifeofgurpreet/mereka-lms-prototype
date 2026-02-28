@@ -57,6 +57,11 @@ STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 ./scripts/qa/verify-multisite-config.
 ./scripts/migrations/run-verification-pipeline.sh
 ```
 
+If enterprise services are intentionally parked at `replicas=0` during a staged rollout window, replace the deployment check with:
+```bash
+./scripts/qa/verify-enterprise-service-deployment.sh --allow-parked-services
+```
+
 ### Manual Procedure (Alternative)
 1. **Create Site and SiteConfiguration**:
    ```bash
