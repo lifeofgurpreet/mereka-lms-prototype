@@ -272,6 +272,10 @@ def main() -> int:
 
     scan_dirs = [repo_root / d for d in args.scan_dirs]
     manual_file = Path(args.manual_file) if args.manual_file else None
+    if manual_file is None:
+        default_manual = (repo_root / "specs" / "manual_verifications.yaml").resolve()
+        if default_manual.exists():
+            manual_file = default_manual
 
     files = find_markdown_files(target)
     spec_files = [f for f in files if is_spec_like(f)]
