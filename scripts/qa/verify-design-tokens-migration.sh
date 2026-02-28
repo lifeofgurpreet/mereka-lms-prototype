@@ -239,6 +239,11 @@ echo "--- Canonical Paragon token policy (no short-form names) ---"
 
 legacy_pgn_short_forms=(
   --pgn-color-primary
+  --pgn-color-secondary
+  --pgn-color-success
+  --pgn-color-info
+  --pgn-color-warning
+  --pgn-color-danger
   --pgn-border-radius
   --pgn-border-radius-sm
   --pgn-border-radius-lg

@@ -122,7 +122,7 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 | Footer (MFE) | `org.openedx.frontend.layout.footer.v1` slot | `footer-slot` plugin only | Implemented in `mereka_lms.py` |
 | Header logo (MFE) | `org.openedx.frontend.layout.header_logo.v1` slot | `header-logo-slot` | Implemented in `mereka_lms.py` |
 | Logo paths | LMS/MFE theme asset + CSS overrides in shell / `mereka.scss` | `logo-slot` (MFE), theme asset fallback (LMS) | Planned for LMS shell; plugin is in MFE shell |
-| Auth page layout | `[class*="authn"]` CSS overrides in `mereka.scss` | Authn MFE plugin slot (when available) | Blocked — no slot exposed upstream yet |
+| Auth page layout | Dead selectors removed; `login_component.v1` slot available | Authn MFE plugin slot injection | Slot available but not yet wired — Phase D candidate |
 
 ---
 
@@ -164,26 +164,26 @@ Inspected the actual top-level wrapper class names emitted by each Ulmo MFE at r
 
 ### Results
 
-| Selector | Target MFE | Status | Actual DOM class | Lines |
-|----------|-----------|--------|------------------|-------|
-| `[class*="authn"]` | Authn | **DEAD** | No element has "authn" in its class attribute. Authn MFE uses Paragon layout components with `pgn__` classes. | 258-314 |
-| `[class*="login-register"]` | Authn | **DEAD** | Same — no element contains "login-register" substring. | 258-314 |
-| `.page__account-settings` | Account | **LIVE** | Matches the Account MFE wrapper div directly. | 324-384 |
-| `[class*="account-page"]` | Account | **DEAD** | No element contains "account-page" substring in Ulmo Account MFE. | 324-384 |
-| `[class*="learner-dashboard"]` | Learner Dashboard | **DEAD** | Dashboard MFE uses Paragon `pgn__page-container` — no "learner-dashboard" class. | 324-522 |
-| `[class*="learning"]` | Learning | **DEAD** | Learning MFE uses generic Paragon layout — no element has "learning" in class. | 429-504 |
-| `[class*="my-courses"]` | Learning | **DEAD** | Not present as a class in the DOM. | 449, 496 |
-| `[class*="discover"]` | Learning | **DEAD** | Not present as a class in the DOM. | 496-503 |
-| `[class*="course-grid"]` | Learner Dashboard / Learning | **DEAD** | Nested under dead parent scope — even if this class existed, parent match fails. | 407, 437 |
-| `[class*="course-list"]` | Learner Dashboard / Learning | **DEAD** | Same — nested under dead parent. | 407, 437 |
-| `[class*="discussions"]` | Discussions | **DEAD** | Discussions MFE uses `pgn__` layout — no "discussions" class on any element. | 545-568 |
+| Selector | Target MFE | Status | Actual DOM class | Resolution |
+|----------|-----------|--------|------------------|------------|
+| `[class*="authn"]` | Authn | **REMOVED** | No element has "authn" in its class attribute. Authn MFE uses Paragon layout components with `pgn__` classes. | Tombstone comment at line 307 |
+| `[class*="login-register"]` | Authn | **REMOVED** | Same — no element contains "login-register" substring. | Removed with authn block |
+| `.page__account-settings` | Account | **LIVE** | Matches the Account MFE wrapper div directly. | Retained as explicit class scope (no wildcard) |
+| `[class*="account-page"]` | Account | **REMOVED** | No element contains "account-page" substring in Ulmo Account MFE. | Replaced by explicit `.page__account-settings` |
+| `[class*="learner-dashboard"]` | Learner Dashboard | **REMOVED** | Dashboard MFE uses Paragon `pgn__page-container` — no "learner-dashboard" class. | Tombstone comment at line 352 |
+| `[class*="learning"]` | Learning | **REMOVED** | Learning MFE uses generic Paragon layout — no element has "learning" in class. | Tombstone comment at line 353 |
+| `[class*="my-courses"]` | Learning | **REMOVED** | Not present as a class in the DOM. | Removed with learning block |
+| `[class*="discover"]` | Learning | **REMOVED** | Not present as a class in the DOM. | Removed with learning block |
+| `[class*="course-grid"]` | Learner Dashboard / Learning | **REMOVED** | Nested under dead parent scope — parent match fails. | Removed with dashboard/learning blocks |
+| `[class*="course-list"]` | Learner Dashboard / Learning | **REMOVED** | Same — nested under dead parent. | Removed with dashboard/learning blocks |
+| `[class*="discussions"]` | Discussions | **REMOVED** | Discussions MFE uses `pgn__` layout — no "discussions" class on any element. | Tombstone comment at line 365 |
 
 ### Impact Assessment
 
-- **~60% of mereka.scss lines 250-570 are dead CSS** — they compile, ship in every MFE bundle, but apply to nothing.
-- **Only `.page__account-settings`** is confirmed LIVE for account-surface scoping.
-- **Estimated dead CSS weight**: ~5-8KB uncompressed per MFE build.
-- **Risk**: Zero runtime risk (dead CSS is harmless). But it creates a false sense of branding coverage — developers think these surfaces are styled when they are not.
+- **All dead selectors have been removed** from `mereka.scss` (10 of 11 selectors).
+- **Only `.page__account-settings`** is retained as a LIVE explicit class scope (no wildcard).
+- **Estimated CSS weight savings**: ~5-8KB uncompressed per MFE build.
+- **Tombstone comments** left at removal points for future reference.
 
 ### Implications for Phase C/D
 
@@ -214,3 +214,4 @@ Inspected the actual top-level wrapper class names emitted by each Ulmo MFE at r
 | 2026-02-28 | codex | Realigned inventory with live T102 state and updated migration rationale |
 | 2026-02-28 | codex | Added Phase D `SAFE_TO_SLOT` / `NEEDS_KEEP` classification for header/footer/authn selectors and slot-owned surfaces |
 | 2026-02-28 | opus | **CRITICAL**: Dead selector audit — ~60% of scoped selectors are phantom CSS matching no DOM elements |
+| 2026-02-28 | opus | Post-implementation review: Updated audit table from DEAD→REMOVED status, fixed stale line references, updated authn migration status |

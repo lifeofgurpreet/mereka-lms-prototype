@@ -22,7 +22,7 @@ assert_contains() {
   local file="$1"
   local pattern="$2"
   local msg="$3"
-  if rg -n --pcre2 -- "$pattern" "$file" >/dev/null 2>&1; then
+  if rg -n -- "$pattern" "$file" >/dev/null 2>&1; then
     pass "$msg"
   else
     fail "$msg"
@@ -33,7 +33,7 @@ assert_not_contains() {
   local file="$1"
   local pattern="$2"
   local msg="$3"
-  if rg -n --pcre2 -- "$pattern" "$file" >/dev/null 2>&1; then
+  if rg -n -- "$pattern" "$file" >/dev/null 2>&1; then
     fail "$msg"
   else
     pass "$msg"

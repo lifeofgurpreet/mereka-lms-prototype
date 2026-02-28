@@ -64,11 +64,11 @@ else
   fail "_tokens.scss missing generation markers"
 fi
 
-TOKENS_STYLE_VIOLATIONS="$(python3 - <<'PY'
-import re
+TOKENS_STYLE_VIOLATIONS="$(python3 - "$REPO_ROOT" <<'PY'
+import re, sys
 from pathlib import Path
 
-path = Path("infrastructure/tutor/themes/mereka/scss/_tokens.scss")
+path = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 text = path.read_text(encoding="utf-8").splitlines()
 violations = []
 
@@ -109,11 +109,11 @@ else
 fi
 
 echo "--- Check 3: No legacy LMS/Studio selectors in MFE stylesheet ---"
-LEGACY_SELECTOR_HITS="$(python3 - <<'PY'
-import re
+LEGACY_SELECTOR_HITS="$(python3 - "$REPO_ROOT" <<'PY'
+import re, sys
 from pathlib import Path
 
-path = Path("infrastructure/tutor/themes/mereka/mfe/mereka.scss")
+path = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 patterns = (
     r"\.dashboard\b",
     r"\.listing-courses\b",

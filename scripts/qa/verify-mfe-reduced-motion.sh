@@ -40,12 +40,12 @@ else
 fi
 
 echo "--- Check 2: transform rules are guarded ---"
-PY_OUT="$(python3 - <<'PY'
-import json
+PY_OUT="$(python3 - "$REPO_ROOT" <<'PY'
+import json, sys
 import re
 from pathlib import Path
 
-path = Path("infrastructure/tutor/themes/mereka/mfe/mereka.scss")
+path = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 lines = path.read_text(encoding="utf-8").splitlines()
 
 stack = []

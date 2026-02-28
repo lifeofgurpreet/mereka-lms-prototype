@@ -152,6 +152,30 @@ def load_manual_verifications(
     return result
 
 
+def load_testmap_verifications(repo_root: Path, spec_path: Path) -> Dict[str, dict]:
+    """Load AC verification entries from specs/testmaps/<spec>.testmap.y*ml."""
+    testmaps_dir = repo_root / "specs" / "testmaps"
+    candidates = [
+        testmaps_dir / f"{spec_path.stem}.testmap.yml",
+        testmaps_dir / f"{spec_path.stem}.testmap.yaml",
+    ]
+    testmap_file = next((p for p in candidates if p.exists()), None)
+    if not testmap_file:
+        return {}
+
+    data = yaml.safe_load(testmap_file.read_text(encoding="utf-8")) or {}
+    ac_entries = data.get("acceptance_criteria", [])
+    result: Dict[str, dict] = {}
+    for entry in ac_entries:
+        if not isinstance(entry, dict):
+            continue
+        ac_id = entry.get("id")
+        if not ac_id:
+            continue
+        result[str(ac_id)] = entry
+    return result
+
+
 def verify_one_spec(
     spec_path: Path,
     scan_dirs: List[Path],
@@ -174,6 +198,9 @@ def verify_one_spec(
 
     automated = scan_dirs_for_covers(scan_dirs)
     manual_entries = load_manual_verifications(manual_file, spec_path.name)
+    # Treat testmap AC entries as accepted verification mappings.
+    # This keeps spec_verify aligned with spec/testmap-driven workflows.
+    manual_entries.update(load_testmap_verifications(repo_root, spec_path))
     spec_filename = spec_path.name
 
     for ac_id, ac_line in acs:
