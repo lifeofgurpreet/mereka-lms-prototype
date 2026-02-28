@@ -543,3 +543,21 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 
 - Both pass in source mode after patch.
 - Runtime remains pending until next MFE/Caddy deployment rolls out this Caddyfile update.
+
+## Addendum — Legacy Email Notification Verifier Realignment
+
+### Command Run
+
+```bash
+./scripts/qa/verify-email-notifications.sh
+```
+
+### Result
+
+- Summary improved to: `PASS=32`, `FAIL=0`, `SKIP=4` (previously large stale-skip surface).
+- Verifier now targets current implementation paths:
+  - template root: `infrastructure/tutor/custom-apps/openedx_email_templates/templates/email`
+  - modern settings candidates (overlay + base LMS production settings)
+  - SES SMTP wiring in `deploy/k8s/patches/smtp-ses-relay.yaml` and related manifests
+  - List-Unsubscribe middleware path in `infrastructure/tutor/plugins/email-preferences/.../middleware.py`
+- AC-110 and AC-026 now validate all 15 message-type template pairs and `ms`/`zh-hans` locale variants directly.

@@ -27,6 +27,19 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+PROD_SETTINGS_CANDIDATES=(
+  "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+  "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+  "deploy/k8s/base/apps/openedx/settings/lms/production.py"
+)
+PROD_SETTINGS=""
+for candidate in "${PROD_SETTINGS_CANDIDATES[@]}"; do
+  if [[ -f "$candidate" ]]; then
+    PROD_SETTINGS="$candidate"
+    break
+  fi
+done
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -48,9 +61,8 @@ echo ""
 
 # Check 1: ACE configuration in production settings
 echo "Checking AC-111: ACE enabled channels configuration..."
-PROD_SETTINGS="../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
 
-if [[ -f "$PROD_SETTINGS" ]]; then
+if [[ -n "$PROD_SETTINGS" ]]; then
   if grep -q "ACE_ENABLED_CHANNELS" "$PROD_SETTINGS"; then
     pass "AC-111: ACE_ENABLED_CHANNELS configuration found"
   else
@@ -69,7 +81,7 @@ if [[ -f "$PROD_SETTINGS" ]]; then
     skip "AC-111: BULK_EMAIL_SEND_USING_EDX_ACE not configured (may not be implemented yet)"
   fi
 else
-  skip "AC-111: Production settings file not found at $PROD_SETTINGS"
+  skip "AC-111: Production settings file not found in known locations"
 fi
 
 echo ""
@@ -78,8 +90,27 @@ echo ""
 echo "Checking AC-110, AC-026: Email templates for message types..."
 
 TEMPLATE_DIRS=(
+  "infrastructure/tutor/custom-apps/openedx_email_templates/templates/email"
   "infrastructure/tutor/themes/mereka/lms/templates/ace"
   "infrastructure/tutor/themes/mereka/lms/templates/emails"
+)
+EMAIL_TEMPLATE_ROOT="infrastructure/tutor/custom-apps/openedx_email_templates/templates/email"
+MESSAGE_TYPES=(
+  "welcome"
+  "enrollment"
+  "grade"
+  "certificate"
+  "deadline"
+  "forum"
+  "password_reset"
+  "account_activation"
+  "course_announcement"
+  "survey"
+  "marketing_promo"
+  "re_engagement"
+  "feedback"
+  "maintenance_notice"
+  "campaign"
 )
 
 TEMPLATE_FOUND=false
@@ -87,37 +118,38 @@ for template_dir in "${TEMPLATE_DIRS[@]}"; do
   if [[ -d "$template_dir" ]]; then
     TEMPLATE_FOUND=true
     pass "AC-110: Email template directory found at $template_dir"
-
-    # Check for message type templates
-    MESSAGE_TYPES=(
-      "enrollment_confirmation"
-      "course_announcement"
-      "certificate_issued"
-      "password_reset"
-    )
-
-    for msg_type in "${MESSAGE_TYPES[@]}"; do
-      if find "$template_dir" -name "*${msg_type}*" -o -name "*enrollment*" -o -name "*announcement*" -o -name "*certificate*" -o -name "*password*" | grep -q .; then
-        pass "AC-110: Templates for $msg_type exist"
-        break
-      fi
-    done
-
-    # Check for multi-language templates
-    LANG_CODES=("en" "ms" "zh")
-    LANG_FOUND=false
-    for lang in "${LANG_CODES[@]}"; do
-      if find "$template_dir" -name "*${lang}*" -o -path "*/${lang}/*" | grep -q .; then
-        LANG_FOUND=true
-        pass "AC-026: Multi-language template support for $lang found"
-      fi
-    done
-
-    if [[ "$LANG_FOUND" = false ]]; then
-      skip "AC-026: Multi-language templates not found (may use runtime translation)"
-    fi
   fi
 done
+
+if [[ -d "$EMAIL_TEMPLATE_ROOT" ]]; then
+  missing_templates=0
+  for msg_type in "${MESSAGE_TYPES[@]}"; do
+    if [[ -f "$EMAIL_TEMPLATE_ROOT/${msg_type}.html" && -f "$EMAIL_TEMPLATE_ROOT/${msg_type}.txt" ]]; then
+      pass "AC-110: Templates for ${msg_type} exist (HTML + TXT)"
+    else
+      missing_templates=$((missing_templates + 1))
+      fail "AC-110: Missing template pair for ${msg_type} (expected ${msg_type}.html/.txt)"
+    fi
+  done
+
+  if [[ "$missing_templates" -eq 0 ]]; then
+    pass "AC-110: All ${#MESSAGE_TYPES[@]} message-type template pairs are present"
+  fi
+
+  if [[ -d "$EMAIL_TEMPLATE_ROOT/ms" ]] && find "$EMAIL_TEMPLATE_ROOT/ms" \( -name "*.html" -o -name "*.txt" \) | grep -q .; then
+    pass "AC-026: Malay (ms) template variants found"
+  else
+    fail "AC-026: Malay (ms) template variants missing"
+  fi
+
+  if [[ -d "$EMAIL_TEMPLATE_ROOT/zh-hans" ]] && find "$EMAIL_TEMPLATE_ROOT/zh-hans" \( -name "*.html" -o -name "*.txt" \) | grep -q .; then
+    pass "AC-026: Chinese (zh-hans) template variants found"
+  else
+    fail "AC-026: Chinese (zh-hans) template variants missing"
+  fi
+else
+  skip "AC-110/AC-026: openedx_email_templates template root not found at $EMAIL_TEMPLATE_ROOT"
+fi
 
 if [[ "$TEMPLATE_FOUND" = false ]]; then
   skip "AC-110: Email template directories not found (may be built into image)"
@@ -128,16 +160,20 @@ echo ""
 # Check 3: SES SMTP credentials in ExternalSecrets
 echo "Checking AC-112: SES SMTP credentials configuration..."
 
-EXTERNAL_SECRETS_FILE="deploy/k8s/base/secrets/external-secrets.yaml"
-
-if [[ -f "$EXTERNAL_SECRETS_FILE" ]]; then
-  if grep -q "ses-smtp-credentials\|SES_SMTP\|RELAY_USERNAME\|RELAY_PASSWORD" "$EXTERNAL_SECRETS_FILE"; then
-    pass "AC-112: SES SMTP credentials mapped in ExternalSecrets"
-  else
-    skip "AC-112: SES SMTP credentials not found in ExternalSecrets (may be separate secret)"
+SES_SECRET_FILES=(
+  "deploy/k8s/patches/smtp-ses-relay.yaml"
+  "deploy/k8s/base/deployments.yml"
+  "deploy/k8s/overlays/local/kustomization.yaml"
+)
+SES_SECRET_FOUND=false
+for ses_file in "${SES_SECRET_FILES[@]}"; do
+  if [[ -f "$ses_file" ]] && grep -q "ses-smtp-credentials\|RELAY_USERNAME\|RELAY_PASSWORD" "$ses_file"; then
+    SES_SECRET_FOUND=true
+    pass "AC-112: SES SMTP credentials wiring found in $ses_file"
   fi
-else
-  skip "AC-112: ExternalSecrets file not found at $EXTERNAL_SECRETS_FILE"
+done
+if [[ "$SES_SECRET_FOUND" = false ]]; then
+  skip "AC-112: SES SMTP credentials wiring not found in known deployment manifests"
 fi
 
 echo ""
@@ -146,8 +182,8 @@ echo ""
 echo "Checking AC-114: Exim relay pod deployment..."
 
 SMTP_DEPLOYMENT_FILES=(
-  "deploy/k8s/base/apps/smtp.yaml"
-  "deploy/k8s/base/services/smtp.yaml"
+  "deploy/k8s/patches/smtp-ses-relay.yaml"
+  "deploy/k8s/base/deployments.yml"
 )
 
 SMTP_FOUND=false
@@ -211,11 +247,25 @@ echo ""
 # Check 7: SNS webhook configuration
 echo "Checking AC-115, AC-116: SNS event publishing and webhook endpoint..."
 
-if [[ -f "$PROD_SETTINGS" ]]; then
+if [[ -n "$PROD_SETTINGS" ]]; then
   if grep -q "sns\|SNS\|webhook" "$PROD_SETTINGS"; then
     pass "AC-115/AC-116: SNS/webhook configuration references found"
   else
-    skip "AC-115/AC-116: SNS webhook configuration not found in settings"
+    SNS_SECRET_FILES=(
+      "deploy/k8s/overlays/rke2-nonprod/patches/externalsecrets-infisical.yaml"
+      "deploy/k8s/base/secrets/external-secrets.yaml"
+    )
+    sns_found=false
+    for sns_file in "${SNS_SECRET_FILES[@]}"; do
+      if [[ -f "$sns_file" ]] && grep -q "SES_SNS_WEBHOOK_SECRET\|webhook" "$sns_file"; then
+        sns_found=true
+        pass "AC-115/AC-116: SNS/webhook secret wiring found in $sns_file"
+        break
+      fi
+    done
+    if [[ "$sns_found" = false ]]; then
+      skip "AC-115/AC-116: SNS webhook configuration not found in known settings/secrets paths"
+    fi
   fi
 else
   skip "AC-115/AC-116: Production settings not available"
@@ -236,6 +286,14 @@ for template_dir in "${TEMPLATE_DIRS[@]}"; do
     fi
   fi
 done
+
+if [[ "$UNSUBSCRIBE_FOUND" = false ]]; then
+  UNSUB_MIDDLEWARE="infrastructure/tutor/plugins/email-preferences/mereka_email_preferences/middleware.py"
+  if [[ -f "$UNSUB_MIDDLEWARE" ]] && grep -q "List-Unsubscribe\|List-Unsubscribe-Post" "$UNSUB_MIDDLEWARE"; then
+    UNSUBSCRIBE_FOUND=true
+    pass "AC-117: List-Unsubscribe headers handled by email middleware"
+  fi
+fi
 
 if [[ "$UNSUBSCRIBE_FOUND" = false ]]; then
   skip "AC-117: List-Unsubscribe headers not found (may be added at runtime)"
@@ -270,7 +328,7 @@ echo ""
 # Check 10: Structured logging format
 echo "Checking AC-118: Structured logging for email delivery..."
 
-if [[ -f "$PROD_SETTINGS" ]]; then
+if [[ -n "$PROD_SETTINGS" ]]; then
   if grep -q "LOGGING\|logging\|LoggingConfig" "$PROD_SETTINGS"; then
     pass "AC-118: Logging configuration found in production settings"
   else
