@@ -71,7 +71,21 @@ else
   fail "AC-BRAND-025 runtime dependency graph has npm resolution errors"
 fi
 
-rm -f /tmp/brand-npm-ls.$$ /tmp/brand-peer.$$
+# Runtime asset contract: package resolves and exposes key OEP-48 files.
+if docker run --rm "$IMAGE" sh -lc '
+set -euo pipefail
+pkg_json="$(node -p "require.resolve(\"@edx/brand/package.json\")")"
+pkg_dir="$(dirname "$pkg_json")"
+test -f "$pkg_dir/logo.js"
+test -f "$pkg_dir/logo_white.png"
+test -f "$pkg_dir/favicon.png"
+' >/tmp/brand-assets.$$ 2>&1; then
+  pass "Runtime asset contract: @edx/brand exports include logo.js, logo_white.png, and favicon.png"
+else
+  fail "Runtime asset contract failed: missing logo.js/logo_white.png/favicon.png in resolved @edx/brand package"
+fi
+
+rm -f /tmp/brand-npm-ls.$$ /tmp/brand-peer.$$ /tmp/brand-assets.$$
 echo "=== Summary: PASS=${PASS} WARN=${WARN} FAIL=${FAIL} ==="
 if [[ "$FAIL" -gt 0 ]]; then
   exit 1
