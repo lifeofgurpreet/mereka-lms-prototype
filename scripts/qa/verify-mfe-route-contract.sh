@@ -623,8 +623,12 @@ if [ "$FAIL" -gt 0 ]; then
   echo "Common fixes:"
   echo "  1. Added MFE in Caddyfile? Add to production.py and verify-mfe-branding.sh"
   echo "  2. Added setting in production.py? Add route to Caddyfile"
-  echo "  3. Runtime Caddyfile stale? Re-run tutor config save + apply-patches + rebuild/redeploy mfe"
-  echo "  4. See docs/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md for full guide"
+  echo "  3. Runtime/configmap drift? Roll a tagged release with runtime verification:"
+  echo "     ./scripts/infra/release-openedx-gitops.sh --openedx-tag <tag> --mfe-tag <tag> --apply --commit --push --verify-runtime"
+  echo "  4. Inspect mounted configmap and runtime Caddy quickly:"
+  echo "     kubectl get deploy -n $K8S_NAMESPACE mfe -o jsonpath='{.spec.template.spec.volumes[?(@.name==\"config\")].configMap.name}'"
+  echo "     kubectl exec -n $K8S_NAMESPACE deploy/mfe -- cat /etc/caddy/Caddyfile | rg '/learner-record'"
+  echo "  5. See docs/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md for full guide"
   echo ""
   exit 1
 fi
