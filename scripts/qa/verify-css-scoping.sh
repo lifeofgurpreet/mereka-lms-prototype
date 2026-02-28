@@ -36,6 +36,24 @@ do_fail() { FAIL=$((FAIL + 1)); echo -e "${RED}[FAIL]${NC} $1"; }
 do_skip() { SKIP=$((SKIP + 1)); echo -e "${YELLOW}[SKIP]${NC} $1"; }
 do_warn() { WARN=$((WARN + 1)); echo -e "${YELLOW}[WARN]${NC} $1"; }
 
+# Count selector matches in active CSS/SCSS only (ignores block + line comments).
+count_active_selector_occurrences() {
+  local file="$1"
+  local selector="$2"
+  python3 - "$file" "$selector" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+selector = sys.argv[2]
+text = path.read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+print(text.count(selector))
+PY
+}
+
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 TOKENS_SCSS="$THEME_DIR/scss/_tokens.scss"
 THEME_SCSS="$THEME_DIR/scss/theme.scss"
@@ -229,15 +247,26 @@ for css_file in "$LMS_CSS" "$COMMON_CSS"; do
   done
 done
 
-# MFE-specific: verify MFE surface scopes are present
+# MFE-specific: enforce current selector reality from dead-selector audit
 if [[ ! -f "$MFE_SCSS" ]]; then
   do_skip "AC-CSS-SCOPE-004: mereka.scss not found — skipping MFE scope checks"
 else
-  for mfe_scope in 'class*="authn"' 'class*="learner-dashboard"' 'class*="learning"' 'class*="discussions"'; do
-    if grep -qF "$mfe_scope" "$MFE_SCSS"; then
-      do_pass "AC-CSS-SCOPE-004: MFE surface scope [$mfe_scope] present in mereka.scss"
+  # Live scoped selector that remains intentionally.
+  live_scope='class*="account-settings"'
+  live_count="$(count_active_selector_occurrences "$MFE_SCSS" "$live_scope")"
+  if [[ "$live_count" -gt 0 ]]; then
+    do_pass "AC-CSS-SCOPE-004: Live MFE scope [$live_scope] present in active selectors (${live_count} occurrence(s))"
+  else
+    do_fail "AC-CSS-SCOPE-004: Live MFE scope [$live_scope] missing from active selectors"
+  fi
+
+  # Dead selectors removed in Phase C should not return (comments ignored).
+  for dead_scope in 'class*="authn"' 'class*="learner-dashboard"' 'class*="learning"' 'class*="discussions"'; do
+    dead_count="$(count_active_selector_occurrences "$MFE_SCSS" "$dead_scope")"
+    if [[ "$dead_count" -eq 0 ]]; then
+      do_pass "AC-CSS-SCOPE-004: Dead MFE scope [$dead_scope] absent from active selectors"
     else
-      do_fail "AC-CSS-SCOPE-004: MFE surface scope [$mfe_scope] missing from mereka.scss"
+      do_fail "AC-CSS-SCOPE-004: Dead MFE scope [$dead_scope] still present in active selectors (${dead_count} occurrence(s))"
     fi
   done
 fi
