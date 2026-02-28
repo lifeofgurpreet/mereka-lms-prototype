@@ -27,12 +27,13 @@ This evidence run captures frontend branding smoke artifacts and QA gate outputs
 
 ### Accessibility Gate
 
-- `verify-a11y-contrast-focus.sh`: `PASS=27`, `WARN=4`, `FAIL=0`
+- `verify-a11y-contrast-focus.sh`: `PASS=28`, `WARN=3`, `FAIL=0`
 - Notable warnings:
   - Placeholder/caption contrast (`ink-300` on surface) below 4.5:1 (documented non-blocking warning)
   - One focus-context `box-shadow:none` warning in minified core CSS
-  - `--pgn-focus-ring-color` bridge gap warning
   - CI wiring warning for the a11y gate script
+- Resolved in follow-up hardening:
+  - Added canonical `--pgn-focus-ring-color` token bridge through `tokens.css` → generator → `_tokens.scss`.
 
 ### Lighthouse Budget Gate
 

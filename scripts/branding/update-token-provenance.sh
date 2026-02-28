@@ -22,13 +22,16 @@ fi
 
 commit="$(git -C "$UPSTREAM_REPO" rev-parse HEAD)"
 branch="$(git -C "$UPSTREAM_REPO" rev-parse --abbrev-ref HEAD)"
-sha="$(sha256sum "$UPSTREAM_REPO/$UPSTREAM_PATH" | awk '{print $1}')"
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 if [[ "$SYNC_FILE" == "1" ]]; then
   cp "$UPSTREAM_REPO/$UPSTREAM_PATH" "$TARGET_TOKENS"
   echo "Synced tokens.css from upstream."
 fi
+
+# Always hash the canonical file used by runtime checks in this repo.
+# This keeps provenance in sync even after intentional local token updates.
+sha="$(sha256sum "$TARGET_TOKENS" | awk '{print $1}')"
 
 python3 - "$PROVENANCE_PATH" "$commit" "$branch" "$sha" "$UPSTREAM_PATH" "$ts" <<'PY'
 import json

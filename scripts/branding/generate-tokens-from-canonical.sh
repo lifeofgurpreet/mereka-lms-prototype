@@ -282,6 +282,7 @@ def build_scss_generated_block() -> str:
     lines.append("  --pgn-link-hover-color: #{$color-teal};\n")
     lines.append("  --pgn-border-color: #{$color-border};\n")
     lines.append(f"  --pgn-form-control-border-color: {token_or_default('--pgn-form-control-border-color', '#{$color-border}')};\n")
+    lines.append(f"  --pgn-focus-ring-color: {token_or_default('--pgn-focus-ring-color', '#{$color-teal}')};\n")
     lines.append(f"  --pgn-btn-color: {token_or_default('--pgn-btn-color', '#{$color-ink-700}')};\n")
     lines.append(f"  --pgn-btn-hover-color: {token_or_default('--pgn-btn-hover-color', '#{$color-ink-900}')};\n")
     lines.append(f"  --pgn-alert-bg: {token_or_default('--pgn-alert-bg', 'var(--mereka-color-white)')};\n")
