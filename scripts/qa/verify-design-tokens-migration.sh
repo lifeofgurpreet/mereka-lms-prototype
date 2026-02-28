@@ -9,7 +9,7 @@
 #   3. The generator script exists and is executable
 #   4. _tokens.scss contains the BEGIN/END GENERATED markers
 #   5. mereka-overrides.css (all variants) contain the BEGIN/END GENERATED markers
-#   6. mereka.scss (MFE) imports the SCSS theme (token bridge)
+#   6. mereka.scss (MFE) imports split token + base partials (no legacy theme import)
 #   7. No old standalone theming paths remain (legacy patterns removed)
 #   8. Token count sanity: tokens.css has >= 100 custom properties
 #   9. The generated blocks in all consumers are in sync with tokens.css
@@ -43,6 +43,7 @@ skip() { echo -e "  ${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
 CANONICAL="assets/branding/tokens.css"
 PROVENANCE="assets/branding/tokens.provenance.json"
 SCSS_BRIDGE="infrastructure/tutor/themes/mereka/scss/_tokens.scss"
+BASE_SCSS="infrastructure/tutor/themes/mereka/scss/_base.scss"
 DESIGN_TOKENS_CSS="infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css"
 COMMON_OVERRIDES="infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 LMS_OVERRIDES="infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css"
@@ -151,11 +152,19 @@ else
     fail "_tokens.scss missing Bootstrap overrides section (\$font-family-sans-serif not found)"
   fi
 
-  # Verify CSS rules section is preserved
-  if grep -q "^body {" "$SCSS_BRIDGE"; then
-    pass "_tokens.scss preserves CSS rules section (body {} present)"
+  # Phase C split: _tokens.scss MUST stay token-only (no structural rules)
+  if grep -qE '^body([^a-zA-Z0-9_-]|$)' "$SCSS_BRIDGE"; then
+    fail "_tokens.scss contains body{} rule — structural CSS must live in _base.scss"
   else
-    fail "_tokens.scss missing CSS rules section (body {} not found)"
+    pass "_tokens.scss is token-only (no body{} structural rule)"
+  fi
+
+  if [[ ! -f "$BASE_SCSS" ]]; then
+    fail "Missing split structural partial: $BASE_SCSS"
+  elif grep -qE '^body([^a-zA-Z0-9_-]|$)' "$BASE_SCSS"; then
+    pass "_base.scss contains structural CSS rules (body* selector present)"
+  else
+    fail "_base.scss missing structural CSS rules (body* selector not found)"
   fi
 fi
 
@@ -187,10 +196,17 @@ echo "--- MFE SCSS token bridge import ---"
 if [[ ! -f "$MFE_SCSS" ]]; then
   fail "MFE SCSS not found: $MFE_SCSS"
 else
-  if grep -qE '@import\s+["\x27]\./scss/theme["\x27]' "$MFE_SCSS"; then
-    pass "mereka.scss imports ./scss/theme (contains _tokens.scss)"
+  if grep -qE '@import\s+["\x27]\./scss/tokens["\x27]' "$MFE_SCSS" && \
+     grep -qE '@import\s+["\x27]\./scss/base["\x27]' "$MFE_SCSS"; then
+    pass "mereka.scss imports split token stack (./scss/tokens + ./scss/base)"
   else
-    fail "mereka.scss does not @import './scss/theme' — MFE tokens will not load correctly"
+    fail "mereka.scss must import ./scss/tokens and ./scss/base for Phase C architecture"
+  fi
+
+  if grep -qE '@import\s+["\x27]\./scss/theme["\x27]' "$MFE_SCSS"; then
+    fail "mereka.scss still imports legacy ./scss/theme (dead CSS risk in MFEs)"
+  else
+    pass "mereka.scss does not import legacy ./scss/theme"
   fi
 
   # Verify mereka.scss uses --mereka-* tokens (not hardcoded colors for brand values)
