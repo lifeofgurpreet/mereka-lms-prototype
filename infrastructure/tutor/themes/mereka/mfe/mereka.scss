@@ -30,7 +30,7 @@ body {
 /* RISK: HIGH — .navbar is a structural layout class; breaks on Bootstrap or Paragon rename */
 .navbar {
   background: var(--pgn-color-white);
-  border-bottom: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  border-bottom: 1px solid var(--mereka-mfe-navbar-divider, rgb(var(--mereka-color-ink-deep-rgb) / 0.08));
   box-shadow: var(--mereka-mfe-navbar-shadow);
   padding: var(--mereka-mfe-navbar-padding);
 }
@@ -99,7 +99,7 @@ body {
 /* RISK: LOW — .btn-outline-primary; color-only override */
 .btn-outline-primary {
   color: var(--mereka-color-ink-900);
-  border-color: rgb(var(--mereka-color-ink-deep-rgb) / 0.25);
+  border-color: var(--mereka-mfe-btn-outline-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.25));
 }
 
 /* RISK: LOW — hover/focus color only; graceful degradation */
@@ -178,26 +178,26 @@ label {
 
 /* RISK: LOW — Paragon alert variant colors; background/border color only */
 .pgn__alert--info {
-  background: rgb(var(--mereka-color-sky-rgb) / 0.22);
-  border-color: rgb(var(--mereka-color-sky-rgb) / 0.55);
+  background: var(--mereka-mfe-alert-info-bg, rgb(var(--mereka-color-sky-rgb) / 0.22));
+  border-color: var(--mereka-mfe-alert-info-border, rgb(var(--mereka-color-sky-rgb) / 0.55));
 }
 
 /* RISK: LOW — Paragon alert variant colors; background/border color only */
 .pgn__alert--success {
-  background: rgb(var(--mereka-color-forest-rgb) / 0.12);
-  border-color: rgb(var(--mereka-color-forest-rgb) / 0.35);
+  background: var(--mereka-mfe-alert-success-bg, rgb(var(--mereka-color-forest-rgb) / 0.12));
+  border-color: var(--mereka-mfe-alert-success-border, rgb(var(--mereka-color-forest-rgb) / 0.35));
 }
 
 /* RISK: LOW — Paragon alert variant colors; background/border color only */
 .pgn__alert--warning {
-  background: rgb(var(--mereka-color-gold-rgb) / 0.14);
-  border-color: rgb(var(--mereka-color-gold-rgb) / 0.55);
+  background: var(--mereka-mfe-alert-warning-bg, rgb(var(--mereka-color-gold-rgb) / 0.14));
+  border-color: var(--mereka-mfe-alert-warning-border, rgb(var(--mereka-color-gold-rgb) / 0.55));
 }
 
 /* RISK: LOW — Paragon alert variant colors; background/border color only */
 .pgn__alert--danger {
-  background: rgb(var(--mereka-color-burgundy-rgb) / 0.08);
-  border-color: rgb(var(--mereka-color-burgundy-rgb) / 0.22);
+  background: var(--mereka-mfe-alert-danger-bg, rgb(var(--mereka-color-burgundy-rgb) / 0.08));
+  border-color: var(--mereka-mfe-alert-danger-border, rgb(var(--mereka-color-burgundy-rgb) / 0.22));
 }
 
 /* RISK: MEDIUM — Paragon modal BEM; border-radius degrade visually on rename */
@@ -234,7 +234,7 @@ label {
   display: inline-flex;
   align-items: center;
   gap: var(--mereka-mfe-badge-gap);
-  background-color: rgb(var(--mereka-color-teal-rgb) / 0.12);
+  background-color: var(--mereka-mfe-badge-bg, rgb(var(--mereka-color-teal-rgb) / 0.12));
   color: var(--mereka-color-teal);
   padding: var(--mereka-mfe-badge-padding);
   border-radius: var(--mereka-mfe-pill-radius);
@@ -273,9 +273,9 @@ label {
 [class*="login-register"] .pgn__card-header {
   background-image: linear-gradient(
     125deg,
-    rgb(var(--mereka-color-teal-rgb) / 0.14) 0%,
-    rgb(var(--mereka-color-magenta-rgb) / 0.1) 55%,
-    rgb(var(--mereka-color-blue-rgb) / 0.12) 100%
+    var(--mereka-mfe-authn-header-gradient-1, rgb(var(--mereka-color-teal-rgb) / 0.14)) 0%,
+    var(--mereka-mfe-authn-header-gradient-2, rgb(var(--mereka-color-magenta-rgb) / 0.1)) 55%,
+    var(--mereka-mfe-authn-header-gradient-3, rgb(var(--mereka-color-blue-rgb) / 0.12)) 100%
   );
 }
 
@@ -376,7 +376,7 @@ label {
 [class*="account-page"] .pgn__dropdown-toggle,
 [class*="learner-dashboard"] .pgn__dropdown-toggle {
   border-radius: var(--mereka-mfe-pill-radius);
-  border-color: rgb(var(--mereka-color-ink-deep-rgb) / 0.2);
+  border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
 }
 
 /* learner-dashboard scope + course component classes */
@@ -511,7 +511,7 @@ label {
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] [class*="course"] [class*="status"] | cosmetic badge; no testid for status pill | expires: 2026-Q3
 [class*="learner-dashboard"] [class*="course"] [class*="status"] {
   border-radius: var(--mereka-mfe-pill-radius);
-  background: rgb(var(--mereka-color-teal-rgb) / 0.1);
+  background: var(--mereka-mfe-status-pill-bg, rgb(var(--mereka-color-teal-rgb) / 0.1));
   color: var(--mereka-color-teal);
   padding: var(--mereka-mfe-status-badge-padding);
   font-weight: var(--mereka-mfe-badge-font-weight);
