@@ -65,7 +65,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | Slot-backed component in `mereka_lms.py` (`MerekaAuthnLoginBranding`) plus compatibility selectors in `mereka.scss` for wrappers with `login-register`/`authn` |
+| **Current approach** | Slot-backed component in `mereka_lms.py` (`MerekaAuthnLoginBranding`) plus compatibility selectors in `mereka.scss` for `authn` wrappers |
 | **Target slot** | `org.openedx.frontend.authn.login_component.v1` |
 | **Status** | ✅ MIGRATED — slot active with compatibility CSS |
 | **Risk** | Low-Medium (slot + compatibility selectors currently retained) |
@@ -228,7 +228,6 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
 |-----------------|-----|----------------------|---------|-------|---------------|
 | `[class*="authn"]` | authn | No stable data-testid on all entrypoints; `authn` is the wrapper class emitted by authn MFE | 2026-Q3 | Mereka frontend | Remove if `[data-testid*="authn"]` covers all routes in next authn MFE upgrade |
-| `[class*="login-register"]` | authn | authn MFE emits this class on top-level wrapper alongside `authn`; retained while compatibility path is still active | 2026-Q3 | Mereka frontend | Remove once slot-only styling proves stable |
 | `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 | `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |
 | `[class*="learning"]` | learning | No upstream slot for course grid layout; upstream slot proposal pending (see AC-US7-005) | 2026-Q3 | Mereka / Upstream | Remove once upstream `learning_course_grid.v1` or equivalent slot is approved |
@@ -244,6 +243,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="auth-page"]` | 2026-02-18 | Fully covered by `[class*="authn"]` + `[data-testid*="authn"]` primary paths |
 | `[class*="discussion"]` (singular) | 2026-02-18 | Consolidated into `[class*="discussions"]` plural + data-testid primary paths (33% of singular blocks eliminated) |
 | `[class*="account-page"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="login-register"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 
 ---
 

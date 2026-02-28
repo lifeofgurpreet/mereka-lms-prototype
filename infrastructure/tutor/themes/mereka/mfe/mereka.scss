@@ -302,23 +302,19 @@ label {
 }
 
 /* Authn/login/register surfaces */
-/* [class*="auth-page"] removed 2026-02-18 (bead 115d.18): fully covered by [class*="authn"] + [class*="login-register"] */
+/* [class*="auth-page"] removed 2026-02-18 (bead 115d.18): scoped via [class*="authn"] */
 /* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 /* per SELECTOR_HARDENING_POLICY: class-based attribute selectors are preferred over data-testid for production CSS */
 
 /* RISK: HIGH — structural authn surface scoping; breaks if authn MFE renames top-level wrapper class */
 // SELECTOR-EXCEPTION: [class*="authn"] | no stable testid on all route entrypoints | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] | authn MFE emits this class on top-level wrapper | expires: 2026-Q3
-[class*="authn"],
-[class*="login-register"] {
+[class*="authn"] {
   background: transparent;
 }
 
 /* RISK: HIGH — structural authn card scoping; breaks if authn MFE renames wrapper class */
 // SELECTOR-EXCEPTION: [class*="authn"] .pgn__card | authn MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card | login-register wrapper | expires: 2026-Q3
-[class*="authn"] .pgn__card,
-[class*="login-register"] .pgn__card {
+[class*="authn"] .pgn__card {
   border-radius: var(--mereka-mfe-authn-card-radius);
   border: var(--mereka-mfe-authn-card-border);
   box-shadow: var(--mereka-mfe-authn-card-shadow);
@@ -326,9 +322,7 @@ label {
 
 /* RISK: HIGH — structural authn card-header scoping; gradient branding lost if class renames */
 // SELECTOR-EXCEPTION: [class*="authn"] .pgn__card-header | authn MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__card-header | login-register wrapper | expires: 2026-Q3
-[class*="authn"] .pgn__card-header,
-[class*="login-register"] .pgn__card-header {
+[class*="authn"] .pgn__card-header {
   background-image: linear-gradient(
     125deg,
     var(--mereka-mfe-authn-header-gradient-1, rgb(var(--mereka-color-teal-rgb) / 0.14)) 0%,
@@ -339,9 +333,7 @@ label {
 
 /* RISK: MEDIUM — authn primary button; degrades to default button sizing if class renames */
 // SELECTOR-EXCEPTION: [class*="authn"] .pgn__btn--primary | authn MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__btn--primary | login-register wrapper | expires: 2026-Q3
-[class*="authn"] .pgn__btn--primary,
-[class*="login-register"] .pgn__btn--primary {
+[class*="authn"] .pgn__btn--primary {
   min-height: var(--mereka-mfe-authn-cta-min-height);
   font-weight: var(--mereka-mfe-emphasis-font-weight);
   letter-spacing: var(--mereka-mfe-authn-link-letter-spacing);
@@ -349,9 +341,7 @@ label {
 
 /* RISK: LOW — authn hyperlink color; degrades to default link color */
 // SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink | authn MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink | login-register wrapper | expires: 2026-Q3
-[class*="authn"] .pgn__hyperlink,
-[class*="login-register"] .pgn__hyperlink {
+[class*="authn"] .pgn__hyperlink {
   color: var(--mereka-color-blue);
   text-decoration: none;
   font-weight: var(--mereka-mfe-brand-font-weight);
@@ -359,11 +349,8 @@ label {
 
 /* RISK: LOW — authn hyperlink hover/focus; color-only, graceful degradation */
 // SELECTOR-EXCEPTION: [class*="authn"] .pgn__hyperlink:hover/focus | authn MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="login-register"] .pgn__hyperlink:hover/focus | login-register wrapper | expires: 2026-Q3
 [class*="authn"] .pgn__hyperlink:hover,
-[class*="authn"] .pgn__hyperlink:focus,
-[class*="login-register"] .pgn__hyperlink:hover,
-[class*="login-register"] .pgn__hyperlink:focus {
+[class*="authn"] .pgn__hyperlink:focus {
   color: var(--mereka-color-teal);
   text-decoration: underline;
 }
