@@ -127,6 +127,7 @@ scripts/qa/verify-data-migration-contracts.sh
 scripts/qa/verify-tenant-branding-contract.sh
 scripts/qa/verify-brand-pack-schema.sh
 scripts/tenants/validate-tenant-brand-pack.sh
+scripts/qa/verify-tenant-token-switching.sh
 scripts/qa/verify-tenant-branding-matrix.sh
 scripts/qa/verify-tenant-ui-smoke.sh
 scripts/qa/verify-tenant-isolation-evidence.sh

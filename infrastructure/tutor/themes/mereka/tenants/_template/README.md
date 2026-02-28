@@ -18,6 +18,9 @@ cp new-tenant-favicon.ico infrastructure/tutor/themes/mereka/tenants/new-tenant/
 
 # Validate brand pack
 ./scripts/tenants/validate-tenant-brand-pack.sh --slug new-tenant
+
+# Generate tenant token overrides from branding.json
+./scripts/tenants/sync-tenant-branding.sh --slug new-tenant
 ```
 
 ## Directory Structure
@@ -28,6 +31,7 @@ _template/
 ├── logos/              # Logo assets directory
 ├── favicons/           # Favicon assets directory
 └── css/                # Custom CSS overrides (optional)
+    └── tokens.css      # Generated token overrides (do not edit by hand)
 ```
 
 ## Required Assets

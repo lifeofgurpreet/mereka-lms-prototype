@@ -57,7 +57,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
 - [x] Consolidate slot variant fallback contract across header/footer components (single runtime map with unknown-host fallback branch).
 - [x] Upgrade Node 18 → 24 (Ulmo default).
-- [ ] Multi-tenant token switching (`tenants/` directory).
+- [x] Multi-tenant token switching (`tenants/` directory) via generated tenant `css/tokens.css` from `branding.json` (`scripts/tenants/sync-tenant-branding.sh` + `verify-tenant-token-switching.sh`).
 
 > **Architecture note (2026-02-28)**: Brand package `_variables.scss` is **dead in Ulmo** — Paragon v23+ ignores SCSS variables. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties. See [deep audit §3 CRIT-1](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-1-brand-package-scss-variables-are-dead).
 
