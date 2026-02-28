@@ -13,17 +13,17 @@ bbi-infrastructure repo
     overlays/
       dev/                        # Dev overlay (domain patches, Infisical ESO, Caddy config)
       profiles/
-        dev/                      # Dev profile (resource limits, scale-to-zero, governance)
+        dev/                      # Dev profile (resource limits, replica policy, governance)
           kustomization.yaml      # References ../../local as base
           patches/
-            workload-profile.yaml # Enterprise services -> 0 replicas, resource limits
+            workload-profile.yaml # Deployment replica policy + resource limits
           limitrange.yaml         # Container min/max/default
           resourcequota.yaml      # Namespace-level CPU/memory/pod caps
           runtime-secrets-placeholder.yaml
           default-serviceaccount.yaml  # imagePullSecrets: dev-image-puller
 ```
 
-The `profiles/dev` overlay layers on top of `overlays/dev`, adding resource governance and workload scaling appropriate for the single-node RKE2 cluster.
+The `profiles/dev` overlay layers on top of `overlays/dev`, adding resource governance and an explicit deployment replica policy appropriate for the single-node RKE2 cluster.
 
 ## Root Cause Analysis
 
@@ -164,5 +164,5 @@ kubectl --context rke2-nonprod exec -n mereka-lms deploy/caddy -- \
 | `kubectl kustomize` fails on profiles/dev | Ensure `yq` and `kubectl` >= 1.27 are installed; check `BBI_INFRA_DIR` path is correct |
 | ExternalSecret `SecretSyncError` | Verify `infisical-secret-store` ClusterSecretStore is Ready: `kubectl get clustersecretstore -A` |
 | MySQL init loop after PVC wipe | `workload-profile.yaml` sets `MYSQL_ALLOW_EMPTY_PASSWORD=yes` for fresh init; set real password in Infisical after first boot |
-| 110-pod limit on single node | Enterprise services scaled to 0 by default; only enable what you need |
+| 110-pod limit on single node | Keep the `profiles/dev/patches/workload-profile.yaml` replica policy minimal and adjust only with capacity review |
 | Caddy 502 after deploy | LMS/CMS take 2-3 minutes to start; check `kubectl logs -n mereka-lms deploy/lms --tail=20` for uWSGI ready message |

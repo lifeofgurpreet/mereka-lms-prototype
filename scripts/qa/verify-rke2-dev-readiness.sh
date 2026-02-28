@@ -29,20 +29,13 @@ PROFILES_DEV="${BBI_INFRA_DIR}/apps/mereka-lms/overlays/profiles/dev"
 KUBE_CONTEXT="${KUBE_CONTEXT:-rke2-nonprod}"
 NAMESPACE="mereka-lms"
 
-# Services expected at replicas: 0 in profiles/dev workload-profile.yaml
-SCALED_TO_ZERO_DEPLOYMENTS=(
-  credentials
-  discovery
-  ecommerce
-  ecommerce-worker
-  notes
-  xqueue
-  enterprise-access
+# Deployments that must have explicit replica policy in workload-profile.yaml
+REQUIRED_WORKLOAD_REPLICA_POLICIES=(
+  lms
+  cms
+  lms-worker
+  cms-worker
   enterprise-access-worker
-  enterprise-admin-portal
-  enterprise-catalog
-  enterprise-learner-portal
-  enterprise-subsidy
 )
 
 # Helper functions
@@ -59,6 +52,42 @@ fail() {
 skip() {
   echo -e "${YELLOW}SKIP${NC} $1"
   SKIP_COUNT=$((SKIP_COUNT + 1))
+}
+
+extract_workload_replica_policies() {
+  local workload_file="$1"
+  awk '
+    $1 == "apiVersion:" {
+      if (in_doc) {
+        if (kind == "Deployment" && name != "" && replicas != "") {
+          print name "=" replicas
+        }
+      }
+      in_doc = 1
+      kind = ""
+      name = ""
+      replicas = ""
+      next
+    }
+    $1 == "kind:" { kind = $2; next }
+    $1 == "name:" && name == "" { name = $2; next }
+    $1 == "replicas:" { replicas = $2; next }
+    $1 == "---" {
+      if (kind == "Deployment" && name != "" && replicas != "") {
+        print name "=" replicas
+      }
+      in_doc = 0
+      kind = ""
+      name = ""
+      replicas = ""
+      next
+    }
+    END {
+      if (kind == "Deployment" && name != "" && replicas != "") {
+        print name "=" replicas
+      }
+    }
+  ' "$workload_file"
 }
 
 # Parse arguments
@@ -98,37 +127,44 @@ run_offline_checks() {
     fail "runtime-secrets-placeholder.yaml does not reference mereka-lms-runtime-secrets"
   fi
 
-  # 3. workload-profile.yaml scales enterprise services to 0
-  echo "--- Workload profile (scale-to-zero services) ---"
+  # 3. workload-profile.yaml contains valid explicit replica policies
+  echo "--- Workload profile replica policy ---"
   local workload="${PROFILES_DEV}/patches/workload-profile.yaml"
   if [[ ! -f "$workload" ]]; then
     fail "workload-profile.yaml missing: ${workload}"
   else
-    local all_zero=true
-    for svc in "${SCALED_TO_ZERO_DEPLOYMENTS[@]}"; do
-      # Check that the deployment name appears followed by replicas: 0
-      # Use yq if available, otherwise fall back to grep
-      if command -v yq > /dev/null 2>&1; then
-        local replica_count
-        replica_count=$(yq eval-all "select(.kind == \"Deployment\" and .metadata.name == \"${svc}\") | .spec.replicas" "$workload" 2>/dev/null || echo "")
-        if [[ "$replica_count" == "0" ]]; then
-          continue
-        else
-          fail "workload-profile: ${svc} replicas=${replica_count:-missing} (expected 0)"
-          all_zero=false
-        fi
-      else
-        # Fallback: grep-based check
-        if grep -A3 "name: ${svc}$" "$workload" | grep -q "replicas: 0"; then
-          continue
-        else
-          fail "workload-profile: ${svc} not scaled to 0"
-          all_zero=false
-        fi
+    declare -A replica_policy=()
+    while IFS='=' read -r name replicas; do
+      [[ -z "${name}" || -z "${replicas}" ]] && continue
+      replica_policy["$name"]="$replicas"
+    done < <(extract_workload_replica_policies "$workload")
+
+    if [[ "${#replica_policy[@]}" -eq 0 ]]; then
+      fail "workload-profile has no explicit Deployment replica policies"
+    else
+      pass "workload-profile defines ${#replica_policy[@]} explicit Deployment replica policies"
+    fi
+
+    local invalid_replica=false
+    for name in "${!replica_policy[@]}"; do
+      if [[ ! "${replica_policy[$name]}" =~ ^[0-9]+$ ]]; then
+        fail "workload-profile: ${name} has non-integer replicas='${replica_policy[$name]}'"
+        invalid_replica=true
       fi
     done
-    if [[ "$all_zero" == true ]]; then
-      pass "workload-profile scales all non-essential services to 0"
+    if [[ "$invalid_replica" == false ]]; then
+      pass "workload-profile replica values are integer literals"
+    fi
+
+    local missing_required=false
+    for svc in "${REQUIRED_WORKLOAD_REPLICA_POLICIES[@]}"; do
+      if [[ -z "${replica_policy[$svc]:-}" ]]; then
+        fail "workload-profile missing explicit replicas policy for required deployment: ${svc}"
+        missing_required=true
+      fi
+    done
+    if [[ "$missing_required" == false ]]; then
+      pass "workload-profile includes required deployment replica policies"
     fi
   fi
 
@@ -255,24 +291,36 @@ run_online_checks() {
     fail "MySQL pod status: phase=${mysql_phase} waiting=${mysql_waiting:-none}"
   fi
 
-  # 12. Non-essential services are scaled to 0 replicas
-  echo "--- Non-essential services scaled to 0 ---"
-  local all_zero=true
-  for svc in "${SCALED_TO_ZERO_DEPLOYMENTS[@]}"; do
-    local replicas
-    replicas=$(kctl get deployment "$svc" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "missing")
-    if [[ "$replicas" == "0" ]]; then
-      continue
-    elif [[ "$replicas" == "missing" ]]; then
-      # Deployment may not exist yet, which is fine
-      continue
-    else
-      fail "Deployment ${svc} has ${replicas} replicas (expected 0)"
-      all_zero=false
+  # 12. Live deployment replicas match workload-profile declared policy
+  echo "--- Workload-profile replica parity ---"
+  local workload="${PROFILES_DEV}/patches/workload-profile.yaml"
+  if [[ ! -f "$workload" ]]; then
+    fail "workload-profile.yaml missing: ${workload}"
+  else
+    declare -A expected_replica_policy=()
+    while IFS='=' read -r name replicas; do
+      [[ -z "${name}" || -z "${replicas}" ]] && continue
+      expected_replica_policy["$name"]="$replicas"
+    done < <(extract_workload_replica_policies "$workload")
+
+    local parity_ok=true
+    for svc in "${!expected_replica_policy[@]}"; do
+      local expected_replicas="${expected_replica_policy[$svc]}"
+      local live_replicas
+      live_replicas=$(kctl get deployment "$svc" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "missing")
+      if [[ "$live_replicas" == "missing" ]]; then
+        fail "Deployment ${svc} missing in cluster (expected replicas=${expected_replicas})"
+        parity_ok=false
+      elif [[ "$live_replicas" == "$expected_replicas" ]]; then
+        continue
+      else
+        fail "Deployment ${svc} replicas=${live_replicas} (expected ${expected_replicas} from workload-profile)"
+        parity_ok=false
+      fi
+    done
+    if [[ "$parity_ok" == true ]]; then
+      pass "All deployments with explicit workload-profile replicas match live cluster"
     fi
-  done
-  if [[ "$all_zero" == true ]]; then
-    pass "All non-essential services scaled to 0 (or absent)"
   fi
 
   # 13. No ImagePullBackOff pods
