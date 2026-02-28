@@ -55,6 +55,7 @@ MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
 COMMON_FONTS_DIR="$THEME_DIR/common/static/fonts"
 MFE_FONTS_DIR="$THEME_DIR/mfe/fonts"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 
 # ===========================================================================
@@ -271,22 +272,28 @@ else
   do_warn "AC-UI-104: cannot check footer assertions — VISUAL_PARITY_CHECKPOINTS.md missing"
 fi
 
-# 4d. MerekaFooter must be defined in apply-patches.sh.
-if [[ -f "$APPLY_PATCHES" ]]; then
-  if grep -q "MerekaFooter" "$APPLY_PATCHES"; then
-    do_pass "AC-UI-104: MerekaFooter component defined in apply-patches.sh"
+# 4d. MerekaFooter wiring must be present (plugin-slot canonical path).
+if [[ -f "$PLUGIN_FILE" ]]; then
+  if grep -q "MerekaFooter" "$PLUGIN_FILE"; then
+    do_pass "AC-UI-104: MerekaFooter component defined in mereka_lms.py"
   else
-    do_fail "AC-UI-104: MerekaFooter NOT found in apply-patches.sh"
+    do_fail "AC-UI-104: MerekaFooter NOT found in mereka_lms.py"
   fi
 
-  # 4e. Replacement of default Footer must be present.
-  if grep -q "RenderWidget.*MerekaFooter\|MerekaFooter.*RenderWidget" "$APPLY_PATCHES"; then
-    do_pass "AC-UI-104: apply-patches.sh replaces default Footer with MerekaFooter"
+  if grep -q "org.openedx.frontend.layout.footer.v1" "$PLUGIN_FILE" \
+    && grep -q "RenderWidget: MerekaFooter" "$PLUGIN_FILE"; then
+    do_pass "AC-UI-104: footer slot wiring uses RenderWidget: MerekaFooter"
   else
-    do_warn "AC-UI-104: RenderWidget → MerekaFooter replacement not confirmed in apply-patches.sh"
+    do_fail "AC-UI-104: footer slot wiring for MerekaFooter not confirmed in mereka_lms.py"
+  fi
+elif [[ -f "$APPLY_PATCHES" ]]; then
+  if grep -q "MerekaFooter" "$APPLY_PATCHES"; then
+    do_pass "AC-UI-104: MerekaFooter component defined in apply-patches.sh (legacy path)"
+  else
+    do_fail "AC-UI-104: MerekaFooter not found in plugin or apply-patches.sh"
   fi
 else
-  do_warn "AC-UI-104: apply-patches.sh not found at infrastructure/tutor/"
+  do_warn "AC-UI-104: neither plugin file nor apply-patches.sh found for footer wiring checks"
 fi
 
 # 4f. mereka-footer CSS class exists in theme CSS.

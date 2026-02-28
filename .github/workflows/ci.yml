@@ -259,6 +259,9 @@ jobs:
       - name: Verify visual smoke baseline
         run: ./scripts/qa/verify-visual-smoke-baseline.sh
 
+      - name: Verify visual parity checkpoints
+        run: ./scripts/qa/verify-visual-parity-checkpoints.sh
+
       - name: Verify generated token layers are in sync
         run: ./scripts/branding/generate-tokens-from-canonical.sh --check
 
