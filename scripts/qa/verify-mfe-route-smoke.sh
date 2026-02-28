@@ -125,6 +125,12 @@ for path in "${!SMOKE_PATHS[@]}"; do
 
   if [[ "$http_code" == "$expected" ]]; then
     pass "AC-MFE-002: ${path} → HTTP ${http_code}"
+
+    # A 200 with empty body is a false-green for SPA routes (usually route wiring drift).
+    if [[ ! -s "$ARTIFACT_DIR/${artifact_name}.html" ]]; then
+      fail "AC-MFE-002: ${path} returned HTTP 200 but empty body (route miswire or stale runtime config)"
+      continue
+    fi
   elif [[ "$http_code" == "000" ]]; then
     warn "AC-MFE-002: ${path} → timeout/unreachable (skipping a11y)"
   else

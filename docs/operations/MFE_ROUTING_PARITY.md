@@ -248,4 +248,5 @@ All paths should return `200` (SPAs serve index.html for all routes).
 | MFE route serves wrong dist dir | Wrong `root` directive | Correct the dist directory path in the handler |
 | `/u/username` shows 404 or wrong page | strip_prefix accidentally added to /u handler | Remove `uri strip_prefix /u` from the `@mfe_profile_u` block |
 | All MFE routes 502 | `mfe:8002` container unhealthy | Check MFE pod logs and readiness probe |
+| Route returns `200` with empty body | Runtime Caddyfile in pod is stale/missing handler (false-green if only status checked) | Check `/etc/caddy/Caddyfile` in the MFE pod and re-apply Tutor patches + rebuild/redeploy MFE |
 | `/api/mfe_config/v1` not found | API passthrough missing | Add `reverse_proxy /api/mfe_config/v1* lms:8000` to MFE Caddyfile |
