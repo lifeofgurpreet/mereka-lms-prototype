@@ -12,6 +12,8 @@ AUDIT_DOC="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
 BRANDING_CHECKLIST="$REPO_ROOT/docs/BRANDING_VERIFICATION_CHECKLIST.md"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"
+RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
+REQUIRE_RUNTIME=0
 
 PASS=0
 FAIL=0
@@ -20,6 +22,44 @@ WARN=0
 pass() { PASS=$((PASS + 1)); echo "PASS: $*"; }
 warn() { WARN=$((WARN + 1)); echo "WARN: $*"; }
 fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
+
+usage() {
+  cat <<'EOF'
+Usage: verify-paragon-runtime-deferred.sh [--runtime-url <url>] [--require-runtime]
+
+Options:
+  --runtime-url <url>  Base URL to validate runtime theme endpoint. Example:
+                       https://apps.academyv2.mereka.io
+  --require-runtime    Fail when runtime URL is unavailable/reachable checks cannot run.
+  -h, --help           Show this help.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --runtime-url)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --runtime-url requires a value" >&2
+        exit 2
+      fi
+      RUNTIME_URL="$2"
+      shift 2
+      ;;
+    --require-runtime)
+      REQUIRE_RUNTIME=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
 
 echo "=== Paragon Runtime/Deferred Contract Verification ==="
 
@@ -31,8 +71,8 @@ else
 fi
 
 # AC-TKN-018 / AC-TKN-019 runtime validation is environment-dependent.
-if [[ -n "${PARAGON_RUNTIME_URL:-}" ]]; then
-  runtime_url="${PARAGON_RUNTIME_URL%/}/theme/mereka-brand.min.css"
+if [[ -n "${RUNTIME_URL:-}" ]]; then
+  runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
   if curl -fsSIL "$runtime_url" >/tmp/paragon-theme-head.$$ 2>/dev/null; then
     if grep -qi "^content-type:.*text/css" /tmp/paragon-theme-head.$$; then
       pass "AC-TKN-019 runtime theme endpoint returns text/css (${runtime_url})"
@@ -50,8 +90,12 @@ if [[ -n "${PARAGON_RUNTIME_URL:-}" ]]; then
   fi
   rm -f /tmp/paragon-theme-head.$$
 else
-  warn "AC-TKN-018 runtime cache-clear behavior requires PARAGON_RUNTIME_URL (not set)"
-  warn "AC-TKN-019 runtime header contract requires PARAGON_RUNTIME_URL (not set)"
+  if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+    fail "AC-TKN-018/019 runtime checks required but no runtime URL was provided (use --runtime-url or PARAGON_RUNTIME_URL)"
+  else
+    warn "AC-TKN-018 runtime cache-clear behavior requires PARAGON_RUNTIME_URL or --runtime-url (not set)"
+    warn "AC-TKN-019 runtime header contract requires PARAGON_RUNTIME_URL or --runtime-url (not set)"
+  fi
 fi
 
 # AC-TKN-024/025/026: v22 tokenization boundary documented in audit + prompt.
