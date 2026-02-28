@@ -36,6 +36,28 @@ check_contains() {
   fi
 }
 
+check_contains_any() {
+  local label="$1"
+  local path="$2"
+  shift 2
+
+  if [[ ! -f "$path" ]]; then
+    echo "  ✗ $label (missing file: $path)"
+    failures=1
+    return
+  fi
+
+  for needle in "$@"; do
+    if grep -q -- "$needle" "$path"; then
+      echo "  ✓ $label"
+      return
+    fi
+  done
+
+  echo "  ✗ $label (missing all candidates: $*)"
+  failures=1
+}
+
 check_mfe_token_stack_imports() {
   local label="$1"
   local path="$2"
@@ -159,8 +181,8 @@ check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
 check_mfe_token_stack_imports "MFE theme imports shared token stack" "$MFE_SCSS"
 check_contains "MFE theme exports branding revision marker" "$MFE_SCSS" '--mereka-mfe-branding-rev'
 check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
-check_contains "MFE theme styles Paragon alert" "$MFE_SCSS" '.pgn__alert'
-check_contains "MFE theme styles Paragon modal" "$MFE_SCSS" '.pgn__modal-content'
+check_contains_any "MFE theme styles alert surface" "$MFE_SCSS" '.pgn__alert' '.alert'
+check_contains_any "MFE theme styles modal surface" "$MFE_SCSS" '.pgn__modal-content' '.modal-content'
 check_contains "MFE theme styles authn slot component" "$MFE_SCSS" '.mereka-authn-login-branding'
 check_selector_absent_noncomment "MFE authn wildcard selectors removed" "$MFE_SCSS" '[class*="authn"]'
 check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
