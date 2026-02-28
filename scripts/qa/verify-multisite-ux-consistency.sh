@@ -9,7 +9,7 @@
 # - AC-MSUX-002: Verifier detects hardcoded domain references that would break on alternative domains
 # - AC-MSUX-003: CI gate prevents introduction of new hardcoded domain references
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"

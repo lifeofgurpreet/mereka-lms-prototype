@@ -4,7 +4,7 @@
 #
 # Usage: ./scripts/qa/verify-custom-app-drift.sh
 # Exit code: 0 = no drift, 1 = drift detected
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"

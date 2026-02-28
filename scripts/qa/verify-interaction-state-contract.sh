@@ -10,7 +10,7 @@
 # - Token definitions include all 4 semantic states
 #
 # Usage: ./scripts/qa/verify-interaction-state-contract.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CONTRACT="$REPO_ROOT/docs/architecture/INTERACTION_STATE_CONTRACT.md"

@@ -5,7 +5,7 @@
 # plugin and that the active slot wiring path is in place. Runs without cluster access.
 #
 # Usage: ./scripts/qa/verify-mfe-footer-slot.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"

@@ -5,7 +5,7 @@
 # the documented versions in docs/architecture/MFE_VERSIONS.md.
 #
 # Usage: ./scripts/qa/verify-mfe-version-pinning.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 KUSTOMIZATION="$REPO_ROOT/deploy/k8s/base/kustomization.yaml"
