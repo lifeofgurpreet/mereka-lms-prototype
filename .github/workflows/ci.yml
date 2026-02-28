@@ -272,6 +272,9 @@ jobs:
       - name: Verify certificate branding surfaces
         run: ./scripts/qa/verify-certificate-branding.sh
 
+      - name: Verify FPF slot coverage truth
+        run: ./scripts/qa/verify-fpf-slot-coverage.sh
+
       - name: Run frontend performance spot-check
         run: ./scripts/qa/verify-frontend-performance-spotcheck.sh
 
