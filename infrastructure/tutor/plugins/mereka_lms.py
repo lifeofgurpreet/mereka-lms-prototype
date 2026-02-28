@@ -825,6 +825,18 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1 | Learning mobile outline-trigger helper
 #   org.openedx.frontend.learning.course_home_section_outline.v1 | Learning course-home outline helper
 #   org.openedx.frontend.learning.course_recommendations.v1 | Learning course-exit recommendations helper
+#   org.openedx.frontend.learning.content_iframe_loader.v1 | Learning iframe-loader helper
+#   org.openedx.frontend.learning.content_iframe_error.v1 | Learning iframe-error helper
+#   org.openedx.frontend.learning.sequence_container.v1 | Learning sequence-container helper
+#   org.openedx.frontend.learning.gated_unit_content_message.v1 | Learning gated-unit helper
+#   org.openedx.frontend.learning.next_unit_top_nav_trigger.v1 | Learning next-unit top-nav helper
+#   org.openedx.frontend.learning.course_outline_tab_notifications.v1 | Learning outline notifications helper
+#   org.openedx.frontend.learning.notification_widget.v1 | Learning notification widget helper
+#   org.openedx.frontend.learning.notification_tray.v1 | Learning notification tray helper
+#   org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1 | Learning discussions/sidebar trigger helper
+#   org.openedx.frontend.learning.notifications_discussions_sidebar.v1 | Learning discussions/sidebar helper
+#   org.openedx.frontend.learning.course_exit_view_courses.v1 | Learning course-exit view-courses helper
+#   org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1 | Learning course-exit dashboard footnote helper
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
@@ -1249,6 +1261,186 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearningCourseRecommendationsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.content_iframe_loader.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_content_iframe_loader_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningContentIFrameLoaderHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.content_iframe_error.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_content_iframe_error_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningContentIFrameErrorHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.sequence_container.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_sequence_container_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningSequenceContainerHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.gated_unit_content_message.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_gated_unit_content_message_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningGatedUnitContentMessageHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.next_unit_top_nav_trigger.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_next_unit_top_nav_trigger_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningNextUnitTopNavTriggerHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_outline_tab_notifications.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_outline_tab_notifications_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseOutlineTabNotificationsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.notification_widget.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_notification_widget_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningNotificationWidgetHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.notification_tray.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_notification_tray_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningNotificationTrayHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_notifications_discussions_sidebar_trigger_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningNotificationsDiscussionsSidebarTriggerHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.notifications_discussions_sidebar.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_notifications_discussions_sidebar_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningNotificationsDiscussionsSidebarHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_exit_view_courses.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_exit_view_courses_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseExitViewCoursesHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_exit_dashboard_footnote_link_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseExitDashboardFootnoteLinkHint,
                 },
             },
             """,
@@ -1855,6 +2047,135 @@ const MerekaLearningCourseRecommendationsHint = ({ variant }) => {
     <div className="mereka-learning-course-recommendations-hint mb-2">
       <span className="mereka-badge me-2">Next step</span>
       <span className="small text-muted">Explore recommended pathways ({safeVariant}).</span>
+    </div>
+  );
+};
+
+// Learning iframe-loader slot helper.
+// Wired into org.openedx.frontend.learning.content_iframe_loader.v1.
+const MerekaLearningContentIFrameLoaderHint = () => {
+  return (
+    <div className="mereka-learning-content-iframe-loader-hint mb-2">
+      <span className="mereka-badge me-2">Loading</span>
+      <span className="small text-muted">Preparing learning content.</span>
+    </div>
+  );
+};
+
+// Learning iframe-error slot helper.
+// Wired into org.openedx.frontend.learning.content_iframe_error.v1.
+const MerekaLearningContentIFrameErrorHint = ({ errorMessage }) => {
+  const message = typeof errorMessage === 'string' && errorMessage ? errorMessage : 'If this persists, contact support.';
+  return (
+    <div className="mereka-learning-content-iframe-error-hint mb-2">
+      <span className="mereka-badge me-2">Content issue</span>
+      <span className="small text-muted">{message}</span>
+    </div>
+  );
+};
+
+// Learning sequence-container slot helper.
+// Wired into org.openedx.frontend.learning.sequence_container.v1.
+const MerekaLearningSequenceContainerHint = () => {
+  return (
+    <div className="mereka-learning-sequence-container-hint mb-2">
+      <span className="mereka-badge me-2">Sequence</span>
+      <span className="small text-muted">Continue through the next unit to maintain momentum.</span>
+    </div>
+  );
+};
+
+// Learning gated-unit message slot helper.
+// Wired into org.openedx.frontend.learning.gated_unit_content_message.v1.
+const MerekaLearningGatedUnitContentMessageHint = () => {
+  return (
+    <div className="mereka-learning-gated-unit-content-message-hint mb-2">
+      <span className="mereka-badge me-2">Access</span>
+      <span className="small text-muted">Unlock this unit by completing the required prerequisites.</span>
+    </div>
+  );
+};
+
+// Learning next-unit top-nav trigger slot helper.
+// Wired into org.openedx.frontend.learning.next_unit_top_nav_trigger.v1.
+const MerekaLearningNextUnitTopNavTriggerHint = () => {
+  return (
+    <span className="mereka-learning-next-unit-top-nav-trigger-hint mereka-badge d-none d-lg-inline-block">
+      Next unit
+    </span>
+  );
+};
+
+// Learning course-outline tab notifications slot helper.
+// Wired into org.openedx.frontend.learning.course_outline_tab_notifications.v1.
+const MerekaLearningCourseOutlineTabNotificationsHint = () => {
+  return (
+    <div className="mereka-learning-course-outline-tab-notifications-hint mb-2">
+      <span className="mereka-badge me-2">Updates</span>
+      <span className="small text-muted">Review announcements and due dates before you continue.</span>
+    </div>
+  );
+};
+
+// Learning notification-widget slot helper.
+// Wired into org.openedx.frontend.learning.notification_widget.v1.
+const MerekaLearningNotificationWidgetHint = () => {
+  return (
+    <div className="mereka-learning-notification-widget-hint mb-2">
+      <span className="mereka-badge me-2">Alert</span>
+      <span className="small text-muted">Stay on top of important learning notifications.</span>
+    </div>
+  );
+};
+
+// Learning notification-tray slot helper.
+// Wired into org.openedx.frontend.learning.notification_tray.v1.
+const MerekaLearningNotificationTrayHint = () => {
+  return (
+    <div className="mereka-learning-notification-tray-hint mb-2">
+      <span className="mereka-badge me-2">Notification tray</span>
+      <span className="small text-muted">Your recent course updates are grouped here.</span>
+    </div>
+  );
+};
+
+// Learning discussions/sidebar trigger slot helper.
+// Wired into org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1.
+const MerekaLearningNotificationsDiscussionsSidebarTriggerHint = () => {
+  return (
+    <span className="mereka-learning-notifications-discussions-sidebar-trigger-hint mereka-badge">
+      Discussions
+    </span>
+  );
+};
+
+// Learning discussions/sidebar slot helper.
+// Wired into org.openedx.frontend.learning.notifications_discussions_sidebar.v1.
+const MerekaLearningNotificationsDiscussionsSidebarHint = () => {
+  return (
+    <div className="mereka-learning-notifications-discussions-sidebar-hint mb-2">
+      <span className="mereka-badge me-2">Community</span>
+      <span className="small text-muted">Join discussions and track replies in one panel.</span>
+    </div>
+  );
+};
+
+// Learning course-exit view-courses slot helper.
+// Wired into org.openedx.frontend.learning.course_exit_view_courses.v1.
+const MerekaLearningCourseExitViewCoursesHint = () => {
+  return (
+    <div className="mereka-learning-course-exit-view-courses-hint mb-2">
+      <a href="/dashboard/courses" className="small">Browse more courses from Mereka Academy.</a>
+    </div>
+  );
+};
+
+// Learning course-exit dashboard-footnote slot helper.
+// Wired into org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1.
+const MerekaLearningCourseExitDashboardFootnoteLinkHint = () => {
+  return (
+    <div className="mereka-learning-course-exit-dashboard-footnote-link-hint mb-2">
+      <a href="/dashboard" className="small">Return to your dashboard for next actions.</a>
     </div>
   );
 };

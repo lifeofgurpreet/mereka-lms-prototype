@@ -237,7 +237,7 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
 - `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
 
-## Addendum — Learning Slot Coverage Expansion (35 Active Slots)
+## Addendum — Learning Slot Coverage Expansion (47 Active Slots)
 
 ### Commands Run
 
@@ -250,25 +250,25 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 
 ### Results
 
-- `verify-mfe-plugin-slots.sh`: `PASS=74`, `WARN=0`, `FAIL=0`
-  - Plugin now declares **35 namespaced slot IDs**.
-  - QA checker now asserts marker coverage for all 35 expected slot bindings (not only the original baseline set).
-  - New learning slots wired:
-    - `org.openedx.frontend.learning.course_breadcrumbs.v1`
-    - `org.openedx.frontend.learning.learner_tools.v1`
-    - `org.openedx.frontend.learning.progress_tab_course_grade.v1`
-    - `org.openedx.frontend.learning.progress_tab_related_links.v1`
-    - `org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1`
-    - `org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1`
-    - `org.openedx.frontend.learning.progress_tab_grade_breakdown.v1`
-    - `org.openedx.frontend.learning.unit_title.v1`
-    - `org.openedx.frontend.learning.sequence_navigation.v1`
-    - `org.openedx.frontend.learning.course_outline_sidebar_trigger.v1`
-    - `org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1`
-    - `org.openedx.frontend.learning.course_home_section_outline.v1`
-    - `org.openedx.frontend.learning.course_recommendations.v1`
-- `verify-mfe-slot-source-alignment.sh`: `PASS=23`, `WARN=13`, `FAIL=0`
-  - All new learning slot IDs are confirmed in the local Ulmo learning MFE source checkout.
+- `verify-mfe-plugin-slots.sh`: `PASS=98`, `WARN=0`, `FAIL=0`
+  - Plugin now declares **47 namespaced slot IDs**.
+  - QA checker now asserts marker coverage for all 47 expected slot bindings.
+  - Local-learning slot coverage is now complete (`28/28` available slot IDs wired in plugin).
+  - Final added learning slot IDs:
+    - `org.openedx.frontend.learning.content_iframe_loader.v1`
+    - `org.openedx.frontend.learning.content_iframe_error.v1`
+    - `org.openedx.frontend.learning.sequence_container.v1`
+    - `org.openedx.frontend.learning.gated_unit_content_message.v1`
+    - `org.openedx.frontend.learning.next_unit_top_nav_trigger.v1`
+    - `org.openedx.frontend.learning.course_outline_tab_notifications.v1`
+    - `org.openedx.frontend.learning.notification_widget.v1`
+    - `org.openedx.frontend.learning.notification_tray.v1`
+    - `org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1`
+    - `org.openedx.frontend.learning.notifications_discussions_sidebar.v1`
+    - `org.openedx.frontend.learning.course_exit_view_courses.v1`
+    - `org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1`
+- `verify-mfe-slot-source-alignment.sh`: `PASS=35`, `WARN=13`, `FAIL=0`
+  - All wired learning slot IDs are confirmed in the local Ulmo learning MFE source checkout.
   - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, non-learning `layout.*`).
 - `verify-email-template-multilang.sh`: `PASS=21`, `FAIL=0`, `WARN=5`
   - Branded marker checks now cover 15 HTML templates including `feedback`, `forum`, `grade`, `maintenance_notice`, `re_engagement`, and `survey`.
