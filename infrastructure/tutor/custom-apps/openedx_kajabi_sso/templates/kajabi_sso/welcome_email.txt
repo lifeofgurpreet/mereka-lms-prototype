@@ -1,2 +1,2 @@
 {# Backward-compatible alias path used by legacy render_to_string callers. #}
-{% include "openedx_kajabi_sso/welcome_email.html" %}
+{% include "openedx_kajabi_sso/welcome_email.txt" %}

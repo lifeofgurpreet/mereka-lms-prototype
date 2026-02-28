@@ -146,6 +146,8 @@ check_file "${APP_DIR}/management/commands/import_kajabi_users.py" "Import comma
 print_test "Checking templates"
 check_file "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "HTML email template"
 check_file "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.txt" "Text email template"
+check_file "${APP_DIR}/templates/kajabi_sso/welcome_email.html" "Legacy alias HTML email template"
+check_file "${APP_DIR}/templates/kajabi_sso/welcome_email.txt" "Legacy alias text email template"
 
 print_test "Checking migrations directory"
 check_file "${APP_DIR}/migrations/__init__.py" "Migrations __init__.py"
@@ -266,9 +268,13 @@ check_content "${APP_DIR}/api.py" "render_to_string.*welcome_email.txt" "Renders
 check_content "${APP_DIR}/api.py" "mark_welcome_email_sent" "Marks email as sent"
 
 print_test "Checking email templates"
-check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "Welcome to Mereka Academy" "HTML template content"
-check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "{{ first_name }}" "HTML template variables"
-check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.txt" "Welcome to Mereka Academy" "Text template content"
+check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "platform_name|default:\"Mereka Academy\"" "HTML template content"
+check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "default:first_name" "HTML template variables"
+check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.txt" "platform_name|default:\"Mereka Academy\"" "Text template content"
+check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "linear-gradient(120deg" "HTML template uses branded gradient header shell"
+check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "org_primary_color|default:'#ab3b78'" "HTML template uses Mereka primary fallback color"
+check_content "${APP_DIR}/templates/openedx_kajabi_sso/welcome_email.html" "org_accent_color|default:'#237072'" "HTML template uses Mereka accent fallback color"
+check_content "${APP_DIR}/templates/kajabi_sso/welcome_email.html" "include \"openedx_kajabi_sso/welcome_email.html\"" "Legacy alias HTML template points to canonical template"
 
 # ========================================================================
 # Section 7: LMS Settings (AC-SSO-001 through AC-SSO-005)
@@ -285,7 +291,11 @@ check_content "$SETTINGS_FILE" "KAJABI_WELCOME_EMAIL_SUPPORT" "KAJABI_WELCOME_EM
 check_content "$SETTINGS_FILE" "KAJABI_SSO_FALLBACK_ENABLED" "KAJABI_SSO_FALLBACK_ENABLED setting"
 
 print_test "Checking app registration"
-check_content "$SETTINGS_FILE" "openedx_kajabi_sso.*INSTALLED_APPS" "App added to INSTALLED_APPS"
+if grep -Eq '_safe_add_app\("openedx_kajabi_sso"\)|INSTALLED_APPS.*openedx_kajabi_sso|openedx_kajabi_sso.*INSTALLED_APPS' "$SETTINGS_FILE" 2>/dev/null; then
+    pass "App added to INSTALLED_APPS (directly or via _safe_add_app)"
+else
+    fail "App added to INSTALLED_APPS"
+fi
 
 print_test "Checking backend registration"
 check_content "$SETTINGS_FILE" "openedx_kajabi_sso.backend.KajabiSsoBackend" "Backend added to AUTHENTICATION_BACKENDS"
