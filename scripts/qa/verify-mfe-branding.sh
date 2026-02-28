@@ -96,6 +96,7 @@ declare -A MFE_ROUTES=(
   ["/course-authoring"]="course-authoring"
   ["/discussions"]="discussions"
   ["/learner-dashboard"]="learner-dashboard"
+  ["/learner-record"]="learner-record"
   ["/learning"]="learning"
   ["/ora-grading"]="ora-grading"
   ["/u"]="profile"  # Special: serves profile SPA at /u/ path

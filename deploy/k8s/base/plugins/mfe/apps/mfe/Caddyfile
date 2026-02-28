@@ -50,7 +50,7 @@
 	}
 	handle @mfe_theme_css {
 		root * /openedx/dist
-		try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
 		file_server
 	}
 
@@ -62,7 +62,7 @@
 		root * /openedx/dist
 		# Theme bundles are emitted per-MFE under /openedx/dist/<mfe>/theme/*.min.css.
 		# Route root /theme/* requests to whichever MFE currently carries the bundle.
-		try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
 		header Content-Type "text/css; charset=utf-8"
 		header Cache-Control "public, max-age=300"
 		file_server
@@ -183,6 +183,16 @@
 	handle @mfe_learning {
 		uri strip_prefix /learning
 		root * /openedx/dist/learning
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_learner-record {
+		path /learner-record /learner-record/*
+	}
+	handle @mfe_learner-record {
+		uri strip_prefix /learner-record
+		root * /openedx/dist/learner-record
 		try_files /{path} /index.html
 		file_server
 	}
