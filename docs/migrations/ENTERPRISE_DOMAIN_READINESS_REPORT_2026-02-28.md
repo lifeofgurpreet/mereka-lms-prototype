@@ -235,6 +235,32 @@ Exit criteria:
 5. Capacity audit no longer reports scheduler-induced pending enterprise pods during verification windows.
 6. Deferred Kajabi lesson-plan/details remains explicitly tracked and excluded from current go-live gate by policy (not by omission).
 
+## Risk register (current)
+
+| Risk | Evidence | Impact | Mitigation |
+|------|----------|--------|------------|
+| Scheduler CPU saturation keeps enterprise API replicas pending | `FailedScheduling ... Insufficient cpu` + ~99% node CPU request allocation | False-ready state and intermittent AC-001 failure | Capacity rebalance or node pool scale-up; keep capacity audit in release checks |
+| Context drift (dev vs prod kube context) produces misleading readiness claims | prior report mismatch fixed only after explicit prod context checks | Incorrect operational decisions | Enforce `--env prod`/explicit context in all runbooks and reports |
+| Long image-build runs appear "stuck" without deterministic terminal behavior | repeated in-progress build runs | Delayed rollouts and unclear recovery | Keep heartbeat + timeout guards + stale-run recovery helper |
+| Deferred Kajabi lesson metadata debt leaks into enterprise QA scope unexpectedly | known deferred item | QA churn and timeline slips | Keep debt item explicit and out of release gate until scoped work starts |
+
+## Immediate work packages (next 3 execution cycles)
+
+1. Capacity package (SRE)
+- Run `./scripts/qa/audit-enterprise-capacity-pressure.sh --env prod` at least 3 times across peak windows.
+- Decide and apply capacity action (scale-up or request rebalance).
+- Re-run `./scripts/qa/verify-enterprise-service-deployment.sh --env prod` until 3 consecutive full passes.
+
+2. Pilot tenant package (Platform + Enterprise Ops)
+- Execute `scripts/tenants/onboard-enterprise-tenant.sh` for pilot tenant.
+- Capture command output/evidence references for SSO, service deployment, and runtime app wiring checks.
+- Confirm strict tenant isolation behavior in learner/admin flows.
+
+3. Release guard package (Platform)
+- Keep enterprise runtime gates in release flow after image updates.
+- Use `scripts/infra/recover-stale-build-tutor-images.sh` when workflow runs are stale.
+- Publish a short post-release verification snapshot in this report path for each pilot deployment.
+
 ## Decision summary
 
 - **Foundation is strong** (spec coverage + SSO + tenant wiring).
