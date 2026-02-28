@@ -36,8 +36,8 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] Update `tutor config` (`THEME_NAME`, favicon/static paths) and rebuild `openedx` images.
 - [x] Verify legacy pages (login, dashboard, course outline) with new branding — deployed to production.
 
-## Phase 4 — Extended Surfaces (NOT STARTED)
-- [ ] Discovery service (React app) styling.
+## Phase 4 — Extended Surfaces (IN PROGRESS)
+- [x] Discovery service styling baseline + token wiring (`verify-catalog-discovery.sh` source gate).
 - [ ] Email templates (transactional + marketing headers/footers).
 - [ ] PDF certificates/badges if applicable.
 - ~~Ecommerce/XQueue UIs~~ — Ecommerce replaced by Purchase Gateway (FastAPI); XQueue UI minimal.
