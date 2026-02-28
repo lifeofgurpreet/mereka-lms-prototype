@@ -804,8 +804,12 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
+#   org.openedx.frontend.learner_dashboard.dashboard_header.v1 | Learner dashboard branded header
+#   org.openedx.frontend.learner_dashboard.course_card.v1 | Learner dashboard course-card accent
 #   org.openedx.frontend.learning.course_outline_sidebar.v1 | Learning course sidebar content
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
+#   org.openedx.frontend.learning.course_header.v1 | Learning course header banner
+#   org.openedx.frontend.learning.course_tabs.v1 | Learning tabs helper strip
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
 #
@@ -917,6 +921,36 @@ for _mfe in [
         ),
         (
             _mfe,
+            "org.openedx.frontend.learner_dashboard.dashboard_header.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_dashboard_header',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaDashboardHeader,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learner_dashboard.course_card.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_dashboard_course_card_accent',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCourseCardAccent,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
             "org.openedx.frontend.learning.course_outline_sidebar.v1",
             """
             {
@@ -941,6 +975,36 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaProgressCertificateStatus,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_header.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_header',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseHeader,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_tabs.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_tabs_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseTabsHint,
                 },
             },
             """,
@@ -1264,6 +1328,33 @@ const MerekaNoCoursesView = () => {
   );
 };
 
+// Learner-dashboard header slot surface (high-visibility post-login branding).
+// Wired into org.openedx.frontend.learner_dashboard.dashboard_header.v1.
+const MerekaDashboardHeader = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+
+  return (
+    <section className="mereka-dashboard-header-slot mb-3">
+      <p className="mereka-badge mb-2">Mereka Learning</p>
+      <h2 className="h4 mb-1">Welcome back to {variant.brand}</h2>
+      <p className="mb-0 small text-muted">Pick up where you left off and keep your momentum.</p>
+    </section>
+  );
+};
+
+// Learner-dashboard course-card accent slot.
+// Wired into org.openedx.frontend.learner_dashboard.course_card.v1.
+const MerekaCourseCardAccent = ({ courseId }) => {
+  const safeCourseId = typeof courseId === 'string' ? courseId : '';
+  return (
+    <div className="mereka-course-card-accent">
+      <span className="mereka-badge">Mereka Curated</span>
+      {safeCourseId ? <span className="mereka-course-card-accent__meta">{safeCourseId}</span> : null}
+    </div>
+  );
+};
+
 // Learning course-outline sidebar branding card inserted into course-outline-sidebar slot.
 // Wired into org.openedx.frontend.learning.course_outline_sidebar.v1.
 const MerekaCourseOutlineSidebar = () => {
@@ -1278,6 +1369,32 @@ const MerekaCourseOutlineSidebar = () => {
       </p>
       <a href="/help/" className="d-inline-block">Help centre</a>
     </aside>
+  );
+};
+
+// Learning header slot for branded in-course context.
+// Wired into org.openedx.frontend.learning.course_header.v1.
+const MerekaLearningCourseHeader = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+
+  return (
+    <div className="mereka-learning-course-header mb-3">
+      <span className="mereka-badge">Learning</span>
+      <p className="mereka-learning-course-header__text mb-0">
+        You are learning with {variant.brand}.
+      </p>
+    </div>
+  );
+};
+
+// Learning tabs slot helper strip.
+// Wired into org.openedx.frontend.learning.course_tabs.v1.
+const MerekaLearningCourseTabsHint = () => {
+  return (
+    <div className="mereka-learning-course-tabs-hint mb-2">
+      <span>Track your progress, discussions, and key dates in one place.</span>
+    </div>
   );
 };
 
