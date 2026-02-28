@@ -136,8 +136,12 @@ else
   do_warn "AC-UISEL-001: $BRITTLE_TESTID [data-testid*=] selector line(s) found — data-testid is for tests, not production CSS (SELECTOR_HARDENING_POLICY)"
 fi
 
-# ── Check 4: SELECTOR-EXCEPTION comments present for remaining brittle selectors ──
-EXCEPTION_COMMENTS=$(python3 -c "
+# ── Check 4/5: Exception docs only required when brittle selectors remain ──
+if [[ "$TOTAL_BRITTLE" -eq 0 ]]; then
+  do_pass "AC-UISEL-002: No brittle selectors remain, so SELECTOR-EXCEPTION annotations are not required"
+  do_pass "AC-UISEL-002: No brittle selectors remain, so expiry annotations are not required"
+else
+  EXCEPTION_COMMENTS=$(python3 -c "
 import re
 with open('$MFE_SCSS') as f:
     content = f.read()
@@ -145,14 +149,13 @@ count = len(re.findall(r'SELECTOR-EXCEPTION:|SELECTOR-KEPT-BRITTLE:', content))
 print(count)
 ")
 
-if [[ "$EXCEPTION_COMMENTS" -gt 0 ]]; then
-  do_pass "AC-UISEL-002: $EXCEPTION_COMMENTS SELECTOR-EXCEPTION/KEPT-BRITTLE comment(s) document remaining brittle selectors"
-else
-  do_warn "AC-UISEL-002: No SELECTOR-EXCEPTION comments found — remaining brittle selectors should be documented"
-fi
+  if [[ "$EXCEPTION_COMMENTS" -gt 0 ]]; then
+    do_pass "AC-UISEL-002: $EXCEPTION_COMMENTS SELECTOR-EXCEPTION/KEPT-BRITTLE comment(s) document remaining brittle selectors"
+  else
+    do_warn "AC-UISEL-002: No SELECTOR-EXCEPTION comments found — remaining brittle selectors should be documented"
+  fi
 
-# ── Check 5: Remaining brittle selectors have expiry dates ───────────
-EXCEPTIONS_WITH_EXPIRY=$(python3 -c "
+  EXCEPTIONS_WITH_EXPIRY=$(python3 -c "
 import re
 with open('$MFE_SCSS') as f:
     content = f.read()
@@ -160,10 +163,11 @@ count = len(re.findall(r'expires:\s*\d{4}-Q\d', content))
 print(count)
 ")
 
-if [[ "$EXCEPTIONS_WITH_EXPIRY" -gt 0 ]]; then
-  do_pass "AC-UISEL-002: $EXCEPTIONS_WITH_EXPIRY exception(s) have expiry dates (review schedule enforced)"
-else
-  do_warn "AC-UISEL-002: No expiry dates found on SELECTOR-EXCEPTION comments — add 'expires: YYYY-QN' annotations"
+  if [[ "$EXCEPTIONS_WITH_EXPIRY" -gt 0 ]]; then
+    do_pass "AC-UISEL-002: $EXCEPTIONS_WITH_EXPIRY exception(s) have expiry dates (review schedule enforced)"
+  else
+    do_warn "AC-UISEL-002: No expiry dates found on SELECTOR-EXCEPTION comments — add 'expires: YYYY-QN' annotations"
+  fi
 fi
 
 # ── Check 6: Branding revision token updated ─────────────────────────
