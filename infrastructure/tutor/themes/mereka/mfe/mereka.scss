@@ -84,8 +84,16 @@ body {
 .btn-primary:focus,
 .pgn__btn--primary:hover,
 .pgn__btn--primary:focus {
-  transform: translateY(-1px);
   box-shadow: 0 18px 38px rgb(var(--mereka-color-teal-rgb) / 0.24);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-primary:hover,
+  .btn-primary:focus,
+  .pgn__btn--primary:hover,
+  .pgn__btn--primary:focus {
+    transform: translateY(-1px);
+  }
 }
 
 /* RISK: LOW — .btn-outline-primary; color-only override */
