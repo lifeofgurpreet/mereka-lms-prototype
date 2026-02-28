@@ -48,13 +48,14 @@
 **Theming Mechanism**:
 ```scss
 // Injected into each MFE's src/styles/mereka.scss
-$mereka-font-path: "/fonts";
-@import "../../../../../infrastructure/tutor/themes/mereka/scss/theme";
+$mereka-font-path: "../fonts";
+@import "./scss/tokens";
+@import "./scss/base";
 ```
 
 **Paragon Variable Bridge** (`scss/_tokens.scss`):
 - Manually maps Mereka colors → Paragon CSS variables
-- Example: `--pgn-color-primary: #ab3b78` (magenta)
+- Example: `--pgn-color-primary-base: #ab3b78` (magenta)
 - Works at runtime, no rebuild needed for CSS var changes
 
 **Asset Sync**: `scripts/branding/sync-brand-assets.sh`

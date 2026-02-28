@@ -92,7 +92,7 @@ import { Button } from '@openedx/paragon';
 
 **Required implementation**:
 - Use Paragon `Alert` component with `variant="danger"`
-- Theme alert via `--pgn-color-danger` (inherited from `--mereka-color-burgundy`)
+- Theme alert via `--pgn-color-danger-base` (inherited from `--mereka-color-burgundy`)
 - Include retry action where applicable
 - Provide clear, user-friendly error message (not raw API response)
 
@@ -116,7 +116,7 @@ import { Alert, Button } from '@openedx/paragon';
 **Design token usage**:
 - Alert background: Auto-themed via Paragon
 - Alert text: Auto-themed via Paragon
-- Custom styling: Use `var(--pgn-color-danger)` or `var(--mereka-color-danger)`
+- Custom styling: Use `var(--pgn-color-danger-base)` or `var(--mereka-color-danger)`
 
 **Error severity levels**:
 - **Critical**: Use `variant="danger"` (red)
@@ -132,7 +132,7 @@ import { Alert, Button } from '@openedx/paragon';
 **Required implementation**:
 - Use Paragon `Alert` with `variant="success"` for persistent confirmation
 - Use Paragon `Toast` for transient notifications
-- Theme via `--pgn-color-success` (inherited from `--mereka-color-forest`)
+- Theme via `--pgn-color-success-base` (inherited from `--mereka-color-forest`)
 
 **Example (Alert)**:
 ```jsx
@@ -158,7 +158,7 @@ import { Toast } from '@openedx/paragon';
 
 **Design token usage**:
 - Alert/Toast background: Auto-themed via Paragon
-- Custom styling: Use `var(--pgn-color-success)` or `var(--mereka-color-success)`
+- Custom styling: Use `var(--pgn-color-success-base)` or `var(--mereka-color-success)`
 
 ---
 
@@ -178,15 +178,15 @@ $color-info: $color-blue;           // #295cad
   --mereka-color-warning: #{$color-warning};
   --mereka-color-danger: #{$color-danger};
   --mereka-color-info: #{$color-info};
-  --pgn-color-success: #{$color-success};
-  --pgn-color-warning: #{$color-warning};
-  --pgn-color-danger: #{$color-danger};
-  --pgn-color-info: #{$color-info};
+  --pgn-color-success-base: #{$color-success};
+  --pgn-color-warning-base: #{$color-warning};
+  --pgn-color-danger-base: #{$color-danger};
+  --pgn-color-info-base: #{$color-info};
 }
 ```
 
 **Paragon auto-theming**:
-- Paragon components automatically consume `--pgn-color-*` tokens
+- Paragon components automatically consume canonical `--pgn-color-*-base` tokens
 - No need to manually style Alert, Spinner, Toast components
 
 **Custom usage**:
