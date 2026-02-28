@@ -14,6 +14,7 @@ LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py
 CMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+FOOTER_COMPONENT_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 CONFIG="$REPO_ROOT/infrastructure/tutor/config.example.yml"
 
@@ -71,25 +72,44 @@ else
   do_fail "MerekaFooter not found in plugin"
 fi
 
-if grep -q 'MerekaFooter\|mereka.*footer' "$PATCHES" 2>/dev/null; then
-  do_pass "apply-patches.sh wires MerekaFooter into MFE slots"
+if grep -q 'org.openedx.frontend.layout.footer.v1\|PLUGIN_SLOTS' "$PLUGIN" 2>/dev/null; then
+  do_pass "Plugin wires footer branding through FPF slots"
 else
-  do_warn "MerekaFooter not found in apply-patches.sh"
+  do_fail "Footer FPF slot wiring not found in plugin"
+fi
+
+if [ -f "$FOOTER_COMPONENT_PATCH" ] && grep -q 'source "\$PATCHES_DIR/footer-component.sh"' "$PATCHES" 2>/dev/null; then
+  do_pass "apply-patches.sh sources footer-component patch module"
+else
+  do_warn "footer-component patch module wiring not found in apply-patches.sh"
 fi
 
 # 5. Head-extra template for theme CSS injection
 echo ""
 echo "--- Theme CSS Injection ---"
-head_extra="$REPO_ROOT/deploy/k8s/base/apps/openedx/head-extra.html"
-if [ -f "$head_extra" ]; then
-  do_pass "head-extra.html exists for CSS injection"
-  if grep -qi 'mereka\|brand' "$head_extra" 2>/dev/null; then
-    do_pass "head-extra.html contains branding references"
+head_extra_found=0
+head_extra_branding=0
+for head_extra in \
+  "$REPO_ROOT/deploy/k8s/base/apps/openedx/theme/head-extra.html" \
+  "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/head-extra.html" \
+  "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html" \
+  "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"; do
+  if [ -f "$head_extra" ]; then
+    head_extra_found=$((head_extra_found + 1))
+    if grep -Eqi 'mereka|brand|font|preload' "$head_extra" 2>/dev/null; then
+      head_extra_branding=$((head_extra_branding + 1))
+    fi
+  fi
+done
+if [ "$head_extra_found" -gt 0 ]; then
+  do_pass "Found $head_extra_found head-extra template(s) in current theme paths"
+  if [ "$head_extra_branding" -gt 0 ]; then
+    do_pass "head-extra templates include branding/font wiring markers"
   else
-    do_warn "head-extra.html exists but no branding references found"
+    do_warn "head-extra templates found but no branding/font markers detected"
   fi
 else
-  do_warn "head-extra.html not found (theme may use SCSS only)"
+  do_warn "No head-extra templates found in expected current paths"
 fi
 
 # 6. Google Fonts stripped (Mereka uses custom fonts)
