@@ -802,6 +802,7 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.layout.header_logo.v1 | Default header logo (MFE header bar)
 #   org.openedx.frontend.layout.studio_footer.v1 | Default Studio footer (studio MFE)
 #   org.openedx.frontend.authoring.course_outline_header.v1 | Studio course-outline branded header
+#   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
@@ -812,11 +813,14 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
 #   org.openedx.frontend.learning.course_header.v1 | Learning course header banner
 #   org.openedx.frontend.learning.course_tabs.v1 | Learning tabs helper strip
+#   org.openedx.frontend.layout.header_learning.v1 | Learning layout header slot
+#   org.openedx.frontend.learning.course_tab_links.v1 | Learning tab-links helper strip
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
 #   org.openedx.frontend.account.account_settings_tab.v1 | Account settings branded tab shell
 #   org.openedx.frontend.account.account_settings_field.v1 | Account settings field-level helper
+#   org.openedx.frontend.account.id_verification_page.v1 | Account ID verification helper
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
 #
@@ -892,6 +896,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaAuthoringCourseOutlineHeader,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_unit_sidebar.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_course_unit_sidebar_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringCourseUnitSidebarHint,
                 },
             },
             """,
@@ -1048,6 +1067,36 @@ for _mfe in [
         ),
         (
             _mfe,
+            "org.openedx.frontend.layout.header_learning.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_layout_header_learning_context',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseHeader,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_tab_links.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_tab_links_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseTabsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
             "org.openedx.frontend.catalog.catalog_header.v1",
             """
             {
@@ -1117,6 +1166,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaAccountSettingsFieldHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.account.id_verification_page.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_account_id_verification_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAccountIdVerificationHint,
                 },
             },
             """,
@@ -1417,6 +1481,17 @@ const MerekaAuthoringCourseOutlineHeader = () => {
   );
 };
 
+// Studio authoring course-unit sidebar helper.
+// Wired into org.openedx.frontend.authoring.course_unit_sidebar.v1.
+const MerekaAuthoringCourseUnitSidebarHint = () => {
+  return (
+    <aside className="mereka-authoring-course-unit-sidebar-hint p-3 rounded">
+      <p className="mereka-badge mb-2">Studio Unit</p>
+      <p className="mb-0 small text-muted">Use this sidebar to keep activities and outcomes aligned with your learning goals.</p>
+    </aside>
+  );
+};
+
 // Custom learner-dashboard sidebar widget for branded links and support prompts.
 // Registered via org.openedx.frontend.learner_dashboard.widget_sidebar.v1.
 const MerekaLearnerSidebarWidget = () => {
@@ -1512,7 +1587,8 @@ const MerekaCourseOutlineSidebar = () => {
 };
 
 // Learning header slot for branded in-course context.
-// Wired into org.openedx.frontend.learning.course_header.v1.
+// Wired into org.openedx.frontend.learning.course_header.v1 and
+// org.openedx.frontend.layout.header_learning.v1.
 const MerekaLearningCourseHeader = () => {
   const config = getConfig();
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
@@ -1528,7 +1604,8 @@ const MerekaLearningCourseHeader = () => {
 };
 
 // Learning tabs slot helper strip.
-// Wired into org.openedx.frontend.learning.course_tabs.v1.
+// Wired into org.openedx.frontend.learning.course_tabs.v1 and
+// org.openedx.frontend.learning.course_tab_links.v1.
 const MerekaLearningCourseTabsHint = () => {
   return (
     <div className="mereka-learning-course-tabs-hint mb-2">
@@ -1610,6 +1687,16 @@ const MerekaAccountSettingsFieldHint = () => {
   return (
     <p className="mereka-account-settings-field-hint mb-2">
       Enterprise-managed profile fields may be locked by your organization.
+    </p>
+  );
+};
+
+// Account ID verification helper slot.
+// Wired into org.openedx.frontend.account.id_verification_page.v1.
+const MerekaAccountIdVerificationHint = () => {
+  return (
+    <p className="mereka-account-id-verification-hint mb-2">
+      ID verification details are reviewed by your learning administrator for secure certificate issuance.
     </p>
   );
 };

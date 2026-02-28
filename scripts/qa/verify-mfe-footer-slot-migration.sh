@@ -108,6 +108,7 @@ else
     "org.openedx.frontend.layout.header_logo.v1"
     "org.openedx.frontend.layout.studio_footer.v1"
     "org.openedx.frontend.authoring.course_outline_header.v1"
+    "org.openedx.frontend.authoring.course_unit_sidebar.v1"
     "org.openedx.frontend.authn.login_component.v1"
     "org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
     "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
@@ -120,11 +121,14 @@ else
     "org.openedx.frontend.learning.progress_certificate_status.v1"
     "org.openedx.frontend.learning.course_header.v1"
     "org.openedx.frontend.learning.course_tabs.v1"
+    "org.openedx.frontend.layout.header_learning.v1"
+    "org.openedx.frontend.learning.course_tab_links.v1"
     "org.openedx.frontend.catalog.catalog_header.v1"
     "org.openedx.frontend.catalog.catalog_card.v1"
     "org.openedx.frontend.catalog.catalog_filters.v1"
     "org.openedx.frontend.account.account_settings_tab.v1"
     "org.openedx.frontend.account.account_settings_field.v1"
+    "org.openedx.frontend.account.id_verification_page.v1"
     "org.openedx.frontend.account.additional_profile_fields.v1"
     "org.openedx.frontend.profile.additional_profile_fields.v1"
   )
@@ -325,6 +329,12 @@ PY
       pass "AC-FRONT-065: Account settings field slot is registered"
     else
       fail "AC-FRONT-065: Account settings field slot not registered"
+    fi
+
+    if grep -q 'org.openedx.frontend.account.id_verification_page.v1' "$PLUGIN_FILE"; then
+      pass "AC-FRONT-065: Account ID verification slot is registered"
+    else
+      fail "AC-FRONT-065: Account ID verification slot not registered"
     fi
 
     if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE" && \

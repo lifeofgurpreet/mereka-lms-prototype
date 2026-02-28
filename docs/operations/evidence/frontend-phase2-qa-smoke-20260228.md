@@ -129,3 +129,30 @@ AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh pr
   - `PASS=9`, `FAIL=0` (Chromium + Firefox + mobile Chrome)
   - WebKit/Safari projects were auto-disabled due missing host runtime deps.
   - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T160129Z.log`
+
+## Addendum — Confirmed Ulmo Slot Expansion
+
+### Additional Commands Run
+
+```bash
+python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
+./scripts/qa/verify-mfe-plugin-slots.sh
+./scripts/qa/verify-selector-to-slot-migration.sh
+./scripts/qa/verify-mfe-footer-slot-migration.sh
+./scripts/qa/verify-mfe-selector-hardening.sh
+./scripts/qa/verify-css-scoping.sh
+```
+
+### Additional Results
+
+- `verify-mfe-plugin-slots.sh`: `PASS=58`, `WARN=0`, `FAIL=0`
+  - Plugin now declares 27 namespaced slot IDs.
+  - Newly wired confirmed Ulmo slot IDs:
+    - `org.openedx.frontend.authoring.course_unit_sidebar.v1`
+    - `org.openedx.frontend.layout.header_learning.v1`
+    - `org.openedx.frontend.learning.course_tab_links.v1`
+    - `org.openedx.frontend.account.id_verification_page.v1`
+- `verify-selector-to-slot-migration.sh`: `PASS=36`, `FAIL=0`
+- `verify-mfe-footer-slot-migration.sh`: `PASS=47`, `FAIL=0`
+- `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
+- `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`

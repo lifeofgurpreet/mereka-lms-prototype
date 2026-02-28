@@ -201,17 +201,17 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 ## Slots We Currently Use
 
-**Current wiring state (2026-02-28): 23 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
+**Current wiring state (2026-02-28): 27 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
 
 | Slot Group | Slots |
 |------------|-------|
 | Layout core | `layout.header_logo.v1`, `layout.footer.v1`, `layout.studio_footer.v1`, `layout.header_desktop_main_menu.v1`, `layout.header_mobile_main_menu.v1` |
 | Authn | `authn.login_component.v1` |
 | Learner dashboard | `learner_dashboard.widget_sidebar.v1`, `learner_dashboard.no_courses_view.v1`, `learner_dashboard.dashboard_header.v1`, `learner_dashboard.course_card.v1`, `learner_dashboard.course_card_action.v1` |
-| Learning | `learning.course_outline_sidebar.v1`, `learning.progress_certificate_status.v1`, `learning.course_header.v1`, `learning.course_tabs.v1` |
+| Learning | `learning.course_outline_sidebar.v1`, `learning.progress_certificate_status.v1`, `learning.course_header.v1`, `learning.course_tabs.v1`, `layout.header_learning.v1`, `learning.course_tab_links.v1` |
 | Catalog | `catalog.catalog_header.v1`, `catalog.catalog_card.v1`, `catalog.catalog_filters.v1` |
-| Account/Profile | `account.account_settings_tab.v1`, `account.account_settings_field.v1`, `account.additional_profile_fields.v1`, `profile.additional_profile_fields.v1` |
-| Authoring | `authoring.course_outline_header.v1` |
+| Account/Profile | `account.account_settings_tab.v1`, `account.account_settings_field.v1`, `account.id_verification_page.v1`, `account.additional_profile_fields.v1`, `profile.additional_profile_fields.v1` |
+| Authoring | `authoring.course_outline_header.v1`, `authoring.course_unit_sidebar.v1` |
 
 ---
 
