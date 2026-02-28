@@ -19,6 +19,7 @@ ENV="prod"
 RUN_CROSS_BROWSER="${RUN_CROSS_BROWSER:-1}"
 RUN_A11Y="${RUN_A11Y:-1}"
 RUN_PERFORMANCE="${RUN_PERFORMANCE:-1}"
+RUN_CERTIFICATE_BRANDING="${RUN_CERTIFICATE_BRANDING:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
 CROSS_BROWSER="${CROSS_BROWSER:-0}"
@@ -43,6 +44,8 @@ Environment toggles:
   RUN_CROSS_BROWSER=0|1     Enable/disable cross-browser smoke gate (default: 1)
   RUN_A11Y=0|1              Enable/disable a11y gate (default: 1)
   RUN_PERFORMANCE=0|1       Enable/disable performance gate (default: 1)
+  RUN_CERTIFICATE_BRANDING=0|1
+                            Enable/disable certificate/email branding gate (default: 1)
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
   A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
@@ -109,6 +112,7 @@ echo "Retention: ${RETENTION_DAYS} days"
 echo "Cross-browser: $CROSS_BROWSER (gate enabled: $RUN_CROSS_BROWSER)"
 echo "A11y gate enabled: $RUN_A11Y"
 echo "Performance gate enabled: $RUN_PERFORMANCE"
+echo "Certificate branding gate enabled: $RUN_CERTIFICATE_BRANDING"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
 echo "Require runtime theme mode: $REQUIRE_RUNTIME_THEME"
@@ -227,7 +231,15 @@ else
   skip_gate "frontend-performance-spotcheck" "RUN_PERFORMANCE=0"
 fi
 
-# --- Gate 9: Public Screenshot Capture (optional operator evidence) ---
+# --- Gate 9: Certificate + Email Branding Contract ---
+if [[ "$RUN_CERTIFICATE_BRANDING" == "1" ]]; then
+  run_gate "certificate-branding" \
+    ./scripts/qa/verify-certificate-branding.sh
+else
+  skip_gate "certificate-branding" "RUN_CERTIFICATE_BRANDING=0"
+fi
+
+# --- Gate 10: Public Screenshot Capture (optional operator evidence) ---
 if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
   run_gate "capture-branding-screenshots" \
     ./scripts/qa/capture-branding-screenshots.sh "$ENV"
@@ -261,6 +273,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - A11y script: ${A11Y_SCRIPT}
 - A11y args: ${A11Y_ARGS}
 - Performance gate enabled: ${RUN_PERFORMANCE}
+- Certificate branding gate enabled: ${RUN_CERTIFICATE_BRANDING}
 - Screenshot gate enabled: ${RUN_SCREENSHOTS}
 
 ## Failure Taxonomy
