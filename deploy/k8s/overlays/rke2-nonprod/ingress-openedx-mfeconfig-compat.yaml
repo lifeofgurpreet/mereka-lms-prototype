@@ -3,6 +3,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: openedx-mfe-mfeconfig-compat
+  labels:
+    app.kubernetes.io/name: openedx-mfe-mfeconfig-compat
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /api/mfe_config/v1
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
