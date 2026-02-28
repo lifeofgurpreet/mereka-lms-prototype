@@ -192,11 +192,12 @@ if "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:
 # MFE OAuth Fix - Custom app to fix OAuth provider visibility
 import sys
 sys.path.insert(0, '/openedx')
-INSTALLED_APPS.append('mfe_oauth_fix')
+_safe_add_app('mfe_oauth_fix')
 
 # Add middleware to fix /api/mfe_context responses
 # Insert at the end of middleware stack so it processes responses
-MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
+if 'mfe_oauth_fix' in INSTALLED_APPS:
+    MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
 
 # Prometheus Metrics Integration
 # django_prometheus must be added at the START of INSTALLED_APPS

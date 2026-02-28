@@ -397,8 +397,8 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/ops/generate-sla-report.sh
-    command: scripts/ops/generate-sla-report.sh
+    file: scripts/qa/generate-sla-report.sh
+    command: scripts/qa/generate-sla-report.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/generate-sla-report.sh
@@ -418,8 +418,8 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/ops/generate-sla-report.sh
-    command: scripts/ops/generate-sla-report.sh
+    file: scripts/qa/generate-sla-report.sh
+    command: scripts/qa/generate-sla-report.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-slo-reporting.sh
@@ -431,8 +431,8 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/ops/generate-sla-report.sh
-    command: scripts/ops/generate-sla-report.sh
+    file: scripts/qa/generate-sla-report.sh
+    command: scripts/qa/generate-sla-report.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-slo-reporting.sh

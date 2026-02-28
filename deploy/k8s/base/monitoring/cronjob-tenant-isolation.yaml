@@ -28,7 +28,7 @@ spec:
           serviceAccountName: lms
           containers:
             - name: isolation-test
-              image: docker.io/bitnami/kubectl:latest
+              image: docker.io/bitnami/kubectl:1.28.5
               command:
                 - /bin/bash
                 - -c
