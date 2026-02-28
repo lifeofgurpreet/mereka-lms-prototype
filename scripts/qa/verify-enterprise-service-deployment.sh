@@ -21,6 +21,7 @@ pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 NODE_PRESSURE_REPORTED=0
+CPU_PRESSURE_DETECTED=0
 
 pending_reason_summary() {
   local app_name="$1"
@@ -222,6 +223,7 @@ for dep in "${EXPECTED_DEPS[@]}"; do
         [[ -n "$line" ]] && info "  - $line"
       done <<< "$SCHED_REASONS"
       if [[ "$NODE_PRESSURE_REPORTED" -eq 0 ]] && grep -qi 'Insufficient cpu' <<< "$SCHED_REASONS"; then
+        CPU_PRESSURE_DETECTED=1
         report_node_cpu_request_pressure
         NODE_PRESSURE_REPORTED=1
       fi
@@ -394,4 +396,10 @@ echo
 echo "=== Summary ==="
 echo -e "${GREEN}PASS:${NC} $PASS"
 echo -e "${RED}FAIL:${NC} $FAIL"
+if [[ "$CPU_PRESSURE_DETECTED" -eq 1 ]]; then
+  info "Detected scheduler CPU pressure. Suggested next steps:"
+  info "  - Inspect HPA desired/current for enterprise API services"
+  info "  - Reduce pod CPU requests (including init containers) where safe"
+  info "  - Increase cluster allocatable CPU capacity if sustained load requires it"
+fi
 [[ $FAIL -eq 0 ]] && exit 0 || exit 1
