@@ -14,8 +14,9 @@ set -euo pipefail
 # REPO_ROOT must be set by the caller (apply-patches.sh)
 : "${REPO_ROOT:?REPO_ROOT must be set before sourcing _common.sh}"
 
-# Activate venv (idempotent)
-if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+# Activate local venv when available (idempotent).
+# CI may provide Python through runner tooling without a repo-local .venv.
+if [[ -z "${VIRTUAL_ENV:-}" && -f "$REPO_ROOT/.venv/bin/activate" ]]; then
   source "$REPO_ROOT/.venv/bin/activate"
 fi
 
