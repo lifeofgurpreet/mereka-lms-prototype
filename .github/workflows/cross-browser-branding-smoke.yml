@@ -1,0 +1,59 @@
+name: Cross Browser Branding Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      cross_browser:
+        description: "Run cross-browser matrix (chromium/firefox/mobile; webkit when deps available)"
+        required: true
+        default: true
+        type: boolean
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  branding-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run branding smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CROSS_BROWSER="${{ inputs.cross_browser || 'true' }}"
+
+          args=(--env "$TARGET_ENV")
+          if [[ "$CROSS_BROWSER" == "true" ]]; then
+            args+=(--cross-browser)
+          fi
+
+          ./scripts/qa/verify-cross-browser-branding-smoke.sh "${args[@]}"
+
+      - name: Upload QA logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-browser-branding-smoke-logs
+          path: |
+            var/qa/cross-browser-branding-smoke-*.log
+            var/e2e-report/**
+            var/e2e-artifacts/**
+          if-no-files-found: warn
