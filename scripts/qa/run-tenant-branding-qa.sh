@@ -3,7 +3,7 @@
 # @covers AC-TBQA-001, AC-TBQA-002, AC-TBQA-003, AC-TBQA-004, AC-TBQA-005
 #
 # Consolidated tenant branding QA runner.
-# Executes all tenant branding verification suites (10 total) and produces a unified
+# Executes all tenant branding verification suites (11 total) and produces a unified
 # summary table with per-suite PASS/FAIL/WARN counts.
 #
 # Usage:
@@ -155,10 +155,11 @@ echo    "Live branding gates: $RUN_BRANDING_GATES_LIVE"
 echo    "Tenant runtime suite: $RUN_TENANT_RUNTIME"
 echo    "Multisite governance suite: $RUN_MULTISITE_GOVERNANCE"
 
-# ── AC-TBQA-001: run all 10 suites in order ──────────────────────────────────
+# ── AC-TBQA-001: run all 11 suites in order ──────────────────────────────────
 run_suite "Analytics Key (8jao.1)"          "scripts/qa/verify-analytics-key.sh"
 run_suite "Selector Hardening (8jao.3)"     "scripts/qa/verify-mfe-selector-hardening.sh"
 run_suite "MFE CSS Architecture"            "scripts/qa/verify-mfe-css-architecture.sh"
+run_suite "MFE Reduced Motion"              "scripts/qa/verify-mfe-reduced-motion.sh"
 run_suite "Token Integrity (8jao.4)"        "scripts/qa/verify-branding-token-integrity.sh"
 run_suite "Plugin Slot Register (8jao.9)"   "scripts/qa/verify-plugin-slot-migration-register.sh"
 run_suite "Footer Variant Matrix (8jao.10)" "scripts/qa/verify-footer-variant-matrix.sh"

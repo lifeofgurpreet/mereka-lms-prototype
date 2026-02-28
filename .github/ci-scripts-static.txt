@@ -70,6 +70,7 @@ scripts/qa/verify-mfe-footer-slot-migration.sh
 scripts/qa/verify-footer-slot-migration.sh
 scripts/qa/verify-mfe-selector-hardening.sh
 scripts/qa/verify-mfe-css-architecture.sh
+scripts/qa/verify-mfe-reduced-motion.sh
 scripts/qa/verify-mfe-routing-parity.sh
 scripts/qa/verify-mfe-first-policy.sh
 scripts/qa/verify-mfe-analytics-plugin-parity.sh
