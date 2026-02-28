@@ -105,3 +105,26 @@ AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh pr
 - Account styling path is now slot-owned through:
   - `org.openedx.frontend.account.account_settings_tab.v1`
   - `org.openedx.frontend.account.account_settings_field.v1`
+
+## Addendum — Cross-Browser Branding Smoke Automation
+
+### New Automation
+
+- Added `tests/e2e/tests/branding-smoke.spec.ts`
+  - Verifies authn + learner-dashboard + account-settings routes expose `PARAGON_THEME` runtime manifest.
+  - Verifies hashed core theme assets are present in the HTML contract (`paragon-theme-core.*.css`, `brand-theme-core.*.css`).
+  - Captures route screenshots per project.
+- Added `scripts/qa/verify-cross-browser-branding-smoke.sh`
+  - Supports `--env prod|dev`.
+  - Supports `--cross-browser` mode (chromium, firefox, mobile-chrome, and webkit/mobile-safari when host deps are available).
+  - Includes WebKit launch probe with explicit fallback (`webkit_enabled=0`) when host dependencies are missing.
+
+### Runtime Results
+
+- `./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod`
+  - `PASS=3`, `FAIL=0` (Chromium)
+  - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T155501Z.log`
+- `./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser`
+  - `PASS=9`, `FAIL=0` (Chromium + Firefox + mobile Chrome)
+  - WebKit/Safari projects were auto-disabled due missing host runtime deps.
+  - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T160129Z.log`

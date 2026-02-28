@@ -17,6 +17,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const BASE_URL = process.env.BASE_URL ?? 'https://academyv2.mereka.io';
+const ENABLE_CROSS_BROWSER = process.env.PW_CROSS_BROWSER === '1';
+const ENABLE_WEBKIT = process.env.PW_ENABLE_WEBKIT !== '0';
 
 // Derive MFE and Studio URLs from BASE_URL host
 const baseHost = new URL(BASE_URL).hostname; // e.g. academyv2.mereka.io
@@ -62,10 +64,41 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Allow passing custom config values via env
         baseURL: BASE_URL,
       },
     },
+    ...(ENABLE_CROSS_BROWSER ? [
+      {
+        name: 'firefox',
+        use: {
+          ...devices['Desktop Firefox'],
+          baseURL: BASE_URL,
+        },
+      },
+      {
+        name: 'mobile-chrome',
+        use: {
+          ...devices['Pixel 7'],
+          baseURL: BASE_URL,
+        },
+      },
+      ...(ENABLE_WEBKIT ? [
+        {
+          name: 'webkit',
+          use: {
+            ...devices['Desktop Safari'],
+            baseURL: BASE_URL,
+          },
+        },
+        {
+          name: 'mobile-safari',
+          use: {
+            ...devices['iPhone 14'],
+            baseURL: BASE_URL,
+          },
+        },
+      ] : []),
+    ] : []),
   ],
   // Output dir for test artifacts (traces, screenshots, videos)
   outputDir: '../../var/e2e-artifacts',
