@@ -146,6 +146,56 @@ fi
 
 echo
 
+# AC-025 (branding hardening): key templates must keep Mereka branded shell
+echo "Checking key email template branding markers..."
+
+EMAIL_TEMPLATE_ROOT="infrastructure/tutor/custom-apps/openedx_email_templates/templates/email"
+
+assert_template_has_marker() {
+    local file="$1"
+    local marker="$2"
+    local label="$3"
+    if [ ! -f "$file" ]; then
+        do_fail "$label — file missing: $file"
+        return
+    fi
+    if grep -qF "$marker" "$file"; then
+        do_pass "$label"
+    else
+        do_fail "$label (missing marker: $marker)"
+    fi
+}
+
+# Transactional templates
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/password_reset.html" \
+  "linear-gradient(120deg" \
+  "Password reset template has branded gradient header shell"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/password_reset.html" \
+  "org_primary_color|default:'#ab3b78'" \
+  "Password reset template uses Mereka primary fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/enrollment.html" \
+  "org_accent_color|default:'#237072'" \
+  "Enrollment template uses Mereka accent fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/welcome.html" \
+  "org_support_email" \
+  "Welcome template footer retains support contact link"
+
+# Marketing templates
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/campaign.html" \
+  "Unsubscribe" \
+  "Campaign template retains unsubscribe footer"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/marketing_promo.html" \
+  "border-radius: 9999px" \
+  "Marketing promo template CTA keeps pill-radius branding"
+
+echo
+
 # Check for ACE configuration
 echo "Checking ACE template configuration..."
 
