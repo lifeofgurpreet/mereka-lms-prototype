@@ -12,6 +12,7 @@ COMPONENTS_DIR="$REPO_ROOT/tokens/src/core/components"
 STYLE_DICT_CFG="$REPO_ROOT/style-dictionary.config.js"
 BUILD_SCRIPT="$REPO_ROOT/scripts/branding/build-tokens.sh"
 OUTPUT_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"
+TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 
 PASS=0
 FAIL=0
@@ -90,6 +91,60 @@ PY
     pass "AC-TKN-002 global.color.teal matches #237072"
   else
     fail "AC-TKN-001/002 global token coverage or teal value check failed"
+  fi
+
+  if python3 - "$GLOBAL_JSON" "$TOKENS_CSS" <<'PY'
+import json
+from pathlib import Path
+import re
+import sys
+
+global_json = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+tokens_css = Path(sys.argv[2]).read_text(encoding="utf-8")
+
+css_colors = {
+    key.lower(): value.lower()
+    for key, value in re.findall(r"(--color-[a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\s*;", tokens_css)
+}
+
+mapping = {
+    "black": "--color-black",
+    "white": "--color-white",
+    "teal": "--color-teal",
+    "magenta": "--color-magenta",
+    "magentaDark": "--color-magenta-dark",
+    "blue": "--color-blue",
+    "burgundy": "--color-burgundy",
+    "pink": "--color-pink",
+    "sky": "--color-sky",
+    "orange": "--color-orange",
+    "gold": "--color-gold",
+    "mint": "--color-mint",
+    "periwinkle": "--color-periwinkle",
+    "forest": "--color-forest",
+    "success": "--color-success",
+    "successLight": "--color-success-light",
+    "warning": "--color-warning",
+    "warningDark": "--color-warning-dark",
+    "error": "--color-error",
+    "errorLight": "--color-error-light",
+    "info": "--color-info",
+    "infoLight": "--color-info-light",
+}
+
+global_colors = global_json.get("global", {}).get("color", {})
+for global_key, css_key in mapping.items():
+    g_val = str(global_colors.get(global_key, {}).get("value", "")).lower()
+    c_val = css_colors.get(css_key.lower())
+    if not c_val:
+        raise SystemExit(f"missing canonical css color {css_key}")
+    if g_val != c_val:
+        raise SystemExit(f"color mismatch {global_key}: global={g_val} css={c_val}")
+PY
+  then
+    pass "Cross-spec color parity: global.json color tokens match canonical tokens.css"
+  else
+    fail "Cross-spec color parity failed between global.json and tokens.css"
   fi
 fi
 
