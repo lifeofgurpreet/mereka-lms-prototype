@@ -62,6 +62,41 @@ check_mfe_token_stack_imports() {
   failures=1
 }
 
+check_selector_absent_noncomment() {
+  local label="$1"
+  local path="$2"
+  local regex="$3"
+
+  if [[ ! -f "$path" ]]; then
+    echo "  ✗ $label (missing file: $path)"
+    failures=1
+    return
+  fi
+
+  if python3 - "$path" "$regex" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+pattern = re.compile(sys.argv[2])
+
+for line in path.read_text(encoding="utf-8").splitlines():
+    stripped = line.strip()
+    if not stripped or stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
+        continue
+    if pattern.search(line):
+        raise SystemExit(1)
+raise SystemExit(0)
+PY
+  then
+    echo "  ✓ $label"
+  else
+    echo "  ✗ $label (found forbidden selector pattern: $regex)"
+    failures=1
+  fi
+}
+
 echo "Verifying Mereka branding health..."
 echo ""
 
@@ -132,8 +167,7 @@ check_contains "MFE theme styles auth card header gradient" "$MFE_SCSS" '.pgn__c
 check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
 check_contains "MFE theme targets learner dashboard surfaces" "$MFE_SCSS" 'learner-dashboard'
 check_contains "MFE learner dashboard status pill styling" "$MFE_SCSS" '[class*="status"]'
-check_contains "MFE theme targets discussions surfaces" "$MFE_SCSS" 'discussions'
-check_contains "MFE discussions links styled to brand tokens" "$MFE_SCSS" 'var(--mereka-color-blue)'
+check_selector_absent_noncomment "MFE discussions wildcard selectors removed" "$MFE_SCSS" '\\[class\\*=\"discussions\"\\]'
 check_contains "Caddy ecommerce root landing is branded" "$CADDYFILE" 'Mereka Ecommerce Service'
 # Forum v2 runs in-process (no separate Caddy block) - skip forum landing check
 

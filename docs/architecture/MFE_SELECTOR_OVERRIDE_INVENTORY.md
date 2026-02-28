@@ -28,14 +28,12 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 | Selector Pattern | Target MFE(s) | Risk | Notes |
 |-----------------|---------------|------|-------|
 | `.pgn__page-container`, `.pgn__btn--primary`, `.pgn__card`, `.pgn__modal-content`, etc. | All MFEs | **MEDIUM** | Paragon component classes are stable within a Paragon major version but change across major bumps |
-| `[class*="authn"]`, `[class*="login-register"]` | Authn/login-route surfaces | **MEDIUM** | Class-based fallback kept where route-level data attributes are not available. `data-testid` selectors were removed in T102 |
+| `[class*="authn"]` | Authn/login-route surfaces | **MEDIUM** | Class-based fallback retained where route-level data attributes are not available. |
 | `[class*="authn"] .pgn__btn--primary` | Authn MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
 | `[class*="account-settings"] .pgn__form-control` | Account MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
 | `[class*="learner-dashboard"] [class*="course"]` | Learner Dashboard MFE | **MEDIUM** | Class-based fallback retained until dedicated wrapper slots are available |
 | `[class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"])` | Learning MFE | **MEDIUM** | Class-based fallback retained; no stable testid for this structure |
-| `[class*="discussions"] .pgn__card` | Discussions MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
-
-**Total selector exception annotations**: 53 comment blocks in `mereka.scss` (`SELECTOR-EXCEPTION`, includes 14 pending P2/P3 items).
+**Total selector exception annotations**: 34 comment blocks in `mereka.scss` (`SELECTOR-EXCEPTION`).
 
 **Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
 
@@ -47,7 +45,8 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 | `.mereka-header-logo`, `.mereka-header-logo img` in `mereka.scss` | **NEEDS_KEEP** | Minimal token-driven presentation layer for the slot output; no upstream DOM dependency beyond our own class names. |
 | `org.openedx.frontend.layout.footer.v1` slot output (`MerekaFooter`) | **SAFE_TO_SLOT** | Footer shell structure is injected via FPF slot and default footer is hidden, eliminating dependence on upstream footer DOM. |
 | `.footer-*` classes in `mereka.scss` (`_mfe-footer.scss`) | **NEEDS_KEEP** | Styling contract for our own slot-rendered markup; retained as tokenized presentation rules. |
-| `[class*="authn"]`, `[class*="login-register"]` fallback blocks | **NEEDS_KEEP** | No stable upstream authn wrapper slot/semantic hooks cover all route entrypoints yet; kept with explicit selector-exception comments. |
+| `[class*="authn"]` fallback block | **NEEDS_KEEP** | No stable upstream authn wrapper slot/semantic hooks cover all route entrypoints yet; kept with explicit selector-exception comments. |
+| `[class*="discussions"]` fallback block | **DEAD_SELECTOR** | Removed from `mereka.scss` on 2026-02-28 after dead-selector audit confirmed no live DOM matches. |
 | `.pgn__*` component overrides in `mereka.scss` | **NEEDS_KEEP** | Paragon v22 does not expose complete component token coverage for all visual requirements; retained with `var(--mereka-*)` hardening. |
 
 ---

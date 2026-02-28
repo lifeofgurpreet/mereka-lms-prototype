@@ -561,53 +561,8 @@ label {
   color: var(--mereka-color-ink-900);
 }
 
-/* Discussions/forum surfaces (MFE discussions is the learner-facing forum UI) */
-/* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18): fully covered by [class*="discussions"] plural */
-/* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
-
-/* RISK: HIGH — structural discussions surface scoping; breaks if discussions MFE renames wrapper */
-// SELECTOR-EXCEPTION: [class*="discussions"] | no upstream slot; P3/cosmetic | expires: 2026-Q3
-[class*="discussions"] {
-  background: transparent;
-}
-
-/* RISK: LOW — discussions card styling; border-radius/shadow color only, degrades visually */
-// SELECTOR-EXCEPTION: [class*="discussions"] .card | P3/cosmetic; no slot | expires: 2026-Q3
-[class*="discussions"] .card,
-[class*="discussions"] .pgn__card {
-  border-radius: var(--mereka-mfe-discussions-card-radius);
-  border: var(--mereka-mfe-discussions-card-border);
-  box-shadow: var(--mereka-mfe-card-shadow);
-}
-
-/* RISK: LOW — discussions link color; color-only, graceful degradation */
-// SELECTOR-EXCEPTION: [class*="discussions"] a | P3/cosmetic link color; no slot | expires: 2026-Q3
-[class*="discussions"] a {
-  color: var(--mereka-color-blue);
-}
-
-/* RISK: LOW — discussions link hover/focus; color-only, graceful degradation */
-// SELECTOR-EXCEPTION: [class*="discussions"] a:hover/focus | P3/cosmetic link hover; no slot | expires: 2026-Q3
-[class*="discussions"] a:hover,
-[class*="discussions"] a:focus {
-  color: var(--mereka-color-teal);
-}
-
-/* RISK: LOW — discussions button gradient; color-only, degrades to default button */
-// SELECTOR-EXCEPTION: [class*="discussions"] .btn-primary | P3/cosmetic btn gradient; no slot | expires: 2026-Q3
-[class*="discussions"] .btn-primary,
-[class*="discussions"] .pgn__btn--primary {
-  background-image: var(--mereka-mfe-gradient);
-  border: none;
-}
-
-/* RISK: LOW — discussions heading font/color; degrades to default heading style */
-// SELECTOR-EXCEPTION: [class*="discussions"] h1/h2 | P3/cosmetic heading font; no slot | expires: 2026-Q3
-[class*="discussions"] h1,
-[class*="discussions"] h2 {
-  font-family: var(--mereka-font-heading);
-  color: var(--mereka-color-ink-900);
-}
+/* [class*="discussion"] singular removed 2026-02-18 (bead 115d.18). */
+/* [class*="discussions"] plural removed 2026-02-28 (dead selector audit, no live DOM matches). */
 
 /* RISK: LOW — responsive navbar padding; degrades to desktop padding only */
 @media (max-width: 768px) {

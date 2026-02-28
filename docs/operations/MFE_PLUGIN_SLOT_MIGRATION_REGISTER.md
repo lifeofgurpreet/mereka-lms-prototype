@@ -231,7 +231,6 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 | `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |
 | `[class*="learning"]` | learning | No upstream slot for course grid layout; upstream slot proposal pending (see AC-US7-005) | 2026-Q3 | Mereka / Upstream | Remove once upstream `learning_course_grid.v1` or equivalent slot is approved |
-| `[class*="discussions"]` | discussions | No upstream slot; P3/cosmetic; data-testid primary present | 2026-Q3 | Mereka frontend | Keep indefinitely unless upstream slot emerges |
 | `[class*="course"]` (in dashboard/learning scope) | dashboard/learning | No stable slot for course card inner; data-testid primary present | 2026-Q3 | Mereka frontend | Remove once dashboard course card slot is upstream |
 | `[class*="image-cap"]`, `[class*="imagecap"]` | learning | Paragon ImageCap component internal classes; semi-stable | 2026-Q3 | Mereka frontend | Remove if Paragon exposes stable BEM for image cap |
 | `[class*="image"]`, `[class*="media"]` (in card scope) | learning | Too broad — no better alternative; scoped inside `.pgn__card` to limit blast radius | 2026-Q3 | Mereka frontend | Replace with explicit Paragon classes once Paragon card layout stabilizes |
@@ -244,6 +243,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="discussion"]` (singular) | 2026-02-18 | Consolidated into `[class*="discussions"]` plural + data-testid primary paths (33% of singular blocks eliminated) |
 | `[class*="account-page"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="login-register"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="discussions"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 
 ---
 
@@ -261,14 +261,12 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 - **Resolution path**: File slot proposal with Open edX community for `org.openedx.frontend.learning.course_grid.v1`. Until approved, keep CSS with `SELECTOR-EXCEPTION` annotations and data-testid primary paths.
 - **Rollback**: If `[class*="learning"]` causes false positives (styling non-learning pages), narrow scope by adding `[data-page="learning"]` attribute via MFE config.
 
-### US7-TICKET-002: Discussions MFE Styling
+### US7-TICKET-002: Discussions MFE Styling (Closed)
 
 - **Selector**: `[class*="discussions"]` (6 rule blocks)
-- **Filed**: 2026-02-18
-- **Rationale**: No upstream slot available for discussions MFE styling. All rules are P3/cosmetic (card borders, link colors, heading font). `[class*="discussion"]` singular was eliminated (bead 115d.18); plural `[class*="discussions"]` remains as well-scoped fallback.
-- **Next review**: 2026-Q3
-- **Resolution path**: Monitor upstream discussions MFE for slot additions. Keep as CSS with data-testid primary + SELECTOR-EXCEPTION.
-- **Rollback**: Styles are cosmetic only — removing the `[class*="discussions"]` fallback would fall back to global Paragon defaults, which are acceptable.
+- **Closed**: 2026-02-28
+- **Resolution**: Removed after dead-selector audit confirmed no live DOM matches in Ulmo discussions surfaces.
+- **Guardrail**: `scripts/qa/verify-mfe-selector-hardening.sh` now fails if `[class*="discussions"]` is reintroduced.
 
 ---
 
