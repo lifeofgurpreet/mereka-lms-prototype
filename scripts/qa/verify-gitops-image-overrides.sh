@@ -8,6 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APP_BASE="${APP_BASE:-$REPO_ROOT/deploy/k8s/base/kustomization.yaml}"
 APP_PROD_OVERLAY="${APP_PROD_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml}"
 APP_STAGING_OVERLAY="${APP_STAGING_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/staging/kustomization.yaml}"
+APP_MFE_CADDYFILE="${APP_MFE_CADDYFILE:-$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile}"
 INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-}"
 CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
 
@@ -40,6 +41,7 @@ Checks:
   4) Staging overlay uses canonical docker.io names (no bare openedx/openedx-mfe names).
   5) Optional infra overlay parity check in active GitOps checkout (when available).
   6) Optional tag/digest parity check between this repo's production overlay and infra production overlay.
+  7) Optional vendored MFE Caddyfile parity check in infra checkout (when vendored base exists).
 
 Options:
   --check-infra        Require and validate infra overlay file.
@@ -76,16 +78,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-python3 - "$APP_BASE" "$APP_PROD_OVERLAY" "$APP_STAGING_OVERLAY" "$INFRA_PROD_OVERLAY" "$CHECK_INFRA" <<'PY'
+python3 - "$APP_BASE" "$APP_PROD_OVERLAY" "$APP_STAGING_OVERLAY" "$APP_MFE_CADDYFILE" "$INFRA_PROD_OVERLAY" "$CHECK_INFRA" <<'PY'
 import re
 import sys
 from pathlib import Path
+import hashlib
 
 APP_BASE = Path(sys.argv[1])
 APP_PROD = Path(sys.argv[2])
 APP_STAGING = Path(sys.argv[3])
-INFRA_PROD = Path(sys.argv[4])
-CHECK_INFRA = sys.argv[5]
+APP_MFE_CADDYFILE = Path(sys.argv[4])
+INFRA_PROD = Path(sys.argv[5])
+CHECK_INFRA = sys.argv[6]
 
 TARGET_OPENEDX = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
 TARGET_MFE = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe"
@@ -145,7 +149,7 @@ def ensure_mapping(images, name, expected_new_name, context, errors):
 errors = []
 notes = []
 
-for required in (APP_BASE, APP_PROD, APP_STAGING):
+for required in (APP_BASE, APP_PROD, APP_STAGING, APP_MFE_CADDYFILE):
     if not required.exists():
         errors.append(f"missing required file: {required}")
 
@@ -239,6 +243,22 @@ if check_infra == "1":
                     f"prod openedx-mfe digest drift: app overlay '{prod_mfe_source['digest']}' "
                     f"!= infra overlay '{infra_mfe_source['digest']}'"
                 )
+
+        # If infra uses vendored base resources, enforce MFE Caddyfile parity so
+        # runtime route contract doesn't drift from app repo source.
+        infra_base_dir = INFRA_PROD.parents[2] / "base"
+        infra_vendored_caddy = infra_base_dir / "deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
+        if infra_vendored_caddy.exists():
+            app_hash = hashlib.sha256(APP_MFE_CADDYFILE.read_bytes()).hexdigest()
+            infra_hash = hashlib.sha256(infra_vendored_caddy.read_bytes()).hexdigest()
+            if app_hash != infra_hash:
+                errors.append(
+                    "vendored MFE Caddyfile drift: "
+                    f"{infra_vendored_caddy} differs from {APP_MFE_CADDYFILE}; "
+                    "sync infra vendored base before release"
+                )
+        else:
+            notes.append(f"vendored MFE Caddyfile not found under infra base: {infra_vendored_caddy}")
 else:
     notes.append("infra overlay check skipped")
 
