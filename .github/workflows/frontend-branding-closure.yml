@@ -1,0 +1,104 @@
+name: Frontend Branding Closure
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      cross_browser_matrix:
+        description: "Run cross-browser matrix (chromium/firefox/mobile, plus webkit probe fallback)"
+        required: true
+        default: true
+        type: boolean
+      require_runtime_theme:
+        description: "Require runtime theme mode (/theme/*.min.css) for smoke and performance checks"
+        required: true
+        default: false
+        type: boolean
+      run_performance_gate:
+        description: "Run frontend performance spot-check gate"
+        required: true
+        default: true
+        type: boolean
+      learning_path:
+        description: "Optional learning route path for smoke checks"
+        required: false
+        default: "/learning"
+        type: string
+
+jobs:
+  frontend-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run frontend closure pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CROSS_BROWSER_MATRIX="${{ inputs.cross_browser_matrix || 'true' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
+          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+
+          args=(--env "$TARGET_ENV" --frontend-only)
+          if [[ "$CROSS_BROWSER_MATRIX" == "true" ]]; then
+            args+=(--cross-browser)
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+
+          RUN_BASELINE_GATES=0 \
+          RUN_CROSS_BROWSER=1 \
+          RUN_A11Y=1 \
+          RUN_SCREENSHOTS=0 \
+          RUN_PERFORMANCE=$([[ "$RUN_PERF" == "true" ]] && echo 1 || echo 0) \
+          LEARNING_PATH="$LEARNING_PATH" \
+          ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
+
+      - name: Summarize closure results
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST="$(ls -1dt var/evidence/branding/* 2>/dev/null | head -1 || true)"
+          {
+            echo "## Frontend Branding Closure"
+            echo
+            echo "- Environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Cross-browser matrix: \`${{ inputs.cross_browser_matrix || 'true' }}\`"
+            echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
+            echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
+            if [[ -n "$LATEST" ]]; then
+              echo "- Evidence directory: \`$LATEST\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload closure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-branding-closure-artifacts
+          path: |
+            var/evidence/branding/**
+            var/qa/cross-browser-branding-smoke-*.log
+            var/e2e-report/**
+            var/e2e-artifacts/**
+          if-no-files-found: warn
