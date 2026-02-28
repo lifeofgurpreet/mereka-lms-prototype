@@ -12,8 +12,10 @@ AUDIT_DOC="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
 BRANDING_CHECKLIST="$REPO_ROOT/docs/BRANDING_VERIFICATION_CHECKLIST.md"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"
+PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
 REQUIRE_RUNTIME=0
+THEME_DEFAULT_ENABLED=1
 
 PASS=0
 FAIL=0
@@ -61,6 +63,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ -f "$PLUGIN_FILE" ]]; then
+  if grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*False)' "$PLUGIN_FILE"; then
+    THEME_DEFAULT_ENABLED=0
+  elif grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True)' "$PLUGIN_FILE"; then
+    THEME_DEFAULT_ENABLED=1
+  fi
+fi
+
 echo "=== Paragon Runtime/Deferred Contract Verification ==="
 
 # AC-008 parser-compatibility: ensure cross-spec text reference exists
@@ -74,32 +84,47 @@ fi
 if [[ -n "${RUNTIME_URL:-}" ]]; then
   runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
   if curl -fsSIL "$runtime_url" >/tmp/paragon-theme-head.$$ 2>/dev/null; then
+    content_type_ok=0
+    cache_header_ok=0
+    body_fetch_ok=0
+    body_size_ok=0
+    marker_ok=0
+
     if grep -qi "^content-type:.*text/css" /tmp/paragon-theme-head.$$; then
-      pass "AC-TKN-019 runtime theme endpoint returns text/css (${runtime_url})"
-    else
-      fail "AC-TKN-019 runtime theme endpoint missing text/css content-type (${runtime_url})"
+      content_type_ok=1
     fi
     if grep -qi "^cache-control:" /tmp/paragon-theme-head.$$; then
-      pass "AC-TKN-019 runtime theme endpoint includes cache-control"
-    else
-      fail "AC-TKN-019 runtime theme endpoint missing cache-control header"
+      cache_header_ok=1
     fi
 
     if curl -fsSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
+      body_fetch_ok=1
       body_bytes="$(wc -c </tmp/paragon-theme-body.$$ | tr -d ' ')"
       if [[ "$body_bytes" -gt 100 ]]; then
-        pass "AC-TKN-019 runtime theme endpoint returns non-empty CSS body (${body_bytes} bytes)"
-      else
-        fail "AC-TKN-019 runtime theme endpoint body too small (${body_bytes} bytes)"
+        body_size_ok=1
       fi
-
       if grep -q -- "--pgn-color-primary-base" /tmp/paragon-theme-body.$$; then
-        pass "AC-TKN-019 runtime theme CSS body contains Paragon primary-color marker"
-      else
-        fail "AC-TKN-019 runtime theme CSS body missing Paragon primary-color marker"
+        marker_ok=1
       fi
     else
-      fail "AC-TKN-019 runtime theme endpoint body fetch failed (${runtime_url})"
+      body_bytes=0
+    fi
+
+    if [[ "$content_type_ok" -eq 1 && "$cache_header_ok" -eq 1 && "$body_fetch_ok" -eq 1 && "$body_size_ok" -eq 1 && "$marker_ok" -eq 1 ]]; then
+      pass "AC-TKN-019 runtime theme endpoint returns text/css (${runtime_url})"
+      pass "AC-TKN-019 runtime theme endpoint includes cache-control"
+      pass "AC-TKN-019 runtime theme endpoint returns non-empty CSS body (${body_bytes} bytes)"
+      pass "AC-TKN-019 runtime theme CSS body contains Paragon primary-color marker"
+    else
+      if [[ "$REQUIRE_RUNTIME" -eq 0 && "$THEME_DEFAULT_ENABLED" -eq 0 ]]; then
+        warn "AC-TKN-019 runtime theme endpoint not active (${runtime_url}); default MEREKA_PARAGON_THEME_ENABLED=False in plugin config"
+      else
+        [[ "$content_type_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint returns text/css (${runtime_url})" || fail "AC-TKN-019 runtime theme endpoint missing text/css content-type (${runtime_url})"
+        [[ "$cache_header_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint includes cache-control" || fail "AC-TKN-019 runtime theme endpoint missing cache-control header"
+        [[ "$body_fetch_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint body fetch succeeded" || fail "AC-TKN-019 runtime theme endpoint body fetch failed (${runtime_url})"
+        [[ "$body_size_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint returns non-empty CSS body (${body_bytes} bytes)" || fail "AC-TKN-019 runtime theme endpoint body too small (${body_bytes} bytes)"
+        [[ "$marker_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme CSS body contains Paragon primary-color marker" || fail "AC-TKN-019 runtime theme CSS body missing Paragon primary-color marker"
+      fi
     fi
 
     pass "AC-TKN-018 runtime URL is reachable for cache-clear verification workflow"
