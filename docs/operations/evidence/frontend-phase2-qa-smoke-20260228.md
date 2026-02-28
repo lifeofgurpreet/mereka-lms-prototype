@@ -436,6 +436,10 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - Interpretation:
   - Source footer template is clean (no non-comment powered-by string), but runtime HTML still renders it.
   - This is a deployment/runtime parity gap (stale image or stale rendered theme), not a source-verifier bug.
+- Runtime confirmation (cluster):
+  - Deployed `lms`/`cms` image tag: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand-hotfix-full-v3`
+  - Pod file probe shows old footer template string still present:
+    - `grep -n 'Powered by Open edX' /openedx/themes/mereka/lms/templates/footer.html` → `<span>${_('Powered by Open edX and Tutor')}</span>`
 
 ## Addendum — Brand Parity Verifier Realignment
 
