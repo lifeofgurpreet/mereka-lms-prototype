@@ -193,7 +193,14 @@ done
 echo ""
 echo "--- Canonical token policy (alias-free) ---"
 
-legacy_aliases=(--mereka-teal --mereka-magenta --mereka-blue --mereka-black)
+legacy_aliases=(
+  --mereka-teal
+  --mereka-magenta
+  --mereka-blue
+  --mereka-black
+  --mereka-color-indigo
+  --mereka-color-indigo-rgb
+)
 alias_files=("$SCSS_BRIDGE" "$COMMON_OVERRIDES" "$LMS_OVERRIDES" "$CMS_OVERRIDES")
 
 for alias in "${legacy_aliases[@]}"; do

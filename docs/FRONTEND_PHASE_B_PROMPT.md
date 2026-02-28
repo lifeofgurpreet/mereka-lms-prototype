@@ -12,7 +12,7 @@
 - `infrastructure/tutor/themes/mereka/scss/_tokens.scss` + `assets/branding/tokens.css` — remaining Paragon token slots bridged (Task B4 DONE)
 
 **Phase B Review Findings (CRITICAL — already fixed)**:
-- RGB values in `_tokens.scss` were wrong: `--mereka-color-teal-rgb` was `45 137 139` (corrected to `35 112 114`), `--mereka-color-indigo-rgb` was `39 110 241` (corrected to `41 92 173`)
+- RGB values in `_tokens.scss` were wrong: `--mereka-color-teal-rgb` was `45 137 139` (corrected to `35 112 114`), and the legacy indigo alias was removed in favor of canonical `--mereka-color-blue-rgb` (`41 92 173`)
 - Duplicate `--pgn-spacing-spacer-*` tokens (7 lines) and duplicate `--pgn-color-primary-400/500` declarations were removed
 - MFE Caddy `/theme/*` handler had double path nesting bug (root was `/openedx/dist/theme`, corrected to `/openedx/dist`)
 - Outer Caddy had blanket `Cache-Control: no-store` killing static asset caching (replaced with tiered policy)
