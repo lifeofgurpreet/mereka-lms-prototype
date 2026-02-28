@@ -152,7 +152,7 @@ When using `build-tutor-images.yml` with `update_gitops=true`:
 Use workflow `.github/workflows/policy-checks.yml` via `workflow_dispatch` to run:
 - release automation contract checks
 - build workflow contract checks
-- release workflow invocation contract checks (`--target-env --apply --commit --push`)
+- release workflow invocation contract checks (`--target-env --apply --commit --push`, plus production runtime verify wiring)
 - release dry-run contract check (`scripts/infra/release-openedx-gitops.sh` dry-run against fixture infra repo)
 - release-evidence workflow contract check (digest resolution + strict dry-run flags)
 - kustomize deprecation key guard (`patchesStrategicMerge/commonLabels/patchesJson6902`)
