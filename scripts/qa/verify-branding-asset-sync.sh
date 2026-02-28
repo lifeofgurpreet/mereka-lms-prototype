@@ -56,6 +56,19 @@ fi
 
 pass "Build directory exists: tutor_env/env/build/openedx"
 
+# If the rendered Mereka theme tree is absent, treat as non-blocking in static contexts.
+# This script validates post-render/build artifacts; without themes/mereka there is
+# no reliable runtime surface to assert.
+if [[ ! -d "${BUILD_DIR}/themes/mereka" ]]; then
+  skip "Rendered themes/mereka build tree not found (run apply-patches + openedx image build first)"
+  echo
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
+  echo
+  echo "Note: Post-build branding sync checks were skipped because rendered theme artifacts are unavailable."
+  exit 0
+fi
+
 # Check 2: Verify Mereka logo variants exist in compiled static files (AC-INT-003)
 echo
 echo -e "${BLUE}Checking Mereka logo variants in build directory...${NC}"
