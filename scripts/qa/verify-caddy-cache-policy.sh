@@ -91,6 +91,13 @@ else
   pass "MFE theme root check (non-standard but not double-nested)"
 fi
 
+# 10. Theme try_files must include /theme{path} first hop
+if awk '/@mfe_theme_assets/{flag=1} flag{print} /file_server/{if(flag){exit}}' "$MFE_CADDY" | grep -q 'try_files /theme{path}'; then
+  pass "MFE theme try_files checks /theme{path} first (runtime min.css root)"
+else
+  fail "MFE theme try_files missing /theme{path} first-hop check"
+fi
+
 # --- Summary ---
 echo ""
 echo "=== Summary: $PASS PASS, $FAIL FAIL, $SKIP SKIP ==="

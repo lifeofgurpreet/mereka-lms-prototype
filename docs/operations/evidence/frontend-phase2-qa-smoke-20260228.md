@@ -517,3 +517,29 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - Current runtime contract status in prod:
   - `AC-TKN-018/019` fails with `HTTP 404` on `https://apps.academyv2.mereka.io/theme/mereka-brand.min.css`.
   - This is an environment/runtime drift signal (theme endpoint unavailable), not a verifier false-negative.
+
+## Addendum — `/theme` Runtime 404 Root-Cause + Source Fix
+
+### Root Cause (source analysis)
+
+- MFE Caddy `@mfe_theme_assets` was rooted at `/openedx/dist` but `try_files` skipped `/theme{path}`.
+- Runtime minified bundles are copied to `/openedx/dist/theme/*.min.css`, so requests like `/theme/mereka-brand.min.css` missed and fell through to 404.
+
+### Source Fix Applied
+
+- Updated MFE Caddy theme handler:
+  - `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
+  - Added `try_files /theme{path} ...` as the first-hop lookup before per-MFE fallbacks.
+- Added regression checks:
+  - `scripts/qa/verify-paragon-theme-urls.sh` now requires `/theme{path}` first-hop in `@mfe_theme_assets`.
+  - `scripts/qa/verify-caddy-cache-policy.sh` now asserts the same contract.
+
+### Verification
+
+```bash
+./scripts/qa/verify-paragon-theme-urls.sh
+./scripts/qa/verify-caddy-cache-policy.sh
+```
+
+- Both pass in source mode after patch.
+- Runtime remains pending until next MFE/Caddy deployment rolls out this Caddyfile update.

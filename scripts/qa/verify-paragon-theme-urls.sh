@@ -186,6 +186,12 @@ else
     fail "Caddy /theme/* handler missing cross-MFE try_files fallback"
   fi
 
+  if rg -n "try_files /theme\\{path\\}" "$CADDY_FILE" >/dev/null; then
+    pass "Caddy /theme/* handler checks /theme{path} first (runtime min.css root)"
+  else
+    fail "Caddy /theme/* handler missing /theme{path} first-hop check"
+  fi
+
   if rg -n 'header Content-Type "text/css; charset=utf-8"' "$CADDY_FILE" >/dev/null; then
     pass "Caddy /theme/* handler sets CSS content-type header"
   else
