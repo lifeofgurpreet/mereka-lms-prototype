@@ -28,7 +28,7 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 | Selector Pattern | Target MFE(s) | Risk | Notes |
 |-----------------|---------------|------|-------|
 | `.pgn__page-container`, `.pgn__btn--primary`, `.pgn__card`, `.pgn__modal-content`, etc. | All MFEs | **MEDIUM** | Paragon component classes are stable within a Paragon major version but change across major bumps |
-| `[class*="account-settings"] .pgn__form-control` | Account MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
+| `.page__account-settings .pgn__form-control` | Account MFE | **MEDIUM** | Explicit wrapper class match; tracked as `SELECTOR-EXCEPTION` in source |
 **Total selector exception annotations**: 7 comment blocks in `mereka.scss` (`SELECTOR-EXCEPTION`).
 
 **Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
@@ -168,7 +168,7 @@ Inspected the actual top-level wrapper class names emitted by each Ulmo MFE at r
 |----------|-----------|--------|------------------|-------|
 | `[class*="authn"]` | Authn | **DEAD** | No element has "authn" in its class attribute. Authn MFE uses Paragon layout components with `pgn__` classes. | 258-314 |
 | `[class*="login-register"]` | Authn | **DEAD** | Same — no element contains "login-register" substring. | 258-314 |
-| `[class*="account-settings"]` | Account | **LIVE** | Matches `page__account-settings` wrapper div. | 324-384 |
+| `.page__account-settings` | Account | **LIVE** | Matches the Account MFE wrapper div directly. | 324-384 |
 | `[class*="account-page"]` | Account | **DEAD** | No element contains "account-page" substring in Ulmo Account MFE. | 324-384 |
 | `[class*="learner-dashboard"]` | Learner Dashboard | **DEAD** | Dashboard MFE uses Paragon `pgn__page-container` — no "learner-dashboard" class. | 324-522 |
 | `[class*="learning"]` | Learning | **DEAD** | Learning MFE uses generic Paragon layout — no element has "learning" in class. | 429-504 |
@@ -181,7 +181,7 @@ Inspected the actual top-level wrapper class names emitted by each Ulmo MFE at r
 ### Impact Assessment
 
 - **~60% of mereka.scss lines 250-570 are dead CSS** — they compile, ship in every MFE bundle, but apply to nothing.
-- **Only `[class*="account-settings"]`** is confirmed LIVE (matches `page__account-settings`).
+- **Only `.page__account-settings`** is confirmed LIVE for account-surface scoping.
 - **Estimated dead CSS weight**: ~5-8KB uncompressed per MFE build.
 - **Risk**: Zero runtime risk (dead CSS is harmless). But it creates a false sense of branding coverage — developers think these surfaces are styled when they are not.
 
@@ -200,7 +200,7 @@ Inspected the actual top-level wrapper class names emitted by each Ulmo MFE at r
 | **P0** | Inspect live Learner Dashboard DOM, find actual wrapper classes | 2 hr |
 | **P1** | Inspect Learning MFE DOM for course card/grid classes | 1 hr |
 | **P1** | Inspect Discussions MFE DOM | 30 min |
-| **P2** | Remove dead `[class*="account-page"]` selector (account-settings is sufficient) | 15 min |
+| **P2** | Keep explicit `.page__account-settings` scope and prevent wildcard regressions | Ongoing |
 | **P3** | Consider replacing ALL scoped selectors with FPF plugin slot injection | Phase D |
 
 ---

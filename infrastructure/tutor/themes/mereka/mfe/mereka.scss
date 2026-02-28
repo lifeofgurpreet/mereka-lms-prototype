@@ -310,41 +310,41 @@ label {
 /* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
 
 /* RISK: HIGH — structural account surface scoping; breaks if MFE renames top-level wrapper */
-// SELECTOR-EXCEPTION: [class*="account-settings"] | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
-[class*="account-settings"] {
+// SELECTOR-EXCEPTION: .page__account-settings | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
+.page__account-settings {
   background: transparent;
 }
 
 /* RISK: MEDIUM — account card styling; border-radius/shadow degrade visually */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__card | account MFE wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__card,
-[class*="account-settings"] .card {
+// SELECTOR-EXCEPTION: .page__account-settings .pgn__card | account MFE wrapper | expires: 2026-Q3
+.page__account-settings .pgn__card,
+.page__account-settings .card {
   border-radius: var(--mereka-mfe-card-radius);
   border: var(--mereka-mfe-card-border);
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
 /* RISK: LOW — form control background within scoped surfaces; color-only */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__form-control | account MFE wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__form-control {
+// SELECTOR-EXCEPTION: .page__account-settings .pgn__form-control | account MFE wrapper | expires: 2026-Q3
+.page__account-settings .pgn__form-control {
   background: var(--pgn-color-white);
 }
 
 /* RISK: LOW — button border-radius within scoped surfaces; shape-only, degrades visually */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__btn | account MFE wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__btn {
+// SELECTOR-EXCEPTION: .page__account-settings .pgn__btn | account MFE wrapper | expires: 2026-Q3
+.page__account-settings .pgn__btn {
   border-radius: var(--mereka-mfe-pill-radius);
 }
 
 /* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__alert | account MFE wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__alert {
+// SELECTOR-EXCEPTION: .page__account-settings .pgn__alert | account MFE wrapper | expires: 2026-Q3
+.page__account-settings .pgn__alert {
   border-radius: var(--mereka-mfe-alert-radius);
 }
 
 /* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
-// SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__dropdown-toggle | account MFE wrapper | expires: 2026-Q3
-[class*="account-settings"] .pgn__dropdown-toggle {
+// SELECTOR-EXCEPTION: .page__account-settings .pgn__dropdown-toggle | account MFE wrapper | expires: 2026-Q3
+.page__account-settings .pgn__dropdown-toggle {
   border-radius: var(--mereka-mfe-pill-radius);
   border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
 }
@@ -354,9 +354,9 @@ label {
 
 /* account scope for headings */
 /* RISK: LOW — heading font/color within scoped surfaces; degrades to default heading style */
-// SELECTOR-EXCEPTION: [class*="account-settings"] h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
-[class*="account-settings"] h1,
-[class*="account-settings"] h2 {
+// SELECTOR-EXCEPTION: .page__account-settings h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
+.page__account-settings h1,
+.page__account-settings h2 {
   font-family: var(--mereka-font-heading);
   color: var(--mereka-color-ink-900);
 }

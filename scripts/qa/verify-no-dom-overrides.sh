@@ -83,7 +83,7 @@ else
   warn "apply-patches.sh not found at expected path"
 fi
 
-# Check 5: Active wildcard selectors are constrained to approved exceptions only
+# Check 5: Wildcard selector policy + explicit account scope metadata
 echo "  Checking mereka.scss wildcard selector policy..."
 if [[ -f "$MFE_SCSS" ]]; then
   mapfile -t ACTIVE_CLASS_VALUES < <(python3 - "$MFE_SCSS" <<'PY'
@@ -100,21 +100,16 @@ PY
   )
 
   if [[ "${#ACTIVE_CLASS_VALUES[@]}" -eq 0 ]]; then
-    pass "No active [class*=...] selectors in mereka.scss (fully hardened)"
+    pass "No active [class*=...] selectors in mereka.scss (wildcard cleanup complete)"
   else
     mapfile -t ACTIVE_CLASS_UNIQUE < <(printf '%s\n' "${ACTIVE_CLASS_VALUES[@]}" | sort -u)
-    mapfile -t DISALLOWED < <(printf '%s\n' "${ACTIVE_CLASS_UNIQUE[@]}" | grep -Ev '^(account-settings)$' || true)
-    if [[ "${#DISALLOWED[@]}" -gt 0 ]]; then
-      fail "Disallowed active wildcard selector targets in mereka.scss: ${DISALLOWED[*]}"
-    else
-      pass "Active wildcard selector targets are constrained to approved exception: account-settings"
-    fi
+    fail "Disallowed active wildcard selector targets in mereka.scss: ${ACTIVE_CLASS_UNIQUE[*]}"
+  fi
 
-    if grep -q 'SELECTOR-EXCEPTION: \[class\*="account-settings"\].*expires:' "$MFE_SCSS"; then
-      pass "Approved wildcard selector includes SELECTOR-EXCEPTION expiry metadata"
-    else
-      fail "Approved wildcard selector missing SELECTOR-EXCEPTION expiry metadata"
-    fi
+  if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings.*expires:' "$MFE_SCSS"; then
+    pass "Explicit account scope selector includes SELECTOR-EXCEPTION expiry metadata"
+  else
+    fail "Explicit account scope selector missing SELECTOR-EXCEPTION expiry metadata"
   fi
 else
   warn "mereka.scss not found at $MFE_SCSS"

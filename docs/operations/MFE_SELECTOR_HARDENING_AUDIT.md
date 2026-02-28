@@ -52,7 +52,7 @@ These selectors target top-level page containers. If upstream changes the class 
 | `[class*="learner-dashboard"]` | 268-449 | Entire Learner Dashboard | Replace with body class or MFE-level data-testid |
 | `[class*="discussions"]`, `[class*="discussion"]` | 455-515 | Entire Discussions MFE | Replace with body class or data-testid (note: redundant singular/plural) |
 | `[class*="authn"]`, `[class*="login-register"]`, `[class*="auth-page"]` | 210-263 | Entire Authentication MFE | Replace with body class or data-testid |
-| `[class*="account-settings"]`, `[class*="account-page"]` | 266-449 | Entire Account Settings | Replace with body class or data-testid |
+| `.page__account-settings` (legacy `[class*="account-page"]` removed) | 266-449 | Entire Account Settings | Keep explicit wrapper class + data-testid checks |
 
 **Count**: 13 critical selectors (lines 210, 211, 212, 266, 267, 268, 342, 455, 456)
 

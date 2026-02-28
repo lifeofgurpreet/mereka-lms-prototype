@@ -201,7 +201,7 @@ The MFE override layer (`infrastructure/tutor/themes/mereka/mfe/mereka.scss`) ha
 - `[class*="discussions"]`/`[class*="discussion"]` → Prioritize `[data-testid*="discussions"]` (9 blocks)
 - `[class*="learner-dashboard"]` → Prioritize `[data-testid*="learner-dashboard"]` (8 blocks)
 - `[class*="authn"]`/`[class*="login-register"]`/`[class*="auth-page"]` → Prioritize `[data-testid*="authn"]` (5 blocks)
-- `[class*="account-settings"]`/`[class*="account-page"]` → Prioritize `[data-testid*="account-settings"]` (6 blocks)
+- `.page__account-settings` (legacy `[class*="account-page"]` removed) → Prioritize stable wrapper + `[data-testid*="account-settings"]` checks (6 blocks)
 
 **Remaining brittle patterns**: All marked with `/* BRITTLE: reason */` comments and tracked in allowlist threshold (60 selectors).
 

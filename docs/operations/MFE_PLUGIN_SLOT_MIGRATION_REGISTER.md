@@ -143,7 +143,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `[class*="account-settings"]` + `[data-testid*="account"]` |
+| **Current approach** | CSS overrides: `.page__account-settings` + `[data-testid*="account"]` |
 | **Target slot** | No slot available upstream |
 | **Status** | 🟡 CSS OVERRIDE — data-testid hardened, no slot |
 | **Risk** | Medium (data-testid fallbacks in place) |
@@ -230,7 +230,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
 |-----------------|-----|----------------------|---------|-------|---------------|
-| `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
+| `.page__account-settings` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 
 ### Removed Exceptions (bead 115d.18, 2026-02-18)
 

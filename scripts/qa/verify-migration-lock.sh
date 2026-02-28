@@ -214,22 +214,15 @@ echo "AC-MIGLOCK-005: dead-selector cleanup policy"
 if [[ "${#ACTIVE_CLASS_VALUES[@]}" -eq 0 ]]; then
   pass_check "No active wildcard class selectors remain"
 else
-  mapfile -t DISALLOWED_ACTIVE < <(printf '%s\n' "${ACTIVE_CLASS_UNIQUE[@]}" \
-    | grep -Ev '^(account-settings)$' || true)
+  echo "  FAIL: Active wildcard targets detected after cleanup:"
+  printf '    - %s\n' "${ACTIVE_CLASS_UNIQUE[@]}"
+  FAIL=$((FAIL + 1))
+fi
 
-  if [[ "${#DISALLOWED_ACTIVE[@]}" -gt 0 ]]; then
-    echo "  FAIL: Found disallowed active wildcard targets after cleanup:"
-    printf '    - %s\n' "${DISALLOWED_ACTIVE[@]}"
-    FAIL=$((FAIL + 1))
-  else
-    pass_check "Only allowed active wildcard target remains ([class*=\"account-settings\"])"
-  fi
-
-  if grep -q 'SELECTOR-EXCEPTION: \[class\*="account-settings"\].*expires:' "$MFE_SCSS"; then
-    pass_check "Account wildcard selector has SELECTOR-EXCEPTION metadata with expiry"
-  else
-    fail_check "Account wildcard selector is missing SELECTOR-EXCEPTION expiry metadata"
-  fi
+if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings.*expires:' "$MFE_SCSS"; then
+  pass_check "Account explicit scope selector has SELECTOR-EXCEPTION metadata with expiry"
+else
+  fail_check "Account explicit scope selector is missing SELECTOR-EXCEPTION expiry metadata"
 fi
 
 echo ""

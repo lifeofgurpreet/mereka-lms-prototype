@@ -264,7 +264,7 @@ if [[ ! -f "$MFE_SCSS" ]]; then
   do_skip "AC-CSS-SCOPE-004: mereka.scss not found — skipping MFE scope checks"
 else
   # Live scoped selector that remains intentionally.
-  live_scope='class*="account-settings"'
+  live_scope='.page__account-settings'
   live_count="$(count_active_selector_occurrences "$MFE_SCSS" "$live_scope")"
   if [[ "$live_count" -gt 0 ]]; then
     do_pass "AC-CSS-SCOPE-004: Live MFE scope [$live_scope] present in active selectors (${live_count} occurrence(s))"

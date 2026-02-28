@@ -56,12 +56,12 @@ if [[ -f "$SCSS_FILE" ]]; then
     fail_check "AC-FRONT-021: HIGH-risk selector count is out of expected range (found: $HIGH_COUNT, expected: 1-3)"
   fi
 
-  LIVE_SCOPE='[class*="account-settings"]'
+  LIVE_SCOPE='.page__account-settings'
   LIVE_COUNT="$(count_active_literal "$SCSS_FILE" "$LIVE_SCOPE")"
   if [[ "$LIVE_COUNT" -gt 0 ]]; then
-    pass_check "AC-FRONT-021: live account-settings wildcard scope is still present (${LIVE_COUNT} occurrence(s))"
+    pass_check "AC-FRONT-021: live account-settings explicit scope is present (${LIVE_COUNT} occurrence(s))"
   else
-    fail_check "AC-FRONT-021: live account-settings wildcard scope is missing"
+    fail_check "AC-FRONT-021: live account-settings explicit scope is missing"
   fi
 
   for dead_scope in '[class*="authn"]' '[class*="learner-dashboard"]' '[class*="learning"]' '[class*="discussions"]'; do
@@ -73,10 +73,10 @@ if [[ -f "$SCSS_FILE" ]]; then
     fi
   done
   
-  if grep -q 'SELECTOR-EXCEPTION: \[class\*="account-settings"\].*expires:' "$SCSS_FILE"; then
-    pass_check "AC-FRONT-021: account-settings selector exception includes expiry metadata"
+  if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings.*expires:' "$SCSS_FILE"; then
+    pass_check "AC-FRONT-021: account-settings explicit selector exception includes expiry metadata"
   else
-    fail_check "AC-FRONT-021: account-settings selector exception missing expiry metadata"
+    fail_check "AC-FRONT-021: account-settings explicit selector exception missing expiry metadata"
   fi
 else
   fail_check "AC-FRONT-021: mereka.scss not found at $SCSS_FILE"
