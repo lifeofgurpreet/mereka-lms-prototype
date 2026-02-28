@@ -49,6 +49,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] **Fix OEP-48 mandatory file gaps** (4 missing files) — see [deep audit §4](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#4-missing-oep-48-mandatory-files-confirmed-from-audit-v1)
 - [x] **Split theme.scss for MFE consumption** — `mereka.scss` now imports focused MFE partials instead of full LMS/Studio theme — see [deep audit §3 CRIT-2](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-2-themescss-leaks-600-lines-of-lmsstudio-css-into-every-mfe)
 - [x] **Fix runtime theme CSS bloat** — `mereka-brand.min.css` now generated as brand delta (3KB class), `light.min.css` as light-variant delta — see [deep audit §3 CRIT-3](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-3-runtime-theme-css-files-are-bloated-and-duplicated)
+- [x] Enforce canonical token policy (no legacy `--mereka-*` aliases, no short-form `--pgn-*` names) across generator + QA gates.
 - [ ] Migrate SCSS token overrides to JSON design tokens (Paragon v23+) — [spec](../specs/paragon-design-tokens-migration_spec.md)
 - [ ] Enable PARAGON_THEME_URLS for runtime CDN theming (config + assets are ready; rollout toggle remains environment-driven).
 - [x] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
@@ -58,7 +59,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 > **Architecture note (2026-02-28)**: Brand package `_variables.scss` is **dead in Ulmo** — Paragon v23+ ignores SCSS variables. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties. See [deep audit §3 CRIT-1](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-1-brand-package-scss-variables-are-dead).
 
-> **Dead selector warning (2026-02-28)**: ~60% of scoped `[class*="..."]` CSS selectors in `mereka.scss` are **phantom CSS** — they match no actual DOM element in Ulmo MFEs. See [selector inventory §Dead Selector Audit](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md#critical-dead-selector-audit-2026-02-28). The token naming gap analysis is at [token audit §Naming Gap](architecture/PARAGON_V22_TOKEN_AUDIT.md#token-naming-gap-analysis-2026-02-28). A registry of 98 FPF plugin slots is at [FPF registry](architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
+> **Dead selector warning (2026-02-28)**: ~60% of scoped `[class*="..."]` CSS selectors in `mereka.scss` are **phantom CSS** — they match no actual DOM element in Ulmo MFEs. See [selector inventory §Dead Selector Audit](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md#critical-dead-selector-audit-2026-02-28). Canonical token naming is now enforced by `scripts/qa/verify-design-tokens-migration.sh`. A registry of 98 FPF plugin slots is at [FPF registry](architecture/FPF_PLUGIN_SLOT_REGISTRY.md).
 
 ## QA & Documentation
 - [ ] Cross-browser + mobile smoke tests (Chrome, Edge, Safari, Firefox, iOS, Android).
