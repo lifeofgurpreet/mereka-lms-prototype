@@ -39,6 +39,9 @@ RUN_BRANDING_SURFACE_AUDIT="${RUN_BRANDING_SURFACE_AUDIT:-1}"
 RUN_FOOTER_RUNTIME_GUARD="${RUN_FOOTER_RUNTIME_GUARD:-1}"
 RUN_MFE_ROUTE_RUNTIME_GUARD="${RUN_MFE_ROUTE_RUNTIME_GUARD:-1}"
 RUN_MFE_ROUTE_SMOKE_GUARD="${RUN_MFE_ROUTE_SMOKE_GUARD:-1}"
+RUN_FRONTEND_CACHE_PURGE="${RUN_FRONTEND_CACHE_PURGE:-0}"
+FRONTEND_CACHE_PURGE_EVERYTHING="${FRONTEND_CACHE_PURGE_EVERYTHING:-0}"
+FRONTEND_CACHE_ENV="${FRONTEND_CACHE_ENV:-auto}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
@@ -97,6 +100,15 @@ Options:
                        Skip strict runtime MFE route contract verification guard.
   --skip-mfe-route-smoke-guard
                        Skip runtime MFE route HTTP smoke guard.
+  --purge-frontend-cache
+                       Run frontend/theme cache purge helper after rollout checks.
+                       Uses dry-run unless --apply is set.
+  --purge-frontend-cache-everything
+                       Purge entire Cloudflare zone cache (high impact).
+                       Implies --purge-frontend-cache.
+  --frontend-cache-env ENV
+                       Cache purge environment: auto|prod|dev (default: auto).
+                       auto maps production->prod, staging->dev.
   --enterprise-readiness-tenant SLUG
                        Tenant slug used for enterprise SSO runtime readiness preflight.
 
@@ -233,6 +245,19 @@ while [[ $# -gt 0 ]]; do
     --skip-mfe-route-smoke-guard)
       RUN_MFE_ROUTE_SMOKE_GUARD=0
       shift
+      ;;
+    --purge-frontend-cache)
+      RUN_FRONTEND_CACHE_PURGE=1
+      shift
+      ;;
+    --purge-frontend-cache-everything)
+      RUN_FRONTEND_CACHE_PURGE=1
+      FRONTEND_CACHE_PURGE_EVERYTHING=1
+      shift
+      ;;
+    --frontend-cache-env)
+      FRONTEND_CACHE_ENV="${2:-}"
+      shift 2
       ;;
     --enterprise-readiness-tenant)
       ENTERPRISE_READINESS_TENANT="${2:-}"
@@ -649,6 +674,20 @@ if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FOOTER_RUNTIME_GU
   exit 1
 fi
 
+case "$FRONTEND_CACHE_ENV" in
+  auto|prod|dev) ;;
+  *)
+    echo "Error: --frontend-cache-env must be auto, prod, or dev (got: $FRONTEND_CACHE_ENV)." >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FRONTEND_CACHE_PURGE" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with cache purge enabled requires --verify-runtime." >&2
+  echo "Run with --verify-runtime or skip --purge-frontend-cache." >&2
+  exit 1
+fi
+
 UPDATE_APP_BASE=0
 UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
@@ -668,6 +707,8 @@ elif [[ "$TARGET_ENV" == "staging" ]]; then
   UPDATE_BASE_REF_DEFAULT=0
   APP_OVERLAY_REL="$APP_STAGING_REL"
   INFRA_OVERLAY_REL="$INFRA_STAGING_REL"
+  # Staging overlay may not include the production-only double-override image entry.
+  INFRA_REQUIRED_NAMES="$APP_REQUIRED_NAMES"
 fi
 
 UPDATE_BASE_REF="$UPDATE_BASE_REF_DEFAULT"
@@ -703,6 +744,9 @@ echo "Branding surface audit: $([[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]] && ech
 echo "Footer runtime guard: $([[ "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "MFE route runtime guard: $([[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "MFE route smoke guard: $([[ "$RUN_MFE_ROUTE_SMOKE_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Frontend cache purge: $([[ "$RUN_FRONTEND_CACHE_PURGE" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Frontend cache purge env: $FRONTEND_CACHE_ENV"
+echo "Frontend cache purge everything: $([[ "$FRONTEND_CACHE_PURGE_EVERYTHING" -eq 1 ]] && echo enabled || echo disabled)"
 echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
 
 run_enterprise_release_preflights() {
@@ -791,6 +835,32 @@ run_branding_release_postflights() {
   fi
 }
 
+run_frontend_cache_purge() {
+  if [[ "$RUN_FRONTEND_CACHE_PURGE" -ne 1 ]]; then
+    return 0
+  fi
+
+  local purge_env="$FRONTEND_CACHE_ENV"
+  if [[ "$purge_env" == "auto" ]]; then
+    if [[ "$TARGET_ENV" == "production" ]]; then
+      purge_env="prod"
+    else
+      purge_env="dev"
+    fi
+  fi
+
+  local -a purge_cmd=("$REPO_ROOT/scripts/infra/purge-frontend-theme-cache.sh" "--env" "$purge_env")
+  if [[ "$APPLY" -eq 1 ]]; then
+    purge_cmd+=("--apply")
+  fi
+  if [[ "$FRONTEND_CACHE_PURGE_EVERYTHING" -eq 1 ]]; then
+    purge_cmd+=("--purge-everything")
+  fi
+
+  echo "Running frontend cache purge helper..."
+  "${purge_cmd[@]}"
+}
+
 if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
   update_image_tags_file \
     "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
@@ -866,5 +936,6 @@ if [[ "$VERIFY_RUNTIME" -eq 1 ]]; then
 fi
 
 run_branding_release_postflights
+run_frontend_cache_purge
 
 echo "Done."

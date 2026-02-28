@@ -29,7 +29,8 @@ docker push "${GAR}/openedx:${TAG}" && docker push "${GAR}/openedx-mfe:${TAG}"
 ./scripts/infra/release-openedx-gitops.sh \
   --target-env production \
   --openedx-tag "${TAG}" --mfe-tag "${TAG}" \
-  --apply --commit --push --verify-runtime
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
 
 # 3. Post-deploy smoke matrix (mandatory)
 ./scripts/qa/verify-post-deploy-smoke.sh --env prod \
@@ -118,7 +119,8 @@ Use the canonical release orchestrator (AC-DEP-002: exact commands for gitops ro
   --openedx-digest "${OPENEDX_DIGEST}" \
   --mfe-digest "${MFE_DIGEST}" \
   --require-digests \
-  --apply --commit --push --verify-runtime
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
 ```
 
 ### Manual GitOps update (if release-openedx-gitops.sh is unavailable)
@@ -173,6 +175,7 @@ kubectl get deploy lms cms mfe -n mereka-lms \
 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
 
 # Purge frontend/theme cache entries (dry-run first, then apply)
+# Note: this is also integrated via release-openedx-gitops.sh --purge-frontend-cache.
 ./scripts/infra/purge-frontend-theme-cache.sh --env prod
 ./scripts/infra/purge-frontend-theme-cache.sh --env prod --apply
 
