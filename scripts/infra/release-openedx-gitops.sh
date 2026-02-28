@@ -674,6 +674,16 @@ if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FOOTER_RUNTIME_GU
   exit 1
 fi
 
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 ]]; then
+  openedx_tag_lc="$(echo "$OPENEDX_TAG" | tr '[:upper:]' '[:lower:]')"
+  mfe_tag_lc="$(echo "$MFE_TAG" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$openedx_tag_lc" == "latest" || "$mfe_tag_lc" == "latest" ]]; then
+    echo "Error: production apply forbids mutable 'latest' tags." >&2
+    echo "Use immutable release tags for --openedx-tag and --mfe-tag." >&2
+    exit 1
+  fi
+fi
+
 case "$FRONTEND_CACHE_ENV" in
   auto|prod|dev) ;;
   *)
