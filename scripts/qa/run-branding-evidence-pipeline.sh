@@ -7,15 +7,93 @@
 # directory, and produces a markdown summary report suitable for release notes.
 #
 # Usage:
-#   ./scripts/qa/run-branding-evidence-pipeline.sh [--env prod|dev]
-#   RETENTION_DAYS=30 ./scripts/qa/run-branding-evidence-pipeline.sh
+#   ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
+#   ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --cross-browser --capture-screenshots
+#   RETENTION_DAYS=30 RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-ENV="${1:-prod}"
-[[ "$ENV" == "--env" ]] && ENV="${2:-prod}"
+ENV="prod"
+RUN_CROSS_BROWSER="${RUN_CROSS_BROWSER:-1}"
+RUN_A11Y="${RUN_A11Y:-1}"
+RUN_PERFORMANCE="${RUN_PERFORMANCE:-1}"
+RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
+RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
+CROSS_BROWSER="${CROSS_BROWSER:-0}"
+LEARNING_PATH="${LEARNING_PATH:-/learning}"
+REQUIRE_RUNTIME_THEME="${REQUIRE_RUNTIME_THEME:-0}"
+A11Y_SCRIPT="${A11Y_SCRIPT:-./scripts/qa/verify-accessibility.sh}"
+A11Y_ARGS="${A11Y_ARGS:---offline}"
+
+usage() {
+  cat <<'EOF'
+Usage: run-branding-evidence-pipeline.sh [options]
+
+Options:
+  --env <prod|dev>          Target environment (default: prod)
+  --cross-browser           Run cross-browser Playwright matrix (chromium/firefox/mobile + webkit probe)
+  --capture-screenshots     Capture public branding screenshots with agent-browser
+  --frontend-only           Skip baseline multisite/route gates; run frontend closure gates only
+  --require-runtime-theme   Enforce runtime PARAGON_THEME_URLS mode in smoke/perf checks
+  -h, --help                Show this help
+
+Environment toggles:
+  RUN_CROSS_BROWSER=0|1     Enable/disable cross-browser smoke gate (default: 1)
+  RUN_A11Y=0|1              Enable/disable a11y gate (default: 1)
+  RUN_PERFORMANCE=0|1       Enable/disable performance gate (default: 1)
+  RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
+  RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
+  A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
+  A11Y_ARGS="<args>"        A11y script args (default: --offline)
+  LEARNING_PATH=/learning   Optional learning route path for smoke checks
+  RETENTION_DAYS=30         Evidence retention window in days (default: 30)
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --env)
+      [[ $# -lt 2 ]] && { echo "ERROR: --env requires a value" >&2; exit 2; }
+      ENV="$2"
+      shift 2
+      ;;
+    --cross-browser)
+      CROSS_BROWSER=1
+      shift
+      ;;
+    --capture-screenshots)
+      RUN_SCREENSHOTS=1
+      shift
+      ;;
+    --frontend-only)
+      RUN_BASELINE_GATES=0
+      shift
+      ;;
+    --require-runtime-theme)
+      REQUIRE_RUNTIME_THEME=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$ENV" in
+  prod|dev) ;;
+  *)
+    echo "ERROR: --env must be prod or dev (got: $ENV)" >&2
+    exit 2
+    ;;
+esac
 
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 EVIDENCE_DIR="var/evidence/branding/${STAMP}"
@@ -28,6 +106,12 @@ echo "=== Branding Evidence Pipeline ==="
 echo "Environment: $ENV"
 echo "Evidence dir: $EVIDENCE_DIR"
 echo "Retention: ${RETENTION_DAYS} days"
+echo "Cross-browser: $CROSS_BROWSER (gate enabled: $RUN_CROSS_BROWSER)"
+echo "A11y gate enabled: $RUN_A11Y"
+echo "Performance gate enabled: $RUN_PERFORMANCE"
+echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
+echo "Baseline gates enabled: $RUN_BASELINE_GATES"
+echo "Require runtime theme mode: $REQUIRE_RUNTIME_THEME"
 echo "Started: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
 
@@ -35,6 +119,14 @@ total_pass=0
 total_fail=0
 total_warn=0
 gate_results=()
+
+skip_gate() {
+  local name="$1"
+  local reason="$2"
+  echo "Skipping: ${name} (${reason})"
+  gate_results+=("| ${name} | SKIP | ${reason} |")
+  total_warn=$((total_warn + 1))
+}
 
 run_gate() {
   local name="$1"; shift
@@ -63,25 +155,85 @@ run_gate() {
   fi
 }
 
-# --- Gate 1: MFE Route Smoke ---
-run_gate "mfe-route-smoke" \
-  ./scripts/qa/verify-mfe-route-smoke.sh --env "$ENV" --json
+if [[ "$RUN_BASELINE_GATES" == "1" ]]; then
+  # --- Gate 1: MFE Route Smoke ---
+  run_gate "mfe-route-smoke" \
+    ./scripts/qa/verify-mfe-route-smoke.sh --env "$ENV" --json
 
-# --- Gate 2: Tenant Branding Runtime ---
-run_gate "tenant-branding-runtime" \
-  ./scripts/qa/verify-tenant-branding-runtime.sh --env "$ENV"
+  # --- Gate 2: Tenant Branding Runtime ---
+  run_gate "tenant-branding-runtime" \
+    ./scripts/qa/verify-tenant-branding-runtime.sh --env "$ENV"
 
-# --- Gate 3: MFE Route Contract ---
-run_gate "mfe-route-contract" \
-  ./scripts/qa/verify-mfe-route-contract.sh
+  # --- Gate 3: MFE Route Contract ---
+  run_gate "mfe-route-contract" \
+    ./scripts/qa/verify-mfe-route-contract.sh
 
-# --- Gate 4: MFE Route Drift ---
-run_gate "mfe-route-drift" \
-  ./scripts/qa/verify-mfe-route-drift.sh
+  # --- Gate 4: MFE Route Drift ---
+  run_gate "mfe-route-drift" \
+    ./scripts/qa/verify-mfe-route-drift.sh
 
-# --- Gate 5: Multisite Governance ---
-run_gate "multisite-governance" \
-  ./scripts/qa/run-multisite-governance-gates.sh --env "$ENV"
+  # --- Gate 5: Multisite Governance ---
+  run_gate "multisite-governance" \
+    ./scripts/qa/run-multisite-governance-gates.sh --env "$ENV"
+else
+  skip_gate "mfe-route-smoke" "RUN_BASELINE_GATES=0"
+  skip_gate "tenant-branding-runtime" "RUN_BASELINE_GATES=0"
+  skip_gate "mfe-route-contract" "RUN_BASELINE_GATES=0"
+  skip_gate "mfe-route-drift" "RUN_BASELINE_GATES=0"
+  skip_gate "multisite-governance" "RUN_BASELINE_GATES=0"
+fi
+
+# --- Gate 6: Frontend Branding Smoke (Playwright) ---
+if [[ "$RUN_CROSS_BROWSER" == "1" ]]; then
+  cross_browser_args=(--env "$ENV" --learning-path "$LEARNING_PATH")
+  if [[ "$CROSS_BROWSER" == "1" ]]; then
+    cross_browser_args+=(--cross-browser)
+  fi
+  if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
+    cross_browser_args+=(--require-runtime-theme)
+  fi
+  run_gate "cross-browser-branding-smoke" \
+    ./scripts/qa/verify-cross-browser-branding-smoke.sh "${cross_browser_args[@]}"
+else
+  skip_gate "cross-browser-branding-smoke" "RUN_CROSS_BROWSER=0"
+fi
+
+# --- Gate 7: Accessibility / Contrast / Focus Lane ---
+if [[ "$RUN_A11Y" == "1" ]]; then
+  if [[ ! -x "$A11Y_SCRIPT" ]]; then
+    echo "ERROR: A11Y script is not executable or missing: $A11Y_SCRIPT" >&2
+    exit 2
+  fi
+  a11y_args=()
+  if [[ -n "$A11Y_ARGS" ]]; then
+    # shellcheck disable=SC2206
+    a11y_args=($A11Y_ARGS)
+  fi
+  run_gate "a11y-tenant-branding" \
+    "$A11Y_SCRIPT" "${a11y_args[@]}"
+else
+  skip_gate "a11y-tenant-branding" "RUN_A11Y=0"
+fi
+
+# --- Gate 8: Frontend Performance Spot-Check ---
+if [[ "$RUN_PERFORMANCE" == "1" ]]; then
+  performance_args=(--env "$ENV")
+  if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
+    performance_args+=(--require-runtime)
+  fi
+  run_gate "frontend-performance-spotcheck" \
+    ./scripts/qa/verify-frontend-performance-spotcheck.sh "${performance_args[@]}"
+else
+  skip_gate "frontend-performance-spotcheck" "RUN_PERFORMANCE=0"
+fi
+
+# --- Gate 9: Public Screenshot Capture (optional operator evidence) ---
+if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
+  run_gate "capture-branding-screenshots" \
+    ./scripts/qa/capture-branding-screenshots.sh "$ENV"
+else
+  skip_gate "capture-branding-screenshots" "RUN_SCREENSHOTS=0"
+fi
 
 # --- Generate Summary Report ---
 cat > "$SUMMARY_FILE" <<EOF
@@ -98,6 +250,18 @@ cat > "$SUMMARY_FILE" <<EOF
 | Gate | Status | Log |
 |------|--------|-----|
 $(printf '%s\n' "${gate_results[@]}")
+
+## Pipeline Options
+
+- Cross-browser matrix requested: ${CROSS_BROWSER}
+- Learning route: ${LEARNING_PATH}
+- Runtime theme strict mode: ${REQUIRE_RUNTIME_THEME}
+- Baseline multisite/route gates enabled: ${RUN_BASELINE_GATES}
+- A11y gate enabled: ${RUN_A11Y}
+- A11y script: ${A11Y_SCRIPT}
+- A11y args: ${A11Y_ARGS}
+- Performance gate enabled: ${RUN_PERFORMANCE}
+- Screenshot gate enabled: ${RUN_SCREENSHOTS}
 
 ## Failure Taxonomy
 
@@ -124,6 +288,7 @@ echo "=== Summary ==="
 echo "Gates run: ${#gate_results[@]}"
 echo "Passed: $total_pass"
 echo "Failures: $total_fail"
+echo "Warnings/Skips: $total_warn"
 echo "Evidence: $EVIDENCE_DIR"
 echo "Report: $SUMMARY_FILE"
 

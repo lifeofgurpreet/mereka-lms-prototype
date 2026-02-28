@@ -172,6 +172,12 @@ kubectl get deploy lms cms mfe -n mereka-lms \
 # Full branding evidence pipeline
 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
 
+# Frontend closure lane (cross-browser + a11y + performance, skips multisite baseline gates)
+./scripts/qa/run-branding-evidence-pipeline.sh \
+  --env prod \
+  --frontend-only \
+  --cross-browser
+
 # Check all tenant domains return HTTP 200
 for domain in academyv2.mereka.io academy.biji-biji.com; do
   echo "$domain: $(curl -s -o /dev/null -w '%{http_code}' "https://${domain}/")"

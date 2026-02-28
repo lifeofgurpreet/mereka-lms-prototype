@@ -345,6 +345,9 @@ curl -s https://skillourfuture.academy.mereka.io/api/mfe_config/v1 | python3 -m 
 
 # With custom retention
 RETENTION_DAYS=90 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
+
+# Frontend closure-only lane (cross-browser + a11y + performance)
+./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser
 ```
 
 ### Evidence Directory Structure
@@ -356,7 +359,10 @@ var/evidence/branding/YYYYMMDD-HHMMSS/
 ├── tenant-branding-runtime.log  # Per-domain branding checks
 ├── mfe-route-contract.log  # Route-to-dist contract
 ├── mfe-route-drift.log     # Route mapping drift guard
-└── multisite-governance.log # Full governance gates
+├── multisite-governance.log # Full governance gates
+├── cross-browser-branding-smoke.log # Playwright smoke matrix
+├── a11y-tenant-branding.log # A11y lane script output
+└── frontend-performance-spotcheck.log # Lighthouse + Paragon runtime checks
 ```
 
 ### Failure Taxonomy
