@@ -36,6 +36,20 @@ resources:
 images:
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
     newTag: mereka-brand
+  # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
+  - name: docker.io/overhangio/openedx-mfe
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newTag: 1c66529-20260220023917
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
+    newTag: 1c66529-20260220023917
+  # Enterprise MFEs must be pinned explicitly for nonprod parity.
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
+    newTag: nreum-clean-202602200416
+  - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+    newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal
+    newTag: nreum-clean-202602200416
 
 generatorOptions:
   disableNameSuffixHash: true

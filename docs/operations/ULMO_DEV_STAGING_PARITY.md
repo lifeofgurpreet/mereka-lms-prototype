@@ -162,32 +162,33 @@ and `.dev` OIDC issuer values for nonprod runtime.
 
 ---
 
-### Gap 2 (HIGH): MFE image tag lag between base and production
+### Gap 2 (RESOLVED 2026-02-28): MFE image tag parity in rke2-nonprod
 
-**Problem**: Base kustomization pins MFE to `b732a7d-20260210161437`; production
-overlay re-pins to `1c66529-20260220023917` (10 days newer). rke2-nonprod has no
-`images:` block so it uses the base tag.
+**Problem (historical)**: Base kustomization pinned MFE to
+`b732a7d-20260210161437`; production overlay re-pinned to
+`1c66529-20260220023917` (newer). rke2-nonprod previously lacked an explicit MFE
+override and inherited the stale base tag.
 
 **Effect**: rke2-nonprod tests an older MFE build. NREUM-clean and
 `env.config.js` wiring applied in `nreum-clean-202602200416` will not be present in
 the rke2-nonprod MFE.
 
-**Fix needed**: Add an `images:` block to the rke2-nonprod overlay mirroring the
-production overlay MFE tag.
+**Fix implemented**: `deploy/k8s/overlays/rke2-nonprod/kustomization.yaml` now pins
+both canonical and transformed MFE image names to `1c66529-20260220023917`.
 
 ---
 
-### Gap 3 (HIGH): Enterprise MFE images not pinned on rke2-nonprod
+### Gap 3 (RESOLVED 2026-02-28): Enterprise MFE image parity in rke2-nonprod
 
-**Problem**: `enterprise-admin-portal` and `enterprise-learner-portal` image tags
-(`nreum-clean-202602200416`) are only set in the production overlay. rke2-nonprod
-has no override.
+**Problem (historical)**: `enterprise-admin-portal` and
+`enterprise-learner-portal` image tags (`nreum-clean-202602200416`) were only set in
+the production overlay. rke2-nonprod had no overrides.
 
 **Effect**: Enterprise MFE pods on rke2-nonprod will run un-patched upstream images
 without NREUM removal or `env.config.js` wiring. These will crash or serve broken UI.
 
-**Fix needed**: Add enterprise MFE image pins to the rke2-nonprod overlay matching
-production.
+**Fix implemented**: rke2-nonprod now pins both enterprise MFE images to
+`nreum-clean-202602200416`, matching production.
 
 ---
 
@@ -283,10 +284,12 @@ Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
 - [x] **Gap 1**: Added `configMapGenerator` merge for `openedx-config` in rke2-nonprod
   using `overlays/rke2-nonprod/config/{lms,cms}.env.yml` (`.dev` roots, cookie domain,
   OIDC issuer, preview base)
-- [ ] **Gap 2**: Add `images:` block to `deploy/k8s/overlays/rke2-nonprod/kustomization.yaml`
-  pinning `openedx-mfe` to `1c66529-20260220023917` (matches production)
-- [ ] **Gap 3**: Add `enterprise-admin-portal` and `enterprise-learner-portal` image pins
-  to rke2-nonprod overlay matching production tags
+- [x] **Gap 2**: Added canonical + transformed `openedx-mfe` image pin entries in
+  `deploy/k8s/overlays/rke2-nonprod/kustomization.yaml` to
+  `1c66529-20260220023917` (matches production)
+- [x] **Gap 3**: Added `enterprise-admin-portal` and `enterprise-learner-portal`
+  image pins in rke2-nonprod overlay matching production
+  (`nreum-clean-202602200416`)
 - [ ] **Gap 4**: Update `commonAnnotations.app.kubernetes.io/version` to `21.0.0`
 - [ ] **Gap 5**: Add CI step to verify `_tokens.scss` is in sync with `tokens.css`
   (T107 prerequisite)

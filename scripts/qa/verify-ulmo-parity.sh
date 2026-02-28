@@ -51,6 +51,17 @@ pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 
+# Extract the first newTag for an image name in a kustomization file.
+extract_image_tag() {
+  local file="$1"
+  local image_name="$2"
+  awk -v name="$image_name" '
+    $1 == "-" && $2 == "name:" && $3 == name { in_block = 1; next }
+    in_block && $1 == "newTag:" { print $2; exit }
+    in_block && $1 == "-" && $2 == "name:" { in_block = 0 }
+  ' "$file"
+}
+
 MODE="offline"
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -215,6 +226,46 @@ else
     pass "rke2-nonprod kustomization has images: block (MFE tag override present)"
   else
     fail "rke2-nonprod kustomization has no images: block — MFE tag will lag behind production (Gap 2)"
+  fi
+
+  PROD_MFE_CANONICAL_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "docker.io/overhangio/openedx-mfe")
+  PROD_MFE_TRANSFORMED_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe")
+  RKE2_MFE_CANONICAL_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "docker.io/overhangio/openedx-mfe")
+  RKE2_MFE_TRANSFORMED_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe")
+
+  if [[ -n "$RKE2_MFE_CANONICAL_TAG" && -n "$RKE2_MFE_TRANSFORMED_TAG" ]]; then
+    pass "rke2-nonprod pins both canonical and transformed openedx-mfe image names"
+  else
+    fail "rke2-nonprod must pin both canonical and transformed openedx-mfe image names"
+  fi
+
+  if [[ -n "$PROD_MFE_CANONICAL_TAG" && -n "$RKE2_MFE_CANONICAL_TAG" && "$RKE2_MFE_CANONICAL_TAG" == "$PROD_MFE_CANONICAL_TAG" ]]; then
+    pass "rke2-nonprod canonical openedx-mfe tag matches production: $RKE2_MFE_CANONICAL_TAG"
+  else
+    fail "rke2-nonprod canonical openedx-mfe tag drift (prod=$PROD_MFE_CANONICAL_TAG, rke2=$RKE2_MFE_CANONICAL_TAG)"
+  fi
+
+  if [[ -n "$PROD_MFE_TRANSFORMED_TAG" && -n "$RKE2_MFE_TRANSFORMED_TAG" && "$RKE2_MFE_TRANSFORMED_TAG" == "$PROD_MFE_TRANSFORMED_TAG" ]]; then
+    pass "rke2-nonprod transformed openedx-mfe tag matches production: $RKE2_MFE_TRANSFORMED_TAG"
+  else
+    fail "rke2-nonprod transformed openedx-mfe tag drift (prod=$PROD_MFE_TRANSFORMED_TAG, rke2=$RKE2_MFE_TRANSFORMED_TAG)"
+  fi
+
+  PROD_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal")
+  PROD_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_PROD" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal")
+  RKE2_ENTERPRISE_ADMIN_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal")
+  RKE2_ENTERPRISE_LEARNER_TAG=$(extract_image_tag "$KUSTOMIZATION_RKE2" "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-learner-portal")
+
+  if [[ -n "$RKE2_ENTERPRISE_ADMIN_TAG" && "$RKE2_ENTERPRISE_ADMIN_TAG" == "$PROD_ENTERPRISE_ADMIN_TAG" ]]; then
+    pass "rke2-nonprod enterprise-admin-portal tag matches production: $RKE2_ENTERPRISE_ADMIN_TAG"
+  else
+    fail "rke2-nonprod enterprise-admin-portal tag drift (prod=$PROD_ENTERPRISE_ADMIN_TAG, rke2=$RKE2_ENTERPRISE_ADMIN_TAG)"
+  fi
+
+  if [[ -n "$RKE2_ENTERPRISE_LEARNER_TAG" && "$RKE2_ENTERPRISE_LEARNER_TAG" == "$PROD_ENTERPRISE_LEARNER_TAG" ]]; then
+    pass "rke2-nonprod enterprise-learner-portal tag matches production: $RKE2_ENTERPRISE_LEARNER_TAG"
+  else
+    fail "rke2-nonprod enterprise-learner-portal tag drift (prod=$PROD_ENTERPRISE_LEARNER_TAG, rke2=$RKE2_ENTERPRISE_LEARNER_TAG)"
   fi
 fi
 
