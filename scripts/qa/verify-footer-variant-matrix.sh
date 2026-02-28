@@ -21,9 +21,9 @@ echo "========================================"
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTVAR-001: SITE_VARIANTS map contains all 3 production domains
+# AC-FTVAR-001: MEREKA_SITE_VARIANTS map contains all 3 production domains
 # -----------------------------------------------------------------------
-echo "AC-FTVAR-001: SITE_VARIANTS contains all 3 production domains"
+echo "AC-FTVAR-001: MEREKA_SITE_VARIANTS contains all 3 production domains"
 
 if [[ ! -f "$PLUGIN" ]]; then
   fail "Plugin file missing: $PLUGIN"
@@ -31,21 +31,21 @@ else
   pass "Plugin file exists: infrastructure/tutor/plugins/mereka_lms.py"
 
   if grep -q "'academyv2.mereka.io'" "$PLUGIN"; then
-    pass "SITE_VARIANTS contains 'academyv2.mereka.io'"
+    pass "MEREKA_SITE_VARIANTS contains 'academyv2.mereka.io'"
   else
-    fail "SITE_VARIANTS missing 'academyv2.mereka.io'"
+    fail "MEREKA_SITE_VARIANTS missing 'academyv2.mereka.io'"
   fi
 
   if grep -q "'academy.biji-biji.com'" "$PLUGIN"; then
-    pass "SITE_VARIANTS contains 'academy.biji-biji.com'"
+    pass "MEREKA_SITE_VARIANTS contains 'academy.biji-biji.com'"
   else
-    fail "SITE_VARIANTS missing 'academy.biji-biji.com'"
+    fail "MEREKA_SITE_VARIANTS missing 'academy.biji-biji.com'"
   fi
 
   if grep -q "'skillourfuture.academy.mereka.io'" "$PLUGIN"; then
-    pass "SITE_VARIANTS contains 'skillourfuture.academy.mereka.io'"
+    pass "MEREKA_SITE_VARIANTS contains 'skillourfuture.academy.mereka.io'"
   else
-    fail "SITE_VARIANTS missing 'skillourfuture.academy.mereka.io'"
+    fail "MEREKA_SITE_VARIANTS missing 'skillourfuture.academy.mereka.io'"
   fi
 fi
 
@@ -57,35 +57,35 @@ echo ""
 echo "AC-FTVAR-002: Each variant has required fields (no nulls)"
 
 if [[ -f "$PLUGIN" ]]; then
-  # Extract the SITE_VARIANTS block: from "const SITE_VARIANTS = {" to the closing "};"
-  VARIANTS_BLOCK=$(awk '/const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
+  # Extract the MEREKA_SITE_VARIANTS block.
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN")
 
   # Check brand field present in variants block
   if echo "$VARIANTS_BLOCK" | grep -q "brand:"; then
-    pass "SITE_VARIANTS entries contain 'brand:' field"
+    pass "MEREKA_SITE_VARIANTS entries contain 'brand:' field"
   else
-    fail "SITE_VARIANTS entries missing 'brand:' field"
+    fail "MEREKA_SITE_VARIANTS entries missing 'brand:' field"
   fi
 
   # Check copyrightHolder field present in variants block
   if echo "$VARIANTS_BLOCK" | grep -q "copyrightHolder:"; then
-    pass "SITE_VARIANTS entries contain 'copyrightHolder:' field"
+    pass "MEREKA_SITE_VARIANTS entries contain 'copyrightHolder:' field"
   else
-    fail "SITE_VARIANTS entries missing 'copyrightHolder:' field"
+    fail "MEREKA_SITE_VARIANTS entries missing 'copyrightHolder:' field"
   fi
 
   # Check whatsapp field present in variants block
   if echo "$VARIANTS_BLOCK" | grep -q "whatsapp:"; then
-    pass "SITE_VARIANTS entries contain 'whatsapp:' field"
+    pass "MEREKA_SITE_VARIANTS entries contain 'whatsapp:' field"
   else
-    fail "SITE_VARIANTS entries missing 'whatsapp:' field"
+    fail "MEREKA_SITE_VARIANTS entries missing 'whatsapp:' field"
   fi
 
-  # Sanity check: no null/undefined values in SITE_VARIANTS block
+  # Sanity check: no null/undefined values in variant block
   if echo "$VARIANTS_BLOCK" | grep -qE ": null|: undefined"; then
-    fail "SITE_VARIANTS contains null or undefined values"
+    fail "MEREKA_SITE_VARIANTS contains null or undefined values"
   else
-    pass "No null/undefined values in SITE_VARIANTS entries"
+    pass "No null/undefined values in MEREKA_SITE_VARIANTS entries"
   fi
 
 # Check brand values are non-empty strings for each domain
@@ -99,7 +99,7 @@ import sys
 path, domain, field = sys.argv[1:4]
 text = open(path, encoding="utf-8").read()
 
-block_match = re.search(r"const SITE_VARIANTS = \{(.*?)\n\s*\};", text, re.S)
+block_match = re.search(r"const MEREKA_SITE_VARIANTS = \{(.*?)\n\s*\};", text, re.S)
 if not block_match:
     raise SystemExit(1)
 
@@ -201,33 +201,31 @@ echo ""
 echo "AC-FTVAR-004: Fallback variant for unknown hostnames"
 
 if [[ -f "$PLUGIN" ]]; then
-  # The fallback is the || { brand: ... } expression on the variant line
-  if grep -q "SITE_VARIANTS\[hostname\] ||" "$PLUGIN"; then
-    pass "Fallback variant exists (|| operator after SITE_VARIANTS lookup)"
+  # Current architecture uses getMerekaVariant() with explicit knownVariant guard.
+  if grep -q "const knownVariant = MEREKA_SITE_VARIANTS\\[normalizedHostname\\]" "$PLUGIN" \
+    && grep -q "if (knownVariant)" "$PLUGIN" \
+    && grep -q "Unknown host fallback" "$PLUGIN"; then
+    pass "Fallback variant exists in getMerekaVariant() (knownVariant guard + explicit return object)"
   else
-    fail "Fallback variant missing — SITE_VARIANTS lookup has no || fallback"
+    fail "Fallback variant missing — expected getMerekaVariant() knownVariant guard + fallback return object"
   fi
 
-  # Confirm fallback references dynamic config values (SITE_NAME / PLATFORM_NAME)
-  FALLBACK_BLOCK=$(awk '
-    /SITE_VARIANTS\[hostname\] \|\|/ { in_fallback=1; next }
-    in_fallback && /^\s*\}\s*,?$/ { in_fallback=0 }
-    in_fallback { print }
-  ' "$PLUGIN" || true)
-  if echo "$FALLBACK_BLOCK" | grep -q "config\.SITE_NAME\|config\.PLATFORM_NAME\|siteName"; then
-    pass "Fallback variant uses dynamic config values (SITE_NAME / PLATFORM_NAME)"
+  # Confirm fallback references dynamic config values (SITE_NAME / PLATFORM_NAME).
+  if grep -q "fallbackBrand.*config\\.SITE_NAME" "$PLUGIN" \
+    && grep -q "fallbackPlatform.*config\\.PLATFORM_NAME" "$PLUGIN"; then
+    pass "Fallback variant uses dynamic config values (config.SITE_NAME / config.PLATFORM_NAME)"
   else
-    warn "Fallback variant may not reference config.SITE_NAME — review fallback block"
+    warn "Fallback variant may not reference config.SITE_NAME/config.PLATFORM_NAME — review getMerekaVariant()"
   fi
 fi
 
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-FTVAR-005: DRY check — no domain strings outside SITE_VARIANTS inside
+# AC-FTVAR-005: DRY check — no domain strings outside MEREKA_SITE_VARIANTS inside
 # MerekaFooter component body
 # -----------------------------------------------------------------------
-echo "AC-FTVAR-005: DRY check — domain strings confined to SITE_VARIANTS"
+echo "AC-FTVAR-005: DRY check — domain strings confined to MEREKA_SITE_VARIANTS"
 
 if [[ -f "$PLUGIN" ]]; then
   DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
@@ -243,8 +241,8 @@ if [[ -f "$PLUGIN" ]]; then
     # Extract the MerekaFooter body using line numbers (exact, no pattern-stop ambiguity)
     FOOTER_BODY=$(awk -v s="$FOOTER_START" -v e="$FOOTER_END" 'NR>=s && NR<=e' "$PLUGIN")
 
-    # Extract the SITE_VARIANTS block within that body
-    VARIANTS_BLOCK=$(echo "$FOOTER_BODY" | awk '/const SITE_VARIANTS = \{/,/^\s*\};/')
+    # Extract the MEREKA_SITE_VARIANTS block within that body
+    VARIANTS_BLOCK=$(echo "$FOOTER_BODY" | awk '/const MEREKA_SITE_VARIANTS = \{/,/^\s*\};/')
 
     for domain in "${DOMAINS[@]}"; do
       TOTAL_COUNT=$(echo "$FOOTER_BODY" | grep -cF "$domain" || true)
@@ -252,9 +250,9 @@ if [[ -f "$PLUGIN" ]]; then
       OUTSIDE_COUNT=$((TOTAL_COUNT - VARIANTS_COUNT))
 
       if [[ "$OUTSIDE_COUNT" -le 0 ]]; then
-        pass "Domain '${domain}' only appears inside SITE_VARIANTS in MerekaFooter (DRY)"
+        pass "Domain '${domain}' only appears inside MEREKA_SITE_VARIANTS in MerekaFooter (DRY)"
       else
-        fail "Domain '${domain}' appears ${OUTSIDE_COUNT} time(s) outside SITE_VARIANTS in MerekaFooter (DRY violation)"
+        fail "Domain '${domain}' appears ${OUTSIDE_COUNT} time(s) outside MEREKA_SITE_VARIANTS in MerekaFooter (DRY violation)"
       fi
     done
   fi

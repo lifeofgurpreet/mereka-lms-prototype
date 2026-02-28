@@ -57,6 +57,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Action** | Keep slot component active and keep `.mereka-header-logo` styling as compatibility surface |
 | **Target Date** | Done |
 | **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Verification** | `verify-selector-to-slot-migration.sh`, `verify-migration-lock.sh`, `verify-no-dom-overrides.sh` |
 | **Migration path** | Slot registration already complete; scoped SCSS kept for layout consistency |
 
 ---
@@ -76,6 +77,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Action** | Keep slot component active; avoid wildcard selector fallback reintroduction |
 | **Target Date** | Done |
 | **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Verification** | `verify-selector-to-slot-migration.sh`, `verify-mfe-selector-hardening.sh`, `verify-migration-lock.sh` |
 | **Migration path** | Slot registration already complete; wrapper fallback selectors removed after dead-selector audit |
 
 ---
@@ -209,6 +211,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Action** | Keep slot component active |
 | **Target Date** | Done |
 | **Files** | `infrastructure/tutor/plugins/mereka_lms.py` |
+| **Verification** | `verify-footer-variant-matrix.sh`, `verify-plugin-slot-migration-register.sh`, `verify-selector-to-slot-migration.sh` |
 | **Migration path** | Slot registration complete |
 
 ---
