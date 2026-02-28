@@ -35,6 +35,7 @@ RUN_ENTERPRISE_SSO_RUNTIME_GUARD="${RUN_ENTERPRISE_SSO_RUNTIME_GUARD:-1}"
 RUN_ENTERPRISE_SCHEMA_GUARD="${RUN_ENTERPRISE_SCHEMA_GUARD:-1}"
 RUN_ENTERPRISE_RUNTIME_APP_GUARD="${RUN_ENTERPRISE_RUNTIME_APP_GUARD:-1}"
 RUN_BRANDING_RUNTIME_GUARD="${RUN_BRANDING_RUNTIME_GUARD:-1}"
+RUN_PARAGON_RUNTIME_GUARD="${RUN_PARAGON_RUNTIME_GUARD:-1}"
 RUN_BRANDING_SURFACE_AUDIT="${RUN_BRANDING_SURFACE_AUDIT:-1}"
 RUN_FOOTER_RUNTIME_GUARD="${RUN_FOOTER_RUNTIME_GUARD:-1}"
 RUN_MFE_ROUTE_RUNTIME_GUARD="${RUN_MFE_ROUTE_RUNTIME_GUARD:-1}"
@@ -43,6 +44,7 @@ RUN_FRONTEND_CACHE_PURGE="${RUN_FRONTEND_CACHE_PURGE:-0}"
 FRONTEND_CACHE_PURGE_EVERYTHING="${FRONTEND_CACHE_PURGE_EVERYTHING:-0}"
 FRONTEND_CACHE_ENV="${FRONTEND_CACHE_ENV:-auto}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
+PARAGON_RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
@@ -92,6 +94,8 @@ Options:
                        Skip enterprise schema integrity preflight.
   --skip-branding-runtime-guard
                        Skip post-rollout runtime branding verification guard.
+  --skip-paragon-runtime-guard
+                       Skip strict runtime PARAGON_THEME_URLS verification guard.
   --skip-branding-surface-audit
                        Skip strict branding surface audit after runtime branding verification.
   --skip-footer-runtime-guard
@@ -111,6 +115,9 @@ Options:
                        auto maps production->prod, staging->dev.
   --enterprise-readiness-tenant SLUG
                        Tenant slug used for enterprise SSO runtime readiness preflight.
+  --paragon-runtime-url URL
+                       Override runtime PARAGON theme origin for post-rollout validation
+                       (default: https://apps.academyv2.mereka.io in production).
 
   --k8s-context NAME    Kubernetes context for runtime verification.
   --argocd-namespace NS ArgoCD namespace (default: argocd).
@@ -230,6 +237,10 @@ while [[ $# -gt 0 ]]; do
       RUN_BRANDING_RUNTIME_GUARD=0
       shift
       ;;
+    --skip-paragon-runtime-guard)
+      RUN_PARAGON_RUNTIME_GUARD=0
+      shift
+      ;;
     --skip-branding-surface-audit)
       RUN_BRANDING_SURFACE_AUDIT=0
       shift
@@ -261,6 +272,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --enterprise-readiness-tenant)
       ENTERPRISE_READINESS_TENANT="${2:-}"
+      shift 2
+      ;;
+    --paragon-runtime-url)
+      PARAGON_RUNTIME_URL="${2:-}"
       shift 2
       ;;
     --k8s-context)
@@ -668,6 +683,12 @@ if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_BRANDING_RUNTIME_
   exit 1
 fi
 
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_PARAGON_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with PARAGON runtime guard enabled requires --verify-runtime." >&2
+  echo "Use --skip-paragon-runtime-guard only for controlled emergency releases." >&2
+  exit 1
+fi
+
 if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
   echo "Error: production apply with footer runtime guard enabled requires --verify-runtime." >&2
   echo "Use --skip-footer-runtime-guard only for controlled emergency releases." >&2
@@ -750,6 +771,7 @@ echo "Enterprise SSO runtime guard: $([[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq
 echo "Enterprise runtime app guard: $([[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise schema guard: $([[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Branding runtime guard: $([[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "PARAGON runtime guard: $([[ "$RUN_PARAGON_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Branding surface audit: $([[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Footer runtime guard: $([[ "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "MFE route runtime guard: $([[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
@@ -804,6 +826,17 @@ run_enterprise_release_preflights
 run_branding_release_postflights() {
   if [[ "$TARGET_ENV" != "production" || "$APPLY" -ne 1 ]]; then
     return 0
+  fi
+
+  local paragon_runtime_url="${PARAGON_RUNTIME_URL:-https://apps.academyv2.mereka.io}"
+
+  if [[ "$RUN_PARAGON_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production PARAGON runtime verification..."
+    "$REPO_ROOT/scripts/qa/verify-paragon-runtime.sh" \
+      --runtime-url "$paragon_runtime_url" \
+      --require-runtime
+  else
+    echo "= skipped PARAGON runtime guard (--skip-paragon-runtime-guard)"
   fi
 
   if [[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]]; then
