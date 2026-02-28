@@ -6,6 +6,7 @@
 # 2) Tokens file is token-only (:root + variable declarations; no style selectors)
 # 3) MFE stylesheet does not leak legacy LMS/Studio selectors
 # 4) No runtime wiring depends on @edx/brand SCSS in Ulmo
+# 5) @edx/brand package contract is asset-only (no SCSS build/runtime surface)
 
 set -euo pipefail
 
@@ -28,6 +29,7 @@ MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 PATCHES_DIR="$REPO_ROOT/infrastructure/tutor/patches"
+BRAND_PACKAGE_JSON="$REPO_ROOT/infrastructure/tutor/brand-mereka/package.json"
 
 echo "=== MFE CSS Architecture Verification ==="
 echo ""
@@ -40,6 +42,9 @@ if [[ ! -f "$TOKENS_SCSS" ]]; then
 fi
 if [[ ! -f "$PLUGIN_FILE" ]]; then
   fail "Tutor plugin missing: $PLUGIN_FILE"
+fi
+if [[ ! -f "$BRAND_PACKAGE_JSON" ]]; then
+  fail "Brand package manifest missing: $BRAND_PACKAGE_JSON"
 fi
 
 echo "--- Check 1: MFE import boundary (no monolithic theme.scss) ---"
@@ -159,10 +164,66 @@ else
   done <<< "$BRAND_SCSS_IMPORTS"
 fi
 
+echo "--- Check 5: @edx/brand package manifest is asset-only ---"
+ASSET_ONLY_CONTRACT_RESULT="$(python3 - "$BRAND_PACKAGE_JSON" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+manifest = Path(sys.argv[1])
+pkg = json.loads(manifest.read_text(encoding="utf-8"))
+
+allowed_exports = {
+    ".",
+    "./logo.js",
+    "./logo.svg",
+    "./logo.png",
+    "./logo-white.svg",
+    "./logo-white.png",
+    "./logo_white.svg",
+    "./logo_white.png",
+    "./logo-trademark.svg",
+    "./logo-trademark.png",
+    "./favicon.ico",
+    "./favicon.png",
+}
+
+errors = []
+
+exports = pkg.get("exports")
+if not isinstance(exports, dict):
+    errors.append("missing/invalid exports map")
+else:
+    keys = set(exports.keys())
+    if keys != allowed_exports:
+        errors.append(f"exports keys mismatch (found {sorted(keys)})")
+    if any(key.startswith("./paragon/") for key in keys):
+        errors.append("paragon/* exports present (asset-only contract violated)")
+
+if "scripts" in pkg:
+    errors.append("package.json contains scripts (build contract should be asset-only)")
+if "peerDependencies" in pkg:
+    errors.append("package.json contains peerDependencies (asset-only contract)")
+if pkg.get("dependencies") not in ({}, None):
+    errors.append("dependencies must be empty/absent")
+
+if errors:
+    print("\n".join(errors))
+PY
+)"
+
+if [[ -z "$ASSET_ONLY_CONTRACT_RESULT" ]]; then
+  pass "@edx/brand package manifest is asset-only and explicitly exported"
+else
+  fail "Asset-only package contract check failed:"
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && echo "  - $line"
+  done <<< "$ASSET_ONLY_CONTRACT_RESULT"
+fi
+
 echo ""
 echo "PASS: $PASS | FAIL: $FAIL | WARN: $WARN"
 
 if [[ "$FAIL" -ne 0 ]]; then
   exit 1
 fi
-
