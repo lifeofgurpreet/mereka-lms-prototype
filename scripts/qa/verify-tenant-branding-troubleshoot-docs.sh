@@ -12,7 +12,7 @@
 # - References the runtime verifier and governance gate scripts
 # - Covers false positives, routing/cache edge cases, and known issues
 
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"

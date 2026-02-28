@@ -7,7 +7,7 @@
 #   - UI components & graphical objects: 3:1 minimum
 #
 # Usage: ./scripts/qa/verify-contrast-compliance.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TOKENS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"

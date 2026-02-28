@@ -3,7 +3,7 @@
 # @spec: email-notifications-pipeline_spec.md
 # @covers AC-031, AC-032, AC-040, AC-041, AC-042
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -12,9 +12,9 @@ PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
 
-do_pass() { echo "✓ $1"; ((PASS_COUNT++)); }
-do_fail() { echo "✗ $1"; ((FAIL_COUNT++)); }
-do_warn() { echo "⚠ $1"; ((WARN_COUNT++)); }
+do_pass() { echo "✓ $1"; PASS_COUNT=$((PASS_COUNT + 1)); }
+do_fail() { echo "✗ $1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
+do_warn() { echo "⚠ $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
 
 cd "$REPO_ROOT" || exit 1
 
@@ -85,13 +85,13 @@ if [ -d "$BULK_PLUGIN" ]; then
     # Check for tracking pixel or open event logging
     if find "$BULK_PLUGIN" -name "*.py" -exec grep -E "(tracking.*pixel|open.*event|email.*opened|track.*open)" {} \; | grep -q .; then
         do_pass "Open tracking logic found"
-        ((TRACKING_FOUND++))
+        TRACKING_FOUND=$((TRACKING_FOUND + 1))
     fi
 
     # Check for engagement store or analytics table
     if find "$BULK_PLUGIN" -name "*.py" -exec grep -E "(engagement.*store|analytics.*table|EmailEngagement|CampaignAnalytics)" {} \; | grep -q .; then
         do_pass "Engagement data storage found"
-        ((TRACKING_FOUND++))
+        TRACKING_FOUND=$((TRACKING_FOUND + 1))
     fi
 
     if [ "$TRACKING_FOUND" -eq 0 ]; then
@@ -112,13 +112,13 @@ if [ -d "$BULK_PLUGIN" ]; then
     # Check for URL rewriting for click tracking
     if find "$BULK_PLUGIN" -name "*.py" -exec grep -E "(rewrite.*url|track.*click|click.*redirect|tracking.*url)" {} \; | grep -q .; then
         do_pass "Click tracking URL rewriting found"
-        ((CLICK_TRACKING_FOUND++))
+        CLICK_TRACKING_FOUND=$((CLICK_TRACKING_FOUND + 1))
     fi
 
     # Check for redirect endpoint
     if find "$BULK_PLUGIN" -name "*.py" -exec grep -E "(redirect.*view|click.*endpoint|track.*click.*view)" {} \; | grep -q .; then
         do_pass "Click tracking redirect endpoint found"
-        ((CLICK_TRACKING_FOUND++))
+        CLICK_TRACKING_FOUND=$((CLICK_TRACKING_FOUND + 1))
     fi
 
     if [ "$CLICK_TRACKING_FOUND" -eq 0 ]; then
@@ -161,7 +161,7 @@ if [ -d "$BULK_PLUGIN" ]; then
 
     for state in draft scheduled sending paused completed failed cancelled; do
         if find "$BULK_PLUGIN" -name "*.py" -exec grep -i "$state" {} \; | grep -q .; then
-            ((CAMPAIGN_STATES++))
+            CAMPAIGN_STATES=$((CAMPAIGN_STATES + 1))
         fi
     done
 

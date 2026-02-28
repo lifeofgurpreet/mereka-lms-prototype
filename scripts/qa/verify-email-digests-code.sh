@@ -3,7 +3,7 @@
 # @spec: email-notifications-pipeline_spec.md
 # @covers AC-037, AC-038, AC-039
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -12,9 +12,9 @@ PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
 
-do_pass() { echo "✓ $1"; ((PASS_COUNT++)); }
-do_fail() { echo "✗ $1"; ((FAIL_COUNT++)); }
-do_warn() { echo "⚠ $1"; ((WARN_COUNT++)); }
+do_pass() { echo "✓ $1"; PASS_COUNT=$((PASS_COUNT + 1)); }
+do_fail() { echo "✗ $1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
+do_warn() { echo "⚠ $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
 
 cd "$REPO_ROOT" || exit 1
 
