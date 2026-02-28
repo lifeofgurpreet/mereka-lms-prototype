@@ -24,6 +24,7 @@ fail() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 
 SCSS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+CORE_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
 AUDIT_DOC="$REPO_ROOT/docs/operations/MFE_SELECTOR_HARDENING_AUDIT.md"
 REGISTER_DOC="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
 MATRIX_DOC="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MATRIX.md"
@@ -262,7 +263,7 @@ print(count)
 
   # Track remaining Paragon BEM override density for Phase 7 reduction progress.
   # Default ceiling is aligned to current plan target; override via env for stricter sweeps.
-  PGN_SELECTOR_CEILING="${PGN_SELECTOR_CEILING:-65}"
+  PGN_SELECTOR_CEILING="${PGN_SELECTOR_CEILING:-40}"
   PGN_SELECTOR_LINES=$(python3 -c "
 import re
 scss = open('$SCSS_FILE').read()
@@ -282,6 +283,45 @@ print(count)
     pass "AC-US7-001: Paragon BEM selector density within ceiling (${PGN_SELECTOR_LINES} <= ${PGN_SELECTOR_CEILING})"
   else
     fail "AC-US7-001: Paragon BEM selector density exceeds ceiling (${PGN_SELECTOR_LINES} > ${PGN_SELECTOR_CEILING})"
+  fi
+
+  # Enforce live Paragon selector contract: any remaining .pgn__ selectors in
+  # mereka.scss must exist in the current runtime Paragon core stylesheet.
+  if [[ -f "$CORE_THEME" ]]; then
+    PGN_CONTRACT_REPORT="$(python3 - "$SCSS_FILE" "$CORE_THEME" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+scss_path = Path(sys.argv[1])
+core_path = Path(sys.argv[2])
+
+scss = scss_path.read_text(encoding='utf-8')
+scss = re.sub(r'/\*.*?\*/', '', scss, flags=re.S)
+scss = re.sub(r'^\s*//.*$', '', scss, flags=re.M)
+used = sorted(set(re.findall(r'\.((?:pgn__)[A-Za-z0-9_-]+)', scss)))
+
+core = core_path.read_text(encoding='utf-8', errors='ignore')
+core_classes = set(re.findall(r'\.((?:pgn__)[A-Za-z0-9_-]+)(?=[\s\.:#,\{\[]|$)', core))
+
+missing = [name for name in used if name not in core_classes]
+print(f"USED={len(used)}")
+print(f"MISSING={len(missing)}")
+for name in missing:
+    print(name)
+PY
+)"
+    PGN_USED="$(echo "$PGN_CONTRACT_REPORT" | awk -F= '/^USED=/{print $2}')"
+    PGN_MISSING="$(echo "$PGN_CONTRACT_REPORT" | awk -F= '/^MISSING=/{print $2}')"
+    echo "  Live Paragon class contract: ${PGN_USED} referenced, ${PGN_MISSING} missing in core.min.css"
+    if [[ "$PGN_MISSING" -eq 0 ]]; then
+      pass "AC-US7-001: All referenced .pgn__ classes are present in core.min.css"
+    else
+      fail "AC-US7-001: ${PGN_MISSING} referenced .pgn__ class(es) not present in core.min.css"
+      echo "$PGN_CONTRACT_REPORT" | sed -n '3,$p' | sed 's/^/  - /'
+    fi
+  else
+    warn "AC-US7-001: core.min.css not found; skipping live Paragon class contract check"
   fi
 fi
 
