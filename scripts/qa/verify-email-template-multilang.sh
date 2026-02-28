@@ -276,23 +276,27 @@ done
 
 echo
 
-# Check for ACE configuration
+# Check for ACE configuration in runtime overlay settings or local Tutor config.
 echo "Checking ACE template configuration..."
 
-if [ -f "infrastructure/tutor/config.yml" ] || [ -f "tutor_env/config.yml" ]; then
-    CONFIG_FILE=""
-    [ -f "infrastructure/tutor/config.yml" ] && CONFIG_FILE="infrastructure/tutor/config.yml"
-    [ -f "tutor_env/config.yml" ] && CONFIG_FILE="tutor_env/config.yml"
+ACE_SETTINGS_FILES=(
+    "../bbi-infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "../infrastructure/apps/mereka-lms/overlays/prod/patches/production-prod.py"
+    "infrastructure/tutor/config.yml"
+    "tutor_env/config.yml"
+)
 
-    if [ -n "$CONFIG_FILE" ]; then
-        if grep -qE "(ACE_TEMPLATE|ACE_CHANNEL)" "$CONFIG_FILE" 2>/dev/null; then
-            do_pass "ACE template configuration found in config.yml"
-        else
-            do_warn "ACE configuration not found in config.yml"
-        fi
+ACE_CONFIG_FOUND=0
+for settings_file in "${ACE_SETTINGS_FILES[@]}"; do
+    if [ -f "$settings_file" ] && grep -qE "(ACE_TEMPLATE|ACE_CHANNEL|ACE_ENABLED_CHANNELS|ACE_CHANNEL_DEFAULT_EMAIL|BULK_EMAIL_SEND_USING_EDX_ACE)" "$settings_file" 2>/dev/null; then
+        do_pass "ACE template configuration found in ${settings_file}"
+        ACE_CONFIG_FOUND=1
+        break
     fi
-else
-    do_warn "No config.yml found to verify ACE configuration"
+done
+
+if [ "$ACE_CONFIG_FOUND" -eq 0 ]; then
+    do_warn "ACE configuration not found in expected settings/config files"
 fi
 
 echo
