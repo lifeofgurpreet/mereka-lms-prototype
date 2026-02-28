@@ -24,7 +24,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] Apply Paragon theme overrides + global styles.
 - [x] Replace logos/favicons in each MFE's `public/` folder (`scripts/branding/setup-mfe-branding.sh` copies favicon + logo assets automatically).
 - [x] MFE footer slot wired via FPF (`MerekaFooter` component in `mereka_lms.py` plugin).
-- [ ] Configure environment copy (`SITE_NAME`, marketing links) — tracked in FRONTEND_TRACKER.md.
+- [x] Configure environment copy (`SITE_NAME`, marketing/support/legal links) via runtime variant map (`MEREKA_SITE_VARIANTS`) and verify with `verify-footer-variant-matrix.sh`.
 - [ ] Run `npm start` smoke checks; capture screenshots.
 - [x] Rebuild Docker image with `tutor images build mfe` (production image deployed).
 
