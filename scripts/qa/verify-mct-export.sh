@@ -55,6 +55,7 @@ check_resource() {
   local resource="$1"
   local min_rows="$2"
   local max_rows="$3"
+  local shape_field="${4:-}"
   local file="$EXPORT_DIR/${resource}.ndjson"
 
   if [[ ! -f "$file" ]]; then
@@ -62,7 +63,18 @@ check_resource() {
   fi
 
   local line_count
+  local effective_count
   line_count=$(wc -l < "$file" | tr -d ' ')
+
+  # If the exporter emits a single JSON object (legacy/object-envelope style)
+  # use the requested shape field to derive logical row count.
+  effective_count="$line_count"
+  if [[ "$line_count" -eq 1 && -n "$shape_field" ]]; then
+    effective_count=$(jq -r "(.${shape_field} // [] ) | if type == \"array\" then length elif type == \"object\" then to_entries|length else 0 end" "$file" 2>/dev/null || echo "0")
+    if [[ "$effective_count" =~ ^[0-9]+$ && "$effective_count" -gt 0 ]]; then
+      line_count="$effective_count"
+    fi
+  fi
 
   if [[ "$line_count" -lt "$min_rows" ]]; then
     fail "${resource}.ndjson has only $line_count rows (expected >=$min_rows)"
@@ -117,7 +129,7 @@ check_categories_shape() {
 # Check row counts (within 1% tolerance as per spec)
 check_resource "users" 68000 70000          # ~69K users
 check_resource "enrollments" 2200000 2400000 # ~2.3M enrollments
-check_resource "courses" 70 250             # exporter variants produce ~81 or ~178
+check_resource "courses" 70 250 courses     # exporter variants produce ~81 or ~178
 check_categories_shape
 
 # Summary

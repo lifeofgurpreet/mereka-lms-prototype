@@ -78,7 +78,7 @@ VERIFICATION_JOBS=(
   "verify-certificate-issuance.sh --source kajabi --check-counts"
 
   # Video phase
-  "verify-mux-video-upload.sh"
+  "verify-mux-video-upload.sh --check-captions"
   "verify-kajabi-thumbnails.sh"
 
   # Rollback and idempotency phase
@@ -217,6 +217,5 @@ else
   echo -e "${GREEN}Pipeline passed: All scripts succeeded${NC}"
   exit 0
 fi
-
 
 
