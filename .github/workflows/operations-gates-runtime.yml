@@ -45,7 +45,7 @@ permissions: {}
 jobs:
   operations-gates:
     name: Run Operations Gates (Runtime)
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

@@ -18,7 +18,7 @@ permissions: {}
 jobs:
   dr-evidence:
     name: Build DR Evidence Bundle
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

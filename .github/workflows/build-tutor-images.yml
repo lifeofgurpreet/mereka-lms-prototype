@@ -35,12 +35,12 @@ on:
           - staging
         default: select-environment
       openedx_runner:
-        description: 'Runner for OpenEdX build (workflow_dispatch only)'
+        description: 'Runner for image builds (workflow_dispatch only)'
         type: choice
         options:
           - github-hosted
           - heavy-builder
-        default: github-hosted
+        default: heavy-builder
       image_tag:
         description: 'Image tag (default: git SHA)'
         type: string
@@ -84,7 +84,7 @@ jobs:
 
   build-openedx:
     name: Build OpenEdX Image
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'heavy-builder' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'github-hosted' && 'ubuntu-24.04' || 'mereka-k8s-heavy-builders' }}
     # Keep outer timeout comfortably above inner image-build timeout (170m)
     # so pre/post-build checks and artifact upload have recovery headroom.
     timeout-minutes: 200
@@ -311,7 +311,7 @@ jobs:
 
   build-mfe:
     name: Build MFE Image
-    runs-on: ubuntu-24.04
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'github-hosted' && 'ubuntu-24.04' || 'mereka-k8s-heavy-builders' }}
     timeout-minutes: 120
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_mfe }}
@@ -380,6 +380,15 @@ jobs:
       - name: Build MFE image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
+          # Keep BuildKit enabled on self-hosted runners for cache efficiency.
+          # Disable only on GitHub-hosted runners when operators explicitly select that mode.
+          if [[ "${RUNNER_ENVIRONMENT:-}" == "github-hosted" ]]; then
+            export DOCKER_BUILDKIT=0
+            export COMPOSE_DOCKER_CLI_BUILD=0
+            echo "GitHub-hosted runner detected: BuildKit disabled for stability."
+          else
+            echo "Self-hosted runner detected: BuildKit remains enabled."
+          fi
           export NODE_OPTIONS="--max-old-space-size=6144"
           (
             while true; do

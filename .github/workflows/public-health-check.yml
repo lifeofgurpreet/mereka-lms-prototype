@@ -10,7 +10,7 @@ permissions: {}
 jobs:
   branding-and-public-checks:
     name: Branding + Public Endpoint Checks
-    runs-on: ubuntu-24.04
+    runs-on: mereka-k8s-runners
     permissions:
       contents: read
     steps:

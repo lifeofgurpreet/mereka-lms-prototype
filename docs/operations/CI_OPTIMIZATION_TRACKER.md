@@ -290,12 +290,16 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
 
 > **Prerequisite**: Phase 1 (ARC infrastructure) must be deployed and verified.
 
-- [ ] **Task 5.1**: Migrate image builds to heavy-builders
+- [x] **Task 5.1**: Migrate image builds to heavy-builders
   - Modify: `.github/workflows/build-tutor-images.yml`
-  - Change: `runs-on: ubuntu-24.04` → `runs-on: mereka-k8s-heavy-builders`
+  - Change: image build jobs default to `runs-on: mereka-k8s-heavy-builders`
+    with manual workflow fallback to `github-hosted` when explicitly selected
+    via `openedx_runner=github-hosted`.
+  - BuildKit policy hardened: disable BuildKit only on GitHub-hosted fallback;
+    keep BuildKit enabled on ARC self-hosted runners.
   - Impact: Builds use 12GB+ RAM natively (no disk swapping), persistent Docker layer cache via PVC
 
-- [ ] **Task 5.2**: Migrate E2E/smoke/cron to standard runners
+- [x] **Task 5.2**: Migrate E2E/smoke/cron to standard runners
   - Modify (change `runs-on: ubuntu-24.04` → `runs-on: mereka-k8s-runners`):
     - `.github/workflows/e2e-tests.yml`
     - `.github/workflows/post-deploy-e2e.yml`
@@ -303,9 +307,8 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
     - `.github/workflows/argocd-drift-check.yml`
     - `.github/workflows/operations-gates-runtime.yml`
     - `.github/workflows/public-health-check.yml`
-    - `.github/workflows/observability-audit.yml` (or merged nightly audit)
-    - `.github/workflows/alert-routing-audit.yml` (or merged nightly audit)
-    - `.github/workflows/observability-parity-runtime.yml` (or merged nightly audit)
+    - `.github/workflows/daily-infrastructure-audit.yml` (merged replacement for
+      observability-audit + alert-routing-audit + observability-parity-runtime)
     - `.github/workflows/secret-scan-audit.yml`
     - `.github/workflows/dr-evidence-bundle.yml`
     - `.github/workflows/tenant-isolation-check.yml`
