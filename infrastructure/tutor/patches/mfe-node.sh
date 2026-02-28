@@ -287,7 +287,11 @@ for target in targets:
         )
         text = text.replace(
             "--revision=open-release/redwood.3 ",
+            "--revision=release/ulmo.1 ",
+        )
+        text = text.replace(
             "--revision=open-release/ulmo.1 ",
+            "--revision=release/ulmo.1 ",
         )
         return text
 

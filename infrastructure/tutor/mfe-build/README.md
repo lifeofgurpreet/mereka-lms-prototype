@@ -22,7 +22,7 @@ git commit -m "chore(mfe): snapshot Dockerfile after apply-patches.sh run"
 ## Current state
 
 - MFE apps: all 12 on `release/ulmo.1` (as of 2026-02-20, bead mereka-lms-2s47)
-- Atlas translations: `open-release/ulmo.1`
+- Atlas translations: `release/ulmo.1`
 - Brand package: `@edly-io/indigo-brand-openedx@^2.1.1` (npm format, --legacy-peer-deps)
 - Node: 18-bullseye-slim (standardized)
 
