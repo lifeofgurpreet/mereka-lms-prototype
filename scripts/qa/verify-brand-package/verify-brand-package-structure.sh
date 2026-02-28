@@ -36,6 +36,7 @@ required_files=(
   "$BRAND_DIR/logo-trademark.png"
   "$BRAND_DIR/favicon.ico"
   "$BRAND_DIR/paragon/fonts.scss"
+  "$BRAND_DIR/paragon/core.scss"
   "$BRAND_DIR/paragon/_overrides.scss"
   "$BRAND_DIR/paragon/_variables.scss"
   "$BRAND_DIR/paragon/tokens.json"
@@ -129,6 +130,7 @@ logo.svg
 package.json
 paragon/_overrides.scss
 paragon/_variables.scss
+paragon/core.scss
 paragon/fonts.scss
 paragon/images/card-imagecap-fallback.png
 paragon/tokens.json

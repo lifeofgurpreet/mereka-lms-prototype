@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Mereka Academy OEP-48 brand package for Open edX MFEs",
   "main": ".",
+  "scripts": {
+    "build-tokens": "paragon build-tokens ./paragon/tokens.json ./paragon",
+    "build-scss": "paragon build-scss ./paragon/core.scss ./paragon",
+    "build": "npm run build-tokens && npm run build-scss"
+  },
   "peerDependencies": {
     "@openedx/paragon": ">=22.0.0 <24.0.0"
   },
