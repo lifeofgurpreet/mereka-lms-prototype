@@ -250,8 +250,9 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 
 ### Results
 
-- `verify-mfe-plugin-slots.sh`: `PASS=48`, `WARN=0`, `FAIL=0`
+- `verify-mfe-plugin-slots.sh`: `PASS=74`, `WARN=0`, `FAIL=0`
   - Plugin now declares **35 namespaced slot IDs**.
+  - QA checker now asserts marker coverage for all 35 expected slot bindings (not only the original baseline set).
   - New learning slots wired:
     - `org.openedx.frontend.learning.course_breadcrumbs.v1`
     - `org.openedx.frontend.learning.learner_tools.v1`
