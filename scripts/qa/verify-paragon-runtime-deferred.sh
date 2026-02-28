@@ -84,11 +84,30 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
     else
       fail "AC-TKN-019 runtime theme endpoint missing cache-control header"
     fi
+
+    if curl -fsSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
+      body_bytes="$(wc -c </tmp/paragon-theme-body.$$ | tr -d ' ')"
+      if [[ "$body_bytes" -gt 100 ]]; then
+        pass "AC-TKN-019 runtime theme endpoint returns non-empty CSS body (${body_bytes} bytes)"
+      else
+        fail "AC-TKN-019 runtime theme endpoint body too small (${body_bytes} bytes)"
+      fi
+
+      if grep -q -- "--pgn-color-primary" /tmp/paragon-theme-body.$$; then
+        pass "AC-TKN-019 runtime theme CSS body contains --pgn-color-primary marker"
+      else
+        fail "AC-TKN-019 runtime theme CSS body missing --pgn-color-primary marker"
+      fi
+    else
+      fail "AC-TKN-019 runtime theme endpoint body fetch failed (${runtime_url})"
+    fi
+
     pass "AC-TKN-018 runtime URL is reachable for cache-clear verification workflow"
   else
     fail "AC-TKN-018/019 runtime URL not reachable: ${runtime_url}"
   fi
   rm -f /tmp/paragon-theme-head.$$
+  rm -f /tmp/paragon-theme-body.$$
 else
   if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
     fail "AC-TKN-018/019 runtime checks required but no runtime URL was provided (use --runtime-url or PARAGON_RUNTIME_URL)"
