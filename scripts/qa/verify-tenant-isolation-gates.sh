@@ -110,6 +110,13 @@ run_offline_checks() {
     fail "request.tenant_uuid not set by middleware (isolation guards depend on this)"
   fi
 
+  # Middleware also sets request._tenant_uuid for backward-compatible helpers.
+  if [[ -f "$MIDDLEWARE_FILE" ]] && grep -q "request._tenant_uuid" "$MIDDLEWARE_FILE"; then
+    pass "TenantResolutionMiddleware sets request._tenant_uuid backward-compat alias"
+  else
+    fail "request._tenant_uuid alias missing (legacy tenant-cache helpers may break)"
+  fi
+
   # ------------------------------------------------------------------
   # 2. Middleware is wired into runtime settings
   # ------------------------------------------------------------------
@@ -132,6 +139,31 @@ run_offline_checks() {
     pass "mereka_tenancy present in apply-patches.sh"
   else
     fail "mereka_tenancy not referenced in runtime wiring"
+  fi
+
+  # ------------------------------------------------------------------
+  # 3b. openedx_tenant_cache plugin URL registration exists
+  # ------------------------------------------------------------------
+  echo "--- openedx_tenant_cache plugin URL wiring ---"
+  local tenant_cache_apps="${REPO_ROOT}/infrastructure/tutor/custom-apps/openedx_tenant_cache/apps.py"
+  if [[ ! -f "$tenant_cache_apps" ]]; then
+    fail "openedx_tenant_cache apps.py not found: ${tenant_cache_apps}"
+  else
+    if grep -q "PluginURLs" "$tenant_cache_apps"; then
+      pass "openedx_tenant_cache apps.py imports PluginURLs constants"
+    else
+      fail "openedx_tenant_cache apps.py missing PluginURLs import"
+    fi
+    if grep -q "plugin_app" "$tenant_cache_apps"; then
+      pass "openedx_tenant_cache plugin_app mapping defined"
+    else
+      fail "openedx_tenant_cache plugin_app mapping missing"
+    fi
+    if grep -q "api/tenant/v1" "$tenant_cache_apps"; then
+      pass "openedx_tenant_cache plugin URL regex includes api/tenant/v1"
+    else
+      fail "openedx_tenant_cache plugin URL regex missing api/tenant/v1 contract"
+    fi
   fi
 
   # ------------------------------------------------------------------

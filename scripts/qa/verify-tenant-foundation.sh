@@ -304,10 +304,29 @@ if [ -f "$APP_DIR/middleware.py" ]; then
     fail_ "Tenant UUID attachment missing"
   fi
 
+  if grep -q "tenant_uuid" "$APP_DIR/middleware.py"; then
+    pass_ "Middleware exposes tenant_uuid public alias"
+  else
+    fail_ "tenant_uuid public alias missing"
+  fi
+
   if grep -q "record_tenant_request" "$APP_DIR/middleware.py"; then
     pass_ "Middleware records per-tenant request metrics"
   else
     fail_ "Per-tenant request metrics missing"
+  fi
+fi
+
+if [ -f "$APP_DIR/apps.py" ]; then
+  if grep -q "plugin_app" "$APP_DIR/apps.py"; then
+    pass_ "openedx_tenant_cache plugin_app URL mapping defined"
+  else
+    fail_ "openedx_tenant_cache plugin_app URL mapping missing"
+  fi
+  if grep -q "api/tenant/v1" "$APP_DIR/apps.py"; then
+    pass_ "openedx_tenant_cache plugin regex includes /api/tenant/v1/"
+  else
+    fail_ "openedx_tenant_cache plugin regex /api/tenant/v1/ missing"
   fi
 fi
 
