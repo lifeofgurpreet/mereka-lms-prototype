@@ -65,18 +65,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | Slot-backed component in `mereka_lms.py` (`MerekaAuthnLoginBranding`) plus compatibility selectors in `mereka.scss` for `authn` wrappers |
+| **Current approach** | Slot-backed component in `mereka_lms.py` (`MerekaAuthnLoginBranding`) with slot-owned classes in `mereka.scss` |
 | **Target slot** | `org.openedx.frontend.authn.login_component.v1` |
-| **Status** | ✅ MIGRATED — slot active with compatibility CSS |
-| **Risk** | Low-Medium (slot + compatibility selectors currently retained) |
+| **Status** | ✅ MIGRATED — slot active without wildcard fallback selectors |
+| **Risk** | Low (slot-owned classes only) |
 | **Tenant impact** | All domains — login/register card styling |
 | **Priority** | Done |
 | **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Keep slot component active; keep compatibility selectors only as fallback |
+| **Action** | Keep slot component active; avoid wildcard selector fallback reintroduction |
 | **Target Date** | Done |
 | **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
-| **Migration path** | Slot registration already complete; wrapper selectors retained for fallback |
+| **Migration path** | Slot registration already complete; wrapper fallback selectors removed after dead-selector audit |
 
 ---
 
@@ -227,7 +227,6 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
 |-----------------|-----|----------------------|---------|-------|---------------|
-| `[class*="authn"]` | authn | No stable data-testid on all entrypoints; `authn` is the wrapper class emitted by authn MFE | 2026-Q3 | Mereka frontend | Remove if `[data-testid*="authn"]` covers all routes in next authn MFE upgrade |
 | `[class*="account-settings"]` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
 | `[class*="learner-dashboard"]` | learner-dashboard | No upstream slot for layout container; covers 8 blocks of cosmetic CSS | 2026-Q3 | Mereka frontend | Phase to `widget_sidebar.v1` + `no_courses_view.v1` once wired |
 | `[class*="learning"]` | learning | No upstream slot for course grid layout; upstream slot proposal pending (see AC-US7-005) | 2026-Q3 | Mereka / Upstream | Remove once upstream `learning_course_grid.v1` or equivalent slot is approved |
@@ -244,6 +243,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="account-page"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="login-register"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="discussions"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `[class*="authn"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 
 ---
 

@@ -70,6 +70,21 @@ for line in lines:
 print(count)
 ")
 
+  # Check that [class*="authn"] is NOT present in CSS selector lines
+  AUTHN_COUNT=$(python3 -c "
+import re, sys
+scss = open('$SCSS_FILE').read()
+lines = scss.split('\n')
+count = 0
+for line in lines:
+    s = line.strip()
+    if s.startswith('//') or s.startswith('/*') or s.startswith('*'):
+        continue
+    if re.search(r'\[class\*=\"authn\"\]', line):
+        count += 1
+print(count)
+")
+
   # Check that [class*="discussion"] (singular, not discussions) is NOT present in CSS selector lines
   DISC_SINGULAR_COUNT=$(python3 -c "
 import re, sys
@@ -147,6 +162,7 @@ print(count)
 ")
 
   echo "  [class*=\"auth-page\"] in CSS selectors: $AUTH_PAGE_COUNT (must be 0)"
+  echo "  [class*=\"authn\"] in CSS selectors: $AUTHN_COUNT (must be 0)"
   echo "  [class*=\"discussion\"] singular in CSS selectors: $DISC_SINGULAR_COUNT (must be 0)"
   echo "  [class*=\"discussions\"] plural in CSS selectors: $DISC_PLURAL_COUNT (must be 0)"
   echo "  [class*=\"login-register\"] in CSS selectors: $LOGIN_REGISTER_COUNT (must be 0)"
@@ -159,6 +175,12 @@ print(count)
     fail "AC-US7-001: [class*=\"auth-page\"] still present ($AUTH_PAGE_COUNT occurrence(s)) — must be removed"
   else
     pass "AC-US7-001: [class*=\"auth-page\"] removed from CSS selectors"
+  fi
+
+  if [[ "$AUTHN_COUNT" -gt 0 ]]; then
+    fail "AC-US7-001: [class*=\"authn\"] still present ($AUTHN_COUNT occurrence(s)) — dead selector must remain removed"
+  else
+    pass "AC-US7-001: [class*=\"authn\"] removed from CSS selectors"
   fi
 
   if [[ "$DISC_SINGULAR_COUNT" -gt 0 ]]; then
@@ -205,7 +227,7 @@ echo "--- AC-US7-002: Fail-on-Regression Policy ---"
 SELF="${BASH_SOURCE[0]}"
 if [[ -f "$SELF" ]]; then
   # Check this script enforces banned selectors (fail path)
-  if grep -q 'AUTH_PAGE_COUNT.*-gt.*0' "$SELF" && grep -q 'DISC_SINGULAR_COUNT.*-gt.*0' "$SELF" && grep -q 'DISC_PLURAL_COUNT.*-gt.*0' "$SELF" && grep -q 'LOGIN_REGISTER_COUNT.*-gt.*0' "$SELF" && grep -q 'ACCOUNT_PAGE_COUNT.*-gt.*0' "$SELF"; then
+  if grep -q 'AUTH_PAGE_COUNT.*-gt.*0' "$SELF" && grep -q 'AUTHN_COUNT.*-gt.*0' "$SELF" && grep -q 'DISC_SINGULAR_COUNT.*-gt.*0' "$SELF" && grep -q 'DISC_PLURAL_COUNT.*-gt.*0' "$SELF" && grep -q 'LOGIN_REGISTER_COUNT.*-gt.*0' "$SELF" && grep -q 'ACCOUNT_PAGE_COUNT.*-gt.*0' "$SELF"; then
     pass "AC-US7-002: Script enforces banned selector regression check"
   else
     fail "AC-US7-002: Script missing fail-on-regression enforcement for banned selectors"
