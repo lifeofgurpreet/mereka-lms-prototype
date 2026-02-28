@@ -715,6 +715,11 @@ jobs:
             echo "Missing image digests from build jobs (openedx='${OPENEDX_DIGEST}' mfe='${MFE_DIGEST}')." >&2
             exit 1
           fi
+          EXTRA_ARGS=()
+          if [[ "${TARGET_ENV}" == "production" ]]; then
+            # Production rollouts require runtime convergence verification.
+            EXTRA_ARGS+=(--verify-runtime --wait-seconds 900)
+          fi
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env "${TARGET_ENV}" \
             --openedx-tag "${TAG}" \
@@ -724,7 +729,8 @@ jobs:
             --require-digests \
             --app-repo "$GITHUB_WORKSPACE" \
             --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
-            --apply --commit --push
+            --apply --commit --push \
+            "${EXTRA_ARGS[@]}"
 
       - name: Summary
         run: |
