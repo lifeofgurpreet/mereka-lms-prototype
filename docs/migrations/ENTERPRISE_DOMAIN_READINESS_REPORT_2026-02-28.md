@@ -50,6 +50,20 @@ Context note:
 - Running this check without an explicit context can produce misleading results if the active kube context is a local/dev cluster.
 - Use `--context` for production assertions to avoid cross-environment drift in reports.
 
+### 5) CI reliability hardening applied
+
+Workflow: `.github/workflows/build-tutor-images.yml`
+
+Implemented:
+- Concurrency policy now avoids canceling manual dispatch runs due to push-triggered runs.
+- Explicit job timeouts added (`build-openedx`, `build-mfe`).
+- Build-step heartbeat output added for long-running `tutor images build` commands.
+- Shell-level timeout guards wrapped around `tutor images build openedx|mfe` for deterministic failure signaling.
+
+Why this matters:
+- Reduces ambiguous "stuck in progress" behavior during long image builds.
+- Ensures long-running builds fail fast and visibly rather than hanging indefinitely.
+
 ### 3) Enterprise SSO readiness (prod)
 
 Command:
