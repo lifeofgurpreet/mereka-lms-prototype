@@ -210,11 +210,11 @@ class Template(models.Model):
         @covers AC-026
         """
         branding = {
-            'org_display_name': '',
+            'org_display_name': 'Mereka Academy',
             'org_logo_url': '',
-            'org_primary_color': '#1a73e8',
-            'org_accent_color': '#4285f4',
-            'org_support_email': '',
+            'org_primary_color': '#ab3b78',
+            'org_accent_color': '#237072',
+            'org_support_email': 'support@mereka.io',
             'org_terms_url': '',
             'org_privacy_url': '',
         }
