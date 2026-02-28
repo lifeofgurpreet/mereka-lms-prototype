@@ -83,18 +83,38 @@ else
   warn "apply-patches.sh not found at expected path"
 fi
 
-# Check 5: All [class*="..."] selectors in mereka.scss have a
-# corresponding [data-testid*="..."] selector (lightweight count check)
-echo "  Checking mereka.scss selector hardening (class* vs data-testid* ratio)..."
+# Check 5: Active wildcard selectors are constrained to approved exceptions only
+echo "  Checking mereka.scss wildcard selector policy..."
 if [[ -f "$MFE_SCSS" ]]; then
-  CLASS_STAR_COUNT=$(grep -c '\[class\*=' "$MFE_SCSS" || true)
-  DATA_TESTID_COUNT=$(grep -c '\[data-testid\*=' "$MFE_SCSS" || true)
-  if [[ "$CLASS_STAR_COUNT" -eq 0 ]]; then
-    pass "No [class*=...] selectors in mereka.scss (fully hardened)"
-  elif [[ "$DATA_TESTID_COUNT" -ge "$CLASS_STAR_COUNT" ]]; then
-    pass "mereka.scss has data-testid* coverage >= class* selectors (${DATA_TESTID_COUNT} >= ${CLASS_STAR_COUNT})"
+  mapfile -t ACTIVE_CLASS_VALUES < <(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+for value in re.findall(r'\[class\*="([^"]+)"\]', text):
+    print(value)
+PY
+  )
+
+  if [[ "${#ACTIVE_CLASS_VALUES[@]}" -eq 0 ]]; then
+    pass "No active [class*=...] selectors in mereka.scss (fully hardened)"
   else
-    warn "mereka.scss has ${CLASS_STAR_COUNT} [class*=...] selectors but only ${DATA_TESTID_COUNT} [data-testid*=...] selectors — some may lack fallback"
+    mapfile -t ACTIVE_CLASS_UNIQUE < <(printf '%s\n' "${ACTIVE_CLASS_VALUES[@]}" | sort -u)
+    mapfile -t DISALLOWED < <(printf '%s\n' "${ACTIVE_CLASS_UNIQUE[@]}" | grep -Ev '^(account-settings)$' || true)
+    if [[ "${#DISALLOWED[@]}" -gt 0 ]]; then
+      fail "Disallowed active wildcard selector targets in mereka.scss: ${DISALLOWED[*]}"
+    else
+      pass "Active wildcard selector targets are constrained to approved exception: account-settings"
+    fi
+
+    if grep -q 'SELECTOR-EXCEPTION: \[class\*="account-settings"\].*expires:' "$MFE_SCSS"; then
+      pass "Approved wildcard selector includes SELECTOR-EXCEPTION expiry metadata"
+    else
+      fail "Approved wildcard selector missing SELECTOR-EXCEPTION expiry metadata"
+    fi
   fi
 else
   warn "mereka.scss not found at $MFE_SCSS"

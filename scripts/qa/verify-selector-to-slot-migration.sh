@@ -6,7 +6,7 @@ set -euo pipefail
 #
 # Bead 2dcy.2 — Migrate brittle MFE selector customizations to plugin slots
 #
-# AC-FRONT-021: 5 highest-risk selectors tagged RISK: HIGH in mereka.scss
+# AC-FRONT-021: Remaining HIGH-risk selectors are intentionally minimal and dead selectors stay removed
 # AC-FRONT-022: Plugin slot registrations exist in mereka_lms.py
 # AC-FRONT-023: Exception documentation file exists at docs/operations/MFE_SELECTOR_EXCEPTIONS.md
 # AC-FRONT-024: No active `updated.replace("RenderWidget` string surgery in apply-patches.sh
@@ -28,15 +28,55 @@ pass_check() { echo "✅ $1"; PASS=$((PASS + 1)); }
 fail_check() { echo "❌ $1"; FAIL=$((FAIL + 1)); }
 warn_check() { echo "⚠️  $1"; WARN=$((WARN + 1)); }
 
+count_active_literal() {
+  local file="$1"
+  local needle="$2"
+  python3 - "$file" "$needle" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+needle = sys.argv[2]
+text = path.read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+print(text.count(needle))
+PY
+}
+
 # ---------------------------------------------------------------------------
-# AC-FRONT-021: At least 5 RISK: HIGH selectors tagged in mereka.scss
+# AC-FRONT-021: HIGH-risk selectors are limited + dead wildcard scopes remain removed
 # ---------------------------------------------------------------------------
 if [[ -f "$SCSS_FILE" ]]; then
   HIGH_COUNT=$(grep -c 'RISK: HIGH' "$SCSS_FILE" || true)
-  if [[ $HIGH_COUNT -ge 5 ]]; then
-    pass_check "AC-FRONT-021: mereka.scss has at least 5 RISK: HIGH tagged selectors (found: $HIGH_COUNT)"
+  if [[ $HIGH_COUNT -ge 1 && $HIGH_COUNT -le 3 ]]; then
+    pass_check "AC-FRONT-021: HIGH-risk selector count is intentionally minimal (found: $HIGH_COUNT, target: 1-3)"
   else
-    fail_check "AC-FRONT-021: mereka.scss needs at least 5 RISK: HIGH selectors (found: $HIGH_COUNT)"
+    fail_check "AC-FRONT-021: HIGH-risk selector count is out of expected range (found: $HIGH_COUNT, expected: 1-3)"
+  fi
+
+  LIVE_SCOPE='[class*="account-settings"]'
+  LIVE_COUNT="$(count_active_literal "$SCSS_FILE" "$LIVE_SCOPE")"
+  if [[ "$LIVE_COUNT" -gt 0 ]]; then
+    pass_check "AC-FRONT-021: live account-settings wildcard scope is still present (${LIVE_COUNT} occurrence(s))"
+  else
+    fail_check "AC-FRONT-021: live account-settings wildcard scope is missing"
+  fi
+
+  for dead_scope in '[class*="authn"]' '[class*="learner-dashboard"]' '[class*="learning"]' '[class*="discussions"]'; do
+    dead_count="$(count_active_literal "$SCSS_FILE" "$dead_scope")"
+    if [[ "$dead_count" -eq 0 ]]; then
+      pass_check "AC-FRONT-021: dead selector scope removed from active CSS ($dead_scope)"
+    else
+      fail_check "AC-FRONT-021: dead selector scope still active ($dead_scope, ${dead_count} occurrence(s))"
+    fi
+  done
+  
+  if grep -q 'SELECTOR-EXCEPTION: \[class\*="account-settings"\].*expires:' "$SCSS_FILE"; then
+    pass_check "AC-FRONT-021: account-settings selector exception includes expiry metadata"
+  else
+    fail_check "AC-FRONT-021: account-settings selector exception missing expiry metadata"
   fi
 else
   fail_check "AC-FRONT-021: mereka.scss not found at $SCSS_FILE"

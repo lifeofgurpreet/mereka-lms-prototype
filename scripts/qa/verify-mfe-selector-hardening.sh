@@ -4,7 +4,7 @@
 # Verify MFE selector hardening: enforce slot-only policy, count brittle patterns,
 # check exception annotations and migration register completeness.
 #
-# Original AC-SEL-001..005 checks are preserved for backward-compat.
+# Historical AC-SEL-001..005 checks are retained as informational parity checks.
 
 set -euo pipefail
 
@@ -403,7 +403,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Legacy AC-SEL-* backward compat checks (AC-SEL-001 through AC-SEL-005)
 # ---------------------------------------------------------------------------
-echo "--- Legacy AC-SEL-001..005 (backward compat) ---"
+echo "--- AC-SEL-001..005 (historical parity checks) ---"
 
 # AC-SEL-001: Audit doc exists
 if [[ -f "$AUDIT_DOC" ]]; then
@@ -419,10 +419,12 @@ fi
 # AC-SEL-002: data-testid selectors present (hardening evidence)
 if [[ -f "$SCSS_FILE" ]]; then
   TESTID_COUNT=$(grep -c '\[data-testid' "$SCSS_FILE" || echo "0")
-  if [[ "$TESTID_COUNT" -ge 4 ]]; then
-    pass "AC-SEL-002: Uses $TESTID_COUNT data-testid selectors and class-based exception coverage"
+  if [[ "$TESTID_COUNT" -ge 1 ]]; then
+    pass "AC-SEL-002: data-testid selector coverage is present ($TESTID_COUNT selector(s))"
+  elif grep -q 'SELECTOR-EXCEPTION' "$SCSS_FILE"; then
+    pass "AC-SEL-002: no data-testid selectors, but class-based exceptions are explicitly tracked"
   else
-    warn "AC-SEL-002: Only $TESTID_COUNT data-testid selectors; this is acceptable when class-based exceptions are tracked"
+    fail "AC-SEL-002: no data-testid coverage and no class-based exceptions tracked"
   fi
 else
   fail "AC-SEL-002: mereka.scss not found"

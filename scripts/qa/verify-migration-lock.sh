@@ -5,7 +5,7 @@ set -euo pipefail
 # @covers AC-MIGLOCK-002: Override block count in mereka.scss matches register inventory count
 # @covers AC-MIGLOCK-003: All P0 items in register are MIGRATED or Done
 # @covers AC-MIGLOCK-004: Migration roadmap "Now" items are all checked off
-# @covers AC-MIGLOCK-005: data-testid coverage ratio >= class* selector count (no regression)
+# @covers AC-MIGLOCK-005: active wildcard selector set matches dead-selector-cleanup policy
 # @spec: bead-115d11
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -22,6 +22,20 @@ fail_check() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 warn() {
   echo "  WARN: $1"
   WARN=$((WARN + 1))
+}
+
+extract_active_class_selector_values() {
+  python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+for value in re.findall(r'\[class\*="([^"]+)"\]', text):
+    print(value)
+PY
 }
 
 echo "========================================"
@@ -77,34 +91,61 @@ if [[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]; then pass_check "SCSS surface se
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-MIGLOCK-002: class* unique pattern count vs register entries
+# AC-MIGLOCK-002: active class* targets must match exception register set
 # -----------------------------------------------------------------------
-echo "AC-MIGLOCK-002: class* override block alignment with register"
+echo "AC-MIGLOCK-002: class* override alignment with exception register"
 
-# Count unique [class*="..."] target names (extract the value, deduplicate)
-CLASS_STAR_TOTAL=$(grep -c '\[class\*=' "$MFE_SCSS" || echo 0)
-
-# Extract unique class name values from [class*="foo"] patterns
-UNIQUE_CLASS_TARGETS=$(grep -oP '\[class\*="[^"]*"\]' "$MFE_SCSS" | sort -u | wc -l || echo 0)
-
-echo "  Total [class*=] lines: $CLASS_STAR_TOTAL"
-echo "  Unique [class*=] patterns: $UNIQUE_CLASS_TARGETS"
-echo "  Register entries: $REGISTER_ENTRY_COUNT"
-
-# Unique class targets should be at least as many as register entries (entries can share selectors)
-# but no more than 3x the register count (would indicate unenumerated overrides)
-LOWER=$REGISTER_ENTRY_COUNT
-UPPER=$(( REGISTER_ENTRY_COUNT * 3 ))
-if [[ $LOWER -lt 1 ]]; then LOWER=1; fi
-
-if [[ $UNIQUE_CLASS_TARGETS -ge $LOWER && $UNIQUE_CLASS_TARGETS -le $UPPER ]]; then
-  pass_check "Unique class* patterns ($UNIQUE_CLASS_TARGETS) within expected range ($LOWER–$UPPER)"
-elif [[ $UNIQUE_CLASS_TARGETS -lt $LOWER ]]; then
-  warn "Unique class* patterns ($UNIQUE_CLASS_TARGETS) lower than register entries ($REGISTER_ENTRY_COUNT) — some entries may lack SCSS coverage"
-  WARN=$((WARN + 1))
+mapfile -t ACTIVE_CLASS_VALUES < <(extract_active_class_selector_values)
+CLASS_STAR_TOTAL="${#ACTIVE_CLASS_VALUES[@]}"
+if [[ "$CLASS_STAR_TOTAL" -gt 0 ]]; then
+  mapfile -t ACTIVE_CLASS_UNIQUE < <(printf '%s\n' "${ACTIVE_CLASS_VALUES[@]}" | sort -u)
 else
-  echo "  FAIL: Unique class* patterns ($UNIQUE_CLASS_TARGETS) exceeds 3x register entries ($REGISTER_ENTRY_COUNT) — register is likely incomplete"
-  FAIL=$((FAIL + 1))
+  ACTIVE_CLASS_UNIQUE=()
+fi
+UNIQUE_CLASS_TARGETS="${#ACTIVE_CLASS_UNIQUE[@]}"
+
+mapfile -t REGISTER_EXCEPTION_UNIQUE < <(
+  awk '/^### Exception Register Table/,/^### Removed Exceptions/' "$REGISTER_DOC" \
+    | grep -oP '\[class\*="[^"]+"\]' \
+    | sort -u
+)
+REGISTER_EXCEPTION_COUNT="${#REGISTER_EXCEPTION_UNIQUE[@]}"
+
+echo "  Active [class*=] occurrences: $CLASS_STAR_TOTAL"
+echo "  Active unique [class*=] targets: $UNIQUE_CLASS_TARGETS"
+echo "  Register exception targets: $REGISTER_EXCEPTION_COUNT"
+
+if [[ "$UNIQUE_CLASS_TARGETS" -eq 0 ]]; then
+  pass_check "No active wildcard class selectors remain"
+else
+  missing_in_register=0
+  for target in "${ACTIVE_CLASS_UNIQUE[@]}"; do
+    pattern="[class*=\"${target}\"]"
+    if printf '%s\n' "${REGISTER_EXCEPTION_UNIQUE[@]}" | grep -qxF "$pattern"; then
+      :
+    else
+      echo "  FAIL: Active wildcard selector is not listed in exception register: $pattern"
+      missing_in_register=$((missing_in_register + 1))
+      FAIL=$((FAIL + 1))
+    fi
+  done
+
+  missing_in_css=0
+  for pattern in "${REGISTER_EXCEPTION_UNIQUE[@]}"; do
+    value="${pattern#\[class*=\"}"
+    value="${value%\"\]}"
+    if printf '%s\n' "${ACTIVE_CLASS_UNIQUE[@]}" | grep -qxF "$value"; then
+      :
+    else
+      echo "  FAIL: Exception register target missing from active CSS: $pattern"
+      missing_in_css=$((missing_in_css + 1))
+      FAIL=$((FAIL + 1))
+    fi
+  done
+
+  if [[ "$missing_in_register" -eq 0 && "$missing_in_css" -eq 0 ]]; then
+    pass_check "Active wildcard selector set matches exception register"
+  fi
 fi
 
 echo ""
@@ -166,31 +207,28 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-MIGLOCK-005: data-testid coverage ratio >= 0.9 vs class* count
+# AC-MIGLOCK-005: enforce dead-selector cleanup policy in active CSS
 # -----------------------------------------------------------------------
-echo "AC-MIGLOCK-005: data-testid coverage ratio (no regression)"
+echo "AC-MIGLOCK-005: dead-selector cleanup policy"
 
-CLASS_STAR_COUNT=$(grep -c '\[class\*=' "$MFE_SCSS" || echo 0)
-DATA_TESTID_COUNT=$(grep -c '\[data-testid\*=' "$MFE_SCSS" || echo 0)
-
-echo "  [class*=] selectors: $CLASS_STAR_COUNT"
-echo "  [data-testid*=] selectors: $DATA_TESTID_COUNT"
-
-if [[ $CLASS_STAR_COUNT -eq 0 ]]; then
-  pass_check "No class* selectors (fully hardened)"
+if [[ "${#ACTIVE_CLASS_VALUES[@]}" -eq 0 ]]; then
+  pass_check "No active wildcard class selectors remain"
 else
-  # Calculate ratio using integer arithmetic: ratio_pct = (data_testid * 100) / class_star
-  RATIO_PCT=$(( DATA_TESTID_COUNT * 100 / CLASS_STAR_COUNT ))
-  echo "  Coverage ratio: ${RATIO_PCT}%"
+  mapfile -t DISALLOWED_ACTIVE < <(printf '%s\n' "${ACTIVE_CLASS_UNIQUE[@]}" \
+    | grep -Ev '^(account-settings)$' || true)
 
-  if [[ $RATIO_PCT -ge 100 ]]; then
-    pass_check "data-testid* coverage equals or exceeds class* count (${DATA_TESTID_COUNT} >= ${CLASS_STAR_COUNT})"
-  elif [[ $RATIO_PCT -ge 90 ]]; then
-    warn "data-testid* coverage is ${RATIO_PCT}% (below 100%, above 90% floor) — consider adding fallbacks"
-    pass_check "data-testid* coverage >= 90% floor (${RATIO_PCT}%)"
-  else
-    echo "  FAIL: data-testid* coverage is ${RATIO_PCT}% — below 90% minimum (${DATA_TESTID_COUNT} vs ${CLASS_STAR_COUNT})"
+  if [[ "${#DISALLOWED_ACTIVE[@]}" -gt 0 ]]; then
+    echo "  FAIL: Found disallowed active wildcard targets after cleanup:"
+    printf '    - %s\n' "${DISALLOWED_ACTIVE[@]}"
     FAIL=$((FAIL + 1))
+  else
+    pass_check "Only allowed active wildcard target remains ([class*=\"account-settings\"])"
+  fi
+
+  if grep -q 'SELECTOR-EXCEPTION: \[class\*="account-settings"\].*expires:' "$MFE_SCSS"; then
+    pass_check "Account wildcard selector has SELECTOR-EXCEPTION metadata with expiry"
+  else
+    fail_check "Account wildcard selector is missing SELECTOR-EXCEPTION expiry metadata"
   fi
 fi
 
