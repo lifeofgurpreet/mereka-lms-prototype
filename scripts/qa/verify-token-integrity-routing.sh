@@ -126,17 +126,25 @@ else
     CADDY_DIRS=""
     CADDY_DIRS=$(grep -oP '(?<=root \* /openedx/dist/)[a-z0-9_-]+' "$CADDYFILE" 2>/dev/null | sort -u || true)
 
-    # Extract MFE directories referenced in verify-mfe-branding.sh
-    # Pattern: values in MFE_ROUTES array like '"authn"' or '"course-authoring"'
-    BRANDING_DIRS=""
-    BRANDING_DIRS=$(grep -oP '(?<=")\w[\w-]+(?="\s*\))' "$BRANDING_VERIFIER" 2>/dev/null | sort -u || true)
-
-    # Verify the key routes that verify-mfe-branding.sh hardcodes are present in Caddyfile
-    EXPECTED_DIRS="authn account communications course-authoring discussions gradebook learner-dashboard learning ora-grading profile"
+    # Derive expected MFE dirs directly from verify-mfe-branding.sh (MFE_ROUTES map)
+    EXPECTED_DIRS="$(
+      awk '
+        /declare -A MFE_ROUTES=\(/ { in_map=1; next }
+        in_map && /^\)/ { in_map=0; next }
+        in_map {
+          if (match($0, /=\s*"([^"]+)"/, m)) {
+            print m[1]
+          }
+        }
+      ' "$BRANDING_VERIFIER" 2>/dev/null | sort -u | tr '\n' ' ' | sed 's/[[:space:]]\+$//'
+    )"
+    if [ -z "$EXPECTED_DIRS" ]; then
+      EXPECTED_DIRS="authn account communications course-authoring discussions gradebook learner-dashboard learning ora-grading profile"
+    fi
 
     ROUTE_FAIL=0
     for dir in $EXPECTED_DIRS; do
-      if echo "$CADDY_DIRS" | grep -qx "$dir"; then
+      if echo "$CADDY_DIRS" | grep -Fqx "$dir"; then
         pass_msg "AC-FRONT-013: route $dir present in Caddyfile"
       else
         fail_msg "AC-FRONT-013: route $dir expected by branding verifier is missing from Caddyfile"
@@ -169,7 +177,7 @@ else
     # Cross-check: warn about any Caddyfile MFE dirs not covered by verify-mfe-branding.sh
     while IFS= read -r caddy_dir; do
       [ -z "$caddy_dir" ] && continue
-      if ! echo "$EXPECTED_DIRS" | grep -qw "$caddy_dir"; then
+      if ! echo "$EXPECTED_DIRS" | grep -Fwq "$caddy_dir"; then
         warn_msg "AC-FRONT-013: Caddyfile has MFE dir '$caddy_dir' not in branding verifier expected list"
       fi
     done <<< "$CADDY_DIRS"
