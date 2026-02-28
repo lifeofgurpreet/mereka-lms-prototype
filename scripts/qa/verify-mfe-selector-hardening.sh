@@ -25,6 +25,7 @@ warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 
 SCSS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 CORE_THEME="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
+PROFILE_CERT_CARD_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src/profile/CertificateCard.jsx"
 AUDIT_DOC="$REPO_ROOT/docs/operations/MFE_SELECTOR_HARDENING_AUDIT.md"
 REGISTER_DOC="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
 MATRIX_DOC="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MATRIX.md"
@@ -460,6 +461,47 @@ else
     pass "AC-US7-005: P2/unresolved items reference upstream request or date"
   else
     warn "AC-US7-005: P2/unresolved items missing upstream request or target date (WARN)"
+  fi
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# AC-US7-005b: Ground profile certificate selectors to live profile source
+# ---------------------------------------------------------------------------
+echo "--- AC-US7-005b: Profile Certificate Selector Grounding ---"
+
+if [[ ! -f "$SCSS_FILE" ]]; then
+  fail "AC-US7-005b: mereka.scss not found at $SCSS_FILE"
+else
+  if rg -qF ".profile-page .certificate" "$SCSS_FILE"; then
+    pass "AC-US7-005b: .profile-page .certificate selector present in mereka.scss"
+    if [[ -f "$PROFILE_CERT_CARD_SRC" ]]; then
+      if rg -qF 'className="col certificate' "$PROFILE_CERT_CARD_SRC"; then
+        pass "AC-US7-005b: frontend-app-profile CertificateCard exposes .certificate class"
+      else
+        fail "AC-US7-005b: frontend-app-profile CertificateCard missing .certificate class"
+      fi
+    else
+      warn "AC-US7-005b: frontend-app-profile source checkout missing; cannot ground .certificate selector"
+    fi
+  else
+    warn "AC-US7-005b: .profile-page .certificate selector not present"
+  fi
+
+  if rg -qF ".profile-page .certificate-type-illustration" "$SCSS_FILE"; then
+    pass "AC-US7-005b: .profile-page .certificate-type-illustration selector present in mereka.scss"
+    if [[ -f "$PROFILE_CERT_CARD_SRC" ]]; then
+      if rg -qF "certificate-type-illustration" "$PROFILE_CERT_CARD_SRC"; then
+        pass "AC-US7-005b: frontend-app-profile CertificateCard exposes .certificate-type-illustration class"
+      else
+        fail "AC-US7-005b: frontend-app-profile CertificateCard missing .certificate-type-illustration class"
+      fi
+    else
+      warn "AC-US7-005b: frontend-app-profile source checkout missing; cannot ground .certificate-type-illustration selector"
+    fi
+  else
+    warn "AC-US7-005b: .profile-page .certificate-type-illustration selector not present"
   fi
 fi
 
