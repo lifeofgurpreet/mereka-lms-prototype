@@ -237,7 +237,7 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
 - `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
 
-## Addendum — Learning Slot Coverage Expansion (30 Active Slots)
+## Addendum — Learning Slot Coverage Expansion (33 Active Slots)
 
 ### Commands Run
 
@@ -251,17 +251,20 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 ### Results
 
 - `verify-mfe-plugin-slots.sh`: `PASS=48`, `WARN=0`, `FAIL=0`
-  - Plugin now declares **30 namespaced slot IDs**.
+  - Plugin now declares **33 namespaced slot IDs**.
   - New learning slots wired:
     - `org.openedx.frontend.learning.course_breadcrumbs.v1`
     - `org.openedx.frontend.learning.learner_tools.v1`
     - `org.openedx.frontend.learning.progress_tab_course_grade.v1`
     - `org.openedx.frontend.learning.progress_tab_related_links.v1`
+    - `org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1`
+    - `org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1`
+    - `org.openedx.frontend.learning.progress_tab_grade_breakdown.v1`
     - `org.openedx.frontend.learning.unit_title.v1`
     - `org.openedx.frontend.learning.sequence_navigation.v1`
     - `org.openedx.frontend.learning.course_outline_sidebar_trigger.v1`
     - `org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1`
-- `verify-mfe-slot-source-alignment.sh`: `PASS=18`, `WARN=13`, `FAIL=0`
+- `verify-mfe-slot-source-alignment.sh`: `PASS=21`, `WARN=13`, `FAIL=0`
   - All new learning slot IDs are confirmed in the local Ulmo learning MFE source checkout.
   - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, non-learning `layout.*`).
 - `verify-email-template-multilang.sh`: `PASS=21`, `FAIL=0`, `WARN=5`

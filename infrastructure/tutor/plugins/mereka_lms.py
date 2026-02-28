@@ -816,6 +816,9 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.learner_tools.v1 | Learning learner tools helper context
 #   org.openedx.frontend.learning.progress_tab_course_grade.v1 | Learning progress course-grade helper
 #   org.openedx.frontend.learning.progress_tab_related_links.v1 | Learning progress related-links helper
+#   org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1 | Learning progress certificate main-body helper
+#   org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1 | Learning progress certificate side-panel helper
+#   org.openedx.frontend.learning.progress_tab_grade_breakdown.v1 | Learning progress grade-breakdown helper
 #   org.openedx.frontend.learning.unit_title.v1 | Learning unit-title helper context
 #   org.openedx.frontend.learning.sequence_navigation.v1 | Learning sequence-navigation helper context
 #   org.openedx.frontend.learning.course_outline_sidebar_trigger.v1 | Learning desktop outline-trigger helper
@@ -1109,6 +1112,51 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaProgressRelatedLinksHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_progress_certificate_status_main_body',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaProgressCertificateStatus,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_progress_certificate_status_side_panel',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaProgressCertificateStatus,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.progress_tab_grade_breakdown.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_progress_grade_breakdown_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaProgressGradeBreakdownHint,
                 },
             },
             """,
@@ -1692,6 +1740,20 @@ const MerekaProgressRelatedLinksHint = () => {
     <div className="mereka-progress-related-links-hint mb-2">
       <span className="mereka-badge me-2">Resources</span>
       <a href="/help/" className="small">Need support? Visit the help centre.</a>
+    </div>
+  );
+};
+
+// Learning progress grade-breakdown slot helper.
+// Wired into org.openedx.frontend.learning.progress_tab_grade_breakdown.v1.
+const MerekaProgressGradeBreakdownHint = ({ courseId }) => {
+  const safeCourseId = typeof courseId === 'string' ? courseId : '';
+  return (
+    <div className="mereka-progress-grade-breakdown-hint mb-2">
+      <span className="mereka-badge me-2">Grade details</span>
+      <span className="small text-muted">
+        {safeCourseId ? `Review assessment trends for ${safeCourseId}.` : 'Review assessment trends and retry weak areas.'}
+      </span>
     </div>
   );
 };
