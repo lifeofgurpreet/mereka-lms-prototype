@@ -8,6 +8,7 @@ This evidence run captures frontend branding smoke artifacts and QA gate outputs
 
 ```bash
 ./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
 ./scripts/qa/verify-a11y-contrast-focus.sh
 ./scripts/qa/verify-lighthouse-budgets.sh
 ./scripts/qa/verify-email-template-multilang.sh
@@ -17,6 +18,7 @@ This evidence run captures frontend branding smoke artifacts and QA gate outputs
 
 - Screenshot bundle: `var/screenshots/prod/20260228T144430Z`
 - Screenshot count: `21` PNG files
+- MFE route smoke artifacts: `/tmp/mfe-route-smoke-20260228-145946` (`results.json` included)
 
 ## Results
 
@@ -24,6 +26,12 @@ This evidence run captures frontend branding smoke artifacts and QA gate outputs
 
 - `capture-branding-screenshots.sh prod` completed successfully.
 - Public LMS/Studio/MFE/ecommerce/credentials/forum/notes surfaces were captured into the bundle above.
+
+### MFE Route Smoke
+
+- `verify-mfe-route-smoke.sh --env prod` completed successfully.
+- Summary: `PASS=33`, `WARN=0`, `FAIL=0`
+- Route mapping, HTTP shell response checks, and lightweight route-level a11y checks all passed.
 
 ### Accessibility Gate
 
