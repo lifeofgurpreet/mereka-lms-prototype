@@ -2,30 +2,38 @@
 # @spec: paragon-design-tokens-migration_spec.md
 # Sync canonical CSS tokens into tokens/src/core/global.json.
 #
-# Default mode is dry-run; use --apply to persist.
+# Default mode is dry-run; use --apply to persist or --check for CI drift gates.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CSS_FILE="$REPO_ROOT/assets/branding/tokens.css"
 JSON_FILE="$REPO_ROOT/tokens/src/core/global.json"
 APPLY=0
+CHECK=0
 
 usage() {
   cat <<'EOF'
-Usage: scripts/branding/sync-tokens-to-json.sh [--apply]
+Usage: scripts/branding/sync-tokens-to-json.sh [--apply|--check]
 
 Options:
   --apply   Write updates to tokens/src/core/global.json
+  --check   Exit non-zero when updates would be required
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --apply) APPLY=1; shift ;;
+    --check) CHECK=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage; exit 1 ;;
   esac
 done
+
+if [[ "$APPLY" -eq 1 && "$CHECK" -eq 1 ]]; then
+  echo "ERROR: --apply and --check are mutually exclusive" >&2
+  exit 1
+fi
 
 if [[ ! -f "$CSS_FILE" ]]; then
   echo "ERROR: missing canonical CSS token file: ${CSS_FILE#$REPO_ROOT/}" >&2
@@ -36,7 +44,7 @@ if [[ ! -f "$JSON_FILE" ]]; then
   exit 1
 fi
 
-python3 - "$CSS_FILE" "$JSON_FILE" "$APPLY" <<'PY'
+python3 - "$CSS_FILE" "$JSON_FILE" "$APPLY" "$CHECK" <<'PY'
 import json
 import re
 import sys
@@ -45,6 +53,7 @@ from pathlib import Path
 css_file = Path(sys.argv[1])
 json_file = Path(sys.argv[2])
 apply_changes = sys.argv[3] == "1"
+check_only = sys.argv[4] == "1"
 
 css_text = css_file.read_text(encoding="utf-8")
 json_data = json.loads(json_file.read_text(encoding="utf-8"))
@@ -200,7 +209,12 @@ for path, source in mapping.items():
         changes.append((".".join(path), current, value))
         set_path_value(json_data, path, value)
 
-mode = "APPLY" if apply_changes else "DRY-RUN"
+if apply_changes:
+    mode = "APPLY"
+elif check_only:
+    mode = "CHECK"
+else:
+    mode = "DRY-RUN"
 print(f"[{mode}] updates: {len(changes)}")
 for name, old, new in changes:
     print(f"  {name}: {old!r} -> {new!r}")
@@ -208,7 +222,11 @@ for name, old, new in changes:
 if apply_changes and changes:
     json_file.write_text(json.dumps(json_data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"[APPLY] wrote {json_file}")
+elif check_only and changes:
+    print("[CHECK] drift detected")
+    raise SystemExit(1)
+elif check_only:
+    print("[CHECK] no drift")
 elif not apply_changes:
     print("[DRY-RUN] no file changes written (use --apply to persist)")
 PY
-

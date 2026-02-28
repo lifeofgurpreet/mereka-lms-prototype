@@ -689,3 +689,13 @@ else:
     action = "checked" if check_only else "regenerated"
     print(f"PASS: all token layers {action} successfully")
 PY
+
+SYNC_JSON_TOKENS="${SYNC_JSON_TOKENS:-1}"
+SYNC_SCRIPT="$REPO_ROOT/scripts/branding/sync-tokens-to-json.sh"
+if [[ "$SYNC_JSON_TOKENS" == "1" && -x "$SYNC_SCRIPT" ]]; then
+  if [[ "$CHECK_ONLY" -eq 1 ]]; then
+    "$SYNC_SCRIPT" --check
+  else
+    "$SYNC_SCRIPT" --apply
+  fi
+fi
