@@ -272,3 +272,28 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
   - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, non-learning `layout.*`).
 - `verify-email-template-multilang.sh`: `PASS=21`, `FAIL=0`, `WARN=5`
   - Branded marker checks now cover 15 HTML templates including `feedback`, `forum`, `grade`, `maintenance_notice`, `re_engagement`, and `survey`.
+
+## Addendum — Post-47-Slot Runtime Smoke
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+```
+
+### Results
+
+- `verify-mfe-route-smoke.sh --env prod`: `PASS=33`, `WARN=0`, `FAIL=0`
+  - Route-artifact directory: `/tmp/mfe-route-smoke-20260228-170527`
+  - Covers authn/account/learner-dashboard/learning/profile/discussions/authoring route shell and lightweight HTML a11y contracts.
+- `verify-cross-browser-branding-smoke.sh --env prod --cross-browser`:
+  - `9 passed`, `0 failed` (`chromium`, `firefox`, `mobile-chrome`)
+  - WebKit/mobile-Safari auto-disabled by runtime dependency probe on this host (expected non-blocking behavior).
+  - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T170601Z.log`
+- `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
+  - Includes:
+    - `verify-lighthouse-budgets.sh` (`PASSED=14`, `FAILED=0`)
+    - `verify-paragon-runtime.sh` (`PASS=9`, `WARN=3`, `FAIL=0`)
+  - Runtime URL-dependent Paragon header/cache checks remain warning-only unless `PARAGON_RUNTIME_URL` (or `--runtime-url`) is provided.
