@@ -471,6 +471,25 @@ if [[ -f "$CADDYFILE_LOCAL" ]]; then
           do_warn "8jao.6: /openedx/dist/$dir MISSING in MFE pod (Caddyfile expects it)"
         fi
       done
+
+      # Runtime Caddy parity: ensure deployed /etc/caddy/Caddyfile contains all
+      # repository-declared route path matchers (catches stale rollouts).
+      RUNTIME_CADDY=$(mktemp)
+      RUNTIME_PATHS=$(mktemp)
+      if kubectl exec -n mereka-lms "$MFE_POD" -- cat /etc/caddy/Caddyfile > "$RUNTIME_CADDY" 2>/dev/null; then
+        do_pass "8jao.7: Retrieved runtime /etc/caddy/Caddyfile from MFE pod"
+        grep -oP '(?<=path )/[a-z0-9_-]+(?= )' "$RUNTIME_CADDY" | sort -u > "$RUNTIME_PATHS"
+
+        while IFS= read -r repo_path; do
+          if grep -qxF "$repo_path" "$RUNTIME_PATHS"; then
+            do_pass "8jao.7: Runtime Caddyfile contains route path '$repo_path'"
+          else
+            do_fail "8jao.7: Runtime Caddyfile missing route path '$repo_path' from repo contract"
+          fi
+        done < "$CADDY_PATHS"
+      else
+        do_warn "8jao.7: Could not read runtime /etc/caddy/Caddyfile from MFE pod"
+      fi
     fi
   fi
 else
@@ -507,7 +526,7 @@ fi
 echo ""
 
 # Cleanup
-rm -f "$CADDY_DIRS" "$CADDY_PATHS" "$LMS_MFE_URLS" "$LMS_API_URLS" "$VERIFIER_ROUTES"
+rm -f "$CADDY_DIRS" "$CADDY_PATHS" "$LMS_MFE_URLS" "$LMS_API_URLS" "$VERIFIER_ROUTES" "${RUNTIME_CADDY:-}" "${RUNTIME_PATHS:-}"
 
 # =============================================================================
 # Summary
@@ -521,7 +540,8 @@ if [ "$FAIL" -gt 0 ]; then
   echo "Common fixes:"
   echo "  1. Added MFE in Caddyfile? Add to production.py and verify-mfe-branding.sh"
   echo "  2. Added setting in production.py? Add route to Caddyfile"
-  echo "  3. See docs/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md for full guide"
+  echo "  3. Runtime Caddyfile stale? Re-run tutor config save + apply-patches + rebuild/redeploy mfe"
+  echo "  4. See docs/architecture/MFE_ROUTE_TO_DIST_CONTRACT.md for full guide"
   echo ""
   exit 1
 fi

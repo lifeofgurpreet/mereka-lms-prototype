@@ -306,6 +306,7 @@ grep -oP '\["/[a-z0-9_-]+"\]="[a-z0-9_-]+"' \
 - Every Caddy directory has a corresponding LMS URL setting
 - Every LMS MFE URL has a corresponding Caddy route
 - Branding verifier `MFE_ROUTES` map includes all Caddy directories
+- Deployed runtime `/etc/caddy/Caddyfile` in MFE pod contains all repo-declared route paths
 - Authoring dual-path (`/authoring` + `/course-authoring`) both resolve to `course-authoring`
 - Profile `/u` route serves `profile` directory
 - Payments-gateway proxy routes exist for deprecated MFEs
