@@ -8,7 +8,9 @@
 
 ## What is OEP-48?
 
-[OEP-48](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0048-brand-customization.html) defines how Open edX operators deliver brand customization. The key requirement is a single **brand package** — an npm package installed as `@edx/brand` — that provides the canonical set of logos, colors, typography, and UI shell components (header/footer) for a deployment.
+[OEP-48](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0048-brand-customization.html) defines how Open edX operators deliver brand customization. The key requirement is a single **brand package** — an npm package installed as `@edx/brand` — that provides canonical brand assets and integration points for a deployment.
+
+In the current Ulmo runtime, `@edx/brand` is intentionally **asset-only** (logos/favicons + `logo.js` exports). Color/typography theming is delivered via the Mereka token pipeline (`assets/branding/tokens.css` -> `_tokens.scss` -> runtime CSS variables), not through `@edx/brand/paragon/*` SCSS imports.
 
 The package exposes a defined interface:
 
@@ -128,6 +130,8 @@ This installs the local `infrastructure/tutor/brand-mereka/` package as `@edx/br
 The package includes canonical OEP-48 aliases (`logo_white.png`, `favicon.png`) and `logo.js`
 exports for direct brand-package consumers.
 
+The package manifest uses an explicit `exports` map and does not expose `paragon/*` paths as a runtime contract.
+
 ---
 
 ### 5. Design Token Pipeline
@@ -172,7 +176,7 @@ CI enforces no drift between layers via the `design-token-validation` job.
 | `logo_white.png` (dark bg) | `logo-white.png` plus package alias `logo_white.png` | YES |
 | `favicon.ico` | All three surfaces | YES |
 | `favicon.png` (256×256) | package alias `favicon.png` (from canonical 256×256 source) | YES |
-| Colors / SCSS variables | `scss/_tokens.scss` — `$color-teal`, `$color-magenta`, etc. | YES |
+| Colors / SCSS variables | `scss/_tokens.scss` + runtime overrides (`mereka-overrides.css`) | YES |
 | CSS custom properties | `--mereka-*` + `--pgn-*` via `_tokens.scss` and `mereka-overrides.css` | YES |
 | Typography / font declarations | `scss/_fonts.scss` (woff2, no Google Fonts dependency) | YES |
 | Header component | `lms/templates/header/brand.html` (LMS); MFE header via Paragon/navbar overrides in `mereka.scss` | PARTIAL — LMS has Mako template; MFE uses CSS-only header overrides, no React header component |
