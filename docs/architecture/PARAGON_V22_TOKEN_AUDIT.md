@@ -217,6 +217,8 @@ OUTPUT names (right column), not the INPUT names (left column).
 ---
 
 ## Guidance for Phase C
+- Paragon v22 **does not consume** many component-level token families (card, modal, dropdown, tabs) in current core CSS.
+- For those non-consumed families, visual customizations **must remain as CSS rules** (BEM overrides) until upstream token support exists.
 - Prioritize replacing BEM overrides only where token replacement is known to take effect.
 - For `--pgn-*` tokens in `defined+ignored`, prefer explicit `--mereka-*` overrides in our own CSS.
 - Re-audit whenever `core.min.css` changes (Theme URL runtime path update).

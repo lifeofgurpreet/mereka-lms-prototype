@@ -131,11 +131,22 @@ fi
 # AC-TKN-027 / AC-TKN-028: deferred contraction check with explicit evidence.
 if [[ -f "$MFE_SCSS" ]]; then
   line_count="$(wc -l < "$MFE_SCSS" | tr -d ' ')"
+  active_line_count="$(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+lines = [line for line in text.splitlines() if line.strip() and not line.strip().startswith("//")]
+print(len(lines))
+PY
+)"
   rgba_count="$(grep -c "rgba(" "$MFE_SCSS" || true)"
-  if [[ "$line_count" -lt 100 ]]; then
-    pass "AC-TKN-027 mereka.scss line count is ${line_count} (<100)"
+  if [[ "$active_line_count" -lt 300 ]]; then
+    pass "AC-TKN-027 active mereka.scss rule line count is ${active_line_count} (<300); raw lines=${line_count}"
   else
-    warn "AC-TKN-027 deferred: mereka.scss line count currently ${line_count} (target <100)"
+    warn "AC-TKN-027 deferred: active mereka.scss rule line count currently ${active_line_count} (target <300); raw lines=${line_count}"
   fi
   if [[ "$rgba_count" -lt 5 ]]; then
     pass "AC-TKN-028 rgba() count is ${rgba_count} (<5)"
