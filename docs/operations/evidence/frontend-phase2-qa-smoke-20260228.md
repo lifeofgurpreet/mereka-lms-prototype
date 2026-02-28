@@ -270,6 +270,9 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - `verify-mfe-slot-source-alignment.sh`: `PASS=35`, `WARN=13`, `FAIL=0`
   - All wired learning slot IDs are confirmed in the local Ulmo learning MFE source checkout.
   - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, non-learning `layout.*`).
+- `verify-mfe-slot-source-alignment.sh` (after checker hardening): `PASS=36`, `WARN=13`, `FAIL=0`
+  - Adds explicit local-learning completeness assertion.
+  - Confirms `28/28` discovered learning slot IDs in `frontend-app-learning` are wired in the plugin.
 - `verify-email-template-multilang.sh`: `PASS=21`, `FAIL=0`, `WARN=5`
   - Branded marker checks now cover 15 HTML templates including `feedback`, `forum`, `grade`, `maintenance_notice`, `re_engagement`, and `survey`.
 

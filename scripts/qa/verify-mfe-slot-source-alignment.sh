@@ -7,6 +7,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 STRICT="${STRICT:-1}"
+STRICT_LOCAL_LEARNING_COMPLETE="${STRICT_LOCAL_LEARNING_COMPLETE:-1}"
 
 PASS=0
 FAIL=0
@@ -95,6 +96,58 @@ while IFS= read -r slot; do
       ;;
   esac
 done <<<"$slots"
+
+if [[ -d "$LEARNING_SRC" ]]; then
+  learning_missing="$(
+    SLOT_LINES="$slots" python3 - "$LEARNING_SRC" <<'PY'
+import re
+import os
+import sys
+from pathlib import Path
+
+learning_src = Path(sys.argv[1])
+slot_pattern = re.compile(r"org\.openedx\.frontend\.learning\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*\.v[0-9]+")
+
+source_slots = set()
+for path in learning_src.rglob("*"):
+    if path.suffix.lower() not in {".js", ".jsx", ".ts", ".tsx", ".md"}:
+        continue
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        continue
+    source_slots.update(slot_pattern.findall(text))
+
+plugin_slots = set()
+for line in os.environ.get("SLOT_LINES", "").splitlines():
+    line = line.strip()
+    if line.startswith("org.openedx.frontend.learning."):
+        plugin_slots.add(line)
+
+for slot in sorted(source_slots - plugin_slots):
+    print(slot)
+PY
+  )"
+
+  if [[ -z "$learning_missing" ]]; then
+    pass "Learning plugin coverage is complete for local source checkout (all discovered learning slot IDs are wired)"
+  else
+    missing_count="$(echo "$learning_missing" | wc -l | tr -d ' ')"
+    if [[ "$STRICT_LOCAL_LEARNING_COMPLETE" == "1" ]]; then
+      fail "Learning plugin coverage gap: $missing_count local learning slot ID(s) are not wired"
+      while IFS= read -r slot; do
+        [[ -n "$slot" ]] && fail "Unwired local learning slot: $slot"
+      done <<<"$learning_missing"
+    else
+      warn "Learning plugin coverage gap (STRICT_LOCAL_LEARNING_COMPLETE=0): $missing_count local learning slot ID(s) are not wired"
+      while IFS= read -r slot; do
+        [[ -n "$slot" ]] && warn "Unwired local learning slot: $slot"
+      done <<<"$learning_missing"
+    fi
+  fi
+else
+  warn "Learning source checkout missing; cannot evaluate local learning slot completeness"
+fi
 
 echo ""
 echo "=== Summary: PASS=$PASS WARN=$WARN FAIL=$FAIL ==="
