@@ -161,12 +161,12 @@ FIGMA EXPORT (manual)          AUTO-GENERATED              AUTO-GENERATED
 
 | Layer 2 (Mereka) | Layer 3 (Paragon) | Notes |
 |------------------|-------------------|-------|
-| `--mereka-color-magenta` | `--pgn-color-primary` | Primary brand color |
-| `--mereka-color-teal` | `--pgn-color-secondary` | Secondary brand color |
-| `--mereka-color-success` | `--pgn-color-success` | Semantic mapping |
-| `--mereka-color-info` | `--pgn-color-info` | Semantic mapping |
-| `--mereka-color-warning` | `--pgn-color-warning` | Semantic mapping |
-| `--mereka-color-danger` | `--pgn-color-danger` | Semantic mapping |
+| `--mereka-color-magenta` | `--pgn-color-primary-base` | Primary brand color |
+| `--mereka-color-teal` | `--pgn-color-secondary-base` | Secondary brand color |
+| `--mereka-color-success` | `--pgn-color-success-base` | Semantic mapping |
+| `--mereka-color-info` | `--pgn-color-info-base` | Semantic mapping |
+| `--mereka-color-warning` | `--pgn-color-warning-base` | Semantic mapping |
+| `--mereka-color-danger` | `--pgn-color-danger-base` | Semantic mapping |
 
 ---
 

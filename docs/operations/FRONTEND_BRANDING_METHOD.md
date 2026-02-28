@@ -51,17 +51,17 @@ The `scss/_tokens.scss` file manually maps Mereka brand tokens to Paragon CSS va
   --mereka-color-teal: #2d898b;
   --mereka-color-magenta: #ab3b78;
 
-  // Map to Paragon variables (used by MFEs)
-  --pgn-color-primary: #{$color-magenta};
-  --pgn-color-secondary: #{$color-teal};
-  --pgn-font-family-sans-serif: #{$mereka-body-font};
-  --pgn-heading-font-family: #{$mereka-heading-font};
+  // Map to canonical Paragon v22 variables (used by MFEs)
+  --pgn-color-primary-base: #{$color-magenta};
+  --pgn-color-secondary-base: #{$color-teal};
+  --pgn-typography-font-family-sans-serif: #{$mereka-body-font};
+  --pgn-typography-headings-font-family: #{$mereka-heading-font};
   --pgn-border-color: #{$color-border};
   --pgn-btn-border-radius: 999px;
 }
 ```
 
-**Why this works**: Paragon components consume CSS variables like `--pgn-color-primary`. By setting these in our SCSS, we theme all MFEs without needing the plugin.
+**Why this works**: Paragon components consume canonical CSS variables like `--pgn-color-primary-base`. By setting these in our SCSS, we theme all MFEs without needing the plugin.
 
 ---
 
@@ -158,7 +158,9 @@ Inside each `frontend-app-*` MFE:
 ```scss
 // src/styles/mereka.scss
 $mereka-font-path: "~@mereka/theme/fonts";
-@import "../../../../../infrastructure/tutor/themes/mereka/scss/theme";
+@import "./scss/fonts";
+@import "./scss/tokens";
+@import "./scss/base";
 ```
 
 Then import from `src/index.scss`:
@@ -224,10 +226,10 @@ tutor images build mfe
 
 **Fix**:
 ```bash
-# Verify Paragon variable bridge
-grep "pgn-color-primary" infrastructure/tutor/themes/mereka/scss/_tokens.scss
+# Verify canonical Paragon variable bridge
+grep "pgn-color-primary-base" infrastructure/tutor/themes/mereka/scss/_tokens.scss
 
-# Should show: --pgn-color-primary: #ab3b78;
+# Should show: --pgn-color-primary-base: #ab3b78;
 
 # If missing, add to :root block in _tokens.scss
 ```

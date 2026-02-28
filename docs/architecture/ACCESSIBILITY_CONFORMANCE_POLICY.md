@@ -147,7 +147,7 @@ a {
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--pgn-color-primary);
+  background: var(--pgn-color-primary-base);
   color: white;
   padding: 8px;
   z-index: 100;

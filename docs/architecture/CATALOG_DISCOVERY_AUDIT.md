@@ -49,7 +49,7 @@ All three layers are in sync as of 2026-02-25 (`--mereka-branding-rev: "2026-02-
 | Course-about sidebar | Full | `--mereka-shadow-card` |
 | Course-about enroll button | Full | `--mereka-gradient-primary` |
 | Course-about summary/description | Full | `--mereka-shadow-card`, `--mereka-font-heading` |
-| Learner Dashboard MFE cards | Partial | `--pgn-color-primary`, `--pgn-*` via Paragon bridge |
+| Learner Dashboard MFE cards | Partial | `--pgn-color-primary-base`, `--pgn-*` via Paragon bridge |
 
 ### 2.3 What Is NOT Tokenised (Gaps)
 

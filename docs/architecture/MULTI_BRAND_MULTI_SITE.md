@@ -66,7 +66,7 @@ assets/branding/tokens.css (canonical, from Figma)
 ```
 
 Token names follow the `--mereka-color-*` namespace. Paragon bridge tokens
-(`--pgn-color-primary`, `--pgn-font-family-sans-serif`, etc.) are derived from Mereka tokens
+(`--pgn-color-primary-base`, `--pgn-typography-font-family-sans-serif`, etc.) are derived from Mereka tokens
 in `_tokens.scss` and `mereka-overrides.css`, so MFE components automatically pick up
 the Mereka palette.
 

@@ -26,7 +26,7 @@ Every user interaction with the Mereka Academy platform must provide clear feedb
 
 **Required implementation**:
 - Use Paragon `Spinner` or `Skeleton` components
-- Theme spinner via `--pgn-color-primary` (inherited from `--mereka-color-magenta`)
+- Theme spinner via `--pgn-color-primary-base` (inherited from `--mereka-color-magenta`)
 - Skeleton components use built-in Paragon styling
 
 **Example (Spinner)**:
@@ -47,7 +47,7 @@ import { Skeleton } from '@openedx/paragon';
 ```
 
 **Design token usage**:
-- Spinner color: `var(--pgn-color-primary)` (auto-themed)
+- Spinner color: `var(--pgn-color-primary-base)` (auto-themed)
 - No hardcoded colors allowed
 
 ---

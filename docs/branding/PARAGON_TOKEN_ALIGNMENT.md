@@ -21,18 +21,18 @@ All Paragon token bridges are defined in `infrastructure/tutor/themes/mereka/scs
 
 | Paragon Token | Mereka Source | Value | Notes |
 |--------------|--------------|-------|-------|
-| `--pgn-color-primary` | `$color-magenta` | #ab3b78 | Primary action color (buttons, active states) |
-| `--pgn-color-secondary` | `$color-teal` | #297F81 | Secondary actions, links |
-| `--pgn-color-success` | `$color-success` / `$color-forest` | #2c6e49 | Success states, positive feedback |
-| `--pgn-color-info` | `$color-info` / `$color-blue` | #295cad | Informational states, default links |
-| `--pgn-color-warning` | `$color-warning` / `$color-gold` | #f4be48 | Warning states, caution indicators |
-| `--pgn-color-danger` | `$color-danger` / `$color-burgundy` | #8c002f | Error states, destructive actions |
+| `--pgn-color-primary-base` | `$color-magenta` | #ab3b78 | Primary action color (buttons, active states) |
+| `--pgn-color-secondary-base` | `$color-teal` | #237072 | Secondary actions, links |
+| `--pgn-color-success-base` | `$color-success` / `$color-forest` | #2c6e49 | Success states, positive feedback |
+| `--pgn-color-info-base` | `$color-info` / `$color-blue` | #295cad | Informational states, default links |
+| `--pgn-color-warning-base` | `$color-warning` / `$color-gold` | #f4be48 | Warning states, caution indicators |
+| `--pgn-color-danger-base` | `$color-danger` / `$color-burgundy` | #8c002f | Error states, destructive actions |
 | `--pgn-body-bg` | `$color-neutral-100` | #FBFAFB | Page background |
 | `--pgn-body-color` | `$color-ink-900` | #000000 | Body text color |
 | `--pgn-link-color` | `$color-info` / `$color-blue` | #295cad | Default link color |
 | `--pgn-link-hover-color` | `$color-teal` | #297F81 | Link hover state |
-| `--pgn-font-family-sans-serif` | `$mereka-body-font` | "Poppins", "Lato", -apple-system, ... | Body font stack |
-| `--pgn-heading-font-family` | `$mereka-heading-font` | "Lato", "Poppins", -apple-system, ... | Heading font stack |
+| `--pgn-typography-font-family-sans-serif` | `$mereka-body-font` | "Poppins", "Lato", -apple-system, ... | Body font stack |
+| `--pgn-typography-headings-font-family` | `$mereka-heading-font` | "Lato", "Poppins", -apple-system, ... | Heading font stack |
 | `--pgn-border-color` | `$color-border` | #DDDDDE | Default border color |
 | `--pgn-border-color-translucent` | N/A | rgba(26, 22, 35, 0.12) | Translucent border for overlays |
 | `--pgn-btn-border-radius` | N/A | 999px | Button border radius (pill shape) |
@@ -58,25 +58,25 @@ These Paragon tokens exist in the Paragon library but are not currently overridd
 
 ### Color Mappings
 
-Mereka's canonical color tokens (from `tokens.css`) are aliased in `mereka-overrides.css` to support both `--color-*` and `--mereka-color-*` naming conventions:
+Mereka's canonical color tokens (from `tokens.css`) are exposed through `--mereka-color-*` names and bridged to canonical Paragon tokens:
 
 | Canonical Token (tokens.css) | Mereka Alias (mereka-overrides.css) | Paragon Bridge | Usage |
 |------------------------------|-------------------------------------|----------------|-------|
-| `--color-teal` | `--mereka-color-teal` | `--pgn-color-secondary` | Secondary actions, link hover |
-| `--color-magenta` | `--mereka-color-magenta` | `--pgn-color-primary` | Primary actions, CTA buttons |
-| `--color-blue` | `--mereka-color-blue` | `--pgn-color-info` | Informational states, default links |
-| `--color-burgundy` | `--mereka-color-danger` | `--pgn-color-danger` | Error states, destructive actions |
+| `--color-teal` | `--mereka-color-teal` | `--pgn-color-secondary-base` | Secondary actions, link hover |
+| `--color-magenta` | `--mereka-color-magenta` | `--pgn-color-primary-base` | Primary actions, CTA buttons |
+| `--color-blue` | `--mereka-color-blue` | `--pgn-color-info-base` | Informational states, default links |
+| `--color-burgundy` | `--mereka-color-danger` | `--pgn-color-danger-base` | Error states, destructive actions |
 | `--color-pink` | `--mereka-color-danger-soft` | N/A | Soft error backgrounds |
 | `--color-sky` | `--mereka-color-sky` | N/A | Info-soft backgrounds |
-| `--color-gold` | `--mereka-color-warning` | `--pgn-color-warning` | Warning states |
-| `--color-forest` | `--mereka-color-success` | `--pgn-color-success` | Success states |
+| `--color-gold` | `--mereka-color-warning` | `--pgn-color-warning-base` | Warning states |
+| `--color-forest` | `--mereka-color-success` | `--pgn-color-success-base` | Success states |
 
 ### Typography Mappings
 
 | Canonical Token (tokens.css) | Mereka Alias (mereka-overrides.css) | Paragon Bridge | Usage |
 |------------------------------|-------------------------------------|----------------|-------|
-| `--font-heading` | `--mereka-font-heading` | `--pgn-heading-font-family` | Headings (h1-h6) |
-| `--font-body` | `--mereka-font-body` | `--pgn-font-family-sans-serif` | Body text, UI components |
+| `--font-heading` | `--mereka-font-heading` | `--pgn-typography-headings-font-family` | Headings (h1-h6) |
+| `--font-body` | `--mereka-font-body` | `--pgn-typography-font-family-sans-serif` | Body text, UI components |
 | `--font-video` | N/A | N/A | Video player UI (not bridged) |
 
 ## Migration Policy (AC-UITOKEN-004)

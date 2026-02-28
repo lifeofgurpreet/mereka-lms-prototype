@@ -43,7 +43,7 @@ Token definitions are spread across three layers:
   - `infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css`
   - `infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css`
 
-**Purpose**: Runtime-injected CSS (loaded via `head-extra.html`) that defines additional tokens and aliases for compatibility.
+**Purpose**: Runtime-injected CSS (loaded via `head-extra.html`) that defines additional tokens and canonical Paragon bridges.
 
 ---
 
@@ -167,17 +167,16 @@ Token definitions are spread across three layers:
 - `--mereka-shadow-card`
 
 **Paragon bridge** (`--pgn-*`, 13 properties):
-- `--pgn-color-primary`, `--pgn-color-secondary`, `--pgn-color-success`, `--pgn-color-info`, `--pgn-color-warning`, `--pgn-color-danger`
+- `--pgn-color-primary-base`, `--pgn-color-secondary-base`, `--pgn-color-success-base`, `--pgn-color-info-base`, `--pgn-color-warning-base`, `--pgn-color-danger-base`
 - `--pgn-body-bg`, `--pgn-body-color`
 - `--pgn-link-color`, `--pgn-link-hover-color`
-- `--pgn-font-family-sans-serif`, `--pgn-heading-font-family`
+- `--pgn-typography-font-family-sans-serif`, `--pgn-typography-headings-font-family`
 - `--pgn-border-color`, `--pgn-border-color-translucent`
 - `--pgn-btn-border-radius`
 
-**Additional runtime tokens** (defined in `mereka-overrides.css`, 6 properties):
+**Additional runtime tokens** (defined in `mereka-overrides.css`, 2 properties):
 - `--mereka-branding-rev` (version tracking)
 - `--mereka-gradient-primary` (gradient effect)
-- `--mereka-teal`, `--mereka-magenta`, `--mereka-blue`, `--mereka-black` (legacy aliases)
 
 ---
 

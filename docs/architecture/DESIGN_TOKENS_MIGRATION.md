@@ -88,18 +88,18 @@ Additional SCSS vars not in `tokens.css` (Mereka-specific ink and neutral scale)
 
 | `--mereka-*` | `--pgn-*` |
 |--------------|-----------|
-| `--mereka-color-magenta` | `--pgn-color-primary` |
-| `--mereka-color-teal` | `--pgn-color-secondary` |
-| `--mereka-color-success` | `--pgn-color-success` |
-| `--mereka-color-info` | `--pgn-color-info` |
-| `--mereka-color-warning` | `--pgn-color-warning` |
-| `--mereka-color-danger` | `--pgn-color-danger` |
+| `--mereka-color-magenta` | `--pgn-color-primary-base` |
+| `--mereka-color-teal` | `--pgn-color-secondary-base` |
+| `--mereka-color-success` | `--pgn-color-success-base` |
+| `--mereka-color-info` | `--pgn-color-info-base` |
+| `--mereka-color-warning` | `--pgn-color-warning-base` |
+| `--mereka-color-danger` | `--pgn-color-danger-base` |
 | `--mereka-color-surface-primary` | `--pgn-body-bg` |
 | `--mereka-color-ink-900` | `--pgn-body-color` |
 | `--mereka-color-info` | `--pgn-link-color` |
 | `--mereka-color-teal` | `--pgn-link-hover-color` |
-| `--mereka-font-body` | `--pgn-font-family-sans-serif` |
-| `--mereka-font-heading` | `--pgn-heading-font-family` |
+| `--mereka-font-body` | `--pgn-typography-font-family-sans-serif` |
+| `--mereka-font-heading` | `--pgn-typography-headings-font-family` |
 | `--mereka-color-border` | `--pgn-border-color` |
 
 ---
@@ -143,10 +143,11 @@ MFEs (authn, account, learning, learner-dashboard, discussions, etc.) receive to
 
 ```scss
 $mereka-font-path: "../fonts";
-@import "./scss/theme";
+@import "./scss/tokens";
+@import "./scss/base";
 ```
 
-The `./scss/theme` path resolves through the Indigo theme system, which ultimately includes `_tokens.scss`. This makes all SCSS variables (`$color-teal`, `$mereka-body-font`) and CSS custom properties (`--mereka-*`, `--pgn-*`) available during SCSS compilation.
+The split `./scss/tokens` + `./scss/base` imports resolve through the Indigo theme system. This makes all SCSS variables (`$color-teal`, `$mereka-body-font`) and CSS custom properties (`--mereka-*`, `--pgn-*`) available during SCSS compilation.
 
 The Tutor plugin (`infrastructure/tutor/plugins/mereka_lms.py`) injects this import into every MFE build via the `mfe-env-config-buildtime-imports` patch:
 
@@ -177,7 +178,7 @@ MFEs use tokens via CSS custom properties in `mereka.scss`:
 }
 ```
 
-The Paragon bridge tokens (`--pgn-color-primary: var(--mereka-color-magenta)`) mean that Paragon's own internal CSS (which uses `--pgn-*`) automatically picks up the Mereka brand colors without any additional overrides.
+The Paragon bridge tokens (`--pgn-color-primary-base: var(--mereka-color-magenta)`) mean that Paragon's own internal CSS (which uses `--pgn-*`) automatically picks up the Mereka brand colors without any additional overrides.
 
 ---
 
