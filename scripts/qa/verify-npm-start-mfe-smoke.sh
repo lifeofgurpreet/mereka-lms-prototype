@@ -95,6 +95,10 @@ if [[ -z "$MFE_ORIGIN" ]]; then
   exit 2
 fi
 
+timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+artifact="$ARTIFACT_DIR/npm-start-mfe-smoke-${timestamp}.log"
+: > "$artifact"
+
 theme_mode="unknown"
 authn_shell_url="${MFE_ORIGIN}/authn/login"
 authn_shell_file="$(mktemp -t mereka-authn-shell.XXXXXX)"
@@ -106,14 +110,15 @@ if curl -ksSL "$authn_shell_url" -o "$authn_shell_file"; then
     theme_mode="embedded-theme-files"
   fi
 else
-  echo "WARN: unable to fetch authn shell for theme-mode preflight: $authn_shell_url"
+  echo "WARN: unable to fetch authn shell for theme-mode preflight: $authn_shell_url" | tee -a "$artifact"
 fi
 rm -f "$authn_shell_file"
 
-echo "Theme-mode preflight (${authn_shell_url}): ${theme_mode}"
+echo "Theme-mode preflight (${authn_shell_url}): ${theme_mode}" | tee -a "$artifact"
 if [[ "$REQUIRE_RUNTIME_THEME" == "1" && "$theme_mode" != "runtime-theme-urls" ]]; then
-  echo "ERROR: runtime theme mode required, but detected '${theme_mode}'." >&2
-  echo "Hint: deploy MFE with PARAGON_THEME_URLS active, then rerun this smoke gate." >&2
+  echo "ERROR: runtime theme mode required, but detected '${theme_mode}'." | tee -a "$artifact" >&2
+  echo "Hint: deploy MFE with PARAGON_THEME_URLS active, then rerun this smoke gate." | tee -a "$artifact" >&2
+  echo "Log: $artifact"
   exit 1
 fi
 
@@ -124,13 +129,10 @@ if [[ ! -d node_modules ]]; then
   npm ci
 fi
 
-echo "Installing Playwright browser: chromium"
+echo "Installing Playwright browser: chromium" | tee -a "$artifact"
 npx playwright install chromium
 
-timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
-artifact="$ARTIFACT_DIR/npm-start-mfe-smoke-${timestamp}.log"
-
-echo "Running npm-start MFE smoke (base_url=$BASE_URL, project=$PROJECT, learning_path=$LEARNING_PATH)"
+echo "Running npm-start MFE smoke (base_url=$BASE_URL, project=$PROJECT, learning_path=$LEARNING_PATH)" | tee -a "$artifact"
 set -o pipefail
 PW_CROSS_BROWSER=0 \
 PW_ENABLE_WEBKIT=0 \
@@ -138,7 +140,7 @@ HEADED="$HEADED" \
 BRANDING_LEARNING_PATH="$LEARNING_PATH" \
 REQUIRE_RUNTIME_THEME_URLS="$REQUIRE_RUNTIME_THEME" \
 BASE_URL="$BASE_URL" \
-npx playwright test tests/branding-smoke.spec.ts --project="$PROJECT" --reporter=list | tee "$artifact"
+npx playwright test tests/branding-smoke.spec.ts --project="$PROJECT" --reporter=list | tee -a "$artifact"
 
 echo "Log: $artifact"
 echo "Screenshots/artifacts: var/e2e-artifacts and var/e2e-report"
