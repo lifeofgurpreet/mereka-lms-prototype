@@ -1,5 +1,5 @@
 # Mereka.io Branding Rollout Tracker
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last updated: 2026-02-27_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last updated: 2026-02-28_
 
 Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
@@ -50,8 +50,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] **Split theme.scss for MFE consumption** — `mereka.scss` now imports focused MFE partials instead of full LMS/Studio theme — see [deep audit §3 CRIT-2](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-2-themescss-leaks-600-lines-of-lmsstudio-css-into-every-mfe)
 - [x] **Fix runtime theme CSS bloat** — `mereka-brand.min.css` now generated as brand delta (3KB class), `light.min.css` as light-variant delta — see [deep audit §3 CRIT-3](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-3-runtime-theme-css-files-are-bloated-and-duplicated)
 - [ ] Migrate SCSS token overrides to JSON design tokens (Paragon v23+) — [spec](../specs/paragon-design-tokens-migration_spec.md)
-- [ ] Enable PARAGON_THEME_URLS for runtime CDN theming.
-- [ ] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
+- [ ] Enable PARAGON_THEME_URLS for runtime CDN theming (config + assets are ready; rollout toggle remains environment-driven).
+- [x] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
+- [x] Consolidate slot variant fallback contract across header/footer components (single runtime map with unknown-host fallback branch).
 - [x] Upgrade Node 18 → 24 (Ulmo default).
 - [ ] Multi-tenant token switching (`tenants/` directory).
 
