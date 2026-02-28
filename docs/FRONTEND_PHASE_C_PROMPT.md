@@ -340,7 +340,7 @@ fi
 if grep -q 'PARAGON_THEME' "$PLUGIN"; then
   pass "PARAGON_THEME config exists in plugin"
 else
-  skip "PARAGON_THEME not yet configured (Phase C4)"
+  fail "PARAGON_THEME config missing from plugin"
 fi
 
 # 5. Token audit doc exists
