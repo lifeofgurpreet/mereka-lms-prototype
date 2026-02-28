@@ -81,6 +81,12 @@ else
     fail "MEREKA_PARAGON_THEME_ENABLED not found in mereka_lms.py"
   fi
 
+  if grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True)' "$PLUGIN_FILE"; then
+    pass "MEREKA_PARAGON_THEME_ENABLED defaults to True (runtime theme active by default)"
+  else
+    fail "MEREKA_PARAGON_THEME_ENABLED is not defaulted to True"
+  fi
+
   if grep -q "MEREKA_PARAGON_THEME_CDN_BASE" "$PLUGIN_FILE" \
     && grep -q "PARAGON_THEME_URLS" "$PLUGIN_FILE"; then
     pass "AC-TKN-034 plugin source contains PARAGON_THEME_URLS render inputs"

@@ -73,6 +73,13 @@ fi
 
 echo "=== Paragon Runtime/Deferred Contract Verification ==="
 
+# Final-pattern contract: runtime PARAGON_THEME_URLS must be enabled by default.
+if [[ "$THEME_DEFAULT_ENABLED" -eq 1 ]]; then
+  pass "Runtime PARAGON_THEME_URLS is enabled by default in plugin config"
+else
+  fail "Runtime PARAGON_THEME_URLS is disabled by default (set MEREKA_PARAGON_THEME_ENABLED=True)"
+fi
+
 # AC-008 parser-compatibility: ensure cross-spec text reference exists
 if [[ -f "$SPEC_FILE" ]] && grep -q "AC-008 through AC-010" "$SPEC_FILE"; then
   pass "AC-008 cross-spec compatibility reference is present in spec text"

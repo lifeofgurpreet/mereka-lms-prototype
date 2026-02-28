@@ -49,7 +49,7 @@ hooks.Filters.CONFIG_DEFAULTS.add_items([
         "https://skillourfuture.academy.mereka.io",
         "https://apps.academy.biji-biji.com",
     ]),
-    ("MEREKA_PARAGON_THEME_ENABLED", False),
+    ("MEREKA_PARAGON_THEME_ENABLED", True),
     ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
     ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
     ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),

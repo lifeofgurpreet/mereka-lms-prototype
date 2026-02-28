@@ -52,8 +52,8 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] **Fix runtime theme CSS bloat** — `mereka-brand.min.css` now generated as brand delta (3KB class), `light.min.css` as light-variant delta — see [deep audit §3 CRIT-3](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-3-runtime-theme-css-files-are-bloated-and-duplicated)
 - [x] Enforce canonical token policy (no legacy `--mereka-*` aliases, no short-form `--pgn-*` names) across generator + QA gates.
 - [x] Add architecture guardrails in CI for MFE CSS boundaries (`verify-mfe-css-architecture.sh`) and reduced-motion transform safety (`verify-mfe-reduced-motion.sh`).
-- [ ] Migrate SCSS token overrides to JSON design tokens (Paragon v23+) — [spec](../specs/paragon-design-tokens-migration_spec.md)
-- [ ] Enable PARAGON_THEME_URLS for runtime CDN theming (config + assets are ready; rollout toggle remains environment-driven).
+- [x] Migrate SCSS token overrides to JSON design tokens (Paragon v23+) — [spec](../specs/paragon-design-tokens-migration_spec.md)
+- [x] Enable PARAGON_THEME_URLS for runtime CDN theming (default enabled; still operator-overridable via `MEREKA_PARAGON_THEME_ENABLED`).
 - [x] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
 - [x] Consolidate slot variant fallback contract across header/footer components (single runtime map with unknown-host fallback branch).
 - [x] Upgrade Node 18 → 24 (Ulmo default).
