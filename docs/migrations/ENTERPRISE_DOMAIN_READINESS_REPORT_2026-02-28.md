@@ -105,6 +105,11 @@ Interpretation:
 
 ### Capacity evidence (runtime)
 
+Command:
+```bash
+./scripts/qa/audit-enterprise-capacity-pressure.sh --env prod
+```
+
 Observed on production context during failed AC-001 steady-state checks:
 - Pending enterprise pods report `FailedScheduling ... Insufficient cpu`.
 - Node allocated CPU requests are effectively saturated (~99% request allocation on all 3 nodes).
