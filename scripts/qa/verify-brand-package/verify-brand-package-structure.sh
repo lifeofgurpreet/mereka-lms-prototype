@@ -30,12 +30,16 @@ required_files=(
   "$BRAND_DIR/package.json"
   "$BRAND_DIR/logo.svg"
   "$BRAND_DIR/logo-white.svg"
+  "$BRAND_DIR/logo-trademark.svg"
   "$BRAND_DIR/logo.png"
   "$BRAND_DIR/logo-white.png"
+  "$BRAND_DIR/logo-trademark.png"
   "$BRAND_DIR/favicon.ico"
   "$BRAND_DIR/paragon/fonts.scss"
+  "$BRAND_DIR/paragon/_overrides.scss"
   "$BRAND_DIR/paragon/_variables.scss"
   "$BRAND_DIR/paragon/tokens.json"
+  "$BRAND_DIR/paragon/images/card-imagecap-fallback.png"
 )
 
 expected_fonts=(
@@ -118,11 +122,15 @@ fonts/Poppins-Regular.woff2
 fonts/Poppins-SemiBold.woff2
 logo-white.png
 logo-white.svg
+logo-trademark.png
+logo-trademark.svg
 logo.png
 logo.svg
 package.json
+paragon/_overrides.scss
 paragon/_variables.scss
 paragon/fonts.scss
+paragon/images/card-imagecap-fallback.png
 paragon/tokens.json
 LIST
 ) | LC_ALL=C sort)"
