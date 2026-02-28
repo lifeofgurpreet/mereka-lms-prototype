@@ -138,7 +138,17 @@ jobs:
           # BuildKit enabled via DOCKER_BUILDKIT=1 env var.
           # Layer caching allowed (--no-cache removed per ADR-012).
           # Parallelizes independent Dockerfile stages for faster builds.
+          (
+            while true; do
+              echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
+              sleep 60
+            done
+          ) &
+          HEARTBEAT_PID=$!
+          trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
           tutor images build openedx
+          kill "$HEARTBEAT_PID" 2>/dev/null || true
+          trap - EXIT
 
       - name: Verify OpenEdX image branding contract
         run: |
@@ -324,7 +334,17 @@ jobs:
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
           export NODE_OPTIONS="--max-old-space-size=6144"
+          (
+            while true; do
+              echo "[build-mfe-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
+              sleep 60
+            done
+          ) &
+          HEARTBEAT_PID=$!
+          trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
           tutor images build mfe
+          kill "$HEARTBEAT_PID" 2>/dev/null || true
+          trap - EXIT
 
       - name: Verify MFE image branding contract
         run: |
