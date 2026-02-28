@@ -110,6 +110,9 @@ Do not use direct `kubectl set image` for normal production rollouts.
   - Frontend closure lane:
     - local: `./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser`
     - workflow: `.github/workflows/frontend-branding-closure.yml` (`workflow_dispatch`)
+    - when runtime theme rollout is expected live, set:
+      - `require_runtime_theme=true`
+      - `run_runtime_theme_contract_gate=true`
   - NPM-start screenshot lane:
     - local: `./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --learning-path /learning`
     - workflow: `.github/workflows/npm-start-mfe-smoke.yml` (`workflow_dispatch`)
