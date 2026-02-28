@@ -78,6 +78,7 @@ jobs:
   build-openedx:
     name: Build OpenEdX Image
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_openedx }}
     permissions:
@@ -267,6 +268,7 @@ jobs:
   build-mfe:
     name: Build MFE Image
     runs-on: ubuntu-24.04
+    timeout-minutes: 120
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_mfe }}
     permissions:
