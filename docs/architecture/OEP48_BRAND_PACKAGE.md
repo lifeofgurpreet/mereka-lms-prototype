@@ -1,7 +1,7 @@
 # OEP-48 Brand Package: Mereka Academy
 
-**Status**: Audit complete — see Gap Analysis below
-**Last updated**: 2026-02-25
+**Status**: Implemented with active verifier coverage; remaining gaps tracked below
+**Last updated**: 2026-02-28
 **Tracker task**: T110
 
 ---
@@ -27,7 +27,7 @@ MFE builds install the brand package via:
 npm install --legacy-peer-deps '@edx/brand@npm:<your-package>'
 ```
 
-Mereka currently installs: `@edly-io/indigo-brand-openedx@^2.4.3` aliased as `@edx/brand`.
+Mereka currently installs: `@edx/brand@file:./brand-mereka` during MFE image builds.
 
 ---
 
@@ -109,11 +109,11 @@ The SCSS layer injected into every MFE build.
 
 | Asset | Present | Notes |
 |-------|---------|-------|
-| `mereka.scss` | YES | MFE SCSS entry: imports `./scss/theme` + MFE-specific `:root` tokens |
+| `mereka.scss` | YES | MFE SCSS entry: imports `./scss/fonts`, `./scss/tokens`, `./scss/base`, and MFE-specific partials |
 | `fonts/` | YES | 9 `.woff2` files (same set as LMS) |
 | `images/` | YES | 17 logo + favicon files (same set as LMS) |
 
-`mereka.scss` is injected into every MFE build via the Tutor plugin (`mereka_lms.py`) using the `mfe-env-config-buildtime-imports` patch. The shared `scss/theme.scss` → `_tokens.scss` → `_fonts.scss` chain is imported, making all `--mereka-*` and `--pgn-*` tokens available at compile time.
+`mereka.scss` is injected into every MFE build via the Tutor plugin (`mereka_lms.py`) using the `mfe-env-config-buildtime-imports` patch. The split shared chain (`_fonts.scss`, `_tokens.scss`, `_base.scss`) is imported directly, avoiding LMS/Studio-only theme selectors in MFE bundles.
 
 ---
 
@@ -121,12 +121,12 @@ The SCSS layer injected into every MFE build.
 
 Installed in the MFE Dockerfile as:
 ```
-npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
+npm install --legacy-peer-deps '@edx/brand@file:./brand-mereka'
 ```
 
-This installs `@edly-io/indigo-brand-openedx` aliased as `@edx/brand`. The Indigo brand provides the Open edX Indigo theme's default brand assets. **Mereka overrides this entirely at the SCSS layer via `mereka.scss`**, which re-declares all `--mereka-*` and `--pgn-*` CSS custom properties, overriding anything Indigo sets.
-
-The logo/favicon assets used by MFEs come from the `mfe/images/` directory (copied into the Docker image), not from the npm brand package.
+This installs the local `infrastructure/tutor/brand-mereka/` package as `@edx/brand`.
+The package includes canonical OEP-48 aliases (`logo_white.png`, `favicon.png`) and `logo.js`
+exports for direct brand-package consumers.
 
 ---
 
@@ -166,38 +166,38 @@ CI enforces no drift between layers via the `design-token-validation` job.
 
 | OEP-48 requirement | Mereka delivery | Status |
 |--------------------|----------------|--------|
-| Single brand package installed as `@edx/brand` | `@edly-io/indigo-brand-openedx@^2.4.3` aliased as `@edx/brand` | PARTIAL — upstream Indigo, overridden by `mereka.scss` |
+| Single brand package installed as `@edx/brand` | Local package `infrastructure/tutor/brand-mereka` via `@edx/brand@file:./brand-mereka` | YES |
 | `logo.png` (primary logo) | `mfe/images/logo.png`, `lms/static/images/logo.png`, `cms/static/images/logo.png` | YES — all surfaces |
 | `logo.svg` | Same paths, `.svg` variant | YES |
-| `logo_white.png` (dark bg) | `logo-white.png` (OEP-48 name differs) | YES — present, naming differs |
+| `logo_white.png` (dark bg) | `logo-white.png` plus package alias `logo_white.png` | YES |
 | `favicon.ico` | All three surfaces | YES |
-| `favicon.png` (256×256) | `favicon-256x256.png` (name differs) | YES — present, naming differs |
+| `favicon.png` (256×256) | package alias `favicon.png` (from canonical 256×256 source) | YES |
 | Colors / SCSS variables | `scss/_tokens.scss` — `$color-teal`, `$color-magenta`, etc. | YES |
 | CSS custom properties | `--mereka-*` + `--pgn-*` via `_tokens.scss` and `mereka-overrides.css` | YES |
 | Typography / font declarations | `scss/_fonts.scss` (woff2, no Google Fonts dependency) | YES |
 | Header component | `lms/templates/header/brand.html` (LMS); MFE header via Paragon/navbar overrides in `mereka.scss` | PARTIAL — LMS has Mako template; MFE uses CSS-only header overrides, no React header component |
 | Footer component | `lms/templates/footer.html` (LMS); MFE footer React component via plugin slot | YES — both surfaces |
-| Package manifest (`package.json`) | Not present | GAP — see Gap Analysis |
-| OEP-48 `logo.js` exports | Not present | GAP — see Gap Analysis |
-| Automated build packaging | `scripts/branding/generate-tokens-from-canonical.sh` handles token sync; no tar/npm pack step | GAP — see Gap Analysis |
+| Package manifest (`package.json`) | Present at `infrastructure/tutor/brand-mereka/package.json` | YES |
+| OEP-48 `logo.js` exports | Present at `infrastructure/tutor/brand-mereka/logo.js` | YES |
+| Automated build packaging | Token pipeline + asset-sync verification wired; npm artifact publishing still pending | PARTIAL |
 
 ---
 
 ## Gap Analysis
 
-### GAP-1: No standalone npm-publishable brand package
+### GAP-1: Standalone brand package publish pipeline (resolved package creation; publish still optional)
 
 **What OEP-48 expects**: A `package.json` at the root of a brand directory so the package can be published to npm and installed as `@edx/brand`.
 
-**Current state**: Mereka brand assets are organized across `assets/branding/` (canonical), `infrastructure/tutor/themes/mereka/mfe/` (MFE-ready), and `infrastructure/tutor/themes/mereka/lms|cms/` (LMS/Studio). There is no single `package.json` that would let this be published to npm.
+**Current state**: Resolved on 2026-02-28 for local/runtime use. `infrastructure/tutor/brand-mereka/package.json` exists and is installed as `@edx/brand` in MFE builds via file alias.
 
-**Impact**: We cannot install Mereka assets as a native `@edx/brand` replacement. Instead, we use `@edly-io/indigo-brand-openedx` as the base and override it with `mereka.scss`. This is functionally equivalent for our deployment but does not satisfy the OEP-48 "single publishable package" model.
+**Impact**: Runtime gap closed. Remaining optional work is publishing/versioning the package as an external npm artifact.
 
 **Priority**: Low for current deployment. Would become necessary if we wanted to publish the brand package to npm or the [Open edX package registry](https://github.com/openedx-unsupported/frontend-build).
 
 ---
 
-### GAP-2: No `logo.js` / JavaScript exports
+### GAP-2: `logo.js` / JavaScript exports (resolved)
 
 **What OEP-48 expects**: A `logo.js` file (or ESM equivalent) that exports logo assets for consumption by React MFE components:
 ```js
@@ -206,11 +206,9 @@ export { default as logoWhite } from './logo_white.png';
 export { default as favicon } from './favicon.ico';
 ```
 
-**Current state**: Logo files are present in `mfe/images/` but there is no JavaScript module that exports them. MFE Paragon `Brand` component cannot resolve `@edx/brand/logo.js` from Mereka assets — it resolves from `@edly-io/indigo-brand-openedx` instead.
+**Current state**: Resolved on 2026-02-28. `infrastructure/tutor/brand-mereka/logo.js` exports `logo`, `logoWhite`, `logoTrademark`, and `favicon`.
 
-**Workaround in place**: `mereka.scss` overrides `.navbar .navbar-brand img` height and the MFE Dockerfile copies `mfe/images/` into the container, making the assets reachable via static URLs. The actual image `src` values in MFE components come from the MFE runtime config (`LOGO_URL`, `LOGO_WHITE_URL`) injected via `env.config.jsx`, not from `@edx/brand/logo.js`.
-
-**Impact**: Medium. Brand images in MFEs (navbar logo, footer logo) render correctly via runtime config. However, any MFE component that imports directly from `@edx/brand` receives the Indigo logo, not the Mereka logo.
+**Impact**: Gap closed. Direct brand package imports now resolve to Mereka assets.
 
 ---
 
@@ -224,13 +222,13 @@ export { default as favicon } from './favicon.ico';
 
 ---
 
-### GAP-4: `logo_white.png` naming mismatch
+### GAP-4: `logo_white.png` naming mismatch (resolved via alias)
 
 **What OEP-48 expects**: File named `logo_white.png` (underscore).
 
-**Current state**: File is named `logo-white.png` (hyphen) in all surfaces.
+**Current state**: Resolved on 2026-02-28 at the package interface level with `logo_white.png` and `logo_white.svg` aliases in `brand-mereka/` while preserving hyphenated theme files.
 
-**Impact**: Low. This only matters if code imports by the exact OEP-48 filename. Our current codebase uses the hyphen convention consistently, and MFE runtime config passes URLs explicitly, so the filename does not need to match OEP-48 exactly.
+**Impact**: Closed for package consumers. No theme-file renaming was required.
 
 ---
 
@@ -258,10 +256,10 @@ export { default as favicon } from './favicon.ico';
 | LMS footer branding | YES — custom `footer.html` with logo | Same (Mako is correct for LMS) | NONE |
 | MFE footer component | YES — React plugin slot component | Same | NONE |
 | MFE header component (React) | NO — CSS-only | Optional React header export | LOW |
-| npm brand package (`package.json`) | NO | `package.json` + publish pipeline | MEDIUM |
-| JS logo exports (`logo.js`) | NO | ESM exports for React component imports | MEDIUM |
+| npm brand package (`package.json`) | YES (local package) | Optional publish pipeline | LOW |
+| JS logo exports (`logo.js`) | YES | Keep exports in sync with asset aliases | LOW |
 | Automated brand package versioning | NO | CI job: `npm pack` or GitHub release | MEDIUM |
-| Naming conventions (logo_white vs logo-white) | Partial mismatch | Rename or alias | LOW |
+| Naming conventions (logo_white vs logo-white) | Alias provided at package boundary | Keep alias parity checks in CI | LOW |
 
 ---
 
@@ -269,15 +267,9 @@ export { default as favicon } from './favicon.ico';
 
 These are improvements beyond the current T110 scope, listed for completeness:
 
-1. **Create `brand/package.json`** in `assets/branding/` (or a new `brand/` directory) with the OEP-48 package shape. Reference: [openedx-unsupported/brand-openedx](https://github.com/openedx-unsupported/brand-openedx).
-
-2. **Add `logo.js` ESM exports** that re-export all logo/favicon files from the package root.
-
-3. **Add logo/font sync to CI** (extend `generate-tokens-from-canonical.sh` or create a separate `sync-brand-assets.sh` CI job) so that `assets/branding/` → `lms/`, `cms/`, `mfe/` image sync is automated and verified.
-
-4. **Add `npm pack` step to release pipeline** to produce a versioned brand package artifact.
-
-5. **Rename `logo-white.png` → `logo_white.png`** across all surfaces to match OEP-48 convention (low urgency).
+1. **Add npm artifact publishing** (`npm pack`/release artifact) for `brand-mereka` so package versioning is explicit in release evidence.
+2. **Expand CI sync checks** from verification-only to enforce a generated/synced brand-package step in release workflows.
+3. **Maintain alias parity gates** (`logo_white.*`, `favicon.png`, `logo.js`) as new assets are added.
 
 ---
 
