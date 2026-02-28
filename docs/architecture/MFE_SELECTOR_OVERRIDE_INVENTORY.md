@@ -5,7 +5,7 @@
 >
 > **AC-MFE-005** — Document risky selector overrides and migration priority.
 > **Spec**: `mfe-branding-customization_spec.md`
-> **Last scanned**: 2026-02-18
+> **Last scanned**: 2026-02-28 (T102 alignment)
 
 ---
 
@@ -28,14 +28,14 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 | Selector Pattern | Target MFE(s) | Risk | Notes |
 |-----------------|---------------|------|-------|
 | `.pgn__page-container`, `.pgn__btn--primary`, `.pgn__card`, `.pgn__modal-content`, etc. | All MFEs | **MEDIUM** | Paragon component classes are stable within a Paragon major version but change across major bumps |
-| `[data-testid*="login-page"] .pgn__card` | Authn MFE | **MEDIUM** | `data-testid` selectors are intended for tests, not production styling; Open edX may remove them |
+| `[class*="authn"]`, `[class*="login-register"]` | Authn/login-route surfaces | **MEDIUM** | Class-based fallback kept where route-level data attributes are not available. `data-testid` selectors were removed in T102 |
 | `[class*="authn"] .pgn__btn--primary` | Authn MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
 | `[class*="account-settings"] .pgn__form-control` | Account MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
-| `[class*="learner-dashboard"] [data-testid*="course"]` | Learner Dashboard MFE | **MEDIUM** | Mixed data-testid + class wildcard; fragile nesting |
-| `[data-testid*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"])` | Learning MFE | **MEDIUM** | Deep compound selector; 3+ levels of combinators |
+| `[class*="learner-dashboard"] [class*="course"]` | Learner Dashboard MFE | **MEDIUM** | Class-based fallback retained until dedicated wrapper slots are available |
+| `[class*="learning"] :is(.pgn__card, .card) :is(.pgn__card-image-cap, [class*="image-cap"])` | Learning MFE | **MEDIUM** | Class-based fallback retained; no stable testid for this structure |
 | `[class*="discussions"] .pgn__card` | Discussions MFE | **MEDIUM** | Wildcard class match; tracked as `SELECTOR-EXCEPTION` in source |
 
-**Total selector exception annotations**: ~40 comment blocks in `mereka.scss`.
+**Total selector exception annotations**: 53 comment blocks in `mereka.scss` (`SELECTOR-EXCEPTION`, includes 14 pending P2/P3 items).
 
 **Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
 
@@ -49,7 +49,7 @@ Applied to the LMS shell page that wraps MFEs (header/footer regions visible bef
 |-----------------|----------------|------|-------|
 | `.header-global`, `.nav-global` | LMS shell header | **MEDIUM** | These are LMS legacy class names; subject to Open edX template refactors |
 | `.find-courses .search-facets .header-search-facets` | Course discovery | **MEDIUM** | 3-level nesting into LMS template structure |
-| `.footer-container`, `.footer-social`, `.footer-nav`, `.footer-logo-link`, `.footer-logo-img`, `.footer-brand-name`, etc. | LMS legacy footer | **MEDIUM** | ~30 footer selectors targeting the legacy Mako-rendered footer; migration to `footer-slot` in progress (8jao.9) |
+| `.footer-container`, `.footer-social`, `.footer-nav`, `.footer-logo-link`, `.footer-logo-img`, `.footer-brand-name`, etc. | LMS legacy footer | **MEDIUM** | ~30 selectors in legacy Mako footer shell; MFE shell now uses slot replacement, LMS shell selectors retained until LMS migration is completed. |
 | `--mereka-*` CSS custom properties | All surfaces | **LOW** | Stable design token contract; no DOM coupling |
 
 ---
@@ -84,8 +84,8 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 ### Immediate (before next Tutor upgrade)
 
 1. **`[class*="..."]` wildcard fallbacks in `mereka.scss`** — tracked as `SELECTOR-EXCEPTION` with explicit expiry and rationale.
-   These are fallback selectors added because `data-testid` attributes were absent at time of authoring.
-   **Action**: Audit each fallback block. If upstream now ships `data-testid`, remove the wildcard fallback.
+   These are fallback selectors used where surface-level plugin slots or stable `data-testid`/semantic hooks are not yet available.
+   **Action**: Audit each fallback block; keep only where upstream contract is not yet available.
 
 2. **`.header-global` / `.nav-global` in LMS overrides** — LMS template classes.
    **Action**: Verify these class names still exist in the Tutor 21 (Ulmo) LMS templates.
@@ -147,4 +147,5 @@ grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-02-18 | 8jao.5 | Initial inventory from live codebase scan (AC-MFE-005) |
-| 2026-02-28 | codex | Aligned risk annotations to `SELECTOR-EXCEPTION` naming and updated grep/check guidance |
+| 2026-02-25 | 2dcy.6 | T102 selector hardening audit baseline captured in `MFE_SELECTOR_AUDIT.md` (data-testid selectors removed) |
+| 2026-02-28 | codex | Realigned inventory with live T102 state and updated migration rationale |
