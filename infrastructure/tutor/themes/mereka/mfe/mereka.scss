@@ -373,23 +373,18 @@ label {
 
 /* RISK: HIGH — structural account/dashboard surface scoping; breaks if MFE renames top-level wrapper */
 // SELECTOR-EXCEPTION: [class*="account-settings"] | no stable slot; account MFE top-level wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] | no stable slot; account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] | no stable slot; dashboard top-level wrapper | expires: 2026-Q3
 [class*="account-settings"],
-[class*="account-page"],
 [class*="learner-dashboard"] {
   background: transparent;
 }
 
 /* RISK: MEDIUM — account/dashboard card styling; border-radius/shadow degrade visually */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__card | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__card | account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__card | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__card,
-[class*="account-page"] .pgn__card,
 [class*="learner-dashboard"] .pgn__card,
 [class*="account-settings"] .card,
-[class*="account-page"] .card,
 [class*="learner-dashboard"] .card {
   border-radius: var(--mereka-mfe-card-radius);
   border: var(--mereka-mfe-card-border);
@@ -398,40 +393,32 @@ label {
 
 /* RISK: LOW — form control background within scoped surfaces; color-only */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__form-control | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__form-control | account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__form-control | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__form-control,
-[class*="account-page"] .pgn__form-control,
 [class*="learner-dashboard"] .pgn__form-control {
   background: var(--pgn-color-white);
 }
 
 /* RISK: LOW — button border-radius within scoped surfaces; shape-only, degrades visually */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__btn | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__btn | account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__btn | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__btn,
-[class*="account-page"] .pgn__btn,
 [class*="learner-dashboard"] .pgn__btn {
   border-radius: var(--mereka-mfe-pill-radius);
 }
 
 /* RISK: LOW — alert border-radius within scoped surfaces; shape-only */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__alert | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__alert | account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__alert | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__alert,
-[class*="account-page"] .pgn__alert,
 [class*="learner-dashboard"] .pgn__alert {
   border-radius: var(--mereka-mfe-alert-radius);
 }
 
 /* RISK: LOW — dropdown toggle styling within scoped surfaces; shape/border color only */
 // SELECTOR-EXCEPTION: [class*="account-settings"] .pgn__dropdown-toggle | account MFE wrapper | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] .pgn__dropdown-toggle | account MFE secondary wrapper | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] .pgn__dropdown-toggle | dashboard wrapper | expires: 2026-Q3
 [class*="account-settings"] .pgn__dropdown-toggle,
-[class*="account-page"] .pgn__dropdown-toggle,
 [class*="learner-dashboard"] .pgn__dropdown-toggle {
   border-radius: var(--mereka-mfe-pill-radius);
   border-color: var(--mereka-mfe-dropdown-toggle-border, rgb(var(--mereka-color-ink-deep-rgb) / 0.2));
@@ -578,12 +565,9 @@ label {
 /* account/learner-dashboard scope for headings */
 /* RISK: LOW — heading font/color within scoped surfaces; degrades to default heading style */
 // SELECTOR-EXCEPTION: [class*="account-settings"] h1/h2 | heading font; no slot for account settings headings | expires: 2026-Q3
-// SELECTOR-EXCEPTION: [class*="account-page"] h1/h2 | heading font; no slot for account page headings | expires: 2026-Q3
 // SELECTOR-EXCEPTION: [class*="learner-dashboard"] h1/h2 | heading font; no slot for dashboard headings | expires: 2026-Q3
 [class*="account-settings"] h1,
 [class*="account-settings"] h2,
-[class*="account-page"] h1,
-[class*="account-page"] h2,
 [class*="learner-dashboard"] h1,
 [class*="learner-dashboard"] h2 {
   font-family: var(--mereka-font-heading);
