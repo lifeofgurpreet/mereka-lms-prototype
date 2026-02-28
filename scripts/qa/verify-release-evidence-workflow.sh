@@ -61,6 +61,31 @@ if ! rg -n -- '--require-digests' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'require_runtime_theme' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing require_runtime_theme input"
+  violations=1
+fi
+
+if ! rg -n 'runtime_theme_url' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing runtime_theme_url input"
+  violations=1
+fi
+
+if ! rg -n './scripts/qa/verify-paragon-runtime\.sh' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing frontend runtime theme contract step"
+  violations=1
+fi
+
+if ! rg -n -- '--runtime-url "\$RUNTIME_THEME_URL"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow runtime contract step missing --runtime-url wiring"
+  violations=1
+fi
+
+if ! rg -n -- '--require-runtime' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow runtime contract step missing strict-mode support (--require-runtime)"
+  violations=1
+fi
+
 if ! rg -n '"openedx_digest": "\$\{\{ steps\.digests\.outputs\.openedx_digest \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing openedx_digest"
   violations=1
@@ -68,6 +93,16 @@ fi
 
 if ! rg -n '"mfe_digest": "\$\{\{ steps\.digests\.outputs\.mfe_digest \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing mfe_digest"
+  violations=1
+fi
+
+if ! rg -n '"require_runtime_theme": "\$\{\{ inputs\.require_runtime_theme \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing require_runtime_theme field"
+  violations=1
+fi
+
+if ! rg -n '"runtime_theme_url": "\$\{\{ inputs\.runtime_theme_url \|\| '\'''\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing runtime_theme_url field"
   violations=1
 fi
 

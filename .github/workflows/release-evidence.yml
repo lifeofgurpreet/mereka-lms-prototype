@@ -18,6 +18,16 @@ on:
         options:
           - production
           - staging
+      require_runtime_theme:
+        description: "Fail evidence run unless runtime /theme/*.min.css mode is active"
+        required: true
+        default: false
+        type: boolean
+      runtime_theme_url:
+        description: "Override runtime theme origin (empty = auto by target environment)"
+        required: false
+        default: ""
+        type: string
 
 permissions: {}
 
@@ -84,6 +94,29 @@ jobs:
             --frontend-cache-env auto \
             | tee var/release-evidence/release-dry-run.log
 
+      - name: Verify frontend runtime theme contract
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment }}"
+          RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+
+          if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
+            RUNTIME_THEME_URL="$RUNTIME_THEME_URL_INPUT"
+          elif [[ "$TARGET_ENV" == "production" ]]; then
+            RUNTIME_THEME_URL="https://apps.academyv2.mereka.io"
+          else
+            RUNTIME_THEME_URL="https://apps.academyv2.mereka.dev"
+          fi
+
+          args=(--runtime-url "$RUNTIME_THEME_URL")
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime)
+          fi
+
+          ./scripts/qa/verify-paragon-runtime.sh "${args[@]}" \
+            | tee var/release-evidence/runtime-theme-contract.log
+
       - name: Write release metadata
         run: |
           python3 - <<'PY'
@@ -108,6 +141,8 @@ jobs:
               "openedx_digest": "${{ steps.digests.outputs.openedx_digest }}",
               "mfe_digest": "${{ steps.digests.outputs.mfe_digest }}",
               "target_environment": "${{ inputs.target_environment }}",
+              "require_runtime_theme": "${{ inputs.require_runtime_theme || 'false' }}",
+              "runtime_theme_url": "${{ inputs.runtime_theme_url || '' }}",
           }
 
           out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
