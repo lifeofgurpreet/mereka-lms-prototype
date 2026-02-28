@@ -12,10 +12,16 @@ AUDIT_DOC="$REPO_ROOT/docs/architecture/PARAGON_V22_TOKEN_AUDIT.md"
 BRANDING_CHECKLIST="$REPO_ROOT/docs/BRANDING_VERIFICATION_CHECKLIST.md"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"
+BRAND_LIGHT_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand-light.min.css"
+CORE_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
+LIGHT_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.min.css"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
 REQUIRE_RUNTIME=0
 THEME_DEFAULT_ENABLED=1
+MAX_CORE_THEME_BYTES="${MAX_CORE_THEME_BYTES:-614400}"
+MAX_BRAND_THEME_BYTES="${MAX_BRAND_THEME_BYTES:-51200}"
+MAX_LIGHT_THEME_BYTES="${MAX_LIGHT_THEME_BYTES:-4096}"
 
 PASS=0
 FAIL=0
@@ -194,6 +200,50 @@ if [[ -f "$BRANDING_CHECKLIST" ]] && [[ -f "$THEME_CSS" ]]; then
   pass "AC-TKN-032 visual regression runbook + compiled theme asset are present"
 else
   fail "AC-TKN-032 missing visual-regression prerequisites"
+fi
+
+# Runtime theme artifact budgets and light-variant parity checks.
+if [[ -f "$CORE_THEME_CSS" ]]; then
+  core_size="$(wc -c < "$CORE_THEME_CSS" | tr -d ' ')"
+  if [[ "$core_size" -le "$MAX_CORE_THEME_BYTES" ]]; then
+    pass "Theme core CSS size ${core_size}B is within budget (${MAX_CORE_THEME_BYTES}B)"
+  else
+    fail "Theme core CSS size ${core_size}B exceeds budget (${MAX_CORE_THEME_BYTES}B)"
+  fi
+else
+  fail "Theme core CSS missing: ${CORE_THEME_CSS#$REPO_ROOT/}"
+fi
+
+if [[ -f "$THEME_CSS" ]]; then
+  brand_size="$(wc -c < "$THEME_CSS" | tr -d ' ')"
+  if [[ "$brand_size" -le "$MAX_BRAND_THEME_BYTES" ]]; then
+    pass "Brand theme CSS size ${brand_size}B is within budget (${MAX_BRAND_THEME_BYTES}B)"
+  else
+    fail "Brand theme CSS size ${brand_size}B exceeds budget (${MAX_BRAND_THEME_BYTES}B)"
+  fi
+else
+  fail "Brand theme CSS missing: ${THEME_CSS#$REPO_ROOT/}"
+fi
+
+if [[ -f "$LIGHT_THEME_CSS" ]]; then
+  light_size="$(wc -c < "$LIGHT_THEME_CSS" | tr -d ' ')"
+  if [[ "$light_size" -le "$MAX_LIGHT_THEME_BYTES" ]]; then
+    pass "Light theme CSS size ${light_size}B is within budget (${MAX_LIGHT_THEME_BYTES}B)"
+  else
+    warn "Light theme CSS size ${light_size}B exceeds delta budget (${MAX_LIGHT_THEME_BYTES}B)"
+  fi
+else
+  fail "Light theme CSS missing: ${LIGHT_THEME_CSS#$REPO_ROOT/}"
+fi
+
+if [[ -f "$THEME_CSS" && -f "$BRAND_LIGHT_CSS" ]]; then
+  if cmp -s "$THEME_CSS" "$BRAND_LIGHT_CSS"; then
+    pass "Brand light theme CSS is byte-identical to base brand theme CSS"
+  else
+    fail "Brand light theme CSS differs from base brand theme CSS (unexpected drift)"
+  fi
+else
+  fail "Brand theme parity check prerequisites missing"
 fi
 
 echo ""
