@@ -51,12 +51,12 @@ This runbook covers operational procedures for the enterprise microservices suit
    ```bash
    ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode all --tenant client-corp
    STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 ./scripts/qa/verify-multisite-config.sh prod
-   ./scripts/qa/verify-enterprise-service-deployment.sh
+   ./scripts/qa/verify-enterprise-service-deployment.sh --env prod
    ./scripts/migrations/run-verification-pipeline.sh
    ```
    If environment is intentionally parked (all enterprise deployments at `replicas=0`), use:
    ```bash
-   ./scripts/qa/verify-enterprise-service-deployment.sh --allow-parked-services
+   ./scripts/qa/verify-enterprise-service-deployment.sh --env prod --allow-parked-services
    ```
 4. Configure enterprise catalogs/license pools and role assignments as required by the customer onboarding plan.
 

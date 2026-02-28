@@ -53,13 +53,13 @@ The workflow performs tenant provisioning, enterprise/site mapping sync, IdP con
 ```bash
 ./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode all --tenant client-corp
 STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 ./scripts/qa/verify-multisite-config.sh prod
-./scripts/qa/verify-enterprise-service-deployment.sh
+./scripts/qa/verify-enterprise-service-deployment.sh --env prod
 ./scripts/migrations/run-verification-pipeline.sh
 ```
 
 If enterprise services are intentionally parked at `replicas=0` during a staged rollout window, replace the deployment check with:
 ```bash
-./scripts/qa/verify-enterprise-service-deployment.sh --allow-parked-services
+./scripts/qa/verify-enterprise-service-deployment.sh --env prod --allow-parked-services
 ```
 
 ### Manual Procedure (Alternative)

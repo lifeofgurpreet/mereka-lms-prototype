@@ -34,7 +34,7 @@ Interpretation:
 
 Command:
 ```bash
-./scripts/qa/verify-enterprise-service-deployment.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+./scripts/qa/verify-enterprise-service-deployment.sh --env prod
 ```
 
 Result summary:
