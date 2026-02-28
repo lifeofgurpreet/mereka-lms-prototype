@@ -56,17 +56,10 @@ fi
 
 pass "Build directory exists: tutor_env/env/build/openedx"
 
-# If the rendered Mereka theme tree is absent, treat as non-blocking in static contexts.
-# This script validates post-render/build artifacts; without themes/mereka there is
-# no reliable runtime surface to assert.
+RUNTIME_THEME_AVAILABLE=1
 if [[ ! -d "${BUILD_DIR}/themes/mereka" ]]; then
-  skip "Rendered themes/mereka build tree not found (run apply-patches + openedx image build first)"
-  echo
-  echo "=== Summary ==="
-  echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
-  echo
-  echo "Note: Post-build branding sync checks were skipped because rendered theme artifacts are unavailable."
-  exit 0
+  RUNTIME_THEME_AVAILABLE=0
+  skip "Rendered themes/mereka build tree not found (runtime asset checks 2/3/4/7 will be skipped)"
 fi
 
 # Check 2: Verify Mereka logo variants exist in compiled static files (AC-INT-003)
@@ -85,58 +78,56 @@ LOGO_BUILD_PATHS=(
   "themes/mereka/lms/static/images/favicon.ico"
 )
 
-LOGO_FOUND=0
-LOGO_MISSING=0
+if [[ "$RUNTIME_THEME_AVAILABLE" -eq 1 ]]; then
+  LOGO_FOUND=0
+  LOGO_MISSING=0
 
-for logo_path in "${LOGO_BUILD_PATHS[@]}"; do
-  full_path="${BUILD_DIR}/${logo_path}"
-  if [[ -f "$full_path" ]]; then
-    pass "Logo variant synced to build: $logo_path"
-    LOGO_FOUND=$((LOGO_FOUND + 1))
+  for logo_path in "${LOGO_BUILD_PATHS[@]}"; do
+    full_path="${BUILD_DIR}/${logo_path}"
+    if [[ -f "$full_path" ]]; then
+      pass "Logo variant synced to build: $logo_path"
+      LOGO_FOUND=$((LOGO_FOUND + 1))
+    else
+      fail "Logo variant missing in build: $logo_path"
+      LOGO_MISSING=$((LOGO_MISSING + 1))
+    fi
+  done
+
+  if [[ $LOGO_MISSING -eq 0 ]]; then
+    pass "AC-INT-003 (Part 1): All Mereka logo variants exist in compiled static files"
   else
-    fail "Logo variant missing in build: $logo_path"
-    LOGO_MISSING=$((LOGO_MISSING + 1))
+    fail "AC-INT-003 (Part 1): Missing logo variants in build (found $LOGO_FOUND/${#LOGO_BUILD_PATHS[@]})"
   fi
-done
 
-if [[ $LOGO_MISSING -eq 0 ]]; then
-  pass "AC-INT-003 (Part 1): All Mereka logo variants exist in compiled static files"
-else
-  fail "AC-INT-003 (Part 1): Missing logo variants in build (found $LOGO_FOUND/${#LOGO_BUILD_PATHS[@]})"
-fi
+  # Check 3: Verify fonts exist in build directory
+  echo
+  echo -e "${BLUE}Checking custom fonts in build directory...${NC}"
 
-# Check 3: Verify fonts exist in build directory
-echo
-echo -e "${BLUE}Checking custom fonts in build directory...${NC}"
+  FONT_BUILD_DIR="${BUILD_DIR}/themes/mereka/lms/static/fonts"
 
-FONT_BUILD_DIR="${BUILD_DIR}/themes/mereka/lms/static/fonts"
-
-if [[ ! -d "$FONT_BUILD_DIR" ]]; then
-  fail "Font directory missing in build: themes/mereka/lms/static/fonts"
-else
-  pass "Font directory exists in build"
-
-  # Count .woff2 files
-  FONT_COUNT=$(find "$FONT_BUILD_DIR" -name "*.woff2" 2>/dev/null | wc -l)
-
-  if [[ $FONT_COUNT -gt 0 ]]; then
-    pass "Custom fonts synced to build ($FONT_COUNT .woff2 files found)"
+  if [[ ! -d "$FONT_BUILD_DIR" ]]; then
+    fail "Font directory missing in build: themes/mereka/lms/static/fonts"
   else
-    fail "No custom fonts (.woff2) found in build directory"
+    pass "Font directory exists in build"
+
+    # Count .woff2 files
+    FONT_COUNT=$(find "$FONT_BUILD_DIR" -name "*.woff2" 2>/dev/null | wc -l)
+
+    if [[ $FONT_COUNT -gt 0 ]]; then
+      pass "Custom fonts synced to build ($FONT_COUNT .woff2 files found)"
+    else
+      fail "No custom fonts (.woff2) found in build directory"
+    fi
   fi
-fi
 
-# Check 4: Verify Google Fonts imports removed from Mereka theme (AC-INT-003 Part 2)
-echo
-echo -e "${BLUE}Verifying Google Fonts removal from Mereka theme...${NC}"
+  # Check 4: Verify Google Fonts imports removed from Mereka theme (AC-INT-003 Part 2)
+  echo
+  echo -e "${BLUE}Verifying Google Fonts removal from Mereka theme...${NC}"
 
-GOOGLE_FONTS_PATTERN="fonts.googleapis.com"
-MEREKA_THEME_DIR="${BUILD_DIR}/themes/mereka"
+  GOOGLE_FONTS_PATTERN="fonts.googleapis.com"
+  MEREKA_THEME_DIR="${BUILD_DIR}/themes/mereka"
 
-# Check Mereka theme specifically (not default Indigo theme)
-if [[ -d "$MEREKA_THEME_DIR" ]]; then
   echo "  Running: grep -r '$GOOGLE_FONTS_PATTERN' tutor_env/env/build/openedx/themes/mereka/"
-
   GOOGLE_FONTS_MATCHES=$(grep -r "$GOOGLE_FONTS_PATTERN" "$MEREKA_THEME_DIR" 2>/dev/null || true)
 
   if [[ -z "$GOOGLE_FONTS_MATCHES" ]]; then
@@ -157,7 +148,8 @@ if [[ -d "$MEREKA_THEME_DIR" ]]; then
     fi
   fi
 else
-  skip "Mereka theme build directory not found"
+  skip "AC-INT-003 (Part 1): runtime logo sync checks skipped (rendered theme artifacts unavailable)"
+  skip "AC-INT-003 (Part 2): runtime Google Fonts checks skipped (rendered theme artifacts unavailable)"
 fi
 
 # Check 5: Verify MFE SCSS synced to build
@@ -166,25 +158,29 @@ echo -e "${BLUE}Checking MFE branding assets in build directory...${NC}"
 
 MFE_BUILD_DIR="${REPO_ROOT}/tutor_env/env/plugins/mfe/build/mfe"
 
-if [[ ! -d "$MFE_BUILD_DIR" ]]; then
-  skip "MFE build directory not found (MFE image not built)"
+if [[ "$RUNTIME_THEME_AVAILABLE" -eq 1 ]]; then
+  if [[ ! -d "$MFE_BUILD_DIR" ]]; then
+    skip "MFE build directory not found (MFE image not built)"
+  else
+    pass "MFE build directory exists"
+
+    # Check for mereka.scss or brand.scss
+    MFE_SCSS_FOUND=false
+
+    if [[ -f "${MFE_BUILD_DIR}/indigo/mereka/mereka.scss" ]]; then
+      pass "MFE SCSS synced: indigo/mereka/mereka.scss"
+      MFE_SCSS_FOUND=true
+    elif [[ -f "${MFE_BUILD_DIR}/brand/mereka.scss" ]]; then
+      pass "MFE SCSS synced: brand/mereka.scss"
+      MFE_SCSS_FOUND=true
+    fi
+
+    if [[ "$MFE_SCSS_FOUND" == "false" ]]; then
+      fail "MFE SCSS not found in build directory"
+    fi
+  fi
 else
-  pass "MFE build directory exists"
-
-  # Check for mereka.scss or brand.scss
-  MFE_SCSS_FOUND=false
-
-  if [[ -f "${MFE_BUILD_DIR}/indigo/mereka/mereka.scss" ]]; then
-    pass "MFE SCSS synced: indigo/mereka/mereka.scss"
-    MFE_SCSS_FOUND=true
-  elif [[ -f "${MFE_BUILD_DIR}/brand/mereka.scss" ]]; then
-    pass "MFE SCSS synced: brand/mereka.scss"
-    MFE_SCSS_FOUND=true
-  fi
-
-  if [[ "$MFE_SCSS_FOUND" == "false" ]]; then
-    fail "MFE SCSS not found in build directory"
-  fi
+  skip "MFE build-asset checks skipped (rendered theme artifacts unavailable)"
 fi
 
 # Check 6: Verify apply-patches.sh syncs assets correctly
@@ -225,17 +221,21 @@ echo -e "${BLUE}Checking Studio (CMS) theme assets in build directory...${NC}"
 
 CMS_THEME_IMAGES="${BUILD_DIR}/themes/mereka/cms/static/images"
 
-if [[ ! -d "$CMS_THEME_IMAGES" ]]; then
-  fail "CMS theme images directory missing in build"
-else
-  pass "CMS theme images directory exists in build"
-
-  # Check for at least one logo file
-  if ls "$CMS_THEME_IMAGES"/logo*.png >/dev/null 2>&1; then
-    pass "CMS logo files found in build"
+if [[ "$RUNTIME_THEME_AVAILABLE" -eq 1 ]]; then
+  if [[ ! -d "$CMS_THEME_IMAGES" ]]; then
+    fail "CMS theme images directory missing in build"
   else
-    fail "No CMS logo files found in build"
+    pass "CMS theme images directory exists in build"
+
+    # Check for at least one logo file
+    if ls "$CMS_THEME_IMAGES"/logo*.png >/dev/null 2>&1; then
+      pass "CMS logo files found in build"
+    else
+      fail "No CMS logo files found in build"
+    fi
   fi
+else
+  skip "CMS theme asset checks skipped (rendered theme artifacts unavailable)"
 fi
 
 # Check 8: Verify SASS compilation strips Google Fonts
