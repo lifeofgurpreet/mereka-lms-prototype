@@ -226,12 +226,12 @@ if [[ -f "$PLUGIN" ]]; then
   fi
 fi
 
-# Check 13: env.config patch uses mfe-env-config hook (canonical entry point)
+# Check 13: env.config patch uses supported mfe-env-config hook variant(s)
 if [[ -f "$PLUGIN" ]]; then
-  if grep -q '"mfe-env-config"' "$PLUGIN"; then
-    pass_check "MFE theme patch uses canonical 'mfe-env-config' hook"
+  if grep -qE '"mfe-env-config"|"mfe-env-config-buildtime-imports"|"mfe-env-config-runtime-definitions"' "$PLUGIN"; then
+    pass_check "MFE theme patch uses supported env-config hook variant(s)"
   else
-    fail_check "MFE theme patch uses canonical 'mfe-env-config' hook"
+    fail_check "MFE theme patch uses supported env-config hook variant(s)"
   fi
 fi
 

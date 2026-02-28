@@ -25,12 +25,33 @@ for target in targets:
 
     def ensure_mfe_cookie_env(text):
         marker = "ENV MFE_CONFIG_API_URL=/api/mfe_config/v1"
-        if marker not in text or "SESSION_COOKIE_DOMAIN" in text:
+        # Normalize historical hardcoded defaults to empty values so cookie domains
+        # are provided by runtime config/environment, not baked into the image.
+        text = text.replace(
+            "ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io",
+            'ARG SESSION_COOKIE_DOMAIN=""',
+        )
+        text = text.replace(
+            "ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io",
+            'ARG CSRF_COOKIE_DOMAIN=""',
+        )
+        text = text.replace(
+            "ARG SESSION_COOKIE_DOMAIN=.localhost",
+            'ARG SESSION_COOKIE_DOMAIN=""',
+        )
+        text = text.replace(
+            "ARG CSRF_COOKIE_DOMAIN=.localhost",
+            'ARG CSRF_COOKIE_DOMAIN=""',
+        )
+
+        if marker not in text:
+            return text
+        if "SESSION_COOKIE_DOMAIN" in text:
             return text
         cookie_block = (
             "ENV MFE_CONFIG_API_URL=/api/mfe_config/v1\n"
-            "ARG SESSION_COOKIE_DOMAIN=.localhost\n"
-            "ARG CSRF_COOKIE_DOMAIN=.localhost\n"
+            'ARG SESSION_COOKIE_DOMAIN=""\n'
+            'ARG CSRF_COOKIE_DOMAIN=""\n'
             "ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}\n"
             "ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}"
         )

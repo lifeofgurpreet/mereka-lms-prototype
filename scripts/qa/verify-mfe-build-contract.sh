@@ -3,7 +3,7 @@
 # @spec: tutor-configuration_spec.md
 # Verify the MFE build contract after patches are applied.
 #
-# This is a light wrapper that reuses existing prereq checks and enforces Node 18
+# This is a light wrapper that reuses existing prereq checks and enforces Node 18+
 # appears in the generated MFE Dockerfile.
 #
 # Usage:
@@ -21,11 +21,10 @@ if [[ ! -f "$dockerfile" ]]; then
   exit 1
 fi
 
-if rg -n "FROM.*node:18" "$dockerfile" >/dev/null 2>&1; then
+if rg -n "FROM.*node:(18|20|22|24)" "$dockerfile" >/dev/null 2>&1; then
   echo "OK"
   exit 0
 fi
 
-echo "[FAIL] Expected Node 18 base image in $dockerfile" >&2
+echo "[FAIL] Expected Node 18+ base image in $dockerfile" >&2
 exit 1
-

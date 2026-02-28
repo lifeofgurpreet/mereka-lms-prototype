@@ -55,8 +55,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -120,8 +120,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -185,8 +185,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -249,8 +249,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -313,8 +313,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -377,8 +377,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -441,8 +441,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -505,8 +505,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -569,8 +569,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -633,8 +633,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -697,8 +697,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
@@ -761,8 +761,8 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 # Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
 ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
 ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 
