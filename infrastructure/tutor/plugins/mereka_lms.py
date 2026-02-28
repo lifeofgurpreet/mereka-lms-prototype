@@ -812,6 +812,10 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
 #   org.openedx.frontend.layout.header_learning.v1 | Learning layout header slot
 #   org.openedx.frontend.learning.course_tab_links.v1 | Learning tab-links helper strip
+#   org.openedx.frontend.learning.course_breadcrumbs.v1 | Learning breadcrumbs helper context
+#   org.openedx.frontend.learning.learner_tools.v1 | Learning learner tools helper context
+#   org.openedx.frontend.learning.progress_tab_course_grade.v1 | Learning progress course-grade helper
+#   org.openedx.frontend.learning.progress_tab_related_links.v1 | Learning progress related-links helper
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
@@ -1041,6 +1045,66 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearningCourseTabsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_breadcrumbs.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_breadcrumbs_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseBreadcrumbsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.learner_tools.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_learner_tools_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningLearnerToolsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.progress_tab_course_grade.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_progress_course_grade_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaProgressCourseGradeHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.progress_tab_related_links.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_progress_related_links_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaProgressRelatedLinksHint,
                 },
             },
             """,
@@ -1511,6 +1575,59 @@ const MerekaLearningCourseTabsHint = () => {
   return (
     <div className="mereka-learning-course-tabs-hint mb-2">
       <span>Track your progress, discussions, and key dates in one place.</span>
+    </div>
+  );
+};
+
+// Learning course breadcrumbs slot helper.
+// Wired into org.openedx.frontend.learning.course_breadcrumbs.v1.
+const MerekaLearningCourseBreadcrumbsHint = ({ courseId }) => {
+  const safeCourseId = typeof courseId === 'string' ? courseId : '';
+  return (
+    <div className="mereka-learning-course-breadcrumbs-hint mb-2">
+      <span className="mereka-badge me-2">Course</span>
+      <span className="small text-muted">
+        {safeCourseId ? `ID: ${safeCourseId}` : 'Track your pathway and continue with confidence.'}
+      </span>
+    </div>
+  );
+};
+
+// Learning learner-tools slot helper.
+// Wired into org.openedx.frontend.learning.learner_tools.v1.
+const MerekaLearningLearnerToolsHint = ({ enrollmentMode, isStaff }) => {
+  const mode = typeof enrollmentMode === 'string' && enrollmentMode ? enrollmentMode : 'audit';
+  return (
+    <div className="mereka-learning-learner-tools-hint mb-2">
+      <span className="mereka-badge me-2">Learner tools</span>
+      <span className="small text-muted">
+        Mode: {mode}{isStaff ? ' · Staff utilities enabled' : ''}
+      </span>
+    </div>
+  );
+};
+
+// Learning progress course-grade slot helper.
+// Wired into org.openedx.frontend.learning.progress_tab_course_grade.v1.
+const MerekaProgressCourseGradeHint = ({ courseId }) => {
+  const safeCourseId = typeof courseId === 'string' ? courseId : '';
+  return (
+    <div className="mereka-progress-course-grade-hint mb-2">
+      <span className="mereka-badge me-2">Grade</span>
+      <span className="small text-muted">
+        Keep progressing in {safeCourseId || 'your active course'} to strengthen outcomes.
+      </span>
+    </div>
+  );
+};
+
+// Learning progress related-links slot helper.
+// Wired into org.openedx.frontend.learning.progress_tab_related_links.v1.
+const MerekaProgressRelatedLinksHint = () => {
+  return (
+    <div className="mereka-progress-related-links-hint mb-2">
+      <span className="mereka-badge me-2">Resources</span>
+      <a href="/help/" className="small">Need support? Visit the help centre.</a>
     </div>
   );
 };
