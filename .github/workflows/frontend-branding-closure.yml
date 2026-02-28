@@ -41,6 +41,26 @@ on:
         required: true
         default: true
         type: boolean
+      run_npm_start_smoke_gate:
+        description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
+        required: true
+        default: false
+        type: boolean
+      run_screenshot_gate:
+        description: "Capture public branding screenshots as closure evidence"
+        required: true
+        default: false
+        type: boolean
+      npm_start_base_url:
+        description: "Base URL for npm-start smoke (empty = auto by env)"
+        required: false
+        default: ""
+        type: string
+      npm_start_project:
+        description: "Playwright project for npm-start smoke"
+        required: false
+        default: "chromium"
+        type: string
       learning_path:
         description: "Optional learning route path for smoke checks"
         required: false
@@ -72,6 +92,10 @@ jobs:
           RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
           RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
           RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
+          RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
+          RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
+          NPM_START_BASE_URL="${{ inputs.npm_start_base_url || '' }}"
+          NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
 
           args=(--env "$TARGET_ENV" --frontend-only)
@@ -90,6 +114,10 @@ jobs:
           RUN_PARAGON_THEME_BUDGET=$([[ "$RUN_PARAGON_BUDGET" == "true" ]] && echo 1 || echo 0) \
           RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
           RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
+          RUN_NPM_START_SMOKE=$([[ "$RUN_NPM_START_SMOKE" == "true" ]] && echo 1 || echo 0) \
+          RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
+          NPM_START_BASE_URL="$NPM_START_BASE_URL" \
+          NPM_START_PROJECT="$NPM_START_PROJECT" \
           LEARNING_PATH="$LEARNING_PATH" \
           ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
 
@@ -109,6 +137,10 @@ jobs:
             echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
             echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
             echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
+            echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
+            echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
+            echo "- npm-start base URL: \`${{ inputs.npm_start_base_url || '(auto by env)' }}\`"
+            echo "- npm-start project: \`${{ inputs.npm_start_project || 'chromium' }}\`"
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
             if [[ -n "$LATEST" ]]; then
               echo "- Evidence directory: \`$LATEST\`"
