@@ -162,6 +162,79 @@ Interpretation:
 5. **Defer-safe migration debt tracking**
 - Keep Kajabi lesson-plan/details and MCT pathway/verification gaps as explicit deferred tasks with owners/date.
 
+## First Enterprise Client Migration Plan (execution tracks)
+
+### Track A: Runtime capacity stabilization (release-blocking)
+
+Goal:
+- Keep `enterprise-catalog` and `enterprise-access` at full desired replicas during normal load windows.
+
+Actions:
+- Keep lower init-container CPU requests (already patched) and roll through GitOps.
+- Validate with:
+  - `./scripts/qa/verify-enterprise-service-deployment.sh --env prod`
+  - `./scripts/qa/audit-enterprise-capacity-pressure.sh --env prod`
+- Add cluster-level right-sizing decision (node pool scale-up vs namespace request rebalance) based on repeated scheduler evidence.
+
+Exit criteria:
+- `verify-enterprise-service-deployment.sh --env prod` is green for AC-001..AC-008 in at least 3 consecutive checks across peak windows.
+
+### Track B: Tenant onboarding path hardening (pilot tenant)
+
+Goal:
+- Prove one complete tenant onboarding path without code hotfixes.
+
+Actions:
+- Execute onboarding via `scripts/tenants/onboard-enterprise-tenant.sh` (pilot tenant).
+- Validate each layer:
+  - Domain/Site mapping: `specs/multi-site-domains_spec.md` contract checks
+  - SSO readiness: `./scripts/qa/verify-enterprise-sso-readiness.sh --env prod --mode all --tenant <slug>`
+  - Runtime app wiring: `./scripts/qa/verify-enterprise-runtime-app-wiring.sh --env prod`
+  - Service readiness: `./scripts/qa/verify-enterprise-service-deployment.sh --env prod`
+- Capture evidence artifacts under `var/` and link in tenant runbook.
+
+Exit criteria:
+- Pilot tenant can authenticate, view only tenant-scoped catalog content, receive/lose license access correctly, and access enterprise portals without manual DB fixes.
+
+### Track C: Data migration fitness for enterprise learners
+
+Goal:
+- Confirm existing Kajabi/MCT migrated learners are enterprise-ready for onboarding waves.
+
+Actions:
+- Re-validate migration spec posture:
+  - `data-migrations-kajabi-mct`: `44 ACs`, `41 automated`, `3 manual`, `0 unmapped`
+- Run targeted QA sample for enterprise pilot learners:
+  - account active state
+  - enrollment integrity
+  - completion visibility in enterprise reporting paths
+- Keep deferred Kajabi lesson-plan/details explicitly out of release gate for now, but track as migration debt item with due date.
+
+Exit criteria:
+- No blocker-level learner integrity defects in pilot cohort; deferred Kajabi lesson metadata remains documented with owner/date.
+
+### Track D: Operational guardrails and truth maintenance
+
+Goal:
+- Prevent regressions between "looks healthy" and true enterprise go-live readiness.
+
+Actions:
+- Keep `--env prod` usage mandatory in runbooks and reporting commands.
+- Retain profile-aware checks (`active` vs `parked`) in enterprise runbooks.
+- Ensure CI/GitOps release path includes enterprise runtime checks after image bumps.
+
+Exit criteria:
+- Release artifacts and runbooks consistently reflect runtime truth; no ambiguous "ready" claims without passing prod-context gates.
+
+## Definition of done for “enterprise-ready for new domain/client”
+
+1. Enterprise service deployment verifier passes fully (`--env prod`, no FAIL).
+2. Enterprise SSO readiness passes fully (`--env prod --mode all`).
+3. Runtime app wiring passes fully (`--env prod`).
+4. Pilot tenant onboarding completes end-to-end with evidence links.
+5. Capacity audit no longer reports scheduler-induced pending enterprise pods during verification windows.
+6. Deferred Kajabi lesson-plan/details remains explicitly tracked and excluded from current go-live gate by policy (not by omission).
+
 ## Decision summary
 
 - **Foundation is strong** (spec coverage + SSO + tenant wiring).
