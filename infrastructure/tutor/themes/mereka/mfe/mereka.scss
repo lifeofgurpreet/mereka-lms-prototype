@@ -152,7 +152,6 @@ label {
 
 /* RISK: MEDIUM — Paragon card BEM + Bootstrap .card; border-radius/shadow degrade visually */
 .card,
-.shadow-lg,
 .pgn__card {
   border-radius: var(--mereka-mfe-card-radius);
   border: var(--mereka-mfe-card-border);

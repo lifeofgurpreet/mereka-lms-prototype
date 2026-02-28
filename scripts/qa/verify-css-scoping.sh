@@ -134,16 +134,28 @@ fi
 if [[ ! -f "$MFE_SCSS" ]]; then
   do_skip "AC-CSS-SCOPE-002: mereka.scss not found — skipping .shadow-lg check"
 else
-  # .shadow-lg should not be grouped with .card to avoid applying border-radius to overlays
-  if grep -qE '\.shadow-lg' "$MFE_SCSS"; then
-    # Check if .shadow-lg is grouped with .card on the same rule
-    if grep -E '\.card|\.pgn__card' "$MFE_SCSS" | grep -q '\.shadow-lg'; then
-      do_warn "AC-CSS-SCOPE-002: .shadow-lg grouped with .card in mereka.scss (documented gap G9 — overapplication risk)"
-    else
-      do_pass "AC-CSS-SCOPE-002: .shadow-lg not grouped with .card selectors in mereka.scss"
-    fi
+  # .shadow-lg should not share a selector block with .card/.pgn__card
+  SHADOW_GROUPED_COUNT="$(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+
+count = 0
+for block in re.finditer(r"([^{}]+)\{", text):
+    header = block.group(1)
+    if ".shadow-lg" in header and (".card" in header or ".pgn__card" in header):
+        count += 1
+print(count)
+PY
+)"
+  if [[ "$SHADOW_GROUPED_COUNT" -gt 0 ]]; then
+    do_warn "AC-CSS-SCOPE-002: .shadow-lg grouped with .card selectors in mereka.scss ($SHADOW_GROUPED_COUNT block(s); overapplication risk)"
   else
-    do_pass "AC-CSS-SCOPE-002: .shadow-lg not present in mereka.scss"
+    do_pass "AC-CSS-SCOPE-002: .shadow-lg is not grouped with .card selectors in mereka.scss"
   fi
 fi
 
