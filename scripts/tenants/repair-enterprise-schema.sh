@@ -62,24 +62,37 @@ django.setup()
 from django.db import connection
 from enterprise.models import EnterpriseCustomer
 
-required_fields = [
-    "identity_provider",
-    "enable_career_engagement_network_on_learner_portal",
-]
-
-model_fields = {f.name for f in EnterpriseCustomer._meta.get_fields()}
-model_missing = [field for field in required_fields if field not in model_fields]
 with connection.cursor() as cursor:
     db_columns = {c.name for c in connection.introspection.get_table_description(cursor, "enterprise_enterprisecustomer")}
-db_missing = [field for field in required_fields if field not in db_columns]
+    table_names = set(connection.introspection.table_names(cursor))
+
+# Runtime contract:
+# - keep concrete modeled fields in DB (currently only career-engagement flag)
+# - accept either legacy identity_provider column OR linkage table model
+required_candidates = ["enable_career_engagement_network_on_learner_portal"]
+model_fields = {f.name for f in EnterpriseCustomer._meta.get_fields()}
+required_modeled = [field for field in required_candidates if field in model_fields]
+db_missing = [field for field in required_modeled if field not in db_columns]
+
+concrete_fields = {f.name for f in EnterpriseCustomer._meta.get_fields() if getattr(f, "concrete", False)}
+has_legacy_identity_provider_field = "identity_provider" in concrete_fields
+has_linkage_table = "enterprise_enterprisecustomeridentityprovider" in table_names
+
+linkage_errors = []
+if has_legacy_identity_provider_field and "identity_provider" not in db_columns:
+    linkage_errors.append("enterprise_enterprisecustomer.identity_provider")
+if not has_legacy_identity_provider_field and not has_linkage_table:
+    linkage_errors.append("enterprise idp linkage model/table")
 
 print(json.dumps({
-    "required": required_fields,
-    "model_missing": model_missing,
+    "required_modeled": required_modeled,
+    "has_legacy_identity_provider_field": has_legacy_identity_provider_field,
+    "has_linkage_table": has_linkage_table,
+    "linkage_errors": linkage_errors,
     "db_missing": db_missing,
 }, sort_keys=True))
 
-if model_missing or db_missing:
+if db_missing or linkage_errors:
     raise SystemExit(2)
 PY
 }
@@ -94,14 +107,14 @@ fi
 
 echo "Checking enterprise schema integrity..."
 if output=$(check_schema 2>&1); then
-  echo "PASS: enterprise schema is aligned with required fields"
+  echo "PASS: enterprise schema/linkage integrity is aligned with runtime contract"
   echo "$output"
 else
   status=$?
   echo "FAIL: enterprise schema drift remains"
   echo "$output"
   if [[ $status -eq 2 ]]; then
-    echo "Required fields must exist in both model and DB: identity_provider, enable_career_engagement_network_on_learner_portal"
+    echo "Required runtime contract: modeled required fields in DB + valid identity-provider linkage path"
   fi
   exit 1
 fi
