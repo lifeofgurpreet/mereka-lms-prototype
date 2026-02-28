@@ -324,10 +324,12 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
   - GitHub-hosted fallback keeps BuildKit disabled and skips cache args.
   - Impact: Tutor builds drop from 30+ min to ~5 min (only changed layers rebuilt)
 
-- [ ] **Task 5.4**: Optimize Trivy scans (single-pass)
+- [x] **Task 5.4**: Optimize Trivy scans (single-pass)
   - Modify: `.github/workflows/build-tutor-images.yml`
-  - Current: Trivy runs twice per image (CRITICAL blocking + HIGH informational)
-  - Fix: Run Trivy once outputting JSON, then `jq` to split CRITICAL (fail) from HIGH (report)
+  - Current state: each image already uses a single Trivy JSON scan
+    (`--severity CRITICAL,HIGH`) with `jq` split:
+    - CRITICAL count gates build failure
+    - HIGH findings exported as artifact summary
   - Impact: Halves security scan time per image build
 
 ---
