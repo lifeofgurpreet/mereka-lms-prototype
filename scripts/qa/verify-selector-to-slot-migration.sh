@@ -96,20 +96,21 @@ if [[ -f "$PLUGIN_FILE" ]]; then
   fi
 
   # Verify required canonical slots are registered
-  for slot in "org.openedx.frontend.layout.footer.v1" "org.openedx.frontend.layout.header_logo.v1"; do
+  required_slots=(
+    "org.openedx.frontend.layout.footer.v1"
+    "org.openedx.frontend.layout.header_logo.v1"
+    "org.openedx.frontend.layout.studio_footer.v1"
+    "org.openedx.frontend.authn.login_component.v1"
+    "org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
+    "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
+  )
+  for slot in "${required_slots[@]}"; do
     if grep -q "\"$slot\"" "$PLUGIN_FILE"; then
       pass_check "AC-FRONT-022: slot '$slot' is registered"
     else
       fail_check "AC-FRONT-022: slot '$slot' is missing from mereka_lms.py"
     fi
   done
-
-  # learner dashboard sidebar slot is optional while it is still pending in code
-  if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE"; then
-    pass_check "AC-FRONT-022: learner-dashboard sidebar slot is registered"
-  else
-    warn_check "AC-FRONT-022: learner-dashboard sidebar slot not yet registered (legacy CSS fallback may still be needed)"
-  fi
 else
   fail_check "AC-FRONT-022: mereka_lms.py not found at $PLUGIN_FILE"
 fi
