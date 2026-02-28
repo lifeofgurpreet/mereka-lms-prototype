@@ -63,6 +63,15 @@ hooks.Filters.ENV_PATCHES.add_item(
     (
         "openedx-lms-production-settings",
         """
+# Safe app installer — prevents ImportError from missing optional modules
+def _safe_add_app(app_name):
+    if app_name not in INSTALLED_APPS:
+        try:
+            __import__(app_name.split('.')[0])
+            INSTALLED_APPS.append(app_name)
+        except ImportError:
+            pass
+
 # Mereka LMS: Multi-site domain configuration
 ALLOWED_HOSTS += {{ MEREKA_LMS_EXTRA_HOSTS }}
 
@@ -200,27 +209,30 @@ if 'mfe_oauth_fix' in INSTALLED_APPS:
     MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
 
 # Prometheus Metrics Integration
-# django_prometheus must be added at the START of INSTALLED_APPS
+# django_prometheus must be at the START of INSTALLED_APPS
 if 'django_prometheus' not in INSTALLED_APPS:
-    INSTALLED_APPS.insert(0, 'django_prometheus')
+    try:
+        __import__('django_prometheus')
+        INSTALLED_APPS.insert(0, 'django_prometheus')
+    except ImportError:
+        pass
 
 # Add custom prometheus app for /metrics endpoint
-if 'openedx_prometheus' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_prometheus')
+_safe_add_app('openedx_prometheus')
 
 # Prometheus middleware must wrap all other middleware
-if 'django_prometheus.middleware.PrometheusBeforeMiddleware' not in MIDDLEWARE:
-    MIDDLEWARE.insert(0, 'django_prometheus.middleware.PrometheusBeforeMiddleware')
-if 'django_prometheus.middleware.PrometheusAfterMiddleware' not in MIDDLEWARE:
-    MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
+if 'django_prometheus' in INSTALLED_APPS:
+    if 'django_prometheus.middleware.PrometheusBeforeMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.insert(0, 'django_prometheus.middleware.PrometheusBeforeMiddleware')
+    if 'django_prometheus.middleware.PrometheusAfterMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.append('django_prometheus.middleware.PrometheusAfterMiddleware')
 
 ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
-if "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
+if 'openedx_prometheus' in INSTALLED_APPS and "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
     ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 
 # In-App Notifications (Email Phase 3)
-if 'openedx_notifications' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_notifications')
+_safe_add_app('openedx_notifications')
 
 # Configure ACE channels for in-app notifications
 ACE_ENABLED_CHANNELS = ["django_email", "in_app"]
@@ -229,8 +241,7 @@ ACE_ENABLED_CHANNELS = ["django_email", "in_app"]
 NOTIFICATION_INAPP_ENABLED = True
 
 # Email Preferences & GDPR Consent (Email Phase 2)
-if 'openedx_email_preferences' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_email_preferences')
+_safe_add_app('openedx_email_preferences')
 
 # Feature flag for email preferences (enable by default)
 ENABLE_EMAIL_PREFERENCES = True
@@ -244,8 +255,7 @@ RATELIMIT_ENABLE = True
 RATELIMIT_USE_CACHE = 'default'
 
 # Mux Video Upload (Video Phase 3: Studio Upload Workflow)
-if 'openedx_mux_upload' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_mux_upload')
+_safe_add_app('openedx_mux_upload')
 
 # Feature flag for Mux Studio upload (default: false, enable in production after testing)
 ENABLE_MUX_STUDIO_UPLOAD = os.environ.get('ENABLE_MUX_STUDIO_UPLOAD', 'false').lower() == 'true'
@@ -256,15 +266,13 @@ MUX_TOKEN_SECRET = os.environ.get('MUX_TOKEN_SECRET')
 MUX_WEBHOOK_SECRET = os.environ.get('MUX_WEBHOOK_SECRET', '')  # Optional
 
 # Video Analytics (Video Phase 4: Analytics Integration)
-if 'openedx_video_analytics' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_video_analytics')
+_safe_add_app('openedx_video_analytics')
 
 # Feature flag for video analytics (default: false, enable after validation)
 ENABLE_VIDEO_ANALYTICS = os.environ.get('ENABLE_VIDEO_ANALYTICS', 'false').lower() == 'true'
 
 # Video Content Protection (Video Phase 5: Signed Playback)
-if 'openedx_video_protection' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_video_protection')
+_safe_add_app('openedx_video_protection')
 
 # Feature flag for signed playback (default: false, enable after E2E validation)
 ENABLE_MUX_SIGNED_PLAYBACK = os.environ.get('ENABLE_MUX_SIGNED_PLAYBACK', 'false').lower() == 'true'
@@ -274,21 +282,19 @@ MUX_SIGNING_KEY_ID = os.environ.get('MUX_SIGNING_KEY_ID')  # Mux signing key ID
 MUX_SIGNING_PRIVATE_KEY = os.environ.get('MUX_SIGNING_PRIVATE_KEY')  # RSA private key (PEM)
 
 # ORA2 Operations & Observability (Assessment Phase 1)
-if 'openedx_ora2_operations' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_ora2_operations')
+_safe_add_app('openedx_ora2_operations')
 
 # Feature flag for ORA2 operations (default: true, enable for production monitoring)
 ENABLE_ORA2_OPERATIONS = os.environ.get('ENABLE_ORA2_OPERATIONS', 'true').lower() == 'true'
 
 # Timed Exams - Server-Side Enforcement & Accommodations (Assessment Phase 2)
-if 'openedx_timed_exams' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_timed_exams')
+_safe_add_app('openedx_timed_exams')
 
 # Feature flag for timed exam enhancements (default: true)
 ENABLE_TIMED_EXAM_ENHANCEMENTS = os.environ.get('ENABLE_TIMED_EXAM_ENHANCEMENTS', 'true').lower() == 'true'
 
 # Add multi-device detection middleware (insert after authentication middleware)
-if 'openedx_timed_exams.middleware.TimedExamEnforcementMiddleware' not in MIDDLEWARE:
+if 'openedx_timed_exams' in INSTALLED_APPS and 'openedx_timed_exams.middleware.TimedExamEnforcementMiddleware' not in MIDDLEWARE:
     # Find authentication middleware and insert after it
     auth_middleware_index = -1
     for i, mw in enumerate(MIDDLEWARE):
@@ -303,8 +309,7 @@ if 'openedx_timed_exams.middleware.TimedExamEnforcementMiddleware' not in MIDDLE
         MIDDLEWARE.append('openedx_timed_exams.middleware.TimedExamEnforcementMiddleware')
 
 # XQueue Graders - Python Code Sandbox (Assessment Phase 3)
-if 'openedx_xqueue_graders' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_xqueue_graders')
+_safe_add_app('openedx_xqueue_graders')
 
 # Feature flag for XQueue graders (default: true)
 ENABLE_XQUEUE_GRADERS = os.environ.get('ENABLE_XQUEUE_GRADERS', 'true').lower() == 'true'
@@ -314,8 +319,7 @@ XQUEUE_GRADER_TIMEOUT_SECONDS = int(os.environ.get('XQUEUE_GRADER_TIMEOUT_SECOND
 XQUEUE_GRADER_MEMORY_LIMIT_MB = int(os.environ.get('XQUEUE_GRADER_MEMORY_LIMIT_MB', '256'))
 
 # Advanced XBlocks - Drag-Drop, Math, Randomization (Assessment Phase 4)
-if 'openedx_advanced_xblocks' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('openedx_advanced_xblocks')
+_safe_add_app('openedx_advanced_xblocks')
 
 # Feature flag for advanced XBlocks (default: true)
 ENABLE_ADVANCED_XBLOCKS = os.environ.get('ENABLE_ADVANCED_XBLOCKS', 'true').lower() == 'true'
@@ -344,12 +348,11 @@ MUX_PLAYBACK_AUDIENCE = os.environ.get('MUX_PLAYBACK_AUDIENCE', 'academyv2.merek
 SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
 
 # Multi-Tenancy Integration (Tenancy Epic Phase 1)
-if 'mereka_tenancy' not in INSTALLED_APPS:
-    INSTALLED_APPS.append('mereka_tenancy')
+_safe_add_app('mereka_tenancy')
 
 # Add TenantResolutionMiddleware after AuthenticationMiddleware
 # This ensures tenant context is available for authenticated requests
-if 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
+if 'mereka_tenancy' in INSTALLED_APPS and 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
     auth_middleware_index = -1
     for i, mw in enumerate(MIDDLEWARE):
         if 'AuthenticationMiddleware' in mw:
