@@ -357,3 +357,22 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
   - Confirms dead wildcard MFE scopes remain absent (`authn`, `learner-dashboard`, `learning`, `discussions`).
   - Confirms token bridge + revision marker contracts remain intact.
 - Artifact updated: `var/css-scoping-gate.txt`
+
+## Addendum — Email Branding Gate Hardening
+
+### Command Run
+
+```bash
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Result
+
+- Gate summary: `PASS=66`, `FAIL=0`, `WARN=5`
+- Verifier now enforces shell markers across **all 15** HTML templates under:
+  - `infrastructure/tutor/custom-apps/openedx_email_templates/templates/email/*.html`
+- New global assertions per template:
+  - gradient header marker (`linear-gradient(120deg`)
+  - primary fallback token (`org_primary_color|default:'#ab3b78'`)
+  - accent fallback token (`org_accent_color|default:'#237072'`)
+- Existing warnings remain unchanged for missing `ms`/`zh` localized variants and ACE config visibility from local config files.

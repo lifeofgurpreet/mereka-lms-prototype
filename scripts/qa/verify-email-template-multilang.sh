@@ -250,6 +250,23 @@ assert_template_has_marker \
   "border-radius: 9999px" \
   "Marketing promo template CTA keeps pill-radius branding"
 
+# Full-shell regression checks across all branded HTML templates.
+for template_file in "$EMAIL_TEMPLATE_ROOT"/*.html; do
+    template_name="$(basename "$template_file")"
+    assert_template_has_marker \
+      "$template_file" \
+      "linear-gradient(120deg" \
+      "${template_name} includes branded gradient header shell"
+    assert_template_has_marker \
+      "$template_file" \
+      "org_primary_color|default:'#ab3b78'" \
+      "${template_name} includes Mereka primary fallback token"
+    assert_template_has_marker \
+      "$template_file" \
+      "org_accent_color|default:'#237072'" \
+      "${template_name} includes Mereka accent fallback token"
+done
+
 echo
 
 # Check for ACE configuration
