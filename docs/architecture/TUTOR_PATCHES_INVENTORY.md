@@ -202,6 +202,21 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | `nginx-lms-config` | domain-names (nginx), prometheus-metrics (nginx), build-optimizations (health) |
 | `credentials-dockerfile-post-python-requirements` | (credentials VC issuer) |
 
+### Dead Patches (registered but no template consumes them)
+
+These patch names are registered in `mereka_lms.py` via `ENV_PATCHES.add_item()` but
+**no Tutor template contains `{{ patch("name") }}`** for them — content is silently discarded.
+
+| Dead Patch Name | Content | Impact |
+| --- | --- | --- |
+| `openedx-cms-assets-settings` | CMS safe_join monkey-patch | CMS collectstatic may fail on edge-case theme paths |
+| `openedx-dockerfile-npm-install-cmd` | npm install lockfile drift override | Builds fall back to default `npm ci` |
+| `webpack-prod-config` | Terser parallel=false | Parallel Terser may OOM on constrained builders |
+| `mfe-dockerfile-npm-install` | npm retry + resilience config | MFE builds use default npm install without retries |
+
+**Fix approach**: These need to be converted to Tutor filter hooks (`ENV_TEMPLATE_*`)
+or filesystem patches in `apply-patches.sh`. Tracked for future cleanup.
+
 ---
 
 ## History: Patch Consolidation (2026-02-27)
