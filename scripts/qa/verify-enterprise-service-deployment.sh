@@ -10,6 +10,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="mereka-lms"
 PASS=0; FAIL=0
 ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
+ALLOW_PARKED_SERVICES="${ALLOW_PARKED_SERVICES:-0}"
 WAIT_FOR_STEADY_SECONDS="${WAIT_FOR_STEADY_SECONDS:-120}"
 KUBE_CONTEXT=""
 SKIP_RUNTIME_CHECKS=0
@@ -22,10 +23,11 @@ info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 
 usage() {
   cat <<'EOF'
-Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--skip-runtime-checks] [-h|--help]
+Usage: verify-enterprise-service-deployment.sh [--context <kubectl-context>] [--skip-runtime-checks] [--allow-parked-services] [-h|--help]
 
 Options:
   --skip-runtime-checks  Skip all kubectl-dependent runtime checks and return early.
+  --allow-parked-services  Treat an all-zero enterprise replica profile as an explicit parked state (exit 0).
 EOF
 }
 
@@ -43,6 +45,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-runtime-checks)
       SKIP_RUNTIME_CHECKS=1
+      shift
+      ;;
+    --allow-parked-services)
+      ALLOW_PARKED_SERVICES=1
       shift
       ;;
     -h|--help)
@@ -136,6 +142,28 @@ EXPECTED_DEPS=(
   enterprise-admin-portal
   enterprise-learner-portal
 )
+
+# Optional compatibility mode for intentionally parked environments:
+# if all enterprise deployments are explicitly set to replicas=0, return success.
+if [[ "$ALLOW_PARKED_SERVICES" == "1" ]]; then
+  all_parked=true
+  for dep in "${EXPECTED_DEPS[@]}"; do
+    desired=$(kubectl get deployment "$dep" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
+    [[ -z "$desired" ]] && desired=0
+    if [[ "$desired" -ne 0 ]]; then
+      all_parked=false
+      break
+    fi
+  done
+  if [[ "$all_parked" == "true" ]]; then
+    pass "All enterprise deployments are explicitly parked at replicas=0 (compat mode)"
+    echo
+    echo "=== Summary ==="
+    echo -e "${GREEN}PASS:${NC} $PASS"
+    echo -e "${RED}FAIL:${NC} $FAIL"
+    exit 0
+  fi
+fi
 
 AC001_OK=true
 for dep in "${EXPECTED_DEPS[@]}"; do

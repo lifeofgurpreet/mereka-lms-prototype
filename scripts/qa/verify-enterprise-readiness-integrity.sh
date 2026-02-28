@@ -88,6 +88,8 @@ assert_contains "$PIPELINE" '"verify-enrollment-import-counts.sh --source mct"' 
 # 4) Enterprise QA hardening remains in place
 assert_contains "$SERVICE_DEPLOY" 'ALLOW_PARTIAL_READY=' \
   "enterprise service deployment checker retains partial-readiness compatibility flag"
+assert_contains "$SERVICE_DEPLOY" 'ALLOW_PARKED_SERVICES=' \
+  "enterprise service deployment checker retains parked-profile compatibility flag"
 assert_contains "$SERVICE_DEPLOY" 'WAIT_FOR_STEADY_SECONDS=' \
   "enterprise service deployment checker retains steady-state wait control"
 assert_contains "$SERVICE_DEPLOY" 'localhost:18170/health/' \
