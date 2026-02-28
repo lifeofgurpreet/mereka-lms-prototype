@@ -34,17 +34,21 @@ Interpretation:
 
 Command:
 ```bash
-./scripts/qa/verify-enterprise-service-deployment.sh
+./scripts/qa/verify-enterprise-service-deployment.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
 ```
 
 Result summary:
-- `PASS: 6`
-- `FAIL: 18`
+- `PASS: 23`
+- `FAIL: 1`
 
 Observed failure pattern:
-- Enterprise deployments exist but are `0/0` ready (scaled down / inactive path).
-- Enterprise service endpoints are empty.
-- In-cluster enterprise health checks fail due no running pods.
+- All enterprise services are reachable with non-empty endpoints and healthy runtime probes.
+- External and in-cluster admin/learner enterprise portals return HTTP 200.
+- Remaining blocker: `enterprise-access` is not at full desired steady state (`1/3 ready` during verification), so AC-001 strict readiness still fails.
+
+Context note:
+- Running this check without an explicit context can produce misleading results if the active kube context is a local/dev cluster.
+- Use `--context` for production assertions to avoid cross-environment drift in reports.
 
 ### 3) Enterprise SSO readiness (prod)
 
@@ -86,14 +90,14 @@ Interpretation:
 
 ### Not ready yet (critical path)
 
-1. **Enterprise service plane is not live**
-- `enterprise-catalog`, `enterprise-access`, `enterprise-subsidy`, portals/workers are not actively serving.
-- This blocks real enterprise customer onboarding beyond foundational records.
+1. **Enterprise service plane is live, but not fully at desired steady state**
+- Enterprise services and portals are actively serving in production context.
+- Remaining strict readiness issue is concentrated in `enterprise-access` desired-vs-ready convergence (`1/3` during validation).
+- This is an SRE/rollout stabilization item, not an architecture absence.
 
 2. **Runbook status mismatch**
-- `enterprise-services-runbook.md` states services are deployed in production.
-- Live verification currently fails readiness for those services.
-- The docs/runtime contract needs alignment to avoid false green status.
+- Operational status language needed profile clarity (active vs parked).
+- Runbooks were updated to include explicit verification profiles and parked-mode check support.
 
 3. **Migration completion is partially deferred by design**
 - Kajabi lesson-plan/lesson-detail fidelity remains intentionally deferred.
@@ -101,17 +105,17 @@ Interpretation:
 
 ## Recommended execution sequence (systematic)
 
-1. **Bring enterprise service plane to active runtime**
-- Activate service deployments and workers in prod (not 0/0).
-- Verify AC-001..AC-008 path via `verify-enterprise-service-deployment.sh` until green.
+1. **Stabilize enterprise-access rollout to full desired readiness**
+- Resolve why `enterprise-access` remains below desired replicas in prod context.
+- Re-run AC-001..AC-008 check with explicit production context until full green.
 
 2. **Lock runtime truth into release gates**
 - Keep `verify-enterprise-runtime-app-wiring.sh` in onboarding/release checks.
 - Add/retain enterprise service readiness check in GitOps release verification path.
 
 3. **Align docs with runtime truth**
-- Update runbook status language to reflect current state (inactive vs active) until activation completes.
-- Keep status labels strict: no “deployed” claim unless AC-001..AC-008 pass in runtime.
+- Keep profile-aware status wording (`active` vs `parked`) and context-aware verification commands.
+- Keep status labels strict: no “fully ready” claim unless AC-001..AC-008 pass in runtime.
 
 4. **Pilot tenant hardening**
 - Onboard one pilot tenant end-to-end using `scripts/tenants/onboard-enterprise-tenant.sh`.
@@ -123,5 +127,5 @@ Interpretation:
 ## Decision summary
 
 - **Foundation is strong** (spec coverage + SSO + tenant wiring).
-- **Primary blocker is runtime activation of enterprise service components** (not architecture/spec gaps).
-- **Next milestone** should be: enterprise service plane live and verified, then pilot tenant go-live.
+- **Primary blocker is enterprise-access steady-state convergence under strict AC-001 readiness**.
+- **Next milestone** should be: full AC-001..AC-008 green in explicit prod context, then pilot tenant go-live.
