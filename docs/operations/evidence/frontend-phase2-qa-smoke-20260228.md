@@ -376,3 +376,22 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
   - primary fallback token (`org_primary_color|default:'#ab3b78'`)
   - accent fallback token (`org_accent_color|default:'#237072'`)
 - Existing warnings remain unchanged for missing `ms`/`zh` localized variants and ACE config visibility from local config files.
+
+## Addendum — Paragon Runtime Gate Warning Reduction
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-paragon-runtime.sh
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+```
+
+### Result
+
+- `verify-paragon-runtime.sh`: `PASS=10`, `WARN=2`, `FAIL=0`
+  - `AC-TKN-027` now passes:
+    - `mereka.scss` active rule lines reduced to `295` (target `<300`)
+    - raw lines reduced to `418`
+- `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
+  - `verify-lighthouse-budgets.sh`: `PASSED=14`, `FAILED=0`
+  - `verify-paragon-runtime.sh`: now `WARN=2` (down from prior `WARN=3`)

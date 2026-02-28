@@ -262,14 +262,9 @@ label {
 }
 
 /* RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals */
-.mereka-authn-login-branding {
-  margin-bottom: 1rem;
-  text-align: center;
-}
+.mereka-authn-login-branding { margin-bottom: 1rem; text-align: center; }
 
-.mereka-authn-login-branding__logo {
-  display: inline-flex;
-}
+.mereka-authn-login-branding__logo { display: inline-flex; }
 
 .mereka-authn-login-branding__logo-img {
   max-width: min(320px, 75%);
@@ -278,15 +273,9 @@ label {
   object-fit: contain;
 }
 
-.mereka-authn-login-branding__title {
-  margin-top: 1rem;
-  margin-bottom: 0.35rem;
-}
+.mereka-authn-login-branding__title { margin-top: 1rem; margin-bottom: 0.35rem; }
 
-.mereka-authn-login-branding__subtitle {
-  margin: 0;
-  color: var(--mereka-color-ink-700);
-}
+.mereka-authn-login-branding__subtitle { margin: 0; color: var(--mereka-color-ink-700); }
 
 /* RISK: LOW — studio footer class names are slot-owned by this repo */
 .mereka-studio-footer__inner {
