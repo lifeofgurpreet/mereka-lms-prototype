@@ -58,6 +58,43 @@ for slot in "${expected[@]}"; do
   fi
 done
 
+declare -A SLOT_BINDING_MARKERS=(
+  ["org.openedx.frontend.layout.header_logo.v1"]="mereka_header_logo"
+  ["org.openedx.frontend.layout.footer.v1"]="mereka_footer"
+  ["org.openedx.frontend.layout.studio_footer.v1"]="mereka_studio_footer"
+  ["org.openedx.frontend.authn.login_component.v1"]="mereka_authn_login_component"
+  ["org.openedx.frontend.learner_dashboard.widget_sidebar.v1"]="mereka_learner_sidebar_widget"
+  ["org.openedx.frontend.learner_dashboard.no_courses_view.v1"]="mereka_no_courses_view"
+  ["org.openedx.frontend.learning.course_outline_sidebar.v1"]="mereka_course_outline_sidebar"
+  ["org.openedx.frontend.learning.progress_certificate_status.v1"]="mereka_progress_certificate_status"
+  ["org.openedx.frontend.account.additional_profile_fields.v1"]="mereka_additional_profile_fields"
+  ["org.openedx.frontend.profile.additional_profile_fields.v1"]="mereka_profile_additional_fields"
+  ["org.openedx.frontend.layout.header_desktop_main_menu.v1"]="withMerekaMenuItems("
+  ["org.openedx.frontend.layout.header_mobile_main_menu.v1"]="withMerekaMenuItems("
+)
+
+for slot in "${expected[@]}"; do
+  slot="$(echo "$slot" | xargs)"
+  [[ -z "$slot" ]] && continue
+  if [[ -v SLOT_BINDING_MARKERS[$slot] ]]; then
+    marker="${SLOT_BINDING_MARKERS[$slot]}"
+    if rg -qF "$marker" "$PLUGIN_FILE"; then
+      pass "Expected slot binding marker present for $slot: $marker"
+    else
+      fail "Expected slot binding marker missing for $slot: $marker"
+    fi
+  fi
+done
+
+# Footer slot should explicitly hide default footer contents before insert.
+if rg -qF "org.openedx.frontend.layout.footer.v1" "$PLUGIN_FILE" \
+  && rg -qF "op: PLUGIN_OPERATIONS.Hide" "$PLUGIN_FILE" \
+  && rg -qF "widgetId: 'default_contents'" "$PLUGIN_FILE"; then
+  pass "Footer slot override hides default contents before custom insert"
+else
+  fail "Footer slot override must hide default_contents before custom insert"
+fi
+
 if [[ "$CHECK_RENDERED_SLOTS" != "1" ]]; then
   pass "Rendered env slot checks skipped (set CHECK_RENDERED_SLOTS=1 to enable)"
 elif [[ -f "$RENDERED_ENV" ]]; then
