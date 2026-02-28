@@ -34,6 +34,13 @@ on:
           - production
           - staging
         default: select-environment
+      openedx_runner:
+        description: 'Runner for OpenEdX build (workflow_dispatch only)'
+        type: choice
+        options:
+          - github-hosted
+          - heavy-builder
+        default: github-hosted
       image_tag:
         description: 'Image tag (default: git SHA)'
         type: string
@@ -77,9 +84,7 @@ jobs:
 
   build-openedx:
     name: Build OpenEdX Image
-    # OpenEdX image builds frequently OOM on GitHub-hosted runners.
-    # Route manual workflow_dispatch runs to the heavy ARC runner pool.
-    runs-on: ${{ github.event_name == 'workflow_dispatch' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.openedx_runner == 'heavy-builder' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
     timeout-minutes: 180
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_openedx }}
@@ -152,9 +157,10 @@ jobs:
       - name: Build OpenEdX image
         run: |
           export TUTOR_ROOT=$(pwd)/tutor_env
-          # BuildKit enabled via DOCKER_BUILDKIT=1 env var.
-          # Layer caching allowed (--no-cache removed per ADR-012).
-          # Parallelizes independent Dockerfile stages for faster builds.
+          # Prefer lower peak-memory Docker build mode for OpenEdX image on
+          # GitHub-hosted runners to avoid abrupt OOM kills during layer export.
+          export DOCKER_BUILDKIT=0
+          export COMPOSE_DOCKER_CLI_BUILD=0
           (
             while true; do
               echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
