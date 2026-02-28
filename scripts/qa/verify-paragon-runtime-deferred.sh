@@ -93,10 +93,10 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
         fail "AC-TKN-019 runtime theme endpoint body too small (${body_bytes} bytes)"
       fi
 
-      if grep -q -- "--pgn-color-primary" /tmp/paragon-theme-body.$$; then
-        pass "AC-TKN-019 runtime theme CSS body contains --pgn-color-primary marker"
+      if grep -Eq -- "--pgn-color-primary-base|--pgn-color-primary" /tmp/paragon-theme-body.$$; then
+        pass "AC-TKN-019 runtime theme CSS body contains Paragon primary-color marker"
       else
-        fail "AC-TKN-019 runtime theme CSS body missing --pgn-color-primary marker"
+        fail "AC-TKN-019 runtime theme CSS body missing Paragon primary-color marker"
       fi
     else
       fail "AC-TKN-019 runtime theme endpoint body fetch failed (${runtime_url})"
