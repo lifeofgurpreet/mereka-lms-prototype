@@ -401,24 +401,7 @@ label {
   background: var(--mereka-mfe-surface-muted);
 }
 
-/* RISK: LOW — slot-owned account settings tab shell */
-.mereka-account-settings-tab-shell {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--mereka-mfe-border);
-  border-radius: var(--mereka-mfe-card-radius);
-  background: var(--mereka-mfe-surface-muted);
-}
-
-.mereka-account-settings-tab-shell .h5 {
-  font-family: var(--mereka-font-heading);
-  color: var(--mereka-color-ink-900);
-}
-
-.mereka-account-settings-field-hint {
-  color: var(--mereka-color-ink-700);
-  font-size: var(--pgn-typography-font-size-sm);
-}
-
+/* RISK: LOW — slot-owned account ID verification helper */
 .mereka-account-id-verification-hint {
   color: var(--mereka-color-ink-700);
   font-size: var(--pgn-typography-font-size-sm);

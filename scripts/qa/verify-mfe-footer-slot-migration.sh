@@ -119,15 +119,11 @@ else
     "org.openedx.frontend.layout.header_mobile_main_menu.v1"
     "org.openedx.frontend.learning.course_outline_sidebar.v1"
     "org.openedx.frontend.learning.progress_certificate_status.v1"
-    "org.openedx.frontend.learning.course_header.v1"
-    "org.openedx.frontend.learning.course_tabs.v1"
     "org.openedx.frontend.layout.header_learning.v1"
     "org.openedx.frontend.learning.course_tab_links.v1"
     "org.openedx.frontend.catalog.catalog_header.v1"
     "org.openedx.frontend.catalog.catalog_card.v1"
     "org.openedx.frontend.catalog.catalog_filters.v1"
-    "org.openedx.frontend.account.account_settings_tab.v1"
-    "org.openedx.frontend.account.account_settings_field.v1"
     "org.openedx.frontend.account.id_verification_page.v1"
     "org.openedx.frontend.account.additional_profile_fields.v1"
     "org.openedx.frontend.profile.additional_profile_fields.v1"
@@ -319,22 +315,16 @@ PY
       fail "AC-FRONT-065: Authn login component slot not registered"
     fi
 
-    if grep -q 'org.openedx.frontend.account.account_settings_tab.v1' "$PLUGIN_FILE"; then
-      pass "AC-FRONT-065: Account settings tab slot is registered"
-    else
-      fail "AC-FRONT-065: Account settings tab slot not registered"
-    fi
-
-    if grep -q 'org.openedx.frontend.account.account_settings_field.v1' "$PLUGIN_FILE"; then
-      pass "AC-FRONT-065: Account settings field slot is registered"
-    else
-      fail "AC-FRONT-065: Account settings field slot not registered"
-    fi
-
     if grep -q 'org.openedx.frontend.account.id_verification_page.v1' "$PLUGIN_FILE"; then
       pass "AC-FRONT-065: Account ID verification slot is registered"
     else
       fail "AC-FRONT-065: Account ID verification slot not registered"
+    fi
+
+    if grep -q 'org.openedx.frontend.account.additional_profile_fields.v1' "$PLUGIN_FILE"; then
+      pass "AC-FRONT-065: Account additional profile fields slot is registered"
+    else
+      fail "AC-FRONT-065: Account additional profile fields slot not registered"
     fi
 
     if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE" && \

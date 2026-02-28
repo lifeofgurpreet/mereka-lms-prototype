@@ -145,14 +145,19 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 
 ### Additional Results
 
-- `verify-mfe-plugin-slots.sh`: `PASS=58`, `WARN=0`, `FAIL=0`
-  - Plugin now declares 27 namespaced slot IDs.
+- `verify-mfe-plugin-slots.sh`: `PASS=50`, `WARN=0`, `FAIL=0`
+  - Plugin now declares 23 namespaced slot IDs.
   - Newly wired confirmed Ulmo slot IDs:
     - `org.openedx.frontend.authoring.course_unit_sidebar.v1`
     - `org.openedx.frontend.layout.header_learning.v1`
     - `org.openedx.frontend.learning.course_tab_links.v1`
     - `org.openedx.frontend.account.id_verification_page.v1`
-- `verify-selector-to-slot-migration.sh`: `PASS=36`, `FAIL=0`
-- `verify-mfe-footer-slot-migration.sh`: `PASS=47`, `FAIL=0`
+  - Retired unconfirmed slot IDs from active wiring:
+    - `org.openedx.frontend.learning.course_header.v1`
+    - `org.openedx.frontend.learning.course_tabs.v1`
+    - `org.openedx.frontend.account.account_settings_tab.v1`
+    - `org.openedx.frontend.account.account_settings_field.v1`
+- `verify-selector-to-slot-migration.sh`: `PASS=32`, `FAIL=0`
+- `verify-mfe-footer-slot-migration.sh`: `PASS=42`, `FAIL=0`
 - `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
 - `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
