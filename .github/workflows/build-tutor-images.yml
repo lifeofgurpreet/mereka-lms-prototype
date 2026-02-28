@@ -91,6 +91,17 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
+      - name: Enable swap for heavy image builds
+        run: |
+          # GitHub hosted runners can OOM during large Open edX layer export.
+          # Add swap to reduce abrupt SIGKILL during docker/buildx workloads.
+          sudo swapoff -a || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
         with:
@@ -293,6 +304,15 @@ jobs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Enable swap for heavy image builds
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
