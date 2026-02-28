@@ -219,10 +219,21 @@ else
   FAIL=$((FAIL + 1))
 fi
 
-if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings.*expires:' "$MFE_SCSS"; then
-  pass_check "Account explicit scope selector has SELECTOR-EXCEPTION metadata with expiry"
+ACCOUNT_SCOPE_ACTIVE=$(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+print(1 if ".page__account-settings" in text else 0)
+PY
+)
+if [[ "$ACCOUNT_SCOPE_ACTIVE" -eq 1 ]]; then
+  fail_check "Legacy account wrapper selector .page__account-settings is still active"
 else
-  fail_check "Account explicit scope selector is missing SELECTOR-EXCEPTION expiry metadata"
+  pass_check "Legacy account wrapper selector removed from active CSS"
 fi
 
 echo ""

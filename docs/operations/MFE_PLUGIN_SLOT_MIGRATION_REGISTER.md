@@ -143,18 +143,18 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Field | Value |
 |-------|-------|
-| **Current approach** | CSS overrides: `.page__account-settings` + `[data-testid*="account"]` |
-| **Target slot** | No slot available upstream |
-| **Status** | 🟡 CSS OVERRIDE — data-testid hardened, no slot |
-| **Risk** | Medium (data-testid fallbacks in place) |
+| **Current approach** | Slot-owned account surfaces (`account_settings_tab.v1` + `account_settings_field.v1`) with tokenized shared component styles |
+| **Target slot** | `org.openedx.frontend.account.account_settings_tab.v1` + `org.openedx.frontend.account.account_settings_field.v1` |
+| **Status** | ✅ MIGRATED — wrapper exception removed |
+| **Risk** | Low (no wrapper-class dependency remains) |
 | **Tenant impact** | All domains — form styling, card layout |
-| **Priority** | P3 (low risk, well-hardened) |
-| **Effort** | N/A (keep CSS) |
+| **Priority** | Done |
+| **Effort** | Done |
 | **Owner** | Mereka frontend team |
-| **Action** | Keep CSS with `SELECTOR-EXCEPTION` annotations. Monitor upstream for account settings slot. |
-| **Target Date** | N/A — review exceptions at 2026-Q3 |
-| **Files** | `mereka.scss:289-560` |
-| **Migration path** | Keep CSS with data-testid. Monitor upstream for account settings slot. |
+| **Action** | Keep slot components active and block wrapper selector regressions in QA gates |
+| **Target Date** | Done |
+| **Files** | `infrastructure/tutor/plugins/mereka_lms.py`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss` |
+| **Migration path** | Wrapper selector retired; account surfaces now flow through slot components and shared tokenized styles |
 
 ---
 
@@ -230,7 +230,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 
 | Selector Pattern | MFE | Reason Cannot Migrate | Expires | Owner | Rollback Plan |
 |-----------------|-----|----------------------|---------|-------|---------------|
-| `.page__account-settings` | account | No upstream slot; account MFE top-level wrapper class | 2026-Q3 | Mereka frontend | Remove once upstream account settings slot is available |
+| _None active_ | — | All prior account wrapper exceptions retired via slot migration | — | — | Re-open only if upstream slot contracts regress |
 
 ### Removed Exceptions (bead 115d.18, 2026-02-18)
 
@@ -244,6 +244,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | `[class*="authn"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="learner-dashboard"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="learning"]` | 2026-02-28 | Removed as dead selector branch from `mereka.scss`; guarded by `verify-mfe-selector-hardening.sh` regression check |
+| `.page__account-settings` | 2026-02-28 | Removed after slot migration to `account_settings_tab.v1` + `account_settings_field.v1`; guarded by `verify-no-dom-overrides.sh` + `verify-migration-lock.sh` |
 | `[class*="course"]` (dashboard/learning scope) | 2026-02-28 | Removed with dead dashboard/learning selector branch; guarded by `verify-mfe-selector-hardening.sh` regression check |
 | `[class*="image-cap"]`, `[class*="imagecap"]` | 2026-02-28 | Removed with dead learning selector branch; scoped media fallback no longer needed |
 | `[class*="image"]`, `[class*="media"]` (card scope) | 2026-02-28 | Removed with dead learning selector branch; scoped media fallback no longer needed |

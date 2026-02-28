@@ -302,10 +302,10 @@ print(count)
 PY
 )
   echo "  Active account-settings scope lines: $ACCOUNT_SCOPE_LINES"
-  if [[ "$ACCOUNT_SCOPE_LINES" -ge 1 ]]; then
-    pass "AC-FRONT-065: Account settings surface retains scoped CSS coverage"
+  if [[ "$ACCOUNT_SCOPE_LINES" -eq 0 ]]; then
+    pass "AC-FRONT-065: Legacy account settings wrapper scope removed from active CSS"
   else
-    fail "AC-FRONT-065: Missing scoped account settings coverage in active CSS"
+    fail "AC-FRONT-065: Legacy account settings wrapper scope still active in CSS"
   fi
 
   if [[ -f "$PLUGIN_FILE" ]]; then
@@ -319,6 +319,12 @@ PY
       pass "AC-FRONT-065: Account settings tab slot is registered"
     else
       fail "AC-FRONT-065: Account settings tab slot not registered"
+    fi
+
+    if grep -q 'org.openedx.frontend.account.account_settings_field.v1' "$PLUGIN_FILE"; then
+      pass "AC-FRONT-065: Account settings field slot is registered"
+    else
+      fail "AC-FRONT-065: Account settings field slot not registered"
     fi
 
     if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE" && \

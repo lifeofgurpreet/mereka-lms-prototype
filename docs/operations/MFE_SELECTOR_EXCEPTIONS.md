@@ -2,7 +2,7 @@
 
 **Bead**: 2dcy.2 (AC-FRONT-023)  
 **Last updated**: 2026-02-28  
-**Status**: Active — slot-first policy, explicit-selector contract
+**Status**: Active — slot-first policy, wrapper exceptions retired
 
 This document tracks the CSS selectors in `infrastructure/tutor/themes/mereka/mfe/mereka.scss` that are intentionally kept as exceptions after Phase C hardening.
 
@@ -42,18 +42,7 @@ body {
 **Rationale**: CSS-only global shell styling, safe degradation.  
 **Expiry**: None.
 
-### EX-03 — `.page__account-settings` scoped account overrides (RISK: HIGH)
-
-```scss
-// SELECTOR-EXCEPTION: .page__account-settings | ... | expires: 2026-Q3
-.page__account-settings .pgn__card { ... }
-```
-
-**Cannot be migrated**: no upstream account-settings wrapper slot exists.  
-**Rationale**: explicit audited wrapper class (`.page__account-settings`) replaces old wildcard scoping and keeps account visual parity.  
-**Expiry**: 2026-Q3 review.
-
-### EX-04 — Paragon/Bootstrap cosmetic component overrides (RISK: LOW-MEDIUM)
+### EX-03 — Paragon/Bootstrap cosmetic component overrides (RISK: LOW-MEDIUM)
 
 ```scss
 .pgn__btn--primary { ... }
@@ -75,6 +64,7 @@ The following wildcard branches were intentionally removed from active CSS and a
 - `[class*="learning"]`
 - `[class*="discussions"]`
 - `[class*="account-page"]`
+- `.page__account-settings`
 
 Regression gates:
 
@@ -89,6 +79,8 @@ Regression gates:
 - `org.openedx.frontend.authn.login_component.v1`
 - `org.openedx.frontend.learner_dashboard.widget_sidebar.v1`
 - `org.openedx.frontend.learner_dashboard.no_courses_view.v1`
+- `org.openedx.frontend.account.account_settings_tab.v1`
+- `org.openedx.frontend.account.account_settings_field.v1`
 
 See `infrastructure/tutor/plugins/mereka_lms.py` for canonical registrations.
 
@@ -98,8 +90,7 @@ See `infrastructure/tutor/plugins/mereka_lms.py` for canonical registrations.
 |---|---|---|---|---|
 | EX-01 | `:root` token vars | LOW | No slot for CSS vars | Never |
 | EX-02 | `body` shell styling | LOW | No slot for document root | Never |
-| EX-03 | `.page__account-settings` | HIGH | No account wrapper slot | 2026-Q3 |
-| EX-04 | `.pgn__*` / `.navbar` cosmetic rules | LOW-MEDIUM | CSS-only theming concern | Paragon/Bootstrap major |
+| EX-03 | `.pgn__*` / `.navbar` cosmetic rules | LOW-MEDIUM | CSS-only theming concern | Paragon/Bootstrap major |
 
 ## Related Documents
 

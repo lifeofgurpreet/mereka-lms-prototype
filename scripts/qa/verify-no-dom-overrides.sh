@@ -106,10 +106,21 @@ PY
     fail "Disallowed active wildcard selector targets in mereka.scss: ${ACTIVE_CLASS_UNIQUE[*]}"
   fi
 
-  if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings.*expires:' "$MFE_SCSS"; then
-    pass "Explicit account scope selector includes SELECTOR-EXCEPTION expiry metadata"
+  ACCOUNT_SCOPE_ACTIVE=$(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+print(1 if ".page__account-settings" in text else 0)
+PY
+  )
+  if [[ "$ACCOUNT_SCOPE_ACTIVE" -eq 1 ]]; then
+    fail "Legacy .page__account-settings scope is still active (expected slot-owned account styling)"
   else
-    fail "Explicit account scope selector missing SELECTOR-EXCEPTION expiry metadata"
+    pass "Legacy .page__account-settings scope removed; account styling is slot-owned"
   fi
 else
   warn "mereka.scss not found at $MFE_SCSS"

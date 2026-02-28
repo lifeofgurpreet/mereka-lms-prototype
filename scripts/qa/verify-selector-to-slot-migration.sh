@@ -58,10 +58,10 @@ if [[ -f "$SCSS_FILE" ]]; then
 
   LIVE_SCOPE='.page__account-settings'
   LIVE_COUNT="$(count_active_literal "$SCSS_FILE" "$LIVE_SCOPE")"
-  if [[ "$LIVE_COUNT" -gt 0 ]]; then
-    pass_check "AC-FRONT-021: live account-settings explicit scope is present (${LIVE_COUNT} occurrence(s))"
+  if [[ "$LIVE_COUNT" -eq 0 ]]; then
+    pass_check "AC-FRONT-021: account-settings wrapper selector removed from active CSS (slot-owned styling)"
   else
-    fail_check "AC-FRONT-021: live account-settings explicit scope is missing"
+    fail_check "AC-FRONT-021: legacy account-settings wrapper selector still active (${LIVE_COUNT} occurrence(s))"
   fi
 
   for dead_scope in '[class*="authn"]' '[class*="learner-dashboard"]' '[class*="learning"]' '[class*="discussions"]'; do
@@ -73,10 +73,10 @@ if [[ -f "$SCSS_FILE" ]]; then
     fi
   done
   
-  if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings.*expires:' "$SCSS_FILE"; then
-    pass_check "AC-FRONT-021: account-settings explicit selector exception includes expiry metadata"
+  if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings' "$SCSS_FILE"; then
+    fail_check "AC-FRONT-021: stale account-settings SELECTOR-EXCEPTION marker still present"
   else
-    fail_check "AC-FRONT-021: account-settings explicit selector exception missing expiry metadata"
+    pass_check "AC-FRONT-021: no account-settings SELECTOR-EXCEPTION marker remains"
   fi
 else
   fail_check "AC-FRONT-021: mereka.scss not found at $SCSS_FILE"
@@ -132,11 +132,11 @@ fi
 if [[ -f "$EXCEPTIONS_DOC" ]]; then
   pass_check "AC-FRONT-023: MFE_SELECTOR_EXCEPTIONS.md exists"
 
-  # Verify the doc has meaningful content (risk levels documented)
-  if grep -q 'RISK: HIGH' "$EXCEPTIONS_DOC"; then
-    pass_check "AC-FRONT-023: Exceptions doc documents HIGH risk selectors"
+  # Verify the doc has meaningful risk-state content.
+  if grep -q 'RISK: HIGH\|None active\|wrapper exceptions retired' "$EXCEPTIONS_DOC"; then
+    pass_check "AC-FRONT-023: Exceptions doc documents current high-risk/none-active state"
   else
-    fail_check "AC-FRONT-023: Exceptions doc is missing RISK: HIGH entries"
+    fail_check "AC-FRONT-023: Exceptions doc missing risk-state declaration"
   fi
 
   # Verify rationale sections exist
