@@ -172,6 +172,10 @@ kubectl get deploy lms cms mfe -n mereka-lms \
 # Full branding evidence pipeline
 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod
 
+# Purge frontend/theme cache entries (dry-run first, then apply)
+./scripts/infra/purge-frontend-theme-cache.sh --env prod
+./scripts/infra/purge-frontend-theme-cache.sh --env prod --apply
+
 # Frontend closure lane (cross-browser + a11y + performance, skips multisite baseline gates)
 ./scripts/qa/run-branding-evidence-pipeline.sh \
   --env prod \
