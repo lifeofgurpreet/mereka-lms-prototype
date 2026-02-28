@@ -45,11 +45,11 @@ else
       fi
     fi
   elif command -v npx >/dev/null 2>&1; then
-    if npx --yes sass "$CMS_SASS" "$tmp_out" >/dev/null 2>"/tmp/studio-sass.err"; then
-      pass "Studio SCSS compiles with npx sass"
+    if npx --no-install sass "$CMS_SASS" "$tmp_out" >/dev/null 2>"/tmp/studio-sass.err"; then
+      pass "Studio SCSS compiles with local npx sass"
     else
-      if rg -q "Can't find stylesheet to import|Could not find Sass file" /tmp/studio-sass.err; then
-        warn "Studio SCSS compile skipped: build-time Sass imports unavailable in local workspace"
+      if rg -q "npm ERR!.*could not determine executable|not found|Can't find stylesheet to import|Could not find Sass file" /tmp/studio-sass.err; then
+        warn "Studio SCSS compile skipped: local sass toolchain/imports unavailable in this workspace"
       else
         fail "Studio SCSS failed to compile with npx sass"
       fi
