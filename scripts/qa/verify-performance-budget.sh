@@ -10,7 +10,7 @@
 # - Web Vitals thresholds section exists
 #
 # Usage: ./scripts/qa/verify-performance-budget.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 BUDGET_DOC="$REPO_ROOT/docs/architecture/PERFORMANCE_BUDGETS.md"

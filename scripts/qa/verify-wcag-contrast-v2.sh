@@ -10,7 +10,7 @@
 # - CI has accessibility/contrast gates
 #
 # Usage: ./scripts/qa/verify-wcag-contrast-v2.sh
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 POLICY="$REPO_ROOT/docs/architecture/WCAG_CONTRAST_POLICY_V2.md"

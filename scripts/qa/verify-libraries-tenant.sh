@@ -10,7 +10,7 @@
 # Flags:
 #   --skip-cluster   Skip runtime cluster tests (offline mode)
 
-set -uo pipefail
+set -euo pipefail
 
 # ── Color Codes ────────────────────────────────────────────────────────
 readonly RED='\033[0;31m'
@@ -40,17 +40,17 @@ done
 # ── Helper Functions ───────────────────────────────────────────────────
 pass() {
   echo -e "${GREEN}✓ PASS${NC}: $1"
-  ((PASS_COUNT++))
+  PASS_COUNT=$((PASS_COUNT + 1))
 }
 
 fail() {
   echo -e "${RED}✗ FAIL${NC}: $1"
-  ((FAIL_COUNT++))
+  FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
 skip() {
   echo -e "${YELLOW}⊘ SKIP${NC}: $1"
-  ((SKIP_COUNT++))
+  SKIP_COUNT=$((SKIP_COUNT + 1))
 }
 
 section() {

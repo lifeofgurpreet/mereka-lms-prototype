@@ -13,7 +13,7 @@
 #   0 — all suites passed (WARNs are non-blocking)
 #   1 — one or more suites had FAIL > 0
 
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 

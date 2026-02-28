@@ -3,7 +3,7 @@
 # @spec: email-notifications-pipeline_spec.md
 # @covers AC-044, AC-045
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -12,9 +12,14 @@ PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
 
-do_pass() { echo "✓ $1"; ((PASS_COUNT++)); }
-do_fail() { echo "✗ $1"; ((FAIL_COUNT++)); }
-do_warn() { echo "⚠ $1"; ((WARN_COUNT++)); }
+do_pass() { echo "✓ $1"; PASS_COUNT=$((PASS_COUNT + 1)); }
+do_fail() { echo "✗ $1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
+do_warn() { echo "⚠ $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
+has_py_pattern() {
+  local base_dir="$1"
+  local pattern="$2"
+  grep -R --include='*.py' --exclude-dir='__pycache__' -E "$pattern" "$base_dir" >/dev/null 2>&1
+}
 
 cd "$REPO_ROOT" || exit 1
 
@@ -30,14 +35,14 @@ EXPORT_FOUND=0
 if [ -d "infrastructure/tutor/plugins/data-privacy" ]; then
     PRIVACY_PLUGIN="infrastructure/tutor/plugins/data-privacy"
 
-    if find "$PRIVACY_PLUGIN" -name "*.py" -exec grep -E "(notification.*preference|consent.*record|email.*preference)" {} \; | grep -q .; then
+    if has_py_pattern "$PRIVACY_PLUGIN" "(notification.*preference|consent.*record|email.*preference)"; then
         do_pass "Notification preferences included in GDPR export"
-        ((EXPORT_FOUND++))
+        EXPORT_FOUND=$((EXPORT_FOUND + 1))
     fi
 
-    if find "$PRIVACY_PLUGIN" -name "*.py" -exec grep -E "(device.*registration|push.*token)" {} \; | grep -q .; then
+    if has_py_pattern "$PRIVACY_PLUGIN" "(device.*registration|push.*token)"; then
         do_pass "Device registrations included in GDPR export"
-        ((EXPORT_FOUND++))
+        EXPORT_FOUND=$((EXPORT_FOUND + 1))
     fi
 fi
 
@@ -45,9 +50,9 @@ fi
 if [ -d "infrastructure/tutor/plugins/email-preferences" ]; then
     PREF_PLUGIN="infrastructure/tutor/plugins/email-preferences"
 
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(export.*user.*data|gdpr.*export|serialize.*preferences)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(export.*user.*data|gdpr.*export|serialize.*preferences)"; then
         do_pass "Email preferences plugin supports data export"
-        ((EXPORT_FOUND++))
+        EXPORT_FOUND=$((EXPORT_FOUND + 1))
     fi
 fi
 
@@ -55,9 +60,9 @@ fi
 if [ -d "infrastructure/tutor/plugins/notifications-inapp" ]; then
     INAPP_PLUGIN="infrastructure/tutor/plugins/notifications-inapp"
 
-    if find "$INAPP_PLUGIN" -name "*.py" -exec grep -E "(export.*notification|gdpr.*export)" {} \; | grep -q .; then
+    if has_py_pattern "$INAPP_PLUGIN" "(export.*notification|gdpr.*export)"; then
         do_pass "In-app notifications included in GDPR export"
-        ((EXPORT_FOUND++))
+        EXPORT_FOUND=$((EXPORT_FOUND + 1))
     fi
 fi
 
@@ -76,9 +81,9 @@ DELETION_FOUND=0
 if [ -d "infrastructure/tutor/plugins/data-privacy" ]; then
     PRIVACY_PLUGIN="infrastructure/tutor/plugins/data-privacy"
 
-    if find "$PRIVACY_PLUGIN" -name "*.py" -exec grep -E "(delete.*notification|purge.*user.*data|anonymize)" {} \; | grep -q .; then
+    if has_py_pattern "$PRIVACY_PLUGIN" "(delete.*notification|purge.*user.*data|anonymize)"; then
         do_pass "Notification data deletion handler found"
-        ((DELETION_FOUND++))
+        DELETION_FOUND=$((DELETION_FOUND + 1))
     fi
 fi
 
@@ -86,15 +91,15 @@ fi
 if [ -d "infrastructure/tutor/plugins/email-preferences" ]; then
     PREF_PLUGIN="infrastructure/tutor/plugins/email-preferences"
 
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(delete.*preference|on_delete|CASCADE)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(delete.*preference|on_delete|CASCADE)"; then
         do_pass "Email preferences deletion logic found"
-        ((DELETION_FOUND++))
+        DELETION_FOUND=$((DELETION_FOUND + 1))
     fi
 
     # Check for consent record deletion
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(delete.*consent|ConsentRecord.*delete)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(delete.*consent|ConsentRecord.*delete)"; then
         do_pass "Consent record deletion logic found"
-        ((DELETION_FOUND++))
+        DELETION_FOUND=$((DELETION_FOUND + 1))
     fi
 fi
 
@@ -102,9 +107,9 @@ fi
 if [ -d "infrastructure/tutor/plugins/push-notifications" ]; then
     PUSH_PLUGIN="infrastructure/tutor/plugins/push-notifications"
 
-    if find "$PUSH_PLUGIN" -name "*.py" -exec grep -E "(delete.*device|unregister.*all|CASCADE)" {} \; | grep -q .; then
+    if has_py_pattern "$PUSH_PLUGIN" "(delete.*device|unregister.*all|CASCADE)"; then
         do_pass "Device registration deletion logic found"
-        ((DELETION_FOUND++))
+        DELETION_FOUND=$((DELETION_FOUND + 1))
     fi
 fi
 
@@ -112,9 +117,9 @@ fi
 if [ -d "infrastructure/tutor/plugins/notifications-inapp" ]; then
     INAPP_PLUGIN="infrastructure/tutor/plugins/notifications-inapp"
 
-    if find "$INAPP_PLUGIN" -name "*.py" -exec grep -E "(delete.*notification|purge.*user|CASCADE)" {} \; | grep -q .; then
+    if has_py_pattern "$INAPP_PLUGIN" "(delete.*notification|purge.*user|CASCADE)"; then
         do_pass "In-app notification deletion logic found"
-        ((DELETION_FOUND++))
+        DELETION_FOUND=$((DELETION_FOUND + 1))
     fi
 fi
 
@@ -131,28 +136,28 @@ if [ -d "infrastructure/tutor/plugins/email-preferences" ]; then
     PREF_PLUGIN="infrastructure/tutor/plugins/email-preferences"
 
     # Check for consent_version field
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -l "consent_version" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "consent_version"; then
         do_pass "Consent version tracking found (GDPR audit trail)"
     else
         do_warn "consent_version field not found (GDPR compliance risk)"
     fi
 
     # Check for consent_text_hash
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(consent_text_hash|SHA-256)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(consent_text_hash|SHA-256)"; then
         do_pass "Consent text hash tracking found (GDPR proof of consent)"
     else
         do_warn "Consent text hash not found (may store version only)"
     fi
 
     # Check for IP address hashing
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(ip_address_hash|hash.*ip)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(ip_address_hash|hash.*ip)"; then
         do_pass "IP address hashing found (GDPR compliance for audit)"
     else
         do_warn "IP address hashing not found (may store plaintext or skip IP)"
     fi
 
     # Check for consent timestamp
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(consented_at|consent.*timestamp)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(consented_at|consent.*timestamp)"; then
         do_pass "Consent timestamp tracking found"
     else
         do_warn "Consent timestamp not found (GDPR audit trail incomplete)"
@@ -170,14 +175,14 @@ if [ -d "infrastructure/tutor/plugins/email-preferences" ]; then
     PREF_PLUGIN="infrastructure/tutor/plugins/email-preferences"
 
     # Check for opt-in default (bulk_campaign should default to disabled)
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(bulk_campaign.*False|bulk_campaign.*disabled|opt.*in.*required)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(bulk_campaign.*False|bulk_campaign.*disabled|opt.*in.*required)"; then
         do_pass "Marketing emails default to opt-out (GDPR compliant)"
     else
         do_warn "Marketing opt-in default not found (may violate GDPR)"
     fi
 
     # Check for explicit consent requirement
-    if find "$PREF_PLUGIN" -name "*.py" -exec grep -E "(explicit.*consent|require.*opt.*in|marketing.*consent)" {} \; | grep -q .; then
+    if has_py_pattern "$PREF_PLUGIN" "(explicit.*consent|require.*opt.*in|marketing.*consent)"; then
         do_pass "Explicit consent requirement found for marketing"
     else
         do_warn "Explicit consent enforcement not evident"

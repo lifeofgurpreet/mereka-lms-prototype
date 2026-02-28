@@ -3,7 +3,7 @@
 # @spec: email-notifications-pipeline_spec.md
 # @covers AC-012, AC-014
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -12,9 +12,9 @@ PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
 
-do_pass() { echo "✓ $1"; ((PASS_COUNT++)); }
-do_fail() { echo "✗ $1"; ((FAIL_COUNT++)); }
-do_warn() { echo "⚠ $1"; ((WARN_COUNT++)); }
+do_pass() { echo "✓ $1"; PASS_COUNT=$((PASS_COUNT + 1)); }
+do_fail() { echo "✗ $1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
+do_warn() { echo "⚠ $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
 
 cd "$REPO_ROOT" || exit 1
 
@@ -70,13 +70,13 @@ if [ -d "$INAPP_PLUGIN" ]; then
 
         if find "$INAPP_PLUGIN" -name "views.py" -exec grep -E "(filter.*org_slug|org_slug.*=.*request)" {} \; | grep -q .; then
             do_pass "org_slug filtering found in views (cross-tenant isolation)"
-            ((ISOLATION_CHECKS++))
+            ISOLATION_CHECKS=$((ISOLATION_CHECKS + 1))
         fi
 
         # Check for org_slug in query filters
         if find "$INAPP_PLUGIN" -name "*.py" -exec grep -E "(queryset.*filter.*org_slug|\.objects\.filter.*org_slug)" {} \; | grep -q .; then
             do_pass "org_slug used in queryset filters"
-            ((ISOLATION_CHECKS++))
+            ISOLATION_CHECKS=$((ISOLATION_CHECKS + 1))
         fi
 
         if [ "$ISOLATION_CHECKS" -eq 0 ]; then

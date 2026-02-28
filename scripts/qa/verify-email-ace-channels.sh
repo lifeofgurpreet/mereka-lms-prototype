@@ -3,7 +3,7 @@
 # @spec: email-notifications-pipeline_spec.md
 # @covers AC-006, AC-008
 
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -12,9 +12,14 @@ PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
 
-do_pass() { echo "✓ $1"; ((PASS_COUNT++)); }
-do_fail() { echo "✗ $1"; ((FAIL_COUNT++)); }
-do_warn() { echo "⚠ $1"; ((WARN_COUNT++)); }
+do_pass() { echo "✓ $1"; PASS_COUNT=$((PASS_COUNT + 1)); }
+do_fail() { echo "✗ $1"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
+do_warn() { echo "⚠ $1"; WARN_COUNT=$((WARN_COUNT + 1)); }
+has_py_pattern() {
+  local base_dir="$1"
+  local pattern="$2"
+  grep -R --include='*.py' --exclude-dir='__pycache__' -E "$pattern" "$base_dir" >/dev/null 2>&1
+}
 
 cd "$REPO_ROOT" || exit 1
 
@@ -40,15 +45,15 @@ if [ -n "$CONFIG" ]; then
         CHANNELS_CONFIG=$(grep "ACE_ENABLED_CHANNELS" "$CONFIG" | head -1)
 
         if echo "$CHANNELS_CONFIG" | grep -q "django_email"; then
-            ((CHANNELS_FOUND++))
+            CHANNELS_FOUND=$((CHANNELS_FOUND + 1))
         fi
 
         if echo "$CHANNELS_CONFIG" | grep -q "push"; then
-            ((CHANNELS_FOUND++))
+            CHANNELS_FOUND=$((CHANNELS_FOUND + 1))
         fi
 
         if echo "$CHANNELS_CONFIG" | grep -q "in_app"; then
-            ((CHANNELS_FOUND++))
+            CHANNELS_FOUND=$((CHANNELS_FOUND + 1))
         fi
 
         if [ "$CHANNELS_FOUND" -eq 3 ]; then
@@ -75,20 +80,20 @@ if [ -d "infrastructure/tutor/plugins/email-preferences" ]; then
     PREF_DIR="infrastructure/tutor/plugins/email-preferences"
 
     # Look for password_reset in SYSTEM_CRITICAL or NONSUPPRESSIBLE constants
-    if grep -r "password_reset" "$PREF_DIR" | grep -qE "(SYSTEM_CRITICAL|NON_SUPPRESSIBLE|system.critical|non.suppressible)"; then
+    if has_py_pattern "$PREF_DIR" "(password_reset.*(SYSTEM_CRITICAL|NON_SUPPRESSIBLE|system.critical|non.suppressible)|(SYSTEM_CRITICAL|NON_SUPPRESSIBLE|system.critical|non.suppressible).*password_reset)"; then
         do_pass "password_reset marked as system-critical (non-suppressible)"
-        ((CRITICAL_TYPES_FOUND++))
+        CRITICAL_TYPES_FOUND=$((CRITICAL_TYPES_FOUND + 1))
     fi
 
     # Look for account_activation in SYSTEM_CRITICAL or NONSUPPRESSIBLE constants
-    if grep -r "account_activation" "$PREF_DIR" | grep -qE "(SYSTEM_CRITICAL|NON_SUPPRESSIBLE|system.critical|non.suppressible)"; then
+    if has_py_pattern "$PREF_DIR" "(account_activation.*(SYSTEM_CRITICAL|NON_SUPPRESSIBLE|system.critical|non.suppressible)|(SYSTEM_CRITICAL|NON_SUPPRESSIBLE|system.critical|non.suppressible).*account_activation)"; then
         do_pass "account_activation marked as system-critical (non-suppressible)"
-        ((CRITICAL_TYPES_FOUND++))
+        CRITICAL_TYPES_FOUND=$((CRITICAL_TYPES_FOUND + 1))
     fi
 
     if [ "$CRITICAL_TYPES_FOUND" -eq 0 ]; then
         # Check for code that bypasses preferences for these types
-        if grep -rE "(password_reset|account_activation)" "$PREF_DIR" | grep -qE "(bypass|override|force_send|always_send)"; then
+        if has_py_pattern "$PREF_DIR" "((password_reset|account_activation).*(bypass|override|force_send|always_send)|(bypass|override|force_send|always_send).*(password_reset|account_activation))"; then
             do_pass "System-critical message types have preference bypass logic"
         else
             do_warn "System-critical message types not explicitly marked (may be in upstream code)"
@@ -110,7 +115,7 @@ if [ -n "$SETTINGS_FILES" ]; then
 
     for settings_file in $SETTINGS_FILES; do
         if grep -qE "(ACE_CHANNEL_DEFAULT|ACE_CHANNEL_TRANSACTIONAL)" "$settings_file" 2>/dev/null; then
-            ((CHANNEL_REFS++))
+            CHANNEL_REFS=$((CHANNEL_REFS + 1))
         fi
     done
 
