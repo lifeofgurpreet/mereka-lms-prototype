@@ -36,6 +36,7 @@ RUN_ENTERPRISE_SCHEMA_GUARD="${RUN_ENTERPRISE_SCHEMA_GUARD:-1}"
 RUN_ENTERPRISE_RUNTIME_APP_GUARD="${RUN_ENTERPRISE_RUNTIME_APP_GUARD:-1}"
 RUN_BRANDING_RUNTIME_GUARD="${RUN_BRANDING_RUNTIME_GUARD:-1}"
 RUN_BRANDING_SURFACE_AUDIT="${RUN_BRANDING_SURFACE_AUDIT:-1}"
+RUN_FOOTER_RUNTIME_GUARD="${RUN_FOOTER_RUNTIME_GUARD:-1}"
 RUN_MFE_ROUTE_RUNTIME_GUARD="${RUN_MFE_ROUTE_RUNTIME_GUARD:-1}"
 RUN_MFE_ROUTE_SMOKE_GUARD="${RUN_MFE_ROUTE_SMOKE_GUARD:-1}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
@@ -90,6 +91,8 @@ Options:
                        Skip post-rollout runtime branding verification guard.
   --skip-branding-surface-audit
                        Skip strict branding surface audit after runtime branding verification.
+  --skip-footer-runtime-guard
+                       Skip live footer parity runtime verification guard.
   --skip-mfe-route-runtime-guard
                        Skip strict runtime MFE route contract verification guard.
   --skip-mfe-route-smoke-guard
@@ -217,6 +220,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-branding-surface-audit)
       RUN_BRANDING_SURFACE_AUDIT=0
+      shift
+      ;;
+    --skip-footer-runtime-guard)
+      RUN_FOOTER_RUNTIME_GUARD=0
       shift
       ;;
     --skip-mfe-route-runtime-guard)
@@ -636,6 +643,12 @@ if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_BRANDING_RUNTIME_
   exit 1
 fi
 
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with footer runtime guard enabled requires --verify-runtime." >&2
+  echo "Use --skip-footer-runtime-guard only for controlled emergency releases." >&2
+  exit 1
+fi
+
 UPDATE_APP_BASE=0
 UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
@@ -687,6 +700,7 @@ echo "Enterprise runtime app guard: $([[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq
 echo "Enterprise schema guard: $([[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Branding runtime guard: $([[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Branding surface audit: $([[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Footer runtime guard: $([[ "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "MFE route runtime guard: $([[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "MFE route smoke guard: $([[ "$RUN_MFE_ROUTE_SMOKE_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
@@ -744,6 +758,13 @@ run_branding_release_postflights() {
       "$REPO_ROOT/scripts/qa/verify-public-branding.sh" prod
   else
     echo "= skipped branding runtime guard (--skip-branding-runtime-guard)"
+  fi
+
+  if [[ "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production footer runtime verification..."
+    "$REPO_ROOT/scripts/qa/verify-footer-parity.sh" --live
+  else
+    echo "= skipped footer runtime guard (--skip-footer-runtime-guard)"
   fi
 
   if [[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 && "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]]; then
