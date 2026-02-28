@@ -45,15 +45,15 @@ for template_dir in $TEMPLATE_DIRS; do
         fi
 
         # Check for Malay templates (ms/ or ms-MY/)
-        if find "$template_dir" -type d -name "ms" -o -name "ms-MY" 2>/dev/null | grep -q .; then
-            if find "$template_dir" -path "*/ms/*" -name "*.html" -o -path "*/ms/*" -name "*.txt" 2>/dev/null | grep -q .; then
+        if find "$template_dir" -type d \( -name "ms" -o -name "ms-MY" \) 2>/dev/null | grep -q .; then
+            if find "$template_dir" \( -path "*/ms/*" -o -path "*/ms-MY/*" \) \( -name "*.html" -o -name "*.txt" \) 2>/dev/null | grep -q .; then
                 MS_TEMPLATES=$((MS_TEMPLATES + 1))
             fi
         fi
 
         # Check for Chinese templates (zh-hans/ or zh/)
-        if find "$template_dir" -type d -name "zh-hans" -o -name "zh" 2>/dev/null | grep -q .; then
-            if find "$template_dir" -path "*/zh*/*" -name "*.html" -o -path "*/zh*/*" -name "*.txt" 2>/dev/null | grep -q .; then
+        if find "$template_dir" -type d \( -name "zh-hans" -o -name "zh" \) 2>/dev/null | grep -q .; then
+            if find "$template_dir" \( -path "*/zh-hans/*" -o -path "*/zh/*" \) \( -name "*.html" -o -name "*.txt" \) 2>/dev/null | grep -q .; then
                 ZH_TEMPLATES=$((ZH_TEMPLATES + 1))
             fi
         fi
@@ -89,12 +89,12 @@ echo "Checking language fallback logic..."
 
 FALLBACK_FOUND=0
 
-if find infrastructure/tutor/plugins -name "*.py" -exec grep -E "(language.*fallback|default.*lang.*en|if.*not.*template.*exists)" {} \; 2>/dev/null | grep -q .; then
+if find infrastructure/tutor/plugins -name "*.py" -exec grep -E "(language.*fallback|default.*lang.*en|if.*not.*template.*exists|if language != 'en')" {} \; 2>/dev/null | grep -q .; then
     do_pass "Language fallback logic found (falls back to EN)"
     FALLBACK_FOUND=$((FALLBACK_FOUND + 1))
 fi
 
-if find infrastructure/tutor -name "*.py" -exec grep -E "(language_preference|LANGUAGE_CODE|user.*language)" {} \; 2>/dev/null | grep -q .; then
+if find infrastructure/tutor -name "*.py" -exec grep -E "(language_preference|LANGUAGE_CODE|user.*language|LANGUAGE_CHOICES)" {} \; 2>/dev/null | grep -q .; then
     do_pass "User language preference handling found"
     FALLBACK_FOUND=$((FALLBACK_FOUND + 1))
 fi
@@ -109,14 +109,21 @@ echo
 echo "Checking message type template coverage..."
 
 MESSAGE_TYPES=(
-    "enrollment_confirmation"
-    "course_announcement"
-    "assignment_reminder"
-    "grade_posted"
-    "discussion_reply"
-    "certificate_issued"
+    "welcome"
+    "enrollment"
+    "grade"
+    "certificate"
+    "deadline"
+    "forum"
     "password_reset"
     "account_activation"
+    "course_announcement"
+    "survey"
+    "marketing_promo"
+    "re_engagement"
+    "feedback"
+    "maintenance_notice"
+    "campaign"
 )
 
 TEMPLATES_WITH_MULTILANG=0
