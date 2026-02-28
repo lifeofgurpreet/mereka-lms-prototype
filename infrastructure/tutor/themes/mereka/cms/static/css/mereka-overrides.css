@@ -49,12 +49,6 @@
     var(--mereka-color-blue) 100%
   );
 
-  /* Legacy compatibility (older overrides used these names) */
-  --mereka-teal: var(--mereka-color-teal);
-  --mereka-magenta: var(--mereka-color-magenta);
-  --mereka-blue: var(--mereka-color-blue);
-  --mereka-black: var(--mereka-color-ink-900);
-
   /* Paragon bridge (MFEs) - canonical v22 token names only */
   --pgn-body-bg: var(--mereka-color-surface-primary);
   --pgn-body-color: var(--mereka-color-ink-900);
@@ -229,7 +223,7 @@ html,
 body:not(.courseware) {
   font-family: var(--mereka-font-body);
   background-color: var(--mereka-color-surface-primary);
-  color: var(--mereka-black);
+  color: var(--mereka-color-ink-900);
 }
 
 body:not(.courseware) h1,
@@ -247,21 +241,21 @@ body:not(.courseware) .hd-4 {
 }
 
 body:not(.courseware) a {
-  color: var(--mereka-blue);
+  color: var(--mereka-color-blue);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
 
 body:not(.courseware) a:hover,
 body:not(.courseware) a:focus {
-  color: var(--mereka-teal);
+  color: var(--mereka-color-teal);
 }
 
 body:not(.courseware) .btn-primary,
 body:not(.courseware) .btn-brand,
 body:not(.courseware) button.btn.btn-primary {
-  background-color: var(--mereka-magenta);
-  border-color: var(--mereka-magenta);
+  background-color: var(--mereka-color-magenta);
+  border-color: var(--mereka-color-magenta);
   border-radius: 999px;
 }
 
@@ -281,7 +275,7 @@ body:not(.courseware) button.btn.btn-primary:focus {
 
 .header-global,
 .nav-global {
-  border-top: 4px solid var(--mereka-teal);
+  border-top: 4px solid var(--mereka-color-teal);
 }
 
 /* -------------------------- */
@@ -1156,8 +1150,8 @@ body:not(.courseware) button.btn.btn-primary:focus {
 .wrapper-content a.action-primary,
 .wrapper-content button.action-primary {
   border-radius: 999px;
-  background-color: var(--mereka-magenta);
-  border: 1px solid var(--mereka-magenta);
+  background-color: var(--mereka-color-magenta);
+  border: 1px solid var(--mereka-color-magenta);
   color: #fff;
   font-weight: 700;
 }

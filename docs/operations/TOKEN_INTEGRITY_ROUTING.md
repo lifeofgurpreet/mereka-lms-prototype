@@ -14,7 +14,7 @@
 | `infrastructure/tutor/themes/mereka/scss/_tokens.scss` | Primary SCSS bridge — SCSS variables + `:root` CSS custom properties |
 | `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` | Runtime CSS entrypoint (no build step), loaded via `head-extra.html` in both LMS and Studio |
 | `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` | LMS-scoped copy of overrides (must stay in sync with `common/`) |
-| `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | MFE-specific tokens (self-contained, imports `./scss/theme`) |
+| `infrastructure/tutor/themes/mereka/mfe/mereka.scss` | MFE-specific tokens (self-contained, imports `./scss/tokens` + `./scss/base`) |
 
 ### Defined `--mereka-*` Tokens (canonical set)
 
@@ -51,11 +51,9 @@ The tokens below are defined in `mereka-overrides.css` (the runtime canonical so
 - `--mereka-shadow-card`
 - `--mereka-gradient-primary`
 
-**Legacy compatibility aliases** (defined in `mereka-overrides.css`)
-- `--mereka-teal` → `var(--mereka-color-teal)`
-- `--mereka-magenta` → `var(--mereka-color-magenta)`
-- `--mereka-blue` → `var(--mereka-color-blue)`
-- `--mereka-black` → `var(--mereka-color-ink-900)`
+**Canonical-only policy**
+- Legacy aliases (`--mereka-teal`, `--mereka-magenta`, `--mereka-blue`, `--mereka-black`) are removed.
+- Runtime CSS must reference canonical tokens directly (`--mereka-color-*`).
 
 **MFE-local tokens** (defined in `mfe/mereka.scss`, self-contained)
 - `--mereka-mfe-branding-rev`
@@ -74,8 +72,8 @@ Running `scripts/qa/verify-token-integrity-routing.sh` confirmed that all `var(-
 in theme files resolve to definitions. The MFE-local tokens (`--mereka-mfe-*`) are self-defined at the
 top of `mfe/mereka.scss` and do not require an entry in the shared token chain.
 
-The legacy alias tokens (`--mereka-teal`, `--mereka-magenta`, `--mereka-blue`, `--mereka-black`) are
-intentionally preserved in `mereka-overrides.css` for backward compatibility with older selectors.
+Legacy alias tokens are no longer preserved. Any reintroduction is treated as a regression by
+`scripts/qa/verify-design-tokens-migration.sh`.
 
 No undefined token references were found at the time of this bead.
 

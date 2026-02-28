@@ -236,6 +236,12 @@ jobs:
       - name: Validate token values in theme files
         run: python3 scripts/qa/check-token-values-in-theme.py
 
+      - name: Syntax check token drift verifier
+        run: bash -n scripts/qa/verify-token-drift.sh
+
+      - name: Verify token drift
+        run: ./scripts/qa/verify-token-drift.sh
+
       - name: Validate config.example.yml
         run: python3 scripts/qa/check-config-example-yaml.py
 

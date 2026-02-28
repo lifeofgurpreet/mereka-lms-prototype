@@ -12,10 +12,10 @@
 
 | Domain | Brand Name | Copyright Holder | WhatsApp | Logo Path | Color Theme | Footer Slot | Status |
 |--------|-----------|-----------------|----------|-----------|-------------|-------------|--------|
-| `academyv2.mereka.io` | Mereka Academy | MEREKA | `601135271981` | `/static/images/logo.png` | `--mereka-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Active |
-| `academy.biji-biji.com` | Biji-Biji Academy | Biji-Biji Initiative | `601135271981` | `/static/images/logo.png` | `--mereka-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Active |
-| `skillourfuture.academy.mereka.io` | Skill Our Future Academy | MEREKA | `601135271981` | `/static/images/logo.png` | `--mereka-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Active |
-| *(default / unknown host)* | *(reads `config.SITE_NAME`)* | *(reads `config.PLATFORM_NAME` or `MEREKA`)* | `601135271981` | `/static/images/logo.png` | `--mereka-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Fallback |
+| `academyv2.mereka.io` | Mereka Academy | MEREKA | `601135271981` | `/static/images/logo.png` | `--mereka-color-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Active |
+| `academy.biji-biji.com` | Biji-Biji Academy | Biji-Biji Initiative | `601135271981` | `/static/images/logo.png` | `--mereka-color-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Active |
+| `skillourfuture.academy.mereka.io` | Skill Our Future Academy | MEREKA | `601135271981` | `/static/images/logo.png` | `--mereka-color-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Active |
+| *(default / unknown host)* | *(reads `config.SITE_NAME`)* | *(reads `config.PLATFORM_NAME` or `MEREKA`)* | `601135271981` | `/static/images/logo.png` | `--mereka-color-teal` primary | `org.openedx.frontend.layout.footer.v1` | ✅ Fallback |
 
 **Notes**:
 - Logo path is currently shared across all domains (served from LMS base URL).

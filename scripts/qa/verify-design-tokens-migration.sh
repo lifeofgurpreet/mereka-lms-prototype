@@ -188,7 +188,44 @@ for f_var in COMMON_OVERRIDES LMS_OVERRIDES CMS_OVERRIDES; do
 done
 
 # ---------------------------------------------------------------------------
-# 6. MFE SCSS imports the token bridge
+# 6. Canonical token policy (no legacy --mereka-* aliases)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- Canonical token policy (alias-free) ---"
+
+legacy_aliases=(--mereka-teal --mereka-magenta --mereka-blue --mereka-black)
+alias_files=("$SCSS_BRIDGE" "$COMMON_OVERRIDES" "$LMS_OVERRIDES" "$CMS_OVERRIDES")
+
+for alias in "${legacy_aliases[@]}"; do
+  alias_defs=0
+  for f in "${alias_files[@]}"; do
+    [[ -f "$f" ]] || continue
+    hits=$(grep -cE "^[[:space:]]+${alias}:" "$f" || true)
+    alias_defs=$((alias_defs + hits))
+  done
+  if [[ "$alias_defs" -eq 0 ]]; then
+    pass "Legacy alias not defined: ${alias}"
+  else
+    fail "Legacy alias still defined (${alias}, ${alias_defs} occurrence(s))"
+  fi
+done
+
+for alias in "${legacy_aliases[@]}"; do
+  alias_refs=$(
+    (
+      grep -Rho --include='*.css' --include='*.scss' "var(${alias})" \
+        "$REPO_ROOT/infrastructure/tutor/themes/mereka" 2>/dev/null || true
+    ) | wc -l | tr -d '[:space:]'
+  )
+  if [[ "$alias_refs" -eq 0 ]]; then
+    pass "Legacy alias not referenced via var(): ${alias}"
+  else
+    fail "Legacy alias still referenced via var() (${alias}, ${alias_refs} occurrence(s))"
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# 7. MFE SCSS imports the token bridge
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- MFE SCSS token bridge import ---"
@@ -219,7 +256,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 7. No old theming paths remain
+# 8. No old theming paths remain
 #    Old pattern: raw hex values assigned directly to CSS custom properties
 #    inside the generated :root blocks. The generated :root in overrides files
 #    should only have hex values that are traceable to tokens.css.
@@ -270,7 +307,7 @@ PY
 fi
 
 # ---------------------------------------------------------------------------
-# 8. Token count sanity: tokens.css has >= 100 custom properties
+# 9. Token count sanity: tokens.css has >= 100 custom properties
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- Token count sanity ---"
@@ -287,7 +324,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 9. Generator --check: all generated blocks in sync with tokens.css
+# 10. Generator --check: all generated blocks in sync with tokens.css
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- All generated blocks in sync with tokens.css ---"
