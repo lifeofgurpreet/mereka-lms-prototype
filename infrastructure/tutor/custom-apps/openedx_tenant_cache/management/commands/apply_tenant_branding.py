@@ -6,6 +6,7 @@ Apply branding configuration from JSON file to a tenant's SiteConfiguration.
 """
 import json
 import logging
+import re
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -14,6 +15,91 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'Apply branding configuration from JSON file to a tenant'
+    HEX_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
+
+    def _hex_color(self, value, field_name, *, default=None, required=False):
+        if value is None or value == "":
+            if required:
+                raise CommandError(f"Missing required field: {field_name}")
+            return default
+        if not isinstance(value, str) or not self.HEX_COLOR_RE.match(value):
+            raise CommandError(f"Invalid color for {field_name}: expected #RRGGBB")
+        return value.lower()
+
+    def _build_site_and_mfe_config(self, branding, tenant_slug):
+        config_slug = branding.get("slug")
+        if config_slug and config_slug != tenant_slug:
+            raise CommandError(
+                f"Branding file slug '{config_slug}' does not match --tenant-slug '{tenant_slug}'"
+            )
+
+        colors = branding.get("colors")
+        if not isinstance(colors, dict):
+            raise CommandError("Branding file must define a top-level 'colors' object")
+
+        logos = branding.get("logos")
+        if not isinstance(logos, dict):
+            raise CommandError("Branding file must define a top-level 'logos' object")
+
+        footer = branding.get("footer")
+        if footer is None:
+            footer = {}
+        if not isinstance(footer, dict):
+            raise CommandError("Branding file 'footer' field must be an object when present")
+
+        tenant_name = branding.get("name") or tenant_slug
+        if not isinstance(tenant_name, str) or not tenant_name.strip():
+            raise CommandError("Branding file field 'name' must be a non-empty string")
+        tenant_name = tenant_name.strip()
+
+        primary_color = self._hex_color(colors.get("primary"), "colors.primary", required=True)
+        secondary_color = self._hex_color(
+            colors.get("secondary"),
+            "colors.secondary",
+            default="#237072",
+        )
+        accent_color = self._hex_color(
+            colors.get("accent"),
+            "colors.accent",
+            default="#295cad",
+        )
+        text_on_primary = self._hex_color(
+            colors.get("text_on_primary"),
+            "colors.text_on_primary",
+            default="#ffffff",
+        )
+
+        logo_url = logos.get("logo_url", "")
+        logo_square_url = logos.get("logo_square_url", "") or logo_url
+        logo_white_url = logos.get("logo_white_url", "") or logo_url
+        favicon_url = logos.get("favicon_url", "")
+
+        site_config = {
+            "PLATFORM_NAME": tenant_name,
+            "SITE_NAME": tenant_name,
+            "logo_url": logo_url,
+            "favicon_url": favicon_url,
+            "primary_color": primary_color,
+            "secondary_color": secondary_color,
+            "accent_color": accent_color,
+            "text_on_primary_color": text_on_primary,
+            "footer_text": footer.get("text", ""),
+            "sender_alias": tenant_name,
+        }
+
+        mfe_config = {
+            "SITE_NAME": tenant_name,
+            "LOGO_URL": logo_url,
+            "LOGO_TRADEMARK_URL": logo_square_url,
+            "LOGO_WHITE_URL": logo_white_url,
+            "FAVICON_URL": favicon_url,
+            "PRIMARY_COLOR": primary_color,
+            "SECONDARY_COLOR": secondary_color,
+            "ACCENT_COLOR": accent_color,
+            "TEXT_ON_PRIMARY": text_on_primary,
+        }
+
+        return site_config, mfe_config
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -41,21 +127,13 @@ class Command(BaseCommand):
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise CommandError(f"Failed to read branding file: {e}")
 
-        # Validate
-        if branding.get('tenant_slug') and branding['tenant_slug'] != slug:
-            raise CommandError(
-                f"Branding file slug '{branding['tenant_slug']}' "
-                f"does not match --tenant-slug '{slug}'"
-            )
-
         from openedx_tenant_cache.models import TenantSiteMapping, TenantSiteConfiguration
 
         mapping = TenantSiteMapping.get_by_slug(slug)
         if not mapping:
             raise CommandError(f"Tenant '{slug}' not found")
 
-        site_config = branding.get('site_configuration', {})
-        mfe_config = branding.get('mfe_config', {})
+        site_config, mfe_config = self._build_site_and_mfe_config(branding, slug)
 
         self.stdout.write(f'\n=== Applying Branding: {slug} ===')
         self.stdout.write(f'  Site config keys: {list(site_config.keys())}')

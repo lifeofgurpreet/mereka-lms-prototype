@@ -163,6 +163,7 @@ if [[ -f "$BRANDING_FILE" ]]; then
       echo -e "${GREEN}Valid${NC}: branding.json is valid JSON"
     else
       echo -e "${RED}Invalid${NC}: branding.json contains malformed JSON"
+      exit 1
     fi
   fi
   TOKEN_CSS="$CSS_DIR/tokens.css"
@@ -189,17 +190,14 @@ def pick_hex(value, fallback):
         return value.lower()
     return fallback
 
-colors = data.get("colors") if isinstance(data.get("colors"), dict) else {}
-
-# Backward compatibility: accept legacy SiteConfiguration payloads.
+colors = data.get("colors") if isinstance(data.get("colors"), dict) else None
 if not colors:
-    site_cfg = data.get("site_configuration") if isinstance(data.get("site_configuration"), dict) else {}
-    colors = {
-        "primary": site_cfg.get("primary_color") or site_cfg.get("PRIMARY_COLOR"),
-        "secondary": site_cfg.get("secondary_color") or site_cfg.get("SECONDARY_COLOR"),
-        "accent": site_cfg.get("accent_color") or site_cfg.get("ACCENT_COLOR"),
-        "text_on_primary": site_cfg.get("text_on_primary_color") or site_cfg.get("TEXT_ON_PRIMARY"),
-    }
+    print("ERROR: branding.json must define a top-level colors object.", file=sys.stderr)
+    sys.exit(1)
+
+if not isinstance(colors.get("primary"), str) or not hex_re.match(colors["primary"]):
+    print("ERROR: branding.json must define colors.primary as #RRGGBB.", file=sys.stderr)
+    sys.exit(1)
 
 primary = pick_hex(colors.get("primary"), "#ab3b78")
 secondary = pick_hex(colors.get("secondary"), "#237072")

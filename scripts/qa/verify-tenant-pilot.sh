@@ -263,23 +263,23 @@ else
 fi
 
 if [[ -f "$ACME_BRANDING" ]] && [[ -f "$MEREKA_BRANDING" ]]; then
-  ACME_COLOR=$(grep -oP '"primary_color":\s*"\K[^"]+' "$ACME_BRANDING" | head -1)
-  MEREKA_COLOR=$(grep -oP '"primary_color":\s*"\K[^"]+' "$MEREKA_BRANDING" | head -1)
+  ACME_COLOR=$(grep -oP '"primary":\s*"\K[^"]+' "$ACME_BRANDING" | head -1)
+  MEREKA_COLOR=$(grep -oP '"primary":\s*"\K[^"]+' "$MEREKA_BRANDING" | head -1)
   if [[ "$ACME_COLOR" != "$MEREKA_COLOR" ]]; then
-    pass_ "Acme branding has different primary_color from Mereka ($ACME_COLOR vs $MEREKA_COLOR)"
+    pass_ "Acme branding has different colors.primary from Mereka ($ACME_COLOR vs $MEREKA_COLOR)"
   else
-    fail_ "Acme and Mereka have same primary_color"
+    fail_ "Acme and Mereka have same colors.primary"
   fi
 fi
 
-if [[ -f "$ACME_BRANDING" ]] && grep -q '"SITE_NAME"' "$ACME_BRANDING" && grep -q '"LOGO_URL"' "$ACME_BRANDING" && grep -q '"FAVICON_URL"' "$ACME_BRANDING"; then
-  pass_ "Acme branding has SITE_NAME, LOGO_URL, FAVICON_URL"
+if [[ -f "$ACME_BRANDING" ]] && grep -q '"name"' "$ACME_BRANDING" && grep -q '"logo_url"' "$ACME_BRANDING" && grep -q '"favicon_url"' "$ACME_BRANDING"; then
+  pass_ "Acme branding has name, logos.logo_url, logos.favicon_url"
 else
   fail_ "Acme branding missing required fields"
 fi
 
-if [[ -f "$MEREKA_BRANDING" ]] && grep -q '"SITE_NAME"' "$MEREKA_BRANDING" && grep -q '"LOGO_URL"' "$MEREKA_BRANDING" && grep -q '"FAVICON_URL"' "$MEREKA_BRANDING"; then
-  pass_ "Mereka branding has SITE_NAME, LOGO_URL, FAVICON_URL"
+if [[ -f "$MEREKA_BRANDING" ]] && grep -q '"name"' "$MEREKA_BRANDING" && grep -q '"logo_url"' "$MEREKA_BRANDING" && grep -q '"favicon_url"' "$MEREKA_BRANDING"; then
+  pass_ "Mereka branding has name, logos.logo_url, logos.favicon_url"
 else
   fail_ "Mereka branding missing required fields"
 fi
