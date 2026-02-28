@@ -12,7 +12,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 BRAND_DIR="$REPO_ROOT/infrastructure/tutor/brand-mereka"
 VARIABLES_FILE="$BRAND_DIR/paragon/_variables.scss"
 TOKENS_JSON="$BRAND_DIR/paragon/tokens.json"
-FONTS_SCSS="$BRAND_DIR/paragon/fonts.scss"
+FONTS_SCSS="$BRAND_DIR/paragon/_fonts.scss"
 PACKAGE_JSON="$BRAND_DIR/package.json"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 CI_STATIC_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
@@ -35,7 +35,7 @@ required_files=(
   "$BRAND_DIR/logo-white.png"
   "$BRAND_DIR/logo-trademark.png"
   "$BRAND_DIR/favicon.ico"
-  "$BRAND_DIR/paragon/fonts.scss"
+  "$BRAND_DIR/paragon/_fonts.scss"
   "$BRAND_DIR/paragon/core.scss"
   "$BRAND_DIR/paragon/_overrides.scss"
   "$BRAND_DIR/paragon/_variables.scss"
@@ -131,7 +131,7 @@ package.json
 paragon/_overrides.scss
 paragon/_variables.scss
 paragon/core.scss
-paragon/fonts.scss
+paragon/_fonts.scss
 paragon/images/card-imagecap-fallback.png
 paragon/tokens.json
 LIST
@@ -300,37 +300,37 @@ if [[ "$font_parity_ok" -eq 1 ]]; then
   pass "AC-BRAND-INT-002 brand package font copies are consistent with LMS theme"
 fi
 
-# AC-BRAND-013 / 014 / 015 / 016 fonts.scss contracts
+# AC-BRAND-013 / 014 / 015 / 016 _fonts.scss contracts
 if [[ -f "$FONTS_SCSS" ]]; then
   ff_count="$(grep -c '@font-face' "$FONTS_SCSS" || true)"
   if [[ "$ff_count" -ge 9 ]]; then
-    pass "AC-BRAND-013 fonts.scss has >=9 @font-face declarations"
+    pass "AC-BRAND-013 _fonts.scss has >=9 @font-face declarations"
   else
-    fail "AC-BRAND-013 fonts.scss has <9 @font-face declarations (${ff_count})"
+    fail "AC-BRAND-013 _fonts.scss has <9 @font-face declarations (${ff_count})"
   fi
 
   swap_count="$(grep -c 'font-display:\s*swap' "$FONTS_SCSS" || true)"
   if [[ "$swap_count" -ge 9 ]]; then
-    pass "AC-BRAND-014 fonts.scss applies font-display: swap"
+    pass "AC-BRAND-014 _fonts.scss applies font-display: swap"
   else
-    fail "AC-BRAND-014 fonts.scss missing font-display: swap in one or more faces"
+    fail "AC-BRAND-014 _fonts.scss missing font-display: swap in one or more faces"
   fi
 
   src_ok=1
   for font in "${expected_fonts[@]}"; do
     if ! grep -qF "../fonts/$font" "$FONTS_SCSS"; then
       src_ok=0
-      fail "AC-BRAND-015 fonts.scss missing src for ../fonts/$font"
+      fail "AC-BRAND-015 _fonts.scss missing src for ../fonts/$font"
     fi
   done
   if [[ "$src_ok" -eq 1 ]]; then
-    pass "AC-BRAND-015 fonts.scss src paths map to existing ../fonts assets"
+    pass "AC-BRAND-015 _fonts.scss src paths map to existing ../fonts assets"
   fi
 
   if grep -Eqi 'googleapis\.com|gstatic\.com|typekit\.net|https?://' "$FONTS_SCSS"; then
-    fail "AC-BRAND-016 fonts.scss contains external URL/CDN reference"
+    fail "AC-BRAND-016 _fonts.scss contains external URL/CDN reference"
   else
-    pass "AC-BRAND-016 fonts.scss has no external font CDN references"
+    pass "AC-BRAND-016 _fonts.scss has no external font CDN references"
   fi
 fi
 

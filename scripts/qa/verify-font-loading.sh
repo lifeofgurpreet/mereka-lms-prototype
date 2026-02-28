@@ -31,7 +31,7 @@ HEAD_FILES=(
 
 FONT_SCSS_FILES=(
   "$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_fonts.scss"
-  "$REPO_ROOT/infrastructure/tutor/brand-mereka/paragon/fonts.scss"
+  "$REPO_ROOT/infrastructure/tutor/brand-mereka/paragon/_fonts.scss"
 )
 
 FONT_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts"
@@ -104,4 +104,3 @@ fi
 echo ""
 echo "=== Summary: PASS=$PASS WARN=$WARN FAIL=$FAIL ==="
 [[ "$FAIL" -eq 0 ]]
-

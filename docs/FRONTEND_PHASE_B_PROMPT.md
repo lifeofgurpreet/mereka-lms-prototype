@@ -40,7 +40,7 @@ infrastructure/tutor/brand-mereka/
 ├── logo-white.png              # Raster white variant
 ├── favicon.ico                 # Copy from existing theme favicon
 ├── paragon/
-│   ├── fonts.scss              # 9 @font-face declarations (see below)
+│   ├── _fonts.scss             # 9 @font-face declarations (see below)
 │   ├── _variables.scss         # Bootstrap SCSS variable overrides (see below)
 │   └── tokens.json             # Placeholder JSON tokens (see below)
 └── fonts/
@@ -62,19 +62,14 @@ infrastructure/tutor/brand-mereka/
   "name": "@edx/brand-mereka",
   "version": "1.0.0",
   "description": "Mereka Academy OEP-48 brand package for Open edX MFEs",
-  "main": "package.json",
-  "exports": {
-    "./logo.svg": "./logo.svg",
-    "./logo-white.svg": "./logo-white.svg",
-    "./logo.png": "./logo.png",
-    "./logo-white.png": "./logo-white.png",
-    "./favicon.ico": "./favicon.ico",
-    "./paragon/fonts.scss": "./paragon/fonts.scss",
-    "./paragon/_variables.scss": "./paragon/_variables.scss",
-    "./paragon/tokens.json": "./paragon/tokens.json"
+  "main": ".",
+  "scripts": {
+    "build-tokens": "paragon build-tokens ./paragon/tokens.json ./paragon",
+    "build-scss": "paragon build-scss ./paragon/core.scss ./paragon",
+    "build": "npm run build-tokens && npm run build-scss"
   },
   "peerDependencies": {
-    "@openedx/paragon": ">=21.0.0"
+    "@openedx/paragon": ">=22.0.0 <24.0.0"
   },
   "license": "AGPL-3.0"
 }
@@ -82,7 +77,7 @@ infrastructure/tutor/brand-mereka/
 
 **Rules**: No `dependencies`. No runtime JavaScript. Asset-only package.
 
-### paragon/fonts.scss
+### paragon/_fonts.scss
 
 Create 9 `@font-face` declarations. Use `font-display: swap` and relative paths:
 
