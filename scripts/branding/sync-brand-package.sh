@@ -69,4 +69,33 @@ for image in "${IMAGE_FILES[@]}"; do
   cp "$ASSET_IMG_DIR/$image" "$BRAND_PACKAGE_DIR/$image"
 done
 
+# OEP-48 compatibility aliases:
+# - logo_white.* (underscore form)
+# - favicon.png (png alias for 256x256 favicon)
+cp "$ASSET_IMG_DIR/logo-white.png" "$BRAND_PACKAGE_DIR/logo_white.png"
+cp "$ASSET_IMG_DIR/logo-white.svg" "$BRAND_PACKAGE_DIR/logo_white.svg"
+cp "$ASSET_IMG_DIR/favicon-256x256.png" "$BRAND_PACKAGE_DIR/favicon.png"
+
+# Trademark aliases: preserve dedicated files if they exist in source;
+# otherwise keep deterministic fallback to primary logo assets.
+if [[ -f "$ASSET_IMG_DIR/logo-trademark.png" ]]; then
+  cp "$ASSET_IMG_DIR/logo-trademark.png" "$BRAND_PACKAGE_DIR/logo-trademark.png"
+else
+  cp "$ASSET_IMG_DIR/logo.png" "$BRAND_PACKAGE_DIR/logo-trademark.png"
+fi
+if [[ -f "$ASSET_IMG_DIR/logo-trademark.svg" ]]; then
+  cp "$ASSET_IMG_DIR/logo-trademark.svg" "$BRAND_PACKAGE_DIR/logo-trademark.svg"
+else
+  cp "$ASSET_IMG_DIR/logo.svg" "$BRAND_PACKAGE_DIR/logo-trademark.svg"
+fi
+
+# Keep @edx/brand JS exports deterministic after every sync.
+cat > "$BRAND_PACKAGE_DIR/logo.js" <<'EOF'
+export { default as logo } from './logo.png';
+export { default as logoWhite } from './logo_white.png';
+export { default as logoTrademark } from './logo-trademark.png';
+export { default as favicon } from './favicon.png';
+export { default } from './logo.png';
+EOF
+
 echo "Synced OEP-48 brand package assets from assets/branding."
