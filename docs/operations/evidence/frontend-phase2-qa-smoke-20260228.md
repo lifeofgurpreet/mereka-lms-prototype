@@ -464,3 +464,38 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - Live mode now isolates runtime issues:
   - `PASS=98`, `FAIL=4`, `WARN=5`, `SKIP=0`
   - Remaining FAILs are all `Powered by Open edX` exposures on LMS/Studio domains (deployment/runtime drift).
+
+## Addendum — Fresh Runtime QA Sweep (2026-02-28T18:03Z)
+
+### Commands Run
+
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+./scripts/qa/verify-a11y-contrast-focus.sh --env prod
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+./scripts/qa/verify-css-branding-overhead.sh
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Artifacts
+
+- Screenshot bundle: `var/screenshots/prod/20260228T175849Z`
+- Cross-browser smoke log: `var/qa/cross-browser-branding-smoke-prod-20260228T180303Z.log`
+- Route smoke JSON: `/tmp/mfe-route-smoke-20260228-180630/results.json`
+
+### Results
+
+- `capture-branding-screenshots.sh prod`: completed, full URL matrix captured.
+- `verify-cross-browser-branding-smoke.sh --env prod --cross-browser`:
+  - `9 passed`, `0 failed` in `2.9m`
+  - Projects passed: Chromium, Firefox, mobile Chrome
+  - WebKit/mobile Safari auto-disabled by host dependency probe (`playwright install-deps` prerequisite on runner)
+- `verify-mfe-route-smoke.sh --env prod`: `PASS=33`, `FAIL=0`, `WARN=0`
+- `verify-a11y-contrast-focus.sh --env prod`: `PASS=29`, `FAIL=0`, `WARN=2`
+- `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
+- `verify-css-branding-overhead.sh`: pass (`3236B` gzip vs `5120B` budget)
+- `verify-email-template-multilang.sh`: `PASS=71`, `FAIL=0`, `WARN=0`
+  - Includes locale wrapper coverage for all 15 ACE message types (`ms`, `zh-hans`)
+  - Verifier now checks runtime ACE settings path (prod overlay patch) in addition to local Tutor config files.
