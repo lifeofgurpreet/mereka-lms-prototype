@@ -274,7 +274,7 @@ if [[ -f "$TOKENS_SCSS" ]]; then
   fi
 
   # Required --pgn-* bridge tokens must be present
-  for token in --pgn-color-primary --pgn-color-secondary --pgn-body-bg --pgn-font-family-sans-serif; do
+  for token in --pgn-color-primary-base --pgn-color-secondary-base --pgn-body-bg --pgn-typography-font-family-sans-serif; do
     if grep -qF -- "$token" "$TOKENS_SCSS"; then
       do_pass "AC-CSS-SCOPE-005: Paragon bridge token $token present in _tokens.scss"
     else
@@ -285,10 +285,13 @@ fi
 
 # MFE SCSS must import the shared theme
 if [[ -f "$MFE_SCSS" ]]; then
-  if grep -qE "@import\s+['\"].*theme['\"]|@import\s+['\"].*scss/theme" "$MFE_SCSS"; then
-    do_pass "AC-CSS-SCOPE-005: mereka.scss imports shared theme"
+  if grep -qE "@import\s+['\"].*theme['\"]|@import\s+['\"].*scss/theme" "$MFE_SCSS" \
+    || { grep -q '@import "./scss/fonts";' "$MFE_SCSS" \
+      && grep -q '@import "./scss/tokens";' "$MFE_SCSS" \
+      && grep -q '@import "./scss/base";' "$MFE_SCSS"; }; then
+    do_pass "AC-CSS-SCOPE-005: mereka.scss imports shared token stack"
   else
-    do_fail "AC-CSS-SCOPE-005: mereka.scss does not import shared theme"
+    do_fail "AC-CSS-SCOPE-005: mereka.scss does not import shared token stack"
   fi
 fi
 

@@ -281,7 +281,10 @@ fi
 # mereka.scss
 if [[ -f "${MFE_SCSS}" ]]; then
   pass "mfe: mereka.scss exists"
-  if grep -q "@import.*scss/theme\|@import.*theme" "${MFE_SCSS}"; then
+  if grep -q "@import.*scss/theme\|@import.*theme" "${MFE_SCSS}" \
+    || { grep -q '@import "./scss/fonts";' "${MFE_SCSS}" \
+      && grep -q '@import "./scss/tokens";' "${MFE_SCSS}" \
+      && grep -q '@import "./scss/base";' "${MFE_SCSS}"; }; then
     pass "mfe: mereka.scss imports shared SCSS token stack"
   else
     fail "mfe: mereka.scss does not import shared SCSS token stack"
@@ -331,7 +334,7 @@ if [[ -f "${SCSS_TOKENS}" ]]; then
     fi
   done
   # Paragon bridge tokens
-  for pgn in "--pgn-color-primary" "--pgn-color-secondary" "--pgn-font-family-sans-serif"; do
+  for pgn in "--pgn-color-primary-base" "--pgn-color-secondary-base" "--pgn-typography-font-family-sans-serif"; do
     if grep -qF -- "${pgn}" "${SCSS_TOKENS}"; then
       pass "scss: _tokens.scss bridges ${pgn} to Paragon"
     else

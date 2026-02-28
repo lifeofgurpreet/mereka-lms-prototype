@@ -55,19 +55,11 @@
   --mereka-blue: var(--mereka-color-blue);
   --mereka-black: var(--mereka-color-ink-900);
 
-  /* Paragon bridge (MFEs) */
-  --pgn-color-primary: var(--mereka-color-magenta);
-  --pgn-color-secondary: var(--mereka-color-teal);
-  --pgn-color-success: var(--mereka-color-success);
-  --pgn-color-info: var(--mereka-color-info);
-  --pgn-color-warning: var(--mereka-color-warning);
-  --pgn-color-danger: var(--mereka-color-danger);
+  /* Paragon bridge (MFEs) - canonical v22 token names only */
   --pgn-body-bg: var(--mereka-color-surface-primary);
   --pgn-body-color: var(--mereka-color-ink-900);
   --pgn-link-color: var(--mereka-color-info);
   --pgn-link-hover-color: var(--mereka-color-teal);
-  --pgn-font-family-sans-serif: var(--mereka-font-body);
-  --pgn-heading-font-family: var(--mereka-font-heading);
   --pgn-border-color: var(--mereka-color-border);
   --pgn-form-control-border-color: #ddddde;
   --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
@@ -100,20 +92,14 @@
   --pgn-color-accent-a: var(--mereka-color-sky);
   --pgn-color-accent-b: var(--mereka-color-info);
   --pgn-color-red: var(--mereka-color-danger);
-  --pgn-font-size-sm: 0.875rem;
-  --pgn-font-size-base: 1rem;
-  --pgn-font-size-lg: 1.125rem;
-  --pgn-line-height-sm: 1.5;
-  --pgn-line-height-base: 1.5;
-  --pgn-line-height-lg: 1.5;
-  --pgn-typography-font-family-sans-serif: var(--pgn-font-family-sans-serif);
-  --pgn-typography-font-family-base: var(--pgn-font-family-sans-serif);
-  --pgn-typography-font-size-sm: var(--pgn-font-size-sm);
-  --pgn-typography-font-size-base: var(--pgn-font-size-base);
-  --pgn-typography-font-size-lg: var(--pgn-font-size-lg);
-  --pgn-typography-line-height-sm: var(--pgn-line-height-sm);
-  --pgn-typography-line-height-base: var(--pgn-line-height-base);
-  --pgn-typography-line-height-lg: var(--pgn-line-height-lg);
+  --pgn-typography-font-family-sans-serif: var(--mereka-font-body);
+  --pgn-typography-font-family-base: var(--mereka-font-body);
+  --pgn-typography-font-size-sm: 0.875rem;
+  --pgn-typography-font-size-base: 1rem;
+  --pgn-typography-font-size-lg: 1.125rem;
+  --pgn-typography-line-height-sm: 1.5;
+  --pgn-typography-line-height-base: 1.5;
+  --pgn-typography-line-height-lg: 1.5;
   --pgn-spacing-1: 0.25rem;
   --pgn-spacing-2: 0.5rem;
   --pgn-spacing-3: 1rem;
@@ -127,12 +113,9 @@
   --pgn-spacing-spacer-4: 1.5rem;
   --pgn-spacing-spacer-5: 3rem;
   --pgn-spacing-spacer-6: 4.5rem;
-  --pgn-border-radius-sm: 0.25rem;
-  --pgn-border-radius: 0.375rem;
-  --pgn-border-radius-lg: 0.425rem;
-  --pgn-size-border-radius-sm: var(--pgn-border-radius-sm);
-  --pgn-size-border-radius-base: var(--pgn-border-radius);
-  --pgn-size-border-radius-lg: var(--pgn-border-radius-lg);
+  --pgn-size-border-radius-sm: 0.25rem;
+  --pgn-size-border-radius-base: 0.375rem;
+  --pgn-size-border-radius-lg: 0.425rem;
   --pgn-elevation-1: var(--shadow-sm);
   --pgn-elevation-2: var(--shadow-md);
   --pgn-elevation-3: var(--shadow-lg);

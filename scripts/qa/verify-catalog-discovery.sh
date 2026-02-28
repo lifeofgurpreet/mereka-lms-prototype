@@ -151,12 +151,12 @@ check_contains "$TOKENS_CSS" "--color-blue: #295cad" "tokens.css defines --color
 # SCSS bridge mirrors the canonical colours
 check_contains "$TOKENS_SCSS" "\$color-teal: #237072" "SCSS bridge mirrors teal"
 check_contains "$TOKENS_SCSS" "\$color-magenta: #ab3b78" "SCSS bridge mirrors magenta"
-check_contains "$TOKENS_SCSS" "--pgn-color-primary" "SCSS bridge exports --pgn-color-primary (Paragon bridge)"
+check_contains "$TOKENS_SCSS" "--pgn-color-primary-base" "SCSS bridge exports --pgn-color-primary-base (Paragon bridge)"
 check_contains "$TOKENS_SCSS" "--mereka-color-teal" "SCSS bridge exports --mereka-color-teal"
 
 # Runtime CSS carries the Mereka namespace vars
 check_contains "$MEREKA_OVERRIDES_LMS" "--mereka-color-teal" "LMS overrides define --mereka-color-teal"
-check_contains "$MEREKA_OVERRIDES_LMS" "--pgn-color-primary" "LMS overrides bridge --pgn-color-primary"
+check_contains "$MEREKA_OVERRIDES_LMS" "--pgn-color-primary-base" "LMS overrides bridge --pgn-color-primary-base"
 check_contains "$MEREKA_OVERRIDES_COMMON" "--mereka-color-teal" "Common overrides define --mereka-color-teal"
 
 # Branding revision marker present

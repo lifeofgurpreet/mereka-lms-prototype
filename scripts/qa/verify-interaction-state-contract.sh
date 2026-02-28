@@ -138,10 +138,10 @@ if [ -f "$TOKENS" ]; then
     "--mereka-color-warning"
     "--mereka-color-danger"
     "--mereka-color-info"
-    "--pgn-color-success"
-    "--pgn-color-warning"
-    "--pgn-color-danger"
-    "--pgn-color-info"
+    "--pgn-color-success-base"
+    "--pgn-color-warning-base"
+    "--pgn-color-danger-base"
+    "--pgn-color-info-base"
   )
 
   for var in "${css_vars[@]}"; do

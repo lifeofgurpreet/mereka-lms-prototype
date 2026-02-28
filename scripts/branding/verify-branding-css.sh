@@ -77,7 +77,7 @@ require_contains "Exports branding revision marker" "$COMMON_CSS" "--mereka-bran
 require_contains "Exports token --mereka-color-teal" "$COMMON_CSS" "--mereka-color-teal"
 require_contains "Exports token --mereka-color-magenta" "$COMMON_CSS" "--mereka-color-magenta"
 require_contains "Exports token --mereka-font-body" "$COMMON_CSS" "--mereka-font-body"
-require_contains "Exports Paragon token --pgn-color-primary" "$COMMON_CSS" "--pgn-color-primary"
+require_contains "Exports Paragon token --pgn-color-primary-base" "$COMMON_CSS" "--pgn-color-primary-base"
 require_contains "Footer styles present" "$COMMON_CSS" ".mereka-footer"
 require_contains "Footer logo size cap present" "$COMMON_CSS" ".mereka-footer .footer-brand img"
 require_contains "Footer logo width is constrained" "$COMMON_CSS" "width: 120px;"

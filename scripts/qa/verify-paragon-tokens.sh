@@ -117,7 +117,6 @@ import sys
 
 css = Path(sys.argv[1]).read_text(encoding="utf-8").lower()
 font_tokens = [
-    "--pgn-font-family-sans-serif",
     "--pgn-typography-font-family-sans-serif",
     "--pgn-typography-font-family-base",
 ]
@@ -130,11 +129,6 @@ for token in font_tokens:
     for value in matches:
         if "poppins" in value:
             found_font_value = True
-        elif "var(--pgn-font-family-sans-serif)" in value:
-            # Accept indirect canonical alias when the base family token is also set.
-            base = re.findall(r"--pgn-font-family-sans-serif:\s*([^;]+);", css)
-            if any("poppins" in v for v in base):
-                found_font_value = True
 
 if not found_font_value:
     raise SystemExit(1)
