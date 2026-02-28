@@ -20,6 +20,7 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 pass() { echo -e "${GREEN}✓${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}✗${NC} $1"; FAIL=$((FAIL + 1)); }
 info() { echo -e "${YELLOW}ℹ${NC} $1"; }
+NODE_PRESSURE_REPORTED=0
 
 pending_reason_summary() {
   local app_name="$1"
@@ -28,6 +29,21 @@ pending_reason_summary() {
     --sort-by=.lastTimestamp -o jsonpath='{range .items[*]}{.involvedObject.kind}{"|"}{.involvedObject.name}{"|"}{.message}{"\n"}{end}' 2>/dev/null \
     | awk -F'|' -v app="$app_name" '$1=="Pod" && $2 ~ app {print $3}' \
     | tail -n 5
+}
+
+report_node_cpu_request_pressure() {
+  info "Cluster node CPU request saturation snapshot"
+  local node cpu_line
+  for node in $(kubectl get nodes -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+    cpu_line="$(kubectl describe node "$node" 2>/dev/null | awk '
+      /Allocated resources:/ {capture=1; next}
+      capture && /^  cpu[[:space:]]/ {print; exit}
+      capture && /^Events:/ {exit}
+    ')"
+    if [[ -n "$cpu_line" ]]; then
+      info "  - $node:$(echo "$cpu_line" | sed 's/^/ /')"
+    fi
+  done
 }
 
 usage() {
@@ -205,6 +221,10 @@ for dep in "${EXPECTED_DEPS[@]}"; do
       while IFS= read -r line; do
         [[ -n "$line" ]] && info "  - $line"
       done <<< "$SCHED_REASONS"
+      if [[ "$NODE_PRESSURE_REPORTED" -eq 0 ]] && grep -qi 'Insufficient cpu' <<< "$SCHED_REASONS"; then
+        report_node_cpu_request_pressure
+        NODE_PRESSURE_REPORTED=1
+      fi
     fi
     AC001_OK=false
   fi
