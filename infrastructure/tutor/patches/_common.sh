@@ -22,6 +22,7 @@ fi
 # Discover Tutor template paths via Python introspection.
 # Each variable is exported so patch functions can reference them.
 _discover_template_paths() {
+  export MFE_TEMPLATE
   MFE_TEMPLATE=$(python - <<'PY'
 import inspect
 import tutormfe
@@ -30,6 +31,7 @@ print(Path(inspect.getfile(tutormfe)).parent / "templates" / "mfe" / "build" / "
 PY
 )
 
+  export MFE_INDIGO_ENV_TEMPLATE
   MFE_INDIGO_ENV_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutorindigo
@@ -37,6 +39,7 @@ print(Path(tutorindigo.__file__).parent / "templates" / "indigo" / "env.config.j
 PY
 )
 
+  export MYSQL_TEMPLATE
   MYSQL_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -44,6 +47,7 @@ print(Path(tutor.__file__).parent / "templates" / "local" / "docker-compose.yml"
 PY
 )
 
+  export OPENEDX_TEMPLATE
   OPENEDX_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -51,6 +55,7 @@ print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "Dockerf
 PY
 )
 
+  export CADDY_TEMPLATE
   CADDY_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -58,6 +63,7 @@ print(Path(tutor.__file__).parent / "templates" / "apps" / "caddy" / "Caddyfile"
 PY
 )
 
+  export NGINX_LMS_TEMPLATE
   NGINX_LMS_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -65,6 +71,7 @@ print(Path(tutor.__file__).parent / "templates" / "apps" / "nginx" / "lms.conf")
 PY
 )
 
+  export LMS_SETTINGS_TEMPLATE
   LMS_SETTINGS_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -72,6 +79,7 @@ print(Path(tutor.__file__).parent / "templates" / "apps" / "openedx" / "settings
 PY
 )
 
+  export LMS_ASSETS_TEMPLATE
   LMS_ASSETS_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -79,6 +87,7 @@ print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "setting
 PY
 )
 
+  export CMS_ASSETS_TEMPLATE
   CMS_ASSETS_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
@@ -86,6 +95,7 @@ print(Path(tutor.__file__).parent / "templates" / "build" / "openedx" / "setting
 PY
 )
 
+  export WEBPACK_PROD_TEMPLATE
   WEBPACK_PROD_TEMPLATE=$(python - <<'PY'
 from pathlib import Path
 import tutor
