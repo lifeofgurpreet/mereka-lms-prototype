@@ -178,7 +178,9 @@ echo "-- Gate 4: Overlay consistency"
 
 VERIFY_OVERRIDES="${REPO_ROOT}/scripts/qa/verify-gitops-image-overrides.sh"
 if [[ -x "${VERIFY_OVERRIDES}" ]]; then
-  OVERRIDE_OUT=$("${VERIFY_OVERRIDES}" --skip-infra 2>&1) && RC=0 || RC=$?
+  # Auto mode checks local infra checkout when present (cross-repo drift guard),
+  # otherwise it skips infra checks gracefully.
+  OVERRIDE_OUT=$("${VERIFY_OVERRIDES}" 2>&1) && RC=0 || RC=$?
   if [[ "${RC}" -eq 0 ]]; then
     pass "GitOps image override contract satisfied"
   else
