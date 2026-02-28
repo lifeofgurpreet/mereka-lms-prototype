@@ -491,21 +491,21 @@ if [[ "$LIVE_MODE" == "1" ]]; then
 
       # AC-UI-102: content marker check.
       marker="${ROUTE_MARKERS[$route]}"
-      if echo "$body" | grep -qiE "$marker"; then
+      if grep -qiE "$marker" <<<"$body"; then
         do_pass "[LIVE] AC-UI-102: $route contains expected content marker"
       else
         do_warn "[LIVE] AC-UI-102: $route returned 200 but content marker not found (may need auth)"
       fi
 
       # AC-UI-104: Footer check — no "Powered by Open edX" default.
-      if echo "$body" | grep -qi "Powered by Open edX"; then
+      if grep -qi "Powered by Open edX" <<<"$body"; then
         do_fail "[LIVE] AC-UI-104: $route contains 'Powered by Open edX' default footer"
       else
         do_pass "[LIVE] AC-UI-104: $route does not expose 'Powered by Open edX' footer"
       fi
 
       # AC-UI-104: mereka-footer class or MerekaFooter hint.
-      if echo "$body" | grep -qiE "mereka.footer|mereka_footer"; then
+      if grep -qiE "mereka.footer|mereka_footer" <<<"$body"; then
         do_pass "[LIVE] AC-UI-104: $route renders mereka-footer component"
       else
         do_warn "[LIVE] AC-UI-104: $route footer class not detected in initial HTML (may be client-rendered)"

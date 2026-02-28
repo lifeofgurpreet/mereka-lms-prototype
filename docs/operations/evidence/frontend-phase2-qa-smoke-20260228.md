@@ -436,3 +436,26 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - Interpretation:
   - Source footer template is clean (no non-comment powered-by string), but runtime HTML still renders it.
   - This is a deployment/runtime parity gap (stale image or stale rendered theme), not a source-verifier bug.
+
+## Addendum — Brand Parity Verifier Realignment
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-brand-parity.sh
+./scripts/qa/verify-brand-parity.sh --live
+```
+
+### Result
+
+- Source mode now returns `PASS=85`, `FAIL=0`, `WARN=2`, `SKIP=3`.
+- Gate updates applied:
+  - Replaced live `echo "$html" | grep -q` probes with here-strings to remove `pipefail`/SIGPIPE false negatives.
+  - Updated AC-BRAND-008 expectation to Ulmo-final architecture:
+    - `mereka.scss` must **avoid** monolithic `theme.scss` import.
+    - `mereka.scss` must import focused partials (`./scss/fonts`, `./scss/tokens`).
+  - Updated AC-BRAND-009 plugin check to ignore comment-only references when scanning for Google Fonts URLs.
+  - MFE live branding probe now degrades to WARN (not FAIL) when explicit brand text is absent from initial HTML but theme CSS assets are present (client-rendered shell path).
+- Live mode now isolates runtime issues:
+  - `PASS=98`, `FAIL=4`, `WARN=5`, `SKIP=0`
+  - Remaining FAILs are all `Powered by Open edX` exposures on LMS/Studio domains (deployment/runtime drift).

@@ -299,21 +299,21 @@ for path in "${DEFAULT_BRANDING_PATHS[@]}"; do
   response=$(curl -sS -L --max-time 10 "$url" 2>/dev/null || echo "")
 
   # Check 4.1: No "Powered by Open edX" text
-  if echo "$response" | grep -qi "powered by open.*edx"; then
+  if grep -qi "powered by open.*edx" <<<"$response"; then
     fail "AC-UI-007: $path contains 'Powered by Open edX' text"
   else
     pass "AC-UI-007: $path does not contain 'Powered by Open edX'"
   fi
 
   # Check 4.2: No default Open edX logo URL
-  if echo "$response" | grep -q "logo-openedx\|openedx-logo\|logo\.png"; then
+  if grep -q "logo-openedx\|openedx-logo\|logo\.png" <<<"$response"; then
     fail "AC-UI-007: $path references default Open edX logo"
   else
     pass "AC-UI-007: $path does not reference default Open edX logo"
   fi
 
   # Check 4.3: No default Open edX brand color (#00262B)
-  if echo "$response" | grep -q "#00262B\|rgb(0,38,43)"; then
+  if grep -q "#00262B\|rgb(0,38,43)" <<<"$response"; then
     fail "AC-UI-007: $path contains default Open edX brand color"
   else
     pass "AC-UI-007: $path does not contain default Open edX brand color"

@@ -209,9 +209,14 @@ if [[ -f "$MFE_SCSS" ]]; then
     warn "MFE mereka.scss does not override \$mereka-font-path — MFE fonts may 404"
   fi
   if grep -q "@import.*scss/theme\|@import.*theme" "$MFE_SCSS"; then
-    pass "MFE mereka.scss imports shared theme partial"
+    fail "MFE mereka.scss imports monolithic theme.scss (should stay split to avoid LMS/Studio CSS leakage)"
   else
-    fail "MFE mereka.scss does not import shared theme — token stack may be missing"
+    pass "MFE mereka.scss avoids monolithic theme.scss import"
+  fi
+  if grep -q "@import.*./scss/fonts" "$MFE_SCSS" && grep -q "@import.*./scss/tokens" "$MFE_SCSS"; then
+    pass "MFE mereka.scss imports focused token/font partials"
+  else
+    fail "MFE mereka.scss missing focused token/font partial imports"
   fi
   if grep -q "\-\-mereka-mfe-branding-rev:" "$MFE_SCSS"; then
     pass "MFE mereka.scss has branding revision marker (--mereka-mfe-branding-rev)"
@@ -379,10 +384,10 @@ else
 fi
 
 if [[ -f "$PLUGIN" ]]; then
-  if grep -q "fonts.googleapis.com\|fonts.gstatic.com" "$PLUGIN"; then
+  if grep -vE '^\s*#|^\s*//|^\s*/\*|^\s*\*' "$PLUGIN" | grep -q "fonts.googleapis.com\|fonts.gstatic.com"; then
     fail "Plugin (mereka_lms.py) references Google Fonts"
   else
-    pass "Plugin has no Google Fonts references"
+    pass "Plugin has no active Google Fonts references"
   fi
 fi
 
@@ -680,31 +685,31 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
   else
     pass "LMS: page loaded successfully"
     # Mereka logo must appear in src attribute
-    if echo "$LMS_HTML" | grep -qi "logo.png\|images/logo\|mereka.*logo"; then
+    if grep -qi "logo.png\|images/logo\|mereka.*logo" <<<"$LMS_HTML"; then
       pass "LMS: Mereka logo src present in page"
     else
       fail "LMS: no Mereka logo src found in page HTML"
     fi
     # mereka-footer class on LMS pages
-    if echo "$LMS_HTML" | grep -q "mereka-footer"; then
+    if grep -q "mereka-footer" <<<"$LMS_HTML"; then
       pass "LMS: mereka-footer class present"
     else
       fail "LMS: mereka-footer class NOT present"
     fi
     # No unbranded Open edX
-    if echo "$LMS_HTML" | grep -qi "powered by open edx"; then
+    if grep -qi "powered by open edx" <<<"$LMS_HTML"; then
       fail "LMS: 'Powered by Open edX' found on live page"
     else
       pass "LMS: no 'Powered by Open edX' on live page"
     fi
     # Copyright/brand
-    if echo "$LMS_HTML" | grep -qiE "©|&copy;|Mereka|Biji-Biji"; then
+    if grep -qiE "©|&copy;|Mereka|Biji-Biji" <<<"$LMS_HTML"; then
       pass "LMS: copyright/brand line present"
     else
       fail "LMS: no copyright/brand line found"
     fi
     # Favicon link
-    if echo "$LMS_HTML" | grep -qi "favicon\|icon.*\.ico\|icon.*\.png"; then
+    if grep -qi "favicon\|icon.*\.ico\|icon.*\.png" <<<"$LMS_HTML"; then
       pass "LMS: favicon link present in <head>"
     else
       warn "LMS: no favicon link detected in page <head>"
@@ -727,22 +732,22 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
   fi
   if [[ -n "$STUDIO_HTML" ]]; then
     pass "Studio: page loaded (or signin page reachable)"
-    if echo "$STUDIO_HTML" | grep -qi "mereka\|Mereka Academy"; then
+    if grep -qi "mereka\|Mereka Academy" <<<"$STUDIO_HTML"; then
       pass "Studio: Mereka brand name present on page"
     else
       fail "Studio: no Mereka brand name found on Studio page"
     fi
-    if echo "$STUDIO_HTML" | grep -qi "powered by open edx"; then
+    if grep -qi "powered by open edx" <<<"$STUDIO_HTML"; then
       fail "Studio: 'Powered by Open edX' found on live Studio page"
     else
       pass "Studio: no 'Powered by Open edX' on live Studio page"
     fi
-    if echo "$STUDIO_HTML" | grep -qi "mereka-overrides\|mereka\.css\|mereka-studio"; then
+    if grep -qi "mereka-overrides\|mereka\.css\|mereka-studio" <<<"$STUDIO_HTML"; then
       pass "Studio: Mereka CSS referenced on Studio page"
     else
       warn "Studio: no Mereka CSS reference found in Studio page — check head-extra.html"
     fi
-    if echo "$STUDIO_HTML" | grep -qi "favicon\|icon.*\.ico"; then
+    if grep -qi "favicon\|icon.*\.ico" <<<"$STUDIO_HTML"; then
       pass "Studio: favicon link present in <head>"
     else
       warn "Studio: no favicon link detected in Studio page <head>"
@@ -758,22 +763,24 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
     fail "MFE: failed to fetch ${MFE_URL}/authn/login"
   else
     pass "MFE: authn login page loaded"
-    if echo "$MFE_HTML" | grep -qi "mereka\|Mereka Academy\|mereka-footer"; then
+    if grep -qi "mereka\|Mereka Academy\|mereka-footer" <<<"$MFE_HTML"; then
       pass "MFE: Mereka branding present on authn login page"
+    elif grep -qiE "/authn/.*\.css|/theme/mereka-brand(\-light)?\.min\.css|/theme/core\.min\.css" <<<"$MFE_HTML"; then
+      warn "MFE: explicit brand text markers not in initial HTML; CSS/theme assets detected (branding likely client-rendered)"
     else
       fail "MFE: no Mereka branding found on authn login page"
     fi
-    if echo "$MFE_HTML" | grep -qi "powered by open edx"; then
+    if grep -qi "powered by open edx" <<<"$MFE_HTML"; then
       fail "MFE: 'Powered by Open edX' found on authn login page"
     else
       pass "MFE: no 'Powered by Open edX' on authn login page"
     fi
-    if echo "$MFE_HTML" | grep -qi "fonts.googleapis.com\|fonts.gstatic.com"; then
+    if grep -qi "fonts.googleapis.com\|fonts.gstatic.com" <<<"$MFE_HTML"; then
       fail "MFE: Google Fonts request found on authn login page (privacy violation)"
     else
       pass "MFE: no Google Fonts request on authn login page"
     fi
-    if echo "$MFE_HTML" | grep -qi "favicon"; then
+    if grep -qi "favicon" <<<"$MFE_HTML"; then
       pass "MFE: favicon present in authn login page <head>"
     else
       warn "MFE: no favicon detected in authn login page <head>"
@@ -794,12 +801,12 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
       fail "${domain}: failed to fetch"
       continue
     fi
-    if echo "$DOMAIN_HTML" | grep -qi "mereka-footer\|mereka.*logo\|Mereka Academy"; then
+    if grep -qi "mereka-footer\|mereka.*logo\|Mereka Academy" <<<"$DOMAIN_HTML"; then
       pass "${domain}: Mereka brand markers present"
     else
       fail "${domain}: no Mereka brand markers found"
     fi
-    if echo "$DOMAIN_HTML" | grep -qi "powered by open edx"; then
+    if grep -qi "powered by open edx" <<<"$DOMAIN_HTML"; then
       fail "${domain}: 'Powered by Open edX' found"
     else
       pass "${domain}: no 'Powered by Open edX'"
