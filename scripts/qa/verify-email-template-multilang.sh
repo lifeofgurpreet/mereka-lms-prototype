@@ -215,6 +215,30 @@ assert_template_has_marker \
   "$EMAIL_TEMPLATE_ROOT/certificate.html" \
   "border-radius: 9999px" \
   "Certificate template CTA keeps pill-radius branding"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/feedback.html" \
+  "linear-gradient(120deg" \
+  "Feedback template has branded gradient header shell"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/forum.html" \
+  "org_accent_color|default:'#237072'" \
+  "Forum template uses Mereka accent fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/grade.html" \
+  "org_primary_color|default:'#ab3b78'" \
+  "Grade template uses Mereka primary fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/maintenance_notice.html" \
+  "org_accent_color|default:'#237072'" \
+  "Maintenance template uses Mereka accent fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/re_engagement.html" \
+  "unsubscribe_url" \
+  "Re-engagement template retains unsubscribe link"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/survey.html" \
+  "border-radius: 9999px" \
+  "Survey template CTA keeps pill-radius branding"
 
 # Marketing templates
 assert_template_has_marker \
