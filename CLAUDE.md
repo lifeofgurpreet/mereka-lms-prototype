@@ -56,8 +56,7 @@ deploy/k8s/               # Kubernetes manifests
   │   └── setup-playwright/ # Node + Playwright + browser cache
   ├── workflows/          # 43 workflow files
   ├── run-scripts-parallel.sh  # xargs -P parallel script runner
-  ├── ci-scripts-static.txt    # 132 scripts for static-validation job
-  └── ci-scripts-full.txt      # 69 scripts for full-verification job (push only)
+  └── ci-scripts-static.txt    # 199 scripts for static-validation job (consolidated)
 
 infrastructure/           # Infrastructure-as-code
   ├── tutor/              # Tutor configs, patches, themes
@@ -115,13 +114,12 @@ tutor_env/                # Generated Tutor state (gitignored)
 - Local builds tag as `latest`, cloud builds tag with git SHA
 
 **CI/CD Pipeline Architecture**:
-- `ci.yml` is the main workflow — **5 consolidated jobs** (was 74 micro-jobs)
-  - `static-validation`: 132 scripts via `xargs -P` parallel runner
+- `ci.yml` is the main workflow — **4 consolidated jobs** (was 74 micro-jobs)
+  - `static-validation`: 199 scripts via `xargs -P` parallel runner
   - `tutor-config-tests`: Tutor rendering + idempotency checks
   - `security-scans`: TruffleHog (HEAD only) + pip-audit
   - `test-coverage`: Python tests with coverage
-  - `full-verification` (push-to-main only): 69 additional scripts
-- Script lists live in `.github/ci-scripts-static.txt` and `.github/ci-scripts-full.txt`
+- Script list lives in `.github/ci-scripts-static.txt` (199 scripts, consolidated)
 - `.github/run-scripts-parallel.sh` runs scripts via `xargs -P` with PASS/FAIL/TIMEOUT tracking
 - 3 composite actions in `.github/actions/` eliminate boilerplate across workflows
 - `daily-infrastructure-audit.yml` merges observability + alert routing + parity checks
@@ -247,7 +245,7 @@ kubectl get pvc -n arc-runners                         # Cache PVCs
 .github/run-scripts-parallel.sh .github/ci-scripts-static.txt 4 120
 
 # Adding a new verification script to CI:
-# 1. Add script path to .github/ci-scripts-static.txt (or ci-scripts-full.txt for push-only)
+# 1. Add script path to .github/ci-scripts-static.txt
 # 2. Scripts must exit 0 on success, non-zero on failure
 # 3. Scripts get 120s timeout by default
 
@@ -540,7 +538,7 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets
    - **Note**: Pre-commit hook will block commits with hardcoded secrets
 9. **Adding verification scripts without updating CI** → Script exists but never runs in CI
-   - **Fix**: Add the script path to `.github/ci-scripts-static.txt` (PR gate) or `.github/ci-scripts-full.txt` (push-to-main)
+   - **Fix**: Add the script path to `.github/ci-scripts-static.txt`
 10. **Duplicating GCP auth / Python setup in workflows** → Use composite actions in `.github/actions/`
 11. **Including ARC manifests in rke2-nonprod overlay** → The overlay's `namespace: mereka-lms` transformer overrides ARC namespaces. Apply ARC separately: `kubectl apply -k deploy/k8s/base/arc/`
 
