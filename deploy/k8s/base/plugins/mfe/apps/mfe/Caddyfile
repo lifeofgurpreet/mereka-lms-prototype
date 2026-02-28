@@ -60,6 +60,11 @@
 	}
 	handle @mfe_theme_assets {
 		root * /openedx/dist
+		# Theme bundles are emitted per-MFE under /openedx/dist/<mfe>/theme/*.min.css.
+		# Route root /theme/* requests to whichever MFE currently carries the bundle.
+		try_files /account{path} /authn{path} /communications{path} /course-authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		header Content-Type "text/css; charset=utf-8"
+		header Cache-Control "public, max-age=300"
 		file_server
 	}
 

@@ -166,6 +166,24 @@ else
   else
     fail "Caddyfile missing /theme/* static route for runtime theme assets"
   fi
+
+  if rg -n "try_files .*/authn\\{path\\}" "$CADDY_FILE" >/dev/null; then
+    pass "Caddy /theme/* handler uses cross-MFE try_files fallback"
+  else
+    fail "Caddy /theme/* handler missing cross-MFE try_files fallback"
+  fi
+
+  if rg -n 'header Content-Type "text/css; charset=utf-8"' "$CADDY_FILE" >/dev/null; then
+    pass "Caddy /theme/* handler sets CSS content-type header"
+  else
+    fail "Caddy /theme/* handler missing explicit CSS content-type header"
+  fi
+
+  if rg -n 'header Cache-Control "public, max-age=' "$CADDY_FILE" >/dev/null; then
+    pass "Caddy /theme/* handler sets explicit cache-control header"
+  else
+    fail "Caddy /theme/* handler missing explicit cache-control header"
+  fi
 fi
 
 echo ""
