@@ -297,3 +297,25 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
     - `verify-lighthouse-budgets.sh` (`PASSED=14`, `FAILED=0`)
     - `verify-paragon-runtime.sh` (`PASS=9`, `WARN=3`, `FAIL=0`)
   - Runtime URL-dependent Paragon header/cache checks remain warning-only unless `PARAGON_RUNTIME_URL` (or `--runtime-url`) is provided.
+
+## Addendum — Screenshot Capture Refresh (Post-Slot Expansion)
+
+### Command Run
+
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+```
+
+### Result
+
+- Capture completed successfully (`OK`).
+- Screenshot bundle: `var/screenshots/prod/20260228T171016Z`
+- PNG count: `22`
+- Covered surfaces include:
+  - `academyv2.mereka.io` LMS + Studio + MFE routes
+  - `ecommerce.academyv2.mereka.io` root/dashboard/basket/checkout
+  - `credentials.academyv2.mereka.io/admin/login`
+  - `forum.academyv2.mereka.io` root/heartbeat
+  - `notes.academyv2.mereka.io`
+  - `academy.biji-biji.com` + associated Studio/MFE routes
+  - `skillourfuture.academy.mereka.io`
