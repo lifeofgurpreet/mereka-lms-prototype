@@ -1,20 +1,6 @@
 @import "fonts";
 @import "tokens";
-
-:root {
-  --mereka-gradient-primary: linear-gradient(135deg, var(--mereka-color-teal) 0%, var(--mereka-color-blue) 100%);
-  --mereka-radius-xl: 32px;
-  --mereka-color-ink-deep-rgb: 26 22 35;
-  --mereka-color-indigo-rgb: 41 92 173;
-  --mereka-color-teal-rgb: 35 112 114;
-  --mereka-color-magenta-rgb: 171 59 120;
-  --mereka-color-blue-rgb: 41 92 173;
-  --mereka-color-sky-rgb: 148 209 228;
-  --mereka-color-forest-rgb: 44 110 73;
-  --mereka-color-gold-rgb: 244 190 72;
-  --mereka-color-burgundy-rgb: 140 0 47;
-  --mereka-color-white-rgb: 255 255 255;
-}
+@import "base";
 
 .bg-mereka-gradient {
   background-image: var(--mereka-gradient-primary);
@@ -42,20 +28,6 @@
   border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.1);
   padding: 1rem 1.25rem;
   background-color: var(--pgn-color-white);
-}
-
-.mereka-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background-color: rgb(var(--mereka-color-teal-rgb) / 0.12);
-  color: var(--mereka-color-teal);
-  padding: 0.25rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
 }
 
 .global-header,

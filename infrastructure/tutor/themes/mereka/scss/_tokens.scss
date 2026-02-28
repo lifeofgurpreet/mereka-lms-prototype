@@ -62,8 +62,6 @@ $color-danger-soft: $color-pink;
   --mereka-color-danger: #{$color-danger};
   --mereka-color-danger-soft: #{$color-danger-soft};
   --mereka-black: #{$color-black};
-  --mereka-color-black-rgb: 0 0 0;
-  --mereka-color-white: #{$color-white};
   --mereka-color-indigo-rgb: 41 92 173;
   --mereka-color-teal-rgb: 35 112 114;
   --mereka-color-magenta-rgb: 171 59 120;
@@ -74,22 +72,36 @@ $color-danger-soft: $color-pink;
   --mereka-color-burgundy-rgb: 140 0 47;
   --mereka-color-white-rgb: 255 255 255;
   --mereka-color-ink-deep-rgb: 26 22 35;
-  --mereka-shadow-card: 0 20px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
+  --mereka-shadow-card: 0 20px 60px rgba(26, 22, 35, 0.08);
   --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
   --mereka-mfe-card-shadow: 0 25px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
   --mereka-mfe-surface: var(--pgn-color-white);
   --mereka-mfe-surface-muted: rgb(var(--mereka-color-ink-deep-rgb) / 0.04);
   --mereka-mfe-border: rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
-  --mereka-mfe-navbar-divider: rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
-  --mereka-mfe-btn-outline-border: rgb(var(--mereka-color-ink-deep-rgb) / 0.25);
+  --mereka-mfe-navbar-divider: 0;
+  --mereka-mfe-navbar-shadow: 0 10px 30px rgba(26, 22, 35, 0.05);
   --mereka-mfe-focus: rgb(var(--mereka-color-teal-rgb) / 0.18);
-  --mereka-mfe-dropdown-toggle-border: rgb(var(--mereka-color-ink-deep-rgb) / 0.20);
-  --mereka-mfe-navbar-shadow: 0 10px 30px rgb(var(--mereka-color-ink-deep-rgb) / 0.05);
-  --mereka-mfe-btn-shadow: 0 12px 30px rgb(var(--mereka-color-indigo-rgb) / 0.3);
-  --mereka-mfe-btn-shadow-hover: 0 18px 38px rgb(var(--mereka-color-teal-rgb) / 0.24);
-  --mereka-mfe-form-control-focus-border: var(--mereka-color-teal);
+  --mereka-mfe-btn-outline-border: rgba(26, 22, 35, 0.25);
   --mereka-mfe-form-control-radius: 16px;
   --mereka-mfe-form-control-border: 1px solid var(--pgn-form-control-border-color);
+  --mereka-mfe-btn-shadow: 0 12px 30px rgba(41, 92, 173, 0.3);
+  --mereka-mfe-btn-shadow-hover: 0 18px 38px rgba(35, 112, 114, 0.24);
+  --mereka-mfe-form-control-focus-border: #237072;
+  --mereka-mfe-dropdown-toggle-border: rgba(26, 22, 35, 0.20);
+  --mereka-mfe-badge-bg: rgba(35, 112, 114, 0.12);
+  --mereka-mfe-status-pill-bg: rgba(35, 112, 114, 0.1);
+  --mereka-mfe-authn-header-gradient-1: rgba(35, 112, 114, 0.14);
+  --mereka-mfe-authn-header-gradient-2: rgba(171, 59, 120, 0.1);
+  --mereka-mfe-authn-header-gradient-3: rgba(41, 92, 173, 0.12);
+  --mereka-mfe-alert-info-bg: rgba(148, 209, 228, 0.22);
+  --mereka-mfe-alert-info-border: rgba(148, 209, 228, 0.55);
+  --mereka-mfe-alert-success-bg: rgba(44, 110, 73, 0.12);
+  --mereka-mfe-alert-success-border: rgba(44, 110, 73, 0.35);
+  --mereka-mfe-alert-warning-bg: rgba(244, 190, 72, 0.14);
+  --mereka-mfe-alert-warning-border: rgba(244, 190, 72, 0.55);
+  --mereka-mfe-alert-danger-bg: rgba(140, 0, 47, 0.08);
+  --mereka-mfe-alert-danger-border: rgba(140, 0, 47, 0.22);
+  --mereka-mfe-modal-shadow: 0 30px 90px rgba(26, 22, 35, 0.18);
   --mereka-mfe-card-radius: 24px;
   --mereka-mfe-card-border: 1px solid var(--mereka-mfe-border);
   --mereka-mfe-navbar-padding: 0.85rem 1.5rem;
@@ -109,39 +121,25 @@ $color-danger-soft: $color-pink;
   --mereka-mfe-course-grid-gap: 1rem;
   --mereka-mfe-status-badge-padding: 0.1rem 0.55rem;
   --mereka-mfe-authn-card-radius: 28px;
-  --mereka-mfe-authn-card-border: 1px solid var(--mereka-mfe-border);
-  --mereka-mfe-authn-card-shadow: 0 28px 72px rgb(var(--mereka-color-ink-deep-rgb) / 0.14);
+  --mereka-mfe-authn-card-border: 1px solid rgba(26, 22, 35, 0.10);
+  --mereka-mfe-authn-card-shadow: 0 28px 72px rgba(26, 22, 35, 0.14);
   --mereka-mfe-alert-radius: 16px;
-  --mereka-mfe-alert-info-bg: rgb(var(--mereka-color-sky-rgb) / 0.22);
-  --mereka-mfe-alert-info-border: rgb(var(--mereka-color-sky-rgb) / 0.55);
-  --mereka-mfe-alert-success-bg: rgb(var(--mereka-color-forest-rgb) / 0.12);
-  --mereka-mfe-alert-success-border: rgb(var(--mereka-color-forest-rgb) / 0.35);
-  --mereka-mfe-alert-warning-bg: rgb(var(--mereka-color-gold-rgb) / 0.14);
-  --mereka-mfe-alert-warning-border: rgb(var(--mereka-color-gold-rgb) / 0.55);
-  --mereka-mfe-alert-danger-bg: rgb(var(--mereka-color-burgundy-rgb) / 0.08);
-  --mereka-mfe-alert-danger-border: rgb(var(--mereka-color-burgundy-rgb) / 0.22);
-  --mereka-mfe-badge-bg: rgb(var(--mereka-color-teal-rgb) / 0.12);
-  --mereka-mfe-status-pill-bg: rgb(var(--mereka-color-teal-rgb) / 0.1);
-  --mereka-mfe-authn-header-gradient-1: rgb(var(--mereka-color-teal-rgb) / 0.14);
-  --mereka-mfe-authn-header-gradient-2: rgb(var(--mereka-color-magenta-rgb) / 0.1);
-  --mereka-mfe-authn-header-gradient-3: rgb(var(--mereka-color-blue-rgb) / 0.12);
   --mereka-mfe-modal-radius: 24px;
   --mereka-mfe-modal-border: 1px solid var(--mereka-mfe-border);
-  --mereka-mfe-modal-shadow: 0 30px 90px rgb(var(--mereka-color-ink-deep-rgb) / 0.18);
   --mereka-mfe-dropdown-radius: 16px;
   --mereka-mfe-dropdown-border: 1px solid var(--mereka-mfe-border);
   --mereka-mfe-dropdown-shadow: 0 20px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.14);
   --mereka-mfe-tab-radius: 999px;
   --mereka-radius-xl: 32px;
   --mereka-mfe-compact-card-radius: 20px;
-  --mereka-mfe-compact-card-border: 1px solid var(--mereka-mfe-border);
-  --mereka-mfe-compact-card-shadow: 0 25px 60px rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
-  --mereka-mfe-compact-card-shadow-hover: 0 18px 48px rgb(var(--mereka-color-ink-deep-rgb) / 0.12);
+  --mereka-mfe-compact-card-border: 1px solid rgba(26, 22, 35, 0.08);
+  --mereka-mfe-compact-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
+  --mereka-mfe-compact-card-shadow-hover: 0 18px 48px rgba(26, 22, 35, 0.12);
   --mereka-mfe-compact-list-gap: 1.5rem;
   --mereka-mfe-compact-vertical-gap: 1.25rem;
   --mereka-mfe-course-list-gap: 1rem;
   --mereka-mfe-discussions-card-radius: 22px;
-  --mereka-mfe-discussions-card-border: 1px solid var(--mereka-mfe-border);
+  --mereka-mfe-discussions-card-border: 1px solid rgba(26, 22, 35, 0.09);
   --pgn-color-primary: #{$color-magenta};
   --pgn-color-secondary: #{$color-teal};
   --pgn-color-success: #{$color-success};
@@ -155,17 +153,17 @@ $color-danger-soft: $color-pink;
   --pgn-font-family-sans-serif: #{$mereka-body-font};
   --pgn-heading-font-family: #{$mereka-heading-font};
   --pgn-border-color: #{$color-border};
-  --pgn-form-control-border-color: var(--mereka-color-border);
-  --pgn-border-color-translucent: rgb(var(--mereka-color-black-rgb) / 0.12);
+  --pgn-form-control-border-color: #ddddde;
+  --pgn-btn-color: #4a494a;
+  --pgn-btn-hover-color: #000000;
+  --pgn-alert-bg: #ffffff;
+  --pgn-alert-border-color: rgba(26, 22, 35, 0.1);
+  --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
   --pgn-btn-border-radius: 999px;
-  --pgn-btn-color: var(--mereka-color-ink-700);
-  --pgn-btn-hover-color: var(--mereka-color-ink-900);
-  --pgn-alert-bg: var(--mereka-color-white);
-  --pgn-alert-border-color: var(--mereka-mfe-border);
   --pgn-spacing-spacer-base: 1rem;
   --pgn-typography-font-size-xs: 0.75rem;
-  --pgn-color-white: var(--mereka-color-white);
-  --pgn-color-black: var(--mereka-black);
+  --pgn-color-white: #fff;
+  --pgn-color-black: #000;
   --pgn-color-gray-base: #{$color-ink-900};
   --pgn-color-gray-500: #6b7280;
   --pgn-color-gray-700: #374151;
@@ -221,7 +219,7 @@ $color-danger-soft: $color-pink;
   --pgn-zindex-tooltip: 1070;
   --pgn-transition-base: all 0.2s ease-in-out 0s normal;
   --pgn-transition-fade: opacity 0.15s linear 0s normal;
-  --pgn-elevation-box-shadow-level-2: 0 4px 6px rgb(var(--mereka-color-black-rgb) / 0.1);
+  --pgn-elevation-box-shadow-level-2: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 // END GENERATED
 
@@ -244,43 +242,4 @@ $btn-border-radius: 999px !default;
 $btn-border-radius-lg: 999px !default;
 $btn-border-radius-sm: 999px !default;
 
-
-body {
-  font-family: $mereka-body-font;
-  background-color: $color-neutral-100;
-  color: $color-ink-900;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: $mereka-heading-font;
-  font-weight: 600;
-  color: $color-ink-900;
-}
-
-a {
-  color: $color-info;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-
-  &:hover,
-  &:focus {
-    color: $color-teal;
-  }
-}
-
-.btn-primary,
-.btn-outline-primary {
-  letter-spacing: 0.01em;
-  text-transform: none;
-}
-
-.card {
-  border-radius: 24px;
-  border-color: var(--mereka-mfe-border);
-  box-shadow: var(--mereka-shadow-card);
-}
+// Base style rules moved to infrastructure/tutor/themes/mereka/scss/_base.scss.

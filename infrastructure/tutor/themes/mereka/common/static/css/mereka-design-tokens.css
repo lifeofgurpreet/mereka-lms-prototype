@@ -93,13 +93,23 @@
   --mereka-mfe-navbar-brand-gap: 0.75rem;
   --mereka-mfe-navbar-logo-height: 32px;
   --mereka-mfe-pill-radius: 999px;
+  --mereka-gradient-primary: linear-gradient(135deg, #237072 0%, #295cad 100%);
+  --mereka-mfe-navbar-divider: 0;
+  --mereka-mfe-navbar-shadow: 0 10px 30px rgba(26, 22, 35, 0.05);
   --mereka-mfe-authn-cta-min-height: 44px;
   --mereka-mfe-nav-link-transition: 150ms ease;
   --mereka-mfe-brand-font-size: 1rem;
   --mereka-mfe-nav-item-font-weight: 500;
+  --mereka-mfe-btn-outline-border: rgba(26, 22, 35, 0.25);
+  --mereka-mfe-btn-shadow: 0 12px 30px rgba(41, 92, 173, 0.3);
+  --mereka-mfe-btn-shadow-hover: 0 18px 38px rgba(35, 112, 114, 0.24);
+  --mereka-mfe-form-control-focus-border: #237072;
+  --mereka-mfe-dropdown-toggle-border: rgba(26, 22, 35, 0.20);
   --mereka-mfe-brand-font-weight: 600;
   --mereka-mfe-emphasis-font-weight: 700;
   --mereka-mfe-badge-font-weight: 600;
+  --mereka-mfe-badge-bg: rgba(35, 112, 114, 0.12);
+  --mereka-mfe-status-pill-bg: rgba(35, 112, 114, 0.1);
   --mereka-mfe-badge-gap: 0.35rem;
   --mereka-mfe-badge-padding: 0.25rem 0.85rem;
   --mereka-mfe-badge-letter-spacing: 0.08em;
@@ -107,6 +117,18 @@
   --mereka-mfe-authn-card-radius: 28px;
   --mereka-mfe-authn-card-border: 1px solid rgba(26, 22, 35, 0.10);
   --mereka-mfe-authn-card-shadow: 0 28px 72px rgba(26, 22, 35, 0.14);
+  --mereka-mfe-authn-header-gradient-1: rgba(35, 112, 114, 0.14);
+  --mereka-mfe-authn-header-gradient-2: rgba(171, 59, 120, 0.1);
+  --mereka-mfe-authn-header-gradient-3: rgba(41, 92, 173, 0.12);
+  --mereka-mfe-alert-info-bg: rgba(148, 209, 228, 0.22);
+  --mereka-mfe-alert-info-border: rgba(148, 209, 228, 0.55);
+  --mereka-mfe-alert-success-bg: rgba(44, 110, 73, 0.12);
+  --mereka-mfe-alert-success-border: rgba(44, 110, 73, 0.35);
+  --mereka-mfe-alert-warning-bg: rgba(244, 190, 72, 0.14);
+  --mereka-mfe-alert-warning-border: rgba(244, 190, 72, 0.55);
+  --mereka-mfe-alert-danger-bg: rgba(140, 0, 47, 0.08);
+  --mereka-mfe-alert-danger-border: rgba(140, 0, 47, 0.22);
+  --mereka-mfe-modal-shadow: 0 30px 90px rgba(26, 22, 35, 0.18);
   --mereka-mfe-status-badge-padding: 0.1rem 0.55rem;
 
   --mereka-mfe-compact-card-radius: 20px;
@@ -123,6 +145,10 @@
 
   --pgn-border-color: #ddddde;
   --pgn-form-control-border-color: #ddddde;
+  --pgn-btn-color: #4a494a;
+  --pgn-btn-hover-color: #000000;
+  --pgn-alert-bg: #ffffff;
+  --pgn-alert-border-color: rgba(26, 22, 35, 0.1);
 
   --pgn-spacing-spacer-0: 0;
   --pgn-spacing-spacer-1: 0.25rem;
