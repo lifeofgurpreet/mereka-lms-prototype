@@ -49,7 +49,11 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --wait-timeout-minutes)
-      WAIT_TIMEOUT_MINUTES="${2:-}"
+      if [[ -z "${2:-}" ]]; then
+        echo "Error: --wait-timeout-minutes requires a numeric argument" >&2
+        exit 1
+      fi
+      WAIT_TIMEOUT_MINUTES="$2"
       shift 2
       ;;
     -h|--help)
