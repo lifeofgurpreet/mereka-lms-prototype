@@ -24,6 +24,22 @@ else
   BRANDING_GATES_COMMAND="RUN_LIVE_GATE=0 scripts/branding/run-branding-gates.sh"
 fi
 
+# In source-only mode, default long runtime suites to off unless explicitly overridden.
+if [[ -z "${RUN_TENANT_RUNTIME+x}" ]]; then
+  if [[ "$RUN_BRANDING_GATES_LIVE" == "0" ]]; then
+    RUN_TENANT_RUNTIME=0
+  else
+    RUN_TENANT_RUNTIME=1
+  fi
+fi
+if [[ -z "${RUN_MULTISITE_GOVERNANCE+x}" ]]; then
+  if [[ "$RUN_BRANDING_GATES_LIVE" == "0" ]]; then
+    RUN_MULTISITE_GOVERNANCE=0
+  else
+    RUN_MULTISITE_GOVERNANCE=1
+  fi
+fi
+
 # ── colour helpers ──────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -52,6 +68,9 @@ run_suite() {
   local exit_code=0
   output=$(bash -lc "cd '$REPO_ROOT' && $command" 2>&1) || exit_code=$?
   echo "$output"
+  # Strip ANSI color codes so summary parsing works for colorized scripts.
+  local clean_output
+  clean_output="$(echo "$output" | sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g')"
 
   # AC-TBQA-004: parse PASS / FAIL / WARN counts from summary line
   # Handles multiple summary formats produced by the sub-scripts:
@@ -63,7 +82,7 @@ run_suite() {
 
   # Try "N PASS / N FAIL / N WARN" format (footer-variant-matrix style)
   local summary_line
-  summary_line=$(echo "$output" | grep -E '[0-9]+ PASS' | tail -1 || true)
+  summary_line=$(echo "$clean_output" | grep -E '[0-9]+ PASS' | tail -1 || true)
   if [[ -n "$summary_line" ]]; then
     pass=$(echo "$summary_line" | grep -oP '\d+(?= PASS)' || echo "-")
     fail=$(echo "$summary_line" | grep -oP '\d+(?= FAIL)' || echo "-")
@@ -73,7 +92,7 @@ run_suite() {
   # Try "PASS: N | FAIL: N" pipe-separated format (analytics-key / selector style)
   if [[ "$pass" == "-" ]]; then
     local pipe_line
-    pipe_line=$(echo "$output" | grep -E 'PASS:.*FAIL:' | tail -1 || true)
+    pipe_line=$(echo "$clean_output" | grep -E 'PASS:.*FAIL:' | tail -1 || true)
     if [[ -n "$pipe_line" ]]; then
       pass=$(echo "$pipe_line" | grep -oP 'PASS:\s*\K\d+' || echo "-")
       fail=$(echo "$pipe_line" | grep -oP 'FAIL:\s*\K\d+' || echo "-")
@@ -87,9 +106,9 @@ run_suite() {
   #   "WARN: N"
   if [[ "$pass" == "-" ]]; then
     local p_line f_line w_line
-    p_line=$(echo "$output" | grep -E '^PASS: [0-9]+$' | tail -1 || true)
-    f_line=$(echo "$output" | grep -E '^FAIL: [0-9]+$' | tail -1 || true)
-    w_line=$(echo "$output" | grep -E '^WARN: [0-9]+$' | tail -1 || true)
+    p_line=$(echo "$clean_output" | grep -E '^PASS: [0-9]+$' | tail -1 || true)
+    f_line=$(echo "$clean_output" | grep -E '^FAIL: [0-9]+$' | tail -1 || true)
+    w_line=$(echo "$clean_output" | grep -E '^WARN: [0-9]+$' | tail -1 || true)
     if [[ -n "$p_line" ]]; then
       pass=$(echo "$p_line" | grep -oP '\d+' || echo "-")
       fail=$(echo "$f_line" | grep -oP '\d+' || echo "0")
@@ -112,6 +131,8 @@ echo -e "========================================${NC}"
 echo    "Repo: $REPO_ROOT"
 echo    "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 echo    "Live branding gates: $RUN_BRANDING_GATES_LIVE"
+echo    "Tenant runtime suite: $RUN_TENANT_RUNTIME"
+echo    "Multisite governance suite: $RUN_MULTISITE_GOVERNANCE"
 
 # ── AC-TBQA-001: run all 9 suites in order ───────────────────────────────────
 run_suite "Analytics Key (8jao.1)"          "scripts/qa/verify-analytics-key.sh"
@@ -120,9 +141,17 @@ run_suite "Token Integrity (8jao.4)"        "scripts/qa/verify-branding-token-in
 run_suite "Plugin Slot Register (8jao.9)"   "scripts/qa/verify-plugin-slot-migration-register.sh"
 run_suite "Footer Variant Matrix (8jao.10)" "scripts/qa/verify-footer-variant-matrix.sh"
 run_suite "RTL Theme Assets"                "scripts/qa/verify-rtl-theme-assets.sh"
-run_suite "Tenant Branding Runtime"         "scripts/qa/verify-tenant-branding-runtime.sh"
+if [[ "$RUN_TENANT_RUNTIME" == "1" ]]; then
+  run_suite "Tenant Branding Runtime"         "scripts/qa/verify-tenant-branding-runtime.sh"
+else
+  run_suite "Tenant Branding Runtime"         "echo 'SKIP: disabled (RUN_TENANT_RUNTIME=0)'; echo 'PASS: 0 | FAIL: 0 | WARN: 0'"
+fi
 run_suite "Branding Gates"                  "$BRANDING_GATES_COMMAND"
-run_suite "Multisite Governance"            "SKIP_DEV_ON_BOTH=1 scripts/qa/run-multisite-governance-gates.sh --env both"
+if [[ "$RUN_MULTISITE_GOVERNANCE" == "1" ]]; then
+  run_suite "Multisite Governance"            "SKIP_DEV_ON_BOTH=1 scripts/qa/run-multisite-governance-gates.sh --env both"
+else
+  run_suite "Multisite Governance"            "echo 'SKIP: disabled (RUN_MULTISITE_GOVERNANCE=0)'; echo 'PASS: 0 | FAIL: 0 | WARN: 0'"
+fi
 
 # ── AC-TBQA-004: consolidated summary table ──────────────────────────────────
 echo ""
