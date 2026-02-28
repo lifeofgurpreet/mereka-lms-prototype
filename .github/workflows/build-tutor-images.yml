@@ -77,7 +77,9 @@ jobs:
 
   build-openedx:
     name: Build OpenEdX Image
-    runs-on: ubuntu-24.04
+    # OpenEdX image builds frequently OOM on GitHub-hosted runners.
+    # Route manual workflow_dispatch runs to the heavy ARC runner pool.
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && 'mereka-k8s-heavy-builders' || 'ubuntu-24.04' }}
     timeout-minutes: 180
     needs: lint
     if: ${{ github.event_name == 'push' || inputs.build_openedx }}
@@ -95,12 +97,16 @@ jobs:
         run: |
           # GitHub hosted runners can OOM during large Open edX layer export.
           # Add swap to reduce abrupt SIGKILL during docker/buildx workloads.
-          sudo swapoff -a || true
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          free -h
+          if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            sudo swapoff -a || true
+            sudo fallocate -l 8G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+          else
+            echo "Skipping swap provisioning: sudo is unavailable/non-interactive on this runner."
+          fi
+          free -h || true
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
@@ -307,12 +313,16 @@ jobs:
 
       - name: Enable swap for heavy image builds
         run: |
-          sudo swapoff -a || true
-          sudo fallocate -l 8G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-          free -h
+          if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            sudo swapoff -a || true
+            sudo fallocate -l 8G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+          else
+            echo "Skipping swap provisioning: sudo is unavailable/non-interactive on this runner."
+          fi
+          free -h || true
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
