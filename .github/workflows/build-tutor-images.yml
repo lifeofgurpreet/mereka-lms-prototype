@@ -168,6 +168,13 @@ jobs:
             echo "GitHub-hosted runner detected: BuildKit disabled for stability."
           else
             echo "Self-hosted runner detected: BuildKit remains enabled."
+            if [[ -d /cache/docker ]]; then
+              mkdir -p /cache/docker/buildkit
+              export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker/buildkit --cache-to=type=local,dest=/cache/docker/buildkit,mode=max"
+              echo "BuildKit local cache enabled via /cache/docker/buildkit."
+            else
+              echo "No /cache/docker mount found; continuing without explicit BuildKit cache args."
+            fi
           fi
           (
             while true; do
@@ -177,7 +184,12 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 170m tutor images build openedx; then
+          build_cmd=(tutor images build openedx)
+          if [[ -n "${DOCKER_BUILD_OPTIONS:-}" ]]; then
+            read -r -a build_opts <<< "$DOCKER_BUILD_OPTIONS"
+            build_cmd+=("${build_opts[@]}")
+          fi
+          if ! timeout 170m "${build_cmd[@]}"; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2
             exit 1
           fi
@@ -388,6 +400,13 @@ jobs:
             echo "GitHub-hosted runner detected: BuildKit disabled for stability."
           else
             echo "Self-hosted runner detected: BuildKit remains enabled."
+            if [[ -d /cache/docker ]]; then
+              mkdir -p /cache/docker/buildkit
+              export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker/buildkit --cache-to=type=local,dest=/cache/docker/buildkit,mode=max"
+              echo "BuildKit local cache enabled via /cache/docker/buildkit."
+            else
+              echo "No /cache/docker mount found; continuing without explicit BuildKit cache args."
+            fi
           fi
           export NODE_OPTIONS="--max-old-space-size=6144"
           (
@@ -398,7 +417,12 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 110m tutor images build mfe; then
+          build_cmd=(tutor images build mfe)
+          if [[ -n "${DOCKER_BUILD_OPTIONS:-}" ]]; then
+            read -r -a build_opts <<< "$DOCKER_BUILD_OPTIONS"
+            build_cmd+=("${build_opts[@]}")
+          fi
+          if ! timeout 110m "${build_cmd[@]}"; then
             echo "MFE image build timed out or failed after timeout guard" >&2
             exit 1
           fi

@@ -314,13 +314,14 @@ Some workflows use `${{ github.run_id }}-${{ github.run_attempt }}` in artifact 
     - `.github/workflows/tenant-isolation-check.yml`
   - Impact: All scheduled/E2E compute on sunk-cost K8s
 
-- [ ] **Task 5.3**: Optimize Docker build caching
+- [x] **Task 5.3**: Optimize Docker build caching
   - Modify: `.github/workflows/build-tutor-images.yml`
-  - Inject BuildKit cache args into Tutor build process:
+  - Inject BuildKit cache args into Tutor build process on ARC heavy runners:
     ```bash
-    export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker --cache-to=type=local,dest=/cache/docker,mode=max"
+    export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker/buildkit --cache-to=type=local,dest=/cache/docker/buildkit,mode=max"
     ```
-  - Alternatively, if using GitHub cache API on ARC: `--cache-from=type=gha --cache-to=type=gha,mode=max`
+  - Build commands now append cache args only when `/cache/docker` exists (ARC PVC path).
+  - GitHub-hosted fallback keeps BuildKit disabled and skips cache args.
   - Impact: Tutor builds drop from 30+ min to ~5 min (only changed layers rebuilt)
 
 - [ ] **Task 5.4**: Optimize Trivy scans (single-pass)
