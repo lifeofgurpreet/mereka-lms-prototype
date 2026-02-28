@@ -12,14 +12,29 @@
 # This function now only syncs static assets (SCSS, fonts) needed at MFE build time.
 
 apply_footer_component_patch() {
-  # Copy MFE theme SCSS/fonts into indigo build directory
-  local MFE_INDIGO_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo"
-  if [ -d "$MFE_INDIGO_DIR" ]; then
+  # Copy MFE theme SCSS/fonts into Indigo build directory.
+  # Some Tutor renders place env.config.jsx at build root, but our patched
+  # Dockerfile expects indigo/env.config.jsx and indigo/mereka/.
+  local MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
+  local MFE_INDIGO_DIR="$MFE_BUILD_DIR/indigo"
+  local ENV_CONFIG_SOURCE="$MFE_BUILD_DIR/env.config.jsx"
+  local THEME_SCSS_SOURCE="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss"
+  local THEME_MFE_SOURCE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe"
+
+  mkdir -p "$MFE_INDIGO_DIR"
+
+  if [ -f "$ENV_CONFIG_SOURCE" ]; then
+    cp "$ENV_CONFIG_SOURCE" "$MFE_INDIGO_DIR/env.config.jsx"
+  elif [ -n "${MFE_INDIGO_ENV_TEMPLATE:-}" ] && [ -f "$MFE_INDIGO_ENV_TEMPLATE" ]; then
+    cp "$MFE_INDIGO_ENV_TEMPLATE" "$MFE_INDIGO_DIR/env.config.jsx"
+  fi
+
+  if [ -d "$THEME_SCSS_SOURCE" ] && [ -d "$THEME_MFE_SOURCE/fonts" ] && [ -f "$THEME_MFE_SOURCE/mereka.scss" ]; then
     mkdir -p "$MFE_INDIGO_DIR/mereka"
     rm -rf "$MFE_INDIGO_DIR/mereka/scss"
-    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/scss" "$MFE_INDIGO_DIR/mereka/scss"
+    cp -R "$THEME_SCSS_SOURCE" "$MFE_INDIGO_DIR/mereka/scss"
     rm -rf "$MFE_INDIGO_DIR/mereka/fonts"
-    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts" "$MFE_INDIGO_DIR/mereka/fonts"
-    cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
+    cp -R "$THEME_MFE_SOURCE/fonts" "$MFE_INDIGO_DIR/mereka/fonts"
+    cp "$THEME_MFE_SOURCE/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"
   fi
 }

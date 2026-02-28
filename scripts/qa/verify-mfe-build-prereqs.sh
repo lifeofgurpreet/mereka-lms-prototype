@@ -10,6 +10,10 @@ cd "$REPO_ROOT"
 APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
 GENERATED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+GENERATED_MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
+GENERATED_MFE_INDIGO_DIR="$GENERATED_MFE_BUILD_DIR/indigo"
+GENERATED_MFE_INDIGO_ENV="$GENERATED_MFE_INDIGO_DIR/env.config.jsx"
+GENERATED_MFE_INDIGO_THEME_DIR="$GENERATED_MFE_INDIGO_DIR/mereka"
 
 PLUGIN_INSTALL_LINE="RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
 LEGACY_PLUGIN_INSTALL_LINE="RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
@@ -101,6 +105,27 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     failures=1
   else
     echo "  ✓ generated Dockerfile has no legacy plugin install line"
+  fi
+
+  if [[ -d "$GENERATED_MFE_INDIGO_DIR" ]]; then
+    echo "  ✓ generated Indigo build directory exists"
+  else
+    echo "  ✗ generated Indigo build directory missing: $GENERATED_MFE_INDIGO_DIR"
+    failures=1
+  fi
+
+  if [[ -f "$GENERATED_MFE_INDIGO_ENV" ]]; then
+    echo "  ✓ generated indigo/env.config.jsx exists"
+  else
+    echo "  ✗ generated indigo/env.config.jsx missing: $GENERATED_MFE_INDIGO_ENV"
+    failures=1
+  fi
+
+  if [[ -d "$GENERATED_MFE_INDIGO_THEME_DIR" ]]; then
+    echo "  ✓ generated indigo/mereka theme directory exists"
+  else
+    echo "  ✗ generated indigo/mereka theme directory missing: $GENERATED_MFE_INDIGO_THEME_DIR"
+    failures=1
   fi
 else
   if [[ "$REQUIRE_GENERATED_DOCKERFILE" == "1" ]]; then

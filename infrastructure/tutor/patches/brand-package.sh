@@ -14,13 +14,8 @@ apply_brand_package_patch() {
     return 0
   fi
 
-  if [ ! -d "$MFE_INDIGO_DIR" ]; then
-    echo "Skipping brand-mereka sync: target dir not found at $MFE_INDIGO_DIR" >&2
-    return 0
-  fi
-
-  rm -rf "$MFE_INDIGO_DIR/brand-mereka"
   mkdir -p "$MFE_INDIGO_DIR"
+  rm -rf "$MFE_INDIGO_DIR/brand-mereka"
   cp -R "$SOURCE_DIR"/. "$MFE_INDIGO_DIR/brand-mereka"
 
   # Keep compiled runtime theme CSS in sync with MFE Docker context.
