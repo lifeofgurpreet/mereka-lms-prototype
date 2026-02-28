@@ -146,3 +146,7 @@
 - Prioritize replacing BEM overrides only where token replacement is known to take effect.
 - For `--pgn-*` tokens in `defined+ignored`, prefer explicit `--mereka-*` overrides in our own CSS.
 - Re-audit whenever `core.min.css` changes (Theme URL runtime path update).
+
+## Migration Boundary Statement
+- Paragon v22 **does not consume** many component-level `--pgn-*` tokens that are often assumed to be active (for example card shadow/radius and modal/dropdown box-shadow families).
+- Where Paragon does not consume these tokens, visual behavior **must remain as CSS rules** in `infrastructure/tutor/themes/mereka/mfe/mereka.scss` until upstream component token support exists.
