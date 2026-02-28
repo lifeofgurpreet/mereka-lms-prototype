@@ -68,12 +68,14 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 
 ---
 
-### 5. `infrastructure/tutor/plugins/mereka_lms.py` (Footer slot injection)
+### 5. `infrastructure/tutor/plugins/mereka_lms.py` (FPF slot injection)
 
 | Override Method | Target | Risk | Notes |
 |----------------|--------|------|-------|
-| `footer_slot` via `PLUGIN_OPERATIONS.Replace` | All MFEs | **LOW** | Plugin-slot API is stable; this is the recommended migration path |
+| `org.openedx.frontend.layout.footer.v1` via `PLUGIN_OPERATIONS.Insert`/`Hide` | MFE shells | **LOW** | Plugin-slot API is stable; this is the recommended migration path |
+| `org.openedx.frontend.layout.header_logo.v1` via `PLUGIN_OPERATIONS.Replace` | MFE shells | **LOW** | Header branding is moved from static CSS overrides to runtime slot output |
 | Inline `MerekaFooter` React component emitting `.footer-social`, `.footer-container`, etc. | All MFEs | **MEDIUM** | The emitted class names in the JSX are custom (not Paragon), so they are stable as long as we own the component |
+| `org.openedx.frontend.authn.login_component.v1`, learner/learning/account/profile slots | All MFEs | **LOW** | Additional high-value brand surfaces are now injected via dedicated slots |
 
 ---
 
@@ -94,8 +96,8 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 3. **`pgn__*` selectors in `mereka.scss`** — Paragon 22 → 23 can rename component classes.
    **Action**: Pin selectors to the Paragon version range tested. Add a CI check that fails if `pgn__` class names in use are not present in the installed Paragon package.
 
-4. **LMS legacy footer selectors** (`.footer-container`, `.footer-social`, etc.) — being actively replaced by the `footer-slot` plugin (8jao.9).
-   **Action**: Once `footer-slot` migration is complete, remove these ~30 selectors from `mereka-overrides.css`.
+4. **LMS legacy footer selectors** (`.footer-container`, `.footer-social`, etc.) — MFE shell now uses slot-inserted footer content.
+   **Action**: Keep LMS shell selectors until shell-level equivalent slots are available, then remove these ~30 selectors from `mereka-overrides.css`.
 
 ### Monitor only
 
@@ -109,9 +111,9 @@ Identical content to `lms/static/css/mereka-overrides.css` (dual-path deployment
 
 | Component | Current Method | Target Method | Status |
 |-----------|---------------|---------------|--------|
-| Footer | `footer_slot` plugin + CSS override fallback (`mereka-overrides.css`) | `footer_slot` plugin only | In progress (8jao.9) — CSS fallback to be removed after slot is fully verified |
-| Header | `.header-global` / `.nav-global` CSS override | `header-slot` plugin | Planned |
-| Logo | LMS theme asset path + `footer-logo-img` CSS | `logo-slot` plugin | Planned |
+| Footer (MFE) | `org.openedx.frontend.layout.footer.v1` slot | `footer-slot` plugin only | Implemented in `mereka_lms.py` |
+| Header logo (MFE) | `org.openedx.frontend.layout.header_logo.v1` slot | `header-logo-slot` | Implemented in `mereka_lms.py` |
+| Logo paths | LMS/MFE theme asset + CSS overrides in shell / `mereka.scss` | `logo-slot` (MFE), theme asset fallback (LMS) | Planned for LMS shell; plugin is in MFE shell |
 | Auth page layout | `[class*="authn"]` CSS overrides in `mereka.scss` | Authn MFE plugin slot (when available) | Blocked — no slot exposed upstream yet |
 
 ---
