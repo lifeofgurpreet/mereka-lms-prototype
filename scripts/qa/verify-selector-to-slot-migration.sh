@@ -106,10 +106,14 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
     "org.openedx.frontend.learner_dashboard.dashboard_header.v1"
     "org.openedx.frontend.learner_dashboard.course_card.v1"
+    "org.openedx.frontend.learner_dashboard.course_card_action.v1"
     "org.openedx.frontend.learning.course_header.v1"
     "org.openedx.frontend.learning.course_tabs.v1"
     "org.openedx.frontend.catalog.catalog_header.v1"
+    "org.openedx.frontend.catalog.catalog_card.v1"
+    "org.openedx.frontend.catalog.catalog_filters.v1"
     "org.openedx.frontend.account.account_settings_tab.v1"
+    "org.openedx.frontend.account.account_settings_field.v1"
   )
   for slot in "${required_slots[@]}"; do
     if grep -q "\"$slot\"" "$PLUGIN_FILE"; then

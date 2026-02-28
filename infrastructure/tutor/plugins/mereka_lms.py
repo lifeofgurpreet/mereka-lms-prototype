@@ -807,12 +807,16 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
 #   org.openedx.frontend.learner_dashboard.dashboard_header.v1 | Learner dashboard branded header
 #   org.openedx.frontend.learner_dashboard.course_card.v1 | Learner dashboard course-card accent
+#   org.openedx.frontend.learner_dashboard.course_card_action.v1 | Learner dashboard course-card action helper
 #   org.openedx.frontend.learning.course_outline_sidebar.v1 | Learning course sidebar content
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
 #   org.openedx.frontend.learning.course_header.v1 | Learning course header banner
 #   org.openedx.frontend.learning.course_tabs.v1 | Learning tabs helper strip
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
+#   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
+#   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
 #   org.openedx.frontend.account.account_settings_tab.v1 | Account settings branded tab shell
+#   org.openedx.frontend.account.account_settings_field.v1 | Account settings field-level helper
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
 #
@@ -969,6 +973,21 @@ for _mfe in [
         ),
         (
             _mfe,
+            "org.openedx.frontend.learner_dashboard.course_card_action.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_dashboard_course_card_action_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCourseCardActionHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
             "org.openedx.frontend.learning.course_outline_sidebar.v1",
             """
             {
@@ -1044,6 +1063,36 @@ for _mfe in [
         ),
         (
             _mfe,
+            "org.openedx.frontend.catalog.catalog_card.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_catalog_course_card_accent',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCatalogCourseCardAccent,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.catalog.catalog_filters.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_catalog_filters_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCatalogFiltersHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
             "org.openedx.frontend.account.account_settings_tab.v1",
             """
             {
@@ -1053,6 +1102,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaAccountSettingsTabShell,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.account.account_settings_field.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_account_settings_field_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAccountSettingsFieldHint,
                 },
             },
             """,
@@ -1420,6 +1484,16 @@ const MerekaCourseCardAccent = ({ courseId }) => {
   );
 };
 
+// Learner-dashboard course-card action slot helper.
+// Wired into org.openedx.frontend.learner_dashboard.course_card_action.v1.
+const MerekaCourseCardActionHint = () => {
+  return (
+    <div className="mereka-course-card-action-hint">
+      <span>Keep your weekly learning streak active.</span>
+    </div>
+  );
+};
+
 // Learning course-outline sidebar branding card inserted into course-outline-sidebar slot.
 // Wired into org.openedx.frontend.learning.course_outline_sidebar.v1.
 const MerekaCourseOutlineSidebar = () => {
@@ -1480,6 +1554,26 @@ const MerekaCatalogHeader = () => {
   );
 };
 
+// Catalog/discovery course-card accent slot.
+// Wired into org.openedx.frontend.catalog.catalog_card.v1.
+const MerekaCatalogCourseCardAccent = () => {
+  return (
+    <div className="mereka-catalog-course-card-accent">
+      <span className="mereka-badge">Mereka Pick</span>
+    </div>
+  );
+};
+
+// Catalog/discovery filter helper slot.
+// Wired into org.openedx.frontend.catalog.catalog_filters.v1.
+const MerekaCatalogFiltersHint = () => {
+  return (
+    <div className="mereka-catalog-filters-hint">
+      <span>Filter by skill path, pace, and difficulty to match your goals.</span>
+    </div>
+  );
+};
+
 // Learning progress certificate status branding and context card.
 // Wired into org.openedx.frontend.learning.progress_certificate_status.v1.
 const MerekaProgressCertificateStatus = ({ courseId }) => {
@@ -1507,6 +1601,16 @@ const MerekaAccountSettingsTabShell = ({ title }) => {
       <span className="mereka-badge mb-2">Account</span>
       <h2 className="h5 mb-0">{safeTitle}</h2>
     </div>
+  );
+};
+
+// Account settings field helper slot.
+// Wired into org.openedx.frontend.account.account_settings_field.v1.
+const MerekaAccountSettingsFieldHint = () => {
+  return (
+    <p className="mereka-account-settings-field-hint mb-2">
+      Enterprise-managed profile fields may be locked by your organization.
+    </p>
   );
 };
 

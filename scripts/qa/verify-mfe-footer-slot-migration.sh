@@ -113,6 +113,7 @@ else
     "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
     "org.openedx.frontend.learner_dashboard.dashboard_header.v1"
     "org.openedx.frontend.learner_dashboard.course_card.v1"
+    "org.openedx.frontend.learner_dashboard.course_card_action.v1"
     "org.openedx.frontend.layout.header_desktop_main_menu.v1"
     "org.openedx.frontend.layout.header_mobile_main_menu.v1"
     "org.openedx.frontend.learning.course_outline_sidebar.v1"
@@ -120,7 +121,10 @@ else
     "org.openedx.frontend.learning.course_header.v1"
     "org.openedx.frontend.learning.course_tabs.v1"
     "org.openedx.frontend.catalog.catalog_header.v1"
+    "org.openedx.frontend.catalog.catalog_card.v1"
+    "org.openedx.frontend.catalog.catalog_filters.v1"
     "org.openedx.frontend.account.account_settings_tab.v1"
+    "org.openedx.frontend.account.account_settings_field.v1"
     "org.openedx.frontend.account.additional_profile_fields.v1"
     "org.openedx.frontend.profile.additional_profile_fields.v1"
   )
@@ -320,8 +324,9 @@ PY
     if grep -q 'org.openedx.frontend.learner_dashboard.widget_sidebar.v1' "$PLUGIN_FILE" && \
        grep -q 'org.openedx.frontend.learner_dashboard.no_courses_view.v1' "$PLUGIN_FILE" && \
        grep -q 'org.openedx.frontend.learner_dashboard.dashboard_header.v1' "$PLUGIN_FILE" && \
-       grep -q 'org.openedx.frontend.learner_dashboard.course_card.v1' "$PLUGIN_FILE"; then
-      pass "AC-FRONT-065: Learner dashboard slots are registered (sidebar + no-courses + header + course-card)"
+       grep -q 'org.openedx.frontend.learner_dashboard.course_card.v1' "$PLUGIN_FILE" && \
+       grep -q 'org.openedx.frontend.learner_dashboard.course_card_action.v1' "$PLUGIN_FILE"; then
+      pass "AC-FRONT-065: Learner dashboard slots are registered (sidebar + no-courses + header + course-card + course-card-action)"
     else
       fail "AC-FRONT-065: Learner dashboard slot coverage incomplete in plugin"
     fi
