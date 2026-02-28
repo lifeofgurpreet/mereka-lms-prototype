@@ -7,6 +7,7 @@ apply_brand_package_patch() {
   local SOURCE_DIR="$REPO_ROOT/infrastructure/tutor/brand-mereka"
   local THEME_SOURCE_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
   local THEME_TARGET_DIR="$MFE_INDIGO_DIR/theme"
+  local BUILD_TOKENS_SCRIPT="$REPO_ROOT/scripts/branding/build-tokens.sh"
 
   if [ ! -d "$SOURCE_DIR" ]; then
     echo "Skipping brand-mereka sync: source not found at $SOURCE_DIR" >&2
@@ -22,7 +23,11 @@ apply_brand_package_patch() {
   mkdir -p "$MFE_INDIGO_DIR"
   cp -R "$SOURCE_DIR"/. "$MFE_INDIGO_DIR/brand-mereka"
 
-  # Keep the compiled runtime theme CSS in sync with MFE Docker context.
+  # Keep compiled runtime theme CSS in sync with MFE Docker context.
+  if [ ! -d "$THEME_SOURCE_DIR" ] && [ -x "$BUILD_TOKENS_SCRIPT" ]; then
+    "$BUILD_TOKENS_SCRIPT"
+  fi
+
   rm -rf "$THEME_TARGET_DIR"
   if [ -d "$THEME_SOURCE_DIR" ]; then
     mkdir -p "$THEME_TARGET_DIR"
@@ -30,5 +35,5 @@ apply_brand_package_patch() {
     return
   fi
 
-  echo "Skipping theme sync: source not found at $THEME_SOURCE_DIR" >&2
+  echo "Skipping theme sync: source not found at $THEME_SOURCE_DIR (build script: $BUILD_TOKENS_SCRIPT)" >&2
 }
