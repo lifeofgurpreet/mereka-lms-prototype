@@ -41,6 +41,7 @@ LMS_ENV_YML="${REPO_ROOT}/deploy/k8s/base/apps/openedx/config/lms.env.yml"
 CMS_ENV_YML="${REPO_ROOT}/deploy/k8s/base/apps/openedx/config/cms.env.yml"
 RKE2_LMS_ENV_YML="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/config/lms.env.yml"
 RKE2_CMS_ENV_YML="${REPO_ROOT}/deploy/k8s/overlays/rke2-nonprod/config/cms.env.yml"
+CI_WORKFLOW="${REPO_ROOT}/.github/workflows/ci.yml"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 
 PASS=0
@@ -143,6 +144,15 @@ else
     fail "Base kustomization pins openedx to unpinned tag: $MEREKA_TAG"
   else
     skip "Could not read openedx newTag from base kustomization"
+  fi
+
+  BASE_APP_VERSION=$(grep -A2 "commonAnnotations:" "$KUSTOMIZATION_BASE" | grep "app.kubernetes.io/version:" | awk '{print $2}' | head -1 || true)
+  if [[ "$BASE_APP_VERSION" == "21.0.0" ]]; then
+    pass "Base kustomization app.kubernetes.io/version is 21.0.0"
+  elif [[ -n "$BASE_APP_VERSION" ]]; then
+    fail "Base kustomization app.kubernetes.io/version is stale: $BASE_APP_VERSION (expected 21.0.0)"
+  else
+    skip "Base kustomization app.kubernetes.io/version annotation not found"
   fi
 fi
 
@@ -456,6 +466,22 @@ if [[ -f "$TOKENS_CSS" && -f "$TOKENS_SCSS" ]]; then
   else
     fail "_tokens.scss: fewer than 5 color token variables found ($TOKEN_COUNT) — may be out of sync"
   fi
+fi
+
+if [[ -f "$CI_WORKFLOW" ]]; then
+  if grep -q "design-token-validation" "$CI_WORKFLOW"; then
+    pass "CI workflow defines design-token-validation job"
+  else
+    fail "CI workflow missing design-token-validation job"
+  fi
+
+  if grep -q "generate-tokens-from-canonical.sh --check" "$CI_WORKFLOW"; then
+    pass "CI workflow enforces generate-tokens-from-canonical.sh --check"
+  else
+    fail "CI workflow missing generate-tokens-from-canonical.sh --check gate"
+  fi
+else
+  skip "CI workflow file not found: $CI_WORKFLOW"
 fi
 
 echo ""

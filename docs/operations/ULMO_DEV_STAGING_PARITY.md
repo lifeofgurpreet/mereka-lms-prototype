@@ -122,9 +122,8 @@ The `infrastructure/tutor/` directory manages Tutor configuration locally. Key p
 
 ### `config.example.yml` observations
 
-The example config references `OPENEDX_COMMON_VERSION: open-release/redwood.master` —
-this is a stale placeholder from pre-Ulmo. A real rke2-nonprod deploy must use the
-Ulmo-era value or the k8s overlay image pins take precedence.
+The example config now references `OPENEDX_COMMON_VERSION: open-release/ulmo.1`, which
+matches the Ulmo baseline used by parity verifiers.
 
 The MFE Dockerfile at `infrastructure/tutor/mfe-build/Dockerfile` is the canonical
 Ulmo MFE build definition. It uses `release/ulmo.1` for all 11+ MFE app source refs
@@ -192,68 +191,58 @@ without NREUM removal or `env.config.js` wiring. These will crash or serve broke
 
 ---
 
-### Gap 4 (MEDIUM): `app.kubernetes.io/version` annotation is stale
+### Gap 4 (RESOLVED 2026-02-28): `app.kubernetes.io/version` annotation parity
 
-**Problem**: `deploy/k8s/base/kustomization.yaml` has:
-```
-commonAnnotations:
-  app.kubernetes.io/version: 18.2.2
-```
-The platform is Tutor v21 / Ulmo. The annotation should reflect the current version.
+**Problem (historical)**: `deploy/k8s/base/kustomization.yaml` had stale
+`app.kubernetes.io/version` metadata.
 
 **Effect**: Observability dashboards and ArgoCD may show incorrect version metadata.
 Not a runtime breakage but misleading.
 
-**Fix needed**: Update to `21.0.0`.
+**Fix implemented**: base annotation is `app.kubernetes.io/version: 21.0.0`, and
+`scripts/qa/verify-ulmo-parity.sh` now enforces this value.
 
 ---
 
-### Gap 5 (MEDIUM): Design Tokens pipeline must be active before rke2-nonprod runs Ulmo
+### Gap 5 (RESOLVED 2026-02-28): Design Tokens CI drift gate
 
 **Background**: `assets/branding/tokens.css` is the canonical design token source.
 `infrastructure/tutor/themes/mereka/scss/_tokens.scss` is generated from it via
 `generate-tokens-from-canonical.sh`. Both files are present and current.
 
-**Problem**: The pipeline from `tokens.css` → `_tokens.scss` → SCSS compile → theme
-CSS → deployed theme asset is manual (no CI job enforces the sync). On rke2-nonprod,
-if `_tokens.scss` drifts from `tokens.css`, the Mereka branding will be visually
-broken.
+**Problem (historical)**: The token pipeline had manual steps and needed CI
+enforcement for drift.
 
 **Effect**: Color / typography drift in LMS and Studio on rke2-nonprod.
 
-**Fix needed**: The CI pipeline should verify `_tokens.scss` is in sync with
-`tokens.css` before deploying to rke2-nonprod. This is part of T107.
+**Fix implemented**: CI includes `design-token-validation` and enforces
+`generate-tokens-from-canonical.sh --check`; `verify-ulmo-parity.sh` now checks this
+contract.
 
 ---
 
-### Gap 6 (MEDIUM): No explicit image pull prerequisites enforcement
+### Gap 6 (RESOLVED 2026-02-28): Image pull prerequisite enforcement
 
 **Problem**: The rke2-nonprod `kustomization.yaml` documents three manual prerequisites:
 1. `infisical-secret-store` ClusterSecretStore
 2. `artifact-registry-key` Secret
 3. Default ServiceAccount `imagePullSecrets` or per-Deployment override
 
-None of these are enforced by any automated check. If the `artifact-registry-key`
-secret is absent, all pods will fail to pull images from GCP Artifact Registry with
-`ImagePullBackOff`.
+If `artifact-registry-key` is absent, all pods fail to pull images from GCP Artifact
+Registry with `ImagePullBackOff`.
 
-**Fix needed**: `scripts/qa/verify-rke2-dev-readiness.sh` covers the ClusterSecretStore
-check. Add a check for `artifact-registry-key` presence to that script, or add it
-to the new `verify-ulmo-parity.sh`.
+**Fix implemented**: `scripts/qa/verify-ulmo-parity.sh --online` verifies both
+`infisical-secret-store` and `artifact-registry-key` on the target context/namespace.
 
 ---
 
-### Gap 7 (LOW): `config.example.yml` has stale `OPENEDX_COMMON_VERSION`
+### Gap 7 (RESOLVED 2026-02-28): `config.example.yml` Ulmo baseline
 
-**Problem**: `infrastructure/tutor/config.example.yml` has:
-```
-OPENEDX_COMMON_VERSION: open-release/redwood.master
-```
-This is the pre-Ulmo value and will mislead operators configuring a new local
-environment.
+**Problem (historical)**: `infrastructure/tutor/config.example.yml` previously used a
+pre-Ulmo value that could mislead operators.
 
-**Fix needed**: Update to `open-release/ulmo.1` (or note that the k8s overlay image
-pins take precedence over this value in production/nonprod).
+**Fix implemented**: `OPENEDX_COMMON_VERSION` is set to `open-release/ulmo.1`, and
+`verify-ulmo-parity.sh` enforces it.
 
 ---
 
@@ -290,15 +279,17 @@ Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
 - [x] **Gap 3**: Added `enterprise-admin-portal` and `enterprise-learner-portal`
   image pins in rke2-nonprod overlay matching production
   (`nreum-clean-202602200416`)
-- [ ] **Gap 4**: Update `commonAnnotations.app.kubernetes.io/version` to `21.0.0`
-- [ ] **Gap 5**: Add CI step to verify `_tokens.scss` is in sync with `tokens.css`
-  (T107 prerequisite)
-- [ ] **Gap 7**: Update `config.example.yml` `OPENEDX_COMMON_VERSION` to
-  `open-release/ulmo.1`
+- [x] **Gap 4**: `commonAnnotations.app.kubernetes.io/version` set to `21.0.0`
+  and enforced by `verify-ulmo-parity.sh`
+- [x] **Gap 5**: CI drift gate (`design-token-validation` +
+  `generate-tokens-from-canonical.sh --check`) is active and enforced by
+  `verify-ulmo-parity.sh`
+- [x] **Gap 7**: `config.example.yml` `OPENEDX_COMMON_VERSION` updated to
+  `open-release/ulmo.1` and enforced by `verify-ulmo-parity.sh`
 
 ### Verification
 
-- [ ] Run `scripts/qa/verify-ulmo-parity.sh` — all checks PASS or SKIP
+- [x] Run `scripts/qa/verify-ulmo-parity.sh` — all checks PASS or SKIP (offline)
 - [ ] Run `scripts/qa/verify-rke2-dev-readiness.sh --offline` — PASS
 - [ ] Smoke test: `https://academyv2.mereka.dev/` returns HTTP 200 with Mereka theme
 - [ ] Smoke test: `https://apps.academyv2.mereka.dev/authn/login` returns HTTP 200
