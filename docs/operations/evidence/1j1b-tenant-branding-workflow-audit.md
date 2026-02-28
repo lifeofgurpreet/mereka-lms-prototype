@@ -19,7 +19,7 @@ The canonical tenant branding onboarding documentation already exists across mul
 | `docs/branding/TENANT_BRANDING_CONTRACT.md` | Required inputs, brand pack schema, fallback rules |
 | `docs/branding/TENANT_BRAND_PACK_SCHEMA.md` | JSON schema for tenant brand pack (logo, colors, fonts, domains) |
 | `docs/branding/BRANDING_OPERATING_MODEL.md` | Canonical branding workflow, change types, approvals |
-| `docs/runbooks/tenant-provisioning-runbook.sh` | Operator runbook for K8s provisioning |
+| `docs/runbooks/tenant-provisioning-runbook.md` | Operator runbook for K8s provisioning |
 | `scripts/tenants/provision-tenant.sh` | Automated provisioning (idempotent) |
 
 ### Required Inputs (from TENANT_BRANDING_CONTRACT.md)
