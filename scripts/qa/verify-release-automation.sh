@@ -219,7 +219,13 @@ if [[ -f "${RELEASE_SCRIPT}" ]]; then
     fail "release-openedx-gitops.sh missing CI production digest safety gate"
   fi
 
-  for flag in '--openedx-digest' '--mfe-digest' '--require-digests'; do
+  for flag in \
+    '--openedx-digest' \
+    '--mfe-digest' \
+    '--require-digests' \
+    '--purge-frontend-cache' \
+    '--frontend-cache-env' \
+    '--purge-frontend-cache-everything'; do
     if grep -q -- "${flag}" "${RELEASE_SCRIPT}" 2>/dev/null; then
       pass "release-openedx-gitops.sh supports ${flag}"
     else

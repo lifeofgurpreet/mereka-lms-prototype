@@ -118,6 +118,12 @@ STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 # Canonical one-command image rollout (recommended)
 ./scripts/infra/release-openedx-gitops.sh --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push --verify-runtime
 
+# Production rollout with post-verify frontend cache purge (recommended for branding/theme releases)
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> \
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
+
 # Current default operations model is local/dev + prod (no dedicated staging cluster).
 # Use production target for live rollout and local/dev for pre-prod testing.
 

@@ -10,6 +10,8 @@
 #   ./scripts/infra/canonical-release.sh --openedx-tag TAG --mfe-tag TAG [options]
 #   ./scripts/infra/canonical-release.sh --check-only   # Just validate environment
 #   ./scripts/infra/canonical-release.sh --dry-run       # Full dry-run with cache check
+#   ./scripts/infra/canonical-release.sh --openedx-tag TAG --mfe-tag TAG \
+#     --apply --commit --push --verify-runtime --purge-frontend-cache
 
 set -euo pipefail
 
@@ -36,12 +38,35 @@ CHECK_ONLY=0
 DRY_RUN=0
 PASSTHROUGH_ARGS=()
 
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/infra/canonical-release.sh [wrapper-options] --openedx-tag TAG --mfe-tag TAG [release-options]
+
+Wrapper options:
+  --check-only    Validate canonical path/branch/worktree and exit
+  --dry-run       Print dry-run summary + delegate dry-run to release orchestrator
+  -h, --help      Show this help
+
+Release options:
+  Forwarded as-is to scripts/infra/release-openedx-gitops.sh
+  Common examples:
+    --target-env production|staging
+    --apply --commit --push --verify-runtime
+    --purge-frontend-cache
+    --frontend-cache-env auto|prod|dev
+    --purge-frontend-cache-everything
+    --openedx-digest sha256:... --mfe-digest sha256:... --require-digests
+EOF
+}
+
 # Parse our flags, pass the rest through
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --check-only) CHECK_ONLY=1; shift ;;
     --dry-run)    DRY_RUN=1; shift ;;
+    -h|--help)    usage; exit 0 ;;
     *)            ARGS+=("$1"); shift ;;
   esac
 done
