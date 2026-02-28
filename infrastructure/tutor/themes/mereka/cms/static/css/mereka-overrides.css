@@ -94,6 +94,7 @@
   --pgn-color-red: var(--mereka-color-danger);
   --pgn-typography-font-family-sans-serif: var(--mereka-font-body);
   --pgn-typography-font-family-base: var(--mereka-font-body);
+  --pgn-typography-headings-font-family: var(--mereka-font-heading);
   --pgn-typography-font-size-sm: 0.875rem;
   --pgn-typography-font-size-base: 1rem;
   --pgn-typography-font-size-lg: 1.125rem;

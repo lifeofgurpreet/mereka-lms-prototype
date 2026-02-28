@@ -247,10 +247,10 @@ if [[ -f "$TOKENS_FILE" ]]; then
     fi
   done
 
-  if grep -qF -- '--pgn-heading-font-family' "$TOKENS_FILE"; then
-    pass "Token bridge defines --pgn-heading-font-family"
+  if grep -qF -- '--pgn-typography-headings-font-family' "$TOKENS_FILE"; then
+    pass "Token bridge defines --pgn-typography-headings-font-family"
   else
-    warn "Token bridge does not define --pgn-heading-font-family; Paragon defaults will be used"
+    fail "Token bridge missing --pgn-typography-headings-font-family"
   fi
 
   if grep -qF -- '--pgn-form-control-border-color' "$TOKENS_FILE"; then
