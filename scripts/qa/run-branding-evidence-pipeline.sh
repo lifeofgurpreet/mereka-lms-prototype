@@ -24,6 +24,7 @@ RUN_EMAIL_TEMPLATE_BRANDING="${RUN_EMAIL_TEMPLATE_BRANDING:-1}"
 RUN_PARAGON_THEME_BUDGET="${RUN_PARAGON_THEME_BUDGET:-1}"
 RUN_SLOT_COVERAGE="${RUN_SLOT_COVERAGE:-1}"
 RUN_SELECTOR_HARDENING="${RUN_SELECTOR_HARDENING:-1}"
+RUN_RUNTIME_THEME_CONTRACT="${RUN_RUNTIME_THEME_CONTRACT:-1}"
 RUN_NPM_START_SMOKE="${RUN_NPM_START_SMOKE:-0}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
@@ -31,6 +32,8 @@ CROSS_BROWSER="${CROSS_BROWSER:-0}"
 LEARNING_PATH="${LEARNING_PATH:-/learning}"
 REQUIRE_RUNTIME_THEME="${REQUIRE_RUNTIME_THEME:-0}"
 STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
+RUNTIME_THEME_URL="${RUNTIME_THEME_URL:-}"
+RUNTIME_THEME_TIMEOUT_SECONDS="${RUNTIME_THEME_TIMEOUT_SECONDS:-300}"
 NPM_START_BASE_URL="${NPM_START_BASE_URL:-}"
 NPM_START_PROJECT="${NPM_START_PROJECT:-chromium}"
 NPM_START_HEADED="${NPM_START_HEADED:-0}"
@@ -63,6 +66,11 @@ Environment toggles:
   RUN_SLOT_COVERAGE=0|1     Enable/disable FPF slot coverage truth gate (default: 1)
   RUN_SELECTOR_HARDENING=0|1
                             Enable/disable MFE selector hardening gate (default: 1)
+  RUN_RUNTIME_THEME_CONTRACT=0|1
+                            Enable/disable runtime theme contract gate (default: 1)
+  RUNTIME_THEME_URL=<url>   Runtime apps origin for theme contract checks (default: env-derived)
+  RUNTIME_THEME_TIMEOUT_SECONDS=<seconds>
+                            Timeout for runtime theme contract gate (default: 300)
   RUN_NPM_START_SMOKE=0|1   Enable/disable npm-start MFE smoke gate (default: 0)
   NPM_START_BASE_URL=<url>  Base URL for npm-start smoke (default: env-derived prod/dev host)
   NPM_START_PROJECT=<name>  Playwright project for npm-start smoke (default: chromium)
@@ -141,6 +149,7 @@ echo "Email template branding gate enabled: $RUN_EMAIL_TEMPLATE_BRANDING"
 echo "Paragon theme budget gate enabled: $RUN_PARAGON_THEME_BUDGET"
 echo "Slot coverage gate enabled: $RUN_SLOT_COVERAGE"
 echo "Selector hardening gate enabled: $RUN_SELECTOR_HARDENING"
+echo "Runtime theme contract gate enabled: $RUN_RUNTIME_THEME_CONTRACT"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
@@ -252,7 +261,27 @@ else
   skip_gate "cross-browser-branding-smoke" "RUN_CROSS_BROWSER=0"
 fi
 
-# --- Gate 9: npm-start MFE smoke (optional) ---
+# --- Gate 9: Runtime Theme Contract ---
+if [[ "$RUN_RUNTIME_THEME_CONTRACT" == "1" ]]; then
+  runtime_theme_args=()
+  if [[ -n "$RUNTIME_THEME_URL" ]]; then
+    runtime_theme_args+=(--runtime-url "$RUNTIME_THEME_URL")
+  elif [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
+    case "$ENV" in
+      prod) runtime_theme_args+=(--runtime-url "https://apps.academyv2.mereka.io") ;;
+      dev) runtime_theme_args+=(--runtime-url "https://apps.academyv2.mereka.dev") ;;
+    esac
+  fi
+  if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
+    runtime_theme_args+=(--require-runtime)
+  fi
+  GATE_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" run_gate "runtime-theme-contract" \
+    ./scripts/qa/verify-paragon-runtime.sh "${runtime_theme_args[@]}"
+else
+  skip_gate "runtime-theme-contract" "RUN_RUNTIME_THEME_CONTRACT=0"
+fi
+
+# --- Gate 10: npm-start MFE smoke (optional) ---
 if [[ "$RUN_NPM_START_SMOKE" == "1" ]]; then
   npm_start_args=(--project "$NPM_START_PROJECT" --learning-path "$LEARNING_PATH")
   if [[ -n "$NPM_START_BASE_URL" ]]; then
@@ -275,7 +304,7 @@ else
   skip_gate "npm-start-mfe-smoke" "RUN_NPM_START_SMOKE=0"
 fi
 
-# --- Gate 10: Accessibility / Contrast / Focus Lane ---
+# --- Gate 11: Accessibility / Contrast / Focus Lane ---
 if [[ "$RUN_A11Y" == "1" ]]; then
   if [[ ! -x "$A11Y_SCRIPT" ]]; then
     echo "ERROR: A11Y script is not executable or missing: $A11Y_SCRIPT" >&2
@@ -292,7 +321,7 @@ else
   skip_gate "a11y-tenant-branding" "RUN_A11Y=0"
 fi
 
-# --- Gate 11: Frontend Performance Spot-Check ---
+# --- Gate 12: Frontend Performance Spot-Check ---
 if [[ "$RUN_PERFORMANCE" == "1" ]]; then
   performance_args=(--env "$ENV")
   if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
@@ -304,7 +333,7 @@ else
   skip_gate "frontend-performance-spotcheck" "RUN_PERFORMANCE=0"
 fi
 
-# --- Gate 12: Paragon Theme Budget Contract ---
+# --- Gate 13: Paragon Theme Budget Contract ---
 if [[ "$RUN_PARAGON_THEME_BUDGET" == "1" ]]; then
   run_gate "paragon-theme-budget" \
     ./scripts/qa/verify-paragon-token-coverage.sh
@@ -312,7 +341,7 @@ else
   skip_gate "paragon-theme-budget" "RUN_PARAGON_THEME_BUDGET=0"
 fi
 
-# --- Gate 13: Certificate + Email Branding Contract ---
+# --- Gate 14: Certificate + Email Branding Contract ---
 if [[ "$RUN_CERTIFICATE_BRANDING" == "1" ]]; then
   run_gate "certificate-branding" \
     ./scripts/qa/verify-certificate-branding.sh
@@ -320,7 +349,7 @@ else
   skip_gate "certificate-branding" "RUN_CERTIFICATE_BRANDING=0"
 fi
 
-# --- Gate 14: Email Template Branding Contract ---
+# --- Gate 15: Email Template Branding Contract ---
 if [[ "$RUN_EMAIL_TEMPLATE_BRANDING" == "1" ]]; then
   run_gate "email-template-branding" \
     ./scripts/qa/verify-email-template-multilang.sh
@@ -328,7 +357,7 @@ else
   skip_gate "email-template-branding" "RUN_EMAIL_TEMPLATE_BRANDING=0"
 fi
 
-# --- Gate 15: Public Screenshot Capture (optional operator evidence) ---
+# --- Gate 16: Public Screenshot Capture (optional operator evidence) ---
 if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
   run_gate "capture-branding-screenshots" \
     ./scripts/qa/capture-branding-screenshots.sh "$ENV"
@@ -368,6 +397,9 @@ $(printf '%s\n' "${gate_results[@]}")
 - Email template branding gate enabled: ${RUN_EMAIL_TEMPLATE_BRANDING}
 - Slot coverage gate enabled: ${RUN_SLOT_COVERAGE}
 - Selector hardening gate enabled: ${RUN_SELECTOR_HARDENING}
+- Runtime theme contract gate enabled: ${RUN_RUNTIME_THEME_CONTRACT}
+- Runtime theme contract URL: ${RUNTIME_THEME_URL:-"(auto by env)"}
+- Runtime theme contract timeout: ${RUNTIME_THEME_TIMEOUT_SECONDS}s
 - npm-start smoke gate enabled: ${RUN_NPM_START_SMOKE}
 - npm-start smoke base URL: ${NPM_START_BASE_URL:-"(auto by env)"}
 - npm-start smoke project: ${NPM_START_PROJECT}

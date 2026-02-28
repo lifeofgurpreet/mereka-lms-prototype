@@ -46,6 +46,11 @@ on:
         required: true
         default: true
         type: boolean
+      run_runtime_theme_contract_gate:
+        description: "Run runtime theme contract gate (verify-paragon-runtime)"
+        required: true
+        default: true
+        type: boolean
       run_npm_start_smoke_gate:
         description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
         required: true
@@ -65,6 +70,16 @@ on:
         description: "Playwright project for npm-start smoke"
         required: false
         default: "chromium"
+        type: string
+      runtime_theme_url:
+        description: "Override runtime theme origin (empty = auto by env)"
+        required: false
+        default: ""
+        type: string
+      runtime_theme_timeout_seconds:
+        description: "Timeout seconds for runtime theme contract gate"
+        required: false
+        default: "300"
         type: string
       learning_path:
         description: "Optional learning route path for smoke checks"
@@ -98,11 +113,14 @@ jobs:
           RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
           RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
           RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
+          RUN_RUNTIME_THEME_CONTRACT="${{ inputs.run_runtime_theme_contract_gate || 'true' }}"
           RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
           RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
           STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
           NPM_START_BASE_URL="${{ inputs.npm_start_base_url || '' }}"
           NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
+          RUNTIME_THEME_URL="${{ inputs.runtime_theme_url || '' }}"
+          RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
 
           args=(--env "$TARGET_ENV" --frontend-only)
@@ -121,11 +139,14 @@ jobs:
           RUN_PARAGON_THEME_BUDGET=$([[ "$RUN_PARAGON_BUDGET" == "true" ]] && echo 1 || echo 0) \
           RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
           RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
+          RUN_RUNTIME_THEME_CONTRACT=$([[ "$RUN_RUNTIME_THEME_CONTRACT" == "true" ]] && echo 1 || echo 0) \
           RUN_NPM_START_SMOKE=$([[ "$RUN_NPM_START_SMOKE" == "true" ]] && echo 1 || echo 0) \
           STRICT_WEBKIT="$STRICT_WEBKIT" \
           RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
           NPM_START_BASE_URL="$NPM_START_BASE_URL" \
           NPM_START_PROJECT="$NPM_START_PROJECT" \
+          RUNTIME_THEME_URL="$RUNTIME_THEME_URL" \
+          RUNTIME_THEME_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" \
           LEARNING_PATH="$LEARNING_PATH" \
           ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
 
@@ -146,10 +167,13 @@ jobs:
             echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
             echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
             echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
+            echo "- Runtime theme contract gate: \`${{ inputs.run_runtime_theme_contract_gate || 'true' }}\`"
             echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
             echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
             echo "- npm-start base URL: \`${{ inputs.npm_start_base_url || '(auto by env)' }}\`"
             echo "- npm-start project: \`${{ inputs.npm_start_project || 'chromium' }}\`"
+            echo "- Runtime theme URL: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
+            echo "- Runtime theme timeout: \`${{ inputs.runtime_theme_timeout_seconds || '300' }}\`"
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
             if [[ -n "$LATEST" ]]; then
               echo "- Evidence directory: \`$LATEST\`"
