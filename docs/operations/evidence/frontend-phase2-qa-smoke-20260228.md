@@ -139,14 +139,15 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 ./scripts/qa/verify-mfe-plugin-slots.sh
 ./scripts/qa/verify-selector-to-slot-migration.sh
 ./scripts/qa/verify-mfe-footer-slot-migration.sh
+./scripts/qa/verify-mfe-slot-source-alignment.sh
 ./scripts/qa/verify-mfe-selector-hardening.sh
 ./scripts/qa/verify-css-scoping.sh
 ```
 
 ### Additional Results
 
-- `verify-mfe-plugin-slots.sh`: `PASS=50`, `WARN=0`, `FAIL=0`
-  - Plugin now declares 23 namespaced slot IDs.
+- `verify-mfe-plugin-slots.sh`: `PASS=48`, `WARN=0`, `FAIL=0`
+  - Plugin now declares 22 namespaced slot IDs.
   - Newly wired confirmed Ulmo slot IDs:
     - `org.openedx.frontend.authoring.course_unit_sidebar.v1`
     - `org.openedx.frontend.layout.header_learning.v1`
@@ -157,7 +158,11 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
     - `org.openedx.frontend.learning.course_tabs.v1`
     - `org.openedx.frontend.account.account_settings_tab.v1`
     - `org.openedx.frontend.account.account_settings_field.v1`
-- `verify-selector-to-slot-migration.sh`: `PASS=32`, `FAIL=0`
-- `verify-mfe-footer-slot-migration.sh`: `PASS=42`, `FAIL=0`
+    - `org.openedx.frontend.authoring.course_outline_header.v1`
+- `verify-selector-to-slot-migration.sh`: `PASS=31`, `FAIL=0`
+- `verify-mfe-footer-slot-migration.sh`: `PASS=41`, `FAIL=0`
+- `verify-mfe-slot-source-alignment.sh`: `PASS=10`, `WARN=13`, `FAIL=0`
+  - All slots tied to locally available MFE source checkouts (`authn`, `account`, `profile`, `learning`, `authoring`) are source-confirmed.
+  - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, and non-learning `layout.*` surfaces).
 - `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
 - `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`

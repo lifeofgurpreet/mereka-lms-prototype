@@ -6,7 +6,7 @@
 > **Last audited**: 2026-02-28
 > **Source**: `@openedx/frontend-plugin-framework` v1.x, MFE source code scan
 >
-> **Validation note (2026-02-28)**: Active slot wiring in `mereka_lms.py` is now constrained to slot IDs confirmed in local Ulmo MFE source checkouts under `tutor_env/dev/frontend-app-*`. Legacy IDs retired from wiring: `learning.course_header.v1`, `learning.course_tabs.v1`, `account.account_settings_tab.v1`, `account.account_settings_field.v1`.
+> **Validation note (2026-02-28)**: Active slot wiring in `mereka_lms.py` is now constrained to slot IDs confirmed in local Ulmo MFE source checkouts under `tutor_env/dev/frontend-app-*`. Legacy IDs retired from wiring: `learning.course_header.v1`, `learning.course_tabs.v1`, `account.account_settings_tab.v1`, `account.account_settings_field.v1`, `authoring.course_outline_header.v1`.
 
 ---
 
@@ -203,7 +203,7 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 ## Slots We Currently Use
 
-**Current wiring state (2026-02-28): 23 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
+**Current wiring state (2026-02-28): 22 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
 
 | Slot Group | Slots |
 |------------|-------|
@@ -213,7 +213,7 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 | Learning | `learning.course_outline_sidebar.v1`, `learning.progress_certificate_status.v1`, `layout.header_learning.v1`, `learning.course_tab_links.v1` |
 | Catalog | `catalog.catalog_header.v1`, `catalog.catalog_card.v1`, `catalog.catalog_filters.v1` |
 | Account/Profile | `account.id_verification_page.v1`, `account.additional_profile_fields.v1`, `profile.additional_profile_fields.v1` |
-| Authoring | `authoring.course_outline_header.v1`, `authoring.course_unit_sidebar.v1` |
+| Authoring | `authoring.course_unit_sidebar.v1` |
 
 ---
 

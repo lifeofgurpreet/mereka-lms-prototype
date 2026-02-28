@@ -107,7 +107,6 @@ else
     "org.openedx.frontend.layout.footer.v1"
     "org.openedx.frontend.layout.header_logo.v1"
     "org.openedx.frontend.layout.studio_footer.v1"
-    "org.openedx.frontend.authoring.course_outline_header.v1"
     "org.openedx.frontend.authoring.course_unit_sidebar.v1"
     "org.openedx.frontend.authn.login_component.v1"
     "org.openedx.frontend.learner_dashboard.widget_sidebar.v1"

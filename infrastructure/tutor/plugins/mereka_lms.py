@@ -801,7 +801,6 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #     footer.v1                       |
 #   org.openedx.frontend.layout.header_logo.v1 | Default header logo (MFE header bar)
 #   org.openedx.frontend.layout.studio_footer.v1 | Default Studio footer (studio MFE)
-#   org.openedx.frontend.authoring.course_outline_header.v1 | Studio course-outline branded header
 #   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
@@ -877,21 +876,6 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaStudioFooter,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.authoring.course_outline_header.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_authoring_course_outline_header',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaAuthoringCourseOutlineHeader,
                 },
             },
             """,
@@ -1397,23 +1381,6 @@ const MerekaStudioFooter = () => {
         </p>
       </div>
     </footer>
-  );
-};
-
-// Studio authoring course-outline header slot.
-// Wired into org.openedx.frontend.authoring.course_outline_header.v1.
-const MerekaAuthoringCourseOutlineHeader = () => {
-  const config = getConfig();
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
-
-  return (
-    <div className="mereka-authoring-course-outline-header mb-3 p-3 rounded">
-      <p className="mereka-badge mb-2">Studio</p>
-      <h2 className="h5 mb-1">Design with {variant.brand}</h2>
-      <p className="mb-0 small text-muted">
-        Keep structure, assessments, and outcomes aligned with your brand system.
-      </p>
-    </div>
   );
 };
 
