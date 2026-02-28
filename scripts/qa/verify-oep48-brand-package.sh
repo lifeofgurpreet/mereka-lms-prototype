@@ -10,13 +10,13 @@
 # - Token pipeline files present and CI-enforced
 # - Footer/header templates are white-label (no "Powered by Open edX")
 # - Documentation file present
-# - Gap areas flagged as SKIP (not yet implemented, tracked in gap analysis)
+# - Remaining gap areas surfaced with explicit PASS/SKIP/FAIL status
 #
 # Usage:
 #   scripts/qa/verify-oep48-brand-package.sh
 #
 # Exits 1 if any FAIL checks are found.
-# SKIP checks represent known OEP-48 gaps documented in OEP48_BRAND_PACKAGE.md.
+# Remaining SKIP checks represent known OEP-48 gaps documented in OEP48_BRAND_PACKAGE.md.
 #
 # Related: docs/architecture/OEP48_BRAND_PACKAGE.md
 # Tracker: T110
@@ -614,17 +614,40 @@ done
 echo ""
 
 # -----------------------------------------------------------------------
-# Section 10: OEP-48 gap items (known, documented — SKIP not FAIL)
+# Section 10: OEP-48 gap status (closed vs remaining)
 # -----------------------------------------------------------------------
-echo "[SECTION 10] OEP-48 gap items (known gaps — SKIP)"
-echo "  These items are documented in docs/architecture/OEP48_BRAND_PACKAGE.md"
-echo "  and are not yet implemented. They are tracked as future work."
+echo "[SECTION 10] OEP-48 gap status (closed vs remaining)"
 
-skip "GAP-1: No standalone npm-publishable brand package (package.json missing in assets/branding/)"
-skip "GAP-2: No logo.js / ESM exports for @edx/brand React component imports"
-skip "GAP-3: No automated CI job for logo/font sync (assets/branding/ -> lms|cms|mfe images/fonts)"
-skip "GAP-4: logo-white.png naming uses hyphens; OEP-48 expects logo_white.png (underscores)"
-skip "GAP-5: MFE header is CSS-only; no Mereka React header component export"
+BRAND_PACKAGE_DIR="${REPO_ROOT}/infrastructure/tutor/brand-mereka"
+if [[ -f "${BRAND_PACKAGE_DIR}/package.json" ]]; then
+  pass "GAP-1 closed: standalone brand package exists at infrastructure/tutor/brand-mereka/package.json"
+else
+  fail "GAP-1 open: standalone brand package missing at infrastructure/tutor/brand-mereka/package.json"
+fi
+
+if [[ -f "${BRAND_PACKAGE_DIR}/logo.js" ]]; then
+  pass "GAP-2 closed: logo.js / ESM exports present for @edx/brand imports"
+else
+  skip "GAP-2 open: logo.js / ESM exports for @edx/brand React imports are not implemented"
+fi
+
+if grep -q "^scripts/qa/verify-branding-asset-sync.sh$" "${REPO_ROOT}/.github/ci-scripts-static.txt"; then
+  pass "GAP-3 closed: branding asset sync verifier is wired into static CI"
+else
+  fail "GAP-3 open: scripts/qa/verify-branding-asset-sync.sh missing from .github/ci-scripts-static.txt"
+fi
+
+if [[ -f "${BRAND_PACKAGE_DIR}/logo_white.png" ]]; then
+  pass "GAP-4 closed: OEP-48 underscore logo_white.png alias exists"
+else
+  skip "GAP-4 open: logo_white.png alias not present (hyphenated logo-white.png is in use)"
+fi
+
+if rg -n "MerekaHeader|logo\\.js" "${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py" >/dev/null 2>&1; then
+  pass "GAP-5 closed: explicit MFE header branding component wiring detected"
+else
+  skip "GAP-5 open: no dedicated React header component export wiring detected"
+fi
 
 echo ""
 
@@ -653,8 +676,8 @@ echo "========================================================"
 echo "OEP-48 Brand Package: PASS=${PASS} FAIL=${FAIL} WARN=${WARN} SKIP=${SKIP}"
 echo "========================================================"
 echo ""
-echo "SKIP items are documented OEP-48 gaps (not blocking failures)."
-echo "See: docs/architecture/OEP48_BRAND_PACKAGE.md — Gap Analysis section"
+echo "Remaining SKIP items are documented OEP-48 gaps (not blocking failures)."
+echo "See: docs/architecture/OEP48_BRAND_PACKAGE.md — Gap Analysis section."
 echo ""
 
 if [[ "${FAIL}" -gt 0 ]]; then
