@@ -1185,29 +1185,16 @@ const MerekaAuthnLoginBranding = () => {
   const variant = getMerekaVariant(hostname, config);
 
   return (
-    <div
-      className="mereka-authn-login-branding"
-      style={{
-        marginBottom: '1rem',
-        textAlign: 'center',
-      }}
-    >
-      <a href="/" className="mereka-authn-login-branding__logo" style={{ display: 'inline-flex' }}>
+    <div className="mereka-authn-login-branding">
+      <a href="/" className="mereka-authn-login-branding__logo">
         <img
           src={variant.logoUrl}
           alt={`${variant.brand} logo`}
-          style={{
-            maxWidth: '320px',
-            width: '75%',
-            maxHeight: '72px',
-            objectFit: 'contain',
-          }}
+          className="mereka-authn-login-branding__logo-img"
         />
       </a>
-      <h2 style={{ marginTop: '1rem', marginBottom: '0.35rem' }}>
-        Welcome back
-      </h2>
-      <p style={{ margin: 0, color: 'var(--mereka-color-ink-700)' }}>
+      <h2 className="mereka-authn-login-branding__title">Welcome back</h2>
+      <p className="mereka-authn-login-branding__subtitle">
         Sign in to continue with your {variant.brand} workspace.
       </p>
     </div>
@@ -1221,15 +1208,15 @@ const MerekaStudioFooter = () => {
 
   return (
     <footer className="mereka-studio-footer" role="contentinfo">
-      <div style={{ padding: '1.25rem 1rem', textAlign: 'center' }}>
-        <a href={baseUrl || '/'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+      <div className="mereka-studio-footer__inner">
+        <a href={baseUrl || '/'} className="mereka-studio-footer__logo-link">
           <img
             src="/static/images/logo-horizontal.svg"
             alt={`${siteName} logo`}
-            style={{ maxWidth: '220px', width: '100%' }}
+            className="mereka-studio-footer__logo"
           />
         </a>
-        <p style={{ margin: 0, color: 'var(--mereka-color-ink-700)' }}>
+        <p className="mereka-studio-footer__tagline">
           Built for creators. Built for teams. Built for growth.
         </p>
       </div>
@@ -1302,8 +1289,7 @@ const MerekaProgressCertificateStatus = ({ courseId }) => {
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
 
   return (
-    <div className="mereka-progress-certificate-status my-3 p-3 rounded"
-         style={{ backgroundColor: 'var(--mereka-bg-surface-alt)', border: '1px solid var(--mereka-border)' }}>
+    <div className="mereka-progress-certificate-status my-3 p-3 rounded">
       <p className="mb-1 fw-semibold">Progress snapshot</p>
       <p className="mb-0 small text-muted">
         {variant.brand} Learning —{safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate.

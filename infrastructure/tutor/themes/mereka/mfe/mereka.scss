@@ -247,6 +247,60 @@ label {
   letter-spacing: var(--mereka-mfe-badge-letter-spacing);
 }
 
+/* RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals */
+.mereka-authn-login-branding {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.mereka-authn-login-branding__logo {
+  display: inline-flex;
+}
+
+.mereka-authn-login-branding__logo-img {
+  max-width: min(320px, 75%);
+  max-height: 72px;
+  width: 100%;
+  object-fit: contain;
+}
+
+.mereka-authn-login-branding__title {
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.mereka-authn-login-branding__subtitle {
+  margin: 0;
+  color: var(--mereka-color-ink-700);
+}
+
+/* RISK: LOW — studio footer class names are slot-owned by this repo */
+.mereka-studio-footer__inner {
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.mereka-studio-footer__logo-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.mereka-studio-footer__logo {
+  max-width: 220px;
+  width: 100%;
+}
+
+.mereka-studio-footer__tagline {
+  margin: 0;
+  color: var(--mereka-color-ink-700);
+}
+
+/* RISK: LOW — slot-owned class used by progress certificate widget */
+.mereka-progress-certificate-status {
+  background-color: var(--mereka-mfe-surface-muted);
+  border: 1px solid var(--mereka-mfe-border);
+}
+
 /* Authn/login/register surfaces */
 /* [class*="auth-page"] removed 2026-02-18 (bead 115d.18): fully covered by [class*="authn"] + [class*="login-register"] */
 /* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */
