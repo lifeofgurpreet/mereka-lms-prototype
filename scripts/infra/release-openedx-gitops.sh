@@ -34,6 +34,8 @@ RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD="${RUN_ENTERPRISE_READINESS_INTEGRITY_G
 RUN_ENTERPRISE_SSO_RUNTIME_GUARD="${RUN_ENTERPRISE_SSO_RUNTIME_GUARD:-1}"
 RUN_ENTERPRISE_SCHEMA_GUARD="${RUN_ENTERPRISE_SCHEMA_GUARD:-1}"
 RUN_ENTERPRISE_RUNTIME_APP_GUARD="${RUN_ENTERPRISE_RUNTIME_APP_GUARD:-1}"
+RUN_BRANDING_RUNTIME_GUARD="${RUN_BRANDING_RUNTIME_GUARD:-1}"
+RUN_BRANDING_SURFACE_AUDIT="${RUN_BRANDING_SURFACE_AUDIT:-1}"
 ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
@@ -82,6 +84,10 @@ Options:
                        Skip enterprise runtime app wiring preflight.
   --skip-enterprise-schema-guard
                        Skip enterprise schema integrity preflight.
+  --skip-branding-runtime-guard
+                       Skip post-rollout runtime branding verification guard.
+  --skip-branding-surface-audit
+                       Skip strict branding surface audit after runtime branding verification.
   --enterprise-readiness-tenant SLUG
                        Tenant slug used for enterprise SSO runtime readiness preflight.
 
@@ -96,9 +102,9 @@ Examples:
   # Dry-run preview
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b
 
-  # Apply + commit production rollout
+  # Apply + commit production rollout (with required runtime verification guards)
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
-    --apply --commit
+    --apply --commit --verify-runtime
 
   # Full production automation (apply, commit, push, runtime verify)
   ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
@@ -197,6 +203,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-enterprise-schema-guard)
       RUN_ENTERPRISE_SCHEMA_GUARD=0
+      shift
+      ;;
+    --skip-branding-runtime-guard)
+      RUN_BRANDING_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-branding-surface-audit)
+      RUN_BRANDING_SURFACE_AUDIT=0
       shift
       ;;
     --enterprise-readiness-tenant)
@@ -602,6 +616,12 @@ if [[ "${CI:-}" == "true" && "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && 
   exit 1
 fi
 
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with runtime branding guard enabled requires --verify-runtime." >&2
+  echo "Use --skip-branding-runtime-guard only for controlled emergency releases." >&2
+  exit 1
+fi
+
 UPDATE_APP_BASE=0
 UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
@@ -651,6 +671,8 @@ echo "Enterprise readiness integrity guard: $([[ "$RUN_ENTERPRISE_READINESS_INTE
 echo "Enterprise SSO runtime guard: $([[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise runtime app guard: $([[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise schema guard: $([[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Branding runtime guard: $([[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Branding surface audit: $([[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]] && echo enabled || echo skipped)"
 echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
 
 run_enterprise_release_preflights() {
@@ -694,6 +716,28 @@ run_enterprise_release_preflights() {
 }
 
 run_enterprise_release_preflights
+
+run_branding_release_postflights() {
+  if [[ "$TARGET_ENV" != "production" || "$APPLY" -ne 1 ]]; then
+    return 0
+  fi
+
+  if [[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production branding runtime verification..."
+    STRICT_MFE_BRANDING_REV=1 STRICT_PROXY_AUTHN_BRANDING=1 \
+      "$REPO_ROOT/scripts/qa/verify-public-branding.sh" prod
+  else
+    echo "= skipped branding runtime guard (--skip-branding-runtime-guard)"
+  fi
+
+  if [[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 && "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]]; then
+    echo "Running production branding surface audit (strict)..."
+    STRICT_PROXY_AUTHN_BRANDING=1 \
+      "$REPO_ROOT/scripts/qa/audit-branding-surfaces.sh" prod --strict
+  elif [[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 0 ]]; then
+    echo "= skipped branding surface audit (--skip-branding-surface-audit)"
+  fi
+}
 
 if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
   update_image_tags_file \
@@ -768,5 +812,7 @@ fi
 if [[ "$VERIFY_RUNTIME" -eq 1 ]]; then
   verify_runtime_convergence "$MFE_TAG" "$WAIT_SECONDS"
 fi
+
+run_branding_release_postflights
 
 echo "Done."
