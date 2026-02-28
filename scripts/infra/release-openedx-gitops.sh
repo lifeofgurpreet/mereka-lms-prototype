@@ -38,7 +38,7 @@ ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
 
 K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
-ARGO_APP="${ARGO_APP:-mereka-lms-local}"
+ARGO_APP="${ARGO_APP:-auto}"
 APP_NAMESPACE="${APP_NAMESPACE:-mereka-lms}"
 WAIT_SECONDS="${WAIT_SECONDS:-600}"
 
@@ -87,7 +87,7 @@ Options:
 
   --k8s-context NAME    Kubernetes context for runtime verification.
   --argocd-namespace NS ArgoCD namespace (default: argocd).
-  --argocd-app NAME     ArgoCD application name (default: mereka-lms-local).
+  --argocd-app NAME     ArgoCD application name (default: auto; production prefers mereka-lms-prod then mereka-lms-local).
   --namespace NS        App namespace for deployment checks (default: mereka-lms).
   --wait-seconds N      Max wait for runtime verification (default: 600).
   -h, --help            Show this help.
@@ -532,6 +532,10 @@ verify_runtime_convergence() {
     attempts=1
   fi
 
+  if ! resolve_argocd_app; then
+    return 1
+  fi
+
   echo "Polling runtime convergence (context=$K8S_CONTEXT app=$ARGO_APP namespace=$APP_NAMESPACE)..."
   for ((i=1; i<=attempts; i++)); do
     local app_line
@@ -550,6 +554,34 @@ verify_runtime_convergence() {
     sleep "$interval"
   done
   echo "Runtime verification timed out waiting for mfe:$mfe_tag" >&2
+  return 1
+}
+
+resolve_argocd_app() {
+  # Respect explicit override.
+  if [[ -n "$ARGO_APP" && "$ARGO_APP" != "auto" ]]; then
+    return 0
+  fi
+
+  local candidates=()
+  if [[ "$TARGET_ENV" == "production" ]]; then
+    candidates=(mereka-lms-prod mereka-lms-local)
+  else
+    candidates=(mereka-lms-staging mereka-lms-local mereka-lms-prod)
+  fi
+
+  local app
+  for app in "${candidates[@]}"; do
+    if kubectl --context "$K8S_CONTEXT" -n "$ARGOCD_NAMESPACE" \
+      get applications.argoproj.io "$app" >/dev/null 2>&1; then
+      ARGO_APP="$app"
+      echo "Auto-detected ArgoCD app: $ARGO_APP"
+      return 0
+    fi
+  done
+
+  echo "Unable to auto-detect ArgoCD app in namespace '$ARGOCD_NAMESPACE' for context '$K8S_CONTEXT'." >&2
+  echo "Pass --argocd-app <name> explicitly." >&2
   return 1
 }
 
