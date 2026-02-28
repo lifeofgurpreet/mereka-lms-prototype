@@ -190,6 +190,10 @@ kubectl get deploy lms cms mfe -n mereka-lms \
   --base-url https://academyv2.mereka.io \
   --learning-path /learning
 
+# GitHub Actions equivalent (manual dispatch):
+# .github/workflows/npm-start-mfe-smoke.yml
+# Enable strict runtime mode only after PARAGON_THEME_URLS rollout is active.
+
 # Check all tenant domains return HTTP 200
 for domain in academyv2.mereka.io academy.biji-biji.com; do
   echo "$domain: $(curl -s -o /dev/null -w '%{http_code}' "https://${domain}/")"
