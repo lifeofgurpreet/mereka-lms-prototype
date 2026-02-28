@@ -147,3 +147,4 @@ grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-02-18 | 8jao.5 | Initial inventory from live codebase scan (AC-MFE-005) |
+| 2026-02-28 | codex | Aligned risk annotations to `SELECTOR-EXCEPTION` naming and updated grep/check guidance |
