@@ -249,7 +249,7 @@ PARAGON_THEME_URLS serves compiled CSS containing `--pgn-*` tokens at runtime. T
 
 1. **Add config defaults** to `mereka_lms.py`:
    ```python
-   ("MEREKA_PARAGON_THEME_ENABLED", False),
+   ("MEREKA_PARAGON_THEME_ENABLED", True),
    ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
    ```
 
