@@ -1,0 +1,112 @@
+name: NPM Start MFE Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment (used when base_url is empty)"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      base_url:
+        description: "Override LMS base URL (empty = auto from target_environment)"
+        required: false
+        default: ""
+        type: string
+      learning_path:
+        description: "Learning route path"
+        required: false
+        default: "/learning"
+        type: string
+      project:
+        description: "Playwright project"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - mobile-chrome
+      require_runtime_theme:
+        description: "Require PARAGON runtime theme URLs (/theme/*.min.css)"
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Resolve base URL
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          BASE_URL_INPUT="${{ inputs.base_url || '' }}"
+          if [[ -n "$BASE_URL_INPUT" ]]; then
+            BASE_URL="$BASE_URL_INPUT"
+          elif [[ "$TARGET_ENV" == "dev" ]]; then
+            BASE_URL="https://academyv2.mereka.dev"
+          else
+            BASE_URL="https://academyv2.mereka.io"
+          fi
+          echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run npm-start smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="${{ steps.resolve.outputs.base_url }}"
+          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+          PROJECT="${{ inputs.project || 'chromium' }}"
+          REQUIRE_RUNTIME="${{ inputs.require_runtime_theme || 'false' }}"
+
+          args=(--base-url "$BASE_URL" --learning-path "$LEARNING_PATH" --project "$PROJECT")
+          if [[ "$REQUIRE_RUNTIME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+
+          ./scripts/qa/verify-npm-start-mfe-smoke.sh "${args[@]}"
+
+      - name: Summarize run
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST_LOG="$(ls -1t var/qa/npm-start-mfe-smoke-*.log 2>/dev/null | head -1 || true)"
+          {
+            echo "## NPM Start MFE Smoke"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Base URL: \`${{ steps.resolve.outputs.base_url }}\`"
+            echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
+            echo "- Playwright project: \`${{ inputs.project || 'chromium' }}\`"
+            echo "- Require runtime theme: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            if [[ -n "$LATEST_LOG" ]]; then
+              echo "- Log file: \`$LATEST_LOG\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-start-mfe-smoke-artifacts
+          path: |
+            var/qa/npm-start-mfe-smoke-*.log
+            var/e2e-artifacts/**
+            var/e2e-report/**
+          if-no-files-found: warn
