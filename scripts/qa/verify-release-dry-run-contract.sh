@@ -36,6 +36,34 @@ cp "$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml" \
 cp "$REPO_ROOT/deploy/k8s/overlays/staging/kustomization.yaml" \
   "$TMP_INFRA/apps/mereka-lms/overlays/staging/kustomization.yaml"
 
+# Fixture guard: release-openedx-gitops.sh expects infra overlay to include the
+# already-transformed openedx image name entry as well.
+python3 - "$TMP_INFRA/apps/mereka-lms/overlays/prod/kustomization.yaml" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+path = Path(sys.argv[1])
+doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+images = doc.setdefault("images", [])
+required_name = "asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx"
+
+if not any((item or {}).get("name") == required_name for item in images):
+    openedx_tag = next(
+        ((item or {}).get("newTag") for item in images if (item or {}).get("name") == "docker.io/overhangio/openedx"),
+        "fixture-openedx-tag",
+    )
+    images.append(
+        {
+            "name": required_name,
+            "newName": required_name,
+            "newTag": openedx_tag,
+        }
+    )
+    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+PY
+
 git -C "$TMP_INFRA" init -q
 
 APP_PROD_FILE="$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml"
