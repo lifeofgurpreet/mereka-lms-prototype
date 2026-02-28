@@ -225,7 +225,38 @@ for alias in "${legacy_aliases[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
-# 7. MFE SCSS imports the token bridge
+# 7. Canonical Paragon token policy (no short-form legacy --pgn-* names)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- Canonical Paragon token policy (no short-form names) ---"
+
+legacy_pgn_short_forms=(
+  --pgn-color-primary
+  --pgn-border-radius
+  --pgn-border-radius-sm
+  --pgn-border-radius-lg
+  --pgn-font-family-sans-serif
+  --pgn-heading-font-family
+  --pgn-body-font-size-base
+  --pgn-body-line-height-base
+)
+
+for token in "${legacy_pgn_short_forms[@]}"; do
+  token_defs=0
+  for f in "${alias_files[@]}"; do
+    [[ -f "$f" ]] || continue
+    hits=$(grep -cE "^[[:space:]]+${token}:" "$f" || true)
+    token_defs=$((token_defs + hits))
+  done
+  if [[ "$token_defs" -eq 0 ]]; then
+    pass "Legacy short-form token not defined: ${token}"
+  else
+    fail "Legacy short-form token still defined (${token}, ${token_defs} occurrence(s))"
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# 8. MFE SCSS imports the token bridge
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- MFE SCSS token bridge import ---"
@@ -256,7 +287,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 8. No old theming paths remain
+# 9. No old theming paths remain
 #    Old pattern: raw hex values assigned directly to CSS custom properties
 #    inside the generated :root blocks. The generated :root in overrides files
 #    should only have hex values that are traceable to tokens.css.
@@ -307,7 +338,7 @@ PY
 fi
 
 # ---------------------------------------------------------------------------
-# 9. Token count sanity: tokens.css has >= 100 custom properties
+# 10. Token count sanity: tokens.css has >= 100 custom properties
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- Token count sanity ---"
@@ -324,7 +355,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 10. Generator --check: all generated blocks in sync with tokens.css
+# 11. Generator --check: all generated blocks in sync with tokens.css
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- All generated blocks in sync with tokens.css ---"
