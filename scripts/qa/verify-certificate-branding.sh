@@ -52,6 +52,7 @@ fi
 
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+PROFILE_CERT_CARD_COMPONENT="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src/profile/CertificateCard.jsx"
 
 if [[ -f "$PLUGIN_FILE" ]]; then
   assert_contains "$PLUGIN_FILE" "org.openedx.frontend.learning.progress_certificate_status.v1" "Learning progress certificate slot is wired in Tutor plugin"
@@ -62,8 +63,17 @@ fi
 
 if [[ -f "$MFE_SCSS" ]]; then
   assert_contains "$MFE_SCSS" ".mereka-progress-certificate-status" "MFE certificate slot class styling exists"
+  assert_contains "$MFE_SCSS" ".profile-page .certificate" "Profile certificate cards use Mereka tokenized card styling"
+  assert_contains "$MFE_SCSS" ".profile-page .certificate-type-illustration" "Profile certificate illustration shell is themed"
 else
   fail "MFE stylesheet missing: infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+fi
+
+if [[ -f "$PROFILE_CERT_CARD_COMPONENT" ]]; then
+  assert_contains "$PROFILE_CERT_CARD_COMPONENT" "className=\"col certificate" "Profile MFE certificate card class remains present upstream"
+  assert_contains "$PROFILE_CERT_CARD_COMPONENT" "certificate-type-illustration" "Profile MFE certificate illustration class remains present upstream"
+else
+  warn "Profile MFE source checkout missing: tutor_env/dev/frontend-app-profile/src/profile/CertificateCard.jsx"
 fi
 
 EMAIL_CERT_TEMPLATE="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_email_templates/templates/email/certificate.html"
