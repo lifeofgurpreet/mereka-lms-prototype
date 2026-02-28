@@ -121,6 +121,23 @@ AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh pr
 - Log:
   - `var/qa/cross-browser-branding-smoke-prod-20260228T163310Z.log`
 
+## Addendum — Lighthouse Budget Re-Run
+
+### Command Run
+
+```bash
+./scripts/qa/verify-lighthouse-budgets.sh
+```
+
+### Result
+
+- `PASSED=14`, `FAILED=0`
+- Coverage + thresholds still pass for:
+  - required MFE routes (`/authn/login`, `/dashboard`, `/learning/course`, `/profile`, `/account`, `/discussions`)
+  - resource ceilings (JS/CSS)
+  - INP/FID policy
+  - CLS and LCP budget constraints
+
 ### Policy Outcome
 
 - Legacy `.page__account-settings` wrapper selector is removed from active CSS.
