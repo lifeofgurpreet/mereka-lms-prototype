@@ -261,10 +261,18 @@ for checker_file in "${BUILD_WORKFLOW_CONTRACT}" "${RELEASE_INVOKE_CHECKER}" \
   checker_name="${checker_file#"$REPO_ROOT"/}"
   if [[ -f "${checker_file}" ]]; then
     pass "${checker_name} exists"
+    if bash "${checker_file}" >/tmp/mereka-release-checker.log 2>&1; then
+      pass "${checker_name} contract passes"
+    else
+      fail "${checker_name} contract failed"
+      sed 's/^/    /' /tmp/mereka-release-checker.log
+    fi
   else
     fail "${checker_name} is MISSING"
   fi
 done
+
+rm -f /tmp/mereka-release-checker.log
 
 echo ""
 
