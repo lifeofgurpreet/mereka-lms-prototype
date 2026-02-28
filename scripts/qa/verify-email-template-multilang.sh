@@ -257,6 +257,37 @@ assert_template_has_marker \
   "border-radius: 9999px" \
   "Marketing promo template CTA keeps pill-radius branding"
 
+# Kajabi SSO migration welcome templates (transactional edge path)
+KAJABI_TEMPLATE_ROOT="infrastructure/tutor/custom-apps/openedx_kajabi_sso/templates"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/openedx_kajabi_sso/welcome_email.html" \
+  "linear-gradient(120deg" \
+  "Kajabi welcome HTML template has branded gradient header shell"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/openedx_kajabi_sso/welcome_email.html" \
+  "org_primary_color|default:'#ab3b78'" \
+  "Kajabi welcome HTML template uses Mereka primary fallback color"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/openedx_kajabi_sso/welcome_email.html" \
+  "org_accent_color|default:'#237072'" \
+  "Kajabi welcome HTML template uses Mereka accent fallback color"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/openedx_kajabi_sso/welcome_email.html" \
+  "platform_name|default:\"Mereka Academy\"" \
+  "Kajabi welcome HTML template supports platform fallback naming"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/openedx_kajabi_sso/welcome_email.txt" \
+  "platform_name|default:\"Mereka Academy\"" \
+  "Kajabi welcome text template supports platform fallback naming"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/kajabi_sso/welcome_email.html" \
+  "include \"openedx_kajabi_sso/welcome_email.html\"" \
+  "Kajabi alias HTML template includes canonical branded template"
+assert_template_has_marker \
+  "$KAJABI_TEMPLATE_ROOT/kajabi_sso/welcome_email.txt" \
+  "include \"openedx_kajabi_sso/welcome_email.txt\"" \
+  "Kajabi alias text template includes canonical branded template"
+
 # Full-shell regression checks across all branded HTML templates.
 for template_file in "$EMAIL_TEMPLATE_ROOT"/*.html; do
     template_name="$(basename "$template_file")"
