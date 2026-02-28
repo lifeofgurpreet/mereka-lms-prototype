@@ -854,6 +854,7 @@ else:
 
 
 LEARNER_HOME_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/learner-dashboard/"
+LEARNER_RECORD_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/learner-record"
 
 
 
@@ -909,6 +910,7 @@ MFE_CONFIG_API_URLS = {
     'communications': f"{MEREKA_MFE_BASE_URL}/communications",
     'discussions': f"{MEREKA_MFE_BASE_URL}/discussions",
     'learner-dashboard': f"{MEREKA_MFE_BASE_URL}/learner-dashboard",
+    'learner-record': f"{MEREKA_MFE_BASE_URL}/learner-record",
     'learning': f"{MEREKA_MFE_BASE_URL}/learning",
     'ora-grading': f"{MEREKA_MFE_BASE_URL}/ora-grading",
     'orders': f"{MEREKA_MFE_BASE_URL}/orders",

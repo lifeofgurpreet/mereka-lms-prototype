@@ -206,6 +206,9 @@ while IFS= read -r dir; do
     learner-dashboard)
       setting="LEARNER_HOME_MICROFRONTEND_URL"
       ;;
+    learner-record)
+      setting="LEARNER_RECORD_MICROFRONTEND_URL"
+      ;;
     learning)
       setting="LEARNING_MICROFRONTEND_URL"
       ;;
@@ -250,6 +253,7 @@ declare -A SETTING_TO_DIR=(
   ["DISCUSSIONS_MICROFRONTEND_URL"]="discussions"
   ["WRITABLE_GRADEBOOK_URL"]="gradebook"
   ["LEARNER_HOME_MICROFRONTEND_URL"]="learner-dashboard"
+  ["LEARNER_RECORD_MICROFRONTEND_URL"]="learner-record"
   ["LEARNING_MICROFRONTEND_URL"]="learning"
   ["ORA_GRADING_MICROFRONTEND_URL"]="ora-grading"
   ["PROFILE_MICROFRONTEND_URL"]="profile"

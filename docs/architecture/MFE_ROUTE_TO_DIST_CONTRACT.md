@@ -82,7 +82,7 @@ This contract ensures the three layers of MFE routing configuration remain in sy
 | `/discussions` | `discussions` | `DISCUSSIONS_MICROFRONTEND_URL` | 89-97 | 97 | Forum threads |
 | `/gradebook` | `gradebook` | `WRITABLE_GRADEBOOK_URL` | 99-107 | 104 | Instructor gradebook |
 | `/learner-dashboard` | `learner-dashboard` | `LEARNER_HOME_MICROFRONTEND_URL` | 109-117 | 98 | Learner home |
-| `/learner-record` | `learner-record` | (none today; route-only support) | 190-198 | 99 | Learner record transcript UI |
+| `/learner-record` | `learner-record` | `LEARNER_RECORD_MICROFRONTEND_URL` | 190-198 | 99 | Learner record transcript UI |
 | `/learning` | `learning` | `LEARNING_MICROFRONTEND_URL` | 119-127 | 99 | Courseware player |
 | `/ora-grading` | `ora-grading` | `ORA_GRADING_MICROFRONTEND_URL` | 129-137 | 100 | Open response assessment grading |
 | `/profile` | `profile` | `PROFILE_MICROFRONTEND_URL` | 139-147 | 102 | User profile editor |
