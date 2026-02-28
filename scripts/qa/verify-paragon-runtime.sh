@@ -133,6 +133,7 @@ fi
 # AC-TKN-018 / AC-TKN-019 runtime validation is environment-dependent.
 if [[ -n "${RUNTIME_URL:-}" ]]; then
   runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
+  authn_shell_url="${RUNTIME_URL%/}/authn/login"
   runtime_status="$(curl -sSIL -o /tmp/paragon-theme-head.$$ -w "%{http_code}" "$runtime_url" || true)"
   if [[ "$runtime_status" =~ ^[0-9]+$ ]] && [[ "$runtime_status" -ge 200 ]] && [[ "$runtime_status" -lt 400 ]]; then
     content_type_ok=0
@@ -182,8 +183,48 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
   else
     fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown})"
   fi
+
+  authn_shell_status="$(curl -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
+  if [[ "$authn_shell_status" =~ ^[0-9]+$ ]] && [[ "$authn_shell_status" -ge 200 ]] && [[ "$authn_shell_status" -lt 400 ]]; then
+    has_runtime_theme_urls=0
+    has_embedded_theme_files=0
+
+    if grep -q '/theme/core.min.css' /tmp/paragon-authn-shell.$$ \
+      && grep -q '/theme/mereka-brand.min.css' /tmp/paragon-authn-shell.$$; then
+      has_runtime_theme_urls=1
+    fi
+
+    if grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$ \
+      && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$; then
+      has_embedded_theme_files=1
+    fi
+
+    if [[ "$has_runtime_theme_urls" -eq 1 ]]; then
+      pass "Runtime authn shell references /theme/core.min.css + /theme/mereka-brand.min.css"
+    elif [[ "$has_embedded_theme_files" -eq 1 ]]; then
+      if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+        fail "Runtime authn shell still uses embedded paragon/brand hash files (runtime theme URLs required)"
+      else
+        warn "Runtime authn shell currently uses embedded paragon/brand hash files"
+      fi
+    else
+      if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+        fail "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+      else
+        warn "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+      fi
+    fi
+  else
+    if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+      fail "Runtime authn shell check failed: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
+    else
+      warn "Runtime authn shell check unavailable: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
+    fi
+  fi
+
   rm -f /tmp/paragon-theme-head.$$
   rm -f /tmp/paragon-theme-body.$$
+  rm -f /tmp/paragon-authn-shell.$$
 else
   if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
     fail "AC-TKN-018/019 runtime checks required but no runtime URL was provided (use --runtime-url or PARAGON_RUNTIME_URL)"
