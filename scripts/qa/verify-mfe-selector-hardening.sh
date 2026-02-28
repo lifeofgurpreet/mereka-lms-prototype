@@ -259,6 +259,30 @@ print(count)
   else
     pass "AC-US7-001: Non-comment [class*=] selector count ($BRITTLE_SELECTOR_LINES) within regression ceiling ($REGRESSION_CEILING)"
   fi
+
+  # Track remaining Paragon BEM override density for Phase 7 reduction progress.
+  # Default ceiling is aligned to current plan target; override via env for stricter sweeps.
+  PGN_SELECTOR_CEILING="${PGN_SELECTOR_CEILING:-65}"
+  PGN_SELECTOR_LINES=$(python3 -c "
+import re
+scss = open('$SCSS_FILE').read()
+scss = re.sub(r'/\\*.*?\\*/', '', scss, flags=re.S)
+scss = re.sub(r'^\\s*//.*$', '', scss, flags=re.M)
+count = 0
+for line in scss.split('\\n'):
+    s = line.strip()
+    if not s:
+        continue
+    if '.pgn__' in s and ('{' in s or s.endswith(',') or s.startswith('.pgn__')):
+        count += 1
+print(count)
+")
+  echo "  Non-comment .pgn__ selector lines: $PGN_SELECTOR_LINES (ceiling: $PGN_SELECTOR_CEILING)"
+  if [[ "$PGN_SELECTOR_LINES" -le "$PGN_SELECTOR_CEILING" ]]; then
+    pass "AC-US7-001: Paragon BEM selector density within ceiling (${PGN_SELECTOR_LINES} <= ${PGN_SELECTOR_CEILING})"
+  else
+    fail "AC-US7-001: Paragon BEM selector density exceeds ceiling (${PGN_SELECTOR_LINES} > ${PGN_SELECTOR_CEILING})"
+  fi
 fi
 
 echo ""
