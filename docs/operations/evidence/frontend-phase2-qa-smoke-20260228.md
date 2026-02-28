@@ -50,11 +50,12 @@ This evidence run captures frontend branding smoke artifacts and QA gate outputs
 
 ### Email Template Branding Gate
 
-- `verify-email-template-multilang.sh`: `PASS=7`, `FAIL=0`, `WARN=5`
+- `verify-email-template-multilang.sh`: `PASS=11`, `FAIL=0`, `WARN=5`
 - New branding checks passed for:
   - `password_reset.html` branded gradient shell + primary fallback color
   - `enrollment.html` accent fallback
   - `welcome.html` support footer link
+  - `certificate.html` branded shell + primary/accent fallbacks + pill CTA styling
   - `campaign.html` unsubscribe footer
   - `marketing_promo.html` pill CTA styling
 - Existing warnings remain on untranslated (`ms`, `zh`) template variants and ACE config visibility from local config files.

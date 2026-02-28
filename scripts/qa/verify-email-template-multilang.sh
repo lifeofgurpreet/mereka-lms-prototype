@@ -183,6 +183,22 @@ assert_template_has_marker \
   "$EMAIL_TEMPLATE_ROOT/welcome.html" \
   "org_support_email" \
   "Welcome template footer retains support contact link"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/certificate.html" \
+  "linear-gradient(120deg" \
+  "Certificate template has branded gradient header shell"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/certificate.html" \
+  "org_primary_color|default:'#ab3b78'" \
+  "Certificate template uses Mereka primary fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/certificate.html" \
+  "org_accent_color|default:'#237072'" \
+  "Certificate template uses Mereka accent fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/certificate.html" \
+  "border-radius: 9999px" \
+  "Certificate template CTA keeps pill-radius branding"
 
 # Marketing templates
 assert_template_has_marker \
