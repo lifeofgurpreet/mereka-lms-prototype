@@ -67,7 +67,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 
 COPY --from=admin-console-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 2025
 
@@ -132,7 +132,7 @@ COPY indigo/env.config.jsx /openedx/app/
 COPY indigo/mereka /openedx/app/mereka
 COPY --from=authn-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1999
 
@@ -196,7 +196,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 
 COPY --from=authoring-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 2001
 
@@ -260,7 +260,7 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=account-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1997
 
@@ -324,7 +324,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 
 COPY --from=communications-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1984
 
@@ -388,7 +388,7 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=discussions-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 2002
 
@@ -452,7 +452,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 
 COPY --from=gradebook-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1994
 
@@ -516,7 +516,7 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=learner-dashboard-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1996
 
@@ -580,7 +580,7 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=learning-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 2000
 
@@ -644,7 +644,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 
 COPY --from=ora-grading-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1993
 
@@ -708,7 +708,7 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=profile-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1995
 
@@ -772,7 +772,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx
 
 COPY --from=learner-record-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations
+RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=open-release/redwood.3 " pull_translations
 
 EXPOSE 1990
 
