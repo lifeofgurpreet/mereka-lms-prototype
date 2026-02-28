@@ -256,6 +256,9 @@ jobs:
       - name: Verify visual regression page count
         run: bash scripts/qa/check-visual-regression-page-count.sh
 
+      - name: Verify visual smoke baseline
+        run: ./scripts/qa/verify-visual-smoke-baseline.sh
+
       - name: Verify generated token layers are in sync
         run: ./scripts/branding/generate-tokens-from-canonical.sh --check
 
