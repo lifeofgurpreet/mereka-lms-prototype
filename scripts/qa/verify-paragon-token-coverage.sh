@@ -208,6 +208,31 @@ if [[ -f "$TOKENS_FILE" ]]; then
     fi
   done
 
+  # Ensure canonical Paragon v22 aliases are declared for tokens consumed by core.min.css
+  for token in \
+    '--pgn-color-secondary-base' \
+    '--pgn-color-success-base' \
+    '--pgn-color-warning-base' \
+    '--pgn-color-danger-base' \
+    '--pgn-typography-font-family-sans-serif' \
+    '--pgn-typography-font-family-base' \
+    '--pgn-typography-font-size-sm' \
+    '--pgn-typography-font-size-base' \
+    '--pgn-typography-font-size-lg' \
+    '--pgn-typography-line-height-sm' \
+    '--pgn-typography-line-height-base' \
+    '--pgn-typography-line-height-lg' \
+    '--pgn-size-border-radius-sm' \
+    '--pgn-size-border-radius-base' \
+    '--pgn-size-border-radius-lg'
+  do
+    if grep -qF -- "$token" "$TOKENS_FILE"; then
+      pass "Token bridge defines canonical alias ${token}"
+    else
+      fail "Token bridge missing canonical alias ${token}"
+    fi
+  done
+
   # Keep this check practical: tokens should be declared before relying on them in compiled files.
   for token in \
     '--mereka-color-teal' \
