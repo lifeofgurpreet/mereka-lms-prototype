@@ -297,7 +297,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 - [x] Navbar token migration (DONE)
 
 ### Next Sprint
-- [ ] Learning layout upstream slot expansion proposal (course grid/surface-level slots)
+- [x] Learning layout upstream slot expansion proposal drafted (course-grid/surface-level slots) — see [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
 
 ### Backlog
 - [ ] Optional: replace remaining structural navbar CSS with slot-owned React shell if upstream adds header layout slots
@@ -349,5 +349,6 @@ Run `./scripts/qa/verify-plugin-slot-migration-register.sh` to check:
 ## References
 - [MFE_SELECTOR_HARDENING_AUDIT.md](MFE_SELECTOR_HARDENING_AUDIT.md)
 - [MFE_PLUGIN_SLOT_MATRIX.md](MFE_PLUGIN_SLOT_MATRIX.md)
+- [LEARNING_SLOT_EXPANSION_PROPOSAL.md](../architecture/LEARNING_SLOT_EXPANSION_PROPOSAL.md)
 - [footer-slot-exceptions.md](footer-slot-exceptions.md) — Footer fallback exception register with visual evidence pack
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
