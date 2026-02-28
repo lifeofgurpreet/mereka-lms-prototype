@@ -39,6 +39,17 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 
 **Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
 
+### Phase D Classification (Task D1)
+
+| Selector/Surface | Classification | Rationale |
+|------------------|----------------|-----------|
+| `org.openedx.frontend.layout.header_logo.v1` slot output (`MerekaHeaderLogo`) | **SAFE_TO_SLOT** | Header logo shell is now owned by plugin-slot rendering, not brittle DOM-targeted CSS overrides. |
+| `.mereka-header-logo`, `.mereka-header-logo img` in `mereka.scss` | **NEEDS_KEEP** | Minimal token-driven presentation layer for the slot output; no upstream DOM dependency beyond our own class names. |
+| `org.openedx.frontend.layout.footer.v1` slot output (`MerekaFooter`) | **SAFE_TO_SLOT** | Footer shell structure is injected via FPF slot and default footer is hidden, eliminating dependence on upstream footer DOM. |
+| `.footer-*` classes in `mereka.scss` (`_mfe-footer.scss`) | **NEEDS_KEEP** | Styling contract for our own slot-rendered markup; retained as tokenized presentation rules. |
+| `[class*="authn"]`, `[class*="login-register"]` fallback blocks | **NEEDS_KEEP** | No stable upstream authn wrapper slot/semantic hooks cover all route entrypoints yet; kept with explicit selector-exception comments. |
+| `.pgn__*` component overrides in `mereka.scss` | **NEEDS_KEEP** | Paragon v22 does not expose complete component token coverage for all visual requirements; retained with `var(--mereka-*)` hardening. |
+
 ---
 
 ### 2. `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` (LMS shell overrides)
@@ -149,3 +160,4 @@ grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
 | 2026-02-18 | 8jao.5 | Initial inventory from live codebase scan (AC-MFE-005) |
 | 2026-02-25 | 2dcy.6 | T102 selector hardening audit baseline captured in `MFE_SELECTOR_AUDIT.md` (data-testid selectors removed) |
 | 2026-02-28 | codex | Realigned inventory with live T102 state and updated migration rationale |
+| 2026-02-28 | codex | Added Phase D `SAFE_TO_SLOT` / `NEEDS_KEEP` classification for header/footer/authn selectors and slot-owned surfaces |
