@@ -17,6 +17,9 @@ Environment flags:
   AUDIT_STRICT=1|0                    Default: 0 (pass --strict to audit-branding-surfaces)
   RUN_STUDIO_AUTHORING_CHECK=1|0      Default: 1
   RUN_MFE_PREREQ_CHECK=1|0            Default: 1
+  RUN_PARAGON_RUNTIME_CHECK=1|0       Default: 1
+  PARAGON_RUNTIME_STRICT=1|0          Default: 1 (require runtime URL + strict header/body contract)
+  PARAGON_RUNTIME_URL=<url>           Optional override for runtime /theme base URL
   STRICT_NO_GOOGLE_FONTS=1|0          Default: 0 (passed to studio authoring check)
   STRICT_PROXY_AUTHN_BRANDING=1|0     Default: 0 (enforce branded /authn assets on service domains)
   RUN_SCREENSHOTS=1|0                 Default: 0
@@ -51,6 +54,8 @@ RUN_AUDIT="${RUN_AUDIT:-1}"
 AUDIT_STRICT="${AUDIT_STRICT:-0}"
 RUN_STUDIO_AUTHORING_CHECK="${RUN_STUDIO_AUTHORING_CHECK:-1}"
 RUN_MFE_PREREQ_CHECK="${RUN_MFE_PREREQ_CHECK:-1}"
+RUN_PARAGON_RUNTIME_CHECK="${RUN_PARAGON_RUNTIME_CHECK:-1}"
+PARAGON_RUNTIME_STRICT="${PARAGON_RUNTIME_STRICT:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_VISUAL_REGRESSION="${RUN_VISUAL_REGRESSION:-0}"
 VISUAL_THRESHOLD="${VISUAL_THRESHOLD:-0.06}"
@@ -83,6 +88,8 @@ run_live_gate() {
   local env=$1
   local certs_flag="${CHECK_CERTS:-}"
   local visual_args=()
+  local runtime_url="${PARAGON_RUNTIME_URL:-}"
+  local -a runtime_args=()
 
   echo "==> Live gate: public-health-check (${env})"
   if [[ -z "$certs_flag" ]]; then
@@ -99,6 +106,22 @@ run_live_gate() {
   BRANDING_LEVEL="$BRANDING_LEVEL" \
     STRICT_MFE_BRANDING_REV="${STRICT_MFE_BRANDING_REV:-0}" \
     "$REPO_ROOT/scripts/qa/verify-public-branding.sh" "$env"
+
+  if [[ "$RUN_PARAGON_RUNTIME_CHECK" == "1" ]]; then
+    if [[ -z "$runtime_url" ]]; then
+      if [[ "$env" == "prod" ]]; then
+        runtime_url="https://apps.academyv2.mereka.io"
+      else
+        runtime_url="https://apps.academyv2.mereka.dev"
+      fi
+    fi
+    runtime_args=(--runtime-url "$runtime_url")
+    if [[ "$PARAGON_RUNTIME_STRICT" == "1" ]]; then
+      runtime_args+=(--require-runtime)
+    fi
+    echo "==> Live gate: verify-paragon-runtime-deferred (${env}, ${runtime_url})"
+    "$REPO_ROOT/scripts/qa/verify-paragon-runtime-deferred.sh" "${runtime_args[@]}"
+  fi
 
   if [[ "$RUN_STUDIO_AUTHORING_CHECK" == "1" ]]; then
     echo "==> Live gate: verify-studio-authoring-branding (${env})"
