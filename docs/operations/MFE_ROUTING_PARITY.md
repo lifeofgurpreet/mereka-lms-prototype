@@ -31,6 +31,7 @@ Two Caddyfile layers are involved:
 | `/discussions/*` | `dist/discussions` | file_server | Discussion forum SPA |
 | `/gradebook/*` | `dist/gradebook` | file_server | Instructor gradebook SPA |
 | `/learner-dashboard/*` | `dist/learner-dashboard` | file_server | Learner home SPA |
+| `/learner-record/*` | `dist/learner-record` | file_server | Learner record / transcript SPA |
 | `/learning/*` | `dist/learning` | file_server | Course player SPA |
 | `/ora-grading/*` | `dist/ora-grading` | file_server | ORA grading interface |
 | `/profile/*` | `dist/profile` | file_server | Public profile SPA |
@@ -227,8 +228,8 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=mfe --follow \
 ```bash
 MFE_BASE="https://apps.academyv2.mereka.io"
 for path in /authn/login /account/ /course-authoring/ /authoring/ \
-            /discussions/ /gradebook/ /learner-dashboard/ /learning/ \
-            /ora-grading/ /profile/; do
+            /discussions/ /gradebook/ /learner-dashboard/ /learner-record/ \
+            /learning/ /ora-grading/ /profile/ /u/test-user; do
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${MFE_BASE}${path}")
   echo "$code  ${path}"
 done

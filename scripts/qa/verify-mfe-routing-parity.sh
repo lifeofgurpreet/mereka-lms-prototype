@@ -121,6 +121,7 @@ declare -A EXPECTED_ROUTES=(
   ["/discussions"]="discussions"
   ["/gradebook"]="gradebook"
   ["/learner-dashboard"]="learner-dashboard"
+  ["/learner-record"]="learner-record"
   ["/learning"]="learning"
   ["/ora-grading"]="ora-grading"
   ["/profile"]="profile"
