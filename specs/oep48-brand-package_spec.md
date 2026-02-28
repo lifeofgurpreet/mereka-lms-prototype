@@ -152,15 +152,15 @@ infrastructure/tutor/brand-mereka/
 
 - The `paragon/_variables.scss` file MUST define `$font-family-sans-serif` using Poppins as primary, with system font stack fallback.
 - The file MUST define `$font-family-heading` using Lato as primary, with system font stack fallback.
-- The file MUST define `$primary` color variable matching the Mereka teal (`#237072`).
-- The file MUST define `$brand` color variable matching the Mereka teal (`#237072`).
+- The file MUST define `$primary` color variable matching the Mereka magenta (`#ab3b78`).
+- The file MUST define `$secondary` color variable matching the Mereka teal (`#237072`).
 - The file SHOULD include a deprecation comment stating that SCSS variables are deprecated in Ulmo and will be replaced by `tokens.json`.
 - The file MUST NOT override variables that break Paragon component rendering (e.g., `$grid-breakpoints`, `$spacers`).
 
 #### tokens.json (Placeholder)
 
 - The `paragon/tokens.json` file MUST exist and contain valid JSON.
-- The file MUST include at minimum a `"colors"` key with `"primary"` set to the Mereka teal hex value.
+- The file MUST include at minimum a `"colors"` key with `"primary"` set to the Mereka magenta hex value.
 - The file MUST include a `"typography"` key with `"font-family-sans-serif"` set to the Poppins font stack.
 - The file SHOULD include a comment (via `"_comment"` key) indicating this is a placeholder pending full token migration.
 - The file MUST be parseable by Paragon's token consumer without errors.
@@ -226,13 +226,13 @@ Only domain-specific NFRs are listed above.
 ### _variables.scss
 
 - [ ] AC-BRAND-017: Given `infrastructure/tutor/brand-mereka/paragon/_variables.scss`, when parsed, then it defines `$font-family-sans-serif` containing "Poppins".
-- [ ] AC-BRAND-018: Given `_variables.scss`, when parsed, then it defines `$primary` with value `#237072` (case-insensitive match).
+- [ ] AC-BRAND-018: Given `_variables.scss`, when parsed, then it defines `$primary` with value `#ab3b78` (case-insensitive match).
 - [ ] AC-BRAND-019: Given `_variables.scss`, when inspected, then it contains a comment indicating SCSS variables are deprecated in favor of `tokens.json`.
 
 ### tokens.json
 
 - [ ] AC-BRAND-020: Given `infrastructure/tutor/brand-mereka/paragon/tokens.json`, when parsed as JSON, then it is valid JSON containing at minimum a `"colors"` key with a `"primary"` value.
-- [ ] AC-BRAND-021: Given `tokens.json`, when parsed, then `colors.primary` equals `"#237072"` (Mereka teal).
+- [ ] AC-BRAND-021: Given `tokens.json`, when parsed, then `colors.primary` equals `"#ab3b78"` (Mereka magenta).
 - [ ] AC-BRAND-022: Given `tokens.json`, when parsed, then it contains a `"typography"` key with `"font-family-sans-serif"` containing "Poppins".
 
 ### Tutor Plugin Integration
@@ -256,8 +256,8 @@ Only domain-specific NFRs are listed above.
 
 #### Design Tokens System (design-tokens-system_spec.md)
 
-- [ ] AC-BRAND-INT-003: Given `paragon/tokens.json` in the brand package and `assets/branding/tokens.css`, when the primary color is compared, then both define the same Mereka teal value (`#237072`).
-- [ ] AC-BRAND-INT-004: Given `paragon/_variables.scss` in the brand package, when the `$primary` value is compared with `--color-teal` from `assets/branding/tokens.css`, then both resolve to the same hex value.
+- [ ] AC-BRAND-INT-003: Given `paragon/tokens.json` in the brand package and `assets/branding/tokens.css`, when the primary color is compared, then both define the same Mereka magenta value (`#ab3b78`).
+- [ ] AC-BRAND-INT-004: Given `paragon/_variables.scss` in the brand package, when the `$primary` value is compared with `--color-magenta` from `assets/branding/tokens.css`, then both resolve to the same hex value.
 
 #### Multi-Tenancy Architecture (multi-tenancy-architecture_spec.md -- Future)
 

@@ -1,0 +1,51 @@
+spec: paragon-design-tokens-migration_spec.md
+acceptance_criteria:
+- id: AC-TKN-016
+  description: Plugin exposes PARAGON_THEME_URLS in rendered MFE config path.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-token-coverage.sh
+    command: scripts/qa/verify-paragon-token-coverage.sh
+- id: AC-TKN-017
+  description: PARAGON_THEME_URLS infrastructure is present and token files are generated.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-token-coverage.sh
+    command: scripts/qa/verify-paragon-token-coverage.sh
+- id: AC-TKN-020
+  description: Theme assets are served from a stable /theme path in repo configuration.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-token-coverage.sh
+    command: scripts/qa/verify-paragon-token-coverage.sh
+- id: AC-TKN-021
+  description: Generated brand CSS includes Paragon token variables and valid payload.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-token-coverage.sh
+    command: scripts/qa/verify-paragon-token-coverage.sh
+- id: AC-TKN-029
+  description: verify-paragon-tokens validates token count, unresolved references, and canonical colors.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-tokens.sh
+    command: scripts/qa/verify-paragon-tokens.sh
+- id: AC-TKN-030
+  description: verify-paragon-tokens fails when required --pgn-color-primary is missing.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-tokens.sh
+    command: scripts/qa/verify-paragon-tokens.sh
+- id: AC-TKN-031
+  description: Static CI script registry includes verify-paragon-tokens.sh.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-paragon-tokens.sh
+    command: scripts/qa/verify-paragon-tokens.sh

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-TKN-016, AC-TKN-017, AC-TKN-020, AC-TKN-021
+# @covers AC-TKN-016, AC-TKN-017, AC-TKN-020, AC-TKN-021, AC-TKN-022, AC-TKN-023
 # @spec: paragon-design-tokens-migration_spec.md
 set -euo pipefail
 
@@ -169,6 +169,21 @@ fi
 # 3) Token bridge verification
 if [[ -f "$TOKENS_FILE" ]]; then
   pass "Token bridge file exists"
+
+  # Backward-compatibility contracts (AC-TKN-022, AC-TKN-023)
+  if grep -q '^\$primary:' "$TOKENS_FILE" \
+    && grep -q '^\$secondary:' "$TOKENS_FILE" \
+    && grep -q '^\$font-family-sans-serif:' "$TOKENS_FILE"; then
+    pass "Backward-compatibility SCSS variables are present (\$primary/\$secondary/\$font-family-sans-serif)"
+  else
+    fail "Backward-compatibility SCSS variables missing from _tokens.scss"
+  fi
+
+  if grep -q ':root[[:space:]]*{' "$TOKENS_FILE"; then
+    pass "_tokens.scss contains :root CSS custom property block"
+  else
+    fail "_tokens.scss missing :root CSS custom property block"
+  fi
 
   # Ensure core semantic tokens are declared
   for token in \

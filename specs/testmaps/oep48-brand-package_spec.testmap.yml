@@ -1,0 +1,79 @@
+spec: oep48-brand-package_spec.md
+acceptance_criteria:
+- id: AC-BRAND-018
+  description: _variables.scss defines $primary using canonical Mereka magenta.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-019
+  description: _variables.scss includes deprecation note pointing to tokens.json.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-020
+  description: tokens.json is valid and includes colors.primary.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-021
+  description: tokens.json colors.primary matches canonical Mereka magenta.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-022
+  description: tokens.json typography font-family-sans-serif contains Poppins.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-023
+  description: Tutor plugin includes mfe pre-npm copy patch for brand-mereka.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-024
+  description: Tutor plugin wires npm alias installation for @edx/brand from local brand-mereka package.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-025
+  description: Tutor plugin uses --legacy-peer-deps to avoid peer conflict failures during build.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-026
+  description: Structure verifier validates OEP-48 package files, fonts, and image constraints.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-027
+  description: Structure verifier fails non-zero when required files are missing.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-028
+  description: Static CI script registry includes the brand-package structure verifier.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
