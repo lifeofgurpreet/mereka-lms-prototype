@@ -313,38 +313,17 @@ label {
   font-size: var(--pgn-typography-font-size-sm);
 }
 
-/* RISK: LOW — Profile MFE certificate card classes are stable in frontend-app-profile
- * and scoped under .profile-page to avoid affecting LMS certificate pages.
- */
+/* RISK: LOW — profile certificate card styling scoped to .profile-page. */
 .profile-page .certificate {
   border-radius: var(--mereka-mfe-card-radius);
   border: 1px solid var(--mereka-mfe-border);
-  background:
-    linear-gradient(
-      180deg,
-      rgb(var(--mereka-color-teal-rgb) / 0.06) 0%,
-      var(--mereka-mfe-surface) 42%
-    );
+  background: linear-gradient(180deg, rgb(var(--mereka-color-teal-rgb) / 0.06) 0%, var(--mereka-mfe-surface) 42%);
   box-shadow: var(--mereka-mfe-card-shadow);
 }
 
-.profile-page .certificate-type-illustration {
-  min-height: 72px;
-  margin-bottom: 0.75rem;
-  background-repeat: no-repeat;
-  background-position: right top;
-  background-size: 72px 72px;
-}
-
-.profile-page .certificate h4,
-.profile-page .certificate h5 {
-  color: var(--mereka-color-ink-900);
-}
-
-.profile-page .certificate .small,
-.profile-page .certificate .x-small {
-  color: var(--mereka-color-ink-700);
-}
+.profile-page .certificate-type-illustration { min-height: 72px; margin-bottom: 0.75rem; background-repeat: no-repeat; background-position: right top; background-size: 72px 72px; }
+.profile-page .certificate h4, .profile-page .certificate h5 { color: var(--mereka-color-ink-900); }
+.profile-page .certificate .small, .profile-page .certificate .x-small { color: var(--mereka-color-ink-700); }
 
 /* RISK: LOW — slot-owned learning header and tabs helper surfaces */
 .mereka-learning-course-header {
