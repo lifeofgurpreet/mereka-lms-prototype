@@ -49,9 +49,11 @@ SERVICE_DEPLOY="scripts/qa/verify-enterprise-service-deployment.sh"
 LICENSE_MGMT="scripts/qa/verify-enterprise-license-management.sh"
 RUNBOOK_TENANT="docs/runbooks/tenant-provisioning-runbook.md"
 RUNBOOK_ENTERPRISE="docs/runbooks/enterprise-services-runbook.md"
+READINESS_REPORT="docs/migrations/ENTERPRISE_DOMAIN_READINESS_REPORT_2026-02-28.md"
 ONBOARD_SCRIPT="scripts/tenants/onboard-enterprise-tenant.sh"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 RUNTIME_APP_GUARD="scripts/qa/verify-enterprise-runtime-app-wiring.sh"
+CAPACITY_AUDIT="scripts/qa/audit-enterprise-capacity-pressure.sh"
 
 # 1) Port truth (AC-003 contract alignment)
 assert_contains "$SPEC_FILE" 'AC-003:.*enterprise-catalog:8160/health/' \
@@ -118,6 +120,12 @@ assert_not_contains "$RUNBOOK_TENANT" '_testmap\.ya?ml' \
   "tenant provisioning runbook has no legacy _testmap.yaml reference"
 assert_not_contains "$RUNBOOK_ENTERPRISE" '_testmap\.ya?ml' \
   "enterprise services runbook has no legacy _testmap.yaml reference"
+assert_contains "$RUNBOOK_TENANT" 'verify-enterprise-service-deployment\.sh --env prod' \
+  "tenant provisioning runbook uses explicit prod-context service deployment verification"
+assert_contains "$RUNBOOK_ENTERPRISE" 'verify-enterprise-service-deployment\.sh --env prod' \
+  "enterprise services runbook uses explicit prod-context service deployment verification"
+assert_contains "$RUNBOOK_ENTERPRISE" '--allow-parked-services' \
+  "enterprise services runbook documents parked-profile verification"
 
 # 7) Deterministic enterprise onboarding workflow contract
 assert_contains "$ONBOARD_SCRIPT" '\[1/6\] Provision/reconcile tenant' \
@@ -180,6 +188,22 @@ if [[ -f "$RUNTIME_APP_GUARD" ]]; then
 else
   fail "runtime app wiring guard script is missing"
 fi
+
+# 10) Capacity-pressure audit and report contract
+if [[ -f "$CAPACITY_AUDIT" ]]; then
+  pass "enterprise capacity-pressure audit script exists"
+  if [[ -x "$CAPACITY_AUDIT" ]]; then
+    pass "enterprise capacity-pressure audit script is executable"
+  else
+    fail "enterprise capacity-pressure audit script is not executable"
+  fi
+else
+  fail "enterprise capacity-pressure audit script is missing"
+fi
+assert_contains "$READINESS_REPORT" 'audit-enterprise-capacity-pressure\.sh --env prod' \
+  "readiness report includes explicit prod capacity-pressure audit command"
+assert_contains "$READINESS_REPORT" 'Definition of done for “enterprise-ready for new domain/client”' \
+  "readiness report includes enterprise-ready definition of done"
 
 echo
 if [[ "$failures" -eq 0 ]]; then
