@@ -126,6 +126,17 @@ docker inspect --format='{{index .RepoDigests 0}}' \
   --apply --commit --push --verify-runtime
 ```
 
+For branding/theme releases, append cache purge (requires Cloudflare credentials):
+
+```bash
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${OPENEDX_TAG}" \
+  --mfe-tag "${MFE_TAG}" \
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
+```
+
 - [ ] GitOps script exits 0
 - [ ] PR merged to `main` (no direct push)
 - [ ] ArgoCD sync confirmed: `kubectl -n argocd get application mereka-lms-local`

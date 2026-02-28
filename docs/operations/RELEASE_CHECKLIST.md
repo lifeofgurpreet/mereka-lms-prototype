@@ -66,6 +66,17 @@ Staging note:
   --apply --commit --push --verify-runtime
 ```
 
+Branding/theme release option (requires Cloudflare credentials):
+
+```bash
+./scripts/infra/release-openedx-gitops.sh \
+  --target-env production \
+  --openedx-tag "${OPENEDX_TAG}" \
+  --mfe-tag "${MFE_TAG}" \
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
+```
+
 Digest pinning (recommended when digests are available):
 
 ```bash

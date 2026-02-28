@@ -46,6 +46,13 @@ docker push asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe:${MFE_
 ./scripts/infra/canonical-release.sh \
   --openedx-tag ${OPENEDX_TAG} --mfe-tag ${MFE_TAG} \
   --apply --commit --push --verify-runtime
+
+# 5b. Branding/theme release (optional): include frontend cache purge
+# Requires Cloudflare credentials in env.
+./scripts/infra/canonical-release.sh \
+  --openedx-tag ${OPENEDX_TAG} --mfe-tag ${MFE_TAG} \
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
 ```
 
 ## 2. Environment Deltas (AC-OPS-062)
