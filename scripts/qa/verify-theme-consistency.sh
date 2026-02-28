@@ -162,12 +162,26 @@ print(getattr(settings, 'DEFAULT_SITE_THEME', 'NOT SET'))
     do_fail "LMS runtime theme is '$theme', expected 'mereka'"
   fi
 
-  # Check MFE Caddyfile has all MFE routes
-  mfe_routes=$(kubectl exec -n mereka-lms deployment/mfe -- grep -c 'file_server' /etc/caddy/Caddyfile 2>/dev/null || echo "0")
-  if [ "$mfe_routes" -ge 9 ]; then
-    do_pass "MFE Caddy serves $mfe_routes MFE routes (>= 9 expected)"
+  # Check MFE Caddyfile has critical route markers.
+  # Counting `file_server` entries is brittle across Caddy template revisions.
+  caddyfile_content="$(kubectl exec -n mereka-lms deployment/mfe -- cat /etc/caddy/Caddyfile 2>/dev/null || true)"
+  if [ -n "$caddyfile_content" ]; then
+    missing_markers=0
+    for marker in '/authn/*' '/profile/*' '/learning/*' '/theme/*'; do
+      if grep -Fq "$marker" <<<"$caddyfile_content"; then
+        :
+      else
+        missing_markers=$((missing_markers + 1))
+      fi
+    done
+
+    if [ "$missing_markers" -eq 0 ]; then
+      do_pass "MFE Caddyfile contains critical MFE/theme route markers"
+    else
+      do_warn "MFE Caddyfile missing $missing_markers critical route marker(s)"
+    fi
   else
-    do_warn "MFE Caddy has only $mfe_routes routes (expected >= 9)"
+    do_warn "Could not read MFE Caddyfile from runtime pod"
   fi
 else
   do_warn "Cluster not accessible — skipping runtime checks"
