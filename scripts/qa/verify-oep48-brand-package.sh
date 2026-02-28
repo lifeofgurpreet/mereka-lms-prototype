@@ -61,6 +61,7 @@ CMS_FONT_DIR="${THEME_ROOT}/cms/static/fonts"
 CMS_HEAD_EXTRA="${THEME_ROOT}/cms/templates/head-extra.html"
 CMS_FOOTER_WIDGET="${THEME_ROOT}/cms/templates/widgets/footer.html"
 MFE_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
+PLUGIN_FILE="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
 PROVENANCE="${ASSETS_BRANDING}/tokens.provenance.json"
 OEP48_DOC="${REPO_ROOT}/docs/architecture/OEP48_BRAND_PACKAGE.md"
 TOKEN_GENERATOR="${REPO_ROOT}/scripts/branding/generate-tokens-from-canonical.sh"
@@ -643,10 +644,21 @@ else
   skip "GAP-4 open: logo_white.png alias not present (hyphenated logo-white.png is in use)"
 fi
 
-if rg -n "MerekaHeader|logo\\.js" "${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py" >/dev/null 2>&1; then
-  pass "GAP-5 closed: explicit MFE header branding component wiring detected"
+HEADER_SLOT_OK=1
+if ! rg -q 'org\.openedx\.frontend\.layout\.header_logo\.v1' "$PLUGIN_FILE"; then
+  HEADER_SLOT_OK=0
+fi
+if ! rg -q 'RenderWidget:[[:space:]]*MerekaHeaderLogo' "$PLUGIN_FILE"; then
+  HEADER_SLOT_OK=0
+fi
+if ! rg -q 'const[[:space:]]+MerekaHeaderLogo[[:space:]]*=[[:space:]]*\(\)[[:space:]]*=>' "$PLUGIN_FILE"; then
+  HEADER_SLOT_OK=0
+fi
+
+if [[ "$HEADER_SLOT_OK" -eq 1 ]]; then
+  pass "GAP-5 closed: header_logo plugin-slot wiring + MerekaHeaderLogo component are present"
 else
-  skip "GAP-5 open: no dedicated React header component export wiring detected"
+  skip "GAP-5 open: header_logo slot wiring or MerekaHeaderLogo component definition is incomplete"
 fi
 
 echo ""
