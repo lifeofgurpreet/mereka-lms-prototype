@@ -823,6 +823,8 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.sequence_navigation.v1 | Learning sequence-navigation helper context
 #   org.openedx.frontend.learning.course_outline_sidebar_trigger.v1 | Learning desktop outline-trigger helper
 #   org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1 | Learning mobile outline-trigger helper
+#   org.openedx.frontend.learning.course_home_section_outline.v1 | Learning course-home outline helper
+#   org.openedx.frontend.learning.course_recommendations.v1 | Learning course-exit recommendations helper
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
@@ -1217,6 +1219,36 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearningOutlineMobileSidebarTriggerHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_home_section_outline.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_home_section_outline_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseHomeSectionOutlineHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_recommendations.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_course_recommendations_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningCourseRecommendationsHint,
                 },
             },
             """,
@@ -1801,6 +1833,29 @@ const MerekaLearningOutlineMobileSidebarTriggerHint = () => {
     <span className="mereka-learning-outline-mobile-sidebar-trigger-hint mereka-badge d-xl-none">
       Outline
     </span>
+  );
+};
+
+// Learning course-home section-outline slot helper.
+// Wired into org.openedx.frontend.learning.course_home_section_outline.v1.
+const MerekaLearningCourseHomeSectionOutlineHint = () => {
+  return (
+    <div className="mereka-learning-course-home-section-outline-hint mb-2">
+      <span className="mereka-badge me-2">Course home</span>
+      <span className="small text-muted">Follow each section in sequence for best outcomes.</span>
+    </div>
+  );
+};
+
+// Learning course-recommendations slot helper.
+// Wired into org.openedx.frontend.learning.course_recommendations.v1.
+const MerekaLearningCourseRecommendationsHint = ({ variant }) => {
+  const safeVariant = typeof variant === 'string' && variant ? variant : 'default';
+  return (
+    <div className="mereka-learning-course-recommendations-hint mb-2">
+      <span className="mereka-badge me-2">Next step</span>
+      <span className="small text-muted">Explore recommended pathways ({safeVariant}).</span>
+    </div>
   );
 };
 
