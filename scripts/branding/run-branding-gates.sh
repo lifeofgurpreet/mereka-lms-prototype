@@ -24,6 +24,7 @@ Environment flags:
   STRICT_NO_GOOGLE_FONTS=1|0          Default: 0 (passed to studio authoring check)
   STRICT_PROXY_AUTHN_BRANDING=1|0     Default: 0 (enforce branded /authn assets on service domains)
   RUN_SCREENSHOTS=1|0                 Default: 0
+  RUN_CROSS_BROWSER_SMOKE=1|0         Default: 0
   RUN_VISUAL_REGRESSION=1|0           Default: 0
   VISUAL_THRESHOLD=<float>            Default: 0.06
   VISUAL_EXCLUDE_REGEX=<expr>         Optional regex for skipped screenshot labels
@@ -59,6 +60,7 @@ RUN_SLOT_SOURCE_ALIGNMENT_CHECK="${RUN_SLOT_SOURCE_ALIGNMENT_CHECK:-1}"
 RUN_PARAGON_RUNTIME_CHECK="${RUN_PARAGON_RUNTIME_CHECK:-1}"
 PARAGON_RUNTIME_STRICT="${PARAGON_RUNTIME_STRICT:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
+RUN_CROSS_BROWSER_SMOKE="${RUN_CROSS_BROWSER_SMOKE:-0}"
 RUN_VISUAL_REGRESSION="${RUN_VISUAL_REGRESSION:-0}"
 VISUAL_THRESHOLD="${VISUAL_THRESHOLD:-0.06}"
 VISUAL_EXCLUDE_REGEX="${VISUAL_EXCLUDE_REGEX:-}"
@@ -147,6 +149,11 @@ run_live_gate() {
   if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
     echo "==> Live gate: capture-branding-screenshots (${env})"
     "$REPO_ROOT/scripts/qa/capture-branding-screenshots.sh" "$env"
+  fi
+
+  if [[ "$RUN_CROSS_BROWSER_SMOKE" == "1" ]]; then
+    echo "==> Live gate: verify-cross-browser-branding-smoke (${env})"
+    "$REPO_ROOT/scripts/qa/verify-cross-browser-branding-smoke.sh" --env "$env" --cross-browser
   fi
 
   if [[ "$RUN_VISUAL_REGRESSION" == "1" ]]; then
