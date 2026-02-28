@@ -816,6 +816,10 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.learner_tools.v1 | Learning learner tools helper context
 #   org.openedx.frontend.learning.progress_tab_course_grade.v1 | Learning progress course-grade helper
 #   org.openedx.frontend.learning.progress_tab_related_links.v1 | Learning progress related-links helper
+#   org.openedx.frontend.learning.unit_title.v1 | Learning unit-title helper context
+#   org.openedx.frontend.learning.sequence_navigation.v1 | Learning sequence-navigation helper context
+#   org.openedx.frontend.learning.course_outline_sidebar_trigger.v1 | Learning desktop outline-trigger helper
+#   org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1 | Learning mobile outline-trigger helper
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
@@ -1105,6 +1109,66 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaProgressRelatedLinksHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.unit_title.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_unit_title_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningUnitTitleHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.sequence_navigation.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_sequence_navigation_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningSequenceNavigationHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_outline_sidebar_trigger.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_outline_sidebar_trigger_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningOutlineSidebarTriggerHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_learning_outline_mobile_sidebar_trigger_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaLearningOutlineMobileSidebarTriggerHint,
                 },
             },
             """,
@@ -1629,6 +1693,52 @@ const MerekaProgressRelatedLinksHint = () => {
       <span className="mereka-badge me-2">Resources</span>
       <a href="/help/" className="small">Need support? Visit the help centre.</a>
     </div>
+  );
+};
+
+// Learning unit-title slot helper.
+// Wired into org.openedx.frontend.learning.unit_title.v1.
+const MerekaLearningUnitTitleHint = ({ unit }) => {
+  const title = unit && typeof unit.title === 'string' ? unit.title : '';
+  return (
+    <div className="mereka-learning-unit-title-hint mb-2">
+      <span className="mereka-badge me-2">Unit</span>
+      {title ? <span className="small text-muted">{title}</span> : null}
+    </div>
+  );
+};
+
+// Learning sequence-navigation slot helper.
+// Wired into org.openedx.frontend.learning.sequence_navigation.v1.
+const MerekaLearningSequenceNavigationHint = ({ unitId }) => {
+  const safeUnitId = typeof unitId === 'string' ? unitId : '';
+  return (
+    <div className="mereka-learning-sequence-navigation-hint mb-2">
+      <span className="mereka-badge me-2">Navigation</span>
+      <span className="small text-muted">
+        {safeUnitId ? `Current unit: ${safeUnitId}` : 'Move through each unit step by step.'}
+      </span>
+    </div>
+  );
+};
+
+// Learning desktop outline-trigger slot helper.
+// Wired into org.openedx.frontend.learning.course_outline_sidebar_trigger.v1.
+const MerekaLearningOutlineSidebarTriggerHint = () => {
+  return (
+    <span className="mereka-learning-outline-sidebar-trigger-hint mereka-badge d-none d-xl-inline-block">
+      Outline
+    </span>
+  );
+};
+
+// Learning mobile outline-trigger slot helper.
+// Wired into org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1.
+const MerekaLearningOutlineMobileSidebarTriggerHint = () => {
+  return (
+    <span className="mereka-learning-outline-mobile-sidebar-trigger-hint mereka-badge d-xl-none">
+      Outline
+    </span>
   );
 };
 
