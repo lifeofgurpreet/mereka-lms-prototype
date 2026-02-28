@@ -43,6 +43,28 @@ Options:
 EOF
 }
 
+normalize_runtime_url() {
+  local raw="$1"
+  [[ -z "$raw" ]] && { echo ""; return 0; }
+  python3 - "$raw" <<'PY'
+import sys
+from urllib.parse import urlparse
+
+raw = (sys.argv[1] or "").strip()
+if not raw:
+    print("")
+    raise SystemExit(0)
+if "://" not in raw:
+    raw = f"https://{raw}"
+parsed = urlparse(raw)
+if not parsed.netloc:
+    print("")
+    raise SystemExit(0)
+scheme = parsed.scheme or "https"
+print(f"{scheme}://{parsed.netloc}")
+PY
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --runtime-url)
@@ -68,6 +90,21 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -n "${RUNTIME_URL:-}" ]]; then
+  original_runtime_url="$RUNTIME_URL"
+  normalized_runtime_url="$(normalize_runtime_url "$RUNTIME_URL")"
+  if [[ -z "$normalized_runtime_url" ]]; then
+    fail "Invalid --runtime-url/PARAGON_RUNTIME_URL value: ${original_runtime_url}"
+    echo ""
+    echo "=== Summary: PASS=${PASS} WARN=${WARN} FAIL=${FAIL} ==="
+    exit 1
+  fi
+  RUNTIME_URL="$normalized_runtime_url"
+  if [[ "$RUNTIME_URL" != "$original_runtime_url" ]]; then
+    warn "Normalized runtime URL to origin for contract checks: ${RUNTIME_URL} (from ${original_runtime_url})"
+  fi
+fi
 
 if [[ -f "$PLUGIN_FILE" ]]; then
   if grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*False)' "$PLUGIN_FILE"; then
@@ -96,7 +133,8 @@ fi
 # AC-TKN-018 / AC-TKN-019 runtime validation is environment-dependent.
 if [[ -n "${RUNTIME_URL:-}" ]]; then
   runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
-  if curl -fsSIL "$runtime_url" >/tmp/paragon-theme-head.$$ 2>/dev/null; then
+  runtime_status="$(curl -sSIL -o /tmp/paragon-theme-head.$$ -w "%{http_code}" "$runtime_url" || true)"
+  if [[ "$runtime_status" =~ ^[0-9]+$ ]] && [[ "$runtime_status" -ge 200 ]] && [[ "$runtime_status" -lt 400 ]]; then
     content_type_ok=0
     cache_header_ok=0
     body_fetch_ok=0
@@ -110,7 +148,7 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
       cache_header_ok=1
     fi
 
-    if curl -fsSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
+    if curl -sSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
       body_fetch_ok=1
       body_bytes="$(wc -c </tmp/paragon-theme-body.$$ | tr -d ' ')"
       if [[ "$body_bytes" -gt 100 ]]; then
@@ -142,7 +180,7 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
 
     pass "AC-TKN-018 runtime URL is reachable for cache-clear verification workflow"
   else
-    fail "AC-TKN-018/019 runtime URL not reachable: ${runtime_url}"
+    fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown})"
   fi
   rm -f /tmp/paragon-theme-head.$$
   rm -f /tmp/paragon-theme-body.$$

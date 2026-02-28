@@ -499,3 +499,21 @@ python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
 - `verify-email-template-multilang.sh`: `PASS=71`, `FAIL=0`, `WARN=0`
   - Includes locale wrapper coverage for all 15 ACE message types (`ms`, `zh-hans`)
   - Verifier now checks runtime ACE settings path (prod overlay patch) in addition to local Tutor config files.
+
+## Addendum — Performance Spot-Check Runtime Contract Behavior
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-frontend-performance-spotcheck.sh --env prod --require-runtime
+./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io/authn/login --require-runtime
+```
+
+### Result
+
+- Wrapper/runtime URL ergonomics were hardened:
+  - `verify-frontend-performance-spotcheck.sh` now supports `--env prod|dev` and auto-resolves the runtime origin from shared domain config.
+  - `verify-paragon-runtime.sh` now normalizes route-style URLs to origin (for example `/authn/login` → host root) and reports explicit HTTP status failures.
+- Current runtime contract status in prod:
+  - `AC-TKN-018/019` fails with `HTTP 404` on `https://apps.academyv2.mereka.io/theme/mereka-brand.min.css`.
+  - This is an environment/runtime drift signal (theme endpoint unavailable), not a verifier false-negative.
