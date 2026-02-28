@@ -194,6 +194,14 @@ kubectl get deploy lms cms mfe -n mereka-lms \
 # .github/workflows/npm-start-mfe-smoke.yml
 # Enable strict runtime mode only after PARAGON_THEME_URLS rollout is active.
 
+# Optional: release evidence workflow (dry-run + runtime contract + optional npm-start smoke)
+# .github/workflows/release-evidence.yml inputs:
+#   - require_runtime_theme=true|false
+#   - runtime_theme_url=<optional override>
+#   - run_npm_start_smoke=true|false
+#   - learning_path=/learning
+#   - npm_start_project=chromium|firefox|mobile-chrome
+
 # Check all tenant domains return HTTP 200
 for domain in academyv2.mereka.io academy.biji-biji.com; do
   echo "$domain: $(curl -s -o /dev/null -w '%{http_code}' "https://${domain}/")"
