@@ -270,3 +270,7 @@ All paths should return `200` (SPAs serve index.html for all routes).
 | All MFE routes 502 | `mfe:8002` container unhealthy | Check MFE pod logs and readiness probe |
 | Route returns `200` with empty body | Runtime Caddyfile in pod is stale/missing handler (false-green if only status checked) | Check `/etc/caddy/Caddyfile` in the MFE pod and re-apply Tutor patches + rebuild/redeploy MFE |
 | `/api/mfe_config/v1` not found | API passthrough missing | Add `reverse_proxy /api/mfe_config/v1* lms:8000` to MFE Caddyfile |
+
+When `verify-mfe-route-contract.sh` fails runtime checks, use its diagnostic classification:
+- `pod reload/rollout drift`: runtime `/etc/caddy/Caddyfile` is stale but mounted configmap already has the path.
+- `GitOps/base-ref/configmap drift`: runtime and mounted configmap both miss a repo-declared route.

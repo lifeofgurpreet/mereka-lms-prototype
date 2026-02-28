@@ -2,7 +2,7 @@
 # @spec: cross-cutting-requirements_spec.md
 # @covers AC-ULMO-001: OPENEDX_COMMON_VERSION patch confirmed working (ensure_mfe_ulmo_source_refs)
 # @covers AC-ULMO-002: All MFE app source refs use release/ulmo.1
-# @covers AC-ULMO-003: Atlas translation pulls use release/ulmo.1
+# @covers AC-ULMO-003: Atlas translation pulls use release/ulmo
 # @covers AC-ULMO-004: Brand package upgraded to ulmo-compatible version (^2.4.3)
 # @covers AC-ULMO-006: discussions webpack fix is no-op on ulmo (fixed upstream)
 #
@@ -185,14 +185,14 @@ run_offline_checks() {
   echo ""
 
   # -----------------------------------------------------------------------
-  # AC-ULMO-003: Atlas translation revision uses release/ulmo.1
+  # AC-ULMO-003: Atlas translation revision uses release/ulmo
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-003: Atlas translation revision ---"
 
   if [[ -f "$SNAPSHOT" ]]; then
     ATLAS_REDWOOD=$(grep -c "revision=open-release/redwood" "$SNAPSHOT" || true)
     ATLAS_OPEN_ULMO=$(grep -c "revision=open-release/ulmo" "$SNAPSHOT" || true)
-    ATLAS_ULMO=$(grep -c "revision=release/ulmo\\.1" "$SNAPSHOT" || true)
+    ATLAS_ULMO=$(grep -cE "revision=release/ulmo(\\.1)?" "$SNAPSHOT" || true)
 
     if [[ "$ATLAS_REDWOOD" -eq 0 ]]; then
       pass "No redwood atlas translation revisions in snapshot"
@@ -207,7 +207,7 @@ run_offline_checks() {
     fi
 
     if [[ "$ATLAS_ULMO" -ge 11 ]]; then
-      pass "All atlas pulls use release/ulmo.1 ($ATLAS_ULMO found)"
+      pass "All atlas pulls use release/ulmo ($ATLAS_ULMO found)"
     elif [[ "$ATLAS_ULMO" -ge 1 ]]; then
       fail "Only $ATLAS_ULMO atlas ulmo refs found (expected >=11)"
     else

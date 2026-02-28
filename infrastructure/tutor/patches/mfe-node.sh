@@ -314,15 +314,19 @@ for target in targets:
             "--revision=open-release/ulmo.1 ",
             "--revision=release/ulmo.1 ",
         )
-        # openedx-translations does not expose ulmo.* branches; keep it on redwood.3
-        # to avoid atlas pull failures during MFE Docker builds.
+        # openedx-translations tracks Ulmo on release/ulmo (not release/ulmo.1).
+        # Keep translation pulls pinned to the canonical translation branch.
+        text = text.replace(
+            "--repository=openedx/openedx-translations --revision=open-release/redwood.3 ",
+            "--repository=openedx/openedx-translations --revision=release/ulmo ",
+        )
         text = text.replace(
             "--repository=openedx/openedx-translations --revision=release/ulmo.1 ",
-            "--repository=openedx/openedx-translations --revision=open-release/redwood.3 ",
+            "--repository=openedx/openedx-translations --revision=release/ulmo ",
         )
         text = text.replace(
             "--repository=openedx/openedx-translations --revision=open-release/ulmo.1 ",
-            "--repository=openedx/openedx-translations --revision=open-release/redwood.3 ",
+            "--repository=openedx/openedx-translations --revision=release/ulmo ",
         )
         return text
 

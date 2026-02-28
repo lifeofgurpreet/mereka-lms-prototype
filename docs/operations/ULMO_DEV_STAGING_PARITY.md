@@ -127,7 +127,7 @@ matches the Ulmo baseline used by parity verifiers.
 
 The MFE Dockerfile at `infrastructure/tutor/mfe-build/Dockerfile` is the canonical
 Ulmo MFE build definition. It uses `release/ulmo.1` for all 11+ MFE app source refs
-and `release/ulmo.1` for Atlas translation pulls — this is correct.
+and `release/ulmo` for Atlas translation pulls — this is correct.
 
 ---
 

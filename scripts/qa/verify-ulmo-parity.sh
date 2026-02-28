@@ -7,7 +7,7 @@
 # Checks (offline unless --online is passed):
 #   - Base image versions reference Tutor v21 / Ulmo images
 #   - MFE Dockerfile uses release/ulmo.1 source refs
-#   - MFE Dockerfile uses release/ulmo.1 for Atlas translations
+#   - MFE Dockerfile uses release/ulmo for Atlas translations
 #   - Design Tokens pipeline files exist (tokens.css + _tokens.scss)
 #   - rke2-nonprod overlay has domain-env patch
 #   - rke2-nonprod overlay has ExternalSecrets infisical patch
@@ -412,13 +412,13 @@ else
     fail "MFE Dockerfile: $ATLAS_OPEN_ULMO legacy open-release/ulmo atlas translation ref(s) present"
   fi
 
-  ATLAS_ULMO=$(grep -c "revision=release/ulmo\\.1" "$MFE_DOCKERFILE" || true)
+  ATLAS_ULMO=$(grep -cE "revision=release/ulmo(\\.1)?" "$MFE_DOCKERFILE" || true)
   if [[ "$ATLAS_ULMO" -ge 11 ]]; then
-    pass "MFE Dockerfile: $ATLAS_ULMO Atlas translation pulls use release/ulmo.1"
+    pass "MFE Dockerfile: $ATLAS_ULMO Atlas translation pulls use release/ulmo"
   elif [[ "$ATLAS_ULMO" -ge 1 ]]; then
     fail "MFE Dockerfile: only $ATLAS_ULMO Atlas ulmo refs (expected >=11)"
   else
-    fail "MFE Dockerfile: no release/ulmo.1 Atlas translation refs"
+    fail "MFE Dockerfile: no release/ulmo Atlas translation refs"
   fi
 
   NODE_BASE=$(grep -E "^FROM (docker\.io/)?node:" "$MFE_DOCKERFILE" | head -1 || true)

@@ -538,15 +538,36 @@ if [[ -f "$CADDYFILE_LOCAL" ]]; then
       # repository-declared route path matchers (catches stale rollouts).
       RUNTIME_CADDY=$(mktemp)
       RUNTIME_PATHS=$(mktemp)
+      DEPLOY_CADDY_CONFIGMAP=""
+      DEPLOY_CONFIGMAP_PATHS=$(mktemp)
       if "${KUBECTL_CMD[@]}" exec -n "$K8S_NAMESPACE" "$MFE_POD" -- cat /etc/caddy/Caddyfile > "$RUNTIME_CADDY" 2>/dev/null; then
         do_pass "8jao.7: Retrieved runtime /etc/caddy/Caddyfile from MFE pod"
         grep -oP '(?<=path )/[a-z0-9_-]+(?= )' "$RUNTIME_CADDY" | sort -u > "$RUNTIME_PATHS"
+
+        DEPLOY_CADDY_CONFIGMAP=$("${KUBECTL_CMD[@]}" get deploy -n "$K8S_NAMESPACE" mfe -o jsonpath='{.spec.template.spec.volumes[?(@.name=="config")].configMap.name}' 2>/dev/null || true)
+        if [[ -n "$DEPLOY_CADDY_CONFIGMAP" ]]; then
+          do_pass "8jao.7: MFE deployment mounts configmap '$DEPLOY_CADDY_CONFIGMAP'"
+          if "${KUBECTL_CMD[@]}" get configmap -n "$K8S_NAMESPACE" "$DEPLOY_CADDY_CONFIGMAP" -o go-template='{{index .data "Caddyfile"}}' \
+            | grep -oP '(?<=path )/[a-z0-9_-]+(?= )' | sort -u > "$DEPLOY_CONFIGMAP_PATHS"; then
+            do_pass "8jao.7: Retrieved route paths from mounted configmap '$DEPLOY_CADDY_CONFIGMAP'"
+          else
+            do_runtime_gate_warn_or_fail "8jao.7: Could not parse Caddyfile paths from configmap '$DEPLOY_CADDY_CONFIGMAP'"
+          fi
+        else
+          do_runtime_gate_warn_or_fail "8jao.7: Could not resolve mounted Caddy configmap from deployment/mfe"
+        fi
 
         while IFS= read -r repo_path; do
           if grep -qxF "$repo_path" "$RUNTIME_PATHS"; then
             do_pass "8jao.7: Runtime Caddyfile contains route path '$repo_path'"
           else
-            do_fail "8jao.7: Runtime Caddyfile missing route path '$repo_path' from repo contract"
+            if [[ -s "$DEPLOY_CONFIGMAP_PATHS" ]] && grep -qxF "$repo_path" "$DEPLOY_CONFIGMAP_PATHS"; then
+              do_fail "8jao.7: Runtime Caddyfile missing '$repo_path' but mounted configmap '$DEPLOY_CADDY_CONFIGMAP' has it (pod reload/rollout drift)"
+            elif [[ -s "$DEPLOY_CONFIGMAP_PATHS" ]]; then
+              do_fail "8jao.7: Runtime + mounted configmap '$DEPLOY_CADDY_CONFIGMAP' both missing '$repo_path' (GitOps/base-ref/configmap drift)"
+            else
+              do_fail "8jao.7: Runtime Caddyfile missing route path '$repo_path' from repo contract"
+            fi
           fi
         done < "$CADDY_PATHS"
       else
@@ -588,7 +609,7 @@ fi
 echo ""
 
 # Cleanup
-rm -f "$CADDY_DIRS" "$CADDY_PATHS" "$LMS_MFE_URLS" "$LMS_API_URLS" "$VERIFIER_ROUTES" "${RUNTIME_CADDY:-}" "${RUNTIME_PATHS:-}"
+rm -f "$CADDY_DIRS" "$CADDY_PATHS" "$LMS_MFE_URLS" "$LMS_API_URLS" "$VERIFIER_ROUTES" "${RUNTIME_CADDY:-}" "${RUNTIME_PATHS:-}" "${DEPLOY_CONFIGMAP_PATHS:-}"
 
 # =============================================================================
 # Summary

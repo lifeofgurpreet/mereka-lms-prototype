@@ -1,7 +1,7 @@
 # MFE Ulmo Migration Tracking
 
 **Status**: COMPLETE (as of 2026-02-20, bead mereka-lms-2s47)
-**Target release**: `release/ulmo.1`
+**Target release**: `release/ulmo.1` (MFE app repos), `release/ulmo` (openedx-translations)
 **Tutor version**: 21.0.0 (Ulmo)
 **Default Node.js**: 24.11.0 (confirmed for Ulmo; patch now aligns to Node 24 in `mfe-node.sh`)
 **Verification script**: `scripts/qa/verify-mfe-ulmo-migration.sh`
@@ -34,7 +34,7 @@ All 12 MFEs are confirmed on `release/ulmo.1` in `infrastructure/tutor/mfe-build
 | Component | Pre-Ulmo (Redwood) | Target (Ulmo) | Status |
 |-----------|-------------------|---------------|--------|
 | MFE git refs | `open-release/redwood.3` | `release/ulmo.1` | DONE |
-| Atlas translations | `open-release/redwood.3` | `release/ulmo.1` | DONE |
+| Atlas translations | `open-release/redwood.3` | `release/ulmo` | DONE |
 | Brand package | `^2.1.1` | `^2.4.3` | DONE |
 | Node base image | `node:18-bullseye-slim` | `node:24.11.0-bullseye-slim` | upgraded |
 | Paragon | v22.x | v23.x | via brand pkg |
@@ -211,7 +211,7 @@ PASS: apply-patches.sh patches ADD refs to release/ulmo.1
 PASS: Snapshot Dockerfile: no stale release refs
 PASS: All MFE apps use release/ulmo.1 (12 refs found, expected >=11)
 PASS: MFE base image uses Node 24+: FROM docker.io/node:24.11.0-bullseye-slim AS base
-PASS: All atlas pulls use release/ulmo.1 (12 found)
+PASS: All atlas pulls use release/ulmo (12 found)
 PASS: Brand upgraded to ulmo-compatible version (12 installs, expected >=11)
 PASS: Production MFE image tag is pinned: 1c66529-20260220023917
 ...
