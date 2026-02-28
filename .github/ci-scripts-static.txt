@@ -95,6 +95,7 @@ scripts/qa/verify-paragon-tokens.sh
 scripts/qa/verify-paragon-json-token-hierarchy.sh
 scripts/qa/verify-paragon-runtime-deferred.sh
 scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+scripts/qa/verify-brand-package-runtime.sh --allow-missing-image
 scripts/qa/verify-token-integrity-routing.sh
 scripts/qa/verify-token-contrast.sh
 scripts/qa/verify-aspects-deployment-readiness.sh
