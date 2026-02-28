@@ -231,6 +231,17 @@ ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
 if 'openedx_prometheus' in INSTALLED_APPS and "openedx_prometheus.urls" not in ROOT_URLCONF_OVERRIDES:
     ROOT_URLCONF_OVERRIDES.insert(0, "openedx_prometheus.urls")
 
+# Register URL patterns for optional modules via ROOT_URLCONF_OVERRIDES
+for _url_mod in [
+    ('openedx_notifications', 'openedx_notifications.urls'),
+    ('openedx_email_preferences', 'openedx_email_preferences.urls'),
+    ('openedx_mux_upload', 'openedx_mux_upload.urls'),
+    ('openedx_video_analytics', 'openedx_video_analytics.urls'),
+    ('openedx_video_protection', 'openedx_video_protection.urls'),
+]:
+    if _url_mod[0] in INSTALLED_APPS and _url_mod[1] not in ROOT_URLCONF_OVERRIDES:
+        ROOT_URLCONF_OVERRIDES.append(_url_mod[1])
+
 # In-App Notifications (Email Phase 3)
 _safe_add_app('openedx_notifications')
 
@@ -1662,44 +1673,10 @@ RUN pip install cryptography>=41.0.0
     )
 )
 
-# Add DID document endpoint to Credentials Service URLs
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "credentials-urlpatterns",
-        """
-# DID document endpoint for Verifiable Credentials issuer (CRED-020)
-# Must be before other patterns to catch /.well-known/did.json
-path('', include('credentials_vc_issuer.urls')),
-""",
-    )
-)
-
-###############################################################################
-# LMS URL Patterns (In-App Notifications API)
-###############################################################################
-
-# Add notifications API to LMS URL patterns
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "lms-urlpatterns",
-        """
-# In-app notifications API (Email Phase 3)
-path('api/notifications/v1/', include('openedx_notifications.urls')),
-
-# Email preferences API (Email Phase 2)
-path('api/user/v1/preferences/email/', include('openedx_email_preferences.urls')),
-
-# Mux video upload API (Video Phase 3: Studio Upload Workflow)
-path('api/mux/upload/', include('openedx_mux_upload.urls')),
-
-# Video analytics API (Video Phase 4: Analytics Integration)
-path('api/video/v1/', include('openedx_video_analytics.urls')),
-
-# Video content protection API (Video Phase 5: Signed Playback)
-path('api/mux/protection/', include('openedx_video_protection.urls')),
-""",
-    )
-)
+# NOTE: credentials-urlpatterns is NOT a standard Tutor patch. The VC issuer
+# URLs must be wired via the credentials_vc_issuer AppConfig or by providing
+# a custom urls.py template via ENV_TEMPLATE_TARGETS when the credentials
+# service is deployed.  See: credentials_vc_issuer/apps.py
 
 # CMS production settings patch (metrics + URL exposure in Studio)
 hooks.Filters.ENV_PATCHES.add_item(

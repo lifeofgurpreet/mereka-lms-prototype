@@ -201,8 +201,6 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | `caddy-caddyfile` | domain-names (Caddy), build-optimizations (MFE proxy) |
 | `nginx-lms-config` | domain-names (nginx), prometheus-metrics (nginx), build-optimizations (health) |
 | `credentials-dockerfile-post-python-requirements` | (credentials VC issuer) |
-| `credentials-urlpatterns` | (credentials VC issuer URLs) |
-| `lms-urlpatterns` | (notifications, email prefs, Mux, video URLs) |
 
 ---
 
