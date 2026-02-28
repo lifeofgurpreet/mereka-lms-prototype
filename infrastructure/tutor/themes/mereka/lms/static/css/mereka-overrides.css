@@ -226,55 +226,55 @@
 }
 
 html,
-body {
+body:not(.courseware) {
   font-family: var(--mereka-font-body);
   background-color: var(--mereka-color-surface-primary);
   color: var(--mereka-black);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.hd-1,
-.hd-2,
-.hd-3,
-.hd-4 {
+body:not(.courseware) h1,
+body:not(.courseware) h2,
+body:not(.courseware) h3,
+body:not(.courseware) h4,
+body:not(.courseware) h5,
+body:not(.courseware) h6,
+body:not(.courseware) .hd-1,
+body:not(.courseware) .hd-2,
+body:not(.courseware) .hd-3,
+body:not(.courseware) .hd-4 {
   font-family: var(--mereka-font-heading);
   font-weight: 600;
 }
 
-a {
+body:not(.courseware) a {
   color: var(--mereka-blue);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
 
-a:hover,
-a:focus {
+body:not(.courseware) a:hover,
+body:not(.courseware) a:focus {
   color: var(--mereka-teal);
 }
 
-.btn-primary,
-.btn-brand,
-button.btn.btn-primary {
+body:not(.courseware) .btn-primary,
+body:not(.courseware) .btn-brand,
+body:not(.courseware) button.btn.btn-primary {
   background-color: var(--mereka-magenta);
   border-color: var(--mereka-magenta);
   border-radius: 999px;
 }
 
-.btn-outline-primary {
+body:not(.courseware) .btn-outline-primary {
   border-radius: 999px;
 }
 
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-brand:hover,
-.btn-brand:focus,
-button.btn.btn-primary:hover,
-button.btn.btn-primary:focus {
+body:not(.courseware) .btn-primary:hover,
+body:not(.courseware) .btn-primary:focus,
+body:not(.courseware) .btn-brand:hover,
+body:not(.courseware) .btn-brand:focus,
+body:not(.courseware) button.btn.btn-primary:hover,
+body:not(.courseware) button.btn.btn-primary:focus {
   background-color: var(--mereka-color-magenta-dark);
   border-color: var(--mereka-color-magenta-dark);
 }

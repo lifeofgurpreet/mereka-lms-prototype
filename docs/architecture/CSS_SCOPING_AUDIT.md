@@ -14,6 +14,8 @@
 - QA contract now enforces this directly in active selectors (comments are ignored by the gate):
   - live scope present: `class*="account-settings"`
   - dead scopes absent: `authn`, `learner-dashboard`, `learning`, `discussions`
+- Global runtime/base selector hardening (`body`, headings, links, primary buttons) was completed on 2026-02-28 via `body:not(.courseware)` scoping in `common/mereka-overrides.css` and `scss/_base.scss`.
+- Sections 1.2–1.6 and older gap notes are historical context from the pre-hardening snapshot; rely on Section 5 summary + `verify-css-scoping.sh` as current truth.
 
 ---
 
@@ -474,14 +476,14 @@ All rules are prefixed with `.courseware .xblock`. This is the **correct scoping
 
 | # | Selector | File | XBlock Impact | Priority | Action |
 |---|----------|------|--------------|----------|--------|
-| G1 | `body` | `_tokens.scss` + `common/mereka-overrides.css` | Indirect (cascade) | P3 | Scope to `body.mereka-theme` — requires template patch |
-| G2 | `h1`–`h6` | `_tokens.scss` + `common/mereka-overrides.css` | HIGH | P2 | Add `.mereka-theme` or remove (`.courseware .xblock` already scopes) |
-| G3 | `a` | `_tokens.scss` + `common/mereka-overrides.css` | HIGH | P2 | Add `.mereka-theme` or remove (`.courseware .xblock a` already scopes) |
-| G4 | `.btn-primary`, `.btn-brand` | `common/mereka-overrides.css` | HIGH | P1 | Scope under `.mereka-chrome` or page wrappers |
+| G1 | `body` | `_base.scss` + `common/mereka-overrides.css` | Indirect (cascade) | RESOLVED | Scoped to `body:not(.courseware)` on 2026-02-28 |
+| G2 | `h1`–`h6` | `_base.scss` + `common/mereka-overrides.css` | HIGH | RESOLVED | Scoped to `body:not(.courseware)` on 2026-02-28 |
+| G3 | `a` | `_base.scss` + `common/mereka-overrides.css` | HIGH | RESOLVED | Scoped to `body:not(.courseware)` on 2026-02-28 |
+| G4 | `.btn-primary`, `.btn-brand` | `_base.scss` + `common/mereka-overrides.css` | HIGH | RESOLVED | Scoped to `body:not(.courseware)` on 2026-02-28 |
 | G5 | `.card` | `_tokens.scss` | HIGH | P1 | Scope under page wrappers or `.mereka-theme` |
 | G6 | `.btn-default` | `scss/theme.scss` | MEDIUM | P2 | Scope to `.wrapper-content .btn-default` |
 | G7 | `.course` (bare) | `common/mereka-overrides.css` + `scss/theme.scss` | MEDIUM | P2 | Prefix with `.find-courses` or `.dashboard` |
-| G8 | `.btn-primary`, `.btn-outline-primary` (letter-spacing) | `_tokens.scss` | LOW | P3 | Cosmetic only; can remain global |
+| G8 | `.btn-primary`, `.btn-outline-primary` (letter-spacing) | `_base.scss` | LOW | RESOLVED | Scoped to `body:not(.courseware)` on 2026-02-28 |
 | G9 | `.shadow-lg` grouped with `.card` | `mfe/mereka.scss` | N/A (MFE only) | P3 | Separate `.shadow-lg` from `.card` rule group |
 | G10 | `.courses-listing` (bare) | `common/mereka-overrides.css` | Very low | P3 | Prefix with `.find-courses` |
 
@@ -499,7 +501,7 @@ These rules demonstrate the correct approach and should be used as templates whe
 | Studio views | `.view-container .xblock-render .xblock { ... }` | Scoped to Studio editor context |
 | Discovery page | `.find-courses .discovery-button { ... }` | Scoped to /courses page only |
 | Dashboard | `.dashboard .listing-courses { ... }` | Scoped to learner dashboard only |
-| MFE surface | `[class*="learner-dashboard"] .pgn__card { ... }` | Scoped to MFE route wrapper |
+| MFE surface | `[class*="account-settings"] .pgn__card { ... }` | Scoped to active MFE route wrapper |
 
 ---
 

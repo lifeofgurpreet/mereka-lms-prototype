@@ -1,22 +1,22 @@
 // Base typography and base component defaults shared by legacy LMS/CMS themes and MFEs.
-body {
+body:not(.courseware) {
   font-family: $mereka-body-font;
   background-color: $color-neutral-100;
   color: $color-ink-900;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+body:not(.courseware) h1,
+body:not(.courseware) h2,
+body:not(.courseware) h3,
+body:not(.courseware) h4,
+body:not(.courseware) h5,
+body:not(.courseware) h6 {
   font-family: $mereka-heading-font;
   font-weight: 600;
   color: $color-ink-900;
 }
 
-a {
+body:not(.courseware) a {
   color: $color-info;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
@@ -27,13 +27,13 @@ a {
   }
 }
 
-.btn-primary,
-.btn-outline-primary {
+body:not(.courseware) .btn-primary,
+body:not(.courseware) .btn-outline-primary {
   letter-spacing: 0.01em;
   text-transform: none;
 }
 
-.card {
+body:not(.courseware) .card {
   border-radius: 24px;
   border-color: var(--mereka-mfe-border);
   box-shadow: var(--mereka-shadow-card);
