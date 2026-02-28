@@ -2,7 +2,7 @@
 
 > **Cluster**: `rke2-nonprod` (single-node, v1.34.3+rke2r3)
 > **Namespace**: `mereka-lms`
-> **ArgoCD source**: `bbi-infrastructure` repo, path `apps/mereka-lms/overlays/profiles/dev`
+> **ArgoCD source**: `infrastructure` repo (legacy name: `bbi-infrastructure`), path `apps/mereka-lms/overlays/profiles/dev`
 
 ## Architecture
 

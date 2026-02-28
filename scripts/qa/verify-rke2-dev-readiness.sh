@@ -24,7 +24,15 @@ SKIP_COUNT=0
 
 # Paths
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-BBI_INFRA_DIR="${BBI_INFRA_DIR:-/home/gurpreet/projects/k8s/bbi-infrastructure}"
+DEFAULT_INFRA_DIR="/home/gurpreet/projects/k8s/infrastructure"
+LEGACY_INFRA_DIR="/home/gurpreet/projects/k8s/bbi-infrastructure"
+if [[ -n "${BBI_INFRA_DIR:-}" ]]; then
+  BBI_INFRA_DIR="$BBI_INFRA_DIR"
+elif [[ -d "$DEFAULT_INFRA_DIR" ]]; then
+  BBI_INFRA_DIR="$DEFAULT_INFRA_DIR"
+else
+  BBI_INFRA_DIR="$LEGACY_INFRA_DIR"
+fi
 PROFILES_DEV="${BBI_INFRA_DIR}/apps/mereka-lms/overlays/profiles/dev"
 KUBE_CONTEXT="${KUBE_CONTEXT:-rke2-nonprod}"
 NAMESPACE="mereka-lms"
