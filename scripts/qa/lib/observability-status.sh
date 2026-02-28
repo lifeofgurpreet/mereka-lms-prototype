@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# lint: allow-no-euo
 
 # Shared observability status parsing helpers for evidence text artifacts.
 # Keeps status checks resilient to ANSI color escapes and accidental substrings.

@@ -203,6 +203,11 @@ check_grep_ability() {
         continue
       fi
 
+      # Explicit per-file exception for scripts that must not set global strict mode.
+      if grep -q "lint: allow-no-euo" "$file" 2>/dev/null; then
+        continue
+      fi
+
       if ! grep -q "set -euo pipefail" "$file" 2>/dev/null && \
          ! grep -q "set -eu" "$file" 2>/dev/null; then
         warn "Grep-ability: Shell script missing 'set -euo pipefail': $file"

@@ -2,6 +2,7 @@
 # Verification script for Kajabi SSO integration
 # @spec: kajabi-sso
 # @covers: AC-SSO-001 through AC-SSO-005, AC-NEG-SSO-001 through AC-NEG-SSO-003
+# lint: allow-no-euo
 
 set -uo pipefail  # Removed -e to allow script to continue on failures
 
