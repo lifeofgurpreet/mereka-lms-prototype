@@ -29,7 +29,7 @@ This is the primary risk file. It is injected into all MFEs via Tutor's MFE buil
 |-----------------|---------------|------|-------|
 | `.pgn__page-container`, `.pgn__btn--primary`, `.pgn__card`, `.pgn__modal-content`, etc. | All MFEs | **MEDIUM** | Paragon component classes are stable within a Paragon major version but change across major bumps |
 | `.page__account-settings .pgn__form-control` | Account MFE | **MEDIUM** | Explicit wrapper class match; tracked as `SELECTOR-EXCEPTION` in source |
-**Total selector exception annotations**: 7 comment blocks in `mereka.scss` (`SELECTOR-EXCEPTION`).
+**Total selector exception annotations**: 2 comment blocks in `mereka.scss` (`SELECTOR-EXCEPTION`).
 
 **Hash-based selectors** (`css-XXXXXXX`): **0 found** — good, none present.
 
