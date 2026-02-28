@@ -12,6 +12,7 @@ Runtime verification for the remaining QA closure lanes in `docs/BRANDING_PLAN.m
 ./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
 ./scripts/qa/verify-a11y-contrast-focus.sh --env prod
 ./scripts/qa/verify-frontend-performance-spotcheck.sh --env prod
+./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --project chromium
 ```
 
 ## Results
@@ -32,5 +33,11 @@ Runtime verification for the remaining QA closure lanes in `docs/BRANDING_PLAN.m
 - Summary (script output): `Summary: PASSED=14 FAILED=0` and `PASS=10 WARN=2 FAIL=0`
 - Artifact: script output only (no explicit artifact path emitted by the command)
 
+### 4) Strict runtime-theme npm-start smoke
+- Status: FAIL (expected deployment blocker signal)
+- Failure: `runtime theme mode required, but detected 'embedded-theme-files'`
+- Failing preflight target: `https://apps.academyv2.mereka.io/authn/login`
+- Artifact: `var/qa/npm-start-mfe-smoke-20260228T211231Z.log`
+
 ## Outcome
-Phase 4 QA runtime checks above are green in production as of 2026-02-28.
+Cross-browser, accessibility, and performance runtime checks are green, but strict runtime-theme mode is still blocked in production until MFE rollout serves `/theme/*.min.css` (instead of embedded authn hash CSS).
