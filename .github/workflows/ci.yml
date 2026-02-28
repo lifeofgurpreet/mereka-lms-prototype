@@ -78,6 +78,7 @@ jobs:
       - name: Syntax check all shell scripts
         run: |
           find scripts/ -name '*.sh' -type f | xargs -P8 bash -n
+          bash -n scripts/qa/verify-multisite-ux-consistency.sh
           bash -n infrastructure/tutor/apply-patches.sh
           echo "All shell script syntax checks passed"
 
@@ -521,4 +522,3 @@ jobs:
           name: coverage-report
           path: .coverage
           retention-days: 3
-
