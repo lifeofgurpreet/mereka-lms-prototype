@@ -361,7 +361,7 @@ print('ok' if f.get('ENABLE_ENTERPRISE_INTEGRATION') else 'disabled')
         fail "Could not verify ENABLE_ENTERPRISE_INTEGRATION ($RUNTIME_FLAG)"
       fi
 
-      # Enterprise schema integrity (runtime table columns required by current model)
+      # Enterprise schema + linkage integrity (runtime model/storage compatibility)
       SCHEMA_CHECK=$(kube exec -n "$NAMESPACE" "$LMS_POD" -- \
         python3 -c "
 import os, json
@@ -371,26 +371,81 @@ import django; django.setup()
 from django.db import connection
 from enterprise.models import EnterpriseCustomer
 
-required_candidates = [
-  'identity_provider',
-  'enable_career_engagement_network_on_learner_portal',
-]
-model_fields = {f.name for f in EnterpriseCustomer._meta.get_fields()}
-required = [c for c in required_candidates if c in model_fields]
 with connection.cursor() as cursor:
     cols = {c.name for c in connection.introspection.get_table_description(cursor, 'enterprise_enterprisecustomer')}
+
+# 1) Column compatibility for currently-modeled concrete fields.
+required_candidates = ['enable_career_engagement_network_on_learner_portal']
+model_fields = {f.name for f in EnterpriseCustomer._meta.get_fields()}
+required = [c for c in required_candidates if c in model_fields]
 missing = [c for c in required if c not in cols]
+
+# 2) IdP linkage compatibility:
+#    - legacy concrete column enterprise_enterprisecustomer.identity_provider, OR
+#    - relationship model/table enterprise_enterprisecustomeridentityprovider
+concrete_fields = {f.name for f in EnterpriseCustomer._meta.get_fields() if getattr(f, 'concrete', False)}
+has_legacy_field = 'identity_provider' in concrete_fields
+has_link_table = False
+with connection.cursor() as cursor:
+    table_names = set(connection.introspection.table_names(cursor))
+if 'enterprise_enterprisecustomeridentityprovider' in table_names:
+    has_link_table = True
+
+if has_legacy_field and 'identity_provider' not in cols:
+    missing.append('enterprise_enterprisecustomer.identity_provider')
+if not has_legacy_field and not has_link_table:
+    missing.append('enterprise idp linkage model/table')
+
 if missing:
     print('missing:' + ','.join(missing))
 else:
-    print('ok:' + ','.join(required))
+    print('ok:' + ','.join(required + ['idp_linkage']))
 " 2>/dev/null || echo \"error\")
       if [[ "$SCHEMA_CHECK" == ok:* ]]; then
-        pass "enterprise_enterprisecustomer schema matches required runtime fields (${SCHEMA_CHECK#ok:})"
+        pass "enterprise schema/linkage integrity check passed (${SCHEMA_CHECK#ok:})"
       elif [[ "$SCHEMA_CHECK" == missing:* ]]; then
-        fail "enterprise_enterprisecustomer missing runtime columns (${SCHEMA_CHECK#missing:})"
+        fail "enterprise schema/linkage integrity check failed (${SCHEMA_CHECK#missing:})"
       else
         fail "Could not verify enterprise schema integrity ($SCHEMA_CHECK)"
+      fi
+
+      # Tenant-domain mapping integrity: SiteConfiguration ENTERPRISE_CUSTOMER_UUID must
+      # be present and match EnterpriseCustomer.uuid for site-bound enterprise customers.
+      SITE_MAP_CHECK=$(kube exec -n "$NAMESPACE" "$LMS_POD" -- \
+        python3 -c "
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.production')
+os.environ.setdefault('SERVICE_VARIANT', 'lms')
+import django; django.setup()
+from enterprise.models import EnterpriseCustomer
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+
+issues = []
+customers = EnterpriseCustomer.objects.filter(site__isnull=False).only('uuid', 'slug', 'site')
+for ec in customers:
+    cfg = SiteConfiguration.objects.filter(site=ec.site).order_by('-id').first()
+    if not cfg:
+        issues.append(f'{ec.slug}:missing_siteconfig')
+        continue
+    values = cfg.site_values or {}
+    mapped = str(values.get('ENTERPRISE_CUSTOMER_UUID', '')).strip()
+    expected = str(ec.uuid)
+    if not mapped:
+        issues.append(f'{ec.slug}:missing_enterprise_uuid')
+    elif mapped != expected:
+        issues.append(f'{ec.slug}:uuid_mismatch:{mapped}->{expected}')
+
+if issues:
+    print('missing:' + ';'.join(issues))
+else:
+    print('ok:' + str(customers.count()))
+" 2>/dev/null || echo \"error\")
+      if [[ "$SITE_MAP_CHECK" == ok:* ]]; then
+        pass "SiteConfiguration ENTERPRISE_CUSTOMER_UUID mapping is aligned for ${SITE_MAP_CHECK#ok:} enterprise site(s)"
+      elif [[ "$SITE_MAP_CHECK" == missing:* ]]; then
+        fail "SiteConfiguration ENTERPRISE_CUSTOMER_UUID mapping drift detected (${SITE_MAP_CHECK#missing:})"
+      else
+        fail "Could not verify SiteConfiguration ENTERPRISE_CUSTOMER_UUID mapping ($SITE_MAP_CHECK)"
       fi
     fi
 
