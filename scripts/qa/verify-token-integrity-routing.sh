@@ -132,7 +132,7 @@ else
     BRANDING_DIRS=$(grep -oP '(?<=")\w[\w-]+(?="\s*\))' "$BRANDING_VERIFIER" 2>/dev/null | sort -u || true)
 
     # Verify the key routes that verify-mfe-branding.sh hardcodes are present in Caddyfile
-    EXPECTED_DIRS="authn account course-authoring discussions learner-dashboard learning ora-grading profile"
+    EXPECTED_DIRS="authn account communications course-authoring discussions gradebook learner-dashboard learning ora-grading profile"
 
     ROUTE_FAIL=0
     for dir in $EXPECTED_DIRS; do

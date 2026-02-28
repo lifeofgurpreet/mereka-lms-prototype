@@ -177,13 +177,8 @@ Coverage: AC-FRONT-011, AC-FRONT-012, AC-FRONT-013, AC-FRONT-014, AC-FRONT-015
 
   [PASS] AC-FRONT-015: Rollback procedure documented in evidence doc
 
-=== Results: 21 PASS / 0 FAIL / 2 WARN ===
+=== Results: 23 PASS / 0 FAIL / 0 WARN ===
 ```
-
-The two WARNs are expected on a dev machine where `communications` and `gradebook` appear in the
-Caddyfile but are not in the branding verifier's current `EXPECTED_DIRS` list. They represent MFEs that
-were added to the Caddyfile after the branding verifier's `MFE_ROUTES` was written. This is benign — the
-WARNs do not cause a CI failure.
 
 ---
 
