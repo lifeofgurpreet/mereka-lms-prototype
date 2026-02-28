@@ -3,7 +3,7 @@
 ## Source
 - Source core theme: `infrastructure/tutor/themes/mereka/mfe/theme/core.min.css`
 - Theme bridge: `infrastructure/tutor/themes/mereka/scss/_tokens.scss`
-- Generated on: 2026-02-28T03:49:29Z (UTC)
+- Generated on: 2026-02-28T03:51:05Z (UTC)
 - Command: `python3 scripts/qa/paragon-v22-token-audit.py --write`
 
 ## Method
@@ -14,14 +14,18 @@
 
 ## Counts
 - Consumed tokens (from `core.min.css`): `1318`
-- Defined in `_tokens.scss`: `76`
-- Consumed & defined: `26`
-- Consumed & missing: `1292`
+- Defined in `_tokens.scss`: `80`
+- Consumed & defined: `30`
+- Consumed & missing: `1288`
 - Defined & ignored: `50`
 
 ## Consumed & Defined
 - These tokens are read by current Paragon styles and already supplied in `_tokens.scss`.
 
+- `--pgn-alert-bg`
+- `--pgn-alert-border-color`
+- `--pgn-btn-color`
+- `--pgn-btn-hover-color`
 - `--pgn-color-accent-a`
 - `--pgn-color-accent-b`
 - `--pgn-color-black`
@@ -72,11 +76,11 @@
 | elevation | 85 | `--pgn-elevation-annotation-box-shadow, --pgn-elevation-btn-box-shadow-active, --pgn-elevation-close-button-text-shadow, --pgn-elevation-code-kbd-box-shadow, --pgn-elevation-data-table-box-shadow`, ... |
 | elevation-box | 38 | `--pgn-elevation-box-shadow-base-blur, --pgn-elevation-box-shadow-base-color, --pgn-elevation-box-shadow-base-offset-x, --pgn-elevation-box-shadow-base-offset-y, --pgn-elevation-box-shadow-centered-1`, ... |
 | other | 21 | `--pgn-other-btn-disabled-opacity, --pgn-other-carousel-control-opacity-base, --pgn-other-carousel-control-opacity-hover, --pgn-other-chip-opacity-disabled, --pgn-other-content-form-control-checkbox-indicator-icon-checked-base`, ... |
-| button | 16 | `--pgn-btn-active-bg, --pgn-btn-active-border-color, --pgn-btn-active-color, --pgn-btn-bg, --pgn-btn-border-color`, ... |
+| button | 14 | `--pgn-btn-active-bg, --pgn-btn-active-border-color, --pgn-btn-active-color, --pgn-btn-bg, --pgn-btn-border-color`, ... |
 | transition | 11 | `--pgn-transition-badge, --pgn-transition-btn, --pgn-transition-carousel-base, --pgn-transition-carousel-control, --pgn-transition-carousel-indicator`, ... |
 | badge | 5 | `--pgn-badge-bg, --pgn-badge-color, --pgn-badge-focus-bg, --pgn-badge-focus-box-shadow, --pgn-badge-focus-color` |
 | content | 4 | `--pgn-content-carousel-control-bg-next-icon, --pgn-content-carousel-control-bg-prev-icon, --pgn-content-navbar-toggler-dark-icon-bg, --pgn-content-navbar-toggler-light-icon-bg` |
-| alert | 3 | `--pgn-alert-bg, --pgn-alert-border-color, --pgn-alert-icon-color` |
+| border | 3 | `--pgn-border-color-nav-tabs-link-border-active, --pgn-border-color-nav-tabs-link-border-focus, --pgn-border-color-nav-tabs-link-border-hover` |
 
 ## Defined & Ignored
 - These tokens are defined in `_tokens.scss` but not observed in the current

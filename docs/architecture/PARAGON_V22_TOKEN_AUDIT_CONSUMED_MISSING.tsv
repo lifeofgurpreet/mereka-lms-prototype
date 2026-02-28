@@ -1,5 +1,3 @@
---pgn-alert-bg
---pgn-alert-border-color
 --pgn-alert-icon-color
 --pgn-badge-bg
 --pgn-badge-color
@@ -14,7 +12,6 @@
 --pgn-btn-active-color
 --pgn-btn-bg
 --pgn-btn-border-color
---pgn-btn-color
 --pgn-btn-disabled-bg
 --pgn-btn-disabled-border-color
 --pgn-btn-disabled-color
@@ -24,7 +21,6 @@
 --pgn-btn-focus-outline-color
 --pgn-btn-hover-bg
 --pgn-btn-hover-border-color
---pgn-btn-hover-color
 --pgn-bubble-bg
 --pgn-bubble-color
 --pgn-carousel-control-color

@@ -31,7 +31,7 @@ body {
 .navbar {
   background: var(--pgn-color-white);
   border-bottom: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.08);
-  box-shadow: 0 10px 30px rgb(var(--mereka-color-ink-deep-rgb) / 0.05);
+  box-shadow: var(--mereka-mfe-navbar-shadow);
   padding: var(--mereka-mfe-navbar-padding);
 }
 
@@ -69,14 +69,14 @@ body {
 .btn-primary {
   background-image: var(--mereka-mfe-gradient);
   border: none;
-  box-shadow: 0 12px 30px rgb(var(--mereka-color-indigo-rgb) / 0.3);
+  box-shadow: var(--mereka-mfe-btn-shadow);
 }
 
 /* RISK: LOW — Paragon .pgn__btn--primary; Paragon BEM semi-stable, color-only override */
 .pgn__btn--primary {
   background-image: var(--mereka-mfe-gradient);
   border: none;
-  box-shadow: 0 12px 30px rgb(var(--mereka-color-indigo-rgb) / 0.3);
+  box-shadow: var(--mereka-mfe-btn-shadow);
 }
 
 /* RISK: LOW — hover/focus color only; graceful degradation */
@@ -84,7 +84,7 @@ body {
 .btn-primary:focus,
 .pgn__btn--primary:hover,
 .pgn__btn--primary:focus {
-  box-shadow: 0 18px 38px rgb(var(--mereka-color-teal-rgb) / 0.24);
+  box-shadow: var(--mereka-mfe-btn-shadow-hover);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -113,7 +113,7 @@ body {
 /* RISK: LOW — Paragon BEM secondary/link buttons; color-only override */
 .pgn__btn--secondary,
 .pgn__btn--link {
-  color: var(--mereka-color-ink-700);
+  color: var(--pgn-btn-color);
 }
 
 /* RISK: LOW — hover/focus color only; graceful degradation */
@@ -121,7 +121,7 @@ body {
 .pgn__btn--secondary:focus,
 .pgn__btn--link:hover,
 .pgn__btn--link:focus {
-  color: var(--mereka-color-ink-900);
+  color: var(--pgn-btn-hover-color);
 }
 
 /* RISK: MEDIUM — Paragon form control BEM + Bootstrap; border-radius/color degrade visually */
@@ -135,7 +135,7 @@ body {
 /* RISK: LOW — focus ring color only; graceful degradation */
 .pgn__form-control:focus,
 .form-control:focus {
-  border-color: var(--mereka-color-teal);
+  border-color: var(--mereka-mfe-form-control-focus-border);
   box-shadow: 0 0 0 4px var(--mereka-mfe-focus);
 }
 
@@ -172,7 +172,8 @@ label {
 /* RISK: LOW — Paragon alert BEM; border-radius/border color only */
 .pgn__alert {
   border-radius: var(--mereka-mfe-alert-radius);
-  border: 1px solid rgb(var(--mereka-color-ink-deep-rgb) / 0.10);
+  background: var(--pgn-alert-bg);
+  border: 1px solid var(--pgn-alert-border-color);
 }
 
 /* RISK: LOW — Paragon alert variant colors; background/border color only */
