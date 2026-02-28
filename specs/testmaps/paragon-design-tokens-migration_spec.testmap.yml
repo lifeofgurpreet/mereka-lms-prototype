@@ -142,16 +142,16 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-019
   description: 'Given production environment, when `PARAGON_THEME_URLS` CDN URL is accessed, then the response includes `Content-Type:
     text/css`, has `Cache-Control` headers, and the file is served with HTTP 200.'
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-020
   description: Given the compiled theme CSS, when Caddy configuration is inspected, then a route serves the theme CSS from
     a stable URL path (e.g., `/theme/mereka-brand.min.css`).
@@ -190,40 +190,40 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-025
   description: Given the component token files, when compiled, then `.pgn__card` border-radius and box-shadow are controlled
     by token values.
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-026
   description: Given the component token files, when compiled, then `.pgn__alert` border-radius and variant background colors
     are controlled by token values.
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-027
   description: Given `mereka.scss` after Phase 3 migration, when its line count is measured, then it is fewer than 100 lines
     (down from 614).
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-028
   description: Given `mereka.scss` after Phase 3 migration, when parsed for hardcoded `rgba()` values, then fewer than 5 remain
     (down from ~40), with each justified as a structural override not expressible as a token.
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-029
   description: 'Given `scripts/qa/verify-paragon-tokens.sh` exists, when run after a successful token build, then it validates:
     (a) token count >= 100, (b) zero unresolved references, (c) all canonical color values from `tokens.css` present in output.'
@@ -254,8 +254,8 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-paragon-runtime-deferred.sh
-    command: scripts/qa/verify-paragon-runtime-deferred.sh
+    file: scripts/qa/verify-paragon-runtime.sh
+    command: scripts/qa/verify-paragon-runtime.sh
 - id: AC-TKN-033
   description: Given `tutor-contrib-paragon` is installed (or equivalent in `mereka_lms.py`), when `tutor images build mfe`
     is run, then the token compilation step executes and the compiled CSS is included in the MFE image.

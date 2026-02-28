@@ -119,8 +119,8 @@ run_live_gate() {
     if [[ "$PARAGON_RUNTIME_STRICT" == "1" ]]; then
       runtime_args+=(--require-runtime)
     fi
-    echo "==> Live gate: verify-paragon-runtime-deferred (${env}, ${runtime_url})"
-    "$REPO_ROOT/scripts/qa/verify-paragon-runtime-deferred.sh" "${runtime_args[@]}"
+    echo "==> Live gate: verify-paragon-runtime (${env}, ${runtime_url})"
+    "$REPO_ROOT/scripts/qa/verify-paragon-runtime.sh" "${runtime_args[@]}"
   fi
 
   if [[ "$RUN_STUDIO_AUTHORING_CHECK" == "1" ]]; then

@@ -27,7 +27,7 @@ fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
 
 usage() {
   cat <<'EOF'
-Usage: verify-paragon-runtime-deferred.sh [--runtime-url <url>] [--require-runtime]
+Usage: verify-paragon-runtime.sh [--runtime-url <url>] [--require-runtime]
 
 Options:
   --runtime-url <url>  Base URL to validate runtime theme endpoint. Example:
@@ -71,7 +71,7 @@ if [[ -f "$PLUGIN_FILE" ]]; then
   fi
 fi
 
-echo "=== Paragon Runtime/Deferred Contract Verification ==="
+echo "=== Paragon Runtime Contract Verification ==="
 
 # Final-pattern contract: runtime PARAGON_THEME_URLS must be enabled by default.
 if [[ "$THEME_DEFAULT_ENABLED" -eq 1 ]]; then

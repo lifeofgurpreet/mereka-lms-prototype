@@ -96,7 +96,7 @@ scripts/qa/verify-paragon-theme-urls.sh
 scripts/qa/verify-paragon-token-coverage.sh
 scripts/qa/verify-paragon-tokens.sh
 scripts/qa/verify-paragon-json-token-hierarchy.sh
-scripts/qa/verify-paragon-runtime-deferred.sh
+scripts/qa/verify-paragon-runtime.sh
 scripts/qa/verify-font-loading.sh
 scripts/qa/verify-catalog-discovery.sh
 scripts/qa/verify-branding-asset-sync.sh
