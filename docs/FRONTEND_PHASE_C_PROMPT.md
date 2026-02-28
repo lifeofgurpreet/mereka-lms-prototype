@@ -1,8 +1,31 @@
 # Frontend Phase C: Token Grounding + BEM Hardening — Implementor Prompt
 
-**Date**: 2026-02-27 (revised)
-**Prerequisite**: Phase B complete (FE-001, FE-011, FE-012 all DONE)
+**Date**: 2026-02-28 (revised)
+**Prerequisite**: Phase B complete + **Phase B deep audit fixes** (see below)
 **Specs**: `specs/paragon-design-tokens-migration_spec.md`, `specs/mfe-plugin-slots_spec.md`
+
+---
+
+## BLOCKING Prerequisites (From Deep Audit)
+
+**Read `docs/reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md` FIRST.** It identifies critical architecture issues that must be fixed before Phase C work is meaningful.
+
+### Must Fix Before Starting Phase C
+
+| ID | What | Why | Est. |
+|----|------|-----|------|
+| **C1** | Create 4 missing OEP-48 files (`_overrides.scss`, `card-imagecap-fallback.png`, `logo-trademark.svg/png`) + update `package.json` exports | MFE components import these at build time — missing = build errors or broken images | 30 min |
+| **C2** | Split `theme.scss` — stop importing ~600 lines of LMS/Studio CSS into MFEs | Every MFE currently ships ~20KB of dead CSS (`.dashboard`, `.courseware`, `.wrapper-view` selectors) | 2 hr |
+| **C3** | Move `_tokens.scss` lines 205-244 (CSS rules) to separate `_base.scss` partial | `_tokens.scss` should define tokens only, not apply styles. Rules risk loss on regeneration | 30 min |
+| **C4** | Remove duplicate `:root` block from `theme.scss` (duplicates _tokens.scss) | Emits 11 identical CSS variables twice | 15 min |
+| **C5** | Remove duplicate `.mereka-badge` from `theme.scss` (tokenized version in mereka.scss is correct) | Conflicting definitions with hardcoded vs tokenized values | 15 min |
+| **C6** | Remove or align `exports` in `package.json` (reference brand-openedx has no exports field) | Exports field blocks unlisted path imports | 15 min |
+
+### Critical Context
+
+**The brand package SCSS is dead in Ulmo.** Paragon v23+ MFEs do NOT `@import` from `@edx/brand`. The `_variables.scss` SCSS variables (`$primary`, `$secondary`) have zero effect. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties (`:root { --pgn-color-primary: ... }`).
+
+The brand package is an **asset container** (logos, images, favicon). Keep SCSS files for OEP-48 compliance but do not treat them as the color/font source of truth.
 
 ---
 

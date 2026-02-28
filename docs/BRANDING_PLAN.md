@@ -42,15 +42,20 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [ ] PDF certificates/badges if applicable.
 - ~~Ecommerce/XQueue UIs~~ — Ecommerce replaced by Purchase Gateway (FastAPI); XQueue UI minimal.
 
-## Phase 5 — Next-Gen Branding (PLANNED)
-> These items are tracked in detail via specs. See [FRONTEND_TRACKER.md](FRONTEND_TRACKER.md).
+## Phase 5 — Next-Gen Branding (IN PROGRESS)
+> See [FRONTEND_PHASE_C_PROMPT.md](FRONTEND_PHASE_C_PROMPT.md) and [deep audit](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md).
 
-- [ ] Create OEP-48 `@edx/brand` package (`infrastructure/tutor/brand-mereka/`) — [spec](../specs/oep48-brand-package_spec.md)
+- [x] Create OEP-48 `@edx/brand` package (`infrastructure/tutor/brand-mereka/`) — [spec](../specs/oep48-brand-package_spec.md)
+- [ ] **Fix OEP-48 mandatory file gaps** (4 missing files) — see [deep audit §4](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#4-missing-oep-48-mandatory-files-confirmed-from-audit-v1)
+- [ ] **Split theme.scss** — stop leaking ~600 lines of LMS/Studio CSS into MFEs — see [deep audit §3 CRIT-2](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-2-themescss-leaks-600-lines-of-lmsstudio-css-into-every-mfe)
+- [ ] **Fix runtime theme CSS** — mereka-brand.min.css is 64KB (should be ~2KB delta) — see [deep audit §3 CRIT-3](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-3-runtime-theme-css-files-are-bloated-and-duplicated)
 - [ ] Migrate SCSS token overrides to JSON design tokens (Paragon v23+) — [spec](../specs/paragon-design-tokens-migration_spec.md)
 - [ ] Enable PARAGON_THEME_URLS for runtime CDN theming.
 - [ ] Activate all relevant FPF plugin slots (header, learning, account, profile) — [spec](../specs/mfe-plugin-slots_spec.md)
-- [ ] Upgrade Node 18 → 24 (Ulmo default).
+- [x] Upgrade Node 18 → 24 (Ulmo default).
 - [ ] Multi-tenant token switching (`tenants/` directory).
+
+> **Architecture note (2026-02-28)**: Brand package `_variables.scss` is **dead in Ulmo** — Paragon v23+ ignores SCSS variables. Our actual theming works through `mereka.scss` → `_tokens.scss` CSS custom properties. See [deep audit §3 CRIT-1](reviews/FRONTEND_PHASE_AB_DEEP_AUDIT.md#crit-1-brand-package-scss-variables-are-dead).
 
 ## QA & Documentation
 - [ ] Cross-browser + mobile smoke tests (Chrome, Edge, Safari, Firefox, iOS, Android).
