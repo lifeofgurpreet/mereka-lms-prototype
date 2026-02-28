@@ -96,6 +96,7 @@ scripts/qa/verify-paragon-tokens.sh
 scripts/qa/verify-paragon-json-token-hierarchy.sh
 scripts/qa/verify-paragon-runtime-deferred.sh
 scripts/qa/verify-font-loading.sh
+scripts/qa/verify-catalog-discovery.sh
 scripts/qa/verify-css-branding-overhead.sh
 scripts/qa/verify-caddy-cache-headers.sh
 scripts/qa/verify-brand-package/verify-brand-package-structure.sh

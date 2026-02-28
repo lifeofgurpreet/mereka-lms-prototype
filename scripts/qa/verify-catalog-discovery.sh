@@ -304,6 +304,14 @@ check_contains "$LMS_PROD" "BRAND_PRIMARY" "MFE_CONFIG has BRAND_PRIMARY token"
 check_contains "$LMS_PROD" "BRAND_SECONDARY" "MFE_CONFIG has BRAND_SECONDARY token"
 check_contains "$LMS_PROD" "BRAND_ACCENT" "MFE_CONFIG has BRAND_ACCENT token"
 
+# ─── 11b. CI Static Coverage ────────────────────────────────────────────────
+
+section "11b. CI Static Coverage"
+
+CI_STATIC_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
+check_file_exists "$CI_STATIC_LIST" "CI static script manifest exists"
+check_contains "$CI_STATIC_LIST" "scripts/qa/verify-catalog-discovery.sh" "Catalog/discovery verifier is included in static CI suite"
+
 # ─── 12. Live Cluster HTTP Checks (--live only) ───────────────────────────
 
 section "12. Live Cluster Checks (--live mode only)"
