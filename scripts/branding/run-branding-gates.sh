@@ -17,6 +17,7 @@ Environment flags:
   AUDIT_STRICT=1|0                    Default: 0 (pass --strict to audit-branding-surfaces)
   RUN_STUDIO_AUTHORING_CHECK=1|0      Default: 1
   RUN_MFE_PREREQ_CHECK=1|0            Default: 1
+  RUN_SLOT_SOURCE_ALIGNMENT_CHECK=1|0 Default: 1
   RUN_PARAGON_RUNTIME_CHECK=1|0       Default: 1
   PARAGON_RUNTIME_STRICT=1|0          Default: 1 (require runtime URL + strict header/body contract)
   PARAGON_RUNTIME_URL=<url>           Optional override for runtime /theme base URL
@@ -54,6 +55,7 @@ RUN_AUDIT="${RUN_AUDIT:-1}"
 AUDIT_STRICT="${AUDIT_STRICT:-0}"
 RUN_STUDIO_AUTHORING_CHECK="${RUN_STUDIO_AUTHORING_CHECK:-1}"
 RUN_MFE_PREREQ_CHECK="${RUN_MFE_PREREQ_CHECK:-1}"
+RUN_SLOT_SOURCE_ALIGNMENT_CHECK="${RUN_SLOT_SOURCE_ALIGNMENT_CHECK:-1}"
 RUN_PARAGON_RUNTIME_CHECK="${RUN_PARAGON_RUNTIME_CHECK:-1}"
 PARAGON_RUNTIME_STRICT="${PARAGON_RUNTIME_STRICT:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
@@ -77,6 +79,10 @@ run_source_gate() {
   if [[ "$RUN_MFE_PREREQ_CHECK" == "1" ]]; then
     echo "==> Source gate: verify-mfe-build-prereqs"
     "$REPO_ROOT/scripts/qa/verify-mfe-build-prereqs.sh"
+  fi
+  if [[ "$RUN_SLOT_SOURCE_ALIGNMENT_CHECK" == "1" ]]; then
+    echo "==> Source gate: verify-mfe-slot-source-alignment"
+    "$REPO_ROOT/scripts/qa/verify-mfe-slot-source-alignment.sh"
   fi
   if [[ "$RUN_STUDIO_AUTHORING_CHECK" == "1" ]]; then
     echo "==> Source gate: verify-studio-authoring-branding (source-only)"
