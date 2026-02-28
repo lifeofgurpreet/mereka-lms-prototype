@@ -38,6 +38,9 @@ Run `.github/workflows/release-evidence.yml` (`workflow_dispatch`) with:
 - `target_environment`
 - `require_runtime_theme` (`true` once PARAGON_THEME_URLS rollout is expected live)
 - `runtime_theme_url` (optional override; empty uses environment default)
+- `run_npm_start_smoke` (optional screenshot lane in the same evidence artifact)
+- `learning_path` (optional route override for smoke)
+- `npm_start_project` (`chromium`, `firefox`, or `mobile-chrome`)
 
 Keep the uploaded artifact with release notes/change record.
 
