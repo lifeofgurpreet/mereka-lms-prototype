@@ -126,8 +126,8 @@ grep -rn 'pgn__\|paragon\|\[class\*=' \
   infrastructure/tutor/themes/ \
   --include="*.css" --include="*.scss"
 
-# Find BRITTLE annotations in the codebase
-grep -rn 'BRITTLE' infrastructure/tutor/themes/
+# Find selector-exception annotations in the codebase
+grep -rn 'SELECTOR-EXCEPTION' infrastructure/tutor/themes/
 
 # Check plugin-slot registration status
 grep -rn 'footer_slot\|header_slot\|PLUGIN_OPERATIONS\|registerPlugin' \
