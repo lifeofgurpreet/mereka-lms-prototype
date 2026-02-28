@@ -2,17 +2,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>{% trans "Activate Your Account" %}</title></head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="text-align: center; padding: 20px 0;">
-    {% if org_logo_url %}<img src="{{ org_logo_url }}" alt="{{ org_display_name }}" style="max-height: 60px;">{% endif %}
+<body style="margin: 0; background-color: #f6f8fb; padding: 24px 0;">
+  <div style="max-width: 640px; margin: 0 auto; border: 1px solid #e6e8ee; border-radius: 16px; overflow: hidden; background: #ffffff;">
+    <div style="padding: 24px; text-align: center; background: linear-gradient(120deg, {{ org_primary_color|default:'#ab3b78' }} 0%, {{ org_accent_color|default:'#237072' }} 100%);">
+      {% if org_logo_url %}
+      <img src="{{ org_logo_url }}" alt="{{ org_display_name|default:'Mereka Academy' }}" style="max-height: 56px; width: auto;">
+      {% else %}
+      <p style="margin: 0; font-family: 'Lato', Arial, sans-serif; font-size: 20px; font-weight: 700; color: #ffffff;">{{ org_display_name|default:"Mereka Academy" }}</p>
+      {% endif %}
+    </div>
+    <div style="padding: 30px 32px; font-family: 'Poppins', Arial, sans-serif; color: #1f2937; line-height: 1.6;">
+      <h1 style="margin: 0 0 16px 0; font-family: 'Lato', Arial, sans-serif; font-size: 28px; color: #111827;">{% trans "Activate Your Account" %}</h1>
+      <p style="margin: 0 0 14px 0;">{% trans "Hi" %} {{ user_name }},</p>
+      <p style="margin: 0 0 24px 0;">{% trans "Please click the button below to activate your account:" %}</p>
+      <div style="text-align: center; margin: 0 0 24px 0;">
+        <a href="{{ activation_url }}" style="display: inline-block; padding: 12px 28px; border-radius: 9999px; text-decoration: none; background-color: {{ org_primary_color|default:'#ab3b78' }}; color: #ffffff; font-weight: 600;">{% trans "Activate Account" %}</a>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 28px 0 16px 0;">
+      <p style="margin: 0; font-size: 12px; color: #6b7280;">
+        {{ org_display_name|default:"Mereka Academy" }}
+        {% if org_support_email %} · <a href="mailto:{{ org_support_email }}" style="color: {{ org_accent_color|default:'#237072' }}; text-decoration: none;">{{ org_support_email }}</a>{% endif %}
+      </p>
+    </div>
   </div>
-  <h1 style="color: {{ org_primary_color|default:'#1a73e8' }};">{% trans "Activate Your Account" %}</h1>
-  <p>{% trans "Hi" %} {{ user_name }},</p>
-  <p>{% trans "Please click the button below to activate your account:" %}</p>
-  <div style="text-align: center; margin: 30px 0;">
-    <a href="{{ activation_url }}" style="background-color: {{ org_primary_color|default:'#1a73e8' }}; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 4px;">{% trans "Activate Account" %}</a>
-  </div>
-  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-  <p style="font-size: 12px; color: #666;">{{ org_display_name }}</p>
 </body>
 </html>

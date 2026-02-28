@@ -184,6 +184,22 @@ assert_template_has_marker \
   "org_support_email" \
   "Welcome template footer retains support contact link"
 assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/account_activation.html" \
+  "linear-gradient(120deg" \
+  "Account activation template has branded gradient header shell"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/account_activation.html" \
+  "org_primary_color|default:'#ab3b78'" \
+  "Account activation template uses Mereka primary fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/course_announcement.html" \
+  "org_accent_color|default:'#237072'" \
+  "Course announcement template uses Mereka accent fallback color"
+assert_template_has_marker \
+  "$EMAIL_TEMPLATE_ROOT/deadline.html" \
+  "border-radius: 9999px" \
+  "Deadline template CTA keeps pill-radius branding"
+assert_template_has_marker \
   "$EMAIL_TEMPLATE_ROOT/certificate.html" \
   "linear-gradient(120deg" \
   "Certificate template has branded gradient header shell"

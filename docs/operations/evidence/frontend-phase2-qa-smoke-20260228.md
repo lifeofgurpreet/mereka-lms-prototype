@@ -153,6 +153,23 @@ AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh pr
   - `verify-lighthouse-budgets.sh` (`PASSED=14`, `FAILED=0`)
   - `verify-paragon-runtime.sh` (artifact/budget checks pass; runtime URL checks remain warning-only unless `--runtime-url` is supplied)
 
+## Addendum — Transactional Email Branding Expansion
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Result
+
+- `PASS=15`, `FAIL=0`, `WARN=5`
+- Added branded-shell marker coverage and template updates for:
+  - `account_activation.html`
+  - `course_announcement.html`
+  - `deadline.html`
+- Existing warnings remain unchanged (missing `ms`/`zh` localized variants + ACE config visibility from local config files).
+
 ### Policy Outcome
 
 - Legacy `.page__account-settings` wrapper selector is removed from active CSS.
