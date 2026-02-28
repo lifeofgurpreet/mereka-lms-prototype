@@ -103,6 +103,25 @@ Interpretation:
 - Kajabi lesson-plan/lesson-detail fidelity remains intentionally deferred.
 - This is acceptable short term, but should remain a tracked migration debt item for enterprise content QA.
 
+### Capacity evidence (runtime)
+
+Observed on production context during failed AC-001 steady-state checks:
+- Pending enterprise pods report `FailedScheduling ... Insufficient cpu`.
+- Node allocated CPU requests are effectively saturated (~99% request allocation on all 3 nodes).
+
+Cluster-wide request distribution snapshot (cpu requests, cores):
+- `kube-system`: `1.703`
+- `mereka-lms`: `1.491`
+- `n8n`: `1.450`
+- `reka-slackbot`: `1.350`
+- `velero`: `0.900`
+- `weaviate`: `0.800`
+- remaining namespaces consume the rest.
+
+Interpretation:
+- AC-001 strict desired-replica failures are currently capacity/scheduler-driven.
+- Enterprise runtime is available and healthy for serving traffic, but not guaranteed to satisfy full desired replicas under current aggregate request pressure.
+
 ## Recommended execution sequence (systematic)
 
 1. **Stabilize enterprise API rollout to full desired readiness**
