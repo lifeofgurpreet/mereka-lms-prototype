@@ -126,15 +126,17 @@ jobs:
           RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
 
+          args=()
           if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
-            RUNTIME_THEME_URL="$RUNTIME_THEME_URL_INPUT"
-          elif [[ "$TARGET_ENV" == "production" ]]; then
-            RUNTIME_THEME_URL="https://apps.academyv2.mereka.io"
-          else
-            RUNTIME_THEME_URL="https://apps.academyv2.mereka.dev"
+            args+=(--runtime-url "$RUNTIME_THEME_URL_INPUT")
+          elif [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            if [[ "$TARGET_ENV" == "production" ]]; then
+              args+=(--runtime-url "https://apps.academyv2.mereka.io")
+            else
+              args+=(--runtime-url "https://apps.academyv2.mereka.dev")
+            fi
           fi
 
-          args=(--runtime-url "$RUNTIME_THEME_URL")
           if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
             args+=(--require-runtime)
           fi

@@ -91,8 +91,8 @@ if ! rg -n './scripts/qa/verify-paragon-runtime\.sh' "$WORKFLOW" >/dev/null; the
   violations=1
 fi
 
-if ! rg -n -- '--runtime-url "\$RUNTIME_THEME_URL"' "$WORKFLOW" >/dev/null; then
-  echo "❌ release-evidence workflow runtime contract step missing --runtime-url wiring"
+if ! rg -n -- 'args\+=\(--runtime-url' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow runtime contract step missing --runtime-url argument wiring"
   violations=1
 fi
 
