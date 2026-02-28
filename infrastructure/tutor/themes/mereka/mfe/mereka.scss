@@ -366,6 +366,14 @@ label {
   background: var(--mereka-mfe-surface-muted);
 }
 
+/* RISK: LOW — slot-owned account settings tab shell */
+.mereka-account-settings-tab-shell {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--mereka-mfe-border);
+  border-radius: var(--mereka-mfe-card-radius);
+  background: var(--mereka-mfe-surface-muted);
+}
+
 /* Authn/login/register surfaces */
 /* [class*="auth-page"] removed 2026-02-18 (bead 115d.18). */
 /* [data-testid*=] primary selectors removed 2026-02-25 (T102): covered by class-based selectors below */

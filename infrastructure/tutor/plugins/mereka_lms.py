@@ -811,6 +811,7 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
 #   org.openedx.frontend.learning.course_header.v1 | Learning course header banner
 #   org.openedx.frontend.learning.course_tabs.v1 | Learning tabs helper strip
+#   org.openedx.frontend.account.account_settings_tab.v1 | Account settings branded tab shell
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
 #
@@ -1021,6 +1022,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearningCourseTabsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.account.account_settings_tab.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_account_settings_tab_shell',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAccountSettingsTabShell,
                 },
             },
             """,
@@ -1444,6 +1460,19 @@ const MerekaProgressCertificateStatus = ({ courseId }) => {
       <p className="mb-0 small text-muted">
         {variant.brand} Learning —{safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate.
       </p>
+    </div>
+  );
+};
+
+// Enterprise profile section for account/profile additional profile field slots.
+// Wired into org.openedx.frontend.account.additional_profile_fields.v1 and
+// org.openedx.frontend.profile.additional_profile_fields.v1.
+const MerekaAccountSettingsTabShell = ({ title }) => {
+  const safeTitle = typeof title === 'string' && title.trim() ? title.trim() : 'Account Settings';
+  return (
+    <div className="mereka-account-settings-tab-shell mb-3">
+      <span className="mereka-badge mb-2">Account</span>
+      <h2 className="h5 mb-0">{safeTitle}</h2>
     </div>
   );
 };
