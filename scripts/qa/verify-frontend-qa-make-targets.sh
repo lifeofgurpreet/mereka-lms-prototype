@@ -86,6 +86,8 @@ for target in \
   qa-phase2-smoke-evidence-prod \
   qa-phase2-smoke-evidence-dev \
   qa-phase2-smoke-evidence-contract \
+  qa-runtime-theme-mode-prod \
+  qa-runtime-theme-mode-dev \
   qa-paragon-theme-budget \
   qa-frontend-extended-surfaces \
   qa-npm-start-smoke-local \
@@ -158,6 +160,9 @@ assert_make_command \
   './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers' \
   "qa-phase2-smoke-evidence-prod includes runtime preflight gate"
 assert_make_command \
+  './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers' \
+  "qa-runtime-theme-mode-prod preflight gate"
+assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --require-branding-markers' \
   "qa-phase2-smoke-evidence-prod includes prod smoke gate"
 assert_make_command \
@@ -166,6 +171,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers' \
   "qa-phase2-smoke-evidence-dev includes runtime preflight gate"
+assert_make_command \
+  './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers' \
+  "qa-runtime-theme-mode-dev preflight gate"
 assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.dev --require-branding-markers' \
   "qa-phase2-smoke-evidence-dev includes dev smoke gate"
@@ -304,6 +312,8 @@ assert_help_entry "qa-phase7-selector-coverage"
 assert_help_entry "qa-phase2-smoke-evidence-prod"
 assert_help_entry "qa-phase2-smoke-evidence-dev"
 assert_help_entry "qa-phase2-smoke-evidence-contract"
+assert_help_entry "qa-runtime-theme-mode-prod"
+assert_help_entry "qa-runtime-theme-mode-dev"
 assert_help_entry "qa-paragon-theme-budget"
 assert_help_entry "qa-frontend-extended-surfaces"
 assert_help_entry "qa-frontend-runtime-qa-prod"

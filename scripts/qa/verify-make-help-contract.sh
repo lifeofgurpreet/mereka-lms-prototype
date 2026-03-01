@@ -35,6 +35,7 @@ else
     "qa-phase7-selector-coverage" \
     "qa-phase2-smoke-evidence-prod" \
     "qa-phase2-smoke-evidence-contract" \
+    "qa-runtime-theme-mode-prod" \
     "qa-paragon-theme-budget" \
     "qa-frontend-extended-surfaces" \
     "qa-frontend-runtime-qa-prod" \
