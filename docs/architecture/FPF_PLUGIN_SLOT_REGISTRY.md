@@ -6,7 +6,7 @@
 > **Last audited**: 2026-02-28
 > **Source**: `@openedx/frontend-plugin-framework` v1.x, MFE source code scan
 >
-> **Validation note (2026-02-28)**: Active slot wiring in `mereka_lms.py` is now constrained to slot IDs confirmed in local Ulmo MFE source checkouts under `tutor_env/dev/frontend-app-*`. Legacy IDs retired from wiring: `learning.course_header.v1`, `learning.course_tabs.v1`, `account.account_settings_tab.v1`, `account.account_settings_field.v1`, `authoring.course_outline_header.v1`.
+> **Validation note (2026-02-28)**: Active slot wiring in `mereka_lms.py` is now constrained to slot IDs confirmed in local Ulmo MFE source checkouts under `tutor_env/dev/frontend-app-*` and `frontend-component-header` (layout/header slots). Legacy IDs retired from wiring: `learning.course_header.v1`, `learning.course_tabs.v1`, `account.account_settings_tab.v1`, `account.account_settings_field.v1`, `authoring.course_outline_header.v1`.
 
 ---
 
@@ -205,11 +205,11 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 ## Slots We Currently Use
 
-**Current wiring state (2026-03-01): 59 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
+**Current wiring state (2026-03-01): 62 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
 
 | Slot Group | Slots |
 |------------|-------|
-| Layout core | `layout.header_logo.v1`, `layout.footer.v1`, `layout.studio_footer.v1`, `layout.header_desktop_main_menu.v1`, `layout.header_mobile_main_menu.v1` |
+| Layout core | `layout.header_logo.v1`, `layout.footer.v1`, `layout.studio_footer.v1`, `layout.header_desktop_main_menu.v1`, `layout.header_mobile_main_menu.v1`, `layout.header_desktop_logged_out_items.v1`, `layout.header_mobile_logged_out_items.v1`, `layout.header_desktop_secondary_menu.v1` |
 | Authn | `authn.login_component.v1` |
 | Learner dashboard | `learner_dashboard.widget_sidebar.v1`, `learner_dashboard.no_courses_view.v1`, `learner_dashboard.course_list.v1`, `learner_dashboard.course_card_banner.v1`, `learner_dashboard.course_card_action.v1`, `learner_dashboard.dashboard_modal.v1` |
 | Learning | `learning.course_outline_sidebar.v1`, `learning.progress_certificate_status.v1`, `layout.header_learning.v1`, `learning.course_tab_links.v1`, `learning.course_breadcrumbs.v1`, `learning.learner_tools.v1`, `learning.progress_tab_course_grade.v1`, `learning.progress_tab_related_links.v1`, `learning.progress_tab_certificate_status_main_body.v1`, `learning.progress_tab_certificate_status_side_panel.v1`, `learning.progress_tab_grade_breakdown.v1`, `learning.unit_title.v1`, `learning.sequence_navigation.v1`, `learning.course_outline_sidebar_trigger.v1`, `learning.course_outline_mobile_sidebar_trigger.v1`, `learning.course_home_section_outline.v1`, `learning.course_recommendations.v1`, `learning.content_iframe_loader.v1`, `learning.content_iframe_error.v1`, `learning.sequence_container.v1`, `learning.gated_unit_content_message.v1`, `learning.next_unit_top_nav_trigger.v1`, `learning.course_outline_tab_notifications.v1`, `learning.notification_widget.v1`, `learning.notification_tray.v1`, `learning.notifications_discussions_sidebar_trigger.v1`, `learning.notifications_discussions_sidebar.v1`, `learning.course_exit_view_courses.v1`, `learning.course_exit_dashboard_footnote_link.v1` |

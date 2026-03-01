@@ -99,6 +99,11 @@ if [[ -f "$PLUGIN_FILE" ]]; then
   required_slots=(
     "org.openedx.frontend.layout.footer.v1"
     "org.openedx.frontend.layout.header_logo.v1"
+    "org.openedx.frontend.layout.header_desktop_main_menu.v1"
+    "org.openedx.frontend.layout.header_mobile_main_menu.v1"
+    "org.openedx.frontend.layout.header_desktop_logged_out_items.v1"
+    "org.openedx.frontend.layout.header_mobile_logged_out_items.v1"
+    "org.openedx.frontend.layout.header_desktop_secondary_menu.v1"
     "org.openedx.frontend.layout.studio_footer.v1"
     "org.openedx.frontend.authoring.course_unit_sidebar.v1"
     "org.openedx.frontend.authoring.course_outline_sidebar.v1"

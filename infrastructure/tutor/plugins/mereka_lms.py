@@ -831,6 +831,11 @@ PY
 #     footer.v1                       |
 #   org.openedx.frontend.layout.header_logo.v1 | Default header logo (MFE header bar)
 #   org.openedx.frontend.layout.studio_footer.v1 | Default Studio footer (studio MFE)
+#   org.openedx.frontend.layout.header_desktop_main_menu.v1 | Desktop main-menu helper
+#   org.openedx.frontend.layout.header_mobile_main_menu.v1 | Mobile main-menu helper
+#   org.openedx.frontend.layout.header_desktop_logged_out_items.v1 | Desktop logged-out menu helper
+#   org.openedx.frontend.layout.header_mobile_logged_out_items.v1 | Mobile logged-out menu helper
+#   org.openedx.frontend.layout.header_desktop_secondary_menu.v1 | Desktop secondary-menu helper
 #   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
 #   org.openedx.frontend.authoring.course_outline_sidebar.v1 | Studio outline-page sidebar helper
 #   org.openedx.frontend.authoring.course_outline_header_actions.v1 | Studio outline header actions helper
@@ -1806,6 +1811,57 @@ for _mfe in [
                         },
                     ],
                 ),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_desktop_logged_out_items.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaMenuItems(
+                    widget,
+                    [
+                        {
+                            type: 'item',
+                            href: '/dashboard/courses',
+                            content: 'Discover Courses',
+                        },
+                    ],
+                ),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_mobile_logged_out_items.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaMenuItems(
+                    widget,
+                    [
+                        {
+                            type: 'item',
+                            href: '/dashboard/courses',
+                            content: 'Discover Courses',
+                        },
+                    ],
+                ),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_desktop_secondary_menu.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaMenuItems(widget, []),
             },
             """,
         ),
