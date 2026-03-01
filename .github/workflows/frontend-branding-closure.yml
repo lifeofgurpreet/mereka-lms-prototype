@@ -74,6 +74,7 @@ on:
         options:
           - standard
           - phase7_strict
+          - phase7_full
       run_npm_start_smoke_gate:
         description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
         required: true

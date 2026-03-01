@@ -1,0 +1,57 @@
+# Expanded selector set for phase7_full runtime DOM audit.
+# One selector per line; comments and blank lines are ignored.
+#
+# Goal:
+# - cover authn + learner-dashboard + learning + account/settings surfaces
+# - include branded slot markers and core Paragon selectors touched by mereka.scss
+
+.mereka-authn-login-branding
+.mereka-authn-login-branding__logo
+.mereka-authn-login-branding__logo-img
+.mereka-authn-login-branding__title
+.mereka-authn-login-branding__subtitle
+.mereka-header-logo
+.mereka-footer
+.mereka-badge
+.mereka-dashboard-header-slot
+.mereka-dashboard-modal-hint
+.mereka-course-card-accent
+.mereka-course-card-accent__meta
+.mereka-course-card-action-hint
+.mereka-learning-course-header
+.mereka-learning-course-header__text
+.mereka-learning-course-tabs-hint
+.mereka-progress-certificate-status
+.mereka-account-id-verification-hint
+.mereka-studio-footer__inner
+.mereka-studio-footer__logo
+.mereka-studio-footer__logo-link
+.mereka-studio-footer__tagline
+.mereka-authoring-additional-course-plugin-hint
+.mereka-authoring-additional-course-content-plugin-hint
+.mereka-authoring-course-outline-header-actions-hint
+.mereka-authoring-course-outline-page-alerts-hint
+.mereka-authoring-course-outline-sidebar-hint
+.mereka-authoring-course-unit-header-actions-hint
+.mereka-authoring-course-unit-sidebar-hint
+.mereka-authoring-course-unit-sidebar-v2-hint
+.mereka-authoring-edit-file-alerts-hint
+.mereka-authoring-edit-video-alerts-hint
+.mereka-authoring-files-upload-page-table-hint
+.mereka-authoring-outline-subsection-extra-actions-hint
+.mereka-authoring-outline-unit-extra-actions-hint
+.mereka-authoring-video-transcript-translations-hint
+.mereka-authoring-videos-upload-page-table-hint
+.pgn__card
+.pgn__card-header
+.pgn__card-footer
+.pgn__tabs
+.btn-primary
+.btn-secondary
+.btn-outline-primary
+.form-control
+.alert
+.alert-info
+.alert-success
+.alert-warning
+.alert-danger

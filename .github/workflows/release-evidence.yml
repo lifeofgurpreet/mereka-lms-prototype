@@ -83,6 +83,7 @@ on:
         options:
           - standard
           - phase7_strict
+          - phase7_full
       live_dom_audit_routes:
         description: "Optional comma-separated route paths for live DOM selector audit"
         required: false

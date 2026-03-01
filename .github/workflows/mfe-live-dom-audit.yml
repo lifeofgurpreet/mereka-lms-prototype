@@ -34,6 +34,7 @@ on:
         options:
           - standard
           - phase7_strict
+          - phase7_full
       selector_audit_path:
         description: "Path used for selector DOM audit"
         required: false

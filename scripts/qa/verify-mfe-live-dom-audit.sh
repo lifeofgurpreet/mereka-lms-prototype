@@ -28,7 +28,7 @@ Options:
   --env <prod|dev>                  Target environment (default: prod)
   --base-url <url>                  LMS base URL (optional; overrides --env mapping)
   --project <name>                  Playwright project (default: chromium)
-  --audit-profile <name>            Audit profile: standard|phase7_strict (default: standard)
+  --audit-profile <name>            Audit profile: standard|phase7_strict|phase7_full (default: standard)
   --selector-audit-path <path>      MFE route path for runtime selector audit (default: /authn/login)
   --selector-audit-routes <csv>     Comma-separated MFE route paths for DOM selector audit
   --selector-audit-selectors <csv>  Comma-separated CSS selectors to audit across routes
@@ -144,25 +144,42 @@ if [[ "$REQUIRE_BRANDING_MARKERS" != "0" && "$REQUIRE_BRANDING_MARKERS" != "1" ]
   exit 2
 fi
 
-if [[ "$AUDIT_PROFILE" != "standard" && "$AUDIT_PROFILE" != "phase7_strict" ]]; then
-  echo "ERROR: --audit-profile must be one of: standard, phase7_strict (got: $AUDIT_PROFILE)" >&2
-  exit 2
-fi
-
-if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
-  if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
-    SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
-  fi
-  if [[ -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
-    SELECTOR_AUDIT_SELECTORS_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-selectors.txt"
-  fi
-  if [[ "$MIN_TRACKED_SELECTOR_HITS" == "3" ]]; then
-    MIN_TRACKED_SELECTOR_HITS="2"
-  fi
-  if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
-    MIN_CUSTOM_SELECTOR_HITS="3"
-  fi
-fi
+case "$AUDIT_PROFILE" in
+  standard)
+    ;;
+  phase7_strict)
+    if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+      SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
+    fi
+    if [[ -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
+      SELECTOR_AUDIT_SELECTORS_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-selectors.txt"
+    fi
+    if [[ "$MIN_TRACKED_SELECTOR_HITS" == "3" ]]; then
+      MIN_TRACKED_SELECTOR_HITS="2"
+    fi
+    if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
+      MIN_CUSTOM_SELECTOR_HITS="3"
+    fi
+    ;;
+  phase7_full)
+    if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+      SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register,/learner-dashboard/,/learning/,/account/settings"
+    fi
+    if [[ -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
+      SELECTOR_AUDIT_SELECTORS_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-full-selectors.txt"
+    fi
+    if [[ "$MIN_TRACKED_SELECTOR_HITS" == "3" ]]; then
+      MIN_TRACKED_SELECTOR_HITS="4"
+    fi
+    if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
+      MIN_CUSTOM_SELECTOR_HITS="8"
+    fi
+    ;;
+  *)
+    echo "ERROR: --audit-profile must be one of: standard, phase7_strict, phase7_full (got: $AUDIT_PROFILE)" >&2
+    exit 2
+    ;;
+esac
 
 if [[ -n "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
   if [[ ! -f "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
