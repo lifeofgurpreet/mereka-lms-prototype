@@ -43,6 +43,8 @@ fi
 
 assert_exec "scripts/qa/verify-cross-browser-branding-smoke.sh"
 assert_exec "scripts/qa/verify-npm-start-mfe-smoke.sh"
+assert_exec "scripts/qa/run-phase7-dom-audit.sh"
+assert_exec "scripts/qa/run-phase7-dom-audit-full.sh"
 assert_exec "scripts/qa/capture-branding-screenshots.sh"
 assert_exec "scripts/qa/verify-frontend-performance-spotcheck.sh"
 assert_exec "scripts/qa/run-branding-evidence-pipeline.sh"
@@ -52,6 +54,10 @@ assert_exec "scripts/qa/verify-email-template-multilang.sh"
 for target in \
   qa-cross-browser-prod \
   qa-cross-browser-dev \
+  qa-phase7-dom-audit \
+  qa-phase7-dom-audit-dev \
+  qa-phase7-dom-audit-full \
+  qa-phase7-dom-audit-full-dev \
   qa-npm-start-smoke-local \
   qa-branding-screenshots-prod \
   qa-branding-screenshots-dev \
@@ -74,6 +80,18 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser' \
   "qa-cross-browser-dev"
+assert_make_command \
+  './scripts/qa/run-phase7-dom-audit.sh --env prod --project chromium' \
+  "qa-phase7-dom-audit"
+assert_make_command \
+  './scripts/qa/run-phase7-dom-audit.sh --env dev --project chromium' \
+  "qa-phase7-dom-audit-dev"
+assert_make_command \
+  './scripts/qa/run-phase7-dom-audit-full.sh --env prod --project chromium' \
+  "qa-phase7-dom-audit-full"
+assert_make_command \
+  './scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium' \
+  "qa-phase7-dom-audit-full-dev"
 assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers' \
   "qa-npm-start-smoke-local"
