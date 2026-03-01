@@ -28,7 +28,8 @@ for input_key in target_environment cross_browser_matrix require_runtime_theme r
   fi
 done
 
-if ! rg -n 'phase7_strict' "$WORKFLOW" >/dev/null || ! rg -n 'phase7_full' "$WORKFLOW" >/dev/null; then
+if ! rg -n '^[[:space:]]+- phase7_strict$' "$WORKFLOW" >/dev/null \
+  || ! rg -n '^[[:space:]]+- phase7_full$' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow live_dom_audit_profile options missing phase7_strict or phase7_full"
   violations=1
 fi

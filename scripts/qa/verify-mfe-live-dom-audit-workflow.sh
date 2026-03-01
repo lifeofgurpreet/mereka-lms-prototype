@@ -33,7 +33,8 @@ if ! rg -n 'AUDIT_PROFILE=' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
-if ! rg -n 'phase7_strict' "$WORKFLOW" >/dev/null || ! rg -n 'phase7_full' "$WORKFLOW" >/dev/null; then
+if ! rg -n '^[[:space:]]+- phase7_strict$' "$WORKFLOW" >/dev/null \
+  || ! rg -n '^[[:space:]]+- phase7_full$' "$WORKFLOW" >/dev/null; then
   echo "❌ workflow audit_profile options missing phase7_strict or phase7_full"
   violations=1
 fi
