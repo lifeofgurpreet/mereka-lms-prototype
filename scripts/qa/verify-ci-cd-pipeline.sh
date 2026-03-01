@@ -22,6 +22,7 @@ BUILD_WF=".github/workflows/build-tutor-images.yml"
 CI_WF=".github/workflows/ci.yml"
 POLICY_WF=".github/workflows/policy-checks.yml"
 EVIDENCE_WF=".github/workflows/release-evidence.yml"
+FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
 WORKFLOWS_DIR=".github/workflows"
@@ -350,6 +351,27 @@ check_gitops() {
     pass "[AC-019] Release evidence uploads artifact bundle"
   else
     fail "[AC-019] Release evidence missing artifact upload"
+  fi
+
+  # AC-020: Frontend contracts workflow exists
+  if [[ -f "$FRONTEND_CONTRACTS_WF" ]]; then
+    pass "[AC-020] Frontend contracts workflow exists"
+  else
+    fail "[AC-020] Frontend contracts workflow missing: $FRONTEND_CONTRACTS_WF"
+  fi
+
+  # AC-020: Frontend contracts workflow is workflow_dispatch only
+  if [[ -f "$FRONTEND_CONTRACTS_WF" ]] && grep -q 'workflow_dispatch:' "$FRONTEND_CONTRACTS_WF"; then
+    pass "[AC-020] Frontend contracts workflow triggered via workflow_dispatch"
+  else
+    fail "[AC-020] Frontend contracts workflow missing workflow_dispatch trigger"
+  fi
+
+  # AC-020: Frontend contracts workflow runs make qa-frontend-contracts
+  if [[ -f "$FRONTEND_CONTRACTS_WF" ]] && grep -q 'make qa-frontend-contracts' "$FRONTEND_CONTRACTS_WF"; then
+    pass "[AC-020] Frontend contracts workflow runs qa-frontend-contracts lane"
+  else
+    fail "[AC-020] Frontend contracts workflow missing qa-frontend-contracts invocation"
   fi
 
   # AC-020: Policy checks workflow exists
