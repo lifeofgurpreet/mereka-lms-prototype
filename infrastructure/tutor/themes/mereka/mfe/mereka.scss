@@ -366,7 +366,10 @@ label {
 }
 
 .mereka-authoring-course-outline-header-actions-hint,
-.mereka-authoring-course-unit-header-actions-hint {
+.mereka-authoring-course-unit-header-actions-hint,
+.mereka-authoring-course-outline-page-alerts-hint,
+.mereka-authoring-edit-video-alerts-hint,
+.mereka-authoring-edit-file-alerts-hint {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;

@@ -835,6 +835,9 @@ PY
 #   org.openedx.frontend.authoring.course_outline_sidebar.v1 | Studio outline-page sidebar helper
 #   org.openedx.frontend.authoring.course_outline_header_actions.v1 | Studio outline header actions helper
 #   org.openedx.frontend.authoring.course_unit_header_actions.v1 | Studio unit header actions helper
+#   org.openedx.frontend.authoring.course_outline_page_alerts.v1 | Studio outline page alerts helper
+#   org.openedx.frontend.authoring.edit_video_alerts.v1 | Studio video editor alerts helper
+#   org.openedx.frontend.authoring.edit_file_alerts.v1 | Studio file editor alerts helper
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
@@ -994,6 +997,51 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaAuthoringCourseUnitHeaderActionsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_outline_page_alerts.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_course_outline_page_alerts_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringCourseOutlinePageAlertsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.edit_video_alerts.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_edit_video_alerts_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringEditVideoAlertsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.edit_file_alerts.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_edit_file_alerts_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringEditFileAlertsHint,
                 },
             },
             """,
@@ -1870,6 +1918,39 @@ const MerekaAuthoringCourseUnitHeaderActionsHint = () => {
   return (
     <div className="mereka-authoring-course-unit-header-actions-hint">
       <span className="small">Keep unit activities outcomes-focused for your learner path.</span>
+    </div>
+  );
+};
+
+// Studio outline page alerts helper.
+// Wired into org.openedx.frontend.authoring.course_outline_page_alerts.v1.
+const MerekaAuthoringCourseOutlinePageAlertsHint = () => {
+  return (
+    <div className="mereka-authoring-course-outline-page-alerts-hint">
+      <span className="mereka-badge me-2">Quality Check</span>
+      <span className="small">Review pacing and prerequisites before publishing this outline.</span>
+    </div>
+  );
+};
+
+// Studio video editor alerts helper.
+// Wired into org.openedx.frontend.authoring.edit_video_alerts.v1.
+const MerekaAuthoringEditVideoAlertsHint = () => {
+  return (
+    <div className="mereka-authoring-edit-video-alerts-hint">
+      <span className="mereka-badge me-2">Video Ready</span>
+      <span className="small">Confirm captions and transcript quality for accessibility.</span>
+    </div>
+  );
+};
+
+// Studio file editor alerts helper.
+// Wired into org.openedx.frontend.authoring.edit_file_alerts.v1.
+const MerekaAuthoringEditFileAlertsHint = () => {
+  return (
+    <div className="mereka-authoring-edit-file-alerts-hint">
+      <span className="mereka-badge me-2">File Review</span>
+      <span className="small">Check filename clarity and learner-facing download labels.</span>
     </div>
   );
 };
