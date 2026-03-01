@@ -872,6 +872,7 @@ PY
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
 #   org.openedx.frontend.catalog.catalog_search.v1 | Catalog/discovery search helper
 #   org.openedx.frontend.catalog.catalog_sort.v1 | Catalog/discovery sort helper
+#   org.openedx.frontend.catalog.catalog_pagination.v1 | Catalog/discovery pagination helper
 #   org.openedx.frontend.account.id_verification_page.v1 | Account ID verification helper
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
@@ -1548,6 +1549,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaCatalogSortHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.catalog.catalog_pagination.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_catalog_pagination_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCatalogPaginationHint,
                 },
             },
             """,
@@ -2305,6 +2321,17 @@ const MerekaCatalogSortHint = () => {
     <div className="mereka-catalog-sort-hint">
       <span className="mereka-badge me-2">Sort</span>
       <span className="small text-muted">Sort by relevance, newest, or learner demand based on your goals.</span>
+    </div>
+  );
+};
+
+// Catalog/discovery pagination helper slot.
+// Wired into org.openedx.frontend.catalog.catalog_pagination.v1.
+const MerekaCatalogPaginationHint = () => {
+  return (
+    <div className="mereka-catalog-pagination-hint">
+      <span className="mereka-badge me-2">Browse</span>
+      <span className="small text-muted">Use pagination to compare programs and shortlist the best fit.</span>
     </div>
   );
 };
