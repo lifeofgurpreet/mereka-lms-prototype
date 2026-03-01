@@ -1,0 +1,31 @@
+name: Email Template Branding
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  email-template-branding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run email template branding gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+          ./scripts/qa/verify-email-template-multilang.sh \
+            | tee var/qa/email-template-branding.log
+
+      - name: Upload email template branding artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: email-template-branding-${{ github.run_number }}
+          path: |
+            var/qa/email-template-branding.log
+          if-no-files-found: warn
