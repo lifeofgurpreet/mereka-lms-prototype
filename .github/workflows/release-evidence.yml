@@ -75,6 +75,29 @@ on:
         required: false
         default: "3"
         type: string
+      live_dom_audit_profile:
+        description: "Preset profile for live DOM selector audit defaults"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - standard
+          - phase7_strict
+      live_dom_audit_routes:
+        description: "Optional comma-separated route paths for live DOM selector audit"
+        required: false
+        default: ""
+        type: string
+      live_dom_audit_selectors:
+        description: "Optional comma-separated CSS selectors for live DOM selector audit"
+        required: false
+        default: ""
+        type: string
+      live_dom_audit_min_custom_hits:
+        description: "Minimum custom selectors that must match across audited routes"
+        required: false
+        default: "0"
+        type: string
       selector_audit_path:
         description: "Route path used by runtime DOM selector audit lane"
         required: false
@@ -231,9 +254,13 @@ jobs:
           RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          AUDIT_PROFILE="${{ inputs.live_dom_audit_profile || 'standard' }}"
           SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
+          SELECTOR_AUDIT_ROUTES="${{ inputs.live_dom_audit_routes || '' }}"
+          SELECTOR_AUDIT_SELECTORS="${{ inputs.live_dom_audit_selectors || '' }}"
           PROJECT="${{ inputs.live_dom_audit_project || 'chromium' }}"
           MIN_HITS="${{ inputs.live_dom_audit_min_hits || '3' }}"
+          MIN_CUSTOM_HITS="${{ inputs.live_dom_audit_min_custom_hits || '0' }}"
 
           if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
             BASE_URL="$RUNTIME_THEME_URL_INPUT"
@@ -244,7 +271,28 @@ jobs:
             BASE_URL="https://academyv2.mereka.dev"
           fi
 
-          args=(--base-url "$BASE_URL" --selector-audit-path "$SELECTOR_AUDIT_PATH" --project "$PROJECT" --min-selector-hits "$MIN_HITS")
+          if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
+            if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+              SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
+            fi
+            if [[ -z "$SELECTOR_AUDIT_SELECTORS" ]]; then
+              SELECTOR_AUDIT_SELECTORS=".mereka-authn-login-branding,.mereka-footer,.btn-primary,.form-control,.navbar"
+            fi
+            if [[ "$MIN_HITS" == "3" ]]; then
+              MIN_HITS="2"
+            fi
+            if [[ "$MIN_CUSTOM_HITS" == "0" ]]; then
+              MIN_CUSTOM_HITS="3"
+            fi
+          fi
+
+          args=(--base-url "$BASE_URL" --audit-profile "$AUDIT_PROFILE" --selector-audit-path "$SELECTOR_AUDIT_PATH" --project "$PROJECT" --min-selector-hits "$MIN_HITS" --min-custom-selector-hits "$MIN_CUSTOM_HITS")
+          if [[ -n "$SELECTOR_AUDIT_ROUTES" ]]; then
+            args+=(--selector-audit-routes "$SELECTOR_AUDIT_ROUTES")
+          fi
+          if [[ -n "$SELECTOR_AUDIT_SELECTORS" ]]; then
+            args+=(--selector-audit-selectors "$SELECTOR_AUDIT_SELECTORS")
+          fi
           if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
             args+=(--require-runtime-theme)
           fi
@@ -291,6 +339,10 @@ jobs:
               "npm_start_project": "${{ inputs.npm_start_project || 'chromium' }}",
               "live_dom_audit_project": "${{ inputs.live_dom_audit_project || 'chromium' }}",
               "live_dom_audit_min_hits": "${{ inputs.live_dom_audit_min_hits || '3' }}",
+              "live_dom_audit_profile": "${{ inputs.live_dom_audit_profile || 'standard' }}",
+              "live_dom_audit_routes": "${{ inputs.live_dom_audit_routes || '' }}",
+              "live_dom_audit_selectors": "${{ inputs.live_dom_audit_selectors || '' }}",
+              "live_dom_audit_min_custom_hits": "${{ inputs.live_dom_audit_min_custom_hits || '0' }}",
               "selector_audit_path": "${{ inputs.selector_audit_path || '/authn/login' }}",
           }
 

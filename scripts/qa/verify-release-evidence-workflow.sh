@@ -111,6 +111,26 @@ if ! rg -n 'live_dom_audit_min_hits' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'live_dom_audit_profile' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live_dom_audit_profile input"
+  violations=1
+fi
+
+if ! rg -n 'live_dom_audit_routes' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live_dom_audit_routes input"
+  violations=1
+fi
+
+if ! rg -n 'live_dom_audit_selectors' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live_dom_audit_selectors input"
+  violations=1
+fi
+
+if ! rg -n 'live_dom_audit_min_custom_hits' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live_dom_audit_min_custom_hits input"
+  violations=1
+fi
+
 if ! rg -n 'selector_audit_path' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing selector_audit_path input"
   violations=1
@@ -156,8 +176,13 @@ if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >
   violations=1
 fi
 
-if ! rg -n -- '--selector-audit-path|--min-selector-hits' "$WORKFLOW" >/dev/null; then
+if ! rg -n -- '--audit-profile|--selector-audit-path|--min-selector-hits|--min-custom-selector-hits' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow live DOM selector audit step missing selector path/min-hit wiring"
+  violations=1
+fi
+
+if ! rg -n -- '--selector-audit-routes|--selector-audit-selectors' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow live DOM selector audit step missing optional route/custom-selector wiring"
   violations=1
 fi
 
@@ -218,6 +243,26 @@ fi
 
 if ! rg -n '"live_dom_audit_min_hits": "\$\{\{ inputs\.live_dom_audit_min_hits \|\| '\''3'\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing live_dom_audit_min_hits field"
+  violations=1
+fi
+
+if ! rg -n '"live_dom_audit_profile": "\$\{\{ inputs\.live_dom_audit_profile \|\| '\''standard'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing live_dom_audit_profile field"
+  violations=1
+fi
+
+if ! rg -n '"live_dom_audit_routes": "\$\{\{ inputs\.live_dom_audit_routes \|\| '\'''\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing live_dom_audit_routes field"
+  violations=1
+fi
+
+if ! rg -n '"live_dom_audit_selectors": "\$\{\{ inputs\.live_dom_audit_selectors \|\| '\'''\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing live_dom_audit_selectors field"
+  violations=1
+fi
+
+if ! rg -n '"live_dom_audit_min_custom_hits": "\$\{\{ inputs\.live_dom_audit_min_custom_hits \|\| '\''0'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing live_dom_audit_min_custom_hits field"
   violations=1
 fi
 
