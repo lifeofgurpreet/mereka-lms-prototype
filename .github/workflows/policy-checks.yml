@@ -33,6 +33,7 @@ jobs:
           bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
           bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
+          bash -n scripts/qa/verify-make-help-contract.sh
           bash -n scripts/qa/verify-frontend-qa-make-targets.sh
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
           bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
@@ -106,6 +107,10 @@ jobs:
       - name: Verify frontend performance spot-check workflow contract
         run: |
           ./scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
+
+      - name: Verify Makefile help contract
+        run: |
+          ./scripts/qa/verify-make-help-contract.sh
 
       - name: Verify frontend QA Makefile target contract
         run: |

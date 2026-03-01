@@ -383,6 +383,7 @@ check_gitops() {
       "verify-cross-browser-branding-workflow.sh"
       "verify-npm-start-smoke-workflow.sh"
       "verify-frontend-performance-spotcheck-workflow.sh"
+      "verify-make-help-contract.sh"
       "verify-frontend-qa-make-targets.sh"
       "verify-frontend-branding-closure-workflow.sh"
       "verify-mfe-live-dom-audit-workflow.sh"

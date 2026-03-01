@@ -56,6 +56,7 @@ if [[ -z "$HELP_OUTPUT" ]]; then
 fi
 
 assert_exec "scripts/qa/verify-cross-browser-branding-smoke.sh"
+assert_exec "scripts/qa/verify-make-help-contract.sh"
 assert_exec "scripts/qa/verify-npm-start-mfe-smoke.sh"
 assert_exec "scripts/qa/run-phase7-dom-audit.sh"
 assert_exec "scripts/qa/run-phase7-dom-audit-full.sh"
@@ -160,6 +161,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-email-template-multilang.sh' \
   "qa-email-template-branding"
+assert_make_command \
+  './scripts/qa/verify-make-help-contract.sh' \
+  "qa-frontend-contracts includes verify-make-help-contract"
 assert_make_command \
   './scripts/qa/verify-frontend-qa-make-targets.sh' \
   "qa-frontend-contracts includes verify-frontend-qa-make-targets"
