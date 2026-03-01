@@ -60,6 +60,7 @@ assert_exec "scripts/qa/verify-make-help-contract.sh"
 assert_exec "scripts/qa/verify-npm-start-mfe-smoke.sh"
 assert_exec "scripts/qa/run-phase7-dom-audit.sh"
 assert_exec "scripts/qa/run-phase7-dom-audit-full.sh"
+assert_exec "scripts/qa/verify-phase7-selector-list-coverage.sh"
 assert_exec "scripts/qa/capture-branding-screenshots.sh"
 assert_exec "scripts/qa/verify-frontend-performance-spotcheck.sh"
 assert_exec "scripts/qa/run-branding-evidence-pipeline.sh"
@@ -76,6 +77,7 @@ for target in \
   qa-phase7-dom-audit-full \
   qa-phase7-dom-audit-full-dev \
   qa-phase7-dom-audit-full-strict \
+  qa-phase7-selector-coverage \
   qa-npm-start-smoke-local \
   qa-npm-start-smoke-prod \
   qa-npm-start-smoke-dev \
@@ -119,6 +121,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/run-phase7-dom-audit-full.sh --env prod --project chromium --require-runtime-theme' \
   "qa-phase7-dom-audit-full-strict"
+assert_make_command \
+  './scripts/qa/verify-phase7-selector-list-coverage.sh' \
+  "qa-phase7-selector-coverage"
 assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers' \
   "qa-npm-start-smoke-local"
@@ -195,6 +200,9 @@ assert_make_command \
   './scripts/qa/verify-phase7-dom-audit-contract.sh' \
   "qa-frontend-contracts includes verify-phase7-dom-audit-contract"
 assert_make_command \
+  './scripts/qa/verify-phase7-selector-list-coverage.sh' \
+  "qa-frontend-contracts includes verify-phase7-selector-list-coverage"
+assert_make_command \
   './scripts/qa/verify-branding-evidence-a11y-contract.sh' \
   "qa-frontend-contracts includes verify-branding-evidence-a11y-contract"
 assert_make_command \
@@ -211,6 +219,7 @@ assert_make_command \
   "qa-performance-dev"
 
 assert_help_entry "qa-phase7-dom-audit-full-strict"
+assert_help_entry "qa-phase7-selector-coverage"
 assert_help_entry "qa-make-help-contract"
 assert_help_entry "qa-frontend-contracts"
 assert_help_entry "qa-npm-start-smoke-prod"
