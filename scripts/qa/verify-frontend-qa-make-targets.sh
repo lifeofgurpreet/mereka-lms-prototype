@@ -80,6 +80,7 @@ for target in \
   qa-phase7-dom-audit-full-strict \
   qa-phase7-selector-coverage \
   qa-paragon-theme-budget \
+  qa-frontend-extended-surfaces \
   qa-npm-start-smoke-local \
   qa-npm-start-smoke-prod \
   qa-npm-start-smoke-dev \
@@ -129,6 +130,15 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-paragon-token-coverage.sh' \
   "qa-paragon-theme-budget"
+assert_make_command \
+  './scripts/qa/verify-paragon-token-coverage.sh' \
+  "qa-frontend-extended-surfaces includes verify-paragon-token-coverage"
+assert_make_command \
+  './scripts/qa/verify-certificate-branding.sh' \
+  "qa-frontend-extended-surfaces includes verify-certificate-branding"
+assert_make_command \
+  './scripts/qa/verify-email-template-multilang.sh' \
+  "qa-frontend-extended-surfaces includes verify-email-template-multilang"
 assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers' \
   "qa-npm-start-smoke-local"
@@ -232,6 +242,7 @@ assert_make_command \
 assert_help_entry "qa-phase7-dom-audit-full-strict"
 assert_help_entry "qa-phase7-selector-coverage"
 assert_help_entry "qa-paragon-theme-budget"
+assert_help_entry "qa-frontend-extended-surfaces"
 assert_help_entry "qa-make-help-contract"
 assert_help_entry "qa-frontend-contracts"
 assert_help_entry "qa-npm-start-smoke-prod"

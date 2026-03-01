@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-paragon-theme-budget qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-npm-start-smoke-prod qa-npm-start-smoke-dev qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-npm-start-smoke-prod qa-npm-start-smoke-dev qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -100,6 +100,11 @@ qa-phase7-selector-coverage: ## Verify Phase 7 selector-list coverage stays alig
 
 qa-paragon-theme-budget: ## Verify Paragon runtime theme asset size-budget and token coverage
 	./scripts/qa/verify-paragon-token-coverage.sh
+
+qa-frontend-extended-surfaces: ## Run extended-surface frontend branding checks (Paragon budget + certificate + email)
+	./scripts/qa/verify-paragon-token-coverage.sh
+	./scripts/qa/verify-certificate-branding.sh
+	./scripts/qa/verify-email-template-multilang.sh
 
 qa-a11y-prod: ## Run accessibility gate (offline) for prod baseline
 	./scripts/qa/run-a11y-runtime-lane.sh --env prod --mode offline

@@ -34,6 +34,7 @@ else
     "qa-phase7-dom-audit-full-strict" \
     "qa-phase7-selector-coverage" \
     "qa-paragon-theme-budget" \
+    "qa-frontend-extended-surfaces" \
     "qa-npm-start-smoke-prod" \
     "qa-frontend-closure-dev-screenshots-mfe" \
     "qa-frontend-contracts"; do
