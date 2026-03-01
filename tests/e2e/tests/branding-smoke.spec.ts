@@ -24,8 +24,10 @@ const MFE_ROUTES: RouteConfig[] = [
 const REQUIRE_RUNTIME_THEME_URLS = process.env.REQUIRE_RUNTIME_THEME_URLS === '1';
 
 function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const baseHost = new URL(lmsBaseUrl).hostname;
-  return `https://apps.${baseHost}`;
+  const parsed = new URL(lmsBaseUrl);
+  const host = parsed.hostname.startsWith('apps.') ? parsed.hostname : `apps.${parsed.hostname}`;
+  const port = parsed.port ? `:${parsed.port}` : '';
+  return `${parsed.protocol}//${host}${port}`;
 }
 
 type ThemeContractMode = 'runtime-theme-urls' | 'embedded-theme-files';
