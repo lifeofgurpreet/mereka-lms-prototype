@@ -89,6 +89,7 @@ for target in \
   qa-frontend-closure-dev-screenshots-mfe \
   qa-certificate-branding \
   qa-email-template-branding \
+  qa-make-help-contract \
   qa-frontend-contracts \
   qa-performance-prod \
   qa-performance-dev; do
@@ -163,6 +164,9 @@ assert_make_command \
   "qa-email-template-branding"
 assert_make_command \
   './scripts/qa/verify-make-help-contract.sh' \
+  "qa-make-help-contract"
+assert_make_command \
+  './scripts/qa/verify-make-help-contract.sh' \
   "qa-frontend-contracts includes verify-make-help-contract"
 assert_make_command \
   './scripts/qa/verify-frontend-qa-make-targets.sh' \
@@ -199,6 +203,7 @@ assert_make_command \
   "qa-performance-dev"
 
 assert_help_entry "qa-phase7-dom-audit-full-strict"
+assert_help_entry "qa-make-help-contract"
 assert_help_entry "qa-frontend-contracts"
 assert_help_entry "qa-npm-start-smoke-prod"
 assert_help_entry "qa-frontend-closure-dev-screenshots-mfe"
