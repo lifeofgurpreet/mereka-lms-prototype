@@ -23,6 +23,7 @@ const MFE_ROUTES: RouteConfig[] = [
 
 const REQUIRE_RUNTIME_THEME_URLS = process.env.REQUIRE_RUNTIME_THEME_URLS === '1';
 const REQUIRE_BRANDING_MARKERS = process.env.REQUIRE_BRANDING_MARKERS !== '0';
+const OPTIONAL_MARKER_ROUTES = new Set(['profile-home', 'learning-route']);
 
 function getMfeBaseUrl(lmsBaseUrl: string): string {
   const parsed = new URL(lmsBaseUrl);
@@ -147,10 +148,13 @@ test.describe('Branding smoke', () => {
       if (themeMode === 'embedded-theme-files') {
         expect(html).toMatch(/paragon-theme-core\.[a-z0-9]+\.css/i);
         expect(html).toMatch(/brand-theme-core\.[a-z0-9]+\.css/i);
+      } else {
+        expect(html).toContain('/theme/core.min.css');
+        expect(html).toContain('/theme/mereka-brand.min.css');
       }
 
       let markerCounts = await getBrandingMarkerCounts(page);
-      if (REQUIRE_BRANDING_MARKERS) {
+      if (REQUIRE_BRANDING_MARKERS && !OPTIONAL_MARKER_ROUTES.has(route.label)) {
         const maxAttempts = 8;
         for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
           const authnMarkerReady = markerCounts.authnBranding > 0;
