@@ -17,7 +17,7 @@ assert_contains() {
   local file="$1"
   local needle="$2"
   local label="$3"
-  if grep -Fq "$needle" "$file"; then
+  if grep -Fq -- "$needle" "$file"; then
     pass "$label"
   else
     fail "$label (missing '$needle' in ${file#$REPO_ROOT/})"
@@ -95,14 +95,13 @@ else
   warn "Localized certificate email wrappers missing (ms/zh-hans)"
 fi
 
-mapfile -t THEMED_CERT_TEMPLATES < <(
-  find "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates" -type f 2>/dev/null \
-    | grep -E '/(certificate|certificates)' || true
-)
-if [[ "${#THEMED_CERT_TEMPLATES[@]}" -gt 0 ]]; then
-  pass "Themed LMS certificate template override(s) found (${#THEMED_CERT_TEMPLATES[@]})"
+THEMED_CERT_BASE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/certificates/accomplishment-base.html"
+if [[ -f "$THEMED_CERT_BASE" ]]; then
+  pass "Themed LMS certificate base template override exists"
+  assert_contains "$THEMED_CERT_BASE" "Mereka certificate branding override" "Certificate template includes Mereka branding marker"
+  assert_contains "$THEMED_CERT_BASE" "--mereka-cert-primary" "Certificate template defines Mereka certificate design tokens"
 else
-  warn "No LMS certificate template overrides found under themes/mereka/lms/templates (PDF certificate branding may be upstream/default-managed)"
+  fail "Missing themed LMS certificate base template override: ${THEMED_CERT_BASE#$REPO_ROOT/}"
 fi
 
 echo ""
