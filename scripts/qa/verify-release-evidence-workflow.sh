@@ -81,6 +81,31 @@ if ! rg -n 'run_npm_start_smoke' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'run_accessibility_scan' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing run_accessibility_scan input"
+  violations=1
+fi
+
+if ! rg -n 'a11y_mode' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing a11y_mode input"
+  violations=1
+fi
+
+if ! rg -n 'a11y_target_url' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing a11y_target_url input"
+  violations=1
+fi
+
+if ! rg -n 'a11y_routes' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing a11y_routes input"
+  violations=1
+fi
+
+if ! rg -n 'a11y_allow_missing_reports' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing a11y_allow_missing_reports input"
+  violations=1
+fi
+
 if ! rg -n 'run_certificate_branding' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing run_certificate_branding input"
   violations=1
@@ -161,6 +186,21 @@ if ! rg -n './scripts/qa/verify-npm-start-mfe-smoke\.sh' "$WORKFLOW" >/dev/null;
   violations=1
 fi
 
+if ! rg -n './scripts/qa/verify-accessibility\.sh' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing accessibility lane step"
+  violations=1
+fi
+
+if ! rg -n -- '--offline|--online' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow accessibility lane missing mode wiring"
+  violations=1
+fi
+
+if ! rg -n -- '--target' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow accessibility lane missing target URL wiring"
+  violations=1
+fi
+
 if ! rg -n './scripts/qa/verify-certificate-branding\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing certificate branding lane step"
   violations=1
@@ -218,6 +258,31 @@ fi
 
 if ! rg -n '"run_npm_start_smoke": "\$\{\{ inputs\.run_npm_start_smoke \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing run_npm_start_smoke field"
+  violations=1
+fi
+
+if ! rg -n '"run_accessibility_scan": "\$\{\{ inputs\.run_accessibility_scan \|\| '\''true'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing run_accessibility_scan field"
+  violations=1
+fi
+
+if ! rg -n '"a11y_mode": "\$\{\{ inputs\.a11y_mode \|\| '\''offline'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing a11y_mode field"
+  violations=1
+fi
+
+if ! rg -n '"a11y_target_url": "\$\{\{ inputs\.a11y_target_url \|\| '\'''\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing a11y_target_url field"
+  violations=1
+fi
+
+if ! rg -n '"a11y_routes": "\$\{\{ inputs\.a11y_routes \|\| '\'''\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing a11y_routes field"
+  violations=1
+fi
+
+if ! rg -n '"a11y_allow_missing_reports": "\$\{\{ inputs\.a11y_allow_missing_reports \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing a11y_allow_missing_reports field"
   violations=1
 fi
 
