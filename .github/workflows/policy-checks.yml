@@ -26,6 +26,7 @@ jobs:
           bash -n scripts/qa/verify-ci-cd-pipeline.sh
           bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
+          bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
           bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
           bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
@@ -65,6 +66,10 @@ jobs:
       - name: Verify npm-start smoke workflow contract
         run: |
           ./scripts/qa/verify-npm-start-smoke-workflow.sh
+
+      - name: Verify frontend performance spot-check workflow contract
+        run: |
+          ./scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
 
       - name: Verify frontend branding closure workflow contract
         run: |

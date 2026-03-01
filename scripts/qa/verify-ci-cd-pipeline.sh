@@ -376,6 +376,7 @@ check_gitops() {
       "verify-release-evidence-workflow.sh"
       "verify-cross-browser-branding-workflow.sh"
       "verify-npm-start-smoke-workflow.sh"
+      "verify-frontend-performance-spotcheck-workflow.sh"
       "verify-frontend-branding-closure-workflow.sh"
       "verify-mfe-live-dom-audit-workflow.sh"
       "verify-no-latest-prod-tags.sh"
