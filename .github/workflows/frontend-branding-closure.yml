@@ -186,18 +186,6 @@ jobs:
           RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
 
-          if [[ "$LIVE_DOM_AUDIT_PROFILE" == "phase7_strict" ]]; then
-            if [[ -z "$LIVE_DOM_AUDIT_ROUTES" ]]; then
-              LIVE_DOM_AUDIT_ROUTES="/authn/login,/authn/register"
-            fi
-            if [[ "$LIVE_DOM_AUDIT_MIN_HITS" == "3" ]]; then
-              LIVE_DOM_AUDIT_MIN_HITS="2"
-            fi
-            if [[ "$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS" == "0" ]]; then
-              LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="3"
-            fi
-          fi
-
           args=(--env "$TARGET_ENV" --frontend-only)
           if [[ "$CROSS_BROWSER_MATRIX" == "true" ]]; then
             args+=(--cross-browser)
@@ -223,6 +211,7 @@ jobs:
           RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
           NPM_START_BASE_URL="$NPM_START_BASE_URL" \
           NPM_START_PROJECT="$NPM_START_PROJECT" \
+          LIVE_DOM_AUDIT_PROFILE="$LIVE_DOM_AUDIT_PROFILE" \
           LIVE_DOM_AUDIT_PROJECT="$LIVE_DOM_AUDIT_PROJECT" \
           LIVE_DOM_AUDIT_MIN_HITS="$LIVE_DOM_AUDIT_MIN_HITS" \
           LIVE_DOM_AUDIT_ROUTES="$LIVE_DOM_AUDIT_ROUTES" \

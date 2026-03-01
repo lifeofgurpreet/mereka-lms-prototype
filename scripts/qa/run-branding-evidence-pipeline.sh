@@ -44,6 +44,7 @@ NPM_START_HEADED="${NPM_START_HEADED:-0}"
 NPM_START_TIMEOUT_SECONDS="${NPM_START_TIMEOUT_SECONDS:-900}"
 LIVE_DOM_AUDIT_PROJECT="${LIVE_DOM_AUDIT_PROJECT:-chromium}"
 LIVE_DOM_AUDIT_MIN_HITS="${LIVE_DOM_AUDIT_MIN_HITS:-3}"
+LIVE_DOM_AUDIT_PROFILE="${LIVE_DOM_AUDIT_PROFILE:-standard}"
 LIVE_DOM_AUDIT_ROUTES="${LIVE_DOM_AUDIT_ROUTES:-}"
 LIVE_DOM_AUDIT_SELECTORS="${LIVE_DOM_AUDIT_SELECTORS:-}"
 LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${LIVE_DOM_AUDIT_MIN_CUSTOM_HITS:-0}"
@@ -97,6 +98,8 @@ Environment toggles:
                             Playwright project for live DOM audit (default: chromium)
   LIVE_DOM_AUDIT_MIN_HITS=<int>
                             Minimum tracked selector hits for live DOM audit (default: 3)
+  LIVE_DOM_AUDIT_PROFILE=standard|phase7_strict
+                            Live DOM profile (default: standard)
   LIVE_DOM_AUDIT_ROUTES=<csv>
                             Optional comma-separated route paths for live DOM audit
   LIVE_DOM_AUDIT_SELECTORS=<csv>
@@ -192,6 +195,7 @@ echo "Slot source-alignment gate enabled: $RUN_SLOT_SOURCE_ALIGNMENT"
 echo "Selector hardening gate enabled: $RUN_SELECTOR_HARDENING"
 echo "Runtime theme contract gate enabled: $RUN_RUNTIME_THEME_CONTRACT"
 echo "MFE live DOM selector audit gate enabled: $RUN_MFE_LIVE_DOM_AUDIT"
+echo "Live DOM audit profile: $LIVE_DOM_AUDIT_PROFILE"
 echo "Runtime slot marker policy: $SLOT_MARKER_POLICY"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
@@ -320,7 +324,7 @@ fi
 
 # --- Gate 10: Runtime selector DOM audit (optional) ---
 if [[ "$RUN_MFE_LIVE_DOM_AUDIT" == "1" ]]; then
-  dom_audit_args=(--env "$ENV" --project "$LIVE_DOM_AUDIT_PROJECT" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$LIVE_DOM_AUDIT_MIN_HITS" --min-custom-selector-hits "$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS")
+  dom_audit_args=(--env "$ENV" --project "$LIVE_DOM_AUDIT_PROJECT" --audit-profile "$LIVE_DOM_AUDIT_PROFILE" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$LIVE_DOM_AUDIT_MIN_HITS" --min-custom-selector-hits "$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS")
   if [[ -n "$LIVE_DOM_AUDIT_ROUTES" ]]; then
     dom_audit_args+=(--selector-audit-routes "$LIVE_DOM_AUDIT_ROUTES")
   fi
@@ -486,6 +490,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - Selector hardening gate enabled: ${RUN_SELECTOR_HARDENING}
 - Runtime theme contract gate enabled: ${RUN_RUNTIME_THEME_CONTRACT}
 - Live DOM selector audit gate enabled: ${RUN_MFE_LIVE_DOM_AUDIT}
+- Live DOM audit profile: ${LIVE_DOM_AUDIT_PROFILE}
 - Runtime theme contract URL: ${RUNTIME_THEME_URL:-"(auto by env)"}
 - Runtime theme contract timeout: ${RUNTIME_THEME_TIMEOUT_SECONDS}s
 - Live DOM audit project: ${LIVE_DOM_AUDIT_PROJECT}

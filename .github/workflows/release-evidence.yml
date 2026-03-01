@@ -271,18 +271,6 @@ jobs:
             BASE_URL="https://academyv2.mereka.dev"
           fi
 
-          if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
-            if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
-              SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
-            fi
-            if [[ "$MIN_HITS" == "3" ]]; then
-              MIN_HITS="2"
-            fi
-            if [[ "$MIN_CUSTOM_HITS" == "0" ]]; then
-              MIN_CUSTOM_HITS="3"
-            fi
-          fi
-
           args=(--base-url "$BASE_URL" --audit-profile "$AUDIT_PROFILE" --selector-audit-path "$SELECTOR_AUDIT_PATH" --project "$PROJECT" --min-selector-hits "$MIN_HITS" --min-custom-selector-hits "$MIN_CUSTOM_HITS")
           if [[ -n "$SELECTOR_AUDIT_ROUTES" ]]; then
             args+=(--selector-audit-routes "$SELECTOR_AUDIT_ROUTES")
