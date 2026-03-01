@@ -313,6 +313,13 @@ label {
   font-size: var(--pgn-typography-font-size-sm);
 }
 
+.mereka-dashboard-modal-hint {
+  border: 1px solid var(--mereka-mfe-border);
+  border-radius: var(--mereka-mfe-card-radius);
+  background: var(--mereka-mfe-surface-muted);
+  padding: 0.75rem;
+}
+
 /* RISK: LOW — profile certificate card styling scoped to .profile-page. */
 .profile-page .certificate {
   border-radius: var(--mereka-mfe-card-radius);

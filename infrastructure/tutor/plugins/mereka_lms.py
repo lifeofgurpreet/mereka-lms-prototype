@@ -835,9 +835,10 @@ PY
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
-#   org.openedx.frontend.learner_dashboard.dashboard_header.v1 | Learner dashboard branded header
-#   org.openedx.frontend.learner_dashboard.course_card.v1 | Learner dashboard course-card accent
+#   org.openedx.frontend.learner_dashboard.course_list.v1 | Learner dashboard course-list helper
+#   org.openedx.frontend.learner_dashboard.course_card_banner.v1 | Learner dashboard course-card banner accent
 #   org.openedx.frontend.learner_dashboard.course_card_action.v1 | Learner dashboard course-card action helper
+#   org.openedx.frontend.learner_dashboard.dashboard_modal.v1 | Learner dashboard modal helper
 #   org.openedx.frontend.learning.course_outline_sidebar.v1 | Learning course sidebar content
 #   org.openedx.frontend.learning.progress_certificate_status.v1 | Learning certificate progress block
 #   org.openedx.frontend.layout.header_learning.v1 | Learning layout header slot
@@ -1000,12 +1001,12 @@ for _mfe in [
         ),
         (
             _mfe,
-            "org.openedx.frontend.learner_dashboard.dashboard_header.v1",
+            "org.openedx.frontend.learner_dashboard.course_list.v1",
             """
             {
                 op: PLUGIN_OPERATIONS.Insert,
                 widget: {
-                    id: 'mereka_dashboard_header',
+                    id: 'mereka_dashboard_course_list_context',
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaDashboardHeader,
@@ -1015,12 +1016,12 @@ for _mfe in [
         ),
         (
             _mfe,
-            "org.openedx.frontend.learner_dashboard.course_card.v1",
+            "org.openedx.frontend.learner_dashboard.course_card_banner.v1",
             """
             {
                 op: PLUGIN_OPERATIONS.Insert,
                 widget: {
-                    id: 'mereka_dashboard_course_card_accent',
+                    id: 'mereka_dashboard_course_card_banner_accent',
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaCourseCardAccent,
@@ -1039,6 +1040,21 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaCourseCardActionHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.learner_dashboard.dashboard_modal.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_dashboard_modal_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaDashboardModalHint,
                 },
             },
             """,
@@ -1915,8 +1931,8 @@ const MerekaNoCoursesView = () => {
   );
 };
 
-// Learner-dashboard header slot surface (high-visibility post-login branding).
-// Wired into org.openedx.frontend.learner_dashboard.dashboard_header.v1.
+// Learner-dashboard course-list slot surface (high-visibility post-login branding).
+// Wired into org.openedx.frontend.learner_dashboard.course_list.v1.
 const MerekaDashboardHeader = () => {
   const config = getConfig();
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
@@ -1930,14 +1946,14 @@ const MerekaDashboardHeader = () => {
   );
 };
 
-// Learner-dashboard course-card accent slot.
-// Wired into org.openedx.frontend.learner_dashboard.course_card.v1.
-const MerekaCourseCardAccent = ({ courseId }) => {
-  const safeCourseId = typeof courseId === 'string' ? courseId : '';
+// Learner-dashboard course-card banner accent slot.
+// Wired into org.openedx.frontend.learner_dashboard.course_card_banner.v1.
+const MerekaCourseCardAccent = ({ cardId }) => {
+  const safeCardId = typeof cardId === 'string' ? cardId : '';
   return (
     <div className="mereka-course-card-accent">
       <span className="mereka-badge">Mereka Curated</span>
-      {safeCourseId ? <span className="mereka-course-card-accent__meta">{safeCourseId}</span> : null}
+      {safeCardId ? <span className="mereka-course-card-accent__meta">{safeCardId}</span> : null}
     </div>
   );
 };
@@ -1948,6 +1964,17 @@ const MerekaCourseCardActionHint = () => {
   return (
     <div className="mereka-course-card-action-hint">
       <span>Keep your weekly learning streak active.</span>
+    </div>
+  );
+};
+
+// Learner-dashboard modal helper slot.
+// Wired into org.openedx.frontend.learner_dashboard.dashboard_modal.v1.
+const MerekaDashboardModalHint = () => {
+  return (
+    <div className="mereka-dashboard-modal-hint">
+      <p className="mereka-badge mb-2">Mereka update</p>
+      <p className="small mb-0">New curated pathways are available for your active learning goals.</p>
     </div>
   );
 };

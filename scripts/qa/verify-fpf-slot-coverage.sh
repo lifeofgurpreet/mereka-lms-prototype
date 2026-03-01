@@ -76,8 +76,8 @@ required_core_slots=(
   "org.openedx.frontend.layout.header_logo.v1"
   "org.openedx.frontend.layout.footer.v1"
   "org.openedx.frontend.authn.login_component.v1"
-  "org.openedx.frontend.learner_dashboard.dashboard_header.v1"
-  "org.openedx.frontend.learner_dashboard.course_card.v1"
+  "org.openedx.frontend.learner_dashboard.course_list.v1"
+  "org.openedx.frontend.learner_dashboard.course_card_banner.v1"
   "org.openedx.frontend.learning.course_tab_links.v1"
   "org.openedx.frontend.catalog.catalog_header.v1"
 )

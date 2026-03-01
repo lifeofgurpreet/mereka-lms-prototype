@@ -20,7 +20,7 @@
 | Authn | 1 | `login_component` |
 | Account | 2 | `account_settings_tab`, `account_settings_field` |
 | Profile | 1 | `profile_header` |
-| Learner Dashboard | 6 | `dashboard_header`, `course_card`, `sidebar` |
+| Learner Dashboard | 6 | `course_list`, `course_card_banner`, `widget_sidebar` |
 | Authoring (Studio) | 15 | `course_outline_header`, `unit_header`, `library_header` |
 | Catalog (Course Discovery) | 22 | `catalog_header`, `catalog_card`, `catalog_filters`, `catalog_search`, `catalog_sort`, `catalog_pagination` |
 | Special Exams | 1 | `exam_timer` |
@@ -133,12 +133,12 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 | Slot Name | Component | Notes |
 |-----------|-----------|-------|
-| `org.openedx.frontend.learner_dashboard.dashboard_header.v1` | Dashboard header | Welcome, search |
-| `org.openedx.frontend.learner_dashboard.course_card.v1` | Individual course card | **HIGH VALUE** — could replace all dead card selectors |
-| `org.openedx.frontend.learner_dashboard.course_card_action.v1` | Card action buttons | Resume, view |
-| `org.openedx.frontend.learner_dashboard.sidebar.v1` | Dashboard sidebar | |
-| `org.openedx.frontend.learner_dashboard.sidebar_settings.v1` | Sidebar settings | |
-| `org.openedx.frontend.learner_dashboard.empty_dashboard.v1` | Empty state | No courses enrolled |
+| `org.openedx.frontend.learner_dashboard.course_card_action.v1` | Course card action controls | Resume, view |
+| `org.openedx.frontend.learner_dashboard.course_card_banner.v1` | Course card banner | Course-level banner surface |
+| `org.openedx.frontend.learner_dashboard.course_list.v1` | Course list container | Primary post-login learner surface |
+| `org.openedx.frontend.learner_dashboard.dashboard_modal.v1` | Dashboard modal | Global modal surface |
+| `org.openedx.frontend.learner_dashboard.no_courses_view.v1` | Empty state | No courses enrolled |
+| `org.openedx.frontend.learner_dashboard.widget_sidebar.v1` | Sidebar widgets | Right-rail widget surface |
 
 ---
 
@@ -174,9 +174,6 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 | `org.openedx.frontend.catalog.catalog_search.v1` | Search input | |
 | `org.openedx.frontend.catalog.catalog_sort.v1` | Sort dropdown | |
 | `org.openedx.frontend.catalog.catalog_pagination.v1` | Pagination | |
-| `org.openedx.frontend.catalog.catalog_search.v1` | Search input | |
-| `org.openedx.frontend.catalog.catalog_sort.v1` | Sort dropdown | |
-| `org.openedx.frontend.catalog.catalog_pagination.v1` | Pagination | |
 | `org.openedx.frontend.catalog.course_detail_header.v1` | Course detail header | |
 | `org.openedx.frontend.catalog.course_detail_sidebar.v1` | Course detail sidebar | |
 | `org.openedx.frontend.catalog.course_detail_about.v1` | About section | |
@@ -206,13 +203,13 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 ## Slots We Currently Use
 
-**Current wiring state (2026-03-01): 50 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
+**Current wiring state (2026-03-01): 51 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
 
 | Slot Group | Slots |
 |------------|-------|
 | Layout core | `layout.header_logo.v1`, `layout.footer.v1`, `layout.studio_footer.v1`, `layout.header_desktop_main_menu.v1`, `layout.header_mobile_main_menu.v1` |
 | Authn | `authn.login_component.v1` |
-| Learner dashboard | `learner_dashboard.widget_sidebar.v1`, `learner_dashboard.no_courses_view.v1`, `learner_dashboard.dashboard_header.v1`, `learner_dashboard.course_card.v1`, `learner_dashboard.course_card_action.v1` |
+| Learner dashboard | `learner_dashboard.widget_sidebar.v1`, `learner_dashboard.no_courses_view.v1`, `learner_dashboard.course_list.v1`, `learner_dashboard.course_card_banner.v1`, `learner_dashboard.course_card_action.v1`, `learner_dashboard.dashboard_modal.v1` |
 | Learning | `learning.course_outline_sidebar.v1`, `learning.progress_certificate_status.v1`, `layout.header_learning.v1`, `learning.course_tab_links.v1`, `learning.course_breadcrumbs.v1`, `learning.learner_tools.v1`, `learning.progress_tab_course_grade.v1`, `learning.progress_tab_related_links.v1`, `learning.progress_tab_certificate_status_main_body.v1`, `learning.progress_tab_certificate_status_side_panel.v1`, `learning.progress_tab_grade_breakdown.v1`, `learning.unit_title.v1`, `learning.sequence_navigation.v1`, `learning.course_outline_sidebar_trigger.v1`, `learning.course_outline_mobile_sidebar_trigger.v1`, `learning.course_home_section_outline.v1`, `learning.course_recommendations.v1`, `learning.content_iframe_loader.v1`, `learning.content_iframe_error.v1`, `learning.sequence_container.v1`, `learning.gated_unit_content_message.v1`, `learning.next_unit_top_nav_trigger.v1`, `learning.course_outline_tab_notifications.v1`, `learning.notification_widget.v1`, `learning.notification_tray.v1`, `learning.notifications_discussions_sidebar_trigger.v1`, `learning.notifications_discussions_sidebar.v1`, `learning.course_exit_view_courses.v1`, `learning.course_exit_dashboard_footnote_link.v1` |
 | Catalog | `catalog.catalog_header.v1`, `catalog.catalog_card.v1`, `catalog.catalog_filters.v1`, `catalog.catalog_search.v1`, `catalog.catalog_sort.v1`, `catalog.catalog_pagination.v1` |
 | Account/Profile | `account.id_verification_page.v1`, `account.additional_profile_fields.v1`, `profile.additional_profile_fields.v1` |
@@ -228,8 +225,8 @@ can replace dead CSS selectors:
 | Dead Selector | Replacement Slot | Priority |
 |---------------|-----------------|----------|
 | `[class*="authn"]` (DEAD) | `org.openedx.frontend.authn.login_component.v1` | **P0** — only 1 slot, limited coverage |
-| `[class*="learner-dashboard"]` course cards (DEAD) | `org.openedx.frontend.learner_dashboard.course_card.v1` | **P0** — high-value brand surface |
-| `[class*="learner-dashboard"]` header (DEAD) | `org.openedx.frontend.learner_dashboard.dashboard_header.v1` | **P1** |
+| `[class*="learner-dashboard"]` course cards (DEAD) | `org.openedx.frontend.learner_dashboard.course_card_banner.v1` | **P0** — high-value brand surface |
+| `[class*="learner-dashboard"]` header/list shell (DEAD) | `org.openedx.frontend.learner_dashboard.course_list.v1` | **P1** |
 | `[class*="learning"]` course cards (DEAD) | Use `org.openedx.frontend.layout.header_learning.v1` + `org.openedx.frontend.learning.course_tab_links.v1` + global CSS | **P2** |
 | `[class*="discussions"]` (DEAD) | No slot — discussions MFE has no FPF slots | **P3** — CSS-only path |
 | `[class*="account-page"]` (DEAD) | `org.openedx.frontend.account.id_verification_page.v1` + `org.openedx.frontend.account.additional_profile_fields.v1` | **P2** |
