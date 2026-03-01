@@ -40,6 +40,8 @@ test('runtime selector DOM audit on authn surface', async ({ page, baseURL }, te
   expect(response?.status() ?? 500).toBeLessThan(500);
 
   await page.waitForLoadState('networkidle').catch(() => {});
+  const pageHtml = await page.content();
+  const pageText = (await page.locator('body').innerText().catch(() => '')).trim();
 
   const requiredSelectors = {
     authnBranding: '.mereka-authn-login-branding',
@@ -79,9 +81,20 @@ test('runtime selector DOM audit on authn surface', async ({ page, baseURL }, te
   }
 
   const trackedSelectorHits = Object.values(trackedCounts).filter((count) => count > 0).length;
+  const hasRootContainer = /id=["'](root|main)["']/i.test(pageHtml) || /data-testid=["'][^"']+["']/i.test(pageHtml);
+  const hasScriptTags = /<script[\s>]/i.test(pageHtml);
+  const hydrationSignal = hasRootContainer || hasScriptTags;
+  const pageTextLength = pageText.length;
+  const failureHint = [
+    `hydrationSignal=${hydrationSignal}`,
+    `hasRootContainer=${hasRootContainer}`,
+    `hasScriptTags=${hasScriptTags}`,
+    `pageTextLength=${pageTextLength}`,
+  ].join(' ');
+
   expect(
     trackedSelectorHits,
-    `Expected at least ${MIN_TRACKED_SELECTOR_HITS} tracked selectors on ${targetUrl}; counts=${JSON.stringify(trackedCounts)}`,
+    `Expected at least ${MIN_TRACKED_SELECTOR_HITS} tracked selectors on ${targetUrl}; counts=${JSON.stringify(trackedCounts)} ${failureHint}`,
   ).toBeGreaterThanOrEqual(MIN_TRACKED_SELECTOR_HITS);
 
   await testInfo.attach('selector-dom-audit.json', {
@@ -93,8 +106,17 @@ test('runtime selector DOM audit on authn surface', async ({ page, baseURL }, te
       trackedSelectorHits,
       minTrackedSelectorHits: MIN_TRACKED_SELECTOR_HITS,
       requireBrandingMarkers: REQUIRE_BRANDING_MARKERS,
+      hydrationSignal,
+      hasRootContainer,
+      hasScriptTags,
+      pageTextLength,
     }, null, 2),
     contentType: 'application/json',
+  });
+
+  await testInfo.attach('selector-dom-audit.html', {
+    body: pageHtml,
+    contentType: 'text/html',
   });
 
   await page.screenshot({
