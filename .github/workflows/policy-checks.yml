@@ -39,6 +39,7 @@ jobs:
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
           bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
           bash -n scripts/qa/verify-phase7-dom-audit-contract.sh
+          bash -n scripts/qa/verify-phase7-selector-list-coverage.sh
           bash -n scripts/qa/verify-accessibility-audit-workflow.sh
           bash -n scripts/qa/verify-a11y-runtime-lane-contract.sh
           bash -n scripts/qa/verify-branding-evidence-a11y-contract.sh
@@ -132,6 +133,10 @@ jobs:
       - name: Verify Phase 7 DOM audit contract
         run: |
           ./scripts/qa/verify-phase7-dom-audit-contract.sh
+
+      - name: Verify Phase 7 selector-list coverage contract
+        run: |
+          ./scripts/qa/verify-phase7-selector-list-coverage.sh
 
       - name: Verify accessibility-audit workflow contract
         run: |
