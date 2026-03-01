@@ -1,0 +1,45 @@
+name: A11y Tenant Branding
+
+on:
+  workflow_dispatch:
+    inputs:
+      live_mode:
+        description: "Run live browser assertions (requires live dependencies)"
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  a11y-tenant-branding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run a11y tenant branding gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          LIVE_MODE="${{ inputs.live_mode || 'false' }}"
+          if [[ "$LIVE_MODE" == "true" ]]; then
+            A11Y_TENANT_LIVE=1 ./scripts/qa/verify-a11y-tenant-branding.sh \
+              | tee var/qa/a11y-tenant-branding-live.log
+          else
+            ./scripts/qa/verify-a11y-tenant-branding.sh \
+              | tee var/qa/a11y-tenant-branding-offline.log
+          fi
+
+      - name: Upload a11y tenant branding artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-tenant-branding-${{ inputs.live_mode && 'live' || 'offline' }}-${{ github.run_number }}
+          path: |
+            var/qa/a11y-tenant-branding-*.log
+            var/a11y/**
+          if-no-files-found: warn

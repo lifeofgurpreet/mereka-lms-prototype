@@ -374,6 +374,7 @@ check_gitops() {
       "verify-release-workflow-invocation.sh"
       "verify-release-dry-run-contract.sh"
       "verify-release-evidence-workflow.sh"
+      "verify-a11y-tenant-branding-workflow.sh"
       "verify-cross-browser-branding-workflow.sh"
       "verify-npm-start-smoke-workflow.sh"
       "verify-frontend-performance-spotcheck-workflow.sh"
