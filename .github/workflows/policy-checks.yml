@@ -42,6 +42,7 @@ jobs:
           bash -n scripts/qa/verify-phase7-dom-audit-contract.sh
           bash -n scripts/qa/verify-phase7-selector-list-coverage.sh
           bash -n scripts/qa/verify-phase2-smoke-evidence-contract.sh
+          bash -n scripts/qa/verify-phase2-smoke-evidence-workflow.sh
           bash -n scripts/qa/verify-accessibility-audit-workflow.sh
           bash -n scripts/qa/verify-a11y-runtime-lane-contract.sh
           bash -n scripts/qa/verify-branding-evidence-a11y-contract.sh
@@ -147,6 +148,10 @@ jobs:
       - name: Verify Phase 2 smoke-evidence contract
         run: |
           ./scripts/qa/verify-phase2-smoke-evidence-contract.sh
+
+      - name: Verify Phase 2 smoke-evidence workflow contract
+        run: |
+          ./scripts/qa/verify-phase2-smoke-evidence-workflow.sh
 
       - name: Verify accessibility-audit workflow contract
         run: |

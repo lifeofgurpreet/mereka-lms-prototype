@@ -24,6 +24,7 @@ POLICY_WF=".github/workflows/policy-checks.yml"
 EVIDENCE_WF=".github/workflows/release-evidence.yml"
 FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
 FRONTEND_EXTENDED_SURFACES_WF=".github/workflows/frontend-extended-surfaces.yml"
+PHASE2_SMOKE_EVIDENCE_WF=".github/workflows/phase2-smoke-evidence.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
 WORKFLOWS_DIR=".github/workflows"
@@ -396,6 +397,27 @@ check_gitops() {
     fail "[AC-020] Frontend extended surfaces workflow missing qa-frontend-extended-surfaces invocation"
   fi
 
+  # AC-020: Phase2 smoke evidence workflow exists
+  if [[ -f "$PHASE2_SMOKE_EVIDENCE_WF" ]]; then
+    pass "[AC-020] Phase2 smoke evidence workflow exists"
+  else
+    fail "[AC-020] Phase2 smoke evidence workflow missing: $PHASE2_SMOKE_EVIDENCE_WF"
+  fi
+
+  # AC-020: Phase2 smoke evidence workflow is workflow_dispatch
+  if [[ -f "$PHASE2_SMOKE_EVIDENCE_WF" ]] && grep -q 'workflow_dispatch:' "$PHASE2_SMOKE_EVIDENCE_WF"; then
+    pass "[AC-020] Phase2 smoke evidence workflow triggered via workflow_dispatch"
+  else
+    fail "[AC-020] Phase2 smoke evidence workflow missing workflow_dispatch trigger"
+  fi
+
+  # AC-020: Phase2 smoke evidence workflow runs smoke verification gate
+  if [[ -f "$PHASE2_SMOKE_EVIDENCE_WF" ]] && grep -q 'verify-npm-start-mfe-smoke.sh' "$PHASE2_SMOKE_EVIDENCE_WF"; then
+    pass "[AC-020] Phase2 smoke evidence workflow runs npm-start smoke gate"
+  else
+    fail "[AC-020] Phase2 smoke evidence workflow missing npm-start smoke gate invocation"
+  fi
+
   # AC-020: Policy checks workflow exists
   if [[ -f "$POLICY_WF" ]]; then
     pass "[AC-020] Policy checks workflow exists"
@@ -436,6 +458,7 @@ check_gitops() {
       "verify-phase7-dom-audit-contract.sh"
       "verify-phase7-selector-list-coverage.sh"
       "verify-phase2-smoke-evidence-contract.sh"
+      "verify-phase2-smoke-evidence-workflow.sh"
       "verify-accessibility-audit-workflow.sh"
       "verify-a11y-runtime-lane-contract.sh"
       "verify-branding-evidence-a11y-contract.sh"

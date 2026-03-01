@@ -71,6 +71,7 @@ assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
 assert_exec "scripts/qa/verify-paragon-theme-budget-workflow.sh"
 assert_exec "scripts/qa/verify-frontend-extended-surfaces-workflow.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
+assert_exec "scripts/qa/verify-phase2-smoke-evidence-workflow.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -242,6 +243,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-phase2-smoke-evidence-contract.sh' \
   "qa-frontend-contracts includes verify-phase2-smoke-evidence-contract"
+assert_make_command \
+  './scripts/qa/verify-phase2-smoke-evidence-workflow.sh' \
+  "qa-frontend-contracts includes verify-phase2-smoke-evidence-workflow"
 assert_make_command \
   './scripts/qa/verify-paragon-theme-budget-workflow.sh' \
   "qa-frontend-contracts includes verify-paragon-theme-budget-workflow"
