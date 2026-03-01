@@ -10,10 +10,18 @@ on:
     - cron: '0 3 * * 1'
   workflow_dispatch:
     inputs:
+      target_environment:
+        description: "Target environment for accessibility scan"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
       target_url:
         description: "Target URL to scan (default: https://apps.academyv2.mereka.io)"
         required: false
-        default: "https://apps.academyv2.mereka.io"
+        default: ""
         type: string
 
 permissions:
@@ -39,7 +47,15 @@ jobs:
 
       - name: Set target URL
         run: |
-          TARGET="${{ github.event.inputs.target_url || 'https://apps.academyv2.mereka.io' }}"
+          TARGET_ENV="${{ github.event.inputs.target_environment || 'prod' }}"
+          TARGET="${{ github.event.inputs.target_url || '' }}"
+          if [[ -z "$TARGET" ]]; then
+            if [[ "$TARGET_ENV" == "dev" ]]; then
+              TARGET="https://apps.academyv2.mereka.dev"
+            else
+              TARGET="https://apps.academyv2.mereka.io"
+            fi
+          fi
           if [[ "$TARGET" != *"://"* ]]; then
             TARGET="https://$TARGET"
           fi
@@ -47,6 +63,7 @@ jobs:
             TARGET="${TARGET/https:\/\//https:\/\/apps.}"
             TARGET="${TARGET/http:\/\//http:\/\/apps.}"
           fi
+          echo "TARGET_ENV=${TARGET_ENV}" >> "$GITHUB_ENV"
           echo "TARGET_URL=${TARGET}" >> "$GITHUB_ENV"
 
       - name: Run axe-core against key routes
@@ -57,7 +74,7 @@ jobs:
           TARGET="${TARGET_URL}"
           ROUTES_CSV="/authn/login,/authn/register,/dashboard,/account,/learning"
           ./scripts/qa/run-a11y-runtime-lane.sh \
-            --env prod \
+            --env "${TARGET_ENV}" \
             --mode online \
             --target-url "$TARGET" \
             --routes "$ROUTES_CSV" \
@@ -120,6 +137,7 @@ jobs:
           {
             echo "## Accessibility Audit (axe-core WCAG 2.2 AA)"
             echo ""
+            echo "**Target environment**: \`${TARGET_ENV:-prod}\`"
             echo "**Target**: \`${TARGET_URL}\`"
             echo "**Standard**: WCAG 2.2 AA (\`wcag2a\`, \`wcag2aa\`, \`wcag22aa\` tags)"
             echo ""

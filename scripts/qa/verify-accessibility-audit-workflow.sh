@@ -31,6 +31,11 @@ if ! rg -n 'target_url:' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'target_environment:' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit missing target_environment input"
+  violations=1
+fi
+
 if ! rg -n 'apps\.academyv2\.mereka\.(io|dev)' "$WORKFLOW" >/dev/null; then
   echo "❌ accessibility-audit missing apps.* MFE target defaults"
   violations=1
@@ -48,6 +53,11 @@ fi
 
 if ! rg -n -- '--mode online' "$WORKFLOW" >/dev/null; then
   echo "❌ accessibility-audit wrapper step missing --mode online wiring"
+  violations=1
+fi
+
+if ! rg -n -- '--env "\$\{TARGET_ENV\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit wrapper step missing TARGET_ENV -> --env wiring"
   violations=1
 fi
 
