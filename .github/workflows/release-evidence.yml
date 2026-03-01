@@ -43,6 +43,11 @@ on:
         required: true
         default: true
         type: boolean
+      run_live_dom_audit:
+        description: "Run runtime DOM selector audit lane"
+        required: true
+        default: false
+        type: boolean
       learning_path:
         description: "Learning route path for npm-start smoke"
         required: false
@@ -57,6 +62,24 @@ on:
           - chromium
           - firefox
           - mobile-chrome
+      live_dom_audit_project:
+        description: "Playwright project for live DOM selector audit lane"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+      live_dom_audit_min_hits:
+        description: "Minimum tracked selector hits for live DOM selector audit"
+        required: false
+        default: "3"
+        type: string
+      selector_audit_path:
+        description: "Route path used by runtime DOM selector audit lane"
+        required: false
+        default: "/authn/login"
+        type: string
 
 permissions: {}
 
@@ -85,7 +108,7 @@ jobs:
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Setup Node for npm-start smoke
-        if: ${{ inputs.run_npm_start_smoke == true }}
+        if: ${{ inputs.run_npm_start_smoke == true || inputs.run_live_dom_audit == true }}
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -200,6 +223,40 @@ jobs:
           ./scripts/qa/verify-certificate-branding.sh \
             | tee var/release-evidence/certificate-branding.log
 
+      - name: Run live DOM selector audit lane
+        if: ${{ inputs.run_live_dom_audit == true }}
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment }}"
+          RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
+          PROJECT="${{ inputs.live_dom_audit_project || 'chromium' }}"
+          MIN_HITS="${{ inputs.live_dom_audit_min_hits || '3' }}"
+
+          if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
+            BASE_URL="$RUNTIME_THEME_URL_INPUT"
+            BASE_URL="${BASE_URL/apps./}"
+          elif [[ "$TARGET_ENV" == "production" ]]; then
+            BASE_URL="https://academyv2.mereka.io"
+          else
+            BASE_URL="https://academyv2.mereka.dev"
+          fi
+
+          args=(--base-url "$BASE_URL" --selector-audit-path "$SELECTOR_AUDIT_PATH" --project "$PROJECT" --min-selector-hits "$MIN_HITS")
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+
+          ./scripts/qa/verify-mfe-live-dom-audit.sh "${args[@]}" \
+            | tee var/release-evidence/live-dom-selector-audit.log
+
       - name: Write release metadata
         run: |
           python3 - <<'PY'
@@ -229,8 +286,12 @@ jobs:
               "runtime_theme_url": "${{ inputs.runtime_theme_url || '' }}",
               "run_npm_start_smoke": "${{ inputs.run_npm_start_smoke || 'false' }}",
               "run_certificate_branding": "${{ inputs.run_certificate_branding || 'true' }}",
+              "run_live_dom_audit": "${{ inputs.run_live_dom_audit || 'false' }}",
               "learning_path": "${{ inputs.learning_path || '/learning' }}",
               "npm_start_project": "${{ inputs.npm_start_project || 'chromium' }}",
+              "live_dom_audit_project": "${{ inputs.live_dom_audit_project || 'chromium' }}",
+              "live_dom_audit_min_hits": "${{ inputs.live_dom_audit_min_hits || '3' }}",
+              "selector_audit_path": "${{ inputs.selector_audit_path || '/authn/login' }}",
           }
 
           out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -241,5 +302,8 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: release-evidence-${{ inputs.target_environment }}-${{ github.run_number }}
-          path: var/release-evidence/
+          path: |
+            var/release-evidence/
+            var/e2e-artifacts/**
+            var/e2e-report/**
           retention-days: 30

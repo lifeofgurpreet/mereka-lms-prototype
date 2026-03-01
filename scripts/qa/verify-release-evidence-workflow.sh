@@ -86,6 +86,11 @@ if ! rg -n 'run_certificate_branding' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'run_live_dom_audit' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing run_live_dom_audit input"
+  violations=1
+fi
+
 if ! rg -n 'learning_path' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing learning_path input"
   violations=1
@@ -93,6 +98,21 @@ fi
 
 if ! rg -n 'npm_start_project' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing npm_start_project input"
+  violations=1
+fi
+
+if ! rg -n 'live_dom_audit_project' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live_dom_audit_project input"
+  violations=1
+fi
+
+if ! rg -n 'live_dom_audit_min_hits' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live_dom_audit_min_hits input"
+  violations=1
+fi
+
+if ! rg -n 'selector_audit_path' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing selector_audit_path input"
   violations=1
 fi
 
@@ -126,8 +146,18 @@ if ! rg -n './scripts/qa/verify-certificate-branding\.sh' "$WORKFLOW" >/dev/null
   violations=1
 fi
 
+if ! rg -n './scripts/qa/verify-mfe-live-dom-audit\.sh' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing live DOM selector audit lane step"
+  violations=1
+fi
+
 if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow npm-start smoke step missing branding marker wiring"
+  violations=1
+fi
+
+if ! rg -n -- '--selector-audit-path|--min-selector-hits' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow live DOM selector audit step missing selector path/min-hit wiring"
   violations=1
 fi
 
@@ -166,6 +196,11 @@ if ! rg -n '"run_certificate_branding": "\$\{\{ inputs\.run_certificate_branding
   violations=1
 fi
 
+if ! rg -n '"run_live_dom_audit": "\$\{\{ inputs\.run_live_dom_audit \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing run_live_dom_audit field"
+  violations=1
+fi
+
 if ! rg -n '"learning_path": "\$\{\{ inputs\.learning_path \|\| '\''/learning'\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing learning_path field"
   violations=1
@@ -173,6 +208,21 @@ fi
 
 if ! rg -n '"npm_start_project": "\$\{\{ inputs\.npm_start_project \|\| '\''chromium'\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing npm_start_project field"
+  violations=1
+fi
+
+if ! rg -n '"live_dom_audit_project": "\$\{\{ inputs\.live_dom_audit_project \|\| '\''chromium'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing live_dom_audit_project field"
+  violations=1
+fi
+
+if ! rg -n '"live_dom_audit_min_hits": "\$\{\{ inputs\.live_dom_audit_min_hits \|\| '\''3'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing live_dom_audit_min_hits field"
+  violations=1
+fi
+
+if ! rg -n '"selector_audit_path": "\$\{\{ inputs\.selector_audit_path \|\| '\''/authn/login'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing selector_audit_path field"
   violations=1
 fi
 
