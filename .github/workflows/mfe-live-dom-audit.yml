@@ -1,0 +1,99 @@
+name: MFE Live DOM Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      base_url:
+        description: "Override LMS base URL (empty = auto by environment)"
+        required: false
+        default: ""
+        type: string
+      require_runtime_theme:
+        description: "Require runtime /theme/*.css mode"
+        required: true
+        default: false
+        type: boolean
+      require_branding_markers:
+        description: "Require branded markers in runtime DOM"
+        required: true
+        default: true
+        type: boolean
+      selector_audit_path:
+        description: "Path used for selector DOM audit"
+        required: false
+        default: "/authn/login"
+        type: string
+      min_selector_hits:
+        description: "Minimum tracked selector hits required"
+        required: false
+        default: "3"
+        type: string
+      project:
+        description: "Playwright project"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+
+permissions: {}
+
+jobs:
+  live-dom-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run live DOM selector audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          BASE_URL_INPUT="${{ inputs.base_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
+          MIN_SELECTOR_HITS="${{ inputs.min_selector_hits || '3' }}"
+          PROJECT="${{ inputs.project || 'chromium' }}"
+
+          args=(--env "$TARGET_ENV" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$MIN_SELECTOR_HITS" --project "$PROJECT")
+          if [[ -n "$BASE_URL_INPUT" ]]; then
+            args+=(--base-url "$BASE_URL_INPUT")
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+
+          ./scripts/qa/verify-mfe-live-dom-audit.sh "${args[@]}"
+
+      - name: Upload live DOM audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-live-dom-audit-${{ inputs.target_environment || 'prod' }}-${{ github.run_number }}
+          path: |
+            var/qa/mfe-live-dom-audit-*.log
+            var/e2e-artifacts/**
+            var/e2e-report/**
+          if-no-files-found: warn
