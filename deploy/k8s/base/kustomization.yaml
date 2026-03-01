@@ -25,7 +25,8 @@ images:
     newTag: mereka-brand-hotfix-full-v3
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: b732a7d-20260210161437
+    newTag: 69b0a6aa-20260301-090629
+    digest: sha256:eaa690b51bc1432d93e8397b0cf30ba541b5c0eee733907b30e921913b661a48
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
