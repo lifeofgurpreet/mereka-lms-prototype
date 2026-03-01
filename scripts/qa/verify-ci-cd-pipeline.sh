@@ -390,6 +390,7 @@ check_gitops() {
       "verify-accessibility-audit-workflow.sh"
       "verify-a11y-runtime-lane-contract.sh"
       "verify-branding-evidence-a11y-contract.sh"
+      "verify-branding-evidence-screenshot-contract.sh"
       "verify-no-latest-prod-tags.sh"
     )
     local found=0
