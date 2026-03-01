@@ -55,6 +55,8 @@ for target in \
   qa-npm-start-smoke-local \
   qa-branding-screenshots-prod \
   qa-branding-screenshots-dev \
+  qa-branding-screenshots-mfe-prod \
+  qa-branding-screenshots-mfe-dev \
   qa-frontend-closure-prod \
   qa-frontend-closure-dev \
   qa-frontend-closure-prod-screenshots \
@@ -80,6 +82,12 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/capture-branding-screenshots.sh dev' \
   "qa-branding-screenshots-dev"
+assert_make_command \
+  './scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only' \
+  "qa-branding-screenshots-mfe-prod"
+assert_make_command \
+  './scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only' \
+  "qa-branding-screenshots-mfe-dev"
 assert_make_command \
   './scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme' \
   "qa-frontend-closure-prod"

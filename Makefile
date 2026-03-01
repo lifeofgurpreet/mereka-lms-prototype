@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-branding-screenshots-prod qa-branding-screenshots-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-certificate-branding qa-email-template-branding forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-certificate-branding qa-email-template-branding forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -130,6 +130,12 @@ qa-branding-screenshots-prod: ## Capture branding screenshots for production sur
 
 qa-branding-screenshots-dev: ## Capture branding screenshots for development surfaces
 	./scripts/qa/capture-branding-screenshots.sh dev
+
+qa-branding-screenshots-mfe-prod: ## Capture MFE-only branding screenshots for production surfaces
+	./scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only
+
+qa-branding-screenshots-mfe-dev: ## Capture MFE-only branding screenshots for development surfaces
+	./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only
 
 qa-frontend-closure-prod: ## Run frontend closure pipeline (prod, cross-browser, runtime theme required)
 	./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme
