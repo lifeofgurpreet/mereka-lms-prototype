@@ -14,6 +14,22 @@ LEARNING_PATH="/learning"
 REQUIRE_RUNTIME_THEME=0
 REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
 
+usage() {
+  cat <<'EOF'
+Usage: verify-cross-browser-branding-smoke.sh [options]
+
+Options:
+  --env <prod|dev>                 Target environment (default: prod)
+  --cross-browser                  Run chromium+firefox (+webkit probe) matrix
+  --learning-path <path>           Optional learning route path (default: /learning)
+  --require-runtime-theme          Require PARAGON_THEME_URLS runtime mode
+  --require-branding-markers       Require slot-rendered Mereka markers in runtime DOM
+  --allow-unbranded-shell          Allow smoke pass without branded marker assertion
+  --strict-webkit                  Fail when webkit install/launch fails
+  -h, --help                       Show this help
+EOF
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --env)
@@ -48,9 +64,13 @@ while [[ $# -gt 0 ]]; do
       STRICT_WEBKIT=1
       shift
       ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
     *)
       echo "Unknown arg: $1" >&2
-      echo "Usage: $0 [--env prod|dev] [--cross-browser] [--learning-path /learning/... ] [--require-runtime-theme] [--require-branding-markers|--allow-unbranded-shell] [--strict-webkit]" >&2
+      usage >&2
       exit 2
       ;;
   esac
