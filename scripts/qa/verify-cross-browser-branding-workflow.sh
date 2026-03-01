@@ -16,7 +16,7 @@ if [[ ! -f "$WORKFLOW" ]]; then
   exit 1
 fi
 
-for input_key in target_environment cross_browser learning_path require_runtime_theme require_webkit; do
+for input_key in target_environment cross_browser learning_path require_runtime_theme require_branding_markers require_webkit; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
     echo "❌ cross-browser workflow missing input: ${input_key}"
     violations=1
@@ -30,6 +30,11 @@ fi
 
 if ! rg -n -- '--require-runtime-theme' "$WORKFLOW" >/dev/null; then
   echo "❌ cross-browser workflow does not wire --require-runtime-theme"
+  violations=1
+fi
+
+if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >/dev/null; then
+  echo "❌ cross-browser workflow does not wire branding marker strictness flags"
   violations=1
 fi
 

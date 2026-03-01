@@ -16,7 +16,7 @@ if [[ ! -f "$WORKFLOW" ]]; then
   exit 1
 fi
 
-for input_key in target_environment cross_browser_matrix require_runtime_theme require_webkit \
+for input_key in target_environment cross_browser_matrix require_runtime_theme require_branding_markers require_webkit \
                  run_runtime_theme_contract_gate run_npm_start_smoke_gate run_screenshot_gate \
                  runtime_theme_url runtime_theme_timeout_seconds learning_path; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
@@ -47,6 +47,11 @@ fi
 
 if ! rg -n 'RUNTIME_THEME_TIMEOUT_SECONDS=' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow does not wire RUNTIME_THEME_TIMEOUT_SECONDS into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'REQUIRE_BRANDING_MARKERS=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire REQUIRE_BRANDING_MARKERS into pipeline env"
   violations=1
 fi
 

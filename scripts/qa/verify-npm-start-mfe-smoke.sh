@@ -18,6 +18,7 @@ LEARNING_PATH="${LEARNING_PATH:-/learning}"
 REQUIRE_RUNTIME_THEME=0
 PROJECT="${PROJECT:-chromium}"
 HEADED="${HEADED:-0}"
+REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
 
 usage() {
   cat <<'EOF'
@@ -27,6 +28,8 @@ Options:
   --base-url <url>            LMS base URL used to derive apps host (default: https://localhost)
   --learning-path <path>      Learning route path to include (default: /learning)
   --require-runtime-theme     Require PARAGON_THEME_URLS runtime mode (/theme/*.min.css)
+  --require-branding-markers Require branded slot markers in rendered DOM (default)
+  --allow-unbranded-shell     Allow smoke pass without branded marker assertion
   --project <name>            Playwright project (default: chromium)
   --headed                    Run headed browser (default: headless)
   -h, --help                  Show this help
@@ -49,6 +52,14 @@ while [[ $# -gt 0 ]]; do
       REQUIRE_RUNTIME_THEME=1
       shift
       ;;
+    --require-branding-markers)
+      REQUIRE_BRANDING_MARKERS=1
+      shift
+      ;;
+    --allow-unbranded-shell)
+      REQUIRE_BRANDING_MARKERS=0
+      shift
+      ;;
     --project)
       [[ $# -lt 2 ]] && { echo "ERROR: --project requires a value" >&2; exit 2; }
       PROJECT="$2"
@@ -69,6 +80,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ "$REQUIRE_BRANDING_MARKERS" != "0" && "$REQUIRE_BRANDING_MARKERS" != "1" ]]; then
+  echo "ERROR: REQUIRE_BRANDING_MARKERS must be 0 or 1 (got: $REQUIRE_BRANDING_MARKERS)" >&2
+  exit 2
+fi
 
 if [[ ! -f "$E2E_DIR/package.json" ]]; then
   echo "ERROR: tests/e2e/package.json not found" >&2
@@ -156,6 +172,7 @@ PW_ENABLE_WEBKIT=0 \
 HEADED="$HEADED" \
 BRANDING_LEARNING_PATH="$LEARNING_PATH" \
 REQUIRE_RUNTIME_THEME_URLS="$REQUIRE_RUNTIME_THEME" \
+REQUIRE_BRANDING_MARKERS="$REQUIRE_BRANDING_MARKERS" \
 BASE_URL="$MFE_ORIGIN" \
 npx playwright test tests/branding-smoke.spec.ts --project="$PROJECT" --reporter=list | tee -a "$artifact"
 

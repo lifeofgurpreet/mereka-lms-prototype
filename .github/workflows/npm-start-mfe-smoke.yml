@@ -35,6 +35,11 @@ on:
         required: true
         default: false
         type: boolean
+      require_branding_markers:
+        description: "Require slot-rendered Mereka marker classes in runtime DOM"
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   smoke:
@@ -73,10 +78,16 @@ jobs:
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
           PROJECT="${{ inputs.project || 'chromium' }}"
           REQUIRE_RUNTIME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
 
           args=(--base-url "$BASE_URL" --learning-path "$LEARNING_PATH" --project "$PROJECT")
           if [[ "$REQUIRE_RUNTIME" == "true" ]]; then
             args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
           fi
 
           ./scripts/qa/verify-npm-start-mfe-smoke.sh "${args[@]}"
@@ -95,6 +106,7 @@ jobs:
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
             echo "- Playwright project: \`${{ inputs.project || 'chromium' }}\`"
             echo "- Require runtime theme: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
             if [[ -n "$LATEST_LOG" ]]; then
               echo "- Log file: \`$LATEST_LOG\`"
             fi

@@ -22,6 +22,7 @@ const MFE_ROUTES: RouteConfig[] = [
 ];
 
 const REQUIRE_RUNTIME_THEME_URLS = process.env.REQUIRE_RUNTIME_THEME_URLS === '1';
+const REQUIRE_BRANDING_MARKERS = process.env.REQUIRE_BRANDING_MARKERS !== '0';
 
 function getMfeBaseUrl(lmsBaseUrl: string): string {
   const parsed = new URL(lmsBaseUrl);
@@ -31,6 +32,49 @@ function getMfeBaseUrl(lmsBaseUrl: string): string {
 }
 
 type ThemeContractMode = 'runtime-theme-urls' | 'embedded-theme-files';
+
+const BRANDING_MARKER_SELECTORS = {
+  authnBranding: '.mereka-authn-login-branding',
+  headerLogo: '.mereka-header-logo',
+  footer: '.mereka-footer',
+  dashboardHeader: '.mereka-dashboard-header-slot',
+  learningHeader: '.mereka-learning-course-header',
+} as const;
+
+type BrandingMarkerCounts = Record<keyof typeof BRANDING_MARKER_SELECTORS, number>;
+
+async function safeCountSelector(page: Page, selector: string): Promise<number> {
+  const retries = 3;
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    try {
+      return await page.locator(selector).count();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isTransientNavigationError =
+        message.includes('Execution context was destroyed')
+        || message.includes('Target page, context or browser has been closed');
+      if (!isTransientNavigationError || attempt === retries - 1) {
+        return 0;
+      }
+      await page.waitForTimeout(250);
+    }
+  }
+  return 0;
+}
+
+async function getBrandingMarkerCounts(page: Page): Promise<BrandingMarkerCounts> {
+  const counts = {} as BrandingMarkerCounts;
+  for (const [key, selector] of Object.entries(BRANDING_MARKER_SELECTORS) as Array<
+    [keyof typeof BRANDING_MARKER_SELECTORS, string]
+  >) {
+    counts[key] = await safeCountSelector(page, selector);
+  }
+  return counts;
+}
+
+function getBrandingMarkerHitCount(counts: BrandingMarkerCounts): number {
+  return Object.values(counts).reduce((sum, value) => sum + value, 0);
+}
 
 async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<ThemeContractMode> {
   // Prefer the rendered authn shell as the source of truth for theme loading mode.
@@ -104,6 +148,38 @@ test.describe('Branding smoke', () => {
         expect(html).toMatch(/paragon-theme-core\.[a-z0-9]+\.css/i);
         expect(html).toMatch(/brand-theme-core\.[a-z0-9]+\.css/i);
       }
+
+      let markerCounts = await getBrandingMarkerCounts(page);
+      if (REQUIRE_BRANDING_MARKERS) {
+        const maxAttempts = 8;
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+          const authnMarkerReady = markerCounts.authnBranding > 0;
+          const anyMarkerReady = getBrandingMarkerHitCount(markerCounts) > 0;
+          const markerReady = route.label === 'authn-login' ? authnMarkerReady : anyMarkerReady;
+          if (markerReady) {
+            break;
+          }
+          await page.waitForTimeout(500);
+          markerCounts = await getBrandingMarkerCounts(page);
+        }
+
+        if (route.label === 'authn-login') {
+          expect(
+            markerCounts.authnBranding,
+            `Expected authn branding marker (${BRANDING_MARKER_SELECTORS.authnBranding}) on ${targetUrl}; current URL=${page.url()} counts=${JSON.stringify(markerCounts)}`,
+          ).toBeGreaterThan(0);
+        } else {
+          expect(
+            getBrandingMarkerHitCount(markerCounts),
+            `Expected at least one branded marker on ${targetUrl}; current URL=${page.url()} counts=${JSON.stringify(markerCounts)}`,
+          ).toBeGreaterThan(0);
+        }
+      }
+
+      await testInfo.attach('branding-markers.json', {
+        body: JSON.stringify({ route: route.label, targetUrl, currentUrl: page.url(), markerCounts }, null, 2),
+        contentType: 'application/json',
+      });
 
       await page.screenshot({
         path: testInfo.outputPath(`${route.label}.png`),

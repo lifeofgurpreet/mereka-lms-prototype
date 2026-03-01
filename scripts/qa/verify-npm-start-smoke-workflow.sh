@@ -16,7 +16,7 @@ if [[ ! -f "$WORKFLOW" ]]; then
   exit 1
 fi
 
-for input_key in target_environment base_url learning_path project require_runtime_theme; do
+for input_key in target_environment base_url learning_path project require_runtime_theme require_branding_markers; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
     echo "❌ npm-start smoke workflow missing input: ${input_key}"
     violations=1
@@ -30,6 +30,11 @@ fi
 
 if ! rg -n './scripts/qa/verify-npm-start-mfe-smoke\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ npm-start smoke workflow missing verify-npm-start-mfe-smoke.sh invocation"
+  violations=1
+fi
+
+if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >/dev/null; then
+  echo "❌ npm-start smoke workflow missing branding marker strictness flag wiring"
   violations=1
 fi
 

@@ -12,6 +12,7 @@ WEBKIT_ENABLED=1
 STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
 LEARNING_PATH="/learning"
 REQUIRE_RUNTIME_THEME=0
+REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -35,17 +36,30 @@ while [[ $# -gt 0 ]]; do
       REQUIRE_RUNTIME_THEME=1
       shift
       ;;
+    --require-branding-markers)
+      REQUIRE_BRANDING_MARKERS=1
+      shift
+      ;;
+    --allow-unbranded-shell)
+      REQUIRE_BRANDING_MARKERS=0
+      shift
+      ;;
     --strict-webkit)
       STRICT_WEBKIT=1
       shift
       ;;
     *)
       echo "Unknown arg: $1" >&2
-      echo "Usage: $0 [--env prod|dev] [--cross-browser] [--learning-path /learning/... ] [--require-runtime-theme] [--strict-webkit]" >&2
+      echo "Usage: $0 [--env prod|dev] [--cross-browser] [--learning-path /learning/... ] [--require-runtime-theme] [--require-branding-markers|--allow-unbranded-shell] [--strict-webkit]" >&2
       exit 2
       ;;
   esac
 done
+
+if [[ "$REQUIRE_BRANDING_MARKERS" != "0" && "$REQUIRE_BRANDING_MARKERS" != "1" ]]; then
+  echo "ERROR: REQUIRE_BRANDING_MARKERS must be 0 or 1 (got: $REQUIRE_BRANDING_MARKERS)" >&2
+  exit 2
+fi
 
 case "$ENVIRONMENT" in
   prod) BASE_URL="https://academyv2.mereka.io" ;;
@@ -204,12 +218,13 @@ fi
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 artifact="$ARTIFACT_DIR/cross-browser-branding-smoke-${ENVIRONMENT}-${timestamp}.log"
 
-echo "Running branding smoke tests (env=$ENVIRONMENT, cross_browser=$CROSS_BROWSER, webkit_enabled=$WEBKIT_ENABLED, strict_webkit=$STRICT_WEBKIT)"
+echo "Running branding smoke tests (env=$ENVIRONMENT, cross_browser=$CROSS_BROWSER, webkit_enabled=$WEBKIT_ENABLED, strict_webkit=$STRICT_WEBKIT, require_branding_markers=$REQUIRE_BRANDING_MARKERS)"
 set -o pipefail
 PW_CROSS_BROWSER="$CROSS_BROWSER" \
 PW_ENABLE_WEBKIT="$WEBKIT_ENABLED" \
 BRANDING_LEARNING_PATH="$LEARNING_PATH" \
 REQUIRE_RUNTIME_THEME_URLS="$REQUIRE_RUNTIME_THEME" \
+REQUIRE_BRANDING_MARKERS="$REQUIRE_BRANDING_MARKERS" \
 BASE_URL="$BASE_URL" \
 npx playwright test tests/branding-smoke.spec.ts --reporter=list | tee "$artifact"
 

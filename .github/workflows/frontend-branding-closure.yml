@@ -21,6 +21,11 @@ on:
         required: true
         default: false
         type: boolean
+      require_branding_markers:
+        description: "Require slot-rendered Mereka marker classes in runtime DOM smoke checks"
+        required: true
+        default: true
+        type: boolean
       require_webkit:
         description: "Fail closure run if WebKit cannot install/launch in cross-browser gate"
         required: true
@@ -108,6 +113,7 @@ jobs:
           TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
           CROSS_BROWSER_MATRIX="${{ inputs.cross_browser_matrix || 'true' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
           REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
           RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
           RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
@@ -142,6 +148,7 @@ jobs:
           RUN_RUNTIME_THEME_CONTRACT=$([[ "$RUN_RUNTIME_THEME_CONTRACT" == "true" ]] && echo 1 || echo 0) \
           RUN_NPM_START_SMOKE=$([[ "$RUN_NPM_START_SMOKE" == "true" ]] && echo 1 || echo 0) \
           STRICT_WEBKIT="$STRICT_WEBKIT" \
+          REQUIRE_BRANDING_MARKERS=$([[ "$REQUIRE_BRANDING_MARKERS" == "true" ]] && echo 1 || echo 0) \
           RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
           NPM_START_BASE_URL="$NPM_START_BASE_URL" \
           NPM_START_PROJECT="$NPM_START_PROJECT" \
@@ -162,6 +169,7 @@ jobs:
             echo "- Environment: \`${{ inputs.target_environment || 'prod' }}\`"
             echo "- Cross-browser matrix: \`${{ inputs.cross_browser_matrix || 'true' }}\`"
             echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
             echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
             echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
             echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"

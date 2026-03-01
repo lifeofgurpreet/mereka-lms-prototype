@@ -32,6 +32,7 @@ RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
 CROSS_BROWSER="${CROSS_BROWSER:-0}"
 LEARNING_PATH="${LEARNING_PATH:-/learning}"
 REQUIRE_RUNTIME_THEME="${REQUIRE_RUNTIME_THEME:-auto}"
+REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
 STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
 RUNTIME_THEME_URL="${RUNTIME_THEME_URL:-}"
 RUNTIME_THEME_TIMEOUT_SECONDS="${RUNTIME_THEME_TIMEOUT_SECONDS:-300}"
@@ -85,6 +86,8 @@ Environment toggles:
   STRICT_WEBKIT=0|1         Require WebKit success in cross-browser gate (default: 0)
   REQUIRE_RUNTIME_THEME=0|1|auto
                             Runtime theme strictness (default: auto -> prod=1, dev=0)
+  REQUIRE_BRANDING_MARKERS=0|1
+                            Require branded slot markers in rendered MFE DOM (default: 1)
   A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
   A11Y_ARGS="<args>"        A11y script args (default: --offline)
   LEARNING_PATH=/learning   Optional learning route path for smoke checks
@@ -168,6 +171,7 @@ echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
 echo "Require runtime theme mode: $REQUIRE_RUNTIME_THEME"
+echo "Require branded runtime slot markers: $REQUIRE_BRANDING_MARKERS"
 echo "Require WebKit in cross-browser gate: $STRICT_WEBKIT"
 echo "Started: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo ""
@@ -277,6 +281,11 @@ if [[ "$RUN_CROSS_BROWSER" == "1" ]]; then
   if [[ "$STRICT_WEBKIT" == "1" ]]; then
     cross_browser_args+=(--strict-webkit)
   fi
+  if [[ "$REQUIRE_BRANDING_MARKERS" == "1" ]]; then
+    cross_browser_args+=(--require-branding-markers)
+  else
+    cross_browser_args+=(--allow-unbranded-shell)
+  fi
   run_gate "cross-browser-branding-smoke" \
     ./scripts/qa/verify-cross-browser-branding-smoke.sh "${cross_browser_args[@]}"
 else
@@ -319,6 +328,11 @@ if [[ "$RUN_NPM_START_SMOKE" == "1" ]]; then
   fi
   if [[ "$NPM_START_HEADED" == "1" ]]; then
     npm_start_args+=(--headed)
+  fi
+  if [[ "$REQUIRE_BRANDING_MARKERS" == "1" ]]; then
+    npm_start_args+=(--require-branding-markers)
+  else
+    npm_start_args+=(--allow-unbranded-shell)
   fi
   GATE_TIMEOUT_SECONDS="$NPM_START_TIMEOUT_SECONDS" run_gate "npm-start-mfe-smoke" \
     ./scripts/qa/verify-npm-start-mfe-smoke.sh "${npm_start_args[@]}"
@@ -408,6 +422,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - Cross-browser matrix requested: ${CROSS_BROWSER}
 - Learning route: ${LEARNING_PATH}
 - Runtime theme strict mode: ${REQUIRE_RUNTIME_THEME}
+- Branded runtime slot markers required: ${REQUIRE_BRANDING_MARKERS}
 - WebKit strict mode: ${STRICT_WEBKIT}
 - Baseline multisite/route gates enabled: ${RUN_BASELINE_GATES}
 - A11y gate enabled: ${RUN_A11Y}
