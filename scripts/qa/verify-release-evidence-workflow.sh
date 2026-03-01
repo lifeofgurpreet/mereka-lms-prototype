@@ -171,6 +171,11 @@ if ! rg -n './scripts/qa/verify-mfe-live-dom-audit\.sh' "$WORKFLOW" >/dev/null; 
   violations=1
 fi
 
+if ! rg -n 'Summarize release evidence|GITHUB_STEP_SUMMARY' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing run summary step"
+  violations=1
+fi
+
 if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow npm-start smoke step missing branding marker wiring"
   violations=1

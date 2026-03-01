@@ -350,6 +350,33 @@ jobs:
           print(out)
           PY
 
+      - name: Summarize release evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Release Evidence Summary"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment }}\`"
+            echo "- Open edX tag: \`${{ inputs.openedx_tag }}\`"
+            echo "- MFE tag: \`${{ inputs.mfe_tag }}\`"
+            echo "- Require runtime theme: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            echo "- Runtime theme URL override: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
+            echo "- Run npm-start smoke lane: \`${{ inputs.run_npm_start_smoke || 'false' }}\`"
+            echo "- Run certificate branding lane: \`${{ inputs.run_certificate_branding || 'true' }}\`"
+            echo "- Run live DOM audit lane: \`${{ inputs.run_live_dom_audit || 'false' }}\`"
+            echo "- Live DOM audit profile: \`${{ inputs.live_dom_audit_profile || 'standard' }}\`"
+            echo "- Live DOM audit project: \`${{ inputs.live_dom_audit_project || 'chromium' }}\`"
+            echo "- Live DOM min tracked hits: \`${{ inputs.live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM routes: \`${{ inputs.live_dom_audit_routes || '(profile/default)' }}\`"
+            echo "- Live DOM selectors: \`${{ inputs.live_dom_audit_selectors || '(profile/default)' }}\`"
+            echo "- Live DOM min custom hits: \`${{ inputs.live_dom_audit_min_custom_hits || '0' }}\`"
+            echo "- Selector audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
+            echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload release evidence artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
