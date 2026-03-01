@@ -17,7 +17,7 @@
 #
 # Usage:
 #   ./scripts/qa/verify-accessibility.sh --offline
-#   ./scripts/qa/verify-accessibility.sh --online [--target https://academyv2.mereka.io]
+#   ./scripts/qa/verify-accessibility.sh --online [--target https://apps.academyv2.mereka.io]
 #   ./scripts/qa/verify-accessibility.sh --offline --online --target https://apps.academyv2.mereka.io
 #   ./scripts/qa/verify-accessibility.sh --online --routes /authn/login,/authn/register,/dashboard
 set -euo pipefail
