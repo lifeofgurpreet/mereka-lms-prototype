@@ -209,14 +209,8 @@ assert_make_command \
   './scripts/qa/verify-frontend-qa-make-targets.sh' \
   "qa-frontend-contracts includes verify-frontend-qa-make-targets"
 assert_make_command \
-  './scripts/qa/verify-paragon-token-coverage.sh' \
-  "qa-frontend-contracts includes verify-paragon-token-coverage"
-assert_make_command \
-  './scripts/qa/verify-certificate-branding.sh' \
-  "qa-frontend-contracts includes verify-certificate-branding"
-assert_make_command \
-  './scripts/qa/verify-email-template-multilang.sh' \
-  "qa-frontend-contracts includes verify-email-template-multilang"
+  '$(MAKE) qa-frontend-extended-surfaces' \
+  "qa-frontend-contracts includes qa-frontend-extended-surfaces aggregator"
 assert_make_command \
   './scripts/qa/verify-frontend-extended-surfaces-workflow.sh' \
   "qa-frontend-contracts includes verify-frontend-extended-surfaces-workflow"
