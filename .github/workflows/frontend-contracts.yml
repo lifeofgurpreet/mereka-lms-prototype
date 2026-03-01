@@ -1,0 +1,33 @@
+name: Frontend Contracts
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  frontend-contracts:
+    name: Run Frontend Contract Suite
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run frontend contract suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+          make qa-frontend-contracts | tee var/qa/frontend-contracts.log
+
+      - name: Upload frontend contract artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-contracts-${{ github.run_number }}
+          path: |
+            var/qa/frontend-contracts.log
+          if-no-files-found: warn
