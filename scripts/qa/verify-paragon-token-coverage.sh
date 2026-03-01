@@ -21,6 +21,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+CORE_THEME_MAX_BYTES=600000
 
 PASS=0
 WARN=0
@@ -80,10 +81,10 @@ echo -e "\n${BLUE}Theme asset checks${NC}"
 check_file "$CORE_THEME" "core.min.css"
 if [[ -f "$CORE_THEME" ]]; then
   CORE_SIZE=$(wc -c < "$CORE_THEME")
-  if [[ "$CORE_SIZE" -gt 1024 && "$CORE_SIZE" -le 614400 ]]; then
-    pass "core.min.css has content (${CORE_SIZE} bytes) and is within size budget (<=614400)"
-  elif [[ "$CORE_SIZE" -gt 614400 ]]; then
-    fail "core.min.css exceeds size budget (${CORE_SIZE} bytes; expected <=614400)"
+  if [[ "$CORE_SIZE" -gt 1024 && "$CORE_SIZE" -le "$CORE_THEME_MAX_BYTES" ]]; then
+    pass "core.min.css has content (${CORE_SIZE} bytes) and is within size budget (<=$CORE_THEME_MAX_BYTES)"
+  elif [[ "$CORE_SIZE" -gt "$CORE_THEME_MAX_BYTES" ]]; then
+    fail "core.min.css exceeds size budget (${CORE_SIZE} bytes; expected <=$CORE_THEME_MAX_BYTES)"
   else
     fail "core.min.css is unexpectedly small (${CORE_SIZE} bytes)"
   fi
