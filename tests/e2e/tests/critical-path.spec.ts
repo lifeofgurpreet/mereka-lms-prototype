@@ -36,8 +36,10 @@ import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 
 /** Derive the MFE base URL from the LMS base URL configured in playwright.config.ts */
 function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const u = new URL(lmsBaseUrl);
-  return `https://apps.${u.hostname}`;
+  const parsed = new URL(lmsBaseUrl);
+  const host = parsed.hostname.startsWith('apps.') ? parsed.hostname : `apps.${parsed.hostname}`;
+  const port = parsed.port ? `:${parsed.port}` : '';
+  return `${parsed.protocol}//${host}${port}`;
 }
 
 /**
