@@ -87,16 +87,16 @@ qa-phase7-dom-audit-dev: ## Run strict Phase 7 runtime DOM selector audit (dev)
 	./scripts/qa/run-phase7-dom-audit.sh --env dev --project chromium
 
 qa-a11y-prod: ## Run accessibility gate (offline) for prod baseline
-	./scripts/qa/verify-accessibility.sh --offline --target https://apps.academyv2.mereka.io
+	./scripts/qa/run-a11y-runtime-lane.sh --env prod --mode offline
 
 qa-a11y-dev: ## Run accessibility gate (offline) for dev baseline
-	./scripts/qa/verify-accessibility.sh --offline --target https://apps.academyv2.mereka.dev
+	./scripts/qa/run-a11y-runtime-lane.sh --env dev --mode offline
 
 qa-a11y-prod-online: ## Run accessibility gate (online) for prod apps routes
-	./scripts/qa/verify-accessibility.sh --online --target https://apps.academyv2.mereka.io
+	./scripts/qa/run-a11y-runtime-lane.sh --env prod --mode online
 
 qa-a11y-dev-online: ## Run accessibility gate (online) for dev apps routes
-	./scripts/qa/verify-accessibility.sh --online --target https://apps.academyv2.mereka.dev
+	./scripts/qa/run-a11y-runtime-lane.sh --env dev --mode online
 
 mobile-secrets-check: ## Run mobile secrets verification (offline static checks)
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline
