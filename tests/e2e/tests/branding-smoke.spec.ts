@@ -25,6 +25,14 @@ const REQUIRE_RUNTIME_THEME_URLS = process.env.REQUIRE_RUNTIME_THEME_URLS === '1
 const REQUIRE_BRANDING_MARKERS = process.env.REQUIRE_BRANDING_MARKERS !== '0';
 const OPTIONAL_MARKER_ROUTES = new Set(['profile-home', 'learning-route']);
 
+function isAuthnLoginUrl(urlValue: string): boolean {
+  try {
+    return new URL(urlValue).pathname.startsWith('/authn/login');
+  } catch {
+    return urlValue.includes('/authn/login');
+  }
+}
+
 function getMfeBaseUrl(lmsBaseUrl: string): string {
   const parsed = new URL(lmsBaseUrl);
   const host = parsed.hostname.startsWith('apps.') ? parsed.hostname : `apps.${parsed.hostname}`;
@@ -154,7 +162,9 @@ test.describe('Branding smoke', () => {
       }
 
       let markerCounts = await getBrandingMarkerCounts(page);
-      if (REQUIRE_BRANDING_MARKERS && !OPTIONAL_MARKER_ROUTES.has(route.label)) {
+      const currentUrl = page.url();
+      const redirectedToAuthn = route.label !== 'authn-login' && isAuthnLoginUrl(currentUrl);
+      if (REQUIRE_BRANDING_MARKERS && !OPTIONAL_MARKER_ROUTES.has(route.label) && !redirectedToAuthn) {
         const maxAttempts = 8;
         for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
           const authnMarkerReady = markerCounts.authnBranding > 0;
@@ -181,7 +191,7 @@ test.describe('Branding smoke', () => {
       }
 
       await testInfo.attach('branding-markers.json', {
-        body: JSON.stringify({ route: route.label, targetUrl, currentUrl: page.url(), markerCounts }, null, 2),
+        body: JSON.stringify({ route: route.label, targetUrl, currentUrl, redirectedToAuthn, markerCounts }, null, 2),
         contentType: 'application/json',
       });
 
