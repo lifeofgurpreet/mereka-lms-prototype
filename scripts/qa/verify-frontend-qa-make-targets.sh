@@ -155,11 +155,17 @@ assert_make_command \
   './scripts/qa/verify-phase7-selector-list-coverage.sh' \
   "qa-phase7-selector-coverage"
 assert_make_command \
+  './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers' \
+  "qa-phase2-smoke-evidence-prod includes runtime preflight gate"
+assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --require-branding-markers' \
   "qa-phase2-smoke-evidence-prod includes prod smoke gate"
 assert_make_command \
   './scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only' \
   "qa-phase2-smoke-evidence-prod includes prod screenshot capture"
+assert_make_command \
+  './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers' \
+  "qa-phase2-smoke-evidence-dev includes runtime preflight gate"
 assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.dev --require-branding-markers' \
   "qa-phase2-smoke-evidence-dev includes dev smoke gate"

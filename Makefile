@@ -99,10 +99,12 @@ qa-phase7-selector-coverage: ## Verify Phase 7 selector-list coverage stays alig
 	./scripts/qa/verify-phase7-selector-list-coverage.sh
 
 qa-phase2-smoke-evidence-prod: ## Run Phase 2 MFE smoke + screenshot evidence capture (prod, runtime theme required)
+	./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers
 	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --require-branding-markers
 	./scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only
 
 qa-phase2-smoke-evidence-dev: ## Run Phase 2 MFE smoke + screenshot evidence capture (dev)
+	./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers
 	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.dev --require-branding-markers
 	./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only
 

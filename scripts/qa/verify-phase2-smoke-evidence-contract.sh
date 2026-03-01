@@ -42,6 +42,12 @@ else
   fail "Prod phase2 lane missing runtime-theme smoke gate"
 fi
 
+if rg -n --fixed-strings './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers' "$MAKEFILE" >/dev/null; then
+  pass "Prod phase2 lane enforces runtime preflight gate"
+else
+  fail "Prod phase2 lane missing runtime preflight gate"
+fi
+
 if rg -n --fixed-strings './scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only' "$MAKEFILE" >/dev/null; then
   pass "Prod phase2 lane captures MFE-only screenshots"
 else
@@ -52,6 +58,12 @@ if rg -n --fixed-strings './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url 
   pass "Dev phase2 lane enforces branding-marker smoke gate"
 else
   fail "Dev phase2 lane missing branding-marker smoke gate"
+fi
+
+if rg -n --fixed-strings './scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers' "$MAKEFILE" >/dev/null; then
+  pass "Dev phase2 lane enforces runtime preflight gate"
+else
+  fail "Dev phase2 lane missing runtime preflight gate"
 fi
 
 if rg -n --fixed-strings './scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only' "$MAKEFILE" >/dev/null; then
