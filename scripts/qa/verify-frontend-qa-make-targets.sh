@@ -69,6 +69,8 @@ for target in \
   qa-frontend-closure-dev \
   qa-frontend-closure-prod-screenshots \
   qa-frontend-closure-prod-screenshots-mfe \
+  qa-frontend-closure-dev-screenshots \
+  qa-frontend-closure-dev-screenshots-mfe \
   qa-certificate-branding \
   qa-email-template-branding \
   qa-frontend-contracts \
@@ -128,6 +130,12 @@ assert_make_command \
 assert_make_command \
   'SCREENSHOT_SCOPE=mfe-only RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme' \
   "qa-frontend-closure-prod-screenshots-mfe"
+assert_make_command \
+  'RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser --capture-screenshots' \
+  "qa-frontend-closure-dev-screenshots"
+assert_make_command \
+  'SCREENSHOT_SCOPE=mfe-only RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser --capture-screenshots' \
+  "qa-frontend-closure-dev-screenshots-mfe"
 assert_make_command \
   './scripts/qa/verify-certificate-branding.sh' \
   "qa-certificate-branding"
