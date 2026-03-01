@@ -2,11 +2,11 @@
 
 ## Canonical Baseline
 
-- Commit: `fc2ce2b5b3e71246061197aee725e8ba260e357f`
+- Commit: `e5d89c6aba98f22832462890444c2a286864f885`
 - Primary branch: `build/tenantfix-20260228-r6`
 - Start-here branch: `start/next-implementor-2026-03-01`
 - Backup branch: `backup/handoff-fc2ce2b5`
-- Immutable tag: `handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7`
+- Immutable tag (pre-doc baseline): `handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7`
 
 All refs above intentionally point to the same commit.
 
@@ -36,14 +36,14 @@ Expected result:
 ## Ref Integrity Check
 
 ```bash
-BASE=fc2ce2b5b3e71246061197aee725e8ba260e357f
+BASE=e5d89c6aba98f22832462890444c2a286864f885
 git rev-parse build/tenantfix-20260228-r6
 git rev-parse start/next-implementor-2026-03-01
 git rev-parse backup/handoff-fc2ce2b5
-git rev-list -n1 handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7
+git rev-list -n1 handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7  # expected pre-doc baseline
 ```
 
-All four commands should resolve to `$BASE`.
+The first three commands should resolve to `$BASE`.
 
 ## Notes
 
