@@ -145,3 +145,30 @@ jobs:
             var/e2e-artifacts/**
             var/e2e-report/**
           if-no-files-found: warn
+
+      - name: Summarize live DOM audit
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG_FILE="$(ls -1t var/qa/mfe-live-dom-audit-*.log 2>/dev/null | head -1 || true)"
+          {
+            echo "## MFE Live DOM Audit"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Audit profile: \`${{ inputs.audit_profile || 'standard' }}\`"
+            echo "- Base URL override: \`${{ inputs.base_url || '(auto by env)' }}\`"
+            echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            echo "- Selector audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
+            echo "- Selector audit routes: \`${{ inputs.selector_audit_routes || '(selector_audit_path only)' }}\`"
+            echo "- Selector audit selectors: \`${{ inputs.selector_audit_selectors || '(none)' }}\`"
+            echo "- Min tracked selector hits: \`${{ inputs.min_selector_hits || '3' }}\`"
+            echo "- Min custom selector hits: \`${{ inputs.min_custom_selector_hits || '0' }}\`"
+            echo "- Playwright project: \`${{ inputs.project || 'chromium' }}\`"
+            if [[ -n "$LOG_FILE" ]]; then
+              echo "- Log file: \`$LOG_FILE\`"
+            else
+              echo "- Log file: not found"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

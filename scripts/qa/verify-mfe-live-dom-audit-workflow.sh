@@ -48,6 +48,11 @@ if ! rg -n 'actions/upload-artifact@v4' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'Summarize live DOM audit|GITHUB_STEP_SUMMARY' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing run summary step"
+  violations=1
+fi
+
 if ! rg -n 'var/qa/mfe-live-dom-audit-\*\.log' "$WORKFLOW" >/dev/null; then
   echo "❌ workflow artifact path missing live DOM audit log glob"
   violations=1
