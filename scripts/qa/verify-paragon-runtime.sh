@@ -181,7 +181,7 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
 
     pass "AC-TKN-018 runtime URL is reachable for cache-clear verification workflow"
   else
-    fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown})"
+    fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown}); likely runtime-theme rollout drift (rebuild/push MFE image and update GitOps tags/ref)"
   fi
 
   authn_shell_status="$(curl -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
