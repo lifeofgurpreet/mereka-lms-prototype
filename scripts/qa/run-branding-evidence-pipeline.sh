@@ -26,6 +26,7 @@ RUN_SLOT_COVERAGE="${RUN_SLOT_COVERAGE:-1}"
 RUN_SLOT_SOURCE_ALIGNMENT="${RUN_SLOT_SOURCE_ALIGNMENT:-1}"
 RUN_SELECTOR_HARDENING="${RUN_SELECTOR_HARDENING:-1}"
 RUN_RUNTIME_THEME_CONTRACT="${RUN_RUNTIME_THEME_CONTRACT:-1}"
+RUN_MFE_LIVE_DOM_AUDIT="${RUN_MFE_LIVE_DOM_AUDIT:-0}"
 RUN_NPM_START_SMOKE="${RUN_NPM_START_SMOKE:-0}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
@@ -41,6 +42,9 @@ NPM_START_BASE_URL="${NPM_START_BASE_URL:-}"
 NPM_START_PROJECT="${NPM_START_PROJECT:-chromium}"
 NPM_START_HEADED="${NPM_START_HEADED:-0}"
 NPM_START_TIMEOUT_SECONDS="${NPM_START_TIMEOUT_SECONDS:-900}"
+LIVE_DOM_AUDIT_PROJECT="${LIVE_DOM_AUDIT_PROJECT:-chromium}"
+LIVE_DOM_AUDIT_MIN_HITS="${LIVE_DOM_AUDIT_MIN_HITS:-3}"
+SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
 A11Y_SCRIPT="${A11Y_SCRIPT:-./scripts/qa/verify-accessibility.sh}"
 A11Y_ARGS="${A11Y_ARGS:---offline}"
 
@@ -73,6 +77,8 @@ Environment toggles:
                             Enable/disable MFE selector hardening gate (default: 1)
   RUN_RUNTIME_THEME_CONTRACT=0|1
                             Enable/disable runtime theme contract gate (default: 1)
+  RUN_MFE_LIVE_DOM_AUDIT=0|1
+                            Enable/disable runtime authn selector DOM audit gate (default: 0)
   RUNTIME_THEME_URL=<url>   Runtime apps origin for theme contract checks (default: env-derived)
   RUNTIME_THEME_TIMEOUT_SECONDS=<seconds>
                             Timeout for runtime theme contract gate (default: 300)
@@ -84,6 +90,12 @@ Environment toggles:
   NPM_START_HEADED=0|1      Run npm-start smoke headed browser (default: 0)
   NPM_START_TIMEOUT_SECONDS=<seconds>
                             Timeout for npm-start smoke gate (default: 900)
+  LIVE_DOM_AUDIT_PROJECT=<name>
+                            Playwright project for live DOM audit (default: chromium)
+  LIVE_DOM_AUDIT_MIN_HITS=<int>
+                            Minimum tracked selector hits for live DOM audit (default: 3)
+  SELECTOR_AUDIT_PATH=<path>
+                            Runtime path for selector DOM audit (default: /authn/login)
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
   STRICT_WEBKIT=0|1         Require WebKit success in cross-browser gate (default: 0)
@@ -170,6 +182,7 @@ echo "Slot coverage gate enabled: $RUN_SLOT_COVERAGE"
 echo "Slot source-alignment gate enabled: $RUN_SLOT_SOURCE_ALIGNMENT"
 echo "Selector hardening gate enabled: $RUN_SELECTOR_HARDENING"
 echo "Runtime theme contract gate enabled: $RUN_RUNTIME_THEME_CONTRACT"
+echo "MFE live DOM selector audit gate enabled: $RUN_MFE_LIVE_DOM_AUDIT"
 echo "Runtime slot marker policy: $SLOT_MARKER_POLICY"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
@@ -296,7 +309,24 @@ else
   skip_gate "cross-browser-branding-smoke" "RUN_CROSS_BROWSER=0"
 fi
 
-# --- Gate 10: Runtime Theme Contract ---
+# --- Gate 10: Runtime selector DOM audit (optional) ---
+if [[ "$RUN_MFE_LIVE_DOM_AUDIT" == "1" ]]; then
+  dom_audit_args=(--env "$ENV" --project "$LIVE_DOM_AUDIT_PROJECT" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$LIVE_DOM_AUDIT_MIN_HITS")
+  if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
+    dom_audit_args+=(--require-runtime-theme)
+  fi
+  if [[ "$REQUIRE_BRANDING_MARKERS" == "1" ]]; then
+    dom_audit_args+=(--require-branding-markers)
+  else
+    dom_audit_args+=(--allow-unbranded-shell)
+  fi
+  run_gate "mfe-live-dom-selector-audit" \
+    ./scripts/qa/verify-mfe-live-dom-audit.sh "${dom_audit_args[@]}"
+else
+  skip_gate "mfe-live-dom-selector-audit" "RUN_MFE_LIVE_DOM_AUDIT=0"
+fi
+
+# --- Gate 11: Runtime Theme Contract ---
 if [[ "$RUN_RUNTIME_THEME_CONTRACT" == "1" ]]; then
   runtime_theme_args=()
   if [[ -n "$RUNTIME_THEME_URL" ]]; then
@@ -316,7 +346,7 @@ else
   skip_gate "runtime-theme-contract" "RUN_RUNTIME_THEME_CONTRACT=0"
 fi
 
-# --- Gate 11: npm-start MFE smoke (optional) ---
+# --- Gate 12: npm-start MFE smoke (optional) ---
 if [[ "$RUN_NPM_START_SMOKE" == "1" ]]; then
   npm_start_args=(--project "$NPM_START_PROJECT" --learning-path "$LEARNING_PATH")
   if [[ -n "$NPM_START_BASE_URL" ]]; then
@@ -344,7 +374,7 @@ else
   skip_gate "npm-start-mfe-smoke" "RUN_NPM_START_SMOKE=0"
 fi
 
-# --- Gate 12: Accessibility / Contrast / Focus Lane ---
+# --- Gate 13: Accessibility / Contrast / Focus Lane ---
 if [[ "$RUN_A11Y" == "1" ]]; then
   if [[ ! -x "$A11Y_SCRIPT" ]]; then
     echo "ERROR: A11Y script is not executable or missing: $A11Y_SCRIPT" >&2
@@ -361,7 +391,7 @@ else
   skip_gate "a11y-tenant-branding" "RUN_A11Y=0"
 fi
 
-# --- Gate 13: Frontend Performance Spot-Check ---
+# --- Gate 14: Frontend Performance Spot-Check ---
 if [[ "$RUN_PERFORMANCE" == "1" ]]; then
   performance_args=(--env "$ENV")
   if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
@@ -373,7 +403,7 @@ else
   skip_gate "frontend-performance-spotcheck" "RUN_PERFORMANCE=0"
 fi
 
-# --- Gate 14: Paragon Theme Budget Contract ---
+# --- Gate 15: Paragon Theme Budget Contract ---
 if [[ "$RUN_PARAGON_THEME_BUDGET" == "1" ]]; then
   run_gate "paragon-theme-budget" \
     ./scripts/qa/verify-paragon-token-coverage.sh
@@ -381,7 +411,7 @@ else
   skip_gate "paragon-theme-budget" "RUN_PARAGON_THEME_BUDGET=0"
 fi
 
-# --- Gate 15: Certificate + Email Branding Contract ---
+# --- Gate 16: Certificate + Email Branding Contract ---
 if [[ "$RUN_CERTIFICATE_BRANDING" == "1" ]]; then
   run_gate "certificate-branding" \
     ./scripts/qa/verify-certificate-branding.sh
@@ -389,7 +419,7 @@ else
   skip_gate "certificate-branding" "RUN_CERTIFICATE_BRANDING=0"
 fi
 
-# --- Gate 16: Email Template Branding Contract ---
+# --- Gate 17: Email Template Branding Contract ---
 if [[ "$RUN_EMAIL_TEMPLATE_BRANDING" == "1" ]]; then
   run_gate "email-template-branding" \
     ./scripts/qa/verify-email-template-multilang.sh
@@ -397,7 +427,7 @@ else
   skip_gate "email-template-branding" "RUN_EMAIL_TEMPLATE_BRANDING=0"
 fi
 
-# --- Gate 17: Public Screenshot Capture (optional operator evidence) ---
+# --- Gate 18: Public Screenshot Capture (optional operator evidence) ---
 if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
   run_gate "capture-branding-screenshots" \
     ./scripts/qa/capture-branding-screenshots.sh "$ENV"
@@ -440,8 +470,12 @@ $(printf '%s\n' "${gate_results[@]}")
 - Slot source-alignment gate enabled: ${RUN_SLOT_SOURCE_ALIGNMENT}
 - Selector hardening gate enabled: ${RUN_SELECTOR_HARDENING}
 - Runtime theme contract gate enabled: ${RUN_RUNTIME_THEME_CONTRACT}
+- Live DOM selector audit gate enabled: ${RUN_MFE_LIVE_DOM_AUDIT}
 - Runtime theme contract URL: ${RUNTIME_THEME_URL:-"(auto by env)"}
 - Runtime theme contract timeout: ${RUNTIME_THEME_TIMEOUT_SECONDS}s
+- Live DOM audit project: ${LIVE_DOM_AUDIT_PROJECT}
+- Live DOM minimum selector hits: ${LIVE_DOM_AUDIT_MIN_HITS}
+- Live DOM audit path: ${SELECTOR_AUDIT_PATH}
 - npm-start smoke gate enabled: ${RUN_NPM_START_SMOKE}
 - npm-start smoke base URL: ${NPM_START_BASE_URL:-"(auto by env)"}
 - npm-start smoke project: ${NPM_START_PROJECT}

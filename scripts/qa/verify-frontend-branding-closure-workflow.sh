@@ -18,7 +18,8 @@ fi
 
 for input_key in target_environment cross_browser_matrix require_runtime_theme require_branding_markers require_webkit \
                  run_runtime_theme_contract_gate run_npm_start_smoke_gate run_screenshot_gate \
-                 run_certificate_branding_gate \
+                 run_certificate_branding_gate run_live_dom_audit_gate \
+                 live_dom_audit_project live_dom_audit_min_hits selector_audit_path \
                  runtime_theme_url runtime_theme_timeout_seconds learning_path; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
     echo "❌ frontend closure workflow missing input: ${input_key}"
@@ -51,6 +52,11 @@ if ! rg -n 'RUNTIME_THEME_TIMEOUT_SECONDS=' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'RUN_MFE_LIVE_DOM_AUDIT=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire RUN_MFE_LIVE_DOM_AUDIT into pipeline env"
+  violations=1
+fi
+
 if ! rg -n 'REQUIRE_BRANDING_MARKERS=' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow does not wire REQUIRE_BRANDING_MARKERS into pipeline env"
   violations=1
@@ -58,6 +64,21 @@ fi
 
 if ! rg -n 'RUN_CERTIFICATE_BRANDING=' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow does not wire RUN_CERTIFICATE_BRANDING into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'LIVE_DOM_AUDIT_PROJECT=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire LIVE_DOM_AUDIT_PROJECT into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'LIVE_DOM_AUDIT_MIN_HITS=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire LIVE_DOM_AUDIT_MIN_HITS into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'SELECTOR_AUDIT_PATH=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire SELECTOR_AUDIT_PATH into pipeline env"
   violations=1
 fi
 

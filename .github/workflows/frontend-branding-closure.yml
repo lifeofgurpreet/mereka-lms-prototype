@@ -61,6 +61,11 @@ on:
         required: true
         default: true
         type: boolean
+      run_live_dom_audit_gate:
+        description: "Run runtime DOM selector audit gate for authn surface"
+        required: true
+        default: false
+        type: boolean
       run_npm_start_smoke_gate:
         description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
         required: true
@@ -80,6 +85,21 @@ on:
         description: "Playwright project for npm-start smoke"
         required: false
         default: "chromium"
+        type: string
+      live_dom_audit_project:
+        description: "Playwright project for live DOM selector audit"
+        required: false
+        default: "chromium"
+        type: string
+      live_dom_audit_min_hits:
+        description: "Minimum tracked selector hits for live DOM selector audit"
+        required: false
+        default: "3"
+        type: string
+      selector_audit_path:
+        description: "Route path used for runtime selector DOM audit"
+        required: false
+        default: "/authn/login"
         type: string
       runtime_theme_url:
         description: "Override runtime theme origin (empty = auto by env)"
@@ -126,11 +146,15 @@ jobs:
           RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
           RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
           RUN_RUNTIME_THEME_CONTRACT="${{ inputs.run_runtime_theme_contract_gate || 'true' }}"
+          RUN_LIVE_DOM_AUDIT="${{ inputs.run_live_dom_audit_gate || 'false' }}"
           RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
           RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
           STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
           NPM_START_BASE_URL="${{ inputs.npm_start_base_url || '' }}"
           NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
+          LIVE_DOM_AUDIT_PROJECT="${{ inputs.live_dom_audit_project || 'chromium' }}"
+          LIVE_DOM_AUDIT_MIN_HITS="${{ inputs.live_dom_audit_min_hits || '3' }}"
+          SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
           RUNTIME_THEME_URL="${{ inputs.runtime_theme_url || '' }}"
           RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
@@ -153,12 +177,16 @@ jobs:
           RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
           RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
           RUN_RUNTIME_THEME_CONTRACT=$([[ "$RUN_RUNTIME_THEME_CONTRACT" == "true" ]] && echo 1 || echo 0) \
+          RUN_MFE_LIVE_DOM_AUDIT=$([[ "$RUN_LIVE_DOM_AUDIT" == "true" ]] && echo 1 || echo 0) \
           RUN_NPM_START_SMOKE=$([[ "$RUN_NPM_START_SMOKE" == "true" ]] && echo 1 || echo 0) \
           STRICT_WEBKIT="$STRICT_WEBKIT" \
           REQUIRE_BRANDING_MARKERS=$([[ "$REQUIRE_BRANDING_MARKERS" == "true" ]] && echo 1 || echo 0) \
           RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
           NPM_START_BASE_URL="$NPM_START_BASE_URL" \
           NPM_START_PROJECT="$NPM_START_PROJECT" \
+          LIVE_DOM_AUDIT_PROJECT="$LIVE_DOM_AUDIT_PROJECT" \
+          LIVE_DOM_AUDIT_MIN_HITS="$LIVE_DOM_AUDIT_MIN_HITS" \
+          SELECTOR_AUDIT_PATH="$SELECTOR_AUDIT_PATH" \
           RUNTIME_THEME_URL="$RUNTIME_THEME_URL" \
           RUNTIME_THEME_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" \
           LEARNING_PATH="$LEARNING_PATH" \
@@ -184,10 +212,14 @@ jobs:
             echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
             echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
             echo "- Runtime theme contract gate: \`${{ inputs.run_runtime_theme_contract_gate || 'true' }}\`"
+            echo "- Live DOM selector audit gate: \`${{ inputs.run_live_dom_audit_gate || 'false' }}\`"
             echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
             echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
             echo "- npm-start base URL: \`${{ inputs.npm_start_base_url || '(auto by env)' }}\`"
             echo "- npm-start project: \`${{ inputs.npm_start_project || 'chromium' }}\`"
+            echo "- Live DOM audit project: \`${{ inputs.live_dom_audit_project || 'chromium' }}\`"
+            echo "- Live DOM minimum selector hits: \`${{ inputs.live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
             echo "- Runtime theme URL: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
             echo "- Runtime theme timeout: \`${{ inputs.runtime_theme_timeout_seconds || '300' }}\`"
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
