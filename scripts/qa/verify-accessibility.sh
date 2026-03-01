@@ -18,7 +18,8 @@
 # Usage:
 #   ./scripts/qa/verify-accessibility.sh --offline
 #   ./scripts/qa/verify-accessibility.sh --online [--target https://academyv2.mereka.io]
-#   ./scripts/qa/verify-accessibility.sh --offline --online --target https://academyv2.mereka.io
+#   ./scripts/qa/verify-accessibility.sh --offline --online --target https://apps.academyv2.mereka.io
+#   ./scripts/qa/verify-accessibility.sh --online --routes /authn/login,/authn/register,/dashboard
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -41,15 +42,23 @@ do_skip() { SKIP=$((SKIP + 1)); echo -e "${YELLOW}[SKIP]${NC} $1"; }
 MODE_OFFLINE=false
 MODE_ONLINE=false
 TARGET="${A11Y_TARGET:-https://academyv2.mereka.io}"
+ROUTES_CSV="${A11Y_ROUTES:-}"
+ALLOW_MISSING_REPORTS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --offline)  MODE_OFFLINE=true; shift ;;
     --online)   MODE_ONLINE=true;  shift ;;
     --target)   TARGET="$2"; shift 2 ;;
+    --routes)   ROUTES_CSV="$2"; shift 2 ;;
+    --allow-missing-reports) ALLOW_MISSING_REPORTS=1; shift ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
 done
+
+if [[ "$TARGET" != *"://"* ]]; then
+  TARGET="https://$TARGET"
+fi
 
 # Default to offline when no mode flag supplied
 if [[ "$MODE_OFFLINE" == false && "$MODE_ONLINE" == false ]]; then
@@ -269,7 +278,53 @@ fi  # end offline mode
 # ONLINE MODE
 # ──────────────────────────────────────────────────────────────────────────
 if [[ "$MODE_ONLINE" == true ]]; then
-  echo -e "${BLUE}## Online Checks (axe-core against ${TARGET})${NC}"
+  MFE_TARGET="$(python3 - "$TARGET" <<'PY'
+import sys
+from urllib.parse import urlparse
+
+raw = (sys.argv[1] or "").strip()
+parsed = urlparse(raw)
+if not parsed.hostname:
+    print("")
+    raise SystemExit(0)
+scheme = parsed.scheme or "https"
+host = parsed.hostname
+if not host.startswith("apps."):
+    host = f"apps.{host}"
+port = f":{parsed.port}" if parsed.port else ""
+print(f"{scheme}://{host}{port}")
+PY
+)"
+  if [[ -z "$MFE_TARGET" ]]; then
+    do_fail "Cannot derive apps.* MFE origin from target: $TARGET"
+    MFE_TARGET="$TARGET"
+  fi
+
+  if [[ -z "$ROUTES_CSV" ]]; then
+    ROUTES_CSV="/authn/login,/authn/register,/dashboard,/account,/learning"
+  fi
+
+  mapfile -t ROUTES < <(python3 - "$ROUTES_CSV" <<'PY'
+import sys
+
+for raw in (sys.argv[1] or "").split(","):
+    entry = raw.strip()
+    if not entry:
+        continue
+    if entry.startswith("http://") or entry.startswith("https://"):
+        print(entry)
+        continue
+    if not entry.startswith("/"):
+        entry = f"/{entry}"
+    print(entry)
+PY
+)
+
+  if [[ "${#ROUTES[@]}" -eq 0 ]]; then
+    do_fail "No valid routes resolved for online accessibility scan"
+  fi
+
+  echo -e "${BLUE}## Online Checks (axe-core against ${MFE_TARGET})${NC}"
   echo ""
 
   # Prerequisite: npx / @axe-core/cli
@@ -278,17 +333,22 @@ if [[ "$MODE_ONLINE" == true ]]; then
   else
     echo -e "${BLUE}### axe-core WCAG 2.2 AA scan${NC}"
 
-    ROUTES=("/" "/login" "/register" "/dashboard" "/courses")
     REPORT_DIR="${REPO_ROOT}/var/a11y-reports"
     mkdir -p "$REPORT_DIR"
 
     ONLINE_VIOLATIONS=0
+    MISSING_REPORTS=0
 
     for route in "${ROUTES[@]}"; do
-      url="${TARGET%/}${route}"
+      if [[ "$route" == http://* || "$route" == https://* ]]; then
+        url="$route"
+      else
+        url="${MFE_TARGET%/}${route}"
+      fi
       safe_name="$(echo "${route}" | sed 's|/|-|g; s|^-||')"
       [[ -z "$safe_name" ]] && safe_name="home"
       report_file="${REPORT_DIR}/axe-${safe_name}.json"
+      command_log="${REPORT_DIR}/axe-${safe_name}.stderr.log"
 
       echo "  Scanning: ${url}"
 
@@ -296,10 +356,11 @@ if [[ "$MODE_ONLINE" == true ]]; then
       npx --yes @axe-core/cli@4.10.2 \
         "${url}" \
         --tags wcag2a,wcag2aa,wcag22aa \
-        --reporter json \
         --save "${report_file}" \
-        --timeout 30000 \
-        2>/dev/null
+        --timeout 30 \
+        --no-reporter \
+        --show-errors true \
+        >"${command_log}" 2>&1
       AXE_EXIT=$?
       set -e
 
@@ -332,14 +393,26 @@ except Exception:
 " 2>/dev/null || echo 0)
         ONLINE_VIOLATIONS=$((ONLINE_VIOLATIONS + VCOUNT))
       else
+        MISSING_REPORTS=$((MISSING_REPORTS + 1))
         echo "    ${route}: no report generated (URL may be unreachable)"
+        if [[ -s "$command_log" ]]; then
+          echo "    command-log: ${command_log}"
+        fi
       fi
     done
 
     echo ""
 
+    if [[ "$MISSING_REPORTS" -gt 0 ]]; then
+      if [[ "$ALLOW_MISSING_REPORTS" -eq 1 ]]; then
+        do_skip "axe-core: ${MISSING_REPORTS} route(s) produced no report (allowed by --allow-missing-reports)"
+      else
+        do_fail "axe-core: ${MISSING_REPORTS} route(s) produced no report (use --allow-missing-reports to downgrade)"
+      fi
+    fi
+
     if [[ "$ONLINE_VIOLATIONS" -eq 0 ]]; then
-      do_pass "axe-core: 0 WCAG 2.2 AA violations across ${#ROUTES[@]} routes"
+      do_pass "axe-core: 0 WCAG 2.2 AA violations across ${#ROUTES[@]} route(s)"
     else
       do_fail "axe-core: ${ONLINE_VIOLATIONS} WCAG 2.2 AA violation(s) found — see reports in ${REPORT_DIR}/"
     fi

@@ -50,7 +50,11 @@ LIVE_DOM_AUDIT_SELECTORS="${LIVE_DOM_AUDIT_SELECTORS:-}"
 LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${LIVE_DOM_AUDIT_MIN_CUSTOM_HITS:-0}"
 SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
 A11Y_SCRIPT="${A11Y_SCRIPT:-./scripts/qa/verify-accessibility.sh}"
-A11Y_ARGS="${A11Y_ARGS:---offline}"
+A11Y_MODE="${A11Y_MODE:-offline}"
+A11Y_TARGET="${A11Y_TARGET:-}"
+A11Y_ROUTES="${A11Y_ROUTES:-}"
+A11Y_ALLOW_MISSING_REPORTS="${A11Y_ALLOW_MISSING_REPORTS:-0}"
+A11Y_ARGS="${A11Y_ARGS:-}"
 
 usage() {
   cat <<'EOF'
@@ -116,7 +120,13 @@ Environment toggles:
   REQUIRE_BRANDING_MARKERS=0|1
                             Require branded slot markers in rendered MFE DOM (default: 1)
   A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
-  A11Y_ARGS="<args>"        A11y script args (default: --offline)
+  A11Y_MODE=offline|online|hybrid
+                            A11y scan mode (default: offline)
+  A11Y_TARGET=<url>         A11y online scan origin (default: env-derived apps domain)
+  A11Y_ROUTES="<csv>"       A11y online scan routes (default: verifier defaults)
+  A11Y_ALLOW_MISSING_REPORTS=0|1
+                            Allow online scan routes with missing reports (default: 0)
+  A11Y_ARGS="<args>"        Extra a11y args appended after mode defaults
   LEARNING_PATH=/learning   Optional learning route path for smoke checks
   RETENTION_DAYS=30         Evidence retention window in days (default: 30)
 EOF
@@ -186,6 +196,7 @@ echo "Evidence dir: $EVIDENCE_DIR"
 echo "Retention: ${RETENTION_DAYS} days"
 echo "Cross-browser: $CROSS_BROWSER (gate enabled: $RUN_CROSS_BROWSER)"
 echo "A11y gate enabled: $RUN_A11Y"
+echo "A11y mode: $A11Y_MODE"
 echo "Performance gate enabled: $RUN_PERFORMANCE"
 echo "Certificate branding gate enabled: $RUN_CERTIFICATE_BRANDING"
 echo "Email template branding gate enabled: $RUN_EMAIL_TEMPLATE_BRANDING"
@@ -399,10 +410,40 @@ if [[ "$RUN_A11Y" == "1" ]]; then
     echo "ERROR: A11Y script is not executable or missing: $A11Y_SCRIPT" >&2
     exit 2
   fi
+
+  if [[ -z "$A11Y_TARGET" ]]; then
+    case "$ENV" in
+      prod) A11Y_TARGET="https://apps.academyv2.mereka.io" ;;
+      dev) A11Y_TARGET="https://apps.academyv2.mereka.dev" ;;
+    esac
+  fi
+
   a11y_args=()
+  case "$A11Y_MODE" in
+    offline)
+      a11y_args+=(--offline)
+      ;;
+    online)
+      a11y_args+=(--online --target "$A11Y_TARGET")
+      ;;
+    hybrid)
+      a11y_args+=(--offline --online --target "$A11Y_TARGET")
+      ;;
+    *)
+      echo "ERROR: A11Y_MODE must be offline|online|hybrid (got: $A11Y_MODE)" >&2
+      exit 2
+      ;;
+  esac
+  if [[ -n "$A11Y_ROUTES" ]]; then
+    a11y_args+=(--routes "$A11Y_ROUTES")
+  fi
+  if [[ "$A11Y_ALLOW_MISSING_REPORTS" == "1" ]]; then
+    a11y_args+=(--allow-missing-reports)
+  fi
   if [[ -n "$A11Y_ARGS" ]]; then
     # shellcheck disable=SC2206
-    a11y_args=($A11Y_ARGS)
+    extra_a11y_args=($A11Y_ARGS)
+    a11y_args+=("${extra_a11y_args[@]}")
   fi
   run_gate "a11y-tenant-branding" \
     "$A11Y_SCRIPT" "${a11y_args[@]}"
@@ -479,8 +520,12 @@ $(printf '%s\n' "${gate_results[@]}")
 - WebKit strict mode: ${STRICT_WEBKIT}
 - Baseline multisite/route gates enabled: ${RUN_BASELINE_GATES}
 - A11y gate enabled: ${RUN_A11Y}
+- A11y mode: ${A11Y_MODE}
 - A11y script: ${A11Y_SCRIPT}
-- A11y args: ${A11Y_ARGS}
+- A11y target: ${A11Y_TARGET}
+- A11y routes: ${A11Y_ROUTES:-"(verifier defaults)"}
+- A11y allow missing reports: ${A11Y_ALLOW_MISSING_REPORTS}
+- A11y extra args: ${A11Y_ARGS:-"(none)"}
 - Performance gate enabled: ${RUN_PERFORMANCE}
 - Paragon theme budget gate enabled: ${RUN_PARAGON_THEME_BUDGET}
 - Certificate branding gate enabled: ${RUN_CERTIFICATE_BRANDING}

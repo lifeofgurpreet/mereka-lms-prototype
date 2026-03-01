@@ -139,6 +139,30 @@ on:
         required: false
         default: "/learning"
         type: string
+      a11y_mode:
+        description: "Accessibility scan mode"
+        required: true
+        default: "hybrid"
+        type: choice
+        options:
+          - offline
+          - online
+          - hybrid
+      a11y_target_url:
+        description: "Accessibility scan origin (empty = auto apps domain by env)"
+        required: false
+        default: ""
+        type: string
+      a11y_routes:
+        description: "Optional CSV routes for accessibility online scan"
+        required: false
+        default: ""
+        type: string
+      a11y_allow_missing_reports:
+        description: "Allow missing axe reports for some routes"
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   frontend-closure:
@@ -185,6 +209,10 @@ jobs:
           RUNTIME_THEME_URL="${{ inputs.runtime_theme_url || '' }}"
           RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+          A11Y_MODE="${{ inputs.a11y_mode || 'hybrid' }}"
+          A11Y_TARGET_URL="${{ inputs.a11y_target_url || '' }}"
+          A11Y_ROUTES="${{ inputs.a11y_routes || '' }}"
+          A11Y_ALLOW_MISSING_REPORTS="${{ inputs.a11y_allow_missing_reports || 'false' }}"
 
           args=(--env "$TARGET_ENV" --frontend-only)
           if [[ "$CROSS_BROWSER_MATRIX" == "true" ]]; then
@@ -221,6 +249,10 @@ jobs:
           RUNTIME_THEME_URL="$RUNTIME_THEME_URL" \
           RUNTIME_THEME_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" \
           LEARNING_PATH="$LEARNING_PATH" \
+          A11Y_MODE="$A11Y_MODE" \
+          A11Y_TARGET="$A11Y_TARGET_URL" \
+          A11Y_ROUTES="$A11Y_ROUTES" \
+          A11Y_ALLOW_MISSING_REPORTS=$([[ "$A11Y_ALLOW_MISSING_REPORTS" == "true" ]] && echo 1 || echo 0) \
           ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
 
       - name: Summarize closure results
@@ -258,6 +290,10 @@ jobs:
             echo "- Runtime theme URL: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
             echo "- Runtime theme timeout: \`${{ inputs.runtime_theme_timeout_seconds || '300' }}\`"
             echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
+            echo "- A11y mode: \`${{ inputs.a11y_mode || 'hybrid' }}\`"
+            echo "- A11y target URL: \`${{ inputs.a11y_target_url || '(auto apps by env)' }}\`"
+            echo "- A11y routes: \`${{ inputs.a11y_routes || '(verifier defaults)' }}\`"
+            echo "- A11y allow missing reports: \`${{ inputs.a11y_allow_missing_reports || 'false' }}\`"
             if [[ -n "$LATEST" ]]; then
               echo "- Evidence directory: \`$LATEST\`"
             fi
