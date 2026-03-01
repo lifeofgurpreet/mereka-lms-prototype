@@ -27,6 +27,19 @@ ACCOUNT_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-account/src"
 PROFILE_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src"
 LEARNING_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-learning/src"
 AUTHORING_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-course-authoring/src"
+GRADEBOOK_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-gradebook/src"
+DASHBOARD_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-learner-dashboard/src"
+CATALOG_SRC=""
+for candidate in \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-discovery/src" \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-catalog/src" \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-course-catalog/src"
+do
+  if [[ -d "$candidate" ]]; then
+    CATALOG_SRC="$candidate"
+    break
+  fi
+done
 
 echo "=== MFE Slot Source Alignment Verification ==="
 
@@ -72,6 +85,29 @@ check_slot_in_source() {
   fi
 }
 
+check_slot_in_any_local_source() {
+  local slot="$1"
+  local found=0
+  local source_dir
+  shift
+
+  for source_dir in "$@"; do
+    [[ -d "$source_dir" ]] || continue
+    if rg -qF "$slot" "$source_dir"; then
+      found=1
+      break
+    fi
+  done
+
+  if [[ "$found" -eq 1 ]]; then
+    pass "Slot exists in at least one local source checkout: $slot"
+  else
+    warn "Slot not found in available local source checkouts: $slot"
+  fi
+}
+
+declare -A skipped_namespace_counts=()
+
 while IFS= read -r slot; do
   [[ -z "$slot" ]] && continue
 
@@ -91,11 +127,42 @@ while IFS= read -r slot; do
     org.openedx.frontend.authoring.*)
       check_slot_in_source "$slot" "$AUTHORING_SRC" "authoring"
       ;;
+    org.openedx.frontend.catalog.*)
+      if [[ -n "$CATALOG_SRC" ]]; then
+        check_slot_in_source "$slot" "$CATALOG_SRC" "catalog"
+      else
+        skipped_namespace_counts["catalog"]=$(( ${skipped_namespace_counts["catalog"]:-0} + 1 ))
+      fi
+      ;;
+    org.openedx.frontend.learner_dashboard.*)
+      if [[ -d "$DASHBOARD_SRC" ]]; then
+        check_slot_in_source "$slot" "$DASHBOARD_SRC" "learner-dashboard"
+      else
+        skipped_namespace_counts["learner_dashboard"]=$(( ${skipped_namespace_counts["learner_dashboard"]:-0} + 1 ))
+      fi
+      ;;
+    org.openedx.frontend.layout.*)
+      check_slot_in_any_local_source "$slot" \
+        "$AUTHN_SRC" \
+        "$ACCOUNT_SRC" \
+        "$PROFILE_SRC" \
+        "$LEARNING_SRC" \
+        "$AUTHORING_SRC" \
+        "$GRADEBOOK_SRC"
+      ;;
     *)
       warn "No local source-alignment check for slot (external/checkout not present): $slot"
       ;;
   esac
 done <<<"$slots"
+
+if [[ ${skipped_namespace_counts["catalog"]:-0} -gt 0 ]]; then
+  warn "Catalog checkout missing; skipped ${skipped_namespace_counts["catalog"]} catalog slot alignment check(s)"
+fi
+
+if [[ ${skipped_namespace_counts["learner_dashboard"]:-0} -gt 0 ]]; then
+  warn "Learner-dashboard checkout missing; skipped ${skipped_namespace_counts["learner_dashboard"]} dashboard slot alignment check(s)"
+fi
 
 if [[ -d "$LEARNING_SRC" ]]; then
   learning_missing="$(
