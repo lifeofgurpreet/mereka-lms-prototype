@@ -8,6 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 STRICT="${STRICT:-1}"
 STRICT_LOCAL_LEARNING_COMPLETE="${STRICT_LOCAL_LEARNING_COMPLETE:-1}"
+STRICT_LOCAL_LAYOUT_COMPLETE="${STRICT_LOCAL_LAYOUT_COMPLETE:-1}"
 CHECK_LAYOUT_SLOT_EXISTENCE="${CHECK_LAYOUT_SLOT_EXISTENCE:-1}"
 ULMO_SLOT_SOURCE_FALLBACK="${ULMO_SLOT_SOURCE_FALLBACK:-/tmp/mfe-slot-inspect}"
 
@@ -303,6 +304,58 @@ PY
   fi
 else
   warn "Learning source checkout missing; cannot evaluate local learning slot completeness"
+fi
+
+if [[ -d "$HEADER_COMPONENT_SRC" ]]; then
+  layout_missing="$(
+    SLOT_LINES="$slots" python3 - "$HEADER_COMPONENT_SRC" <<'PY'
+import re
+import os
+import sys
+from pathlib import Path
+
+header_src = Path(sys.argv[1])
+slot_pattern = re.compile(r"org\.openedx\.frontend\.layout\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*\.v[0-9]+")
+
+source_slots = set()
+for path in header_src.rglob("*"):
+    if path.suffix.lower() not in {".js", ".jsx", ".ts", ".tsx", ".md"}:
+        continue
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        continue
+    source_slots.update(slot_pattern.findall(text))
+
+plugin_slots = set()
+for line in os.environ.get("SLOT_LINES", "").splitlines():
+    line = line.strip()
+    if line.startswith("org.openedx.frontend.layout."):
+        plugin_slots.add(line)
+
+for slot in sorted(source_slots - plugin_slots):
+    print(slot)
+PY
+  )"
+
+  if [[ -z "$layout_missing" ]]; then
+    pass "Layout plugin coverage is complete for header source checkout (all discovered layout slot IDs are wired)"
+  else
+    missing_count="$(echo "$layout_missing" | wc -l | tr -d ' ')"
+    if [[ "$STRICT_LOCAL_LAYOUT_COMPLETE" == "1" ]]; then
+      fail "Layout plugin coverage gap: $missing_count local layout slot ID(s) are not wired"
+      while IFS= read -r slot; do
+        [[ -n "$slot" ]] && fail "Unwired local layout slot: $slot"
+      done <<<"$layout_missing"
+    else
+      warn "Layout plugin coverage gap (STRICT_LOCAL_LAYOUT_COMPLETE=0): $missing_count local layout slot ID(s) are not wired"
+      while IFS= read -r slot; do
+        [[ -n "$slot" ]] && warn "Unwired local layout slot: $slot"
+      done <<<"$layout_missing"
+    fi
+  fi
+else
+  warn "Header component source checkout missing; cannot evaluate local layout slot completeness"
 fi
 
 echo ""
