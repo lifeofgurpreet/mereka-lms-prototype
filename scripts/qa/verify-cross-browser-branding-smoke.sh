@@ -159,15 +159,17 @@ if [[ ! -d node_modules ]]; then
 fi
 
 if [[ "$CROSS_BROWSER" -eq 1 ]]; then
-  echo "Installing Playwright browsers: chromium firefox webkit"
-  if ! npx playwright install chromium firefox webkit; then
+  echo "Installing Playwright browsers: chromium firefox"
+  npx playwright install chromium firefox
+
+  echo "Installing Playwright browser: webkit (optional)"
+  if ! npx playwright install webkit; then
     if [[ "$STRICT_WEBKIT" -eq 1 ]]; then
       echo "ERROR: WebKit install failed and strict mode is enabled"
       exit 1
     else
       echo "WARN: WebKit install failed (likely missing host deps); falling back to chromium+firefox projects"
       WEBKIT_ENABLED=0
-      npx playwright install chromium firefox
     fi
   fi
 
