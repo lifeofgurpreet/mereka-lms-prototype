@@ -838,6 +838,9 @@ PY
 #   org.openedx.frontend.layout.header_desktop_secondary_menu.v1 | Desktop secondary-menu helper
 #   org.openedx.frontend.layout.header_learning_help.v1 | Learning help-link helper
 #   org.openedx.frontend.layout.header_learning_logged_out_items.v1 | Learning logged-out items helper
+#   org.openedx.frontend.layout.header_desktop_user_menu.v1 | Desktop user-menu helper
+#   org.openedx.frontend.layout.header_mobile_user_menu.v1 | Mobile user-menu helper
+#   org.openedx.frontend.layout.header_learning_user_menu.v1 | Learning user-menu helper
 #   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
 #   org.openedx.frontend.authoring.course_outline_sidebar.v1 | Studio outline-page sidebar helper
 #   org.openedx.frontend.authoring.course_outline_header_actions.v1 | Studio outline header actions helper
@@ -1893,6 +1896,39 @@ for _mfe in [
             },
             """,
         ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_desktop_user_menu.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaHeaderUserMenuSupport(widget),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_mobile_user_menu.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaHeaderUserMenuSupport(widget),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_learning_user_menu.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaLearningUserMenuSupport(widget),
+            },
+            """,
+        ),
     ])
 
 ###############################################################################
@@ -2062,6 +2098,88 @@ const withMerekaLearningLoggedOutItems = (widget) => {
     content: {
       ...widgetContent,
       buttonsInfo: nextButtons,
+    },
+  };
+};
+
+const withMerekaHeaderUserMenuSupport = (widget) => {
+  const widgetContent = (widget && widget.content) || {};
+  const defaultMenuGroups = Array.isArray(widgetContent.menu) ? widgetContent.menu : null;
+  if (!Array.isArray(defaultMenuGroups)) {
+    return widget;
+  }
+
+  const config = getConfig();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const helpUrl = (typeof variant?.helpUrl === 'string' && variant.helpUrl) ? variant.helpUrl : '';
+  if (!helpUrl) {
+    return widget;
+  }
+
+  const supportItem = { type: 'item', href: helpUrl, content: 'Support' };
+  const existingHrefs = new Set(
+    defaultMenuGroups.flatMap((group) =>
+      Array.isArray(group?.items)
+        ? group.items.map((item) => (item && item.href ? item.href : ''))
+        : []
+    )
+  );
+  if (existingHrefs.has(helpUrl)) {
+    return widget;
+  }
+
+  const nextGroups = [...defaultMenuGroups];
+  const lastIndex = nextGroups.length - 1;
+  if (lastIndex >= 0 && Array.isArray(nextGroups[lastIndex]?.items)) {
+    nextGroups[lastIndex] = {
+      ...nextGroups[lastIndex],
+      items: [...nextGroups[lastIndex].items, supportItem],
+    };
+  } else {
+    nextGroups.push({ items: [supportItem] });
+  }
+
+  return {
+    ...widget,
+    content: {
+      ...widgetContent,
+      menu: nextGroups,
+    },
+  };
+};
+
+const withMerekaLearningUserMenuSupport = (widget) => {
+  const widgetContent = (widget && widget.content) || {};
+  const defaultItems = Array.isArray(widgetContent.items) ? widgetContent.items : null;
+  if (!Array.isArray(defaultItems)) {
+    return widget;
+  }
+
+  const config = getConfig();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const helpUrl = (typeof variant?.helpUrl === 'string' && variant.helpUrl) ? variant.helpUrl : '';
+  if (!helpUrl) {
+    return widget;
+  }
+
+  const existingHrefs = new Set(defaultItems.map((item) => (item && item.href ? item.href : '')));
+  if (existingHrefs.has(helpUrl)) {
+    return widget;
+  }
+
+  return {
+    ...widget,
+    content: {
+      ...widgetContent,
+      items: [
+        ...defaultItems,
+        {
+          href: helpUrl,
+          message: 'Support',
+        },
+      ],
     },
   };
 };
