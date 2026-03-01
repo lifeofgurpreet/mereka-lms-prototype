@@ -25,7 +25,7 @@ if [[ ! -f "$REGISTRY_DOC" ]]; then
 fi
 
 mapfile -t slot_ids < <(
-  rg -o '"org\.openedx\.frontend\.[^"]+\.v1"' "$PLUGIN_FILE" \
+  rg -o '"org\.openedx\.frontend\.[^"]+\.v[0-9]+"' "$PLUGIN_FILE" \
     | tr -d '"' \
     | sort -u
 )

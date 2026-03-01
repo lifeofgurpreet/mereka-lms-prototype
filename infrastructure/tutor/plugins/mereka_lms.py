@@ -838,6 +838,14 @@ PY
 #   org.openedx.frontend.authoring.course_outline_page_alerts.v1 | Studio outline page alerts helper
 #   org.openedx.frontend.authoring.edit_video_alerts.v1 | Studio video editor alerts helper
 #   org.openedx.frontend.authoring.edit_file_alerts.v1 | Studio file editor alerts helper
+#   org.openedx.frontend.authoring.additional_course_plugin.v1 | Studio additional course plugin helper
+#   org.openedx.frontend.authoring.additional_course_content_plugin.v1 | Studio additional course content helper
+#   org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1 | Studio subsection extra actions helper
+#   org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1 | Studio unit-card extra actions helper
+#   org.openedx.frontend.authoring.course_unit_sidebar.v2 | Studio course-unit sidebar v2 helper
+#   org.openedx.frontend.authoring.files_upload_page_table.v1 | Studio file upload table helper
+#   org.openedx.frontend.authoring.videos_upload_page_table.v1 | Studio video upload table helper
+#   org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1 | Studio transcript translations helper
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
@@ -1042,6 +1050,126 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaAuthoringEditFileAlertsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.additional_course_plugin.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_additional_course_plugin_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringAdditionalCoursePluginHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.additional_course_content_plugin.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_additional_course_content_plugin_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringAdditionalCourseContentPluginHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_outline_subsection_extra_actions_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringOutlineSubsectionExtraActionsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_outline_unit_extra_actions_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringOutlineUnitExtraActionsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_unit_sidebar.v2",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_course_unit_sidebar_v2_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringCourseUnitSidebarV2Hint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.files_upload_page_table.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_files_upload_page_table_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringFilesUploadPageTableHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.videos_upload_page_table.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_videos_upload_page_table_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringVideosUploadPageTableHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_video_transcript_translations_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringVideoTranscriptTranslationsHint,
                 },
             },
             """,
@@ -1951,6 +2079,89 @@ const MerekaAuthoringEditFileAlertsHint = () => {
     <div className="mereka-authoring-edit-file-alerts-hint">
       <span className="mereka-badge me-2">File Review</span>
       <span className="small">Check filename clarity and learner-facing download labels.</span>
+    </div>
+  );
+};
+
+// Studio additional course plugin helper.
+// Wired into org.openedx.frontend.authoring.additional_course_plugin.v1.
+const MerekaAuthoringAdditionalCoursePluginHint = () => {
+  return (
+    <div className="mereka-authoring-additional-course-plugin-hint">
+      <span className="mereka-badge me-2">Course Plugin</span>
+      <span className="small">Add external tools that match your program outcomes.</span>
+    </div>
+  );
+};
+
+// Studio additional course content plugin helper.
+// Wired into org.openedx.frontend.authoring.additional_course_content_plugin.v1.
+const MerekaAuthoringAdditionalCourseContentPluginHint = () => {
+  return (
+    <div className="mereka-authoring-additional-course-content-plugin-hint">
+      <span className="mereka-badge me-2">Content Plugin</span>
+      <span className="small">Use reusable content blocks to keep experiences consistent.</span>
+    </div>
+  );
+};
+
+// Studio outline subsection extra-actions helper.
+// Wired into org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1.
+const MerekaAuthoringOutlineSubsectionExtraActionsHint = () => {
+  return (
+    <div className="mereka-authoring-outline-subsection-extra-actions-hint">
+      <span className="small">Subsection actions are available for sequencing and visibility controls.</span>
+    </div>
+  );
+};
+
+// Studio outline unit-card extra-actions helper.
+// Wired into org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1.
+const MerekaAuthoringOutlineUnitExtraActionsHint = () => {
+  return (
+    <div className="mereka-authoring-outline-unit-extra-actions-hint">
+      <span className="small">Unit-level actions help you align assessments with outcomes.</span>
+    </div>
+  );
+};
+
+// Studio course-unit sidebar v2 helper.
+// Wired into org.openedx.frontend.authoring.course_unit_sidebar.v2.
+const MerekaAuthoringCourseUnitSidebarV2Hint = () => {
+  return (
+    <div className="mereka-authoring-course-unit-sidebar-v2-hint">
+      <span className="mereka-badge me-2">Studio Unit v2</span>
+      <span className="small">Use quick controls to refine component flow and accessibility.</span>
+    </div>
+  );
+};
+
+// Studio files-upload page table helper.
+// Wired into org.openedx.frontend.authoring.files_upload_page_table.v1.
+const MerekaAuthoringFilesUploadPageTableHint = () => {
+  return (
+    <div className="mereka-authoring-files-upload-page-table-hint">
+      <span className="small">Label files clearly so learners can discover the right assets fast.</span>
+    </div>
+  );
+};
+
+// Studio videos-upload page table helper.
+// Wired into org.openedx.frontend.authoring.videos_upload_page_table.v1.
+const MerekaAuthoringVideosUploadPageTableHint = () => {
+  return (
+    <div className="mereka-authoring-videos-upload-page-table-hint">
+      <span className="small">Prioritize transcripts and descriptive titles for each uploaded video.</span>
+    </div>
+  );
+};
+
+// Studio video transcript translations helper.
+// Wired into org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1.
+const MerekaAuthoringVideoTranscriptTranslationsHint = () => {
+  return (
+    <div className="mereka-authoring-video-transcript-translations-hint">
+      <span className="small">Add multilingual transcript tracks to improve inclusivity and completion.</span>
     </div>
   );
 };
