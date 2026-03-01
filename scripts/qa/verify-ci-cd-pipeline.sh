@@ -374,6 +374,10 @@ check_gitops() {
       "verify-release-workflow-invocation.sh"
       "verify-release-dry-run-contract.sh"
       "verify-release-evidence-workflow.sh"
+      "verify-cross-browser-branding-workflow.sh"
+      "verify-npm-start-smoke-workflow.sh"
+      "verify-frontend-branding-closure-workflow.sh"
+      "verify-mfe-live-dom-audit-workflow.sh"
       "verify-no-latest-prod-tags.sh"
     )
     local found=0
