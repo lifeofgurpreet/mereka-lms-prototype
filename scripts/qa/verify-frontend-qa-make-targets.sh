@@ -105,7 +105,9 @@ for target in \
   qa-make-help-contract \
   qa-frontend-contracts \
   qa-performance-prod \
-  qa-performance-dev; do
+  qa-performance-dev \
+  qa-frontend-runtime-qa-prod \
+  qa-frontend-runtime-qa-dev; do
   assert_make_target "$target"
 done
 
@@ -115,6 +117,24 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser' \
   "qa-cross-browser-dev"
+assert_make_command \
+  '$(MAKE) qa-cross-browser-prod' \
+  "qa-frontend-runtime-qa-prod includes qa-cross-browser-prod"
+assert_make_command \
+  '$(MAKE) qa-a11y-prod-hybrid' \
+  "qa-frontend-runtime-qa-prod includes qa-a11y-prod-hybrid"
+assert_make_command \
+  '$(MAKE) qa-performance-prod' \
+  "qa-frontend-runtime-qa-prod includes qa-performance-prod"
+assert_make_command \
+  '$(MAKE) qa-cross-browser-dev' \
+  "qa-frontend-runtime-qa-dev includes qa-cross-browser-dev"
+assert_make_command \
+  '$(MAKE) qa-a11y-dev-hybrid' \
+  "qa-frontend-runtime-qa-dev includes qa-a11y-dev-hybrid"
+assert_make_command \
+  '$(MAKE) qa-performance-dev' \
+  "qa-frontend-runtime-qa-dev includes qa-performance-dev"
 assert_make_command \
   './scripts/qa/run-phase7-dom-audit.sh --env prod --project chromium' \
   "qa-phase7-dom-audit"
@@ -276,6 +296,8 @@ assert_help_entry "qa-phase2-smoke-evidence-dev"
 assert_help_entry "qa-phase2-smoke-evidence-contract"
 assert_help_entry "qa-paragon-theme-budget"
 assert_help_entry "qa-frontend-extended-surfaces"
+assert_help_entry "qa-frontend-runtime-qa-prod"
+assert_help_entry "qa-frontend-runtime-qa-dev"
 assert_help_entry "qa-make-help-contract"
 assert_help_entry "qa-frontend-contracts"
 assert_help_entry "qa-npm-start-smoke-prod"

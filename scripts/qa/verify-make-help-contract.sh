@@ -37,6 +37,7 @@ else
     "qa-phase2-smoke-evidence-contract" \
     "qa-paragon-theme-budget" \
     "qa-frontend-extended-surfaces" \
+    "qa-frontend-runtime-qa-prod" \
     "qa-npm-start-smoke-prod" \
     "qa-frontend-closure-dev-screenshots-mfe" \
     "qa-frontend-contracts"; do
