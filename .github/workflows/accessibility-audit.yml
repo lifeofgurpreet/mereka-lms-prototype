@@ -11,9 +11,9 @@ on:
   workflow_dispatch:
     inputs:
       target_url:
-        description: "Target URL to scan (default: https://academyv2.mereka.io)"
+        description: "Target URL to scan (default: https://apps.academyv2.mereka.io)"
         required: false
-        default: "https://academyv2.mereka.io"
+        default: "https://apps.academyv2.mereka.io"
         type: string
 
 permissions:
@@ -42,7 +42,14 @@ jobs:
 
       - name: Set target URL
         run: |
-          TARGET="${{ github.event.inputs.target_url || 'https://academyv2.mereka.io' }}"
+          TARGET="${{ github.event.inputs.target_url || 'https://apps.academyv2.mereka.io' }}"
+          if [[ "$TARGET" != *"://"* ]]; then
+            TARGET="https://$TARGET"
+          fi
+          if [[ "$TARGET" != https://apps.* && "$TARGET" != http://apps.* ]]; then
+            TARGET="${TARGET/https:\/\//https:\/\/apps.}"
+            TARGET="${TARGET/http:\/\//http:\/\/apps.}"
+          fi
           echo "TARGET_URL=${TARGET}" >> "$GITHUB_ENV"
 
       - name: Run axe-core against key routes
@@ -53,11 +60,11 @@ jobs:
           TARGET="${TARGET_URL}"
 
           ROUTES=(
-            "/"
-            "/login"
-            "/register"
+            "/authn/login"
+            "/authn/register"
             "/dashboard"
-            "/courses"
+            "/account"
+            "/learning"
           )
 
           VIOLATIONS_TOTAL=0
@@ -68,17 +75,18 @@ jobs:
             safe_name="$(echo "${route}" | sed 's|/|-|g; s|^-||')"
             if [[ -z "$safe_name" ]]; then safe_name="home"; fi
             report_file="var/ci/axe-reports/axe-${safe_name}.json"
+            command_log="var/ci/axe-reports/axe-${safe_name}.stderr.log"
 
             echo "--- Scanning: ${url} ---"
 
             # Run axe CLI; capture exit code separately so we can collect results
             axe "${url}" \
               --tags wcag2a,wcag2aa,wcag22aa \
-              --reporter json \
               --save "${report_file}" \
-              --timeout 30000 \
-              --chromium-path "$(which chromium-browser 2>/dev/null || which chromium 2>/dev/null || echo '')" \
-              2>/dev/null || true
+              --timeout 30 \
+              --no-reporter \
+              --show-errors true \
+              >"${command_log}" 2>&1 || true
 
             REPORT_FILES+=("$report_file")
 
@@ -98,6 +106,9 @@ jobs:
               echo "  violations found: ${VIOLS}"
             else
               echo "  (no report generated — URL may be unreachable)"
+              if [[ -s "$command_log" ]]; then
+                echo "  command-log: ${command_log}"
+              fi
             fi
           done
 
@@ -151,11 +162,11 @@ jobs:
             echo "**Standard**: WCAG 2.2 AA (\`wcag2a\`, \`wcag2aa\`, \`wcag22aa\` tags)"
             echo ""
             echo "### Routes Scanned"
-            echo "- \`/\` (homepage)"
-            echo "- \`/login\`"
-            echo "- \`/register\`"
+            echo "- \`/authn/login\`"
+            echo "- \`/authn/register\`"
             echo "- \`/dashboard\`"
-            echo "- \`/courses\`"
+            echo "- \`/account\`"
+            echo "- \`/learning\`"
             echo ""
             if [[ -f "var/ci/axe-summary.json" ]]; then
               python3 - << 'PYEOF'
