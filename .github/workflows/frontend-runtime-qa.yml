@@ -1,0 +1,70 @@
+name: Frontend Runtime QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      capture_screenshots:
+        description: "Capture MFE-only screenshots after runtime QA tranche"
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  frontend-runtime-qa:
+    name: Run Runtime Frontend QA Tranche
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run runtime frontend QA tranche
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CAPTURE_SCREENSHOTS="${{ inputs.capture_screenshots || 'false' }}"
+
+          case "$TARGET_ENV" in
+            prod)
+              make qa-frontend-runtime-qa-prod | tee var/qa/frontend-runtime-qa.log
+              ;;
+            dev)
+              make qa-frontend-runtime-qa-dev | tee var/qa/frontend-runtime-qa.log
+              ;;
+            *)
+              echo "ERROR: target_environment must be prod or dev (got: $TARGET_ENV)" >&2
+              exit 2
+              ;;
+          esac
+
+          if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
+            ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
+              | tee -a var/qa/frontend-runtime-qa.log
+          fi
+
+      - name: Upload runtime frontend QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-runtime-qa-${{ github.run_number }}
+          path: |
+            var/qa/frontend-runtime-qa.log
+            var/qa/cross-browser-branding-smoke-*.log
+            var/qa/frontend-performance-spotcheck-*.log
+            var/branding-screenshots/**
+          if-no-files-found: warn

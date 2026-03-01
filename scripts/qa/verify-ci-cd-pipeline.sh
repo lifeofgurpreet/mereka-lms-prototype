@@ -24,6 +24,7 @@ POLICY_WF=".github/workflows/policy-checks.yml"
 EVIDENCE_WF=".github/workflows/release-evidence.yml"
 FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
 FRONTEND_EXTENDED_SURFACES_WF=".github/workflows/frontend-extended-surfaces.yml"
+FRONTEND_RUNTIME_QA_WF=".github/workflows/frontend-runtime-qa.yml"
 PHASE2_SMOKE_EVIDENCE_WF=".github/workflows/phase2-smoke-evidence.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
@@ -418,6 +419,29 @@ check_gitops() {
     fail "[AC-020] Phase2 smoke evidence workflow missing npm-start smoke gate invocation"
   fi
 
+  # AC-020: Frontend runtime QA workflow exists
+  if [[ -f "$FRONTEND_RUNTIME_QA_WF" ]]; then
+    pass "[AC-020] Frontend runtime QA workflow exists"
+  else
+    fail "[AC-020] Frontend runtime QA workflow missing: $FRONTEND_RUNTIME_QA_WF"
+  fi
+
+  # AC-020: Frontend runtime QA workflow is workflow_dispatch
+  if [[ -f "$FRONTEND_RUNTIME_QA_WF" ]] && grep -q 'workflow_dispatch:' "$FRONTEND_RUNTIME_QA_WF"; then
+    pass "[AC-020] Frontend runtime QA workflow triggered via workflow_dispatch"
+  else
+    fail "[AC-020] Frontend runtime QA workflow missing workflow_dispatch trigger"
+  fi
+
+  # AC-020: Frontend runtime QA workflow runs both prod/dev runtime make lanes
+  if [[ -f "$FRONTEND_RUNTIME_QA_WF" ]] \
+    && grep -q 'make qa-frontend-runtime-qa-prod' "$FRONTEND_RUNTIME_QA_WF" \
+    && grep -q 'make qa-frontend-runtime-qa-dev' "$FRONTEND_RUNTIME_QA_WF"; then
+    pass "[AC-020] Frontend runtime QA workflow runs qa-frontend-runtime-qa-{prod,dev} lanes"
+  else
+    fail "[AC-020] Frontend runtime QA workflow missing runtime make-lane invocations"
+  fi
+
   # AC-020: Policy checks workflow exists
   if [[ -f "$POLICY_WF" ]]; then
     pass "[AC-020] Policy checks workflow exists"
@@ -451,6 +475,7 @@ check_gitops() {
       "verify-frontend-performance-spotcheck-workflow.sh"
       "verify-frontend-contracts-workflow.sh"
       "verify-frontend-extended-surfaces-workflow.sh"
+      "verify-frontend-runtime-qa-workflow.sh"
       "verify-make-help-contract.sh"
       "verify-frontend-qa-make-targets.sh"
       "verify-frontend-branding-closure-workflow.sh"

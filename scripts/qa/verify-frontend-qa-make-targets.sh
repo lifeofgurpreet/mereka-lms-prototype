@@ -70,6 +70,7 @@ assert_exec "scripts/qa/verify-email-template-multilang.sh"
 assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
 assert_exec "scripts/qa/verify-paragon-theme-budget-workflow.sh"
 assert_exec "scripts/qa/verify-frontend-extended-surfaces-workflow.sh"
+assert_exec "scripts/qa/verify-frontend-runtime-qa-workflow.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-workflow.sh"
 
@@ -258,6 +259,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-frontend-branding-closure-workflow.sh' \
   "qa-frontend-contracts includes verify-frontend-branding-closure-workflow"
+assert_make_command \
+  './scripts/qa/verify-frontend-runtime-qa-workflow.sh' \
+  "qa-frontend-contracts includes verify-frontend-runtime-qa-workflow"
 assert_make_command \
   './scripts/qa/verify-release-evidence-workflow.sh' \
   "qa-frontend-contracts includes verify-release-evidence-workflow"

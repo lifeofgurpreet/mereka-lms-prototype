@@ -35,6 +35,7 @@ jobs:
           bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
           bash -n scripts/qa/verify-frontend-contracts-workflow.sh
           bash -n scripts/qa/verify-frontend-extended-surfaces-workflow.sh
+          bash -n scripts/qa/verify-frontend-runtime-qa-workflow.sh
           bash -n scripts/qa/verify-make-help-contract.sh
           bash -n scripts/qa/verify-frontend-qa-make-targets.sh
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
@@ -120,6 +121,10 @@ jobs:
       - name: Verify frontend extended surfaces workflow contract
         run: |
           ./scripts/qa/verify-frontend-extended-surfaces-workflow.sh
+
+      - name: Verify frontend runtime QA workflow contract
+        run: |
+          ./scripts/qa/verify-frontend-runtime-qa-workflow.sh
 
       - name: Verify Makefile help contract
         run: |
