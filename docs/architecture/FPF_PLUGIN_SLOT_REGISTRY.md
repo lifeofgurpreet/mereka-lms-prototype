@@ -21,7 +21,7 @@
 | Account | 2 | `account_settings_tab`, `account_settings_field` |
 | Profile | 1 | `profile_header` |
 | Learner Dashboard | 6 | `course_list`, `course_card_banner`, `widget_sidebar` |
-| Authoring (Studio) | 15 | `course_outline_header`, `unit_header`, `library_header` |
+| Authoring (Studio) | 15 | `course_outline_sidebar`, `course_outline_header_actions`, `course_unit_header_actions` |
 | Catalog (Course Discovery) | 22 | `catalog_header`, `catalog_card`, `catalog_filters`, `catalog_search`, `catalog_sort`, `catalog_pagination` |
 | Special Exams | 1 | `exam_timer` |
 | **Total** | **98** | |
@@ -146,21 +146,21 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 | Slot Name | Component | Notes |
 |-----------|-----------|-------|
-| `org.openedx.frontend.authoring.course_outline_header.v1` | Outline page header | |
-| `org.openedx.frontend.authoring.course_outline_section.v1` | Section row | |
-| `org.openedx.frontend.authoring.course_outline_subsection.v1` | Subsection row | |
-| `org.openedx.frontend.authoring.unit_header.v1` | Unit edit header | |
-| `org.openedx.frontend.authoring.unit_footer.v1` | Unit edit footer | |
-| `org.openedx.frontend.authoring.library_header.v1` | Library header | |
-| `org.openedx.frontend.authoring.library_component.v1` | Library component card | |
-| `org.openedx.frontend.authoring.course_team.v1` | Course team settings | |
-| `org.openedx.frontend.authoring.course_schedule.v1` | Schedule settings | |
-| `org.openedx.frontend.authoring.grading_settings.v1` | Grading config | |
-| `org.openedx.frontend.authoring.advanced_settings.v1` | Advanced settings | |
-| `org.openedx.frontend.authoring.course_updates.v1` | Course updates | |
-| `org.openedx.frontend.authoring.files_uploads.v1` | File management | |
-| `org.openedx.frontend.authoring.import_export.v1` | Import/export | |
-| `org.openedx.frontend.authoring.certificates.v1` | Certificate settings | |
+| `org.openedx.frontend.authoring.additional_course_content_plugin.v1` | Additional course content plugin | |
+| `org.openedx.frontend.authoring.additional_course_plugin.v1` | Additional course plugin | |
+| `org.openedx.frontend.authoring.course_outline_header_actions.v1` | Outline header action area | |
+| `org.openedx.frontend.authoring.course_outline_page_alerts.v1` | Outline page alerts | |
+| `org.openedx.frontend.authoring.course_outline_sidebar.v1` | Outline sidebar | |
+| `org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1` | Subsection card extra actions | |
+| `org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1` | Unit card extra actions | |
+| `org.openedx.frontend.authoring.course_unit_header_actions.v1` | Unit header action area | |
+| `org.openedx.frontend.authoring.course_unit_sidebar.v1` | Unit sidebar (v1) | |
+| `org.openedx.frontend.authoring.course_unit_sidebar.v2` | Unit sidebar (v2) | Successor slot for newer unit experience |
+| `org.openedx.frontend.authoring.edit_file_alerts.v1` | File editor alerts | |
+| `org.openedx.frontend.authoring.edit_video_alerts.v1` | Video editor alerts | |
+| `org.openedx.frontend.authoring.files_upload_page_table.v1` | Files upload table | |
+| `org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1` | Transcript translations component | |
+| `org.openedx.frontend.authoring.videos_upload_page_table.v1` | Videos upload table | |
 
 ---
 
@@ -203,7 +203,7 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 
 ## Slots We Currently Use
 
-**Current wiring state (2026-03-01): 51 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
+**Current wiring state (2026-03-01): 54 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
 
 | Slot Group | Slots |
 |------------|-------|
@@ -213,7 +213,7 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 | Learning | `learning.course_outline_sidebar.v1`, `learning.progress_certificate_status.v1`, `layout.header_learning.v1`, `learning.course_tab_links.v1`, `learning.course_breadcrumbs.v1`, `learning.learner_tools.v1`, `learning.progress_tab_course_grade.v1`, `learning.progress_tab_related_links.v1`, `learning.progress_tab_certificate_status_main_body.v1`, `learning.progress_tab_certificate_status_side_panel.v1`, `learning.progress_tab_grade_breakdown.v1`, `learning.unit_title.v1`, `learning.sequence_navigation.v1`, `learning.course_outline_sidebar_trigger.v1`, `learning.course_outline_mobile_sidebar_trigger.v1`, `learning.course_home_section_outline.v1`, `learning.course_recommendations.v1`, `learning.content_iframe_loader.v1`, `learning.content_iframe_error.v1`, `learning.sequence_container.v1`, `learning.gated_unit_content_message.v1`, `learning.next_unit_top_nav_trigger.v1`, `learning.course_outline_tab_notifications.v1`, `learning.notification_widget.v1`, `learning.notification_tray.v1`, `learning.notifications_discussions_sidebar_trigger.v1`, `learning.notifications_discussions_sidebar.v1`, `learning.course_exit_view_courses.v1`, `learning.course_exit_dashboard_footnote_link.v1` |
 | Catalog | `catalog.catalog_header.v1`, `catalog.catalog_card.v1`, `catalog.catalog_filters.v1`, `catalog.catalog_search.v1`, `catalog.catalog_sort.v1`, `catalog.catalog_pagination.v1` |
 | Account/Profile | `account.id_verification_page.v1`, `account.additional_profile_fields.v1`, `profile.additional_profile_fields.v1` |
-| Authoring | `authoring.course_unit_sidebar.v1` |
+| Authoring | `authoring.course_unit_sidebar.v1`, `authoring.course_outline_sidebar.v1`, `authoring.course_outline_header_actions.v1`, `authoring.course_unit_header_actions.v1` |
 
 ---
 

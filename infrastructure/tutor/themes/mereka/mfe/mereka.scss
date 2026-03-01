@@ -393,6 +393,23 @@ label {
   background: var(--mereka-mfe-surface-muted);
 }
 
+.mereka-authoring-course-outline-sidebar-hint {
+  border: 1px solid var(--mereka-mfe-border);
+  background: var(--mereka-mfe-surface-muted);
+}
+
+.mereka-authoring-course-outline-header-actions-hint,
+.mereka-authoring-course-unit-header-actions-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--mereka-mfe-border);
+  border-radius: var(--mereka-mfe-pill-radius);
+  background: var(--mereka-mfe-surface-muted);
+  color: var(--mereka-color-ink-700);
+}
+
 /* RISK: LOW — slot-owned account ID verification helper */
 .mereka-account-id-verification-hint {
   color: var(--mereka-color-ink-700);

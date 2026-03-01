@@ -832,6 +832,9 @@ PY
 #   org.openedx.frontend.layout.header_logo.v1 | Default header logo (MFE header bar)
 #   org.openedx.frontend.layout.studio_footer.v1 | Default Studio footer (studio MFE)
 #   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
+#   org.openedx.frontend.authoring.course_outline_sidebar.v1 | Studio outline-page sidebar helper
+#   org.openedx.frontend.authoring.course_outline_header_actions.v1 | Studio outline header actions helper
+#   org.openedx.frontend.authoring.course_unit_header_actions.v1 | Studio unit header actions helper
 #   org.openedx.frontend.authn.login_component.v1 | Authn login component shell
 #   org.openedx.frontend.learner_dashboard.widget_sidebar.v1 | Learner dashboard sidebar widgets
 #   org.openedx.frontend.learner_dashboard.no_courses_view.v1 | Learner dashboard empty-state copy
@@ -950,6 +953,51 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaAuthoringCourseUnitSidebarHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_outline_sidebar.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_course_outline_sidebar_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringCourseOutlineSidebarHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_outline_header_actions.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_course_outline_header_actions_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringCourseOutlineHeaderActionsHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.authoring.course_unit_header_actions.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_authoring_course_unit_header_actions_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaAuthoringCourseUnitHeaderActionsHint,
                 },
             },
             """,
@@ -1886,6 +1934,37 @@ const MerekaAuthoringCourseUnitSidebarHint = () => {
       <p className="mereka-badge mb-2">Studio Unit</p>
       <p className="mb-0 small text-muted">Use this sidebar to keep activities and outcomes aligned with your learning goals.</p>
     </aside>
+  );
+};
+
+// Studio authoring course-outline sidebar helper.
+// Wired into org.openedx.frontend.authoring.course_outline_sidebar.v1.
+const MerekaAuthoringCourseOutlineSidebarHint = () => {
+  return (
+    <aside className="mereka-authoring-course-outline-sidebar-hint p-3 rounded">
+      <p className="mereka-badge mb-2">Outline Guide</p>
+      <p className="mb-0 small text-muted">Use this panel to keep weekly objectives and sequencing decisions aligned.</p>
+    </aside>
+  );
+};
+
+// Studio outline header actions helper.
+// Wired into org.openedx.frontend.authoring.course_outline_header_actions.v1.
+const MerekaAuthoringCourseOutlineHeaderActionsHint = () => {
+  return (
+    <div className="mereka-authoring-course-outline-header-actions-hint">
+      <span className="mereka-badge">Mereka Studio</span>
+    </div>
+  );
+};
+
+// Studio unit header actions helper.
+// Wired into org.openedx.frontend.authoring.course_unit_header_actions.v1.
+const MerekaAuthoringCourseUnitHeaderActionsHint = () => {
+  return (
+    <div className="mereka-authoring-course-unit-header-actions-hint">
+      <span className="small">Keep unit activities outcomes-focused for your learner path.</span>
+    </div>
   );
 };
 

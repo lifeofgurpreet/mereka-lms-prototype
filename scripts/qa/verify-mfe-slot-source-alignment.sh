@@ -26,7 +26,16 @@ AUTHN_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-authn/src"
 ACCOUNT_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-account/src"
 PROFILE_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src"
 LEARNING_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-learning/src"
-AUTHORING_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-course-authoring/src"
+AUTHORING_SRC=""
+for candidate in \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-authoring/src" \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-course-authoring/src"
+do
+  if [[ -d "$candidate" ]]; then
+    AUTHORING_SRC="$candidate"
+    break
+  fi
+done
 GRADEBOOK_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-gradebook/src"
 DASHBOARD_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-learner-dashboard/src"
 CATALOG_SRC=""
@@ -107,6 +116,21 @@ check_slot_in_any_local_source() {
 }
 
 declare -A skipped_namespace_counts=()
+AUTHORING_LEGACY_ONLY=0
+if [[ -n "$AUTHORING_SRC" ]]; then
+  authoring_slot_count="$(
+    rg -o "org\\.openedx\\.frontend\\.authoring\\.[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)*\\.v[0-9]+" "$AUTHORING_SRC" \
+      | sed -E 's/.*://g' \
+      | sort -u \
+      | sed '/^$/d' \
+      | wc -l \
+      | tr -d ' '
+  )"
+  if [[ "$authoring_slot_count" -le 1 ]] && rg -qF "org.openedx.frontend.authoring.course_unit_sidebar.v1" "$AUTHORING_SRC"; then
+    AUTHORING_LEGACY_ONLY=1
+    warn "Authoring checkout appears legacy (only unit-sidebar slot detected); non-v1 authoring slot alignment checks will be skipped"
+  fi
+fi
 
 while IFS= read -r slot; do
   [[ -z "$slot" ]] && continue
@@ -125,7 +149,11 @@ while IFS= read -r slot; do
       check_slot_in_source "$slot" "$LEARNING_SRC" "learning"
       ;;
     org.openedx.frontend.authoring.*)
-      check_slot_in_source "$slot" "$AUTHORING_SRC" "authoring"
+      if [[ "$AUTHORING_LEGACY_ONLY" == "1" && "$slot" != "org.openedx.frontend.authoring.course_unit_sidebar.v1" ]]; then
+        skipped_namespace_counts["authoring_legacy"]=$(( ${skipped_namespace_counts["authoring_legacy"]:-0} + 1 ))
+      else
+        check_slot_in_source "$slot" "$AUTHORING_SRC" "authoring"
+      fi
       ;;
     org.openedx.frontend.catalog.*)
       if [[ -n "$CATALOG_SRC" ]]; then
@@ -162,6 +190,10 @@ fi
 
 if [[ ${skipped_namespace_counts["learner_dashboard"]:-0} -gt 0 ]]; then
   warn "Learner-dashboard checkout missing; skipped ${skipped_namespace_counts["learner_dashboard"]} dashboard slot alignment check(s)"
+fi
+
+if [[ ${skipped_namespace_counts["authoring_legacy"]:-0} -gt 0 ]]; then
+  warn "Authoring checkout lacks modern slot surfaces; skipped ${skipped_namespace_counts["authoring_legacy"]} authoring slot alignment check(s)"
 fi
 
 if [[ -d "$LEARNING_SRC" ]]; then
