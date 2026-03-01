@@ -206,6 +206,7 @@ exist in `mereka.scss` — but they're DEAD (see MFE_SELECTOR_OVERRIDE_INVENTORY
 ## Slots We Currently Use
 
 **Current wiring state (2026-03-01): 74 slots active in `infrastructure/tutor/plugins/mereka_lms.py`.**
+**Source parity note (2026-03-01): `frontend-component-header` local source coverage is now 18/18 layout slots wired (`verify-mfe-slot-source-alignment.sh`).**
 
 | Slot Group | Slots |
 |------------|-------|
