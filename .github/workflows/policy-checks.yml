@@ -23,6 +23,7 @@ jobs:
           bash -n scripts/qa/verify-release-workflow-invocation.sh
           bash -n scripts/qa/verify-release-dry-run-contract.sh
           bash -n scripts/qa/verify-release-evidence-workflow.sh
+          bash -n scripts/qa/verify-ci-cd-pipeline.sh
           bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
@@ -52,6 +53,10 @@ jobs:
       - name: Verify release evidence workflow contract
         run: |
           ./scripts/qa/verify-release-evidence-workflow.sh
+
+      - name: Verify consolidated CI/CD gitops contract
+        run: |
+          ./scripts/qa/verify-ci-cd-pipeline.sh --section gitops
 
       - name: Verify cross-browser branding workflow contract
         run: |
