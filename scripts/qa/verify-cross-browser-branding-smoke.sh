@@ -61,12 +61,60 @@ if [[ "$STRICT_WEBKIT" -eq 1 && "$CROSS_BROWSER" -ne 1 ]]; then
   exit 2
 fi
 
-MFE_BASE_URL="https://apps.$(python3 -c 'from urllib.parse import urlparse; import sys; print(urlparse(sys.argv[1]).hostname)' "$BASE_URL")"
+MFE_BASE_URL="$(
+python3 - "$BASE_URL" <<'PY'
+import sys
+from urllib.parse import urlparse
+
+raw = (sys.argv[1] or "").strip()
+if "://" not in raw:
+    raw = f"https://{raw}"
+parsed = urlparse(raw)
+if not parsed.hostname:
+    print("")
+    raise SystemExit(0)
+scheme = parsed.scheme or "https"
+host = parsed.hostname
+if not host.startswith("apps."):
+    host = f"apps.{host}"
+port = f":{parsed.port}" if parsed.port else ""
+print(f"{scheme}://{host}{port}")
+PY
+)"
+
+if [[ -z "$MFE_BASE_URL" ]]; then
+  echo "ERROR: could not derive MFE base URL from BASE_URL=$BASE_URL" >&2
+  exit 2
+fi
+
+preflight_authn_html=""
+
+preflight_mfe_shell() {
+  local status=""
+  status="$(curl -ksSL -o /tmp/mereka-mfe-authn-shell.$$ -w '%{http_code}' "$MFE_BASE_URL/authn/login" || true)"
+  if [[ "$status" != "200" ]]; then
+    rm -f /tmp/mereka-mfe-authn-shell.$$
+    echo "ERROR: MFE shell preflight failed ($MFE_BASE_URL/authn/login returned HTTP ${status:-unknown})." >&2
+    echo "       Action: verify apps host routing before running cross-browser smoke." >&2
+    return 1
+  fi
+  preflight_authn_html="$(cat /tmp/mereka-mfe-authn-shell.$$)"
+  rm -f /tmp/mereka-mfe-authn-shell.$$
+  if [[ "$preflight_authn_html" != *"PARAGON_THEME"* ]]; then
+    echo "ERROR: MFE shell preflight returned non-MFE HTML (missing PARAGON_THEME): $MFE_BASE_URL/authn/login" >&2
+    echo "       Action: check reverse-proxy target for the apps host." >&2
+    return 1
+  fi
+  return 0
+}
 
 preflight_runtime_theme_contract() {
   local authn_html=""
   local mfe_config=""
-  authn_html="$(curl -fsSL "$MFE_BASE_URL/authn/login" 2>/dev/null || true)"
+  authn_html="$preflight_authn_html"
+  if [[ -z "$authn_html" ]]; then
+    authn_html="$(curl -ksSL "$MFE_BASE_URL/authn/login" 2>/dev/null || true)"
+  fi
   if [[ -n "$authn_html" ]]; then
     if [[ "$authn_html" == *"/theme/core.min.css"* && "$authn_html" == *"/theme/mereka-brand.min.css"* ]]; then
       echo "Runtime-theme preflight: PASS ($MFE_BASE_URL/authn/login uses /theme/*.css)"
@@ -91,6 +139,8 @@ preflight_runtime_theme_contract() {
   echo "       Action: verify apps MFE deployment is serving PARAGON_THEME_URLS and /theme CSS endpoints." >&2
   return 1
 }
+
+preflight_mfe_shell
 
 if [[ "$REQUIRE_RUNTIME_THEME" -eq 1 ]]; then
   preflight_runtime_theme_contract
