@@ -388,6 +388,7 @@ check_gitops() {
       "verify-phase7-dom-audit-contract.sh"
       "verify-accessibility-audit-workflow.sh"
       "verify-a11y-runtime-lane-contract.sh"
+      "verify-branding-evidence-a11y-contract.sh"
       "verify-no-latest-prod-tags.sh"
     )
     local found=0

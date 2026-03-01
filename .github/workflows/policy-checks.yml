@@ -38,6 +38,7 @@ jobs:
           bash -n scripts/qa/verify-phase7-dom-audit-contract.sh
           bash -n scripts/qa/verify-accessibility-audit-workflow.sh
           bash -n scripts/qa/verify-a11y-runtime-lane-contract.sh
+          bash -n scripts/qa/verify-branding-evidence-a11y-contract.sh
           bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
           bash -n scripts/qa/verify-dev-prod-image-parity.sh
           bash -n scripts/qa/verify-site-id-hardening.sh
@@ -123,6 +124,10 @@ jobs:
       - name: Verify a11y runtime lane contract
         run: |
           ./scripts/qa/verify-a11y-runtime-lane-contract.sh
+
+      - name: Verify branding evidence a11y contract
+        run: |
+          ./scripts/qa/verify-branding-evidence-a11y-contract.sh
 
       - name: Verify no deprecated kustomize keys
         run: |
