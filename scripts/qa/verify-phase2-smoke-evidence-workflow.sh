@@ -89,6 +89,17 @@ if ! rg -n 'var/qa/phase2-smoke-evidence\.log' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'var/qa/npm-start-mfe-smoke-\*\.log' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing npm-start smoke log artifact glob"
+  violations=1
+fi
+
+if ! rg -n 'var/e2e-artifacts/\*\*' "$WORKFLOW" >/dev/null \
+  || ! rg -n 'var/e2e-report/\*\*' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing Playwright artifact globs"
+  violations=1
+fi
+
 if [[ "$violations" -ne 0 ]]; then
   echo "Phase2-smoke-evidence workflow contract failed."
   exit 1
