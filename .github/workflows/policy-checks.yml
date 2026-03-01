@@ -23,6 +23,10 @@ jobs:
           bash -n scripts/qa/verify-release-workflow-invocation.sh
           bash -n scripts/qa/verify-release-dry-run-contract.sh
           bash -n scripts/qa/verify-release-evidence-workflow.sh
+          bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
+          bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
+          bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
+          bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
           bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
           bash -n scripts/qa/verify-dev-prod-image-parity.sh
           bash -n scripts/qa/verify-site-id-hardening.sh
@@ -48,6 +52,22 @@ jobs:
       - name: Verify release evidence workflow contract
         run: |
           ./scripts/qa/verify-release-evidence-workflow.sh
+
+      - name: Verify cross-browser branding workflow contract
+        run: |
+          ./scripts/qa/verify-cross-browser-branding-workflow.sh
+
+      - name: Verify npm-start smoke workflow contract
+        run: |
+          ./scripts/qa/verify-npm-start-smoke-workflow.sh
+
+      - name: Verify frontend branding closure workflow contract
+        run: |
+          ./scripts/qa/verify-frontend-branding-closure-workflow.sh
+
+      - name: Verify MFE live DOM audit workflow contract
+        run: |
+          ./scripts/qa/verify-mfe-live-dom-audit-workflow.sh
 
       - name: Verify no deprecated kustomize keys
         run: |
