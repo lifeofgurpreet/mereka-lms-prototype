@@ -44,8 +44,8 @@ if [[ ! -f "$FULL_SELECTOR_FILE" ]]; then
   fail "Missing expanded selector list: scripts/qa/mfe-live-dom-phase7-full-selectors.txt"
 else
   full_selector_count="$(grep -Ev '^\s*($|#)' "$FULL_SELECTOR_FILE" | wc -l | tr -d ' ')"
-  if [[ "$full_selector_count" -lt 20 ]]; then
-    fail "Expanded selector list too small ($full_selector_count entries, expected >=20)"
+  if [[ "$full_selector_count" -lt 40 ]]; then
+    fail "Expanded selector list too small ($full_selector_count entries, expected >=40)"
   else
     pass "Expanded selector list exists with $full_selector_count selectors"
   fi
