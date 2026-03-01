@@ -87,7 +87,13 @@ if not parsed.hostname:
     print("")
     raise SystemExit(0)
 scheme = parsed.scheme or "https"
-print(f"{scheme}://apps.{parsed.hostname}")
+host = parsed.hostname
+if host.startswith("apps."):
+    mfe_host = host
+else:
+    mfe_host = f"apps.{host}"
+port = f":{parsed.port}" if parsed.port else ""
+print(f"{scheme}://{mfe_host}{port}")
 PY
 )"
 if [[ -z "$MFE_ORIGIN" ]]; then
@@ -102,15 +108,26 @@ artifact="$ARTIFACT_DIR/npm-start-mfe-smoke-${timestamp}.log"
 theme_mode="unknown"
 authn_shell_url="${MFE_ORIGIN}/authn/login"
 authn_shell_file="$(mktemp -t mereka-authn-shell.XXXXXX)"
-if curl -ksSL "$authn_shell_url" -o "$authn_shell_file"; then
-  if grep -q '/theme/core.min.css' "$authn_shell_file" && grep -q '/theme/mereka-brand.min.css' "$authn_shell_file"; then
-    theme_mode="runtime-theme-urls"
-  elif grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' "$authn_shell_file" \
-    && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' "$authn_shell_file"; then
-    theme_mode="embedded-theme-files"
-  fi
-else
-  echo "WARN: unable to fetch authn shell for theme-mode preflight: $authn_shell_url" | tee -a "$artifact"
+authn_shell_status="$(curl -ksSL -o "$authn_shell_file" -w '%{http_code}' "$authn_shell_url" || true)"
+if [[ "$authn_shell_status" != "200" ]]; then
+  echo "ERROR: authn shell preflight failed (${authn_shell_url} returned HTTP ${authn_shell_status:-unknown})." | tee -a "$artifact" >&2
+  echo "Hint: ensure local MFE shell is reachable (for example: tutor dev start mfe --detach)." | tee -a "$artifact" >&2
+  rm -f "$authn_shell_file"
+  exit 1
+fi
+
+if ! grep -q 'PARAGON_THEME' "$authn_shell_file"; then
+  echo "ERROR: authn shell preflight returned non-MFE HTML (missing PARAGON_THEME): $authn_shell_url" | tee -a "$artifact" >&2
+  echo "Hint: check reverse-proxy host routing for apps.* before running npm-start smoke." | tee -a "$artifact" >&2
+  rm -f "$authn_shell_file"
+  exit 1
+fi
+
+if grep -q '/theme/core.min.css' "$authn_shell_file" && grep -q '/theme/mereka-brand.min.css' "$authn_shell_file"; then
+  theme_mode="runtime-theme-urls"
+elif grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' "$authn_shell_file" \
+  && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' "$authn_shell_file"; then
+  theme_mode="embedded-theme-files"
 fi
 rm -f "$authn_shell_file"
 
@@ -132,14 +149,14 @@ fi
 echo "Installing Playwright browser: chromium" | tee -a "$artifact"
 npx playwright install chromium
 
-echo "Running npm-start MFE smoke (base_url=$BASE_URL, project=$PROJECT, learning_path=$LEARNING_PATH)" | tee -a "$artifact"
+echo "Running npm-start MFE smoke (lms_base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, learning_path=$LEARNING_PATH)" | tee -a "$artifact"
 set -o pipefail
 PW_CROSS_BROWSER=0 \
 PW_ENABLE_WEBKIT=0 \
 HEADED="$HEADED" \
 BRANDING_LEARNING_PATH="$LEARNING_PATH" \
 REQUIRE_RUNTIME_THEME_URLS="$REQUIRE_RUNTIME_THEME" \
-BASE_URL="$BASE_URL" \
+BASE_URL="$MFE_ORIGIN" \
 npx playwright test tests/branding-smoke.spec.ts --project="$PROJECT" --reporter=list | tee -a "$artifact"
 
 echo "Log: $artifact"
