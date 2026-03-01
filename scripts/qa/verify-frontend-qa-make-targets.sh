@@ -69,6 +69,7 @@ for target in \
   qa-frontend-closure-prod-screenshots-mfe \
   qa-certificate-branding \
   qa-email-template-branding \
+  qa-frontend-contracts \
   qa-performance-prod \
   qa-performance-dev; do
   assert_make_target "$target"
@@ -125,6 +126,30 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-email-template-multilang.sh' \
   "qa-email-template-branding"
+assert_make_command \
+  './scripts/qa/verify-frontend-qa-make-targets.sh' \
+  "qa-frontend-contracts includes verify-frontend-qa-make-targets"
+assert_make_command \
+  './scripts/qa/verify-mfe-live-dom-audit-workflow.sh' \
+  "qa-frontend-contracts includes verify-mfe-live-dom-audit-workflow"
+assert_make_command \
+  './scripts/qa/verify-frontend-branding-closure-workflow.sh' \
+  "qa-frontend-contracts includes verify-frontend-branding-closure-workflow"
+assert_make_command \
+  './scripts/qa/verify-release-evidence-workflow.sh' \
+  "qa-frontend-contracts includes verify-release-evidence-workflow"
+assert_make_command \
+  './scripts/qa/verify-phase7-dom-audit-contract.sh' \
+  "qa-frontend-contracts includes verify-phase7-dom-audit-contract"
+assert_make_command \
+  './scripts/qa/verify-branding-evidence-a11y-contract.sh' \
+  "qa-frontend-contracts includes verify-branding-evidence-a11y-contract"
+assert_make_command \
+  './scripts/qa/verify-branding-evidence-screenshot-contract.sh' \
+  "qa-frontend-contracts includes verify-branding-evidence-screenshot-contract"
+assert_make_command \
+  './scripts/qa/verify-ci-cd-pipeline.sh --section gitops' \
+  "qa-frontend-contracts includes verify-ci-cd-pipeline --section gitops"
 assert_make_command \
   './scripts/qa/verify-frontend-performance-spotcheck.sh --env prod --require-runtime' \
   "qa-performance-prod"
