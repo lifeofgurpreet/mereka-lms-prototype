@@ -91,9 +91,18 @@ CSRF_COOKIE_HTTPONLY = False
 
 CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "true").lower() not in ("false", "0", "no")
 
-_lms_url = MEREKA_LMS_BASE_URL
-_mfe_url = MEREKA_MFE_BASE_URL
-_studio_url = MEREKA_STUDIO_BASE_URL
+_lms_url = globals().get("MEREKA_LMS_BASE_URL", "https://{{ LMS_HOST }}")
+_mfe_url = globals().get("MEREKA_MFE_BASE_URL", "https://{{ MFE_HOST }}")
+_studio_url = globals().get("MEREKA_STUDIO_BASE_URL", "https://{{ CMS_HOST }}")
+_mfe_static_base = _mfe_url.rstrip("/")
+
+# Use MFE-hosted static branding assets as global defaults.
+# This avoids broken themed-asset redirects on LMS hosts for logo-horizontal*.png
+# and keeps Authn/Account/Profile logos consistent across environments.
+MFE_CONFIG["FAVICON_URL"] = f"{_mfe_static_base}/static/images/favicon.ico"
+MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/static/images/logo-horizontal.png"
+MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/static/images/logo-horizontal-white.png"
+MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/static/images/logo.png"
 
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = (
@@ -772,8 +781,9 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 )
 
 # Enforce runtime Paragon theme URLs in built MFE shells.
-# This rewrites PARAGON_THEME fileName entries to /theme/* so runtime contracts
-# consume Caddy-served theme assets instead of embedded hash filenames.
+# We write ../theme/* (not /theme/*) because Ulmo joins fileName against the MFE
+# app base path (e.g. /authn/), and a leading slash can become /authn//theme/*.
+# The relative hop resolves consistently to /theme/* at runtime.
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "mfe-dockerfile-post-npm-build",
@@ -794,10 +804,10 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 

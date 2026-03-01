@@ -172,14 +172,20 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
                 or rendered_values.get("DEFAULT_SITE_THEME")
                 or "mereka"
             )
-            # The upstream /theming/asset/<path> view redirects to staticfiles_storage.url(path)
-            # and does not auto-resolve the "current theme". We therefore namespace theme assets
-            # explicitly under /theming/asset/<theme_name>/... so multisites always get branded
-            # assets (and so MFEs remain deterministic).
-            overrides["FAVICON_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/favicon.ico"
-            overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.png"
-            overrides["LOGO_WHITE_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.png"
-            overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.png"
+            if mfe_base:
+                # Prefer MFE-static branding assets when available. In dev/staging, LMS
+                # themed-asset redirects for logo-horizontal*.png can resolve to unhashed
+                # static paths that 404, while apps host serves stable /static/images/*.
+                overrides["FAVICON_URL"] = f"{mfe_base}/static/images/favicon.ico"
+                overrides["LOGO_URL"] = f"{mfe_base}/static/images/logo-horizontal.png"
+                overrides["LOGO_WHITE_URL"] = f"{mfe_base}/static/images/logo-horizontal-white.png"
+                overrides["LOGO_TRADEMARK_URL"] = f"{mfe_base}/static/images/logo.png"
+            else:
+                # Fallback path when no MFE base URL is configured.
+                overrides["FAVICON_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/favicon.ico"
+                overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.png"
+                overrides["LOGO_WHITE_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.png"
+                overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.png"
             if cms_root:
                 overrides["STUDIO_BASE_URL"] = cms_root
             if mfe_host:
