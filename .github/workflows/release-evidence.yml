@@ -38,6 +38,11 @@ on:
         required: true
         default: false
         type: boolean
+      run_certificate_branding:
+        description: "Run certificate branding verification lane"
+        required: true
+        default: true
+        type: boolean
       learning_path:
         description: "Learning route path for npm-start smoke"
         required: false
@@ -188,6 +193,13 @@ jobs:
           ./scripts/qa/verify-npm-start-mfe-smoke.sh "${args[@]}" \
             | tee var/release-evidence/npm-start-mfe-smoke.log
 
+      - name: Run certificate branding lane
+        if: ${{ inputs.run_certificate_branding == true }}
+        run: |
+          set -euo pipefail
+          ./scripts/qa/verify-certificate-branding.sh \
+            | tee var/release-evidence/certificate-branding.log
+
       - name: Write release metadata
         run: |
           python3 - <<'PY'
@@ -216,6 +228,7 @@ jobs:
               "require_branding_markers": "${{ inputs.require_branding_markers || 'true' }}",
               "runtime_theme_url": "${{ inputs.runtime_theme_url || '' }}",
               "run_npm_start_smoke": "${{ inputs.run_npm_start_smoke || 'false' }}",
+              "run_certificate_branding": "${{ inputs.run_certificate_branding || 'true' }}",
               "learning_path": "${{ inputs.learning_path || '/learning' }}",
               "npm_start_project": "${{ inputs.npm_start_project || 'chromium' }}",
           }

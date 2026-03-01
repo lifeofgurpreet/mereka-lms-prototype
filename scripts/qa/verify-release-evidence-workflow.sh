@@ -81,6 +81,11 @@ if ! rg -n 'run_npm_start_smoke' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'run_certificate_branding' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing run_certificate_branding input"
+  violations=1
+fi
+
 if ! rg -n 'learning_path' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing learning_path input"
   violations=1
@@ -116,6 +121,11 @@ if ! rg -n './scripts/qa/verify-npm-start-mfe-smoke\.sh' "$WORKFLOW" >/dev/null;
   violations=1
 fi
 
+if ! rg -n './scripts/qa/verify-certificate-branding\.sh' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing certificate branding lane step"
+  violations=1
+fi
+
 if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow npm-start smoke step missing branding marker wiring"
   violations=1
@@ -148,6 +158,11 @@ fi
 
 if ! rg -n '"run_npm_start_smoke": "\$\{\{ inputs\.run_npm_start_smoke \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing run_npm_start_smoke field"
+  violations=1
+fi
+
+if ! rg -n '"run_certificate_branding": "\$\{\{ inputs\.run_certificate_branding \|\| '\''true'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing run_certificate_branding field"
   violations=1
 fi
 
