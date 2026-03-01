@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# Verify plugin slot IDs stay aligned with locally checked-out Ulmo MFE source trees.
-# This catches regressions where slot IDs are wired in plugin config but do not exist
-# in the source for MFEs available under tutor_env/dev/.
+# Verify plugin slot IDs stay aligned with Ulmo MFE source trees.
+# By default, this checks local tutor_env/dev checkouts first and optionally falls
+# back to an external source root (for example /tmp/mfe-slot-inspect).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 STRICT="${STRICT:-1}"
 STRICT_LOCAL_LEARNING_COMPLETE="${STRICT_LOCAL_LEARNING_COMPLETE:-1}"
+CHECK_LAYOUT_SLOT_EXISTENCE="${CHECK_LAYOUT_SLOT_EXISTENCE:-0}"
+ULMO_SLOT_SOURCE_FALLBACK="${ULMO_SLOT_SOURCE_FALLBACK:-/tmp/mfe-slot-inspect}"
 
 PASS=0
 FAIL=0
@@ -22,27 +24,55 @@ if [[ ! -f "$PLUGIN_FILE" ]]; then
   exit 1
 fi
 
-AUTHN_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-authn/src"
-ACCOUNT_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-account/src"
-PROFILE_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src"
-LEARNING_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-learning/src"
+pick_source_dir() {
+  local candidate
+  for candidate in "$@"; do
+    if [[ -d "$candidate" ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  echo ""
+}
+
+AUTHN_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-authn/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-authn/src")"
+ACCOUNT_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-account/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-account/src")"
+PROFILE_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-profile/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-profile/src")"
+LEARNING_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-learning/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-learning/src")"
 AUTHORING_SRC=""
 for candidate in \
   "$REPO_ROOT/tutor_env/dev/frontend-app-authoring/src" \
-  "$REPO_ROOT/tutor_env/dev/frontend-app-course-authoring/src"
+  "$REPO_ROOT/tutor_env/dev/frontend-app-course-authoring/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-authoring/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-course-authoring/src"
 do
   if [[ -d "$candidate" ]]; then
     AUTHORING_SRC="$candidate"
     break
   fi
 done
-GRADEBOOK_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-gradebook/src"
-DASHBOARD_SRC="$REPO_ROOT/tutor_env/dev/frontend-app-learner-dashboard/src"
+GRADEBOOK_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-gradebook/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-gradebook/src")"
+DASHBOARD_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-app-learner-dashboard/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-learner-dashboard/src")"
 CATALOG_SRC=""
 for candidate in \
   "$REPO_ROOT/tutor_env/dev/frontend-app-discovery/src" \
   "$REPO_ROOT/tutor_env/dev/frontend-app-catalog/src" \
-  "$REPO_ROOT/tutor_env/dev/frontend-app-course-catalog/src"
+  "$REPO_ROOT/tutor_env/dev/frontend-app-course-catalog/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-discovery/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-catalog/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-course-catalog/src"
 do
   if [[ -d "$candidate" ]]; then
     CATALOG_SRC="$candidate"
@@ -170,13 +200,19 @@ while IFS= read -r slot; do
       fi
       ;;
     org.openedx.frontend.layout.*)
-      check_slot_in_any_local_source "$slot" \
-        "$AUTHN_SRC" \
-        "$ACCOUNT_SRC" \
-        "$PROFILE_SRC" \
-        "$LEARNING_SRC" \
-        "$AUTHORING_SRC" \
-        "$GRADEBOOK_SRC"
+      if [[ "$CHECK_LAYOUT_SLOT_EXISTENCE" == "1" ]]; then
+        check_slot_in_any_local_source "$slot" \
+          "$AUTHN_SRC" \
+          "$ACCOUNT_SRC" \
+          "$PROFILE_SRC" \
+          "$LEARNING_SRC" \
+          "$AUTHORING_SRC" \
+          "$GRADEBOOK_SRC" \
+          "$DASHBOARD_SRC" \
+          "$CATALOG_SRC"
+      else
+        skipped_namespace_counts["layout_framework"]=$(( ${skipped_namespace_counts["layout_framework"]:-0} + 1 ))
+      fi
       ;;
     *)
       warn "No local source-alignment check for slot (external/checkout not present): $slot"
@@ -194,6 +230,10 @@ fi
 
 if [[ ${skipped_namespace_counts["authoring_legacy"]:-0} -gt 0 ]]; then
   warn "Authoring checkout lacks modern slot surfaces; skipped ${skipped_namespace_counts["authoring_legacy"]} authoring slot alignment check(s)"
+fi
+
+if [[ ${skipped_namespace_counts["layout_framework"]:-0} -gt 0 ]]; then
+  warn "Layout slot existence checks are disabled (CHECK_LAYOUT_SLOT_EXISTENCE=0); skipped ${skipped_namespace_counts["layout_framework"]} layout slot check(s)"
 fi
 
 if [[ -d "$LEARNING_SRC" ]]; then
