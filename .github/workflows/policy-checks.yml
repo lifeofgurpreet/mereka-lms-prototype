@@ -34,6 +34,7 @@ jobs:
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
           bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
           bash -n scripts/qa/verify-frontend-contracts-workflow.sh
+          bash -n scripts/qa/verify-frontend-extended-surfaces-workflow.sh
           bash -n scripts/qa/verify-make-help-contract.sh
           bash -n scripts/qa/verify-frontend-qa-make-targets.sh
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
@@ -113,6 +114,10 @@ jobs:
       - name: Verify frontend contracts workflow contract
         run: |
           ./scripts/qa/verify-frontend-contracts-workflow.sh
+
+      - name: Verify frontend extended surfaces workflow contract
+        run: |
+          ./scripts/qa/verify-frontend-extended-surfaces-workflow.sh
 
       - name: Verify Makefile help contract
         run: |

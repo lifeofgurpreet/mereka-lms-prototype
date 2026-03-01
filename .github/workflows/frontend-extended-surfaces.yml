@@ -1,0 +1,33 @@
+name: Frontend Extended Surfaces
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  frontend-extended-surfaces:
+    name: Run Frontend Extended Surface Gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run frontend extended surface gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+          make qa-frontend-extended-surfaces | tee var/qa/frontend-extended-surfaces.log
+
+      - name: Upload frontend extended surface artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-extended-surfaces-${{ github.run_number }}
+          path: |
+            var/qa/frontend-extended-surfaces.log
+          if-no-files-found: warn

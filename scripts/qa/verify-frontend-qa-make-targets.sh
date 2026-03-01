@@ -69,6 +69,7 @@ assert_exec "scripts/qa/verify-certificate-branding-workflow.sh"
 assert_exec "scripts/qa/verify-email-template-multilang.sh"
 assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
 assert_exec "scripts/qa/verify-paragon-theme-budget-workflow.sh"
+assert_exec "scripts/qa/verify-frontend-extended-surfaces-workflow.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -202,6 +203,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-email-template-multilang.sh' \
   "qa-frontend-contracts includes verify-email-template-multilang"
+assert_make_command \
+  './scripts/qa/verify-frontend-extended-surfaces-workflow.sh' \
+  "qa-frontend-contracts includes verify-frontend-extended-surfaces-workflow"
 assert_make_command \
   './scripts/qa/verify-certificate-branding-workflow.sh' \
   "qa-frontend-contracts includes verify-certificate-branding-workflow"

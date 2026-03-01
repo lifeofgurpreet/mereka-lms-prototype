@@ -23,6 +23,7 @@ CI_WF=".github/workflows/ci.yml"
 POLICY_WF=".github/workflows/policy-checks.yml"
 EVIDENCE_WF=".github/workflows/release-evidence.yml"
 FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
+FRONTEND_EXTENDED_SURFACES_WF=".github/workflows/frontend-extended-surfaces.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
 WORKFLOWS_DIR=".github/workflows"
@@ -374,6 +375,27 @@ check_gitops() {
     fail "[AC-020] Frontend contracts workflow missing qa-frontend-contracts invocation"
   fi
 
+  # AC-020: Frontend extended surfaces workflow exists
+  if [[ -f "$FRONTEND_EXTENDED_SURFACES_WF" ]]; then
+    pass "[AC-020] Frontend extended surfaces workflow exists"
+  else
+    fail "[AC-020] Frontend extended surfaces workflow missing: $FRONTEND_EXTENDED_SURFACES_WF"
+  fi
+
+  # AC-020: Frontend extended surfaces workflow is workflow_dispatch only
+  if [[ -f "$FRONTEND_EXTENDED_SURFACES_WF" ]] && grep -q 'workflow_dispatch:' "$FRONTEND_EXTENDED_SURFACES_WF"; then
+    pass "[AC-020] Frontend extended surfaces workflow triggered via workflow_dispatch"
+  else
+    fail "[AC-020] Frontend extended surfaces workflow missing workflow_dispatch trigger"
+  fi
+
+  # AC-020: Frontend extended surfaces workflow runs make qa-frontend-extended-surfaces
+  if [[ -f "$FRONTEND_EXTENDED_SURFACES_WF" ]] && grep -q 'make qa-frontend-extended-surfaces' "$FRONTEND_EXTENDED_SURFACES_WF"; then
+    pass "[AC-020] Frontend extended surfaces workflow runs qa-frontend-extended-surfaces lane"
+  else
+    fail "[AC-020] Frontend extended surfaces workflow missing qa-frontend-extended-surfaces invocation"
+  fi
+
   # AC-020: Policy checks workflow exists
   if [[ -f "$POLICY_WF" ]]; then
     pass "[AC-020] Policy checks workflow exists"
@@ -406,6 +428,7 @@ check_gitops() {
       "verify-npm-start-smoke-workflow.sh"
       "verify-frontend-performance-spotcheck-workflow.sh"
       "verify-frontend-contracts-workflow.sh"
+      "verify-frontend-extended-surfaces-workflow.sh"
       "verify-make-help-contract.sh"
       "verify-frontend-qa-make-targets.sh"
       "verify-frontend-branding-closure-workflow.sh"
