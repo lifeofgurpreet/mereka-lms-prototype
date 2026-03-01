@@ -25,6 +25,7 @@ EVIDENCE_WF=".github/workflows/release-evidence.yml"
 FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
 FRONTEND_EXTENDED_SURFACES_WF=".github/workflows/frontend-extended-surfaces.yml"
 FRONTEND_RUNTIME_QA_WF=".github/workflows/frontend-runtime-qa.yml"
+RUNTIME_THEME_DRIFT_DIAGNOSE_WF=".github/workflows/runtime-theme-drift-diagnose.yml"
 PHASE2_SMOKE_EVIDENCE_WF=".github/workflows/phase2-smoke-evidence.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
@@ -442,6 +443,28 @@ check_gitops() {
     fail "[AC-020] Frontend runtime QA workflow missing runtime make-lane invocations"
   fi
 
+  # AC-020: Runtime theme drift diagnose workflow exists
+  if [[ -f "$RUNTIME_THEME_DRIFT_DIAGNOSE_WF" ]]; then
+    pass "[AC-020] Runtime theme drift diagnose workflow exists"
+  else
+    fail "[AC-020] Runtime theme drift diagnose workflow missing: $RUNTIME_THEME_DRIFT_DIAGNOSE_WF"
+  fi
+
+  # AC-020: Runtime theme drift diagnose workflow is workflow_dispatch
+  if [[ -f "$RUNTIME_THEME_DRIFT_DIAGNOSE_WF" ]] && grep -q 'workflow_dispatch:' "$RUNTIME_THEME_DRIFT_DIAGNOSE_WF"; then
+    pass "[AC-020] Runtime theme drift diagnose workflow triggered via workflow_dispatch"
+  else
+    fail "[AC-020] Runtime theme drift diagnose workflow missing workflow_dispatch trigger"
+  fi
+
+  # AC-020: Runtime theme drift diagnose workflow runs the diagnose make lane
+  if [[ -f "$RUNTIME_THEME_DRIFT_DIAGNOSE_WF" ]] \
+    && grep -q 'make qa-runtime-theme-drift-diagnose' "$RUNTIME_THEME_DRIFT_DIAGNOSE_WF"; then
+    pass "[AC-020] Runtime theme drift diagnose workflow runs qa-runtime-theme-drift-diagnose lane"
+  else
+    fail "[AC-020] Runtime theme drift diagnose workflow missing qa-runtime-theme-drift-diagnose invocation"
+  fi
+
   # AC-020: Policy checks workflow exists
   if [[ -f "$POLICY_WF" ]]; then
     pass "[AC-020] Policy checks workflow exists"
@@ -480,6 +503,7 @@ check_gitops() {
       "verify-frontend-qa-make-targets.sh"
       "verify-frontend-branding-closure-workflow.sh"
       "verify-mfe-live-dom-audit-workflow.sh"
+      "verify-runtime-theme-drift-diagnose-workflow.sh"
       "verify-phase7-dom-audit-contract.sh"
       "verify-phase7-selector-list-coverage.sh"
       "verify-runtime-theme-drift-lane.sh"

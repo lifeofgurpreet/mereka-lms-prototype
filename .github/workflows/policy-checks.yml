@@ -40,6 +40,7 @@ jobs:
           bash -n scripts/qa/verify-frontend-qa-make-targets.sh
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
           bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
+          bash -n scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh
           bash -n scripts/qa/verify-phase7-dom-audit-contract.sh
           bash -n scripts/qa/verify-phase7-selector-list-coverage.sh
           bash -n scripts/qa/verify-runtime-theme-drift-lane.sh
@@ -142,6 +143,10 @@ jobs:
       - name: Verify MFE live DOM audit workflow contract
         run: |
           ./scripts/qa/verify-mfe-live-dom-audit-workflow.sh
+
+      - name: Verify runtime-theme-drift-diagnose workflow contract
+        run: |
+          ./scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh
 
       - name: Verify Phase 7 DOM audit contract
         run: |
