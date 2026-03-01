@@ -36,9 +36,23 @@ assert_make_command() {
   fi
 }
 
+assert_help_entry() {
+  local needle="$1"
+  if ! grep -Fq -- "$needle" <<<"$HELP_OUTPUT"; then
+    echo "❌ make help output missing target entry: $needle"
+    violations=1
+  fi
+}
+
 if [[ ! -f "$MAKEFILE" ]]; then
   echo "❌ Missing Makefile"
   exit 1
+fi
+
+HELP_OUTPUT="$(make help 2>/dev/null || true)"
+if [[ -z "$HELP_OUTPUT" ]]; then
+  echo "❌ make help produced no output"
+  violations=1
 fi
 
 assert_exec "scripts/qa/verify-cross-browser-branding-smoke.sh"
@@ -176,6 +190,11 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-frontend-performance-spotcheck.sh --env dev' \
   "qa-performance-dev"
+
+assert_help_entry "qa-phase7-dom-audit-full-strict"
+assert_help_entry "qa-frontend-contracts"
+assert_help_entry "qa-npm-start-smoke-prod"
+assert_help_entry "qa-frontend-closure-dev-screenshots-mfe"
 
 if [[ "$violations" -ne 0 ]]; then
   echo "Frontend QA Makefile target contract failed."
