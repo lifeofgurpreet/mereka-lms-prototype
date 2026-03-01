@@ -36,6 +36,7 @@ REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
 STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
 RUNTIME_THEME_URL="${RUNTIME_THEME_URL:-}"
 RUNTIME_THEME_TIMEOUT_SECONDS="${RUNTIME_THEME_TIMEOUT_SECONDS:-300}"
+SLOT_MARKER_POLICY="${SLOT_MARKER_POLICY:-auto}"
 NPM_START_BASE_URL="${NPM_START_BASE_URL:-}"
 NPM_START_PROJECT="${NPM_START_PROJECT:-chromium}"
 NPM_START_HEADED="${NPM_START_HEADED:-0}"
@@ -75,6 +76,8 @@ Environment toggles:
   RUNTIME_THEME_URL=<url>   Runtime apps origin for theme contract checks (default: env-derived)
   RUNTIME_THEME_TIMEOUT_SECONDS=<seconds>
                             Timeout for runtime theme contract gate (default: 300)
+  SLOT_MARKER_POLICY=auto|required|allow
+                            Runtime authn bundle marker policy for verify-paragon-runtime.sh (default: auto)
   RUN_NPM_START_SMOKE=0|1   Enable/disable npm-start MFE smoke gate (default: 0)
   NPM_START_BASE_URL=<url>  Base URL for npm-start smoke (default: env-derived prod/dev host)
   NPM_START_PROJECT=<name>  Playwright project for npm-start smoke (default: chromium)
@@ -167,6 +170,7 @@ echo "Slot coverage gate enabled: $RUN_SLOT_COVERAGE"
 echo "Slot source-alignment gate enabled: $RUN_SLOT_SOURCE_ALIGNMENT"
 echo "Selector hardening gate enabled: $RUN_SELECTOR_HARDENING"
 echo "Runtime theme contract gate enabled: $RUN_RUNTIME_THEME_CONTRACT"
+echo "Runtime slot marker policy: $SLOT_MARKER_POLICY"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
@@ -307,7 +311,7 @@ if [[ "$RUN_RUNTIME_THEME_CONTRACT" == "1" ]]; then
     runtime_theme_args+=(--require-runtime)
   fi
   GATE_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" run_gate "runtime-theme-contract" \
-    ./scripts/qa/verify-paragon-runtime.sh "${runtime_theme_args[@]}"
+    env "SLOT_MARKER_POLICY=$SLOT_MARKER_POLICY" ./scripts/qa/verify-paragon-runtime.sh "${runtime_theme_args[@]}"
 else
   skip_gate "runtime-theme-contract" "RUN_RUNTIME_THEME_CONTRACT=0"
 fi

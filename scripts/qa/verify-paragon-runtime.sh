@@ -18,6 +18,7 @@ LIGHT_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.m
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
 REQUIRE_RUNTIME=0
+SLOT_MARKER_POLICY="${SLOT_MARKER_POLICY:-auto}"
 THEME_DEFAULT_ENABLED=1
 MAX_CORE_THEME_BYTES="${MAX_CORE_THEME_BYTES:-614400}"
 MAX_BRAND_THEME_BYTES="${MAX_BRAND_THEME_BYTES:-51200}"
@@ -39,6 +40,10 @@ Options:
   --runtime-url <url>  Base URL to validate runtime theme endpoint. Example:
                        https://apps.academyv2.mereka.io
   --require-runtime    Fail when runtime URL is unavailable/reachable checks cannot run.
+  --require-slot-markers
+                       Require branded slot markers in runtime authn bundles.
+  --allow-missing-slot-markers
+                       Allow missing branded slot markers (warn-only mode).
   -h, --help           Show this help.
 EOF
 }
@@ -79,6 +84,14 @@ while [[ $# -gt 0 ]]; do
       REQUIRE_RUNTIME=1
       shift
       ;;
+    --require-slot-markers)
+      SLOT_MARKER_POLICY="required"
+      shift
+      ;;
+    --allow-missing-slot-markers)
+      SLOT_MARKER_POLICY="allow"
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -90,6 +103,26 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ "$SLOT_MARKER_POLICY" != "auto" && "$SLOT_MARKER_POLICY" != "required" && "$SLOT_MARKER_POLICY" != "allow" ]]; then
+  echo "ERROR: SLOT_MARKER_POLICY must be one of: auto, required, allow (got: $SLOT_MARKER_POLICY)" >&2
+  exit 2
+fi
+
+SLOT_MARKERS_REQUIRED=0
+case "$SLOT_MARKER_POLICY" in
+  required)
+    SLOT_MARKERS_REQUIRED=1
+    ;;
+  allow)
+    SLOT_MARKERS_REQUIRED=0
+    ;;
+  auto)
+    if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+      SLOT_MARKERS_REQUIRED=1
+    fi
+    ;;
+esac
 
 if [[ -n "${RUNTIME_URL:-}" ]]; then
   original_runtime_url="$RUNTIME_URL"
@@ -212,6 +245,39 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
         fail "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
       else
         warn "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+      fi
+    fi
+
+    # Branded-slot runtime signal:
+    # Authn bundles should contain at least one mereka marker string when slot
+    # definitions are actually present in the deployed MFE artifact.
+    bundle_marker_hits=""
+    while IFS= read -r bundle_path; do
+      [[ -z "$bundle_path" ]] && continue
+      bundle_url="${RUNTIME_URL%/}${bundle_path}"
+      bundle_tmp="$(mktemp -t paragon-authn-bundle.XXXXXX)"
+      if curl -fsSL "$bundle_url" -o "$bundle_tmp" 2>/dev/null; then
+        for marker in \
+          "mereka-authn-login-branding" \
+          "mereka-header-logo" \
+          "mereka-footer" \
+          "MerekaAuthnLoginBranding"; do
+          if grep -q "$marker" "$bundle_tmp"; then
+            bundle_marker_hits+="${marker}@${bundle_path}"$'\n'
+          fi
+        done
+      fi
+      rm -f "$bundle_tmp"
+    done < <(grep -Eo 'src="/authn/[^"]+\.js"' /tmp/paragon-authn-shell.$$ | sed -E 's/src="([^"]+)"/\1/' | sort -u)
+
+    if [[ -n "$bundle_marker_hits" ]]; then
+      hit_count="$(printf '%s' "$bundle_marker_hits" | sed '/^$/d' | wc -l | tr -d ' ')"
+      pass "Runtime authn bundles expose branded slot markers (${hit_count} hit(s))"
+    else
+      if [[ "$SLOT_MARKERS_REQUIRED" -eq 1 ]]; then
+        fail "Runtime authn bundles do not expose branded slot markers (likely stale/unbranded MFE rollout)"
+      else
+        warn "Runtime authn bundles do not expose branded slot markers"
       fi
     fi
   else
