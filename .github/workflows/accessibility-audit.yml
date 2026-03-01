@@ -23,6 +23,11 @@ on:
         required: false
         default: ""
         type: string
+      routes_csv:
+        description: "Comma-separated routes to scan (default: authn/dashboard/account/learning)"
+        required: false
+        default: "/authn/login,/authn/register,/dashboard,/account,/learning"
+        type: string
 
 permissions:
   contents: read
@@ -72,7 +77,7 @@ jobs:
           mkdir -p var/ci/axe-reports
 
           TARGET="${TARGET_URL}"
-          ROUTES_CSV="/authn/login,/authn/register,/dashboard,/account,/learning"
+          ROUTES_CSV="${{ github.event.inputs.routes_csv || '/authn/login,/authn/register,/dashboard,/account,/learning' }}"
           ./scripts/qa/run-a11y-runtime-lane.sh \
             --env "${TARGET_ENV}" \
             --mode online \
@@ -139,6 +144,7 @@ jobs:
             echo ""
             echo "**Target environment**: \`${TARGET_ENV:-prod}\`"
             echo "**Target**: \`${TARGET_URL}\`"
+            echo "**Routes CSV**: \`${{ github.event.inputs.routes_csv || '/authn/login,/authn/register,/dashboard,/account,/learning' }}\`"
             echo "**Standard**: WCAG 2.2 AA (\`wcag2a\`, \`wcag2aa\`, \`wcag22aa\` tags)"
             echo ""
             echo "### Routes Scanned"

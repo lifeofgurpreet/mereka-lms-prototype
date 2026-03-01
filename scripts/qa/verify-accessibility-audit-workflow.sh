@@ -36,6 +36,11 @@ if ! rg -n 'target_environment:' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'routes_csv:' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit missing routes_csv input"
+  violations=1
+fi
+
 if ! rg -n 'apps\.academyv2\.mereka\.(io|dev)' "$WORKFLOW" >/dev/null; then
   echo "❌ accessibility-audit missing apps.* MFE target defaults"
   violations=1
