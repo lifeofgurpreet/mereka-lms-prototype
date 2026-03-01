@@ -10,6 +10,7 @@ mkdir -p "$ARTIFACT_DIR"
 ENVIRONMENT="prod"
 BASE_URL=""
 PROJECT="${PROJECT:-chromium}"
+AUDIT_PROFILE="${AUDIT_PROFILE:-standard}"
 SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
 SELECTOR_AUDIT_ROUTES="${SELECTOR_AUDIT_ROUTES:-}"
 SELECTOR_AUDIT_SELECTORS="${SELECTOR_AUDIT_SELECTORS:-}"
@@ -26,6 +27,7 @@ Options:
   --env <prod|dev>                  Target environment (default: prod)
   --base-url <url>                  LMS base URL (optional; overrides --env mapping)
   --project <name>                  Playwright project (default: chromium)
+  --audit-profile <name>            Audit profile: standard|phase7_strict (default: standard)
   --selector-audit-path <path>      MFE route path for runtime selector audit (default: /authn/login)
   --selector-audit-routes <csv>     Comma-separated MFE route paths for DOM selector audit
   --selector-audit-selectors <csv>  Comma-separated CSS selectors to audit across routes
@@ -53,6 +55,11 @@ while [[ $# -gt 0 ]]; do
     --project)
       [[ $# -lt 2 ]] && { echo "ERROR: --project requires a value" >&2; exit 2; }
       PROJECT="$2"
+      shift 2
+      ;;
+    --audit-profile)
+      [[ $# -lt 2 ]] && { echo "ERROR: --audit-profile requires a value" >&2; exit 2; }
+      AUDIT_PROFILE="$2"
       shift 2
       ;;
     --selector-audit-path)
@@ -128,6 +135,26 @@ fi
 if [[ "$REQUIRE_BRANDING_MARKERS" != "0" && "$REQUIRE_BRANDING_MARKERS" != "1" ]]; then
   echo "ERROR: REQUIRE_BRANDING_MARKERS must be 0 or 1 (got: $REQUIRE_BRANDING_MARKERS)" >&2
   exit 2
+fi
+
+if [[ "$AUDIT_PROFILE" != "standard" && "$AUDIT_PROFILE" != "phase7_strict" ]]; then
+  echo "ERROR: --audit-profile must be one of: standard, phase7_strict (got: $AUDIT_PROFILE)" >&2
+  exit 2
+fi
+
+if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
+  if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+    SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
+  fi
+  if [[ -z "$SELECTOR_AUDIT_SELECTORS" ]]; then
+    SELECTOR_AUDIT_SELECTORS=".mereka-authn-login-branding,.mereka-footer,.btn-primary,.form-control,.navbar"
+  fi
+  if [[ "$MIN_TRACKED_SELECTOR_HITS" == "3" ]]; then
+    MIN_TRACKED_SELECTOR_HITS="2"
+  fi
+  if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
+    MIN_CUSTOM_SELECTOR_HITS="3"
+  fi
 fi
 
 if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
@@ -217,7 +244,7 @@ case "$PROJECT" in
     ;;
 esac
 
-echo "Running runtime selector DOM audit (base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, selector_audit_path=$SELECTOR_AUDIT_PATH, selector_audit_routes=$SELECTOR_AUDIT_ROUTES, min_selector_hits=$MIN_TRACKED_SELECTOR_HITS, min_custom_selector_hits=$MIN_CUSTOM_SELECTOR_HITS)" | tee -a "$artifact"
+echo "Running runtime selector DOM audit (base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, audit_profile=$AUDIT_PROFILE, selector_audit_path=$SELECTOR_AUDIT_PATH, selector_audit_routes=$SELECTOR_AUDIT_ROUTES, min_selector_hits=$MIN_TRACKED_SELECTOR_HITS, min_custom_selector_hits=$MIN_CUSTOM_SELECTOR_HITS)" | tee -a "$artifact"
 set -o pipefail
 PW_CROSS_BROWSER=0 \
 PW_ENABLE_WEBKIT=0 \
