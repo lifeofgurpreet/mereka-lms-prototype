@@ -369,22 +369,15 @@ if 'mereka_tenancy' in INSTALLED_APPS and 'mereka_tenancy.middleware.TenantResol
 if "{{ MEREKA_PARAGON_THEME_ENABLED }}".lower() == "true":
     _theme_base = "{{ MEREKA_PARAGON_THEME_CDN_BASE }}"
     MFE_CONFIG.setdefault("PARAGON_THEME_URLS", {})
-    MFE_CONFIG["PARAGON_THEME_URLS"] = {
-        "core": {
-            "urls": {
-                "default": f"{_theme_base}/core.min.css",
-                "brandOverride": f"{_theme_base}/mereka-brand.min.css",
-            }
-        },
-        "variants": {
-            "light": {
-                "urls": {
-                    "default": f"{_theme_base}/light.min.css",
-                    "brandOverride": f"{_theme_base}/mereka-brand-light.min.css",
-                }
-            },
-        },
-    }
+    MFE_CONFIG["PARAGON_THEME_URLS"]["core"] = {}
+    MFE_CONFIG["PARAGON_THEME_URLS"]["core"]["urls"] = {}
+    MFE_CONFIG["PARAGON_THEME_URLS"]["core"]["urls"]["default"] = _theme_base + "/core.min.css"
+    MFE_CONFIG["PARAGON_THEME_URLS"]["core"]["urls"]["brandOverride"] = _theme_base + "/mereka-brand.min.css"
+    MFE_CONFIG["PARAGON_THEME_URLS"]["variants"] = {}
+    MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"] = {}
+    MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"] = {}
+    MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"]["default"] = _theme_base + "/light.min.css"
+    MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"]["brandOverride"] = _theme_base + "/mereka-brand-light.min.css"
 """,
     )
 )
