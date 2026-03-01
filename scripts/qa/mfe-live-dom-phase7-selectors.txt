@@ -1,0 +1,10 @@
+# Canonical selector set for phase7_strict runtime DOM audit.
+# One selector per line; lines beginning with # are ignored.
+
+.mereka-authn-login-branding
+.mereka-footer
+.btn-primary
+.form-control
+.navbar
+.mereka-header-logo
+.mereka-badge

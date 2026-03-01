@@ -14,6 +14,7 @@ AUDIT_PROFILE="${AUDIT_PROFILE:-standard}"
 SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
 SELECTOR_AUDIT_ROUTES="${SELECTOR_AUDIT_ROUTES:-}"
 SELECTOR_AUDIT_SELECTORS="${SELECTOR_AUDIT_SELECTORS:-}"
+SELECTOR_AUDIT_SELECTORS_FILE="${SELECTOR_AUDIT_SELECTORS_FILE:-}"
 MIN_TRACKED_SELECTOR_HITS="${MIN_TRACKED_SELECTOR_HITS:-3}"
 MIN_CUSTOM_SELECTOR_HITS="${MIN_CUSTOM_SELECTOR_HITS:-0}"
 REQUIRE_RUNTIME_THEME=0
@@ -31,6 +32,7 @@ Options:
   --selector-audit-path <path>      MFE route path for runtime selector audit (default: /authn/login)
   --selector-audit-routes <csv>     Comma-separated MFE route paths for DOM selector audit
   --selector-audit-selectors <csv>  Comma-separated CSS selectors to audit across routes
+  --selector-audit-selectors-file   Path to newline-separated selectors (comments with # supported)
   --min-selector-hits <int>         Minimum tracked selector hits required (default: 3)
   --min-custom-selector-hits <int>  Minimum custom selectors that must match across audited routes
   --require-runtime-theme           Require runtime /theme/*.css mode in authn shell
@@ -75,6 +77,11 @@ while [[ $# -gt 0 ]]; do
     --selector-audit-selectors)
       [[ $# -lt 2 ]] && { echo "ERROR: --selector-audit-selectors requires a value" >&2; exit 2; }
       SELECTOR_AUDIT_SELECTORS="$2"
+      shift 2
+      ;;
+    --selector-audit-selectors-file)
+      [[ $# -lt 2 ]] && { echo "ERROR: --selector-audit-selectors-file requires a value" >&2; exit 2; }
+      SELECTOR_AUDIT_SELECTORS_FILE="$2"
       shift 2
       ;;
     --min-selector-hits)
@@ -146,8 +153,8 @@ if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
   if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
     SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
   fi
-  if [[ -z "$SELECTOR_AUDIT_SELECTORS" ]]; then
-    SELECTOR_AUDIT_SELECTORS=".mereka-authn-login-branding,.mereka-footer,.btn-primary,.form-control,.navbar"
+  if [[ -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
+    SELECTOR_AUDIT_SELECTORS_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-selectors.txt"
   fi
   if [[ "$MIN_TRACKED_SELECTOR_HITS" == "3" ]]; then
     MIN_TRACKED_SELECTOR_HITS="2"
@@ -155,6 +162,51 @@ if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
   if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
     MIN_CUSTOM_SELECTOR_HITS="3"
   fi
+fi
+
+if [[ -n "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
+  if [[ ! -f "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
+    echo "ERROR: selector audit selectors file not found: $SELECTOR_AUDIT_SELECTORS_FILE" >&2
+    exit 2
+  fi
+  FILE_SELECTORS="$(
+    python3 - "$SELECTOR_AUDIT_SELECTORS_FILE" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+items = []
+for raw in path.read_text(encoding="utf-8").splitlines():
+    line = raw.split("#", 1)[0].strip()
+    if not line:
+        continue
+    items.append(line)
+print(",".join(items))
+PY
+  )"
+  if [[ -z "$SELECTOR_AUDIT_SELECTORS" ]]; then
+    SELECTOR_AUDIT_SELECTORS="$FILE_SELECTORS"
+  elif [[ -n "$FILE_SELECTORS" ]]; then
+    SELECTOR_AUDIT_SELECTORS="$SELECTOR_AUDIT_SELECTORS,$FILE_SELECTORS"
+  fi
+fi
+
+if [[ -n "$SELECTOR_AUDIT_SELECTORS" ]]; then
+  SELECTOR_AUDIT_SELECTORS="$(
+    python3 - "$SELECTOR_AUDIT_SELECTORS" <<'PY'
+import sys
+
+entries = [item.strip() for item in sys.argv[1].split(",") if item.strip()]
+seen = set()
+ordered = []
+for item in entries:
+    if item in seen:
+      continue
+    seen.add(item)
+    ordered.append(item)
+print(",".join(ordered))
+PY
+  )"
 fi
 
 if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then

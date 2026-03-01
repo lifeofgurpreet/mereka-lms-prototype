@@ -103,9 +103,6 @@ jobs:
             if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
               SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
             fi
-            if [[ -z "$SELECTOR_AUDIT_SELECTORS" ]]; then
-              SELECTOR_AUDIT_SELECTORS=".mereka-authn-login-branding,.mereka-footer,.btn-primary,.form-control,.navbar"
-            fi
             if [[ "$MIN_SELECTOR_HITS" == "3" ]]; then
               MIN_SELECTOR_HITS="2"
             fi
