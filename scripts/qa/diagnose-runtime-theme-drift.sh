@@ -14,6 +14,8 @@ FAILURES=0
 FAIL_PROD_PREFLIGHT=0
 FAIL_DEV_PREFLIGHT=0
 FAIL_GITOPS_PARITY=0
+INFRA_REPO=""
+INFRA_BRANCH=""
 
 run_check() {
   local fail_var="$1"
@@ -32,6 +34,22 @@ run_check() {
 }
 
 echo "Runtime theme drift diagnosis started at ${TIMESTAMP}" | tee "$LOG_FILE"
+
+for candidate in \
+  /home/gurpreet/projects/k8s/infrastructure \
+  /home/gurpreet/projects/k8s/bbi-infrastructure; do
+  if [[ -d "$candidate/.git" ]]; then
+    INFRA_REPO="$candidate"
+    break
+  fi
+done
+
+if [[ -n "$INFRA_REPO" ]]; then
+  INFRA_BRANCH="$(git -C "$INFRA_REPO" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  if [[ -n "$INFRA_BRANCH" ]]; then
+    echo "Detected infra checkout: $INFRA_REPO (branch: $INFRA_BRANCH)" | tee -a "$LOG_FILE"
+  fi
+fi
 
 run_check \
   FAIL_PROD_PREFLIGHT \
@@ -78,6 +96,11 @@ EOF
    - Run canonical release/sync flow, then verify runtime:
      ./scripts/infra/release-openedx-gitops.sh --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push --verify-runtime
 EOF
+      if [[ -n "$INFRA_BRANCH" && "$INFRA_BRANCH" != "main" ]]; then
+        cat <<EOF | tee -a "$LOG_FILE"
+   - Note: infra checkout is currently on '$INFRA_BRANCH'. Ensure changes are merged/promoted to the Argo-tracked branch (typically 'main').
+EOF
+      fi
     else
       echo "2. After GitOps parity fix is merged/synced, re-check runtime preflight." | tee -a "$LOG_FILE"
     fi
