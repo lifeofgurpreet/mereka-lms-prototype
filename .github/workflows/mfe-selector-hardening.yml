@@ -1,0 +1,45 @@
+name: MFE Selector Hardening
+
+on:
+  workflow_dispatch:
+    inputs:
+      pgn_selector_ceiling:
+        description: "Optional override ceiling for non-comment .pgn__ selector lines"
+        required: false
+        default: ""
+        type: string
+
+permissions: {}
+
+jobs:
+  mfe-selector-hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run selector hardening gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          PGN_SELECTOR_CEILING="${{ inputs.pgn_selector_ceiling || '' }}"
+          if [[ -n "$PGN_SELECTOR_CEILING" ]]; then
+            env PGN_SELECTOR_CEILING="$PGN_SELECTOR_CEILING" ./scripts/qa/verify-mfe-selector-hardening.sh \
+              | tee var/qa/mfe-selector-hardening.log
+          else
+            ./scripts/qa/verify-mfe-selector-hardening.sh \
+              | tee var/qa/mfe-selector-hardening.log
+          fi
+
+      - name: Upload selector hardening artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-selector-hardening-${{ github.run_number }}
+          path: |
+            var/qa/mfe-selector-hardening.log
+            var/mfe-selector-hardening-verification.txt
+          if-no-files-found: warn
