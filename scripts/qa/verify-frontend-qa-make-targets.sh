@@ -202,6 +202,9 @@ assert_help_entry "qa-phase7-dom-audit-full-strict"
 assert_help_entry "qa-frontend-contracts"
 assert_help_entry "qa-npm-start-smoke-prod"
 assert_help_entry "qa-frontend-closure-dev-screenshots-mfe"
+assert_help_entry "qa-frontend-closure-prod-screenshots-mfe"
+assert_help_entry "qa-frontend-closure-dev-screenshots"
+assert_help_entry "qa-branding-screenshots-mfe-prod"
 
 if [[ "$violations" -ne 0 ]]; then
   echo "Frontend QA Makefile target contract failed."
