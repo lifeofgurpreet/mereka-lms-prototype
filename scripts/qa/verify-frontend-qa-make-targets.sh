@@ -73,6 +73,7 @@ assert_exec "scripts/qa/verify-frontend-extended-surfaces-workflow.sh"
 assert_exec "scripts/qa/verify-frontend-runtime-qa-workflow.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-workflow.sh"
+assert_exec "scripts/qa/verify-runtime-theme-drift-lane.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -285,6 +286,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-phase7-selector-list-coverage.sh' \
   "qa-frontend-contracts includes verify-phase7-selector-list-coverage"
+assert_make_command \
+  './scripts/qa/verify-runtime-theme-drift-lane.sh' \
+  "qa-frontend-contracts includes verify-runtime-theme-drift-lane"
 assert_make_command \
   '$(MAKE) qa-phase2-smoke-evidence-contract' \
   "qa-frontend-contracts includes qa-phase2-smoke-evidence-contract aggregator"

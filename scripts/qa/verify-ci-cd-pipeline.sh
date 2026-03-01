@@ -482,6 +482,7 @@ check_gitops() {
       "verify-mfe-live-dom-audit-workflow.sh"
       "verify-phase7-dom-audit-contract.sh"
       "verify-phase7-selector-list-coverage.sh"
+      "verify-runtime-theme-drift-lane.sh"
       "verify-phase2-smoke-evidence-contract.sh"
       "verify-phase2-smoke-evidence-workflow.sh"
       "verify-accessibility-audit-workflow.sh"

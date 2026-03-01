@@ -42,6 +42,7 @@ jobs:
           bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
           bash -n scripts/qa/verify-phase7-dom-audit-contract.sh
           bash -n scripts/qa/verify-phase7-selector-list-coverage.sh
+          bash -n scripts/qa/verify-runtime-theme-drift-lane.sh
           bash -n scripts/qa/verify-phase2-smoke-evidence-contract.sh
           bash -n scripts/qa/verify-phase2-smoke-evidence-workflow.sh
           bash -n scripts/qa/verify-accessibility-audit-workflow.sh
@@ -149,6 +150,10 @@ jobs:
       - name: Verify Phase 7 selector-list coverage contract
         run: |
           ./scripts/qa/verify-phase7-selector-list-coverage.sh
+
+      - name: Verify runtime-theme drift lane contract
+        run: |
+          ./scripts/qa/verify-runtime-theme-drift-lane.sh
 
       - name: Verify Phase 2 smoke-evidence contract
         run: |

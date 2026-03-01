@@ -237,6 +237,7 @@ qa-frontend-contracts: ## Run frontend closure contract suite (workflows + make 
 	./scripts/qa/verify-release-evidence-workflow.sh
 	./scripts/qa/verify-phase7-dom-audit-contract.sh
 	./scripts/qa/verify-phase7-selector-list-coverage.sh
+	./scripts/qa/verify-runtime-theme-drift-lane.sh
 	$(MAKE) qa-phase2-smoke-evidence-contract
 	./scripts/qa/verify-paragon-theme-budget-workflow.sh
 	./scripts/qa/verify-branding-evidence-a11y-contract.sh
