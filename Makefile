@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -79,6 +79,12 @@ qa-smoke: ## Run smoke tests
 	./scripts/qa/verify-forum-smoke.sh --offline
 	./scripts/qa/verify-credentials-notes-smoke.sh --offline
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline || true
+
+qa-phase7-dom-audit: ## Run strict Phase 7 runtime DOM selector audit (prod)
+	./scripts/qa/run-phase7-dom-audit.sh --env prod --project chromium
+
+qa-phase7-dom-audit-dev: ## Run strict Phase 7 runtime DOM selector audit (dev)
+	./scripts/qa/run-phase7-dom-audit.sh --env dev --project chromium
 
 mobile-secrets-check: ## Run mobile secrets verification (offline static checks)
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline
