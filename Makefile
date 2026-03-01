@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-npm-start-smoke-local qa-npm-start-smoke-prod qa-npm-start-smoke-dev qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-npm-start-smoke-local qa-npm-start-smoke-prod qa-npm-start-smoke-dev qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-branding-before-after-prod qa-branding-before-after-dev qa-branding-before-after-mfe-prod qa-branding-before-after-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -196,6 +196,18 @@ qa-branding-screenshots-mfe-prod: ## Capture MFE-only branding screenshots for p
 qa-branding-screenshots-mfe-dev: ## Capture MFE-only branding screenshots for development surfaces
 	./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only
 
+qa-branding-before-after-prod: ## Build before/after branding visual report from latest production screenshot runs
+	./scripts/qa/build-branding-before-after-report.sh --env prod
+
+qa-branding-before-after-dev: ## Build before/after branding visual report from latest development screenshot runs
+	./scripts/qa/build-branding-before-after-report.sh --env dev
+
+qa-branding-before-after-mfe-prod: ## Build before/after branding visual report (MFE-only) from latest production screenshot runs
+	./scripts/qa/build-branding-before-after-report.sh --env prod --mfe-only
+
+qa-branding-before-after-mfe-dev: ## Build before/after branding visual report (MFE-only) from latest development screenshot runs
+	./scripts/qa/build-branding-before-after-report.sh --env dev --mfe-only
+
 qa-frontend-closure-prod: ## Run frontend closure pipeline (prod, cross-browser, runtime theme required)
 	./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme
 
@@ -234,6 +246,7 @@ qa-frontend-contracts: ## Run frontend closure contract suite (workflows + make 
 	./scripts/qa/verify-mfe-live-dom-audit-workflow.sh
 	./scripts/qa/verify-frontend-branding-closure-workflow.sh
 	./scripts/qa/verify-frontend-runtime-qa-workflow.sh
+	./scripts/qa/verify-frontend-before-after-visuals-workflow.sh
 	./scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh
 	./scripts/qa/verify-release-evidence-workflow.sh
 	./scripts/qa/verify-phase7-dom-audit-contract.sh

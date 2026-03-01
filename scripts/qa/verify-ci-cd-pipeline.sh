@@ -25,6 +25,7 @@ EVIDENCE_WF=".github/workflows/release-evidence.yml"
 FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
 FRONTEND_EXTENDED_SURFACES_WF=".github/workflows/frontend-extended-surfaces.yml"
 FRONTEND_RUNTIME_QA_WF=".github/workflows/frontend-runtime-qa.yml"
+FRONTEND_BEFORE_AFTER_VISUALS_WF=".github/workflows/frontend-before-after-visuals.yml"
 RUNTIME_THEME_DRIFT_DIAGNOSE_WF=".github/workflows/runtime-theme-drift-diagnose.yml"
 PHASE2_SMOKE_EVIDENCE_WF=".github/workflows/phase2-smoke-evidence.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
@@ -443,6 +444,28 @@ check_gitops() {
     fail "[AC-020] Frontend runtime QA workflow missing runtime make-lane invocations"
   fi
 
+  # AC-020: Frontend before/after visuals workflow exists
+  if [[ -f "$FRONTEND_BEFORE_AFTER_VISUALS_WF" ]]; then
+    pass "[AC-020] Frontend before/after visuals workflow exists"
+  else
+    fail "[AC-020] Frontend before/after visuals workflow missing: $FRONTEND_BEFORE_AFTER_VISUALS_WF"
+  fi
+
+  # AC-020: Frontend before/after visuals workflow is workflow_dispatch
+  if [[ -f "$FRONTEND_BEFORE_AFTER_VISUALS_WF" ]] && grep -q 'workflow_dispatch:' "$FRONTEND_BEFORE_AFTER_VISUALS_WF"; then
+    pass "[AC-020] Frontend before/after visuals workflow triggered via workflow_dispatch"
+  else
+    fail "[AC-020] Frontend before/after visuals workflow missing workflow_dispatch trigger"
+  fi
+
+  # AC-020: Frontend before/after visuals workflow runs before/after report generator
+  if [[ -f "$FRONTEND_BEFORE_AFTER_VISUALS_WF" ]] \
+    && grep -q 'build-branding-before-after-report.sh' "$FRONTEND_BEFORE_AFTER_VISUALS_WF"; then
+    pass "[AC-020] Frontend before/after visuals workflow runs before/after report generation"
+  else
+    fail "[AC-020] Frontend before/after visuals workflow missing report generation invocation"
+  fi
+
   # AC-020: Runtime theme drift diagnose workflow exists
   if [[ -f "$RUNTIME_THEME_DRIFT_DIAGNOSE_WF" ]]; then
     pass "[AC-020] Runtime theme drift diagnose workflow exists"
@@ -499,6 +522,7 @@ check_gitops() {
       "verify-frontend-contracts-workflow.sh"
       "verify-frontend-extended-surfaces-workflow.sh"
       "verify-frontend-runtime-qa-workflow.sh"
+      "verify-frontend-before-after-visuals-workflow.sh"
       "verify-make-help-contract.sh"
       "verify-frontend-qa-make-targets.sh"
       "verify-frontend-branding-closure-workflow.sh"

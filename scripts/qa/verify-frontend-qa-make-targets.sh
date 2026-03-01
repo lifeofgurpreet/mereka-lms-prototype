@@ -75,6 +75,8 @@ assert_exec "scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-workflow.sh"
 assert_exec "scripts/qa/verify-runtime-theme-drift-lane.sh"
+assert_exec "scripts/qa/build-branding-before-after-report.sh"
+assert_exec "scripts/qa/verify-frontend-before-after-visuals-workflow.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -99,6 +101,10 @@ for target in \
   qa-branding-screenshots-dev \
   qa-branding-screenshots-mfe-prod \
   qa-branding-screenshots-mfe-dev \
+  qa-branding-before-after-prod \
+  qa-branding-before-after-dev \
+  qa-branding-before-after-mfe-prod \
+  qa-branding-before-after-mfe-dev \
   qa-frontend-closure-prod \
   qa-frontend-closure-dev \
   qa-frontend-closure-prod-screenshots \
@@ -222,6 +228,18 @@ assert_make_command \
   './scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only' \
   "qa-branding-screenshots-mfe-dev"
 assert_make_command \
+  './scripts/qa/build-branding-before-after-report.sh --env prod' \
+  "qa-branding-before-after-prod"
+assert_make_command \
+  './scripts/qa/build-branding-before-after-report.sh --env dev' \
+  "qa-branding-before-after-dev"
+assert_make_command \
+  './scripts/qa/build-branding-before-after-report.sh --env prod --mfe-only' \
+  "qa-branding-before-after-mfe-prod"
+assert_make_command \
+  './scripts/qa/build-branding-before-after-report.sh --env dev --mfe-only' \
+  "qa-branding-before-after-mfe-dev"
+assert_make_command \
   './scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme' \
   "qa-frontend-closure-prod"
 assert_make_command \
@@ -278,6 +296,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-frontend-runtime-qa-workflow.sh' \
   "qa-frontend-contracts includes verify-frontend-runtime-qa-workflow"
+assert_make_command \
+  './scripts/qa/verify-frontend-before-after-visuals-workflow.sh' \
+  "qa-frontend-contracts includes verify-frontend-before-after-visuals-workflow"
 assert_make_command \
   './scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh' \
   "qa-frontend-contracts includes verify-runtime-theme-drift-diagnose-workflow"
