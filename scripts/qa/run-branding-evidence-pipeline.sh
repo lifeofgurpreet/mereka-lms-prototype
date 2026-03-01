@@ -31,7 +31,7 @@ RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
 CROSS_BROWSER="${CROSS_BROWSER:-0}"
 LEARNING_PATH="${LEARNING_PATH:-/learning}"
-REQUIRE_RUNTIME_THEME="${REQUIRE_RUNTIME_THEME:-0}"
+REQUIRE_RUNTIME_THEME="${REQUIRE_RUNTIME_THEME:-auto}"
 STRICT_WEBKIT="${STRICT_WEBKIT:-0}"
 RUNTIME_THEME_URL="${RUNTIME_THEME_URL:-}"
 RUNTIME_THEME_TIMEOUT_SECONDS="${RUNTIME_THEME_TIMEOUT_SECONDS:-300}"
@@ -83,6 +83,8 @@ Environment toggles:
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
   STRICT_WEBKIT=0|1         Require WebKit success in cross-browser gate (default: 0)
+  REQUIRE_RUNTIME_THEME=0|1|auto
+                            Runtime theme strictness (default: auto -> prod=1, dev=0)
   A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
   A11Y_ARGS="<args>"        A11y script args (default: --offline)
   LEARNING_PATH=/learning   Optional learning route path for smoke checks
@@ -132,6 +134,14 @@ case "$ENV" in
     exit 2
     ;;
 esac
+
+if [[ "$REQUIRE_RUNTIME_THEME" == "auto" ]]; then
+  if [[ "$ENV" == "prod" ]]; then
+    REQUIRE_RUNTIME_THEME=1
+  else
+    REQUIRE_RUNTIME_THEME=0
+  fi
+fi
 
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 EVIDENCE_DIR="var/evidence/branding/${STAMP}"
