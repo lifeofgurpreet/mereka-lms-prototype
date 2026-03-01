@@ -56,6 +56,11 @@ if ! rg -n './scripts/qa/run-a11y-runtime-lane\.sh' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if rg -n '^[[:space:]]*axe[[:space:]]' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit should not invoke raw axe CLI directly (wrapper-only contract)"
+  violations=1
+fi
+
 if ! rg -n -- '--mode online' "$WORKFLOW" >/dev/null; then
   echo "❌ accessibility-audit wrapper step missing --mode online wiring"
   violations=1
