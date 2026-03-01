@@ -19,7 +19,7 @@ fi
 for input_key in target_environment cross_browser_matrix require_runtime_theme require_branding_markers require_webkit \
                  run_runtime_theme_contract_gate run_npm_start_smoke_gate run_screenshot_gate \
                  run_certificate_branding_gate run_live_dom_audit_gate \
-                 live_dom_audit_project live_dom_audit_min_hits selector_audit_path \
+                 live_dom_audit_project live_dom_audit_min_hits live_dom_audit_routes live_dom_audit_selectors live_dom_audit_min_custom_hits selector_audit_path \
                  runtime_theme_url runtime_theme_timeout_seconds learning_path; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
     echo "❌ frontend closure workflow missing input: ${input_key}"
@@ -74,6 +74,21 @@ fi
 
 if ! rg -n 'LIVE_DOM_AUDIT_MIN_HITS=' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow does not wire LIVE_DOM_AUDIT_MIN_HITS into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'LIVE_DOM_AUDIT_ROUTES=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire LIVE_DOM_AUDIT_ROUTES into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'LIVE_DOM_AUDIT_SELECTORS=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire LIVE_DOM_AUDIT_SELECTORS into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'LIVE_DOM_AUDIT_MIN_CUSTOM_HITS=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire LIVE_DOM_AUDIT_MIN_CUSTOM_HITS into pipeline env"
   violations=1
 fi
 

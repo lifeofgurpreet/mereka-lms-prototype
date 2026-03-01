@@ -15,7 +15,8 @@ if [[ ! -f "$WORKFLOW" ]]; then
 fi
 
 for input_key in target_environment base_url require_runtime_theme require_branding_markers \
-                 selector_audit_path min_selector_hits project; do
+                 selector_audit_path selector_audit_routes selector_audit_selectors \
+                 min_selector_hits min_custom_selector_hits project; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
     echo "❌ workflow missing input: ${input_key}"
     violations=1
@@ -27,8 +28,13 @@ if ! rg -n './scripts/qa/verify-mfe-live-dom-audit\.sh' "$WORKFLOW" >/dev/null; 
   violations=1
 fi
 
-if ! rg -n -- '--selector-audit-path|--min-selector-hits' "$WORKFLOW" >/dev/null; then
+if ! rg -n -- '--selector-audit-path|--min-selector-hits|--min-custom-selector-hits' "$WORKFLOW" >/dev/null; then
   echo "❌ workflow missing selector path/min-hit arg wiring"
+  violations=1
+fi
+
+if ! rg -n 'selector_audit_routes|selector_audit_selectors' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing selector route/custom-selector input wiring"
   violations=1
 fi
 

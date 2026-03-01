@@ -44,6 +44,9 @@ NPM_START_HEADED="${NPM_START_HEADED:-0}"
 NPM_START_TIMEOUT_SECONDS="${NPM_START_TIMEOUT_SECONDS:-900}"
 LIVE_DOM_AUDIT_PROJECT="${LIVE_DOM_AUDIT_PROJECT:-chromium}"
 LIVE_DOM_AUDIT_MIN_HITS="${LIVE_DOM_AUDIT_MIN_HITS:-3}"
+LIVE_DOM_AUDIT_ROUTES="${LIVE_DOM_AUDIT_ROUTES:-}"
+LIVE_DOM_AUDIT_SELECTORS="${LIVE_DOM_AUDIT_SELECTORS:-}"
+LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${LIVE_DOM_AUDIT_MIN_CUSTOM_HITS:-0}"
 SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
 A11Y_SCRIPT="${A11Y_SCRIPT:-./scripts/qa/verify-accessibility.sh}"
 A11Y_ARGS="${A11Y_ARGS:---offline}"
@@ -94,6 +97,12 @@ Environment toggles:
                             Playwright project for live DOM audit (default: chromium)
   LIVE_DOM_AUDIT_MIN_HITS=<int>
                             Minimum tracked selector hits for live DOM audit (default: 3)
+  LIVE_DOM_AUDIT_ROUTES=<csv>
+                            Optional comma-separated route paths for live DOM audit
+  LIVE_DOM_AUDIT_SELECTORS=<csv>
+                            Optional comma-separated CSS selectors for live DOM audit
+  LIVE_DOM_AUDIT_MIN_CUSTOM_HITS=<int>
+                            Minimum custom selectors that must match across audited routes (default: 0)
   SELECTOR_AUDIT_PATH=<path>
                             Runtime path for selector DOM audit (default: /authn/login)
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
@@ -311,7 +320,13 @@ fi
 
 # --- Gate 10: Runtime selector DOM audit (optional) ---
 if [[ "$RUN_MFE_LIVE_DOM_AUDIT" == "1" ]]; then
-  dom_audit_args=(--env "$ENV" --project "$LIVE_DOM_AUDIT_PROJECT" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$LIVE_DOM_AUDIT_MIN_HITS")
+  dom_audit_args=(--env "$ENV" --project "$LIVE_DOM_AUDIT_PROJECT" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$LIVE_DOM_AUDIT_MIN_HITS" --min-custom-selector-hits "$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS")
+  if [[ -n "$LIVE_DOM_AUDIT_ROUTES" ]]; then
+    dom_audit_args+=(--selector-audit-routes "$LIVE_DOM_AUDIT_ROUTES")
+  fi
+  if [[ -n "$LIVE_DOM_AUDIT_SELECTORS" ]]; then
+    dom_audit_args+=(--selector-audit-selectors "$LIVE_DOM_AUDIT_SELECTORS")
+  fi
   if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
     dom_audit_args+=(--require-runtime-theme)
   fi

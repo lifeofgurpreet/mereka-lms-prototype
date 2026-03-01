@@ -11,7 +11,10 @@ ENVIRONMENT="prod"
 BASE_URL=""
 PROJECT="${PROJECT:-chromium}"
 SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
+SELECTOR_AUDIT_ROUTES="${SELECTOR_AUDIT_ROUTES:-}"
+SELECTOR_AUDIT_SELECTORS="${SELECTOR_AUDIT_SELECTORS:-}"
 MIN_TRACKED_SELECTOR_HITS="${MIN_TRACKED_SELECTOR_HITS:-3}"
+MIN_CUSTOM_SELECTOR_HITS="${MIN_CUSTOM_SELECTOR_HITS:-0}"
 REQUIRE_RUNTIME_THEME=0
 REQUIRE_BRANDING_MARKERS="${REQUIRE_BRANDING_MARKERS:-1}"
 
@@ -24,7 +27,10 @@ Options:
   --base-url <url>                  LMS base URL (optional; overrides --env mapping)
   --project <name>                  Playwright project (default: chromium)
   --selector-audit-path <path>      MFE route path for runtime selector audit (default: /authn/login)
+  --selector-audit-routes <csv>     Comma-separated MFE route paths for DOM selector audit
+  --selector-audit-selectors <csv>  Comma-separated CSS selectors to audit across routes
   --min-selector-hits <int>         Minimum tracked selector hits required (default: 3)
+  --min-custom-selector-hits <int>  Minimum custom selectors that must match across audited routes
   --require-runtime-theme           Require runtime /theme/*.css mode in authn shell
   --require-branding-markers        Require branded markers in runtime DOM (default)
   --allow-unbranded-shell           Allow selector audit without marker assertions
@@ -54,9 +60,24 @@ while [[ $# -gt 0 ]]; do
       SELECTOR_AUDIT_PATH="$2"
       shift 2
       ;;
+    --selector-audit-routes)
+      [[ $# -lt 2 ]] && { echo "ERROR: --selector-audit-routes requires a value" >&2; exit 2; }
+      SELECTOR_AUDIT_ROUTES="$2"
+      shift 2
+      ;;
+    --selector-audit-selectors)
+      [[ $# -lt 2 ]] && { echo "ERROR: --selector-audit-selectors requires a value" >&2; exit 2; }
+      SELECTOR_AUDIT_SELECTORS="$2"
+      shift 2
+      ;;
     --min-selector-hits)
       [[ $# -lt 2 ]] && { echo "ERROR: --min-selector-hits requires a value" >&2; exit 2; }
       MIN_TRACKED_SELECTOR_HITS="$2"
+      shift 2
+      ;;
+    --min-custom-selector-hits)
+      [[ $# -lt 2 ]] && { echo "ERROR: --min-custom-selector-hits requires a value" >&2; exit 2; }
+      MIN_CUSTOM_SELECTOR_HITS="$2"
       shift 2
       ;;
     --require-runtime-theme)
@@ -99,9 +120,18 @@ if ! [[ "$MIN_TRACKED_SELECTOR_HITS" =~ ^[0-9]+$ ]]; then
   exit 2
 fi
 
+if ! [[ "$MIN_CUSTOM_SELECTOR_HITS" =~ ^[0-9]+$ ]]; then
+  echo "ERROR: --min-custom-selector-hits must be a non-negative integer (got: $MIN_CUSTOM_SELECTOR_HITS)" >&2
+  exit 2
+fi
+
 if [[ "$REQUIRE_BRANDING_MARKERS" != "0" && "$REQUIRE_BRANDING_MARKERS" != "1" ]]; then
   echo "ERROR: REQUIRE_BRANDING_MARKERS must be 0 or 1 (got: $REQUIRE_BRANDING_MARKERS)" >&2
   exit 2
+fi
+
+if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+  SELECTOR_AUDIT_ROUTES="$SELECTOR_AUDIT_PATH"
 fi
 
 MFE_ORIGIN="$(python3 - "$BASE_URL" <<'PY'
@@ -187,7 +217,7 @@ case "$PROJECT" in
     ;;
 esac
 
-echo "Running runtime selector DOM audit (base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, selector_audit_path=$SELECTOR_AUDIT_PATH, min_selector_hits=$MIN_TRACKED_SELECTOR_HITS)" | tee -a "$artifact"
+echo "Running runtime selector DOM audit (base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, selector_audit_path=$SELECTOR_AUDIT_PATH, selector_audit_routes=$SELECTOR_AUDIT_ROUTES, min_selector_hits=$MIN_TRACKED_SELECTOR_HITS, min_custom_selector_hits=$MIN_CUSTOM_SELECTOR_HITS)" | tee -a "$artifact"
 set -o pipefail
 PW_CROSS_BROWSER=0 \
 PW_ENABLE_WEBKIT=0 \
@@ -195,6 +225,9 @@ BASE_URL="$BASE_URL" \
 REQUIRE_BRANDING_MARKERS="$REQUIRE_BRANDING_MARKERS" \
 MIN_TRACKED_SELECTOR_HITS="$MIN_TRACKED_SELECTOR_HITS" \
 SELECTOR_AUDIT_PATH="$SELECTOR_AUDIT_PATH" \
+SELECTOR_AUDIT_ROUTES="$SELECTOR_AUDIT_ROUTES" \
+SELECTOR_AUDIT_SELECTORS="$SELECTOR_AUDIT_SELECTORS" \
+MIN_CUSTOM_SELECTOR_HITS="$MIN_CUSTOM_SELECTOR_HITS" \
 npx playwright test tests/selector-dom-audit.spec.ts --project="$PROJECT" --reporter=list | tee -a "$artifact"
 
 echo "Log: $artifact"

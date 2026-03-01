@@ -31,10 +31,25 @@ on:
         required: false
         default: "/authn/login"
         type: string
+      selector_audit_routes:
+        description: "Comma-separated MFE route paths for selector DOM audit (empty = selector_audit_path)"
+        required: false
+        default: ""
+        type: string
+      selector_audit_selectors:
+        description: "Comma-separated CSS selectors to audit across configured routes"
+        required: false
+        default: ""
+        type: string
       min_selector_hits:
         description: "Minimum tracked selector hits required"
         required: false
         default: "3"
+        type: string
+      min_custom_selector_hits:
+        description: "Minimum custom selectors that must match across all audited routes"
+        required: false
+        default: "0"
         type: string
       project:
         description: "Playwright project"
@@ -69,10 +84,19 @@ jobs:
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
           SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
+          SELECTOR_AUDIT_ROUTES="${{ inputs.selector_audit_routes || '' }}"
+          SELECTOR_AUDIT_SELECTORS="${{ inputs.selector_audit_selectors || '' }}"
           MIN_SELECTOR_HITS="${{ inputs.min_selector_hits || '3' }}"
+          MIN_CUSTOM_SELECTOR_HITS="${{ inputs.min_custom_selector_hits || '0' }}"
           PROJECT="${{ inputs.project || 'chromium' }}"
 
-          args=(--env "$TARGET_ENV" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$MIN_SELECTOR_HITS" --project "$PROJECT")
+          args=(--env "$TARGET_ENV" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$MIN_SELECTOR_HITS" --min-custom-selector-hits "$MIN_CUSTOM_SELECTOR_HITS" --project "$PROJECT")
+          if [[ -n "$SELECTOR_AUDIT_ROUTES" ]]; then
+            args+=(--selector-audit-routes "$SELECTOR_AUDIT_ROUTES")
+          fi
+          if [[ -n "$SELECTOR_AUDIT_SELECTORS" ]]; then
+            args+=(--selector-audit-selectors "$SELECTOR_AUDIT_SELECTORS")
+          fi
           if [[ -n "$BASE_URL_INPUT" ]]; then
             args+=(--base-url "$BASE_URL_INPUT")
           fi

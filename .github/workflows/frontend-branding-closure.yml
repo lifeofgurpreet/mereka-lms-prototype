@@ -96,6 +96,21 @@ on:
         required: false
         default: "3"
         type: string
+      live_dom_audit_routes:
+        description: "Optional comma-separated route paths for live DOM selector audit"
+        required: false
+        default: ""
+        type: string
+      live_dom_audit_selectors:
+        description: "Optional comma-separated CSS selectors for live DOM selector audit"
+        required: false
+        default: ""
+        type: string
+      live_dom_audit_min_custom_hits:
+        description: "Minimum custom selectors that must match across audited routes"
+        required: false
+        default: "0"
+        type: string
       selector_audit_path:
         description: "Route path used for runtime selector DOM audit"
         required: false
@@ -154,6 +169,9 @@ jobs:
           NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
           LIVE_DOM_AUDIT_PROJECT="${{ inputs.live_dom_audit_project || 'chromium' }}"
           LIVE_DOM_AUDIT_MIN_HITS="${{ inputs.live_dom_audit_min_hits || '3' }}"
+          LIVE_DOM_AUDIT_ROUTES="${{ inputs.live_dom_audit_routes || '' }}"
+          LIVE_DOM_AUDIT_SELECTORS="${{ inputs.live_dom_audit_selectors || '' }}"
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${{ inputs.live_dom_audit_min_custom_hits || '0' }}"
           SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
           RUNTIME_THEME_URL="${{ inputs.runtime_theme_url || '' }}"
           RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
@@ -186,6 +204,9 @@ jobs:
           NPM_START_PROJECT="$NPM_START_PROJECT" \
           LIVE_DOM_AUDIT_PROJECT="$LIVE_DOM_AUDIT_PROJECT" \
           LIVE_DOM_AUDIT_MIN_HITS="$LIVE_DOM_AUDIT_MIN_HITS" \
+          LIVE_DOM_AUDIT_ROUTES="$LIVE_DOM_AUDIT_ROUTES" \
+          LIVE_DOM_AUDIT_SELECTORS="$LIVE_DOM_AUDIT_SELECTORS" \
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS" \
           SELECTOR_AUDIT_PATH="$SELECTOR_AUDIT_PATH" \
           RUNTIME_THEME_URL="$RUNTIME_THEME_URL" \
           RUNTIME_THEME_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" \
@@ -219,6 +240,9 @@ jobs:
             echo "- npm-start project: \`${{ inputs.npm_start_project || 'chromium' }}\`"
             echo "- Live DOM audit project: \`${{ inputs.live_dom_audit_project || 'chromium' }}\`"
             echo "- Live DOM minimum selector hits: \`${{ inputs.live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM audit routes: \`${{ inputs.live_dom_audit_routes || '(selector_audit_path only)' }}\`"
+            echo "- Live DOM custom selectors: \`${{ inputs.live_dom_audit_selectors || '(none)' }}\`"
+            echo "- Live DOM minimum custom selector hits: \`${{ inputs.live_dom_audit_min_custom_hits || '0' }}\`"
             echo "- Live DOM audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
             echo "- Runtime theme URL: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
             echo "- Runtime theme timeout: \`${{ inputs.runtime_theme_timeout_seconds || '300' }}\`"
