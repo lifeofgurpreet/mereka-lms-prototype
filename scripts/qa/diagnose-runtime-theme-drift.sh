@@ -54,7 +54,8 @@ if [[ "$FAILURES" -ne 0 ]]; then
 Summary: ${FAILURES} check(s) failed.
 Suggested remediation order:
 1. Fix app/infra image tag drift so overlays reference the same Open edX + MFE tags.
-2. Sync infra vendored base from this repo when Caddyfile drift is reported.
+2. Sync infra vendored base from this repo when Caddyfile drift is reported:
+   - scripts/infra/sync-vendored-mfe-caddyfile.sh --infra-repo /home/gurpreet/projects/k8s/bbi-infrastructure --apply
 3. Re-run:
    - make qa-runtime-theme-mode-prod
    - make qa-runtime-theme-mode-dev
