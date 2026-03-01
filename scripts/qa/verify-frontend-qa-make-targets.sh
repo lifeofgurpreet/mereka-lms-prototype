@@ -70,6 +70,7 @@ assert_exec "scripts/qa/verify-email-template-multilang.sh"
 assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
 assert_exec "scripts/qa/verify-paragon-theme-budget-workflow.sh"
 assert_exec "scripts/qa/verify-frontend-extended-surfaces-workflow.sh"
+assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -238,6 +239,9 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-phase7-selector-list-coverage.sh' \
   "qa-frontend-contracts includes verify-phase7-selector-list-coverage"
+assert_make_command \
+  './scripts/qa/verify-phase2-smoke-evidence-contract.sh' \
+  "qa-frontend-contracts includes verify-phase2-smoke-evidence-contract"
 assert_make_command \
   './scripts/qa/verify-paragon-theme-budget-workflow.sh' \
   "qa-frontend-contracts includes verify-paragon-theme-budget-workflow"

@@ -435,6 +435,7 @@ check_gitops() {
       "verify-mfe-live-dom-audit-workflow.sh"
       "verify-phase7-dom-audit-contract.sh"
       "verify-phase7-selector-list-coverage.sh"
+      "verify-phase2-smoke-evidence-contract.sh"
       "verify-accessibility-audit-workflow.sh"
       "verify-a11y-runtime-lane-contract.sh"
       "verify-branding-evidence-a11y-contract.sh"
