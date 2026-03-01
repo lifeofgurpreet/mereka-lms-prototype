@@ -84,6 +84,7 @@ for target in \
   qa-phase7-selector-coverage \
   qa-phase2-smoke-evidence-prod \
   qa-phase2-smoke-evidence-dev \
+  qa-phase2-smoke-evidence-contract \
   qa-paragon-theme-budget \
   qa-frontend-extended-surfaces \
   qa-npm-start-smoke-local \
@@ -144,6 +145,12 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only' \
   "qa-phase2-smoke-evidence-dev includes dev screenshot capture"
+assert_make_command \
+  './scripts/qa/verify-phase2-smoke-evidence-contract.sh' \
+  "qa-phase2-smoke-evidence-contract includes script contract"
+assert_make_command \
+  './scripts/qa/verify-phase2-smoke-evidence-workflow.sh' \
+  "qa-phase2-smoke-evidence-contract includes workflow contract"
 assert_make_command \
   './scripts/qa/verify-paragon-token-coverage.sh' \
   "qa-paragon-theme-budget"
@@ -241,11 +248,8 @@ assert_make_command \
   './scripts/qa/verify-phase7-selector-list-coverage.sh' \
   "qa-frontend-contracts includes verify-phase7-selector-list-coverage"
 assert_make_command \
-  './scripts/qa/verify-phase2-smoke-evidence-contract.sh' \
-  "qa-frontend-contracts includes verify-phase2-smoke-evidence-contract"
-assert_make_command \
-  './scripts/qa/verify-phase2-smoke-evidence-workflow.sh' \
-  "qa-frontend-contracts includes verify-phase2-smoke-evidence-workflow"
+  '$(MAKE) qa-phase2-smoke-evidence-contract' \
+  "qa-frontend-contracts includes qa-phase2-smoke-evidence-contract aggregator"
 assert_make_command \
   './scripts/qa/verify-paragon-theme-budget-workflow.sh' \
   "qa-frontend-contracts includes verify-paragon-theme-budget-workflow"
@@ -269,6 +273,7 @@ assert_help_entry "qa-phase7-dom-audit-full-strict"
 assert_help_entry "qa-phase7-selector-coverage"
 assert_help_entry "qa-phase2-smoke-evidence-prod"
 assert_help_entry "qa-phase2-smoke-evidence-dev"
+assert_help_entry "qa-phase2-smoke-evidence-contract"
 assert_help_entry "qa-paragon-theme-budget"
 assert_help_entry "qa-frontend-extended-surfaces"
 assert_help_entry "qa-make-help-contract"

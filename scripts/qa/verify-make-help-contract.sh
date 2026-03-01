@@ -34,6 +34,7 @@ else
     "qa-phase7-dom-audit-full-strict" \
     "qa-phase7-selector-coverage" \
     "qa-phase2-smoke-evidence-prod" \
+    "qa-phase2-smoke-evidence-contract" \
     "qa-paragon-theme-budget" \
     "qa-frontend-extended-surfaces" \
     "qa-npm-start-smoke-prod" \
