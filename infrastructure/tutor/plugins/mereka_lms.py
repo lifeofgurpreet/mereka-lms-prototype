@@ -771,6 +771,43 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
     )
 )
 
+# Enforce runtime Paragon theme URLs in built MFE shells.
+# This rewrites PARAGON_THEME fileName entries to /theme/* so runtime contracts
+# consume Caddy-served theme assets instead of embedded hash filenames.
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "mfe-dockerfile-post-npm-build",
+        """
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\\{.*?\\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+updated = content[:match.start(1)] + json.dumps(theme, separators=(", ", ": ")) + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
+""",
+    )
+)
+
 ###############################################################################
 # MFE Plugin Slot Configuration
 ###############################################################################

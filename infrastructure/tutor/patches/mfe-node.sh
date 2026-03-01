@@ -299,34 +299,39 @@ for target in targets:
     def ensure_mfe_ulmo_source_refs(text):
         if "mfe/build/mfe/Dockerfile" not in str(path):
             return text
-        if "open-release/redwood.3" not in text:
-            return text
-        text = re.sub(
-            r"(ADD --keep-git-dir=true https://github\.com/openedx/[^\s]+\.git)#open-release/redwood\.3",
-            r"\1#release/ulmo.1",
-            text,
-        )
+        if "open-release/redwood.3" in text:
+            text = re.sub(
+                r"(ADD --keep-git-dir=true https://github\.com/openedx/[^\s]+\.git)#open-release/redwood\.3",
+                r"\1#release/ulmo.1",
+                text,
+            )
+            text = text.replace(
+                "--revision=open-release/redwood.3 ",
+                "--revision=release/ulmo.1 ",
+            )
+            text = text.replace(
+                "--revision=open-release/ulmo.1 ",
+                "--revision=release/ulmo.1 ",
+            )
+            # openedx-translations tracks Ulmo on release/ulmo (not release/ulmo.1).
+            # Keep translation pulls pinned to the canonical translation branch.
+            text = text.replace(
+                "--repository=openedx/openedx-translations --revision=open-release/redwood.3 ",
+                "--repository=openedx/openedx-translations --revision=release/ulmo ",
+            )
+            text = text.replace(
+                "--repository=openedx/openedx-translations --revision=release/ulmo.1 ",
+                "--repository=openedx/openedx-translations --revision=release/ulmo ",
+            )
+            text = text.replace(
+                "--repository=openedx/openedx-translations --revision=open-release/ulmo.1 ",
+                "--repository=openedx/openedx-translations --revision=release/ulmo ",
+            )
+        # frontend-app-admin-console publishes Ulmo on branch `release/ulmo`.
+        # Use the branch ref (not the tag) to avoid ref-resolution drift in Docker ADD.
         text = text.replace(
-            "--revision=open-release/redwood.3 ",
-            "--revision=release/ulmo.1 ",
-        )
-        text = text.replace(
-            "--revision=open-release/ulmo.1 ",
-            "--revision=release/ulmo.1 ",
-        )
-        # openedx-translations tracks Ulmo on release/ulmo (not release/ulmo.1).
-        # Keep translation pulls pinned to the canonical translation branch.
-        text = text.replace(
-            "--repository=openedx/openedx-translations --revision=open-release/redwood.3 ",
-            "--repository=openedx/openedx-translations --revision=release/ulmo ",
-        )
-        text = text.replace(
-            "--repository=openedx/openedx-translations --revision=release/ulmo.1 ",
-            "--repository=openedx/openedx-translations --revision=release/ulmo ",
-        )
-        text = text.replace(
-            "--repository=openedx/openedx-translations --revision=open-release/ulmo.1 ",
-            "--repository=openedx/openedx-translations --revision=release/ulmo ",
+            "frontend-app-admin-console.git#release/ulmo.1",
+            "frontend-app-admin-console.git#release/ulmo",
         )
         return text
 
