@@ -386,6 +386,7 @@ check_gitops() {
       "verify-frontend-branding-closure-workflow.sh"
       "verify-mfe-live-dom-audit-workflow.sh"
       "verify-phase7-dom-audit-contract.sh"
+      "verify-accessibility-audit-workflow.sh"
       "verify-no-latest-prod-tags.sh"
     )
     local found=0

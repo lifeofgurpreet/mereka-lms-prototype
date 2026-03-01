@@ -36,6 +36,7 @@ jobs:
           bash -n scripts/qa/verify-frontend-branding-closure-workflow.sh
           bash -n scripts/qa/verify-mfe-live-dom-audit-workflow.sh
           bash -n scripts/qa/verify-phase7-dom-audit-contract.sh
+          bash -n scripts/qa/verify-accessibility-audit-workflow.sh
           bash -n scripts/qa/verify-kustomize-no-deprecated-keys.sh
           bash -n scripts/qa/verify-dev-prod-image-parity.sh
           bash -n scripts/qa/verify-site-id-hardening.sh
@@ -113,6 +114,10 @@ jobs:
       - name: Verify Phase 7 DOM audit contract
         run: |
           ./scripts/qa/verify-phase7-dom-audit-contract.sh
+
+      - name: Verify accessibility-audit workflow contract
+        run: |
+          ./scripts/qa/verify-accessibility-audit-workflow.sh
 
       - name: Verify no deprecated kustomize keys
         run: |
