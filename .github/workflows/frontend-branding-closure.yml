@@ -85,6 +85,14 @@ on:
         required: true
         default: false
         type: boolean
+      screenshot_scope:
+        description: "Screenshot surface scope when screenshot gate is enabled"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - full
+          - mfe-only
       npm_start_base_url:
         description: "Base URL for npm-start smoke (empty = auto by env)"
         required: false
@@ -198,6 +206,7 @@ jobs:
           LIVE_DOM_AUDIT_PROFILE="${{ inputs.live_dom_audit_profile || 'standard' }}"
           RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
           RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
+          SCREENSHOT_SCOPE="${{ inputs.screenshot_scope || 'full' }}"
           STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
           NPM_START_BASE_URL="${{ inputs.npm_start_base_url || '' }}"
           NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
@@ -238,6 +247,7 @@ jobs:
           STRICT_WEBKIT="$STRICT_WEBKIT" \
           REQUIRE_BRANDING_MARKERS=$([[ "$REQUIRE_BRANDING_MARKERS" == "true" ]] && echo 1 || echo 0) \
           RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
+          SCREENSHOT_SCOPE="$SCREENSHOT_SCOPE" \
           NPM_START_BASE_URL="$NPM_START_BASE_URL" \
           NPM_START_PROJECT="$NPM_START_PROJECT" \
           LIVE_DOM_AUDIT_PROFILE="$LIVE_DOM_AUDIT_PROFILE" \
@@ -280,6 +290,7 @@ jobs:
             echo "- Live DOM audit profile: \`${{ inputs.live_dom_audit_profile || 'standard' }}\`"
             echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
             echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
+            echo "- Screenshot scope: \`${{ inputs.screenshot_scope || 'full' }}\`"
             echo "- npm-start base URL: \`${{ inputs.npm_start_base_url || '(auto by env)' }}\`"
             echo "- npm-start project: \`${{ inputs.npm_start_project || 'chromium' }}\`"
             echo "- Live DOM audit project: \`${{ inputs.live_dom_audit_project || 'chromium' }}\`"

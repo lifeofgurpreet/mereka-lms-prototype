@@ -18,6 +18,7 @@ fi
 
 for input_key in target_environment cross_browser_matrix require_runtime_theme require_branding_markers require_webkit \
                  run_runtime_theme_contract_gate run_npm_start_smoke_gate run_screenshot_gate live_dom_audit_profile \
+                 screenshot_scope \
                  run_certificate_branding_gate run_live_dom_audit_gate \
                  live_dom_audit_project live_dom_audit_min_hits live_dom_audit_routes live_dom_audit_selectors live_dom_audit_min_custom_hits selector_audit_path \
                  runtime_theme_url runtime_theme_timeout_seconds learning_path a11y_mode a11y_target_url a11y_routes a11y_allow_missing_reports; do
@@ -89,6 +90,11 @@ fi
 
 if ! rg -n 'RUN_CERTIFICATE_BRANDING=' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow does not wire RUN_CERTIFICATE_BRANDING into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'SCREENSHOT_SCOPE=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire SCREENSHOT_SCOPE into pipeline env"
   violations=1
 fi
 

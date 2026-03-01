@@ -29,6 +29,7 @@ RUN_RUNTIME_THEME_CONTRACT="${RUN_RUNTIME_THEME_CONTRACT:-1}"
 RUN_MFE_LIVE_DOM_AUDIT="${RUN_MFE_LIVE_DOM_AUDIT:-0}"
 RUN_NPM_START_SMOKE="${RUN_NPM_START_SMOKE:-0}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
+SCREENSHOT_SCOPE="${SCREENSHOT_SCOPE:-full}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
 CROSS_BROWSER="${CROSS_BROWSER:-0}"
 LEARNING_PATH="${LEARNING_PATH:-/learning}"
@@ -113,6 +114,8 @@ Environment toggles:
   SELECTOR_AUDIT_PATH=<path>
                             Runtime path for selector DOM audit (default: /authn/login)
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
+  SCREENSHOT_SCOPE=full|mfe-only
+                            Screenshot scope when RUN_SCREENSHOTS=1 (default: full)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
   STRICT_WEBKIT=0|1         Require WebKit success in cross-browser gate (default: 0)
   REQUIRE_RUNTIME_THEME=0|1|auto
@@ -175,6 +178,11 @@ case "$ENV" in
     ;;
 esac
 
+if [[ "$SCREENSHOT_SCOPE" != "full" && "$SCREENSHOT_SCOPE" != "mfe-only" ]]; then
+  echo "ERROR: SCREENSHOT_SCOPE must be full or mfe-only (got: $SCREENSHOT_SCOPE)" >&2
+  exit 2
+fi
+
 if [[ "$REQUIRE_RUNTIME_THEME" == "auto" ]]; then
   if [[ "$ENV" == "prod" ]]; then
     REQUIRE_RUNTIME_THEME=1
@@ -210,6 +218,7 @@ echo "Live DOM audit profile: $LIVE_DOM_AUDIT_PROFILE"
 echo "Runtime slot marker policy: $SLOT_MARKER_POLICY"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
+echo "Screenshot scope: $SCREENSHOT_SCOPE"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
 echo "Require runtime theme mode: $REQUIRE_RUNTIME_THEME"
 echo "Require branded runtime slot markers: $REQUIRE_BRANDING_MARKERS"
@@ -483,8 +492,12 @@ fi
 
 # --- Gate 18: Public Screenshot Capture (optional operator evidence) ---
 if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
+  screenshot_args=("$ENV")
+  if [[ "$SCREENSHOT_SCOPE" == "mfe-only" ]]; then
+    screenshot_args=(--env "$ENV" --mfe-only)
+  fi
   run_gate "capture-branding-screenshots" \
-    ./scripts/qa/capture-branding-screenshots.sh "$ENV"
+    ./scripts/qa/capture-branding-screenshots.sh "${screenshot_args[@]}"
 else
   skip_gate "capture-branding-screenshots" "RUN_SCREENSHOTS=0"
 fi
@@ -541,6 +554,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - npm-start smoke headed: ${NPM_START_HEADED}
 - npm-start smoke timeout: ${NPM_START_TIMEOUT_SECONDS}s
 - Screenshot gate enabled: ${RUN_SCREENSHOTS}
+- Screenshot scope: ${SCREENSHOT_SCOPE}
 
 ## Failure Taxonomy
 
