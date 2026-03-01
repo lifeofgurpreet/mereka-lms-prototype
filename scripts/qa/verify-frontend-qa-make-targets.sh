@@ -184,6 +184,9 @@ assert_make_command \
   './scripts/qa/verify-frontend-qa-make-targets.sh' \
   "qa-frontend-contracts includes verify-frontend-qa-make-targets"
 assert_make_command \
+  './scripts/qa/verify-paragon-token-coverage.sh' \
+  "qa-frontend-contracts includes verify-paragon-token-coverage"
+assert_make_command \
   './scripts/qa/verify-certificate-branding-workflow.sh' \
   "qa-frontend-contracts includes verify-certificate-branding-workflow"
 assert_make_command \
