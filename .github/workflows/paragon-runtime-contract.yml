@@ -1,0 +1,81 @@
+name: Paragon Runtime Contract
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      runtime_url:
+        description: "Override runtime apps URL (empty = auto by environment)"
+        required: false
+        default: ""
+        type: string
+      require_runtime_theme:
+        description: "Require live runtime URL checks"
+        required: true
+        default: false
+        type: boolean
+      require_slot_markers:
+        description: "Require branded slot markers in runtime authn bundles"
+        required: true
+        default: true
+        type: boolean
+
+permissions: {}
+
+jobs:
+  paragon-runtime-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run paragon runtime contract gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          RUNTIME_URL="${{ inputs.runtime_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_SLOT_MARKERS="${{ inputs.require_slot_markers || 'true' }}"
+
+          args=()
+          if [[ -n "$RUNTIME_URL" ]]; then
+            args+=(--runtime-url "$RUNTIME_URL")
+          elif [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            if [[ "$TARGET_ENV" == "prod" ]]; then
+              args+=(--runtime-url "https://apps.academyv2.mereka.io")
+            else
+              args+=(--runtime-url "https://apps.academyv2.mereka.dev")
+            fi
+          fi
+
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime)
+          fi
+          if [[ "$REQUIRE_SLOT_MARKERS" == "true" ]]; then
+            args+=(--require-slot-markers)
+          else
+            args+=(--allow-missing-slot-markers)
+          fi
+
+          ./scripts/qa/verify-paragon-runtime.sh "${args[@]}" \
+            | tee var/qa/paragon-runtime-contract.log
+
+      - name: Upload paragon runtime contract artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paragon-runtime-contract-${{ inputs.target_environment || 'prod' }}-${{ github.run_number }}
+          path: |
+            var/qa/paragon-runtime-contract.log
+          if-no-files-found: warn

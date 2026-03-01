@@ -28,6 +28,7 @@ jobs:
           bash -n scripts/qa/verify-certificate-branding-workflow.sh
           bash -n scripts/qa/verify-email-template-branding-workflow.sh
           bash -n scripts/qa/verify-mfe-selector-hardening-workflow.sh
+          bash -n scripts/qa/verify-paragon-runtime-contract-workflow.sh
           bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
           bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
@@ -78,6 +79,10 @@ jobs:
       - name: Verify MFE selector hardening workflow contract
         run: |
           ./scripts/qa/verify-mfe-selector-hardening-workflow.sh
+
+      - name: Verify paragon runtime contract workflow
+        run: |
+          ./scripts/qa/verify-paragon-runtime-contract-workflow.sh
 
       - name: Verify cross-browser branding workflow contract
         run: |

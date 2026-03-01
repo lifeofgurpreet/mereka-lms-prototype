@@ -378,6 +378,7 @@ check_gitops() {
       "verify-certificate-branding-workflow.sh"
       "verify-email-template-branding-workflow.sh"
       "verify-mfe-selector-hardening-workflow.sh"
+      "verify-paragon-runtime-contract-workflow.sh"
       "verify-cross-browser-branding-workflow.sh"
       "verify-npm-start-smoke-workflow.sh"
       "verify-frontend-performance-spotcheck-workflow.sh"
