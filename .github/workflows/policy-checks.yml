@@ -25,6 +25,7 @@ jobs:
           bash -n scripts/qa/verify-release-evidence-workflow.sh
           bash -n scripts/qa/verify-ci-cd-pipeline.sh
           bash -n scripts/qa/verify-a11y-tenant-branding-workflow.sh
+          bash -n scripts/qa/verify-certificate-branding-workflow.sh
           bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
           bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
@@ -63,6 +64,10 @@ jobs:
       - name: Verify a11y tenant branding workflow contract
         run: |
           ./scripts/qa/verify-a11y-tenant-branding-workflow.sh
+
+      - name: Verify certificate branding workflow contract
+        run: |
+          ./scripts/qa/verify-certificate-branding-workflow.sh
 
       - name: Verify cross-browser branding workflow contract
         run: |
