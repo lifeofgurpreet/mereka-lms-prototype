@@ -197,6 +197,12 @@ assert_make_command \
   './scripts/qa/verify-paragon-token-coverage.sh' \
   "qa-frontend-contracts includes verify-paragon-token-coverage"
 assert_make_command \
+  './scripts/qa/verify-certificate-branding.sh' \
+  "qa-frontend-contracts includes verify-certificate-branding"
+assert_make_command \
+  './scripts/qa/verify-email-template-multilang.sh' \
+  "qa-frontend-contracts includes verify-email-template-multilang"
+assert_make_command \
   './scripts/qa/verify-certificate-branding-workflow.sh' \
   "qa-frontend-contracts includes verify-certificate-branding-workflow"
 assert_make_command \

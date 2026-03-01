@@ -188,6 +188,8 @@ qa-frontend-contracts: ## Run frontend closure contract suite (workflows + make 
 	./scripts/qa/verify-make-help-contract.sh
 	./scripts/qa/verify-frontend-qa-make-targets.sh
 	./scripts/qa/verify-paragon-token-coverage.sh
+	./scripts/qa/verify-certificate-branding.sh
+	./scripts/qa/verify-email-template-multilang.sh
 	./scripts/qa/verify-certificate-branding-workflow.sh
 	./scripts/qa/verify-email-template-branding-workflow.sh
 	./scripts/qa/verify-frontend-contracts-workflow.sh
