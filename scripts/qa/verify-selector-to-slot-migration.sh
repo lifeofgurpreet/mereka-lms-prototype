@@ -104,6 +104,8 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     "org.openedx.frontend.layout.header_desktop_logged_out_items.v1"
     "org.openedx.frontend.layout.header_mobile_logged_out_items.v1"
     "org.openedx.frontend.layout.header_desktop_secondary_menu.v1"
+    "org.openedx.frontend.layout.header_learning_help.v1"
+    "org.openedx.frontend.layout.header_learning_logged_out_items.v1"
     "org.openedx.frontend.layout.studio_footer.v1"
     "org.openedx.frontend.authoring.course_unit_sidebar.v1"
     "org.openedx.frontend.authoring.course_outline_sidebar.v1"

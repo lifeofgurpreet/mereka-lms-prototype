@@ -836,6 +836,8 @@ PY
 #   org.openedx.frontend.layout.header_desktop_logged_out_items.v1 | Desktop logged-out menu helper
 #   org.openedx.frontend.layout.header_mobile_logged_out_items.v1 | Mobile logged-out menu helper
 #   org.openedx.frontend.layout.header_desktop_secondary_menu.v1 | Desktop secondary-menu helper
+#   org.openedx.frontend.layout.header_learning_help.v1 | Learning help-link helper
+#   org.openedx.frontend.layout.header_learning_logged_out_items.v1 | Learning logged-out items helper
 #   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
 #   org.openedx.frontend.authoring.course_outline_sidebar.v1 | Studio outline-page sidebar helper
 #   org.openedx.frontend.authoring.course_outline_header_actions.v1 | Studio outline header actions helper
@@ -1865,6 +1867,32 @@ for _mfe in [
             },
             """,
         ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_learning_help.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Replace,
+                widget: {
+                    id: 'mereka_layout_header_learning_help_link',
+                    type: DIRECT_PLUGIN,
+                    priority: 10,
+                    RenderWidget: MerekaLearningHelpLink,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_learning_logged_out_items.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaLearningLoggedOutItems(widget),
+            },
+            """,
+        ),
     ])
 
 ###############################################################################
@@ -2002,6 +2030,42 @@ const withMerekaMenuItems = (widget, menuItems = []) => {
   };
 };
 
+const withMerekaLearningLoggedOutItems = (widget) => {
+  const widgetContent = (widget && widget.content) || {};
+  const defaultButtons = Array.isArray(widgetContent.buttonsInfo) ? widgetContent.buttonsInfo : null;
+  if (!Array.isArray(defaultButtons)) {
+    return widget;
+  }
+
+  const config = getConfig();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const existingHrefs = new Set(defaultButtons.map((item) => (item && item.href ? item.href : '')));
+  const nextButtons = [...defaultButtons];
+
+  if (!existingHrefs.has('/dashboard/courses')) {
+    nextButtons.push({
+      href: '/dashboard/courses',
+      message: 'Discover Courses',
+    });
+  }
+
+  if (typeof variant?.helpUrl === 'string' && variant.helpUrl && !existingHrefs.has(variant.helpUrl)) {
+    nextButtons.push({
+      href: variant.helpUrl,
+      message: 'Support',
+    });
+  }
+
+  return {
+    ...widget,
+    content: {
+      ...widgetContent,
+      buttonsInfo: nextButtons,
+    },
+  };
+};
+
 // Custom Mereka header-logo component (Direct plugin — registered via header_logo slot)
 // Wired into org.openedx.frontend.layout.header_logo.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaHeaderLogo = () => {
@@ -2015,6 +2079,19 @@ const MerekaHeaderLogo = () => {
   return (
     <a href={getLogoHref(baseUrl)} aria-label={`${variant.brand} dashboard`} className="mereka-header-logo">
       <img src={baseUrl ? `${baseUrl}${selectedLogo}` : selectedLogo} alt={`${variant.brand} logo`} />
+    </a>
+  );
+};
+
+// Learning-header help link replacement for org.openedx.frontend.layout.header_learning_help.v1.
+const MerekaLearningHelpLink = () => {
+  const config = getConfig();
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const helpUrl = (typeof variant?.helpUrl === 'string' && variant.helpUrl) ? variant.helpUrl : 'https://help.mereka.io/';
+  return (
+    <a href={helpUrl} className="mereka-learning-help-link" target="_blank" rel="noopener noreferrer">
+      Support
     </a>
   );
 };
