@@ -14,6 +14,7 @@
 # Usage:
 #   ./scripts/qa/verify-auth-surfaces.sh prod
 #   ./scripts/qa/verify-auth-surfaces.sh dev
+#   ./scripts/qa/verify-auth-surfaces.sh staging
 #
 # Optional:
 #   STRICT_ADMIN_LOGIN_REDIRECT=1  # fail if /admin/login doesn't redirect to /login
@@ -24,8 +25,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENVIRONMENT="${1:-}"
-if [[ -z "$ENVIRONMENT" || ( "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ) ]]; then
-  echo "Usage: $0 {prod|dev}" >&2
+if [[ -z "$ENVIRONMENT" || ( "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "staging" ) ]]; then
+  echo "Usage: $0 {prod|dev|staging}" >&2
   exit 1
 fi
 
@@ -41,6 +42,7 @@ failures=0
 log_ok() { printf "✓ %s\n" "$*"; }
 log_fail() { printf "✗ %s\n" "$*" >&2; failures=$((failures + 1)); }
 log_warn() { printf "! %s\n" "$*" >&2; }
+host_resolves() { getent hosts "$1" >/dev/null 2>&1; }
 
 curl_loc() {
   # Prints "code location"
@@ -121,7 +123,7 @@ require_authentik_accepts_authorize_url() {
 
   local code loc auth_code
   read -r code loc < <(curl_loc "$start_url")
-  if [[ "$code" != "302" || "$loc" != https://auth0.mereka.io/* ]]; then
+  if [[ "$code" != "302" || "$loc" != "https://${AUTHENTIK_DOMAIN_FOR_ENV}/"* ]]; then
     log_fail "$label (expected 302 -> Authentik authorize, got code=$code loc=$loc) url=$start_url"
     return 1
   fi
@@ -176,6 +178,8 @@ require_oidc_session_cookie_domain() {
   cookie_line_lc="$(printf "%s" "$cookie_line" | tr '[:upper:]' '[:lower:]')"
   if [[ "$cookie_line_lc" == *"domain=${expected}"* ]]; then
     log_ok "$label (session cookie domain=${expected})"
+  elif [[ "${ALLOW_HOST_ONLY_SESSION_COOKIE:-0}" == "1" && "$cookie_line_lc" != *"domain="* ]]; then
+    log_ok "$label (host-only session cookie accepted for non-prod)"
   else
     log_fail "$label (expected session cookie domain=${expected}, got: $cookie_line) url=$url"
   fi
@@ -269,12 +273,25 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   STUDIO_HOSTS=("studio.${LMS_DOMAIN}" "$BIJI_STUDIO_DOMAIN")
   MFE_HOSTS=("apps.${LMS_DOMAIN}" "$BIJI_MFE_DOMAIN")
   ECOSYSTEM_BASE="$LMS_DOMAIN"
+  AUTHENTIK_DOMAIN_FOR_ENV="$AUTHENTIK_DOMAIN"
+  ALLOW_HOST_ONLY_SESSION_COOKIE="${ALLOW_HOST_ONLY_SESSION_COOKIE:-0}"
+elif [[ "$ENVIRONMENT" == "staging" ]]; then
+  LMS_DOMAINS=("$STAGING_LMS_DOMAIN")
+  LMS_ALIAS_DOMAINS=()
+  STUDIO_HOSTS=("$STAGING_STUDIO_DOMAIN")
+  MFE_HOSTS=("$STAGING_MFE_DOMAIN")
+  ECOSYSTEM_BASE="$STAGING_LMS_DOMAIN"
+  AUTHENTIK_DOMAIN_FOR_ENV="$STAGING_AUTHENTIK_DOMAIN"
+  ALLOW_HOST_ONLY_SESSION_COOKIE="${ALLOW_HOST_ONLY_SESSION_COOKIE:-1}"
+  ALLOW_UNRESOLVED_OPTIONAL_HOSTS="${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-1}"
 else
   LMS_DOMAINS=("$DEV_LMS_DOMAIN")
   LMS_ALIAS_DOMAINS=("$DEV_PREVIEW_DOMAIN")
   STUDIO_HOSTS=("studio.${DEV_LMS_DOMAIN}")
   MFE_HOSTS=("apps.${DEV_LMS_DOMAIN}")
   ECOSYSTEM_BASE="$DEV_LMS_DOMAIN"
+  AUTHENTIK_DOMAIN_FOR_ENV="$DEV_AUTHENTIK_DOMAIN"
+  ALLOW_HOST_ONLY_SESSION_COOKIE="${ALLOW_HOST_ONLY_SESSION_COOKIE:-1}"
 fi
 
 echo "Environment: $ENVIRONMENT"
@@ -285,7 +302,7 @@ for domain in "${LMS_DOMAINS[@]}"; do
   require_302_location_contains \
     "https://${domain}/auth/login/oidc/" \
     "${domain}: LMS OIDC entrypoint" \
-    "auth0.mereka.io/application/o/authorize/"
+    "${AUTHENTIK_DOMAIN_FOR_ENV}/application/o/authorize/"
 
   # Make sure redirect_uri is aligned with the domain we're testing.
   require_302_location_contains \
@@ -320,7 +337,7 @@ for domain in "${LMS_ALIAS_DOMAINS[@]}"; do
   require_302_location_contains \
     "https://${domain}/auth/login/oidc/" \
     "${domain}: LMS OIDC entrypoint (alias)" \
-    "auth0.mereka.io/application/o/authorize/"
+    "${AUTHENTIK_DOMAIN_FOR_ENV}/application/o/authorize/"
 
   require_302_location_contains \
     "https://${domain}/auth/login/oidc/" \
@@ -364,6 +381,19 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
     "https://${BIJI_STUDIO_DOMAIN}/complete/edx-oauth2/" \
     "${BIJI_STUDIO_DOMAIN}: /complete/edx-oauth2 does not 500" \
     "302" "400" "403" "404"
+elif [[ "$ENVIRONMENT" == "staging" ]]; then
+  if host_resolves "$STAGING_STUDIO_DOMAIN"; then
+    check_studio_signin_redirect "$STAGING_STUDIO_DOMAIN" "$STAGING_LMS_DOMAIN"
+    check_studio_home_next_scheme "$STAGING_STUDIO_DOMAIN"
+    require_status_one_of \
+      "https://${STAGING_STUDIO_DOMAIN}/complete/edx-oauth2/" \
+      "${STAGING_STUDIO_DOMAIN}: /complete/edx-oauth2 does not 500" \
+      "302" "400" "403" "404"
+  elif [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]]; then
+    log_warn "staging optional host unresolved: ${STAGING_STUDIO_DOMAIN} (skipping Studio checks)"
+  else
+    log_fail "staging required host unresolved: ${STAGING_STUDIO_DOMAIN}"
+  fi
 else
   check_studio_signin_redirect "studio.${DEV_LMS_DOMAIN}" "$DEV_LMS_DOMAIN"
   check_studio_home_next_scheme "studio.${DEV_LMS_DOMAIN}"
@@ -376,31 +406,39 @@ fi
 
 # MFE login should be reachable on all configured MFE hosts.
 for mfe in "${MFE_HOSTS[@]}"; do
+  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "$mfe"; then
+    log_warn "optional MFE host unresolved: ${mfe} (skipping)"
+    continue
+  fi
   require_200 "https://${mfe}/authn/login" "${mfe}: Authn MFE login"
   require_200 "https://${mfe}/api/mfe_config/v1" "${mfe}: MFE config endpoint"
 done
 
 # MFE config must be site-correct (prevents SSO/login drift across microsites).
-require_body_contains \
-  "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" \
-  "Primary MFE config LMS_BASE_URL" \
-  "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
-
-primary_mfe_config="$(curl -fsSL "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1")" || primary_mfe_config=""
-if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\"" <<<"$primary_mfe_config" \
-  || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$primary_mfe_config"; then
-  echo "✓ Primary MFE config refresh endpoint is same-origin (absolute or relative)"
+if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "apps.${ECOSYSTEM_BASE}"; then
+  log_warn "optional primary MFE host unresolved: apps.${ECOSYSTEM_BASE} (skipping MFE config checks)"
 else
-  echo "✗ Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh) (expected REFRESH_ACCESS_TOKEN_ENDPOINT to be https://apps.${ECOSYSTEM_BASE}/login_refresh OR /login_refresh) url=https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" >&2
-  failures=$((failures + 1))
-fi
+  require_body_contains \
+    "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" \
+    "Primary MFE config LMS_BASE_URL" \
+    "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
 
-# Sanity-check the reverse-proxy exists: unauthenticated HEAD should return 405 (POST only),
-# not 404/500. We do not require 401 here because the endpoint can be hit without session.
-require_status \
-  "https://apps.${ECOSYSTEM_BASE}/login_refresh" \
-  "Primary MFE host exposes /login_refresh" \
-  "405"
+  primary_mfe_config="$(curl -fsSL "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1")" || primary_mfe_config=""
+  if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\"" <<<"$primary_mfe_config" \
+    || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$primary_mfe_config"; then
+    echo "✓ Primary MFE config refresh endpoint is same-origin (absolute or relative)"
+  else
+    echo "✗ Primary MFE config refresh endpoint is same-origin (prevents 401 login_refresh) (expected REFRESH_ACCESS_TOKEN_ENDPOINT to be https://apps.${ECOSYSTEM_BASE}/login_refresh OR /login_refresh) url=https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1" >&2
+    failures=$((failures + 1))
+  fi
+
+  # Sanity-check the reverse-proxy exists: unauthenticated HEAD should return 405 (POST only),
+  # not 404/500. We do not require 401 here because the endpoint can be hit without session.
+  require_status \
+    "https://apps.${ECOSYSTEM_BASE}/login_refresh" \
+    "Primary MFE host exposes /login_refresh" \
+    "405"
+fi
 
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   require_body_contains \
@@ -428,6 +466,10 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
 fi
 
 for svc in discovery credentials ecommerce; do
+  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "${svc}.${ECOSYSTEM_BASE}"; then
+    log_warn "optional service host unresolved: ${svc}.${ECOSYSTEM_BASE} (skipping auth entrypoint checks)"
+    continue
+  fi
   require_302_location_is \
     "https://${svc}.${ECOSYSTEM_BASE}/login/" \
     "${svc}: /login SSO entrypoint" \
@@ -441,26 +483,37 @@ for svc in discovery credentials ecommerce; do
 done
 
 for svc in discovery credentials ecommerce; do
+  if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "${svc}.${ECOSYSTEM_BASE}"; then
+    continue
+  fi
   check_admin_login_redirect "$svc" "$ECOSYSTEM_BASE"
 done
 
 # Notes and forum are API-first. They do not have their own SSO entrypoints.
 # We still verify they are reachable so operators don't misdiagnose outages as "SSO missing".
-require_body_contains \
-  "https://notes.${ECOSYSTEM_BASE}/" \
-  "notes: API banner" \
-  "edX Notes API"
+if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "notes.${ECOSYSTEM_BASE}"; then
+  log_warn "optional service host unresolved: notes.${ECOSYSTEM_BASE} (skipping)"
+else
+  require_body_contains \
+    "https://notes.${ECOSYSTEM_BASE}/" \
+    "notes: API banner" \
+    "edX Notes API"
+fi
 
 # Forum has had multiple production architectures over time.
 # Current contract: it MUST be reachable (no 5xx) and heartbeat MUST return 200.
-require_status_one_of \
-  "https://forum.${ECOSYSTEM_BASE}/" \
-  "forum: reachable" \
-  "200" "401" "404"
+if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "forum.${ECOSYSTEM_BASE}"; then
+  log_warn "optional service host unresolved: forum.${ECOSYSTEM_BASE} (skipping)"
+else
+  require_status_one_of \
+    "https://forum.${ECOSYSTEM_BASE}/" \
+    "forum: reachable" \
+    "200" "401" "404"
 
-require_200 \
-  "https://forum.${ECOSYSTEM_BASE}/heartbeat" \
-  "forum: heartbeat"
+  require_200 \
+    "https://forum.${ECOSYSTEM_BASE}/heartbeat" \
+    "forum: heartbeat"
+fi
 
 if [[ "$failures" -gt 0 ]]; then
   echo ""

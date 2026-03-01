@@ -15,6 +15,7 @@ NAMESPACE="${NAMESPACE:-mereka-lms}"
 DRY_RUN="${DRY_RUN:-true}"
 ENVIRONMENT="${ENVIRONMENT:-prod}"
 DEFINITIONS_PATH=""
+SERVICE_TARGET="${SERVICE_TARGET:-lms}"
 
 log_info() {
   echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] INFO: $*"
@@ -33,7 +34,8 @@ Apply multisite configuration to LMS database via kubectl exec.
 OPTIONS:
   -c, --context CONTEXT       Kubernetes context (default: $K8S_CONTEXT)
   -n, --namespace NAMESPACE   K8s namespace (default: mereka-lms)
-  -e, --env ENV               Which definition set to apply (prod|dev). Default: prod
+  -e, --env ENV               Which definition set to apply (prod|dev|staging). Default: prod
+  -s, --service TARGET        Which service to run against (lms|cms|both). Default: lms
   --definitions PATH          Path to multisite definitions YAML (overrides --env)
   --dry-run                   Preview operations without applying changes (default)
   --apply                     Apply changes to database
@@ -43,9 +45,10 @@ EXAMPLES:
   # Preview changes (dry run - default)
   $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
 
-  # Apply changes to production/dev
+  # Apply changes to production/dev/staging
   $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
   $0 --context kind-dev --env dev --apply
+  $0 --context rke2-nonprod --namespace stg-mereka-lms --env staging --apply
 
   # Apply to different namespace
   $0 --namespace production --apply
@@ -72,6 +75,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     -e|--env)
       ENVIRONMENT="$2"
+      shift 2
+      ;;
+    -s|--service)
+      SERVICE_TARGET="$2"
       shift 2
       ;;
     --definitions)
@@ -102,8 +109,10 @@ if [[ -z "$DEFINITIONS_PATH" ]]; then
     DEFINITIONS_PATH="$REPO_ROOT/infrastructure/tutor/multisite-sites.yml"
   elif [[ "$ENVIRONMENT" == "dev" ]]; then
     DEFINITIONS_PATH="$REPO_ROOT/infrastructure/tutor/multisite-sites.dev.yml"
+  elif [[ "$ENVIRONMENT" == "staging" ]]; then
+    DEFINITIONS_PATH="$REPO_ROOT/infrastructure/tutor/multisite-sites.staging.yml"
   else
-    log_error "Unknown --env value: $ENVIRONMENT (expected prod|dev)"
+    log_error "Unknown --env value: $ENVIRONMENT (expected prod|dev|staging)"
     exit 1
   fi
 fi
@@ -113,58 +122,76 @@ if [[ ! -f "$DEFINITIONS_PATH" ]]; then
   exit 1
 fi
 
-# Find LMS pod
-log_info "Finding LMS pod in context=$K8S_CONTEXT namespace=$NAMESPACE"
-LMS_POD=$(
-  kubectl --context "$K8S_CONTEXT" get pods -n "$NAMESPACE" \
-    -l app.kubernetes.io/name=lms \
-    -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo ""
-)
-
-if [[ -z "$LMS_POD" ]]; then
-  log_error "No LMS pod found in namespace $NAMESPACE"
-  log_error "Check that the namespace exists and pods are running:"
-  log_error "  kubectl --context $K8S_CONTEXT get pods -n $NAMESPACE"
+if [[ "$SERVICE_TARGET" != "lms" && "$SERVICE_TARGET" != "cms" && "$SERVICE_TARGET" != "both" ]]; then
+  log_error "Invalid --service value: $SERVICE_TARGET (expected lms|cms|both)"
   exit 1
 fi
 
-log_info "Using LMS pod: $LMS_POD"
-
-# Copy the multisite bootstrap script to the pod
-log_info "Copying multisite_bootstrap_django.py to LMS pod..."
-kubectl --context "$K8S_CONTEXT" cp "$REPO_ROOT/scripts/shared/multisite_bootstrap_django.py" \
-  "$NAMESPACE/$LMS_POD:/tmp/multisite_bootstrap.py"
-
-# Copy the multisite definition YAML (single source of truth)
-log_info "Copying multisite definitions to LMS pod: $DEFINITIONS_PATH"
-kubectl --context "$K8S_CONTEXT" cp "$DEFINITIONS_PATH" \
-  "$NAMESPACE/$LMS_POD:/tmp/multisite-sites.yml"
-
-# Run the script
-if [[ "$DRY_RUN" == "true" ]]; then
-  log_info "Running in DRY RUN mode (no changes will be made)"
-  kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$LMS_POD" -- \
-    env MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
-    python /tmp/multisite_bootstrap.py \
-    --dry-run
-else
-  log_info "Applying multisite configuration to database (context=$K8S_CONTEXT namespace=$NAMESPACE)..."
-  kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$LMS_POD" -- \
-    env MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
-    python /tmp/multisite_bootstrap.py \
-    $APPLY_FLAG
+SERVICES=(lms)
+if [[ "$SERVICE_TARGET" == "cms" ]]; then
+  SERVICES=(cms)
+elif [[ "$SERVICE_TARGET" == "both" ]]; then
+  SERVICES=(lms cms)
 fi
 
-# Cleanup
-log_info "Cleaning up temporary files..."
-kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$LMS_POD" -- rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml
+for service in "${SERVICES[@]}"; do
+  log_info "Finding ${service} pod in context=$K8S_CONTEXT namespace=$NAMESPACE"
+  SERVICE_POD=$(
+    kubectl --context "$K8S_CONTEXT" get pods -n "$NAMESPACE" \
+      -l app.kubernetes.io/name="$service" \
+      -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo ""
+  )
+
+  if [[ -z "$SERVICE_POD" ]]; then
+    log_error "No $service pod found in namespace $NAMESPACE"
+    log_error "Check that the namespace exists and pods are running:"
+    log_error "  kubectl --context $K8S_CONTEXT get pods -n $NAMESPACE"
+    exit 1
+  fi
+
+  settings_module="lms.envs.tutor.production"
+  scope_arg=""
+  if [[ "$service" == "cms" ]]; then
+    settings_module="cms.envs.tutor.production"
+    # CMS needs django_site/SiteConfiguration parity, but organization + OIDC rows
+    # are LMS-owned and should be reconciled from LMS settings.
+    scope_arg="--scope sites"
+  fi
+
+  log_info "Using $service pod: $SERVICE_POD"
+  log_info "Copying multisite_bootstrap_django.py to $service pod..."
+  kubectl --context "$K8S_CONTEXT" cp "$REPO_ROOT/scripts/shared/multisite_bootstrap_django.py" \
+    "$NAMESPACE/$SERVICE_POD:/tmp/multisite_bootstrap.py"
+
+  log_info "Copying multisite definitions to $service pod: $DEFINITIONS_PATH"
+  kubectl --context "$K8S_CONTEXT" cp "$DEFINITIONS_PATH" \
+    "$NAMESPACE/$SERVICE_POD:/tmp/multisite-sites.yml"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    log_info "Running in DRY RUN mode for $service (no changes will be made)"
+    kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$SERVICE_POD" -- \
+      env DJANGO_SETTINGS_MODULE="$settings_module" MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
+      python /tmp/multisite_bootstrap.py \
+      --dry-run $scope_arg
+  else
+    log_info "Applying multisite configuration for $service (context=$K8S_CONTEXT namespace=$NAMESPACE)..."
+    kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$SERVICE_POD" -- \
+      env DJANGO_SETTINGS_MODULE="$settings_module" MULTISITE_DEFINITIONS_PATH=/tmp/multisite-sites.yml \
+      python /tmp/multisite_bootstrap.py \
+      $APPLY_FLAG $scope_arg
+  fi
+
+  log_info "Cleaning up temporary files for $service..."
+  kubectl --context "$K8S_CONTEXT" exec -n "$NAMESPACE" "$SERVICE_POD" -- \
+    rm -f /tmp/multisite_bootstrap.py /tmp/multisite-sites.yml
+done
 
 log_info "Done!"
 
 if [[ "$DRY_RUN" == "true" ]]; then
   log_info ""
   log_info "This was a dry run. To apply changes, run:"
-  log_info "  $0 --context $K8S_CONTEXT --namespace $NAMESPACE --env $ENVIRONMENT --apply"
+  log_info "  $0 --context $K8S_CONTEXT --namespace $NAMESPACE --env $ENVIRONMENT --service $SERVICE_TARGET --apply"
 else
   log_info ""
   log_info "Multisite configuration applied successfully!"

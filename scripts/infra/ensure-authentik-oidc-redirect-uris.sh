@@ -22,6 +22,7 @@ NAMESPACE="${NAMESPACE:-authentik}"
 AUTHENTIK_DEPLOY="${AUTHENTIK_DEPLOY:-authentik-server}"
 
 CLIENT_ID="${CLIENT_ID:-mereka-lms}"
+TARGET_ENV="${TARGET_ENV:-all}" # all | prod | dev | staging
 
 MODE="verify" # verify | apply
 
@@ -36,6 +37,7 @@ OPTIONS:
   --namespace NAMESPACE     Namespace (default: $NAMESPACE)
   --deploy DEPLOYMENT       Authentik server deployment name (default: $AUTHENTIK_DEPLOY)
   --client-id CLIENT_ID     OAuth2 client_id (default: $CLIENT_ID)
+  --env TARGET_ENV          Host set to enforce (all|prod|dev|staging). Default: all
   -h, --help                Show help
 EOF
   exit 1
@@ -49,19 +51,38 @@ while [[ $# -gt 0 ]]; do
     --namespace) NAMESPACE="$2"; shift 2 ;;
     --deploy) AUTHENTIK_DEPLOY="$2"; shift 2 ;;
     --client-id) CLIENT_ID="$2"; shift 2 ;;
+    --env) TARGET_ENV="$2"; shift 2 ;;
     -h|--help) usage ;;
     *) echo "Unknown option: $1" >&2; usage ;;
   esac
 done
 
-expected_hosts=(
-  "$LMS_DOMAIN"
-  "$PREVIEW_DOMAIN"
-  "$BIJI_DOMAIN"
-  "$SKILLOURFUTURE_DOMAIN"
-  "$DEV_LMS_DOMAIN"
-  "$DEV_PREVIEW_DOMAIN"
-)
+if [[ "$TARGET_ENV" != "all" && "$TARGET_ENV" != "prod" && "$TARGET_ENV" != "dev" && "$TARGET_ENV" != "staging" ]]; then
+  echo "Invalid --env value: $TARGET_ENV (expected all|prod|dev|staging)" >&2
+  exit 1
+fi
+
+expected_hosts=()
+if [[ "$TARGET_ENV" == "all" || "$TARGET_ENV" == "prod" ]]; then
+  expected_hosts+=(
+    "$LMS_DOMAIN"
+    "$PREVIEW_DOMAIN"
+    "$BIJI_DOMAIN"
+    "$SKILLOURFUTURE_DOMAIN"
+  )
+fi
+if [[ "$TARGET_ENV" == "all" || "$TARGET_ENV" == "dev" ]]; then
+  expected_hosts+=(
+    "$DEV_LMS_DOMAIN"
+    "$DEV_PREVIEW_DOMAIN"
+  )
+fi
+if [[ "$TARGET_ENV" == "all" || "$TARGET_ENV" == "staging" ]]; then
+  expected_hosts+=(
+    "$STAGING_LMS_DOMAIN"
+    "$STAGING_PREVIEW_DOMAIN"
+  )
+fi
 
 expected_csv="$(printf "%s\n" "${expected_hosts[@]}" | awk 'NF{print}' | awk '!seen[$0]++' | paste -sd, -)"
 if [[ -z "${expected_csv:-}" ]]; then
@@ -74,6 +95,7 @@ echo "Context: $K8S_CONTEXT"
 echo "Namespace: $NAMESPACE"
 echo "Deploy: $AUTHENTIK_DEPLOY"
 echo "Client ID: $CLIENT_ID"
+echo "Target env: $TARGET_ENV"
 echo "Expected LMS hosts: $expected_csv"
 echo ""
 

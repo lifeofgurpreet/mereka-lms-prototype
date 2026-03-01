@@ -1,0 +1,51 @@
+organizations:
+  - short_name: MEREKA
+    name: Mereka Academy
+    description: Mereka Academy staging catalog.
+  - short_name: BIJIBIJI
+    name: Biji-Biji Academy
+    description: Biji-Biji Academy microsite catalog.
+  - short_name: SKILLOURFUTURE
+    name: Skill Our Future
+    description: Skill Our Future microsite catalog.
+
+sites:
+  - domain: staging.academyv2.mereka.io
+    name: Mereka Academy (Staging)
+    orgs:
+      - MEREKA
+    site_values:
+      domain: staging.academyv2.mereka.io
+      site_name: Mereka Academy (Staging)
+      platform_name: Mereka Academy (Staging)
+      LMS_ROOT_URL: https://staging.academyv2.mereka.io
+      CMS_ROOT_URL: https://studio.staging.academyv2.mereka.io
+      MFE_BASE_URL: https://apps.staging.academyv2.mereka.io
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - MEREKA
+      logo_image: https://staging.academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+
+  - domain: preview.staging.academyv2.mereka.io
+    name: Mereka Academy Preview (Staging)
+    orgs:
+      - MEREKA
+    site_values:
+      domain: preview.staging.academyv2.mereka.io
+      site_name: Mereka Academy Preview (Staging)
+      platform_name: Mereka Academy (Staging)
+      LMS_ROOT_URL: https://preview.staging.academyv2.mereka.io
+      CMS_ROOT_URL: https://studio.staging.academyv2.mereka.io
+      MFE_BASE_URL: https://apps.staging.academyv2.mereka.io
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - MEREKA
+      logo_image: https://preview.staging.academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false

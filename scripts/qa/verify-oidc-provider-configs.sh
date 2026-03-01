@@ -34,7 +34,7 @@ DEFAULT_CONTEXTS=(
 )
 
 CONTEXTS=()
-ENVIRONMENT="auto" # auto | prod | dev
+ENVIRONMENT="auto" # auto | prod | dev | staging
 
 # If true, allow an empty domain list (not recommended).
 ALLOW_EMPTY_DOMAINS="${ALLOW_EMPTY_DOMAINS:-0}"
@@ -49,7 +49,8 @@ OPTIONS:
   -n, --namespace NAMESPACE   K8s namespace (default: $NAMESPACE)
   -c, --context CONTEXT       Kube context to target (repeatable). If omitted, uses:
                               ${DEFAULT_CONTEXTS[*]}
-  --env {auto|prod|dev}       Which domain set to verify per context (default: $ENVIRONMENT)
+  --env {auto|prod|dev|staging}
+                              Which domain set to verify per context (default: $ENVIRONMENT)
   -h, --help                  Show help
 EOF
   exit 1
@@ -76,6 +77,8 @@ if [[ ${#CONTEXTS[@]} -eq 0 ]]; then
     CONTEXTS=("gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster")
   elif [[ "$ENVIRONMENT" == "dev" ]]; then
     CONTEXTS=("kind-dev")
+  elif [[ "$ENVIRONMENT" == "staging" ]]; then
+    CONTEXTS=("rke2-nonprod")
   else
     CONTEXTS=("${DEFAULT_CONTEXTS[@]}")
   fi
@@ -93,14 +96,16 @@ for ctx in "${CONTEXTS[@]}"; do
     fi
   fi
 
-  if [[ "$env_for_ctx" != "prod" && "$env_for_ctx" != "dev" ]]; then
-    echo "Invalid --env value: $ENVIRONMENT (expected auto|prod|dev)" >&2
+  if [[ "$env_for_ctx" != "prod" && "$env_for_ctx" != "dev" && "$env_for_ctx" != "staging" ]]; then
+    echo "Invalid --env value: $ENVIRONMENT (expected auto|prod|dev|staging)" >&2
     exit 1
   fi
 
   DOMAINS=()
   if [[ "$env_for_ctx" == "prod" ]]; then
     DOMAINS=("$LMS_DOMAIN" "$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
+  elif [[ "$env_for_ctx" == "staging" ]]; then
+    DOMAINS=("$STAGING_LMS_DOMAIN")
   else
     DOMAINS=("$DEV_LMS_DOMAIN")
   fi

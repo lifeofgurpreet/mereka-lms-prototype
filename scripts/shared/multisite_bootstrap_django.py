@@ -318,9 +318,16 @@ def main() -> None:
         action="store_true",
         help="Apply changes to database",
     )
+    parser.add_argument(
+        "--scope",
+        choices=("full", "sites"),
+        default="full",
+        help="Apply full multisite bootstrap or only django_site/SiteConfiguration rows",
+    )
     args = parser.parse_args()
 
     dry_run = not args.apply
+    sites_only = args.scope == "sites"
 
     if dry_run:
         print("=" * 60)
@@ -353,13 +360,16 @@ def main() -> None:
     print()
 
     # Apply changes
-    upsert_organizations(dry_run=False)
-    print()
-    upsert_sites(SITE_DEFINITIONS, dry_run=False)
-    print()
-    upsert_oidc_provider_configs(SITE_DEFINITIONS, dry_run=False)
-    print()
-    upsert_waffle_flags(dry_run=False)
+    if sites_only:
+        upsert_sites(SITE_DEFINITIONS, dry_run=False)
+    else:
+        upsert_organizations(dry_run=False)
+        print()
+        upsert_sites(SITE_DEFINITIONS, dry_run=False)
+        print()
+        upsert_oidc_provider_configs(SITE_DEFINITIONS, dry_run=False)
+        print()
+        upsert_waffle_flags(dry_run=False)
 
     print()
     print("=" * 60)

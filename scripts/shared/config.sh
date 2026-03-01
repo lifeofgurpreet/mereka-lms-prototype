@@ -37,6 +37,7 @@ export K8S_CLUSTER="${K8S_CLUSTER:-mereka-lms}"
 export LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
 export STUDIO_DOMAIN="${STUDIO_DOMAIN:-studio.${LMS_DOMAIN}}"
 export MFE_DOMAIN="${MFE_DOMAIN:-apps.${LMS_DOMAIN}}"
+export AUTHENTIK_DOMAIN="${AUTHENTIK_DOMAIN:-auth0.mereka.io}"
 export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
 export DISCOVERY_DOMAIN="${DISCOVERY_DOMAIN:-discovery.${LMS_DOMAIN}}"
 
@@ -64,6 +65,7 @@ export BIJI_MFE_DOMAIN="${BIJI_MFE_DOMAIN:-apps.academy.biji-biji.com}"
 export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
 export DEV_STUDIO_DOMAIN="${DEV_STUDIO_DOMAIN:-studio.${DEV_LMS_DOMAIN}}"
 export DEV_MFE_DOMAIN="${DEV_MFE_DOMAIN:-apps.${DEV_LMS_DOMAIN}}"
+export DEV_AUTHENTIK_DOMAIN="${DEV_AUTHENTIK_DOMAIN:-auth0.mereka.dev}"
 export DEV_PREVIEW_DOMAIN="${DEV_PREVIEW_DOMAIN:-preview.${DEV_LMS_DOMAIN}}"
 export DEV_DISCOVERY_DOMAIN="${DEV_DISCOVERY_DOMAIN:-discovery.${DEV_LMS_DOMAIN}}"
 
@@ -78,6 +80,18 @@ export DEV_FORUM_DOMAIN="${DEV_FORUM_DOMAIN:-forum.${DEV_LMS_DOMAIN}}"
 # Purchase Gateway (canonical ecommerce replacement)
 export PURCHASE_GATEWAY_DOMAIN="${PURCHASE_GATEWAY_DOMAIN:-payments.${LMS_DOMAIN}}"
 export DEV_PURCHASE_GATEWAY_DOMAIN="${DEV_PURCHASE_GATEWAY_DOMAIN:-payments.${DEV_LMS_DOMAIN}}"
+
+# Staging (optional future-ready environment)
+export STAGING_LMS_DOMAIN="${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
+export STAGING_STUDIO_DOMAIN="${STAGING_STUDIO_DOMAIN:-studio.staging.academyv2.mereka.io}"
+export STAGING_MFE_DOMAIN="${STAGING_MFE_DOMAIN:-apps.staging.academyv2.mereka.io}"
+export STAGING_AUTHENTIK_DOMAIN="${STAGING_AUTHENTIK_DOMAIN:-staging.auth0.mereka.io}"
+export STAGING_PREVIEW_DOMAIN="${STAGING_PREVIEW_DOMAIN:-preview.staging.academyv2.mereka.io}"
+export STAGING_DISCOVERY_DOMAIN="${STAGING_DISCOVERY_DOMAIN:-discovery.staging.academyv2.mereka.io}"
+export STAGING_ECOMMERCE_DOMAIN="${STAGING_ECOMMERCE_DOMAIN:-ecommerce.staging.academyv2.mereka.io}"
+export STAGING_NOTES_DOMAIN="${STAGING_NOTES_DOMAIN:-notes.staging.academyv2.mereka.io}"
+export STAGING_CREDENTIALS_DOMAIN="${STAGING_CREDENTIALS_DOMAIN:-credentials.staging.academyv2.mereka.io}"
+export STAGING_FORUM_DOMAIN="${STAGING_FORUM_DOMAIN:-forum.staging.academyv2.mereka.io}"
 
 # =============================================================================
 # Container Registry

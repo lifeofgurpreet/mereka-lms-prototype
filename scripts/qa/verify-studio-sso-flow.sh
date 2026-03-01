@@ -6,6 +6,13 @@
 set -euo pipefail
 
 DOMAIN="${1:-academyv2.mereka.io}"
+if [[ "$DOMAIN" == *.mereka.dev ]]; then
+  AUTHENTIK_DOMAIN="auth0.mereka.dev"
+elif [[ "$DOMAIN" == staging.*.mereka.io || "$DOMAIN" == *.staging.academyv2.mereka.io ]]; then
+  AUTHENTIK_DOMAIN="staging.auth0.mereka.io"
+else
+  AUTHENTIK_DOMAIN="auth0.mereka.io"
+fi
 PASS=0
 FAIL=0
 
@@ -60,7 +67,7 @@ echo "--- Full chain trace ---"
 OIDC_URL="$(curl -sS -o /dev/null -w '%{redirect_url}' \
   "https://${DOMAIN}/auth/login/oidc/?next=/oauth2/authorize%3Fclient_id%3Dcms-sso")"
 
-if echo "$OIDC_URL" | grep -qE "auth0\.mereka\.io/application/o/authorize"; then
+if echo "$OIDC_URL" | grep -qE "${AUTHENTIK_DOMAIN//./\\.}/application/o/authorize"; then
   echo "PASS  OIDC redirects to Authentik"
   echo "      -> ${OIDC_URL:0:120}..."
   PASS=$((PASS + 1))
