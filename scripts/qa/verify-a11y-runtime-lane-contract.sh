@@ -34,7 +34,7 @@ if [[ -x "$WRAPPER" ]]; then
 fi
 
 if [[ -f "$MAKEFILE" ]]; then
-  for target in qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online; do
+  for target in qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid; do
     if ! rg -n "^${target}:" "$MAKEFILE" >/dev/null; then
       echo "❌ Makefile missing target: ${target}"
       violations=1
