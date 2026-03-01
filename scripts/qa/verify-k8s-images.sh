@@ -94,7 +94,8 @@ check_registry_path() {
 
   local files=("$PROD_KUSTOMIZATION" "$BASE_KUSTOMIZATION")
   local expected_registry="asia-southeast1-docker.pkg.dev/mereka-lms/openedx/"
-  local tag_pattern='^[0-9]{8}-.*-[a-f0-9]+$'
+  # Accept: YYYYMMDD-*-HASH, HASH-YYYYMMDD*, mereka-brand*, nreum-clean-*
+  local tag_pattern='^([0-9]{8}-.*-[a-f0-9]+|[a-f0-9]+-[0-9]{14}|mereka-brand[a-z0-9-]*|nreum-clean-[0-9]+)$'
 
   local all_valid=true
   local checked=0

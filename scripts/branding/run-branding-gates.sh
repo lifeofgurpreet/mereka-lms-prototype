@@ -19,6 +19,7 @@ Environment flags:
   RUN_MFE_PREREQ_CHECK=1|0            Default: 1
   RUN_SLOT_SOURCE_ALIGNMENT_CHECK=1|0 Default: 1
   RUN_PARAGON_RUNTIME_CHECK=1|0       Default: 1
+  RUN_FOOTER_PARITY_CHECK=1|0         Default: 1 (prod-only live footer parity check)
   PARAGON_RUNTIME_STRICT=1|0          Default: 1 (require runtime URL + strict header/body contract)
   PARAGON_RUNTIME_URL=<url>           Optional override for runtime /theme base URL
   STRICT_NO_GOOGLE_FONTS=1|0          Default: 0 (passed to studio authoring check)
@@ -58,6 +59,7 @@ RUN_STUDIO_AUTHORING_CHECK="${RUN_STUDIO_AUTHORING_CHECK:-1}"
 RUN_MFE_PREREQ_CHECK="${RUN_MFE_PREREQ_CHECK:-1}"
 RUN_SLOT_SOURCE_ALIGNMENT_CHECK="${RUN_SLOT_SOURCE_ALIGNMENT_CHECK:-1}"
 RUN_PARAGON_RUNTIME_CHECK="${RUN_PARAGON_RUNTIME_CHECK:-1}"
+RUN_FOOTER_PARITY_CHECK="${RUN_FOOTER_PARITY_CHECK:-1}"
 PARAGON_RUNTIME_STRICT="${PARAGON_RUNTIME_STRICT:-1}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 RUN_CROSS_BROWSER_SMOKE="${RUN_CROSS_BROWSER_SMOKE:-0}"
@@ -114,6 +116,17 @@ run_live_gate() {
   BRANDING_LEVEL="$BRANDING_LEVEL" \
     STRICT_MFE_BRANDING_REV="${STRICT_MFE_BRANDING_REV:-0}" \
     "$REPO_ROOT/scripts/qa/verify-public-branding.sh" "$env"
+
+  if [[ "$RUN_FOOTER_PARITY_CHECK" == "1" ]]; then
+    if [[ "$env" == "prod" ]]; then
+      echo "==> Live gate: verify-footer-parity (--live, prod)"
+      "$REPO_ROOT/scripts/qa/verify-footer-parity.sh" --live
+    else
+      echo "==> Live gate: skipping verify-footer-parity for env=${env} (prod-only domain contract)"
+    fi
+  else
+    echo "==> Live gate: skipping verify-footer-parity (RUN_FOOTER_PARITY_CHECK=${RUN_FOOTER_PARITY_CHECK})"
+  fi
 
   if [[ "$RUN_PARAGON_RUNTIME_CHECK" == "1" ]]; then
     if [[ -z "$runtime_url" ]]; then

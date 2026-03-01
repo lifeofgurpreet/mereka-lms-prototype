@@ -149,6 +149,7 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         lms_root = (rendered_values.get("LMS_ROOT_URL") or "").rstrip("/")
         cms_root = (rendered_values.get("CMS_ROOT_URL") or "").rstrip("/")
         mfe_base = (rendered_values.get("MFE_BASE_URL") or "").rstrip("/")
+        overrides: dict[str, object] = {}
         if lms_root:
             mfe_host = ""
             if mfe_base:
@@ -159,7 +160,6 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
                     mfe_host = ""
 
             default_cfg = dict(getattr(settings, "MFE_CONFIG", {}) or {})
-            overrides: dict[str, object] = {}
             # Tenant-specific core URLs.
             overrides["LMS_BASE_URL"] = lms_root
             overrides["LOGIN_URL"] = f"{lms_root}/login"
@@ -210,6 +210,40 @@ def upsert_sites(definitions: List[SiteDefinition], dry_run: bool) -> None:
         print(f"  - platform_name: {rendered_values.get('platform_name')}")
         print(f"  - theme: {rendered_values.get('THEME_NAME')}")
         print(f"  - organizations: {rendered_values.get('course_org_filter')}")
+
+        # Ensure MFE host itself resolves through SiteConfiguration overrides.
+        # Without this, requests to apps.<domain> can miss tenant MFE_CONFIG and
+        # fall back to global defaults (e.g., broken logo/theming URLs).
+        if (
+            mfe_base
+            and overrides
+            and not definition.domain.startswith("preview.")
+        ):
+            try:
+                mfe_host = urlparse(mfe_base).netloc or ""
+            except Exception:
+                mfe_host = ""
+            if mfe_host and mfe_host != definition.domain:
+                mfe_site, mfe_site_created = Site.objects.update_or_create(
+                    domain=mfe_host,
+                    defaults={"name": f"{definition.name} Apps"},
+                )
+                mfe_site_action = "Created" if mfe_site_created else "Updated"
+                print(f"{mfe_site_action} site: {mfe_site.domain} - {mfe_site.name}")
+
+                mfe_site_values = dict(rendered_values)
+                mfe_site_values["domain"] = mfe_host
+                mfe_site_values["MFE_CONFIG"] = dict(overrides)
+
+                mfe_site_config, mfe_sc_created = SiteConfiguration.objects.update_or_create(
+                    site=mfe_site,
+                    defaults={
+                        "enabled": True,
+                        "site_values": mfe_site_values,
+                    },
+                )
+                mfe_sc_action = "Created" if mfe_sc_created else "Updated"
+                print(f"{mfe_sc_action} site configuration for: {mfe_site.domain}")
 
 
 def upsert_oidc_provider_configs(definitions: List[SiteDefinition], dry_run: bool) -> None:

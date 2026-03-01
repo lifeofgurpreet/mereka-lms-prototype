@@ -84,7 +84,7 @@ fi
 echo ""
 echo -n "Checking favicon rewrite path is /theming/asset/images/favicon.ico... "
 INCONSISTENT=$(grep -A 1 '@favicon_matcher' "$CADDYFILE" | grep 'rewrite' | \
-  grep -v '/theming/asset/images/favicon.ico' | wc -l)
+  grep -v '/theming/asset/images/favicon.ico' | wc -l || true)
 if [[ $INCONSISTENT -eq 0 ]]; then
   echo -e "${GREEN}PASS${NC}"
   PASS=$((PASS + 1))

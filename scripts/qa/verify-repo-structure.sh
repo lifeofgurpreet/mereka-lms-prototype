@@ -116,6 +116,8 @@ allowed_root_md=(
   "MIGRATION_CHECKLIST.md"
   "LOCAL_SETUP_COMPLETE.md"
   "DEPR.md"
+  "SECURITY.md"
+  "TRACKER.md"
 )
 shopt -s nullglob
 root_mds=( *.md )
@@ -223,6 +225,8 @@ check_gitignore_has "tutor_env/"
 # AC-011: specs root markdown files match *_spec.md (allow explicit exceptions).
 spec_exceptions=(
   "IMPLEMENTATION_ORDER.md"
+  "_TEMPLATE.md"
+  "INDEX.md"
 )
 if [[ -d "specs" ]]; then
   while IFS= read -r -d '' p; do

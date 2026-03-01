@@ -344,13 +344,16 @@ ARTIFACT="$VAR_DIR/a11y-contrast-focus-gate.txt"
 
 do_pass "AC-A11Y-003: Artifact written to var/a11y-contrast-focus-gate.txt"
 
-# Check the CI workflow itself references this script
+# Check CI integration: either direct workflow reference OR script-list wiring.
 CI_YML="$REPO_ROOT/.github/workflows/ci.yml"
+CI_STATIC_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
 if [[ -f "$CI_YML" ]]; then
   if grep -qF 'verify-a11y-contrast-focus.sh' "$CI_YML"; then
-    do_pass "AC-A11Y-003: verify-a11y-contrast-focus.sh referenced in CI workflow"
+    do_pass "AC-A11Y-003: verify-a11y-contrast-focus.sh referenced directly in ci.yml"
+  elif [[ -f "$CI_STATIC_LIST" ]] && grep -qF 'scripts/qa/verify-a11y-contrast-focus.sh' "$CI_STATIC_LIST"; then
+    do_pass "AC-A11Y-003: verify-a11y-contrast-focus.sh wired via ci-scripts-static.txt"
   else
-    do_warn "AC-A11Y-003: verify-a11y-contrast-focus.sh not yet in CI workflow (expected after this task)"
+    do_warn "AC-A11Y-003: verify-a11y-contrast-focus.sh not found in ci.yml or ci-scripts-static.txt"
   fi
 else
   do_warn "AC-A11Y-003: .github/workflows/ci.yml not found — cannot verify CI integration"

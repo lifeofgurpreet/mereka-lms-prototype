@@ -75,20 +75,12 @@ check_merge_gates() {
     fail "ci.yml does not trigger on push to main"
   fi
 
-  # Verify all 12 required CI jobs are defined
+  # Verify all required CI jobs are defined (consolidated architecture)
   local required_jobs=(
-    "spec-lint"
-    "generated-docs"
-    "branding-preflight"
-    "monitoring-guardrails"
-    "atlas-modulestore-guardrails"
-    "gitops-image-contract"
-    "prod-tag-guard"
-    "lint"
-    "validate-k8s"
-    "validate-tutor-config"
-    "validate-infisical"
-    "security-scan"
+    "static-validation"
+    "tutor-config-tests"
+    "security-scans"
+    "test-coverage"
   )
   local job_count=0
   local missing_jobs=""

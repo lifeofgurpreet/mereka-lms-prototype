@@ -221,7 +221,6 @@ payload = "\n".join(
         "  --pgn-color-info-base: var(--tenant-color-accent);",
         "  --pgn-link-color: var(--tenant-color-primary);",
         "  --pgn-link-hover-color: var(--tenant-color-secondary);",
-        "  --pgn-color-text-base: var(--tenant-color-text-on-primary);",
         "}",
         "",
     ]

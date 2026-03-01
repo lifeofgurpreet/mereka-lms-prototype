@@ -27,10 +27,10 @@ images:
     newTag: 20260207-branding-pass7-5b26e45
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260208-mfe-discussions-pass4-c17df16
+    newTag: c1ef8f8f-20260301182820
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 20260208-mfe-discussions-pass4-c17df16
+    newTag: c1ef8f8f-20260301182820
 
 # Staging replica counts (lower for cost)
 replicas:

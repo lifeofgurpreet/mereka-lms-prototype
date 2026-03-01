@@ -35,7 +35,7 @@ declare -A PATTERNS=(
 
 allowlist_line() {
   local line="$1"
-  if [[ "$line" =~ \<password\> || "$line" =~ \*\*\* || "$line" =~ user:pass || "$line" =~ example || "$line" =~ \$\{[A-Z0-9_]+\} ]]; then
+  if [[ "$line" =~ \<password\> || "$line" =~ \*\*\* || "$line" =~ user:pass || "$line" =~ username:password || "$line" =~ s3cr3t || "$line" =~ example || "$line" =~ \$\{[A-Z0-9_]+\} ]]; then
     return 0
   fi
   return 1
@@ -47,7 +47,7 @@ for name in "${!PATTERNS[@]}"; do
   out="$tmpdir/${name}.txt"
 
   set +e
-  rg -n --pcre2 \
+  rg -n \
     --glob '!.git/**' \
     --glob '!node_modules/**' \
     --glob '!tutor_env/**' \

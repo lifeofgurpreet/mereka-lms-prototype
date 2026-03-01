@@ -20,9 +20,12 @@ const BASE_URL = process.env.BASE_URL ?? 'https://academyv2.mereka.io';
 const ENABLE_CROSS_BROWSER = process.env.PW_CROSS_BROWSER === '1';
 const ENABLE_WEBKIT = process.env.PW_ENABLE_WEBKIT !== '0';
 
-// Derive MFE and Studio URLs from BASE_URL host
-const baseHost = new URL(BASE_URL).hostname; // e.g. academyv2.mereka.io
-const MFE_BASE_URL = `https://apps.${baseHost}`;
+// Derive MFE URL from BASE_URL host (prefix-safe for apps.* inputs)
+const parsedBaseUrl = new URL(BASE_URL);
+const baseHost = parsedBaseUrl.hostname;
+const mfeHost = baseHost.startsWith('apps.') ? baseHost : `apps.${baseHost}`;
+const mfePort = parsedBaseUrl.port ? `:${parsedBaseUrl.port}` : '';
+const MFE_BASE_URL = `${parsedBaseUrl.protocol}//${mfeHost}${mfePort}`;
 
 export default defineConfig({
   testDir: './tests',

@@ -39,10 +39,10 @@ images:
   # Keep canonical + transformed openedx-mfe names aligned to avoid post-transform drift.
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 1c66529-20260220023917
+    newTag: c1ef8f8f-20260301182820
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
-    newTag: 1c66529-20260220023917
+    newTag: c1ef8f8f-20260301182820
   # Enterprise MFEs must be pinned explicitly for nonprod parity.
   - name: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-admin-portal
