@@ -71,7 +71,7 @@ jobs:
           echo "TARGET_ENV=${TARGET_ENV}" >> "$GITHUB_ENV"
           echo "TARGET_URL=${TARGET}" >> "$GITHUB_ENV"
 
-      - name: Run axe-core against key routes
+      - name: Run accessibility lane against selected routes
         run: |
           set -euo pipefail
           mkdir -p var/ci/axe-reports
@@ -139,6 +139,7 @@ jobs:
       - name: Publish run summary
         if: always()
         run: |
+          ROUTES_CSV="${{ github.event.inputs.routes_csv || '/authn/login,/authn/register,/dashboard,/account,/learning' }}"
           {
             echo "## Accessibility Audit (axe-core WCAG 2.2 AA)"
             echo ""
@@ -148,11 +149,13 @@ jobs:
             echo "**Standard**: WCAG 2.2 AA (\`wcag2a\`, \`wcag2aa\`, \`wcag22aa\` tags)"
             echo ""
             echo "### Routes Scanned"
-            echo "- \`/authn/login\`"
-            echo "- \`/authn/register\`"
-            echo "- \`/dashboard\`"
-            echo "- \`/account\`"
-            echo "- \`/learning\`"
+            IFS=',' read -r -a ROUTES <<< "$ROUTES_CSV"
+            for raw in "${ROUTES[@]}"; do
+              route="$(echo "$raw" | xargs)"
+              [[ -z "$route" ]] && continue
+              [[ "$route" == /* ]] || route="/$route"
+              echo "- \`$route\`"
+            done
             echo ""
             if [[ -f "var/ci/axe-summary.json" ]]; then
               python3 - << 'PYEOF'
