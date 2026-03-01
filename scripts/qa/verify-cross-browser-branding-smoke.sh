@@ -61,6 +61,41 @@ if [[ "$STRICT_WEBKIT" -eq 1 && "$CROSS_BROWSER" -ne 1 ]]; then
   exit 2
 fi
 
+MFE_BASE_URL="https://apps.$(python3 -c 'from urllib.parse import urlparse; import sys; print(urlparse(sys.argv[1]).hostname)' "$BASE_URL")"
+
+preflight_runtime_theme_contract() {
+  local authn_html=""
+  local mfe_config=""
+  authn_html="$(curl -fsSL "$MFE_BASE_URL/authn/login" 2>/dev/null || true)"
+  if [[ -n "$authn_html" ]]; then
+    if [[ "$authn_html" == *"/theme/core.min.css"* && "$authn_html" == *"/theme/mereka-brand.min.css"* ]]; then
+      echo "Runtime-theme preflight: PASS ($MFE_BASE_URL/authn/login uses /theme/*.css)"
+      return 0
+    fi
+    if echo "$authn_html" | grep -Eq 'paragon-theme-core\.[a-z0-9]+\.css' \
+      && echo "$authn_html" | grep -Eq 'brand-theme-core\.[a-z0-9]+\.css'; then
+      echo "ERROR: Runtime-theme preflight failed — authn shell is using embedded theme bundles, not /theme URLs." >&2
+      echo "       Expected: /theme/core.min.css and /theme/mereka-brand.min.css in $MFE_BASE_URL/authn/login" >&2
+      echo "       Action: rebuild/redeploy MFE image with PARAGON_THEME_URLS enabled, then re-run smoke." >&2
+      return 1
+    fi
+  fi
+
+  mfe_config="$(curl -fsSL "$MFE_BASE_URL/api/mfe_config/v1" 2>/dev/null || true)"
+  if [[ "$mfe_config" == *"PARAGON_THEME_URLS"* && "$mfe_config" == *"/theme/core.min.css"* && "$mfe_config" == *"/theme/mereka-brand.min.css"* ]]; then
+    echo "Runtime-theme preflight: PASS ($MFE_BASE_URL/api/mfe_config/v1 references /theme/*.css)"
+    return 0
+  fi
+
+  echo "ERROR: Runtime-theme preflight failed — could not confirm runtime theme URLs from authn shell or mfe_config." >&2
+  echo "       Action: verify apps MFE deployment is serving PARAGON_THEME_URLS and /theme CSS endpoints." >&2
+  return 1
+}
+
+if [[ "$REQUIRE_RUNTIME_THEME" -eq 1 ]]; then
+  preflight_runtime_theme_contract
+fi
+
 if [[ ! -f "$E2E_DIR/package.json" ]]; then
   echo "tests/e2e/package.json not found" >&2
   exit 1
