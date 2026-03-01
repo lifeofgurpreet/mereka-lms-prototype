@@ -64,7 +64,9 @@ assert_exec "scripts/qa/capture-branding-screenshots.sh"
 assert_exec "scripts/qa/verify-frontend-performance-spotcheck.sh"
 assert_exec "scripts/qa/run-branding-evidence-pipeline.sh"
 assert_exec "scripts/qa/verify-certificate-branding.sh"
+assert_exec "scripts/qa/verify-certificate-branding-workflow.sh"
 assert_exec "scripts/qa/verify-email-template-multilang.sh"
+assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -171,6 +173,12 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-frontend-qa-make-targets.sh' \
   "qa-frontend-contracts includes verify-frontend-qa-make-targets"
+assert_make_command \
+  './scripts/qa/verify-certificate-branding-workflow.sh' \
+  "qa-frontend-contracts includes verify-certificate-branding-workflow"
+assert_make_command \
+  './scripts/qa/verify-email-template-branding-workflow.sh' \
+  "qa-frontend-contracts includes verify-email-template-branding-workflow"
 assert_make_command \
   './scripts/qa/verify-frontend-contracts-workflow.sh' \
   "qa-frontend-contracts includes verify-frontend-contracts-workflow"
