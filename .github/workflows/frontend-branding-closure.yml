@@ -66,6 +66,14 @@ on:
         required: true
         default: false
         type: boolean
+      live_dom_audit_profile:
+        description: "Preset profile for live DOM selector audit defaults"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - standard
+          - phase7_strict
       run_npm_start_smoke_gate:
         description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
         required: true
@@ -162,6 +170,7 @@ jobs:
           RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
           RUN_RUNTIME_THEME_CONTRACT="${{ inputs.run_runtime_theme_contract_gate || 'true' }}"
           RUN_LIVE_DOM_AUDIT="${{ inputs.run_live_dom_audit_gate || 'false' }}"
+          LIVE_DOM_AUDIT_PROFILE="${{ inputs.live_dom_audit_profile || 'standard' }}"
           RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
           RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
           STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
@@ -176,6 +185,21 @@ jobs:
           RUNTIME_THEME_URL="${{ inputs.runtime_theme_url || '' }}"
           RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
           LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+
+          if [[ "$LIVE_DOM_AUDIT_PROFILE" == "phase7_strict" ]]; then
+            if [[ -z "$LIVE_DOM_AUDIT_ROUTES" ]]; then
+              LIVE_DOM_AUDIT_ROUTES="/authn/login,/authn/register"
+            fi
+            if [[ -z "$LIVE_DOM_AUDIT_SELECTORS" ]]; then
+              LIVE_DOM_AUDIT_SELECTORS=".mereka-authn-login-branding,.mereka-footer,.btn-primary,.form-control,.navbar"
+            fi
+            if [[ "$LIVE_DOM_AUDIT_MIN_HITS" == "3" ]]; then
+              LIVE_DOM_AUDIT_MIN_HITS="2"
+            fi
+            if [[ "$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS" == "0" ]]; then
+              LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="3"
+            fi
+          fi
 
           args=(--env "$TARGET_ENV" --frontend-only)
           if [[ "$CROSS_BROWSER_MATRIX" == "true" ]]; then
@@ -234,6 +258,7 @@ jobs:
             echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
             echo "- Runtime theme contract gate: \`${{ inputs.run_runtime_theme_contract_gate || 'true' }}\`"
             echo "- Live DOM selector audit gate: \`${{ inputs.run_live_dom_audit_gate || 'false' }}\`"
+            echo "- Live DOM audit profile: \`${{ inputs.live_dom_audit_profile || 'standard' }}\`"
             echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
             echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
             echo "- npm-start base URL: \`${{ inputs.npm_start_base_url || '(auto by env)' }}\`"
