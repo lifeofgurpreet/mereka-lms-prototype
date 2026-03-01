@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -85,6 +85,18 @@ qa-phase7-dom-audit: ## Run strict Phase 7 runtime DOM selector audit (prod)
 
 qa-phase7-dom-audit-dev: ## Run strict Phase 7 runtime DOM selector audit (dev)
 	./scripts/qa/run-phase7-dom-audit.sh --env dev --project chromium
+
+qa-a11y-prod: ## Run accessibility gate (offline) for prod baseline
+	./scripts/qa/verify-accessibility.sh --offline --target https://apps.academyv2.mereka.io
+
+qa-a11y-dev: ## Run accessibility gate (offline) for dev baseline
+	./scripts/qa/verify-accessibility.sh --offline --target https://apps.academyv2.mereka.dev
+
+qa-a11y-prod-online: ## Run accessibility gate (online) for prod apps routes
+	./scripts/qa/verify-accessibility.sh --online --target https://apps.academyv2.mereka.io
+
+qa-a11y-dev-online: ## Run accessibility gate (online) for dev apps routes
+	./scripts/qa/verify-accessibility.sh --online --target https://apps.academyv2.mereka.dev
 
 mobile-secrets-check: ## Run mobile secrets verification (offline static checks)
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline
