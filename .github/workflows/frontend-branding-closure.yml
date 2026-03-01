@@ -41,6 +41,11 @@ on:
         required: true
         default: true
         type: boolean
+      run_certificate_branding_gate:
+        description: "Run certificate branding gate"
+        required: true
+        default: true
+        type: boolean
       run_email_template_gate:
         description: "Run transactional/marketing email branding gate"
         required: true
@@ -117,6 +122,7 @@ jobs:
           REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
           RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
           RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
+          RUN_CERTIFICATE_BRANDING="${{ inputs.run_certificate_branding_gate || 'true' }}"
           RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
           RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
           RUN_RUNTIME_THEME_CONTRACT="${{ inputs.run_runtime_theme_contract_gate || 'true' }}"
@@ -143,6 +149,7 @@ jobs:
           RUN_SCREENSHOTS=0 \
           RUN_PERFORMANCE=$([[ "$RUN_PERF" == "true" ]] && echo 1 || echo 0) \
           RUN_PARAGON_THEME_BUDGET=$([[ "$RUN_PARAGON_BUDGET" == "true" ]] && echo 1 || echo 0) \
+          RUN_CERTIFICATE_BRANDING=$([[ "$RUN_CERTIFICATE_BRANDING" == "true" ]] && echo 1 || echo 0) \
           RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
           RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
           RUN_RUNTIME_THEME_CONTRACT=$([[ "$RUN_RUNTIME_THEME_CONTRACT" == "true" ]] && echo 1 || echo 0) \
@@ -173,6 +180,7 @@ jobs:
             echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
             echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
             echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
+            echo "- Certificate branding gate: \`${{ inputs.run_certificate_branding_gate || 'true' }}\`"
             echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
             echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
             echo "- Runtime theme contract gate: \`${{ inputs.run_runtime_theme_contract_gate || 'true' }}\`"

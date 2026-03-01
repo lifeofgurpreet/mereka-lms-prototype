@@ -18,6 +18,7 @@ fi
 
 for input_key in target_environment cross_browser_matrix require_runtime_theme require_branding_markers require_webkit \
                  run_runtime_theme_contract_gate run_npm_start_smoke_gate run_screenshot_gate \
+                 run_certificate_branding_gate \
                  runtime_theme_url runtime_theme_timeout_seconds learning_path; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
     echo "❌ frontend closure workflow missing input: ${input_key}"
@@ -52,6 +53,11 @@ fi
 
 if ! rg -n 'REQUIRE_BRANDING_MARKERS=' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow does not wire REQUIRE_BRANDING_MARKERS into pipeline env"
+  violations=1
+fi
+
+if ! rg -n 'RUN_CERTIFICATE_BRANDING=' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow does not wire RUN_CERTIFICATE_BRANDING into pipeline env"
   violations=1
 fi
 
