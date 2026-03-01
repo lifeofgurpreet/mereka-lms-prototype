@@ -41,7 +41,7 @@ do_skip() { SKIP=$((SKIP + 1)); echo -e "${YELLOW}[SKIP]${NC} $1"; }
 # ── Defaults ──────────────────────────────────────────────────────────────
 MODE_OFFLINE=false
 MODE_ONLINE=false
-TARGET="${A11Y_TARGET:-https://academyv2.mereka.io}"
+TARGET="${A11Y_TARGET:-https://apps.academyv2.mereka.io}"
 ROUTES_CSV="${A11Y_ROUTES:-}"
 ALLOW_MISSING_REPORTS=0
 
