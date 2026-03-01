@@ -13,6 +13,7 @@ VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-mfe-live-dom-audit.sh"
 LIVE_DOM_WORKFLOW="$REPO_ROOT/.github/workflows/mfe-live-dom-audit.yml"
 CLOSURE_WORKFLOW="$REPO_ROOT/.github/workflows/frontend-branding-closure.yml"
 RELEASE_WORKFLOW="$REPO_ROOT/.github/workflows/release-evidence.yml"
+MAKEFILE="$REPO_ROOT/Makefile"
 
 violations=0
 
@@ -73,6 +74,24 @@ for wf in "$LIVE_DOM_WORKFLOW" "$CLOSURE_WORKFLOW" "$RELEASE_WORKFLOW"; do
     fail "$rel missing phase7_strict profile option"
   fi
 done
+
+if [[ ! -f "$MAKEFILE" ]]; then
+  fail "Missing Makefile for operator target checks"
+else
+  if rg -n '^qa-phase7-dom-audit:' "$MAKEFILE" >/dev/null \
+    && rg -n 'run-phase7-dom-audit\.sh --env prod' "$MAKEFILE" >/dev/null; then
+    pass "Makefile exposes qa-phase7-dom-audit target"
+  else
+    fail "Makefile missing qa-phase7-dom-audit target wiring"
+  fi
+
+  if rg -n '^qa-phase7-dom-audit-dev:' "$MAKEFILE" >/dev/null \
+    && rg -n 'run-phase7-dom-audit\.sh --env dev' "$MAKEFILE" >/dev/null; then
+    pass "Makefile exposes qa-phase7-dom-audit-dev target"
+  else
+    fail "Makefile missing qa-phase7-dom-audit-dev target wiring"
+  fi
+fi
 
 if [[ "$violations" -ne 0 ]]; then
   echo "Phase 7 DOM audit contract failed."
