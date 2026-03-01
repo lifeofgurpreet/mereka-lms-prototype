@@ -370,6 +370,16 @@ label {
   font-size: var(--pgn-typography-font-size-sm);
 }
 
+.mereka-catalog-search-hint,
+.mereka-catalog-sort-hint {
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--mereka-color-magenta);
+  background: rgb(var(--mereka-color-magenta-rgb) / 0.06);
+  color: var(--mereka-color-ink-700);
+  font-size: var(--pgn-typography-font-size-sm);
+}
+
 .mereka-authoring-course-unit-sidebar-hint {
   border: 1px solid var(--mereka-mfe-border);
   background: var(--mereka-mfe-surface-muted);

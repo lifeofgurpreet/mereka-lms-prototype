@@ -870,6 +870,8 @@ PY
 #   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
 #   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
 #   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
+#   org.openedx.frontend.catalog.catalog_search.v1 | Catalog/discovery search helper
+#   org.openedx.frontend.catalog.catalog_sort.v1 | Catalog/discovery sort helper
 #   org.openedx.frontend.account.id_verification_page.v1 | Account ID verification helper
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
@@ -1522,6 +1524,36 @@ for _mfe in [
         ),
         (
             _mfe,
+            "org.openedx.frontend.catalog.catalog_search.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_catalog_search_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCatalogSearchHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.catalog.catalog_sort.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Insert,
+                widget: {
+                    id: 'mereka_catalog_sort_hint',
+                    type: DIRECT_PLUGIN,
+                    priority: 1,
+                    RenderWidget: MerekaCatalogSortHint,
+                },
+            },
+            """,
+        ),
+        (
+            _mfe,
             "org.openedx.frontend.account.id_verification_page.v1",
             """
             {
@@ -1830,15 +1862,17 @@ const MerekaAuthoringCourseUnitSidebarHint = () => {
 const MerekaLearnerSidebarWidget = () => {
   const config = getConfig();
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\\/$/, '');
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const dashboardPath = baseUrl ? `${baseUrl}/dashboard` : '/dashboard';
   const coursesPath = baseUrl ? `${baseUrl}/dashboard/courses` : '/dashboard/courses';
+  const helpPath = variant.helpUrl || '/help/';
 
   return (
     <div className="mereka-learner-sidebar-widget">
-      <p className="h5 mb-2">Mereka quick links</p>
+      <p className="h5 mb-2">{variant.brand} quick links</p>
       <a href={dashboardPath} className="d-block mb-1">Dashboard</a>
       <a href={coursesPath} className="d-block mb-1">My Courses</a>
-      <a href="/help/" className="d-block">Support</a>
+      <a href={helpPath} className="d-block">Support</a>
     </div>
   );
 };
@@ -1907,6 +1941,7 @@ const MerekaCourseCardActionHint = () => {
 const MerekaCourseOutlineSidebar = () => {
   const config = getConfig();
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const helpPath = variant.helpUrl || '/help/';
 
   return (
     <aside className="mereka-course-outline-sidebar mb-3 border rounded p-3">
@@ -1914,7 +1949,7 @@ const MerekaCourseOutlineSidebar = () => {
       <p className="small text-muted mb-3">
         Use this area to find support resources while learning.
       </p>
-      <a href="/help/" className="d-inline-block">Help centre</a>
+      <a href={helpPath} className="d-inline-block">Help centre</a>
     </aside>
   );
 };
@@ -1990,10 +2025,13 @@ const MerekaProgressCourseGradeHint = ({ courseId }) => {
 // Learning progress related-links slot helper.
 // Wired into org.openedx.frontend.learning.progress_tab_related_links.v1.
 const MerekaProgressRelatedLinksHint = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const helpPath = variant.helpUrl || '/help/';
   return (
     <div className="mereka-progress-related-links-hint mb-2">
       <span className="mereka-badge me-2">Resources</span>
-      <a href="/help/" className="small">Need support? Visit the help centre.</a>
+      <a href={helpPath} className="small">Need support? Visit the help centre.</a>
     </div>
   );
 };
@@ -2193,9 +2231,11 @@ const MerekaLearningNotificationsDiscussionsSidebarHint = () => {
 // Learning course-exit view-courses slot helper.
 // Wired into org.openedx.frontend.learning.course_exit_view_courses.v1.
 const MerekaLearningCourseExitViewCoursesHint = () => {
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   return (
     <div className="mereka-learning-course-exit-view-courses-hint mb-2">
-      <a href="/dashboard/courses" className="small">Browse more courses from Mereka Academy.</a>
+      <a href="/dashboard/courses" className="small">Browse more courses from {variant.brand}.</a>
     </div>
   );
 };
@@ -2247,6 +2287,28 @@ const MerekaCatalogFiltersHint = () => {
   );
 };
 
+// Catalog/discovery search helper slot.
+// Wired into org.openedx.frontend.catalog.catalog_search.v1.
+const MerekaCatalogSearchHint = () => {
+  return (
+    <div className="mereka-catalog-search-hint">
+      <span className="mereka-badge me-2">Search</span>
+      <span className="small text-muted">Search by role, outcome, or skill to find relevant programs faster.</span>
+    </div>
+  );
+};
+
+// Catalog/discovery sort helper slot.
+// Wired into org.openedx.frontend.catalog.catalog_sort.v1.
+const MerekaCatalogSortHint = () => {
+  return (
+    <div className="mereka-catalog-sort-hint">
+      <span className="mereka-badge me-2">Sort</span>
+      <span className="small text-muted">Sort by relevance, newest, or learner demand based on your goals.</span>
+    </div>
+  );
+};
+
 // Learning progress certificate status branding and context card.
 // Wired into org.openedx.frontend.learning.progress_certificate_status.v1.
 const MerekaProgressCertificateStatus = ({ courseId }) => {
@@ -2286,7 +2348,7 @@ const MerekaAdditionalProfileFields = () => {
       <h2 className="h5 mb-2">Enterprise profile details</h2>
       <p className="small mb-3">For {variant.brand} workplace setups, these fields are preconfigured by your admin team.</p>
       <ul className="mereka-additional-profile-fields__list list-unstyled mb-0">
-        <li className="mb-2">Organization: <strong>Mereka Academy</strong></li>
+        <li className="mb-2">Organization: <strong>{variant.brand}</strong></li>
         <li className="mb-2">Job title: <strong>—</strong></li>
         <li className="mb-2">Department: <strong>—</strong></li>
       </ul>
