@@ -62,6 +62,12 @@ legacy_retired_ids=(
   "org.openedx.frontend.account.account_settings_tab.v1"
   "org.openedx.frontend.account.account_settings_field.v1"
   "org.openedx.frontend.authoring.course_outline_header.v1"
+  "org.openedx.frontend.catalog.catalog_header.v1"
+  "org.openedx.frontend.catalog.catalog_card.v1"
+  "org.openedx.frontend.catalog.catalog_filters.v1"
+  "org.openedx.frontend.catalog.catalog_search.v1"
+  "org.openedx.frontend.catalog.catalog_sort.v1"
+  "org.openedx.frontend.catalog.catalog_pagination.v1"
 )
 
 for legacy_id in "${legacy_retired_ids[@]}"; do
@@ -79,7 +85,6 @@ required_core_slots=(
   "org.openedx.frontend.learner_dashboard.course_list.v1"
   "org.openedx.frontend.learner_dashboard.course_card_banner.v1"
   "org.openedx.frontend.learning.course_tab_links.v1"
-  "org.openedx.frontend.catalog.catalog_header.v1"
 )
 
 for slot_id in "${required_core_slots[@]}"; do

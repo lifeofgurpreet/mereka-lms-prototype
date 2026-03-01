@@ -871,12 +871,8 @@ PY
 #   org.openedx.frontend.learning.notifications_discussions_sidebar.v1 | Learning discussions/sidebar helper
 #   org.openedx.frontend.learning.course_exit_view_courses.v1 | Learning course-exit view-courses helper
 #   org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1 | Learning course-exit dashboard footnote helper
-#   org.openedx.frontend.catalog.catalog_header.v1 | Catalog/discovery branded header
-#   org.openedx.frontend.catalog.catalog_card.v1 | Catalog/discovery course card accent
-#   org.openedx.frontend.catalog.catalog_filters.v1 | Catalog/discovery filter panel helper
-#   org.openedx.frontend.catalog.catalog_search.v1 | Catalog/discovery search helper
-#   org.openedx.frontend.catalog.catalog_sort.v1 | Catalog/discovery sort helper
-#   org.openedx.frontend.catalog.catalog_pagination.v1 | Catalog/discovery pagination helper
+#   catalog namespace slots are intentionally not wired:
+#     frontend-app-catalog@release/ulmo currently exposes only layout.footer.v1
 #   org.openedx.frontend.account.id_verification_page.v1 | Account ID verification helper
 #   org.openedx.frontend.account.additional_profile_fields.v1 | Account enterprise profile fields
 #   org.openedx.frontend.profile.additional_profile_fields.v1 | Profile enterprise profile fields
@@ -1538,96 +1534,6 @@ for _mfe in [
                     type: DIRECT_PLUGIN,
                     priority: 1,
                     RenderWidget: MerekaLearningCourseExitDashboardFootnoteLinkHint,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.catalog.catalog_header.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_catalog_header',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaCatalogHeader,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.catalog.catalog_card.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_catalog_course_card_accent',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaCatalogCourseCardAccent,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.catalog.catalog_filters.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_catalog_filters_hint',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaCatalogFiltersHint,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.catalog.catalog_search.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_catalog_search_hint',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaCatalogSearchHint,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.catalog.catalog_sort.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_catalog_sort_hint',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaCatalogSortHint,
-                },
-            },
-            """,
-        ),
-        (
-            _mfe,
-            "org.openedx.frontend.catalog.catalog_pagination.v1",
-            """
-            {
-                op: PLUGIN_OPERATIONS.Insert,
-                widget: {
-                    id: 'mereka_catalog_pagination_hint',
-                    type: DIRECT_PLUGIN,
-                    priority: 1,
-                    RenderWidget: MerekaCatalogPaginationHint,
                 },
             },
             """,
@@ -2368,76 +2274,6 @@ const MerekaLearningCourseExitDashboardFootnoteLinkHint = () => {
   return (
     <div className="mereka-learning-course-exit-dashboard-footnote-link-hint mb-2">
       <a href="/dashboard" className="small">Return to your dashboard for next actions.</a>
-    </div>
-  );
-};
-
-// Catalog/discovery header slot for branded discovery context.
-// Wired into org.openedx.frontend.catalog.catalog_header.v1.
-const MerekaCatalogHeader = () => {
-  const config = getConfig();
-  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
-
-  return (
-    <section className="mereka-catalog-header-slot mb-3">
-      <span className="mereka-badge mb-2">Explore</span>
-      <h2 className="h4 mb-1">Discover programs from {variant.brand}</h2>
-      <p className="mb-0 small text-muted">
-        Browse curated learning pathways and enrol when you are ready.
-      </p>
-    </section>
-  );
-};
-
-// Catalog/discovery course-card accent slot.
-// Wired into org.openedx.frontend.catalog.catalog_card.v1.
-const MerekaCatalogCourseCardAccent = () => {
-  return (
-    <div className="mereka-catalog-course-card-accent">
-      <span className="mereka-badge">Mereka Pick</span>
-    </div>
-  );
-};
-
-// Catalog/discovery filter helper slot.
-// Wired into org.openedx.frontend.catalog.catalog_filters.v1.
-const MerekaCatalogFiltersHint = () => {
-  return (
-    <div className="mereka-catalog-filters-hint">
-      <span>Filter by skill path, pace, and difficulty to match your goals.</span>
-    </div>
-  );
-};
-
-// Catalog/discovery search helper slot.
-// Wired into org.openedx.frontend.catalog.catalog_search.v1.
-const MerekaCatalogSearchHint = () => {
-  return (
-    <div className="mereka-catalog-search-hint">
-      <span className="mereka-badge me-2">Search</span>
-      <span className="small text-muted">Search by role, outcome, or skill to find relevant programs faster.</span>
-    </div>
-  );
-};
-
-// Catalog/discovery sort helper slot.
-// Wired into org.openedx.frontend.catalog.catalog_sort.v1.
-const MerekaCatalogSortHint = () => {
-  return (
-    <div className="mereka-catalog-sort-hint">
-      <span className="mereka-badge me-2">Sort</span>
-      <span className="small text-muted">Sort by relevance, newest, or learner demand based on your goals.</span>
-    </div>
-  );
-};
-
-// Catalog/discovery pagination helper slot.
-// Wired into org.openedx.frontend.catalog.catalog_pagination.v1.
-const MerekaCatalogPaginationHint = () => {
-  return (
-    <div className="mereka-catalog-pagination-hint">
-      <span className="mereka-badge me-2">Browse</span>
-      <span className="small text-muted">Use pagination to compare programs and shortlist the best fit.</span>
     </div>
   );
 };
