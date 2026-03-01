@@ -41,23 +41,28 @@ if ! rg -n 'wcag22aa' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
-if rg -n -- '--reporter' "$WORKFLOW" >/dev/null; then
-  echo "❌ accessibility-audit still uses deprecated axe flag --reporter"
+if ! rg -n './scripts/qa/run-a11y-runtime-lane\.sh' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit must invoke canonical run-a11y-runtime-lane.sh wrapper"
   violations=1
 fi
 
-if ! rg -n -- '--save' "$WORKFLOW" >/dev/null; then
-  echo "❌ accessibility-audit missing axe --save report output"
+if ! rg -n -- '--mode online' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit wrapper step missing --mode online wiring"
   violations=1
 fi
 
-if ! rg -n -- '--no-reporter' "$WORKFLOW" >/dev/null; then
-  echo "❌ accessibility-audit missing axe --no-reporter wiring"
+if ! rg -n -- '--target-url' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit wrapper step missing --target-url wiring"
   violations=1
 fi
 
-if ! rg -n '/authn/login|/authn/register|/dashboard|/account|/learning' "$WORKFLOW" >/dev/null; then
-  echo "❌ accessibility-audit missing Open edX MFE route coverage"
+if ! rg -n -- '--routes' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit wrapper step missing route coverage wiring"
+  violations=1
+fi
+
+if ! rg -n -- '--allow-missing-reports' "$WORKFLOW" >/dev/null; then
+  echo "❌ accessibility-audit wrapper step missing --allow-missing-reports safety flag"
   violations=1
 fi
 

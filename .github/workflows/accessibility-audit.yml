@@ -37,9 +37,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install axe-core CLI
-        run: npm install -g @axe-core/cli@4.10.2
-
       - name: Set target URL
         run: |
           TARGET="${{ github.event.inputs.target_url || 'https://apps.academyv2.mereka.io' }}"
@@ -58,60 +55,25 @@ jobs:
           mkdir -p var/ci/axe-reports
 
           TARGET="${TARGET_URL}"
+          ROUTES_CSV="/authn/login,/authn/register,/dashboard,/account,/learning"
+          ./scripts/qa/run-a11y-runtime-lane.sh \
+            --env prod \
+            --mode online \
+            --target-url "$TARGET" \
+            --routes "$ROUTES_CSV" \
+            --allow-missing-reports \
+            | tee var/ci/axe-audit.log
 
-          ROUTES=(
-            "/authn/login"
-            "/authn/register"
-            "/dashboard"
-            "/account"
-            "/learning"
-          )
+          cp -f var/a11y-reports/axe-*.json var/ci/axe-reports/ 2>/dev/null || true
+          cp -f var/a11y-reports/axe-*.stderr.log var/ci/axe-reports/ 2>/dev/null || true
 
           VIOLATIONS_TOTAL=0
-          REPORT_FILES=()
-
-          for route in "${ROUTES[@]}"; do
-            url="${TARGET}${route}"
-            safe_name="$(echo "${route}" | sed 's|/|-|g; s|^-||')"
-            if [[ -z "$safe_name" ]]; then safe_name="home"; fi
-            report_file="var/ci/axe-reports/axe-${safe_name}.json"
-            command_log="var/ci/axe-reports/axe-${safe_name}.stderr.log"
-
-            echo "--- Scanning: ${url} ---"
-
-            # Run axe CLI; capture exit code separately so we can collect results
-            axe "${url}" \
-              --tags wcag2a,wcag2aa,wcag22aa \
-              --save "${report_file}" \
-              --timeout 30 \
-              --no-reporter \
-              --show-errors true \
-              >"${command_log}" 2>&1 || true
-
-            REPORT_FILES+=("$report_file")
-
-            if [[ -f "$report_file" ]]; then
-              # Count violations in this report
-              VIOLS=$(python3 -c "
-          import json, sys
-          try:
-              data = json.load(open('${report_file}'))
-              results = data if isinstance(data, list) else [data]
-              total = sum(len(r.get('violations', [])) for r in results)
-              print(total)
-          except Exception:
-              print(0)
-          " 2>/dev/null || echo 0)
-              VIOLATIONS_TOTAL=$((VIOLATIONS_TOTAL + VIOLS))
-              echo "  violations found: ${VIOLS}"
-            else
-              echo "  (no report generated — URL may be unreachable)"
-              if [[ -s "$command_log" ]]; then
-                echo "  command-log: ${command_log}"
-              fi
-            fi
+          ROUTES=(/authn/login /authn/register /dashboard /account /learning)
+          for report_file in var/ci/axe-reports/axe-*.json; do
+            [[ -f "$report_file" ]] || continue
+            VIOLS="$(python3 -c 'import json,sys,pathlib; p=sys.argv[1]; d=json.loads(pathlib.Path(p).read_text(encoding="utf-8")); r=d if isinstance(d,list) else [d]; print(sum(len(x.get("violations", [])) for x in r))' "$report_file" 2>/dev/null || echo 0)"
+            VIOLATIONS_TOTAL=$((VIOLATIONS_TOTAL + VIOLS))
           done
-
           echo ""
           echo "=== Summary ==="
           echo "Routes scanned : ${#ROUTES[@]}"
@@ -203,6 +165,8 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: axe-audit-reports
-          path: var/ci/axe-reports/
+          path: |
+            var/ci/axe-reports/
+            var/ci/axe-audit.log
           retention-days: 3
           if-no-files-found: warn
