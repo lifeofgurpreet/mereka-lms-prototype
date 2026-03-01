@@ -26,6 +26,14 @@ on:
         required: true
         default: true
         type: boolean
+      audit_profile:
+        description: "Preset profile for route/selector defaults"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - standard
+          - phase7_strict
       selector_audit_path:
         description: "Path used for selector DOM audit"
         required: false
@@ -83,12 +91,28 @@ jobs:
           BASE_URL_INPUT="${{ inputs.base_url || '' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          AUDIT_PROFILE="${{ inputs.audit_profile || 'standard' }}"
           SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
           SELECTOR_AUDIT_ROUTES="${{ inputs.selector_audit_routes || '' }}"
           SELECTOR_AUDIT_SELECTORS="${{ inputs.selector_audit_selectors || '' }}"
           MIN_SELECTOR_HITS="${{ inputs.min_selector_hits || '3' }}"
           MIN_CUSTOM_SELECTOR_HITS="${{ inputs.min_custom_selector_hits || '0' }}"
           PROJECT="${{ inputs.project || 'chromium' }}"
+
+          if [[ "$AUDIT_PROFILE" == "phase7_strict" ]]; then
+            if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
+              SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
+            fi
+            if [[ -z "$SELECTOR_AUDIT_SELECTORS" ]]; then
+              SELECTOR_AUDIT_SELECTORS=".mereka-authn-login-branding,.mereka-footer,.btn-primary,.form-control,.navbar"
+            fi
+            if [[ "$MIN_SELECTOR_HITS" == "3" ]]; then
+              MIN_SELECTOR_HITS="2"
+            fi
+            if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
+              MIN_CUSTOM_SELECTOR_HITS="3"
+            fi
+          fi
 
           args=(--env "$TARGET_ENV" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$MIN_SELECTOR_HITS" --min-custom-selector-hits "$MIN_CUSTOM_SELECTOR_HITS" --project "$PROJECT")
           if [[ -n "$SELECTOR_AUDIT_ROUTES" ]]; then

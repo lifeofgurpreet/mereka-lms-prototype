@@ -14,7 +14,7 @@ if [[ ! -f "$WORKFLOW" ]]; then
   exit 1
 fi
 
-for input_key in target_environment base_url require_runtime_theme require_branding_markers \
+for input_key in target_environment base_url require_runtime_theme require_branding_markers audit_profile \
                  selector_audit_path selector_audit_routes selector_audit_selectors \
                  min_selector_hits min_custom_selector_hits project; do
   if ! rg -n "^[[:space:]]+${input_key}:" "$WORKFLOW" >/dev/null; then
@@ -25,6 +25,11 @@ done
 
 if ! rg -n './scripts/qa/verify-mfe-live-dom-audit\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ workflow missing verify-mfe-live-dom-audit.sh invocation"
+  violations=1
+fi
+
+if ! rg -n 'AUDIT_PROFILE=' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing audit profile wiring"
   violations=1
 fi
 
