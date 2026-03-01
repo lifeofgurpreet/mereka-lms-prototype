@@ -1,0 +1,31 @@
+name: Paragon Theme Budget
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  paragon-theme-budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run paragon token coverage / theme budget gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+          ./scripts/qa/verify-paragon-token-coverage.sh \
+            | tee var/qa/paragon-theme-budget.log
+
+      - name: Upload paragon theme budget artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paragon-theme-budget-${{ github.run_number }}
+          path: |
+            var/qa/paragon-theme-budget.log
+          if-no-files-found: warn
