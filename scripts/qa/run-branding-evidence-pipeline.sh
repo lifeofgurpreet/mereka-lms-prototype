@@ -49,7 +49,7 @@ LIVE_DOM_AUDIT_ROUTES="${LIVE_DOM_AUDIT_ROUTES:-}"
 LIVE_DOM_AUDIT_SELECTORS="${LIVE_DOM_AUDIT_SELECTORS:-}"
 LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${LIVE_DOM_AUDIT_MIN_CUSTOM_HITS:-0}"
 SELECTOR_AUDIT_PATH="${SELECTOR_AUDIT_PATH:-/authn/login}"
-A11Y_SCRIPT="${A11Y_SCRIPT:-./scripts/qa/verify-accessibility.sh}"
+A11Y_SCRIPT="${A11Y_SCRIPT:-./scripts/qa/run-a11y-runtime-lane.sh}"
 A11Y_MODE="${A11Y_MODE:-offline}"
 A11Y_TARGET="${A11Y_TARGET:-}"
 A11Y_ROUTES="${A11Y_ROUTES:-}"
@@ -119,7 +119,7 @@ Environment toggles:
                             Runtime theme strictness (default: auto -> prod=1, dev=0)
   REQUIRE_BRANDING_MARKERS=0|1
                             Require branded slot markers in rendered MFE DOM (default: 1)
-  A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/verify-accessibility.sh)
+  A11Y_SCRIPT=<path>        A11y script path (default: ./scripts/qa/run-a11y-runtime-lane.sh)
   A11Y_MODE=offline|online|hybrid
                             A11y scan mode (default: offline)
   A11Y_TARGET=<url>         A11y online scan origin (default: env-derived apps domain)
@@ -420,20 +420,14 @@ if [[ "$RUN_A11Y" == "1" ]]; then
 
   a11y_args=()
   case "$A11Y_MODE" in
-    offline)
-      a11y_args+=(--offline)
-      ;;
-    online)
-      a11y_args+=(--online --target "$A11Y_TARGET")
-      ;;
-    hybrid)
-      a11y_args+=(--offline --online --target "$A11Y_TARGET")
-      ;;
+    offline|online|hybrid) ;;
     *)
       echo "ERROR: A11Y_MODE must be offline|online|hybrid (got: $A11Y_MODE)" >&2
       exit 2
       ;;
   esac
+
+  a11y_args+=(--env "$ENV" --mode "$A11Y_MODE" --target-url "$A11Y_TARGET")
   if [[ -n "$A11Y_ROUTES" ]]; then
     a11y_args+=(--routes "$A11Y_ROUTES")
   fi
