@@ -20,8 +20,28 @@ if ! rg -n 'workflow_dispatch:' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'runs-on:[[:space:]]+ubuntu-24\.04' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow must run on ubuntu-24.04"
+  violations=1
+fi
+
+if ! rg -n 'timeout-minutes:[[:space:]]+30' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing timeout-minutes: 30 contract"
+  violations=1
+fi
+
+if ! rg -n 'actions/checkout@[0-9a-f]{40}' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow must pin actions/checkout to a full commit SHA"
+  violations=1
+fi
+
 if ! rg -n 'make qa-frontend-contracts' "$WORKFLOW" >/dev/null; then
   echo "❌ workflow missing make qa-frontend-contracts invocation"
+  violations=1
+fi
+
+if ! rg -n 'mkdir -p var/qa' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow missing var/qa log directory bootstrap"
   violations=1
 fi
 
