@@ -168,6 +168,9 @@ assert_make_command \
   './scripts/qa/verify-frontend-qa-make-targets.sh' \
   "qa-frontend-contracts includes verify-frontend-qa-make-targets"
 assert_make_command \
+  './scripts/qa/verify-frontend-contracts-workflow.sh' \
+  "qa-frontend-contracts includes verify-frontend-contracts-workflow"
+assert_make_command \
   './scripts/qa/verify-mfe-live-dom-audit-workflow.sh' \
   "qa-frontend-contracts includes verify-mfe-live-dom-audit-workflow"
 assert_make_command \
