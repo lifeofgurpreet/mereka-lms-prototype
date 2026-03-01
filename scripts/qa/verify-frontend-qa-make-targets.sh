@@ -45,6 +45,7 @@ assert_exec "scripts/qa/verify-cross-browser-branding-smoke.sh"
 assert_exec "scripts/qa/verify-npm-start-mfe-smoke.sh"
 assert_exec "scripts/qa/capture-branding-screenshots.sh"
 assert_exec "scripts/qa/verify-frontend-performance-spotcheck.sh"
+assert_exec "scripts/qa/run-branding-evidence-pipeline.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -52,6 +53,9 @@ for target in \
   qa-npm-start-smoke-local \
   qa-branding-screenshots-prod \
   qa-branding-screenshots-dev \
+  qa-frontend-closure-prod \
+  qa-frontend-closure-dev \
+  qa-frontend-closure-prod-screenshots \
   qa-performance-prod \
   qa-performance-dev; do
   assert_make_target "$target"
@@ -72,6 +76,15 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/capture-branding-screenshots.sh dev' \
   "qa-branding-screenshots-dev"
+assert_make_command \
+  './scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme' \
+  "qa-frontend-closure-prod"
+assert_make_command \
+  './scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser' \
+  "qa-frontend-closure-dev"
+assert_make_command \
+  'RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme' \
+  "qa-frontend-closure-prod-screenshots"
 assert_make_command \
   './scripts/qa/verify-frontend-performance-spotcheck.sh --env prod --require-runtime' \
   "qa-performance-prod"
