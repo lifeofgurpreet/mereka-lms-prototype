@@ -162,8 +162,24 @@ if [[ ! -d node_modules ]]; then
   npm ci
 fi
 
-echo "Installing Playwright browser: chromium" | tee -a "$artifact"
-npx playwright install chromium
+case "$PROJECT" in
+  firefox)
+    browser_install_target="firefox"
+    ;;
+  webkit|mobile-safari)
+    browser_install_target="webkit"
+    ;;
+  chromium|mobile-chrome)
+    browser_install_target="chromium"
+    ;;
+  *)
+    browser_install_target="chromium"
+    echo "WARN: Unknown Playwright project '$PROJECT'; defaulting browser install to chromium." | tee -a "$artifact"
+    ;;
+esac
+
+echo "Installing Playwright browser: ${browser_install_target}" | tee -a "$artifact"
+npx playwright install "$browser_install_target"
 
 echo "Running npm-start MFE smoke (lms_base_url=$BASE_URL, mfe_origin=$MFE_ORIGIN, project=$PROJECT, learning_path=$LEARNING_PATH)" | tee -a "$artifact"
 set -o pipefail
