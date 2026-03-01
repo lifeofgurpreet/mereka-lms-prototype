@@ -35,6 +35,38 @@ pick_source_dir() {
   echo ""
 }
 
+count_namespace_slots_from_source() {
+  local namespace="$1"
+  local source_dir="$2"
+  if [[ ! -d "$source_dir" ]]; then
+    echo "0"
+    return 0
+  fi
+  rg -o "org\\.openedx\\.frontend\\.${namespace}\\.[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)*\\.v[0-9]+" "$source_dir" \
+    | sed -E 's/.*://g' \
+    | sort -u \
+    | sed '/^$/d' \
+    | wc -l \
+    | tr -d ' '
+}
+
+pick_best_namespace_source() {
+  local namespace="$1"
+  shift
+  local best_source=""
+  local best_count=-1
+  local candidate candidate_count
+  for candidate in "$@"; do
+    [[ -d "$candidate" ]] || continue
+    candidate_count="$(count_namespace_slots_from_source "$namespace" "$candidate")"
+    if [[ "$candidate_count" -gt "$best_count" ]]; then
+      best_source="$candidate"
+      best_count="$candidate_count"
+    fi
+  done
+  echo "$best_source"
+}
+
 AUTHN_SRC="$(pick_source_dir \
   "$REPO_ROOT/tutor_env/dev/frontend-app-authn/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-authn/src")"
@@ -47,38 +79,24 @@ PROFILE_SRC="$(pick_source_dir \
 LEARNING_SRC="$(pick_source_dir \
   "$REPO_ROOT/tutor_env/dev/frontend-app-learning/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-learning/src")"
-AUTHORING_SRC=""
-for candidate in \
+AUTHORING_SRC="$(pick_best_namespace_source "authoring" \
   "$REPO_ROOT/tutor_env/dev/frontend-app-authoring/src" \
   "$REPO_ROOT/tutor_env/dev/frontend-app-course-authoring/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-authoring/src" \
-  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-course-authoring/src"
-do
-  if [[ -d "$candidate" ]]; then
-    AUTHORING_SRC="$candidate"
-    break
-  fi
-done
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-course-authoring/src")"
 GRADEBOOK_SRC="$(pick_source_dir \
   "$REPO_ROOT/tutor_env/dev/frontend-app-gradebook/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-gradebook/src")"
 DASHBOARD_SRC="$(pick_source_dir \
   "$REPO_ROOT/tutor_env/dev/frontend-app-learner-dashboard/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-learner-dashboard/src")"
-CATALOG_SRC=""
-for candidate in \
+CATALOG_SRC="$(pick_best_namespace_source "catalog" \
   "$REPO_ROOT/tutor_env/dev/frontend-app-discovery/src" \
   "$REPO_ROOT/tutor_env/dev/frontend-app-catalog/src" \
   "$REPO_ROOT/tutor_env/dev/frontend-app-course-catalog/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-discovery/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-catalog/src" \
-  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-course-catalog/src"
-do
-  if [[ -d "$candidate" ]]; then
-    CATALOG_SRC="$candidate"
-    break
-  fi
-done
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-course-catalog/src")"
 
 echo "=== MFE Slot Source Alignment Verification ==="
 
@@ -148,17 +166,12 @@ check_slot_in_any_local_source() {
 declare -A skipped_namespace_counts=()
 AUTHORING_LEGACY_ONLY=0
 if [[ -n "$AUTHORING_SRC" ]]; then
-  authoring_slot_count="$(
-    rg -o "org\\.openedx\\.frontend\\.authoring\\.[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)*\\.v[0-9]+" "$AUTHORING_SRC" \
-      | sed -E 's/.*://g' \
-      | sort -u \
-      | sed '/^$/d' \
-      | wc -l \
-      | tr -d ' '
-  )"
+  authoring_slot_count="$(count_namespace_slots_from_source "authoring" "$AUTHORING_SRC")"
   if [[ "$authoring_slot_count" -le 1 ]] && rg -qF "org.openedx.frontend.authoring.course_unit_sidebar.v1" "$AUTHORING_SRC"; then
     AUTHORING_LEGACY_ONLY=1
     warn "Authoring checkout appears legacy (only unit-sidebar slot detected); non-v1 authoring slot alignment checks will be skipped"
+  elif [[ "$authoring_slot_count" -gt 1 ]]; then
+    pass "Authoring source selected for alignment has ${authoring_slot_count} unique slot IDs: ${AUTHORING_SRC#$REPO_ROOT/}"
   fi
 fi
 
