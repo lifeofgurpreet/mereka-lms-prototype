@@ -66,6 +66,11 @@ if ! rg -n 'require_runtime_theme' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'require_branding_markers' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow missing require_branding_markers input"
+  violations=1
+fi
+
 if ! rg -n 'runtime_theme_url' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing runtime_theme_url input"
   violations=1
@@ -101,8 +106,18 @@ if ! rg -n -- '--require-runtime' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n -- '--require-slot-markers|--allow-missing-slot-markers' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow runtime contract step missing slot-marker policy wiring"
+  violations=1
+fi
+
 if ! rg -n './scripts/qa/verify-npm-start-mfe-smoke\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing npm-start smoke lane step"
+  violations=1
+fi
+
+if ! rg -n -- '--require-branding-markers|--allow-unbranded-shell' "$WORKFLOW" >/dev/null; then
+  echo "❌ release-evidence workflow npm-start smoke step missing branding marker wiring"
   violations=1
 fi
 
@@ -118,6 +133,11 @@ fi
 
 if ! rg -n '"require_runtime_theme": "\$\{\{ inputs\.require_runtime_theme \|\| '\''false'\'' \}\}"' "$WORKFLOW" >/dev/null; then
   echo "❌ release metadata missing require_runtime_theme field"
+  violations=1
+fi
+
+if ! rg -n '"require_branding_markers": "\$\{\{ inputs\.require_branding_markers \|\| '\''true'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  echo "❌ release metadata missing require_branding_markers field"
   violations=1
 fi
 
