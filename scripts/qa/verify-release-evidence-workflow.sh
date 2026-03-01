@@ -186,17 +186,17 @@ if ! rg -n './scripts/qa/verify-npm-start-mfe-smoke\.sh' "$WORKFLOW" >/dev/null;
   violations=1
 fi
 
-if ! rg -n './scripts/qa/verify-accessibility\.sh' "$WORKFLOW" >/dev/null; then
+if ! rg -n './scripts/qa/run-a11y-runtime-lane\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow missing accessibility lane step"
   violations=1
 fi
 
-if ! rg -n -- '--offline|--online' "$WORKFLOW" >/dev/null; then
+if ! rg -n -- '--mode' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow accessibility lane missing mode wiring"
   violations=1
 fi
 
-if ! rg -n -- '--target' "$WORKFLOW" >/dev/null; then
+if ! rg -n -- '--target-url' "$WORKFLOW" >/dev/null; then
   echo "❌ release-evidence workflow accessibility lane missing target URL wiring"
   violations=1
 fi

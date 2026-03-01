@@ -278,30 +278,16 @@ jobs:
           A11Y_ROUTES="${{ inputs.a11y_routes || '' }}"
           A11Y_ALLOW_MISSING="${{ inputs.a11y_allow_missing_reports || 'false' }}"
 
-          if [[ -z "$A11Y_TARGET_URL" ]]; then
-            if [[ "$TARGET_ENV" == "production" ]]; then
-              A11Y_TARGET_URL="https://apps.academyv2.mereka.io"
-            else
-              A11Y_TARGET_URL="https://apps.academyv2.mereka.dev"
-            fi
+          if [[ "$TARGET_ENV" == "production" ]]; then
+            ENV_FLAG="prod"
+          else
+            ENV_FLAG="dev"
           fi
 
-          args=()
-          case "$A11Y_MODE" in
-            offline)
-              args+=(--offline)
-              ;;
-            online)
-              args+=(--online --target "$A11Y_TARGET_URL")
-              ;;
-            hybrid)
-              args+=(--offline --online --target "$A11Y_TARGET_URL")
-              ;;
-            *)
-              echo "ERROR: a11y_mode must be offline|online|hybrid (got: $A11Y_MODE)" >&2
-              exit 2
-              ;;
-          esac
+          args=(--env "$ENV_FLAG" --mode "$A11Y_MODE")
+          if [[ -n "$A11Y_TARGET_URL" ]]; then
+            args+=(--target-url "$A11Y_TARGET_URL")
+          fi
 
           if [[ -n "$A11Y_ROUTES" ]]; then
             args+=(--routes "$A11Y_ROUTES")
@@ -310,7 +296,7 @@ jobs:
             args+=(--allow-missing-reports)
           fi
 
-          ./scripts/qa/verify-accessibility.sh "${args[@]}" \
+          ./scripts/qa/run-a11y-runtime-lane.sh "${args[@]}" \
             | tee var/release-evidence/accessibility.log
 
       - name: Run certificate branding lane
