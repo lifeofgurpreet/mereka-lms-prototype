@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-branding-screenshots-prod qa-branding-screenshots-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-branding-screenshots-prod qa-branding-screenshots-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-certificate-branding qa-email-template-branding forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -133,6 +133,12 @@ qa-frontend-closure-dev: ## Run frontend closure pipeline (dev, cross-browser)
 
 qa-frontend-closure-prod-screenshots: ## Run frontend closure pipeline with screenshot capture (prod)
 	RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme
+
+qa-certificate-branding: ## Verify certificate surface branding coverage
+	./scripts/qa/verify-certificate-branding.sh
+
+qa-email-template-branding: ## Verify multilingual email template branding coverage
+	./scripts/qa/verify-email-template-multilang.sh
 
 mobile-secrets-check: ## Run mobile secrets verification (offline static checks)
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline
