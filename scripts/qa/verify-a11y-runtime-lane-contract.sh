@@ -40,6 +40,32 @@ if [[ -f "$MAKEFILE" ]]; then
       violations=1
     fi
   done
+
+  if ! rg -n --fixed-strings './scripts/qa/run-a11y-runtime-lane.sh --env prod --mode offline' "$MAKEFILE" >/dev/null; then
+    echo "❌ Makefile target qa-a11y-prod is not wired to --env prod --mode offline"
+    violations=1
+  fi
+  if ! rg -n --fixed-strings './scripts/qa/run-a11y-runtime-lane.sh --env dev --mode offline' "$MAKEFILE" >/dev/null; then
+    echo "❌ Makefile target qa-a11y-dev is not wired to --env dev --mode offline"
+    violations=1
+  fi
+  if ! rg -n --fixed-strings './scripts/qa/run-a11y-runtime-lane.sh --env prod --mode online' "$MAKEFILE" >/dev/null; then
+    echo "❌ Makefile target qa-a11y-prod-online is not wired to --env prod --mode online"
+    violations=1
+  fi
+  if ! rg -n --fixed-strings './scripts/qa/run-a11y-runtime-lane.sh --env dev --mode online' "$MAKEFILE" >/dev/null; then
+    echo "❌ Makefile target qa-a11y-dev-online is not wired to --env dev --mode online"
+    violations=1
+  fi
+  if ! rg -n --fixed-strings './scripts/qa/run-a11y-runtime-lane.sh --env prod --mode hybrid --allow-missing-reports' "$MAKEFILE" >/dev/null; then
+    echo "❌ Makefile target qa-a11y-prod-hybrid is not wired to --env prod --mode hybrid --allow-missing-reports"
+    violations=1
+  fi
+  if ! rg -n --fixed-strings './scripts/qa/run-a11y-runtime-lane.sh --env dev --mode hybrid --allow-missing-reports' "$MAKEFILE" >/dev/null; then
+    echo "❌ Makefile target qa-a11y-dev-hybrid is not wired to --env dev --mode hybrid --allow-missing-reports"
+    violations=1
+  fi
+
   if ! rg -n 'run-a11y-runtime-lane\.sh' "$MAKEFILE" >/dev/null; then
     echo "❌ Makefile a11y targets are not wired through run-a11y-runtime-lane.sh"
     violations=1
