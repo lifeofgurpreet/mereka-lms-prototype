@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-npm-start-smoke-local qa-npm-start-smoke-prod qa-npm-start-smoke-dev qa-branding-screenshots-prod qa-branding-screenshots-dev qa-branding-screenshots-mfe-prod qa-branding-screenshots-mfe-dev qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -124,6 +124,12 @@ qa-cross-browser-dev: ## Run cross-browser branding smoke (dev)
 
 qa-npm-start-smoke-local: ## Run local npm-start MFE smoke (authn, learning, account, profile)
 	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers
+
+qa-npm-start-smoke-prod: ## Run prod MFE smoke (runtime theme + branding markers)
+	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --require-branding-markers
+
+qa-npm-start-smoke-dev: ## Run dev MFE smoke (branding markers)
+	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.dev --require-branding-markers
 
 qa-branding-screenshots-prod: ## Capture branding screenshots for production surfaces
 	./scripts/qa/capture-branding-screenshots.sh prod

@@ -59,6 +59,8 @@ for target in \
   qa-phase7-dom-audit-full \
   qa-phase7-dom-audit-full-dev \
   qa-npm-start-smoke-local \
+  qa-npm-start-smoke-prod \
+  qa-npm-start-smoke-dev \
   qa-branding-screenshots-prod \
   qa-branding-screenshots-dev \
   qa-branding-screenshots-mfe-prod \
@@ -96,6 +98,12 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers' \
   "qa-npm-start-smoke-local"
+assert_make_command \
+  './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --require-branding-markers' \
+  "qa-npm-start-smoke-prod"
+assert_make_command \
+  './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.dev --require-branding-markers' \
+  "qa-npm-start-smoke-dev"
 assert_make_command \
   './scripts/qa/capture-branding-screenshots.sh prod' \
   "qa-branding-screenshots-prod"
