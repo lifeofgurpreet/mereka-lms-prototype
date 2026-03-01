@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -97,6 +97,12 @@ qa-a11y-prod-online: ## Run accessibility gate (online) for prod apps routes
 
 qa-a11y-dev-online: ## Run accessibility gate (online) for dev apps routes
 	./scripts/qa/run-a11y-runtime-lane.sh --env dev --mode online
+
+qa-a11y-prod-hybrid: ## Run accessibility gate (hybrid offline+online) for prod apps routes
+	./scripts/qa/run-a11y-runtime-lane.sh --env prod --mode hybrid --allow-missing-reports
+
+qa-a11y-dev-hybrid: ## Run accessibility gate (hybrid offline+online) for dev apps routes
+	./scripts/qa/run-a11y-runtime-lane.sh --env dev --mode hybrid --allow-missing-reports
 
 mobile-secrets-check: ## Run mobile secrets verification (offline static checks)
 	./scripts/qa/verify-mobile-secrets-runtime.sh --offline
