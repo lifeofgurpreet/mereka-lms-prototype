@@ -844,6 +844,10 @@ PY
 #   org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1 | Desktop user-menu toggle helper
 #   org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1 | Mobile user-menu trigger helper
 #   org.openedx.frontend.layout.header_learning_user_menu_toggle.v1 | Learning user-menu toggle helper
+#   org.openedx.frontend.layout.header_desktop.v1 | Desktop header-shell class helper
+#   org.openedx.frontend.layout.header_mobile.v1 | Mobile header-shell class helper
+#   org.openedx.frontend.layout.header_learning_course_info.v1 | Learning course-info class helper
+#   org.openedx.frontend.layout.studio_header_search_button_slot.v1 | Studio header-search class helper
 #   org.openedx.frontend.authoring.course_unit_sidebar.v1 | Studio course-unit sidebar helper
 #   org.openedx.frontend.authoring.course_outline_sidebar.v1 | Studio outline-page sidebar helper
 #   org.openedx.frontend.authoring.course_outline_header_actions.v1 | Studio outline header actions helper
@@ -959,6 +963,17 @@ for _mfe in [
                     priority: 1,
                     RenderWidget: MerekaStudioFooter,
                 },
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.studio_header_search_button_slot.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaStudioHeaderSearchButton(widget),
             },
             """,
         ),
@@ -1875,6 +1890,39 @@ for _mfe in [
         ),
         (
             _mfe,
+            "org.openedx.frontend.layout.header_desktop.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaHeaderDesktopShell(widget),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_mobile.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaHeaderMobileShell(widget),
+            },
+            """,
+        ),
+        (
+            _mfe,
+            "org.openedx.frontend.layout.header_learning_course_info.v1",
+            """
+            {
+                op: PLUGIN_OPERATIONS.Modify,
+                widgetId: 'default_contents',
+                fn: (widget) => withMerekaHeaderLearningCourseInfo(widget),
+            },
+            """,
+        ),
+        (
+            _mfe,
             "org.openedx.frontend.layout.header_learning_help.v1",
             """
             {
@@ -2227,6 +2275,26 @@ const appendClassName = (baseValue, classNameToAppend) => {
   return merged.join(' ');
 };
 
+const withMerekaHeaderShellClass = (widget, classNameToAppend) => {
+  const widgetContent = (widget && widget.content) || {};
+  if (!widgetContent || typeof widgetContent !== 'object') {
+    return widget;
+  }
+
+  const nextClassName = appendClassName(widgetContent.className, classNameToAppend);
+  if (!nextClassName || nextClassName === widgetContent.className) {
+    return widget;
+  }
+
+  return {
+    ...widget,
+    content: {
+      ...widgetContent,
+      className: nextClassName,
+    },
+  };
+};
+
 const withMerekaUserMenuToggleClass = (widget, classNameToAppend) => {
   const widgetContent = (widget && widget.content) || {};
   if (!widgetContent || typeof widgetContent !== 'object') {
@@ -2273,6 +2341,22 @@ const withMerekaMobileUserMenuTrigger = (widget) => {
 
 const withMerekaLearningUserMenuToggle = (widget) => {
   return withMerekaUserMenuToggleClass(widget, 'mereka-learning-user-menu-toggle');
+};
+
+const withMerekaHeaderDesktopShell = (widget) => {
+  return withMerekaHeaderShellClass(widget, 'mereka-header-desktop-shell');
+};
+
+const withMerekaHeaderMobileShell = (widget) => {
+  return withMerekaHeaderShellClass(widget, 'mereka-header-mobile-shell');
+};
+
+const withMerekaHeaderLearningCourseInfo = (widget) => {
+  return withMerekaHeaderShellClass(widget, 'mereka-header-learning-course-info');
+};
+
+const withMerekaStudioHeaderSearchButton = (widget) => {
+  return withMerekaUserMenuToggleClass(widget, 'mereka-studio-header-search-button');
 };
 
 // Custom Mereka header-logo component (Direct plugin — registered via header_logo slot)
