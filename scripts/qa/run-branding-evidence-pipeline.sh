@@ -30,6 +30,9 @@ RUN_MFE_LIVE_DOM_AUDIT="${RUN_MFE_LIVE_DOM_AUDIT:-0}"
 RUN_NPM_START_SMOKE="${RUN_NPM_START_SMOKE:-0}"
 RUN_SCREENSHOTS="${RUN_SCREENSHOTS:-0}"
 SCREENSHOT_SCOPE="${SCREENSHOT_SCOPE:-full}"
+GATE_TIMEOUT_SECONDS="${GATE_TIMEOUT_SECONDS:-300}"
+CROSS_BROWSER_GATE_TIMEOUT_SECONDS="${CROSS_BROWSER_GATE_TIMEOUT_SECONDS:-900}"
+SCREENSHOT_GATE_TIMEOUT_SECONDS="${SCREENSHOT_GATE_TIMEOUT_SECONDS:-900}"
 RUN_BASELINE_GATES="${RUN_BASELINE_GATES:-1}"
 CROSS_BROWSER="${CROSS_BROWSER:-0}"
 LEARNING_PATH="${LEARNING_PATH:-/learning}"
@@ -116,6 +119,12 @@ Environment toggles:
   RUN_SCREENSHOTS=0|1       Enable/disable screenshot gate (default: 0)
   SCREENSHOT_SCOPE=full|mfe-only
                             Screenshot scope when RUN_SCREENSHOTS=1 (default: full)
+  GATE_TIMEOUT_SECONDS=<seconds>
+                            Default timeout for each gate (default: 300)
+  CROSS_BROWSER_GATE_TIMEOUT_SECONDS=<seconds>
+                            Timeout for cross-browser smoke gate (default: 900)
+  SCREENSHOT_GATE_TIMEOUT_SECONDS=<seconds>
+                            Timeout for screenshot capture gate (default: 900)
   RUN_BASELINE_GATES=0|1    Enable/disable baseline multisite/route gates (default: 1)
   STRICT_WEBKIT=0|1         Require WebKit success in cross-browser gate (default: 0)
   REQUIRE_RUNTIME_THEME=0|1|auto
@@ -219,6 +228,9 @@ echo "Runtime slot marker policy: $SLOT_MARKER_POLICY"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
 echo "Screenshot gate enabled: $RUN_SCREENSHOTS"
 echo "Screenshot scope: $SCREENSHOT_SCOPE"
+echo "Default gate timeout: ${GATE_TIMEOUT_SECONDS}s"
+echo "Cross-browser gate timeout: ${CROSS_BROWSER_GATE_TIMEOUT_SECONDS}s"
+echo "Screenshot gate timeout: ${SCREENSHOT_GATE_TIMEOUT_SECONDS}s"
 echo "Baseline gates enabled: $RUN_BASELINE_GATES"
 echo "Require runtime theme mode: $REQUIRE_RUNTIME_THEME"
 echo "Require branded runtime slot markers: $REQUIRE_BRANDING_MARKERS"
@@ -241,7 +253,7 @@ skip_gate() {
 
 run_gate() {
   local name="$1"; shift
-  local timeout_seconds="${GATE_TIMEOUT_SECONDS:-300}"
+  local timeout_seconds="${GATE_TIMEOUT_SECONDS}"
   local log_file="${EVIDENCE_DIR}/${name}.log"
   local rc=0
 
@@ -265,6 +277,16 @@ run_gate() {
     gate_results+=("| ${name} | FAIL | [log](${name}.log) |")
     total_fail=$((total_fail + 1))
   fi
+}
+
+run_gate_with_timeout() {
+  local name="$1"
+  local timeout_seconds="$2"
+  shift 2
+  local previous_timeout="${GATE_TIMEOUT_SECONDS}"
+  GATE_TIMEOUT_SECONDS="$timeout_seconds"
+  run_gate "$name" "$@"
+  GATE_TIMEOUT_SECONDS="$previous_timeout"
 }
 
 if [[ "$RUN_BASELINE_GATES" == "1" ]]; then
@@ -336,7 +358,7 @@ if [[ "$RUN_CROSS_BROWSER" == "1" ]]; then
   else
     cross_browser_args+=(--allow-unbranded-shell)
   fi
-  run_gate "cross-browser-branding-smoke" \
+  run_gate_with_timeout "cross-browser-branding-smoke" "$CROSS_BROWSER_GATE_TIMEOUT_SECONDS" \
     ./scripts/qa/verify-cross-browser-branding-smoke.sh "${cross_browser_args[@]}"
 else
   skip_gate "cross-browser-branding-smoke" "RUN_CROSS_BROWSER=0"
@@ -496,7 +518,7 @@ if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
   if [[ "$SCREENSHOT_SCOPE" == "mfe-only" ]]; then
     screenshot_args=(--env "$ENV" --mfe-only)
   fi
-  run_gate "capture-branding-screenshots" \
+  run_gate_with_timeout "capture-branding-screenshots" "$SCREENSHOT_GATE_TIMEOUT_SECONDS" \
     ./scripts/qa/capture-branding-screenshots.sh "${screenshot_args[@]}"
 else
   skip_gate "capture-branding-screenshots" "RUN_SCREENSHOTS=0"
