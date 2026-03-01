@@ -74,6 +74,8 @@ scripts/qa/verify-mfe-reduced-motion.sh
 scripts/qa/verify-mfe-routing-parity.sh
 scripts/qa/verify-mfe-first-policy.sh
 scripts/qa/verify-mfe-analytics-plugin-parity.sh
+scripts/qa/verify-fpf-slot-coverage.sh
+scripts/qa/verify-mfe-slot-source-alignment.sh
 
 # ── Auth & SSO ───────────────────────────────────────────────────────────────
 scripts/qa/verify-auth-hardening.sh

@@ -23,6 +23,7 @@ RUN_CERTIFICATE_BRANDING="${RUN_CERTIFICATE_BRANDING:-1}"
 RUN_EMAIL_TEMPLATE_BRANDING="${RUN_EMAIL_TEMPLATE_BRANDING:-1}"
 RUN_PARAGON_THEME_BUDGET="${RUN_PARAGON_THEME_BUDGET:-1}"
 RUN_SLOT_COVERAGE="${RUN_SLOT_COVERAGE:-1}"
+RUN_SLOT_SOURCE_ALIGNMENT="${RUN_SLOT_SOURCE_ALIGNMENT:-1}"
 RUN_SELECTOR_HARDENING="${RUN_SELECTOR_HARDENING:-1}"
 RUN_RUNTIME_THEME_CONTRACT="${RUN_RUNTIME_THEME_CONTRACT:-1}"
 RUN_NPM_START_SMOKE="${RUN_NPM_START_SMOKE:-0}"
@@ -64,6 +65,8 @@ Environment toggles:
   RUN_PARAGON_THEME_BUDGET=0|1
                             Enable/disable Paragon theme CSS size/token budget gate (default: 1)
   RUN_SLOT_COVERAGE=0|1     Enable/disable FPF slot coverage truth gate (default: 1)
+  RUN_SLOT_SOURCE_ALIGNMENT=0|1
+                            Enable/disable FPF slot source-alignment gate (default: 1)
   RUN_SELECTOR_HARDENING=0|1
                             Enable/disable MFE selector hardening gate (default: 1)
   RUN_RUNTIME_THEME_CONTRACT=0|1
@@ -148,6 +151,7 @@ echo "Certificate branding gate enabled: $RUN_CERTIFICATE_BRANDING"
 echo "Email template branding gate enabled: $RUN_EMAIL_TEMPLATE_BRANDING"
 echo "Paragon theme budget gate enabled: $RUN_PARAGON_THEME_BUDGET"
 echo "Slot coverage gate enabled: $RUN_SLOT_COVERAGE"
+echo "Slot source-alignment gate enabled: $RUN_SLOT_SOURCE_ALIGNMENT"
 echo "Selector hardening gate enabled: $RUN_SELECTOR_HARDENING"
 echo "Runtime theme contract gate enabled: $RUN_RUNTIME_THEME_CONTRACT"
 echo "npm-start smoke gate enabled: $RUN_NPM_START_SMOKE"
@@ -235,7 +239,15 @@ else
   skip_gate "fpf-slot-coverage" "RUN_SLOT_COVERAGE=0"
 fi
 
-# --- Gate 7: MFE Selector Hardening ---
+# --- Gate 7: FPF Slot Source Alignment ---
+if [[ "$RUN_SLOT_SOURCE_ALIGNMENT" == "1" ]]; then
+  run_gate "fpf-slot-source-alignment" \
+    ./scripts/qa/verify-mfe-slot-source-alignment.sh
+else
+  skip_gate "fpf-slot-source-alignment" "RUN_SLOT_SOURCE_ALIGNMENT=0"
+fi
+
+# --- Gate 8: MFE Selector Hardening ---
 if [[ "$RUN_SELECTOR_HARDENING" == "1" ]]; then
   run_gate "mfe-selector-hardening" \
     ./scripts/qa/verify-mfe-selector-hardening.sh
@@ -243,7 +255,7 @@ else
   skip_gate "mfe-selector-hardening" "RUN_SELECTOR_HARDENING=0"
 fi
 
-# --- Gate 8: Frontend Branding Smoke (Playwright) ---
+# --- Gate 9: Frontend Branding Smoke (Playwright) ---
 if [[ "$RUN_CROSS_BROWSER" == "1" ]]; then
   cross_browser_args=(--env "$ENV" --learning-path "$LEARNING_PATH")
   if [[ "$CROSS_BROWSER" == "1" ]]; then
@@ -261,7 +273,7 @@ else
   skip_gate "cross-browser-branding-smoke" "RUN_CROSS_BROWSER=0"
 fi
 
-# --- Gate 9: Runtime Theme Contract ---
+# --- Gate 10: Runtime Theme Contract ---
 if [[ "$RUN_RUNTIME_THEME_CONTRACT" == "1" ]]; then
   runtime_theme_args=()
   if [[ -n "$RUNTIME_THEME_URL" ]]; then
@@ -281,7 +293,7 @@ else
   skip_gate "runtime-theme-contract" "RUN_RUNTIME_THEME_CONTRACT=0"
 fi
 
-# --- Gate 10: npm-start MFE smoke (optional) ---
+# --- Gate 11: npm-start MFE smoke (optional) ---
 if [[ "$RUN_NPM_START_SMOKE" == "1" ]]; then
   npm_start_args=(--project "$NPM_START_PROJECT" --learning-path "$LEARNING_PATH")
   if [[ -n "$NPM_START_BASE_URL" ]]; then
@@ -304,7 +316,7 @@ else
   skip_gate "npm-start-mfe-smoke" "RUN_NPM_START_SMOKE=0"
 fi
 
-# --- Gate 11: Accessibility / Contrast / Focus Lane ---
+# --- Gate 12: Accessibility / Contrast / Focus Lane ---
 if [[ "$RUN_A11Y" == "1" ]]; then
   if [[ ! -x "$A11Y_SCRIPT" ]]; then
     echo "ERROR: A11Y script is not executable or missing: $A11Y_SCRIPT" >&2
@@ -321,7 +333,7 @@ else
   skip_gate "a11y-tenant-branding" "RUN_A11Y=0"
 fi
 
-# --- Gate 12: Frontend Performance Spot-Check ---
+# --- Gate 13: Frontend Performance Spot-Check ---
 if [[ "$RUN_PERFORMANCE" == "1" ]]; then
   performance_args=(--env "$ENV")
   if [[ "$REQUIRE_RUNTIME_THEME" == "1" ]]; then
@@ -333,7 +345,7 @@ else
   skip_gate "frontend-performance-spotcheck" "RUN_PERFORMANCE=0"
 fi
 
-# --- Gate 13: Paragon Theme Budget Contract ---
+# --- Gate 14: Paragon Theme Budget Contract ---
 if [[ "$RUN_PARAGON_THEME_BUDGET" == "1" ]]; then
   run_gate "paragon-theme-budget" \
     ./scripts/qa/verify-paragon-token-coverage.sh
@@ -341,7 +353,7 @@ else
   skip_gate "paragon-theme-budget" "RUN_PARAGON_THEME_BUDGET=0"
 fi
 
-# --- Gate 14: Certificate + Email Branding Contract ---
+# --- Gate 15: Certificate + Email Branding Contract ---
 if [[ "$RUN_CERTIFICATE_BRANDING" == "1" ]]; then
   run_gate "certificate-branding" \
     ./scripts/qa/verify-certificate-branding.sh
@@ -349,7 +361,7 @@ else
   skip_gate "certificate-branding" "RUN_CERTIFICATE_BRANDING=0"
 fi
 
-# --- Gate 15: Email Template Branding Contract ---
+# --- Gate 16: Email Template Branding Contract ---
 if [[ "$RUN_EMAIL_TEMPLATE_BRANDING" == "1" ]]; then
   run_gate "email-template-branding" \
     ./scripts/qa/verify-email-template-multilang.sh
@@ -357,7 +369,7 @@ else
   skip_gate "email-template-branding" "RUN_EMAIL_TEMPLATE_BRANDING=0"
 fi
 
-# --- Gate 16: Public Screenshot Capture (optional operator evidence) ---
+# --- Gate 17: Public Screenshot Capture (optional operator evidence) ---
 if [[ "$RUN_SCREENSHOTS" == "1" ]]; then
   run_gate "capture-branding-screenshots" \
     ./scripts/qa/capture-branding-screenshots.sh "$ENV"
@@ -396,6 +408,7 @@ $(printf '%s\n' "${gate_results[@]}")
 - Certificate branding gate enabled: ${RUN_CERTIFICATE_BRANDING}
 - Email template branding gate enabled: ${RUN_EMAIL_TEMPLATE_BRANDING}
 - Slot coverage gate enabled: ${RUN_SLOT_COVERAGE}
+- Slot source-alignment gate enabled: ${RUN_SLOT_SOURCE_ALIGNMENT}
 - Selector hardening gate enabled: ${RUN_SELECTOR_HARDENING}
 - Runtime theme contract gate enabled: ${RUN_RUNTIME_THEME_CONTRACT}
 - Runtime theme contract URL: ${RUNTIME_THEME_URL:-"(auto by env)"}
