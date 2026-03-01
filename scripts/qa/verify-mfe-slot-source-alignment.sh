@@ -8,7 +8,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 STRICT="${STRICT:-1}"
 STRICT_LOCAL_LEARNING_COMPLETE="${STRICT_LOCAL_LEARNING_COMPLETE:-1}"
-CHECK_LAYOUT_SLOT_EXISTENCE="${CHECK_LAYOUT_SLOT_EXISTENCE:-0}"
+CHECK_LAYOUT_SLOT_EXISTENCE="${CHECK_LAYOUT_SLOT_EXISTENCE:-1}"
 ULMO_SLOT_SOURCE_FALLBACK="${ULMO_SLOT_SOURCE_FALLBACK:-/tmp/mfe-slot-inspect}"
 
 PASS=0
@@ -87,6 +87,9 @@ AUTHORING_SRC="$(pick_best_namespace_source "authoring" \
 GRADEBOOK_SRC="$(pick_source_dir \
   "$REPO_ROOT/tutor_env/dev/frontend-app-gradebook/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-gradebook/src")"
+HEADER_COMPONENT_SRC="$(pick_source_dir \
+  "$REPO_ROOT/tutor_env/dev/frontend-component-header/src" \
+  "$ULMO_SLOT_SOURCE_FALLBACK/frontend-component-header/src")"
 DASHBOARD_SRC="$(pick_source_dir \
   "$REPO_ROOT/tutor_env/dev/frontend-app-learner-dashboard/src" \
   "$ULMO_SLOT_SOURCE_FALLBACK/frontend-app-learner-dashboard/src")"
@@ -221,6 +224,7 @@ while IFS= read -r slot; do
           "$LEARNING_SRC" \
           "$AUTHORING_SRC" \
           "$GRADEBOOK_SRC" \
+          "$HEADER_COMPONENT_SRC" \
           "$DASHBOARD_SRC" \
           "$CATALOG_SRC"
       else
