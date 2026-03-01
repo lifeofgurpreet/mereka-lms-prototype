@@ -60,7 +60,8 @@ if [[ "$violations" -eq 0 ]]; then
     violations=1
   fi
 
-  if ! rg -n 'mfe-only' "$WORKFLOW" >/dev/null || ! rg -n 'full' "$WORKFLOW" >/dev/null; then
+  if ! rg -n '^[[:space:]]+- full$' "$WORKFLOW" >/dev/null \
+    || ! rg -n '^[[:space:]]+- mfe-only$' "$WORKFLOW" >/dev/null; then
     echo "❌ Closure workflow screenshot_scope options missing full or mfe-only"
     violations=1
   fi

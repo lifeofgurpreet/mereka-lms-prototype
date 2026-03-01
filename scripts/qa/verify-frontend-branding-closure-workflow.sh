@@ -33,9 +33,9 @@ if ! rg -n 'phase7_strict' "$WORKFLOW" >/dev/null || ! rg -n 'phase7_full' "$WOR
   violations=1
 fi
 
-if ! rg -n 'screenshot_scope:' "$WORKFLOW" >/dev/null \
-  || ! rg -n 'mfe-only' "$WORKFLOW" >/dev/null \
-  || ! rg -n 'full' "$WORKFLOW" >/dev/null; then
+if ! rg -n '^[[:space:]]+screenshot_scope:' "$WORKFLOW" >/dev/null \
+  || ! rg -n '^[[:space:]]+- full$' "$WORKFLOW" >/dev/null \
+  || ! rg -n '^[[:space:]]+- mfe-only$' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow screenshot_scope options missing full or mfe-only"
   violations=1
 fi
