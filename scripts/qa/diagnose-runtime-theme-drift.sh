@@ -11,23 +11,30 @@ TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 LOG_FILE="$LOG_DIR/runtime-theme-drift-diagnose-${TIMESTAMP}.log"
 
 FAILURES=0
+FAIL_PROD_PREFLIGHT=0
+FAIL_DEV_PREFLIGHT=0
+FAIL_GITOPS_PARITY=0
 
 run_check() {
-  local label="$1"
-  shift
+  local fail_var="$1"
+  local label="$2"
+  shift 2
   echo "" | tee -a "$LOG_FILE"
   echo "=== ${label} ===" | tee -a "$LOG_FILE"
   if "$@" 2>&1 | tee -a "$LOG_FILE"; then
     echo "PASS: ${label}" | tee -a "$LOG_FILE"
+    printf -v "$fail_var" '%s' "0"
   else
     echo "FAIL: ${label}" | tee -a "$LOG_FILE"
     FAILURES=$((FAILURES + 1))
+    printf -v "$fail_var" '%s' "1"
   fi
 }
 
 echo "Runtime theme drift diagnosis started at ${TIMESTAMP}" | tee "$LOG_FILE"
 
 run_check \
+  FAIL_PROD_PREFLIGHT \
   "Prod runtime theme preflight" \
   "$REPO_ROOT/scripts/qa/verify-paragon-runtime.sh" \
   --runtime-url https://apps.academyv2.mereka.io \
@@ -35,12 +42,14 @@ run_check \
   --require-slot-markers
 
 run_check \
+  FAIL_DEV_PREFLIGHT \
   "Dev runtime theme preflight" \
   "$REPO_ROOT/scripts/qa/verify-paragon-runtime.sh" \
   --runtime-url https://apps.academyv2.mereka.dev \
   --require-slot-markers
 
 run_check \
+  FAIL_GITOPS_PARITY \
   "GitOps image override parity (infra checkout)" \
   "$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh" \
   --check-infra
@@ -49,14 +58,32 @@ echo "" | tee -a "$LOG_FILE"
 echo "Diagnosis log: $LOG_FILE" | tee -a "$LOG_FILE"
 
 if [[ "$FAILURES" -ne 0 ]]; then
-  cat <<EOF | tee -a "$LOG_FILE"
+  echo "" | tee -a "$LOG_FILE"
+  echo "Summary: ${FAILURES} check(s) failed." | tee -a "$LOG_FILE"
+  echo "Targeted remediation:" | tee -a "$LOG_FILE"
 
-Summary: ${FAILURES} check(s) failed.
-Suggested remediation order:
-1. Fix app/infra image tag drift so overlays reference the same Open edX + MFE tags:
+  if [[ "$FAIL_GITOPS_PARITY" -eq 1 ]]; then
+    cat <<EOF | tee -a "$LOG_FILE"
+1. Fix app/infra GitOps parity first:
    - scripts/infra/sync-gitops-prod-image-tags.sh --infra-repo /home/gurpreet/projects/k8s/bbi-infrastructure --apply
-2. Sync infra vendored base from this repo when Caddyfile drift is reported:
    - scripts/infra/sync-vendored-mfe-caddyfile.sh --infra-repo /home/gurpreet/projects/k8s/bbi-infrastructure --apply
+EOF
+  fi
+
+  if [[ "$FAIL_PROD_PREFLIGHT" -eq 1 || "$FAIL_DEV_PREFLIGHT" -eq 1 ]]; then
+    if [[ "$FAIL_GITOPS_PARITY" -eq 0 ]]; then
+      cat <<EOF | tee -a "$LOG_FILE"
+2. GitOps parity is clean, but runtime theme preflight still fails:
+   - This indicates rollout/runtime drift (cluster not serving expected MFE artifacts yet).
+   - Run canonical release/sync flow, then verify runtime:
+     ./scripts/infra/release-openedx-gitops.sh --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push --verify-runtime
+EOF
+    else
+      echo "2. After GitOps parity fix is merged/synced, re-check runtime preflight." | tee -a "$LOG_FILE"
+    fi
+  fi
+
+  cat <<EOF | tee -a "$LOG_FILE"
 3. Re-run:
    - make qa-runtime-theme-mode-prod
    - make qa-runtime-theme-mode-dev
