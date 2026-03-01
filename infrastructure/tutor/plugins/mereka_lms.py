@@ -99,10 +99,10 @@ _mfe_static_base = _mfe_url.rstrip("/")
 # Use MFE-hosted static branding assets as global defaults.
 # This avoids broken themed-asset redirects on LMS hosts for logo-horizontal*.png
 # and keeps Authn/Account/Profile logos consistent across environments.
-MFE_CONFIG["FAVICON_URL"] = f"{_mfe_static_base}/static/images/favicon.ico"
-MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/static/images/logo-horizontal.png"
-MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/static/images/logo-horizontal-white.png"
-MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/static/images/logo.png"
+MFE_CONFIG["FAVICON_URL"] = f"{_mfe_static_base}/theme/favicon.ico"
+MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/theme/logo-horizontal.png"
+MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/theme/logo-horizontal-white.png"
+MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/theme/logo.png"
 
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = (
@@ -2053,8 +2053,8 @@ const normalizeHostname = (hostname) => {
 const MEREKA_SITE_VARIANTS = {
   'academyv2.mereka.io': {
     brand: 'Mereka Academy',
-    logoUrl: '/static/images/logo-horizontal.svg',
-    mobileLogoUrl: '/static/images/logo-square.svg',
+    logoUrl: '/theme/logo-horizontal.svg',
+    mobileLogoUrl: '/theme/logo.svg',
     helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'MEREKA',
     whatsapp: '601135271981',
@@ -2065,8 +2065,8 @@ const MEREKA_SITE_VARIANTS = {
   },
   'academy.biji-biji.com': {
     brand: 'Biji-Biji Academy',
-    logoUrl: '/static/images/logo-horizontal.svg',
-    mobileLogoUrl: '/static/images/logo-square.svg',
+    logoUrl: '/theme/logo-horizontal.svg',
+    mobileLogoUrl: '/theme/logo.svg',
     helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'Biji-Biji Initiative',
     whatsapp: '601135271981',
@@ -2077,8 +2077,8 @@ const MEREKA_SITE_VARIANTS = {
   },
   'skillourfuture.academy.mereka.io': {
     brand: 'Skill Our Future Academy',
-    logoUrl: '/static/images/logo-horizontal.svg',
-    mobileLogoUrl: '/static/images/logo-square.svg',
+    logoUrl: '/theme/logo-horizontal.svg',
+    mobileLogoUrl: '/theme/logo.svg',
     helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'MEREKA',
     whatsapp: '601135271981',
@@ -2102,8 +2102,8 @@ const getMerekaVariant = (hostname, config) => {
   // Unknown host fallback: keep shell rendering deterministic for dev/staging/new tenants.
   return {
     brand: fallbackBrand,
-    logoUrl: '/static/images/logo-horizontal.svg',
-    mobileLogoUrl: '/static/images/logo-square.svg',
+    logoUrl: '/theme/logo-horizontal.svg',
+    mobileLogoUrl: '/theme/logo.svg',
     helpUrl: 'https://help.mereka.io/',
     copyrightHolder: fallbackPlatform,
     whatsapp: '601135271981',
@@ -2431,7 +2431,7 @@ const MerekaStudioFooter = () => {
       <div className="mereka-studio-footer__inner">
         <a href={baseUrl || '/'} className="mereka-studio-footer__logo-link">
           <img
-            src="/static/images/logo-horizontal.svg"
+            src="/theme/logo-horizontal.svg"
             alt={`${siteName} logo`}
             className="mereka-studio-footer__logo"
           />
@@ -3061,7 +3061,7 @@ const MerekaFooter = () => {
   const currentYear = new Date().getFullYear();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
-  const logoPath = variant.logoUrl || '/static/images/logo-horizontal.svg';
+  const logoPath = variant.logoUrl || '/theme/logo-horizontal.svg';
   const logoUrl = baseUrl ? `${baseUrl}${logoPath}` : logoPath;
 
   const socialLinks = [

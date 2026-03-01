@@ -61,6 +61,26 @@ for target in targets:
         env_copy = "COPY indigo/env.config.jsx /openedx/app/"
         app_theme_copy = "COPY indigo/mereka /openedx/app/mereka"
         runtime_theme_copy = "COPY indigo/theme /openedx/dist/theme"
+        runtime_brand_copy = "COPY indigo/brand-mereka /openedx/brand-mereka"
+        runtime_brand_assets_copy = (
+            "RUN mkdir -p /openedx/dist/theme \\\n"
+            " && cp -f /openedx/brand-mereka/favicon.ico /openedx/dist/theme/favicon.ico \\\n"
+            " && cp -f /openedx/brand-mereka/logo.png /openedx/dist/theme/logo-horizontal.png \\\n"
+            " && cp -f /openedx/brand-mereka/logo.svg /openedx/dist/theme/logo-horizontal.svg \\\n"
+            " && cp -f /openedx/brand-mereka/logo-white.png /openedx/dist/theme/logo-horizontal-white.png \\\n"
+            " && cp -f /openedx/brand-mereka/logo-white.svg /openedx/dist/theme/logo-horizontal-white.svg \\\n"
+            " && cp -f /openedx/brand-mereka/logo-trademark.png /openedx/dist/theme/logo.png \\\n"
+            " && cp -f /openedx/brand-mereka/logo-trademark.svg /openedx/dist/theme/logo.svg"
+        )
+
+        # Remove legacy pre-runtime logo copy blocks from intermediate stages.
+        # They do not survive into the final caddy runtime image and create noise.
+        text = re.sub(
+            r"\nRUN mkdir -p /openedx/dist/static/images \\\n"
+            r"(?:\s*&& cp -f /openedx/app/brand-mereka/[^\n]+\n)+",
+            "\n",
+            text,
+        )
 
         lines = text.splitlines()
         normalized = []
@@ -144,6 +164,12 @@ for target in targets:
             has_runtime_theme_copy = any(
                 line.strip() == runtime_theme_copy for line in production_block
             )
+            has_runtime_brand_copy = any(
+                line.strip() == runtime_brand_copy for line in production_block
+            )
+            has_runtime_brand_assets_copy = any(
+                "/openedx/dist/theme/logo-horizontal.svg" in line for line in production_block
+            )
             if not has_runtime_theme_copy:
                 insert_at = None
                 for idx in range(production_start, production_end):
@@ -153,6 +179,26 @@ for target in targets:
                 if insert_at is None:
                     insert_at = production_start + 1
                 lines = lines[:insert_at] + [runtime_theme_copy] + lines[insert_at:]
+                production_end += 1
+            if not has_runtime_brand_copy:
+                insert_at = None
+                for idx in range(production_start, production_end):
+                    if lines[idx].strip() == runtime_theme_copy:
+                        insert_at = idx + 1
+                        break
+                if insert_at is None:
+                    insert_at = production_start + 1
+                lines = lines[:insert_at] + [runtime_brand_copy] + lines[insert_at:]
+                production_end += 1
+            if not has_runtime_brand_assets_copy:
+                insert_at = None
+                for idx in range(production_start, production_end):
+                    if lines[idx].strip() == runtime_brand_copy:
+                        insert_at = idx + 1
+                        break
+                if insert_at is None:
+                    insert_at = production_start + 1
+                lines = lines[:insert_at] + [runtime_brand_assets_copy] + lines[insert_at:]
 
         rebuilt = "\n".join(lines)
         if text.endswith("\n"):
