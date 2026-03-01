@@ -33,6 +33,11 @@ if ! rg -n 'AUDIT_PROFILE=' "$WORKFLOW" >/dev/null; then
   violations=1
 fi
 
+if ! rg -n 'phase7_strict' "$WORKFLOW" >/dev/null || ! rg -n 'phase7_full' "$WORKFLOW" >/dev/null; then
+  echo "❌ workflow audit_profile options missing phase7_strict or phase7_full"
+  violations=1
+fi
+
 if ! rg -n -- '--selector-audit-path|--min-selector-hits|--min-custom-selector-hits' "$WORKFLOW" >/dev/null; then
   echo "❌ workflow missing selector path/min-hit arg wiring"
   violations=1

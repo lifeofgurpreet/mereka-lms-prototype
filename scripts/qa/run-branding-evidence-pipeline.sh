@@ -103,7 +103,7 @@ Environment toggles:
                             Playwright project for live DOM audit (default: chromium)
   LIVE_DOM_AUDIT_MIN_HITS=<int>
                             Minimum tracked selector hits for live DOM audit (default: 3)
-  LIVE_DOM_AUDIT_PROFILE=standard|phase7_strict
+  LIVE_DOM_AUDIT_PROFILE=standard|phase7_strict|phase7_full
                             Live DOM profile (default: standard)
   LIVE_DOM_AUDIT_ROUTES=<csv>
                             Optional comma-separated route paths for live DOM audit

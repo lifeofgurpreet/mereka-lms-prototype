@@ -28,6 +28,18 @@ for input_key in target_environment cross_browser_matrix require_runtime_theme r
   fi
 done
 
+if ! rg -n 'phase7_strict' "$WORKFLOW" >/dev/null || ! rg -n 'phase7_full' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow live_dom_audit_profile options missing phase7_strict or phase7_full"
+  violations=1
+fi
+
+if ! rg -n 'screenshot_scope:' "$WORKFLOW" >/dev/null \
+  || ! rg -n 'mfe-only' "$WORKFLOW" >/dev/null \
+  || ! rg -n 'full' "$WORKFLOW" >/dev/null; then
+  echo "❌ frontend closure workflow screenshot_scope options missing full or mfe-only"
+  violations=1
+fi
+
 if ! rg -n './scripts/qa/run-branding-evidence-pipeline\.sh' "$WORKFLOW" >/dev/null; then
   echo "❌ frontend closure workflow missing run-branding-evidence-pipeline.sh invocation"
   violations=1
