@@ -59,7 +59,8 @@ for target in targets:
 
     def ensure_mfe_theme_copy(text):
         env_copy = "COPY indigo/env.config.jsx /openedx/app/"
-        theme_copy = "COPY indigo/mereka /openedx/app/mereka"
+        app_theme_copy = "COPY indigo/mereka /openedx/app/mereka"
+        runtime_theme_copy = "COPY indigo/theme /openedx/dist/theme"
 
         lines = text.splitlines()
         normalized = []
@@ -69,9 +70,9 @@ for target in targets:
             normalized.append(line)
             if line.strip() == env_copy:
                 next_index = index + 1
-                while next_index < len(lines) and lines[next_index].strip() == theme_copy:
+                while next_index < len(lines) and lines[next_index].strip() == app_theme_copy:
                     next_index += 1
-                normalized.append(theme_copy)
+                normalized.append(app_theme_copy)
                 index = next_index
                 continue
             index += 1
@@ -79,14 +80,14 @@ for target in targets:
         lines = normalized
 
         base_anchor = "WORKDIR /openedx/app"
-        has_global_copy = any(line.strip() == theme_copy for line in lines[:50])
+        has_global_copy = any(line.strip() == app_theme_copy for line in lines[:50])
         if base_anchor in text and not has_global_copy:
             patched = []
             inserted = False
             for line in lines:
                 patched.append(line)
                 if not inserted and line.strip() == base_anchor:
-                    patched.append(theme_copy)
+                    patched.append(app_theme_copy)
                     inserted = True
             lines = patched
 
@@ -104,7 +105,7 @@ for target in targets:
                     break
             authn_block = lines[start:end]
             has_env_copy = any(line.strip() == env_copy for line in authn_block)
-            has_theme_copy = any(line.strip() == theme_copy for line in authn_block)
+            has_theme_copy = any(line.strip() == app_theme_copy for line in authn_block)
 
             if not (has_env_copy and has_theme_copy):
                 insert_at = None
@@ -122,8 +123,36 @@ for target in targets:
                     if not has_env_copy:
                         inserts.append(env_copy)
                     if not has_theme_copy:
-                        inserts.append(theme_copy)
+                        inserts.append(app_theme_copy)
                     lines = lines[:insert_at] + inserts + lines[insert_at:]
+
+        # Ensure runtime theme assets are present in the final caddy image.
+        # Without this COPY, /theme/*.css resolves to 404 at runtime.
+        production_start = None
+        for idx, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped.startswith("FROM ") and stripped.endswith(" AS production"):
+                production_start = idx
+                break
+        if production_start is not None:
+            production_end = len(lines)
+            for idx in range(production_start + 1, len(lines)):
+                if lines[idx].strip().startswith("FROM "):
+                    production_end = idx
+                    break
+            production_block = lines[production_start:production_end]
+            has_runtime_theme_copy = any(
+                line.strip() == runtime_theme_copy for line in production_block
+            )
+            if not has_runtime_theme_copy:
+                insert_at = None
+                for idx in range(production_start, production_end):
+                    if lines[idx].strip() == "RUN mkdir -p /openedx/dist":
+                        insert_at = idx + 1
+                        break
+                if insert_at is None:
+                    insert_at = production_start + 1
+                lines = lines[:insert_at] + [runtime_theme_copy] + lines[insert_at:]
 
         rebuilt = "\n".join(lines)
         if text.endswith("\n"):
@@ -197,15 +226,19 @@ for target in targets:
     def ensure_mfe_plugin_framework_dependency(text):
         plugin_line = "RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
         legacy_line = "RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
+        local_brand_line = "RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka"
+        legacy_brand_patterns = (
+            r"RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@\^[^']+'",
+            r"RUN npm install '@edx/brand@github:@edly-io/brand-openedx#[^']+'",
+        )
+
+        for pattern in legacy_brand_patterns:
+            text = re.sub(pattern, local_brand_line, text)
+
         if legacy_line in text:
             text = text.replace(legacy_line, plugin_line)
-        if plugin_line in text and "RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka" in text:
+        if plugin_line in text and local_brand_line in text:
             return text
-
-        local_brand_line = "RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka"
-        legacy_brand_line = "RUN npm install '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'"
-        if legacy_brand_line in text:
-            text = text.replace(legacy_brand_line, local_brand_line)
 
         if local_brand_line in text or plugin_line in text:
             return text
