@@ -38,11 +38,17 @@ else
 fi
 
 failures=0
+CURL_TLS_FLAGS=()
+if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "staging" ]]; then
+  # Non-prod stacks may use self-signed or transient cert chains.
+  CURL_TLS_FLAGS=(-k)
+fi
 
 log_ok() { printf "✓ %s\n" "$*"; }
 log_fail() { printf "✗ %s\n" "$*" >&2; failures=$((failures + 1)); }
 log_warn() { printf "! %s\n" "$*" >&2; }
 host_resolves() { getent hosts "$1" >/dev/null 2>&1; }
+curl_with_tls() { command curl "${CURL_TLS_FLAGS[@]}" "$@"; }
 
 curl_loc() {
   # Prints "code location"
@@ -50,10 +56,10 @@ curl_loc() {
   local method="${2:-HEAD}"
   local out code loc
   if [[ "$method" == "HEAD" ]]; then
-    out="$(curl -sS -I "$url" || true)"
+    out="$(curl_with_tls -sS -I "$url" || true)"
   else
     # Use GET to exercise middleware redirects (some stacks don't redirect on HEAD).
-    out="$(curl -sS -D - "$url" -o /dev/null || true)"
+    out="$(curl_with_tls -sS -D - "$url" -o /dev/null || true)"
   fi
   code="$(printf "%s\n" "$out" | awk 'NR==1 {print $2}')"
   loc="$(printf "%s\n" "$out" | awk -F': ' 'tolower($1)=="location" {print $2}' | tr -d '\r' | head -n 1)"
@@ -69,9 +75,9 @@ http_diag() {
   body_file="$(mktemp)"
 
   if [[ "$method" == "HEAD" ]]; then
-    curl -sS -I -D "$header_file" "$url" -o /dev/null >/dev/null 2>&1 || true
+    curl_with_tls -sS -I -D "$header_file" "$url" -o /dev/null >/dev/null 2>&1 || true
   else
-    curl -sS -X "$method" -D "$header_file" "$url" -o "$body_file" >/dev/null 2>&1 || true
+    curl_with_tls -sS -X "$method" -D "$header_file" "$url" -o "$body_file" >/dev/null 2>&1 || true
   fi
 
   status="$(awk 'NR==1 {print $2}' "$header_file")"
@@ -91,7 +97,7 @@ require_200() {
   local url="$1"
   local label="$2"
   local code
-  code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
+  code="$(curl_with_tls -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
   if [[ "$code" == "200" ]]; then
     log_ok "$label ($code)"
   else
@@ -104,7 +110,7 @@ require_status() {
   local label="$2"
   local expected="$3"
   local code
-  code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
+  code="$(curl_with_tls -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
   if [[ "$code" == "$expected" ]]; then
     log_ok "$label ($code)"
   else
@@ -117,7 +123,7 @@ require_status_one_of() {
   local label="$2"
   shift 2
   local code expected ok=0
-  code="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
+  code="$(curl_with_tls -sS -o /dev/null -w "%{http_code}" "$url" || echo "000")"
   for expected in "$@"; do
     if [[ "$code" == "$expected" ]]; then
       ok=1
@@ -155,7 +161,7 @@ require_authentik_accepts_authorize_url() {
     return 1
   fi
 
-  auth_code="$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 "$loc" || echo "000")"
+  auth_code="$(curl_with_tls -sS -o /dev/null -w "%{http_code}" --max-time 15 "$loc" || echo "000")"
   if [[ "$auth_code" == "200" || "$auth_code" == "302" || "$auth_code" == "303" ]]; then
     log_ok "$label (Authentik authorize accepts redirect_uri: $auth_code)"
     return 0
@@ -191,7 +197,7 @@ require_oidc_session_cookie_domain() {
   local expected cookie_headers cookie_line cookie_line_lc
 
   expected="$(expected_cookie_domain_for_host "$host" | tr '[:upper:]' '[:lower:]')"
-  cookie_headers="$(curl -sS -D - -o /dev/null "$url" || true)"
+  cookie_headers="$(curl_with_tls -sS -D - -o /dev/null "$url" || true)"
   cookie_line="$(
     printf "%s\n" "$cookie_headers" \
       | awk 'tolower($1)=="set-cookie:" && tolower($2) ~ /^sessionid=/{print; exit}'
@@ -230,7 +236,7 @@ require_body_contains() {
   local label="$2"
   local needle="$3"
   local body
-  body="$(curl -sS "$url" || true)"
+  body="$(curl_with_tls -sS "$url" || true)"
   if [[ -n "$body" && "$body" == *"$needle"* ]]; then
     log_ok "$label (contains '$needle')"
   else
@@ -243,7 +249,7 @@ require_body_contains_one_of() {
   local label="$2"
   shift 2
   local body needle
-  body="$(curl -sS "$url" || true)"
+  body="$(curl_with_tls -sS "$url" || true)"
   if [[ -z "$body" ]]; then
     log_fail "$label (empty response body) url=$url"
     return
@@ -263,14 +269,14 @@ check_forum_health_contract() {
   local healthz_url="https://${forum_host}/healthz"
   local heartbeat_code healthz_code
 
-  heartbeat_code="$(curl -sS -o /dev/null -w "%{http_code}" "$heartbeat_url" || echo "000")"
+  heartbeat_code="$(curl_with_tls -sS -o /dev/null -w "%{http_code}" "$heartbeat_url" || echo "000")"
   if [[ "$heartbeat_code" == "200" ]]; then
     log_ok "forum: heartbeat (200)"
     return
   fi
 
   if [[ "$ENVIRONMENT" != "prod" ]]; then
-    healthz_code="$(curl -sS -o /dev/null -w "%{http_code}" "$healthz_url" || echo "000")"
+    healthz_code="$(curl_with_tls -sS -o /dev/null -w "%{http_code}" "$healthz_url" || echo "000")"
     if [[ "$healthz_code" == "200" ]]; then
       log_warn "forum: /heartbeat returned ${heartbeat_code}; accepting /healthz=200 fallback for ${ENVIRONMENT}"
       log_ok "forum: health fallback (/healthz=200)"
@@ -298,7 +304,7 @@ check_studio_home_next_scheme() {
   local studio_host="$1"
   local url="https://${studio_host}/"
   local body
-  body="$(curl -sS -L --max-redirs 15 "$url" || true)"
+  body="$(curl_with_tls -sS -L --max-redirs 15 "$url" || true)"
   if [[ -z "$body" ]]; then
     log_fail "${studio_host}: Studio home page not reachable"
     return 1
@@ -493,7 +499,7 @@ else
     "Primary MFE config LMS_BASE_URL" \
     "\"LMS_BASE_URL\": \"https://${ECOSYSTEM_BASE}\""
 
-  primary_mfe_config="$(curl -fsSL "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1")" || primary_mfe_config=""
+  primary_mfe_config="$(curl_with_tls -fsSL "https://apps.${ECOSYSTEM_BASE}/api/mfe_config/v1")" || primary_mfe_config=""
   if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://apps.${ECOSYSTEM_BASE}/login_refresh\"" <<<"$primary_mfe_config" \
     || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$primary_mfe_config"; then
     echo "✓ Primary MFE config refresh endpoint is same-origin (absolute or relative)"
@@ -520,7 +526,7 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
     "Biji MFE config STUDIO_BASE_URL" \
     "\"STUDIO_BASE_URL\": \"https://${BIJI_STUDIO_DOMAIN}\""
 
-  biji_mfe_config="$(curl -fsSL "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1")" || biji_mfe_config=""
+  biji_mfe_config="$(curl_with_tls -fsSL "https://${BIJI_MFE_DOMAIN}/api/mfe_config/v1")" || biji_mfe_config=""
   if rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"https://${BIJI_MFE_DOMAIN}/login_refresh\"" <<<"$biji_mfe_config" \
     || rg -q --fixed-strings "\"REFRESH_ACCESS_TOKEN_ENDPOINT\": \"/login_refresh\"" <<<"$biji_mfe_config"; then
     echo "✓ Biji MFE config refresh endpoint is same-origin (absolute or relative)"
