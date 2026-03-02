@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `22` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `16` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -209,13 +209,35 @@ Validation after phase 9:
 - `./scripts/qa/verify-brand-parity.sh --offline` PASS (`PASS=86 / FAIL=0 / WARN=1 / SKIP=3`)
 - `./scripts/qa/verify-content-libraries-v2.sh --mode local` PASS (`PASS=25 / FAIL=0 / SKIP=2`)
 
+## Progress Update (Phase 10, brand/lti/readiness verifier tranche)
+
+- Extended compatibility-layer adoption to additional brand/lti/readiness QA verifiers:
+  - `scripts/qa/verify-brand-package/verify-brand-package-structure.sh`
+  - `scripts/qa/verify-credentials-readiness.sh`
+  - `scripts/qa/verify-custom-app-drift.sh`
+  - `scripts/qa/verify-lti-saml-config.sh`
+  - `scripts/qa/verify-lti-store.sh`
+  - `scripts/qa/verify-oep48-brand-package.sh`
+- Outcome:
+  - direct path-coupling reduced from `22` to `16`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - all six verifiers pass post-migration (no regression introduced)
+
+Validation after phase 10:
+- `./scripts/qa/verify-brand-package/verify-brand-package-structure.sh` PASS (`PASS=64 / FAIL=0`)
+- `./scripts/qa/verify-credentials-readiness.sh` PASS (`PASS=47 / FAIL=0 / SKIP=7`)
+- `./scripts/qa/verify-custom-app-drift.sh` PASS (`46 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-lti-saml-config.sh --offline` PASS (`PASS=18 / FAIL=0 / SKIP=1`)
+- `./scripts/qa/verify-lti-store.sh --offline` PASS (`PASS=12 / FAIL=0 / SKIP=3`)
+- `./scripts/qa/verify-oep48-brand-package.sh` PASS (`PASS=127 / FAIL=0 / WARN=0 / SKIP=0`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 
