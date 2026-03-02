@@ -201,6 +201,7 @@ if [[ "$SOURCE_ONLY" != "1" && "${CI:-}" == "true" ]]; then
   unset _studio_url
 fi
 
+
 check_source_selectors
 
 if [[ "$SOURCE_ONLY" != "1" ]]; then
