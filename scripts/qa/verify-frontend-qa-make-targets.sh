@@ -93,6 +93,7 @@ for target in \
   qa-npm-start-smoke-local \
   qa-branding-screenshots \
   qa-branding-before-after \
+  qa-frontend-closure \
   qa-frontend-closure-prod \
   qa-frontend-closure-dev \
   qa-frontend-closure-prod-screenshots \
@@ -207,22 +208,28 @@ assert_make_command \
   './scripts/qa/build-branding-before-after-report.sh $$args' \
   "qa-branding-before-after delegates to build-branding-before-after-report.sh"
 assert_make_command \
-  './scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme' \
+  'args="--env $(QA_ENV) --frontend-only"' \
+  "qa-frontend-closure base args"
+assert_make_command \
+  './scripts/qa/run-branding-evidence-pipeline.sh $$args' \
+  "qa-frontend-closure delegates to run-branding-evidence-pipeline.sh"
+assert_make_command \
+  '$(MAKE) qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_REQUIRE_RUNTIME_THEME=1' \
   "qa-frontend-closure-prod"
 assert_make_command \
-  './scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser' \
+  '$(MAKE) qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1' \
   "qa-frontend-closure-dev"
 assert_make_command \
-  'RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme' \
+  '$(MAKE) qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_REQUIRE_RUNTIME_THEME=1' \
   "qa-frontend-closure-prod-screenshots"
 assert_make_command \
-  'SCREENSHOT_SCOPE=mfe-only RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme' \
+  '$(MAKE) qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1 QA_REQUIRE_RUNTIME_THEME=1' \
   "qa-frontend-closure-prod-screenshots-mfe"
 assert_make_command \
-  'RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser --capture-screenshots' \
+  '$(MAKE) qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1' \
   "qa-frontend-closure-dev-screenshots"
 assert_make_command \
-  'SCREENSHOT_SCOPE=mfe-only RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser --capture-screenshots' \
+  '$(MAKE) qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1' \
   "qa-frontend-closure-dev-screenshots-mfe"
 assert_make_command \
   './scripts/qa/verify-certificate-branding.sh' \
@@ -289,6 +296,7 @@ assert_help_entry "qa-frontend-contracts"
 assert_help_entry "qa-npm-start-smoke"
 assert_help_entry "qa-branding-screenshots"
 assert_help_entry "qa-branding-before-after"
+assert_help_entry "qa-frontend-closure"
 assert_help_entry "qa-frontend-closure-dev-screenshots-mfe"
 assert_help_entry "qa-frontend-closure-prod-screenshots-mfe"
 assert_help_entry "qa-frontend-closure-dev-screenshots"

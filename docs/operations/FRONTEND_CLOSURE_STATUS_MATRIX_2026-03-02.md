@@ -24,6 +24,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `f0d007ec` — docs update (`#105/#104/#110`): record consolidated frontend evidence bundle and align handoff references
 - `d1e28b55` — docs update (handoff): append 2026-03-02 stabilization addendum with current blocker/evidence/start commands
 - `8f05f9d9` — docs update (`#110`): add staging auth-surface pre-signal baseline evidence
 - `db39572e` — docs update (`#105/#110`): add latest dev/prod auth-surface evidence log references
@@ -77,6 +78,10 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)
     - `./scripts/qa/verify-ci-cd-pipeline.sh --section gitops` (PASS `27/0/0`)
     - `./scripts/qa/verify-release-automation.sh` (PASS; one expected worktree-mode WARN for dry-run contract checker)
+  - #104 follow-on make-lane consolidation:
+    - canonical parameterized target added: `qa-frontend-closure`
+    - env-specific closure targets now delegate to `qa-frontend-closure` with explicit `QA_*` flags
+    - verifier updated: `scripts/qa/verify-frontend-qa-make-targets.sh` and rerun PASS
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) now passes notes-root banner and forum health contracts (forum non-prod fallback `/healthz=200`) and still fails on one non-authn runtime blocker (`credentials` `/login`, `/login/edx-oauth2`, `/admin/login` returning `500`), so local login/session runtime validation remains infra-convergence dependent. Equivalent prod credentials checks return `302`, confirming dev-runtime drift.
   - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T064809Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T064809Z.log` (`OK`).
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.

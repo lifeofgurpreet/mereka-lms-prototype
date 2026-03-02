@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -207,23 +207,37 @@ qa-branding-before-after: ## Build before/after branding visual report (set QA_E
 	if [ "$(QA_MFE_ONLY)" = "1" ]; then args="$$args --mfe-only"; fi; \
 	./scripts/qa/build-branding-before-after-report.sh $$args
 
+qa-frontend-closure: ## Run frontend closure pipeline (set QA_ENV=prod|dev; optional: QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1 QA_REQUIRE_RUNTIME_THEME=1 QA_CROSS_BROWSER=0)
+	@if [ "$(QA_ENV)" != "prod" ] && [ "$(QA_ENV)" != "dev" ]; then \
+		echo "ERROR: QA_ENV must be prod or dev (got '$(QA_ENV)')"; \
+		exit 2; \
+	fi; \
+	args="--env $(QA_ENV) --frontend-only"; \
+	if [ "$(QA_CROSS_BROWSER)" != "0" ]; then args="$$args --cross-browser"; fi; \
+	if [ "$(QA_CAPTURE_SCREENSHOTS)" = "1" ]; then args="$$args --capture-screenshots"; fi; \
+	if [ "$(QA_REQUIRE_RUNTIME_THEME)" = "1" ]; then args="$$args --require-runtime-theme"; fi; \
+	env_prefix=""; \
+	if [ "$(QA_CAPTURE_SCREENSHOTS)" = "1" ]; then env_prefix="RUN_SCREENSHOTS=1"; fi; \
+	if [ "$(QA_MFE_ONLY)" = "1" ]; then env_prefix="$$env_prefix SCREENSHOT_SCOPE=mfe-only"; fi; \
+	eval "$$env_prefix ./scripts/qa/run-branding-evidence-pipeline.sh $$args"
+
 qa-frontend-closure-prod: ## Run frontend closure pipeline (prod, cross-browser, runtime theme required)
-	./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme
+	$(MAKE) qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_REQUIRE_RUNTIME_THEME=1
 
 qa-frontend-closure-dev: ## Run frontend closure pipeline (dev, cross-browser)
-	./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser
+	$(MAKE) qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1
 
 qa-frontend-closure-prod-screenshots: ## Run frontend closure pipeline with screenshot capture (prod)
-	RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme
+	$(MAKE) qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_REQUIRE_RUNTIME_THEME=1
 
 qa-frontend-closure-prod-screenshots-mfe: ## Run frontend closure pipeline with MFE-only screenshot capture (prod)
-	SCREENSHOT_SCOPE=mfe-only RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --capture-screenshots --require-runtime-theme
+	$(MAKE) qa-frontend-closure QA_ENV=prod QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1 QA_REQUIRE_RUNTIME_THEME=1
 
 qa-frontend-closure-dev-screenshots: ## Run frontend closure pipeline with screenshot capture (dev)
-	RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser --capture-screenshots
+	$(MAKE) qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1
 
 qa-frontend-closure-dev-screenshots-mfe: ## Run frontend closure pipeline with MFE-only screenshot capture (dev)
-	SCREENSHOT_SCOPE=mfe-only RUN_SCREENSHOTS=1 ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only --cross-browser --capture-screenshots
+	$(MAKE) qa-frontend-closure QA_ENV=dev QA_CROSS_BROWSER=1 QA_CAPTURE_SCREENSHOTS=1 QA_MFE_ONLY=1
 
 qa-certificate-branding: ## Verify certificate surface branding coverage
 	./scripts/qa/verify-certificate-branding.sh
