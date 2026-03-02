@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `28` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `22` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -186,13 +186,36 @@ Validation after phase 8:
 - `./scripts/qa/verify-selector-to-slot-migration.sh` PASS (`60 PASS / 0 FAIL`)
 - `./scripts/qa/verify-performance-budget.sh` PASS (`46 PASS / 0 FAIL / 0 WARN`)
 
+## Progress Update (Phase 9, analytics/brand/content verifier tranche)
+
+- Extended compatibility-layer adoption to additional analytics/brand/content QA verifiers:
+  - `scripts/qa/verify-a11y-regression-lane.sh`
+  - `scripts/qa/verify-admin-console.sh`
+  - `scripts/qa/verify-analytics-key-elimination.sh`
+  - `scripts/qa/verify-analytics-undefined-regression.sh`
+  - `scripts/qa/verify-brand-parity.sh`
+  - `scripts/qa/verify-content-libraries-v2.sh`
+- Outcome:
+  - direct path-coupling reduced from `28` to `22`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - all six verifiers pass post-migration (no regression introduced)
+  - analytics verifiers preserve line-level grep behavior via temporary plugin-contract bundle input.
+
+Validation after phase 9:
+- `./scripts/qa/verify-a11y-regression-lane.sh` PASS (`PASS=25 / FAIL=0 / WARN=0`)
+- `./scripts/qa/verify-admin-console.sh` PASS (`6/6`)
+- `./scripts/qa/verify-analytics-key-elimination.sh` PASS (`29 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-analytics-undefined-regression.sh` PASS (`24 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-brand-parity.sh --offline` PASS (`PASS=86 / FAIL=0 / WARN=1 / SKIP=3`)
+- `./scripts/qa/verify-content-libraries-v2.sh --mode local` PASS (`PASS=25 / FAIL=0 / SKIP=2`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 
