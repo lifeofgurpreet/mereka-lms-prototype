@@ -44,6 +44,18 @@ Scope: Promotion execution checklist once operator signal is given.
   - `./scripts/qa/verify-release-dry-run-contract.sh` (`PASS`)
 - These checks confirm rollback/promotion script behavior without building images and verify dry-run safety semantics before any live promotion step.
 
+## Staging-Target Release Dry-Run Rehearsal (2026-03-02T040104Z)
+
+- Ran `release-openedx-gitops.sh` in `--target-env staging` dry-run mode against a temporary fixture infra repo:
+  - Command mode confirmed: `Mode: dry-run`
+  - Target confirmed: `Target env: staging`
+  - Script emitted dry-run paths for both app and infra staging overlays, then `Done.`
+- No mutation proof (SHA unchanged before/after dry-run):
+  - app overlay (`deploy/k8s/overlays/staging/kustomization.yaml`) unchanged
+  - fixture infra overlay (`apps/mereka-lms/overlays/staging/kustomization.yaml`) unchanged
+- Evidence log:
+  - `var/qa/staging-release-dryrun-rehearsal-20260302T040104Z.log`
+
 ## Promotion Run Sequence
 
 1. Validate source branch state in `mereka-lms`:
