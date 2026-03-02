@@ -45,10 +45,13 @@ jobs:
           python3 -m py_compile infrastructure/tutor/plugins/mfe_oauth_fix.py
           echo "✅ Plugin syntax valid"
 
-      - name: Enable plugin
+      - name: Generate config with plugin
         run: |
           source .venv/bin/activate
+          # Copy example config BEFORE enabling plugin (enable saves to config.yml)
+          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor plugins enable mfe_oauth_fix
+          tutor config save
 
       - name: Verify plugin enabled
         run: |
@@ -58,12 +61,6 @@ jobs:
             exit 1
           fi
           echo "✅ PASSED: Plugin enabled successfully"
-
-      - name: Generate config with plugin
-        run: |
-          source .venv/bin/activate
-          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
-          tutor config save
 
       - name: Verify plugin patches applied
         run: |
@@ -159,6 +156,7 @@ jobs:
       - name: Test enable
         run: |
           source .venv/bin/activate
+          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor plugins enable mfe_oauth_fix
 
           if ! tutor plugins list | grep -q "mfe_oauth_fix"; then
@@ -170,7 +168,6 @@ jobs:
       - name: Test config generation with plugin
         run: |
           source .venv/bin/activate
-          cp infrastructure/tutor/config.example.yml tutor_env/config.yml
           tutor config save
           echo "✅ Config generated with plugin"
 
@@ -268,15 +265,11 @@ jobs:
         run: |
           echo "TUTOR_ROOT=$(pwd)/tutor_env" >> $GITHUB_ENV
 
-      - name: Enable plugin
-        run: |
-          source .venv/bin/activate
-          tutor plugins enable mfe_oauth_fix
-
-      - name: Generate config
+      - name: Enable plugin and generate config
         run: |
           source .venv/bin/activate
           cp infrastructure/tutor/config.example.yml tutor_env/config.yml
+          tutor plugins enable mfe_oauth_fix
           tutor config save
 
       - name: Apply patches (should work with plugin enabled)
