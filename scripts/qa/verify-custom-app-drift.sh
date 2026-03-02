@@ -7,7 +7,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 CUSTOM_APPS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps"
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 CMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"

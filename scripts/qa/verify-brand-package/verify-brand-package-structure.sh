@@ -9,12 +9,14 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 BRAND_DIR="$REPO_ROOT/infrastructure/tutor/brand-mereka"
 VARIABLES_FILE="$BRAND_DIR/paragon/_variables.scss"
 TOKENS_JSON="$BRAND_DIR/paragon/tokens.json"
 FONTS_SCSS="$BRAND_DIR/paragon/_fonts.scss"
 PACKAGE_JSON="$BRAND_DIR/package.json"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_FILE="$PLUGIN_MAIN"
 CI_STATIC_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 THEME_IMAGES_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images"

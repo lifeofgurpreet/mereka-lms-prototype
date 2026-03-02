@@ -25,6 +25,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # ── Mode ─────────────────────────────────────────────────────────────────────
 MODE="offline"
@@ -185,7 +187,7 @@ section "LTI XBlock availability"
 # Check if lti_consumer is referenced in pip requirements or settings
 LTI_FOUND=false
 for f in \
-  "${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py" \
+  "${PLUGIN_MAIN}" \
   "${PROD_SETTINGS}" \
   "${APPLY_PATCHES}"; do
   if [[ -f "$f" ]] && grep -qi "lti_consumer\|lti-consumer" "$f" 2>/dev/null; then

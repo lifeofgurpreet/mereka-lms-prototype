@@ -25,6 +25,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 PASS=0
 FAIL=0
@@ -61,7 +63,7 @@ CMS_FONT_DIR="${THEME_ROOT}/cms/static/fonts"
 CMS_HEAD_EXTRA="${THEME_ROOT}/cms/templates/head-extra.html"
 CMS_FOOTER_WIDGET="${THEME_ROOT}/cms/templates/widgets/footer.html"
 MFE_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
-PLUGIN_FILE="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_FILE="${PLUGIN_MAIN}"
 PROVENANCE="${ASSETS_BRANDING}/tokens.provenance.json"
 OEP48_DOC="${REPO_ROOT}/docs/architecture/OEP48_BRAND_PACKAGE.md"
 TOKEN_GENERATOR="${REPO_ROOT}/scripts/branding/generate-tokens-from-canonical.sh"

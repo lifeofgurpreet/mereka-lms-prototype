@@ -28,6 +28,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # ── Mode ─────────────────────────────────────────────────────────────────────
 MODE="offline"
@@ -59,7 +61,7 @@ section() { echo ""; echo "=== $1 ==="; }
 EXTERNAL_SECRETS="${REPO_ROOT}/deploy/k8s/base/secrets/external-secrets.yaml"
 PROD_SETTINGS="${REPO_ROOT}/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 APPLY_PATCHES="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
-TUTOR_PLUGIN="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
+TUTOR_PLUGIN="${PLUGIN_MAIN}"
 LTI_DOC="${REPO_ROOT}/docs/integrations/LTI.md"
 LTI_STORE_DOC="${REPO_ROOT}/docs/integrations/LTI_STORE.md"
 

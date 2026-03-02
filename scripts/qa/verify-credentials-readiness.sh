@@ -15,6 +15,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
 CLUSTER=false
@@ -67,7 +69,7 @@ SERVICES="$REPO_ROOT/deploy/k8s/base/services.yml"
 PROD_INGRESS="$REPO_ROOT/deploy/k8s/overlays/production/ingress-openedx-lms.yaml"
 EXTERNAL_SECRETS="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
 MFE_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
-MEREKA_PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+MEREKA_PLUGIN="$PLUGIN_MAIN"
 VC_ISSUER_VIEWS="$REPO_ROOT/infrastructure/tutor/custom-apps/credentials_vc_issuer/views.py"
 VC_ISSUER_URLS="$REPO_ROOT/infrastructure/tutor/custom-apps/credentials_vc_issuer/urls.py"
 PROMETHEUS_RULE="$REPO_ROOT/deploy/k8s/base/monitoring/prometheusrule-credentials.yaml"
