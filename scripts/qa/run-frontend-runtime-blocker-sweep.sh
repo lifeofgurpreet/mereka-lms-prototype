@@ -201,12 +201,29 @@ echo "Summary log: $summary_log" | tee -a "$summary_log"
 echo "Summary json: $summary_json" | tee -a "$summary_log"
 echo "Diagnostics tsv: $diagnostics_file" | tee -a "$summary_log"
 
-python3 - "$ENVIRONMENT" "$ts" "$pass" "$fail" "$skip" "$summary_log" "$summary_json" "$records_file" "$diagnostics_file" <<'PY'
+python3 - "$ENVIRONMENT" "$ts" "$pass" "$fail" "$skip" "$summary_log" "$summary_json" "$records_file" "$diagnostics_file" "$summary_log_latest" "$summary_json_latest" "$records_file_latest" "$diagnostics_file_latest" "$auth_log_prod_latest" "$auth_log_dev_latest" "$cred_log_latest" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-environment, ts, pass_count, fail_count, skip_count, summary_log, summary_json, records_file, diagnostics_file = sys.argv[1:10]
+(
+    environment,
+    ts,
+    pass_count,
+    fail_count,
+    skip_count,
+    summary_log,
+    summary_json,
+    records_file,
+    diagnostics_file,
+    summary_log_latest,
+    summary_json_latest,
+    records_file_latest,
+    diagnostics_file_latest,
+    auth_log_prod_latest,
+    auth_log_dev_latest,
+    credentials_log_dev_latest,
+) = sys.argv[1:17]
 checks = []
 for line in Path(records_file).read_text().splitlines():
     if not line.strip():
@@ -249,6 +266,15 @@ payload = {
         "checks": checks,
         "diagnostics_tsv": diagnostics_file,
         "diagnostics": diagnostics,
+        "latest": {
+            "summary_log": summary_log_latest,
+            "summary_json": summary_json_latest,
+            "records_tsv": records_file_latest,
+            "diagnostics_tsv": diagnostics_file_latest,
+            "auth_surfaces_prod_log": auth_log_prod_latest,
+            "auth_surfaces_dev_log": auth_log_dev_latest,
+            "credentials_dev_log": credentials_log_dev_latest,
+        },
     },
 }
 
