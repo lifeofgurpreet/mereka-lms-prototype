@@ -58,7 +58,7 @@ The first three commands should resolve to `$BASE`.
 
 ### Updated Canonical Start Point
 
-- `main` and `start/next-implementor-2026-03-01` are aligned at: `6e6bcb6d`.
+- `main` and `start/next-implementor-2026-03-01` were aligned at addendum update time: `d1e28b55`.
 - All updates in this addendum were executed in `mereka-lms` repo only (no GitOps repo mutations).
 
 ### What Landed Since 2026-03-01 Baseline
@@ -71,6 +71,7 @@ The first three commands should resolve to `$BASE`.
 - Closure evidence refreshes:
   - latest screenshots, DOM/a11y/certificate reruns, CI ceremony contract reruns
   - matrix + branding plan updated with current artifacts and commit trace
+  - consolidated frontend evidence pipeline run passed (`var/evidence/branding/20260302-065539/`)
 - Troubleshooting runbook expanded with dev `credentials` 500 failure mode (`ZoneInfoNotFoundError` + missing `tzdata` signal).
 
 ### Remaining Blocker (Current)
@@ -91,4 +92,4 @@ git rev-parse --short HEAD
 git status --short --branch
 ```
 
-Expected HEAD: `6e6bcb6d`.
+Expected HEAD: `origin/start/next-implementor-2026-03-01` (at least `d1e28b55` or newer).

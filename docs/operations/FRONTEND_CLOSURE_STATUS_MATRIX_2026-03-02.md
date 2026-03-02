@@ -24,6 +24,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `d1e28b55` — docs update (handoff): append 2026-03-02 stabilization addendum with current blocker/evidence/start commands
 - `8f05f9d9` — docs update (`#110`): add staging auth-surface pre-signal baseline evidence
 - `db39572e` — docs update (`#105/#110`): add latest dev/prod auth-surface evidence log references
 - `4afb0bcd` — docs update (`#104/#106`): refresh closure evidence with latest CI/certificate gate reruns
@@ -61,6 +62,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 - Latest repo-only stabilization update (while infra sync pending):
   - Script hardening: `scripts/qa/capture-branding-screenshots.sh` now includes route-aware readiness probes, retry capture logic, `capture-summary.tsv`, and `--core-routes` mode for canonical closure paths.
   - Runtime proof refresh on dev:
+    - `RUN_BASELINE_GATES=0 RUN_MFE_LIVE_DOM_AUDIT=1 RUN_SCREENSHOTS=1 SCREENSHOT_SCOPE=mfe-only ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only` (PASS; bundle: `var/evidence/branding/20260302-065539/`, summary: `11 PASS / 0 FAIL / 7 WARN|SKIP`)
     - `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`

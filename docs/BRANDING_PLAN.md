@@ -26,6 +26,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
 - Runtime evidence (`#105`):
   - Strict rerun completed with deterministic sweep summary: `var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`.
+  - Consolidated frontend evidence rerun passed: `RUN_BASELINE_GATES=0 RUN_MFE_LIVE_DOM_AUDIT=1 RUN_SCREENSHOTS=1 SCREENSHOT_SCOPE=mfe-only ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only` -> `ALL GATES PASSED`; bundle: `var/evidence/branding/20260302-065539/`.
   - Screenshot runner now supports focused closure capture mode: `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`.
   - Latest focused closure screenshot set: `var/screenshots/dev/20260302T063522Z/` with probe summary `capture-summary.tsv` (includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format for each route, with normalized unquoted probe values).
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`).
