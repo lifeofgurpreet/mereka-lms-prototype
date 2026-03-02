@@ -57,6 +57,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Slot-expansion lane remains intentionally frozen as a scope decision; runtime checks above are now green on latest rerun.
 - Staging/promotion lane (`#110`):
   - Repo-local promotion readiness checks are green.
+  - Staging auth-surface pre-signal baseline refreshed: `./scripts/qa/verify-auth-surfaces.sh staging` -> `OK` with unresolved optional host warnings (`var/qa/auth-surfaces-staging-20260302T101941Z.log`).
   - Online activation remains blocked by live Argo/ExternalSecret issues captured in `var/qa/staging-activation-online-20260302T040504Z.log`.
 
 ---
