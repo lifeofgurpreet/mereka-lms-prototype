@@ -1,5 +1,6 @@
 name: Accessibility Audit (axe-core)
 
+permissions: {}
 on:
   push:
     branches: [main]

@@ -1,5 +1,6 @@
 name: Build Tutor Images
 
+permissions: {}
 on:
   push:
     branches:

@@ -1,5 +1,6 @@
 name: Daily Infrastructure Audit
 
+permissions: {}
 # Merged from:
 #   - observability-audit.yml       (local + runtime observability)
 #   - alert-routing-audit.yml       (alert routing verification)

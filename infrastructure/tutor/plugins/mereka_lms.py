@@ -867,43 +867,35 @@ const normalizeHostname = (hostname) => {
 };
 
 // Tenant branding + footer data contract.
-// Add tenant-specific overrides by hostname key.
+// Base config shared by all tenants; per-tenant overrides below.
+const MEREKA_BASE_VARIANT = {
+  logoUrl: '/theme/logo-horizontal.svg',
+  mobileLogoUrl: '/theme/logo.svg',
+  helpUrl: 'https://help.mereka.io/',
+  whatsapp: '601135271981',
+  privacyUrl: 'https://legal.mereka.io/privacy-policy/',
+  termsUrl: 'https://legal.mereka.io/',
+  cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
+};
+
 const MEREKA_SITE_VARIANTS = {
   'academyv2.mereka.io': {
+    ...MEREKA_BASE_VARIANT,
     brand: 'Mereka Academy',
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'MEREKA',
-    whatsapp: '601135271981',
     supportEmail: 'support@mereka.io',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   },
   'academy.biji-biji.com': {
+    ...MEREKA_BASE_VARIANT,
     brand: 'Biji-Biji Academy',
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'Biji-Biji Initiative',
-    whatsapp: '601135271981',
     supportEmail: 'techadmin@biji-biji.com',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   },
   'skillourfuture.academy.mereka.io': {
+    ...MEREKA_BASE_VARIANT,
     brand: 'Skill Our Future Academy',
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: 'MEREKA',
-    whatsapp: '601135271981',
     supportEmail: 'support@mereka.io',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   },
 };
 
@@ -919,16 +911,10 @@ const getMerekaVariant = (hostname, config) => {
 
   // Unknown host fallback: keep shell rendering deterministic for dev/staging/new tenants.
   return {
+    ...MEREKA_BASE_VARIANT,
     brand: fallbackBrand,
-    logoUrl: '/theme/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/logo.svg',
-    helpUrl: 'https://help.mereka.io/',
     copyrightHolder: fallbackPlatform,
-    whatsapp: '601135271981',
     supportEmail: 'support@mereka.io',
-    privacyUrl: 'https://legal.mereka.io/privacy-policy/',
-    termsUrl: 'https://legal.mereka.io/',
-    cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
   };
 };
 

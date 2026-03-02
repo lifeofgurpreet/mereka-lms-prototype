@@ -1,5 +1,6 @@
 name: Release Evidence
 
+permissions: {}
 on:
   workflow_dispatch:
     inputs:

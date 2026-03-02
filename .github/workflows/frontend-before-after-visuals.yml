@@ -1,5 +1,6 @@
 name: Frontend Before After Visuals
 
+permissions: {}
 on:
   workflow_dispatch:
     inputs:
