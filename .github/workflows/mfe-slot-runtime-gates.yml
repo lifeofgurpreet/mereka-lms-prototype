@@ -29,7 +29,7 @@ permissions: {}
 jobs:
   mfe-slot-runtime-gates:
     name: Run MFE Slot Runtime Gates
-    runs-on: mereka-k8s-runners
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && 'mereka-k8s-runners' || 'ubuntu-24.04' }}
     permissions:
       contents: read
     env:
