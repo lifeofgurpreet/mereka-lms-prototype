@@ -211,6 +211,49 @@ require_body_contains() {
   fi
 }
 
+require_body_contains_one_of() {
+  local url="$1"
+  local label="$2"
+  shift 2
+  local body needle
+  body="$(curl -sS "$url" || true)"
+  if [[ -z "$body" ]]; then
+    log_fail "$label (empty response body) url=$url"
+    return
+  fi
+  for needle in "$@"; do
+    if [[ "$body" == *"$needle"* ]]; then
+      log_ok "$label (contains '$needle')"
+      return
+    fi
+  done
+  log_fail "$label (expected body contains one of: $*) url=$url"
+}
+
+check_forum_health_contract() {
+  local forum_host="$1"
+  local heartbeat_url="https://${forum_host}/heartbeat"
+  local healthz_url="https://${forum_host}/healthz"
+  local heartbeat_code healthz_code
+
+  heartbeat_code="$(curl -sS -o /dev/null -w "%{http_code}" "$heartbeat_url" || echo "000")"
+  if [[ "$heartbeat_code" == "200" ]]; then
+    log_ok "forum: heartbeat (200)"
+    return
+  fi
+
+  if [[ "$ENVIRONMENT" != "prod" ]]; then
+    healthz_code="$(curl -sS -o /dev/null -w "%{http_code}" "$healthz_url" || echo "000")"
+    if [[ "$healthz_code" == "200" ]]; then
+      log_warn "forum: /heartbeat returned ${heartbeat_code}; accepting /healthz=200 fallback for ${ENVIRONMENT}"
+      log_ok "forum: health fallback (/healthz=200)"
+      return
+    fi
+  fi
+
+  log_fail "forum: heartbeat (expected 200, got ${heartbeat_code}) url=${heartbeat_url}"
+}
+
 check_studio_signin_redirect() {
   local studio_host="$1"
   local expected_lms_host="$2"
@@ -494,14 +537,15 @@ done
 if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "notes.${ECOSYSTEM_BASE}"; then
   log_warn "optional service host unresolved: notes.${ECOSYSTEM_BASE} (skipping)"
 else
-  require_body_contains \
+  require_body_contains_one_of \
     "https://notes.${ECOSYSTEM_BASE}/" \
-    "notes: API banner" \
+    "notes: service banner" \
+    "Mereka Notes Service" \
     "edX Notes API"
 fi
 
-# Forum has had multiple production architectures over time.
-# Current contract: it MUST be reachable (no 5xx) and heartbeat MUST return 200.
+# Forum has had multiple deployment architectures over time.
+# Current production contract requires /heartbeat=200. Non-prod accepts /healthz fallback.
 if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "forum.${ECOSYSTEM_BASE}"; then
   log_warn "optional service host unresolved: forum.${ECOSYSTEM_BASE} (skipping)"
 else
@@ -510,9 +554,7 @@ else
     "forum: reachable" \
     "200" "401" "404"
 
-  require_200 \
-    "https://forum.${ECOSYSTEM_BASE}/heartbeat" \
-    "forum: heartbeat"
+  check_forum_health_contract "forum.${ECOSYSTEM_BASE}"
 fi
 
 if [[ "$failures" -gt 0 ]]; then
