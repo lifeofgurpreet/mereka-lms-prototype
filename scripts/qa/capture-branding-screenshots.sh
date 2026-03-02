@@ -218,20 +218,28 @@ probe_login_refresh_status() {
   probe="$(
     ab eval '(() => {
       try {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", "/login_refresh", false);
-        xhr.withCredentials = true;
-        xhr.send(null);
-        return String(xhr.status || "na");
+        const probeMethod = (method, body = null) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open(method, "/login_refresh", false);
+          xhr.withCredentials = true;
+          if (method === "POST") {
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+          }
+          xhr.send(body);
+          return String(xhr.status || "na");
+        };
+        const getStatus = probeMethod("GET", null);
+        const postStatus = probeMethod("POST", "");
+        return `GET:${getStatus},POST:${postStatus}`;
       } catch (_err) {
-        return "na";
+        return "GET:na,POST:na";
       }
     })()' 2>/dev/null || true
   )"
   probe="${probe//$'\t'/ }"
   probe="${probe//$'\n'/ }"
   if [[ -z "${probe:-}" ]]; then
-    echo "na"
+    echo "GET:na,POST:na"
     return 0
   fi
   echo "$probe"
