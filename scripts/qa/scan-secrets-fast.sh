@@ -23,6 +23,14 @@ STRICT="${STRICT:-0}"
 tmpdir="$(mktemp -d -t scan-secrets-fast.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 declare -A PATTERNS=(
   ["aws_access_key"]="AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}"
   ["private_key"]="-----BEGIN (RSA|EC|OPENSSH|DSA|PGP) PRIVATE KEY-----"
@@ -35,7 +43,7 @@ declare -A PATTERNS=(
 
 allowlist_line() {
   local line="$1"
-  if [[ "$line" =~ \<password\> || "$line" =~ \*\*\* || "$line" =~ user:pass || "$line" =~ username:password || "$line" =~ s3cr3t || "$line" =~ example || "$line" =~ \$\{[A-Z0-9_]+\} ]]; then
+  if [[ "$line" =~ \<password\> || "$line" =~ \*\*\* || "$line" =~ user:pass || "$line" =~ example || "$line" =~ \$\{[A-Z0-9_]+\} ]]; then
     return 0
   fi
   return 1
@@ -47,7 +55,7 @@ for name in "${!PATTERNS[@]}"; do
   out="$tmpdir/${name}.txt"
 
   set +e
-  rg -n \
+  rg -n --pcre2 \
     --glob '!.git/**' \
     --glob '!node_modules/**' \
     --glob '!tutor_env/**' \
