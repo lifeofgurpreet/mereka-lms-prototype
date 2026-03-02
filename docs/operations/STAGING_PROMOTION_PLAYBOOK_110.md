@@ -56,6 +56,18 @@ Scope: Promotion execution checklist once operator signal is given.
 - Evidence log:
   - `var/qa/staging-release-dryrun-rehearsal-20260302T040104Z.log`
 
+## Latest Online Probe (Read-Only) (2026-03-02T040236Z)
+
+- Ran `./scripts/qa/verify-staging-activation.sh --online --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster` in read-only mode.
+- Result: `6 PASS / 3 FAIL / 1 SKIP`
+- Current live blockers reported by the probe:
+  - production Argo app `mereka-lms-prod` sync status `OutOfSync` (expected `Synced`)
+  - production Argo app `mereka-lms-prod` health `Degraded` (expected `Healthy`)
+  - `ExternalSecret enterprise-secrets=False` (not ready)
+  - staging app absent (`mereka-lms-staging` not found) remains expected pre-activation SKIP
+- Evidence log:
+  - `var/qa/staging-activation-online-20260302T040236Z.log`
+
 ## Promotion Run Sequence
 
 1. Validate source branch state in `mereka-lms`:
