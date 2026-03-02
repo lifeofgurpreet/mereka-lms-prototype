@@ -8,10 +8,10 @@
 #     2) verify-credentials-readiness.sh --cluster
 #
 # Usage:
-#   ./scripts/qa/run-frontend-runtime-blocker-sweep.sh [--env dev|prod]
+#   ./scripts/qa/run-frontend-runtime-blocker-sweep.sh [--env dev|prod|both]
 #
 # Notes:
-#   - Default env is dev.
+#   - Default env is both.
 #   - credentials-readiness cluster check is scoped to dev because current blocker
 #     triage is dev-runtime specific.
 set -euo pipefail
@@ -19,14 +19,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-ENVIRONMENT="dev"
+ENVIRONMENT="both"
 
 usage() {
   cat <<'USAGE'
-Usage: run-frontend-runtime-blocker-sweep.sh [--env dev|prod]
+Usage: run-frontend-runtime-blocker-sweep.sh [--env dev|prod|both]
 
 Options:
-  --env <dev|prod>   Target environment for auth-surfaces check (default: dev)
+  --env <dev|prod|both>   Target environment set for checks (default: both)
   -h, --help         Show help
 USAGE
 }
@@ -50,15 +50,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "prod" ]]; then
-  echo "ERROR: --env must be dev or prod" >&2
+if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "both" ]]; then
+  echo "ERROR: --env must be dev, prod, or both" >&2
   exit 2
 fi
 
 mkdir -p "$REPO_ROOT/var/qa"
 ts="$(date -u +%Y%m%dT%H%M%SZ)"
-auth_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-${ENVIRONMENT}-${ts}.log"
-cred_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-credentials-${ENVIRONMENT}-${ts}.log"
+auth_log_dev="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-dev-${ts}.log"
+auth_log_prod="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-prod-${ts}.log"
+cred_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-credentials-dev-${ts}.log"
 summary_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.log"
 
 pass=0
@@ -83,13 +84,27 @@ run_check() {
 : >"$summary_log"
 echo "Frontend runtime blocker sweep (${ENVIRONMENT}) @ ${ts}" | tee -a "$summary_log"
 
-run_check \
-  "auth-surfaces:${ENVIRONMENT}" \
-  "$auth_log" \
-  "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh" \
-  "$ENVIRONMENT"
+if [[ "$ENVIRONMENT" == "prod" || "$ENVIRONMENT" == "both" ]]; then
+  run_check \
+    "auth-surfaces:prod" \
+    "$auth_log_prod" \
+    "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh" \
+    "prod"
+else
+  skip=$((skip + 1))
+fi
 
-if [[ "$ENVIRONMENT" == "dev" ]]; then
+if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
+  run_check \
+    "auth-surfaces:dev" \
+    "$auth_log_dev" \
+    "$REPO_ROOT/scripts/qa/verify-auth-surfaces.sh" \
+    "dev"
+else
+  skip=$((skip + 1))
+fi
+
+if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
   run_check \
     "credentials-readiness:dev:cluster" \
     "$cred_log" \
@@ -102,8 +117,11 @@ fi
 
 echo "" | tee -a "$summary_log"
 echo "Summary: PASS=${pass} FAIL=${fail} SKIP=${skip}" | tee -a "$summary_log"
-echo "Auth log: $auth_log" | tee -a "$summary_log"
-if [[ "$ENVIRONMENT" == "dev" ]]; then
+if [[ "$ENVIRONMENT" == "prod" || "$ENVIRONMENT" == "both" ]]; then
+  echo "Auth log (prod): $auth_log_prod" | tee -a "$summary_log"
+fi
+if [[ "$ENVIRONMENT" == "dev" || "$ENVIRONMENT" == "both" ]]; then
+  echo "Auth log (dev): $auth_log_dev" | tee -a "$summary_log"
   echo "Credentials log: $cred_log" | tee -a "$summary_log"
 fi
 echo "Summary log: $summary_log" | tee -a "$summary_log"
