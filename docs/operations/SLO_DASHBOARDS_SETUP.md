@@ -34,13 +34,14 @@ Located in: `infrastructure/monitoring/`
 | Alert | `alerts/log-5xx-spike.json` | Log-based 5xx spikes |
 | Alert | `alerts/log-auth-failures.json` | Log-based auth failures |
 
-### 2. Centralized Grafana Dashboard (VPS Observability Stack)
+### 2. Centralized Grafana Dashboard (GitOps Platform Stack)
 
-Located in: `/home/gurpreet/projects/observability/`
+Primary source of truth: `bbi-infrastructure/platform/monitoring/`
 
-**Dashboard:** `dashboards/03-applications/bbi-mereka-lms.json`
-- UID: `bbi-app-mereka-lms`
-- Folder: Applications
+Dashboard contract in this repo:
+- `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
+
+Runtime endpoint:
 - URL: https://grafana.mereka.dev/d/bbi-app-mereka-lms
 
 **Panels:**
@@ -74,11 +75,11 @@ Based on STANDARDS.md Tier 2 classification:
 
 ## Deployment
 
-### VPS Grafana Stack
+### Platform Grafana Stack (GitOps)
 
 ```bash
-cd /home/gurpreet/projects/observability
-kubectl apply -k deploy/overlays/vps
+cd /home/gurpreet/projects/k8s/bbi-infrastructure
+./scripts/kube dev apply -f platform/monitoring/application.yaml
 ```
 
 ### GCP Cloud Monitoring
@@ -500,8 +501,11 @@ Caddy LoadBalancer and run `./scripts/infra/check-cert-sans.sh`. Caddy manages T
 
 ## Files Modified
 
-- `/home/gurpreet/projects/observability/dashboards/03-applications/bbi-mereka-lms.json` (created)
-- `/home/gurpreet/projects/observability/alerts/applications.yaml` (updated)
-- `/home/gurpreet/projects/observability/deploy/base/kustomization.yaml` (updated)
-- `/home/gurpreet/infrastructure/prometheus/prometheus.yml` (updated - added external-urls job)
-- `/home/gurpreet/infrastructure/prometheus/blackbox.yml` (updated - added https_2xx module)
+- `infrastructure/monitoring/` in this repo (GCP monitoring templates and alert JSON)
+- `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json` (dashboard contract)
+- `bbi-infrastructure/platform/monitoring/overlays/{dev,prod}/dashboards/` (platform Grafana dashboards)
+- `vps/infrastructure/observability/` (VPS-only runtime observability assets)
+
+Legacy historical artifacts (deprecated workspace, do not use as active SoT):
+- `/home/gurpreet/projects/observability/dashboards/03-applications/bbi-mereka-lms.json`
+- `/home/gurpreet/projects/observability/alerts/applications.yaml`

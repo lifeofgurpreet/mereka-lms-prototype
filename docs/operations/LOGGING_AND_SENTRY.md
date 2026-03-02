@@ -46,7 +46,12 @@ Supported env vars:
 - `SENTRY_PROFILES_SAMPLE_RATE` (float, default `0.0`)
 - `SENTRY_SEND_DEFAULT_PII` (`true|false`, default `false`)
 
-Canonical standard references (shared observability repo):
+Canonical standards and ownership references:
+- `docs/operations/OBSERVABILITY_OWNERSHIP.md` (ownership and SoT boundaries)
+- `scripts/qa/verify-sentry-wiring.sh` and `scripts/qa/verify-sentry-cli-contract.sh` (enforcement/audit contract)
+- `bbi-infrastructure/platform/monitoring/README.md` (platform monitoring stack SoT)
+
+Historical references (deprecated workspace, read-only context):
 - `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-STANDARD.md`
 - `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-K8S-INTEGRATION.md`
 - `/home/gurpreet/projects/observability/specs/16-error-tracking/SENTRY-PROJECT-REGISTRY.md`
