@@ -92,6 +92,12 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-auth-surfaces-prod-20260302T112113Z.log` (PASS)
       - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T112113Z.log` (FAIL on credentials login redirects `500`)
       - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T112113Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
+    - Latest diagnostics-labeled run:
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112446Z.summary.json`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112446Z.diagnostics.tsv`
+      - diagnosis labels emitted:
+        - `auth-surfaces:dev` -> `credentials_dev_login_500`
+        - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
     - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)
@@ -115,6 +121,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-sweep-*.summary.log`
       - `var/qa/frontend-runtime-blocker-sweep-*.summary.json`
       - `var/qa/frontend-runtime-blocker-sweep-*.records.tsv`
+      - `var/qa/frontend-runtime-blocker-sweep-*.diagnostics.tsv`
       - `var/qa/frontend-runtime-blocker-auth-surfaces-*.log`
       - `var/qa/frontend-runtime-blocker-credentials-*.log`
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
