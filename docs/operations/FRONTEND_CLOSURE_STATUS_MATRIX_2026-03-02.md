@@ -24,6 +24,8 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `63614879` — warning contrast hardening (`#108`): promote warning token to `#996b00`, enforce warning pair in a11y gate, refresh token provenance + docs
+- `7668e3e8` — auth stability hardening (`#105`): add optional native `/authn/login` local-session canary mode to `verify-authenticated-sso-canary.sh`
 - `f224e375` — source hardening + status docs (`#105/#107/#108`, staged notes for `#109/#111`)
 - `776adce7` — ceremony reduction (`#104`)
 - `0320d5e4` — runtime evidence/check stabilization (`#105/#107/#108`)
@@ -48,3 +50,6 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
+  - Latest capture artifact set: `var/screenshots/dev/20260302T054228Z/` (`capture-summary.tsv` confirms deterministic non-blank renders for authn/login + studio, and unauthenticated redirects for account/learner-dashboard).
+  - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) still fails outside authn lane (`credentials` 500, `notes` banner mismatch, `forum/heartbeat` 404), so local login/session runtime validation remains infra-convergence dependent.
+  - Follow-on #104 reduction matrix for canonical migration path and projected deltas: `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md`.
