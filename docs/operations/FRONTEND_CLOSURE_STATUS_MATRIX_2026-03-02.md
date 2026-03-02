@@ -97,6 +97,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `capture-branding-screenshots.sh` now starts by closing stale agent-browser daemon sessions so launch flags are applied consistently.
     - Capture wrapper strips daemon-warning noise from command stdout so `capture-summary.tsv` fields remain parseable and stable.
     - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-allow insecure TLS only for dev runtime checks (configurable via `PARAGON_RUNTIME_CURL_INSECURE` and `STUDIO_CURL_INSECURE`) to prevent self-signed cert false failures.
+    - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` and defaults to TLS-ignore only in `dev` (prod stays strict), reducing false auth/session canary failures from non-prod cert trust.
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
   - Direct pod inspection confirms timezone data is missing in dev credentials runtime (`/usr/share/zoneinfo/UTC` absent; `python -m pip show tzdata` not found), narrowing remediation to image/runtime package composition.

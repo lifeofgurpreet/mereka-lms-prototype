@@ -31,6 +31,7 @@
 #   LOCAL_CANARY_EMAIL[_PROD|_DEV]           Optional native authn canary email/user
 #   LOCAL_CANARY_PASSWORD[_PROD|_DEV]        Optional native authn canary password
 #   SSO_CANARY_DEBUG=1                       Emit extra diagnostics
+#   SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1  TLS mode (default: auto; dev=1, prod=0)
 #
 set -euo pipefail
 
@@ -68,6 +69,7 @@ Env:
   LOCAL_CANARY_EMAIL[_PROD|_DEV]           Optional native authn canary email/user
   LOCAL_CANARY_PASSWORD[_PROD|_DEV]        Optional native authn canary password
   SSO_CANARY_DEBUG=1                       Enable debug logging
+  SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1  TLS mode (default: auto; dev=1, prod=0)
 USAGE_EOF
 }
 
@@ -103,6 +105,27 @@ run_playwright_canary() {
   local run_id="$7"
   local require_studio_access="$8" # 0|1
   local login_flow="${9:-oidc}" # oidc|local
+  local ignore_https_errors_raw="${SSO_CANARY_IGNORE_HTTPS_ERRORS:-auto}"
+  local ignore_https_errors="0"
+  case "$ignore_https_errors_raw" in
+    auto)
+      if [[ "$env_name" == "dev" ]]; then
+        ignore_https_errors="1"
+      fi
+      ;;
+    1|true|TRUE|yes|YES)
+      ignore_https_errors="1"
+      ;;
+    0|false|FALSE|no|NO)
+      ignore_https_errors="0"
+      ;;
+    *)
+      echo "WARN: invalid SSO_CANARY_IGNORE_HTTPS_ERRORS=$ignore_https_errors_raw (using auto policy)" >&2
+      if [[ "$env_name" == "dev" ]]; then
+        ignore_https_errors="1"
+      fi
+      ;;
+  esac
 
   if ! CANARY_ENV_NAME="$env_name" \
     CANARY_LMS_DOMAIN="$lms_domain" \
@@ -113,6 +136,7 @@ run_playwright_canary() {
     CANARY_RUN_ID="$run_id" \
     CANARY_REQUIRE_STUDIO_ACCESS="$require_studio_access" \
     CANARY_LOGIN_FLOW="$login_flow" \
+    CANARY_IGNORE_HTTPS_ERRORS="$ignore_https_errors" \
     OUT_DIR="$OUT_DIR" \
     SSO_CANARY_DEBUG="$SSO_CANARY_DEBUG" \
     timeout "${SSO_CANARY_TIMEOUT_SECONDS}s" python3 - <<'PY'
@@ -134,6 +158,7 @@ if login_flow not in {"oidc", "local"}:
 debug = os.environ.get("SSO_CANARY_DEBUG", "0") == "1"
 out_dir = Path(os.environ["OUT_DIR"])
 run_id = os.environ["CANARY_RUN_ID"]
+ignore_https_errors = os.environ.get("CANARY_IGNORE_HTTPS_ERRORS", "0") == "1"
 
 _http_trace = []
 _studio_cookie_names = set()
@@ -251,7 +276,7 @@ def probe_login_refresh_status(request_context, app_base_url: str) -> str:
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
-    context = browser.new_context(ignore_https_errors=False)
+    context = browser.new_context(ignore_https_errors=ignore_https_errors)
     page = context.new_page()
     studio_error = {"url": None, "status": None}
     _http_trace.clear()
