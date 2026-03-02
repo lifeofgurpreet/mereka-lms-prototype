@@ -52,9 +52,9 @@ jobs:
               ;;
           esac
 
-          # Canonical blocker regression lane (prod+dev auth surfaces + dev credentials cluster).
+          # Canonical blocker refresh lane (sweep + prompt/status artifacts, then preserve sweep exit code).
           set +e
-          make qa-frontend-runtime-blocker-sweep-both \
+          make qa-runtime-blocker-refresh \
             | tee -a var/qa/frontend-runtime-qa.log
           blocker_sweep_exit="${PIPESTATUS[0]}"
           set -e
@@ -62,14 +62,6 @@ jobs:
             echo "WARN: blocker sweep reported active blockers (exit=$blocker_sweep_exit); continuing to emit prompt/status artifacts." \
               | tee -a var/qa/frontend-runtime-qa.log
           fi
-
-          # Generate infra-ready remediation prompt from latest blocker sweep JSON.
-          make qa-runtime-blocker-infra-prompt \
-            OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt
-          cat var/qa/frontend-runtime-blocker-infra-prompt.txt >> var/qa/frontend-runtime-qa.log
-          make qa-runtime-blocker-status \
-            OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt
-          cat var/qa/frontend-runtime-blocker-status.txt >> var/qa/frontend-runtime-qa.log
 
           if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
             ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
