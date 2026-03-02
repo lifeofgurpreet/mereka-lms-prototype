@@ -228,6 +228,7 @@ fetch_metrics_with_status() {
   local -a timeout_cmd=()
   local -a kubectl_cmd=()
   local host_header=""
+  local exec_rc=0
 
   if [[ -n "$metrics_host" ]]; then
     host_header="-H 'Host: ${metrics_host}' "
@@ -243,29 +244,6 @@ code=\$(awk 'BEGIN{code=\"000\"} /^  HTTP\\//{code=\$2} END{print code}' \"\$tmp
 body=\$(cat \"\$tmp_body\"); \
 rm -f \"\$tmp_body\" \"\$tmp_hdr\"; \
 printf '%s\n${split_token}:%s\n' \"\$body\" \"\${code:-000}\"; \
-elif command -v python3 >/dev/null 2>&1; then \
-tmp_body=\$(mktemp); \
-tmp_status=\$(python3 - <<'PY' '${target}' '${RUNTIME_CMD_TIMEOUT}' '${metrics_host:-__EMPTY__}' \"\$tmp_body\" 2>/dev/null \
-import sys, urllib.request \
-url=sys.argv[1] \
-timeout=int(sys.argv[2]) \
-host=sys.argv[3] \
-out_path=sys.argv[4] \
-headers={} \
-if host and host != '__EMPTY__': \
-    headers['Host']=host \
-req=urllib.request.Request(url, headers=headers) \
-try: \
-    with urllib.request.urlopen(req, timeout=timeout) as resp: \
-        with open(out_path,'wb') as f: \
-            f.write(resp.read()) \
-        print(resp.getcode()) \
-except Exception as exc: \
-    print(getattr(exc,'code',0) or 0) \
-PY); \
-body=\$(cat \"\$tmp_body\" 2>/dev/null || true); \
-rm -f \"\$tmp_body\"; \
-printf '%s\n${split_token}:%s\n' \"\$body\" \"\${tmp_status:-000}\"; \
 else \
 printf '${split_token}:000\n'; \
 fi"
@@ -280,15 +258,35 @@ fi"
     kubectl_cmd=(kubectl --request-timeout="${RUNTIME_CMD_TIMEOUT}s" exec -n "$namespace" "$resource" -- sh -lc "$probe_cmd")
   fi
 
-  result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>/dev/null || true)"
+  if [[ "${VALIDATE_OBS_DEBUG_METRICS:-0}" == "1" ]]; then
+    set +e
+    result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>&1)"
+    exec_rc=$?
+    set -e
+  else
+    result="$("${timeout_cmd[@]}" "${kubectl_cmd[@]}" 2>/dev/null || true)"
+  fi
+  if [[ "${VALIDATE_OBS_DEBUG_METRICS:-0}" == "1" ]]; then
+    {
+      echo "[debug] fetch_metrics_with_status namespace=$namespace resource=$resource target=$target host=${metrics_host:-<none>}"
+      echo "[debug] exec_rc=$exec_rc"
+      echo "[debug] raw_result_start"
+      printf '%s\n' "$result"
+      echo "[debug] raw_result_end"
+    } >&2
+  fi
 
-  if [[ -z "$result" ]] || ! printf '%s' "$result" | tail -n1 | grep -q "^${split_token}:"; then
+  if [[ -z "$result" ]] || ! printf '%s' "$result" | grep -q "^${split_token}:"; then
     printf '000%s' "$split_token"
     return 0
   fi
 
-  status="$(printf '%s' "$result" | tail -n1 | sed "s/^${split_token}://")"
-  body="$(printf '%s' "$result" | sed '$d')"
+  status="$(printf '%s' "$result" | awk -v marker="${split_token}:" 'index($0, marker)==1 {code=substr($0, length(marker)+1)} END{print code}')"
+  if [[ -z "${status//[[:space:]]/}" ]]; then
+    status="000"
+  fi
+
+  body="$(printf '%s' "$result" | sed "/^${split_token}:/d")"
   body="${body%$'\r'}"
 
   printf '%s%s%s' "$status" "$split_token" "$body"
@@ -316,7 +314,7 @@ read_metrics_host() {
   esac
 
   for key in "${fallback_keys[@]}"; do
-    resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+    resolved_host="$(kubectl_cmd exec -n "$namespace" "$resource" -- \
       sh -lc "grep -E \"^${key}:\" '$config_file' 2>/dev/null | tail -n 1 | awk '{print \$2}'" 2>/dev/null || true)"
     resolved_host="$(normalize_host_value "$resolved_host")"
     if [[ -n "$resolved_host" ]]; then
@@ -325,7 +323,7 @@ read_metrics_host() {
     fi
   done
 
-  resolved_host="$(kubectl_cmd_with_timeout exec -n "$namespace" "$resource" -- \
+  resolved_host="$(kubectl_cmd exec -n "$namespace" "$resource" -- \
     sh -lc "printenv | awk -F= '/^(LMS_BASE|CMS_BASE|LMS_HOST|CMS_HOST|OPENEDX_HOSTNAME)=/ {print \$2; exit}'" 2>/dev/null || true)"
   resolved_host="$(normalize_host_value "$resolved_host")"
   echo "$resolved_host"
@@ -759,7 +757,7 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
     echo ""
     echo "## Failed Checks"
     echo ""
-    if awk -F $'\t' '$1=="fail"{exit 0} END{exit 1}' "$RESULTS_FILE"; then
+    if awk -F $'\t' '$1=="fail"{found=1} END{exit(found?0:1)}' "$RESULTS_FILE"; then
       awk -F $'\t' '$1=="fail"{printf("- %s: %s\n", $2, $3)}' "$RESULTS_FILE"
     else
       echo "- none"

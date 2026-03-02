@@ -77,9 +77,18 @@ fi
 if [[ -z "$LOKI_URL" ]]; then
   # Try to find Loki service
   for ns in monitoring loki-stack "$APP_NS"; do
-    if kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app.kubernetes.io/name=loki -o name >/dev/null 2>&1; then
-      LOKI_SVC=$(kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app.kubernetes.io/name=loki -o jsonpath='{.items[0].metadata.name}')
-      LOKI_URL="http://${LOKI_SVC}.${ns}.svc.cluster.local:3100"
+    loki_svc_name="$(
+      kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app.kubernetes.io/name=loki \
+        -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true
+    )"
+    if [[ -z "${loki_svc_name//[[:space:]]/}" ]]; then
+      loki_svc_name="$(
+        kubectl --context "$K8S_CONTEXT" -n "$ns" get svc -l app=loki \
+          -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true
+      )"
+    fi
+    if [[ -n "${loki_svc_name//[[:space:]]/}" ]]; then
+      LOKI_URL="http://${loki_svc_name}.${ns}.svc.cluster.local:3100"
       echo "Auto-detected Loki URL: $LOKI_URL"
       break
     fi

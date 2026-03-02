@@ -67,8 +67,19 @@ echo "Checking Loki retention configuration..."
 
 # Find Loki namespace
 loki_ns=""
+loki_config="{}"
 for ns in monitoring loki-stack "$APP_NS"; do
-  if kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment -l app.kubernetes.io/name=loki -o name >/dev/null 2>&1; then
+  loki_workload_names="$(
+    kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment \
+      -l app.kubernetes.io/name=loki -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+  )"
+  if [[ -z "${loki_workload_names//[[:space:]]/}" ]]; then
+    loki_workload_names="$(
+      kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment \
+        -l app=loki -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+    )"
+  fi
+  if [[ -n "${loki_workload_names//[[:space:]]/}" ]]; then
     loki_ns="$ns"
     break
   fi
@@ -81,9 +92,15 @@ else
   echo "Found Loki in namespace: $loki_ns"
 
   # Check Loki ConfigMap for retention settings
-  loki_cm=$(kubectl --context "$K8S_CONTEXT" -n "$loki_ns" get configmap -l app.kubernetes.io/name=loki -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+  loki_cm=$(kubectl --context "$K8S_CONTEXT" -n "$loki_ns" get configmap -l app.kubernetes.io/name=loki -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  if [[ -z "${loki_cm//[[:space:]]/}" ]]; then
+    loki_cm=$(kubectl --context "$K8S_CONTEXT" -n "$loki_ns" get configmap -l app=loki -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  fi
+  if [[ -z "${loki_cm//[[:space:]]/}" ]]; then
+    loki_cm=$(kubectl --context "$K8S_CONTEXT" -n "$loki_ns" get configmap loki-config -o jsonpath='{.metadata.name}' 2>/dev/null || true)
+  fi
 
-  if [[ -n "$loki_cm" ]]; then
+  if [[ -n "${loki_cm//[[:space:]]/}" ]]; then
     echo -n "  Check: Loki retention configured to 30 days... "
     loki_config=$(kubectl --context "$K8S_CONTEXT" -n "$loki_ns" get configmap "$loki_cm" -o jsonpath='{.data}' 2>/dev/null || echo "{}")
 
@@ -91,7 +108,7 @@ else
     if echo "$loki_config" | grep -qE "(retention_period.*30d|retention_period.*720h)"; then
       echo -e "${GREEN}PASS${NC}"
     elif echo "$loki_config" | grep -q "retention_period"; then
-      retention=$(echo "$loki_config" | grep -oE "retention_period[:\s]*[0-9]+[dhm]" | head -1)
+      retention=$(echo "$loki_config" | grep -oE "retention_period[:\s]*[0-9]+[dhm]" | head -1 || true)
       echo -e "${YELLOW}WARN${NC} Retention configured but not 30d: $retention"
     else
       echo -e "${YELLOW}WARN${NC} Retention config not found (using default)"
@@ -118,7 +135,17 @@ echo "Checking Tempo retention configuration..."
 # Find Tempo namespace
 tempo_ns=""
 for ns in monitoring tempo "$APP_NS"; do
-  if kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment -l app.kubernetes.io/name=tempo -o name >/dev/null 2>&1; then
+  tempo_workload_names="$(
+    kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment \
+      -l app.kubernetes.io/name=tempo -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+  )"
+  if [[ -z "${tempo_workload_names//[[:space:]]/}" ]]; then
+    tempo_workload_names="$(
+      kubectl --context "$K8S_CONTEXT" -n "$ns" get statefulset,deployment \
+        -l app=tempo -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+    )"
+  fi
+  if [[ -n "${tempo_workload_names//[[:space:]]/}" ]]; then
     tempo_ns="$ns"
     break
   fi
@@ -131,9 +158,15 @@ else
   echo "Found Tempo in namespace: $tempo_ns"
 
   # Check Tempo ConfigMap for retention settings
-  tempo_cm=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_ns" get configmap -l app.kubernetes.io/name=tempo -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+  tempo_cm=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_ns" get configmap -l app.kubernetes.io/name=tempo -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  if [[ -z "${tempo_cm//[[:space:]]/}" ]]; then
+    tempo_cm=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_ns" get configmap -l app=tempo -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+  fi
+  if [[ -z "${tempo_cm//[[:space:]]/}" ]]; then
+    tempo_cm=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_ns" get configmap tempo -o jsonpath='{.metadata.name}' 2>/dev/null || true)
+  fi
 
-  if [[ -n "$tempo_cm" ]]; then
+  if [[ -n "${tempo_cm//[[:space:]]/}" ]]; then
     echo -n "  Check: Tempo retention configured to 7 days... "
     tempo_config=$(kubectl --context "$K8S_CONTEXT" -n "$tempo_ns" get configmap "$tempo_cm" -o jsonpath='{.data}' 2>/dev/null || echo "{}")
 
@@ -141,7 +174,7 @@ else
     if echo "$tempo_config" | grep -qE "(retention.*7d|retention.*168h)"; then
       echo -e "${GREEN}PASS${NC}"
     elif echo "$tempo_config" | grep -q "retention"; then
-      retention=$(echo "$tempo_config" | grep -oE "retention[:\s]*[0-9]+[dhm]" | head -1)
+      retention=$(echo "$tempo_config" | grep -oE "retention[:\s]*[0-9]+[dhm]" | head -1 || true)
       echo -e "${YELLOW}WARN${NC} Retention configured but not 7d: $retention"
     else
       echo -e "${YELLOW}WARN${NC} Retention config not found (using default)"
@@ -158,7 +191,17 @@ echo ""
 echo "Checking Prometheus retention configuration..."
 
 prom_ns="monitoring"
-if kubectl --context "$K8S_CONTEXT" -n "$prom_ns" get statefulset,deployment -l app.kubernetes.io/name=prometheus -o name >/dev/null 2>&1; then
+prom_workload_names="$(
+  kubectl --context "$K8S_CONTEXT" -n "$prom_ns" get statefulset,deployment \
+    -l app.kubernetes.io/name=prometheus -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+)"
+if [[ -z "${prom_workload_names//[[:space:]]/}" ]]; then
+  prom_workload_names="$(
+    kubectl --context "$K8S_CONTEXT" -n "$prom_ns" get statefulset,deployment \
+      -l app=prometheus -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true
+  )"
+fi
+if [[ -n "${prom_workload_names//[[:space:]]/}" ]]; then
   echo "Found Prometheus in namespace: $prom_ns"
 
   # Check Prometheus StatefulSet for retention flags
@@ -168,7 +211,7 @@ if kubectl --context "$K8S_CONTEXT" -n "$prom_ns" get statefulset,deployment -l 
   if echo "$prom_args" | grep -qE "(storage.tsdb.retention.time.*30d|storage.tsdb.retention.time.*720h)"; then
     echo -e "${GREEN}PASS${NC}"
   elif echo "$prom_args" | grep -q "storage.tsdb.retention.time"; then
-    retention=$(echo "$prom_args" | grep -oE "storage.tsdb.retention.time[=]*[0-9]+[dhm]" | head -1)
+    retention=$(echo "$prom_args" | grep -oE "storage.tsdb.retention.time[=]*[0-9]+[dhm]" | head -1 || true)
     echo -e "${YELLOW}WARN${NC} Retention configured but not 30d: $retention"
   else
     echo -e "${YELLOW}WARN${NC} Retention config not found (using default 15d)"
