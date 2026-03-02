@@ -137,6 +137,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-credentials-dev-latest.log`
       - `var/qa/frontend-runtime-blocker-infra-prompt.txt`
       - `var/qa/frontend-runtime-blocker-status.txt`
+      - `var/qa/frontend-runtime-blocker-status.md`
   - Infra handoff prompt generation (deterministic from latest sweep JSON):
     - `make qa-runtime-blocker-infra-prompt`
     - optional explicit input: `make qa-runtime-blocker-infra-prompt INPUT_JSON=<path-to-summary.json>`
@@ -150,6 +151,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
   - Canonical concise status view (human + CI):
     - `make qa-runtime-blocker-status`
     - canonical file output mode: `make qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt`
+    - markdown output mode: `make qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.md FORMAT=markdown`
   - Canonical local refresh lane (artifact-first, CI-parity semantics):
     - `make qa-runtime-blocker-refresh`
     - runs blocker sweep, always writes `frontend-runtime-blocker-infra-prompt.txt` + `frontend-runtime-blocker-status.txt`, then exits with sweep status.

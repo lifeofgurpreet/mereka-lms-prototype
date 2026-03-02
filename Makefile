@@ -203,6 +203,7 @@ qa-runtime-blocker-refresh: ## Run blocker sweep + always emit prompt/status art
 	set -e; \
 	$(MAKE) qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt; \
 	$(MAKE) qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt; \
+	$(MAKE) qa-runtime-blocker-status OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.md FORMAT=markdown; \
 	exit $$sweep_exit
 
 qa-runtime-blocker-infra-prompt: ## Generate infra-ready prompt (INPUT_JSON=<path> optional, OUTPUT_FILE=<path> optional)
@@ -211,10 +212,11 @@ qa-runtime-blocker-infra-prompt: ## Generate infra-ready prompt (INPUT_JSON=<pat
 	if [ -n "$(OUTPUT_FILE)" ]; then args="$$args --output \"$(OUTPUT_FILE)\""; fi; \
 	eval "./scripts/qa/generate-runtime-blocker-infra-prompt.sh $$args"
 
-qa-runtime-blocker-status: ## Print blocker status from latest summary (INPUT_JSON/OUTPUT_FILE optional; STRICT=1 to fail on blockers)
+qa-runtime-blocker-status: ## Print blocker status (INPUT_JSON/OUTPUT_FILE optional; FORMAT=text|markdown; STRICT=1 fail on blockers)
 	@args=""; \
 	if [ -n "$(INPUT_JSON)" ]; then args="$$args --input \"$(INPUT_JSON)\""; fi; \
 	if [ -n "$(OUTPUT_FILE)" ]; then args="$$args --output \"$(OUTPUT_FILE)\""; fi; \
+	if [ -n "$(FORMAT)" ]; then args="$$args --format \"$(FORMAT)\""; fi; \
 	if [ "$(STRICT)" = "1" ]; then args="$$args --strict"; fi; \
 	eval "./scripts/qa/print-runtime-blocker-status.sh $$args"
 

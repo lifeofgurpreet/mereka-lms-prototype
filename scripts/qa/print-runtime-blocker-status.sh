@@ -7,14 +7,16 @@ DEFAULT_INPUT="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-both.summ
 INPUT_JSON="$DEFAULT_INPUT"
 OUTPUT_FILE=""
 STRICT=0
+FORMAT="text"
 
 usage() {
   cat <<'USAGE'
-Usage: print-runtime-blocker-status.sh [--input <summary.json>] [--output <path>] [--strict]
+Usage: print-runtime-blocker-status.sh [--input <summary.json>] [--output <path>] [--format text|markdown] [--strict]
 
 Options:
   --input <path>   Blocker sweep summary JSON path (default: latest-both pointer).
   --output <path>  Also write rendered status output to this path.
+  --format <mode>  Output format: text (default) or markdown.
   --strict         Exit non-zero when summary.fail > 0.
   -h, --help       Show help.
 USAGE
@@ -30,6 +32,11 @@ while [[ $# -gt 0 ]]; do
     --output)
       [[ $# -lt 2 ]] && { echo "ERROR: --output requires a value" >&2; exit 2; }
       OUTPUT_FILE="$2"
+      shift 2
+      ;;
+    --format)
+      [[ $# -lt 2 ]] && { echo "ERROR: --format requires a value" >&2; exit 2; }
+      FORMAT="$2"
       shift 2
       ;;
     --strict)
@@ -53,7 +60,12 @@ if [[ ! -f "$INPUT_JSON" ]]; then
   exit 1
 fi
 
-python3 - "$INPUT_JSON" "$OUTPUT_FILE" "$STRICT" <<'PY'
+if [[ "$FORMAT" != "text" && "$FORMAT" != "markdown" ]]; then
+  echo "ERROR: --format must be text or markdown (got: $FORMAT)" >&2
+  exit 2
+fi
+
+python3 - "$INPUT_JSON" "$OUTPUT_FILE" "$STRICT" "$FORMAT" <<'PY'
 import io
 import json
 import sys
@@ -62,6 +74,7 @@ from pathlib import Path
 p = Path(sys.argv[1])
 output_file = sys.argv[2].strip()
 strict = sys.argv[3].strip() == "1"
+fmt = sys.argv[4].strip()
 
 data = json.loads(p.read_text())
 env = data.get("environment", "unknown")
@@ -75,38 +88,67 @@ pass_count = int(summary.get("pass", 0) or 0)
 fail_count = int(summary.get("fail", 0) or 0)
 skip_count = int(summary.get("skip", 0) or 0)
 
+failing = [d for d in diagnostics if d.get("status") == "fail"]
+
 buf = io.StringIO()
 def line(s=""):
     print(s, file=buf)
 
-line("Runtime Blocker Status")
-line(f"source={p}")
-line(f"environment={env} timestamp={ts}")
-line(f"summary=PASS:{pass_count} FAIL:{fail_count} SKIP:{skip_count}")
-if latest:
-    line("latest_artifacts:")
-    for k in sorted(latest.keys()):
-        line(f"  - {k}={latest[k]}")
-
-failing = [d for d in diagnostics if d.get("status") == "fail"]
-if failing:
-    line("failing_diagnostics:")
-    seen = set()
-    for d in failing:
-        diagnosis = d.get("diagnosis", "unknown")
-        owner = d.get("owner", "unknown")
-        action = d.get("next_action", "inspect_logs")
-        log = d.get("log", "")
-        key = (diagnosis, owner, action, log)
-        if key in seen:
-            continue
-        seen.add(key)
-        line(f"  - diagnosis={diagnosis}")
-        line(f"    owner={owner}")
-        line(f"    next_action={action}")
-        line(f"    log={log}")
+if fmt == "markdown":
+    line("## Runtime Blocker Status")
+    line(f"- source: `{p}`")
+    line(f"- environment: `{env}`")
+    line(f"- timestamp: `{ts}`")
+    line(f"- summary: `PASS:{pass_count} FAIL:{fail_count} SKIP:{skip_count}`")
+    if latest:
+        line("- latest artifacts:")
+        for k in sorted(latest.keys()):
+            line(f"  - `{k}`: `{latest[k]}`")
+    if failing:
+        line("- failing diagnostics:")
+        seen = set()
+        for d in failing:
+            diagnosis = d.get("diagnosis", "unknown")
+            owner = d.get("owner", "unknown")
+            action = d.get("next_action", "inspect_logs")
+            log = d.get("log", "")
+            key = (diagnosis, owner, action, log)
+            if key in seen:
+                continue
+            seen.add(key)
+            line(f"  - diagnosis: `{diagnosis}`")
+            line(f"    owner: `{owner}`")
+            line(f"    next_action: `{action}`")
+            line(f"    log: `{log}`")
+    else:
+        line("- failing diagnostics: none")
 else:
-    line("failing_diagnostics: none")
+    line("Runtime Blocker Status")
+    line(f"source={p}")
+    line(f"environment={env} timestamp={ts}")
+    line(f"summary=PASS:{pass_count} FAIL:{fail_count} SKIP:{skip_count}")
+    if latest:
+        line("latest_artifacts:")
+        for k in sorted(latest.keys()):
+            line(f"  - {k}={latest[k]}")
+    if failing:
+        line("failing_diagnostics:")
+        seen = set()
+        for d in failing:
+            diagnosis = d.get("diagnosis", "unknown")
+            owner = d.get("owner", "unknown")
+            action = d.get("next_action", "inspect_logs")
+            log = d.get("log", "")
+            key = (diagnosis, owner, action, log)
+            if key in seen:
+                continue
+            seen.add(key)
+            line(f"  - diagnosis={diagnosis}")
+            line(f"    owner={owner}")
+            line(f"    next_action={action}")
+            line(f"    log={log}")
+    else:
+        line("failing_diagnostics: none")
 
 rendered = buf.getvalue()
 print(rendered, end="")
