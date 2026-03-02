@@ -29,13 +29,18 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Consolidated frontend evidence rerun passed: `RUN_BASELINE_GATES=0 RUN_MFE_LIVE_DOM_AUDIT=1 RUN_SCREENSHOTS=1 SCREENSHOT_SCOPE=mfe-only ./scripts/qa/run-branding-evidence-pipeline.sh --env dev --frontend-only` -> `ALL GATES PASSED`; bundle: `var/evidence/branding/20260302-065539/`.
   - Screenshot runner now supports focused closure capture mode: `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`.
   - Latest focused closure screenshot set: `var/screenshots/dev/20260302T063522Z/` with probe summary `capture-summary.tsv` (includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format for each route, with normalized unquoted probe values).
-  - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`).
-  - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun.
+  - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`), latest log `var/qa/paragon-runtime-dev-20260302T105604Z.log`.
+  - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun, log `var/qa/studio-authoring-branding-dev-20260302T105604Z.log`.
+  - Latest deterministic MFE capture rerun: `CAPTURE_RETRIES=1 AGENT_BROWSER_TIMEOUT_SECONDS=30 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed; screenshots `var/screenshots/dev/20260302T105625Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-20260302T105625Z.log`.
   - Full Playwright matrix rerun now passes after preflight hardening in `verify-cross-browser-branding-smoke.sh`: `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` -> `15 passed`; log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`.
   - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` now passes notes + forum health checks (forum accepts `/healthz` fallback in non-prod) and reports one remaining non-authn blocker (`credentials` login endpoints returning 500). Equivalent prod checks return expected `302` redirects, so the failure is dev-runtime specific.
   - Latest auth-surface evidence logs:
-    - dev: `var/qa/auth-surfaces-dev-20260302T101424Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
+    - dev: `var/qa/auth-surfaces-dev-20260302T105604Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
     - prod: `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`)
+  - Deterministic verification hardening in this tranche:
+    - `capture-branding-screenshots.sh` now closes stale agent-browser daemon sessions before capture to guarantee launch-flag application.
+    - capture wrapper now strips daemon-warning stdout noise so `capture-summary.tsv` remains machine-parseable.
+    - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-enable insecure TLS only for dev checks (configurable overrides), removing self-signed cert false failures.
   - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
   - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=9`).

@@ -47,7 +47,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 STRICT_NO_GOOGLE_FONTS="${STRICT_NO_GOOGLE_FONTS:-0}"
+STUDIO_CURL_INSECURE="${STUDIO_CURL_INSECURE:-auto}"
 failures=0
+FETCH_CURL_FLAGS=()
+AGENT_BROWSER_FLAGS=()
 
 ok() { printf "✓ %s\n" "$1"; }
 fail() { printf "✗ %s\n" "$1" >&2; failures=$((failures + 1)); }
@@ -78,7 +81,7 @@ check_source_selectors() {
 
 fetch() {
   local url=$1
-  curl -sS -L --connect-timeout 10 --max-time 30 "$url" 2>/dev/null || true
+  curl "${FETCH_CURL_FLAGS[@]}" -sS -L --connect-timeout 10 --max-time 30 "$url" 2>/dev/null || true
 }
 
 check_live_css() {
@@ -161,20 +164,33 @@ capture_screenshots() {
   mkdir -p "$out_dir"
 
   printf "Capturing Studio screenshots: %s\n" "$out_dir"
-  agent-browser set viewport 1440 900 >/dev/null
+  agent-browser "${AGENT_BROWSER_FLAGS[@]}" set viewport 1440 900 >/dev/null
   for route in "/" "/course/" "/library/"; do
     local url file
     url="https://${studio_host}${route}"
     file="${out_dir}/studio$(echo "$route" | tr '/:' '__').png"
-    agent-browser open "$url" >/dev/null || true
-    agent-browser wait --load networkidle >/dev/null || true
-    agent-browser screenshot --full "$file" >/dev/null || true
+    agent-browser "${AGENT_BROWSER_FLAGS[@]}" open "$url" >/dev/null || true
+    agent-browser "${AGENT_BROWSER_FLAGS[@]}" wait --load networkidle >/dev/null || true
+    agent-browser "${AGENT_BROWSER_FLAGS[@]}" screenshot --full "$file" >/dev/null || true
   done
-  agent-browser close >/dev/null || true
+  agent-browser "${AGENT_BROWSER_FLAGS[@]}" close >/dev/null || true
   ok "Studio screenshots captured (${out_dir})"
 }
 
 echo "Verifying Studio authoring branding (${ENVIRONMENT})..."
+
+if [[ "$STUDIO_CURL_INSECURE" == "auto" ]]; then
+  if [[ "$ENVIRONMENT" == "dev" ]]; then
+    STUDIO_CURL_INSECURE=1
+  else
+    STUDIO_CURL_INSECURE=0
+  fi
+fi
+if [[ "$STUDIO_CURL_INSECURE" == "1" || "$STUDIO_CURL_INSECURE" == "true" ]]; then
+  FETCH_CURL_FLAGS=(-k)
+  AGENT_BROWSER_FLAGS=(--ignore-https-errors)
+fi
+
 check_source_selectors
 
 if [[ "$SOURCE_ONLY" != "1" ]]; then

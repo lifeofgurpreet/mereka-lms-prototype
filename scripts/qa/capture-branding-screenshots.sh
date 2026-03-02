@@ -94,16 +94,30 @@ mkdir -p "$OUT_DIR"
 AB_TIMEOUT_SECONDS="${AGENT_BROWSER_TIMEOUT_SECONDS:-45}"
 AB_SESSION="${AGENT_BROWSER_SESSION:-branding-capture-${ts}}"
 CAPTURE_RETRIES="${CAPTURE_RETRIES:-3}"
+IGNORE_HTTPS_ERRORS="${AGENT_BROWSER_IGNORE_HTTPS_ERRORS:-}"
+if [[ -z "$IGNORE_HTTPS_ERRORS" ]]; then
+  if [[ "$ENVIRONMENT" == "dev" ]]; then
+    IGNORE_HTTPS_ERRORS=1
+  else
+    IGNORE_HTTPS_ERRORS=0
+  fi
+fi
 export AGENT_BROWSER_SESSION="$AB_SESSION"
 
 ab_run() {
-  timeout --foreground "${AB_TIMEOUT_SECONDS}s" agent-browser "$@" 2>&1
+  local -a cmd=(agent-browser)
+  if [[ "$IGNORE_HTTPS_ERRORS" == "1" || "$IGNORE_HTTPS_ERRORS" == "true" ]]; then
+    cmd+=(--ignore-https-errors)
+  fi
+  cmd+=("$@")
+  timeout --foreground "${AB_TIMEOUT_SECONDS}s" "${cmd[@]}" 2>&1
 }
 
 ab() {
   local out status uid session cmd
   cmd="$*"
   if out="$(ab_run "$@")"; then
+    out="$(sed '/--ignore-https-errors ignored: daemon already running/d' <<<"$out")"
     [[ -n "$out" ]] && echo "$out"
     return 0
   fi
@@ -121,6 +135,7 @@ ab() {
       2>/dev/null || true
     sleep 1
     if out="$(ab_run "$@")"; then
+      out="$(sed '/--ignore-https-errors ignored: daemon already running/d' <<<"$out")"
       [[ -n "$out" ]] && echo "$out"
       return 0
     fi
@@ -421,6 +436,8 @@ sanitize() {
 }
 
 echo "Capturing screenshots to: $OUT_DIR (mfe_only=$MFE_ONLY)"
+# Ensure a fresh daemon so launch flags (e.g., ignore-https-errors) are honored.
+ab close >/dev/null 2>&1 || true
 ab set viewport 1440 900 >/dev/null
 SUMMARY_FILE="$OUT_DIR/capture-summary.tsv"
 echo -e "label\tattempt\tauth_state\tnav_ms\tme_status\tlogin_refresh_status\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
