@@ -1,8 +1,7 @@
 # GitHub Actions Cost Monitoring Runbook
+_Audience: Platform Eng + FinOps • Owner: Engineering Lead • Last updated: 2026-02-19_
 
 > **Spec**: `specs/github-actions-cost-monitoring_spec.md`
-> **Owner**: platform-engineering
-> **Last Updated**: 2026-02-19
 
 This runbook covers operational procedures for GitHub Actions cost monitoring, budget enforcement, and optimization.
 

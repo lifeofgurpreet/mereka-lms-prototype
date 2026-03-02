@@ -1,4 +1,5 @@
 # MFE Plugin Slots Runbook
+_Audience: Frontend + Platform Eng • Owner: Engineering Lead • Last updated: 2026-03-02_
 
 This runbook defines operational verification for `specs/mfe-plugin-slots_spec.md`.
 

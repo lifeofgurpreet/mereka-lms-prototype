@@ -1,4 +1,5 @@
 # Production Park-Mode Runbook
+_Audience: Platform Eng + SRE • Owner: Engineering Lead • Last updated: 2026-02-18_
 
 **Purpose**: Safely suspend GKE prod LMS compute to reduce cost while preserving all data.
 **Risk**: Site unavailable during park. Data plane stays up; no data loss.
