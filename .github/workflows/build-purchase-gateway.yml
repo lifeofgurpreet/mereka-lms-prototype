@@ -33,5 +33,6 @@ jobs:
       app_name: mereka-lms
       image_tag: ${{ needs.build.outputs.image_tag }}
       image_digest: ${{ needs.build.outputs.image_digest }}
+      image_repository: ghcr.io/biji-biji-initiative/purchase-gateway
     secrets:
       GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
