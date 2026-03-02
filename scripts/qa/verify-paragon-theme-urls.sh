@@ -4,8 +4,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 CADDY_FILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 BUILD_TOKENS_SCRIPT="$REPO_ROOT/scripts/branding/build-tokens.sh"
@@ -42,53 +42,39 @@ print(len(re.findall(r"^\s*--pgn-", text, flags=re.M)))
 PY
 }
 
-count_var_refs() {
-  local file="$1"
-  local pattern="$2"
-  python3 - "$file" "$pattern" <<'PY'
-from pathlib import Path
-import re
-import sys
-
-text = Path(sys.argv[1]).read_text(encoding="utf-8")
-pattern = sys.argv[2]
-print(len(re.findall(pattern, text)))
-PY
-}
-
 echo "=== PARAGON_THEME_URLS verification ==="
 
 echo ""
 echo "1) Tutor plugin config"
-if [[ ! -f "$PLUGIN_FILE" ]]; then
-  fail "Plugin missing: infrastructure/tutor/plugins/mereka_lms.py"
+if ! mereka_plugin_has_any "$REPO_ROOT"; then
+  fail "Plugin contract sources missing (expected at least infrastructure/tutor/plugins/mereka_lms.py)"
 else
-  if grep -q "PARAGON_THEME_URLS" "$PLUGIN_FILE"; then
-    pass "mereka_lms.py contains PARAGON_THEME_URLS"
+  if mereka_plugin_has_regex "$REPO_ROOT" "PARAGON_THEME_URLS"; then
+    pass "Plugin contract sources contain PARAGON_THEME_URLS"
   else
-    fail "PARAGON_THEME_URLS not found in mereka_lms.py"
+    fail "PARAGON_THEME_URLS not found in plugin contract sources"
   fi
 
-  if grep -q "MEREKA_PARAGON_THEME_CDN_BASE" "$PLUGIN_FILE"; then
-    pass "mereka_lms.py contains MEREKA_PARAGON_THEME_CDN_BASE"
+  if mereka_plugin_has_regex "$REPO_ROOT" "MEREKA_PARAGON_THEME_CDN_BASE"; then
+    pass "Plugin contract sources contain MEREKA_PARAGON_THEME_CDN_BASE"
   else
-    fail "MEREKA_PARAGON_THEME_CDN_BASE not found in mereka_lms.py"
+    fail "MEREKA_PARAGON_THEME_CDN_BASE not found in plugin contract sources"
   fi
 
-  if grep -q "MEREKA_PARAGON_THEME_ENABLED" "$PLUGIN_FILE"; then
-    pass "mereka_lms.py contains MEREKA_PARAGON_THEME_ENABLED toggle"
+  if mereka_plugin_has_regex "$REPO_ROOT" "MEREKA_PARAGON_THEME_ENABLED"; then
+    pass "Plugin contract sources contain MEREKA_PARAGON_THEME_ENABLED toggle"
   else
-    fail "MEREKA_PARAGON_THEME_ENABLED not found in mereka_lms.py"
+    fail "MEREKA_PARAGON_THEME_ENABLED not found in plugin contract sources"
   fi
 
-  if grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True)' "$PLUGIN_FILE"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" '\("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True\)'; then
     pass "MEREKA_PARAGON_THEME_ENABLED defaults to True (runtime theme active by default)"
   else
     fail "MEREKA_PARAGON_THEME_ENABLED is not defaulted to True"
   fi
 
-  if grep -q "MEREKA_PARAGON_THEME_CDN_BASE" "$PLUGIN_FILE" \
-    && grep -q "PARAGON_THEME_URLS" "$PLUGIN_FILE"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" "MEREKA_PARAGON_THEME_CDN_BASE" \
+    && mereka_plugin_has_regex "$REPO_ROOT" "PARAGON_THEME_URLS"; then
     pass "AC-TKN-034 plugin source contains PARAGON_THEME_URLS render inputs"
   else
     fail "AC-TKN-034 plugin source missing PARAGON_THEME_URLS render inputs"
@@ -228,7 +214,7 @@ fi
 
 echo ""
 echo "4) Optional sanity: MFE route tokens"
-if [[ -n "$(count_var_refs "$PLUGIN_FILE" "MEREKA_PARAGON_THEME_CDN_BASE")" ]]; then
+if [[ "$(mereka_plugin_count_regex "$REPO_ROOT" "MEREKA_PARAGON_THEME_CDN_BASE")" -gt 0 ]]; then
   pass "Token base variable referenced in plugin: MEREKA_PARAGON_THEME_CDN_BASE"
 else
   fail "MEREKA_PARAGON_THEME_CDN_BASE not referenced in plugin"

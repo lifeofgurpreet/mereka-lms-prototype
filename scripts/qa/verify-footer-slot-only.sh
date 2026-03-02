@@ -21,6 +21,7 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 POLICY_DOC="$REPO_ROOT/docs/operations/FOOTER_SLOT_ONLY_POLICY.md"
@@ -78,29 +79,29 @@ echo ""
 # -----------------------------------------------------------------------
 echo "AC-FTR-302: Plugin uses PLUGIN_SLOTS for footer; env.config.jsx generated deterministically"
 
-if [[ ! -f "$PLUGIN" ]]; then
-  fail "AC-FTR-302: mereka_lms.py not found at $PLUGIN"
+if [[ ! -f "$PLUGIN" ]] && ! mereka_plugin_has_any "$REPO_ROOT"; then
+  fail "AC-FTR-302: plugin contract sources not found (expected at least infrastructure/tutor/plugins/mereka_lms.py)"
 else
   # Must have a footer.v1 / footer_slot reference in the plugin
-  SLOT_REF=$(grep -c "footer_slot\|footer\.v1\|footer.v1" "$PLUGIN" || true)
+  SLOT_REF="$(mereka_plugin_count_regex "$REPO_ROOT" "footer_slot|footer\\.v1|footer.v1")"
   if [[ "$SLOT_REF" -gt 0 ]]; then
-    pass "AC-FTR-302: footer slot reference present in mereka_lms.py (footer_slot / footer.v1) — $SLOT_REF occurrence(s)"
+    pass "AC-FTR-302: footer slot reference present in plugin contract sources (footer_slot / footer.v1) — $SLOT_REF occurrence(s)"
   else
-    fail "AC-FTR-302: No footer slot reference (footer_slot / footer.v1) found in mereka_lms.py"
+    fail "AC-FTR-302: No footer slot reference (footer_slot / footer.v1) found in plugin contract sources"
   fi
 
   # Must have PLUGIN_SLOTS registration block (forward-compatible registration)
-  if grep -q "PLUGIN_SLOTS" "$PLUGIN"; then
-    pass "AC-FTR-302: PLUGIN_SLOTS registration block present in mereka_lms.py"
+  if mereka_plugin_has_fixed "$REPO_ROOT" "PLUGIN_SLOTS"; then
+    pass "AC-FTR-302: PLUGIN_SLOTS registration block present in plugin contract sources"
   else
-    fail "AC-FTR-302: PLUGIN_SLOTS not referenced in mereka_lms.py — slot registration missing"
+    fail "AC-FTR-302: PLUGIN_SLOTS not referenced in plugin contract sources — slot registration missing"
   fi
 
   # MerekaFooter component must be defined in the plugin (canonical source)
-  if grep -q "const MerekaFooter" "$PLUGIN"; then
-    pass "AC-FTR-302: MerekaFooter component defined in mereka_lms.py"
+  if mereka_plugin_has_fixed "$REPO_ROOT" "const MerekaFooter"; then
+    pass "AC-FTR-302: MerekaFooter component defined in plugin contract sources"
   else
-    fail "AC-FTR-302: MerekaFooter component not found in mereka_lms.py"
+    fail "AC-FTR-302: MerekaFooter component not found in plugin contract sources"
   fi
 
   # env.config.jsx determinism: the component must be injected via a deterministic
@@ -181,12 +182,21 @@ check_banned() {
   fi
 }
 
+check_banned_in_plugins() {
+  local pattern="$1"
+  local label="$2"
+  local plugin_file
+  while IFS= read -r plugin_file; do
+    check_banned "$plugin_file" "$pattern" "$label"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+}
+
 # innerHTML footer injection
-check_banned "$PLUGIN" "innerHTML.*footer\|footer.*innerHTML" "innerHTML footer injection"
+check_banned_in_plugins "innerHTML.*footer\|footer.*innerHTML" "innerHTML footer injection"
 check_banned "$PATCHES" "innerHTML.*footer\|footer.*innerHTML" "innerHTML footer injection"
 
 # Direct DOM querySelector footer manipulation
-check_banned "$PLUGIN" "document\.querySelector.*footer\|document\.getElementById.*footer" "document.querySelector/getElementById footer"
+check_banned_in_plugins "document\.querySelector.*footer\|document\.getElementById.*footer" "document.querySelector/getElementById footer"
 check_banned "$PATCHES" "document\.querySelector.*footer\|document\.getElementById.*footer" "document.querySelector/getElementById footer"
 
 # Raw <footer> tag as a JS/Python string concatenation (not JSX — detect string-concat patterns)

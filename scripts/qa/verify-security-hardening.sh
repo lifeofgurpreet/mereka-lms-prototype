@@ -17,6 +17,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -70,6 +71,21 @@ check_pattern() {
   return 1
 }
 
+check_plugin_pattern() {
+  local pattern="$1"
+  local description="$2"
+  if [[ ! -f "$PLUGIN_FILE" ]] && ! mereka_plugin_has_any "$REPO_ROOT"; then
+    do_fail "$description - plugin contract sources not found"
+    return 1
+  fi
+  if mereka_plugin_has_fixed "$REPO_ROOT" "$pattern"; then
+    do_pass "$description"
+    return 0
+  fi
+  do_fail "$description - pattern not found in plugin contract sources"
+  return 1
+}
+
 pattern_present() {
   local file="$1"
   local pattern="$2"
@@ -85,14 +101,14 @@ printf "  mfe caddyfile:  deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile\n"
 printf "  django settings: deploy/k8s/base/apps/openedx/settings/lms/production.py\n\n"
 
 # ── 1. Security hardening in plugin settings ─────────────────────────────
-check_pattern "$PLUGIN_FILE" "CSP_DEFAULT_SRC" "CSP_DEFAULT_SRC configured in plugin production settings hook"
-check_pattern "$PLUGIN_FILE" "CSP_SCRIPT_SRC" "CSP_SCRIPT_SRC configured in plugin production settings hook"
-check_pattern "$PLUGIN_FILE" "CSP_REPORT_ONLY" "CSP_REPORT_ONLY flag present in plugin"
-check_pattern "$PLUGIN_FILE" "DEFAULT_THROTTLE_RATES" "DEFAULT_THROTTLE_RATES block added in plugin"
-check_pattern "$PLUGIN_FILE" "SESSION_COOKIE_SECURE = True" "Session hardening flags added in plugin"
-check_pattern "$PLUGIN_FILE" "CSRF_COOKIE_SECURE = True" "CSRF hardening flags added in plugin"
-check_pattern "$PLUGIN_FILE" "CSRF_COOKIE_HTTPONLY = False" "CSRF_HTTPONLY false remains required for MFE"
-check_pattern "$PLUGIN_FILE" "REST_FRAMEWORK.setdefault(\"DEFAULT_THROTTLE_RATES\"" "REST_FRAMEWORK throttle defaults are initialized in plugin"
+check_plugin_pattern "CSP_DEFAULT_SRC" "CSP_DEFAULT_SRC configured in plugin production settings hook"
+check_plugin_pattern "CSP_SCRIPT_SRC" "CSP_SCRIPT_SRC configured in plugin production settings hook"
+check_plugin_pattern "CSP_REPORT_ONLY" "CSP_REPORT_ONLY flag present in plugin"
+check_plugin_pattern "DEFAULT_THROTTLE_RATES" "DEFAULT_THROTTLE_RATES block added in plugin"
+check_plugin_pattern "SESSION_COOKIE_SECURE = True" "Session hardening flags added in plugin"
+check_plugin_pattern "CSRF_COOKIE_SECURE = True" "CSRF hardening flags added in plugin"
+check_plugin_pattern "CSRF_COOKIE_HTTPONLY = False" "CSRF_HTTPONLY false remains required for MFE"
+check_plugin_pattern "REST_FRAMEWORK.setdefault(\"DEFAULT_THROTTLE_RATES\"" "REST_FRAMEWORK throttle defaults are initialized in plugin"
 
 # ── 2. Caddy security headers (static k8s Caddyfile) ─────────────────────
 check_file_exists "$MFE_CADDYFILE" "MFE static k8s Caddyfile"

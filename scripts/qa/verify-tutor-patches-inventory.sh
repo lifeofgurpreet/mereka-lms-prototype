@@ -14,6 +14,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 INVENTORY="$REPO_ROOT/docs/architecture/TUTOR_PATCHES_INVENTORY.md"
 PATCHES_DIR="$REPO_ROOT/infrastructure/tutor/patches"
@@ -65,10 +66,10 @@ for patch_name in "${!REMOVED_CHECKS[@]}"; do
   expected="${REMOVED_CHECKS[$patch_name]}"
   if [[ -f "$PATCHES_DIR/$patch_name" ]]; then
     _fail "removed patch still exists on disk: $patch_name (should have been deleted)"
-  elif grep -qE "$expected" "$PLUGIN" 2>/dev/null; then
+  elif mereka_plugin_has_regex "$REPO_ROOT" "$expected"; then
     _pass "removed patch migrated to plugin: $patch_name -> $expected"
   else
-    _fail "removed patch hook NOT found in plugin: $patch_name -> expected '$expected' in $PLUGIN"
+    _fail "removed patch hook NOT found in plugin contract sources: $patch_name -> expected '$expected'"
   fi
 done
 
@@ -95,12 +96,20 @@ for patch_name in "${FILESYSTEM_PATCHES[@]}"; do
 done
 
 ###############################################################################
-# Check 5: Plugin file is valid Python
+# Check 5: Plugin contract sources are valid Python
 ###############################################################################
-if python3 -c "import ast; ast.parse(open('$PLUGIN').read())" 2>/dev/null; then
-  _pass "mereka_lms.py is valid Python"
-else
-  _fail "mereka_lms.py has Python syntax errors"
+plugin_files_checked=0
+while IFS= read -r plugin_file; do
+  plugin_files_checked=$((plugin_files_checked + 1))
+  if python3 -c "import ast; ast.parse(open('$plugin_file').read())" 2>/dev/null; then
+    _pass "$(basename "$plugin_file") is valid Python"
+  else
+    _fail "$(basename "$plugin_file") has Python syntax errors"
+  fi
+done < <(mereka_plugin_contract_files "$REPO_ROOT")
+
+if (( plugin_files_checked == 0 )); then
+  _fail "No plugin contract sources found (expected infrastructure/tutor/plugins/mereka_lms.py)"
 fi
 
 ###############################################################################

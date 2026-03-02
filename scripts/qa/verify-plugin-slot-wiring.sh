@@ -8,6 +8,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 INVENTORY="$REPO_ROOT/docs/architecture/MFE_PLUGIN_SLOT_INVENTORY.md"
@@ -20,13 +21,15 @@ WARN=0
 do_pass() { PASS=$((PASS + 1)); echo "  PASS  $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL  $1"; }
 do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
+plugin_has_fixed() { mereka_plugin_has_fixed "$REPO_ROOT" "$1"; }
+plugin_has_regex() { mereka_plugin_has_regex "$REPO_ROOT" "$1"; }
 
 echo "=== Plugin-Slot Wiring Integrity Check ==="
 echo ""
 
 # ── 1. Source files exist ──────────────────────────────────────────────
 echo "--- Source file existence ---"
-for f in "$PLUGIN" "$PATCHES" "$INVENTORY" "$ADR014"; do
+for f in "$PATCHES" "$INVENTORY" "$ADR014"; do
   basename=$(basename "$f")
   if [ -f "$f" ]; then
     do_pass "$basename exists"
@@ -34,19 +37,24 @@ for f in "$PLUGIN" "$PATCHES" "$INVENTORY" "$ADR014"; do
     do_fail "$basename not found at $f"
   fi
 done
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  do_pass "Plugin contract source exists (mereka_lms.py and/or split modules)"
+else
+  do_fail "Plugin contract source missing (expected infrastructure/tutor/plugins/mereka_lms.py)"
+fi
 
 # ── 2. Plugin: slot registration chain ────────────────────────────────
 echo ""
 echo "--- Plugin slot registration (mereka_lms.py) ---"
 
 # 2a. Forward-compatible PLUGIN_SLOTS registration
-if grep -q 'from tutormfe.hooks import PLUGIN_SLOTS' "$PLUGIN"; then
+if plugin_has_regex 'from tutormfe.hooks import PLUGIN_SLOTS'; then
   do_pass "PLUGIN_SLOTS import present (forward-compatible)"
 else
   do_fail "PLUGIN_SLOTS import missing"
 fi
 
-if grep -q 'PLUGIN_SLOTS.add_items\|PLUGIN_SLOTS.add_item' "$PLUGIN"; then
+if plugin_has_regex 'PLUGIN_SLOTS.add_items|PLUGIN_SLOTS.add_item'; then
   do_pass "PLUGIN_SLOTS registration call present (add_item or add_items)"
 else
   do_fail "No PLUGIN_SLOTS add_item/add_items registration found"
@@ -68,15 +76,15 @@ required_slots=(
   "org.openedx.frontend.profile.additional_profile_fields.v1"
 )
 for slot in "${required_slots[@]}"; do
-  if grep -q "\"${slot}\"" "$PLUGIN"; then
+  if plugin_has_regex "\"${slot}\""; then
     do_pass "Required slot registered: ${slot}"
   else
-    do_fail "Required slot missing in mereka_lms.py: ${slot}"
+    do_fail "Required slot missing in plugin contract sources: ${slot}"
   fi
 done
 
 # 2c. Plugin defines runtime helper components used by slot registrations
-if grep -q 'const MerekaHeaderLogo' "$PLUGIN"; then
+if plugin_has_regex 'const MerekaHeaderLogo'; then
   do_pass "MerekaHeaderLogo component defined for header_logo slot"
 else
   do_fail "MerekaHeaderLogo component missing"
@@ -86,19 +94,19 @@ fi
 echo ""
 echo "--- MerekaFooter component (mereka_lms.py) ---"
 
-if grep -q 'const MerekaFooter' "$PLUGIN"; then
+if plugin_has_regex 'const MerekaFooter'; then
   do_pass "MerekaFooter component defined in plugin"
 else
   do_fail "MerekaFooter component missing from plugin"
 fi
 
-if grep -q 'DIRECT_PLUGIN' "$PLUGIN"; then
+if plugin_has_fixed 'DIRECT_PLUGIN'; then
   do_pass "Direct plugin type specified (performance: no iframe overhead)"
 else
   do_fail "Direct plugin type not specified"
 fi
 
-if grep -q 'PLUGIN_OPERATIONS' "$PLUGIN"; then
+if plugin_has_fixed 'PLUGIN_OPERATIONS'; then
   do_pass "PLUGIN_OPERATIONS referenced (Replace/Insert/Hide)"
 else
   do_fail "PLUGIN_OPERATIONS not referenced"
@@ -106,7 +114,7 @@ fi
 
 # 3a. Footer semantic content
 for check in 'role="contentinfo"' 'mereka-footer' 'supportEmail'; do
-  if grep -q "$check" "$PLUGIN"; then
+  if plugin_has_fixed "$check"; then
     do_pass "Footer contains '$check'"
   else
     do_fail "Footer missing '$check'"
@@ -118,7 +126,7 @@ echo ""
 echo "--- Patch chain (apply-patches.sh) ---"
 
 # 4a. Slot runtime definitions are in plugin, not patch file
-if grep -q 'mfe-env-config-runtime-definitions' "$PLUGIN"; then
+if plugin_has_fixed 'mfe-env-config-runtime-definitions'; then
   do_pass "Slot component definitions are injected via plugin hooks"
 else
   do_fail "Plugin runtime definition hook for slot components missing"
@@ -139,14 +147,14 @@ else
 fi
 
 # 4d. SCSS theme import injection is via plugin env-config patch
-if grep -q "mfe-env-config-buildtime-imports" "$PLUGIN" && grep -q 'mereka/mereka.scss' "$PLUGIN"; then
+if plugin_has_fixed "mfe-env-config-buildtime-imports" && plugin_has_fixed 'mereka/mereka.scss'; then
   do_pass "mereka.scss import is injected via plugin env-config hook"
 else
   do_fail "mereka.scss import not found in plugin env-config buildtime hook"
 fi
 
 # 4e. FPF framework import
-if grep -q 'frontend-plugin-framework' "$PATCHES" || grep -q 'frontend-plugin-framework' "$PLUGIN"; then
+if grep -q 'frontend-plugin-framework' "$PATCHES" || plugin_has_fixed 'frontend-plugin-framework'; then
   do_pass "frontend-plugin-framework dependency referenced"
 else
   do_fail "frontend-plugin-framework dependency not found in plugin or patches"
@@ -157,7 +165,7 @@ echo ""
 echo "--- Consistency checks ---"
 
 # 5a. Footer components are defined in plugin-only runtime definitions
-if grep -q 'const MerekaFooter' "$PLUGIN" && grep -q 'const MerekaStudioFooter' "$PLUGIN"; then
+if plugin_has_fixed 'const MerekaFooter' && plugin_has_fixed 'const MerekaStudioFooter'; then
   do_pass "Plugin defines both MerekaFooter and MerekaStudioFooter components"
 else
   do_fail "Plugin is missing one or more footer components (MerekaFooter/MerekaStudioFooter)"
