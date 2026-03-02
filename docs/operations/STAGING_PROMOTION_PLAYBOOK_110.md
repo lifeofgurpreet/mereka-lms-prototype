@@ -37,6 +37,13 @@ Scope: Promotion execution checklist once operator signal is given.
   - `var/qa/staging-prepromotion-dev-baseline-20260302T035438Z.summary.log`
   - `var/screenshots/dev/20260302T035438Z/`
 
+## Rollback Contract Validation (Repo-Local)
+
+- Rollback command path is not just documented; it is also contract-tested in repo-local mode:
+  - `./scripts/qa/verify-cicd-release-rollback.sh` (`PASS: 5 / FAIL: 0 / SKIP: 0`)
+  - `./scripts/qa/verify-release-dry-run-contract.sh` (`PASS`)
+- These checks confirm rollback/promotion script behavior without building images and verify dry-run safety semantics before any live promotion step.
+
 ## Promotion Run Sequence
 
 1. Validate source branch state in `mereka-lms`:
