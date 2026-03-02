@@ -80,6 +80,8 @@ ts="$(date -u +%Y%m%dT%H%M%SZ)"
 OUT_DIR="$REPO_ROOT/var/screenshots/${ENVIRONMENT}/${ts}"
 mkdir -p "$OUT_DIR"
 AB_TIMEOUT_SECONDS="${AGENT_BROWSER_TIMEOUT_SECONDS:-45}"
+AB_SESSION="${AGENT_BROWSER_SESSION:-branding-capture-${ts}}"
+export AGENT_BROWSER_SESSION="$AB_SESSION"
 
 ab_run() {
   timeout --foreground "${AB_TIMEOUT_SECONDS}s" agent-browser "$@" 2>&1
@@ -117,6 +119,33 @@ ab() {
   fi
   echo "$out" >&2
   return "$status"
+}
+
+wait_for_rendered_content() {
+  local label=$1
+  local max_attempts=20
+  local attempt title text_len current_url
+
+  for ((attempt = 1; attempt <= max_attempts; attempt++)); do
+    title="$(ab get title 2>/dev/null || true)"
+    text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
+    current_url="$(ab get url 2>/dev/null || true)"
+
+    if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge 40 ]] && [[ -n "${title:-}" ]]; then
+      return 0
+    fi
+
+    # Account/dashboard routes commonly redirect client-side to authn/login.
+    # Wait for the redirect target to render meaningful content before capture.
+    if [[ "$current_url" == *"/authn/login"* ]] && [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge 20 ]]; then
+      return 0
+    fi
+
+    sleep 1
+  done
+
+  echo "WARN: timed out waiting for rendered content ($label)" >&2
+  return 0
 }
 
 base_lms="$LMS_DOMAIN"
@@ -205,6 +234,7 @@ for entry in "${URLS[@]}"; do
   echo "- $label: $url"
   ab open "$url" >/dev/null
   ab wait --load networkidle >/dev/null || true
+  wait_for_rendered_content "$label"
   ab screenshot --full "$file" >/dev/null
 done
 

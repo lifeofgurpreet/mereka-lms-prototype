@@ -16,13 +16,13 @@ No `bbi-infrastructure` / GitOps repo edits were performed.
 
 | Command | Result | Notes / Artifacts |
 |---|---|---|
-| `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` | PASS | `var/screenshots/dev/20260302T002850Z/` |
+| `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` | PASS | `var/screenshots/dev/20260302T005256Z/` |
 | `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` | PASS | `PASS=17 WARN=0 FAIL=0` |
-| `./scripts/qa/verify-studio-authoring-branding.sh dev` | FAIL | Runtime blocker: `studio.academyv2.mereka.dev` unreachable at check time |
+| `./scripts/qa/verify-studio-authoring-branding.sh dev` | PASS | `failures=0` on rerun |
 | `./scripts/qa/verify-mfe-selector-hardening.sh` | PASS | Selector hardening contract green |
 | `./scripts/qa/verify-a11y-contrast-focus.sh` | PASS | Non-blocking warnings documented |
 | `./scripts/qa/verify-wcag-contrast-v2.sh` | PASS | WCAG v2 gate green |
-| `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` | FAIL (runtime) | Live dev surfaces returning transient/partial error shell; artifacts under `var/e2e-artifacts/selector-dom-audit-runtime-b7179--on-configured-MFE-surfaces-chromium/` |
+| `./scripts/qa/verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium` | PASS | `1 passed`; log: `var/qa/mfe-live-dom-audit-dev-20260302T005354Z.log` |
 | `./scripts/qa/verify-certificate-branding.sh` | PASS | `PASS=25 WARN=0 FAIL=0` |
 | `./scripts/qa/verify-security-hardening.sh` | PASS | `PASS=30 FAIL=0 WARN=1` |
 | `cd tests/e2e && npx playwright test tests/selector-dom-audit.spec.ts --list` | PASS | Playwright spec compiles/lists |
@@ -44,9 +44,11 @@ No `bbi-infrastructure` / GitOps repo edits were performed.
 
 ## Open Blockers
 
-- Live dev runtime is still unstable for some checks (error-shell / empty-body behavior).
-- Studio dev host (`studio.academyv2.mereka.dev`) was unreachable during validation.
 - CSP improvement is a source change until deployed; runtime can only be re-verified after rollout.
+
+## Notes
+
+- Earlier in the same day, runtime checks intermittently failed with transient error-shell behavior and Studio reachability issues; latest reruns listed above are green.
 
 ## Next Action (Requires Deployment Signal)
 

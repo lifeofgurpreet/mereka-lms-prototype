@@ -16,6 +16,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 POLICY="$REPO_ROOT/docs/architecture/WCAG_CONTRAST_POLICY_V2.md"
 ORIGINAL_VERIFIER="$REPO_ROOT/scripts/qa/verify-contrast-compliance.sh"
 CI_CONFIG="$REPO_ROOT/.github/workflows/ci.yml"
+CI_STATIC_LIST="$REPO_ROOT/.github/ci-scripts-static.txt"
 
 PASS=0
 FAIL=0
@@ -225,13 +226,22 @@ echo "--- CI gate enforcement (AC-WCAG2-003) ---"
 if [ ! -f "$CI_CONFIG" ]; then
   do_fail "CI config file not found"
 else
-  if grep -q "verify-contrast-compliance\|verify-wcag-contrast" "$CI_CONFIG"; then
+  if grep -q "run-scripts-parallel\\.sh .github/ci-scripts-static\\.txt" "$CI_CONFIG" \
+    && [ -f "$CI_STATIC_LIST" ] \
+    && grep -q "scripts/qa/verify-contrast-compliance\\.sh" "$CI_STATIC_LIST" \
+    && grep -q "scripts/qa/verify-wcag-contrast-v2\\.sh" "$CI_STATIC_LIST"; then
+    do_pass "CI has contrast verification jobs (via ci-scripts-static lane)"
+  elif grep -q "verify-contrast-compliance\|verify-wcag-contrast" "$CI_CONFIG"; then
     do_pass "CI has contrast verification jobs"
   else
     do_fail "CI missing contrast verification jobs"
   fi
 
-  if grep -q "verify-accessibility-conformance\|accessibility" "$CI_CONFIG"; then
+  if grep -q "run-scripts-parallel\\.sh .github/ci-scripts-static\\.txt" "$CI_CONFIG" \
+    && [ -f "$CI_STATIC_LIST" ] \
+    && grep -q "scripts/qa/verify-accessibility-conformance\\.sh" "$CI_STATIC_LIST"; then
+    do_pass "CI has accessibility conformance gate (via ci-scripts-static lane)"
+  elif grep -q "verify-accessibility-conformance\|accessibility" "$CI_CONFIG"; then
     do_pass "CI has accessibility conformance gate"
   else
     do_fail "CI missing accessibility conformance gate"

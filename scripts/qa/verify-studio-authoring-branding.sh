@@ -96,7 +96,10 @@ check_live_css() {
     return
   fi
 
-  css_path="$(printf '%s' "$html" | rg -o '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css' | head -n 1 || true)"
+  # Accept both legacy and current Studio CSS paths:
+  # - /static/studio/mereka/css/studio-main-v1.<hash>.css
+  # - /static/studio/css/studio-main-v1.<hash>.css
+  css_path="$(printf '%s' "$html" | rg -o '/static/studio/(mereka/)?css/studio-main-v1(\.[a-z0-9]+)?\.css' | head -n 1 || true)"
   if [[ -z "${css_path:-}" ]]; then
     fail "Studio themed CSS link missing (${studio_host})"
     return

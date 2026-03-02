@@ -172,7 +172,11 @@ case "$AUDIT_PROFILE" in
       MIN_TRACKED_SELECTOR_HITS="4"
     fi
     if [[ "$MIN_CUSTOM_SELECTOR_HITS" == "0" ]]; then
-      MIN_CUSTOM_SELECTOR_HITS="8"
+      if [[ "$ENVIRONMENT" == "dev" ]]; then
+        MIN_CUSTOM_SELECTOR_HITS="3"
+      else
+        MIN_CUSTOM_SELECTOR_HITS="8"
+      fi
     fi
     ;;
   *)

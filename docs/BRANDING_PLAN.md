@@ -16,8 +16,8 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 | Phase 4 — Extended Surfaces | **MOSTLY COMPLETE** | PDF certificates only |
 | Phase 5 — Next-Gen Branding | **COMPLETE** | — |
 | Phase 6 — Slot Branding Expansion | **FROZEN (Issue #111 decision)** | Freeze new slot expansion until dev runtime stability is restored |
-| Phase 7 — BEM Reduction | **IN PROGRESS** | Live DOM audit remains blocked by dev runtime error-shell state |
-| QA & Documentation | **IN PROGRESS** | Studio reachability + deterministic DOM-audit evidence |
+| Phase 7 — BEM Reduction | **IN PROGRESS** | Remaining selector pruning decisions after latest green live audit rerun |
+| QA & Documentation | **MOSTLY COMPLETE** | Before/after visuals + stakeholder handoff bundle |
 | Deployment | **MOSTLY COMPLETE** | Dev runtime re-verify after CSP rollout, stakeholder notification |
 
 ---
@@ -25,14 +25,14 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 ## 2026-03-02 Stabilization Snapshot (Issues #105, #107, #108, #106, #111)
 
 - Runtime evidence (`#105`):
-  - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed and wrote artifacts under `var/screenshots/dev/20260302T002850Z/`.
+  - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed and wrote artifacts under `var/screenshots/dev/20260302T005256Z/`.
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`PASS=17 WARN=0 FAIL=0`).
-  - `./scripts/qa/verify-studio-authoring-branding.sh dev` is currently blocked by environment reachability (`studio.academyv2.mereka.dev` timeout at runtime check time).
+  - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`failures=0`) on latest rerun.
 - BEM + a11y (`#107`, `#108`):
   - `./scripts/qa/verify-mfe-selector-hardening.sh` passed.
   - `./scripts/qa/verify-a11y-contrast-focus.sh` passed with documented non-blocking warnings.
   - `./scripts/qa/verify-wcag-contrast-v2.sh` passed.
-  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` is blocked by transient/partial MFE runtime error-shell rendering in dev.
+  - `./scripts/qa/verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium` passed (`1 passed`), log: `var/qa/mfe-live-dom-audit-dev-20260302T005354Z.log`.
 - Root-cause hardening applied in repo:
   - Updated `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` CSP to allow required CDN/Google font domains for MFE runtime script/style/font loads.
   - Added bounded recovery + low-signal hydration handling in `tests/e2e/tests/selector-dom-audit.spec.ts` to reduce headless false negatives.
@@ -40,7 +40,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - Certificate closure (`#106`):
   - `./scripts/qa/verify-certificate-branding.sh` passed (`PASS=25 WARN=0 FAIL=0`).
 - Phase 6 decision (`#111`):
-  - Slot-expansion lane is intentionally frozen until runtime stability checks above are green again.
+  - Slot-expansion lane remains intentionally frozen as a scope decision; runtime checks above are now green on latest rerun.
 
 ---
 
@@ -170,7 +170,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] npm-start MFE smoke tests — `verify-npm-start-mfe-smoke.sh` (authn, learning, account, profile with screenshot capture).
 - [x] Accessibility scan (contrast, focus order) on key pages. Current gates pass (`verify-a11y-contrast-focus.sh`, `verify-wcag-contrast-v2.sh`) with non-blocking documented warnings.
 - [x] Performance spot-check — runtime theme preflight checks built into both smoke scripts (PARAGON_THEME_URLS verification, theme-mode detection).
-- [ ] Capture before/after screenshots for all branded surfaces. Latest deterministic MFE capture set: `var/screenshots/dev/20260302T002850Z/`; Studio capture remains environment-blocked when host is unreachable.
+- [ ] Capture before/after screenshots for all branded surfaces. Latest deterministic MFE capture set: `var/screenshots/dev/20260302T005256Z/`.
 - [x] Publish implementation notes/screenshots in `docs/BRANDING.md`.
 - [x] Update README/AGENTS with quick branding maintenance instructions.
 - [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
