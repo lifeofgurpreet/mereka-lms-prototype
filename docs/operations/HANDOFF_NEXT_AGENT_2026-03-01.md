@@ -51,3 +51,44 @@ The first three commands should resolve to `$BASE`.
 
 - If Beads sync fails again, first run `sqlite3 .beads/beads.db 'PRAGMA quick_check;'` before any changes.
 - Use the start-here branch for new work; keep backup/tag untouched.
+
+---
+
+## Addendum (2026-03-02 Stabilization)
+
+### Updated Canonical Start Point
+
+- `main` and `start/next-implementor-2026-03-01` are aligned at: `6e6bcb6d`.
+- All updates in this addendum were executed in `mereka-lms` repo only (no GitOps repo mutations).
+
+### What Landed Since 2026-03-01 Baseline
+
+- Auth-surface contract stabilization for runtime checks:
+  - branded notes banner accepted
+  - forum non-prod `/healthz` fallback accepted while prod still requires `/heartbeat=200`
+- Auth-surface diagnostics hardening:
+  - failures now emit `diag{...}` metadata (status, location, content-type, request IDs when available, body snippet)
+- Closure evidence refreshes:
+  - latest screenshots, DOM/a11y/certificate reruns, CI ceremony contract reruns
+  - matrix + branding plan updated with current artifacts and commit trace
+- Troubleshooting runbook expanded with dev `credentials` 500 failure mode (`ZoneInfoNotFoundError` + missing `tzdata` signal).
+
+### Remaining Blocker (Current)
+
+- Dev runtime only: `credentials.academyv2.mereka.dev` login endpoints (`/login`, `/login/edx-oauth2`, `/admin/login`) return `500`.
+- Prod control lane for same surfaces is healthy (`302` redirects).
+- Latest evidence logs:
+  - `var/qa/auth-surfaces-dev-20260302T064809Z.log`
+  - `var/qa/auth-surfaces-prod-20260302T064809Z.log`
+
+### Start Commands (Updated)
+
+```bash
+git fetch --all --prune
+git switch start/next-implementor-2026-03-01
+git pull --ff-only
+git rev-parse --short HEAD
+git status --short --branch
+```
+
+Expected HEAD: `6e6bcb6d`.
