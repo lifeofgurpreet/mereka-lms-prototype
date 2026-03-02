@@ -2187,6 +2187,9 @@ RUN pip install -e /openedx/credentials_vc_issuer
 
 # Install cryptography for Ed25519 key operations
 RUN pip install cryptography>=41.0.0
+
+# Ensure ZoneInfo("UTC") works even when OS tzdata files are absent
+RUN pip install tzdata>=2024.1
 """,
     )
 )
