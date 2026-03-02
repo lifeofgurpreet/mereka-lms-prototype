@@ -8,6 +8,20 @@ Scope: Promotion execution checklist once operator signal is given.
 - Repo-side frontend/runtime gates are green (see `FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md`).
 - Promotion approval explicitly received.
 - If promotion involves GitOps overlays, ensure authorized operator context for infra repo operations.
+- Preflight repo check is green:
+
+```bash
+./scripts/qa/verify-staging-activation.sh --offline
+```
+
+## Blocked-State Rule (Current Lane)
+
+- If explicit infra/GitOps promotion signal has **not** been given, stop before step 3.
+- In blocked mode, only do repo-local preparation:
+  - refresh dev baseline evidence
+  - keep rollback command path documented
+  - post blocker status to `#110` with current evidence links
+- Do not touch `bbi-infrastructure` overlays or Argo resources in blocked mode.
 
 ## Promotion Run Sequence
 
