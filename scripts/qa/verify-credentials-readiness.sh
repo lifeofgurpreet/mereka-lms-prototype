@@ -58,6 +58,7 @@ SKIP=0
 pass_() { PASS=$((PASS + 1)); printf "PASS: %s\n" "$1"; }
 fail_() { FAIL=$((FAIL + 1)); printf "FAIL: %s\n" "$1"; }
 skip_() { SKIP=$((SKIP + 1)); printf "SKIP: %s\n" "$1"; }
+warn_() { printf "WARN: %s\n" "$1"; }
 
 # ── Key file paths ────────────────────────────────────────────────────────────
 CRED_SETTINGS="$REPO_ROOT/deploy/k8s/base/plugins/credentials/apps/credentials/settings/production.py"
