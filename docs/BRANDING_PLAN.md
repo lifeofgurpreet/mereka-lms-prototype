@@ -40,6 +40,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Deterministic verification hardening in this tranche:
     - `capture-branding-screenshots.sh` now closes stale agent-browser daemon sessions before capture to guarantee launch-flag application.
     - capture wrapper now strips daemon-warning stdout noise so `capture-summary.tsv` remains machine-parseable.
+    - capture wrapper now supports `CAPTURE_STRICT_READY=1` to fail on unresolved render-readiness (no fallback screenshot) for deterministic release evidence.
     - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-enable insecure TLS only for dev checks (configurable overrides), removing self-signed cert false failures.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:

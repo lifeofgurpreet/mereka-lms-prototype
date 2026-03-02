@@ -34,6 +34,9 @@ Options:
 Back-compat:
   capture-branding-screenshots.sh prod
   capture-branding-screenshots.sh dev
+
+Environment:
+  CAPTURE_STRICT_READY=1  Fail instead of fallback screenshot if readiness checks never pass.
 EOF
 }
 
@@ -94,6 +97,7 @@ mkdir -p "$OUT_DIR"
 AB_TIMEOUT_SECONDS="${AGENT_BROWSER_TIMEOUT_SECONDS:-45}"
 AB_SESSION="${AGENT_BROWSER_SESSION:-branding-capture-${ts}}"
 CAPTURE_RETRIES="${CAPTURE_RETRIES:-3}"
+CAPTURE_STRICT_READY="${CAPTURE_STRICT_READY:-0}"
 IGNORE_HTTPS_ERRORS="${AGENT_BROWSER_IGNORE_HTTPS_ERRORS:-}"
 if [[ -z "$IGNORE_HTTPS_ERRORS" ]]; then
   if [[ "$ENVIRONMENT" == "dev" ]]; then
@@ -153,7 +157,7 @@ wait_for_rendered_content() {
   local label=$1
   local target_url=${2:-}
   local max_attempts=20
-  local attempt title text_len current_url min_text
+  local attempt title text_len current_url min_text ready_state interactive_count
 
   min_text=40
   case "$label" in
@@ -169,8 +173,11 @@ wait_for_rendered_content() {
     title="$(ab get title 2>/dev/null || true)"
     text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
     current_url="$(ab get url 2>/dev/null || true)"
+    ready_state="$(ab eval '(() => document.readyState || "na")()' 2>/dev/null || true)"
+    interactive_count="$(ab eval '(() => document.querySelectorAll("main,[role=\"main\"],form,input,button,a[href],h1,h2").length)()' 2>/dev/null || true)"
 
-    if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge "$min_text" ]] && [[ -n "${title:-}" ]]; then
+    if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge "$min_text" ]] && [[ -n "${title:-}" ]] \
+      && [[ "${ready_state:-}" == "complete" ]] && [[ "$interactive_count" =~ ^[0-9]+$ ]] && [[ "$interactive_count" -ge 1 ]]; then
       return 0
     fi
 
@@ -198,6 +205,9 @@ wait_for_rendered_content() {
   done
 
   echo "WARN: timed out waiting for rendered content ($label)" >&2
+  if [[ "$CAPTURE_STRICT_READY" == "1" ]]; then
+    return 1
+  fi
   return 0
 }
 
@@ -289,7 +299,13 @@ capture_route() {
   for ((attempt = 1; attempt <= CAPTURE_RETRIES; attempt++)); do
     ab open "$url" >/dev/null
     ab wait --load networkidle >/dev/null || true
-    wait_for_rendered_content "$label" "$url"
+    if ! wait_for_rendered_content "$label" "$url"; then
+      echo "WARN: strict readiness timeout for $label (attempt $attempt/$CAPTURE_RETRIES)" >&2
+      if [[ "$attempt" -lt "$CAPTURE_RETRIES" ]]; then
+        sleep 2
+        continue
+      fi
+    fi
 
     current_url="$(ab get url 2>/dev/null || true)"
     title="$(ab get title 2>/dev/null || true)"
@@ -318,6 +334,10 @@ capture_route() {
     fi
   done
 
+  if [[ "$CAPTURE_STRICT_READY" == "1" ]]; then
+    echo "ERROR: strict readiness mode failed for $label after $CAPTURE_RETRIES attempts" >&2
+    return 1
+  fi
   echo "WARN: capturing fallback screenshot for $label after $CAPTURE_RETRIES attempts" >&2
   ab screenshot --full "$file" >/dev/null
   return 0

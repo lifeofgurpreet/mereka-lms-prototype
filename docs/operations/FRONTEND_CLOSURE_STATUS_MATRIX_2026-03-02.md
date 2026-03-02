@@ -80,6 +80,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` (PASS `15 passed`, log: `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`)
   - Latest deterministic capture/runtime rerun (dev):
     - `CAPTURE_RETRIES=1 AGENT_BROWSER_TIMEOUT_SECONDS=30 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` (PASS; screenshots `var/screenshots/dev/20260302T105625Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-20260302T105625Z.log`)
+    - strict readiness mode is now available for release-grade non-blank enforcement: `CAPTURE_STRICT_READY=1 CAPTURE_RETRIES=3 ./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes` (fails instead of fallback when render readiness is not reached).
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` (PASS; log `var/qa/paragon-runtime-dev-20260302T105604Z.log`)
     - `./scripts/qa/verify-studio-authoring-branding.sh dev` (PASS; log `var/qa/studio-authoring-branding-dev-20260302T105604Z.log`)
   - Canonical blocker tracking lane added:
