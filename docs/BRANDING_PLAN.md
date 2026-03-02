@@ -44,7 +44,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - Detailed stabilization log: `docs/operations/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md`.
   - Issue closure matrix: `docs/operations/FRONTEND_CLOSURE_STATUS_MATRIX_2026-03-02.md`.
 - Certificate closure (`#106`):
-  - `./scripts/qa/verify-certificate-branding.sh` passed (`PASS=25 WARN=0 FAIL=0`).
+  - `./scripts/qa/verify-certificate-branding.sh` rerun passed (`PASS=23 WARN=1 FAIL=0`; warning is expected when `frontend-app-profile` source checkout is absent on the runner).
 - Phase 6 decision (`#111`):
   - Slot-expansion lane remains intentionally frozen as a scope decision; runtime checks above are now green on latest rerun.
 - Staging/promotion lane (`#110`):

@@ -63,6 +63,11 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS)
     - `./scripts/qa/verify-a11y-contrast-focus.sh` (PASS, warning pair now enforced and passing at `4.52:1`)
     - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS)
+  - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
+  - Latest #104 consolidation contract reruns:
+    - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)
+    - `./scripts/qa/verify-ci-cd-pipeline.sh --section gitops` (PASS `27/0/0`)
+    - `./scripts/qa/verify-release-automation.sh` (PASS; one expected worktree-mode WARN for dry-run contract checker)
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) now passes notes-root banner and forum health contracts (forum non-prod fallback `/healthz=200`) and still fails on one non-authn runtime blocker (`credentials` `/login`, `/login/edx-oauth2`, `/admin/login` returning `500`), so local login/session runtime validation remains infra-convergence dependent. Equivalent prod credentials checks return `302`, confirming dev-runtime drift.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
   - `verify-auth-surfaces.sh` now emits per-failure `diag{...}` metadata (status/location/content-type/body head) to speed runtime triage without changing pass/fail criteria.
