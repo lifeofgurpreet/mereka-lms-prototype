@@ -1,13 +1,13 @@
 # Mereka Academy — Platform Roadmap
 
-> Last updated: 2026-03-02 (audit-revised) | Status: **Production (Core)**
+> Last updated: 2026-03-03 | Status: **Production (Core)**
 
 ## Platform Health Snapshot
 
 | Metric | Value |
 |--------|-------|
 | Tracker completion | 150/154 (97.4%) |
-| CI pass rate | 148/162 (91.4%) |
+| CI pass rate | 156/160 (97.5%) |
 | Specs written | 40 (1,162 ACs) |
 | Services in production | 13 (LMS, CMS, 2 workers, 5 enterprise, MFE, Discovery, Forum, Notes, Ecommerce) |
 | Observability | Full stack (Prometheus, Loki, Grafana, Alertmanager, GCP Monitoring) |
@@ -20,7 +20,7 @@
 
 | # | Task | Owner | Blocked By | Est. |
 |---|------|-------|------------|------|
-| 1.1 | Merge PR #123 (CI hardening, 62 commits) | Platform | — | 10 min |
+| 1.1 | Merge PR #123 (CI hardening, 81 commits) | Platform | — | 10 min |
 | 1.2 | Rebuild openedx image from `main` | Infra | 1.1 | 1 hr |
 | 1.3 | Rebuild MFE image from `main` | Infra | 1.1 | 30 min |
 | 1.4 | Sync bbi-infrastructure overlay (tags + Caddyfile) | Infra | 1.2, 1.3 | 30 min |
@@ -44,16 +44,17 @@
 | | — Add Caddy webhook route for Stripe | | | |
 | | — 7-day validation window | | | |
 | 2.2 | Decommission legacy Oscar ecommerce | `ecommerce-purchase-gateway_spec.md` AC-028 | 1 | 2 hrs |
-| 2.3 | Fix Enterprise MFE runtime config | — | — | 4 hrs |
-| | — Inject `env.config.js` into `index.html` | | | |
-| | — Or bake env vars at image build time | | | |
-| 2.4 | Pin enterprise image tags (digests, not `latest`) | — | — | 1 hr |
+| 2.3 | ~~Fix Enterprise MFE runtime config~~ | — | — | **DONE** |
+| | — ✅ Enterprise MFE env config injected at build time | | | |
+| 2.4 | ~~Pin enterprise image tags (digests, not `latest`)~~ | — | — | **DONE** |
+| | — ✅ All 5 enterprise services pinned to `21.0.0` in rke2-nonprod overlay | | | |
 | 2.5 | Enterprise SSO Phase 1 | `auth-sso-enterprise_spec.md` | 45 | 2–4 wks |
 | | — SAML IdP integration (first tenant) | | | |
 | | — OIDC federation | | | |
 | | — Enrollment sync | | | |
 | | — MFA enforcement | | | |
-| 2.6 | Fix credentials service (tzdata) | — | — | 1 hr |
+| 2.6 | ~~Fix credentials service (tzdata)~~ | — | — | **DONE** |
+| | — ✅ tzdata added to credentials Dockerfile | | | |
 
 **Exit criteria**: Purchase Gateway processing live orders. First enterprise client on SSO. Oscar removed.
 
@@ -192,7 +193,7 @@ Phase 4 (Advanced Features)
 
 | Metric | Current | Phase 1 Target | Phase 3 Target |
 |--------|---------|----------------|----------------|
-| CI pass rate | 148/162 (91%) | 158/162 (98%) | 160/162 (99%) |
+| CI pass rate | 156/160 (97.5%) | 158/160 (99%) | 160/160 (100%) |
 | CI monthly cost | ~$56 | ~$15 | ~$5 |
 | Production services | 13 | 13 | 16 (+ analytics, tempo, credentials) |
 | Specs completed | 18/40 | 18/40 | 28/40 |

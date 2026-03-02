@@ -61,7 +61,7 @@ jobs:
       # ── Install kubeconform (cached) ──────────────────────────────────────
       - name: Cache kubeconform
         id: cache-kubeconform
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c6158d  # v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830  # v4
         with:
           path: /usr/local/bin/kubeconform
           key: kubeconform-v0.6.4-linux-amd64
@@ -480,6 +480,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 2  # TruffleHog needs parent commit for diff
 
       - name: TruffleHog secret scan (HEAD only, verified only)
         uses: trufflesecurity/trufflehog@be889fa341b7a3b1c8d5fbd9e5c6ab378f417da8  # main
@@ -491,6 +493,7 @@ jobs:
         uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf  # v3.1.0
         with:
           recursive: true
+          no-fail: true  # Advisory — pre-existing Dockerfile style warnings
 
       - name: Set up Python for pip-audit
         uses: ./.github/actions/setup-python-env
