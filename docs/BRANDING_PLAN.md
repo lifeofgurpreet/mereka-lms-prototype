@@ -50,6 +50,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260302T112714Z.diagnostics.tsv`).
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
+    - generated prompt now includes fixed execution/verification/rollback command contract for infra remediation.
     - `.github/workflows/frontend-runtime-qa.yml` now emits `var/qa/frontend-runtime-blocker-infra-prompt.txt` as a runtime QA artifact for direct infra handoff.
     - latest result remains stable and isolated to the known dev credentials runtime blockers (`prod auth-surfaces` passes; `dev auth-surfaces` credentials 500 + credentials cluster timezone/tzdata fail).
   - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
