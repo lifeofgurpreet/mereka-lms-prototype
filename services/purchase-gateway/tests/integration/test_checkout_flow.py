@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
 from app.database import get_db
 from app.main import app
 from app.models.offering import Offering, OfferingType

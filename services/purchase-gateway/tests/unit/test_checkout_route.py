@@ -5,11 +5,12 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.offering import Offering, OfferingType
 from app.models.order import Order, OrderStatus
 from app.routers.checkout import CheckoutRequest, _is_allowed_origin
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -95,8 +96,9 @@ def test_checkout_request_rejects_disallowed_origin():
 @patch("app.routers.checkout.stripe")
 async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mock_db):
     """create_checkout returns 404 when offering does not exist or is inactive."""
-    from app.routers.checkout import create_checkout
     from fastapi import HTTPException
+
+    from app.routers.checkout import create_checkout
 
     mock_db.execute.return_value = _mock_select_result(None)
     mock_settings.STRIPE_SECRET_KEY = "sk_test_xxx"
@@ -130,8 +132,9 @@ async def test_create_checkout_offering_not_found(mock_stripe, mock_settings, mo
 @patch("app.routers.checkout.stripe")
 async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_db):
     """create_checkout returns 403 when offering belongs to a different tenant."""
-    from app.routers.checkout import create_checkout
     from fastapi import HTTPException
+
+    from app.routers.checkout import create_checkout
 
     offering = _make_offering(tenant_id=uuid.UUID(int=99))
     mock_db.execute.return_value = _mock_select_result(offering)
@@ -164,8 +167,9 @@ async def test_create_checkout_tenant_mismatch(mock_stripe, mock_settings, mock_
 async def test_create_checkout_stripe_error_returns_503(mock_stripe, mock_settings, mock_db):
     """create_checkout returns 503 when Stripe raises an error."""
     import stripe as stripe_lib
-    from app.routers.checkout import create_checkout
     from fastapi import HTTPException
+
+    from app.routers.checkout import create_checkout
 
     offering = _make_offering(tenant_id=uuid.UUID(int=0))
     mock_db.execute.return_value = _mock_select_result(offering)
@@ -239,8 +243,9 @@ async def test_create_checkout_happy_path(mock_stripe, mock_settings, mock_db):
 @pytest.mark.asyncio
 async def test_checkout_status_order_not_found(mock_db):
     """checkout_status returns 404 when session_id is unknown."""
-    from app.routers.checkout import checkout_status
     from fastapi import HTTPException
+
+    from app.routers.checkout import checkout_status
 
     mock_db.execute.return_value = _mock_select_result(None)
 

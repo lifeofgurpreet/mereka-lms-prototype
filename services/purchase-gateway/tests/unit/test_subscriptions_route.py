@@ -7,6 +7,10 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from fastapi import HTTPException
+from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.routers.subscriptions import (
     CreateSubscriptionRequest,
@@ -16,9 +20,6 @@ from app.routers.subscriptions import (
     list_subscriptions,
     update_subscription,
 )
-from fastapi import HTTPException
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # ---------------------------------------------------------------------------
 # Fixtures / helpers

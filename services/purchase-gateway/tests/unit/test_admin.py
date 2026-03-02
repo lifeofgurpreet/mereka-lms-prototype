@@ -7,6 +7,10 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from fastapi import HTTPException
+from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.offering import Offering, OfferingType
 from app.models.order import Order, OrderStatus
 from app.routers.admin import (
@@ -18,9 +22,6 @@ from app.routers.admin import (
     list_orders,
     update_offering,
 )
-from fastapi import HTTPException
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # ---------------------------------------------------------------------------
 # Fixtures / helpers

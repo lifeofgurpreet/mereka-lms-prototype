@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.subscription import Subscription, SubscriptionStatus
 from app.services.subscription import (
     handle_invoice_paid,
@@ -13,7 +15,6 @@ from app.services.subscription import (
     handle_subscription_deleted,
     handle_subscription_updated,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture

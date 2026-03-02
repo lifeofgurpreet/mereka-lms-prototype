@@ -5,8 +5,9 @@
 from unittest.mock import patch
 
 import pytest
-from app.auth import require_admin_api_key
 from fastapi import HTTPException
+
+from app.auth import require_admin_api_key
 
 # ---------------------------------------------------------------------------
 # Missing API key → 401
