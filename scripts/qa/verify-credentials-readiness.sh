@@ -565,7 +565,22 @@ PY
       skip_ "Credentials health check skipped (credentials pod not found)"
     fi
 
-    # 10.6 DID document endpoint returns valid JSON
+    ZONEINFO_OK=0
+    # 10.6 Credentials runtime can resolve ZoneInfo('UTC')
+    if [[ -n "$CRED_POD" ]]; then
+      ZONEINFO_RESULT="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
+        python -c "from zoneinfo import ZoneInfo; ZoneInfo('UTC'); print('OK')" 2>&1 || true)"
+      if echo "$ZONEINFO_RESULT" | grep -qx 'OK'; then
+        ZONEINFO_OK=1
+        pass_ "Credentials runtime resolves ZoneInfo('UTC')"
+      else
+        fail_ "Credentials runtime cannot resolve ZoneInfo('UTC') (output: ${ZONEINFO_RESULT})"
+      fi
+    else
+      skip_ "ZoneInfo check skipped (credentials pod not found)"
+    fi
+
+    # 10.7 DID document endpoint returns valid JSON
     if [[ -n "$CRED_POD" ]]; then
       DID_RESPONSE="$(kubectl exec -i "$CRED_POD" -n "$NAMESPACE" -- \
         python - "$CRED_INTERNAL_HOST" <<'PY' || echo "ERROR|0|FAILED"
@@ -595,6 +610,8 @@ PY
       DID_BODY_PREVIEW="$(printf "%s" "$DID_BODY" | tr '\r\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
       if [[ "$DID_MODE" == "OK" ]] && echo "$DID_BODY" | grep -q '"id".*did:web:'; then
         pass_ "DID document endpoint returns valid DID document (Host: ${CRED_INTERNAL_HOST})"
+      elif [[ "$ZONEINFO_OK" -eq 0 ]]; then
+        warn_ "DID endpoint failure appears cascaded from timezone runtime failure (Host: ${CRED_INTERNAL_HOST}; mode=${DID_MODE}; status=${DID_STATUS}; body='${DID_BODY_PREVIEW}')"
       else
         fail_ "DID document endpoint invalid (Host: ${CRED_INTERNAL_HOST}; mode=${DID_MODE}; status=${DID_STATUS}; body='${DID_BODY_PREVIEW}')"
       fi
@@ -602,7 +619,7 @@ PY
       skip_ "DID document check skipped (credentials pod not found)"
     fi
 
-    # 10.7 MFE pod running
+    # 10.8 MFE pod running
     MFE_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=mfe \
       -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
     if [[ -n "$MFE_POD" ]]; then
@@ -611,7 +628,7 @@ PY
       fail_ "No MFE pod found in namespace $NAMESPACE"
     fi
 
-    # 10.8 learner-record dist directory present in MFE pod
+    # 10.9 learner-record dist directory present in MFE pod
     if [[ -n "$MFE_POD" ]]; then
       LR_DIST=$(kubectl exec "$MFE_POD" -n "$NAMESPACE" -- \
         ls /openedx/dist/learner-record/index.html 2>/dev/null || echo "MISSING")
@@ -620,19 +637,6 @@ PY
       else
         pass_ "learner-record MFE dist present in MFE pod"
       fi
-    fi
-
-    # 10.9 Credentials runtime can resolve ZoneInfo('UTC')
-    if [[ -n "$CRED_POD" ]]; then
-      ZONEINFO_RESULT="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
-        python -c "from zoneinfo import ZoneInfo; ZoneInfo('UTC'); print('OK')" 2>&1 || true)"
-      if echo "$ZONEINFO_RESULT" | grep -qx 'OK'; then
-        pass_ "Credentials runtime resolves ZoneInfo('UTC')"
-      else
-        fail_ "Credentials runtime cannot resolve ZoneInfo('UTC') (output: ${ZONEINFO_RESULT})"
-      fi
-    else
-      skip_ "ZoneInfo check skipped (credentials pod not found)"
     fi
 
     # 10.10 Credentials runtime exposes python tzdata package (or equivalent source).
