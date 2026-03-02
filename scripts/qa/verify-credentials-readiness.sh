@@ -498,6 +498,8 @@ if [[ "$CLUSTER" != "true" ]]; then
   skip_ "learner-record route reachable (HTTP 200)"
   skip_ "credentials health endpoint reachable"
   skip_ "DID document endpoint reachable"
+  skip_ "credentials runtime ZoneInfo('UTC') check"
+  skip_ "credentials runtime python tzdata package check"
 else
   NAMESPACE="mereka-lms"
 
@@ -581,6 +583,32 @@ else
       else
         pass_ "learner-record MFE dist present in MFE pod"
       fi
+    fi
+
+    # 10.9 Credentials runtime can resolve ZoneInfo('UTC')
+    if [[ -n "$CRED_POD" ]]; then
+      ZONEINFO_RESULT="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
+        python -c "from zoneinfo import ZoneInfo; ZoneInfo('UTC'); print('OK')" 2>&1 || true)"
+      if echo "$ZONEINFO_RESULT" | grep -qx 'OK'; then
+        pass_ "Credentials runtime resolves ZoneInfo('UTC')"
+      else
+        fail_ "Credentials runtime cannot resolve ZoneInfo('UTC') (output: ${ZONEINFO_RESULT})"
+      fi
+    else
+      skip_ "ZoneInfo check skipped (credentials pod not found)"
+    fi
+
+    # 10.10 Credentials runtime exposes python tzdata package (or equivalent source).
+    if [[ -n "$CRED_POD" ]]; then
+      TZDATA_RESULT="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
+        python -c "import importlib.util; print('yes' if importlib.util.find_spec('tzdata') else 'no')" 2>/dev/null || echo "no")"
+      if [[ "$TZDATA_RESULT" == "yes" ]]; then
+        pass_ "Credentials runtime has python tzdata package"
+      else
+        warn_ "Credentials runtime python tzdata package not found (acceptable if system zoneinfo is present and ZoneInfo check passed)"
+      fi
+    else
+      skip_ "tzdata package check skipped (credentials pod not found)"
     fi
   fi
 fi
