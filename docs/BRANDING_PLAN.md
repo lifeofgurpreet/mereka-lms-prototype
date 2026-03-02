@@ -27,9 +27,11 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - Runtime evidence (`#105`):
   - Strict rerun completed with deterministic sweep summary: `var/qa/frontend-stability-sweep-20260302T040727Z.summary.log`.
   - Screenshot runner now supports focused closure capture mode: `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`.
-  - Latest focused closure screenshot set: `var/screenshots/dev/20260302T052543Z/` with probe summary `capture-summary.tsv` (authn/account/learning/learner-dashboard + Studio home).
+  - Latest focused closure screenshot set: `var/screenshots/dev/20260302T054228Z/` with probe summary `capture-summary.tsv` (authn/account/learning/learner-dashboard + Studio home).
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`).
   - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun.
+  - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` still reports non-authn blockers (`credentials` 500, `notes` mismatch, `forum/heartbeat` 404).
+  - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
   - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`).
   - `./scripts/qa/verify-a11y-contrast-focus.sh` passed (`exit=0`) with documented non-blocking warnings.
@@ -176,7 +178,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 - [x] npm-start MFE smoke tests — `verify-npm-start-mfe-smoke.sh` (authn, learning, account, profile with screenshot capture).
 - [x] Accessibility scan (contrast, focus order) on key pages. Current gates pass (`verify-a11y-contrast-focus.sh`, `verify-wcag-contrast-v2.sh`) with non-blocking documented warnings.
 - [x] Performance spot-check — runtime theme preflight checks built into both smoke scripts (PARAGON_THEME_URLS verification, theme-mode detection).
-- [x] Capture deterministic screenshot evidence for closure routes. Latest set: `var/screenshots/dev/20260302T052543Z/` (`./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`).
+- [x] Capture deterministic screenshot evidence for closure routes. Latest set: `var/screenshots/dev/20260302T054228Z/` (`./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`).
 - [x] Publish implementation notes/screenshots in `docs/BRANDING.md`.
 - [x] Update README/AGENTS with quick branding maintenance instructions.
 - [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
