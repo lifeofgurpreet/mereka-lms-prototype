@@ -74,6 +74,7 @@ See [`ECOMMERCE_OAUTH_TROUBLESHOOTING.md`](ECOMMERCE_OAUTH_TROUBLESHOOTING.md) f
 **Verification commands**:
 ```bash
 ./scripts/qa/verify-auth-surfaces.sh dev
+./scripts/qa/verify-credentials-readiness.sh --cluster
 curl -I https://credentials.academyv2.mereka.dev/login/
 curl -I https://credentials.academyv2.mereka.dev/login/edx-oauth2/
 kubectl -n mereka-lms logs deploy/credentials --tail=200 | rg -n "ZoneInfoNotFoundError|tzdata|UTC"
@@ -82,6 +83,11 @@ kubectl -n mereka-lms exec "$POD" -- sh -lc "ls -l /usr/share/zoneinfo/UTC || tr
 kubectl -n mereka-lms exec "$POD" -- python -c "import zoneinfo; print(zoneinfo.ZoneInfo('UTC'))"
 kubectl -n mereka-lms exec "$POD" -- python -m pip show tzdata || true
 ```
+
+**Current canonical gate signal (2026-03-02)**:
+- `./scripts/qa/verify-credentials-readiness.sh --cluster` => `PASS=54 FAIL=1 SKIP=0`
+- Single fail is timezone runtime (`ZoneInfo('UTC')` + missing `tzdata`).
+- DID endpoint instability is treated as cascaded warning while timezone is broken, and becomes fail-only after timezone is healthy.
 
 **Expected healthy behavior**:
 - `/login/` -> `302` to `/login/edx-oauth2/`
@@ -102,6 +108,7 @@ kubectl -n mereka-lms exec "$POD" -- python -m pip show tzdata || true
 
 **Notes**:
 - `scripts/qa/verify-auth-surfaces.sh` now prints `diag{...}` metadata on failures (status/location/content-type/body snippet) to speed runtime triage.
+- `scripts/qa/verify-credentials-readiness.sh --cluster` now emits deterministic in-pod Host-aware probe diagnostics and canonical root-cause gating.
 - Production credentials currently returns expected `302` redirects; this has been observed as a dev-specific runtime drift.
 
 ## Cloud IPs in Local Config
