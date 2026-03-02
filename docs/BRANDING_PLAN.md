@@ -55,7 +55,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260302T115917Z.diagnostics.tsv`).
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
-    - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt`.
+    - canonical file output mode: `make qa-runtime-blocker-infra-prompt OUTPUT_FILE=var/qa/frontend-runtime-blocker-infra-prompt.txt` (markdown mode via `FORMAT=markdown`).
     - default prompt input now resolves via stable latest sweep pointers (`frontend-runtime-blocker-sweep-latest-{both,dev,prod}.summary.json`).
     - generated prompt now includes fixed execution/verification/rollback command contract for infra remediation.
     - canonical concise status command: `make qa-runtime-blocker-status` (or `OUTPUT_FILE=var/qa/frontend-runtime-blocker-status.txt`; markdown mode via `FORMAT=markdown`).
