@@ -9,7 +9,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 |---|---|---|
 | `#103` Frontend phase handover + closure epic | CLOSED | Final handover update posted (`issuecomment-3981836140`) with runtime proofs, residual risks, rollback path |
 | `#104` CI ceremony reduction + workflow consolidation | CLOSED | `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7` |
-| `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest artifacts `var/screenshots/dev/20260302T060833Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`) |
+| `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest artifacts `var/screenshots/dev/20260302T061514Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`) |
 | `#106` PDF certificate branding closure | CLOSED | `verify-certificate-branding.sh` PASS; issue closure evidence on thread |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | CLOSED | DOM audit rerun PASS after stability hardening (`issuecomment-3981799304`) |
 | `#108` Accessibility closure (contrast + focus) | CLOSED | `verify-a11y-contrast-focus.sh` + `verify-wcag-contrast-v2.sh` PASS |
@@ -53,7 +53,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
-  - Latest capture artifact set: `var/screenshots/dev/20260302T060833Z/` (`capture-summary.tsv` now includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format per route; confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
+  - Latest capture artifact set: `var/screenshots/dev/20260302T061514Z/` (`capture-summary.tsv` now includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format per route, with normalized unquoted probe values for deterministic parsing; confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
   - Latest Phase 7 + a11y sweep on dev:
     - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260302T054715Z.log`)
     - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS)

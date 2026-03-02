@@ -206,6 +206,12 @@ probe_me_status() {
   )"
   probe="${probe//$'\t'/ }"
   probe="${probe//$'\n'/ }"
+  if [[ "$probe" == \"*\" && "$probe" == *\" ]]; then
+    probe="${probe:1:${#probe}-2}"
+  fi
+  if [[ "$probe" == \'*\' && "$probe" == *\' ]]; then
+    probe="${probe:1:${#probe}-2}"
+  fi
   if [[ -z "${probe:-}" ]]; then
     echo "na|na"
     return 0
@@ -238,6 +244,12 @@ probe_login_refresh_status() {
   )"
   probe="${probe//$'\t'/ }"
   probe="${probe//$'\n'/ }"
+  if [[ "$probe" == \"*\" && "$probe" == *\" ]]; then
+    probe="${probe:1:${#probe}-2}"
+  fi
+  if [[ "$probe" == \'*\' && "$probe" == *\' ]]; then
+    probe="${probe:1:${#probe}-2}"
+  fi
   if [[ -z "${probe:-}" ]]; then
     echo "GET:na,POST:na"
     return 0
