@@ -42,6 +42,10 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - capture wrapper now strips daemon-warning stdout noise so `capture-summary.tsv` remains machine-parseable.
     - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-enable insecure TLS only for dev checks (configurable overrides), removing self-signed cert false failures.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
+  - Canonical blocker sweep lane added for repeated dev tracking:
+    - `make qa-frontend-runtime-blocker-sweep-dev`
+    - latest summary: `var/qa/frontend-runtime-blocker-sweep-dev-20260302T111043Z.summary.log`
+    - latest result remains stable and isolated to the known credentials runtime blockers (`auth-surfaces` credentials 500 + credentials cluster timezone/tzdata fail).
   - Auth-surface checker is now non-prod TLS tolerant (`-k` for `dev`/`staging`) to prevent self-signed certificate noise from masking real auth/runtime failures.
   - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
   - Repo-side remediation is now in place: `infrastructure/tutor/plugins/mereka_lms.py` credentials Docker hook installs `tzdata>=2024.1` alongside cryptography; readiness contract updated in `scripts/qa/verify-credentials-readiness.sh` and rerun offline PASS (`PASS=48 FAIL=0 SKIP=9`).

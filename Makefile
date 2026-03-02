@@ -1,4 +1,4 @@
-.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
+.PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-frontend-runtime-blocker-sweep qa-frontend-runtime-blocker-sweep-dev qa-frontend-runtime-blocker-sweep-prod qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure qa-frontend-closure-prod qa-frontend-closure-dev qa-frontend-closure-prod-screenshots qa-frontend-closure-prod-screenshots-mfe qa-frontend-closure-dev-screenshots qa-frontend-closure-dev-screenshots-mfe qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -173,6 +173,24 @@ qa-frontend-runtime-qa-dev: ## Run runtime frontend QA tranche (dev: cross-brows
 	$(MAKE) qa-cross-browser-dev
 	$(MAKE) qa-a11y-dev-hybrid
 	$(MAKE) qa-performance-dev
+
+qa-frontend-runtime-blocker-sweep: ## Run canonical frontend runtime blocker sweep (set QA_ENV=dev|prod; default dev)
+	@if [ -z "$(QA_ENV)" ]; then \
+		QA_ENV=dev; \
+	else \
+		QA_ENV="$(QA_ENV)"; \
+	fi; \
+	if [ "$$QA_ENV" != "dev" ] && [ "$$QA_ENV" != "prod" ]; then \
+		echo "ERROR: QA_ENV must be dev or prod (got '$$QA_ENV')"; \
+		exit 2; \
+	fi; \
+	./scripts/qa/run-frontend-runtime-blocker-sweep.sh --env "$$QA_ENV"
+
+qa-frontend-runtime-blocker-sweep-dev: ## Run canonical frontend runtime blocker sweep (dev)
+	$(MAKE) qa-frontend-runtime-blocker-sweep QA_ENV=dev
+
+qa-frontend-runtime-blocker-sweep-prod: ## Run canonical frontend runtime blocker sweep (prod)
+	$(MAKE) qa-frontend-runtime-blocker-sweep QA_ENV=prod
 
 qa-npm-start-smoke-local: ## Run local npm-start MFE smoke (authn, learning, account, profile)
 	./scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers
