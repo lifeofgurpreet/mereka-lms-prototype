@@ -235,6 +235,20 @@ def wait_for_app_return(page) -> None:
             raise
     fail(f"post_callback navigation failed after retries: {last_exc}", page=page)
 
+def probe_login_refresh_status(request_context, app_base_url: str) -> str:
+    endpoint = f"{app_base_url.rstrip('/')}/login_refresh"
+    probes = []
+    for method in ("GET", "POST"):
+        try:
+            if method == "GET":
+                resp = request_context.get(endpoint, fail_on_status_code=False)
+            else:
+                resp = request_context.post(endpoint, fail_on_status_code=False)
+            probes.append(f"{method}:{resp.status}")
+        except Exception:
+            probes.append(f"{method}:err")
+    return ",".join(probes)
+
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     context = browser.new_context(ignore_https_errors=False)
@@ -463,9 +477,10 @@ with sync_playwright() as p:
                 except PWTimeout:
                     pass
             if "/authn/login" in (page.url or ""):
+                refresh_probe = probe_login_refresh_status(context.request, f"https://{mfe_domain}")
                 fail(
                     f"local_authn_submit_still_on_login url={page.url} "
-                    "(credentials rejected or session cookie not set)",
+                    f"(login_refresh_probe={refresh_probe}; credentials rejected or session cookie not set)",
                     page=page,
                 )
             assert_not_auth_error_page(page, "local_authn_submitted")
@@ -475,7 +490,12 @@ with sync_playwright() as p:
         me_status = me_resp.status
         me_body = me_resp.text() or ""
         if me_status != 200:
-            fail(f"/api/user/v1/me status={me_status} (expected 200) base={session_api_base}", page=page)
+            refresh_probe = probe_login_refresh_status(context.request, session_api_base)
+            fail(
+                f"/api/user/v1/me status={me_status} (expected 200) "
+                f"base={session_api_base} login_refresh_probe={refresh_probe}",
+                page=page,
+            )
         if "username" not in me_body:
             fail("/api/user/v1/me response missing username marker", page=page)
 
@@ -485,9 +505,10 @@ with sync_playwright() as p:
             page.goto(home_mfe_url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_load_state("domcontentloaded", timeout=60000)
             if "/authn/login" in (page.url or ""):
+                refresh_probe = probe_login_refresh_status(context.request, f"https://{mfe_domain}")
                 fail(
                     f"local_home_redirected_to_authn_login url={page.url} "
-                    "(login seemed successful but session did not persist)",
+                    f"(login_refresh_probe={refresh_probe}; login seemed successful but session did not persist)",
                     page=page,
                 )
             assert_not_auth_error_page(page, "local_home_navigation")
@@ -497,9 +518,10 @@ with sync_playwright() as p:
             page.goto(sso_mfe_learner_dashboard_url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_load_state("domcontentloaded", timeout=60000)
             if "/authn/login" in (page.url or ""):
+                refresh_probe = probe_login_refresh_status(context.request, f"https://{mfe_domain}")
                 fail(
                     f"local_learner_dashboard_redirected_to_authn_login url={page.url} "
-                    "(likely login_refresh 401 / cookie domain drift)",
+                    f"(login_refresh_probe={refresh_probe}; likely cookie domain/session drift)",
                     page=page,
                 )
             assert_not_auth_error_page(page, "local_mfe_learner_dashboard")
@@ -575,9 +597,10 @@ with sync_playwright() as p:
         page.goto(sso_mfe_learner_dashboard_url, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_load_state("domcontentloaded", timeout=60000)
         if "/authn/login" in (page.url or ""):
+            refresh_probe = probe_login_refresh_status(context.request, f"https://{mfe_domain}")
             fail(
                 f"mfe_learner_dashboard_redirected_to_authn_login url={page.url} "
-                "(likely login_refresh 401 / cookie or reverse-proxy drift)",
+                f"(login_refresh_probe={refresh_probe}; likely cookie or reverse-proxy drift)",
                 page=page,
             )
         assert_not_auth_error_page(page, "mfe_learner_dashboard")
