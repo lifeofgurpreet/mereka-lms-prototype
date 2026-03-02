@@ -538,29 +538,33 @@ else
       fail_ "Credentials Service endpoints are empty — Service cannot route traffic"
     fi
 
+    CRED_INTERNAL_HOST="${CREDENTIALS_INTERNAL_HOST_HEADER:-credentials.academyv2.mereka.io}"
+
     # 10.5 Credentials health endpoint reachable
-    if command -v curl &>/dev/null && [[ -n "$CRED_POD" ]]; then
-      HEALTH_STATUS=$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
-        wget -qO- http://localhost:8000/health/ 2>/dev/null | head -1 || echo "FAILED")
-      if echo "$HEALTH_STATUS" | grep -qi 'ok\|healthy\|{'; then
-        pass_ "Credentials health endpoint responds OK"
+    if [[ -n "$CRED_POD" ]]; then
+      HEALTH_STATUS="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
+        python -c "import sys, urllib.request; host=sys.argv[1]; req=urllib.request.Request('http://127.0.0.1:8000/health/', headers={'Host': host}); print(urllib.request.urlopen(req, timeout=10).read().decode('utf-8', errors='replace')[:500])" "$CRED_INTERNAL_HOST" 2>/dev/null || echo "FAILED"
+)"
+      if echo "$HEALTH_STATUS" | grep -qi '"overall_status"[[:space:]]*:[[:space:]]*"OK"\|ok\|healthy'; then
+        pass_ "Credentials health endpoint responds OK (Host: ${CRED_INTERNAL_HOST})"
       else
-        fail_ "Credentials health endpoint did not return healthy response"
+        fail_ "Credentials health endpoint did not return healthy response (Host: ${CRED_INTERNAL_HOST})"
       fi
     else
-      skip_ "Credentials health check skipped (no curl or pod not found)"
+      skip_ "Credentials health check skipped (credentials pod not found)"
     fi
 
     # 10.6 DID document endpoint returns valid JSON
     if [[ -n "$CRED_POD" ]]; then
-      DID_RESPONSE=$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
-        wget -qO- 'http://localhost:8000/.well-known/did.json' 2>/dev/null || echo "FAILED")
+      DID_RESPONSE="$(kubectl exec "$CRED_POD" -n "$NAMESPACE" -- \
+        python -c "import sys, urllib.request; host=sys.argv[1]; req=urllib.request.Request('http://127.0.0.1:8000/.well-known/did.json', headers={'Host': host}); print(urllib.request.urlopen(req, timeout=10).read().decode('utf-8', errors='replace')[:1000])" "$CRED_INTERNAL_HOST" 2>/dev/null || echo "FAILED"
+)"
       if echo "$DID_RESPONSE" | grep -q '"id".*did:web:'; then
-        pass_ "DID document endpoint returns valid DID document"
+        pass_ "DID document endpoint returns valid DID document (Host: ${CRED_INTERNAL_HOST})"
       elif echo "$DID_RESPONSE" | grep -qi 'error\|FAILED'; then
-        fail_ "DID document endpoint returned error (VC signing key may be missing)"
+        fail_ "DID document endpoint returned error (Host: ${CRED_INTERNAL_HOST}; VC signing key may be missing)"
       else
-        fail_ "DID document endpoint did not return expected did:web document"
+        fail_ "DID document endpoint did not return expected did:web document (Host: ${CRED_INTERNAL_HOST})"
       fi
     else
       skip_ "DID document check skipped (credentials pod not found)"
