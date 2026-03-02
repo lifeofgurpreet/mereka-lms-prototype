@@ -51,5 +51,11 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
   - Latest capture artifact set: `var/screenshots/dev/20260302T054228Z/` (`capture-summary.tsv` confirms deterministic non-blank renders for authn/login + studio, and unauthenticated redirects for account/learner-dashboard).
+  - Latest Phase 7 + a11y sweep on dev:
+    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260302T054715Z.log`)
+    - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS)
+    - `./scripts/qa/verify-a11y-contrast-focus.sh` (PASS, warning pair now enforced and passing at `4.52:1`)
+    - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS)
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) still fails outside authn lane (`credentials` 500, `notes` banner mismatch, `forum/heartbeat` 404), so local login/session runtime validation remains infra-convergence dependent.
+  - Credentialed canary blocker: local/SSO canary env credentials are not available in this execution environment (`SSO_CANARY_*` and `LOCAL_CANARY_*` currently unset), so full authenticated local-login replay is pending secrets injection.
   - Follow-on #104 reduction matrix for canonical migration path and projected deltas: `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md`.
