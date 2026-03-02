@@ -12,6 +12,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 PASS=0
 FAIL=0
@@ -23,11 +24,29 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN="$PLUGIN_MAIN"
 REGISTER="$REPO_ROOT/docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
 EXCEPTIONS="$REPO_ROOT/docs/operations/footer-slot-exceptions.md"
 ENTERPRISE_ENV="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 echo "========================================"
 echo "MFE Footer Fallback Verification"

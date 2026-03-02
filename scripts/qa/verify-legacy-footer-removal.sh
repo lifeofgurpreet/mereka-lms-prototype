@@ -7,7 +7,7 @@
 # AC-UI-401: No active (uncommented) sed or string-rewrite targeting footer HTML
 #            structure in infrastructure/tutor/apply-patches.sh. The MIGRATED-TO-SLOT
 #            annotations from 2dcy.6 must now be fully disabled.
-# AC-UI-402: infrastructure/tutor/plugins/mereka_lms.py has footer_slot configuration
+# AC-UI-402: infrastructure/tutor/plugins/mereka_lms*.py has footer_slot configuration
 #            via PLUGIN_SLOTS (no fallback flag — slot is the only path).
 # AC-UI-403: MFE config (authn, dashboard, learning) env.config.jsx coverage exists
 #            via slot mechanism in the plugin.
@@ -24,11 +24,30 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_FILE="$PLUGIN_MAIN"
 OPS_DOC="$REPO_ROOT/docs/operations/LEGACY_FOOTER_REMOVAL.md"
 EVIDENCE_FILE="$REPO_ROOT/docs/operations/evidence/footer-migration-diff.md"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -342,8 +361,8 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo "Remediation:"
   echo "  AC-UI-401: Comment out the 'updated = updated.replace(\"RenderWidget: <Footer />\"...' line"
   echo "             in infrastructure/tutor/apply-patches.sh"
-  echo "  AC-UI-402: Ensure footer_slot PLUGIN_SLOTS.add_item is present in mereka_lms.py"
-  echo "  AC-UI-403: Ensure mfe-env-config patch and frontend-plugin-framework are in mereka_lms.py"
+  echo "  AC-UI-402: Ensure footer_slot PLUGIN_SLOTS.add_item is present in plugin contract sources"
+  echo "  AC-UI-403: Ensure mfe-env-config patch and frontend-plugin-framework are in plugin contract sources"
   echo "  AC-UI-404: Create docs/operations/LEGACY_FOOTER_REMOVAL.md with rollback steps"
   echo "  AC-UI-405: Create docs/operations/evidence/footer-migration-diff.md with before/after diff"
   exit 1

@@ -57,7 +57,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN="$PLUGIN_MAIN"
 FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 MEREKA_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
@@ -69,6 +72,22 @@ CMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/footer.h
 CMS_FOOTER_WIDGET="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html"
 ENTERPRISE_ENV="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"
 ENTERPRISE_KUSTOMIZE="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/kustomization.yaml"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 echo "========================================"
 echo "Footer Parity Verifier"
@@ -228,7 +247,7 @@ echo ""
 echo "AC-FTPAR-001: MFE footer component exists with site variants"
 
 if [[ ! -f "$PLUGIN" ]]; then
-  fail "Plugin file missing: infrastructure/tutor/plugins/mereka_lms.py"
+  fail "Plugin contract source missing: $PLUGIN_MAIN"
 else
   pass "Plugin file exists"
 

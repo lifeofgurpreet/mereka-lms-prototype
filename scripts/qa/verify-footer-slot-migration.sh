@@ -5,7 +5,7 @@
 # Footer Slot Migration Contract Verifier
 #
 # Updated for current phase:
-# - Canonical footer implementation is in infrastructure/tutor/plugins/mereka_lms.py
+# - Canonical footer implementation is in infrastructure/tutor/plugins/mereka_lms*.py
 #   via PLUGIN_SLOTS + mfe-env-config runtime definitions.
 # - apply-patches now only runs footer-component asset-copy logic.
 # - CI gate execution is driven by .github/ci-scripts-static.txt.
@@ -13,15 +13,34 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PASS=0
 FAIL=0
 WARN=0
 
-PLUGIN_FILE="${REPO_ROOT}/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_FILE="$PLUGIN_MAIN"
 PATCHES_FILE="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
 FOOTER_PATCH_FILE="${REPO_ROOT}/infrastructure/tutor/patches/footer-component.sh"
 CONTRACT_DOC="${REPO_ROOT}/docs/architecture/FOOTER_SLOT_MIGRATION.md"
 CI_STATIC_FILE="${REPO_ROOT}/.github/ci-scripts-static.txt"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 do_pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
@@ -48,9 +67,9 @@ echo ""
 echo "AC-FTSLOT-002: Canonical Source (mereka_lms.py)"
 
 if [[ -f "${PLUGIN_FILE}" ]]; then
-    do_pass "Plugin file exists: infrastructure/tutor/plugins/mereka_lms.py"
+    do_pass "Plugin contract source exists: $PLUGIN_MAIN"
 else
-    do_fail "Plugin file missing: infrastructure/tutor/plugins/mereka_lms.py"
+    do_fail "Plugin contract source missing: $PLUGIN_MAIN"
 fi
 
 if grep -q "mfe-env-config-runtime-definitions" "${PLUGIN_FILE}"; then

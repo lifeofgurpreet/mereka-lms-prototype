@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `86` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `73` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -89,13 +89,38 @@ Validation after phase 4:
 - `./scripts/qa/verify-mfe-footer-slot.sh` PASS (`29 PASS / 0 FAIL / 0 WARN`)
 - `./scripts/qa/verify-mfe-footer-plugin-slot.sh` PASS (`9 PASS / 0 FAIL / 1 SKIP`)
 
+## Progress Update (Phase 5, footer verifier tranche)
+
+- Extended compatibility-layer adoption to additional footer-focused QA verifiers:
+  - `scripts/qa/verify-footer-parity.sh`
+  - `scripts/qa/verify-footer-slot-migration.sh`
+  - `scripts/qa/verify-footer-variant-matrix.sh`
+  - `scripts/qa/verify-legacy-footer-removal.sh`
+  - `scripts/qa/verify-mfe-footer-slot-migration.sh`
+  - `scripts/qa/verify-mfe-footer-fallbacks.sh`
+- Outcome:
+  - direct path-coupling reduced from `86` to `73`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - pass/fail behavior preserved; one known baseline failure set in legacy-footer-removal remains unchanged and non-regression.
+
+Validation after phase 5:
+- `./scripts/qa/verify-footer-parity.sh` PASS (`PASS=77 FAIL=0 WARN=1 SKIP=1`)
+- `./scripts/qa/verify-footer-slot-migration.sh` PASS (`PASS=30 FAIL=0 WARN=1`)
+- `./scripts/qa/verify-footer-variant-matrix.sh` PASS (`29 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-legacy-footer-removal.sh` baseline FAIL unchanged (`PASS=26 FAIL=3 WARN=3`):
+  - expects literal `"footer_slot"` marker that is not present in canonical plugin source
+  - expects literal `"DIRECT_PLUGIN"` marker that is not present in canonical plugin source
+  - expects legacy apply-patches component marker that current plugin-first path no longer uses
+- `./scripts/qa/verify-mfe-footer-slot-migration.sh` PASS (`PASS=53 FAIL=0 WARN=0`)
+- `./scripts/qa/verify-mfe-footer-fallbacks.sh` PASS (`PASS=14 FAIL=0 WARN=2 SKIP=0`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 

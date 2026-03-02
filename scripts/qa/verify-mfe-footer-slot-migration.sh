@@ -13,6 +13,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -28,10 +29,28 @@ fail() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 
 SCSS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_FILE="$PLUGIN_MAIN"
 PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 BRANDING_DOC="$REPO_ROOT/docs/branding/BRANDING_OPERATING_MODEL.md"
 OPS_DOC="$REPO_ROOT/docs/operations/MFE_FOOTER_SLOT_MIGRATION.md"
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 echo "=== MFE Footer/Slot Migration Verification (bead 2dcy.6) ==="
 echo ""
@@ -361,12 +380,12 @@ if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Remediation:"
   echo "1. Tag all selector blocks in mereka.scss with /* RISK: HIGH/MEDIUM/LOW */"
-  echo "2. Register canonical slots in infrastructure/tutor/plugins/mereka_lms.py"
+  echo "2. Register canonical slots in plugin contract sources"
   echo "   (org.openedx.frontend.layout.footer.v1 and org.openedx.frontend.layout.header_logo.v1)"
   echo "3. Keep apply-patches.sh free of structural footer/layout string rewrites"
   echo "4. Add 'Plugin Slot Migration' section to docs/branding/BRANDING_OPERATING_MODEL.md"
   echo "   documenting canonical slot IDs, fallback/exception paths, and rollback procedure"
-  echo "5. Keep dead authn/dashboard wildcard selectors removed; enforce slot coverage in mereka_lms.py"
+  echo "5. Keep dead authn/dashboard wildcard selectors removed; enforce slot coverage in plugin contract sources"
   exit 1
 fi
 
