@@ -9,7 +9,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 |---|---|---|
 | `#103` Frontend phase handover + closure epic | CLOSED | Final handover update posted (`issuecomment-3981836140`) with runtime proofs, residual risks, rollback path |
 | `#104` CI ceremony reduction + workflow consolidation | CLOSED | `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7` |
-| `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; latest evidence comment `issuecomment-3981768766` |
+| `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest artifacts `var/screenshots/dev/20260302T052543Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`) |
 | `#106` PDF certificate branding closure | CLOSED | `verify-certificate-branding.sh` PASS; issue closure evidence on thread |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | CLOSED | DOM audit rerun PASS after stability hardening (`issuecomment-3981799304`) |
 | `#108` Accessibility closure (contrast + focus) | CLOSED | `verify-a11y-contrast-focus.sh` + `verify-wcag-contrast-v2.sh` PASS |
@@ -42,3 +42,9 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 - “OPEN (BLOCKED BY SIGNAL)” means the issue is execution-ready but deferred by current no-infra/no-GitOps instruction.
 - Once signal is granted, follow `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` and attach promotion + rollback evidence back to `#110`.
+- Latest repo-only stabilization update (while infra sync pending):
+  - Script hardening: `scripts/qa/capture-branding-screenshots.sh` now includes route-aware readiness probes, retry capture logic, `capture-summary.tsv`, and `--core-routes` mode for canonical closure paths.
+  - Runtime proof refresh on dev:
+    - `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`
+    - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
+    - `./scripts/qa/verify-studio-authoring-branding.sh dev`

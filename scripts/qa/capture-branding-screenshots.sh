@@ -18,6 +18,7 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENVIRONMENT=""
 MFE_ONLY=0
+CORE_ROUTES_ONLY=0
 
 usage() {
   cat <<'EOF'
@@ -26,6 +27,8 @@ Usage: capture-branding-screenshots.sh [options]
 Options:
   --env <prod|dev>  Target environment.
   --mfe-only        Capture only MFE routes (authn, dashboard, learning, account).
+  --core-routes     Capture only runtime-closure routes:
+                    authn/login, account, learning, learner-dashboard, studio-home.
   -h, --help        Show this help.
 
 Back-compat:
@@ -43,6 +46,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --mfe-only)
       MFE_ONLY=1
+      shift
+      ;;
+    --core-routes)
+      CORE_ROUTES_ONLY=1
       shift
       ;;
     -h|--help)
@@ -71,6 +78,11 @@ if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   exit 2
 fi
 
+if [[ "$MFE_ONLY" == "1" && "$CORE_ROUTES_ONLY" == "1" ]]; then
+  echo "ERROR: --mfe-only and --core-routes are mutually exclusive" >&2
+  exit 2
+fi
+
 if ! command -v agent-browser >/dev/null 2>&1; then
   echo "agent-browser is required (Codex skill: agent-browser)." >&2
   exit 2
@@ -81,6 +93,7 @@ OUT_DIR="$REPO_ROOT/var/screenshots/${ENVIRONMENT}/${ts}"
 mkdir -p "$OUT_DIR"
 AB_TIMEOUT_SECONDS="${AGENT_BROWSER_TIMEOUT_SECONDS:-45}"
 AB_SESSION="${AGENT_BROWSER_SESSION:-branding-capture-${ts}}"
+CAPTURE_RETRIES="${CAPTURE_RETRIES:-3}"
 export AGENT_BROWSER_SESSION="$AB_SESSION"
 
 ab_run() {
@@ -123,15 +136,26 @@ ab() {
 
 wait_for_rendered_content() {
   local label=$1
+  local target_url=${2:-}
   local max_attempts=20
-  local attempt title text_len current_url
+  local attempt title text_len current_url min_text
+
+  min_text=40
+  case "$label" in
+    studio-home|studio-*)
+      min_text=80
+      ;;
+    mfe-authn-login|mfe-account|mfe-account-settings|mfe-learning|mfe-learner-dashboard|biji-mfe-authn-login|biji-mfe-account)
+      min_text=20
+      ;;
+  esac
 
   for ((attempt = 1; attempt <= max_attempts; attempt++)); do
     title="$(ab get title 2>/dev/null || true)"
     text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
     current_url="$(ab get url 2>/dev/null || true)"
 
-    if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge 40 ]] && [[ -n "${title:-}" ]]; then
+    if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge "$min_text" ]] && [[ -n "${title:-}" ]]; then
       return 0
     fi
 
@@ -141,10 +165,70 @@ wait_for_rendered_content() {
       return 0
     fi
 
+    # Studio/LMS pages can take longer to hydrate after first paint on dev.
+    if [[ "$label" == studio-* || "$label" == lms-* ]]; then
+      if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge 60 ]] && [[ "$current_url" == https://* ]]; then
+        return 0
+      fi
+    fi
+
+    # Target URL resolved and has enough content; accept even if title is delayed.
+    if [[ -n "$target_url" ]] && [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$text_len" -ge "$min_text" ]]; then
+      if [[ "$current_url" == "${target_url}"* || "$current_url" == *"/authn/login"* ]]; then
+        return 0
+      fi
+    fi
+
     sleep 1
   done
 
   echo "WARN: timed out waiting for rendered content ($label)" >&2
+  return 0
+}
+
+capture_route() {
+  local label=$1
+  local url=$2
+  local file=$3
+  local summary_file=$4
+  local attempt current_url title text_len node_count min_nodes
+
+  min_nodes=20
+  case "$label" in
+    mfe-learning)
+      min_nodes=5
+      ;;
+  esac
+
+  for ((attempt = 1; attempt <= CAPTURE_RETRIES; attempt++)); do
+    ab open "$url" >/dev/null
+    ab wait --load networkidle >/dev/null || true
+    wait_for_rendered_content "$label" "$url"
+
+    current_url="$(ab get url 2>/dev/null || true)"
+    title="$(ab get title 2>/dev/null || true)"
+    text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
+    node_count="$(ab eval '(() => document.querySelectorAll("body *").length)()' 2>/dev/null || true)"
+
+    if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$node_count" =~ ^[0-9]+$ ]]; then
+      if [[ "$text_len" -ge 20 ]] && [[ "$node_count" -ge "$min_nodes" ]]; then
+        ab screenshot --full "$file" >/dev/null
+        printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
+        printf "\n" >>"$summary_file"
+        return 0
+      fi
+    fi
+
+    printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
+    printf "\n" >>"$summary_file"
+    if [[ "$attempt" -lt "$CAPTURE_RETRIES" ]]; then
+      echo "WARN: low-content capture probe for $label (attempt $attempt/$CAPTURE_RETRIES), retrying" >&2
+      sleep 2
+    fi
+  done
+
+  echo "WARN: capturing fallback screenshot for $label after $CAPTURE_RETRIES attempts" >&2
+  ab screenshot --full "$file" >/dev/null
   return 0
 }
 
@@ -171,7 +255,15 @@ if [[ "$ENVIRONMENT" == "dev" ]]; then
 fi
 
 declare -a URLS=()
-if [[ "$MFE_ONLY" == "1" ]]; then
+if [[ "$CORE_ROUTES_ONLY" == "1" ]]; then
+  URLS=(
+    "mfe-authn-login|https://${base_mfe}/authn/login"
+    "mfe-learning|https://${base_mfe}/learning/"
+    "mfe-account|https://${base_mfe}/account/"
+    "mfe-learner-dashboard|https://${base_mfe}/learner-dashboard/"
+    "studio-home|https://${base_studio}/"
+  )
+elif [[ "$MFE_ONLY" == "1" ]]; then
   URLS=(
     "mfe-authn-login|https://${base_mfe}/authn/login"
     "mfe-learning|https://${base_mfe}/learning/"
@@ -225,6 +317,8 @@ sanitize() {
 
 echo "Capturing screenshots to: $OUT_DIR (mfe_only=$MFE_ONLY)"
 ab set viewport 1440 900 >/dev/null
+SUMMARY_FILE="$OUT_DIR/capture-summary.tsv"
+echo -e "label\tattempt\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
 
 for entry in "${URLS[@]}"; do
   label="${entry%%|*}"
@@ -232,12 +326,10 @@ for entry in "${URLS[@]}"; do
   file="$OUT_DIR/$(sanitize "$label").png"
 
   echo "- $label: $url"
-  ab open "$url" >/dev/null
-  ab wait --load networkidle >/dev/null || true
-  wait_for_rendered_content "$label"
-  ab screenshot --full "$file" >/dev/null
+  capture_route "$label" "$url" "$file" "$SUMMARY_FILE"
 done
 
 ab close >/dev/null || true
 
 echo "OK"
+echo "Capture summary: $SUMMARY_FILE"
