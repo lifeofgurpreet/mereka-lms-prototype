@@ -24,6 +24,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `b941c66a` — #104 follow-on completion: parameterize canonical `qa-frontend-closure` make lane and keep env-specific targets as delegators
 - `f0d007ec` — docs update (`#105/#104/#110`): record consolidated frontend evidence bundle and align handoff references
 - `d1e28b55` — docs update (handoff): append 2026-03-02 stabilization addendum with current blocker/evidence/start commands
 - `8f05f9d9` — docs update (`#110`): add staging auth-surface pre-signal baseline evidence
