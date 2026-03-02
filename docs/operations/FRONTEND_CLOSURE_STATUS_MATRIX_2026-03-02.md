@@ -93,11 +93,14 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-auth-surfaces-dev-20260302T112113Z.log` (FAIL on credentials login redirects `500`)
       - `var/qa/frontend-runtime-blocker-credentials-dev-20260302T112113Z.log` (FAIL on `ZoneInfo('UTC')` / missing `tzdata`)
     - Latest diagnostics-labeled run:
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112446Z.summary.json`
-      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112446Z.diagnostics.tsv`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112714Z.summary.json`
+      - `var/qa/frontend-runtime-blocker-sweep-both-20260302T112714Z.diagnostics.tsv`
       - diagnosis labels emitted:
         - `auth-surfaces:dev` -> `credentials_dev_login_500`
         - `credentials-readiness:dev:cluster` -> `credentials_timezone_tzdata_missing`
+      - routing metadata emitted per diagnosis:
+        - `owner` (responsible lane)
+        - `next_action` (recommended immediate remediation)
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
     - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)

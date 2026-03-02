@@ -91,9 +91,11 @@ emit_diagnostics() {
   local status="$2"
   local log_file="$3"
   local diagnosis="none"
+  local owner="none"
+  local next_action="none"
 
   if [[ "$status" == "pass" || "$status" == "skip" || -z "$log_file" || ! -f "$log_file" ]]; then
-    printf "%s\t%s\t%s\t%s\n" "$label" "$status" "$diagnosis" "$log_file" >>"$diagnostics_file"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$status" "$diagnosis" "$owner" "$next_action" "$log_file" >>"$diagnostics_file"
     return 0
   fi
 
@@ -101,26 +103,38 @@ emit_diagnostics() {
     auth-surfaces:dev)
       if rg -q "credentials: /login SSO entrypoint.*got code=500|credentials: /login/edx-oauth2.*got code=500" "$log_file"; then
         diagnosis="credentials_dev_login_500"
+        owner="infra-runtime"
+        next_action="rollout_credentials_image_with_tzdata_then_rerun_sweep"
       else
         diagnosis="auth_surfaces_dev_failure_other"
+        owner="platform-auth"
+        next_action="inspect_auth_surfaces_dev_log_and_triage"
       fi
       ;;
     credentials-readiness:dev:cluster)
       if rg -q "ZoneInfoNotFoundError|No module named 'tzdata'|cannot resolve ZoneInfo\\('UTC'\\)" "$log_file"; then
         diagnosis="credentials_timezone_tzdata_missing"
+        owner="infra-runtime"
+        next_action="rollout_credentials_runtime_with_tzdata_and_verify_zoneinfo_utc"
       else
         diagnosis="credentials_cluster_failure_other"
+        owner="infra-runtime"
+        next_action="inspect_credentials_cluster_log_and_triage"
       fi
       ;;
     auth-surfaces:prod)
       diagnosis="auth_surfaces_prod_failure_other"
+      owner="platform-auth"
+      next_action="inspect_auth_surfaces_prod_log_and_triage"
       ;;
     *)
       diagnosis="unknown_failure"
+      owner="triage"
+      next_action="inspect_log_and_classify_failure"
       ;;
   esac
 
-  printf "%s\t%s\t%s\t%s\n" "$label" "$status" "$diagnosis" "$log_file" >>"$diagnostics_file"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$status" "$diagnosis" "$owner" "$next_action" "$log_file" >>"$diagnostics_file"
 }
 
 : >"$summary_log"
@@ -203,12 +217,14 @@ diagnostics = []
 for line in Path(diagnostics_file).read_text().splitlines():
     if not line.strip():
         continue
-    label, status, diagnosis, log_path = (line.split("\t") + ["", "", "", ""])[:4]
+    label, status, diagnosis, owner, next_action, log_path = (line.split("\t") + ["", "", "", "", "", ""])[:6]
     diagnostics.append(
         {
             "label": label,
             "status": status,
             "diagnosis": diagnosis,
+            "owner": owner,
+            "next_action": next_action,
             "log": log_path or None,
         }
     )
