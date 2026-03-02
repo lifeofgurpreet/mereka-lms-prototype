@@ -13,9 +13,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 BUDGET_DOC="$REPO_ROOT/docs/architecture/PERFORMANCE_BUDGETS.md"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
-MFE_PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 
 PASS=0
 FAIL=0
@@ -169,11 +170,15 @@ echo "--- Hardcoded Cache Durations Check ---"
 hardcoded_found=0
 
 # Check Python MFE plugin for hardcoded cache headers
-if [ -f "$MFE_PLUGIN" ]; then
-  if grep -E "Cache-Control.*[0-9]+" "$MFE_PLUGIN" 2>/dev/null | grep -qv "^#"; then
-    do_warn "Found hardcoded cache durations in MFE plugin (prefer Caddyfile config)"
-    hardcoded_found=1
-  fi
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  while IFS= read -r plugin_file; do
+    if grep -E "Cache-Control.*[0-9]+" "$plugin_file" 2>/dev/null | grep -qv "^#"; then
+      do_warn "Found hardcoded cache durations in plugin contract source $(basename "$plugin_file") (prefer Caddyfile config)"
+      hardcoded_found=1
+    fi
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+else
+  do_warn "Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 # Check for hardcoded cache headers in custom Django settings

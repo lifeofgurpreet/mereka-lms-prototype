@@ -4,7 +4,7 @@
 # Verifies that the tutor patches inventory is complete and consistent:
 #   1. The inventory doc exists.
 #   2. Every patch file in patches/ is listed in the inventory.
-#   3. ALREADY_CONVERTED patches have a corresponding ENV_PATCHES hook in mereka_lms.py.
+#   3. ALREADY_CONVERTED patches have a corresponding ENV_PATCHES hook in plugin contract sources.
 #   4. FILESYSTEM patches are still sourced in apply-patches.sh.
 #   5. The plugin file is valid Python.
 #
@@ -15,11 +15,11 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 INVENTORY="$REPO_ROOT/docs/architecture/TUTOR_PATCHES_INVENTORY.md"
 PATCHES_DIR="$REPO_ROOT/infrastructure/tutor/patches"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 
 pass_count=0
 fail_count=0
@@ -52,7 +52,7 @@ done < <(find "$PATCHES_DIR" -maxdepth 1 -name "*.sh" -print0 | sort -z)
 
 ###############################################################################
 # Check 3: REMOVED patches must NOT exist on disk but their hooks must
-# still be present in mereka_lms.py (functionality was migrated).
+# still be present in plugin contract sources (functionality was migrated).
 ###############################################################################
 declare -A REMOVED_CHECKS
 REMOVED_CHECKS["mysql-auth.sh"]="mysql-docker-compose"
@@ -109,7 +109,7 @@ while IFS= read -r plugin_file; do
 done < <(mereka_plugin_contract_files "$REPO_ROOT")
 
 if (( plugin_files_checked == 0 )); then
-  _fail "No plugin contract sources found (expected infrastructure/tutor/plugins/mereka_lms.py)"
+  _fail "No plugin contract sources found (expected at least $PLUGIN_MAIN)"
 fi
 
 ###############################################################################

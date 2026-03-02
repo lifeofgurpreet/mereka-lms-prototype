@@ -5,6 +5,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 PASS=0; FAIL=0; WARN=0
@@ -41,25 +43,23 @@ fi
 # ---------------------------------------------------------------------------
 # Check 2: Footer slot is actively wired (ACTIVE status)
 # ---------------------------------------------------------------------------
-PLUGIN_FILE="infrastructure/tutor/plugins/mereka_lms.py"
-
-if [[ ! -f "$PLUGIN_FILE" ]]; then
-  fail "mereka_lms.py plugin not found at $PLUGIN_FILE"
+if ! mereka_plugin_has_any "$REPO_ROOT"; then
+  fail "Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 else
-  pass "mereka_lms.py plugin exists"
+  pass "Plugin contract sources exist"
 
   # Check for footer slot registration (either full slot ID or Python variable name)
-  if grep -qE "org\.openedx\.frontend\.layout\.footer\.v1|footer_slot" "$PLUGIN_FILE"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" "org\.openedx\.frontend\.layout\.footer\.v1|footer_slot"; then
     pass "Footer slot (org.openedx.frontend.layout.footer.v1 / footer_slot) registered in plugin"
   else
-    fail "Footer slot not registered in $PLUGIN_FILE"
+    fail "Footer slot not registered in plugin contract sources"
   fi
 
   # Check for MerekaFooter component reference
-  if grep -q "MerekaFooter" "$PLUGIN_FILE"; then
+  if mereka_plugin_has_fixed "$REPO_ROOT" "MerekaFooter"; then
     pass "MerekaFooter component referenced in plugin"
   else
-    fail "MerekaFooter component not found in $PLUGIN_FILE"
+    fail "MerekaFooter component not found in plugin contract sources"
   fi
 fi
 

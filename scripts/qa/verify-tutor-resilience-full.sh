@@ -14,6 +14,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "${SCRIPT_DIR}/../shared/config.sh"
+source "${SCRIPT_DIR}/../shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 # Colors
 RED='\033[0;31m'
@@ -35,6 +37,16 @@ fi
 info() { echo -e "${GREEN}[INFO]${NC} $*"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
+
+plugin_has_fixed() { mereka_plugin_has_fixed "$REPO_ROOT" "$1"; }
+
+plugin_contract_python_valid() {
+  local plugin_file
+  while IFS= read -r plugin_file; do
+    [[ -f "$plugin_file" ]] || continue
+    python3 -m py_compile "$plugin_file"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+}
 
 check() {
   local ac_id="$1"
@@ -67,19 +79,18 @@ echo ""
 # AC-TCR-001: Plugin installs and shows in tutor plugins list
 # ==============================================================================
 echo "--- AC-TCR-001: Plugin Installation ---"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
-check "AC-TCR-001" "Plugin file exists at infrastructure/tutor/plugins/mereka_lms.py" \
-  test -f "$PLUGIN_FILE"
+check "AC-TCR-001" "Plugin contract source exists (expected at least $PLUGIN_MAIN)" \
+  mereka_plugin_has_any "$REPO_ROOT"
 
-if [[ -f "$PLUGIN_FILE" ]]; then
-  check "AC-TCR-001" "Plugin file is valid Python syntax" \
-    python3 -m py_compile "$PLUGIN_FILE"
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  check "AC-TCR-001" "Plugin contract sources are valid Python syntax" \
+    plugin_contract_python_valid
 
   check "AC-TCR-001" "Plugin defines MEREKA_LMS_VERSION config default" \
-    grep -q "MEREKA_LMS_VERSION" "$PLUGIN_FILE"
+    plugin_has_fixed "MEREKA_LMS_VERSION"
 
   check "AC-TCR-001" "Plugin defines hooks module import" \
-    grep -q "from tutor import hooks" "$PLUGIN_FILE"
+    plugin_has_fixed "from tutor import hooks"
 else
   FAIL=$((FAIL+3))
 fi
@@ -90,16 +101,16 @@ echo ""
 # ==============================================================================
 echo "--- AC-TCR-002: Plugin Multi-Site Patches ---"
 check "AC-TCR-002" "Plugin has openedx-lms-production-settings hook" \
-  grep -q "openedx-lms-production-settings" "$PLUGIN_FILE"
+  plugin_has_fixed "openedx-lms-production-settings"
 
 check "AC-TCR-002" "Plugin adds academy.biji-biji.com to ALLOWED_HOSTS" \
-  grep -q "academy.biji-biji.com" "$PLUGIN_FILE"
+  plugin_has_fixed "academy.biji-biji.com"
 
 check "AC-TCR-002" "Plugin adds skillourfuture.academy.mereka.io to ALLOWED_HOSTS" \
-  grep -q "skillourfuture.academy.mereka.io" "$PLUGIN_FILE"
+  plugin_has_fixed "skillourfuture.academy.mereka.io"
 
 check "AC-TCR-002" "Plugin configures CSRF_TRUSTED_ORIGINS" \
-  grep -q "CSRF_TRUSTED_ORIGINS" "$PLUGIN_FILE"
+  plugin_has_fixed "CSRF_TRUSTED_ORIGINS"
 echo ""
 
 # ==============================================================================
@@ -107,10 +118,10 @@ echo ""
 # ==============================================================================
 echo "--- AC-TCR-003: Plugin MySQL Patches ---"
 check "AC-TCR-003" "Plugin has mysql-docker-compose hook" \
-  grep -q "mysql-docker-compose" "$PLUGIN_FILE"
+  plugin_has_fixed "mysql-docker-compose"
 
 check "AC-TCR-003" "Plugin sets mysql_native_password authentication" \
-  grep -q "mysql_native_password" "$PLUGIN_FILE"
+  plugin_has_fixed "mysql_native_password"
 echo ""
 
 # ==============================================================================

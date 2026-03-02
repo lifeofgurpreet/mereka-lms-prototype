@@ -7,15 +7,16 @@ set -euo pipefail
 # Bead 2dcy.2 — Migrate brittle MFE selector customizations to plugin slots
 #
 # AC-FRONT-021: Remaining HIGH-risk selectors are intentionally minimal and dead selectors stay removed
-# AC-FRONT-022: Plugin slot registrations exist in mereka_lms.py
+# AC-FRONT-022: Plugin slot registrations exist in plugin contract sources
 # AC-FRONT-023: Exception documentation file exists at docs/operations/MFE_SELECTOR_EXCEPTIONS.md
 # AC-FRONT-024: No active `updated.replace("RenderWidget` string surgery in apply-patches.sh
 # AC-FRONT-025: Evidence file exists at docs/operations/evidence/selector-to-slot-migration-diff.md
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 SCSS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 EXCEPTIONS_DOC="$REPO_ROOT/docs/operations/MFE_SELECTOR_EXCEPTIONS.md"
 EVIDENCE_FILE="$REPO_ROOT/docs/operations/evidence/selector-to-slot-migration-diff.md"
@@ -85,14 +86,14 @@ fi
 # ---------------------------------------------------------------------------
 # AC-FRONT-022: Plugin slots are wired using canonical slot IDs
 # ---------------------------------------------------------------------------
-if [[ -f "$PLUGIN_FILE" ]]; then
-  SLOT_COUNT=$(grep -Eo 'PLUGIN_SLOTS\.add_items|PLUGIN_SLOTS\.add_item' "$PLUGIN_FILE" | wc -l | tr -d ' ' || true)
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  SLOT_COUNT=$(mereka_plugin_count_regex "$REPO_ROOT" 'PLUGIN_SLOTS\.add_items|PLUGIN_SLOTS\.add_item')
   SLOT_COUNT=${SLOT_COUNT:-0}
   echo "  PLUGIN_SLOTS registration calls: $SLOT_COUNT"
   if [[ "$SLOT_COUNT" -ge 1 ]]; then
-    pass_check "AC-FRONT-022: Found slot registration call(s) in mereka_lms.py ($SLOT_COUNT)"
+    pass_check "AC-FRONT-022: Found slot registration call(s) in plugin contract sources ($SLOT_COUNT)"
   else
-    fail_check "AC-FRONT-022: No PLUGIN_SLOTS registration calls found in mereka_lms.py"
+    fail_check "AC-FRONT-022: No PLUGIN_SLOTS registration calls found in plugin contract sources"
   fi
 
   # Verify required canonical slots are registered
@@ -144,14 +145,14 @@ if [[ -f "$PLUGIN_FILE" ]]; then
     "org.openedx.frontend.account.id_verification_page.v1"
   )
   for slot in "${required_slots[@]}"; do
-    if grep -q "\"$slot\"" "$PLUGIN_FILE"; then
+    if mereka_plugin_has_fixed "$REPO_ROOT" "\"$slot\""; then
       pass_check "AC-FRONT-022: slot '$slot' is registered"
     else
-      fail_check "AC-FRONT-022: slot '$slot' is missing from mereka_lms.py"
+      fail_check "AC-FRONT-022: slot '$slot' is missing from plugin contract sources"
     fi
   done
 else
-  fail_check "AC-FRONT-022: mereka_lms.py not found at $PLUGIN_FILE"
+  fail_check "AC-FRONT-022: plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 # ---------------------------------------------------------------------------

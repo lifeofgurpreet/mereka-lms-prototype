@@ -20,6 +20,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 LIVE_MODE="${VISUAL_PARITY_LIVE:-0}"
 
@@ -55,7 +57,6 @@ MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
 COMMON_FONTS_DIR="$THEME_DIR/common/static/fonts"
 MFE_FONTS_DIR="$THEME_DIR/mfe/fonts"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 
 # ===========================================================================
@@ -273,27 +274,21 @@ else
 fi
 
 # 4d. MerekaFooter wiring must be present (plugin-slot canonical path).
-if [[ -f "$PLUGIN_FILE" ]]; then
-  if grep -q "MerekaFooter" "$PLUGIN_FILE"; then
-    do_pass "AC-UI-104: MerekaFooter component defined in mereka_lms.py"
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  if mereka_plugin_has_fixed "$REPO_ROOT" "MerekaFooter"; then
+    do_pass "AC-UI-104: MerekaFooter component defined in plugin contract sources"
   else
-    do_fail "AC-UI-104: MerekaFooter NOT found in mereka_lms.py"
+    do_fail "AC-UI-104: MerekaFooter not found in plugin contract sources"
   fi
 
-  if grep -q "org.openedx.frontend.layout.footer.v1" "$PLUGIN_FILE" \
-    && grep -q "RenderWidget: MerekaFooter" "$PLUGIN_FILE"; then
+  if mereka_plugin_has_fixed "$REPO_ROOT" "org.openedx.frontend.layout.footer.v1" \
+    && mereka_plugin_has_fixed "$REPO_ROOT" "RenderWidget: MerekaFooter"; then
     do_pass "AC-UI-104: footer slot wiring uses RenderWidget: MerekaFooter"
   else
-    do_fail "AC-UI-104: footer slot wiring for MerekaFooter not confirmed in mereka_lms.py"
-  fi
-elif [[ -f "$APPLY_PATCHES" ]]; then
-  if grep -q "MerekaFooter" "$APPLY_PATCHES"; then
-    do_pass "AC-UI-104: MerekaFooter component defined in apply-patches.sh (legacy path)"
-  else
-    do_fail "AC-UI-104: MerekaFooter not found in plugin or apply-patches.sh"
+    do_fail "AC-UI-104: footer slot wiring for MerekaFooter not confirmed in plugin contract sources"
   fi
 else
-  do_warn "AC-UI-104: neither plugin file nor apply-patches.sh found for footer wiring checks"
+  do_fail "AC-UI-104: plugin contract sources not found (expected at least $PLUGIN_MAIN)"
 fi
 
 # 4f. mereka-footer CSS class exists in theme CSS.
