@@ -23,6 +23,7 @@ images:
   - name: docker.io/overhangio/openedx
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx
     newTag: mereka-brand-hotfix-full-v3
+    digest: sha256:907951ebabff35f1843685c97c2fb0a0e5fa0c286adba54d34156ffee594dad4
   - name: docker.io/overhangio/openedx-mfe
     newName: asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx-mfe
     newTag: 900d3d9d-20260301-142349
