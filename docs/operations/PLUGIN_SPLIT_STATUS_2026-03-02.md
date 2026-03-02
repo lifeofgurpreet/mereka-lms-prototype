@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `48` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `36` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -139,13 +139,37 @@ Validation after phase 6:
 - `./scripts/qa/verify-tenant-isolation-evidence.sh` PASS (`39 PASS / 0 FAIL / 3 WARN`)
 - `./scripts/qa/verify-tenant-isolation-gates.sh` PASS (`30 PASS / 0 FAIL / 0 SKIP`)
 
+## Progress Update (Phase 7, multisite/security verifier tranche)
+
+- Extended compatibility-layer adoption to additional multisite/security QA verifiers:
+  - `scripts/qa/verify-security-hardening.sh`
+  - `scripts/qa/verify-plugin-slot-wiring.sh`
+  - `scripts/qa/verify-footer-slot-only.sh`
+  - `scripts/qa/verify-multisite-ux-consistency.sh`
+  - `scripts/qa/verify-multitenant-brand-platform.sh`
+  - `scripts/qa/validate-multisite-config.sh`
+- Outcome:
+  - direct path-coupling reduced from `48` to `36`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - parser compatibility hardened for `SITE_VARIANTS` and `MEREKA_SITE_VARIANTS` contract names in `validate-multisite-config.sh`
+  - known runtime baseline failure remains only in `verify-multisite-ux-consistency.sh` (hardcoded domain references detected in running MFE dist artifacts).
+
+Validation after phase 7:
+- `./scripts/qa/verify-security-hardening.sh` PASS (`PASS=30 FAIL=0 WARN=1`)
+- `./scripts/qa/verify-plugin-slot-wiring.sh` PASS (`39 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-footer-slot-only.sh` PASS (`15 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-multisite-ux-consistency.sh` baseline FAIL unchanged (`17 PASS / 1 FAIL / 2 WARN`):
+  - runtime MFE dist artifacts still include hardcoded `academyv2.mereka.io` references
+- `./scripts/qa/verify-multitenant-brand-platform.sh` PASS (`63 PASS / 0 FAIL / 1 WARN`)
+- `./scripts/qa/validate-multisite-config.sh` PASS after parser fix (`12 PASS / 0 FAIL`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 
