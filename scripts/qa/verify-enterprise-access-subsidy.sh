@@ -48,6 +48,13 @@ except Exception:
 echo "=== Enterprise Access & Subsidy Verification (AC-022..AC-025) ==="
 echo
 
+# Early-exit when no cluster is available (CI without kubectl context).
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl not available or cluster unreachable — skipping runtime access/subsidy checks"
+  echo "  (Run with a valid KUBECONFIG/cluster context to execute AC-022..AC-025)"
+  exit 0
+fi
+
 ACC_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=enterprise-access --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 SUB_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=enterprise-subsidy --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 

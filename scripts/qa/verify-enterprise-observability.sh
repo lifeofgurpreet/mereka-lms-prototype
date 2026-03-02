@@ -18,6 +18,13 @@ info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 echo "=== Enterprise Observability Verification (AC-035..AC-036) ==="
 echo
 
+# Early-exit when no cluster is available (CI without kubectl context).
+_CLUSTER_AVAILABLE=1
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ NOTE: kubectl not available or cluster unreachable — cluster checks will be skipped"
+  _CLUSTER_AVAILABLE=0
+fi
+
 # ---------------------------------------------------------------------------
 # AC-035: /metrics scraped by Prometheus → enterprise-specific metrics present
 # ---------------------------------------------------------------------------

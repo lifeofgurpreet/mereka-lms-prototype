@@ -32,6 +32,13 @@ except Exception:
 echo "=== Enterprise Catalog Verification (AC-019..AC-021) ==="
 echo
 
+# Early-exit when no cluster is available (CI without kubectl context).
+if ! command -v kubectl >/dev/null 2>&1 || ! kubectl cluster-info >/dev/null 2>&1; then
+  echo "⚠ SKIP: kubectl not available or cluster unreachable — skipping runtime catalog checks"
+  echo "  (Run with a valid KUBECONFIG/cluster context to execute AC-019..AC-021)"
+  exit 0
+fi
+
 CAT_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=enterprise-catalog --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 CAT_WORKER_POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=enterprise-catalog-worker --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
 

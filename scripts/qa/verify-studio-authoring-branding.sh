@@ -191,6 +191,16 @@ if [[ "$STUDIO_CURL_INSECURE" == "1" || "$STUDIO_CURL_INSECURE" == "true" ]]; th
   AGENT_BROWSER_FLAGS=(--ignore-https-errors)
 fi
 
+# In CI environments without live cluster access, default to source-only mode.
+if [[ "$SOURCE_ONLY" != "1" && "${CI:-}" == "true" ]]; then
+  _studio_url="https://${STUDIO_DOMAIN:-studio.academyv2.mereka.io}"
+  if ! curl -s --connect-timeout 3 --max-time 5 -o /dev/null "$_studio_url" 2>/dev/null; then
+    echo "⚠ SKIP: Studio URL not reachable in CI environment — running source-only checks"
+    SOURCE_ONLY=1
+  fi
+  unset _studio_url
+fi
+
 check_source_selectors
 
 if [[ "$SOURCE_ONLY" != "1" ]]; then

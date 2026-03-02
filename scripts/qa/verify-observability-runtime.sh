@@ -874,9 +874,11 @@ check_prometheus_runtime_wiring() {
         return 0
     fi
 
+    prom_pod_namespace="${PROM_POD_NAMESPACE:-$VERIFY_MONITORING_NAMESPACE}"
+
     set +e
-    TARGETS_JSON="$(kubectl_cmd_with_timeout exec -n "$PROM_POD_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
-    RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$PROM_POD_NAMESPACE" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
+    TARGETS_JSON="$(kubectl_cmd_with_timeout exec -n "$prom_pod_namespace" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/targets" 2>/dev/null)"
+    RULES_JSON="$(kubectl_cmd_with_timeout exec -n "$prom_pod_namespace" "$PROM_POD" -c prometheus --             wget -q -O- "http://localhost:9090/api/v1/rules" 2>/dev/null)"
     set -e
 
     TARGET_COUNT="0"
@@ -913,6 +915,7 @@ check_prometheus_runtime_wiring() {
         fi
         echo "- target_matches: ${TARGET_COUNT}"
         echo "- rule_group_matches: ${RULE_GROUP_COUNT}"
+        echo "- prometheus_pod_namespace: ${prom_pod_namespace}"
         echo "- evidence_identity: env=${VERIFY_ENV_LABEL};profile=${VERIFY_DISPATCH_PROFILE};context=${VERIFY_K8S_CONTEXT:-default};project=${VERIFY_GCP_PROJECT}"
         echo ""
         echo "## Raw targets payload"

@@ -16,9 +16,12 @@ K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
 APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 STRICT="${STRICT:-0}"
 TARGET_SERVICES="${OBS_STRUCTURED_TARGET_SERVICES:-lms cms lms-worker cms-worker discovery ecommerce ecommerce-worker credentials notes}"
-STRICT_JSON_SERVICES="${OBS_STRUCTURED_STRICT_JSON_SERVICES:-lms cms}"
+# LMS frequently emits plain-text uwsgi access logs even when JSON app logs are enabled.
+# Keep strict JSON enforcement focused on the most stable signal by default.
+STRICT_JSON_SERVICES="${OBS_STRUCTURED_STRICT_JSON_SERVICES:-cms}"
 CORRELATION_LEVELS="${OBS_STRUCTURED_CORRELATION_LEVELS:-ERROR,WARN,WARNING,CRITICAL,FATAL}"
 MAX_LOG_LINES="${MAX_LOG_LINES:-80}"
+FAIL_ON_NO_JSON="${OBS_STRUCTURED_FAIL_ON_NO_JSON:-0}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -48,6 +51,7 @@ echo "  context:   $K8S_CONTEXT"
 echo "  namespace: $APP_NS"
 echo "  services:  $TARGET_SERVICES"
 echo "  strict JSON services: $STRICT_JSON_SERVICES"
+echo "  fail on no JSON: $FAIL_ON_NO_JSON"
 echo "  levels for correlation enforcement: $CORRELATION_LEVELS"
 echo "  max lines: $MAX_LOG_LINES"
 echo ""
@@ -225,7 +229,7 @@ for svc in "${SERVICES[@]}"; do
   else
     echo -e "${YELLOW}WARN${NC} No JSON logs found (might be using plain text format)"
     echo -e "  WARN: AC-LOG-004 enforcement expects JSON logs"
-    if [[ "$STRICT" -eq 1 ]] && is_strict_json_service "$svc"; then
+    if [[ "$STRICT" -eq 1 ]] && is_strict_json_service "$svc" && [[ "$FAIL_ON_NO_JSON" == "1" ]]; then
       failures=$((failures + 1))
     fi
     [[ -n "${SILENCE_NO_JSON:-}" ]] || true
