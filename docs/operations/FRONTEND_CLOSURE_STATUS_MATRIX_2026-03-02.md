@@ -132,6 +132,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
   - Infra handoff prompt generation (deterministic from latest sweep JSON):
     - `make qa-runtime-blocker-infra-prompt`
     - optional explicit input: `make qa-runtime-blocker-infra-prompt INPUT_JSON=<path-to-summary.json>`
+    - prompt now embeds deterministic infra execution + verification + rollback contract commands for dev credentials blocker handoff.
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
   - Direct pod inspection confirms timezone data is missing in dev credentials runtime (`/usr/share/zoneinfo/UTC` absent; `python -m pip show tzdata` not found), narrowing remediation to image/runtime package composition.
