@@ -2,13 +2,14 @@
 
 ## Canonical Baseline
 
-- Commit: `e5d89c6aba98f22832462890444c2a286864f885`
+- Commit: `9ed0f591e0cfafcd7643c82693b3b0844c45612e`
 - Primary branch: `build/tenantfix-20260228-r6`
 - Start-here branch: `start/next-implementor-2026-03-01`
 - Backup branch: `backup/handoff-fc2ce2b5`
-- Immutable tag (pre-doc baseline): `handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7`
+- Ready tag (current canonical): `handoff/2026-03-01-ready-next-agent` -> `9ed0f591e0cfafcd7643c82693b3b0844c45612e`
+- Historical tag (earlier snapshot): `handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7` -> `fc2ce2b5...`
 
-All refs above intentionally point to the same commit.
+Primary/start/backup branches plus `handoff/2026-03-01-ready-next-agent` intentionally point to the same commit; the historical snapshot tag remains on the earlier baseline.
 
 ## Safety State Completed
 
@@ -36,11 +37,12 @@ Expected result:
 ## Ref Integrity Check
 
 ```bash
-BASE=e5d89c6aba98f22832462890444c2a286864f885
+BASE=9ed0f591e0cfafcd7643c82693b3b0844c45612e
 git rev-parse build/tenantfix-20260228-r6
 git rev-parse start/next-implementor-2026-03-01
 git rev-parse backup/handoff-fc2ce2b5
-git rev-list -n1 handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7  # expected pre-doc baseline
+git rev-list -n1 handoff/2026-03-01-ready-next-agent
+git rev-list -n1 handoff/2026-03-01-clean-baseline-fc2ce2b5b3e7
 ```
 
 The first three commands should resolve to `$BASE`.

@@ -1,5 +1,5 @@
 # Mereka.io Branding Rollout Tracker
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last updated: 2026-02-28_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last updated: 2026-03-02_
 
 Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 
@@ -15,10 +15,32 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 | Phase 3 — LMS/Studio Theme | **COMPLETE** | — |
 | Phase 4 — Extended Surfaces | **MOSTLY COMPLETE** | PDF certificates only |
 | Phase 5 — Next-Gen Branding | **COMPLETE** | — |
-| Phase 6 — Slot Branding Expansion | **IN PROGRESS** | 51 of 98 FPF slots unwired |
-| Phase 7 — BEM Reduction | **IN PROGRESS** | 69 BEM selectors, 0 SELECTOR-EXCEPTIONs |
-| QA & Documentation | **MOSTLY COMPLETE** | a11y scan, before/after screenshots |
-| Deployment | **MOSTLY COMPLETE** | Stakeholder notification |
+| Phase 6 — Slot Branding Expansion | **FROZEN (Issue #111 decision)** | Freeze new slot expansion until dev runtime stability is restored |
+| Phase 7 — BEM Reduction | **IN PROGRESS** | Live DOM audit remains blocked by dev runtime error-shell state |
+| QA & Documentation | **IN PROGRESS** | Studio reachability + deterministic DOM-audit evidence |
+| Deployment | **MOSTLY COMPLETE** | Dev runtime re-verify after CSP rollout, stakeholder notification |
+
+---
+
+## 2026-03-02 Stabilization Snapshot (Issues #105, #107, #108, #106, #111)
+
+- Runtime evidence (`#105`):
+  - `./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` passed and wrote artifacts under `var/screenshots/dev/20260302T002850Z/`.
+  - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`PASS=17 WARN=0 FAIL=0`).
+  - `./scripts/qa/verify-studio-authoring-branding.sh dev` is currently blocked by environment reachability (`studio.academyv2.mereka.dev` timeout at runtime check time).
+- BEM + a11y (`#107`, `#108`):
+  - `./scripts/qa/verify-mfe-selector-hardening.sh` passed.
+  - `./scripts/qa/verify-a11y-contrast-focus.sh` passed with documented non-blocking warnings.
+  - `./scripts/qa/verify-wcag-contrast-v2.sh` passed.
+  - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` is blocked by transient/partial MFE runtime error-shell rendering in dev.
+- Root-cause hardening applied in repo:
+  - Updated `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` CSP to allow required CDN/Google font domains for MFE runtime script/style/font loads.
+  - Added bounded recovery + low-signal hydration handling in `tests/e2e/tests/selector-dom-audit.spec.ts` to reduce headless false negatives.
+  - Detailed stabilization log: `docs/operations/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md`.
+- Certificate closure (`#106`):
+  - `./scripts/qa/verify-certificate-branding.sh` passed (`PASS=25 WARN=0 FAIL=0`).
+- Phase 6 decision (`#111`):
+  - Slot-expansion lane is intentionally frozen until runtime stability checks above are green again.
 
 ---
 
@@ -146,9 +168,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 ## QA & Documentation
 - [x] Cross-browser + mobile smoke tests — `verify-cross-browser-branding-smoke.sh` (Chromium, Firefox, WebKit with graceful fallback). Playwright-based.
 - [x] npm-start MFE smoke tests — `verify-npm-start-mfe-smoke.sh` (authn, learning, account, profile with screenshot capture).
-- [ ] Accessibility scan (contrast, focus order) on key pages. Known issues: `#f4be48` gold/warning on white fails AA contrast.
+- [x] Accessibility scan (contrast, focus order) on key pages. Current gates pass (`verify-a11y-contrast-focus.sh`, `verify-wcag-contrast-v2.sh`) with non-blocking documented warnings.
 - [x] Performance spot-check — runtime theme preflight checks built into both smoke scripts (PARAGON_THEME_URLS verification, theme-mode detection).
-- [ ] Capture before/after screenshots for all branded surfaces.
+- [ ] Capture before/after screenshots for all branded surfaces. Latest deterministic MFE capture set: `var/screenshots/dev/20260302T002850Z/`; Studio capture remains environment-blocked when host is unreachable.
 - [x] Publish implementation notes/screenshots in `docs/BRANDING.md`.
 - [x] Update README/AGENTS with quick branding maintenance instructions.
 - [x] Dead selector audit documented in [MFE_SELECTOR_OVERRIDE_INVENTORY.md](architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md).
@@ -213,7 +235,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
 | **Dark mode** | Add `variants.dark` to PARAGON_THEME_URLS. Currently light-only. |
 | **Performance budgets in CI** | Lighthouse CI with LCP < 2.5s, bundle < 300KB gzip, theme CSS < 50KB. |
 | **CI Phase 5 — ARC migration** | Migrate heavy builds to `mereka-k8s-heavy-builders`. See `CI_OPTIMIZATION_TRACKER.md`. Requires ARC deployed to rke2-nonprod. |
-| **Plugin file splitting** | Extract 47 React component strings from `mereka_lms.py` (2,671 lines) into separate file. |
+| **Plugin file splitting** | Extract 47 React component strings from `mereka_lms.py` into separate file(s). Status: staged/blocked pending runtime stabilization; see `docs/operations/PLUGIN_SPLIT_STATUS_2026-03-02.md`. |
 | **Hardcoded brand name** | Replace "Mereka Academy" literals in enterprise profile fields with `{variant.brand}`. |
 
 ---
