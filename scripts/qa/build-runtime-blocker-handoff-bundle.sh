@@ -5,13 +5,15 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEFAULT_OUTPUT="$REPO_ROOT/var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz"
 OUTPUT_FILE="$DEFAULT_OUTPUT"
+STRICT=0
 
 usage() {
   cat <<'USAGE'
-Usage: build-runtime-blocker-handoff-bundle.sh [--output <path>]
+Usage: build-runtime-blocker-handoff-bundle.sh [--output <path>] [--strict]
 
 Options:
   --output <path>  Output tar.gz path (default: var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz)
+  --strict         Exit non-zero if any expected artifact is missing.
   -h, --help       Show help.
 USAGE
 }
@@ -22,6 +24,10 @@ while [[ $# -gt 0 ]]; do
       [[ $# -lt 2 ]] && { echo "ERROR: --output requires a value" >&2; exit 2; }
       OUTPUT_FILE="$2"
       shift 2
+      ;;
+    --strict)
+      STRICT=1
+      shift
       ;;
     -h|--help)
       usage
@@ -84,3 +90,8 @@ done
 
 tar -czf "$OUTPUT_FILE" -C "$TMP_DIR" runtime-blocker-handoff
 echo "wrote $OUTPUT_FILE (copied=$copied missing=$missing)"
+
+if [[ "$STRICT" -eq 1 && "$missing" -gt 0 ]]; then
+  echo "ERROR: strict mode enabled and $missing expected artifact(s) were missing." >&2
+  exit 1
+fi
