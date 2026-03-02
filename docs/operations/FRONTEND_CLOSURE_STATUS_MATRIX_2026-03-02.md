@@ -7,6 +7,7 @@ No `bbi-infrastructure` / GitOps repo changes in this lane.
 
 | Issue | Status | Evidence |
 |---|---|---|
+| `#103` Frontend phase handover + closure epic | DONE | Closed with final handover comments (`issuecomment-3981491220`, `issuecomment-3981495132`), docs: `EPIC_103_HANDOVER_DRAFT_2026-03-02.md` + this matrix |
 | `#104` CI ceremony reduction + workflow consolidation | DONE | Commit `776adce7`; doc `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`; gates: `verify-make-help-contract.sh`, `verify-frontend-qa-make-targets.sh`, `verify-ci-cd-pipeline.sh --section gitops` |
 | `#105` Runtime branding stabilization + deterministic screenshot evidence | DONE (repo-side) | Commit `0320d5e4`; screenshot set `var/screenshots/dev/20260302T010124Z/`; `verify-paragon-runtime.sh` PASS; `verify-studio-authoring-branding.sh dev` PASS |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | DONE (current contract) | `verify-mfe-live-dom-audit.sh --env dev --audit-profile phase7_full --project chromium` PASS; log `var/qa/mfe-live-dom-audit-dev-20260302T010325Z.log`; `verify-mfe-selector-hardening.sh` PASS |
@@ -15,6 +16,17 @@ No `bbi-infrastructure` / GitOps repo changes in this lane.
 | `#109` `mereka_lms.py` maintainability split | BLOCKED / STAGED | `docs/operations/PLUGIN_SPLIT_STATUS_2026-03-02.md` (3460-line file, 96 QA path couplings; deferred to post-stability staged migration) |
 | `#111` Phase 6 slot decision (freeze vs continue) | DECISION: FREEZE | Documented in `docs/BRANDING_PLAN.md` stabilization snapshot and `docs/operations/EPIC_103_HANDOVER_DRAFT_2026-03-02.md` |
 | `#110` staging promotion + rollback evidence | DEFERRED (await signal) | Out of scope in this repo-only lane per current instruction; rollback commands prepared in `docs/operations/EPIC_103_HANDOVER_DRAFT_2026-03-02.md` |
+
+Issue comment links (GitHub):
+- `#104`: `issuecomment-3981489973`
+- `#105`: `issuecomment-3981490111`
+- `#106`: `issuecomment-3981490349`
+- `#107`: `issuecomment-3981490493`
+- `#108`: `issuecomment-3981490660`
+- `#109`: `issuecomment-3981490806`
+- `#111`: `issuecomment-3981490907`
+- `#110`: `issuecomment-3981491101`
+- `#103`: `issuecomment-3981491220`, `issuecomment-3981495132`
 
 ## Commit Trace (this lane)
 
