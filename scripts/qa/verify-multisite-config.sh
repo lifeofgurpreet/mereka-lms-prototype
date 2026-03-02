@@ -18,6 +18,18 @@ NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 STRICT="${STRICT:-0}"
 CTX_OVERRIDE=""
 
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --context)
@@ -43,7 +55,7 @@ if [[ -z "$K8S_CONTEXT_EFFECTIVE" ]]; then
   if [[ "$ENVIRONMENT" == "prod" ]]; then
     K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT:-$DEFAULT_PROD_CTX}"
   else
-    K8S_CONTEXT_EFFECTIVE="$DEFAULT_DEV_CTX"
+    K8S_CONTEXT_EFFECTIVE="${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-$DEFAULT_DEV_CTX}}"
   fi
 fi
 
@@ -69,6 +81,8 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
 else
   REQUIRE_ENTERPRISE_SITE_MAPPING="${REQUIRE_ENTERPRISE_SITE_MAPPING:-0}"
 fi
+require_bool_01 "STRICT" "$STRICT"
+require_bool_01 "REQUIRE_ENTERPRISE_SITE_MAPPING" "$REQUIRE_ENTERPRISE_SITE_MAPPING"
 
 export DOMAINS_CSV
 DOMAINS_CSV=$(IFS=, ; echo "${DOMAINS[*]}")
@@ -84,6 +98,8 @@ biji = os.environ.get("BIJI_DOMAIN", "academy.biji-biji.com")
 biji_studio = os.environ.get("BIJI_STUDIO_DOMAIN", "studio.academy.biji-biji.com")
 biji_mfe = os.environ.get("BIJI_MFE_DOMAIN", "apps.academy.biji-biji.com")
 skill = os.environ.get("SKILLOURFUTURE_DOMAIN", "skillourfuture.academy.mereka.io")
+skill_studio = os.environ.get("SKILLOURFUTURE_STUDIO_DOMAIN", f"studio.{skill}")
+skill_mfe = os.environ.get("SKILLOURFUTURE_MFE_DOMAIN", f"apps.{skill}")
 dev = os.environ.get("DEV_LMS_DOMAIN", "academyv2.mereka.dev")
 dev_studio = os.environ.get("DEV_STUDIO_DOMAIN", f"studio.{dev}")
 dev_mfe = os.environ.get("DEV_MFE_DOMAIN", f"apps.{dev}")
@@ -105,12 +121,11 @@ expected = {
     "MFE_BASE_URL": f"https://{biji_mfe}",
     "COURSE_ORG_FILTER": ["BIJIBIJI"],
   },
-  # Skillourfuture currently shares the main Studio domain (no dedicated studio.* DNS).
   skill: {
     **base,
     "LMS_ROOT_URL": f"https://{skill}",
-    "CMS_ROOT_URL": f"https://{studio}",
-    "MFE_BASE_URL": f"https://{mfe}",
+    "CMS_ROOT_URL": f"https://{skill_studio}",
+    "MFE_BASE_URL": f"https://{skill_mfe}",
     "COURSE_ORG_FILTER": ["SKILLOURFUTURE"],
   },
   dev: {
@@ -131,6 +146,7 @@ import os
 import sys
 import json
 import django
+from django.db.utils import OperationalError
 
 django.setup()
 
@@ -149,6 +165,7 @@ except Exception:
 
 missing = []
 bad = []
+hints = []
 for domain in domains:
     site = Site.objects.filter(domain=domain).first()
     if not site:
@@ -196,8 +213,26 @@ for domain in domains:
         bad.append(f"{domain}: LMS_ROOT_URL expected={exp_lms} got={lms_root}")
     if exp_cms and cms_root != exp_cms:
         bad.append(f"{domain}: CMS_ROOT_URL expected={exp_cms} got={cms_root}")
+        if (
+            domain != os.environ.get("LMS_DOMAIN", "academyv2.mereka.io")
+            and exp_cms.startswith("https://studio.")
+            and cms_root.startswith("https://studio.academyv2.")
+        ):
+            hints.append(
+                f"{domain}: runtime still uses shared Studio root; expected tenant-owned host. "
+                "Remediation: rerun multisite bootstrap/apply flow and verify latest config rollout."
+            )
     if exp_mfe and mfe_base != exp_mfe:
         bad.append(f"{domain}: MFE_BASE_URL expected={exp_mfe} got={mfe_base}")
+        if (
+            domain != os.environ.get("LMS_DOMAIN", "academyv2.mereka.io")
+            and exp_mfe.startswith("https://apps.")
+            and mfe_base.startswith("https://apps.academyv2.")
+        ):
+            hints.append(
+                f"{domain}: runtime still uses shared MFE root; expected tenant-owned host. "
+                "Remediation: rerun multisite bootstrap/apply flow and verify latest config rollout."
+            )
     if exp_theme and theme != exp_theme:
         bad.append(f"{domain}: THEME_NAME expected={exp_theme} got={theme}")
     if exp_orgs and org_filter_norm != exp_orgs:
@@ -213,13 +248,20 @@ for domain in domains:
 
     # EnterpriseCustomer may use a non-integer PK (uuid) in some builds,
     # so avoid ordering by a hardcoded "id" field.
-    ec_qs = EnterpriseCustomer.objects.filter(site=site)
-    if hasattr(EnterpriseCustomer, "created"):
-        ec = ec_qs.order_by("-created").first()
-    elif hasattr(EnterpriseCustomer, "modified"):
-        ec = ec_qs.order_by("-modified").first()
-    else:
-        ec = ec_qs.first()
+    try:
+        ec_qs = EnterpriseCustomer.objects.filter(site=site)
+        if hasattr(EnterpriseCustomer, "created"):
+            ec = ec_qs.order_by("-created").first()
+        elif hasattr(EnterpriseCustomer, "modified"):
+            ec = ec_qs.order_by("-modified").first()
+        else:
+            ec = ec_qs.first()
+    except OperationalError as exc:
+        if require_site_mapping:
+            bad.append(f"{domain}: enterprise mapping query failed: {exc}")
+        else:
+            print(f"{domain}: enterprise mapping query skipped (non-strict schema): {exc}")
+        continue
     cfg_uuid = str(values.get("ENTERPRISE_CUSTOMER_UUID", "")).strip()
     if ec is None:
         if require_site_mapping:
@@ -236,6 +278,9 @@ for domain in domains:
 if bad:
     for line in bad:
         print(f"{line} :: MISMATCH")
+if hints:
+    for line in hints:
+        print(f"{line} :: HINT")
 
 if missing and strict:
     sys.exit(1)

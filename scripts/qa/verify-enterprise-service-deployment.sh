@@ -7,14 +7,18 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-NAMESPACE="mereka-lms"
+NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 PASS=0; FAIL=0
 ALLOW_PARTIAL_READY="${ALLOW_PARTIAL_READY:-0}"
 ALLOW_PARKED_SERVICES="${ALLOW_PARKED_SERVICES:-0}"
 WAIT_FOR_STEADY_SECONDS="${WAIT_FOR_STEADY_SECONDS:-120}"
 KUBE_CONTEXT=""
 ENV_NAME=""
-SKIP_RUNTIME_CHECKS=0
+SKIP_RUNTIME_CHECKS="${SKIP_RUNTIME_CHECKS:-0}"
 TMP_KUBECONFIG=""
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
@@ -97,14 +101,36 @@ done
 
 if [[ -n "$ENV_NAME" ]]; then
   case "$ENV_NAME" in
-    prod) KUBE_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" ;;
-    dev) KUBE_CONTEXT="kind-dev" ;;
+    prod)
+      KUBE_CONTEXT="$CONTEXT_PROD"
+      NAMESPACE="$NAMESPACE_PROD"
+      ;;
+    dev)
+      KUBE_CONTEXT="$CONTEXT_DEV"
+      NAMESPACE="$NAMESPACE_DEV"
+      ;;
     *)
       echo "Invalid --env: $ENV_NAME (expected prod|dev)" >&2
       exit 1
       ;;
   esac
 fi
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_bool_01 "ALLOW_PARTIAL_READY" "$ALLOW_PARTIAL_READY"
+require_bool_01 "ALLOW_PARKED_SERVICES" "$ALLOW_PARKED_SERVICES"
+require_bool_01 "SKIP_RUNTIME_CHECKS" "$SKIP_RUNTIME_CHECKS"
 
 if [[ "$SKIP_RUNTIME_CHECKS" -eq 1 ]]; then
   echo "Skipping enterprise service deployment runtime checks (--skip-runtime-checks)"

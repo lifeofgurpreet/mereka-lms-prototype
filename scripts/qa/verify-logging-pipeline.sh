@@ -9,8 +9,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 STRICT="${STRICT:-0}"
 RUNNER="${VERIFY_LOGGING_PIPELINE_RUNNER:-unknown}"
 EVIDENCE_FILE="${VERIFY_LOGGING_PIPELINE_EVIDENCE_FILE:-}"
@@ -71,6 +71,14 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
 
 if [[ -n "$EVIDENCE_FILE" ]]; then
   mkdir -p "$(dirname "$EVIDENCE_FILE")"

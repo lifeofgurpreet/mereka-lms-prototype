@@ -25,11 +25,15 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+COMPUTE_QUOTA_PROJECT="${COMPUTE_QUOTA_PROJECT:-bbi-k8}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 APP_NS="${APP_NS:-mereka-lms}"
 VELERO_NS="${VELERO_NS:-velero}"
 INCLUDE_LEGACY="${INCLUDE_LEGACY_MONITORING:-0}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
+SNAPSHOT_QUOTA_WARN_PCT="${SNAPSHOT_QUOTA_WARN_PCT:-90}"
+SNAPSHOT_QUOTA_FAIL_PCT="${SNAPSHOT_QUOTA_FAIL_PCT:-95}"
+VELERO_SIGNBLOB_WINDOW="${VELERO_SIGNBLOB_WINDOW:-5m}"
 GCLOUD_TIMEOUT="${AUDIT_OBS_GCLOUD_TIMEOUT:-30}"
 DEBUG_MODE="${AUDIT_OBS_DEBUG:-0}"
 INCLUDE_GRAFANA_DASHBOARDS="${OBSERVABILITY_INCLUDE_GRAFANA_DASHBOARDS:-0}"
@@ -37,13 +41,14 @@ MODE="local" # local | runtime | all
 JSON_OUT=0
 usage() {
   cat <<'EOF' >&2
-Usage: ./scripts/qa/audit-observability.sh [--project PROJECT] [--context CONTEXT] [--app-namespace NS] [--velero-namespace NS] [--mode local|runtime|all] [--include-legacy] [--strict-runtime] [--json]
+Usage: ./scripts/qa/audit-observability.sh [--project PROJECT] [--compute-quota-project PROJECT] [--context CONTEXT] [--app-namespace NS] [--velero-namespace NS] [--mode local|runtime|all] [--include-legacy] [--strict-runtime] [--json]
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project) PROJECT="${2:-}"; shift 2 ;;
+    --compute-quota-project) COMPUTE_QUOTA_PROJECT="${2:-}"; shift 2 ;;
     --context) K8S_CONTEXT="${2:-}"; shift 2 ;;
     --app-namespace) APP_NS="${2:-}"; shift 2 ;;
     --velero-namespace) VELERO_NS="${2:-}"; shift 2 ;;
@@ -425,17 +430,23 @@ runtime_velero_freshness_check() {
     return 0
   fi
 
-  local cronjobs_json
-  cronjobs_json="$(kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get cronjob backup-verification restore-test -o json)"
+  local cronjobs_file backups_file
+  cronjobs_file="$(mktemp -t velero-cronjobs.XXXXXX.json)"
+  backups_file="$(mktemp -t velero-backups.XXXXXX.json)"
+  kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get cronjob backup-verification restore-test -o json >"$cronjobs_file"
+  kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" get backup.velero.io -o json >"$backups_file" 2>/dev/null || echo '{"items":[]}' >"$backups_file"
 
-  STRICT_RUNTIME="$STRICT_RUNTIME" python3 - "$cronjobs_json" <<'PY'
+  STRICT_RUNTIME="$STRICT_RUNTIME" python3 - "$cronjobs_file" "$backups_file" <<'PY'
 import json
 import os
 import sys
 from datetime import datetime, timedelta, timezone
 
-raw = sys.argv[1]
-obj = json.loads(raw)
+with open(sys.argv[1], "r", encoding="utf-8") as f:
+    cronjobs = json.load(f)
+with open(sys.argv[2], "r", encoding="utf-8") as f:
+    backups = json.load(f)
+obj = cronjobs
 items = {it.get("metadata", {}).get("name"): it for it in obj.get("items", [])}
 strict = os.getenv("STRICT_RUNTIME", "0") == "1"
 warnings = []
@@ -470,6 +481,27 @@ if not restore_ts:
 elif datetime.now(timezone.utc) - restore_ts > timedelta(days=45):
     warnings.append(f"restore-test lastSuccessfulTime stale: {restore_ts.isoformat()}")
 
+# Add actionable backup phase context when backup-verification is stale/missing.
+if any("backup-verification" in w for w in warnings):
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=30)
+    phase_counts = {}
+    failed_names = []
+    for item in backups.get("items", []):
+      meta = item.get("metadata", {})
+      status = item.get("status", {})
+      created = parse_ts(meta.get("creationTimestamp"))
+      if created and created < cutoff:
+        continue
+      phase = status.get("phase") or "Unknown"
+      phase_counts[phase] = phase_counts.get(phase, 0) + 1
+      if phase in {"Failed", "PartiallyFailed"}:
+        failed_names.append(meta.get("name", "<unknown>"))
+    if phase_counts:
+      summary = ", ".join(f"{k}={v}" for k, v in sorted(phase_counts.items()))
+      warnings.append(f"recent backups (30h) phase summary: {summary}")
+    if failed_names:
+      warnings.append(f"recent failed backups sample: {', '.join(failed_names[-3:])}")
+
 if warnings:
     if strict:
         print("; ".join(warnings))
@@ -477,11 +509,97 @@ if warnings:
     print("WARN: " + "; ".join(warnings))
     sys.exit(0)
 PY
+  local py_status=$?
+  rm -f "$cronjobs_file" "$backups_file"
+  return "$py_status"
+}
+
+runtime_snapshot_quota_headroom_check() {
+  command -v gcloud >/dev/null
+  command -v python3 >/dev/null
+
+  local quota_json
+  quota_json="$(timeout "$GCLOUD_TIMEOUT" gcloud compute project-info describe --project="$COMPUTE_QUOTA_PROJECT" --format=json)" || {
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Failed to fetch compute quota for project=$COMPUTE_QUOTA_PROJECT"
+      return 1
+    fi
+    echo "SKIP: failed to fetch compute quota for project=$COMPUTE_QUOTA_PROJECT"
+    return 0
+  }
+
+  python3 - "$quota_json" "$SNAPSHOT_QUOTA_WARN_PCT" "$SNAPSHOT_QUOTA_FAIL_PCT" "$STRICT_RUNTIME" <<'PY'
+import json
+import sys
+
+obj = json.loads(sys.argv[1])
+warn_pct = float(sys.argv[2])
+fail_pct = float(sys.argv[3])
+strict = sys.argv[4] == "1"
+
+snap = next((q for q in obj.get("quotas", []) if q.get("metric") == "SNAPSHOTS"), None)
+if not snap:
+    msg = "SNAPSHOTS quota metric not found"
+    if strict:
+        print(msg)
+        sys.exit(1)
+    print(f"WARN: {msg}")
+    sys.exit(0)
+
+limit = float(snap.get("limit") or 0)
+usage = float(snap.get("usage") or 0)
+if limit <= 0:
+    msg = f"invalid SNAPSHOTS quota limit: {limit}"
+    if strict:
+        print(msg)
+        sys.exit(1)
+    print(f"WARN: {msg}")
+    sys.exit(0)
+
+pct = (usage / limit) * 100.0
+summary = f"SNAPSHOTS usage={int(usage)}/{int(limit)} ({pct:.1f}%)"
+if pct >= fail_pct:
+    print(f"{summary} exceeds fail threshold {fail_pct:.1f}%")
+    sys.exit(1)
+if pct >= warn_pct:
+    print(f"WARN: {summary} exceeds warn threshold {warn_pct:.1f}%")
+sys.exit(0)
+PY
+}
+
+runtime_velero_signblob_check() {
+  command -v kubectl >/dev/null
+
+  if ! kubectl --context "$K8S_CONTEXT" get namespace "$VELERO_NS" >/dev/null 2>&1; then
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Cannot reach velero namespace: context=$K8S_CONTEXT namespace=$VELERO_NS"
+      return 1
+    fi
+    echo "SKIP: cannot reach velero namespace ($K8S_CONTEXT / $VELERO_NS)"
+    return 0
+  fi
+
+  local logs
+  logs="$(kubectl --context "$K8S_CONTEXT" -n "$VELERO_NS" logs deploy/velero-local --since="$VELERO_SIGNBLOB_WINDOW" 2>/dev/null || true)"
+  if [[ -z "$logs" ]]; then
+    if [[ "$STRICT_RUNTIME" == "1" ]]; then
+      echo "Unable to read velero-local logs in namespace $VELERO_NS"
+      return 1
+    fi
+    echo "SKIP: unable to read velero-local logs in namespace $VELERO_NS"
+    return 0
+  fi
+
+  if rg -q 'iam\.serviceAccounts\.signBlob|IAM_PERMISSION_DENIED' <<<"$logs"; then
+    echo "Detected recent Velero signBlob IAM errors in velero-local logs (window=$VELERO_SIGNBLOB_WINDOW)"
+    return 1
+  fi
 }
 
 if [[ "$JSON_OUT" -eq 0 ]]; then
   echo "Audit: observability posture"
   echo "  project:        $PROJECT"
+  echo "  compute quota:  $COMPUTE_QUOTA_PROJECT"
   echo "  context:        $K8S_CONTEXT"
   echo "  app namespace:  $APP_NS"
   echo "  velero ns:      $VELERO_NS"
@@ -497,6 +615,8 @@ if [[ "$MODE" == "runtime" || "$MODE" == "all" ]]; then
   run_check "runtime: gcp monitoring/logging objects exist" runtime_gcp_check
   run_check "runtime: key in-cluster cronjobs exist" runtime_k8s_check
   run_check "runtime: velero cronjob freshness is within SLO" runtime_velero_freshness_check
+  run_check "runtime: compute snapshot quota has headroom" runtime_snapshot_quota_headroom_check
+  run_check "runtime: velero signBlob IAM errors absent (recent window)" runtime_velero_signblob_check
 fi
 
 if [[ "$JSON_OUT" -eq 1 ]]; then

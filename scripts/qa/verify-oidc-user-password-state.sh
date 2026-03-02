@@ -18,9 +18,11 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENV_SCOPE="prod" # prod|dev|both
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
-CONTEXT_PROD="${CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-CONTEXT_DEV="${CONTEXT_DEV:-kind-dev}"
-APPLY_FIX=0
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+APPLY_FIX="${APPLY_FIX:-0}"
 
 usage() {
   cat <<'EOF' >&2
@@ -32,8 +34,11 @@ Options:
 
 Env overrides:
   NAMESPACE      Kubernetes namespace (default: mereka-lms)
+  NAMESPACE_PROD Kubernetes namespace for prod (default: NAMESPACE)
+  NAMESPACE_DEV  Kubernetes namespace for dev (default: NAMESPACE)
   CONTEXT_PROD   Kubernetes context for prod
   CONTEXT_DEV    Kubernetes context for dev
+  APPLY_FIX      0|1, equivalent to --fix
 EOF
 }
 
@@ -58,23 +63,32 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
   exit 1
 fi
 
+case "$APPLY_FIX" in
+  0|1) ;;
+  *)
+    echo "Invalid APPLY_FIX='$APPLY_FIX' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 run_env() {
   local env_name="$1"
   local context="$2"
+  local namespace="$3"
 
-  if ! kubectl --context "$context" get namespace "$NAMESPACE" >/dev/null 2>&1; then
-    echo "[$env_name] FAIL namespace '$NAMESPACE' not found in context '$context'" >&2
+  if ! kubectl --context "$context" get namespace "$namespace" >/dev/null 2>&1; then
+    echo "[$env_name] FAIL namespace '$namespace' not found in context '$context'" >&2
     return 2
   fi
-  if ! kubectl --context "$context" -n "$NAMESPACE" get deploy lms >/dev/null 2>&1; then
-    echo "[$env_name] FAIL deployment/lms not found in namespace '$NAMESPACE'" >&2
+  if ! kubectl --context "$context" -n "$namespace" get deploy lms >/dev/null 2>&1; then
+    echo "[$env_name] FAIL deployment/lms not found in namespace '$namespace'" >&2
     return 2
   fi
 
   local output rc summary
   set +e
   output="$(
-    kubectl --context "$context" -n "$NAMESPACE" exec -i deploy/lms -- bash -lc "cd /openedx/edx-platform && OIDC_PASSWORD_FIX=${APPLY_FIX} ./manage.py lms shell" <<'PY'
+    kubectl --context "$context" -n "$namespace" exec -i deploy/lms -- bash -lc "cd /openedx/edx-platform && OIDC_PASSWORD_FIX=${APPLY_FIX} ./manage.py lms shell" <<'PY'
 import json
 import os
 from django.contrib.auth import get_user_model
@@ -139,10 +153,10 @@ PY
 
 rc=0
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-  run_env "prod" "$CONTEXT_PROD" || rc=1
+  run_env "prod" "$CONTEXT_PROD" "$NAMESPACE_PROD" || rc=1
 fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-  run_env "dev" "$CONTEXT_DEV" || rc=1
+  run_env "dev" "$CONTEXT_DEV" "$NAMESPACE_DEV" || rc=1
 fi
 
 exit "$rc"

@@ -10,8 +10,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+DEFAULT_K8S_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 STRICT="${STRICT:-0}"
 
 RED='\033[0;31m'
@@ -27,6 +28,11 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
+
+if [[ "$STRICT" != "0" && "$STRICT" != "1" ]]; then
+  echo "STRICT must be 0 or 1 (got: $STRICT)" >&2
+  exit 2
+fi
 
 failures=0
 skips=0

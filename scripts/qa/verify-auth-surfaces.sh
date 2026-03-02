@@ -18,6 +18,9 @@
 #
 # Optional:
 #   STRICT_ADMIN_LOGIN_REDIRECT=1  # fail if /admin/login doesn't redirect to /login
+#   ALLOW_CREDENTIALS_500=1        # allow credentials /login 500 (nonprod drift window)
+#   NOTES_BANNER_NEEDLE="Mereka Notes Service"  # customize notes root banner expectation
+#   ALLOW_FORUM_HEARTBEAT_404=1    # allow forum /heartbeat 404 (nonprod routing mode)
 
 set -euo pipefail
 
@@ -31,11 +34,32 @@ if [[ -z "$ENVIRONMENT" || ( "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev"
 fi
 
 STRICT_ADMIN_LOGIN_REDIRECT="${STRICT_ADMIN_LOGIN_REDIRECT:-0}"
+ALLOW_CREDENTIALS_500="${ALLOW_CREDENTIALS_500:-0}"
+NOTES_BANNER_NEEDLE="${NOTES_BANNER_NEEDLE:-edX Notes API}"
+ALLOW_FORUM_HEARTBEAT_404="${ALLOW_FORUM_HEARTBEAT_404:-0}"
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+require_bool_01 "STRICT_ADMIN_LOGIN_REDIRECT" "$STRICT_ADMIN_LOGIN_REDIRECT"
+require_bool_01 "ALLOW_CREDENTIALS_500" "$ALLOW_CREDENTIALS_500"
+require_bool_01 "ALLOW_FORUM_HEARTBEAT_404" "$ALLOW_FORUM_HEARTBEAT_404"
+
 if [[ "$ENVIRONMENT" == "prod" ]]; then
   REQUIRE_OIDC_PKCE="${REQUIRE_OIDC_PKCE:-1}"
 else
   REQUIRE_OIDC_PKCE="${REQUIRE_OIDC_PKCE:-0}"
 fi
+require_bool_01 "REQUIRE_OIDC_PKCE" "$REQUIRE_OIDC_PKCE"
 
 failures=0
 
@@ -60,33 +84,6 @@ curl_loc() {
   printf "%s %s\n" "${code:-000}" "${loc:-}"
 }
 
-http_diag() {
-  # Prints one-line diagnostics for failing HTTP checks.
-  local url="$1"
-  local method="${2:-GET}"
-  local header_file body_file status location ctype server req_id cf_ray body_head
-  header_file="$(mktemp)"
-  body_file="$(mktemp)"
-
-  if [[ "$method" == "HEAD" ]]; then
-    curl -sS -I -D "$header_file" "$url" -o /dev/null >/dev/null 2>&1 || true
-  else
-    curl -sS -X "$method" -D "$header_file" "$url" -o "$body_file" >/dev/null 2>&1 || true
-  fi
-
-  status="$(awk 'NR==1 {print $2}' "$header_file")"
-  location="$(awk -F': ' 'tolower($1)=="location" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
-  ctype="$(awk -F': ' 'tolower($1)=="content-type" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
-  server="$(awk -F': ' 'tolower($1)=="server" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
-  req_id="$(awk -F': ' 'tolower($1)=="x-request-id" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
-  cf_ray="$(awk -F': ' 'tolower($1)=="cf-ray" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
-  body_head="$(head -c 180 "$body_file" 2>/dev/null | tr '\r\n' ' ' | sed 's/[[:space:]]\\+/ /g')"
-
-  rm -f "$header_file" "$body_file"
-  printf "diag{method=%s,status=%s,location=%s,content-type=%s,server=%s,x-request-id=%s,cf-ray=%s,body=%s}" \
-    "${method:-GET}" "${status:-000}" "${location:--}" "${ctype:--}" "${server:--}" "${req_id:--}" "${cf_ray:--}" "${body_head:--}"
-}
-
 require_200() {
   local url="$1"
   local label="$2"
@@ -108,7 +105,7 @@ require_status() {
   if [[ "$code" == "$expected" ]]; then
     log_ok "$label ($code)"
   else
-    log_fail "$label (expected $expected, got $code) url=$url $(http_diag "$url" "GET")"
+    log_fail "$label (expected $expected, got $code) url=$url"
   fi
 }
 
@@ -127,7 +124,7 @@ require_status_one_of() {
   if [[ "$ok" -eq 1 ]]; then
     log_ok "$label ($code)"
   else
-    log_fail "$label (expected one of: $*, got $code) url=$url $(http_diag "$url" "GET")"
+    log_fail "$label (expected one of: $*, got $code) url=$url"
   fi
 }
 
@@ -140,7 +137,7 @@ require_302_location_contains() {
   if [[ "$code" == "302" && "$loc" == *"$needle"* ]]; then
     log_ok "$label (302 -> contains '$needle')"
   else
-    log_fail "$label (expected 302 + location contains '$needle', got code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
+    log_fail "$label (expected 302 + location contains '$needle', got code=$code loc=$loc) url=$url"
   fi
 }
 
@@ -221,7 +218,7 @@ require_302_location_is() {
   if [[ "$code" == "302" && "$loc" == "$expected" ]]; then
     log_ok "$label (302 -> $expected)"
   else
-    log_fail "$label (expected 302 -> $expected, got code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
+    log_fail "$label (expected 302 -> $expected, got code=$code loc=$loc) url=$url"
   fi
 }
 
@@ -236,49 +233,6 @@ require_body_contains() {
   else
     log_fail "$label (expected body contains '$needle') url=$url"
   fi
-}
-
-require_body_contains_one_of() {
-  local url="$1"
-  local label="$2"
-  shift 2
-  local body needle
-  body="$(curl -sS "$url" || true)"
-  if [[ -z "$body" ]]; then
-    log_fail "$label (empty response body) url=$url"
-    return
-  fi
-  for needle in "$@"; do
-    if [[ "$body" == *"$needle"* ]]; then
-      log_ok "$label (contains '$needle')"
-      return
-    fi
-  done
-  log_fail "$label (expected body contains one of: $*) url=$url"
-}
-
-check_forum_health_contract() {
-  local forum_host="$1"
-  local heartbeat_url="https://${forum_host}/heartbeat"
-  local healthz_url="https://${forum_host}/healthz"
-  local heartbeat_code healthz_code
-
-  heartbeat_code="$(curl -sS -o /dev/null -w "%{http_code}" "$heartbeat_url" || echo "000")"
-  if [[ "$heartbeat_code" == "200" ]]; then
-    log_ok "forum: heartbeat (200)"
-    return
-  fi
-
-  if [[ "$ENVIRONMENT" != "prod" ]]; then
-    healthz_code="$(curl -sS -o /dev/null -w "%{http_code}" "$healthz_url" || echo "000")"
-    if [[ "$healthz_code" == "200" ]]; then
-      log_warn "forum: /heartbeat returned ${heartbeat_code}; accepting /healthz=200 fallback for ${ENVIRONMENT}"
-      log_ok "forum: health fallback (/healthz=200)"
-      return
-    fi
-  fi
-
-  log_fail "forum: heartbeat (expected 200, got ${heartbeat_code}) url=${heartbeat_url}"
 }
 
 check_studio_signin_redirect() {
@@ -329,11 +283,11 @@ check_admin_login_redirect() {
   fi
 
   if [[ "$STRICT_ADMIN_LOGIN_REDIRECT" == "1" ]]; then
-    log_fail "${svc}: /admin/login does not redirect to /login (code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
+    log_fail "${svc}: /admin/login does not redirect to /login (code=$code loc=$loc) url=$url"
     return 1
   fi
 
-  log_warn "${svc}: /admin/login does not redirect to /login yet (code=$code loc=$loc). This is OK if hardening not deployed. $(http_diag "$url" "GET")"
+  log_warn "${svc}: /admin/login does not redirect to /login yet (code=$code loc=$loc). This is OK if hardening not deployed."
   return 0
 }
 
@@ -540,6 +494,13 @@ for svc in discovery credentials ecommerce; do
     log_warn "optional service host unresolved: ${svc}.${ECOSYSTEM_BASE} (skipping auth entrypoint checks)"
     continue
   fi
+  if [[ "$svc" == "credentials" && "$ALLOW_CREDENTIALS_500" == "1" ]]; then
+    cred_code="$(curl -sS -o /dev/null -w "%{http_code}" "https://${svc}.${ECOSYSTEM_BASE}/login/" || echo "000")"
+    if [[ "$cred_code" == "500" ]]; then
+      log_warn "credentials: /login SSO entrypoint returned 500 (allowed by ALLOW_CREDENTIALS_500=1)"
+      continue
+    fi
+  fi
   require_302_location_is \
     "https://${svc}.${ECOSYSTEM_BASE}/login/" \
     "${svc}: /login SSO entrypoint" \
@@ -564,15 +525,14 @@ done
 if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "notes.${ECOSYSTEM_BASE}"; then
   log_warn "optional service host unresolved: notes.${ECOSYSTEM_BASE} (skipping)"
 else
-  require_body_contains_one_of \
+  require_body_contains \
     "https://notes.${ECOSYSTEM_BASE}/" \
-    "notes: service banner" \
-    "Mereka Notes Service" \
-    "edX Notes API"
+    "notes: API banner" \
+    "$NOTES_BANNER_NEEDLE"
 fi
 
-# Forum has had multiple deployment architectures over time.
-# Current production contract requires /heartbeat=200. Non-prod accepts /healthz fallback.
+# Forum has had multiple production architectures over time.
+# Current contract: it MUST be reachable (no 5xx) and heartbeat MUST return 200.
 if [[ "${ALLOW_UNRESOLVED_OPTIONAL_HOSTS:-0}" == "1" ]] && ! host_resolves "forum.${ECOSYSTEM_BASE}"; then
   log_warn "optional service host unresolved: forum.${ECOSYSTEM_BASE} (skipping)"
 else
@@ -581,7 +541,16 @@ else
     "forum: reachable" \
     "200" "401" "404"
 
-  check_forum_health_contract "forum.${ECOSYSTEM_BASE}"
+  if [[ "$ALLOW_FORUM_HEARTBEAT_404" == "1" ]]; then
+    require_status_one_of \
+      "https://forum.${ECOSYSTEM_BASE}/heartbeat" \
+      "forum: heartbeat" \
+      "200" "404"
+  else
+    require_200 \
+      "https://forum.${ECOSYSTEM_BASE}/heartbeat" \
+      "forum: heartbeat"
+  fi
 fi
 
 if [[ "$failures" -gt 0 ]]; then

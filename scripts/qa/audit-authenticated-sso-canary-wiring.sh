@@ -40,6 +40,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 check_workflow_pattern() {
   local file="$1"
   local pattern="$2"

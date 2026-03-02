@@ -8,6 +8,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../shared/config.sh"
 
 ENVIRONMENT="${1:-prod}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-${K8S_NAMESPACE:-mereka-lms}}}"
 
 if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   echo "Usage: $0 [prod|dev]" >&2
@@ -91,11 +95,11 @@ dev_forum_diagnostics() {
     return
   fi
 
-  local ctx="${K8S_CONTEXT:-kind-dev}"
-  local ns="${K8S_NAMESPACE:-mereka-lms}"
+  local ctx="$CONTEXT_DEV"
+  local ns="$NAMESPACE_DEV"
 
   if ! kubectl --context "$ctx" get deploy/forum -n "$ns" >/dev/null 2>&1; then
-    echo "Tip: set K8S_CONTEXT (default kind-dev) if you want this script to inspect forum logs." >&2
+    echo "Tip: set CONTEXT_DEV/K8S_CONTEXT_DEV to inspect forum logs for your dev cluster." >&2
     return
   fi
 

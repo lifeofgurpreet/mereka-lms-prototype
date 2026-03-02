@@ -40,7 +40,7 @@ skip_check() { echo -e "  ${YELLOW}SKIP${NC}: $1"; SKIP=$((SKIP + 1)); }
 # ── Argument parsing ──────────────────────────────────────────────────────────
 MODE_OFFLINE=false
 MODE_ONLINE=false
-KUBECONTEXT="${KUBECONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+KUBECONTEXT="${KUBECONTEXT:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
 NS="${NS:-mereka-lms}"
 ARGOCD_NS="${ARGOCD_NS:-argocd}"
 

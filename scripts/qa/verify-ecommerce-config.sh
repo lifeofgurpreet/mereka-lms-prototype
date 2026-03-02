@@ -19,6 +19,14 @@ if [[ -n "${K8S_CONTEXT:-}" ]]; then
   CONTEXT_ARGS+=(--context "${K8S_CONTEXT}")
 fi
 
+case "$STRICT" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT='$STRICT' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
+
 failures=0
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }

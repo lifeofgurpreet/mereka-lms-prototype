@@ -27,10 +27,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 
 DEFAULT_CONTEXTS=(
-  "gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
-  "kind-dev"
+  "$CONTEXT_PROD"
+  "$CONTEXT_DEV"
 )
 
 CONTEXTS=()
@@ -40,6 +43,18 @@ ENVIRONMENT="auto" # auto | prod | dev | staging
 ALLOW_EMPTY_DOMAINS="${ALLOW_EMPTY_DOMAINS:-0}"
 OIDC_PROVIDER_DISPLAY_NAME="${OIDC_PROVIDER_DISPLAY_NAME:-Sign in with Mereka}"
 VERIFY_OIDC_DISPLAY_NAME="${VERIFY_OIDC_DISPLAY_NAME:-1}"
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
 
 usage() {
   cat <<EOF
@@ -70,15 +85,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+require_bool_01 "ALLOW_EMPTY_DOMAINS" "$ALLOW_EMPTY_DOMAINS"
+require_bool_01 "VERIFY_OIDC_DISPLAY_NAME" "$VERIFY_OIDC_DISPLAY_NAME"
+
 if [[ ${#CONTEXTS[@]} -eq 0 ]]; then
   # If caller explicitly scopes env, only target the matching default context(s).
   # This avoids accidentally verifying prod domains against a dev kind cluster (or vice versa).
   if [[ "$ENVIRONMENT" == "prod" ]]; then
-    CONTEXTS=("gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster")
+    CONTEXTS=("$CONTEXT_PROD")
   elif [[ "$ENVIRONMENT" == "dev" ]]; then
-    CONTEXTS=("kind-dev")
+    CONTEXTS=("$CONTEXT_DEV")
   elif [[ "$ENVIRONMENT" == "staging" ]]; then
-    CONTEXTS=("rke2-nonprod")
+    CONTEXTS=("$CONTEXT_STAGING")
   else
     CONTEXTS=("${DEFAULT_CONTEXTS[@]}")
   fi

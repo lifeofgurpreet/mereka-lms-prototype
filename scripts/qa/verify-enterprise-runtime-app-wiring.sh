@@ -20,7 +20,12 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 ENV="prod"
 MODE="standard" # standard|strict
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 KUBE_CONTEXT_OVERRIDE=""
+NAMESPACE_OVERRIDE=""
 
 PASS=0
 FAIL=0
@@ -54,7 +59,11 @@ while [[ $# -gt 0 ]]; do
     --env) ENV="$2"; shift 2 ;;
     --context) KUBE_CONTEXT_OVERRIDE="$2"; shift 2 ;;
     --strict) MODE="strict"; shift ;;
-    -n|--namespace) NAMESPACE="$2"; shift 2 ;;
+    -n|--namespace)
+      NAMESPACE="$2"
+      NAMESPACE_OVERRIDE="$NAMESPACE"
+      shift 2
+      ;;
     -h|--help) usage ;;
     *) echo "Unknown option: $1" >&2; usage ;;
   esac
@@ -67,10 +76,20 @@ fi
 
 if [[ -n "$KUBE_CONTEXT_OVERRIDE" ]]; then
   KUBE_CTX="$KUBE_CONTEXT_OVERRIDE"
-elif [[ "$ENV" == "prod" ]]; then
-  KUBE_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
 else
-  KUBE_CTX="kind-dev"
+  if [[ "$ENV" == "prod" ]]; then
+    KUBE_CTX="$CONTEXT_PROD"
+  else
+    KUBE_CTX="$CONTEXT_DEV"
+  fi
+fi
+
+if [[ -z "$NAMESPACE_OVERRIDE" ]]; then
+  if [[ "$ENV" == "prod" ]]; then
+    NAMESPACE="$NAMESPACE_PROD"
+  else
+    NAMESPACE="$NAMESPACE_DEV"
+  fi
 fi
 
 kube() { kubectl --context "$KUBE_CTX" "$@"; }

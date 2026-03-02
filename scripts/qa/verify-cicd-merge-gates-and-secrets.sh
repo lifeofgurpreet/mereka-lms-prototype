@@ -9,7 +9,7 @@
 #
 # This script verifies the configuration chain that guarantees these behaviors:
 #   1. ci.yml triggers on PRs to main
-#   2. ci.yml defines all 12 required jobs (which become status checks)
+#   2. ci.yml defines all required consolidated jobs (which become status checks)
 #   3. All workflows use ${{ secrets.* }} (auto-masked by GitHub), never raw echo
 #   4. No set -x or debug tracing before secret usage
 #
@@ -265,7 +265,7 @@ if [[ "$FAILED" -eq 0 ]]; then
   echo -e "${GREEN}All CI/CD merge gate and secret masking checks passed.${NC}"
   echo ""
   echo "Verified:"
-  echo "  AC-007/008: ci.yml defines 12 required jobs as PR status checks"
+  echo "  AC-007/008: ci.yml defines 4 required consolidated jobs as PR status checks"
   echo "              GitHub branch protection enforces all checks before merge"
   echo "  AC-028:     All workflows use \${{ secrets.* }} (auto-masked by GitHub)"
   echo "              No raw echo, no set -x near secrets, no inline references"

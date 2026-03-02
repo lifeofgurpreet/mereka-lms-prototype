@@ -25,7 +25,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 APP_NS="${APP_NS:-mereka-lms}"
 VELERO_NS="${VELERO_NS:-velero}"
 INCLUDE_LEGACY="${INCLUDE_LEGACY_MONITORING:-0}"
@@ -267,7 +267,6 @@ fetch_runtime_names() {
   esac
 }
 
-runtime_k8s_check() {
 runtime_k8s_check() {
   command -v kubectl >/dev/null
 

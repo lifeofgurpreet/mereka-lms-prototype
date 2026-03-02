@@ -12,8 +12,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 FAIL_ON_LEGACY_MONGODB="${FAIL_ON_LEGACY_MONGODB:-0}"
 FAIL_ON_LEGACY_MONGODB_SERVICE="${FAIL_ON_LEGACY_MONGODB_SERVICE:-0}"
@@ -46,6 +46,16 @@ if [[ "$MODE" != "local" && "$MODE" != "runtime" && "$MODE" != "all" ]]; then
   usage
   exit 1
 fi
+
+for bool_var in STRICT_RUNTIME FAIL_ON_LEGACY_MONGODB FAIL_ON_LEGACY_MONGODB_SERVICE; do
+  case "${!bool_var}" in
+    0|1) ;;
+    *)
+      echo "Invalid ${bool_var}='${!bool_var}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+done
 
 failures=0
 warnings=0

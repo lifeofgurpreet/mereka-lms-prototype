@@ -30,10 +30,18 @@ fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 TEMPO_URL="${TEMPO_URL:-}"
 TRACING_REQUIRED="${TRACING_REQUIRED:-${OBS_REQUIRE_TRACING_ARTIFACT:-0}}"
+
+case "$TRACING_REQUIRED" in
+  0|1) ;;
+  *)
+    echo "Invalid TRACING_REQUIRED='$TRACING_REQUIRED' (expected 0 or 1)" >&2
+    exit 2
+    ;;
+esac
 
 pass=0
 fail=0

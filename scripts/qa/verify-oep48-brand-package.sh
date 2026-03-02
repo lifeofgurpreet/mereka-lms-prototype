@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-SLOT-028
+# @spec: oep48-brand-package_spec.md, mfe-plugin-slots_spec.md
 # verify-oep48-brand-package.sh — OEP-48 brand package formalization audit.
 #
 # Verifies that Mereka Academy brand assets satisfy OEP-48 requirements:

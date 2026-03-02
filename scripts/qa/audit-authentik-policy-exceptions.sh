@@ -18,10 +18,18 @@
 set -euo pipefail
 
 SINCE="${SINCE:-6h}"
-CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 NAMESPACE="${AUTHENTIK_NAMESPACE:-authentik}"
 DEPLOYMENT="${AUTHENTIK_DEPLOYMENT:-authentik-server}"
 FILTER_OIDC_ONLY="${FILTER_OIDC_ONLY:-1}"
+
+case "$FILTER_OIDC_ONLY" in
+  0|1) ;;
+  *)
+    echo "Invalid FILTER_OIDC_ONLY='$FILTER_OIDC_ONLY' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
 
 usage() {
   cat <<'USAGE' >&2

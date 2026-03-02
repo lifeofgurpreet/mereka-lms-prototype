@@ -16,7 +16,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
 VELERO_NS="${VELERO_NS:-velero}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 HOURLY_SCHEDULE_NAME="${HOURLY_SCHEDULE_NAME:-velero-local-hourly-critical-databases}"
@@ -39,6 +39,14 @@ OPTIONAL_ALERT_DISPLAY_NAMES=(
   "Velero backup verification stale (no success in 30h)"
   "Velero restore-test stale (no success in 45d)"
 )
+
+case "$STRICT_RUNTIME" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT_RUNTIME='$STRICT_RUNTIME' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
 
 usage() {
   cat <<EOF

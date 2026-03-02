@@ -25,8 +25,20 @@ STRICT="${STRICT:-0}"
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 ENV_SCOPE="both" # prod|dev|both
 
-CONTEXT_PROD="${CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-CONTEXT_DEV="${CONTEXT_DEV:-kind-dev}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
 
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
 
@@ -58,6 +70,7 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "both" 
   usage
   exit 1
 fi
+require_bool_01 "STRICT" "$STRICT"
 
 collect_ingress_hosts() {
   local ctx="$1"

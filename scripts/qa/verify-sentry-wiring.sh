@@ -15,8 +15,8 @@ cd "$REPO_ROOT"
 MODE="local" # local|runtime|all
 JSON_OUT=0
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
-APP_NS="${APP_NS:-mereka-lms}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+APP_NS="${APP_NS:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 REQUIRED_DEPLOYS="${REQUIRED_DEPLOYS:-lms cms lms-worker cms-worker discovery ecommerce credentials}"
 OPTIONAL_DEPLOYS="${OPTIONAL_DEPLOYS:-ecommerce-worker notes notes-worker forum forum-worker}"
 
@@ -51,6 +51,14 @@ if [[ "$MODE" != "local" && "$MODE" != "runtime" && "$MODE" != "all" ]]; then
   usage
   exit 1
 fi
+
+case "$STRICT_RUNTIME" in
+  0|1) ;;
+  *)
+    echo "Invalid STRICT_RUNTIME='$STRICT_RUNTIME' (expected 0 or 1)" >&2
+    exit 1
+    ;;
+esac
 
 json_escape() {
   local s="${1:-}"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# @covers AC-INT-003
-# @spec: branding-system_spec.md
+# @covers AC-INT-003, AC-SLOT-029
+# @spec: branding-system_spec.md, mfe-plugin-slots_spec.md
 set -euo pipefail
 
 # verify-branding-asset-sync.sh - Verify apply-patches workflow syncs theme assets correctly

@@ -123,7 +123,8 @@ check_glob_ability() {
            [[ ! "$basename" =~ ^map- ]] && [[ ! "$basename" =~ ^microsite- ]] && \
            [[ ! "$basename" =~ ^public- ]] && [[ ! "$basename" =~ ^visual- ]] && \
            [[ ! "$basename" =~ ^fix- ]] && [[ ! "$basename" =~ ^course- ]] && \
-           [[ ! "$basename" =~ ^analyze- ]] && [[ ! "$basename" =~ ^gate- ]]; then
+           [[ ! "$basename" =~ ^analyze- ]] && [[ ! "$basename" =~ ^gate- ]] && \
+           [[ ! "$basename" =~ ^load- ]] && [[ ! "$basename" =~ ^comprehensive- ]]; then
           # This is overly strict for existing codebase, just warn
           warn "Glob-ability: QA script doesn't follow standard naming: $file"
         fi
@@ -307,6 +308,8 @@ check_architectural_boundaries() {
   # Only fail if it's referenced in a *_spec.md file (not *_plan.md or *_testplan.md)
   local missing_script_refs=0
   local missing_script_warns=0
+  local missing_script_warn_duplicates=0
+  declare -A seen_missing_plan_refs=()
   if [[ -d specs ]]; then
     while IFS= read -r -d '' file; do
       local basename
@@ -326,8 +329,13 @@ check_architectural_boundaries() {
         if [[ ! -f "$script_path" ]] && [[ ! -d "$script_path" ]]; then
           # Only warn for plan/testplan files (future work), fail for spec files
           if [[ "$basename" =~ _plan\.md$ ]] || [[ "$basename" =~ _testplan\.md$ ]]; then
-            warn "Architectural boundaries: Plan references non-existent file (future work): $script_path"
-            missing_script_warns=$((missing_script_warns + 1))
+            if [[ -z "${seen_missing_plan_refs[$script_path]+x}" ]]; then
+              warn "Architectural boundaries: Plan references non-existent file (future work): $script_path"
+              seen_missing_plan_refs[$script_path]=1
+              missing_script_warns=$((missing_script_warns + 1))
+            else
+              missing_script_warn_duplicates=$((missing_script_warn_duplicates + 1))
+            fi
           else
             fail "Architectural boundaries: Spec references non-existent file: $script_path (in $file)"
             missing_script_refs=$((missing_script_refs + 1))
@@ -339,6 +347,9 @@ check_architectural_boundaries() {
 
   if [[ $missing_script_refs -eq 0 ]] && [[ -d specs ]]; then
     pass "Architectural boundaries: All spec-referenced scripts exist"
+  fi
+  if [[ $missing_script_warn_duplicates -gt 0 ]]; then
+    pass "Architectural boundaries: Suppressed $missing_script_warn_duplicates duplicate future-work missing-file warnings"
   fi
 }
 
@@ -362,7 +373,16 @@ check_observability() {
         continue
       fi
 
-      # Should follow prometheusrule-*.yaml pattern
+      # Should follow prometheusrule-*.yaml pattern.
+      # Allow known historical exceptions to avoid noisy warnings until renamed.
+      case "$file" in
+        deploy/k8s/base/monitoring/slo-burn-rate-rules.yaml|\
+        deploy/k8s/base/plugins/aspects/prometheusrule.yml|\
+        deploy/k8s/base/apps/xqueue-graders/prometheusrule.yaml)
+          continue
+          ;;
+      esac
+
       if [[ ! "$basename" =~ ^prometheusrule- ]]; then
         warn "Observability: PrometheusRule file doesn't follow prometheusrule-*.yaml naming: $file"
         prometheus_violations=$((prometheus_violations + 1))

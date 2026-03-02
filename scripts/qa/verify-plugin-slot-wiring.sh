@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-SLOT-016, AC-SLOT-017, AC-SLOT-018, AC-SLOT-019, AC-SLOT-020
+# @spec: mfe-plugin-slots_spec.md
 # verify-plugin-slot-wiring.sh — Comprehensive FPF plugin-slot wiring verification
 #
 # Validates that the Mereka plugin-slot configuration chain is consistent:
@@ -82,6 +84,19 @@ for slot in "${required_slots[@]}"; do
     do_fail "Required slot missing in plugin contract sources: ${slot}"
   fi
 done
+
+# 2d. FPF no-op safety contract for unsupported slots.
+# No-op behavior comes from using the PLUGIN_SLOTS API contract (slot may be ignored if absent in an MFE).
+if plugin_has_regex 'PLUGIN_SLOTS.add_items|PLUGIN_SLOTS.add_item'; then
+  do_pass "Slot overrides use PLUGIN_SLOTS API (framework-managed no-op behavior for unsupported slots)"
+  if plugin_has_regex '[(][[:space:]]*["'\'']all["'\''][[:space:]]*,[[:space:]]*["'\'']org[.]openedx[.]frontend[.]'; then
+    do_pass "\"all\" target slot registrations present"
+  else
+    do_warn "No \"all\" target registrations found (using explicit MFE targets only)"
+  fi
+else
+  do_fail "No PLUGIN_SLOTS API registrations found for slot no-op safety"
+fi
 
 # 2c. Plugin defines runtime helper components used by slot registrations
 if plugin_has_regex 'const MerekaHeaderLogo'; then

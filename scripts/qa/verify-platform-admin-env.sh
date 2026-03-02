@@ -19,6 +19,10 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENV_SCOPE="both" # prod|dev|both
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
+NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
+NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 REQUIRED_ADMINS_CSV="${REQUIRED_ADMINS_CSV:-gurpreet@biji-biji.com,malasari@mereka.my}"
 
 usage() {
@@ -57,16 +61,17 @@ fi
 
 check_context() {
   local ctx="$1"
+  local ns="$2"
   local failures=0
   local deployments=(lms cms discovery credentials ecommerce)
 
   echo "Context: $ctx"
-  echo "Namespace: $NAMESPACE"
+  echo "Namespace: $ns"
   echo "Required: $(printf "%s," "${required_norm[@]}" | sed 's/,$//')"
 
   for d in "${deployments[@]}"; do
     local value
-    value="$(kubectl --context "$ctx" -n "$NAMESPACE" get deploy "$d" \
+    value="$(kubectl --context "$ctx" -n "$ns" get deploy "$d" \
       -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="MEREKA_PLATFORM_ADMIN_EMAILS")].value}' 2>/dev/null || true)"
     value="${value:-}"
     local current_norm
@@ -97,11 +102,10 @@ check_context() {
 
 rc=0
 if [[ "$ENV_SCOPE" == "prod" || "$ENV_SCOPE" == "both" ]]; then
-  check_context "gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" || rc=1
+  check_context "$CONTEXT_PROD" "$NAMESPACE_PROD" || rc=1
 fi
 if [[ "$ENV_SCOPE" == "dev" || "$ENV_SCOPE" == "both" ]]; then
-  check_context "kind-dev" || rc=1
+  check_context "$CONTEXT_DEV" "$NAMESPACE_DEV" || rc=1
 fi
 
 exit "$rc"
-
