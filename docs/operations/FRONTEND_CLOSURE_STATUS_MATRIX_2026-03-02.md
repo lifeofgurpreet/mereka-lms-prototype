@@ -24,6 +24,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `c0f0d9a2` — auth-surface contract stabilization (`#105`): accept branded notes marker; require forum `/heartbeat` in prod while allowing non-prod `/healthz` fallback
 - `e2937e6b` — #104 follow-on completion: remove `policy-checks.yml`, delete 18 `verify-*-workflow.sh` wrappers, retarget Make/CI contracts to direct scripts
 - `fe2944f1` — runtime evidence hardening (`#105`): normalize probe values (`me_status`, `login_refresh_status`) for deterministic TSV parsing
 - `073f8be3` — docs trace sync: refresh closure matrix commit ledger with latest stabilization commits
@@ -56,9 +57,9 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/capture-branding-screenshots.sh --env dev --core-routes`
     - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers`
     - `./scripts/qa/verify-studio-authoring-branding.sh dev`
-  - Latest capture artifact set: `var/screenshots/dev/20260302T061514Z/` (`capture-summary.tsv` now includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format per route, with normalized unquoted probe values for deterministic parsing; confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
+  - Latest capture artifact set: `var/screenshots/dev/20260302T063522Z/` (`capture-summary.tsv` now includes `auth_state`, `nav_ms`, `me_status` (`/api/user/v1/me` probe), and `login_refresh_status` in `GET:<code>,POST:<code>` format per route, with normalized unquoted probe values for deterministic parsing; confirms deterministic non-blank renders for authn/login + studio, plus unauthenticated redirects for account/learner-dashboard).
   - Latest Phase 7 + a11y sweep on dev:
-    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260302T054715Z.log`)
+    - `./scripts/qa/run-phase7-dom-audit-full.sh --env dev --project chromium` (PASS, log: `var/qa/mfe-live-dom-audit-dev-20260302T063401Z.log`)
     - `./scripts/qa/verify-mfe-selector-hardening.sh` (PASS)
     - `./scripts/qa/verify-a11y-contrast-focus.sh` (PASS, warning pair now enforced and passing at `4.52:1`)
     - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS)
