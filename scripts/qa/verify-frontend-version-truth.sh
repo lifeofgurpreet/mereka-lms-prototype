@@ -8,11 +8,11 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 MFE_VERSIONS_DOC="$REPO_ROOT/docs/architecture/MFE_VERSIONS.md"
 BUILD_WORKFLOW="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
 SETUP_SCRIPT="$REPO_ROOT/scripts/shared/setup-local.sh"
 KUSTOMIZATION_BASE="$REPO_ROOT/deploy/k8s/base/kustomization.yaml"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 
 PASS=0
 FAIL=0
@@ -217,30 +217,35 @@ fi
 echo ""
 
 # 5. Cross-reference plugin __version__
-echo "--- Mereka Plugin Version (infrastructure/tutor/plugins/mereka_lms.py) ---"
-if [ ! -f "$PLUGIN_FILE" ]; then
-  do_warn "mereka_lms.py plugin not found (optional)"
+echo "--- Mereka Plugin Version (plugin contract sources) ---"
+if ! mereka_plugin_has_any "$REPO_ROOT"; then
+  do_warn "Plugin contract sources not found (expected mereka_lms.py)"
 else
-  do_pass "mereka_lms.py plugin exists"
+  do_pass "Plugin contract source exists"
 
-  if grep -q "__version__" "$PLUGIN_FILE"; then
-    plugin_version=$(grep "^__version__" "$PLUGIN_FILE" | sed -E 's/^__version__[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/')
-    if [ -n "$plugin_version" ]; then
-      do_pass "Plugin __version__ found: $plugin_version"
+  plugin_version=""
+  plugin_version_source=""
+  while IFS= read -r plugin_file; do
+    if grep -q "^__version__" "$plugin_file"; then
+      plugin_version="$(grep "^__version__" "$plugin_file" | sed -E 's/^__version__[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/' | head -1)"
+      plugin_version_source="${plugin_file#$REPO_ROOT/}"
+      break
+    fi
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
 
-      # Compare with documented version if present
-      if [ -n "$doc_plugin_version" ]; then
-        if [ "$plugin_version" = "$doc_plugin_version" ]; then
-          do_pass "Plugin version matches docs: $plugin_version"
-        else
-          do_fail "Plugin version ($plugin_version) != docs ($doc_plugin_version)"
-        fi
+  if [ -n "$plugin_version" ]; then
+    do_pass "Plugin __version__ found: $plugin_version (${plugin_version_source})"
+
+    # Compare with documented version if present
+    if [ -n "$doc_plugin_version" ]; then
+      if [ "$plugin_version" = "$doc_plugin_version" ]; then
+        do_pass "Plugin version matches docs: $plugin_version"
+      else
+        do_fail "Plugin version ($plugin_version) != docs ($doc_plugin_version)"
       fi
-    else
-      do_warn "Could not extract __version__ value from mereka_lms.py"
     fi
   else
-    do_warn "No __version__ found in mereka_lms.py"
+    do_warn "No __version__ found in plugin contract sources"
   fi
 fi
 

@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high: `98` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `92` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -44,13 +44,36 @@ Validation after phase 2:
 - `./scripts/qa/verify-footer-slot-only.sh` PASS (`PASS=15 FAIL=0 WARN=0`)
 - `./scripts/qa/verify-tutor-patches-inventory.sh` PASS (`23 PASS 0 FAIL 0 SKIP`)
 
+## Progress Update (Phase 3, wider verifier adoption)
+
+- Extended compatibility-layer adoption to additional QA verifiers:
+  - `scripts/qa/verify-paragon-runtime.sh`
+  - `scripts/qa/verify-certificate-branding.sh`
+  - `scripts/qa/verify-analytics-key.sh`
+  - `scripts/qa/verify-frontend-version-truth.sh`
+  - `scripts/qa/verify-analytics-hardening.sh` (uses plugin-contract bundle source)
+- Outcome:
+  - direct path-coupling reduced from `98` to `92`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - existing pass/fail semantics preserved for known analytics-hardening baseline failures.
+
+Validation after phase 3:
+- `./scripts/qa/verify-paragon-runtime.sh` PASS (`PASS=10 WARN=2 FAIL=0`)
+- `./scripts/qa/verify-certificate-branding.sh` PASS (`PASS=25 WARN=0 FAIL=0`)
+- `./scripts/qa/verify-analytics-key.sh` PASS (`PASS=6 FAIL=0 SKIP=0`)
+- `./scripts/qa/verify-frontend-version-truth.sh` PASS (`29 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-analytics-hardening.sh` unchanged baseline FAIL (`23 PASS / 3 FAIL / 0 WARN`):
+  - `SEGMENT_KEY` expected-in-hook assertion
+  - footer runtime sentinel guard assertion
+  - CI workflow wiring assertion
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 

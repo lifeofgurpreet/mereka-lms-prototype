@@ -5,6 +5,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 SPEC_FILE="$REPO_ROOT/specs/paragon-design-tokens-migration_spec.md"
 PROMPT_FILE="$REPO_ROOT/docs/FRONTEND_PHASE_C_PROMPT.md"
@@ -15,7 +16,6 @@ THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.
 BRAND_LIGHT_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand-light.min.css"
 CORE_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
 LIGHT_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.min.css"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
 REQUIRE_RUNTIME=0
 SLOT_MARKER_POLICY="${SLOT_MARKER_POLICY:-auto}"
@@ -139,10 +139,10 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
   fi
 fi
 
-if [[ -f "$PLUGIN_FILE" ]]; then
-  if grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*False)' "$PLUGIN_FILE"; then
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" '\("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*False\)'; then
     THEME_DEFAULT_ENABLED=0
-  elif grep -q '("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True)' "$PLUGIN_FILE"; then
+  elif mereka_plugin_has_regex "$REPO_ROOT" '\("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True\)'; then
     THEME_DEFAULT_ENABLED=1
   fi
 fi

@@ -4,6 +4,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
 PASS=0
 WARN=0
@@ -50,15 +51,23 @@ else
   warn "Certificate-related override CSS differs across common/lms/cms copies"
 fi
 
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 PROFILE_CERT_CARD_COMPONENT="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src/profile/CertificateCard.jsx"
 
-if [[ -f "$PLUGIN_FILE" ]]; then
-  assert_contains "$PLUGIN_FILE" "org.openedx.frontend.learning.progress_certificate_status.v1" "Learning progress certificate slot is wired in Tutor plugin"
-  assert_contains "$PLUGIN_FILE" "mereka_progress_certificate_status" "Certificate slot widget id is declared in Tutor plugin"
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  if mereka_plugin_has_fixed "$REPO_ROOT" "org.openedx.frontend.learning.progress_certificate_status.v1"; then
+    pass "Learning progress certificate slot is wired in Tutor plugin contract sources"
+  else
+    fail "Learning progress certificate slot wiring missing in Tutor plugin contract sources"
+  fi
+
+  if mereka_plugin_has_fixed "$REPO_ROOT" "mereka_progress_certificate_status"; then
+    pass "Certificate slot widget id is declared in Tutor plugin contract sources"
+  else
+    fail "Certificate slot widget id missing in Tutor plugin contract sources"
+  fi
 else
-  fail "Tutor plugin file missing: infrastructure/tutor/plugins/mereka_lms.py"
+  fail "Tutor plugin contract sources missing: infrastructure/tutor/plugins/mereka_lms.py"
 fi
 
 if [[ -f "$MFE_SCSS" ]]; then
