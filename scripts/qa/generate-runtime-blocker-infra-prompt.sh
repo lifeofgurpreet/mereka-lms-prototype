@@ -82,7 +82,8 @@ output_file = sys.argv[2].strip() if len(sys.argv) > 2 else ""
 data = json.loads(p.read_text())
 summary = data.get("summary", {})
 diags = data.get("artifacts", {}).get("diagnostics", [])
-diagnostics_tsv = data.get("artifacts", {}).get("diagnostics_tsv")
+latest_artifacts = data.get("artifacts", {}).get("latest", {})
+diagnostics_tsv = latest_artifacts.get("diagnostics_tsv") or data.get("artifacts", {}).get("diagnostics_tsv")
 
 fails = [d for d in diags if d.get("status") == "fail"]
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
