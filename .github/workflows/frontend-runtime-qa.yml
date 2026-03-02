@@ -56,6 +56,11 @@ jobs:
           make qa-frontend-runtime-blocker-sweep-both \
             | tee -a var/qa/frontend-runtime-qa.log
 
+          # Generate infra-ready remediation prompt from latest blocker sweep JSON.
+          make qa-runtime-blocker-infra-prompt \
+            | tee var/qa/frontend-runtime-blocker-infra-prompt.txt
+          cat var/qa/frontend-runtime-blocker-infra-prompt.txt >> var/qa/frontend-runtime-qa.log
+
           if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
             ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
               | tee -a var/qa/frontend-runtime-qa.log
@@ -76,5 +81,6 @@ jobs:
             var/qa/frontend-runtime-blocker-sweep-*.diagnostics.tsv
             var/qa/frontend-runtime-blocker-auth-surfaces-*.log
             var/qa/frontend-runtime-blocker-credentials-*.log
+            var/qa/frontend-runtime-blocker-infra-prompt.txt
             var/branding-screenshots/**
           if-no-files-found: warn

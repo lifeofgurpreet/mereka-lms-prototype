@@ -120,6 +120,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - New canonical wrapper script `scripts/qa/run-frontend-runtime-blocker-sweep.sh` and Make target `qa-frontend-runtime-blocker-sweep-both` provide one-command blocker regression tracking for ongoing runtime convergence.
   - CI runtime lane wiring:
     - `.github/workflows/frontend-runtime-qa.yml` now runs `make qa-frontend-runtime-blocker-sweep-both` after the runtime tranche.
+    - The same workflow now generates and uploads an infra handoff prompt artifact from the latest blocker JSON (`var/qa/frontend-runtime-blocker-infra-prompt.txt`).
     - Runtime QA artifacts now include blocker sweep outputs:
       - `var/qa/frontend-runtime-blocker-sweep-*.summary.log`
       - `var/qa/frontend-runtime-blocker-sweep-*.summary.json`
@@ -127,6 +128,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
       - `var/qa/frontend-runtime-blocker-sweep-*.diagnostics.tsv`
       - `var/qa/frontend-runtime-blocker-auth-surfaces-*.log`
       - `var/qa/frontend-runtime-blocker-credentials-*.log`
+      - `var/qa/frontend-runtime-blocker-infra-prompt.txt`
   - Infra handoff prompt generation (deterministic from latest sweep JSON):
     - `make qa-runtime-blocker-infra-prompt`
     - optional explicit input: `make qa-runtime-blocker-infra-prompt INPUT_JSON=<path-to-summary.json>`
