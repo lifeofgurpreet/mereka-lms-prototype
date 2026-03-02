@@ -51,7 +51,7 @@ Required environment:
   MONGODB_CONNECTION_STRING   Atlas connection string (mongodb+srv://...)
 
 Example:
-  export MONGODB_CONNECTION_STRING="mongodb+srv://devuser:s3cr3t@cluster-dev.abc.mongodb.net"
+  export MONGODB_CONNECTION_STRING="mongodb+srv://${MONGODB_DEV_USER}:${MONGODB_DEV_PASSWORD}@cluster-dev.abc.mongodb.net"
   $(basename "$0") --dry-run
   $(basename "$0")
   $(basename "$0") --obliterate

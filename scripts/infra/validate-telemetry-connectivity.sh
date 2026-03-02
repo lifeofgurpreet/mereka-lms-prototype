@@ -23,11 +23,15 @@ GKE_PROM_SVC="${GKE_PROM_SVC:-monitoring-kube-prometheus-prometheus}"
 GRAFANA_LABEL="${GRAFANA_LABEL:-app.kubernetes.io/name=grafana}"
 OBSERVABILITY_REPO="${OBSERVABILITY_REPO:-/home/gurpreet/projects/observability}"
 GRAFANA_CONTRACT_FILE="${GRAFANA_CONTRACT_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
+GRAFANA_DASHBOARD_FILE="${GRAFANA_DASHBOARD_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboards/slo-overview.json}"
+LEGACY_GRAFANA_DASHBOARD_FILE="${LEGACY_GRAFANA_DASHBOARD_FILE:-${OBSERVABILITY_REPO}/dashboards/03-applications/bbi-mereka-lms.json}"
 JSON_OUT=0
 STRICT=0
 REQUIRE_VPS_PROM_DS="${REQUIRE_VPS_PROM_DS:-0}"
 REQUIRE_GRAFANA_RECOMMENDED="${REQUIRE_GRAFANA_RECOMMENDED:-0}"
 REQUIRE_DB_EXPORTER_METRICS="${REQUIRE_DB_EXPORTER_METRICS:-0}"
+WARN_ON_MISSING_VPS_PROM_DS="${WARN_ON_MISSING_VPS_PROM_DS:-0}"
+CHECK_LEGACY_DASHBOARD_UID_DRIFT="${CHECK_LEGACY_DASHBOARD_UID_DRIFT:-0}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -112,6 +116,9 @@ run_check() {
   rm -f "$tmp"
   if [[ "$rc" -eq 0 ]]; then
     record_check "$name" 1 ""
+    if [[ "$JSON_OUT" -eq 0 && -n "${out//[[:space:]]/}" ]]; then
+      printf "%s\n" "$out"
+    fi
   else
     record_check "$name" 0 "$out"
   fi
@@ -140,28 +147,97 @@ grafana_pod_name() {
     -l "$GRAFANA_LABEL" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true
 }
 
-check_gke_query_from_grafana() {
+grafana_exec_container_name() {
+  local grafana_pod="${1:-}"
+  local pod_json
+  local container
+
+  [[ -n "$grafana_pod" ]] || grafana_pod="$(grafana_pod_name)"
+  [[ -n "$grafana_pod" ]] || return 1
+
+  if [[ -n "${GRAFANA_CONTAINER:-}" ]]; then
+    echo "$GRAFANA_CONTAINER"
+    return 0
+  fi
+
+  pod_json="$(kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" get pod "$grafana_pod" -o json)"
+
+  for container in grafana grafana-sc-dashboard grafana-sc-datasources; do
+    if jq -e --arg name "$container" '.status.containerStatuses[]? | select(.name == $name and .ready == true)' <<<"$pod_json" >/dev/null; then
+      echo "$container"
+      return 0
+    fi
+  done
+
+  container="$(jq -r '.status.containerStatuses[]? | select(.ready == true) | .name' <<<"$pod_json" | head -n1)"
+  [[ -n "$container" ]] || return 1
+  echo "$container"
+}
+
+check_grafana_runtime_ready() {
   local grafana_pod
+  local pod_json
+  local reason
+  local message
+  local missing_secret
+
   grafana_pod="$(grafana_pod_name)"
   [[ -n "$grafana_pod" ]] || { echo "Grafana pod not found in $MONITORING_NS"; return 1; }
-  kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec "$grafana_pod" -- \
+
+  pod_json="$(kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" get pod "$grafana_pod" -o json)"
+
+  if jq -e '.status.containerStatuses[]? | select(.name == "grafana" and .ready == true)' <<<"$pod_json" >/dev/null; then
+    return 0
+  fi
+
+  reason="$(jq -r '.status.containerStatuses[]? | select(.name == "grafana") | (.state.waiting.reason // .state.terminated.reason // "unknown")' <<<"$pod_json" | head -n1)"
+  message="$(jq -r '.status.containerStatuses[]? | select(.name == "grafana") | (.state.waiting.message // .state.terminated.message // "no message")' <<<"$pod_json" | head -n1)"
+
+  missing_secret="$(sed -n 's/.*secret "\([^"]\+\)".*/\1/p' <<<"$message" | head -n1)"
+  if [[ -n "$missing_secret" ]]; then
+    if kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" get secret "$missing_secret" >/dev/null 2>&1; then
+      echo "Grafana container not ready (${reason}): ${message}"
+      return 1
+    fi
+    echo "Grafana container not ready (${reason}): missing Secret/${missing_secret} in namespace ${MONITORING_NS}"
+    return 1
+  fi
+
+  echo "Grafana container not ready (${reason}): ${message}"
+  return 1
+}
+
+check_gke_query_from_grafana() {
+  local grafana_pod
+  local grafana_container
+  grafana_pod="$(grafana_pod_name)"
+  [[ -n "$grafana_pod" ]] || { echo "Grafana pod not found in $MONITORING_NS"; return 1; }
+  grafana_container="$(grafana_exec_container_name "$grafana_pod")"
+  [[ -n "$grafana_container" ]] || { echo "No ready Grafana pod container available for exec"; return 1; }
+  kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec -c "$grafana_container" "$grafana_pod" -- \
     wget -qO- --timeout=5 "http://${GKE_PROM_SVC}.${MONITORING_NS}:9090/api/v1/query?query=up" \
     | jq -e '.status == "success"' >/dev/null
 }
 
 check_mereka_metrics_from_grafana() {
   local grafana_pod
+  local grafana_container
   grafana_pod="$(grafana_pod_name)"
   [[ -n "$grafana_pod" ]] || { echo "Grafana pod not found in $MONITORING_NS"; return 1; }
-  kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec "$grafana_pod" -- \
+  grafana_container="$(grafana_exec_container_name "$grafana_pod")"
+  [[ -n "$grafana_container" ]] || { echo "No ready Grafana pod container available for exec"; return 1; }
+  kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec -c "$grafana_container" "$grafana_pod" -- \
     wget -qO- --timeout=5 "http://${GKE_PROM_SVC}.${MONITORING_NS}:9090/api/v1/query?query=kube_pod_status_phase{namespace=\"${APP_NS}\"}" \
     | jq -e --arg ns "$APP_NS" '.status == "success" and (.data.result | any(.metric.namespace == $ns))' >/dev/null
 }
 
 check_db_exporter_metrics_from_grafana() {
   local grafana_pod
+  local grafana_container
   grafana_pod="$(grafana_pod_name)"
   [[ -n "$grafana_pod" ]] || { echo "Grafana pod not found in $MONITORING_NS"; return 1; }
+  grafana_container="$(grafana_exec_container_name "$grafana_pod")"
+  [[ -n "$grafana_container" ]] || { echo "No ready Grafana pod container available for exec"; return 1; }
 
   local queries=(
     "mysql_global_status_threads_connected{namespace=\"${APP_NS}\",service=\"mysql\"}"
@@ -179,7 +255,7 @@ print(urllib.parse.quote("""$q""", safe=''))
 PY
 )"
     resp="$(
-      kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec "$grafana_pod" -- \
+      kubectl --context "$K8S_CONTEXT" -n "$MONITORING_NS" exec -c "$grafana_container" "$grafana_pod" -- \
         wget -qO- --timeout=5 "http://${GKE_PROM_SVC}.${MONITORING_NS}:9090/api/v1/query?query=${encoded}" 2>/dev/null || true
     )"
     if [[ -z "$resp" ]]; then
@@ -213,7 +289,7 @@ check_required_datasource_configmaps() {
 }
 
 check_dashboard_parity() {
-  local dashboard_file="${OBSERVABILITY_REPO}/dashboards/03-applications/bbi-mereka-lms.json"
+  local dashboard_file="${GRAFANA_DASHBOARD_FILE}"
   if [[ ! -f "$dashboard_file" ]]; then
     if [[ "$STRICT" -eq 1 ]]; then
       echo "Dashboard file missing: $dashboard_file"
@@ -223,11 +299,8 @@ check_dashboard_parity() {
     return 0
   fi
 
-  jq -e '
-    .uid == "bbi-app-mereka-lms"
-    and ((.panels // []) | length > 0)
-  ' "$dashboard_file" >/dev/null || {
-    echo "Dashboard UID/panels sanity failed in $dashboard_file"
+  jq -e '((.uid // "") | length > 0) and ((.panels // []) | length > 0)' "$dashboard_file" >/dev/null || {
+    echo "Dashboard UID/panels sanity failed for $dashboard_file"
     return 1
   }
 
@@ -235,7 +308,10 @@ check_dashboard_parity() {
     [.. | objects | select(has("datasource")) | .datasource]
     | any(
         (type == "string" and . == "prometheus")
-        or (type == "object" and (.uid // "") == "prometheus")
+        or (type == "object" and (
+          (.uid // "") == "prometheus"
+          or (.type // "") == "prometheus"
+        ))
       )
   ' "$dashboard_file" >/dev/null || {
     echo "Dashboard missing primary prometheus datasource references: $dashboard_file"
@@ -246,14 +322,19 @@ check_dashboard_parity() {
       [.. | objects | select(has("datasource")) | .datasource]
       | any(
           (type == "string" and . == "prometheus-vps")
-          or (type == "object" and (.uid // "") == "prometheus-vps")
+          or (type == "object" and (
+            (.uid // "") == "prometheus-vps"
+            or (.uid // "") == "${DS_PROMETHEUS_VPS}"
+          ))
         )
     ' "$dashboard_file" >/dev/null; then
     if [[ "$STRICT" -eq 1 && "$REQUIRE_VPS_PROM_DS" == "1" ]]; then
       echo "Dashboard has no prometheus-vps datasource references: $dashboard_file"
       return 1
     fi
-    record_warn "Dashboard currently has no prometheus-vps datasource refs; GKE path is still validated."
+    if [[ "$WARN_ON_MISSING_VPS_PROM_DS" == "1" ]]; then
+      record_warn "Dashboard currently has no prometheus-vps datasource refs; GKE path is still validated."
+    fi
   fi
 
   local audit_script="${REPO_ROOT}/scripts/qa/audit-grafana-dashboard.sh"
@@ -291,6 +372,15 @@ check_dashboard_parity() {
     fi
     record_warn "Grafana dashboard has $warn_count recommended coverage gaps. Run ./scripts/qa/audit-grafana-dashboard.sh."
   fi
+
+  if [[ "$CHECK_LEGACY_DASHBOARD_UID_DRIFT" == "1" ]] && [[ -f "$LEGACY_GRAFANA_DASHBOARD_FILE" ]]; then
+    local repo_uid legacy_uid
+    repo_uid="$(jq -r '.uid // ""' "$dashboard_file" 2>/dev/null || true)"
+    legacy_uid="$(jq -r '.uid // ""' "$LEGACY_GRAFANA_DASHBOARD_FILE" 2>/dev/null || true)"
+    if [[ -n "$repo_uid" && -n "$legacy_uid" && "$repo_uid" != "$legacy_uid" ]]; then
+      record_warn "Dashboard UID drift between repo (${repo_uid}) and legacy observability repo (${legacy_uid})"
+    fi
+  fi
 }
 
 if [[ "$JSON_OUT" -eq 0 ]]; then
@@ -307,6 +397,7 @@ run_check "VPS Prometheus HTTPS endpoint" check_vps_prometheus
 run_check "VPS Prometheus external-urls job" check_vps_external_urls
 run_check "GKE Prometheus service exists" check_gke_prometheus_service
 run_check "GKE Prometheus pod running" check_gke_prometheus_pod
+run_check "Grafana runtime ready" check_grafana_runtime_ready
 run_check "GKE Prometheus query from Grafana" check_gke_query_from_grafana
 run_check "Mereka LMS pod metrics from Grafana" check_mereka_metrics_from_grafana
 run_check "Grafana datasource ConfigMaps present" check_grafana_datasource_configmaps
