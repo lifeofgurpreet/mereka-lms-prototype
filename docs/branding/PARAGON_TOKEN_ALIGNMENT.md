@@ -25,7 +25,7 @@ All Paragon token bridges are defined in `infrastructure/tutor/themes/mereka/scs
 | `--pgn-color-secondary-base` | `$color-teal` | #237072 | Secondary actions, links |
 | `--pgn-color-success-base` | `$color-success` / `$color-forest` | #2c6e49 | Success states, positive feedback |
 | `--pgn-color-info-base` | `$color-info` / `$color-blue` | #295cad | Informational states, default links |
-| `--pgn-color-warning-base` | `$color-warning` / `$color-gold` | #f4be48 | Warning states, caution indicators |
+| `--pgn-color-warning-base` | `$color-warning` / `$color-gold` | #996b00 | Warning states, caution indicators |
 | `--pgn-color-danger-base` | `$color-danger` / `$color-burgundy` | #8c002f | Error states, destructive actions |
 | `--pgn-body-bg` | `$color-neutral-100` | #FBFAFB | Page background |
 | `--pgn-body-color` | `$color-ink-900` | #000000 | Body text color |

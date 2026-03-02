@@ -18,7 +18,7 @@ Quick operational entrypoint (read this before changing anything):
 | `magenta` | `#ab3b78` | CTA buttons |
 | `blue` | `#295cad` | Links, info states |
 | `forest` | `#2c6e49` | Success |
-| `gold` | `#f4be48` | Warnings |
+| `gold` | `#996b00` | Warnings |
 | `burgundy` | `#8c002f` | Errors |
 | `pink` | `#cd89ae` | Error backgrounds |
 | `sky` | `#94d1e4` | Info backgrounds |

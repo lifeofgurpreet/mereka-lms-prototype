@@ -123,6 +123,7 @@ else
   COLOR_MAGENTA=$(get_scss_color "color-magenta")
   COLOR_FOREST=$(get_scss_color "color-forest")
   COLOR_BURGUNDY=$(get_scss_color "color-burgundy")
+  COLOR_WARNING=$(get_scss_color "color-gold")
 
   # Helper: evaluate a pair with label, threshold, and size hint
   # Usage: check_pair <label> <fg> <bg> <threshold> <size_note>
@@ -180,6 +181,7 @@ else
   # ── Status / semantic colors on white surface
   check_pair "success text (forest on surface)"       "$COLOR_FOREST"   "$SURFACE" 4.5 "normal text"
   check_pair "danger text (burgundy on surface)"      "$COLOR_BURGUNDY" "$SURFACE" 4.5 "normal text"
+  check_pair "warning text (warning on surface)"      "$COLOR_WARNING"  "$SURFACE" 4.5 "normal text"
 
   # ── mereka-badge: teal text on teal/12 background
   # Effective background is ~rgba(35,112,114,0.12) blended onto white (#fbfafb).

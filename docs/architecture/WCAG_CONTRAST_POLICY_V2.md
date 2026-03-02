@@ -49,7 +49,7 @@ $color-magenta: #ab3b78;
 $color-blue: #295cad;
 $color-forest: #2c6e49;
 $color-burgundy: #8c002f;
-$color-gold: #f4be48;
+$color-gold: #996b00;
 $color-sky: #94d1e4;
 $color-pink: #cd89ae;
 ```
@@ -116,7 +116,7 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 
 | Component | Foreground Token | Background Token | Required Ratio | Measured Ratio (L2) | Status |
 |-----------|------------------|------------------|----------------|---------------------|--------|
-| Warning badge | ink-900 (#000000) | gold (#f4be48) | 4.5:1 | 13.3:1 | PASS |
+| Warning badge | white (#ffffff) | gold (#996b00) | 4.5:1 | 4.71:1 | PASS |
 | Info-soft badge | ink-900 (#000000) | sky (#94d1e4) | 4.5:1 | 14.5:1 | PASS |
 | Danger-soft badge | ink-900 (#000000) | pink (#cd89ae) | 4.5:1 | 9.5:1 | PASS |
 
