@@ -9,7 +9,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 |---|---|---|
 | `#103` Frontend phase handover + closure epic | CLOSED | Final handover update posted (`issuecomment-3981836140`) with runtime proofs, residual risks, rollback path |
 | `#104` CI ceremony reduction + workflow consolidation | CLOSED | Initial consolidation: `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7`; canonical wrapper-prune follow-on completed: commit `e2937e6b` + `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md` |
-| `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest artifacts `var/screenshots/dev/20260302T061514Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`); cross-browser matrix rerun PASS (`./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser`, `15 passed`, log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`) |
+| `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest MFE artifacts `var/screenshots/dev/20260302T105625Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`; logs `var/qa/paragon-runtime-dev-20260302T105604Z.log`, `var/qa/studio-authoring-branding-dev-20260302T105604Z.log`); cross-browser matrix rerun PASS (`./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser`, `15 passed`, log `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`) |
 | `#106` PDF certificate branding closure | CLOSED | `verify-certificate-branding.sh` PASS; issue closure evidence on thread |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | CLOSED | DOM audit rerun PASS after stability hardening (`issuecomment-3981799304`) |
 | `#108` Accessibility closure (contrast + focus) | CLOSED | `verify-a11y-contrast-focus.sh` + `verify-wcag-contrast-v2.sh` PASS |
@@ -78,6 +78,10 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS)
   - Latest cross-browser smoke stability rerun (dev):
     - `./scripts/qa/verify-cross-browser-branding-smoke.sh --env dev --cross-browser` (PASS `15 passed`, log: `var/qa/cross-browser-branding-smoke-dev-20260302T100442Z.log`)
+  - Latest deterministic capture/runtime rerun (dev):
+    - `CAPTURE_RETRIES=1 AGENT_BROWSER_TIMEOUT_SECONDS=30 ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only` (PASS; screenshots `var/screenshots/dev/20260302T105625Z/`, log `var/qa/capture-branding-screenshots-dev-mfe-20260302T105625Z.log`)
+    - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` (PASS; log `var/qa/paragon-runtime-dev-20260302T105604Z.log`)
+    - `./scripts/qa/verify-studio-authoring-branding.sh dev` (PASS; log `var/qa/studio-authoring-branding-dev-20260302T105604Z.log`)
   - Latest certificate closure rerun: `./scripts/qa/verify-certificate-branding.sh` (PASS `23`, WARN `1`, FAIL `0`; warning is expected when `frontend-app-profile` source checkout is absent on runner).
   - Latest #104 consolidation contract reruns:
     - `./scripts/qa/verify-frontend-qa-make-targets.sh` (PASS)
@@ -88,7 +92,11 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - env-specific closure targets now delegate to `qa-frontend-closure` with explicit `QA_*` flags
     - verifier updated: `scripts/qa/verify-frontend-qa-make-targets.sh` and rerun PASS
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) now passes notes-root banner and forum health contracts (forum non-prod fallback `/healthz=200`) and still fails on one non-authn runtime blocker (`credentials` `/login`, `/login/edx-oauth2`, `/admin/login` returning `500`), so local login/session runtime validation remains infra-convergence dependent. Equivalent prod credentials checks return `302`, confirming dev-runtime drift.
-  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T101424Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`).
+  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T105604Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T101515Z.log` (`OK`).
+  - Capture/verification deterministic hardening in this tranche:
+    - `capture-branding-screenshots.sh` now starts by closing stale agent-browser daemon sessions so launch flags are applied consistently.
+    - Capture wrapper strips daemon-warning noise from command stdout so `capture-summary.tsv` fields remain parseable and stable.
+    - `verify-paragon-runtime.sh` and `verify-studio-authoring-branding.sh` now auto-allow insecure TLS only for dev runtime checks (configurable via `PARAGON_RUNTIME_CURL_INSECURE` and `STUDIO_CURL_INSECURE`) to prevent self-signed cert false failures.
   - `verify-auth-surfaces.sh` now applies TLS-insecure curl mode only for non-prod (`dev`/`staging`) so self-signed certs do not create false failures.
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
   - Direct pod inspection confirms timezone data is missing in dev credentials runtime (`/usr/share/zoneinfo/UTC` absent; `python -m pip show tzdata` not found), narrowing remediation to image/runtime package composition.

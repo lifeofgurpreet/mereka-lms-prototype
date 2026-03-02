@@ -20,9 +20,11 @@ RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
 REQUIRE_RUNTIME=0
 SLOT_MARKER_POLICY="${SLOT_MARKER_POLICY:-auto}"
 THEME_DEFAULT_ENABLED=1
+RUNTIME_CURL_INSECURE="${PARAGON_RUNTIME_CURL_INSECURE:-auto}"
 MAX_CORE_THEME_BYTES="${MAX_CORE_THEME_BYTES:-614400}"
 MAX_BRAND_THEME_BYTES="${MAX_BRAND_THEME_BYTES:-51200}"
 MAX_LIGHT_THEME_BYTES="${MAX_LIGHT_THEME_BYTES:-4096}"
+CURL_FLAGS=()
 
 PASS=0
 FAIL=0
@@ -139,6 +141,17 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
   fi
 fi
 
+if [[ "$RUNTIME_CURL_INSECURE" == "auto" ]]; then
+  if [[ "$RUNTIME_URL" == *".dev"* ]]; then
+    RUNTIME_CURL_INSECURE=1
+  else
+    RUNTIME_CURL_INSECURE=0
+  fi
+fi
+if [[ "$RUNTIME_CURL_INSECURE" == "1" || "$RUNTIME_CURL_INSECURE" == "true" ]]; then
+  CURL_FLAGS=(-k)
+fi
+
 if mereka_plugin_has_any "$REPO_ROOT"; then
   if mereka_plugin_has_regex "$REPO_ROOT" '\("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*False\)'; then
     THEME_DEFAULT_ENABLED=0
@@ -167,7 +180,7 @@ fi
 if [[ -n "${RUNTIME_URL:-}" ]]; then
   runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
   authn_shell_url="${RUNTIME_URL%/}/authn/login"
-  runtime_status="$(curl -sSIL -o /tmp/paragon-theme-head.$$ -w "%{http_code}" "$runtime_url" || true)"
+  runtime_status="$(curl "${CURL_FLAGS[@]}" -sSIL -o /tmp/paragon-theme-head.$$ -w "%{http_code}" "$runtime_url" || true)"
   if [[ "$runtime_status" =~ ^[0-9]+$ ]] && [[ "$runtime_status" -ge 200 ]] && [[ "$runtime_status" -lt 400 ]]; then
     content_type_ok=0
     cache_header_ok=0
@@ -182,7 +195,7 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
       cache_header_ok=1
     fi
 
-    if curl -sSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
+    if curl "${CURL_FLAGS[@]}" -sSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
       body_fetch_ok=1
       body_bytes="$(wc -c </tmp/paragon-theme-body.$$ | tr -d ' ')"
       if [[ "$body_bytes" -gt 100 ]]; then
@@ -217,7 +230,7 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
     fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown}); likely runtime-theme rollout drift (rebuild/push MFE image and update GitOps tags/ref)"
   fi
 
-  authn_shell_status="$(curl -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
+  authn_shell_status="$(curl "${CURL_FLAGS[@]}" -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
   if [[ "$authn_shell_status" =~ ^[0-9]+$ ]] && [[ "$authn_shell_status" -ge 200 ]] && [[ "$authn_shell_status" -lt 400 ]]; then
     has_runtime_theme_urls=0
     has_embedded_theme_files=0
@@ -256,7 +269,7 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
       [[ -z "$bundle_path" ]] && continue
       bundle_url="${RUNTIME_URL%/}${bundle_path}"
       bundle_tmp="$(mktemp -t paragon-authn-bundle.XXXXXX)"
-      if curl -fsSL "$bundle_url" -o "$bundle_tmp" 2>/dev/null; then
+      if curl "${CURL_FLAGS[@]}" -fsSL "$bundle_url" -o "$bundle_tmp" 2>/dev/null; then
         for marker in \
           "mereka-authn-login-branding" \
           "mereka-header-logo" \
