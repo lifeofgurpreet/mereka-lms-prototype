@@ -31,6 +31,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - `./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers` passed (`exit=0`).
   - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun.
   - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` now passes notes + forum health checks (forum accepts `/healthz` fallback in non-prod) and reports one remaining non-authn blocker (`credentials` login endpoints returning 500). Equivalent prod checks return expected `302` redirects, so the failure is dev-runtime specific.
+  - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`), which is the current lead root-cause indicator.
   - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
   - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`).

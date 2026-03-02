@@ -60,6 +60,33 @@ curl_loc() {
   printf "%s %s\n" "${code:-000}" "${loc:-}"
 }
 
+http_diag() {
+  # Prints one-line diagnostics for failing HTTP checks.
+  local url="$1"
+  local method="${2:-GET}"
+  local header_file body_file status location ctype server req_id cf_ray body_head
+  header_file="$(mktemp)"
+  body_file="$(mktemp)"
+
+  if [[ "$method" == "HEAD" ]]; then
+    curl -sS -I -D "$header_file" "$url" -o /dev/null >/dev/null 2>&1 || true
+  else
+    curl -sS -X "$method" -D "$header_file" "$url" -o "$body_file" >/dev/null 2>&1 || true
+  fi
+
+  status="$(awk 'NR==1 {print $2}' "$header_file")"
+  location="$(awk -F': ' 'tolower($1)=="location" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
+  ctype="$(awk -F': ' 'tolower($1)=="content-type" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
+  server="$(awk -F': ' 'tolower($1)=="server" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
+  req_id="$(awk -F': ' 'tolower($1)=="x-request-id" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
+  cf_ray="$(awk -F': ' 'tolower($1)=="cf-ray" {print $2}' "$header_file" | tr -d '\r' | head -n1)"
+  body_head="$(head -c 180 "$body_file" 2>/dev/null | tr '\r\n' ' ' | sed 's/[[:space:]]\\+/ /g')"
+
+  rm -f "$header_file" "$body_file"
+  printf "diag{method=%s,status=%s,location=%s,content-type=%s,server=%s,x-request-id=%s,cf-ray=%s,body=%s}" \
+    "${method:-GET}" "${status:-000}" "${location:--}" "${ctype:--}" "${server:--}" "${req_id:--}" "${cf_ray:--}" "${body_head:--}"
+}
+
 require_200() {
   local url="$1"
   local label="$2"
@@ -81,7 +108,7 @@ require_status() {
   if [[ "$code" == "$expected" ]]; then
     log_ok "$label ($code)"
   else
-    log_fail "$label (expected $expected, got $code) url=$url"
+    log_fail "$label (expected $expected, got $code) url=$url $(http_diag "$url" "GET")"
   fi
 }
 
@@ -100,7 +127,7 @@ require_status_one_of() {
   if [[ "$ok" -eq 1 ]]; then
     log_ok "$label ($code)"
   else
-    log_fail "$label (expected one of: $*, got $code) url=$url"
+    log_fail "$label (expected one of: $*, got $code) url=$url $(http_diag "$url" "GET")"
   fi
 }
 
@@ -113,7 +140,7 @@ require_302_location_contains() {
   if [[ "$code" == "302" && "$loc" == *"$needle"* ]]; then
     log_ok "$label (302 -> contains '$needle')"
   else
-    log_fail "$label (expected 302 + location contains '$needle', got code=$code loc=$loc) url=$url"
+    log_fail "$label (expected 302 + location contains '$needle', got code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
   fi
 }
 
@@ -194,7 +221,7 @@ require_302_location_is() {
   if [[ "$code" == "302" && "$loc" == "$expected" ]]; then
     log_ok "$label (302 -> $expected)"
   else
-    log_fail "$label (expected 302 -> $expected, got code=$code loc=$loc) url=$url"
+    log_fail "$label (expected 302 -> $expected, got code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
   fi
 }
 
@@ -302,11 +329,11 @@ check_admin_login_redirect() {
   fi
 
   if [[ "$STRICT_ADMIN_LOGIN_REDIRECT" == "1" ]]; then
-    log_fail "${svc}: /admin/login does not redirect to /login (code=$code loc=$loc) url=$url"
+    log_fail "${svc}: /admin/login does not redirect to /login (code=$code loc=$loc) url=$url $(http_diag "$url" "GET")"
     return 1
   fi
 
-  log_warn "${svc}: /admin/login does not redirect to /login yet (code=$code loc=$loc). This is OK if hardening not deployed."
+  log_warn "${svc}: /admin/login does not redirect to /login yet (code=$code loc=$loc). This is OK if hardening not deployed. $(http_diag "$url" "GET")"
   return 0
 }
 
