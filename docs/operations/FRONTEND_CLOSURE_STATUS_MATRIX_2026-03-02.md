@@ -15,7 +15,7 @@ No `bbi-infrastructure` / GitOps repo changes in this lane.
 | `#106` PDF certificate branding closure | DONE | `verify-certificate-branding.sh` PASS (`PASS=25 WARN=0 FAIL=0`) |
 | `#109` `mereka_lms.py` maintainability split | BLOCKED / STAGED (phase-1 started) | `docs/operations/PLUGIN_SPLIT_STATUS_2026-03-02.md` (3426-line file, 96 QA path couplings; phase-1 no-behavior dedupe complete, staged migration still deferred) |
 | `#111` Phase 6 slot decision (freeze vs continue) | DECISION: FREEZE | Documented in `docs/BRANDING_PLAN.md` stabilization snapshot and `docs/operations/EPIC_103_HANDOVER_DRAFT_2026-03-02.md` |
-| `#110` staging promotion + rollback evidence | DEFERRED (await signal) | Out of scope in this repo-only lane per current instruction; rollback commands prepared in `docs/operations/EPIC_103_HANDOVER_DRAFT_2026-03-02.md` |
+| `#110` staging promotion + rollback evidence | DEFERRED (await signal) | Out of scope in this repo-only lane per current instruction; rollback commands prepared in `docs/operations/EPIC_103_HANDOVER_DRAFT_2026-03-02.md`; execution checklist in `docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md` |
 
 Issue comment links (GitHub):
 - `#104`: `issuecomment-3981489973`
