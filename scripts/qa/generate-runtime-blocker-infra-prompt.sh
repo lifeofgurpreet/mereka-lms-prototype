@@ -4,6 +4,11 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEFAULT_GLOB="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-*.summary.json"
+PREFERRED_DEFAULTS=(
+  "$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-both.summary.json"
+  "$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-dev.summary.json"
+  "$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-prod.summary.json"
+)
 INPUT_JSON=""
 
 usage() {
@@ -34,6 +39,15 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -z "$INPUT_JSON" ]]; then
+  for candidate in "${PREFERRED_DEFAULTS[@]}"; do
+    if [[ -f "$candidate" ]]; then
+      INPUT_JSON="$candidate"
+      break
+    fi
+  done
+fi
 
 if [[ -z "$INPUT_JSON" ]]; then
   INPUT_JSON="$(ls -1t $DEFAULT_GLOB 2>/dev/null | head -n 1 || true)"

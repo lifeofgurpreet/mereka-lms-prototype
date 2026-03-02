@@ -44,12 +44,13 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - `verify-authenticated-sso-canary.sh` now supports `SSO_CANARY_IGNORE_HTTPS_ERRORS=auto|0|1` with default `auto` policy (`dev=1`, `prod=0`) so authenticated canary runs remain signal-focused in non-prod while production stays TLS-strict.
   - Canonical blocker sweep lane added for repeated tracking:
     - `make qa-frontend-runtime-blocker-sweep-both`
-    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.summary.log`
-    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.summary.json`
+    - latest summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T113939Z.summary.log`
+    - latest machine-readable summary: `var/qa/frontend-runtime-blocker-sweep-both-20260302T113939Z.summary.json`
     - machine-readable summary artifact: `var/qa/frontend-runtime-blocker-sweep-*.summary.json` (plus per-check `*.records.tsv` and diagnosis labels in `*.diagnostics.tsv`)
-    - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260302T113717Z.diagnostics.tsv`).
+    - latest diagnosis labels: `auth-surfaces:dev=credentials_dev_login_500`, `credentials-readiness:dev:cluster=credentials_timezone_tzdata_missing` (`var/qa/frontend-runtime-blocker-sweep-both-20260302T113939Z.diagnostics.tsv`).
     - diagnosis output now includes `owner` + `next_action` routing metadata for each check in both JSON and TSV artifacts.
     - infra-ready prompt can be generated from latest sweep JSON with `make qa-runtime-blocker-infra-prompt`.
+    - default prompt input now resolves via stable latest sweep pointers (`frontend-runtime-blocker-sweep-latest-{both,dev,prod}.summary.json`).
     - generated prompt now includes fixed execution/verification/rollback command contract for infra remediation.
     - `.github/workflows/frontend-runtime-qa.yml` now emits `var/qa/frontend-runtime-blocker-infra-prompt.txt` as a runtime QA artifact for direct infra handoff.
     - latest result remains stable and isolated to the known dev credentials runtime blockers (`prod auth-surfaces` passes; `dev auth-surfaces` credentials 500 + credentials cluster timezone/tzdata fail).
