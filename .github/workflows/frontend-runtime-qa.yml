@@ -96,5 +96,6 @@ jobs:
             var/qa/frontend-runtime-blocker-credentials-dev-latest.log
             var/qa/frontend-runtime-blocker-infra-prompt.txt
             var/qa/frontend-runtime-blocker-status.txt
+            var/qa/frontend-runtime-blocker-status.md
             var/branding-screenshots/**
           if-no-files-found: warn
