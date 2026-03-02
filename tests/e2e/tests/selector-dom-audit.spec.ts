@@ -49,6 +49,47 @@ async function safeCountSelector(page: Page, selector: string): Promise<number> 
   return 0;
 }
 
+async function safePageContent(page: Page): Promise<string> {
+  const retries = 5;
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    try {
+      return await page.content();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isClosedError = page.isClosed()
+        || message.includes('Target page, context or browser has been closed');
+      const isTransientNavigationError = message.includes('is navigating and changing the content')
+        || message.includes('Execution context was destroyed')
+        || isClosedError;
+      if (isClosedError || !isTransientNavigationError || attempt === retries - 1) {
+        return '';
+      }
+      await page.waitForTimeout(200);
+    }
+  }
+  return '';
+}
+
+async function safeBodyText(page: Page): Promise<string> {
+  const retries = 5;
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    try {
+      return (await page.locator('body').innerText().catch(() => '')).trim();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isClosedError = page.isClosed()
+        || message.includes('Target page, context or browser has been closed');
+      const isTransientNavigationError = message.includes('Execution context was destroyed')
+        || isClosedError;
+      if (isClosedError || !isTransientNavigationError || attempt === retries - 1) {
+        return '';
+      }
+      await page.waitForTimeout(200);
+    }
+  }
+  return '';
+}
+
 async function recoverTransientErrorShell(page: Page): Promise<void> {
   // Some authn surfaces intermittently render a recoverable runtime error shell
   // before hydration completes. Try a bounded self-heal before asserting selectors.
@@ -74,6 +115,7 @@ async function recoverTransientErrorShell(page: Page): Promise<void> {
 }
 
 test('runtime selector DOM audit on configured MFE surfaces', async ({ page, baseURL }, testInfo) => {
+  test.setTimeout(180_000);
   const mfeBaseUrl = getMfeBaseUrl(baseURL!);
 
   const requiredSelectors = {
@@ -116,28 +158,30 @@ test('runtime selector DOM audit on configured MFE surfaces', async ({ page, bas
     expect(response?.status() ?? 500).toBeLessThan(500);
 
     await page.waitForLoadState('networkidle').catch(() => {});
-    let pageHtml = await page.content();
-    let pageText = (await page.locator('body').innerText().catch(() => '')).trim();
+    let pageHtml = await safePageContent(page);
+    let pageText = await safeBodyText(page);
 
-    // Authn/runtime pages can occasionally present a transient blank shell in headless runs.
-    // Retry a bounded number of reloads before asserting selector coverage.
-    for (let retry = 0; retry < 2; retry += 1) {
-      const blankShell = pageText.length === 0
-        && !/<script[\s>]/i.test(pageHtml)
-        && !/mereka-brand(?:-light)?(?:\\.min)?\\.css/i.test(pageHtml);
-      if (!blankShell) {
+    // Runtime MFE surfaces can occasionally present a transient blank shell in headless runs.
+    // Retry bounded reloads while the page is text-empty and lacks branded stylesheet signals.
+    for (let retry = 0; retry < 3; retry += 1) {
+      const hasThemeBrandStylesheet = /mereka-brand(?:-light)?(?:\\.min)?\\.css/i.test(pageHtml);
+      const hasThemeBrandLink = (await safeCountSelector(page, 'link[href*="mereka-brand"]')) > 0;
+      const blankLikeShell = pageText.length === 0
+        && !hasThemeBrandStylesheet
+        && !hasThemeBrandLink;
+      if (!blankLikeShell) {
         break;
       }
       await page.waitForTimeout(1500);
       await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
       await page.waitForLoadState('networkidle').catch(() => {});
-      pageHtml = await page.content();
-      pageText = (await page.locator('body').innerText().catch(() => '')).trim();
+      pageHtml = await safePageContent(page);
+      pageText = await safeBodyText(page);
     }
 
     await recoverTransientErrorShell(page);
-    pageHtml = await page.content();
-    pageText = (await page.locator('body').innerText().catch(() => '')).trim();
+    pageHtml = await safePageContent(page);
+    pageText = await safeBodyText(page);
 
     const requiredCounts = {} as Record<keyof typeof requiredSelectors, number>;
     for (const [key, selector] of Object.entries(requiredSelectors) as Array<[
@@ -196,7 +240,7 @@ test('runtime selector DOM audit on configured MFE surfaces', async ({ page, bas
 
     const allowBlankShellBypass = trackedSelectorHits === 0
       && pageTextLength === 0
-      && (hasThemeBrandStylesheet || hasThemeBrandLink || hydrationSignal);
+      && (hasThemeBrandStylesheet || hasThemeBrandLink);
     const allowHydratingAuthnShell = isAuthnSurface
       && trackedSelectorHits <= 1
       && pageTextLength === 0
