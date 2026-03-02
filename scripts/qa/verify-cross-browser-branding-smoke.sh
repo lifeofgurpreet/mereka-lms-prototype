@@ -124,21 +124,47 @@ fi
 preflight_authn_html=""
 
 preflight_mfe_shell() {
+  local tmp_file="/tmp/mereka-mfe-authn-shell.$$"
+  local -a candidates=(
+    "$MFE_BASE_URL/authn/login"
+    "$MFE_BASE_URL/authn/login/"
+    "$MFE_BASE_URL/authn/login?next=%2F"
+  )
+  local attempts=3
+  local sleep_seconds=1
+  local summary=""
+  local candidate=""
   local status=""
-  status="$(curl -ksSL -o /tmp/mereka-mfe-authn-shell.$$ -w '%{http_code}' "$MFE_BASE_URL/authn/login" || true)"
-  if [[ "$status" != "200" ]]; then
-    rm -f /tmp/mereka-mfe-authn-shell.$$
-    echo "ERROR: MFE shell preflight failed ($MFE_BASE_URL/authn/login returned HTTP ${status:-unknown})." >&2
-    echo "       Action: verify apps host routing before running cross-browser smoke." >&2
+  local found_theme=0
+
+  for (( attempt=1; attempt<=attempts; attempt++ )); do
+    for candidate in "${candidates[@]}"; do
+      status="$(curl -ksSL -o "$tmp_file" -w '%{http_code}' "$candidate" || true)"
+      summary+="${attempt}:${candidate}->${status:-unknown} "
+
+      if [[ "$status" =~ ^2[0-9][0-9]$ || "$status" =~ ^3[0-9][0-9]$ ]]; then
+        preflight_authn_html="$(cat "$tmp_file" 2>/dev/null || true)"
+        if [[ "$preflight_authn_html" == *"PARAGON_THEME"* ]]; then
+          found_theme=1
+          break
+        fi
+      fi
+    done
+    if [[ "$found_theme" -eq 1 ]]; then
+      break
+    fi
+    sleep "$sleep_seconds"
+  done
+
+  rm -f "$tmp_file"
+
+  if [[ "$found_theme" -ne 1 ]]; then
+    echo "ERROR: MFE shell preflight failed to get branded authn shell after retries." >&2
+    echo "       Attempts: ${summary}" >&2
+    echo "       Action: verify apps host routing/proxy and authn shell response content." >&2
     return 1
   fi
-  preflight_authn_html="$(cat /tmp/mereka-mfe-authn-shell.$$)"
-  rm -f /tmp/mereka-mfe-authn-shell.$$
-  if [[ "$preflight_authn_html" != *"PARAGON_THEME"* ]]; then
-    echo "ERROR: MFE shell preflight returned non-MFE HTML (missing PARAGON_THEME): $MFE_BASE_URL/authn/login" >&2
-    echo "       Action: check reverse-proxy target for the apps host." >&2
-    return 1
-  fi
+
   return 0
 }
 
