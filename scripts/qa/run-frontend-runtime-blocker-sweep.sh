@@ -61,10 +61,16 @@ auth_log_dev="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-dev-${ts}
 auth_log_prod="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-prod-${ts}.log"
 cred_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-credentials-dev-${ts}.log"
 summary_log="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.log"
+summary_log_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-${ENVIRONMENT}.summary.log"
 summary_json="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.summary.json"
 summary_json_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-${ENVIRONMENT}.summary.json"
 records_file="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.records.tsv"
 diagnostics_file="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-${ENVIRONMENT}-${ts}.diagnostics.tsv"
+records_file_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-${ENVIRONMENT}.records.tsv"
+diagnostics_file_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-sweep-latest-${ENVIRONMENT}.diagnostics.tsv"
+auth_log_dev_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-dev-latest.log"
+auth_log_prod_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-auth-surfaces-prod-latest.log"
+cred_log_latest="$REPO_ROOT/var/qa/frontend-runtime-blocker-credentials-dev-latest.log"
 
 pass=0
 fail=0
@@ -251,5 +257,17 @@ PY
 
 # Keep stable pointers for downstream prompt generation and CI artifact consumers.
 cp "$summary_json" "$summary_json_latest"
+cp "$summary_log" "$summary_log_latest"
+cp "$records_file" "$records_file_latest"
+cp "$diagnostics_file" "$diagnostics_file_latest"
+if [[ -f "$auth_log_prod" ]]; then
+  cp "$auth_log_prod" "$auth_log_prod_latest"
+fi
+if [[ -f "$auth_log_dev" ]]; then
+  cp "$auth_log_dev" "$auth_log_dev_latest"
+fi
+if [[ -f "$cred_log" ]]; then
+  cp "$cred_log" "$cred_log_latest"
+fi
 
 [[ "$fail" -eq 0 ]]
