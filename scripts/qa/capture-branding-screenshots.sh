@@ -186,12 +186,63 @@ wait_for_rendered_content() {
   return 0
 }
 
+probe_me_status() {
+  local probe
+  probe="$(
+    ab eval '(() => {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/user/v1/me", false);
+        xhr.withCredentials = true;
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.send(null);
+        const body = String(xhr.responseText || "");
+        const hasUsername = /"username"\s*:/.test(body) ? "username" : "no_username";
+        return `${xhr.status}|${hasUsername}`;
+      } catch (_err) {
+        return "na|na";
+      }
+    })()' 2>/dev/null || true
+  )"
+  probe="${probe//$'\t'/ }"
+  probe="${probe//$'\n'/ }"
+  if [[ -z "${probe:-}" ]]; then
+    echo "na|na"
+    return 0
+  fi
+  echo "$probe"
+}
+
+probe_login_refresh_status() {
+  local probe
+  probe="$(
+    ab eval '(() => {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/login_refresh", false);
+        xhr.withCredentials = true;
+        xhr.send(null);
+        return String(xhr.status || "na");
+      } catch (_err) {
+        return "na";
+      }
+    })()' 2>/dev/null || true
+  )"
+  probe="${probe//$'\t'/ }"
+  probe="${probe//$'\n'/ }"
+  if [[ -z "${probe:-}" ]]; then
+    echo "na"
+    return 0
+  fi
+  echo "$probe"
+}
+
 capture_route() {
   local label=$1
   local url=$2
   local file=$3
   local summary_file=$4
-  local attempt current_url title text_len node_count nav_ms min_nodes auth_state
+  local attempt current_url title text_len node_count nav_ms min_nodes auth_state me_status login_refresh_status
 
   min_nodes=20
   case "$label" in
@@ -210,19 +261,21 @@ capture_route() {
     text_len="$(ab eval '(() => (document.body?.innerText || "").trim().length)()' 2>/dev/null || true)"
     node_count="$(ab eval '(() => document.querySelectorAll("body *").length)()' 2>/dev/null || true)"
     nav_ms="$(ab eval '(() => { const n = performance.getEntriesByType("navigation")[0]; if (!n) return "na"; const dcl = Number(n.domContentLoadedEventEnd || 0); const dur = Number(n.duration || 0); if (dcl > 0) return Math.round(dcl); if (dur > 0) return Math.round(dur); return "na"; })()' 2>/dev/null || true)"
+    me_status="$(probe_me_status)"
+    login_refresh_status="$(probe_login_refresh_status)"
 
     auth_state="$(classify_auth_state "$label" "$current_url")"
 
     if [[ "$text_len" =~ ^[0-9]+$ ]] && [[ "$node_count" =~ ^[0-9]+$ ]]; then
       if [[ "$text_len" -ge 20 ]] && [[ "$node_count" -ge "$min_nodes" ]]; then
         ab screenshot --full "$file" >/dev/null
-        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "${nav_ms:-na}" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
+        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "${nav_ms:-na}" "${me_status:-na|na}" "${login_refresh_status:-na}" "$current_url" "$text_len" "$node_count" "$title" | tr '\n' ' ' >>"$summary_file"
         printf "\n" >>"$summary_file"
         return 0
       fi
     fi
 
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "${nav_ms:-na}" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$label" "$attempt" "$auth_state" "${nav_ms:-na}" "${me_status:-na|na}" "${login_refresh_status:-na}" "$current_url" "${text_len:-na}" "${node_count:-na}" "${title:-}" | tr '\n' ' ' >>"$summary_file"
     printf "\n" >>"$summary_file"
     if [[ "$attempt" -lt "$CAPTURE_RETRIES" ]]; then
       echo "WARN: low-content capture probe for $label (attempt $attempt/$CAPTURE_RETRIES), retrying" >&2
@@ -350,7 +403,7 @@ sanitize() {
 echo "Capturing screenshots to: $OUT_DIR (mfe_only=$MFE_ONLY)"
 ab set viewport 1440 900 >/dev/null
 SUMMARY_FILE="$OUT_DIR/capture-summary.tsv"
-echo -e "label\tattempt\tauth_state\tnav_ms\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
+echo -e "label\tattempt\tauth_state\tnav_ms\tme_status\tlogin_refresh_status\tfinal_url\ttext_len\tnode_count\ttitle" >"$SUMMARY_FILE"
 
 for entry in "${URLS[@]}"; do
   label="${entry%%|*}"
