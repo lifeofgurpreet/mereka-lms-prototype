@@ -30,19 +30,19 @@ rg -n "^[A-Za-z0-9_.-]+:($|[^=])" Makefile | sed -E 's/:.*$//' | wc -l
 
 | Candidate | Type | Why redundant | Canonical replacement | Status |
 |---|---|---|---|---|
-| `.github/workflows/policy-checks.yml` | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by `ci.yml` static lanes | `ci.yml` + `verify-ci-cd-pipeline.sh` | Planned |
-| `scripts/qa/verify-*-workflow.sh` family (18 files) | Meta wrapper scripts | Checks wrapper/workflow shape rather than runtime behavior; high ceremony, low signal | Direct source/runtime checks already in `ci-scripts-static.txt` | Planned |
+| `.github/workflows/policy-checks.yml` | Workflow wrapper | Manual-only fanout of contract wrappers that duplicate checks already covered by `ci.yml` static lanes | `ci.yml` + `verify-ci-cd-pipeline.sh` | Completed |
+| `scripts/qa/verify-*-workflow.sh` family (18 files) | Meta wrapper scripts | Checks wrapper/workflow shape rather than runtime behavior; high ceremony, low signal | Direct source/runtime checks already in `ci-scripts-static.txt` | Completed |
 | `Makefile` frontend QA wrapper aliases (env-specific duplicates) | Make target duplication | Multiple targets differ only by env/flags | Parameterized canonical targets (`QA_ENV`, `QA_MFE_ONLY`, gate flags) | In progress |
 
-## Projected Counts After Follow-on Tranche
+## Post-Tranche Counts
 
-If the `policy-checks` workflow and 18 meta wrapper scripts are removed in one focused tranche:
+After removing `policy-checks` and the 18-script workflow-wrapper family:
 
-| Metric | Current | Projected | Delta |
+| Metric | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| Workflow files | 60 | 59 | -1 |
-| Verify scripts | 495 | 477 | -18 |
-| Make targets | 76 | 70-73 | -3 to -6 |
+| Workflow files | 60 | 58 | -2 |
+| Verify scripts | 495 | 473 | -22 |
+| Make targets | 76 | 76 | 0 |
 
 ## Wrapper Script Deletion Set (18)
 
@@ -67,5 +67,5 @@ If the `policy-checks` workflow and 18 meta wrapper scripts are removed in one f
 
 ## Execution Note
 
-This follow-on reduction is gated on a clean integration window because several contract scripts currently have parallel-agent local modifications in this worktree.  
-To avoid mixing unrelated edits, execute removal tranche only when those files are either merged upstream or isolated in a clean branch.
+This tranche was executed in an isolated clean worktree to avoid colliding with parallel-agent dirty state in the primary workspace.  
+No GitOps repository changes were required.

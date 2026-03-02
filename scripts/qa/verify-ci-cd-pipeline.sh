@@ -20,7 +20,6 @@ cd "$REPO_ROOT"
 # --- Paths ---
 BUILD_WF=".github/workflows/build-tutor-images.yml"
 CI_WF=".github/workflows/ci.yml"
-POLICY_WF=".github/workflows/policy-checks.yml"
 EVIDENCE_WF=".github/workflows/release-evidence.yml"
 FRONTEND_RUNTIME_QA_WF=".github/workflows/frontend-runtime-qa.yml"
 FRONTEND_BEFORE_AFTER_VISUALS_WF=".github/workflows/frontend-before-after-visuals.yml"
@@ -456,66 +455,37 @@ check_gitops() {
     fail "[AC-020] Runtime theme drift diagnose workflow missing qa-runtime-theme-drift-diagnose invocation"
   fi
 
-  # AC-020: Policy checks workflow exists
-  if [[ -f "$POLICY_WF" ]]; then
-    pass "[AC-020] Policy checks workflow exists"
+  # AC-020: CI static script list uses direct contracts (no workflow-wrapper verifiers)
+  if [[ -f "$CI_STATIC_LIST" ]] && ! grep -Eq 'verify-.*-workflow\.sh$' "$CI_STATIC_LIST"; then
+    pass "[AC-020] ci-scripts-static list excludes workflow-wrapper verifier scripts"
   else
-    fail "[AC-020] Policy checks workflow missing: $POLICY_WF"
+    fail "[AC-020] ci-scripts-static still contains workflow-wrapper verifier scripts"
   fi
 
-  # AC-020: Policy checks is workflow_dispatch only
-  if [[ -f "$POLICY_WF" ]] && grep -q 'workflow_dispatch:' "$POLICY_WF"; then
-    pass "[AC-020] Policy checks triggered via workflow_dispatch"
-  else
-    fail "[AC-020] Policy checks missing workflow_dispatch trigger"
-  fi
-
-  # AC-020: Policy checks run all required verification scripts
-  if [[ -f "$POLICY_WF" ]]; then
+  # AC-020: CI static script list includes canonical direct contract checks
+  if [[ -f "$CI_STATIC_LIST" ]]; then
     local required_scripts=(
-      "verify-release-automation.sh"
       "verify-build-workflow-contract.sh"
+      "verify-release-automation.sh"
       "verify-release-workflow-invocation.sh"
       "verify-release-dry-run-contract.sh"
-      "verify-release-evidence-workflow.sh"
-      "verify-a11y-tenant-branding-workflow.sh"
-      "verify-certificate-branding-workflow.sh"
-      "verify-email-template-branding-workflow.sh"
-      "verify-mfe-selector-hardening-workflow.sh"
-      "verify-paragon-runtime-contract-workflow.sh"
-      "verify-paragon-theme-budget-workflow.sh"
-      "verify-cross-browser-branding-workflow.sh"
-      "verify-npm-start-smoke-workflow.sh"
-      "verify-frontend-performance-spotcheck-workflow.sh"
-      "verify-frontend-runtime-qa-workflow.sh"
-      "verify-frontend-before-after-visuals-workflow.sh"
-      "verify-make-help-contract.sh"
-      "verify-frontend-qa-make-targets.sh"
-      "verify-frontend-branding-closure-workflow.sh"
-      "verify-mfe-live-dom-audit-workflow.sh"
-      "verify-runtime-theme-drift-diagnose-workflow.sh"
-      "verify-phase7-dom-audit-contract.sh"
-      "verify-phase7-selector-list-coverage.sh"
-      "verify-runtime-theme-drift-lane.sh"
-      "verify-phase2-smoke-evidence-contract.sh"
-      "verify-phase2-smoke-evidence-workflow.sh"
-      "verify-accessibility-audit-workflow.sh"
-      "verify-a11y-runtime-lane-contract.sh"
-      "verify-branding-evidence-a11y-contract.sh"
-      "verify-branding-evidence-screenshot-contract.sh"
+      "verify-mfe-selector-hardening.sh"
+      "verify-paragon-token-coverage.sh"
       "verify-no-latest-prod-tags.sh"
     )
     local found=0
     for script in "${required_scripts[@]}"; do
-      if grep -q "$script" "$POLICY_WF" 2>/dev/null; then
+      if grep -q "$script" "$CI_STATIC_LIST" 2>/dev/null; then
         found=$((found + 1))
       fi
     done
     if [[ "$found" -eq "${#required_scripts[@]}" ]]; then
-      pass "[AC-020] Policy checks run all ${#required_scripts[@]} required verification scripts"
+      pass "[AC-020] ci-scripts-static includes all ${#required_scripts[@]} required direct contract scripts"
     else
-      fail "[AC-020] Policy checks missing scripts ($found/${#required_scripts[@]} found)"
+      fail "[AC-020] ci-scripts-static missing direct contract scripts ($found/${#required_scripts[@]} found)"
     fi
+  else
+    fail "[AC-020] ci-scripts-static list missing: $CI_STATIC_LIST"
   fi
 }
 

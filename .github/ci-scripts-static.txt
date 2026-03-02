@@ -56,7 +56,6 @@ scripts/qa/verify-build-workflow-contract.sh
 scripts/qa/verify-release-automation.sh
 scripts/qa/verify-release-workflow-invocation.sh
 scripts/qa/verify-release-dry-run-contract.sh
-scripts/qa/verify-release-evidence-workflow.sh
 scripts/qa/verify-release-deployment-choreography.sh
 
 # ── MFE contracts ────────────────────────────────────────────────────────────

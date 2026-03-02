@@ -65,17 +65,13 @@ assert_exec "scripts/qa/capture-branding-screenshots.sh"
 assert_exec "scripts/qa/verify-frontend-performance-spotcheck.sh"
 assert_exec "scripts/qa/run-branding-evidence-pipeline.sh"
 assert_exec "scripts/qa/verify-certificate-branding.sh"
-assert_exec "scripts/qa/verify-certificate-branding-workflow.sh"
 assert_exec "scripts/qa/verify-email-template-multilang.sh"
-assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
-assert_exec "scripts/qa/verify-paragon-theme-budget-workflow.sh"
-assert_exec "scripts/qa/verify-frontend-runtime-qa-workflow.sh"
-assert_exec "scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
-assert_exec "scripts/qa/verify-phase2-smoke-evidence-workflow.sh"
 assert_exec "scripts/qa/verify-runtime-theme-drift-lane.sh"
+assert_exec "scripts/qa/verify-release-automation.sh"
+assert_exec "scripts/qa/verify-branding-evidence-a11y-contract.sh"
+assert_exec "scripts/qa/verify-branding-evidence-screenshot-contract.sh"
 assert_exec "scripts/qa/build-branding-before-after-report.sh"
-assert_exec "scripts/qa/verify-frontend-before-after-visuals-workflow.sh"
 
 for target in \
   qa-cross-browser-prod \
@@ -184,9 +180,6 @@ assert_make_command \
   './scripts/qa/verify-phase2-smoke-evidence-contract.sh' \
   "qa-phase2-smoke-evidence-contract includes script contract"
 assert_make_command \
-  './scripts/qa/verify-phase2-smoke-evidence-workflow.sh' \
-  "qa-phase2-smoke-evidence-contract includes workflow contract"
-assert_make_command \
   './scripts/qa/verify-paragon-token-coverage.sh' \
   "qa-paragon-theme-budget"
 assert_make_command \
@@ -250,29 +243,11 @@ assert_make_command \
   '$(MAKE) qa-frontend-extended-surfaces' \
   "qa-frontend-contracts includes qa-frontend-extended-surfaces aggregator"
 assert_make_command \
-  './scripts/qa/verify-certificate-branding-workflow.sh' \
-  "qa-frontend-contracts includes verify-certificate-branding-workflow"
+  './scripts/qa/verify-release-automation.sh' \
+  "qa-frontend-contracts includes verify-release-automation"
 assert_make_command \
-  './scripts/qa/verify-email-template-branding-workflow.sh' \
-  "qa-frontend-contracts includes verify-email-template-branding-workflow"
-assert_make_command \
-  './scripts/qa/verify-mfe-live-dom-audit-workflow.sh' \
-  "qa-frontend-contracts includes verify-mfe-live-dom-audit-workflow"
-assert_make_command \
-  './scripts/qa/verify-frontend-branding-closure-workflow.sh' \
-  "qa-frontend-contracts includes verify-frontend-branding-closure-workflow"
-assert_make_command \
-  './scripts/qa/verify-frontend-runtime-qa-workflow.sh' \
-  "qa-frontend-contracts includes verify-frontend-runtime-qa-workflow"
-assert_make_command \
-  './scripts/qa/verify-frontend-before-after-visuals-workflow.sh' \
-  "qa-frontend-contracts includes verify-frontend-before-after-visuals-workflow"
-assert_make_command \
-  './scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh' \
-  "qa-frontend-contracts includes verify-runtime-theme-drift-diagnose-workflow"
-assert_make_command \
-  './scripts/qa/verify-release-evidence-workflow.sh' \
-  "qa-frontend-contracts includes verify-release-evidence-workflow"
+  './scripts/qa/verify-phase2-smoke-evidence-contract.sh' \
+  "qa-frontend-contracts includes verify-phase2-smoke-evidence-contract"
 assert_make_command \
   './scripts/qa/verify-phase7-dom-audit-contract.sh' \
   "qa-frontend-contracts includes verify-phase7-dom-audit-contract"
@@ -282,12 +257,6 @@ assert_make_command \
 assert_make_command \
   './scripts/qa/verify-runtime-theme-drift-lane.sh' \
   "qa-frontend-contracts includes verify-runtime-theme-drift-lane"
-assert_make_command \
-  '$(MAKE) qa-phase2-smoke-evidence-contract' \
-  "qa-frontend-contracts includes qa-phase2-smoke-evidence-contract aggregator"
-assert_make_command \
-  './scripts/qa/verify-paragon-theme-budget-workflow.sh' \
-  "qa-frontend-contracts includes verify-paragon-theme-budget-workflow"
 assert_make_command \
   './scripts/qa/verify-branding-evidence-a11y-contract.sh' \
   "qa-frontend-contracts includes verify-branding-evidence-a11y-contract"

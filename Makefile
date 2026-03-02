@@ -116,7 +116,6 @@ qa-phase2-smoke-evidence-dev: ## Run Phase 2 MFE smoke + screenshot evidence cap
 
 qa-phase2-smoke-evidence-contract: ## Verify Phase 2 smoke evidence script + workflow contracts
 	./scripts/qa/verify-phase2-smoke-evidence-contract.sh
-	./scripts/qa/verify-phase2-smoke-evidence-workflow.sh
 
 qa-runtime-theme-mode-prod: ## Fast runtime theme-mode preflight (prod)
 	./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers
@@ -239,19 +238,11 @@ qa-frontend-contracts: ## Run frontend closure contract suite (Makefile lanes + 
 	./scripts/qa/verify-make-help-contract.sh
 	./scripts/qa/verify-frontend-qa-make-targets.sh
 	$(MAKE) qa-frontend-extended-surfaces
-	./scripts/qa/verify-certificate-branding-workflow.sh
-	./scripts/qa/verify-email-template-branding-workflow.sh
-	./scripts/qa/verify-mfe-live-dom-audit-workflow.sh
-	./scripts/qa/verify-frontend-branding-closure-workflow.sh
-	./scripts/qa/verify-frontend-runtime-qa-workflow.sh
-	./scripts/qa/verify-frontend-before-after-visuals-workflow.sh
-	./scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh
-	./scripts/qa/verify-release-evidence-workflow.sh
+	./scripts/qa/verify-release-automation.sh
 	./scripts/qa/verify-phase7-dom-audit-contract.sh
 	./scripts/qa/verify-phase7-selector-list-coverage.sh
 	./scripts/qa/verify-runtime-theme-drift-lane.sh
-	$(MAKE) qa-phase2-smoke-evidence-contract
-	./scripts/qa/verify-paragon-theme-budget-workflow.sh
+	./scripts/qa/verify-phase2-smoke-evidence-contract.sh
 	./scripts/qa/verify-branding-evidence-a11y-contract.sh
 	./scripts/qa/verify-branding-evidence-screenshot-contract.sh
 	./scripts/qa/verify-ci-cd-pipeline.sh --section gitops
