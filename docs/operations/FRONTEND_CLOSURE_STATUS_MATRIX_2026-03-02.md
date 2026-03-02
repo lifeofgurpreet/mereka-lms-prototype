@@ -8,7 +8,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 | Issue | Status | Evidence |
 |---|---|---|
 | `#103` Frontend phase handover + closure epic | CLOSED | Final handover update posted (`issuecomment-3981836140`) with runtime proofs, residual risks, rollback path |
-| `#104` CI ceremony reduction + workflow consolidation | CLOSED | `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7` |
+| `#104` CI ceremony reduction + workflow consolidation | CLOSED | Initial consolidation: `docs/operations/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md`, commit `776adce7`; canonical wrapper-prune follow-on completed: commit `e2937e6b` + `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md` |
 | `#105` Runtime branding stabilization + deterministic screenshot evidence | CLOSED | Deterministic screenshots + runtime gates; focused closure capture mode added (`capture-branding-screenshots.sh --core-routes`), latest artifacts `var/screenshots/dev/20260302T061514Z/` + `capture-summary.tsv`; runtime gates PASS (`verify-paragon-runtime.sh`, `verify-studio-authoring-branding.sh`) |
 | `#106` PDF certificate branding closure | CLOSED | `verify-certificate-branding.sh` PASS; issue closure evidence on thread |
 | `#107` Phase 7 BEM live DOM audit + selector pruning | CLOSED | DOM audit rerun PASS after stability hardening (`issuecomment-3981799304`) |
@@ -24,6 +24,7 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `e2937e6b` — #104 follow-on completion: remove `policy-checks.yml`, delete 18 `verify-*-workflow.sh` wrappers, retarget Make/CI contracts to direct scripts
 - `fe2944f1` — runtime evidence hardening (`#105`): normalize probe values (`me_status`, `login_refresh_status`) for deterministic TSV parsing
 - `073f8be3` — docs trace sync: refresh closure matrix commit ledger with latest stabilization commits
 - `eefe8b5b` — runtime evidence hardening (`#105`): capture `login_refresh_status` as `GET:<code>,POST:<code>` and refresh closure artifacts/docs
@@ -63,4 +64,4 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - `./scripts/qa/verify-wcag-contrast-v2.sh` (PASS)
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) still fails outside authn lane (`credentials` 500, `notes` banner mismatch, `forum/heartbeat` 404), so local login/session runtime validation remains infra-convergence dependent.
   - Credentialed canary blocker: local/SSO canary env credentials are not available in this execution environment (`SSO_CANARY_*` and `LOCAL_CANARY_*` currently unset), so full authenticated local-login replay is pending secrets injection. Runner now supports independent mode toggles (`RUN_OIDC_CANARY`, `RUN_STUDIO_CANARY`, `RUN_LOCAL_LOGIN_CANARY`) so local checks can execute without OIDC lanes once local creds are injected (example command: `RUN_OIDC_CANARY=0 RUN_STUDIO_CANARY=0 RUN_LOCAL_LOGIN_CANARY=1 REQUIRE_LOCAL_CANARY=1 ./scripts/qa/verify-authenticated-sso-canary.sh --env dev`). Failure diagnostics now include `login_refresh_probe=GET:<code>,POST:<code>` to speed cookie/session drift triage.
-  - Follow-on #104 reduction matrix for canonical migration path and projected deltas: `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md`.
+  - Follow-on #104 reduction matrix now reflects completed canonical prune + post-tranche counts: `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md`.
