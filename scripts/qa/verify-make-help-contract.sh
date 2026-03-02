@@ -39,8 +39,9 @@ else
     "qa-paragon-theme-budget" \
     "qa-frontend-extended-surfaces" \
     "qa-frontend-runtime-qa-prod" \
-    "qa-branding-before-after-mfe-prod" \
-    "qa-npm-start-smoke-prod" \
+    "qa-branding-before-after" \
+    "qa-branding-screenshots" \
+    "qa-npm-start-smoke" \
     "qa-frontend-closure-dev-screenshots-mfe" \
     "qa-frontend-contracts"; do
     if ! grep -Fq -- "$required" <<<"$HELP_OUTPUT"; then

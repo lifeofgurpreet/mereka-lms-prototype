@@ -22,8 +22,6 @@ BUILD_WF=".github/workflows/build-tutor-images.yml"
 CI_WF=".github/workflows/ci.yml"
 POLICY_WF=".github/workflows/policy-checks.yml"
 EVIDENCE_WF=".github/workflows/release-evidence.yml"
-FRONTEND_CONTRACTS_WF=".github/workflows/frontend-contracts.yml"
-FRONTEND_EXTENDED_SURFACES_WF=".github/workflows/frontend-extended-surfaces.yml"
 FRONTEND_RUNTIME_QA_WF=".github/workflows/frontend-runtime-qa.yml"
 FRONTEND_BEFORE_AFTER_VISUALS_WF=".github/workflows/frontend-before-after-visuals.yml"
 RUNTIME_THEME_DRIFT_DIAGNOSE_WF=".github/workflows/runtime-theme-drift-diagnose.yml"
@@ -31,6 +29,7 @@ PHASE2_SMOKE_EVIDENCE_WF=".github/workflows/phase2-smoke-evidence.yml"
 RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
 WORKFLOWS_DIR=".github/workflows"
+CI_STATIC_LIST=".github/ci-scripts-static.txt"
 
 # --- Colours ---
 GREEN='\033[0;32m'
@@ -358,46 +357,15 @@ check_gitops() {
     fail "[AC-019] Release evidence missing artifact upload"
   fi
 
-  # AC-020: Frontend contracts workflow exists
-  if [[ -f "$FRONTEND_CONTRACTS_WF" ]]; then
-    pass "[AC-020] Frontend contracts workflow exists"
+  # AC-020: Frontend contract/extended-surface gates are consolidated into ci.yml lanes
+  if [[ -f "$CI_WF" && -f "$CI_STATIC_LIST" ]] \
+    && grep -q 'run-scripts-parallel\.sh .github/ci-scripts-static\.txt' "$CI_WF" \
+    && grep -q '^scripts/qa/verify-paragon-token-coverage\.sh$' "$CI_STATIC_LIST" \
+    && grep -q 'verify-certificate-branding\.sh' "$CI_WF" \
+    ; then
+    pass "[AC-020] Frontend contract and extended-surface checks are consolidated into ci.yml static-validation lanes"
   else
-    fail "[AC-020] Frontend contracts workflow missing: $FRONTEND_CONTRACTS_WF"
-  fi
-
-  # AC-020: Frontend contracts workflow is workflow_dispatch only
-  if [[ -f "$FRONTEND_CONTRACTS_WF" ]] && grep -q 'workflow_dispatch:' "$FRONTEND_CONTRACTS_WF"; then
-    pass "[AC-020] Frontend contracts workflow triggered via workflow_dispatch"
-  else
-    fail "[AC-020] Frontend contracts workflow missing workflow_dispatch trigger"
-  fi
-
-  # AC-020: Frontend contracts workflow runs make qa-frontend-contracts
-  if [[ -f "$FRONTEND_CONTRACTS_WF" ]] && grep -q 'make qa-frontend-contracts' "$FRONTEND_CONTRACTS_WF"; then
-    pass "[AC-020] Frontend contracts workflow runs qa-frontend-contracts lane"
-  else
-    fail "[AC-020] Frontend contracts workflow missing qa-frontend-contracts invocation"
-  fi
-
-  # AC-020: Frontend extended surfaces workflow exists
-  if [[ -f "$FRONTEND_EXTENDED_SURFACES_WF" ]]; then
-    pass "[AC-020] Frontend extended surfaces workflow exists"
-  else
-    fail "[AC-020] Frontend extended surfaces workflow missing: $FRONTEND_EXTENDED_SURFACES_WF"
-  fi
-
-  # AC-020: Frontend extended surfaces workflow is workflow_dispatch only
-  if [[ -f "$FRONTEND_EXTENDED_SURFACES_WF" ]] && grep -q 'workflow_dispatch:' "$FRONTEND_EXTENDED_SURFACES_WF"; then
-    pass "[AC-020] Frontend extended surfaces workflow triggered via workflow_dispatch"
-  else
-    fail "[AC-020] Frontend extended surfaces workflow missing workflow_dispatch trigger"
-  fi
-
-  # AC-020: Frontend extended surfaces workflow runs make qa-frontend-extended-surfaces
-  if [[ -f "$FRONTEND_EXTENDED_SURFACES_WF" ]] && grep -q 'make qa-frontend-extended-surfaces' "$FRONTEND_EXTENDED_SURFACES_WF"; then
-    pass "[AC-020] Frontend extended surfaces workflow runs qa-frontend-extended-surfaces lane"
-  else
-    fail "[AC-020] Frontend extended surfaces workflow missing qa-frontend-extended-surfaces invocation"
+    fail "[AC-020] ci.yml missing consolidated frontend contract/extended-surface gate wiring"
   fi
 
   # AC-020: Phase2 smoke evidence workflow exists
@@ -519,8 +487,6 @@ check_gitops() {
       "verify-cross-browser-branding-workflow.sh"
       "verify-npm-start-smoke-workflow.sh"
       "verify-frontend-performance-spotcheck-workflow.sh"
-      "verify-frontend-contracts-workflow.sh"
-      "verify-frontend-extended-surfaces-workflow.sh"
       "verify-frontend-runtime-qa-workflow.sh"
       "verify-frontend-before-after-visuals-workflow.sh"
       "verify-make-help-contract.sh"

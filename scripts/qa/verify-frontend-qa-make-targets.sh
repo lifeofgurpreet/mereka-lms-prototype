@@ -69,7 +69,6 @@ assert_exec "scripts/qa/verify-certificate-branding-workflow.sh"
 assert_exec "scripts/qa/verify-email-template-multilang.sh"
 assert_exec "scripts/qa/verify-email-template-branding-workflow.sh"
 assert_exec "scripts/qa/verify-paragon-theme-budget-workflow.sh"
-assert_exec "scripts/qa/verify-frontend-extended-surfaces-workflow.sh"
 assert_exec "scripts/qa/verify-frontend-runtime-qa-workflow.sh"
 assert_exec "scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh"
 assert_exec "scripts/qa/verify-phase2-smoke-evidence-contract.sh"
@@ -94,17 +93,10 @@ for target in \
   qa-runtime-theme-mode-dev \
   qa-paragon-theme-budget \
   qa-frontend-extended-surfaces \
+  qa-npm-start-smoke \
   qa-npm-start-smoke-local \
-  qa-npm-start-smoke-prod \
-  qa-npm-start-smoke-dev \
-  qa-branding-screenshots-prod \
-  qa-branding-screenshots-dev \
-  qa-branding-screenshots-mfe-prod \
-  qa-branding-screenshots-mfe-dev \
-  qa-branding-before-after-prod \
-  qa-branding-before-after-dev \
-  qa-branding-before-after-mfe-prod \
-  qa-branding-before-after-mfe-dev \
+  qa-branding-screenshots \
+  qa-branding-before-after \
   qa-frontend-closure-prod \
   qa-frontend-closure-dev \
   qa-frontend-closure-prod-screenshots \
@@ -210,35 +202,17 @@ assert_make_command \
   './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://localhost --require-branding-markers' \
   "qa-npm-start-smoke-local"
 assert_make_command \
-  './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.io --require-runtime-theme --require-branding-markers' \
-  "qa-npm-start-smoke-prod"
+  'args="--base-url https://academyv2.mereka.io --require-branding-markers"' \
+  "qa-npm-start-smoke includes prod base-url args"
 assert_make_command \
-  './scripts/qa/verify-npm-start-mfe-smoke.sh --base-url https://academyv2.mereka.dev --require-branding-markers' \
-  "qa-npm-start-smoke-dev"
+  './scripts/qa/verify-npm-start-mfe-smoke.sh $$args' \
+  "qa-npm-start-smoke delegates to verify-npm-start-mfe-smoke.sh"
 assert_make_command \
-  './scripts/qa/capture-branding-screenshots.sh prod' \
-  "qa-branding-screenshots-prod"
+  './scripts/qa/capture-branding-screenshots.sh $$args' \
+  "qa-branding-screenshots delegates to capture-branding-screenshots.sh"
 assert_make_command \
-  './scripts/qa/capture-branding-screenshots.sh dev' \
-  "qa-branding-screenshots-dev"
-assert_make_command \
-  './scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only' \
-  "qa-branding-screenshots-mfe-prod"
-assert_make_command \
-  './scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only' \
-  "qa-branding-screenshots-mfe-dev"
-assert_make_command \
-  './scripts/qa/build-branding-before-after-report.sh --env prod' \
-  "qa-branding-before-after-prod"
-assert_make_command \
-  './scripts/qa/build-branding-before-after-report.sh --env dev' \
-  "qa-branding-before-after-dev"
-assert_make_command \
-  './scripts/qa/build-branding-before-after-report.sh --env prod --mfe-only' \
-  "qa-branding-before-after-mfe-prod"
-assert_make_command \
-  './scripts/qa/build-branding-before-after-report.sh --env dev --mfe-only' \
-  "qa-branding-before-after-mfe-dev"
+  './scripts/qa/build-branding-before-after-report.sh $$args' \
+  "qa-branding-before-after delegates to build-branding-before-after-report.sh"
 assert_make_command \
   './scripts/qa/run-branding-evidence-pipeline.sh --env prod --frontend-only --cross-browser --require-runtime-theme' \
   "qa-frontend-closure-prod"
@@ -276,17 +250,11 @@ assert_make_command \
   '$(MAKE) qa-frontend-extended-surfaces' \
   "qa-frontend-contracts includes qa-frontend-extended-surfaces aggregator"
 assert_make_command \
-  './scripts/qa/verify-frontend-extended-surfaces-workflow.sh' \
-  "qa-frontend-contracts includes verify-frontend-extended-surfaces-workflow"
-assert_make_command \
   './scripts/qa/verify-certificate-branding-workflow.sh' \
   "qa-frontend-contracts includes verify-certificate-branding-workflow"
 assert_make_command \
   './scripts/qa/verify-email-template-branding-workflow.sh' \
   "qa-frontend-contracts includes verify-email-template-branding-workflow"
-assert_make_command \
-  './scripts/qa/verify-frontend-contracts-workflow.sh' \
-  "qa-frontend-contracts includes verify-frontend-contracts-workflow"
 assert_make_command \
   './scripts/qa/verify-mfe-live-dom-audit-workflow.sh' \
   "qa-frontend-contracts includes verify-mfe-live-dom-audit-workflow"
@@ -349,11 +317,12 @@ assert_help_entry "qa-frontend-runtime-qa-prod"
 assert_help_entry "qa-frontend-runtime-qa-dev"
 assert_help_entry "qa-make-help-contract"
 assert_help_entry "qa-frontend-contracts"
-assert_help_entry "qa-npm-start-smoke-prod"
+assert_help_entry "qa-npm-start-smoke"
+assert_help_entry "qa-branding-screenshots"
+assert_help_entry "qa-branding-before-after"
 assert_help_entry "qa-frontend-closure-dev-screenshots-mfe"
 assert_help_entry "qa-frontend-closure-prod-screenshots-mfe"
 assert_help_entry "qa-frontend-closure-dev-screenshots"
-assert_help_entry "qa-branding-screenshots-mfe-prod"
 
 if [[ "$violations" -ne 0 ]]; then
   echo "Frontend QA Makefile target contract failed."

@@ -33,8 +33,6 @@ jobs:
           bash -n scripts/qa/verify-cross-browser-branding-workflow.sh
           bash -n scripts/qa/verify-npm-start-smoke-workflow.sh
           bash -n scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
-          bash -n scripts/qa/verify-frontend-contracts-workflow.sh
-          bash -n scripts/qa/verify-frontend-extended-surfaces-workflow.sh
           bash -n scripts/qa/verify-frontend-runtime-qa-workflow.sh
           bash -n scripts/qa/verify-frontend-before-after-visuals-workflow.sh
           bash -n scripts/qa/verify-make-help-contract.sh
@@ -116,14 +114,6 @@ jobs:
       - name: Verify frontend performance spot-check workflow contract
         run: |
           ./scripts/qa/verify-frontend-performance-spotcheck-workflow.sh
-
-      - name: Verify frontend contracts workflow contract
-        run: |
-          ./scripts/qa/verify-frontend-contracts-workflow.sh
-
-      - name: Verify frontend extended surfaces workflow contract
-        run: |
-          ./scripts/qa/verify-frontend-extended-surfaces-workflow.sh
 
       - name: Verify frontend runtime QA workflow contract
         run: |
