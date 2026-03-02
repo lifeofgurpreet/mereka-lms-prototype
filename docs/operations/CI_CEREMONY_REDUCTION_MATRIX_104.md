@@ -44,6 +44,27 @@ If the `policy-checks` workflow and 18 meta wrapper scripts are removed in one f
 | Verify scripts | 495 | 477 | -18 |
 | Make targets | 76 | 70-73 | -3 to -6 |
 
+## Wrapper Script Deletion Set (18)
+
+1. `scripts/qa/verify-a11y-tenant-branding-workflow.sh`
+2. `scripts/qa/verify-accessibility-audit-workflow.sh`
+3. `scripts/qa/verify-certificate-branding-workflow.sh`
+4. `scripts/qa/verify-cicd-tutor-config-workflow.sh`
+5. `scripts/qa/verify-cross-browser-branding-workflow.sh`
+6. `scripts/qa/verify-email-template-branding-workflow.sh`
+7. `scripts/qa/verify-frontend-before-after-visuals-workflow.sh`
+8. `scripts/qa/verify-frontend-branding-closure-workflow.sh`
+9. `scripts/qa/verify-frontend-performance-spotcheck-workflow.sh`
+10. `scripts/qa/verify-frontend-runtime-qa-workflow.sh`
+11. `scripts/qa/verify-mfe-live-dom-audit-workflow.sh`
+12. `scripts/qa/verify-mfe-selector-hardening-workflow.sh`
+13. `scripts/qa/verify-npm-start-smoke-workflow.sh`
+14. `scripts/qa/verify-paragon-runtime-contract-workflow.sh`
+15. `scripts/qa/verify-paragon-theme-budget-workflow.sh`
+16. `scripts/qa/verify-phase2-smoke-evidence-workflow.sh`
+17. `scripts/qa/verify-release-evidence-workflow.sh`
+18. `scripts/qa/verify-runtime-theme-drift-diagnose-workflow.sh`
+
 ## Execution Note
 
 This follow-on reduction is gated on a clean integration window because several contract scripts currently have parallel-agent local modifications in this worktree.  
