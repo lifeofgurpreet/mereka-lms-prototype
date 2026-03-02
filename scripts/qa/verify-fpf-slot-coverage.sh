@@ -4,8 +4,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
-PLUGIN_FILE="$PLUGIN_MAIN"
 REGISTRY_DOC="$REPO_ROOT/docs/architecture/FPF_PLUGIN_SLOT_REGISTRY.md"
 
 PASS=0
@@ -16,8 +14,9 @@ pass() { PASS=$((PASS + 1)); echo "PASS: $*"; }
 fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
 warn() { WARN=$((WARN + 1)); echo "WARN: $*"; }
 
-if [[ ! -f "$PLUGIN_FILE" ]]; then
-  echo "ERROR: plugin file not found: $PLUGIN_FILE" >&2
+mapfile -t plugin_contract_files < <(mereka_plugin_contract_files "$REPO_ROOT")
+if [[ "${#plugin_contract_files[@]}" -eq 0 ]]; then
+  echo "ERROR: no plugin contract files found via mereka_plugin_contract_files" >&2
   exit 2
 fi
 
@@ -27,16 +26,16 @@ if [[ ! -f "$REGISTRY_DOC" ]]; then
 fi
 
 mapfile -t slot_ids < <(
-  rg -o '"org\.openedx\.frontend\.[^"]+\.v[0-9]+"' "$PLUGIN_FILE" \
+  rg --no-filename -o '"org\.openedx\.frontend\.[^"]+\.v[0-9]+"' "${plugin_contract_files[@]}" 2>/dev/null \
     | tr -d '"' \
-    | sort -u
+    | sort -u || true
 )
 
 slot_count="${#slot_ids[@]}"
 if [[ "$slot_count" -gt 0 ]]; then
-  pass "Discovered $slot_count unique slot IDs in mereka_lms.py"
+  pass "Discovered $slot_count unique slot IDs across plugin contract sources"
 else
-  fail "No FPF slot IDs found in mereka_lms.py"
+  fail "No FPF slot IDs found across plugin contract sources"
 fi
 
 declared_count="$(python3 - "$REGISTRY_DOC" <<'PY'
