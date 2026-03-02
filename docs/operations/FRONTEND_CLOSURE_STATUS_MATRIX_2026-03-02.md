@@ -24,6 +24,8 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `fe2944f1` — runtime evidence hardening (`#105`): normalize probe values (`me_status`, `login_refresh_status`) for deterministic TSV parsing
+- `073f8be3` — docs trace sync: refresh closure matrix commit ledger with latest stabilization commits
 - `eefe8b5b` — runtime evidence hardening (`#105`): capture `login_refresh_status` as `GET:<code>,POST:<code>` and refresh closure artifacts/docs
 - `1ace06ea` — auth canary diagnostics (`#105`): add `login_refresh_probe=GET:<code>,POST:<code>` to local/OIDC failure paths
 - `1b3d33d2` — runtime evidence hardening (`#105`): add per-route `me_status` + `login_refresh_status` to screenshot summary
