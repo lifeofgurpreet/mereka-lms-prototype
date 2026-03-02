@@ -231,9 +231,11 @@ qa-runtime-blocker-handoff-md: ## Build single markdown handoff from prompt/stat
 	} > "$$out_file"; \
 	echo "wrote $$out_file"
 
-qa-runtime-blocker-handoff-bundle: ## Package canonical runtime blocker artifacts into one tar.gz
+qa-runtime-blocker-handoff-bundle: ## Package runtime blocker artifacts into one tar.gz (STRICT=1 fail if any missing)
 	@out_file="$(if $(OUTPUT_FILE),$(OUTPUT_FILE),var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz)"; \
-	./scripts/qa/build-runtime-blocker-handoff-bundle.sh --output "$$out_file"
+	args="--output \"$$out_file\""; \
+	if [ "$(STRICT)" = "1" ]; then args="$$args --strict"; fi; \
+	eval "./scripts/qa/build-runtime-blocker-handoff-bundle.sh $$args"
 
 qa-runtime-blocker-infra-prompt: ## Generate infra prompt (INPUT_JSON/OUTPUT_FILE optional; FORMAT=text|markdown)
 	@args=""; \

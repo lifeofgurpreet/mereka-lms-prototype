@@ -62,6 +62,7 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
     - canonical local refresh command: `make qa-runtime-blocker-refresh` (always emits prompt/status artifacts, returns blocker sweep status).
     - canonical consolidated handoff artifact from refresh lane: `var/qa/frontend-runtime-blocker-handoff.md`.
     - canonical bundled handoff archive from refresh lane: `var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz`.
+    - strict bundle validation mode available via `make qa-runtime-blocker-handoff-bundle STRICT=1`.
     - runtime QA workflow now uses the same canonical refresh lane (`make qa-runtime-blocker-refresh`) to avoid duplicated logic.
     - `.github/workflows/frontend-runtime-qa.yml` now emits `var/qa/frontend-runtime-blocker-infra-prompt.txt` as a runtime QA artifact for direct infra handoff.
     - workflow behavior is now fail-safe for evidence: blocker sweep failures no longer short-circuit prompt/status artifact generation; job still exits non-zero after artifacts are written.
