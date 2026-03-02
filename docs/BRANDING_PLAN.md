@@ -33,9 +33,9 @@ Checklist that tracks the status of each LMS/Studio/MFE theming milestone.
   - `./scripts/qa/verify-studio-authoring-branding.sh dev` passed (`exit=0`) on latest rerun.
   - Auth runtime probe status: `./scripts/qa/verify-auth-surfaces.sh dev` now passes notes + forum health checks (forum accepts `/healthz` fallback in non-prod) and reports one remaining non-authn blocker (`credentials` login endpoints returning 500). Equivalent prod checks return expected `302` redirects, so the failure is dev-runtime specific.
   - Latest auth-surface evidence logs:
-    - dev: `var/qa/auth-surfaces-dev-20260302T064809Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
-    - prod: `var/qa/auth-surfaces-prod-20260302T064809Z.log` (`OK`)
-  - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`), which is the current lead root-cause indicator.
+    - dev: `var/qa/auth-surfaces-dev-20260302T070747Z.log` (`FAILED` with 2 checks, both credentials login redirects returning 500)
+    - prod: `var/qa/auth-surfaces-prod-20260302T070747Z.log` (`OK`)
+  - Live dev runtime signal from `deployment/credentials` logs while probing failing endpoints shows timezone stack failure (`ZoneInfoNotFoundError: 'No time zone found with key UTC'` with `ModuleNotFoundError: No module named 'tzdata'`). Direct pod inspection confirms `/usr/share/zoneinfo/UTC` is absent and `python -m pip show tzdata` returns not found.
   - Local-login replay canary support added in repo (`RUN_LOCAL_LOGIN_CANARY=1` mode in `verify-authenticated-sso-canary.sh`), but this runner currently has no canary secrets injected (`SSO_CANARY_*`/`LOCAL_CANARY_*` unset).
 - BEM + a11y (`#107`, `#108`):
   - `./scripts/qa/verify-mfe-selector-hardening.sh` passed (`exit=0`).

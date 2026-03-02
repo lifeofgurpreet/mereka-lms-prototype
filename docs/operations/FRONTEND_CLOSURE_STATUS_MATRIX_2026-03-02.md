@@ -24,6 +24,8 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
 
 ## Commit Trace (this lane)
 
+- `24176afa` — tracker update: add Beads P1 bug `bd-1gx8` for remaining dev credentials auth-runtime blocker
+- `2358ef59` — docs sync: align closure + handoff references to canonical head after #104 follow-on
 - `b941c66a` — #104 follow-on completion: parameterize canonical `qa-frontend-closure` make lane and keep env-specific targets as delegators
 - `f0d007ec` — docs update (`#105/#104/#110`): record consolidated frontend evidence bundle and align handoff references
 - `d1e28b55` — docs update (handoff): append 2026-03-02 stabilization addendum with current blocker/evidence/start commands
@@ -84,8 +86,9 @@ No `bbi-infrastructure` / GitOps repo mutations in this lane.
     - env-specific closure targets now delegate to `qa-frontend-closure` with explicit `QA_*` flags
     - verifier updated: `scripts/qa/verify-frontend-qa-make-targets.sh` and rerun PASS
   - Auth surface probe on dev (`./scripts/qa/verify-auth-surfaces.sh dev`) now passes notes-root banner and forum health contracts (forum non-prod fallback `/healthz=200`) and still fails on one non-authn runtime blocker (`credentials` `/login`, `/login/edx-oauth2`, `/admin/login` returning `500`), so local login/session runtime validation remains infra-convergence dependent. Equivalent prod credentials checks return `302`, confirming dev-runtime drift.
-  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T064809Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T064809Z.log` (`OK`).
+  - Latest auth-surface evidence logs: dev `var/qa/auth-surfaces-dev-20260302T070747Z.log` (`FAILED` with 2 checks) vs prod `var/qa/auth-surfaces-prod-20260302T070747Z.log` (`OK`).
   - Runtime log signal for the failing dev credentials lane: `ZoneInfoNotFoundError: 'No time zone found with key UTC'` together with `ModuleNotFoundError: No module named 'tzdata'` in `deployment/credentials` logs.
+  - Direct pod inspection confirms timezone data is missing in dev credentials runtime (`/usr/share/zoneinfo/UTC` absent; `python -m pip show tzdata` not found), narrowing remediation to image/runtime package composition.
   - `verify-auth-surfaces.sh` now emits per-failure `diag{...}` metadata (status/location/content-type/body head) to speed runtime triage without changing pass/fail criteria.
   - Credentialed canary blocker: local/SSO canary env credentials are not available in this execution environment (`SSO_CANARY_*` and `LOCAL_CANARY_*` currently unset), so full authenticated local-login replay is pending secrets injection. Runner now supports independent mode toggles (`RUN_OIDC_CANARY`, `RUN_STUDIO_CANARY`, `RUN_LOCAL_LOGIN_CANARY`) so local checks can execute without OIDC lanes once local creds are injected (example command: `RUN_OIDC_CANARY=0 RUN_STUDIO_CANARY=0 RUN_LOCAL_LOGIN_CANARY=1 REQUIRE_LOCAL_CANARY=1 ./scripts/qa/verify-authenticated-sso-canary.sh --env dev`). Failure diagnostics now include `login_refresh_probe=GET:<code>,POST:<code>` to speed cookie/session drift triage.
   - Follow-on #104 reduction matrix now reflects completed canonical prune + post-tranche counts: `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md`.

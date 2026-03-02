@@ -77,12 +77,28 @@ See [`ECOMMERCE_OAUTH_TROUBLESHOOTING.md`](ECOMMERCE_OAUTH_TROUBLESHOOTING.md) f
 curl -I https://credentials.academyv2.mereka.dev/login/
 curl -I https://credentials.academyv2.mereka.dev/login/edx-oauth2/
 kubectl -n mereka-lms logs deploy/credentials --tail=200 | rg -n "ZoneInfoNotFoundError|tzdata|UTC"
+POD=$(kubectl -n mereka-lms get pods -l app.kubernetes.io/name=credentials -o jsonpath='{.items[0].metadata.name}')
+kubectl -n mereka-lms exec "$POD" -- sh -lc "ls -l /usr/share/zoneinfo/UTC || true"
+kubectl -n mereka-lms exec "$POD" -- python -c "import zoneinfo; print(zoneinfo.ZoneInfo('UTC'))"
+kubectl -n mereka-lms exec "$POD" -- python -m pip show tzdata || true
 ```
 
 **Expected healthy behavior**:
 - `/login/` -> `302` to `/login/edx-oauth2/`
 - `/login/edx-oauth2/` -> `302` to LMS `/oauth2/authorize`
 - `/admin/login` -> `302` to `/login/`
+- `/usr/share/zoneinfo/UTC` exists in the running credentials container, **or** Python package `tzdata` is installed.
+
+**Remediation (runtime/image level)**:
+1. Ensure timezone data is present in the credentials runtime image:
+   - Install OS timezone database (`tzdata`) and verify `/usr/share/zoneinfo/UTC` exists, or
+   - Install Python `tzdata` package in the runtime environment.
+2. Roll out updated credentials deployment in dev.
+3. Re-verify:
+   - `./scripts/qa/verify-auth-surfaces.sh dev`
+   - `curl -I https://credentials.academyv2.mereka.dev/login/`
+   - `curl -I https://credentials.academyv2.mereka.dev/login/edx-oauth2/`
+   - No `ZoneInfoNotFoundError` / `ModuleNotFoundError: tzdata` in recent credentials logs.
 
 **Notes**:
 - `scripts/qa/verify-auth-surfaces.sh` now prints `diag{...}` metadata on failures (status/location/content-type/body snippet) to speed runtime triage.

@@ -58,7 +58,7 @@ The first three commands should resolve to `$BASE`.
 
 ### Updated Canonical Start Point
 
-- `main` and `start/next-implementor-2026-03-01` are aligned at: `b941c66a`.
+- `main` and `start/next-implementor-2026-03-01` are aligned at: `24176afa`.
 - All updates in this addendum were executed in `mereka-lms` repo only (no GitOps repo mutations).
 
 ### What Landed Since 2026-03-01 Baseline
@@ -92,4 +92,4 @@ git rev-parse --short HEAD
 git status --short --branch
 ```
 
-Expected HEAD: `origin/start/next-implementor-2026-03-01` (at least `b941c66a` or newer).
+Expected HEAD: `origin/start/next-implementor-2026-03-01` (at least `24176afa` or newer).
