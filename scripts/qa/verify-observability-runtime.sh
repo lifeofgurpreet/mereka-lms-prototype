@@ -554,6 +554,9 @@ normalize_host_value() {
     value="${value//$'\n'/}"
     value="${value//\"/}"
     value="${value// /}"
+    value="${value#http://}"
+    value="${value#https://}"
+    value="${value%%/*}"
     printf '%s' "$value"
 }
 
@@ -653,7 +656,7 @@ tmp_body=$(mktemp)
 tmp_hdr=$(mktemp)
 tmp_status=000
 if command -v curl >/dev/null 2>&1; then
-  tmp_status=$(curl -s -m __TIMEOUT__s __HOST_HEADER__ -o "$tmp_body" -D "$tmp_hdr" -w '%{http_code}' '__URL__' 2>/dev/null || echo 000)
+  tmp_status=$(curl -s -m __TIMEOUT__ __HOST_HEADER__ -o "$tmp_body" -D "$tmp_hdr" -w '%{http_code}' '__URL__' 2>/dev/null || echo 000)
 elif command -v wget >/dev/null 2>&1; then
   tmp_status=$(wget --server-response --quiet __HOST_HEADER_WGET__ --timeout=__TIMEOUT__ -O - '__URL__' >"$tmp_body" 2>"$tmp_hdr" && awk 'BEGIN{code="000"} /^  HTTP\// {code=$2} END{print code}' "$tmp_hdr" 2>/dev/null | tr -d '[:space:]' || echo 000)
 elif command -v python3 >/dev/null 2>&1; then
@@ -982,7 +985,7 @@ if command -v kubectl >/dev/null 2>&1; then
 
     LMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms /metrics "$lms_metrics_host")"
     LMS_CODE="${LMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
-    if [[ "$LMS_CODE" == "400" && -n "$lms_metrics_host" ]]; then
+    if [[ ( "$LMS_CODE" == "400" || "$LMS_CODE" == "000" ) && -n "$lms_metrics_host" ]]; then
         LMS_RESULT_NOHOST="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/lms /metrics "")"
         if [[ "${LMS_RESULT_NOHOST%%${METRICS_SPLIT_TOKEN}*}" == "200" ]]; then
             LMS_RESULT="$LMS_RESULT_NOHOST"
@@ -995,7 +998,7 @@ if command -v kubectl >/dev/null 2>&1; then
 
     CMS_RESULT="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms /metrics "$cms_metrics_host")"
     CMS_CODE="${CMS_RESULT%%${METRICS_SPLIT_TOKEN}*}"
-    if [[ "$CMS_CODE" == "400" && -n "$cms_metrics_host" ]]; then
+    if [[ ( "$CMS_CODE" == "400" || "$CMS_CODE" == "000" ) && -n "$cms_metrics_host" ]]; then
         CMS_RESULT_NOHOST="$(fetch_metrics_with_status "$VERIFY_APP_NAMESPACE" deploy/cms /metrics "")"
         if [[ "${CMS_RESULT_NOHOST%%${METRICS_SPLIT_TOKEN}*}" == "200" ]]; then
             CMS_RESULT="$CMS_RESULT_NOHOST"

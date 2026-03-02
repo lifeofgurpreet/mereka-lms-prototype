@@ -210,6 +210,9 @@ normalize_host_value() {
   value="${value//$'\n'/}"
   value="${value//\"/}"
   value="${value// /}"
+  value="${value#http://}"
+  value="${value#https://}"
+  value="${value%%/*}"
   printf '%s' "$value"
 }
 
@@ -231,7 +234,7 @@ fetch_metrics_with_status() {
   fi
 
   probe_cmd="if command -v curl >/dev/null 2>&1; then \
-curl -s -m ${RUNTIME_CMD_TIMEOUT}s ${host_header}-w '\n${split_token}:%{http_code}\n' '${target}'; \
+curl -s -m ${RUNTIME_CMD_TIMEOUT} ${host_header}-w '\n${split_token}:%{http_code}\n' '${target}'; \
 elif command -v wget >/dev/null 2>&1; then \
 tmp_body=\$(mktemp); \
 tmp_hdr=\$(mktemp); \
@@ -564,13 +567,13 @@ run_runtime_checks() {
   cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
   cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
 
-  if [[ "$lms_metrics_code" == "400" && -n "$lms_metrics_host" ]]; then
+  if [[ ( "$lms_metrics_code" == "400" || "$lms_metrics_code" == "000" ) && -n "$lms_metrics_host" ]]; then
     lms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/lms "http://localhost:8000/metrics" "")"
     lms_metrics_code="${lms_metrics_result%%$metrics_split*}"
     lms_metrics_payload="${lms_metrics_result#*$metrics_split}"
   fi
 
-  if [[ "$cms_metrics_code" == "400" && -n "$cms_metrics_host" ]]; then
+  if [[ ( "$cms_metrics_code" == "400" || "$cms_metrics_code" == "000" ) && -n "$cms_metrics_host" ]]; then
     cms_metrics_result="$(fetch_metrics_with_status "$APP_NAMESPACE" deploy/cms "http://localhost:8000/metrics" "")"
     cms_metrics_code="${cms_metrics_result%%$metrics_split*}"
     cms_metrics_payload="${cms_metrics_result#*$metrics_split}"
