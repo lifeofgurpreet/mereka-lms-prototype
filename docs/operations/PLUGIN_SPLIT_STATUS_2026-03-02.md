@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `16` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `10` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -231,13 +231,35 @@ Validation after phase 10:
 - `./scripts/qa/verify-lti-store.sh --offline` PASS (`PASS=12 / FAIL=0 / SKIP=3`)
 - `./scripts/qa/verify-oep48-brand-package.sh` PASS (`PASS=127 / FAIL=0 / WARN=0 / SKIP=0`)
 
+## Progress Update (Phase 11, mfe/tenant/policy verifier tranche)
+
+- Extended compatibility-layer adoption to additional MFE/tenant/policy QA verifiers:
+  - `scripts/qa/verify-mfe-css-architecture.sh`
+  - `scripts/qa/verify-oep65-readiness.sh`
+  - `scripts/qa/verify-tenant-first-consolidation.sh`
+  - `scripts/qa/verify-multi-brand-site.sh`
+  - `scripts/qa/verify-mfe-first-policy.sh`
+  - `scripts/qa/verify-mfe-analytics-plugin-parity.sh`
+- Outcome:
+  - direct path-coupling reduced from `16` to `10`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - 4/6 verifiers pass post-migration; 2/6 remain failing due pre-existing baseline/runtime gap checks unrelated to plugin-path migration.
+
+Validation after phase 11:
+- `./scripts/qa/verify-mfe-css-architecture.sh` PASS (`PASS=7 / FAIL=0 / WARN=0`)
+- `./scripts/qa/verify-oep65-readiness.sh` FAIL (`PASS=16 / FAIL=5 / SKIP=3`) — existing OEP-65 readiness gaps tracked in `docs/architecture/OEP65_MODULE_READINESS.md`
+- `./scripts/qa/verify-tenant-first-consolidation.sh --env dev` FAIL (`PASS=15 / FAIL=2 / WARN=0 / SKIP=0`) — existing runtime checks failing in tenant visual/smoke sub-gates
+- `./scripts/qa/verify-multi-brand-site.sh` PASS (`PASS=76 / FAIL=0 / SKIP=1`)
+- `./scripts/qa/verify-mfe-first-policy.sh` PASS (`PASS=22 / WARN=0 / FAIL=0`)
+- `./scripts/qa/verify-mfe-analytics-plugin-parity.sh` PASS (`PASS=25 / FAIL=0 / WARN=0`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 + phase 5 + phase 6 + phase 7 + phase 8 + phase 9 + phase 10 + phase 11 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 
