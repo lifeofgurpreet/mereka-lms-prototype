@@ -5,7 +5,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN_FILE="$PLUGIN_MAIN"
 RENDERED_ENV="${RENDERED_ENV:-$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx}"
 EXPECTED_SLOT_IDS="${EXPECTED_SLOT_IDS:-org.openedx.frontend.layout.header_logo.v1,org.openedx.frontend.layout.footer.v1,org.openedx.frontend.layout.studio_footer.v1,org.openedx.frontend.layout.studio_header_search_button_slot.v1,org.openedx.frontend.authoring.course_unit_sidebar.v1,org.openedx.frontend.authoring.course_outline_sidebar.v1,org.openedx.frontend.authoring.course_outline_header_actions.v1,org.openedx.frontend.authoring.course_unit_header_actions.v1,org.openedx.frontend.authoring.course_outline_page_alerts.v1,org.openedx.frontend.authoring.edit_video_alerts.v1,org.openedx.frontend.authoring.edit_file_alerts.v1,org.openedx.frontend.authoring.additional_course_plugin.v1,org.openedx.frontend.authoring.additional_course_content_plugin.v1,org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1,org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1,org.openedx.frontend.authoring.course_unit_sidebar.v2,org.openedx.frontend.authoring.files_upload_page_table.v1,org.openedx.frontend.authoring.videos_upload_page_table.v1,org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1,org.openedx.frontend.authn.login_component.v1,org.openedx.frontend.learner_dashboard.widget_sidebar.v1,org.openedx.frontend.learner_dashboard.no_courses_view.v1,org.openedx.frontend.learner_dashboard.course_list.v1,org.openedx.frontend.learner_dashboard.course_card_banner.v1,org.openedx.frontend.learner_dashboard.course_card_action.v1,org.openedx.frontend.learner_dashboard.dashboard_modal.v1,org.openedx.frontend.learning.course_outline_sidebar.v1,org.openedx.frontend.learning.progress_certificate_status.v1,org.openedx.frontend.layout.header_learning.v1,org.openedx.frontend.layout.header_desktop.v1,org.openedx.frontend.layout.header_mobile.v1,org.openedx.frontend.layout.header_learning_course_info.v1,org.openedx.frontend.learning.course_tab_links.v1,org.openedx.frontend.learning.course_breadcrumbs.v1,org.openedx.frontend.learning.learner_tools.v1,org.openedx.frontend.learning.progress_tab_course_grade.v1,org.openedx.frontend.learning.progress_tab_related_links.v1,org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1,org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1,org.openedx.frontend.learning.progress_tab_grade_breakdown.v1,org.openedx.frontend.learning.unit_title.v1,org.openedx.frontend.learning.sequence_navigation.v1,org.openedx.frontend.learning.course_outline_sidebar_trigger.v1,org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1,org.openedx.frontend.learning.course_home_section_outline.v1,org.openedx.frontend.learning.course_recommendations.v1,org.openedx.frontend.learning.content_iframe_loader.v1,org.openedx.frontend.learning.content_iframe_error.v1,org.openedx.frontend.learning.sequence_container.v1,org.openedx.frontend.learning.gated_unit_content_message.v1,org.openedx.frontend.learning.next_unit_top_nav_trigger.v1,org.openedx.frontend.learning.course_outline_tab_notifications.v1,org.openedx.frontend.learning.notification_widget.v1,org.openedx.frontend.learning.notification_tray.v1,org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1,org.openedx.frontend.learning.notifications_discussions_sidebar.v1,org.openedx.frontend.learning.course_exit_view_courses.v1,org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1,org.openedx.frontend.account.id_verification_page.v1,org.openedx.frontend.account.additional_profile_fields.v1,org.openedx.frontend.profile.additional_profile_fields.v1,org.openedx.frontend.layout.header_desktop_main_menu.v1,org.openedx.frontend.layout.header_mobile_main_menu.v1,org.openedx.frontend.layout.header_desktop_logged_out_items.v1,org.openedx.frontend.layout.header_mobile_logged_out_items.v1,org.openedx.frontend.layout.header_desktop_secondary_menu.v1,org.openedx.frontend.layout.header_learning_help.v1,org.openedx.frontend.layout.header_learning_logged_out_items.v1,org.openedx.frontend.layout.header_desktop_user_menu.v1,org.openedx.frontend.layout.header_mobile_user_menu.v1,org.openedx.frontend.layout.header_learning_user_menu.v1,org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1,org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1,org.openedx.frontend.layout.header_learning_user_menu_toggle.v1}"
 STRICT_RENDERED_SLOTS="${STRICT_RENDERED_SLOTS:-0}"
@@ -14,6 +17,22 @@ CHECK_RENDERED_SLOTS="${CHECK_RENDERED_SLOTS:-0}"
 PASS=0
 FAIL=0
 WARN=0
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN_FILE="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 pass() { PASS=$((PASS + 1)); echo "PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "FAIL: $1"; }

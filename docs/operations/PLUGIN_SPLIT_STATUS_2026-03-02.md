@@ -7,7 +7,7 @@ Issue: `#109` (`infrastructure/tutor/plugins/mereka_lms.py` maintainability spli
 ## Current State
 
 - Plugin file length: `3426` lines.
-- Direct QA coupling remains high but improved: `92` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
+- Direct QA coupling remains high but improved: `86` references inside `scripts/qa/*` to the concrete file path `infrastructure/tutor/plugins/mereka_lms.py`.
 - Many checks currently rely on direct `grep` against the monolithic file for contract assertions (slots, token keys, theme URLs, tenant wiring, analytics guardrails).
 
 ## Progress Update (Phase 1, no-behavior-change)
@@ -67,13 +67,35 @@ Validation after phase 3:
   - footer runtime sentinel guard assertion
   - CI workflow wiring assertion
 
+## Progress Update (Phase 4, additional verifier adoption)
+
+- Extended compatibility-layer adoption to another tranche of QA verifiers:
+  - `scripts/qa/verify-paragon-token-coverage.sh`
+  - `scripts/qa/verify-theme-consistency.sh`
+  - `scripts/qa/verify-mfe-plugin-slots.sh`
+  - `scripts/qa/verify-mfe-slot-source-alignment.sh`
+  - `scripts/qa/verify-mfe-footer-slot.sh`
+  - `scripts/qa/verify-mfe-footer-plugin-slot.sh`
+- Outcome:
+  - direct path-coupling reduced from `92` to `86`
+  - all updated scripts are shell-syntax clean (`bash -n`)
+  - existing pass/skip semantics preserved (including expected optional `tutormfe.hooks` import skip when unavailable).
+
+Validation after phase 4:
+- `./scripts/qa/verify-paragon-token-coverage.sh` PASS (`PASS=52 WARN=0 FAIL=0`)
+- `./scripts/qa/verify-theme-consistency.sh` PASS (`16 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-mfe-plugin-slots.sh` PASS (`PASS=152 WARN=0 FAIL=0`)
+- `./scripts/qa/verify-mfe-slot-source-alignment.sh` PASS (`PASS=78 WARN=0 FAIL=0`)
+- `./scripts/qa/verify-mfe-footer-slot.sh` PASS (`29 PASS / 0 FAIL / 0 WARN`)
+- `./scripts/qa/verify-mfe-footer-plugin-slot.sh` PASS (`9 PASS / 0 FAIL / 1 SKIP`)
+
 ## Why Full Split Is Blocked Right Now
 
 A hard split (moving major hook payload strings into separate files/modules) will immediately invalidate path-sensitive and text-sensitive QA gates unless those gates are migrated in the same change set. Doing that safely is a broad refactor and conflicts with the current priority: runtime stabilization and deterministic frontend evidence closure.
 
 ## Decision (2026-03-02, updated)
 
-- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 complete).
+- `#109` is **in staged execution** (phase 1 + phase 2 + phase 3 + phase 4 complete).
 - Broad one-shot decomposition remains out-of-scope for this lane.
 - Next safe move is section-by-section extraction with compatibility-gate coverage already in place.
 

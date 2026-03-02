@@ -10,9 +10,12 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 CMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
-PLUGIN="$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms.py"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+PLUGIN_BUNDLE=""
+PLUGIN="$PLUGIN_MAIN"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 FOOTER_COMPONENT_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
@@ -21,6 +24,22 @@ CONFIG="$REPO_ROOT/infrastructure/tutor/config.example.yml"
 PASS=0
 FAIL=0
 WARN=0
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
+  while IFS= read -r plugin_file; do
+    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
+    printf '\n' >>"$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+  PLUGIN="$PLUGIN_BUNDLE"
+fi
+
+cleanup() {
+  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    rm -f "$PLUGIN_BUNDLE"
+  fi
+}
+trap cleanup EXIT
 
 do_pass() { PASS=$((PASS + 1)); echo "  PASS  $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL  $1"; }
